@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Utilities for reflection.
+ * This is a static utilities class provides utilities for {@code reflection}.
  *
  * @author fredsuvn
  */

@@ -1,7 +1,7 @@
 package xyz.fslabo.common.base;
 
 /**
- * Provides utilities for {@code bytes}.
+ * This is a static utilities class provides utilities for {@code bytes}.
  *
  * @author fredsuvn
  */

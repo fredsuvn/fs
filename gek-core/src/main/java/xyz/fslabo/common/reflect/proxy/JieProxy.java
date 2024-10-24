@@ -3,7 +3,7 @@ package xyz.fslabo.common.reflect.proxy;
 import java.lang.reflect.Proxy;
 
 /**
- * Utilities for class proxy.
+ * This is a static utilities class provides utilities for {@code class proxy}.
  *
  * @author fredsuvn
  */

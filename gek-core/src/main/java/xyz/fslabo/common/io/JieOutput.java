@@ -8,7 +8,7 @@ import java.nio.CharBuffer;
 import java.nio.charset.*;
 
 /**
- * Provides implementations and utilities for {@link OutputStream}/{@link Writer}.
+ * This class provides implementations and utilities for {@link OutputStream}/{@link Writer}.
  *
  * @author sunqian
  */

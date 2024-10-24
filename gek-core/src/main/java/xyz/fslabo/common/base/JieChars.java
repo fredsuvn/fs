@@ -6,7 +6,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Provides utilities for {@code character}/{@link Charset}.
+ * This is a static utilities class provides utilities for {@code character}/{@link Charset}.
  *
  * @author fredsuvn
  */

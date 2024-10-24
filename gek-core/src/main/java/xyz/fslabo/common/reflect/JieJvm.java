@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Utilities for JVM.
+ * This is a static utilities class provides utilities for {@code JVM}.
  *
  * @author fredsuvn
  */

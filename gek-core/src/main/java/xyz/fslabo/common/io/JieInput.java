@@ -9,7 +9,7 @@ import java.nio.CharBuffer;
 import java.nio.charset.*;
 
 /**
- * Provides implementations and utilities for {@link InputStream}/{@link Reader}.
+ * This class provides implementations and utilities for {@link InputStream}/{@link Reader}.
  *
  * @author sunqian
  */

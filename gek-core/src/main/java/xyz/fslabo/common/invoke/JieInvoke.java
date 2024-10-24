@@ -5,7 +5,7 @@ import xyz.fslabo.annotations.Nullable;
 import java.lang.invoke.MethodHandle;
 
 /**
- * Utilities for invoking operation.
+ * This is a static utilities class provides utilities for {@code invocation}.
  *
  * @author fredsuvn
  */

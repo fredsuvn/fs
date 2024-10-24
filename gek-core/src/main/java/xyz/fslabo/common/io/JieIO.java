@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.function.Function;
 
 /**
- * IO (Input/Output) utilities.
+ * This is a static utilities class provides utilities for {@code IO} operations.
  *
  * @author fresduvn
  */

@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
- * Collection utilities.
+ * This is a static utilities class provides utilities for {@code collection}.
  *
  * @author fresduvn
  */

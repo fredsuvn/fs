@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Utilities for bean operation.
+ * This is a static utilities class provides utilities for {@code bean}.
  *
  * @author fredsuvn
  */

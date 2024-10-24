@@ -6,6 +6,7 @@ import xyz.fslabo.common.base.JieChars;
 import xyz.fslabo.common.base.JieCheck;
 
 import java.io.OutputStream;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.function.IntFunction;
 
 /**
- * Buffer utilities.
+ * This is a static utilities class provides utilities for {@link Buffer}.
  *
  * @author fresduvn
  */
