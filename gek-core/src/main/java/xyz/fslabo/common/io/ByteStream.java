@@ -189,7 +189,8 @@ public interface ByteStream {
     interface Encoder {
 
         /**
-         * Encodes specified data in bytes.
+         * Encodes specified data in bytes. The returned buffer's position will be zero and its limit will be the number
+         * of encoding bytes.
          *
          * @param data specified data
          * @return result of encoding

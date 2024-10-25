@@ -198,7 +198,8 @@ public interface CharStream {
     interface Encoder {
 
         /**
-         * Encodes specified data in bytes.
+         * Encodes specified data in chars. The returned buffer's position will be zero and its limit will be the number
+         * of encoding chars.
          *
          * @param data specified data
          * @return result of encoding
