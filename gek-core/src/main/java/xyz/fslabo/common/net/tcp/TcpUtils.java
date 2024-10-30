@@ -1,7 +1,7 @@
 package xyz.fslabo.common.net.tcp;
 
+import xyz.fslabo.common.base.JieBytes;
 import xyz.fslabo.common.coll.JieArray;
-import xyz.fslabo.common.io.JieBuffer;
 
 import java.nio.ByteBuffer;
 import java.util.function.IntFunction;
@@ -13,7 +13,7 @@ final class TcpUtils {
             return buffer;
         }
         if (buffer.remaining() <= 0) {
-            return JieBuffer.emptyBuffer();
+            return JieBytes.emptyBuffer();
         }
         ByteBuffer newBuffer = generator.apply(buffer.remaining());
         newBuffer.put(buffer);
@@ -24,7 +24,7 @@ final class TcpUtils {
     static ByteBuffer compact(ByteBuffer buffer, byte[] newBytes, IntFunction<ByteBuffer> generator) {
         if (buffer.remaining() <= 0) {
             if (JieArray.isEmpty(newBytes)) {
-                return JieBuffer.emptyBuffer();
+                return JieBytes.emptyBuffer();
             }
             ByteBuffer newBuffer = generator.apply(newBytes.length);
             newBuffer.put(newBytes);

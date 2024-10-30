@@ -1,6 +1,7 @@
 package xyz.fslabo.common.io;
 
 import xyz.fslabo.annotations.Nullable;
+import xyz.fslabo.common.base.JieChars;
 import xyz.fslabo.common.base.JieString;
 
 import java.io.IOException;
@@ -146,18 +147,35 @@ final class CharStreamImpl implements CharStream {
         while (true) {
             CharBuffer buf = in.read();
             if (buf == null) {
-                return count == 0 ? -1 : count;
+                if (count == 0) {
+                    return -1;
+                }
+                if (encoder != null) {
+                    CharBuffer encoded = encoder.encode(JieChars.emptyBuffer(), true);
+                    out.write(encoded);
+                }
+                return count;
             }
             if (!buf.hasRemaining()) {
                 if (breakOnZeroRead) {
+                    if (encoder != null) {
+                        CharBuffer encoded = encoder.encode(JieChars.emptyBuffer(), true);
+                        out.write(encoded);
+                    }
                     return count;
                 }
                 continue;
             }
-            count += buf.remaining();
+            int readSize = buf.remaining();
+            count += readSize;
             if (encoder != null) {
-                CharBuffer converted = encoder.encode(buf);
-                out.write(converted);
+                CharBuffer encoded;
+                if (readSize < blockSize) {
+                    encoded = encoder.encode(buf, false);
+                } else {
+                    encoded = encoder.encode(buf, false);
+                }
+                out.write(encoded);
             } else {
                 out.write(buf);
             }

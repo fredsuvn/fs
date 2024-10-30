@@ -662,13 +662,4 @@ public class JieBuffer {
         }
         return read(buffer);
     }
-
-    /**
-     * Returns an empty byte buffer.
-     *
-     * @return an empty byte buffer
-     */
-    public static ByteBuffer emptyBuffer() {
-        return EMPTY_BUFFER;
-    }
 }

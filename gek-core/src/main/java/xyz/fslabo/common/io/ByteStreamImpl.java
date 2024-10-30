@@ -1,6 +1,7 @@
 package xyz.fslabo.common.io;
 
 import xyz.fslabo.annotations.Nullable;
+import xyz.fslabo.common.base.JieBytes;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -144,18 +145,35 @@ final class ByteStreamImpl implements ByteStream {
         while (true) {
             ByteBuffer buf = in.read();
             if (buf == null) {
-                return count == 0 ? -1 : count;
+                if (count == 0) {
+                    return -1;
+                }
+                if (encoder != null) {
+                    ByteBuffer encoded = encoder.encode(JieBytes.emptyBuffer(), true);
+                    out.write(encoded);
+                }
+                return count;
             }
             if (!buf.hasRemaining()) {
                 if (breakOnZeroRead) {
+                    if (encoder != null) {
+                        ByteBuffer encoded = encoder.encode(JieBytes.emptyBuffer(), true);
+                        out.write(encoded);
+                    }
                     return count;
                 }
                 continue;
             }
-            count += buf.remaining();
+            int readSize = buf.remaining();
+            count += readSize;
             if (encoder != null) {
-                ByteBuffer converted = encoder.encode(buf);
-                out.write(converted);
+                ByteBuffer encoded;
+                if (readSize < blockSize) {
+                    encoded = encoder.encode(buf, false);
+                } else {
+                    encoded = encoder.encode(buf, false);
+                }
+                out.write(encoded);
             } else {
                 out.write(buf);
             }
@@ -292,6 +310,9 @@ final class ByteStreamImpl implements ByteStream {
 
         @Override
         public void write(ByteBuffer buffer) throws IOException {
+            if (!buffer.hasRemaining()) {
+                return;
+            }
             if (buffer.hasArray()) {
                 int remaining = buffer.remaining();
                 dest.write(buffer.array(), buffer.arrayOffset() + buffer.position(), remaining);

@@ -4,7 +4,7 @@ import java.io.Reader;
 import java.nio.CharBuffer;
 
 /**
- * The interface represents a char stream for transferring byte data, from specified data source to specified
+ * The interface represents a char stream for transferring char data, from specified data source to specified
  * destination. There are two types of method in this interface:
  * <ul>
  *     <li>
@@ -135,7 +135,7 @@ public interface CharStream {
     CharStream readLimit(long readLimit);
 
     /**
-     * Sets the bytes number for each reading from data source.
+     * Sets the chars number for each reading from data source.
      * <p>
      * This setting is typically used when the source is a reader, or when {@code encoding} (see
      * {@link #encoder(Encoder)}) is required for the transfer, default is {@link JieIO#BUFFER_SIZE}.
@@ -163,7 +163,7 @@ public interface CharStream {
      * then be written to the destination. This setting is optional; if not set, the source data will be written
      * directly to the destination.
      * <p>
-     * When the transfer starts, data encoder will be called after each data read, passing the read data as the
+     * When the transfer starts, data encoder will be called after each data read, passing the read data as the first
      * argument. The value returned by the encoder will be the actual data written to the destination. The length of
      * data read in each read operation is specified by {@link #blockSize(int)}, and the remaining data of last read may
      * be smaller than this value.
@@ -179,7 +179,9 @@ public interface CharStream {
     CharStream encoder(Encoder encoder);
 
     /**
-     * Starts transfer through this stream, returns the actual bytes number that read and success to transfer.
+     * Starts transfer through this stream, returns the actual chars number that read and success to transfer. Ensure
+     * that the remaining of destination is enough, otherwise a {@link IORuntimeException} will be thrown and the actual
+     * read and written chars number is undefined.
      * <p>
      * If the {@code encoder} (see {@link #encoder(Encoder)}) is {@code null}, read number equals to written number.
      * Otherwise, the written number may not equal to read number, and this method returns actual read number.
@@ -187,7 +189,7 @@ public interface CharStream {
      * <p>
      * This is a final method.
      *
-     * @return the actual bytes number that read and success to transfer
+     * @return the actual chars number that read and success to transfer
      * @throws IORuntimeException IO runtime exception
      */
     long start() throws IORuntimeException;
@@ -202,8 +204,9 @@ public interface CharStream {
          * of encoding chars.
          *
          * @param data specified data
+         * @param end  whether the current encoding is the last call (source has been read to the end)
          * @return result of encoding
          */
-        CharBuffer encode(CharBuffer data);
+        CharBuffer encode(CharBuffer data, boolean end);
     }
 }

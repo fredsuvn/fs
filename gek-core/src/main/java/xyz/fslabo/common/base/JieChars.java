@@ -2,6 +2,7 @@ package xyz.fslabo.common.base;
 
 import xyz.fslabo.annotations.Nullable;
 
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -21,6 +22,9 @@ public class JieChars {
      * Charset: ISO-8859-1.
      */
     public static final Charset ISO_8859_1 = StandardCharsets.ISO_8859_1;
+
+    private static final char[] EMPTY_CHARS = {};
+    private static final CharBuffer EMPTY_BUFFER = CharBuffer.wrap(EMPTY_CHARS);
 
     /**
      * Returns default charset: {@link #UTF_8}.
@@ -82,6 +86,24 @@ public class JieChars {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    /**
+     * Returns an empty char array.
+     *
+     * @return an empty char array
+     */
+    public static char[] emptyChars() {
+        return EMPTY_CHARS;
+    }
+
+    /**
+     * Returns an empty char buffer.
+     *
+     * @return an empty char buffer
+     */
+    public static CharBuffer emptyBuffer() {
+        return EMPTY_BUFFER;
     }
 
     private static final class Natives {

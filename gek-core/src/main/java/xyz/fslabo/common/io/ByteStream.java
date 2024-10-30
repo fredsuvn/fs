@@ -154,7 +154,7 @@ public interface ByteStream {
      * then be written to the destination. This setting is optional; if not set, the source data will be written
      * directly to the destination.
      * <p>
-     * When the transfer starts, data encoder will be called after each data read, passing the read data as the
+     * When the transfer starts, data encoder will be called after each data read, passing the read data as the first
      * argument. The value returned by the encoder will be the actual data written to the destination. The length of
      * data read in each read operation is specified by {@link #blockSize(int)}, and the remaining data of last read may
      * be smaller than this value.
@@ -170,7 +170,9 @@ public interface ByteStream {
     ByteStream encoder(Encoder encoder);
 
     /**
-     * Starts transfer through this stream, returns the actual bytes number that read and success to transfer.
+     * Starts transfer through this stream, returns the actual bytes number that read and success to transfer. Ensure
+     * that the remaining of destination is enough, otherwise a {@link IORuntimeException} will be thrown and the actual
+     * read and written bytes number is undefined.
      * <p>
      * If the {@code encoder} (see {@link #encoder(Encoder)}) is {@code null}, read number equals to written number.
      * Otherwise, the written number may not equal to read number, and this method returns actual read number.
@@ -193,8 +195,9 @@ public interface ByteStream {
          * of encoding bytes.
          *
          * @param data specified data
+         * @param end  whether the current encoding is the last call (source has been read to the end)
          * @return result of encoding
          */
-        ByteBuffer encode(ByteBuffer data);
+        ByteBuffer encode(ByteBuffer data, boolean end);
     }
 }

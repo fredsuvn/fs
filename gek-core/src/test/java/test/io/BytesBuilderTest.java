@@ -1,11 +1,11 @@
 package test.io;
 
 import org.testng.annotations.Test;
+import xyz.fslabo.common.base.JieBytes;
 import xyz.fslabo.common.base.JieChars;
 import xyz.fslabo.common.base.JieRandom;
 import xyz.fslabo.common.io.BytesBuilder;
 import xyz.fslabo.common.io.IORuntimeException;
-import xyz.fslabo.common.io.JieBuffer;
 import xyz.fslabo.common.io.JieInput;
 import xyz.fslabo.test.JieTest;
 
@@ -53,7 +53,7 @@ public class BytesBuilderTest {
         assertEquals(bb.toByteArray(), Arrays.copyOf(bs, 70));
         assertEquals(buffer.position(), 10);
         assertFalse(buffer.hasRemaining());
-        bb.append(JieBuffer.emptyBuffer());
+        bb.append(JieBytes.emptyBuffer());
         expectThrows(IORuntimeException.class, () -> bb.append(new InputStream() {
             @Override
             public int read() throws IOException {

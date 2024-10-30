@@ -159,7 +159,7 @@ public class IOTest {
         assertEquals(str.substring(0, 1), new String(Arrays.copyOfRange(out.toByteArray(), 0, 1), JieChars.UTF_8));
         in.reset();
         out.reset();
-        readNum = ByteStream.from(in).to(out).encoder(b -> {
+        readNum = ByteStream.from(in).to(out).encoder((b, e) -> {
             int len = b.remaining();
             byte[] bs = new byte[len * 2];
             b.get(bs, 0, len);
@@ -371,7 +371,7 @@ public class IOTest {
         assertEquals(str.substring(0, 1), new String(Arrays.copyOfRange(out.toCharArray(), 0, 1)));
         in.reset();
         out.reset();
-        readNum = CharStream.from(in).to(out).encoder(b -> {
+        readNum = CharStream.from(in).to(out).encoder((b, e) -> {
             int len = b.remaining();
             char[] bs = new char[len * 2];
             b.get(bs, 0, len);
@@ -536,6 +536,72 @@ public class IOTest {
             return length;
         }
         return Math.min(length, readLimit);
+    }
+
+    @Test
+    public void testEncoder() throws Exception {
+        testEncoder(1, 1);
+        testEncoder(1, 10);
+        testEncoder(99, 9);
+        testEncoder(99, 990);
+    }
+
+    private void testEncoder(int size, int blockSize) {
+        // bytes
+        byte[] endBytes = "end".getBytes(JieChars.defaultCharset());
+        ByteStream.Encoder bytesEn = (data, end) -> {
+            ByteBuffer bb = ByteBuffer.allocate(end ? data.remaining() + endBytes.length : data.remaining());
+            bb.put(data);
+            if (end) {
+                bb.put(endBytes);
+            }
+            bb.flip();
+            return bb;
+        };
+        ByteBuffer bo = ByteBuffer.allocateDirect(size + endBytes.length);
+        byte[] bSrc = JieRandom.fill(new byte[size], 0, 9);
+        long c = ByteStream.from(bSrc).to(bo).blockSize(blockSize).encoder(bytesEn).start();
+        assertEquals(c, bSrc.length);
+        bo.flip();
+        byte[] bDst = new byte[bo.remaining()];
+        bo.get(bDst);
+        assertEquals(Arrays.copyOfRange(bDst, 0, size), bSrc);
+        assertEquals(Arrays.copyOfRange(bDst, bDst.length - 3, bDst.length), endBytes);
+        bo.flip();
+        c = ByteStream.from(new NioIn()).to(bo).blockSize(blockSize).encoder(bytesEn).breakOnZeroRead(true).start();
+        assertEquals(c, 0);
+        assertEquals(bo.remaining(), size);
+        bo.flip();
+        bo.get(bDst, 0, 3);
+        assertEquals(Arrays.copyOfRange(bDst, 0, 3), endBytes);
+
+        // chars
+        char[] endChars = "end".toCharArray();
+        CharStream.Encoder charsEn = (data, end) -> {
+            CharBuffer cb = CharBuffer.allocate(end ? data.remaining() + endChars.length : data.remaining());
+            cb.put(data);
+            if (end) {
+                cb.put(endChars);
+            }
+            cb.flip();
+            return cb;
+        };
+        CharBuffer co = CharBuffer.allocate(size + endChars.length);
+        char[] cSrc = JieRandom.fill(new char[size], '0', '9');
+        c = CharStream.from(cSrc).to(co).blockSize(blockSize).encoder(charsEn).start();
+        assertEquals(c, cSrc.length);
+        co.flip();
+        char[] cDst = new char[co.remaining()];
+        co.get(cDst);
+        assertEquals(Arrays.copyOfRange(cDst, 0, size), cSrc);
+        assertEquals(Arrays.copyOfRange(cDst, cDst.length - 3, cDst.length), endChars);
+        co.flip();
+        c = CharStream.from(new NioReader()).to(co).blockSize(blockSize).encoder(charsEn).breakOnZeroRead(true).start();
+        assertEquals(c, 0);
+        assertEquals(co.remaining(), size);
+        co.flip();
+        co.get(cDst, 0, 3);
+        assertEquals(Arrays.copyOfRange(cDst, 0, 3), endChars);
     }
 
     private InputStream bytesIn(byte[] array, int available) {
