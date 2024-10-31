@@ -4,6 +4,7 @@ import org.testng.annotations.Test;
 import xyz.fslabo.common.base.ShouldNotHappenException;
 import xyz.fslabo.common.bean.BeanException;
 import xyz.fslabo.common.bean.BeanResolvingException;
+import xyz.fslabo.common.codec.CodecException;
 import xyz.fslabo.common.invoke.InvocationException;
 import xyz.fslabo.common.io.IORuntimeException;
 import xyz.fslabo.common.reflect.JvmException;
@@ -105,6 +106,19 @@ public class ExceptionCoverageTest {
         });
         expectThrows(IORuntimeException.class, () -> {
             throw new IORuntimeException(new RuntimeException());
+        });
+
+        expectThrows(CodecException.class, () -> {
+            throw new CodecException();
+        });
+        expectThrows(CodecException.class, () -> {
+            throw new CodecException("");
+        });
+        expectThrows(CodecException.class, () -> {
+            throw new CodecException("", new RuntimeException());
+        });
+        expectThrows(CodecException.class, () -> {
+            throw new CodecException(new RuntimeException());
         });
     }
 }

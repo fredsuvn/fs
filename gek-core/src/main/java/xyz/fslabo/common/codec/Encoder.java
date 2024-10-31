@@ -5,12 +5,11 @@ import xyz.fslabo.common.io.ByteStream;
 import java.nio.ByteBuffer;
 
 /**
- * This is a generic interface for encoding. It extends {@link xyz.fslabo.common.io.ByteStream.Encoder}, and can be used
- * in conjunction with {@link ByteStream}.
+ * This is a generic interface for encoding.
  *
  * @author sunqian
  */
-public interface Encoder extends ByteStream.Encoder {
+public interface Encoder {
 
     /**
      * Encodes given source.
@@ -34,7 +33,7 @@ public interface Encoder extends ByteStream.Encoder {
     /**
      * Encodes given source into specified dest, returns the number of bytes written.
      * <p>
-     * Ensure that the remaining of dest is enough, otherwise no byte will be written and an {@link CodecException} will
+     * Ensure that the remaining of dest is enough, otherwise no byte will be written and a {@link CodecException} will
      * be thrown.
      *
      * @param source given source
@@ -47,7 +46,7 @@ public interface Encoder extends ByteStream.Encoder {
     /**
      * Encodes given source into specified dest, returns the number of bytes written.
      * <p>
-     * Ensure that the remaining of dest is enough, otherwise no byte will be written and an {@link CodecException} will
+     * Ensure that the remaining of dest is enough, otherwise no byte will be written and a {@link CodecException} will
      * be thrown.
      *
      * @param source given source
@@ -65,4 +64,21 @@ public interface Encoder extends ByteStream.Encoder {
      * @return output size in bytes after encoding specified input size
      */
     int getOutputSize(int inputSize);
+
+    /**
+     * Returns the block size. When encoding, data is sometimes processed in blocks, this method returns the size of
+     * those blocks. If the block size cannot be determined, it returns 0.
+     *
+     * @return the block size
+     */
+    int getBlockSize();
+
+    /**
+     * Returns a {@link ByteStream.Encoder} with current encoding. When using this method, the
+     * {@link ByteStream#blockSize(int)} needs to be set to a correct value, such as {@link #getBlockSize()} (if it does
+     * not return {@code 0}).
+     *
+     * @return a {@link ByteStream.Encoder} with current encoding
+     */
+    ByteStream.Encoder toStreamEncoder();
 }

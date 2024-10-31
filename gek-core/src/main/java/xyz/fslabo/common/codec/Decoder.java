@@ -34,7 +34,7 @@ public interface Decoder {
     /**
      * Decodes given data into specified dest, returns the number of bytes written.
      * <p>
-     * Ensure that the remaining of dest is enough, otherwise no byte will be written and an {@link CodecException} will
+     * Ensure that the remaining of dest is enough, otherwise no byte will be written and a {@link CodecException} will
      * be thrown.
      *
      * @param data given data
@@ -47,7 +47,7 @@ public interface Decoder {
     /**
      * Decodes given data into specified dest, returns the number of bytes written.
      * <p>
-     * Ensure that the remaining of dest is enough, otherwise no byte will be written and an {@link CodecException} will
+     * Ensure that the remaining of dest is enough, otherwise no byte will be written and a {@link CodecException} will
      * be thrown.
      *
      * @param data given data
