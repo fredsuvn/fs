@@ -5,8 +5,8 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 /**
- * The interface represents a byte stream for transferring byte data, from specified data source to specified
- * destination. There are two types of method in this interface:
+ * The interface represents a byte stream for transferring byte data, from specified source to specified destination.
+ * There are two types of method in this interface:
  * <ul>
  *     <li>
  *         Setting methods, used to set parameters and options for current stream before the transferring starts;
@@ -129,7 +129,9 @@ public interface ByteStream {
      * Sets the bytes number for each reading from data source.
      * <p>
      * This setting is typically used when the source is an input stream, or when {@code encoding} (see
-     * {@link #encoder(Encoder)}) is required for the transfer, default is {@link JieIO#BUFFER_SIZE}.
+     * {@link #encoder(Encoder)}) is required for the transfer, default is {@link JieIO#BUFFER_SIZE}. This stream
+     * ensures that the size of source data passed to the {@code encoding} is the value set by this method each times
+     * when the transfer starts, until the last read where the remaining source data might be smaller than this value.
      * <p>
      * This is a setting method.
      *
@@ -139,15 +141,26 @@ public interface ByteStream {
     ByteStream blockSize(int blockSize);
 
     /**
-     * Sets whether break the transfer operation immediately if a read operation returns zero bytes. If it is set to
-     * {@code false}, the reading will continue until reaches to end of the source. Default is {@code false}.
+     * Sets whether end the transfer operation if a read operation returns zero bytes (possible for {@code NIO}). If it
+     * is set to {@code false}, the reading will continue until reaches to end of the source. Default is {@code false}.
+     * <p>
+     * If the transfer is ended in this scenario:
+     * <ul>
+     *     <li>
+     *         If no byte was read, the {@link #start()} returns {@code 0} rather than {@code -1};
+     *     </li>
+     *     <li>
+     *         If the {@code encoder} (specified by {@link #encoder(Encoder)}) is not {@code null}, the 2nd argument of
+     *         {@link Encoder#encode(ByteBuffer, boolean)} will be passed to {@code true};
+     *     </li>
+     * </ul>
      * <p>
      * This is a setting method.
      *
-     * @param breakOnZeroRead whether break reading immediately when the number of bytes read is 0
+     * @param endOnZeroRead whether break reading immediately when the number of bytes read is 0
      * @return this
      */
-    ByteStream breakOnZeroRead(boolean breakOnZeroRead);
+    ByteStream endOnZeroRead(boolean endOnZeroRead);
 
     /**
      * Set the data encoder to encode the source data before it is written to the destination. The encoded data will

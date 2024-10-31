@@ -14,7 +14,7 @@ final class ByteStreamImpl implements ByteStream {
     private Object dest;
     private long readLimit = -1;
     private int blockSize = JieIO.BUFFER_SIZE;
-    private boolean breakOnZeroRead = false;
+    private boolean endOnZeroRead = false;
     private Encoder encoder;
 
     ByteStreamImpl(InputStream source) {
@@ -76,8 +76,8 @@ final class ByteStreamImpl implements ByteStream {
     }
 
     @Override
-    public ByteStream breakOnZeroRead(boolean breakOnZeroRead) {
-        this.breakOnZeroRead = breakOnZeroRead;
+    public ByteStream endOnZeroRead(boolean endOnZeroRead) {
+        this.endOnZeroRead = endOnZeroRead;
         return this;
     }
 
@@ -96,14 +96,64 @@ final class ByteStreamImpl implements ByteStream {
             return 0;
         }
         try {
-            BufferIn in = toBufferIn(source);
-            BufferOut out = toBufferOut(dest);
-            return readTo(in, out);
-        } catch (IOException e) {
-            throw new IORuntimeException(e);
+            if (encoder == null) {
+                if (source instanceof byte[]) {
+                    if (dest instanceof byte[]) {
+                        return bytesToBytes((byte[]) source, (byte[]) dest);
+                    }
+                    if (dest instanceof ByteBuffer) {
+                        return bytesToBuffer((byte[]) source, (ByteBuffer) dest);
+                    }
+                } else if (source instanceof ByteBuffer) {
+                    if (dest instanceof byte[]) {
+                        return bufferToBytes((ByteBuffer) source, (byte[]) dest);
+                    }
+                    if (dest instanceof ByteBuffer) {
+                        return bufferToBuffer((ByteBuffer) source, (ByteBuffer) dest);
+                    }
+                }
+            }
+            return start0();
         } catch (Exception e) {
             throw new IORuntimeException(e);
         }
+    }
+
+    private long bytesToBytes(byte[] src, byte[] dst) {
+        int len = getDirectLen(src.length);
+        System.arraycopy(src, 0, dst, 0, len);
+        return len;
+    }
+
+    private long bytesToBuffer(byte[] src, ByteBuffer dst) {
+        int len = getDirectLen(src.length);
+        dst.put(src, 0, len);
+        return len;
+    }
+
+    private long bufferToBytes(ByteBuffer src, byte[] dst) {
+        int len = getDirectLen(src.remaining());
+        src.get(dst, 0, len);
+        return len;
+    }
+
+    private long bufferToBuffer(ByteBuffer src, ByteBuffer dst) {
+        int len = getDirectLen(src.remaining());
+        ByteBuffer share = src.slice();
+        share.limit(len);
+        dst.put(share);
+        src.position(src.position() + len);
+        return len;
+    }
+
+    private int getDirectLen(int srcSize) {
+        return readLimit < 0 ? srcSize : Math.min(srcSize, (int) readLimit);
+    }
+
+    private long start0() throws Exception {
+        BufferIn in = toBufferIn(source);
+        BufferOut out = toBufferOut(dest);
+        return readTo(in, out);
     }
 
     private BufferIn toBufferIn(Object src) {
@@ -144,40 +194,36 @@ final class ByteStreamImpl implements ByteStream {
         long count = 0;
         while (true) {
             ByteBuffer buf = in.read();
-            if (buf == null) {
+            if (buf == null || !buf.hasRemaining()) {
                 if (count == 0) {
-                    return -1;
+                    return buf == null ? -1 : 0;
                 }
                 if (encoder != null) {
                     ByteBuffer encoded = encoder.encode(JieBytes.emptyBuffer(), true);
                     out.write(encoded);
                 }
-                return count;
-            }
-            if (!buf.hasRemaining()) {
-                if (breakOnZeroRead) {
-                    if (encoder != null) {
-                        ByteBuffer encoded = encoder.encode(JieBytes.emptyBuffer(), true);
-                        out.write(encoded);
-                    }
-                    return count;
-                }
-                continue;
+                break;
             }
             int readSize = buf.remaining();
             count += readSize;
             if (encoder != null) {
                 ByteBuffer encoded;
                 if (readSize < blockSize) {
-                    encoded = encoder.encode(buf, false);
+                    encoded = encoder.encode(buf, true);
+                    out.write(encoded);
+                    break;
                 } else {
                     encoded = encoder.encode(buf, false);
+                    out.write(encoded);
                 }
-                out.write(encoded);
             } else {
                 out.write(buf);
+                if (readSize < blockSize) {
+                    break;
+                }
             }
         }
+        return count;
     }
 
     private interface BufferIn {
@@ -189,7 +235,7 @@ final class ByteStreamImpl implements ByteStream {
         void write(ByteBuffer buffer) throws Exception;
     }
 
-    private static final class InputStreamBufferIn implements BufferIn {
+    private final class InputStreamBufferIn implements BufferIn {
 
         private final InputStream source;
         private final byte[] block;
@@ -211,14 +257,29 @@ final class ByteStreamImpl implements ByteStream {
             if (readSize <= 0) {
                 return null;
             }
-            int size = source.read(block, 0, readSize);
-            if (size < 0) {
+            int hasRead = 0;
+            boolean zeroRead = false;
+            while (hasRead < readSize) {
+                int size = source.read(block, hasRead, readSize - hasRead);
+                if (size < 0) {
+                    break;
+                }
+                if (size == 0 && endOnZeroRead) {
+                    zeroRead = true;
+                    break;
+                }
+                hasRead += size;
+            }
+            if (hasRead == 0) {
+                if (zeroRead) {
+                    return JieBytes.emptyBuffer();
+                }
                 return null;
             }
             blockBuffer.position(0);
-            blockBuffer.limit(size);
+            blockBuffer.limit(hasRead);
             if (limit > 0) {
-                remaining -= size;
+                remaining -= hasRead;
             }
             return blockBuffer;
         }
@@ -310,9 +371,6 @@ final class ByteStreamImpl implements ByteStream {
 
         @Override
         public void write(ByteBuffer buffer) throws IOException {
-            if (!buffer.hasRemaining()) {
-                return;
-            }
             if (buffer.hasArray()) {
                 int remaining = buffer.remaining();
                 dest.write(buffer.array(), buffer.arrayOffset() + buffer.position(), remaining);

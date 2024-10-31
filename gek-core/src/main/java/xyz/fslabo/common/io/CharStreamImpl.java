@@ -15,7 +15,7 @@ final class CharStreamImpl implements CharStream {
     private Object dest;
     private long readLimit = -1;
     private int blockSize = JieIO.BUFFER_SIZE;
-    private boolean breakOnZeroRead = false;
+    private boolean endOnZeroRead = false;
     private Encoder encoder;
 
     CharStreamImpl(Reader source) {
@@ -42,7 +42,7 @@ final class CharStreamImpl implements CharStream {
 
     @Override
     public CharStream to(char[] dest) {
-        this.dest = CharBuffer.wrap(dest);
+        this.dest = dest;
         return this;
     }
 
@@ -78,8 +78,8 @@ final class CharStreamImpl implements CharStream {
     }
 
     @Override
-    public CharStream breakOnZeroRead(boolean breakOnZeroRead) {
-        this.breakOnZeroRead = breakOnZeroRead;
+    public CharStream endOnZeroRead(boolean endOnZeroRead) {
+        this.endOnZeroRead = endOnZeroRead;
         return this;
     }
 
@@ -98,14 +98,92 @@ final class CharStreamImpl implements CharStream {
             return 0;
         }
         try {
-            BufferIn in = toBufferIn(source);
-            BufferOut out = toBufferOut(dest);
-            return readTo(in, out);
-        } catch (IOException e) {
-            throw new IORuntimeException(e);
+            if (encoder == null) {
+                if (source instanceof char[]) {
+                    if (dest instanceof char[]) {
+                        return charsToChars((char[]) source, (char[]) dest);
+                    }
+                    if (dest instanceof CharBuffer) {
+                        return charsToBuffer((char[]) source, (CharBuffer) dest);
+                    }
+                    return charsToAppender((char[]) source, (Appendable) dest);
+                } else if (source instanceof CharBuffer) {
+                    if (dest instanceof char[]) {
+                        return bufferToChars((CharBuffer) source, (char[]) dest);
+                    }
+                    return bufferToAppender((CharBuffer) source, (Appendable) dest);
+                } else if (source instanceof CharSequence) {
+                    if (dest instanceof char[]) {
+                        return charSeqToChars((CharSequence) source, (char[]) dest);
+                    }
+                    return charSeqToAppender((CharSequence) source, (Appendable) dest);
+                }
+            }
+            return start0();
         } catch (Exception e) {
             throw new IORuntimeException(e);
         }
+    }
+
+    private long charsToChars(char[] src, char[] dst) {
+        int len = getDirectLen(src.length);
+        System.arraycopy(src, 0, dst, 0, len);
+        return len;
+    }
+
+    private long charsToBuffer(char[] src, CharBuffer dst) {
+        int len = getDirectLen(src.length);
+        dst.put(src, 0, len);
+        return len;
+    }
+
+    private long charsToAppender(char[] src, Appendable dst) throws IOException {
+        int len = getDirectLen(src.length);
+        dst.append(JieString.asChars(src, 0, len));
+        return len;
+    }
+
+    private long bufferToChars(CharBuffer src, char[] dst) {
+        int len = getDirectLen(src.remaining());
+        src.get(dst, 0, len);
+        return len;
+    }
+
+    private long bufferToAppender(CharBuffer src, Appendable dst) throws IOException {
+        int len = getDirectLen(src.remaining());
+        int pos = src.position();
+        int newPos = pos + len;
+        dst.append(src, 0, len);
+        src.position(newPos);
+        return len;
+    }
+
+    private long charSeqToChars(CharSequence src, char[] dst) throws IOException {
+        int len = getDirectLen(src.length());
+        if (src instanceof String) {
+            ((String) src).getChars(0, len, dst, 0);
+        } else {
+            for (int i = 0; i < len; i++) {
+                dst[i] = src.charAt(i);
+            }
+        }
+        return len;
+    }
+
+    private long charSeqToAppender(CharSequence src, Appendable dst) throws IOException {
+        int len = getDirectLen(src.length());
+        dst.append(src, 0, len);
+        return len;
+    }
+
+    private int getDirectLen(int srcSize) {
+        return readLimit < 0 ? srcSize : Math.min(srcSize, (int) readLimit);
+    }
+
+    private long start0() throws Exception {
+        BufferIn in = toBufferIn(source);
+        BufferOut out = toBufferOut(dest);
+        return readTo(in, out);
     }
 
     private BufferIn toBufferIn(Object src) {
@@ -120,12 +198,15 @@ final class CharStreamImpl implements CharStream {
             return new BufferBufferIn((CharBuffer) src, actualBlockSize, readLimit);
         }
         if (src instanceof CharSequence) {
-            return new StringBufferIn((CharSequence) src, actualBlockSize, readLimit);
+            return new CharSeqBufferIn((CharSequence) src, actualBlockSize, readLimit);
         }
         throw new IORuntimeException("Unexpected source type: " + src.getClass());
     }
 
     private BufferOut toBufferOut(Object dst) {
+        if (dst instanceof char[]) {
+            return new AppendableBufferOut(CharBuffer.wrap((char[]) dst));
+        }
         if (dst instanceof CharBuffer) {
             return new AppendableBufferOut(JieOutput.wrap((CharBuffer) dst));
         }
@@ -146,40 +227,36 @@ final class CharStreamImpl implements CharStream {
         long count = 0;
         while (true) {
             CharBuffer buf = in.read();
-            if (buf == null) {
+            if (buf == null || !buf.hasRemaining()) {
                 if (count == 0) {
-                    return -1;
+                    return buf == null ? -1 : 0;
                 }
                 if (encoder != null) {
                     CharBuffer encoded = encoder.encode(JieChars.emptyBuffer(), true);
                     out.write(encoded);
                 }
-                return count;
-            }
-            if (!buf.hasRemaining()) {
-                if (breakOnZeroRead) {
-                    if (encoder != null) {
-                        CharBuffer encoded = encoder.encode(JieChars.emptyBuffer(), true);
-                        out.write(encoded);
-                    }
-                    return count;
-                }
-                continue;
+                break;
             }
             int readSize = buf.remaining();
             count += readSize;
             if (encoder != null) {
                 CharBuffer encoded;
                 if (readSize < blockSize) {
-                    encoded = encoder.encode(buf, false);
+                    encoded = encoder.encode(buf, true);
+                    out.write(encoded);
+                    break;
                 } else {
                     encoded = encoder.encode(buf, false);
+                    out.write(encoded);
                 }
-                out.write(encoded);
             } else {
                 out.write(buf);
+                if (readSize < blockSize) {
+                    break;
+                }
             }
         }
+        return count;
     }
 
     private interface BufferIn {
@@ -191,7 +268,7 @@ final class CharStreamImpl implements CharStream {
         void write(CharBuffer buffer) throws Exception;
     }
 
-    private static final class ReaderBufferIn implements BufferIn {
+    private final class ReaderBufferIn implements BufferIn {
 
         private final Reader source;
         private final char[] block;
@@ -213,14 +290,29 @@ final class CharStreamImpl implements CharStream {
             if (readSize <= 0) {
                 return null;
             }
-            int size = source.read(block, 0, readSize);
-            if (size < 0) {
+            int hasRead = 0;
+            boolean zeroRead = false;
+            while (hasRead < readSize) {
+                int size = source.read(block, hasRead, readSize - hasRead);
+                if (size < 0) {
+                    break;
+                }
+                if (size == 0 && endOnZeroRead) {
+                    zeroRead = true;
+                    break;
+                }
+                hasRead += size;
+            }
+            if (hasRead == 0) {
+                if (zeroRead) {
+                    return JieChars.emptyBuffer();
+                }
                 return null;
             }
             blockBuffer.position(0);
-            blockBuffer.limit(size);
+            blockBuffer.limit(hasRead);
             if (limit > 0) {
-                remaining -= size;
+                remaining -= hasRead;
             }
             return blockBuffer;
         }
@@ -302,7 +394,7 @@ final class CharStreamImpl implements CharStream {
         }
     }
 
-    private static final class StringBufferIn implements BufferIn {
+    private static final class CharSeqBufferIn implements BufferIn {
 
         private final CharSequence source;
         private final CharBuffer sourceBuffer;
@@ -311,7 +403,7 @@ final class CharStreamImpl implements CharStream {
         private final long limit;
         private long remaining;
 
-        private StringBufferIn(CharSequence source, int blockSize, long limit) {
+        private CharSeqBufferIn(CharSequence source, int blockSize, long limit) {
             this.source = source;
             this.sourceBuffer = CharBuffer.wrap(source);
             this.blockSize = blockSize;
