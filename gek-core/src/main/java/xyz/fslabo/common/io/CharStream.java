@@ -11,7 +11,8 @@ import java.nio.CharBuffer;
  *         Setting methods, used to set parameters and options for current stream before the transferring starts;
  *     </li>
  *     <li>
- *         Final methods, start transfer, and when the transfer is finished, the current instance will be invalid;
+ *         Final methods, start do final things, such as {@link #transfer()}. And when a final method is finished,
+ *         state of current stream instance will be invalid and undefined;
  *     </li>
  * </ul>
  * The stream will keep reading and writing until the source reaches to the end or specified {@code readLimit} (by
@@ -156,7 +157,7 @@ public interface CharStream {
      * If the transfer is ended in this scenario:
      * <ul>
      *     <li>
-     *         If no byte was read, the {@link #start()} returns {@code 0} rather than {@code -1};
+     *         If no byte was read, the {@link #transfer()} returns {@code 0} rather than {@code -1};
      *     </li>
      *     <li>
      *         If the {@code encoder} (specified by {@link #encoder(Encoder)}) is not {@code null}, the 2nd argument of
@@ -192,9 +193,9 @@ public interface CharStream {
     CharStream encoder(Encoder encoder);
 
     /**
-     * Starts transfer through this stream, returns the actual chars number that read and success to transfer. Ensure
-     * that the remaining of destination is enough, otherwise a {@link IORuntimeException} will be thrown and the actual
-     * read and written chars number is undefined.
+     * Starts transfer data from source into destination through this stream, returns the actual chars number that read
+     * and success to transfer. Ensure that the remaining of destination is enough, otherwise a
+     * {@link IORuntimeException} will be thrown and the actual read and written chars number is undefined.
      * <p>
      * If the {@code encoder} (see {@link #encoder(Encoder)}) is {@code null}, read number equals to written number.
      * Otherwise, the written number may not equal to read number, and this method returns actual read number.
@@ -205,7 +206,7 @@ public interface CharStream {
      * @return the actual chars number that read and success to transfer
      * @throws IORuntimeException IO runtime exception
      */
-    long start() throws IORuntimeException;
+    long transfer() throws IORuntimeException;
 
     /**
      * Encoder to encode the char data in the stream transfer processing.
