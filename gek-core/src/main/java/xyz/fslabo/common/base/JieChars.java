@@ -2,6 +2,7 @@ package xyz.fslabo.common.base;
 
 import xyz.fslabo.annotations.Nullable;
 
+import java.nio.ByteOrder;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -106,21 +107,118 @@ public class JieChars {
         return EMPTY_BUFFER;
     }
 
+    /**
+     * Returns a new {@link CharBuffer} (not direct) of which content copied from given data. This method is equivalent
+     * to ({@link #copyBuffer(char[], boolean)}):
+     * <pre>
+     *     return copy(data, false);
+     * </pre>
+     *
+     * @param data given data
+     * @return a new {@link CharBuffer} (not direct) of which content copied from given data
+     * @see #copyBuffer(char[], boolean)
+     */
+    public static CharBuffer copyBuffer(char[] data) {
+        return copyBuffer(data, false);
+    }
+
+    /**
+     * Returns a new {@link CharBuffer} of which content copied from given data. The buffer will be direct if specified
+     * direct option is {@code true}, otherwise be not.
+     *
+     * @param data   given data
+     * @param direct specified direct option
+     * @return a new {@link CharBuffer} of which content copied from given data
+     */
+    public static CharBuffer copyBuffer(char[] data, boolean direct) {
+        if (direct) {
+            byte[] bytes = toBytes(data);
+            return JieBytes.copyBuffer(bytes, true).order(ByteOrder.BIG_ENDIAN).asCharBuffer();
+        }
+        CharBuffer buffer = CharBuffer.allocate(data.length);
+        buffer.put(data);
+        buffer.flip();
+        return buffer;
+    }
+
+    private static byte[] toBytes(char[] data) {
+        byte[] bytes = new byte[data.length * 2];
+        for (int i = 0; i < data.length; i++) {
+            bytes[i * 2] = (byte) (data[i] >> 8);
+            bytes[i * 2 + 1] = (byte) data[i];
+        }
+        return bytes;
+    }
+
+    /**
+     * Returns a new {@code char} array of which content copied from given data. The position of given data will not be
+     * changed, rather than incremented by its remaining.
+     *
+     * @param data given data
+     * @return a new {@code char} array of which content copied from given data
+     */
+    public static char[] copyChars(CharBuffer data) {
+        int pos = data.position();
+        char[] chars = new char[data.remaining()];
+        data.get(chars);
+        data.position(pos);
+        return chars;
+    }
+
+    /**
+     * Returns a new {@link CharBuffer} of which content copied from given data. The buffer will be direct if given data
+     * is direct, otherwise be not. The position of given data will not be changed, rather than incremented by its
+     * remaining.
+     *
+     * @param data given data
+     * @return a new {@link CharBuffer} (not direct) of which content copied from given data
+     */
+    public static CharBuffer copyBuffer(CharBuffer data) {
+        if (data.isDirect()) {
+            byte[] bytes = toBytes(data);
+            return JieBytes.copyBuffer(bytes, true).order(ByteOrder.BIG_ENDIAN).asCharBuffer();
+        }
+        CharBuffer buffer = CharBuffer.allocate(data.remaining());
+        int pos = data.position();
+        buffer.put(data);
+        data.position(pos);
+        buffer.flip();
+        return buffer;
+    }
+
+    private static byte[] toBytes(CharBuffer data) {
+        int size = data.remaining();
+        byte[] bytes = new byte[size * 2];
+        for (int i = 0; i < size; i++) {
+            bytes[i * 2] = (byte) (data.charAt(i) >> 8);
+            bytes[i * 2 + 1] = (byte) data.charAt(i);
+        }
+        return bytes;
+    }
+
     private static final class Natives {
 
         private static final Charset NATIVE_CHARSET = searchNativeCharset();
 
         @Nullable
         private static Charset searchNativeCharset() {
-            Charset result = charset(JieSystem.getNativeEncoding());
-            if (result != null) {
-                return result;
+            return search(
+                JieSystem.KEY_OF_NATIVE_ENCODING,
+                "sun.jnu.encoding",
+                JieSystem.KEY_OF_FILE_ENCODING
+            );
+        }
+
+        @Nullable
+        private static Charset search(String... proName) {
+            for (String s : proName) {
+                String prop = System.getProperty(s);
+                Charset charset = charset(prop);
+                if (charset != null) {
+                    return charset;
+                }
             }
-            result = charset(System.getProperty("sun.jnu.encoding"));
-            if (result != null) {
-                return result;
-            }
-            return charset(JieSystem.getFileEncoding());
+            return null;
         }
     }
 }
