@@ -118,3 +118,7 @@ tasks.register('cleanWithJavadoc') {
     delete(javadoc.destinationDir)
   }
 }
+
+test {
+  include("**/TU.class")
+}
