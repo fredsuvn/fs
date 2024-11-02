@@ -1,6 +1,7 @@
 package test.base;
 
 import org.testng.annotations.Test;
+import test.TU;
 import xyz.fslabo.common.base.*;
 
 import java.lang.reflect.Method;
@@ -97,6 +98,30 @@ public class BaseTest {
             assertNotSame(JieBytes.copyBytes(bufferDir), JieBytes.copyBytes(bufferDir2));
             assertEquals(JieBytes.copyBytes(buffer), JieBytes.copyBytes(bufferDir));
             assertNotSame(JieBytes.copyBytes(buffer), JieBytes.copyBytes(bufferDir));
+            assertEquals(buffer.remaining(), bytes.length);
+            assertEquals(JieBytes.getBytes(buffer), bytes);
+            assertEquals(buffer.remaining(), 0);
+            assertEquals(bufferDir.remaining(), bytes.length);
+            assertEquals(JieBytes.getBytes(bufferDir), bytes);
+            assertEquals(bufferDir.remaining(), 0);
+            ByteBuffer src = TU.bufferDangling(bytes);
+            ByteBuffer dst = ByteBuffer.allocateDirect(bytes.length * 2);
+            JieBytes.putBuffer(src, dst, bytes.length);
+            dst.flip();
+            assertEquals(dst.remaining(), bytes.length);
+            assertEquals(JieBytes.getBytes(dst), bytes);
+            assertEquals(dst.remaining(), 0);
+            assertEquals(src.remaining(), 0);
+            src = TU.bufferDangling(bytes);
+            ByteBuffer slice = JieBytes.slice(src, 2, 222);
+            assertEquals(src.position(), 0);
+            assertEquals(src.limit(), bytes.length);
+            assertEquals(src.capacity(), bytes.length);
+            assertEquals(slice.position(), 0);
+            assertEquals(slice.limit(), 222);
+            assertEquals(slice.capacity(), 222);
+            assertEquals(JieBytes.getBytes(slice), Arrays.copyOfRange(bytes, 2, 2 + 222));
+            assertEquals(slice.position(), slice.limit());
         }
     }
 
@@ -140,6 +165,30 @@ public class BaseTest {
             assertNotSame(JieChars.copyChars(bufferDir), JieChars.copyChars(bufferDir2));
             assertEquals(JieChars.copyChars(buffer), JieChars.copyChars(bufferDir));
             assertNotSame(JieChars.copyChars(buffer), JieChars.copyChars(bufferDir));
+            assertEquals(buffer.remaining(), chars.length);
+            assertEquals(JieChars.getBytes(buffer), chars);
+            assertEquals(buffer.remaining(), 0);
+            assertEquals(bufferDir.remaining(), chars.length);
+            assertEquals(JieChars.getBytes(bufferDir), chars);
+            assertEquals(bufferDir.remaining(), 0);
+            CharBuffer src = TU.bufferDangling(chars);
+            CharBuffer dst = CharBuffer.allocate(chars.length * 2);
+            JieChars.putBuffer(src, dst, chars.length);
+            dst.flip();
+            assertEquals(dst.remaining(), chars.length);
+            assertEquals(JieChars.getBytes(dst), chars);
+            assertEquals(dst.remaining(), 0);
+            assertEquals(src.remaining(), 0);
+            src = TU.bufferDangling(chars);
+            CharBuffer slice = JieChars.slice(src, 2, 222);
+            assertEquals(src.position(), 0);
+            assertEquals(src.limit(), chars.length);
+            assertEquals(src.capacity(), chars.length);
+            assertEquals(slice.position(), 0);
+            assertEquals(slice.limit(), 222);
+            assertEquals(slice.capacity(), 222);
+            assertEquals(JieChars.getBytes(slice), Arrays.copyOfRange(chars, 2, 2 + 222));
+            assertEquals(slice.position(), slice.limit());
         }
 
         {
