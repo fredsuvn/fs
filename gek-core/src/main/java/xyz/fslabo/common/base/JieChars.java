@@ -205,7 +205,7 @@ public class JieChars {
      * @param data given data
      * @return a new array of which content read from given data
      */
-    public static char[] getBytes(CharBuffer data) {
+    public static char[] getChars(CharBuffer data) {
         char[] bytes = new char[data.remaining()];
         data.get(bytes);
         return bytes;

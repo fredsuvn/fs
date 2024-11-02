@@ -373,7 +373,7 @@ final class ByteStreamImpl implements ByteStream {
         public void write(ByteBuffer buffer) throws IOException {
             if (buffer.hasArray()) {
                 int remaining = buffer.remaining();
-                dest.write(buffer.array(), buffer.arrayOffset() + buffer.position(), remaining);
+                dest.write(buffer.array(), JieBuffer.getArrayStartIndex(buffer), remaining);
                 buffer.position(buffer.position() + remaining);
             } else {
                 byte[] buf = new byte[buffer.remaining()];

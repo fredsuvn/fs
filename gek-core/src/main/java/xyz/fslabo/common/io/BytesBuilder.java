@@ -294,7 +294,7 @@ public class BytesBuilder extends OutputStream {
             return this;
         }
         if (bytes.hasArray()) {
-            write(bytes.array(), bytes.arrayOffset() + bytes.position(), bytes.remaining());
+            write(bytes.array(), JieBuffer.getArrayStartIndex(bytes), bytes.remaining());
             bytes.position(bytes.position() + bytes.remaining());
         } else {
             byte[] remaining = JieBuffer.read(bytes);

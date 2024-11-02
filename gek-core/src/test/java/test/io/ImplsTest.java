@@ -24,7 +24,7 @@ import java.util.Arrays;
 
 import static org.testng.Assert.*;
 
-public class StreamTest {
+public class ImplsTest {
 
     @Test
     public void testInput() throws Exception {

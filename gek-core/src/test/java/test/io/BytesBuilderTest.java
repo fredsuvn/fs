@@ -33,10 +33,13 @@ public class BytesBuilderTest {
         assertEquals(bb.toByteArray(), Arrays.copyOf(bs, 10));
         bb.append(bs, 10, 10);
         assertEquals(bb.toByteArray(), Arrays.copyOf(bs, 20));
-        ByteBuffer buffer = ByteBuffer.wrap(Arrays.copyOfRange(bs, 20, 30));
+        ByteBuffer buffer = ByteBuffer.wrap(Arrays.copyOfRange(bs, 20, 25));
         bb.append(buffer);
+        ByteBuffer arrayBuf = ByteBuffer.wrap(bs, 20, 10);
+        arrayBuf.get(new byte[5]);
+        bb.append(arrayBuf);
         assertEquals(bb.toByteArray(), Arrays.copyOf(bs, 30));
-        assertEquals(buffer.position(), 10);
+        assertEquals(buffer.position(), 5);
         assertFalse(buffer.hasRemaining());
         bb.append(JieInput.wrap(Arrays.copyOfRange(bs, 30, 40)));
         assertEquals(bb.toByteArray(), Arrays.copyOf(bs, 40));
@@ -51,8 +54,8 @@ public class BytesBuilderTest {
         buffer2.flip();
         bb.append(buffer2);
         assertEquals(bb.toByteArray(), Arrays.copyOf(bs, 70));
-        assertEquals(buffer.position(), 10);
-        assertFalse(buffer.hasRemaining());
+        assertEquals(buffer2.position(), 10);
+        assertFalse(buffer2.hasRemaining());
         bb.append(JieBytes.emptyBuffer());
         expectThrows(IORuntimeException.class, () -> bb.append(new InputStream() {
             @Override

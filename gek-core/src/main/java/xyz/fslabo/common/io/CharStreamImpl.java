@@ -448,8 +448,11 @@ final class CharStreamImpl implements CharStream {
             }
             if (buffer.hasArray()) {
                 int remaining = buffer.remaining();
-                int start = buffer.arrayOffset() + buffer.position();
-                dest.append(JieString.asChars(buffer.array(), start, start + remaining));
+                dest.append(JieString.asChars(
+                    buffer.array(),
+                    JieBuffer.getArrayStartIndex(buffer),
+                    JieBuffer.getArrayEndIndex(buffer)
+                ));
                 buffer.position(buffer.position() + remaining);
             } else {
                 char[] buf = new char[buffer.remaining()];
@@ -461,7 +464,7 @@ final class CharStreamImpl implements CharStream {
         private void write(CharBuffer buffer, Writer writer) throws IOException {
             if (buffer.hasArray()) {
                 int remaining = buffer.remaining();
-                writer.write(buffer.array(), buffer.arrayOffset() + buffer.position(), remaining);
+                writer.write(buffer.array(), JieBuffer.getArrayStartIndex(buffer), remaining);
                 buffer.position(buffer.position() + remaining);
             } else {
                 char[] buf = new char[buffer.remaining()];

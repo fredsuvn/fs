@@ -1,7 +1,6 @@
 package xyz.fslabo.common.io;
 
 import xyz.fslabo.annotations.Nullable;
-import xyz.fslabo.common.base.JieBytes;
 import xyz.fslabo.common.base.JieChars;
 import xyz.fslabo.common.base.JieCheck;
 
@@ -22,7 +21,27 @@ import java.util.function.IntFunction;
  */
 public class JieBuffer {
 
-    private static final ByteBuffer EMPTY_BUFFER = ByteBuffer.wrap(JieBytes.emptyBytes());
+    /**
+     * Returns actual start index (inclusive) of backing array in given buffer.
+     *
+     * @param buffer given buffer
+     * @return actual start index (inclusive) of backing array in given buffer
+     * @throws UnsupportedOperationException if this buffer is not backed by an array
+     */
+    public static int getArrayStartIndex(Buffer buffer) throws UnsupportedOperationException {
+        return buffer.arrayOffset() + buffer.position();
+    }
+
+    /**
+     * Returns actual start index (exclusive) of backing array in given buffer.
+     *
+     * @param buffer given buffer
+     * @return actual start index (exclusive) of backing array in given buffer
+     * @throws UnsupportedOperationException if this buffer is not backed by an array
+     */
+    public static int getArrayEndIndex(Buffer buffer) throws UnsupportedOperationException {
+        return buffer.arrayOffset() + buffer.position() + buffer.remaining();
+    }
 
     /**
      * Reads all bytes from source buffer into an array. Returns the array, or null if no data read out and reaches to
@@ -36,9 +55,9 @@ public class JieBuffer {
     public static byte[] read(ByteBuffer source) throws IORuntimeException {
         try {
             int length = source.remaining();
-            if (length <= 0) {
-                return null;
-            }
+            // if (length <= 0) {
+            //     return null;
+            // }
             byte[] result = new byte[length];
             source.get(result);
             return result;
