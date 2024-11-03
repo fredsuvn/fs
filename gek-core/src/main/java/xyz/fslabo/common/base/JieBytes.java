@@ -134,6 +134,8 @@ public class JieBytes {
      * its capacity and its limit will be the specified length, and its mark will be undefined. The new buffer will be
      * direct if, and only if, given buffer is direct, and it will be read-only if, and only if, given buffer is
      * read-only. The position of given buffer will not be changed.
+     * <p>
+     * Note if specified length is {@code 0}, returns {@link #emptyBuffer()}.
      *
      * @param buffer given buffer
      * @param offset specified offset to {@code position}
