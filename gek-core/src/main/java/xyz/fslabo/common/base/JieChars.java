@@ -230,7 +230,7 @@ public class JieChars {
 
     /**
      * Returns a new buffer whose content is a shared subsequence of given buffer's content. The content of the new
-     * buffer will start at specified offset of given buffer's current position, up to specified length. Changes to
+     * buffer will start at specified offset to given buffer's current position, up to specified length. Changes to
      * given buffer's content will be visible in the new buffer, and vice versa.
      * <p>
      * The two buffers' position, limit, and mark values will be independent. The new buffer's position will be zero,
@@ -239,11 +239,14 @@ public class JieChars {
      * read-only. The position of given buffer will not be changed.
      *
      * @param buffer given buffer
-     * @param offset specified offset of {@code position}
+     * @param offset specified offset to {@code position}
      * @param length specified length
      * @throws IllegalArgumentException if the preconditions on offset and length do not hold
      */
     public static CharBuffer slice(CharBuffer buffer, int offset, int length) throws IllegalArgumentException {
+        if (length == 0) {
+            return emptyBuffer();
+        }
         int pos = buffer.position();
         int limit = buffer.limit();
         buffer.position(pos + offset);

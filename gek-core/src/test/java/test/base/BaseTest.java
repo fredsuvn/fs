@@ -122,6 +122,7 @@ public class BaseTest {
             assertEquals(slice.capacity(), 222);
             assertEquals(JieBytes.getBytes(slice), Arrays.copyOfRange(bytes, 2, 2 + 222));
             assertEquals(slice.position(), slice.limit());
+            assertSame(JieBytes.slice(ByteBuffer.allocate(99), 0, 0), JieBytes.emptyBuffer());
         }
     }
 
@@ -189,6 +190,7 @@ public class BaseTest {
             assertEquals(slice.capacity(), 222);
             assertEquals(JieChars.getChars(slice), Arrays.copyOfRange(chars, 2, 2 + 222));
             assertEquals(slice.position(), slice.limit());
+            assertSame(JieChars.slice(CharBuffer.allocate(99), 0, 0), JieChars.emptyBuffer());
         }
 
         {

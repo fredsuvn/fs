@@ -173,8 +173,17 @@ public interface ByteStream {
      * data read in each read operation is specified by {@link #blockSize(int)}, and the remaining data of last read may
      * be smaller than this value.
      * <p>
-     * Note that the {@link ByteBuffer} passed as the argument is not always a new instance or new allocated, it may be
-     * reused. And the returned {@link ByteBuffer} will also be treated as potentially reusable.
+     * Note:
+     * <ul>
+     *     <li>
+     *         The {@link ByteBuffer} passed as the argument is not always a new instance or new allocated, it may be
+     *         reused. And the returned {@link ByteBuffer} will also be treated as potentially reusable;
+     *     </li>
+     *     <li>
+     *         The encoder can be either a stateless function or a stateful, non-thread-safe object, depending on the
+     *         implementation.
+     *     </li>
+     * </ul>
      * <p>
      * This is a setting method.
      *
