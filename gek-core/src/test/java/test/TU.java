@@ -1,9 +1,9 @@
 package test;
 
 import org.testng.annotations.Test;
-import xyz.fslabo.common.base.JieBytes;
-import xyz.fslabo.common.base.JieChars;
-import xyz.fslabo.common.base.JieRandom;
+import xyz.sunqian.common.base.JieBytes;
+import xyz.sunqian.common.base.JieChars;
+import xyz.sunqian.common.base.JieRandom;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;

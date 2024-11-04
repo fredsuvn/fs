@@ -1,5 +1,5 @@
 import org.testng.annotations.Test;
-import xyz.fslabo.common.reflect.JieReflect;
+import xyz.sunqian.common.reflect.JieReflect;
 
 import static org.testng.Assert.assertEquals;
 

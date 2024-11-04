@@ -1,8 +1,8 @@
 package test;
 
 import org.testng.annotations.Test;
-import xyz.fslabo.test.JieTest;
-import xyz.fslabo.test.JieTestException;
+import xyz.sunqian.test.JieTest;
+import xyz.sunqian.test.JieTestException;
 
 import java.lang.reflect.Method;
 import java.nio.file.Path;

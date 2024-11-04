@@ -6,15 +6,15 @@
 //import lombok.NoArgsConstructor;
 //import org.testng.Assert;
 //import org.testng.annotations.Test;
-//import xyz.fslabo.annotations.Nullable;
-//import xyz.fslabo.common.base.*;
-//import xyz.fslabo.common.bean.*;
-//import xyz.fslabo.common.bean.handlers.JavaBeanResolverHandler;
-//import xyz.fslabo.common.bean.handlers.NonGetterPrefixResolverHandler;
-//import xyz.fslabo.common.mapping.BeanMapper;
-//import xyz.fslabo.common.mapping.Mapper;
-//import xyz.fslabo.common.mapping.MappingOptions;
-//import xyz.fslabo.common.reflect.TypeRef;
+//import xyz.sunqian.annotations.Nullable;
+//import xyz.sunqian.common.base.*;
+//import xyz.sunqian.common.bean.*;
+//import xyz.sunqian.common.bean.handlers.JavaBeanResolverHandler;
+//import xyz.sunqian.common.bean.handlers.NonGetterPrefixResolverHandler;
+//import xyz.sunqian.common.mapping.BeanMapper;
+//import xyz.sunqian.common.mapping.Mapper;
+//import xyz.sunqian.common.mapping.MappingOptions;
+//import xyz.sunqian.common.reflect.TypeRef;
 //
 //import java.lang.annotation.*;
 //import java.lang.reflect.Type;

@@ -3,9 +3,9 @@
 //import com.google.common.base.CaseFormat;
 //import org.testng.Assert;
 //import org.testng.annotations.Test;
-//import xyz.fslabo.common.base.CaseFormatter;
-//import xyz.fslabo.common.base.JieString;
-//import xyz.fslabo.common.coll.JieColl;
+//import xyz.sunqian.common.base.CaseFormatter;
+//import xyz.sunqian.common.base.JieString;
+//import xyz.sunqian.common.coll.JieColl;
 //
 //import java.util.Arrays;
 //

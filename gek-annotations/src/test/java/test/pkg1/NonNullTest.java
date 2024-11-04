@@ -8,6 +8,6 @@ public class NonNullTest {
 
     @Test
     public void testAnnotations() {
-        //System.out.println(nonNullStr.length());
+        // System.out.println(nonNullStr.length());
     }
 }

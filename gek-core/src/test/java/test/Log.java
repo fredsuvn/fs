@@ -1,6 +1,6 @@
 package test;
 
-import xyz.fslabo.common.base.JieLog;
+import xyz.sunqian.common.base.JieLog;
 
 public class Log {
 

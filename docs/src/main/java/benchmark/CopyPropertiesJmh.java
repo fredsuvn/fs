@@ -4,7 +4,7 @@
 // import lombok.Data;
 // import org.apache.commons.beanutils.BeanUtils;
 // import org.openjdk.jmh.annotations.*;
-// import xyz.fslabo.common.base.Jie;
+// import xyz.sunqian.common.base.Jie;
 //
 // import java.lang.reflect.InvocationTargetException;
 // import java.util.Arrays;

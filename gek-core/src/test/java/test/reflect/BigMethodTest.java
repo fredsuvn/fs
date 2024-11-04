@@ -1,11 +1,11 @@
 package test.reflect;
 
 import org.testng.annotations.Test;
-import xyz.fslabo.annotations.Nullable;
-import xyz.fslabo.common.base.Jie;
-import xyz.fslabo.common.reflect.proxy.JieProxy;
-import xyz.fslabo.common.reflect.proxy.MethodProxyHandler;
-import xyz.fslabo.common.reflect.proxy.ProxyInvoker;
+import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.reflect.proxy.JieProxy;
+import xyz.sunqian.common.reflect.proxy.MethodProxyHandler;
+import xyz.sunqian.common.reflect.proxy.ProxyInvoker;
 
 import java.lang.reflect.Method;
 

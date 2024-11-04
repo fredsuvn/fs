@@ -2,12 +2,12 @@ package test.reflect;
 
 import org.objectweb.asm.MethodVisitor;
 import org.testng.annotations.Test;
-import xyz.fslabo.annotations.Nullable;
-import xyz.fslabo.common.base.Jie;
-import xyz.fslabo.common.reflect.NotPrimitiveException;
-import xyz.fslabo.common.reflect.proxy.*;
-import xyz.fslabo.test.JieTest;
-import xyz.fslabo.test.JieTestException;
+import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.reflect.NotPrimitiveException;
+import xyz.sunqian.common.reflect.proxy.*;
+import xyz.sunqian.test.JieTest;
+import xyz.sunqian.test.JieTestException;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -127,7 +127,7 @@ public class ProxyTest {
 
     @Test
     public void testAsmMisc() throws Exception {
-        Class<?> asmMisc = Class.forName("xyz.fslabo.common.reflect.proxy.AsmMisc");
+        Class<?> asmMisc = Class.forName("xyz.sunqian.common.reflect.proxy.AsmMisc");
         Method method = asmMisc.getDeclaredMethod(
             "visitLoadPrimitiveParamAsObject", MethodVisitor.class, Class.class, int.class);
         JieTest.testThrow(NotPrimitiveException.class, method, null, null, Object.class, 1);

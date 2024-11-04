@@ -1,8 +1,8 @@
 package test.reflect;
 
 import org.testng.annotations.Test;
-import xyz.fslabo.common.reflect.JieReflect;
-import xyz.fslabo.common.reflect.JieType;
+import xyz.sunqian.common.reflect.JieReflect;
+import xyz.sunqian.common.reflect.JieType;
 
 import java.lang.reflect.*;
 import java.util.ArrayList;

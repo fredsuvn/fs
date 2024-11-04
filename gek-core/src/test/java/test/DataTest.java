@@ -2,9 +2,9 @@
 //
 //import org.testng.Assert;
 //import org.testng.annotations.Test;
-//import xyz.fslabo.common.base.JieChars;
-//import xyz.fslabo.common.data.GekData;
-//import xyz.fslabo.common.io.JieIO;
+//import xyz.sunqian.common.base.JieChars;
+//import xyz.sunqian.common.data.GekData;
+//import xyz.sunqian.common.io.JieIO;
 //
 //import java.io.ByteArrayInputStream;
 //import java.io.ByteArrayOutputStream;

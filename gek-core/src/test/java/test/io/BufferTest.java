@@ -2,7 +2,7 @@ package test.io;
 
 import org.testng.annotations.Test;
 import test.TU;
-import xyz.fslabo.common.io.JieBuffer;
+import xyz.sunqian.common.io.JieBuffer;
 
 import java.nio.ByteBuffer;
 

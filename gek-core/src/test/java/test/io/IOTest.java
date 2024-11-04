@@ -2,10 +2,10 @@ package test.io;
 
 import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
-import xyz.fslabo.common.base.JieChars;
-import xyz.fslabo.common.base.JieRandom;
-import xyz.fslabo.common.io.IORuntimeException;
-import xyz.fslabo.common.io.JieIO;
+import xyz.sunqian.common.base.JieChars;
+import xyz.sunqian.common.base.JieRandom;
+import xyz.sunqian.common.io.IORuntimeException;
+import xyz.sunqian.common.io.JieIO;
 
 import java.io.*;
 import java.util.Arrays;

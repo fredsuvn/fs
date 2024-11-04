@@ -1,11 +1,11 @@
 package test.reflect;
 
 import org.testng.annotations.Test;
-import xyz.fslabo.common.reflect.JieJvm;
-import xyz.fslabo.common.reflect.JieType;
-import xyz.fslabo.common.reflect.JvmException;
-import xyz.fslabo.common.reflect.NotPrimitiveException;
-import xyz.fslabo.test.JieTest;
+import xyz.sunqian.common.reflect.JieJvm;
+import xyz.sunqian.common.reflect.JieType;
+import xyz.sunqian.common.reflect.JvmException;
+import xyz.sunqian.common.reflect.NotPrimitiveException;
+import xyz.sunqian.test.JieTest;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;

@@ -1,12 +1,12 @@
 package test.invoke;
 
 import org.testng.annotations.Test;
-import xyz.fslabo.common.base.Jie;
-import xyz.fslabo.common.invoke.InvocationException;
-import xyz.fslabo.common.invoke.Invoker;
-import xyz.fslabo.common.invoke.JieInvoke;
-import xyz.fslabo.common.reflect.JieReflect;
-import xyz.fslabo.test.JieTestException;
+import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.invoke.InvocationException;
+import xyz.sunqian.common.invoke.Invoker;
+import xyz.sunqian.common.invoke.JieInvoke;
+import xyz.sunqian.common.reflect.JieReflect;
+import xyz.sunqian.test.JieTestException;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;

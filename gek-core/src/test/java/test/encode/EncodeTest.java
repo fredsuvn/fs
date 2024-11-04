@@ -2,14 +2,14 @@ package test.encode;
 
 import org.testng.annotations.Test;
 import test.TU;
-import xyz.fslabo.common.base.JieBytes;
-import xyz.fslabo.common.base.JieRandom;
-import xyz.fslabo.common.codec.CodecException;
-import xyz.fslabo.common.encode.Base64Encoder;
-import xyz.fslabo.common.encode.Encoder;
-import xyz.fslabo.common.encode.JieBase64;
-import xyz.fslabo.common.io.ByteStream;
-import xyz.fslabo.common.io.JieIO;
+import xyz.sunqian.common.base.JieBytes;
+import xyz.sunqian.common.base.JieRandom;
+import xyz.sunqian.common.codec.CodecException;
+import xyz.sunqian.common.encode.Base64Encoder;
+import xyz.sunqian.common.encode.Encoder;
+import xyz.sunqian.common.encode.JieBase64;
+import xyz.sunqian.common.io.ByteStream;
+import xyz.sunqian.common.io.JieIO;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;

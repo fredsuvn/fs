@@ -1,12 +1,12 @@
 package test
 
 import org.testng.annotations.Test
-import xyz.fslabo.common.base.helloGekKotlin
+import xyz.sunqian.common.base.helloKotlin
 
 class KotlinTest {
 
     @Test
     fun testKotlin() {
-        helloGekKotlin()
+        helloKotlin()
     }
 }

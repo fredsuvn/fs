@@ -5,7 +5,7 @@
 // import org.openjdk.jmh.annotations.*;
 // import org.openjdk.jmh.infra.BenchmarkParams;
 // import org.openjdk.jmh.infra.Blackhole;
-// import xyz.fslabo.common.cache.Cache;
+// import xyz.sunqian.common.cache.Cache;
 //
 // import java.util.concurrent.ExecutionException;
 // import java.util.concurrent.ThreadLocalRandom;

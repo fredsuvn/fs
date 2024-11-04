@@ -2,7 +2,7 @@ package test.base;
 
 import org.testng.annotations.Test;
 import test.Log;
-import xyz.fslabo.common.base.JieCheck;
+import xyz.sunqian.common.base.JieCheck;
 
 import static org.testng.Assert.*;
 

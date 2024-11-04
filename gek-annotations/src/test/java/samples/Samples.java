@@ -1,6 +1,9 @@
 package samples;
 
-import xyz.fslabo.annotations.*;
+import xyz.sunqian.annotations.DefaultNonNull;
+import xyz.sunqian.annotations.DefaultNullable;
+import xyz.sunqian.annotations.NonNull;
+import xyz.sunqian.annotations.Nullable;
 
 public class Samples {
 

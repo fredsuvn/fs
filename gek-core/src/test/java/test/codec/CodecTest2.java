@@ -4,11 +4,11 @@
 //import org.testng.Assert;
 //import org.testng.annotations.Test;
 //import xyz.fslabo.annotations.Nullable;
-//import xyz.fslabo.common.base.JieString;
-//import xyz.fslabo.common.codec.CipherCodec;
-//import xyz.fslabo.common.codec.CodecConfigurator;
-//import xyz.fslabo.common.codec.JieCodec;
-//import xyz.fslabo.common.io.JieIO;
+//import xyz.sunqian.common.base.JieString;
+//import xyz.sunqian.common.codec.CipherCodec;
+//import xyz.sunqian.common.codec.CodecConfigurator;
+//import xyz.sunqian.common.codec.JieCodec;
+//import xyz.sunqian.common.io.JieIO;
 //
 //import javax.crypto.Cipher;
 //import javax.crypto.KeyGenerator;

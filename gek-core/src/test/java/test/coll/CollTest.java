@@ -1,8 +1,8 @@
 package test.coll;
 
 import org.testng.annotations.Test;
-import xyz.fslabo.common.base.Jie;
-import xyz.fslabo.common.coll.JieColl;
+import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.coll.JieColl;
 
 import java.util.*;
 import java.util.stream.Stream;

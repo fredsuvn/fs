@@ -1,7 +1,7 @@
 package test.base;
 
 import org.testng.annotations.Test;
-import xyz.fslabo.common.base.JieLog;
+import xyz.sunqian.common.base.JieLog;
 
 import java.io.IOException;
 

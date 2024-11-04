@@ -2,7 +2,7 @@ package test.base;
 
 import org.testng.annotations.Test;
 import test.TU;
-import xyz.fslabo.common.base.*;
+import xyz.sunqian.common.base.*;
 
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;

@@ -1,7 +1,7 @@
 package test.base;
 
 import org.testng.annotations.Test;
-import xyz.fslabo.common.ref.*;
+import xyz.sunqian.common.ref.*;
 
 import static org.testng.Assert.*;
 

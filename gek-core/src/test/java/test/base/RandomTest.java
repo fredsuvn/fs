@@ -2,11 +2,11 @@ package test.base;
 
 import org.testng.annotations.Test;
 import test.Log;
-import xyz.fslabo.common.base.Jie;
-import xyz.fslabo.common.base.JieRandom;
-import xyz.fslabo.common.coll.JieArray;
-import xyz.fslabo.common.invoke.InvocationException;
-import xyz.fslabo.common.invoke.Invoker;
+import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.JieRandom;
+import xyz.sunqian.common.coll.JieArray;
+import xyz.sunqian.common.invoke.InvocationException;
+import xyz.sunqian.common.invoke.Invoker;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

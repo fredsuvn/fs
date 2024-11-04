@@ -2,9 +2,9 @@ package test.reflect;
 
 import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
-import xyz.fslabo.common.base.Jie;
-import xyz.fslabo.common.reflect.*;
-import xyz.fslabo.test.JieTest;
+import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.reflect.*;
+import xyz.sunqian.test.JieTest;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;

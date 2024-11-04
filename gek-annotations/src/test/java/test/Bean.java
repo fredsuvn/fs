@@ -1,7 +1,7 @@
 package test;
 
 import lombok.Data;
-import xyz.fslabo.annotations.Nullable;
+import xyz.sunqian.annotations.Nullable;
 
 /**
  * @author fredsuvn

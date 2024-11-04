@@ -1,7 +1,7 @@
 package test.base;
 
 import org.testng.annotations.Test;
-import xyz.fslabo.common.base.StackCounter;
+import xyz.sunqian.common.base.StackCounter;
 
 import static org.testng.Assert.assertEquals;
 

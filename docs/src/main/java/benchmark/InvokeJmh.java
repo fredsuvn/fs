@@ -1,7 +1,7 @@
 // package benchmark;
 //
 // import org.openjdk.jmh.annotations.*;
-// import xyz.fslabo.common.invoke.Invoker;
+// import xyz.sunqian.common.invoke.Invoker;
 //
 // import java.lang.reflect.Method;
 // import java.util.concurrent.TimeUnit;

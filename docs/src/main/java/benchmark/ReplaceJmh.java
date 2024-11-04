@@ -1,7 +1,7 @@
 // package benchmark;
 //
 // import org.openjdk.jmh.annotations.*;
-// import xyz.fslabo.common.base.JieString;
+// import xyz.sunqian.common.base.JieString;
 //
 // import java.util.concurrent.TimeUnit;
 //

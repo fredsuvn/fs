@@ -1,13 +1,13 @@
 package test.io;
 
 import org.testng.annotations.Test;
-import xyz.fslabo.common.base.JieBytes;
-import xyz.fslabo.common.base.JieChars;
-import xyz.fslabo.common.base.JieRandom;
-import xyz.fslabo.common.io.BytesBuilder;
-import xyz.fslabo.common.io.IORuntimeException;
-import xyz.fslabo.common.io.JieInput;
-import xyz.fslabo.test.JieTest;
+import xyz.sunqian.common.base.JieBytes;
+import xyz.sunqian.common.base.JieChars;
+import xyz.sunqian.common.base.JieRandom;
+import xyz.sunqian.common.io.BytesBuilder;
+import xyz.sunqian.common.io.IORuntimeException;
+import xyz.sunqian.common.io.JieInput;
+import xyz.sunqian.test.JieTest;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

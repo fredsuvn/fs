@@ -1,15 +1,15 @@
 package test;
 
 import org.testng.annotations.Test;
-import xyz.fslabo.common.base.ShouldNotHappenException;
-import xyz.fslabo.common.bean.BeanException;
-import xyz.fslabo.common.bean.BeanResolvingException;
-import xyz.fslabo.common.codec.CodecException;
-import xyz.fslabo.common.invoke.InvocationException;
-import xyz.fslabo.common.io.IORuntimeException;
-import xyz.fslabo.common.reflect.JvmException;
-import xyz.fslabo.common.reflect.ReflectionException;
-import xyz.fslabo.common.reflect.proxy.ProxyException;
+import xyz.sunqian.common.base.ShouldNotHappenException;
+import xyz.sunqian.common.bean.BeanException;
+import xyz.sunqian.common.bean.BeanResolvingException;
+import xyz.sunqian.common.codec.CodecException;
+import xyz.sunqian.common.invoke.InvocationException;
+import xyz.sunqian.common.io.IORuntimeException;
+import xyz.sunqian.common.reflect.JvmException;
+import xyz.sunqian.common.reflect.ReflectionException;
+import xyz.sunqian.common.reflect.proxy.ProxyException;
 
 import static org.testng.Assert.expectThrows;
 
