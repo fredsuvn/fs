@@ -1,11 +1,12 @@
-package xyz.fslabo.common.codec;
+package xyz.fslabo.common.encode;
 
+import xyz.fslabo.common.codec.CodecException;
 import xyz.fslabo.common.io.ByteStream;
 
 import java.nio.ByteBuffer;
 
 /**
- * This is a generic interface for encoding.
+ * This interface represents an encoder for encoding source bytes.
  *
  * @author sunqian
  */
@@ -57,7 +58,7 @@ public interface Encoder {
     int encode(ByteBuffer source, ByteBuffer dest) throws CodecException;
 
     /**
-     * Returns output size in bytes after encoding the specified input size. If the exact output size cannot be
+     * Returns output size in bytes for encoding the specified input size. If the exact output size cannot be
      * determined, provide an estimated maximum value that can accommodate the output.
      *
      * @param inputSize specified input size
@@ -67,7 +68,7 @@ public interface Encoder {
 
     /**
      * Returns the block size. When encoding, data is sometimes processed in blocks, this method returns the size of
-     * those blocks. If the block size cannot be determined, it returns 0.
+     * those blocks. If the block size cannot be determined, it returns {@code 0}.
      *
      * @return the block size
      */
