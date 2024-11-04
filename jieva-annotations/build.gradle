@@ -11,13 +11,13 @@ description = "Annotations of Gek."
 
 dependencies {
 
-  implementation platform(project(":gek-dependencies"))
+  implementation platform(project(":jieva-dependencies"))
   implementation "com.google.code.findbugs:jsr305"
   compileOnly 'org.projectlombok:lombok'
 
-  testAnnotationProcessor platform(project(":gek-dependencies"))
+  testAnnotationProcessor platform(project(":jieva-dependencies"))
   testAnnotationProcessor 'org.projectlombok:lombok'
-  testImplementation project(":gek-test")
+  testImplementation project(":jieva-test")
 }
 
 java {

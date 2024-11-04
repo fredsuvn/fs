@@ -8,8 +8,8 @@ pluginManagement {
   }
 }
 
-rootProject.name = 'gek-root'
-file("${rootDir}/").eachDirMatch(~/gek-(?!(plugins|draft)).*/) { dir ->
+rootProject.name = 'jieva'
+file("${rootDir}/").eachDirMatch(~/jieva-(?!(plugins|draft)).*/) { dir ->
   include ":${dir.name}"
 }
-include ":docs"
+// include ":docs"

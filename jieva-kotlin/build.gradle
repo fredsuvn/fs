@@ -14,13 +14,13 @@ description = 'Kotlin support of Gek.'
 
 dependencies {
 
-  implementation platform(project(':gek-dependencies'))
+  implementation platform(project(':jieva-dependencies'))
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-  api project(':gek-annotations')
-  api project(':gek-core')
+  api project(':jieva-annotations')
+  api project(':jieva-core')
 
-  testImplementation project(":gek-test")
-  testAnnotationProcessor platform(project(":gek-dependencies"))
+  testImplementation project(":jieva-test")
+  testAnnotationProcessor platform(project(":jieva-dependencies"))
   testAnnotationProcessor "org.openjdk.jmh:jmh-generator-annprocess"
 }
 
