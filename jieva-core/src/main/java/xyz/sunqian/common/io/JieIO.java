@@ -267,6 +267,7 @@ public class JieIO {
      * @return actual read number, or -1 if the source has been ended and no data read out
      * @throws IORuntimeException IO runtime exception
      * @see ByteStream
+     * @see ByteStream#transfer()
      */
     public static int transfer(InputStream source, byte[] dest) throws IORuntimeException {
         return (int) ByteStream.from(source).to(dest).readLimit(dest.length).transfer();
@@ -287,6 +288,7 @@ public class JieIO {
      * @return actual read number, or -1 if the source has been ended and no data read out
      * @throws IORuntimeException IO runtime exception
      * @see ByteStream
+     * @see ByteStream#transfer()
      */
     public static int transfer(InputStream source, byte[] dest, int offset, int length) throws IORuntimeException {
         return (int) ByteStream.from(source).to(dest, offset, length).readLimit(length).transfer();
@@ -304,6 +306,7 @@ public class JieIO {
      * @return actual read number, or -1 if the source has been ended and no data read out
      * @throws IORuntimeException IO runtime exception
      * @see ByteStream
+     * @see ByteStream#transfer()
      */
     public static int transfer(InputStream source, ByteBuffer dest) throws IORuntimeException {
         return (int) ByteStream.from(source).to(dest).readLimit(dest.remaining()).transfer();
@@ -321,6 +324,7 @@ public class JieIO {
      * @return actual read number, or -1 if the source has been ended and no data read out
      * @throws IORuntimeException IO runtime exception
      * @see ByteStream
+     * @see ByteStream#transfer()
      */
     public static long transfer(InputStream source, OutputStream dest) throws IORuntimeException {
         return (int) ByteStream.from(source).to(dest).transfer();
@@ -339,6 +343,7 @@ public class JieIO {
      * @return actual read number, or -1 if the source has been ended and no data read out
      * @throws IORuntimeException IO runtime exception
      * @see ByteStream
+     * @see ByteStream#transfer()
      */
     public static long transfer(InputStream source, OutputStream dest, long readLimit) throws IORuntimeException {
         return (int) ByteStream.from(source).to(dest).readLimit(readLimit).transfer();
@@ -359,6 +364,7 @@ public class JieIO {
      * @return actual read number, or -1 if the source has been ended and no data read out
      * @throws IORuntimeException IO runtime exception
      * @see ByteStream
+     * @see ByteStream#transfer()
      */
     public static long transfer(InputStream source, OutputStream dest, long readLimit, int blockSize) throws IORuntimeException {
         return (int) ByteStream.from(source).to(dest).readLimit(readLimit).blockSize(blockSize).transfer();
@@ -376,6 +382,7 @@ public class JieIO {
      * @return actual read number, or -1 if the source has been ended and no data read out
      * @throws IORuntimeException IO runtime exception
      * @see CharStream
+     * @see CharStream#transfer()
      */
     public static int transfer(Reader source, char[] dest) throws IORuntimeException {
         return (int) CharStream.from(source).to(dest).readLimit(dest.length).transfer();
@@ -396,6 +403,7 @@ public class JieIO {
      * @return actual read number, or -1 if the source has been ended and no data read out
      * @throws IORuntimeException IO runtime exception
      * @see CharStream
+     * @see CharStream#transfer()
      */
     public static int transfer(Reader source, char[] dest, int offset, int length) throws IORuntimeException {
         return (int) CharStream.from(source).to(dest, offset, length).readLimit(length).transfer();
@@ -413,6 +421,7 @@ public class JieIO {
      * @return actual read number, or -1 if the source has been ended and no data read out
      * @throws IORuntimeException IO runtime exception
      * @see CharStream
+     * @see CharStream#transfer()
      */
     public static int transfer(Reader source, CharBuffer dest) throws IORuntimeException {
         return (int) CharStream.from(source).to(dest).readLimit(dest.remaining()).transfer();
@@ -430,6 +439,7 @@ public class JieIO {
      * @return actual read number, or -1 if the source has been ended and no data read out
      * @throws IORuntimeException IO runtime exception
      * @see CharStream
+     * @see CharStream#transfer()
      */
     public static long transfer(Reader source, Appendable dest) throws IORuntimeException {
         return (int) CharStream.from(source).to(dest).transfer();
@@ -448,6 +458,7 @@ public class JieIO {
      * @return actual read number, or -1 if the source has been ended and no data read out
      * @throws IORuntimeException IO runtime exception
      * @see CharStream
+     * @see CharStream#transfer()
      */
     public static long transfer(Reader source, Appendable dest, int readLimit) throws IORuntimeException {
         return (int) CharStream.from(source).to(dest).readLimit(readLimit).transfer();
@@ -468,6 +479,7 @@ public class JieIO {
      * @return actual read number, or -1 if the source has been ended and no data read out
      * @throws IORuntimeException IO runtime exception
      * @see CharStream
+     * @see CharStream#transfer()
      */
     public static long transfer(Reader source, Appendable dest, int readLimit, int blockSize) throws IORuntimeException {
         return (int) CharStream.from(source).to(dest).readLimit(readLimit).blockSize(blockSize).transfer();

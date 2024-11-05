@@ -61,23 +61,44 @@ public class JieString {
     }
 
     /**
-     * Encodes given chars with {@link JieChars#defaultCharset()}.
+     * Encodes given chars into a new byte array using {@link JieChars#defaultCharset()}.
      *
      * @param chars given chars
-     * @return encoded bytes
+     * @return a new byte array encoded given chars
      */
-    public static byte[] encode(CharSequence chars) {
-        return encode(chars, JieChars.defaultCharset());
+    public static byte[] getBytes(char[] chars) {
+        return getBytes(chars, JieChars.defaultCharset());
     }
 
     /**
-     * Encodes given chars with given charset.
+     * Encodes given chars into a new byte array using the given charset.
      *
      * @param chars   given chars
      * @param charset given charset
-     * @return encoded bytes
+     * @return a new byte array encoded given chars
      */
-    public static byte[] encode(CharSequence chars, Charset charset) {
+    public static byte[] getBytes(char[] chars, Charset charset) {
+        return new String(chars).getBytes(charset);
+    }
+
+    /**
+     * Encodes given chars into a new byte array using {@link JieChars#defaultCharset()}.
+     *
+     * @param chars given chars
+     * @return a new byte array encoded given chars
+     */
+    public static byte[] getBytes(CharSequence chars) {
+        return getBytes(chars, JieChars.defaultCharset());
+    }
+
+    /**
+     * Encodes given chars into a new byte array using the given charset.
+     *
+     * @param chars   given chars
+     * @param charset given charset
+     * @return a new byte array encoded given chars
+     */
+    public static byte[] getBytes(CharSequence chars, Charset charset) {
         return chars.toString().getBytes(charset);
     }
 

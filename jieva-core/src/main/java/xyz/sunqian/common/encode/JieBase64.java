@@ -1,7 +1,6 @@
 package xyz.sunqian.common.encode;
 
 import xyz.sunqian.common.base.JieBytes;
-import xyz.sunqian.common.codec.CodecException;
 import xyz.sunqian.common.io.ByteStream;
 import xyz.sunqian.common.io.JieBuffer;
 
@@ -10,7 +9,10 @@ import java.nio.ByteBuffer;
 /**
  * This is a static utilities class provides implementations and utilities for {@code Base64} encoder and decoder,
  * specified in <a href="http://www.ietf.org/rfc/rfc4648.txt">RFC 4648</a> and <a
- * href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a>. There are 3 types of {@code Base64}:
+ * href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a>.
+ * <h2>Types</h2>
+ * <p>
+ * There are 3 types of {@code Base64}:
  * <ul>
  *     <li>
  *         {@code Basic}: The most common Base64 type, if no specified, it is typically refers to this type;
@@ -23,93 +25,123 @@ import java.nio.ByteBuffer;
  *         '\r\n' as the line separator. Note no line separator is added to the end of the output;
  *     </li>
  * </ul>
- * {@link Encoder#toStreamEncoder()} returns a stateful and non-thread-safe object, it is the recommended that
- * set {@link ByteStream#blockSize(int)} to be {@link Encoder#getBlockSize()} or a multiple of it (other legal values
- * are permitted but may be low performance).
+ * <h2>Encoder</h2>
+ * <p>
+ * For {@link ByteEncoder#toStreamEncoder()}, the best block size for {@link ByteStream#blockSize(int)} is
+ * {@link ByteEncoder#getBlockSize()} or multiples of it, and:
+ * <ul>
+ *     <li>
+ *         {@code Basic} and {@code URL and Filename safe}: the {@link ByteStream#blockSize(int)} should be set to
+ *         multiples of 3, and {@link ByteEncoder#toStreamEncoder()} returns singleton thread-safe instance for each
+ *         calling;
+ *     </li>
+ *     <li>
+ *         {@code MIME}: the {@link ByteStream#blockSize(int)} should be set to multiples of ({@code lineMax / 4 * 3}),
+ *         and {@link ByteEncoder#toStreamEncoder()} returns a new un-thread-safe instance for each calling;
+ *     </li>
+ * </ul>
+ * <h2>Decoder</h2>
+ * <p>
+ * For {@link ByteDecoder#toStreamEncoder()}, the best block size for {@link ByteStream#blockSize(int)} is
+ * {@link ByteDecoder#getBlockSize()} or multiples of it, and:
+ * <ul>
+ *     <li>
+ *         {@code Basic} and {@code URL and Filename safe}: the {@link ByteStream#blockSize(int)} should be set to
+ *         multiples of 3, and {@link ByteDecoder#toStreamEncoder()} returns singleton thread-safe instance for each
+ *         calling;
+ *     </li>
+ *     <li>
+ *         {@code MIME}: the {@link ByteStream#blockSize(int)} should be set to multiples of ({@code lineMax / 4 * 3}),
+ *         and {@link ByteDecoder#toStreamEncoder()} returns a new un-thread-safe instance for each calling;
+ *     </li>
+ * </ul>
  *
  * @author sunqian
  */
 public class JieBase64 {
 
     /**
-     * Returns an {@link Base64Encoder} instance in type of {@code Basic}, with padding character if the length of
-     * source is not a multiple of 3.
+     * Returns a {@code Base64} encoder  in type of {@code Basic}, with padding character if the length of source is not
+     * a multiple of
+     * 3.
      *
-     * @return an {@link Base64Encoder} instance in type of {@code Basic}
+     * @return a {@code Base64} encoder  in type of {@code Basic}
      */
-    public static Base64Encoder encoder() {
+    public static ToTextEncoder encoder() {
         return BasicEncoder.PADDING;
     }
 
     /**
-     * Returns an {@link Base64Encoder} instance in type of {@code Basic}. without padding character if the length of
-     * source is not a multiple of 3.
+     * Returns a {@code Base64} encoder  in type of {@code Basic}. without padding character if the length of source is
+     * not a multiple of 3.
      *
-     * @return an {@link Base64Encoder} instance in type of {@code Basic}
+     * @return a {@code Base64} encoder  in type of {@code Basic}
      */
-    public static Base64Encoder encoder(boolean padding) {
+    public static ToTextEncoder encoder(boolean padding) {
         return padding ? encoder() : BasicEncoder.NO_PADDING;
     }
 
     /**
-     * Returns an {@link Base64Encoder} instance in type of {@code URL and Filename safe}, with padding character if the
-     * length of source is not a multiple of 3.
+     * Returns a {@code Base64} encoder  in type of {@code URL and Filename safe}, with padding character if the length
+     * of source is not a multiple of 3.
      *
-     * @return an {@link Base64Encoder} instance in type of {@code URL and Filename safe}
+     * @return a {@code Base64} encoder  in type of {@code URL and Filename safe}
      */
-    public static Base64Encoder urlEncoder() {
+    public static ToTextEncoder urlEncoder() {
         return UrlEncoder.PADDING;
     }
 
     /**
-     * Returns an {@link Base64Encoder} instance in type of {@code URL and Filename safe}, without padding character if
-     * the length of source is not a multiple of 3.
+     * Returns a {@code Base64} encoder  in type of {@code URL and Filename safe}, without padding character if the
+     * length of source is not a multiple of 3.
      *
-     * @return an {@link Base64Encoder} instance in type of {@code URL and Filename safe}
+     * @return a {@code Base64} encoder  in type of {@code URL and Filename safe}
      */
-    public static Base64Encoder urlEncoder(boolean padding) {
+    public static ToTextEncoder urlEncoder(boolean padding) {
         return padding ? urlEncoder() : UrlEncoder.NO_PADDING;
     }
 
     /**
-     * Returns an {@link Base64Encoder} instance in type of {@code MIME}, with padding character if the length of source
-     * is not a multiple of 3.
+     * Returns a {@code Base64} encoder  in type of {@code MIME}, with padding character if the length of source is not
+     * a multiple of
+     * 3.
      *
-     * @return an {@link Base64Encoder} instance in type of {@code MIME}
+     * @return a {@code Base64} encoder  in type of {@code MIME}
      */
-    public static Base64Encoder mimeEncoder() {
+    public static ToTextEncoder mimeEncoder() {
         return MimeEncoder.PADDING;
     }
 
     /**
-     * Returns an {@link Base64Encoder} instance in type of {@code MIME}, without padding character if the length of
-     * source is not a multiple of 3.
+     * Returns a {@code Base64} encoder  in type of {@code MIME}, without padding character if the length of source is
+     * not a multiple of 3.
      *
-     * @return an {@link Base64Encoder} instance in type of {@code MIME}
+     * @return a {@code Base64} encoder  in type of {@code MIME}
      */
-    public static Base64Encoder mimeEncoder(boolean padding) {
+    public static ToTextEncoder mimeEncoder(boolean padding) {
         return padding ? mimeEncoder() : MimeEncoder.NO_PADDING;
     }
 
     /**
-     * Returns a new {@link Base64Encoder} in type of {@code MIME}, with specified arguments.
+     * Returns a {@code Base64} encoder  in type of {@code MIME}, with specified arguments.
      *
      * @param lineMax sets the max length per line, must be a multiple of {@code 4}
      * @param newLine sets the line separator. The array will be used directly, any modification to array will affect
      *                the encoding.
      * @param padding whether add padding character at the end if the length of source is not a multiple of 3.
+     * @return a {@code Base64} encoder  in type of {@code MIME}
      */
-    public static Base64Encoder mimeEncoder(int lineMax, byte[] newLine, boolean padding) {
+    public static ToTextEncoder mimeEncoder(int lineMax, byte[] newLine, boolean padding) {
         return new MimeEncoder(padding, lineMax, newLine);
     }
 
-    private static void checkRemaining(int srcRemaining, int dstRemaining) {
+    private static void checkEncodingRemaining(int srcRemaining, int dstRemaining) {
         if (srcRemaining > dstRemaining) {
-            throw new CodecException("Remaining of destination is not enough.");
+            throw new EncodingException("Remaining space of destination for encoding is not enough.");
         }
     }
 
-    private static abstract class AbsEncoder implements Base64Encoder {
+    private static abstract class AbsEncoder implements ToTextEncoder, ByteStream.Encoder {
 
         private static final char[] DICT = {
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
@@ -126,17 +158,17 @@ public class JieBase64 {
         }
 
         @Override
-        public byte[] encode(byte[] source) throws CodecException {
-            int len = getOutputSize(source.length);
-            byte[] dst = new byte[len];
+        public byte[] encode(byte[] source) throws EncodingException {
+            int outputSize = getOutputSize(source.length);
+            byte[] dst = new byte[outputSize];
             encode0(source, 0, source.length, dst, 0);
             return dst;
         }
 
         @Override
-        public ByteBuffer encode(ByteBuffer source) throws CodecException {
-            int len = getOutputSize(source.remaining());
-            byte[] dst = new byte[len];
+        public ByteBuffer encode(ByteBuffer source) throws EncodingException {
+            int outputSize = getOutputSize(source.remaining());
+            byte[] dst = new byte[outputSize];
             ByteBuffer ret = ByteBuffer.wrap(dst);
             if (source.hasArray()) {
                 encode0(
@@ -156,16 +188,16 @@ public class JieBase64 {
         }
 
         @Override
-        public int encode(byte[] source, byte[] dest) throws CodecException {
+        public int encode(byte[] source, byte[] dest) throws EncodingException {
             int outputSize = getOutputSize(source.length);
-            checkRemaining(outputSize, dest.length);
+            checkEncodingRemaining(outputSize, dest.length);
             return encode0(source, 0, source.length, dest, 0);
         }
 
         @Override
-        public int encode(ByteBuffer source, ByteBuffer dest) throws CodecException {
+        public int encode(ByteBuffer source, ByteBuffer dest) throws EncodingException {
             int outputSize = getOutputSize(source.remaining());
-            checkRemaining(outputSize, dest.remaining());
+            checkEncodingRemaining(outputSize, dest.remaining());
             if (source.hasArray() && dest.hasArray()) {
                 encode0(
                     source.array(),
@@ -202,7 +234,12 @@ public class JieBase64 {
 
         @Override
         public ByteStream.Encoder toStreamEncoder() {
-            return new ByteEncoder();
+            return this;
+        }
+
+        @Override
+        public ByteBuffer encode(ByteBuffer data, boolean end) {
+            return encode(data);
         }
 
         protected char[] dict() {
@@ -248,6 +285,7 @@ public class JieBase64 {
             return dstPos - dstOff;
         }
 
+        /*
         protected class ByteEncoder implements ByteStream.Encoder {
 
             protected ByteBuffer buf;
@@ -322,8 +360,6 @@ public class JieBase64 {
                 JieBytes.putBuffer(data, buf, Math.min(buf.remaining(), data.remaining()));
             }
         }
-
-        /*
         public ByteStream.Encoder toStreamEncoder2() {
             return new ByteStream.Encoder() {
 
@@ -464,7 +500,28 @@ public class JieBase64 {
 
         @Override
         public ByteStream.Encoder toStreamEncoder() {
-            return new ByteEncoder();
+            return new ByteStream.Encoder() {
+
+                private boolean hasPrev = false;
+
+                @Override
+                public ByteBuffer encode(ByteBuffer data, boolean end) {
+                    if (hasPrev) {
+                        if (end && !data.hasRemaining()) {
+                            return JieBytes.emptyBuffer();
+                        }
+                        ByteBuffer ret = ByteBuffer.allocate(getOutputSize(data.remaining()) + newLine.length);
+                        for (byte b : newLine) {
+                            ret.put(b);
+                        }
+                        MimeEncoder.this.encode(data, ret);
+                        ret.flip();
+                        return ret;
+                    }
+                    hasPrev = true;
+                    return MimeEncoder.this.encode(data);
+                }
+            };
         }
 
         protected int encode0(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff) {
@@ -515,6 +572,7 @@ public class JieBase64 {
             return destPos - dstOff;
         }
 
+        /*
         private class ByteEncoder extends AbsEncoder.ByteEncoder {
 
             private boolean hasPrev = false;
@@ -598,6 +656,7 @@ public class JieBase64 {
                 }
             }
         }
+         */
     }
 
     // private static abstract class AbsDecoder implements Base64Decoder, ByteStream.Encoder {
@@ -617,7 +676,7 @@ public class JieBase64 {
     //     }
     //
     //     @Override
-    //     public byte[] decode(byte[] data) throws CodecException {
+    //     public byte[] decode(byte[] data) throws EncodingException {
     //         int len = getOutputSize(data.length);
     //         byte[] dst = new byte[len];
     //         decode0(data, 0, data.length, dst, 0);
@@ -625,7 +684,7 @@ public class JieBase64 {
     //     }
     //
     //     @Override
-    //     public ByteBuffer decode(ByteBuffer data) throws CodecException {
+    //     public ByteBuffer decode(ByteBuffer data) throws EncodingException {
     //         int len = getOutputSize(data.remaining());
     //         byte[] dst = new byte[len];
     //         ByteBuffer ret = ByteBuffer.wrap(dst);
@@ -647,14 +706,14 @@ public class JieBase64 {
     //     }
     //
     //     @Override
-    //     public int decode(byte[] data, byte[] dest) throws CodecException {
+    //     public int decode(byte[] data, byte[] dest) throws EncodingException {
     //         int outputSize = getOutputSize(data.length);
     //         checkRemaining(outputSize, dest.length);
     //         return decode0(data, 0, data.length, dest, 0);
     //     }
     //
     //     @Override
-    //     public int decode(ByteBuffer data, ByteBuffer dest) throws CodecException {
+    //     public int decode(ByteBuffer data, ByteBuffer dest) throws EncodingException {
     //         int outputSize = getOutputSize(data.remaining());
     //         checkRemaining(outputSize, dest.remaining());
     //         if (data.hasArray() && dest.hasArray()) {
@@ -697,7 +756,7 @@ public class JieBase64 {
     //     }
     //
     //     @Override
-    //     public ByteBuffer encode(ByteBuffer source, boolean end) throws CodecException {
+    //     public ByteBuffer encode(ByteBuffer source, boolean end) throws EncodingException {
     //         return decode(source);
     //     }
     //

@@ -82,7 +82,7 @@ public interface IOConfigurator<T extends IOConfigurator<T>> extends BaseConfigu
      * @return this
      */
     default T input(String str, Charset charset) {
-        return input(JieString.encode(str, charset));
+        return input(JieString.getBytes(str, charset));
     }
 
     /**

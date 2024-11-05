@@ -24,7 +24,7 @@ public interface GekData extends GekDataOutput {
      * @return the {@link OfArray}
      */
     static GekData.OfArray wrap(String str) {
-        return wrap(JieString.encode(str));
+        return wrap(JieString.getBytes(str));
     }
 
     /**

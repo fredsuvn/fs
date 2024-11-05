@@ -23,7 +23,7 @@ public interface CodecConfigurator<T extends CodecConfigurator<T>> extends IOCon
      * @return this
      */
     default T inputLatin(String str) {
-        return Jie.as(input(JieString.encode(str, JieChars.latinCharset())));
+        return Jie.as(input(JieString.getBytes(str, JieChars.latinCharset())));
     }
 
     /**

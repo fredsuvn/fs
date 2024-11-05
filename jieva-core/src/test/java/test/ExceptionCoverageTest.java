@@ -5,6 +5,8 @@ import xyz.sunqian.common.base.ShouldNotHappenException;
 import xyz.sunqian.common.bean.BeanException;
 import xyz.sunqian.common.bean.BeanResolvingException;
 import xyz.sunqian.common.codec.CodecException;
+import xyz.sunqian.common.encode.DecodingException;
+import xyz.sunqian.common.encode.EncodingException;
 import xyz.sunqian.common.invoke.InvocationException;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.reflect.JvmException;
@@ -119,6 +121,31 @@ public class ExceptionCoverageTest {
         });
         expectThrows(CodecException.class, () -> {
             throw new CodecException(new RuntimeException());
+        });
+
+        expectThrows(EncodingException.class, () -> {
+            throw new EncodingException();
+        });
+        expectThrows(EncodingException.class, () -> {
+            throw new EncodingException("");
+        });
+        expectThrows(EncodingException.class, () -> {
+            throw new EncodingException("", new RuntimeException());
+        });
+        expectThrows(EncodingException.class, () -> {
+            throw new EncodingException(new RuntimeException());
+        });
+        expectThrows(DecodingException.class, () -> {
+            throw new DecodingException();
+        });
+        expectThrows(DecodingException.class, () -> {
+            throw new DecodingException("");
+        });
+        expectThrows(DecodingException.class, () -> {
+            throw new DecodingException("", new RuntimeException());
+        });
+        expectThrows(DecodingException.class, () -> {
+            throw new DecodingException(new RuntimeException());
         });
     }
 }

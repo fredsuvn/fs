@@ -210,6 +210,9 @@ public interface CharStream {
      * Otherwise, the written number may not equal to read number, and this method returns actual read number.
      * Specifically, if it is detected that the data source has already reached to the end before starting, return -1.
      * <p>
+     * If the source and/or destination is a buffer or stream, its position will be incremented by actual affected
+     * length.
+     * <p>
      * This is a final method.
      *
      * @return the actual chars number that read and success to transfer
