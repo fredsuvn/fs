@@ -7,14 +7,14 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
 /**
- * This interface extends {@link ByteDecoder} and adds methods for decoding text to binary, such as {@link JieBase64}
+ * This interface extends {@link ByteDecoder} and adds methods for decoding char to binary, such as {@link JieBase64}
  * and {@link JieHex}.
  *
  * @author sunqian
  * @see JieBase64
  * @see JieHex
  */
-public interface ToTextDecoder extends ByteDecoder {
+public interface ToCharDecoder extends ByteDecoder {
 
     /**
      * Decodes given data into a new byte array (with {@link JieChars#latinCharset()}).

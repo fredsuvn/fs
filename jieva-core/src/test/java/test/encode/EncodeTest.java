@@ -81,7 +81,7 @@ public class EncodeTest {
         );
     }
 
-    private void testBase64(byte[] data, ToTextEncoder encoder, Base64.Encoder be) throws Exception {
+    private void testBase64(byte[] data, ToCharEncoder encoder, Base64.Encoder be) throws Exception {
 
         assertEquals(encoder.encode(data), be.encode(data));
         assertEquals(encoder.toString(data), be.encodeToString(data));
@@ -236,7 +236,7 @@ public class EncodeTest {
         testHex(source, JieHex.encoder(), JieHex.decoder());
     }
 
-    private void testHex(byte[] data, ToTextEncoder encoder, ToTextDecoder decoder) throws Exception {
+    private void testHex(byte[] data, ToCharEncoder encoder, ToCharDecoder decoder) throws Exception {
 
         String apache = Hex.encodeHexString(data, false);
         byte[] aBytes = apache.getBytes(JieChars.latinCharset());

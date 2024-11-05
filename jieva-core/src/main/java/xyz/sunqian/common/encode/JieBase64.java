@@ -67,7 +67,7 @@ public class JieBase64 {
      *
      * @return a {@code Base64} encoder  in type of {@code Basic}
      */
-    public static ToTextEncoder encoder() {
+    public static ToCharEncoder encoder() {
         return BasicEncoder.PADDING;
     }
 
@@ -77,7 +77,7 @@ public class JieBase64 {
      *
      * @return a {@code Base64} encoder  in type of {@code Basic}
      */
-    public static ToTextEncoder encoder(boolean padding) {
+    public static ToCharEncoder encoder(boolean padding) {
         return padding ? encoder() : BasicEncoder.NO_PADDING;
     }
 
@@ -87,7 +87,7 @@ public class JieBase64 {
      *
      * @return a {@code Base64} encoder  in type of {@code URL and Filename safe}
      */
-    public static ToTextEncoder urlEncoder() {
+    public static ToCharEncoder urlEncoder() {
         return UrlEncoder.PADDING;
     }
 
@@ -97,7 +97,7 @@ public class JieBase64 {
      *
      * @return a {@code Base64} encoder  in type of {@code URL and Filename safe}
      */
-    public static ToTextEncoder urlEncoder(boolean padding) {
+    public static ToCharEncoder urlEncoder(boolean padding) {
         return padding ? urlEncoder() : UrlEncoder.NO_PADDING;
     }
 
@@ -108,7 +108,7 @@ public class JieBase64 {
      *
      * @return a {@code Base64} encoder  in type of {@code MIME}
      */
-    public static ToTextEncoder mimeEncoder() {
+    public static ToCharEncoder mimeEncoder() {
         return MimeEncoder.PADDING;
     }
 
@@ -118,7 +118,7 @@ public class JieBase64 {
      *
      * @return a {@code Base64} encoder  in type of {@code MIME}
      */
-    public static ToTextEncoder mimeEncoder(boolean padding) {
+    public static ToCharEncoder mimeEncoder(boolean padding) {
         return padding ? mimeEncoder() : MimeEncoder.NO_PADDING;
     }
 
@@ -131,7 +131,7 @@ public class JieBase64 {
      * @param padding whether add padding character at the end if the length of source is not a multiple of 3.
      * @return a {@code Base64} encoder  in type of {@code MIME}
      */
-    public static ToTextEncoder mimeEncoder(int lineMax, byte[] newLine, boolean padding) {
+    public static ToCharEncoder mimeEncoder(int lineMax, byte[] newLine, boolean padding) {
         return new MimeEncoder(padding, lineMax, newLine);
     }
 
@@ -141,7 +141,7 @@ public class JieBase64 {
         }
     }
 
-    private static abstract class AbsEncoder implements ToTextEncoder, ByteStream.Encoder {
+    private static abstract class AbsEncoder implements ToCharEncoder, ByteStream.Encoder {
 
         private static final char[] DICT = {
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',

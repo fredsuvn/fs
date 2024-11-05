@@ -27,7 +27,7 @@ public class JieHex {
      *
      * @return a {@code Hex} encoder
      */
-    public static ToTextEncoder encoder() {
+    public static ToCharEncoder encoder() {
         return HexEncoder.SINGLETON;
     }
 
@@ -36,7 +36,7 @@ public class JieHex {
      *
      * @return a {@code Hex} decoder
      */
-    public static ToTextDecoder decoder() {
+    public static ToCharDecoder decoder() {
         return HexDecoder.SINGLETON;
     }
 
@@ -52,7 +52,7 @@ public class JieHex {
         }
     }
 
-    private static final class HexEncoder implements ToTextEncoder, ByteStream.Encoder {
+    private static final class HexEncoder implements ToCharEncoder, ByteStream.Encoder {
 
         private static final HexEncoder SINGLETON = new HexEncoder();
 
@@ -148,7 +148,7 @@ public class JieHex {
         }
     }
 
-    private static final class HexDecoder implements ToTextDecoder, ByteStream.Encoder {
+    private static final class HexDecoder implements ToCharDecoder, ByteStream.Encoder {
 
         private static final HexDecoder SINGLETON = new HexDecoder();
 

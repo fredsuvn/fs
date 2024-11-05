@@ -6,14 +6,14 @@ import xyz.sunqian.common.base.JieChars;
 import java.nio.ByteBuffer;
 
 /**
- * This interface extends {@link ByteEncoder} and adds methods for encoding binary to text, such as {@link JieBase64}
+ * This interface extends {@link ByteEncoder} and adds methods for encoding binary to char, such as {@link JieBase64}
  * and {@link JieHex}.
  *
  * @author sunqian
  * @see JieBase64
  * @see JieHex
  */
-public interface ToTextEncoder extends ByteEncoder {
+public interface ToCharEncoder extends ByteEncoder {
 
     /**
      * Encodes given source to string (with {@link JieChars#latinCharset()}).
