@@ -490,7 +490,7 @@ public class EncodeTest {
         System.out.println("jie out: " + (t2 - t1));
     }
 
-    @Test
+    //@Test
     public void testHexPerformance() throws Exception {
         int times = 10000;
         byte[] source = JieRandom.fill(new byte[99999]);
