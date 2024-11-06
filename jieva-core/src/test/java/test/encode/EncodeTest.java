@@ -49,39 +49,15 @@ public class EncodeTest {
         testBase64(source, JieBase64.encoder(false), Base64.getEncoder().withoutPadding());
         testBase64(source, JieBase64.urlEncoder(false), Base64.getUrlEncoder().withoutPadding());
         testBase64(source, JieBase64.mimeEncoder(false), Base64.getMimeEncoder().withoutPadding());
-        testBase64(
-            source,
-            JieBase64.mimeEncoder(16, new byte[]{'\t'}, true),
-            Base64.getMimeEncoder(16, new byte[]{'\t'})
-        );
-        testBase64(
-            source,
-            JieBase64.mimeEncoder(16, new byte[]{'\t'}, false),
-            Base64.getMimeEncoder(16, new byte[]{'\t'}).withoutPadding()
-        );
-        testBase64(
-            source,
-            JieBase64.mimeEncoder(4, new byte[]{'\t'}, true),
-            Base64.getMimeEncoder(4, new byte[]{'\t'})
-        );
-        testBase64(
-            source,
-            JieBase64.mimeEncoder(4, new byte[]{'\t'}, false),
-            Base64.getMimeEncoder(4, new byte[]{'\t'}).withoutPadding()
-        );
-        testBase64(
-            source,
-            JieBase64.mimeEncoder(400, new byte[]{'\t', '\r'}, true),
-            Base64.getMimeEncoder(400, new byte[]{'\t', '\r'})
-        );
-        testBase64(
-            source,
-            JieBase64.mimeEncoder(400, new byte[]{'\t', '\r'}, false),
-            Base64.getMimeEncoder(400, new byte[]{'\t', '\r'}).withoutPadding()
-        );
+        testBase64(source, JieBase64.mimeEncoder(16, new byte[]{'\t'}, true), Base64.getMimeEncoder(16, new byte[]{'\t'}));
+        testBase64(source, JieBase64.mimeEncoder(16, new byte[]{'\t'}, false), Base64.getMimeEncoder(16, new byte[]{'\t'}).withoutPadding());
+        testBase64(source, JieBase64.mimeEncoder(4, new byte[]{'\t'}, true), Base64.getMimeEncoder(4, new byte[]{'\t'}));
+        testBase64(source, JieBase64.mimeEncoder(4, new byte[]{'\t'}, false), Base64.getMimeEncoder(4, new byte[]{'\t'}).withoutPadding());
+        testBase64(source, JieBase64.mimeEncoder(400, new byte[]{'\t', '\r'}, true), Base64.getMimeEncoder(400, new byte[]{'\t', '\r'}));
+        testBase64(source, JieBase64.mimeEncoder(400, new byte[]{'\t', '\r'}, false), Base64.getMimeEncoder(400, new byte[]{'\t', '\r'}).withoutPadding());
     }
 
-    private void testBase64(byte[] data, ToCharEncoder encoder, Base64.Encoder be) throws Exception {
+    private void testBase64(byte[] data, JieBase64.Encoder encoder, Base64.Encoder be) throws Exception {
 
         assertEquals(encoder.encode(data), be.encode(data));
         assertEquals(encoder.toString(data), be.encodeToString(data));
@@ -149,24 +125,21 @@ public class EncodeTest {
             ByteArrayOutputStream bytesOut2 = new ByteArrayOutputStream();
             {
                 bytesOut2.reset();
-                ByteStream byteStream = ByteStream.from(data).to(bytesOut2)
-                    .blockSize(encoder.getBlockSize()).encoder(encoder.toStreamEncoder());
+                ByteStream byteStream = ByteStream.from(data).to(bytesOut2).blockSize(encoder.getBlockSize()).encoder(encoder.toStreamEncoder());
                 int readNum = (int) byteStream.transfer();
                 assertEquals(readNum, data.length == 0 ? -1 : data.length);
                 assertEquals(bytesOut.toByteArray(), bytesOut2.toByteArray());
             }
             {
                 bytesOut2.reset();
-                ByteStream byteStream = ByteStream.from(data).to(bytesOut2)
-                    .blockSize(encoder.getBlockSize() * 2).encoder(encoder.toStreamEncoder());
+                ByteStream byteStream = ByteStream.from(data).to(bytesOut2).blockSize(encoder.getBlockSize() * 2).encoder(encoder.toStreamEncoder());
                 int readNum = (int) byteStream.transfer();
                 assertEquals(readNum, data.length == 0 ? -1 : data.length);
                 assertEquals(bytesOut.toByteArray(), bytesOut2.toByteArray());
             }
             {
                 bytesOut2.reset();
-                ByteStream byteStream = ByteStream.from(data).to(bytesOut2)
-                    .blockSize(encoder.getBlockSize() * 20).encoder(encoder.toStreamEncoder());
+                ByteStream byteStream = ByteStream.from(data).to(bytesOut2).blockSize(encoder.getBlockSize() * 20).encoder(encoder.toStreamEncoder());
                 int readNum = (int) byteStream.transfer();
                 assertEquals(readNum, data.length == 0 ? -1 : data.length);
                 assertEquals(bytesOut.toByteArray(), bytesOut2.toByteArray());
@@ -179,8 +152,7 @@ public class EncodeTest {
                 } else {
                     blockSize = 3;
                 }
-                ByteStream byteStream = ByteStream.from(data).to(bytesOut2)
-                    .blockSize(blockSize).encoder(encoder.toStreamEncoder());
+                ByteStream byteStream = ByteStream.from(data).to(bytesOut2).blockSize(blockSize).encoder(encoder.toStreamEncoder());
                 int readNum = (int) byteStream.transfer();
                 assertEquals(readNum, data.length == 0 ? -1 : data.length);
                 assertEquals(bytesOut.toByteArray(), bytesOut2.toByteArray());
@@ -219,16 +191,18 @@ public class EncodeTest {
         byte[] encoded = new byte[3];
         expectThrows(DecodingException.class, () -> JieHex.decoder().decode(encoded));
         byte[] encoded2 = new byte[2];
-        encoded2[0] = 'G';
+        encoded2[0] = '0' - 1;
         expectThrows(DecodingException.class, () -> JieHex.decoder().decode(encoded2));
-
-        // coverage
-        String s = "0123456789ABCDEF";
-        assertEquals(JieHex.decoder().decode(s), Hex.decodeHex(s));
-        assertEquals(JieHex.decoder().decode(s.toCharArray()), Hex.decodeHex(s));
-        CharBuffer cb = CharBuffer.wrap(s);
-        assertEquals(JieBytes.copyBytes(JieHex.decoder().decode(cb)), Hex.decodeHex(s));
-        assertEquals(cb.position(), s.length());
+        encoded2[0] = '9' + 1;
+        expectThrows(DecodingException.class, () -> JieHex.decoder().decode(encoded2));
+        encoded2[0] = 'A' - 1;
+        expectThrows(DecodingException.class, () -> JieHex.decoder().decode(encoded2));
+        encoded2[0] = 'F' + 1;
+        expectThrows(DecodingException.class, () -> JieHex.decoder().decode(encoded2));
+        encoded2[0] = 'a' - 1;
+        expectThrows(DecodingException.class, () -> JieHex.decoder().decode(encoded2));
+        encoded2[0] = 'f' + 1;
+        expectThrows(DecodingException.class, () -> JieHex.decoder().decode(encoded2));
     }
 
     private void testHex(int size) throws Exception {
@@ -236,14 +210,14 @@ public class EncodeTest {
         testHex(source, JieHex.encoder(), JieHex.decoder());
     }
 
-    private void testHex(byte[] data, ToCharEncoder encoder, ToCharDecoder decoder) throws Exception {
+    private void testHex(byte[] data, JieHex.Encoder encoder, JieHex.Decoder decoder) throws Exception {
 
         String apache = Hex.encodeHexString(data, false);
         byte[] aBytes = apache.getBytes(JieChars.latinCharset());
         assertEquals(encoder.encode(data), aBytes);
         assertEquals(encoder.toString(data), apache);
         assertEquals(encoder.toString(ByteBuffer.wrap(data)), apache);
-        assertEquals(decoder.decode(apache), data);
+        assertEquals(decoder.decode(aBytes), data);
 
         {
             // wrap
@@ -338,24 +312,21 @@ public class EncodeTest {
             ByteArrayOutputStream bytesOut2 = new ByteArrayOutputStream();
             {
                 bytesOut2.reset();
-                ByteStream byteStream = ByteStream.from(data).to(bytesOut2)
-                    .blockSize(encoder.getBlockSize()).encoder(encoder.toStreamEncoder());
+                ByteStream byteStream = ByteStream.from(data).to(bytesOut2).blockSize(encoder.getBlockSize()).encoder(encoder.toStreamEncoder());
                 int readNum = (int) byteStream.transfer();
                 assertEquals(readNum, data.length == 0 ? -1 : data.length);
                 assertEquals(bytesOut.toByteArray(), bytesOut2.toByteArray());
             }
             {
                 bytesOut2.reset();
-                ByteStream byteStream = ByteStream.from(data).to(bytesOut2)
-                    .blockSize(encoder.getBlockSize() * 2).encoder(encoder.toStreamEncoder());
+                ByteStream byteStream = ByteStream.from(data).to(bytesOut2).blockSize(encoder.getBlockSize() * 2).encoder(encoder.toStreamEncoder());
                 int readNum = (int) byteStream.transfer();
                 assertEquals(readNum, data.length == 0 ? -1 : data.length);
                 assertEquals(bytesOut.toByteArray(), bytesOut2.toByteArray());
             }
             {
                 bytesOut2.reset();
-                ByteStream byteStream = ByteStream.from(data).to(bytesOut2)
-                    .blockSize(encoder.getBlockSize() * 20).encoder(encoder.toStreamEncoder());
+                ByteStream byteStream = ByteStream.from(data).to(bytesOut2).blockSize(encoder.getBlockSize() * 20).encoder(encoder.toStreamEncoder());
                 int readNum = (int) byteStream.transfer();
                 assertEquals(readNum, data.length == 0 ? -1 : data.length);
                 assertEquals(bytesOut.toByteArray(), bytesOut2.toByteArray());
@@ -366,24 +337,21 @@ public class EncodeTest {
             bytesOut2 = new ByteArrayOutputStream();
             {
                 bytesOut2.reset();
-                ByteStream byteStream = ByteStream.from(aBytes).to(bytesOut2)
-                    .blockSize(decoder.getBlockSize()).encoder(decoder.toStreamEncoder());
+                ByteStream byteStream = ByteStream.from(aBytes).to(bytesOut2).blockSize(decoder.getBlockSize()).encoder(decoder.toStreamEncoder());
                 int readNum = (int) byteStream.transfer();
                 assertEquals(readNum, aBytes.length == 0 ? -1 : aBytes.length);
                 assertEquals(bytesOut.toByteArray(), bytesOut2.toByteArray());
             }
             {
                 bytesOut2.reset();
-                ByteStream byteStream = ByteStream.from(aBytes).to(bytesOut2)
-                    .blockSize(decoder.getBlockSize() * 2).encoder(decoder.toStreamEncoder());
+                ByteStream byteStream = ByteStream.from(aBytes).to(bytesOut2).blockSize(decoder.getBlockSize() * 2).encoder(decoder.toStreamEncoder());
                 int readNum = (int) byteStream.transfer();
                 assertEquals(readNum, aBytes.length == 0 ? -1 : aBytes.length);
                 assertEquals(bytesOut.toByteArray(), bytesOut2.toByteArray());
             }
             {
                 bytesOut2.reset();
-                ByteStream byteStream = ByteStream.from(aBytes).to(bytesOut2)
-                    .blockSize(decoder.getBlockSize() * 20).encoder(decoder.toStreamEncoder());
+                ByteStream byteStream = ByteStream.from(aBytes).to(bytesOut2).blockSize(decoder.getBlockSize() * 20).encoder(decoder.toStreamEncoder());
                 int readNum = (int) byteStream.transfer();
                 assertEquals(readNum, aBytes.length == 0 ? -1 : aBytes.length);
                 assertEquals(bytesOut.toByteArray(), bytesOut2.toByteArray());
@@ -401,6 +369,16 @@ public class EncodeTest {
                 expectThrows(DecodingException.class, () -> decoder.decode(ByteBuffer.wrap(aBytes), ByteBuffer.wrap(new byte[0])));
             }
         }
+    }
+
+    @Test
+    public void testToChars() throws Exception {
+        String s = "0123456789ABCDEFabcdef";
+        assertEquals(JieHex.decoder().decode(s), Hex.decodeHex(s));
+        assertEquals(JieHex.decoder().decode(s.toCharArray()), Hex.decodeHex(s));
+        CharBuffer cb = CharBuffer.wrap(s);
+        assertEquals(JieBytes.copyBytes(JieHex.decoder().decode(cb)), Hex.decodeHex(s));
+        assertEquals(cb.position(), s.length());
     }
 
     //@Test
@@ -482,8 +460,7 @@ public class EncodeTest {
         // jie out (block:1024 * 3): 1530
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
-            ByteStream bs = ByteStream.from(source).to(new ByteArrayOutputStream())
-                .blockSize(encoder.getBlockSize()).encoder(encoder.toStreamEncoder());
+            ByteStream bs = ByteStream.from(source).to(new ByteArrayOutputStream()).blockSize(encoder.getBlockSize()).encoder(encoder.toStreamEncoder());
             bs.transfer();
         }
         t2 = System.currentTimeMillis();
@@ -507,6 +484,10 @@ public class EncodeTest {
         // apache hex encode: 3375
         // jie hex decode: 8954
         // apache hex decode: 10219
+        // jie hex encode: 941
+        // apache hex encode: 3103
+        // jie hex decode: 5955
+        // apache hex decode: 9375
         ByteEncoder hexEn = JieHex.encoder();
         ByteDecoder hexDe = JieHex.decoder();
         Hex hex = new Hex();

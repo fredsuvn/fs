@@ -47,12 +47,12 @@ import java.nio.ByteBuffer;
  * <ul>
  *     <li>
  *         {@code Basic} and {@code URL and Filename safe}: the {@link ByteStream#blockSize(int)} should be set to
- *         multiples of 3, and {@link ByteDecoder#toStreamEncoder()} returns singleton thread-safe instance for each
+ *         multiples of 4, and {@link ByteDecoder#toStreamEncoder()} returns singleton thread-safe instance for each
  *         calling;
  *     </li>
  *     <li>
- *         {@code MIME}: the {@link ByteStream#blockSize(int)} should be set to multiples of ({@code lineMax / 4 * 3}),
- *         and {@link ByteDecoder#toStreamEncoder()} returns a new un-thread-safe instance for each calling;
+ *         {@code MIME}: the {@link ByteStream#blockSize(int)} should be set to multiples of ({@code lineMax}), and
+ *         {@link ByteDecoder#toStreamEncoder()} returns a new un-thread-safe instance for each calling;
  *     </li>
  * </ul>
  *
@@ -67,7 +67,7 @@ public class JieBase64 {
      *
      * @return a {@code Base64} encoder  in type of {@code Basic}
      */
-    public static ToCharEncoder encoder() {
+    public static Encoder encoder() {
         return BasicEncoder.PADDING;
     }
 
@@ -77,7 +77,7 @@ public class JieBase64 {
      *
      * @return a {@code Base64} encoder  in type of {@code Basic}
      */
-    public static ToCharEncoder encoder(boolean padding) {
+    public static Encoder encoder(boolean padding) {
         return padding ? encoder() : BasicEncoder.NO_PADDING;
     }
 
@@ -87,7 +87,7 @@ public class JieBase64 {
      *
      * @return a {@code Base64} encoder  in type of {@code URL and Filename safe}
      */
-    public static ToCharEncoder urlEncoder() {
+    public static Encoder urlEncoder() {
         return UrlEncoder.PADDING;
     }
 
@@ -97,7 +97,7 @@ public class JieBase64 {
      *
      * @return a {@code Base64} encoder  in type of {@code URL and Filename safe}
      */
-    public static ToCharEncoder urlEncoder(boolean padding) {
+    public static Encoder urlEncoder(boolean padding) {
         return padding ? urlEncoder() : UrlEncoder.NO_PADDING;
     }
 
@@ -108,7 +108,7 @@ public class JieBase64 {
      *
      * @return a {@code Base64} encoder  in type of {@code MIME}
      */
-    public static ToCharEncoder mimeEncoder() {
+    public static Encoder mimeEncoder() {
         return MimeEncoder.PADDING;
     }
 
@@ -118,7 +118,7 @@ public class JieBase64 {
      *
      * @return a {@code Base64} encoder  in type of {@code MIME}
      */
-    public static ToCharEncoder mimeEncoder(boolean padding) {
+    public static Encoder mimeEncoder(boolean padding) {
         return padding ? mimeEncoder() : MimeEncoder.NO_PADDING;
     }
 
@@ -131,7 +131,7 @@ public class JieBase64 {
      * @param padding whether add padding character at the end if the length of source is not a multiple of 3.
      * @return a {@code Base64} encoder  in type of {@code MIME}
      */
-    public static ToCharEncoder mimeEncoder(int lineMax, byte[] newLine, boolean padding) {
+    public static Encoder mimeEncoder(int lineMax, byte[] newLine, boolean padding) {
         return new MimeEncoder(padding, lineMax, newLine);
     }
 
@@ -141,7 +141,23 @@ public class JieBase64 {
         }
     }
 
-    private static abstract class AbsEncoder implements ToCharEncoder, ByteStream.Encoder {
+    /**
+     * {@code Base64} encoder, extends {@link ToCharEncoder}.
+     *
+     * @author sunqian
+     */
+    public interface Encoder extends ToCharEncoder {
+    }
+
+    /**
+     * {@code Base64} decoder, extends {@link ToCharDecoder}.
+     *
+     * @author sunqian
+     */
+    public interface Decoder extends ToCharDecoder {
+    }
+
+    private static abstract class AbsEncoder implements Encoder, ByteStream.Encoder {
 
         private static final char[] DICT = {
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',

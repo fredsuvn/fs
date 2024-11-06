@@ -27,7 +27,7 @@ public class JieHex {
      *
      * @return a {@code Hex} encoder
      */
-    public static ToCharEncoder encoder() {
+    public static Encoder encoder() {
         return HexEncoder.SINGLETON;
     }
 
@@ -36,7 +36,7 @@ public class JieHex {
      *
      * @return a {@code Hex} decoder
      */
-    public static ToCharDecoder decoder() {
+    public static Decoder decoder() {
         return HexDecoder.SINGLETON;
     }
 
@@ -52,13 +52,27 @@ public class JieHex {
         }
     }
 
-    private static final class HexEncoder implements ToCharEncoder, ByteStream.Encoder {
+    /**
+     * {@code Hex} encoder, extends {@link ToCharEncoder}.
+     *
+     * @author sunqian
+     */
+    public interface Encoder extends ToCharEncoder {
+    }
+
+    /**
+     * {@code Hex} decoder, extends {@link ToCharDecoder}.
+     *
+     * @author sunqian
+     */
+    public interface Decoder extends ToCharDecoder {
+    }
+
+    private static final class HexEncoder implements Encoder, ByteStream.Encoder {
 
         private static final HexEncoder SINGLETON = new HexEncoder();
 
-        private static final char[] DICT = {
-            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
-        };
+        private static final char[] DICT = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
         @Override
         public byte[] encode(byte[] source) throws EncodingException {
@@ -74,13 +88,7 @@ public class JieHex {
             byte[] dst = new byte[outputSize];
             ByteBuffer ret = ByteBuffer.wrap(dst);
             if (source.hasArray()) {
-                encode0(
-                    source.array(),
-                    JieBuffer.getArrayStartIndex(source),
-                    JieBuffer.getArrayEndIndex(source),
-                    dst,
-                    0
-                );
+                encode0(source.array(), JieBuffer.getArrayStartIndex(source), JieBuffer.getArrayEndIndex(source), dst, 0);
                 source.position(source.limit());
             } else {
                 byte[] s = new byte[source.remaining()];
@@ -102,13 +110,7 @@ public class JieHex {
             int outputSize = getOutputSize(source.remaining());
             checkEncodingRemaining(outputSize, dest.remaining());
             if (source.hasArray() && dest.hasArray()) {
-                encode0(
-                    source.array(),
-                    JieBuffer.getArrayStartIndex(source),
-                    JieBuffer.getArrayEndIndex(source),
-                    dest.array(),
-                    JieBuffer.getArrayStartIndex(dest)
-                );
+                encode0(source.array(), JieBuffer.getArrayStartIndex(source), JieBuffer.getArrayEndIndex(source), dest.array(), JieBuffer.getArrayStartIndex(dest));
                 source.position(source.limit());
                 dest.position(dest.position() + outputSize);
             } else {
@@ -148,13 +150,9 @@ public class JieHex {
         }
     }
 
-    private static final class HexDecoder implements ToCharDecoder, ByteStream.Encoder {
+    private static final class HexDecoder implements Decoder, ByteStream.Encoder {
 
         private static final HexDecoder SINGLETON = new HexDecoder();
-
-        private static final char[] DICT = {
-            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
-        };
 
         @Override
         public byte[] decode(byte[] data) throws DecodingException {
@@ -170,13 +168,7 @@ public class JieHex {
             byte[] dst = new byte[outputSize];
             ByteBuffer ret = ByteBuffer.wrap(dst);
             if (data.hasArray()) {
-                decode0(
-                    data.array(),
-                    JieBuffer.getArrayStartIndex(data),
-                    JieBuffer.getArrayEndIndex(data),
-                    dst,
-                    0
-                );
+                decode0(data.array(), JieBuffer.getArrayStartIndex(data), JieBuffer.getArrayEndIndex(data), dst, 0);
                 data.position(data.limit());
             } else {
                 byte[] s = new byte[data.remaining()];
@@ -198,13 +190,7 @@ public class JieHex {
             int outputSize = getOutputSize(data.remaining());
             checkDecodingRemaining(outputSize, dest.remaining());
             if (data.hasArray() && dest.hasArray()) {
-                decode0(
-                    data.array(),
-                    JieBuffer.getArrayStartIndex(data),
-                    JieBuffer.getArrayEndIndex(data),
-                    dest.array(),
-                    JieBuffer.getArrayStartIndex(dest)
-                );
+                decode0(data.array(), JieBuffer.getArrayStartIndex(data), JieBuffer.getArrayEndIndex(data), dest.array(), JieBuffer.getArrayStartIndex(dest));
                 data.position(data.limit());
                 dest.position(dest.position() + outputSize);
             } else {
@@ -240,8 +226,8 @@ public class JieHex {
                 throw new DecodingException("Invalid hex string: length must be even.");
             }
             for (int i = srcOff, j = dstOff; i < srcEnd; ) {
-                int bits1 = toDigit((char) (src[i++]));
-                int bits2 = toDigit((char) (src[i++]));
+                int bits1 = toDigit((char) src[i++]);
+                int bits2 = toDigit((char) src[i++]);
                 int bits = ((bits1 << 4) | bits2);
                 dst[j++] = (byte) bits;
             }
@@ -249,11 +235,16 @@ public class JieHex {
         }
 
         private int toDigit(char c) {
-            int ret = Character.digit(c, 16);
-            if (ret == -1) {
-                throw new DecodingException("Invalid hex char: " + c + ".");
+            if (c >= '0' && c <= '9') {
+                return c - '0';
             }
-            return ret;
+            if (c >= 'a' && c <= 'f') {
+                return c - 'a' + 10;
+            }
+            if (c >= 'A' && c <= 'F') {
+                return c - 'A' + 10;
+            }
+            throw new DecodingException("Invalid hex char: " + c + ".");
         }
     }
 }

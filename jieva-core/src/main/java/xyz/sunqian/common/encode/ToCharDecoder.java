@@ -17,9 +17,9 @@ import java.nio.CharBuffer;
 public interface ToCharDecoder extends ByteDecoder {
 
     /**
-     * Decodes given data into a new byte array (with {@link JieChars#latinCharset()}).
+     * Decodes given chars data into a new byte array (with {@link JieChars#latinCharset()}).
      *
-     * @param data given data
+     * @param data given chars data
      * @return result of decoding into a new byte array (with {@link JieChars#latinCharset()})
      * @throws DecodingException if any decoding problem occurs
      */
@@ -29,9 +29,9 @@ public interface ToCharDecoder extends ByteDecoder {
     }
 
     /**
-     * Decodes given data into a new byte array (with {@link JieChars#latinCharset()}).
+     * Decodes given chars data into a new byte array (with {@link JieChars#latinCharset()}).
      *
-     * @param data given data
+     * @param data given chars data
      * @return result of decoding into a new byte array (with {@link JieChars#latinCharset()})
      * @throws DecodingException if any decoding problem occurs
      */
