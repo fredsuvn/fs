@@ -40,18 +40,6 @@ public class JieHex {
         return HexDecoder.SINGLETON;
     }
 
-    private static void checkEncodingRemaining(int srcRemaining, int dstRemaining) {
-        if (srcRemaining > dstRemaining) {
-            throw new EncodingException("Remaining space of destination for encoding is not enough.");
-        }
-    }
-
-    private static void checkDecodingRemaining(int srcRemaining, int dstRemaining) {
-        if (srcRemaining > dstRemaining) {
-            throw new DecodingException("Remaining space of destination for decoding is not enough.");
-        }
-    }
-
     /**
      * {@code Hex} encoder, extends {@link ToCharEncoder}.
      *
@@ -72,7 +60,9 @@ public class JieHex {
 
         private static final HexEncoder SINGLETON = new HexEncoder();
 
-        private static final char[] DICT = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+        private static final char[] DICT = {
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
+        };
 
         @Override
         public byte[] encode(byte[] source) throws EncodingException {
@@ -88,7 +78,13 @@ public class JieHex {
             byte[] dst = new byte[outputSize];
             ByteBuffer ret = ByteBuffer.wrap(dst);
             if (source.hasArray()) {
-                encode0(source.array(), JieBuffer.getArrayStartIndex(source), JieBuffer.getArrayEndIndex(source), dst, 0);
+                encode0(
+                    source.array(),
+                    JieBuffer.getArrayStartIndex(source),
+                    JieBuffer.getArrayEndIndex(source),
+                    dst,
+                    0
+                );
                 source.position(source.limit());
             } else {
                 byte[] s = new byte[source.remaining()];
@@ -101,16 +97,22 @@ public class JieHex {
         @Override
         public int encode(byte[] source, byte[] dest) throws EncodingException {
             int outputSize = getOutputSize(source.length);
-            checkEncodingRemaining(outputSize, dest.length);
+            EncodeMisc.checkEncodingRemaining(outputSize, dest.length);
             return encode0(source, 0, source.length, dest, 0);
         }
 
         @Override
         public int encode(ByteBuffer source, ByteBuffer dest) throws EncodingException {
             int outputSize = getOutputSize(source.remaining());
-            checkEncodingRemaining(outputSize, dest.remaining());
+            EncodeMisc.checkEncodingRemaining(outputSize, dest.remaining());
             if (source.hasArray() && dest.hasArray()) {
-                encode0(source.array(), JieBuffer.getArrayStartIndex(source), JieBuffer.getArrayEndIndex(source), dest.array(), JieBuffer.getArrayStartIndex(dest));
+                encode0(
+                    source.array(),
+                    JieBuffer.getArrayStartIndex(source),
+                    JieBuffer.getArrayEndIndex(source),
+                    dest.array(),
+                    JieBuffer.getArrayStartIndex(dest)
+                );
                 source.position(source.limit());
                 dest.position(dest.position() + outputSize);
             } else {
@@ -168,7 +170,13 @@ public class JieHex {
             byte[] dst = new byte[outputSize];
             ByteBuffer ret = ByteBuffer.wrap(dst);
             if (data.hasArray()) {
-                decode0(data.array(), JieBuffer.getArrayStartIndex(data), JieBuffer.getArrayEndIndex(data), dst, 0);
+                decode0(
+                    data.array(),
+                    JieBuffer.getArrayStartIndex(data),
+                    JieBuffer.getArrayEndIndex(data),
+                    dst,
+                    0
+                );
                 data.position(data.limit());
             } else {
                 byte[] s = new byte[data.remaining()];
@@ -181,16 +189,22 @@ public class JieHex {
         @Override
         public int decode(byte[] data, byte[] dest) throws DecodingException {
             int outputSize = getOutputSize(data.length);
-            checkDecodingRemaining(outputSize, dest.length);
+            EncodeMisc.checkDecodingRemaining(outputSize, dest.length);
             return decode0(data, 0, data.length, dest, 0);
         }
 
         @Override
         public int decode(ByteBuffer data, ByteBuffer dest) throws DecodingException {
             int outputSize = getOutputSize(data.remaining());
-            checkDecodingRemaining(outputSize, dest.remaining());
+            EncodeMisc.checkDecodingRemaining(outputSize, dest.remaining());
             if (data.hasArray() && dest.hasArray()) {
-                decode0(data.array(), JieBuffer.getArrayStartIndex(data), JieBuffer.getArrayEndIndex(data), dest.array(), JieBuffer.getArrayStartIndex(dest));
+                decode0(
+                    data.array(),
+                    JieBuffer.getArrayStartIndex(data),
+                    JieBuffer.getArrayEndIndex(data),
+                    dest.array(),
+                    JieBuffer.getArrayStartIndex(dest)
+                );
                 data.position(data.limit());
                 dest.position(dest.position() + outputSize);
             } else {

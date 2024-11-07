@@ -135,12 +135,6 @@ public class JieBase64 {
         return new MimeEncoder(padding, lineMax, newLine);
     }
 
-    private static void checkEncodingRemaining(int srcRemaining, int dstRemaining) {
-        if (srcRemaining > dstRemaining) {
-            throw new EncodingException("Remaining space of destination for encoding is not enough.");
-        }
-    }
-
     /**
      * {@code Base64} encoder, extends {@link ToCharEncoder}.
      *
@@ -206,14 +200,14 @@ public class JieBase64 {
         @Override
         public int encode(byte[] source, byte[] dest) throws EncodingException {
             int outputSize = getOutputSize(source.length);
-            checkEncodingRemaining(outputSize, dest.length);
+            EncodeMisc.checkEncodingRemaining(outputSize, dest.length);
             return encode0(source, 0, source.length, dest, 0);
         }
 
         @Override
         public int encode(ByteBuffer source, ByteBuffer dest) throws EncodingException {
             int outputSize = getOutputSize(source.remaining());
-            checkEncodingRemaining(outputSize, dest.remaining());
+            EncodeMisc.checkEncodingRemaining(outputSize, dest.remaining());
             if (source.hasArray() && dest.hasArray()) {
                 encode0(
                     source.array(),
@@ -269,9 +263,7 @@ public class JieBase64 {
             int roundLen = (srcEnd - srcOff) / 3 * 3;
             int roundEnd = srcPos + roundLen;
             for (int i = srcPos, j = dstPos; i < roundEnd; ) {
-                int bits = (src[i++] & 0xff) << 16 |
-                    (src[i++] & 0xff) << 8 |
-                    (src[i++] & 0xff);
+                int bits = (src[i++] & 0xff) << 16 | (src[i++] & 0xff) << 8 | (src[i++] & 0xff);
                 dst[j++] = (byte) dict[(bits >>> 18) & 0x3f];
                 dst[j++] = (byte) dict[(bits >>> 12) & 0x3f];
                 dst[j++] = (byte) dict[(bits >>> 6) & 0x3f];
@@ -549,9 +541,7 @@ public class JieBase64 {
             while (srcPos < roundEnd) {
                 int readEnd = Math.min(srcPos + lineSize, roundEnd);
                 for (int i = srcPos, j = destPos; i < readEnd; ) {
-                    int bits = (src[i++] & 0xff) << 16 |
-                        (src[i++] & 0xff) << 8 |
-                        (src[i++] & 0xff);
+                    int bits = (src[i++] & 0xff) << 16 | (src[i++] & 0xff) << 8 | (src[i++] & 0xff);
                     dst[j++] = (byte) dict[(bits >>> 18) & 0x3f];
                     dst[j++] = (byte) dict[(bits >>> 12) & 0x3f];
                     dst[j++] = (byte) dict[(bits >>> 6) & 0x3f];
@@ -675,109 +665,94 @@ public class JieBase64 {
          */
     }
 
-    // private static abstract class AbsDecoder implements Base64Decoder, ByteStream.Encoder {
-    //
-    //     private static final char[] DICT = {
-    //         'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-    //         'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-    //         'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-    //         'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-    //         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'
-    //     };
-    //
-    //     protected final boolean padding;
-    //
-    //     protected AbsDecoder(boolean padding) {
-    //         this.padding = padding;
-    //     }
-    //
-    //     @Override
-    //     public byte[] decode(byte[] data) throws EncodingException {
-    //         int len = getOutputSize(data.length);
-    //         byte[] dst = new byte[len];
-    //         decode0(data, 0, data.length, dst, 0);
-    //         return dst;
-    //     }
-    //
-    //     @Override
-    //     public ByteBuffer decode(ByteBuffer data) throws EncodingException {
-    //         int len = getOutputSize(data.remaining());
-    //         byte[] dst = new byte[len];
-    //         ByteBuffer ret = ByteBuffer.wrap(dst);
-    //         if (data.hasArray()) {
-    //             decode0(
-    //                 data.array(),
-    //                 JieBuffer.getArrayStartIndex(data),
-    //                 JieBuffer.getArrayEndIndex(data),
-    //                 dst,
-    //                 0
-    //             );
-    //             data.position(data.limit());
-    //         } else {
-    //             byte[] s = new byte[data.remaining()];
-    //             data.get(s);
-    //             decode0(s, 0, s.length, dst, 0);
-    //         }
-    //         return ret;
-    //     }
-    //
-    //     @Override
-    //     public int decode(byte[] data, byte[] dest) throws EncodingException {
-    //         int outputSize = getOutputSize(data.length);
-    //         checkRemaining(outputSize, dest.length);
-    //         return decode0(data, 0, data.length, dest, 0);
-    //     }
-    //
-    //     @Override
-    //     public int decode(ByteBuffer data, ByteBuffer dest) throws EncodingException {
-    //         int outputSize = getOutputSize(data.remaining());
-    //         checkRemaining(outputSize, dest.remaining());
-    //         if (data.hasArray() && dest.hasArray()) {
-    //             decode0(
-    //                 data.array(),
-    //                 JieBuffer.getArrayStartIndex(data),
-    //                 JieBuffer.getArrayEndIndex(data),
-    //                 dest.array(),
-    //                 JieBuffer.getArrayStartIndex(dest)
-    //             );
-    //             data.position(data.limit());
-    //             dest.position(dest.position() + outputSize);
-    //         } else {
-    //             ByteBuffer dst = decode(data);
-    //             dest.put(dst);
-    //         }
-    //         return outputSize;
-    //     }
-    //
-    //     @Override
-    //     public int getOutputSize(int inputSize) {
-    //         if (padding) {
-    //             return inputSize / 4 * 3;
-    //         }
-    //         int remainder = inputSize % 3;
-    //         if (remainder == 0) {
-    //             return inputSize / 3 * 4;
-    //         }
-    //         return inputSize / 3 * 4 + remainder + 1;
-    //     }
-    //
-    //     @Override
-    //     public int getBlockSize() {
-    //         return 1024 * 3;
-    //     }
-    //
-    //     @Override
-    //     public ByteStream.Encoder toStreamEncoder() {
-    //         return this;
-    //     }
-    //
-    //     @Override
-    //     public ByteBuffer encode(ByteBuffer source, boolean end) throws EncodingException {
-    //         return decode(source);
-    //     }
-    //
-    //     protected int decode0(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff) {
-    //         return 0;
-    //     }
-    // }
+    /*
+    private static abstract class AbsDecoder implements Decoder, ByteStream.Encoder {
+
+        private static final char[] DICT = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'};
+
+        protected final boolean padding;
+
+        protected AbsDecoder(boolean padding) {
+            this.padding = padding;
+        }
+
+        @Override
+        public byte[] decode(byte[] data) throws EncodingException {
+            int len = getOutputSize(data.length);
+            byte[] dst = new byte[len];
+            decode0(data, 0, data.length, dst, 0);
+            return dst;
+        }
+
+        @Override
+        public ByteBuffer decode(ByteBuffer data) throws EncodingException {
+            int len = getOutputSize(data.remaining());
+            byte[] dst = new byte[len];
+            ByteBuffer ret = ByteBuffer.wrap(dst);
+            if (data.hasArray()) {
+                decode0(data.array(), JieBuffer.getArrayStartIndex(data), JieBuffer.getArrayEndIndex(data), dst, 0);
+                data.position(data.limit());
+            } else {
+                byte[] s = new byte[data.remaining()];
+                data.get(s);
+                decode0(s, 0, s.length, dst, 0);
+            }
+            return ret;
+        }
+
+        @Override
+        public int decode(byte[] data, byte[] dest) throws EncodingException {
+            int outputSize = getOutputSize(data.length);
+            EncodeMisc.checkDecodingRemaining(outputSize, dest.length);
+            return decode0(data, 0, data.length, dest, 0);
+        }
+
+        @Override
+        public int decode(ByteBuffer data, ByteBuffer dest) throws EncodingException {
+            int outputSize = getOutputSize(data.remaining());
+            EncodeMisc.checkDecodingRemaining(outputSize, dest.remaining());
+            if (data.hasArray() && dest.hasArray()) {
+                decode0(data.array(), JieBuffer.getArrayStartIndex(data), JieBuffer.getArrayEndIndex(data),
+                    dest.array(), JieBuffer.getArrayStartIndex(dest));
+                data.position(data.limit());
+                dest.position(dest.position() + outputSize);
+            } else {
+                ByteBuffer dst = decode(data);
+                dest.put(dst);
+            }
+            return outputSize;
+        }
+
+        @Override
+        public int getOutputSize(int inputSize) {
+            if (padding) {
+                return inputSize / 4 * 3;
+            }
+            int remainder = inputSize % 3;
+            if (remainder == 0) {
+                return inputSize / 3 * 4;
+            }
+            return inputSize / 3 * 4 + remainder + 1;
+        }
+
+        @Override
+        public int getBlockSize() {
+            return 1024 * 3;
+        }
+
+        @Override
+        public ByteStream.Encoder toStreamEncoder() {
+            return this;
+        }
+
+        @Override
+        public ByteBuffer encode(ByteBuffer source, boolean end) throws EncodingException {
+            return decode(source);
+        }
+
+        protected int decode0(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff) {
+            return 0;
+        }
+    }
+     */
 }
