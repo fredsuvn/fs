@@ -8,7 +8,7 @@ import java.util.*;
 final class Impls {
 
     static final String UNABLE_NULL_TYPE =
-        "Unable to create a new array because all mapped elements are null, preventing the determination of the new array's type.";
+        "Unable to create array because all mapped elements are null, the type of array can not be determined.";
 
     static <T> List<T> immutableList(Object[] array) {
         return new ImmutableList<>(array);

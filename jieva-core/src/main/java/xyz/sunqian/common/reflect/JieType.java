@@ -63,7 +63,8 @@ public class JieType {
      * @param ownerType      given owner type
      * @return a {@link ParameterizedType}
      */
-    public static ParameterizedType parameterized(Class<?> rawType, Iterable<Type> actualTypeArgs, @Nullable Type ownerType) {
+    public static ParameterizedType parameterized(
+        Class<?> rawType, Iterable<Type> actualTypeArgs, @Nullable Type ownerType) {
         return parameterized(rawType, JieColl.toArray(actualTypeArgs, Type.class), ownerType);
     }
 

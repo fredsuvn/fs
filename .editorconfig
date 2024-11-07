@@ -7,6 +7,7 @@ indent_size = 4
 continuation_indent_size = 4
 insert_final_newline = false
 trim_trailing_whitespace = true
+max_line_length = 120
 
 [*.{groovy,gradle,kts,xml,html,js,ts,yml,yaml,svg,md,adoc,json}]
 indent_size = 2

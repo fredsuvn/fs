@@ -481,7 +481,9 @@ public class JieSystem {
      */
     public static boolean isBsd() {
         String osName = getOsName();
-        return osName != null && (osName.startsWith("FreeBSD") || osName.startsWith("OpenBSD") || osName.startsWith("NetBSD"));
+        return osName != null && (
+            osName.startsWith("FreeBSD") || osName.startsWith("OpenBSD") || osName.startsWith("NetBSD")
+        );
     }
 
     /**
