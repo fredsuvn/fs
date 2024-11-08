@@ -1,7 +1,5 @@
 package xyz.sunqian.common.encode;
 
-import xyz.sunqian.common.io.ByteStream;
-
 import java.nio.ByteBuffer;
 
 /**
@@ -9,7 +7,7 @@ import java.nio.ByteBuffer;
  *
  * @author sunqian
  */
-public interface ByteDecoder {
+public interface ByteDecoder extends ByteCoder {
 
     /**
      * Decodes given data into a new byte array.
@@ -56,30 +54,4 @@ public interface ByteDecoder {
      * @throws DecodingException if any decoding problem occurs
      */
     int decode(ByteBuffer data, ByteBuffer dest) throws DecodingException;
-
-    /**
-     * Returns output size in bytes for decoding the specified input size. If the exact output size cannot be
-     * determined, provide an estimated maximum value that can accommodate the output.
-     *
-     * @param inputSize specified input size
-     * @return output size in bytes after decoding specified input size
-     */
-    int getOutputSize(int inputSize);
-
-    /**
-     * Returns the block size. When decoding, data is sometimes processed in blocks, this method returns the recommended
-     * size of those blocks. If the block size cannot be determined, it returns {@code 0}.
-     *
-     * @return the block size
-     */
-    int getBlockSize();
-
-    /**
-     * Returns a {@link ByteStream.Encoder} with current decoding. When using this method, the
-     * {@link ByteStream#blockSize(int)} needs to be set to a correct value, such as {@link #getBlockSize()} (if it does
-     * not return {@code 0}).
-     *
-     * @return a {@link ByteStream.Encoder} with current decoding
-     */
-    ByteStream.Encoder toStreamEncoder();
 }
