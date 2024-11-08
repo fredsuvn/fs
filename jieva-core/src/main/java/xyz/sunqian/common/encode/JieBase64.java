@@ -61,86 +61,85 @@ import java.util.Arrays;
 public class JieBase64 {
 
     /**
-     * Returns a {@code Base64} encoder  in type of {@code Basic}, with padding character if the length of source is not
+     * Returns a {@code Base64} encoder in type of {@code Basic}, with padding character if the length of source is not
      * a multiple of 3.
      *
-     * @return a {@code Base64} encoder  in type of {@code Basic}
+     * @return a {@code Base64} encoder in type of {@code Basic}
      */
     public static Encoder encoder() {
         return BasicEncoder.PADDING;
     }
 
     /**
-     * Returns a {@code Base64} encoder  in type of {@code Basic}. without padding character if the length of source is
+     * Returns a {@code Base64} encoder in type of {@code Basic}. without padding character if the length of source is
      * not a multiple of 3.
      *
-     * @return a {@code Base64} encoder  in type of {@code Basic}
+     * @return a {@code Base64} encoder in type of {@code Basic}
      */
     public static Encoder encoder(boolean padding) {
         return padding ? encoder() : BasicEncoder.NO_PADDING;
     }
 
     /**
-     * Returns a {@code Base64} encoder  in type of {@code URL and Filename safe}, with padding character if the length
+     * Returns a {@code Base64} encoder in type of {@code URL and Filename safe}, with padding character if the length
      * of source is not a multiple of 3.
      *
-     * @return a {@code Base64} encoder  in type of {@code URL and Filename safe}
+     * @return a {@code Base64} encoder in type of {@code URL and Filename safe}
      */
     public static Encoder urlEncoder() {
         return UrlEncoder.PADDING;
     }
 
     /**
-     * Returns a {@code Base64} encoder  in type of {@code URL and Filename safe}, without padding character if the
+     * Returns a {@code Base64} encoder in type of {@code URL and Filename safe}, without padding character if the
      * length of source is not a multiple of 3.
      *
-     * @return a {@code Base64} encoder  in type of {@code URL and Filename safe}
+     * @return a {@code Base64} encoder in type of {@code URL and Filename safe}
      */
     public static Encoder urlEncoder(boolean padding) {
         return padding ? urlEncoder() : UrlEncoder.NO_PADDING;
     }
 
     /**
-     * Returns a {@code Base64} encoder  in type of {@code MIME}, with padding character if the length of source is not
-     * a multiple of 3.
+     * Returns a {@code Base64} encoder in type of {@code MIME}, with padding character if the length of source is not a
+     * multiple of 3.
      *
-     * @return a {@code Base64} encoder  in type of {@code MIME}
+     * @return a {@code Base64} encoder in type of {@code MIME}
      */
     public static Encoder mimeEncoder() {
         return MimeEncoder.PADDING;
     }
 
     /**
-     * Returns a {@code Base64} encoder  in type of {@code MIME}, without padding character if the length of source is
+     * Returns a {@code Base64} encoder in type of {@code MIME}, without padding character if the length of source is
      * not a multiple of 3.
      *
-     * @return a {@code Base64} encoder  in type of {@code MIME}
+     * @return a {@code Base64} encoder in type of {@code MIME}
      */
     public static Encoder mimeEncoder(boolean padding) {
         return padding ? mimeEncoder() : MimeEncoder.NO_PADDING;
     }
 
     /**
-     * Returns a {@code Base64} encoder  in type of {@code MIME}, with specified arguments.
+     * Returns a {@code Base64} encoder in type of {@code MIME}, with specified arguments.
      *
      * @param lineMax sets the max length per line, must be a multiple of {@code 4}
      * @param newLine sets the line separator. The array will be used directly, any modification to array will affect
      *                the encoding.
      * @param padding whether add padding character at the end if the length of source is not a multiple of 3.
-     * @return a {@code Base64} encoder  in type of {@code MIME}
+     * @return a {@code Base64} encoder in type of {@code MIME}
      */
     public static Encoder mimeEncoder(int lineMax, byte[] newLine, boolean padding) {
         return new MimeEncoder(padding, lineMax, newLine);
     }
 
     /**
-     * Returns a {@code Base64} decoder  in type of {@code Basic}, with padding character if the length of source is not
-     * a multiple of 3.
+     * Returns a {@code Base64} decoder in type of {@code Basic}, supports both {@code padding} or {@code no-padding}.
      *
-     * @return a {@code Base64} encoder  in type of {@code Basic}
+     * @return a {@code Base64} encoder in type of {@code Basic}
      */
     public static Decoder decoder() {
-        return BasicDecoder.PADDING;
+        return BasicDecoder.SINGLETON;
     }
 
     /**
@@ -620,17 +619,11 @@ public class JieBase64 {
             DICT['='] = -2;
         }
 
-        protected final boolean padding;
-
-        protected AbsDecoder(boolean padding) {
-            this.padding = padding;
+        protected AbsDecoder() {
         }
 
         @Override
         public int getOutputSize(int inputSize) {
-            if (padding) {
-                return inputSize / 4 * 3;
-            }
             int remainder = inputSize % 4;
             if (remainder == 0) {
                 return inputSize / 4 * 3;
@@ -644,6 +637,11 @@ public class JieBase64 {
         @Override
         public int getBlockSize() {
             return 384 * 4;
+        }
+
+        @Override
+        protected void checkCodingRemaining(int srcRemaining, int dstRemaining) {
+            // No checking, because no determine.
         }
 
         protected int doCode(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff) {
@@ -686,7 +684,7 @@ public class JieBase64 {
             } else if (shiftTo == 0) {
                 dst[dstPos++] = (byte) (bits >> 16);
                 dst[dstPos++] = (byte) (bits >> 8);
-            } else {
+            } else if (shiftTo != 18) {
                 throw new DecodingException("Invalid base64 tail without padding, must be 2 or 3 remainder left.");
             }
             return dstPos - dstOff;
@@ -695,11 +693,10 @@ public class JieBase64 {
 
     private static final class BasicDecoder extends AbsDecoder {
 
-        private static final BasicDecoder PADDING = new BasicDecoder(true);
-        private static final BasicDecoder NO_PADDING = new BasicDecoder(false);
+        private static final BasicDecoder SINGLETON = new BasicDecoder();
 
-        private BasicDecoder(boolean padding) {
-            super(padding);
+        private BasicDecoder() {
+            super();
         }
     }
 }

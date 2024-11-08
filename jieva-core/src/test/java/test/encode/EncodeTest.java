@@ -8,6 +8,7 @@ import xyz.sunqian.common.base.JieChars;
 import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.encode.*;
 import xyz.sunqian.common.io.ByteStream;
+import xyz.sunqian.common.io.BytesBuilder;
 import xyz.sunqian.common.io.JieIO;
 
 import java.io.ByteArrayOutputStream;
@@ -383,12 +384,22 @@ public class EncodeTest {
 
     @Test
     public void test0() throws Exception {
-        byte[] src = "1234567890".getBytes(JieChars.defaultCharset());
-        String base64 = JieBase64.encoder().toString(src);
+        BytesBuilder bb = new BytesBuilder();
+        bb.append("1234567890".getBytes(JieChars.defaultCharset()));
+        bb.append((byte) 0xff);
+        bb.append((byte) 0xff);
+        bb.append((byte) 0xff);
+        bb.append((byte) 0xfb);
+        bb.append((byte) 0xfb);
+        bb.append((byte) 0xfb);
+        bb.append((byte) 0xfb);
+        bb.append((byte) 0xfb);
+        byte[] src = bb.toByteArray();
+        String base64 = JieBase64.urlEncoder().toString(src);
         System.out.println(base64);
         byte[] de = JieBase64.decoder().decode(base64);
         System.out.println(new String(de, JieChars.defaultCharset()));
-        byte[] de2 = Base64.getDecoder().decode(base64);
+        byte[] de2 = Base64.getUrlDecoder().decode(base64);
         System.out.println(new String(de2, JieChars.defaultCharset()));
         assertEquals(src, de2);
         assertEquals(src, de);
@@ -400,21 +411,36 @@ public class EncodeTest {
         byte[] source = JieRandom.fill(new byte[99999]);
         ByteBuffer sb = ByteBuffer.wrap(source);
         ByteEncoder encoder = JieBase64.encoder();
+        ByteDecoder decoder = JieBase64.decoder();
         Base64.Encoder be = Base64.getEncoder();
+        Base64.Decoder de = Base64.getDecoder();
+        byte[] deBytes = be.encode(source);
         long t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
             be.encode(sb);
             sb.flip();
         }
         long t2 = System.currentTimeMillis();
-        System.out.println("java array: " + (t2 - t1));
+        System.out.println("jdk encode: " + (t2 - t1));
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
             encoder.encode(sb);
             sb.flip();
         }
         t2 = System.currentTimeMillis();
-        System.out.println("jie array: " + (t2 - t1));
+        System.out.println("jie encode: " + (t2 - t1));
+        t1 = System.currentTimeMillis();
+        for (int i = 0; i < times; i++) {
+            de.decode(deBytes);
+        }
+        t2 = System.currentTimeMillis();
+        System.out.println("jdk decode: " + (t2 - t1));
+        t1 = System.currentTimeMillis();
+        for (int i = 0; i < times; i++) {
+            decoder.decode(deBytes);
+        }
+        t2 = System.currentTimeMillis();
+        System.out.println("jie decode: " + (t2 - t1));
         sb = ByteBuffer.allocateDirect(source.length);
         sb.put(source);
         sb.flip();

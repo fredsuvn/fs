@@ -4,22 +4,26 @@ import xyz.sunqian.common.io.ByteStream;
 import xyz.sunqian.common.io.JieBuffer;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 abstract class AbsCoder implements ByteCoder, ByteStream.Encoder {
 
     private byte[] doCode(byte[] source) throws EncodingException {
         int outputSize = getOutputSize(source.length);
         byte[] dst = new byte[outputSize];
-        doCode(source, 0, source.length, dst, 0);
-        return dst;
+        int len = doCode(source, 0, source.length, dst, 0);
+        if (len == dst.length) {
+            return dst;
+        }
+        return Arrays.copyOf(dst, len);
     }
 
     private ByteBuffer doCode(ByteBuffer source) throws EncodingException {
         int outputSize = getOutputSize(source.remaining());
         byte[] dst = new byte[outputSize];
-        ByteBuffer ret = ByteBuffer.wrap(dst);
+        int len;
         if (source.hasArray()) {
-            doCode(
+            len = doCode(
                 source.array(),
                 JieBuffer.getArrayStartIndex(source),
                 JieBuffer.getArrayEndIndex(source),
@@ -30,9 +34,12 @@ abstract class AbsCoder implements ByteCoder, ByteStream.Encoder {
         } else {
             byte[] s = new byte[source.remaining()];
             source.get(s);
-            doCode(s, 0, s.length, dst, 0);
+            len = doCode(s, 0, s.length, dst, 0);
         }
-        return ret;
+        if (len == dst.length) {
+            return ByteBuffer.wrap(dst);
+        }
+        return ByteBuffer.wrap(Arrays.copyOf(dst, len));
     }
 
     private int doCode(byte[] source, byte[] dest) throws EncodingException {
