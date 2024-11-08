@@ -597,152 +597,91 @@ public class JieBase64 {
          */
     }
 
-    // private static abstract class AbsDecoder extends AbsCoder.De implements Decoder {
-    //
-    //     private static final byte[] DICT = new byte[Byte.MAX_VALUE];
-    //
-    //     static {
-    //         Arrays.fill(DICT, (byte) -1);
-    //         for (int i = 0; i < AbsEncoder.DICT.length; i++) {
-    //             int c = AbsEncoder.DICT[i];
-    //             DICT[c & 0xff] = (byte) i;
-    //         }
-    //         DICT['-'] = DICT['+'];
-    //         DICT['_'] = DICT['/'];
-    //         DICT['='] = -2;
-    //     }
-    //
-    //     protected final boolean padding;
-    //
-    //     protected AbsDecoder(boolean padding) {
-    //         this.padding = padding;
-    //     }
-    //
-    //     @Override
-    //     public int getOutputSize(int inputSize) {
-    //         if (padding) {
-    //             return inputSize / 4 * 3;
-    //         }
-    //         int remainder = inputSize % 4;
-    //         if (remainder == 0) {
-    //             return inputSize / 4 * 3;
-    //         }
-    //         if (remainder == 1) {
-    //             throw new DecodingException("Illegal input size: " + inputSize + ".");
-    //         }
-    //         return inputSize / 4 * 3 + remainder - 1;
-    //     }
-    //
-    //     @Override
-    //     public int getBlockSize() {
-    //         return 384 * 4;
-    //     }
-    //
-    //
-    //
-    //     protected int doCode(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff) {
-    //         int srcPos= srcOff;
-    //         int dstPos = dstOff;
-    //         int totalLen = srcEnd - srcOff;
-    //         int roundLen = totalLen / 4 * 4;
-    //         int bits = 0;
-    //         int shiftTo = 18;
-    //         while (srcPos < srcOff + roundLen) {
-    //             char c = (char) (src[srcPos++] & 0xff);
-    //             int b = DICT[c];
-    //             if (b < 0) {
-    //                 if (b == -2) {
-    //                     // must be padding end with xx== or xxx=
-    //                     if (!padding) {
-    //                         throw new DecodingException("Invalid base64 char: " + c + ".");
-    //                     }
-    //                     if (shiftTo == 6) {
-    //                         // xx==
-    //                         char nextC = (char) (src[srcPos++] & 0xff);
-    //                         if (nextC != '=' || srcPos != srcEnd) {
-    //                             throw new DecodingException("Invalid base64 char: " + c + ".");
-    //                         } else {
-    //
-    //                         }
-    //                     }
-    //                 }
-    //                 throw new DecodingException("Invalid base64 char: " + c + ".");
-    //             }
-    //             bits |= (b << shiftTo);
-    //             shiftTo -= 6;
-    //             if (shiftTo < 0) {
-    //                 dst[dstPos++] = (byte) (bits >> 16);
-    //                 dst[dstPos++] = (byte) (bits >> 8);
-    //                 dst[dstPos++] = (byte) (bits);
-    //                 shiftTo = 18;
-    //                 bits = 0;
-    //             }
-    //         }
-    //         // left
-    //         while (srcPos < srcOff) {
-    //
-    //         }
-    //
-    //
-    //
-    //
-    //         int[] base64 = isURL ? fromBase64URL : fromBase64;
-    //         int dp = 0;
-    //         int bits = 0;
-    //         int shiftto = 18;       // pos of first byte of 4-byte atom
-    //         while (sp < sl) {
-    //             int b = src[sp++] & 0xff;
-    //             if ((b = base64[b]) < 0) {
-    //                 if (b == -2) {         // padding byte '='
-    //                     // =     shiftto==18 unnecessary padding
-    //                     // x=    shiftto==12 a dangling single x
-    //                     // x     to be handled together with non-padding case
-    //                     // xx=   shiftto==6&&sp==sl missing last =
-    //                     // xx=y  shiftto==6 last is not =
-    //                     if (shiftto == 6 && (sp == sl || src[sp++] != '=') ||
-    //                         shiftto == 18) {
-    //                         throw new IllegalArgumentException(
-    //                             "Input byte array has wrong 4-byte ending unit");
-    //                     }
-    //                     break;
-    //                 }
-    //                 if (isMIME)    // skip if for rfc2045
-    //                     continue;
-    //                 else
-    //                     throw new IllegalArgumentException(
-    //                         "Illegal base64 character " +
-    //                             Integer.toString(src[sp - 1], 16));
-    //             }
-    //             bits |= (b << shiftto);
-    //             shiftto -= 6;
-    //             if (shiftto < 0) {
-    //                 dst[dp++] = (byte) (bits >> 16);
-    //                 dst[dp++] = (byte) (bits >> 8);
-    //                 dst[dp++] = (byte) (bits);
-    //                 shiftto = 18;
-    //                 bits = 0;
-    //             }
-    //         }
-    //         // reached end of byte array or hit padding '=' characters.
-    //         if (shiftto == 6) {
-    //             dst[dp++] = (byte) (bits >> 16);
-    //         } else if (shiftto == 0) {
-    //             dst[dp++] = (byte) (bits >> 16);
-    //             dst[dp++] = (byte) (bits >> 8);
-    //         } else if (shiftto == 12) {
-    //             // dangling single "x", incorrectly encoded.
-    //             throw new IllegalArgumentException(
-    //                 "Last unit does not have enough valid bits");
-    //         }
-    //         // anything left is invalid, if is not MIME.
-    //         // if MIME, ignore all non-base64 character
-    //         while (sp < sl) {
-    //             if (isMIME && base64[src[sp++]] < 0)
-    //                 continue;
-    //             throw new IllegalArgumentException(
-    //                 "Input byte array has incorrect ending byte at " + sp);
-    //         }
-    //         return dp;
-    //     }
-    // }
+    private static abstract class AbsDecoder extends AbsCoder.De implements Decoder {
+
+        private static final byte[] DICT = new byte[Byte.MAX_VALUE];
+
+        static {
+            Arrays.fill(DICT, (byte) -1);
+            for (int i = 0; i < AbsEncoder.DICT.length; i++) {
+                int c = AbsEncoder.DICT[i];
+                DICT[c & 0xff] = (byte) i;
+            }
+            DICT['-'] = DICT['+'];
+            DICT['_'] = DICT['/'];
+            DICT['='] = -2;
+        }
+
+        protected final boolean padding;
+
+        protected AbsDecoder(boolean padding) {
+            this.padding = padding;
+        }
+
+        @Override
+        public int getOutputSize(int inputSize) {
+            if (padding) {
+                return inputSize / 4 * 3;
+            }
+            int remainder = inputSize % 4;
+            if (remainder == 0) {
+                return inputSize / 4 * 3;
+            }
+            if (remainder == 1) {
+                throw new DecodingException("Illegal input size: " + inputSize + ".");
+            }
+            return inputSize / 4 * 3 + remainder - 1;
+        }
+
+        @Override
+        public int getBlockSize() {
+            return 384 * 4;
+        }
+
+        protected int doCode(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff) {
+            int srcPos = srcOff;
+            int dstPos = dstOff;
+            int bits = 0;
+            int shiftTo = 18;
+            while (srcPos < srcEnd) {
+                int c = src[srcPos++] & 0xff;
+                int b = DICT[c];
+                if (b < 0) {
+                    if (b == -2) {
+                        // must be padding end with xx== or xxx=
+                        // xx==
+                        if (shiftTo == 6 && srcPos == srcEnd - 1 && src[srcPos] == '=') {
+                            dst[dstPos++] = (byte) (bits >> 16);
+                            return dstPos - dstOff;
+                        }
+                        // xxx=
+                        if (shiftTo == 0 && srcPos == srcEnd) {
+                            dst[dstPos++] = (byte) (bits >> 16);
+                            dst[dstPos++] = (byte) (bits >> 8);
+                            return dstPos - dstOff;
+                        }
+                    }
+                    throw new DecodingException("Invalid base64 char: " + ((char) c) + ".");
+                }
+                bits |= (b << shiftTo);
+                shiftTo -= 6;
+                if (shiftTo < 0) {
+                    dst[dstPos++] = (byte) (bits >> 16);
+                    dst[dstPos++] = (byte) (bits >> 8);
+                    dst[dstPos++] = (byte) (bits);
+                    shiftTo = 18;
+                    bits = 0;
+                }
+            }
+            if (shiftTo == 6) {
+                dst[dstPos++] = (byte) (bits >> 16);
+            } else if (shiftTo == 0) {
+                dst[dstPos++] = (byte) (bits >> 16);
+                dst[dstPos++] = (byte) (bits >> 8);
+            } else {
+                throw new DecodingException("Invalid base64 tail without padding, must be 2 or 3 remainder left.");
+            }
+            return dstPos - dstOff;
+        }
+    }
 }
