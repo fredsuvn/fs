@@ -62,8 +62,7 @@ public class JieBase64 {
 
     /**
      * Returns a {@code Base64} encoder  in type of {@code Basic}, with padding character if the length of source is not
-     * a multiple of
-     * 3.
+     * a multiple of 3.
      *
      * @return a {@code Base64} encoder  in type of {@code Basic}
      */
@@ -103,8 +102,7 @@ public class JieBase64 {
 
     /**
      * Returns a {@code Base64} encoder  in type of {@code MIME}, with padding character if the length of source is not
-     * a multiple of
-     * 3.
+     * a multiple of 3.
      *
      * @return a {@code Base64} encoder  in type of {@code MIME}
      */
@@ -133,6 +131,16 @@ public class JieBase64 {
      */
     public static Encoder mimeEncoder(int lineMax, byte[] newLine, boolean padding) {
         return new MimeEncoder(padding, lineMax, newLine);
+    }
+
+    /**
+     * Returns a {@code Base64} decoder  in type of {@code Basic}, with padding character if the length of source is not
+     * a multiple of 3.
+     *
+     * @return a {@code Base64} encoder  in type of {@code Basic}
+     */
+    public static Decoder decoder() {
+        return BasicDecoder.PADDING;
     }
 
     /**
@@ -682,6 +690,16 @@ public class JieBase64 {
                 throw new DecodingException("Invalid base64 tail without padding, must be 2 or 3 remainder left.");
             }
             return dstPos - dstOff;
+        }
+    }
+
+    private static final class BasicDecoder extends AbsDecoder {
+
+        private static final BasicDecoder PADDING = new BasicDecoder(true);
+        private static final BasicDecoder NO_PADDING = new BasicDecoder(false);
+
+        private BasicDecoder(boolean padding) {
+            super(padding);
         }
     }
 }

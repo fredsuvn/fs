@@ -381,6 +381,19 @@ public class EncodeTest {
         assertEquals(cb.position(), s.length());
     }
 
+    @Test
+    public void test0() throws Exception {
+        byte[] src = "1234567890".getBytes(JieChars.defaultCharset());
+        String base64 = JieBase64.encoder().toString(src);
+        System.out.println(base64);
+        byte[] de = JieBase64.decoder().decode(base64);
+        System.out.println(new String(de, JieChars.defaultCharset()));
+        byte[] de2 = Base64.getDecoder().decode(base64);
+        System.out.println(new String(de2, JieChars.defaultCharset()));
+        assertEquals(src, de2);
+        assertEquals(src, de);
+    }
+
     //@Test
     public void testBase64Performance() throws Exception {
         int times = 10000;
