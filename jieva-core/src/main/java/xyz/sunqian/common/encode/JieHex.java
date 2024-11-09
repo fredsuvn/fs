@@ -6,14 +6,13 @@ import xyz.sunqian.common.io.ByteStream;
  * This is a static utilities class provides implementations and utilities for {@code Hex} encoder and decoder.
  * <h2>Encoder</h2>
  * <p>
- * {@link ByteEncoder#toStreamEncoder()} always returns a singleton thread-safe object, the best block size for
- * {@link ByteStream#blockSize(int)} is {@link ByteEncoder#getBlockSize()} or multiples of it, but any legal size
- * (&gt;0) are permitted.
+ * {@link Encoder#toStreamEncoder()} always returns a singleton thread-safe object, and the best block size for
+ * {@link ByteStream#blockSize(int)} is {@link Encoder#getBlockSize()} or multiples of it (but any size that {@code >0}
+ * are permitted).
  * <h2>Decoder</h2>
  * <p>
- * {@link ByteDecoder#toStreamEncoder()} always returns a singleton thread-safe object, the best block size for
- * {@link ByteStream#blockSize(int)} is {@link ByteDecoder#getBlockSize()} or multiples of it, or must be multiples of 2
- * (even).
+ * {@link Decoder#toStreamEncoder()} always returns a singleton thread-safe object, and the best block size for
+ * {@link ByteStream#blockSize(int)} is {@link Decoder#getBlockSize()} or multiples of it, or an even value.
  *
  * @author sunqian
  */
@@ -38,7 +37,7 @@ public class JieHex {
     }
 
     /**
-     * {@code Hex} encoder, extends {@link ToCharEncoder}.
+     * {@code Hex} encoder.
      *
      * @author sunqian
      */
@@ -46,7 +45,7 @@ public class JieHex {
     }
 
     /**
-     * {@code Hex} decoder, extends {@link ToCharDecoder}.
+     * {@code Hex} decoder.
      *
      * @author sunqian
      */
@@ -62,7 +61,10 @@ public class JieHex {
         };
 
         @Override
-        public int getOutputSize(int inputSize) {
+        public int getOutputSize(int inputSize) throws EncodingException {
+            if (inputSize < 0) {
+                throw new EncodingException("Hex encoding size can not be negative.");
+            }
             return inputSize * 2;
         }
 
@@ -86,7 +88,13 @@ public class JieHex {
         private static final HexDecoder SINGLETON = new HexDecoder();
 
         @Override
-        public int getOutputSize(int inputSize) {
+        public int getOutputSize(int inputSize) throws DecodingException {
+            if (inputSize < 0) {
+                throw new DecodingException("Hex decoding size can not be negative.");
+            }
+            if (inputSize % 2 != 0) {
+                throw new DecodingException("Hex decoding size must be even.");
+            }
             return inputSize / 2;
         }
 
@@ -97,9 +105,6 @@ public class JieHex {
 
         protected int doCode(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff) {
             int length = srcEnd - srcOff;
-            if (length % 2 != 0) {
-                throw new DecodingException("Invalid hex string: length must be even.");
-            }
             for (int i = srcOff, j = dstOff; i < srcEnd; ) {
                 int bits1 = toDigit((char) src[i++]);
                 int bits2 = toDigit((char) src[i++]);

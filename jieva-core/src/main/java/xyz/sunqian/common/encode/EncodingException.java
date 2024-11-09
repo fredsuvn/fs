@@ -5,12 +5,13 @@ package xyz.sunqian.common.encode;
  *
  * @author fredsuvn
  */
-public class EncodingException extends RuntimeException {
+public class EncodingException extends CodingException {
 
     /**
      * Empty constructor.
      */
     public EncodingException() {
+        super();
     }
 
     /**

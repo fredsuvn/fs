@@ -15,8 +15,9 @@ public interface ByteCoder {
      *
      * @param inputSize specified input size
      * @return output size in bytes after en/de-coding specified input size
+     * @throws CodingException if the input size is illegal
      */
-    int getOutputSize(int inputSize);
+    int getOutputSize(int inputSize) throws CodingException;
 
     /**
      * Returns the block size. When en/de-coding, data is sometimes processed in blocks, this method returns the

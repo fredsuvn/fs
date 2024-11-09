@@ -1,16 +1,16 @@
 package xyz.sunqian.common.encode;
 
 /**
- * Exception for decoding.
+ * Super exception class of {@link EncodingException} and {@link DecodingException}.
  *
  * @author fredsuvn
  */
-public class DecodingException extends CodingException {
+public class CodingException extends RuntimeException {
 
     /**
      * Empty constructor.
      */
-    public DecodingException() {
+    public CodingException() {
         super();
     }
 
@@ -19,7 +19,7 @@ public class DecodingException extends CodingException {
      *
      * @param message exception message
      */
-    public DecodingException(String message) {
+    public CodingException(String message) {
         super(message);
     }
 
@@ -29,7 +29,7 @@ public class DecodingException extends CodingException {
      * @param message exception message
      * @param cause   exception cause
      */
-    public DecodingException(String message, Throwable cause) {
+    public CodingException(String message, Throwable cause) {
         super(message, cause);
     }
 
@@ -38,7 +38,7 @@ public class DecodingException extends CodingException {
      *
      * @param cause exception cause
      */
-    public DecodingException(Throwable cause) {
+    public CodingException(Throwable cause) {
         super(cause);
     }
 }

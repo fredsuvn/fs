@@ -40,6 +40,10 @@ public class EncodeTest {
         testBase64(JieIO.BUFFER_SIZE + 10086);
         testBase64(57);
         testBase64(1024);
+
+        // error
+        expectThrows(EncodingException.class, () -> JieBase64.encoder().getOutputSize(-1));
+        expectThrows(DecodingException.class, () -> JieBase64.decoder().getOutputSize(-1));
     }
 
     private void testBase64(int size) throws Exception {
@@ -189,6 +193,8 @@ public class EncodeTest {
         testHex(1024);
 
         // error
+        expectThrows(EncodingException.class, () -> JieHex.encoder().getOutputSize(-1));
+        expectThrows(DecodingException.class, () -> JieHex.decoder().getOutputSize(-1));
         byte[] encoded = new byte[3];
         expectThrows(DecodingException.class, () -> JieHex.decoder().decode(encoded));
         byte[] encoded2 = new byte[2];
@@ -385,7 +391,7 @@ public class EncodeTest {
     @Test
     public void test0() throws Exception {
         BytesBuilder bb = new BytesBuilder();
-        bb.append("1234567890".getBytes(JieChars.defaultCharset()));
+        bb.append("1234567890fgnhdnfhhgdn".getBytes(JieChars.defaultCharset()));
         bb.append((byte) 0xff);
         bb.append((byte) 0xff);
         bb.append((byte) 0xff);
@@ -403,6 +409,10 @@ public class EncodeTest {
         System.out.println(new String(de2, JieChars.defaultCharset()));
         assertEquals(src, de2);
         assertEquals(src, de);
+
+        byte[] ab = new org.apache.commons.codec.binary.Base64(76).encode(src);
+        byte[] sb = JieBase64.mimeEncoder().encode(src);
+        assertEquals(ab, sb);
     }
 
     //@Test
