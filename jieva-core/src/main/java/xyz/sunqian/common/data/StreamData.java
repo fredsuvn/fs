@@ -2,7 +2,7 @@ package xyz.sunqian.common.data;
 
 import xyz.sunqian.common.base.JieCheck;
 import xyz.sunqian.common.io.JieIO;
-import xyz.sunqian.common.io.JieOutput;
+import xyz.sunqian.common.io.JieOut;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -67,7 +67,7 @@ final class StreamData implements GekData.OfStream {
 
     @Override
     public int write(ByteBuffer dest, int length) {
-        return (int) JieIO.transfer(stream, JieOutput.wrap(dest), length);
+        return (int) JieIO.transfer(stream, JieOut.wrap(dest), length);
     }
 
     @Override

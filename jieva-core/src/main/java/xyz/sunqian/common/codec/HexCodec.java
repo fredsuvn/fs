@@ -3,8 +3,8 @@ package xyz.sunqian.common.codec;
 import xyz.sunqian.common.base.JieChars;
 import xyz.sunqian.common.io.JieBuffer;
 import xyz.sunqian.common.io.JieIO;
-import xyz.sunqian.common.io.JieInput;
-import xyz.sunqian.common.io.JieOutput;
+import xyz.sunqian.common.io.JieIn;
+import xyz.sunqian.common.io.JieOut;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -130,7 +130,7 @@ public class HexCodec implements CodecConfigurator<HexCodec> {
                     return doEncode(ByteBuffer.wrap(src), dest);
                 } else if (output instanceof OutputStream) {
                     OutputStream dest = (OutputStream) output;
-                    return doEncode(JieInput.wrap(src), dest);
+                    return doEncode(JieIn.wrap(src), dest);
                 } else {
                     throw new CodecException("Unknown output type: " + output.getClass());
                 }
@@ -144,7 +144,7 @@ public class HexCodec implements CodecConfigurator<HexCodec> {
                     return doEncode(src, dest);
                 } else if (output instanceof OutputStream) {
                     OutputStream dest = (OutputStream) output;
-                    return doEncode(JieInput.wrap(src), dest);
+                    return doEncode(JieIn.wrap(src), dest);
                 } else {
                     throw new CodecException("Unknown output type: " + output.getClass());
                 }
@@ -152,10 +152,10 @@ public class HexCodec implements CodecConfigurator<HexCodec> {
                 InputStream src = (InputStream) input;
                 if (output instanceof byte[]) {
                     byte[] dest = (byte[]) output;
-                    return doEncode(src, JieOutput.wrap(dest));
+                    return doEncode(src, JieOut.wrap(dest));
                 } else if (output instanceof ByteBuffer) {
                     ByteBuffer dest = (ByteBuffer) output;
-                    return doEncode(src, JieOutput.wrap(dest));
+                    return doEncode(src, JieOut.wrap(dest));
                 } else if (output instanceof OutputStream) {
                     OutputStream dest = (OutputStream) output;
                     return doEncode(src, dest);
@@ -211,7 +211,7 @@ public class HexCodec implements CodecConfigurator<HexCodec> {
                     return doDecode(ByteBuffer.wrap(src), dest);
                 } else if (output instanceof OutputStream) {
                     OutputStream dest = (OutputStream) output;
-                    return doDecode(JieInput.wrap(src), dest);
+                    return doDecode(JieIn.wrap(src), dest);
                 } else {
                     throw new CodecException("Unknown output type: " + output.getClass());
                 }
@@ -225,7 +225,7 @@ public class HexCodec implements CodecConfigurator<HexCodec> {
                     return doDecode(src, dest);
                 } else if (output instanceof OutputStream) {
                     OutputStream dest = (OutputStream) output;
-                    return doDecode(JieInput.wrap(src), dest);
+                    return doDecode(JieIn.wrap(src), dest);
                 } else {
                     throw new CodecException("Unknown output type: " + output.getClass());
                 }
@@ -233,10 +233,10 @@ public class HexCodec implements CodecConfigurator<HexCodec> {
                 InputStream src = (InputStream) input;
                 if (output instanceof byte[]) {
                     byte[] dest = (byte[]) output;
-                    return doDecode(src, JieOutput.wrap(dest));
+                    return doDecode(src, JieOut.wrap(dest));
                 } else if (output instanceof ByteBuffer) {
                     ByteBuffer dest = (ByteBuffer) output;
-                    return doDecode(src, JieOutput.wrap(dest));
+                    return doDecode(src, JieOut.wrap(dest));
                 } else if (output instanceof OutputStream) {
                     OutputStream dest = (OutputStream) output;
                     return doDecode(src, dest);
@@ -363,10 +363,10 @@ public class HexCodec implements CodecConfigurator<HexCodec> {
 
     private InputStream inputToInputStream() {
         if (input instanceof byte[]) {
-            return JieInput.wrap((byte[]) input);
+            return JieIn.wrap((byte[]) input);
         }
         if (input instanceof ByteBuffer) {
-            return JieInput.wrap((ByteBuffer) input);
+            return JieIn.wrap((ByteBuffer) input);
         }
         if (input instanceof InputStream) {
             return (InputStream) input;

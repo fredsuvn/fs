@@ -2,7 +2,7 @@ package xyz.sunqian.common.codec;
 
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.io.JieIO;
-import xyz.sunqian.common.io.JieInput;
+import xyz.sunqian.common.io.JieIn;
 
 import javax.crypto.Cipher;
 import java.io.InputStream;
@@ -248,7 +248,7 @@ public class CipherCodec implements CodecConfigurator<CipherCodec> {
             initCipher(cipher);
             InputStream source;
             if (input instanceof ByteBuffer) {
-                source = JieInput.wrap((ByteBuffer) input);
+                source = JieIn.wrap((ByteBuffer) input);
             } else if (input instanceof InputStream) {
                 source = (InputStream) input;
             } else {

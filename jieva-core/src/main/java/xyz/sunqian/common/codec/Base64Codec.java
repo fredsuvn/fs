@@ -5,7 +5,7 @@ import xyz.sunqian.common.base.JieChars;
 import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.io.JieBuffer;
 import xyz.sunqian.common.io.JieIO;
-import xyz.sunqian.common.io.JieInput;
+import xyz.sunqian.common.io.JieIn;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -467,10 +467,10 @@ public class Base64Codec implements CodecConfigurator<Base64Codec> {
 
     private InputStream inputToInputStream() {
         if (input instanceof byte[]) {
-            return JieInput.wrap((byte[]) input);
+            return JieIn.wrap((byte[]) input);
         }
         if (input instanceof ByteBuffer) {
-            return JieInput.wrap((ByteBuffer) input);
+            return JieIn.wrap((ByteBuffer) input);
         }
         if (input instanceof InputStream) {
             return (InputStream) input;

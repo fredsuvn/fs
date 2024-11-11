@@ -2,8 +2,8 @@ package xyz.sunqian.common.file;
 
 import xyz.sunqian.common.base.JieChars;
 import xyz.sunqian.common.io.JieIO;
-import xyz.sunqian.common.io.JieInput;
-import xyz.sunqian.common.io.JieOutput;
+import xyz.sunqian.common.io.JieIn;
+import xyz.sunqian.common.io.JieOut;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -39,7 +39,7 @@ public class JieFile {
      */
     public static byte[] readBytes(Path path, long offset, long length) {
         try (RandomAccessFile random = new RandomAccessFile(path.toFile(), "r")) {
-            return JieIO.read(JieInput.wrap(random, offset));
+            return JieIO.read(JieIn.wrap(random, offset));
         } catch (Exception e) {
             throw new FileException(e);
         }
@@ -94,7 +94,7 @@ public class JieFile {
      */
     public static String readString(Path path, long offset, long length, Charset charset) {
         try (RandomAccessFile random = new RandomAccessFile(path.toFile(), "r")) {
-            return JieIO.readString(JieInput.wrap(random, offset), charset);
+            return JieIO.readString(JieIn.wrap(random, offset), charset);
         } catch (Exception e) {
             throw new FileException(e);
         }
@@ -121,7 +121,7 @@ public class JieFile {
      */
     public static void writeBytes(Path path, long offset, long length, InputStream data) {
         try (RandomAccessFile random = new RandomAccessFile(path.toFile(), "rw")) {
-            OutputStream dest = JieOutput.wrap(random, offset);
+            OutputStream dest = JieOut.wrap(random, offset);
             JieIO.transfer(data, dest);
             dest.flush();
         } catch (Exception e) {
@@ -178,7 +178,7 @@ public class JieFile {
      */
     public static void writeString(Path path, long offset, long length, CharSequence data, Charset charset) {
         try (RandomAccessFile random = new RandomAccessFile(path.toFile(), "rw")) {
-            Writer writer = JieOutput.wrap(JieOutput.wrap(random, offset), charset);
+            Writer writer = JieOut.wrap(JieOut.wrap(random, offset), charset);
             writer.append(data);
             writer.flush();
         } catch (Exception e) {

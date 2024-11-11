@@ -3,7 +3,7 @@ package xyz.sunqian.common.data;
 import xyz.sunqian.common.base.JieCheck;
 import xyz.sunqian.common.io.JieBuffer;
 import xyz.sunqian.common.io.JieIO;
-import xyz.sunqian.common.io.JieInput;
+import xyz.sunqian.common.io.JieIn;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -74,12 +74,12 @@ final class BufferData implements GekData.OfBuffer {
 
     @Override
     public long write(OutputStream dest) {
-        return JieIO.transfer(JieInput.wrap(buffer), dest);
+        return JieIO.transfer(JieIn.wrap(buffer), dest);
     }
 
     @Override
     public long write(OutputStream dest, long length) {
-        return JieIO.transfer(JieInput.wrap(buffer), dest, length);
+        return JieIO.transfer(JieIn.wrap(buffer), dest, length);
     }
 
     @Override
@@ -92,6 +92,6 @@ final class BufferData implements GekData.OfBuffer {
 
     @Override
     public InputStream asInputStream() {
-        return JieInput.wrap(buffer);
+        return JieIn.wrap(buffer);
     }
 }

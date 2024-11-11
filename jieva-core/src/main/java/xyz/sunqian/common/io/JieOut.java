@@ -12,7 +12,7 @@ import java.nio.charset.*;
  *
  * @author sunqian
  */
-public class JieOutput {
+public class JieOut {
 
     /**
      * Wraps given array as an {@link OutputStream}.

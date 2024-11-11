@@ -3,7 +3,7 @@ package xyz.sunqian.common.net.http;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.io.JieIO;
-import xyz.sunqian.common.io.JieInput;
+import xyz.sunqian.common.io.JieIn;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -122,7 +122,7 @@ final class HttpClientImpl implements GekHttpClient {
             return (InputStream) requestBody;
         } else if (requestBody instanceof ByteBuffer) {
             connection.setFixedLengthStreamingMode(((ByteBuffer) requestBody).remaining());
-            return JieInput.wrap((ByteBuffer) requestBody);
+            return JieIn.wrap((ByteBuffer) requestBody);
         } else {
             throw new GekHttpException("Invalid body type: " + requestBody.getClass());
         }
