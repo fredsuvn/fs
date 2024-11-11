@@ -90,7 +90,7 @@ final class ByteStreamImpl implements ByteStream {
     }
 
     @Override
-    public long transfer() throws IORuntimeException {
+    public long start() throws IORuntimeException {
         if (source == null || dest == null) {
             throw new IORuntimeException("Source or dest is null!");
         }

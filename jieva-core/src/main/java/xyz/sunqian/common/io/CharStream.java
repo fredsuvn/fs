@@ -14,7 +14,7 @@ import java.util.function.Function;
  *         Setting methods, used to set parameters and options for current stream before the transferring starts;
  *     </li>
  *     <li>
- *         Final methods, start do final things, such as {@link #transfer()}. And when a final method is finished,
+ *         Final methods, start do final things, such as {@link #start()}. And when a final method is finished,
  *         state of current stream instance will be invalid and undefined;
  *     </li>
  * </ul>
@@ -183,7 +183,7 @@ public interface CharStream {
      * If the transfer is ended in this scenario:
      * <ul>
      *     <li>
-     *         If no byte was read, the {@link #transfer()} returns {@code 0} rather than {@code -1};
+     *         If no byte was read, the {@link #start()} returns {@code 0} rather than {@code -1};
      *     </li>
      *     <li>
      *         If the {@code encoder} (specified by {@link #encoder(Encoder)}) is not {@code null}, the 2nd argument of
@@ -246,7 +246,7 @@ public interface CharStream {
      * @return the actual chars number that read and success to transfer
      * @throws IORuntimeException IO runtime exception
      */
-    long transfer() throws IORuntimeException;
+    long start() throws IORuntimeException;
 
     /**
      * Encoder to encode the char data in the stream transfer processing.
