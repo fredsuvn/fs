@@ -121,16 +121,36 @@ public class JieBase64 {
     }
 
     /**
+     * Returns a {@code Base64} encoder in type of {@code MIME}, with padding character if the length of source is not a
+     * multiple of 3.
+     *
+     * @return a {@code Base64} encoder in type of {@code MIME}
+     */
+    public static Encoder pemEncoder() {
+        return PemEncoder.PADDING;
+    }
+
+    /**
+     * Returns a {@code Base64} encoder in type of {@code MIME}, without padding character if the length of source is
+     * not a multiple of 3.
+     *
+     * @return a {@code Base64} encoder in type of {@code MIME}
+     */
+    public static Encoder pemEncoder(boolean padding) {
+        return padding ? pemEncoder() : PemEncoder.NO_PADDING;
+    }
+
+    /**
      * Returns a {@code Base64} encoder in type of {@code MIME}, with specified arguments.
      *
-     * @param lineMax sets the max length per line, must be a multiple of {@code 4}
-     * @param newLine sets the line separator. The array will be used directly, any modification to array will affect
+     * @param blockSize sets the max length per line, must be a multiple of {@code 4}
+     * @param blockSeparator sets the line separator. The array will be used directly, any modification to array will affect
      *                the encoding.
      * @param padding whether add padding character at the end if the length of source is not a multiple of 3.
      * @return a {@code Base64} encoder in type of {@code MIME}
      */
-    public static Encoder mimeEncoder(int lineMax, byte[] newLine, boolean padding) {
-        return new MimeEncoder(padding, lineMax, newLine);
+    public static Encoder blockEncoder(int blockSize, byte[] blockSeparator, boolean padding, boolean lastSeparator) {
+        return new BlockEncoder(blockSize, blockSeparator, padding, lastSeparator);
     }
 
     /**
@@ -239,156 +259,6 @@ public class JieBase64 {
             }
             return dstPos - dstOff;
         }
-
-        /*
-        protected class ByteEncoder implements ByteStream.Encoder {
-
-            protected ByteBuffer buf;
-
-            @Override
-            public ByteBuffer encode(ByteBuffer data, boolean end) {
-                if (noBuf()) {
-                    if (end) {
-                        ByteBuffer ret = newDest(data.remaining());
-                        AbsEncoder.this.encode(data, ret);
-                        ret.flip();
-                        return ret;
-                    }
-                    int multiLen = data.remaining() / 3 * 3;
-                    if (multiLen == data.remaining()) {
-                        ByteBuffer ret = newDest(multiLen);
-                        AbsEncoder.this.encode(data, ret);
-                        ret.flip();
-                        return ret;
-                    }
-                }
-                int blockSize = AbsEncoder.this.getBlockSize();
-                if (buf == null) {
-                    buf = ByteBuffer.allocate(blockSize);
-                }
-                int totalSize = buf.position() + data.remaining();
-                if (totalSize < blockSize) {
-                    fillBuffer(data);
-                    if (end) {
-                        buf.flip();
-                        ByteBuffer ret = newDest(buf.remaining());
-                        AbsEncoder.this.encode(buf, ret);
-                        ret.flip();
-                        return ret;
-                    } else {
-                        return JieBytes.emptyBuffer();
-                    }
-                }
-                int multiSize = totalSize / 3 * 3;
-                ByteBuffer ret;
-                if (end) {
-                    ret = newDest(totalSize);
-                } else {
-                    ret = newDest(multiSize);
-                }
-                while (data.hasRemaining()) {
-                    fillBuffer(data);
-                    if (buf.hasRemaining()) {
-                        break;
-                    }
-                    buf.flip();
-                    AbsEncoder.this.encode(buf, ret);
-                    buf.compact();
-                }
-                if (end) {
-                    buf.flip();
-                    AbsEncoder.this.encode(buf, ret);
-                }
-                ret.flip();
-                return ret;
-            }
-
-            protected ByteBuffer newDest(int inSize) {
-                return ByteBuffer.allocate(AbsEncoder.this.getOutputSize(inSize));
-            }
-
-            protected boolean noBuf() {
-                return buf == null || buf.position() == 0;
-            }
-
-            protected void fillBuffer(ByteBuffer data) {
-                JieBytes.putBuffer(data, buf, Math.min(buf.remaining(), data.remaining()));
-            }
-        }
-        public ByteStream.Encoder toStreamEncoder2() {
-            return new ByteStream.Encoder() {
-
-                private ByteBuffer buf;
-
-                @Override
-                public ByteBuffer encode(ByteBuffer data, boolean end) {
-                    int multiLen = 0;
-                    if (noBuf()) {
-                        if (end) {
-                            return AbsEncoder.this.encode(data);
-                        }
-                        multiLen = data.remaining() / 3 * 3;
-                        if (multiLen == data.remaining()) {
-                            return AbsEncoder.this.encode(data);
-                        }
-                    }
-                    if (buf == null) {
-                        buf = ByteBuffer.allocate(3);
-                    }
-                    int totalLen = buf.position() + data.remaining();
-                    if (end) {
-                        ByteBuffer ret = ByteBuffer.allocate(getOutputSize(totalLen));
-                        fillLeftBuffer(buf, data);
-                        buf.flip();
-                        AbsEncoder.this.encode(buf, ret);
-                        AbsEncoder.this.encode(data, ret);
-                        ret.flip();
-                        return ret;
-                    }
-                    if (buf.position() > 0) {
-                        fillLeftBuffer(buf, data);
-                        if (buf.position() < 3) {
-                            return JieBytes.emptyBuffer();
-                        }
-                        multiLen = data.remaining() / 3 * 3;
-                        int remainder = data.remaining() - multiLen;
-                        ByteBuffer ret = ByteBuffer.allocate(getOutputSize(multiLen + 3));
-                        buf.flip();
-                        AbsEncoder.this.encode(buf, ret);
-                        buf.flip();
-                        if (remainder > 0) {
-                            ByteBuffer slice = JieBytes.slice(data, 0, multiLen);
-                            data.position(data.position() + multiLen);
-                            AbsEncoder.this.encode(slice, ret);
-                            fillLeftBuffer(buf, data);
-                        } else {
-                            AbsEncoder.this.encode(data, ret);
-                        }
-                        ret.flip();
-                        return ret;
-                    } else {
-                        ByteBuffer ret = ByteBuffer.allocate(getOutputSize(multiLen));
-                        ByteBuffer slice = JieBytes.slice(data, 0, multiLen);
-                        data.position(data.position() + multiLen);
-                        AbsEncoder.this.encode(slice, ret);
-                        fillLeftBuffer(buf, data);
-                        ret.flip();
-                        return ret;
-                    }
-                }
-
-                private boolean noBuf() {
-                    return buf == null || buf.position() == 0;
-                }
-
-                private void fillLeftBuffer(ByteBuffer buf, ByteBuffer data) {
-                    while (buf.hasRemaining() && data.hasRemaining()) {
-                        buf.put(data.get());
-                    }
-                }
-            };
-        }
-         */
     }
 
     private static final class BasicEncoder extends AbsEncoder {
@@ -424,30 +294,39 @@ public class JieBase64 {
         }
     }
 
-    private static final class BlockEncoder extends AbsEncoder {
+    private static class BlockEncoder extends AbsEncoder {
 
-        private final int lineMax;
-        private final byte[] newLine;
+        private final int blockSize;
+        private final byte[] blockSeparator;
         private final boolean lastSeparator;
 
-        private BlockEncoder(
-            int blockSize, byte[] blockSeparator, boolean padding, boolean lastSeparator, boolean lastSeparator1) {
+        private BlockEncoder(int blockSize, byte[] blockSeparator, boolean padding, boolean lastSeparator) {
             super(padding);
-            this.lineMax = blockSize;
-            this.newLine = blockSeparator;
-            this.lastSeparator = lastSeparator1;
+            this.blockSize = blockSize;
+            this.blockSeparator = blockSeparator;
+            this.lastSeparator = lastSeparator;
         }
 
         @Override
         public int getOutputSize(int inputSize) {
             int outputSize = super.getOutputSize(inputSize);
-            outputSize += (outputSize - 1) / lineMax * newLine.length;
+            if (!lastSeparator) {
+                outputSize += (outputSize - 1) / blockSize * blockSeparator.length;
+                return outputSize;
+            }
+            int blockCount = outputSize / blockSize;
+            int remainder = outputSize % blockSize;
+            if (remainder == 0) {
+                outputSize += blockCount * blockSeparator.length;
+            } else {
+                outputSize += (blockCount + 1) * blockSeparator.length;
+            }
             return outputSize;
         }
 
         @Override
         public int getBlockSize() {
-            return lineMax / 4 * 3 * 20;
+            return blockSize / 4 * 3 * 20;
         }
 
         @Override
@@ -462,8 +341,8 @@ public class JieBase64 {
                         if (end && !data.hasRemaining()) {
                             return JieBytes.emptyBuffer();
                         }
-                        ByteBuffer ret = ByteBuffer.allocate(getOutputSize(data.remaining()) + newLine.length);
-                        for (byte b : newLine) {
+                        ByteBuffer ret = ByteBuffer.allocate(getOutputSize(data.remaining()) + blockSeparator.length);
+                        for (byte b : blockSeparator) {
                             ret.put(b);
                         }
                         BlockEncoder.this.encode(data, ret);
@@ -480,12 +359,12 @@ public class JieBase64 {
         protected int doCode(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff) {
             char[] dict = dict();
             int srcPos = srcOff;
-            int lineSize = lineMax / 4 * 3;
+            int readBlock = blockSize / 4 * 3;
             int roundEnd = srcOff + ((srcEnd - srcOff) / 3 * 3);
-            int destPos = dstOff;
+            int dstPos = dstOff;
             while (srcPos < roundEnd) {
-                int readEnd = Math.min(srcPos + lineSize, roundEnd);
-                for (int i = srcPos, j = destPos; i < readEnd; ) {
+                int readEnd = Math.min(srcPos + readBlock, roundEnd);
+                for (int i = srcPos, j = dstPos; i < readEnd; ) {
                     int bits = (src[i++] & 0xff) << 16 | (src[i++] & 0xff) << 8 | (src[i++] & 0xff);
                     dst[j++] = (byte) dict[(bits >>> 18) & 0x3f];
                     dst[j++] = (byte) dict[(bits >>> 12) & 0x3f];
@@ -493,309 +372,66 @@ public class JieBase64 {
                     dst[j++] = (byte) dict[bits & 0x3f];
                 }
                 int writeLen = (readEnd - srcPos) / 3 * 4;
-                destPos += writeLen;
+                dstPos += writeLen;
                 srcPos = readEnd;
-                if (writeLen == lineMax && srcPos < srcEnd) {
-                    for (byte b : newLine) {
-                        dst[destPos++] = b;
+                if (writeLen == blockSize && (lastSeparator || srcPos < srcEnd)) {
+                    for (byte b : blockSeparator) {
+                        dst[dstPos++] = b;
                     }
                 }
             }
             // 1 or 2 leftover bytes
             if (srcPos < srcEnd) {
                 int b0 = src[srcPos++] & 0xff;
-                dst[destPos++] = (byte) dict[b0 >> 2];
+                dst[dstPos++] = (byte) dict[b0 >> 2];
                 if (srcPos == srcEnd) {
-                    dst[destPos++] = (byte) dict[(b0 << 4) & 0x3f];
+                    dst[dstPos++] = (byte) dict[(b0 << 4) & 0x3f];
                     if (padding) {
-                        dst[destPos++] = '=';
-                        dst[destPos++] = '=';
+                        dst[dstPos++] = '=';
+                        dst[dstPos++] = '=';
                     }
                 } else {
                     int b1 = src[srcPos] & 0xff;
-                    dst[destPos++] = (byte) dict[(b0 << 4) & 0x3f | (b1 >> 4)];
-                    dst[destPos++] = (byte) dict[(b1 << 2) & 0x3f];
+                    dst[dstPos++] = (byte) dict[(b0 << 4) & 0x3f | (b1 >> 4)];
+                    dst[dstPos++] = (byte) dict[(b1 << 2) & 0x3f];
                     if (padding) {
-                        dst[destPos++] = '=';
+                        dst[dstPos++] = '=';
+                    }
+                }
+                if (lastSeparator) {
+                    for (byte b : blockSeparator) {
+                        dst[dstPos++] = b;
                     }
                 }
             }
-            return destPos - dstOff;
+            return dstPos - dstOff;
         }
-
-        /*
-        private class ByteEncoder extends AbsEncoder.ByteEncoder {
-
-            private boolean hasPrev = false;
-
-            @Override
-            public ByteBuffer encode(ByteBuffer data, boolean end) {
-                if (noBuf()) {
-                    if (end) {
-                        ByteBuffer ret = newDest(data.remaining(), true);
-                        MimeEncoder.this.encode(data, ret);
-                        ret.flip();
-                        return ret;
-                    }
-                }
-                int blockSize = MimeEncoder.this.getBlockSize();
-                if (buf == null) {
-                    buf = ByteBuffer.allocate(blockSize);
-                }
-                int totalSize = buf.position() + data.remaining();
-                if (totalSize < blockSize) {
-                    fillBuffer(data);
-                    if (end) {
-                        buf.flip();
-                        ByteBuffer ret = newDest(buf.remaining(), true);
-                        MimeEncoder.this.encode(buf, ret);
-                        ret.flip();
-                        return ret;
-                    } else {
-                        return JieBytes.emptyBuffer();
-                    }
-                }
-                int multiSize = totalSize / blockSize * blockSize;
-                ByteBuffer ret;
-                if (end) {
-                    ret = newDest(totalSize, false);
-                } else {
-                    ret = newDest(multiSize, false);
-                }
-                while (data.hasRemaining()) {
-                    fillBuffer(data);
-                    if (buf.hasRemaining()) {
-                        break;
-                    }
-                    buf.flip();
-                    if (hasPrev) {
-                        fillLineSeparator(ret);
-                    }
-                    MimeEncoder.this.encode(buf, ret);
-                    hasPrev = true;
-                    buf.compact();
-                }
-                if (end) {
-                    buf.flip();
-                    if (buf.hasRemaining()) {
-                        for (byte b : newLine) {
-                            ret.put(b);
-                        }
-                        MimeEncoder.this.encode(buf, ret);
-                    }
-                }
-                ret.flip();
-                return ret;
-            }
-
-            protected ByteBuffer newDest(int inSize, boolean fillSeparator) {
-                if (inSize == 0) {
-                    return JieBytes.emptyBuffer();
-                }
-                int outputSize = hasPrev ? newLine.length : 0;
-                outputSize += MimeEncoder.this.getOutputSize(inSize);
-                ByteBuffer ret = ByteBuffer.allocate(outputSize);
-                if (fillSeparator && hasPrev) {
-                    fillLineSeparator(ret);
-                }
-                return ret;
-            }
-
-            private void fillLineSeparator(ByteBuffer ret) {
-                for (byte b : newLine) {
-                    ret.put(b);
-                }
-            }
-        }
-         */
     }
 
-    private static final class MimeEncoder extends AbsEncoder {
+    private static final class MimeEncoder extends BlockEncoder {
 
-        private static final int MIME_LINE_MAX = 76;
-        private static final byte[] CRLF = new byte[]{'\r', '\n'};
+        private static final int BLOCK_SIZE = 76;
+        private static final byte[] BLOCK_SEPARATOR = new byte[]{'\r', '\n'};
 
-        private static final MimeEncoder PADDING = new MimeEncoder(true, MIME_LINE_MAX, CRLF);
-        private static final MimeEncoder NO_PADDING = new MimeEncoder(false, MIME_LINE_MAX, CRLF);
+        private static final MimeEncoder PADDING = new MimeEncoder(BLOCK_SIZE, BLOCK_SEPARATOR, true);
+        private static final MimeEncoder NO_PADDING = new MimeEncoder(BLOCK_SIZE, BLOCK_SEPARATOR, false);
 
-        private final int lineMax;
-        private final byte[] newLine;
-
-        private MimeEncoder(boolean padding, int lineMax, byte[] newLine) {
-            super(padding);
-            this.lineMax = lineMax;
-            this.newLine = newLine;
+        private MimeEncoder(int blockSize, byte[] blockSeparator, boolean padding) {
+            super(blockSize, blockSeparator, padding, false);
         }
+    }
 
-        @Override
-        public int getOutputSize(int inputSize) {
-            int outputSize = super.getOutputSize(inputSize);
-            outputSize += (outputSize - 1) / lineMax * newLine.length;
-            return outputSize;
+    private static final class PemEncoder extends BlockEncoder {
+
+        private static final int BLOCK_SIZE = 64;
+        private static final byte[] BLOCK_SEPARATOR = new byte[]{'\r', '\n'};
+
+        private static final PemEncoder PADDING = new PemEncoder(BLOCK_SIZE, BLOCK_SEPARATOR, true);
+        private static final PemEncoder NO_PADDING = new PemEncoder(BLOCK_SIZE, BLOCK_SEPARATOR, false);
+
+        private PemEncoder(int blockSize, byte[] blockSeparator, boolean padding) {
+            super(blockSize, blockSeparator, padding, false);
         }
-
-        @Override
-        public int getBlockSize() {
-            return lineMax / 4 * 3 * 20;
-        }
-
-        @Override
-        public ByteStream.Encoder toStreamEncoder() {
-            return new ByteStream.Encoder() {
-
-                private boolean hasPrev = false;
-
-                @Override
-                public ByteBuffer encode(ByteBuffer data, boolean end) {
-                    if (hasPrev) {
-                        if (end && !data.hasRemaining()) {
-                            return JieBytes.emptyBuffer();
-                        }
-                        ByteBuffer ret = ByteBuffer.allocate(getOutputSize(data.remaining()) + newLine.length);
-                        for (byte b : newLine) {
-                            ret.put(b);
-                        }
-                        MimeEncoder.this.encode(data, ret);
-                        ret.flip();
-                        return ret;
-                    }
-                    hasPrev = true;
-                    return MimeEncoder.this.encode(data);
-                }
-            };
-        }
-
-        protected int doCode(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff) {
-            char[] dict = dict();
-            int srcPos = srcOff;
-            int lineSize = lineMax / 4 * 3;
-            int roundEnd = srcOff + ((srcEnd - srcOff) / 3 * 3);
-            int destPos = dstOff;
-            while (srcPos < roundEnd) {
-                int readEnd = Math.min(srcPos + lineSize, roundEnd);
-                for (int i = srcPos, j = destPos; i < readEnd; ) {
-                    int bits = (src[i++] & 0xff) << 16 | (src[i++] & 0xff) << 8 | (src[i++] & 0xff);
-                    dst[j++] = (byte) dict[(bits >>> 18) & 0x3f];
-                    dst[j++] = (byte) dict[(bits >>> 12) & 0x3f];
-                    dst[j++] = (byte) dict[(bits >>> 6) & 0x3f];
-                    dst[j++] = (byte) dict[bits & 0x3f];
-                }
-                int writeLen = (readEnd - srcPos) / 3 * 4;
-                destPos += writeLen;
-                srcPos = readEnd;
-                if (writeLen == lineMax && srcPos < srcEnd) {
-                    for (byte b : newLine) {
-                        dst[destPos++] = b;
-                    }
-                }
-            }
-            // 1 or 2 leftover bytes
-            if (srcPos < srcEnd) {
-                int b0 = src[srcPos++] & 0xff;
-                dst[destPos++] = (byte) dict[b0 >> 2];
-                if (srcPos == srcEnd) {
-                    dst[destPos++] = (byte) dict[(b0 << 4) & 0x3f];
-                    if (padding) {
-                        dst[destPos++] = '=';
-                        dst[destPos++] = '=';
-                    }
-                } else {
-                    int b1 = src[srcPos] & 0xff;
-                    dst[destPos++] = (byte) dict[(b0 << 4) & 0x3f | (b1 >> 4)];
-                    dst[destPos++] = (byte) dict[(b1 << 2) & 0x3f];
-                    if (padding) {
-                        dst[destPos++] = '=';
-                    }
-                }
-            }
-            return destPos - dstOff;
-        }
-
-        /*
-        private class ByteEncoder extends AbsEncoder.ByteEncoder {
-
-            private boolean hasPrev = false;
-
-            @Override
-            public ByteBuffer encode(ByteBuffer data, boolean end) {
-                if (noBuf()) {
-                    if (end) {
-                        ByteBuffer ret = newDest(data.remaining(), true);
-                        MimeEncoder.this.encode(data, ret);
-                        ret.flip();
-                        return ret;
-                    }
-                }
-                int blockSize = MimeEncoder.this.getBlockSize();
-                if (buf == null) {
-                    buf = ByteBuffer.allocate(blockSize);
-                }
-                int totalSize = buf.position() + data.remaining();
-                if (totalSize < blockSize) {
-                    fillBuffer(data);
-                    if (end) {
-                        buf.flip();
-                        ByteBuffer ret = newDest(buf.remaining(), true);
-                        MimeEncoder.this.encode(buf, ret);
-                        ret.flip();
-                        return ret;
-                    } else {
-                        return JieBytes.emptyBuffer();
-                    }
-                }
-                int multiSize = totalSize / blockSize * blockSize;
-                ByteBuffer ret;
-                if (end) {
-                    ret = newDest(totalSize, false);
-                } else {
-                    ret = newDest(multiSize, false);
-                }
-                while (data.hasRemaining()) {
-                    fillBuffer(data);
-                    if (buf.hasRemaining()) {
-                        break;
-                    }
-                    buf.flip();
-                    if (hasPrev) {
-                        fillLineSeparator(ret);
-                    }
-                    MimeEncoder.this.encode(buf, ret);
-                    hasPrev = true;
-                    buf.compact();
-                }
-                if (end) {
-                    buf.flip();
-                    if (buf.hasRemaining()) {
-                        for (byte b : newLine) {
-                            ret.put(b);
-                        }
-                        MimeEncoder.this.encode(buf, ret);
-                    }
-                }
-                ret.flip();
-                return ret;
-            }
-
-            protected ByteBuffer newDest(int inSize, boolean fillSeparator) {
-                if (inSize == 0) {
-                    return JieBytes.emptyBuffer();
-                }
-                int outputSize = hasPrev ? newLine.length : 0;
-                outputSize += MimeEncoder.this.getOutputSize(inSize);
-                ByteBuffer ret = ByteBuffer.allocate(outputSize);
-                if (fillSeparator && hasPrev) {
-                    fillLineSeparator(ret);
-                }
-                return ret;
-            }
-
-            private void fillLineSeparator(ByteBuffer ret) {
-                for (byte b : newLine) {
-                    ret.put(b);
-                }
-            }
-        }
-         */
     }
 
     private static abstract class AbsDecoder extends AbsCoder.De implements Decoder {
