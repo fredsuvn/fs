@@ -833,38 +833,82 @@ public class StreamTest {
         {
             // bytes
             byte[] src = JieRandom.fill(new byte[size]);
-            byte[] dst = new byte[src.length];
-            ByteStream.from(src).to(dst).blockSize(blockSize).encoder(ByteStream.bufferedEncoder(
-                (data, end) -> data,
+            byte[] dst = new byte[src.length * 2];
+            for (int i = 0; i < src.length; i++) {
+                dst[i * 2] = src[i];
+                dst[i * 2 + 1] = (byte) expectedBlockSize;
+            }
+            byte[] dst2 = new byte[src.length * 2];
+            long len = ByteStream.from(src).to(dst2).blockSize(blockSize).encoder(ByteStream.bufferedEncoder(
+                (data, end) -> {
+                    ByteBuffer bb = ByteBuffer.allocate(data.remaining() * 2);
+                    while (data.hasRemaining()) {
+                        bb.put(data.get());
+                        bb.put((byte) expectedBlockSize);
+                    }
+                    bb.flip();
+                    return bb;
+                },
                 expectedBlockSize,
                 null
             )).start();
-            assertEquals(src, dst);
-            dst = new byte[src.length];
-            ByteStream.from(src).to(dst).blockSize(blockSize).encoder(ByteStream.bufferedEncoder(
-                (data, end) -> data,
+            assertEquals(dst2, dst);
+            assertEquals(len, src.length);
+            len = ByteStream.from(src).to(dst2).blockSize(blockSize).encoder(ByteStream.bufferedEncoder(
+                (data, end) -> {
+                    ByteBuffer bb = ByteBuffer.allocateDirect(data.remaining() * 2);
+                    while (data.hasRemaining()) {
+                        bb.put(data.get());
+                        bb.put((byte) expectedBlockSize);
+                    }
+                    bb.flip();
+                    return bb;
+                },
                 expectedBlockSize,
                 d -> d
             )).start();
-            assertEquals(src, dst);
+            assertEquals(dst2, dst);
+            assertEquals(len, src.length);
         }
         {
             // chars
             char[] src = JieRandom.fill(new char[size]);
-            char[] dst = new char[src.length];
-            CharStream.from(src).to(dst).blockSize(blockSize).encoder(CharStream.bufferedEncoder(
-                (data, end) -> data,
+            char[] dst = new char[src.length * 2];
+            for (int i = 0; i < src.length; i++) {
+                dst[i * 2] = src[i];
+                dst[i * 2 + 1] = (char) expectedBlockSize;
+            }
+            char[] dst2 = new char[src.length * 2];
+            long len = CharStream.from(src).to(dst2).blockSize(blockSize).encoder(CharStream.bufferedEncoder(
+                (data, end) -> {
+                    CharBuffer bb = CharBuffer.allocate(data.remaining() * 2);
+                    while (data.hasRemaining()) {
+                        bb.put(data.get());
+                        bb.put((char) expectedBlockSize);
+                    }
+                    bb.flip();
+                    return bb;
+                },
                 expectedBlockSize,
                 null
             )).start();
-            assertEquals(src, dst);
-            dst = new char[src.length];
-            CharStream.from(src).to(dst).blockSize(blockSize).encoder(CharStream.bufferedEncoder(
-                (data, end) -> data,
+            assertEquals(dst2, dst);
+            assertEquals(len, src.length);
+            len = CharStream.from(src).to(dst2).blockSize(blockSize).encoder(CharStream.bufferedEncoder(
+                (data, end) -> {
+                    CharBuffer bb = CharBuffer.allocate(data.remaining() * 2);
+                    while (data.hasRemaining()) {
+                        bb.put(data.get());
+                        bb.put((char) expectedBlockSize);
+                    }
+                    bb.flip();
+                    return bb;
+                },
                 expectedBlockSize,
                 d -> d
             )).start();
-            assertEquals(src, dst);
+            assertEquals(dst2, dst);
+            assertEquals(len, src.length);
         }
     }
 

@@ -410,7 +410,10 @@ public class EncodeTest {
         assertEquals(src, de2);
         assertEquals(src, de);
 
-        // byte[] ab = new org.apache.commons.codec.binary.Base64(76).encode(src);
+        // byte[] aaa = JieRandom.fill(new byte[58]);
+        // byte[] ab = new org.apache.commons.codec.binary.Base64(76).encode(aaa);
+        // byte[] ab2 = Base64.getMimeEncoder().encode(aaa);
+        // assertEquals(ab, ab2);
         // byte[] sb = JieBase64.mimeEncoder().encode(src);
         // assertEquals(ab, sb);
     }

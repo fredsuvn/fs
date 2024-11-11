@@ -103,6 +103,11 @@ public class JieHex {
             return 1024;
         }
 
+        @Override
+        public ByteStream.Encoder toStreamEncoder() {
+            return ByteStream.bufferedEncoder(this, getBlockSize(), null);
+        }
+
         protected int doCode(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff) {
             int length = srcEnd - srcOff;
             for (int i = srcOff, j = dstOff; i < srcEnd; ) {
