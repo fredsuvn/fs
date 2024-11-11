@@ -22,7 +22,7 @@ import java.util.Arrays;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.expectThrows;
 
-public class TransferTest {
+public class StreamTest {
 
     @Test
     public void testBytesTransfer() throws Exception {
@@ -772,6 +772,7 @@ public class TransferTest {
         assertEquals(c, 0);
         assertEquals(bOut.toByteArray(), new byte[0]);
 
+
         // chars
         char[] endChars = "end".toCharArray();
         CharStream.Encoder charsEn = (data, end) -> {
@@ -818,6 +819,53 @@ public class TransferTest {
         c = CharStream.from(new NioReader()).to(cOut).blockSize(blockSize).encoder(charsEn).endOnZeroRead(true).transfer();
         assertEquals(c, 0);
         assertEquals(cOut.toCharArray(), new char[0]);
+    }
+
+    @Test
+    public void testBufferedEncoder() {
+        testBufferedEncoder(100, 5, 6);
+        testBufferedEncoder(10086, 11, 333);
+        testBufferedEncoder(10086, 333, 11);
+        testBufferedEncoder(10086, 22, 22);
+    }
+
+    private void testBufferedEncoder(int size, int blockSize, int expectedBlockSize) {
+        {
+            // bytes
+            byte[] src = JieRandom.fill(new byte[size]);
+            byte[] dst = new byte[src.length];
+            ByteStream.from(src).to(dst).blockSize(blockSize).encoder(ByteStream.bufferedEncoder(
+                (data, end) -> data,
+                expectedBlockSize,
+                null
+            )).transfer();
+            assertEquals(src, dst);
+            dst = new byte[src.length];
+            ByteStream.from(src).to(dst).blockSize(blockSize).encoder(ByteStream.bufferedEncoder(
+                (data, end) -> data,
+                expectedBlockSize,
+                d -> d
+            )).transfer();
+            assertEquals(src, dst);
+        }
+        {
+            // chars
+            char[] src = JieRandom.fill(new char[size]);
+            char[] dst = new char[src.length];
+            CharStream.from(src).to(dst).blockSize(blockSize).encoder(CharStream.bufferedEncoder(
+                (data, end) -> data,
+                expectedBlockSize,
+                null
+            )).transfer();
+            assertEquals(src, dst);
+            dst = new char[src.length];
+            CharStream.from(src).to(dst).blockSize(blockSize).encoder(CharStream.bufferedEncoder(
+                (data, end) -> data,
+                expectedBlockSize,
+                d -> d
+            )).transfer();
+            assertEquals(src, dst);
+        }
     }
 
     private static final class NioIn extends InputStream {

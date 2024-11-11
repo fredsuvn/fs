@@ -175,7 +175,10 @@ public class JieBase64 {
         }
 
         @Override
-        public int getOutputSize(int inputSize) {
+        public int getOutputSize(int inputSize) throws EncodingException {
+            if (inputSize < 0) {
+                throw new EncodingException("Base64 encoding size can not be negative.");
+            }
             if (padding) {
                 return ((inputSize + 2) / 3) * 4;
             }
@@ -623,13 +626,16 @@ public class JieBase64 {
         }
 
         @Override
-        public int getOutputSize(int inputSize) {
+        public int getOutputSize(int inputSize) throws DecodingException {
+            if (inputSize < 0) {
+                throw new DecodingException("Base64 decoding size can not be negative.");
+            }
             int remainder = inputSize % 4;
             if (remainder == 0) {
                 return inputSize / 4 * 3;
             }
             if (remainder == 1) {
-                throw new DecodingException("Illegal input size: " + inputSize + ".");
+                throw new DecodingException("Base64 decoding will not has 1 remainder left.");
             }
             return inputSize / 4 * 3 + remainder - 1;
         }
@@ -696,6 +702,15 @@ public class JieBase64 {
         private static final BasicDecoder SINGLETON = new BasicDecoder();
 
         private BasicDecoder() {
+            super();
+        }
+    }
+
+    private static final class MimeDecoder extends AbsDecoder {
+
+        private static final MimeDecoder SINGLETON = new MimeDecoder();
+
+        private MimeDecoder() {
             super();
         }
     }

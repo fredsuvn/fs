@@ -1,8 +1,11 @@
 package xyz.sunqian.common.io;
 
+import xyz.sunqian.annotations.Nullable;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.function.Function;
 
 /**
  * The interface represents a byte stream for transferring byte data, from specified source to specified destination.
@@ -72,6 +75,28 @@ public interface ByteStream {
      */
     static ByteStream from(ByteBuffer source) {
         return new ByteStreamImpl(source);
+    }
+
+    /**
+     * Returns a new buffered {@link Encoder} for rounding and buffering given encoder, typically used for the encoder
+     * which is not applicable to the setting of {@link #blockSize(int)}, or the input data needs to be filtered.
+     * <p>
+     * The buffered encoder first filters input data if the filter is not {@code null} (skipped if it is {@code null}).
+     * Then it rounds length of the data to a max value which is the largest multiple of the specified expected block
+     * size, and pass the rounding data to given encoder. The remainder data will be buffered for next calling, until
+     * the last calling (where the {@code end} is {@code true}). In last calling, buffered data and filtered/input data
+     * will be passed to the given encoder.
+     * <p>
+     * The buffered encoder is not thread-safe.
+     *
+     * @param encoder           given encoder
+     * @param expectedBlockSize specified expected block size
+     * @param filter            the filter
+     * @return a new buffered {@link Encoder} for rounding and buffering given encoder
+     */
+    static Encoder bufferedEncoder(
+        Encoder encoder, int expectedBlockSize, @Nullable Function<ByteBuffer, ByteBuffer> filter) {
+        return new ByteStreamImpl.BufferedEncoder(encoder, expectedBlockSize, filter);
     }
 
     /**
@@ -185,10 +210,12 @@ public interface ByteStream {
      *     </li>
      * </ul>
      * <p>
-     * This is a setting method.
+     * This is a setting method, and the interface provides helper encoder implementations:
+     * {@link #bufferedEncoder(Encoder, int, Function)}.
      *
      * @param encoder data encoder
      * @return this
+     * @see #bufferedEncoder(Encoder, int, Function)
      */
     ByteStream encoder(Encoder encoder);
 

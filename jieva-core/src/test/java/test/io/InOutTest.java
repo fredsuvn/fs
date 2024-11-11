@@ -24,7 +24,7 @@ import java.util.Arrays;
 
 import static org.testng.Assert.*;
 
-public class ImplsTest {
+public class InOutTest {
 
     @Test
     public void testInput() throws Exception {

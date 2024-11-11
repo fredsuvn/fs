@@ -2,11 +2,13 @@ package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.JieBytes;
+import xyz.sunqian.common.coll.JieArray;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.function.Function;
 
 final class ByteStreamImpl implements ByteStream {
 
@@ -380,6 +382,79 @@ final class ByteStreamImpl implements ByteStream {
                 buffer.get(buf);
                 dest.write(buf);
             }
+        }
+    }
+
+    final static class BufferedEncoder implements Encoder {
+
+        private final Encoder encoder;
+        private final int expectedBlockSize;
+        private final @Nullable Function<ByteBuffer, ByteBuffer> filter;
+        private byte[] buf = JieBytes.emptyBytes();
+
+        BufferedEncoder(
+            Encoder encoder, int expectedBlockSize, @Nullable Function<ByteBuffer, ByteBuffer> filter) {
+            this.encoder = encoder;
+            this.expectedBlockSize = expectedBlockSize;
+            this.filter = filter;
+        }
+
+        @Override
+        public ByteBuffer encode(ByteBuffer data, boolean end) {
+            ByteBuffer actualData = filter == null ? data : filter.apply(data);
+            if (end) {
+                return encoder.encode(totalData(actualData), true);
+            }
+            int size = totalSize(actualData);
+            if (size == expectedBlockSize) {
+                ByteBuffer total = totalData(actualData);
+                buf = JieBytes.emptyBytes();
+                return encoder.encode(total, false);
+            }
+            if (size < expectedBlockSize) {
+                byte[] newBuf = new byte[size];
+                System.arraycopy(buf, 0, newBuf, 0, buf.length);
+                actualData.get(newBuf, buf.length, actualData.remaining());
+                buf = newBuf;
+                return JieBytes.emptyBuffer();
+            }
+            int remainder = size % expectedBlockSize;
+            if (remainder == 0) {
+                ByteBuffer total = totalData(actualData);
+                buf = JieBytes.emptyBytes();
+                return encoder.encode(total, false);
+            }
+            int roundSize = size / expectedBlockSize * expectedBlockSize;
+            ByteBuffer round = roundData(actualData, roundSize);
+            buf = new byte[remainder];
+            actualData.get(buf);
+            return encoder.encode(round, false);
+        }
+
+        private ByteBuffer totalData(ByteBuffer data) {
+            if (JieArray.isEmpty(buf)) {
+                return data;
+            }
+            ByteBuffer total = ByteBuffer.allocate(totalSize(data));
+            total.put(buf);
+            total.put(data);
+            total.flip();
+            return total;
+        }
+
+        private ByteBuffer roundData(ByteBuffer data, int roundSize) {
+            ByteBuffer round = ByteBuffer.allocate(roundSize);
+            round.put(buf);
+            int sliceSize = roundSize - buf.length;
+            ByteBuffer slice = JieBytes.slice(data, 0, sliceSize);
+            data.position(data.position() + sliceSize);
+            round.put(slice);
+            round.flip();
+            return round;
+        }
+
+        private int totalSize(ByteBuffer data) {
+            return buf.length + data.remaining();
         }
     }
 }

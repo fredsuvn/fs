@@ -3,11 +3,13 @@ package xyz.sunqian.common.io;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.JieChars;
 import xyz.sunqian.common.base.JieString;
+import xyz.sunqian.common.coll.JieArray;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.CharBuffer;
+import java.util.function.Function;
 
 final class CharStreamImpl implements CharStream {
 
@@ -471,6 +473,79 @@ final class CharStreamImpl implements CharStream {
                 buffer.get(buf);
                 writer.write(buf);
             }
+        }
+    }
+
+    final static class BufferedEncoder implements Encoder {
+
+        private final Encoder encoder;
+        private final int expectedBlockSize;
+        private final @Nullable Function<CharBuffer, CharBuffer> filter;
+        private char[] buf = JieChars.emptyChars();
+
+        BufferedEncoder(
+            CharStream.Encoder encoder, int expectedBlockSize, @Nullable Function<CharBuffer, CharBuffer> filter) {
+            this.encoder = encoder;
+            this.expectedBlockSize = expectedBlockSize;
+            this.filter = filter;
+        }
+
+        @Override
+        public CharBuffer encode(CharBuffer data, boolean end) {
+            CharBuffer actualData = filter == null ? data : filter.apply(data);
+            if (end) {
+                return encoder.encode(totalData(actualData), true);
+            }
+            int size = totalSize(actualData);
+            if (size == expectedBlockSize) {
+                CharBuffer total = totalData(actualData);
+                buf = JieChars.emptyChars();
+                return encoder.encode(total, false);
+            }
+            if (size < expectedBlockSize) {
+                char[] newBuf = new char[size];
+                System.arraycopy(buf, 0, newBuf, 0, buf.length);
+                actualData.get(newBuf, buf.length, actualData.remaining());
+                buf = newBuf;
+                return JieChars.emptyBuffer();
+            }
+            int remainder = size % expectedBlockSize;
+            if (remainder == 0) {
+                CharBuffer total = totalData(actualData);
+                buf = JieChars.emptyChars();
+                return encoder.encode(total, false);
+            }
+            int roundSize = size / expectedBlockSize * expectedBlockSize;
+            CharBuffer round = roundData(actualData, roundSize);
+            buf = new char[remainder];
+            actualData.get(buf);
+            return encoder.encode(round, false);
+        }
+
+        private CharBuffer totalData(CharBuffer data) {
+            if (JieArray.isEmpty(buf)) {
+                return data;
+            }
+            CharBuffer total = CharBuffer.allocate(totalSize(data));
+            total.put(buf);
+            total.put(data);
+            total.flip();
+            return total;
+        }
+
+        private CharBuffer roundData(CharBuffer data, int roundSize) {
+            CharBuffer round = CharBuffer.allocate(roundSize);
+            round.put(buf);
+            int sliceSize = roundSize - buf.length;
+            CharBuffer slice = JieChars.slice(data, 0, sliceSize);
+            data.position(data.position() + sliceSize);
+            round.put(slice);
+            round.flip();
+            return round;
+        }
+
+        private int totalSize(CharBuffer data) {
+            return buf.length + data.remaining();
         }
     }
 }
