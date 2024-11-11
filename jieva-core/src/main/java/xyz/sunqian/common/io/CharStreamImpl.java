@@ -4,11 +4,14 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.JieChars;
 import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.coll.JieArray;
+import xyz.sunqian.common.coll.JieColl;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.CharBuffer;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Function;
 
 final class CharStreamImpl implements CharStream {
@@ -18,7 +21,7 @@ final class CharStreamImpl implements CharStream {
     private long readLimit = -1;
     private int blockSize = JieIO.BUFFER_SIZE;
     private boolean endOnZeroRead = false;
-    private Encoder encoder;
+    private List<Encoder> encoders;
 
     CharStreamImpl(Reader source) {
         this.source = source;
@@ -87,7 +90,13 @@ final class CharStreamImpl implements CharStream {
 
     @Override
     public CharStream encoder(Encoder encoder) {
-        this.encoder = encoder;
+        this.encoders = Collections.singletonList(encoder);
+        return this;
+    }
+
+    @Override
+    public CharStream encoders(Iterable<Encoder> encoders) {
+        this.encoders = JieColl.toList(encoders);
         return this;
     }
 
@@ -100,7 +109,7 @@ final class CharStreamImpl implements CharStream {
             return 0;
         }
         try {
-            if (encoder == null) {
+            if (encoders == null) {
                 if (source instanceof char[]) {
                     if (dest instanceof char[]) {
                         return charsToChars((char[]) source, (char[]) dest);
@@ -233,22 +242,22 @@ final class CharStreamImpl implements CharStream {
                 if (count == 0) {
                     return buf == null ? -1 : 0;
                 }
-                if (encoder != null) {
-                    CharBuffer encoded = encoder.encode(JieChars.emptyBuffer(), true);
+                if (encoders != null) {
+                    CharBuffer encoded = encode(JieChars.emptyBuffer(), true);
                     out.write(encoded);
                 }
                 break;
             }
             int readSize = buf.remaining();
             count += readSize;
-            if (encoder != null) {
+            if (encoders != null) {
                 CharBuffer encoded;
                 if (readSize < blockSize) {
-                    encoded = encoder.encode(buf, true);
+                    encoded = encode(buf, true);
                     out.write(encoded);
                     break;
                 } else {
-                    encoded = encoder.encode(buf, false);
+                    encoded = encode(buf, false);
                     out.write(encoded);
                 }
             } else {
@@ -259,6 +268,18 @@ final class CharStreamImpl implements CharStream {
             }
         }
         return count;
+    }
+
+    private CharBuffer encode(CharBuffer buffer, boolean end) {
+        CharBuffer data = buffer;
+        for (Encoder encoder : encoders) {
+            CharBuffer encoded = encoder.encode(data, end);
+            if (!encoded.hasRemaining()) {
+                return encoded;
+            }
+            data = encoded;
+        }
+        return data;
     }
 
     private interface BufferIn {

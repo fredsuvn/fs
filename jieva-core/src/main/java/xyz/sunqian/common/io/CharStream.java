@@ -152,7 +152,7 @@ public interface CharStream {
     CharStream to(CharBuffer dest);
 
     /**
-     * Sets max chars number to read. May be -1 if set to read to end, and this is default setting.
+     * Sets max chars number to read. May be -1 if sets to read to end, and this is default setting.
      * <p>
      * This is a setting method.
      *
@@ -165,9 +165,10 @@ public interface CharStream {
      * Sets the bytes number for each reading from data source.
      * <p>
      * This setting is typically used when the source is an input stream, or when {@code encoding} (see
-     * {@link #encoder(Encoder)}) is required for the transfer, default is {@link JieIO#BUFFER_SIZE}. This stream
-     * ensures that the size of source data passed to the {@code encoding} is the value set by this method each times
-     * when the transfer starts, until the last read where the remaining source data might be smaller than this value.
+     * {@link #encoder(Encoder)}/{@link #encoders(Iterable)}) is required for the transfer, default is
+     * {@link JieIO#BUFFER_SIZE}. This stream ensures that the size of source data passed to the {@code encoding} is the
+     * value set by this method each times when the transfer starts, until the last read where the remaining source data
+     * might be smaller than this value.
      * <p>
      * This is a setting method.
      *
@@ -186,8 +187,9 @@ public interface CharStream {
      *         If no byte was read, the {@link #start()} returns {@code 0} rather than {@code -1};
      *     </li>
      *     <li>
-     *         If the {@code encoder} (specified by {@link #encoder(Encoder)}) is not {@code null}, the 2nd argument of
-     *         {@link Encoder#encode(CharBuffer, boolean)} will be passed to {@code true};
+     *         If the {@code encoders} (specified by {@link #encoder(Encoder)}/{@link #encoders(Iterable)}) is not
+     *         {@code null}, the 2nd argument of {@link Encoder#encode(CharBuffer, boolean)} will be passed to
+     *         {@code true};
      *     </li>
      * </ul>
      * <p>
@@ -199,7 +201,7 @@ public interface CharStream {
     CharStream endOnZeroRead(boolean endOnZeroRead);
 
     /**
-     * Set the data encoder to encode the source data before it is written to the destination. The encoded data will
+     * Sets the data encoder to encode the source data before it is written to the destination. The encoded data will
      * then be written to the destination. This setting is optional; if not set, the source data will be written
      * directly to the destination.
      * <p>
@@ -220,23 +222,39 @@ public interface CharStream {
      *     </li>
      * </ul>
      * <p>
-     * This is a setting method, and the interface provides helper encoder implementations:
-     * {@link #bufferedEncoder(Encoder, int, Function)}.
+     * This is a setting method. To set more than one encoder, use {@link #encoders(Iterable)}, and the interface
+     * provides helper encoder implementations: {@link #bufferedEncoder(Encoder, int, Function)}.
      *
      * @param encoder data encoder
      * @return this
+     * @see #encoders(Iterable)
      * @see #bufferedEncoder(Encoder, int, Function)
      */
     CharStream encoder(Encoder encoder);
+
+    /**
+     * Sets a list of {@code encoder} ({@link #encoder(Encoder)}) for this byte stream.
+     * <p>
+     * The stream will pass the input data into first encoder and get the result of encoding, if the result is not empty
+     * then pass it into next encoder until the last encoder. If one result is empty, next encoder will not be called
+     * and that result will be returned as final result of the whole encoder chain. Otherwise, encoding result from last
+     * encoder will be returned.
+     *
+     * @param encoders a list of encoder
+     * @return this
+     * @see #encoder(Encoder)
+     */
+    CharStream encoders(Iterable<Encoder> encoders);
 
     /**
      * Starts transfer data from source into destination through this stream, returns the actual chars number that read
      * and success to transfer. Ensure that the remaining of destination is enough, otherwise a
      * {@link IORuntimeException} will be thrown and the actual read and written chars number is undefined.
      * <p>
-     * If the {@code encoder} (see {@link #encoder(Encoder)}) is {@code null}, read number equals to written number.
-     * Otherwise, the written number may not equal to read number, and this method returns actual read number.
-     * Specifically, if it is detected that the data source has already reached to the end before starting, return -1.
+     * If the {@code encoders} (see {@link #encoder(Encoder)}/{@link #encoders(Iterable)}) is {@code null}, read number
+     * equals to written number. Otherwise, the written number may not equal to read number, and this method returns
+     * actual read number. Specifically, if it is detected that the data source has already reached to the end before
+     * starting, return -1.
      * <p>
      * If the source and/or destination is a buffer or stream, its position will be incremented by actual affected
      * length.
