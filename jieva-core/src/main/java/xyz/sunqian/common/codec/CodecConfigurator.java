@@ -11,8 +11,6 @@ import xyz.sunqian.common.io.IOConfigurator;
  * @param <T> actual type of this {@code CodecConfigurator}
  * @author fredsuvn
  * @see CipherCodec
- * @see Base64Codec
- * @see HexCodec
  */
 public interface CodecConfigurator<T extends CodecConfigurator<T>> extends IOConfigurator<T> {
 

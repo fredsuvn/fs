@@ -19,25 +19,6 @@ import java.security.*;
  */
 public class JieCodec {
 
-
-    /**
-     * Returns a base64 codec process.
-     *
-     * @return a base64 codec process
-     */
-    public static Base64Codec base64() {
-        return new Base64Codec();
-    }
-
-    /**
-     * Returns a hex codec process.
-     *
-     * @return a hex codec process
-     */
-    public static HexCodec hex() {
-        return new HexCodec();
-    }
-
     /**
      * Returns a cipher codec process.
      *
