@@ -893,6 +893,7 @@ public class StreamTest {
                             assertEquals(data.remaining(), expectedBlockSize);
                         } else {
                             assertTrue(data.remaining() <= (blockSize / expectedBlockSize + 1) * expectedBlockSize);
+                            assertTrue(data.remaining() >= (blockSize / expectedBlockSize) * expectedBlockSize);
                         }
                     }
                     ByteBuffer bb = ByteBuffer.allocate(data.remaining() * 2);
@@ -915,6 +916,7 @@ public class StreamTest {
                             assertEquals(data.remaining(), expectedBlockSize);
                         } else {
                             assertTrue(data.remaining() <= (blockSize / expectedBlockSize + 1) * expectedBlockSize);
+                            assertTrue(data.remaining() >= (blockSize / expectedBlockSize) * expectedBlockSize);
                         }
                     }
                     ByteBuffer bb = ByteBuffer.allocateDirect(data.remaining() * 2);
@@ -947,6 +949,7 @@ public class StreamTest {
                             assertEquals(data.remaining(), expectedBlockSize);
                         } else {
                             assertTrue(data.remaining() <= (blockSize / expectedBlockSize + 1) * expectedBlockSize);
+                            assertTrue(data.remaining() >= (blockSize / expectedBlockSize) * expectedBlockSize);
                         }
                     }
                     CharBuffer bb = CharBuffer.allocate(data.remaining() * 2);
@@ -969,6 +972,7 @@ public class StreamTest {
                             assertEquals(data.remaining(), expectedBlockSize);
                         } else {
                             assertTrue(data.remaining() <= (blockSize / expectedBlockSize + 1) * expectedBlockSize);
+                            assertTrue(data.remaining() >= (blockSize / expectedBlockSize) * expectedBlockSize);
                         }
                     }
                     CharBuffer bb = CharBuffer.allocate(data.remaining() * 2);
