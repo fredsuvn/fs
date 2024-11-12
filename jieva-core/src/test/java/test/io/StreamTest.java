@@ -16,8 +16,7 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.util.Arrays;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.expectThrows;
+import static org.testng.Assert.*;
 
 public class StreamTest {
 
@@ -873,6 +872,7 @@ public class StreamTest {
         testRoundEncoder(10086, 11, 333);
         testRoundEncoder(10086, 333, 11);
         testRoundEncoder(10086, 22, 22);
+        testRoundEncoder(10086, 222, 1);
     }
 
     private void testRoundEncoder(int size, int blockSize, int expectedBlockSize) {
@@ -887,6 +887,14 @@ public class StreamTest {
             byte[] dst2 = new byte[src.length * 2];
             long len = ByteStream.from(src).to(dst2).blockSize(blockSize).encoder(ByteStream.roundEncoder(
                 (data, end) -> {
+                    if (!end) {
+                        assertTrue(data.remaining() >= expectedBlockSize);
+                        if (blockSize < expectedBlockSize) {
+                            assertEquals(data.remaining(), expectedBlockSize);
+                        } else {
+                            assertTrue(data.remaining() <= (blockSize / expectedBlockSize + 1) * expectedBlockSize);
+                        }
+                    }
                     ByteBuffer bb = ByteBuffer.allocate(data.remaining() * 2);
                     while (data.hasRemaining()) {
                         bb.put(data.get());
@@ -901,6 +909,14 @@ public class StreamTest {
             assertEquals(len, src.length);
             len = ByteStream.from(src).to(dst2).blockSize(blockSize).encoder(ByteStream.roundEncoder(
                 (data, end) -> {
+                    if (!end) {
+                        assertTrue(data.remaining() >= expectedBlockSize);
+                        if (blockSize < expectedBlockSize) {
+                            assertEquals(data.remaining(), expectedBlockSize);
+                        } else {
+                            assertTrue(data.remaining() <= (blockSize / expectedBlockSize + 1) * expectedBlockSize);
+                        }
+                    }
                     ByteBuffer bb = ByteBuffer.allocateDirect(data.remaining() * 2);
                     while (data.hasRemaining()) {
                         bb.put(data.get());
@@ -925,6 +941,14 @@ public class StreamTest {
             char[] dst2 = new char[src.length * 2];
             long len = CharStream.from(src).to(dst2).blockSize(blockSize).encoder(CharStream.roundEncoder(
                 (data, end) -> {
+                    if (!end) {
+                        assertTrue(data.remaining() >= expectedBlockSize);
+                        if (blockSize < expectedBlockSize) {
+                            assertEquals(data.remaining(), expectedBlockSize);
+                        } else {
+                            assertTrue(data.remaining() <= (blockSize / expectedBlockSize + 1) * expectedBlockSize);
+                        }
+                    }
                     CharBuffer bb = CharBuffer.allocate(data.remaining() * 2);
                     while (data.hasRemaining()) {
                         bb.put(data.get());
@@ -939,6 +963,14 @@ public class StreamTest {
             assertEquals(len, src.length);
             len = CharStream.from(src).to(dst2).blockSize(blockSize).encoder(CharStream.roundEncoder(
                 (data, end) -> {
+                    if (!end) {
+                        assertTrue(data.remaining() >= expectedBlockSize);
+                        if (blockSize < expectedBlockSize) {
+                            assertEquals(data.remaining(), expectedBlockSize);
+                        } else {
+                            assertTrue(data.remaining() <= (blockSize / expectedBlockSize + 1) * expectedBlockSize);
+                        }
+                    }
                     CharBuffer bb = CharBuffer.allocate(data.remaining() * 2);
                     while (data.hasRemaining()) {
                         bb.put(data.get());
