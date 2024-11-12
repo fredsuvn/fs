@@ -27,32 +27,32 @@ import java.util.Arrays;
  * </ul>
  * <h2>Encoder</h2>
  * <p>
- * For {@link ByteEncoder#toStreamEncoder()}, the best block size for {@link ByteStream#blockSize(int)} is
+ * For {@link ByteEncoder#streamEncoder()}, the best block size for {@link ByteStream#blockSize(int)} is
  * {@link ByteEncoder#getBlockSize()} or multiples of it, and:
  * <ul>
  *     <li>
  *         {@code Basic} and {@code URL and Filename safe}: the {@link ByteStream#blockSize(int)} should be set to
- *         multiples of 3, and {@link ByteEncoder#toStreamEncoder()} returns singleton thread-safe instance for each
+ *         multiples of 3, and {@link ByteEncoder#streamEncoder()} returns singleton thread-safe instance for each
  *         calling;
  *     </li>
  *     <li>
  *         {@code MIME}: the {@link ByteStream#blockSize(int)} should be set to multiples of ({@code lineMax / 4 * 3}),
- *         and {@link ByteEncoder#toStreamEncoder()} returns a new un-thread-safe instance for each calling;
+ *         and {@link ByteEncoder#streamEncoder()} returns a new un-thread-safe instance for each calling;
  *     </li>
  * </ul>
  * <h2>Decoder</h2>
  * <p>
- * For {@link ByteDecoder#toStreamEncoder()}, the best block size for {@link ByteStream#blockSize(int)} is
+ * For {@link ByteDecoder#streamEncoder()}, the best block size for {@link ByteStream#blockSize(int)} is
  * {@link ByteDecoder#getBlockSize()} or multiples of it, and:
  * <ul>
  *     <li>
  *         {@code Basic} and {@code URL and Filename safe}: the {@link ByteStream#blockSize(int)} should be set to
- *         multiples of 4, and {@link ByteDecoder#toStreamEncoder()} returns singleton thread-safe instance for each
+ *         multiples of 4, and {@link ByteDecoder#streamEncoder()} returns singleton thread-safe instance for each
  *         calling;
  *     </li>
  *     <li>
  *         {@code MIME}: the {@link ByteStream#blockSize(int)} should be set to multiples of ({@code lineMax}), and
- *         {@link ByteDecoder#toStreamEncoder()} returns a new un-thread-safe instance for each calling;
+ *         {@link ByteDecoder#streamEncoder()} returns a new un-thread-safe instance for each calling;
  *     </li>
  * </ul>
  *
@@ -215,7 +215,7 @@ public class JieBase64 {
         }
 
         @Override
-        public ByteStream.Encoder toStreamEncoder() {
+        public ByteStream.Encoder streamEncoder() {
             return ByteStream.roundEncoder(this, getBlockSize());
         }
 
@@ -330,7 +330,7 @@ public class JieBase64 {
         }
 
         @Override
-        public ByteStream.Encoder toStreamEncoder() {
+        public ByteStream.Encoder streamEncoder() {
             ByteStream.Encoder encoder = new ByteStream.Encoder() {
 
                 private boolean hasPrev = false;

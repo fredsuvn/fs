@@ -20,8 +20,9 @@ public interface ByteCoder {
     int getOutputSize(int inputSize) throws CodingException;
 
     /**
-     * Returns the block size. When en/de-coding, data is sometimes processed in blocks, this method returns the
-     * recommended size of those blocks. If the block size cannot be determined, it returns {@code 0}.
+     * Returns the block size for encoding. When en/de-coding, data is sometimes processed in blocks, this method
+     * returns the recommended or minimal size of those blocks (determined by implementations). If the block size cannot
+     * be determined, it returns {@code 0}.
      *
      * @return the block size
      */
@@ -29,10 +30,13 @@ public interface ByteCoder {
 
     /**
      * Returns a {@link ByteStream.Encoder} with current en/de-coding. When using this method, the
-     * {@link ByteStream#blockSize(int)} needs to be set to a correct value, such as {@link #getBlockSize()} (if it does
-     * not return {@code 0}).
+     * {@link ByteStream#blockSize(int)} needs to be set to a correct value. The correct value usually comes from
+     * {@link #getBlockSize()} or multiples of it, determined by the implementation. See
+     * {@link ByteStream#encoder(ByteStream.Encoder)} and {@link ByteStream#encoders(Iterable)}.
      *
      * @return a {@link ByteStream.Encoder} with current en/de-coding
+     * @see ByteStream#encoder(ByteStream.Encoder)
+     * @see ByteStream#encoders(Iterable)
      */
-    ByteStream.Encoder toStreamEncoder();
+    ByteStream.Encoder streamEncoder();
 }

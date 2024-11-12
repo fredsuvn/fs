@@ -4,15 +4,15 @@ import xyz.sunqian.common.io.ByteStream;
 
 /**
  * This is a static utilities class provides implementations and utilities for {@code Hex} encoder and decoder.
- * <h2>Encoder</h2>
  * <p>
- * {@link Encoder#toStreamEncoder()} always returns a singleton thread-safe object, and the best block size for
- * {@link ByteStream#blockSize(int)} is {@link Encoder#getBlockSize()} or multiples of it (but any size that {@code >0}
- * are permitted).
- * <h2>Decoder</h2>
+ * {@link Encoder#streamEncoder()} always returns a singleton thread-safe object, and it can process any size of data.
+ * Even though {@link Encoder#getBlockSize()} returns 1, it's best to set {@link ByteStream#blockSize(int)} to a
+ * reasonable value, such as {@code 1024}, for better performance.
  * <p>
- * {@link Decoder#toStreamEncoder()} always returns a singleton thread-safe object, and the best block size for
- * {@link ByteStream#blockSize(int)} is {@link Decoder#getBlockSize()} or multiples of it, or an even value.
+ * {@link Decoder#streamEncoder()} always returns a new decoder wrapped by
+ * {@link ByteStream#bufferedEncoder(ByteStream.Encoder)}. Although it accepts both odd and even size of data at per
+ * decoding, it's best to set even block size for better performance. {@link Decoder#getBlockSize()} returns minimal
+ * block size: 2, but like the encoder, set a reasonable block size such as {@code 1024}.
  *
  * @author sunqian
  */
@@ -42,6 +42,16 @@ public class JieHex {
      * @author sunqian
      */
     public interface Encoder extends ToCharEncoder {
+
+        /**
+         * Returns 1 because {@code Hex} encoding is applicable to any size of data.
+         *
+         * @return 1
+         */
+        @Override
+        default int getBlockSize() {
+            return 1;
+        }
     }
 
     /**
@@ -50,6 +60,16 @@ public class JieHex {
      * @author sunqian
      */
     public interface Decoder extends ToCharDecoder {
+
+        /**
+         * Returns 2 because data size for {@code Hex} decoding should be even.
+         *
+         * @return 1
+         */
+        @Override
+        default int getBlockSize() {
+            return 2;
+        }
     }
 
     private static final class HexEncoder extends AbsCoder.En implements Encoder {
@@ -66,11 +86,6 @@ public class JieHex {
                 throw new EncodingException("Hex encoding size can not be negative.");
             }
             return inputSize * 2;
-        }
-
-        @Override
-        public int getBlockSize() {
-            return 1024;
         }
 
         protected int doCode(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff) {
@@ -99,12 +114,7 @@ public class JieHex {
         }
 
         @Override
-        public int getBlockSize() {
-            return 1024;
-        }
-
-        @Override
-        public ByteStream.Encoder toStreamEncoder() {
+        public ByteStream.Encoder streamEncoder() {
             return ByteStream.roundEncoder(this, getBlockSize());
         }
 

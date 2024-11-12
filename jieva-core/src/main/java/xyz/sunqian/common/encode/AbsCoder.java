@@ -69,7 +69,7 @@ abstract class AbsCoder implements ByteCoder, ByteStream.Encoder {
     }
 
     @Override
-    public ByteStream.Encoder toStreamEncoder() {
+    public ByteStream.Encoder streamEncoder() {
         return this;
     }
 
