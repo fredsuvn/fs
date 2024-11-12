@@ -216,7 +216,7 @@ public class JieBase64 {
 
         @Override
         public ByteStream.Encoder toStreamEncoder() {
-            return ByteStream.bufferedEncoder(this, getBlockSize(), null);
+            return ByteStream.roundEncoder(this, getBlockSize());
         }
 
         protected char[] dict() {
@@ -353,7 +353,7 @@ public class JieBase64 {
                     return BlockEncoder.this.encode(data);
                 }
             };
-            return ByteStream.bufferedEncoder(encoder, getBlockSize(), null);
+            return ByteStream.roundEncoder(encoder, getBlockSize());
         }
 
         protected int doCode(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff) {

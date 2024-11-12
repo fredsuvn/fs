@@ -105,7 +105,7 @@ public class JieHex {
 
         @Override
         public ByteStream.Encoder toStreamEncoder() {
-            return ByteStream.bufferedEncoder(this, getBlockSize(), null);
+            return ByteStream.roundEncoder(this, getBlockSize());
         }
 
         protected int doCode(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff) {

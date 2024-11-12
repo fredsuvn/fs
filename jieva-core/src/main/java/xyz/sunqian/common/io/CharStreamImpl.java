@@ -12,7 +12,6 @@ import java.io.Writer;
 import java.nio.CharBuffer;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
 
 final class CharStreamImpl implements CharStream {
 
@@ -497,49 +496,45 @@ final class CharStreamImpl implements CharStream {
         }
     }
 
-    final static class BufferedEncoder implements Encoder {
+    final static class RoundEncoder implements Encoder {
 
         private final Encoder encoder;
         private final int expectedBlockSize;
-        private final @Nullable Function<CharBuffer, CharBuffer> filter;
         private char[] buf = JieChars.emptyChars();
 
-        BufferedEncoder(
-            CharStream.Encoder encoder, int expectedBlockSize, @Nullable Function<CharBuffer, CharBuffer> filter) {
+        RoundEncoder(CharStream.Encoder encoder, int expectedBlockSize) {
             this.encoder = encoder;
             this.expectedBlockSize = expectedBlockSize;
-            this.filter = filter;
         }
 
         @Override
         public CharBuffer encode(CharBuffer data, boolean end) {
-            CharBuffer actualData = filter == null ? data : filter.apply(data);
             if (end) {
-                return encoder.encode(totalData(actualData), true);
+                return encoder.encode(totalData(data), true);
             }
-            int size = totalSize(actualData);
+            int size = totalSize(data);
             if (size == expectedBlockSize) {
-                CharBuffer total = totalData(actualData);
+                CharBuffer total = totalData(data);
                 buf = JieChars.emptyChars();
                 return encoder.encode(total, false);
             }
             if (size < expectedBlockSize) {
                 char[] newBuf = new char[size];
                 System.arraycopy(buf, 0, newBuf, 0, buf.length);
-                actualData.get(newBuf, buf.length, actualData.remaining());
+                data.get(newBuf, buf.length, data.remaining());
                 buf = newBuf;
                 return JieChars.emptyBuffer();
             }
             int remainder = size % expectedBlockSize;
             if (remainder == 0) {
-                CharBuffer total = totalData(actualData);
+                CharBuffer total = totalData(data);
                 buf = JieChars.emptyChars();
                 return encoder.encode(total, false);
             }
             int roundSize = size / expectedBlockSize * expectedBlockSize;
-            CharBuffer round = roundData(actualData, roundSize);
+            CharBuffer round = roundData(data, roundSize);
             buf = new char[remainder];
-            actualData.get(buf);
+            data.get(buf);
             return encoder.encode(round, false);
         }
 

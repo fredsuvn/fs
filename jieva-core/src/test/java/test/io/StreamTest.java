@@ -885,7 +885,7 @@ public class StreamTest {
                 dst[i * 2 + 1] = (byte) expectedBlockSize;
             }
             byte[] dst2 = new byte[src.length * 2];
-            long len = ByteStream.from(src).to(dst2).blockSize(blockSize).encoder(ByteStream.bufferedEncoder(
+            long len = ByteStream.from(src).to(dst2).blockSize(blockSize).encoder(ByteStream.roundEncoder(
                 (data, end) -> {
                     ByteBuffer bb = ByteBuffer.allocate(data.remaining() * 2);
                     while (data.hasRemaining()) {
@@ -895,12 +895,11 @@ public class StreamTest {
                     bb.flip();
                     return bb;
                 },
-                expectedBlockSize,
-                null
+                expectedBlockSize
             )).start();
             assertEquals(dst2, dst);
             assertEquals(len, src.length);
-            len = ByteStream.from(src).to(dst2).blockSize(blockSize).encoder(ByteStream.bufferedEncoder(
+            len = ByteStream.from(src).to(dst2).blockSize(blockSize).encoder(ByteStream.roundEncoder(
                 (data, end) -> {
                     ByteBuffer bb = ByteBuffer.allocateDirect(data.remaining() * 2);
                     while (data.hasRemaining()) {
@@ -910,8 +909,7 @@ public class StreamTest {
                     bb.flip();
                     return bb;
                 },
-                expectedBlockSize,
-                d -> d
+                expectedBlockSize
             )).start();
             assertEquals(dst2, dst);
             assertEquals(len, src.length);
@@ -925,7 +923,7 @@ public class StreamTest {
                 dst[i * 2 + 1] = (char) expectedBlockSize;
             }
             char[] dst2 = new char[src.length * 2];
-            long len = CharStream.from(src).to(dst2).blockSize(blockSize).encoder(CharStream.bufferedEncoder(
+            long len = CharStream.from(src).to(dst2).blockSize(blockSize).encoder(CharStream.roundEncoder(
                 (data, end) -> {
                     CharBuffer bb = CharBuffer.allocate(data.remaining() * 2);
                     while (data.hasRemaining()) {
@@ -935,12 +933,11 @@ public class StreamTest {
                     bb.flip();
                     return bb;
                 },
-                expectedBlockSize,
-                null
+                expectedBlockSize
             )).start();
             assertEquals(dst2, dst);
             assertEquals(len, src.length);
-            len = CharStream.from(src).to(dst2).blockSize(blockSize).encoder(CharStream.bufferedEncoder(
+            len = CharStream.from(src).to(dst2).blockSize(blockSize).encoder(CharStream.roundEncoder(
                 (data, end) -> {
                     CharBuffer bb = CharBuffer.allocate(data.remaining() * 2);
                     while (data.hasRemaining()) {
@@ -950,8 +947,7 @@ public class StreamTest {
                     bb.flip();
                     return bb;
                 },
-                expectedBlockSize,
-                d -> d
+                expectedBlockSize
             )).start();
             assertEquals(dst2, dst);
             assertEquals(len, src.length);

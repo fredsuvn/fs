@@ -11,7 +11,6 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
 
 final class ByteStreamImpl implements ByteStream {
 
@@ -406,49 +405,45 @@ final class ByteStreamImpl implements ByteStream {
         }
     }
 
-    final static class BufferedEncoder implements Encoder {
+    final static class RoundEncoder implements Encoder {
 
         private final Encoder encoder;
         private final int expectedBlockSize;
-        private final @Nullable Function<ByteBuffer, ByteBuffer> filter;
         private byte[] buf = JieBytes.emptyBytes();
 
-        BufferedEncoder(
-            Encoder encoder, int expectedBlockSize, @Nullable Function<ByteBuffer, ByteBuffer> filter) {
+        RoundEncoder(Encoder encoder, int expectedBlockSize) {
             this.encoder = encoder;
             this.expectedBlockSize = expectedBlockSize;
-            this.filter = filter;
         }
 
         @Override
         public ByteBuffer encode(ByteBuffer data, boolean end) {
-            ByteBuffer actualData = filter == null ? data : filter.apply(data);
             if (end) {
-                return encoder.encode(totalData(actualData), true);
+                return encoder.encode(totalData(data), true);
             }
-            int size = totalSize(actualData);
+            int size = totalSize(data);
             if (size == expectedBlockSize) {
-                ByteBuffer total = totalData(actualData);
+                ByteBuffer total = totalData(data);
                 buf = JieBytes.emptyBytes();
                 return encoder.encode(total, false);
             }
             if (size < expectedBlockSize) {
                 byte[] newBuf = new byte[size];
                 System.arraycopy(buf, 0, newBuf, 0, buf.length);
-                actualData.get(newBuf, buf.length, actualData.remaining());
+                data.get(newBuf, buf.length, data.remaining());
                 buf = newBuf;
                 return JieBytes.emptyBuffer();
             }
             int remainder = size % expectedBlockSize;
             if (remainder == 0) {
-                ByteBuffer total = totalData(actualData);
+                ByteBuffer total = totalData(data);
                 buf = JieBytes.emptyBytes();
                 return encoder.encode(total, false);
             }
             int roundSize = size / expectedBlockSize * expectedBlockSize;
-            ByteBuffer round = roundData(actualData, roundSize);
+            ByteBuffer round = roundData(data, roundSize);
             buf = new byte[remainder];
-            actualData.get(buf);
+            data.get(buf);
             return encoder.encode(round, false);
         }
 
