@@ -22,20 +22,20 @@ import static org.testng.Assert.expectThrows;
 public class StreamTest {
 
     @Test
-    public void testBytesTransfer() throws Exception {
+    public void testBytesStream() throws Exception {
         // readTo()
-        testBytesTransfer(666, JieIO.BUFFER_SIZE, -1);
-        testBytesTransfer(666, 67, -1);
-        testBytesTransfer(666, 1, -1);
-        testBytesTransfer(100, 10, -1);
-        testBytesTransfer(666, JieIO.BUFFER_SIZE, -1);
-        testBytesTransfer(666, 67, 667);
-        testBytesTransfer(666, 1, 667);
-        testBytesTransfer(100, 10, 101);
-        testBytesTransfer(222, 33, 55);
-        testBytesTransfer(100, 10, 0);
-        testBytesTransfer(100, 10, 100);
-        testBytesTransfer(6666, 99, 77777);
+        testBytesStream(666, JieIO.BUFFER_SIZE, -1);
+        testBytesStream(666, 67, -1);
+        testBytesStream(666, 1, -1);
+        testBytesStream(100, 10, -1);
+        testBytesStream(666, JieIO.BUFFER_SIZE, -1);
+        testBytesStream(666, 67, 667);
+        testBytesStream(666, 1, 667);
+        testBytesStream(100, 10, 101);
+        testBytesStream(222, 33, 55);
+        testBytesStream(100, 10, 0);
+        testBytesStream(100, 10, 100);
+        testBytesStream(6666, 99, 77777);
 
         int size = 10;
         int offset = 6;
@@ -47,36 +47,36 @@ public class StreamTest {
 
         // readTo methods
         byte[] outBytes = new byte[bytes.length];
-        JieIO.transfer(in, outBytes);
+        JieIO.readTo(in, outBytes);
         assertEquals(bytes, outBytes);
         byte[] outBytes2 = new byte[bytes.length * 2];
-        in.reset();
-        JieIO.transfer(in, outBytes2, offset, bytes.length);
-        assertEquals(bytes, Arrays.copyOfRange(outBytes2, offset, offset + bytes.length));
+        // in.reset();
+        // JieIO.transfer(in, outBytes2, offset, bytes.length);
+        // assertEquals(bytes, Arrays.copyOfRange(outBytes2, offset, offset + bytes.length));
         ByteBuffer outBuffer = ByteBuffer.allocateDirect(bytes.length);
         in.reset();
-        JieIO.transfer(in, outBuffer);
+        JieIO.readTo(in, outBuffer);
         outBuffer.flip();
         byte[] outBufferContent = JieBytes.getBytes(outBuffer);
         assertEquals(bytes, outBufferContent);
         in.reset();
-        JieIO.transfer(in, out);
+        JieIO.readTo(in, out);
         assertEquals(bytes, out.toByteArray());
-        in.reset();
-        out.reset();
-        JieIO.transfer(in, out, 2);
-        assertEquals(Arrays.copyOfRange(bytes, 0, 2), out.toByteArray());
-        in.reset();
-        out.reset();
-        JieIO.transfer(in, out, 2, 1);
-        assertEquals(Arrays.copyOfRange(bytes, 0, 2), out.toByteArray());
-        in.reset();
-        out.reset();
-        JieIO.transfer(in, out, 2, 100);
-        assertEquals(Arrays.copyOfRange(bytes, 0, 2), out.toByteArray());
+        // in.reset();
+        // out.reset();
+        // JieIO.transfer(in, out, 2);
+        // assertEquals(Arrays.copyOfRange(bytes, 0, 2), out.toByteArray());
+        // in.reset();
+        // out.reset();
+        // JieIO.transfer(in, out, 2, 1);
+        // assertEquals(Arrays.copyOfRange(bytes, 0, 2), out.toByteArray());
+        // in.reset();
+        // out.reset();
+        // JieIO.transfer(in, out, 2, 100);
+        // assertEquals(Arrays.copyOfRange(bytes, 0, 2), out.toByteArray());
 
         // read empty
-        assertEquals(JieIO.transfer(new ByteArrayInputStream(new byte[0]), new ByteArrayOutputStream()), -1);
+        assertEquals(JieIO.readTo(new ByteArrayInputStream(new byte[0]), new ByteArrayOutputStream()), -1);
 
         // read limit
         in.reset();
@@ -115,7 +115,7 @@ public class StreamTest {
         assertEquals(nioBytes, compareBytes);
 
         // error
-        expectThrows(IORuntimeException.class, () -> testBytesTransfer(666, 0, 0));
+        expectThrows(IORuntimeException.class, () -> testBytesStream(666, 0, 0));
         expectThrows(IORuntimeException.class, () -> ByteStream.from((InputStream) null).start());
         expectThrows(IORuntimeException.class, () -> ByteStream.from(new byte[0], 0, 100));
         expectThrows(IORuntimeException.class, () -> ByteStream.from(new byte[0]).to(new byte[0], 0, 100));
@@ -129,7 +129,7 @@ public class StreamTest {
         expectThrows(IORuntimeException.class, () -> ByteStream.from(new ThrowIn(1)).to(new byte[0]).start());
     }
 
-    private void testBytesTransfer(int size, int blockSize, int readLimit) throws Exception {
+    private void testBytesStream(int size, int blockSize, int readLimit) throws Exception {
         int offset = 22;
         String str = new String(JieRandom.fill(new char[size], 'a', 'z'));
         byte[] bytes = str.getBytes(JieChars.UTF_8);
@@ -299,20 +299,20 @@ public class StreamTest {
     }
 
     @Test
-    public void testCharsTransfer() throws Exception {
+    public void testCharsStream() throws Exception {
         // readTo()
-        testCharsTransfer(666, JieIO.BUFFER_SIZE, -1);
-        testCharsTransfer(666, 67, -1);
-        testCharsTransfer(666, 1, -1);
-        testCharsTransfer(100, 10, -1);
-        testCharsTransfer(666, JieIO.BUFFER_SIZE, -1);
-        testCharsTransfer(666, 67, 667);
-        testCharsTransfer(666, 1, 667);
-        testCharsTransfer(100, 10, 101);
-        testCharsTransfer(222, 33, 55);
-        testCharsTransfer(100, 10, 0);
-        testCharsTransfer(100, 10, 100);
-        testCharsTransfer(6666, 99, 77777);
+        testCharsStream(666, JieIO.BUFFER_SIZE, -1);
+        testCharsStream(666, 67, -1);
+        testCharsStream(666, 1, -1);
+        testCharsStream(100, 10, -1);
+        testCharsStream(666, JieIO.BUFFER_SIZE, -1);
+        testCharsStream(666, 67, 667);
+        testCharsStream(666, 1, 667);
+        testCharsStream(100, 10, 101);
+        testCharsStream(222, 33, 55);
+        testCharsStream(100, 10, 0);
+        testCharsStream(100, 10, 100);
+        testCharsStream(6666, 99, 77777);
 
         int size = 10;
         int offset = 6;
@@ -326,36 +326,36 @@ public class StreamTest {
 
         // readTo methods
         char[] outChars = new char[chars.length];
-        JieIO.transfer(in, outChars);
+        JieIO.readTo(in, outChars);
         assertEquals(chars, outChars);
         char[] outChars2 = new char[chars.length * 2];
-        in.reset();
-        JieIO.transfer(in, outChars2, offset, chars.length);
-        assertEquals(chars, Arrays.copyOfRange(outChars2, offset, offset + chars.length));
+        // in.reset();
+        // JieIO.transfer(in, outChars2, offset, chars.length);
+        // assertEquals(chars, Arrays.copyOfRange(outChars2, offset, offset + chars.length));
         CharBuffer outBuffer = dirBuffer;
         in.reset();
-        JieIO.transfer(in, outBuffer);
+        JieIO.readTo(in, outBuffer);
         outBuffer.flip();
         char[] outBufferContent = JieChars.getChars(outBuffer);
         assertEquals(chars, outBufferContent);
         in.reset();
-        JieIO.transfer(in, out);
+        JieIO.readTo(in, out);
         assertEquals(chars, out.toCharArray());
-        in.reset();
-        out.reset();
-        JieIO.transfer(in, out, 2);
-        assertEquals(Arrays.copyOfRange(chars, 0, 2), out.toCharArray());
-        in.reset();
-        out.reset();
-        JieIO.transfer(in, out, 2, 1);
-        assertEquals(Arrays.copyOfRange(chars, 0, 2), out.toCharArray());
-        in.reset();
-        out.reset();
-        JieIO.transfer(in, out, 2, 100);
-        assertEquals(Arrays.copyOfRange(chars, 0, 2), out.toCharArray());
+        // in.reset();
+        // out.reset();
+        // JieIO.transfer(in, out, 2);
+        // assertEquals(Arrays.copyOfRange(chars, 0, 2), out.toCharArray());
+        // in.reset();
+        // out.reset();
+        // JieIO.transfer(in, out, 2, 1);
+        // assertEquals(Arrays.copyOfRange(chars, 0, 2), out.toCharArray());
+        // in.reset();
+        // out.reset();
+        // JieIO.transfer(in, out, 2, 100);
+        // assertEquals(Arrays.copyOfRange(chars, 0, 2), out.toCharArray());
 
         // read empty
-        assertEquals(JieIO.transfer(new CharArrayReader(new char[0]), new CharArrayWriter()), -1);
+        assertEquals(JieIO.readTo(new CharArrayReader(new char[0]), new CharArrayWriter()), -1);
 
         // read limit
         in.reset();
@@ -394,7 +394,7 @@ public class StreamTest {
         assertEquals(nioChars, compareChars);
 
         // error
-        expectThrows(IORuntimeException.class, () -> testCharsTransfer(666, 0, 0));
+        expectThrows(IORuntimeException.class, () -> testCharsStream(666, 0, 0));
         expectThrows(IORuntimeException.class, () -> CharStream.from((Reader) null).start());
         expectThrows(IORuntimeException.class, () -> CharStream.from(new char[0], 0, 100));
         expectThrows(IORuntimeException.class, () -> CharStream.from(new char[0]).to(new char[0], 0, 100));
@@ -408,7 +408,7 @@ public class StreamTest {
         expectThrows(IORuntimeException.class, () -> CharStream.from(new ThrowReader(1)).to(new char[0]).start());
     }
 
-    private void testCharsTransfer(int size, int blockSize, int readLimit) throws Exception {
+    private void testCharsStream(int size, int blockSize, int readLimit) throws Exception {
         int offset = 22;
         String str = new String(JieRandom.fill(new char[size], 'a', 'z'));
         char[] chars = str.toCharArray();

@@ -218,7 +218,7 @@ final class CharStreamImpl implements CharStream {
             return new AppendableBufferOut(CharBuffer.wrap((char[]) dst));
         }
         if (dst instanceof CharBuffer) {
-            return new AppendableBufferOut(JieOut.wrap((CharBuffer) dst));
+            return new AppendableBufferOut(JieIO.writer((CharBuffer) dst));
         }
         if (dst instanceof Appendable) {
             return new AppendableBufferOut((Appendable) dst);

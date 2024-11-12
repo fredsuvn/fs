@@ -3,9 +3,9 @@ package xyz.sunqian.common.codec;
 import lombok.Data;
 import xyz.sunqian.common.base.JieChars;
 import xyz.sunqian.common.base.JieString;
+import xyz.sunqian.common.io.ByteStream;
 import xyz.sunqian.common.io.JieBuffer;
 import xyz.sunqian.common.io.JieIO;
-import xyz.sunqian.common.io.JieIn;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -269,7 +269,7 @@ public class Base64Codec implements CodecConfigurator<Base64Codec> {
                     OutputStream dest = (OutputStream) output;
                     OutputCounter counter = new OutputCounter(dest);
                     OutputStream wrapper = encoder.wrap(counter);
-                    JieIO.transfer(src, wrapper, -1, blockSize);
+                    ByteStream.from(src).to(wrapper).blockSize(blockSize).start();
                     wrapper.close();
                     return counter.count;
                 } else {
@@ -369,7 +369,7 @@ public class Base64Codec implements CodecConfigurator<Base64Codec> {
                     OutputStream dest = (OutputStream) output;
                     InputStream wrapper = decoder.wrap(src);
                     OutputCounter counter = new OutputCounter(dest);
-                    JieIO.transfer(wrapper, counter, -1, blockSize);
+                    ByteStream.from(wrapper).to(counter).blockSize(blockSize).start();
                     return counter.count;
                 } else {
                     throw new CodecException("Unknown output type: " + output.getClass());
@@ -467,10 +467,10 @@ public class Base64Codec implements CodecConfigurator<Base64Codec> {
 
     private InputStream inputToInputStream() {
         if (input instanceof byte[]) {
-            return JieIn.wrap((byte[]) input);
+            return JieIO.in((byte[]) input);
         }
         if (input instanceof ByteBuffer) {
-            return JieIn.wrap((ByteBuffer) input);
+            return JieIO.in((ByteBuffer) input);
         }
         if (input instanceof InputStream) {
             return (InputStream) input;

@@ -2,8 +2,6 @@ package xyz.sunqian.common.base;
 
 import xyz.sunqian.common.coll.JieColl;
 import xyz.sunqian.common.io.JieIO;
-import xyz.sunqian.common.io.JieIn;
-import xyz.sunqian.common.io.JieOut;
 
 import java.io.File;
 import java.io.IOException;
@@ -402,23 +400,23 @@ public abstract class ProcessStarter implements BaseStarter<Process, ProcessStar
         }
         Process process = builder.start();
         if (in != null) {
-            JieIO.transfer(in, process.getOutputStream());
+            JieIO.readTo(in, process.getOutputStream());
         }
         if (out != null) {
-            JieIO.transfer(process.getInputStream(), out);
+            JieIO.readTo(process.getInputStream(), out);
         }
         if (err != null) {
-            JieIO.transfer(process.getErrorStream(), out);
+            JieIO.readTo(process.getErrorStream(), out);
         }
         return process;
     }
 
     private static InputStream inputToStream(Object in) {
         if (in instanceof byte[]) {
-            return JieIn.wrap((byte[]) in);
+            return JieIO.in((byte[]) in);
         }
         if (in instanceof ByteBuffer) {
-            return JieIn.wrap((ByteBuffer) in);
+            return JieIO.in((ByteBuffer) in);
         }
         if (in instanceof InputStream) {
             return (InputStream) in;
@@ -428,10 +426,10 @@ public abstract class ProcessStarter implements BaseStarter<Process, ProcessStar
 
     private static OutputStream outputToStream(Object out) {
         if (out instanceof byte[]) {
-            return JieOut.wrap((byte[]) out);
+            return JieIO.out((byte[]) out);
         }
         if (out instanceof ByteBuffer) {
-            return JieOut.wrap((ByteBuffer) out);
+            return JieIO.out((ByteBuffer) out);
         }
         if (out instanceof OutputStream) {
             return (OutputStream) out;

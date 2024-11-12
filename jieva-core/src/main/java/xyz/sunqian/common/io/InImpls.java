@@ -3,76 +3,29 @@ package xyz.sunqian.common.io;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.JieChars;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
+import java.io.Reader;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.*;
 
-/**
- * This class provides implementations and utilities for {@link InputStream}/{@link Reader}.
- *
- * @author sunqian
- */
-public class JieIn {
+final class InImpls {
 
-    /**
-     * Wraps given array as an {@link InputStream}.
-     * <p>
-     * The returned stream is similar to {@link ByteArrayInputStream} but is not the same, its methods are not modified
-     * by {@code synchronized} thus do not guarantee thread safety. It also supports mark/reset operations, and the
-     * close method does nothing (similar to {@link ByteArrayInputStream}).
-     *
-     * @param array given array
-     * @return given array as an {@link InputStream}
-     */
-    public static InputStream wrap(byte[] array) {
+    static InputStream in(byte[] array) {
         return new BytesInputStream(array);
     }
 
-    /**
-     * Wraps given array as an {@link InputStream} from specified offset up to specified length.
-     * <p>
-     * The returned stream is similar to {@link ByteArrayInputStream} but is not the same, its methods are not modified
-     * by {@code synchronized} thus do not guarantee thread safety. It also supports mark/reset operations, and the
-     * close method does nothing (similar to {@link ByteArrayInputStream}).
-     *
-     * @param array  given array
-     * @param offset specified offset
-     * @param length specified length
-     * @return given array as an {@link InputStream}
-     */
-    public static InputStream wrap(byte[] array, int offset, int length) {
+    static InputStream in(byte[] array, int offset, int length) {
         return new BytesInputStream(array, offset, length);
     }
 
-    /**
-     * Wraps given buffer as an {@link InputStream}.
-     * <p>
-     * Returned stream does not guarantee thread safety. It supports mark/reset operations, and the close method does
-     * nothing.
-     *
-     * @param buffer given buffer
-     * @return given buffer as an {@link InputStream}
-     */
-    public static InputStream wrap(ByteBuffer buffer) {
+    static InputStream in(ByteBuffer buffer) {
         return new BufferInputStream(buffer);
     }
 
-    /**
-     * Wraps given random access file as an {@link InputStream} from specified initial file pointer.
-     * <p>
-     * Returned stream does not guarantee thread safety. It supports mark/reset operations, and first seeks to specified
-     * initial file pointer when creating the stream and re-seeks if calls reset method. The close method will close the
-     * file.
-     * <p>
-     * Note that if anything else seeks this file, it will affect this stream.
-     *
-     * @param random      given random access file
-     * @param initialSeek specified initial file pointer
-     * @return given random access file as an {@link InputStream}
-     * @throws IORuntimeException IO runtime exception
-     */
-    public static InputStream wrap(RandomAccessFile random, long initialSeek) throws IORuntimeException {
+    static InputStream in(RandomAccessFile random, long initialSeek) throws IORuntimeException {
         try {
             return new RandomInputStream(random, initialSeek);
         } catch (IOException e) {
@@ -80,117 +33,27 @@ public class JieIn {
         }
     }
 
-    /**
-     * Wraps given reader as an {@link InputStream} with {@link JieChars#defaultCharset()}.
-     * <p>
-     * Returned stream does not guarantee thread safety. It does support mark/reset operations. The read position of the
-     * reader and stream may not correspond, the close method will close both reader and stream at their current
-     * positions.
-     *
-     * @param reader given reader
-     * @return given reader as an {@link InputStream}
-     */
-    public static InputStream wrap(Reader reader) {
-        return wrap(reader, JieChars.defaultCharset());
-    }
-
-    /**
-     * Wraps given reader as an {@link InputStream} with specified charset.
-     * <p>
-     * Returned stream does not guarantee thread safety. It does support mark/reset operations. The read position of the
-     * reader and stream may not correspond, the close method will close both reader and stream at their current
-     * positions.
-     *
-     * @param reader  given reader
-     * @param charset specified charset
-     * @return given reader as an {@link InputStream}
-     */
-    public static InputStream wrap(Reader reader, Charset charset) {
+    static InputStream in(Reader reader, Charset charset) {
         return new ReaderInputStream(reader, charset);
     }
 
-    /**
-     * Wraps given array as an {@link Reader}.
-     * <p>
-     * The returned stream is similar to {@link CharArrayReader} but is not the same. Returned reader does not guarantee
-     * thread safety. It supports mark/reset operations, and the close method does nothing.
-     *
-     * @param array given array
-     * @return given array as an {@link Reader}
-     */
-    public static Reader wrap(char[] array) {
+    static Reader reader(char[] array) {
         return new BufferReader(array);
     }
 
-    /**
-     * Wraps given array as an {@link Reader} from specified offset up to specified length.
-     * <p>
-     * The returned stream is similar to {@link CharArrayReader} but is not the same. Returned reader does not guarantee
-     * thread safety. It supports mark/reset operations, and the close method does nothing.
-     *
-     * @param array  given array
-     * @param offset specified offset
-     * @param length specified length
-     * @return given array as an {@link Reader}
-     */
-    public static Reader wrap(char[] array, int offset, int length) {
+    static Reader reader(char[] array, int offset, int length) {
         return new BufferReader(array, offset, length);
     }
 
-    /**
-     * Wraps given chars as an {@link Reader}.
-     * <p>
-     * The returned stream is similar to {@link StringReader} but is not the same. Returned reader does not guarantee
-     * thread safety. It supports mark/reset operations, and the close method does nothing.
-     *
-     * @param chars given chars
-     * @return given array as an {@link Reader}
-     */
-    public static Reader wrap(CharSequence chars) {
+    static Reader reader(CharSequence chars) {
         return new BufferReader(chars);
     }
 
-    /**
-     * Wraps given buffer as an {@link Reader}.
-     * <p>
-     * Returned reader does not guarantee thread safety. It supports mark/reset operations, and the close method does
-     * nothing.
-     *
-     * @param buffer given buffer
-     * @return given buffer as an {@link Reader}
-     */
-    public static Reader wrap(CharBuffer buffer) {
+    static Reader reader(CharBuffer buffer) {
         return new BufferReader(buffer);
     }
 
-    /**
-     * Wraps given stream as an {@link Reader} with {@link JieChars#defaultCharset()}.
-     * <p>
-     * The returned stream is similar to {@link InputStreamReader} but is not the same, its methods are not modified by
-     * {@code synchronized} thus do not guarantee thread safety. It does support mark/reset operations. The read
-     * position of the reader and stream may not correspond, the close method will close both reader and stream at their
-     * current positions.
-     *
-     * @param inputStream given stream
-     * @return given stream as an {@link Reader}
-     */
-    public static Reader wrap(InputStream inputStream) {
-        return wrap(inputStream, JieChars.defaultCharset());
-    }
-
-    /**
-     * Wraps given stream as an {@link Reader} with specified charset.
-     * <p>
-     * The returned stream is similar to {@link InputStreamReader} but is not the same, its methods are not modified by
-     * {@code synchronized} thus do not guarantee thread safety. It does support mark/reset operations. The read
-     * position of the reader and stream may not correspond, the close method will close both reader and stream at their
-     * current positions.
-     *
-     * @param inputStream given stream
-     * @param charset     specified charset
-     * @return given stream as an {@link Reader}
-     */
-    public static Reader wrap(InputStream inputStream, Charset charset) {
+    static Reader reader(InputStream inputStream, Charset charset) {
         return new BytesReader(inputStream, charset);
     }
 

@@ -224,12 +224,13 @@ public interface ByteStream {
      * </ul>
      * <p>
      * This is a setting method. To set more than one encoder, use {@link #encoders(Iterable)}, and the interface
-     * provides helper encoder implementations: {@link #roundEncoder(Encoder, int)}.
+     * provides helper encoder implementations: {@link #roundEncoder(Encoder, int)}, {@link #bufferedEncoder(Encoder)}.
      *
      * @param encoder data encoder
      * @return this
      * @see #encoders(Iterable)
      * @see #roundEncoder(Encoder, int)
+     * @see #bufferedEncoder(Encoder)
      */
     ByteStream encoder(Encoder encoder);
 
