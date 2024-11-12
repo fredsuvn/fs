@@ -79,7 +79,7 @@ public interface ByteStream {
      * which is not applicable to the setting of {@link #blockSize(int)}.
      * <p>
      * The round encoder rounds length of the data to a max value which is the largest multiple of the specified
-     * expected block size, and pass the rounding data to given encoder. The remainder data will be buffered for next
+     * expected block size, and passes the rounding data to given encoder. The remainder data will be buffered for next
      * calling, until the last calling (where the {@code end} is {@code true}). In last calling, buffered data and input
      * data will be merged and passed to the given encoder.
      * <p>
@@ -91,6 +91,23 @@ public interface ByteStream {
      */
     static Encoder roundEncoder(Encoder encoder, int expectedBlockSize) {
         return new ByteStreamImpl.RoundEncoder(encoder, expectedBlockSize);
+    }
+
+    /**
+     * Returns a new buffered {@link Encoder} for buffering remaining data of given encoder, typically used for the
+     * encoder which is not applicable to the setting of {@link #blockSize(int)}.
+     * <p>
+     * The buffered encoder passes the input data to given encoder. Given encoder can only process an initial part of
+     * data, the remaining data will be buffered by buffered encoder, and the buffered data will be passed at next
+     * calling (if not end) along with the next input data, merged into one data.
+     * <p>
+     * The buffered encoder is not thread-safe.
+     *
+     * @param encoder given encoder
+     * @return a new buffered {@link Encoder} for buffering remaining data of given encoder
+     */
+    static Encoder bufferedEncoder(Encoder encoder) {
+        return new ByteStreamImpl.BufferedEncoder(encoder);
     }
 
     /**

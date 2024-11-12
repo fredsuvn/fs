@@ -496,14 +496,37 @@ final class CharStreamImpl implements CharStream {
         }
     }
 
-    final static class RoundEncoder implements Encoder {
+    private static abstract class AbsEncoder implements CharStream.Encoder {
 
-        private final Encoder encoder;
+        protected final CharStream.Encoder encoder;
+        protected char[] buf = JieChars.emptyChars();
+
+        protected AbsEncoder(CharStream.Encoder encoder) {
+            this.encoder = encoder;
+        }
+
+        protected CharBuffer totalData(CharBuffer data) {
+            if (JieArray.isEmpty(buf)) {
+                return data;
+            }
+            CharBuffer total = CharBuffer.allocate(totalSize(data));
+            total.put(buf);
+            total.put(data);
+            total.flip();
+            return total;
+        }
+
+        protected int totalSize(CharBuffer data) {
+            return buf.length + data.remaining();
+        }
+    }
+
+    final static class RoundEncoder extends AbsEncoder {
+
         private final int expectedBlockSize;
-        private char[] buf = JieChars.emptyChars();
 
         RoundEncoder(CharStream.Encoder encoder, int expectedBlockSize) {
-            this.encoder = encoder;
+            super(encoder);
             this.expectedBlockSize = expectedBlockSize;
         }
 
@@ -538,17 +561,6 @@ final class CharStreamImpl implements CharStream {
             return encoder.encode(round, false);
         }
 
-        private CharBuffer totalData(CharBuffer data) {
-            if (JieArray.isEmpty(buf)) {
-                return data;
-            }
-            CharBuffer total = CharBuffer.allocate(totalSize(data));
-            total.put(buf);
-            total.put(data);
-            total.flip();
-            return total;
-        }
-
         private CharBuffer roundData(CharBuffer data, int roundSize) {
             CharBuffer round = CharBuffer.allocate(roundSize);
             round.put(buf);
@@ -559,9 +571,23 @@ final class CharStreamImpl implements CharStream {
             round.flip();
             return round;
         }
+    }
 
-        private int totalSize(CharBuffer data) {
-            return buf.length + data.remaining();
+    final static class BufferedEncoder extends AbsEncoder {
+
+        BufferedEncoder(CharStream.Encoder encoder) {
+            super(encoder);
+        }
+
+        @Override
+        public CharBuffer encode(CharBuffer data, boolean end) {
+            CharBuffer total = totalData(data);
+            CharBuffer ret = encoder.encode(total, end);
+            if (total.hasRemaining() && !end) {
+                buf = new char[total.remaining()];
+                total.get(buf);
+            }
+            return ret;
         }
     }
 }

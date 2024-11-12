@@ -868,14 +868,14 @@ public class StreamTest {
     }
 
     @Test
-    public void testBufferedEncoder() {
-        testBufferedEncoder(100, 5, 6);
-        testBufferedEncoder(10086, 11, 333);
-        testBufferedEncoder(10086, 333, 11);
-        testBufferedEncoder(10086, 22, 22);
+    public void testRoundEncoder() {
+        testRoundEncoder(100, 5, 6);
+        testRoundEncoder(10086, 11, 333);
+        testRoundEncoder(10086, 333, 11);
+        testRoundEncoder(10086, 22, 22);
     }
 
-    private void testBufferedEncoder(int size, int blockSize, int expectedBlockSize) {
+    private void testRoundEncoder(int size, int blockSize, int expectedBlockSize) {
         {
             // bytes
             byte[] src = JieRandom.fill(new byte[size]);
@@ -950,6 +950,52 @@ public class StreamTest {
                 expectedBlockSize
             )).start();
             assertEquals(dst2, dst);
+            assertEquals(len, src.length);
+        }
+    }
+
+    @Test
+    public void testBufferedEncoder() {
+        testBufferedEncoder(100, 5, 6);
+        testBufferedEncoder(10086, 11, 333);
+        testBufferedEncoder(10086, 333, 11);
+        testBufferedEncoder(10086, 22, 22);
+        testBufferedEncoder(10086, 333, 1);
+    }
+
+    private void testBufferedEncoder(int size, int blockSize, int eatNum) {
+        {
+            // bytes
+            byte[] src = JieRandom.fill(new byte[size]);
+            byte[] dst = new byte[src.length];
+            long len = ByteStream.from(src).to(dst).blockSize(blockSize).encoder(ByteStream.bufferedEncoder(
+                (data, end) -> {
+                    if (end) {
+                        return data;
+                    }
+                    byte[] bb = new byte[Math.min(data.remaining(), eatNum)];
+                    data.get(bb);
+                    return ByteBuffer.wrap(bb);
+                }
+            )).start();
+            assertEquals(dst, src);
+            assertEquals(len, src.length);
+        }
+        {
+            // chars
+            char[] src = JieRandom.fill(new char[size]);
+            char[] dst = new char[src.length];
+            long len = CharStream.from(src).to(dst).blockSize(blockSize).encoder(CharStream.bufferedEncoder(
+                (data, end) -> {
+                    if (end) {
+                        return data;
+                    }
+                    char[] bb = new char[Math.min(data.remaining(), eatNum)];
+                    data.get(bb);
+                    return CharBuffer.wrap(bb);
+                }
+            )).start();
+            assertEquals(dst, src);
             assertEquals(len, src.length);
         }
     }

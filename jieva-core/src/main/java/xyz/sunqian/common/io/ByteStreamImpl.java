@@ -405,14 +405,37 @@ final class ByteStreamImpl implements ByteStream {
         }
     }
 
-    final static class RoundEncoder implements Encoder {
+    private static abstract class AbsEncoder implements Encoder {
 
-        private final Encoder encoder;
+        protected final Encoder encoder;
+        protected byte[] buf = JieBytes.emptyBytes();
+
+        protected AbsEncoder(Encoder encoder) {
+            this.encoder = encoder;
+        }
+
+        protected ByteBuffer totalData(ByteBuffer data) {
+            if (JieArray.isEmpty(buf)) {
+                return data;
+            }
+            ByteBuffer total = ByteBuffer.allocate(totalSize(data));
+            total.put(buf);
+            total.put(data);
+            total.flip();
+            return total;
+        }
+
+        protected int totalSize(ByteBuffer data) {
+            return buf.length + data.remaining();
+        }
+    }
+
+    final static class RoundEncoder extends AbsEncoder {
+
         private final int expectedBlockSize;
-        private byte[] buf = JieBytes.emptyBytes();
 
         RoundEncoder(Encoder encoder, int expectedBlockSize) {
-            this.encoder = encoder;
+            super(encoder);
             this.expectedBlockSize = expectedBlockSize;
         }
 
@@ -447,17 +470,6 @@ final class ByteStreamImpl implements ByteStream {
             return encoder.encode(round, false);
         }
 
-        private ByteBuffer totalData(ByteBuffer data) {
-            if (JieArray.isEmpty(buf)) {
-                return data;
-            }
-            ByteBuffer total = ByteBuffer.allocate(totalSize(data));
-            total.put(buf);
-            total.put(data);
-            total.flip();
-            return total;
-        }
-
         private ByteBuffer roundData(ByteBuffer data, int roundSize) {
             ByteBuffer round = ByteBuffer.allocate(roundSize);
             round.put(buf);
@@ -468,9 +480,23 @@ final class ByteStreamImpl implements ByteStream {
             round.flip();
             return round;
         }
+    }
 
-        private int totalSize(ByteBuffer data) {
-            return buf.length + data.remaining();
+    final static class BufferedEncoder extends AbsEncoder {
+
+        BufferedEncoder(Encoder encoder) {
+            super(encoder);
+        }
+
+        @Override
+        public ByteBuffer encode(ByteBuffer data, boolean end) {
+            ByteBuffer total = totalData(data);
+            ByteBuffer ret = encoder.encode(total, end);
+            if (total.hasRemaining() && !end) {
+                buf = new byte[total.remaining()];
+                total.get(buf);
+            }
+            return ret;
         }
     }
 }
