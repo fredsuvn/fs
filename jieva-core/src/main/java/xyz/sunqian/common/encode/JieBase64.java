@@ -8,31 +8,51 @@ import java.util.Arrays;
 
 /**
  * This is a static utilities class provides implementations and utilities for {@code Base64} encoder and decoder,
- * mainly specified in <a href="http://www.ietf.org/rfc/rfc4648.txt">RFC 4648</a>,
- * <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a> for {@code MIME}, and
- * <a href="http://www.ietf.org/rfc/rfc1421.txt">RFC 1421</a> for {@code PEM}.
+ * specified in <a href="http://www.ietf.org/rfc/rfc4648.txt">RFC 4648</a>,
+ * <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a> ({@code MIME}), and
+ * <a href="http://www.ietf.org/rfc/rfc1421.txt">RFC 1421</a> ({@code PEM}).
  * <h2>Types</h2>
  * <p>
- * There are 3 types of {@code Base64}:
+ * This class provides 3 types of {@code Base64} for encoding and decoding:
  * <ul>
  *     <li>
- *         {@code Basic}: The typical Base64 type, if no specified, it is generally refers to this type;
+ *         {@code Basic}: Typical Base64 type, if no specified, it is generally refers to this type;
  *     </li>
  *     <li>
- *         {@code URL and Filename safe}: In this type, using '-' and '_' instead of '+' and '/';
+ *         {@code URL Safe}: In this type, using '-' and '_' instead of '+' and '/';
  *     </li>
  *     <li>
- *         {@code Block Mode}: Result of encoding is separated by specified separator (such as \r\n). Common block
- *         types include {@code MIME} (output block size is 76, no separator added to the last block) and {@code PEM} (
- *         output block size is 64, adding separator to the last block);
+ *         {@code Block Separation}: Encoding result is separated by specified separator (such as \r\n). For example:
+ *         <ul>
+ *             <li>
+ *                 {@code MIME}: separated in 76 bytes, no separator added to the last segment;
+ *             </li>
+ *             <li>
+ *                 {@code PEM}: separated in 64 bytes, adding separator to the last segment;
+ *             </li>
+ *         </ul>
  *     </li>
  * </ul>
  * <h2>Stream Encoder and Block Size</h2>
  * <p>
- * {@link Encoder#streamEncoder()} always returns a new encoder wrapped by
- * {@link ByteStream#roundEncoder(ByteStream.Encoder, int)}, and it can process any size of data.
- * Even though {@link Encoder#getBlockSize()} returns 3, it's best to set {@link ByteStream#blockSize(int)} to a
- * reasonable value, such as {@code 384 * 3}, for better performance.
+ * {@link Encoder#streamEncoder()} always returns a new stream encoder wrapped by
+ * {@link ByteStream#roundEncoder(ByteStream.Encoder, int)}, it can process any size of data. Even though
+ * {@link Encoder#getBlockSize()} returns 3, it's best to set {@link ByteStream#blockSize(int)} to a reasonable value
+ * (preferably be multiples of 3), such as {@code 384 * 3}, for better performance.
+ * <h2>Stream Decoder and Block Size</h2>
+ * There are two types of decoder: un-block decoder (decoding for {@code Basic} and {@code URL Safe}) and block decoder
+ * (decoding for {@code Block Mode}).
+ * <p>
+ * Un-block decoder expects the size that is multiples of 4, its
+ * {@link Decoder#getBlockSize()} returns 4, and {@link Decoder#streamEncoder()} returns a new stream decoder wrapped by
+ * {@link ByteStream#roundEncoder(ByteStream.Encoder, int)}. Like stream encoder, it's best to set
+ * {@link ByteStream#blockSize(int)} to a reasonable value (preferably be multiples of 4), such as {@code 1024}, for
+ * better performance.
+ * <p>
+ * {@link Decoder#streamEncoder()} of block decoder returns a new stream decoder wrapped by
+ * {@link ByteStream#bufferedEncoder(ByteStream.Encoder)}, {@link Decoder#getBlockSize()} returns 1. Block decoder
+ * accepts and ignores all non-base64 characters so that it can not determine its expected block. Set
+ * {@link ByteStream#blockSize(int)} to a reasonable value, such as 1024, for better performance.
  *
  * @author sunqian
  */
@@ -80,7 +100,7 @@ public class JieBase64 {
 
     /**
      * Returns a {@code Base64} encoder in type of {@code MIME}, with padding character if the length of source is not a
-     * multiple of 3.
+     * multiple of 3. The {@code MIME} base64 format is separated in 76 bytes, no separator added to the last segment.
      *
      * @return a {@code Base64} encoder in type of {@code MIME}
      */
@@ -90,7 +110,8 @@ public class JieBase64 {
 
     /**
      * Returns a {@code Base64} encoder in type of {@code MIME}, without padding character if the length of source is
-     * not a multiple of 3.
+     * not a multiple of 3. The {@code MIME} base64 format is separated in 76 bytes, no separator added to the last
+     * segment.
      *
      * @return a {@code Base64} encoder in type of {@code MIME}
      */
@@ -100,7 +121,7 @@ public class JieBase64 {
 
     /**
      * Returns a {@code Base64} encoder in type of {@code PEM}, with padding character if the length of source is not a
-     * multiple of 3.
+     * multiple of 3. The {@code PEM} base64 format is separated in 64 bytes, adding separator to the last segment.
      *
      * @return a {@code Base64} encoder in type of {@code PEM}
      */
@@ -110,7 +131,7 @@ public class JieBase64 {
 
     /**
      * Returns a {@code Base64} encoder in type of {@code PEM}, without padding character if the length of source is not
-     * a multiple of 3.
+     * a multiple of 3. The {@code PEM} base64 format is separated in 64 bytes, adding separator to the last segment.
      *
      * @return a {@code Base64} encoder in type of {@code PEM}
      */
@@ -119,24 +140,25 @@ public class JieBase64 {
     }
 
     /**
-     * Returns a {@code Base64} encoder in type of {@code Block Mode}, with specified arguments.
+     * Returns a {@code Base64} encoder in type of {@code Block Separation} with specified arguments.
      *
-     * @param blockSize      Sets the max block size, must be a multiple of {@code 4}.
-     * @param blockSeparator Sets the block separator. The array will be used directly, any modification to array will
-     *                       affect the encoding.
-     * @param padding        Whether add padding character at the end if the length of source is not a multiple of 3.
-     * @param lastSeparator  Whether add block separator at tail if the output size is not multiple of block size.
-     * @return a {@code Base64} encoder in type of {@code Block Mode}
+     * @param separationSize   Sets the max size per separation segment, must be a multiple of {@code 4}.
+     * @param separator        Sets the separator. The array will be used directly, any modification to array will
+     *                         affect the encoding.
+     * @param padding          Whether add padding character at the end if the length of source is not a multiple of 3.
+     * @param addLastSeparator Whether add the separator at tail (after paddings if padding is true) if the output size
+     *                         is not multiple of separation size.
+     * @return a {@code Base64} encoder in type of {@code Block Separation} with specified arguments
      */
-    public static Encoder blockEncoder(
-        int blockSize, byte[] blockSeparator, boolean padding, boolean lastSeparator) throws EncodingException {
-        if (blockSize <= 0) {
+    public static Encoder separationEncoder(
+        int separationSize, byte[] separator, boolean padding, boolean addLastSeparator) throws EncodingException {
+        if (separationSize <= 0) {
             throw new EncodingException("Block size must be positive.");
         }
-        if (blockSize % 4 != 0) {
+        if (separationSize % 4 != 0) {
             throw new EncodingException("Block size must be multiple of 4.");
         }
-        return new BlockEncoder(blockSize, blockSeparator, padding, lastSeparator);
+        return new SeparationEncoder(separationSize, separator, padding, addLastSeparator);
     }
 
     /**
@@ -156,7 +178,7 @@ public class JieBase64 {
     public interface Encoder extends ToCharEncoder {
 
         /**
-         * Returns 3 for {@code Base64} encoding.
+         * Returns 3 for all {@code Base64} encoding.
          *
          * @return 3
          */
@@ -174,9 +196,9 @@ public class JieBase64 {
     public interface Decoder extends ToCharDecoder {
 
         /**
-         * Returns 4 for {@code Base64} decoding.
+         * Returns 4 for un-block decoding, 1 for block decoding.
          *
-         * @return 3
+         * @return 4 for un-block decoding, 1 for block decoding
          */
         @Override
         default int getBlockSize() {
@@ -295,41 +317,41 @@ public class JieBase64 {
         }
     }
 
-    private static class BlockEncoder extends AbsEncoder {
+    private static class SeparationEncoder extends AbsEncoder {
 
-        private static final byte[] BLOCK_SEPARATOR = new byte[]{'\r', '\n'};
+        private static final byte[] SEPARATOR = new byte[]{'\r', '\n'};
 
-        private final int blockSize;
-        private final byte[] blockSeparator;
-        private final boolean lastSeparator;
+        private final int separationSize;
+        private final byte[] separator;
+        private final boolean addLastSeparator;
 
-        private BlockEncoder(int blockSize, byte[] blockSeparator, boolean padding, boolean lastSeparator) {
+        private SeparationEncoder(int separationSize, byte[] separator, boolean padding, boolean addLastSeparator) {
             super(padding);
-            this.blockSize = blockSize;
-            this.blockSeparator = blockSeparator;
-            this.lastSeparator = lastSeparator;
+            this.separationSize = separationSize;
+            this.separator = separator;
+            this.addLastSeparator = addLastSeparator;
         }
 
         @Override
         public int getOutputSize(int inputSize) {
             int outputSize = super.getOutputSize(inputSize);
-            if (!lastSeparator) {
-                outputSize += (outputSize - 1) / blockSize * blockSeparator.length;
+            if (!addLastSeparator) {
+                outputSize += (outputSize - 1) / separationSize * separator.length;
                 return outputSize;
             }
-            int blockCount = outputSize / blockSize;
-            int remainder = outputSize % blockSize;
+            int blockCount = outputSize / separationSize;
+            int remainder = outputSize % separationSize;
             if (remainder == 0) {
-                outputSize += blockCount * blockSeparator.length;
+                outputSize += blockCount * separator.length;
             } else {
-                outputSize += (blockCount + 1) * blockSeparator.length;
+                outputSize += (blockCount + 1) * separator.length;
             }
             return outputSize;
         }
 
         @Override
         public int getBlockSize() {
-            return blockSize / 4 * 3 * 20;
+            return separationSize / 4 * 3 * 20;
         }
 
         @Override
@@ -344,25 +366,28 @@ public class JieBase64 {
                         if (end && !data.hasRemaining()) {
                             return JieBytes.emptyBuffer();
                         }
-                        ByteBuffer ret = ByteBuffer.allocate(getOutputSize(data.remaining()) + blockSeparator.length);
-                        for (byte b : blockSeparator) {
+                        ByteBuffer ret = ByteBuffer.allocate(getOutputSize(data.remaining()) + separator.length);
+                        for (byte b : separator) {
                             ret.put(b);
                         }
-                        BlockEncoder.this.encode(data, ret);
+                        SeparationEncoder.this.encode(data, ret);
                         ret.flip();
                         return ret;
                     }
                     hasPrev = true;
-                    return BlockEncoder.this.encode(data);
+                    return SeparationEncoder.this.encode(data);
                 }
             };
             return ByteStream.roundEncoder(encoder, getBlockSize());
         }
 
         protected int doCode(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff) {
+            if (srcEnd == srcOff) {
+                return 0;
+            }
             char[] dict = dict();
             int srcPos = srcOff;
-            int srcBlock = blockSize / 4 * 3;
+            int srcBlock = separationSize / 4 * 3;
             int roundEnd = srcOff + ((srcEnd - srcOff) / 3 * 3);
             int dstPos = dstOff;
             while (srcPos < roundEnd) {
@@ -377,8 +402,8 @@ public class JieBase64 {
                 int writeLen = (readEnd - srcPos) / 3 * 4;
                 dstPos += writeLen;
                 srcPos = readEnd;
-                if (writeLen == blockSize && (lastSeparator || srcPos < srcEnd)) {
-                    for (byte b : blockSeparator) {
+                if ((writeLen == separationSize && srcPos < srcEnd) || (srcPos == srcEnd && addLastSeparator)) {
+                    for (byte b : separator) {
                         dst[dstPos++] = b;
                     }
                 }
@@ -401,8 +426,8 @@ public class JieBase64 {
                         dst[dstPos++] = '=';
                     }
                 }
-                if (lastSeparator) {
-                    for (byte b : blockSeparator) {
+                if (addLastSeparator) {
+                    for (byte b : separator) {
                         dst[dstPos++] = b;
                     }
                 }
@@ -411,27 +436,31 @@ public class JieBase64 {
         }
     }
 
-    private static final class MimeEncoder extends BlockEncoder {
+    private static final class MimeEncoder extends SeparationEncoder {
 
-        private static final int BLOCK_SIZE = 76;
+        private static final int SEPARATION_SIZE = 76;
 
-        private static final MimeEncoder PADDING = new MimeEncoder(BLOCK_SIZE, BlockEncoder.BLOCK_SEPARATOR, true);
-        private static final MimeEncoder NO_PADDING = new MimeEncoder(BLOCK_SIZE, BlockEncoder.BLOCK_SEPARATOR, false);
+        private static final MimeEncoder PADDING =
+            new MimeEncoder(SEPARATION_SIZE, SeparationEncoder.SEPARATOR, true);
+        private static final MimeEncoder NO_PADDING =
+            new MimeEncoder(SEPARATION_SIZE, SeparationEncoder.SEPARATOR, false);
 
-        private MimeEncoder(int blockSize, byte[] blockSeparator, boolean padding) {
-            super(blockSize, blockSeparator, padding, false);
+        private MimeEncoder(int separationSize, byte[] blockSeparator, boolean padding) {
+            super(separationSize, blockSeparator, padding, false);
         }
     }
 
-    private static final class PemEncoder extends BlockEncoder {
+    private static final class PemEncoder extends SeparationEncoder {
 
-        private static final int BLOCK_SIZE = 64;
+        private static final int SEPARATION_SIZE = 64;
 
-        private static final PemEncoder PADDING = new PemEncoder(BLOCK_SIZE, BlockEncoder.BLOCK_SEPARATOR, true);
-        private static final PemEncoder NO_PADDING = new PemEncoder(BLOCK_SIZE, BlockEncoder.BLOCK_SEPARATOR, false);
+        private static final PemEncoder PADDING =
+            new PemEncoder(SEPARATION_SIZE, SeparationEncoder.SEPARATOR, true);
+        private static final PemEncoder NO_PADDING =
+            new PemEncoder(SEPARATION_SIZE, SeparationEncoder.SEPARATOR, false);
 
-        private PemEncoder(int blockSize, byte[] blockSeparator, boolean padding) {
-            super(blockSize, blockSeparator, padding, false);
+        private PemEncoder(int separationSize, byte[] blockSeparator, boolean padding) {
+            super(separationSize, blockSeparator, padding, true);
         }
     }
 

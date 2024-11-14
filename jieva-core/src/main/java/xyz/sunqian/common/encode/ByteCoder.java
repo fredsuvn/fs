@@ -29,14 +29,20 @@ public interface ByteCoder {
     int getBlockSize();
 
     /**
-     * Returns a {@link ByteStream.Encoder} with current en/de-coding. When using this method, the
+     * Returns a {@link ByteStream.Encoder} with current coding algorithm. When using this method, the
      * {@link ByteStream#blockSize(int)} needs to be set to a correct value. The correct value usually comes from
      * {@link #getBlockSize()} or multiples of it, determined by the implementation. See
      * {@link ByteStream#encoder(ByteStream.Encoder)} and {@link ByteStream#encoders(Iterable)}.
+     * <p>
+     * {@link ByteStream} provides some wrapper encoders to accommodate encoders that do not applicable to the block
+     * size, such as {@link ByteStream#roundEncoder(ByteStream.Encoder, int)},
+     * {@link ByteStream#bufferedEncoder(ByteStream.Encoder)}.
      *
      * @return a {@link ByteStream.Encoder} with current en/de-coding
      * @see ByteStream#encoder(ByteStream.Encoder)
      * @see ByteStream#encoders(Iterable)
+     * @see ByteStream#roundEncoder(ByteStream.Encoder, int)
+     * @see ByteStream#bufferedEncoder(ByteStream.Encoder)
      */
     ByteStream.Encoder streamEncoder();
 }

@@ -14,6 +14,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+import java.util.Arrays;
 import java.util.Base64;
 
 import static org.testng.Assert.assertEquals;
@@ -23,7 +24,12 @@ public class EncodeTest {
 
     @Test
     public void testBase64() throws Exception {
-        testBase64(1024 * 1024);
+        for (int i = 0; i < 10; i++) {
+            testBase64(i);
+        }
+        testBase64(47);
+        testBase64(48);
+        testBase64(49);
         testBase64(1139);
         testBase64(1140);
         testBase64(1141);
@@ -32,47 +38,111 @@ public class EncodeTest {
         testBase64(384 * 3 + 1);
         testBase64(10086);
         testBase64(99);
-        for (int i = 0; i < 10; i++) {
-            testBase64(i);
-        }
         testBase64(JieIO.BUFFER_SIZE);
         testBase64(JieIO.BUFFER_SIZE + 10086);
         testBase64(57);
         testBase64(1024);
+        testBase64(1024 * 1024);
 
         // error
         expectThrows(EncodingException.class, () -> JieBase64.encoder().getOutputSize(-1));
         expectThrows(DecodingException.class, () -> JieBase64.decoder().getOutputSize(-1));
-        expectThrows(EncodingException.class, () -> JieBase64.blockEncoder(-1, new byte[1], true, true));
-        expectThrows(EncodingException.class, () -> JieBase64.blockEncoder(5, new byte[1], true, true));
+        expectThrows(EncodingException.class, () -> JieBase64.separationEncoder(-1, new byte[1], true, true));
+        expectThrows(EncodingException.class, () -> JieBase64.separationEncoder(5, new byte[1], true, true));
+
+        // pem without padding
+        testPemBase64();
     }
 
     private void testBase64(int size) throws Exception {
         byte[] source = JieRandom.fill(new byte[size]);
-        testBase64(source, JieBase64.encoder(true), Base64.getEncoder());
-        testBase64(source, JieBase64.urlEncoder(true), Base64.getUrlEncoder());
-        testBase64(source, JieBase64.mimeEncoder(true), Base64.getMimeEncoder());
-        testBase64(source, JieBase64.encoder(false), Base64.getEncoder().withoutPadding());
-        testBase64(source, JieBase64.urlEncoder(false), Base64.getUrlEncoder().withoutPadding());
-        testBase64(source, JieBase64.mimeEncoder(false), Base64.getMimeEncoder().withoutPadding());
-        testBase64(source, JieBase64.blockEncoder(16, new byte[]{'\t'}, true, false), Base64.getMimeEncoder(16, new byte[]{'\t'}));
-        testBase64(source, JieBase64.blockEncoder(16, new byte[]{'\t'}, false, false), Base64.getMimeEncoder(16, new byte[]{'\t'}).withoutPadding());
-        testBase64(source, JieBase64.blockEncoder(4, new byte[]{'\t'}, true, false), Base64.getMimeEncoder(4, new byte[]{'\t'}));
-        testBase64(source, JieBase64.blockEncoder(4, new byte[]{'\t'}, false, false), Base64.getMimeEncoder(4, new byte[]{'\t'}).withoutPadding());
-        testBase64(source, JieBase64.blockEncoder(400, new byte[]{'\t', '\r'}, true, false), Base64.getMimeEncoder(400, new byte[]{'\t', '\r'}));
-        testBase64(source, JieBase64.blockEncoder(400, new byte[]{'\t', '\r'}, false, false), Base64.getMimeEncoder(400, new byte[]{'\t', '\r'}).withoutPadding());
+        testBase64Jdk(source, JieBase64.encoder(true), Base64.getEncoder());
+        testBase64Jdk(source, JieBase64.urlEncoder(true), Base64.getUrlEncoder());
+        testBase64Jdk(source, JieBase64.mimeEncoder(true), Base64.getMimeEncoder());
+        testBase64Apache(
+            source,
+            JieBase64.pemEncoder(true),
+            new org.apache.commons.codec.binary.Base64(64)
+        );
+        testBase64Jdk(source, JieBase64.encoder(false), Base64.getEncoder().withoutPadding());
+        testBase64Jdk(source, JieBase64.urlEncoder(false), Base64.getUrlEncoder().withoutPadding());
+        testBase64Jdk(source, JieBase64.mimeEncoder(false), Base64.getMimeEncoder().withoutPadding());
+        testBase64Jdk(
+            source,
+            JieBase64.separationEncoder(16, new byte[]{'\t'}, true, false),
+            Base64.getMimeEncoder(16, new byte[]{'\t'})
+        );
+        testBase64Jdk(
+            source,
+            JieBase64.separationEncoder(16, new byte[]{'\t'}, false, false),
+            Base64.getMimeEncoder(16, new byte[]{'\t'}).withoutPadding()
+        );
+        testBase64Jdk(
+            source,
+            JieBase64.separationEncoder(4, new byte[]{'\t'}, true, false),
+            Base64.getMimeEncoder(4, new byte[]{'\t'})
+        );
+        testBase64Jdk(
+            source,
+            JieBase64.separationEncoder(4, new byte[]{'\t'}, false, false),
+            Base64.getMimeEncoder(4, new byte[]{'\t'}).withoutPadding()
+        );
+        testBase64Jdk(
+            source,
+            JieBase64.separationEncoder(400, new byte[]{'\t', '\r'}, true, false),
+            Base64.getMimeEncoder(400, new byte[]{'\t', '\r'})
+        );
+        testBase64Jdk(
+            source,
+            JieBase64.separationEncoder(400, new byte[]{'\t', '\r'}, false, false),
+            Base64.getMimeEncoder(400, new byte[]{'\t', '\r'}).withoutPadding()
+        );
+        testBase64Apache(
+            source,
+            JieBase64.separationEncoder(16, new byte[]{'\t'}, true, true),
+            new org.apache.commons.codec.binary.Base64(16, new byte[]{'\t'})
+        );
+        testBase64Apache(
+            source,
+            JieBase64.separationEncoder(4, new byte[]{'\t'}, true, true),
+            new org.apache.commons.codec.binary.Base64(4, new byte[]{'\t'})
+        );
+        testBase64Apache(
+            source,
+            JieBase64.separationEncoder(400, new byte[]{'\t'}, true, true),
+            new org.apache.commons.codec.binary.Base64(400, new byte[]{'\t'})
+        );
+        testBase64Apache(
+            source,
+            JieBase64.separationEncoder(16, new byte[0], true, false),
+            new org.apache.commons.codec.binary.Base64(16, new byte[0])
+        );
+        testBase64Apache(
+            source,
+            JieBase64.separationEncoder(4, new byte[0], true, false),
+            new org.apache.commons.codec.binary.Base64(4, new byte[0])
+        );
+        testBase64Apache(
+            source,
+            JieBase64.separationEncoder(400, new byte[0], true, false),
+            new org.apache.commons.codec.binary.Base64(400, new byte[0])
+        );
     }
 
-    private void testBase64(byte[] data, JieBase64.Encoder encoder, Base64.Encoder be) throws Exception {
+    private void testBase64Jdk(
+        byte[] data,
+        JieBase64.Encoder encoder,
+        Base64.Encoder jdkEncoder
+    ) throws Exception {
 
-        assertEquals(encoder.encode(data), be.encode(data));
-        assertEquals(encoder.toString(data), be.encodeToString(data));
-        assertEquals(encoder.toString(ByteBuffer.wrap(data)), be.encodeToString(data));
+        assertEquals(encoder.encode(data), jdkEncoder.encode(data));
+        assertEquals(encoder.toString(data), jdkEncoder.encodeToString(data));
+        assertEquals(encoder.toString(ByteBuffer.wrap(data)), jdkEncoder.encodeToString(data));
 
         {
             // wrap
             ByteBuffer b1 = encoder.encode(ByteBuffer.wrap(data));
-            ByteBuffer b2 = be.encode(ByteBuffer.wrap(data));
+            ByteBuffer b2 = jdkEncoder.encode(ByteBuffer.wrap(data));
             assertEquals(b1, b2);
             assertEquals(JieBytes.copyBytes(b1), JieBytes.copyBytes(b2));
         }
@@ -80,7 +150,7 @@ public class EncodeTest {
         {
             // array offset
             ByteBuffer b1 = encoder.encode(TU.bufferDangling(data));
-            ByteBuffer b2 = be.encode(TU.bufferDangling(data));
+            ByteBuffer b2 = jdkEncoder.encode(TU.bufferDangling(data));
             assertEquals(b1, b2);
             assertEquals(JieBytes.copyBytes(b1), JieBytes.copyBytes(b2));
         }
@@ -89,7 +159,7 @@ public class EncodeTest {
         {
             // direct
             ByteBuffer b1 = encoder.encode(JieBytes.copyBuffer(data, true));
-            ByteBuffer b2 = be.encode(JieBytes.copyBuffer(data, true));
+            ByteBuffer b2 = jdkEncoder.encode(JieBytes.copyBuffer(data, true));
             assertEquals(b1, b2);
             assertEquals(JieBytes.copyBytes(b1), JieBytes.copyBytes(b2));
         }
@@ -98,34 +168,34 @@ public class EncodeTest {
             // byte[] -> byte[]
             byte[] dest = new byte[encoder.getOutputSize(data.length)];
             encoder.encode(data, dest);
-            assertEquals(dest, be.encode(data));
+            assertEquals(dest, jdkEncoder.encode(data));
         }
 
         {
             // buffer -> buffer
             byte[] dest = new byte[encoder.getOutputSize(data.length)];
             encoder.encode(ByteBuffer.wrap(data), ByteBuffer.wrap(dest));
-            assertEquals(dest, be.encode(data));
+            assertEquals(dest, jdkEncoder.encode(data));
             dest = new byte[encoder.getOutputSize(data.length)];
             encoder.encode(JieBytes.copyBuffer(data, true), ByteBuffer.wrap(dest));
-            assertEquals(dest, be.encode(data));
+            assertEquals(dest, jdkEncoder.encode(data));
             dest = new byte[encoder.getOutputSize(data.length)];
             encoder.encode(TU.bufferDangling(data), ByteBuffer.wrap(dest));
-            assertEquals(dest, be.encode(data));
+            assertEquals(dest, jdkEncoder.encode(data));
             ByteBuffer destBuffer = ByteBuffer.allocateDirect(encoder.getOutputSize(data.length));
             encoder.encode(JieBytes.copyBuffer(data, true), destBuffer);
             destBuffer.flip();
-            assertEquals(JieBytes.copyBytes(destBuffer), be.encode(data));
+            assertEquals(JieBytes.copyBytes(destBuffer), jdkEncoder.encode(data));
             destBuffer = ByteBuffer.allocateDirect(encoder.getOutputSize(data.length));
             encoder.encode(TU.bufferDangling(data), destBuffer);
             destBuffer.flip();
-            assertEquals(JieBytes.copyBytes(destBuffer), be.encode(data));
+            assertEquals(JieBytes.copyBytes(destBuffer), jdkEncoder.encode(data));
         }
 
         {
             // stream
             ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-            OutputStream out = be.wrap(bytesOut);
+            OutputStream out = jdkEncoder.wrap(bytesOut);
             out.write(data);
             out.close();
             ByteArrayOutputStream bytesOut2 = new ByteArrayOutputStream();
@@ -170,9 +240,114 @@ public class EncodeTest {
         }
     }
 
+    private void testBase64Apache(
+        byte[] data,
+        JieBase64.Encoder encoder,
+        org.apache.commons.codec.binary.Base64 apacheEncoder
+    ) throws Exception {
+
+        assertEquals(encoder.encode(data), apacheEncoder.encode(data));
+        assertEquals(encoder.toString(data), apacheEncoder.encodeToString(data));
+        assertEquals(encoder.toString(ByteBuffer.wrap(data)), apacheEncoder.encodeToString(data));
+
+        {
+            // wrap
+            ByteBuffer b1 = encoder.encode(ByteBuffer.wrap(data));
+            ByteBuffer b2 = ByteBuffer.wrap(apacheEncoder.encode(data));
+            assertEquals(b1, b2);
+            assertEquals(JieBytes.copyBytes(b1), JieBytes.copyBytes(b2));
+        }
+
+        {
+            // array offset
+            ByteBuffer b1 = encoder.encode(TU.bufferDangling(data));
+            ByteBuffer b2 = ByteBuffer.wrap(apacheEncoder.encode(JieBytes.copyBytes(TU.bufferDangling(data))));
+            assertEquals(b1, b2);
+            assertEquals(JieBytes.copyBytes(b1), JieBytes.copyBytes(b2));
+        }
+
+
+        {
+            // direct
+            ByteBuffer b1 = encoder.encode(JieBytes.copyBuffer(data, true));
+            ByteBuffer b2 = ByteBuffer.wrap(apacheEncoder.encode(JieBytes.copyBytes(JieBytes.copyBuffer(data, true))));
+            assertEquals(b1, b2);
+            assertEquals(JieBytes.copyBytes(b1), JieBytes.copyBytes(b2));
+        }
+
+        {
+            // byte[] -> byte[]
+            byte[] dest = new byte[encoder.getOutputSize(data.length)];
+            encoder.encode(data, dest);
+            assertEquals(dest, apacheEncoder.encode(data));
+        }
+
+        {
+            // buffer -> buffer
+            byte[] dest = new byte[encoder.getOutputSize(data.length)];
+            encoder.encode(ByteBuffer.wrap(data), ByteBuffer.wrap(dest));
+            assertEquals(dest, apacheEncoder.encode(data));
+            dest = new byte[encoder.getOutputSize(data.length)];
+            encoder.encode(JieBytes.copyBuffer(data, true), ByteBuffer.wrap(dest));
+            assertEquals(dest, apacheEncoder.encode(data));
+            dest = new byte[encoder.getOutputSize(data.length)];
+            encoder.encode(TU.bufferDangling(data), ByteBuffer.wrap(dest));
+            assertEquals(dest, apacheEncoder.encode(data));
+            ByteBuffer destBuffer = ByteBuffer.allocateDirect(encoder.getOutputSize(data.length));
+            encoder.encode(JieBytes.copyBuffer(data, true), destBuffer);
+            destBuffer.flip();
+            assertEquals(JieBytes.copyBytes(destBuffer), apacheEncoder.encode(data));
+            destBuffer = ByteBuffer.allocateDirect(encoder.getOutputSize(data.length));
+            encoder.encode(TU.bufferDangling(data), destBuffer);
+            destBuffer.flip();
+            assertEquals(JieBytes.copyBytes(destBuffer), apacheEncoder.encode(data));
+        }
+
+        {
+            // error
+            if (data.length > 0) {
+                expectThrows(EncodingException.class, () -> encoder.encode(data, new byte[0]));
+                expectThrows(EncodingException.class, () -> encoder.encode(ByteBuffer.wrap(data), ByteBuffer.wrap(new byte[0])));
+            }
+        }
+    }
+
+    private void testPemBase64() {
+        // pem without padding
+        {
+            // 47
+            byte[] pemSrc = new byte[47];
+            byte[] pemEn = JieBase64.pemEncoder(false).encode(pemSrc);
+            assertEquals(pemEn.length, 65);
+            byte[] pemApacheEn = new org.apache.commons.codec.binary.Base64(64).encode(pemSrc);
+            assertEquals(pemApacheEn.length, 66);
+            assertEquals(Arrays.copyOf(pemEn, 63), Arrays.copyOf(pemApacheEn, 63));
+        }
+        {
+            // 48
+            byte[] pemSrc = new byte[48];
+            byte[] pemEn = JieBase64.pemEncoder(false).encode(pemSrc);
+            assertEquals(pemEn.length, 66);
+            byte[] pemApacheEn = new org.apache.commons.codec.binary.Base64(64).encode(pemSrc);
+            assertEquals(pemApacheEn.length, 66);
+            assertEquals(Arrays.copyOf(pemEn, 66), Arrays.copyOf(pemApacheEn, 66));
+        }
+        {
+            // 49
+            byte[] pemSrc = new byte[49];
+            byte[] pemEn = JieBase64.pemEncoder(false).encode(pemSrc);
+            assertEquals(pemEn.length, 70);
+            byte[] pemApacheEn = new org.apache.commons.codec.binary.Base64(64).encode(pemSrc);
+            assertEquals(pemApacheEn.length, 72);
+            assertEquals(Arrays.copyOf(pemEn, 68), Arrays.copyOf(pemApacheEn, 68));
+        }
+    }
+
     @Test
     public void testHex() throws Exception {
-        testHex(1024 * 1024);
+        for (int i = 0; i < 10; i++) {
+            testHex(i);
+        }
         testHex(1139);
         testHex(1140);
         testHex(1141);
@@ -181,13 +356,11 @@ public class EncodeTest {
         testHex(384 * 3 + 1);
         testHex(10086);
         testHex(99);
-        for (int i = 0; i < 10; i++) {
-            testHex(i);
-        }
         testHex(JieIO.BUFFER_SIZE);
         testHex(JieIO.BUFFER_SIZE + 10086);
         testHex(57);
         testHex(1024);
+        testHex(1024 * 1024);
 
         // error
         expectThrows(EncodingException.class, () -> JieHex.encoder().getOutputSize(-1));
@@ -387,50 +560,34 @@ public class EncodeTest {
 
     // @Test
     // public void test0() throws Exception {
-    //     BytesBuilder bb = new BytesBuilder();
-    //     bb.append("1234567890fgnhdnfhhgdn".getBytes(JieChars.defaultCharset()));
-    //     bb.append((byte) 0xff);
-    //     bb.append((byte) 0xff);
-    //     bb.append((byte) 0xff);
-    //     bb.append((byte) 0xfb);
-    //     bb.append((byte) 0xfb);
-    //     bb.append((byte) 0xfb);
-    //     bb.append((byte) 0xfb);
-    //     bb.append((byte) 0xfb);
-    //     byte[] src = bb.toByteArray();
-    //     String base64 = JieBase64.urlEncoder().toString(src);
-    //     System.out.println(base64);
-    //     byte[] de = JieBase64.decoder().decode(base64);
-    //     System.out.println(new String(de, JieChars.defaultCharset()));
-    //     byte[] de2 = Base64.getUrlDecoder().decode(base64);
-    //     System.out.println(new String(de2, JieChars.defaultCharset()));
-    //     assertEquals(src, de2);
-    //     assertEquals(src, de);
-    //
-    //     byte[] aaa = JieRandom.fill(new byte[57]);
-    //     org.apache.commons.codec.binary.Base64.encodeBase64Chunked()
-    //     byte[] ab = new org.apache.commons.codec.binary.Base64(76).encode(aaa);
-    //     byte[] ab2 = Base64.getMimeEncoder().encode(aaa);
-    //     System.out.println(new String(ab, JieChars.latinCharset()));
-    //     System.out.println("------");
-    //     System.out.println(new String(ab2, JieChars.latinCharset()));
-    //     System.out.println("------");
-    //     // assertEquals(ab, ab2);
-    //     // byte[] sb = JieBase64.mimeEncoder().encode(src);
-    //     // assertEquals(ab, sb);
+    //     byte[] src = JieRandom.fill(new byte[58]);
+    //     byte[] enSrc = org.apache.commons.codec.binary.Base64.encodeBase64(src, true);
+    //     System.out.println(new String(enSrc));
+    //     byte[] xenSrc = new byte[enSrc.length + 2];
+    //     System.arraycopy(enSrc, 0, xenSrc, 0, enSrc.length);
+    //     xenSrc[enSrc.length] = '(';
+    //     xenSrc[enSrc.length + 1] = ')';
+    //     System.out.println(new String(xenSrc));
+    //     byte[] deSrc = org.apache.commons.codec.binary.Base64.decodeBase64(xenSrc);
+    //     assertEquals(deSrc, src);
+    //     deSrc = Base64.getMimeDecoder().decode(xenSrc);
+    //     assertEquals(deSrc, src);
     // }
 
-    // jdk encode: 835
-    // jie encode: 906
-    // jdk decode: 1354
-    // jie decode: 1420
-    // java direct: 863
-    // jie direct: 981
-    // jie encode direct buffer: 1001
-    // jie encode heap buffer: 802
-    // java encode stream: 3582
-    // jie encode stream (570): 1219
-    // jie encode stream (30): 2311
+    // jdk encode: 876
+    // jie encode: 1001
+    // jdk decode: 1486
+    // jie decode: 1610
+    // java direct: 975
+    // jie direct: 1138
+    // jie encode direct buffer: 1130
+    // jie encode heap buffer: 974
+    // java encode stream: 4148
+    // jie encode stream (570): 1376
+    // jie encode stream (30): 2603
+    // jie encode stream (577): 1464
+    // jie encode stream (567): 1250
+    // jie encode stream (570): 1241
     //@Test
     public void testBase64Performance() throws Exception {
         int times = 10000;
@@ -526,6 +683,27 @@ public class EncodeTest {
         }
         t2 = System.currentTimeMillis();
         System.out.println("jie encode stream (30): " + (t2 - t1));
+        t1 = System.currentTimeMillis();
+        for (int i = 0; i < times; i++) {
+            ByteStream bs = ByteStream.from(source).to(new ByteArrayOutputStream()).blockSize(577).encoder(encoder.streamEncoder());
+            bs.start();
+        }
+        t2 = System.currentTimeMillis();
+        System.out.println("jie encode stream (577): " + (t2 - t1));
+        t1 = System.currentTimeMillis();
+        for (int i = 0; i < times; i++) {
+            ByteStream bs = ByteStream.from(source).to(new ByteArrayOutputStream()).blockSize(567).encoder(encoder.streamEncoder());
+            bs.start();
+        }
+        t2 = System.currentTimeMillis();
+        System.out.println("jie encode stream (567): " + (t2 - t1));
+        t1 = System.currentTimeMillis();
+        for (int i = 0; i < times; i++) {
+            ByteStream bs = ByteStream.from(source).to(new ByteArrayOutputStream()).blockSize(570).encoder(encoder.streamEncoder());
+            bs.start();
+        }
+        t2 = System.currentTimeMillis();
+        System.out.println("jie encode stream (570): " + (t2 - t1));
     }
 
     // jie hex encode: 839
