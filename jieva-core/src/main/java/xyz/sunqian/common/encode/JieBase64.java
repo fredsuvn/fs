@@ -382,9 +382,6 @@ public class JieBase64 {
         }
 
         protected int doCode(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff) {
-            if (srcEnd == srcOff) {
-                return 0;
-            }
             char[] dict = dict();
             int srcPos = srcOff;
             int srcBlock = separationSize / 4 * 3;
