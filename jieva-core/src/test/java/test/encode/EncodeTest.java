@@ -47,11 +47,16 @@ public class EncodeTest {
         // error
         expectThrows(EncodingException.class, () -> JieBase64.encoder().getOutputSize(-1));
         expectThrows(DecodingException.class, () -> JieBase64.decoder().getOutputSize(-1));
-        expectThrows(EncodingException.class, () -> JieBase64.separationEncoder(-1, new byte[1], true, true));
-        expectThrows(EncodingException.class, () -> JieBase64.separationEncoder(5, new byte[1], true, true));
+        expectThrows(EncodingException.class, () ->
+            JieBase64.separationEncoder(-1, new byte[1], true, true, true));
+        expectThrows(EncodingException.class, () ->
+            JieBase64.separationEncoder(5, new byte[1], true, true, false));
 
         // pem without padding
         testPemBase64();
+
+        // separator with url-safe
+        testSeparationUrlSafe();
     }
 
     private void testBase64(int size) throws Exception {
@@ -69,62 +74,62 @@ public class EncodeTest {
         testBase64Jdk(source, JieBase64.mimeEncoder(false), Base64.getMimeEncoder().withoutPadding());
         testBase64Jdk(
             source,
-            JieBase64.separationEncoder(16, new byte[]{'\t'}, true, false),
+            JieBase64.separationEncoder(16, new byte[]{'\t'}, true, false, false),
             Base64.getMimeEncoder(16, new byte[]{'\t'})
         );
         testBase64Jdk(
             source,
-            JieBase64.separationEncoder(16, new byte[]{'\t'}, false, false),
+            JieBase64.separationEncoder(16, new byte[]{'\t'}, false, false, false),
             Base64.getMimeEncoder(16, new byte[]{'\t'}).withoutPadding()
         );
         testBase64Jdk(
             source,
-            JieBase64.separationEncoder(4, new byte[]{'\t'}, true, false),
+            JieBase64.separationEncoder(4, new byte[]{'\t'}, true, false, false),
             Base64.getMimeEncoder(4, new byte[]{'\t'})
         );
         testBase64Jdk(
             source,
-            JieBase64.separationEncoder(4, new byte[]{'\t'}, false, false),
+            JieBase64.separationEncoder(4, new byte[]{'\t'}, false, false, false),
             Base64.getMimeEncoder(4, new byte[]{'\t'}).withoutPadding()
         );
         testBase64Jdk(
             source,
-            JieBase64.separationEncoder(400, new byte[]{'\t', '\r'}, true, false),
+            JieBase64.separationEncoder(400, new byte[]{'\t', '\r'}, true, false, false),
             Base64.getMimeEncoder(400, new byte[]{'\t', '\r'})
         );
         testBase64Jdk(
             source,
-            JieBase64.separationEncoder(400, new byte[]{'\t', '\r'}, false, false),
+            JieBase64.separationEncoder(400, new byte[]{'\t', '\r'}, false, false, false),
             Base64.getMimeEncoder(400, new byte[]{'\t', '\r'}).withoutPadding()
         );
         testBase64Apache(
             source,
-            JieBase64.separationEncoder(16, new byte[]{'\t'}, true, true),
+            JieBase64.separationEncoder(16, new byte[]{'\t'}, true, true, false),
             new org.apache.commons.codec.binary.Base64(16, new byte[]{'\t'})
         );
         testBase64Apache(
             source,
-            JieBase64.separationEncoder(4, new byte[]{'\t'}, true, true),
+            JieBase64.separationEncoder(4, new byte[]{'\t'}, true, true, false),
             new org.apache.commons.codec.binary.Base64(4, new byte[]{'\t'})
         );
         testBase64Apache(
             source,
-            JieBase64.separationEncoder(400, new byte[]{'\t'}, true, true),
+            JieBase64.separationEncoder(400, new byte[]{'\t'}, true, true, false),
             new org.apache.commons.codec.binary.Base64(400, new byte[]{'\t'})
         );
         testBase64Apache(
             source,
-            JieBase64.separationEncoder(16, new byte[0], true, false),
+            JieBase64.separationEncoder(16, new byte[0], true, false, false),
             new org.apache.commons.codec.binary.Base64(16, new byte[0])
         );
         testBase64Apache(
             source,
-            JieBase64.separationEncoder(4, new byte[0], true, false),
+            JieBase64.separationEncoder(4, new byte[0], true, false, false),
             new org.apache.commons.codec.binary.Base64(4, new byte[0])
         );
         testBase64Apache(
             source,
-            JieBase64.separationEncoder(400, new byte[0], true, false),
+            JieBase64.separationEncoder(400, new byte[0], true, false, false),
             new org.apache.commons.codec.binary.Base64(400, new byte[0])
         );
     }
@@ -134,8 +139,9 @@ public class EncodeTest {
         JieBase64.Encoder encoder,
         Base64.Encoder jdkEncoder
     ) throws Exception {
+        byte[] enData = jdkEncoder.encode(data);
 
-        assertEquals(encoder.encode(data), jdkEncoder.encode(data));
+        assertEquals(encoder.encode(data), enData);
         assertEquals(encoder.toString(data), jdkEncoder.encodeToString(data));
         assertEquals(encoder.toString(ByteBuffer.wrap(data)), jdkEncoder.encodeToString(data));
 
@@ -168,68 +174,32 @@ public class EncodeTest {
             // byte[] -> byte[]
             byte[] dest = new byte[encoder.getOutputSize(data.length)];
             encoder.encode(data, dest);
-            assertEquals(dest, jdkEncoder.encode(data));
+            assertEquals(dest, enData);
         }
 
         {
             // buffer -> buffer
             byte[] dest = new byte[encoder.getOutputSize(data.length)];
             encoder.encode(ByteBuffer.wrap(data), ByteBuffer.wrap(dest));
-            assertEquals(dest, jdkEncoder.encode(data));
+            assertEquals(dest, enData);
             dest = new byte[encoder.getOutputSize(data.length)];
             encoder.encode(JieBytes.copyBuffer(data, true), ByteBuffer.wrap(dest));
-            assertEquals(dest, jdkEncoder.encode(data));
+            assertEquals(dest, enData);
             dest = new byte[encoder.getOutputSize(data.length)];
             encoder.encode(TU.bufferDangling(data), ByteBuffer.wrap(dest));
-            assertEquals(dest, jdkEncoder.encode(data));
+            assertEquals(dest, enData);
             ByteBuffer destBuffer = ByteBuffer.allocateDirect(encoder.getOutputSize(data.length));
             encoder.encode(JieBytes.copyBuffer(data, true), destBuffer);
             destBuffer.flip();
-            assertEquals(JieBytes.copyBytes(destBuffer), jdkEncoder.encode(data));
+            assertEquals(JieBytes.copyBytes(destBuffer), enData);
             destBuffer = ByteBuffer.allocateDirect(encoder.getOutputSize(data.length));
             encoder.encode(TU.bufferDangling(data), destBuffer);
             destBuffer.flip();
-            assertEquals(JieBytes.copyBytes(destBuffer), jdkEncoder.encode(data));
+            assertEquals(JieBytes.copyBytes(destBuffer), enData);
         }
 
-        {
-            // stream
-            ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-            OutputStream out = jdkEncoder.wrap(bytesOut);
-            out.write(data);
-            out.close();
-            ByteArrayOutputStream bytesOut2 = new ByteArrayOutputStream();
-            {
-                bytesOut2.reset();
-                ByteStream byteStream = ByteStream.from(data).to(bytesOut2).encoder(encoder.streamEncoder());
-                int readNum = (int) byteStream.start();
-                assertEquals(readNum, data.length == 0 ? -1 : data.length);
-                assertEquals(bytesOut.toByteArray(), bytesOut2.toByteArray());
-            }
-            {
-                bytesOut2.reset();
-                ByteStream byteStream = ByteStream.from(data).to(bytesOut2).blockSize(57).encoder(encoder.streamEncoder());
-                int readNum = (int) byteStream.start();
-                assertEquals(readNum, data.length == 0 ? -1 : data.length);
-                assertEquals(bytesOut.toByteArray(), bytesOut2.toByteArray());
-            }
-            {
-                bytesOut2.reset();
-                ByteStream byteStream = ByteStream.from(data).to(bytesOut2).blockSize(570).encoder(encoder.streamEncoder());
-                int readNum = (int) byteStream.start();
-                assertEquals(readNum, data.length == 0 ? -1 : data.length);
-                assertEquals(bytesOut.toByteArray(), bytesOut2.toByteArray());
-            }
-            for (int i = 1; i < 10; i++) {
-                {
-                    bytesOut2.reset();
-                    ByteStream byteStream = ByteStream.from(data).to(bytesOut2).blockSize(i).encoder(encoder.streamEncoder());
-                    int readNum = (int) byteStream.start();
-                    assertEquals(readNum, data.length == 0 ? -1 : data.length);
-                    assertEquals(bytesOut.toByteArray(), bytesOut2.toByteArray());
-                }
-            }
-        }
+        // stream
+        testByteStreamEncoder(data, encoder, enData);
 
         {
             // error
@@ -245,15 +215,16 @@ public class EncodeTest {
         JieBase64.Encoder encoder,
         org.apache.commons.codec.binary.Base64 apacheEncoder
     ) throws Exception {
+        byte[] enData = apacheEncoder.encode(data);
 
-        assertEquals(encoder.encode(data), apacheEncoder.encode(data));
+        assertEquals(encoder.encode(data), enData);
         assertEquals(encoder.toString(data), apacheEncoder.encodeToString(data));
         assertEquals(encoder.toString(ByteBuffer.wrap(data)), apacheEncoder.encodeToString(data));
 
         {
             // wrap
             ByteBuffer b1 = encoder.encode(ByteBuffer.wrap(data));
-            ByteBuffer b2 = ByteBuffer.wrap(apacheEncoder.encode(data));
+            ByteBuffer b2 = ByteBuffer.wrap(enData);
             assertEquals(b1, b2);
             assertEquals(JieBytes.copyBytes(b1), JieBytes.copyBytes(b2));
         }
@@ -279,35 +250,113 @@ public class EncodeTest {
             // byte[] -> byte[]
             byte[] dest = new byte[encoder.getOutputSize(data.length)];
             encoder.encode(data, dest);
-            assertEquals(dest, apacheEncoder.encode(data));
+            assertEquals(dest, enData);
         }
 
         {
             // buffer -> buffer
             byte[] dest = new byte[encoder.getOutputSize(data.length)];
             encoder.encode(ByteBuffer.wrap(data), ByteBuffer.wrap(dest));
-            assertEquals(dest, apacheEncoder.encode(data));
+            assertEquals(dest, enData);
             dest = new byte[encoder.getOutputSize(data.length)];
             encoder.encode(JieBytes.copyBuffer(data, true), ByteBuffer.wrap(dest));
-            assertEquals(dest, apacheEncoder.encode(data));
+            assertEquals(dest, enData);
             dest = new byte[encoder.getOutputSize(data.length)];
             encoder.encode(TU.bufferDangling(data), ByteBuffer.wrap(dest));
-            assertEquals(dest, apacheEncoder.encode(data));
+            assertEquals(dest, enData);
             ByteBuffer destBuffer = ByteBuffer.allocateDirect(encoder.getOutputSize(data.length));
             encoder.encode(JieBytes.copyBuffer(data, true), destBuffer);
             destBuffer.flip();
-            assertEquals(JieBytes.copyBytes(destBuffer), apacheEncoder.encode(data));
+            assertEquals(JieBytes.copyBytes(destBuffer), enData);
             destBuffer = ByteBuffer.allocateDirect(encoder.getOutputSize(data.length));
             encoder.encode(TU.bufferDangling(data), destBuffer);
             destBuffer.flip();
-            assertEquals(JieBytes.copyBytes(destBuffer), apacheEncoder.encode(data));
+            assertEquals(JieBytes.copyBytes(destBuffer), enData);
         }
+
+        // stream
+        testByteStreamEncoder(data, encoder, enData);
 
         {
             // error
             if (data.length > 0) {
                 expectThrows(EncodingException.class, () -> encoder.encode(data, new byte[0]));
                 expectThrows(EncodingException.class, () -> encoder.encode(ByteBuffer.wrap(data), ByteBuffer.wrap(new byte[0])));
+            }
+        }
+    }
+
+    private void testByteStreamEncoder(byte[] data, JieBase64.Encoder encoder, byte[] enData) {
+        {
+            ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+            ByteStream byteStream = ByteStream.from(data).to(bytesOut).encoder(encoder.streamEncoder());
+            int readNum = (int) byteStream.start();
+            assertEquals(readNum, data.length == 0 ? -1 : data.length);
+            assertEquals(bytesOut.toByteArray(), enData);
+        }
+        {
+            ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+            ByteStream byteStream = ByteStream.from(data).to(bytesOut).blockSize(56).encoder(encoder.streamEncoder());
+            int readNum = (int) byteStream.start();
+            assertEquals(readNum, data.length == 0 ? -1 : data.length);
+            assertEquals(bytesOut.toByteArray(), enData);
+        }
+        {
+            ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+            ByteStream byteStream = ByteStream.from(data).to(bytesOut).blockSize(57).encoder(encoder.streamEncoder());
+            int readNum = (int) byteStream.start();
+            assertEquals(readNum, data.length == 0 ? -1 : data.length);
+            assertEquals(bytesOut.toByteArray(), enData);
+        }
+        {
+            ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+            ByteStream byteStream = ByteStream.from(data).to(bytesOut).blockSize(58).encoder(encoder.streamEncoder());
+            int readNum = (int) byteStream.start();
+            assertEquals(readNum, data.length == 0 ? -1 : data.length);
+            assertEquals(bytesOut.toByteArray(), enData);
+        }
+        {
+            ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+            ByteStream byteStream = ByteStream.from(data).to(bytesOut).blockSize(47).encoder(encoder.streamEncoder());
+            int readNum = (int) byteStream.start();
+            assertEquals(readNum, data.length == 0 ? -1 : data.length);
+            assertEquals(bytesOut.toByteArray(), enData);
+        }
+        {
+            ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+            ByteStream byteStream = ByteStream.from(data).to(bytesOut).blockSize(48).encoder(encoder.streamEncoder());
+            int readNum = (int) byteStream.start();
+            assertEquals(readNum, data.length == 0 ? -1 : data.length);
+            assertEquals(bytesOut.toByteArray(), enData);
+        }
+        {
+            ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+            ByteStream byteStream = ByteStream.from(data).to(bytesOut).blockSize(49).encoder(encoder.streamEncoder());
+            int readNum = (int) byteStream.start();
+            assertEquals(readNum, data.length == 0 ? -1 : data.length);
+            assertEquals(bytesOut.toByteArray(), enData);
+        }
+        {
+            ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+            ByteStream byteStream = ByteStream.from(data).to(bytesOut).blockSize(480).encoder(encoder.streamEncoder());
+            int readNum = (int) byteStream.start();
+            assertEquals(readNum, data.length == 0 ? -1 : data.length);
+            assertEquals(bytesOut.toByteArray(), enData);
+        }
+        {
+            ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+            ByteStream byteStream = ByteStream.from(data).to(bytesOut).blockSize(233).encoder(encoder.streamEncoder());
+            int readNum = (int) byteStream.start();
+            assertEquals(readNum, data.length == 0 ? -1 : data.length);
+            assertEquals(bytesOut.toByteArray(), enData);
+        }
+        for (int i = 1; i < 10; i++) {
+            {
+                ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+                ByteStream byteStream = ByteStream.from(data).to(bytesOut).blockSize(i).encoder(encoder.streamEncoder());
+                int readNum = (int) byteStream.start();
+                assertEquals(readNum, data.length == 0 ? -1 : data.length);
+                assertEquals(bytesOut.toByteArray(), enData);
             }
         }
     }
@@ -341,6 +390,21 @@ public class EncodeTest {
             assertEquals(pemApacheEn.length, 72);
             assertEquals(Arrays.copyOf(pemEn, 68), Arrays.copyOf(pemApacheEn, 68));
         }
+    }
+
+    private void testSeparationUrlSafe() {
+        JieBase64.Encoder encoder =
+            JieBase64.separationEncoder(16, new byte[]{'\t'}, true, true, true);
+        byte[] src = JieRandom.fill(new byte[34]);
+        byte[] enSrc = encoder.encode(src);
+        byte[] enApache = new org.apache.commons.codec.binary.Base64(16, new byte[]{'\t'}, true).encode(src);
+        byte[] fixApache = new byte[enSrc.length];
+        System.arraycopy(enApache, 0, fixApache, 0, 48);
+        fixApache[48] = '=';
+        fixApache[49] = '=';
+        fixApache[50] = '\t';
+        assertEquals(enSrc.length, 51);
+        assertEquals(enSrc, fixApache);
     }
 
     @Test
@@ -557,22 +621,6 @@ public class EncodeTest {
         assertEquals(JieBytes.copyBytes(JieHex.decoder().decode(cb)), Hex.decodeHex(s));
         assertEquals(cb.position(), s.length());
     }
-
-    // @Test
-    // public void test0() throws Exception {
-    //     byte[] src = JieRandom.fill(new byte[58]);
-    //     byte[] enSrc = org.apache.commons.codec.binary.Base64.encodeBase64(src, true);
-    //     System.out.println(new String(enSrc));
-    //     byte[] xenSrc = new byte[enSrc.length + 2];
-    //     System.arraycopy(enSrc, 0, xenSrc, 0, enSrc.length);
-    //     xenSrc[enSrc.length] = '(';
-    //     xenSrc[enSrc.length + 1] = ')';
-    //     System.out.println(new String(xenSrc));
-    //     byte[] deSrc = org.apache.commons.codec.binary.Base64.decodeBase64(xenSrc);
-    //     assertEquals(deSrc, src);
-    //     deSrc = Base64.getMimeDecoder().decode(xenSrc);
-    //     assertEquals(deSrc, src);
-    // }
 
     // jdk encode: 876
     // jie encode: 1001

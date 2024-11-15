@@ -2,6 +2,7 @@ package xyz.sunqian.common.encode;
 
 import xyz.sunqian.common.base.JieBytes;
 import xyz.sunqian.common.io.ByteStream;
+import xyz.sunqian.common.io.JieBuffer;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -22,7 +23,7 @@ import java.util.Arrays;
  *         {@code URL Safe}: In this type, using '-' and '_' instead of '+' and '/';
  *     </li>
  *     <li>
- *         {@code Block Separation}: Encoding result is separated by specified separator (such as \r\n). For example:
+ *         {@code Separation}: Encoding result is separated by specified separator (such as \r\n). For example:
  *         <ul>
  *             <li>
  *                 {@code MIME}: separated in 76 bytes, no separator added to the last segment;
@@ -33,26 +34,29 @@ import java.util.Arrays;
  *         </ul>
  *     </li>
  * </ul>
- * <h2>Stream Encoder and Block Size</h2>
- * <p>
+ * <h2>
+ *     Stream Encoder and Block Size
+ * </h2>
  * {@link Encoder#streamEncoder()} always returns a new stream encoder wrapped by
  * {@link ByteStream#roundEncoder(ByteStream.Encoder, int)}, it can process any size of data. Even though
  * {@link Encoder#getBlockSize()} returns 3, it's best to set {@link ByteStream#blockSize(int)} to a reasonable value
  * (preferably be multiples of 3), such as {@code 384 * 3}, for better performance.
- * <h2>Stream Decoder and Block Size</h2>
- * There are two types of decoder: un-block decoder (decoding for {@code Basic} and {@code URL Safe}) and block decoder
- * (decoding for {@code Block Mode}).
+ * <h2>
+ *     Stream Decoder and Block Size
+ * </h2>
+ * This class providers two implementations of decoder: non-separation decoder for types of {@code Basic} and
+ * {@code URL Safe} and separation decoder for {@code Separation} type.
  * <p>
- * Un-block decoder expects the size that is multiples of 4, its
+ * Non-separation decoder expects the size that is multiples of 4, its
  * {@link Decoder#getBlockSize()} returns 4, and {@link Decoder#streamEncoder()} returns a new stream decoder wrapped by
  * {@link ByteStream#roundEncoder(ByteStream.Encoder, int)}. Like stream encoder, it's best to set
  * {@link ByteStream#blockSize(int)} to a reasonable value (preferably be multiples of 4), such as {@code 1024}, for
  * better performance.
  * <p>
- * {@link Decoder#streamEncoder()} of block decoder returns a new stream decoder wrapped by
- * {@link ByteStream#bufferedEncoder(ByteStream.Encoder)}, {@link Decoder#getBlockSize()} returns 1. Block decoder
- * accepts and ignores all non-base64 characters so that it can not determine its expected block. Set
- * {@link ByteStream#blockSize(int)} to a reasonable value, such as 1024, for better performance.
+ * Separation decoder's {@link Decoder#streamEncoder()} returns a new stream decoder wrapped by
+ * {@link ByteStream#bufferedEncoder(ByteStream.Encoder)}, and its {@link Decoder#getBlockSize()} returns 1. Separation
+ * decoder accepts and ignores non-base64 characters so that it can not determine its expected block size for
+ * {@link ByteStream#blockSize(int)}, set it to a reasonable value, such as 1024, for better buffering performance.
  *
  * @author sunqian
  */
@@ -145,29 +149,47 @@ public class JieBase64 {
      * @param separationSize   Sets the max size per separation segment, must be a multiple of {@code 4}.
      * @param separator        Sets the separator. The array will be used directly, any modification to array will
      *                         affect the encoding.
-     * @param padding          Whether add padding character at the end if the length of source is not a multiple of 3.
-     * @param addLastSeparator Whether add the separator at tail (after paddings if padding is true) if the output size
+     * @param padding          Whether adds padding character at the end if the length of source is not a multiple of
+     *                         3.
+     * @param addLastSeparator Whether adds the separator at tail (after paddings if padding is true) if the output size
      *                         is not multiple of separation size.
+     * @param urlSafe          Whether the base64 dict is in {@code URL Safe}
      * @return a {@code Base64} encoder in type of {@code Block Separation} with specified arguments
      */
     public static Encoder separationEncoder(
-        int separationSize, byte[] separator, boolean padding, boolean addLastSeparator) throws EncodingException {
+        int separationSize,
+        byte[] separator,
+        boolean padding,
+        boolean addLastSeparator,
+        boolean urlSafe
+    ) throws EncodingException {
         if (separationSize <= 0) {
             throw new EncodingException("Block size must be positive.");
         }
         if (separationSize % 4 != 0) {
             throw new EncodingException("Block size must be multiple of 4.");
         }
-        return new SeparationEncoder(separationSize, separator, padding, addLastSeparator);
+        return new SeparationEncoder(separationSize, separator, padding, addLastSeparator, urlSafe);
     }
 
     /**
-     * Returns a {@code Base64} decoder in type of {@code Basic}, supports both {@code padding} or {@code no-padding}.
+     * Returns a {@code Base64} decoder for non-separation decoding.
      *
-     * @return a {@code Base64} encoder in type of {@code Basic}
+     * @return a {@code Base64} decoder for non-separation decoding
      */
     public static Decoder decoder() {
-        return BasicDecoder.SINGLETON;
+        return NonSepaartionDecoder.SINGLETON;
+    }
+
+    /**
+     * Returns a {@code Base64} decoder with specified separation option: true for separation decoding, false for
+     * non-separation decoding.
+     *
+     * @param separation true for separation decoding, false for non-separation decoding
+     * @return a {@code Base64} decoder with specified separation option
+     */
+    public static Decoder decoder(boolean separation) {
+        return separation ? SeparationDecoder.SINGLETON : decoder();
     }
 
     /**
@@ -178,7 +200,8 @@ public class JieBase64 {
     public interface Encoder extends ToCharEncoder {
 
         /**
-         * Returns 3 for all {@code Base64} encoding.
+         * Returns 3. {@code Base64} encoding expects the size of input data is multiple of 3 (although it accepts any
+         * size of input data).
          *
          * @return 3
          */
@@ -186,6 +209,17 @@ public class JieBase64 {
         default int getBlockSize() {
             return 3;
         }
+
+        /**
+         * Returns a new stream encoder. The encoder is wrapped by
+         * {@link ByteStream#roundEncoder(ByteStream.Encoder, int)} to keep size of input data is multiple of 3.
+         * Although the encoder accepts any size of input data, it is recommended that sets block size to multiple of 3
+         * for a better performance.
+         *
+         * @return a new stream decoder wrapped by {@link ByteStream#roundEncoder(ByteStream.Encoder, int)}
+         */
+        @Override
+        ByteStream.Encoder streamEncoder();
     }
 
     /**
@@ -196,14 +230,27 @@ public class JieBase64 {
     public interface Decoder extends ToCharDecoder {
 
         /**
-         * Returns 4 for un-block decoding, 1 for block decoding.
+         * Returns 4 for un-separation decoder, 1 for separation decoder. Expected data size for {@code Base64} decoding
+         * is different for un-separation and separation. Un-separation decoder expects the size of input data is
+         * multiple of 4 (although it can decode the data without padding, where the size of the data is not a multiple
+         * of 4). Separation decoder will attempt to decode any size of data so that its block size is 1.
          *
-         * @return 4 for un-block decoding, 1 for block decoding
+         * @return 4 for un-separation decoder, 1 for separation decoder.
          */
         @Override
-        default int getBlockSize() {
-            return 4;
-        }
+        int getBlockSize();
+
+        /**
+         * Returns a new stream decoder. The decoder is wrapped by
+         * {@link ByteStream#roundEncoder(ByteStream.Encoder, int)} or
+         * {@link ByteStream#bufferedEncoder(ByteStream.Encoder)} to satisfy the un-separation and separation decoding.
+         * Thus, it is recommended that sets a multiple of 4 block size for un-separation decoding, or an enough
+         * buffered size for separation decoding, for a better performance.
+         *
+         * @return a new stream decoder wrapped by {@link ByteStream#roundEncoder(ByteStream.Encoder, int)}
+         */
+        @Override
+        ByteStream.Encoder streamEncoder();
     }
 
     private static abstract class AbsEncoder extends AbsCoder.En implements Encoder {
@@ -324,18 +371,78 @@ public class JieBase64 {
         private final int separationSize;
         private final byte[] separator;
         private final boolean addLastSeparator;
+        private final boolean urlSafe;
 
-        private SeparationEncoder(int separationSize, byte[] separator, boolean padding, boolean addLastSeparator) {
+        private SeparationEncoder(
+            int separationSize, byte[] separator, boolean padding, boolean addLastSeparator, boolean urlSafe) {
             super(padding);
             this.separationSize = separationSize;
             this.separator = separator;
             this.addLastSeparator = addLastSeparator;
+            this.urlSafe = urlSafe;
+        }
+
+        @Override
+        protected char[] dict() {
+            return urlSafe ? UrlEncoder.DICT : AbsEncoder.DICT;
+        }
+
+        @Override
+        public ByteBuffer encode(ByteBuffer source) throws EncodingException {
+            return encode0(source, true);
+        }
+
+        @Override
+        public int encode(ByteBuffer source, ByteBuffer dest) throws EncodingException {
+            return encode0(source, dest, true);
         }
 
         @Override
         public int getOutputSize(int inputSize) {
+            return getOutputSize0(inputSize, addLastSeparator);
+        }
+
+        @Override
+        public int getBlockSize() {
+            return separationSize / 4 * 3;
+        }
+
+        @Override
+        public ByteStream.Encoder streamEncoder() {
+            ByteStream.Encoder encoder = new ByteStream.Encoder() {
+
+                private boolean hasPrev = false;
+
+                @Override
+                public ByteBuffer encode(ByteBuffer data, boolean end) {
+                    if (hasPrev) {
+                        if (end && !data.hasRemaining()) {
+                            if (addLastSeparator) {
+                                return JieBytes.copyBuffer(separator);
+                            }
+                            return JieBytes.emptyBuffer();
+                        }
+                        ByteBuffer ret = ByteBuffer.allocate(
+                            (end ? getOutputSize(data.remaining()) : getOutputSize0(data.remaining(), false))
+                                + separator.length
+                        );
+                        for (byte b : separator) {
+                            ret.put(b);
+                        }
+                        SeparationEncoder.this.encode0(data, ret, end);
+                        ret.flip();
+                        return ret;
+                    }
+                    hasPrev = true;
+                    return SeparationEncoder.this.encode0(data, end);
+                }
+            };
+            return ByteStream.roundEncoder(encoder, getBlockSize());
+        }
+
+        private int getOutputSize0(int inputSize, boolean doLast) {
             int outputSize = super.getOutputSize(inputSize);
-            if (!addLastSeparator) {
+            if (!doLast) {
                 outputSize += (outputSize - 1) / separationSize * separator.length;
                 return outputSize;
             }
@@ -349,39 +456,60 @@ public class JieBase64 {
             return outputSize;
         }
 
-        @Override
-        public int getBlockSize() {
-            return separationSize / 4 * 3 * 20;
+        private int encode0(ByteBuffer source, ByteBuffer dest, boolean end) throws EncodingException {
+            int outputSize = getOutputSize0(source.remaining(), addLast(end));
+            checkCodingRemaining(outputSize, dest.remaining());
+            if (source.hasArray() && dest.hasArray()) {
+                doCode(
+                    source.array(),
+                    JieBuffer.getArrayStartIndex(source),
+                    JieBuffer.getArrayEndIndex(source),
+                    dest.array(),
+                    JieBuffer.getArrayStartIndex(dest),
+                    addLast(end)
+                );
+                source.position(source.limit());
+                dest.position(dest.position() + outputSize);
+            } else {
+                ByteBuffer dst = encode0(source, addLast(end));
+                dest.put(dst);
+            }
+            return outputSize;
         }
 
-        @Override
-        public ByteStream.Encoder streamEncoder() {
-            ByteStream.Encoder encoder = new ByteStream.Encoder() {
+        private ByteBuffer encode0(ByteBuffer source, boolean end) throws EncodingException {
+            int outputSize = getOutputSize0(source.remaining(), addLast(end));
+            byte[] dst = new byte[outputSize];
+            if (source.hasArray()) {
+                doCode(
+                    source.array(),
+                    JieBuffer.getArrayStartIndex(source),
+                    JieBuffer.getArrayEndIndex(source),
+                    dst,
+                    0,
+                    addLast(end)
+                );
+                source.position(source.limit());
+            } else {
+                byte[] s = new byte[source.remaining()];
+                source.get(s);
+                doCode(s, 0, s.length, dst, 0, addLast(end));
+            }
+            return ByteBuffer.wrap(dst);
+        }
 
-                private boolean hasPrev = false;
-
-                @Override
-                public ByteBuffer encode(ByteBuffer data, boolean end) {
-                    if (hasPrev) {
-                        if (end && !data.hasRemaining()) {
-                            return JieBytes.emptyBuffer();
-                        }
-                        ByteBuffer ret = ByteBuffer.allocate(getOutputSize(data.remaining()) + separator.length);
-                        for (byte b : separator) {
-                            ret.put(b);
-                        }
-                        SeparationEncoder.this.encode(data, ret);
-                        ret.flip();
-                        return ret;
-                    }
-                    hasPrev = true;
-                    return SeparationEncoder.this.encode(data);
-                }
-            };
-            return ByteStream.roundEncoder(encoder, getBlockSize());
+        private boolean addLast(boolean end) {
+            if (end) {
+                return addLastSeparator;
+            }
+            return false;
         }
 
         protected int doCode(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff) {
+            return doCode(src, srcOff, srcEnd, dst, dstOff, addLastSeparator);
+        }
+
+        private int doCode(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, boolean doLast) {
             char[] dict = dict();
             int srcPos = srcOff;
             int srcBlock = separationSize / 4 * 3;
@@ -399,7 +527,7 @@ public class JieBase64 {
                 int writeLen = (readEnd - srcPos) / 3 * 4;
                 dstPos += writeLen;
                 srcPos = readEnd;
-                if ((writeLen == separationSize && srcPos < srcEnd) || (srcPos == srcEnd && addLastSeparator)) {
+                if ((writeLen == separationSize && srcPos < srcEnd) || (srcPos == srcEnd && doLast)) {
                     for (byte b : separator) {
                         dst[dstPos++] = b;
                     }
@@ -423,7 +551,7 @@ public class JieBase64 {
                         dst[dstPos++] = '=';
                     }
                 }
-                if (addLastSeparator) {
+                if (doLast) {
                     for (byte b : separator) {
                         dst[dstPos++] = b;
                     }
@@ -443,7 +571,7 @@ public class JieBase64 {
             new MimeEncoder(SEPARATION_SIZE, SeparationEncoder.SEPARATOR, false);
 
         private MimeEncoder(int separationSize, byte[] blockSeparator, boolean padding) {
-            super(separationSize, blockSeparator, padding, false);
+            super(separationSize, blockSeparator, padding, false, false);
         }
     }
 
@@ -457,7 +585,7 @@ public class JieBase64 {
             new PemEncoder(SEPARATION_SIZE, SeparationEncoder.SEPARATOR, false);
 
         private PemEncoder(int separationSize, byte[] blockSeparator, boolean padding) {
-            super(separationSize, blockSeparator, padding, true);
+            super(separationSize, blockSeparator, padding, true, false);
         }
     }
 
@@ -496,7 +624,7 @@ public class JieBase64 {
 
         @Override
         public int getBlockSize() {
-            return 384 * 4;
+            return 4;
         }
 
         @Override
@@ -551,21 +679,31 @@ public class JieBase64 {
         }
     }
 
-    private static final class BasicDecoder extends AbsDecoder {
+    private static final class NonSepaartionDecoder extends AbsDecoder {
 
-        private static final BasicDecoder SINGLETON = new BasicDecoder();
+        private static final NonSepaartionDecoder SINGLETON = new NonSepaartionDecoder();
 
-        private BasicDecoder() {
+        private NonSepaartionDecoder() {
             super();
         }
     }
 
-    private static final class MimeDecoder extends AbsDecoder {
+    private static final class SeparationDecoder extends AbsDecoder {
 
-        private static final MimeDecoder SINGLETON = new MimeDecoder();
+        private static final SeparationDecoder SINGLETON = new SeparationDecoder();
 
-        private MimeDecoder() {
+        private SeparationDecoder() {
             super();
+        }
+
+        @Override
+        public int getBlockSize() {
+            return 1;
+        }
+
+        @Override
+        protected void checkCodingRemaining(int srcRemaining, int dstRemaining) {
+            // No checking, because no determine.
         }
     }
 }

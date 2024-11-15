@@ -4,15 +4,6 @@ import xyz.sunqian.common.io.ByteStream;
 
 /**
  * This is a static utilities class provides implementations and utilities for {@code Hex} encoder and decoder.
- * <p>
- * {@link Encoder#streamEncoder()} always returns a singleton thread-safe object, it can process any size of data. Even
- * though {@link Encoder#getBlockSize()} returns 1, it's best to set {@link ByteStream#blockSize(int)} to a reasonable
- * value, such as {@code 1024}, for better performance.
- * <p>
- * {@link Decoder#streamEncoder()} always returns a new stream decoder wrapped by
- * {@link ByteStream#roundEncoder(ByteStream.Encoder, int)}. Although the stream decoder accepts both odd and even size
- * of data, even size has a better performance. {@link Decoder#getBlockSize()} returns minimal block size: 2, like the
- * encoder, set a reasonable block size (preferably be an even value) such as {@code 1024}.
  *
  * @author sunqian
  */
@@ -44,7 +35,7 @@ public class JieHex {
     public interface Encoder extends ToCharEncoder {
 
         /**
-         * Returns 1 because {@code Hex} encoding is applicable to any size of data.
+         * Returns 1. {@code Hex} encoding is applicable to any size of data so that returns 1.
          *
          * @return 1
          */
@@ -52,6 +43,14 @@ public class JieHex {
         default int getBlockSize() {
             return 1;
         }
+
+        /**
+         * Returns a singleton thread-safe stream encoder object, accepts any size of input data.
+         *
+         * @return a singleton thread-safe stream encoder object
+         */
+        @Override
+        ByteStream.Encoder streamEncoder();
     }
 
     /**
@@ -62,7 +61,8 @@ public class JieHex {
     public interface Decoder extends ToCharDecoder {
 
         /**
-         * Returns 2 because data size of {@code Hex} decoding should be even.
+         * Returns 2. Data size for {@code Hex} decoding should be even, so that minimal block size for {@code Hex}
+         * decoding is 2.
          *
          * @return 1
          */
@@ -70,6 +70,17 @@ public class JieHex {
         default int getBlockSize() {
             return 2;
         }
+
+        /**
+         * Returns a new stream decoder. The decoder is wrapped by
+         * {@link ByteStream#roundEncoder(ByteStream.Encoder, int)} to keep size of input data is even. Although the
+         * decoder accepts any size of input data, it is recommended that sets an even block size for a better
+         * performance.
+         *
+         * @return a new stream decoder wrapped by {@link ByteStream#roundEncoder(ByteStream.Encoder, int)}
+         */
+        @Override
+        ByteStream.Encoder streamEncoder();
     }
 
     private static final class HexEncoder extends AbsCoder.En implements Encoder {
