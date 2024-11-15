@@ -12,7 +12,6 @@ import java.util.Arrays;
  * specified in <a href="http://www.ietf.org/rfc/rfc4648.txt">RFC 4648</a>,
  * <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a> ({@code MIME}), and
  * <a href="http://www.ietf.org/rfc/rfc1421.txt">RFC 1421</a> ({@code PEM}).
- * <h2>Types</h2>
  * <p>
  * This class provides 3 types of {@code Base64} for encoding and decoding:
  * <ul>
@@ -34,29 +33,6 @@ import java.util.Arrays;
  *         </ul>
  *     </li>
  * </ul>
- * <h2>
- *     Stream Encoder and Block Size
- * </h2>
- * {@link Encoder#streamEncoder()} always returns a new stream encoder wrapped by
- * {@link ByteStream#roundEncoder(ByteStream.Encoder, int)}, it can process any size of data. Even though
- * {@link Encoder#getBlockSize()} returns 3, it's best to set {@link ByteStream#blockSize(int)} to a reasonable value
- * (preferably be multiples of 3), such as {@code 384 * 3}, for better performance.
- * <h2>
- *     Stream Decoder and Block Size
- * </h2>
- * This class providers two implementations of decoder: non-separation decoder for types of {@code Basic} and
- * {@code URL Safe} and separation decoder for {@code Separation} type.
- * <p>
- * Non-separation decoder expects the size that is multiples of 4, its
- * {@link Decoder#getBlockSize()} returns 4, and {@link Decoder#streamEncoder()} returns a new stream decoder wrapped by
- * {@link ByteStream#roundEncoder(ByteStream.Encoder, int)}. Like stream encoder, it's best to set
- * {@link ByteStream#blockSize(int)} to a reasonable value (preferably be multiples of 4), such as {@code 1024}, for
- * better performance.
- * <p>
- * Separation decoder's {@link Decoder#streamEncoder()} returns a new stream decoder wrapped by
- * {@link ByteStream#bufferedEncoder(ByteStream.Encoder)}, and its {@link Decoder#getBlockSize()} returns 1. Separation
- * decoder accepts and ignores non-base64 characters so that it can not determine its expected block size for
- * {@link ByteStream#blockSize(int)}, set it to a reasonable value, such as 1024, for better buffering performance.
  *
  * @author sunqian
  */
