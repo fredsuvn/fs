@@ -8,12 +8,14 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 /**
- * This is a static utilities class provides implementations and utilities for {@code Base64} encoder and decoder,
- * specified in <a href="http://www.ietf.org/rfc/rfc4648.txt">RFC 4648</a>,
- * <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a> ({@code MIME}), and
- * <a href="http://www.ietf.org/rfc/rfc1421.txt">RFC 1421</a> ({@code PEM}).
- * <p>
- * This class provides 3 types of {@code Base64} for encoding and decoding:
+ * This is a static utilities class for {@code Base64} encoding and decoding, provides encoder and decoder
+ * implementations: {@link Encoder} and {@link Decoder}. The algorithms are specified in:
+ * <ul>
+ *     <li>{@code Basic}: <a href="http://www.ietf.org/rfc/rfc4648.txt">RFC 4648</a></li>
+ *     <li>{@code MIME}: <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a></li>
+ *     <li>{@code PEM}: <a href="http://www.ietf.org/rfc/rfc1421.txt">RFC 1421</a></li>
+ * </ul>
+ * This class provides 3 types of {@code Base64}:
  * <ul>
  *     <li>
  *         {@code Basic}: Typical Base64 type, if no specified, it is generally refers to this type;
@@ -35,6 +37,8 @@ import java.util.Arrays;
  * </ul>
  *
  * @author sunqian
+ * @see Encoder
+ * @see Decoder
  */
 public class JieBase64 {
 
@@ -169,7 +173,8 @@ public class JieBase64 {
     }
 
     /**
-     * {@code Base64} encoder.
+     * {@code Base64} encoder implementation. {@link #getBlockSize()} and {@link #streamEncoder()} are overridden and
+     * require attention.
      *
      * @author sunqian
      */
@@ -199,7 +204,8 @@ public class JieBase64 {
     }
 
     /**
-     * {@code Base64} decoder.
+     * {@code Base64} decoder implementation. {@link #getBlockSize()} and {@link #streamEncoder()} are overridden and
+     * require attention.
      *
      * @author sunqian
      */
@@ -218,12 +224,13 @@ public class JieBase64 {
 
         /**
          * Returns a new stream decoder. The decoder is wrapped by
-         * {@link ByteStream#roundEncoder(ByteStream.Encoder, int)} or
-         * {@link ByteStream#bufferedEncoder(ByteStream.Encoder)} to satisfy the un-separation and separation decoding.
-         * Thus, it is recommended that sets a multiple of 4 block size for un-separation decoding, or an enough
-         * buffered size for separation decoding, for a better performance.
+         * {@link ByteStream#roundEncoder(ByteStream.Encoder, int)} for un-separation, and
+         * {@link ByteStream#bufferedEncoder(ByteStream.Encoder)} for separation. Thus, it is recommended that sets a
+         * multiple of 4 block size for un-separation decoding, or an enough buffered size, such as 1024 for separation
+         * decoding, for a better performance.
          *
-         * @return a new stream decoder wrapped by {@link ByteStream#roundEncoder(ByteStream.Encoder, int)}
+         * @return a new stream decoder wrapped by {@link ByteStream#roundEncoder(ByteStream.Encoder, int)} or
+         * {@link ByteStream#bufferedEncoder(ByteStream.Encoder)}
          */
         @Override
         ByteStream.Encoder streamEncoder();
@@ -604,8 +611,8 @@ public class JieBase64 {
         }
 
         @Override
-        protected void checkCodingRemaining(int srcRemaining, int dstRemaining) {
-            // No checking, because no determine.
+        public ByteStream.Encoder streamEncoder() {
+            return ByteStream.roundEncoder(this, getBlockSize());
         }
 
         protected int doCode(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff) {

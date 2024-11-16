@@ -3,9 +3,12 @@ package xyz.sunqian.common.encode;
 import xyz.sunqian.common.io.ByteStream;
 
 /**
- * This is a static utilities class provides implementations and utilities for {@code Hex} encoder and decoder.
+ * This is a static utilities class for {@code Hex} encoding and decoding, provides encoder and decoder implementations:
+ * {@link Encoder} and {@link Decoder}.
  *
  * @author sunqian
+ * @see Encoder
+ * @see Decoder
  */
 public class JieHex {
 
@@ -28,7 +31,8 @@ public class JieHex {
     }
 
     /**
-     * {@code Hex} encoder.
+     * {@code Hex} encoder implementation. {@link #getBlockSize()} and {@link #streamEncoder()} are overridden and
+     * require attention.
      *
      * @author sunqian
      */
@@ -54,7 +58,8 @@ public class JieHex {
     }
 
     /**
-     * {@code Hex} decoder.
+     * {@code Hex} decoder implementation. {@link #getBlockSize()} and {@link #streamEncoder()} are overridden and
+     * require attention.
      *
      * @author sunqian
      */
