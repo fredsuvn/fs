@@ -8,6 +8,7 @@ import xyz.sunqian.common.base.JieChars;
 import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.encode.*;
 import xyz.sunqian.common.io.ByteStream;
+import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieIO;
 
 import java.io.ByteArrayOutputStream;
@@ -622,6 +623,57 @@ public class EncodeTest {
         assertEquals(cb.position(), s.length());
     }
 
+    @Test
+    public void testOthers() throws Exception {
+        String s = "0123456789ABCDEFabcdef";
+        {
+            // Hex
+            byte[] en = JieHex.encoder().encode(s.getBytes(JieChars.latinCharset()));
+            en[11] = 'Q';
+            String[] error = new String[1];
+            try {
+                JieHex.decoder().decode(en);
+            } catch (DecodingException e) {
+                error[0] = e.getMessage();
+            } finally {
+                assertEquals(error[0], "Invalid hex char at pos 11: Q.");
+                error[0] = null;
+            }
+            try {
+                ByteStream.from(en).to(new ByteArrayOutputStream()).blockSize(1)
+                    .encoder(JieHex.decoder().streamEncoder()).start();
+            } catch (IORuntimeException e) {
+                error[0] = e.getCause().getMessage();
+            } finally {
+                assertEquals(error[0], "Invalid hex char at pos 11: Q.");
+                error[0] = null;
+            }
+        }
+        {
+            // Base64
+            byte[] en = JieBase64.encoder().encode(s.getBytes(JieChars.latinCharset()));
+            en[11] = ']';
+            String[] error = new String[1];
+            try {
+                JieBase64.decoder().decode(en);
+            } catch (DecodingException e) {
+                error[0] = e.getMessage();
+            } finally {
+                assertEquals(error[0], "Invalid base64 char at pos 11: ].");
+                error[0] = null;
+            }
+            try {
+                ByteStream.from(en).to(new ByteArrayOutputStream()).blockSize(1)
+                    .encoder(JieBase64.decoder().streamEncoder()).start();
+            } catch (IORuntimeException e) {
+                error[0] = e.getCause().getMessage();
+            } finally {
+                assertEquals(error[0], "Invalid base64 char at pos 11: ].");
+                error[0] = null;
+            }
+        }
+    }
+
     // jdk encode: 876
     // jie encode: 1001
     // jdk decode: 1486
@@ -754,16 +806,16 @@ public class EncodeTest {
         System.out.println("jie encode stream (570): " + (t2 - t1));
     }
 
-    // jie hex encode: 4079
-    // apache hex encode: 15510
-    // jie hex decode: 30313
-    // apache hex decode: 45678
-    // jie hex encode stream: 6703
-    // jie hex encode stream(99999): 7311
-    // jie hex encode stream(100): 8996
-    // jie hex decode stream: 30644
-    // jie hex decode stream(99999): 33265
-    // jie hex decode stream(100): 37011
+    // jie hex encode: 8097
+    // apache hex encode: 27923
+    // jie hex decode: 62509
+    // apache hex decode: 92295
+    // jie hex encode stream: 8995
+    // jie hex encode stream(99999): 9061
+    // jie hex encode stream(100): 11850
+    // jie hex decode stream: 62201
+    // jie hex decode stream(99999): 67351
+    // jie hex decode stream(100): 74228
     //@Test
     public void testHexPerformance() throws Exception {
         int times = 10000;
@@ -796,45 +848,53 @@ public class EncodeTest {
         }
         t2 = System.currentTimeMillis();
         System.out.println("apache hex decode: " + (t2 - t1));
+        ByteArrayOutputStream enOutput = new ByteArrayOutputStream(hexEncoded.length);
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
-            ByteStream bs = ByteStream.from(source).to(new ByteArrayOutputStream()).encoder(hexEn.streamEncoder());
+            ByteStream bs = ByteStream.from(source).to(enOutput).encoder(hexEn.streamEncoder());
             bs.start();
+            enOutput.reset();
         }
         t2 = System.currentTimeMillis();
         System.out.println("jie hex encode stream: " + (t2 - t1));
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
-            ByteStream bs = ByteStream.from(source).to(new ByteArrayOutputStream()).blockSize(99999).encoder(hexEn.streamEncoder());
+            ByteStream bs = ByteStream.from(source).to(enOutput).blockSize(99999).encoder(hexEn.streamEncoder());
             bs.start();
+            enOutput.reset();
         }
         t2 = System.currentTimeMillis();
         System.out.println("jie hex encode stream(99999): " + (t2 - t1));
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
-            ByteStream bs = ByteStream.from(source).to(new ByteArrayOutputStream()).blockSize(100).encoder(hexEn.streamEncoder());
+            ByteStream bs = ByteStream.from(source).to(enOutput).blockSize(100).encoder(hexEn.streamEncoder());
             bs.start();
+            enOutput.reset();
         }
         t2 = System.currentTimeMillis();
         System.out.println("jie hex encode stream(100): " + (t2 - t1));
+        ByteArrayOutputStream deOutput = new ByteArrayOutputStream(source.length);
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
-            ByteStream bs = ByteStream.from(hexEncoded).to(new ByteArrayOutputStream()).encoder(hexDe.streamEncoder());
+            ByteStream bs = ByteStream.from(hexEncoded).to(deOutput).encoder(hexDe.streamEncoder());
             bs.start();
+            deOutput.reset();
         }
         t2 = System.currentTimeMillis();
         System.out.println("jie hex decode stream: " + (t2 - t1));
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
-            ByteStream bs = ByteStream.from(hexEncoded).to(new ByteArrayOutputStream()).blockSize(99999).encoder(hexDe.streamEncoder());
+            ByteStream bs = ByteStream.from(hexEncoded).to(deOutput).blockSize(99999).encoder(hexDe.streamEncoder());
             bs.start();
+            deOutput.reset();
         }
         t2 = System.currentTimeMillis();
         System.out.println("jie hex decode stream(99999): " + (t2 - t1));
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
-            ByteStream bs = ByteStream.from(hexEncoded).to(new ByteArrayOutputStream()).blockSize(100).encoder(hexDe.streamEncoder());
+            ByteStream bs = ByteStream.from(hexEncoded).to(deOutput).blockSize(100).encoder(hexDe.streamEncoder());
             bs.start();
+            deOutput.reset();
         }
         t2 = System.currentTimeMillis();
         System.out.println("jie hex decode stream(100): " + (t2 - t1));

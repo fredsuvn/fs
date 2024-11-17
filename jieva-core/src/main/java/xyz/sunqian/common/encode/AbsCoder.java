@@ -99,8 +99,9 @@ abstract class AbsCoder implements ByteCoder {
 
             @Override
             public ByteBuffer encode(ByteBuffer data, boolean end) {
+                int pos = data.position();
                 ByteBuffer ret = doCode(startPos, data, end);
-                startPos += ret.remaining();
+                startPos += (data.position() - pos);
                 return ret;
             }
         };

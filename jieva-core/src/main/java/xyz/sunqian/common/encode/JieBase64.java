@@ -401,6 +401,7 @@ public class JieBase64 {
 
                 @Override
                 public ByteBuffer encode(ByteBuffer data, boolean end) {
+                    int pos = data.position();
                     if (startPos > 0) {
                         if (end && !data.hasRemaining()) {
                             if (addLastSeparator) {
@@ -416,10 +417,11 @@ public class JieBase64 {
                         }
                         doCode(startPos, data, ret, end);
                         ret.flip();
+                        startPos += (data.position() - pos);
                         return ret;
                     }
                     ByteBuffer ret = doCode(startPos, data, end);
-                    startPos += ret.remaining();
+                    startPos += (data.position() - pos);
                     return ret;
                 }
             };
