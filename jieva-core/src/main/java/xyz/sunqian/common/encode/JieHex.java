@@ -104,7 +104,7 @@ public class JieHex {
             return inputSize * 2;
         }
 
-        protected int doCode(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, boolean end) {
+        protected int doCode(long startPos, byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, boolean end) {
             for (int i = srcOff, j = dstOff; i < srcEnd; ) {
                 int bits = src[i++];
                 dst[j++] = (byte) DICT[((bits >> 4) & 0x0f)];
@@ -129,23 +129,20 @@ public class JieHex {
             return inputSize / 2;
         }
 
-        @Override
-        public ByteStream.Encoder streamEncoder() {
-            return ByteStream.roundEncoder(this, getBlockSize());
-        }
-
-        protected int doCode(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, boolean end) {
+        protected int doCode(long startPos, byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, boolean end) {
             int length = srcEnd - srcOff;
             for (int i = srcOff, j = dstOff; i < srcEnd; ) {
-                int bits1 = toDigit((char) src[i++]);
-                int bits2 = toDigit((char) src[i++]);
+                int bits1 = toDigit((char) src[i], startPos, i);
+                i++;
+                int bits2 = toDigit((char) src[i], startPos, i);
+                i++;
                 int bits = ((bits1 << 4) | bits2);
                 dst[j++] = (byte) bits;
             }
             return length / 2;
         }
 
-        private int toDigit(char c) {
+        private int toDigit(char c, long startPos, int index) {
             if (c >= '0' && c <= '9') {
                 return c - '0';
             }
@@ -155,7 +152,7 @@ public class JieHex {
             if (c >= 'A' && c <= 'F') {
                 return c - 'A' + 10;
             }
-            throw new DecodingException("Invalid hex char: " + c + ".");
+            throw new DecodingException("Invalid hex char at pos " + (startPos + index) + ": " + c + ".");
         }
     }
 }

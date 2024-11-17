@@ -266,16 +266,11 @@ public class JieBase64 {
             return inputSize / 3 * 4 + remainder + 1;
         }
 
-        @Override
-        public ByteStream.Encoder streamEncoder() {
-            return ByteStream.roundEncoder(this, getBlockSize());
-        }
-
         protected char[] dict() {
             return DICT;
         }
 
-        protected int doCode(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, boolean end) {
+        protected int doCode(long startPos, byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, boolean end) {
             char[] dict = dict();
             int srcPos = srcOff;
             int dstPos = dstOff;
@@ -402,39 +397,36 @@ public class JieBase64 {
         public ByteStream.Encoder streamEncoder() {
             ByteStream.Encoder encoder = new ByteStream.Encoder() {
 
-                private boolean hasPrev = false;
+                private long startPos = 0;
 
                 @Override
                 public ByteBuffer encode(ByteBuffer data, boolean end) {
-                    if (hasPrev) {
+                    if (startPos > 0) {
                         if (end && !data.hasRemaining()) {
                             if (addLastSeparator) {
                                 return JieBytes.copyBuffer(separator);
                             }
                             return JieBytes.emptyBuffer();
                         }
-                        // ByteBuffer ret = ByteBuffer.allocate(
-                        //     (end ? getOutputSize(data.remaining()) : getOutputSize0(data.remaining(), false))
-                        //         + separator.length
-                        // );
                         ByteBuffer ret = ByteBuffer.allocate(
                             getOutputSize(data.remaining(), end) + separator.length
                         );
                         for (byte b : separator) {
                             ret.put(b);
                         }
-                        doCode(data, ret, end);
+                        doCode(startPos, data, ret, end);
                         ret.flip();
                         return ret;
                     }
-                    hasPrev = true;
-                    return doCode(data, end);
+                    ByteBuffer ret = doCode(startPos, data, end);
+                    startPos += ret.remaining();
+                    return ret;
                 }
             };
             return ByteStream.roundEncoder(encoder, getBlockSize());
         }
 
-        protected int doCode(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, boolean end) {
+        protected int doCode(long startPos, byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, boolean end) {
             if (end) {
                 return doCode0(src, srcOff, srcEnd, dst, dstOff, addLastSeparator);
             }
@@ -559,12 +551,7 @@ public class JieBase64 {
             return 4;
         }
 
-        @Override
-        public ByteStream.Encoder streamEncoder() {
-            return ByteStream.roundEncoder(this, getBlockSize());
-        }
-
-        protected int doCode(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, boolean end) {
+        protected int doCode(long startPos, byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, boolean end) {
             int srcPos = srcOff;
             int dstPos = dstOff;
             int bits = 0;
@@ -587,7 +574,8 @@ public class JieBase64 {
                             return dstPos - dstOff;
                         }
                     }
-                    throw new DecodingException("Invalid base64 char: " + ((char) c) + ".");
+                    throw new DecodingException(
+                        "Invalid base64 char at pos " + (startPos + srcPos - 1) + ": " + ((char) c) + ".");
                 }
                 bits |= (b << shiftTo);
                 shiftTo -= 6;
@@ -629,7 +617,7 @@ public class JieBase64 {
         }
 
         @Override
-        public int getOutputSize(int inputSize) throws DecodingException {
+        public int getOutputSize(int inputSize, boolean end) throws DecodingException {
             if (inputSize < 0) {
                 throw new DecodingException("Base64 decoding size can not be negative.");
             }
@@ -650,10 +638,10 @@ public class JieBase64 {
             // No checking, because no determine.
         }
 
-        @Override
-        public ByteStream.Encoder streamEncoder() {
-            return ByteStream.roundEncoder(this, getBlockSize());
-        }
+        // @Override
+        // public ByteStream.Encoder streamEncoder() {
+        //     return ByteStream.roundEncoder(this, getBlockSize());
+        // }
         //
         // private int decode0(ByteBuffer source, ByteBuffer dest, boolean end) throws EncodingException {
         //     int outputSize = getOutputSize(source.remaining());

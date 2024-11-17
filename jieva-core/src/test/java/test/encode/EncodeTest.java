@@ -754,19 +754,22 @@ public class EncodeTest {
         System.out.println("jie encode stream (570): " + (t2 - t1));
     }
 
-    // jie hex encode: 839
-    // apache hex encode: 2745
-    // jie hex decode: 6009
-    // apache hex decode: 8705
-    // jie hex decode stream: 6050
-    // jie hex decode stream(99999): 6138
-    // jie hex decode stream(2): 37468
+    // jie hex encode: 4079
+    // apache hex encode: 15510
+    // jie hex decode: 30313
+    // apache hex decode: 45678
+    // jie hex encode stream: 6703
+    // jie hex encode stream(99999): 7311
+    // jie hex encode stream(100): 8996
+    // jie hex decode stream: 30644
+    // jie hex decode stream(99999): 33265
+    // jie hex decode stream(100): 37011
     //@Test
     public void testHexPerformance() throws Exception {
         int times = 10000;
-        byte[] source = JieRandom.fill(new byte[99999]);
-        ByteEncoder hexEn = JieHex.encoder();
-        ByteDecoder hexDe = JieHex.decoder();
+        byte[] source = JieRandom.fill(new byte[1024 * 512]);
+        JieHex.Encoder hexEn = JieHex.encoder();
+        JieHex.Decoder hexDe = JieHex.decoder();
         Hex hex = new Hex();
         byte[] hexEncoded = hex.encode(source);
         long t1 = System.currentTimeMillis();
@@ -795,6 +798,27 @@ public class EncodeTest {
         System.out.println("apache hex decode: " + (t2 - t1));
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
+            ByteStream bs = ByteStream.from(source).to(new ByteArrayOutputStream()).encoder(hexEn.streamEncoder());
+            bs.start();
+        }
+        t2 = System.currentTimeMillis();
+        System.out.println("jie hex encode stream: " + (t2 - t1));
+        t1 = System.currentTimeMillis();
+        for (int i = 0; i < times; i++) {
+            ByteStream bs = ByteStream.from(source).to(new ByteArrayOutputStream()).blockSize(99999).encoder(hexEn.streamEncoder());
+            bs.start();
+        }
+        t2 = System.currentTimeMillis();
+        System.out.println("jie hex encode stream(99999): " + (t2 - t1));
+        t1 = System.currentTimeMillis();
+        for (int i = 0; i < times; i++) {
+            ByteStream bs = ByteStream.from(source).to(new ByteArrayOutputStream()).blockSize(100).encoder(hexEn.streamEncoder());
+            bs.start();
+        }
+        t2 = System.currentTimeMillis();
+        System.out.println("jie hex encode stream(100): " + (t2 - t1));
+        t1 = System.currentTimeMillis();
+        for (int i = 0; i < times; i++) {
             ByteStream bs = ByteStream.from(hexEncoded).to(new ByteArrayOutputStream()).encoder(hexDe.streamEncoder());
             bs.start();
         }
@@ -809,10 +833,10 @@ public class EncodeTest {
         System.out.println("jie hex decode stream(99999): " + (t2 - t1));
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
-            ByteStream bs = ByteStream.from(hexEncoded).to(new ByteArrayOutputStream()).blockSize(hexDe.getBlockSize()).encoder(hexDe.streamEncoder());
+            ByteStream bs = ByteStream.from(hexEncoded).to(new ByteArrayOutputStream()).blockSize(100).encoder(hexDe.streamEncoder());
             bs.start();
         }
         t2 = System.currentTimeMillis();
-        System.out.println("jie hex decode stream(2): " + (t2 - t1));
+        System.out.println("jie hex decode stream(100): " + (t2 - t1));
     }
 }
