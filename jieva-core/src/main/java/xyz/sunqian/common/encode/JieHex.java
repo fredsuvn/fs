@@ -97,14 +97,14 @@ public class JieHex {
         };
 
         @Override
-        public int getOutputSize(int inputSize) throws EncodingException {
+        public int getOutputSize(int inputSize, boolean end) throws EncodingException {
             if (inputSize < 0) {
                 throw new EncodingException("Hex encoding size can not be negative.");
             }
             return inputSize * 2;
         }
 
-        protected int doCode(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff) {
+        protected int doCode(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, boolean end) {
             for (int i = srcOff, j = dstOff; i < srcEnd; ) {
                 int bits = src[i++];
                 dst[j++] = (byte) DICT[((bits >> 4) & 0x0f)];
@@ -119,7 +119,7 @@ public class JieHex {
         private static final HexDecoder SINGLETON = new HexDecoder();
 
         @Override
-        public int getOutputSize(int inputSize) throws DecodingException {
+        public int getOutputSize(int inputSize, boolean end) throws DecodingException {
             if (inputSize < 0) {
                 throw new DecodingException("Hex decoding size can not be negative.");
             }
@@ -134,7 +134,7 @@ public class JieHex {
             return ByteStream.roundEncoder(this, getBlockSize());
         }
 
-        protected int doCode(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff) {
+        protected int doCode(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, boolean end) {
             int length = srcEnd - srcOff;
             for (int i = srcOff, j = dstOff; i < srcEnd; ) {
                 int bits1 = toDigit((char) src[i++]);
