@@ -251,7 +251,7 @@ public interface ByteStream {
     /**
      * Starts transfer from source into destination through this stream, returns the actual bytes number that read and
      * success to transfer. Ensure that the remaining of destination is enough, otherwise a {@link IORuntimeException}
-     * will be thrown and the actual read and written bytes number is undefined.
+     * will be thrown. If current transfer fails, the read and written number are undefined.
      * <p>
      * If the {@code encoders} (see {@link #encoder(Encoder)}/{@link #encoders(Iterable)}) is {@code null}, read number
      * equals to written number. Otherwise, the written number may not equal to read number, and this method returns
