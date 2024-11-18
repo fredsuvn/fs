@@ -8,7 +8,7 @@ import xyz.sunqian.common.base.JieChars;
 import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.encode.*;
 import xyz.sunqian.common.io.ByteStream;
-import xyz.sunqian.common.io.IORuntimeException;
+import xyz.sunqian.common.io.IOEncodingException;
 import xyz.sunqian.common.io.JieIO;
 
 import java.io.ByteArrayOutputStream;
@@ -642,7 +642,7 @@ public class EncodeTest {
             try {
                 ByteStream.from(en).to(new ByteArrayOutputStream()).blockSize(1)
                     .encoder(JieHex.decoder().streamEncoder()).start();
-            } catch (IORuntimeException e) {
+            } catch (IOEncodingException e) {
                 error[0] = e.getCause().getMessage();
             } finally {
                 assertEquals(error[0], "Invalid hex char at pos 11: Q.");
@@ -665,7 +665,7 @@ public class EncodeTest {
             try {
                 ByteStream.from(en).to(new ByteArrayOutputStream()).blockSize(1)
                     .encoder(JieBase64.decoder().streamEncoder()).start();
-            } catch (IORuntimeException e) {
+            } catch (IOEncodingException e) {
                 error[0] = e.getCause().getMessage();
             } finally {
                 assertEquals(error[0], "Invalid base64 char at pos 11: ].");
