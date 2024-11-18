@@ -256,7 +256,8 @@ public interface ByteStream {
      * If the {@code encoders} (see {@link #encoder(Encoder)}/{@link #encoders(Iterable)}) is {@code null}, read number
      * equals to written number. Otherwise, the written number may not equal to read number, and this method returns
      * actual read number. Specifically, if it is detected that the data source has already reached to the end before
-     * starting, return -1.
+     * starting, return -1. If an error is thrown by the {@code encoders}, the error will be wrapped by
+     * {@link IOEncodingException} to throw, use {@link Throwable#getCause()} to get it.
      * <p>
      * If the source and/or destination is a buffer or stream, its position will be incremented by actual affected
      * length.
@@ -264,9 +265,10 @@ public interface ByteStream {
      * This is a final method.
      *
      * @return the actual bytes number that read and success to transfer
-     * @throws IORuntimeException IO runtime exception
+     * @throws IOEncodingException to wrap the error thrown by encoders
+     * @throws IORuntimeException  thrown for any other IO problems
      */
-    long start() throws IORuntimeException;
+    long start() throws IOEncodingException, IORuntimeException;
 
     /**
      * Encoder to encode the byte data in the stream transfer processing.

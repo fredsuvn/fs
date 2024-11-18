@@ -98,7 +98,7 @@ final class ByteStreamImpl implements ByteStream {
     }
 
     @Override
-    public long start() throws IORuntimeException {
+    public long start() throws IOEncodingException, IORuntimeException {
         if (source == null || dest == null) {
             throw new IORuntimeException("Source or dest is null!");
         }
@@ -124,6 +124,8 @@ final class ByteStreamImpl implements ByteStream {
                 }
             }
             return start0();
+        } catch (IOEncodingException e) {
+            throw e;
         } catch (Exception e) {
             throw new IORuntimeException(e);
         }
@@ -236,10 +238,15 @@ final class ByteStreamImpl implements ByteStream {
         return count;
     }
 
-    private ByteBuffer encode(ByteBuffer buffer, boolean end) {
+    private ByteBuffer encode(ByteBuffer buffer, boolean end) throws IOEncodingException {
         ByteBuffer data = buffer;
         for (Encoder encoder : encoders) {
-            ByteBuffer encoded = encoder.encode(data, end);
+            ByteBuffer encoded;
+            try {
+                encoded = encoder.encode(data, end);
+            } catch (Throwable e) {
+                throw new IOEncodingException(e);
+            }
             if (!encoded.hasRemaining()) {
                 return encoded;
             }

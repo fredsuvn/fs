@@ -4,11 +4,9 @@ import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 import test.TU;
 import xyz.sunqian.common.base.*;
-import xyz.sunqian.common.io.ByteStream;
-import xyz.sunqian.common.io.CharStream;
-import xyz.sunqian.common.io.IORuntimeException;
-import xyz.sunqian.common.io.JieIO;
+import xyz.sunqian.common.io.*;
 import xyz.sunqian.test.JieTest;
+import xyz.sunqian.test.JieTestException;
 
 import java.io.*;
 import java.lang.reflect.Method;
@@ -723,6 +721,32 @@ public class StreamTest {
         testEncoder(1024, 77);
         testEncoder(1024 * 1024, 777);
         testEncoder(1024 * 1024, 1024);
+
+        // error
+        {
+            Throwable[] ts = new Throwable[1];
+            try {
+                ByteStream.from(new byte[100]).to(new byte[100]).encoder((data, end) -> {
+                    throw new JieTestException("haha");
+                }).start();
+            } catch (IOEncodingException e) {
+                ts[0] = e;
+            }
+            assertEquals(ts[0].getCause().getClass(), JieTestException.class);
+            assertEquals(ts[0].getCause().getMessage(), "haha");
+        }
+        {
+            Throwable[] ts = new Throwable[1];
+            try {
+                CharStream.from(new char[100]).to(new char[100]).encoder((data, end) -> {
+                    throw new JieTestException("haha");
+                }).start();
+            } catch (IOEncodingException e) {
+                ts[0] = e;
+            }
+            assertEquals(ts[0].getCause().getClass(), JieTestException.class);
+            assertEquals(ts[0].getCause().getMessage(), "haha");
+        }
     }
 
     private void testEncoder(int size, int blockSize) {

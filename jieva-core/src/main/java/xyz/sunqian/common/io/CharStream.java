@@ -258,14 +258,15 @@ public interface CharStream {
     CharStream encoders(Iterable<Encoder> encoders);
 
     /**
-     * Starts transfer data from source into destination through this stream, returns the actual chars number that read
-     * and success to transfer. Ensure that the remaining of destination is enough, otherwise a
-     * {@link IORuntimeException} will be thrown and the actual read and written chars number is undefined.
+     * Starts transfer from source into destination through this stream, returns the actual chars number that read and
+     * success to transfer. Ensure that the remaining of destination is enough, otherwise a {@link IORuntimeException}
+     * will be thrown and the actual read and written chars number is undefined.
      * <p>
      * If the {@code encoders} (see {@link #encoder(Encoder)}/{@link #encoders(Iterable)}) is {@code null}, read number
      * equals to written number. Otherwise, the written number may not equal to read number, and this method returns
      * actual read number. Specifically, if it is detected that the data source has already reached to the end before
-     * starting, return -1.
+     * starting, return -1. If an error is thrown by the {@code encoders}, the error will be wrapped by
+     * {@link IOEncodingException} to throw, use {@link Throwable#getCause()} to get it.
      * <p>
      * If the source and/or destination is a buffer or stream, its position will be incremented by actual affected
      * length.
@@ -273,9 +274,10 @@ public interface CharStream {
      * This is a final method.
      *
      * @return the actual chars number that read and success to transfer
-     * @throws IORuntimeException IO runtime exception
+     * @throws IOEncodingException to wrap the error thrown by encoders
+     * @throws IORuntimeException  thrown for any other IO problems
      */
-    long start() throws IORuntimeException;
+    long start() throws IOEncodingException, IORuntimeException;
 
     /**
      * Encoder to encode the char data in the stream transfer processing.

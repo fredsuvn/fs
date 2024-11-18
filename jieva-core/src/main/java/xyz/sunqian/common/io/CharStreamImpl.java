@@ -100,7 +100,7 @@ final class CharStreamImpl implements CharStream {
     }
 
     @Override
-    public long start() throws IORuntimeException {
+    public long start() throws IOEncodingException, IORuntimeException {
         if (source == null || dest == null) {
             throw new IORuntimeException("Source or dest is null!");
         }
@@ -130,6 +130,8 @@ final class CharStreamImpl implements CharStream {
                 }
             }
             return start0();
+        } catch (IOEncodingException e) {
+            throw e;
         } catch (Exception e) {
             throw new IORuntimeException(e);
         }
@@ -269,10 +271,15 @@ final class CharStreamImpl implements CharStream {
         return count;
     }
 
-    private CharBuffer encode(CharBuffer buffer, boolean end) {
+    private CharBuffer encode(CharBuffer buffer, boolean end) throws IOEncodingException {
         CharBuffer data = buffer;
         for (Encoder encoder : encoders) {
-            CharBuffer encoded = encoder.encode(data, end);
+            CharBuffer encoded;
+            try {
+                encoded = encoder.encode(data, end);
+            } catch (Throwable e) {
+                throw new IOEncodingException(e);
+            }
             if (!encoded.hasRemaining()) {
                 return encoded;
             }

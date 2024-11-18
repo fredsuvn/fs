@@ -8,6 +8,7 @@ import xyz.sunqian.common.codec.CodecException;
 import xyz.sunqian.common.encode.DecodingException;
 import xyz.sunqian.common.encode.EncodingException;
 import xyz.sunqian.common.invoke.InvocationException;
+import xyz.sunqian.common.io.IOEncodingException;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.reflect.JvmException;
 import xyz.sunqian.common.reflect.ReflectionException;
@@ -108,6 +109,18 @@ public class ExceptionCoverageTest {
         });
         expectThrows(IORuntimeException.class, () -> {
             throw new IORuntimeException(new RuntimeException());
+        });
+        expectThrows(IOEncodingException.class, () -> {
+            throw new IOEncodingException();
+        });
+        expectThrows(IOEncodingException.class, () -> {
+            throw new IOEncodingException("");
+        });
+        expectThrows(IOEncodingException.class, () -> {
+            throw new IOEncodingException("", new RuntimeException());
+        });
+        expectThrows(IOEncodingException.class, () -> {
+            throw new IOEncodingException(new RuntimeException());
         });
 
         expectThrows(CodecException.class, () -> {
