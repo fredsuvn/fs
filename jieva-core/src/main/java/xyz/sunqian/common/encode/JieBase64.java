@@ -127,7 +127,7 @@ public class JieBase64 {
     /**
      * Returns a {@code Base64} encoder in type of {@code Line Separated} with specified arguments.
      *
-     * @param separationSize    Sets the max line size, must be a multiple of {@code 4}.
+     * @param lineSize          Sets the max line size, must be a multiple of {@code 4}.
      * @param separator         Sets the line separator. The array will be used directly, any modification to array will
      *                          affect the encoding.
      * @param padding           Whether adds padding characters if the length of source is not a multiple of 3.
@@ -136,19 +136,19 @@ public class JieBase64 {
      * @return a {@code Base64} encoder in type of {@code Line Separated} with specified arguments
      */
     public static Encoder lineEncoder(
-        int separationSize,
+        int lineSize,
         byte[] separator,
         boolean padding,
         boolean lastLineSeparator,
         boolean urlSafe
     ) throws EncodingException {
-        if (separationSize <= 0) {
+        if (lineSize <= 0) {
             throw new EncodingException("Block size must be positive.");
         }
-        if (separationSize % 4 != 0) {
+        if (lineSize % 4 != 0) {
             throw new EncodingException("Block size must be multiple of 4.");
         }
-        return new LineEncoder(separationSize, separator, padding, lastLineSeparator, urlSafe);
+        return new LineEncoder(lineSize, separator, padding, lastLineSeparator, urlSafe);
     }
 
     /**
