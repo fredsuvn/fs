@@ -23,13 +23,13 @@ import java.util.Arrays;
  *         {@code URL Safe}: In this type, using '-' and '_' instead of '+' and '/';
  *     </li>
  *     <li>
- *         {@code Separation}: Encoding result is separated by specified separator (such as \r\n). For example:
+ *         {@code Line Separated}: Encoding result is line-separated by specified separator (such as \r\n). For example:
  *         <ul>
  *             <li>
- *                 {@code MIME}: separated in 76 bytes, no separator added to the last segment;
+ *                 {@code MIME}: separated in 76 bytes, no separator added to the last line;
  *             </li>
  *             <li>
- *                 {@code PEM}: separated in 64 bytes, adding separator to the last segment;
+ *                 {@code PEM}: separated in 64 bytes, adding separators to the last line;
  *             </li>
  *         </ul>
  *     </li>
@@ -52,9 +52,9 @@ public class JieBase64 {
     }
 
     /**
-     * Returns a {@code Base64} encoder in type of {@code Basic}. without padding character if the length of source is
-     * not a multiple of 3.
+     * Returns a {@code Base64} encoder in type of {@code Basic}.
      *
+     * @param padding whether adds padding characters if the length of source is not a multiple of 3
      * @return a {@code Base64} encoder in type of {@code Basic}
      */
     public static Encoder encoder(boolean padding) {
@@ -62,84 +62,84 @@ public class JieBase64 {
     }
 
     /**
-     * Returns a {@code Base64} encoder in type of {@code URL and Filename safe}, with padding character if the length
-     * of source is not a multiple of 3.
+     * Returns a {@code Base64} encoder in type of {@code URL Safe}, with padding character if the length of source is
+     * not a multiple of 3.
      *
-     * @return a {@code Base64} encoder in type of {@code URL and Filename safe}
+     * @return a {@code Base64} encoder in type of {@code URL Safe}
      */
     public static Encoder urlEncoder() {
         return UrlEncoder.PADDING;
     }
 
     /**
-     * Returns a {@code Base64} encoder in type of {@code URL and Filename safe}, without padding character if the
-     * length of source is not a multiple of 3.
+     * Returns a {@code Base64} encoder in type of {@code URL Safe}.
      *
-     * @return a {@code Base64} encoder in type of {@code URL and Filename safe}
+     * @param padding whether adds padding characters if the length of source is not a multiple of 3
+     * @return a {@code Base64} encoder in type of {@code URL Safe}
      */
     public static Encoder urlEncoder(boolean padding) {
         return padding ? urlEncoder() : UrlEncoder.NO_PADDING;
     }
 
     /**
-     * Returns a {@code Base64} encoder in type of {@code MIME}, with padding character if the length of source is not a
-     * multiple of 3. The {@code MIME} base64 format is separated in 76 bytes, no separator added to the last segment.
+     * Returns a {@code Base64} encoder in {@code MIME} format, which is a format of {@code Line Separated} type,
+     * separated in 76 bytes, no separator added to the last line, without padding and url-safe.
      *
-     * @return a {@code Base64} encoder in type of {@code MIME}
+     * @return a {@code Base64} encoder in {@code MIME} format
      */
     public static Encoder mimeEncoder() {
         return MimeEncoder.PADDING;
     }
 
     /**
-     * Returns a {@code Base64} encoder in type of {@code MIME}, without padding character if the length of source is
-     * not a multiple of 3. The {@code MIME} base64 format is separated in 76 bytes, no separator added to the last
-     * segment.
+     * Returns a {@code Base64} encoder in {@code MIME} format, which is a format of {@code Line Separated} type,
+     * separated in 76 bytes, no separator added to the last line, without url-safe.
      *
-     * @return a {@code Base64} encoder in type of {@code MIME}
+     * @param padding whether adds padding characters if the length of source is not a multiple of 3
+     * @return a {@code Base64} encoder in {@code MIME} format
      */
     public static Encoder mimeEncoder(boolean padding) {
         return padding ? mimeEncoder() : MimeEncoder.NO_PADDING;
     }
 
     /**
-     * Returns a {@code Base64} encoder in type of {@code PEM}, with padding character if the length of source is not a
-     * multiple of 3. The {@code PEM} base64 format is separated in 64 bytes, adding separator to the last segment.
+     * Returns a {@code Base64} encoder in {@code PEM} format, which is a format of {@code Line Separated} type,
+     * separated in 64 bytes, adding separators to the last line, without padding and url-safe.
      *
-     * @return a {@code Base64} encoder in type of {@code PEM}
+     * @return a {@code Base64} encoder in {@code PEM} format
      */
     public static Encoder pemEncoder() {
         return PemEncoder.PADDING;
     }
 
     /**
-     * Returns a {@code Base64} encoder in type of {@code PEM}, without padding character if the length of source is not
-     * a multiple of 3. The {@code PEM} base64 format is separated in 64 bytes, adding separator to the last segment.
+     * Returns a {@code Base64} encoder in {@code PEM} format, which is a format of {@code Line Separated} type,
+     * separated in 64 bytes, adding separators to the last line, without url-safe.
      *
-     * @return a {@code Base64} encoder in type of {@code PEM}
+     * @param padding whether adds padding characters if the length of source is not a multiple of 3, the paddings are
+     *                placed before the separators
+     * @return a {@code Base64} encoder in {@code PEM} format
      */
     public static Encoder pemEncoder(boolean padding) {
         return padding ? pemEncoder() : PemEncoder.NO_PADDING;
     }
 
     /**
-     * Returns a {@code Base64} encoder in type of {@code Block Separation} with specified arguments.
+     * Returns a {@code Base64} encoder in type of {@code Line Separated} with specified arguments.
      *
-     * @param separationSize   Sets the max size per separation segment, must be a multiple of {@code 4}.
-     * @param separator        Sets the separator. The array will be used directly, any modification to array will
-     *                         affect the encoding.
-     * @param padding          Whether adds padding character at the end if the length of source is not a multiple of
-     *                         3.
-     * @param addLastSeparator Whether adds the separator at tail (after paddings if padding is true) if the output size
-     *                         is not multiple of separation size.
-     * @param urlSafe          Whether the base64 dict is in {@code URL Safe}
-     * @return a {@code Base64} encoder in type of {@code Block Separation} with specified arguments
+     * @param separationSize    Sets the max line size, must be a multiple of {@code 4}.
+     * @param separator         Sets the line separator. The array will be used directly, any modification to array will
+     *                          affect the encoding.
+     * @param padding           Whether adds padding characters if the length of source is not a multiple of 3.
+     * @param lastLineSeparator Whether adds the separators to the last line
+     * @param urlSafe           Whether the base64 dict is in {@code URL Safe}
+     * @return a {@code Base64} encoder in type of {@code Line Separated} with specified arguments
      */
-    public static Encoder separationEncoder(
+    public static Encoder lineEncoder(
         int separationSize,
         byte[] separator,
         boolean padding,
-        boolean addLastSeparator,
+        boolean lastLineSeparator,
         boolean urlSafe
     ) throws EncodingException {
         if (separationSize <= 0) {
@@ -148,7 +148,7 @@ public class JieBase64 {
         if (separationSize % 4 != 0) {
             throw new EncodingException("Block size must be multiple of 4.");
         }
-        return new SeparationEncoder(separationSize, separator, padding, addLastSeparator, urlSafe);
+        return new LineEncoder(separationSize, separator, padding, lastLineSeparator, urlSafe);
     }
 
     /**
@@ -341,21 +341,21 @@ public class JieBase64 {
         }
     }
 
-    private static class SeparationEncoder extends AbsEncoder {
+    private static class LineEncoder extends AbsEncoder {
 
         private static final byte[] SEPARATOR = new byte[]{'\r', '\n'};
 
-        private final int separationSize;
+        private final int lineSize;
         private final byte[] separator;
-        private final boolean addLastSeparator;
+        private final boolean lastLineSeparator;
         private final boolean urlSafe;
 
-        private SeparationEncoder(
-            int separationSize, byte[] separator, boolean padding, boolean addLastSeparator, boolean urlSafe) {
+        private LineEncoder(
+            int lineSize, byte[] separator, boolean padding, boolean lastLineSeparator, boolean urlSafe) {
             super(padding);
-            this.separationSize = separationSize;
+            this.lineSize = lineSize;
             this.separator = separator;
-            this.addLastSeparator = addLastSeparator;
+            this.lastLineSeparator = lastLineSeparator;
             this.urlSafe = urlSafe;
         }
 
@@ -367,7 +367,7 @@ public class JieBase64 {
         @Override
         public int getOutputSize(int inputSize, boolean end) {
             if (end) {
-                return getOutputSize0(inputSize, addLastSeparator);
+                return getOutputSize0(inputSize, lastLineSeparator);
             }
             return getOutputSize0(inputSize, false);
         }
@@ -375,11 +375,11 @@ public class JieBase64 {
         private int getOutputSize0(int inputSize, boolean doLast) {
             int outputSize = super.getOutputSize(inputSize, true);
             if (!doLast) {
-                outputSize += (outputSize - 1) / separationSize * separator.length;
+                outputSize += (outputSize - 1) / lineSize * separator.length;
                 return outputSize;
             }
-            int blockCount = outputSize / separationSize;
-            int remainder = outputSize % separationSize;
+            int blockCount = outputSize / lineSize;
+            int remainder = outputSize % lineSize;
             if (remainder == 0) {
                 outputSize += blockCount * separator.length;
             } else {
@@ -390,7 +390,7 @@ public class JieBase64 {
 
         @Override
         public int getBlockSize() {
-            return separationSize / 4 * 3;
+            return lineSize / 4 * 3;
         }
 
         @Override
@@ -404,7 +404,7 @@ public class JieBase64 {
                     int pos = data.position();
                     if (startPos > 0) {
                         if (end && !data.hasRemaining()) {
-                            if (addLastSeparator) {
+                            if (lastLineSeparator) {
                                 return JieBytes.copyBuffer(separator);
                             }
                             return JieBytes.emptyBuffer();
@@ -430,7 +430,7 @@ public class JieBase64 {
 
         protected int doCode(long startPos, byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, boolean end) {
             if (end) {
-                return doCode0(src, srcOff, srcEnd, dst, dstOff, addLastSeparator);
+                return doCode0(src, srcOff, srcEnd, dst, dstOff, lastLineSeparator);
             }
             return doCode0(src, srcOff, srcEnd, dst, dstOff, false);
         }
@@ -438,7 +438,7 @@ public class JieBase64 {
         private int doCode0(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, boolean doLast) {
             char[] dict = dict();
             int srcPos = srcOff;
-            int srcBlock = separationSize / 4 * 3;
+            int srcBlock = lineSize / 4 * 3;
             int roundEnd = srcOff + ((srcEnd - srcOff) / 3 * 3);
             int dstPos = dstOff;
             while (srcPos < roundEnd) {
@@ -453,7 +453,7 @@ public class JieBase64 {
                 int writeLen = (readEnd - srcPos) / 3 * 4;
                 dstPos += writeLen;
                 srcPos = readEnd;
-                if ((writeLen == separationSize && srcPos < srcEnd) || (srcPos == srcEnd && doLast)) {
+                if ((writeLen == lineSize && srcPos < srcEnd) || (srcPos == srcEnd && doLast)) {
                     for (byte b : separator) {
                         dst[dstPos++] = b;
                     }
@@ -487,28 +487,28 @@ public class JieBase64 {
         }
     }
 
-    private static final class MimeEncoder extends SeparationEncoder {
+    private static final class MimeEncoder extends LineEncoder {
 
         private static final int SEPARATION_SIZE = 76;
 
         private static final MimeEncoder PADDING =
-            new MimeEncoder(SEPARATION_SIZE, SeparationEncoder.SEPARATOR, true);
+            new MimeEncoder(SEPARATION_SIZE, LineEncoder.SEPARATOR, true);
         private static final MimeEncoder NO_PADDING =
-            new MimeEncoder(SEPARATION_SIZE, SeparationEncoder.SEPARATOR, false);
+            new MimeEncoder(SEPARATION_SIZE, LineEncoder.SEPARATOR, false);
 
         private MimeEncoder(int separationSize, byte[] blockSeparator, boolean padding) {
             super(separationSize, blockSeparator, padding, false, false);
         }
     }
 
-    private static final class PemEncoder extends SeparationEncoder {
+    private static final class PemEncoder extends LineEncoder {
 
         private static final int SEPARATION_SIZE = 64;
 
         private static final PemEncoder PADDING =
-            new PemEncoder(SEPARATION_SIZE, SeparationEncoder.SEPARATOR, true);
+            new PemEncoder(SEPARATION_SIZE, LineEncoder.SEPARATOR, true);
         private static final PemEncoder NO_PADDING =
-            new PemEncoder(SEPARATION_SIZE, SeparationEncoder.SEPARATOR, false);
+            new PemEncoder(SEPARATION_SIZE, LineEncoder.SEPARATOR, false);
 
         private PemEncoder(int separationSize, byte[] blockSeparator, boolean padding) {
             super(separationSize, blockSeparator, padding, true, false);

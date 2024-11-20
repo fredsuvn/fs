@@ -49,9 +49,9 @@ public class EncodeTest {
         expectThrows(EncodingException.class, () -> JieBase64.encoder().getOutputSize(-1));
         expectThrows(DecodingException.class, () -> JieBase64.decoder().getOutputSize(-1));
         expectThrows(EncodingException.class, () ->
-            JieBase64.separationEncoder(-1, new byte[1], true, true, true));
+            JieBase64.lineEncoder(-1, new byte[1], true, true, true));
         expectThrows(EncodingException.class, () ->
-            JieBase64.separationEncoder(5, new byte[1], true, true, false));
+            JieBase64.lineEncoder(5, new byte[1], true, true, false));
 
         // pem without padding
         testPemBase64();
@@ -75,62 +75,62 @@ public class EncodeTest {
         testBase64Jdk(source, JieBase64.mimeEncoder(false), Base64.getMimeEncoder().withoutPadding());
         testBase64Jdk(
             source,
-            JieBase64.separationEncoder(16, new byte[]{'\t'}, true, false, false),
+            JieBase64.lineEncoder(16, new byte[]{'\t'}, true, false, false),
             Base64.getMimeEncoder(16, new byte[]{'\t'})
         );
         testBase64Jdk(
             source,
-            JieBase64.separationEncoder(16, new byte[]{'\t'}, false, false, false),
+            JieBase64.lineEncoder(16, new byte[]{'\t'}, false, false, false),
             Base64.getMimeEncoder(16, new byte[]{'\t'}).withoutPadding()
         );
         testBase64Jdk(
             source,
-            JieBase64.separationEncoder(4, new byte[]{'\t'}, true, false, false),
+            JieBase64.lineEncoder(4, new byte[]{'\t'}, true, false, false),
             Base64.getMimeEncoder(4, new byte[]{'\t'})
         );
         testBase64Jdk(
             source,
-            JieBase64.separationEncoder(4, new byte[]{'\t'}, false, false, false),
+            JieBase64.lineEncoder(4, new byte[]{'\t'}, false, false, false),
             Base64.getMimeEncoder(4, new byte[]{'\t'}).withoutPadding()
         );
         testBase64Jdk(
             source,
-            JieBase64.separationEncoder(400, new byte[]{'\t', '\r'}, true, false, false),
+            JieBase64.lineEncoder(400, new byte[]{'\t', '\r'}, true, false, false),
             Base64.getMimeEncoder(400, new byte[]{'\t', '\r'})
         );
         testBase64Jdk(
             source,
-            JieBase64.separationEncoder(400, new byte[]{'\t', '\r'}, false, false, false),
+            JieBase64.lineEncoder(400, new byte[]{'\t', '\r'}, false, false, false),
             Base64.getMimeEncoder(400, new byte[]{'\t', '\r'}).withoutPadding()
         );
         testBase64Apache(
             source,
-            JieBase64.separationEncoder(16, new byte[]{'\t'}, true, true, false),
+            JieBase64.lineEncoder(16, new byte[]{'\t'}, true, true, false),
             new org.apache.commons.codec.binary.Base64(16, new byte[]{'\t'})
         );
         testBase64Apache(
             source,
-            JieBase64.separationEncoder(4, new byte[]{'\t'}, true, true, false),
+            JieBase64.lineEncoder(4, new byte[]{'\t'}, true, true, false),
             new org.apache.commons.codec.binary.Base64(4, new byte[]{'\t'})
         );
         testBase64Apache(
             source,
-            JieBase64.separationEncoder(400, new byte[]{'\t'}, true, true, false),
+            JieBase64.lineEncoder(400, new byte[]{'\t'}, true, true, false),
             new org.apache.commons.codec.binary.Base64(400, new byte[]{'\t'})
         );
         testBase64Apache(
             source,
-            JieBase64.separationEncoder(16, new byte[0], true, false, false),
+            JieBase64.lineEncoder(16, new byte[0], true, false, false),
             new org.apache.commons.codec.binary.Base64(16, new byte[0])
         );
         testBase64Apache(
             source,
-            JieBase64.separationEncoder(4, new byte[0], true, false, false),
+            JieBase64.lineEncoder(4, new byte[0], true, false, false),
             new org.apache.commons.codec.binary.Base64(4, new byte[0])
         );
         testBase64Apache(
             source,
-            JieBase64.separationEncoder(400, new byte[0], true, false, false),
+            JieBase64.lineEncoder(400, new byte[0], true, false, false),
             new org.apache.commons.codec.binary.Base64(400, new byte[0])
         );
     }
@@ -395,7 +395,7 @@ public class EncodeTest {
 
     private void testSeparationUrlSafe() {
         JieBase64.Encoder encoder =
-            JieBase64.separationEncoder(16, new byte[]{'\t'}, true, true, true);
+            JieBase64.lineEncoder(16, new byte[]{'\t'}, true, true, true);
         byte[] src = JieRandom.fill(new byte[34]);
         byte[] enSrc = encoder.encode(src);
         byte[] enApache = new org.apache.commons.codec.binary.Base64(16, new byte[]{'\t'}, true).encode(src);
