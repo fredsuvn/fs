@@ -1,6 +1,6 @@
 package xyz.sunqian.common.encode;
 
-import xyz.sunqian.common.io.ByteStream;
+import xyz.sunqian.common.io.ByteSource;
 
 /**
  * Super interface for coding process.
@@ -31,14 +31,14 @@ public interface ByteCoder {
     int getBlockSize();
 
     /**
-     * Returns a {@link ByteStream.Encoder} for {@link ByteStream#encoder(ByteStream.Encoder)} and
-     * {@link ByteStream#encoders(Iterable)} with current coding algorithm. When using this method, the
-     * {@link ByteStream#blockSize(int)} needs to be set to a reasonable value. The reasonable value usually comes from
+     * Returns a {@link ByteSource.Encoder} for {@link ByteSource#encoder(ByteSource.Encoder)} and
+     * {@link ByteSource#encoders(Iterable)} with current coding algorithm. When using this method, the
+     * {@link ByteSource#blockSize(int)} needs to be set to a reasonable value. The reasonable value usually comes from
      * {@link #getBlockSize()} or multiples of it or may be not, determined by the implementation.
      *
-     * @return a {@link ByteStream.Encoder} with current coding algorithm
-     * @see ByteStream#encoder(ByteStream.Encoder)
-     * @see ByteStream#encoders(Iterable)
+     * @return a {@link ByteSource.Encoder} with current coding algorithm
+     * @see ByteSource#encoder(ByteSource.Encoder)
+     * @see ByteSource#encoders(Iterable)
      */
-    ByteStream.Encoder streamEncoder();
+    ByteSource.Encoder streamEncoder();
 }

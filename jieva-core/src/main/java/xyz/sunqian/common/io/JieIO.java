@@ -142,7 +142,7 @@ public class JieIO {
     @Nullable
     public static String read(Reader source, int number) throws IORuntimeException {
         StringBuilder dest = new StringBuilder();
-        long readCount = CharStream.from(source).to(dest).readLimit(number).start();
+        long readCount = CharSource.from(source).readLimit(number).to(dest);
         if (readCount == -1) {
             return null;
         }
@@ -257,110 +257,104 @@ public class JieIO {
 
     /**
      * Reads bytes from source stream and writes them into dest array, returns actual read number. If the source has
-     * been ended and no data read out, return -1. This method is equivalent to ({@link ByteStream}):
+     * been ended and no data read out, return -1. This method is equivalent to ({@link ByteSource}):
      * <pre>
-     *     return (int) ByteStream.from(source).to(dest).readLimit(dest.length).start();
+     *     return (int) ByteSource.from(source).readLimit(dest.length).to(dest);
      * </pre>
      *
      * @param source source stream
      * @param dest   dest array
      * @return actual read number, or -1 if the source has been ended and no data read out
      * @throws IORuntimeException IO runtime exception
-     * @see ByteStream
-     * @see ByteStream#start()
+     * @see ByteSource
      */
     public static int readTo(InputStream source, byte[] dest) throws IORuntimeException {
-        return (int) ByteStream.from(source).to(dest).readLimit(dest.length).start();
+        return (int) ByteSource.from(source).readLimit(dest.length).to(dest);
     }
 
     /**
      * Reads bytes from source stream and writes them into dest buffer, returns actual read number. If the source has
-     * been ended and no data read out, return -1. This method is equivalent to ({@link ByteStream}):
+     * been ended and no data read out, return -1. This method is equivalent to ({@link ByteSource}):
      * <pre>
-     *     return (int) ByteStream.from(source).to(dest).readLimit(dest.remaining()).start();
+     *     return (int) ByteSource.from(source).readLimit(dest.remaining()).to(dest);
      * </pre>
      *
      * @param source source stream
      * @param dest   dest buffer
      * @return actual read number, or -1 if the source has been ended and no data read out
      * @throws IORuntimeException IO runtime exception
-     * @see ByteStream
-     * @see ByteStream#start()
+     * @see ByteSource
      */
     public static int readTo(InputStream source, ByteBuffer dest) throws IORuntimeException {
-        return (int) ByteStream.from(source).to(dest).readLimit(dest.remaining()).start();
+        return (int) ByteSource.from(source).readLimit(dest.remaining()).to(dest);
     }
 
     /**
      * Reads bytes from source stream and writes them into dest stream, returns actual read number. If the source has
-     * been ended and no data read out, return -1. This method is equivalent to ({@link ByteStream}):
+     * been ended and no data read out, return -1. This method is equivalent to ({@link ByteSource}):
      * <pre>
-     *     return (int) ByteStream.from(source).to(dest).start();
+     *     return (int) ByteSource.from(source).to(dest);
      * </pre>
      *
      * @param source source stream
      * @param dest   dest stream
      * @return actual read number, or -1 if the source has been ended and no data read out
      * @throws IORuntimeException IO runtime exception
-     * @see ByteStream
-     * @see ByteStream#start()
+     * @see ByteSource
      */
     public static long readTo(InputStream source, OutputStream dest) throws IORuntimeException {
-        return (int) ByteStream.from(source).to(dest).start();
+        return (int) ByteSource.from(source).to(dest);
     }
 
     /**
      * Reads chars from source reader and writes them into dest array, returns actual read number. If the source has
-     * been ended and no data read out, return -1. This method is equivalent to ({@link CharStream}):
+     * been ended and no data read out, return -1. This method is equivalent to ({@link CharSource}):
      * <pre>
-     *     return (int) CharStream.from(source).to(dest).readLimit(dest.length).start();
+     *     return (int) CharSource.from(source).readLimit(dest.length).to(dest);
      * </pre>
      *
      * @param source source reader
      * @param dest   dest array
      * @return actual read number, or -1 if the source has been ended and no data read out
      * @throws IORuntimeException IO runtime exception
-     * @see CharStream
-     * @see CharStream#start()
+     * @see CharSource
      */
     public static int readTo(Reader source, char[] dest) throws IORuntimeException {
-        return (int) CharStream.from(source).to(dest).readLimit(dest.length).start();
+        return (int) CharSource.from(source).readLimit(dest.length).to(dest);
     }
 
     /**
      * Reads chars from source reader and writes them into dest buffer, returns actual read number. If the source has
-     * been ended and no data read out, return -1. This method is equivalent to ({@link CharStream}):
+     * been ended and no data read out, return -1. This method is equivalent to ({@link CharSource}):
      * <pre>
-     *     return (int) CharStream.from(source).to(dest).readLimit(dest.remaining()).start();
+     *     return (int) CharSource.from(source).readLimit(dest.remaining()).to(dest);
      * </pre>
      *
      * @param source source reader
      * @param dest   dest buffer
      * @return actual read number, or -1 if the source has been ended and no data read out
      * @throws IORuntimeException IO runtime exception
-     * @see CharStream
-     * @see CharStream#start()
+     * @see CharSource
      */
     public static int readTo(Reader source, CharBuffer dest) throws IORuntimeException {
-        return (int) CharStream.from(source).to(dest).readLimit(dest.remaining()).start();
+        return (int) CharSource.from(source).readLimit(dest.remaining()).to(dest);
     }
 
     /**
      * Reads bytes from source reader and writes them into dest appendable, returns actual read number. If the source
-     * has been ended and no data read out, return -1. This method is equivalent to ({@link CharStream}):
+     * has been ended and no data read out, return -1. This method is equivalent to ({@link CharSource}):
      * <pre>
-     *     return (int) CharStream.from(source).to(dest).start();
+     *     return (int) CharStream.from(source).to(dest);
      * </pre>
      *
      * @param source source reader
      * @param dest   dest appendable
      * @return actual read number, or -1 if the source has been ended and no data read out
      * @throws IORuntimeException IO runtime exception
-     * @see CharStream
-     * @see CharStream#start()
+     * @see CharSource
      */
     public static long readTo(Reader source, Appendable dest) throws IORuntimeException {
-        return (int) CharStream.from(source).to(dest).start();
+        return (int) CharSource.from(source).to(dest);
     }
 
     /**

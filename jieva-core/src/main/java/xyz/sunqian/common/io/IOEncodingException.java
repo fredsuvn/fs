@@ -1,7 +1,7 @@
 package xyz.sunqian.common.io;
 
 /**
- * This exception is used to wrap exceptions thrown by {@link ByteStream.Encoder} or {@link CharStream.Encoder}.
+ * This exception is used to wrap exceptions thrown by {@link ByteSource.Encoder} or {@link CharSource.Encoder}.
  *
  * @author sunqian
  */
