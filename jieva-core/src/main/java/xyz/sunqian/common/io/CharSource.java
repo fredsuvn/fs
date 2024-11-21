@@ -1,14 +1,13 @@
 package xyz.sunqian.common.io;
 
-import java.io.InputStream;
 import java.io.Reader;
 import java.nio.CharBuffer;
 
 /**
- * This interface represents a char data source, abstracting different types of data sources such as input stream, char
- * array, char buffer, etc. It is used to read data from the data source, encode it (if necessary), and then write to
- * the destination or as an {@link InputStream} (this process is called final operation). There are two types of method
- * in this interface:
+ * This interface represents a char data source, abstracting different types of data sources such as reader, char array,
+ * char buffer, etc. It is used to read data from the data source, encode it (if necessary), and then write to the
+ * destination or as an {@link Reader} (this process is called final operation). There are two types of method in this
+ * interface:
  * <ul>
  *     <li>
  *         Setting methods, used to set parameters and options before the final methods are invoked, such as
@@ -54,8 +53,9 @@ public interface CharSource {
      * @param offset start index
      * @param length specified length
      * @return a new {@link CharSource}
+     * @throws IORuntimeException thrown for any problem
      */
-    static CharSource from(char[] source, int offset, int length) {
+    static CharSource from(char[] source, int offset, int length) throws IORuntimeException {
         if (offset == 0 && length == source.length) {
             return from(source);
         }
@@ -133,7 +133,7 @@ public interface CharSource {
      * already reached to the end before reading, return -1. If an error is thrown by an {@code encoder}, the error will
      * be wrapped by {@link IOEncodingException} to be thrown, use {@link Throwable#getCause()} to get it.
      * <p>
-     * If the source and/or destination is a buffer or stream, its position will be incremented by actual affected
+     * If the source and/or destination is a buffer or reader, its position will be incremented by actual affected
      * length.
      * <p>
      * This is a final method.
@@ -155,7 +155,7 @@ public interface CharSource {
      * already reached to the end before reading, return -1. If an error is thrown by an {@code encoder}, the error will
      * be wrapped by {@link IOEncodingException} to be thrown, use {@link Throwable#getCause()} to get it.
      * <p>
-     * If the source and/or destination is a buffer or stream, its position will be incremented by actual affected
+     * If the source and/or destination is a buffer or reader, its position will be incremented by actual affected
      * length.
      * <p>
      * This is a final method.
@@ -177,7 +177,7 @@ public interface CharSource {
      * already reached to the end before reading, return -1. If an error is thrown by an {@code encoder}, the error will
      * be wrapped by {@link IOEncodingException} to be thrown, use {@link Throwable#getCause()} to get it.
      * <p>
-     * If the source and/or destination is a buffer or stream, its position will be incremented by actual affected
+     * If the source and/or destination is a buffer or reader, its position will be incremented by actual affected
      * length.
      * <p>
      * This is a final method.
@@ -201,7 +201,7 @@ public interface CharSource {
      * already reached to the end before reading, return -1. If an error is thrown by an {@code encoder}, the error will
      * be wrapped by {@link IOEncodingException} to be thrown, use {@link Throwable#getCause()} to get it.
      * <p>
-     * If the source and/or destination is a buffer or stream, its position will be incremented by actual affected
+     * If the source and/or destination is a buffer or reader, its position will be incremented by actual affected
      * length.
      * <p>
      * This is a final method.
@@ -226,7 +226,7 @@ public interface CharSource {
     /**
      * Sets the chars number for each reading from data source.
      * <p>
-     * This setting is typically used when the source is an input stream, or when {@code encoder} (see
+     * This setting is typically used when the source is a reader, or when {@code encoder} (see
      * {@link #encoder(Encoder)}/{@link #encoders(Iterable)}) is set for final operation, default is
      * {@link JieIO#BUFFER_SIZE}. When the final operation starts, it ensures that the size of data passed to the
      * {@code encoder} is the value set by this method, until the last read where the remaining source data might be

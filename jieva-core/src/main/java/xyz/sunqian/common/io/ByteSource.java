@@ -54,8 +54,9 @@ public interface ByteSource {
      * @param offset start index
      * @param length specified length
      * @return a new {@link ByteSource}
+     * @throws IORuntimeException thrown for any problem
      */
-    static ByteSource from(byte[] source, int offset, int length) {
+    static ByteSource from(byte[] source, int offset, int length) throws IORuntimeException {
         if (offset == 0 && length == source.length) {
             return from(source);
         }
@@ -274,6 +275,19 @@ public interface ByteSource {
      * @see #encoder(Encoder)
      */
     ByteSource encoders(Iterable<Encoder> encoders);
+
+    // /**
+    //  * Returns an input stream of which data from the data source after encoding (if necessary).
+    //  * <p>
+    //  * If the source is a buffer or stream, its position will be incremented by actual affected length. The close method
+    //  * will close the actual underlying data source (if it can be closed).
+    //  * <p>
+    //  * This is a final method.
+    //  *
+    //  * @return an input stream of which data from the data source after encoding (if necessary)
+    //  * @throws IORuntimeException thrown for any problem
+    //  */
+    // InputStream asInputStream() throws IORuntimeException;
 
     /**
      * Encoder to encode the data in the final operation.
