@@ -11,24 +11,29 @@ import java.util.Arrays;
  * {@link OutputStream}.
  * <p>
  * Like {@link ByteArrayOutputStream}, this class also has a buffer space to store the bytes, and close method has no
- * effect. The methods in this class can be called after the stream has been closed without generating an IOException.
+ * effect. The methods in this class can be called after the stream has been closed without exception.
  *
  * @author sunqian
  */
 public class BytesBuilder extends OutputStream {
 
     /**
-     * Max buffer size of bytes builder.
+     * Max buffer size.
      */
     public static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
-    private byte[] buf;
-    private int count;
     private final int maxSize;
 
+    private byte[] buf;
+    private int count;
+
     /**
-     * Constructs with 32 initial size of buffer capacity.
+     * Constructs with 32 bytes of buffer capacity, it is equivalent to:
+     * <pre>
+     *     BytesBuilder(32)
+     * </pre>
      *
+     * @see #BytesBuilder(int)
      * @see ByteArrayOutputStream#ByteArrayOutputStream()
      */
     public BytesBuilder() {
@@ -38,8 +43,8 @@ public class BytesBuilder extends OutputStream {
     /**
      * Constructs with specified initial size of buffer capacity in bytes.
      *
-     * @param initialSize the initial size.
-     * @throws IllegalArgumentException if size is negative.
+     * @param initialSize the initial size
+     * @throws IllegalArgumentException if size is negative
      * @see ByteArrayOutputStream#ByteArrayOutputStream(int)
      */
     public BytesBuilder(int initialSize) {
@@ -49,15 +54,19 @@ public class BytesBuilder extends OutputStream {
     /**
      * Constructs with specified initial size and max size of buffer capacity in bytes.
      *
-     * @param initialSize the initial size.
+     * @param initialSize the initial size
      * @param maxSize     max size
-     * @throws IllegalArgumentException if initial size is negative or max size &lt;= 0 or initial size &gt; max size.
-     * @see ByteArrayOutputStream#ByteArrayOutputStream(int)
+     * @throws IllegalArgumentException if initial size is negative or max size &lt;= 0 or initial size &gt; max size
      */
     public BytesBuilder(int initialSize, int maxSize) {
-        if (initialSize < 0 || maxSize <= 0 || initialSize > maxSize) {
-            throw new IllegalArgumentException("Negative initialSize: "
-                + initialSize + ", maxSize: " + maxSize + ".");
+        if (initialSize < 0) {
+            throw new IllegalArgumentException("Negative initialSize: " + initialSize + ".");
+        }
+        if (maxSize < 0) {
+            throw new IllegalArgumentException("Negative maxSize: " + maxSize + ".");
+        }
+        if (initialSize > maxSize) {
+            throw new IllegalArgumentException("The initialSize must <= maxSize.");
         }
         buf = new byte[initialSize];
         this.maxSize = maxSize;
@@ -66,7 +75,7 @@ public class BytesBuilder extends OutputStream {
     /**
      * Writes the specified byte to this builder.
      *
-     * @param b the byte to be written.
+     * @param b the byte to be written
      * @see ByteArrayOutputStream#write(int)
      */
     public void write(int b) {
@@ -76,11 +85,11 @@ public class BytesBuilder extends OutputStream {
     }
 
     /**
-     * Writes <code>len</code> bytes from the specified byte array starting at offset <code>off</code> to this builder.
+     * Writes specified length of bytes from the specified byte array starting at specified offset to this builder.
      *
-     * @param b   the data.
-     * @param off the start offset in the data.
-     * @param len the number of bytes to write.
+     * @param b   specified byte array
+     * @param off specified offset
+     * @param len specified length
      * @see ByteArrayOutputStream#write(byte[], int, int)
      */
     public void write(byte[] b, int off, int len) {
@@ -91,11 +100,10 @@ public class BytesBuilder extends OutputStream {
     }
 
     /**
-     * Writes the complete contents of this builder to the specified output stream argument, as if by calling the output
-     * stream's write method using <code>out.write(buf, 0, count)</code>.
+     * Writes contents of this builder to specified output stream.
      *
-     * @param out the output stream to which to write the data.
-     * @throws IOException if an I/O error occurs.
+     * @param out specified output stream
+     * @throws IOException if an I/O error occurs
      * @see ByteArrayOutputStream#writeTo(OutputStream)
      */
     public void writeTo(OutputStream out) throws IOException {
@@ -103,11 +111,10 @@ public class BytesBuilder extends OutputStream {
     }
 
     /**
-     * Writes the complete contents of this builder to the specified byte buffer argument, as if by calling the buffer's
-     * write method using <code>out.put(buf, 0, count)</code>.
+     * Writes contents of this builder to specified byte buffer.
      *
-     * @param out the byte buffer to which to write the data.
-     * @throws IOException if an I/O error occurs.
+     * @param out specified byte buffer
+     * @throws IOException if an I/O error occurs
      */
     public void writeTo(ByteBuffer out) throws IOException {
         out.put(buf, 0, count);
@@ -126,14 +133,14 @@ public class BytesBuilder extends OutputStream {
     }
 
     /**
-     * Trims the allocated but unused buffer space.
+     * Trims and releases the allocated but discarded buffer space.
      */
     public void trimBuffer() {
         buf = Arrays.copyOf(buf, count);
     }
 
     /**
-     * Returns the current size of the buffer.
+     * Returns the current size of the buffer (value of the <code>byte count</code>).
      *
      * @return the value of the <code>byte count</code>, which is the number of valid bytes in this builder.
      * @see ByteArrayOutputStream#size()
@@ -143,10 +150,10 @@ public class BytesBuilder extends OutputStream {
     }
 
     /**
-     * Creates a newly allocated byte array. Its size is the current size of this builder and the valid contents of the
-     * buffer have been copied into it.
+     * Creates and returns a newly allocated byte array. Its size is the current size of this builder and the valid
+     * contents of the buffer have been copied into it.
      *
-     * @return the current contents of this builder, as a byte array.
+     * @return copy of the current contents of this builder, as a byte array.
      * @see ByteArrayOutputStream#toByteArray()
      */
     public byte[] toByteArray() {
@@ -154,25 +161,19 @@ public class BytesBuilder extends OutputStream {
     }
 
     /**
-     * Creates a newly allocated byte buffer, and its contents are copied from this builder.
+     * Creates and returns a newly allocated byte buffer. Its size is the current size of this builder and the valid
+     * contents of the buffer have been copied into it.
      *
-     * @return the current contents of this builder, as a byte buffer.
+     * @return copy of the current contents of this builder, as a byte buffer.
      */
     public ByteBuffer toByteBuffer() {
         return ByteBuffer.wrap(toByteArray());
     }
 
     /**
-     * Converts the buffer's contents into a string decoding bytes using the platform's default character set. The
-     * length of the new <tt>String</tt> is a function of the character set, and hence may not be equal to the size of
-     * the buffer.
+     * Converts the buffer's contents into a string using the platform's default charset.
      *
-     * <p> This method always replaces malformed-input and unmappable-character
-     * sequences with the default replacement string for the platform's default character set. The
-     * {@linkplain java.nio.charset.CharsetDecoder} class should be used when more control over the decoding process is
-     * required.
-     *
-     * @return String decoded from the buffer's contents.
+     * @return String decoded from the buffer's contents using the platform's default charset
      * @see ByteArrayOutputStream#toString()
      */
     public String toString() {
@@ -180,22 +181,14 @@ public class BytesBuilder extends OutputStream {
     }
 
     /**
-     * Converts the buffer's contents into a string by decoding the bytes using the named
-     * {@link java.nio.charset.Charset charset}. The length of the new
-     * <tt>String</tt> is a function of the charset, and hence may not be equal
-     * to the length of the byte array.
+     * Converts the buffer's contents into a string using specified charset.
      *
-     * <p> This method always replaces malformed-input and unmappable-character
-     * sequences with this charset's default replacement string. The {@link java.nio.charset.CharsetDecoder} class
-     * should be used when more control over the decoding process is required.
-     *
-     * @param charsetName the name of a supported {@link java.nio.charset.Charset charset}
-     * @return String decoded from the buffer's contents.
+     * @param charsetName name of specified charset
+     * @return String decoded from the buffer's contents using specified charset
      * @throws UnsupportedEncodingException If the named charset is not supported
      * @see ByteArrayOutputStream#toString(String)
      */
-    public String toString(String charsetName)
-        throws UnsupportedEncodingException {
+    public String toString(String charsetName) throws UnsupportedEncodingException {
         return new String(buf, 0, count, charsetName);
     }
 
@@ -203,7 +196,7 @@ public class BytesBuilder extends OutputStream {
      * Converts current contents of this builder into a string with specified charset.
      *
      * @param charset specified charset
-     * @return String decoded from the current contents of this builder
+     * @return String decoded from the buffer's contents using specified charset
      */
     public String toString(Charset charset) {
         return new String(buf, 0, count, charset);
@@ -242,10 +235,7 @@ public class BytesBuilder extends OutputStream {
         if (newCapacity <= 0 || newCapacity > maxSize) {
             return maxSize;
         }
-        if (newCapacity < minCapacity) {
-            return minCapacity;
-        }
-        return newCapacity;
+        return Math.max(newCapacity, minCapacity);
     }
 
     /**
