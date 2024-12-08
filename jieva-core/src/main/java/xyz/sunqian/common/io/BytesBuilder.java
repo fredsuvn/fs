@@ -1,6 +1,9 @@
 package xyz.sunqian.common.io;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -103,21 +106,29 @@ public class BytesBuilder extends OutputStream {
      * Writes contents of this builder to specified output stream.
      *
      * @param out specified output stream
-     * @throws IOException if an I/O error occurs
+     * @throws IORuntimeException if an I/O error occurs
      * @see ByteArrayOutputStream#writeTo(OutputStream)
      */
-    public void writeTo(OutputStream out) throws IOException {
-        out.write(buf, 0, count);
+    public void writeTo(OutputStream out) throws IORuntimeException {
+        try {
+            out.write(buf, 0, count);
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
     }
 
     /**
      * Writes contents of this builder to specified byte buffer.
      *
      * @param out specified byte buffer
-     * @throws IOException if an I/O error occurs
+     * @throws IORuntimeException if an I/O error occurs
      */
-    public void writeTo(ByteBuffer out) throws IOException {
-        out.put(buf, 0, count);
+    public void writeTo(ByteBuffer out) throws IORuntimeException {
+        try {
+            out.put(buf, 0, count);
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
     }
 
     /**
@@ -218,7 +229,7 @@ public class BytesBuilder extends OutputStream {
 
     private void grow(int minCapacity) {
         if (minCapacity < 0 || minCapacity > maxSize) {
-            throw new IllegalStateException("Buffer out of size: " + minCapacity);
+            throw new IllegalStateException("Buffer out of size: " + minCapacity + ".");
         }
         int oldCapacity = buf.length;
         int newCapacity;
@@ -321,7 +332,7 @@ public class BytesBuilder extends OutputStream {
                     return this;
                 }
                 write(buffer, 0, readSize);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new IORuntimeException(e);
             }
         }

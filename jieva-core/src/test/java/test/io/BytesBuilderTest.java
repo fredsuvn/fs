@@ -12,6 +12,7 @@ import xyz.sunqian.test.JieTest;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -22,7 +23,40 @@ public class BytesBuilderTest {
 
     @Test
     public void testBytesBuilder() throws Exception {
-        char[] cs = JieRandom.fill(new char[1024], '0', '9');
+        testBytesBuilder(512);
+        testBytesBuilder(1024);
+        expectThrows(IllegalArgumentException.class, () -> new BytesBuilder(-1));
+        expectThrows(IllegalArgumentException.class, () -> new BytesBuilder(10, -2));
+        expectThrows(IllegalArgumentException.class, () -> new BytesBuilder(10, 2));
+        BytesBuilder bb = new BytesBuilder();
+        bb.append((byte) 1);
+        expectThrows(IORuntimeException.class, () -> bb.writeTo(new OutputStream() {
+            @Override
+            public void write(int b) throws IOException {
+                throw new IOException();
+            }
+        }));
+        ByteBuffer bufEmpty = ByteBuffer.allocate(0);
+        expectThrows(IORuntimeException.class, () -> bb.writeTo(bufEmpty));
+
+        // test big memory!
+        Method grow = BytesBuilder.class.getDeclaredMethod("grow", int.class);
+        BytesBuilder bbs = new BytesBuilder(1, 1);
+        bbs.write(1);
+        expectThrows(IllegalStateException.class, () -> bbs.write(1));
+        BytesBuilder bbs2 = new BytesBuilder(2, 3);
+        bbs2.write(1);
+        bbs2.write(1);
+        bbs2.write(1);
+        expectThrows(IllegalStateException.class, () -> bbs2.write(1));
+        JieTest.testThrow(IllegalStateException.class, grow, new BytesBuilder(), BytesBuilder.MAX_ARRAY_SIZE + 10);
+        Method newCapacity = BytesBuilder.class.getDeclaredMethod("newCapacity", int.class, int.class);
+        newCapacity.setAccessible(true);
+        assertEquals(BytesBuilder.MAX_ARRAY_SIZE, newCapacity.invoke(new BytesBuilder(), -1, 1));
+    }
+
+    private void testBytesBuilder(int size) throws Exception {
+        char[] cs = JieRandom.fill(new char[size], '0', '9');
         byte[] bs = new String(cs).getBytes();
         BytesBuilder bb = new BytesBuilder();
         bb.close();
@@ -90,23 +124,5 @@ public class BytesBuilderTest {
         ByteBuffer bufOut = ByteBuffer.allocate(1);
         bb.writeTo(bufOut);
         assertEquals(bb.toByteArray(), bufOut.array());
-        expectThrows(IllegalArgumentException.class, () -> new BytesBuilder(-1));
-        expectThrows(IllegalArgumentException.class, () -> new BytesBuilder(10, -2));
-        expectThrows(IllegalArgumentException.class, () -> new BytesBuilder(10, 2));
-
-        // test big memory!
-        Method grow = BytesBuilder.class.getDeclaredMethod("grow", int.class);
-        BytesBuilder bbs = new BytesBuilder(1, 1);
-        bbs.write(1);
-        expectThrows(IllegalStateException.class, () -> bbs.write(1));
-        BytesBuilder bbs2 = new BytesBuilder(2, 3);
-        bbs2.write(1);
-        bbs2.write(1);
-        bbs2.write(1);
-        expectThrows(IllegalStateException.class, () -> bbs2.write(1));
-        JieTest.testThrow(IllegalStateException.class, grow, new BytesBuilder(), BytesBuilder.MAX_ARRAY_SIZE + 10);
-        Method newCapacity = BytesBuilder.class.getDeclaredMethod("newCapacity", int.class, int.class);
-        newCapacity.setAccessible(true);
-        assertEquals(BytesBuilder.MAX_ARRAY_SIZE, newCapacity.invoke(new BytesBuilder(), -1, 1));
     }
 }
