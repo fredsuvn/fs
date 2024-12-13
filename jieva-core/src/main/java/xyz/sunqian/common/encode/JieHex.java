@@ -1,6 +1,6 @@
 package xyz.sunqian.common.encode;
 
-import xyz.sunqian.common.io.ByteSource;
+import xyz.sunqian.common.io.ByteStream;
 
 /**
  * This is a static utilities class for {@code Hex} encoding and decoding, provides encoder and decoder implementations:
@@ -54,7 +54,7 @@ public class JieHex {
          * @return a singleton thread-safe stream encoder object
          */
         @Override
-        ByteSource.Encoder streamEncoder();
+        ByteStream.Encoder streamEncoder();
     }
 
     /**
@@ -78,14 +78,14 @@ public class JieHex {
 
         /**
          * Returns a new stream decoder. The decoder is wrapped by
-         * {@link ByteSource#roundEncoder(ByteSource.Encoder, int)} to keep size of input data is even. Although the
+         * {@link ByteStream#roundEncoder(ByteStream.Encoder, int)} to keep size of input data is even. Although the
          * decoder accepts any size of input data, it is recommended that sets an even block size for a better
          * performance.
          *
-         * @return a new stream decoder wrapped by {@link ByteSource#roundEncoder(ByteSource.Encoder, int)}
+         * @return a new stream decoder wrapped by {@link ByteStream#roundEncoder(ByteStream.Encoder, int)}
          */
         @Override
-        ByteSource.Encoder streamEncoder();
+        ByteStream.Encoder streamEncoder();
     }
 
     private static final class HexEncoder extends AbsCoder.En implements Encoder {

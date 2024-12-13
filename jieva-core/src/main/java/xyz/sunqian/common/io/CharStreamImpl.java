@@ -13,7 +13,7 @@ import java.nio.CharBuffer;
 import java.util.Collections;
 import java.util.List;
 
-final class CharSourceImpl implements CharSource {
+final class CharStreamImpl implements CharStream {
 
     private final Object source;
     private Object dest;
@@ -22,36 +22,36 @@ final class CharSourceImpl implements CharSource {
     private boolean endOnZeroRead = false;
     private List<Encoder> encoders;
 
-    CharSourceImpl(Reader source) {
+    CharStreamImpl(Reader source) {
         this.source = source;
     }
 
-    CharSourceImpl(char[] source) {
+    CharStreamImpl(char[] source) {
         this.source = source;
     }
 
-    CharSourceImpl(CharBuffer source) {
+    CharStreamImpl(CharBuffer source) {
         this.source = source;
     }
 
-    CharSourceImpl(CharSequence source) {
+    CharStreamImpl(CharSequence source) {
         this.source = source;
     }
 
     @Override
-    public long to(Appendable dest) {
+    public long writeTo(Appendable dest) {
         this.dest = dest;
         return start();
     }
 
     @Override
-    public long to(char[] dest) {
+    public long writeTo(char[] dest) {
         this.dest = dest;
         return start();
     }
 
     @Override
-    public long to(char[] dest, int offset, int length) {
+    public long writeTo(char[] dest, int offset, int length) {
         try {
             this.dest = CharBuffer.wrap(dest, offset, length);
         } catch (Exception e) {
@@ -61,19 +61,19 @@ final class CharSourceImpl implements CharSource {
     }
 
     @Override
-    public long to(CharBuffer dest) {
+    public long writeTo(CharBuffer dest) {
         this.dest = dest;
         return start();
     }
 
     @Override
-    public CharSource readLimit(long readLimit) {
+    public CharStream readLimit(long readLimit) {
         this.readLimit = readLimit;
         return this;
     }
 
     @Override
-    public CharSource blockSize(int blockSize) {
+    public CharStream blockSize(int blockSize) {
         if (blockSize <= 0) {
             throw new IORuntimeException("blockSize must > 0!");
         }
@@ -82,19 +82,19 @@ final class CharSourceImpl implements CharSource {
     }
 
     @Override
-    public CharSource endOnZeroRead(boolean endOnZeroRead) {
+    public CharStream endOnZeroRead(boolean endOnZeroRead) {
         this.endOnZeroRead = endOnZeroRead;
         return this;
     }
 
     @Override
-    public CharSource encoder(Encoder encoder) {
+    public CharStream encoder(Encoder encoder) {
         this.encoders = Collections.singletonList(encoder);
         return this;
     }
 
     @Override
-    public CharSource encoders(Iterable<Encoder> encoders) {
+    public CharStream encoders(Iterable<Encoder> encoders) {
         this.encoders = JieColl.toList(encoders);
         return this;
     }
@@ -502,12 +502,12 @@ final class CharSourceImpl implements CharSource {
         }
     }
 
-    private static abstract class AbsEncoder implements CharSource.Encoder {
+    private static abstract class AbsEncoder implements CharStream.Encoder {
 
-        protected final CharSource.Encoder encoder;
+        protected final CharStream.Encoder encoder;
         protected char[] buf = JieChars.emptyChars();
 
-        protected AbsEncoder(CharSource.Encoder encoder) {
+        protected AbsEncoder(CharStream.Encoder encoder) {
             this.encoder = encoder;
         }
 
@@ -531,7 +531,7 @@ final class CharSourceImpl implements CharSource {
 
         private final int expectedBlockSize;
 
-        RoundEncoder(CharSource.Encoder encoder, int expectedBlockSize) {
+        RoundEncoder(CharStream.Encoder encoder, int expectedBlockSize) {
             super(encoder);
             this.expectedBlockSize = expectedBlockSize;
         }
@@ -581,7 +581,7 @@ final class CharSourceImpl implements CharSource {
 
     final static class BufferedEncoder extends AbsEncoder {
 
-        BufferedEncoder(CharSource.Encoder encoder) {
+        BufferedEncoder(CharStream.Encoder encoder) {
             super(encoder);
         }
 

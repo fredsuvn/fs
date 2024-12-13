@@ -12,7 +12,7 @@ import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.List;
 
-final class ByteSourceImpl implements ByteSource {
+final class ByteStreamImpl implements ByteStream {
 
     private final Object source;
     private Object dest;
@@ -21,34 +21,34 @@ final class ByteSourceImpl implements ByteSource {
     private boolean endOnZeroRead = false;
     private List<Encoder> encoders;
 
-    ByteSourceImpl(InputStream source) {
+    ByteStreamImpl(InputStream source) {
         this.source = source;
     }
 
-    ByteSourceImpl(byte[] source) {
+    ByteStreamImpl(byte[] source) {
         this.source = source;
     }
 
-    ByteSourceImpl(ByteBuffer source) {
+    ByteStreamImpl(ByteBuffer source) {
         this.source = source;
     }
 
     @Override
-    public long to(OutputStream dest) {
+    public long writeTo(OutputStream dest) {
         this.dest = dest;
         return start();
     }
 
     @Override
-    public long to(byte[] dest) {
+    public long writeTo(byte[] dest) {
         this.dest = dest;
         return start();
     }
 
     @Override
-    public long to(byte[] dest, int offset, int length) {
+    public long writeTo(byte[] dest, int offset, int length) {
         if (offset == 0 && length == dest.length) {
-            return to(dest);
+            return writeTo(dest);
         }
         try {
             this.dest = ByteBuffer.wrap(dest, offset, length);
@@ -59,19 +59,19 @@ final class ByteSourceImpl implements ByteSource {
     }
 
     @Override
-    public long to(ByteBuffer dest) {
+    public long writeTo(ByteBuffer dest) {
         this.dest = dest;
         return start();
     }
 
     @Override
-    public ByteSource readLimit(long readLimit) {
+    public ByteStream readLimit(long readLimit) {
         this.readLimit = readLimit;
         return this;
     }
 
     @Override
-    public ByteSource blockSize(int blockSize) {
+    public ByteStream blockSize(int blockSize) {
         if (blockSize <= 0) {
             throw new IORuntimeException("blockSize must > 0!");
         }
@@ -80,19 +80,19 @@ final class ByteSourceImpl implements ByteSource {
     }
 
     @Override
-    public ByteSource endOnZeroRead(boolean endOnZeroRead) {
+    public ByteStream endOnZeroRead(boolean endOnZeroRead) {
         this.endOnZeroRead = endOnZeroRead;
         return this;
     }
 
     @Override
-    public ByteSource encoder(Encoder encoder) {
+    public ByteStream encoder(Encoder encoder) {
         this.encoders = Collections.singletonList(encoder);
         return this;
     }
 
     @Override
-    public ByteSource encoders(Iterable<Encoder> encoders) {
+    public ByteStream encoders(Iterable<Encoder> encoders) {
         this.encoders = JieColl.toList(encoders);
         return this;
     }

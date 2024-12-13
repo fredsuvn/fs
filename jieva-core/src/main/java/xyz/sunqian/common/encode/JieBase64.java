@@ -1,7 +1,7 @@
 package xyz.sunqian.common.encode;
 
 import xyz.sunqian.common.base.JieBytes;
-import xyz.sunqian.common.io.ByteSource;
+import xyz.sunqian.common.io.ByteStream;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -192,14 +192,14 @@ public class JieBase64 {
 
         /**
          * Returns a new stream encoder. The encoder is wrapped by
-         * {@link ByteSource#roundEncoder(ByteSource.Encoder, int)} to keep size of input data is multiple of 3.
+         * {@link ByteStream#roundEncoder(ByteStream.Encoder, int)} to keep size of input data is multiple of 3.
          * Although the encoder accepts any size of input data, it is recommended that sets block size to multiple of 3
          * for a better performance.
          *
-         * @return a new stream decoder wrapped by {@link ByteSource#roundEncoder(ByteSource.Encoder, int)}
+         * @return a new stream decoder wrapped by {@link ByteStream#roundEncoder(ByteStream.Encoder, int)}
          */
         @Override
-        ByteSource.Encoder streamEncoder();
+        ByteStream.Encoder streamEncoder();
     }
 
     /**
@@ -223,16 +223,16 @@ public class JieBase64 {
 
         /**
          * Returns a new stream decoder. The decoder is wrapped by
-         * {@link ByteSource#roundEncoder(ByteSource.Encoder, int)} for un-separation, and
-         * {@link ByteSource#bufferedEncoder(ByteSource.Encoder)} for separation. Thus, it is recommended that sets a
+         * {@link ByteStream#roundEncoder(ByteStream.Encoder, int)} for un-separation, and
+         * {@link ByteStream#bufferedEncoder(ByteStream.Encoder)} for separation. Thus, it is recommended that sets a
          * multiple of 4 block size for un-separation decoding, or an enough buffered size, such as 1024 for separation
          * decoding, for a better performance.
          *
-         * @return a new stream decoder wrapped by {@link ByteSource#roundEncoder(ByteSource.Encoder, int)} or
-         * {@link ByteSource#bufferedEncoder(ByteSource.Encoder)}
+         * @return a new stream decoder wrapped by {@link ByteStream#roundEncoder(ByteStream.Encoder, int)} or
+         * {@link ByteStream#bufferedEncoder(ByteStream.Encoder)}
          */
         @Override
-        ByteSource.Encoder streamEncoder();
+        ByteStream.Encoder streamEncoder();
     }
 
     private static abstract class AbsEncoder extends AbsCoder.En implements Encoder {
@@ -394,8 +394,8 @@ public class JieBase64 {
         }
 
         @Override
-        public ByteSource.Encoder streamEncoder() {
-            ByteSource.Encoder encoder = new ByteSource.Encoder() {
+        public ByteStream.Encoder streamEncoder() {
+            ByteStream.Encoder encoder = new ByteStream.Encoder() {
 
                 private long startPos = 0;
 
@@ -425,7 +425,7 @@ public class JieBase64 {
                     return ret;
                 }
             };
-            return ByteSource.roundEncoder(encoder, getBlockSize());
+            return ByteStream.roundEncoder(encoder, getBlockSize());
         }
 
         protected int doCode(long startPos, byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, boolean end) {

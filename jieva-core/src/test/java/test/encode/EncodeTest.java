@@ -7,7 +7,7 @@ import xyz.sunqian.common.base.JieBytes;
 import xyz.sunqian.common.base.JieChars;
 import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.encode.*;
-import xyz.sunqian.common.io.ByteSource;
+import xyz.sunqian.common.io.ByteStream;
 import xyz.sunqian.common.io.IOEncodingException;
 import xyz.sunqian.common.io.JieIO;
 
@@ -290,72 +290,72 @@ public class EncodeTest {
     private void testByteStreamEncoder(byte[] data, JieBase64.Encoder encoder, byte[] enData) {
         {
             ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-            ByteSource byteSource = ByteSource.from(data).encoder(encoder.streamEncoder());
-            int readNum = (int) byteSource.to(bytesOut);
+            ByteStream byteStream = ByteStream.from(data).encoder(encoder.streamEncoder());
+            int readNum = (int) byteStream.writeTo(bytesOut);
             assertEquals(readNum, data.length == 0 ? -1 : data.length);
             assertEquals(bytesOut.toByteArray(), enData);
         }
         {
             ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-            ByteSource byteSource = ByteSource.from(data).blockSize(56).encoder(encoder.streamEncoder());
-            int readNum = (int) byteSource.to(bytesOut);
+            ByteStream byteStream = ByteStream.from(data).blockSize(56).encoder(encoder.streamEncoder());
+            int readNum = (int) byteStream.writeTo(bytesOut);
             assertEquals(readNum, data.length == 0 ? -1 : data.length);
             assertEquals(bytesOut.toByteArray(), enData);
         }
         {
             ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-            ByteSource byteSource = ByteSource.from(data).blockSize(57).encoder(encoder.streamEncoder());
-            int readNum = (int) byteSource.to(bytesOut);
+            ByteStream byteStream = ByteStream.from(data).blockSize(57).encoder(encoder.streamEncoder());
+            int readNum = (int) byteStream.writeTo(bytesOut);
             assertEquals(readNum, data.length == 0 ? -1 : data.length);
             assertEquals(bytesOut.toByteArray(), enData);
         }
         {
             ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-            ByteSource byteSource = ByteSource.from(data).blockSize(58).encoder(encoder.streamEncoder());
-            int readNum = (int) byteSource.to(bytesOut);
+            ByteStream byteStream = ByteStream.from(data).blockSize(58).encoder(encoder.streamEncoder());
+            int readNum = (int) byteStream.writeTo(bytesOut);
             assertEquals(readNum, data.length == 0 ? -1 : data.length);
             assertEquals(bytesOut.toByteArray(), enData);
         }
         {
             ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-            ByteSource byteSource = ByteSource.from(data).blockSize(47).encoder(encoder.streamEncoder());
-            int readNum = (int) byteSource.to(bytesOut);
+            ByteStream byteStream = ByteStream.from(data).blockSize(47).encoder(encoder.streamEncoder());
+            int readNum = (int) byteStream.writeTo(bytesOut);
             assertEquals(readNum, data.length == 0 ? -1 : data.length);
             assertEquals(bytesOut.toByteArray(), enData);
         }
         {
             ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-            ByteSource byteSource = ByteSource.from(data).blockSize(48).encoder(encoder.streamEncoder());
-            int readNum = (int) byteSource.to(bytesOut);
+            ByteStream byteStream = ByteStream.from(data).blockSize(48).encoder(encoder.streamEncoder());
+            int readNum = (int) byteStream.writeTo(bytesOut);
             assertEquals(readNum, data.length == 0 ? -1 : data.length);
             assertEquals(bytesOut.toByteArray(), enData);
         }
         {
             ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-            ByteSource byteSource = ByteSource.from(data).blockSize(49).encoder(encoder.streamEncoder());
-            int readNum = (int) byteSource.to(bytesOut);
+            ByteStream byteStream = ByteStream.from(data).blockSize(49).encoder(encoder.streamEncoder());
+            int readNum = (int) byteStream.writeTo(bytesOut);
             assertEquals(readNum, data.length == 0 ? -1 : data.length);
             assertEquals(bytesOut.toByteArray(), enData);
         }
         {
             ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-            ByteSource byteSource = ByteSource.from(data).blockSize(480).encoder(encoder.streamEncoder());
-            int readNum = (int) byteSource.to(bytesOut);
+            ByteStream byteStream = ByteStream.from(data).blockSize(480).encoder(encoder.streamEncoder());
+            int readNum = (int) byteStream.writeTo(bytesOut);
             assertEquals(readNum, data.length == 0 ? -1 : data.length);
             assertEquals(bytesOut.toByteArray(), enData);
         }
         {
             ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-            ByteSource byteSource = ByteSource.from(data).blockSize(233).encoder(encoder.streamEncoder());
-            int readNum = (int) byteSource.to(bytesOut);
+            ByteStream byteStream = ByteStream.from(data).blockSize(233).encoder(encoder.streamEncoder());
+            int readNum = (int) byteStream.writeTo(bytesOut);
             assertEquals(readNum, data.length == 0 ? -1 : data.length);
             assertEquals(bytesOut.toByteArray(), enData);
         }
         for (int i = 1; i < 10; i++) {
             {
                 ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-                ByteSource byteSource = ByteSource.from(data).blockSize(i).encoder(encoder.streamEncoder());
-                int readNum = (int) byteSource.to(bytesOut);
+                ByteStream byteStream = ByteStream.from(data).blockSize(i).encoder(encoder.streamEncoder());
+                int readNum = (int) byteStream.writeTo(bytesOut);
                 assertEquals(readNum, data.length == 0 ? -1 : data.length);
                 assertEquals(bytesOut.toByteArray(), enData);
             }
@@ -554,22 +554,22 @@ public class EncodeTest {
             ByteArrayOutputStream bytesOut2 = new ByteArrayOutputStream();
             {
                 bytesOut2.reset();
-                ByteSource byteSource = ByteSource.from(data).blockSize(encoder.getBlockSize()).encoder(encoder.streamEncoder());
-                int readNum = (int) byteSource.to(bytesOut2);
+                ByteStream byteStream = ByteStream.from(data).blockSize(encoder.getBlockSize()).encoder(encoder.streamEncoder());
+                int readNum = (int) byteStream.writeTo(bytesOut2);
                 assertEquals(readNum, data.length == 0 ? -1 : data.length);
                 assertEquals(bytesOut.toByteArray(), bytesOut2.toByteArray());
             }
             {
                 bytesOut2.reset();
-                ByteSource byteSource = ByteSource.from(data).blockSize(encoder.getBlockSize() * 2).encoder(encoder.streamEncoder());
-                int readNum = (int) byteSource.to(bytesOut2);
+                ByteStream byteStream = ByteStream.from(data).blockSize(encoder.getBlockSize() * 2).encoder(encoder.streamEncoder());
+                int readNum = (int) byteStream.writeTo(bytesOut2);
                 assertEquals(readNum, data.length == 0 ? -1 : data.length);
                 assertEquals(bytesOut.toByteArray(), bytesOut2.toByteArray());
             }
             {
                 bytesOut2.reset();
-                ByteSource byteSource = ByteSource.from(data).blockSize(encoder.getBlockSize() * 20).encoder(encoder.streamEncoder());
-                int readNum = (int) byteSource.to(bytesOut2);
+                ByteStream byteStream = ByteStream.from(data).blockSize(encoder.getBlockSize() * 20).encoder(encoder.streamEncoder());
+                int readNum = (int) byteStream.writeTo(bytesOut2);
                 assertEquals(readNum, data.length == 0 ? -1 : data.length);
                 assertEquals(bytesOut.toByteArray(), bytesOut2.toByteArray());
             }
@@ -579,22 +579,22 @@ public class EncodeTest {
             bytesOut2 = new ByteArrayOutputStream();
             {
                 bytesOut2.reset();
-                ByteSource byteSource = ByteSource.from(aBytes).blockSize(decoder.getBlockSize()).encoder(decoder.streamEncoder());
-                int readNum = (int) byteSource.to(bytesOut2);
+                ByteStream byteStream = ByteStream.from(aBytes).blockSize(decoder.getBlockSize()).encoder(decoder.streamEncoder());
+                int readNum = (int) byteStream.writeTo(bytesOut2);
                 assertEquals(readNum, aBytes.length == 0 ? -1 : aBytes.length);
                 assertEquals(bytesOut.toByteArray(), bytesOut2.toByteArray());
             }
             {
                 bytesOut2.reset();
-                ByteSource byteSource = ByteSource.from(aBytes).blockSize(decoder.getBlockSize() * 2).encoder(decoder.streamEncoder());
-                int readNum = (int) byteSource.to(bytesOut2);
+                ByteStream byteStream = ByteStream.from(aBytes).blockSize(decoder.getBlockSize() * 2).encoder(decoder.streamEncoder());
+                int readNum = (int) byteStream.writeTo(bytesOut2);
                 assertEquals(readNum, aBytes.length == 0 ? -1 : aBytes.length);
                 assertEquals(bytesOut.toByteArray(), bytesOut2.toByteArray());
             }
             {
                 bytesOut2.reset();
-                ByteSource byteSource = ByteSource.from(aBytes).blockSize(decoder.getBlockSize() * 20).encoder(decoder.streamEncoder());
-                int readNum = (int) byteSource.to(bytesOut2);
+                ByteStream byteStream = ByteStream.from(aBytes).blockSize(decoder.getBlockSize() * 20).encoder(decoder.streamEncoder());
+                int readNum = (int) byteStream.writeTo(bytesOut2);
                 assertEquals(readNum, aBytes.length == 0 ? -1 : aBytes.length);
                 assertEquals(bytesOut.toByteArray(), bytesOut2.toByteArray());
             }
@@ -640,8 +640,8 @@ public class EncodeTest {
                 error[0] = null;
             }
             try {
-                ByteSource.from(en).blockSize(1)
-                    .encoder(JieHex.decoder().streamEncoder()).to(new ByteArrayOutputStream());
+                ByteStream.from(en).blockSize(1)
+                    .encoder(JieHex.decoder().streamEncoder()).writeTo(new ByteArrayOutputStream());
             } catch (IOEncodingException e) {
                 error[0] = e.getCause().getMessage();
             } finally {
@@ -663,8 +663,8 @@ public class EncodeTest {
                 error[0] = null;
             }
             try {
-                ByteSource.from(en).blockSize(1)
-                    .encoder(JieBase64.decoder().streamEncoder()).to(new ByteArrayOutputStream());
+                ByteStream.from(en).blockSize(1)
+                    .encoder(JieBase64.decoder().streamEncoder()).writeTo(new ByteArrayOutputStream());
             } catch (IOEncodingException e) {
                 error[0] = e.getCause().getMessage();
             } finally {
@@ -771,36 +771,36 @@ public class EncodeTest {
         System.out.println("java encode stream: " + (t2 - t1));
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
-            ByteSource bs = ByteSource.from(source).blockSize(570).encoder(encoder.streamEncoder());
-            bs.to(new ByteArrayOutputStream());
+            ByteStream bs = ByteStream.from(source).blockSize(570).encoder(encoder.streamEncoder());
+            bs.writeTo(new ByteArrayOutputStream());
         }
         t2 = System.currentTimeMillis();
         System.out.println("jie encode stream (570): " + (t2 - t1));
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
-            ByteSource bs = ByteSource.from(source).blockSize(30).encoder(encoder.streamEncoder());
-            bs.to(new ByteArrayOutputStream());
+            ByteStream bs = ByteStream.from(source).blockSize(30).encoder(encoder.streamEncoder());
+            bs.writeTo(new ByteArrayOutputStream());
         }
         t2 = System.currentTimeMillis();
         System.out.println("jie encode stream (30): " + (t2 - t1));
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
-            ByteSource bs = ByteSource.from(source).blockSize(577).encoder(encoder.streamEncoder());
-            bs.to(new ByteArrayOutputStream());
+            ByteStream bs = ByteStream.from(source).blockSize(577).encoder(encoder.streamEncoder());
+            bs.writeTo(new ByteArrayOutputStream());
         }
         t2 = System.currentTimeMillis();
         System.out.println("jie encode stream (577): " + (t2 - t1));
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
-            ByteSource bs = ByteSource.from(source).blockSize(567).encoder(encoder.streamEncoder());
-            bs.to(new ByteArrayOutputStream());
+            ByteStream bs = ByteStream.from(source).blockSize(567).encoder(encoder.streamEncoder());
+            bs.writeTo(new ByteArrayOutputStream());
         }
         t2 = System.currentTimeMillis();
         System.out.println("jie encode stream (567): " + (t2 - t1));
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
-            ByteSource bs = ByteSource.from(source).blockSize(570).encoder(encoder.streamEncoder());
-            bs.to(new ByteArrayOutputStream());
+            ByteStream bs = ByteStream.from(source).blockSize(570).encoder(encoder.streamEncoder());
+            bs.writeTo(new ByteArrayOutputStream());
         }
         t2 = System.currentTimeMillis();
         System.out.println("jie encode stream (570): " + (t2 - t1));
@@ -851,24 +851,24 @@ public class EncodeTest {
         ByteArrayOutputStream enOutput = new ByteArrayOutputStream(hexEncoded.length);
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
-            ByteSource bs = ByteSource.from(source).encoder(hexEn.streamEncoder());
-            bs.to(enOutput);
+            ByteStream bs = ByteStream.from(source).encoder(hexEn.streamEncoder());
+            bs.writeTo(enOutput);
             enOutput.reset();
         }
         t2 = System.currentTimeMillis();
         System.out.println("jie hex encode stream: " + (t2 - t1));
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
-            ByteSource bs = ByteSource.from(source).blockSize(99999).encoder(hexEn.streamEncoder());
-            bs.to(enOutput);
+            ByteStream bs = ByteStream.from(source).blockSize(99999).encoder(hexEn.streamEncoder());
+            bs.writeTo(enOutput);
             enOutput.reset();
         }
         t2 = System.currentTimeMillis();
         System.out.println("jie hex encode stream(99999): " + (t2 - t1));
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
-            ByteSource bs = ByteSource.from(source).blockSize(100).encoder(hexEn.streamEncoder());
-            bs.to(enOutput);
+            ByteStream bs = ByteStream.from(source).blockSize(100).encoder(hexEn.streamEncoder());
+            bs.writeTo(enOutput);
             enOutput.reset();
         }
         t2 = System.currentTimeMillis();
@@ -876,24 +876,24 @@ public class EncodeTest {
         ByteArrayOutputStream deOutput = new ByteArrayOutputStream(source.length);
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
-            ByteSource bs = ByteSource.from(hexEncoded).encoder(hexDe.streamEncoder());
-            bs.to(deOutput);
+            ByteStream bs = ByteStream.from(hexEncoded).encoder(hexDe.streamEncoder());
+            bs.writeTo(deOutput);
             deOutput.reset();
         }
         t2 = System.currentTimeMillis();
         System.out.println("jie hex decode stream: " + (t2 - t1));
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
-            ByteSource bs = ByteSource.from(hexEncoded).blockSize(99999).encoder(hexDe.streamEncoder());
-            bs.to(deOutput);
+            ByteStream bs = ByteStream.from(hexEncoded).blockSize(99999).encoder(hexDe.streamEncoder());
+            bs.writeTo(deOutput);
             deOutput.reset();
         }
         t2 = System.currentTimeMillis();
         System.out.println("jie hex decode stream(99999): " + (t2 - t1));
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
-            ByteSource bs = ByteSource.from(hexEncoded).blockSize(100).encoder(hexDe.streamEncoder());
-            bs.to(deOutput);
+            ByteStream bs = ByteStream.from(hexEncoded).blockSize(100).encoder(hexDe.streamEncoder());
+            bs.writeTo(deOutput);
             deOutput.reset();
         }
         t2 = System.currentTimeMillis();
