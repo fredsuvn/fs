@@ -34,37 +34,6 @@ final class ByteStreamImpl implements ByteStream {
     }
 
     @Override
-    public long writeTo(OutputStream dest) {
-        this.dest = dest;
-        return start();
-    }
-
-    @Override
-    public long writeTo(byte[] dest) {
-        this.dest = dest;
-        return start();
-    }
-
-    @Override
-    public long writeTo(byte[] dest, int offset, int length) {
-        if (offset == 0 && length == dest.length) {
-            return writeTo(dest);
-        }
-        try {
-            this.dest = ByteBuffer.wrap(dest, offset, length);
-        } catch (Exception e) {
-            throw new IORuntimeException(e);
-        }
-        return start();
-    }
-
-    @Override
-    public long writeTo(ByteBuffer dest) {
-        this.dest = dest;
-        return start();
-    }
-
-    @Override
     public ByteStream readLimit(long readLimit) {
         this.readLimit = readLimit;
         return this;
@@ -97,11 +66,36 @@ final class ByteStreamImpl implements ByteStream {
         return this;
     }
 
-    // @Override
-    // public InputStream asInputStream() throws IORuntimeException {
-    //     BufferIn in = toBufferIn(source);
-    //     return null;
-    // }
+    @Override
+    public long writeTo(OutputStream dest) {
+        this.dest = dest;
+        return start();
+    }
+
+    @Override
+    public long writeTo(byte[] dest) {
+        this.dest = dest;
+        return start();
+    }
+
+    @Override
+    public long writeTo(byte[] dest, int offset, int length) {
+        if (offset == 0 && length == dest.length) {
+            return writeTo(dest);
+        }
+        try {
+            this.dest = ByteBuffer.wrap(dest, offset, length);
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+        return start();
+    }
+
+    @Override
+    public long writeTo(ByteBuffer dest) {
+        this.dest = dest;
+        return start();
+    }
 
     private long start() {
         if (source == null || dest == null) {
@@ -511,123 +505,4 @@ final class ByteStreamImpl implements ByteStream {
             return ret;
         }
     }
-
-    // private final class BufferInputStream extends InputStream {
-    //
-    //     private final BufferIn in;
-    //     private ByteBuffer buf = JieBytes.emptyBuffer();
-    //     private boolean closed = false;
-    //
-    //     private BufferInputStream(BufferIn in) {
-    //         this.in = in;
-    //     }
-    //
-    //     @Override
-    //     public int read() throws IOException {
-    //         checkClosed();
-    //         if (buf == null) {
-    //             return -1;
-    //         }
-    //         if (!buf.hasRemaining()) {
-    //             try {
-    //                 buf = in.read();
-    //                 if (buf == null) {
-    //                     return -1;
-    //                 }
-    //                 if (!buf.hasRemaining() && endOnZeroRead) {
-    //                     return -1;
-    //                 }
-    //             } catch (Exception e) {
-    //                 throw new IOException(e);
-    //             }
-    //             return -1;
-    //         }
-    //         return read0();
-    //     }
-    //
-    //     private int read0() throws IOException {
-    //         try {
-    //             return in.get() & 0xff;
-    //         } catch (Exception e) {
-    //             throw new IOException(e);
-    //         }
-    //     }
-    //
-    //     @Override
-    //     public int read(byte[] b, int off, int len) throws IOException {
-    //         IOMisc.checkReadBounds(b, off, len);
-    //         if (len <= 0) {
-    //             return 0;
-    //         }
-    //         if (!in.hasRemaining()) {
-    //             return -1;
-    //         }
-    //         int avail = Math.min(in.remaining(), len);
-    //         read0(b, off, avail);
-    //         return avail;
-    //     }
-    //
-    //     private void read0(byte[] b, int off, int avail) throws IOException {
-    //         try {
-    //             in.get(b, off, avail);
-    //         } catch (Exception e) {
-    //             throw new IOException(e);
-    //         }
-    //     }
-    //
-    //     @Override
-    //     public long skip(long n) throws IOException {
-    //         if (n <= 0) {
-    //             return 0;
-    //         }
-    //         int avail = (int) Math.min(in.remaining(), n);
-    //         if (avail <= 0) {
-    //             return 0;
-    //         }
-    //         skip0(avail);
-    //         return avail;
-    //     }
-    //
-    //     private void skip0(int avail) throws IOException {
-    //         try {
-    //             in.position(in.position() + avail);
-    //         } catch (Exception e) {
-    //             throw new IOException(e);
-    //         }
-    //     }
-    //
-    //     @Override
-    //     public int available() {
-    //         return in.remaining();
-    //     }
-    //
-    //     @Override
-    //     public boolean markSupported() {
-    //         return true;
-    //     }
-    //
-    //     @Override
-    //     public void mark(int readlimit) {
-    //         in.mark();
-    //     }
-    //
-    //     @Override
-    //     public void reset() throws IOException {
-    //         try {
-    //             in.reset();
-    //         } catch (Exception e) {
-    //             throw new IOException(e);
-    //         }
-    //     }
-    //
-    //     @Override
-    //     public void close() {
-    //     }
-    //
-    //     private void checkClosed() throws IOException {
-    //         if (closed) {
-    //             throw new IOException("Stream closed.");
-    //         }
-    //     }
-    // }
 }

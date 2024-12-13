@@ -83,19 +83,19 @@ public interface ByteStream {
     }
 
     /**
-     * Returns a new round {@link Encoder} for rounding input data of given encoder, typically used for the encoder
-     * which is not applicable to the setting of {@link #blockSize(int)}.
+     * Returns a new {@link Encoder} to round input data for given encoder, typically used for the encoder which is not
+     * applicable to the setting of {@link #blockSize(int)}.
      * <p>
-     * The round encoder rounds length of the data to a max value which is the largest multiple of the specified
-     * expected block size, and passes the rounding data to given encoder. The remainder data will be buffered for next
-     * calling, until the last calling (where the {@code end} is {@code true}). In last calling, buffered data and input
-     * data will be merged and passed to the given encoder.
+     * This encoder rounds input data (possibly following buffered data from the previous invocation) to the largest
+     * multiple of the expected block size and passes the rounded data to the given encoder. Any remainder data will be
+     * buffered and used in the next invocation. However, in the last invocation (where the {@code end} is
+     * {@code true}), all data (buffered data followed by input data) will be passed directly to the given encoder.
      * <p>
-     * The round encoder is not thread-safe.
+     * This encoder is not thread-safe.
      *
      * @param encoder           given encoder
      * @param expectedBlockSize specified expected block size
-     * @return a new round {@link Encoder} for rounding input data of given encoder
+     * @return a new {@link Encoder} to round input data for given encoder
      */
     static Encoder roundEncoder(Encoder encoder, int expectedBlockSize) {
         return new ByteStreamImpl.RoundEncoder(encoder, expectedBlockSize);

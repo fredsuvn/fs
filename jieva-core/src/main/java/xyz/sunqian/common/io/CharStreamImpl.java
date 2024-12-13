@@ -39,34 +39,6 @@ final class CharStreamImpl implements CharStream {
     }
 
     @Override
-    public long writeTo(Appendable dest) {
-        this.dest = dest;
-        return start();
-    }
-
-    @Override
-    public long writeTo(char[] dest) {
-        this.dest = dest;
-        return start();
-    }
-
-    @Override
-    public long writeTo(char[] dest, int offset, int length) {
-        try {
-            this.dest = CharBuffer.wrap(dest, offset, length);
-        } catch (Exception e) {
-            throw new IORuntimeException(e);
-        }
-        return start();
-    }
-
-    @Override
-    public long writeTo(CharBuffer dest) {
-        this.dest = dest;
-        return start();
-    }
-
-    @Override
     public CharStream readLimit(long readLimit) {
         this.readLimit = readLimit;
         return this;
@@ -97,6 +69,34 @@ final class CharStreamImpl implements CharStream {
     public CharStream encoders(Iterable<Encoder> encoders) {
         this.encoders = JieColl.toList(encoders);
         return this;
+    }
+
+    @Override
+    public long writeTo(Appendable dest) {
+        this.dest = dest;
+        return start();
+    }
+
+    @Override
+    public long writeTo(char[] dest) {
+        this.dest = dest;
+        return start();
+    }
+
+    @Override
+    public long writeTo(char[] dest, int offset, int length) {
+        try {
+            this.dest = CharBuffer.wrap(dest, offset, length);
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+        return start();
+    }
+
+    @Override
+    public long writeTo(CharBuffer dest) {
+        this.dest = dest;
+        return start();
     }
 
     private long start() {
