@@ -258,9 +258,9 @@ public class JieIO {
     /**
      * Reads bytes from source stream and writes them into dest array, returns actual read number. If the source has
      * been ended and no data read out, return -1. This method is equivalent to ({@link ByteStream}):
-     * <pre>
-     *     return (int) ByteSource.from(source).readLimit(dest.length).to(dest);
-     * </pre>
+     * <pre>{@code
+     *     return (int) ByteStream.from(source).readLimit(dest.length).writeTo(dest);
+     * }</pre>
      *
      * @param source source stream
      * @param dest   dest array
@@ -275,9 +275,9 @@ public class JieIO {
     /**
      * Reads bytes from source stream and writes them into dest buffer, returns actual read number. If the source has
      * been ended and no data read out, return -1. This method is equivalent to ({@link ByteStream}):
-     * <pre>
-     *     return (int) ByteSource.from(source).readLimit(dest.remaining()).to(dest);
-     * </pre>
+     * <pre>{@code
+     *     return (int) ByteStream.from(source).readLimit(dest.remaining()).writeTo(dest);
+     * }</pre>
      *
      * @param source source stream
      * @param dest   dest buffer
@@ -292,9 +292,9 @@ public class JieIO {
     /**
      * Reads bytes from source stream and writes them into dest stream, returns actual read number. If the source has
      * been ended and no data read out, return -1. This method is equivalent to ({@link ByteStream}):
-     * <pre>
-     *     return (int) ByteSource.from(source).to(dest);
-     * </pre>
+     * <pre>{@code
+     *     return (int) ByteStream.from(source).writeTo(dest);
+     * }</pre>
      *
      * @param source source stream
      * @param dest   dest stream
@@ -309,9 +309,9 @@ public class JieIO {
     /**
      * Reads chars from source reader and writes them into dest array, returns actual read number. If the source has
      * been ended and no data read out, return -1. This method is equivalent to ({@link CharStream}):
-     * <pre>
-     *     return (int) CharSource.from(source).readLimit(dest.length).to(dest);
-     * </pre>
+     * <pre>{@code
+     *     return (int) CharStream.from(source).readLimit(dest.length).writeTo(dest);
+     * }</pre>
      *
      * @param source source reader
      * @param dest   dest array
@@ -326,9 +326,9 @@ public class JieIO {
     /**
      * Reads chars from source reader and writes them into dest buffer, returns actual read number. If the source has
      * been ended and no data read out, return -1. This method is equivalent to ({@link CharStream}):
-     * <pre>
-     *     return (int) CharSource.from(source).readLimit(dest.remaining()).to(dest);
-     * </pre>
+     * <pre>{@code
+     *     return (int) CharStream.from(source).readLimit(dest.remaining()).writeTo(dest);
+     * }</pre>
      *
      * @param source source reader
      * @param dest   dest buffer
@@ -343,9 +343,9 @@ public class JieIO {
     /**
      * Reads bytes from source reader and writes them into dest appendable, returns actual read number. If the source
      * has been ended and no data read out, return -1. This method is equivalent to ({@link CharStream}):
-     * <pre>
-     *     return (int) CharStream.from(source).to(dest);
-     * </pre>
+     * <pre>{@code
+     *     return (int) CharStream.from(source).writeTo(dest);
+     * }</pre>
      *
      * @param source source reader
      * @param dest   dest appendable

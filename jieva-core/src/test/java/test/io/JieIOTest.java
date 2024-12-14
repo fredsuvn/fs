@@ -5,6 +5,7 @@ import org.testng.annotations.Test;
 import xyz.sunqian.common.base.JieBytes;
 import xyz.sunqian.common.base.JieChars;
 import xyz.sunqian.common.base.JieRandom;
+import xyz.sunqian.common.io.BytesBuilder;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieIO;
 
@@ -34,79 +35,53 @@ public class JieIOTest {
     }
 
     @Test
-    // public void testReadTo() throws Exception {
-    //     {
-    //         // bytes
-    //         // readTo methods
-    //         byte[] outBytes = new byte[bytes.length];
-    //         JieIO.readTo(in, outBytes);
-    //         assertEquals(bytes, outBytes);
-    //         byte[] outBytes2 = new byte[bytes.length * 2];
-    //         // in.reset();
-    //         // JieIO.transfer(in, outBytes2, offset, bytes.length);
-    //         // assertEquals(bytes, Arrays.copyOfRange(outBytes2, offset, offset + bytes.length));
-    //         ByteBuffer outBuffer = ByteBuffer.allocateDirect(bytes.length);
-    //         in.reset();
-    //         JieIO.readTo(in, outBuffer);
-    //         outBuffer.flip();
-    //         byte[] outBufferContent = JieBytes.getBytes(outBuffer);
-    //         assertEquals(bytes, outBufferContent);
-    //         in.reset();
-    //         JieIO.readTo(in, out);
-    //         assertEquals(bytes, out.toByteArray());
-    //         // in.reset();
-    //         // out.reset();
-    //         // JieIO.transfer(in, out, 2);
-    //         // assertEquals(Arrays.copyOfRange(bytes, 0, 2), out.toByteArray());
-    //         // in.reset();
-    //         // out.reset();
-    //         // JieIO.transfer(in, out, 2, 1);
-    //         // assertEquals(Arrays.copyOfRange(bytes, 0, 2), out.toByteArray());
-    //         // in.reset();
-    //         // out.reset();
-    //         // JieIO.transfer(in, out, 2, 100);
-    //         // assertEquals(Arrays.copyOfRange(bytes, 0, 2), out.toByteArray());
-    //
-    //         // read empty
-    //         assertEquals(JieIO.readTo(new ByteArrayInputStream(new byte[0]), new ByteArrayOutputStream()), -1);
-    //     }
-    //
-    //     {
-    //         // chars
-    //         // readTo methods
-    //         char[] outChars = new char[chars.length];
-    //         JieIO.readTo(in, outChars);
-    //         assertEquals(chars, outChars);
-    //         char[] outChars2 = new char[chars.length * 2];
-    //         // in.reset();
-    //         // JieIO.transfer(in, outChars2, offset, chars.length);
-    //         // assertEquals(chars, Arrays.copyOfRange(outChars2, offset, offset + chars.length));
-    //         CharBuffer outBuffer = dirBuffer;
-    //         in.reset();
-    //         JieIO.readTo(in, outBuffer);
-    //         outBuffer.flip();
-    //         char[] outBufferContent = JieChars.getChars(outBuffer);
-    //         assertEquals(chars, outBufferContent);
-    //         in.reset();
-    //         JieIO.readTo(in, out);
-    //         assertEquals(chars, out.toCharArray());
-    //         // in.reset();
-    //         // out.reset();
-    //         // JieIO.transfer(in, out, 2);
-    //         // assertEquals(Arrays.copyOfRange(chars, 0, 2), out.toCharArray());
-    //         // in.reset();
-    //         // out.reset();
-    //         // JieIO.transfer(in, out, 2, 1);
-    //         // assertEquals(Arrays.copyOfRange(chars, 0, 2), out.toCharArray());
-    //         // in.reset();
-    //         // out.reset();
-    //         // JieIO.transfer(in, out, 2, 100);
-    //         // assertEquals(Arrays.copyOfRange(chars, 0, 2), out.toCharArray());
-    //
-    //         // read empty
-    //         assertEquals(JieIO.readTo(new CharArrayReader(new char[0]), new CharArrayWriter()), -1);
-    //     }
-    // }
+    public void testReadTo() throws Exception {
+        {
+            // bytes
+            int size = 1024;
+            byte[] src = JieRandom.fill(new byte[size]);
+            InputStream in = JieIO.in(src);
+            in.mark(0);
+            byte[] dst = new byte[size];
+            long c = JieIO.readTo(in, dst);
+            assertEquals(c, size);
+            assertEquals(dst, src);
+            ByteBuffer dstBuffer = ByteBuffer.allocate(size);
+            in.reset();
+            c = JieIO.readTo(in, dstBuffer);
+            assertEquals(c, size);
+            dstBuffer.flip();
+            assertEquals(JieBytes.copyBytes(dstBuffer), src);
+            BytesBuilder dstOut = new BytesBuilder();
+            in.reset();
+            c = JieIO.readTo(in, dstOut);
+            assertEquals(c, size);
+            assertEquals(dstOut.toByteArray(), src);
+        }
+
+        {
+            // chars
+            int size = 1024;
+            char[] src = JieRandom.fill(new char[size]);
+            Reader in = JieIO.reader(src);
+            in.mark(0);
+            char[] dst = new char[size];
+            long c = JieIO.readTo(in, dst);
+            assertEquals(c, size);
+            assertEquals(dst, src);
+            CharBuffer dstBuffer = CharBuffer.allocate(size);
+            in.reset();
+            c = JieIO.readTo(in, dstBuffer);
+            assertEquals(c, size);
+            dstBuffer.flip();
+            assertEquals(JieChars.copyChars(dstBuffer), src);
+            StringBuilder dstOut = new StringBuilder();
+            in.reset();
+            c = JieIO.readTo(in, dstOut);
+            assertEquals(c, size);
+            assertEquals(dstOut.toString().toCharArray(), src);
+        }
+    }
 
     private void testRead(int size, int available) throws Exception {
         int offset = 22;
