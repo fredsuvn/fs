@@ -114,6 +114,7 @@ public class BytesBuilderTest {
         bb.append(bs[0]);
         bb.append(bs[1]);
         assertEquals(bb.toByteArray(), Arrays.copyOf(bs, 2));
+        bb.trimBuffer();
         bb.reset();
         bb.trimBuffer();
         bb.append(bs[0]);

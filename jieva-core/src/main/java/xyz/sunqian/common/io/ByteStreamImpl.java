@@ -3,14 +3,11 @@ package xyz.sunqian.common.io;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.JieBytes;
 import xyz.sunqian.common.coll.JieArray;
-import xyz.sunqian.common.coll.JieColl;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.util.Collections;
-import java.util.List;
 
 final class ByteStreamImpl implements ByteStream {
 
@@ -19,7 +16,7 @@ final class ByteStreamImpl implements ByteStream {
     private long readLimit = -1;
     private int blockSize = JieIO.BUFFER_SIZE;
     private boolean endOnZeroRead = false;
-    private List<Encoder> encoders;
+    private Encoder encoder;
 
     ByteStreamImpl(InputStream source) {
         this.source = source;
@@ -56,13 +53,7 @@ final class ByteStreamImpl implements ByteStream {
 
     @Override
     public ByteStream encoder(Encoder encoder) {
-        this.encoders = Collections.singletonList(encoder);
-        return this;
-    }
-
-    @Override
-    public ByteStream encoders(Iterable<Encoder> encoders) {
-        this.encoders = JieColl.toList(encoders);
+        this.encoder = encoder;
         return this;
     }
 
@@ -105,7 +96,7 @@ final class ByteStreamImpl implements ByteStream {
             return 0;
         }
         try {
-            if (encoders == null) {
+            if (encoder == null) {
                 if (source instanceof byte[]) {
                     if (dest instanceof byte[]) {
                         return bytesToBytes((byte[]) source, (byte[]) dest);
@@ -122,7 +113,7 @@ final class ByteStreamImpl implements ByteStream {
                     }
                 }
             }
-            return start0();
+            return startInBlock();
         } catch (IOEncodingException e) {
             throw e;
         } catch (Exception e) {
@@ -161,7 +152,7 @@ final class ByteStreamImpl implements ByteStream {
         return readLimit < 0 ? srcSize : Math.min(srcSize, (int) readLimit);
     }
 
-    private long start0() throws Exception {
+    private long startInBlock() throws Exception {
         BufferIn in = toBufferIn(source);
         BufferOut out = toBufferOut(dest);
         return readTo(in, out);
@@ -205,19 +196,20 @@ final class ByteStreamImpl implements ByteStream {
         long count = 0;
         while (true) {
             ByteBuffer buf = in.read();
-            if (buf == null || !buf.hasRemaining()) {
-                if (count == 0) {
-                    return buf == null ? -1 : 0;
-                }
-                if (encoders != null) {
-                    ByteBuffer encoded = encode(JieBytes.emptyBuffer(), true);
+            if (buf == null && count == 0) {
+                return -1;
+            }
+            buf = buf == null ? JieBytes.emptyBuffer() : buf.asReadOnlyBuffer();
+            if (!buf.hasRemaining()) {
+                if (encoder != null) {
+                    ByteBuffer encoded = encode(buf, true);
                     out.write(encoded);
                 }
                 break;
             }
             int readSize = buf.remaining();
             count += readSize;
-            if (encoders != null) {
+            if (encoder != null) {
                 ByteBuffer encoded;
                 if (readSize < blockSize) {
                     encoded = encode(buf, true);
@@ -237,21 +229,12 @@ final class ByteStreamImpl implements ByteStream {
         return count;
     }
 
-    private ByteBuffer encode(ByteBuffer buffer, boolean end) throws IOEncodingException {
-        ByteBuffer data = buffer;
-        for (Encoder encoder : encoders) {
-            ByteBuffer encoded;
-            try {
-                encoded = encoder.encode(data, end);
-            } catch (Throwable e) {
-                throw new IOEncodingException(e);
-            }
-            if (!encoded.hasRemaining()) {
-                return encoded;
-            }
-            data = encoded;
+    private ByteBuffer encode(ByteBuffer buf, boolean end) {
+        try {
+            return encoder.encode(buf, end);
+        } catch (Exception e) {
+            throw new IOEncodingException(e);
         }
-        return data;
     }
 
     private interface BufferIn {
@@ -283,7 +266,7 @@ final class ByteStreamImpl implements ByteStream {
         public ByteBuffer read() throws IOException {
             int readSize = limit < 0 ? block.length : (int) Math.min(remaining, block.length);
             if (readSize <= 0) {
-                return null;
+                return JieBytes.emptyBuffer();
             }
             int hasRead = 0;
             boolean zeroRead = false;
@@ -334,7 +317,7 @@ final class ByteStreamImpl implements ByteStream {
         public ByteBuffer read() {
             int readSize = limit < 0 ? blockSize : (int) Math.min(remaining, blockSize);
             if (readSize <= 0) {
-                return null;
+                return JieBytes.emptyBuffer();
             }
             if (pos >= source.length) {
                 return null;
@@ -372,7 +355,7 @@ final class ByteStreamImpl implements ByteStream {
         public ByteBuffer read() {
             int readSize = limit < 0 ? blockSize : (int) Math.min(remaining, blockSize);
             if (readSize <= 0) {
-                return null;
+                return JieBytes.emptyBuffer();
             }
             if (pos >= sourceRemaining) {
                 return null;

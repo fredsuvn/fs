@@ -144,10 +144,15 @@ public class BytesBuilder extends OutputStream {
     }
 
     /**
-     * Trims and releases the allocated but discarded buffer space.
+     * Trims and releases the allocated but discarded buffer space. This method is similar to
+     * {@link StringBuilder#trimToSize()}.
+     *
+     * @see StringBuilder#trimToSize()
      */
     public void trimBuffer() {
-        buf = Arrays.copyOf(buf, count);
+        if (count < buf.length) {
+            buf = Arrays.copyOf(buf, count);
+        }
     }
 
     /**

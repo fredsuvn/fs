@@ -192,6 +192,8 @@ public interface ByteStream {
      * }</pre>
      * That is, pass the {@link ByteBuffer} to the first encoder, then pass the return value of the first encoder to the
      * second encoder, and so on.
+     * <p>
+     * Note the given list of encoders is used directly, any modification to the list will affect the encoding.
      *
      * @param encoders a list of encoders for encoding data from read operation
      * @return this
@@ -211,9 +213,9 @@ public interface ByteStream {
      * Starts data processing and writes processed data into specified destination, returns actual number of read bytes.
      * If current operation fails, the return value are undefined.
      * <p>
-     * Specifically, if it is detected that the data source has already reached to the end before reading, or equivalent
-     * to this, return -1. If an error is thrown by an {@code encoder}, the error will be wrapped by
-     * {@link IOEncodingException} to be thrown, use {@link Throwable#getCause()} to get it.
+     * Specifically, if it is detected that the data source has already reached to the end before reading, return -1. If
+     * an error is thrown by an {@code encoder}, the error will be wrapped by {@link IOEncodingException} to be thrown,
+     * use {@link Throwable#getCause()} to get it.
      * <p>
      * If the source and/or destination is a buffer or stream, its position will be incremented by actual affected
      * length.
@@ -231,9 +233,9 @@ public interface ByteStream {
      * Starts data processing and writes processed data into specified destination, returns actual number of read bytes.
      * If current operation fails, the return value are undefined.
      * <p>
-     * Specifically, if it is detected that the data source has already reached to the end before reading, or equivalent
-     * to this, return -1. If an error is thrown by an {@code encoder}, the error will be wrapped by
-     * {@link IOEncodingException} to be thrown, use {@link Throwable#getCause()} to get it.
+     * Specifically, if it is detected that the data source has already reached to the end before reading return -1. If
+     * an error is thrown by an {@code encoder}, the error will be wrapped by {@link IOEncodingException} to be thrown,
+     * use {@link Throwable#getCause()} to get it.
      * <p>
      * If the source and/or destination is a buffer or stream, its position will be incremented by actual affected
      * length.
@@ -252,9 +254,9 @@ public interface ByteStream {
      * up to specified length), returns actual number of read bytes. If current operation fails, the return value are
      * undefined.
      * <p>
-     * Specifically, if it is detected that the data source has already reached to the end before reading, or equivalent
-     * to this, return -1. If an error is thrown by an {@code encoder}, the error will be wrapped by
-     * {@link IOEncodingException} to be thrown, use {@link Throwable#getCause()} to get it.
+     * Specifically, if it is detected that the data source has already reached to the end before reading return -1. If
+     * an error is thrown by an {@code encoder}, the error will be wrapped by {@link IOEncodingException} to be thrown,
+     * use {@link Throwable#getCause()} to get it.
      * <p>
      * If the source and/or destination is a buffer or stream, its position will be incremented by actual affected
      * length.
@@ -274,9 +276,9 @@ public interface ByteStream {
      * Starts data processing and writes processed data into specified destination, returns actual number of read bytes.
      * If current operation fails, the return value are undefined.
      * <p>
-     * Specifically, if it is detected that the data source has already reached to the end before reading, or equivalent
-     * to this, return -1. If an error is thrown by an {@code encoder}, the error will be wrapped by
-     * {@link IOEncodingException} to be thrown, use {@link Throwable#getCause()} to get it.
+     * Specifically, if it is detected that the data source has already reached to the end before reading return -1. If
+     * an error is thrown by an {@code encoder}, the error will be wrapped by {@link IOEncodingException} to be thrown,
+     * use {@link Throwable#getCause()} to get it.
      * <p>
      * If the source and/or destination is a buffer or stream, its position will be incremented by actual affected
      * length.
