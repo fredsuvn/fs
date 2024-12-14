@@ -35,9 +35,13 @@ dependencies {
   compileOnly 'org.projectlombok:lombok'
   annotationProcessor 'org.projectlombok:lombok'
 
-  proxySpringSupportImplementation 'org.springframework:spring-core'
-  proxyCglibSupportImplementation 'cglib:cglib'
-  dataProtobufSupportImplementation 'com.google.protobuf:protobuf-java'
+  //proxySpringSupportImplementation 'org.springframework:spring-core'
+  //proxyCglibSupportImplementation 'cglib:cglib'
+  //dataProtobufSupportImplementation 'com.google.protobuf:protobuf-java'
+
+  compileOnly 'org.springframework:spring-core'
+  compileOnly 'cglib:cglib'
+  compileOnly 'com.google.protobuf:protobuf-java'
 
   testImplementation platform(project(':jieva-dependencies'))
   testAnnotationProcessor platform(project(":jieva-dependencies"))
