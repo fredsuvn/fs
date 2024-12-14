@@ -210,8 +210,8 @@ public interface ByteStream {
     }
 
     /**
-     * Starts data processing and writes processed data into specified destination, returns actual number of read bytes.
-     * If current operation fails, the return value are undefined.
+     * Starts data processing and writes processed data into specified destination, returns actual number of read
+     * bytes.
      * <p>
      * Specifically, if it is detected that the data source has already reached to the end before reading, return -1. If
      * an error is thrown by an {@code encoder}, the error will be wrapped by {@link IOEncodingException} to be thrown,
@@ -230,8 +230,8 @@ public interface ByteStream {
     long writeTo(OutputStream dest) throws IOEncodingException, IORuntimeException;
 
     /**
-     * Starts data processing and writes processed data into specified destination, returns actual number of read bytes.
-     * If current operation fails, the return value are undefined.
+     * Starts data processing and writes processed data into specified destination, returns actual number of read
+     * bytes.
      * <p>
      * Specifically, if it is detected that the data source has already reached to the end before reading return -1. If
      * an error is thrown by an {@code encoder}, the error will be wrapped by {@link IOEncodingException} to be thrown,
@@ -251,8 +251,7 @@ public interface ByteStream {
 
     /**
      * Starts data processing and writes processed data into specified destination (starting from specified start index
-     * up to specified length), returns actual number of read bytes. If current operation fails, the return value are
-     * undefined.
+     * up to specified length), returns actual number of read bytes.
      * <p>
      * Specifically, if it is detected that the data source has already reached to the end before reading return -1. If
      * an error is thrown by an {@code encoder}, the error will be wrapped by {@link IOEncodingException} to be thrown,
@@ -273,8 +272,8 @@ public interface ByteStream {
     long writeTo(byte[] dest, int offset, int length) throws IOEncodingException, IORuntimeException;
 
     /**
-     * Starts data processing and writes processed data into specified destination, returns actual number of read bytes.
-     * If current operation fails, the return value are undefined.
+     * Starts data processing and writes processed data into specified destination, returns actual number of read
+     * bytes.
      * <p>
      * Specifically, if it is detected that the data source has already reached to the end before reading return -1. If
      * an error is thrown by an {@code encoder}, the error will be wrapped by {@link IOEncodingException} to be thrown,

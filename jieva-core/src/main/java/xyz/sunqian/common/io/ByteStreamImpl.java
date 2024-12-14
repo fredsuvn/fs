@@ -122,24 +122,36 @@ final class ByteStreamImpl implements ByteStream {
     }
 
     private long bytesToBytes(byte[] src, byte[] dst) {
+        if (src.length == 0) {
+            return -1;
+        }
         int len = getDirectLen(src.length);
         System.arraycopy(src, 0, dst, 0, len);
         return len;
     }
 
     private long bytesToBuffer(byte[] src, ByteBuffer dst) {
+        if (src.length == 0) {
+            return -1;
+        }
         int len = getDirectLen(src.length);
         dst.put(src, 0, len);
         return len;
     }
 
     private long bufferToBytes(ByteBuffer src, byte[] dst) {
+        if (src.remaining() == 0) {
+            return -1;
+        }
         int len = getDirectLen(src.remaining());
         src.get(dst, 0, len);
         return len;
     }
 
     private long bufferToBuffer(ByteBuffer src, ByteBuffer dst) {
+        if (src.remaining() == 0) {
+            return -1;
+        }
         int len = getDirectLen(src.remaining());
         ByteBuffer share = src.slice();
         share.limit(len);

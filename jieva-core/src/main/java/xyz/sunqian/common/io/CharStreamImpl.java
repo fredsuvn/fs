@@ -128,30 +128,45 @@ final class CharStreamImpl implements CharStream {
     }
 
     private long charsToChars(char[] src, char[] dst) {
+        if (src.length == 0) {
+            return -1;
+        }
         int len = getDirectLen(src.length);
         System.arraycopy(src, 0, dst, 0, len);
         return len;
     }
 
     private long charsToBuffer(char[] src, CharBuffer dst) {
+        if (src.length == 0) {
+            return -1;
+        }
         int len = getDirectLen(src.length);
         dst.put(src, 0, len);
         return len;
     }
 
     private long charsToAppender(char[] src, Appendable dst) throws IOException {
+        if (src.length == 0) {
+            return -1;
+        }
         int len = getDirectLen(src.length);
         dst.append(JieString.asChars(src, 0, len));
         return len;
     }
 
     private long bufferToChars(CharBuffer src, char[] dst) {
+        if (src.remaining() == 0) {
+            return -1;
+        }
         int len = getDirectLen(src.remaining());
         src.get(dst, 0, len);
         return len;
     }
 
     private long bufferToAppender(CharBuffer src, Appendable dst) throws IOException {
+        if (src.remaining() == 0) {
+            return -1;
+        }
         int len = getDirectLen(src.remaining());
         int pos = src.position();
         int newPos = pos + len;
@@ -161,6 +176,9 @@ final class CharStreamImpl implements CharStream {
     }
 
     private long charSeqToChars(CharSequence src, char[] dst) throws IOException {
+        if (src.length() == 0) {
+            return -1;
+        }
         int len = getDirectLen(src.length());
         if (src instanceof String) {
             ((String) src).getChars(0, len, dst, 0);
@@ -173,6 +191,9 @@ final class CharStreamImpl implements CharStream {
     }
 
     private long charSeqToAppender(CharSequence src, Appendable dst) throws IOException {
+        if (src.length() == 0) {
+            return -1;
+        }
         int len = getDirectLen(src.length());
         dst.append(src, 0, len);
         return len;
