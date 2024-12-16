@@ -319,6 +319,24 @@ public interface CharStream {
     long writeTo(CharBuffer dest) throws IOEncodingException, IORuntimeException;
 
     /**
+     * Starts data processing without writing data into destination, returns actual number of read chars. This method is
+     * typically used to produce side effects via the {@code encoder}.
+     * <p>
+     * Specifically, if it is detected that the data source has already reached to the end before reading return -1. If
+     * an error is thrown by an {@code encoder}, the error will be wrapped by {@link IOEncodingException} to be thrown,
+     * use {@link Throwable#getCause()} to get it.
+     * <p>
+     * If the source is a buffer or stream, its position will be incremented by actual affected length.
+     * <p>
+     * This is a terminal method.
+     *
+     * @return actual number of read chars
+     * @throws IOEncodingException to wrap the error thrown by encoder
+     * @throws IORuntimeException  thrown for any other IO problems
+     */
+    long writeTo() throws IOEncodingException, IORuntimeException;
+
+    /**
      * Encoder for encoding data in data processing.
      */
     interface Encoder {

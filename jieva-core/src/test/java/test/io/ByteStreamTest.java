@@ -91,9 +91,9 @@ public class ByteStreamTest {
         expectThrows(IORuntimeException.class, () -> ByteStream.from(new ThrowIn(1)).writeTo(new byte[0]));
     }
 
-    private void testBytesStream(int size, int blockSize, int readLimit) throws Exception {
+    private void testBytesStream(int totalSize, int blockSize, int readLimit) throws Exception {
         int offset = 22;
-        String str = new String(JieRandom.fill(new char[size], 'a', 'z'));
+        String str = new String(JieRandom.fill(new char[totalSize], 'a', 'z'));
         byte[] bytes = str.getBytes(JieChars.UTF_8);
 
         {
@@ -158,10 +158,10 @@ public class ByteStreamTest {
             // byte[] -> byte[]
             byte[] outBytes = new byte[bytes.length];
             long readNum = ByteStream.from(bytes).blockSize(blockSize).readLimit(readLimit).writeTo(outBytes);
-            assertEquals(readNum, getLength(size, readLimit));
+            assertEquals(readNum, getLength(totalSize, readLimit));
             assertEquals(
-                Arrays.copyOfRange(bytes, 0, getLength(size, readLimit)),
-                Arrays.copyOfRange(outBytes, 0, getLength(size, readLimit))
+                Arrays.copyOfRange(bytes, 0, getLength(totalSize, readLimit)),
+                Arrays.copyOfRange(outBytes, 0, getLength(totalSize, readLimit))
             );
             outBytes = new byte[bytes.length];
             readNum = ByteStream.from(bytes).blockSize(blockSize).writeTo(outBytes);
@@ -194,9 +194,9 @@ public class ByteStreamTest {
             // byte[] -> buffer
             ByteBuffer outBuffer = ByteBuffer.allocateDirect(bytes.length);
             long readNum = ByteStream.from(bytes).blockSize(blockSize).readLimit(readLimit).writeTo(outBuffer);
-            assertEquals(readNum, getLength(size, readLimit));
+            assertEquals(readNum, getLength(totalSize, readLimit));
             outBuffer.flip();
-            assertEquals(Arrays.copyOfRange(bytes, 0, getLength(size, readLimit)), JieBytes.getBytes(outBuffer));
+            assertEquals(Arrays.copyOfRange(bytes, 0, getLength(totalSize, readLimit)), JieBytes.getBytes(outBuffer));
             outBuffer = ByteBuffer.allocateDirect(bytes.length);
             readNum = ByteStream.from(bytes).blockSize(blockSize).writeTo(outBuffer);
             assertEquals(readNum, bytes.length);
@@ -230,9 +230,9 @@ public class ByteStreamTest {
             ByteBuffer inBuffer = JieBytes.copyBuffer(bytes, true);
             byte[] outBytes = new byte[bytes.length];
             long readNum = ByteStream.from(inBuffer).blockSize(blockSize).readLimit(readLimit).writeTo(outBytes);
-            assertEquals(readNum, getLength(size, readLimit));
+            assertEquals(readNum, getLength(totalSize, readLimit));
             inBuffer.flip();
-            assertEquals(JieBytes.getBytes(inBuffer), Arrays.copyOfRange(outBytes, 0, getLength(size, readLimit)));
+            assertEquals(JieBytes.getBytes(inBuffer), Arrays.copyOfRange(outBytes, 0, getLength(totalSize, readLimit)));
             inBuffer = JieBytes.copyBuffer(bytes, true);
             outBytes = new byte[bytes.length];
             readNum = ByteStream.from(inBuffer).blockSize(blockSize).writeTo(outBytes);
@@ -245,18 +245,33 @@ public class ByteStreamTest {
             ByteBuffer inBuffer = TU.bufferDangling(bytes);
             ByteBuffer outBuffer = ByteBuffer.allocateDirect(bytes.length);
             long readNum = ByteStream.from(inBuffer).blockSize(blockSize).readLimit(readLimit).writeTo(outBuffer);
-            assertEquals(readNum, getLength(size, readLimit));
+            assertEquals(readNum, getLength(totalSize, readLimit));
             inBuffer.flip();
             outBuffer.flip();
             assertEquals(JieBytes.getBytes(inBuffer), JieBytes.getBytes(outBuffer));
             inBuffer = TU.bufferDangling(bytes);
             outBuffer = TU.bufferDangling(bytes);
             readNum = ByteStream.from(inBuffer).blockSize(blockSize).readLimit(readLimit).writeTo(outBuffer);
-            assertEquals(readNum, getLength(size, readLimit));
+            assertEquals(readNum, getLength(totalSize, readLimit));
             inBuffer.flip();
             outBuffer.flip();
             byte[] outBytes = JieBytes.getBytes(outBuffer);
             assertEquals(JieBytes.getBytes(inBuffer), outBytes);
+        }
+
+        {
+            // any -> null
+            long[] counter = {0};
+            long readNum = ByteStream.from(new byte[totalSize])
+                .blockSize(blockSize)
+                .readLimit(readLimit)
+                .encoder(((data, end) -> {
+                    counter[0] += data.remaining();
+                    return data;
+                }))
+                .writeTo();
+            assertEquals(readNum, getLength(totalSize, readLimit));
+            assertEquals(counter[0], getLength(totalSize, readLimit));
         }
     }
 
@@ -293,32 +308,103 @@ public class ByteStreamTest {
     }
 
     private void testEncoder(int totalSize, int blockSize) {
-        byte[] src = JieRandom.fill(new byte[totalSize]);
-        int portion = JieMath.leastPortion(totalSize, blockSize);
-        BytesBuilder bb = new BytesBuilder();
-        int start = 0;
-        for (int i = 0; i < portion; i++) {
-            int end = Math.min(start + blockSize, totalSize);
-            bb.append(Arrays.copyOfRange(src, start, end));
-            bb.append(Arrays.copyOfRange(src, start, end));
-            bb.append(Arrays.copyOfRange(src, start, end));
-            bb.append(Arrays.copyOfRange(src, start, end));
-            start += blockSize;
+        {
+            // simple
+            byte[] src = JieRandom.fill(new byte[totalSize]);
+            int portion = JieMath.leastPortion(totalSize, blockSize);
+            BytesBuilder bb = new BytesBuilder();
+            int start = 0;
+            for (int i = 0; i < portion; i++) {
+                int end = Math.min(start + blockSize, totalSize);
+                bb.append(Arrays.copyOfRange(src, start, end));
+                bb.append(Arrays.copyOfRange(src, start, end));
+                bb.append(Arrays.copyOfRange(src, start, end));
+                bb.append(Arrays.copyOfRange(src, start, end));
+                start += blockSize;
+            }
+            byte[] expectDst = bb.toByteArray();
+            bb.reset();
+            ByteStream.Encoder encoder = (data, end) -> {
+                byte[] bytes = JieBytes.getBytes(data);
+                byte[] ret = new byte[bytes.length * 2];
+                System.arraycopy(bytes, 0, ret, 0, bytes.length);
+                System.arraycopy(bytes, 0, ret, bytes.length, bytes.length);
+                return ByteBuffer.wrap(ret);
+            };
+            long count = ByteStream.from(src).blockSize(blockSize).encoders(Jie.list(
+                encoder, encoder
+            )).writeTo(bb);
+            assertEquals(count, totalSize);
+            assertEquals(bb.toByteArray(), expectDst);
         }
-        byte[] expectDst = bb.toByteArray();
-        bb.reset();
-        ByteStream.Encoder encoder = (data, end) -> {
-            byte[] bytes = JieBytes.getBytes(data);
-            byte[] ret = new byte[bytes.length * 2];
-            System.arraycopy(bytes, 0, ret, 0, bytes.length);
-            System.arraycopy(bytes, 0, ret, bytes.length, bytes.length);
-            return ByteBuffer.wrap(ret);
-        };
-        long count = ByteStream.from(src).blockSize(blockSize).encoders(Jie.list(
-            encoder, encoder
-        )).writeTo(bb);
-        assertEquals(count, totalSize);
-        assertEquals(bb.toByteArray(), expectDst);
+        {
+            // complex
+            byte[] src = JieRandom.fill(new byte[totalSize]);
+            BytesBuilder bb = new BytesBuilder();
+            for (int i = 0, j = 0; i < src.length; i++) {
+                if (j == 2) {
+                    j = 0;
+                    continue;
+                }
+                bb.append(src[i]);
+                j++;
+            }
+            byte[] proc = bb.toByteArray();
+            bb.reset();
+            for (int i = 0, j = 0; i < proc.length; i++) {
+                bb.append(proc[i]);
+                if (j == 9) {
+                    j = 0;
+                    bb.append((byte) '\r');
+                } else {
+                    j++;
+                }
+            }
+            proc = bb.toByteArray();
+            bb.reset();
+            boolean[] buffer = {true};
+            long count = ByteStream.from(src).blockSize(blockSize).encoders(Jie.list(
+                ByteStream.roundEncoder((data, end) -> {
+                    BytesBuilder ret = new BytesBuilder();
+                    int j = 0;
+                    while (data.hasRemaining()) {
+                        byte b = data.get();
+                        if (j == 2) {
+                            j = 0;
+                            continue;
+                        }
+                        ret.append(b);
+                        j++;
+                    }
+                    return ret.toByteBuffer();
+                }, 3),
+                ByteStream.bufferedEncoder(((data, end) -> {
+                    if (end) {
+                        return data;
+                    }
+                    ByteBuffer ret;
+                    if (buffer[0]) {
+                        ret = JieBytes.emptyBuffer();
+                    } else {
+                        ret = data;
+                    }
+                    buffer[0] = !buffer[0];
+                    return ret;
+                })),
+                ByteStream.fixedSizeEncoder(((data, end) -> {
+                    if (data.remaining() == 10) {
+                        byte[] ret = new byte[11];
+                        data.get(ret, 0, 10);
+                        ret[10] = '\r';
+                        return ByteBuffer.wrap(ret);
+                    } else {
+                        return data;
+                    }
+                }), 10)
+            )).writeTo(bb);
+            assertEquals(count, totalSize);
+            assertEquals(bb.toByteArray(), proc);
+        }
     }
 
     @Test
@@ -331,8 +417,8 @@ public class ByteStreamTest {
         testRoundEncoder(223, 2233, 2);
     }
 
-    private void testRoundEncoder(int size, int blockSize, int expectedBlockSize) {
-        byte[] src = JieRandom.fill(new byte[size]);
+    private void testRoundEncoder(int totalSize, int blockSize, int expectedBlockSize) {
+        byte[] src = JieRandom.fill(new byte[totalSize]);
         byte[] dst = new byte[src.length * 2];
         for (int i = 0; i < src.length; i++) {
             dst[i * 2] = src[i];
@@ -400,14 +486,22 @@ public class ByteStreamTest {
     private void testBufferedEncoder(int size, int blockSize, int eatNum) {
         byte[] src = JieRandom.fill(new byte[size]);
         byte[] dst = new byte[src.length];
+        boolean[] buffer = {true};
         long len = ByteStream.from(src).blockSize(blockSize).encoder(ByteStream.bufferedEncoder(
             (data, end) -> {
                 if (end) {
                     return data;
                 }
-                byte[] bb = new byte[Math.min(data.remaining(), eatNum)];
-                data.get(bb);
-                return ByteBuffer.wrap(bb);
+                ByteBuffer ret;
+                if (buffer[0]) {
+                    byte[] bb = new byte[Math.min(data.remaining(), eatNum)];
+                    data.get(bb);
+                    ret = ByteBuffer.wrap(bb);
+                } else {
+                    ret = data;
+                }
+                buffer[0] = !buffer[0];
+                return ret;
             }
         )).writeTo(dst);
         assertEquals(dst, src);
@@ -425,9 +519,9 @@ public class ByteStreamTest {
         testFixedSizeEncoder(20, 40, 19);
     }
 
-    private void testFixedSizeEncoder(int size, int blockSize, int fixedSize) {
-        byte[] src = JieRandom.fill(new byte[size]);
-        int times = size / fixedSize;
+    private void testFixedSizeEncoder(int totalSize, int blockSize, int fixedSize) {
+        byte[] src = JieRandom.fill(new byte[totalSize]);
+        int times = totalSize / fixedSize;
         BytesBuilder bytesBuilder = new BytesBuilder();
         int pos = 0;
         for (int i = 0; i < times; i++) {
@@ -441,7 +535,7 @@ public class ByteStreamTest {
             bytesBuilder.append((byte) '\r');
             bytesBuilder.append((byte) '\n');
         }
-        int portion = JieMath.leastPortion(size, fixedSize);
+        int portion = JieMath.leastPortion(totalSize, fixedSize);
         byte[] dst = new byte[src.length + portion * 2];
         long len = ByteStream.from(src).blockSize(blockSize).encoder(ByteStream.fixedSizeEncoder(
             (data, end) -> {

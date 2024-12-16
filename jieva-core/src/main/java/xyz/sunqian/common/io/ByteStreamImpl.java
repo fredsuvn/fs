@@ -88,6 +88,12 @@ final class ByteStreamImpl implements ByteStream {
         return start();
     }
 
+    @Override
+    public long writeTo() {
+        this.dest = NullBufferOut.SINGLETON;
+        return start();
+    }
+
     private long start() {
         if (source == null || dest == null) {
             throw new IORuntimeException("Source or dest is null!");
@@ -185,6 +191,9 @@ final class ByteStreamImpl implements ByteStream {
     }
 
     private BufferOut toBufferOut(Object dst) {
+        if (dst instanceof BufferOut) {
+            return (BufferOut) dst;
+        }
         if (dst instanceof OutputStream) {
             return new OutputSteamBufferOut((OutputStream) dst);
         }
@@ -406,6 +415,16 @@ final class ByteStreamImpl implements ByteStream {
         }
     }
 
+    private static final class NullBufferOut implements BufferOut {
+
+        static final NullBufferOut SINGLETON = new NullBufferOut();
+
+        @Override
+        public void write(ByteBuffer buffer) {
+            // Do nothing
+        }
+    }
+
     private static abstract class AbsEncoder implements Encoder {
 
         protected final Encoder encoder;
@@ -431,7 +450,7 @@ final class ByteStreamImpl implements ByteStream {
         }
     }
 
-    final static class RoundEncoder extends AbsEncoder {
+    static final class RoundEncoder extends AbsEncoder {
 
         private final int expectedBlockSize;
 
@@ -483,7 +502,7 @@ final class ByteStreamImpl implements ByteStream {
         }
     }
 
-    final static class BufferedEncoder extends AbsEncoder {
+    static final class BufferedEncoder extends AbsEncoder {
 
         BufferedEncoder(Encoder encoder) {
             super(encoder);
@@ -493,15 +512,20 @@ final class ByteStreamImpl implements ByteStream {
         public ByteBuffer encode(ByteBuffer data, boolean end) {
             ByteBuffer total = totalData(data);
             ByteBuffer ret = encoder.encode(total, end);
-            if (total.hasRemaining() && !end) {
+            if (end) {
+                return ret;
+            }
+            if (total.hasRemaining()) {
                 buf = new byte[total.remaining()];
                 total.get(buf);
+                return ret;
             }
+            buf = JieBytes.emptyBytes();
             return ret;
         }
     }
 
-    final static class FixedSizeEncoder extends AbsEncoder {
+    static final class FixedSizeEncoder extends AbsEncoder {
 
         private final int size;
 

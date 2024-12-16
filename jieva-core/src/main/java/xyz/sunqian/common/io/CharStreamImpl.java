@@ -90,6 +90,12 @@ final class CharStreamImpl implements CharStream {
         return start();
     }
 
+    @Override
+    public long writeTo() {
+        this.dest = NullBufferOut.SINGLETON;
+        return start();
+    }
+
     private long start() {
         if (source == null || dest == null) {
             throw new IORuntimeException("Source or dest is null!");
@@ -227,6 +233,9 @@ final class CharStreamImpl implements CharStream {
     }
 
     private BufferOut toBufferOut(Object dst) {
+        if (dst instanceof BufferOut) {
+            return (BufferOut) dst;
+        }
         if (dst instanceof char[]) {
             return new AppendableBufferOut(CharBuffer.wrap((char[]) dst));
         }
@@ -506,6 +515,16 @@ final class CharStreamImpl implements CharStream {
         }
     }
 
+    private static final class NullBufferOut implements BufferOut {
+
+        static final NullBufferOut SINGLETON = new NullBufferOut();
+
+        @Override
+        public void write(CharBuffer buffer) {
+            // Do nothing
+        }
+    }
+
     private static abstract class AbsEncoder implements CharStream.Encoder {
 
         protected final CharStream.Encoder encoder;
@@ -531,7 +550,7 @@ final class CharStreamImpl implements CharStream {
         }
     }
 
-    final static class RoundEncoder extends AbsEncoder {
+    static final class RoundEncoder extends AbsEncoder {
 
         private final int expectedBlockSize;
 
@@ -583,7 +602,7 @@ final class CharStreamImpl implements CharStream {
         }
     }
 
-    final static class BufferedEncoder extends AbsEncoder {
+    static final class BufferedEncoder extends AbsEncoder {
 
         BufferedEncoder(CharStream.Encoder encoder) {
             super(encoder);
@@ -593,15 +612,20 @@ final class CharStreamImpl implements CharStream {
         public CharBuffer encode(CharBuffer data, boolean end) {
             CharBuffer total = totalData(data);
             CharBuffer ret = encoder.encode(total, end);
-            if (total.hasRemaining() && !end) {
+            if (end) {
+                return ret;
+            }
+            if (total.hasRemaining()) {
                 buf = new char[total.remaining()];
                 total.get(buf);
+                return ret;
             }
+            buf = JieChars.emptyChars();
             return ret;
         }
     }
 
-    final static class FixedSizeEncoder extends AbsEncoder {
+    static final class FixedSizeEncoder extends AbsEncoder {
 
         private final int size;
 

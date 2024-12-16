@@ -100,9 +100,9 @@ public class CharStreamTest {
         expectThrows(IORuntimeException.class, () -> CharStream.from(new ThrowReader(1)).writeTo(new char[0]));
     }
 
-    private void testCharsStream(int size, int blockSize, int readLimit) throws Exception {
+    private void testCharsStream(int totalSize, int blockSize, int readLimit) throws Exception {
         int offset = 22;
-        String str = new String(JieRandom.fill(new char[size], 'a', 'z'));
+        String str = new String(JieRandom.fill(new char[totalSize], 'a', 'z'));
         char[] chars = str.toCharArray();
 
         byte[] bytes = new byte[chars.length * 2];
@@ -402,6 +402,21 @@ public class CharStreamTest {
                 appender.toString()
             );
         }
+
+        {
+            // any -> null
+            long[] counter = {0};
+            long readNum = CharStream.from(new char[totalSize])
+                .blockSize(blockSize)
+                .readLimit(readLimit)
+                .encoder(((data, end) -> {
+                    counter[0] += data.remaining();
+                    return data;
+                }))
+                .writeTo();
+            assertEquals(readNum, getLength(totalSize, readLimit));
+            assertEquals(counter[0], getLength(totalSize, readLimit));
+        }
     }
 
     private int getLength(int length, int readLimit) {
@@ -437,32 +452,103 @@ public class CharStreamTest {
     }
 
     private void testEncoder(int totalSize, int blockSize) {
-        char[] src = JieRandom.fill(new char[totalSize]);
-        int portion = JieMath.leastPortion(totalSize, blockSize);
-        StringBuilder bb = new StringBuilder();
-        int start = 0;
-        for (int i = 0; i < portion; i++) {
-            int end = Math.min(start + blockSize, totalSize);
-            bb.append(Arrays.copyOfRange(src, start, end));
-            bb.append(Arrays.copyOfRange(src, start, end));
-            bb.append(Arrays.copyOfRange(src, start, end));
-            bb.append(Arrays.copyOfRange(src, start, end));
-            start += blockSize;
+        {
+            // simple
+            char[] src = JieRandom.fill(new char[totalSize]);
+            int portion = JieMath.leastPortion(totalSize, blockSize);
+            StringBuilder bb = new StringBuilder();
+            int start = 0;
+            for (int i = 0; i < portion; i++) {
+                int end = Math.min(start + blockSize, totalSize);
+                bb.append(Arrays.copyOfRange(src, start, end));
+                bb.append(Arrays.copyOfRange(src, start, end));
+                bb.append(Arrays.copyOfRange(src, start, end));
+                bb.append(Arrays.copyOfRange(src, start, end));
+                start += blockSize;
+            }
+            char[] expectDst = bb.toString().toCharArray();
+            bb.setLength(0);
+            CharStream.Encoder encoder = (data, end) -> {
+                char[] chars = JieChars.getChars(data);
+                char[] ret = new char[chars.length * 2];
+                System.arraycopy(chars, 0, ret, 0, chars.length);
+                System.arraycopy(chars, 0, ret, chars.length, chars.length);
+                return CharBuffer.wrap(ret);
+            };
+            long count = CharStream.from(src).blockSize(blockSize).encoders(Jie.list(
+                encoder, encoder
+            )).writeTo(bb);
+            assertEquals(count, totalSize);
+            assertEquals(bb.toString().toCharArray(), expectDst);
         }
-        char[] expectDst = bb.toString().toCharArray();
-        bb.setLength(0);
-        CharStream.Encoder encoder = (data, end) -> {
-            char[] chars = JieChars.getChars(data);
-            char[] ret = new char[chars.length * 2];
-            System.arraycopy(chars, 0, ret, 0, chars.length);
-            System.arraycopy(chars, 0, ret, chars.length, chars.length);
-            return CharBuffer.wrap(ret);
-        };
-        long count = CharStream.from(src).blockSize(blockSize).encoders(Jie.list(
-            encoder, encoder
-        )).writeTo(bb);
-        assertEquals(count, totalSize);
-        assertEquals(bb.toString().toCharArray(), expectDst);
+        {
+            // complex
+            char[] src = JieRandom.fill(new char[totalSize]);
+            StringBuilder bb = new StringBuilder();
+            for (int i = 0, j = 0; i < src.length; i++) {
+                if (j == 2) {
+                    j = 0;
+                    continue;
+                }
+                bb.append(src[i]);
+                j++;
+            }
+            char[] proc = bb.toString().toCharArray();
+            bb.setLength(0);
+            for (int i = 0, j = 0; i < proc.length; i++) {
+                bb.append(proc[i]);
+                if (j == 9) {
+                    j = 0;
+                    bb.append('\r');
+                } else {
+                    j++;
+                }
+            }
+            proc = bb.toString().toCharArray();
+            bb.setLength(0);
+            boolean[] buffer = {true};
+            long count = CharStream.from(src).blockSize(blockSize).encoders(Jie.list(
+                CharStream.roundEncoder((data, end) -> {
+                    StringBuilder ret = new StringBuilder();
+                    int j = 0;
+                    while (data.hasRemaining()) {
+                        char b = data.get();
+                        if (j == 2) {
+                            j = 0;
+                            continue;
+                        }
+                        ret.append(b);
+                        j++;
+                    }
+                    return CharBuffer.wrap(ret.toString());
+                }, 3),
+                CharStream.bufferedEncoder(((data, end) -> {
+                    if (end) {
+                        return data;
+                    }
+                    CharBuffer ret;
+                    if (buffer[0]) {
+                        ret = JieChars.emptyBuffer();
+                    } else {
+                        ret = data;
+                    }
+                    buffer[0] = !buffer[0];
+                    return ret;
+                })),
+                CharStream.fixedSizeEncoder(((data, end) -> {
+                    if (data.remaining() == 10) {
+                        char[] ret = new char[11];
+                        data.get(ret, 0, 10);
+                        ret[10] = '\r';
+                        return CharBuffer.wrap(ret);
+                    } else {
+                        return data;
+                    }
+                }), 10)
+            )).writeTo(bb);
+            assertEquals(count, totalSize);
+            assertEquals(bb.toString().toCharArray(), proc);
+        }
     }
 
     @Test
@@ -475,8 +561,8 @@ public class CharStreamTest {
         testRoundEncoder(223, 2233, 2);
     }
 
-    private void testRoundEncoder(int size, int blockSize, int expectedBlockSize) {
-        char[] src = JieRandom.fill(new char[size]);
+    private void testRoundEncoder(int totalSize, int blockSize, int expectedBlockSize) {
+        char[] src = JieRandom.fill(new char[totalSize]);
         char[] dst = new char[src.length * 2];
         for (int i = 0; i < src.length; i++) {
             dst[i * 2] = src[i];
@@ -544,14 +630,22 @@ public class CharStreamTest {
     private void testBufferedEncoder(int size, int blockSize, int eatNum) {
         char[] src = JieRandom.fill(new char[size]);
         char[] dst = new char[src.length];
+        boolean[] buffer = {true};
         long len = CharStream.from(src).blockSize(blockSize).encoder(CharStream.bufferedEncoder(
             (data, end) -> {
                 if (end) {
                     return data;
                 }
-                char[] bb = new char[Math.min(data.remaining(), eatNum)];
-                data.get(bb);
-                return CharBuffer.wrap(bb);
+                CharBuffer ret;
+                if (buffer[0]) {
+                    char[] bb = new char[Math.min(data.remaining(), eatNum)];
+                    data.get(bb);
+                    ret = CharBuffer.wrap(bb);
+                } else {
+                    ret = data;
+                }
+                buffer[0] = !buffer[0];
+                return ret;
             }
         )).writeTo(dst);
         assertEquals(dst, src);
@@ -569,9 +663,9 @@ public class CharStreamTest {
         testFixedSizeEncoder(20, 40, 19);
     }
 
-    private void testFixedSizeEncoder(int size, int blockSize, int fixedSize) {
-        char[] src = JieRandom.fill(new char[size]);
-        int times = size / fixedSize;
+    private void testFixedSizeEncoder(int totalSize, int blockSize, int fixedSize) {
+        char[] src = JieRandom.fill(new char[totalSize]);
+        int times = totalSize / fixedSize;
         StringBuilder charsBuilder = new StringBuilder();
         int pos = 0;
         for (int i = 0; i < times; i++) {
@@ -585,7 +679,7 @@ public class CharStreamTest {
             charsBuilder.append('\r');
             charsBuilder.append('\n');
         }
-        int portion = JieMath.leastPortion(size, fixedSize);
+        int portion = JieMath.leastPortion(totalSize, fixedSize);
         char[] dst = new char[src.length + portion * 2];
         long len = CharStream.from(src).blockSize(blockSize).encoder(CharStream.fixedSizeEncoder(
             (data, end) -> {
