@@ -600,4 +600,61 @@ final class CharStreamImpl implements CharStream {
             return ret;
         }
     }
+
+    final static class FixedSizeEncoder extends AbsEncoder {
+
+        private final int size;
+
+        FixedSizeEncoder(Encoder encoder, int size) {
+            super(encoder);
+            this.size = size;
+        }
+
+        @Override
+        public CharBuffer encode(CharBuffer data, boolean end) {
+            CharBuffer total = totalData(data);
+            int totalSize = total.remaining();
+            int times = totalSize / size;
+            if (times == 0) {
+                if (end) {
+                    return encoder.encode(total, true);
+                }
+                buf = new char[totalSize];
+                total.get(buf);
+                return JieChars.emptyBuffer();
+            }
+            if (times == 1) {
+                CharBuffer slice = JieChars.slice(total, 0, size);
+                CharBuffer ret1 = encoder.encode(slice, false);
+                total.position(total.position() + size);
+                if (end) {
+                    CharBuffer ret2 = encoder.encode(total, true);
+                    int retSize1 = ret1.remaining();
+                    int retSize2 = ret2.remaining();
+                    char[] ret = new char[retSize1 + retSize2];
+                    ret1.get(ret, 0, retSize1);
+                    ret2.get(ret, retSize1, retSize2);
+                    return CharBuffer.wrap(ret);
+                }
+                buf = new char[total.remaining()];
+                total.get(buf);
+                return ret1;
+            }
+            StringBuilder charsBuilder = new StringBuilder();
+            for (int i = 0; i < times; i++) {
+                CharBuffer slice = JieChars.slice(total, 0, size);
+                CharBuffer ret = encoder.encode(slice, false);
+                total.position(total.position() + size);
+                charsBuilder.append(ret);
+            }
+            if (end) {
+                CharBuffer ret2 = encoder.encode(total, true);
+                charsBuilder.append(ret2);
+            } else {
+                buf = new char[total.remaining()];
+                total.get(buf);
+            }
+            return CharBuffer.wrap(charsBuilder.toString());
+        }
+    }
 }

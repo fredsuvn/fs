@@ -500,4 +500,61 @@ final class ByteStreamImpl implements ByteStream {
             return ret;
         }
     }
+
+    final static class FixedSizeEncoder extends AbsEncoder {
+
+        private final int size;
+
+        FixedSizeEncoder(Encoder encoder, int size) {
+            super(encoder);
+            this.size = size;
+        }
+
+        @Override
+        public ByteBuffer encode(ByteBuffer data, boolean end) {
+            ByteBuffer total = totalData(data);
+            int totalSize = total.remaining();
+            int times = totalSize / size;
+            if (times == 0) {
+                if (end) {
+                    return encoder.encode(total, true);
+                }
+                buf = new byte[totalSize];
+                total.get(buf);
+                return JieBytes.emptyBuffer();
+            }
+            if (times == 1) {
+                ByteBuffer slice = JieBytes.slice(total, 0, size);
+                ByteBuffer ret1 = encoder.encode(slice, false);
+                total.position(total.position() + size);
+                if (end) {
+                    ByteBuffer ret2 = encoder.encode(total, true);
+                    int retSize1 = ret1.remaining();
+                    int retSize2 = ret2.remaining();
+                    byte[] ret = new byte[retSize1 + retSize2];
+                    ret1.get(ret, 0, retSize1);
+                    ret2.get(ret, retSize1, retSize2);
+                    return ByteBuffer.wrap(ret);
+                }
+                buf = new byte[total.remaining()];
+                total.get(buf);
+                return ret1;
+            }
+            BytesBuilder bytesBuilder = new BytesBuilder();
+            for (int i = 0; i < times; i++) {
+                ByteBuffer slice = JieBytes.slice(total, 0, size);
+                ByteBuffer ret = encoder.encode(slice, false);
+                total.position(total.position() + size);
+                bytesBuilder.append(ret);
+            }
+            if (end) {
+                ByteBuffer ret2 = encoder.encode(total, true);
+                bytesBuilder.append(ret2);
+            } else {
+                buf = new byte[total.remaining()];
+                total.get(buf);
+            }
+            return bytesBuilder.toByteBuffer();
+        }
+    }
 }

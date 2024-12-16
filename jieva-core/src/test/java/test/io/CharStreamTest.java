@@ -472,6 +472,7 @@ public class CharStreamTest {
         testRoundEncoder(10086, 333, 11);
         testRoundEncoder(10086, 22, 22);
         testRoundEncoder(10086, 222, 1);
+        testRoundEncoder(223, 2233, 2);
     }
 
     private void testRoundEncoder(int size, int blockSize, int expectedBlockSize) {
@@ -537,6 +538,7 @@ public class CharStreamTest {
         testBufferedEncoder(10086, 333, 11);
         testBufferedEncoder(10086, 22, 22);
         testBufferedEncoder(10086, 333, 1);
+        testBufferedEncoder(233, 2333, 2);
     }
 
     private void testBufferedEncoder(int size, int blockSize, int eatNum) {
@@ -553,6 +555,53 @@ public class CharStreamTest {
             }
         )).writeTo(dst);
         assertEquals(dst, src);
+        assertEquals(len, src.length);
+    }
+
+    @Test
+    public void testFixedSizeEncoder() {
+        testFixedSizeEncoder(100, 5, 6);
+        testFixedSizeEncoder(10086, 11, 333);
+        testFixedSizeEncoder(10086, 333, 11);
+        testFixedSizeEncoder(10086, 22, 22);
+        testFixedSizeEncoder(10086, 333, 1);
+        testFixedSizeEncoder(10086, 20, 19);
+        testFixedSizeEncoder(20, 40, 19);
+    }
+
+    private void testFixedSizeEncoder(int size, int blockSize, int fixedSize) {
+        char[] src = JieRandom.fill(new char[size]);
+        int times = size / fixedSize;
+        StringBuilder charsBuilder = new StringBuilder();
+        int pos = 0;
+        for (int i = 0; i < times; i++) {
+            charsBuilder.append(Arrays.copyOfRange(src, pos, pos + fixedSize));
+            charsBuilder.append('\r');
+            charsBuilder.append('\n');
+            pos += fixedSize;
+        }
+        if (src.length > pos) {
+            charsBuilder.append(Arrays.copyOfRange(src, pos, src.length));
+            charsBuilder.append('\r');
+            charsBuilder.append('\n');
+        }
+        int portion = JieMath.leastPortion(size, fixedSize);
+        char[] dst = new char[src.length + portion * 2];
+        long len = CharStream.from(src).blockSize(blockSize).encoder(CharStream.fixedSizeEncoder(
+            (data, end) -> {
+                int remaining = data.remaining();
+                if (remaining == 0) {
+                    return JieChars.emptyBuffer();
+                }
+                char[] bb = new char[remaining + 2];
+                data.get(bb, 0, remaining);
+                bb[remaining] = '\r';
+                bb[remaining + 1] = '\n';
+                return CharBuffer.wrap(bb);
+            },
+            fixedSize
+        )).writeTo(dst);
+        assertEquals(dst, charsBuilder.toString().toCharArray());
         assertEquals(len, src.length);
     }
 

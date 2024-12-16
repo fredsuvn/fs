@@ -83,8 +83,8 @@ public interface ByteStream {
     }
 
     /**
-     * Returns a new {@link Encoder} to round input data for given encoder, typically used for the encoder which is not
-     * applicable to the setting of {@link #blockSize(int)}.
+     * Returns a new {@link Encoder} to round input data for given encoder, it is typically used for the encoder which
+     * is not applicable to the setting of {@link #blockSize(int)}.
      * <p>
      * This encoder rounds input data (possibly following buffered data from the previous invocation) to the largest
      * multiple of the expected block size and passes the rounded data to the given encoder. Any remainder data will be
@@ -102,20 +102,38 @@ public interface ByteStream {
     }
 
     /**
-     * Returns a new buffered {@link Encoder} for buffering remaining data of given encoder, typically used for the
-     * encoder which is not applicable to the setting of {@link #blockSize(int)}.
+     * Returns a new {@link Encoder} that buffers remaining data for given encoder, it is typically used for the encoder
+     * which requires consuming data in next invocation.
      * <p>
-     * The buffered encoder passes the input data to given encoder. Given encoder can only process an initial part of
-     * data, the remaining data will be buffered by buffered encoder, and the buffered data will be passed at next
-     * calling (if not end) along with the next input data, merged into one data.
+     * This encoder passes input data (possibly following buffered data from the previous invocation) to the given
+     * encoder. Any remaining data after encoding of given encoder will be buffered and used in the next invocation.
+     * However, in the last invocation (where the {@code end} is {@code true}), no data will be buffered.
      * <p>
-     * The buffered encoder is not thread-safe.
+     * This encoder is not thread-safe.
      *
      * @param encoder given encoder
-     * @return a new buffered {@link Encoder} for buffering remaining data of given encoder
+     * @return a new {@link Encoder} that buffers remaining data for given encoder
      */
     static Encoder bufferedEncoder(Encoder encoder) {
         return new ByteStreamImpl.BufferedEncoder(encoder);
+    }
+
+    /**
+     * Returns a new {@link Encoder} that guarantees a specified fixed-size data block is passed to the given encoder in
+     * each invocation, it is typically used for the encoder which requires consuming data in fixed-size block.
+     * <p>
+     * Note in last invocation (where the {@code end} is {@code true}), size of remainder data may be smaller than
+     * specified fixed-size.
+     * <p>
+     * This encoder is not thread-safe.
+     *
+     * @param encoder given encoder
+     * @param size    specified fixed-size
+     * @return a new {@link Encoder} that guarantees a specified fixed-size data block is passed to the given encoder in
+     * each invocation
+     */
+    static Encoder fixedSizeEncoder(Encoder encoder, int size) {
+        return new ByteStreamImpl.FixedSizeEncoder(encoder, size);
     }
 
     /**
@@ -163,7 +181,7 @@ public interface ByteStream {
      * When the data processing starts, the encoder will be invoked after each read operation, size of passed data is
      * specified by {@link #blockSize(int)} (except for the last reading, which may be smaller than the block size).
      * Passed {@link ByteBuffer} object, which is the first argument of {@link Encoder#encode(ByteBuffer, boolean)}, is
-     * readonly. And the returned {@link ByteBuffer} will also be treated as readonly;
+     * readonly and discarded after invocation. The returned {@link ByteBuffer} will also be treated as readonly;
      * <p>
      * This is an optional setting method. This interface provides helper encoder implementations such as:
      * {@link #roundEncoder(Encoder, int)}, {@link #bufferedEncoder(Encoder)}. To set more than one encoder, try

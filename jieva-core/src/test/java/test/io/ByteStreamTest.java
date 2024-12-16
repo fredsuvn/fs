@@ -328,6 +328,7 @@ public class ByteStreamTest {
         testRoundEncoder(10086, 333, 11);
         testRoundEncoder(10086, 22, 22);
         testRoundEncoder(10086, 222, 1);
+        testRoundEncoder(223, 2233, 2);
     }
 
     private void testRoundEncoder(int size, int blockSize, int expectedBlockSize) {
@@ -393,6 +394,7 @@ public class ByteStreamTest {
         testBufferedEncoder(10086, 333, 11);
         testBufferedEncoder(10086, 22, 22);
         testBufferedEncoder(10086, 333, 1);
+        testBufferedEncoder(233, 2333, 2);
     }
 
     private void testBufferedEncoder(int size, int blockSize, int eatNum) {
@@ -409,6 +411,53 @@ public class ByteStreamTest {
             }
         )).writeTo(dst);
         assertEquals(dst, src);
+        assertEquals(len, src.length);
+    }
+
+    @Test
+    public void testFixedSizeEncoder() {
+        testFixedSizeEncoder(100, 5, 6);
+        testFixedSizeEncoder(10086, 11, 333);
+        testFixedSizeEncoder(10086, 333, 11);
+        testFixedSizeEncoder(10086, 22, 22);
+        testFixedSizeEncoder(10086, 333, 1);
+        testFixedSizeEncoder(10086, 20, 19);
+        testFixedSizeEncoder(20, 40, 19);
+    }
+
+    private void testFixedSizeEncoder(int size, int blockSize, int fixedSize) {
+        byte[] src = JieRandom.fill(new byte[size]);
+        int times = size / fixedSize;
+        BytesBuilder bytesBuilder = new BytesBuilder();
+        int pos = 0;
+        for (int i = 0; i < times; i++) {
+            bytesBuilder.append(Arrays.copyOfRange(src, pos, pos + fixedSize));
+            bytesBuilder.append((byte) '\r');
+            bytesBuilder.append((byte) '\n');
+            pos += fixedSize;
+        }
+        if (src.length > pos) {
+            bytesBuilder.append(Arrays.copyOfRange(src, pos, src.length));
+            bytesBuilder.append((byte) '\r');
+            bytesBuilder.append((byte) '\n');
+        }
+        int portion = JieMath.leastPortion(size, fixedSize);
+        byte[] dst = new byte[src.length + portion * 2];
+        long len = ByteStream.from(src).blockSize(blockSize).encoder(ByteStream.fixedSizeEncoder(
+            (data, end) -> {
+                int remaining = data.remaining();
+                if (remaining == 0) {
+                    return JieBytes.emptyBuffer();
+                }
+                byte[] bb = new byte[remaining + 2];
+                data.get(bb, 0, remaining);
+                bb[remaining] = '\r';
+                bb[remaining + 1] = '\n';
+                return ByteBuffer.wrap(bb);
+            },
+            fixedSize
+        )).writeTo(dst);
+        assertEquals(dst, bytesBuilder.toByteArray());
         assertEquals(len, src.length);
     }
 
