@@ -328,6 +328,18 @@ public interface ByteStream {
     long writeTo() throws IOEncodingException, IORuntimeException;
 
     /**
+     * Returns an input stream which encompasses the entire data processing. The input stream is lazy, read operations
+     * on the source data are performed only as needed, and doesn't support mark/reset operations. The close method will
+     * close the source if the source is also closable.
+     * <p>
+     * This is a terminal method.
+     *
+     * @return an input stream which encompasses the entire data processing
+     * @throws IORuntimeException thrown for any IO problems
+     */
+    InputStream asInputStream() throws IORuntimeException;
+
+    /**
      * Encoder for encoding data in data processing.
      */
     interface Encoder {

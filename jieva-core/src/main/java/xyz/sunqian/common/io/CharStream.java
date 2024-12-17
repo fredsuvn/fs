@@ -337,6 +337,18 @@ public interface CharStream {
     long writeTo() throws IOEncodingException, IORuntimeException;
 
     /**
+     * Returns a reader which encompasses the entire data processing. The reader is lazy, read operations on the source
+     * data are performed only as needed, and doesn't support mark/reset operations. The close method will close the
+     * source if the source is also closable.
+     * <p>
+     * This is a terminal method.
+     *
+     * @return a reader which encompasses the entire data processing
+     * @throws IORuntimeException thrown for any IO problems
+     */
+    Reader asReader() throws IORuntimeException;
+
+    /**
      * Encoder for encoding data in data processing.
      */
     interface Encoder {

@@ -94,6 +94,11 @@ final class ByteStreamImpl implements ByteStream {
         return start();
     }
 
+    @Override
+    public InputStream asInputStream() {
+        return new StreamIn(toBufferIn(source));
+    }
+
     private long start() {
         if (source == null || dest == null) {
             throw new IORuntimeException("Source or dest is null!");
@@ -422,6 +427,37 @@ final class ByteStreamImpl implements ByteStream {
         @Override
         public void write(ByteBuffer buffer) {
             // Do nothing
+        }
+    }
+
+    private static final class StreamIn extends InputStream {
+
+        private final BufferIn in;
+        private ByteBuffer buffer = JieBytes.emptyBuffer();
+
+        private StreamIn(BufferIn in) {
+            this.in = in;
+        }
+
+        @Override
+        public int read() throws IOException {
+            try {
+                if (buffer == null) {
+                    return -1;
+                }
+                if (buffer.hasRemaining()) {
+                    return buffer.get() & 0xff;
+                }
+                ByteBuffer newBuf = in.read();
+                if (newBuf == null || !newBuf.hasRemaining()) {
+                    buffer = null;
+                    return -1;
+                }
+                buffer = newBuf;
+                return buffer.get() & 0xff;
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
         }
     }
 

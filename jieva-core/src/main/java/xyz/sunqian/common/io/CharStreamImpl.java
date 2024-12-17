@@ -96,6 +96,11 @@ final class CharStreamImpl implements CharStream {
         return start();
     }
 
+    @Override
+    public Reader asReader() {
+        return new ReaderIn(toBufferIn(source));
+    }
+
     private long start() {
         if (source == null || dest == null) {
             throw new IORuntimeException("Source or dest is null!");
@@ -522,6 +527,26 @@ final class CharStreamImpl implements CharStream {
         @Override
         public void write(CharBuffer buffer) {
             // Do nothing
+        }
+    }
+
+    private static final class ReaderIn extends Reader {
+
+        private final BufferIn in;
+        private CharBuffer buffer = JieChars.emptyBuffer();
+
+        private ReaderIn(BufferIn in) {
+            this.in = in;
+        }
+
+        @Override
+        public int read(char[] cbuf, int off, int len) throws IOException {
+            return 0;
+        }
+
+        @Override
+        public void close() throws IOException {
+
         }
     }
 
