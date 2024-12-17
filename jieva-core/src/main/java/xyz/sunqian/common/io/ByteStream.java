@@ -209,7 +209,7 @@ public interface ByteStream {
      *     });
      * }</pre>
      * That is, pass the {@link ByteBuffer} to the first encoder, then pass the return value of the first encoder to the
-     * second encoder, and so on.
+     * second encoder, and so on, and the first passed {@link ByteBuffer} is readonly.
      * <p>
      * Note the given list of encoders is used directly, any modification to the list will affect the encoding.
      *
@@ -347,7 +347,8 @@ public interface ByteStream {
         /**
          * Encodes specified data and return the result.
          * <p>
-         * The specified data is readonly, and the result will also be treated as readonly.
+         * The specified data for first encoder is readonly, and the result data of last encoder will also be treated as
+         * readonly (see {@link #encoder(Encoder)} and {@link #encoders(Iterable)}).
          *
          * @param data specified data
          * @param end  whether current encoding is the last invocation
