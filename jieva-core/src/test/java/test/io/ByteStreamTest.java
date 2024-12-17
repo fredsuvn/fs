@@ -555,6 +555,40 @@ public class ByteStreamTest {
         assertEquals(len, src.length);
     }
 
+    ///@Test
+    public void testAsInputStream() {
+        testAsInputStream(100, 5);
+        testAsInputStream(10086, 11);
+        testAsInputStream(10086, 333);
+        testAsInputStream(10086, 22);
+        testAsInputStream(333, 10086);
+        testAsInputStream(20, 10086);
+        testAsInputStream(20, 40);
+    }
+
+    private void testAsInputStream(int totalSize, int blockSize) {
+        byte[] src = JieRandom.fill(new byte[totalSize]);
+        int times = totalSize / blockSize;
+        BytesBuilder bb = new BytesBuilder();
+        int pos = 0;
+        for (int i = 0; i < times; i++) {
+            bb.append(Arrays.copyOfRange(src, pos, pos + blockSize));
+            bb.append((byte) '\r');
+            pos += blockSize;
+        }
+        if (pos < totalSize) {
+            bb.append(Arrays.copyOfRange(src, pos, totalSize));
+            bb.append((byte) '\r');
+        }
+        InputStream in = ByteStream.from(src).blockSize(blockSize).encoder(((data, end) -> {
+            BytesBuilder b = new BytesBuilder();
+            b.append(data);
+            b.append((byte) '\r');
+            return b.toByteBuffer();
+        })).asInputStream();
+        assertEquals(JieIO.read(in), bb.toByteArray());
+    }
+
     private static final class NioIn extends InputStream {
 
         private int i = 0;

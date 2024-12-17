@@ -424,7 +424,7 @@ final class ByteStreamImpl implements ByteStream {
         }
     }
 
-    private static final class StreamIn extends InputStream {
+    private final class StreamIn extends InputStream {
 
         private final BufferIn in;
         private ByteBuffer buffer = JieBytes.emptyBuffer();
@@ -435,13 +435,13 @@ final class ByteStreamImpl implements ByteStream {
 
         @Override
         public int read() throws IOException {
+            if (buffer == null) {
+                return -1;
+            }
+            if (buffer.hasRemaining()) {
+                return buffer.get() & 0xff;
+            }
             try {
-                if (buffer == null) {
-                    return -1;
-                }
-                if (buffer.hasRemaining()) {
-                    return buffer.get() & 0xff;
-                }
                 ByteBuffer newBuf = in.read();
                 if (newBuf == null || !newBuf.hasRemaining()) {
                     buffer = null;
@@ -451,6 +451,77 @@ final class ByteStreamImpl implements ByteStream {
                 return buffer.get() & 0xff;
             } catch (Exception e) {
                 throw new IOException(e);
+            }
+        }
+
+        public int read(byte[] b, int off, int len) throws IOException {
+            IOMisc.checkReadBounds(b, off, len);
+            if (len <= 0) {
+                return 0;
+            }
+            if (buffer == null) {
+                return -1;
+            }
+            try {
+                final int endPos = off + len;
+                int pos = off;
+                while (pos < endPos) {
+                    if (!buffer.hasRemaining()) {
+                        ByteBuffer newBuf = in.read();
+                        if (newBuf == null || !newBuf.hasRemaining()) {
+                            buffer = null;
+                            return pos - off;
+                        }
+                        buffer = newBuf;
+                    }
+                    int getLen = Math.min(buffer.remaining(), endPos - pos);
+                    buffer.get(b, pos, getLen);
+                    pos += getLen;
+                }
+                return pos - off;
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+
+        public long skip(long n) throws IOException {
+            if (n <= 0 || buffer == null) {
+                return 0;
+            }
+            try {
+                int pos = 0;
+                while (pos < n) {
+                    if (!buffer.hasRemaining()) {
+                        ByteBuffer newBuf = in.read();
+                        if (newBuf == null || !newBuf.hasRemaining()) {
+                            buffer = null;
+                            return n - pos;
+                        }
+                        buffer = newBuf;
+                    }
+                    int getLen = (int) Math.min(buffer.remaining(), n - pos);
+                    buffer.position(buffer.position() + getLen);
+                    pos += getLen;
+                }
+                return n - pos;
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+
+        public int available() {
+            return buffer == null ? 0 : buffer.remaining();
+        }
+
+        public void close() throws IOException {
+            if (source instanceof AutoCloseable) {
+                try {
+                    ((AutoCloseable) source).close();
+                } catch (IOException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new IOException(e);
+                }
             }
         }
     }
