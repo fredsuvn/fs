@@ -349,6 +349,8 @@ public interface ByteStream {
          * <p>
          * The specified data for first encoder is readonly, and the result data of last encoder will also be treated as
          * readonly (see {@link #encoder(Encoder)} and {@link #encoders(Iterable)}).
+         * <p>
+         * Note specified data may be empty (but never null).
          *
          * @param data specified data
          * @param end  whether current encoding is the last invocation

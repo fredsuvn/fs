@@ -555,8 +555,8 @@ public class ByteStreamTest {
         assertEquals(len, src.length);
     }
 
-    ///@Test
-    public void testAsInputStream() {
+    @Test
+    public void testAsInputStream() throws Exception {
         testAsInputStream(100, 5);
         testAsInputStream(10086, 11);
         testAsInputStream(10086, 333);
@@ -564,9 +564,25 @@ public class ByteStreamTest {
         testAsInputStream(333, 10086);
         testAsInputStream(20, 10086);
         testAsInputStream(20, 40);
+        {
+            InputStream in = ByteStream.from(new byte[0]).asInputStream();
+            assertEquals(in.read(), -1);
+            assertEquals(in.read(), -1);
+            assertEquals(in.read(new byte[1], 0, 0), 0);
+            assertEquals(in.skip(-1), 0);
+            assertEquals(in.skip(0), 0);
+            assertEquals(in.available(), 0);
+            in.close();
+            in.close();
+            expectThrows(IOException.class, () -> in.read());
+            InputStream err1 = ByteStream.from(new ThrowIn(0)).asInputStream();
+            expectThrows(IOException.class, () -> err1.close());
+            InputStream err2 = ByteStream.from(new ThrowIn(2)).asInputStream();
+            expectThrows(IOException.class, () -> err2.close());
+        }
     }
 
-    private void testAsInputStream(int totalSize, int blockSize) {
+    private void testAsInputStream(int totalSize, int blockSize) throws Exception {
         byte[] src = JieRandom.fill(new byte[totalSize]);
         int times = totalSize / blockSize;
         BytesBuilder bb = new BytesBuilder();
@@ -580,13 +596,52 @@ public class ByteStreamTest {
             bb.append(Arrays.copyOfRange(src, pos, totalSize));
             bb.append((byte) '\r');
         }
-        InputStream in = ByteStream.from(src).blockSize(blockSize).encoder(((data, end) -> {
-            BytesBuilder b = new BytesBuilder();
-            b.append(data);
-            b.append((byte) '\r');
-            return b.toByteBuffer();
-        })).asInputStream();
-        assertEquals(JieIO.read(in), bb.toByteArray());
+        byte[] encoded = bb.toByteArray();
+        {
+            InputStream in = ByteStream.from(src).blockSize(blockSize).encoder(((data, end) -> {
+                if (!data.hasRemaining()) {
+                    return data;
+                }
+                BytesBuilder b = new BytesBuilder();
+                b.append(data);
+                b.append((byte) '\r');
+                return b.toByteBuffer();
+            })).asInputStream();
+            assertEquals(JieIO.read(in), encoded);
+        }
+        {
+            InputStream in = ByteStream.from(src).blockSize(blockSize).encoder(((data, end) -> {
+                if (!data.hasRemaining()) {
+                    return data;
+                }
+                BytesBuilder b = new BytesBuilder();
+                b.append(data);
+                b.append((byte) '\r');
+                return b.toByteBuffer();
+            })).asInputStream();
+            BytesBuilder builder = new BytesBuilder();
+            while (true) {
+                int b = in.read();
+                if (b == -1) {
+                    break;
+                }
+                builder.append((byte) b);
+            }
+            assertEquals(builder.toByteArray(), encoded);
+        }
+        {
+            InputStream in = ByteStream.from(src).blockSize(blockSize).encoder(((data, end) -> {
+                if (!data.hasRemaining()) {
+                    return data;
+                }
+                BytesBuilder b = new BytesBuilder();
+                b.append(data);
+                b.append((byte) '\r');
+                return b.toByteBuffer();
+            })).asInputStream();
+            assertEquals(in.skip(666), Math.min(666, encoded.length));
+            assertEquals(in.skip(1666), Math.min(1666, Math.max(encoded.length - 666, 0)));
+        }
     }
 
     private static final class NioIn extends InputStream {
@@ -641,6 +696,14 @@ public class ByteStreamTest {
 
         @Override
         public int read(@NotNull byte[] b, int off, int len) throws IOException {
+            if (e == 0) {
+                throw new IOException("e == 0");
+            }
+            throw new IllegalArgumentException("e = " + e);
+        }
+
+        @Override
+        public void close() throws IOException {
             if (e == 0) {
                 throw new IOException("e == 0");
             }

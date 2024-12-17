@@ -225,7 +225,7 @@ final class ByteStreamImpl implements ByteStream {
             if (buf == null && count == 0) {
                 return -1;
             }
-            buf = buf == null ? JieBytes.emptyBuffer() : buf.asReadOnlyBuffer();
+            buf = buf == null ? JieBytes.emptyBuffer() : buf.slice().asReadOnlyBuffer();
             if (!buf.hasRemaining()) {
                 if (encoder != null) {
                     ByteBuffer encoded = encode(buf, true);
@@ -288,8 +288,8 @@ final class ByteStreamImpl implements ByteStream {
 
         @Override
         public ByteBuffer read() throws IOException {
-            int readSize = readLimit < 0 ? block.length : (int) Math.min(remaining, block.length);
-            if (readSize <= 0) {
+            int readSize = remaining < 0 ? block.length : (int) Math.min(remaining, block.length);
+            if (readSize == 0) {
                 return JieBytes.emptyBuffer();
             }
             int hasRead = 0;
@@ -337,7 +337,7 @@ final class ByteStreamImpl implements ByteStream {
 
         @Override
         public ByteBuffer read() {
-            int readSize = readLimit < 0 ? blockSize : (int) Math.min(remaining, blockSize);
+            int readSize = remaining < 0 ? blockSize : (int) Math.min(remaining, blockSize);
             if (readSize <= 0) {
                 return JieBytes.emptyBuffer();
             }
@@ -373,7 +373,7 @@ final class ByteStreamImpl implements ByteStream {
 
         @Override
         public ByteBuffer read() {
-            int readSize = readLimit < 0 ? blockSize : (int) Math.min(remaining, blockSize);
+            int readSize = remaining < 0 ? blockSize : (int) Math.min(remaining, blockSize);
             if (readSize <= 0) {
                 return JieBytes.emptyBuffer();
             }
@@ -429,32 +429,67 @@ final class ByteStreamImpl implements ByteStream {
         private final BufferIn in;
         private ByteBuffer buffer = JieBytes.emptyBuffer();
 
+        // 0-init, 1-processing, 2-end, 3-closed
+        private int state = 0;
+
         private StreamIn(BufferIn in) {
             this.in = in;
         }
 
+        @Nullable
+        private ByteBuffer read0() throws IOException {
+            if (state == 2) {
+                return null;
+            }
+            try {
+                ByteBuffer buf = in.read();
+                if (buf == null || !buf.hasRemaining()) {
+                    if (state == 0) {
+                        state = 2;
+                        return null;
+                    }
+                    state = 2;
+                    if (encoder == null) {
+                        return null;
+                    }
+                    ByteBuffer ret = encoder.encode(JieBytes.emptyBuffer(), true);
+                    if (ret.hasRemaining()) {
+                        return ret;
+                    }
+                    return null;
+                }
+                if (state == 0) {
+                    state = 1;
+                }
+                if (encoder == null) {
+                    return buf;
+                }
+                return encoder.encode(buf.slice().asReadOnlyBuffer(), false);
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+
         @Override
         public int read() throws IOException {
+            checkClosed();
             if (buffer == null) {
                 return -1;
             }
             if (buffer.hasRemaining()) {
                 return buffer.get() & 0xff;
             }
-            try {
-                ByteBuffer newBuf = in.read();
-                if (newBuf == null || !newBuf.hasRemaining()) {
-                    buffer = null;
-                    return -1;
-                }
-                buffer = newBuf;
-                return buffer.get() & 0xff;
-            } catch (Exception e) {
-                throw new IOException(e);
+            ByteBuffer newBuf = read0();
+            if (newBuf == null) {
+                buffer = null;
+                return -1;
             }
+            buffer = newBuf;
+            return buffer.get() & 0xff;
         }
 
         public int read(byte[] b, int off, int len) throws IOException {
+            checkClosed();
             IOMisc.checkReadBounds(b, off, len);
             if (len <= 0) {
                 return 0;
@@ -462,51 +497,44 @@ final class ByteStreamImpl implements ByteStream {
             if (buffer == null) {
                 return -1;
             }
-            try {
-                final int endPos = off + len;
-                int pos = off;
-                while (pos < endPos) {
-                    if (!buffer.hasRemaining()) {
-                        ByteBuffer newBuf = in.read();
-                        if (newBuf == null || !newBuf.hasRemaining()) {
-                            buffer = null;
-                            return pos - off;
-                        }
-                        buffer = newBuf;
+            final int endPos = off + len;
+            int pos = off;
+            while (pos < endPos) {
+                if (!buffer.hasRemaining()) {
+                    ByteBuffer newBuf = read0();
+                    if (newBuf == null) {
+                        buffer = null;
+                        return pos - off;
                     }
-                    int getLen = Math.min(buffer.remaining(), endPos - pos);
-                    buffer.get(b, pos, getLen);
-                    pos += getLen;
+                    buffer = newBuf;
                 }
-                return pos - off;
-            } catch (Exception e) {
-                throw new IOException(e);
+                int getLen = Math.min(buffer.remaining(), endPos - pos);
+                buffer.get(b, pos, getLen);
+                pos += getLen;
             }
+            return pos - off;
         }
 
         public long skip(long n) throws IOException {
+            checkClosed();
             if (n <= 0 || buffer == null) {
                 return 0;
             }
-            try {
-                int pos = 0;
-                while (pos < n) {
-                    if (!buffer.hasRemaining()) {
-                        ByteBuffer newBuf = in.read();
-                        if (newBuf == null || !newBuf.hasRemaining()) {
-                            buffer = null;
-                            return n - pos;
-                        }
-                        buffer = newBuf;
+            int pos = 0;
+            while (pos < n) {
+                if (!buffer.hasRemaining()) {
+                    ByteBuffer newBuf = read0();
+                    if (newBuf == null) {
+                        buffer = null;
+                        return pos;
                     }
-                    int getLen = (int) Math.min(buffer.remaining(), n - pos);
-                    buffer.position(buffer.position() + getLen);
-                    pos += getLen;
+                    buffer = newBuf;
                 }
-                return n - pos;
-            } catch (Exception e) {
-                throw new IOException(e);
+                int getLen = (int) Math.min(buffer.remaining(), n - pos);
+                buffer.position(buffer.position() + getLen);
+                pos += getLen;
             }
+            return pos;
         }
 
         public int available() {
@@ -514,6 +542,9 @@ final class ByteStreamImpl implements ByteStream {
         }
 
         public void close() throws IOException {
+            if (state == 3) {
+                return;
+            }
             if (source instanceof AutoCloseable) {
                 try {
                     ((AutoCloseable) source).close();
@@ -522,6 +553,13 @@ final class ByteStreamImpl implements ByteStream {
                 } catch (Exception e) {
                     throw new IOException(e);
                 }
+            }
+            state = 3;
+        }
+
+        private void checkClosed() throws IOException {
+            if (state == 3) {
+                throw new IOException("Stream closed.");
             }
         }
     }

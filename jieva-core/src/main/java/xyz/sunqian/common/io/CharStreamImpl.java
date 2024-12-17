@@ -330,8 +330,8 @@ final class CharStreamImpl implements CharStream {
 
         @Override
         public CharBuffer read() throws IOException {
-            int readSize = readLimit < 0 ? block.length : (int) Math.min(remaining, block.length);
-            if (readSize <= 0) {
+            int readSize = remaining < 0 ? block.length : (int) Math.min(remaining, block.length);
+            if (readSize == 0) {
                 return JieChars.emptyBuffer();
             }
             int hasRead = 0;
@@ -379,7 +379,7 @@ final class CharStreamImpl implements CharStream {
 
         @Override
         public CharBuffer read() {
-            int readSize = readLimit < 0 ? blockSize : (int) Math.min(remaining, blockSize);
+            int readSize = remaining < 0 ? blockSize : (int) Math.min(remaining, blockSize);
             if (readSize <= 0) {
                 return JieChars.emptyBuffer();
             }
@@ -415,7 +415,7 @@ final class CharStreamImpl implements CharStream {
 
         @Override
         public CharBuffer read() {
-            int readSize = readLimit < 0 ? blockSize : (int) Math.min(remaining, blockSize);
+            int readSize = remaining < 0 ? blockSize : (int) Math.min(remaining, blockSize);
             if (readSize <= 0) {
                 return JieChars.emptyBuffer();
             }
@@ -451,7 +451,7 @@ final class CharStreamImpl implements CharStream {
 
         @Override
         public CharBuffer read() {
-            int readSize = readLimit < 0 ? blockSize : (int) Math.min(remaining, blockSize);
+            int readSize = remaining < 0 ? blockSize : (int) Math.min(remaining, blockSize);
             if (readSize <= 0) {
                 return JieChars.emptyBuffer();
             }
