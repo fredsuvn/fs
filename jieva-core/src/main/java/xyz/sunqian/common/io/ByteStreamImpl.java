@@ -488,9 +488,9 @@ final class ByteStreamImpl implements ByteStream {
             return buffer.get() & 0xff;
         }
 
-        public int read(byte[] b, int off, int len) throws IOException {
+        public int read(byte[] dst, int off, int len) throws IOException {
             checkClosed();
-            IOMisc.checkReadBounds(b, off, len);
+            IOMisc.checkReadBounds(dst, off, len);
             if (len <= 0) {
                 return 0;
             }
@@ -509,7 +509,7 @@ final class ByteStreamImpl implements ByteStream {
                     buffer = newBuf;
                 }
                 int getLen = Math.min(buffer.remaining(), endPos - pos);
-                buffer.get(b, pos, getLen);
+                buffer.get(dst, pos, getLen);
                 pos += getLen;
             }
             return pos - off;

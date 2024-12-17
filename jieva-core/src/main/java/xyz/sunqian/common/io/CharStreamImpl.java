@@ -522,23 +522,142 @@ final class CharStreamImpl implements CharStream {
         }
     }
 
-    private static final class ReaderIn extends Reader {
+    private final class ReaderIn extends Reader {
 
         private final BufferIn in;
         private CharBuffer buffer = JieChars.emptyBuffer();
+
+        // 0-init, 1-processing, 2-end, 3-closed
+        private int state = 0;
 
         private ReaderIn(BufferIn in) {
             this.in = in;
         }
 
+        @Nullable
+        private CharBuffer read0() throws IOException {
+            if (state == 2) {
+                return null;
+            }
+            try {
+                CharBuffer buf = in.read();
+                if (buf == null || !buf.hasRemaining()) {
+                    if (state == 0) {
+                        state = 2;
+                        return null;
+                    }
+                    state = 2;
+                    if (encoder == null) {
+                        return null;
+                    }
+                    CharBuffer ret = encoder.encode(JieChars.emptyBuffer(), true);
+                    if (ret.hasRemaining()) {
+                        return ret;
+                    }
+                    return null;
+                }
+                if (state == 0) {
+                    state = 1;
+                }
+                if (encoder == null) {
+                    return buf;
+                }
+                return encoder.encode(buf.slice().asReadOnlyBuffer(), false);
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+
         @Override
-        public int read(char[] cbuf, int off, int len) throws IOException {
-            return 0;
+        public int read() throws IOException {
+            checkClosed();
+            if (buffer == null) {
+                return -1;
+            }
+            if (buffer.hasRemaining()) {
+                return buffer.get() & 0xff;
+            }
+            CharBuffer newBuf = read0();
+            if (newBuf == null) {
+                buffer = null;
+                return -1;
+            }
+            buffer = newBuf;
+            return buffer.get() & 0xff;
+        }
+
+        @Override
+        public int read(char[] dst, int off, int len) throws IOException {
+            checkClosed();
+            IOMisc.checkReadBounds(dst, off, len);
+            if (len <= 0) {
+                return 0;
+            }
+            if (buffer == null) {
+                return -1;
+            }
+            final int endPos = off + len;
+            int pos = off;
+            while (pos < endPos) {
+                if (!buffer.hasRemaining()) {
+                    CharBuffer newBuf = read0();
+                    if (newBuf == null) {
+                        buffer = null;
+                        return pos - off;
+                    }
+                    buffer = newBuf;
+                }
+                int getLen = Math.min(buffer.remaining(), endPos - pos);
+                buffer.get(dst, pos, getLen);
+                pos += getLen;
+            }
+            return pos - off;
+        }
+
+        @Override
+        public long skip(long n) throws IOException {
+            checkClosed();
+            if (n <= 0 || buffer == null) {
+                return 0;
+            }
+            int pos = 0;
+            while (pos < n) {
+                if (!buffer.hasRemaining()) {
+                    CharBuffer newBuf = read0();
+                    if (newBuf == null) {
+                        buffer = null;
+                        return pos;
+                    }
+                    buffer = newBuf;
+                }
+                int getLen = (int) Math.min(buffer.remaining(), n - pos);
+                buffer.position(buffer.position() + getLen);
+                pos += getLen;
+            }
+            return pos;
         }
 
         @Override
         public void close() throws IOException {
+            if (state == 3) {
+                return;
+            }
+            if (source instanceof AutoCloseable) {
+                try {
+                    ((AutoCloseable) source).close();
+                } catch (IOException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new IOException(e);
+                }
+            }
+            state = 3;
+        }
 
+        private void checkClosed() throws IOException {
+            if (state == 3) {
+                throw new IOException("Reader closed.");
+            }
         }
     }
 

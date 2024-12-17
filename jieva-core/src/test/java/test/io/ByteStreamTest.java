@@ -575,10 +575,22 @@ public class ByteStreamTest {
             in.close();
             in.close();
             expectThrows(IOException.class, () -> in.read());
+            InputStream nio = ByteStream.from(new NioIn()).endOnZeroRead(true).asInputStream();
+            assertEquals(nio.read(), -1);
+            InputStream empty = ByteStream.from(new byte[]{9}).encoder(((data, end) -> {
+                if (data.hasRemaining()) {
+                    return data;
+                }
+                return ByteBuffer.wrap(new byte[]{1, 2, 3});
+            })).asInputStream();
+            assertEquals(JieIO.read(empty), new byte[]{9, 1, 2, 3});
+            assertEquals(empty.read(), -1);
             InputStream err1 = ByteStream.from(new ThrowIn(0)).asInputStream();
             expectThrows(IOException.class, () -> err1.close());
             InputStream err2 = ByteStream.from(new ThrowIn(2)).asInputStream();
             expectThrows(IOException.class, () -> err2.close());
+            InputStream err3 = ByteStream.from(new ThrowIn(3)).asInputStream();
+            expectThrows(IOException.class, () -> err3.read());
         }
     }
 
@@ -608,6 +620,7 @@ public class ByteStreamTest {
                 return b.toByteBuffer();
             })).asInputStream();
             assertEquals(JieIO.read(in), encoded);
+            assertEquals(in.read(), -1);
         }
         {
             InputStream in = ByteStream.from(src).blockSize(blockSize).encoder(((data, end) -> {
@@ -641,6 +654,11 @@ public class ByteStreamTest {
             })).asInputStream();
             assertEquals(in.skip(666), Math.min(666, encoded.length));
             assertEquals(in.skip(1666), Math.min(1666, Math.max(encoded.length - 666, 0)));
+        }
+        {
+            InputStream in = ByteStream.from(src).blockSize(blockSize).asInputStream();
+            assertEquals(JieIO.read(in), src);
+            assertEquals(in.read(), -1);
         }
     }
 

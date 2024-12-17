@@ -699,6 +699,112 @@ public class CharStreamTest {
         assertEquals(len, src.length);
     }
 
+    @Test
+    public void testAsReader() throws Exception {
+        testAsReader(100, 5);
+        testAsReader(10086, 11);
+        testAsReader(10086, 333);
+        testAsReader(10086, 22);
+        testAsReader(333, 10086);
+        testAsReader(20, 10086);
+        testAsReader(20, 40);
+        {
+            Reader in = CharStream.from(new char[0]).asReader();
+            assertEquals(in.read(), -1);
+            assertEquals(in.read(), -1);
+            assertEquals(in.read(new char[1], 0, 0), 0);
+            assertEquals(in.skip(-1), 0);
+            assertEquals(in.skip(0), 0);
+            in.close();
+            in.close();
+            expectThrows(IOException.class, () -> in.read());
+            Reader nio = CharStream.from(new NioReader()).endOnZeroRead(true).asReader();
+            assertEquals(nio.read(), -1);
+            Reader empty = CharStream.from(new char[]{9}).encoder(((data, end) -> {
+                if (data.hasRemaining()) {
+                    return data;
+                }
+                return CharBuffer.wrap(new char[]{1, 2, 3});
+            })).asReader();
+            assertEquals(JieIO.read(empty), new char[]{9, 1, 2, 3});
+            assertEquals(empty.read(), -1);
+            Reader err1 = CharStream.from(new CharStreamTest.ThrowReader(0)).asReader();
+            expectThrows(IOException.class, () -> err1.close());
+            Reader err2 = CharStream.from(new CharStreamTest.ThrowReader(2)).asReader();
+            expectThrows(IOException.class, () -> err2.close());
+            Reader err3 = CharStream.from(new CharStreamTest.ThrowReader(3)).asReader();
+            expectThrows(IOException.class, () -> err3.read());
+        }
+    }
+
+    private void testAsReader(int totalSize, int blockSize) throws Exception {
+        char[] src = JieRandom.fill(new char[totalSize]);
+        int times = totalSize / blockSize;
+        StringBuilder bb = new StringBuilder();
+        int pos = 0;
+        for (int i = 0; i < times; i++) {
+            bb.append(Arrays.copyOfRange(src, pos, pos + blockSize));
+            bb.append('\r');
+            pos += blockSize;
+        }
+        if (pos < totalSize) {
+            bb.append(Arrays.copyOfRange(src, pos, totalSize));
+            bb.append('\r');
+        }
+        char[] encoded = bb.toString().toCharArray();
+        {
+            Reader in = CharStream.from(src).blockSize(blockSize).encoder(((data, end) -> {
+                if (!data.hasRemaining()) {
+                    return data;
+                }
+                StringBuilder b = new StringBuilder();
+                b.append(data);
+                b.append('\r');
+                return CharBuffer.wrap(b.toString());
+            })).asReader();
+            assertEquals(JieIO.read(in).toCharArray(), encoded);
+            assertEquals(in.read(), -1);
+        }
+        {
+            Reader in = CharStream.from(src).blockSize(blockSize).encoder(((data, end) -> {
+                if (!data.hasRemaining()) {
+                    return data;
+                }
+                StringBuilder b = new StringBuilder();
+                b.append(data);
+                b.append('\r');
+                return CharBuffer.wrap(b.toString());
+            })).asReader();
+            StringBuilder builder = new StringBuilder();
+            while (true) {
+                int b = in.read();
+                if (b == -1) {
+                    break;
+                }
+                builder.append((char) b);
+            }
+            assertEquals(builder.toString().toCharArray(), encoded);
+        }
+        {
+            Reader in = CharStream.from(src).blockSize(blockSize).encoder(((data, end) -> {
+                if (!data.hasRemaining()) {
+                    return data;
+                }
+                StringBuilder b = new StringBuilder();
+                b.append(data);
+                b.append('\r');
+                return CharBuffer.wrap(b.toString());
+            })).asReader();
+            assertEquals(in.skip(666), Math.min(666, encoded.length));
+            assertEquals(in.skip(1666), Math.min(1666, Math.max(encoded.length - 666, 0)));
+        }
+        {
+            Reader in = CharStream.from(src).blockSize(blockSize).asReader();
+            assertEquals(JieIO.read(in).toCharArray(), src);
+            assertEquals(in.read(), -1);
+        }
+    }
+
     private static final class NioReader extends Reader {
 
         private int i = 0;
