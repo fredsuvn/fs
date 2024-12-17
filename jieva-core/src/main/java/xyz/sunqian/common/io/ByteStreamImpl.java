@@ -184,13 +184,13 @@ final class ByteStreamImpl implements ByteStream {
     private BufferIn toBufferIn(Object src) {
         int actualBlockSize = getActualBlockSize();
         if (src instanceof InputStream) {
-            return new InputStreamBufferIn((InputStream) src, actualBlockSize, readLimit);
+            return new InputStreamBufferIn((InputStream) src, actualBlockSize);
         }
         if (src instanceof byte[]) {
-            return new BytesBufferIn((byte[]) src, actualBlockSize, readLimit);
+            return new BytesBufferIn((byte[]) src, actualBlockSize);
         }
         if (src instanceof ByteBuffer) {
-            return new BufferBufferIn((ByteBuffer) src, actualBlockSize, readLimit);
+            return new BufferBufferIn((ByteBuffer) src, actualBlockSize);
         }
         throw new IORuntimeException("Unexpected source type: " + src.getClass());
     }
@@ -277,20 +277,18 @@ final class ByteStreamImpl implements ByteStream {
         private final InputStream source;
         private final byte[] block;
         private final ByteBuffer blockBuffer;
-        private final long limit;
         private long remaining;
 
-        private InputStreamBufferIn(InputStream source, int blockSize, long limit) {
+        private InputStreamBufferIn(InputStream source, int blockSize) {
             this.source = source;
-            this.block = new byte[limit < 0 ? blockSize : (int) Math.min(blockSize, limit)];
+            this.block = new byte[readLimit < 0 ? blockSize : (int) Math.min(blockSize, readLimit)];
             this.blockBuffer = ByteBuffer.wrap(block);
-            this.limit = limit;
-            this.remaining = limit;
+            this.remaining = readLimit;
         }
 
         @Override
         public ByteBuffer read() throws IOException {
-            int readSize = limit < 0 ? block.length : (int) Math.min(remaining, block.length);
+            int readSize = readLimit < 0 ? block.length : (int) Math.min(remaining, block.length);
             if (readSize <= 0) {
                 return JieBytes.emptyBuffer();
             }
@@ -315,33 +313,31 @@ final class ByteStreamImpl implements ByteStream {
             }
             blockBuffer.position(0);
             blockBuffer.limit(hasRead);
-            if (limit > 0) {
+            if (readLimit > 0) {
                 remaining -= hasRead;
             }
             return blockBuffer;
         }
     }
 
-    private static final class BytesBufferIn implements BufferIn {
+    private final class BytesBufferIn implements BufferIn {
 
         private final byte[] source;
         private final ByteBuffer sourceBuffer;
         private final int blockSize;
         private int pos = 0;
-        private final long limit;
         private long remaining;
 
-        private BytesBufferIn(byte[] source, int blockSize, long limit) {
+        private BytesBufferIn(byte[] source, int blockSize) {
             this.source = source;
             this.sourceBuffer = ByteBuffer.wrap(source);
             this.blockSize = blockSize;
-            this.limit = limit;
-            this.remaining = limit;
+            this.remaining = readLimit;
         }
 
         @Override
         public ByteBuffer read() {
-            int readSize = limit < 0 ? blockSize : (int) Math.min(remaining, blockSize);
+            int readSize = readLimit < 0 ? blockSize : (int) Math.min(remaining, blockSize);
             if (readSize <= 0) {
                 return JieBytes.emptyBuffer();
             }
@@ -353,33 +349,31 @@ final class ByteStreamImpl implements ByteStream {
             sourceBuffer.limit(newPos);
             int size = newPos - pos;
             pos = newPos;
-            if (limit > 0) {
+            if (readLimit > 0) {
                 remaining -= size;
             }
             return sourceBuffer;
         }
     }
 
-    private static final class BufferBufferIn implements BufferIn {
+    private final class BufferBufferIn implements BufferIn {
 
         private final ByteBuffer sourceBuffer;
         private final int blockSize;
         private int pos = 0;
-        private final long limit;
         private long remaining;
         private final int sourceRemaining;
 
-        private BufferBufferIn(ByteBuffer source, int blockSize, long limit) {
+        private BufferBufferIn(ByteBuffer source, int blockSize) {
             this.sourceBuffer = source.slice();
             this.blockSize = blockSize;
-            this.limit = limit;
-            this.remaining = limit;
+            this.remaining = readLimit;
             this.sourceRemaining = source.remaining();
         }
 
         @Override
         public ByteBuffer read() {
-            int readSize = limit < 0 ? blockSize : (int) Math.min(remaining, blockSize);
+            int readSize = readLimit < 0 ? blockSize : (int) Math.min(remaining, blockSize);
             if (readSize <= 0) {
                 return JieBytes.emptyBuffer();
             }
@@ -391,7 +385,7 @@ final class ByteStreamImpl implements ByteStream {
             sourceBuffer.limit(newPos);
             int size = newPos - pos;
             pos = newPos;
-            if (limit > 0) {
+            if (readLimit > 0) {
                 remaining -= size;
             }
             return sourceBuffer;

@@ -223,16 +223,16 @@ final class CharStreamImpl implements CharStream {
     private BufferIn toBufferIn(Object src) {
         int actualBlockSize = getActualBlockSize();
         if (src instanceof Reader) {
-            return new ReaderBufferIn((Reader) src, actualBlockSize, readLimit);
+            return new ReaderBufferIn((Reader) src, actualBlockSize);
         }
         if (src instanceof char[]) {
-            return new CharsBufferIn((char[]) src, actualBlockSize, readLimit);
+            return new CharsBufferIn((char[]) src, actualBlockSize);
         }
         if (src instanceof CharBuffer) {
-            return new BufferBufferIn((CharBuffer) src, actualBlockSize, readLimit);
+            return new BufferBufferIn((CharBuffer) src, actualBlockSize);
         }
         if (src instanceof CharSequence) {
-            return new CharSeqBufferIn((CharSequence) src, actualBlockSize, readLimit);
+            return new CharSeqBufferIn((CharSequence) src, actualBlockSize);
         }
         throw new IORuntimeException("Unexpected source type: " + src.getClass());
     }
@@ -319,20 +319,18 @@ final class CharStreamImpl implements CharStream {
         private final Reader source;
         private final char[] block;
         private final CharBuffer blockBuffer;
-        private final long limit;
         private long remaining;
 
-        private ReaderBufferIn(Reader source, int blockSize, long limit) {
+        private ReaderBufferIn(Reader source, int blockSize) {
             this.source = source;
-            this.block = new char[limit < 0 ? blockSize : (int) Math.min(blockSize, limit)];
+            this.block = new char[readLimit < 0 ? blockSize : (int) Math.min(blockSize, readLimit)];
             this.blockBuffer = CharBuffer.wrap(block);
-            this.limit = limit;
-            this.remaining = limit;
+            this.remaining = readLimit;
         }
 
         @Override
         public CharBuffer read() throws IOException {
-            int readSize = limit < 0 ? block.length : (int) Math.min(remaining, block.length);
+            int readSize = readLimit < 0 ? block.length : (int) Math.min(remaining, block.length);
             if (readSize <= 0) {
                 return JieChars.emptyBuffer();
             }
@@ -357,33 +355,31 @@ final class CharStreamImpl implements CharStream {
             }
             blockBuffer.position(0);
             blockBuffer.limit(hasRead);
-            if (limit > 0) {
+            if (readLimit > 0) {
                 remaining -= hasRead;
             }
             return blockBuffer;
         }
     }
 
-    private static final class CharsBufferIn implements BufferIn {
+    private final class CharsBufferIn implements BufferIn {
 
         private final char[] source;
         private final CharBuffer sourceBuffer;
         private final int blockSize;
         private int pos = 0;
-        private final long limit;
         private long remaining;
 
-        private CharsBufferIn(char[] source, int blockSize, long limit) {
+        private CharsBufferIn(char[] source, int blockSize) {
             this.source = source;
             this.sourceBuffer = CharBuffer.wrap(source);
             this.blockSize = blockSize;
-            this.limit = limit;
-            this.remaining = limit;
+            this.remaining = readLimit;
         }
 
         @Override
         public CharBuffer read() {
-            int readSize = limit < 0 ? blockSize : (int) Math.min(remaining, blockSize);
+            int readSize = readLimit < 0 ? blockSize : (int) Math.min(remaining, blockSize);
             if (readSize <= 0) {
                 return JieChars.emptyBuffer();
             }
@@ -395,33 +391,31 @@ final class CharStreamImpl implements CharStream {
             sourceBuffer.limit(newPos);
             int size = newPos - pos;
             pos = newPos;
-            if (limit > 0) {
+            if (readLimit > 0) {
                 remaining -= size;
             }
             return sourceBuffer;
         }
     }
 
-    private static final class BufferBufferIn implements BufferIn {
+    private final class BufferBufferIn implements BufferIn {
 
         private final CharBuffer sourceBuffer;
         private final int blockSize;
         private int pos = 0;
-        private final long limit;
         private long remaining;
         private final int sourceRemaining;
 
-        private BufferBufferIn(CharBuffer source, int blockSize, long limit) {
+        private BufferBufferIn(CharBuffer source, int blockSize) {
             this.sourceBuffer = source.slice();
             this.blockSize = blockSize;
-            this.limit = limit;
-            this.remaining = limit;
+            this.remaining = readLimit;
             this.sourceRemaining = source.remaining();
         }
 
         @Override
         public CharBuffer read() {
-            int readSize = limit < 0 ? blockSize : (int) Math.min(remaining, blockSize);
+            int readSize = readLimit < 0 ? blockSize : (int) Math.min(remaining, blockSize);
             if (readSize <= 0) {
                 return JieChars.emptyBuffer();
             }
@@ -433,33 +427,31 @@ final class CharStreamImpl implements CharStream {
             sourceBuffer.limit(newPos);
             int size = newPos - pos;
             pos = newPos;
-            if (limit > 0) {
+            if (readLimit > 0) {
                 remaining -= size;
             }
             return sourceBuffer;
         }
     }
 
-    private static final class CharSeqBufferIn implements BufferIn {
+    private final class CharSeqBufferIn implements BufferIn {
 
         private final CharSequence source;
         private final CharBuffer sourceBuffer;
         private final int blockSize;
         private int pos = 0;
-        private final long limit;
         private long remaining;
 
-        private CharSeqBufferIn(CharSequence source, int blockSize, long limit) {
+        private CharSeqBufferIn(CharSequence source, int blockSize) {
             this.source = source;
             this.sourceBuffer = CharBuffer.wrap(source);
             this.blockSize = blockSize;
-            this.limit = limit;
-            this.remaining = limit;
+            this.remaining = readLimit;
         }
 
         @Override
         public CharBuffer read() {
-            int readSize = limit < 0 ? blockSize : (int) Math.min(remaining, blockSize);
+            int readSize = readLimit < 0 ? blockSize : (int) Math.min(remaining, blockSize);
             if (readSize <= 0) {
                 return JieChars.emptyBuffer();
             }
@@ -471,7 +463,7 @@ final class CharStreamImpl implements CharStream {
             sourceBuffer.limit(newPos);
             int size = newPos - pos;
             pos = newPos;
-            if (limit > 0) {
+            if (readLimit > 0) {
                 remaining -= size;
             }
             return sourceBuffer;
