@@ -121,7 +121,7 @@ final class HttpClientImpl implements GekHttpClient {
             return (InputStream) requestBody;
         } else if (requestBody instanceof ByteBuffer) {
             connection.setFixedLengthStreamingMode(((ByteBuffer) requestBody).remaining());
-            return JieIO.in((ByteBuffer) requestBody);
+            return JieIO.inputStream((ByteBuffer) requestBody);
         } else {
             throw new GekHttpException("Invalid body type: " + requestBody.getClass());
         }

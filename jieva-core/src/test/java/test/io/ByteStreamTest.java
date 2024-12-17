@@ -110,7 +110,7 @@ public class ByteStreamTest {
         // error
         expectThrows(IORuntimeException.class, () -> testBytesStream(666, 0, 0));
         expectThrows(IORuntimeException.class, () -> ByteStream.from((InputStream) null).writeTo((OutputStream) null));
-        expectThrows(IORuntimeException.class, () -> ByteStream.from(new byte[0], 0, 100));
+        expectThrows(IndexOutOfBoundsException.class, () -> ByteStream.from(new byte[0], 0, 100));
         expectThrows(IORuntimeException.class, () -> ByteStream.from(new byte[0]).writeTo(new byte[0], 0, 100));
         expectThrows(IORuntimeException.class, () -> ByteStream.from(new byte[0]).writeTo((OutputStream) null));
         expectThrows(IORuntimeException.class, () -> ByteStream.from((InputStream) null).writeTo(new byte[0]));

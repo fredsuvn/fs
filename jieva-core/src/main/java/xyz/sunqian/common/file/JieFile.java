@@ -37,7 +37,7 @@ public class JieFile {
      */
     public static byte[] readBytes(Path path, long offset, long length) {
         try (RandomAccessFile random = new RandomAccessFile(path.toFile(), "r")) {
-            return JieIO.read(JieIO.in(random, offset));
+            return JieIO.read(JieIO.inputStream(random, offset));
         } catch (Exception e) {
             throw new FileException(e);
         }
@@ -92,7 +92,7 @@ public class JieFile {
      */
     public static String readString(Path path, long offset, long length, Charset charset) {
         try (RandomAccessFile random = new RandomAccessFile(path.toFile(), "r")) {
-            return JieIO.readString(JieIO.in(random, offset), charset);
+            return JieIO.readString(JieIO.inputStream(random, offset), charset);
         } catch (Exception e) {
             throw new FileException(e);
         }
@@ -119,7 +119,7 @@ public class JieFile {
      */
     public static void writeBytes(Path path, long offset, long length, InputStream data) {
         try (RandomAccessFile random = new RandomAccessFile(path.toFile(), "rw")) {
-            OutputStream dest = JieIO.out(random, offset);
+            OutputStream dest = JieIO.outputStream(random, offset);
             JieIO.readTo(data, dest);
             dest.flush();
         } catch (Exception e) {
@@ -176,7 +176,7 @@ public class JieFile {
      */
     public static void writeString(Path path, long offset, long length, CharSequence data, Charset charset) {
         try (RandomAccessFile random = new RandomAccessFile(path.toFile(), "rw")) {
-            Writer writer = JieIO.writer(JieIO.out(random, offset), charset);
+            Writer writer = JieIO.writer(JieIO.outputStream(random, offset), charset);
             writer.append(data);
             writer.flush();
         } catch (Exception e) {

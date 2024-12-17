@@ -413,10 +413,10 @@ public abstract class ProcessStarter implements BaseStarter<Process, ProcessStar
 
     private static InputStream inputToStream(Object in) {
         if (in instanceof byte[]) {
-            return JieIO.in((byte[]) in);
+            return JieIO.inputStream((byte[]) in);
         }
         if (in instanceof ByteBuffer) {
-            return JieIO.in((ByteBuffer) in);
+            return JieIO.inputStream((ByteBuffer) in);
         }
         if (in instanceof InputStream) {
             return (InputStream) in;
@@ -426,10 +426,10 @@ public abstract class ProcessStarter implements BaseStarter<Process, ProcessStar
 
     private static OutputStream outputToStream(Object out) {
         if (out instanceof byte[]) {
-            return JieIO.out((byte[]) out);
+            return JieIO.outputStream((byte[]) out);
         }
         if (out instanceof ByteBuffer) {
-            return JieIO.out((ByteBuffer) out);
+            return JieIO.outputStream((ByteBuffer) out);
         }
         if (out instanceof OutputStream) {
             return (OutputStream) out;

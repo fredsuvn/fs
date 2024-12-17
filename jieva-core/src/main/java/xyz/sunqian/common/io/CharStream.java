@@ -57,18 +57,15 @@ public interface CharStream {
      * @param offset start index
      * @param length specified length
      * @return a new {@link CharStream}
-     * @throws IORuntimeException thrown for any problem
+     * @throws IndexOutOfBoundsException thrown bounds problem
      */
-    static CharStream from(char[] source, int offset, int length) throws IORuntimeException {
+    static CharStream from(char[] source, int offset, int length) throws IndexOutOfBoundsException {
+        IOMisc.checkReadBounds(source, offset, length);
         if (offset == 0 && length == source.length) {
             return from(source);
         }
-        try {
-            CharBuffer buffer = CharBuffer.wrap(source, offset, length);
-            return from(buffer);
-        } catch (Exception e) {
-            throw new IORuntimeException(e);
-        }
+        CharBuffer buffer = CharBuffer.wrap(source, offset, length);
+        return from(buffer);
     }
 
     /**

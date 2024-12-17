@@ -58,18 +58,15 @@ public interface ByteStream {
      * @param offset start index
      * @param length specified length
      * @return a new {@link ByteStream}
-     * @throws IORuntimeException thrown for any problem
+     * @throws IndexOutOfBoundsException thrown bounds problem
      */
-    static ByteStream from(byte[] source, int offset, int length) throws IORuntimeException {
+    static ByteStream from(byte[] source, int offset, int length) throws IndexOutOfBoundsException {
+        IOMisc.checkReadBounds(source, offset, length);
         if (offset == 0 && length == source.length) {
             return from(source);
         }
-        try {
-            ByteBuffer buffer = ByteBuffer.wrap(source, offset, length);
-            return from(buffer);
-        } catch (Exception e) {
-            throw new IORuntimeException(e);
-        }
+        ByteBuffer buffer = ByteBuffer.wrap(source, offset, length);
+        return from(buffer);
     }
 
     /**

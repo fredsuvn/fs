@@ -123,7 +123,7 @@ public class CharStreamTest {
         // error
         expectThrows(IORuntimeException.class, () -> testCharsStream(666, 0, 0));
         expectThrows(IORuntimeException.class, () -> CharStream.from((Reader) null).writeTo((Appendable) null));
-        expectThrows(IORuntimeException.class, () -> CharStream.from(new char[0], 0, 100));
+        expectThrows(IndexOutOfBoundsException.class, () -> CharStream.from(new char[0], 0, 100));
         expectThrows(IORuntimeException.class, () -> CharStream.from(new char[0]).writeTo(new char[0], 0, 100));
         expectThrows(IORuntimeException.class, () -> CharStream.from(new char[0]).writeTo((Appendable) null));
         expectThrows(IORuntimeException.class, () -> CharStream.from((Reader) null).writeTo(new char[0]));

@@ -204,10 +204,10 @@ final class ByteStreamImpl implements ByteStream {
             return new OutputSteamBufferOut((OutputStream) dst);
         }
         if (dst instanceof byte[]) {
-            return new OutputSteamBufferOut(JieIO.out((byte[]) dst));
+            return new OutputSteamBufferOut(JieIO.outputStream((byte[]) dst));
         }
         if (dst instanceof ByteBuffer) {
-            return new OutputSteamBufferOut(JieIO.out((ByteBuffer) dst));
+            return new OutputSteamBufferOut(JieIO.outputStream((ByteBuffer) dst));
         }
         throw new IORuntimeException("Unexpected destination type: " + dst.getClass());
     }

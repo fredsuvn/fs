@@ -8,7 +8,6 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.function.Function;
 
 /**
  * This is a static utilities class provides utilities for {@code IO} operations.
@@ -358,6 +357,104 @@ public class JieIO {
     }
 
     /**
+     * Returns a new {@link ByteStream} with specified data source.
+     *
+     * @param source specified data source
+     * @return a new {@link ByteStream}
+     */
+    public static ByteStream byteStream(InputStream source) {
+        return ByteStream.from(source);
+    }
+
+    /**
+     * Returns a new {@link ByteStream} with specified data source.
+     *
+     * @param source specified data source
+     * @return a new {@link ByteStream}
+     */
+    public static ByteStream byteStream(byte[] source) {
+        return ByteStream.from(source);
+    }
+
+    /**
+     * Returns a new {@link ByteStream} with specified data source, starting from the start index up to the specified
+     * length.
+     *
+     * @param source specified data source
+     * @param offset start index
+     * @param length specified length
+     * @return a new {@link ByteStream}
+     * @throws IndexOutOfBoundsException thrown bounds problem
+     */
+    public static ByteStream byteStream(byte[] source, int offset, int length) throws IndexOutOfBoundsException {
+        return ByteStream.from(source, offset, length);
+    }
+
+    /**
+     * Returns a new {@link ByteStream} with specified data source.
+     *
+     * @param source specified data source
+     * @return a new {@link ByteStream}
+     */
+    public static ByteStream byteStream(ByteBuffer source) {
+        return ByteStream.from(source);
+    }
+
+    /**
+     * Returns a new {@link CharStream} with specified data source.
+     *
+     * @param source specified data source
+     * @return a new {@link CharStream}
+     */
+    public static CharStream charStream(Reader source) {
+        return CharStream.from(source);
+    }
+
+    /**
+     * Returns a new {@link CharStream} with specified data source.
+     *
+     * @param source specified data source
+     * @return a new {@link CharStream}
+     */
+    public static CharStream charStream(char[] source) {
+        return CharStream.from(source);
+    }
+
+    /**
+     * Returns a new {@link CharStream} with specified data source, starting from the start index up to the specified
+     * length.
+     *
+     * @param source specified data source
+     * @param offset start index
+     * @param length specified length
+     * @return a new {@link CharStream}
+     * @throws IndexOutOfBoundsException thrown bounds problem
+     */
+    public static CharStream charStream(char[] source, int offset, int length) throws IndexOutOfBoundsException {
+        return CharStream.from(source, offset, length);
+    }
+
+    /**
+     * Returns a new {@link CharStream} with specified data source.
+     *
+     * @param source specified data source
+     * @return a new {@link CharStream}
+     */
+    public static CharStream charStream(CharBuffer source) {
+        return CharStream.from(source);
+    }
+
+    /**
+     * Returns a new {@link CharStream} with specified data source.
+     *
+     * @param source specified data source
+     * @return a new {@link CharStream}
+     */
+    public static CharStream charStream(CharSequence source) {
+        return CharStream.from(source);
+    }
+
+    /**
      * Wraps given array as an {@link InputStream}.
      * <p>
      * The returned stream is similar to {@link ByteArrayInputStream} but is not the same, its methods are not modified
@@ -367,7 +464,7 @@ public class JieIO {
      * @param array given array
      * @return given array as an {@link InputStream}
      */
-    public static InputStream in(byte[] array) {
+    public static InputStream inputStream(byte[] array) {
         return InImpls.in(array);
     }
 
@@ -383,7 +480,7 @@ public class JieIO {
      * @param length specified length
      * @return given array as an {@link InputStream}
      */
-    public static InputStream in(byte[] array, int offset, int length) {
+    public static InputStream inputStream(byte[] array, int offset, int length) {
         return InImpls.in(array, offset, length);
     }
 
@@ -396,7 +493,7 @@ public class JieIO {
      * @param buffer given buffer
      * @return given buffer as an {@link InputStream}
      */
-    public static InputStream in(ByteBuffer buffer) {
+    public static InputStream inputStream(ByteBuffer buffer) {
         return InImpls.in(buffer);
     }
 
@@ -414,7 +511,7 @@ public class JieIO {
      * @return given random access file as an {@link InputStream}
      * @throws IORuntimeException IO runtime exception
      */
-    public static InputStream in(RandomAccessFile random, long initialSeek) throws IORuntimeException {
+    public static InputStream inputStream(RandomAccessFile random, long initialSeek) throws IORuntimeException {
         return InImpls.in(random, initialSeek);
     }
 
@@ -428,8 +525,8 @@ public class JieIO {
      * @param reader given reader
      * @return given reader as an {@link InputStream}
      */
-    public static InputStream in(Reader reader) {
-        return in(reader, JieChars.defaultCharset());
+    public static InputStream inputStream(Reader reader) {
+        return inputStream(reader, JieChars.defaultCharset());
     }
 
     /**
@@ -443,7 +540,7 @@ public class JieIO {
      * @param charset specified charset
      * @return given reader as an {@link InputStream}
      */
-    public static InputStream in(Reader reader, Charset charset) {
+    public static InputStream inputStream(Reader reader, Charset charset) {
         return InImpls.in(reader, charset);
     }
 
@@ -541,7 +638,7 @@ public class JieIO {
      * @param array given array
      * @return given array as an {@link OutputStream}
      */
-    public static OutputStream out(byte[] array) {
+    public static OutputStream outputStream(byte[] array) {
         return OutImpls.out(array);
     }
 
@@ -556,7 +653,7 @@ public class JieIO {
      * @param length specified length
      * @return given array as an {@link OutputStream}
      */
-    public static OutputStream out(byte[] array, int offset, int length) {
+    public static OutputStream outputStream(byte[] array, int offset, int length) {
         return OutImpls.out(array, offset, length);
     }
 
@@ -569,7 +666,7 @@ public class JieIO {
      * @param buffer given buffer
      * @return given buffer as an {@link OutputStream}
      */
-    public static OutputStream out(ByteBuffer buffer) {
+    public static OutputStream outputStream(ByteBuffer buffer) {
         return OutImpls.out(buffer);
     }
 
@@ -586,7 +683,7 @@ public class JieIO {
      * @return given random access file as an {@link OutputStream}
      * @throws IORuntimeException IO runtime exception
      */
-    public static OutputStream out(RandomAccessFile random, long initialSeek) throws IORuntimeException {
+    public static OutputStream outputStream(RandomAccessFile random, long initialSeek) throws IORuntimeException {
         return OutImpls.out(random, initialSeek);
     }
 
@@ -599,8 +696,8 @@ public class JieIO {
      * @param appender given char appender
      * @return given char appender as an {@link OutputStream}
      */
-    public static OutputStream out(Appendable appender) {
-        return out(appender, JieChars.defaultCharset());
+    public static OutputStream outputStream(Appendable appender) {
+        return outputStream(appender, JieChars.defaultCharset());
     }
 
     /**
@@ -613,7 +710,7 @@ public class JieIO {
      * @param charset  specified charset
      * @return given char appender as an {@link OutputStream}
      */
-    public static OutputStream out(Appendable appender, Charset charset) {
+    public static OutputStream outputStream(Appendable appender, Charset charset) {
         return OutImpls.out(appender, charset);
     }
 
@@ -688,33 +785,21 @@ public class JieIO {
     }
 
     /**
-     * Returns a {@link TransformInputStream} with source stream, block size and transformer.
-     * <p>
-     * Note the block size could be negative or {@code 0}, in this case all bytes would be read once from source stream
-     * to transform.
-     * <p>
-     * See {@link TransformInputStream} and
-     * {@link TransformInputStream#TransformInputStream(InputStream, int, Function)}.
-     *
-     * @param source      source stream
-     * @param blockSize   block size
-     * @param transformer given transformer
-     * @return a {@link TransformInputStream}
-     * @see TransformInputStream
-     * @see TransformInputStream#TransformInputStream(InputStream, int, Function)
-     */
-    public static TransformInputStream transform(
-        InputStream source, int blockSize, Function<byte[], byte[]> transformer) {
-        return new TransformInputStream(source, blockSize, transformer);
-    }
-
-    /**
      * Returns an empty input stream.
      *
      * @return an empty input stream
      */
     public static InputStream emptyInputStream() {
         return EmptyInputStream.SINGLETON;
+    }
+
+    /**
+     * Returns an empty reader.
+     *
+     * @return an empty reader
+     */
+    public static Reader emptyReader() {
+        return EmptyReader.SINGLETON;
     }
 
     private static final class EmptyInputStream extends InputStream {
@@ -724,6 +809,20 @@ public class JieIO {
         @Override
         public int read() {
             return -1;
+        }
+    }
+
+    private static final class EmptyReader extends Reader {
+
+        private static final EmptyReader SINGLETON = new EmptyReader();
+
+        @Override
+        public int read(char[] cbuf, int off, int len) {
+            return -1;
+        }
+
+        @Override
+        public void close() {
         }
     }
 }

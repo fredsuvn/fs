@@ -1,6 +1,7 @@
 package xyz.sunqian.common.codec;
 
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.io.ByteStream;
 import xyz.sunqian.common.io.JieIO;
 
 import javax.crypto.Cipher;
@@ -247,13 +248,15 @@ public class CipherCodec implements CodecConfigurator<CipherCodec> {
             initCipher(cipher);
             InputStream source;
             if (input instanceof ByteBuffer) {
-                source = JieIO.in((ByteBuffer) input);
+                source = JieIO.inputStream((ByteBuffer) input);
             } else if (input instanceof InputStream) {
                 source = (InputStream) input;
             } else {
                 throw new CodecException("Unknown input type: " + input.getClass());
             }
-            return JieIO.transform(source, blockSize, bytes -> JieCodec.doCipher(cipher, ByteBuffer.wrap(bytes)));
+            return ByteStream.from(source).blockSize(blockSize).encoder((data, end) ->
+                    ByteBuffer.wrap(JieCodec.doCipher(cipher, data)))
+                .asInputStream();
         } catch (CodecException e) {
             throw e;
         } catch (Exception e) {

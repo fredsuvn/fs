@@ -20,8 +20,23 @@ import static org.testng.Assert.expectThrows;
 public class JieIOTest {
 
     @Test
+    public void testByteStream() throws Exception {
+        JieIO.byteStream(new byte[0]);
+        JieIO.byteStream(JieIO.emptyInputStream());
+        JieIO.byteStream(ByteBuffer.allocate(1));
+        JieIO.byteStream(new byte[1], 0, 1);
+        JieIO.charStream(new char[0]);
+        JieIO.charStream("");
+        JieIO.charStream(JieIO.emptyReader());
+        JieIO.charStream(CharBuffer.allocate(1));
+        JieIO.charStream(new char[1], 0, 1);
+    }
+
+    @Test
     public void testEmpty() throws Exception {
         assertEquals(JieIO.emptyInputStream().read(), -1);
+        assertEquals(JieIO.emptyReader().read(), -1);
+        JieIO.emptyReader().close();
     }
 
     @Test
@@ -40,7 +55,7 @@ public class JieIOTest {
             // bytes
             int size = 1024;
             byte[] src = JieRandom.fill(new byte[size]);
-            InputStream in = JieIO.in(src);
+            InputStream in = JieIO.inputStream(src);
             in.mark(0);
             byte[] dst = new byte[size];
             long c = JieIO.readTo(in, dst);
