@@ -189,8 +189,10 @@ public interface CharStream {
      * <p>
      * When the data processing starts, the encoder will be invoked after each read operation, size of passed data is
      * specified by {@link #blockSize(int)} (except for the last reading, which may be smaller than the block size).
-     * Passed {@link CharBuffer} object, which is the first argument of {@link Encoder#encode(CharBuffer, boolean)}, is
-     * readonly and discarded after invocation. The returned {@link CharBuffer} will also be treated as readonly;
+     * Passed {@link CharBuffer} object, which is the first argument of {@link Encoder#encode(CharBuffer, boolean)}, can
+     * be read-only (for example, when the source is a reader), or writable (for example, when the source is a char
+     * array or char buffer), and discarded after each invocation. The returned {@link CharBuffer} will also be treated
+     * as read-only;
      * <p>
      * This is an optional setting method. This interface provides helper encoder implementations such as:
      * {@link #roundEncoder(Encoder, int)}, {@link #bufferedEncoder(Encoder)}. To set more than one encoder, try
@@ -207,18 +209,20 @@ public interface CharStream {
     /**
      * Sets a list of encoders for encoding data from read operation, the encoding is an intermediate operation.
      * <p>
-     * The behavior of this list of encoders is equivalent to the following code:
+     * This method combines given list of encoders into a single encoder. The behavior of combined encoder is equivalent
+     * to the following code:
      * <pre>{@code
      *     return encoder((data, end) -> {
-     *         CharBuffer bytes = data;
+     *         CharBuffer chars = data;
      *         for (Encoder encoder : encoders) {
-     *             bytes = encoder.encode(bytes, end);
+     *             chars = encoder.encode(chars, end);
      *         }
-     *         return bytes;
+     *         return chars;
      *     });
      * }</pre>
-     * That is, pass the {@link CharBuffer} to the first encoder, then pass the return value of the first encoder to the
-     * second encoder, and so on, and the first passed {@link CharBuffer} is readonly.
+     * That is, pass the {@link CharBuffer} to the first encoder, and once it has finished executing, pass its return
+     * value to the second encoder, and so on. Last encoder's return value will be the final result of the combined
+     * encoder.
      * <p>
      * Note the given list of encoders is used directly, any modification to the list will affect the encoding.
      *
@@ -355,9 +359,6 @@ public interface CharStream {
 
         /**
          * Encodes specified data and return the result.
-         * <p>
-         * The specified data for first encoder is readonly, and the result data of last encoder will also be treated as
-         * readonly (see {@link #encoder(Encoder)} and {@link #encoders(Iterable)}).
          * <p>
          * Note specified data may be empty (but never null).
          *

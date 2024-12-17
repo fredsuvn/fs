@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.CharBuffer;
+import java.util.Arrays;
 
 final class CharStreamImpl implements CharStream {
 
@@ -267,7 +268,7 @@ final class CharStreamImpl implements CharStream {
             if (buf == null && count == 0) {
                 return -1;
             }
-            buf = buf == null ? JieChars.emptyBuffer() : buf.asReadOnlyBuffer();
+            buf = buf == null ? JieChars.emptyBuffer() : buf;
             if (!buf.hasRemaining()) {
                 if (encoder != null) {
                     CharBuffer encoded = encode(buf, true);
@@ -314,30 +315,37 @@ final class CharStreamImpl implements CharStream {
         void write(CharBuffer buffer) throws Exception;
     }
 
-    private final class ReaderBufferIn implements BufferIn {
+    private abstract class BaseBufferIn implements BufferIn {
+
+        protected final int bufSize;
+        protected long remaining;
+
+        private BaseBufferIn(int blockSize) {
+            this.bufSize = readLimit < 0 ? blockSize : (int) Math.min(blockSize, readLimit);
+            this.remaining = readLimit;
+        }
+    }
+
+    private final class ReaderBufferIn extends BaseBufferIn {
 
         private final Reader source;
-        private final char[] block;
-        private final CharBuffer blockBuffer;
-        private long remaining;
 
         private ReaderBufferIn(Reader source, int blockSize) {
+            super(blockSize);
             this.source = source;
-            this.block = new char[readLimit < 0 ? blockSize : (int) Math.min(blockSize, readLimit)];
-            this.blockBuffer = CharBuffer.wrap(block);
-            this.remaining = readLimit;
         }
 
         @Override
         public CharBuffer read() throws IOException {
-            int readSize = remaining < 0 ? block.length : (int) Math.min(remaining, block.length);
+            int readSize = remaining < 0 ? bufSize : (int) Math.min(remaining, bufSize);
             if (readSize == 0) {
                 return JieChars.emptyBuffer();
             }
             int hasRead = 0;
             boolean zeroRead = false;
+            char[] buf = new char[bufSize];
             while (hasRead < readSize) {
-                int size = source.read(block, hasRead, readSize - hasRead);
+                int size = source.read(buf, hasRead, readSize - hasRead);
                 if (size < 0) {
                     break;
                 }
@@ -353,28 +361,23 @@ final class CharStreamImpl implements CharStream {
                 }
                 return null;
             }
-            blockBuffer.position(0);
-            blockBuffer.limit(hasRead);
             if (readLimit > 0) {
                 remaining -= hasRead;
             }
-            return blockBuffer;
+            return CharBuffer.wrap(
+                hasRead == bufSize ? buf : Arrays.copyOfRange(buf, 0, hasRead)
+            ).asReadOnlyBuffer();
         }
     }
 
-    private final class CharsBufferIn implements BufferIn {
+    private final class CharsBufferIn extends BaseBufferIn {
 
         private final char[] source;
-        private final CharBuffer sourceBuffer;
-        private final int blockSize;
         private int pos = 0;
-        private long remaining;
 
         private CharsBufferIn(char[] source, int blockSize) {
+            super(blockSize);
             this.source = source;
-            this.sourceBuffer = CharBuffer.wrap(source);
-            this.blockSize = blockSize;
-            this.remaining = readLimit;
         }
 
         @Override
@@ -386,31 +389,24 @@ final class CharStreamImpl implements CharStream {
             if (pos >= source.length) {
                 return null;
             }
-            sourceBuffer.position(pos);
             int newPos = Math.min(pos + readSize, source.length);
-            sourceBuffer.limit(newPos);
             int size = newPos - pos;
+            CharBuffer ret = CharBuffer.wrap(source, pos, size).slice();
             pos = newPos;
             if (readLimit > 0) {
                 remaining -= size;
             }
-            return sourceBuffer;
+            return ret;
         }
     }
 
-    private final class BufferBufferIn implements BufferIn {
+    private final class BufferBufferIn extends BaseBufferIn {
 
-        private final CharBuffer sourceBuffer;
-        private final int blockSize;
-        private int pos = 0;
-        private long remaining;
-        private final int sourceRemaining;
+        private final CharBuffer source;
 
         private BufferBufferIn(CharBuffer source, int blockSize) {
-            this.sourceBuffer = source.slice();
-            this.blockSize = blockSize;
-            this.remaining = readLimit;
-            this.sourceRemaining = source.remaining();
+            super(blockSize);
+            this.source = source;
         }
 
         @Override
@@ -419,34 +415,32 @@ final class CharStreamImpl implements CharStream {
             if (readSize <= 0) {
                 return JieChars.emptyBuffer();
             }
-            if (pos >= sourceRemaining) {
+            if (!source.hasRemaining()) {
                 return null;
             }
-            sourceBuffer.position(pos);
-            int newPos = Math.min(pos + readSize, sourceRemaining);
-            sourceBuffer.limit(newPos);
+            int pos = source.position();
+            int limit = source.limit();
+            int newPos = Math.min(pos + readSize, limit);
             int size = newPos - pos;
-            pos = newPos;
+            source.limit(newPos);
+            CharBuffer ret = source.slice();
+            source.limit(limit);
+            source.position(newPos);
             if (readLimit > 0) {
                 remaining -= size;
             }
-            return sourceBuffer;
+            return ret;
         }
     }
 
-    private final class CharSeqBufferIn implements BufferIn {
+    private final class CharSeqBufferIn extends BaseBufferIn {
 
         private final CharSequence source;
-        private final CharBuffer sourceBuffer;
-        private final int blockSize;
         private int pos = 0;
-        private long remaining;
 
         private CharSeqBufferIn(CharSequence source, int blockSize) {
+            super(blockSize);
             this.source = source;
-            this.sourceBuffer = CharBuffer.wrap(source);
-            this.blockSize = blockSize;
-            this.remaining = readLimit;
         }
 
         @Override
@@ -458,15 +452,14 @@ final class CharStreamImpl implements CharStream {
             if (pos >= source.length()) {
                 return null;
             }
-            sourceBuffer.position(pos);
             int newPos = Math.min(pos + readSize, source.length());
-            sourceBuffer.limit(newPos);
             int size = newPos - pos;
+            CharBuffer ret = CharBuffer.wrap(source, pos, newPos).slice();
             pos = newPos;
             if (readLimit > 0) {
                 remaining -= size;
             }
-            return sourceBuffer;
+            return ret;
         }
     }
 
@@ -562,7 +555,7 @@ final class CharStreamImpl implements CharStream {
                 if (encoder == null) {
                     return buf;
                 }
-                return encoder.encode(buf.slice().asReadOnlyBuffer(), false);
+                return encoder.encode(buf, false);
             } catch (Exception e) {
                 throw new IOException(e);
             }
@@ -575,7 +568,7 @@ final class CharStreamImpl implements CharStream {
                 return -1;
             }
             if (buffer.hasRemaining()) {
-                return buffer.get() & 0xff;
+                return buffer.get() & 0xffff;
             }
             CharBuffer newBuf = read0();
             if (newBuf == null) {
@@ -583,7 +576,7 @@ final class CharStreamImpl implements CharStream {
                 return -1;
             }
             buffer = newBuf;
-            return buffer.get() & 0xff;
+            return buffer.get() & 0xffff;
         }
 
         @Override

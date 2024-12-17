@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 final class ByteStreamImpl implements ByteStream {
 
@@ -225,7 +226,7 @@ final class ByteStreamImpl implements ByteStream {
             if (buf == null && count == 0) {
                 return -1;
             }
-            buf = buf == null ? JieBytes.emptyBuffer() : buf.slice().asReadOnlyBuffer();
+            buf = buf == null ? JieBytes.emptyBuffer() : buf;
             if (!buf.hasRemaining()) {
                 if (encoder != null) {
                     ByteBuffer encoded = encode(buf, true);
@@ -272,30 +273,37 @@ final class ByteStreamImpl implements ByteStream {
         void write(ByteBuffer buffer) throws Exception;
     }
 
-    private final class InputStreamBufferIn implements BufferIn {
+    private abstract class BaseBufferIn implements BufferIn {
+
+        protected final int bufSize;
+        protected long remaining;
+
+        private BaseBufferIn(int blockSize) {
+            this.bufSize = readLimit < 0 ? blockSize : (int) Math.min(blockSize, readLimit);
+            this.remaining = readLimit;
+        }
+    }
+
+    private final class InputStreamBufferIn extends BaseBufferIn {
 
         private final InputStream source;
-        private final byte[] block;
-        private final ByteBuffer blockBuffer;
-        private long remaining;
 
         private InputStreamBufferIn(InputStream source, int blockSize) {
+            super(blockSize);
             this.source = source;
-            this.block = new byte[readLimit < 0 ? blockSize : (int) Math.min(blockSize, readLimit)];
-            this.blockBuffer = ByteBuffer.wrap(block);
-            this.remaining = readLimit;
         }
 
         @Override
         public ByteBuffer read() throws IOException {
-            int readSize = remaining < 0 ? block.length : (int) Math.min(remaining, block.length);
+            int readSize = remaining < 0 ? bufSize : (int) Math.min(remaining, bufSize);
             if (readSize == 0) {
                 return JieBytes.emptyBuffer();
             }
             int hasRead = 0;
             boolean zeroRead = false;
+            byte[] buf = new byte[bufSize];
             while (hasRead < readSize) {
-                int size = source.read(block, hasRead, readSize - hasRead);
+                int size = source.read(buf, hasRead, readSize - hasRead);
                 if (size < 0) {
                     break;
                 }
@@ -311,28 +319,23 @@ final class ByteStreamImpl implements ByteStream {
                 }
                 return null;
             }
-            blockBuffer.position(0);
-            blockBuffer.limit(hasRead);
             if (readLimit > 0) {
                 remaining -= hasRead;
             }
-            return blockBuffer;
+            return ByteBuffer.wrap(
+                hasRead == bufSize ? buf : Arrays.copyOfRange(buf, 0, hasRead)
+            ).asReadOnlyBuffer();
         }
     }
 
-    private final class BytesBufferIn implements BufferIn {
+    private final class BytesBufferIn extends BaseBufferIn {
 
         private final byte[] source;
-        private final ByteBuffer sourceBuffer;
-        private final int blockSize;
         private int pos = 0;
-        private long remaining;
 
         private BytesBufferIn(byte[] source, int blockSize) {
+            super(blockSize);
             this.source = source;
-            this.sourceBuffer = ByteBuffer.wrap(source);
-            this.blockSize = blockSize;
-            this.remaining = readLimit;
         }
 
         @Override
@@ -344,31 +347,24 @@ final class ByteStreamImpl implements ByteStream {
             if (pos >= source.length) {
                 return null;
             }
-            sourceBuffer.position(pos);
             int newPos = Math.min(pos + readSize, source.length);
-            sourceBuffer.limit(newPos);
             int size = newPos - pos;
+            ByteBuffer ret = ByteBuffer.wrap(source, pos, size).slice();
             pos = newPos;
             if (readLimit > 0) {
                 remaining -= size;
             }
-            return sourceBuffer;
+            return ret;
         }
     }
 
-    private final class BufferBufferIn implements BufferIn {
+    private final class BufferBufferIn extends BaseBufferIn {
 
-        private final ByteBuffer sourceBuffer;
-        private final int blockSize;
-        private int pos = 0;
-        private long remaining;
-        private final int sourceRemaining;
+        private final ByteBuffer source;
 
         private BufferBufferIn(ByteBuffer source, int blockSize) {
-            this.sourceBuffer = source.slice();
-            this.blockSize = blockSize;
-            this.remaining = readLimit;
-            this.sourceRemaining = source.remaining();
+            super(blockSize);
+            this.source = source;
         }
 
         @Override
@@ -377,18 +373,21 @@ final class ByteStreamImpl implements ByteStream {
             if (readSize <= 0) {
                 return JieBytes.emptyBuffer();
             }
-            if (pos >= sourceRemaining) {
+            if (!source.hasRemaining()) {
                 return null;
             }
-            sourceBuffer.position(pos);
-            int newPos = Math.min(pos + readSize, sourceRemaining);
-            sourceBuffer.limit(newPos);
+            int pos = source.position();
+            int limit = source.limit();
+            int newPos = Math.min(pos + readSize, limit);
             int size = newPos - pos;
-            pos = newPos;
+            source.limit(newPos);
+            ByteBuffer ret = source.slice();
+            source.limit(limit);
+            source.position(newPos);
             if (readLimit > 0) {
                 remaining -= size;
             }
-            return sourceBuffer;
+            return ret;
         }
     }
 
@@ -464,7 +463,7 @@ final class ByteStreamImpl implements ByteStream {
                 if (encoder == null) {
                     return buf;
                 }
-                return encoder.encode(buf.slice().asReadOnlyBuffer(), false);
+                return encoder.encode(buf, false);
             } catch (Exception e) {
                 throw new IOException(e);
             }

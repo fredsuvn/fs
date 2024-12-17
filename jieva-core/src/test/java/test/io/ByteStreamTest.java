@@ -76,6 +76,37 @@ public class ByteStreamTest {
             assertEquals(bb.toByteArray(), new byte[0]);
         }
 
+        {
+            // writeable
+            byte[] src = new byte[1024];
+            byte[] target = new byte[1024];
+            Arrays.fill(src, (byte) 1);
+            Arrays.fill(target, (byte) 2);
+            assertNotEquals(src, target);
+            ByteStream.from(src).blockSize(3).encoder(((data, end) -> {
+                assertFalse(data.isReadOnly());
+                while (data.hasRemaining()) {
+                    data.put((byte) 2);
+                }
+                return data;
+            })).writeTo();
+            assertEquals(src, target);
+            Arrays.fill(src, (byte) 1);
+            assertNotEquals(src, target);
+            ByteStream.from(ByteBuffer.wrap(src)).blockSize(3).encoder(((data, end) -> {
+                assertFalse(data.isReadOnly());
+                while (data.hasRemaining()) {
+                    data.put((byte) 2);
+                }
+                return data;
+            })).writeTo();
+            assertEquals(src, target);
+            ByteStream.from(new ByteArrayInputStream(src)).blockSize(3).encoder(((data, end) -> {
+                assertTrue(data.isReadOnly());
+                return data;
+            })).writeTo();
+        }
+
         // error
         expectThrows(IORuntimeException.class, () -> testBytesStream(666, 0, 0));
         expectThrows(IORuntimeException.class, () -> ByteStream.from((InputStream) null).writeTo((OutputStream) null));

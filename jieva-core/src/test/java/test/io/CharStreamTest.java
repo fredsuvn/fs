@@ -85,6 +85,41 @@ public class CharStreamTest {
             assertEquals(bb.toString().toCharArray(), new char[0]);
         }
 
+        {
+            // writeable
+            char[] src = new char[1024];
+            char[] target = new char[1024];
+            Arrays.fill(src, (char) 1);
+            Arrays.fill(target, (char) 2);
+            assertNotEquals(src, target);
+            CharStream.from(src).blockSize(3).encoder(((data, end) -> {
+                assertFalse(data.isReadOnly());
+                while (data.hasRemaining()) {
+                    data.put((char) 2);
+                }
+                return data;
+            })).writeTo();
+            assertEquals(src, target);
+            Arrays.fill(src, (char) 1);
+            assertNotEquals(src, target);
+            CharStream.from(CharBuffer.wrap(src)).blockSize(3).encoder(((data, end) -> {
+                assertFalse(data.isReadOnly());
+                while (data.hasRemaining()) {
+                    data.put((char) 2);
+                }
+                return data;
+            })).writeTo();
+            assertEquals(src, target);
+            CharStream.from(new CharArrayReader(src)).blockSize(3).encoder(((data, end) -> {
+                assertTrue(data.isReadOnly());
+                return data;
+            })).writeTo();
+            CharStream.from(new String(src)).blockSize(3).encoder(((data, end) -> {
+                assertTrue(data.isReadOnly());
+                return data;
+            })).writeTo();
+        }
+
         // error
         expectThrows(IORuntimeException.class, () -> testCharsStream(666, 0, 0));
         expectThrows(IORuntimeException.class, () -> CharStream.from((Reader) null).writeTo((Appendable) null));
@@ -720,13 +755,13 @@ public class CharStreamTest {
             expectThrows(IOException.class, () -> in.read());
             Reader nio = CharStream.from(new NioReader()).endOnZeroRead(true).asReader();
             assertEquals(nio.read(), -1);
-            Reader empty = CharStream.from(new char[]{9}).encoder(((data, end) -> {
+            Reader empty = CharStream.from(new char[]{'9'}).encoder(((data, end) -> {
                 if (data.hasRemaining()) {
                     return data;
                 }
-                return CharBuffer.wrap(new char[]{1, 2, 3});
+                return CharBuffer.wrap(new char[]{'1', '2', '3'});
             })).asReader();
-            assertEquals(JieIO.read(empty), new char[]{9, 1, 2, 3});
+            assertEquals(JieIO.read(empty).toCharArray(), new char[]{'9', '1', '2', '3'});
             assertEquals(empty.read(), -1);
             Reader err1 = CharStream.from(new CharStreamTest.ThrowReader(0)).asReader();
             expectThrows(IOException.class, () -> err1.close());
@@ -869,7 +904,10 @@ public class CharStreamTest {
 
         @Override
         public void close() throws IOException {
-
+            if (e == 0) {
+                throw new IOException("e == 0");
+            }
+            throw new IllegalArgumentException("e = " + e);
         }
     }
 }
