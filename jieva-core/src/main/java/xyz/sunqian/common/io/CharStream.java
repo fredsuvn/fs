@@ -2,6 +2,7 @@ package xyz.sunqian.common.io;
 
 import java.io.Reader;
 import java.nio.CharBuffer;
+import java.nio.charset.Charset;
 
 /**
  * Char stream is used to process char data, from specified data source, through zero or more intermediate operations,
@@ -348,6 +349,17 @@ public interface CharStream {
      * @throws IORuntimeException thrown for any IO problems
      */
     Reader toReader() throws IORuntimeException;
+
+    /**
+     * Converts this char stream to byte stream with specified charset.
+     * <p>
+     * This is a setting method but this char stream still be invalid after current invocation.
+     *
+     * @return a new {@link CharStream} converted from this char stream with specified charset
+     */
+    default ByteStream toByteStream(Charset charset) {
+        return ByteStream.from(JieIO.inputStream(toReader(), charset));
+    }
 
     /**
      * Encoder for encoding data in data processing.

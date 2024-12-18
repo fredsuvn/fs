@@ -3,6 +3,7 @@ package xyz.sunqian.common.io;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 /**
  * Byte stream is used to process byte data, from specified data source, through zero or more intermediate operations,
@@ -339,6 +340,17 @@ public interface ByteStream {
      * @throws IORuntimeException thrown for any IO problems
      */
     InputStream toInputStream() throws IORuntimeException;
+
+    /**
+     * Converts this byte stream to char stream with specified charset.
+     * <p>
+     * This is a setting method but this byte stream still be invalid after current invocation.
+     *
+     * @return a new {@link CharStream} converted from this byte stream with specified charset
+     */
+    default CharStream toCharStream(Charset charset) {
+        return CharStream.from(JieIO.reader(toInputStream(), charset));
+    }
 
     /**
      * Encoder for encoding data in data processing.

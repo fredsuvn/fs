@@ -693,6 +693,37 @@ public class ByteStreamTest {
         }
     }
 
+    @Test
+    public void testToCharStream() {
+        testToCharStream(100, 5);
+        testToCharStream(10086, 11);
+        testToCharStream(10086, 333);
+        testToCharStream(10086, 22);
+        testToCharStream(10086, 333);
+        testToCharStream(10086, 20);
+        testToCharStream(20, 40);
+        testToCharStream(10086, 1);
+    }
+
+    private void testToCharStream(int totalSize, int blockSize) {
+        {
+            char[] str = JieRandom.fill(new char[totalSize], 'a', 'z');
+            byte[] bytes = new String(str).getBytes(JieChars.UTF_8);
+            String converted = JieIO.read(
+                ByteStream.from(bytes).blockSize(blockSize).toCharStream(JieChars.UTF_8).toReader()
+            );
+            assertEquals(converted.toCharArray(), str);
+        }
+        {
+            char[] str = JieRandom.fill(new char[totalSize], '\u4e00', '\u9fff');
+            byte[] bytes = new String(str).getBytes(JieChars.UTF_8);
+            String converted = JieIO.read(
+                ByteStream.from(bytes).blockSize(blockSize).toCharStream(JieChars.UTF_8).toReader()
+            );
+            assertEquals(converted.toCharArray(), str);
+        }
+    }
+
     private static final class NioIn extends InputStream {
 
         private int i = 0;

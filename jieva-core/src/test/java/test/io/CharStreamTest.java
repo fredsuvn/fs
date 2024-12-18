@@ -840,6 +840,37 @@ public class CharStreamTest {
         }
     }
 
+    @Test
+    public void testToByteStream() {
+        testToByteStream(100, 5);
+        testToByteStream(10086, 11);
+        testToByteStream(10086, 333);
+        testToByteStream(10086, 22);
+        testToByteStream(10086, 333);
+        testToByteStream(10086, 20);
+        testToByteStream(20, 40);
+        testToByteStream(10086, 1);
+    }
+
+    private void testToByteStream(int totalSize, int blockSize) {
+        {
+            char[] str = JieRandom.fill(new char[totalSize], 'a', 'z');
+            byte[] bytes = new String(str).getBytes(JieChars.UTF_8);
+            byte[] converted = JieIO.read(
+                CharStream.from(str).blockSize(blockSize).toByteStream(JieChars.UTF_8).toInputStream()
+            );
+            assertEquals(converted, bytes);
+        }
+        {
+            char[] str = JieRandom.fill(new char[totalSize], '\u4e00', '\u9fff');
+            byte[] bytes = new String(str).getBytes(JieChars.UTF_8);
+            byte[] converted = JieIO.read(
+                CharStream.from(str).blockSize(blockSize).toByteStream(JieChars.UTF_8).toInputStream()
+            );
+            assertEquals(converted, bytes);
+        }
+    }
+
     private static final class NioReader extends Reader {
 
         private int i = 0;
