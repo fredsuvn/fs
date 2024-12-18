@@ -33,7 +33,7 @@ public interface ByteCoder {
 
     /**
      * Returns a new {@link ByteStream.Encoder} which encapsulates current coding logic. Note {@link ByteStream.Encoder}
-     * may require appropriate block size which is set by {@link ByteStream#blockSize(int)}.
+     * may require specified block size.
      *
      * @return a {@link ByteStream.Encoder} with current coding logic
      * @see ByteStream

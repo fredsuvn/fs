@@ -59,28 +59,32 @@ public interface ByteEncoder extends ByteCoder {
     int encode(ByteBuffer source, ByteBuffer dest) throws EncodingException;
 
     /**
-     * Encodes given source to string with default charset of current encoder (<b>not current environment</b>),
-     * typically is {@link JieChars#latinCharset()}.
-     *
-     * @param source given source
-     * @return result of encoding to string with default charset of current encoder
-     * @throws EncodingException for encoding error
+     * Expansion of {@link ByteEncoder}, provides methods to encode to string with {@link JieChars#latinCharset()}.
      */
-    default String toString(byte[] source) throws EncodingException {
-        return new String(encode(source), JieChars.latinCharset());
-    }
+    interface ToLatin extends ByteEncoder {
 
-    /**
-     * Encodes given source to string with default charset of current encoder (<b>not current environment</b>),
-     * typically is {@link JieChars#latinCharset()}.
-     *
-     * @param source given source
-     * @return result of encoding to string with default charset of current encoder
-     * @throws EncodingException for encoding error
-     */
-    default String toString(ByteBuffer source) throws EncodingException {
-        ByteBuffer encoded = encode(source);
-        byte[] bytes = JieBytes.getBytes(encoded);
-        return new String(bytes, JieChars.latinCharset());
+        /**
+         * Encodes given source to string with {@link JieChars#latinCharset()}.
+         *
+         * @param source given source
+         * @return result of encoding to string with {@link JieChars#latinCharset()}
+         * @throws EncodingException for encoding error
+         */
+        default String toString(byte[] source) throws EncodingException {
+            return new String(encode(source), JieChars.latinCharset());
+        }
+
+        /**
+         * Encodes given source to string with {@link JieChars#latinCharset()}.
+         *
+         * @param source given source
+         * @return result of encoding to string with {@link JieChars#latinCharset()}
+         * @throws EncodingException for encoding error
+         */
+        default String toString(ByteBuffer source) throws EncodingException {
+            ByteBuffer encoded = encode(source);
+            byte[] bytes = JieBytes.getBytes(encoded);
+            return new String(bytes, JieChars.latinCharset());
+        }
     }
 }

@@ -2,7 +2,6 @@ package xyz.sunqian.common.encode;
 
 import xyz.sunqian.common.base.JieBytes;
 import xyz.sunqian.common.base.JieChars;
-import xyz.sunqian.common.encode.hex.JieHex;
 
 import java.nio.ByteBuffer;
 
@@ -17,23 +16,22 @@ import java.nio.ByteBuffer;
 public interface ToCharEncoder extends ByteEncoder {
 
     /**
-     * Encodes given source to string (with {@link JieChars#latinCharset()}).
+     * Encodes given source to string with {@link JieChars#latinCharset()}.
      *
      * @param source given source
-     * @return result of encoding to string (with {@link JieChars#latinCharset()})
-     * @throws EncodingException if any encoding problem occurs
+     * @return result of encoding to string with {@link JieChars#latinCharset()}
+     * @throws EncodingException for encoding error
      */
     default String toString(byte[] source) throws EncodingException {
         return new String(encode(source), JieChars.latinCharset());
     }
 
     /**
-     * Encodes given source to string (with {@link JieChars#latinCharset()}). The source buffer's position will be
-     * incremented by the read length.
+     * Encodes given source to string with {@link JieChars#latinCharset()}.
      *
      * @param source given source
-     * @return result of encoding to string (with {@link JieChars#latinCharset()})
-     * @throws EncodingException if any encoding problem occurs
+     * @return result of encoding to string with {@link JieChars#latinCharset()}
+     * @throws EncodingException for encoding error
      */
     default String toString(ByteBuffer source) throws EncodingException {
         ByteBuffer encoded = encode(source);

@@ -1,6 +1,5 @@
-package xyz.sunqian.common.encode.hex;
+package xyz.sunqian.common.encode;
 
-import xyz.sunqian.common.encode.*;
 import xyz.sunqian.common.io.ByteStream;
 
 /**
@@ -32,12 +31,11 @@ public class JieHex {
     }
 
     /**
-     * {@code Hex} encoder implementation. {@link #getBlockSize()} and {@link #streamEncoder()} are overridden and
-     * require attention.
+     * {@code Hex} encoder implementation.
      *
      * @author sunqian
      */
-    public interface Encoder extends ToCharEncoder {
+    public interface Encoder extends ByteEncoder.ToLatin {
 
         /**
          * Returns 1. {@code Hex} encoding is applicable to any size of data so that returns 1.
@@ -50,27 +48,39 @@ public class JieHex {
         }
 
         /**
-         * Returns a singleton thread-safe stream encoder object, accepts any size of input data.
+         * Returns twice the specified input size.
          *
-         * @return a singleton thread-safe stream encoder object
+         * @param inputSize specified input size
+         * @return twice the specified input size
+         * @throws EncodingException if input size is illegal
+         */
+        @Override
+        int getOutputSize(int inputSize) throws EncodingException;
+
+        /**
+         * Returns a new {@link ByteStream.Encoder} which encapsulates current hex encoding, supports any size of input
+         * data, not thread-safe.
+         *
+         * @return a {@link ByteStream.Encoder} with current hex encoding
+         * @see ByteStream
+         * @see ByteStream.Encoder
          */
         @Override
         ByteStream.Encoder streamEncoder();
     }
 
     /**
-     * {@code Hex} decoder implementation. {@link #getBlockSize()} and {@link #streamEncoder()} are overridden and
-     * require attention.
+     * {@code Hex} decoder implementation.
      *
      * @author sunqian
      */
-    public interface Decoder extends ToCharDecoder {
+    public interface Decoder extends ByteDecoder.ToLatin {
 
         /**
          * Returns 2. Data size for {@code Hex} decoding should be even, so that minimal block size for {@code Hex}
          * decoding is 2.
          *
-         * @return 1
+         * @return 2
          */
         @Override
         default int getBlockSize() {
@@ -78,12 +88,22 @@ public class JieHex {
         }
 
         /**
-         * Returns a new stream decoder. The decoder is wrapped by
-         * {@link ByteStream#roundEncoder(ByteStream.Encoder, int)} to keep size of input data is even. Although the
-         * decoder accepts any size of input data, it is recommended that sets an even block size for a better
-         * performance.
+         * Returns half of the specified input size.
          *
-         * @return a new stream decoder wrapped by {@link ByteStream#roundEncoder(ByteStream.Encoder, int)}
+         * @param inputSize specified input size
+         * @return half of the specified input size
+         * @throws DecodingException if input size is illegal
+         */
+        @Override
+        int getOutputSize(int inputSize) throws DecodingException;
+
+        /**
+         * Returns a new {@link ByteStream.Encoder} which encapsulates current hex decoding, supports even size of input
+         * data, not thread-safe.
+         *
+         * @return a {@link ByteStream.Encoder} with current hex decoding
+         * @see ByteStream
+         * @see ByteStream.Encoder
          */
         @Override
         ByteStream.Encoder streamEncoder();
@@ -98,10 +118,7 @@ public class JieHex {
         };
 
         @Override
-        public int getOutputSize(int inputSize, boolean end) throws EncodingException {
-            if (inputSize < 0) {
-                throw new EncodingException("Hex encoding size can not be negative.");
-            }
+        public int getOutputSize(int inputSize, boolean end) {
             return inputSize * 2;
         }
 
@@ -111,7 +128,7 @@ public class JieHex {
                 dst[j++] = (byte) DICT[((bits >> 4) & 0x0f)];
                 dst[j++] = (byte) DICT[(bits & 0x0f)];
             }
-            return (srcEnd - srcOff) * 2;
+            return (srcEnd - srcOff) * 2L;
         }
     }
 
@@ -121,11 +138,8 @@ public class JieHex {
 
         @Override
         public int getOutputSize(int inputSize, boolean end) throws DecodingException {
-            if (inputSize < 0) {
-                throw new DecodingException("Hex decoding size can not be negative.");
-            }
             if (inputSize % 2 != 0) {
-                throw new DecodingException("Hex decoding size must be even.");
+                throw new DecodingException("Hex decoding size must be even: " + inputSize + ".");
             }
             return inputSize / 2;
         }
@@ -140,7 +154,7 @@ public class JieHex {
                 int bits = ((bits1 << 4) | bits2);
                 dst[j++] = (byte) bits;
             }
-            return length / 2;
+            return length / 2L;
         }
 
         private int toDigit(char c, long startPos, int index) {

@@ -60,42 +60,45 @@ public interface ByteDecoder extends ByteCoder {
     int decode(ByteBuffer data, ByteBuffer dest) throws DecodingException;
 
     /**
-     * Decodes given data with default charset of current decoder (<b>not current environment</b>), typically is
-     * {@link JieChars#latinCharset()}.
-     *
-     * @param data given data
-     * @return result of decoding with default charset of current decoder
-     * @throws DecodingException for decoding error
+     * Expansion of {@link ByteDecoder}, provides methods to decode string with {@link JieChars#latinCharset()}.
      */
-    default byte[] decode(CharSequence data) throws DecodingException {
-        byte[] bytes = JieString.getBytes(data, JieChars.latinCharset());
-        return decode(bytes);
-    }
+    interface ToLatin extends ByteDecoder {
 
-    /**
-     * Decodes given data with default charset of current decoder (<b>not current environment</b>), typically is
-     * {@link JieChars#latinCharset()}.
-     *
-     * @param data given data
-     * @return result of decoding with default charset of current decoder
-     * @throws DecodingException for decoding error
-     */
-    default byte[] decode(char[] data) throws DecodingException {
-        byte[] bytes = JieString.getBytes(data, JieChars.latinCharset());
-        return decode(bytes);
-    }
+        /**
+         * Decodes given data with {@link JieChars#latinCharset()}.
+         *
+         * @param data given data
+         * @return result of decoding with {@link JieChars#latinCharset()}
+         * @throws DecodingException for decoding error
+         */
+        default byte[] decode(CharSequence data) throws DecodingException {
+            byte[] bytes = JieString.getBytes(data, JieChars.latinCharset());
+            return decode(bytes);
+        }
 
-    /**
-     * Decodes given data with default charset of current decoder (<b>not current environment</b>), typically is
-     * {@link JieChars#latinCharset()}.
-     *
-     * @param data given data
-     * @return result of decoding with default charset of current decoder
-     * @throws DecodingException for decoding error
-     */
-    default ByteBuffer decode(CharBuffer data) throws DecodingException {
-        char[] chars = JieChars.getChars(data);
-        byte[] bytes = JieString.getBytes(chars);
-        return decode(ByteBuffer.wrap(bytes));
+        /**
+         * Decodes given data with {@link JieChars#latinCharset()}.
+         *
+         * @param data given data
+         * @return result of decoding with {@link JieChars#latinCharset()}
+         * @throws DecodingException for decoding error
+         */
+        default byte[] decode(char[] data) throws DecodingException {
+            byte[] bytes = JieString.getBytes(data, JieChars.latinCharset());
+            return decode(bytes);
+        }
+
+        /**
+         * Decodes given data with {@link JieChars#latinCharset()}.
+         *
+         * @param data given data
+         * @return result of decoding with {@link JieChars#latinCharset()}
+         * @throws DecodingException for decoding error
+         */
+        default ByteBuffer decode(CharBuffer data) throws DecodingException {
+            char[] chars = JieChars.getChars(data);
+            byte[] bytes = JieString.getBytes(chars);
+            return decode(ByteBuffer.wrap(bytes));
+        }
     }
 }

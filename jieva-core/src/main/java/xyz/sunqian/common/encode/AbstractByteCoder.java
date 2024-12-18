@@ -26,20 +26,30 @@ import java.util.Arrays;
  * And these methods can be overridden as needed:
  * <ul>
  *     <li>
+ *         {@link #checkInputSize(int, boolean)};
+ *     </li>
+ *     <li>
  *         {@link #checkRemainingSpace(int, int)};
  *     </li>
  * </ul>
- * Note implementation of {@link ByteCoder#streamEncoder()} is not thread-safe.
+ * Implementation of {@link ByteCoder#streamEncoder()} is not thread-safe, and even if the input data is not fully
+ * consumed after encoding/decoding, it will also be ignored and discarded. If you do not intend to override this
+ * method, ensure that the {@link #doCode(long, byte[], int, int, byte[], int, boolean)} consumes the entire source each
+ * time.
  *
  * @author sunqian
  */
 public abstract class AbstractByteCoder implements ByteCoder {
 
     private static final String REMAINING_NOT_ENOUGH = "Remaining space is not enough.";
+    private static final String INPUT_SIZE_ILLEGAL = "Input size is illegal: ";
 
     /**
      * Returns output size in bytes for the specified input size. If the exact output size cannot be determined, returns
      * an estimated maximum value that can accommodate the output. Or {@code -1} if it cannot be estimated.
+     * <p>
+     * By default, the {@code inputSize} is checked by {@link #checkInputSize(int, boolean)} first before be passed to
+     * this method, so it usually does not need to be validated again.
      *
      * @param inputSize specified input size
      * @param end       whether the current data to be encoded is the last segment of the entire data
@@ -74,7 +84,21 @@ public abstract class AbstractByteCoder implements ByteCoder {
     ) throws EncodingException, DecodingException;
 
     /**
-     * Checks remaining space, typically, the implementation like following:
+     * Checks input size, default implementation like:
+     * <pre>{@code
+     *     if (inputSize < 0) {
+     *         throw new EncodingException("Input size is illegal: -1.");
+     *     }
+     * }</pre>
+     *
+     * @param inputSize size of input data
+     * @throws EncodingException if size of input data is illegal for encoding
+     * @throws DecodingException if size of input data is illegal for decoding
+     */
+    protected abstract void checkInputSize(int inputSize, boolean end) throws EncodingException, DecodingException;
+
+    /**
+     * Checks remaining space, default implementation like:
      * <pre>{@code
      *     if (srcRemaining > dstRemaining) {
      *         throw new EncodingException("Remaining space is not enough.");
@@ -92,7 +116,7 @@ public abstract class AbstractByteCoder implements ByteCoder {
     ) throws EncodingException, DecodingException;
 
     private byte[] doCode(long startPos, byte[] source, boolean end) throws EncodingException {
-        int outputSize = getOutputSize(source.length, end);
+        int outputSize = getSafeOutputSize(source.length, end);
         byte[] dst = new byte[outputSize];
         int len = (int) doCode(startPos, source, 0, source.length, dst, 0, end);
         if (len == dst.length) {
@@ -102,7 +126,7 @@ public abstract class AbstractByteCoder implements ByteCoder {
     }
 
     private ByteBuffer doCode(long startPos, ByteBuffer source, boolean end) throws EncodingException {
-        int outputSize = getOutputSize(source.remaining(), end);
+        int outputSize = getSafeOutputSize(source.remaining(), end);
         byte[] dst = new byte[outputSize];
         int len;
         if (source.hasArray()) {
@@ -128,13 +152,13 @@ public abstract class AbstractByteCoder implements ByteCoder {
     }
 
     private int doCode(long startPos, byte[] source, byte[] dest, boolean end) throws EncodingException {
-        int outputSize = getOutputSize(source.length, end);
+        int outputSize = getSafeOutputSize(source.length, end);
         checkRemainingSpace(outputSize, dest.length);
         return (int) doCode(startPos, source, 0, source.length, dest, 0, end);
     }
 
     private int doCode(long startPos, ByteBuffer source, ByteBuffer dest, boolean end) throws EncodingException {
-        int outputSize = getOutputSize(source.remaining(), end);
+        int outputSize = getSafeOutputSize(source.remaining(), end);
         checkRemainingSpace(outputSize, dest.remaining());
         if (source.hasArray() && dest.hasArray()) {
             doCode(
@@ -155,9 +179,14 @@ public abstract class AbstractByteCoder implements ByteCoder {
         return outputSize;
     }
 
+    private int getSafeOutputSize(int inputSize, boolean end) {
+        checkInputSize(inputSize, end);
+        return getOutputSize(inputSize, end);
+    }
+
     @Override
     public int getOutputSize(int inputSize) throws CodingException {
-        return getOutputSize(inputSize, true);
+        return getSafeOutputSize(inputSize, true);
     }
 
     @Override
@@ -178,9 +207,10 @@ public abstract class AbstractByteCoder implements ByteCoder {
     }
 
     /**
-     * Abstract skeletal implementation of {@link ByteEncoder}, provided by {@link AbstractByteCoder}.
+     * Abstract skeletal implementation of {@link ByteEncoder}, see {@link AbstractByteCoder}.
      *
      * @author sunqian
+     * @see AbstractByteCoder
      */
     public abstract static class En extends AbstractByteCoder implements ByteEncoder {
 
@@ -204,6 +234,13 @@ public abstract class AbstractByteCoder implements ByteCoder {
             return super.doCode(0, source, dest, true);
         }
 
+        @Override
+        protected void checkInputSize(int inputSize, boolean end) throws EncodingException, DecodingException {
+            if (inputSize < 0) {
+                throw new EncodingException(INPUT_SIZE_ILLEGAL + inputSize + ".");
+            }
+        }
+
         protected void checkRemainingSpace(int srcRemaining, int dstRemaining) {
             if (srcRemaining > dstRemaining) {
                 throw new EncodingException(REMAINING_NOT_ENOUGH);
@@ -211,6 +248,12 @@ public abstract class AbstractByteCoder implements ByteCoder {
         }
     }
 
+    /**
+     * Abstract skeletal implementation of {@link ByteDecoder}, see {@link AbstractByteCoder}.
+     *
+     * @author sunqian
+     * @see AbstractByteCoder
+     */
     public abstract static class De extends AbstractByteCoder implements ByteDecoder {
 
         @Override
@@ -231,6 +274,13 @@ public abstract class AbstractByteCoder implements ByteCoder {
         @Override
         public int decode(ByteBuffer data, ByteBuffer dest) throws DecodingException {
             return super.doCode(0, data, dest, true);
+        }
+
+        @Override
+        protected void checkInputSize(int inputSize, boolean end) throws EncodingException, DecodingException {
+            if (inputSize < 0) {
+                throw new DecodingException(INPUT_SIZE_ILLEGAL + inputSize + ".");
+            }
         }
 
         protected void checkRemainingSpace(int srcRemaining, int dstRemaining) {
