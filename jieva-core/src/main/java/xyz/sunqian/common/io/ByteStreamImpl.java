@@ -96,7 +96,7 @@ final class ByteStreamImpl implements ByteStream {
     }
 
     @Override
-    public InputStream asInputStream() {
+    public InputStream toInputStream() {
         return new StreamIn(toBufferIn(source));
     }
 

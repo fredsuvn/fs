@@ -98,7 +98,7 @@ final class CharStreamImpl implements CharStream {
     }
 
     @Override
-    public Reader asReader() {
+    public Reader toReader() {
         return new ReaderIn(toBufferIn(source));
     }
 

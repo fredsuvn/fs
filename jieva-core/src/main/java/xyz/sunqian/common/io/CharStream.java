@@ -347,7 +347,7 @@ public interface CharStream {
      * @return a reader which encompasses the entire data processing
      * @throws IORuntimeException thrown for any IO problems
      */
-    Reader asReader() throws IORuntimeException;
+    Reader toReader() throws IORuntimeException;
 
     /**
      * Encoder for encoding data in data processing.

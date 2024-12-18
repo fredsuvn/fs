@@ -587,16 +587,16 @@ public class ByteStreamTest {
     }
 
     @Test
-    public void testAsInputStream() throws Exception {
-        testAsInputStream(100, 5);
-        testAsInputStream(10086, 11);
-        testAsInputStream(10086, 333);
-        testAsInputStream(10086, 22);
-        testAsInputStream(333, 10086);
-        testAsInputStream(20, 10086);
-        testAsInputStream(20, 40);
+    public void testToInputStream() throws Exception {
+        testToInputStream(100, 5);
+        testToInputStream(10086, 11);
+        testToInputStream(10086, 333);
+        testToInputStream(10086, 22);
+        testToInputStream(333, 10086);
+        testToInputStream(20, 10086);
+        testToInputStream(20, 40);
         {
-            InputStream in = ByteStream.from(new byte[0]).asInputStream();
+            InputStream in = ByteStream.from(new byte[0]).toInputStream();
             assertEquals(in.read(), -1);
             assertEquals(in.read(), -1);
             assertEquals(in.read(new byte[1], 0, 0), 0);
@@ -606,26 +606,26 @@ public class ByteStreamTest {
             in.close();
             in.close();
             expectThrows(IOException.class, () -> in.read());
-            InputStream nio = ByteStream.from(new NioIn()).endOnZeroRead(true).asInputStream();
+            InputStream nio = ByteStream.from(new NioIn()).endOnZeroRead(true).toInputStream();
             assertEquals(nio.read(), -1);
             InputStream empty = ByteStream.from(new byte[]{9}).encoder(((data, end) -> {
                 if (data.hasRemaining()) {
                     return data;
                 }
                 return ByteBuffer.wrap(new byte[]{1, 2, 3});
-            })).asInputStream();
+            })).toInputStream();
             assertEquals(JieIO.read(empty), new byte[]{9, 1, 2, 3});
             assertEquals(empty.read(), -1);
-            InputStream err1 = ByteStream.from(new ThrowIn(0)).asInputStream();
+            InputStream err1 = ByteStream.from(new ThrowIn(0)).toInputStream();
             expectThrows(IOException.class, () -> err1.close());
-            InputStream err2 = ByteStream.from(new ThrowIn(2)).asInputStream();
+            InputStream err2 = ByteStream.from(new ThrowIn(2)).toInputStream();
             expectThrows(IOException.class, () -> err2.close());
-            InputStream err3 = ByteStream.from(new ThrowIn(3)).asInputStream();
+            InputStream err3 = ByteStream.from(new ThrowIn(3)).toInputStream();
             expectThrows(IOException.class, () -> err3.read());
         }
     }
 
-    private void testAsInputStream(int totalSize, int blockSize) throws Exception {
+    private void testToInputStream(int totalSize, int blockSize) throws Exception {
         byte[] src = JieRandom.fill(new byte[totalSize]);
         int times = totalSize / blockSize;
         BytesBuilder bb = new BytesBuilder();
@@ -649,7 +649,7 @@ public class ByteStreamTest {
                 b.append(data);
                 b.append((byte) '\r');
                 return b.toByteBuffer();
-            })).asInputStream();
+            })).toInputStream();
             assertEquals(JieIO.read(in), encoded);
             assertEquals(in.read(), -1);
         }
@@ -662,7 +662,7 @@ public class ByteStreamTest {
                 b.append(data);
                 b.append((byte) '\r');
                 return b.toByteBuffer();
-            })).asInputStream();
+            })).toInputStream();
             BytesBuilder builder = new BytesBuilder();
             while (true) {
                 int b = in.read();
@@ -682,12 +682,12 @@ public class ByteStreamTest {
                 b.append(data);
                 b.append((byte) '\r');
                 return b.toByteBuffer();
-            })).asInputStream();
+            })).toInputStream();
             assertEquals(in.skip(666), Math.min(666, encoded.length));
             assertEquals(in.skip(1666), Math.min(1666, Math.max(encoded.length - 666, 0)));
         }
         {
-            InputStream in = ByteStream.from(src).blockSize(blockSize).asInputStream();
+            InputStream in = ByteStream.from(src).blockSize(blockSize).toInputStream();
             assertEquals(JieIO.read(in), src);
             assertEquals(in.read(), -1);
         }

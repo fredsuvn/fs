@@ -338,7 +338,7 @@ public interface ByteStream {
      * @return an input stream which encompasses the entire data processing
      * @throws IORuntimeException thrown for any IO problems
      */
-    InputStream asInputStream() throws IORuntimeException;
+    InputStream toInputStream() throws IORuntimeException;
 
     /**
      * Encoder for encoding data in data processing.
