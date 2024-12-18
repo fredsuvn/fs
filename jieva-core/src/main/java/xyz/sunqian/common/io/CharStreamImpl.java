@@ -9,7 +9,9 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.CharBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 final class CharStreamImpl implements CharStream {
 
@@ -18,7 +20,7 @@ final class CharStreamImpl implements CharStream {
     private long readLimit = -1;
     private int blockSize = JieIO.BUFFER_SIZE;
     private boolean endOnZeroRead = false;
-    private Encoder encoder;
+    private List<Encoder> encoders;
 
     CharStreamImpl(Reader source) {
         this.source = source;
@@ -59,8 +61,25 @@ final class CharStreamImpl implements CharStream {
 
     @Override
     public CharStream encoder(Encoder encoder) {
-        this.encoder = encoder;
+        if (encoders == null) {
+            encoders = new ArrayList<>();
+        }
+        encoders.add(encoder);
         return this;
+    }
+
+    @Nullable
+    private Encoder buildEncoder() {
+        if (encoders == null) {
+            return null;
+        }
+        return (data, end) -> {
+            CharBuffer chars = data;
+            for (CharStream.Encoder encoder : encoders) {
+                chars = encoder.encode(chars, end);
+            }
+            return chars;
+        };
     }
 
     @Override
@@ -110,7 +129,7 @@ final class CharStreamImpl implements CharStream {
             return 0;
         }
         try {
-            if (encoder == null) {
+            if (encoders == null) {
                 if (source instanceof char[]) {
                     if (dest instanceof char[]) {
                         return charsToChars((char[]) source, (char[]) dest);
@@ -269,9 +288,10 @@ final class CharStreamImpl implements CharStream {
                 return -1;
             }
             buf = buf == null ? JieChars.emptyBuffer() : buf;
+            Encoder encoder = buildEncoder();
             if (!buf.hasRemaining()) {
                 if (encoder != null) {
-                    CharBuffer encoded = encode(buf, true);
+                    CharBuffer encoded = encode(encoder, buf, true);
                     out.write(encoded);
                 }
                 break;
@@ -281,11 +301,11 @@ final class CharStreamImpl implements CharStream {
             if (encoder != null) {
                 CharBuffer encoded;
                 if (readSize < blockSize) {
-                    encoded = encode(buf, true);
+                    encoded = encode(encoder, buf, true);
                     out.write(encoded);
                     break;
                 } else {
-                    encoded = encode(buf, false);
+                    encoded = encode(encoder, buf, false);
                     out.write(encoded);
                 }
             } else {
@@ -298,7 +318,7 @@ final class CharStreamImpl implements CharStream {
         return count;
     }
 
-    private CharBuffer encode(CharBuffer buf, boolean end) {
+    private CharBuffer encode(Encoder encoder, CharBuffer buf, boolean end) {
         try {
             return encoder.encode(buf, end);
         } catch (Exception e) {
@@ -534,6 +554,7 @@ final class CharStreamImpl implements CharStream {
             }
             try {
                 CharBuffer buf = in.read();
+                Encoder encoder = buildEncoder();
                 if (buf == null || !buf.hasRemaining()) {
                     if (state == 0) {
                         state = 2;

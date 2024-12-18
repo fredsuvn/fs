@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 final class ByteStreamImpl implements ByteStream {
 
@@ -17,7 +19,7 @@ final class ByteStreamImpl implements ByteStream {
     private long readLimit = -1;
     private int blockSize = JieIO.BUFFER_SIZE;
     private boolean endOnZeroRead = false;
-    private Encoder encoder;
+    private List<Encoder> encoders;
 
     ByteStreamImpl(InputStream source) {
         this.source = source;
@@ -54,8 +56,25 @@ final class ByteStreamImpl implements ByteStream {
 
     @Override
     public ByteStream encoder(Encoder encoder) {
-        this.encoder = encoder;
+        if (encoders == null) {
+            encoders = new ArrayList<>();
+        }
+        encoders.add(encoder);
         return this;
+    }
+
+    @Nullable
+    private Encoder buildEncoder() {
+        if (encoders == null) {
+            return null;
+        }
+        return (data, end) -> {
+            ByteBuffer bytes = data;
+            for (Encoder encoder : encoders) {
+                bytes = encoder.encode(bytes, end);
+            }
+            return bytes;
+        };
     }
 
     @Override
@@ -108,7 +127,7 @@ final class ByteStreamImpl implements ByteStream {
             return 0;
         }
         try {
-            if (encoder == null) {
+            if (encoders == null) {
                 if (source instanceof byte[]) {
                     if (dest instanceof byte[]) {
                         return bytesToBytes((byte[]) source, (byte[]) dest);
@@ -227,9 +246,10 @@ final class ByteStreamImpl implements ByteStream {
                 return -1;
             }
             buf = buf == null ? JieBytes.emptyBuffer() : buf;
+            Encoder encoder = buildEncoder();
             if (!buf.hasRemaining()) {
                 if (encoder != null) {
-                    ByteBuffer encoded = encode(buf, true);
+                    ByteBuffer encoded = encode(encoder, buf, true);
                     out.write(encoded);
                 }
                 break;
@@ -239,11 +259,11 @@ final class ByteStreamImpl implements ByteStream {
             if (encoder != null) {
                 ByteBuffer encoded;
                 if (readSize < blockSize) {
-                    encoded = encode(buf, true);
+                    encoded = encode(encoder, buf, true);
                     out.write(encoded);
                     break;
                 } else {
-                    encoded = encode(buf, false);
+                    encoded = encode(encoder, buf, false);
                     out.write(encoded);
                 }
             } else {
@@ -256,7 +276,7 @@ final class ByteStreamImpl implements ByteStream {
         return count;
     }
 
-    private ByteBuffer encode(ByteBuffer buf, boolean end) {
+    private ByteBuffer encode(Encoder encoder, ByteBuffer buf, boolean end) {
         try {
             return encoder.encode(buf, end);
         } catch (Exception e) {
@@ -442,6 +462,7 @@ final class ByteStreamImpl implements ByteStream {
             }
             try {
                 ByteBuffer buf = in.read();
+                Encoder encoder = buildEncoder();
                 if (buf == null || !buf.hasRemaining()) {
                     if (state == 0) {
                         state = 2;

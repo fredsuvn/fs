@@ -3,7 +3,10 @@ package test.io;
 import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 import test.TU;
-import xyz.sunqian.common.base.*;
+import xyz.sunqian.common.base.JieBytes;
+import xyz.sunqian.common.base.JieChars;
+import xyz.sunqian.common.base.JieMath;
+import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.io.*;
 import xyz.sunqian.test.JieTest;
 import xyz.sunqian.test.JieTestException;
@@ -362,9 +365,7 @@ public class ByteStreamTest {
                 System.arraycopy(bytes, 0, ret, bytes.length, bytes.length);
                 return ByteBuffer.wrap(ret);
             };
-            long count = ByteStream.from(src).blockSize(blockSize).encoders(Jie.list(
-                encoder, encoder
-            )).writeTo(bb);
+            long count = ByteStream.from(src).blockSize(blockSize).encoder(encoder).encoder(encoder).writeTo(bb);
             assertEquals(count, totalSize);
             assertEquals(bb.toByteArray(), expectDst);
         }
@@ -394,8 +395,8 @@ public class ByteStreamTest {
             proc = bb.toByteArray();
             bb.reset();
             boolean[] buffer = {true};
-            long count = ByteStream.from(src).blockSize(blockSize).encoders(Jie.list(
-                ByteStream.roundEncoder((data, end) -> {
+            long count = ByteStream.from(src).blockSize(blockSize)
+                .encoder(ByteStream.roundEncoder((data, end) -> {
                     BytesBuilder ret = new BytesBuilder();
                     int j = 0;
                     while (data.hasRemaining()) {
@@ -408,8 +409,8 @@ public class ByteStreamTest {
                         j++;
                     }
                     return ret.toByteBuffer();
-                }, 3),
-                ByteStream.bufferedEncoder(((data, end) -> {
+                }, 3))
+                .encoder(ByteStream.bufferedEncoder(((data, end) -> {
                     if (end) {
                         return data;
                     }
@@ -421,8 +422,8 @@ public class ByteStreamTest {
                     }
                     buffer[0] = !buffer[0];
                     return ret;
-                })),
-                ByteStream.fixedSizeEncoder(((data, end) -> {
+                })))
+                .encoder((data, end) -> {
                     if (data.remaining() == 10) {
                         byte[] ret = new byte[11];
                         data.get(ret, 0, 10);
@@ -431,8 +432,8 @@ public class ByteStreamTest {
                     } else {
                         return data;
                     }
-                }), 10)
-            )).writeTo(bb);
+                }, 10)
+                .writeTo(bb);
             assertEquals(count, totalSize);
             assertEquals(bb.toByteArray(), proc);
         }

@@ -3,7 +3,10 @@ package test.io;
 import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 import test.TU;
-import xyz.sunqian.common.base.*;
+import xyz.sunqian.common.base.JieChars;
+import xyz.sunqian.common.base.JieMath;
+import xyz.sunqian.common.base.JieRandom;
+import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.io.CharStream;
 import xyz.sunqian.common.io.IOEncodingException;
 import xyz.sunqian.common.io.IORuntimeException;
@@ -510,9 +513,7 @@ public class CharStreamTest {
                 System.arraycopy(chars, 0, ret, chars.length, chars.length);
                 return CharBuffer.wrap(ret);
             };
-            long count = CharStream.from(src).blockSize(blockSize).encoders(Jie.list(
-                encoder, encoder
-            )).writeTo(bb);
+            long count = CharStream.from(src).blockSize(blockSize).encoder(encoder).encoder(encoder).writeTo(bb);
             assertEquals(count, totalSize);
             assertEquals(bb.toString().toCharArray(), expectDst);
         }
@@ -542,8 +543,8 @@ public class CharStreamTest {
             proc = bb.toString().toCharArray();
             bb.setLength(0);
             boolean[] buffer = {true};
-            long count = CharStream.from(src).blockSize(blockSize).encoders(Jie.list(
-                CharStream.roundEncoder((data, end) -> {
+            long count = CharStream.from(src).blockSize(blockSize)
+                .encoder(CharStream.roundEncoder((data, end) -> {
                     StringBuilder ret = new StringBuilder();
                     int j = 0;
                     while (data.hasRemaining()) {
@@ -556,8 +557,8 @@ public class CharStreamTest {
                         j++;
                     }
                     return CharBuffer.wrap(ret.toString());
-                }, 3),
-                CharStream.bufferedEncoder(((data, end) -> {
+                }, 3))
+                .encoder(CharStream.bufferedEncoder(((data, end) -> {
                     if (end) {
                         return data;
                     }
@@ -569,8 +570,8 @@ public class CharStreamTest {
                     }
                     buffer[0] = !buffer[0];
                     return ret;
-                })),
-                CharStream.fixedSizeEncoder(((data, end) -> {
+                })))
+                .encoder((data, end) -> {
                     if (data.remaining() == 10) {
                         char[] ret = new char[11];
                         data.get(ret, 0, 10);
@@ -579,8 +580,8 @@ public class CharStreamTest {
                     } else {
                         return data;
                     }
-                }), 10)
-            )).writeTo(bb);
+                }, 10)
+                .writeTo(bb);
             assertEquals(count, totalSize);
             assertEquals(bb.toString().toCharArray(), proc);
         }

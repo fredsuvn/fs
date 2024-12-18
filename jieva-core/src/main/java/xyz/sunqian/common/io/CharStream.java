@@ -91,7 +91,7 @@ public interface CharStream {
 
     /**
      * Returns a new {@link Encoder} to round input data for given encoder, it is typically used for the encoder which
-     * is not applicable to the setting of {@link #blockSize(int)}.
+     * requires consuming data in multiples of fixed-size block.
      * <p>
      * This encoder rounds input data (possibly following buffered data from the previous invocation) to the largest
      * multiple of the expected block size and passes the rounded data to the given encoder. Any remainder data will be
@@ -157,10 +157,8 @@ public interface CharStream {
     /**
      * Sets the number of chars for each read operation from data source.
      * <p>
-     * This setting is typically used when the data source is an input stream, or intermediate operation is set, default
-     * is {@link JieIO#BUFFER_SIZE}. When the terminal method starts, it ensures that the size of data passed to the
-     * intermediate operation is the value set by this method, until the last read operation where the remaining source
-     * data might be smaller than this value.
+     * This setting is typically used when the data source is an input stream, or intermediate operations are set,
+     * default is {@link JieIO#BUFFER_SIZE}.
      * <p>
      * This is an optional setting method.
      *
@@ -183,59 +181,59 @@ public interface CharStream {
     CharStream endOnZeroRead(boolean endOnZeroRead);
 
     /**
-     * Sets encoder for encoding data from read operation, the encoding is an intermediate operation.
+     * Adds an encoder for encoding which is an intermediate operation. When the data processing starts, all encoders
+     * will be invoked after each read operation as following:
+     * <pre>{@code
+     *     read operation -> encoder-1 -> encoder-2 ... -> encoder-n -> terminal operation
+     * }</pre>
+     * All encoders can be considered as a combined encoder, of which behavior is equivalent to:
+     * <pre>{@code
+     *     CharBuffer chars = data;
+     *     for (Encoder encoder : encoders) {
+     *         chars = encoder.encode(chars, end);
+     *     }
+     *     return chars;
+     * }</pre>
+     * Size of passed data is uncertain, if it is the first encoder, the size may match the {@link #blockSize(int)}.
+     * (except for the last reading, which may be smaller than the block size). To a certain size, try
+     * {@link #encoder(Encoder, int)}.
      * <p>
-     * When the data processing starts, the encoder will be invoked after each read operation, size of passed data is
-     * specified by {@link #blockSize(int)} (except for the last reading, which may be smaller than the block size).
      * Passed {@link CharBuffer} object, which is the first argument of {@link Encoder#encode(CharBuffer, boolean)}, can
-     * be read-only (for example, when the source is a reader), or writable (for example, when the source is a char
-     * array or char buffer), and discarded after each invocation. The returned {@link CharBuffer} will also be treated
-     * as read-only;
+     * be read-only (for example, when the source is an input stream), or writable (for example, when the source is a
+     * char array or char buffer), and discarded after each invocation. The returned {@link CharBuffer} will also be
+     * treated as read-only;
      * <p>
-     * This is an optional setting method. This interface provides helper encoder implementations such as:
-     * {@link #roundEncoder(Encoder, int)}, {@link #bufferedEncoder(Encoder)}. To set more than one encoder, try
-     * {@link #encoders(Iterable)}.
+     * This is an optional setting method. This interface also provides helper encoder implementations:
+     * <ul>
+     *     <li>
+     *         {@link #roundEncoder(Encoder, int)};
+     *     </li>
+     *     <li>
+     *         {@link #bufferedEncoder(Encoder)};
+     *     </li>
+     *     <li>
+     *         {@link #fixedSizeEncoder(Encoder, int)};
+     *     </li>
+     * </ul>
      *
      * @param encoder encoder for encoding data from read operation
      * @return this
-     * @see #encoders(Iterable)
-     * @see #roundEncoder(Encoder, int)
-     * @see #bufferedEncoder(Encoder)
      */
     CharStream encoder(Encoder encoder);
 
     /**
-     * Sets a list of encoders for encoding data from read operation, the encoding is an intermediate operation.
-     * <p>
-     * This method combines given list of encoders into a single encoder. The behavior of combined encoder is equivalent
-     * to the following code:
+     * Adds an encoder for encoding which is an intermediate operation. This method is equivalent to adding a fixed-size
+     * encoder by {@link #encoder(Encoder)} and {@link #fixedSizeEncoder(Encoder, int)}:
      * <pre>{@code
-     *     return encoder((data, end) -> {
-     *         CharBuffer chars = data;
-     *         for (Encoder encoder : encoders) {
-     *             chars = encoder.encode(chars, end);
-     *         }
-     *         return chars;
-     *     });
+     *     return encoder(fixedSizeEncoder(encoder, size));
      * }</pre>
-     * That is, pass the {@link CharBuffer} to the first encoder, and once it has finished executing, pass its return
-     * value to the second encoder, and so on. Last encoder's return value will be the final result of the combined
-     * encoder.
-     * <p>
-     * Note the given list of encoders is used directly, any modification to the list will affect the encoding.
      *
-     * @param encoders a list of encoders for encoding data from read operation
+     * @param encoder encoder for encoding data from read operation
+     * @param size    specified fixed-size
      * @return this
-     * @see #encoder(Encoder)
      */
-    default CharStream encoders(Iterable<Encoder> encoders) {
-        return encoder((data, end) -> {
-            CharBuffer chars = data;
-            for (Encoder encoder : encoders) {
-                chars = encoder.encode(chars, end);
-            }
-            return chars;
-        });
+    default CharStream encoder(Encoder encoder, int size) {
+        return encoder(fixedSizeEncoder(encoder, size));
     }
 
     /**
