@@ -10,7 +10,8 @@ import java.nio.charset.Charset;
  * <pre>{@code
  *     CharStream.from(input)
  *         .blockSize(1024)
- *         .encoder(encoder)
+ *         .encoder(en1)
+ *         .encoder(en2, 64)
  *         .writeTo(output);
  * }</pre>
  * There are types of methods in this interface:
