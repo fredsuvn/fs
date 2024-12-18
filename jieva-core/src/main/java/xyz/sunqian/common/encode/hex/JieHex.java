@@ -1,5 +1,6 @@
-package xyz.sunqian.common.encode;
+package xyz.sunqian.common.encode.hex;
 
+import xyz.sunqian.common.encode.*;
 import xyz.sunqian.common.io.ByteStream;
 
 /**
@@ -88,7 +89,7 @@ public class JieHex {
         ByteStream.Encoder streamEncoder();
     }
 
-    private static final class HexEncoder extends AbsCoder.En implements Encoder {
+    private static final class HexEncoder extends AbstractByteCoder.En implements Encoder {
 
         private static final HexEncoder SINGLETON = new HexEncoder();
 
@@ -104,7 +105,7 @@ public class JieHex {
             return inputSize * 2;
         }
 
-        protected int doCode(long startPos, byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, boolean end) {
+        protected long doCode(long startPos, byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, boolean end) {
             for (int i = srcOff, j = dstOff; i < srcEnd; ) {
                 int bits = src[i++];
                 dst[j++] = (byte) DICT[((bits >> 4) & 0x0f)];
@@ -114,7 +115,7 @@ public class JieHex {
         }
     }
 
-    private static final class HexDecoder extends AbsCoder.De implements Decoder {
+    private static final class HexDecoder extends AbstractByteCoder.De implements Decoder {
 
         private static final HexDecoder SINGLETON = new HexDecoder();
 
@@ -129,7 +130,7 @@ public class JieHex {
             return inputSize / 2;
         }
 
-        protected int doCode(long startPos, byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, boolean end) {
+        protected long doCode(long startPos, byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, boolean end) {
             int length = srcEnd - srcOff;
             for (int i = srcOff, j = dstOff; i < srcEnd; ) {
                 int bits1 = toDigit((char) src[i], startPos, i);

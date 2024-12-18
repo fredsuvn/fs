@@ -17,9 +17,10 @@ public interface ByteCoder {
      *
      * @param inputSize specified input size
      * @return output size in bytes for the specified input size
-     * @throws CodingException if the input size is illegal
+     * @throws EncodingException for encoding error
+     * @throws DecodingException for encoding error
      */
-    int getOutputSize(int inputSize) throws CodingException;
+    int getOutputSize(int inputSize) throws EncodingException, DecodingException;
 
     /**
      * Returns the block size in bytes for current coding logic. In a coding process, data is sometimes processed in
@@ -31,8 +32,8 @@ public interface ByteCoder {
     int getBlockSize();
 
     /**
-     * Encapsulates current coding logic into a {@link ByteStream.Encoder} and returns. Note {@link ByteStream.Encoder}
-     * may require appropriate {@link ByteStream#blockSize(int)}.
+     * Returns a new {@link ByteStream.Encoder} which encapsulates current coding logic. Note {@link ByteStream.Encoder}
+     * may require appropriate block size which is set by {@link ByteStream#blockSize(int)}.
      *
      * @return a {@link ByteStream.Encoder} with current coding logic
      * @see ByteStream

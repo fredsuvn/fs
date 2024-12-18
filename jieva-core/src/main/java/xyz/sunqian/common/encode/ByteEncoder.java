@@ -1,5 +1,8 @@
 package xyz.sunqian.common.encode;
 
+import xyz.sunqian.common.base.JieBytes;
+import xyz.sunqian.common.base.JieChars;
+
 import java.nio.ByteBuffer;
 
 /**
@@ -14,7 +17,7 @@ public interface ByteEncoder extends ByteCoder {
      *
      * @param source given source
      * @return result of encoding into a new byte array
-     * @throws EncodingException if any encoding problem occurs
+     * @throws EncodingException for encoding error
      */
     byte[] encode(byte[] source) throws EncodingException;
 
@@ -24,7 +27,7 @@ public interface ByteEncoder extends ByteCoder {
      *
      * @param source given source
      * @return result of encoding into a new byte buffer
-     * @throws EncodingException if any encoding problem occurs
+     * @throws EncodingException for encoding error
      */
     ByteBuffer encode(ByteBuffer source) throws EncodingException;
 
@@ -37,7 +40,7 @@ public interface ByteEncoder extends ByteCoder {
      * @param source given source
      * @param dest   specified dest
      * @return the number of bytes written
-     * @throws EncodingException if any encoding problem occurs
+     * @throws EncodingException for encoding error
      */
     int encode(byte[] source, byte[] dest) throws EncodingException;
 
@@ -51,7 +54,33 @@ public interface ByteEncoder extends ByteCoder {
      * @param source given source
      * @param dest   specified dest
      * @return the number of bytes written
-     * @throws EncodingException if any encoding problem occurs
+     * @throws EncodingException for encoding error
      */
     int encode(ByteBuffer source, ByteBuffer dest) throws EncodingException;
+
+    /**
+     * Encodes given source to string with default charset of current encoder (<b>not current environment</b>),
+     * typically is {@link JieChars#latinCharset()}.
+     *
+     * @param source given source
+     * @return result of encoding to string with default charset of current encoder
+     * @throws EncodingException for encoding error
+     */
+    default String toString(byte[] source) throws EncodingException {
+        return new String(encode(source), JieChars.latinCharset());
+    }
+
+    /**
+     * Encodes given source to string with default charset of current encoder (<b>not current environment</b>),
+     * typically is {@link JieChars#latinCharset()}.
+     *
+     * @param source given source
+     * @return result of encoding to string with default charset of current encoder
+     * @throws EncodingException for encoding error
+     */
+    default String toString(ByteBuffer source) throws EncodingException {
+        ByteBuffer encoded = encode(source);
+        byte[] bytes = JieBytes.getBytes(encoded);
+        return new String(bytes, JieChars.latinCharset());
+    }
 }

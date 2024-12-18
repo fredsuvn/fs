@@ -256,7 +256,7 @@ public class CipherCodec implements CodecConfigurator<CipherCodec> {
             }
             return ByteStream.from(source).blockSize(blockSize).encoder((data, end) ->
                     ByteBuffer.wrap(JieCodec.doCipher(cipher, data)))
-                .asInputStream();
+                .toInputStream();
         } catch (CodecException e) {
             throw e;
         } catch (Exception e) {

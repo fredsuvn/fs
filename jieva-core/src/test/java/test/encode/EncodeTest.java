@@ -7,6 +7,7 @@ import xyz.sunqian.common.base.JieBytes;
 import xyz.sunqian.common.base.JieChars;
 import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.encode.*;
+import xyz.sunqian.common.encode.hex.JieHex;
 import xyz.sunqian.common.io.ByteStream;
 import xyz.sunqian.common.io.IOEncodingException;
 import xyz.sunqian.common.io.JieIO;
