@@ -166,7 +166,7 @@ public interface CharStream {
      * @param blockSize the number of chars for each read operation from data source
      * @return this
      */
-    CharStream blockSize(int blockSize);
+    CharStream readBlockSize(int blockSize);
 
     /**
      * Sets whether to treat a read operation from data source that returns 0 chars as an indication to break the read
@@ -195,7 +195,7 @@ public interface CharStream {
      *     }
      *     return chars;
      * }</pre>
-     * Size of passed data is uncertain, if it is the first encoder, the size may match the {@link #blockSize(int)}.
+     * Size of passed data is uncertain, if it is the first encoder, the size may match the {@link #readBlockSize(int)}.
      * (except for the last reading, which may be smaller than the block size). To a certain size, try
      * {@link #encoder(Encoder, int)}.
      * <p>

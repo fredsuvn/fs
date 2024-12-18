@@ -157,7 +157,7 @@ public interface ByteStream {
      * @param blockSize the number of bytes for each read operation from data source
      * @return this
      */
-    ByteStream blockSize(int blockSize);
+    ByteStream readBlockSize(int blockSize);
 
     /**
      * Sets whether to treat a read operation from data source that returns 0 bytes as an indication to break the read
@@ -186,7 +186,7 @@ public interface ByteStream {
      *     }
      *     return bytes;
      * }</pre>
-     * Size of passed data is uncertain, if it is the first encoder, the size may match the {@link #blockSize(int)}.
+     * Size of passed data is uncertain, if it is the first encoder, the size may match the {@link #readBlockSize(int)}.
      * (except for the last reading, which may be smaller than the block size). To a certain size, try
      * {@link #encoder(Encoder, int)}.
      * <p>

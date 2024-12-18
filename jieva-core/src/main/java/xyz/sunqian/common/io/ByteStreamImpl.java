@@ -40,7 +40,7 @@ final class ByteStreamImpl implements ByteStream {
     }
 
     @Override
-    public ByteStream blockSize(int blockSize) {
+    public ByteStream readBlockSize(int blockSize) {
         if (blockSize <= 0) {
             throw new IORuntimeException("blockSize must > 0!");
         }

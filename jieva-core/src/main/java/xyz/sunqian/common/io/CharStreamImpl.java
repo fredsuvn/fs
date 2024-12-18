@@ -45,7 +45,7 @@ final class CharStreamImpl implements CharStream {
     }
 
     @Override
-    public CharStream blockSize(int blockSize) {
+    public CharStream readBlockSize(int blockSize) {
         if (blockSize <= 0) {
             throw new IORuntimeException("blockSize must > 0!");
         }

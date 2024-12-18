@@ -86,7 +86,7 @@ public class ByteStreamTest {
             Arrays.fill(src, (byte) 1);
             Arrays.fill(target, (byte) 2);
             assertNotEquals(src, target);
-            ByteStream.from(src).blockSize(3).encoder(((data, end) -> {
+            ByteStream.from(src).readBlockSize(3).encoder(((data, end) -> {
                 assertFalse(data.isReadOnly());
                 while (data.hasRemaining()) {
                     data.put((byte) 2);
@@ -96,7 +96,7 @@ public class ByteStreamTest {
             assertEquals(src, target);
             Arrays.fill(src, (byte) 1);
             assertNotEquals(src, target);
-            ByteStream.from(ByteBuffer.wrap(src)).blockSize(3).encoder(((data, end) -> {
+            ByteStream.from(ByteBuffer.wrap(src)).readBlockSize(3).encoder(((data, end) -> {
                 assertFalse(data.isReadOnly());
                 while (data.hasRemaining()) {
                     data.put((byte) 2);
@@ -104,7 +104,7 @@ public class ByteStreamTest {
                 return data;
             })).writeTo();
             assertEquals(src, target);
-            ByteStream.from(new ByteArrayInputStream(src)).blockSize(3).encoder(((data, end) -> {
+            ByteStream.from(new ByteArrayInputStream(src)).readBlockSize(3).encoder(((data, end) -> {
                 assertTrue(data.isReadOnly());
                 return data;
             })).writeTo();
@@ -135,7 +135,7 @@ public class ByteStreamTest {
             ByteArrayInputStream in = new ByteArrayInputStream(bytes);
             in.mark(0);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            long readNum = ByteStream.from(in).blockSize(blockSize).readLimit(readLimit).writeTo(out);
+            long readNum = ByteStream.from(in).readBlockSize(blockSize).readLimit(readLimit).writeTo(out);
             assertEquals(readNum, getLength(bytes.length, readLimit));
             assertEquals(
                 str.substring(0, getLength(bytes.length, readLimit)),
@@ -147,12 +147,12 @@ public class ByteStreamTest {
             // stream -> byte[]
             byte[] outBytes = new byte[bytes.length];
             ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-            long readNum = ByteStream.from(in).blockSize(blockSize).writeTo(outBytes);
+            long readNum = ByteStream.from(in).readBlockSize(blockSize).writeTo(outBytes);
             assertEquals(readNum, bytes.length);
             assertEquals(str, new String(outBytes, 0, bytes.length, JieChars.UTF_8));
             outBytes = new byte[bytes.length * 2];
             in.reset();
-            readNum = ByteStream.from(in).blockSize(blockSize).writeTo(outBytes, offset, bytes.length);
+            readNum = ByteStream.from(in).readBlockSize(blockSize).writeTo(outBytes, offset, bytes.length);
             assertEquals(readNum, bytes.length);
             assertEquals(
                 str,
@@ -163,14 +163,14 @@ public class ByteStreamTest {
             // stream -> buffer
             ByteBuffer outBuffer = ByteBuffer.allocateDirect(bytes.length);
             ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-            long readNum = ByteStream.from(in).blockSize(blockSize).writeTo(outBuffer);
+            long readNum = ByteStream.from(in).readBlockSize(blockSize).writeTo(outBuffer);
             assertEquals(readNum, bytes.length);
             outBuffer.flip();
             byte[] outBytes = JieBytes.getBytes(outBuffer);
             assertEquals(str, new String(outBytes, JieChars.UTF_8));
             outBuffer = TU.bufferDangling(bytes);
             in.reset();
-            readNum = ByteStream.from(in).blockSize(blockSize).writeTo(outBuffer);
+            readNum = ByteStream.from(in).readBlockSize(blockSize).writeTo(outBuffer);
             assertEquals(readNum, bytes.length);
             outBuffer.flip();
             outBytes = JieBytes.getBytes(outBuffer);
@@ -180,7 +180,7 @@ public class ByteStreamTest {
         {
             // byte[] -> stream
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            long readNum = ByteStream.from(bytes).blockSize(blockSize).readLimit(readLimit).writeTo(out);
+            long readNum = ByteStream.from(bytes).readBlockSize(blockSize).readLimit(readLimit).writeTo(out);
             assertEquals(readNum, getLength(bytes.length, readLimit));
             assertEquals(
                 str.substring(0, getLength(bytes.length, readLimit)),
@@ -191,31 +191,31 @@ public class ByteStreamTest {
         {
             // byte[] -> byte[]
             byte[] outBytes = new byte[bytes.length];
-            long readNum = ByteStream.from(bytes).blockSize(blockSize).readLimit(readLimit).writeTo(outBytes);
+            long readNum = ByteStream.from(bytes).readBlockSize(blockSize).readLimit(readLimit).writeTo(outBytes);
             assertEquals(readNum, getLength(totalSize, readLimit));
             assertEquals(
                 Arrays.copyOfRange(bytes, 0, getLength(totalSize, readLimit)),
                 Arrays.copyOfRange(outBytes, 0, getLength(totalSize, readLimit))
             );
             outBytes = new byte[bytes.length];
-            readNum = ByteStream.from(bytes).blockSize(blockSize).writeTo(outBytes);
+            readNum = ByteStream.from(bytes).readBlockSize(blockSize).writeTo(outBytes);
             assertEquals(readNum, bytes.length);
             assertEquals(str, new String(outBytes, JieChars.UTF_8));
             byte[] inBytes = new byte[bytes.length * 2];
             outBytes = new byte[bytes.length];
             System.arraycopy(bytes, 0, inBytes, offset, bytes.length);
-            readNum = ByteStream.from(inBytes, offset, bytes.length).blockSize(blockSize).writeTo(outBytes);
+            readNum = ByteStream.from(inBytes, offset, bytes.length).readBlockSize(blockSize).writeTo(outBytes);
             assertEquals(readNum, bytes.length);
             assertEquals(str, new String(outBytes, JieChars.UTF_8));
             outBytes = new byte[bytes.length];
             readNum = ByteStream.from(bytes, 0, bytes.length)
-                .blockSize(blockSize).writeTo(outBytes, 0, outBytes.length);
+                .readBlockSize(blockSize).writeTo(outBytes, 0, outBytes.length);
             assertEquals(readNum, bytes.length);
             assertEquals(str, new String(outBytes, JieChars.UTF_8));
             outBytes = new byte[bytes.length];
             readNum = ByteStream
                 .from(bytes, 0, bytes.length - 1)
-                .blockSize(blockSize)
+                .readBlockSize(blockSize)
                 .writeTo(outBytes, 0, outBytes.length - 1);
             assertEquals(readNum, bytes.length - 1);
             assertEquals(
@@ -227,12 +227,12 @@ public class ByteStreamTest {
         {
             // byte[] -> buffer
             ByteBuffer outBuffer = ByteBuffer.allocateDirect(bytes.length);
-            long readNum = ByteStream.from(bytes).blockSize(blockSize).readLimit(readLimit).writeTo(outBuffer);
+            long readNum = ByteStream.from(bytes).readBlockSize(blockSize).readLimit(readLimit).writeTo(outBuffer);
             assertEquals(readNum, getLength(totalSize, readLimit));
             outBuffer.flip();
             assertEquals(Arrays.copyOfRange(bytes, 0, getLength(totalSize, readLimit)), JieBytes.getBytes(outBuffer));
             outBuffer = ByteBuffer.allocateDirect(bytes.length);
-            readNum = ByteStream.from(bytes).blockSize(blockSize).writeTo(outBuffer);
+            readNum = ByteStream.from(bytes).readBlockSize(blockSize).writeTo(outBuffer);
             assertEquals(readNum, bytes.length);
             outBuffer.flip();
             byte[] outBytes = JieBytes.getBytes(outBuffer);
@@ -243,7 +243,7 @@ public class ByteStreamTest {
             // buffer -> stream
             ByteBuffer inBuffer = JieBytes.copyBuffer(bytes, true);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            long readNum = ByteStream.from(inBuffer).blockSize(blockSize).readLimit(readLimit).writeTo(out);
+            long readNum = ByteStream.from(inBuffer).readBlockSize(blockSize).readLimit(readLimit).writeTo(out);
             assertEquals(readNum, getLength(bytes.length, readLimit));
             assertEquals(
                 str.substring(0, getLength(bytes.length, readLimit)),
@@ -251,7 +251,7 @@ public class ByteStreamTest {
             );
             ByteBuffer inArray = TU.bufferDangling(bytes);
             out.reset();
-            readNum = ByteStream.from(inArray).blockSize(blockSize).readLimit(readLimit).writeTo(out);
+            readNum = ByteStream.from(inArray).readBlockSize(blockSize).readLimit(readLimit).writeTo(out);
             assertEquals(readNum, getLength(bytes.length, readLimit));
             assertEquals(
                 str.substring(0, getLength(bytes.length, readLimit)),
@@ -263,13 +263,13 @@ public class ByteStreamTest {
             // buffer -> byte[]
             ByteBuffer inBuffer = JieBytes.copyBuffer(bytes, true);
             byte[] outBytes = new byte[bytes.length];
-            long readNum = ByteStream.from(inBuffer).blockSize(blockSize).readLimit(readLimit).writeTo(outBytes);
+            long readNum = ByteStream.from(inBuffer).readBlockSize(blockSize).readLimit(readLimit).writeTo(outBytes);
             assertEquals(readNum, getLength(totalSize, readLimit));
             inBuffer.flip();
             assertEquals(JieBytes.getBytes(inBuffer), Arrays.copyOfRange(outBytes, 0, getLength(totalSize, readLimit)));
             inBuffer = JieBytes.copyBuffer(bytes, true);
             outBytes = new byte[bytes.length];
-            readNum = ByteStream.from(inBuffer).blockSize(blockSize).writeTo(outBytes);
+            readNum = ByteStream.from(inBuffer).readBlockSize(blockSize).writeTo(outBytes);
             assertEquals(readNum, bytes.length);
             assertEquals(str, new String(outBytes, JieChars.UTF_8));
         }
@@ -278,14 +278,14 @@ public class ByteStreamTest {
             // buffer -> buffer
             ByteBuffer inBuffer = TU.bufferDangling(bytes);
             ByteBuffer outBuffer = ByteBuffer.allocateDirect(bytes.length);
-            long readNum = ByteStream.from(inBuffer).blockSize(blockSize).readLimit(readLimit).writeTo(outBuffer);
+            long readNum = ByteStream.from(inBuffer).readBlockSize(blockSize).readLimit(readLimit).writeTo(outBuffer);
             assertEquals(readNum, getLength(totalSize, readLimit));
             inBuffer.flip();
             outBuffer.flip();
             assertEquals(JieBytes.getBytes(inBuffer), JieBytes.getBytes(outBuffer));
             inBuffer = TU.bufferDangling(bytes);
             outBuffer = TU.bufferDangling(bytes);
-            readNum = ByteStream.from(inBuffer).blockSize(blockSize).readLimit(readLimit).writeTo(outBuffer);
+            readNum = ByteStream.from(inBuffer).readBlockSize(blockSize).readLimit(readLimit).writeTo(outBuffer);
             assertEquals(readNum, getLength(totalSize, readLimit));
             inBuffer.flip();
             outBuffer.flip();
@@ -297,7 +297,7 @@ public class ByteStreamTest {
             // any -> null
             long[] counter = {0};
             long readNum = ByteStream.from(new byte[totalSize])
-                .blockSize(blockSize)
+                .readBlockSize(blockSize)
                 .readLimit(readLimit)
                 .encoder(((data, end) -> {
                     counter[0] += data.remaining();
@@ -365,7 +365,7 @@ public class ByteStreamTest {
                 System.arraycopy(bytes, 0, ret, bytes.length, bytes.length);
                 return ByteBuffer.wrap(ret);
             };
-            long count = ByteStream.from(src).blockSize(blockSize).encoder(encoder).encoder(encoder).writeTo(bb);
+            long count = ByteStream.from(src).readBlockSize(blockSize).encoder(encoder).encoder(encoder).writeTo(bb);
             assertEquals(count, totalSize);
             assertEquals(bb.toByteArray(), expectDst);
         }
@@ -395,7 +395,7 @@ public class ByteStreamTest {
             proc = bb.toByteArray();
             bb.reset();
             boolean[] buffer = {true};
-            long count = ByteStream.from(src).blockSize(blockSize)
+            long count = ByteStream.from(src).readBlockSize(blockSize)
                 .encoder(ByteStream.roundEncoder((data, end) -> {
                     BytesBuilder ret = new BytesBuilder();
                     int j = 0;
@@ -457,7 +457,7 @@ public class ByteStreamTest {
             dst[i * 2 + 1] = (byte) expectedBlockSize;
         }
         byte[] dst2 = new byte[src.length * 2];
-        long len = ByteStream.from(src).blockSize(blockSize).encoder(ByteStream.roundEncoder(
+        long len = ByteStream.from(src).readBlockSize(blockSize).encoder(ByteStream.roundEncoder(
             (data, end) -> {
                 if (!end) {
                     assertTrue(data.remaining() >= expectedBlockSize);
@@ -480,7 +480,7 @@ public class ByteStreamTest {
         )).writeTo(dst2);
         assertEquals(dst2, dst);
         assertEquals(len, src.length);
-        len = ByteStream.from(src).blockSize(blockSize).encoder(ByteStream.roundEncoder(
+        len = ByteStream.from(src).readBlockSize(blockSize).encoder(ByteStream.roundEncoder(
             (data, end) -> {
                 if (!end) {
                     assertTrue(data.remaining() >= expectedBlockSize);
@@ -519,7 +519,7 @@ public class ByteStreamTest {
         byte[] src = JieRandom.fill(new byte[size]);
         byte[] dst = new byte[src.length];
         boolean[] buffer = {true};
-        long len = ByteStream.from(src).blockSize(blockSize).encoder(ByteStream.bufferedEncoder(
+        long len = ByteStream.from(src).readBlockSize(blockSize).encoder(ByteStream.bufferedEncoder(
             (data, end) -> {
                 if (end) {
                     return data;
@@ -569,7 +569,7 @@ public class ByteStreamTest {
         }
         int portion = JieMath.leastPortion(totalSize, fixedSize);
         byte[] dst = new byte[src.length + portion * 2];
-        long len = ByteStream.from(src).blockSize(blockSize).encoder(ByteStream.fixedSizeEncoder(
+        long len = ByteStream.from(src).readBlockSize(blockSize).encoder(ByteStream.fixedSizeEncoder(
             (data, end) -> {
                 int remaining = data.remaining();
                 if (remaining == 0) {
@@ -642,7 +642,7 @@ public class ByteStreamTest {
         }
         byte[] encoded = bb.toByteArray();
         {
-            InputStream in = ByteStream.from(src).blockSize(blockSize).encoder(((data, end) -> {
+            InputStream in = ByteStream.from(src).readBlockSize(blockSize).encoder(((data, end) -> {
                 if (!data.hasRemaining()) {
                     return data;
                 }
@@ -655,7 +655,7 @@ public class ByteStreamTest {
             assertEquals(in.read(), -1);
         }
         {
-            InputStream in = ByteStream.from(src).blockSize(blockSize).encoder(((data, end) -> {
+            InputStream in = ByteStream.from(src).readBlockSize(blockSize).encoder(((data, end) -> {
                 if (!data.hasRemaining()) {
                     return data;
                 }
@@ -675,7 +675,7 @@ public class ByteStreamTest {
             assertEquals(builder.toByteArray(), encoded);
         }
         {
-            InputStream in = ByteStream.from(src).blockSize(blockSize).encoder(((data, end) -> {
+            InputStream in = ByteStream.from(src).readBlockSize(blockSize).encoder(((data, end) -> {
                 if (!data.hasRemaining()) {
                     return data;
                 }
@@ -688,7 +688,7 @@ public class ByteStreamTest {
             assertEquals(in.skip(1666), Math.min(1666, Math.max(encoded.length - 666, 0)));
         }
         {
-            InputStream in = ByteStream.from(src).blockSize(blockSize).toInputStream();
+            InputStream in = ByteStream.from(src).readBlockSize(blockSize).toInputStream();
             assertEquals(JieIO.read(in), src);
             assertEquals(in.read(), -1);
         }
@@ -711,7 +711,7 @@ public class ByteStreamTest {
             char[] str = JieRandom.fill(new char[totalSize], 'a', 'z');
             byte[] bytes = new String(str).getBytes(JieChars.UTF_8);
             String converted = JieIO.read(
-                ByteStream.from(bytes).blockSize(blockSize).toCharStream(JieChars.UTF_8).toReader()
+                ByteStream.from(bytes).readBlockSize(blockSize).toCharStream(JieChars.UTF_8).toReader()
             );
             assertEquals(converted.toCharArray(), str);
         }
@@ -719,7 +719,7 @@ public class ByteStreamTest {
             char[] str = JieRandom.fill(new char[totalSize], '\u4e00', '\u9fff');
             byte[] bytes = new String(str).getBytes(JieChars.UTF_8);
             String converted = JieIO.read(
-                ByteStream.from(bytes).blockSize(blockSize).toCharStream(JieChars.UTF_8).toReader()
+                ByteStream.from(bytes).readBlockSize(blockSize).toCharStream(JieChars.UTF_8).toReader()
             );
             assertEquals(converted.toCharArray(), str);
         }
