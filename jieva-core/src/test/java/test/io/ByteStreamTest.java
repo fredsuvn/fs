@@ -633,6 +633,23 @@ public class ByteStreamTest {
             InputStream err3 = ByteStream.from(new ThrowIn(3)).toInputStream();
             expectThrows(IOException.class, () -> err3.read());
         }
+        {
+            boolean[] flag = {true};
+            InputStream in = ByteStream.from(new byte[1024]).readBlockSize(1).encoder(((data, end) -> {
+                ByteBuffer ret = flag[0] ? data : JieBytes.emptyBuffer();
+                flag[0] = !flag[0];
+                return ret;
+            })).toInputStream();
+            BytesBuilder builder = new BytesBuilder();
+            while (true) {
+                int b = in.read();
+                if (b == -1) {
+                    break;
+                }
+                builder.append((byte) b);
+            }
+            assertEquals(builder.toByteArray().length, 1024 / 2);
+        }
     }
 
     private void testToInputStream(int totalSize, int blockSize) throws Exception {

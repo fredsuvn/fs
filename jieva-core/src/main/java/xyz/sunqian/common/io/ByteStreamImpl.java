@@ -461,30 +461,35 @@ final class ByteStreamImpl implements ByteStream {
                 return null;
             }
             try {
-                ByteBuffer buf = in.read();
-                Encoder encoder = buildEncoder();
-                if (buf == null || !buf.hasRemaining()) {
-                    if (state == 0) {
+                while (true) {
+                    ByteBuffer buf = in.read();
+                    Encoder encoder = buildEncoder();
+                    if (buf == null || !buf.hasRemaining()) {
+                        if (state == 0) {
+                            state = 2;
+                            return null;
+                        }
                         state = 2;
+                        if (encoder == null) {
+                            return null;
+                        }
+                        ByteBuffer ret = encoder.encode(JieBytes.emptyBuffer(), true);
+                        if (ret.hasRemaining()) {
+                            return ret;
+                        }
                         return null;
                     }
-                    state = 2;
+                    if (state == 0) {
+                        state = 1;
+                    }
                     if (encoder == null) {
-                        return null;
+                        return buf;
                     }
-                    ByteBuffer ret = encoder.encode(JieBytes.emptyBuffer(), true);
+                    ByteBuffer ret = encoder.encode(buf, false);
                     if (ret.hasRemaining()) {
                         return ret;
                     }
-                    return null;
                 }
-                if (state == 0) {
-                    state = 1;
-                }
-                if (encoder == null) {
-                    return buf;
-                }
-                return encoder.encode(buf, false);
             } catch (Exception e) {
                 throw new IOException(e);
             }

@@ -553,30 +553,35 @@ final class CharStreamImpl implements CharStream {
                 return null;
             }
             try {
-                CharBuffer buf = in.read();
-                Encoder encoder = buildEncoder();
-                if (buf == null || !buf.hasRemaining()) {
-                    if (state == 0) {
+                while (true) {
+                    CharBuffer buf = in.read();
+                    Encoder encoder = buildEncoder();
+                    if (buf == null || !buf.hasRemaining()) {
+                        if (state == 0) {
+                            state = 2;
+                            return null;
+                        }
                         state = 2;
+                        if (encoder == null) {
+                            return null;
+                        }
+                        CharBuffer ret = encoder.encode(JieChars.emptyBuffer(), true);
+                        if (ret.hasRemaining()) {
+                            return ret;
+                        }
                         return null;
                     }
-                    state = 2;
+                    if (state == 0) {
+                        state = 1;
+                    }
                     if (encoder == null) {
-                        return null;
+                        return buf;
                     }
-                    CharBuffer ret = encoder.encode(JieChars.emptyBuffer(), true);
+                    CharBuffer ret = encoder.encode(buf, false);
                     if (ret.hasRemaining()) {
                         return ret;
                     }
-                    return null;
                 }
-                if (state == 0) {
-                    state = 1;
-                }
-                if (encoder == null) {
-                    return buf;
-                }
-                return encoder.encode(buf, false);
             } catch (Exception e) {
                 throw new IOException(e);
             }

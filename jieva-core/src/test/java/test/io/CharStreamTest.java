@@ -780,6 +780,23 @@ public class CharStreamTest {
             Reader err3 = CharStream.from(new CharStreamTest.ThrowReader(3)).toReader();
             expectThrows(IOException.class, () -> err3.read());
         }
+        {
+            boolean[] flag = {true};
+            Reader in = CharStream.from(new char[1024]).readBlockSize(1).encoder(((data, end) -> {
+                CharBuffer ret = flag[0] ? data : JieChars.emptyBuffer();
+                flag[0] = !flag[0];
+                return ret;
+            })).toReader();
+            CharArrayWriter builder = new CharArrayWriter();
+            while (true) {
+                int b = in.read();
+                if (b == -1) {
+                    break;
+                }
+                builder.append((char) b);
+            }
+            assertEquals(builder.toCharArray().length, 1024 / 2);
+        }
     }
 
     private void testToReader(int totalSize, int blockSize) throws Exception {
