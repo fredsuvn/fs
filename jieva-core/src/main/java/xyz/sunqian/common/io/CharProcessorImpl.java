@@ -362,23 +362,15 @@ final class CharProcessorImpl implements CharProcessor {
                 return JieChars.emptyBuffer();
             }
             int hasRead = 0;
-            boolean zeroRead = false;
             char[] buf = new char[bufSize];
             while (hasRead < readSize) {
                 int size = source.read(buf, hasRead, readSize - hasRead);
-                if (size < 0) {
-                    break;
-                }
-                if (size == 0 && endOnZeroRead) {
-                    zeroRead = true;
+                if (size < 0 || (size == 0 && endOnZeroRead)) {
                     break;
                 }
                 hasRead += size;
             }
             if (hasRead == 0) {
-                if (zeroRead) {
-                    return JieChars.emptyBuffer();
-                }
                 return null;
             }
             if (readLimit > 0) {
@@ -556,7 +548,7 @@ final class CharProcessorImpl implements CharProcessor {
                 while (true) {
                     CharBuffer buf = in.read();
                     Encoder encoder = buildEncoder();
-                    if (buf == null || !buf.hasRemaining()) {
+                    if (JieChars.isEmpty(buf)) {
                         if (state == 0) {
                             state = 2;
                             return null;

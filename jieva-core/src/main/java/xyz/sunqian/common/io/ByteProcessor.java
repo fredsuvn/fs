@@ -161,14 +161,13 @@ public interface ByteProcessor {
     ByteProcessor readBlockSize(int readBlockSize);
 
     /**
-     * Sets whether to treat a read operation from data source that returns 0 bytes as an indication to break the read
-     * loop, similar to reaching the end. A read operation returning 0 bytes can occur in NIO. Default is
-     * {@code false}.
+     * Sets whether reading 0 byte from data source should be treated as reaching to the end and break the read loop. A
+     * read operation returning 0 byte can occur in NIO. Default is {@code false}.
      * <p>
      * This is an optional setting method.
      *
-     * @param endOnZeroRead whether to treat a read operation from data source that returns 0 bytes as an indication to
-     *                      break the read loop
+     * @param endOnZeroRead whether reading 0 byte from data source should be treated as reaching to the end and break
+     *                      the read loop
      * @return this
      */
     ByteProcessor endOnZeroRead(boolean endOnZeroRead);

@@ -171,14 +171,13 @@ public interface CharProcessor {
     CharProcessor readBlockSize(int readBlockSize);
 
     /**
-     * Sets whether to treat a read operation from data source that returns 0 chars as an indication to break the read
-     * loop, similar to reaching the end. A read operation returning 0 chars can occur in NIO. Default is
-     * {@code false}.
+     * Sets whether reading 0 char from data source should be treated as reaching to the end and break the read loop. A
+     * read operation returning 0 char can occur in NIO. Default is {@code false}.
      * <p>
      * This is an optional setting method.
      *
-     * @param endOnZeroRead whether to treat a read operation from data source that returns 0 chars as an indication to
-     *                      break the read loop
+     * @param endOnZeroRead whether reading 0 char from data source should be treated as reaching to the end and break
+     *                      the read loop
      * @return this
      */
     CharProcessor endOnZeroRead(boolean endOnZeroRead);

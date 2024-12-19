@@ -320,23 +320,15 @@ final class ByteProcessorImpl implements ByteProcessor {
                 return JieBytes.emptyBuffer();
             }
             int hasRead = 0;
-            boolean zeroRead = false;
             byte[] buf = new byte[bufSize];
             while (hasRead < readSize) {
                 int size = source.read(buf, hasRead, readSize - hasRead);
-                if (size < 0) {
-                    break;
-                }
-                if (size == 0 && endOnZeroRead) {
-                    zeroRead = true;
+                if (size < 0 || (size == 0 && endOnZeroRead)) {
                     break;
                 }
                 hasRead += size;
             }
             if (hasRead == 0) {
-                if (zeroRead) {
-                    return JieBytes.emptyBuffer();
-                }
                 return null;
             }
             if (readLimit > 0) {
@@ -464,7 +456,7 @@ final class ByteProcessorImpl implements ByteProcessor {
                 while (true) {
                     ByteBuffer buf = in.read();
                     Encoder encoder = buildEncoder();
-                    if (buf == null || !buf.hasRemaining()) {
+                    if (JieBytes.isEmpty(buf)) {
                         if (state == 0) {
                             state = 2;
                             return null;

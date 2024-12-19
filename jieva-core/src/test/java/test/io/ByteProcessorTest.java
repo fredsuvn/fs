@@ -21,20 +21,20 @@ import static org.testng.Assert.*;
 public class ByteProcessorTest {
 
     @Test
-    public void testBytesStream() throws Exception {
+    public void testProcessing() throws Exception {
         // readTo()
-        testBytesStream(666, JieIO.BUFFER_SIZE, -1);
-        testBytesStream(666, 67, -1);
-        testBytesStream(666, 1, -1);
-        testBytesStream(100, 10, -1);
-        testBytesStream(666, JieIO.BUFFER_SIZE, -1);
-        testBytesStream(666, 67, 667);
-        testBytesStream(666, 1, 667);
-        testBytesStream(100, 10, 101);
-        testBytesStream(222, 33, 55);
-        testBytesStream(100, 10, 0);
-        testBytesStream(100, 10, 100);
-        testBytesStream(6666, 99, 77777);
+        testProcessing(666, JieIO.BUFFER_SIZE, -1);
+        testProcessing(666, 67, -1);
+        testProcessing(666, 1, -1);
+        testProcessing(100, 10, -1);
+        testProcessing(666, JieIO.BUFFER_SIZE, -1);
+        testProcessing(666, 67, 667);
+        testProcessing(666, 1, 667);
+        testProcessing(100, 10, 101);
+        testProcessing(222, 33, 55);
+        testProcessing(100, 10, 0);
+        testProcessing(100, 10, 100);
+        testProcessing(6666, 99, 77777);
 
         {
             // empty
@@ -70,7 +70,7 @@ public class ByteProcessorTest {
             c = ByteProcessor.from(new NioIn()).endOnZeroRead(true)
                 .encoder((data, end) -> data)
                 .writeTo(bb);
-            assertEquals(c, 0);
+            assertEquals(c, -1);
             assertEquals(bb.toByteArray(), new byte[0]);
             c = ByteProcessor.from(new NioIn(new ByteArrayInputStream(new byte[0]))).endOnZeroRead(false)
                 .encoder((data, end) -> data)
@@ -120,7 +120,7 @@ public class ByteProcessorTest {
         }
 
         // error
-        expectThrows(IORuntimeException.class, () -> testBytesStream(666, 0, 0));
+        expectThrows(IORuntimeException.class, () -> testProcessing(666, 0, 0));
         expectThrows(IORuntimeException.class, () -> ByteProcessor.from((InputStream) null).writeTo((OutputStream) null));
         expectThrows(IndexOutOfBoundsException.class, () -> ByteProcessor.from(new byte[0], 0, 100));
         expectThrows(IORuntimeException.class, () -> ByteProcessor.from(new byte[0]).writeTo(new byte[0], 0, 100));
@@ -134,7 +134,7 @@ public class ByteProcessorTest {
         expectThrows(IORuntimeException.class, () -> ByteProcessor.from(new ThrowIn(1)).writeTo(new byte[0]));
     }
 
-    private void testBytesStream(int totalSize, int blockSize, int readLimit) throws Exception {
+    private void testProcessing(int totalSize, int blockSize, int readLimit) throws Exception {
         int offset = 22;
         String str = new String(JieRandom.fill(new char[totalSize], 'a', 'z'));
         byte[] bytes = str.getBytes(JieChars.UTF_8);

@@ -24,20 +24,20 @@ import static org.testng.Assert.*;
 public class CharProcessorTest {
 
     @Test
-    public void testCharsStream() throws Exception {
+    public void testProcessing() throws Exception {
         // readTo()
-        testCharsStream(666, JieIO.BUFFER_SIZE, -1);
-        testCharsStream(666, 67, -1);
-        testCharsStream(666, 1, -1);
-        testCharsStream(100, 10, -1);
-        testCharsStream(666, JieIO.BUFFER_SIZE, -1);
-        testCharsStream(666, 67, 667);
-        testCharsStream(666, 1, 667);
-        testCharsStream(100, 10, 101);
-        testCharsStream(222, 33, 55);
-        testCharsStream(100, 10, 0);
-        testCharsStream(100, 10, 100);
-        testCharsStream(6666, 99, 77777);
+        testProcessing(666, JieIO.BUFFER_SIZE, -1);
+        testProcessing(666, 67, -1);
+        testProcessing(666, 1, -1);
+        testProcessing(100, 10, -1);
+        testProcessing(666, JieIO.BUFFER_SIZE, -1);
+        testProcessing(666, 67, 667);
+        testProcessing(666, 1, 667);
+        testProcessing(100, 10, 101);
+        testProcessing(222, 33, 55);
+        testProcessing(100, 10, 0);
+        testProcessing(100, 10, 100);
+        testProcessing(6666, 99, 77777);
 
         {
             // empty
@@ -79,7 +79,7 @@ public class CharProcessorTest {
             c = CharProcessor.from(new NioReader()).endOnZeroRead(true)
                 .encoder((data, end) -> data)
                 .writeTo(bb);
-            assertEquals(c, 0);
+            assertEquals(c, -1);
             assertEquals(bb.toString().toCharArray(), new char[0]);
             c = CharProcessor.from(new NioReader(new CharArrayReader(new char[0]))).endOnZeroRead(false)
                 .encoder((data, end) -> data)
@@ -133,7 +133,7 @@ public class CharProcessorTest {
         }
 
         // error
-        expectThrows(IORuntimeException.class, () -> testCharsStream(666, 0, 0));
+        expectThrows(IORuntimeException.class, () -> testProcessing(666, 0, 0));
         expectThrows(IORuntimeException.class, () -> CharProcessor.from((Reader) null).writeTo((Appendable) null));
         expectThrows(IndexOutOfBoundsException.class, () -> CharProcessor.from(new char[0], 0, 100));
         expectThrows(IORuntimeException.class, () -> CharProcessor.from(new char[0]).writeTo(new char[0], 0, 100));
@@ -147,7 +147,7 @@ public class CharProcessorTest {
         expectThrows(IORuntimeException.class, () -> CharProcessor.from(new ThrowReader(1)).writeTo(new char[0]));
     }
 
-    private void testCharsStream(int totalSize, int blockSize, int readLimit) throws Exception {
+    private void testProcessing(int totalSize, int blockSize, int readLimit) throws Exception {
         int offset = 22;
         String str = new String(JieRandom.fill(new char[totalSize], 'a', 'z'));
         char[] chars = str.toCharArray();
