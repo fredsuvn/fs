@@ -91,6 +91,16 @@ public class JieChars {
     }
 
     /**
+     * Returns whether given buffer is null or empty.
+     *
+     * @param buffer given buffer
+     * @return whether given buffer is null or empty
+     */
+    public static boolean isEmpty(@Nullable CharBuffer buffer) {
+        return buffer == null || !buffer.hasRemaining();
+    }
+
+    /**
      * Returns an empty char array.
      *
      * @return an empty char array

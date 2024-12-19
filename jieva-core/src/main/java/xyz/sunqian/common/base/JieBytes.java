@@ -1,5 +1,7 @@
 package xyz.sunqian.common.base;
 
+import xyz.sunqian.annotations.Nullable;
+
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 
@@ -12,6 +14,16 @@ public class JieBytes {
 
     private static final byte[] EMPTY_BYTES = new byte[0];
     private static final ByteBuffer EMPTY_BUFFER = ByteBuffer.wrap(EMPTY_BYTES);
+
+    /**
+     * Returns whether given buffer is null or empty.
+     *
+     * @param buffer given buffer
+     * @return whether given buffer is null or empty
+     */
+    public static boolean isEmpty(@Nullable ByteBuffer buffer) {
+        return buffer == null || !buffer.hasRemaining();
+    }
 
     /**
      * Returns an empty byte array.
