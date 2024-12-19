@@ -20,16 +20,16 @@ import static org.testng.Assert.expectThrows;
 public class JieIOTest {
 
     @Test
-    public void testByteStream() throws Exception {
-        JieIO.byteStream(new byte[0]);
-        JieIO.byteStream(JieIO.emptyInputStream());
-        JieIO.byteStream(ByteBuffer.allocate(1));
-        JieIO.byteStream(new byte[1], 0, 1);
-        JieIO.charStream(new char[0]);
-        JieIO.charStream("");
-        JieIO.charStream(JieIO.emptyReader());
-        JieIO.charStream(CharBuffer.allocate(1));
-        JieIO.charStream(new char[1], 0, 1);
+    public void testProcessor() throws Exception {
+        JieIO.processor(new byte[0]);
+        JieIO.processor(JieIO.emptyInputStream());
+        JieIO.processor(ByteBuffer.allocate(1));
+        JieIO.processor(new byte[1], 0, 1);
+        JieIO.processor(new char[0]);
+        JieIO.processor("");
+        JieIO.processor(JieIO.emptyReader());
+        JieIO.processor(CharBuffer.allocate(1));
+        JieIO.processor(new char[1], 0, 1);
     }
 
     @Test

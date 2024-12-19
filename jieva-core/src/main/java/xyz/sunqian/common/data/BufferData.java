@@ -1,7 +1,7 @@
 package xyz.sunqian.common.data;
 
 import xyz.sunqian.common.base.JieCheck;
-import xyz.sunqian.common.io.ByteStream;
+import xyz.sunqian.common.io.ByteProcessor;
 import xyz.sunqian.common.io.JieBuffer;
 import xyz.sunqian.common.io.JieIO;
 
@@ -79,7 +79,7 @@ final class BufferData implements GekData.OfBuffer {
 
     @Override
     public long write(OutputStream dest, long length) {
-        return ByteStream.from(JieIO.inputStream(buffer)).readLimit(length).writeTo(dest);
+        return ByteProcessor.from(JieIO.inputStream(buffer)).readLimit(length).writeTo(dest);
     }
 
     @Override

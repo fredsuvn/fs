@@ -1,6 +1,6 @@
 package xyz.sunqian.common.encode;
 
-import xyz.sunqian.common.io.ByteStream;
+import xyz.sunqian.common.io.ByteProcessor;
 
 /**
  * This is a static utilities class for {@code Hex} encoding and decoding, provides encoder and decoder implementations:
@@ -58,15 +58,15 @@ public class JieHex {
         int getOutputSize(int inputSize) throws EncodingException;
 
         /**
-         * Returns a new {@link ByteStream.Encoder} which encapsulates current hex encoding, supports any size of input
-         * data, not thread-safe.
+         * Returns a new {@link ByteProcessor.Encoder} which encapsulates current hex encoding, supports any size of
+         * input data, not thread-safe.
          *
-         * @return a {@link ByteStream.Encoder} with current hex encoding
-         * @see ByteStream
-         * @see ByteStream.Encoder
+         * @return a {@link ByteProcessor.Encoder} with current hex encoding
+         * @see ByteProcessor
+         * @see ByteProcessor.Encoder
          */
         @Override
-        ByteStream.Encoder streamEncoder();
+        ByteProcessor.Encoder streamEncoder();
     }
 
     /**
@@ -98,15 +98,15 @@ public class JieHex {
         int getOutputSize(int inputSize) throws DecodingException;
 
         /**
-         * Returns a new {@link ByteStream.Encoder} which encapsulates current hex decoding, supports even size of input
-         * data, not thread-safe.
+         * Returns a new {@link ByteProcessor.Encoder} which encapsulates current hex decoding, supports even size of
+         * input data, not thread-safe.
          *
-         * @return a {@link ByteStream.Encoder} with current hex decoding
-         * @see ByteStream
-         * @see ByteStream.Encoder
+         * @return a {@link ByteProcessor.Encoder} with current hex decoding
+         * @see ByteProcessor
+         * @see ByteProcessor.Encoder
          */
         @Override
-        ByteStream.Encoder streamEncoder();
+        ByteProcessor.Encoder streamEncoder();
     }
 
     private static final class HexEncoder extends AbstractByteCoder.En implements Encoder {

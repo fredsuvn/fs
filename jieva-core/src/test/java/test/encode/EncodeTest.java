@@ -5,7 +5,7 @@ import xyz.sunqian.common.encode.ByteDecoder;
 import xyz.sunqian.common.encode.ByteEncoder;
 import xyz.sunqian.common.encode.DecodingException;
 import xyz.sunqian.common.encode.EncodingException;
-import xyz.sunqian.common.io.ByteStream;
+import xyz.sunqian.common.io.ByteProcessor;
 import xyz.sunqian.common.io.BytesBuilder;
 
 import java.nio.ByteBuffer;
@@ -85,7 +85,7 @@ public class EncodeTest {
         {
             // stream
             BytesBuilder bb = new BytesBuilder();
-            long c = ByteStream.from(source).encoder(encoder.streamEncoder(), blockSize).writeTo(bb);
+            long c = ByteProcessor.from(source).encoder(encoder.streamEncoder(), blockSize).writeTo(bb);
             if (source.length == 0) {
                 assertEquals(c, -1);
             } else {
@@ -174,7 +174,7 @@ public class EncodeTest {
         {
             // stream
             BytesBuilder bb = new BytesBuilder();
-            long c = ByteStream.from(source).encoder(decoder.streamEncoder(), blockSize).writeTo(bb);
+            long c = ByteProcessor.from(source).encoder(decoder.streamEncoder(), blockSize).writeTo(bb);
             if (source.length == 0) {
                 assertEquals(c, -1);
             } else {

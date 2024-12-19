@@ -8,7 +8,7 @@ import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.encode.DecodingException;
 import xyz.sunqian.common.encode.EncodingException;
 import xyz.sunqian.common.encode.JieHex;
-import xyz.sunqian.common.io.ByteStream;
+import xyz.sunqian.common.io.ByteProcessor;
 import xyz.sunqian.common.io.IOEncodingException;
 import xyz.sunqian.common.io.JieIO;
 
@@ -105,7 +105,7 @@ public class HexTest {
                 error[0] = null;
             }
             try {
-                ByteStream.from(en).readBlockSize(1)
+                ByteProcessor.from(en).readBlockSize(1)
                     .encoder(JieHex.decoder().streamEncoder()).writeTo(new ByteArrayOutputStream());
             } catch (IOEncodingException e) {
                 error[0] = e.getCause().getMessage();

@@ -6,8 +6,9 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 /**
- * Byte stream is used to process byte data, from specified data source, through zero or more intermediate operations,
- * and finally produces a result or side effect. The following example shows an encoding-then-writing operation:
+ * Byte processor is used to process byte data, from specified data source, through zero or more intermediate
+ * operations, and finally produces a result or side effect. The following example shows an encoding-then-writing
+ * operation:
  * <pre>{@code
  *     ByteStream.from(input)
  *         .readBlockSize(1024)
@@ -22,47 +23,47 @@ import java.nio.charset.Charset;
  *     </li>
  *     <li>
  *         Terminal methods, to start the data processing, once a terminal method is invoked, the state of current
- *         stream becomes undefined, and no safe guarantees for further operations on current stream;
+ *         processor becomes undefined, and no safe guarantees for further operations;
  *     </li>
  * </ul>
- * Byte stream is lazy, operations on the source data are only performed when a terminal method is invoked, and source
+ * Byte processor is lazy, operations on the source data are only performed when a terminal method is invoked, and source
  * data are consumed only as needed.
  *
  * @author sunqian
  */
-public interface ByteStream {
+public interface ByteProcessor {
 
     /**
-     * Returns a new {@link ByteStream} with specified data source.
+     * Returns a new {@link ByteProcessor} with specified data source.
      *
      * @param source specified data source
-     * @return a new {@link ByteStream}
+     * @return a new {@link ByteProcessor}
      */
-    static ByteStream from(InputStream source) {
-        return new ByteStreamImpl(source);
+    static ByteProcessor from(InputStream source) {
+        return new ByteProcessorImpl(source);
     }
 
     /**
-     * Returns a new {@link ByteStream} with specified data source.
+     * Returns a new {@link ByteProcessor} with specified data source.
      *
      * @param source specified data source
-     * @return a new {@link ByteStream}
+     * @return a new {@link ByteProcessor}
      */
-    static ByteStream from(byte[] source) {
-        return new ByteStreamImpl(source);
+    static ByteProcessor from(byte[] source) {
+        return new ByteProcessorImpl(source);
     }
 
     /**
-     * Returns a new {@link ByteStream} with specified data source, starting from the start index up to the specified
+     * Returns a new {@link ByteProcessor} with specified data source, starting from the start index up to the specified
      * length.
      *
      * @param source specified data source
      * @param offset start index
      * @param length specified length
-     * @return a new {@link ByteStream}
+     * @return a new {@link ByteProcessor}
      * @throws IndexOutOfBoundsException thrown bounds problem
      */
-    static ByteStream from(byte[] source, int offset, int length) throws IndexOutOfBoundsException {
+    static ByteProcessor from(byte[] source, int offset, int length) throws IndexOutOfBoundsException {
         IOMisc.checkReadBounds(source, offset, length);
         if (offset == 0 && length == source.length) {
             return from(source);
@@ -72,13 +73,13 @@ public interface ByteStream {
     }
 
     /**
-     * Returns a new {@link ByteStream} with specified data source.
+     * Returns a new {@link ByteProcessor} with specified data source.
      *
      * @param source specified data source
-     * @return a new {@link ByteStream}
+     * @return a new {@link ByteProcessor}
      */
-    static ByteStream from(ByteBuffer source) {
-        return new ByteStreamImpl(source);
+    static ByteProcessor from(ByteBuffer source) {
+        return new ByteProcessorImpl(source);
     }
 
     /**
@@ -97,7 +98,7 @@ public interface ByteStream {
      * @return a new {@link Encoder} to round input data for given encoder
      */
     static Encoder roundEncoder(Encoder encoder, int expectedBlockSize) {
-        return new ByteStreamImpl.RoundEncoder(encoder, expectedBlockSize);
+        return new ByteProcessorImpl.RoundEncoder(encoder, expectedBlockSize);
     }
 
     /**
@@ -114,7 +115,7 @@ public interface ByteStream {
      * @return a new {@link Encoder} that buffers remaining data for given encoder
      */
     static Encoder bufferedEncoder(Encoder encoder) {
-        return new ByteStreamImpl.BufferedEncoder(encoder);
+        return new ByteProcessorImpl.BufferedEncoder(encoder);
     }
 
     /**
@@ -132,7 +133,7 @@ public interface ByteStream {
      * each invocation
      */
     static Encoder fixedSizeEncoder(Encoder encoder, int size) {
-        return new ByteStreamImpl.FixedSizeEncoder(encoder, size);
+        return new ByteProcessorImpl.FixedSizeEncoder(encoder, size);
     }
 
     /**
@@ -144,7 +145,7 @@ public interface ByteStream {
      * @param readLimit maximum number of bytes to read from data source
      * @return this
      */
-    ByteStream readLimit(long readLimit);
+    ByteProcessor readLimit(long readLimit);
 
     /**
      * Sets the number of bytes for each read operation from data source.
@@ -157,7 +158,7 @@ public interface ByteStream {
      * @param readBlockSize the number of bytes for each read operation from data source
      * @return this
      */
-    ByteStream readBlockSize(int readBlockSize);
+    ByteProcessor readBlockSize(int readBlockSize);
 
     /**
      * Sets whether to treat a read operation from data source that returns 0 bytes as an indication to break the read
@@ -170,7 +171,7 @@ public interface ByteStream {
      *                      break the read loop
      * @return this
      */
-    ByteStream endOnZeroRead(boolean endOnZeroRead);
+    ByteProcessor endOnZeroRead(boolean endOnZeroRead);
 
     /**
      * Adds an encoder for encoding which is an intermediate operation. When the data processing starts, all encoders
@@ -211,7 +212,7 @@ public interface ByteStream {
      * @param encoder encoder for encoding data from read operation
      * @return this
      */
-    ByteStream encoder(Encoder encoder);
+    ByteProcessor encoder(Encoder encoder);
 
     /**
      * Adds an encoder for encoding which is an intermediate operation. This method is equivalent to adding a fixed-size
@@ -224,7 +225,7 @@ public interface ByteStream {
      * @param size    specified fixed-size
      * @return this
      */
-    default ByteStream encoder(Encoder encoder, int size) {
+    default ByteProcessor encoder(Encoder encoder, int size) {
         return encoder(fixedSizeEncoder(encoder, size));
     }
 
@@ -329,7 +330,7 @@ public interface ByteStream {
     long writeTo() throws IOEncodingException, IORuntimeException;
 
     /**
-     * Returns a byte array which is the result of data processing by this stream. This method is equivalent to:
+     * Returns a byte array which is the result of data processing by this processor. This method is equivalent to:
      * <pre>{@code
      *     BytesBuilder builder = new BytesBuilder();
      *     writeTo(builder);
@@ -337,7 +338,7 @@ public interface ByteStream {
      * }</pre>
      * This is a terminal method.
      *
-     * @return a byte array which is the result of data processing by this stream
+     * @return a byte array which is the result of data processing by this processor
      * @throws IORuntimeException thrown for any IO problems
      */
     default byte[] writeToByteArray() throws IORuntimeException {
@@ -347,13 +348,13 @@ public interface ByteStream {
     }
 
     /**
-     * Returns a byte buffer which is the result of data processing by this stream. This method is equivalent to:
+     * Returns a byte buffer which is the result of data processing by this processor. This method is equivalent to:
      * <pre>{@code
      *     return ByteBuffer.wrap(writeToByteArray());
      * }</pre>
      * This is a terminal method.
      *
-     * @return a byte buffer which is the result of data processing by this stream
+     * @return a byte buffer which is the result of data processing by this processor
      * @throws IORuntimeException thrown for any IO problems
      */
     default ByteBuffer writeToByteBuffer() throws IORuntimeException {
@@ -361,14 +362,14 @@ public interface ByteStream {
     }
 
     /**
-     * Returns a string which is encoded from the result of data processing by this stream. This method is equivalent
+     * Returns a string which is encoded from the result of data processing by this processor. This method is equivalent
      * to:
      * <pre>{@code
      *     return new String(writeToByteArray(), charset);
      * }</pre>
      * This is a terminal method.
      *
-     * @return a string which is encoded from the result of data processing by this stream
+     * @return a string which is encoded from the result of data processing by this processor
      * @throws IORuntimeException thrown for any IO problems
      */
     default String writeToString(Charset charset) throws IORuntimeException {
@@ -388,14 +389,14 @@ public interface ByteStream {
     InputStream toInputStream() throws IORuntimeException;
 
     /**
-     * Converts this byte stream to char stream with specified charset.
+     * Converts this byte processor to char processor with specified charset.
      * <p>
-     * This is a setting method but this byte stream still be invalid after current invocation.
+     * This is a setting method but this byte processor still be invalid after current invocation.
      *
-     * @return a new {@link CharStream} converted from this byte stream with specified charset
+     * @return a new {@link CharProcessor} converted from this byte processor with specified charset
      */
-    default CharStream toCharStream(Charset charset) {
-        return CharStream.from(JieIO.reader(toInputStream(), charset));
+    default CharProcessor toCharProcessor(Charset charset) {
+        return CharProcessor.from(JieIO.reader(toInputStream(), charset));
     }
 
     /**

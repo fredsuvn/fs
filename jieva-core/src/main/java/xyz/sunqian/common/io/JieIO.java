@@ -141,7 +141,7 @@ public class JieIO {
     @Nullable
     public static String read(Reader source, int number) throws IORuntimeException {
         StringBuilder dest = new StringBuilder();
-        long readCount = CharStream.from(source).readLimit(number).writeTo(dest);
+        long readCount = CharProcessor.from(source).readLimit(number).writeTo(dest);
         if (readCount == -1) {
             return null;
         }
@@ -256,7 +256,7 @@ public class JieIO {
 
     /**
      * Reads bytes from source stream and writes them into dest array, returns actual read number. If the source has
-     * been ended and no data read out, return -1. This method is equivalent to ({@link ByteStream}):
+     * been ended and no data read out, return -1. This method is equivalent to ({@link ByteProcessor}):
      * <pre>{@code
      *     return (int) ByteStream.from(source).readLimit(dest.length).writeTo(dest);
      * }</pre>
@@ -265,15 +265,15 @@ public class JieIO {
      * @param dest   dest array
      * @return actual read number, or -1 if the source has been ended and no data read out
      * @throws IORuntimeException IO runtime exception
-     * @see ByteStream
+     * @see ByteProcessor
      */
     public static int readTo(InputStream source, byte[] dest) throws IORuntimeException {
-        return (int) ByteStream.from(source).readLimit(dest.length).writeTo(dest);
+        return (int) ByteProcessor.from(source).readLimit(dest.length).writeTo(dest);
     }
 
     /**
      * Reads bytes from source stream and writes them into dest buffer, returns actual read number. If the source has
-     * been ended and no data read out, return -1. This method is equivalent to ({@link ByteStream}):
+     * been ended and no data read out, return -1. This method is equivalent to ({@link ByteProcessor}):
      * <pre>{@code
      *     return (int) ByteStream.from(source).readLimit(dest.remaining()).writeTo(dest);
      * }</pre>
@@ -282,15 +282,15 @@ public class JieIO {
      * @param dest   dest buffer
      * @return actual read number, or -1 if the source has been ended and no data read out
      * @throws IORuntimeException IO runtime exception
-     * @see ByteStream
+     * @see ByteProcessor
      */
     public static int readTo(InputStream source, ByteBuffer dest) throws IORuntimeException {
-        return (int) ByteStream.from(source).readLimit(dest.remaining()).writeTo(dest);
+        return (int) ByteProcessor.from(source).readLimit(dest.remaining()).writeTo(dest);
     }
 
     /**
      * Reads bytes from source stream and writes them into dest stream, returns actual read number. If the source has
-     * been ended and no data read out, return -1. This method is equivalent to ({@link ByteStream}):
+     * been ended and no data read out, return -1. This method is equivalent to ({@link ByteProcessor}):
      * <pre>{@code
      *     return (int) ByteStream.from(source).writeTo(dest);
      * }</pre>
@@ -299,15 +299,15 @@ public class JieIO {
      * @param dest   dest stream
      * @return actual read number, or -1 if the source has been ended and no data read out
      * @throws IORuntimeException IO runtime exception
-     * @see ByteStream
+     * @see ByteProcessor
      */
     public static long readTo(InputStream source, OutputStream dest) throws IORuntimeException {
-        return (int) ByteStream.from(source).writeTo(dest);
+        return (int) ByteProcessor.from(source).writeTo(dest);
     }
 
     /**
      * Reads chars from source reader and writes them into dest array, returns actual read number. If the source has
-     * been ended and no data read out, return -1. This method is equivalent to ({@link CharStream}):
+     * been ended and no data read out, return -1. This method is equivalent to ({@link CharProcessor}):
      * <pre>{@code
      *     return (int) CharStream.from(source).readLimit(dest.length).writeTo(dest);
      * }</pre>
@@ -316,15 +316,15 @@ public class JieIO {
      * @param dest   dest array
      * @return actual read number, or -1 if the source has been ended and no data read out
      * @throws IORuntimeException IO runtime exception
-     * @see CharStream
+     * @see CharProcessor
      */
     public static int readTo(Reader source, char[] dest) throws IORuntimeException {
-        return (int) CharStream.from(source).readLimit(dest.length).writeTo(dest);
+        return (int) CharProcessor.from(source).readLimit(dest.length).writeTo(dest);
     }
 
     /**
      * Reads chars from source reader and writes them into dest buffer, returns actual read number. If the source has
-     * been ended and no data read out, return -1. This method is equivalent to ({@link CharStream}):
+     * been ended and no data read out, return -1. This method is equivalent to ({@link CharProcessor}):
      * <pre>{@code
      *     return (int) CharStream.from(source).readLimit(dest.remaining()).writeTo(dest);
      * }</pre>
@@ -333,15 +333,15 @@ public class JieIO {
      * @param dest   dest buffer
      * @return actual read number, or -1 if the source has been ended and no data read out
      * @throws IORuntimeException IO runtime exception
-     * @see CharStream
+     * @see CharProcessor
      */
     public static int readTo(Reader source, CharBuffer dest) throws IORuntimeException {
-        return (int) CharStream.from(source).readLimit(dest.remaining()).writeTo(dest);
+        return (int) CharProcessor.from(source).readLimit(dest.remaining()).writeTo(dest);
     }
 
     /**
      * Reads bytes from source reader and writes them into dest appendable, returns actual read number. If the source
-     * has been ended and no data read out, return -1. This method is equivalent to ({@link CharStream}):
+     * has been ended and no data read out, return -1. This method is equivalent to ({@link CharProcessor}):
      * <pre>{@code
      *     return (int) CharStream.from(source).writeTo(dest);
      * }</pre>
@@ -350,108 +350,108 @@ public class JieIO {
      * @param dest   dest appendable
      * @return actual read number, or -1 if the source has been ended and no data read out
      * @throws IORuntimeException IO runtime exception
-     * @see CharStream
+     * @see CharProcessor
      */
     public static long readTo(Reader source, Appendable dest) throws IORuntimeException {
-        return (int) CharStream.from(source).writeTo(dest);
+        return (int) CharProcessor.from(source).writeTo(dest);
     }
 
     /**
-     * Returns a new {@link ByteStream} with specified data source.
+     * Returns a new {@link ByteProcessor} with specified data source.
      *
      * @param source specified data source
-     * @return a new {@link ByteStream}
+     * @return a new {@link ByteProcessor}
      */
-    public static ByteStream byteStream(InputStream source) {
-        return ByteStream.from(source);
+    public static ByteProcessor processor(InputStream source) {
+        return ByteProcessor.from(source);
     }
 
     /**
-     * Returns a new {@link ByteStream} with specified data source.
+     * Returns a new {@link ByteProcessor} with specified data source.
      *
      * @param source specified data source
-     * @return a new {@link ByteStream}
+     * @return a new {@link ByteProcessor}
      */
-    public static ByteStream byteStream(byte[] source) {
-        return ByteStream.from(source);
+    public static ByteProcessor processor(byte[] source) {
+        return ByteProcessor.from(source);
     }
 
     /**
-     * Returns a new {@link ByteStream} with specified data source, starting from the start index up to the specified
+     * Returns a new {@link ByteProcessor} with specified data source, starting from the start index up to the specified
      * length.
      *
      * @param source specified data source
      * @param offset start index
      * @param length specified length
-     * @return a new {@link ByteStream}
+     * @return a new {@link ByteProcessor}
      * @throws IndexOutOfBoundsException thrown bounds problem
      */
-    public static ByteStream byteStream(byte[] source, int offset, int length) throws IndexOutOfBoundsException {
-        return ByteStream.from(source, offset, length);
+    public static ByteProcessor processor(byte[] source, int offset, int length) throws IndexOutOfBoundsException {
+        return ByteProcessor.from(source, offset, length);
     }
 
     /**
-     * Returns a new {@link ByteStream} with specified data source.
+     * Returns a new {@link ByteProcessor} with specified data source.
      *
      * @param source specified data source
-     * @return a new {@link ByteStream}
+     * @return a new {@link ByteProcessor}
      */
-    public static ByteStream byteStream(ByteBuffer source) {
-        return ByteStream.from(source);
+    public static ByteProcessor processor(ByteBuffer source) {
+        return ByteProcessor.from(source);
     }
 
     /**
-     * Returns a new {@link CharStream} with specified data source.
+     * Returns a new {@link CharProcessor} with specified data source.
      *
      * @param source specified data source
-     * @return a new {@link CharStream}
+     * @return a new {@link CharProcessor}
      */
-    public static CharStream charStream(Reader source) {
-        return CharStream.from(source);
+    public static CharProcessor processor(Reader source) {
+        return CharProcessor.from(source);
     }
 
     /**
-     * Returns a new {@link CharStream} with specified data source.
+     * Returns a new {@link CharProcessor} with specified data source.
      *
      * @param source specified data source
-     * @return a new {@link CharStream}
+     * @return a new {@link CharProcessor}
      */
-    public static CharStream charStream(char[] source) {
-        return CharStream.from(source);
+    public static CharProcessor processor(char[] source) {
+        return CharProcessor.from(source);
     }
 
     /**
-     * Returns a new {@link CharStream} with specified data source, starting from the start index up to the specified
+     * Returns a new {@link CharProcessor} with specified data source, starting from the start index up to the specified
      * length.
      *
      * @param source specified data source
      * @param offset start index
      * @param length specified length
-     * @return a new {@link CharStream}
+     * @return a new {@link CharProcessor}
      * @throws IndexOutOfBoundsException thrown bounds problem
      */
-    public static CharStream charStream(char[] source, int offset, int length) throws IndexOutOfBoundsException {
-        return CharStream.from(source, offset, length);
+    public static CharProcessor processor(char[] source, int offset, int length) throws IndexOutOfBoundsException {
+        return CharProcessor.from(source, offset, length);
     }
 
     /**
-     * Returns a new {@link CharStream} with specified data source.
+     * Returns a new {@link CharProcessor} with specified data source.
      *
      * @param source specified data source
-     * @return a new {@link CharStream}
+     * @return a new {@link CharProcessor}
      */
-    public static CharStream charStream(CharBuffer source) {
-        return CharStream.from(source);
+    public static CharProcessor processor(CharBuffer source) {
+        return CharProcessor.from(source);
     }
 
     /**
-     * Returns a new {@link CharStream} with specified data source.
+     * Returns a new {@link CharProcessor} with specified data source.
      *
      * @param source specified data source
-     * @return a new {@link CharStream}
+     * @return a new {@link CharProcessor}
      */
-    public static CharStream charStream(CharSequence source) {
-        return CharStream.from(source);
+    public static CharProcessor processor(CharSequence source) {
+        return CharProcessor.from(source);
     }
 
     /**

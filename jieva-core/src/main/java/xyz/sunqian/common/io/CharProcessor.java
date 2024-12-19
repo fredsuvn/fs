@@ -6,8 +6,9 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 
 /**
- * Char stream is used to process char data, from specified data source, through zero or more intermediate operations,
- * and finally produces a result or side effect. The following example shows an encoding-then-writing operation:
+ * Char processor is used to process char data, from specified data source, through zero or more intermediate
+ * operations, and finally produces a result or side effect. The following example shows an encoding-then-writing
+ * operation:
  * <pre>{@code
  *     CharStream.from(input)
  *         .readBlockSize(1024)
@@ -22,47 +23,47 @@ import java.nio.charset.Charset;
  *     </li>
  *     <li>
  *         Terminal methods, to start the data processing, once a terminal method is invoked, the state of current
- *         stream becomes undefined, and no safe guarantees for further operations on current stream;
+ *         processor becomes undefined, and no safe guarantees for further operations;
  *     </li>
  * </ul>
- * Char stream is lazy, operations on the source data are only performed when a terminal method is invoked, and source
+ * Char processor is lazy, operations on the source data are only performed when a terminal method is invoked, and source
  * data are consumed only as needed.
  *
  * @author sunqian
  */
-public interface CharStream {
+public interface CharProcessor {
 
     /**
-     * Returns a new {@link CharStream} with specified data source.
+     * Returns a new {@link CharProcessor} with specified data source.
      *
      * @param source specified data source
-     * @return a new {@link CharStream}
+     * @return a new {@link CharProcessor}
      */
-    static CharStream from(Reader source) {
-        return new CharStreamImpl(source);
+    static CharProcessor from(Reader source) {
+        return new CharProcessorImpl(source);
     }
 
     /**
-     * Returns a new {@link CharStream} with specified data source.
+     * Returns a new {@link CharProcessor} with specified data source.
      *
      * @param source specified data source
-     * @return a new {@link CharStream}
+     * @return a new {@link CharProcessor}
      */
-    static CharStream from(char[] source) {
-        return new CharStreamImpl(source);
+    static CharProcessor from(char[] source) {
+        return new CharProcessorImpl(source);
     }
 
     /**
-     * Returns a new {@link CharStream} with specified data source, starting from the start index up to the specified
+     * Returns a new {@link CharProcessor} with specified data source, starting from the start index up to the specified
      * length.
      *
      * @param source specified data source
      * @param offset start index
      * @param length specified length
-     * @return a new {@link CharStream}
+     * @return a new {@link CharProcessor}
      * @throws IndexOutOfBoundsException thrown bounds problem
      */
-    static CharStream from(char[] source, int offset, int length) throws IndexOutOfBoundsException {
+    static CharProcessor from(char[] source, int offset, int length) throws IndexOutOfBoundsException {
         IOMisc.checkReadBounds(source, offset, length);
         if (offset == 0 && length == source.length) {
             return from(source);
@@ -72,23 +73,23 @@ public interface CharStream {
     }
 
     /**
-     * Returns a new {@link CharStream} with specified data source.
+     * Returns a new {@link CharProcessor} with specified data source.
      *
      * @param source specified data source
-     * @return a new {@link CharStream}
+     * @return a new {@link CharProcessor}
      */
-    static CharStream from(CharBuffer source) {
-        return new CharStreamImpl(source);
+    static CharProcessor from(CharBuffer source) {
+        return new CharProcessorImpl(source);
     }
 
     /**
-     * Returns a new {@link CharStream} with specified data source.
+     * Returns a new {@link CharProcessor} with specified data source.
      *
      * @param source specified data source
-     * @return a new {@link CharStream}
+     * @return a new {@link CharProcessor}
      */
-    static CharStream from(CharSequence source) {
-        return new CharStreamImpl(source);
+    static CharProcessor from(CharSequence source) {
+        return new CharProcessorImpl(source);
     }
 
     /**
@@ -107,7 +108,7 @@ public interface CharStream {
      * @return a new {@link Encoder} to round input data for given encoder
      */
     static Encoder roundEncoder(Encoder encoder, int expectedBlockSize) {
-        return new CharStreamImpl.RoundEncoder(encoder, expectedBlockSize);
+        return new CharProcessorImpl.RoundEncoder(encoder, expectedBlockSize);
     }
 
     /**
@@ -124,7 +125,7 @@ public interface CharStream {
      * @return a new {@link Encoder} that buffers remaining data for given encoder
      */
     static Encoder bufferedEncoder(Encoder encoder) {
-        return new CharStreamImpl.BufferedEncoder(encoder);
+        return new CharProcessorImpl.BufferedEncoder(encoder);
     }
 
     /**
@@ -142,7 +143,7 @@ public interface CharStream {
      * each invocation
      */
     static Encoder fixedSizeEncoder(Encoder encoder, int size) {
-        return new CharStreamImpl.FixedSizeEncoder(encoder, size);
+        return new CharProcessorImpl.FixedSizeEncoder(encoder, size);
     }
 
     /**
@@ -154,20 +155,20 @@ public interface CharStream {
      * @param readLimit maximum number of chars to read from data source
      * @return this
      */
-    CharStream readLimit(long readLimit);
+    CharProcessor readLimit(long readLimit);
 
     /**
      * Sets the number of chars for each read operation from data source.
      * <p>
-     * This setting is typically used when the data source is an input stream, or intermediate operations are set,
-     * default is {@link JieIO#BUFFER_SIZE}.
+     * This setting is typically used when the data source is a reader, or intermediate operations are set, default is
+     * {@link JieIO#BUFFER_SIZE}.
      * <p>
      * This is an optional setting method.
      *
      * @param readBlockSize the number of chars for each read operation from data source
      * @return this
      */
-    CharStream readBlockSize(int readBlockSize);
+    CharProcessor readBlockSize(int readBlockSize);
 
     /**
      * Sets whether to treat a read operation from data source that returns 0 chars as an indication to break the read
@@ -180,7 +181,7 @@ public interface CharStream {
      *                      break the read loop
      * @return this
      */
-    CharStream endOnZeroRead(boolean endOnZeroRead);
+    CharProcessor endOnZeroRead(boolean endOnZeroRead);
 
     /**
      * Adds an encoder for encoding which is an intermediate operation. When the data processing starts, all encoders
@@ -201,9 +202,9 @@ public interface CharStream {
      * {@link #encoder(Encoder, int)}.
      * <p>
      * Passed {@link CharBuffer} object, which is the first argument of {@link Encoder#encode(CharBuffer, boolean)}, can
-     * be read-only (for example, when the source is an input stream), or writable (for example, when the source is a
-     * char array or char buffer), and discarded after each invocation. The returned {@link CharBuffer} will also be
-     * treated as read-only;
+     * be read-only (for example, when the source is a reader), or writable (for example, when the source is a char
+     * array or char buffer), and discarded after each invocation. The returned {@link CharBuffer} will also be treated
+     * as read-only;
      * <p>
      * This is an optional setting method. This interface also provides helper encoder implementations:
      * <ul>
@@ -221,7 +222,7 @@ public interface CharStream {
      * @param encoder encoder for encoding data from read operation
      * @return this
      */
-    CharStream encoder(Encoder encoder);
+    CharProcessor encoder(Encoder encoder);
 
     /**
      * Adds an encoder for encoding which is an intermediate operation. This method is equivalent to adding a fixed-size
@@ -234,7 +235,7 @@ public interface CharStream {
      * @param size    specified fixed-size
      * @return this
      */
-    default CharStream encoder(Encoder encoder, int size) {
+    default CharProcessor encoder(Encoder encoder, int size) {
         return encoder(fixedSizeEncoder(encoder, size));
     }
 
@@ -246,8 +247,8 @@ public interface CharStream {
      * an error is thrown by an {@code encoder}, the error will be wrapped by {@link IOEncodingException} to be thrown,
      * use {@link Throwable#getCause()} to get it.
      * <p>
-     * If the source and/or destination is a buffer or stream, its position will be incremented by actual affected
-     * length.
+     * If the source and/or destination is a buffer or reader/writer, its position will be incremented by actual
+     * affected length.
      * <p>
      * This is a terminal method.
      *
@@ -266,8 +267,8 @@ public interface CharStream {
      * an error is thrown by an {@code encoder}, the error will be wrapped by {@link IOEncodingException} to be thrown,
      * use {@link Throwable#getCause()} to get it.
      * <p>
-     * If the source and/or destination is a buffer or stream, its position will be incremented by actual affected
-     * length.
+     * If the source and/or destination is a buffer or reader/writer, its position will be incremented by actual
+     * affected length.
      * <p>
      * This is a terminal method.
      *
@@ -286,8 +287,8 @@ public interface CharStream {
      * an error is thrown by an {@code encoder}, the error will be wrapped by {@link IOEncodingException} to be thrown,
      * use {@link Throwable#getCause()} to get it.
      * <p>
-     * If the source and/or destination is a buffer or stream, its position will be incremented by actual affected
-     * length.
+     * If the source and/or destination is a buffer or reader/writer, its position will be incremented by actual
+     * affected length.
      * <p>
      * This is a terminal method.
      *
@@ -308,8 +309,8 @@ public interface CharStream {
      * an error is thrown by an {@code encoder}, the error will be wrapped by {@link IOEncodingException} to be thrown,
      * use {@link Throwable#getCause()} to get it.
      * <p>
-     * If the source and/or destination is a buffer or stream, its position will be incremented by actual affected
-     * length.
+     * If the source and/or destination is a buffer or reader/writer, its position will be incremented by actual
+     * affected length.
      * <p>
      * This is a terminal method.
      *
@@ -328,7 +329,7 @@ public interface CharStream {
      * an error is thrown by an {@code encoder}, the error will be wrapped by {@link IOEncodingException} to be thrown,
      * use {@link Throwable#getCause()} to get it.
      * <p>
-     * If the source is a buffer or stream, its position will be incremented by actual affected length.
+     * If the source is a buffer or reader/writer, its position will be incremented by actual affected length.
      * <p>
      * This is a terminal method.
      *
@@ -339,7 +340,7 @@ public interface CharStream {
     long writeTo() throws IOEncodingException, IORuntimeException;
 
     /**
-     * Returns a char array which is the result of data processing by this stream. This method is equivalent to:
+     * Returns a char array which is the result of data processing by this processor. This method is equivalent to:
      * <pre>{@code
      *     CharArrayWriter writer = new CharArrayWriter();
      *     writeTo(writer);
@@ -347,7 +348,7 @@ public interface CharStream {
      * }</pre>
      * This is a terminal method.
      *
-     * @return a char array which is the result of data processing by this stream
+     * @return a char array which is the result of data processing by this processor
      * @throws IORuntimeException thrown for any IO problems
      */
     default char[] writeToCharArray() throws IORuntimeException {
@@ -357,13 +358,13 @@ public interface CharStream {
     }
 
     /**
-     * Returns a char buffer which is the result of data processing by this stream. This method is equivalent to:
+     * Returns a char buffer which is the result of data processing by this processor. This method is equivalent to:
      * <pre>{@code
      *     return CharBuffer.wrap(writeToCharArray());
      * }</pre>
      * This is a terminal method.
      *
-     * @return a char buffer which is the result of data processing by this stream
+     * @return a char buffer which is the result of data processing by this processor
      * @throws IORuntimeException thrown for any IO problems
      */
     default CharBuffer writeToCharBuffer() throws IORuntimeException {
@@ -371,13 +372,14 @@ public interface CharStream {
     }
 
     /**
-     * Returns a string which is built from the result of data processing by this stream. This method is equivalent to:
+     * Returns a string which is built from the result of data processing by this processor. This method is equivalent
+     * to:
      * <pre>{@code
      *     return new String(writeToCharArray());
      * }</pre>
      * This is a terminal method.
      *
-     * @return a string which is built from the result of data processing by this stream
+     * @return a string which is built from the result of data processing by this processor
      * @throws IORuntimeException thrown for any IO problems
      */
     default String writeToString() throws IORuntimeException {
@@ -397,14 +399,14 @@ public interface CharStream {
     Reader toReader() throws IORuntimeException;
 
     /**
-     * Converts this char stream to byte stream with specified charset.
+     * Converts this char processor to byte processor with specified charset.
      * <p>
-     * This is a setting method but this char stream still be invalid after current invocation.
+     * This is a setting method but this char processor still be invalid after current invocation.
      *
-     * @return a new {@link CharStream} converted from this char stream with specified charset
+     * @return a new {@link CharProcessor} converted from this char processor with specified charset
      */
-    default ByteStream toByteStream(Charset charset) {
-        return ByteStream.from(JieIO.inputStream(toReader(), charset));
+    default ByteProcessor toByteProcessor(Charset charset) {
+        return ByteProcessor.from(JieIO.inputStream(toReader(), charset));
     }
 
     /**
