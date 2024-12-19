@@ -329,6 +329,53 @@ public interface ByteStream {
     long writeTo() throws IOEncodingException, IORuntimeException;
 
     /**
+     * Returns a byte array which is the result of data processing by this stream. This method is equivalent to:
+     * <pre>{@code
+     *     BytesBuilder builder = new BytesBuilder();
+     *     writeTo(builder);
+     *     return builder.toByteArray();
+     * }</pre>
+     * This is a terminal method.
+     *
+     * @return a byte array which is the result of data processing by this stream
+     * @throws IORuntimeException thrown for any IO problems
+     */
+    default byte[] writeToByteArray() throws IORuntimeException {
+        BytesBuilder builder = new BytesBuilder();
+        writeTo(builder);
+        return builder.toByteArray();
+    }
+
+    /**
+     * Returns a byte buffer which is the result of data processing by this stream. This method is equivalent to:
+     * <pre>{@code
+     *     return ByteBuffer.wrap(writeToByteArray());
+     * }</pre>
+     * This is a terminal method.
+     *
+     * @return a byte buffer which is the result of data processing by this stream
+     * @throws IORuntimeException thrown for any IO problems
+     */
+    default ByteBuffer writeToByteBuffer() throws IORuntimeException {
+        return ByteBuffer.wrap(writeToByteArray());
+    }
+
+    /**
+     * Returns a string which is encoded from the result of data processing by this stream. This method is equivalent
+     * to:
+     * <pre>{@code
+     *     return new String(writeToByteArray(), charset);
+     * }</pre>
+     * This is a terminal method.
+     *
+     * @return a string which is encoded from the result of data processing by this stream
+     * @throws IORuntimeException thrown for any IO problems
+     */
+    default String writeToString(Charset charset) throws IORuntimeException {
+        return new String(writeToByteArray(), charset);
+    }
+
+    /**
      * Returns an input stream which encompasses the entire data processing. The input stream is lazy, read operations
      * on the source data are performed only as needed, and doesn't support mark/reset operations. The close method will
      * close the source if the source is also closable.

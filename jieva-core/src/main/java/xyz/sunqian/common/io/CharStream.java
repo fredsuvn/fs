@@ -1,5 +1,6 @@
 package xyz.sunqian.common.io;
 
+import java.io.CharArrayWriter;
 import java.io.Reader;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -336,6 +337,52 @@ public interface CharStream {
      * @throws IORuntimeException  thrown for any other IO problems
      */
     long writeTo() throws IOEncodingException, IORuntimeException;
+
+    /**
+     * Returns a char array which is the result of data processing by this stream. This method is equivalent to:
+     * <pre>{@code
+     *     CharArrayWriter writer = new CharArrayWriter();
+     *     writeTo(writer);
+     *     return writer.toCharArray();
+     * }</pre>
+     * This is a terminal method.
+     *
+     * @return a char array which is the result of data processing by this stream
+     * @throws IORuntimeException thrown for any IO problems
+     */
+    default char[] writeToCharArray() throws IORuntimeException {
+        CharArrayWriter writer = new CharArrayWriter();
+        writeTo(writer);
+        return writer.toCharArray();
+    }
+
+    /**
+     * Returns a char buffer which is the result of data processing by this stream. This method is equivalent to:
+     * <pre>{@code
+     *     return CharBuffer.wrap(writeToCharArray());
+     * }</pre>
+     * This is a terminal method.
+     *
+     * @return a char buffer which is the result of data processing by this stream
+     * @throws IORuntimeException thrown for any IO problems
+     */
+    default CharBuffer writeToCharBuffer() throws IORuntimeException {
+        return CharBuffer.wrap(writeToCharArray());
+    }
+
+    /**
+     * Returns a string which is built from the result of data processing by this stream. This method is equivalent to:
+     * <pre>{@code
+     *     return new String(writeToCharArray());
+     * }</pre>
+     * This is a terminal method.
+     *
+     * @return a string which is built from the result of data processing by this stream
+     * @throws IORuntimeException thrown for any IO problems
+     */
+    default String writeToString() throws IORuntimeException {
+        return new String(writeToCharArray());
+    }
 
     /**
      * Returns a reader which encompasses the entire data processing. The reader is lazy, read operations on the source

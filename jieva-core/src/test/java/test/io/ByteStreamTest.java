@@ -110,6 +110,15 @@ public class ByteStreamTest {
             })).writeTo();
         }
 
+        {
+            // writeTo
+            String str = "1234567890qwertyuiop[]中文";
+            byte[] strBytes = str.getBytes(JieChars.UTF_8);
+            assertEquals(ByteStream.from(strBytes).writeToByteArray(), strBytes);
+            assertEquals(ByteStream.from(strBytes).writeToByteBuffer(), ByteBuffer.wrap(strBytes));
+            assertEquals(ByteStream.from(strBytes).writeToString(JieChars.UTF_8), str);
+        }
+
         // error
         expectThrows(IORuntimeException.class, () -> testBytesStream(666, 0, 0));
         expectThrows(IORuntimeException.class, () -> ByteStream.from((InputStream) null).writeTo((OutputStream) null));

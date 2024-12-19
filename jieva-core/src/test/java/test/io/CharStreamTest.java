@@ -123,6 +123,15 @@ public class CharStreamTest {
             })).writeTo();
         }
 
+        {
+            // writeTo
+            String str = "1234567890qwertyuiop[]中文";
+            char[] strChars = str.toCharArray();
+            assertEquals(CharStream.from(str).writeToCharArray(), strChars);
+            assertEquals(CharStream.from(str).writeToCharBuffer(), CharBuffer.wrap(strChars));
+            assertEquals(CharStream.from(str).writeToString(), str);
+        }
+
         // error
         expectThrows(IORuntimeException.class, () -> testCharsStream(666, 0, 0));
         expectThrows(IORuntimeException.class, () -> CharStream.from((Reader) null).writeTo((Appendable) null));
