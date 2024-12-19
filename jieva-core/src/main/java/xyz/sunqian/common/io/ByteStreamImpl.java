@@ -17,7 +17,7 @@ final class ByteStreamImpl implements ByteStream {
     private final Object source;
     private Object dest;
     private long readLimit = -1;
-    private int blockSize = JieIO.BUFFER_SIZE;
+    private int readBlockSize = JieIO.BUFFER_SIZE;
     private boolean endOnZeroRead = false;
     private List<Encoder> encoders;
 
@@ -40,11 +40,11 @@ final class ByteStreamImpl implements ByteStream {
     }
 
     @Override
-    public ByteStream readBlockSize(int blockSize) {
-        if (blockSize <= 0) {
-            throw new IORuntimeException("blockSize must > 0!");
+    public ByteStream readBlockSize(int readBlockSize) {
+        if (readBlockSize <= 0) {
+            throw new IORuntimeException("readBlockSize must > 0!");
         }
-        this.blockSize = blockSize;
+        this.readBlockSize = readBlockSize;
         return this;
     }
 
@@ -233,9 +233,9 @@ final class ByteStreamImpl implements ByteStream {
 
     private int getActualBlockSize() {
         if (readLimit < 0) {
-            return blockSize;
+            return readBlockSize;
         }
-        return (int) Math.min(readLimit, blockSize);
+        return (int) Math.min(readLimit, readBlockSize);
     }
 
     private long readTo(BufferIn in, BufferOut out) throws Exception {
@@ -258,7 +258,7 @@ final class ByteStreamImpl implements ByteStream {
             count += readSize;
             if (encoder != null) {
                 ByteBuffer encoded;
-                if (readSize < blockSize) {
+                if (readSize < readBlockSize) {
                     encoded = encode(encoder, buf, true);
                     out.write(encoded);
                     break;
@@ -268,7 +268,7 @@ final class ByteStreamImpl implements ByteStream {
                 }
             } else {
                 out.write(buf);
-                if (readSize < blockSize) {
+                if (readSize < readBlockSize) {
                     break;
                 }
             }
@@ -360,7 +360,7 @@ final class ByteStreamImpl implements ByteStream {
 
         @Override
         public ByteBuffer read() {
-            int readSize = remaining < 0 ? blockSize : (int) Math.min(remaining, blockSize);
+            int readSize = remaining < 0 ? readBlockSize : (int) Math.min(remaining, readBlockSize);
             if (readSize <= 0) {
                 return JieBytes.emptyBuffer();
             }
@@ -389,7 +389,7 @@ final class ByteStreamImpl implements ByteStream {
 
         @Override
         public ByteBuffer read() {
-            int readSize = remaining < 0 ? blockSize : (int) Math.min(remaining, blockSize);
+            int readSize = remaining < 0 ? readBlockSize : (int) Math.min(remaining, readBlockSize);
             if (readSize <= 0) {
                 return JieBytes.emptyBuffer();
             }

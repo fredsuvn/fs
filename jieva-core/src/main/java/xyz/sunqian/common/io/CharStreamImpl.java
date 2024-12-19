@@ -18,7 +18,7 @@ final class CharStreamImpl implements CharStream {
     private final Object source;
     private Object dest;
     private long readLimit = -1;
-    private int blockSize = JieIO.BUFFER_SIZE;
+    private int readBlockSize = JieIO.BUFFER_SIZE;
     private boolean endOnZeroRead = false;
     private List<Encoder> encoders;
 
@@ -45,11 +45,11 @@ final class CharStreamImpl implements CharStream {
     }
 
     @Override
-    public CharStream readBlockSize(int blockSize) {
-        if (blockSize <= 0) {
-            throw new IORuntimeException("blockSize must > 0!");
+    public CharStream readBlockSize(int readBlockSize) {
+        if (readBlockSize <= 0) {
+            throw new IORuntimeException("readBlockSize must > 0!");
         }
-        this.blockSize = blockSize;
+        this.readBlockSize = readBlockSize;
         return this;
     }
 
@@ -275,9 +275,9 @@ final class CharStreamImpl implements CharStream {
 
     private int getActualBlockSize() {
         if (readLimit < 0) {
-            return blockSize;
+            return readBlockSize;
         }
-        return (int) Math.min(readLimit, blockSize);
+        return (int) Math.min(readLimit, readBlockSize);
     }
 
     private long readTo(BufferIn in, BufferOut out) throws Exception {
@@ -300,7 +300,7 @@ final class CharStreamImpl implements CharStream {
             count += readSize;
             if (encoder != null) {
                 CharBuffer encoded;
-                if (readSize < blockSize) {
+                if (readSize < readBlockSize) {
                     encoded = encode(encoder, buf, true);
                     out.write(encoded);
                     break;
@@ -310,7 +310,7 @@ final class CharStreamImpl implements CharStream {
                 }
             } else {
                 out.write(buf);
-                if (readSize < blockSize) {
+                if (readSize < readBlockSize) {
                     break;
                 }
             }
@@ -402,7 +402,7 @@ final class CharStreamImpl implements CharStream {
 
         @Override
         public CharBuffer read() {
-            int readSize = remaining < 0 ? blockSize : (int) Math.min(remaining, blockSize);
+            int readSize = remaining < 0 ? readBlockSize : (int) Math.min(remaining, readBlockSize);
             if (readSize <= 0) {
                 return JieChars.emptyBuffer();
             }
@@ -431,7 +431,7 @@ final class CharStreamImpl implements CharStream {
 
         @Override
         public CharBuffer read() {
-            int readSize = remaining < 0 ? blockSize : (int) Math.min(remaining, blockSize);
+            int readSize = remaining < 0 ? readBlockSize : (int) Math.min(remaining, readBlockSize);
             if (readSize <= 0) {
                 return JieChars.emptyBuffer();
             }
@@ -465,7 +465,7 @@ final class CharStreamImpl implements CharStream {
 
         @Override
         public CharBuffer read() {
-            int readSize = remaining < 0 ? blockSize : (int) Math.min(remaining, blockSize);
+            int readSize = remaining < 0 ? readBlockSize : (int) Math.min(remaining, readBlockSize);
             if (readSize <= 0) {
                 return JieChars.emptyBuffer();
             }

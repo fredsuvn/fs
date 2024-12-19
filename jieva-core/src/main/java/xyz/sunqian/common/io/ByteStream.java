@@ -10,7 +10,7 @@ import java.nio.charset.Charset;
  * and finally produces a result or side effect. The following example shows an encoding-then-writing operation:
  * <pre>{@code
  *     ByteStream.from(input)
- *         .blockSize(1024)
+ *         .readBlockSize(1024)
  *         .encoder(en1)
  *         .encoder(en2, 64)
  *         .writeTo(output);
@@ -154,10 +154,10 @@ public interface ByteStream {
      * <p>
      * This is an optional setting method.
      *
-     * @param blockSize the number of bytes for each read operation from data source
+     * @param readBlockSize the number of bytes for each read operation from data source
      * @return this
      */
-    ByteStream readBlockSize(int blockSize);
+    ByteStream readBlockSize(int readBlockSize);
 
     /**
      * Sets whether to treat a read operation from data source that returns 0 bytes as an indication to break the read
@@ -187,7 +187,7 @@ public interface ByteStream {
      *     return bytes;
      * }</pre>
      * Size of passed data is uncertain, if it is the first encoder, the size may match the {@link #readBlockSize(int)}.
-     * (except for the last reading, which may be smaller than the block size). To a certain size, try
+     * (except for the last reading, which may be smaller than the read block size). To a certain size, try
      * {@link #encoder(Encoder, int)}.
      * <p>
      * Passed {@link ByteBuffer} object, which is the first argument of {@link Encoder#encode(ByteBuffer, boolean)}, can
