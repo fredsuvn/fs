@@ -44,31 +44,31 @@ public class CharProcessorTest {
             StringBuilder bb = new StringBuilder();
             long c;
             c = CharProcessor.from(new char[0]).writeTo(bb);
-            assertEquals(c, -1);
+            assertEquals(c, 0);
             assertEquals(bb.toString().toCharArray(), new char[0]);
             c = CharProcessor.from(new char[0]).writeTo(new char[0]);
-            assertEquals(c, -1);
+            assertEquals(c, 0);
             assertEquals(bb.toString().toCharArray(), new char[0]);
             c = CharProcessor.from(new char[0]).writeTo(CharBuffer.allocate(0));
-            assertEquals(c, -1);
+            assertEquals(c, 0);
             assertEquals(bb.toString().toCharArray(), new char[0]);
             c = CharProcessor.from(JieChars.emptyBuffer()).writeTo(bb);
-            assertEquals(c, -1);
+            assertEquals(c, 0);
             assertEquals(bb.toString().toCharArray(), new char[0]);
             c = CharProcessor.from(JieChars.emptyBuffer()).writeTo(new char[0]);
-            assertEquals(c, -1);
+            assertEquals(c, 0);
             assertEquals(bb.toString().toCharArray(), new char[0]);
             c = CharProcessor.from(JieChars.emptyBuffer()).writeTo(CharBuffer.allocate(0));
-            assertEquals(c, -1);
+            assertEquals(c, 0);
             assertEquals(bb.toString().toCharArray(), new char[0]);
             c = CharProcessor.from(new CharArrayReader(new char[0])).writeTo(bb);
-            assertEquals(c, -1);
+            assertEquals(c, 0);
             assertEquals(bb.toString().toCharArray(), new char[0]);
             c = CharProcessor.from("").writeTo(new char[0]);
-            assertEquals(c, -1);
+            assertEquals(c, 0);
             assertEquals(bb.toString().toCharArray(), new char[0]);
             c = CharProcessor.from("").writeTo(bb);
-            assertEquals(c, -1);
+            assertEquals(c, 0);
             assertEquals(bb.toString().toCharArray(), new char[0]);
         }
 
@@ -79,12 +79,12 @@ public class CharProcessorTest {
             c = CharProcessor.from(new NioReader()).endOnZeroRead(true)
                 .encoder((data, end) -> data)
                 .writeTo(bb);
-            assertEquals(c, -1);
+            assertEquals(c, 0);
             assertEquals(bb.toString().toCharArray(), new char[0]);
             c = CharProcessor.from(new NioReader(new CharArrayReader(new char[0]))).endOnZeroRead(false)
                 .encoder((data, end) -> data)
                 .writeTo(bb);
-            assertEquals(c, -1);
+            assertEquals(c, 0);
             assertEquals(bb.toString().toCharArray(), new char[0]);
         }
 

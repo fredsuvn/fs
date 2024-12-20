@@ -41,25 +41,25 @@ public class ByteProcessorTest {
             BytesBuilder bb = new BytesBuilder();
             long c;
             c = ByteProcessor.from(new byte[0]).writeTo(bb);
-            assertEquals(c, -1);
+            assertEquals(c, 0);
             assertEquals(bb.toByteArray(), new byte[0]);
             c = ByteProcessor.from(new byte[0]).writeTo(new byte[0]);
-            assertEquals(c, -1);
+            assertEquals(c, 0);
             assertEquals(bb.toByteArray(), new byte[0]);
             c = ByteProcessor.from(new byte[0]).writeTo(ByteBuffer.allocate(0));
-            assertEquals(c, -1);
+            assertEquals(c, 0);
             assertEquals(bb.toByteArray(), new byte[0]);
             c = ByteProcessor.from(JieBytes.emptyBuffer()).writeTo(bb);
-            assertEquals(c, -1);
+            assertEquals(c, 0);
             assertEquals(bb.toByteArray(), new byte[0]);
             c = ByteProcessor.from(JieBytes.emptyBuffer()).writeTo(new byte[0]);
-            assertEquals(c, -1);
+            assertEquals(c, 0);
             assertEquals(bb.toByteArray(), new byte[0]);
             c = ByteProcessor.from(JieBytes.emptyBuffer()).writeTo(ByteBuffer.allocate(0));
-            assertEquals(c, -1);
+            assertEquals(c, 0);
             assertEquals(bb.toByteArray(), new byte[0]);
             c = ByteProcessor.from(new ByteArrayInputStream(new byte[0])).writeTo(bb);
-            assertEquals(c, -1);
+            assertEquals(c, 0);
             assertEquals(bb.toByteArray(), new byte[0]);
         }
 
@@ -70,12 +70,12 @@ public class ByteProcessorTest {
             c = ByteProcessor.from(new NioIn()).endOnZeroRead(true)
                 .encoder((data, end) -> data)
                 .writeTo(bb);
-            assertEquals(c, -1);
+            assertEquals(c, 0);
             assertEquals(bb.toByteArray(), new byte[0]);
             c = ByteProcessor.from(new NioIn(new ByteArrayInputStream(new byte[0]))).endOnZeroRead(false)
                 .encoder((data, end) -> data)
                 .writeTo(bb);
-            assertEquals(c, -1);
+            assertEquals(c, 0);
             assertEquals(bb.toByteArray(), new byte[0]);
         }
 

@@ -153,36 +153,24 @@ final class ByteProcessorImpl implements ByteProcessor {
     }
 
     private long bytesToBytes(byte[] src, byte[] dst) {
-        if (src.length == 0) {
-            return -1;
-        }
         int len = getDirectLen(src.length);
         System.arraycopy(src, 0, dst, 0, len);
         return len;
     }
 
     private long bytesToBuffer(byte[] src, ByteBuffer dst) {
-        if (src.length == 0) {
-            return -1;
-        }
         int len = getDirectLen(src.length);
         dst.put(src, 0, len);
         return len;
     }
 
     private long bufferToBytes(ByteBuffer src, byte[] dst) {
-        if (src.remaining() == 0) {
-            return -1;
-        }
         int len = getDirectLen(src.remaining());
         src.get(dst, 0, len);
         return len;
     }
 
     private long bufferToBuffer(ByteBuffer src, ByteBuffer dst) {
-        if (src.remaining() == 0) {
-            return -1;
-        }
         int len = getDirectLen(src.remaining());
         ByteBuffer share = src.slice();
         share.limit(len);
@@ -239,44 +227,58 @@ final class ByteProcessorImpl implements ByteProcessor {
     }
 
     private long readTo(BufferIn in, BufferOut out) throws Exception {
+        EnReader enReader = new EnReader(in);
         long count = 0;
         while (true) {
-            ByteBuffer buf = in.read();
-            if (buf == null && count == 0) {
-                return -1;
+            ByteBuffer buffer = enReader.read();
+            if (JieBytes.isEmpty(buffer)) {
+                return count;
             }
-            buf = buf == null ? JieBytes.emptyBuffer() : buf;
-            Encoder encoder = buildEncoder();
-            if (!buf.hasRemaining()) {
-                if (encoder != null) {
-                    ByteBuffer encoded = encode(encoder, buf, true);
-                    out.write(encoded);
-                }
-                break;
-            }
-            int readSize = buf.remaining();
-            count += readSize;
-            if (encoder != null) {
-                ByteBuffer encoded;
-                if (readSize < readBlockSize) {
-                    encoded = encode(encoder, buf, true);
-                    out.write(encoded);
-                    break;
-                } else {
-                    encoded = encode(encoder, buf, false);
-                    out.write(encoded);
-                }
-            } else {
-                out.write(buf);
-                if (readSize < readBlockSize) {
-                    break;
-                }
-            }
+            count += buffer.remaining();
+            out.write(buffer);
         }
-        return count;
+        // long count = 0;
+        // while (true) {
+        //     ByteBuffer buf = in.read();
+        //     if (buf == null && count == 0) {
+        //         return count;
+        //     }
+        //     buf = Jie.nonNull(buf, JieBytes.emptyBuffer());
+        //     Encoder encoder = buildEncoder();
+        //     if (!buf.hasRemaining()) {
+        //         if (encoder != null) {
+        //             ByteBuffer encoded = encode(encoder, buf, true);
+        //             out.write(encoded);
+        //         }
+        //         break;
+        //     }
+        //     int readSize = buf.remaining();
+        //     count += readSize;
+        //     if (encoder != null) {
+        //         ByteBuffer encoded;
+        //         if (readSize < readBlockSize) {
+        //             encoded = encode(encoder, buf, true);
+        //             out.write(encoded);
+        //             break;
+        //         } else {
+        //             encoded = encode(encoder, buf, false);
+        //             out.write(encoded);
+        //         }
+        //     } else {
+        //         out.write(buf);
+        //         if (readSize < readBlockSize) {
+        //             break;
+        //         }
+        //     }
+        // }
+        // return count;
     }
 
-    private ByteBuffer encode(Encoder encoder, ByteBuffer buf, boolean end) {
+    @Nullable
+    private ByteBuffer encode(@Nullable Encoder encoder, ByteBuffer buf, boolean end) {
+        if (encoder == null) {
+            return buf;
+        }
         try {
             return encoder.encode(buf, end);
         } catch (Exception e) {
@@ -285,12 +287,77 @@ final class ByteProcessorImpl implements ByteProcessor {
     }
 
     private interface BufferIn {
+
+        /*
+         * Note if the return buffer is non-null, it must be non-empty.
+         */
         @Nullable
         ByteBuffer read() throws Exception;
     }
 
     private interface BufferOut {
         void write(ByteBuffer buffer) throws Exception;
+    }
+
+    private final class EnReader {
+
+        private final BufferIn in;
+
+        // null:  break end;
+        // empty: for last empty invocation
+        private ByteBuffer buffer;
+
+        // init when a terminal method has invoked
+        private Encoder en;
+
+        private EnReader(BufferIn in) throws Exception {
+            this.in = in;
+            this.buffer = in.read();
+            if (JieBytes.isEmpty(this.buffer)) {
+                this.buffer = null;
+            }
+        }
+
+        /*
+         * Note if the return buffer is non-null, it must be non-empty.
+         */
+        @Nullable
+        private ByteBuffer read() throws Exception {
+            while (true) {
+                if (buffer == null) {
+                    return null;
+                }
+                Encoder encoder = getEncoder();
+                if (!buffer.hasRemaining()) {
+                    buffer = null;
+                    return encode(encoder, JieBytes.emptyBuffer(), true);
+                }
+                int readSize = buffer.remaining();
+                ByteBuffer encoded;
+                if (readSize < readBlockSize) {
+                    encoded = encode(encoder, buffer, true);
+                    buffer = null;
+                    return encoded;
+                } else {
+                    encoded = encode(encoder, buffer, false);
+                    buffer = in.read();
+                    if (JieBytes.isEmpty(buffer)) {
+                        buffer = JieBytes.emptyBuffer();
+                    }
+                    if (!JieBytes.isEmpty(encoded)) {
+                        return encoded;
+                    }
+                }
+            }
+        }
+
+        @Nullable
+        private Encoder getEncoder() {
+            if (en == null) {
+                en = buildEncoder();
+            }
+            return en;
+        }
     }
 
     private abstract class BaseBufferIn implements BufferIn {
@@ -317,7 +384,7 @@ final class ByteProcessorImpl implements ByteProcessor {
         public ByteBuffer read() throws IOException {
             int readSize = remaining < 0 ? bufSize : (int) Math.min(remaining, bufSize);
             if (readSize == 0) {
-                return JieBytes.emptyBuffer();
+                return null;
             }
             int hasRead = 0;
             byte[] buf = new byte[bufSize];
@@ -354,7 +421,7 @@ final class ByteProcessorImpl implements ByteProcessor {
         public ByteBuffer read() {
             int readSize = remaining < 0 ? readBlockSize : (int) Math.min(remaining, readBlockSize);
             if (readSize <= 0) {
-                return JieBytes.emptyBuffer();
+                return null;
             }
             if (pos >= source.length) {
                 return null;
@@ -383,7 +450,7 @@ final class ByteProcessorImpl implements ByteProcessor {
         public ByteBuffer read() {
             int readSize = remaining < 0 ? readBlockSize : (int) Math.min(remaining, readBlockSize);
             if (readSize <= 0) {
-                return JieBytes.emptyBuffer();
+                return null;
             }
             if (!source.hasRemaining()) {
                 return null;

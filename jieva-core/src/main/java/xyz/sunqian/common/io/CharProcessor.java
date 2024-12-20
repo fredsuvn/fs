@@ -239,12 +239,9 @@ public interface CharProcessor {
     }
 
     /**
-     * Starts data processing and writes processed data into specified destination, returns actual number of read
-     * chars.
-     * <p>
-     * Specifically, if it is detected that the data source has already reached to the end before reading return -1. If
-     * an error is thrown by an {@code encoder}, the error will be wrapped by {@link IOEncodingException} to be thrown,
-     * use {@link Throwable#getCause()} to get it.
+     * Starts data processing and writes processed data into specified destination, returns the actual number of chars
+     * processed, which is typically the number of chars actually read. If an error is thrown by an {@code encoder}, the
+     * error will be wrapped by {@link IOEncodingException} to be thrown, use {@link Throwable#getCause()} to get it.
      * <p>
      * If the source and/or destination is a buffer or reader/writer, its position will be incremented by actual
      * affected length.
@@ -252,19 +249,16 @@ public interface CharProcessor {
      * This is a terminal method.
      *
      * @param dest specified destination to be written
-     * @return actual number of read chars
+     * @return returns the actual number of chars processed, which is typically the number of chars actually read
      * @throws IOEncodingException to wrap the error thrown by encoder
      * @throws IORuntimeException  thrown for any other IO problems
      */
     long writeTo(Appendable dest) throws IOEncodingException, IORuntimeException;
 
     /**
-     * Starts data processing and writes processed data into specified destination, returns actual number of read
-     * chars.
-     * <p>
-     * Specifically, if it is detected that the data source has already reached to the end before reading return -1. If
-     * an error is thrown by an {@code encoder}, the error will be wrapped by {@link IOEncodingException} to be thrown,
-     * use {@link Throwable#getCause()} to get it.
+     * Starts data processing and writes processed data into specified destination, returns the actual number of chars
+     * processed, which is typically the number of chars actually read. If an error is thrown by an {@code encoder}, the
+     * error will be wrapped by {@link IOEncodingException} to be thrown, use {@link Throwable#getCause()} to get it.
      * <p>
      * If the source and/or destination is a buffer or reader/writer, its position will be incremented by actual
      * affected length.
@@ -272,7 +266,7 @@ public interface CharProcessor {
      * This is a terminal method.
      *
      * @param dest specified destination to be written
-     * @return actual number of read chars
+     * @return returns the actual number of chars processed, which is typically the number of chars actually read
      * @throws IOEncodingException to wrap the error thrown by encoder
      * @throws IORuntimeException  thrown for any other IO problems
      */
@@ -280,11 +274,9 @@ public interface CharProcessor {
 
     /**
      * Starts data processing and writes processed data into specified destination (starting from specified start index
-     * up to specified length), returns actual number of read chars.
-     * <p>
-     * Specifically, if it is detected that the data source has already reached to the end before reading return -1. If
-     * an error is thrown by an {@code encoder}, the error will be wrapped by {@link IOEncodingException} to be thrown,
-     * use {@link Throwable#getCause()} to get it.
+     * up to specified length), returns the actual number of chars processed, which is typically the number of chars
+     * actually read. If an error is thrown by an {@code encoder}, the error will be wrapped by
+     * {@link IOEncodingException} to be thrown, use {@link Throwable#getCause()} to get it.
      * <p>
      * If the source and/or destination is a buffer or reader/writer, its position will be incremented by actual
      * affected length.
@@ -294,19 +286,16 @@ public interface CharProcessor {
      * @param dest   specified destination to be written
      * @param offset specified start index
      * @param length specified length
-     * @return actual number of read chars
+     * @return returns the actual number of chars processed, which is typically the number of chars actually read
      * @throws IOEncodingException to wrap the error thrown by encoder
      * @throws IORuntimeException  thrown for any other IO problems
      */
     long writeTo(char[] dest, int offset, int length) throws IOEncodingException, IORuntimeException;
 
     /**
-     * Starts data processing and writes processed data into specified destination, returns actual number of read
-     * chars.
-     * <p>
-     * Specifically, if it is detected that the data source has already reached to the end before reading return -1. If
-     * an error is thrown by an {@code encoder}, the error will be wrapped by {@link IOEncodingException} to be thrown,
-     * use {@link Throwable#getCause()} to get it.
+     * Starts data processing and writes processed data into specified destination, returns the actual number of chars
+     * processed, which is typically the number of chars actually read. If an error is thrown by an {@code encoder}, the
+     * error will be wrapped by {@link IOEncodingException} to be thrown, use {@link Throwable#getCause()} to get it.
      * <p>
      * If the source and/or destination is a buffer or reader/writer, its position will be incremented by actual
      * affected length.
@@ -314,7 +303,7 @@ public interface CharProcessor {
      * This is a terminal method.
      *
      * @param dest specified destination to be written
-     * @return actual number of read chars
+     * @return returns the actual number of chars processed, which is typically the number of chars actually read
      * @throws IOEncodingException to wrap the error thrown by encoder
      * @throws IORuntimeException  thrown for any other IO problems
      */
@@ -322,11 +311,8 @@ public interface CharProcessor {
 
     /**
      * Starts data processing without writing data into destination, returns actual number of read chars. This method is
-     * typically used to produce side effects via the {@code encoder}.
-     * <p>
-     * Specifically, if it is detected that the data source has already reached to the end before reading return -1. If
-     * an error is thrown by an {@code encoder}, the error will be wrapped by {@link IOEncodingException} to be thrown,
-     * use {@link Throwable#getCause()} to get it.
+     * typically used to produce side effects via the {@code encoder}. If an error is thrown by an {@code encoder}, the
+     * error will be wrapped by {@link IOEncodingException} to be thrown, use {@link Throwable#getCause()} to get it.
      * <p>
      * If the source is a buffer or reader/writer, its position will be incremented by actual affected length.
      * <p>

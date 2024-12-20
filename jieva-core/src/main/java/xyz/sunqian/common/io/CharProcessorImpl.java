@@ -1,6 +1,7 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieChars;
 import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.coll.JieArray;
@@ -159,45 +160,30 @@ final class CharProcessorImpl implements CharProcessor {
     }
 
     private long charsToChars(char[] src, char[] dst) {
-        if (src.length == 0) {
-            return -1;
-        }
         int len = getDirectLen(src.length);
         System.arraycopy(src, 0, dst, 0, len);
         return len;
     }
 
     private long charsToBuffer(char[] src, CharBuffer dst) {
-        if (src.length == 0) {
-            return -1;
-        }
         int len = getDirectLen(src.length);
         dst.put(src, 0, len);
         return len;
     }
 
     private long charsToAppender(char[] src, Appendable dst) throws IOException {
-        if (src.length == 0) {
-            return -1;
-        }
         int len = getDirectLen(src.length);
         dst.append(JieString.asChars(src, 0, len));
         return len;
     }
 
     private long bufferToChars(CharBuffer src, char[] dst) {
-        if (src.remaining() == 0) {
-            return -1;
-        }
         int len = getDirectLen(src.remaining());
         src.get(dst, 0, len);
         return len;
     }
 
     private long bufferToAppender(CharBuffer src, Appendable dst) throws IOException {
-        if (src.remaining() == 0) {
-            return -1;
-        }
         int len = getDirectLen(src.remaining());
         int pos = src.position();
         int newPos = pos + len;
@@ -207,9 +193,6 @@ final class CharProcessorImpl implements CharProcessor {
     }
 
     private long charSeqToChars(CharSequence src, char[] dst) throws IOException {
-        if (src.length() == 0) {
-            return -1;
-        }
         int len = getDirectLen(src.length());
         if (src instanceof String) {
             ((String) src).getChars(0, len, dst, 0);
@@ -222,9 +205,6 @@ final class CharProcessorImpl implements CharProcessor {
     }
 
     private long charSeqToAppender(CharSequence src, Appendable dst) throws IOException {
-        if (src.length() == 0) {
-            return -1;
-        }
         int len = getDirectLen(src.length());
         dst.append(src, 0, len);
         return len;
@@ -285,9 +265,9 @@ final class CharProcessorImpl implements CharProcessor {
         while (true) {
             CharBuffer buf = in.read();
             if (buf == null && count == 0) {
-                return -1;
+                return count;
             }
-            buf = buf == null ? JieChars.emptyBuffer() : buf;
+            buf = Jie.nonNull(buf, JieChars.emptyBuffer());
             Encoder encoder = buildEncoder();
             if (!buf.hasRemaining()) {
                 if (encoder != null) {
@@ -327,6 +307,10 @@ final class CharProcessorImpl implements CharProcessor {
     }
 
     private interface BufferIn {
+
+        /*
+         * Note if the return buffer is non-null, it must be non-empty.
+         */
         @Nullable
         CharBuffer read() throws Exception;
     }
@@ -359,7 +343,7 @@ final class CharProcessorImpl implements CharProcessor {
         public CharBuffer read() throws IOException {
             int readSize = remaining < 0 ? bufSize : (int) Math.min(remaining, bufSize);
             if (readSize == 0) {
-                return JieChars.emptyBuffer();
+                return null;
             }
             int hasRead = 0;
             char[] buf = new char[bufSize];
@@ -396,7 +380,7 @@ final class CharProcessorImpl implements CharProcessor {
         public CharBuffer read() {
             int readSize = remaining < 0 ? readBlockSize : (int) Math.min(remaining, readBlockSize);
             if (readSize <= 0) {
-                return JieChars.emptyBuffer();
+                return null;
             }
             if (pos >= source.length) {
                 return null;
@@ -425,7 +409,7 @@ final class CharProcessorImpl implements CharProcessor {
         public CharBuffer read() {
             int readSize = remaining < 0 ? readBlockSize : (int) Math.min(remaining, readBlockSize);
             if (readSize <= 0) {
-                return JieChars.emptyBuffer();
+                return null;
             }
             if (!source.hasRemaining()) {
                 return null;
@@ -459,7 +443,7 @@ final class CharProcessorImpl implements CharProcessor {
         public CharBuffer read() {
             int readSize = remaining < 0 ? readBlockSize : (int) Math.min(remaining, readBlockSize);
             if (readSize <= 0) {
-                return JieChars.emptyBuffer();
+                return null;
             }
             if (pos >= source.length()) {
                 return null;

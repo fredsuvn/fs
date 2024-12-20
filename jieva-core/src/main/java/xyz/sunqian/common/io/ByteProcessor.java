@@ -229,12 +229,9 @@ public interface ByteProcessor {
     }
 
     /**
-     * Starts data processing and writes processed data into specified destination, returns actual number of read
-     * bytes.
-     * <p>
-     * Specifically, if it is detected that the data source has already reached to the end before reading, return -1. If
-     * an error is thrown by an {@code encoder}, the error will be wrapped by {@link IOEncodingException} to be thrown,
-     * use {@link Throwable#getCause()} to get it.
+     * Starts data processing and writes processed data into specified destination, returns the actual number of bytes
+     * processed, which is typically the number of bytes actually read. If an error is thrown by an {@code encoder}, the
+     * error will be wrapped by {@link IOEncodingException} to be thrown, use {@link Throwable#getCause()} to get it.
      * <p>
      * If the source and/or destination is a buffer or stream, its position will be incremented by actual affected
      * length.
@@ -242,19 +239,16 @@ public interface ByteProcessor {
      * This is a terminal method.
      *
      * @param dest specified destination to be written
-     * @return actual number of read bytes
+     * @return returns the actual number of bytes processed, which is typically the number of bytes actually read
      * @throws IOEncodingException to wrap the error thrown by encoder
      * @throws IORuntimeException  thrown for any other IO problems
      */
     long writeTo(OutputStream dest) throws IOEncodingException, IORuntimeException;
 
     /**
-     * Starts data processing and writes processed data into specified destination, returns actual number of read
-     * bytes.
-     * <p>
-     * Specifically, if it is detected that the data source has already reached to the end before reading return -1. If
-     * an error is thrown by an {@code encoder}, the error will be wrapped by {@link IOEncodingException} to be thrown,
-     * use {@link Throwable#getCause()} to get it.
+     * Starts data processing and writes processed data into specified destination, returns the actual number of bytes
+     * processed, which is typically the number of bytes actually read. If an error is thrown by an {@code encoder}, the
+     * error will be wrapped by {@link IOEncodingException} to be thrown, use {@link Throwable#getCause()} to get it.
      * <p>
      * If the source and/or destination is a buffer or stream, its position will be incremented by actual affected
      * length.
@@ -262,7 +256,7 @@ public interface ByteProcessor {
      * This is a terminal method.
      *
      * @param dest specified destination to be written
-     * @return actual number of read bytes
+     * @return returns the actual number of bytes processed, which is typically the number of bytes actually read
      * @throws IOEncodingException to wrap the error thrown by encoder
      * @throws IORuntimeException  thrown for any other IO problems
      */
@@ -270,11 +264,9 @@ public interface ByteProcessor {
 
     /**
      * Starts data processing and writes processed data into specified destination (starting from specified start index
-     * up to specified length), returns actual number of read bytes.
-     * <p>
-     * Specifically, if it is detected that the data source has already reached to the end before reading return -1. If
-     * an error is thrown by an {@code encoder}, the error will be wrapped by {@link IOEncodingException} to be thrown,
-     * use {@link Throwable#getCause()} to get it.
+     * up to specified length), returns the actual number of bytes processed, which is typically the number of bytes
+     * actually read. If an error is thrown by an {@code encoder}, the error will be wrapped by
+     * {@link IOEncodingException} to be thrown, use {@link Throwable#getCause()} to get it.
      * <p>
      * If the source and/or destination is a buffer or stream, its position will be incremented by actual affected
      * length.
@@ -284,19 +276,16 @@ public interface ByteProcessor {
      * @param dest   specified destination to be written
      * @param offset specified start index
      * @param length specified length
-     * @return actual number of read bytes
+     * @return returns the actual number of bytes processed, which is typically the number of bytes actually read
      * @throws IOEncodingException to wrap the error thrown by encoder
      * @throws IORuntimeException  thrown for any other IO problems
      */
     long writeTo(byte[] dest, int offset, int length) throws IOEncodingException, IORuntimeException;
 
     /**
-     * Starts data processing and writes processed data into specified destination, returns actual number of read
-     * bytes.
-     * <p>
-     * Specifically, if it is detected that the data source has already reached to the end before reading return -1. If
-     * an error is thrown by an {@code encoder}, the error will be wrapped by {@link IOEncodingException} to be thrown,
-     * use {@link Throwable#getCause()} to get it.
+     * Starts data processing and writes processed data into specified destination, returns the actual number of bytes
+     * processed, which is typically the number of bytes actually read. If an error is thrown by an {@code encoder}, the
+     * error will be wrapped by {@link IOEncodingException} to be thrown, use {@link Throwable#getCause()} to get it.
      * <p>
      * If the source and/or destination is a buffer or stream, its position will be incremented by actual affected
      * length.
@@ -304,7 +293,7 @@ public interface ByteProcessor {
      * This is a terminal method.
      *
      * @param dest specified destination to be written
-     * @return actual number of read bytes
+     * @return returns the actual number of bytes processed, which is typically the number of bytes actually read
      * @throws IOEncodingException to wrap the error thrown by encoder
      * @throws IORuntimeException  thrown for any other IO problems
      */
@@ -312,11 +301,8 @@ public interface ByteProcessor {
 
     /**
      * Starts data processing without writing data into destination, returns actual number of read bytes. This method is
-     * typically used to produce side effects via the {@code encoder}.
-     * <p>
-     * Specifically, if it is detected that the data source has already reached to the end before reading return -1. If
-     * an error is thrown by an {@code encoder}, the error will be wrapped by {@link IOEncodingException} to be thrown,
-     * use {@link Throwable#getCause()} to get it.
+     * typically used to produce side effects via the {@code encoder}. If an error is thrown by an {@code encoder}, the
+     * error will be wrapped by {@link IOEncodingException} to be thrown, use {@link Throwable#getCause()} to get it.
      * <p>
      * If the source is a buffer or stream, its position will be incremented by actual affected length.
      * <p>
