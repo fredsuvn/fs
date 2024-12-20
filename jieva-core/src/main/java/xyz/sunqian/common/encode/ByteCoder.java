@@ -1,6 +1,6 @@
 package xyz.sunqian.common.encode;
 
-import xyz.sunqian.common.io.ByteProcessor;
+import xyz.sunqian.common.io.BytesProcessor;
 
 /**
  * Super interface for encoding and decoding.
@@ -32,12 +32,12 @@ public interface ByteCoder {
     int getBlockSize();
 
     /**
-     * Returns a new {@link ByteProcessor.Encoder} which encapsulates current coding logic. Note
-     * {@link ByteProcessor.Encoder} may require specified block size.
+     * Returns a new {@link BytesProcessor.Encoder} which encapsulates current coding logic. Note
+     * {@link BytesProcessor.Encoder} may require specified block size.
      *
-     * @return a {@link ByteProcessor.Encoder} with current coding logic
-     * @see ByteProcessor
-     * @see ByteProcessor.Encoder
+     * @return a {@link BytesProcessor.Encoder} with current coding logic
+     * @see BytesProcessor
+     * @see BytesProcessor.Encoder
      */
-    ByteProcessor.Encoder streamEncoder();
+    BytesProcessor.Encoder streamEncoder();
 }

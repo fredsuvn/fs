@@ -1,7 +1,8 @@
 package xyz.sunqian.common.io;
 
 /**
- * This exception is used to wrap exceptions thrown by {@link ByteProcessor.Encoder} or {@link CharProcessor.Encoder}.
+ * This exception is used for IO encoding error, such as to wrap exceptions thrown from {@link BytesProcessor.Encoder}
+ * or {@link CharsProcessor.Encoder}.
  *
  * @author sunqian
  */

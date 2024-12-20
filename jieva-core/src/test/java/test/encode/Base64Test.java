@@ -7,7 +7,7 @@ import xyz.sunqian.common.base.JieBytes;
 import xyz.sunqian.common.base.JieChars;
 import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.encode.*;
-import xyz.sunqian.common.io.ByteProcessor;
+import xyz.sunqian.common.io.BytesProcessor;
 import xyz.sunqian.common.io.IOEncodingException;
 import xyz.sunqian.common.io.JieIO;
 
@@ -206,7 +206,8 @@ public class Base64Test {
             // error
             if (data.length > 0) {
                 expectThrows(EncodingException.class, () -> encoder.encode(data, new byte[0]));
-                expectThrows(EncodingException.class, () -> encoder.encode(ByteBuffer.wrap(data), ByteBuffer.wrap(new byte[0])));
+                expectThrows(EncodingException.class, () ->
+                    encoder.encode(ByteBuffer.wrap(data), ByteBuffer.wrap(new byte[0])));
             }
         }
     }
@@ -242,7 +243,8 @@ public class Base64Test {
         {
             // direct
             ByteBuffer b1 = encoder.encode(JieBytes.copyBuffer(data, true));
-            ByteBuffer b2 = ByteBuffer.wrap(apacheEncoder.encode(JieBytes.copyBytes(JieBytes.copyBuffer(data, true))));
+            ByteBuffer b2 =
+                ByteBuffer.wrap(apacheEncoder.encode(JieBytes.copyBytes(JieBytes.copyBuffer(data, true))));
             assertEquals(b1, b2);
             assertEquals(JieBytes.copyBytes(b1), JieBytes.copyBytes(b2));
         }
@@ -282,7 +284,8 @@ public class Base64Test {
             // error
             if (data.length > 0) {
                 expectThrows(EncodingException.class, () -> encoder.encode(data, new byte[0]));
-                expectThrows(EncodingException.class, () -> encoder.encode(ByteBuffer.wrap(data), ByteBuffer.wrap(new byte[0])));
+                expectThrows(EncodingException.class, () ->
+                    encoder.encode(ByteBuffer.wrap(data), ByteBuffer.wrap(new byte[0])));
             }
         }
     }
@@ -290,72 +293,72 @@ public class Base64Test {
     private void testByteStreamEncoder(byte[] data, JieBase64.Encoder encoder, byte[] enData) {
         {
             ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-            ByteProcessor byteProcessor = ByteProcessor.from(data).encoder(encoder.streamEncoder());
-            int readNum = (int) byteProcessor.writeTo(bytesOut);
+            BytesProcessor bp = BytesProcessor.from(data).encoder(encoder.streamEncoder());
+            int readNum = (int) bp.writeTo(bytesOut);
             assertEquals(readNum, data.length == 0 ? -1 : data.length);
             assertEquals(bytesOut.toByteArray(), enData);
         }
         {
             ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-            ByteProcessor byteProcessor = ByteProcessor.from(data).readBlockSize(56).encoder(encoder.streamEncoder());
-            int readNum = (int) byteProcessor.writeTo(bytesOut);
+            BytesProcessor bp = BytesProcessor.from(data).readBlockSize(56).encoder(encoder.streamEncoder());
+            int readNum = (int) bp.writeTo(bytesOut);
             assertEquals(readNum, data.length == 0 ? -1 : data.length);
             assertEquals(bytesOut.toByteArray(), enData);
         }
         {
             ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-            ByteProcessor byteProcessor = ByteProcessor.from(data).readBlockSize(57).encoder(encoder.streamEncoder());
-            int readNum = (int) byteProcessor.writeTo(bytesOut);
+            BytesProcessor bp = BytesProcessor.from(data).readBlockSize(57).encoder(encoder.streamEncoder());
+            int readNum = (int) bp.writeTo(bytesOut);
             assertEquals(readNum, data.length == 0 ? -1 : data.length);
             assertEquals(bytesOut.toByteArray(), enData);
         }
         {
             ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-            ByteProcessor byteProcessor = ByteProcessor.from(data).readBlockSize(58).encoder(encoder.streamEncoder());
-            int readNum = (int) byteProcessor.writeTo(bytesOut);
+            BytesProcessor bp = BytesProcessor.from(data).readBlockSize(58).encoder(encoder.streamEncoder());
+            int readNum = (int) bp.writeTo(bytesOut);
             assertEquals(readNum, data.length == 0 ? -1 : data.length);
             assertEquals(bytesOut.toByteArray(), enData);
         }
         {
             ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-            ByteProcessor byteProcessor = ByteProcessor.from(data).readBlockSize(47).encoder(encoder.streamEncoder());
-            int readNum = (int) byteProcessor.writeTo(bytesOut);
+            BytesProcessor bp = BytesProcessor.from(data).readBlockSize(47).encoder(encoder.streamEncoder());
+            int readNum = (int) bp.writeTo(bytesOut);
             assertEquals(readNum, data.length == 0 ? -1 : data.length);
             assertEquals(bytesOut.toByteArray(), enData);
         }
         {
             ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-            ByteProcessor byteProcessor = ByteProcessor.from(data).readBlockSize(48).encoder(encoder.streamEncoder());
-            int readNum = (int) byteProcessor.writeTo(bytesOut);
+            BytesProcessor bp = BytesProcessor.from(data).readBlockSize(48).encoder(encoder.streamEncoder());
+            int readNum = (int) bp.writeTo(bytesOut);
             assertEquals(readNum, data.length == 0 ? -1 : data.length);
             assertEquals(bytesOut.toByteArray(), enData);
         }
         {
             ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-            ByteProcessor byteProcessor = ByteProcessor.from(data).readBlockSize(49).encoder(encoder.streamEncoder());
-            int readNum = (int) byteProcessor.writeTo(bytesOut);
+            BytesProcessor bp = BytesProcessor.from(data).readBlockSize(49).encoder(encoder.streamEncoder());
+            int readNum = (int) bp.writeTo(bytesOut);
             assertEquals(readNum, data.length == 0 ? -1 : data.length);
             assertEquals(bytesOut.toByteArray(), enData);
         }
         {
             ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-            ByteProcessor byteProcessor = ByteProcessor.from(data).readBlockSize(480).encoder(encoder.streamEncoder());
-            int readNum = (int) byteProcessor.writeTo(bytesOut);
+            BytesProcessor bp = BytesProcessor.from(data).readBlockSize(480).encoder(encoder.streamEncoder());
+            int readNum = (int) bp.writeTo(bytesOut);
             assertEquals(readNum, data.length == 0 ? -1 : data.length);
             assertEquals(bytesOut.toByteArray(), enData);
         }
         {
             ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-            ByteProcessor byteProcessor = ByteProcessor.from(data).readBlockSize(233).encoder(encoder.streamEncoder());
-            int readNum = (int) byteProcessor.writeTo(bytesOut);
+            BytesProcessor bp = BytesProcessor.from(data).readBlockSize(233).encoder(encoder.streamEncoder());
+            int readNum = (int) bp.writeTo(bytesOut);
             assertEquals(readNum, data.length == 0 ? -1 : data.length);
             assertEquals(bytesOut.toByteArray(), enData);
         }
         for (int i = 1; i < 10; i++) {
             {
                 ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-                ByteProcessor byteProcessor = ByteProcessor.from(data).readBlockSize(i).encoder(encoder.streamEncoder());
-                int readNum = (int) byteProcessor.writeTo(bytesOut);
+                BytesProcessor bp = BytesProcessor.from(data).readBlockSize(i).encoder(encoder.streamEncoder());
+                int readNum = (int) bp.writeTo(bytesOut);
                 assertEquals(readNum, data.length == 0 ? -1 : data.length);
                 assertEquals(bytesOut.toByteArray(), enData);
             }
@@ -398,7 +401,8 @@ public class Base64Test {
             JieBase64.lineEncoder(16, new byte[]{'\t'}, true, true, true);
         byte[] src = JieRandom.fill(new byte[34]);
         byte[] enSrc = encoder.encode(src);
-        byte[] enApache = new org.apache.commons.codec.binary.Base64(16, new byte[]{'\t'}, true).encode(src);
+        byte[] enApache =
+            new org.apache.commons.codec.binary.Base64(16, new byte[]{'\t'}, true).encode(src);
         byte[] fixApache = new byte[enSrc.length];
         System.arraycopy(enApache, 0, fixApache, 0, 48);
         fixApache[48] = '=';
@@ -554,22 +558,25 @@ public class Base64Test {
             ByteArrayOutputStream bytesOut2 = new ByteArrayOutputStream();
             {
                 bytesOut2.reset();
-                ByteProcessor byteProcessor = ByteProcessor.from(data).readBlockSize(encoder.getBlockSize()).encoder(encoder.streamEncoder());
-                int readNum = (int) byteProcessor.writeTo(bytesOut2);
+                BytesProcessor bp = BytesProcessor.from(data).readBlockSize(encoder.getBlockSize())
+                    .encoder(encoder.streamEncoder());
+                int readNum = (int) bp.writeTo(bytesOut2);
                 assertEquals(readNum, data.length == 0 ? -1 : data.length);
                 assertEquals(bytesOut.toByteArray(), bytesOut2.toByteArray());
             }
             {
                 bytesOut2.reset();
-                ByteProcessor byteProcessor = ByteProcessor.from(data).readBlockSize(encoder.getBlockSize() * 2).encoder(encoder.streamEncoder());
-                int readNum = (int) byteProcessor.writeTo(bytesOut2);
+                BytesProcessor bp = BytesProcessor.from(data).readBlockSize(encoder.getBlockSize() * 2)
+                    .encoder(encoder.streamEncoder());
+                int readNum = (int) bp.writeTo(bytesOut2);
                 assertEquals(readNum, data.length == 0 ? -1 : data.length);
                 assertEquals(bytesOut.toByteArray(), bytesOut2.toByteArray());
             }
             {
                 bytesOut2.reset();
-                ByteProcessor byteProcessor = ByteProcessor.from(data).readBlockSize(encoder.getBlockSize() * 20).encoder(encoder.streamEncoder());
-                int readNum = (int) byteProcessor.writeTo(bytesOut2);
+                BytesProcessor bp = BytesProcessor.from(data).readBlockSize(encoder.getBlockSize() * 20)
+                    .encoder(encoder.streamEncoder());
+                int readNum = (int) bp.writeTo(bytesOut2);
                 assertEquals(readNum, data.length == 0 ? -1 : data.length);
                 assertEquals(bytesOut.toByteArray(), bytesOut2.toByteArray());
             }
@@ -579,22 +586,25 @@ public class Base64Test {
             bytesOut2 = new ByteArrayOutputStream();
             {
                 bytesOut2.reset();
-                ByteProcessor byteProcessor = ByteProcessor.from(aBytes).readBlockSize(decoder.getBlockSize()).encoder(decoder.streamEncoder());
-                int readNum = (int) byteProcessor.writeTo(bytesOut2);
+                BytesProcessor bp = BytesProcessor.from(aBytes).readBlockSize(decoder.getBlockSize())
+                    .encoder(decoder.streamEncoder());
+                int readNum = (int) bp.writeTo(bytesOut2);
                 assertEquals(readNum, aBytes.length == 0 ? -1 : aBytes.length);
                 assertEquals(bytesOut.toByteArray(), bytesOut2.toByteArray());
             }
             {
                 bytesOut2.reset();
-                ByteProcessor byteProcessor = ByteProcessor.from(aBytes).readBlockSize(decoder.getBlockSize() * 2).encoder(decoder.streamEncoder());
-                int readNum = (int) byteProcessor.writeTo(bytesOut2);
+                BytesProcessor bp = BytesProcessor.from(aBytes).readBlockSize(decoder.getBlockSize() * 2)
+                    .encoder(decoder.streamEncoder());
+                int readNum = (int) bp.writeTo(bytesOut2);
                 assertEquals(readNum, aBytes.length == 0 ? -1 : aBytes.length);
                 assertEquals(bytesOut.toByteArray(), bytesOut2.toByteArray());
             }
             {
                 bytesOut2.reset();
-                ByteProcessor byteProcessor = ByteProcessor.from(aBytes).readBlockSize(decoder.getBlockSize() * 20).encoder(decoder.streamEncoder());
-                int readNum = (int) byteProcessor.writeTo(bytesOut2);
+                BytesProcessor bp = BytesProcessor.from(aBytes).readBlockSize(decoder.getBlockSize() * 20)
+                    .encoder(decoder.streamEncoder());
+                int readNum = (int) bp.writeTo(bytesOut2);
                 assertEquals(readNum, aBytes.length == 0 ? -1 : aBytes.length);
                 assertEquals(bytesOut.toByteArray(), bytesOut2.toByteArray());
             }
@@ -604,11 +614,13 @@ public class Base64Test {
             // error
             if (data.length > 0) {
                 expectThrows(EncodingException.class, () -> encoder.encode(data, new byte[0]));
-                expectThrows(EncodingException.class, () -> encoder.encode(ByteBuffer.wrap(data), ByteBuffer.wrap(new byte[0])));
+                expectThrows(EncodingException.class, () ->
+                    encoder.encode(ByteBuffer.wrap(data), ByteBuffer.wrap(new byte[0])));
             }
             if (aBytes.length > 0) {
                 expectThrows(DecodingException.class, () -> decoder.decode(aBytes, new byte[0]));
-                expectThrows(DecodingException.class, () -> decoder.decode(ByteBuffer.wrap(aBytes), ByteBuffer.wrap(new byte[0])));
+                expectThrows(DecodingException.class, () ->
+                    decoder.decode(ByteBuffer.wrap(aBytes), ByteBuffer.wrap(new byte[0])));
             }
         }
     }
@@ -640,7 +652,7 @@ public class Base64Test {
                 error[0] = null;
             }
             try {
-                ByteProcessor.from(en).readBlockSize(1)
+                BytesProcessor.from(en).readBlockSize(1)
                     .encoder(JieHex.decoder().streamEncoder()).writeTo(new ByteArrayOutputStream());
             } catch (IOEncodingException e) {
                 error[0] = e.getCause().getMessage();
@@ -663,7 +675,7 @@ public class Base64Test {
                 error[0] = null;
             }
             try {
-                ByteProcessor.from(en).readBlockSize(1)
+                BytesProcessor.from(en).readBlockSize(1)
                     .encoder(JieBase64.decoder().streamEncoder()).writeTo(new ByteArrayOutputStream());
             } catch (IOEncodingException e) {
                 error[0] = e.getCause().getMessage();
@@ -771,35 +783,35 @@ public class Base64Test {
         System.out.println("java encode stream: " + (t2 - t1));
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
-            ByteProcessor bs = ByteProcessor.from(source).readBlockSize(570).encoder(encoder.streamEncoder());
+            BytesProcessor bs = BytesProcessor.from(source).readBlockSize(570).encoder(encoder.streamEncoder());
             bs.writeTo(new ByteArrayOutputStream());
         }
         t2 = System.currentTimeMillis();
         System.out.println("jie encode stream (570): " + (t2 - t1));
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
-            ByteProcessor bs = ByteProcessor.from(source).readBlockSize(30).encoder(encoder.streamEncoder());
+            BytesProcessor bs = BytesProcessor.from(source).readBlockSize(30).encoder(encoder.streamEncoder());
             bs.writeTo(new ByteArrayOutputStream());
         }
         t2 = System.currentTimeMillis();
         System.out.println("jie encode stream (30): " + (t2 - t1));
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
-            ByteProcessor bs = ByteProcessor.from(source).readBlockSize(577).encoder(encoder.streamEncoder());
+            BytesProcessor bs = BytesProcessor.from(source).readBlockSize(577).encoder(encoder.streamEncoder());
             bs.writeTo(new ByteArrayOutputStream());
         }
         t2 = System.currentTimeMillis();
         System.out.println("jie encode stream (577): " + (t2 - t1));
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
-            ByteProcessor bs = ByteProcessor.from(source).readBlockSize(567).encoder(encoder.streamEncoder());
+            BytesProcessor bs = BytesProcessor.from(source).readBlockSize(567).encoder(encoder.streamEncoder());
             bs.writeTo(new ByteArrayOutputStream());
         }
         t2 = System.currentTimeMillis();
         System.out.println("jie encode stream (567): " + (t2 - t1));
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
-            ByteProcessor bs = ByteProcessor.from(source).readBlockSize(570).encoder(encoder.streamEncoder());
+            BytesProcessor bs = BytesProcessor.from(source).readBlockSize(570).encoder(encoder.streamEncoder());
             bs.writeTo(new ByteArrayOutputStream());
         }
         t2 = System.currentTimeMillis();
@@ -851,7 +863,7 @@ public class Base64Test {
         ByteArrayOutputStream enOutput = new ByteArrayOutputStream(hexEncoded.length);
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
-            ByteProcessor bs = ByteProcessor.from(source).encoder(hexEn.streamEncoder());
+            BytesProcessor bs = BytesProcessor.from(source).encoder(hexEn.streamEncoder());
             bs.writeTo(enOutput);
             enOutput.reset();
         }
@@ -859,7 +871,7 @@ public class Base64Test {
         System.out.println("jie hex encode stream: " + (t2 - t1));
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
-            ByteProcessor bs = ByteProcessor.from(source).readBlockSize(99999).encoder(hexEn.streamEncoder());
+            BytesProcessor bs = BytesProcessor.from(source).readBlockSize(99999).encoder(hexEn.streamEncoder());
             bs.writeTo(enOutput);
             enOutput.reset();
         }
@@ -867,7 +879,7 @@ public class Base64Test {
         System.out.println("jie hex encode stream(99999): " + (t2 - t1));
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
-            ByteProcessor bs = ByteProcessor.from(source).readBlockSize(100).encoder(hexEn.streamEncoder());
+            BytesProcessor bs = BytesProcessor.from(source).readBlockSize(100).encoder(hexEn.streamEncoder());
             bs.writeTo(enOutput);
             enOutput.reset();
         }
@@ -876,7 +888,7 @@ public class Base64Test {
         ByteArrayOutputStream deOutput = new ByteArrayOutputStream(source.length);
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
-            ByteProcessor bs = ByteProcessor.from(hexEncoded).encoder(hexDe.streamEncoder());
+            BytesProcessor bs = BytesProcessor.from(hexEncoded).encoder(hexDe.streamEncoder());
             bs.writeTo(deOutput);
             deOutput.reset();
         }
@@ -884,7 +896,7 @@ public class Base64Test {
         System.out.println("jie hex decode stream: " + (t2 - t1));
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
-            ByteProcessor bs = ByteProcessor.from(hexEncoded).readBlockSize(99999).encoder(hexDe.streamEncoder());
+            BytesProcessor bs = BytesProcessor.from(hexEncoded).readBlockSize(99999).encoder(hexDe.streamEncoder());
             bs.writeTo(deOutput);
             deOutput.reset();
         }
@@ -892,7 +904,7 @@ public class Base64Test {
         System.out.println("jie hex decode stream(99999): " + (t2 - t1));
         t1 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
-            ByteProcessor bs = ByteProcessor.from(hexEncoded).readBlockSize(100).encoder(hexDe.streamEncoder());
+            BytesProcessor bs = BytesProcessor.from(hexEncoded).readBlockSize(100).encoder(hexDe.streamEncoder());
             bs.writeTo(deOutput);
             deOutput.reset();
         }

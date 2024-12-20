@@ -31,39 +31,39 @@ import java.nio.charset.Charset;
  *
  * @author sunqian
  */
-public interface CharProcessor {
+public interface CharsProcessor {
 
     /**
-     * Returns a new {@link CharProcessor} with specified data source.
+     * Returns a new {@link CharsProcessor} with specified data source.
      *
      * @param source specified data source
-     * @return a new {@link CharProcessor}
+     * @return a new {@link CharsProcessor}
      */
-    static CharProcessor from(Reader source) {
-        return new CharProcessorImpl(source);
+    static CharsProcessor from(Reader source) {
+        return new CharsProcessorImpl(source);
     }
 
     /**
-     * Returns a new {@link CharProcessor} with specified data source.
+     * Returns a new {@link CharsProcessor} with specified data source.
      *
      * @param source specified data source
-     * @return a new {@link CharProcessor}
+     * @return a new {@link CharsProcessor}
      */
-    static CharProcessor from(char[] source) {
-        return new CharProcessorImpl(source);
+    static CharsProcessor from(char[] source) {
+        return new CharsProcessorImpl(source);
     }
 
     /**
-     * Returns a new {@link CharProcessor} with specified data source, starting from the start index up to the specified
-     * length.
+     * Returns a new {@link CharsProcessor} with specified data source, starting from the start index up to the
+     * specified length.
      *
      * @param source specified data source
      * @param offset start index
      * @param length specified length
-     * @return a new {@link CharProcessor}
+     * @return a new {@link CharsProcessor}
      * @throws IndexOutOfBoundsException thrown bounds problem
      */
-    static CharProcessor from(char[] source, int offset, int length) throws IndexOutOfBoundsException {
+    static CharsProcessor from(char[] source, int offset, int length) throws IndexOutOfBoundsException {
         IOMisc.checkReadBounds(source, offset, length);
         if (offset == 0 && length == source.length) {
             return from(source);
@@ -73,23 +73,23 @@ public interface CharProcessor {
     }
 
     /**
-     * Returns a new {@link CharProcessor} with specified data source.
+     * Returns a new {@link CharsProcessor} with specified data source.
      *
      * @param source specified data source
-     * @return a new {@link CharProcessor}
+     * @return a new {@link CharsProcessor}
      */
-    static CharProcessor from(CharBuffer source) {
-        return new CharProcessorImpl(source);
+    static CharsProcessor from(CharBuffer source) {
+        return new CharsProcessorImpl(source);
     }
 
     /**
-     * Returns a new {@link CharProcessor} with specified data source.
+     * Returns a new {@link CharsProcessor} with specified data source.
      *
      * @param source specified data source
-     * @return a new {@link CharProcessor}
+     * @return a new {@link CharsProcessor}
      */
-    static CharProcessor from(CharSequence source) {
-        return new CharProcessorImpl(source);
+    static CharsProcessor from(CharSequence source) {
+        return new CharsProcessorImpl(source);
     }
 
     /**
@@ -108,7 +108,7 @@ public interface CharProcessor {
      * @return a new {@link Encoder} to round input data for given encoder
      */
     static Encoder roundEncoder(Encoder encoder, int expectedBlockSize) {
-        return new CharProcessorImpl.RoundEncoder(encoder, expectedBlockSize);
+        return new CharsProcessorImpl.RoundEncoder(encoder, expectedBlockSize);
     }
 
     /**
@@ -125,7 +125,7 @@ public interface CharProcessor {
      * @return a new {@link Encoder} that buffers remaining data for given encoder
      */
     static Encoder bufferedEncoder(Encoder encoder) {
-        return new CharProcessorImpl.BufferedEncoder(encoder);
+        return new CharsProcessorImpl.BufferedEncoder(encoder);
     }
 
     /**
@@ -143,7 +143,7 @@ public interface CharProcessor {
      * each invocation
      */
     static Encoder fixedSizeEncoder(Encoder encoder, int size) {
-        return new CharProcessorImpl.FixedSizeEncoder(encoder, size);
+        return new CharsProcessorImpl.FixedSizeEncoder(encoder, size);
     }
 
     /**
@@ -155,7 +155,7 @@ public interface CharProcessor {
      * @param readLimit maximum number of chars to read from data source
      * @return this
      */
-    CharProcessor readLimit(long readLimit);
+    CharsProcessor readLimit(long readLimit);
 
     /**
      * Sets the number of chars for each read operation from data source.
@@ -168,7 +168,7 @@ public interface CharProcessor {
      * @param readBlockSize the number of chars for each read operation from data source
      * @return this
      */
-    CharProcessor readBlockSize(int readBlockSize);
+    CharsProcessor readBlockSize(int readBlockSize);
 
     /**
      * Sets whether reading 0 char from data source should be treated as reaching to the end and break the read loop. A
@@ -180,7 +180,7 @@ public interface CharProcessor {
      *                      the read loop
      * @return this
      */
-    CharProcessor endOnZeroRead(boolean endOnZeroRead);
+    CharsProcessor endOnZeroRead(boolean endOnZeroRead);
 
     /**
      * Adds an encoder for encoding which is an intermediate operation. When the data processing starts, all encoders
@@ -221,7 +221,7 @@ public interface CharProcessor {
      * @param encoder encoder for encoding data from read operation
      * @return this
      */
-    CharProcessor encoder(Encoder encoder);
+    CharsProcessor encoder(Encoder encoder);
 
     /**
      * Adds an encoder for encoding which is an intermediate operation. This method is equivalent to adding a fixed-size
@@ -234,7 +234,7 @@ public interface CharProcessor {
      * @param size    specified fixed-size
      * @return this
      */
-    default CharProcessor encoder(Encoder encoder, int size) {
+    default CharsProcessor encoder(Encoder encoder, int size) {
         return encoder(fixedSizeEncoder(encoder, size));
     }
 
@@ -388,10 +388,10 @@ public interface CharProcessor {
      * <p>
      * This is a setting method but this char processor still be invalid after current invocation.
      *
-     * @return a new {@link CharProcessor} converted from this char processor with specified charset
+     * @return a new {@link CharsProcessor} converted from this char processor with specified charset
      */
-    default ByteProcessor toByteProcessor(Charset charset) {
-        return ByteProcessor.from(JieIO.inputStream(toReader(), charset));
+    default BytesProcessor toByteProcessor(Charset charset) {
+        return BytesProcessor.from(JieIO.inputStream(toReader(), charset));
     }
 
     /**

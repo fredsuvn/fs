@@ -21,7 +21,7 @@ import java.util.Arrays;
 
 import static org.testng.Assert.*;
 
-public class CharProcessorTest {
+public class CharsProcessorTest {
 
     @Test
     public void testProcessing() throws Exception {
@@ -43,31 +43,31 @@ public class CharProcessorTest {
             // empty
             CharsBuilder bb = new CharsBuilder();
             long c;
-            c = CharProcessor.from(new char[0]).writeTo(bb);
+            c = CharsProcessor.from(new char[0]).writeTo(bb);
             assertEquals(c, 0);
             assertEquals(bb.toCharArray(), new char[0]);
-            c = CharProcessor.from(new char[0]).writeTo(new char[0]);
+            c = CharsProcessor.from(new char[0]).writeTo(new char[0]);
             assertEquals(c, 0);
             assertEquals(bb.toCharArray(), new char[0]);
-            c = CharProcessor.from(new char[0]).writeTo(CharBuffer.allocate(0));
+            c = CharsProcessor.from(new char[0]).writeTo(CharBuffer.allocate(0));
             assertEquals(c, 0);
             assertEquals(bb.toCharArray(), new char[0]);
-            c = CharProcessor.from(JieChars.emptyBuffer()).writeTo(bb);
+            c = CharsProcessor.from(JieChars.emptyBuffer()).writeTo(bb);
             assertEquals(c, 0);
             assertEquals(bb.toCharArray(), new char[0]);
-            c = CharProcessor.from(JieChars.emptyBuffer()).writeTo(new char[0]);
+            c = CharsProcessor.from(JieChars.emptyBuffer()).writeTo(new char[0]);
             assertEquals(c, 0);
             assertEquals(bb.toCharArray(), new char[0]);
-            c = CharProcessor.from(JieChars.emptyBuffer()).writeTo(CharBuffer.allocate(0));
+            c = CharsProcessor.from(JieChars.emptyBuffer()).writeTo(CharBuffer.allocate(0));
             assertEquals(c, 0);
             assertEquals(bb.toCharArray(), new char[0]);
-            c = CharProcessor.from(new CharArrayReader(new char[0])).writeTo(bb);
+            c = CharsProcessor.from(new CharArrayReader(new char[0])).writeTo(bb);
             assertEquals(c, 0);
             assertEquals(bb.toCharArray(), new char[0]);
-            c = CharProcessor.from("").writeTo(new char[0]);
+            c = CharsProcessor.from("").writeTo(new char[0]);
             assertEquals(c, 0);
             assertEquals(bb.toCharArray(), new char[0]);
-            c = CharProcessor.from("").writeTo(bb);
+            c = CharsProcessor.from("").writeTo(bb);
             assertEquals(c, 0);
             assertEquals(bb.toCharArray(), new char[0]);
         }
@@ -76,12 +76,12 @@ public class CharProcessorTest {
             // endOnZeroRead
             CharsBuilder bb = new CharsBuilder();
             long c;
-            c = CharProcessor.from(new NioReader()).endOnZeroRead(true)
+            c = CharsProcessor.from(new NioReader()).endOnZeroRead(true)
                 .encoder((data, end) -> data)
                 .writeTo(bb);
             assertEquals(c, 0);
             assertEquals(bb.toCharArray(), new char[0]);
-            c = CharProcessor.from(new NioReader(new CharArrayReader(new char[0]))).endOnZeroRead(false)
+            c = CharsProcessor.from(new NioReader(new CharArrayReader(new char[0]))).endOnZeroRead(false)
                 .encoder((data, end) -> data)
                 .writeTo(bb);
             assertEquals(c, 0);
@@ -95,7 +95,7 @@ public class CharProcessorTest {
             Arrays.fill(src, (char) 1);
             Arrays.fill(target, (char) 2);
             assertNotEquals(src, target);
-            CharProcessor.from(src).readBlockSize(3).encoder(((data, end) -> {
+            CharsProcessor.from(src).readBlockSize(3).encoder(((data, end) -> {
                 assertFalse(data.isReadOnly());
                 while (data.hasRemaining()) {
                     data.put((char) 2);
@@ -105,7 +105,7 @@ public class CharProcessorTest {
             assertEquals(src, target);
             Arrays.fill(src, (char) 1);
             assertNotEquals(src, target);
-            CharProcessor.from(CharBuffer.wrap(src)).readBlockSize(3).encoder(((data, end) -> {
+            CharsProcessor.from(CharBuffer.wrap(src)).readBlockSize(3).encoder(((data, end) -> {
                 assertFalse(data.isReadOnly());
                 while (data.hasRemaining()) {
                     data.put((char) 2);
@@ -113,11 +113,11 @@ public class CharProcessorTest {
                 return data;
             })).writeTo();
             assertEquals(src, target);
-            CharProcessor.from(new CharArrayReader(src)).readBlockSize(3).encoder(((data, end) -> {
+            CharsProcessor.from(new CharArrayReader(src)).readBlockSize(3).encoder(((data, end) -> {
                 assertTrue(data.isReadOnly());
                 return data;
             })).writeTo();
-            CharProcessor.from(new String(src)).readBlockSize(3).encoder(((data, end) -> {
+            CharsProcessor.from(new String(src)).readBlockSize(3).encoder(((data, end) -> {
                 assertTrue(data.isReadOnly());
                 return data;
             })).writeTo();
@@ -127,24 +127,24 @@ public class CharProcessorTest {
             // writeTo
             String str = "1234567890qwertyuiop[]中文";
             char[] strChars = str.toCharArray();
-            assertEquals(CharProcessor.from(str).writeToCharArray(), strChars);
-            assertEquals(CharProcessor.from(str).writeToCharBuffer(), CharBuffer.wrap(strChars));
-            assertEquals(CharProcessor.from(str).writeToString(), str);
+            assertEquals(CharsProcessor.from(str).writeToCharArray(), strChars);
+            assertEquals(CharsProcessor.from(str).writeToCharBuffer(), CharBuffer.wrap(strChars));
+            assertEquals(CharsProcessor.from(str).writeToString(), str);
         }
 
         // error
         expectThrows(IORuntimeException.class, () -> testProcessing(666, 0, 0));
-        expectThrows(IORuntimeException.class, () -> CharProcessor.from((Reader) null).writeTo((Appendable) null));
-        expectThrows(IndexOutOfBoundsException.class, () -> CharProcessor.from(new char[0], 0, 100));
-        expectThrows(IORuntimeException.class, () -> CharProcessor.from(new char[0]).writeTo(new char[0], 0, 100));
-        expectThrows(IORuntimeException.class, () -> CharProcessor.from(new char[0]).writeTo((Appendable) null));
-        expectThrows(IORuntimeException.class, () -> CharProcessor.from((Reader) null).writeTo(new char[0]));
-        Method method = CharProcessor.from(new char[0]).getClass().getDeclaredMethod("toBufferIn", Object.class);
-        JieTest.testThrow(IORuntimeException.class, method, CharProcessor.from(new char[0]), 1);
-        method = CharProcessor.from(new char[0]).getClass().getDeclaredMethod("toBufferOut", Object.class);
-        JieTest.testThrow(IORuntimeException.class, method, CharProcessor.from(new char[0]), "");
-        expectThrows(IORuntimeException.class, () -> CharProcessor.from(new ThrowReader(0)).writeTo(new char[0]));
-        expectThrows(IORuntimeException.class, () -> CharProcessor.from(new ThrowReader(1)).writeTo(new char[0]));
+        expectThrows(IORuntimeException.class, () -> CharsProcessor.from((Reader) null).writeTo((Appendable) null));
+        expectThrows(IndexOutOfBoundsException.class, () -> CharsProcessor.from(new char[0], 0, 100));
+        expectThrows(IORuntimeException.class, () -> CharsProcessor.from(new char[0]).writeTo(new char[0], 0, 100));
+        expectThrows(IORuntimeException.class, () -> CharsProcessor.from(new char[0]).writeTo((Appendable) null));
+        expectThrows(IORuntimeException.class, () -> CharsProcessor.from((Reader) null).writeTo(new char[0]));
+        Method method = CharsProcessor.from(new char[0]).getClass().getDeclaredMethod("toBufferIn", Object.class);
+        JieTest.testThrow(IORuntimeException.class, method, CharsProcessor.from(new char[0]), 1);
+        method = CharsProcessor.from(new char[0]).getClass().getDeclaredMethod("toBufferOut", Object.class);
+        JieTest.testThrow(IORuntimeException.class, method, CharsProcessor.from(new char[0]), "");
+        expectThrows(IORuntimeException.class, () -> CharsProcessor.from(new ThrowReader(0)).writeTo(new char[0]));
+        expectThrows(IORuntimeException.class, () -> CharsProcessor.from(new ThrowReader(1)).writeTo(new char[0]));
     }
 
     private void testProcessing(int totalSize, int blockSize, int readLimit) throws Exception {
@@ -163,7 +163,7 @@ public class CharProcessorTest {
             // stream -> stream
             CharArrayReader in = new CharArrayReader(chars);
             CharsBuilder out = new CharsBuilder();
-            long readNum = CharProcessor.from(in).readBlockSize(blockSize).readLimit(readLimit).writeTo(out);
+            long readNum = CharsProcessor.from(in).readBlockSize(blockSize).readLimit(readLimit).writeTo(out);
             assertEquals(readNum, getLength(chars.length, readLimit));
             assertEquals(
                 str.substring(0, getLength(chars.length, readLimit)),
@@ -174,7 +174,7 @@ public class CharProcessorTest {
         {
             // string -> stream
             CharsBuilder out = new CharsBuilder();
-            long readNum = CharProcessor.from(str).readBlockSize(blockSize).readLimit(readLimit).writeTo(out);
+            long readNum = CharsProcessor.from(str).readBlockSize(blockSize).readLimit(readLimit).writeTo(out);
             assertEquals(readNum, getLength(chars.length, readLimit));
             assertEquals(
                 str.substring(0, getLength(chars.length, readLimit)),
@@ -186,18 +186,18 @@ public class CharProcessorTest {
             // direct -> stream
             CharBuffer dirInBuffer = JieChars.copyBuffer(dirBuffer);
             CharsBuilder outBuilder = new CharsBuilder();
-            long readNum = CharProcessor.from(dirInBuffer).readBlockSize(blockSize).readLimit(readLimit).writeTo(outBuilder);
+            long readNum = CharsProcessor.from(dirInBuffer).readBlockSize(blockSize).readLimit(readLimit).writeTo(outBuilder);
             assertEquals(readNum, getLength(chars.length, readLimit));
             assertEquals(str.substring(0, getLength(chars.length, readLimit)), outBuilder.toString());
             dirInBuffer = JieChars.copyBuffer(dirBuffer);
             outBuilder.reset();
-            readNum = CharProcessor.from(dirInBuffer).readBlockSize(blockSize).readLimit(readLimit)
+            readNum = CharsProcessor.from(dirInBuffer).readBlockSize(blockSize).readLimit(readLimit)
                 .encoder((s, e) -> JieChars.copyBuffer(s)).writeTo(outBuilder);
             assertEquals(readNum, getLength(chars.length, readLimit));
             assertEquals(str.substring(0, getLength(chars.length, readLimit)), outBuilder.toString());
             dirInBuffer = JieChars.copyBuffer(dirBuffer);
             StringWriter sw = new StringWriter();
-            readNum = CharProcessor.from(dirInBuffer).readBlockSize(blockSize).readLimit(readLimit)
+            readNum = CharsProcessor.from(dirInBuffer).readBlockSize(blockSize).readLimit(readLimit)
                 .encoder((s, e) -> JieChars.copyBuffer(s)).writeTo(sw);
             assertEquals(readNum, getLength(chars.length, readLimit));
             assertEquals(str.substring(0, getLength(chars.length, readLimit)), sw.toString());
@@ -208,12 +208,12 @@ public class CharProcessorTest {
             char[] outChars = new char[chars.length];
             CharArrayReader in = new CharArrayReader(chars);
             in.mark(0);
-            long readNum = CharProcessor.from(in).readBlockSize(blockSize).writeTo(outChars);
+            long readNum = CharsProcessor.from(in).readBlockSize(blockSize).writeTo(outChars);
             assertEquals(readNum, chars.length);
             assertEquals(str, new String(outChars));
             outChars = new char[chars.length * 2];
             in.reset();
-            readNum = CharProcessor.from(in).readBlockSize(blockSize).writeTo(outChars, offset, chars.length);
+            readNum = CharsProcessor.from(in).readBlockSize(blockSize).writeTo(outChars, offset, chars.length);
             assertEquals(readNum, chars.length);
             assertEquals(str, new String(Arrays.copyOfRange(outChars, offset, offset + chars.length)));
         }
@@ -222,7 +222,7 @@ public class CharProcessorTest {
             // stream -> buffer
             CharBuffer outBuffer = JieChars.copyBuffer(dirBuffer);
             CharArrayReader in = new CharArrayReader(chars);
-            long readNum = CharProcessor.from(in).readBlockSize(blockSize).writeTo(outBuffer);
+            long readNum = CharsProcessor.from(in).readBlockSize(blockSize).writeTo(outBuffer);
             assertEquals(readNum, chars.length);
             outBuffer.flip();
             char[] outChars = JieChars.getChars(outBuffer);
@@ -232,14 +232,14 @@ public class CharProcessorTest {
         // char[] -> stream
         {
             CharsBuilder out = new CharsBuilder();
-            long readNum = CharProcessor.from(chars).readBlockSize(blockSize).readLimit(readLimit).writeTo(out);
+            long readNum = CharsProcessor.from(chars).readBlockSize(blockSize).readLimit(readLimit).writeTo(out);
             assertEquals(readNum, getLength(chars.length, readLimit));
             assertEquals(
                 str.substring(0, getLength(chars.length, readLimit)),
                 new String(out.toCharArray(), 0, getLength(chars.length, readLimit))
             );
             out.reset();
-            readNum = CharProcessor.from(chars).readBlockSize(blockSize).readLimit(readLimit)
+            readNum = CharsProcessor.from(chars).readBlockSize(blockSize).readLimit(readLimit)
                 .encoder((s, e) -> CharBuffer.wrap(JieChars.getChars(s))).writeTo(out);
             assertEquals(readNum, getLength(chars.length, readLimit));
             assertEquals(
@@ -251,10 +251,10 @@ public class CharProcessorTest {
         {
             // char[] -> char[]
             char[] outChars = new char[chars.length];
-            long readNum = CharProcessor.from(chars).readBlockSize(blockSize).writeTo(outChars);
+            long readNum = CharsProcessor.from(chars).readBlockSize(blockSize).writeTo(outChars);
             assertEquals(readNum, chars.length);
             assertEquals(str, new String(outChars));
-            readNum = CharProcessor.from(chars).readBlockSize(blockSize).readLimit(readLimit).writeTo(outChars);
+            readNum = CharsProcessor.from(chars).readBlockSize(blockSize).readLimit(readLimit).writeTo(outChars);
             assertEquals(readNum, getLength(chars.length, readLimit));
             assertEquals(
                 str.substring(0, getLength(chars.length, readLimit)),
@@ -263,16 +263,16 @@ public class CharProcessorTest {
             char[] inChars = new char[chars.length * 2];
             outChars = new char[chars.length];
             System.arraycopy(chars, 0, inChars, offset, chars.length);
-            readNum = CharProcessor.from(inChars, offset, chars.length).readBlockSize(blockSize).writeTo(outChars);
+            readNum = CharsProcessor.from(inChars, offset, chars.length).readBlockSize(blockSize).writeTo(outChars);
             assertEquals(readNum, chars.length);
             assertEquals(str, new String(outChars));
             outChars = new char[chars.length];
-            readNum = CharProcessor.from(chars, 0, chars.length)
+            readNum = CharsProcessor.from(chars, 0, chars.length)
                 .readBlockSize(blockSize).writeTo(outChars, 0, outChars.length);
             assertEquals(readNum, chars.length);
             assertEquals(str, new String(outChars));
             outChars = new char[chars.length];
-            readNum = CharProcessor.from(chars, 0, chars.length - 1)
+            readNum = CharsProcessor.from(chars, 0, chars.length - 1)
                 .readBlockSize(blockSize).writeTo(outChars, 0, outChars.length - 1);
             assertEquals(readNum, chars.length - 1);
             assertEquals(str.substring(0, str.length() - 1),
@@ -282,12 +282,12 @@ public class CharProcessorTest {
         {
             // char[] -> buffer
             CharBuffer outBuffer = JieChars.copyBuffer(chars, true);
-            long readNum = CharProcessor.from(chars).readBlockSize(blockSize).writeTo(outBuffer);
+            long readNum = CharsProcessor.from(chars).readBlockSize(blockSize).writeTo(outBuffer);
             assertEquals(readNum, chars.length);
             outBuffer.flip();
             assertEquals(str, new String(JieChars.getChars(outBuffer)));
             outBuffer = JieChars.copyBuffer(chars, true);
-            readNum = CharProcessor.from(chars).readBlockSize(blockSize).readLimit(readLimit).writeTo(outBuffer);
+            readNum = CharsProcessor.from(chars).readBlockSize(blockSize).readLimit(readLimit).writeTo(outBuffer);
             assertEquals(readNum, getLength(chars.length, readLimit));
             outBuffer.flip();
             assertEquals(
@@ -299,11 +299,11 @@ public class CharProcessorTest {
         {
             // char[] -> appender
             CharsBuilder appender = new CharsBuilder();
-            long readNum = CharProcessor.from(chars).readBlockSize(blockSize).writeTo(appender);
+            long readNum = CharsProcessor.from(chars).readBlockSize(blockSize).writeTo(appender);
             assertEquals(readNum, chars.length);
             assertEquals(str, appender.toString());
             appender.reset();
-            readNum = CharProcessor.from(chars).readBlockSize(blockSize).readLimit(readLimit).writeTo(appender);
+            readNum = CharsProcessor.from(chars).readBlockSize(blockSize).readLimit(readLimit).writeTo(appender);
             assertEquals(readNum, getLength(chars.length, readLimit));
             assertEquals(
                 str.substring(0, getLength(chars.length, readLimit)),
@@ -316,7 +316,7 @@ public class CharProcessorTest {
             CharBuffer inBuffer = TU.buffer(chars);
             inBuffer.mark();
             CharsBuilder out = new CharsBuilder();
-            long readNum = CharProcessor.from(inBuffer).readBlockSize(blockSize).readLimit(readLimit).writeTo(out);
+            long readNum = CharsProcessor.from(inBuffer).readBlockSize(blockSize).readLimit(readLimit).writeTo(out);
             assertEquals(readNum, getLength(chars.length, readLimit));
             assertEquals(
                 str.substring(0, getLength(chars.length, readLimit)),
@@ -324,7 +324,7 @@ public class CharProcessorTest {
             );
             inBuffer.reset();
             out.reset();
-            readNum = CharProcessor.from(inBuffer).readBlockSize(blockSize).readLimit(readLimit)
+            readNum = CharsProcessor.from(inBuffer).readBlockSize(blockSize).readLimit(readLimit)
                 .encoder((s, e) -> CharBuffer.wrap(JieChars.getChars(s))).writeTo(out);
             assertEquals(readNum, getLength(chars.length, readLimit));
             assertEquals(
@@ -333,7 +333,7 @@ public class CharProcessorTest {
             );
             CharBuffer arrayIn = TU.bufferDangling(chars);
             CharBuffer arrayOut = TU.bufferDangling(new char[chars.length]);
-            readNum = CharProcessor.from(arrayIn).readBlockSize(blockSize).readLimit(readLimit).writeTo(arrayOut);
+            readNum = CharsProcessor.from(arrayIn).readBlockSize(blockSize).readLimit(readLimit).writeTo(arrayOut);
             assertEquals(readNum, getLength(chars.length, readLimit));
             arrayOut.flip();
             assertEquals(
@@ -342,7 +342,7 @@ public class CharProcessorTest {
             );
             arrayIn.flip();
             arrayOut.flip();
-            readNum = CharProcessor.from(arrayIn).readBlockSize(blockSize).readLimit(readLimit)
+            readNum = CharsProcessor.from(arrayIn).readBlockSize(blockSize).readLimit(readLimit)
                 .encoder((s, e) -> CharBuffer.wrap(JieChars.getChars(s))).writeTo(arrayOut);
             assertEquals(readNum, getLength(chars.length, readLimit));
             arrayOut.flip();
@@ -357,12 +357,12 @@ public class CharProcessorTest {
             CharBuffer inBuffer = TU.buffer(chars);
             inBuffer.mark();
             char[] outChars = new char[chars.length];
-            long readNum = CharProcessor.from(inBuffer).readBlockSize(blockSize).writeTo(outChars);
+            long readNum = CharsProcessor.from(inBuffer).readBlockSize(blockSize).writeTo(outChars);
             assertEquals(readNum, chars.length);
             assertEquals(str, new String(outChars));
             inBuffer.reset();
             outChars = new char[chars.length];
-            readNum = CharProcessor.from(inBuffer).readBlockSize(blockSize).readLimit(readLimit).writeTo(outChars);
+            readNum = CharsProcessor.from(inBuffer).readBlockSize(blockSize).readLimit(readLimit).writeTo(outChars);
             assertEquals(readNum, getLength(chars.length, readLimit));
             assertEquals(
                 str.substring(0, getLength(chars.length, readLimit)),
@@ -375,12 +375,12 @@ public class CharProcessorTest {
             CharBuffer inBuffer = TU.bufferDangling(chars);
             inBuffer.mark();
             CharsBuilder appender = new CharsBuilder();
-            long readNum = CharProcessor.from(inBuffer).readBlockSize(blockSize).writeTo(appender);
+            long readNum = CharsProcessor.from(inBuffer).readBlockSize(blockSize).writeTo(appender);
             assertEquals(readNum, chars.length);
             assertEquals(str, appender.toString());
             inBuffer.reset();
             appender.reset();
-            readNum = CharProcessor.from(inBuffer).readBlockSize(blockSize).readLimit(readLimit).writeTo(appender);
+            readNum = CharsProcessor.from(inBuffer).readBlockSize(blockSize).readLimit(readLimit).writeTo(appender);
             assertEquals(readNum, getLength(chars.length, readLimit));
             assertEquals(
                 str.substring(0, getLength(chars.length, readLimit)),
@@ -393,7 +393,7 @@ public class CharProcessorTest {
             CharBuffer inBuffer = TU.bufferDangling(chars);
             inBuffer.mark();
             CharBuffer outBuffer = JieChars.copyBuffer(dirBuffer);
-            long readNum = CharProcessor.from(inBuffer).readBlockSize(blockSize).writeTo(outBuffer);
+            long readNum = CharsProcessor.from(inBuffer).readBlockSize(blockSize).writeTo(outBuffer);
             assertEquals(readNum, chars.length);
             outBuffer.flip();
             char[] outBytes = JieChars.getChars(outBuffer);
@@ -403,22 +403,22 @@ public class CharProcessorTest {
         {
             // charSeq -> char[]
             char[] outChars = new char[chars.length];
-            long readNum = CharProcessor.from(str).readBlockSize(blockSize).writeTo(outChars);
+            long readNum = CharsProcessor.from(str).readBlockSize(blockSize).writeTo(outChars);
             assertEquals(readNum, chars.length);
             assertEquals(str, new String(outChars));
             outChars = new char[chars.length];
-            readNum = CharProcessor.from(str).readBlockSize(blockSize).readLimit(readLimit).writeTo(outChars);
+            readNum = CharsProcessor.from(str).readBlockSize(blockSize).readLimit(readLimit).writeTo(outChars);
             assertEquals(readNum, getLength(chars.length, readLimit));
             assertEquals(
                 str.substring(0, getLength(chars.length, readLimit)),
                 new String(outChars, 0, getLength(chars.length, readLimit))
             );
             outChars = new char[chars.length];
-            readNum = CharProcessor.from(JieString.asChars(str.toCharArray())).readBlockSize(blockSize).writeTo(outChars);
+            readNum = CharsProcessor.from(JieString.asChars(str.toCharArray())).readBlockSize(blockSize).writeTo(outChars);
             assertEquals(readNum, chars.length);
             assertEquals(str, new String(outChars));
             outChars = new char[chars.length];
-            readNum = CharProcessor.from(JieString.asChars(str.toCharArray()))
+            readNum = CharsProcessor.from(JieString.asChars(str.toCharArray()))
                 .readBlockSize(blockSize).readLimit(readLimit).writeTo(outChars);
             assertEquals(readNum, getLength(chars.length, readLimit));
             assertEquals(
@@ -430,18 +430,18 @@ public class CharProcessorTest {
         {
             // charSeq -> appender
             CharsBuilder appender = new CharsBuilder();
-            long readNum = CharProcessor.from(str).readBlockSize(blockSize).writeTo(appender);
+            long readNum = CharsProcessor.from(str).readBlockSize(blockSize).writeTo(appender);
             assertEquals(readNum, chars.length);
             assertEquals(str, appender.toString());
             appender.reset();
-            readNum = CharProcessor.from(str).readBlockSize(blockSize).readLimit(readLimit).writeTo(appender);
+            readNum = CharsProcessor.from(str).readBlockSize(blockSize).readLimit(readLimit).writeTo(appender);
             assertEquals(readNum, getLength(chars.length, readLimit));
             assertEquals(
                 str.substring(0, getLength(chars.length, readLimit)),
                 appender.toString()
             );
             appender.reset();
-            readNum = CharProcessor.from(str).readBlockSize(blockSize).readLimit(readLimit)
+            readNum = CharsProcessor.from(str).readBlockSize(blockSize).readLimit(readLimit)
                 .encoder((s, e) -> CharBuffer.wrap(JieChars.getChars(s))).writeTo(appender);
             assertEquals(readNum, getLength(chars.length, readLimit));
             assertEquals(
@@ -453,7 +453,7 @@ public class CharProcessorTest {
         {
             // any -> null
             long[] counter = {0};
-            long readNum = CharProcessor.from(new char[totalSize])
+            long readNum = CharsProcessor.from(new char[totalSize])
                 .readBlockSize(blockSize)
                 .readLimit(readLimit)
                 .encoder(((data, end) -> {
@@ -487,7 +487,7 @@ public class CharProcessorTest {
             // error
             Throwable[] ts = new Throwable[1];
             try {
-                CharProcessor.from(new char[100]).encoder((data, end) -> {
+                CharsProcessor.from(new char[100]).encoder((data, end) -> {
                     throw new JieTestException("haha");
                 }).writeTo(new char[100]);
             } catch (IOEncodingException e) {
@@ -515,14 +515,14 @@ public class CharProcessorTest {
             }
             char[] expectDst = bb.toCharArray();
             bb.reset();
-            CharProcessor.Encoder encoder = (data, end) -> {
+            CharsProcessor.Encoder encoder = (data, end) -> {
                 char[] chars = JieChars.getChars(data);
                 char[] ret = new char[chars.length * 2];
                 System.arraycopy(chars, 0, ret, 0, chars.length);
                 System.arraycopy(chars, 0, ret, chars.length, chars.length);
                 return CharBuffer.wrap(ret);
             };
-            long count = CharProcessor.from(src).readBlockSize(blockSize).encoder(encoder).encoder(encoder).writeTo(bb);
+            long count = CharsProcessor.from(src).readBlockSize(blockSize).encoder(encoder).encoder(encoder).writeTo(bb);
             assertEquals(count, totalSize);
             assertEquals(bb.toCharArray(), expectDst);
         }
@@ -552,8 +552,8 @@ public class CharProcessorTest {
             proc = bb.toCharArray();
             bb.reset();
             boolean[] buffer = {true};
-            long count = CharProcessor.from(src).readBlockSize(blockSize)
-                .encoder(CharProcessor.roundEncoder((data, end) -> {
+            long count = CharsProcessor.from(src).readBlockSize(blockSize)
+                .encoder(CharsProcessor.roundEncoder((data, end) -> {
                     CharsBuilder ret = new CharsBuilder();
                     int j = 0;
                     while (data.hasRemaining()) {
@@ -567,7 +567,7 @@ public class CharProcessorTest {
                     }
                     return CharBuffer.wrap(ret.toString());
                 }, 3))
-                .encoder(CharProcessor.bufferedEncoder(((data, end) -> {
+                .encoder(CharsProcessor.bufferedEncoder(((data, end) -> {
                     if (end) {
                         return data;
                     }
@@ -614,7 +614,7 @@ public class CharProcessorTest {
             dst[i * 2 + 1] = (char) expectedBlockSize;
         }
         char[] dst2 = new char[src.length * 2];
-        long len = CharProcessor.from(src).readBlockSize(blockSize).encoder(CharProcessor.roundEncoder(
+        long len = CharsProcessor.from(src).readBlockSize(blockSize).encoder(CharsProcessor.roundEncoder(
             (data, end) -> {
                 if (!end) {
                     assertTrue(data.remaining() >= expectedBlockSize);
@@ -637,7 +637,7 @@ public class CharProcessorTest {
         )).writeTo(dst2);
         assertEquals(dst2, dst);
         assertEquals(len, src.length);
-        len = CharProcessor.from(src).readBlockSize(blockSize).encoder(CharProcessor.roundEncoder(
+        len = CharsProcessor.from(src).readBlockSize(blockSize).encoder(CharsProcessor.roundEncoder(
             (data, end) -> {
                 if (!end) {
                     assertTrue(data.remaining() >= expectedBlockSize);
@@ -676,7 +676,7 @@ public class CharProcessorTest {
         char[] src = JieRandom.fill(new char[size]);
         char[] dst = new char[src.length];
         boolean[] buffer = {true};
-        long len = CharProcessor.from(src).readBlockSize(blockSize).encoder(CharProcessor.bufferedEncoder(
+        long len = CharsProcessor.from(src).readBlockSize(blockSize).encoder(CharsProcessor.bufferedEncoder(
             (data, end) -> {
                 if (end) {
                     return data;
@@ -726,7 +726,7 @@ public class CharProcessorTest {
         }
         int portion = JieMath.leastPortion(totalSize, fixedSize);
         char[] dst = new char[src.length + portion * 2];
-        long len = CharProcessor.from(src).readBlockSize(blockSize).encoder(CharProcessor.fixedSizeEncoder(
+        long len = CharsProcessor.from(src).readBlockSize(blockSize).encoder(CharsProcessor.fixedSizeEncoder(
             (data, end) -> {
                 int remaining = data.remaining();
                 if (remaining == 0) {
@@ -754,7 +754,7 @@ public class CharProcessorTest {
         testToReader(20, 10086);
         testToReader(20, 40);
         {
-            Reader in = CharProcessor.from(new char[0]).toReader();
+            Reader in = CharsProcessor.from(new char[0]).toReader();
             assertEquals(in.read(), -1);
             assertEquals(in.read(), -1);
             assertEquals(in.read(new char[1], 0, 0), 0);
@@ -763,9 +763,9 @@ public class CharProcessorTest {
             in.close();
             in.close();
             expectThrows(IOException.class, () -> in.read());
-            Reader nio = CharProcessor.from(new NioReader()).endOnZeroRead(true).toReader();
+            Reader nio = CharsProcessor.from(new NioReader()).endOnZeroRead(true).toReader();
             assertEquals(nio.read(), -1);
-            Reader empty = CharProcessor.from(new char[]{'9'}).encoder(((data, end) -> {
+            Reader empty = CharsProcessor.from(new char[]{'9'}).encoder(((data, end) -> {
                 CharsBuilder builder = new CharsBuilder();
                 builder.append(data);
                 if (end) {
@@ -775,16 +775,16 @@ public class CharProcessorTest {
             })).toReader();
             assertEquals(JieIO.read(empty).toCharArray(), new char[]{'9', '1', '2', '3'});
             assertEquals(empty.read(), -1);
-            Reader err1 = CharProcessor.from(new CharProcessorTest.ThrowReader(0)).toReader();
+            Reader err1 = CharsProcessor.from(new CharsProcessorTest.ThrowReader(0)).toReader();
             expectThrows(IOException.class, () -> err1.close());
-            Reader err2 = CharProcessor.from(new CharProcessorTest.ThrowReader(2)).toReader();
+            Reader err2 = CharsProcessor.from(new CharsProcessorTest.ThrowReader(2)).toReader();
             expectThrows(IOException.class, () -> err2.close());
-            Reader err3 = CharProcessor.from(new CharProcessorTest.ThrowReader(3)).toReader();
+            Reader err3 = CharsProcessor.from(new CharsProcessorTest.ThrowReader(3)).toReader();
             expectThrows(IOException.class, () -> err3.read());
         }
         {
             boolean[] flag = {true};
-            Reader in = CharProcessor.from(new char[1024]).readBlockSize(1).encoder(((data, end) -> {
+            Reader in = CharsProcessor.from(new char[1024]).readBlockSize(1).encoder(((data, end) -> {
                 CharBuffer ret = flag[0] ? data : JieChars.emptyBuffer();
                 flag[0] = !flag[0];
                 return ret;
@@ -817,7 +817,7 @@ public class CharProcessorTest {
         }
         char[] encoded = bb.toCharArray();
         {
-            Reader in = CharProcessor.from(src).readBlockSize(blockSize).encoder(((data, end) -> {
+            Reader in = CharsProcessor.from(src).readBlockSize(blockSize).encoder(((data, end) -> {
                 if (!data.hasRemaining()) {
                     return data;
                 }
@@ -830,7 +830,7 @@ public class CharProcessorTest {
             assertEquals(in.read(), -1);
         }
         {
-            Reader in = CharProcessor.from(src).readBlockSize(blockSize).encoder(((data, end) -> {
+            Reader in = CharsProcessor.from(src).readBlockSize(blockSize).encoder(((data, end) -> {
                 if (!data.hasRemaining()) {
                     return data;
                 }
@@ -850,7 +850,7 @@ public class CharProcessorTest {
             assertEquals(builder.toCharArray(), encoded);
         }
         {
-            Reader in = CharProcessor.from(src).readBlockSize(blockSize).encoder(((data, end) -> {
+            Reader in = CharsProcessor.from(src).readBlockSize(blockSize).encoder(((data, end) -> {
                 if (!data.hasRemaining()) {
                     return data;
                 }
@@ -863,7 +863,7 @@ public class CharProcessorTest {
             assertEquals(in.skip(1666), Math.min(1666, Math.max(encoded.length - 666, 0)));
         }
         {
-            Reader in = CharProcessor.from(src).readBlockSize(blockSize).toReader();
+            Reader in = CharsProcessor.from(src).readBlockSize(blockSize).toReader();
             assertEquals(JieIO.read(in).toCharArray(), src);
             assertEquals(in.read(), -1);
         }
@@ -886,7 +886,7 @@ public class CharProcessorTest {
             char[] str = JieRandom.fill(new char[totalSize], 'a', 'z');
             byte[] bytes = new String(str).getBytes(JieChars.UTF_8);
             byte[] converted = JieIO.read(
-                CharProcessor.from(str).readBlockSize(blockSize).toByteProcessor(JieChars.UTF_8).toInputStream()
+                CharsProcessor.from(str).readBlockSize(blockSize).toByteProcessor(JieChars.UTF_8).toInputStream()
             );
             assertEquals(converted, bytes);
         }
@@ -894,7 +894,7 @@ public class CharProcessorTest {
             char[] str = JieRandom.fill(new char[totalSize], '\u4e00', '\u9fff');
             byte[] bytes = new String(str).getBytes(JieChars.UTF_8);
             byte[] converted = JieIO.read(
-                CharProcessor.from(str).readBlockSize(blockSize).toByteProcessor(JieChars.UTF_8).toInputStream()
+                CharsProcessor.from(str).readBlockSize(blockSize).toByteProcessor(JieChars.UTF_8).toInputStream()
             );
             assertEquals(converted, bytes);
         }

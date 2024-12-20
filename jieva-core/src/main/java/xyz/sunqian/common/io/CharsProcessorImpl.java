@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-final class CharProcessorImpl implements CharProcessor {
+final class CharsProcessorImpl implements CharsProcessor {
 
     private final Object source;
     private Object dest;
@@ -22,30 +22,30 @@ final class CharProcessorImpl implements CharProcessor {
     private boolean endOnZeroRead = false;
     private List<Encoder> encoders;
 
-    CharProcessorImpl(Reader source) {
+    CharsProcessorImpl(Reader source) {
         this.source = source;
     }
 
-    CharProcessorImpl(char[] source) {
+    CharsProcessorImpl(char[] source) {
         this.source = source;
     }
 
-    CharProcessorImpl(CharBuffer source) {
+    CharsProcessorImpl(CharBuffer source) {
         this.source = source;
     }
 
-    CharProcessorImpl(CharSequence source) {
+    CharsProcessorImpl(CharSequence source) {
         this.source = source;
     }
 
     @Override
-    public CharProcessor readLimit(long readLimit) {
+    public CharsProcessor readLimit(long readLimit) {
         this.readLimit = readLimit;
         return this;
     }
 
     @Override
-    public CharProcessor readBlockSize(int readBlockSize) {
+    public CharsProcessor readBlockSize(int readBlockSize) {
         if (readBlockSize <= 0) {
             throw new IORuntimeException("readBlockSize must > 0!");
         }
@@ -54,13 +54,13 @@ final class CharProcessorImpl implements CharProcessor {
     }
 
     @Override
-    public CharProcessor endOnZeroRead(boolean endOnZeroRead) {
+    public CharsProcessor endOnZeroRead(boolean endOnZeroRead) {
         this.endOnZeroRead = endOnZeroRead;
         return this;
     }
 
     @Override
-    public CharProcessor encoder(Encoder encoder) {
+    public CharsProcessor encoder(Encoder encoder) {
         if (encoders == null) {
             encoders = new ArrayList<>();
         }
@@ -677,12 +677,12 @@ final class CharProcessorImpl implements CharProcessor {
         }
     }
 
-    private static abstract class AbsEncoder implements CharProcessor.Encoder {
+    private static abstract class AbsEncoder implements CharsProcessor.Encoder {
 
-        protected final CharProcessor.Encoder encoder;
+        protected final CharsProcessor.Encoder encoder;
         protected char[] buf = JieChars.emptyChars();
 
-        protected AbsEncoder(CharProcessor.Encoder encoder) {
+        protected AbsEncoder(CharsProcessor.Encoder encoder) {
             this.encoder = encoder;
         }
 
@@ -706,7 +706,7 @@ final class CharProcessorImpl implements CharProcessor {
 
         private final int expectedBlockSize;
 
-        RoundEncoder(CharProcessor.Encoder encoder, int expectedBlockSize) {
+        RoundEncoder(CharsProcessor.Encoder encoder, int expectedBlockSize) {
             super(encoder);
             this.expectedBlockSize = expectedBlockSize;
         }
@@ -756,7 +756,7 @@ final class CharProcessorImpl implements CharProcessor {
 
     static final class BufferedEncoder extends AbsEncoder {
 
-        BufferedEncoder(CharProcessor.Encoder encoder) {
+        BufferedEncoder(CharsProcessor.Encoder encoder) {
             super(encoder);
         }
 

@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 /**
- * Byte processor is used to process byte data, from specified data source, through zero or more intermediate
+ * Bytes processor is used to process byte data, from specified data source, through zero or more intermediate
  * operations, and finally produces a result or side effect. The following example shows an encoding-then-writing
  * operation:
  * <pre>{@code
@@ -31,39 +31,39 @@ import java.nio.charset.Charset;
  *
  * @author sunqian
  */
-public interface ByteProcessor {
+public interface BytesProcessor {
 
     /**
-     * Returns a new {@link ByteProcessor} with specified data source.
+     * Returns a new {@link BytesProcessor} with specified data source.
      *
      * @param source specified data source
-     * @return a new {@link ByteProcessor}
+     * @return a new {@link BytesProcessor}
      */
-    static ByteProcessor from(InputStream source) {
-        return new ByteProcessorImpl(source);
+    static BytesProcessor from(InputStream source) {
+        return new BytesProcessorImpl(source);
     }
 
     /**
-     * Returns a new {@link ByteProcessor} with specified data source.
+     * Returns a new {@link BytesProcessor} with specified data source.
      *
      * @param source specified data source
-     * @return a new {@link ByteProcessor}
+     * @return a new {@link BytesProcessor}
      */
-    static ByteProcessor from(byte[] source) {
-        return new ByteProcessorImpl(source);
+    static BytesProcessor from(byte[] source) {
+        return new BytesProcessorImpl(source);
     }
 
     /**
-     * Returns a new {@link ByteProcessor} with specified data source, starting from the start index up to the specified
-     * length.
+     * Returns a new {@link BytesProcessor} with specified data source, starting from the start index up to the
+     * specified length.
      *
      * @param source specified data source
      * @param offset start index
      * @param length specified length
-     * @return a new {@link ByteProcessor}
+     * @return a new {@link BytesProcessor}
      * @throws IndexOutOfBoundsException thrown bounds problem
      */
-    static ByteProcessor from(byte[] source, int offset, int length) throws IndexOutOfBoundsException {
+    static BytesProcessor from(byte[] source, int offset, int length) throws IndexOutOfBoundsException {
         IOMisc.checkReadBounds(source, offset, length);
         if (offset == 0 && length == source.length) {
             return from(source);
@@ -73,13 +73,13 @@ public interface ByteProcessor {
     }
 
     /**
-     * Returns a new {@link ByteProcessor} with specified data source.
+     * Returns a new {@link BytesProcessor} with specified data source.
      *
      * @param source specified data source
-     * @return a new {@link ByteProcessor}
+     * @return a new {@link BytesProcessor}
      */
-    static ByteProcessor from(ByteBuffer source) {
-        return new ByteProcessorImpl(source);
+    static BytesProcessor from(ByteBuffer source) {
+        return new BytesProcessorImpl(source);
     }
 
     /**
@@ -98,7 +98,7 @@ public interface ByteProcessor {
      * @return a new {@link Encoder} to round input data for given encoder
      */
     static Encoder roundEncoder(Encoder encoder, int expectedBlockSize) {
-        return new ByteProcessorImpl.RoundEncoder(encoder, expectedBlockSize);
+        return new BytesProcessorImpl.RoundEncoder(encoder, expectedBlockSize);
     }
 
     /**
@@ -115,7 +115,7 @@ public interface ByteProcessor {
      * @return a new {@link Encoder} that buffers remaining data for given encoder
      */
     static Encoder bufferedEncoder(Encoder encoder) {
-        return new ByteProcessorImpl.BufferedEncoder(encoder);
+        return new BytesProcessorImpl.BufferedEncoder(encoder);
     }
 
     /**
@@ -133,7 +133,7 @@ public interface ByteProcessor {
      * each invocation
      */
     static Encoder fixedSizeEncoder(Encoder encoder, int size) {
-        return new ByteProcessorImpl.FixedSizeEncoder(encoder, size);
+        return new BytesProcessorImpl.FixedSizeEncoder(encoder, size);
     }
 
     /**
@@ -145,7 +145,7 @@ public interface ByteProcessor {
      * @param readLimit maximum number of bytes to read from data source
      * @return this
      */
-    ByteProcessor readLimit(long readLimit);
+    BytesProcessor readLimit(long readLimit);
 
     /**
      * Sets the number of bytes for each read operation from data source.
@@ -158,7 +158,7 @@ public interface ByteProcessor {
      * @param readBlockSize the number of bytes for each read operation from data source
      * @return this
      */
-    ByteProcessor readBlockSize(int readBlockSize);
+    BytesProcessor readBlockSize(int readBlockSize);
 
     /**
      * Sets whether reading 0 byte from data source should be treated as reaching to the end and break the read loop. A
@@ -170,7 +170,7 @@ public interface ByteProcessor {
      *                      the read loop
      * @return this
      */
-    ByteProcessor endOnZeroRead(boolean endOnZeroRead);
+    BytesProcessor endOnZeroRead(boolean endOnZeroRead);
 
     /**
      * Adds an encoder for encoding which is an intermediate operation. When the data processing starts, all encoders
@@ -211,7 +211,7 @@ public interface ByteProcessor {
      * @param encoder encoder for encoding data from read operation
      * @return this
      */
-    ByteProcessor encoder(Encoder encoder);
+    BytesProcessor encoder(Encoder encoder);
 
     /**
      * Adds an encoder for encoding which is an intermediate operation. This method is equivalent to adding a fixed-size
@@ -224,7 +224,7 @@ public interface ByteProcessor {
      * @param size    specified fixed-size
      * @return this
      */
-    default ByteProcessor encoder(Encoder encoder, int size) {
+    default BytesProcessor encoder(Encoder encoder, int size) {
         return encoder(fixedSizeEncoder(encoder, size));
     }
 
@@ -378,10 +378,10 @@ public interface ByteProcessor {
      * <p>
      * This is a setting method but this byte processor still be invalid after current invocation.
      *
-     * @return a new {@link CharProcessor} converted from this byte processor with specified charset
+     * @return a new {@link CharsProcessor} converted from this byte processor with specified charset
      */
-    default CharProcessor toCharProcessor(Charset charset) {
-        return CharProcessor.from(JieIO.reader(toInputStream(), charset));
+    default CharsProcessor toCharProcessor(Charset charset) {
+        return CharsProcessor.from(JieIO.reader(toInputStream(), charset));
     }
 
     /**

@@ -1,6 +1,6 @@
 package xyz.sunqian.common.encode;
 
-import xyz.sunqian.common.io.ByteProcessor;
+import xyz.sunqian.common.io.BytesProcessor;
 import xyz.sunqian.common.io.JieBuffer;
 
 import java.nio.ByteBuffer;
@@ -92,8 +92,8 @@ abstract class AbsCoder implements ByteCoder {
     }
 
     @Override
-    public ByteProcessor.Encoder streamEncoder() {
-        ByteProcessor.Encoder encoder = new ByteProcessor.Encoder() {
+    public BytesProcessor.Encoder streamEncoder() {
+        BytesProcessor.Encoder encoder = new BytesProcessor.Encoder() {
 
             private long startPos = 0;
 
@@ -105,7 +105,7 @@ abstract class AbsCoder implements ByteCoder {
                 return ret;
             }
         };
-        return ByteProcessor.roundEncoder(encoder, getBlockSize());
+        return BytesProcessor.roundEncoder(encoder, getBlockSize());
     }
 
     abstract static class En extends AbsCoder implements ByteEncoder {

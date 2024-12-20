@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-final class ByteProcessorImpl implements ByteProcessor {
+final class BytesProcessorImpl implements BytesProcessor {
 
     private final Object source;
     private Object dest;
@@ -21,26 +21,26 @@ final class ByteProcessorImpl implements ByteProcessor {
     private boolean endOnZeroRead = false;
     private List<Encoder> encoders;
 
-    ByteProcessorImpl(InputStream source) {
+    BytesProcessorImpl(InputStream source) {
         this.source = source;
     }
 
-    ByteProcessorImpl(byte[] source) {
+    BytesProcessorImpl(byte[] source) {
         this.source = source;
     }
 
-    ByteProcessorImpl(ByteBuffer source) {
+    BytesProcessorImpl(ByteBuffer source) {
         this.source = source;
     }
 
     @Override
-    public ByteProcessor readLimit(long readLimit) {
+    public BytesProcessor readLimit(long readLimit) {
         this.readLimit = readLimit;
         return this;
     }
 
     @Override
-    public ByteProcessor readBlockSize(int readBlockSize) {
+    public BytesProcessor readBlockSize(int readBlockSize) {
         if (readBlockSize <= 0) {
             throw new IORuntimeException("readBlockSize must > 0!");
         }
@@ -49,13 +49,13 @@ final class ByteProcessorImpl implements ByteProcessor {
     }
 
     @Override
-    public ByteProcessor endOnZeroRead(boolean endOnZeroRead) {
+    public BytesProcessor endOnZeroRead(boolean endOnZeroRead) {
         this.endOnZeroRead = endOnZeroRead;
         return this;
     }
 
     @Override
-    public ByteProcessor encoder(Encoder encoder) {
+    public BytesProcessor encoder(Encoder encoder) {
         if (encoders == null) {
             encoders = new ArrayList<>();
         }
