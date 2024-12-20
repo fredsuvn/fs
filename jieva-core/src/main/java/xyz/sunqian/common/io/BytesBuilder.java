@@ -1,5 +1,7 @@
 package xyz.sunqian.common.io;
 
+import xyz.sunqian.common.base.JieBytes;
+
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -14,7 +16,7 @@ import java.util.Arrays;
  * {@link OutputStream}.
  * <p>
  * Like {@link ByteArrayOutputStream}, this class also has a buffer space to store the bytes, and close method has no
- * effect. The methods in this class can be called after the stream has been closed without exception.
+ * effect. The methods in this class can be called after the builder has been closed without exception.
  *
  * @author sunqian
  */
@@ -81,6 +83,7 @@ public class BytesBuilder extends OutputStream {
      * @param b the byte to be written
      * @see ByteArrayOutputStream#write(int)
      */
+    @Override
     public void write(int b) {
         ensureCapacity(count + 1);
         buf[count] = (byte) b;
@@ -95,6 +98,7 @@ public class BytesBuilder extends OutputStream {
      * @param len specified length
      * @see ByteArrayOutputStream#write(byte[], int, int)
      */
+    @Override
     public void write(byte[] b, int off, int len) {
         IOMisc.checkReadBounds(b, off, len);
         ensureCapacity(count + len);
@@ -192,6 +196,7 @@ public class BytesBuilder extends OutputStream {
      * @return String decoded from the buffer's contents using the platform's default charset
      * @see ByteArrayOutputStream#toString()
      */
+    @Override
     public String toString() {
         return new String(buf, 0, count);
     }
@@ -220,9 +225,8 @@ public class BytesBuilder extends OutputStream {
 
     /**
      * No effect for this builder.
-     *
-     * @see ByteArrayOutputStream#close()
      */
+    @Override
     public void close() {
     }
 
@@ -303,7 +307,7 @@ public class BytesBuilder extends OutputStream {
             write(bytes.array(), JieBuffer.getArrayStartIndex(bytes), bytes.remaining());
             bytes.position(bytes.position() + bytes.remaining());
         } else {
-            byte[] remaining = JieBuffer.read(bytes);
+            byte[] remaining = JieBytes.getBytes(bytes);
             write(remaining, 0, remaining.length);
         }
         return this;
