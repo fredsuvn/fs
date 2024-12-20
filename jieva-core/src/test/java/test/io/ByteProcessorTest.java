@@ -598,7 +598,7 @@ public class ByteProcessorTest {
 
     @Test
     public void testToInputStream() throws Exception {
-        testToInputStream(100, 5);
+        testToInputStream(10, 5);
         testToInputStream(10086, 11);
         testToInputStream(10086, 333);
         testToInputStream(10086, 22);
@@ -619,10 +619,12 @@ public class ByteProcessorTest {
             InputStream nio = ByteProcessor.from(new NioIn()).endOnZeroRead(true).toInputStream();
             assertEquals(nio.read(), -1);
             InputStream empty = ByteProcessor.from(new byte[]{9}).encoder(((data, end) -> {
-                if (data.hasRemaining()) {
-                    return data;
+                BytesBuilder bb = new BytesBuilder();
+                bb.append(data);
+                if (end) {
+                    bb.append(new byte[]{1, 2, 3});
                 }
-                return ByteBuffer.wrap(new byte[]{1, 2, 3});
+                return bb.toByteBuffer();
             })).toInputStream();
             assertEquals(JieIO.read(empty), new byte[]{9, 1, 2, 3});
             assertEquals(empty.read(), -1);

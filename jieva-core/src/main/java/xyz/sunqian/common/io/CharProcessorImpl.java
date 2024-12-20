@@ -1,7 +1,6 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieChars;
 import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.coll.JieArray;
@@ -67,20 +66,6 @@ final class CharProcessorImpl implements CharProcessor {
         }
         encoders.add(encoder);
         return this;
-    }
-
-    @Nullable
-    private Encoder buildEncoder() {
-        if (encoders == null) {
-            return null;
-        }
-        return (data, end) -> {
-            CharBuffer chars = data;
-            for (CharProcessor.Encoder encoder : encoders) {
-                chars = encoder.encode(chars, end);
-            }
-            return chars;
-        };
     }
 
     @Override
@@ -261,49 +246,15 @@ final class CharProcessorImpl implements CharProcessor {
     }
 
     private long readTo(BufferIn in, BufferOut out) throws Exception {
-        long count = 0;
+        EnReader enReader = new EnReader(in);
         while (true) {
-            CharBuffer buf = in.read();
-            if (buf == null && count == 0) {
-                return count;
-            }
-            buf = Jie.nonNull(buf, JieChars.emptyBuffer());
-            Encoder encoder = buildEncoder();
-            if (!buf.hasRemaining()) {
-                if (encoder != null) {
-                    CharBuffer encoded = encode(encoder, buf, true);
-                    out.write(encoded);
-                }
+            CharBuffer buffer = enReader.read();
+            if (buffer == null) {
                 break;
             }
-            int readSize = buf.remaining();
-            count += readSize;
-            if (encoder != null) {
-                CharBuffer encoded;
-                if (readSize < readBlockSize) {
-                    encoded = encode(encoder, buf, true);
-                    out.write(encoded);
-                    break;
-                } else {
-                    encoded = encode(encoder, buf, false);
-                    out.write(encoded);
-                }
-            } else {
-                out.write(buf);
-                if (readSize < readBlockSize) {
-                    break;
-                }
-            }
+            out.write(buffer);
         }
-        return count;
-    }
-
-    private CharBuffer encode(Encoder encoder, CharBuffer buf, boolean end) {
-        try {
-            return encoder.encode(buf, end);
-        } catch (Exception e) {
-            throw new IOEncodingException(e);
-        }
+        return enReader.count();
     }
 
     private interface BufferIn {
@@ -317,6 +268,109 @@ final class CharProcessorImpl implements CharProcessor {
 
     private interface BufferOut {
         void write(CharBuffer buffer) throws Exception;
+    }
+
+    private final class EnReader {
+
+        private final BufferIn in;
+
+        // null:  break end;
+        // empty: for last empty invocation
+        private CharBuffer buffer;
+        private long count = -1;
+
+        // init when a terminal method has invoked
+        private Encoder en;
+
+        private EnReader(BufferIn in) {
+            this.in = in;
+        }
+
+        /*
+         * Note if the return buffer is non-null, it must be non-empty.
+         */
+        @Nullable
+        private CharBuffer read() {
+            try {
+                if (count == -1) {
+                    buffer = in.read();
+                    count = 0;
+                }
+                while (true) {
+                    if (buffer == null) {
+                        return null;
+                    }
+                    Encoder encoder = getEncoder();
+                    CharBuffer encoded;
+                    if (!buffer.hasRemaining()) {
+                        buffer = null;
+                        encoded = encode(encoder, JieChars.emptyBuffer(), true);
+                        if (JieChars.isEmpty(encoded)) {
+                            continue;
+                        }
+                        return encoded;
+                    }
+                    int readSize = buffer.remaining();
+                    count += readSize;
+                    if (readSize < readBlockSize) {
+                        encoded = encode(encoder, buffer, true);
+                        buffer = null;
+                    } else {
+                        encoded = encode(encoder, buffer, false);
+                        buffer = in.read();
+                        if (buffer == null) {
+                            buffer = JieChars.emptyBuffer();
+                        }
+                    }
+                    if (JieChars.isEmpty(encoded)) {
+                        continue;
+                    }
+                    return encoded;
+                }
+            } catch (IOEncodingException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new IORuntimeException(e);
+            }
+        }
+
+        private long count() {
+            return count;
+        }
+
+        @Nullable
+        private Encoder getEncoder() {
+            if (en == null) {
+                en = buildEncoder();
+            }
+            return en;
+        }
+
+        @Nullable
+        private Encoder buildEncoder() {
+            if (encoders == null) {
+                return null;
+            }
+            return (data, end) -> {
+                CharBuffer chars = data;
+                for (Encoder encoder : encoders) {
+                    chars = encoder.encode(chars, end);
+                }
+                return chars;
+            };
+        }
+
+        @Nullable
+        private CharBuffer encode(@Nullable Encoder encoder, CharBuffer buf, boolean end) {
+            if (encoder == null) {
+                return buf;
+            }
+            try {
+                return encoder.encode(buf, end);
+            } catch (Exception e) {
+                throw new IOEncodingException(e);
+            }
+        }
     }
 
     private abstract class BaseBufferIn implements BufferIn {
@@ -513,51 +567,18 @@ final class CharProcessorImpl implements CharProcessor {
 
     private final class ReaderIn extends Reader {
 
-        private final BufferIn in;
+        private final EnReader enReader;
         private CharBuffer buffer = JieChars.emptyBuffer();
-
-        // 0-init, 1-processing, 2-end, 3-closed
-        private int state = 0;
+        private boolean closed = false;
 
         private ReaderIn(BufferIn in) {
-            this.in = in;
+            this.enReader = new EnReader(in);
         }
 
         @Nullable
         private CharBuffer read0() throws IOException {
-            if (state == 2) {
-                return null;
-            }
             try {
-                while (true) {
-                    CharBuffer buf = in.read();
-                    Encoder encoder = buildEncoder();
-                    if (JieChars.isEmpty(buf)) {
-                        if (state == 0) {
-                            state = 2;
-                            return null;
-                        }
-                        state = 2;
-                        if (encoder == null) {
-                            return null;
-                        }
-                        CharBuffer ret = encoder.encode(JieChars.emptyBuffer(), true);
-                        if (ret.hasRemaining()) {
-                            return ret;
-                        }
-                        return null;
-                    }
-                    if (state == 0) {
-                        state = 1;
-                    }
-                    if (encoder == null) {
-                        return buf;
-                    }
-                    CharBuffer ret = encoder.encode(buf, false);
-                    if (ret.hasRemaining()) {
-                        return ret;
-                    }
-                }
+                return enReader.read();
             } catch (Exception e) {
                 throw new IOException(e);
             }
@@ -634,7 +655,7 @@ final class CharProcessorImpl implements CharProcessor {
 
         @Override
         public void close() throws IOException {
-            if (state == 3) {
+            if (closed) {
                 return;
             }
             if (source instanceof AutoCloseable) {
@@ -646,11 +667,11 @@ final class CharProcessorImpl implements CharProcessor {
                     throw new IOException(e);
                 }
             }
-            state = 3;
+            closed = true;
         }
 
         private void checkClosed() throws IOException {
-            if (state == 3) {
+            if (closed) {
                 throw new IOException("Reader closed.");
             }
         }

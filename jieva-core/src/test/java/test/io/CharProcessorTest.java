@@ -766,10 +766,12 @@ public class CharProcessorTest {
             Reader nio = CharProcessor.from(new NioReader()).endOnZeroRead(true).toReader();
             assertEquals(nio.read(), -1);
             Reader empty = CharProcessor.from(new char[]{'9'}).encoder(((data, end) -> {
-                if (data.hasRemaining()) {
-                    return data;
+                StringBuilder builder = new StringBuilder();
+                builder.append(data);
+                if (end) {
+                    builder.append(new char[]{'1', '2', '3'});
                 }
-                return CharBuffer.wrap(new char[]{'1', '2', '3'});
+                return CharBuffer.wrap(builder.toString());
             })).toReader();
             assertEquals(JieIO.read(empty).toCharArray(), new char[]{'9', '1', '2', '3'});
             assertEquals(empty.read(), -1);
