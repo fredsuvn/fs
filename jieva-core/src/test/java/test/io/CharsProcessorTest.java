@@ -553,7 +553,7 @@ public class CharsProcessorTest {
             bb.reset();
             boolean[] buffer = {true};
             long count = CharsProcessor.from(src).readBlockSize(blockSize)
-                .encoder(CharsProcessor.roundEncoder((data, end) -> {
+                .roundEncoder(3, (data, end) -> {
                     CharsBuilder ret = new CharsBuilder();
                     int j = 0;
                     while (data.hasRemaining()) {
@@ -566,8 +566,8 @@ public class CharsProcessorTest {
                         j++;
                     }
                     return CharBuffer.wrap(ret.toString());
-                }, 3))
-                .encoder(CharsProcessor.bufferedEncoder(((data, end) -> {
+                })
+                .bufferedEncoder((data, end) -> {
                     if (end) {
                         return data;
                     }
@@ -579,8 +579,8 @@ public class CharsProcessorTest {
                     }
                     buffer[0] = !buffer[0];
                     return ret;
-                })))
-                .encoder((data, end) -> {
+                })
+                .encoder(10, (data, end) -> {
                     if (data.remaining() == 10) {
                         char[] ret = new char[11];
                         data.get(ret, 0, 10);
@@ -589,7 +589,7 @@ public class CharsProcessorTest {
                     } else {
                         return data;
                     }
-                }, 10)
+                })
                 .writeTo(bb);
             assertEquals(count, totalSize);
             assertEquals(bb.toCharArray(), proc);
@@ -645,8 +645,8 @@ public class CharsProcessorTest {
             dst[i * 2 + 1] = (char) expectedBlockSize;
         }
         char[] dst2 = new char[src.length * 2];
-        long len = CharsProcessor.from(src).readBlockSize(blockSize).encoder(CharsProcessor.roundEncoder(
-            (data, end) -> {
+        long len = CharsProcessor.from(src).readBlockSize(blockSize)
+            .roundEncoder(expectedBlockSize, (data, end) -> {
                 if (!end) {
                     assertTrue(data.remaining() >= expectedBlockSize);
                     if (blockSize < expectedBlockSize) {
@@ -663,13 +663,12 @@ public class CharsProcessorTest {
                 }
                 bb.flip();
                 return bb;
-            },
-            expectedBlockSize
-        )).writeTo(dst2);
+            })
+            .writeTo(dst2);
         assertEquals(dst2, dst);
         assertEquals(len, src.length);
-        len = CharsProcessor.from(src).readBlockSize(blockSize).encoder(CharsProcessor.roundEncoder(
-            (data, end) -> {
+        len = CharsProcessor.from(src).readBlockSize(blockSize)
+            .roundEncoder(expectedBlockSize, (data, end) -> {
                 if (!end) {
                     assertTrue(data.remaining() >= expectedBlockSize);
                     if (blockSize < expectedBlockSize) {
@@ -686,9 +685,8 @@ public class CharsProcessorTest {
                 }
                 bb.flip();
                 return bb;
-            },
-            expectedBlockSize
-        )).writeTo(dst2);
+            })
+            .writeTo(dst2);
         assertEquals(dst2, dst);
         assertEquals(len, src.length);
     }
@@ -707,8 +705,8 @@ public class CharsProcessorTest {
         char[] src = JieRandom.fill(new char[size]);
         char[] dst = new char[src.length];
         boolean[] buffer = {true};
-        long len = CharsProcessor.from(src).readBlockSize(blockSize).encoder(CharsProcessor.bufferedEncoder(
-            (data, end) -> {
+        long len = CharsProcessor.from(src).readBlockSize(blockSize).
+            bufferedEncoder((data, end) -> {
                 if (end) {
                     return data;
                 }
@@ -722,8 +720,8 @@ public class CharsProcessorTest {
                 }
                 buffer[0] = !buffer[0];
                 return ret;
-            }
-        )).writeTo(dst);
+            })
+            .writeTo(dst);
         assertEquals(dst, src);
         assertEquals(len, src.length);
     }
@@ -757,8 +755,8 @@ public class CharsProcessorTest {
         }
         int portion = JieMath.leastPortion(totalSize, fixedSize);
         char[] dst = new char[src.length + portion * 2];
-        long len = CharsProcessor.from(src).readBlockSize(blockSize).encoder(CharsProcessor.fixedSizeEncoder(
-            (data, end) -> {
+        long len = CharsProcessor.from(src).readBlockSize(blockSize).
+            encoder(fixedSize, (data, end) -> {
                 int remaining = data.remaining();
                 if (remaining == 0) {
                     return JieChars.emptyBuffer();
@@ -768,9 +766,8 @@ public class CharsProcessorTest {
                 bb[remaining] = '\r';
                 bb[remaining + 1] = '\n';
                 return CharBuffer.wrap(bb);
-            },
-            fixedSize
-        )).writeTo(dst);
+            })
+            .writeTo(dst);
         assertEquals(dst, charsBuilder.toCharArray());
         assertEquals(len, src.length);
     }

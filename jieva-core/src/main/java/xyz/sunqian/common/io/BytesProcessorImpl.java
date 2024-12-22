@@ -64,21 +64,6 @@ final class BytesProcessorImpl implements BytesProcessor {
     }
 
     @Override
-    public BytesProcessor encoder(int size, Encoder encoder) {
-        return encoder(new FixedSizeEncoder(encoder, size));
-    }
-
-    @Override
-    public BytesProcessor roundEncoder(int size, Encoder encoder) {
-        return encoder(new RoundEncoder(encoder, size));
-    }
-
-    @Override
-    public BytesProcessor bufferedEncoder(Encoder encoder) {
-        return encoder(new BufferedEncoder(encoder));
-    }
-
-    @Override
     public long writeTo(OutputStream dest) {
         this.dest = dest;
         return start();

@@ -510,6 +510,61 @@ public class JieIO {
     }
 
     /**
+     * Returns a new {@link CharsProcessor.Encoder} that guarantees a specified fixed-size data is passed to the given
+     * encoder in each invocation, it is typically used for the encoder which requires consuming data of fixed-size.
+     * <p>
+     * Note in last invocation (where the {@code end} is {@code true}), size of remainder data may be smaller than
+     * specified fixed-size.
+     * <p>
+     * This encoder is not thread-safe.
+     *
+     * @param size    specified fixed-size
+     * @param encoder given encoder
+     * @return a new {@link CharsProcessor.Encoder} that guarantees a specified fixed-size data is passed to the given
+     * encoder in each invocation
+     */
+    public static CharsProcessor.Encoder fixedSizeEncoder(int size, CharsProcessor.Encoder encoder) {
+        return new CharsProcessorImpl.FixedSizeEncoder(encoder, size);
+    }
+
+    /**
+     * Returns a new {@link CharsProcessor.Encoder} to round input data for given encoder, it is typically used for the
+     * encoder which requires consuming data in multiples of specified size.
+     * <p>
+     * This encoder rounds input data (possibly following buffered data from the previous invocation) to the largest
+     * multiple of specified size and passes the rounded data to the given encoder. Any remainder data will be buffered
+     * and used in the next invocation. However, in the last invocation (where the {@code end} is {@code true}), all
+     * data (buffered data followed by input data) will be passed directly to the given encoder.
+     * <p>
+     * This encoder is not thread-safe.
+     *
+     * @param size    specified size
+     * @param encoder given encoder
+     * @return a new {@link CharsProcessor.Encoder} to round input data for given encoder
+     */
+    public static CharsProcessor.Encoder roundEncoder(int size, CharsProcessor.Encoder encoder) {
+        return new CharsProcessorImpl.RoundEncoder(encoder, size);
+    }
+
+    /**
+     * Returns a new {@link CharsProcessor.Encoder} that buffers remaining data for given encoder, it is typically used
+     * for the encoder which may not fully consume current passed data, requires buffering and consuming data in next
+     * invocation.
+     * <p>
+     * This encoder passes input data (possibly following buffered data from the previous invocation) to the given
+     * encoder. Any remaining data after encoding of given encoder will be buffered and used in the next invocation.
+     * However, in the last invocation (where the {@code end} is {@code true}), no data will be buffered.
+     * <p>
+     * This encoder is not thread-safe.
+     *
+     * @param encoder given encoder
+     * @return a new {@link CharsProcessor.Encoder} that buffers remaining data for given encoder
+     */
+    public static CharsProcessor.Encoder bufferedEncoder(CharsProcessor.Encoder encoder) {
+        return new CharsProcessorImpl.BufferedEncoder(encoder);
+    }
+
+    /**
      * Wraps given array as an {@link InputStream}.
      * <p>
      * The returned stream is similar to {@link ByteArrayInputStream} but is not the same, its methods are not modified

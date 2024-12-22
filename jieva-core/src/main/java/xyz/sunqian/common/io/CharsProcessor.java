@@ -95,60 +95,6 @@ public interface CharsProcessor {
     }
 
     /**
-     * Returns a new {@link Encoder} to round input data for given encoder, it is typically used for the encoder which
-     * requires consuming data in multiples of specified size.
-     * <p>
-     * This encoder rounds input data (possibly following buffered data from the previous invocation) to the largest
-     * multiple of specified size and passes the rounded data to the given encoder. Any remainder data will be buffered
-     * and used in the next invocation. However, in the last invocation (where the {@code end} is {@code true}), all
-     * data (buffered data followed by input data) will be passed directly to the given encoder.
-     * <p>
-     * This encoder is not thread-safe.
-     *
-     * @param encoder given encoder
-     * @param size    specified size
-     * @return a new {@link Encoder} to round input data for given encoder
-     */
-    static Encoder roundEncoder(Encoder encoder, int size) {
-        return new CharsProcessorImpl.RoundEncoder(encoder, size);
-    }
-
-    /**
-     * Returns a new {@link Encoder} that buffers remaining data for given encoder, it is typically used for the encoder
-     * which may not fully consume current passed data, requires buffering and consuming data in next invocation.
-     * <p>
-     * This encoder passes input data (possibly following buffered data from the previous invocation) to the given
-     * encoder. Any remaining data after encoding of given encoder will be buffered and used in the next invocation.
-     * However, in the last invocation (where the {@code end} is {@code true}), no data will be buffered.
-     * <p>
-     * This encoder is not thread-safe.
-     *
-     * @param encoder given encoder
-     * @return a new {@link Encoder} that buffers remaining data for given encoder
-     */
-    static Encoder bufferedEncoder(Encoder encoder) {
-        return new CharsProcessorImpl.BufferedEncoder(encoder);
-    }
-
-    /**
-     * Returns a new {@link Encoder} that guarantees a specified fixed-size data is passed to the given encoder in each
-     * invocation, it is typically used for the encoder which requires consuming data of fixed-size.
-     * <p>
-     * Note in last invocation (where the {@code end} is {@code true}), size of remainder data may be smaller than
-     * specified fixed-size.
-     * <p>
-     * This encoder is not thread-safe.
-     *
-     * @param encoder given encoder
-     * @param size    specified fixed-size
-     * @return a new {@link Encoder} that guarantees a specified fixed-size data is passed to the given encoder in each
-     * invocation
-     */
-    static Encoder fixedSizeEncoder(Encoder encoder, int size) {
-        return new CharsProcessorImpl.FixedSizeEncoder(encoder, size);
-    }
-
-    /**
      * Sets maximum number of chars to read from data source. This can be -1, meaning read until the end, which is the
      * default value.
      * <p>
@@ -204,23 +150,23 @@ public interface CharsProcessor {
      * }</pre>
      * Size of passed data is uncertain, if it is the first encoder, the size may match the {@link #readBlockSize(int)}.
      * (except for the last reading, which may be smaller than the read block size). To a certain size, try
-     * {@link #encoder(Encoder, int)}.
+     * {@link #encoder(int, Encoder)}.
      * <p>
      * Passed {@link CharBuffer} object, which is the first argument of {@link Encoder#encode(CharBuffer, boolean)}, can
      * be read-only (for example, when the source is a reader), or writable (for example, when the source is a char
      * array or char buffer), and discarded after each invocation. The returned {@link CharBuffer} will also be treated
      * as read-only;
      * <p>
-     * This is an optional setting method. This interface also provides helper encoder methods:
+     * This is an optional setting method. Additionally, there are also more helper methods:
      * <ul>
      *     <li>
-     *         {@link #roundEncoder(Encoder, int)};
+     *         For fixed-size: {@link #encoder(int, Encoder)}, {@link JieIO#fixedSizeEncoder(int, Encoder)};
      *     </li>
      *     <li>
-     *         {@link #bufferedEncoder(Encoder)};
+     *         For round size: {@link #roundEncoder(int, Encoder)}, {@link JieIO#roundEncoder(int, Encoder)};
      *     </li>
      *     <li>
-     *         {@link #fixedSizeEncoder(Encoder, int)};
+     *         for buffering: {@link #bufferedEncoder(Encoder)}, {@link JieIO#bufferedEncoder(Encoder)};
      *     </li>
      * </ul>
      *
@@ -230,18 +176,49 @@ public interface CharsProcessor {
     CharsProcessor encoder(Encoder encoder);
 
     /**
-     * Adds an encoder for encoding which is an intermediate operation. This method is equivalent to adding a fixed-size
-     * encoder by {@link #encoder(Encoder)} and {@link #fixedSizeEncoder(Encoder, int)}:
+     * Adds an encoder for this processor. This is a special type of {@link #encoder(Encoder)}, typically used for the
+     * encoder which requires consuming data of fixed-size. The behavior of this method is equivalent to:
      * <pre>{@code
-     *     return encoder(fixedSizeEncoder(encoder, size));
+     *     return encoder(JieIO.fixedSizeEncoder(size, encoder));
+     * }</pre>
+     *
+     * @param size    specified fixed-size
+     * @param encoder encoder for encoding data from read operation
+     * @return this
+     */
+    default CharsProcessor encoder(int size, Encoder encoder) {
+        return encoder(JieIO.fixedSizeEncoder(size, encoder));
+    }
+
+    /**
+     * Adds an encoder for this processor. This is a special type of {@link #encoder(Encoder)}, typically used for the
+     * encoder which requires consuming data in multiples of specified size. The behavior of this method is equivalent
+     * to:
+     * <pre>{@code
+     *     return encoder(JieIO.roundEncoder(size, encoder));
+     * }</pre>
+     *
+     * @param size    specified size
+     * @param encoder encoder for encoding data from read operation
+     * @return this
+     */
+    default CharsProcessor roundEncoder(int size, Encoder encoder) {
+        return encoder(JieIO.roundEncoder(size, encoder));
+    }
+
+    /**
+     * Adds an encoder for this processor. This is a special type of {@link #encoder(Encoder)}, typically used for the
+     * encoder which may not fully consume current passed data, requires buffering and consuming in next invocation. The
+     * behavior of this method is equivalent to:
+     * <pre>{@code
+     *     return encoder(JieIO.bufferedEncoder(encoder));
      * }</pre>
      *
      * @param encoder encoder for encoding data from read operation
-     * @param size    specified fixed-size
      * @return this
      */
-    default CharsProcessor encoder(Encoder encoder, int size) {
-        return encoder(fixedSizeEncoder(encoder, size));
+    default CharsProcessor bufferedEncoder(Encoder encoder) {
+        return encoder(JieIO.bufferedEncoder(encoder));
     }
 
     /**
