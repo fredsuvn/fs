@@ -18,7 +18,7 @@ import java.util.Arrays;
  * These methods are minimize required to implement:
  * <ul>
  *     <li>
- *         {@link #doCode(long, byte[], int, int, byte[], int, boolean)};
+ *         {@link #doCode(long, byte[], int, int, byte[], int, int, boolean)};
  *     </li>
  *     <li>
  *         {@link #getOutputSize(int, boolean)};
@@ -32,11 +32,10 @@ import java.util.Arrays;
  *     <li>
  *         {@link #checkRemainingSpace(int, int)};
  *     </li>
+ *     <li>
+ *         {@link #streamEncoder()};
+ *     </li>
  * </ul>
- * Implementation of {@link ByteCoder#streamEncoder()} is not thread-safe, and even if the input data is not fully
- * consumed after encoding/decoding, it will also be ignored and discarded. If you do not intend to override this
- * method, ensure that the {@link #doCode(long, byte[], int, int, byte[], int, boolean)} consumes the entire source each
- * time.
  *
  * @author sunqian
  */
@@ -49,11 +48,16 @@ public abstract class AbstractByteCoder implements ByteCoder {
      * Returns output size in bytes for the specified input size. If the exact output size cannot be determined, returns
      * an estimated maximum value that can accommodate the output. Or {@code -1} if it cannot be estimated.
      * <p>
-     * By default, the {@code inputSize} is checked by {@link #checkInputSize(int, boolean)} first before be passed to
-     * this method, so it usually does not need to be validated again.
+     * The {@code end} parameter tells whether specified input data to be encoded is the last segment of the entire
+     * data. If the {@code end} parameter is false, it indicates that the data of specified input size may not be
+     * expected to be fully consumed. The returned output size should only match the expected amount of consumed data.
+     * <p>
+     * By default, {@code inputSize} is validated once by {@link #checkInputSize(int, boolean)} before being passed to
+     * this method. Therefore, there is no need to invoke {@link #checkInputSize(int, boolean)} again when implementing
+     * this method.
      *
      * @param inputSize specified input size
-     * @param end       whether the current data to be encoded is the last segment of the entire data
+     * @param end       whether specified input data to be encoded is the last segment of the entire data
      * @return output size in bytes for the specified input size
      * @throws EncodingException for encoding error
      * @throws DecodingException for encoding error
@@ -61,9 +65,15 @@ public abstract class AbstractByteCoder implements ByteCoder {
     protected abstract int getOutputSize(int inputSize, boolean end) throws EncodingException, DecodingException;
 
     /**
-     * This method encodes/decodes source data from source start index to source end index, and writes result into
-     * destination byte array from destination start index. It returns a long value of which high 32 bits indicates read
-     * byte number, low 32 bits indicates written byte number
+     * This method encodes/decodes source data (from source start index to source end index) and writes result into
+     * destination byte array (from destination start index to destination end index). It returns a long value of which
+     * high 32 bits indicates read byte number, low 32 bits indicates written byte number
+     * ({@link #buildDoCodeResult(int, int)} can be used to build the return value). The source data in specified bounds
+     * does not need to be fully consumed, nor does it need to fill the destination bounds.
+     * <p>
+     * By default, the passed arguments will not be null, and bounds of source and destination have already been
+     * validated by {@link #checkInputSize(int, boolean)}, {@link #checkRemainingSpace(int, int)} and
+     * {@link #getOutputSize(int, boolean)}. Therefore, there is no need for duplicate validation.
      *
      * @param startPos the position of the first byte of the current data within the entire data
      * @param src      source data
@@ -71,6 +81,7 @@ public abstract class AbstractByteCoder implements ByteCoder {
      * @param srcEnd   source end index
      * @param dst      destination byte array
      * @param dstOff   destination start index
+     * @param dstEnd   destination end index
      * @param end      whether the current data to be encoded is the last segment of the entire data
      * @return a long value of which high 32 bits indicates read byte number, low 32 bits indicates written byte number
      */
@@ -81,8 +92,22 @@ public abstract class AbstractByteCoder implements ByteCoder {
         int srcEnd,
         byte[] dst,
         int dstOff,
+        int dstEnd,
         boolean end
     ) throws EncodingException, DecodingException;
+
+    /**
+     * Helps build the read-write-value from {@link #doCode(long, byte[], int, int, byte[], int, int, boolean)}.
+     *
+     * @param readSize  read size
+     * @param writeSize write size
+     * @return read-write-value from {@link #doCode(long, byte[], int, int, byte[], int, int, boolean)}
+     */
+    protected long buildDoCodeResult(int readSize, int writeSize) {
+        long lr = readSize;
+        long lw = writeSize;
+        return lr << 32 | (lw & 0x00000000ffffffffL);
+    }
 
     /**
      * Checks input size, default implementation like:
@@ -119,7 +144,9 @@ public abstract class AbstractByteCoder implements ByteCoder {
     private byte[] doCode(long startPos, byte[] source, boolean end) throws EncodingException {
         int outputSize = getSafeOutputSize(source.length, end);
         byte[] dst = new byte[outputSize];
-        int len = (int) doCode(startPos, source, 0, source.length, dst, 0, end);
+        int len = getActualWriteSize(
+            doCode(startPos, source, 0, source.length, dst, 0, outputSize, end)
+        );
         if (len == dst.length) {
             return dst;
         }
@@ -129,55 +156,73 @@ public abstract class AbstractByteCoder implements ByteCoder {
     private ByteBuffer doCode(long startPos, ByteBuffer source, boolean end) throws EncodingException {
         int outputSize = getSafeOutputSize(source.remaining(), end);
         byte[] dst = new byte[outputSize];
-        int len;
+        long doCodeResult;
         if (source.hasArray()) {
-            len = (int) doCode(
+            doCodeResult = doCode(
                 startPos,
                 source.array(),
                 JieBuffer.getArrayStartIndex(source),
                 JieBuffer.getArrayEndIndex(source),
                 dst,
                 0,
+                outputSize,
                 end
             );
-            source.position(source.limit());
+            source.position(source.position() + getActualReadSize(doCodeResult));
         } else {
             byte[] s = new byte[source.remaining()];
+            int oldPos = source.position();
             source.get(s);
-            len = (int) doCode(startPos, s, 0, s.length, dst, 0, end);
+            doCodeResult = doCode(startPos, s, 0, s.length, dst, 0, outputSize, end);
+            source.position(oldPos + getActualReadSize(doCodeResult));
         }
-        if (len == dst.length) {
+        int writeSize = getActualWriteSize(doCodeResult);
+        if (writeSize == dst.length) {
             return ByteBuffer.wrap(dst);
         }
-        return ByteBuffer.wrap(Arrays.copyOf(dst, len));
+        return ByteBuffer.wrap(Arrays.copyOf(dst, writeSize));
     }
 
     private int doCode(long startPos, byte[] source, byte[] dest, boolean end) throws EncodingException {
         int outputSize = getSafeOutputSize(source.length, end);
         checkRemainingSpace(outputSize, dest.length);
-        return (int) doCode(startPos, source, 0, source.length, dest, 0, end);
+        return getActualWriteSize(
+            doCode(startPos, source, 0, source.length, dest, 0, outputSize, end)
+        );
     }
 
     private int doCode(long startPos, ByteBuffer source, ByteBuffer dest, boolean end) throws EncodingException {
         int outputSize = getSafeOutputSize(source.remaining(), end);
         checkRemainingSpace(outputSize, dest.remaining());
         if (source.hasArray() && dest.hasArray()) {
-            doCode(
+            int oldPos = source.position();
+            long doCodeResult = doCode(
                 startPos,
                 source.array(),
                 JieBuffer.getArrayStartIndex(source),
                 JieBuffer.getArrayEndIndex(source),
                 dest.array(),
                 JieBuffer.getArrayStartIndex(dest),
+                JieBuffer.getArrayStartIndex(dest) + outputSize,
                 end
             );
-            source.position(source.limit());
-            dest.position(dest.position() + outputSize);
+            source.position(oldPos + getActualReadSize(doCodeResult));
+            dest.position(dest.position() + getActualWriteSize(doCodeResult));
+            return getActualWriteSize(doCodeResult);
         } else {
             ByteBuffer dst = doCode(startPos, source, end);
+            int oldPos = dest.position();
             dest.put(dst);
+            return dest.position() - oldPos;
         }
-        return outputSize;
+    }
+
+    private int getActualReadSize(long doCodeResult) {
+        return (int) (doCodeResult >>> 32);
+    }
+
+    private int getActualWriteSize(long doCodeResult) {
+        return (int) doCodeResult;
     }
 
     private int getSafeOutputSize(int inputSize, boolean end) {
@@ -190,6 +235,14 @@ public abstract class AbstractByteCoder implements ByteCoder {
         return getSafeOutputSize(inputSize, true);
     }
 
+    /**
+     * The default implementation is wrapped by {@link JieIO#bufferedEncoder(BytesProcessor.Encoder)}. This means that
+     * the input data does not need to be fully consumed, any unconsumed data will be buffered for the next invocation.
+     *
+     * @return a {@link BytesProcessor.Encoder} with current coding logic
+     * @see BytesProcessor
+     * @see BytesProcessor.Encoder
+     */
     @Override
     public BytesProcessor.Encoder streamEncoder() {
         BytesProcessor.Encoder encoder = new BytesProcessor.Encoder() {
@@ -204,7 +257,7 @@ public abstract class AbstractByteCoder implements ByteCoder {
                 return ret;
             }
         };
-        return JieIO.roundEncoder(getBlockSize(), encoder);
+        return JieIO.bufferedEncoder(encoder);
     }
 
     /**

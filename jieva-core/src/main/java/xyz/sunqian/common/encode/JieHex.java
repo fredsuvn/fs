@@ -118,17 +118,20 @@ public class JieHex {
         };
 
         @Override
-        public int getOutputSize(int inputSize, boolean end) {
+        protected int getOutputSize(int inputSize, boolean end) {
             return inputSize * 2;
         }
 
-        protected long doCode(long startPos, byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, boolean end) {
+        protected long doCode(
+            long startPos, byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, int dstEnd, boolean end
+        ) {
             for (int i = srcOff, j = dstOff; i < srcEnd; ) {
                 int bits = src[i++];
                 dst[j++] = (byte) DICT[((bits >> 4) & 0x0f)];
                 dst[j++] = (byte) DICT[(bits & 0x0f)];
             }
-            return (srcEnd - srcOff) * 2L;
+            int readSize = srcEnd - srcOff;
+            return buildDoCodeResult(readSize, readSize * 2);
         }
     }
 
@@ -137,24 +140,28 @@ public class JieHex {
         private static final HexDecoder SINGLETON = new HexDecoder();
 
         @Override
-        public int getOutputSize(int inputSize, boolean end) throws DecodingException {
-            if (inputSize % 2 != 0) {
-                throw new DecodingException("Hex decoding size must be even: " + inputSize + ".");
+        protected int getOutputSize(int inputSize, boolean end) throws DecodingException {
+            if (end) {
+                if (inputSize % 2 != 0) {
+                    throw new DecodingException("Hex decoding size must be even: " + inputSize + ".");
+                }
             }
             return inputSize / 2;
         }
 
-        protected long doCode(long startPos, byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, boolean end) {
-            int length = srcEnd - srcOff;
-            for (int i = srcOff, j = dstOff; i < srcEnd; ) {
-                int bits1 = toDigit((char) src[i], startPos, i);
-                i++;
-                int bits2 = toDigit((char) src[i], startPos, i);
-                i++;
+        protected long doCode(
+            long startPos, byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, int dstEnd, boolean end
+        ) {
+            for (int i = dstOff, j = srcOff; i < dstEnd; i++) {
+                int bits1 = toDigit((char) src[j], startPos, j);
+                j++;
+                int bits2 = toDigit((char) src[j], startPos, j);
+                j++;
                 int bits = ((bits1 << 4) | bits2);
-                dst[j++] = (byte) bits;
+                dst[i] = (byte) bits;
             }
-            return length / 2L;
+            int writeSize = dstEnd - dstOff;
+            return buildDoCodeResult(writeSize * 2, writeSize);
         }
 
         private int toDigit(char c, long startPos, int index) {
