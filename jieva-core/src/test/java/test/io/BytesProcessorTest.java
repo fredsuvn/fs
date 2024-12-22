@@ -463,6 +463,17 @@ public class BytesProcessorTest {
             assertEquals(c, totalSize);
             assertEquals(dst, src);
             assertEquals(dst0.size(), 0);
+            byte[] dst1 = new byte[src.length];
+            boolean[] buffer = {true};
+            c = JieIO.processor(src)
+                .bufferedEncoder((data, end) -> {
+                    boolean b = buffer[0];
+                    buffer[0] = !b;
+                    return b ? data : null;
+                }).encoder((data, end) -> data)
+                .writeTo(dst1);
+            assertEquals(c, totalSize);
+            assertEquals(dst1, src);
             byte[] dst2 = new byte[src.length];
             boolean[] hit = {false};
             c = JieIO.processor(src)
