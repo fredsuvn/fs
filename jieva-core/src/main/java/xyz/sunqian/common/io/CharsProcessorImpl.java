@@ -1,6 +1,7 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieChars;
 import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.coll.JieArray;
@@ -689,6 +690,7 @@ final class CharsProcessorImpl implements CharsProcessor {
             this.encoder = encoder;
         }
 
+        // buf will be set null after total
         protected CharBuffer totalData(CharBuffer data) {
             if (JieArray.isEmpty(buf)) {
                 return data;
@@ -697,6 +699,7 @@ final class CharsProcessorImpl implements CharsProcessor {
             total.put(buf);
             total.put(data);
             total.flip();
+            buf = null;
             return total;
         }
 
@@ -799,36 +802,46 @@ final class CharsProcessorImpl implements CharsProcessor {
             }
             if (times == 1) {
                 CharBuffer slice = JieChars.slice(total, 0, size);
-                CharBuffer ret1 = encoder.encode(slice, false);
+                CharBuffer ret1 = Jie.nonNull(encoder.encode(slice, false), JieChars.emptyBuffer());
                 total.position(total.position() + size);
                 if (end) {
-                    CharBuffer ret2 = encoder.encode(total, true);
-                    int retSize1 = ret1.remaining();
-                    int retSize2 = ret2.remaining();
-                    char[] ret = new char[retSize1 + retSize2];
-                    ret1.get(ret, 0, retSize1);
-                    ret2.get(ret, retSize1, retSize2);
-                    return CharBuffer.wrap(ret);
+                    CharBuffer ret2 = Jie.nonNull(encoder.encode(total, true), JieChars.emptyBuffer());
+                    int size12 = ret1.remaining() + ret2.remaining();
+                    if (size12 <= 0) {
+                        return null;
+                    }
+                    CharBuffer ret = CharBuffer.allocate(size12);
+                    ret.put(ret1);
+                    ret.put(ret2);
+                    ret.flip();
+                    return ret;
                 }
                 buf = new char[total.remaining()];
                 total.get(buf);
                 return ret1;
             }
-            StringBuilder charsBuilder = new StringBuilder();
+            CharsBuilder charsBuilder = new CharsBuilder();
             for (int i = 0; i < times; i++) {
                 CharBuffer slice = JieChars.slice(total, 0, size);
                 CharBuffer ret = encoder.encode(slice, false);
                 total.position(total.position() + size);
-                charsBuilder.append(ret);
+                if (!JieChars.isEmpty(ret)) {
+                    charsBuilder.append(ret);
+                }
             }
             if (end) {
-                CharBuffer ret2 = encoder.encode(total, true);
-                charsBuilder.append(ret2);
+                CharBuffer lastRet = encoder.encode(total, true);
+                if (!JieChars.isEmpty(lastRet)) {
+                    charsBuilder.append(lastRet);
+                }
             } else {
                 buf = new char[total.remaining()];
                 total.get(buf);
             }
-            return CharBuffer.wrap(charsBuilder.toString());
+            if (charsBuilder.size() <= 0) {
+                return null;
+            }
+            return charsBuilder.toCharBuffer();
         }
     }
 }

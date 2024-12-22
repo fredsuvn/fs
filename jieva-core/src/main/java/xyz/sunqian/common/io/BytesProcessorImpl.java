@@ -1,6 +1,7 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieBytes;
 import xyz.sunqian.common.coll.JieArray;
 
@@ -607,6 +608,7 @@ final class BytesProcessorImpl implements BytesProcessor {
             this.encoder = encoder;
         }
 
+        // buf will be set null after total
         protected ByteBuffer totalData(ByteBuffer data) {
             if (JieArray.isEmpty(buf)) {
                 return data;
@@ -615,6 +617,7 @@ final class BytesProcessorImpl implements BytesProcessor {
             total.put(buf);
             total.put(data);
             total.flip();
+            buf = null;
             return total;
         }
 
@@ -717,16 +720,19 @@ final class BytesProcessorImpl implements BytesProcessor {
             }
             if (times == 1) {
                 ByteBuffer slice = JieBytes.slice(total, 0, size);
-                ByteBuffer ret1 = encoder.encode(slice, false);
+                ByteBuffer ret1 = Jie.nonNull(encoder.encode(slice, false), JieBytes.emptyBuffer());
                 total.position(total.position() + size);
                 if (end) {
-                    ByteBuffer ret2 = encoder.encode(total, true);
-                    int retSize1 = ret1.remaining();
-                    int retSize2 = ret2.remaining();
-                    byte[] ret = new byte[retSize1 + retSize2];
-                    ret1.get(ret, 0, retSize1);
-                    ret2.get(ret, retSize1, retSize2);
-                    return ByteBuffer.wrap(ret);
+                    ByteBuffer ret2 = Jie.nonNull(encoder.encode(total, true), JieBytes.emptyBuffer());
+                    int size12 = ret1.remaining() + ret2.remaining();
+                    if (size12 <= 0) {
+                        return null;
+                    }
+                    ByteBuffer ret = ByteBuffer.allocate(size12);
+                    ret.put(ret1);
+                    ret.put(ret2);
+                    ret.flip();
+                    return ret;
                 }
                 buf = new byte[total.remaining()];
                 total.get(buf);
@@ -737,14 +743,21 @@ final class BytesProcessorImpl implements BytesProcessor {
                 ByteBuffer slice = JieBytes.slice(total, 0, size);
                 ByteBuffer ret = encoder.encode(slice, false);
                 total.position(total.position() + size);
-                bytesBuilder.append(ret);
+                if (!JieBytes.isEmpty(ret)) {
+                    bytesBuilder.append(ret);
+                }
             }
             if (end) {
-                ByteBuffer ret2 = encoder.encode(total, true);
-                bytesBuilder.append(ret2);
+                ByteBuffer lastRet = encoder.encode(total, true);
+                if (!JieBytes.isEmpty(lastRet)) {
+                    bytesBuilder.append(lastRet);
+                }
             } else {
                 buf = new byte[total.remaining()];
                 total.get(buf);
+            }
+            if (bytesBuilder.size() <= 0) {
+                return null;
             }
             return bytesBuilder.toByteBuffer();
         }

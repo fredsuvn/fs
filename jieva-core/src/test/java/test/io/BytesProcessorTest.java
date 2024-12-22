@@ -482,146 +482,185 @@ public class BytesProcessorTest {
     @Test
     public void testRoundEncoder() {
         testRoundEncoder(100, 5, 6);
+        testRoundEncoder(100, 200, 60);
         testRoundEncoder(10086, 11, 333);
         testRoundEncoder(10086, 333, 11);
         testRoundEncoder(10086, 22, 22);
         testRoundEncoder(10086, 222, 1);
+        testRoundEncoder(222, 10086, 1);
         testRoundEncoder(223, 2233, 2);
     }
 
     private void testRoundEncoder(int totalSize, int blockSize, int expectedBlockSize) {
-        byte[] src = JieRandom.fill(new byte[totalSize]);
-        byte[] dst = new byte[src.length * 2];
-        for (int i = 0; i < src.length; i++) {
-            dst[i * 2] = src[i];
-            dst[i * 2 + 1] = (byte) expectedBlockSize;
+        {
+            byte[] src = JieRandom.fill(new byte[totalSize]);
+            byte[] dst = new byte[src.length * 2];
+            for (int i = 0; i < src.length; i++) {
+                dst[i * 2] = src[i];
+                dst[i * 2 + 1] = (byte) expectedBlockSize;
+            }
+            byte[] dst2 = new byte[src.length * 2];
+            long len = JieIO.processor(src).readBlockSize(blockSize)
+                .roundEncoder(expectedBlockSize, (data, end) -> {
+                    if (!end) {
+                        assertTrue(data.remaining() >= expectedBlockSize);
+                        if (blockSize < expectedBlockSize) {
+                            assertEquals(data.remaining(), expectedBlockSize);
+                        } else {
+                            assertTrue(data.remaining() <= (blockSize / expectedBlockSize + 1) * expectedBlockSize);
+                            assertTrue(data.remaining() >= (blockSize / expectedBlockSize) * expectedBlockSize);
+                        }
+                    }
+                    ByteBuffer bb = ByteBuffer.allocate(data.remaining() * 2);
+                    while (data.hasRemaining()) {
+                        bb.put(data.get());
+                        bb.put((byte) expectedBlockSize);
+                    }
+                    bb.flip();
+                    return bb;
+                })
+                .writeTo(dst2);
+            assertEquals(dst2, dst);
+            assertEquals(len, src.length);
+            len = JieIO.processor(src).readBlockSize(blockSize)
+                .roundEncoder(expectedBlockSize, (data, end) -> {
+                    if (!end) {
+                        assertTrue(data.remaining() >= expectedBlockSize);
+                        if (blockSize < expectedBlockSize) {
+                            assertEquals(data.remaining(), expectedBlockSize);
+                        } else {
+                            assertTrue(data.remaining() <= (blockSize / expectedBlockSize + 1) * expectedBlockSize);
+                            assertTrue(data.remaining() >= (blockSize / expectedBlockSize) * expectedBlockSize);
+                        }
+                    }
+                    ByteBuffer bb = ByteBuffer.allocateDirect(data.remaining() * 2);
+                    while (data.hasRemaining()) {
+                        bb.put(data.get());
+                        bb.put((byte) expectedBlockSize);
+                    }
+                    bb.flip();
+                    return bb;
+                })
+                .writeTo(dst2);
+            assertEquals(dst2, dst);
+            assertEquals(len, src.length);
         }
-        byte[] dst2 = new byte[src.length * 2];
-        long len = JieIO.processor(src).readBlockSize(blockSize)
-            .roundEncoder(expectedBlockSize, (data, end) -> {
-                if (!end) {
-                    assertTrue(data.remaining() >= expectedBlockSize);
-                    if (blockSize < expectedBlockSize) {
-                        assertEquals(data.remaining(), expectedBlockSize);
-                    } else {
-                        assertTrue(data.remaining() <= (blockSize / expectedBlockSize + 1) * expectedBlockSize);
-                        assertTrue(data.remaining() >= (blockSize / expectedBlockSize) * expectedBlockSize);
-                    }
-                }
-                ByteBuffer bb = ByteBuffer.allocate(data.remaining() * 2);
-                while (data.hasRemaining()) {
-                    bb.put(data.get());
-                    bb.put((byte) expectedBlockSize);
-                }
-                bb.flip();
-                return bb;
-            })
-            .writeTo(dst2);
-        assertEquals(dst2, dst);
-        assertEquals(len, src.length);
-        len = JieIO.processor(src).readBlockSize(blockSize)
-            .roundEncoder(expectedBlockSize, (data, end) -> {
-                if (!end) {
-                    assertTrue(data.remaining() >= expectedBlockSize);
-                    if (blockSize < expectedBlockSize) {
-                        assertEquals(data.remaining(), expectedBlockSize);
-                    } else {
-                        assertTrue(data.remaining() <= (blockSize / expectedBlockSize + 1) * expectedBlockSize);
-                        assertTrue(data.remaining() >= (blockSize / expectedBlockSize) * expectedBlockSize);
-                    }
-                }
-                ByteBuffer bb = ByteBuffer.allocateDirect(data.remaining() * 2);
-                while (data.hasRemaining()) {
-                    bb.put(data.get());
-                    bb.put((byte) expectedBlockSize);
-                }
-                bb.flip();
-                return bb;
-            })
-            .writeTo(dst2);
-        assertEquals(dst2, dst);
-        assertEquals(len, src.length);
+        {
+            // null
+            byte[] src = JieRandom.fill(new byte[totalSize]);
+            BytesBuilder builder = new BytesBuilder();
+            JieIO.processor(src).readBlockSize(blockSize)
+                .roundEncoder(expectedBlockSize, (data, end) -> null)
+                .writeTo(builder);
+            assertEquals(builder.size(), 0);
+        }
     }
 
     @Test
     public void testBufferedEncoder() {
         testBufferedEncoder(100, 5, 6);
+        testBufferedEncoder(100, 200, 60);
         testBufferedEncoder(10086, 11, 333);
         testBufferedEncoder(10086, 333, 11);
         testBufferedEncoder(10086, 22, 22);
         testBufferedEncoder(10086, 333, 1);
+        testBufferedEncoder(333, 10086, 1);
         testBufferedEncoder(233, 2333, 2);
     }
 
     private void testBufferedEncoder(int size, int blockSize, int eatNum) {
-        byte[] src = JieRandom.fill(new byte[size]);
-        byte[] dst = new byte[src.length];
-        boolean[] buffer = {true};
-        long len = JieIO.processor(src).readBlockSize(blockSize)
-            .bufferedEncoder((data, end) -> {
-                if (end) {
-                    return data;
-                }
-                ByteBuffer ret;
-                if (buffer[0]) {
-                    byte[] bb = new byte[Math.min(data.remaining(), eatNum)];
-                    data.get(bb);
-                    ret = ByteBuffer.wrap(bb);
-                } else {
-                    ret = data;
-                }
-                buffer[0] = !buffer[0];
-                return ret;
-            })
-            .writeTo(dst);
-        assertEquals(dst, src);
-        assertEquals(len, src.length);
+        {
+            byte[] src = JieRandom.fill(new byte[size]);
+            byte[] dst = new byte[src.length];
+            boolean[] buffer = {true};
+            long len = JieIO.processor(src).readBlockSize(blockSize)
+                .bufferedEncoder((data, end) -> {
+                    if (end) {
+                        return data;
+                    }
+                    ByteBuffer ret;
+                    if (buffer[0]) {
+                        byte[] bb = new byte[Math.min(data.remaining(), eatNum)];
+                        data.get(bb);
+                        ret = ByteBuffer.wrap(bb);
+                    } else {
+                        ret = data;
+                    }
+                    buffer[0] = !buffer[0];
+                    return ret;
+                })
+                .writeTo(dst);
+            assertEquals(dst, src);
+            assertEquals(len, src.length);
+        }
+        {
+            // null
+            byte[] src = JieRandom.fill(new byte[size]);
+            BytesBuilder builder = new BytesBuilder();
+            JieIO.processor(src).readBlockSize(blockSize)
+                .bufferedEncoder((data, end) -> null)
+                .writeTo(builder);
+            assertEquals(builder.size(), 0);
+        }
     }
 
     @Test
     public void testFixedSizeEncoder() {
         testFixedSizeEncoder(100, 5, 6);
+        testFixedSizeEncoder(100, 200, 60);
         testFixedSizeEncoder(10086, 11, 333);
         testFixedSizeEncoder(10086, 333, 11);
         testFixedSizeEncoder(10086, 22, 22);
         testFixedSizeEncoder(10086, 333, 1);
+        testFixedSizeEncoder(333, 10086, 1);
         testFixedSizeEncoder(10086, 20, 19);
         testFixedSizeEncoder(20, 40, 19);
     }
 
     private void testFixedSizeEncoder(int totalSize, int blockSize, int fixedSize) {
-        byte[] src = JieRandom.fill(new byte[totalSize]);
-        int times = totalSize / fixedSize;
-        BytesBuilder bytesBuilder = new BytesBuilder();
-        int pos = 0;
-        for (int i = 0; i < times; i++) {
-            bytesBuilder.append(Arrays.copyOfRange(src, pos, pos + fixedSize));
-            bytesBuilder.append((byte) '\r');
-            bytesBuilder.append((byte) '\n');
-            pos += fixedSize;
+        {
+            byte[] src = JieRandom.fill(new byte[totalSize]);
+            int times = totalSize / fixedSize;
+            BytesBuilder bytesBuilder = new BytesBuilder();
+            int pos = 0;
+            for (int i = 0; i < times; i++) {
+                bytesBuilder.append(Arrays.copyOfRange(src, pos, pos + fixedSize));
+                bytesBuilder.append((byte) '\r');
+                bytesBuilder.append((byte) '\n');
+                pos += fixedSize;
+            }
+            if (src.length > pos) {
+                bytesBuilder.append(Arrays.copyOfRange(src, pos, src.length));
+                bytesBuilder.append((byte) '\r');
+                bytesBuilder.append((byte) '\n');
+            }
+            int portion = JieMath.leastPortion(totalSize, fixedSize);
+            byte[] dst = new byte[src.length + portion * 2];
+            long len = JieIO.processor(src).readBlockSize(blockSize)
+                .encoder(fixedSize, (data, end) -> {
+                    int remaining = data.remaining();
+                    if (remaining == 0) {
+                        return JieBytes.emptyBuffer();
+                    }
+                    byte[] bb = new byte[remaining + 2];
+                    data.get(bb, 0, remaining);
+                    bb[remaining] = '\r';
+                    bb[remaining + 1] = '\n';
+                    return ByteBuffer.wrap(bb);
+                })
+                .writeTo(dst);
+            assertEquals(dst, bytesBuilder.toByteArray());
+            assertEquals(len, src.length);
         }
-        if (src.length > pos) {
-            bytesBuilder.append(Arrays.copyOfRange(src, pos, src.length));
-            bytesBuilder.append((byte) '\r');
-            bytesBuilder.append((byte) '\n');
+        {
+            // null
+            byte[] src = JieRandom.fill(new byte[totalSize]);
+            BytesBuilder builder = new BytesBuilder();
+            JieIO.processor(src).readBlockSize(blockSize)
+                .encoder(fixedSize, (data, end) -> null)
+                .writeTo(builder);
+            assertEquals(builder.size(), 0);
         }
-        int portion = JieMath.leastPortion(totalSize, fixedSize);
-        byte[] dst = new byte[src.length + portion * 2];
-        long len = JieIO.processor(src).readBlockSize(blockSize)
-            .encoder(fixedSize, (data, end) -> {
-                int remaining = data.remaining();
-                if (remaining == 0) {
-                    return JieBytes.emptyBuffer();
-                }
-                byte[] bb = new byte[remaining + 2];
-                data.get(bb, 0, remaining);
-                bb[remaining] = '\r';
-                bb[remaining + 1] = '\n';
-                return ByteBuffer.wrap(bb);
-            })
-            .writeTo(dst);
-        assertEquals(dst, bytesBuilder.toByteArray());
-        assertEquals(len, src.length);
     }
 
     @Test
