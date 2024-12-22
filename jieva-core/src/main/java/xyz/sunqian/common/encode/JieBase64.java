@@ -173,70 +173,86 @@ public class JieBase64 {
     }
 
     /**
-     * {@code Base64} encoder implementation. {@link #getBlockSize()} and {@link #streamEncoder()} are overridden and
-     * require attention.
+     * {@code Base64} encoder implementation.
      *
      * @author sunqian
      */
-    public interface Encoder extends ToCharEncoder {
+    public interface Encoder extends ByteEncoder.ToLatin {
 
         /**
-         * Returns 3. {@code Base64} encoding expects the size of input data is multiple of 3 (although it accepts any
-         * size of input data).
+         * Returns 3. {@code Base64} encoding expects the data size to be a multiple of 3, but it still encodes data of
+         * any size.
          *
          * @return 3
          */
         @Override
         default int getBlockSize() {
-            return 3;
+            return 1;
         }
 
         /**
-         * Returns a new stream encoder. The encoder is wrapped by
-         * {@link BytesProcessor#roundEncoder(BytesProcessor.Encoder, int)} to keep size of input data is multiple of 3.
-         * Although the encoder accepts any size of input data, it is recommended that sets block size to multiple of 3
-         * for a better performance.
+         * Returns output size of base64 encoding.
          *
-         * @return a new stream decoder wrapped by {@link BytesProcessor#roundEncoder(BytesProcessor.Encoder, int)}
+         * @param inputSize specified input size
+         * @return output size of base64 encoding
+         * @throws EncodingException if input size is illegal
+         */
+        @Override
+        int getOutputSize(int inputSize) throws EncodingException;
+
+        /**
+         * Returns a new {@link BytesProcessor.Encoder} which encapsulates current base64 encoding, supports any size of
+         * input data, not thread-safe.
+         *
+         * @return a {@link BytesProcessor.Encoder} with current base64 encoding
+         * @see BytesProcessor
+         * @see BytesProcessor.Encoder
          */
         @Override
         BytesProcessor.Encoder streamEncoder();
     }
 
     /**
-     * {@code Base64} decoder implementation. {@link #getBlockSize()} and {@link #streamEncoder()} are overridden and
-     * require attention.
+     * {@code Base64} decoder implementation.
      *
      * @author sunqian
      */
-    public interface Decoder extends ToCharDecoder {
+    public interface Decoder extends ByteDecoder.ToLatin {
 
         /**
-         * Returns 4 for un-separation decoder, 1 for separation decoder. Expected data size for {@code Base64} decoding
-         * is different for un-separation and separation. Un-separation decoder expects the size of input data is
-         * multiple of 4 (although it can decode the data without padding, where the size of the data is not a multiple
-         * of 4). Separation decoder will attempt to decode any size of data so that its block size is 1.
+         * Returns 4. {@code Base64} decoding expects the data size to be a multiple of 4, but in some cases, it can
+         * still decode data of other size
          *
-         * @return 4 for un-separation decoder, 1 for separation decoder.
+         * @return 4
          */
         @Override
-        int getBlockSize();
+        default int getBlockSize() {
+            return 2;
+        }
 
         /**
-         * Returns a new stream decoder. The decoder is wrapped by
-         * {@link BytesProcessor#roundEncoder(BytesProcessor.Encoder, int)} for un-separation, and
-         * {@link BytesProcessor#bufferedEncoder(BytesProcessor.Encoder)} for separation. Thus, it is recommended that
-         * sets a multiple of 4 block size for un-separation decoding, or an enough buffered size, such as 1024 for
-         * separation decoding, for a better performance.
+         * Returns maximum output size of base64 decoding.
          *
-         * @return a new stream decoder wrapped by {@link BytesProcessor#roundEncoder(BytesProcessor.Encoder, int)} or
-         * {@link BytesProcessor#bufferedEncoder(BytesProcessor.Encoder)}
+         * @param inputSize specified input size
+         * @return maximum output size of base64 decoding
+         * @throws DecodingException if input size is illegal
+         */
+        @Override
+        int getOutputSize(int inputSize) throws DecodingException;
+
+        /**
+         * Returns a new {@link BytesProcessor.Encoder} which encapsulates current base64 decoding, supports even size
+         * of input data, not thread-safe.
+         *
+         * @return a {@link BytesProcessor.Encoder} with current base64 decoding
+         * @see BytesProcessor
+         * @see BytesProcessor.Encoder
          */
         @Override
         BytesProcessor.Encoder streamEncoder();
     }
 
-    private static abstract class AbsEncoder extends AbsCoder.En implements Encoder {
+    private static abstract class AbsEncoder extends AbstractByteCoder.En implements Encoder {
 
         private static final char[] DICT = {
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
@@ -254,9 +270,13 @@ public class JieBase64 {
 
         @Override
         public int getOutputSize(int inputSize, boolean end) throws EncodingException {
-            if (inputSize < 0) {
-                throw new EncodingException("Base64 encoding size can not be negative.");
+            if (end) {
+                return getOutputSizeEnd(inputSize);
             }
+            return inputSize / 3 * 4;
+        }
+
+        private int getOutputSizeEnd(int inputSize) {
             if (padding) {
                 return ((inputSize + 2) / 3) * 4;
             }
@@ -271,7 +291,9 @@ public class JieBase64 {
             return DICT;
         }
 
-        protected int doCode(long startPos, byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, boolean end) {
+        protected long doCode(
+            long startPos, byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, int dstEnd, boolean end
+        ) {
             char[] dict = dict();
             int srcPos = srcOff;
             int dstPos = dstOff;
@@ -305,7 +327,7 @@ public class JieBase64 {
                     }
                 }
             }
-            return dstPos - dstOff;
+            return buildDoCodeResult(srcEnd - srcOff, dstPos - dstOff);
         }
     }
 
@@ -352,7 +374,8 @@ public class JieBase64 {
         private final boolean urlSafe;
 
         private LineEncoder(
-            int lineSize, byte[] separator, boolean padding, boolean lastLineSeparator, boolean urlSafe) {
+            int lineSize, byte[] separator, boolean padding, boolean lastLineSeparator, boolean urlSafe
+        ) {
             super(padding);
             this.lineSize = lineSize;
             this.separator = separator;
@@ -416,12 +439,12 @@ public class JieBase64 {
                         for (byte b : separator) {
                             ret.put(b);
                         }
-                        doCode(startPos, data, ret, end);
+                        //doCode(startPos, data, ret, end);
                         ret.flip();
                         startPos += (data.position() - pos);
                         return ret;
                     }
-                    ByteBuffer ret = doCode(startPos, data, end);
+                    ByteBuffer ret = null;//doCode(startPos, data, end);
                     startPos += (data.position() - pos);
                     return ret;
                 }
@@ -429,7 +452,9 @@ public class JieBase64 {
             return JieIO.roundEncoder(getBlockSize(), encoder);
         }
 
-        protected int doCode(long startPos, byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, boolean end) {
+        protected long doCode(
+            long startPos, byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, int dstEnd, boolean end
+        ) {
             if (end) {
                 return doCode0(src, srcOff, srcEnd, dst, dstOff, lastLineSeparator);
             }
