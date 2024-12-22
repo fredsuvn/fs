@@ -2,6 +2,7 @@ package xyz.sunqian.common.encode;
 
 import xyz.sunqian.common.io.BytesProcessor;
 import xyz.sunqian.common.io.JieBuffer;
+import xyz.sunqian.common.io.JieIO;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -203,7 +204,7 @@ public abstract class AbstractByteCoder implements ByteCoder {
                 return ret;
             }
         };
-        return BytesProcessor.roundEncoder(encoder, getBlockSize());
+        return JieIO.roundEncoder(getBlockSize(), encoder);
     }
 
     /**

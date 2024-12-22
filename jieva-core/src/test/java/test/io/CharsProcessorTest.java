@@ -594,6 +594,37 @@ public class CharsProcessorTest {
             assertEquals(count, totalSize);
             assertEquals(bb.toCharArray(), proc);
         }
+        {
+            // null
+            char[] src = JieRandom.fill(new char[totalSize]);
+            char[] dst = new char[src.length];
+            int[] pos = {0};
+            CharsBuilder dst0 = new CharsBuilder();
+            long c = CharsProcessor.from(src)
+                .encoder((data, end) -> {
+                    int len = data.remaining();
+                    data.get(dst, pos[0], len);
+                    pos[0] += len;
+                    return null;
+                }).encoder((data, end) -> data)
+                .writeTo(dst0);
+            assertEquals(c, totalSize);
+            assertEquals(dst, src);
+            assertEquals(dst0.size(), 0);
+            char[] dst2 = new char[src.length];
+            boolean[] hit = {false};
+            c = CharsProcessor.from(src)
+                .encoder((data, end) -> null)
+                .encoder((data, end) -> {
+                    hit[0] = true;
+                    return data;
+                })
+                .writeTo(dst0);
+            assertEquals(c, totalSize);
+            assertEquals(dst2, new char[src.length]);
+            assertEquals(dst0.size(), 0);
+            assertFalse(hit[0]);
+        }
     }
 
     @Test

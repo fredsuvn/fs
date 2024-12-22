@@ -85,7 +85,7 @@ public class EncodeTest {
         {
             // stream
             BytesBuilder bb = new BytesBuilder();
-            long c = BytesProcessor.from(source).encoder(encoder.streamEncoder(), blockSize).writeTo(bb);
+            long c = BytesProcessor.from(source).encoder(blockSize, encoder.streamEncoder()).writeTo(bb);
             if (source.length == 0) {
                 assertEquals(c, -1);
             } else {
@@ -174,7 +174,7 @@ public class EncodeTest {
         {
             // stream
             BytesBuilder bb = new BytesBuilder();
-            long c = BytesProcessor.from(source).encoder(decoder.streamEncoder(), blockSize).writeTo(bb);
+            long c = BytesProcessor.from(source).encoder(blockSize, decoder.streamEncoder()).writeTo(bb);
             if (source.length == 0) {
                 assertEquals(c, -1);
             } else {

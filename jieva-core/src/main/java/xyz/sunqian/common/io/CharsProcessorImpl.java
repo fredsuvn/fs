@@ -355,6 +355,9 @@ final class CharsProcessorImpl implements CharsProcessor {
                 CharBuffer chars = data;
                 for (Encoder encoder : encoders) {
                     chars = encoder.encode(chars, end);
+                    if (chars == null) {
+                        break;
+                    }
                 }
                 return chars;
             };
@@ -712,22 +715,17 @@ final class CharsProcessorImpl implements CharsProcessor {
         }
 
         @Override
-        public CharBuffer encode(CharBuffer data, boolean end) {
+        public @Nullable CharBuffer encode(CharBuffer data, boolean end) {
             if (end) {
                 return encoder.encode(totalData(data), true);
             }
             int size = totalSize(data);
-            if (size == expectedBlockSize) {
-                CharBuffer total = totalData(data);
-                buf = JieChars.emptyChars();
-                return encoder.encode(total, false);
-            }
             if (size < expectedBlockSize) {
                 char[] newBuf = new char[size];
                 System.arraycopy(buf, 0, newBuf, 0, buf.length);
                 data.get(newBuf, buf.length, data.remaining());
                 buf = newBuf;
-                return JieChars.emptyBuffer();
+                return null;
             }
             int remainder = size % expectedBlockSize;
             if (remainder == 0) {
@@ -761,7 +759,7 @@ final class CharsProcessorImpl implements CharsProcessor {
         }
 
         @Override
-        public CharBuffer encode(CharBuffer data, boolean end) {
+        public @Nullable CharBuffer encode(CharBuffer data, boolean end) {
             CharBuffer total = totalData(data);
             CharBuffer ret = encoder.encode(total, end);
             if (end) {
@@ -787,7 +785,7 @@ final class CharsProcessorImpl implements CharsProcessor {
         }
 
         @Override
-        public CharBuffer encode(CharBuffer data, boolean end) {
+        public @Nullable CharBuffer encode(CharBuffer data, boolean end) {
             CharBuffer total = totalData(data);
             int totalSize = total.remaining();
             int times = totalSize / size;
@@ -797,7 +795,7 @@ final class CharsProcessorImpl implements CharsProcessor {
                 }
                 buf = new char[totalSize];
                 total.get(buf);
-                return JieChars.emptyBuffer();
+                return null;
             }
             if (times == 1) {
                 CharBuffer slice = JieChars.slice(total, 0, size);

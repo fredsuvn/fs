@@ -64,6 +64,21 @@ final class BytesProcessorImpl implements BytesProcessor {
     }
 
     @Override
+    public BytesProcessor encoder(int size, Encoder encoder) {
+        return encoder(new FixedSizeEncoder(encoder, size));
+    }
+
+    @Override
+    public BytesProcessor roundEncoder(int size, Encoder encoder) {
+        return encoder(new RoundEncoder(encoder, size));
+    }
+
+    @Override
+    public BytesProcessor bufferedEncoder(Encoder encoder) {
+        return encoder(new BufferedEncoder(encoder));
+    }
+
+    @Override
     public long writeTo(OutputStream dest) {
         this.dest = dest;
         return start();
@@ -322,6 +337,9 @@ final class BytesProcessorImpl implements BytesProcessor {
                 ByteBuffer bytes = data;
                 for (Encoder encoder : encoders) {
                     bytes = encoder.encode(bytes, end);
+                    if (bytes == null) {
+                        break;
+                    }
                 }
                 return bytes;
             };
@@ -630,22 +648,17 @@ final class BytesProcessorImpl implements BytesProcessor {
         }
 
         @Override
-        public ByteBuffer encode(ByteBuffer data, boolean end) {
+        public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) {
             if (end) {
                 return encoder.encode(totalData(data), true);
             }
             int size = totalSize(data);
-            if (size == expectedBlockSize) {
-                ByteBuffer total = totalData(data);
-                buf = JieBytes.emptyBytes();
-                return encoder.encode(total, false);
-            }
             if (size < expectedBlockSize) {
                 byte[] newBuf = new byte[size];
                 System.arraycopy(buf, 0, newBuf, 0, buf.length);
                 data.get(newBuf, buf.length, data.remaining());
                 buf = newBuf;
-                return JieBytes.emptyBuffer();
+                return null;
             }
             int remainder = size % expectedBlockSize;
             if (remainder == 0) {
@@ -679,7 +692,7 @@ final class BytesProcessorImpl implements BytesProcessor {
         }
 
         @Override
-        public ByteBuffer encode(ByteBuffer data, boolean end) {
+        public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) {
             ByteBuffer total = totalData(data);
             ByteBuffer ret = encoder.encode(total, end);
             if (end) {
@@ -705,7 +718,7 @@ final class BytesProcessorImpl implements BytesProcessor {
         }
 
         @Override
-        public ByteBuffer encode(ByteBuffer data, boolean end) {
+        public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) {
             ByteBuffer total = totalData(data);
             int totalSize = total.remaining();
             int times = totalSize / size;
@@ -715,7 +728,7 @@ final class BytesProcessorImpl implements BytesProcessor {
                 }
                 buf = new byte[totalSize];
                 total.get(buf);
-                return JieBytes.emptyBuffer();
+                return null;
             }
             if (times == 1) {
                 ByteBuffer slice = JieBytes.slice(total, 0, size);

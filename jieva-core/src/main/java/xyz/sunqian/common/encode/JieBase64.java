@@ -2,6 +2,7 @@ package xyz.sunqian.common.encode;
 
 import xyz.sunqian.common.base.JieBytes;
 import xyz.sunqian.common.io.BytesProcessor;
+import xyz.sunqian.common.io.JieIO;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -425,7 +426,7 @@ public class JieBase64 {
                     return ret;
                 }
             };
-            return BytesProcessor.roundEncoder(encoder, getBlockSize());
+            return JieIO.roundEncoder(getBlockSize(), encoder);
         }
 
         protected int doCode(long startPos, byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, boolean end) {

@@ -1,5 +1,7 @@
 package xyz.sunqian.common.io;
 
+import xyz.sunqian.annotations.Nullable;
+
 import java.io.CharArrayWriter;
 import java.io.Reader;
 import java.nio.CharBuffer;
@@ -94,26 +96,26 @@ public interface CharsProcessor {
 
     /**
      * Returns a new {@link Encoder} to round input data for given encoder, it is typically used for the encoder which
-     * requires consuming data in multiples of fixed-size block.
+     * requires consuming data in multiples of specified size.
      * <p>
      * This encoder rounds input data (possibly following buffered data from the previous invocation) to the largest
-     * multiple of the expected block size and passes the rounded data to the given encoder. Any remainder data will be
-     * buffered and used in the next invocation. However, in the last invocation (where the {@code end} is
-     * {@code true}), all data (buffered data followed by input data) will be passed directly to the given encoder.
+     * multiple of specified size and passes the rounded data to the given encoder. Any remainder data will be buffered
+     * and used in the next invocation. However, in the last invocation (where the {@code end} is {@code true}), all
+     * data (buffered data followed by input data) will be passed directly to the given encoder.
      * <p>
      * This encoder is not thread-safe.
      *
-     * @param encoder           given encoder
-     * @param expectedBlockSize specified expected block size
+     * @param encoder given encoder
+     * @param size    specified size
      * @return a new {@link Encoder} to round input data for given encoder
      */
-    static Encoder roundEncoder(Encoder encoder, int expectedBlockSize) {
-        return new CharsProcessorImpl.RoundEncoder(encoder, expectedBlockSize);
+    static Encoder roundEncoder(Encoder encoder, int size) {
+        return new CharsProcessorImpl.RoundEncoder(encoder, size);
     }
 
     /**
      * Returns a new {@link Encoder} that buffers remaining data for given encoder, it is typically used for the encoder
-     * which requires consuming data in next invocation.
+     * which may not fully consume current passed data, requires buffering and consuming data in next invocation.
      * <p>
      * This encoder passes input data (possibly following buffered data from the previous invocation) to the given
      * encoder. Any remaining data after encoding of given encoder will be buffered and used in the next invocation.
@@ -129,8 +131,8 @@ public interface CharsProcessor {
     }
 
     /**
-     * Returns a new {@link Encoder} that guarantees a specified fixed-size data block is passed to the given encoder in
-     * each invocation, it is typically used for the encoder which requires consuming data in fixed-size block.
+     * Returns a new {@link Encoder} that guarantees a specified fixed-size data is passed to the given encoder in each
+     * invocation, it is typically used for the encoder which requires consuming data of fixed-size.
      * <p>
      * Note in last invocation (where the {@code end} is {@code true}), size of remainder data may be smaller than
      * specified fixed-size.
@@ -139,8 +141,8 @@ public interface CharsProcessor {
      *
      * @param encoder given encoder
      * @param size    specified fixed-size
-     * @return a new {@link Encoder} that guarantees a specified fixed-size data block is passed to the given encoder in
-     * each invocation
+     * @return a new {@link Encoder} that guarantees a specified fixed-size data is passed to the given encoder in each
+     * invocation
      */
     static Encoder fixedSizeEncoder(Encoder encoder, int size) {
         return new CharsProcessorImpl.FixedSizeEncoder(encoder, size);
@@ -183,16 +185,20 @@ public interface CharsProcessor {
     CharsProcessor endOnZeroRead(boolean endOnZeroRead);
 
     /**
-     * Adds an encoder for encoding which is an intermediate operation. When the data processing starts, all encoders
-     * will be invoked after each read operation as following:
+     * Adds an encoder for this processor. When the data processing starts, all encoders will be invoked after each read
+     * operation as following:
      * <pre>{@code
      *     read operation -> encoder-1 -> encoder-2 ... -> encoder-n -> terminal operation
      * }</pre>
-     * All encoders can be considered as a combined encoder, of which behavior is equivalent to:
+     * The encoder represents an intermediate operation, and all encoders can be considered as a combined encoder, of
+     * which behavior is equivalent to:
      * <pre>{@code
      *     CharBuffer chars = data;
      *     for (Encoder encoder : encoders) {
      *         chars = encoder.encode(chars, end);
+     *         if (chars == null) {
+     *             break;
+     *         }
      *     }
      *     return chars;
      * }</pre>
@@ -205,7 +211,7 @@ public interface CharsProcessor {
      * array or char buffer), and discarded after each invocation. The returned {@link CharBuffer} will also be treated
      * as read-only;
      * <p>
-     * This is an optional setting method. This interface also provides helper encoder implementations:
+     * This is an optional setting method. This interface also provides helper encoder methods:
      * <ul>
      *     <li>
      *         {@link #roundEncoder(Encoder, int)};
@@ -400,14 +406,15 @@ public interface CharsProcessor {
     interface Encoder {
 
         /**
-         * Encodes specified data and return the result.
-         * <p>
-         * Note specified data may be empty (but never null).
+         * Encodes specified input data and return the result. Specified input data will not be null (but may be empty),
+         * and the return value can be null. If {@code null} is returned, next encoder, if it exists, will not be
+         * invoked; If an {@code empty} buffer is returned, next encoder, if it exists, will be invoked.
          *
          * @param data specified data
          * @param end  whether current encoding is the last invocation
          * @return result of encoding
          */
+        @Nullable
         CharBuffer encode(CharBuffer data, boolean end);
     }
 }
