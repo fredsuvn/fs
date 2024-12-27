@@ -173,17 +173,16 @@ public class JieBase64 {
     }
 
     /**
-     * {@code Base64} encoder implementation.
+     * The implementation of {@link ByteEncoder} for {@code base64} encoding.
      *
      * @author sunqian
      */
     public interface Encoder extends ByteEncoder.ToLatin {
 
         /**
-         * Returns 3. {@code Base64} encoding expects the data size to be a multiple of 3, but it still encodes data of
-         * any size.
+         * Returns -1. The {@code base64} doesn't require encoding in blocks.
          *
-         * @return 3
+         * @return -1
          */
         @Override
         default int getBlockSize() {
@@ -204,7 +203,7 @@ public class JieBase64 {
          * Returns a new {@link BytesProcessor.Encoder} which encapsulates current base64 encoding, supports any size of
          * input data, not thread-safe.
          *
-         * @return a {@link BytesProcessor.Encoder} with current base64 encoding
+         * @return a {@link BytesProcessor.Encoder} with current base64 encoding logic
          * @see BytesProcessor
          * @see BytesProcessor.Encoder
          */
@@ -213,17 +212,16 @@ public class JieBase64 {
     }
 
     /**
-     * {@code Base64} decoder implementation.
+     * The implementation of {@link ByteEncoder} for {@code base64} decoding.
      *
      * @author sunqian
      */
     public interface Decoder extends ByteDecoder.ToLatin {
 
         /**
-         * Returns 4. {@code Base64} decoding expects the data size to be a multiple of 4, but in some cases, it can
-         * still decode data of other size
+         * Returns -1. The {@code base64} doesn't require decoding in blocks.
          *
-         * @return 4
+         * @return -1
          */
         @Override
         default int getBlockSize() {
@@ -241,10 +239,10 @@ public class JieBase64 {
         int getOutputSize(int inputSize) throws DecodingException;
 
         /**
-         * Returns a new {@link BytesProcessor.Encoder} which encapsulates current base64 decoding, supports even size
-         * of input data, not thread-safe.
+         * Returns a new {@link BytesProcessor.Encoder} which encapsulates current base64 decoding, supports any size of
+         * input data, not thread-safe.
          *
-         * @return a {@link BytesProcessor.Encoder} with current base64 decoding
+         * @return a {@link BytesProcessor.Encoder} with current base64 decoding logic
          * @see BytesProcessor
          * @see BytesProcessor.Encoder
          */
@@ -439,12 +437,12 @@ public class JieBase64 {
                         for (byte b : separator) {
                             ret.put(b);
                         }
-                        //doCode(startPos, data, ret, end);
+                        // doCode(startPos, data, ret, end);
                         ret.flip();
                         startPos += (data.position() - pos);
                         return ret;
                     }
-                    ByteBuffer ret = null;//doCode(startPos, data, end);
+                    ByteBuffer ret = null;// doCode(startPos, data, end);
                     startPos += (data.position() - pos);
                     return ret;
                 }

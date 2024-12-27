@@ -50,7 +50,7 @@ public abstract class AbstractByteCoder implements ByteCoder {
      * <p>
      * The {@code end} parameter tells whether specified input data to be encoded is the last segment of the entire
      * data. If the {@code end} parameter is false, it indicates that the data of specified input size may not be
-     * expected to be fully consumed. The returned output size should only match the expected amount of consumed data.
+     * expected to be fully consumed. The returned output size should only match the expected size of consumed data.
      * <p>
      * By default, {@code inputSize} is validated once by {@link #checkInputSize(int, boolean)} before being passed to
      * this method. Therefore, there is no need to invoke {@link #checkInputSize(int, boolean)} again when implementing
@@ -67,9 +67,10 @@ public abstract class AbstractByteCoder implements ByteCoder {
     /**
      * This method encodes/decodes source data (from source start index to source end index) and writes result into
      * destination byte array (from destination start index to destination end index). It returns a long value of which
-     * high 32 bits indicates read byte number, low 32 bits indicates written byte number
-     * ({@link #buildDoCodeResult(int, int)} can be used to build the return value). The source data in specified bounds
-     * does not need to be fully consumed, nor does it need to fill the destination bounds.
+     * high 32 bits indicates read bytes number, low 32 bits indicates written bytes number
+     * ({@link #buildDoCodeResult(int, int)} can be used to build the return value). The source data within the
+     * specified bounds does not need to be fully consumed, and the destination within the specified bounds does not
+     * need to be fully filled.
      * <p>
      * By default, the passed arguments will not be null, and bounds of source and destination have already been
      * validated by {@link #checkInputSize(int, boolean)}, {@link #checkRemainingSpace(int, int)} and
@@ -97,7 +98,8 @@ public abstract class AbstractByteCoder implements ByteCoder {
     ) throws EncodingException, DecodingException;
 
     /**
-     * Helps build the read-write-value from {@link #doCode(long, byte[], int, int, byte[], int, int, boolean)}.
+     * Helps build the read-write-value from {@link #doCode(long, byte[], int, int, byte[], int, int, boolean)}, high 32
+     * bits indicates read bytes number, low 32 bits indicates written bytes number.
      *
      * @param readSize  read size
      * @param writeSize write size

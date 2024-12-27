@@ -7,9 +7,11 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
 /**
- * This interface represents a decoder for {@code byte} decoding.
+ * Byte decoder is used for decoding in bytes, such as {@link JieHex.Decoder} and {@link JieBase64.Decoder}.
  *
  * @author sunqian
+ * @see JieHex.Decoder
+ * @see JieBase64.Decoder
  */
 public interface ByteDecoder extends ByteCoder {
 

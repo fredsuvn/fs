@@ -3,7 +3,7 @@ package xyz.sunqian.common.encode;
 import xyz.sunqian.common.io.BytesProcessor;
 
 /**
- * This is a static utilities class for {@code Hex} encoding and decoding, provides encoder and decoder implementations:
+ * This is a static utilities class for {@code hex} encoding and decoding, provides encoder and decoder implementations:
  * {@link Encoder} and {@link Decoder}.
  *
  * @author sunqian
@@ -13,34 +13,34 @@ import xyz.sunqian.common.io.BytesProcessor;
 public class JieHex {
 
     /**
-     * Returns a {@code Hex} encoder.
+     * Returns a {@code hex} encoder.
      *
-     * @return a {@code Hex} encoder
+     * @return a {@code hex} encoder
      */
     public static Encoder encoder() {
         return HexEncoder.SINGLETON;
     }
 
     /**
-     * Returns a {@code Hex} decoder.
+     * Returns a {@code hex} decoder.
      *
-     * @return a {@code Hex} decoder
+     * @return a {@code hex} decoder
      */
     public static Decoder decoder() {
         return HexDecoder.SINGLETON;
     }
 
     /**
-     * {@code Hex} encoder implementation.
+     * The implementation of {@link ByteEncoder} for {@code hex} encoding.
      *
      * @author sunqian
      */
     public interface Encoder extends ByteEncoder.ToLatin {
 
         /**
-         * Returns 1. {@code Hex} encoding is applicable to any size of data so that returns 1.
+         * Returns -1. The {@code hex} doesn't require encoding in blocks.
          *
-         * @return 1
+         * @return -1
          */
         @Override
         default int getBlockSize() {
@@ -61,7 +61,7 @@ public class JieHex {
          * Returns a new {@link BytesProcessor.Encoder} which encapsulates current hex encoding, supports any size of
          * input data, not thread-safe.
          *
-         * @return a {@link BytesProcessor.Encoder} with current hex encoding
+         * @return a {@link BytesProcessor.Encoder} with current hex encoding logic
          * @see BytesProcessor
          * @see BytesProcessor.Encoder
          */
@@ -70,15 +70,14 @@ public class JieHex {
     }
 
     /**
-     * {@code Hex} decoder implementation.
+     * The implementation of {@link ByteDecoder} for {@code hex} decoding.
      *
      * @author sunqian
      */
     public interface Decoder extends ByteDecoder.ToLatin {
 
         /**
-         * Returns 2. Data size for {@code Hex} decoding should be even, so that minimal block size for {@code Hex}
-         * decoding is 2.
+         * Returns 2. The size of {@code hex} data is even.
          *
          * @return 2
          */
@@ -101,7 +100,7 @@ public class JieHex {
          * Returns a new {@link BytesProcessor.Encoder} which encapsulates current hex decoding, supports even size of
          * input data, not thread-safe.
          *
-         * @return a {@link BytesProcessor.Encoder} with current hex decoding
+         * @return a {@link BytesProcessor.Encoder} with current hex decoding logic
          * @see BytesProcessor
          * @see BytesProcessor.Encoder
          */

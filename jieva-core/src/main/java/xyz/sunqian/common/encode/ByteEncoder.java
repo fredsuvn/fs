@@ -6,9 +6,11 @@ import xyz.sunqian.common.base.JieChars;
 import java.nio.ByteBuffer;
 
 /**
- * This interface represents an encoder for {@code byte} encoding.
+ * Byte encoder is used for encoding in bytes, such as {@link JieHex.Encoder} and {@link JieBase64.Encoder}.
  *
  * @author sunqian
+ * @see JieHex.Encoder
+ * @see JieBase64.Encoder
  */
 public interface ByteEncoder extends ByteCoder {
 
