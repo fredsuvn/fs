@@ -2,7 +2,6 @@ package test.encode;
 
 import org.apache.commons.codec.binary.Hex;
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.JieBytes;
 import xyz.sunqian.common.base.JieChars;
 import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.encode.DecodingException;
@@ -20,29 +19,29 @@ import static org.testng.Assert.*;
 public class HexTest {
 
     @Test
-    public void testHex() {
+    public void testCoding() {
 
         assertSame(JieHex.encoder(), JieHex.encoder());
         assertSame(JieHex.decoder(), JieHex.decoder());
-        assertEquals(JieHex.encoder().getBlockSize(), 1);
+        assertEquals(JieHex.encoder().getBlockSize(), -1);
         assertEquals(JieHex.decoder().getBlockSize(), 2);
 
         for (int i = 0; i < 10; i++) {
-            testHex(i);
+            testCoding(i);
         }
-        testHex(1139);
-        testHex(1140);
-        testHex(1141);
-        testHex(384 * 3 - 1);
-        testHex(384 * 3);
-        testHex(384 * 3 + 1);
-        testHex(10086);
-        testHex(99);
-        testHex(JieIO.BUFFER_SIZE);
-        testHex(JieIO.BUFFER_SIZE + 10086);
-        testHex(57);
-        testHex(1024);
-        testHex(1024 * 1024);
+        testCoding(1139);
+        testCoding(1140);
+        testCoding(1141);
+        testCoding(384 * 3 - 1);
+        testCoding(384 * 3);
+        testCoding(384 * 3 + 1);
+        testCoding(10086);
+        testCoding(99);
+        testCoding(JieIO.BUFFER_SIZE);
+        testCoding(JieIO.BUFFER_SIZE + 10086);
+        testCoding(57);
+        testCoding(1024);
+        testCoding(1024 * 1024);
 
         // error
         expectThrows(EncodingException.class, () -> JieHex.encoder().getOutputSize(-1));
@@ -64,7 +63,7 @@ public class HexTest {
         expectThrows(DecodingException.class, () -> JieHex.decoder().decode(encoded2));
     }
 
-    private void testHex(int size) {
+    private void testCoding(int size) {
         for (int i = 1; i < 10; i++) {
             byte[] source = JieRandom.fill(new byte[size]);
             byte[] target = Hex.encodeHexString(source).toUpperCase().getBytes(JieChars.latinCharset());
@@ -77,16 +76,13 @@ public class HexTest {
 
     @Test
     public void testToChars() throws Exception {
-        String str = "0123456789ABCDEFabcdef";
-        assertEquals(JieHex.decoder().decode(str), Hex.decodeHex(str));
-        assertEquals(JieHex.decoder().decode(str.toCharArray()), Hex.decodeHex(str));
-        CharBuffer cb = CharBuffer.wrap(str);
-        assertEquals(JieBytes.copyBytes(JieHex.decoder().decode(cb)), Hex.decodeHex(str));
-        assertEquals(cb.position(), str.length());
-
-        byte[] bytes = JieHex.decoder().decode(str);
-        assertEquals(str.toUpperCase(), JieHex.encoder().toString(bytes));
-        assertEquals(str.toUpperCase(), JieHex.encoder().toString(ByteBuffer.wrap(bytes)));
+        String hexStr = "0123456789ABCDEFabcdef";
+        byte[] srcBytes = Hex.decodeHex(hexStr);
+        assertEquals(JieHex.encoder().toString(srcBytes), hexStr.toUpperCase());
+        assertEquals(JieHex.encoder().toString(ByteBuffer.wrap(srcBytes)), hexStr.toUpperCase());
+        assertEquals(JieHex.decoder().decode(hexStr), srcBytes);
+        assertEquals(JieHex.decoder().decode(CharBuffer.wrap(hexStr)), ByteBuffer.wrap(srcBytes));
+        assertEquals(JieHex.decoder().decode(hexStr.toCharArray()), srcBytes);
     }
 
     @Test

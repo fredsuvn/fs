@@ -44,7 +44,7 @@ public class JieHex {
          */
         @Override
         default int getBlockSize() {
-            return 1;
+            return -1;
         }
 
         /**

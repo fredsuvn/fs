@@ -186,7 +186,7 @@ public class JieBase64 {
          */
         @Override
         default int getBlockSize() {
-            return 1;
+            return -1;
         }
 
         /**
@@ -219,13 +219,13 @@ public class JieBase64 {
     public interface Decoder extends ByteDecoder.ToLatin {
 
         /**
-         * Returns -1. The {@code base64} doesn't require decoding in blocks.
+         * Returns -1. The {@code base64} decoding may not determine block size.
          *
          * @return -1
          */
         @Override
         default int getBlockSize() {
-            return 2;
+            return -1;
         }
 
         /**
@@ -307,7 +307,7 @@ public class JieBase64 {
             srcPos = roundEnd;
             dstPos += roundLen / 3 * 4;
             // 1 or 2 leftover bytes
-            if (srcPos < srcEnd) {
+            if (end && srcPos < srcEnd) {
                 int b0 = src[srcPos++] & 0xff;
                 dst[dstPos++] = (byte) dict[b0 >> 2];
                 if (srcPos == srcEnd) {
@@ -317,7 +317,7 @@ public class JieBase64 {
                         dst[dstPos++] = '=';
                     }
                 } else {
-                    int b1 = src[srcPos] & 0xff;
+                    int b1 = src[srcPos++] & 0xff;
                     dst[dstPos++] = (byte) dict[(b0 << 4) & 0x3f | (b1 >> 4)];
                     dst[dstPos++] = (byte) dict[(b1 << 2) & 0x3f];
                     if (padding) {
@@ -325,7 +325,7 @@ public class JieBase64 {
                     }
                 }
             }
-            return buildDoCodeResult(srcEnd - srcOff, dstPos - dstOff);
+            return buildDoCodeResult(srcPos - srcOff, dstPos - dstOff);
         }
     }
 
