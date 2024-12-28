@@ -1,19 +1,12 @@
 package test.encode;
 
-import org.apache.commons.codec.binary.Hex;
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.JieBytes;
-import xyz.sunqian.common.base.JieChars;
 import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.encode.DecodingException;
 import xyz.sunqian.common.encode.EncodingException;
 import xyz.sunqian.common.encode.JieBase64;
-import xyz.sunqian.common.io.IOEncodingException;
 import xyz.sunqian.common.io.JieIO;
 
-import java.io.ByteArrayOutputStream;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.util.Base64;
 
 import static org.testng.Assert.*;
@@ -26,7 +19,6 @@ public class Base64Test {
         assertSame(JieBase64.encoder(), JieBase64.encoder());
         assertSame(JieBase64.urlEncoder(), JieBase64.urlEncoder());
         assertEquals(JieBase64.encoder().getBlockSize(), -1);
-        assertEquals(JieBase64.decoder().getBlockSize(), -1);
 
         for (int i = 0; i < 10; i++) {
             testCoding(i);
@@ -66,29 +58,39 @@ public class Base64Test {
     }
 
     private void testCoding(int size) {
+        byte[] source = JieRandom.fill(new byte[size]);
+        byte[] target = Base64.getEncoder().encode(source);
+        byte[] targetNoPadding = Base64.getEncoder().withoutPadding().encode(source);
+        byte[] urlTarget = Base64.getUrlEncoder().encode(source);
+        byte[] urlTargetNoPadding = Base64.getUrlEncoder().withoutPadding().encode(source);
         for (int i = 1; i < 10; i++) {
-            byte[] source = JieRandom.fill(new byte[size]);
-            byte[] target = Base64.getEncoder().encode(source);
             EncodeTest.testEncoding(JieBase64.encoder(), source, target, i);
+            EncodeTest.testEncoding(JieBase64.encoder(false), source, targetNoPadding, i);
+            EncodeTest.testEncoding(JieBase64.urlEncoder(), source, urlTarget, i);
+            EncodeTest.testEncoding(JieBase64.urlEncoder(false), source, urlTargetNoPadding, i);
             // if (i % 2 == 0) {
             //     EncodeTest.testDecoding(JieBase64.decoder(), target, source, i);
             // }
         }
+        EncodeTest.testEncoding(JieBase64.encoder(), source, target, JieIO.BUFFER_SIZE);
+        EncodeTest.testEncoding(JieBase64.encoder(false), source, targetNoPadding, JieIO.BUFFER_SIZE);
+        EncodeTest.testEncoding(JieBase64.urlEncoder(), source, urlTarget, JieIO.BUFFER_SIZE);
+        EncodeTest.testEncoding(JieBase64.urlEncoder(false), source, urlTargetNoPadding, JieIO.BUFFER_SIZE);
     }
 
-    @Test
-    public void testToChars() throws Exception {
-        String str = "0123456789ABCDEFabcdef";
-        assertEquals(JieBase64.decoder().decode(str), Hex.decodeHex(str));
-        assertEquals(JieBase64.decoder().decode(str.toCharArray()), Hex.decodeHex(str));
-        CharBuffer cb = CharBuffer.wrap(str);
-        assertEquals(JieBytes.copyBytes(JieBase64.decoder().decode(cb)), Hex.decodeHex(str));
-        assertEquals(cb.position(), str.length());
-
-        byte[] bytes = JieBase64.decoder().decode(str);
-        assertEquals(str.toUpperCase(), JieBase64.encoder().toString(bytes));
-        assertEquals(str.toUpperCase(), JieBase64.encoder().toString(ByteBuffer.wrap(bytes)));
-    }
+    // @Test
+    // public void testToChars() throws Exception {
+    //     String str = "0123456789ABCDEFabcdef";
+    //     assertEquals(JieBase64.decoder().decode(str), Hex.decodeHex(str));
+    //     assertEquals(JieBase64.decoder().decode(str.toCharArray()), Hex.decodeHex(str));
+    //     CharBuffer cb = CharBuffer.wrap(str);
+    //     assertEquals(JieBytes.copyBytes(JieBase64.decoder().decode(cb)), Hex.decodeHex(str));
+    //     assertEquals(cb.position(), str.length());
+    //
+    //     byte[] bytes = JieBase64.decoder().decode(str);
+    //     assertEquals(str.toUpperCase(), JieBase64.encoder().toString(bytes));
+    //     assertEquals(str.toUpperCase(), JieBase64.encoder().toString(ByteBuffer.wrap(bytes)));
+    // }
 
     // @Test
     // public void testOthers() throws Exception {

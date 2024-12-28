@@ -8,8 +8,8 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 /**
- * This is a static utilities class for {@code Base64} encoding and decoding, provides encoder and decoder
- * implementations: {@link Encoder} and {@link Decoder}. The algorithms are specified in:
+ * This is a static utilities class for {@code base64} encoding and decoding, provides encoder and decoder
+ * implementations: {@link JieBase64.Encoder} and {@link JieBase64.Decoder}. The algorithms are specified in:
  * <ul>
  *     <li>{@code Basic}: <a href="http://www.ietf.org/rfc/rfc4648.txt">RFC 4648</a></li>
  *     <li>{@code MIME}: <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a></li>
@@ -43,43 +43,41 @@ import java.util.Arrays;
 public class JieBase64 {
 
     /**
-     * Returns a {@code Base64} encoder in type of {@code Basic}, with padding character if the length of source is not
-     * a multiple of 3.
+     * Returns a {@code basic base64} encoder with padding characters as necessary.
      *
-     * @return a {@code Base64} encoder in type of {@code Basic}
+     * @return a {@code basic base64} encoder with padding characters as necessary
      */
     public static Encoder encoder() {
-        return BasicEncoder.PADDING;
+        return encoder(true);
     }
 
     /**
-     * Returns a {@code Base64} encoder in type of {@code Basic}.
+     * Returns a {@code basic base64} encoder.
      *
-     * @param padding whether adds padding characters if the length of source is not a multiple of 3
-     * @return a {@code Base64} encoder in type of {@code Basic}
+     * @param padding whether the encoder with padding characters as necessary
+     * @return a {@code basic base64} encoder
      */
     public static Encoder encoder(boolean padding) {
-        return padding ? encoder() : BasicEncoder.NO_PADDING;
+        return padding ? BasicEncoder.PADDING : BasicEncoder.NO_PADDING;
     }
 
     /**
-     * Returns a {@code Base64} encoder in type of {@code URL Safe}, with padding character if the length of source is
-     * not a multiple of 3.
+     * Returns a {@code url-safe base64} encoder with padding characters as necessary.
      *
-     * @return a {@code Base64} encoder in type of {@code URL Safe}
+     * @return a {@code url-safe base64} encoder with padding characters as necessary
      */
     public static Encoder urlEncoder() {
-        return UrlEncoder.PADDING;
+        return urlEncoder(true);
     }
 
     /**
-     * Returns a {@code Base64} encoder in type of {@code URL Safe}.
+     * Returns a {@code url-safe base64} encoder.
      *
-     * @param padding whether adds padding characters if the length of source is not a multiple of 3
-     * @return a {@code Base64} encoder in type of {@code URL Safe}
+     * @param padding whether the encoder with padding characters as necessary
+     * @return a {@code url-safe base64} encoder
      */
     public static Encoder urlEncoder(boolean padding) {
-        return padding ? urlEncoder() : UrlEncoder.NO_PADDING;
+        return padding ? UrlEncoder.PADDING : UrlEncoder.NO_PADDING;
     }
 
     /**
@@ -388,26 +386,21 @@ public class JieBase64 {
 
         @Override
         public int getOutputSize(int inputSize, boolean end) {
-            if (end) {
-                return getOutputSize0(inputSize, lastLineSeparator);
+            int sourceLineSize = getSourceLineSize();
+            int portion = inputSize / sourceLineSize;
+            int portionSize = portion * lineSize + (portion > 1 ? (portion - 1) * separator.length : 0);
+            if (!end) {
+                return portionSize;
             }
-            return getOutputSize0(inputSize, false);
+            int portionRemainder = inputSize % sourceLineSize;
+            if (portionRemainder == 0) {
+                return portionSize + (lastLineSeparator ? separator.length : 0);
+            }
+            return portionSize + separator.length + portionRemainder + (lastLineSeparator ? separator.length : 0);
         }
 
-        private int getOutputSize0(int inputSize, boolean doLast) {
-            int outputSize = super.getOutputSize(inputSize, true);
-            if (!doLast) {
-                outputSize += (outputSize - 1) / lineSize * separator.length;
-                return outputSize;
-            }
-            int blockCount = outputSize / lineSize;
-            int remainder = outputSize % lineSize;
-            if (remainder == 0) {
-                outputSize += blockCount * separator.length;
-            } else {
-                outputSize += (blockCount + 1) * separator.length;
-            }
-            return outputSize;
+        private int getSourceLineSize() {
+            return lineSize / 4 * 3;
         }
 
         @Override
