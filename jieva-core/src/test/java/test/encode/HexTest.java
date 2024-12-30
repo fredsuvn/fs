@@ -39,6 +39,8 @@ public class HexTest {
         testCoding(99);
         testCoding(JieIO.BUFFER_SIZE);
         testCoding(JieIO.BUFFER_SIZE + 10086);
+        testCoding(JieIO.BUFFER_SIZE * 11 + 1);
+        testCoding(JieIO.BUFFER_SIZE * 11 + 2);
         testCoding(57);
         testCoding(1024);
         testCoding(1024 * 1024);

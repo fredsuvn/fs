@@ -117,12 +117,12 @@ public class JieHex {
         };
 
         @Override
-        protected int getOutputSize(long startPos, int inputSize, boolean end) {
+        protected int getOutputSize(int inputSize, long startPos, boolean end) {
             return inputSize * 2;
         }
 
         protected long doCode(
-            long startPos, byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, int dstEnd, boolean end
+            byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, int dstEnd, long startPos, boolean end
         ) {
             for (int i = srcOff, j = dstOff; i < srcEnd; ) {
                 int bits = src[i++];
@@ -139,7 +139,7 @@ public class JieHex {
         private static final HexDecoder SINGLETON = new HexDecoder();
 
         @Override
-        protected int getOutputSize(long startPos, int inputSize, boolean end) throws DecodingException {
+        protected int getOutputSize(int inputSize, long startPos, boolean end) throws DecodingException {
             if (end && inputSize % 2 != 0) {
                 throw new DecodingException("Hex decoding size must be even: " + inputSize + ".");
             }
@@ -147,7 +147,7 @@ public class JieHex {
         }
 
         protected long doCode(
-            long startPos, byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, int dstEnd, boolean end
+            byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, int dstEnd, long startPos, boolean end
         ) {
             for (int i = dstOff, j = srcOff; i < dstEnd; i++) {
                 int bits1 = toDigit((char) src[j], startPos, j);

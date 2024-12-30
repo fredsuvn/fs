@@ -19,10 +19,10 @@ import java.util.Arrays;
  * These methods are minimize required to implement:
  * <ul>
  *     <li>
- *         {@link #doCode(long, byte[], int, int, byte[], int, int, boolean)};
+ *         {@link #doCode(byte[], int, int, byte[], int, int, long, boolean)};
  *     </li>
  *     <li>
- *         {@link #getOutputSize(long, int, boolean)};
+ *         {@link #getOutputSize(int, long, boolean)};
  *     </li>
  * </ul>
  * And these methods can be overridden as needed:
@@ -53,7 +53,7 @@ public abstract class AbstractByteCoder implements ByteCoder {
      * The {@code startPos} and {@code end} parameters form a context that indicates the position of the input data
      * within the entire data. This method can determine the consumption of the input data based on the context and
      * returns the output size corresponding to the actual consumption size. Unconsumed data will be buffered and passed
-     * at next invocation. Typically, this method and {@link #doCode(long, byte[], int, int, byte[], int, int, boolean)}
+     * at next invocation. Typically, this method and {@link #doCode(byte[], int, int, byte[], int, int, long, boolean)}
      * are invoked in sequence, so their data consumption logic must remain consistent. Moreover, if this method returns
      * {@code 0}, the {@code doCode} method will not be invoked.
      * <p>
@@ -69,8 +69,8 @@ public abstract class AbstractByteCoder implements ByteCoder {
      * @throws DecodingException for encoding error
      */
     protected abstract int getOutputSize(
-        long startPos,
         int inputSize,
+        long startPos,
         boolean end
     ) throws EncodingException, DecodingException;
 
@@ -83,13 +83,13 @@ public abstract class AbstractByteCoder implements ByteCoder {
      * The {@code startPos} and {@code end} parameters form a context that indicates the position of the given source
      * data within the entire source data. This method can determine the consumption of the source data based on the
      * context and writes the result corresponding to the actual consumption data into destination. Unconsumed data will
-     * be buffered and passed at next invocation. Typically, {@link #getOutputSize(long, int, boolean)} and this method
+     * be buffered and passed at next invocation. Typically, {@link #getOutputSize(int, long, boolean)} and this method
      * are invoked in sequence, so their data consumption logic must remain consistent. Moreover, if the
      * {@code getOutputSize} returns {@code 0}, this method will not be invoked.
      * <p>
      * By default, the passed arguments will not be null, and bounds of source and destination have already been
      * validated by {@link #checkInputSize(int, boolean)}, {@link #checkRemainingSpace(int, int)} and
-     * {@link #getOutputSize(long, int, boolean)}. Therefore, there is no need for duplicate validation.
+     * {@link #getOutputSize(int, long, boolean)}. Therefore, there is no need for duplicate validation.
      *
      * @param src      source data
      * @param srcOff   source start index
@@ -105,23 +105,23 @@ public abstract class AbstractByteCoder implements ByteCoder {
      * @throws DecodingException for encoding error
      */
     protected abstract long doCode(
-        long startPos,
         byte[] src,
         int srcOff,
         int srcEnd,
         byte[] dst,
         int dstOff,
         int dstEnd,
+        long startPos,
         boolean end
     ) throws EncodingException, DecodingException;
 
     /**
-     * Helps build the read-write-value from {@link #doCode(long, byte[], int, int, byte[], int, int, boolean)}, high 32
+     * Helps build the read-write-value from {@link #doCode(byte[], int, int, byte[], int, int, long, boolean)}, high 32
      * bits indicates read bytes number, low 32 bits indicates written bytes number.
      *
      * @param readSize  read size
      * @param writeSize write size
-     * @return read-write-value from {@link #doCode(long, byte[], int, int, byte[], int, int, boolean)}
+     * @return read-write-value from {@link #doCode(byte[], int, int, byte[], int, int, long, boolean)}
      */
     protected long buildDoCodeResult(int readSize, int writeSize) {
         long lr = readSize;
@@ -161,14 +161,14 @@ public abstract class AbstractByteCoder implements ByteCoder {
         int dstRemaining
     ) throws EncodingException, DecodingException;
 
-    private byte[] doCode(long startPos, byte[] source, boolean end) throws EncodingException {
+    private byte[] doCode(byte[] source, long startPos, boolean end) throws EncodingException {
         int outputSize = getSafeOutputSize(startPos, source.length, end);
         if (outputSize <= 0) {
             return JieBytes.emptyBytes();
         }
         byte[] dst = new byte[outputSize];
         int len = getActualWriteSize(
-            doCode(startPos, source, 0, source.length, dst, 0, outputSize, end)
+            doCode(source, 0, source.length, dst, 0, outputSize, startPos, end)
         );
         if (len == dst.length) {
             return dst;
@@ -176,7 +176,7 @@ public abstract class AbstractByteCoder implements ByteCoder {
         return Arrays.copyOf(dst, len);
     }
 
-    private ByteBuffer doCode(long startPos, ByteBuffer source, boolean end) throws EncodingException {
+    private ByteBuffer doCode(ByteBuffer source, long startPos, boolean end) throws EncodingException {
         int outputSize = getSafeOutputSize(startPos, source.remaining(), end);
         if (outputSize <= 0) {
             return JieBytes.emptyBuffer();
@@ -185,13 +185,13 @@ public abstract class AbstractByteCoder implements ByteCoder {
         long doCodeResult;
         if (source.hasArray()) {
             doCodeResult = doCode(
-                startPos,
                 source.array(),
                 JieBuffer.getArrayStartIndex(source),
                 JieBuffer.getArrayEndIndex(source),
                 dst,
                 0,
                 outputSize,
+                startPos,
                 end
             );
             source.position(source.position() + getActualReadSize(doCodeResult));
@@ -199,7 +199,7 @@ public abstract class AbstractByteCoder implements ByteCoder {
             byte[] s = new byte[source.remaining()];
             int oldPos = source.position();
             source.get(s);
-            doCodeResult = doCode(startPos, s, 0, s.length, dst, 0, outputSize, end);
+            doCodeResult = doCode(s, 0, s.length, dst, 0, outputSize, startPos, end);
             source.position(oldPos + getActualReadSize(doCodeResult));
         }
         int writeSize = getActualWriteSize(doCodeResult);
@@ -209,18 +209,18 @@ public abstract class AbstractByteCoder implements ByteCoder {
         return ByteBuffer.wrap(Arrays.copyOf(dst, writeSize));
     }
 
-    private int doCode(long startPos, byte[] source, byte[] dest, boolean end) throws EncodingException {
+    private int doCode(byte[] source, byte[] dest, long startPos, boolean end) throws EncodingException {
         int outputSize = getSafeOutputSize(startPos, source.length, end);
         if (outputSize <= 0) {
             return 0;
         }
         checkRemainingSpace(outputSize, dest.length);
         return getActualWriteSize(
-            doCode(startPos, source, 0, source.length, dest, 0, outputSize, end)
+            doCode(source, 0, source.length, dest, 0, outputSize, startPos, end)
         );
     }
 
-    private int doCode(long startPos, ByteBuffer source, ByteBuffer dest, boolean end) throws EncodingException {
+    private int doCode(ByteBuffer source, ByteBuffer dest, long startPos, boolean end) throws EncodingException {
         int outputSize = getSafeOutputSize(startPos, source.remaining(), end);
         if (outputSize <= 0) {
             return 0;
@@ -229,20 +229,20 @@ public abstract class AbstractByteCoder implements ByteCoder {
         if (source.hasArray() && dest.hasArray()) {
             int oldPos = source.position();
             long doCodeResult = doCode(
-                startPos,
                 source.array(),
                 JieBuffer.getArrayStartIndex(source),
                 JieBuffer.getArrayEndIndex(source),
                 dest.array(),
                 JieBuffer.getArrayStartIndex(dest),
                 JieBuffer.getArrayStartIndex(dest) + outputSize,
+                startPos,
                 end
             );
             source.position(oldPos + getActualReadSize(doCodeResult));
             dest.position(dest.position() + getActualWriteSize(doCodeResult));
             return getActualWriteSize(doCodeResult);
         } else {
-            ByteBuffer dst = doCode(startPos, source, end);
+            ByteBuffer dst = doCode(source, startPos, end);
             int oldPos = dest.position();
             dest.put(dst);
             return dest.position() - oldPos;
@@ -259,7 +259,7 @@ public abstract class AbstractByteCoder implements ByteCoder {
 
     private int getSafeOutputSize(long startPos, int inputSize, boolean end) {
         checkInputSize(inputSize, end);
-        return getOutputSize(startPos, inputSize, end);
+        return getOutputSize(inputSize, startPos, end);
     }
 
     @Override
@@ -269,8 +269,8 @@ public abstract class AbstractByteCoder implements ByteCoder {
 
     /**
      * This method generated a {@link BytesProcessor.Encoder} based on encoding/decoding logic of
-     * {@link #getOutputSize(long, int, boolean)} and
-     * {@link #doCode(long, byte[], int, int, byte[], int, int, boolean)}, and then wrap the generated encoder via
+     * {@link #getOutputSize(int, long, boolean)} and
+     * {@link #doCode(byte[], int, int, byte[], int, int, long, boolean)}, and then wrap the generated encoder via
      * {@link JieIO#bufferedEncoder(BytesProcessor.Encoder)}.
      *
      * @return a {@link BytesProcessor.Encoder} based on current encoding/decoding logic
@@ -284,7 +284,7 @@ public abstract class AbstractByteCoder implements ByteCoder {
             @Override
             public ByteBuffer encode(ByteBuffer data, boolean end) {
                 int pos = data.position();
-                ByteBuffer ret = doCode(startPos, data, end);
+                ByteBuffer ret = doCode(data, startPos, end);
                 startPos += (data.position() - pos);
                 return ret;
             }
@@ -302,22 +302,22 @@ public abstract class AbstractByteCoder implements ByteCoder {
 
         @Override
         public byte[] encode(byte[] source) throws EncodingException {
-            return super.doCode(0, source, true);
+            return super.doCode(source, 0, true);
         }
 
         @Override
         public ByteBuffer encode(ByteBuffer source) throws EncodingException {
-            return super.doCode(0, source, true);
+            return super.doCode(source, 0, true);
         }
 
         @Override
         public int encode(byte[] source, byte[] dest) throws EncodingException {
-            return super.doCode(0, source, dest, true);
+            return super.doCode(source, dest, 0, true);
         }
 
         @Override
         public int encode(ByteBuffer source, ByteBuffer dest) throws EncodingException {
-            return super.doCode(0, source, dest, true);
+            return super.doCode(source, dest, 0, true);
         }
 
         @Override
@@ -344,22 +344,22 @@ public abstract class AbstractByteCoder implements ByteCoder {
 
         @Override
         public byte[] decode(byte[] data) throws DecodingException {
-            return super.doCode(0, data, true);
+            return super.doCode(data, 0, true);
         }
 
         @Override
         public ByteBuffer decode(ByteBuffer data) throws DecodingException {
-            return super.doCode(0, data, true);
+            return super.doCode(data, 0, true);
         }
 
         @Override
         public int decode(byte[] data, byte[] dest) throws DecodingException {
-            return super.doCode(0, data, dest, true);
+            return super.doCode(data, dest, 0, true);
         }
 
         @Override
         public int decode(ByteBuffer data, ByteBuffer dest) throws DecodingException {
-            return super.doCode(0, data, dest, true);
+            return super.doCode(data, dest, 0, true);
         }
 
         @Override

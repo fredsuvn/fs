@@ -1,5 +1,6 @@
 package xyz.sunqian.common.encode;
 
+import xyz.sunqian.common.base.UnreachablePointException;
 import xyz.sunqian.common.io.BytesProcessor;
 
 import java.util.Arrays;
@@ -27,7 +28,7 @@ import java.util.Arrays;
  *                 {@code MIME}: separated in 76 bytes, no separator added to the last line;
  *             </li>
  *             <li>
- *                 {@code PEM}: separated in 64 bytes, adding separators to the last line;
+ *                 {@code PEM}: separated in 64 bytes, adding line separator to the last line;
  *             </li>
  *         </ul>
  *     </li>
@@ -78,58 +79,57 @@ public class JieBase64 {
     }
 
     /**
-     * Returns a {@code Base64} encoder in {@code MIME} format, which is a format of {@code Line Separated} type,
-     * separated in 76 bytes, no separator added to the last line, without padding and url-safe.
+     * Returns a {@code line-separated base64} encoder in {@code MIME} format, of which encoding result is separated in
+     * 76 bytes, no separator added to the last line, with padding characters as necessary.
      *
-     * @return a {@code Base64} encoder in {@code MIME} format
+     * @return a {@code line-separated base64} encoder in {@code MIME} format
      */
     public static Encoder mimeEncoder() {
-        return MimeEncoder.PADDING;
+        return mimeEncoder(true);
     }
 
     /**
-     * Returns a {@code Base64} encoder in {@code MIME} format, which is a format of {@code Line Separated} type,
-     * separated in 76 bytes, no separator added to the last line, without url-safe.
+     * Returns a {@code line-separated base64} encoder in {@code MIME} format, of which encoding result is separated in
+     * 76 bytes, no separator added to the last line.
      *
-     * @param padding whether adds padding characters if the length of source is not a multiple of 3
-     * @return a {@code Base64} encoder in {@code MIME} format
+     * @param padding whether the encoder with padding characters as necessary
+     * @return a {@code line-separated base64} encoder in {@code MIME} format
      */
     public static Encoder mimeEncoder(boolean padding) {
-        return padding ? mimeEncoder() : MimeEncoder.NO_PADDING;
+        return padding ? MimeEncoder.PADDING : MimeEncoder.NO_PADDING;
     }
 
     /**
-     * Returns a {@code Base64} encoder in {@code PEM} format, which is a format of {@code Line Separated} type,
-     * separated in 64 bytes, adding separators to the last line, without padding and url-safe.
+     * Returns a {@code line-separated base64} encoder in {@code PEM} format, of which encoding result is separated in
+     * 64 bytes, adding line separator to the last line, with padding characters as necessary.
      *
-     * @return a {@code Base64} encoder in {@code PEM} format
+     * @return a {@code line-separated base64} encoder in {@code PEM} format
      */
     public static Encoder pemEncoder() {
-        return PemEncoder.PADDING;
+        return pemEncoder(true);
     }
 
     /**
-     * Returns a {@code Base64} encoder in {@code PEM} format, which is a format of {@code Line Separated} type,
-     * separated in 64 bytes, adding separators to the last line, without url-safe.
+     * Returns a {@code line-separated base64} encoder in {@code PEM} format, of which encoding result is separated in
+     * 64 bytes, adding line separator to the last line.
      *
-     * @param padding whether adds padding characters if the length of source is not a multiple of 3, the paddings are
-     *                placed before the separators
-     * @return a {@code Base64} encoder in {@code PEM} format
+     * @param padding whether the encoder with padding characters as necessary
+     * @return a {@code line-separated base64} encoder in {@code PEM} format
      */
     public static Encoder pemEncoder(boolean padding) {
-        return padding ? pemEncoder() : PemEncoder.NO_PADDING;
+        return padding ? PemEncoder.PADDING : PemEncoder.NO_PADDING;
     }
 
     /**
-     * Returns a {@code Base64} encoder in type of {@code Line Separated} with specified arguments.
+     * Returns a {@code line-separated base64} encoder with specified arguments.
      *
      * @param lineSize          Sets the max line size, must be a multiple of {@code 4}.
      * @param separator         Sets the line separator. The array will be used directly, any modification to array will
      *                          affect the encoding.
-     * @param padding           Whether adds padding characters if the length of source is not a multiple of 3.
-     * @param lastLineSeparator Whether adds the separators to the last line
-     * @param urlSafe           Whether the base64 dict is in {@code URL Safe}
-     * @return a {@code Base64} encoder in type of {@code Line Separated} with specified arguments
+     * @param padding           Whether the encoder with padding characters as necessary.
+     * @param lastLineSeparator Whether adds the line separator to the last line
+     * @param urlSafe           Whether the base64 dict is {@code url-safe}
+     * @return a {@code line-separated base64} encoder with specified arguments
      */
     public static Encoder lineEncoder(
         int lineSize,
@@ -262,7 +262,7 @@ public class JieBase64 {
         }
 
         @Override
-        protected int getOutputSize(long startPos, int inputSize, boolean end) throws EncodingException {
+        protected int getOutputSize(int inputSize, long startPos, boolean end) throws EncodingException {
             if (inputSize == 0) {
                 return 0;
             }
@@ -288,7 +288,7 @@ public class JieBase64 {
         }
 
         protected long doCode(
-            long startPos, byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, int dstEnd, boolean end
+            byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, int dstEnd, long startPos, boolean end
         ) {
             char[] dict = dict();
             int srcPos = srcOff;
@@ -388,10 +388,10 @@ public class JieBase64 {
         }
 
         @Override
-        protected int getOutputSize(long startPos, int inputSize, boolean end) throws EncodingException{
+        protected int getOutputSize(int inputSize, long startPos, boolean end) throws EncodingException {
             if (inputSize == 0) {
                 if (!end) {
-                    throw new EncodingException("");
+                    throw new EncodingException(new UnreachablePointException());
                 }
                 if (startPos == 0) {
                     return 0;
@@ -404,7 +404,7 @@ public class JieBase64 {
                     return 0;
                 }
                 return getPrefixSize(startPos) +
-                    super.getOutputSize(startPos, inputSize, true) +
+                    super.getOutputSize(inputSize, startPos, true) +
                     getSuffixSize();
             }
             int portion = inputSize / sourceLineSize;
@@ -419,7 +419,7 @@ public class JieBase64 {
             return getPrefixSize(startPos) +
                 portionSize +
                 separator.length +
-                super.getOutputSize(startPos, portionRemainder, true) +
+                super.getOutputSize(portionRemainder, startPos, true) +
                 getSuffixSize();
         }
 
@@ -442,13 +442,8 @@ public class JieBase64 {
             return (portion - 1) * separator.length;
         }
 
-        @Override
-        public int getBlockSize() {
-            return lineSize / 4 * 3;
-        }
-
         protected long doCode(
-            long startPos, byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, int dstEnd, boolean end
+            byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, int dstEnd, long startPos, boolean end
         ) {
             int dstPos = dstOff;
             if (startPos > 0) {

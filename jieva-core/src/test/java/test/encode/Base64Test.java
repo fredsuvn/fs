@@ -2,11 +2,15 @@ package test.encode;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.JieRandom;
+import xyz.sunqian.common.encode.ByteEncoder;
 import xyz.sunqian.common.encode.DecodingException;
 import xyz.sunqian.common.encode.EncodingException;
 import xyz.sunqian.common.encode.JieBase64;
 import xyz.sunqian.common.io.JieIO;
+import xyz.sunqian.test.JieTest;
 
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Base64;
 
 import static org.testng.Assert.*;
@@ -65,6 +69,10 @@ public class Base64Test {
         // error
         expectThrows(EncodingException.class, () -> JieBase64.encoder().getOutputSize(-1));
         expectThrows(DecodingException.class, () -> JieBase64.decoder().getOutputSize(-1));
+        expectThrows(EncodingException.class, () ->
+            JieBase64.lineEncoder(-1, new byte[0], true, true, true));
+        expectThrows(EncodingException.class, () ->
+            JieBase64.lineEncoder(3, new byte[0], true, true, true));
         // byte[] encoded = new byte[3];
         // expectThrows(DecodingException.class, () -> JieBase64.decoder().decode(encoded));
         // byte[] encoded2 = new byte[2];
@@ -90,9 +98,25 @@ public class Base64Test {
         byte[] urlTargetNoPadding = Base64.getUrlEncoder().withoutPadding().encode(source);
         byte[] mimeTarget = Base64.getMimeEncoder().encode(source);
         byte[] mimeTargetNoPadding = Base64.getMimeEncoder().withoutPadding().encode(source);
-        byte[] pemTarget =
-            new org.apache.commons.codec.binary.Base64(64, new byte[]{(byte) '\r', (byte) '\n'}).encode(source);
-        //byte[] pemTargetNoPadding = new
+        byte[] pemTarget = new org.apache.commons.codec.binary.Base64(
+            64, new byte[]{(byte) '\r', (byte) '\n'}
+        ).encode(source);
+        ByteEncoder lineEncoder = JieBase64.lineEncoder(
+            76, new byte[]{(byte) '\r', (byte) '\n'}, true, false, false
+        );
+        ByteEncoder lineEncoderUrl = JieBase64.lineEncoder(
+            76, new byte[]{(byte) '\r', (byte) '\n'}, true, false, true
+        );
+        byte[] mimeTargetUrl = Arrays.copyOf(mimeTarget, mimeTarget.length);
+        for (int i = 0; i < mimeTargetUrl.length; i++) {
+            if (mimeTargetUrl[i] == '+') {
+                mimeTargetUrl[i] = '-';
+                continue;
+            }
+            if (mimeTargetUrl[i] == '/') {
+                mimeTargetUrl[i] = '_';
+            }
+        }
         for (int i = 1; i < 10; i++) {
             EncodeTest.testEncoding(JieBase64.encoder(), source, target, i);
             EncodeTest.testEncoding(JieBase64.encoder(false), source, targetNoPadding, i);
@@ -101,6 +125,8 @@ public class Base64Test {
             EncodeTest.testEncoding(JieBase64.mimeEncoder(), source, mimeTarget, i);
             EncodeTest.testEncoding(JieBase64.mimeEncoder(false), source, mimeTargetNoPadding, i);
             EncodeTest.testEncoding(JieBase64.pemEncoder(), source, pemTarget, i);
+            EncodeTest.testEncoding(lineEncoder, source, mimeTarget, i);
+            EncodeTest.testEncoding(lineEncoderUrl, source, mimeTargetUrl, i);
             // if (i % 2 == 0) {
             //     EncodeTest.testDecoding(JieBase64.decoder(), target, source, i);
             // }
@@ -112,6 +138,8 @@ public class Base64Test {
         EncodeTest.testEncoding(JieBase64.mimeEncoder(), source, mimeTarget, JieIO.BUFFER_SIZE);
         EncodeTest.testEncoding(JieBase64.mimeEncoder(false), source, mimeTargetNoPadding, JieIO.BUFFER_SIZE);
         EncodeTest.testEncoding(JieBase64.pemEncoder(), source, pemTarget, JieIO.BUFFER_SIZE);
+        EncodeTest.testEncoding(lineEncoder, source, mimeTarget, JieIO.BUFFER_SIZE);
+        EncodeTest.testEncoding(lineEncoderUrl, source, mimeTargetUrl, JieIO.BUFFER_SIZE);
     }
 
     // @Test
@@ -155,4 +183,11 @@ public class Base64Test {
     //         }
     //     }
     // }
+
+    @Test
+    public void testUnreachablePoint() throws Exception {
+        ByteEncoder encoder = JieBase64.lineEncoder(16, new byte[]{'\t'}, true, true, false);
+        Method getOutputSize = encoder.getClass().getDeclaredMethod("getOutputSize", int.class, long.class, boolean.class);
+        JieTest.testThrow(EncodingException.class, getOutputSize, encoder, 0, 0L, false);
+    }
 }

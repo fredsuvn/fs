@@ -10,7 +10,7 @@ public class UnreachablePointException extends JieException {
     /**
      * Empty constructor.
      */
-    protected UnreachablePointException() {
+    public UnreachablePointException() {
         super();
     }
 
@@ -19,7 +19,7 @@ public class UnreachablePointException extends JieException {
      *
      * @param message the message
      */
-    protected UnreachablePointException(String message) {
+    public UnreachablePointException(String message) {
         super(message);
     }
 
@@ -29,7 +29,7 @@ public class UnreachablePointException extends JieException {
      * @param message the message
      * @param cause   the cause
      */
-    protected UnreachablePointException(String message, Throwable cause) {
+    public UnreachablePointException(String message, Throwable cause) {
         super(message, cause);
     }
 
@@ -38,7 +38,7 @@ public class UnreachablePointException extends JieException {
      *
      * @param cause the cause
      */
-    protected UnreachablePointException(Throwable cause) {
+    public UnreachablePointException(Throwable cause) {
         super(cause);
     }
 }
