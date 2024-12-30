@@ -56,6 +56,8 @@ public class Base64Test {
         testCoding(99);
         testCoding(JieIO.BUFFER_SIZE);
         testCoding(JieIO.BUFFER_SIZE + 10086);
+        testCoding(JieIO.BUFFER_SIZE * 11 + 384 * 3 + 1);
+        testCoding(JieIO.BUFFER_SIZE * 11 + 384 * 3 + 2);
         testCoding(57);
         testCoding(1024);
         testCoding(1024 * 1024);

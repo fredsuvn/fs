@@ -52,10 +52,10 @@ public abstract class AbstractByteCoder implements ByteCoder {
      * <p>
      * The {@code startPos} and {@code end} parameters form a context that indicates the position of the input data
      * within the entire data. This method can determine the consumption of the input data based on the context and
-     * returns the output size corresponding to the actual consumption size. Typically, this method and
-     * {@link #doCode(long, byte[], int, int, byte[], int, int, boolean)} are invoked in sequence, so their data
-     * consumption logic must remain consistent. Moreover, if this method returns {@code 0}, the {@code doCode} method
-     * will not be invoked.
+     * returns the output size corresponding to the actual consumption size. Unconsumed data will be buffered and passed
+     * at next invocation. Typically, this method and {@link #doCode(long, byte[], int, int, byte[], int, int, boolean)}
+     * are invoked in sequence, so their data consumption logic must remain consistent. Moreover, if this method returns
+     * {@code 0}, the {@code doCode} method will not be invoked.
      * <p>
      * By default, {@code inputSize} is validated once by {@link #checkInputSize(int, boolean)} before being passed to
      * this method. Therefore, there is no need to invoke {@link #checkInputSize(int, boolean)} again when implementing
@@ -82,10 +82,10 @@ public abstract class AbstractByteCoder implements ByteCoder {
      * <p>
      * The {@code startPos} and {@code end} parameters form a context that indicates the position of the given source
      * data within the entire source data. This method can determine the consumption of the source data based on the
-     * context and writes the result corresponding to the actual consumption data into destination. Typically,
-     * {@link #getOutputSize(long, int, boolean)} and this method are invoked in sequence, so their data consumption
-     * logic must remain consistent. Moreover, if the {@code getOutputSize} returns {@code 0}, this method will not be
-     * invoked.
+     * context and writes the result corresponding to the actual consumption data into destination. Unconsumed data will
+     * be buffered and passed at next invocation. Typically, {@link #getOutputSize(long, int, boolean)} and this method
+     * are invoked in sequence, so their data consumption logic must remain consistent. Moreover, if the
+     * {@code getOutputSize} returns {@code 0}, this method will not be invoked.
      * <p>
      * By default, the passed arguments will not be null, and bounds of source and destination have already been
      * validated by {@link #checkInputSize(int, boolean)}, {@link #checkRemainingSpace(int, int)} and
@@ -274,8 +274,6 @@ public abstract class AbstractByteCoder implements ByteCoder {
      * {@link JieIO#bufferedEncoder(BytesProcessor.Encoder)}.
      *
      * @return a {@link BytesProcessor.Encoder} based on current encoding/decoding logic
-     * @see BytesProcessor
-     * @see BytesProcessor.Encoder
      */
     @Override
     public BytesProcessor.Encoder streamEncoder() {
@@ -295,7 +293,7 @@ public abstract class AbstractByteCoder implements ByteCoder {
     }
 
     /**
-     * Abstract skeletal implementation of {@link ByteEncoder}, see {@link AbstractByteCoder}.
+     * Abstract skeletal implementation of {@link ByteEncoder}, see {@link AbstractByteCoder} for more detail.
      *
      * @author sunqian
      * @see AbstractByteCoder
@@ -337,7 +335,7 @@ public abstract class AbstractByteCoder implements ByteCoder {
     }
 
     /**
-     * Abstract skeletal implementation of {@link ByteDecoder}, see {@link AbstractByteCoder}.
+     * Abstract skeletal implementation of {@link ByteDecoder}, see {@link AbstractByteCoder} for more detail.
      *
      * @author sunqian
      * @see AbstractByteCoder

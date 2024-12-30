@@ -388,9 +388,11 @@ public class JieBase64 {
         }
 
         @Override
-        protected int getOutputSize(long startPos, int inputSize, boolean end) {
+        protected int getOutputSize(long startPos, int inputSize, boolean end) throws EncodingException{
             if (inputSize == 0) {
-                // must be "end == true"
+                if (!end) {
+                    throw new EncodingException("");
+                }
                 if (startPos == 0) {
                     return 0;
                 }
