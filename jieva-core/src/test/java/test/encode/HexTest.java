@@ -68,9 +68,7 @@ public class HexTest {
         byte[] target = Hex.encodeHexString(source).toUpperCase().getBytes(JieChars.latinCharset());
         for (int i = 1; i < 10; i++) {
             EncodeTest.testEncoding(JieHex.encoder(), source, target, i);
-            if (i % 2 == 0) {
-                EncodeTest.testDecoding(JieHex.decoder(), target, source, i);
-            }
+            EncodeTest.testDecoding(JieHex.decoder(), target, source, i);
         }
         EncodeTest.testEncoding(JieHex.encoder(), source, target, JieIO.BUFFER_SIZE);
         EncodeTest.testDecoding(JieHex.decoder(), target, source, JieIO.BUFFER_SIZE);

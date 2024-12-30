@@ -1,5 +1,6 @@
 package xyz.sunqian.common.encode;
 
+import xyz.sunqian.common.base.JieBytes;
 import xyz.sunqian.common.io.BytesProcessor;
 import xyz.sunqian.common.io.JieBuffer;
 import xyz.sunqian.common.io.JieIO;
@@ -9,7 +10,7 @@ import java.util.Arrays;
 
 /**
  * This abstract class provides skeletal implementation methods for {@link ByteEncoder} and {@link ByteDecoder}, and
- * skeletal implementation classes: {@link En} and {@link De}. The following example shows declare an encoder based on
+ * skeletal implementation classes: {@link En} and {@link De}. The following example shows declaring an encoder based on
  * {@link En}:
  * <pre>{@code
  *     public class MyEncoder extends AbstractByteCoder.En {...}
@@ -21,7 +22,7 @@ import java.util.Arrays;
  *         {@link #doCode(long, byte[], int, int, byte[], int, int, boolean)};
  *     </li>
  *     <li>
- *         {@link #getOutputSize(int, boolean)};
+ *         {@link #getOutputSize(long, int, boolean)};
  *     </li>
  * </ul>
  * And these methods can be overridden as needed:
@@ -45,46 +46,63 @@ public abstract class AbstractByteCoder implements ByteCoder {
     private static final String INPUT_SIZE_ILLEGAL = "Input size is illegal: ";
 
     /**
-     * Returns output size in bytes for the specified input size. If the exact output size cannot be determined, returns
-     * an estimated maximum value that can accommodate the output. Or {@code -1} if it cannot be estimated.
+     * This method is used to estimate the output size in bytes of input data of specified size after encoding/decoding.
+     * If the exact output size cannot be determined, returns a maximum value that can accommodate all output, or
+     * {@code -1} if the estimating fails.
      * <p>
-     * The {@code end} parameter tells whether specified input data to be encoded is the last segment of the entire
-     * data. If the {@code end} parameter is false, it indicates that the data of specified input size may not be
-     * expected to be fully consumed. The returned output size should only match the expected size of consumed data.
+     * The {@code startPos} and {@code end} parameters form a context that indicates the position of the input data
+     * within the entire data. This method can determine the consumption of the input data based on the context and
+     * returns the output size corresponding to the actual consumption size. Typically, this method and
+     * {@link #doCode(long, byte[], int, int, byte[], int, int, boolean)} are invoked in sequence, so their data
+     * consumption logic must remain consistent. Moreover, if this method returns {@code 0}, the {@code doCode} method
+     * will not be invoked.
      * <p>
      * By default, {@code inputSize} is validated once by {@link #checkInputSize(int, boolean)} before being passed to
      * this method. Therefore, there is no need to invoke {@link #checkInputSize(int, boolean)} again when implementing
      * this method.
      *
-     * @param inputSize specified input size
-     * @param end       whether specified input data to be encoded is the last segment of the entire data
-     * @return output size in bytes for the specified input size
+     * @param inputSize specified size of input data
+     * @param startPos  the position of the first byte of the input data within the entire data
+     * @param end       whether the input data is the last segment of the entire data
+     * @return output size in bytes of input data of specified size after encoding/decoding
      * @throws EncodingException for encoding error
      * @throws DecodingException for encoding error
      */
-    protected abstract int getOutputSize(int inputSize, boolean end) throws EncodingException, DecodingException;
+    protected abstract int getOutputSize(
+        long startPos,
+        int inputSize,
+        boolean end
+    ) throws EncodingException, DecodingException;
 
     /**
      * This method encodes/decodes source data (from source start index to source end index) and writes result into
      * destination byte array (from destination start index to destination end index). It returns a long value of which
-     * high 32 bits indicates read bytes number, low 32 bits indicates written bytes number
-     * ({@link #buildDoCodeResult(int, int)} can be used to build the return value). The source data within the
-     * specified bounds does not need to be fully consumed, and the destination within the specified bounds does not
-     * need to be fully filled.
+     * high 32 bits indicates read bytes number, low 32 bits indicates written bytes number. Using
+     * {@link #buildDoCodeResult(int, int)} can build the return value.
+     * <p>
+     * The {@code startPos} and {@code end} parameters form a context that indicates the position of the given source
+     * data within the entire source data. This method can determine the consumption of the source data based on the
+     * context and writes the result corresponding to the actual consumption data into destination. Typically,
+     * {@link #getOutputSize(long, int, boolean)} and this method are invoked in sequence, so their data consumption
+     * logic must remain consistent. Moreover, if the {@code getOutputSize} returns {@code 0}, this method will not be
+     * invoked.
      * <p>
      * By default, the passed arguments will not be null, and bounds of source and destination have already been
      * validated by {@link #checkInputSize(int, boolean)}, {@link #checkRemainingSpace(int, int)} and
-     * {@link #getOutputSize(int, boolean)}. Therefore, there is no need for duplicate validation.
+     * {@link #getOutputSize(long, int, boolean)}. Therefore, there is no need for duplicate validation.
      *
-     * @param startPos the position of the first byte of the current data within the entire data
      * @param src      source data
      * @param srcOff   source start index
      * @param srcEnd   source end index
      * @param dst      destination byte array
      * @param dstOff   destination start index
      * @param dstEnd   destination end index
-     * @param end      whether the current data to be encoded is the last segment of the entire data
-     * @return a long value of which high 32 bits indicates read byte number, low 32 bits indicates written byte number
+     * @param startPos the position of the first byte of the source data within the entire data
+     * @param end      whether the source data is the last segment of the entire data
+     * @return a long value of which high 32 bits indicates read bytes number, low 32 bits indicates written bytes
+     * number
+     * @throws EncodingException for encoding error
+     * @throws DecodingException for encoding error
      */
     protected abstract long doCode(
         long startPos,
@@ -144,7 +162,10 @@ public abstract class AbstractByteCoder implements ByteCoder {
     ) throws EncodingException, DecodingException;
 
     private byte[] doCode(long startPos, byte[] source, boolean end) throws EncodingException {
-        int outputSize = getSafeOutputSize(source.length, end);
+        int outputSize = getSafeOutputSize(startPos, source.length, end);
+        if (outputSize <= 0) {
+            return JieBytes.emptyBytes();
+        }
         byte[] dst = new byte[outputSize];
         int len = getActualWriteSize(
             doCode(startPos, source, 0, source.length, dst, 0, outputSize, end)
@@ -156,7 +177,10 @@ public abstract class AbstractByteCoder implements ByteCoder {
     }
 
     private ByteBuffer doCode(long startPos, ByteBuffer source, boolean end) throws EncodingException {
-        int outputSize = getSafeOutputSize(source.remaining(), end);
+        int outputSize = getSafeOutputSize(startPos, source.remaining(), end);
+        if (outputSize <= 0) {
+            return JieBytes.emptyBuffer();
+        }
         byte[] dst = new byte[outputSize];
         long doCodeResult;
         if (source.hasArray()) {
@@ -186,7 +210,10 @@ public abstract class AbstractByteCoder implements ByteCoder {
     }
 
     private int doCode(long startPos, byte[] source, byte[] dest, boolean end) throws EncodingException {
-        int outputSize = getSafeOutputSize(source.length, end);
+        int outputSize = getSafeOutputSize(startPos, source.length, end);
+        if (outputSize <= 0) {
+            return 0;
+        }
         checkRemainingSpace(outputSize, dest.length);
         return getActualWriteSize(
             doCode(startPos, source, 0, source.length, dest, 0, outputSize, end)
@@ -194,7 +221,10 @@ public abstract class AbstractByteCoder implements ByteCoder {
     }
 
     private int doCode(long startPos, ByteBuffer source, ByteBuffer dest, boolean end) throws EncodingException {
-        int outputSize = getSafeOutputSize(source.remaining(), end);
+        int outputSize = getSafeOutputSize(startPos, source.remaining(), end);
+        if (outputSize <= 0) {
+            return 0;
+        }
         checkRemainingSpace(outputSize, dest.remaining());
         if (source.hasArray() && dest.hasArray()) {
             int oldPos = source.position();
@@ -227,21 +257,23 @@ public abstract class AbstractByteCoder implements ByteCoder {
         return (int) doCodeResult;
     }
 
-    private int getSafeOutputSize(int inputSize, boolean end) {
+    private int getSafeOutputSize(long startPos, int inputSize, boolean end) {
         checkInputSize(inputSize, end);
-        return getOutputSize(inputSize, end);
+        return getOutputSize(startPos, inputSize, end);
     }
 
     @Override
     public int getOutputSize(int inputSize) throws CodingException {
-        return getSafeOutputSize(inputSize, true);
+        return getSafeOutputSize(0, inputSize, true);
     }
 
     /**
-     * The default implementation is wrapped by {@link JieIO#bufferedEncoder(BytesProcessor.Encoder)}. This means that
-     * the input data does not need to be fully consumed, any unconsumed data will be buffered for the next invocation.
+     * This method generated a {@link BytesProcessor.Encoder} based on encoding/decoding logic of
+     * {@link #getOutputSize(long, int, boolean)} and
+     * {@link #doCode(long, byte[], int, int, byte[], int, int, boolean)}, and then wrap the generated encoder via
+     * {@link JieIO#bufferedEncoder(BytesProcessor.Encoder)}.
      *
-     * @return a {@link BytesProcessor.Encoder} with current coding logic
+     * @return a {@link BytesProcessor.Encoder} based on current encoding/decoding logic
      * @see BytesProcessor
      * @see BytesProcessor.Encoder
      */

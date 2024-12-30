@@ -14,6 +14,29 @@ import static org.testng.Assert.*;
 public class Base64Test {
 
     @Test
+    public void testOutputSize() {
+        assertEquals(JieBase64.mimeEncoder().getOutputSize(1), 4);
+        assertEquals(JieBase64.mimeEncoder().getOutputSize(57), 76);
+        assertEquals(JieBase64.mimeEncoder().getOutputSize(58), 76 + 2 + 4);
+        assertEquals(JieBase64.mimeEncoder().getOutputSize(57 * 2), 76 * 2 + 2);
+        assertEquals(JieBase64.mimeEncoder().getOutputSize(57 * 2 + 3), 76 * 2 + 4 + 4);
+        assertEquals(JieBase64.mimeEncoder().getOutputSize(57 * 2 + 2), 76 * 2 + 4 + 4);
+        assertEquals(JieBase64.mimeEncoder(false).getOutputSize(57 * 2 + 2), 76 * 2 + 4 + 3);
+        assertEquals(JieBase64.pemEncoder().getOutputSize(1), 4 + 2);
+        assertEquals(JieBase64.pemEncoder().getOutputSize(48), 64 + 2);
+        assertEquals(JieBase64.pemEncoder().getOutputSize(49), 64 + 2 + 4 + 2);
+        assertEquals(JieBase64.pemEncoder().getOutputSize(48 * 2), 64 * 2 + 2 * 2);
+        assertEquals(JieBase64.pemEncoder().getOutputSize(48 * 2 + 3), 64 * 2 + 2 * 2 + 4 + 2);
+        assertEquals(JieBase64.pemEncoder().getOutputSize(48 * 2 + 2), 64 * 2 + 2 * 2 + 4 + 2);
+        assertEquals(JieBase64.pemEncoder(false).getOutputSize(48 * 2 + 2), 64 * 2 + 2 * 2 + 3 + 2);
+
+        byte[] src = JieRandom.fill(new byte[10088]);
+        byte[] b64 = Base64.getMimeEncoder().encode(src);
+        byte[] b64m = JieBase64.mimeEncoder().encode(src);
+        assertEquals(b64m, b64);
+    }
+
+    @Test
     public void testCoding() {
 
         assertSame(JieBase64.encoder(), JieBase64.encoder());
@@ -63,11 +86,19 @@ public class Base64Test {
         byte[] targetNoPadding = Base64.getEncoder().withoutPadding().encode(source);
         byte[] urlTarget = Base64.getUrlEncoder().encode(source);
         byte[] urlTargetNoPadding = Base64.getUrlEncoder().withoutPadding().encode(source);
+        byte[] mimeTarget = Base64.getMimeEncoder().encode(source);
+        byte[] mimeTargetNoPadding = Base64.getMimeEncoder().withoutPadding().encode(source);
+        byte[] pemTarget =
+            new org.apache.commons.codec.binary.Base64(64, new byte[]{(byte) '\r', (byte) '\n'}).encode(source);
+        //byte[] pemTargetNoPadding = new
         for (int i = 1; i < 10; i++) {
             EncodeTest.testEncoding(JieBase64.encoder(), source, target, i);
             EncodeTest.testEncoding(JieBase64.encoder(false), source, targetNoPadding, i);
             EncodeTest.testEncoding(JieBase64.urlEncoder(), source, urlTarget, i);
             EncodeTest.testEncoding(JieBase64.urlEncoder(false), source, urlTargetNoPadding, i);
+            EncodeTest.testEncoding(JieBase64.mimeEncoder(), source, mimeTarget, i);
+            EncodeTest.testEncoding(JieBase64.mimeEncoder(false), source, mimeTargetNoPadding, i);
+            EncodeTest.testEncoding(JieBase64.pemEncoder(), source, pemTarget, i);
             // if (i % 2 == 0) {
             //     EncodeTest.testDecoding(JieBase64.decoder(), target, source, i);
             // }
@@ -76,6 +107,9 @@ public class Base64Test {
         EncodeTest.testEncoding(JieBase64.encoder(false), source, targetNoPadding, JieIO.BUFFER_SIZE);
         EncodeTest.testEncoding(JieBase64.urlEncoder(), source, urlTarget, JieIO.BUFFER_SIZE);
         EncodeTest.testEncoding(JieBase64.urlEncoder(false), source, urlTargetNoPadding, JieIO.BUFFER_SIZE);
+        EncodeTest.testEncoding(JieBase64.mimeEncoder(), source, mimeTarget, JieIO.BUFFER_SIZE);
+        EncodeTest.testEncoding(JieBase64.mimeEncoder(false), source, mimeTargetNoPadding, JieIO.BUFFER_SIZE);
+        EncodeTest.testEncoding(JieBase64.pemEncoder(), source, pemTarget, JieIO.BUFFER_SIZE);
     }
 
     // @Test

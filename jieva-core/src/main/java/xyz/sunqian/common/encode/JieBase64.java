@@ -1,10 +1,7 @@
 package xyz.sunqian.common.encode;
 
-import xyz.sunqian.common.base.JieBytes;
 import xyz.sunqian.common.io.BytesProcessor;
-import xyz.sunqian.common.io.JieIO;
 
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 /**
@@ -265,7 +262,10 @@ public class JieBase64 {
         }
 
         @Override
-        public int getOutputSize(int inputSize, boolean end) throws EncodingException {
+        protected int getOutputSize(long startPos, int inputSize, boolean end) throws EncodingException {
+            if (inputSize == 0) {
+                return 0;
+            }
             if (end) {
                 return getOutputSizeEnd(inputSize);
             }
@@ -304,8 +304,11 @@ public class JieBase64 {
             }
             srcPos = roundEnd;
             dstPos += roundLen / 3 * 4;
+            if (!end) {
+                return buildDoCodeResult(srcPos - srcOff, dstPos - dstOff);
+            }
             // 1 or 2 leftover bytes
-            if (end && srcPos < srcEnd) {
+            if (srcPos < srcEnd) {
                 int b0 = src[srcPos++] & 0xff;
                 dst[dstPos++] = (byte) dict[b0 >> 2];
                 if (srcPos == srcEnd) {
@@ -385,22 +388,56 @@ public class JieBase64 {
         }
 
         @Override
-        public int getOutputSize(int inputSize, boolean end) {
+        protected int getOutputSize(long startPos, int inputSize, boolean end) {
+            if (inputSize == 0) {
+                // must be "end == true"
+                if (startPos == 0) {
+                    return 0;
+                }
+                return getSuffixSize();
+            }
             int sourceLineSize = getSourceLineSize();
+            if (inputSize < sourceLineSize) {
+                if (!end) {
+                    return 0;
+                }
+                return getPrefixSize(startPos) +
+                    super.getOutputSize(startPos, inputSize, true) +
+                    getSuffixSize();
+            }
             int portion = inputSize / sourceLineSize;
-            int portionSize = portion * lineSize + (portion > 1 ? (portion - 1) * separator.length : 0);
+            int portionSize = portion * lineSize + getPortionMiddleSeparatorSize(portion);
             if (!end) {
-                return portionSize;
+                return getPrefixSize(startPos) + portionSize;
             }
             int portionRemainder = inputSize % sourceLineSize;
             if (portionRemainder == 0) {
-                return portionSize + (lastLineSeparator ? separator.length : 0);
+                return getPrefixSize(startPos) + portionSize + getSuffixSize();
             }
-            return portionSize + separator.length + portionRemainder + (lastLineSeparator ? separator.length : 0);
+            return getPrefixSize(startPos) +
+                portionSize +
+                separator.length +
+                super.getOutputSize(startPos, portionRemainder, true) +
+                getSuffixSize();
         }
 
         private int getSourceLineSize() {
             return lineSize / 4 * 3;
+        }
+
+        private int getPrefixSize(long startPos) {
+            return startPos > 0 ? separator.length : 0;
+        }
+
+        private int getSuffixSize() {
+            return lastLineSeparator ? separator.length : 0;
+        }
+
+        private int getPortionMiddleSeparatorSize(int portion) {
+            if (portion < 2) {
+                return 0;
+            }
+            return (portion - 1) * separator.length;
         }
 
         @Override
@@ -408,99 +445,85 @@ public class JieBase64 {
             return lineSize / 4 * 3;
         }
 
-        @Override
-        public BytesProcessor.Encoder streamEncoder() {
-            BytesProcessor.Encoder encoder = new BytesProcessor.Encoder() {
-
-                private long startPos = 0;
-
-                @Override
-                public ByteBuffer encode(ByteBuffer data, boolean end) {
-                    int pos = data.position();
-                    if (startPos > 0) {
-                        if (end && !data.hasRemaining()) {
-                            if (lastLineSeparator) {
-                                return JieBytes.copyBuffer(separator);
-                            }
-                            return JieBytes.emptyBuffer();
-                        }
-                        ByteBuffer ret = ByteBuffer.allocate(
-                            getOutputSize(data.remaining(), end) + separator.length
-                        );
-                        for (byte b : separator) {
-                            ret.put(b);
-                        }
-                        // doCode(startPos, data, ret, end);
-                        ret.flip();
-                        startPos += (data.position() - pos);
-                        return ret;
-                    }
-                    ByteBuffer ret = null;// doCode(startPos, data, end);
-                    startPos += (data.position() - pos);
-                    return ret;
-                }
-            };
-            return JieIO.roundEncoder(getBlockSize(), encoder);
-        }
-
         protected long doCode(
             long startPos, byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, int dstEnd, boolean end
         ) {
-            if (end) {
-                return doCode0(src, srcOff, srcEnd, dst, dstOff, lastLineSeparator);
+            int dstPos = dstOff;
+            if (startPos > 0) {
+                for (byte b : separator) {
+                    dst[dstPos++] = b;
+                }
             }
-            return doCode0(src, srcOff, srcEnd, dst, dstOff, false);
-        }
-
-        private int doCode0(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, boolean doLast) {
             char[] dict = dict();
             int srcPos = srcOff;
-            int srcBlock = lineSize / 4 * 3;
-            int roundEnd = srcOff + ((srcEnd - srcOff) / 3 * 3);
-            int dstPos = dstOff;
-            while (srcPos < roundEnd) {
-                int readEnd = Math.min(srcPos + srcBlock, roundEnd);
-                for (int i = srcPos, j = dstPos; i < readEnd; ) {
-                    int bits = (src[i++] & 0xff) << 16 | (src[i++] & 0xff) << 8 | (src[i++] & 0xff);
-                    dst[j++] = (byte) dict[(bits >>> 18) & 0x3f];
-                    dst[j++] = (byte) dict[(bits >>> 12) & 0x3f];
-                    dst[j++] = (byte) dict[(bits >>> 6) & 0x3f];
-                    dst[j++] = (byte) dict[bits & 0x3f];
+            int srcLineSize = getSourceLineSize();
+            int srcLineEnd = srcOff + (srcEnd - srcOff) / srcLineSize * srcLineSize;
+            if (srcPos < srcLineEnd) {
+                while (true) {
+                    int readEnd = srcPos + srcLineSize;
+                    for (int i = srcPos, j = dstPos; i < readEnd; ) {
+                        int bits = (src[i++] & 0xff) << 16 | (src[i++] & 0xff) << 8 | (src[i++] & 0xff);
+                        dst[j++] = (byte) dict[(bits >>> 18) & 0x3f];
+                        dst[j++] = (byte) dict[(bits >>> 12) & 0x3f];
+                        dst[j++] = (byte) dict[(bits >>> 6) & 0x3f];
+                        dst[j++] = (byte) dict[bits & 0x3f];
+                    }
+                    dstPos += lineSize;
+                    srcPos = readEnd;
+                    if (srcPos < srcLineEnd) {
+                        for (byte b : separator) {
+                            dst[dstPos++] = b;
+                        }
+                    } else {
+                        break;
+                    }
                 }
-                int writeLen = (readEnd - srcPos) / 3 * 4;
-                dstPos += writeLen;
-                srcPos = readEnd;
-                if ((writeLen == lineSize && srcPos < srcEnd) || (srcPos == srcEnd && doLast)) {
+            }
+            if (!end) {
+                return buildDoCodeResult(srcPos - srcOff, dstPos - dstOff);
+            }
+            int remainder = srcEnd - srcPos;
+            if (remainder > 0) {
+                if (srcPos - srcOff > 0) {
                     for (byte b : separator) {
                         dst[dstPos++] = b;
                     }
                 }
-            }
-            // 1 or 2 leftover bytes
-            if (srcPos < srcEnd) {
-                int b0 = src[srcPos++] & 0xff;
-                dst[dstPos++] = (byte) dict[b0 >> 2];
-                if (srcPos == srcEnd) {
-                    dst[dstPos++] = (byte) dict[(b0 << 4) & 0x3f];
-                    if (padding) {
-                        dst[dstPos++] = '=';
-                        dst[dstPos++] = '=';
-                    }
-                } else {
-                    int b1 = src[srcPos] & 0xff;
-                    dst[dstPos++] = (byte) dict[(b0 << 4) & 0x3f | (b1 >> 4)];
-                    dst[dstPos++] = (byte) dict[(b1 << 2) & 0x3f];
-                    if (padding) {
-                        dst[dstPos++] = '=';
+                int roundLen = remainder / 3 * 3;
+                int roundEnd = srcPos + roundLen;
+                while (srcPos < roundEnd) {
+                    int bits = (src[srcPos++] & 0xff) << 16 | (src[srcPos++] & 0xff) << 8 | (src[srcPos++] & 0xff);
+                    dst[dstPos++] = (byte) dict[(bits >>> 18) & 0x3f];
+                    dst[dstPos++] = (byte) dict[(bits >>> 12) & 0x3f];
+                    dst[dstPos++] = (byte) dict[(bits >>> 6) & 0x3f];
+                    dst[dstPos++] = (byte) dict[bits & 0x3f];
+                }
+                // 1 or 2 leftover bytes
+                if (srcPos < srcEnd) {
+                    int b0 = src[srcPos++] & 0xff;
+                    dst[dstPos++] = (byte) dict[b0 >> 2];
+                    if (srcPos == srcEnd) {
+                        dst[dstPos++] = (byte) dict[(b0 << 4) & 0x3f];
+                        if (padding) {
+                            dst[dstPos++] = '=';
+                            dst[dstPos++] = '=';
+                        }
+                    } else {
+                        int b1 = src[srcPos++] & 0xff;
+                        dst[dstPos++] = (byte) dict[(b0 << 4) & 0x3f | (b1 >> 4)];
+                        dst[dstPos++] = (byte) dict[(b1 << 2) & 0x3f];
+                        if (padding) {
+                            dst[dstPos++] = '=';
+                        }
                     }
                 }
-                if (doLast) {
-                    for (byte b : separator) {
-                        dst[dstPos++] = b;
-                    }
+            }
+            if (lastLineSeparator && srcPos > srcOff) {
+                for (byte b : separator) {
+                    dst[dstPos++] = b;
                 }
             }
-            return dstPos - dstOff;
+            return buildDoCodeResult(srcPos - srcOff, dstPos - dstOff);
         }
     }
 

@@ -13,29 +13,31 @@ import xyz.sunqian.common.io.BytesProcessor;
 public interface ByteCoder {
 
     /**
-     * Returns output size in bytes after encoding/decoding for the specified input size. If the exact output size
-     * cannot be determined, returns an estimated maximum value that can accommodate all output. Or {@code -1} if it
-     * cannot be estimated.
+     * This method is used to estimate the output size in bytes of input data of specified size after encoding/decoding.
+     * If the exact output size cannot be determined, returns a maximum value that can accommodate all output, or
+     * {@code -1} if the estimating fails.
      *
-     * @param inputSize specified input size
-     * @return output size in bytes for the specified input size
+     * @param inputSize specified size of input data
+     * @return output size in bytes of input data of specified size after encoding/decoding
      * @throws EncodingException for encoding error
      * @throws DecodingException for encoding error
      */
     int getOutputSize(int inputSize) throws EncodingException, DecodingException;
 
     /**
-     * Returns the block size in bytes for current encoding/decoding logic. In an encoding/decoding process, data is
-     * sometimes processed in blocks, this method returns the block size. If the encoding/decoding doesn't require
-     * processing in blocks, or if the block size cannot be estimated, return {@code -1}.
+     * If current implementation of this method requires processing in blocks, it returns the block size. Otherwise, it
+     * returns {@code -1}.
      *
      * @return the block size
      */
     int getBlockSize();
 
     /**
-     * Returns a new {@link BytesProcessor.Encoder} which encapsulates current encoding/decoding logic. Note
-     * {@link BytesProcessor.Encoder} may require specified block size.
+     * Returns a {@link BytesProcessor.Encoder} which encapsulates current encoding/decoding logic for processing within
+     * {@link BytesProcessor}.
+     * <p>
+     * Note that different {@link BytesProcessor.Encoder} implementations may have specific requirements for the data to
+     * be encoded/decoded.
      *
      * @return a {@link BytesProcessor.Encoder} encapsulates current encoding/decoding logic
      * @see BytesProcessor

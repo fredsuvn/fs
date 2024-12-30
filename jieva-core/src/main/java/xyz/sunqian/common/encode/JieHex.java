@@ -97,7 +97,7 @@ public class JieHex {
         int getOutputSize(int inputSize) throws DecodingException;
 
         /**
-         * Returns a new {@link BytesProcessor.Encoder} which encapsulates current hex decoding, supports even size of
+         * Returns a new {@link BytesProcessor.Encoder} which encapsulates current hex decoding, supports any size of
          * input data, not thread-safe.
          *
          * @return a {@link BytesProcessor.Encoder} with current hex decoding logic
@@ -117,7 +117,7 @@ public class JieHex {
         };
 
         @Override
-        protected int getOutputSize(int inputSize, boolean end) {
+        protected int getOutputSize(long startPos, int inputSize, boolean end) {
             return inputSize * 2;
         }
 
@@ -139,11 +139,9 @@ public class JieHex {
         private static final HexDecoder SINGLETON = new HexDecoder();
 
         @Override
-        protected int getOutputSize(int inputSize, boolean end) throws DecodingException {
-            if (end) {
-                if (inputSize % 2 != 0) {
-                    throw new DecodingException("Hex decoding size must be even: " + inputSize + ".");
-                }
+        protected int getOutputSize(long startPos, int inputSize, boolean end) throws DecodingException {
+            if (end && inputSize % 2 != 0) {
+                throw new DecodingException("Hex decoding size must be even: " + inputSize + ".");
             }
             return inputSize / 2;
         }
