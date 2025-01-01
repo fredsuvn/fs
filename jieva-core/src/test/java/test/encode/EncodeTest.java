@@ -9,6 +9,7 @@ import xyz.sunqian.common.io.BytesBuilder;
 import xyz.sunqian.common.io.JieIO;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.expectThrows;
@@ -128,7 +129,7 @@ public class EncodeTest {
             // byte[] -> byte[]
             byte[] dst = new byte[target.length];
             decoder.decode(source, dst);
-            assertEquals(dst, target);
+            assertEquals(Arrays.copyOfRange(dst, 0, target.length), target);
         }
         {
             // buffer -> buffer

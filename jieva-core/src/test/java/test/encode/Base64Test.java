@@ -1,11 +1,14 @@
 package test.encode;
 
 import org.testng.annotations.Test;
+import xyz.sunqian.common.base.JieChars;
 import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.encode.ByteEncoder;
 import xyz.sunqian.common.encode.DecodingException;
 import xyz.sunqian.common.encode.EncodingException;
 import xyz.sunqian.common.encode.JieBase64;
+import xyz.sunqian.common.io.BytesBuilder;
+import xyz.sunqian.common.io.IOEncodingException;
 import xyz.sunqian.common.io.JieIO;
 import xyz.sunqian.test.JieTest;
 
@@ -34,10 +37,7 @@ public class Base64Test {
         assertEquals(JieBase64.pemEncoder().getOutputSize(48 * 2 + 2), 64 * 2 + 2 * 2 + 4 + 2);
         assertEquals(JieBase64.pemEncoder(false).getOutputSize(48 * 2 + 2), 64 * 2 + 2 * 2 + 3 + 2);
 
-        byte[] src = JieRandom.fill(new byte[10088]);
-        byte[] b64 = Base64.getMimeEncoder().encode(src);
-        byte[] b64m = JieBase64.mimeEncoder().encode(src);
-        assertEquals(b64m, b64);
+        expectThrows(DecodingException.class, () -> JieBase64.decoder().getOutputSize(1));
     }
 
     @Test
@@ -46,6 +46,7 @@ public class Base64Test {
         assertSame(JieBase64.encoder(), JieBase64.encoder());
         assertSame(JieBase64.urlEncoder(), JieBase64.urlEncoder());
         assertEquals(JieBase64.encoder().getBlockSize(), -1);
+        assertEquals(JieBase64.decoder().getBlockSize(), -1);
 
         for (int i = 0; i < 10; i++) {
             testCoding(i);
@@ -73,21 +74,6 @@ public class Base64Test {
             JieBase64.lineEncoder(-1, new byte[0], true, true, true));
         expectThrows(EncodingException.class, () ->
             JieBase64.lineEncoder(3, new byte[0], true, true, true));
-        // byte[] encoded = new byte[3];
-        // expectThrows(DecodingException.class, () -> JieBase64.decoder().decode(encoded));
-        // byte[] encoded2 = new byte[2];
-        // encoded2[0] = '0' - 1;
-        // expectThrows(DecodingException.class, () -> JieBase64.decoder().decode(encoded2));
-        // encoded2[0] = '9' + 1;
-        // expectThrows(DecodingException.class, () -> JieBase64.decoder().decode(encoded2));
-        // encoded2[0] = 'A' - 1;
-        // expectThrows(DecodingException.class, () -> JieBase64.decoder().decode(encoded2));
-        // encoded2[0] = 'F' + 1;
-        // expectThrows(DecodingException.class, () -> JieBase64.decoder().decode(encoded2));
-        // encoded2[0] = 'a' - 1;
-        // expectThrows(DecodingException.class, () -> JieBase64.decoder().decode(encoded2));
-        // encoded2[0] = 'f' + 1;
-        // expectThrows(DecodingException.class, () -> JieBase64.decoder().decode(encoded2));
     }
 
     private void testCoding(int size) {
@@ -117,7 +103,14 @@ public class Base64Test {
                 mimeTargetUrl[i] = '_';
             }
         }
+        byte[] mixTarget = new byte[pemTarget.length * 3];
+        for (int i = 0, j = 0; i < pemTarget.length; i++) {
+            mixTarget[j++] = pemTarget[i];
+            mixTarget[j++] = '.';
+            mixTarget[j++] = '*';
+        }
         for (int i = 1; i < 10; i++) {
+            // encode
             EncodeTest.testEncoding(JieBase64.encoder(), source, target, i);
             EncodeTest.testEncoding(JieBase64.encoder(false), source, targetNoPadding, i);
             EncodeTest.testEncoding(JieBase64.urlEncoder(), source, urlTarget, i);
@@ -127,10 +120,19 @@ public class Base64Test {
             EncodeTest.testEncoding(JieBase64.pemEncoder(), source, pemTarget, i);
             EncodeTest.testEncoding(lineEncoder, source, mimeTarget, i);
             EncodeTest.testEncoding(lineEncoderUrl, source, mimeTargetUrl, i);
-            // if (i % 2 == 0) {
-            //     EncodeTest.testDecoding(JieBase64.decoder(), target, source, i);
-            // }
+            // decode
+            EncodeTest.testDecoding(JieBase64.decoder(), target, source, i);
+            EncodeTest.testDecoding(JieBase64.decoder(), targetNoPadding, source, i);
+            EncodeTest.testDecoding(JieBase64.decoder(), urlTarget, source, i);
+            EncodeTest.testDecoding(JieBase64.decoder(), urlTargetNoPadding, source, i);
+            EncodeTest.testDecoding(JieBase64.decoder(), mimeTarget, source, i);
+            EncodeTest.testDecoding(JieBase64.decoder(), mimeTargetNoPadding, source, i);
+            EncodeTest.testDecoding(JieBase64.decoder(), pemTarget, source, i);
+            EncodeTest.testDecoding(JieBase64.decoder(), mimeTarget, source, i);
+            EncodeTest.testDecoding(JieBase64.decoder(), mimeTargetUrl, source, i);
+            EncodeTest.testDecoding(JieBase64.decoder(), mixTarget, source, i);
         }
+        // encode
         EncodeTest.testEncoding(JieBase64.encoder(), source, target, JieIO.BUFFER_SIZE);
         EncodeTest.testEncoding(JieBase64.encoder(false), source, targetNoPadding, JieIO.BUFFER_SIZE);
         EncodeTest.testEncoding(JieBase64.urlEncoder(), source, urlTarget, JieIO.BUFFER_SIZE);
@@ -140,49 +142,85 @@ public class Base64Test {
         EncodeTest.testEncoding(JieBase64.pemEncoder(), source, pemTarget, JieIO.BUFFER_SIZE);
         EncodeTest.testEncoding(lineEncoder, source, mimeTarget, JieIO.BUFFER_SIZE);
         EncodeTest.testEncoding(lineEncoderUrl, source, mimeTargetUrl, JieIO.BUFFER_SIZE);
+        // decode
+        EncodeTest.testDecoding(JieBase64.decoder(), target, source, JieIO.BUFFER_SIZE);
+        EncodeTest.testDecoding(JieBase64.decoder(), targetNoPadding, source, JieIO.BUFFER_SIZE);
+        EncodeTest.testDecoding(JieBase64.decoder(), urlTarget, source, JieIO.BUFFER_SIZE);
+        EncodeTest.testDecoding(JieBase64.decoder(), urlTargetNoPadding, source, JieIO.BUFFER_SIZE);
+        EncodeTest.testDecoding(JieBase64.decoder(), mimeTarget, source, JieIO.BUFFER_SIZE);
+        EncodeTest.testDecoding(JieBase64.decoder(), mimeTargetNoPadding, source, JieIO.BUFFER_SIZE);
+        EncodeTest.testDecoding(JieBase64.decoder(), pemTarget, source, JieIO.BUFFER_SIZE);
+        EncodeTest.testDecoding(JieBase64.decoder(), mimeTarget, source, JieIO.BUFFER_SIZE);
+        EncodeTest.testDecoding(JieBase64.decoder(), mimeTargetUrl, source, JieIO.BUFFER_SIZE);
+        EncodeTest.testDecoding(JieBase64.decoder(), mixTarget, source, JieIO.BUFFER_SIZE);
     }
 
-    // @Test
-    // public void testToChars() throws Exception {
-    //     String str = "0123456789ABCDEFabcdef";
-    //     assertEquals(JieBase64.decoder().decode(str), Hex.decodeHex(str));
-    //     assertEquals(JieBase64.decoder().decode(str.toCharArray()), Hex.decodeHex(str));
-    //     CharBuffer cb = CharBuffer.wrap(str);
-    //     assertEquals(JieBytes.copyBytes(JieBase64.decoder().decode(cb)), Hex.decodeHex(str));
-    //     assertEquals(cb.position(), str.length());
-    //
-    //     byte[] bytes = JieBase64.decoder().decode(str);
-    //     assertEquals(str.toUpperCase(), JieBase64.encoder().toString(bytes));
-    //     assertEquals(str.toUpperCase(), JieBase64.encoder().toString(ByteBuffer.wrap(bytes)));
-    // }
-
-    // @Test
-    // public void testOthers() throws Exception {
-    //     String s = "0123456789ABCDEFabcdef";
-    //     {
-    //         // Hex
-    //         byte[] en = JieBase64.encoder().encode(s.getBytes(JieChars.latinCharset()));
-    //         en[11] = 'Q';
-    //         String[] error = new String[1];
-    //         try {
-    //             JieBase64.decoder().decode(en);
-    //         } catch (DecodingException e) {
-    //             error[0] = e.getMessage();
-    //         } finally {
-    //             assertEquals(error[0], "Invalid hex char at pos 11: Q.");
-    //             error[0] = null;
-    //         }
-    //         try {
-    //             JieIO.processor(en).readBlockSize(1)
-    //                 .encoder(JieBase64.decoder().streamEncoder()).writeTo(new ByteArrayOutputStream());
-    //         } catch (IOEncodingException e) {
-    //             error[0] = e.getCause().getMessage();
-    //         } finally {
-    //             assertEquals(error[0], "Invalid hex char at pos 11: Q.");
-    //             error[0] = null;
-    //         }
-    //     }
-    // }
+    @Test
+    public void testOthers() {
+        {
+            String s = "ABCDABCDA=";
+            String[] error = new String[1];
+            try {
+                JieBase64.decoder().decode(s.getBytes(JieChars.latinCharset()));
+            } catch (DecodingException e) {
+                error[0] = e.getMessage();
+            } finally {
+                assertEquals(error[0], "Invalid base64 char at pos 9: =.");
+                error[0] = null;
+            }
+            try {
+                JieIO.processor(s.getBytes(JieChars.latinCharset())).readBlockSize(1)
+                    .encoder(JieBase64.decoder().streamEncoder()).writeTo(new BytesBuilder());
+            } catch (IOEncodingException e) {
+                error[0] = e.getCause().getMessage();
+            } finally {
+                assertEquals(error[0], "Invalid base64 char at pos 9: =.");
+                error[0] = null;
+            }
+        }
+        {
+            String s = "ABCDABCDAB=A";
+            String[] error = new String[1];
+            try {
+                JieBase64.decoder().decode(s.getBytes(JieChars.latinCharset()));
+            } catch (DecodingException e) {
+                error[0] = e.getMessage();
+            } finally {
+                assertEquals(error[0], "Invalid base64 char at pos 11: A.");
+                error[0] = null;
+            }
+            try {
+                JieIO.processor(s.getBytes(JieChars.latinCharset())).readBlockSize(1)
+                    .encoder(JieBase64.decoder().streamEncoder()).writeTo(new BytesBuilder());
+            } catch (IOEncodingException e) {
+                error[0] = e.getCause().getMessage();
+            } finally {
+                assertEquals(error[0], "Invalid base64 char at pos 11: A.");
+                error[0] = null;
+            }
+        }
+        {
+            String s = "ABCDABCDAB=";
+            String[] error = new String[1];
+            try {
+                JieBase64.decoder().decode(s.getBytes(JieChars.latinCharset()));
+            } catch (DecodingException e) {
+                error[0] = e.getMessage();
+            } finally {
+                assertEquals(error[0], "Invalid base64 tail, must be xx, xxx, xx== or xxx=.");
+                error[0] = null;
+            }
+            try {
+                JieIO.processor(s.getBytes(JieChars.latinCharset())).readBlockSize(1)
+                    .encoder(JieBase64.decoder().streamEncoder()).writeTo(new BytesBuilder());
+            } catch (IOEncodingException e) {
+                error[0] = e.getCause().getMessage();
+            } finally {
+                assertEquals(error[0], "Invalid base64 tail, must be xx, xxx, xx== or xxx=.");
+                error[0] = null;
+            }
+        }
+    }
 
     @Test
     public void testUnreachablePoint() throws Exception {

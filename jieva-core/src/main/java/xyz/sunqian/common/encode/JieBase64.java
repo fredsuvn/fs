@@ -148,23 +148,14 @@ public class JieBase64 {
     }
 
     /**
-     * Returns a {@code Base64} decoder for non-separation decoding.
+     * Returns a {@code base64} decoder for all types including {@code basic}, {@code url-safe} and
+     * {@code line-separated}.
      *
-     * @return a {@code Base64} decoder for non-separation decoding
+     * @return a {@code base64} decoder for all types including {@code basic}, {@code url-safe} and
+     * {@code line-separated}
      */
     public static Decoder decoder() {
-        return NonSepaartionDecoder.SINGLETON;
-    }
-
-    /**
-     * Returns a {@code Base64} decoder with specified separation option: true for separation decoding, false for
-     * non-separation decoding.
-     *
-     * @param separation true for separation decoding, false for non-separation decoding
-     * @return a {@code Base64} decoder with specified separation option
-     */
-    public static Decoder decoder(boolean separation) {
-        return separation ? SeparationDecoder.SINGLETON : decoder();
+        return BasicDecoder.SINGLETON;
     }
 
     /**
@@ -552,7 +543,7 @@ public class JieBase64 {
         }
     }
 
-    private static abstract class AbsDecoder extends AbsCoder.De implements Decoder {
+    private static abstract class AbsDecoder extends AbstractByteCoder.De implements Decoder {
 
         protected static final byte[] DICT = new byte[Byte.MAX_VALUE];
 
@@ -571,226 +562,128 @@ public class JieBase64 {
         }
 
         @Override
-        public int getOutputSize(int inputSize, boolean end) throws DecodingException {
-            if (inputSize < 0) {
-                throw new DecodingException("Base64 decoding size can not be negative.");
+        protected int getOutputSize(int inputSize, long startPos, boolean end) throws DecodingException {
+            switch (inputSize) {
+                case 0:
+                    return 0;
+                case 1:
+                    if (end) {
+                        throw new DecodingException("Invalid Base64 decoding size: " + inputSize + ".");
+                    }
+                    return 0;
+                case 2:
+                    return 1;
+                case 3:
+                    return 2;
+                default:
+                    return getOutputSizeEnd(inputSize);
             }
+        }
+
+        private int getOutputSizeEnd(int inputSize) throws DecodingException {
             int remainder = inputSize % 4;
             if (remainder == 0) {
                 return inputSize / 4 * 3;
-            }
-            if (remainder == 1) {
-                throw new DecodingException("Base64 decoding will not has 1 remainder left.");
             }
             return inputSize / 4 * 3 + remainder - 1;
         }
 
         @Override
-        public int getBlockSize() {
-            return 4;
+        protected void checkRemainingSpace(int srcRemaining, int dstRemaining) {
+            // do not check!
         }
 
-        protected int doCode(long startPos, byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, boolean end) {
+        @Override
+        protected long doCode(
+            byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, int dstEnd, long startPos, boolean end
+        ) {
+            try {
+                return doCode0(src, srcOff, srcEnd, dst, dstOff, dstEnd, startPos, end);
+            } catch (DecodingException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new DecodingException(e);
+            }
+        }
+
+        private long doCode0(
+            byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, int dstEnd, long startPos, boolean end
+        ) {
             int srcPos = srcOff;
             int dstPos = dstOff;
             int bits = 0;
-            int shiftTo = 18;
+            int shiftTo = 18;// must be 18, 12, 6, 0, -6.
+            int endState = 0;
+            int bitsStart = srcPos;
             while (srcPos < srcEnd) {
                 int c = src[srcPos++] & 0xff;
                 int b = DICT[c];
-                if (b < 0) {
-                    if (b == -2) {
-                        // must be padding end with xx== or xxx=
-                        // xx==
-                        if (shiftTo == 6 && srcPos == srcEnd - 1 && src[srcPos] == '=') {
-                            dst[dstPos++] = (byte) (bits >> 16);
-                            return dstPos - dstOff;
+                if (b >= 0) {
+                    if (endState != 0) {
+                        throw new DecodingException(
+                            "Invalid base64 char at pos " + (startPos + srcPos - 1) + ": " + ((char) c) + ".");
+                    }
+                    bits |= (b << shiftTo);
+                    shiftTo -= 6;
+                    if (shiftTo < 0) {
+                        dst[dstPos++] = (byte) (bits >> 16);
+                        dst[dstPos++] = (byte) (bits >> 8);
+                        dst[dstPos++] = (byte) (bits);
+                        shiftTo = 18;
+                        bits = 0;
+                        bitsStart = srcPos;
+                    }
+                    continue;
+                }
+                if (b == -2) {
+                    // must be padding end with xx== or xxx=
+                    if (shiftTo == 6) {
+                        if (endState == 0) {
+                            // xx= -> endState = 1;
+                            endState = 1;
+                            continue;
                         }
-                        // xxx=
-                        if (shiftTo == 0 && srcPos == srcEnd) {
-                            dst[dstPos++] = (byte) (bits >> 16);
-                            dst[dstPos++] = (byte) (bits >> 8);
-                            return dstPos - dstOff;
-                        }
+                        // (endState == 1 && xx==) -> endState = 2;
+                        endState = 2;
+                        dst[dstPos++] = (byte) (bits >> 16);
+                        bitsStart = srcPos;
+                        continue;
+                    } else if (shiftTo == 0) {
+                        // (endState == 0 && xxx=) -> endState = 2;
+                        endState = 2;
+                        dst[dstPos++] = (byte) (bits >> 16);
+                        dst[dstPos++] = (byte) (bits >> 8);
+                        bitsStart = srcPos;
+                        continue;
                     }
                     throw new DecodingException(
                         "Invalid base64 char at pos " + (startPos + srcPos - 1) + ": " + ((char) c) + ".");
                 }
-                bits |= (b << shiftTo);
-                shiftTo -= 6;
-                if (shiftTo < 0) {
-                    dst[dstPos++] = (byte) (bits >> 16);
-                    dst[dstPos++] = (byte) (bits >> 8);
-                    dst[dstPos++] = (byte) (bits);
-                    shiftTo = 18;
-                    bits = 0;
-                }
+                // Otherwise: -1
             }
-            if (shiftTo == 6) {
+            if (!end) {
+                return buildDoCodeResult(bitsStart - srcOff, dstPos - dstOff);
+            }
+            if (endState == 0 && shiftTo == 6) {
+                // xx
                 dst[dstPos++] = (byte) (bits >> 16);
-            } else if (shiftTo == 0) {
+            } else if (endState == 0 && shiftTo == 0) {
+                // xxx
                 dst[dstPos++] = (byte) (bits >> 16);
                 dst[dstPos++] = (byte) (bits >> 8);
-            } else if (shiftTo != 18) {
-                throw new DecodingException("Invalid base64 tail without padding, must be 2 or 3 remainder left.");
+            } else if (endState != 2 && endState != 0) {
+                throw new DecodingException("Invalid base64 tail, must be xx, xxx, xx== or xxx=.");
             }
-            return dstPos - dstOff;
+            return buildDoCodeResult(srcPos - srcOff, dstPos - dstOff);
         }
     }
 
-    private static final class NonSepaartionDecoder extends AbsDecoder {
+    private static final class BasicDecoder extends AbsDecoder {
 
-        private static final NonSepaartionDecoder SINGLETON = new NonSepaartionDecoder();
+        private static final BasicDecoder SINGLETON = new BasicDecoder();
 
-        private NonSepaartionDecoder() {
+        private BasicDecoder() {
             super();
         }
-    }
-
-    private static final class SeparationDecoder extends AbsDecoder {
-
-        private static final SeparationDecoder SINGLETON = new SeparationDecoder();
-
-        private SeparationDecoder() {
-            super();
-        }
-
-        @Override
-        public int getOutputSize(int inputSize, boolean end) throws DecodingException {
-            if (inputSize < 0) {
-                throw new DecodingException("Base64 decoding size can not be negative.");
-            }
-            int remainder = inputSize % 4;
-            if (remainder == 0) {
-                return inputSize / 4 * 3;
-            }
-            return inputSize / 4 * 3 + remainder - 1;
-        }
-
-        @Override
-        public int getBlockSize() {
-            return 1;
-        }
-
-        @Override
-        protected void checkCodingRemaining(int srcRemaining, int dstRemaining) {
-            // No checking, because no determine.
-        }
-
-        // @Override
-        // public ByteStream.Encoder streamEncoder() {
-        //     return ByteStream.roundEncoder(this, getBlockSize());
-        // }
-        //
-        // private int decode0(ByteBuffer source, ByteBuffer dest, boolean end) throws EncodingException {
-        //     int outputSize = getOutputSize(source.remaining());
-        //     if (source.hasArray() && dest.hasArray()) {
-        //         doCode(
-        //             source.array(),
-        //             JieBuffer.getArrayStartIndex(source),
-        //             JieBuffer.getArrayEndIndex(source),
-        //             dest.array(),
-        //             JieBuffer.getArrayStartIndex(dest),
-        //             end
-        //         );
-        //         source.position(source.limit());
-        //         dest.position(dest.position() + outputSize);
-        //     } else {
-        //         ByteBuffer dst = decode0(source, end);
-        //         dest.put(dst);
-        //     }
-        //     return outputSize;
-        // }
-        //
-        // private ByteBuffer decode0(ByteBuffer source, boolean end) throws EncodingException {
-        //     int outputSize = getOutputSize(source.remaining());
-        //     byte[] dst = new byte[outputSize];
-        //     if (source.hasArray()) {
-        //         doCode(
-        //             source.array(),
-        //             JieBuffer.getArrayStartIndex(source),
-        //             JieBuffer.getArrayEndIndex(source),
-        //             dst,
-        //             0,
-        //             end
-        //         );
-        //         source.position(source.limit());
-        //     } else {
-        //         byte[] s = new byte[source.remaining()];
-        //         source.get(s);
-        //         doCode(s, 0, s.length, dst, 0, end);
-        //     }
-        //     return ByteBuffer.wrap(dst);
-        // }
-        //
-        // protected int doCode(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff) {
-        //     return doCode(src, srcOff, srcEnd, dst, dstOff, true);
-        // }
-        //
-        // private long doCode(byte[] src, int srcOff, int srcEnd, byte[] dst, int dstOff, boolean end) {
-        //     int srcPos = srcOff;
-        //     int dstPos = dstOff;
-        //     int bits = 0;
-        //     int shiftTo = 18;
-        //     while (srcPos < srcEnd) {
-        //         int c = src[srcPos++] & 0xff;
-        //         int b = DICT[c];
-        //         if (b < 0) {
-        //             if (b == -2) {
-        //                 // must be padding end with xx== or xxx=
-        //                 // xx==
-        //                 if (shiftTo == 6 && srcPos == srcEnd - 1 && src[srcPos] == '=') {
-        //                     // find last "="
-        //                     while (srcPos < srcEnd) {
-        //                         if (src[srcPos] == '=') {
-        //                         }
-        //                     }
-        //                     dst[dstPos++] = (byte) (bits >> 16);
-        //                     return dstPos - dstOff;
-        //                 }
-        //                 // xxx=
-        //                 if (shiftTo == 0 && srcPos == srcEnd) {
-        //                     dst[dstPos++] = (byte) (bits >> 16);
-        //                     dst[dstPos++] = (byte) (bits >> 8);
-        //                     return dstPos - dstOff;
-        //                 }
-        //             }
-        //             // ignored
-        //             continue;
-        //         }
-        //         bits |= (b << shiftTo);
-        //         shiftTo -= 6;
-        //         if (shiftTo < 0) {
-        //             dst[dstPos++] = (byte) (bits >> 16);
-        //             dst[dstPos++] = (byte) (bits >> 8);
-        //             dst[dstPos++] = (byte) (bits);
-        //             shiftTo = 18;
-        //             bits = 0;
-        //         }
-        //     }
-        //     if (shiftTo == 6) {
-        //         dst[dstPos++] = (byte) (bits >> 16);
-        //     } else if (shiftTo == 0) {
-        //         dst[dstPos++] = (byte) (bits >> 16);
-        //         dst[dstPos++] = (byte) (bits >> 8);
-        //     } else if (shiftTo != 18) {
-        //         throw new DecodingException("Invalid base64 tail without padding, must be 2 or 3 remainder left.");
-        //     }
-        //     return dstPos - dstOff;
-        // }
-        //
-        // private long mergeCount(int readSize, int writeSize) {
-        //     long rs = readSize;
-        //     long ws = writeSize;
-        //     return (rs << 32) | (0x00000000ffffffffL & ws);
-        // }
-        //
-        // private int getReadSize(long mergeSize) {
-        //     return (int) (mergeSize >>> 32);
-        // }
-        //
-        // private int getWriteSize(long mergeSize) {
-        //     return (int) mergeSize;
-        // }
     }
 }

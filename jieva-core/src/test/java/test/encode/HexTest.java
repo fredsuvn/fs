@@ -7,12 +7,9 @@ import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.encode.DecodingException;
 import xyz.sunqian.common.encode.EncodingException;
 import xyz.sunqian.common.encode.JieHex;
+import xyz.sunqian.common.io.BytesBuilder;
 import xyz.sunqian.common.io.IOEncodingException;
 import xyz.sunqian.common.io.JieIO;
-
-import java.io.ByteArrayOutputStream;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 
 import static org.testng.Assert.*;
 
@@ -77,21 +74,9 @@ public class HexTest {
     }
 
     @Test
-    public void testToChars() throws Exception {
-        String hexStr = "0123456789ABCDEFabcdef";
-        byte[] srcBytes = Hex.decodeHex(hexStr);
-        assertEquals(JieHex.encoder().toString(srcBytes), hexStr.toUpperCase());
-        assertEquals(JieHex.encoder().toString(ByteBuffer.wrap(srcBytes)), hexStr.toUpperCase());
-        assertEquals(JieHex.decoder().decode(hexStr), srcBytes);
-        assertEquals(JieHex.decoder().decode(CharBuffer.wrap(hexStr)), ByteBuffer.wrap(srcBytes));
-        assertEquals(JieHex.decoder().decode(hexStr.toCharArray()), srcBytes);
-    }
-
-    @Test
     public void testOthers() throws Exception {
         String s = "0123456789ABCDEFabcdef";
         {
-            // Hex
             byte[] en = JieHex.encoder().encode(s.getBytes(JieChars.latinCharset()));
             en[11] = 'Q';
             String[] error = new String[1];
@@ -105,7 +90,7 @@ public class HexTest {
             }
             try {
                 JieIO.processor(en).readBlockSize(1)
-                    .encoder(JieHex.decoder().streamEncoder()).writeTo(new ByteArrayOutputStream());
+                    .encoder(JieHex.decoder().streamEncoder()).writeTo(new BytesBuilder());
             } catch (IOEncodingException e) {
                 error[0] = e.getCause().getMessage();
             } finally {
