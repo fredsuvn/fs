@@ -26,7 +26,7 @@ public interface ByteCoder {
 
     /**
      * If current implementation of this method requires processing in blocks, it returns the block size. Otherwise, it
-     * returns {@code -1}.
+     * returns a value {@code <= 0}.
      *
      * @return the block size
      */
@@ -36,8 +36,8 @@ public interface ByteCoder {
      * Returns a {@link BytesProcessor.Encoder} which encapsulates current encoding/decoding algorithm for processing
      * within {@link BytesProcessor}.
      * <p>
-     * Note that different {@link BytesProcessor.Encoder} implementations may have specific requirements for the data to
-     * be encoded/decoded.
+     * Note that different {@link BytesProcessor.Encoder} implementations may have specific requirements, such as
+     * specified block size, for the data to be encoded/decoded.
      *
      * @return a {@link BytesProcessor.Encoder} encapsulates current encoding/decoding algorithm
      * @see BytesProcessor
