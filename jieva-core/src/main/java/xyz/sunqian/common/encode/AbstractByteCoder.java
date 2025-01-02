@@ -66,12 +66,12 @@ public abstract class AbstractByteCoder implements ByteCoder {
      * @param end       whether the input data is the last segment of the entire data
      * @return output size in bytes of input data of specified size after encoding/decoding
      * @throws EncodingException for encoding error
-     * @throws DecodingException for encoding error
+     * @throws DecodingException for decoding error
      */
     protected abstract int getOutputSize(
-            int inputSize,
-            long startPos,
-            boolean end
+        int inputSize,
+        long startPos,
+        boolean end
     ) throws EncodingException, DecodingException;
 
     /**
@@ -102,17 +102,17 @@ public abstract class AbstractByteCoder implements ByteCoder {
      * @return a long value of which high 32 bits indicates read bytes number, low 32 bits indicates written bytes
      * number
      * @throws EncodingException for encoding error
-     * @throws DecodingException for encoding error
+     * @throws DecodingException for decoding error
      */
     protected abstract long doCode(
-            byte[] src,
-            int srcOff,
-            int srcEnd,
-            byte[] dst,
-            int dstOff,
-            int dstEnd,
-            long startPos,
-            boolean end
+        byte[] src,
+        int srcOff,
+        int srcEnd,
+        byte[] dst,
+        int dstOff,
+        int dstEnd,
+        long startPos,
+        boolean end
     ) throws EncodingException, DecodingException;
 
     /**
@@ -157,8 +157,8 @@ public abstract class AbstractByteCoder implements ByteCoder {
      * @throws DecodingException if remaining space is not enough for decoding
      */
     protected abstract void checkRemainingSpace(
-            int srcRemaining,
-            int dstRemaining
+        int srcRemaining,
+        int dstRemaining
     ) throws EncodingException, DecodingException;
 
     private byte[] doCode(byte[] source, long startPos, boolean end) throws EncodingException {
@@ -168,7 +168,7 @@ public abstract class AbstractByteCoder implements ByteCoder {
         }
         byte[] dst = new byte[outputSize];
         int len = getActualWriteSize(
-                doCode(source, 0, source.length, dst, 0, outputSize, startPos, end)
+            doCode(source, 0, source.length, dst, 0, outputSize, startPos, end)
         );
         if (len == dst.length) {
             return dst;
@@ -185,14 +185,14 @@ public abstract class AbstractByteCoder implements ByteCoder {
         long doCodeResult;
         if (source.hasArray()) {
             doCodeResult = doCode(
-                    source.array(),
-                    JieBuffer.getArrayStartIndex(source),
-                    JieBuffer.getArrayEndIndex(source),
-                    dst,
-                    0,
-                    outputSize,
-                    startPos,
-                    end
+                source.array(),
+                JieBuffer.getArrayStartIndex(source),
+                JieBuffer.getArrayEndIndex(source),
+                dst,
+                0,
+                outputSize,
+                startPos,
+                end
             );
             source.position(source.position() + getActualReadSize(doCodeResult));
         } else {
@@ -216,7 +216,7 @@ public abstract class AbstractByteCoder implements ByteCoder {
         }
         checkRemainingSpace(outputSize, dest.length);
         return getActualWriteSize(
-                doCode(source, 0, source.length, dest, 0, outputSize, startPos, end)
+            doCode(source, 0, source.length, dest, 0, outputSize, startPos, end)
         );
     }
 
@@ -229,14 +229,14 @@ public abstract class AbstractByteCoder implements ByteCoder {
         if (source.hasArray() && dest.hasArray()) {
             int oldPos = source.position();
             long doCodeResult = doCode(
-                    source.array(),
-                    JieBuffer.getArrayStartIndex(source),
-                    JieBuffer.getArrayEndIndex(source),
-                    dest.array(),
-                    JieBuffer.getArrayStartIndex(dest),
-                    JieBuffer.getArrayStartIndex(dest) + outputSize,
-                    startPos,
-                    end
+                source.array(),
+                JieBuffer.getArrayStartIndex(source),
+                JieBuffer.getArrayEndIndex(source),
+                dest.array(),
+                JieBuffer.getArrayStartIndex(dest),
+                JieBuffer.getArrayStartIndex(dest) + outputSize,
+                startPos,
+                end
             );
             source.position(oldPos + getActualReadSize(doCodeResult));
             dest.position(dest.position() + getActualWriteSize(doCodeResult));

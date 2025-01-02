@@ -3,8 +3,8 @@ package xyz.sunqian.common.encode;
 import xyz.sunqian.common.io.BytesProcessor;
 
 /**
- * This interface is the super interface for {@link ByteEncoder} and {@link ByteDecoder}, for encoding and decoding in
- * bytes respectively.
+ * This interface acts as a base for {@link ByteEncoder} and {@link ByteDecoder}, which are used for encoding and
+ * decoding in bytes respectively.
  *
  * @author sunqian
  * @see ByteEncoder
@@ -20,7 +20,7 @@ public interface ByteCoder {
      * @param inputSize specified size of input data
      * @return output size in bytes of input data of specified size after encoding/decoding
      * @throws EncodingException for encoding error
-     * @throws DecodingException for encoding error
+     * @throws DecodingException for decoding error
      */
     int getOutputSize(int inputSize) throws EncodingException, DecodingException;
 
