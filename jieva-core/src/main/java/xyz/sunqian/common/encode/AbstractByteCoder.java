@@ -54,8 +54,8 @@ public abstract class AbstractByteCoder implements ByteCoder {
      * within the entire data. This method can determine the consumption of the input data based on the context and
      * returns the output size corresponding to the actual consumption size. Unconsumed data will be buffered and passed
      * at next invocation. Typically, this method and {@link #doCode(byte[], int, int, byte[], int, int, long, boolean)}
-     * are invoked in sequence, so their data consumption logic must remain consistent. Moreover, if this method returns
-     * {@code 0}, the {@code doCode} method will not be invoked.
+     * are invoked in sequence, so their data consumption algorithm must remain consistent. Moreover, if this method
+     * returns {@code 0}, the {@code doCode} method will not be invoked.
      * <p>
      * By default, {@code inputSize} is validated once by {@link #checkInputSize(int, boolean)} before being passed to
      * this method. Therefore, there is no need to invoke {@link #checkInputSize(int, boolean)} again when implementing
@@ -69,9 +69,9 @@ public abstract class AbstractByteCoder implements ByteCoder {
      * @throws DecodingException for encoding error
      */
     protected abstract int getOutputSize(
-        int inputSize,
-        long startPos,
-        boolean end
+            int inputSize,
+            long startPos,
+            boolean end
     ) throws EncodingException, DecodingException;
 
     /**
@@ -84,7 +84,7 @@ public abstract class AbstractByteCoder implements ByteCoder {
      * data within the entire source data. This method can determine the consumption of the source data based on the
      * context and writes the result corresponding to the actual consumption data into destination. Unconsumed data will
      * be buffered and passed at next invocation. Typically, {@link #getOutputSize(int, long, boolean)} and this method
-     * are invoked in sequence, so their data consumption logic must remain consistent. Moreover, if the
+     * are invoked in sequence, so their data consumption algorithm must remain consistent. Moreover, if the
      * {@code getOutputSize} returns {@code 0}, this method will not be invoked.
      * <p>
      * By default, the passed arguments will not be null, and bounds of source and destination have already been
@@ -105,14 +105,14 @@ public abstract class AbstractByteCoder implements ByteCoder {
      * @throws DecodingException for encoding error
      */
     protected abstract long doCode(
-        byte[] src,
-        int srcOff,
-        int srcEnd,
-        byte[] dst,
-        int dstOff,
-        int dstEnd,
-        long startPos,
-        boolean end
+            byte[] src,
+            int srcOff,
+            int srcEnd,
+            byte[] dst,
+            int dstOff,
+            int dstEnd,
+            long startPos,
+            boolean end
     ) throws EncodingException, DecodingException;
 
     /**
@@ -157,8 +157,8 @@ public abstract class AbstractByteCoder implements ByteCoder {
      * @throws DecodingException if remaining space is not enough for decoding
      */
     protected abstract void checkRemainingSpace(
-        int srcRemaining,
-        int dstRemaining
+            int srcRemaining,
+            int dstRemaining
     ) throws EncodingException, DecodingException;
 
     private byte[] doCode(byte[] source, long startPos, boolean end) throws EncodingException {
@@ -168,7 +168,7 @@ public abstract class AbstractByteCoder implements ByteCoder {
         }
         byte[] dst = new byte[outputSize];
         int len = getActualWriteSize(
-            doCode(source, 0, source.length, dst, 0, outputSize, startPos, end)
+                doCode(source, 0, source.length, dst, 0, outputSize, startPos, end)
         );
         if (len == dst.length) {
             return dst;
@@ -185,14 +185,14 @@ public abstract class AbstractByteCoder implements ByteCoder {
         long doCodeResult;
         if (source.hasArray()) {
             doCodeResult = doCode(
-                source.array(),
-                JieBuffer.getArrayStartIndex(source),
-                JieBuffer.getArrayEndIndex(source),
-                dst,
-                0,
-                outputSize,
-                startPos,
-                end
+                    source.array(),
+                    JieBuffer.getArrayStartIndex(source),
+                    JieBuffer.getArrayEndIndex(source),
+                    dst,
+                    0,
+                    outputSize,
+                    startPos,
+                    end
             );
             source.position(source.position() + getActualReadSize(doCodeResult));
         } else {
@@ -216,7 +216,7 @@ public abstract class AbstractByteCoder implements ByteCoder {
         }
         checkRemainingSpace(outputSize, dest.length);
         return getActualWriteSize(
-            doCode(source, 0, source.length, dest, 0, outputSize, startPos, end)
+                doCode(source, 0, source.length, dest, 0, outputSize, startPos, end)
         );
     }
 
@@ -229,14 +229,14 @@ public abstract class AbstractByteCoder implements ByteCoder {
         if (source.hasArray() && dest.hasArray()) {
             int oldPos = source.position();
             long doCodeResult = doCode(
-                source.array(),
-                JieBuffer.getArrayStartIndex(source),
-                JieBuffer.getArrayEndIndex(source),
-                dest.array(),
-                JieBuffer.getArrayStartIndex(dest),
-                JieBuffer.getArrayStartIndex(dest) + outputSize,
-                startPos,
-                end
+                    source.array(),
+                    JieBuffer.getArrayStartIndex(source),
+                    JieBuffer.getArrayEndIndex(source),
+                    dest.array(),
+                    JieBuffer.getArrayStartIndex(dest),
+                    JieBuffer.getArrayStartIndex(dest) + outputSize,
+                    startPos,
+                    end
             );
             source.position(oldPos + getActualReadSize(doCodeResult));
             dest.position(dest.position() + getActualWriteSize(doCodeResult));
@@ -268,12 +268,12 @@ public abstract class AbstractByteCoder implements ByteCoder {
     }
 
     /**
-     * This method generated a {@link BytesProcessor.Encoder} based on encoding/decoding logic of
+     * This method generated a {@link BytesProcessor.Encoder} based on encoding/decoding algorithm of
      * {@link #getOutputSize(int, long, boolean)} and
      * {@link #doCode(byte[], int, int, byte[], int, int, long, boolean)}, and then wrap the generated encoder via
      * {@link JieIO#bufferedEncoder(BytesProcessor.Encoder)}.
      *
-     * @return a {@link BytesProcessor.Encoder} based on current encoding/decoding logic
+     * @return a {@link BytesProcessor.Encoder} based on current encoding/decoding algorithm
      */
     @Override
     public BytesProcessor.Encoder streamEncoder() {

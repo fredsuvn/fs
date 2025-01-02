@@ -33,13 +33,13 @@ public interface ByteCoder {
     int getBlockSize();
 
     /**
-     * Returns a {@link BytesProcessor.Encoder} which encapsulates current encoding/decoding logic for processing within
-     * {@link BytesProcessor}.
+     * Returns a {@link BytesProcessor.Encoder} which encapsulates current encoding/decoding algorithm for processing
+     * within {@link BytesProcessor}.
      * <p>
      * Note that different {@link BytesProcessor.Encoder} implementations may have specific requirements for the data to
      * be encoded/decoded.
      *
-     * @return a {@link BytesProcessor.Encoder} encapsulates current encoding/decoding logic
+     * @return a {@link BytesProcessor.Encoder} encapsulates current encoding/decoding algorithm
      * @see BytesProcessor
      * @see BytesProcessor.Encoder
      */
