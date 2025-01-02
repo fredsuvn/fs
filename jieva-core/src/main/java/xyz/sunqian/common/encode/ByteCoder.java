@@ -3,8 +3,8 @@ package xyz.sunqian.common.encode;
 import xyz.sunqian.common.io.BytesProcessor;
 
 /**
- * Super interface for byte encoding/decoding. It has two main sub-interfaces: {@link ByteEncoder} and
- * {@link ByteDecoder}, for encoding and decoding respectively.
+ * This interface is the super interface for {@link ByteEncoder} and {@link ByteDecoder}, for encoding and decoding in
+ * bytes respectively.
  *
  * @author sunqian
  * @see ByteEncoder
