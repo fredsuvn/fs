@@ -36,7 +36,7 @@ public interface ByteCrypto {
      * processing within {@link BytesProcessor}.
      * <p>
      * Note that different {@link BytesProcessor.Encoder} implementations may have specific requirements, such as
-     * specified block size, for the data to be encoded/decoded.
+     * specified block size, for the data to be encrypted/decrypted.
      *
      * @return a {@link BytesProcessor.Encoder} encapsulates current encrypting/decrypting algorithm
      * @see BytesProcessor

@@ -1,5 +1,6 @@
 package test.crypto;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.testng.annotations.Test;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.JieBytes;
@@ -13,6 +14,7 @@ import java.nio.ByteBuffer;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.Provider;
 
 import static org.testng.Assert.assertEquals;
 
@@ -20,14 +22,22 @@ public class CryptoTest {
 
     @Test
     public void testRsa() throws Exception {
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+        //testRsa(null);
+        Provider bouncyCastleProvider = new BouncyCastleProvider();
+        testRsa(bouncyCastleProvider);
+    }
+
+    public void testRsa(Provider provider) throws Exception {
+        KeyPairGenerator keyPairGenerator = provider == null ?
+            KeyPairGenerator.getInstance("RSA") : KeyPairGenerator.getInstance("RSA", provider);
         keyPairGenerator.initialize(2048);
         KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
-        byte[] data = JieRandom.fill(new byte[245]);
+        byte[] data = JieRandom.fill(new byte[222]);
 
         // encrypt
-        Cipher cipher = Cipher.getInstance("RSA");
+        Cipher cipher = provider == null ?
+            Cipher.getInstance("RSA") : Cipher.getInstance("RSA", provider);
         cipher.init(Cipher.ENCRYPT_MODE, keyPair.getPublic());
         System.out.println("encrypt block size: " + cipher.getBlockSize());
         System.out.println("encrypt output size: " + cipher.getOutputSize(data.length));
@@ -45,18 +55,56 @@ public class CryptoTest {
         System.out.println("decrypt output size: " + cipher.getOutputSize(encryptedBytes.length));
 
         assertEquals(data, decryptedBytes);
+
+        // stream
+        data = JieRandom.fill(new byte[1222]);
+        cipher.init(Cipher.ENCRYPT_MODE, keyPair.getPublic());
+        byte[] en = JieIO.processor(data).readBlockSize(3).encoder(cipher.getBlockSize(), new BytesProcessor.Encoder() {
+            @Override
+            public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) {
+                try {
+                    byte[] result = cipher.doFinal(JieBytes.getBytes(data));
+                    System.out.println("result length: " + (result == null ? 0 : result.length));
+                    return result == null ? null : ByteBuffer.wrap(result);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).writeToByteArray();
+        cipher.init(Cipher.DECRYPT_MODE, keyPair.getPrivate());
+        byte[] de = JieIO.processor(en).readBlockSize(3).encoder(cipher.getBlockSize(), new BytesProcessor.Encoder() {
+            @Override
+            public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) {
+                try {
+                    byte[] result = cipher.doFinal(JieBytes.getBytes(data));
+                    System.out.println("result length: " + (result == null ? 0 : result.length));
+                    return result == null ? null : ByteBuffer.wrap(result);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).writeToByteArray();
+        assertEquals(data, de);
     }
 
     @Test
     public void testAes() throws Exception {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+        testAes(null);
+        Provider bouncyCastleProvider = new BouncyCastleProvider();
+        testAes(bouncyCastleProvider);
+    }
+
+    private void testAes(@Nullable Provider provider) throws Exception {
+        KeyGenerator keyGenerator = provider == null ?
+            KeyGenerator.getInstance("AES") : KeyGenerator.getInstance("AES", provider);
         keyGenerator.init(256);
         Key key = keyGenerator.generateKey();
 
         byte[] data = JieRandom.fill(new byte[17]);
 
         // encrypt
-        Cipher cipher = Cipher.getInstance("AES");
+        Cipher cipher = provider == null ?
+            Cipher.getInstance("AES") : Cipher.getInstance("AES", provider);
         cipher.init(Cipher.ENCRYPT_MODE, key);
         System.out.println("encrypt block size: " + cipher.getBlockSize());
         System.out.println("encrypt output size: " + cipher.getOutputSize(data.length));
