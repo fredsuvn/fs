@@ -40,7 +40,6 @@ import java.util.Arrays;
  * @see Encoder
  * @see Decoder
  */
-@ThreadSafe
 public class JieBase64 {
 
     /**
@@ -162,10 +161,11 @@ public class JieBase64 {
     }
 
     /**
-     * The implementation of {@link ByteEncoder} for {@code base64} encoding.
+     * The implementation of {@link ByteEncoder} for {@code base64} encoding, thread-safe.
      *
      * @author sunqian
      */
+    @ThreadSafe
     public interface Encoder extends ByteEncoder.ToLatin {
 
         /**
@@ -201,10 +201,11 @@ public class JieBase64 {
     }
 
     /**
-     * The implementation of {@link ByteEncoder} for {@code base64} decoding.
+     * The implementation of {@link ByteEncoder} for {@code base64} decoding, thread-safe.
      *
      * @author sunqian
      */
+    @ThreadSafe
     public interface Decoder extends ByteDecoder.ToLatin {
 
         /**

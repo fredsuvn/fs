@@ -11,7 +11,6 @@ import xyz.sunqian.common.io.BytesProcessor;
  * @see Encoder
  * @see Decoder
  */
-@ThreadSafe
 public class JieHex {
 
     /**
@@ -33,10 +32,11 @@ public class JieHex {
     }
 
     /**
-     * The implementation of {@link ByteEncoder} for {@code hex} encoding.
+     * The implementation of {@link ByteEncoder} for {@code hex} encoding, thread-safe.
      *
      * @author sunqian
      */
+    @ThreadSafe
     public interface Encoder extends ByteEncoder.ToLatin {
 
         /**
@@ -72,10 +72,11 @@ public class JieHex {
     }
 
     /**
-     * The implementation of {@link ByteDecoder} for {@code hex} decoding.
+     * The implementation of {@link ByteDecoder} for {@code hex} decoding, thread-safe.
      *
      * @author sunqian
      */
+    @ThreadSafe
     public interface Decoder extends ByteDecoder.ToLatin {
 
         /**
