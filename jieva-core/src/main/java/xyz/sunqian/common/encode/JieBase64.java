@@ -1,5 +1,6 @@
 package xyz.sunqian.common.encode;
 
+import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.UnreachablePointException;
 import xyz.sunqian.common.io.BytesProcessor;
 
@@ -7,7 +8,8 @@ import java.util.Arrays;
 
 /**
  * This is a static utilities class for {@code base64} encoding and decoding, provides encoder and decoder
- * implementations: {@link JieBase64.Encoder} and {@link JieBase64.Decoder}. The algorithms are specified in:
+ * implementations: {@link JieBase64.Encoder} and {@link JieBase64.Decoder}. All implementations are thread-safe. The
+ * algorithms are specified in:
  * <ul>
  *     <li>{@code Basic}: <a href="http://www.ietf.org/rfc/rfc4648.txt">RFC 4648</a></li>
  *     <li>{@code MIME}: <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a></li>
@@ -38,6 +40,7 @@ import java.util.Arrays;
  * @see Encoder
  * @see Decoder
  */
+@ThreadSafe
 public class JieBase64 {
 
     /**

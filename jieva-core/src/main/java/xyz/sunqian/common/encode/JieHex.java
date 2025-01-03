@@ -1,15 +1,17 @@
 package xyz.sunqian.common.encode;
 
+import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.io.BytesProcessor;
 
 /**
  * This is a static utilities class for {@code hex} encoding and decoding, provides encoder and decoder implementations:
- * {@link Encoder} and {@link Decoder}.
+ * {@link Encoder} and {@link Decoder}. All implementations are thread-safe.
  *
  * @author sunqian
  * @see Encoder
  * @see Decoder
  */
+@ThreadSafe
 public class JieHex {
 
     /**

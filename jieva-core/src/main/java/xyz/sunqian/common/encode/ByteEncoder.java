@@ -1,20 +1,17 @@
 package xyz.sunqian.common.encode;
 
-import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.JieBytes;
 import xyz.sunqian.common.base.JieChars;
 
 import java.nio.ByteBuffer;
 
 /**
- * Byte encoder is used for encoding in bytes, such as {@link JieHex.Encoder} and {@link JieBase64.Encoder}. The
- * implementations should be thread-safe.
+ * Byte encoder is used for encoding in bytes, such as {@link JieHex.Encoder} and {@link JieBase64.Encoder}.
  *
  * @author sunqian
  * @see JieHex.Encoder
  * @see JieBase64.Encoder
  */
-@ThreadSafe
 public interface ByteEncoder extends ByteCoder {
 
     /**

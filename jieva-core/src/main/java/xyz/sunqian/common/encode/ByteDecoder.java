@@ -1,6 +1,5 @@
 package xyz.sunqian.common.encode;
 
-import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.JieChars;
 import xyz.sunqian.common.base.JieString;
 
@@ -8,14 +7,12 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
 /**
- * Byte decoder is used for decoding in bytes, such as {@link JieHex.Decoder} and {@link JieBase64.Decoder}. The
- * implementations should be thread-safe.
+ * Byte decoder is used for decoding in bytes, such as {@link JieHex.Decoder} and {@link JieBase64.Decoder}.
  *
  * @author sunqian
  * @see JieHex.Decoder
  * @see JieBase64.Decoder
  */
-@ThreadSafe
 public interface ByteDecoder extends ByteCoder {
 
     /**
