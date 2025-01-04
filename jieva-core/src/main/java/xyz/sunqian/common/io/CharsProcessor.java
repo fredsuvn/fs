@@ -184,6 +184,7 @@ public interface CharsProcessor {
      * @param size    specified fixed-size
      * @param encoder encoder for encoding data from read operation
      * @return this
+     * @see JieIO#fixedSizeEncoder(int, Encoder)
      */
     default CharsProcessor encoder(int size, Encoder encoder) {
         return encoder(JieIO.fixedSizeEncoder(size, encoder));
@@ -200,6 +201,7 @@ public interface CharsProcessor {
      * @param size    specified size
      * @param encoder encoder for encoding data from read operation
      * @return this
+     * @see JieIO#roundEncoder(int, Encoder)
      */
     default CharsProcessor roundEncoder(int size, Encoder encoder) {
         return encoder(JieIO.roundEncoder(size, encoder));
@@ -215,6 +217,7 @@ public interface CharsProcessor {
      *
      * @param encoder encoder for encoding data from read operation
      * @return this
+     * @see JieIO#bufferedEncoder(Encoder)
      */
     default CharsProcessor bufferedEncoder(Encoder encoder) {
         return encoder(JieIO.bufferedEncoder(encoder));

@@ -176,6 +176,7 @@ public interface BytesProcessor {
      * @param size    specified fixed-size
      * @param encoder encoder for encoding data from read operation
      * @return this
+     * @see JieIO#fixedSizeEncoder(int, CharsProcessor.Encoder)
      */
     default BytesProcessor encoder(int size, Encoder encoder) {
         return encoder(JieIO.fixedSizeEncoder(size, encoder));
@@ -192,6 +193,7 @@ public interface BytesProcessor {
      * @param size    specified size
      * @param encoder encoder for encoding data from read operation
      * @return this
+     * @see JieIO#roundEncoder(int, Encoder)
      */
     default BytesProcessor roundEncoder(int size, Encoder encoder) {
         return encoder(JieIO.roundEncoder(size, encoder));
@@ -207,6 +209,7 @@ public interface BytesProcessor {
      *
      * @param encoder encoder for encoding data from read operation
      * @return this
+     * @see JieIO#bufferedEncoder(Encoder)
      */
     default BytesProcessor bufferedEncoder(Encoder encoder) {
         return encoder(JieIO.bufferedEncoder(encoder));

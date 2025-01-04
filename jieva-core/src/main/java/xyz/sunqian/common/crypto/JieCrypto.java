@@ -2,29 +2,21 @@ package xyz.sunqian.common.crypto;
 
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.JieBytes;
+import xyz.sunqian.common.coll.JieArray;
 import xyz.sunqian.common.io.BytesProcessor;
 import xyz.sunqian.common.io.JieIO;
 
 import javax.crypto.Cipher;
 import java.nio.ByteBuffer;
-import java.security.Provider;
 
 public class JieCrypto {
 
-    public static Cipher newCipher(String algorithm, @Nullable Provider provider) {
-        try {
-            return provider == null ? Cipher.getInstance(algorithm) : Cipher.getInstance(algorithm, provider);
-        } catch (Exception e) {
-            throw new CryptoException(e);
-        }
-    }
-
-    public static BytesProcessor.Encoder cipherEncoder(Cipher cipher, int maxSize) {
+    public static BytesProcessor.Encoder cipherEncoder(Cipher cipher, int blockSize, boolean useFinal) {
         BytesProcessor.Encoder encoder = new BytesProcessor.Encoder() {
             @Override
             public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) {
                 try {
-                    if (maxSize > 0) {
+                    if (useFinal) {
                         if (JieBytes.isEmpty(data)) {
                             return null;
                         }
@@ -42,26 +34,38 @@ public class JieCrypto {
                 }
             }
         };
-        return JieIO.fixedSizeEncoder(maxSize > 0 ? maxSize : cipher.getBlockSize(), encoder);
+        return JieIO.fixedSizeEncoder(blockSize, encoder);
     }
 
     private static ByteBuffer doFinal(Cipher cipher, ByteBuffer input) throws Exception {
-        ByteBuffer out = ByteBuffer.allocate(cipher.getOutputSize(input.remaining()));
-        cipher.doFinal(input, out);
-        out.flip();
-        if (out.limit() < out.capacity()) {
-            return JieBytes.copyBuffer(out);
+        byte[] ret;
+        if (input.hasArray()) {
+            ret = cipher.doFinal(
+                input.array(), input.arrayOffset() + input.position(), input.remaining()
+            );
+            input.position(input.position() + input.remaining());
+        } else {
+            byte[] inBytes = JieBytes.getBytes(input);
+            ret = cipher.doFinal(inBytes);
         }
-        return out;
+        return toBuffer(ret);
     }
 
     private static ByteBuffer doUpdate(Cipher cipher, ByteBuffer input) throws Exception {
-        ByteBuffer out = ByteBuffer.allocate(cipher.getOutputSize(input.remaining()));
-        cipher.update(input, out);
-        out.flip();
-        if (out.limit() < out.capacity()) {
-            return JieBytes.copyBuffer(out);
+        byte[] ret;
+        if (input.hasArray()) {
+            ret = cipher.update(
+                input.array(), input.arrayOffset() + input.position(), input.remaining()
+            );
+            input.position(input.position() + input.remaining());
+        } else {
+            byte[] inBytes = JieBytes.getBytes(input);
+            ret = cipher.update(inBytes);
         }
-        return out;
+        return toBuffer(ret);
+    }
+
+    private static ByteBuffer toBuffer(@Nullable byte[] ret) {
+        return JieArray.isEmpty(ret) ? null : ByteBuffer.wrap(ret);
     }
 }
