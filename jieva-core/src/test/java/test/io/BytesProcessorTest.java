@@ -113,10 +113,10 @@ public class BytesProcessorTest {
         {
             // writeTo
             String str = "1234567890qwertyuiop[]中文";
-            byte[] strBytes = str.getBytes(JieChars.UTF_8);
-            assertEquals(JieIO.processor(strBytes).writeToByteArray(), strBytes);
-            assertEquals(JieIO.processor(strBytes).writeToByteBuffer(), ByteBuffer.wrap(strBytes));
-            assertEquals(JieIO.processor(strBytes).writeToString(JieChars.UTF_8), str);
+            byte[] strBytes = str.getBytes(JieChars.defaultCharset());
+            assertEquals(JieIO.processor(strBytes).toByteArray(), strBytes);
+            assertEquals(JieIO.processor(strBytes).toByteBuffer(), ByteBuffer.wrap(strBytes));
+            assertEquals(JieIO.processor(strBytes).toString(), str);
         }
 
         // error
@@ -137,7 +137,7 @@ public class BytesProcessorTest {
     private void testProcessing(int totalSize, int blockSize, int readLimit) throws Exception {
         int offset = 22;
         String str = new String(JieRandom.fill(new char[totalSize], 'a', 'z'));
-        byte[] bytes = str.getBytes(JieChars.UTF_8);
+        byte[] bytes = str.getBytes(JieChars.defaultCharset());
 
         {
             // stream -> stream
@@ -148,7 +148,7 @@ public class BytesProcessorTest {
             assertEquals(readNum, getLength(bytes.length, readLimit));
             assertEquals(
                 str.substring(0, getLength(bytes.length, readLimit)),
-                new String(out.toByteArray(), 0, getLength(bytes.length, readLimit), JieChars.UTF_8)
+                new String(out.toByteArray(), 0, getLength(bytes.length, readLimit), JieChars.defaultCharset())
             );
         }
 
@@ -158,14 +158,14 @@ public class BytesProcessorTest {
             ByteArrayInputStream in = new ByteArrayInputStream(bytes);
             long readNum = JieIO.processor(in).readBlockSize(blockSize).writeTo(outBytes);
             assertEquals(readNum, bytes.length);
-            assertEquals(str, new String(outBytes, 0, bytes.length, JieChars.UTF_8));
+            assertEquals(str, new String(outBytes, 0, bytes.length, JieChars.defaultCharset()));
             outBytes = new byte[bytes.length * 2];
             in.reset();
             readNum = JieIO.processor(in).readBlockSize(blockSize).writeTo(outBytes, offset, bytes.length);
             assertEquals(readNum, bytes.length);
             assertEquals(
                 str,
-                new String(Arrays.copyOfRange(outBytes, offset, offset + bytes.length), JieChars.UTF_8)
+                new String(Arrays.copyOfRange(outBytes, offset, offset + bytes.length), JieChars.defaultCharset())
             );
         }
         {
@@ -176,14 +176,14 @@ public class BytesProcessorTest {
             assertEquals(readNum, bytes.length);
             outBuffer.flip();
             byte[] outBytes = JieBytes.getBytes(outBuffer);
-            assertEquals(str, new String(outBytes, JieChars.UTF_8));
+            assertEquals(str, new String(outBytes, JieChars.defaultCharset()));
             outBuffer = TU.bufferDangling(bytes);
             in.reset();
             readNum = JieIO.processor(in).readBlockSize(blockSize).writeTo(outBuffer);
             assertEquals(readNum, bytes.length);
             outBuffer.flip();
             outBytes = JieBytes.getBytes(outBuffer);
-            assertEquals(str, new String(outBytes, JieChars.UTF_8));
+            assertEquals(str, new String(outBytes, JieChars.defaultCharset()));
         }
 
         {
@@ -193,7 +193,7 @@ public class BytesProcessorTest {
             assertEquals(readNum, getLength(bytes.length, readLimit));
             assertEquals(
                 str.substring(0, getLength(bytes.length, readLimit)),
-                new String(out.toByteArray(), 0, getLength(bytes.length, readLimit), JieChars.UTF_8)
+                new String(out.toByteArray(), 0, getLength(bytes.length, readLimit), JieChars.defaultCharset())
             );
         }
 
@@ -209,18 +209,18 @@ public class BytesProcessorTest {
             outBytes = new byte[bytes.length];
             readNum = JieIO.processor(bytes).readBlockSize(blockSize).writeTo(outBytes);
             assertEquals(readNum, bytes.length);
-            assertEquals(str, new String(outBytes, JieChars.UTF_8));
+            assertEquals(str, new String(outBytes, JieChars.defaultCharset()));
             byte[] inBytes = new byte[bytes.length * 2];
             outBytes = new byte[bytes.length];
             System.arraycopy(bytes, 0, inBytes, offset, bytes.length);
             readNum = JieIO.processor(inBytes, offset, bytes.length).readBlockSize(blockSize).writeTo(outBytes);
             assertEquals(readNum, bytes.length);
-            assertEquals(str, new String(outBytes, JieChars.UTF_8));
+            assertEquals(str, new String(outBytes, JieChars.defaultCharset()));
             outBytes = new byte[bytes.length];
             readNum = JieIO.processor(bytes, 0, bytes.length)
                 .readBlockSize(blockSize).writeTo(outBytes, 0, outBytes.length);
             assertEquals(readNum, bytes.length);
-            assertEquals(str, new String(outBytes, JieChars.UTF_8));
+            assertEquals(str, new String(outBytes, JieChars.defaultCharset()));
             outBytes = new byte[bytes.length];
             readNum = BytesProcessor
                 .from(bytes, 0, bytes.length - 1)
@@ -229,7 +229,7 @@ public class BytesProcessorTest {
             assertEquals(readNum, bytes.length - 1);
             assertEquals(
                 str.substring(0, str.length() - 1),
-                new String(Arrays.copyOfRange(outBytes, 0, outBytes.length - 1), JieChars.UTF_8)
+                new String(Arrays.copyOfRange(outBytes, 0, outBytes.length - 1), JieChars.defaultCharset())
             );
         }
 
@@ -245,7 +245,7 @@ public class BytesProcessorTest {
             assertEquals(readNum, bytes.length);
             outBuffer.flip();
             byte[] outBytes = JieBytes.getBytes(outBuffer);
-            assertEquals(str, new String(outBytes, JieChars.UTF_8));
+            assertEquals(str, new String(outBytes, JieChars.defaultCharset()));
         }
 
         {
@@ -256,7 +256,7 @@ public class BytesProcessorTest {
             assertEquals(readNum, getLength(bytes.length, readLimit));
             assertEquals(
                 str.substring(0, getLength(bytes.length, readLimit)),
-                new String(out.toByteArray(), 0, getLength(bytes.length, readLimit), JieChars.UTF_8)
+                new String(out.toByteArray(), 0, getLength(bytes.length, readLimit), JieChars.defaultCharset())
             );
             ByteBuffer inArray = TU.bufferDangling(bytes);
             out.reset();
@@ -264,7 +264,7 @@ public class BytesProcessorTest {
             assertEquals(readNum, getLength(bytes.length, readLimit));
             assertEquals(
                 str.substring(0, getLength(bytes.length, readLimit)),
-                new String(out.toByteArray(), 0, getLength(bytes.length, readLimit), JieChars.UTF_8)
+                new String(out.toByteArray(), 0, getLength(bytes.length, readLimit), JieChars.defaultCharset())
             );
         }
 
@@ -280,7 +280,7 @@ public class BytesProcessorTest {
             outBytes = new byte[bytes.length];
             readNum = JieIO.processor(inBuffer).readBlockSize(blockSize).writeTo(outBytes);
             assertEquals(readNum, bytes.length);
-            assertEquals(str, new String(outBytes, JieChars.UTF_8));
+            assertEquals(str, new String(outBytes, JieChars.defaultCharset()));
         }
 
         {
@@ -815,17 +815,17 @@ public class BytesProcessorTest {
     private void testToCharProcessor(int totalSize, int blockSize) {
         {
             char[] str = JieRandom.fill(new char[totalSize], 'a', 'z');
-            byte[] bytes = new String(str).getBytes(JieChars.UTF_8);
+            byte[] bytes = new String(str).getBytes(JieChars.defaultCharset());
             String converted = JieIO.read(
-                JieIO.processor(bytes).readBlockSize(blockSize).toCharProcessor(JieChars.UTF_8).toReader()
+                JieIO.processor(bytes).readBlockSize(blockSize).toCharProcessor(JieChars.defaultCharset()).toReader()
             );
             assertEquals(converted.toCharArray(), str);
         }
         {
             char[] str = JieRandom.fill(new char[totalSize], '\u4e00', '\u9fff');
-            byte[] bytes = new String(str).getBytes(JieChars.UTF_8);
+            byte[] bytes = new String(str).getBytes(JieChars.defaultCharset());
             String converted = JieIO.read(
-                JieIO.processor(bytes).readBlockSize(blockSize).toCharProcessor(JieChars.UTF_8).toReader()
+                JieIO.processor(bytes).readBlockSize(blockSize).toCharProcessor(JieChars.defaultCharset()).toReader()
             );
             assertEquals(converted.toCharArray(), str);
         }

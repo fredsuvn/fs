@@ -59,12 +59,12 @@ public class CryptoTest {
         cipher.init(Cipher.ENCRYPT_MODE, enKey);
         byte[] cipherEn = doCipher(src, enMax, cipher);
         cipher.init(Cipher.ENCRYPT_MODE, enKey);
-        byte[] jieEn = JieIO.processor(src).encoder(JieCrypto.cipherEncoder(cipher, enMax)).writeToByteArray();
+        byte[] jieEn = JieIO.processor(src).encoder(JieCrypto.cipherEncoder(cipher, enMax)).toByteArray();
         assertEquals(jieEn.length, cipherEn.length);
 
         // de
         cipher.init(Cipher.DECRYPT_MODE, deKey);
-        byte[] jieDe = JieIO.processor(cipherEn).encoder(JieCrypto.cipherEncoder(cipher, deMax)).writeToByteArray();
+        byte[] jieDe = JieIO.processor(cipherEn).encoder(JieCrypto.cipherEncoder(cipher, deMax)).toByteArray();
         assertEquals(jieDe, src);
         cipher.init(Cipher.DECRYPT_MODE, deKey);
         byte[] cipherDe = doCipher(cipherEn, deMax, cipher);
@@ -152,7 +152,7 @@ public class CryptoTest {
                     throw new RuntimeException(e);
                 }
             }
-        }).writeToByteArray();
+        }).toByteArray();
         cipher.init(Cipher.DECRYPT_MODE, keyPair.getPrivate());
         byte[] de = JieIO.processor(en).readBlockSize(3).encoder(cipher.getBlockSize(), new BytesProcessor.Encoder() {
             @Override
@@ -165,7 +165,7 @@ public class CryptoTest {
                     throw new RuntimeException(e);
                 }
             }
-        }).writeToByteArray();
+        }).toByteArray();
         assertEquals(data, de);
     }
 
@@ -223,7 +223,7 @@ public class CryptoTest {
                     throw new RuntimeException(e);
                 }
             }
-        }).writeToByteArray();
+        }).toByteArray();
         cipher.init(Cipher.DECRYPT_MODE, key);
         byte[] de = cipher.doFinal(en);
         assertEquals(data, de);

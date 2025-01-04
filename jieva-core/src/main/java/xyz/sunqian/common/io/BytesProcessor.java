@@ -1,6 +1,7 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.JieChars;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -309,7 +310,7 @@ public interface BytesProcessor {
      * @return a byte array which is the result of data processing by this processor
      * @throws IORuntimeException thrown for any IO problems
      */
-    default byte[] writeToByteArray() throws IORuntimeException {
+    default byte[] toByteArray() throws IORuntimeException {
         BytesBuilder builder = new BytesBuilder();
         writeTo(builder);
         return builder.toByteArray();
@@ -318,31 +319,50 @@ public interface BytesProcessor {
     /**
      * Returns a byte buffer which is the result of data processing by this processor. This method is equivalent to:
      * <pre>{@code
-     *     return ByteBuffer.wrap(writeToByteArray());
+     *     BytesBuilder builder = new BytesBuilder();
+     *     writeTo(builder);
+     *     return builder.toByteBuffer();
      * }</pre>
      * This is a terminal method.
      *
      * @return a byte buffer which is the result of data processing by this processor
      * @throws IORuntimeException thrown for any IO problems
      */
-    default ByteBuffer writeToByteBuffer() throws IORuntimeException {
-        return ByteBuffer.wrap(writeToByteArray());
+    default ByteBuffer toByteBuffer() throws IORuntimeException {
+        BytesBuilder builder = new BytesBuilder();
+        writeTo(builder);
+        return builder.toByteBuffer();
     }
 
     /**
-     * Returns a string which is encoded from the result of data processing by this processor. This method is equivalent
-     * to:
+     * Returns a string which is encoded from the result of data processing by this processor with specified charset.
+     * This method is equivalent to:
      * <pre>{@code
-     *     return new String(writeToByteArray(), charset);
+     *     return new String(toByteArray(), charset);
      * }</pre>
      * This is a terminal method.
      *
+     * @param charset the specified charset
      * @return a string which is encoded from the result of data processing by this processor
      * @throws IORuntimeException thrown for any IO problems
      */
-    default String writeToString(Charset charset) throws IORuntimeException {
-        return new String(writeToByteArray(), charset);
+    default String toString(Charset charset) throws IORuntimeException {
+        return new String(toByteArray(), charset);
     }
+
+    /**
+     * Returns a string which is encoded from the result of data processing by this processor with
+     * {@link JieChars#defaultCharset()}. This method is equivalent to:
+     * <pre>{@code
+     *     return toString(JieChars.defaultCharset());
+     * }</pre>
+     * This is a terminal method.
+     *
+     * @return a string which is encoded from the result of data processing by this processor with
+     * {@link JieChars#defaultCharset()}
+     * @throws IORuntimeException thrown for any IO problems
+     */
+    String toString() throws IORuntimeException;
 
     /**
      * Returns an input stream which encompasses the entire data processing. The input stream is lazy, read operations

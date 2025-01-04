@@ -104,6 +104,11 @@ final class CharsProcessorImpl implements CharsProcessor {
     }
 
     @Override
+    public String toString() {
+        return new String(toCharArray());
+    }
+
+    @Override
     public Reader toReader() {
         return new ReaderIn(toBufferIn(source));
     }

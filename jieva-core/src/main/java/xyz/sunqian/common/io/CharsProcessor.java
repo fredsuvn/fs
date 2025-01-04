@@ -2,7 +2,6 @@ package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nullable;
 
-import java.io.CharArrayWriter;
 import java.io.Reader;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -310,7 +309,7 @@ public interface CharsProcessor {
     /**
      * Returns a char array which is the result of data processing by this processor. This method is equivalent to:
      * <pre>{@code
-     *     CharArrayWriter writer = new CharArrayWriter();
+     *     CharsBuilder writer = new CharsBuilder();
      *     writeTo(writer);
      *     return writer.toCharArray();
      * }</pre>
@@ -319,8 +318,8 @@ public interface CharsProcessor {
      * @return a char array which is the result of data processing by this processor
      * @throws IORuntimeException thrown for any IO problems
      */
-    default char[] writeToCharArray() throws IORuntimeException {
-        CharArrayWriter writer = new CharArrayWriter();
+    default char[] toCharArray() throws IORuntimeException {
+        CharsBuilder writer = new CharsBuilder();
         writeTo(writer);
         return writer.toCharArray();
     }
@@ -328,31 +327,33 @@ public interface CharsProcessor {
     /**
      * Returns a char buffer which is the result of data processing by this processor. This method is equivalent to:
      * <pre>{@code
-     *     return CharBuffer.wrap(writeToCharArray());
+     *     CharsBuilder writer = new CharsBuilder();
+     *     writeTo(writer);
+     *     return writer.toCharBuffer();
      * }</pre>
      * This is a terminal method.
      *
      * @return a char buffer which is the result of data processing by this processor
      * @throws IORuntimeException thrown for any IO problems
      */
-    default CharBuffer writeToCharBuffer() throws IORuntimeException {
-        return CharBuffer.wrap(writeToCharArray());
+    default CharBuffer toCharBuffer() throws IORuntimeException {
+        CharsBuilder writer = new CharsBuilder();
+        writeTo(writer);
+        return writer.toCharBuffer();
     }
 
     /**
      * Returns a string which is built from the result of data processing by this processor. This method is equivalent
      * to:
      * <pre>{@code
-     *     return new String(writeToCharArray());
+     *     return new String(toCharArray());
      * }</pre>
      * This is a terminal method.
      *
      * @return a string which is built from the result of data processing by this processor
      * @throws IORuntimeException thrown for any IO problems
      */
-    default String writeToString() throws IORuntimeException {
-        return new String(writeToCharArray());
-    }
+    String toString() throws IORuntimeException;
 
     /**
      * Returns a reader which encompasses the entire data processing. The reader is lazy, read operations on the source

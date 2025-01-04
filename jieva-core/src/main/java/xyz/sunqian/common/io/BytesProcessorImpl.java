@@ -3,6 +3,7 @@ package xyz.sunqian.common.io;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieBytes;
+import xyz.sunqian.common.base.JieChars;
 import xyz.sunqian.common.coll.JieArray;
 
 import java.io.IOException;
@@ -99,6 +100,11 @@ final class BytesProcessorImpl implements BytesProcessor {
     public long writeTo() {
         this.dest = NullBufferOut.SINGLETON;
         return start();
+    }
+
+    @Override
+    public String toString() {
+        return toString(JieChars.defaultCharset());
     }
 
     @Override
