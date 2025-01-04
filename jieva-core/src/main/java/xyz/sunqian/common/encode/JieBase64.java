@@ -206,7 +206,7 @@ public class JieBase64 {
      * @author sunqian
      */
     @ThreadSafe
-    public interface Decoder extends ByteDecoder.ToLatin {
+    public interface Decoder extends ByteDecoder.FromLatin {
 
         /**
          * Returns -1. The {@code base64} decoding may not determine block size.

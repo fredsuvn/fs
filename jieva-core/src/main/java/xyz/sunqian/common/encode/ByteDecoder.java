@@ -64,7 +64,7 @@ public interface ByteDecoder extends ByteCoder {
     /**
      * Expansion of {@link ByteDecoder}, provides methods to decode string with {@link JieChars#latinCharset()}.
      */
-    interface ToLatin extends ByteDecoder {
+    interface FromLatin extends ByteDecoder {
 
         /**
          * Decodes given data with {@link JieChars#latinCharset()}.
@@ -73,7 +73,7 @@ public interface ByteDecoder extends ByteCoder {
          * @return result of decoding with {@link JieChars#latinCharset()}
          * @throws DecodingException for decoding error
          */
-        default byte[] decode(CharSequence data) throws DecodingException {
+        default byte[] fromLatin(CharSequence data) throws DecodingException {
             byte[] bytes = JieString.getBytes(data, JieChars.latinCharset());
             return decode(bytes);
         }
@@ -85,7 +85,7 @@ public interface ByteDecoder extends ByteCoder {
          * @return result of decoding with {@link JieChars#latinCharset()}
          * @throws DecodingException for decoding error
          */
-        default byte[] decode(char[] data) throws DecodingException {
+        default byte[] fromLatin(char[] data) throws DecodingException {
             byte[] bytes = JieString.getBytes(data, JieChars.latinCharset());
             return decode(bytes);
         }
@@ -97,7 +97,7 @@ public interface ByteDecoder extends ByteCoder {
          * @return result of decoding with {@link JieChars#latinCharset()}
          * @throws DecodingException for decoding error
          */
-        default ByteBuffer decode(CharBuffer data) throws DecodingException {
+        default ByteBuffer fromLatin(CharBuffer data) throws DecodingException {
             char[] chars = JieChars.getChars(data);
             byte[] bytes = JieString.getBytes(chars);
             return decode(ByteBuffer.wrap(bytes));

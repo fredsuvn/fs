@@ -15,10 +15,10 @@ public class ToLatinTest {
     public void toLatinTest() throws Exception {
         String hexStr = "0123456789ABCDEFabcdef";
         byte[] srcBytes = Hex.decodeHex(hexStr);
-        assertEquals(JieHex.encoder().toString(srcBytes), hexStr.toUpperCase());
-        assertEquals(JieHex.encoder().toString(ByteBuffer.wrap(srcBytes)), hexStr.toUpperCase());
-        assertEquals(JieHex.decoder().decode(hexStr), srcBytes);
-        assertEquals(JieHex.decoder().decode(CharBuffer.wrap(hexStr)), ByteBuffer.wrap(srcBytes));
-        assertEquals(JieHex.decoder().decode(hexStr.toCharArray()), srcBytes);
+        assertEquals(JieHex.encoder().toLatin(srcBytes), hexStr.toUpperCase());
+        assertEquals(JieHex.encoder().toLatin(ByteBuffer.wrap(srcBytes)), hexStr.toUpperCase());
+        assertEquals(JieHex.decoder().fromLatin(hexStr), srcBytes);
+        assertEquals(JieHex.decoder().fromLatin(CharBuffer.wrap(hexStr)), ByteBuffer.wrap(srcBytes));
+        assertEquals(JieHex.decoder().fromLatin(hexStr.toCharArray()), srcBytes);
     }
 }

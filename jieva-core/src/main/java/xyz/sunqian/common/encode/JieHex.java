@@ -77,7 +77,7 @@ public class JieHex {
      * @author sunqian
      */
     @ThreadSafe
-    public interface Decoder extends ByteDecoder.ToLatin {
+    public interface Decoder extends ByteDecoder.FromLatin {
 
         /**
          * Returns 2. The size of {@code hex} data is even.

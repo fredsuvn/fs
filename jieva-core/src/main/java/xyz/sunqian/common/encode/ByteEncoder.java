@@ -72,7 +72,7 @@ public interface ByteEncoder extends ByteCoder {
          * @return result of encoding to string with {@link JieChars#latinCharset()}
          * @throws EncodingException for encoding error
          */
-        default String toString(byte[] source) throws EncodingException {
+        default String toLatin(byte[] source) throws EncodingException {
             return new String(encode(source), JieChars.latinCharset());
         }
 
@@ -83,7 +83,7 @@ public interface ByteEncoder extends ByteCoder {
          * @return result of encoding to string with {@link JieChars#latinCharset()}
          * @throws EncodingException for encoding error
          */
-        default String toString(ByteBuffer source) throws EncodingException {
+        default String toLatin(ByteBuffer source) throws EncodingException {
             ByteBuffer encoded = encode(source);
             byte[] bytes = JieBytes.getBytes(encoded);
             return new String(bytes, JieChars.latinCharset());
