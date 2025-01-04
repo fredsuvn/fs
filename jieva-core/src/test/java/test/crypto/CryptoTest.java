@@ -5,6 +5,8 @@ import org.testng.annotations.Test;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.JieBytes;
 import xyz.sunqian.common.base.JieRandom;
+import xyz.sunqian.common.crypto.JieCrypto;
+import xyz.sunqian.common.io.BytesBuilder;
 import xyz.sunqian.common.io.BytesProcessor;
 import xyz.sunqian.common.io.JieIO;
 
@@ -15,14 +17,94 @@ import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.Provider;
+import java.util.Arrays;
 
 import static org.testng.Assert.assertEquals;
 
 public class CryptoTest {
 
     @Test
+    public void testCipher() throws Exception {
+        testCipher(10086, null);
+        Provider bouncyCastleProvider = new BouncyCastleProvider();
+        testCipher(10086, bouncyCastleProvider);
+    }
+
+    public void testCipher(int totalSize, @Nullable Provider provider) throws Exception {
+        {
+            // AES
+            KeyGenerator keyGenerator = provider == null ?
+                KeyGenerator.getInstance("AES") : KeyGenerator.getInstance("AES", provider);
+            keyGenerator.init(256);
+            Key key = keyGenerator.generateKey();
+            Cipher cipher = JieCrypto.newCipher("AES", provider);
+            testCipher(totalSize, 0, 0, cipher, key, key);
+        }
+        {
+            // RSA
+            KeyPairGenerator keyPairGenerator = provider == null ?
+                KeyPairGenerator.getInstance("RSA") : KeyPairGenerator.getInstance("RSA", provider);
+            keyPairGenerator.initialize(2048);
+            KeyPair keyPair = keyPairGenerator.generateKeyPair();
+            Cipher cipher = JieCrypto.newCipher("RSA/ECB/PKCS1Padding", provider);
+            testCipher(totalSize, 245, 256, cipher, keyPair.getPublic(), keyPair.getPrivate());
+        }
+    }
+
+    private void testCipher(
+        int totalSize, int enMax, int deMax, Cipher cipher, Key enKey, Key deKey
+    ) throws Exception {
+        byte[] src = JieRandom.fill(new byte[totalSize]);
+        // en
+        cipher.init(Cipher.ENCRYPT_MODE, enKey);
+        byte[] cipherEn = doCipher(src, enMax, cipher);
+        cipher.init(Cipher.ENCRYPT_MODE, enKey);
+        byte[] jieEn = JieIO.processor(src).encoder(JieCrypto.cipherEncoder(cipher, enMax)).writeToByteArray();
+        assertEquals(jieEn.length, cipherEn.length);
+
+        // de
+        cipher.init(Cipher.DECRYPT_MODE, deKey);
+        byte[] jieDe = JieIO.processor(cipherEn).encoder(JieCrypto.cipherEncoder(cipher, deMax)).writeToByteArray();
+        assertEquals(jieDe, src);
+        cipher.init(Cipher.DECRYPT_MODE, deKey);
+        byte[] cipherDe = doCipher(cipherEn, deMax, cipher);
+        assertEquals(cipherDe, src);
+    }
+
+    private byte[] doCipher(byte[] src, int maxSize, Cipher cipher) throws Exception {
+        if (maxSize <= 0) {
+            return doCipher(src, cipher);
+        }
+        BytesBuilder bb = new BytesBuilder();
+        for (int i = 0; i < src.length; ) {
+            int end = Math.min(i + maxSize, src.length);
+            bb.append(cipher.doFinal(Arrays.copyOfRange(src, i, end)));
+            i += maxSize;
+        }
+        return bb.toByteArray();
+    }
+
+    private byte[] doCipher(byte[] src, Cipher cipher) throws Exception {
+        BytesBuilder bb = new BytesBuilder();
+        for (int i = 0; i < src.length; ) {
+            int end = Math.min(i + cipher.getBlockSize(), src.length);
+            byte[] en;
+            if (end >= src.length) {
+                en = cipher.doFinal(Arrays.copyOfRange(src, i, end));
+            } else {
+                en = cipher.update(Arrays.copyOfRange(src, i, end));
+            }
+            if (en != null) {
+                bb.append(en);
+            }
+            i += cipher.getBlockSize();
+        }
+        return bb.toByteArray();
+    }
+
+    @Test
     public void testRsa() throws Exception {
-        //testRsa(null);
+        // testRsa(null);
         Provider bouncyCastleProvider = new BouncyCastleProvider();
         testRsa(bouncyCastleProvider);
     }
