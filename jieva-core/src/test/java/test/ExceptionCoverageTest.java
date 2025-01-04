@@ -5,6 +5,7 @@ import xyz.sunqian.common.base.ShouldNotHappenException;
 import xyz.sunqian.common.bean.BeanException;
 import xyz.sunqian.common.bean.BeanResolvingException;
 import xyz.sunqian.common.codec.CodecException;
+import xyz.sunqian.common.crypto.CryptoException;
 import xyz.sunqian.common.encode.DecodingException;
 import xyz.sunqian.common.encode.EncodingException;
 import xyz.sunqian.common.invoke.InvocationException;
@@ -159,6 +160,19 @@ public class ExceptionCoverageTest {
         });
         expectThrows(DecodingException.class, () -> {
             throw new DecodingException(new RuntimeException());
+        });
+
+        expectThrows(CryptoException.class, () -> {
+            throw new CryptoException();
+        });
+        expectThrows(CryptoException.class, () -> {
+            throw new CryptoException("");
+        });
+        expectThrows(CryptoException.class, () -> {
+            throw new CryptoException("", new RuntimeException());
+        });
+        expectThrows(CryptoException.class, () -> {
+            throw new CryptoException(new RuntimeException());
         });
     }
 }

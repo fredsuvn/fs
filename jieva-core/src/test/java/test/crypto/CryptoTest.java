@@ -11,11 +11,9 @@ import xyz.sunqian.common.io.JieIO;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
+import javax.crypto.Mac;
 import java.nio.ByteBuffer;
-import java.security.Key;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.Provider;
+import java.security.*;
 import java.util.Arrays;
 
 import static org.testng.Assert.assertEquals;
@@ -30,35 +28,29 @@ public class CryptoTest {
         testCipher(10086, bouncyCastleProvider);
 
         // error
-        Cipher cipher = Cipher.getInstance("AES");
+        Cipher cipher = JieCrypto.cipher("AES", null);
         expectThrows(IOEncodingException.class, () ->
             JieIO.processor(new byte[10086])
-                .encoder(JieCrypto.cipherEncoder(cipher, 16, true))
+                .encoder(JieCrypto.encoder(cipher, 16, true))
                 .toByteArray()
         );
     }
 
-    public void testCipher(int totalSize, @Nullable Provider provider) throws Exception {
+    private void testCipher(int totalSize, @Nullable Provider provider) throws Exception {
         {
             // AES
-            KeyGenerator keyGenerator = provider == null ?
-                KeyGenerator.getInstance("AES") : KeyGenerator.getInstance("AES", provider);
+            KeyGenerator keyGenerator = JieCrypto.keyGenerator("AES", provider);
             keyGenerator.init(256);
             Key key = keyGenerator.generateKey();
-            Cipher cipher = provider == null ?
-                Cipher.getInstance("AES") : Cipher.getInstance("AES", provider);
+            Cipher cipher = JieCrypto.cipher("AES", provider);
             testCipher(totalSize, 16, 16, cipher, key, key);
         }
         {
             // RSA
-            KeyPairGenerator keyPairGenerator = provider == null ?
-                KeyPairGenerator.getInstance("RSA") : KeyPairGenerator.getInstance("RSA", provider);
+            KeyPairGenerator keyPairGenerator = JieCrypto.keyPairGenerator("RSA", provider);
             keyPairGenerator.initialize(2048);
             KeyPair keyPair = keyPairGenerator.generateKeyPair();
-            Cipher cipher = provider == null ?
-                Cipher.getInstance("RSA/ECB/PKCS1Padding")
-                :
-                Cipher.getInstance("RSA/ECB/PKCS1Padding", provider);
+            Cipher cipher = JieCrypto.cipher("RSA/ECB/PKCS1Padding", provider);
             testCipher(totalSize, -245, -256, cipher, keyPair.getPublic(), keyPair.getPrivate());
         }
     }
@@ -69,26 +61,26 @@ public class CryptoTest {
         byte[] src = JieRandom.fill(new byte[totalSize]);
         // en
         cipher.init(Cipher.ENCRYPT_MODE, enKey);
-        byte[] cipherEn = doCipher(src, enBlock, cipher);
+        byte[] javaEn = doCipher(src, enBlock, cipher);
         cipher.init(Cipher.ENCRYPT_MODE, enKey);
         byte[] jieEn = JieIO.processor(src)
-            .encoder(JieCrypto.cipherEncoder(cipher, Math.abs(enBlock), enBlock <= 0)).toByteArray();
-        assertEquals(jieEn.length, cipherEn.length);
+            .encoder(JieCrypto.encoder(cipher, Math.abs(enBlock), enBlock <= 0)).toByteArray();
+        assertEquals(jieEn.length, javaEn.length);
 
         // de
         cipher.init(Cipher.DECRYPT_MODE, deKey);
-        byte[] jieDe = JieIO.processor(cipherEn)
+        byte[] jieDe = JieIO.processor(javaEn)
             .encoder(((data, end) -> {
                 ByteBuffer ret = ByteBuffer.allocateDirect(data.remaining());
                 ret.put(data);
                 ret.flip();
                 return ret;
             }))
-            .encoder(JieCrypto.cipherEncoder(cipher, Math.abs(deBlock), deBlock <= 0)).toByteArray();
+            .encoder(JieCrypto.encoder(cipher, Math.abs(deBlock), deBlock <= 0)).toByteArray();
         assertEquals(jieDe, src);
         cipher.init(Cipher.DECRYPT_MODE, deKey);
-        byte[] cipherDe = doCipher(cipherEn, deBlock, cipher);
-        assertEquals(cipherDe, src);
+        byte[] javaDe = doCipher(javaEn, deBlock, cipher);
+        assertEquals(javaDe, src);
     }
 
     private byte[] doCipher(byte[] src, int blockSize, Cipher cipher) throws Exception {
@@ -120,5 +112,50 @@ public class CryptoTest {
             i += cipher.getBlockSize();
         }
         return bb.toByteArray();
+    }
+
+    @Test
+    public void testDigest() throws Exception {
+        testDigest(10086, 111, null);
+        Provider bouncyCastleProvider = new BouncyCastleProvider();
+        testDigest(10086, 111, bouncyCastleProvider);
+
+        // error
+        // MessageDigest digest = JieCrypto.digest("MD5", null);
+        // expectThrows(IOEncodingException.class, () ->
+        //     JieIO.processor(new byte[10086])
+        //         .encoder(JieCrypto.encoder(digest, 16))
+        //         .toByteArray()
+        // );
+        Mac mac = JieCrypto.mac("HmacSHA256", null);
+        expectThrows(IOEncodingException.class, () ->
+            JieIO.processor(new byte[10086])
+                .encoder(JieCrypto.encoder(mac, 16))
+                .toByteArray()
+        );
+    }
+
+    public void testDigest(int totalSize, int blockSize, @Nullable Provider provider) throws Exception {
+        byte[] src = JieRandom.fill(new byte[totalSize]);
+        {
+            // Digest
+            MessageDigest digest = JieCrypto.digest("MD5", provider);
+            digest.reset();
+            byte[] javaEn = digest.digest(src);
+            digest.reset();
+            byte[] jieEn = JieIO.processor(src).encoder(JieCrypto.encoder(digest, blockSize)).toByteArray();
+            assertEquals(jieEn, javaEn);
+        }
+        {
+            // Mac
+            Mac mac = JieCrypto.mac("HmacSHA256", provider);
+            KeyGenerator keyGenerator = JieCrypto.keyGenerator("HmacSHA256", provider);
+            Key key = keyGenerator.generateKey();
+            mac.init(key);
+            byte[] javaEn = mac.doFinal(src);
+            mac.init(key);
+            byte[] jieEn = JieIO.processor(src).encoder(JieCrypto.encoder(mac, blockSize)).toByteArray();
+            assertEquals(jieEn, javaEn);
+        }
     }
 }
