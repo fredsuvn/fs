@@ -15,6 +15,18 @@ import static org.testng.Assert.*;
 public class BaseTest {
 
     @Test
+    public void testNullExpr() {
+        assertEquals(Jie.nonNull("123", "456"), "123");
+        assertEquals(Jie.nonNull(null, "456"), "456");
+        assertEquals(Jie.nonNull("123", ()->"456"), "123");
+        assertEquals(Jie.nonNull(null, ()->"456"), "456");
+        assertEquals(Jie.nullable("123", "456"), "456");
+        assertNull(Jie.nullable(null, "456"));
+        assertEquals(Jie.nullable("123", ()->"456"), "456");
+        assertNull(Jie.nullable(null, ()->"456"));
+    }
+
+    @Test
     public void testConvenient() {
         assertEquals(Jie.array(1, 2, 3), new Integer[]{1, 2, 3});
         assertEquals(Jie.list(1, 2, 3), Arrays.asList(1, 2, 3));

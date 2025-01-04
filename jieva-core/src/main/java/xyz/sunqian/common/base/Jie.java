@@ -37,33 +37,69 @@ public class Jie {
     }
 
     /**
-     * Returns default value if given object is null, or given object itself if it is not null:
+     * Returns the default value if given object is null, or given object itself if it is not null. It is equivalent
+     * to:
      * <pre>
      *     return obj == null ? defaultValue : obj;
      * </pre>
      *
      * @param obj          given object
-     * @param defaultValue default value
-     * @param <T>          type of values
-     * @return default value if given object is null, or given object itself if it is not null
+     * @param defaultValue the default value
+     * @param <T>          type of return value
+     * @return the default value if given object is null, or given object itself if it is not null
      */
     public static <T> T nonNull(@Nullable T obj, T defaultValue) {
         return obj == null ? defaultValue : obj;
     }
 
     /**
-     * Returns supplied value if given object is null, or given object itself if it is not null:
+     * Returns result of given supplier if given object is null, or given object itself if it is not null. It is
+     * equivalent to:
      * <pre>
-     *     return obj == null ? defaultSupplier.get() : obj;
+     *     return obj == null ? supplier.get() : obj;
      * </pre>
      *
-     * @param obj             given object
-     * @param defaultSupplier computed value
-     * @param <T>             type of values
-     * @return computed value if given object is null, or given object itself if it is not null
+     * @param obj      given object
+     * @param supplier given supplier
+     * @param <T>      type of return value
+     * @return result of given supplier if given object is null, or given object itself if it is not null
      */
-    public static <T> T nonNull(@Nullable T obj, Supplier<? extends T> defaultSupplier) {
-        return obj == null ? defaultSupplier.get() : obj;
+    public static <T> T nonNull(@Nullable T obj, Supplier<? extends T> supplier) {
+        return obj == null ? supplier.get() : obj;
+    }
+
+    /**
+     * Returns the default value if given object is <b>not</b> null, or {@code null} if given object is null. It is
+     * equivalent to:
+     * <pre>
+     *     return obj == null ? null : defaultValue;
+     * </pre>
+     *
+     * @param obj          given object
+     * @param defaultValue the default value
+     * @param <T>          type of return value
+     * @return the default value if given object is <b>not</b> null, or {@code null} if given object is null
+     */
+    @Nullable
+    public static <T> T nullable(@Nullable Object obj, T defaultValue) {
+        return obj == null ? null : defaultValue;
+    }
+
+    /**
+     * Returns result of given supplier if given object is <b>not</b> null, or {@code null} if given object is null. It
+     * is equivalent to:
+     * <pre>
+     *     return obj == null ? null : supplier.get();
+     * </pre>
+     *
+     * @param obj      given object
+     * @param supplier given supplier
+     * @param <T>      type of return value
+     * @return result of given supplier if given object is <b>not</b> null, or {@code null} if given object is null
+     */
+    @Nullable
+    public static <T> T nullable(@Nullable Object obj, Supplier<? extends T> supplier) {
+        return obj == null ? null : supplier.get();
     }
 
     /**
