@@ -76,8 +76,8 @@ public interface ProxyBuilder {
      * <p>
      * Typically, the builder creates a subclass that inherits from {@link #superClass(Class)} and/or
      * {@link #interfaces(List)} (if been set). Then tests each method obtained from the {@link Class#getMethods()} by
-     * {@link MethodProxyHandler#proxy(Method)} (from {@link #proxyHandler(MethodProxyHandler)}). If the handler returns
-     * {@code true}, the method will be overridden.
+     * {@link MethodProxyHandler#needsProxy(Method)} (from {@link #proxyHandler(MethodProxyHandler)}). If the handler
+     * returns {@code true}, the method will be proxied via overriding.
      *
      * @return a new proxy class
      * @throws ProxyException if any problem occurs

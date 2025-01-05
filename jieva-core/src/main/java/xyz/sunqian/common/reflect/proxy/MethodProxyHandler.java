@@ -9,9 +9,10 @@ import java.lang.reflect.Method;
  * Method proxy handle for {@link ProxyClass}.
  * <p>
  * Each proxy instance has an associated method proxy handler. When the proxy instance is created, all non-final and
- * non-static method from {@link Class#getMethods()} will be passed into {@link #proxy(Method)}, to determine whether
- * current method should be proxied. If it returns {@code true}, the method will be proxied. Then when the method is
- * invoked on the proxy instance, {@link #invoke(Object, Method, Object[], ProxyInvoker)} will be invoked.
+ * non-static method from {@link Class#getMethods()} will be passed into {@link #needsProxy(Method)}, to determine
+ * whether current method should be proxied. If it returns {@code true}, the method will be proxied. Then when the
+ * method is invoked on an instance of the proxy, {@link #invoke(Object, Method, Object[], ProxyInvoker)} will be
+ * invoked.
  *
  * @author fredsuvn
  */
@@ -23,16 +24,16 @@ public interface MethodProxyHandler {
      * @param method specified method
      * @return whether specified method should be proxied
      */
-    boolean proxy(Method method);
+    boolean needsProxy(Method method);
 
     /**
-     * Processes a method invocation on a proxy instance and returns the result. This method will be invoked when a
-     * method is invoked on a proxy instance that it is associated with.
+     * When the specified method is invoked on an instance of the proxy, it is this method which actually is executed.
+     * That is, this method serves as the implementation body of the proxy method.
      *
      * @param proxy   the proxy instance
-     * @param method  the proxied method
+     * @param method  the specified method which is proxied
      * @param args    invocation arguments
-     * @param invoker an invoker to invoke proxied method (super) on given proxy or proxied instance
+     * @param invoker the proxy method invoker associates to the specified method
      * @return the result
      * @throws Throwable the bare exceptions thrown by the proxied method, without any wrapping such as
      *                   {@link InvocationTargetException}

@@ -17,7 +17,7 @@ public class BigMethodTest {
     public void testBigMethod() throws Exception {
         MethodProxyHandler handler = new MethodProxyHandler() {
             @Override
-            public boolean proxy(Method method) {
+            public boolean needsProxy(Method method) {
                 return method.getName().startsWith("big");
             }
 

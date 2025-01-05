@@ -19,7 +19,7 @@ public interface ProxyClass {
     /**
      * Returns actual generated proxy class.
      * <p>
-     * This method may be return {@code null} if the generator of this proxy class is unsupported.
+     * This method may be return {@code null} if the implementation doesn't support.
      *
      * @return actual generated proxy class
      */

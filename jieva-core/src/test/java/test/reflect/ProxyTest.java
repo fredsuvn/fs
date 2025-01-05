@@ -72,7 +72,7 @@ public class ProxyTest {
         expectThrows(ProxyException.class, () ->
             JieProxy.asmProxyBuilder().superClass(ClassO.class).proxyHandler(new MethodProxyHandler() {
                 @Override
-                public boolean proxy(Method method) {
+                public boolean needsProxy(Method method) {
                     throw new IllegalStateException();
                 }
 
@@ -84,7 +84,7 @@ public class ProxyTest {
 
         MethodProxyHandler superHandle = new MethodProxyHandler() {
             @Override
-            public boolean proxy(Method method) {
+            public boolean needsProxy(Method method) {
                 return Objects.equals(method.getName(), "ppi_String");
             }
 
@@ -102,7 +102,7 @@ public class ProxyTest {
 
         Object op = JieProxy.asmProxyBuilder().superClass(Object.class).proxyHandler(new MethodProxyHandler() {
             @Override
-            public boolean proxy(Method method) {
+            public boolean needsProxy(Method method) {
                 return true;
             }
 
@@ -247,7 +247,7 @@ public class ProxyTest {
         expectThrows(ProxyException.class, () ->
             JieProxy.jdkProxyBuilder().interfaces(Jie.list(Inter1.class)).proxyHandler(new MethodProxyHandler() {
                 @Override
-                public boolean proxy(Method method) {
+                public boolean needsProxy(Method method) {
                     throw new IllegalStateException();
                 }
 
@@ -261,7 +261,7 @@ public class ProxyTest {
         MethodProxyHandler handler = new MethodProxyHandler() {
 
             @Override
-            public boolean proxy(Method method) {
+            public boolean needsProxy(Method method) {
                 return method.getName().startsWith("pp") && !method.getName().endsWith("_nonProxied");
             }
 
@@ -311,7 +311,7 @@ public class ProxyTest {
         }
 
         @Override
-        public boolean proxy(Method method) {
+        public boolean needsProxy(Method method) {
             return (method.getName().startsWith("pp")
                 || method.getName().equals("callSuper")
                 || method.getName().equals("callVirtual"))
@@ -751,7 +751,7 @@ public class ProxyTest {
             .proxyHandler(new MethodProxyHandler() {
 
                 @Override
-                public boolean proxy(Method method) {
+                public boolean needsProxy(Method method) {
                     return method.getName().startsWith("fun");
                 }
 

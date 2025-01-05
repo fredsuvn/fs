@@ -136,7 +136,7 @@ public class AsmProxyBuilder implements ProxyBuilder, Opcodes {
                 if (Modifier.isFinal(method.getModifiers()) || Modifier.isStatic(method.getModifiers())) {
                     continue;
                 }
-                if (!handler.proxy(method)) {
+                if (!handler.needsProxy(method)) {
                     continue;
                 }
                 String methodInfo = method.getName() + ":" + JieJvm.getDescriptor(method);
