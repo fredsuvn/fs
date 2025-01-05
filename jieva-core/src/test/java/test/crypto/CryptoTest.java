@@ -2,22 +2,25 @@ package test.crypto;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.testng.annotations.Test;
+import test.TU;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.JieBytes;
 import xyz.sunqian.common.base.JieRandom;
+import xyz.sunqian.common.crypto.CryptoException;
 import xyz.sunqian.common.crypto.JieCrypto;
 import xyz.sunqian.common.io.BytesBuilder;
 import xyz.sunqian.common.io.IOEncodingException;
 import xyz.sunqian.common.io.JieIO;
+import xyz.sunqian.test.JieTest;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
-import java.nio.ByteBuffer;
+import java.lang.reflect.Method;
 import java.security.*;
 import java.util.Arrays;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.expectThrows;
+import static org.testng.Assert.*;
 
 public class CryptoTest {
 
@@ -34,6 +37,10 @@ public class CryptoTest {
                 .encoder(JieCrypto.encoder(cipher, 16, true))
                 .toByteArray()
         );
+
+        // null
+        Method toBuffer = JieCrypto.class.getDeclaredMethod("toBuffer", byte[].class);
+        JieTest.reflectEquals(toBuffer, null, null, (Object) null);
     }
 
     private void testCipher(int totalSize, @Nullable Provider provider) throws Exception {
@@ -43,7 +50,7 @@ public class CryptoTest {
             keyGenerator.init(256);
             Key key = keyGenerator.generateKey();
             Cipher cipher = JieCrypto.cipher("AES", provider);
-            testCipher(totalSize, 16, 16, cipher, key, key);
+            testCipher(totalSize, 16 * 100, 16 * 16, cipher, key, key);
         }
         {
             // RSA
@@ -70,12 +77,7 @@ public class CryptoTest {
         // de
         cipher.init(Cipher.DECRYPT_MODE, deKey);
         byte[] jieDe = JieIO.processor(javaEn)
-            .encoder(((data, end) -> {
-                ByteBuffer ret = ByteBuffer.allocateDirect(data.remaining());
-                ret.put(data);
-                ret.flip();
-                return ret;
-            }))
+            .encoder(((data, end) -> TU.bufferDirect(JieBytes.getBytes(data))))
             .encoder(JieCrypto.encoder(cipher, Math.abs(deBlock), deBlock <= 0)).toByteArray();
         assertEquals(jieDe, src);
         cipher.init(Cipher.DECRYPT_MODE, deKey);
@@ -121,12 +123,10 @@ public class CryptoTest {
         testDigest(10086, 111, bouncyCastleProvider);
 
         // error
-        // MessageDigest digest = JieCrypto.digest("MD5", null);
-        // expectThrows(IOEncodingException.class, () ->
-        //     JieIO.processor(new byte[10086])
-        //         .encoder(JieCrypto.encoder(digest, 16))
-        //         .toByteArray()
-        // );
+        MessageDigest digest = JieCrypto.digest("MD5", null);
+        expectThrows(CryptoException.class, () ->
+            JieCrypto.encoder(digest, 16).encode(JieBytes.emptyBuffer(), true)
+        );
         Mac mac = JieCrypto.mac("HmacSHA256", null);
         expectThrows(IOEncodingException.class, () ->
             JieIO.processor(new byte[10086])
@@ -143,8 +143,13 @@ public class CryptoTest {
             digest.reset();
             byte[] javaEn = digest.digest(src);
             digest.reset();
-            byte[] jieEn = JieIO.processor(src).encoder(JieCrypto.encoder(digest, blockSize)).toByteArray();
-            assertEquals(jieEn, javaEn);
+            byte[] jieEn1 = JieIO.processor(src).encoder(JieCrypto.encoder(digest, blockSize)).toByteArray();
+            assertEquals(jieEn1, javaEn);
+            byte[] jieEn2 = JieIO.processor(src)
+                .encoder(((data, end) -> TU.bufferDirect(JieBytes.getBytes(data))))
+                .encoder(JieCrypto.encoder(digest, blockSize))
+                .toByteArray();
+            assertEquals(jieEn2, javaEn);
         }
         {
             // Mac
@@ -154,8 +159,22 @@ public class CryptoTest {
             mac.init(key);
             byte[] javaEn = mac.doFinal(src);
             mac.init(key);
-            byte[] jieEn = JieIO.processor(src).encoder(JieCrypto.encoder(mac, blockSize)).toByteArray();
-            assertEquals(jieEn, javaEn);
+            byte[] jieEn1 = JieIO.processor(src).encoder(JieCrypto.encoder(mac, blockSize)).toByteArray();
+            assertEquals(jieEn1, javaEn);
+            byte[] jieEn2 = JieIO.processor(src)
+                .encoder(((data, end) -> TU.bufferDirect(JieBytes.getBytes(data))))
+                .encoder(JieCrypto.encoder(mac, blockSize))
+                .toByteArray();
+            assertEquals(jieEn2, javaEn);
         }
+    }
+
+    @Test
+    public void testAlgorithm() {
+        expectThrows(CryptoException.class, () -> JieCrypto.keyGenerator("不存在", null));
+        expectThrows(CryptoException.class, () -> JieCrypto.keyPairGenerator("不存在", null));
+        expectThrows(CryptoException.class, () -> JieCrypto.cipher("不存在", null));
+        expectThrows(CryptoException.class, () -> JieCrypto.digest("不存在", null));
+        expectThrows(CryptoException.class, () -> JieCrypto.mac("不存在", null));
     }
 }
