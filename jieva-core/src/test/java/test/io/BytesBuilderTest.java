@@ -49,7 +49,7 @@ public class BytesBuilderTest {
         bbs2.write(1);
         bbs2.write(1);
         expectThrows(IllegalStateException.class, () -> bbs2.write(1));
-        JieTest.testThrow(IllegalStateException.class, grow, new BytesBuilder(), BytesBuilder.MAX_ARRAY_SIZE + 10);
+        JieTest.reflectThrows(IllegalStateException.class, grow, new BytesBuilder(), BytesBuilder.MAX_ARRAY_SIZE + 10);
         Method newCapacity = BytesBuilder.class.getDeclaredMethod("newCapacity", int.class, int.class);
         newCapacity.setAccessible(true);
         assertEquals(BytesBuilder.MAX_ARRAY_SIZE, newCapacity.invoke(new BytesBuilder(), -1, 1));

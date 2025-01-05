@@ -127,9 +127,9 @@ public class BytesProcessorTest {
         expectThrows(IORuntimeException.class, () -> JieIO.processor(new byte[0]).writeTo((OutputStream) null));
         expectThrows(IORuntimeException.class, () -> JieIO.processor((InputStream) null).writeTo(new byte[0]));
         Method method = JieIO.processor(new byte[0]).getClass().getDeclaredMethod("toBufferIn", Object.class);
-        JieTest.testThrow(IORuntimeException.class, method, JieIO.processor(new byte[0]), "");
+        JieTest.reflectThrows(IORuntimeException.class, method, JieIO.processor(new byte[0]), "");
         method = JieIO.processor(new byte[0]).getClass().getDeclaredMethod("toBufferOut", Object.class);
-        JieTest.testThrow(IORuntimeException.class, method, JieIO.processor(new byte[0]), "");
+        JieTest.reflectThrows(IORuntimeException.class, method, JieIO.processor(new byte[0]), "");
         expectThrows(IORuntimeException.class, () -> JieIO.processor(new ThrowIn(0)).writeTo(new byte[0]));
         expectThrows(IORuntimeException.class, () -> JieIO.processor(new ThrowIn(1)).writeTo(new byte[0]));
     }

@@ -86,7 +86,7 @@ public class JvmTest {
 
         // exception
         Method getPrimitiveDescriptor = JieJvm.class.getDeclaredMethod("getPrimitiveDescriptor", Class.class);
-        JieTest.testThrow(NotPrimitiveException.class, getPrimitiveDescriptor, null, Object.class);
+        JieTest.reflectThrows(NotPrimitiveException.class, getPrimitiveDescriptor, null, Object.class);
     }
 
     @Test

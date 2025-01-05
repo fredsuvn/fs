@@ -140,9 +140,9 @@ public class CharsProcessorTest {
         expectThrows(IORuntimeException.class, () -> JieIO.processor(new char[0]).writeTo((Appendable) null));
         expectThrows(IORuntimeException.class, () -> JieIO.processor((Reader) null).writeTo(new char[0]));
         Method method = JieIO.processor(new char[0]).getClass().getDeclaredMethod("toBufferIn", Object.class);
-        JieTest.testThrow(IORuntimeException.class, method, JieIO.processor(new char[0]), 1);
+        JieTest.reflectThrows(IORuntimeException.class, method, JieIO.processor(new char[0]), 1);
         method = JieIO.processor(new char[0]).getClass().getDeclaredMethod("toBufferOut", Object.class);
-        JieTest.testThrow(IORuntimeException.class, method, JieIO.processor(new char[0]), "");
+        JieTest.reflectThrows(IORuntimeException.class, method, JieIO.processor(new char[0]), "");
         expectThrows(IORuntimeException.class, () -> JieIO.processor(new ThrowReader(0)).writeTo(new char[0]));
         expectThrows(IORuntimeException.class, () -> JieIO.processor(new ThrowReader(1)).writeTo(new char[0]));
     }

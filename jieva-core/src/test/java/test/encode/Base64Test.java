@@ -226,6 +226,6 @@ public class Base64Test {
     public void testUnreachablePoint() throws Exception {
         ByteEncoder encoder = JieBase64.lineEncoder(16, new byte[]{'\t'}, true, true, false);
         Method getOutputSize = encoder.getClass().getDeclaredMethod("getOutputSize", int.class, long.class, boolean.class);
-        JieTest.testThrow(EncodingException.class, getOutputSize, encoder, 0, 0L, false);
+        JieTest.reflectThrows(EncodingException.class, getOutputSize, encoder, 0, 0L, false);
     }
 }

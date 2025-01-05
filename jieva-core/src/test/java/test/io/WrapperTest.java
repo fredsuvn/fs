@@ -56,11 +56,11 @@ public class WrapperTest {
         testInput(bufferIn, source, true);
         Class<?> bufferInClass = bufferIn.getClass();
         Method read0 = bufferInClass.getDeclaredMethod("read0");
-        JieTest.testThrow(IOException.class, read0, bufferIn);
+        JieTest.reflectThrows(IOException.class, read0, bufferIn);
         read0 = bufferInClass.getDeclaredMethod("read0", byte[].class, int.class, int.class);
-        JieTest.testThrow(IOException.class, read0, bufferIn, null, 0, 0);
+        JieTest.reflectThrows(IOException.class, read0, bufferIn, null, 0, 0);
         read0 = bufferInClass.getDeclaredMethod("skip0", int.class);
-        JieTest.testThrow(IOException.class, read0, bufferIn, 99);
+        JieTest.reflectThrows(IOException.class, read0, bufferIn, 99);
 
         // file
         Path path = Paths.get("src", "test", "resources", "io", "input.test");
@@ -315,11 +315,11 @@ public class WrapperTest {
         testReader(bufferIn, source);
         Class<?> bufferInClass = bufferIn.getClass();
         Method read0 = bufferInClass.getDeclaredMethod("read0");
-        JieTest.testThrow(IOException.class, read0, bufferIn);
+        JieTest.reflectThrows(IOException.class, read0, bufferIn);
         read0 = bufferInClass.getDeclaredMethod("read0", char[].class, int.class, int.class);
-        JieTest.testThrow(IOException.class, read0, bufferIn, null, 0, 0);
+        JieTest.reflectThrows(IOException.class, read0, bufferIn, null, 0, 0);
         read0 = bufferInClass.getDeclaredMethod("skip0", int.class);
-        JieTest.testThrow(IOException.class, read0, bufferIn, 99);
+        JieTest.reflectThrows(IOException.class, read0, bufferIn, 99);
 
         // bytes
         char[] chars = JieRandom.fill(new char[sourceSize], '0', '9');

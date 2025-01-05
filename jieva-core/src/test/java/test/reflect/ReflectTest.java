@@ -199,7 +199,7 @@ public class ReflectTest {
 
         // exception
         Method wrapperPrimitive = JieReflect.class.getDeclaredMethod("wrapperPrimitive", Class.class);
-        JieTest.testThrow(NotPrimitiveException.class, wrapperPrimitive, null, Object.class);
+        JieTest.reflectThrows(NotPrimitiveException.class, wrapperPrimitive, null, Object.class);
     }
 
     @Test
@@ -414,7 +414,7 @@ public class ReflectTest {
         }.getType(), String.class);
 
         Method get0 = TypeRef.class.getDeclaredMethod("get0", List.class);
-        JieTest.testThrow(ReflectionException.class, get0, new TypeRef<Object>() {}, Collections.emptyList());
+        JieTest.reflectThrows(ReflectionException.class, get0, new TypeRef<Object>() {}, Collections.emptyList());
     }
 
     @Test

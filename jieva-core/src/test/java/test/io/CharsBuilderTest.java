@@ -67,7 +67,7 @@ public class CharsBuilderTest {
         cbs2.write(1);
         cbs2.write(1);
         expectThrows(IllegalStateException.class, () -> cbs2.write(1));
-        JieTest.testThrow(IllegalStateException.class, grow, new CharsBuilder(), CharsBuilder.MAX_ARRAY_SIZE + 10);
+        JieTest.reflectThrows(IllegalStateException.class, grow, new CharsBuilder(), CharsBuilder.MAX_ARRAY_SIZE + 10);
         Method newCapacity = CharsBuilder.class.getDeclaredMethod("newCapacity", int.class, int.class);
         newCapacity.setAccessible(true);
         assertEquals(CharsBuilder.MAX_ARRAY_SIZE, newCapacity.invoke(new CharsBuilder(), -1, 1));

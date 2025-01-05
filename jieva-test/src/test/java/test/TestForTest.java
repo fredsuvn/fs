@@ -14,9 +14,18 @@ import static org.testng.Assert.expectThrows;
 public class TestForTest {
 
     @Test
-    public void testExpect() throws Exception {
+    public void testThrows() throws Exception {
         Method throwError = T.class.getDeclaredMethod("throwError");
-        assertEquals(JieTest.testThrow(JieTestException.class, throwError, null).getClass(), JieTestException.class);
+        assertEquals(JieTest.reflectThrows(JieTestException.class, throwError, null).getClass(), JieTestException.class);
+    }
+
+    @Test
+    public void testEquals() throws Exception {
+        Method string = T.class.getDeclaredMethod("string");
+        JieTest.reflectEquals(string, "123", null);
+        expectThrows(JieTestException.class, () ->
+            JieTest.reflectEquals(string, "123", null, "123")
+        );
     }
 
     @Test
@@ -32,6 +41,10 @@ public class TestForTest {
 
         private static void throwError() {
             throw new JieTestException();
+        }
+
+        private static String string() {
+            return "123";
         }
     }
 

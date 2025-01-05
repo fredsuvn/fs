@@ -130,13 +130,13 @@ public class ProxyTest {
         Class<?> asmMisc = Class.forName("xyz.sunqian.common.reflect.proxy.AsmMisc");
         Method method = asmMisc.getDeclaredMethod(
             "visitLoadPrimitiveParamAsObject", MethodVisitor.class, Class.class, int.class);
-        JieTest.testThrow(NotPrimitiveException.class, method, null, null, Object.class, 1);
+        JieTest.reflectThrows(NotPrimitiveException.class, method, null, null, Object.class, 1);
         method = asmMisc.getDeclaredMethod(
             "visitObjectCastPrimitive", MethodVisitor.class, Class.class, boolean.class);
-        JieTest.testThrow(NotPrimitiveException.class, method, null, null, Object.class, true);
+        JieTest.reflectThrows(NotPrimitiveException.class, method, null, null, Object.class, true);
         method = asmMisc.getDeclaredMethod(
             "returnPrimitiveCastObject", MethodVisitor.class, Class.class);
-        JieTest.testThrow(NotPrimitiveException.class, method, null, null, Object.class);
+        JieTest.reflectThrows(NotPrimitiveException.class, method, null, null, Object.class);
     }
 
     private void testAsm(ClassP proxy, String ppi_String, boolean absError) {
