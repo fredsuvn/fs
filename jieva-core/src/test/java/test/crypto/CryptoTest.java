@@ -5,9 +5,11 @@ import org.testng.annotations.Test;
 import test.TU;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.JieBytes;
+import xyz.sunqian.common.base.JieChars;
 import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.crypto.CryptoException;
 import xyz.sunqian.common.crypto.JieCrypto;
+import xyz.sunqian.common.encode.JieBase64;
 import xyz.sunqian.common.io.BytesBuilder;
 import xyz.sunqian.common.io.IOEncodingException;
 import xyz.sunqian.common.io.JieIO;
@@ -19,6 +21,7 @@ import javax.crypto.Mac;
 import java.lang.reflect.Method;
 import java.security.*;
 import java.util.Arrays;
+import java.util.Base64;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.expectThrows;
@@ -173,5 +176,34 @@ public class CryptoTest {
         expectThrows(CryptoException.class, () -> JieCrypto.cipher("不存在", null));
         expectThrows(CryptoException.class, () -> JieCrypto.digest("不存在", null));
         expectThrows(CryptoException.class, () -> JieCrypto.mac("不存在", null));
+    }
+
+    @Test
+    public void testFull() throws Exception {
+        String hello = "你好，世界！";
+        KeyGenerator keyGenerator = JieCrypto.keyGenerator("AES", null);
+        Key key = keyGenerator.generateKey();
+        Cipher cipher = JieCrypto.cipher("AES/ECB/PKCS5Padding", null);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+        String base64 = JieIO.processor(hello)
+            .toByteProcessor(JieChars.defaultCharset())
+            .encoder(JieCrypto.encoder(cipher, 16, false))
+            .encoder(JieBase64.encoder().streamEncoder())
+            .toString();
+        cipher.init(Cipher.DECRYPT_MODE, key);
+
+        // jie
+        String deHello = JieIO.processor(base64)
+            .toByteProcessor(JieChars.latinCharset())
+            .encoder(JieBase64.decoder().streamEncoder())
+            .encoder(JieCrypto.encoder(cipher, 16, false))
+            .toString();
+        assertEquals(deHello, hello);
+
+        // java
+        byte[] aesBytes = Base64.getDecoder().decode(base64);
+        cipher.init(Cipher.DECRYPT_MODE, key);
+        byte[] helloBytes = cipher.doFinal(aesBytes);
+        assertEquals(new String(helloBytes, JieChars.defaultCharset()), hello);
     }
 }
