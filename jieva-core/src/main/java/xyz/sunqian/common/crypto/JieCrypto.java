@@ -131,24 +131,20 @@ public class JieCrypto {
     public static BytesProcessor.Encoder encoder(Cipher cipher, int blockSize, boolean onlyFinal) {
         BytesProcessor.Encoder encoder = new BytesProcessor.Encoder() {
             @Override
-            public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) {
-                try {
-                    if (onlyFinal) {
-                        if (JieBytes.isEmpty(data)) {
-                            return null;
-                        }
-                        return doFinal(cipher, data);
+            public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) throws Exception {
+                if (onlyFinal) {
+                    if (JieBytes.isEmpty(data)) {
+                        return null;
                     }
-                    ByteBuffer ret;
-                    if (end) {
-                        ret = doFinal(cipher, data);
-                    } else {
-                        ret = doUpdate(cipher, data);
-                    }
-                    return ret;
-                } catch (Exception e) {
-                    throw new CryptoException(e);
+                    return doFinal(cipher, data);
                 }
+                ByteBuffer ret;
+                if (end) {
+                    ret = doFinal(cipher, data);
+                } else {
+                    ret = doUpdate(cipher, data);
+                }
+                return ret;
             }
         };
         return JieIO.fixedSizeEncoder(blockSize, encoder);
@@ -196,19 +192,15 @@ public class JieCrypto {
     public static BytesProcessor.Encoder encoder(MessageDigest digest, int blockSize) {
         BytesProcessor.Encoder encoder = new BytesProcessor.Encoder() {
             @Override
-            public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) {
-                try {
-                    ByteBuffer ret;
-                    if (end) {
-                        ret = ByteBuffer.wrap(doFinal(digest, data));
-                    } else {
-                        doUpdate(digest, data);
-                        ret = null;
-                    }
-                    return ret;
-                } catch (Exception e) {
-                    throw new CryptoException(e);
+            public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) throws Exception {
+                ByteBuffer ret;
+                if (end) {
+                    ret = ByteBuffer.wrap(doFinal(digest, data));
+                } else {
+                    doUpdate(digest, data);
+                    ret = null;
                 }
+                return ret;
             }
         };
         return JieIO.fixedSizeEncoder(blockSize, encoder);
@@ -244,19 +236,15 @@ public class JieCrypto {
     public static BytesProcessor.Encoder encoder(Mac mac, int blockSize) {
         BytesProcessor.Encoder encoder = new BytesProcessor.Encoder() {
             @Override
-            public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) {
-                try {
-                    ByteBuffer ret;
-                    if (end) {
-                        ret = ByteBuffer.wrap(doFinal(mac, data));
-                    } else {
-                        doUpdate(mac, data);
-                        ret = null;
-                    }
-                    return ret;
-                } catch (Exception e) {
-                    throw new CryptoException(e);
+            public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) throws Exception {
+                ByteBuffer ret;
+                if (end) {
+                    ret = ByteBuffer.wrap(doFinal(mac, data));
+                } else {
+                    doUpdate(mac, data);
+                    ret = null;
                 }
+                return ret;
             }
         };
         return JieIO.fixedSizeEncoder(blockSize, encoder);

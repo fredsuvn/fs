@@ -20,7 +20,8 @@ import java.lang.reflect.Method;
 import java.security.*;
 import java.util.Arrays;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.expectThrows;
 
 public class CryptoTest {
 
@@ -123,10 +124,6 @@ public class CryptoTest {
         testDigest(10086, 111, bouncyCastleProvider);
 
         // error
-        MessageDigest digest = JieCrypto.digest("MD5", null);
-        expectThrows(CryptoException.class, () ->
-            JieCrypto.encoder(digest, 16).encode(JieBytes.emptyBuffer(), true)
-        );
         Mac mac = JieCrypto.mac("HmacSHA256", null);
         expectThrows(IOEncodingException.class, () ->
             JieIO.processor(new byte[10086])
