@@ -394,8 +394,9 @@ public interface CharsProcessor {
          * @param data specified data
          * @param end  whether current encoding is the last invocation
          * @return result of encoding
+         * @throws Exception thrown for any problems
          */
         @Nullable
-        CharBuffer encode(CharBuffer data, boolean end);
+        CharBuffer encode(CharBuffer data, boolean end) throws Exception;
     }
 }

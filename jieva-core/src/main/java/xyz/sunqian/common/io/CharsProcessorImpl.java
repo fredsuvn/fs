@@ -723,7 +723,7 @@ final class CharsProcessorImpl implements CharsProcessor {
         }
 
         @Override
-        public @Nullable CharBuffer encode(CharBuffer data, boolean end) {
+        public @Nullable CharBuffer encode(CharBuffer data, boolean end) throws Exception {
             if (end) {
                 return encoder.encode(totalData(data), true);
             }
@@ -767,7 +767,7 @@ final class CharsProcessorImpl implements CharsProcessor {
         }
 
         @Override
-        public @Nullable CharBuffer encode(CharBuffer data, boolean end) {
+        public @Nullable CharBuffer encode(CharBuffer data, boolean end) throws Exception {
             CharBuffer total = totalData(data);
             CharBuffer ret = encoder.encode(total, end);
             if (end) {
@@ -793,7 +793,7 @@ final class CharsProcessorImpl implements CharsProcessor {
         }
 
         @Override
-        public @Nullable CharBuffer encode(CharBuffer data, boolean end) {
+        public @Nullable CharBuffer encode(CharBuffer data, boolean end) throws Exception {
             CharBuffer total = totalData(data);
             int totalSize = total.remaining();
             int times = totalSize / size;

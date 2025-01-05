@@ -642,7 +642,7 @@ final class BytesProcessorImpl implements BytesProcessor {
         }
 
         @Override
-        public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) {
+        public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) throws Exception {
             if (end) {
                 return encoder.encode(totalData(data), true);
             }
@@ -686,7 +686,7 @@ final class BytesProcessorImpl implements BytesProcessor {
         }
 
         @Override
-        public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) {
+        public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) throws Exception {
             ByteBuffer total = totalData(data);
             ByteBuffer ret = encoder.encode(total, end);
             if (end) {
@@ -712,7 +712,7 @@ final class BytesProcessorImpl implements BytesProcessor {
         }
 
         @Override
-        public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) {
+        public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) throws Exception {
             ByteBuffer total = totalData(data);
             int totalSize = total.remaining();
             int times = totalSize / size;

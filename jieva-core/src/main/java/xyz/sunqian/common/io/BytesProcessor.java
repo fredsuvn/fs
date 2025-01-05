@@ -403,8 +403,9 @@ public interface BytesProcessor {
          * @param data specified input data
          * @param end  whether current encoding is the last invocation
          * @return result of encoding
+         * @throws Exception thrown for any problems
          */
         @Nullable
-        ByteBuffer encode(ByteBuffer data, boolean end);
+        ByteBuffer encode(ByteBuffer data, boolean end) throws Exception;
     }
 }
