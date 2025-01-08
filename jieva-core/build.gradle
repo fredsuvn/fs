@@ -51,6 +51,7 @@ dependencies {
 
   testImplementation project(":jieva-test")
   testImplementation "com.google.protobuf:protobuf-java"
+  testImplementation 'org.bouncycastle:bcpkix-jdk18on:1.79'
 }
 
 java {
