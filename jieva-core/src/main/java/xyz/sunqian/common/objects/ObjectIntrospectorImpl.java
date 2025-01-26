@@ -1,8 +1,7 @@
-package xyz.sunqian.common.bean;
+package xyz.sunqian.common.objects;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Flag;
-import xyz.sunqian.common.bean.handlers.JavaBeanResolverHandler;
+import xyz.sunqian.common.objects.handlers.JavaBeanResolverHandler;
 import xyz.sunqian.common.coll.JieColl;
 
 import java.lang.annotation.Annotation;
@@ -11,100 +10,139 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.*;
 
-final class BeanResolverImpl implements BeanResolver, BeanResolver.Handler {
+final class ObjectIntrospectorImpl implements ObjectIntrospector, ObjectIntrospector.Handler {
 
-    static BeanResolverImpl DEFAULT_RESOLVER =
-        new BeanResolverImpl(Collections.singletonList(new JavaBeanResolverHandler()));
+    static ObjectIntrospectorImpl SINGLETON =
+        new ObjectIntrospectorImpl(Collections.singletonList(new JavaBeanResolverHandler()));
 
-    private final List<BeanResolver.Handler> handlers;
+    private final List<ObjectIntrospector.Handler> handlers;
 
-    BeanResolverImpl(Iterable<BeanResolver.Handler> handlers) {
+    ObjectIntrospectorImpl(Iterable<ObjectIntrospector.Handler> handlers) {
         this.handlers = JieColl.toList(handlers);
     }
 
     @Override
-    public BeanInfo resolve(Type type) throws BeanResolvingException {
+    public ObjectDef introspect(Type type) throws ObjectIntrospectionException {
         try {
-            Context builder = new Context(type);
+            ContextImpl builder = new ContextImpl(type);
             for (Handler handler : handlers) {
-                Flag flag = handler.resolve(builder);
-                if (Objects.equals(flag, Flag.BREAK)) {
+                if (!handler.introspect(builder)){
                     break;
                 }
             }
             return builder.build();
         } catch (Exception e) {
-            throw new BeanResolvingException(type, e);
+            throw new ObjectIntrospectionException(type, e);
         }
     }
 
     @Override
-    public List<BeanResolver.Handler> getHandlers() {
+    public List<ObjectIntrospector.Handler> getHandlers() {
         return handlers;
     }
 
     @Override
-    public BeanResolver addFirstHandler(Handler handler) {
-        List<BeanResolver.Handler> newHandlers = new ArrayList<>(handlers.size() + 1);
+    public ObjectIntrospector addFirstHandler(Handler handler) {
+        List<ObjectIntrospector.Handler> newHandlers = new ArrayList<>(handlers.size() + 1);
         newHandlers.add(handler);
         newHandlers.addAll(handlers);
-        return new BeanResolverImpl(newHandlers);
+        return new ObjectIntrospectorImpl(newHandlers);
     }
 
     @Override
-    public BeanResolver addLastHandler(Handler handler) {
-        List<BeanResolver.Handler> newHandlers = new ArrayList<>(handlers.size() + 1);
+    public ObjectIntrospector addLastHandler(Handler handler) {
+        List<ObjectIntrospector.Handler> newHandlers = new ArrayList<>(handlers.size() + 1);
         newHandlers.addAll(handlers);
         newHandlers.add(handler);
-        return new BeanResolverImpl(newHandlers);
+        return new ObjectIntrospectorImpl(newHandlers);
     }
 
     @Override
-    public BeanResolver replaceFirstHandler(Handler handler) {
+    public ObjectIntrospector replaceFirstHandler(Handler handler) {
         if (Objects.equals(handlers.get(0), handler)) {
             return this;
         }
-        List<BeanResolver.Handler> newHandlers = new ArrayList<>(handlers.size());
+        List<ObjectIntrospector.Handler> newHandlers = new ArrayList<>(handlers.size());
         newHandlers.addAll(handlers);
         newHandlers.set(0, handler);
-        return new BeanResolverImpl(newHandlers);
+        return new ObjectIntrospectorImpl(newHandlers);
     }
 
     @Override
-    public BeanResolver replaceLastHandler(Handler handler) {
+    public ObjectIntrospector replaceLastHandler(Handler handler) {
         if (Objects.equals(handlers.get(handlers.size() - 1), handler)) {
             return this;
         }
-        List<BeanResolver.Handler> newHandlers = new ArrayList<>(handlers.size());
+        List<ObjectIntrospector.Handler> newHandlers = new ArrayList<>(handlers.size());
         newHandlers.addAll(handlers);
         newHandlers.set(newHandlers.size() - 1, handler);
-        return new BeanResolverImpl(newHandlers);
+        return new ObjectIntrospectorImpl(newHandlers);
     }
 
     @Override
-    public BeanResolver.Handler asHandler() {
+    public ObjectIntrospector.Handler asHandler() {
         return this;
     }
 
     @Override
-    public @Nullable Flag resolve(BeanResolver.Context builder) {
-        for (BeanResolver.Handler handler : getHandlers()) {
-            Flag flag = handler.resolve(builder);
-            if (Objects.equals(flag, Flag.BREAK)) {
-                return Flag.BREAK;
+    public @Nullable boolean introspect(ObjectIntrospector.Context builder) {
+        for (ObjectIntrospector.Handler handler : getHandlers()) {
+            if (!handler.introspect(builder)){
+                return false;
             }
         }
-        return null;
+        return true;
     }
 
-    static final class Context implements BeanResolver.Context {
+    static final class ContextImpl implements ObjectIntrospector.Context {
 
         private final Type type;
-        private final Map<String, BasePropertyInfo> properties = new LinkedHashMap<>();
-        private final List<BaseMethodInfo> methods = new LinkedList<>();
+        private final Map<String, PropertyIntro> properties = new LinkedHashMap<>();
+        private final List<MethodIntro> methods = new LinkedList<>();
 
-        Context(Type type) {
+        ContextImpl(Type type) {
             this.type = type;
+        }
+
+        @Override
+        public Type getObjectType() {
+            return type;
+        }
+
+        @Override
+        public Map<String, PropertyIntro> propertyIntros() {
+            return properties;
+        }
+
+        @Override
+        public List<MethodIntro> methodIntros() {
+            return methods;
+        }
+
+        private ObjectDef build() {
+            return new ObjectDefImpl(type, properties, methods);
+        }
+    }
+
+    private static final class ObjectDefImpl implements ObjectDef {
+
+        private final Type type;
+        private final Map<String, PropertyDef> properties;
+        private final List<MethodDef> methods;
+
+        private ObjectDefImpl(
+            Type type,
+            Map<String, PropertyIntro> properties,
+            List<MethodIntro> methods
+        ) {
+            this.type = type;
+            this.properties = JieColl.toMap(properties, name -> name, PropertyDefImpl::new);
+            this.methods = JieColl.toList(methods, MethodDefImpl::new);
+        }
+
+        @Override
+        public ObjectIntrospector getIntrospector() {
+            return SINGLETON;
         }
 
         @Override
@@ -113,73 +151,46 @@ final class BeanResolverImpl implements BeanResolver, BeanResolver.Handler {
         }
 
         @Override
-        public Map<String, BasePropertyInfo> getProperties() {
+        public Map<String, PropertyDef> getProperties() {
             return properties;
         }
 
         @Override
-        public List<BaseMethodInfo> getMethods() {
+        public List<MethodDef> getMethods() {
             return methods;
         }
 
-        private BeanInfo build() {
-            return new BeanInfoImpl(type, properties, methods);
-        }
-    }
-
-    private static final class BeanInfoImpl implements BeanInfo {
-
-        private final Type type;
-        private final Map<String, PropertyInfo> properties;
-        private final List<MethodInfo> methods;
-
-        private BeanInfoImpl(Type type, Map<String, BasePropertyInfo> properties, List<BaseMethodInfo> methods) {
-            this.type = type;
-            this.properties = JieColl.toMap(properties, name -> name, PropertyInfoImpl::new);
-            this.methods = JieColl.toList(methods, MethodInfoImpl::new);
-        }
-
         @Override
-        public Type getType() {
-            return type;
-        }
-
-        @Override
-        public Map<String, PropertyInfo> getProperties() {
-            return properties;
-        }
-
-        @Override
-        public List<MethodInfo> getMethods() {
-            return methods;
+        public @Nullable MethodDef getMethod(String name, Class<?>... parameterTypes) {
+            return null;
         }
 
         @Override
         public boolean equals(Object o) {
-            return JieBean.equals(this, o);
+            return JieDef.equals(this, o);
         }
 
         @Override
         public int hashCode() {
-            return JieBean.hashCode(this);
+            return JieDef.hashCode(this);
         }
 
         @Override
         public String toString() {
-            return JieBean.toString(this);
+            return JieDef.toString(this);
         }
 
-        private final class PropertyInfoImpl implements PropertyInfo {
+        private final class PropertyDefImpl implements PropertyDef {
 
-            private final BasePropertyInfo base;
+            private final PropertyIntro base;
 
-            private PropertyInfoImpl(BasePropertyInfo propBase) {
+            private PropertyDefImpl(PropertyIntro propBase) {
                 this.base = propBase;
             }
 
             @Override
-            public BeanInfo getOwner() {
-                return BeanInfoImpl.this;
+            public ObjectDef getOwner() {
+                return ObjectDefImpl.this;
             }
 
             @Override
@@ -189,13 +200,13 @@ final class BeanResolverImpl implements BeanResolver, BeanResolver.Handler {
 
             @Override
             @Nullable
-            public Object getValue(Object bean) {
-                return base.getValue(bean);
+            public Object getValue(Object inst) {
+                return base.getValue(inst);
             }
 
             @Override
-            public void setValue(Object bean, @Nullable Object value) {
-                base.setValue(bean, value);
+            public void setValue(Object inst, @Nullable Object value) {
+                base.setValue(inst, value);
             }
 
             @Override
@@ -255,31 +266,31 @@ final class BeanResolverImpl implements BeanResolver, BeanResolver.Handler {
 
             @Override
             public boolean equals(Object o) {
-                return JieBean.equals(this, o);
+                return JieDef.equals(this, o);
             }
 
             @Override
             public int hashCode() {
-                return JieBean.hashCode(this);
+                return JieDef.hashCode(this);
             }
 
             @Override
             public String toString() {
-                return JieBean.toString(this);
+                return JieDef.toString(this);
             }
         }
 
-        private final class MethodInfoImpl implements MethodInfo {
+        private final class MethodDefImpl implements MethodDef {
 
-            private final BaseMethodInfo base;
+            private final MethodIntro base;
 
-            private MethodInfoImpl(BaseMethodInfo propBase) {
+            private MethodDefImpl(MethodIntro propBase) {
                 this.base = propBase;
             }
 
             @Override
-            public BeanInfo getOwner() {
-                return BeanInfoImpl.this;
+            public ObjectDef getOwner() {
+                return ObjectDefImpl.this;
             }
 
             @Override
@@ -288,8 +299,8 @@ final class BeanResolverImpl implements BeanResolver, BeanResolver.Handler {
             }
 
             @Override
-            public Object invoke(Object bean, Object... args) {
-                return base.invoke(bean, args);
+            public Object invoke(Object inst, Object... args) {
+                return base.invoke(inst, args);
             }
 
             @Override
@@ -304,17 +315,17 @@ final class BeanResolverImpl implements BeanResolver, BeanResolver.Handler {
 
             @Override
             public boolean equals(Object o) {
-                return JieBean.equals(this, o);
+                return JieDef.equals(this, o);
             }
 
             @Override
             public int hashCode() {
-                return JieBean.hashCode(this);
+                return JieDef.hashCode(this);
             }
 
             @Override
             public String toString() {
-                return JieBean.toString(this);
+                return JieDef.toString(this);
             }
         }
     }

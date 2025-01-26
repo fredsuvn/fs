@@ -2,7 +2,7 @@ package xyz.sunqian.common.mapping.handlers;
 
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Flag;
-import xyz.sunqian.common.bean.PropertyInfo;
+import xyz.sunqian.common.objects.PropertyDef;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingOptions;
 
@@ -17,7 +17,7 @@ import java.util.Map;
  * <p>
  * This handler has a {@link Converter} map ({@code Map<Type, Converter<?>>}). If source object is {@code null}, return
  * {@link Flag#CONTINUE}. Else the map tries to find the converter for target type, if the converter is not found, or
- * result of {@link Converter#convert(Object, Type, PropertyInfo, MappingOptions)} is {@code null}, return
+ * result of {@link Converter#convert(Object, Type, PropertyDef, MappingOptions)} is {@code null}, return
  * {@link Flag#CONTINUE}.
  * <p>
  * The converter map should be specified in {@link #TypedMapperHandler(Map)}, or use default map
@@ -55,7 +55,7 @@ public class TypedMapperHandler implements Mapper.Handler {
     }
 
     @Override
-    public Object mapProperty(@Nullable Object source, Type sourceType, Type targetType, @Nullable PropertyInfo targetProperty, Mapper mapper, MappingOptions options) {
+    public Object mapProperty(@Nullable Object source, Type sourceType, Type targetType, @Nullable PropertyDef targetProperty, Mapper mapper, MappingOptions options) {
         if (source == null) {
             return Flag.CONTINUE;
         }
@@ -108,6 +108,6 @@ public class TypedMapperHandler implements Mapper.Handler {
          * @return a new object from source type to target type or null if unsupported
          */
         @Nullable
-        T convert(Object source, Type sourceType, @Nullable PropertyInfo targetProperty, MappingOptions options);
+        T convert(Object source, Type sourceType, @Nullable PropertyDef targetProperty, MappingOptions options);
     }
 }

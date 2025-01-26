@@ -63,8 +63,8 @@ public class JieReflect {
     }
 
     /**
-     * Returns raw type of given type, the given type must be a Class or ParameterizedType. Returns null if given type
-     * neither be Class nor ParameterizedType.
+     * Returns raw type of given type, the given type must be a {@link Class} or {@link ParameterizedType}. Returns null
+     * if given type neither be {@link Class} nor {@link ParameterizedType}.
      *
      * @param type given type
      * @return raw type of given type or null

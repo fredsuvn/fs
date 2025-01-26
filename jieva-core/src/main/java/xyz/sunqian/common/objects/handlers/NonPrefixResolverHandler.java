@@ -1,13 +1,13 @@
-package xyz.sunqian.common.bean.handlers;
+package xyz.sunqian.common.objects.handlers;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.bean.BeanResolver;
+import xyz.sunqian.common.objects.ObjectIntrospector;
 
 import java.lang.reflect.Method;
 import java.util.Objects;
 
 /**
- * {@link BeanResolver.Handler} for non-prefix style, of which getters' and setters' names are themselves. For example:
+ * {@link ObjectIntrospector.Handler} for non-prefix style, of which getters' and setters' names are themselves. For example:
  * <pre>
  *     // Getter of "foo"
  *     someData.foo();

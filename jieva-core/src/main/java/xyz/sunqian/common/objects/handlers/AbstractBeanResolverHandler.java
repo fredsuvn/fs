@@ -1,8 +1,8 @@
-package xyz.sunqian.common.bean.handlers;
+package xyz.sunqian.common.objects.handlers;
 
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Flag;
-import xyz.sunqian.common.bean.*;
+import xyz.sunqian.common.objects.*;
 import xyz.sunqian.common.coll.JieArray;
 import xyz.sunqian.common.coll.JieColl;
 import xyz.sunqian.common.invoke.Invoker;
@@ -16,12 +16,12 @@ import java.lang.reflect.TypeVariable;
 import java.util.*;
 
 /**
- * Base abstract bean resolving handler, provides a skeletal implementation of the {@link BeanResolver.Handler} to
+ * Base abstract bean resolving handler, provides a skeletal implementation of the {@link ObjectIntrospector.Handler} to
  * minimize the effort required to implement the interface.
  * <p>
  * This abstract handler uses {@link Class#getMethods()} to find out all methods, then put each of them into
  * {@link #resolveGetter(Method)} and {@link #resolveSetter(Method)} to determine whether it is a getter/setter. If it
- * is, it will be resolved to a property descriptor, else it will be resolved to be a {@link MethodInfo}. Subtypes can
+ * is, it will be resolved to a property descriptor, else it will be resolved to be a {@link MethodDef}. Subtypes can
  * use/override {@link #buildGetter(String, Method)} and {@link #buildSetter(String, Method)} to create getter/setter.
  * <p>
  * It uses {@link #buildInvoker(Method)} to generate invokers for getters and setters. By default, it is implemented
@@ -29,14 +29,14 @@ import java.util.*;
  *
  * @author fredsuvn
  */
-public abstract class AbstractBeanResolverHandler implements BeanResolver.Handler {
+public abstract class AbstractBeanResolverHandler implements ObjectIntrospector.Handler {
 
     @Override
-    public @Nullable Flag resolve(BeanResolver.Context context) {
-        Type type = context.getType();
+    public @Nullable Flag introspect(ObjectIntrospector.Context context) {
+        Type type = context.getObjectType();
         Class<?> rawType = JieReflect.getRawType(type);
         if (rawType == null) {
-            throw new BeanResolvingException("Not a Class or ParameterizedType: " + type + ".");
+            throw new ObjectIntrospectionException("Not a Class or ParameterizedType: " + type + ".");
         }
         Method[] methods = rawType.getMethods();
         Map<String, Method> getters = new LinkedHashMap<>();
@@ -56,27 +56,27 @@ public abstract class AbstractBeanResolverHandler implements BeanResolver.Handle
                 setters.put(setterInfo.getName(), method);
                 continue;
             }
-            context.getMethods().add(new BaseMethodInfoImpl(method));
+            context.methodIntros().add(new MethodIntroImpl(method));
         }
         if (JieColl.isNotEmpty(getters) || JieColl.isNotEmpty(setters)) {
             mergeAccessors(context, getters, setters, rawType, extraMethods);
         }
         if (JieColl.isNotEmpty(extraMethods)) {
             for (Method extraMethod : extraMethods) {
-                context.getMethods().add(new BaseMethodInfoImpl(extraMethod));
+                context.methodIntros().add(new MethodIntroImpl(extraMethod));
             }
         }
         return null;
     }
 
     private void mergeAccessors(
-        BeanResolver.Context context,
+        ObjectIntrospector.Context context,
         Map<String, Method> getters,
         Map<String, Method> setters,
         Class<?> rawType,
         List<Method> extraMethods
     ) {
-        Map<TypeVariable<?>, Type> typeParameterMapping = JieReflect.getTypeParameterMapping(context.getType());
+        Map<TypeVariable<?>, Type> typeParameterMapping = JieReflect.getTypeParameterMapping(context.getObjectType());
         Set<Type> stack = new HashSet<>();
         getters.forEach((name, getter) -> {
             Method setter = setters.get(name);
@@ -96,13 +96,13 @@ public abstract class AbstractBeanResolverHandler implements BeanResolver.Handle
                     return;
                 }
             }
-            context.getProperties().put(name, new BasePropertyInfoImpl(name, getter, setter, returnType, rawType));
+            context.propertyIntros().put(name, new PropertyIntroImpl(name, getter, setter, returnType, rawType));
             setters.remove(name);
         });
         setters.forEach((name, setter) -> {
             Type setType = setter.getGenericParameterTypes()[0];
             setType = getActualType(setType, typeParameterMapping, stack);
-            context.getProperties().put(name, new BasePropertyInfoImpl(name, null, setter, setType, rawType));
+            context.propertyIntros().put(name, new PropertyIntroImpl(name, null, setter, setType, rawType));
         });
     }
 
@@ -192,7 +192,7 @@ public abstract class AbstractBeanResolverHandler implements BeanResolver.Handle
         String getName();
     }
 
-    private final class BasePropertyInfoImpl implements BasePropertyInfo {
+    private final class PropertyIntroImpl implements PropertyIntro {
 
         private final String name;
         private final @Nullable Method getter;
@@ -206,7 +206,7 @@ public abstract class AbstractBeanResolverHandler implements BeanResolver.Handle
         private final List<Annotation> fieldAnnotations;
         private final List<Annotation> allAnnotations;
 
-        private BasePropertyInfoImpl(
+        private PropertyIntroImpl(
             String name, @Nullable Method getter, @Nullable Method setter, Type type, Class<?> rawType) {
             this.name = name;
             this.getter = getter;
@@ -305,13 +305,13 @@ public abstract class AbstractBeanResolverHandler implements BeanResolver.Handle
         }
     }
 
-    private final class BaseMethodInfoImpl implements BaseMethodInfo {
+    private final class MethodIntroImpl implements MethodIntro {
 
         private final Method method;
         private final List<Annotation> annotations;
         private final Invoker invoker;
 
-        private BaseMethodInfoImpl(Method method) {
+        private MethodIntroImpl(Method method) {
             this.method = method;
             this.annotations = JieArray.asList(method.getAnnotations());
             this.invoker = buildInvoker(method);

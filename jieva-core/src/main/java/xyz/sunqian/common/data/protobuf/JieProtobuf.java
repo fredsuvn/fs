@@ -1,7 +1,7 @@
 package xyz.sunqian.common.data.protobuf;
 
-import xyz.sunqian.common.bean.BeanProvider;
-import xyz.sunqian.common.bean.BeanResolver;
+import xyz.sunqian.common.objects.BeanProvider;
+import xyz.sunqian.common.objects.ObjectIntrospector;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.handlers.AssignableMapperHandler;
 import xyz.sunqian.common.mapping.handlers.BeanMapperHandler;
@@ -16,11 +16,11 @@ import java.util.List;
 public class JieProtobuf {
 
     private static final BeanProvider BEAN_PROVIDER;
-    private static final BeanResolver BEAN_RESOLVER;
+    private static final ObjectIntrospector BEAN_RESOLVER;
     private static final Mapper MAPPER;
 
     static {
-        BEAN_RESOLVER = BeanResolver.defaultResolver().addFirstHandler(new ProtobufBeanResolveHandler());
+        BEAN_RESOLVER = ObjectIntrospector.defaultResolver().addFirstHandler(new ProtobufBeanResolveHandler());
         BEAN_PROVIDER = BeanProvider.withResolver(BEAN_RESOLVER);
         List<Mapper.Handler> defaultHandlers = Mapper.defaultMapper().getHandlers();
         List<Mapper.Handler> handlers = new ArrayList<>(defaultHandlers.size() + 1);
@@ -38,7 +38,7 @@ public class JieProtobuf {
     /**
      * Returns default {@link BeanProvider} which supports
      * <a href="https://github.com/protocolbuffers/protobuf">Protocol Buffers</a>. It comes from
-     * {@link BeanProvider#withResolver(BeanResolver)} and {@link #defaultBeanResolver()}.
+     * {@link BeanProvider#withResolver(ObjectIntrospector)} and {@link #defaultBeanResolver()}.
      *
      * @return default {@link BeanProvider} which supports
      * <a href="https://github.com/protocolbuffers/protobuf">Protocol Buffers</a>
@@ -48,14 +48,14 @@ public class JieProtobuf {
     }
 
     /**
-     * Returns default {@link BeanResolver} which supports
+     * Returns default {@link ObjectIntrospector} which supports
      * <a href="https://github.com/protocolbuffers/protobuf">Protocol Buffers</a>. It copies handler list of
-     * {@link BeanResolver#defaultResolver()} and inserts a {@link ProtobufBeanResolveHandler} at first element.
+     * {@link ObjectIntrospector#defaultResolver()} and inserts a {@link ProtobufBeanResolveHandler} at first element.
      *
-     * @return default {@link BeanResolver} which supports
+     * @return default {@link ObjectIntrospector} which supports
      * <a href="https://github.com/protocolbuffers/protobuf">Protocol Buffers</a>
      */
-    public static BeanResolver defaultBeanResolver() {
+    public static ObjectIntrospector defaultBeanResolver() {
         return BEAN_RESOLVER;
     }
 

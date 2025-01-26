@@ -1,14 +1,14 @@
 package xyz.sunqian.common.mapping;
 
-import xyz.sunqian.common.bean.BeanInfo;
-import xyz.sunqian.common.bean.BeanProvider;
-import xyz.sunqian.common.bean.PropertyInfo;
+import xyz.sunqian.common.objects.ObjectDef;
+import xyz.sunqian.common.objects.BeanProvider;
+import xyz.sunqian.common.objects.PropertyDef;
 
 import java.lang.reflect.Type;
 import java.util.Map;
 
 /**
- * Mapper for {@link BeanInfo}, to copy properties from source object to dest object.
+ * Mapper for {@link ObjectDef}, to copy properties from source object to dest object.
  *
  * @author fredsuvn
  */
@@ -86,7 +86,7 @@ public interface BeanMapper {
      *     </li>
      *     <li>
      *         For bean object, bean info will be provided by {@link BeanProvider} first, type of properties' names
-     *         is always {@link String} and types of properties' values are come from {@link PropertyInfo#getType()};
+     *         is always {@link String} and types of properties' values are come from {@link PropertyDef#getType()};
      *     </li>
      *     <li>
      *         For {@link Map} object, types of keys and values are come from {@code sourceType} or {@code destType};

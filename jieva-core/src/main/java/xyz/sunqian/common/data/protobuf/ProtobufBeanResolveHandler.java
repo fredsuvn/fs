@@ -5,9 +5,9 @@ import com.google.protobuf.Message;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Flag;
 import xyz.sunqian.common.base.JieString;
-import xyz.sunqian.common.bean.BasePropertyInfo;
-import xyz.sunqian.common.bean.BeanException;
-import xyz.sunqian.common.bean.BeanResolver;
+import xyz.sunqian.common.objects.PropertyIntro;
+import xyz.sunqian.common.objects.BeanException;
+import xyz.sunqian.common.objects.ObjectIntrospector;
 import xyz.sunqian.common.coll.JieColl;
 import xyz.sunqian.common.invoke.Invoker;
 import xyz.sunqian.common.mapping.MappingException;
@@ -23,19 +23,19 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * {@link BeanResolver.Handler} implementation for
+ * {@link ObjectIntrospector.Handler} implementation for
  * <a href="https://github.com/protocolbuffers/protobuf">Protocol Buffers</a>.
  * <p>
  * Note this handler depends on {@code protobuf libs} in the runtime.
  *
  * @author fredsuvn
  */
-public class ProtobufBeanResolveHandler implements BeanResolver.Handler {
+public class ProtobufBeanResolveHandler implements ObjectIntrospector.Handler {
 
     @Override
-    public @Nullable Flag resolve(BeanResolver.Context context) {
+    public @Nullable Flag introspect(ObjectIntrospector.Context context) {
         try {
-            Class<?> rawType = JieReflect.getRawType(context.getType());
+            Class<?> rawType = JieReflect.getRawType(context.getObjectType());
             if (rawType == null) {
                 return null;
             }
@@ -55,8 +55,8 @@ public class ProtobufBeanResolveHandler implements BeanResolver.Handler {
             Method getDescriptorMethod = rawType.getMethod("getDescriptor");
             Descriptors.Descriptor descriptor = (Descriptors.Descriptor) getDescriptorMethod.invoke(null);
             for (Descriptors.FieldDescriptor field : descriptor.getFields()) {
-                BasePropertyInfo basePropertyInfo = buildProperty(context, field, rawType, isBuilder);
-                context.getProperties().put(basePropertyInfo.getName(), basePropertyInfo);
+                PropertyIntro propertyIntro = buildProperty(context, field, rawType, isBuilder);
+                context.propertyIntros().put(propertyIntro.getName(), propertyIntro);
             }
             return Flag.BREAK;
         } catch (MappingException e) {
@@ -66,8 +66,8 @@ public class ProtobufBeanResolveHandler implements BeanResolver.Handler {
         }
     }
 
-    private BasePropertyInfo buildProperty(
-        BeanResolver.Context builder,
+    private PropertyIntro buildProperty(
+        ObjectIntrospector.Context builder,
         Descriptors.FieldDescriptor field,
         Class<?> rawClass,
         boolean isBuilder
@@ -150,7 +150,7 @@ public class ProtobufBeanResolveHandler implements BeanResolver.Handler {
         }
     }
 
-    private static final class Impl implements BasePropertyInfo {
+    private static final class Impl implements PropertyIntro {
 
         private final String name;
         private final Type type;

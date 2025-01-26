@@ -5,7 +5,7 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.Flag;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.bean.PropertyInfo;
+import xyz.sunqian.common.objects.PropertyDef;
 import xyz.sunqian.common.mapping.handlers.*;
 import xyz.sunqian.common.ref.Val;
 import xyz.sunqian.common.reflect.TypeRef;
@@ -17,11 +17,11 @@ import java.util.List;
  * Mapper interface to map object from source type to target type. A {@link Mapper} typically has a list of
  * {@link Handler}s, and in default implementation, the {@link Handler}s provide actual map operation for core methods
  * {@link #map(Object, Type, Type, MappingOptions)} and
- * {@link #mapProperty(Object, Type, Type, PropertyInfo, MappingOptions)}.
+ * {@link #mapProperty(Object, Type, Type, PropertyDef, MappingOptions)}.
  *
  * @author fredsuvn
  * @see Handler#map(Object, Type, Type, Mapper, MappingOptions)
- * @see Handler#mapProperty(Object, Type, Type, PropertyInfo, Mapper, MappingOptions)
+ * @see Handler#mapProperty(Object, Type, Type, PropertyDef, Mapper, MappingOptions)
  */
 @ThreadSafe
 public interface Mapper {
@@ -184,7 +184,7 @@ public interface Mapper {
 
     /**
      * Maps source object from source type to target property with {@link #getOptions()}. The target type is specified
-     * in current context, may not equal to {@link PropertyInfo#getType()} of target property. The result of this method
+     * in current context, may not equal to {@link PropertyDef#getType()} of target property. The result of this method
      * in 3 types:
      * <ul>
      *     <li>
@@ -197,7 +197,7 @@ public interface Mapper {
      *         {@code others}: mapping successful, the result is returned object;
      *     </li>
      * </ul>
-     * This method is equivalent to ({@link #mapProperty(Object, Type, Type, PropertyInfo, MappingOptions)}):
+     * This method is equivalent to ({@link #mapProperty(Object, Type, Type, PropertyDef, MappingOptions)}):
      * <pre>
      *     return mapProperty(source, sourceType, targetType, targetProperty, defaultOptions());
      * </pre>
@@ -213,7 +213,7 @@ public interface Mapper {
         @Nullable Object source,
         Type sourceType,
         Type targetType,
-        PropertyInfo targetProperty
+        PropertyDef targetProperty
     ) {
         return mapProperty(source, sourceType, targetType, targetProperty, getOptions());
     }
@@ -329,7 +329,7 @@ public interface Mapper {
 
     /**
      * Maps source object from source type to target property. The target type is specified in current context, may not
-     * equal to {@link PropertyInfo#getType()} of target property. The result of this method in 3 types:
+     * equal to {@link PropertyDef#getType()} of target property. The result of this method in 3 types:
      * <ul>
      *     <li>
      *         {@code null}: mapping failed;
@@ -342,7 +342,7 @@ public interface Mapper {
      *     </li>
      * </ul>
      * In the default implementation, this method will invoke
-     * {@link Handler#mapProperty(Object, Type, Type, PropertyInfo, Mapper, MappingOptions)} for each handler in
+     * {@link Handler#mapProperty(Object, Type, Type, PropertyDef, Mapper, MappingOptions)} for each handler in
      * {@link Mapper#getHandlers()} sequentially. It is equivalent to:
      * <pre>
      *     for (Handler handler : getHandlers()) {
@@ -370,7 +370,7 @@ public interface Mapper {
         @Nullable Object source,
         Type sourceType,
         Type targetType,
-        PropertyInfo targetProperty,
+        PropertyDef targetProperty,
         MappingOptions options
     ) {
         for (Handler handler : getHandlers()) {
@@ -507,7 +507,7 @@ public interface Mapper {
 
         /**
          * Maps object from source type to the target type of target property. The target type is specified in current
-         * context, may not equal to {@link PropertyInfo#getType()} of target property. The result of this method in 4
+         * context, may not equal to {@link PropertyDef#getType()} of target property. The result of this method in 4
          * types:
          * <ul>
          *     <li>
@@ -536,7 +536,7 @@ public interface Mapper {
             @Nullable Object source,
             Type sourceType,
             Type targetType,
-            PropertyInfo targetProperty,
+            PropertyDef targetProperty,
             Mapper mapper,
             MappingOptions options
         );

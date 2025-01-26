@@ -6,8 +6,8 @@ import lombok.Getter;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieChars;
-import xyz.sunqian.common.bean.BeanProvider;
-import xyz.sunqian.common.bean.PropertyInfo;
+import xyz.sunqian.common.objects.BeanProvider;
+import xyz.sunqian.common.objects.PropertyDef;
 
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
@@ -182,7 +182,7 @@ public class MappingOptions {
      * <p>
      * Default is {@code null}.
      */
-    private @Nullable Function<PropertyInfo, Charset> propertyCharset;
+    private @Nullable Function<PropertyDef, Charset> propertyCharset;
 
     /**
      * Function to determine which format to use for number conversion. This option is typically used in
@@ -190,7 +190,7 @@ public class MappingOptions {
      * <p>
      * Default is {@code null}.
      */
-    private @Nullable Function<PropertyInfo, NumberFormat> propertyNumberFormat;
+    private @Nullable Function<PropertyDef, NumberFormat> propertyNumberFormat;
 
     /**
      * Function to determine which format to use for date conversion. This option is typically used in
@@ -198,7 +198,7 @@ public class MappingOptions {
      * <p>
      * Default is {@code null}.
      */
-    private @Nullable Function<PropertyInfo, DateTimeFormatter> propertyDateFormat;
+    private @Nullable Function<PropertyDef, DateTimeFormatter> propertyDateFormat;
 
     /**
      * Function to determine which zone offset to use for date conversion. This option is typically used in
@@ -206,7 +206,7 @@ public class MappingOptions {
      * <p>
      * Default is {@code null}.
      */
-    private @Nullable Function<PropertyInfo, ZoneOffset> propertyZoneOffset;
+    private @Nullable Function<PropertyDef, ZoneOffset> propertyZoneOffset;
 
     /**
      * Returns {@link Charset} option from given property info and this options. If property info is not null and
@@ -217,9 +217,9 @@ public class MappingOptions {
      * @param targetProperty given property info
      * @return {@link Charset} option
      */
-    public Charset getCharset(@Nullable PropertyInfo targetProperty) {
+    public Charset getCharset(@Nullable PropertyDef targetProperty) {
         if (targetProperty != null) {
-            Function<PropertyInfo, Charset> func = getPropertyCharset();
+            Function<PropertyDef, Charset> func = getPropertyCharset();
             if (func != null) {
                 return Jie.nonNull(func.apply(targetProperty), JieChars.defaultCharset());
             }
@@ -232,17 +232,17 @@ public class MappingOptions {
      * property info is not null and {@link #getPropertyDateFormat()} is not null, returns result of
      * {@link #getPropertyDateFormat()}. Otherwise, it returns {@link #getDateFormat()}.
      * <p>
-     * Note the returned formatter does not include zone offset from {@link #getZoneOffset(PropertyInfo)} or
-     * {@link #getZoneOffset()}. Using {@link #getDateTimeFormatterWithZone(PropertyInfo)} to get that.
+     * Note the returned formatter does not include zone offset from {@link #getZoneOffset(PropertyDef)} or
+     * {@link #getZoneOffset()}. Using {@link #getDateTimeFormatterWithZone(PropertyDef)} to get that.
      *
      * @param targetProperty given property info
      * @return {@link DateTimeFormatter} option, may be {@code null}
-     * @see #getDateTimeFormatterWithZone(PropertyInfo)
+     * @see #getDateTimeFormatterWithZone(PropertyDef)
      */
     @Nullable
-    public DateTimeFormatter getDateTimeFormatter(@Nullable PropertyInfo targetProperty) {
+    public DateTimeFormatter getDateTimeFormatter(@Nullable PropertyDef targetProperty) {
         if (targetProperty != null) {
-            Function<PropertyInfo, DateTimeFormatter> func = getPropertyDateFormat();
+            Function<PropertyDef, DateTimeFormatter> func = getPropertyDateFormat();
             if (func != null) {
                 return func.apply(targetProperty);
             }
@@ -259,9 +259,9 @@ public class MappingOptions {
      * @return {@link NumberFormat} option, may be {@code null}
      */
     @Nullable
-    public NumberFormat getNumberFormatter(@Nullable PropertyInfo targetProperty) {
+    public NumberFormat getNumberFormatter(@Nullable PropertyDef targetProperty) {
         if (targetProperty != null) {
-            Function<PropertyInfo, NumberFormat> func = getPropertyNumberFormat();
+            Function<PropertyDef, NumberFormat> func = getPropertyNumberFormat();
             if (func != null) {
                 return func.apply(targetProperty);
             }
@@ -278,9 +278,9 @@ public class MappingOptions {
      * @return {@link ZoneOffset} option
      */
     @Nullable
-    public ZoneOffset getZoneOffset(@Nullable PropertyInfo targetProperty) {
+    public ZoneOffset getZoneOffset(@Nullable PropertyDef targetProperty) {
         if (targetProperty != null) {
-            Function<PropertyInfo, ZoneOffset> func = getPropertyZoneOffset();
+            Function<PropertyDef, ZoneOffset> func = getPropertyZoneOffset();
             if (func != null) {
                 return func.apply(targetProperty);
             }
@@ -289,8 +289,8 @@ public class MappingOptions {
     }
 
     /**
-     * Returns a combined {@link DateTimeFormatter} with {@link #getDateTimeFormatter(PropertyInfo)} and
-     * {@link #getZoneOffset()}, may be {@code null} if result of {@link #getDateTimeFormatter(PropertyInfo)} is
+     * Returns a combined {@link DateTimeFormatter} with {@link #getDateTimeFormatter(PropertyDef)} and
+     * {@link #getZoneOffset()}, may be {@code null} if result of {@link #getDateTimeFormatter(PropertyDef)} is
      * {@code null}. It is equivalent to:
      * <pre>
      *     DateTimeFormatter formatter = getDateTimeFormatter(targetProperty);
@@ -308,7 +308,7 @@ public class MappingOptions {
      * @return {@link DateTimeFormatter} option, may be {@code null}
      */
     @Nullable
-    public DateTimeFormatter getDateTimeFormatterWithZone(@Nullable PropertyInfo targetProperty) {
+    public DateTimeFormatter getDateTimeFormatterWithZone(@Nullable PropertyDef targetProperty) {
         DateTimeFormatter formatter = getDateTimeFormatter(targetProperty);
         if (formatter == null) {
             return null;

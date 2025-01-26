@@ -1,15 +1,15 @@
-package xyz.sunqian.common.bean.handlers;
+package xyz.sunqian.common.objects.handlers;
 
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.CaseFormatter;
 import xyz.sunqian.common.base.JieString;
-import xyz.sunqian.common.bean.BeanResolver;
+import xyz.sunqian.common.objects.ObjectIntrospector;
 
 import java.lang.reflect.Method;
 import java.util.List;
 
 /**
- * {@link BeanResolver.Handler} for non-getter-prefix style (but setters have), of which getters' names are themselves,
+ * {@link ObjectIntrospector.Handler} for non-getter-prefix style (but setters have), of which getters' names are themselves,
  * and setters' names are start with "set". For example:
  * <pre>
  *     // Getter of "foo"

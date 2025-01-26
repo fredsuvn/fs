@@ -1,13 +1,13 @@
-package xyz.sunqian.common.bean;
+package xyz.sunqian.common.objects;
 
 import java.lang.reflect.Type;
 
 /**
- * This interface provides a standard way to get {@link BeanInfo}.
+ * This interface provides a standard way to get {@link ObjectDef}.
  *
  * @author sunqian
- * @see BeanInfo
- * @see BeanResolver
+ * @see ObjectDef
+ * @see ObjectIntrospector
  */
 public interface BeanProvider {
 
@@ -25,15 +25,15 @@ public interface BeanProvider {
      *
      * @return specified resolver
      */
-    static BeanProvider withResolver(BeanResolver resolver) {
+    static BeanProvider withResolver(ObjectIntrospector resolver) {
         return new BeanProviderImpl(resolver);
     }
 
     /**
-     * Returns {@link BeanInfo} of given type.
+     * Returns {@link ObjectDef} of given type.
      *
      * @param type given type
-     * @return {@link BeanInfo} of given type
+     * @return {@link ObjectDef} of given type
      */
-    BeanInfo getBeanInfo(Type type);
+    ObjectDef getBeanInfo(Type type);
 }

@@ -1,4 +1,4 @@
-package xyz.sunqian.common.bean;
+package xyz.sunqian.common.objects;
 
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nullable;
@@ -14,137 +14,138 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * This is a static utilities class provides utilities for {@code bean}.
+ * This is a static utilities class provides utilities for definitions such as {@link ObjectDef}, {@link PropertyDef}
+ * and {@link MethodDef}.
  *
  * @author fredsuvn
  */
-public class JieBean {
+public class JieDef {
 
     /**
-     * Utility method which is a simple implementing of {@link Object#equals(Object)} for {@link BeanInfo}. This method
-     * uses result of {@link BeanInfo#getType()} to compare. The code is similar to the following:
+     * Utility method which is a simple implementing of {@link Object#equals(Object)} for {@link ObjectDef}. This method
+     * uses result of {@link ObjectDef#getType()} to compare. The code is similar to the following:
      * <pre>
      *     return Objects.equals(bean.getType(), other.getType());
      * </pre>
-     * And it works in conjunction with {@link #hashCode(BeanInfo)}.
+     * And it works in conjunction with {@link #hashCode(ObjectDef)}.
      *
-     * @param beanInfo comparing bean info
-     * @param o        object to be compared
+     * @param objectDef comparing bean info
+     * @param o         object to be compared
      * @return true if equals false otherwise
      */
-    public static boolean equals(BeanInfo beanInfo, @Nullable Object o) {
-        if (beanInfo == o) {
+    public static boolean equals(ObjectDef objectDef, @Nullable Object o) {
+        if (objectDef == o) {
             return true;
         }
-        if (o == null || !beanInfo.getClass().equals(o.getClass())) {
+        if (o == null || !objectDef.getClass().equals(o.getClass())) {
             return false;
         }
-        BeanInfo other = (BeanInfo) o;
-        return Objects.equals(beanInfo.getType(), other.getType());
+        ObjectDef other = (ObjectDef) o;
+        return Objects.equals(objectDef.getType(), other.getType());
     }
 
     /**
-     * Utility method which is a simple implementing of {@link Object#equals(Object)} for {@link PropertyInfo}. This
-     * method compares result of {@link Object#getClass()}, {@link PropertyInfo#getName()} and
-     * {@link PropertyInfo#getOwner()}. The code is similar to the following:
+     * Utility method which is a simple implementing of {@link Object#equals(Object)} for {@link PropertyDef}. This
+     * method compares result of {@link Object#getClass()}, {@link PropertyDef#getName()} and
+     * {@link PropertyDef#getOwner()}. The code is similar to the following:
      * <pre>
      *     return Objects.equals(info.getClass(), other.getClass())
      *         && Objects.equals(info.getName(), other.getName())
      *         && Objects.equals(info.getOwner(), other.getOwner());
      * </pre>
-     * And it works in conjunction with {@link #hashCode(PropertyInfo)}.
+     * And it works in conjunction with {@link #hashCode(PropertyDef)}.
      *
      * @param info info to be compared
      * @param o    object to be compared
      * @return true if equals false otherwise
      */
-    public static boolean equals(PropertyInfo info, @Nullable Object o) {
+    public static boolean equals(PropertyDef info, @Nullable Object o) {
         if (info == o) {
             return true;
         }
         if (o == null || !info.getClass().equals(o.getClass())) {
             return false;
         }
-        PropertyInfo other = (PropertyInfo) o;
+        PropertyDef other = (PropertyDef) o;
         return Objects.equals(info.getName(), other.getName()) &&
             Objects.equals(info.getOwner(), other.getOwner());
     }
 
     /**
-     * Utility method which is a simple implementing of {@link Object#equals(Object)} for {@link MethodInfo}. This
-     * method compares result of {@link Object#getClass()} and {@link MethodInfo#getMethod()}. The code is similar to
-     * the following:
+     * Utility method which is a simple implementing of {@link Object#equals(Object)} for {@link MethodDef}. This method
+     * compares result of {@link Object#getClass()} and {@link MethodDef#getMethod()}. The code is similar to the
+     * following:
      * <pre>
      *     return Objects.equals(info.getMethod(), other.getMethod())
      *         && Objects.equals(info.getName(), other.getName());
      * </pre>
-     * And it works in conjunction with {@link #hashCode(MethodInfo)}.
+     * And it works in conjunction with {@link #hashCode(MethodDef)}.
      *
      * @param info info to be compared
      * @param o    object to be compared
      * @return true if equals false otherwise
      */
-    public static boolean equals(MethodInfo info, @Nullable Object o) {
+    public static boolean equals(MethodDef info, @Nullable Object o) {
         if (info == o) {
             return true;
         }
         if (o == null || !info.getClass().equals(o.getClass())) {
             return false;
         }
-        MethodInfo other = (MethodInfo) o;
+        MethodDef other = (MethodDef) o;
         return Objects.equals(info.getMethod(), other.getMethod())
             && Objects.equals(info.getOwner(), other.getOwner());
     }
 
     /**
-     * Utility method which is a simple implementing of {@link Object#hashCode()} for {@link BeanInfo}. This method uses
-     * {@link Object#hashCode()} of {@link BeanInfo#getType()} to compute. The code is similar to the following:
+     * Utility method which is a simple implementing of {@link Object#hashCode()} for {@link ObjectDef}. This method
+     * uses {@link Object#hashCode()} of {@link ObjectDef#getType()} to compute. The code is similar to the following:
      * <pre>
      *     return bean.getType().hashCode();
      * </pre>
-     * And it works in conjunction with {@link #equals(BeanInfo, Object)}.
+     * And it works in conjunction with {@link #equals(ObjectDef, Object)}.
      *
-     * @param beanInfo bean info to be hashed
+     * @param objectDef bean info to be hashed
      * @return hash code of given bean
      */
-    public static int hashCode(BeanInfo beanInfo) {
-        return beanInfo.getType().hashCode();
+    public static int hashCode(ObjectDef objectDef) {
+        return objectDef.getType().hashCode();
     }
 
     /**
-     * Utility method which is a simple implementing of {@link Object#hashCode()} for {@link PropertyInfo}. This method
-     * uses {@link Object#hashCode()} of {@link PropertyInfo#getName()} to compute. The code is similar to the
+     * Utility method which is a simple implementing of {@link Object#hashCode()} for {@link PropertyDef}. This method
+     * uses {@link Object#hashCode()} of {@link PropertyDef#getName()} to compute. The code is similar to the
      * following:
      * <pre>
      *     return info.getName().hashCode();
      * </pre>
-     * And it works in conjunction with {@link #equals(PropertyInfo, Object)}.
+     * And it works in conjunction with {@link #equals(PropertyDef, Object)}.
      *
      * @param info info to be hashed
      * @return hash code of given info
      */
-    public static int hashCode(PropertyInfo info) {
+    public static int hashCode(PropertyDef info) {
         return info.getName().hashCode();
     }
 
     /**
-     * Utility method which is a simple implementing of {@link Object#hashCode()} for {@link MethodInfo}. This method
-     * uses {@link Object#hashCode()} of {@link MethodInfo#getMethod()} to compute. The code is similar to the
+     * Utility method which is a simple implementing of {@link Object#hashCode()} for {@link MethodDef}. This method
+     * uses {@link Object#hashCode()} of {@link MethodDef#getMethod()} to compute. The code is similar to the
      * following:
      * <pre>
      *     return info.getMethod().hashCode();
      * </pre>
-     * And it works in conjunction with {@link #equals(MethodInfo, Object)}.
+     * And it works in conjunction with {@link #equals(MethodDef, Object)}.
      *
      * @param info info to be hashed
      * @return hash code of given info
      */
-    public static int hashCode(MethodInfo info) {
+    public static int hashCode(MethodDef info) {
         return info.getMethod().hashCode();
     }
 
     /**
-     * Utility method which is a simple implementing of {@link Object#toString()} for {@link PropertyInfo}. The code is
+     * Utility method which is a simple implementing of {@link Object#toString()} for {@link PropertyDef}. The code is
      * similar to the following:
      * <pre>
      *     return info.getOwner().getType().getTypeName() + "." + info.getName()
@@ -154,13 +155,13 @@ public class JieBean {
      * @param info info to be string description
      * @return a string description for given info
      */
-    public static String toString(PropertyInfo info) {
+    public static String toString(PropertyDef info) {
         return info.getOwner().getType().getTypeName() + "." + info.getName()
             + "[" + info.getType().getTypeName() + "]";
     }
 
     /**
-     * Utility method which is a simple implementing of {@link Object#toString()} for {@link MethodInfo}. The code is
+     * Utility method which is a simple implementing of {@link Object#toString()} for {@link MethodDef}. The code is
      * similar to the following:
      * <pre>
      *     return info.getOwner().getType().getTypeName() + "." + info.getName()
@@ -172,7 +173,7 @@ public class JieBean {
      * @param info info to be string description
      * @return a string description for given info
      */
-    public static String toString(MethodInfo info) {
+    public static String toString(MethodDef info) {
         return info.getOwner().getType().getTypeName() + "." + info.getName()
             + "(" + Arrays.stream(info.getMethod().getGenericParameterTypes())
             .map(Type::getTypeName).collect(Collectors.joining(", ")) + ")["
@@ -180,17 +181,17 @@ public class JieBean {
     }
 
     /**
-     * Utility method which is a simple implementing of {@link Object#toString()} for {@link BeanInfo}. The code is
+     * Utility method which is a simple implementing of {@link Object#toString()} for {@link ObjectDef}. The code is
      * similar to the following:
      * <pre>
      *     return beanInfo.getType().getTypeName();
      * </pre>
      *
-     * @param beanInfo bean info to be string description
+     * @param objectDef bean info to be string description
      * @return a string description for given descriptor
      */
-    public static String toString(BeanInfo beanInfo) {
-        return beanInfo.getType().getTypeName();
+    public static String toString(ObjectDef objectDef) {
+        return objectDef.getType().getTypeName();
     }
 
     /**
@@ -198,18 +199,18 @@ public class JieBean {
      * mapping found, given bean info itself will be returned. Otherwise, a new bean info with extra mapping will be
      * returned.
      *
-     * @param beanInfo            given bean info
+     * @param objectDef           given bean info
      * @param extraTypeVarMapping extra type variable mapping
      * @return iven bean info itself or a new bean info with extra mapping
-     * @throws BeanResolvingException if any problem occurs when resolving
+     * @throws ObjectIntrospectionException if any problem occurs when resolving
      */
-    public static BeanInfo withExtraTypeVariableMapping(
-        BeanInfo beanInfo, @Nullable Map<TypeVariable<?>, Type> extraTypeVarMapping
-    ) throws BeanResolvingException {
+    public static ObjectDef withExtraTypeVariableMapping(
+        ObjectDef objectDef, @Nullable Map<TypeVariable<?>, Type> extraTypeVarMapping
+    ) throws ObjectIntrospectionException {
         if (JieColl.isNotEmpty(extraTypeVarMapping)) {
-            Map<PropertyInfo, Type> mapping = new HashMap<>();
+            Map<PropertyDef, Type> mapping = new HashMap<>();
             Set<Type> stack = new HashSet<>();
-            beanInfo.getProperties().forEach((n, p) -> {
+            objectDef.getProperties().forEach((n, p) -> {
                 Type pt = p.getType();
                 if (pt instanceof TypeVariable) {
                     stack.clear();
@@ -220,29 +221,34 @@ public class JieBean {
                 }
             });
             if (!mapping.isEmpty()) {
-                return new BeanInfoWrapper(beanInfo, mapping);
+                return new ObjectDefWrapper(objectDef, mapping);
             }
         }
-        return beanInfo;
+        return objectDef;
     }
 
-    private static final class BeanInfoWrapper implements BeanInfo {
+    private static final class ObjectDefWrapper implements ObjectDef {
 
-        private final BeanInfo origin;
-        private final Map<String, PropertyInfo> props;
+        private final ObjectDef origin;
+        private final Map<String, PropertyDef> props;
 
-        private BeanInfoWrapper(BeanInfo origin, Map<PropertyInfo, Type> mapping) {
+        private ObjectDefWrapper(ObjectDef origin, Map<PropertyDef, Type> mapping) {
             this.origin = origin;
-            Map<String, PropertyInfo> newProps = new LinkedHashMap<>();
+            Map<String, PropertyDef> newProps = new LinkedHashMap<>();
             origin.getProperties().forEach((n, p) -> {
                 Type newType = mapping.get(p);
                 if (newType != null) {
-                    newProps.put(n, new PropertyInfoWrapper(p, newType));
+                    newProps.put(n, new PropertyDefWrapper(p, newType));
                     return;
                 }
-                newProps.put(n, new PropertyInfoWrapper(p, p.getType()));
+                newProps.put(n, new PropertyDefWrapper(p, p.getType()));
             });
             this.props = Collections.unmodifiableMap(newProps);
+        }
+
+        @Override
+        public ObjectIntrospector getIntrospector() {
+            return origin.getIntrospector();
         }
 
         @Override
@@ -256,53 +262,53 @@ public class JieBean {
         }
 
         @Override
-        public @Immutable Map<String, PropertyInfo> getProperties() {
+        public @Immutable Map<String, PropertyDef> getProperties() {
             return props;
         }
 
         @Override
-        public @Nullable PropertyInfo getProperty(String name) {
+        public @Nullable PropertyDef getProperty(String name) {
             return props.get(name);
         }
 
         @Override
-        public @Immutable List<MethodInfo> getMethods() {
+        public @Immutable List<MethodDef> getMethods() {
             return origin.getMethods();
         }
 
         @Override
-        public @Nullable MethodInfo getMethod(String name, Class<?>... parameterTypes) {
+        public @Nullable MethodDef getMethod(String name, Class<?>... parameterTypes) {
             return origin.getMethod(name, parameterTypes);
         }
 
         @Override
         public boolean equals(Object o) {
-            return JieBean.equals(this, o);
+            return JieDef.equals(this, o);
         }
 
         @Override
         public int hashCode() {
-            return JieBean.hashCode(this);
+            return JieDef.hashCode(this);
         }
 
         @Override
         public String toString() {
-            return JieBean.toString(this);
+            return JieDef.toString(this);
         }
 
-        private final class PropertyInfoWrapper implements PropertyInfo {
+        private final class PropertyDefWrapper implements PropertyDef {
 
-            private final PropertyInfo prop;
+            private final PropertyDef prop;
             private final Type type;
 
-            private PropertyInfoWrapper(PropertyInfo prop, Type type) {
+            private PropertyDefWrapper(PropertyDef prop, Type type) {
                 this.prop = prop;
                 this.type = type;
             }
 
             @Override
-            public BeanInfo getOwner() {
-                return BeanInfoWrapper.this;
+            public ObjectDef getOwner() {
+                return ObjectDefWrapper.this;
             }
 
             @Override
@@ -316,18 +322,18 @@ public class JieBean {
             }
 
             @Override
-            public <A extends Annotation> @Nullable A getAnnotation(Class<A> annotationType) {
-                return prop.getAnnotation(annotationType);
+            public <A extends Annotation> @Nullable A getAnnotation(Class<A> type) {
+                return prop.getAnnotation(type);
             }
 
             @Override
-            public @Nullable Object getValue(Object bean) {
-                return prop.getValue(bean);
+            public @Nullable Object getValue(Object inst) {
+                return prop.getValue(inst);
             }
 
             @Override
-            public void setValue(Object bean, @Nullable Object value) {
-                prop.setValue(bean, value);
+            public void setValue(Object inst, @Nullable Object value) {
+                prop.setValue(inst, value);
             }
 
             @Override
@@ -382,17 +388,17 @@ public class JieBean {
 
             @Override
             public boolean equals(Object o) {
-                return JieBean.equals(this, o);
+                return JieDef.equals(this, o);
             }
 
             @Override
             public int hashCode() {
-                return JieBean.hashCode(this);
+                return JieDef.hashCode(this);
             }
 
             @Override
             public String toString() {
-                return JieBean.toString(this);
+                return JieDef.toString(this);
             }
         }
     }

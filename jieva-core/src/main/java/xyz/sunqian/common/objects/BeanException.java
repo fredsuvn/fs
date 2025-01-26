@@ -1,4 +1,4 @@
-package xyz.sunqian.common.bean;
+package xyz.sunqian.common.objects;
 
 import xyz.sunqian.common.base.JieException;
 

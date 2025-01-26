@@ -8,9 +8,9 @@ import xyz.sunqian.annotations.NonNull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Flag;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.bean.*;
-import xyz.sunqian.common.bean.handlers.NonGetterPrefixResolverHandler;
-import xyz.sunqian.common.bean.handlers.NonPrefixResolverHandler;
+import xyz.sunqian.common.objects.*;
+import xyz.sunqian.common.objects.handlers.NonGetterPrefixResolverHandler;
+import xyz.sunqian.common.objects.handlers.NonPrefixResolverHandler;
 import xyz.sunqian.common.coll.JieColl;
 import xyz.sunqian.common.reflect.JieReflect;
 import xyz.sunqian.common.reflect.JieType;
@@ -29,16 +29,16 @@ public class BeanTest {
     @Test
     public void testProvider() {
         BeanProvider provider = BeanProvider.defaultProvider();
-        BeanInfo b1 = provider.getBeanInfo(new TypeRef<Inner<Short, Long>>() {
+        ObjectDef b1 = provider.getBeanInfo(new TypeRef<Inner<Short, Long>>() {
         }.getType());
-        BeanInfo b2 = provider.getBeanInfo(new TypeRef<Inner<Short, Long>>() {
+        ObjectDef b2 = provider.getBeanInfo(new TypeRef<Inner<Short, Long>>() {
         }.getType());
         assertSame(b1, b2);
         assertEquals(b1, b2);
         assertEquals(b1.toString(), b2.toString());
         assertEquals(b1.hashCode(), b2.hashCode());
-        BeanProvider provider2 = BeanProvider.withResolver(BeanResolver.defaultResolver());
-        BeanInfo b3 = provider2.getBeanInfo(new TypeRef<Inner<Short, Long>>() {
+        BeanProvider provider2 = BeanProvider.withResolver(ObjectIntrospector.defaultResolver());
+        ObjectDef b3 = provider2.getBeanInfo(new TypeRef<Inner<Short, Long>>() {
         }.getType());
         assertNotSame(b1, b3);
         assertEquals(b1, b3);
@@ -48,9 +48,9 @@ public class BeanTest {
 
     @Test
     public void testBeanInfo() {
-        BeanInfo b1 = BeanInfo.get(new TypeRef<Inner<Short, Long>>() {
+        ObjectDef b1 = ObjectDef.get(new TypeRef<Inner<Short, Long>>() {
         }.getType());
-        BeanInfo b2 = BeanResolver.defaultResolver().resolve(new TypeRef<Inner<Short, Long>>() {
+        ObjectDef b2 = ObjectIntrospector.defaultResolver().introspect(new TypeRef<Inner<Short, Long>>() {
         }.getType());
         assertEquals(b1.getType(), new TypeRef<Inner<Short, Long>>() {
         }.getType());
@@ -62,10 +62,10 @@ public class BeanTest {
         assertTrue(b1.equals(b1));
         assertFalse(b1.equals(null));
         assertFalse(b1.equals(""));
-        assertFalse(b1.equals(BeanInfo.get(new TypeRef<Inner<Long, Long>>() {
+        assertFalse(b1.equals(ObjectDef.get(new TypeRef<Inner<Long, Long>>() {
         }.getType())));
         assertEquals(
-            JieColl.putAll(new HashMap<>(), b1.getProperties(), k -> k, BasePropertyInfo::getType),
+            JieColl.putAll(new HashMap<>(), b1.getProperties(), k -> k, PropertyIntro::getType),
             Jie.hashMap("ffFf1", String.class
                 , "ffFf2", Short.class
                 , "ffFf3", Long.class
@@ -87,7 +87,7 @@ public class BeanTest {
             )
         );
         assertEquals(
-            JieColl.addAll(new HashSet<>(), b1.getMethods(), BaseMethodInfo::getMethod),
+            JieColl.addAll(new HashSet<>(), b1.getMethods(), MethodIntro::getMethod),
             mSet
         );
         assertEquals(
@@ -95,9 +95,9 @@ public class BeanTest {
             }.getType()
         );
 
-        BeanInfo b3 = BeanInfo.get(Inner.class);
+        ObjectDef b3 = ObjectDef.get(Inner.class);
         assertEquals(
-            JieColl.putAll(new HashMap<>(), b3.getProperties(), k -> k, BasePropertyInfo::getType),
+            JieColl.putAll(new HashMap<>(), b3.getProperties(), k -> k, PropertyIntro::getType),
             Jie.hashMap("ffFf1", String.class
                 , "ffFf2", Inner.class.getTypeParameters()[0]
                 , "ffFf3", Inner.class.getTypeParameters()[1]
@@ -110,34 +110,34 @@ public class BeanTest {
                 , "bb3", Boolean.class)
         );
 
-        BeanInfo bo1 = BeanInfo.get(Object.class);
+        ObjectDef bo1 = ObjectDef.get(Object.class);
         assertEquals(bo1.getProperties().size(), 1);
-        BeanInfo bo2 = BeanResolver.withHandlers(new NonPrefixResolverHandler()).resolve(Object.class);
+        ObjectDef bo2 = ObjectIntrospector.withHandlers(new NonPrefixResolverHandler()).introspect(Object.class);
         assertEquals(bo2.getProperties().size(), 0);
         assertNotNull(bo1.getProperty("class"));
-        BeanInfo bc = BeanInfo.get(InnerSuperChild.class);
-        PropertyInfo pc = bc.getProperty("c1");
+        ObjectDef bc = ObjectDef.get(InnerSuperChild.class);
+        PropertyDef pc = bc.getProperty("c1");
         assertEquals(pc.getType(), String.class);
-        BeanInfo bs3 = BeanResolver.withHandlers(new NonPrefixResolverHandler()).resolve(Simple3.class);
-        PropertyInfo ps3 = bs3.getProperty("c1");
+        ObjectDef bs3 = ObjectIntrospector.withHandlers(new NonPrefixResolverHandler()).introspect(Simple3.class);
+        PropertyDef ps3 = bs3.getProperty("c1");
         assertEquals(ps3.getType(), String.class);
-        BeanInfo s1 = BeanResolver.withHandlers(new NonGetterPrefixResolverHandler()).resolve(Simple1.class);
+        ObjectDef s1 = ObjectIntrospector.withHandlers(new NonGetterPrefixResolverHandler()).introspect(Simple1.class);
         assertEquals(s1.getProperties().size(), 1);
         assertNotNull(s1.getProperty("aa"));
     }
 
     @Test
     public void testMember() throws Exception {
-        BeanInfo b1 = BeanInfo.get(new TypeRef<Inner<Short, Long>>() {
+        ObjectDef b1 = ObjectDef.get(new TypeRef<Inner<Short, Long>>() {
         }.getType());
-        BeanInfo b3 = BeanResolver.defaultResolver().resolve(new TypeRef<Inner<Short, Long>>() {
+        ObjectDef b3 = ObjectIntrospector.defaultResolver().introspect(new TypeRef<Inner<Short, Long>>() {
         }.getType());
-        PropertyInfo p1 = b1.getProperty("ffFf1");
+        PropertyDef p1 = b1.getProperty("ffFf1");
         assertEquals(p1.getOwner(), b1);
         assertEquals(b1.toString(), b1.getType().getTypeName());
         assertEquals(p1.toString(),
             b1.getType().getTypeName() + "." + p1.getName() + "[" + p1.getType().getTypeName() + "]");
-        MethodInfo m1 = b1.getMethod("m1");
+        MethodDef m1 = b1.getMethod("m1");
         assertEquals(m1.toString(),
             b1.getType().getTypeName() + "." + m1.getName() + "()[" + m1.getMethod().getGenericReturnType() + "]");
         assertEquals(p1, b3.getProperty("ffFf1"));
@@ -157,11 +157,11 @@ public class BeanTest {
         assertFalse(m1.equals(null));
         assertFalse(m1.equals(""));
 
-        PropertyInfo p2 = b1.getProperty("ffFf2");
-        PropertyInfo p3 = b1.getProperty("ffFf3");
-        PropertyInfo p4 = b1.getProperty("ffFf4");
-        PropertyInfo p5 = b1.getProperty("ffFf5");
-        PropertyInfo c1 = b1.getProperty("c1");
+        PropertyDef p2 = b1.getProperty("ffFf2");
+        PropertyDef p3 = b1.getProperty("ffFf3");
+        PropertyDef p4 = b1.getProperty("ffFf4");
+        PropertyDef p5 = b1.getProperty("ffFf5");
+        PropertyDef c1 = b1.getProperty("c1");
         assertEquals(p1.getAnnotations().get(0).annotationType(), Nullable.class);
         assertEquals(p1.getGetterAnnotations().get(0).annotationType(), Nullable.class);
         assertTrue(p1.getSetterAnnotations().isEmpty());
@@ -218,24 +218,24 @@ public class BeanTest {
         TestHandler h1 = new TestHandler();
         TestHandler h2 = new TestHandler();
         TestHandler h3 = new TestHandler();
-        BeanResolver r1 = BeanResolver.withHandlers(h1);
-        BeanInfo b1 = r1.resolve(Inner.class);
+        ObjectIntrospector r1 = ObjectIntrospector.withHandlers(h1);
+        ObjectDef b1 = r1.introspect(Inner.class);
         assertEquals(b1.getProperties(), Collections.emptyMap());
         assertEquals(b1.getMethods(), Collections.emptyList());
         assertEquals(h1.times, 1);
-        r1 = BeanResolver.withHandlers(Jie.list(h1));
-        b1 = r1.resolve(Inner.class);
+        r1 = ObjectIntrospector.withHandlers(Jie.list(h1));
+        b1 = r1.introspect(Inner.class);
         assertEquals(b1.getProperties(), Collections.emptyMap());
         assertEquals(b1.getMethods(), Collections.emptyList());
         assertEquals(h1.times, 2);
         r1 = r1.addFirstHandler(h2);
-        b1 = r1.resolve(Inner.class);
+        b1 = r1.introspect(Inner.class);
         assertEquals(b1.getProperties(), Collections.emptyMap());
         assertEquals(b1.getMethods(), Collections.emptyList());
         assertEquals(h1.times, 3);
         assertEquals(h2.times, 1);
         r1 = r1.addLastHandler(h3);
-        b1 = r1.resolve(Inner.class);
+        b1 = r1.introspect(Inner.class);
         assertEquals(b1.getProperties(), Collections.emptyMap());
         assertEquals(b1.getMethods(), Collections.emptyList());
         assertEquals(h1.times, 4);
@@ -243,7 +243,7 @@ public class BeanTest {
         assertEquals(h3.times, 1);
         r1 = r1.replaceFirstHandler(h3);
         r1 = r1.replaceFirstHandler(h3);
-        b1 = r1.resolve(Inner.class);
+        b1 = r1.introspect(Inner.class);
         assertEquals(b1.getProperties(), Collections.emptyMap());
         assertEquals(b1.getMethods(), Collections.emptyList());
         assertEquals(h1.times, 5);
@@ -251,7 +251,7 @@ public class BeanTest {
         assertEquals(h3.times, 3);
         r1 = r1.replaceLastHandler(h2);
         r1 = r1.replaceLastHandler(h2);
-        b1 = r1.resolve(Inner.class);
+        b1 = r1.introspect(Inner.class);
         assertEquals(b1.getProperties(), Collections.emptyMap());
         assertEquals(b1.getMethods(), Collections.emptyList());
         assertEquals(h1.times, 6);
@@ -259,10 +259,10 @@ public class BeanTest {
         assertEquals(h3.times, 4);
         // h3 -> h1 -> h2
         // h4 = h3 -> h1 -> h2
-        BeanResolver.Handler h4 = r1.asHandler();
+        ObjectIntrospector.Handler h4 = r1.asHandler();
         // h3 -> h1 -> h2 -> h4
         r1 = r1.addLastHandler(h4);
-        b1 = r1.resolve(Inner.class);
+        b1 = r1.introspect(Inner.class);
         assertEquals(b1.getProperties(), Collections.emptyMap());
         assertEquals(b1.getMethods(), Collections.emptyList());
         assertEquals(h1.times, 8);
@@ -271,19 +271,19 @@ public class BeanTest {
         BreakHandler h5 = new BreakHandler();
         // h5 -> h3 -> h1 -> h2 -> h4
         r1 = r1.addFirstHandler(h5);
-        b1 = r1.resolve(Inner.class);
+        b1 = r1.introspect(Inner.class);
         assertEquals(b1.getProperties(), Collections.emptyMap());
         assertEquals(b1.getMethods(), Collections.emptyList());
         assertEquals(h1.times, 8);
         assertEquals(h2.times, 5);
         assertEquals(h3.times, 6);
 
-        BeanResolver r4 = (BeanResolver) h4;
+        ObjectIntrospector r4 = (ObjectIntrospector) h4;
         // h5 -> h4
         r4 = r4.addFirstHandler(h5);
         h4 = r4.asHandler();
-        BeanResolver r5 = BeanResolver.withHandlers(h4);
-        b1 = r5.resolve(Inner.class);
+        ObjectIntrospector r5 = ObjectIntrospector.withHandlers(h4);
+        b1 = r5.introspect(Inner.class);
         assertEquals(b1.getProperties(), Collections.emptyMap());
         assertEquals(b1.getMethods(), Collections.emptyList());
         assertEquals(h1.times, 8);
@@ -292,25 +292,25 @@ public class BeanTest {
 
         ThrowHandler h6 = new ThrowHandler();
         // h6 -> h5 -> h4
-        BeanResolver r6 = r5.addFirstHandler(h6);
-        expectThrows(BeanResolvingException.class, () -> r6.resolve(Inner.class));
+        ObjectIntrospector r6 = r5.addFirstHandler(h6);
+        expectThrows(ObjectIntrospectionException.class, () -> r6.introspect(Inner.class));
     }
 
     @Test
     public void testHandler() {
-        expectThrows(BeanResolvingException.class, () -> BeanInfo.get(JieType.array(String.class)));
-        BeanInfo b1 = BeanResolver.withHandlers(new NonGetterPrefixResolverHandler()).resolve(Simple1.class);
+        expectThrows(ObjectIntrospectionException.class, () -> ObjectDef.get(JieType.array(String.class)));
+        ObjectDef b1 = ObjectIntrospector.withHandlers(new NonGetterPrefixResolverHandler()).introspect(Simple1.class);
         assertEquals(b1.getProperties().size(), 1);
         Simple1 s1 = new Simple1();
-        PropertyInfo aa1 = b1.getProperty("aa");
+        PropertyDef aa1 = b1.getProperty("aa");
         assertEquals(aa1.getValue(s1), null);
         aa1.setValue(s1, "ss");
         assertEquals(aa1.getValue(s1), "ss");
 
-        BeanInfo b2 = BeanResolver.withHandlers(new NonPrefixResolverHandler()).resolve(Simple2.class);
+        ObjectDef b2 = ObjectIntrospector.withHandlers(new NonPrefixResolverHandler()).introspect(Simple2.class);
         assertEquals(b2.getProperties().size(), 1);
         Simple2 s2 = new Simple2();
-        PropertyInfo aa2 = b2.getProperty("aa");
+        PropertyDef aa2 = b2.getProperty("aa");
         assertEquals(aa2.getValue(s2), null);
         aa2.setValue(s2, "ss");
         assertEquals(aa2.getValue(s2), "ss");
@@ -321,19 +321,19 @@ public class BeanTest {
         Map<TypeVariable<?>, Type> extra =
             JieReflect.getTypeParameterMapping(new TypeRef<TestExtra<String>>() {}.getType());
         Map<TypeVariable<?>, Type> empty = Collections.emptyMap();
-        BeanInfo b1 = BeanInfo.get(new TypeRef<TestExtra<String>>() {}.getType());
-        BeanInfo b2 = JieBean.withExtraTypeVariableMapping(BeanInfo.get(TestExtra.class), extra);
+        ObjectDef b1 = ObjectDef.get(new TypeRef<TestExtra<String>>() {}.getType());
+        ObjectDef b2 = JieDef.withExtraTypeVariableMapping(ObjectDef.get(TestExtra.class), extra);
         assertNotEquals(b1, b2);
         assertNotEquals(b1.getProperty("tt"), b2.getProperty("tt"));
         assertEquals(b1.getProperty("tt").getType(), b2.getProperty("tt").getType());
-        BeanInfo b3 = BeanInfo.get(TestExtra.class);
+        ObjectDef b3 = ObjectDef.get(TestExtra.class);
         assertNotEquals(b3, b2);
         assertNotEquals(b3.getProperty("tt"), b2.getProperty("tt"));
         assertNotEquals(b3.getProperty("tt").getType(), b2.getProperty("tt").getType());
-        BeanInfo b4 = JieBean.withExtraTypeVariableMapping(BeanInfo.get(TestExtra.class), empty);
+        ObjectDef b4 = JieDef.withExtraTypeVariableMapping(ObjectDef.get(TestExtra.class), empty);
         assertEquals(b4, b3);
         assertEquals(b4.getProperty("tt"), b4.getProperty("tt"));
-        BeanInfo b5 = JieBean.withExtraTypeVariableMapping(BeanInfo.get(TestExtra.class),
+        ObjectDef b5 = JieDef.withExtraTypeVariableMapping(ObjectDef.get(TestExtra.class),
             JieReflect.getTypeParameterMapping(new TypeRef<TestExtra2<String>>() {}.getType()));
         assertEquals(b5, b3);
         assertEquals(b5.getProperty("tt"), b3.getProperty("tt"));
@@ -341,12 +341,12 @@ public class BeanTest {
         assertEquals(b1.getRawType(), b2.getRawType());
         assertEquals(b2.getRawType(), b3.getRawType());
         assertEquals(
-            b1.getProperties().values().stream().map(BasePropertyInfo::getType).collect(Collectors.toList()),
-            b2.getProperties().values().stream().map(BasePropertyInfo::getType).collect(Collectors.toList())
+            b1.getProperties().values().stream().map(PropertyIntro::getType).collect(Collectors.toList()),
+            b2.getProperties().values().stream().map(PropertyIntro::getType).collect(Collectors.toList())
         );
         assertNotEquals(
-            b2.getProperties().values().stream().map(BasePropertyInfo::getType).collect(Collectors.toList()),
-            b3.getProperties().values().stream().map(BasePropertyInfo::getType).collect(Collectors.toList())
+            b2.getProperties().values().stream().map(PropertyIntro::getType).collect(Collectors.toList()),
+            b3.getProperties().values().stream().map(PropertyIntro::getType).collect(Collectors.toList())
         );
 
         assertNotEquals(b1.hashCode(), b2.hashCode());
@@ -361,9 +361,9 @@ public class BeanTest {
         assertNotEquals(b1.getMethod("hashCode"), b2.getMethod("hashCode"));
         assertEquals(b2.getMethod("hashCode"), b3.getMethod("hashCode"));
 
-        PropertyInfo p1 = b1.getProperty("tt");
-        PropertyInfo p2 = b2.getProperty("tt");
-        PropertyInfo p3 = b3.getProperty("tt");
+        PropertyDef p1 = b1.getProperty("tt");
+        PropertyDef p2 = b2.getProperty("tt");
+        PropertyDef p3 = b3.getProperty("tt");
         assertEquals(p1.getAnnotations(), p2.getAnnotations());
         assertEquals(p2.getAnnotations(), p3.getAnnotations());
         assertEquals(p1.getAnnotation(Nullable.class), p2.getAnnotation(Nullable.class));
@@ -392,29 +392,29 @@ public class BeanTest {
         assertEquals(p2.isReadable(), p3.isReadable());
     }
 
-    public static class TestHandler implements BeanResolver.Handler {
+    public static class TestHandler implements ObjectIntrospector.Handler {
 
         public int times = 0;
 
         @Override
-        public @Nullable Flag resolve(BeanResolver.Context context) throws BeanResolvingException {
+        public @Nullable Flag introspect(ObjectIntrospector.Context context) throws ObjectIntrospectionException {
             times++;
             return null;
         }
     }
 
-    public static class BreakHandler implements BeanResolver.Handler {
+    public static class BreakHandler implements ObjectIntrospector.Handler {
 
         @Override
-        public @Nullable Flag resolve(BeanResolver.Context context) throws BeanResolvingException {
+        public @Nullable Flag introspect(ObjectIntrospector.Context context) throws ObjectIntrospectionException {
             return Flag.BREAK;
         }
     }
 
-    public static class ThrowHandler implements BeanResolver.Handler {
+    public static class ThrowHandler implements ObjectIntrospector.Handler {
 
         @Override
-        public @Nullable Flag resolve(BeanResolver.Context context) throws BeanResolvingException {
+        public @Nullable Flag introspect(ObjectIntrospector.Context context) throws ObjectIntrospectionException {
             throw new IllegalStateException("");
         }
     }

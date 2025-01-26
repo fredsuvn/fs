@@ -8,9 +8,9 @@
 //import org.testng.annotations.Test;
 //import xyz.sunqian.annotations.Nullable;
 //import xyz.sunqian.common.base.*;
-//import xyz.sunqian.common.bean.*;
-//import xyz.sunqian.common.bean.handlers.JavaBeanResolverHandler;
-//import xyz.sunqian.common.bean.handlers.NonGetterPrefixResolverHandler;
+//import xyz.sunqian.common.objects.*;
+//import xyz.sunqian.common.objects.handlers.JavaBeanResolverHandler;
+//import xyz.sunqian.common.objects.handlers.NonGetterPrefixResolverHandler;
 //import xyz.sunqian.common.mapping.BeanMapper;
 //import xyz.sunqian.common.mapping.Mapper;
 //import xyz.sunqian.common.mapping.MappingOptions;

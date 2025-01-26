@@ -3,7 +3,7 @@ package xyz.sunqian.common.mapping.handlers;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Flag;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.bean.PropertyInfo;
+import xyz.sunqian.common.objects.PropertyDef;
 import xyz.sunqian.common.coll.JieColl;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingException;
@@ -25,7 +25,7 @@ import java.util.function.IntFunction;
  * {@link Flag#CONTINUE}. Else the generator tries to create a new collection of target type as target collection, if
  * the generator return {@code null}, this handler return {@link Flag#CONTINUE}, else this handler will map all
  * component of source object by {@link Mapper#map(Object, Type, Type, MappingOptions)} or
- * {@link Mapper#mapProperty(Object, Type, Type, PropertyInfo, MappingOptions)}, then return target collection wrapped
+ * {@link Mapper#mapProperty(Object, Type, Type, PropertyDef, MappingOptions)}, then return target collection wrapped
  * by {@link #wrapResult(Object)} ({@code wrapResult(targetCollection)}).
  * <p>
  * The generator should be specified in {@link #CollectionMappingHandler(CollectionGenerator)}, or use default generator
@@ -124,7 +124,7 @@ public class CollectionMappingHandler implements Mapper.Handler {
     }
 
     @Override
-    public Object mapProperty(@Nullable Object source, Type sourceType, Type targetType, @Nullable PropertyInfo targetProperty, Mapper mapper, MappingOptions options) {
+    public Object mapProperty(@Nullable Object source, Type sourceType, Type targetType, @Nullable PropertyDef targetProperty, Mapper mapper, MappingOptions options) {
         if (source == null) {
             return Flag.CONTINUE;
         }
@@ -244,7 +244,7 @@ public class CollectionMappingHandler implements Mapper.Handler {
         @Nullable Object sourceComponent,
         Type sourceComponentType,
         Type targetComponentType,
-        @Nullable PropertyInfo targetProperty,
+        @Nullable PropertyDef targetProperty,
         Mapper mapper,
         MappingOptions options
     ) {

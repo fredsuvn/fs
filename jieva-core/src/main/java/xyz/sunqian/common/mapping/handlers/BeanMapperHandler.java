@@ -3,7 +3,7 @@ package xyz.sunqian.common.mapping.handlers;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Flag;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.bean.PropertyInfo;
+import xyz.sunqian.common.objects.PropertyDef;
 import xyz.sunqian.common.mapping.BeanMapper;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingOptions;
@@ -135,7 +135,7 @@ public class BeanMapperHandler implements Mapper.Handler {
     }
 
     @Override
-    public Object mapProperty(@Nullable Object source, Type sourceType, Type targetType, PropertyInfo targetProperty, Mapper mapper, MappingOptions options) {
+    public Object mapProperty(@Nullable Object source, Type sourceType, Type targetType, PropertyDef targetProperty, Mapper mapper, MappingOptions options) {
         return map(source, sourceType, targetType, mapper, options);
     }
 
