@@ -5,7 +5,7 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Flag;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieChars;
-import xyz.sunqian.common.objects.PropertyDef;
+import xyz.sunqian.common.objects.DataProperty;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingOptions;
 
@@ -37,7 +37,7 @@ public class ProtobufMapperHandler implements Mapper.Handler {
     }
 
     @Override
-    public Object mapProperty(@Nullable Object source, Type sourceType, Type targetType, @Nullable PropertyDef targetProperty, Mapper mapper, MappingOptions options) {
+    public Object mapProperty(@Nullable Object source, Type sourceType, Type targetType, @Nullable DataProperty targetProperty, Mapper mapper, MappingOptions options) {
         if (source == null) {
             return Flag.CONTINUE;
         }
@@ -73,7 +73,7 @@ public class ProtobufMapperHandler implements Mapper.Handler {
         return Flag.CONTINUE;
     }
 
-    private Charset getCharset(@Nullable PropertyDef targetProperty, MappingOptions options) {
+    private Charset getCharset(@Nullable DataProperty targetProperty, MappingOptions options) {
         Charset charset = options.getCharset(targetProperty);
         return Jie.nonNull(charset, JieChars.defaultCharset());
     }

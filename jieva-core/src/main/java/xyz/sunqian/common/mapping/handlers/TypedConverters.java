@@ -6,7 +6,7 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.JieChars;
 import xyz.sunqian.common.base.JieDate;
 import xyz.sunqian.common.base.JieString;
-import xyz.sunqian.common.objects.PropertyDef;
+import xyz.sunqian.common.objects.DataProperty;
 import xyz.sunqian.common.io.JieBuffer;
 import xyz.sunqian.common.io.JieIO;
 import xyz.sunqian.common.mapping.MappingException;
@@ -163,7 +163,7 @@ public class TypedConverters {
     }
 
     private static Instant toInstant(
-        TemporalAccessor temporal, @Nullable PropertyDef targetProperty, MappingOptions options) {
+            TemporalAccessor temporal, @Nullable DataProperty targetProperty, MappingOptions options) {
         if (temporal instanceof TemporalConverter.StringTemporal) {
             return ((TemporalConverter.StringTemporal) temporal).toInstant();
         }
@@ -172,7 +172,7 @@ public class TypedConverters {
     }
 
     private static LocalDateTime toLocalDateTime(
-        TemporalAccessor temporal, @Nullable PropertyDef targetProperty, MappingOptions options) {
+            TemporalAccessor temporal, @Nullable DataProperty targetProperty, MappingOptions options) {
         if (temporal instanceof TemporalConverter.StringTemporal) {
             return ((TemporalConverter.StringTemporal) temporal).toLocalDateTime();
         }
@@ -181,7 +181,7 @@ public class TypedConverters {
     }
 
     private static OffsetDateTime toOffsetDateTime(
-        TemporalAccessor temporal, @Nullable PropertyDef targetProperty, MappingOptions options) {
+            TemporalAccessor temporal, @Nullable DataProperty targetProperty, MappingOptions options) {
         if (temporal instanceof TemporalConverter.StringTemporal) {
             return ((TemporalConverter.StringTemporal) temporal).toOffsetDateTime();
         }
@@ -190,7 +190,7 @@ public class TypedConverters {
     }
 
     private static ZonedDateTime toZonedDateTime(
-        TemporalAccessor temporal, @Nullable PropertyDef targetProperty, MappingOptions options) {
+            TemporalAccessor temporal, @Nullable DataProperty targetProperty, MappingOptions options) {
         if (temporal instanceof TemporalConverter.StringTemporal) {
             return ((TemporalConverter.StringTemporal) temporal).toZonedDateTime();
         }
@@ -199,7 +199,7 @@ public class TypedConverters {
     }
 
     private static LocalDate toLocalDate(
-        TemporalAccessor temporal, @Nullable PropertyDef targetProperty, MappingOptions options) {
+            TemporalAccessor temporal, @Nullable DataProperty targetProperty, MappingOptions options) {
         if (temporal instanceof TemporalConverter.StringTemporal) {
             return ((TemporalConverter.StringTemporal) temporal).toLocalDate();
         }
@@ -208,7 +208,7 @@ public class TypedConverters {
     }
 
     private static LocalTime toLocalTime(
-        TemporalAccessor temporal, @Nullable PropertyDef targetProperty, MappingOptions options) {
+            TemporalAccessor temporal, @Nullable DataProperty targetProperty, MappingOptions options) {
         if (temporal instanceof TemporalConverter.StringTemporal) {
             return ((TemporalConverter.StringTemporal) temporal).toLocalTime();
         }
@@ -236,7 +236,7 @@ public class TypedConverters {
 
         @Override
         public @Nullable String convert(
-            Object source, Type sourceType, @Nullable PropertyDef targetProperty, MappingOptions options) {
+                Object source, Type sourceType, @Nullable DataProperty targetProperty, MappingOptions options) {
             if (source instanceof Date) {
                 DateTimeFormatter dateTimeFormatter = options.getDateTimeFormatterWithZone(targetProperty);
                 if (dateTimeFormatter != null) {
@@ -301,7 +301,7 @@ public class TypedConverters {
 
         @Override
         public @Nullable byte[] convert(
-            Object source, Type sourceType, @Nullable PropertyDef targetProperty, MappingOptions options) {
+                Object source, Type sourceType, @Nullable DataProperty targetProperty, MappingOptions options) {
             if (source instanceof CharSequence) {
                 Charset charset = options.getCharset(targetProperty);
                 if (charset != null) {
@@ -343,7 +343,7 @@ public class TypedConverters {
 
         @Override
         public @Nullable Number convert(
-            Object source, Type sourceType, @Nullable PropertyDef targetProperty, MappingOptions options) {
+                Object source, Type sourceType, @Nullable DataProperty targetProperty, MappingOptions options) {
             if (source instanceof Number) {
                 return (Number) source;
             }
@@ -426,7 +426,7 @@ public class TypedConverters {
 
         @Override
         public @Nullable Character convert(
-            Object source, Type sourceType, @Nullable PropertyDef targetProperty, MappingOptions options) {
+                Object source, Type sourceType, @Nullable DataProperty targetProperty, MappingOptions options) {
             if (source instanceof Character) {
                 return (Character) source;
             }
@@ -455,7 +455,7 @@ public class TypedConverters {
 
         @Override
         public @Nullable Date convert(
-            Object source, Type sourceType, @Nullable PropertyDef targetProperty, MappingOptions options) {
+                Object source, Type sourceType, @Nullable DataProperty targetProperty, MappingOptions options) {
             if (source instanceof Date) {
                 return new Date(((Date) source).getTime());
             }
@@ -498,7 +498,7 @@ public class TypedConverters {
 
         @Override
         public @Nullable TemporalAccessor convert(
-            Object source, Type sourceType, @Nullable PropertyDef targetProperty, MappingOptions options) {
+                Object source, Type sourceType, @Nullable DataProperty targetProperty, MappingOptions options) {
             if (source instanceof Date) {
                 return ((Date) source).toInstant();
             }
@@ -518,10 +518,10 @@ public class TypedConverters {
         private static final class StringTemporal implements TemporalAccessor {
 
             private final CharSequence string;
-            private final @Nullable PropertyDef targetProperty;
+            private final @Nullable DataProperty targetProperty;
             private final MappingOptions options;
 
-            private StringTemporal(CharSequence string, @Nullable PropertyDef targetProperty, MappingOptions options) {
+            private StringTemporal(CharSequence string, @Nullable DataProperty targetProperty, MappingOptions options) {
                 this.string = string;
                 this.targetProperty = targetProperty;
                 this.options = options;
@@ -602,7 +602,7 @@ public class TypedConverters {
 
         @Override
         public @Nullable Duration convert(
-            Object source, Type sourceType, @Nullable PropertyDef targetProperty, MappingOptions options) {
+                Object source, Type sourceType, @Nullable DataProperty targetProperty, MappingOptions options) {
             if (source instanceof Duration) {
                 return (Duration) source;
             }
@@ -633,7 +633,7 @@ public class TypedConverters {
 
         @Override
         public @Nullable Boolean convert(
-            Object source, Type sourceType, @Nullable PropertyDef targetProperty, MappingOptions options) {
+                Object source, Type sourceType, @Nullable DataProperty targetProperty, MappingOptions options) {
             if (source instanceof Boolean) {
                 return (Boolean) source;
             }

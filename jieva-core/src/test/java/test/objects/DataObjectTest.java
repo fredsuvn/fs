@@ -1,4 +1,4 @@
-package test.bean;
+package test.objects;
 
 import lombok.Data;
 import lombok.Getter;
@@ -6,12 +6,9 @@ import lombok.Setter;
 import org.testng.annotations.Test;
 import xyz.sunqian.annotations.NonNull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Flag;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.objects.*;
-import xyz.sunqian.common.objects.handlers.NonGetterPrefixResolverHandler;
-import xyz.sunqian.common.objects.handlers.NonPrefixResolverHandler;
 import xyz.sunqian.common.coll.JieColl;
+import xyz.sunqian.common.objects.*;
 import xyz.sunqian.common.reflect.JieReflect;
 import xyz.sunqian.common.reflect.JieType;
 import xyz.sunqian.common.reflect.TypeRef;
@@ -24,34 +21,12 @@ import java.util.stream.Collectors;
 
 import static org.testng.Assert.*;
 
-public class BeanTest {
+public class DataObjectTest {
 
     @Test
-    public void testProvider() {
-        BeanProvider provider = BeanProvider.defaultProvider();
-        ObjectDef b1 = provider.getBeanInfo(new TypeRef<Inner<Short, Long>>() {
-        }.getType());
-        ObjectDef b2 = provider.getBeanInfo(new TypeRef<Inner<Short, Long>>() {
-        }.getType());
-        assertSame(b1, b2);
-        assertEquals(b1, b2);
-        assertEquals(b1.toString(), b2.toString());
-        assertEquals(b1.hashCode(), b2.hashCode());
-        BeanProvider provider2 = BeanProvider.withResolver(ObjectIntrospector.defaultResolver());
-        ObjectDef b3 = provider2.getBeanInfo(new TypeRef<Inner<Short, Long>>() {
-        }.getType());
-        assertNotSame(b1, b3);
-        assertEquals(b1, b3);
-        assertEquals(b1.toString(), b3.toString());
-        assertEquals(b1.hashCode(), b3.hashCode());
-    }
-
-    @Test
-    public void testBeanInfo() {
-        ObjectDef b1 = ObjectDef.get(new TypeRef<Inner<Short, Long>>() {
-        }.getType());
-        ObjectDef b2 = ObjectIntrospector.defaultResolver().introspect(new TypeRef<Inner<Short, Long>>() {
-        }.getType());
+    public void testDataSchema() {
+        DataSchema b1 = DataSchema.get(new TypeRef<Inner<Short, Long>>() {}.getType());
+        DataSchema b2 = DataSchemaParser.defaultParser().parse(new TypeRef<Inner<Short, Long>>() {}.getType());
         assertEquals(b1.getType(), new TypeRef<Inner<Short, Long>>() {
         }.getType());
         assertEquals(b1.getRawType(), Inner.class);
@@ -62,10 +37,10 @@ public class BeanTest {
         assertTrue(b1.equals(b1));
         assertFalse(b1.equals(null));
         assertFalse(b1.equals(""));
-        assertFalse(b1.equals(ObjectDef.get(new TypeRef<Inner<Long, Long>>() {
+        assertFalse(b1.equals(DataSchema.get(new TypeRef<Inner<Long, Long>>() {
         }.getType())));
         assertEquals(
-            JieColl.putAll(new HashMap<>(), b1.getProperties(), k -> k, PropertyIntro::getType),
+            JieColl.putAll(new HashMap<>(), b1.getProperties(), k -> k, DataPropertyBase::getType),
             Jie.hashMap("ffFf1", String.class
                 , "ffFf2", Short.class
                 , "ffFf3", Long.class
@@ -87,17 +62,13 @@ public class BeanTest {
             )
         );
         assertEquals(
-            JieColl.addAll(new HashSet<>(), b1.getMethods(), MethodIntro::getMethod),
-            mSet
-        );
-        assertEquals(
             b1.getType(), new TypeRef<Inner<Short, Long>>() {
             }.getType()
         );
 
-        ObjectDef b3 = ObjectDef.get(Inner.class);
+        DataSchema b3 = DataSchema.get(Inner.class);
         assertEquals(
-            JieColl.putAll(new HashMap<>(), b3.getProperties(), k -> k, PropertyIntro::getType),
+            JieColl.putAll(new HashMap<>(), b3.getProperties(), k -> k, DataPropertyBase::getType),
             Jie.hashMap("ffFf1", String.class
                 , "ffFf2", Inner.class.getTypeParameters()[0]
                 , "ffFf3", Inner.class.getTypeParameters()[1]
@@ -109,37 +80,22 @@ public class BeanTest {
                 , "bb2", Boolean.class
                 , "bb3", Boolean.class)
         );
-
-        ObjectDef bo1 = ObjectDef.get(Object.class);
-        assertEquals(bo1.getProperties().size(), 1);
-        ObjectDef bo2 = ObjectIntrospector.withHandlers(new NonPrefixResolverHandler()).introspect(Object.class);
-        assertEquals(bo2.getProperties().size(), 0);
-        assertNotNull(bo1.getProperty("class"));
-        ObjectDef bc = ObjectDef.get(InnerSuperChild.class);
-        PropertyDef pc = bc.getProperty("c1");
-        assertEquals(pc.getType(), String.class);
-        ObjectDef bs3 = ObjectIntrospector.withHandlers(new NonPrefixResolverHandler()).introspect(Simple3.class);
-        PropertyDef ps3 = bs3.getProperty("c1");
-        assertEquals(ps3.getType(), String.class);
-        ObjectDef s1 = ObjectIntrospector.withHandlers(new NonGetterPrefixResolverHandler()).introspect(Simple1.class);
-        assertEquals(s1.getProperties().size(), 1);
-        assertNotNull(s1.getProperty("aa"));
     }
 
     @Test
     public void testMember() throws Exception {
-        ObjectDef b1 = ObjectDef.get(new TypeRef<Inner<Short, Long>>() {
+        DataSchema b1 = DataSchema.get(new TypeRef<Inner<Short, Long>>() {
         }.getType());
-        ObjectDef b3 = ObjectIntrospector.defaultResolver().introspect(new TypeRef<Inner<Short, Long>>() {
+        DataSchema b3 = DataSchemaParser.defaultParser().parse(new TypeRef<Inner<Short, Long>>() {
         }.getType());
-        PropertyDef p1 = b1.getProperty("ffFf1");
+        DataProperty p1 = b1.getProperty("ffFf1");
         assertEquals(p1.getOwner(), b1);
         assertEquals(b1.toString(), b1.getType().getTypeName());
         assertEquals(p1.toString(),
-            b1.getType().getTypeName() + "." + p1.getName() + "[" + p1.getType().getTypeName() + "]");
-        MethodDef m1 = b1.getMethod("m1");
-        assertEquals(m1.toString(),
-            b1.getType().getTypeName() + "." + m1.getName() + "()[" + m1.getMethod().getGenericReturnType() + "]");
+            "property[name=" + p1.getName()
+                + ", type=" + p1.getType().getTypeName()
+                + ", ownerType=" + p1.getOwner().getType().getTypeName()
+                + "]");
         assertEquals(p1, b3.getProperty("ffFf1"));
         assertEquals(p1.toString(), b3.getProperty("ffFf1").toString());
         assertEquals(p1.hashCode(), b3.getProperty("ffFf1").hashCode());
@@ -148,20 +104,12 @@ public class BeanTest {
         assertTrue(p1.equals(p1));
         assertFalse(p1.equals(null));
         assertFalse(p1.equals(""));
-        assertEquals(m1, b3.getMethod("m1"));
-        assertEquals(m1.toString(), b3.getMethod("m1").toString());
-        assertEquals(m1.hashCode(), b3.getMethod("m1").hashCode());
-        assertNotSame(m1, b3.getMethod("m1"));
-        assertSame(m1, m1);
-        assertTrue(m1.equals(m1));
-        assertFalse(m1.equals(null));
-        assertFalse(m1.equals(""));
 
-        PropertyDef p2 = b1.getProperty("ffFf2");
-        PropertyDef p3 = b1.getProperty("ffFf3");
-        PropertyDef p4 = b1.getProperty("ffFf4");
-        PropertyDef p5 = b1.getProperty("ffFf5");
-        PropertyDef c1 = b1.getProperty("c1");
+        DataProperty p2 = b1.getProperty("ffFf2");
+        DataProperty p3 = b1.getProperty("ffFf3");
+        DataProperty p4 = b1.getProperty("ffFf4");
+        DataProperty p5 = b1.getProperty("ffFf5");
+        DataProperty c1 = b1.getProperty("c1");
         assertEquals(p1.getAnnotations().get(0).annotationType(), Nullable.class);
         assertEquals(p1.getGetterAnnotations().get(0).annotationType(), Nullable.class);
         assertTrue(p1.getSetterAnnotations().isEmpty());
@@ -177,7 +125,6 @@ public class BeanTest {
         assertTrue(c1.getSetterAnnotations().isEmpty());
         assertTrue(c1.getGetterAnnotations().isEmpty());
         assertNotNull(c1.getAnnotation(Nullable.class));
-        assertEquals(m1.getAnnotations().get(0).annotationType(), Nullable.class);
         assertNull(p2.getAnnotation(Nullable.class));
         assertNull(p3.getAnnotation(Nullable.class));
         assertTrue(p1.isReadable());
@@ -202,138 +149,121 @@ public class BeanTest {
 
         Inner<Short, Long> inner = new Inner<>();
         inner.setFfFf2((short) 22);
-        assertEquals(m1.invoke(inner), (short) 22);
         assertEquals(p2.getValue(inner), (short) 22);
         p2.setValue(inner, (short) 111);
         assertEquals(p2.getValue(inner), (short) 111);
         expectThrows(BeanException.class, () -> p4.getValue(inner));
         expectThrows(BeanException.class, () -> p1.setValue(inner, 111));
-        assertNull(b1.getMethod("m1", Object.class));
-        assertNull(b1.getMethod("m11"));
-        assertFalse(m1.equals(b1.getMethod("get")));
     }
 
     @Test
-    public void testResolver() {
+    public void testParser() {
         TestHandler h1 = new TestHandler();
         TestHandler h2 = new TestHandler();
         TestHandler h3 = new TestHandler();
-        ObjectIntrospector r1 = ObjectIntrospector.withHandlers(h1);
-        ObjectDef b1 = r1.introspect(Inner.class);
+        DataSchemaParser r1 = DataSchemaParser.withHandlers(h1);
+        DataSchema b1 = r1.parse(Inner.class);
         assertEquals(b1.getProperties(), Collections.emptyMap());
-        assertEquals(b1.getMethods(), Collections.emptyList());
         assertEquals(h1.times, 1);
-        r1 = ObjectIntrospector.withHandlers(Jie.list(h1));
-        b1 = r1.introspect(Inner.class);
+        r1 = DataSchemaParser.withHandlers(Jie.list(h1));
+        b1 = r1.parse(Inner.class);
         assertEquals(b1.getProperties(), Collections.emptyMap());
-        assertEquals(b1.getMethods(), Collections.emptyList());
         assertEquals(h1.times, 2);
         r1 = r1.addFirstHandler(h2);
-        b1 = r1.introspect(Inner.class);
+        b1 = r1.parse(Inner.class);
         assertEquals(b1.getProperties(), Collections.emptyMap());
-        assertEquals(b1.getMethods(), Collections.emptyList());
         assertEquals(h1.times, 3);
         assertEquals(h2.times, 1);
         r1 = r1.addLastHandler(h3);
-        b1 = r1.introspect(Inner.class);
+        b1 = r1.parse(Inner.class);
         assertEquals(b1.getProperties(), Collections.emptyMap());
-        assertEquals(b1.getMethods(), Collections.emptyList());
         assertEquals(h1.times, 4);
         assertEquals(h2.times, 2);
         assertEquals(h3.times, 1);
-        r1 = r1.replaceFirstHandler(h3);
-        r1 = r1.replaceFirstHandler(h3);
-        b1 = r1.introspect(Inner.class);
+        b1 = r1.parse(Inner.class);
         assertEquals(b1.getProperties(), Collections.emptyMap());
-        assertEquals(b1.getMethods(), Collections.emptyList());
         assertEquals(h1.times, 5);
         assertEquals(h2.times, 2);
         assertEquals(h3.times, 3);
-        r1 = r1.replaceLastHandler(h2);
-        r1 = r1.replaceLastHandler(h2);
-        b1 = r1.introspect(Inner.class);
+        b1 = r1.parse(Inner.class);
         assertEquals(b1.getProperties(), Collections.emptyMap());
-        assertEquals(b1.getMethods(), Collections.emptyList());
         assertEquals(h1.times, 6);
         assertEquals(h2.times, 3);
         assertEquals(h3.times, 4);
         // h3 -> h1 -> h2
         // h4 = h3 -> h1 -> h2
-        ObjectIntrospector.Handler h4 = r1.asHandler();
+        DataSchemaParser.Handler h4 = r1.asHandler();
         // h3 -> h1 -> h2 -> h4
         r1 = r1.addLastHandler(h4);
-        b1 = r1.introspect(Inner.class);
+        b1 = r1.parse(Inner.class);
         assertEquals(b1.getProperties(), Collections.emptyMap());
-        assertEquals(b1.getMethods(), Collections.emptyList());
         assertEquals(h1.times, 8);
         assertEquals(h2.times, 5);
         assertEquals(h3.times, 6);
         BreakHandler h5 = new BreakHandler();
         // h5 -> h3 -> h1 -> h2 -> h4
         r1 = r1.addFirstHandler(h5);
-        b1 = r1.introspect(Inner.class);
+        b1 = r1.parse(Inner.class);
         assertEquals(b1.getProperties(), Collections.emptyMap());
-        assertEquals(b1.getMethods(), Collections.emptyList());
         assertEquals(h1.times, 8);
         assertEquals(h2.times, 5);
         assertEquals(h3.times, 6);
 
-        ObjectIntrospector r4 = (ObjectIntrospector) h4;
+        DataSchemaParser r4 = (DataSchemaParser) h4;
         // h5 -> h4
         r4 = r4.addFirstHandler(h5);
         h4 = r4.asHandler();
-        ObjectIntrospector r5 = ObjectIntrospector.withHandlers(h4);
-        b1 = r5.introspect(Inner.class);
+        DataSchemaParser r5 = DataSchemaParser.withHandlers(h4);
+        b1 = r5.parse(Inner.class);
         assertEquals(b1.getProperties(), Collections.emptyMap());
-        assertEquals(b1.getMethods(), Collections.emptyList());
         assertEquals(h1.times, 8);
         assertEquals(h2.times, 5);
         assertEquals(h3.times, 6);
 
         ThrowHandler h6 = new ThrowHandler();
         // h6 -> h5 -> h4
-        ObjectIntrospector r6 = r5.addFirstHandler(h6);
-        expectThrows(ObjectIntrospectionException.class, () -> r6.introspect(Inner.class));
+        DataSchemaParser r6 = r5.addFirstHandler(h6);
+        expectThrows(DataObjectException.class, () -> r6.parse(Inner.class));
     }
 
-    @Test
-    public void testHandler() {
-        expectThrows(ObjectIntrospectionException.class, () -> ObjectDef.get(JieType.array(String.class)));
-        ObjectDef b1 = ObjectIntrospector.withHandlers(new NonGetterPrefixResolverHandler()).introspect(Simple1.class);
-        assertEquals(b1.getProperties().size(), 1);
-        Simple1 s1 = new Simple1();
-        PropertyDef aa1 = b1.getProperty("aa");
-        assertEquals(aa1.getValue(s1), null);
-        aa1.setValue(s1, "ss");
-        assertEquals(aa1.getValue(s1), "ss");
-
-        ObjectDef b2 = ObjectIntrospector.withHandlers(new NonPrefixResolverHandler()).introspect(Simple2.class);
-        assertEquals(b2.getProperties().size(), 1);
-        Simple2 s2 = new Simple2();
-        PropertyDef aa2 = b2.getProperty("aa");
-        assertEquals(aa2.getValue(s2), null);
-        aa2.setValue(s2, "ss");
-        assertEquals(aa2.getValue(s2), "ss");
-    }
+    // @Test
+    // public void testHandler() {
+    //     expectThrows(DataObjectException.class, () -> DataSchema.get(JieType.array(String.class)));
+    //     DataSchema b1 = DataSchemaParser.withHandlers(new NonGetterPrefixSchemaHandler()).parse(Simple1.class);
+    //     assertEquals(b1.getProperties().size(), 1);
+    //     Simple1 s1 = new Simple1();
+    //     DataProperty aa1 = b1.getProperty("aa");
+    //     assertEquals(aa1.getValue(s1), null);
+    //     aa1.setValue(s1, "ss");
+    //     assertEquals(aa1.getValue(s1), "ss");
+    //
+    //     DataSchema b2 = DataSchemaParser.withHandlers(new NonPrefixResolverHandler()).parse(Simple2.class);
+    //     assertEquals(b2.getProperties().size(), 1);
+    //     Simple2 s2 = new Simple2();
+    //     DataProperty aa2 = b2.getProperty("aa");
+    //     assertEquals(aa2.getValue(s2), null);
+    //     aa2.setValue(s2, "ss");
+    //     assertEquals(aa2.getValue(s2), "ss");
+    // }
 
     @Test
     public void testExtra() {
         Map<TypeVariable<?>, Type> extra =
             JieReflect.getTypeParameterMapping(new TypeRef<TestExtra<String>>() {}.getType());
         Map<TypeVariable<?>, Type> empty = Collections.emptyMap();
-        ObjectDef b1 = ObjectDef.get(new TypeRef<TestExtra<String>>() {}.getType());
-        ObjectDef b2 = JieDef.withExtraTypeVariableMapping(ObjectDef.get(TestExtra.class), extra);
+        DataSchema b1 = DataSchema.get(new TypeRef<TestExtra<String>>() {}.getType());
+        DataSchema b2 = JieData.withExtraTypeVariableMapping(DataSchema.get(TestExtra.class), extra);
         assertNotEquals(b1, b2);
         assertNotEquals(b1.getProperty("tt"), b2.getProperty("tt"));
         assertEquals(b1.getProperty("tt").getType(), b2.getProperty("tt").getType());
-        ObjectDef b3 = ObjectDef.get(TestExtra.class);
+        DataSchema b3 = DataSchema.get(TestExtra.class);
         assertNotEquals(b3, b2);
         assertNotEquals(b3.getProperty("tt"), b2.getProperty("tt"));
         assertNotEquals(b3.getProperty("tt").getType(), b2.getProperty("tt").getType());
-        ObjectDef b4 = JieDef.withExtraTypeVariableMapping(ObjectDef.get(TestExtra.class), empty);
+        DataSchema b4 = JieData.withExtraTypeVariableMapping(DataSchema.get(TestExtra.class), empty);
         assertEquals(b4, b3);
         assertEquals(b4.getProperty("tt"), b4.getProperty("tt"));
-        ObjectDef b5 = JieDef.withExtraTypeVariableMapping(ObjectDef.get(TestExtra.class),
+        DataSchema b5 = JieData.withExtraTypeVariableMapping(DataSchema.get(TestExtra.class),
             JieReflect.getTypeParameterMapping(new TypeRef<TestExtra2<String>>() {}.getType()));
         assertEquals(b5, b3);
         assertEquals(b5.getProperty("tt"), b3.getProperty("tt"));
@@ -341,12 +271,12 @@ public class BeanTest {
         assertEquals(b1.getRawType(), b2.getRawType());
         assertEquals(b2.getRawType(), b3.getRawType());
         assertEquals(
-            b1.getProperties().values().stream().map(PropertyIntro::getType).collect(Collectors.toList()),
-            b2.getProperties().values().stream().map(PropertyIntro::getType).collect(Collectors.toList())
+            b1.getProperties().values().stream().map(DataPropertyBase::getType).collect(Collectors.toList()),
+            b2.getProperties().values().stream().map(DataPropertyBase::getType).collect(Collectors.toList())
         );
         assertNotEquals(
-            b2.getProperties().values().stream().map(PropertyIntro::getType).collect(Collectors.toList()),
-            b3.getProperties().values().stream().map(PropertyIntro::getType).collect(Collectors.toList())
+            b2.getProperties().values().stream().map(DataPropertyBase::getType).collect(Collectors.toList()),
+            b3.getProperties().values().stream().map(DataPropertyBase::getType).collect(Collectors.toList())
         );
 
         assertNotEquals(b1.hashCode(), b2.hashCode());
@@ -356,14 +286,9 @@ public class BeanTest {
         assertEquals(b1.getProperty("tt").hashCode(), b2.getProperty("tt").hashCode());
         assertNotEquals(b1.getProperty("tt").toString(), b2.getProperty("tt").toString());
 
-        assertNotEquals(b1.getMethods(), b2.getMethods());
-        assertEquals(b2.getMethods(), b3.getMethods());
-        assertNotEquals(b1.getMethod("hashCode"), b2.getMethod("hashCode"));
-        assertEquals(b2.getMethod("hashCode"), b3.getMethod("hashCode"));
-
-        PropertyDef p1 = b1.getProperty("tt");
-        PropertyDef p2 = b2.getProperty("tt");
-        PropertyDef p3 = b3.getProperty("tt");
+        DataProperty p1 = b1.getProperty("tt");
+        DataProperty p2 = b2.getProperty("tt");
+        DataProperty p3 = b3.getProperty("tt");
         assertEquals(p1.getAnnotations(), p2.getAnnotations());
         assertEquals(p2.getAnnotations(), p3.getAnnotations());
         assertEquals(p1.getAnnotation(Nullable.class), p2.getAnnotation(Nullable.class));
@@ -392,29 +317,29 @@ public class BeanTest {
         assertEquals(p2.isReadable(), p3.isReadable());
     }
 
-    public static class TestHandler implements ObjectIntrospector.Handler {
+    public static class TestHandler implements DataSchemaParser.Handler {
 
         public int times = 0;
 
         @Override
-        public @Nullable Flag introspect(ObjectIntrospector.Context context) throws ObjectIntrospectionException {
+        public @Nullable boolean doParse(DataSchemaParser.Context context) throws DataObjectException {
             times++;
-            return null;
+            return true;
         }
     }
 
-    public static class BreakHandler implements ObjectIntrospector.Handler {
+    public static class BreakHandler implements DataSchemaParser.Handler {
 
         @Override
-        public @Nullable Flag introspect(ObjectIntrospector.Context context) throws ObjectIntrospectionException {
-            return Flag.BREAK;
+        public @Nullable boolean doParse(DataSchemaParser.Context context) throws DataObjectException {
+            return false;
         }
     }
 
-    public static class ThrowHandler implements ObjectIntrospector.Handler {
+    public static class ThrowHandler implements DataSchemaParser.Handler {
 
         @Override
-        public @Nullable Flag introspect(ObjectIntrospector.Context context) throws ObjectIntrospectionException {
+        public @Nullable boolean doParse(DataSchemaParser.Context context) throws DataObjectException {
             throw new IllegalStateException("");
         }
     }

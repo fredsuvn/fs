@@ -3,7 +3,7 @@ package xyz.sunqian.common.mapping;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Flag;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.objects.PropertyDef;
+import xyz.sunqian.common.objects.DataProperty;
 import xyz.sunqian.common.coll.JieColl;
 import xyz.sunqian.common.mapping.handlers.*;
 
@@ -103,7 +103,7 @@ final class MapperImpl implements Mapper, Mapper.Handler {
 
     @Override
     public Object mapProperty(
-        @Nullable Object source, Type sourceType, Type targetType, PropertyDef targetProperty, Mapper mapper, MappingOptions options) {
+            @Nullable Object source, Type sourceType, Type targetType, DataProperty targetProperty, Mapper mapper, MappingOptions options) {
         Object result = mapProperty(source, sourceType, targetType, targetProperty, options);
         if (result == null) {
             return Flag.CONTINUE;

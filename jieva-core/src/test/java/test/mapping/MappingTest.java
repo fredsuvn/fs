@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import org.testng.annotations.Test;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.objects.PropertyDef;
+import xyz.sunqian.common.objects.DataProperty;
 import xyz.sunqian.common.mapping.BeanMapper;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingException;
@@ -383,7 +383,7 @@ public class MappingTest {
         }
 
         @Override
-        public Object mapProperty(@Nullable Object source, Type sourceType, Type targetType, PropertyDef targetProperty, Mapper mapper, MappingOptions options) {
+        public Object mapProperty(@Nullable Object source, Type sourceType, Type targetType, DataProperty targetProperty, Mapper mapper, MappingOptions options) {
             if (propError) {
                 throw new IllegalStateException();
             }

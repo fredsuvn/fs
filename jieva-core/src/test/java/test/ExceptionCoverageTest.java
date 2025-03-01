@@ -2,8 +2,6 @@ package test;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.ShouldNotHappenException;
-import xyz.sunqian.common.objects.BeanException;
-import xyz.sunqian.common.objects.ObjectIntrospectionException;
 import xyz.sunqian.common.codec.CodecException;
 import xyz.sunqian.common.crypto.CryptoException;
 import xyz.sunqian.common.encode.DecodingException;
@@ -11,6 +9,8 @@ import xyz.sunqian.common.encode.EncodingException;
 import xyz.sunqian.common.invoke.InvocationException;
 import xyz.sunqian.common.io.IOEncodingException;
 import xyz.sunqian.common.io.IORuntimeException;
+import xyz.sunqian.common.objects.BeanException;
+import xyz.sunqian.common.objects.DataObjectException;
 import xyz.sunqian.common.reflect.JvmException;
 import xyz.sunqian.common.reflect.ReflectionException;
 import xyz.sunqian.common.reflect.proxy.ProxyException;
@@ -48,14 +48,14 @@ public class ExceptionCoverageTest {
             throw new InvocationException(new RuntimeException());
         });
 
-        expectThrows(ObjectIntrospectionException.class, () -> {
-            throw new ObjectIntrospectionException();
+        expectThrows(DataObjectException.class, () -> {
+            throw new DataObjectException();
         });
-        expectThrows(ObjectIntrospectionException.class, () -> {
-            throw new ObjectIntrospectionException(String.class);
+        expectThrows(DataObjectException.class, () -> {
+            throw new DataObjectException(String.class);
         });
-        expectThrows(ObjectIntrospectionException.class, () -> {
-            throw new ObjectIntrospectionException(new RuntimeException());
+        expectThrows(DataObjectException.class, () -> {
+            throw new DataObjectException(new RuntimeException());
         });
         expectThrows(BeanException.class, () -> {
             throw new BeanException();

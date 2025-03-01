@@ -5,9 +5,9 @@ import com.google.protobuf.Message;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Flag;
 import xyz.sunqian.common.base.JieString;
-import xyz.sunqian.common.objects.PropertyIntro;
+import xyz.sunqian.common.objects.DataPropertyBase;
 import xyz.sunqian.common.objects.BeanException;
-import xyz.sunqian.common.objects.ObjectIntrospector;
+import xyz.sunqian.common.objects.DataSchemaParser;
 import xyz.sunqian.common.coll.JieColl;
 import xyz.sunqian.common.invoke.Invoker;
 import xyz.sunqian.common.mapping.MappingException;
@@ -23,21 +23,21 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * {@link ObjectIntrospector.Handler} implementation for
+ * {@link DataSchemaParser.Handler} implementation for
  * <a href="https://github.com/protocolbuffers/protobuf">Protocol Buffers</a>.
  * <p>
  * Note this handler depends on {@code protobuf libs} in the runtime.
  *
  * @author fredsuvn
  */
-public class ProtobufBeanResolveHandler implements ObjectIntrospector.Handler {
+public class ProtobufBeanResolveHandler implements DataSchemaParser.Handler {
 
     @Override
-    public @Nullable Flag introspect(ObjectIntrospector.Context context) {
+    public @Nullable boolean doParse(DataSchemaParser.Context context) {
         try {
-            Class<?> rawType = JieReflect.getRawType(context.getObjectType());
+            Class<?> rawType = JieReflect.getRawType(context.getType());
             if (rawType == null) {
-                return null;
+                return true;
             }
             // Check whether it is a protobuf object
             boolean isProtobuf = false;
@@ -50,15 +50,15 @@ public class ProtobufBeanResolveHandler implements ObjectIntrospector.Handler {
                 isBuilder = true;
             }
             if (!isProtobuf) {
-                return null;
+                return true;
             }
             Method getDescriptorMethod = rawType.getMethod("getDescriptor");
             Descriptors.Descriptor descriptor = (Descriptors.Descriptor) getDescriptorMethod.invoke(null);
             for (Descriptors.FieldDescriptor field : descriptor.getFields()) {
-                PropertyIntro propertyIntro = buildProperty(context, field, rawType, isBuilder);
-                context.propertyIntros().put(propertyIntro.getName(), propertyIntro);
+                DataPropertyBase dataPropertyBase = buildProperty(context, field, rawType, isBuilder);
+                context.getPropertyBaseMap().put(dataPropertyBase.getName(), dataPropertyBase);
             }
-            return Flag.BREAK;
+            return false;
         } catch (MappingException e) {
             throw e;
         } catch (Exception e) {
@@ -66,8 +66,8 @@ public class ProtobufBeanResolveHandler implements ObjectIntrospector.Handler {
         }
     }
 
-    private PropertyIntro buildProperty(
-        ObjectIntrospector.Context builder,
+    private DataPropertyBase buildProperty(
+        DataSchemaParser.Context builder,
         Descriptors.FieldDescriptor field,
         Class<?> rawClass,
         boolean isBuilder
@@ -150,7 +150,7 @@ public class ProtobufBeanResolveHandler implements ObjectIntrospector.Handler {
         }
     }
 
-    private static final class Impl implements PropertyIntro {
+    private static final class Impl implements DataPropertyBase {
 
         private final String name;
         private final Type type;

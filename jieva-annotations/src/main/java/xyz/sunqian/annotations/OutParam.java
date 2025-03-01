@@ -3,9 +3,9 @@ package xyz.sunqian.annotations;
 import java.lang.annotation.*;
 
 /**
- * Declares the annotated element is an output parameter which can be modified.
+ * This annotation indicates that the parameter will be modified by the current method.
  *
- * @author fredsuvn
+ * @author sunqian
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

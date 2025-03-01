@@ -2,6 +2,7 @@ package xyz.sunqian.common.objects;
 
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.reflect.JieReflect;
 
 import java.lang.annotation.Annotation;
@@ -11,13 +12,13 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 /**
- * This interface represents the introspection info for an object property, and typically provides introspection
- * functions for generating {@link PropertyDef}.
+ * This interface provides the base info for {@link DataProperty}, typically used in the parsing process of
+ * {@link DataSchema}.
  *
  * @author sunqian
  */
 @Immutable
-public interface PropertyIntro {
+public interface DataPropertyBase {
 
     /**
      * Returns name of this property.
@@ -25,23 +26,6 @@ public interface PropertyIntro {
      * @return name of this property
      */
     String getName();
-
-    /**
-     * Returns property value of specified instance.
-     *
-     * @param inst specified instance
-     * @return property value of specified instance
-     */
-    @Nullable
-    Object getValue(Object inst);
-
-    /**
-     * Sets property value of specified instance.
-     *
-     * @param inst  specified instance
-     * @param value property value
-     */
-    void setValue(Object inst, @Nullable Object value);
 
     /**
      * Returns type of this property.
@@ -126,7 +110,14 @@ public interface PropertyIntro {
      * @return annotation of specified type on this property, or null if it doesn't exist
      */
     @Nullable
-    <A extends Annotation> A getAnnotation(Class<A> type);
+    default <A extends Annotation> A getAnnotation(Class<A> type) {
+        for (Annotation annotation : getAnnotations()) {
+            if (type.isInstance(annotation)) {
+                return Jie.as(annotation);
+            }
+        }
+        return null;
+    }
 
     /**
      * Returns whether this property is readable.
@@ -141,4 +132,21 @@ public interface PropertyIntro {
      * @return whether this property is writeable
      */
     boolean isWriteable();
+
+    /**
+     * Returns property value of specified instance.
+     *
+     * @param inst specified instance
+     * @return property value of specified instance
+     */
+    @Nullable
+    Object getValue(Object inst);
+
+    /**
+     * Sets property value of specified instance.
+     *
+     * @param inst  specified instance
+     * @param value property value
+     */
+    void setValue(Object inst, @Nullable Object value);
 }
