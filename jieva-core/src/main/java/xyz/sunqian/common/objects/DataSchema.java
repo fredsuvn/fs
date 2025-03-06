@@ -47,7 +47,7 @@ public interface DataSchema {
      */
     @CachedResult
     static DataSchema get(Type type, @Nullable DataSchemaParser parser) {
-        return DataMisc.getDataSchema(type, parser);
+        return DataObjectBack.getDataSchema(type, parser);
     }
 
     /**
@@ -104,7 +104,7 @@ public interface DataSchema {
 
     /**
      * Returns hash code of this {@link DataSchema}. The hash code is generated via {@link #getType()} and
-     * {@link #getParser()}:
+     * {@link #getParser()} like following codes:
      * <pre>{@code
      *     int result = 1;
      *     result = 31 * result + getType().hashCode();
@@ -117,7 +117,16 @@ public interface DataSchema {
     int hashCode();
 
     /**
-     * Returns a string representation of this {@link DataSchema}.
+     * Returns a string representation of this {@link DataSchema}. The string is generated like following codes:
+     * <pre>{@code
+     *     return "data[" +
+     *             "type=" + getType().getTypeName() + ", " +
+     *             "properties=[" +
+     *             getProperties().values().stream().map(it ->
+     *                 it.getName() + ": " + it.getType().getTypeName()
+     *             ).collect(Collectors.joining("; ")) +
+     *             "]]";
+     * }</pre>
      *
      * @return a string representation of this {@link DataSchema}
      */

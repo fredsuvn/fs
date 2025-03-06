@@ -116,17 +116,17 @@ final class DataSchemaParserImpl implements DataSchemaParser, DataSchemaParser.H
 
         @Override
         public boolean equals(Object o) {
-            return JieData.equals(this, o);
+            return JieDataObject.equals(this, o);
         }
 
         @Override
         public int hashCode() {
-            return JieData.hashCode(this);
+            return JieDataObject.hashCode(this);
         }
 
         @Override
         public String toString() {
-            return JieData.toString(this);
+            return JieDataObject.toString(this);
         }
 
         private final class DataPropertyImpl implements DataProperty {
@@ -220,17 +220,17 @@ final class DataSchemaParserImpl implements DataSchemaParser, DataSchemaParser.H
 
             @Override
             public boolean equals(Object o) {
-                return JieData.equals(this, o);
+                return JieDataObject.equals(this, o);
             }
 
             @Override
             public int hashCode() {
-                return JieData.hashCode(this);
+                return JieDataObject.hashCode(this);
             }
 
             @Override
             public String toString() {
-                return JieData.toString(this);
+                return JieDataObject.toString(this);
             }
         }
     }

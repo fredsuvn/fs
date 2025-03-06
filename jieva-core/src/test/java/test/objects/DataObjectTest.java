@@ -252,7 +252,7 @@ public class DataObjectTest {
             JieReflect.getTypeParameterMapping(new TypeRef<TestExtra<String>>() {}.getType());
         Map<TypeVariable<?>, Type> empty = Collections.emptyMap();
         DataSchema b1 = DataSchema.get(new TypeRef<TestExtra<String>>() {}.getType());
-        DataSchema b2 = JieData.withExtraTypeVariableMapping(DataSchema.get(TestExtra.class), extra);
+        DataSchema b2 = JieDataObject.withExtraTypeVariableMapping(DataSchema.get(TestExtra.class), extra);
         assertNotEquals(b1, b2);
         assertNotEquals(b1.getProperty("tt"), b2.getProperty("tt"));
         assertEquals(b1.getProperty("tt").getType(), b2.getProperty("tt").getType());
@@ -260,10 +260,10 @@ public class DataObjectTest {
         assertNotEquals(b3, b2);
         assertNotEquals(b3.getProperty("tt"), b2.getProperty("tt"));
         assertNotEquals(b3.getProperty("tt").getType(), b2.getProperty("tt").getType());
-        DataSchema b4 = JieData.withExtraTypeVariableMapping(DataSchema.get(TestExtra.class), empty);
+        DataSchema b4 = JieDataObject.withExtraTypeVariableMapping(DataSchema.get(TestExtra.class), empty);
         assertEquals(b4, b3);
         assertEquals(b4.getProperty("tt"), b4.getProperty("tt"));
-        DataSchema b5 = JieData.withExtraTypeVariableMapping(DataSchema.get(TestExtra.class),
+        DataSchema b5 = JieDataObject.withExtraTypeVariableMapping(DataSchema.get(TestExtra.class),
             JieReflect.getTypeParameterMapping(new TypeRef<TestExtra2<String>>() {}.getType()));
         assertEquals(b5, b3);
         assertEquals(b5.getProperty("tt"), b3.getProperty("tt"));

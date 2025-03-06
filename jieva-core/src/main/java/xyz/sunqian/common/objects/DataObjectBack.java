@@ -7,18 +7,17 @@ import xyz.sunqian.common.cache.Cache;
 import java.lang.reflect.Type;
 import java.util.Map;
 
-final class DataMisc {
+final class DataObjectBack {
 
     private static final Cache<Type, Object> CACHE = Cache.softCache();
-    private static final DataSchemaParser DEFAULT_INTRO = DataSchemaParser.defaultParser();
 
-    static DataSchema getDataSchema(Type type, @Nullable DataSchemaParser inspector) {
-        DataSchemaParser ins = Jie.nonNull(inspector, DEFAULT_INTRO);
-        Object ret = CACHE.compute(type, ins::parse);
+    static DataSchema getDataSchema(Type type, @Nullable DataSchemaParser parser) {
+        DataSchemaParser p = parser == null ? DataSchemaParser.defaultParser() : parser;
+        Object ret = CACHE.compute(type, p::parse);
         if (ret instanceof DataSchema) {
             return (DataSchema) ret;
         }
         Map<DataSchemaParser, DataSchema> map = Jie.as(ret);
-        return map.computeIfAbsent(ins, i -> i.parse(type));
+        return map.computeIfAbsent(p, i -> i.parse(type));
     }
 }

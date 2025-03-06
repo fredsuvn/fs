@@ -14,20 +14,19 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * This is a static utilities class provides utilities for data object such as {@link DataSchema} and
- * {@link DataProperty}.
+ * Static utilities class for data object.
  *
  * @author sunqian
  */
-public class JieData {
+public class JieDataObject {
 
     /**
-     * Utility method for implementing {@link DataSchema#equals(Object)}, and it works in conjunction with
+     * The implementation of {@link DataSchema#equals(Object)}, and it works in conjunction with
      * {@link #hashCode(DataSchema)}.
      *
-     * @param dataSchema the {@link DataSchema}
-     * @param other      the specified other {@link DataSchema}
-     * @return whether the {@link DataSchema} is equal to specified other {@link DataSchema}
+     * @param dataSchema the compared {@link DataSchema}
+     * @param other      the other {@link DataSchema}
+     * @return whether the compared {@link DataSchema} is equal to other {@link DataSchema}
      */
     public static boolean equals(DataSchema dataSchema, @Nullable Object other) {
         if (dataSchema == other) {
@@ -42,12 +41,12 @@ public class JieData {
     }
 
     /**
-     * Utility method for implementing {@link DataProperty#equals(Object)}, and it works in conjunction with
+     * The implementation of {@link DataProperty#equals(Object)}, and it works in conjunction with
      * {@link #hashCode(DataProperty)}.
      *
-     * @param dataProperty the {@link DataProperty}
-     * @param other        the specified other {@link DataProperty}
-     * @return whether the {@link DataProperty} is equal to specified other {@link DataProperty}
+     * @param dataProperty the compared {@link DataProperty}
+     * @param other        the other {@link DataProperty}
+     * @return whether the compared {@link DataProperty} is equal to other {@link DataProperty}
      */
     public static boolean equals(DataProperty dataProperty, @Nullable Object other) {
         if (dataProperty == other) {
@@ -62,11 +61,11 @@ public class JieData {
     }
 
     /**
-     * Utility method for implementing {@link DataSchema#hashCode()}, and it works in conjunction with
+     * The implementation of {@link DataSchema#hashCode()}, and it works in conjunction with
      * {@link #equals(DataSchema, Object)}.
      *
-     * @param dataSchema the {@link DataSchema}
-     * @return hash code of given {@link DataSchema}
+     * @param dataSchema the {@link DataSchema} to be hashed
+     * @return hash code of the {@link DataSchema}
      */
     public static int hashCode(DataSchema dataSchema) {
         int result = 1;
@@ -76,11 +75,11 @@ public class JieData {
     }
 
     /**
-     * Utility method for implementing {@link DataProperty#hashCode()}, and it works in conjunction with
+     * The implementation of {@link DataProperty#hashCode()}, and it works in conjunction with
      * {@link #equals(DataProperty, Object)}.
      *
-     * @param dataProperty the {@link DataProperty}
-     * @return hash code of given {@link DataProperty}
+     * @param dataProperty the {@link DataProperty} to be hashed
+     * @return hash code of the {@link DataProperty}
      */
     public static int hashCode(DataProperty dataProperty) {
         int result = 1;
@@ -90,30 +89,33 @@ public class JieData {
     }
 
     /**
-     * Utility method for implementing {@link DataSchema#toString()}.
+     * The implementation of {@link DataSchema#toString()}.
      *
-     * @param dataSchema the {@link DataSchema}
+     * @param dataSchema the {@link DataSchema} to be string
      * @return a string representation of given {@link DataSchema}
      */
     public static String toString(DataSchema dataSchema) {
-        return "data[type=" + dataSchema.getType().getTypeName() + ", properties=["
-            + dataSchema.getProperties().values().stream().map(
-            it -> it.getName() + "(" + it.getType().getTypeName() + ")"
-        ).collect(Collectors.joining(", "))
-            + "]]";
+        return "data[" +
+            "type=" + dataSchema.getType().getTypeName() + ", " +
+            "properties=[" +
+            dataSchema.getProperties().values().stream().map(it ->
+                it.getName() + ": " + it.getType().getTypeName()
+            ).collect(Collectors.joining("; ")) +
+            "]]";
     }
 
     /**
-     * Utility method for implementing {@link DataProperty#toString()}.
+     * The implementation of {@link DataProperty#toString()}.
      *
-     * @param dataProperty the {@link DataProperty}
+     * @param dataProperty the {@link DataProperty} to be string
      * @return a string representation of given {@link DataProperty}
      */
     public static String toString(DataProperty dataProperty) {
-        return "property[name=" + dataProperty.getName()
-            + ", type=" + dataProperty.getType().getTypeName()
-            + ", ownerType=" + dataProperty.getOwner().getType().getTypeName()
-            + "]";
+        return "property[" +
+            "name=" + dataProperty.getName() + ", " +
+            "type=" + dataProperty.getType().getTypeName() + ", " +
+            "ownerType=" + dataProperty.getOwner().getType().getTypeName() +
+            "]";
     }
 
     /**
@@ -195,17 +197,17 @@ public class JieData {
 
         @Override
         public boolean equals(Object o) {
-            return JieData.equals(this, o);
+            return JieDataObject.equals(this, o);
         }
 
         @Override
         public int hashCode() {
-            return JieData.hashCode(this);
+            return JieDataObject.hashCode(this);
         }
 
         @Override
         public String toString() {
-            return JieData.toString(this);
+            return JieDataObject.toString(this);
         }
 
         private final class DataPropertyWrapper implements DataProperty {
@@ -300,17 +302,17 @@ public class JieData {
 
             @Override
             public boolean equals(Object o) {
-                return JieData.equals(this, o);
+                return JieDataObject.equals(this, o);
             }
 
             @Override
             public int hashCode() {
-                return JieData.hashCode(this);
+                return JieDataObject.hashCode(this);
             }
 
             @Override
             public String toString() {
-                return JieData.toString(this);
+                return JieDataObject.toString(this);
             }
         }
     }

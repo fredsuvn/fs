@@ -32,7 +32,7 @@ public interface DataProperty extends DataPropertyBase {
 
     /**
      * Returns hash code of this {@link DataProperty}. The hash code is generated via {@link #getName()} and
-     * {@link #getOwner()}:
+     * {@link #getOwner()} like following codes:
      * <pre>{@code
      *     int result = 1;
      *     result = 31 * result + getName().hashCode();
@@ -45,7 +45,14 @@ public interface DataProperty extends DataPropertyBase {
     int hashCode();
 
     /**
-     * Returns a string representation of this {@link DataProperty}.
+     * Returns a string representation of this {@link DataProperty}. The string is generated like following codes:
+     * <pre>{@code
+     *     return "property[" +
+     *             "name=" + getName() + ", " +
+     *             "type=" + getType().getTypeName() + ", " +
+     *             "ownerType=" + getOwner().getType().getTypeName() +
+     *             "]";
+     * }</pre>
      *
      * @return a string representation of this {@link DataProperty}
      */
