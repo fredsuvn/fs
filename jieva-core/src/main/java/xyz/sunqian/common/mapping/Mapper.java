@@ -5,7 +5,7 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.Flag;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.objects.DataProperty;
+import xyz.sunqian.common.objects.data.DataProperty;
 import xyz.sunqian.common.mapping.handlers.*;
 import xyz.sunqian.common.ref.Val;
 import xyz.sunqian.common.reflect.TypeRef;

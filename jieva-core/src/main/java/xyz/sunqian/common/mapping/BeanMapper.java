@@ -1,7 +1,7 @@
 package xyz.sunqian.common.mapping;
 
-import xyz.sunqian.common.objects.DataSchema;
-import xyz.sunqian.common.objects.DataProperty;
+import xyz.sunqian.common.objects.data.DataSchema;
+import xyz.sunqian.common.objects.data.DataProperty;
 
 import java.lang.reflect.Type;
 import java.util.Map;

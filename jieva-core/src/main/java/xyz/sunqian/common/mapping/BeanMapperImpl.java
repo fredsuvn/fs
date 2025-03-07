@@ -2,9 +2,9 @@ package xyz.sunqian.common.mapping;
 
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.objects.DataSchema;
-import xyz.sunqian.common.objects.DataProperty;
-import xyz.sunqian.common.objects.DataSchemaParser;
+import xyz.sunqian.common.objects.data.DataSchema;
+import xyz.sunqian.common.objects.data.DataProperty;
+import xyz.sunqian.common.objects.data.DataSchemaParser;
 import xyz.sunqian.common.ref.Val;
 import xyz.sunqian.common.reflect.JieReflect;
 

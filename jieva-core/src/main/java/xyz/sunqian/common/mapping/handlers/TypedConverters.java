@@ -6,7 +6,7 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.JieChars;
 import xyz.sunqian.common.base.JieDate;
 import xyz.sunqian.common.base.JieString;
-import xyz.sunqian.common.objects.DataProperty;
+import xyz.sunqian.common.objects.data.DataProperty;
 import xyz.sunqian.common.io.JieBuffer;
 import xyz.sunqian.common.io.JieIO;
 import xyz.sunqian.common.mapping.MappingException;

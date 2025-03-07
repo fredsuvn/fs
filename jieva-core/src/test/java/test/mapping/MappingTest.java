@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import org.testng.annotations.Test;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.objects.DataProperty;
+import xyz.sunqian.common.objects.data.DataProperty;
 import xyz.sunqian.common.mapping.BeanMapper;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingException;

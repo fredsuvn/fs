@@ -6,8 +6,8 @@ import lombok.Getter;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieChars;
-import xyz.sunqian.common.objects.DataProperty;
-import xyz.sunqian.common.objects.DataSchemaParser;
+import xyz.sunqian.common.objects.data.DataProperty;
+import xyz.sunqian.common.objects.data.DataSchemaParser;
 
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;

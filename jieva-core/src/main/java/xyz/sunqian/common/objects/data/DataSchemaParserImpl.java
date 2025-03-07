@@ -1,10 +1,10 @@
-package xyz.sunqian.common.objects;
+package xyz.sunqian.common.objects.data;
 
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.coll.JieColl;
-import xyz.sunqian.common.objects.handlers.JavaBeanDataSchemaHandler;
+import xyz.sunqian.common.objects.data.handlers.JavaBeanDataSchemaHandler;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;

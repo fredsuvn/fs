@@ -1,6 +1,6 @@
 package xyz.sunqian.common.data.protobuf;
 
-import xyz.sunqian.common.objects.DataSchemaParser;
+import xyz.sunqian.common.objects.data.DataSchemaParser;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.handlers.AssignableMapperHandler;
 import xyz.sunqian.common.mapping.handlers.BeanMapperHandler;

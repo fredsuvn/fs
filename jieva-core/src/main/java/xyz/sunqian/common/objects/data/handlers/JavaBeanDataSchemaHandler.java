@@ -1,10 +1,10 @@
-package xyz.sunqian.common.objects.handlers;
+package xyz.sunqian.common.objects.data.handlers;
 
 import lombok.Data;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.CaseFormatter;
 import xyz.sunqian.common.base.JieString;
-import xyz.sunqian.common.objects.DataSchemaParser;
+import xyz.sunqian.common.objects.data.DataSchemaParser;
 
 import java.lang.reflect.Method;
 import java.util.List;

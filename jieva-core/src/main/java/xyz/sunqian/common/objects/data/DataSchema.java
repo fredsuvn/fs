@@ -1,4 +1,4 @@
-package xyz.sunqian.common.objects;
+package xyz.sunqian.common.objects.data;
 
 import xyz.sunqian.annotations.CachedResult;
 import xyz.sunqian.annotations.Immutable;
