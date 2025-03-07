@@ -94,11 +94,11 @@ public interface DataSchema {
     }
 
     /**
-     * Returns whether this {@link DataSchema} is equal to specified other {@link DataSchema}. They are considered equal
-     * if and only if both the data object's type and {@link DataSchemaParser} are equal.
+     * Returns whether this {@link DataSchema} is equal to the other {@link DataSchema}. They are considered equal if
+     * and only if both the data object's type and {@link DataSchemaParser} are equal.
      *
-     * @param other specified other {@link DataSchema}
-     * @return whether this {@link DataSchema} is equal to specified other {@link DataSchema}
+     * @param other the other {@link DataSchema}
+     * @return whether this {@link DataSchema} is equal to the other {@link DataSchema}
      */
     boolean equals(@Nullable Object other);
 

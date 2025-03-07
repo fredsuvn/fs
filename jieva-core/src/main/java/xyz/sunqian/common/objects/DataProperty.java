@@ -22,11 +22,11 @@ public interface DataProperty extends DataPropertyBase {
     DataSchema getOwner();
 
     /**
-     * Returns whether this {@link DataProperty} is equal to specified other {@link DataProperty}. They are considered
-     * equal if and only if both the data object's name and owner are equal.
+     * Returns whether this {@link DataProperty} is equal to the other {@link DataProperty}. They are considered equal
+     * if and only if both the data object's name and owner are equal.
      *
-     * @param other specified other {@link DataProperty}
-     * @return whether this {@link DataProperty} is equal to specified other {@link DataProperty}
+     * @param other the other {@link DataProperty}
+     * @return whether this {@link DataProperty} is equal to the other {@link DataProperty}
      */
     boolean equals(@Nullable Object other);
 
