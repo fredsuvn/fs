@@ -5,8 +5,8 @@ import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieConfig;
 import xyz.sunqian.common.base.JieSystem;
 import xyz.sunqian.common.coll.JieColl;
+import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.invoke.InvocationException;
-import xyz.sunqian.common.invoke.Invokable;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -125,8 +125,8 @@ public class JdkDynamicProxyBuilder implements ProxyBuilder {
                         continue;
                     }
                     if (handler.needsProxy(method)) {
-                        Invokable invokable = Invokable.handle(method);
-                        JdkProxyInvoker jdkInvoker = new JdkProxyInvoker(method, invokable);
+                        Invocable invocable = Invocable.handle(method);
+                        JdkProxyInvoker jdkInvoker = new JdkProxyInvoker(method, invocable);
                         invokerMap.put(method, jdkInvoker);
                     }
                 }
@@ -147,17 +147,17 @@ public class JdkDynamicProxyBuilder implements ProxyBuilder {
     private static final class JdkProxyInvoker implements ProxyInvoker {
 
         private final Method method;
-        private final Invokable invokable;
+        private final Invocable invocable;
 
-        private JdkProxyInvoker(Method method, Invokable invokable) {
+        private JdkProxyInvoker(Method method, Invocable invocable) {
             this.method = method;
-            this.invokable = invokable;
+            this.invocable = invocable;
         }
 
         @Override
         public @Nullable Object invoke(Object inst, Object[] args) throws Throwable {
             try {
-                return invokable.invoke(inst, args);
+                return invocable.invoke(inst, args);
             } catch (InvocationException e) {
                 throw e.getCause();
             }

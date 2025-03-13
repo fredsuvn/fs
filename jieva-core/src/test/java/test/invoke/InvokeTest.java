@@ -2,8 +2,8 @@ package test.invoke;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.invoke.InvocationException;
-import xyz.sunqian.common.invoke.Invokable;
 import xyz.sunqian.common.invoke.JieHandle;
 import xyz.sunqian.common.reflect.JieReflect;
 import xyz.sunqian.test.JieTestException;
@@ -21,13 +21,13 @@ public class InvokeTest {
     @Test
     public void testInvoke() throws Exception {
         Constructor<?> constructor = Invoked.class.getDeclaredConstructor();
-        expectThrows(InvocationException.class, () -> Invokable.reflect(constructor).invoke(null));
-        expectThrows(InvocationException.class, () -> Invokable.handle(constructor).invoke(null));
+        expectThrows(InvocationException.class, () -> Invocable.reflect(constructor).invoke(null));
+        expectThrows(InvocationException.class, () -> Invocable.handle(constructor).invoke(null));
         constructor.setAccessible(true);
         Method[] methods = Invoked.class.getDeclaredMethods();
         for (Method method : methods) {
-            expectThrows(InvocationException.class, () -> Invokable.reflect(method).invoke(null));
-            expectThrows(InvocationException.class, () -> Invokable.handle(method).invoke(null));
+            expectThrows(InvocationException.class, () -> Invocable.reflect(method).invoke(null));
+            expectThrows(InvocationException.class, () -> Invocable.handle(method).invoke(null));
             method.setAccessible(true);
             if (method.getName().startsWith("sm") || method.getName().startsWith("m")) {
                 testInvoke0(constructor, method, Modifier.isStatic(method.getModifiers()), true);
@@ -38,22 +38,22 @@ public class InvokeTest {
 
     private void testInvoke0(
         Constructor<?> constructor, Method method, boolean isStatic, boolean reflect) throws Exception {
-        Invokable cons = reflect ? Invokable.reflect(constructor) : Invokable.handle(constructor);
+        Invocable cons = reflect ? Invocable.reflect(constructor) : Invocable.handle(constructor);
         Invoked tt = (Invoked) cons.invoke(null);
         assertNotNull(tt);
         String[] args = new String[method.getParameterCount()];
         for (int i = 0; i < args.length; i++) {
             args[i] = "" + i;
         }
-        expectThrows(InvocationException.class, () -> (reflect ? Invokable.reflect(method) : Invokable.handle(method))
+        expectThrows(InvocationException.class, () -> (reflect ? Invocable.reflect(method) : Invocable.handle(method))
             .invoke(null, 1, 2, 3));
-        Invokable invokable = reflect ? Invokable.reflect(method) : Invokable.handle(method);
-        assertNotNull(invokable);
+        Invocable invocable = reflect ? Invocable.reflect(method) : Invocable.handle(method);
+        assertNotNull(invocable);
         assertEquals(
-            invokable.invoke(isStatic ? null : tt, (Object[]) args),
+            invocable.invoke(isStatic ? null : tt, (Object[]) args),
             buildString(method.getName(), args)
         );
-        Invokable handle = Invokable.handle(MethodHandles.lookup().unreflect(method), isStatic);
+        Invocable handle = Invocable.handle(MethodHandles.lookup().unreflect(method), isStatic);
         assertNotNull(handle);
         assertEquals(
             handle.invoke(isStatic ? null : tt, (Object[]) args),
@@ -174,42 +174,42 @@ public class InvokeTest {
         Method tttStatic = JieReflect.getMethod(TestThrow.class, "tttStatic", Jie.array());
         Method ttt = JieReflect.getMethod(TestThrow.class, "ttt", Jie.array());
         expectThrows(InvocationException.class, () ->
-            Invokable.reflect(ttc).invoke(null));
+            Invocable.reflect(ttc).invoke(null));
         expectThrows(InvocationException.class, () ->
-            Invokable.reflect(tttStatic).invoke(null));
+            Invocable.reflect(tttStatic).invoke(null));
         expectThrows(InvocationException.class, () ->
-            Invokable.reflect(ttt).invoke(tt));
+            Invocable.reflect(ttt).invoke(tt));
         try {
-            Invokable.reflect(ttc).invoke(null, 1);
+            Invocable.reflect(ttc).invoke(null, 1);
         } catch (InvocationException e) {
             assertEquals(JieTestException.class, e.getCause().getClass());
         }
         try {
-            Invokable.reflect(tttStatic).invoke(null);
+            Invocable.reflect(tttStatic).invoke(null);
         } catch (InvocationException e) {
             assertEquals(JieTestException.class, e.getCause().getClass());
         }
         try {
-            Invokable.reflect(ttt).invoke(tt);
+            Invocable.reflect(ttt).invoke(tt);
         } catch (InvocationException e) {
             assertEquals(JieTestException.class, e.getCause().getClass());
         }
         expectThrows(InvocationException.class, () ->
-            Invokable.handle(tttStatic).invoke(null));
+            Invocable.handle(tttStatic).invoke(null));
         expectThrows(InvocationException.class, () ->
-            Invokable.handle(ttt).invoke(tt));
+            Invocable.handle(ttt).invoke(tt));
         try {
-            Invokable.handle(ttc).invoke(null, 1);
+            Invocable.handle(ttc).invoke(null, 1);
         } catch (InvocationException e) {
             assertEquals(JieTestException.class, e.getCause().getClass());
         }
         try {
-            Invokable.handle(tttStatic).invoke(null);
+            Invocable.handle(tttStatic).invoke(null);
         } catch (InvocationException e) {
             assertEquals(JieTestException.class, e.getCause().getClass());
         }
         try {
-            Invokable.handle(ttt).invoke(tt);
+            Invocable.handle(ttt).invoke(tt);
         } catch (InvocationException e) {
             assertEquals(JieTestException.class, e.getCause().getClass());
         }

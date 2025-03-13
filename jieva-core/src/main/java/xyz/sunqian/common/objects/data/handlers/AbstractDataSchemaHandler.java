@@ -4,7 +4,7 @@ import lombok.Data;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.coll.JieArray;
 import xyz.sunqian.common.coll.JieColl;
-import xyz.sunqian.common.invoke.Invokable;
+import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.objects.data.DataObjectException;
 import xyz.sunqian.common.objects.data.DataPropertyBase;
 import xyz.sunqian.common.objects.data.DataSchemaParser;
@@ -29,7 +29,7 @@ import java.util.*;
  * the setter for this property.
  * <p>
  * It uses {@link #buildInvoker(Method)} to generate invokers for property accessors. By default, it is implemented
- * through the {@link Invokable#handle(Method)}, and can be overridden.
+ * through the {@link Invocable#handle(Method)}, and can be overridden.
  *
  * @author sunqian
  */
@@ -151,13 +151,13 @@ public abstract class AbstractDataSchemaHandler implements DataSchemaParser.Hand
     protected abstract AccessorInfo resolveAccessor(Method method);
 
     /**
-     * Generates invoker for specified method. Default using {@link Invokable#handle(Method)}.
+     * Generates invoker for specified method. Default using {@link Invocable#handle(Method)}.
      *
      * @param method specified method
      * @return invoker for specified method
      */
-    protected Invokable buildInvoker(Method method) {
-        return Invokable.handle(method);
+    protected Invocable buildInvoker(Method method) {
+        return Invocable.handle(method);
     }
 
     /**
@@ -196,8 +196,8 @@ public abstract class AbstractDataSchemaHandler implements DataSchemaParser.Hand
 
         private final @Nullable Method getter;
         private final @Nullable Method setter;
-        private final @Nullable Invokable getterInvokable;
-        private final @Nullable Invokable setterInvokable;
+        private final @Nullable Invocable getterInvocable;
+        private final @Nullable Invocable setterInvocable;
         private final @Nullable Field field;
         private final List<Annotation> getterAnnotations;
         private final List<Annotation> setterAnnotations;
@@ -214,9 +214,9 @@ public abstract class AbstractDataSchemaHandler implements DataSchemaParser.Hand
             this.name = name;
             this.type = type;
             this.getter = getter;
-            this.getterInvokable = getter == null ? null : buildInvoker(getter);
+            this.getterInvocable = getter == null ? null : buildInvoker(getter);
             this.setter = setter;
-            this.setterInvokable = setter == null ? null : buildInvoker(setter);
+            this.setterInvocable = setter == null ? null : buildInvoker(setter);
             this.field = findField(name, rawType);
             this.getterAnnotations = getter == null ? Collections.emptyList() : JieArray.listOf(getter.getAnnotations());
             this.setterAnnotations = setter == null ? Collections.emptyList() : JieArray.listOf(setter.getAnnotations());
@@ -283,28 +283,28 @@ public abstract class AbstractDataSchemaHandler implements DataSchemaParser.Hand
 
         @Override
         public boolean isReadable() {
-            return getterInvokable != null;
+            return getterInvocable != null;
         }
 
         @Override
         public boolean isWriteable() {
-            return setterInvokable != null;
+            return setterInvocable != null;
         }
 
         @Override
         public @Nullable Object getValue(Object bean) {
-            if (getterInvokable == null) {
+            if (getterInvocable == null) {
                 throw new DataObjectException("Data property is not readable: " + name + ".");
             }
-            return getterInvokable.invoke(bean);
+            return getterInvocable.invoke(bean);
         }
 
         @Override
         public void setValue(Object bean, @Nullable Object value) {
-            if (setterInvokable == null) {
+            if (setterInvocable == null) {
                 throw new DataObjectException("Data property is not writeable: " + name + ".");
             }
-            setterInvokable.invoke(bean, value);
+            setterInvocable.invoke(bean, value);
         }
     }
 }

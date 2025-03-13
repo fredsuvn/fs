@@ -9,25 +9,25 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-final class InvokableBack {
+final class InvocableBack {
 
-    static Invokable ofConstructor(Constructor<?> constructor) {
+    static Invocable ofConstructor(Constructor<?> constructor) {
         return new OfConstructor(constructor);
     }
 
-    static Invokable ofMethod(Method method) {
+    static Invocable ofMethod(Method method) {
         return new OfMethod(method);
     }
 
-    static Invokable ofMethodHandle(Constructor<?> constructor) {
+    static Invocable ofMethodHandle(Constructor<?> constructor) {
         return new OfMethodHandle(constructor);
     }
 
-    static Invokable ofMethodHandle(Method method) {
+    static Invocable ofMethodHandle(Method method) {
         return new OfMethodHandle(method);
     }
 
-    static Invokable ofMethodHandle(MethodHandle methodHandle, boolean isStatic) {
+    static Invocable ofMethodHandle(MethodHandle methodHandle, boolean isStatic) {
         return new OfMethodHandle(methodHandle, isStatic);
     }
 
@@ -38,7 +38,7 @@ final class InvokableBack {
         return new InvocationException(rawCause);
     }
 
-    private static final class OfConstructor implements Invokable {
+    private static final class OfConstructor implements Invocable {
 
         private final Constructor<?> constructor;
 
@@ -56,7 +56,7 @@ final class InvokableBack {
         }
     }
 
-    private static final class OfMethod implements Invokable {
+    private static final class OfMethod implements Invocable {
 
         private final Method method;
 
@@ -74,7 +74,7 @@ final class InvokableBack {
         }
     }
 
-    private static final class OfMethodHandle implements Invokable {
+    private static final class OfMethodHandle implements Invocable {
 
         private final MethodHandle methodHandle;
         private final boolean isStatic;
