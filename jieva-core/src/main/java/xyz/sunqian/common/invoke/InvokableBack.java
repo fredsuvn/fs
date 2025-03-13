@@ -9,33 +9,40 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-final class Impls {
+final class InvokableBack {
 
-    static Invoker ofConstructor(Constructor<?> constructor) {
+    static Invokable ofConstructor(Constructor<?> constructor) {
         return new OfConstructor(constructor);
     }
 
-    static Invoker ofMethod(Method method) {
+    static Invokable ofMethod(Method method) {
         return new OfMethod(method);
     }
 
-    static Invoker ofMethodHandle(Constructor<?> constructor) {
+    static Invokable ofMethodHandle(Constructor<?> constructor) {
         return new OfMethodHandle(constructor);
     }
 
-    static Invoker ofMethodHandle(Method method) {
+    static Invokable ofMethodHandle(Method method) {
         return new OfMethodHandle(method);
     }
 
-    static Invoker ofMethodHandle(MethodHandle methodHandle, boolean isStatic) {
+    static Invokable ofMethodHandle(MethodHandle methodHandle, boolean isStatic) {
         return new OfMethodHandle(methodHandle, isStatic);
     }
 
-    private static final class OfConstructor implements Invoker {
+    private static InvocationException buildInvocationException(Throwable rawCause) {
+        if (rawCause instanceof InvocationTargetException) {
+            return new InvocationException(rawCause.getCause());
+        }
+        return new InvocationException(rawCause);
+    }
+
+    private static final class OfConstructor implements Invokable {
 
         private final Constructor<?> constructor;
 
-        OfConstructor(Constructor<?> constructor) {
+        private OfConstructor(Constructor<?> constructor) {
             this.constructor = constructor;
         }
 
@@ -44,19 +51,16 @@ final class Impls {
             try {
                 return constructor.newInstance(args);
             } catch (Exception e) {
-                if (e instanceof InvocationTargetException) {
-                    throw new InvocationException(e.getCause());
-                }
-                throw new InvocationException(e);
+                throw buildInvocationException(e);
             }
         }
     }
 
-    private static final class OfMethod implements Invoker {
+    private static final class OfMethod implements Invokable {
 
         private final Method method;
 
-        OfMethod(Method method) {
+        private OfMethod(Method method) {
             this.method = method;
         }
 
@@ -65,20 +69,17 @@ final class Impls {
             try {
                 return method.invoke(inst, args);
             } catch (Exception e) {
-                if (e instanceof InvocationTargetException) {
-                    throw new InvocationException(e.getCause());
-                }
-                throw new InvocationException(e);
+                throw buildInvocationException(e);
             }
         }
     }
 
-    private static final class OfMethodHandle implements Invoker {
+    private static final class OfMethodHandle implements Invokable {
 
         private final MethodHandle methodHandle;
         private final boolean isStatic;
 
-        OfMethodHandle(Method method) {
+        private OfMethodHandle(Method method) {
             try {
                 this.methodHandle = MethodHandles.lookup().unreflect(method);
                 this.isStatic = Modifier.isStatic(method.getModifiers());
@@ -87,7 +88,7 @@ final class Impls {
             }
         }
 
-        OfMethodHandle(Constructor<?> constructor) {
+        private OfMethodHandle(Constructor<?> constructor) {
             try {
                 this.methodHandle = MethodHandles.lookup().unreflectConstructor(constructor);
                 this.isStatic = true;
@@ -96,7 +97,7 @@ final class Impls {
             }
         }
 
-        OfMethodHandle(MethodHandle methodHandle, boolean isStatic) {
+        private OfMethodHandle(MethodHandle methodHandle, boolean isStatic) {
             this.methodHandle = methodHandle;
             this.isStatic = isStatic;
         }
@@ -104,8 +105,8 @@ final class Impls {
         @Override
         public @Nullable Object invoke(@Nullable Object inst, Object... args) {
             try {
-                return isStatic ? JieInvoke.invokeStatic(methodHandle, args)
-                    : JieInvoke.invokeInstance(methodHandle, inst, args);
+                return isStatic ? JieHandle.invokeStatic(methodHandle, args)
+                    : JieHandle.invokeInstance(methodHandle, inst, args);
             } catch (Throwable e) {
                 throw new InvocationException(e);
             }

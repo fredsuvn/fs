@@ -6,7 +6,7 @@ import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.coll.JieArray;
 import xyz.sunqian.common.invoke.InvocationException;
-import xyz.sunqian.common.invoke.Invoker;
+import xyz.sunqian.common.invoke.Invokable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -178,7 +178,7 @@ public class RandomTest {
         field.setAccessible(true);
         Method supply = s1.getClass().getDeclaredMethod("supply", int.class);
         supply.setAccessible(true);
-        Invoker supplyInvoker = Invoker.reflect(supply);
+        Invokable supplyInvokable = Invokable.reflect(supply);
         int totalScore = (Integer) field.get(s1);
         for (int i = 0; i < totalScore * 2; i++) {
             Object node = binarySearch.invoke(s1, i);
@@ -186,7 +186,7 @@ public class RandomTest {
                 int next = i;
                 expectThrows(IllegalStateException.class, () -> {
                     try {
-                        supplyInvoker.invoke(s1, next);
+                        supplyInvokable.invoke(s1, next);
                     } catch (InvocationException e) {
                         throw e.getCause();
                     }

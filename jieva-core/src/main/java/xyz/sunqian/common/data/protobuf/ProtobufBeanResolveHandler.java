@@ -4,12 +4,12 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.JieString;
-import xyz.sunqian.common.objects.data.DataPropertyBase;
-import xyz.sunqian.common.objects.data.BeanException;
-import xyz.sunqian.common.objects.data.DataSchemaParser;
 import xyz.sunqian.common.coll.JieColl;
-import xyz.sunqian.common.invoke.Invoker;
+import xyz.sunqian.common.invoke.Invokable;
 import xyz.sunqian.common.mapping.MappingException;
+import xyz.sunqian.common.objects.data.BeanException;
+import xyz.sunqian.common.objects.data.DataPropertyBase;
+import xyz.sunqian.common.objects.data.DataSchemaParser;
 import xyz.sunqian.common.reflect.JieReflect;
 
 import java.lang.annotation.Annotation;
@@ -82,11 +82,11 @@ public class ProtobufBeanResolveHandler implements DataSchemaParser.Handler {
             if (JieColl.isEmpty(argsTypes)) {
                 throw new BeanException("Cannot get actual argument type for " + getterMethod.getGenericReturnType() + ".");
             }
-            Invoker getter = Invoker.reflect(getterMethod);
+            Invokable getter = Invokable.reflect(getterMethod);
             if (isBuilder) {
                 Method clearMethod = rawClass.getMethod("clear" + JieString.capitalize(rawName));
                 Method putAllMethod = rawClass.getMethod("putAll" + JieString.capitalize(rawName), Map.class);
-                Invoker setter = new Invoker() {
+                Invokable setter = new Invokable() {
                     @Override
                     public @Nullable Object invoke(@Nullable Object inst, Object... args) {
                         try {
@@ -113,11 +113,11 @@ public class ProtobufBeanResolveHandler implements DataSchemaParser.Handler {
             if (JieColl.isEmpty(argsTypes)) {
                 throw new BeanException("Cannot get actual argument type for " + getterMethod.getGenericReturnType() + ".");
             }
-            Invoker getter = Invoker.reflect(getterMethod);
+            Invokable getter = Invokable.reflect(getterMethod);
             if (isBuilder) {
                 Method clearMethod = rawClass.getMethod("clear" + JieString.capitalize(rawName));
                 Method addAllMethod = rawClass.getMethod("addAll" + JieString.capitalize(rawName), Iterable.class);
-                Invoker setter = new Invoker() {
+                Invokable setter = new Invokable() {
                     @Override
                     public @Nullable Object invoke(@Nullable Object inst, Object... args) {
                         try {
@@ -139,10 +139,10 @@ public class ProtobufBeanResolveHandler implements DataSchemaParser.Handler {
         // Simple object
         Method getterMethod = rawClass.getMethod("get" + JieString.capitalize(rawName));
         Type type = getterMethod.getGenericReturnType();
-        Invoker getter = Invoker.reflect(getterMethod);
+        Invokable getter = Invokable.reflect(getterMethod);
         if (isBuilder) {
             Method setterMethod = rawClass.getMethod("set" + JieString.capitalize(rawName), JieReflect.getRawType(type));
-            Invoker setter = Invoker.reflect(setterMethod);
+            Invokable setter = Invokable.reflect(setterMethod);
             return new Impl(rawName, type, getterMethod, setterMethod, getter, setter);
         } else {
             return new Impl(rawName, type, getterMethod, null, getter, null);
@@ -155,16 +155,16 @@ public class ProtobufBeanResolveHandler implements DataSchemaParser.Handler {
         private final Type type;
         private final @Nullable Method getterMethod;
         private final @Nullable Method setterMethod;
-        private final Invoker getter;
-        private final @Nullable Invoker setter;
+        private final Invokable getter;
+        private final @Nullable Invokable setter;
 
         private Impl(
             String name,
             Type type,
             @Nullable Method getterMethod,
             @Nullable Method setterMethod,
-            Invoker getter,
-            @Nullable Invoker setter
+            Invokable getter,
+            @Nullable Invokable setter
         ) {
             this.name = name;
             this.type = type;
