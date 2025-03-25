@@ -2,8 +2,8 @@ package xyz.sunqian.common.cache;
 
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.ref.Val;
-import xyz.sunqian.common.ref.Var;
+import xyz.sunqian.common.base.value.Val;
+import xyz.sunqian.common.base.value.Var;
 
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
@@ -118,7 +118,7 @@ final class CacheImpl<K, V> implements Cache<K, V> {
 
     @Override
     public @Nullable V compute(K key, Function<? super K, ? extends V> loader) {
-        Var<V> result = Var.ofNull();
+        Var<V> result = Var.of(null);
         data.compute(key, (k, old) -> {
             if (old != null) {
                 Object oldValue = resolveGet(old);
@@ -136,7 +136,7 @@ final class CacheImpl<K, V> implements Cache<K, V> {
 
     @Override
     public @Nullable Val<V> computeVal(K key, Function<? super K, @Nullable ? extends Value<? extends V>> loader) {
-        Var<V> result = Var.ofNull();
+        Var<V> result = Var.of(null);
         Object isNull = data.compute(key, (k, old) -> {
             if (old != null) {
                 Object oldValue = resolveGet(old);

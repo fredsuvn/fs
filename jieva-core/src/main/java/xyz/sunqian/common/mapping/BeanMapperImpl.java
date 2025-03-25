@@ -2,10 +2,10 @@ package xyz.sunqian.common.mapping;
 
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.objects.data.DataSchema;
+import xyz.sunqian.common.base.value.Val;
 import xyz.sunqian.common.objects.data.DataProperty;
+import xyz.sunqian.common.objects.data.DataSchema;
 import xyz.sunqian.common.objects.data.DataSchemaParser;
-import xyz.sunqian.common.ref.Val;
 import xyz.sunqian.common.reflect.JieReflect;
 
 import java.lang.reflect.Type;
@@ -79,7 +79,7 @@ final class BeanMapperImpl implements BeanMapper {
         Type sourceValueType = sourceTypeArgs.get(1);
         Map<Object, Object> sourceMap = Jie.as(source);
         DataSchemaParser beanProvider = Jie.nonNull(options.getDataSchemaParser(), DataSchemaParser.defaultParser());
-        DataSchema destInfo = DataSchema.get(destType,beanProvider);
+        DataSchema destInfo = DataSchema.get(destType, beanProvider);
         Map<String, DataProperty> destProperties = destInfo.getProperties();
         Collection<?> ignored = Jie.nonNull(options.getIgnored(), Collections.emptyList());
         boolean ignoreNull = options.isIgnoreNull();
@@ -106,7 +106,7 @@ final class BeanMapperImpl implements BeanMapper {
 
     private void beanToMap(Object source, Type sourceType, Object dest, Type destType, MappingOptions options) {
         DataSchemaParser beanProvider = Jie.nonNull(options.getDataSchemaParser(), DataSchemaParser.defaultParser());
-        DataSchema sourceInfo = DataSchema.get(sourceType,beanProvider);
+        DataSchema sourceInfo = DataSchema.get(sourceType, beanProvider);
         Map<String, DataProperty> sourceProperties = sourceInfo.getProperties();
         List<Type> destTypeArgs = getMapTypeArgs(destType);
         Type destKeyType = destTypeArgs.get(0);
@@ -143,9 +143,9 @@ final class BeanMapperImpl implements BeanMapper {
 
     private void beanToBean(Object source, Type sourceType, Object dest, Type destType, MappingOptions options) {
         DataSchemaParser beanProvider = Jie.nonNull(options.getDataSchemaParser(), DataSchemaParser.defaultParser());
-        DataSchema sourceInfo = DataSchema.get(sourceType,beanProvider);
+        DataSchema sourceInfo = DataSchema.get(sourceType, beanProvider);
         Map<String, DataProperty> sourceProperties = sourceInfo.getProperties();
-        DataSchema destInfo = DataSchema.get(destType,beanProvider);
+        DataSchema destInfo = DataSchema.get(destType, beanProvider);
         Map<String, DataProperty> destProperties = destInfo.getProperties();
         Collection<?> ignored = Jie.nonNull(options.getIgnored(), Collections.emptyList());
         boolean ignoreNull = options.isIgnoreNull();

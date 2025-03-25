@@ -1,60 +1,61 @@
-package xyz.sunqian.common.ref;
+package xyz.sunqian.common.base.value;
 
 import lombok.AllArgsConstructor;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.Jie;
 
-final class VarImpls {
+final class VarBack {
 
     static <T> Var<T> of(@Nullable T value) {
         return new VarImpl<>(value);
     }
 
-    static BooleanVar ofBoolean(boolean value) {
+    static BooleanVar of(boolean value) {
         return new BooleanVarImpl(value);
     }
 
-    static IntVar ofInt(int value) {
+    static IntVar of(int value) {
         return new IntVarImpl(value);
     }
 
-    static LongVar ofLong(long value) {
+    static LongVar of(long value) {
         return new LongVarImpl(value);
     }
 
-    static ShortVar ofShort(short value) {
+    static ShortVar of(short value) {
         return new ShortVarImpl(value);
     }
 
-    static FloatVar ofFloat(float value) {
+    static FloatVar of(float value) {
         return new FloatVarImpl(value);
     }
 
-    static DoubleVar ofDouble(double value) {
+    static DoubleVar of(double value) {
         return new DoubleVarImpl(value);
     }
 
-    static ByteVar ofByte(byte value) {
+    static ByteVar of(byte value) {
         return new ByteVarImpl(value);
     }
 
-    static CharVar ofChar(char value) {
+    static CharVar of(char value) {
         return new CharVarImpl(value);
     }
 
     @AllArgsConstructor
     private static final class VarImpl<T> implements Var<T> {
 
-        private T value;
+        private Object value;
 
         @Override
         public @Nullable T get() {
-            return value;
+            return Jie.as(value);
         }
 
         @Override
-        public Var<T> set(@Nullable T value) {
+        public <R> Var<R> set(@Nullable R value) {
             this.value = value;
-            return this;
+            return Jie.as(this);
         }
     }
 
@@ -71,6 +72,12 @@ final class VarImpls {
         @Override
         public BooleanVar set(boolean value) {
             this.value = value;
+            return this;
+        }
+
+        @Override
+        public BooleanVar toggle() {
+            value = !value;
             return this;
         }
 

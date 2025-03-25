@@ -2,7 +2,7 @@ package xyz.sunqian.common.cache;
 
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.ThreadSafe;
-import xyz.sunqian.common.ref.Val;
+import xyz.sunqian.common.base.value.Val;
 
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;

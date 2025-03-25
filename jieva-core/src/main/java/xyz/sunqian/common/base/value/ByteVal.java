@@ -1,0 +1,50 @@
+package xyz.sunqian.common.base.value;
+
+/**
+ * Primitive {@code byte} version of {@link Val}.
+ *
+ * @author sunqian
+ */
+public interface ByteVal extends PrimitiveToVal<Byte> {
+
+    /**
+     * Returns a {@link ByteVal} holding the {@code 0}.
+     *
+     * @return a {@link ByteVal} holding the {@code 0}
+     */
+    static ByteVal ofZero() {
+        return ValBack.OF_ZERO_BYTE;
+    }
+
+    /**
+     * Returns a {@link ByteVal} holding the specified value.
+     *
+     * @param value the specified value
+     * @return a {@link ByteVal} holding the specified value
+     */
+    static ByteVal of(byte value) {
+        return ValBack.of(value);
+    }
+
+    /**
+     * Returns a {@link ByteVal} holding the specified value.
+     *
+     * @param value the specified value
+     * @return a {@link ByteVal} holding the specified value
+     */
+    static ByteVal of(int value) {
+        return of((byte) value);
+    }
+
+    /**
+     * Returns the held value.
+     *
+     * @return the held value
+     */
+    byte get();
+
+    @Override
+    default Val<Byte> toVal() {
+        return Val.of(get());
+    }
+}

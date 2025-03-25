@@ -2,10 +2,10 @@ package xyz.sunqian.common.mapping.handlers;
 
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Flag;
-import xyz.sunqian.common.objects.data.DataProperty;
+import xyz.sunqian.common.base.value.Val;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingOptions;
-import xyz.sunqian.common.ref.Val;
+import xyz.sunqian.common.objects.data.DataProperty;
 import xyz.sunqian.common.reflect.JieReflect;
 
 import java.lang.reflect.Type;
@@ -86,7 +86,7 @@ public class AssignableMapperHandler implements Mapper.Handler {
 
     @Override
     public Object mapProperty(
-            @Nullable Object source, Type sourceType, Type targetType, DataProperty targetProperty, Mapper mapper, MappingOptions options) {
+        @Nullable Object source, Type sourceType, Type targetType, DataProperty targetProperty, Mapper mapper, MappingOptions options) {
         if (source == null) {
             return Val.ofNull();
         }
