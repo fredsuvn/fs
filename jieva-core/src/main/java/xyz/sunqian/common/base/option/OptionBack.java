@@ -1,11 +1,8 @@
-package xyz.sunqian.common.base;
+package xyz.sunqian.common.base.option;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 import xyz.sunqian.annotations.Nullable;
 
-final class OptionImpls {
+final class OptionBack {
 
     static Option<?, ?>[] EMPTY_OPTIONS = new Option<?, ?>[0];
 
@@ -13,11 +10,24 @@ final class OptionImpls {
         return new OptionImpl<>(key, value);
     }
 
-    @Data
-    @EqualsAndHashCode
-    @AllArgsConstructor
     private static final class OptionImpl<K, V> implements Option<K, V> {
+
         private final K key;
         private final @Nullable V value;
+
+        private OptionImpl(K key, @Nullable V value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        @Override
+        public K key() {
+            return key;
+        }
+
+        @Override
+        public @Nullable V value() {
+            return value;
+        }
     }
 }
