@@ -27,13 +27,13 @@ import java.util.Objects;
 public interface Option<K, V> {
 
     /**
-     * Returns an {@link Option} with specified key and value.
+     * Returns an {@link Option} with the specified key and value.
      *
-     * @param key   specified key
-     * @param value specified value
+     * @param key   the specified key
+     * @param value the specified value
      * @param <K>   type of the key
      * @param <V>   type of the value
-     * @return an {@link Option} with specified key and value
+     * @return an {@link Option} with the specified key and value
      */
     static <K, V> Option<K, V> of(K key, V value) {
         return OptionBack.of(key, value);
@@ -51,12 +51,12 @@ public interface Option<K, V> {
     }
 
     /**
-     * Finds the first option value matching the specified key from given options.
+     * Finds the first option value matching the specified key from the given options.
      *
-     * @param key     specified key
-     * @param options given options
+     * @param key     the  specified key
+     * @param options the given options
      * @param <V>     type of the value
-     * @return the first option value matching the specified key from given options
+     * @return the first option value matching the specified key from the given options
      */
     @Nullable
     static <V> V find(Object key, Option<?, ?>... options) {
@@ -72,16 +72,16 @@ public interface Option<K, V> {
     }
 
     /**
-     * Returns key of this option.
+     * Returns the key of this option.
      *
-     * @return key of this option
+     * @return the key of this option
      */
     K key();
 
     /**
-     * Returns value of this option.
+     * Returns the value of this option.
      *
-     * @return value of this option.
+     * @return the value of this option.
      */
     @Nullable
     V value();
