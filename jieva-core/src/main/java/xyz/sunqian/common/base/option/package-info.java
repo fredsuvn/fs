@@ -1,4 +1,4 @@
 /**
- * Provides classes and interfaces about the option.
+ * Provides classes and interfaces for options.
  */
 package xyz.sunqian.common.base.option;
