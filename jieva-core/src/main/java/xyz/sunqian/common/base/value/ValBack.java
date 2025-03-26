@@ -55,7 +55,7 @@ final class ValBack {
 
         private final T value;
 
-        private ValImpl(T value) {
+        private ValImpl(@Nullable T value) {
             this.value = value;
         }
 

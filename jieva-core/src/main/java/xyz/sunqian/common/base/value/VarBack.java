@@ -94,8 +94,7 @@ final class VarBack {
 
         @Override
         public boolean getAndToggle() {
-            value = !value;
-            return !value;
+            return !toggleAndGet();
         }
     }
 
