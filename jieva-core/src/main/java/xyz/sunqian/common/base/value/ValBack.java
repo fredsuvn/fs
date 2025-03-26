@@ -1,6 +1,5 @@
 package xyz.sunqian.common.base.value;
 
-import lombok.AllArgsConstructor;
 import xyz.sunqian.annotations.Nullable;
 
 final class ValBack {
@@ -24,16 +23,24 @@ final class ValBack {
         return new BooleanValImpl(value);
     }
 
+    static ByteVal of(byte value) {
+        return new ByteValImpl(value);
+    }
+
+    static ShortVal of(short value) {
+        return new ShortValImpl(value);
+    }
+
+    static CharVal of(char value) {
+        return new CharValImpl(value);
+    }
+
     static IntVal of(int value) {
         return new IntValImpl(value);
     }
 
     static LongVal of(long value) {
         return new LongValImpl(value);
-    }
-
-    static ShortVal of(short value) {
-        return new ShortValImpl(value);
     }
 
     static FloatVal of(float value) {
@@ -44,18 +51,13 @@ final class ValBack {
         return new DoubleValImpl(value);
     }
 
-    static ByteVal of(byte value) {
-        return new ByteValImpl(value);
-    }
-
-    static CharVal of(char value) {
-        return new CharValImpl(value);
-    }
-
-    @AllArgsConstructor
     private static final class ValImpl<T> implements Val<T> {
 
         private final T value;
+
+        private ValImpl(T value) {
+            this.value = value;
+        }
 
         @Override
         public @Nullable T get() {
@@ -63,10 +65,13 @@ final class ValBack {
         }
     }
 
-    @AllArgsConstructor
     private static final class BooleanValImpl implements BooleanVal {
 
         private final boolean value;
+
+        private BooleanValImpl(boolean value) {
+            this.value = value;
+        }
 
         @Override
         public boolean get() {
@@ -74,65 +79,13 @@ final class ValBack {
         }
     }
 
-    @AllArgsConstructor
-    private static final class IntValImpl implements IntVal {
-
-        private final int value;
-
-        @Override
-        public int get() {
-            return value;
-        }
-    }
-
-    @AllArgsConstructor
-    private static final class LongValImpl implements LongVal {
-
-        private final long value;
-
-        @Override
-        public long get() {
-            return value;
-        }
-    }
-
-    @AllArgsConstructor
-    private static final class ShortValImpl implements ShortVal {
-
-        private final short value;
-
-        @Override
-        public short get() {
-            return value;
-        }
-    }
-
-    @AllArgsConstructor
-    private static final class FloatValImpl implements FloatVal {
-
-        private final float value;
-
-        @Override
-        public float get() {
-            return value;
-        }
-    }
-
-    @AllArgsConstructor
-    private static final class DoubleValImpl implements DoubleVal {
-
-        private final double value;
-
-        @Override
-        public double get() {
-            return value;
-        }
-    }
-
-    @AllArgsConstructor
     private static final class ByteValImpl implements ByteVal {
 
         private final byte value;
+
+        private ByteValImpl(byte value) {
+            this.value = value;
+        }
 
         @Override
         public byte get() {
@@ -140,13 +93,86 @@ final class ValBack {
         }
     }
 
-    @AllArgsConstructor
+    private static final class ShortValImpl implements ShortVal {
+
+        private final short value;
+
+        private ShortValImpl(short value) {
+            this.value = value;
+        }
+
+        @Override
+        public short get() {
+            return value;
+        }
+    }
+
     private static final class CharValImpl implements CharVal {
 
         private final char value;
 
+        private CharValImpl(char value) {
+            this.value = value;
+        }
+
         @Override
         public char get() {
+            return value;
+        }
+    }
+
+    private static final class IntValImpl implements IntVal {
+
+        private final int value;
+
+        private IntValImpl(int value) {
+            this.value = value;
+        }
+
+        @Override
+        public int get() {
+            return value;
+        }
+    }
+
+    private static final class LongValImpl implements LongVal {
+
+        private final long value;
+
+        private LongValImpl(long value) {
+            this.value = value;
+        }
+
+        @Override
+        public long get() {
+            return value;
+        }
+    }
+
+    private static final class FloatValImpl implements FloatVal {
+
+        private final float value;
+
+        private FloatValImpl(float value) {
+            this.value = value;
+        }
+
+        @Override
+        public float get() {
+            return value;
+        }
+    }
+
+    private static final class DoubleValImpl implements DoubleVal {
+
+        private final double value;
+
+        private DoubleValImpl(double value) {
+            this.value = value;
+        }
+
+        @Override
+        public double get() {
             return value;
         }
     }
