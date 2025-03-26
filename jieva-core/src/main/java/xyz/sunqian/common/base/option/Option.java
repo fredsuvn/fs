@@ -1,5 +1,6 @@
 package xyz.sunqian.common.base.option;
 
+import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.coll.JieArray;
@@ -24,6 +25,7 @@ import java.util.Objects;
  * @param <V> type of the value
  * @author sunqian
  */
+@Immutable
 public interface Option<K, V> {
 
     /**

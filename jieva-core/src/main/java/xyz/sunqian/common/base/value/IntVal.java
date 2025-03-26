@@ -1,10 +1,13 @@
 package xyz.sunqian.common.base.value;
 
+import xyz.sunqian.annotations.Immutable;
+
 /**
  * Primitive {@code int} version of {@link Val}.
  *
  * @author sunqian
  */
+@Immutable
 public interface IntVal extends PrimitiveToVal<Integer> {
 
     /**
