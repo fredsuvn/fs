@@ -4,6 +4,7 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.value.Val;
 
+import java.lang.ref.PhantomReference;
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.time.Duration;
@@ -80,6 +81,24 @@ public interface SimpleCache<K, V> {
         @Nullable SimpleCache.RemovalListener<K, V> removalListener
     ) {
         return SimpleCacheBack.newSimpleCache(false, duration, removalListener);
+    }
+
+    /**
+     * Returns a new {@link SimpleCache} based on {@link PhantomReference}. The cache automatically removes invalid
+     * entries by calling {@link #clean()} during each method invocation. The {@code removalListener} is an optional
+     * callback function for the removal of entries.
+     * <p>
+     * Actually, this cache cannot retain valid entries due to the features of {@link PhantomReference}, so it is
+     * typically used for testing.
+     *
+     * @param removalListener an optional callback function for the removal of entries
+     * @param <K>             type of the cache keys
+     * @param <V>             type of the cache values
+     * @return a new {@link SimpleCache} based on {@link PhantomReference}
+     */
+    static <K, V> SimpleCache<K, V> phantom(@Nullable SimpleCache.RemovalListener<K, V> removalListener
+    ) {
+        return SimpleCacheBack.newSimpleCache(removalListener);
     }
 
     /**

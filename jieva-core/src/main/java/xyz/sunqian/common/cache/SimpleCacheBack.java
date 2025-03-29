@@ -5,10 +5,7 @@ import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.value.Val;
 import xyz.sunqian.common.base.value.Var;
 
-import java.lang.ref.Reference;
-import java.lang.ref.ReferenceQueue;
-import java.lang.ref.SoftReference;
-import java.lang.ref.WeakReference;
+import java.lang.ref.*;
 import java.time.Duration;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -24,6 +21,12 @@ final class SimpleCacheBack {
         return new ReferenceCache<>(isWeak, duration, removalListener);
     }
 
+    static <K, V> SimpleCache<K, V> newSimpleCache(
+        @Nullable SimpleCache.RemovalListener<K, V> removalListener
+    ) {
+        return new ReferenceCache<>(removalListener);
+    }
+
     private static <V> Object maskValue(@Nullable V value) {
         return value == null ? new Null() : value;
     }
@@ -35,12 +38,60 @@ final class SimpleCacheBack {
         return Jie.as(raw);
     }
 
+    private static SimpleCache.RemovalCause getCause(@Nullable SimpleCache.RemovalCause cause) {
+        return cause == null ? SimpleCache.RemovalCause.COLLECTED : cause;
+    }
+
+    @Nullable
+    private static <K, V> Object getRawValue(ReferenceValue<K, V> rv) {
+        Object raw = rv.rawValue();
+        if (raw == null) {
+            return null;
+        }
+        if (isExpired(rv, raw)) {
+            return null;
+        }
+        return raw;
+    }
+
+    private static <K, V> boolean isExpired(ReferenceValue<K, V> rv, Object rawValue) {
+        if (rv.expiration() <= 0) {
+            return false;
+        }
+        boolean expired = System.currentTimeMillis() > rv.expiration();
+        if (expired) {
+            rv.setCause(SimpleCache.RemovalCause.EXPIRED);
+            rv.setHeldValue(Val.of(unmaskRawValue(rawValue)));
+            rv.doEnqueue();
+        }
+        return expired;
+    }
+
+    private static <K, V> void invalid(ReferenceValue<K, V> rv, SimpleCache.RemovalCause cause) {
+        // Thread safety is not enforced here.
+        @Nullable Object rawValue = getRawValue(rv);
+        if (rawValue != null) {
+            rv.setCause(cause);
+            rv.setHeldValue(Val.of(unmaskRawValue(rawValue)));
+        }
+        rv.doEnqueue();
+    }
+
     private static class ReferenceCache<K, V> implements SimpleCache<K, V> {
 
         private static final Object NULL_VAL = "(╯‵□′)╯︵┻━┻";
 
-        private static final ReferenceValueGenerator WeakGenerator = WeakReferenceValue::new;
-        private static final ReferenceValueGenerator SoftGenerator = SoftReferenceValue::new;
+        private static final ReferenceValueGenerator WEAK_GENERATOR = WeakReferenceValue::new;
+        private static final ReferenceValueGenerator SOFT_GENERATOR = SoftReferenceValue::new;
+
+        private static final ReferenceValueGenerator PHANTOM_GENERATOR = new ReferenceValueGenerator() {
+            @Override
+            public <K1, V1> ReferenceValue<K1, V1> generate(
+                K1 key, @Nullable Object value, long expiration, ReferenceQueue<Object> queue) {
+                return new PhantomReferenceValue<>(key, value, queue);
+            }
+        };
+
         private static final RemovalListener<?, ?> EMPTY_LISTENER =
             (key, value, cause) -> {};
 
@@ -57,8 +108,20 @@ final class SimpleCacheBack {
             @Nullable RemovalListener<K, V> removalListener
         ) {
             this.duration = duration;
-            this.removalListener = removalListener == null ? Jie.as(EMPTY_LISTENER) : removalListener;
-            this.valueGenerator = isWeak ? WeakGenerator : SoftGenerator;
+            this.removalListener = getListener(removalListener);
+            this.valueGenerator = isWeak ? WEAK_GENERATOR : SOFT_GENERATOR;
+        }
+
+        private ReferenceCache(
+            @Nullable RemovalListener<K, V> removalListener
+        ) {
+            this.duration = null;
+            this.removalListener = getListener(removalListener);
+            this.valueGenerator = PHANTOM_GENERATOR;
+        }
+
+        private RemovalListener<K, V> getListener(@Nullable RemovalListener<K, V> listener) {
+            return listener == null ? Jie.as(EMPTY_LISTENER) : listener;
         }
 
         @Override
@@ -142,10 +205,7 @@ final class SimpleCacheBack {
             clean();
             ReferenceValue<K, V> old = map.put(key, newReferenceValue(key, maskValue(value), expiration(null)));
             if (old != null) {
-                @Nullable Object raw = getRawValue(old);
-                if (raw != null) {
-                    old.invalid(RemovalCause.REPLACED);
-                }
+                old.invalid(RemovalCause.REPLACED);
             }
         }
 
@@ -157,10 +217,7 @@ final class SimpleCacheBack {
                 newReferenceValue(key, maskValue(value.value()), expiration(value.duration()))
             );
             if (old != null) {
-                @Nullable Object raw = getRawValue(old);
-                if (raw != null) {
-                    old.invalid(RemovalCause.REPLACED);
-                }
+                old.invalid(RemovalCause.REPLACED);
             }
         }
 
@@ -169,10 +226,7 @@ final class SimpleCacheBack {
             clean();
             ReferenceValue<K, V> old = map.remove(key);
             if (old != null) {
-                @Nullable Object raw = getRawValue(old);
-                if (raw != null) {
-                    old.invalid(RemovalCause.EXPLICIT);
-                }
+                old.invalid(RemovalCause.EXPLICIT);
             }
         }
 
@@ -195,7 +249,7 @@ final class SimpleCacheBack {
             }
             @Nullable Object raw = getRawValue(rv);
             if (raw != null) {
-                rv.expiration(expiration(duration));
+                rv.setExpiration(expiration(duration));
             }
         }
 
@@ -208,10 +262,7 @@ final class SimpleCacheBack {
         @Override
         public void clear() {
             map.forEach((k, rv) -> {
-                @Nullable Object raw = getRawValue(rv);
-                if (raw != null) {
-                    rv.invalid(RemovalCause.EXPLICIT);
-                }
+                rv.invalid(RemovalCause.EXPLICIT);
             });
             clean();
         }
@@ -237,29 +288,6 @@ final class SimpleCacheBack {
                 return old;
             });
             rv.doListener(removalListener);
-        }
-
-        @Nullable
-        private Object getRawValue(ReferenceValue<K, V> rv) {
-            Object raw = rv.rawValue();
-            if (raw == null) {
-                return null;
-            }
-            if (isExpired(rv)) {
-                return null;
-            }
-            return raw;
-        }
-
-        private boolean isExpired(ReferenceValue<K, V> rv) {
-            if (rv.expiration() <= 0) {
-                return false;
-            }
-            boolean expired = System.currentTimeMillis() > rv.expiration();
-            if (expired) {
-                rv.invalid(RemovalCause.EXPIRED);
-            }
-            return expired;
         }
 
         private long expiration(@Nullable Duration d) {
@@ -296,14 +324,18 @@ final class SimpleCacheBack {
 
         long expiration();
 
-        void expiration(long expiration);
+        void setExpiration(long expiration);
 
         void invalid(SimpleCache.RemovalCause cause);
 
+        void setCause(SimpleCache.RemovalCause cause);
+
+        void setHeldValue(Val<V> heldValue);
+
+        void doEnqueue();
+
         void doListener(SimpleCache.RemovalListener<K, V> listener);
     }
-
-    private static final class Null {}
 
     private static final class WeakReferenceValue<K, V> extends WeakReference<Object> implements ReferenceValue<K, V> {
 
@@ -347,24 +379,33 @@ final class SimpleCacheBack {
         }
 
         @Override
-        public void expiration(long expiration) {
+        public void setExpiration(long expiration) {
             this.expiration = expiration;
         }
 
         @Override
         public void invalid(SimpleCache.RemovalCause cause) {
-            // Thread safety is not enforced here.
+            SimpleCacheBack.invalid(this, cause);
+        }
+
+        @Override
+        public void setCause(SimpleCache.RemovalCause cause) {
             this.cause = cause;
-            @Nullable Object rawValue = rawValue();
-            if (rawValue != null) {
-                this.heldValue = Val.of(unmaskRawValue(rawValue));
-            }
+        }
+
+        @Override
+        public void setHeldValue(Val<V> heldValue) {
+            this.heldValue = heldValue;
+        }
+
+        @Override
+        public void doEnqueue() {
             enqueue();
         }
 
         @Override
         public void doListener(SimpleCache.RemovalListener<K, V> listener) {
-            listener.onRemoval(key, heldValue, cause);
+            listener.onRemoval(key, heldValue, getCause(cause));
         }
     }
 
@@ -410,24 +451,101 @@ final class SimpleCacheBack {
         }
 
         @Override
-        public void expiration(long expiration) {
+        public void setExpiration(long expiration) {
             this.expiration = expiration;
         }
 
         @Override
         public void invalid(SimpleCache.RemovalCause cause) {
-            // Thread safety is not enforced here.
+            SimpleCacheBack.invalid(this, cause);
+        }
+
+        @Override
+        public void setCause(SimpleCache.RemovalCause cause) {
             this.cause = cause;
-            @Nullable Object rawValue = rawValue();
-            if (rawValue != null) {
-                this.heldValue = Val.of(unmaskRawValue(rawValue));
-            }
+        }
+
+        @Override
+        public void setHeldValue(Val<V> heldValue) {
+            this.heldValue = heldValue;
+        }
+
+        @Override
+        public void doEnqueue() {
             enqueue();
         }
 
         @Override
         public void doListener(SimpleCache.RemovalListener<K, V> listener) {
-            listener.onRemoval(key, heldValue, cause);
+            listener.onRemoval(key, heldValue, getCause(cause));
+        }
+    }
+
+    private static final class PhantomReferenceValue<K, V> extends PhantomReference<Object> implements ReferenceValue<K, V> {
+
+        private final K key;
+
+        PhantomReferenceValue(
+            K key,
+            Object value,
+            ReferenceQueue<? super Object> q
+        ) {
+            super(value, q);
+            this.key = key;
+        }
+
+        @Override
+        public K key() {
+            return key;
+        }
+
+        @Override
+        public @Nullable Object rawValue() {
+            return get();
+        }
+
+        @Override
+        public long expiration() {
+            return 0;
+        }
+
+        @Override
+        public void setExpiration(long expiration) {
+        }
+
+        @Override
+        public void invalid(SimpleCache.RemovalCause cause) {
+            SimpleCacheBack.invalid(this, cause);
+
+            /*
+             * Only for tests...
+             */
+            setExpiration(expiration());
+            setCause(null);
+            setHeldValue(null);
+        }
+
+        @Override
+        public void setCause(SimpleCache.RemovalCause cause) {
+        }
+
+        @Override
+        public void setHeldValue(Val<V> heldValue) {
+        }
+
+        @Override
+        public void doEnqueue() {
+            enqueue();
+        }
+
+        @Override
+        public void doListener(SimpleCache.RemovalListener<K, V> listener) {
+            listener.onRemoval(key, null, getCause(null));
+        }
+    }
+
+    private static final class Null {
+        private Null() {
         }
     }
 }
