@@ -5,7 +5,7 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.OutParam;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieString;
-import xyz.sunqian.common.cache.Cache;
+import xyz.sunqian.common.cache.SimpleCache;
 import xyz.sunqian.common.coll.JieArray;
 import xyz.sunqian.common.coll.JieColl;
 
@@ -43,7 +43,7 @@ public class JieReflect {
         double.class, "[D"
     );
 
-    private static final Cache<Type, Map<TypeVariable<?>, Type>> TYPE_PARAMETER_MAPPING_CACHE = Cache.softCache();
+    private static final SimpleCache<Type, Map<TypeVariable<?>, Type>> TYPE_PARAMETER_MAPPING_CACHE = SimpleCache.soft();
 
     /**
      * Returns last name of given class. The last name is sub-string after last dot, for example:
@@ -635,7 +635,7 @@ public class JieReflect {
      */
     @Immutable
     public static Map<TypeVariable<?>, Type> getTypeParameterMapping(Type type) {
-        return TYPE_PARAMETER_MAPPING_CACHE.compute(type, it -> {
+        return TYPE_PARAMETER_MAPPING_CACHE.get(type, it -> {
             Map<TypeVariable<?>, Type> result = new HashMap<>();
             getTypeParameterMapping(type, result);
             return Collections.unmodifiableMap(result);
