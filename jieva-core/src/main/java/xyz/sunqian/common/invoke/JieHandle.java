@@ -12,84 +12,27 @@ import java.lang.invoke.MethodHandle;
 public class JieHandle {
 
     /**
-     * Invokes given {@link MethodHandle} as instance method with specified instance and arguments.
+     * Invokes the {@link MethodHandle} as an instance method, with the specified instance and invocation arguments.
      *
-     * @param handle given handle
-     * @param inst   specified instance
-     * @param args   specified arguments
+     * @param handle the {@link MethodHandle} to be invoked
+     * @param inst   the specified instance
+     * @param args   the invocation arguments
      * @return result of invocation
-     * @throws Throwable anything thrown by the target method invocation
+     * @throws Throwable for any error thrown by the specified method handle
      */
     public static @Nullable Object invokeInstance(MethodHandle handle, Object inst, Object... args) throws Throwable {
-        switch (args.length) {
-            case 0:
-                return handle.invoke(inst);
-            case 1:
-                return handle.invoke(inst, args[0]);
-            case 2:
-                return handle.invoke(inst, args[0], args[1]);
-            case 3:
-                return handle.invoke(inst, args[0], args[1], args[2]);
-            case 4:
-                return handle.invoke(inst, args[0], args[1], args[2], args[3]);
-            case 5:
-                return handle.invoke(inst, args[0], args[1], args[2], args[3], args[4]);
-            case 6:
-                return handle.invoke(inst, args[0], args[1], args[2], args[3], args[4], args[5]);
-            case 7:
-                return handle.invoke(inst, args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
-            case 8:
-                return handle.invoke(inst, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
-            case 9:
-                return handle.invoke(inst, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8]);
-            case 10:
-                return handle.invoke(inst, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
-            default:
-                return handle.invokeWithArguments(copyArgs(inst, args));
-        }
-    }
-
-    private static Object[] copyArgs(Object inst, Object... args) {
-        Object[] ret = new Object[args.length + 1];
-        ret[0] = inst;
-        System.arraycopy(args, 0, ret, 1, args.length);
-        return ret;
+        return HandleBack.invokeInstance(handle, inst, args);
     }
 
     /**
-     * Invokes given {@link MethodHandle} as static method with specified arguments.
+     * Invokes the {@link MethodHandle} as a static method or constructor, with the invocation arguments.
      *
-     * @param handle given handle
-     * @param args   specified arguments
+     * @param handle the {@link MethodHandle} to be invoked
+     * @param args   the invocation arguments
      * @return result of invocation
-     * @throws Throwable anything thrown by the target method invocation
+     * @throws Throwable for any error thrown by the specified method handle
      */
     public static @Nullable Object invokeStatic(MethodHandle handle, Object... args) throws Throwable {
-        switch (args.length) {
-            case 0:
-                return handle.invoke();
-            case 1:
-                return handle.invoke(args[0]);
-            case 2:
-                return handle.invoke(args[0], args[1]);
-            case 3:
-                return handle.invoke(args[0], args[1], args[2]);
-            case 4:
-                return handle.invoke(args[0], args[1], args[2], args[3]);
-            case 5:
-                return handle.invoke(args[0], args[1], args[2], args[3], args[4]);
-            case 6:
-                return handle.invoke(args[0], args[1], args[2], args[3], args[4], args[5]);
-            case 7:
-                return handle.invoke(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
-            case 8:
-                return handle.invoke(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
-            case 9:
-                return handle.invoke(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8]);
-            case 10:
-                return handle.invoke(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
-            default:
-                return handle.invokeWithArguments(args);
-        }
+        return HandleBack.invokeStatic(handle, args);
     }
 }

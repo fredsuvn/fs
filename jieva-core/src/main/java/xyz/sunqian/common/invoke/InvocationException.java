@@ -5,7 +5,7 @@ import xyz.sunqian.common.base.JieException;
 /**
  * Invocation exception.
  *
- * @author fredsuvn
+ * @author sunqian
  */
 public class InvocationException extends JieException {
 
