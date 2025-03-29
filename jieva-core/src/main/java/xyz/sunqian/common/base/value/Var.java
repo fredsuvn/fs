@@ -24,12 +24,10 @@ public interface Var<T> extends Val<T> {
     }
 
     /**
-     * Sets the held value to the specified value of type {@code R}. Returns this {@link Var} itself, but its generic
-     * type is now {@code Var<R>}.
+     * Sets the held value to the specified value, and returns this {@link Var} itself.
      *
      * @param value the specified value
-     * @param <R>   type of the specified value
-     * @return this {@link Var} itself, but its generic type is now {@code Var<R>}
+     * @return this {@link Var} itself
      */
-    <R> Var<R> set(@Nullable R value);
+    Var<T> set(@Nullable T value);
 }

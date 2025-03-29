@@ -26,14 +26,15 @@ public interface Val<T> {
     }
 
     /**
-     * Returns a {@link Val} holding the specified value.
+     * Returns a {@link Val} holding the specified value. If the specified value is {@code null}, returns
+     * {@link #ofNull()}.
      *
      * @param value the specified value
      * @param <T>   type of the held value
      * @return a {@link Val} holding the specified value
      */
     static <T> Val<T> of(@Nullable T value) {
-        return ValBack.of(value);
+        return value == null ? ofNull() : ValBack.of(value);
     }
 
     /**

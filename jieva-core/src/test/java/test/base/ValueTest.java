@@ -12,6 +12,7 @@ public class ValueTest {
     public void testVal() {
         // object
         assertSame(Val.ofNull(), Val.ofNull());
+        assertSame(Val.ofNull(), Val.of(null));
         Object o = new Object();
         assertSame(Val.of(o).get(), o);
         // boolean
@@ -56,9 +57,9 @@ public class ValueTest {
         assertSame(Var.of(o).get(), o);
         Var<Integer> vi = Var.of(1);
         assertEquals(vi.get(), 1);
-        Var<String> vs = vi.set("2");
-        assertSame(vs, vi);
-        assertEquals(vs.get(), "2");
+        Var<Integer> v2 = vi.set(2);
+        assertSame(v2, vi);
+        assertEquals(v2.get(), 2);
         // boolean
         assertEquals(BooleanVar.of(true).get(), true);
         assertEquals(BooleanVar.of(true).set(false).get(), false);

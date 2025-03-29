@@ -55,9 +55,9 @@ final class VarBack {
         }
 
         @Override
-        public <R> Var<R> set(@Nullable R value) {
+        public Var<T> set(@Nullable T value) {
             this.value = value;
-            return Jie.as(this);
+            return this;
         }
     }
 
