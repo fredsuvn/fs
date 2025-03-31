@@ -22,6 +22,8 @@ import static org.testng.Assert.*;
 
 public class CharsBuilderTest {
 
+    private static int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
+
     @Test
     public void testCharsBuilder() throws Exception {
         testCharsBuilder(512);
@@ -30,7 +32,7 @@ public class CharsBuilderTest {
         expectThrows(IllegalArgumentException.class, () -> new CharsBuilder(10, -2));
         expectThrows(IllegalArgumentException.class, () -> new CharsBuilder(10, 2));
         CharsBuilder cb = new CharsBuilder();
-        cb.append((char) 1);
+        cb.append(1);
         expectThrows(IORuntimeException.class, () -> cb.writeTo(new Writer() {
 
             @Override
@@ -67,10 +69,10 @@ public class CharsBuilderTest {
         cbs2.write(1);
         cbs2.write(1);
         expectThrows(IllegalStateException.class, () -> cbs2.write(1));
-        JieTest.reflectThrows(IllegalStateException.class, grow, new CharsBuilder(), CharsBuilder.MAX_ARRAY_SIZE + 10);
+        JieTest.reflectThrows(IllegalStateException.class, grow, new CharsBuilder(), MAX_ARRAY_SIZE + 10);
         Method newCapacity = CharsBuilder.class.getDeclaredMethod("newCapacity", int.class, int.class);
         newCapacity.setAccessible(true);
-        assertEquals(CharsBuilder.MAX_ARRAY_SIZE, newCapacity.invoke(new CharsBuilder(), -1, 1));
+        assertEquals(MAX_ARRAY_SIZE, newCapacity.invoke(new CharsBuilder(), -1, 1));
     }
 
     private void testCharsBuilder(int size) throws Exception {
@@ -78,7 +80,7 @@ public class CharsBuilderTest {
         char[] bs = new String(cs).toCharArray();
         CharsBuilder bb = new CharsBuilder();
         bb.close();
-        bb.trimBuffer();
+        bb.trim();
         bb.append(bs[0]);
         assertEquals(bb.toCharArray(), Arrays.copyOf(bs, 1));
         bb.append(Arrays.copyOfRange(bs, 1, 10));
@@ -132,13 +134,13 @@ public class CharsBuilderTest {
         bb.append(bs[0]);
         assertEquals(bb.toCharArray(), Arrays.copyOf(bs, 1));
         bb.reset();
-        bb.trimBuffer();
+        bb.trim();
         bb.append(bs[0]);
         bb.append(bs[1]);
         assertEquals(bb.toCharArray(), Arrays.copyOf(bs, 2));
-        bb.trimBuffer();
+        bb.trim();
         bb.reset();
-        bb.trimBuffer();
+        bb.trim();
         bb.append(bs[0]);
         assertEquals(bb.toCharArray(), Arrays.copyOf(bs, 1));
         CharArrayWriter out = new CharArrayWriter();

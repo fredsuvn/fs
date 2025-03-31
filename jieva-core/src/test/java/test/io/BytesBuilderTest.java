@@ -21,6 +21,8 @@ import static org.testng.Assert.*;
 
 public class BytesBuilderTest {
 
+    private static int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
+
     @Test
     public void testBytesBuilder() throws Exception {
         testBytesBuilder(512);
@@ -29,7 +31,7 @@ public class BytesBuilderTest {
         expectThrows(IllegalArgumentException.class, () -> new BytesBuilder(10, -2));
         expectThrows(IllegalArgumentException.class, () -> new BytesBuilder(10, 2));
         BytesBuilder bb = new BytesBuilder();
-        bb.append((byte) 1);
+        bb.append(1);
         expectThrows(IORuntimeException.class, () -> bb.writeTo(new OutputStream() {
             @Override
             public void write(int b) throws IOException {
@@ -49,10 +51,10 @@ public class BytesBuilderTest {
         bbs2.write(1);
         bbs2.write(1);
         expectThrows(IllegalStateException.class, () -> bbs2.write(1));
-        JieTest.reflectThrows(IllegalStateException.class, grow, new BytesBuilder(), BytesBuilder.MAX_ARRAY_SIZE + 10);
+        JieTest.reflectThrows(IllegalStateException.class, grow, new BytesBuilder(), MAX_ARRAY_SIZE + 10);
         Method newCapacity = BytesBuilder.class.getDeclaredMethod("newCapacity", int.class, int.class);
         newCapacity.setAccessible(true);
-        assertEquals(BytesBuilder.MAX_ARRAY_SIZE, newCapacity.invoke(new BytesBuilder(), -1, 1));
+        assertEquals(MAX_ARRAY_SIZE, newCapacity.invoke(new BytesBuilder(), -1, 1));
     }
 
     private void testBytesBuilder(int size) throws Exception {
@@ -60,7 +62,7 @@ public class BytesBuilderTest {
         byte[] bs = new String(cs).getBytes();
         BytesBuilder bb = new BytesBuilder();
         bb.close();
-        bb.trimBuffer();
+        bb.trim();
         bb.append(bs[0]);
         assertEquals(bb.toByteArray(), Arrays.copyOf(bs, 1));
         bb.append(Arrays.copyOfRange(bs, 1, 10));
@@ -110,13 +112,13 @@ public class BytesBuilderTest {
         bb.append(bs[0]);
         assertEquals(bb.toByteArray(), Arrays.copyOf(bs, 1));
         bb.reset();
-        bb.trimBuffer();
+        bb.trim();
         bb.append(bs[0]);
         bb.append(bs[1]);
         assertEquals(bb.toByteArray(), Arrays.copyOf(bs, 2));
-        bb.trimBuffer();
+        bb.trim();
         bb.reset();
-        bb.trimBuffer();
+        bb.trim();
         bb.append(bs[0]);
         assertEquals(bb.toByteArray(), Arrays.copyOf(bs, 1));
         ByteArrayOutputStream out = new ByteArrayOutputStream();

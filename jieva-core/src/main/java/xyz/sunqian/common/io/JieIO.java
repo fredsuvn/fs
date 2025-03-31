@@ -29,7 +29,7 @@ public class JieIO {
      *
      * @param source the source stream
      * @return the array containing the data
-     * @throws IORuntimeException if an {@code IO} error occurs
+     * @throws IORuntimeException if an I/O error occurs
      */
     public static byte[] read(InputStream source) throws IORuntimeException {
         try {
@@ -55,9 +55,7 @@ public class JieIO {
                     return Arrays.copyOf(bytes, c);
                 }
             } else {
-                BytesBuilder builder = new BytesBuilder();
-                readTo(source, builder);
-                return builder.toByteArray();
+                return processBytes(source).toByteArray();
             }
         } catch (IOException e) {
             throw new IORuntimeException(e);
@@ -73,7 +71,7 @@ public class JieIO {
      * @param source the source stream
      * @param number the specified number
      * @return the array containing the data
-     * @throws IORuntimeException if an {@code IO} error occurs
+     * @throws IORuntimeException if an I/O error occurs
      */
     public static byte[] read(InputStream source, int number) throws IORuntimeException {
         try {
@@ -111,12 +109,10 @@ public class JieIO {
      *
      * @param source the source reader
      * @return the array containing the data
-     * @throws IORuntimeException if an {@code IO} error occurs
+     * @throws IORuntimeException if an I/O error occurs
      */
     public static char[] read(Reader source) throws IORuntimeException {
-        CharsBuilder builder = new CharsBuilder();
-        readTo(source, builder);
-        return builder.toCharArray();
+        return processChars(source).toCharArray();
     }
 
     /**
@@ -128,7 +124,7 @@ public class JieIO {
      * @param source the source reader
      * @param number the specified number
      * @return the array containing the data
-     * @throws IORuntimeException if an {@code IO} error occurs
+     * @throws IORuntimeException if an I/O error occurs
      */
     public static char[] read(Reader source, int number) throws IORuntimeException {
         try {
@@ -166,7 +162,7 @@ public class JieIO {
      *
      * @param source the source reader
      * @return the string containing the data
-     * @throws IORuntimeException if an {@code IO} error occurs
+     * @throws IORuntimeException if an I/O error occurs
      */
     public static String string(Reader source) throws IORuntimeException {
         StringBuilder builder = new StringBuilder();
@@ -183,7 +179,7 @@ public class JieIO {
      * @param source the source reader
      * @param number the specified number
      * @return the array containing the data
-     * @throws IORuntimeException if an {@code IO} error occurs
+     * @throws IORuntimeException if an I/O error occurs
      */
     public static String string(Reader source, int number) throws IORuntimeException {
         StringBuilder builder = new StringBuilder();
@@ -196,7 +192,7 @@ public class JieIO {
      *
      * @param source the source stream
      * @return the string
-     * @throws IORuntimeException if an {@code IO} error occurs
+     * @throws IORuntimeException if an I/O error occurs
      */
     public static String string(InputStream source) throws IORuntimeException {
         return string(source, JieChars.defaultCharset());
@@ -208,7 +204,7 @@ public class JieIO {
      * @param source  the source stream
      * @param charset the specified charset
      * @return the string
-     * @throws IORuntimeException if an {@code IO} error occurs
+     * @throws IORuntimeException if an I/O error occurs
      */
     public static String string(InputStream source, Charset charset) throws IORuntimeException {
         byte[] bytes = read(source);
@@ -223,7 +219,7 @@ public class JieIO {
      *
      * @param source the source stream
      * @return the array containing the data
-     * @throws IORuntimeException if an {@code IO} error occurs
+     * @throws IORuntimeException if an I/O error occurs
      */
     public static byte[] available(InputStream source) throws IORuntimeException {
         try {
@@ -259,7 +255,7 @@ public class JieIO {
      *
      * @param source the source stream
      * @return the string
-     * @throws IORuntimeException if an {@code IO} error occurs
+     * @throws IORuntimeException if an I/O error occurs
      */
     public static String avalaibleString(InputStream source) throws IORuntimeException {
         return avalaibleString(source, JieChars.defaultCharset());
@@ -271,7 +267,7 @@ public class JieIO {
      * @param source  the source stream
      * @param charset the specified charset
      * @return the string
-     * @throws IORuntimeException if an {@code IO} error occurs
+     * @throws IORuntimeException if an I/O error occurs
      */
     public static String avalaibleString(InputStream source, Charset charset) throws IORuntimeException {
         try {
@@ -286,84 +282,78 @@ public class JieIO {
     }
 
     /**
-     * Reads bytes from the source stream into the destination array, up to the array's capacity. Returns the number of
-     * bytes actually read. If no data is read out and the end of the stream has been reached, returns -1.
+     * Reads data from the source stream into the specified array until the array is completely filled or the end of the
+     * stream is reached. Returns the actual number of bytes read
      *
      * @param source the source stream
-     * @param dest   the destination array
-     * @return the number of bytes actually read, or -1 if no data is read out and the end of the stream has been
-     * reached
-     * @throws IORuntimeException if an {@code IO} error occurs
+     * @param dest   the specified array
+     * @return the actual number of bytes read
+     * @throws IORuntimeException if an I/O error occurs
      */
     public static int readTo(InputStream source, byte[] dest) throws IORuntimeException {
         return (int) processBytes(source).readLimit(dest.length).writeTo(dest);
     }
 
     /**
-     * Reads bytes from the source stream into the destination buffer, up to the buffer's remaining. Returns the number
-     * of bytes actually read. If no data is read out and the end of the stream has been reached, returns -1.
+     * Reads data from the source stream into the specified buffer until the buffer is completely filled or the end of
+     * the stream is reached. Returns the actual number of bytes read
      *
      * @param source the source stream
-     * @param dest   the destination buffer
-     * @return the number of bytes actually read, or -1 if no data is read out and the end of the stream has been
-     * reached
-     * @throws IORuntimeException if an {@code IO} error occurs
+     * @param dest   the specified buffer
+     * @return the actual number of bytes read
+     * @throws IORuntimeException if an I/O error occurs
      */
     public static int readTo(InputStream source, ByteBuffer dest) throws IORuntimeException {
         return (int) processBytes(source).readLimit(dest.remaining()).writeTo(dest);
     }
 
     /**
-     * Reads bytes from the source stream into the destination output stream. Returns the number of bytes actually read.
-     * If no data is read out and the end of the source stream has been reached, returns -1.
+     * Reads data from the source stream into the specified output stream until the end of the source stream is reached.
+     * Returns the actual number of bytes read
      *
      * @param source the source stream
-     * @param dest   the destination output stream
-     * @return the number of bytes actually read, or -1 if no data is read out and the end of the source stream has been
-     * reached
-     * @throws IORuntimeException if an {@code IO} error occurs
+     * @param dest   the specified output stream
+     * @return the actual number of bytes read
+     * @throws IORuntimeException if an I/O error occurs
      */
     public static long readTo(InputStream source, OutputStream dest) throws IORuntimeException {
         return (int) processBytes(source).writeTo(dest);
     }
 
     /**
-     * Reads bytes from the source reader into the destination array, up to the array's capacity. Returns the number of
-     * bytes actually read. If no data is read out and the end of the reader has been reached, returns -1.
+     * Reads data from the source reader into the specified array until the array is completely filled or the end of the
+     * reader is reached. Returns the actual number of chars read
      *
      * @param source the source reader
-     * @param dest   the destination array
-     * @return the number of bytes actually read, or -1 if no data is read out and the end of the reader has been
-     * reached
-     * @throws IORuntimeException if an {@code IO} error occurs
+     * @param dest   the specified array
+     * @return the actual number of chars read
+     * @throws IORuntimeException if an I/O error occurs
      */
     public static int readTo(Reader source, char[] dest) throws IORuntimeException {
         return (int) processChars(source).readLimit(dest.length).writeTo(dest);
     }
 
     /**
-     * Reads bytes from the source reader into the destination buffer, up to the buffer's remaining. Returns the number
-     * of bytes actually read. If no data is read out and the end of the reader has been reached, returns -1.
+     * Reads data from the source reader into the specified buffer until the buffer is completely filled or the end of
+     * the reader is reached. Returns the actual number of chars read
      *
      * @param source the source reader
-     * @param dest   the destination buffer
-     * @return the number of bytes actually read, or -1 if no data is read out and the end of the reader has been
-     * reached
-     * @throws IORuntimeException if an {@code IO} error occurs
+     * @param dest   the specified buffer
+     * @return the actual number of chars read
+     * @throws IORuntimeException if an I/O error occurs
      */
     public static int readTo(Reader source, CharBuffer dest) throws IORuntimeException {
         return (int) processChars(source).readLimit(dest.remaining()).writeTo(dest);
     }
 
     /**
-     * Reads bytes from the source reader into the destination appender. Returns the number of bytes actually read. If
-     * no data is read out and the end of the reader has been reached, returns -1.
+     * Reads data from the source reader into the specified appender until the end of the reader is reached. Returns the
+     * actual number of chars read
      *
      * @param source the source reader
-     * @param dest   the destination appender
-     * @return the number of bytes actually read, or -1 if no data is read out and the end of the reader has been
-     * reached
-     * @throws IORuntimeException if an {@code IO} error occurs
+     * @param dest   the specified appender
+     * @return the actual number of chars read
+     * @throws IORuntimeException if an I/O error occurs
      */
     public static long readTo(Reader source, Appendable dest) throws IORuntimeException {
         return processChars(source).writeTo(dest);
@@ -419,7 +409,7 @@ public class JieIO {
      * @param random the given random access file
      * @param offset the specified file pointer offset
      * @return the given random access file as an {@link InputStream}
-     * @throws IORuntimeException if an {@code IO} error occurs
+     * @throws IORuntimeException if an I/O error occurs
      */
     public static InputStream inStream(RandomAccessFile random, long offset) throws IORuntimeException {
         return IOBack.in(random, offset);
@@ -561,7 +551,7 @@ public class JieIO {
      * @param random the given random access file
      * @param offset the specified file pointer offset
      * @return the given random access file as an {@link OutputStream}
-     * @throws IORuntimeException if an {@code IO} error occurs
+     * @throws IORuntimeException if an I/O error occurs
      */
     public static OutputStream outStream(RandomAccessFile random, long offset) throws IORuntimeException {
         return IOBack.out(random, offset);

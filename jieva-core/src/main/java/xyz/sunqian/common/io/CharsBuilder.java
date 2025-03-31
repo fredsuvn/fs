@@ -9,21 +9,16 @@ import java.nio.CharBuffer;
 import java.util.Arrays;
 
 /**
- * This class is used to build chars, provides an API compatible with {@link CharArrayWriter}, but with no guarantee of
- * synchronization. It is {@code char} version of {@link BytesBuilder} and an implementation of {@link Writer} and
- * {@link CharSequence}.
- * <p>
- * Like {@link CharArrayWriter}, this class also has a buffer space to store the bytes, and close method has no effect.
- * The methods in this class can be called after the builder has been closed without exception.
+ * {@code CharsBuilder} is used to build char arrays and their derived objects by appending char data. It is similar to
+ * {@link CharArrayWriter}, provides compatible methods, but is not thread-safe. This class is also the subtype of the
+ * {@link Writer} and {@link CharSequence}, but the {@code close()} method has no effect.
  *
  * @author sunqian
  */
 public class CharsBuilder extends Writer implements CharSequence {
 
-    /**
-     * Max buffer size.
-     */
-    public static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
+    // Max array size.
+    private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
     private final int maxSize;
 
@@ -31,55 +26,48 @@ public class CharsBuilder extends Writer implements CharSequence {
     private int count;
 
     /**
-     * Constructs with 32 chars of buffer capacity, it is equivalent to:
-     * <pre>
-     *     CharsBuilder(32)
-     * </pre>
-     *
-     * @see #CharsBuilder(int)
-     * @see CharArrayWriter#CharArrayWriter()
+     * Constructs with 32-chars initial capacity.
      */
     public CharsBuilder() {
         this(32);
     }
 
     /**
-     * Constructs with specified initial size of buffer capacity in chars.
+     * Constructs with the specified initial capacity in chars.
      *
-     * @param initialSize the initial size
+     * @param initialCapacity the specified initial capacity in chars
      * @throws IllegalArgumentException if size is negative
-     * @see CharArrayWriter#CharArrayWriter(int)
      */
-    public CharsBuilder(int initialSize) {
-        this(initialSize, MAX_ARRAY_SIZE);
+    public CharsBuilder(int initialCapacity) {
+        this(initialCapacity, MAX_ARRAY_SIZE);
     }
 
     /**
-     * Constructs with specified initial size and max size of buffer capacity in chars.
+     * Constructs with the specified initial capacity and the max capacity in bytes.
      *
-     * @param initialSize the initial size
-     * @param maxSize     max size
-     * @throws IllegalArgumentException if initial size is negative or max size &lt;= 0 or initial size &gt; max size
+     * @param initialCapacity the specified initial capacity in bytes
+     * @param maxCapacity     the max capacity in bytes
+     * @throws IllegalArgumentException if the {@code initialCapacity < 0} or {@code maxCapacity < 0} or
+     *                                  {@code initialCapacity > maxCapacity}
      */
-    public CharsBuilder(int initialSize, int maxSize) {
-        if (initialSize < 0) {
-            throw new IllegalArgumentException("Negative initialSize: " + initialSize + ".");
+    public CharsBuilder(int initialCapacity, int maxCapacity) {
+        if (initialCapacity < 0) {
+            throw new IllegalArgumentException("Negative initial capacity: " + initialCapacity + ".");
         }
-        if (maxSize < 0) {
-            throw new IllegalArgumentException("Negative maxSize: " + maxSize + ".");
+        if (maxCapacity < 0) {
+            throw new IllegalArgumentException("Negative max capacity: " + maxCapacity + ".");
         }
-        if (initialSize > maxSize) {
-            throw new IllegalArgumentException("The initialSize must <= maxSize.");
+        if (initialCapacity > maxCapacity) {
+            throw new IllegalArgumentException("Initial capacity must <= max capacity!");
         }
-        buf = new char[initialSize];
-        this.maxSize = maxSize;
+        buf = new char[initialCapacity];
+        this.maxSize = maxCapacity;
     }
 
     /**
-     * Writes the specified char to this builder.
+     * Appends the specified char to this builder.
      *
-     * @param b the char to be written
-     * @see CharArrayWriter#write(int)
+     * @param b the specified char
      */
     public void write(int b) {
         ensureCapacity(count + 1);
@@ -88,12 +76,11 @@ public class CharsBuilder extends Writer implements CharSequence {
     }
 
     /**
-     * Writes specified length of chars from the specified char array starting at specified offset to this builder.
+     * Appends the specified number of chars from the given array, starting at the specified offset.
      *
-     * @param b   specified char array
-     * @param off specified offset
-     * @param len specified length
-     * @see CharArrayWriter#write(char[], int, int)
+     * @param b   the given array
+     * @param off the specified offset
+     * @param len the specified number
      */
     public void write(char[] b, int off, int len) {
         IOBack.checkReadBounds(b, off, len);
@@ -103,11 +90,10 @@ public class CharsBuilder extends Writer implements CharSequence {
     }
 
     /**
-     * Writes contents of this builder to specified writer.
+     * Writes the appended data of this builder to the specified writer.
      *
-     * @param out specified writer
+     * @param out the specified writer
      * @throws IORuntimeException if an I/O error occurs
-     * @see CharArrayWriter#writeTo(Writer)
      */
     public void writeTo(Writer out) throws IORuntimeException {
         try {
@@ -118,9 +104,9 @@ public class CharsBuilder extends Writer implements CharSequence {
     }
 
     /**
-     * Writes contents of this builder to specified char buffer.
+     * Writes the appended buffered data of this builder to the specified buffer.
      *
-     * @param out specified char buffer
+     * @param out the specified buffer
      * @throws IORuntimeException if an I/O error occurs
      */
     public void writeTo(CharBuffer out) throws IORuntimeException {
@@ -132,65 +118,55 @@ public class CharsBuilder extends Writer implements CharSequence {
     }
 
     /**
-     * Resets the <code>char count</code> of buffer of this builder to zero, so that all currently accumulated chars in
-     * this builder is discarded. This builder can be used again, reusing the already allocated buffer space.
+     * Resets this builder, the appended data will be discarded.
      * <p>
-     * To trim and release discarded allocated buffer space, use {@link #trimBuffer()}.
-     *
-     * @see CharArrayWriter#reset()
+     * This method doesn't guarantee releasing the allocated space for the appended data. To trim and release the unused
+     * space, use {@link #trim()}.
      */
     public void reset() {
         count = 0;
     }
 
     /**
-     * Trims and releases the allocated but discarded buffer space. This method is similar to
-     * {@link StringBuilder#trimToSize()}.
-     *
-     * @see StringBuilder#trimToSize()
+     * Trims and releases the allocated but unused space.
      */
-    public void trimBuffer() {
+    public void trim() {
         if (count < buf.length) {
             buf = Arrays.copyOf(buf, count);
         }
     }
 
     /**
-     * Returns the current size of the buffer (value of the <code>char count</code>).
+     * Returns the size of appended data.
      *
-     * @return the value of the <code>char count</code>, which is the number of valid chars in this builder.
-     * @see CharArrayWriter#size()
+     * @return the size of appended data
      */
     public int size() {
         return count;
     }
 
     /**
-     * Creates and returns a newly allocated char array. Its size is the current size of this builder and the valid
-     * contents of the buffer have been copied into it.
+     * Returns a new array containing a copy of the appended data.
      *
-     * @return copy of the current contents of this builder, as a char array.
-     * @see CharArrayWriter#toCharArray()
+     * @return a new array containing a copy of the appended data
      */
     public char[] toCharArray() {
         return Arrays.copyOf(buf, count);
     }
 
     /**
-     * Creates and returns a newly allocated char buffer. Its size is the current size of this builder and the valid
-     * contents of the buffer have been copied into it.
+     * Returns a new buffer containing a copy of the appended data.
      *
-     * @return copy of the current contents of this builder, as a char buffer.
+     * @return a new buffer containing a copy of the appended data
      */
     public CharBuffer toCharBuffer() {
         return CharBuffer.wrap(toCharArray());
     }
 
     /**
-     * Converts input data to a string.
+     * Returns a string from a copy of the appended data.
      *
-     * @return the string
-     * @see CharArrayWriter#toString()
+     * @return a string from a copy of the appended data
      */
     public String toString() {
         return new String(buf, 0, count);
@@ -208,6 +184,137 @@ public class CharsBuilder extends Writer implements CharSequence {
      */
     @Override
     public void close() {
+    }
+
+    /**
+     * Appends the specified char to this builder.
+     *
+     * @param b the specified char
+     * @return this builder
+     */
+    public CharsBuilder append(int b) {
+        write(b);
+        return this;
+    }
+
+    /**
+     * Appends the specified char to this builder.
+     *
+     * @param b the specified char
+     * @return this builder
+     */
+    public CharsBuilder append(char b) {
+        write(b);
+        return this;
+    }
+
+    /**
+     * Appends all chars from the given array.
+     *
+     * @param chars the given array
+     * @return this builder
+     */
+    public CharsBuilder append(char[] chars) {
+        write(chars, 0, chars.length);
+        return this;
+    }
+
+    /**
+     * Appends the specified number of chars from the given array, starting at the specified offset.
+     *
+     * @param chars  the given array
+     * @param offset the specified offset
+     * @param length the specified number
+     * @return this builder
+     */
+    public CharsBuilder append(char[] chars, int offset, int length) {
+        write(chars, offset, length);
+        return this;
+    }
+
+    /**
+     * Appends all chars from the given buffer.
+     *
+     * @param chars the given buffer
+     * @return this builder
+     */
+    public CharsBuilder append(CharBuffer chars) {
+        if (!chars.hasRemaining()) {
+            return this;
+        }
+        if (chars.hasArray()) {
+            write(chars.array(), JieBuffer.getArrayStartIndex(chars), chars.remaining());
+            chars.position(chars.position() + chars.remaining());
+        } else {
+            char[] remaining = JieChars.getChars(chars);
+            write(remaining, 0, remaining.length);
+        }
+        return this;
+    }
+
+    /**
+     * Appends all chars from the given reader.
+     *
+     * @param reader the given reader
+     * @return this builder
+     */
+    public CharsBuilder append(Reader reader) throws IORuntimeException {
+        return append(reader, JieIO.BUFFER_SIZE);
+    }
+
+    /**
+     * Appends all chars from the given reader with the specified buffer size for each reading.
+     *
+     * @param reader     the given reader
+     * @param bufferSize the specified buffer size for each reading
+     * @return this builder
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public CharsBuilder append(Reader reader, int bufferSize) throws IORuntimeException {
+        char[] buffer = new char[bufferSize];
+        while (true) {
+            try {
+                int readSize = reader.read(buffer);
+                if (readSize < 0) {
+                    return this;
+                }
+                write(buffer, 0, readSize);
+            } catch (Exception e) {
+                throw new IORuntimeException(e);
+            }
+        }
+    }
+
+    /**
+     * Appends all chars from the given builder.
+     *
+     * @param builder the given reader
+     * @return this builder
+     */
+    public CharsBuilder append(CharsBuilder builder) {
+        write(builder.buf, 0, builder.count);
+        return this;
+    }
+
+    @Override
+    public int length() {
+        return count;
+    }
+
+    @Override
+    public char charAt(int index) {
+        if (index < 0) {
+            throw new IllegalArgumentException("Illegal index, must >= 0: " + index + ".");
+        }
+        if (index >= count) {
+            throw new IndexOutOfBoundsException("Index out of bounds: " + index + ".");
+        }
+        return buf[index];
+    }
+
+    @Override
+    public CharSequence subSequence(int start, int end) {
+        return toString().subSequence(start, end);
     }
 
     private void ensureCapacity(int minCapacity) {
@@ -236,137 +343,5 @@ public class CharsBuilder extends Writer implements CharSequence {
             return maxSize;
         }
         return Math.max(newCapacity, minCapacity);
-    }
-
-    /**
-     * Appends a char into this builder.
-     *
-     * @param b a char
-     * @return this builder
-     */
-    public CharsBuilder append(int b) {
-        write(b);
-        return this;
-    }
-
-    /**
-     * Appends a char into this builder.
-     *
-     * @param b a char
-     * @return this builder
-     */
-    public CharsBuilder append(char b) {
-        write(b);
-        return this;
-    }
-
-    /**
-     * Appends given chars into this builder.
-     *
-     * @param chars given chars
-     * @return this builder
-     */
-    public CharsBuilder append(char[] chars) {
-        write(chars, 0, chars.length);
-        return this;
-    }
-
-    /**
-     * Appends given chars from specified offset up to specified length into this builder.
-     *
-     * @param chars  given chars
-     * @param offset specified offset
-     * @param length specified length
-     * @return this builder
-     */
-    public CharsBuilder append(char[] chars, int offset, int length) {
-        write(chars, offset, length);
-        return this;
-    }
-
-    /**
-     * Reads and appends given char buffer into this builder.
-     *
-     * @param chars given char buffer
-     * @return this builder
-     */
-    public CharsBuilder append(CharBuffer chars) {
-        if (!chars.hasRemaining()) {
-            return this;
-        }
-        if (chars.hasArray()) {
-            write(chars.array(), JieBuffer.getArrayStartIndex(chars), chars.remaining());
-            chars.position(chars.position() + chars.remaining());
-        } else {
-            char[] remaining = JieChars.getChars(chars);
-            write(remaining, 0, remaining.length);
-        }
-        return this;
-    }
-
-    /**
-     * Reads and appends given reader into this builder.
-     *
-     * @param in given reader
-     * @return this builder
-     * @throws IORuntimeException if any IO problem occurs
-     */
-    public CharsBuilder append(Reader in) throws IORuntimeException {
-        return append(in, JieIO.BUFFER_SIZE);
-    }
-
-    /**
-     * Reads and appends given reader into this builder with specified buffer size for per reading.
-     *
-     * @param in         given reader
-     * @param bufferSize specified buffer size
-     * @return this builder
-     * @throws IORuntimeException if any IO problem occurs
-     */
-    public CharsBuilder append(Reader in, int bufferSize) throws IORuntimeException {
-        char[] buffer = new char[bufferSize];
-        while (true) {
-            try {
-                int readSize = in.read(buffer);
-                if (readSize < 0) {
-                    return this;
-                }
-                write(buffer, 0, readSize);
-            } catch (Exception e) {
-                throw new IORuntimeException(e);
-            }
-        }
-    }
-
-    /**
-     * Appends contents of given chars builder into this builder.
-     *
-     * @param builder given chars builder
-     * @return this builder
-     */
-    public CharsBuilder append(CharsBuilder builder) {
-        write(builder.buf, 0, builder.count);
-        return this;
-    }
-
-    @Override
-    public int length() {
-        return count;
-    }
-
-    @Override
-    public char charAt(int index) {
-        if (index < 0) {
-            throw new IllegalArgumentException("Illegal index, must >= 0: " + index + ".");
-        }
-        if (index >= count) {
-            throw new IndexOutOfBoundsException("Index out of bounds: " + index + ".");
-        }
-        return buf[index];
-    }
-
-    @Override
-    public CharSequence subSequence(int start, int end) {
-        return toString().subSequence(start, end);
     }
 }
