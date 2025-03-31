@@ -74,7 +74,7 @@ final class FileAccImpl implements FileAcc {
         checkOpened();
         checkStatus();
         hasStream = true;
-        InputStream ris = JieIO.inputStream(raf, position);
+        InputStream ris = JieIO.inStream(raf, position);
         return new BindedInputStream(ris);
     }
 
@@ -83,7 +83,7 @@ final class FileAccImpl implements FileAcc {
         checkOpened();
         checkStatus();
         hasStream = true;
-        OutputStream ros = JieIO.outputStream(raf, position);
+        OutputStream ros = JieIO.outStream(raf, position);
         return new BindedOutputStream(ros);
     }
 

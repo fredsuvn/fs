@@ -89,7 +89,7 @@ public class HexTest {
                 error[0] = null;
             }
             try {
-                JieIO.processor(en).readBlockSize(1)
+                JieIO.processBytes(en).readBlockSize(1)
                     .encoder(JieHex.decoder().streamEncoder()).writeTo(new BytesBuilder());
             } catch (IOEncodingException e) {
                 error[0] = e.getCause().getMessage();

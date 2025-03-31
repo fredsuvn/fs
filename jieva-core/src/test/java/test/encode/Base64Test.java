@@ -169,7 +169,7 @@ public class Base64Test {
                 error[0] = null;
             }
             try {
-                JieIO.processor(s.getBytes(JieChars.latinCharset())).readBlockSize(1)
+                JieIO.processBytes(s.getBytes(JieChars.latinCharset())).readBlockSize(1)
                     .encoder(JieBase64.decoder().streamEncoder()).writeTo(new BytesBuilder());
             } catch (IOEncodingException e) {
                 error[0] = e.getCause().getMessage();
@@ -190,7 +190,7 @@ public class Base64Test {
                 error[0] = null;
             }
             try {
-                JieIO.processor(s.getBytes(JieChars.latinCharset())).readBlockSize(1)
+                JieIO.processBytes(s.getBytes(JieChars.latinCharset())).readBlockSize(1)
                     .encoder(JieBase64.decoder().streamEncoder()).writeTo(new BytesBuilder());
             } catch (IOEncodingException e) {
                 error[0] = e.getCause().getMessage();
@@ -211,7 +211,7 @@ public class Base64Test {
                 error[0] = null;
             }
             try {
-                JieIO.processor(s.getBytes(JieChars.latinCharset())).readBlockSize(1)
+                JieIO.processBytes(s.getBytes(JieChars.latinCharset())).readBlockSize(1)
                     .encoder(JieBase64.decoder().streamEncoder()).writeTo(new BytesBuilder());
             } catch (IOEncodingException e) {
                 error[0] = e.getCause().getMessage();

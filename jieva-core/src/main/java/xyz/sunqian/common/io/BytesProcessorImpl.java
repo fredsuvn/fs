@@ -204,10 +204,10 @@ final class BytesProcessorImpl implements BytesProcessor {
             return new OutputSteamBufferOut((OutputStream) dst);
         }
         if (dst instanceof byte[]) {
-            return new OutputSteamBufferOut(JieIO.outputStream((byte[]) dst));
+            return new OutputSteamBufferOut(JieIO.outStream((byte[]) dst));
         }
         if (dst instanceof ByteBuffer) {
-            return new OutputSteamBufferOut(JieIO.outputStream((ByteBuffer) dst));
+            return new OutputSteamBufferOut(JieIO.outStream((ByteBuffer) dst));
         }
         throw new IORuntimeException("Unexpected destination type: " + dst.getClass());
     }
@@ -234,7 +234,8 @@ final class BytesProcessorImpl implements BytesProcessor {
     private interface BufferIn {
 
         /*
-         * Note if the return buffer is non-null, it must be non-empty.
+         * Returns null if reaches the end of the input.
+         * If the returned buffer is non-null, then it is definitely non-empty.
          */
         @Nullable
         ByteBuffer read() throws Exception;
@@ -261,7 +262,8 @@ final class BytesProcessorImpl implements BytesProcessor {
         }
 
         /*
-         * Note if the return buffer is non-null, it must be non-empty.
+         * Returns null if reaches the end of the input.
+         * If the returned buffer is non-null, then it is definitely non-empty.
          */
         @Nullable
         private ByteBuffer read() {
@@ -531,7 +533,7 @@ final class BytesProcessorImpl implements BytesProcessor {
 
         public int read(byte[] dst, int off, int len) throws IOException {
             checkClosed();
-            IOMisc.checkReadBounds(dst, off, len);
+            IOBack.checkReadBounds(dst, off, len);
             if (len <= 0) {
                 return 0;
             }

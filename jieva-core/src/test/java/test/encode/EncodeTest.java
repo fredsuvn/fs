@@ -86,7 +86,7 @@ public class EncodeTest {
         {
             // stream
             BytesBuilder bb = new BytesBuilder();
-            long c = JieIO.processor(source).encoder(blockSize, encoder.streamEncoder()).writeTo(bb);
+            long c = JieIO.processBytes(source).encoder(blockSize, encoder.streamEncoder()).writeTo(bb);
             if (source.length == 0) {
                 assertEquals(c, 0);
             } else {
@@ -175,7 +175,7 @@ public class EncodeTest {
         {
             // stream
             BytesBuilder bb = new BytesBuilder();
-            long c = JieIO.processor(source).encoder(blockSize, decoder.streamEncoder()).writeTo(bb);
+            long c = JieIO.processBytes(source).encoder(blockSize, decoder.streamEncoder()).writeTo(bb);
             if (source.length == 0) {
                 assertEquals(c, 0);
             } else {

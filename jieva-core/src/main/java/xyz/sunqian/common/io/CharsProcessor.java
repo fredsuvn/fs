@@ -35,65 +35,6 @@ import java.nio.charset.Charset;
 public interface CharsProcessor {
 
     /**
-     * Returns a new {@link CharsProcessor} with specified data source.
-     *
-     * @param source specified data source
-     * @return a new {@link CharsProcessor}
-     */
-    static CharsProcessor from(Reader source) {
-        return new CharsProcessorImpl(source);
-    }
-
-    /**
-     * Returns a new {@link CharsProcessor} with specified data source.
-     *
-     * @param source specified data source
-     * @return a new {@link CharsProcessor}
-     */
-    static CharsProcessor from(char[] source) {
-        return new CharsProcessorImpl(source);
-    }
-
-    /**
-     * Returns a new {@link CharsProcessor} with specified data source, starting from the start index up to the
-     * specified length.
-     *
-     * @param source specified data source
-     * @param offset start index
-     * @param length specified length
-     * @return a new {@link CharsProcessor}
-     * @throws IndexOutOfBoundsException thrown bounds problem
-     */
-    static CharsProcessor from(char[] source, int offset, int length) throws IndexOutOfBoundsException {
-        IOMisc.checkReadBounds(source, offset, length);
-        if (offset == 0 && length == source.length) {
-            return from(source);
-        }
-        CharBuffer buffer = CharBuffer.wrap(source, offset, length);
-        return from(buffer);
-    }
-
-    /**
-     * Returns a new {@link CharsProcessor} with specified data source.
-     *
-     * @param source specified data source
-     * @return a new {@link CharsProcessor}
-     */
-    static CharsProcessor from(CharBuffer source) {
-        return new CharsProcessorImpl(source);
-    }
-
-    /**
-     * Returns a new {@link CharsProcessor} with specified data source.
-     *
-     * @param source specified data source
-     * @return a new {@link CharsProcessor}
-     */
-    static CharsProcessor from(CharSequence source) {
-        return new CharsProcessorImpl(source);
-    }
-
-    /**
      * Sets maximum number of chars to read from data source. This can be -1, meaning read until the end, which is the
      * default value.
      * <p>
@@ -378,7 +319,7 @@ public interface CharsProcessor {
      * @return a new {@link CharsProcessor} converted from this char processor with specified charset
      */
     default BytesProcessor toByteProcessor(Charset charset) {
-        return BytesProcessor.from(JieIO.inputStream(toReader(), charset));
+        return JieIO.processBytes(JieIO.inStream(toReader(), charset));
     }
 
     /**

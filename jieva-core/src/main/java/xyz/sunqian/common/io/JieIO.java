@@ -1,7 +1,7 @@
 package xyz.sunqian.common.io;
 
-import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.JieChars;
+import xyz.sunqian.common.coll.JieArray;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -10,26 +10,27 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 
 /**
- * This is a static utilities class provides utilities for {@code IO} operations.
+ * Static utility class for {@code IO} operations.
  *
- * @author fresduvn
+ * @author sunqian
  */
 public class JieIO {
 
     /**
-     * Default IO buffer size: 1024 * 8 = 8192.
+     * The default IO buffer size: 1024 * 8 = 8192.
      */
     public static final int BUFFER_SIZE = 1024 * 8;
 
+    //---------------- Common Start ----------------//
+
     /**
-     * Reads all bytes from source stream into an array. Returns the array, or null if no data read out and reaches to
-     * the end of stream.
+     * Reads all data from the source stream into a new array, continuing until the end of the stream, and returns the
+     * array.
      *
-     * @param source source stream
-     * @return the array, or null if no data read out and reaches to the end of stream
-     * @throws IORuntimeException IO runtime exception
+     * @param source the source stream
+     * @return the array containing the data
+     * @throws IORuntimeException if an {@code IO} error occurs
      */
-    @Nullable
     public static byte[] read(InputStream source) throws IORuntimeException {
         try {
             int available = source.available();
@@ -37,26 +38,26 @@ public class JieIO {
                 byte[] bytes = new byte[available];
                 int c = source.read(bytes);
                 if (c == -1) {
-                    return null;
+                    return new byte[0];
                 }
                 if (c == available) {
                     int r = source.read();
                     if (r == -1) {
                         return bytes;
                     } else {
-                        ByteArrayOutputStream dest = new ByteArrayOutputStream(available + 1);
-                        dest.write(bytes);
-                        dest.write(r);
-                        readTo(source, dest);
-                        return dest.toByteArray();
+                        BytesBuilder builder = new BytesBuilder(available + 1);
+                        builder.append(bytes);
+                        builder.append(r);
+                        readTo(source, builder);
+                        return builder.toByteArray();
                     }
                 } else {
                     return Arrays.copyOf(bytes, c);
                 }
             } else {
-                ByteArrayOutputStream dest = new ByteArrayOutputStream();
-                long num = readTo(source, dest);
-                return num < 0 ? null : dest.toByteArray();
+                BytesBuilder builder = new BytesBuilder();
+                readTo(source, builder);
+                return builder.toByteArray();
             }
         } catch (IOException e) {
             throw new IORuntimeException(e);
@@ -64,19 +65,16 @@ public class JieIO {
     }
 
     /**
-     * Reads specified number of bytes from source stream into an array. Returns the array, or null if no data read out
-     * and reaches to the end of stream.
-     * <p>
-     * If the number &lt; 0, read all as {@link #read(InputStream)}; els if the number is 0, no read and return an empty
-     * array; else this method will keep reading until the read number reaches to the specified number, or the reading
-     * reaches the end of the stream.
+     * Reads the specified number of data from the source stream into a new array, and returns the array. If
+     * {@code number < 0}, this method performs as {@link #read(InputStream)}. If {@code number == 0}, returns an empty
+     * array without reading. Otherwise, this method keeps reading until the read number reaches the specified number or
+     * the end of the stream has been reached.
      *
-     * @param source source stream
-     * @param number specified number
-     * @return the array, or null if no data read out and reaches to the end of stream
-     * @throws IORuntimeException IO runtime exception
+     * @param source the source stream
+     * @param number the specified number
+     * @return the array containing the data
+     * @throws IORuntimeException if an {@code IO} error occurs
      */
-    @Nullable
     public static byte[] read(InputStream source, int number) throws IORuntimeException {
         try {
             if (number < 0) {
@@ -87,7 +85,7 @@ public class JieIO {
             }
             int b = source.read();
             if (b == -1) {
-                return null;
+                return new byte[0];
             }
             byte[] dest = new byte[number];
             dest[0] = (byte) b;
@@ -108,86 +106,125 @@ public class JieIO {
     }
 
     /**
-     * Reads all chars from source reader into a string. Returns the string, or null if no data read out and reaches to
-     * the end of reader.
+     * Reads all data from the source reader into a new array, continuing until the end of the reader, and returns the
+     * array.
      *
-     * @param source source reader
-     * @return the string, or null if no data read out and reaches to the end of reader
-     * @throws IORuntimeException IO runtime exception
+     * @param source the source reader
+     * @return the array containing the data
+     * @throws IORuntimeException if an {@code IO} error occurs
      */
-    @Nullable
-    public static String read(Reader source) throws IORuntimeException {
-        StringBuilder dest = new StringBuilder();
-        long readCount = readTo(source, dest);
-        if (readCount == -1) {
-            return null;
+    public static char[] read(Reader source) throws IORuntimeException {
+        CharsBuilder builder = new CharsBuilder();
+        readTo(source, builder);
+        return builder.toCharArray();
+    }
+
+    /**
+     * Reads the specified number of data from the source reader into a new array, and returns the array. If
+     * {@code number < 0}, this method performs as {@link #read(Reader)}. If {@code number == 0}, returns an empty array
+     * without reading. Otherwise, this method keeps reading until the read number reaches the specified number or the
+     * end of the reader has been reached.
+     *
+     * @param source the source reader
+     * @param number the specified number
+     * @return the array containing the data
+     * @throws IORuntimeException if an {@code IO} error occurs
+     */
+    public static char[] read(Reader source, int number) throws IORuntimeException {
+        try {
+            if (number < 0) {
+                return read(source);
+            }
+            if (number == 0) {
+                return new char[0];
+            }
+            int b = source.read();
+            if (b == -1) {
+                return new char[0];
+            }
+            char[] dest = new char[number];
+            dest[0] = (char) b;
+            int remaining = number - 1;
+            int offset = 1;
+            while (remaining > 0) {
+                int readSize = source.read(dest, offset, remaining);
+                if (readSize < 0) {
+                    return Arrays.copyOfRange(dest, 0, number - remaining);
+                }
+                remaining -= readSize;
+                offset += readSize;
+            }
+            return dest;
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
         }
-        return dest.toString();
     }
 
     /**
-     * Reads specified number of chars from source reader into a string. Returns the string, or null if no data read out
-     * and reaches to the end of reader.
-     * <p>
-     * If the number &lt; 0, read all as {@link #read(Reader)}; els if the number is 0, no read and return an empty
-     * array; else this method will keep reading until the read number reaches to the specified number, or the reading
-     * reaches the end of the reader.
+     * Reads all data from the source reader into a string, continuing until the end of the reader, and returns the
+     * string.
      *
-     * @param source source reader
-     * @param number specified number
-     * @return the string, or null if no data read out and reaches to the end of reader
-     * @throws IORuntimeException IO runtime exception
+     * @param source the source reader
+     * @return the string containing the data
+     * @throws IORuntimeException if an {@code IO} error occurs
      */
-    @Nullable
-    public static String read(Reader source, int number) throws IORuntimeException {
-        StringBuilder dest = new StringBuilder();
-        long readCount = CharsProcessor.from(source).readLimit(number).writeTo(dest);
-        if (readCount == -1) {
-            return null;
-        }
-        return dest.toString();
+    public static String string(Reader source) throws IORuntimeException {
+        StringBuilder builder = new StringBuilder();
+        readTo(source, builder);
+        return builder.toString();
     }
 
     /**
-     * Reads all bytes from source stream into a string with {@link JieChars#defaultCharset()}. Returns the string, or
-     * null if no data read out and reaches to the end of stream.
+     * Reads the specified number of data from the source reader into a string, and returns the string. If
+     * {@code number < 0}, this method performs as {@link #string(Reader)}. If {@code number == 0}, returns an empty
+     * array without reading. Otherwise, this method keeps reading until the read number reaches the specified number or
+     * the end of the reader has been reached.
      *
-     * @param source source stream
-     * @return the string, or null if no data read out and reaches to the end of stream
-     * @throws IORuntimeException IO runtime exception
+     * @param source the source reader
+     * @param number the specified number
+     * @return the array containing the data
+     * @throws IORuntimeException if an {@code IO} error occurs
      */
-    @Nullable
-    public static String readString(InputStream source) throws IORuntimeException {
-        return readString(source, JieChars.defaultCharset());
+    public static String string(Reader source, int number) throws IORuntimeException {
+        StringBuilder builder = new StringBuilder();
+        processChars(source).readLimit(number).writeTo(builder);
+        return builder.toString();
     }
 
     /**
-     * Reads all bytes from source stream into a string with specified charset. Returns the string, or null if no data
-     * read out and reaches to the end of stream.
+     * Reads all bytes from the source stream and returns them as a string with {@link JieChars#defaultCharset()}.
      *
-     * @param source  source stream
-     * @param charset specified charset
-     * @return the string, or null if no data read out and reaches to the end of stream
-     * @throws IORuntimeException IO runtime exception
+     * @param source the source stream
+     * @return the string
+     * @throws IORuntimeException if an {@code IO} error occurs
      */
-    @Nullable
-    public static String readString(InputStream source, Charset charset) throws IORuntimeException {
+    public static String string(InputStream source) throws IORuntimeException {
+        return string(source, JieChars.defaultCharset());
+    }
+
+    /**
+     * Reads all bytes from the source stream and returns them as a string with the specified charset.
+     *
+     * @param source  the source stream
+     * @param charset the specified charset
+     * @return the string
+     * @throws IORuntimeException if an {@code IO} error occurs
+     */
+    public static String string(InputStream source, Charset charset) throws IORuntimeException {
         byte[] bytes = read(source);
-        if (bytes == null) {
-            return null;
+        if (JieArray.isEmpty(bytes)) {
+            return "";
         }
         return new String(bytes, charset);
     }
 
     /**
-     * Reads available bytes from source stream into an array. Returns the array, or null if no data read out and
-     * reaches to the end of stream.
+     * Reads available data from the source stream into a new array and returns the array.
      *
-     * @param source source stream
-     * @return the array, or null if no data read out and reaches to the end of stream
-     * @throws IORuntimeException IO runtime exception
+     * @param source the source stream
+     * @return the array containing the data
+     * @throws IORuntimeException if an {@code IO} error occurs
      */
-    @Nullable
     public static byte[] available(InputStream source) throws IORuntimeException {
         try {
             int available = source.available();
@@ -195,7 +232,7 @@ public class JieIO {
                 byte[] bytes = new byte[available];
                 int c = source.read(bytes);
                 if (c == -1) {
-                    return null;
+                    return new byte[0];
                 }
                 if (c == available) {
                     return bytes;
@@ -205,48 +242,42 @@ public class JieIO {
             if (available == 0) {
                 byte[] b = new byte[1];
                 int readSize = source.read(b);
-                if (readSize == -1) {
-                    return null;
-                }
-                if (readSize == 0) {
+                if (readSize <= 0) {
                     return new byte[0];
                 }
                 return b;
             }
-            return null;
+            return new byte[0];
         } catch (Exception e) {
             throw new IORuntimeException(e);
         }
     }
 
     /**
-     * Reads available bytes from source stream into a string with {@link JieChars#defaultCharset()}. Returns the
-     * string, or null if no data read out and reaches to the end of stream.
+     * Reads available bytes from the source stream and returns them as a string with
+     * {@link JieChars#defaultCharset()}.
      *
-     * @param source source stream
-     * @return the string, or null if no data read out and reaches to the end of stream
-     * @throws IORuntimeException IO runtime exception
+     * @param source the source stream
+     * @return the string
+     * @throws IORuntimeException if an {@code IO} error occurs
      */
-    @Nullable
     public static String avalaibleString(InputStream source) throws IORuntimeException {
         return avalaibleString(source, JieChars.defaultCharset());
     }
 
     /**
-     * Reads available bytes from source stream into a string with specified charset. Returns the string, or null if no
-     * data read out and reaches to the end of stream.
+     * Reads available bytes from the source stream and returns them as a string with the specified charset.
      *
-     * @param source  source stream
-     * @param charset specified charset
-     * @return the string, or null if no data read out and reaches to the end of stream
-     * @throws IORuntimeException IO runtime exception
+     * @param source  the source stream
+     * @param charset the specified charset
+     * @return the string
+     * @throws IORuntimeException if an {@code IO} error occurs
      */
-    @Nullable
     public static String avalaibleString(InputStream source, Charset charset) throws IORuntimeException {
         try {
             byte[] bytes = available(source);
-            if (bytes == null) {
-                return null;
+            if (JieArray.isEmpty(bytes)) {
+                return "";
             }
             return new String(bytes, charset);
         } catch (Exception e) {
@@ -255,684 +286,620 @@ public class JieIO {
     }
 
     /**
-     * Reads bytes from source stream and writes them into dest array, returns actual read number. If the source has
-     * been ended and no data read out, return -1. This method is equivalent to ({@link BytesProcessor}):
-     * <pre>{@code
-     *     return (int) ByteStream.from(source).readLimit(dest.length).writeTo(dest);
-     * }</pre>
+     * Reads bytes from the source stream into the destination array, up to the array's capacity. Returns the number of
+     * bytes actually read. If no data is read out and the end of the stream has been reached, returns -1.
      *
-     * @param source source stream
-     * @param dest   dest array
-     * @return actual read number, or -1 if the source has been ended and no data read out
-     * @throws IORuntimeException IO runtime exception
-     * @see BytesProcessor
+     * @param source the source stream
+     * @param dest   the destination array
+     * @return the number of bytes actually read, or -1 if no data is read out and the end of the stream has been
+     * reached
+     * @throws IORuntimeException if an {@code IO} error occurs
      */
     public static int readTo(InputStream source, byte[] dest) throws IORuntimeException {
-        return (int) BytesProcessor.from(source).readLimit(dest.length).writeTo(dest);
+        return (int) processBytes(source).readLimit(dest.length).writeTo(dest);
     }
 
     /**
-     * Reads bytes from source stream and writes them into dest buffer, returns actual read number. If the source has
-     * been ended and no data read out, return -1. This method is equivalent to ({@link BytesProcessor}):
-     * <pre>{@code
-     *     return (int) ByteStream.from(source).readLimit(dest.remaining()).writeTo(dest);
-     * }</pre>
+     * Reads bytes from the source stream into the destination buffer, up to the buffer's remaining. Returns the number
+     * of bytes actually read. If no data is read out and the end of the stream has been reached, returns -1.
      *
-     * @param source source stream
-     * @param dest   dest buffer
-     * @return actual read number, or -1 if the source has been ended and no data read out
-     * @throws IORuntimeException IO runtime exception
-     * @see BytesProcessor
+     * @param source the source stream
+     * @param dest   the destination buffer
+     * @return the number of bytes actually read, or -1 if no data is read out and the end of the stream has been
+     * reached
+     * @throws IORuntimeException if an {@code IO} error occurs
      */
     public static int readTo(InputStream source, ByteBuffer dest) throws IORuntimeException {
-        return (int) BytesProcessor.from(source).readLimit(dest.remaining()).writeTo(dest);
+        return (int) processBytes(source).readLimit(dest.remaining()).writeTo(dest);
     }
 
     /**
-     * Reads bytes from source stream and writes them into dest stream, returns actual read number. If the source has
-     * been ended and no data read out, return -1. This method is equivalent to ({@link BytesProcessor}):
-     * <pre>{@code
-     *     return (int) ByteStream.from(source).writeTo(dest);
-     * }</pre>
+     * Reads bytes from the source stream into the destination output stream. Returns the number of bytes actually read.
+     * If no data is read out and the end of the source stream has been reached, returns -1.
      *
-     * @param source source stream
-     * @param dest   dest stream
-     * @return actual read number, or -1 if the source has been ended and no data read out
-     * @throws IORuntimeException IO runtime exception
-     * @see BytesProcessor
+     * @param source the source stream
+     * @param dest   the destination output stream
+     * @return the number of bytes actually read, or -1 if no data is read out and the end of the source stream has been
+     * reached
+     * @throws IORuntimeException if an {@code IO} error occurs
      */
     public static long readTo(InputStream source, OutputStream dest) throws IORuntimeException {
-        return (int) BytesProcessor.from(source).writeTo(dest);
+        return (int) processBytes(source).writeTo(dest);
     }
 
     /**
-     * Reads chars from source reader and writes them into dest array, returns actual read number. If the source has
-     * been ended and no data read out, return -1. This method is equivalent to ({@link CharsProcessor}):
-     * <pre>{@code
-     *     return (int) CharStream.from(source).readLimit(dest.length).writeTo(dest);
-     * }</pre>
+     * Reads bytes from the source reader into the destination array, up to the array's capacity. Returns the number of
+     * bytes actually read. If no data is read out and the end of the reader has been reached, returns -1.
      *
-     * @param source source reader
-     * @param dest   dest array
-     * @return actual read number, or -1 if the source has been ended and no data read out
-     * @throws IORuntimeException IO runtime exception
-     * @see CharsProcessor
+     * @param source the source reader
+     * @param dest   the destination array
+     * @return the number of bytes actually read, or -1 if no data is read out and the end of the reader has been
+     * reached
+     * @throws IORuntimeException if an {@code IO} error occurs
      */
     public static int readTo(Reader source, char[] dest) throws IORuntimeException {
-        return (int) CharsProcessor.from(source).readLimit(dest.length).writeTo(dest);
+        return (int) processChars(source).readLimit(dest.length).writeTo(dest);
     }
 
     /**
-     * Reads chars from source reader and writes them into dest buffer, returns actual read number. If the source has
-     * been ended and no data read out, return -1. This method is equivalent to ({@link CharsProcessor}):
-     * <pre>{@code
-     *     return (int) CharStream.from(source).readLimit(dest.remaining()).writeTo(dest);
-     * }</pre>
+     * Reads bytes from the source reader into the destination buffer, up to the buffer's remaining. Returns the number
+     * of bytes actually read. If no data is read out and the end of the reader has been reached, returns -1.
      *
-     * @param source source reader
-     * @param dest   dest buffer
-     * @return actual read number, or -1 if the source has been ended and no data read out
-     * @throws IORuntimeException IO runtime exception
-     * @see CharsProcessor
+     * @param source the source reader
+     * @param dest   the destination buffer
+     * @return the number of bytes actually read, or -1 if no data is read out and the end of the reader has been
+     * reached
+     * @throws IORuntimeException if an {@code IO} error occurs
      */
     public static int readTo(Reader source, CharBuffer dest) throws IORuntimeException {
-        return (int) CharsProcessor.from(source).readLimit(dest.remaining()).writeTo(dest);
+        return (int) processChars(source).readLimit(dest.remaining()).writeTo(dest);
     }
 
     /**
-     * Reads bytes from source reader and writes them into dest appendable, returns actual read number. If the source
-     * has been ended and no data read out, return -1. This method is equivalent to ({@link CharsProcessor}):
-     * <pre>{@code
-     *     return (int) CharStream.from(source).writeTo(dest);
-     * }</pre>
+     * Reads bytes from the source reader into the destination appender. Returns the number of bytes actually read. If
+     * no data is read out and the end of the reader has been reached, returns -1.
      *
-     * @param source source reader
-     * @param dest   dest appendable
-     * @return actual read number, or -1 if the source has been ended and no data read out
-     * @throws IORuntimeException IO runtime exception
-     * @see CharsProcessor
+     * @param source the source reader
+     * @param dest   the destination appender
+     * @return the number of bytes actually read, or -1 if no data is read out and the end of the reader has been
+     * reached
+     * @throws IORuntimeException if an {@code IO} error occurs
      */
     public static long readTo(Reader source, Appendable dest) throws IORuntimeException {
-        return (int) CharsProcessor.from(source).writeTo(dest);
+        return processChars(source).writeTo(dest);
+    }
+
+    //---------------- Common End ----------------//
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    //---------------- Wrappers Begin ----------------//
+
+    /**
+     * Wraps the given array as an {@link InputStream}. It supports mark/reset operations, and the close method does
+     * nothing.
+     *
+     * @param array the given array
+     * @return the given array as an {@link InputStream}
+     */
+    public static InputStream inStream(byte[] array) {
+        return IOBack.in(array);
     }
 
     /**
-     * Returns a new {@link BytesProcessor} with specified data source.
+     * Wraps the given array as an {@link InputStream} from the specified offset up to the specified length. It supports
+     * mark/reset operations, and the close method does nothing.
      *
-     * @param source specified data source
+     * @param array  the given array
+     * @param offset the specified offset
+     * @param length the specified length
+     * @return the given array as an {@link InputStream}
+     */
+    public static InputStream inStream(byte[] array, int offset, int length) {
+        return IOBack.in(array, offset, length);
+    }
+
+    /**
+     * Wraps the given buffer as an {@link InputStream}. It supports mark/reset operations, and the close method does
+     * nothing.
+     *
+     * @param buffer the given buffer
+     * @return the given buffer as an {@link InputStream}
+     */
+    public static InputStream inStream(ByteBuffer buffer) {
+        return IOBack.in(buffer);
+    }
+
+    /**
+     * Wraps the given random access file as an {@link InputStream} from the specified file pointer offset. It supports
+     * mark/reset operations by seek methods, and the close method will close the file. Any operation to the file will
+     * affect the stream.
+     *
+     * @param random the given random access file
+     * @param offset the specified file pointer offset
+     * @return the given random access file as an {@link InputStream}
+     * @throws IORuntimeException if an {@code IO} error occurs
+     */
+    public static InputStream inStream(RandomAccessFile random, long offset) throws IORuntimeException {
+        return IOBack.in(random, offset);
+    }
+
+    /**
+     * Wraps the given reader as an {@link InputStream} with {@link JieChars#defaultCharset()}. It supports mark/reset
+     * operations. The read position of the reader may not correspond to the position of the stream, and the close
+     * method will close both the reader and stream at their current positions.
+     *
+     * @param reader the given reader
+     * @return the given reader as an {@link InputStream}
+     */
+    public static InputStream inStream(Reader reader) {
+        return inStream(reader, JieChars.defaultCharset());
+    }
+
+    /**
+     * Wraps the given reader as an {@link InputStream} with the specified charset. It supports mark/reset operations.
+     * The read position of the reader may not correspond to the position of the stream, and the close method will close
+     * both the reader and stream at their current positions.
+     *
+     * @param reader  the given reader
+     * @param charset the specified charset
+     * @return the given reader as an {@link InputStream}
+     */
+    public static InputStream inStream(Reader reader, Charset charset) {
+        return IOBack.in(reader, charset);
+    }
+
+    /**
+     * Wraps the given array as an {@link Reader}. It supports mark/reset operations, and the close method does
+     * nothing.
+     *
+     * @param array the given array
+     * @return the given array as an {@link Reader}
+     */
+    public static Reader reader(char[] array) {
+        return IOBack.reader(array);
+    }
+
+    /**
+     * Wraps the given array as an {@link Reader} from the specified offset up to the specified length. It supports
+     * mark/reset operations, and the close method does nothing.
+     *
+     * @param array  the given array
+     * @param offset the specified offset
+     * @param length the specified length
+     * @return the given array as an {@link Reader}
+     */
+    public static Reader reader(char[] array, int offset, int length) {
+        return IOBack.reader(array, offset, length);
+    }
+
+    /**
+     * Wraps the given chars as an {@link Reader}. It supports mark/reset operations, and the close method does
+     * nothing.
+     *
+     * @param chars the given chars
+     * @return the given array as an {@link Reader}
+     */
+    public static Reader reader(CharSequence chars) {
+        return IOBack.reader(chars);
+    }
+
+    /**
+     * Wraps the given buffer as an {@link Reader}. It supports mark/reset operations, and the close method does
+     * nothing.
+     *
+     * @param buffer the given buffer
+     * @return the given buffer as an {@link Reader}
+     */
+    public static Reader reader(CharBuffer buffer) {
+        return IOBack.reader(buffer);
+    }
+
+    /**
+     * Wraps the given stream as an {@link Reader} with {@link JieChars#defaultCharset()}. It supports mark/reset
+     * operations. The read position of the stream may not correspond to the position of the reader, and the close
+     * method will close both the stream and reader at their current positions.
+     *
+     * @param stream the given stream
+     * @return the given stream as an {@link Reader}
+     */
+    public static Reader reader(InputStream stream) {
+        return reader(stream, JieChars.defaultCharset());
+    }
+
+    /**
+     * Wraps the given stream as an {@link Reader} with the specified charset. It supports mark/reset operations. The
+     * read position of the stream may not correspond to the position of the reader, and the close method will close
+     * both the stream and reader at their current positions.
+     *
+     * @param stream  the given stream
+     * @param charset the specified charset
+     * @return the given stream as an {@link Reader}
+     */
+    public static Reader reader(InputStream stream, Charset charset) {
+        return IOBack.reader(stream, charset);
+    }
+
+    /**
+     * Wraps the given array as an {@link OutputStream}. The close method does nothing.
+     *
+     * @param array the given array
+     * @return the given array as an {@link OutputStream}
+     */
+    public static OutputStream outStream(byte[] array) {
+        return IOBack.out(array);
+    }
+
+    /**
+     * Wraps the given array as an {@link OutputStream} from the specified offset up to the specified length. The close
+     * method does nothing.
+     *
+     * @param array  the given array
+     * @param offset the specified offset
+     * @param length the specified length
+     * @return the given array as an {@link OutputStream}
+     */
+    public static OutputStream outStream(byte[] array, int offset, int length) {
+        return IOBack.out(array, offset, length);
+    }
+
+    /**
+     * Wraps the given buffer as an {@link OutputStream}. The close method does nothing.
+     *
+     * @param buffer the given buffer
+     * @return the given buffer as an {@link OutputStream}
+     */
+    public static OutputStream outStream(ByteBuffer buffer) {
+        return IOBack.out(buffer);
+    }
+
+    /**
+     * Wraps the given random access file as an {@link OutputStream} from the specified file pointer offset. The close
+     * method will close the file. Any operation to the file will affect the stream.
+     *
+     * @param random the given random access file
+     * @param offset the specified file pointer offset
+     * @return the given random access file as an {@link OutputStream}
+     * @throws IORuntimeException if an {@code IO} error occurs
+     */
+    public static OutputStream outStream(RandomAccessFile random, long offset) throws IORuntimeException {
+        return IOBack.out(random, offset);
+    }
+
+    /**
+     * Wraps the given appender as an {@link OutputStream} with {@link JieChars#defaultCharset()}. The write position of
+     * the appender may not correspond to the position of the stream, and the close method will close both the appender
+     * and stream at their current positions.
+     *
+     * @param appender the given appender
+     * @return the given appender as an {@link OutputStream}
+     */
+    public static OutputStream outStream(Appendable appender) {
+        return outStream(appender, JieChars.defaultCharset());
+    }
+
+    /**
+     * Wraps the given appender as an {@link OutputStream} with the specified charset. The write position of the
+     * appender may not correspond to the position of the stream, and the close method will close both the appender and
+     * stream at their current positions.
+     *
+     * @param appender the given appender
+     * @param charset  the specified charset
+     * @return the given appender as an {@link OutputStream}
+     */
+    public static OutputStream outStream(Appendable appender, Charset charset) {
+        return IOBack.out(appender, charset);
+    }
+
+    /**
+     * Wraps the given array as an {@link Writer}. The close method does nothing.
+     *
+     * @param array the given array
+     * @return the given array as an {@link Writer}
+     */
+    public static Writer writer(char[] array) {
+        return IOBack.writer(array);
+    }
+
+    /**
+     * Wraps the given array as an {@link Writer} from the specified offset up to the specified length. The close method
+     * does nothing.
+     *
+     * @param array  the given array
+     * @param offset the specified offset
+     * @param length the specified length
+     * @return the given array as an {@link Writer}
+     */
+    public static Writer writer(char[] array, int offset, int length) {
+        return IOBack.writer(array, offset, length);
+    }
+
+    /**
+     * Wraps the given buffer as an {@link Writer}. The close method does nothing.
+     *
+     * @param buffer the given buffer
+     * @return the given array as an {@link Writer}
+     */
+    public static Writer writer(CharBuffer buffer) {
+        return IOBack.writer(buffer);
+    }
+
+    /**
+     * Wraps the given stream as an {@link Writer} with {@link JieChars#defaultCharset()}. The write position of the
+     * stream may not correspond to the position of the writer, and the close method will close both the stream and
+     * writer at their current positions.
+     *
+     * @param stream the given stream
+     * @return the given appender as an {@link Writer}
+     */
+    public static Writer writer(OutputStream stream) {
+        return writer(stream, JieChars.defaultCharset());
+    }
+
+    /**
+     * Wraps the given stream as an {@link Writer} with the specified charset. The write position of the stream may not
+     * correspond to the position of the writer, and the close method will close both the stream and writer at their
+     * current positions.
+     *
+     * @param stream  the given stream
+     * @param charset the specified charset
+     * @return the given appender as an {@link Writer}
+     */
+    public static Writer writer(OutputStream stream, Charset charset) {
+        return IOBack.writer(stream, charset);
+    }
+
+    /**
+     * Returns an empty {@link InputStream}.
+     *
+     * @return an empty {@link InputStream}
+     */
+    public static InputStream emptyInStream() {
+        return IOBack.in();
+    }
+
+    /**
+     * Returns an empty {@link Reader}.
+     *
+     * @return an empty {@link Reader}
+     */
+    public static Reader emptyReader() {
+        return IOBack.reader();
+    }
+
+    /**
+     * Returns an {@link OutputStream} that infinitely accepts data but immediately discards them.
+     *
+     * @return an {@link OutputStream} that infinitely accepts data but immediately discards them
+     */
+    public static OutputStream nullOutStream() {
+        return IOBack.out();
+    }
+
+    /**
+     * Returns an {@link Writer} that infinitely accepts data but immediately discards them.
+     *
+     * @return an {@link Writer} that infinitely accepts data but immediately discards them
+     */
+    public static Writer nullWriter() {
+        return IOBack.writer();
+    }
+
+    //---------------- Wrappers End ----------------//
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    //---------------- Processors Begin ----------------//
+
+    /**
+     * Returns a new {@link BytesProcessor} to process the specified data.
+     *
+     * @param data the specified data
      * @return a new {@link BytesProcessor}
      */
-    public static BytesProcessor processor(InputStream source) {
-        return BytesProcessor.from(source);
+    public static BytesProcessor processBytes(InputStream data) {
+        return new BytesProcessorImpl(data);
     }
 
     /**
-     * Returns a new {@link BytesProcessor} with specified data source.
+     * Returns a new {@link BytesProcessor} to process the specified data.
      *
-     * @param source specified data source
+     * @param data the specified data
      * @return a new {@link BytesProcessor}
      */
-    public static BytesProcessor processor(byte[] source) {
-        return BytesProcessor.from(source);
+    public static BytesProcessor processBytes(byte[] data) {
+        return new BytesProcessorImpl(data);
     }
 
     /**
-     * Returns a new {@link BytesProcessor} with specified data source, starting from the start index up to the
-     * specified length.
+     * Returns a new {@link BytesProcessor} to process the specified data from the specified offset up to the specified
+     * length.
      *
-     * @param source specified data source
-     * @param offset start index
-     * @param length specified length
+     * @param data   the specified data
+     * @param offset the specified offset
+     * @param length the specified length
      * @return a new {@link BytesProcessor}
-     * @throws IndexOutOfBoundsException thrown bounds problem
+     * @throws IndexOutOfBoundsException if an index is out of bounds
      */
-    public static BytesProcessor processor(byte[] source, int offset, int length) throws IndexOutOfBoundsException {
-        return BytesProcessor.from(source, offset, length);
+    public static BytesProcessor processBytes(byte[] data, int offset, int length) throws IndexOutOfBoundsException {
+        IOBack.checkReadBounds(data, offset, length);
+        if (offset == 0 && length == data.length) {
+            return processBytes(data);
+        }
+        ByteBuffer buffer = ByteBuffer.wrap(data, offset, length);
+        return processBytes(buffer);
     }
 
     /**
-     * Returns a new {@link BytesProcessor} with specified data source.
+     * Returns a new {@link BytesProcessor} to process the specified data.
      *
-     * @param source specified data source
+     * @param data the specified data
      * @return a new {@link BytesProcessor}
      */
-    public static BytesProcessor processor(ByteBuffer source) {
-        return BytesProcessor.from(source);
+    public static BytesProcessor processBytes(ByteBuffer data) {
+        return new BytesProcessorImpl(data);
     }
 
     /**
-     * Returns a new {@link CharsProcessor} with specified data source.
+     * Returns a new {@link CharsProcessor} to process the specified data.
      *
-     * @param source specified data source
+     * @param data the specified data
      * @return a new {@link CharsProcessor}
      */
-    public static CharsProcessor processor(Reader source) {
-        return CharsProcessor.from(source);
+    public static CharsProcessor processChars(Reader data) {
+        return new CharsProcessorImpl(data);
     }
 
     /**
-     * Returns a new {@link CharsProcessor} with specified data source.
+     * Returns a new {@link CharsProcessor} to process the specified data.
      *
-     * @param source specified data source
+     * @param data the specified data
      * @return a new {@link CharsProcessor}
      */
-    public static CharsProcessor processor(char[] source) {
-        return CharsProcessor.from(source);
+    public static CharsProcessor processChars(char[] data) {
+        return new CharsProcessorImpl(data);
     }
 
     /**
-     * Returns a new {@link CharsProcessor} with specified data source, starting from the start index up to the
-     * specified length.
+     * Returns a new {@link CharsProcessor} to process the specified data from the specified offset up to the specified
+     * length.
      *
-     * @param source specified data source
-     * @param offset start index
-     * @param length specified length
+     * @param data   the specified data
+     * @param offset the specified offset
+     * @param length the specified length
      * @return a new {@link CharsProcessor}
-     * @throws IndexOutOfBoundsException thrown bounds problem
+     * @throws IndexOutOfBoundsException if an index is out of bounds
      */
-    public static CharsProcessor processor(char[] source, int offset, int length) throws IndexOutOfBoundsException {
-        return CharsProcessor.from(source, offset, length);
+    public static CharsProcessor processChars(char[] data, int offset, int length) throws IndexOutOfBoundsException {
+        IOBack.checkReadBounds(data, offset, length);
+        if (offset == 0 && length == data.length) {
+            return processChars(data);
+        }
+        CharBuffer buffer = CharBuffer.wrap(data, offset, length);
+        return processChars(buffer);
     }
 
     /**
-     * Returns a new {@link CharsProcessor} with specified data source.
+     * Returns a new {@link CharsProcessor} to process the specified data.
      *
-     * @param source specified data source
-     * @return a new {@link CharsProcessor}
-     */
-    public static CharsProcessor processor(CharBuffer source) {
-        return CharsProcessor.from(source);
-    }
-
-    /**
-     * Returns a new {@link CharsProcessor} with specified data source.
-     *
-     * @param source specified data source
+     * @param data the specified data
      * @return a new {@link CharsProcessor}
      */
-    public static CharsProcessor processor(CharSequence source) {
-        return CharsProcessor.from(source);
+    public static CharsProcessor processChars(CharBuffer data) {
+        return new CharsProcessorImpl(data);
     }
 
     /**
-     * Returns a new {@link BytesProcessor.Encoder} that guarantees a specified fixed-size data is passed to the given
-     * encoder in each invocation, it is typically used for the encoder which requires consuming data of fixed-size.
+     * Returns a new {@link CharsProcessor} to process the specified data.
+     *
+     * @param data the specified data
+     * @return a new {@link CharsProcessor}
+     */
+    public static CharsProcessor processChars(CharSequence data) {
+        return new CharsProcessorImpl(data);
+    }
+
+    /**
+     * Returns a {@link BytesProcessor.Encoder} that wraps the given encoder to encode data in fixed-size blocks. The
+     * returned encoder splits incoming data into blocks of the specified block size, and for each block, it
+     * sequentially calls the given encoder, passing the block as the data parameter. If incoming data is insufficient
+     * to form a full block, it is buffered until enough data is received to form a full block.
      * <p>
-     * Note in last invocation (where the {@code end} is {@code true}), size of remainder data may be smaller than
-     * specified fixed-size.
-     * <p>
-     * This encoder is not thread-safe.
+     * In the last invocation (when {@code end == true}) of the returned encoder, even if the remainder data after
+     * splitting is insufficient to form a full block, it will still be passed to the given encoder as the last block,
+     * and this call is the given encoder's last invocation.
      *
-     * @param size    specified fixed-size
-     * @param encoder given encoder
-     * @return a new {@link BytesProcessor.Encoder} that guarantees a specified fixed-size data is passed to the given
-     * encoder in each invocation
+     * @param size    the specified block size
+     * @param encoder the given encoder
+     * @return a new {@link BytesProcessor.Encoder} that wraps the given encoder to encode data in fixed-size blocks
      */
     public static BytesProcessor.Encoder fixedSizeEncoder(int size, BytesProcessor.Encoder encoder) {
         return new BytesProcessorImpl.FixedSizeEncoder(encoder, size);
     }
 
     /**
-     * Returns a new {@link BytesProcessor.Encoder} to round input data for given encoder, it is typically used for the
-     * encoder which requires consuming data in multiples of specified size.
+     * Returns a {@link BytesProcessor.Encoder} to round down incoming data for the given encoder, it is typically used
+     * for the encoder which requires consuming data in multiples of the specified size. The returned encoder rounds
+     * down incoming data to the largest multiple of the specified size and passes the rounded data to the given
+     * encoder. The remainder data will be buffered until enough data is received to round.
      * <p>
-     * This encoder rounds input data (possibly following buffered data from the previous invocation) to the largest
-     * multiple of specified size and passes the rounded data to the given encoder. Any remainder data will be buffered
-     * and used in the next invocation. However, in the last invocation (where the {@code end} is {@code true}), all
-     * data (buffered data followed by input data) will be passed directly to the given encoder.
-     * <p>
-     * This encoder is not thread-safe.
+     * However, in the last invocation (when {@code end == true}), all remaining data will be passed directly to the
+     * given encoder.
      *
-     * @param size    specified size
-     * @param encoder given encoder
-     * @return a new {@link BytesProcessor.Encoder} to round input data for given encoder
+     * @param size    the specified size
+     * @param encoder the given encoder
+     * @return a {@link BytesProcessor.Encoder} to round down incoming data for the given encoder
      */
     public static BytesProcessor.Encoder roundEncoder(int size, BytesProcessor.Encoder encoder) {
         return new BytesProcessorImpl.RoundEncoder(encoder, size);
     }
 
     /**
-     * Returns a new {@link BytesProcessor.Encoder} that buffers remaining data for given encoder, it is typically used
-     * for the encoder which may not fully consume current passed data, requires buffering and consuming data in next
-     * invocation.
+     * Returns a {@link BytesProcessor.Encoder} that buffers unconsumed data of the given encoder, it is typically used
+     * for the encoder which may not fully consume the passed data, requires buffering and consuming data in next
+     * invocation. This encoder passes incoming data to the given encoder. The unconsumed remaining data after encoding
+     * of the given encoder will be buffered and used in the next invocation.
      * <p>
-     * This encoder passes input data (possibly following buffered data from the previous invocation) to the given
-     * encoder. Any remaining data after encoding of given encoder will be buffered and used in the next invocation.
-     * However, in the last invocation (where the {@code end} is {@code true}), no data will be buffered.
-     * <p>
-     * This encoder is not thread-safe.
+     * However, in the last invocation (when {@code end == true}), no data will be buffered.
      *
-     * @param encoder given encoder
-     * @return a new {@link BytesProcessor.Encoder} that buffers remaining data for given encoder
+     * @param encoder the given encoder
+     * @return a {@link BytesProcessor.Encoder} that buffers unconsumed data of the given encoder
      */
     public static BytesProcessor.Encoder bufferedEncoder(BytesProcessor.Encoder encoder) {
         return new BytesProcessorImpl.BufferedEncoder(encoder);
     }
 
     /**
-     * Returns a new {@link CharsProcessor.Encoder} that guarantees a specified fixed-size data is passed to the given
-     * encoder in each invocation, it is typically used for the encoder which requires consuming data of fixed-size.
+     * Returns a {@link CharsProcessor.Encoder} that wraps the given encoder to encode data in fixed-size blocks. The
+     * returned encoder splits incoming data into blocks of the specified block size, and for each block, it
+     * sequentially calls the given encoder, passing the block as the data parameter. If incoming data is insufficient
+     * to form a full block, it is buffered until enough data is received to form a full block.
      * <p>
-     * Note in last invocation (where the {@code end} is {@code true}), size of remainder data may be smaller than
-     * specified fixed-size.
-     * <p>
-     * This encoder is not thread-safe.
+     * In the last invocation (when {@code end == true}) of the returned encoder, even if the remainder data after
+     * splitting is insufficient to form a full block, it will still be passed to the given encoder as the last block,
+     * and this call is the given encoder's last invocation.
      *
-     * @param size    specified fixed-size
-     * @param encoder given encoder
-     * @return a new {@link CharsProcessor.Encoder} that guarantees a specified fixed-size data is passed to the given
-     * encoder in each invocation
+     * @param size    the specified block size
+     * @param encoder the given encoder
+     * @return a new {@link CharsProcessor.Encoder} that wraps the given encoder to encode data in fixed-size blocks
      */
     public static CharsProcessor.Encoder fixedSizeEncoder(int size, CharsProcessor.Encoder encoder) {
         return new CharsProcessorImpl.FixedSizeEncoder(encoder, size);
     }
 
     /**
-     * Returns a new {@link CharsProcessor.Encoder} to round input data for given encoder, it is typically used for the
-     * encoder which requires consuming data in multiples of specified size.
+     * Returns a {@link CharsProcessor.Encoder} to round down incoming data for the given encoder, it is typically used
+     * for the encoder which requires consuming data in multiples of the specified size. The returned encoder rounds
+     * down incoming data to the largest multiple of the specified size and passes the rounded data to the given
+     * encoder. The remainder data will be buffered until enough data is received to round.
      * <p>
-     * This encoder rounds input data (possibly following buffered data from the previous invocation) to the largest
-     * multiple of specified size and passes the rounded data to the given encoder. Any remainder data will be buffered
-     * and used in the next invocation. However, in the last invocation (where the {@code end} is {@code true}), all
-     * data (buffered data followed by input data) will be passed directly to the given encoder.
-     * <p>
-     * This encoder is not thread-safe.
+     * However, in the last invocation (when {@code end == true}), all remaining data will be passed directly to the
+     * given encoder.
      *
-     * @param size    specified size
-     * @param encoder given encoder
-     * @return a new {@link CharsProcessor.Encoder} to round input data for given encoder
+     * @param size    the specified size
+     * @param encoder the given encoder
+     * @return a {@link CharsProcessor.Encoder} to round down incoming data for the given encoder
      */
     public static CharsProcessor.Encoder roundEncoder(int size, CharsProcessor.Encoder encoder) {
         return new CharsProcessorImpl.RoundEncoder(encoder, size);
     }
 
     /**
-     * Returns a new {@link CharsProcessor.Encoder} that buffers remaining data for given encoder, it is typically used
-     * for the encoder which may not fully consume current passed data, requires buffering and consuming data in next
-     * invocation.
+     * Returns a {@link CharsProcessor.Encoder} that buffers unconsumed data of the given encoder, it is typically used
+     * for the encoder which may not fully consume the passed data, requires buffering and consuming data in next
+     * invocation. This encoder passes incoming data to the given encoder. The unconsumed remaining data after encoding
+     * of the given encoder will be buffered and used in the next invocation.
      * <p>
-     * This encoder passes input data (possibly following buffered data from the previous invocation) to the given
-     * encoder. Any remaining data after encoding of given encoder will be buffered and used in the next invocation.
-     * However, in the last invocation (where the {@code end} is {@code true}), no data will be buffered.
-     * <p>
-     * This encoder is not thread-safe.
+     * However, in the last invocation (when {@code end == true}), no data will be buffered.
      *
-     * @param encoder given encoder
-     * @return a new {@link CharsProcessor.Encoder} that buffers remaining data for given encoder
+     * @param encoder the given encoder
+     * @return a {@link CharsProcessor.Encoder} that buffers unconsumed data of the given encoder
      */
     public static CharsProcessor.Encoder bufferedEncoder(CharsProcessor.Encoder encoder) {
         return new CharsProcessorImpl.BufferedEncoder(encoder);
     }
 
-    /**
-     * Wraps given array as an {@link InputStream}.
-     * <p>
-     * The returned stream is similar to {@link ByteArrayInputStream} but is not the same, its methods are not modified
-     * by {@code synchronized} thus do not guarantee thread safety. It also supports mark/reset operations, and the
-     * close method does nothing (similar to {@link ByteArrayInputStream}).
-     *
-     * @param array given array
-     * @return given array as an {@link InputStream}
-     */
-    public static InputStream inputStream(byte[] array) {
-        return InImpls.in(array);
-    }
-
-    /**
-     * Wraps given array as an {@link InputStream} from specified offset up to specified length.
-     * <p>
-     * The returned stream is similar to {@link ByteArrayInputStream} but is not the same, its methods are not modified
-     * by {@code synchronized} thus do not guarantee thread safety. It also supports mark/reset operations, and the
-     * close method does nothing (similar to {@link ByteArrayInputStream}).
-     *
-     * @param array  given array
-     * @param offset specified offset
-     * @param length specified length
-     * @return given array as an {@link InputStream}
-     */
-    public static InputStream inputStream(byte[] array, int offset, int length) {
-        return InImpls.in(array, offset, length);
-    }
-
-    /**
-     * Wraps given buffer as an {@link InputStream}.
-     * <p>
-     * Returned stream does not guarantee thread safety. It supports mark/reset operations, and the close method does
-     * nothing.
-     *
-     * @param buffer given buffer
-     * @return given buffer as an {@link InputStream}
-     */
-    public static InputStream inputStream(ByteBuffer buffer) {
-        return InImpls.in(buffer);
-    }
-
-    /**
-     * Wraps given random access file as an {@link InputStream} from specified initial file pointer.
-     * <p>
-     * Returned stream does not guarantee thread safety. It supports mark/reset operations, and first seeks to specified
-     * initial file pointer when creating the stream and re-seeks if calls reset method. The close method will close the
-     * file.
-     * <p>
-     * Note that if anything else seeks this file, it will affect this stream.
-     *
-     * @param random      given random access file
-     * @param initialSeek specified initial file pointer
-     * @return given random access file as an {@link InputStream}
-     * @throws IORuntimeException IO runtime exception
-     */
-    public static InputStream inputStream(RandomAccessFile random, long initialSeek) throws IORuntimeException {
-        return InImpls.in(random, initialSeek);
-    }
-
-    /**
-     * Wraps given reader as an {@link InputStream} with {@link JieChars#defaultCharset()}.
-     * <p>
-     * Returned stream does not guarantee thread safety. It does support mark/reset operations. The read position of the
-     * reader and stream may not correspond, the close method will close both reader and stream at their current
-     * positions.
-     *
-     * @param reader given reader
-     * @return given reader as an {@link InputStream}
-     */
-    public static InputStream inputStream(Reader reader) {
-        return inputStream(reader, JieChars.defaultCharset());
-    }
-
-    /**
-     * Wraps given reader as an {@link InputStream} with specified charset.
-     * <p>
-     * Returned stream does not guarantee thread safety. It does support mark/reset operations. The read position of the
-     * reader and stream may not correspond, the close method will close both reader and stream at their current
-     * positions.
-     *
-     * @param reader  given reader
-     * @param charset specified charset
-     * @return given reader as an {@link InputStream}
-     */
-    public static InputStream inputStream(Reader reader, Charset charset) {
-        return InImpls.in(reader, charset);
-    }
-
-    /**
-     * Wraps given array as an {@link Reader}.
-     * <p>
-     * The returned stream is similar to {@link CharArrayReader} but is not the same. Returned reader does not guarantee
-     * thread safety. It supports mark/reset operations, and the close method does nothing.
-     *
-     * @param array given array
-     * @return given array as an {@link Reader}
-     */
-    public static Reader reader(char[] array) {
-        return InImpls.reader(array);
-    }
-
-    /**
-     * Wraps given array as an {@link Reader} from specified offset up to specified length.
-     * <p>
-     * The returned stream is similar to {@link CharArrayReader} but is not the same. Returned reader does not guarantee
-     * thread safety. It supports mark/reset operations, and the close method does nothing.
-     *
-     * @param array  given array
-     * @param offset specified offset
-     * @param length specified length
-     * @return given array as an {@link Reader}
-     */
-    public static Reader reader(char[] array, int offset, int length) {
-        return InImpls.reader(array, offset, length);
-    }
-
-    /**
-     * Wraps given chars as an {@link Reader}.
-     * <p>
-     * The returned stream is similar to {@link StringReader} but is not the same. Returned reader does not guarantee
-     * thread safety. It supports mark/reset operations, and the close method does nothing.
-     *
-     * @param chars given chars
-     * @return given array as an {@link Reader}
-     */
-    public static Reader reader(CharSequence chars) {
-        return InImpls.reader(chars);
-    }
-
-    /**
-     * Wraps given buffer as an {@link Reader}.
-     * <p>
-     * Returned reader does not guarantee thread safety. It supports mark/reset operations, and the close method does
-     * nothing.
-     *
-     * @param buffer given buffer
-     * @return given buffer as an {@link Reader}
-     */
-    public static Reader reader(CharBuffer buffer) {
-        return InImpls.reader(buffer);
-    }
-
-    /**
-     * Wraps given stream as an {@link Reader} with {@link JieChars#defaultCharset()}.
-     * <p>
-     * The returned stream is similar to {@link InputStreamReader} but is not the same, its methods are not modified by
-     * {@code synchronized} thus do not guarantee thread safety. It does support mark/reset operations. The read
-     * position of the reader and stream may not correspond, the close method will close both reader and stream at their
-     * current positions.
-     *
-     * @param inputStream given stream
-     * @return given stream as an {@link Reader}
-     */
-    public static Reader reader(InputStream inputStream) {
-        return reader(inputStream, JieChars.defaultCharset());
-    }
-
-    /**
-     * Wraps given stream as an {@link Reader} with specified charset.
-     * <p>
-     * The returned stream is similar to {@link InputStreamReader} but is not the same, its methods are not modified by
-     * {@code synchronized} thus do not guarantee thread safety. It does support mark/reset operations. The read
-     * position of the reader and stream may not correspond, the close method will close both reader and stream at their
-     * current positions.
-     *
-     * @param inputStream given stream
-     * @param charset     specified charset
-     * @return given stream as an {@link Reader}
-     */
-    public static Reader reader(InputStream inputStream, Charset charset) {
-        return InImpls.reader(inputStream, charset);
-    }
-
-    /**
-     * Wraps given array as an {@link OutputStream}.
-     * <p>
-     * Returned stream does not guarantee thread safety, and the written data must not overflow the array. Close method
-     * does nothing.
-     *
-     * @param array given array
-     * @return given array as an {@link OutputStream}
-     */
-    public static OutputStream outputStream(byte[] array) {
-        return OutImpls.out(array);
-    }
-
-    /**
-     * Wraps given array as {@link OutputStream} from specified offset up to specified length.
-     * <p>
-     * Returned stream does not guarantee thread safety, and the written data must not overflow the array. Close method
-     * does nothing.
-     *
-     * @param array  given array
-     * @param offset specified offset
-     * @param length specified length
-     * @return given array as an {@link OutputStream}
-     */
-    public static OutputStream outputStream(byte[] array, int offset, int length) {
-        return OutImpls.out(array, offset, length);
-    }
-
-    /**
-     * Wraps given buffer as an {@link OutputStream}.
-     * <p>
-     * Returned stream does not guarantee thread safety, and the written data must not overflow the buffer. Close method
-     * does nothing.
-     *
-     * @param buffer given buffer
-     * @return given buffer as an {@link OutputStream}
-     */
-    public static OutputStream outputStream(ByteBuffer buffer) {
-        return OutImpls.out(buffer);
-    }
-
-    /**
-     * Wraps given random access file as an {@link OutputStream} from specified initial file pointer.
-     * <p>
-     * Returned stream does not guarantee thread safety. It first seeks to specified initial file pointer when creating
-     * the stream. The close method will close the file.
-     * <p>
-     * Note that if anything else seeks this file, it will affect this stream.
-     *
-     * @param random      given random access file
-     * @param initialSeek specified initial file pointer
-     * @return given random access file as an {@link OutputStream}
-     * @throws IORuntimeException IO runtime exception
-     */
-    public static OutputStream outputStream(RandomAccessFile random, long initialSeek) throws IORuntimeException {
-        return OutImpls.out(random, initialSeek);
-    }
-
-    /**
-     * Wraps given char appender as an {@link OutputStream} with {@link JieChars#defaultCharset()}.
-     * <p>
-     * Returned stream does not guarantee thread safety. The written position of the appender and stream may not
-     * correspond, the close method will close both appender and stream at their current positions.
-     *
-     * @param appender given char appender
-     * @return given char appender as an {@link OutputStream}
-     */
-    public static OutputStream outputStream(Appendable appender) {
-        return outputStream(appender, JieChars.defaultCharset());
-    }
-
-    /**
-     * Wraps given char appender as an {@link OutputStream} with specified charset.
-     * <p>
-     * Returned stream does not guarantee thread safety. The written position of the appender and stream may not
-     * correspond, the close method will close both appender and stream at their current positions.
-     *
-     * @param appender given char appender
-     * @param charset  specified charset
-     * @return given char appender as an {@link OutputStream}
-     */
-    public static OutputStream outputStream(Appendable appender, Charset charset) {
-        return OutImpls.out(appender, charset);
-    }
-
-    /**
-     * Wraps given array as an {@link Writer}.
-     * <p>
-     * Returned writer does not guarantee thread safety, and the written data must not overflow the buffer. Close method
-     * does nothing.
-     *
-     * @param array given array
-     * @return given array as an {@link Writer}
-     */
-    public static Writer writer(char[] array) {
-        return OutImpls.writer(array);
-    }
-
-    /**
-     * Wraps given array as {@link Writer} from specified offset up to specified length.
-     * <p>
-     * Returned writer does not guarantee thread safety, and the written data must not overflow the buffer. Close method
-     * does nothing.
-     *
-     * @param array  given array
-     * @param offset specified offset
-     * @param length specified length
-     * @return given array as an {@link Writer}
-     */
-    public static Writer writer(char[] array, int offset, int length) {
-        return OutImpls.writer(array, offset, length);
-    }
-
-    /**
-     * Wraps given buffer as an {@link Writer}.
-     * <p>
-     * Returned writer does not guarantee thread safety, and the written data must not overflow the buffer. Close method
-     * does nothing.
-     *
-     * @param buffer given buffer
-     * @return given buffer as an {@link Writer}
-     */
-    public static Writer writer(CharBuffer buffer) {
-        return OutImpls.writer(buffer);
-    }
-
-    /**
-     * Wraps given stream as an {@link Writer} with {@link JieChars#defaultCharset()}.
-     * <p>
-     * The returned stream is similar to {@link OutputStreamWriter} but is not the same, its methods are not modified by
-     * {@code synchronized} thus do not guarantee thread safety. The write position of the writer and stream may not
-     * correspond, the close method will close both writer and stream at their current positions.
-     *
-     * @param outputStream given stream
-     * @return given stream as an {@link Writer}
-     */
-    public static Writer writer(OutputStream outputStream) {
-        return writer(outputStream, JieChars.defaultCharset());
-    }
-
-    /**
-     * Wraps given stream as an {@link Writer} with specified charset.
-     * <p>
-     * The returned stream is similar to {@link OutputStreamWriter} but is not the same, its methods are not modified by
-     * {@code synchronized} thus do not guarantee thread safety. The write position of the writer and stream may not
-     * correspond, the close method will close both writer and stream at their current positions.
-     *
-     * @param outputStream given stream
-     * @param charset      specified charset
-     * @return given stream as an {@link Writer}
-     */
-    public static Writer writer(OutputStream outputStream, Charset charset) {
-        return OutImpls.writer(outputStream, charset);
-    }
-
-    /**
-     * Returns an empty input stream.
-     *
-     * @return an empty input stream
-     */
-    public static InputStream emptyInputStream() {
-        return EmptyInputStream.SINGLETON;
-    }
-
-    /**
-     * Returns an empty reader.
-     *
-     * @return an empty reader
-     */
-    public static Reader emptyReader() {
-        return EmptyReader.SINGLETON;
-    }
-
-    private static final class EmptyInputStream extends InputStream {
-
-        private static final EmptyInputStream SINGLETON = new EmptyInputStream();
-
-        @Override
-        public int read() {
-            return -1;
-        }
-    }
-
-    private static final class EmptyReader extends Reader {
-
-        private static final EmptyReader SINGLETON = new EmptyReader();
-
-        @Override
-        public int read(char[] cbuf, int off, int len) {
-            return -1;
-        }
-
-        @Override
-        public void close() {
-        }
-    }
+    //---------------- Processors End ----------------//
 }

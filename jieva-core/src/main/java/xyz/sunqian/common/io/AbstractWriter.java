@@ -78,7 +78,7 @@ public abstract class AbstractWriter extends Writer {
 
     @Override
     public void write(char[] cbuf, int off, int len) throws IOException {
-        IOMisc.checkReadBounds(cbuf, off, len);
+        IOBack.checkReadBounds(cbuf, off, len);
         if (len <= 0) {
             return;
         }
@@ -107,7 +107,7 @@ public abstract class AbstractWriter extends Writer {
 
     @Override
     public void write(String str, int off, int len) throws IOException {
-        IOMisc.checkReadBounds(str, off, len);
+        IOBack.checkReadBounds(str, off, len);
         if (len <= 0) {
             return;
         }
@@ -127,7 +127,7 @@ public abstract class AbstractWriter extends Writer {
     @Override
     public Writer append(@Nullable CharSequence csq, int start, int end) throws IOException {
         CharSequence cs = nonNull(csq);
-        IOMisc.checkReadBounds(cs, start, end - start);
+        IOBack.checkReadBounds(cs, start, end - start);
         if (start == end) {
             return this;
         }

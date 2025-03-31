@@ -266,7 +266,8 @@ final class CharsProcessorImpl implements CharsProcessor {
     private interface BufferIn {
 
         /*
-         * Note if the return buffer is non-null, it must be non-empty.
+         * Returns null if reaches the end of the input.
+         * If the returned buffer is non-null, then it is definitely non-empty.
          */
         @Nullable
         CharBuffer read() throws Exception;
@@ -293,7 +294,8 @@ final class CharsProcessorImpl implements CharsProcessor {
         }
 
         /*
-         * Note if the return buffer is non-null, it must be non-empty.
+         * Returns null if reaches the end of the input.
+         * If the returned buffer is non-null, then it is definitely non-empty.
          */
         @Nullable
         private CharBuffer read() {
@@ -614,7 +616,7 @@ final class CharsProcessorImpl implements CharsProcessor {
         @Override
         public int read(char[] dst, int off, int len) throws IOException {
             checkClosed();
-            IOMisc.checkReadBounds(dst, off, len);
+            IOBack.checkReadBounds(dst, off, len);
             if (len <= 0) {
                 return 0;
             }

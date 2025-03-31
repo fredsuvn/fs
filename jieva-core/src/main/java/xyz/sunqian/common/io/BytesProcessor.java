@@ -37,55 +37,6 @@ import java.nio.charset.Charset;
 public interface BytesProcessor {
 
     /**
-     * Returns a new {@link BytesProcessor} with specified data source.
-     *
-     * @param source specified data source
-     * @return a new {@link BytesProcessor}
-     */
-    static BytesProcessor from(InputStream source) {
-        return new BytesProcessorImpl(source);
-    }
-
-    /**
-     * Returns a new {@link BytesProcessor} with specified data source.
-     *
-     * @param source specified data source
-     * @return a new {@link BytesProcessor}
-     */
-    static BytesProcessor from(byte[] source) {
-        return new BytesProcessorImpl(source);
-    }
-
-    /**
-     * Returns a new {@link BytesProcessor} with specified data source, starting from the start index up to the
-     * specified length.
-     *
-     * @param source specified data source
-     * @param offset start index
-     * @param length specified length
-     * @return a new {@link BytesProcessor}
-     * @throws IndexOutOfBoundsException thrown bounds problem
-     */
-    static BytesProcessor from(byte[] source, int offset, int length) throws IndexOutOfBoundsException {
-        IOMisc.checkReadBounds(source, offset, length);
-        if (offset == 0 && length == source.length) {
-            return from(source);
-        }
-        ByteBuffer buffer = ByteBuffer.wrap(source, offset, length);
-        return from(buffer);
-    }
-
-    /**
-     * Returns a new {@link BytesProcessor} with specified data source.
-     *
-     * @param source specified data source
-     * @return a new {@link BytesProcessor}
-     */
-    static BytesProcessor from(ByteBuffer source) {
-        return new BytesProcessorImpl(source);
-    }
-
-    /**
      * Sets maximum number of bytes to read from data source. This can be -1, meaning read until the end, which is the
      * default value.
      * <p>
@@ -387,7 +338,7 @@ public interface BytesProcessor {
      * @return a new {@link CharsProcessor} converted from this byte processor with specified charset
      */
     default CharsProcessor toCharProcessor(Charset charset) {
-        return CharsProcessor.from(JieIO.reader(toInputStream(), charset));
+        return JieIO.processChars(JieIO.reader(toInputStream(), charset));
     }
 
     /**

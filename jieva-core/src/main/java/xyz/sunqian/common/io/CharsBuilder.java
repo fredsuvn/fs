@@ -96,7 +96,7 @@ public class CharsBuilder extends Writer implements CharSequence {
      * @see CharArrayWriter#write(char[], int, int)
      */
     public void write(char[] b, int off, int len) {
-        IOMisc.checkReadBounds(b, off, len);
+        IOBack.checkReadBounds(b, off, len);
         ensureCapacity(count + len);
         System.arraycopy(b, off, buf, count, len);
         count += len;
@@ -236,6 +236,17 @@ public class CharsBuilder extends Writer implements CharSequence {
             return maxSize;
         }
         return Math.max(newCapacity, minCapacity);
+    }
+
+    /**
+     * Appends a char into this builder.
+     *
+     * @param b a char
+     * @return this builder
+     */
+    public CharsBuilder append(int b) {
+        write(b);
+        return this;
     }
 
     /**

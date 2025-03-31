@@ -100,7 +100,7 @@ public class BytesBuilder extends OutputStream {
      */
     @Override
     public void write(byte[] b, int off, int len) {
-        IOMisc.checkReadBounds(b, off, len);
+        IOBack.checkReadBounds(b, off, len);
         ensureCapacity(count + len);
         System.arraycopy(b, off, buf, count, len);
         count += len;
@@ -256,6 +256,17 @@ public class BytesBuilder extends OutputStream {
             return maxSize;
         }
         return Math.max(newCapacity, minCapacity);
+    }
+
+    /**
+     * Appends a byte into this builder.
+     *
+     * @param b a byte
+     * @return this builder
+     */
+    public BytesBuilder append(int b) {
+        write(b);
+        return this;
     }
 
     /**

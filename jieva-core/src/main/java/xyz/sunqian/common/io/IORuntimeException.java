@@ -3,9 +3,9 @@ package xyz.sunqian.common.io;
 import java.io.IOException;
 
 /**
- * Runtime version of {@link IOException}.
+ * Runtime exception for {@link IOException}.
  *
- * @author fredsuvn
+ * @author sunqian
  */
 public class IORuntimeException extends RuntimeException {
 
@@ -41,5 +41,14 @@ public class IORuntimeException extends RuntimeException {
      */
     public IORuntimeException(Throwable cause) {
         super(cause);
+    }
+
+    /**
+     * Constructs with exception cause.
+     *
+     * @param cause exception cause
+     */
+    public IORuntimeException(IOException cause) {
+        this(cause.getMessage(), cause.getCause());
     }
 }
