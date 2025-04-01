@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.io.Writer;
 
 /**
- * This class is a skeletal implementation of the {@link Writer}, implementing these methods allows to quickly build a
- * new Writer:
+ * This class is a skeletal implementation for the {@link Writer}. The complete implementation is based on the following
+ * methods:
  * <ul>
  *     <li>{@link #doWrite(char)};</li>
  *     <li>{@link #doWrite(char[], int, int)};</li>
@@ -16,54 +16,54 @@ import java.io.Writer;
  *     <li>{@link #flush()};</li>
  *     <li>{@link #close()};</li>
  * </ul>
- * Don't need to worry about null pointers or boundary issues when implementing the above methods, as the underlying
- * methods being called already handle these checks.
+ * When implementing those methods, there is no need to consider null pointers or boundary issues, as relevant checks
+ * are done (If necessary) before invoking them.
  *
- * @author fredsuvn
+ * @author sunqian
  */
 public abstract class AbstractWriter extends Writer {
 
     /**
-     * Writes a char.
+     * Does write a char to this writer.
      *
-     * @param c a char
-     * @throws Exception may any exception
+     * @param c the char
+     * @throws Exception if any error occurs
      */
     protected abstract void doWrite(char c) throws Exception;
 
     /**
-     * Writes chars in given array from specified offset up to specified length.
+     * Does write the specified number of chars from the given array, starting at the specified offset.
      * <p>
-     * Null pointer or boundary issues are not considered when implementing this method.
+     * Null there is no need to consider null pointers or boundary issues.
      *
-     * @param cbuf given array
-     * @param off  specified offset
-     * @param len  specified length
-     * @throws Exception may any exception
+     * @param cbuf the given array
+     * @param off  the specified offset
+     * @param len  the specified number
+     * @throws Exception if any error occurs
      */
     protected abstract void doWrite(char[] cbuf, int off, int len) throws Exception;
 
     /**
-     * Writes chars in given string from specified offset up to specified length.
+     * Does write the specified number of chars from the given string, starting at the specified offset.
      * <p>
-     * Null pointer or boundary issues are not considered when implementing this method.
+     * Null there is no need to consider null pointers or boundary issues.
      *
-     * @param str given string
-     * @param off specified offset
-     * @param len specified length
-     * @throws Exception may any exception
+     * @param str the given string
+     * @param off the specified offset
+     * @param len the specified number
+     * @throws Exception if any error occurs
      */
     protected abstract void doWrite(String str, int off, int len) throws Exception;
 
     /**
-     * Writes chars in given char sequences from specified start index inclusive to end index exclusive.
+     * Does write the chars from the given char sequence, starting and ending at the specified indexes.
      * <p>
-     * Null pointer or boundary issues are not considered when implementing this method.
+     * Null there is no need to consider null pointers or boundary issues.
      *
-     * @param csq   given char sequences
+     * @param csq   the given char sequence
      * @param start specified start index inclusive
      * @param end   specified end index exclusive
-     * @throws Exception may any exception
+     * @throws Exception if any error occurs
      */
     protected abstract void doAppend(CharSequence csq, int start, int end) throws Exception;
 

@@ -367,8 +367,10 @@ public class JieIO {
     //---------------- Wrappers Begin ----------------//
 
     /**
-     * Wraps the given array as an {@link InputStream}. It supports mark/reset operations, and the close method does
-     * nothing.
+     * Wraps the given array as an {@link InputStream}. It supports mark/reset operations, but the {@code close()}
+     * method has no effect.
+     * <p>
+     * Note the returned wrapper itself does not guarantee thread safety.
      *
      * @param array the given array
      * @return the given array as an {@link InputStream}
@@ -379,7 +381,9 @@ public class JieIO {
 
     /**
      * Wraps the given array as an {@link InputStream} from the specified offset up to the specified length. It supports
-     * mark/reset operations, and the close method does nothing.
+     * mark/reset operations, but the {@code close()} method has no effect.
+     * <p>
+     * Note the returned wrapper itself does not guarantee thread safety.
      *
      * @param array  the given array
      * @param offset the specified offset
@@ -391,8 +395,10 @@ public class JieIO {
     }
 
     /**
-     * Wraps the given buffer as an {@link InputStream}. It supports mark/reset operations, and the close method does
-     * nothing.
+     * Wraps the given buffer as an {@link InputStream}. It supports mark/reset operations, but the {@code close()}
+     * method has no effect.
+     * <p>
+     * Note the returned wrapper itself does not guarantee thread safety.
      *
      * @param buffer the given buffer
      * @return the given buffer as an {@link InputStream}
@@ -403,8 +409,10 @@ public class JieIO {
 
     /**
      * Wraps the given random access file as an {@link InputStream} from the specified file pointer offset. It supports
-     * mark/reset operations by seek methods, and the close method will close the file. Any operation to the file will
-     * affect the stream.
+     * mark/reset operations, and the {@code close()} method will close both the file and stream. Any operation to the
+     * file will affect the stream.
+     * <p>
+     * Note the returned wrapper itself does not guarantee thread safety.
      *
      * @param random the given random access file
      * @param offset the specified file pointer offset
@@ -417,8 +425,10 @@ public class JieIO {
 
     /**
      * Wraps the given reader as an {@link InputStream} with {@link JieChars#defaultCharset()}. It supports mark/reset
-     * operations. The read position of the reader may not correspond to the position of the stream, and the close
-     * method will close both the reader and stream at their current positions.
+     * operations. The read position of the reader may not correspond to the position of the stream, and the
+     * {@code close()} method will close both the reader and stream at their current positions.
+     * <p>
+     * Note the returned wrapper itself does not guarantee thread safety.
      *
      * @param reader the given reader
      * @return the given reader as an {@link InputStream}
@@ -429,8 +439,10 @@ public class JieIO {
 
     /**
      * Wraps the given reader as an {@link InputStream} with the specified charset. It supports mark/reset operations.
-     * The read position of the reader may not correspond to the position of the stream, and the close method will close
-     * both the reader and stream at their current positions.
+     * The read position of the reader may not correspond to the position of the stream, and the close method will
+     * {@code close()} both the reader and stream at their current positions.
+     * <p>
+     * Note the returned wrapper itself does not guarantee thread safety.
      *
      * @param reader  the given reader
      * @param charset the specified charset
@@ -441,8 +453,10 @@ public class JieIO {
     }
 
     /**
-     * Wraps the given array as an {@link Reader}. It supports mark/reset operations, and the close method does
-     * nothing.
+     * Wraps the given array as an {@link Reader}. It supports mark/reset operations, but the {@code close()} method has
+     * no effect.
+     * <p>
+     * Note the returned wrapper itself does not guarantee thread safety.
      *
      * @param array the given array
      * @return the given array as an {@link Reader}
@@ -453,7 +467,9 @@ public class JieIO {
 
     /**
      * Wraps the given array as an {@link Reader} from the specified offset up to the specified length. It supports
-     * mark/reset operations, and the close method does nothing.
+     * mark/reset operations, but the {@code close()} method has no effect.
+     * <p>
+     * Note the returned wrapper itself does not guarantee thread safety.
      *
      * @param array  the given array
      * @param offset the specified offset
@@ -465,8 +481,10 @@ public class JieIO {
     }
 
     /**
-     * Wraps the given chars as an {@link Reader}. It supports mark/reset operations, and the close method does
-     * nothing.
+     * Wraps the given chars as an {@link Reader}. It supports mark/reset operations, but the {@code close()} method has
+     * no effect.
+     * <p>
+     * Note the returned wrapper itself does not guarantee thread safety.
      *
      * @param chars the given chars
      * @return the given array as an {@link Reader}
@@ -476,8 +494,10 @@ public class JieIO {
     }
 
     /**
-     * Wraps the given buffer as an {@link Reader}. It supports mark/reset operations, and the close method does
-     * nothing.
+     * Wraps the given buffer as an {@link Reader}. It supports mark/reset operations, but the {@code close()} method
+     * has no effect.
+     * <p>
+     * Note the returned wrapper itself does not guarantee thread safety.
      *
      * @param buffer the given buffer
      * @return the given buffer as an {@link Reader}
@@ -488,8 +508,10 @@ public class JieIO {
 
     /**
      * Wraps the given stream as an {@link Reader} with {@link JieChars#defaultCharset()}. It supports mark/reset
-     * operations. The read position of the stream may not correspond to the position of the reader, and the close
-     * method will close both the stream and reader at their current positions.
+     * operations. The read position of the stream may not correspond to the position of the reader, and the
+     * {@code close()} method will close both the stream and reader at their current positions.
+     * <p>
+     * Note the returned wrapper itself does not guarantee thread safety.
      *
      * @param stream the given stream
      * @return the given stream as an {@link Reader}
@@ -500,8 +522,10 @@ public class JieIO {
 
     /**
      * Wraps the given stream as an {@link Reader} with the specified charset. It supports mark/reset operations. The
-     * read position of the stream may not correspond to the position of the reader, and the close method will close
-     * both the stream and reader at their current positions.
+     * read position of the stream may not correspond to the position of the reader, and the {@code close()} method will
+     * close both the stream and reader at their current positions.
+     * <p>
+     * Note the returned wrapper itself does not guarantee thread safety.
      *
      * @param stream  the given stream
      * @param charset the specified charset
@@ -512,7 +536,9 @@ public class JieIO {
     }
 
     /**
-     * Wraps the given array as an {@link OutputStream}. The close method does nothing.
+     * Wraps the given array as an {@link OutputStream}. The {@code close()} method has no effect.
+     * <p>
+     * Note the returned wrapper itself does not guarantee thread safety.
      *
      * @param array the given array
      * @return the given array as an {@link OutputStream}
@@ -522,8 +548,10 @@ public class JieIO {
     }
 
     /**
-     * Wraps the given array as an {@link OutputStream} from the specified offset up to the specified length. The close
-     * method does nothing.
+     * Wraps the given array as an {@link OutputStream} from the specified offset up to the specified length. The
+     * {@code close()} method has no effect.
+     * <p>
+     * Note the returned wrapper itself does not guarantee thread safety.
      *
      * @param array  the given array
      * @param offset the specified offset
@@ -535,7 +563,9 @@ public class JieIO {
     }
 
     /**
-     * Wraps the given buffer as an {@link OutputStream}. The close method does nothing.
+     * Wraps the given buffer as an {@link OutputStream}. The {@code close()} method has no effect.
+     * <p>
+     * Note the returned wrapper itself does not guarantee thread safety.
      *
      * @param buffer the given buffer
      * @return the given buffer as an {@link OutputStream}
@@ -545,8 +575,10 @@ public class JieIO {
     }
 
     /**
-     * Wraps the given random access file as an {@link OutputStream} from the specified file pointer offset. The close
-     * method will close the file. Any operation to the file will affect the stream.
+     * Wraps the given random access file as an {@link OutputStream} from the specified file pointer offset. The
+     * {@code close()} method will close both the file and stream. Any operation to the file will affect the stream.
+     * <p>
+     * Note the returned wrapper itself does not guarantee thread safety.
      *
      * @param random the given random access file
      * @param offset the specified file pointer offset
@@ -559,8 +591,10 @@ public class JieIO {
 
     /**
      * Wraps the given appender as an {@link OutputStream} with {@link JieChars#defaultCharset()}. The write position of
-     * the appender may not correspond to the position of the stream, and the close method will close both the appender
-     * and stream at their current positions.
+     * the appender may not correspond to the position of the stream, and the {@code close()} method will close both the
+     * appender and stream at their current positions.
+     * <p>
+     * Note the returned wrapper itself does not guarantee thread safety.
      *
      * @param appender the given appender
      * @return the given appender as an {@link OutputStream}
@@ -571,8 +605,10 @@ public class JieIO {
 
     /**
      * Wraps the given appender as an {@link OutputStream} with the specified charset. The write position of the
-     * appender may not correspond to the position of the stream, and the close method will close both the appender and
-     * stream at their current positions.
+     * appender may not correspond to the position of the stream, and the {@code close()} method will close both the
+     * appender and stream at their current positions.
+     * <p>
+     * Note the returned wrapper itself does not guarantee thread safety.
      *
      * @param appender the given appender
      * @param charset  the specified charset
@@ -583,7 +619,9 @@ public class JieIO {
     }
 
     /**
-     * Wraps the given array as an {@link Writer}. The close method does nothing.
+     * Wraps the given array as an {@link Writer}. The {@code close()} method has no effect.
+     * <p>
+     * Note the returned wrapper itself does not guarantee thread safety.
      *
      * @param array the given array
      * @return the given array as an {@link Writer}
@@ -593,8 +631,10 @@ public class JieIO {
     }
 
     /**
-     * Wraps the given array as an {@link Writer} from the specified offset up to the specified length. The close method
-     * does nothing.
+     * Wraps the given array as an {@link Writer} from the specified offset up to the specified length. The
+     * {@code close()} method has no effect.
+     * <p>
+     * Note the returned wrapper itself does not guarantee thread safety.
      *
      * @param array  the given array
      * @param offset the specified offset
@@ -606,7 +646,9 @@ public class JieIO {
     }
 
     /**
-     * Wraps the given buffer as an {@link Writer}. The close method does nothing.
+     * Wraps the given buffer as an {@link Writer}. The {@code close()} method has no effect.
+     * <p>
+     * Note the returned wrapper itself does not guarantee thread safety.
      *
      * @param buffer the given buffer
      * @return the given array as an {@link Writer}
@@ -617,8 +659,10 @@ public class JieIO {
 
     /**
      * Wraps the given stream as an {@link Writer} with {@link JieChars#defaultCharset()}. The write position of the
-     * stream may not correspond to the position of the writer, and the close method will close both the stream and
-     * writer at their current positions.
+     * stream may not correspond to the position of the writer, and the {@code close()} method will close both the
+     * stream and writer at their current positions.
+     * <p>
+     * Note the returned wrapper itself does not guarantee thread safety.
      *
      * @param stream the given stream
      * @return the given appender as an {@link Writer}
@@ -629,8 +673,10 @@ public class JieIO {
 
     /**
      * Wraps the given stream as an {@link Writer} with the specified charset. The write position of the stream may not
-     * correspond to the position of the writer, and the close method will close both the stream and writer at their
-     * current positions.
+     * correspond to the position of the writer, and the {@code close()} method will close both the stream and writer at
+     * their current positions.
+     * <p>
+     * Note the returned wrapper itself does not guarantee thread safety.
      *
      * @param stream  the given stream
      * @param charset the specified charset
