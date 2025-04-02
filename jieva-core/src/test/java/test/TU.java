@@ -1,8 +1,8 @@
 package test;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.JieBytes;
-import xyz.sunqian.common.base.JieChars;
+import xyz.sunqian.common.base.bytes.JieBytes;
+import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.base.JieRandom;
 
 import java.nio.ByteBuffer;

@@ -1,7 +1,7 @@
 package xyz.sunqian.common.data;
 
 import xyz.sunqian.annotations.ThreadSafe;
-import xyz.sunqian.common.base.JieChars;
+import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.base.JieCheck;
 import xyz.sunqian.common.base.JieString;
 

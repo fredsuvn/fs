@@ -1,6 +1,7 @@
 package xyz.sunqian.common.io;
 
-import xyz.sunqian.common.base.JieBytes;
+import xyz.sunqian.common.base.JieCheck;
+import xyz.sunqian.common.base.bytes.JieBytes;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -87,7 +88,7 @@ public class BytesBuilder extends OutputStream {
      */
     @Override
     public void write(byte[] b, int off, int len) {
-        IOBack.checkReadBounds(b, off, len);
+        JieCheck.checkOffsetLength(b, off, len);
         ensureCapacity(count + len);
         System.arraycopy(b, off, buf, count, len);
         count += len;

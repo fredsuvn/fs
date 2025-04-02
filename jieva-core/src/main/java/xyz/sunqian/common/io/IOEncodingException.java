@@ -1,5 +1,8 @@
 package xyz.sunqian.common.io;
 
+import xyz.sunqian.common.base.bytes.BytesProcessor;
+import xyz.sunqian.common.base.chars.CharsProcessor;
+
 /**
  * This exception is used for IO encoding error, such as to wrap exceptions thrown from {@link BytesProcessor.Encoder}
  * or {@link CharsProcessor.Encoder}.

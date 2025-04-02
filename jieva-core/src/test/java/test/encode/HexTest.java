@@ -2,8 +2,9 @@ package test.encode;
 
 import org.apache.commons.codec.binary.Hex;
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.JieChars;
 import xyz.sunqian.common.base.JieRandom;
+import xyz.sunqian.common.base.bytes.JieBytes;
+import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.encode.DecodingException;
 import xyz.sunqian.common.encode.EncodingException;
 import xyz.sunqian.common.encode.JieHex;
@@ -89,7 +90,7 @@ public class HexTest {
                 error[0] = null;
             }
             try {
-                JieIO.processBytes(en).readBlockSize(1)
+                JieBytes.processor(en).readBlockSize(1)
                     .encoder(JieHex.decoder().streamEncoder()).writeTo(new BytesBuilder());
             } catch (IOEncodingException e) {
                 error[0] = e.getCause().getMessage();

@@ -1,6 +1,7 @@
 package xyz.sunqian.common.io;
 
-import xyz.sunqian.common.base.JieChars;
+import xyz.sunqian.common.base.bytes.JieBytes;
+import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.coll.JieArray;
 
 import java.io.*;
@@ -10,7 +11,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 
 /**
- * Static utility class for {@code IO} operations.
+ * Static utility class for I/O operations.
  *
  * @author sunqian
  */
@@ -55,7 +56,7 @@ public class JieIO {
                     return Arrays.copyOf(bytes, c);
                 }
             } else {
-                return processBytes(source).toByteArray();
+                return JieBytes.processor(source).toByteArray();
             }
         } catch (IOException e) {
             throw new IORuntimeException(e);
@@ -112,7 +113,7 @@ public class JieIO {
      * @throws IORuntimeException if an I/O error occurs
      */
     public static char[] read(Reader source) throws IORuntimeException {
-        return processChars(source).toCharArray();
+        return JieChars.processor(source).toCharArray();
     }
 
     /**
@@ -183,7 +184,7 @@ public class JieIO {
      */
     public static String string(Reader source, int number) throws IORuntimeException {
         StringBuilder builder = new StringBuilder();
-        processChars(source).readLimit(number).writeTo(builder);
+        JieChars.processor(source).readLimit(number).writeTo(builder);
         return builder.toString();
     }
 
@@ -291,7 +292,7 @@ public class JieIO {
      * @throws IORuntimeException if an I/O error occurs
      */
     public static int readTo(InputStream source, byte[] dest) throws IORuntimeException {
-        return (int) processBytes(source).readLimit(dest.length).writeTo(dest);
+        return (int) JieBytes.processor(source).readLimit(dest.length).writeTo(dest);
     }
 
     /**
@@ -304,7 +305,7 @@ public class JieIO {
      * @throws IORuntimeException if an I/O error occurs
      */
     public static int readTo(InputStream source, ByteBuffer dest) throws IORuntimeException {
-        return (int) processBytes(source).readLimit(dest.remaining()).writeTo(dest);
+        return (int) JieBytes.processor(source).readLimit(dest.remaining()).writeTo(dest);
     }
 
     /**
@@ -317,7 +318,7 @@ public class JieIO {
      * @throws IORuntimeException if an I/O error occurs
      */
     public static long readTo(InputStream source, OutputStream dest) throws IORuntimeException {
-        return (int) processBytes(source).writeTo(dest);
+        return JieBytes.processor(source).writeTo(dest);
     }
 
     /**
@@ -330,7 +331,7 @@ public class JieIO {
      * @throws IORuntimeException if an I/O error occurs
      */
     public static int readTo(Reader source, char[] dest) throws IORuntimeException {
-        return (int) processChars(source).readLimit(dest.length).writeTo(dest);
+        return (int) JieChars.processor(source).readLimit(dest.length).writeTo(dest);
     }
 
     /**
@@ -343,7 +344,7 @@ public class JieIO {
      * @throws IORuntimeException if an I/O error occurs
      */
     public static int readTo(Reader source, CharBuffer dest) throws IORuntimeException {
-        return (int) processChars(source).readLimit(dest.remaining()).writeTo(dest);
+        return (int) JieChars.processor(source).readLimit(dest.remaining()).writeTo(dest);
     }
 
     /**
@@ -356,7 +357,7 @@ public class JieIO {
      * @throws IORuntimeException if an I/O error occurs
      */
     public static long readTo(Reader source, Appendable dest) throws IORuntimeException {
-        return processChars(source).writeTo(dest);
+        return JieChars.processor(source).writeTo(dest);
     }
 
     //---------------- Common End ----------------//
@@ -376,7 +377,7 @@ public class JieIO {
      * @return the given array as an {@link InputStream}
      */
     public static InputStream inStream(byte[] array) {
-        return IOBack.in(array);
+        return Wrappers.in(array);
     }
 
     /**
@@ -391,7 +392,7 @@ public class JieIO {
      * @return the given array as an {@link InputStream}
      */
     public static InputStream inStream(byte[] array, int offset, int length) {
-        return IOBack.in(array, offset, length);
+        return Wrappers.in(array, offset, length);
     }
 
     /**
@@ -404,7 +405,7 @@ public class JieIO {
      * @return the given buffer as an {@link InputStream}
      */
     public static InputStream inStream(ByteBuffer buffer) {
-        return IOBack.in(buffer);
+        return Wrappers.in(buffer);
     }
 
     /**
@@ -420,7 +421,7 @@ public class JieIO {
      * @throws IORuntimeException if an I/O error occurs
      */
     public static InputStream inStream(RandomAccessFile random, long offset) throws IORuntimeException {
-        return IOBack.in(random, offset);
+        return Wrappers.in(random, offset);
     }
 
     /**
@@ -449,7 +450,7 @@ public class JieIO {
      * @return the given reader as an {@link InputStream}
      */
     public static InputStream inStream(Reader reader, Charset charset) {
-        return IOBack.in(reader, charset);
+        return Wrappers.in(reader, charset);
     }
 
     /**
@@ -462,7 +463,7 @@ public class JieIO {
      * @return the given array as an {@link Reader}
      */
     public static Reader reader(char[] array) {
-        return IOBack.reader(array);
+        return Wrappers.reader(array);
     }
 
     /**
@@ -477,7 +478,7 @@ public class JieIO {
      * @return the given array as an {@link Reader}
      */
     public static Reader reader(char[] array, int offset, int length) {
-        return IOBack.reader(array, offset, length);
+        return Wrappers.reader(array, offset, length);
     }
 
     /**
@@ -490,7 +491,7 @@ public class JieIO {
      * @return the given array as an {@link Reader}
      */
     public static Reader reader(CharSequence chars) {
-        return IOBack.reader(chars);
+        return Wrappers.reader(chars);
     }
 
     /**
@@ -503,7 +504,7 @@ public class JieIO {
      * @return the given buffer as an {@link Reader}
      */
     public static Reader reader(CharBuffer buffer) {
-        return IOBack.reader(buffer);
+        return Wrappers.reader(buffer);
     }
 
     /**
@@ -532,7 +533,7 @@ public class JieIO {
      * @return the given stream as an {@link Reader}
      */
     public static Reader reader(InputStream stream, Charset charset) {
-        return IOBack.reader(stream, charset);
+        return Wrappers.reader(stream, charset);
     }
 
     /**
@@ -544,7 +545,7 @@ public class JieIO {
      * @return the given array as an {@link OutputStream}
      */
     public static OutputStream outStream(byte[] array) {
-        return IOBack.out(array);
+        return Wrappers.out(array);
     }
 
     /**
@@ -559,7 +560,7 @@ public class JieIO {
      * @return the given array as an {@link OutputStream}
      */
     public static OutputStream outStream(byte[] array, int offset, int length) {
-        return IOBack.out(array, offset, length);
+        return Wrappers.out(array, offset, length);
     }
 
     /**
@@ -571,7 +572,7 @@ public class JieIO {
      * @return the given buffer as an {@link OutputStream}
      */
     public static OutputStream outStream(ByteBuffer buffer) {
-        return IOBack.out(buffer);
+        return Wrappers.out(buffer);
     }
 
     /**
@@ -586,7 +587,7 @@ public class JieIO {
      * @throws IORuntimeException if an I/O error occurs
      */
     public static OutputStream outStream(RandomAccessFile random, long offset) throws IORuntimeException {
-        return IOBack.out(random, offset);
+        return Wrappers.out(random, offset);
     }
 
     /**
@@ -615,7 +616,7 @@ public class JieIO {
      * @return the given appender as an {@link OutputStream}
      */
     public static OutputStream outStream(Appendable appender, Charset charset) {
-        return IOBack.out(appender, charset);
+        return Wrappers.out(appender, charset);
     }
 
     /**
@@ -627,7 +628,7 @@ public class JieIO {
      * @return the given array as an {@link Writer}
      */
     public static Writer writer(char[] array) {
-        return IOBack.writer(array);
+        return Wrappers.writer(array);
     }
 
     /**
@@ -642,7 +643,7 @@ public class JieIO {
      * @return the given array as an {@link Writer}
      */
     public static Writer writer(char[] array, int offset, int length) {
-        return IOBack.writer(array, offset, length);
+        return Wrappers.writer(array, offset, length);
     }
 
     /**
@@ -654,7 +655,7 @@ public class JieIO {
      * @return the given array as an {@link Writer}
      */
     public static Writer writer(CharBuffer buffer) {
-        return IOBack.writer(buffer);
+        return Wrappers.writer(buffer);
     }
 
     /**
@@ -683,7 +684,7 @@ public class JieIO {
      * @return the given appender as an {@link Writer}
      */
     public static Writer writer(OutputStream stream, Charset charset) {
-        return IOBack.writer(stream, charset);
+        return Wrappers.writer(stream, charset);
     }
 
     /**
@@ -692,7 +693,7 @@ public class JieIO {
      * @return an empty {@link InputStream}
      */
     public static InputStream emptyInStream() {
-        return IOBack.in();
+        return Wrappers.emptyIn();
     }
 
     /**
@@ -701,7 +702,7 @@ public class JieIO {
      * @return an empty {@link Reader}
      */
     public static Reader emptyReader() {
-        return IOBack.reader();
+        return Wrappers.emptyReader();
     }
 
     /**
@@ -710,7 +711,7 @@ public class JieIO {
      * @return an {@link OutputStream} that infinitely accepts data but immediately discards them
      */
     public static OutputStream nullOutStream() {
-        return IOBack.out();
+        return Wrappers.nullOut();
     }
 
     /**
@@ -719,223 +720,8 @@ public class JieIO {
      * @return an {@link Writer} that infinitely accepts data but immediately discards them
      */
     public static Writer nullWriter() {
-        return IOBack.writer();
+        return Wrappers.nullWriter();
     }
 
     //---------------- Wrappers End ----------------//
-
-    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
-    //---------------- Processors Begin ----------------//
-
-    /**
-     * Returns a new {@link BytesProcessor} to process the specified data.
-     *
-     * @param data the specified data
-     * @return a new {@link BytesProcessor}
-     */
-    public static BytesProcessor processBytes(InputStream data) {
-        return new BytesProcessorImpl(data);
-    }
-
-    /**
-     * Returns a new {@link BytesProcessor} to process the specified data.
-     *
-     * @param data the specified data
-     * @return a new {@link BytesProcessor}
-     */
-    public static BytesProcessor processBytes(byte[] data) {
-        return new BytesProcessorImpl(data);
-    }
-
-    /**
-     * Returns a new {@link BytesProcessor} to process the specified data from the specified offset up to the specified
-     * length.
-     *
-     * @param data   the specified data
-     * @param offset the specified offset
-     * @param length the specified length
-     * @return a new {@link BytesProcessor}
-     * @throws IndexOutOfBoundsException if an index is out of bounds
-     */
-    public static BytesProcessor processBytes(byte[] data, int offset, int length) throws IndexOutOfBoundsException {
-        IOBack.checkReadBounds(data, offset, length);
-        if (offset == 0 && length == data.length) {
-            return processBytes(data);
-        }
-        ByteBuffer buffer = ByteBuffer.wrap(data, offset, length);
-        return processBytes(buffer);
-    }
-
-    /**
-     * Returns a new {@link BytesProcessor} to process the specified data.
-     *
-     * @param data the specified data
-     * @return a new {@link BytesProcessor}
-     */
-    public static BytesProcessor processBytes(ByteBuffer data) {
-        return new BytesProcessorImpl(data);
-    }
-
-    /**
-     * Returns a new {@link CharsProcessor} to process the specified data.
-     *
-     * @param data the specified data
-     * @return a new {@link CharsProcessor}
-     */
-    public static CharsProcessor processChars(Reader data) {
-        return new CharsProcessorImpl(data);
-    }
-
-    /**
-     * Returns a new {@link CharsProcessor} to process the specified data.
-     *
-     * @param data the specified data
-     * @return a new {@link CharsProcessor}
-     */
-    public static CharsProcessor processChars(char[] data) {
-        return new CharsProcessorImpl(data);
-    }
-
-    /**
-     * Returns a new {@link CharsProcessor} to process the specified data from the specified offset up to the specified
-     * length.
-     *
-     * @param data   the specified data
-     * @param offset the specified offset
-     * @param length the specified length
-     * @return a new {@link CharsProcessor}
-     * @throws IndexOutOfBoundsException if an index is out of bounds
-     */
-    public static CharsProcessor processChars(char[] data, int offset, int length) throws IndexOutOfBoundsException {
-        IOBack.checkReadBounds(data, offset, length);
-        if (offset == 0 && length == data.length) {
-            return processChars(data);
-        }
-        CharBuffer buffer = CharBuffer.wrap(data, offset, length);
-        return processChars(buffer);
-    }
-
-    /**
-     * Returns a new {@link CharsProcessor} to process the specified data.
-     *
-     * @param data the specified data
-     * @return a new {@link CharsProcessor}
-     */
-    public static CharsProcessor processChars(CharBuffer data) {
-        return new CharsProcessorImpl(data);
-    }
-
-    /**
-     * Returns a new {@link CharsProcessor} to process the specified data.
-     *
-     * @param data the specified data
-     * @return a new {@link CharsProcessor}
-     */
-    public static CharsProcessor processChars(CharSequence data) {
-        return new CharsProcessorImpl(data);
-    }
-
-    /**
-     * Returns a {@link BytesProcessor.Encoder} that wraps the given encoder to encode data in fixed-size blocks. The
-     * returned encoder splits incoming data into blocks of the specified block size, and for each block, it
-     * sequentially calls the given encoder, passing the block as the data parameter. If incoming data is insufficient
-     * to form a full block, it is buffered until enough data is received to form a full block.
-     * <p>
-     * In the last invocation (when {@code end == true}) of the returned encoder, even if the remainder data after
-     * splitting is insufficient to form a full block, it will still be passed to the given encoder as the last block,
-     * and this call is the given encoder's last invocation.
-     *
-     * @param size    the specified block size
-     * @param encoder the given encoder
-     * @return a new {@link BytesProcessor.Encoder} that wraps the given encoder to encode data in fixed-size blocks
-     */
-    public static BytesProcessor.Encoder fixedSizeEncoder(int size, BytesProcessor.Encoder encoder) {
-        return new BytesProcessorImpl.FixedSizeEncoder(encoder, size);
-    }
-
-    /**
-     * Returns a {@link BytesProcessor.Encoder} to round down incoming data for the given encoder, it is typically used
-     * for the encoder which requires consuming data in multiples of the specified size. The returned encoder rounds
-     * down incoming data to the largest multiple of the specified size and passes the rounded data to the given
-     * encoder. The remainder data will be buffered until enough data is received to round.
-     * <p>
-     * However, in the last invocation (when {@code end == true}), all remaining data will be passed directly to the
-     * given encoder.
-     *
-     * @param size    the specified size
-     * @param encoder the given encoder
-     * @return a {@link BytesProcessor.Encoder} to round down incoming data for the given encoder
-     */
-    public static BytesProcessor.Encoder roundEncoder(int size, BytesProcessor.Encoder encoder) {
-        return new BytesProcessorImpl.RoundEncoder(encoder, size);
-    }
-
-    /**
-     * Returns a {@link BytesProcessor.Encoder} that buffers unconsumed data of the given encoder, it is typically used
-     * for the encoder which may not fully consume the passed data, requires buffering and consuming data in next
-     * invocation. This encoder passes incoming data to the given encoder. The unconsumed remaining data after encoding
-     * of the given encoder will be buffered and used in the next invocation.
-     * <p>
-     * However, in the last invocation (when {@code end == true}), no data will be buffered.
-     *
-     * @param encoder the given encoder
-     * @return a {@link BytesProcessor.Encoder} that buffers unconsumed data of the given encoder
-     */
-    public static BytesProcessor.Encoder bufferedEncoder(BytesProcessor.Encoder encoder) {
-        return new BytesProcessorImpl.BufferedEncoder(encoder);
-    }
-
-    /**
-     * Returns a {@link CharsProcessor.Encoder} that wraps the given encoder to encode data in fixed-size blocks. The
-     * returned encoder splits incoming data into blocks of the specified block size, and for each block, it
-     * sequentially calls the given encoder, passing the block as the data parameter. If incoming data is insufficient
-     * to form a full block, it is buffered until enough data is received to form a full block.
-     * <p>
-     * In the last invocation (when {@code end == true}) of the returned encoder, even if the remainder data after
-     * splitting is insufficient to form a full block, it will still be passed to the given encoder as the last block,
-     * and this call is the given encoder's last invocation.
-     *
-     * @param size    the specified block size
-     * @param encoder the given encoder
-     * @return a new {@link CharsProcessor.Encoder} that wraps the given encoder to encode data in fixed-size blocks
-     */
-    public static CharsProcessor.Encoder fixedSizeEncoder(int size, CharsProcessor.Encoder encoder) {
-        return new CharsProcessorImpl.FixedSizeEncoder(encoder, size);
-    }
-
-    /**
-     * Returns a {@link CharsProcessor.Encoder} to round down incoming data for the given encoder, it is typically used
-     * for the encoder which requires consuming data in multiples of the specified size. The returned encoder rounds
-     * down incoming data to the largest multiple of the specified size and passes the rounded data to the given
-     * encoder. The remainder data will be buffered until enough data is received to round.
-     * <p>
-     * However, in the last invocation (when {@code end == true}), all remaining data will be passed directly to the
-     * given encoder.
-     *
-     * @param size    the specified size
-     * @param encoder the given encoder
-     * @return a {@link CharsProcessor.Encoder} to round down incoming data for the given encoder
-     */
-    public static CharsProcessor.Encoder roundEncoder(int size, CharsProcessor.Encoder encoder) {
-        return new CharsProcessorImpl.RoundEncoder(encoder, size);
-    }
-
-    /**
-     * Returns a {@link CharsProcessor.Encoder} that buffers unconsumed data of the given encoder, it is typically used
-     * for the encoder which may not fully consume the passed data, requires buffering and consuming data in next
-     * invocation. This encoder passes incoming data to the given encoder. The unconsumed remaining data after encoding
-     * of the given encoder will be buffered and used in the next invocation.
-     * <p>
-     * However, in the last invocation (when {@code end == true}), no data will be buffered.
-     *
-     * @param encoder the given encoder
-     * @return a {@link CharsProcessor.Encoder} that buffers unconsumed data of the given encoder
-     */
-    public static CharsProcessor.Encoder bufferedEncoder(CharsProcessor.Encoder encoder) {
-        return new CharsProcessorImpl.BufferedEncoder(encoder);
-    }
-
-    //---------------- Processors End ----------------//
 }

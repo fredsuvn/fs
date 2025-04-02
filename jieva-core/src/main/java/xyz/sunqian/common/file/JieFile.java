@@ -1,6 +1,6 @@
 package xyz.sunqian.common.file;
 
-import xyz.sunqian.common.base.JieChars;
+import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.io.JieIO;
 
 import java.io.*;

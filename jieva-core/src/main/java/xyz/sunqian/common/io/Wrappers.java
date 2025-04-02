@@ -1,46 +1,14 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.JieCheck;
 
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.*;
 
-final class IOBack {
-
-    //---------------- Common Begin ----------------//
-
-    static void checkReadBounds(byte[] b, int off, int len) {
-        if (b == null) {
-            throw new NullPointerException();
-        } else if (off < 0 || len < 0 || len > b.length - off) {
-            throw new IndexOutOfBoundsException();
-        }
-    }
-
-    static void checkReadBounds(char[] b, int off, int len) {
-        if (b == null) {
-            throw new NullPointerException();
-        } else if (off < 0 || len < 0 || len > b.length - off) {
-            throw new IndexOutOfBoundsException();
-        }
-    }
-
-    static void checkReadBounds(CharSequence chars, int off, int len) {
-        if (chars == null) {
-            throw new NullPointerException();
-        } else if (off < 0 || len < 0 || len > chars.length() - off) {
-            throw new IndexOutOfBoundsException();
-        }
-    }
-
-    //---------------- Common End ----------------//
-
-    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
-    //---------------- Input Begin ----------------//
+final class Wrappers {
 
     static InputStream in(byte[] array) {
         return new BytesInputStream(array);
@@ -86,12 +54,60 @@ final class IOBack {
         return new BytesReader(inputStream, charset);
     }
 
-    static InputStream in() {
+    static InputStream emptyIn() {
         return EmptyInputStream.SINGLETON;
     }
 
-    static Reader reader() {
+    static Reader emptyReader() {
         return EmptyReader.SINGLETON;
+    }
+
+    static OutputStream out(byte[] array) {
+        return new BytesOutputStream(array);
+    }
+
+    static OutputStream out(byte[] array, int offset, int length) {
+        return new BytesOutputStream(array, offset, length);
+    }
+
+    static OutputStream out(ByteBuffer buffer) {
+        return new BufferOutputStream(buffer);
+    }
+
+    static OutputStream out(RandomAccessFile random, long initialSeek) throws IORuntimeException {
+        try {
+            return new RandomOutputStream(random, initialSeek);
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    static OutputStream out(Appendable appender, Charset charset) {
+        return new AppenderOutputStream(appender, charset);
+    }
+
+    static Writer writer(char[] array) {
+        return new BufferWriter(array);
+    }
+
+    static Writer writer(char[] array, int offset, int length) {
+        return new BufferWriter(array, offset, length);
+    }
+
+    static Writer writer(CharBuffer buffer) {
+        return new BufferWriter(buffer);
+    }
+
+    static Writer writer(OutputStream outputStream, Charset charset) {
+        return new BytesWriter(outputStream, charset);
+    }
+
+    static OutputStream nullOut() {
+        return NullOutputStream.SINGLETON;
+    }
+
+    static Writer nullWriter() {
+        return NullWriter.SINGLETON;
     }
 
     private static final class BytesInputStream extends InputStream {
@@ -106,7 +122,7 @@ final class IOBack {
         }
 
         BytesInputStream(byte[] buf, int offset, int length) {
-            IOBack.checkReadBounds(buf, offset, length);
+            JieCheck.checkOffsetLength(buf, offset, length);
             this.buf = buf;
             this.pos = offset;
             this.count = Math.min(offset + length, buf.length);
@@ -117,7 +133,7 @@ final class IOBack {
         }
 
         public int read(byte[] b, int off, int len) {
-            IOBack.checkReadBounds(b, off, len);
+            JieCheck.checkOffsetLength(b, off, len);
             if (len <= 0) {
                 return 0;
             }
@@ -193,7 +209,7 @@ final class IOBack {
 
         @Override
         public int read(byte[] b, int off, int len) throws IOException {
-            IOBack.checkReadBounds(b, off, len);
+            JieCheck.checkOffsetLength(b, off, len);
             if (len <= 0) {
                 return 0;
             }
@@ -305,7 +321,7 @@ final class IOBack {
 
         @Override
         public int read(byte[] b, int off, int len) throws IOException {
-            IOBack.checkReadBounds(b, off, len);
+            JieCheck.checkOffsetLength(b, off, len);
             checkClosed();
             if (len <= 0) {
                 return 0;
@@ -409,7 +425,7 @@ final class IOBack {
 
         @Override
         public int read(byte[] b, int off, int len) throws IOException {
-            IOBack.checkReadBounds(b, off, len);
+            JieCheck.checkOffsetLength(b, off, len);
             if (len <= 0) {
                 return 0;
             }
@@ -466,7 +482,7 @@ final class IOBack {
         }
 
         BufferReader(char[] cbuf, int offset, int length) {
-            IOBack.checkReadBounds(cbuf, offset, length);
+            JieCheck.checkOffsetLength(cbuf, offset, length);
             this.buffer = CharBuffer.wrap(cbuf, offset, length);
         }
 
@@ -496,7 +512,7 @@ final class IOBack {
 
         @Override
         public int read(char[] c, int off, int len) throws IOException {
-            IOBack.checkReadBounds(c, off, len);
+            JieCheck.checkOffsetLength(c, off, len);
             if (len <= 0) {
                 return 0;
             }
@@ -613,7 +629,7 @@ final class IOBack {
 
         @Override
         public int read(char[] c, int off, int len) throws IOException {
-            IOBack.checkReadBounds(c, off, len);
+            JieCheck.checkOffsetLength(c, off, len);
             checkClosed();
             if (len <= 0) {
                 return 0;
@@ -726,61 +742,6 @@ final class IOBack {
         }
     }
 
-    //---------------- Input End ----------------//
-
-    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
-    //---------------- Out Begin ----------------//
-
-    static OutputStream out(byte[] array) {
-        return new BytesOutputStream(array);
-    }
-
-    static OutputStream out(byte[] array, int offset, int length) {
-        return new BytesOutputStream(array, offset, length);
-    }
-
-    static OutputStream out(ByteBuffer buffer) {
-        return new BufferOutputStream(buffer);
-    }
-
-    static OutputStream out(RandomAccessFile random, long initialSeek) throws IORuntimeException {
-        try {
-            return new RandomOutputStream(random, initialSeek);
-        } catch (IOException e) {
-            throw new IORuntimeException(e);
-        }
-    }
-
-    static OutputStream out(Appendable appender, Charset charset) {
-        return new AppenderOutputStream(appender, charset);
-    }
-
-    static Writer writer(char[] array) {
-        return new BufferWriter(array);
-    }
-
-    static Writer writer(char[] array, int offset, int length) {
-        return new BufferWriter(array, offset, length);
-    }
-
-    static Writer writer(CharBuffer buffer) {
-        return new BufferWriter(buffer);
-    }
-
-    static Writer writer(OutputStream outputStream, Charset charset) {
-        return new BytesWriter(outputStream, charset);
-    }
-
-    static OutputStream out() {
-        return NullOutputStream.SINGLETON;
-    }
-
-    static Writer writer() {
-        return NullWriter.SINGLETON;
-    }
-
     private static final class BytesOutputStream extends OutputStream {
 
         private final byte[] buf;
@@ -792,7 +753,7 @@ final class IOBack {
         }
 
         BytesOutputStream(byte[] buf, int offset, int length) {
-            IOBack.checkReadBounds(buf, offset, length);
+            JieCheck.checkOffsetLength(buf, offset, length);
             this.buf = buf;
             this.end = offset + length;
             this.pos = offset;
@@ -809,7 +770,7 @@ final class IOBack {
 
         @Override
         public void write(byte[] b, int off, int len) throws IOException {
-            IOBack.checkReadBounds(b, off, len);
+            JieCheck.checkOffsetLength(b, off, len);
             if (len <= 0) {
                 return;
             }
@@ -840,7 +801,7 @@ final class IOBack {
 
         @Override
         public void write(byte[] b, int off, int len) throws IOException {
-            IOBack.checkReadBounds(b, off, len);
+            JieCheck.checkOffsetLength(b, off, len);
             if (len <= 0) {
                 return;
             }
@@ -896,7 +857,7 @@ final class IOBack {
 
         @Override
         public void write(byte[] b, int off, int len) throws IOException {
-            IOBack.checkReadBounds(b, off, len);
+            JieCheck.checkOffsetLength(b, off, len);
             checkClosed();
             if (len <= 0) {
                 return;
@@ -1015,7 +976,7 @@ final class IOBack {
 
         @Override
         public void write(byte[] b, int off, int len) throws IOException {
-            IOBack.checkReadBounds(b, off, len);
+            JieCheck.checkOffsetLength(b, off, len);
             if (len <= 0) {
                 return;
             }
@@ -1047,7 +1008,7 @@ final class IOBack {
         }
 
         BufferWriter(char[] cbuf, int offset, int length) {
-            IOBack.checkReadBounds(cbuf, offset, length);
+            JieCheck.checkOffsetLength(cbuf, offset, length);
             this.buffer = CharBuffer.wrap(cbuf, offset, length);
         }
 
@@ -1251,6 +1212,4 @@ final class IOBack {
         public void close() throws IOException {
         }
     }
-
-    //---------------- Out End ----------------//
 }

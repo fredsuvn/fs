@@ -1,20 +1,21 @@
-package xyz.sunqian.common.io;
+package xyz.sunqian.common.base.chars;
 
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.base.JieBytes;
-import xyz.sunqian.common.base.JieChars;
+import xyz.sunqian.common.base.JieCheck;
+import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.coll.JieArray;
+import xyz.sunqian.common.io.*;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
+import java.io.Reader;
+import java.io.Writer;
+import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-final class BytesProcessorImpl implements BytesProcessor {
+final class CharsProcessorImpl implements CharsProcessor {
 
     private final Object source;
     private Object dest;
@@ -23,26 +24,30 @@ final class BytesProcessorImpl implements BytesProcessor {
     private boolean endOnZeroRead = false;
     private List<Encoder> encoders;
 
-    BytesProcessorImpl(InputStream source) {
+    CharsProcessorImpl(Reader source) {
         this.source = source;
     }
 
-    BytesProcessorImpl(byte[] source) {
+    CharsProcessorImpl(char[] source) {
         this.source = source;
     }
 
-    BytesProcessorImpl(ByteBuffer source) {
+    CharsProcessorImpl(CharBuffer source) {
+        this.source = source;
+    }
+
+    CharsProcessorImpl(CharSequence source) {
         this.source = source;
     }
 
     @Override
-    public BytesProcessor readLimit(long readLimit) {
+    public CharsProcessor readLimit(long readLimit) {
         this.readLimit = readLimit;
         return this;
     }
 
     @Override
-    public BytesProcessor readBlockSize(int readBlockSize) {
+    public CharsProcessor readBlockSize(int readBlockSize) {
         if (readBlockSize <= 0) {
             throw new IORuntimeException("readBlockSize must > 0!");
         }
@@ -51,13 +56,13 @@ final class BytesProcessorImpl implements BytesProcessor {
     }
 
     @Override
-    public BytesProcessor endOnZeroRead(boolean endOnZeroRead) {
+    public CharsProcessor endOnZeroRead(boolean endOnZeroRead) {
         this.endOnZeroRead = endOnZeroRead;
         return this;
     }
 
     @Override
-    public BytesProcessor encoder(Encoder encoder) {
+    public CharsProcessor encoder(Encoder encoder) {
         if (encoders == null) {
             encoders = new ArrayList<>();
         }
@@ -66,24 +71,21 @@ final class BytesProcessorImpl implements BytesProcessor {
     }
 
     @Override
-    public long writeTo(OutputStream dest) {
+    public long writeTo(Appendable dest) {
         this.dest = dest;
         return start();
     }
 
     @Override
-    public long writeTo(byte[] dest) {
+    public long writeTo(char[] dest) {
         this.dest = dest;
         return start();
     }
 
     @Override
-    public long writeTo(byte[] dest, int offset, int length) {
-        if (offset == 0 && length == dest.length) {
-            return writeTo(dest);
-        }
+    public long writeTo(char[] dest, int offset, int length) {
         try {
-            this.dest = ByteBuffer.wrap(dest, offset, length);
+            this.dest = CharBuffer.wrap(dest, offset, length);
         } catch (Exception e) {
             throw new IORuntimeException(e);
         }
@@ -91,7 +93,7 @@ final class BytesProcessorImpl implements BytesProcessor {
     }
 
     @Override
-    public long writeTo(ByteBuffer dest) {
+    public long writeTo(CharBuffer dest) {
         this.dest = dest;
         return start();
     }
@@ -104,12 +106,12 @@ final class BytesProcessorImpl implements BytesProcessor {
 
     @Override
     public String toString() {
-        return toString(JieChars.defaultCharset());
+        return new String(toCharArray());
     }
 
     @Override
-    public InputStream toInputStream() {
-        return new StreamIn(toBufferIn(source));
+    public Reader toReader() {
+        return new ReaderIn(toBufferIn(source));
     }
 
     private long start() {
@@ -121,20 +123,24 @@ final class BytesProcessorImpl implements BytesProcessor {
         }
         try {
             if (encoders == null) {
-                if (source instanceof byte[]) {
-                    if (dest instanceof byte[]) {
-                        return bytesToBytes((byte[]) source, (byte[]) dest);
+                if (source instanceof char[]) {
+                    if (dest instanceof char[]) {
+                        return charsToChars((char[]) source, (char[]) dest);
                     }
-                    if (dest instanceof ByteBuffer) {
-                        return bytesToBuffer((byte[]) source, (ByteBuffer) dest);
+                    if (dest instanceof CharBuffer) {
+                        return charsToBuffer((char[]) source, (CharBuffer) dest);
                     }
-                } else if (source instanceof ByteBuffer) {
-                    if (dest instanceof byte[]) {
-                        return bufferToBytes((ByteBuffer) source, (byte[]) dest);
+                    return charsToAppender((char[]) source, (Appendable) dest);
+                } else if (source instanceof CharBuffer) {
+                    if (dest instanceof char[]) {
+                        return bufferToChars((CharBuffer) source, (char[]) dest);
                     }
-                    if (dest instanceof ByteBuffer) {
-                        return bufferToBuffer((ByteBuffer) source, (ByteBuffer) dest);
+                    return bufferToAppender((CharBuffer) source, (Appendable) dest);
+                } else if (source instanceof CharSequence) {
+                    if (dest instanceof char[]) {
+                        return charSeqToChars((CharSequence) source, (char[]) dest);
                     }
+                    return charSeqToAppender((CharSequence) source, (Appendable) dest);
                 }
             }
             return startInBlock();
@@ -145,30 +151,54 @@ final class BytesProcessorImpl implements BytesProcessor {
         }
     }
 
-    private long bytesToBytes(byte[] src, byte[] dst) {
+    private long charsToChars(char[] src, char[] dst) {
         int len = getDirectLen(src.length);
         System.arraycopy(src, 0, dst, 0, len);
         return len;
     }
 
-    private long bytesToBuffer(byte[] src, ByteBuffer dst) {
+    private long charsToBuffer(char[] src, CharBuffer dst) {
         int len = getDirectLen(src.length);
         dst.put(src, 0, len);
         return len;
     }
 
-    private long bufferToBytes(ByteBuffer src, byte[] dst) {
+    private long charsToAppender(char[] src, Appendable dst) throws IOException {
+        int len = getDirectLen(src.length);
+        dst.append(JieString.asChars(src, 0, len));
+        return len;
+    }
+
+    private long bufferToChars(CharBuffer src, char[] dst) {
         int len = getDirectLen(src.remaining());
         src.get(dst, 0, len);
         return len;
     }
 
-    private long bufferToBuffer(ByteBuffer src, ByteBuffer dst) {
+    private long bufferToAppender(CharBuffer src, Appendable dst) throws IOException {
         int len = getDirectLen(src.remaining());
-        ByteBuffer share = src.slice();
-        share.limit(len);
-        dst.put(share);
-        src.position(src.position() + len);
+        int pos = src.position();
+        int newPos = pos + len;
+        dst.append(src, 0, len);
+        src.position(newPos);
+        return len;
+    }
+
+    private long charSeqToChars(CharSequence src, char[] dst) throws IOException {
+        int len = getDirectLen(src.length());
+        if (src instanceof String) {
+            ((String) src).getChars(0, len, dst, 0);
+        } else {
+            for (int i = 0; i < len; i++) {
+                dst[i] = src.charAt(i);
+            }
+        }
+        return len;
+    }
+
+    private long charSeqToAppender(CharSequence src, Appendable dst) throws IOException {
+        int len = getDirectLen(src.length());
+        dst.append(src, 0, len);
         return len;
     }
 
@@ -184,14 +214,17 @@ final class BytesProcessorImpl implements BytesProcessor {
 
     private BufferIn toBufferIn(Object src) {
         int actualBlockSize = getActualBlockSize();
-        if (src instanceof InputStream) {
-            return new InputStreamBufferIn((InputStream) src, actualBlockSize);
+        if (src instanceof Reader) {
+            return new ReaderBufferIn((Reader) src, actualBlockSize);
         }
-        if (src instanceof byte[]) {
-            return new BytesBufferIn((byte[]) src, actualBlockSize);
+        if (src instanceof char[]) {
+            return new CharsBufferIn((char[]) src, actualBlockSize);
         }
-        if (src instanceof ByteBuffer) {
-            return new BufferBufferIn((ByteBuffer) src, actualBlockSize);
+        if (src instanceof CharBuffer) {
+            return new BufferBufferIn((CharBuffer) src, actualBlockSize);
+        }
+        if (src instanceof CharSequence) {
+            return new CharSeqBufferIn((CharSequence) src, actualBlockSize);
         }
         throw new IORuntimeException("Unexpected source type: " + src.getClass());
     }
@@ -200,14 +233,14 @@ final class BytesProcessorImpl implements BytesProcessor {
         if (dst instanceof BufferOut) {
             return (BufferOut) dst;
         }
-        if (dst instanceof OutputStream) {
-            return new OutputSteamBufferOut((OutputStream) dst);
+        if (dst instanceof char[]) {
+            return new AppendableBufferOut(CharBuffer.wrap((char[]) dst));
         }
-        if (dst instanceof byte[]) {
-            return new OutputSteamBufferOut(JieIO.outStream((byte[]) dst));
+        if (dst instanceof CharBuffer) {
+            return new AppendableBufferOut(JieIO.writer((CharBuffer) dst));
         }
-        if (dst instanceof ByteBuffer) {
-            return new OutputSteamBufferOut(JieIO.outStream((ByteBuffer) dst));
+        if (dst instanceof Appendable) {
+            return new AppendableBufferOut((Appendable) dst);
         }
         throw new IORuntimeException("Unexpected destination type: " + dst.getClass());
     }
@@ -222,7 +255,7 @@ final class BytesProcessorImpl implements BytesProcessor {
     private long readTo(BufferIn in, BufferOut out) throws Exception {
         EnReader enReader = new EnReader(in);
         while (true) {
-            ByteBuffer buffer = enReader.read();
+            CharBuffer buffer = enReader.read();
             if (buffer == null) {
                 break;
             }
@@ -238,11 +271,11 @@ final class BytesProcessorImpl implements BytesProcessor {
          * If the returned buffer is non-null, then it is definitely non-empty.
          */
         @Nullable
-        ByteBuffer read() throws Exception;
+        CharBuffer read() throws Exception;
     }
 
     private interface BufferOut {
-        void write(ByteBuffer buffer) throws Exception;
+        void write(CharBuffer buffer) throws Exception;
     }
 
     private final class EnReader {
@@ -251,7 +284,7 @@ final class BytesProcessorImpl implements BytesProcessor {
 
         // null:  break end;
         // empty: for last empty invocation
-        private ByteBuffer buffer;
+        private CharBuffer buffer;
         private long count = -1;
 
         // init when a terminal method has invoked
@@ -266,7 +299,7 @@ final class BytesProcessorImpl implements BytesProcessor {
          * If the returned buffer is non-null, then it is definitely non-empty.
          */
         @Nullable
-        private ByteBuffer read() {
+        private CharBuffer read() {
             try {
                 if (count == -1) {
                     buffer = in.read();
@@ -277,11 +310,11 @@ final class BytesProcessorImpl implements BytesProcessor {
                         return null;
                     }
                     Encoder encoder = getEncoder();
-                    ByteBuffer encoded;
+                    CharBuffer encoded;
                     if (!buffer.hasRemaining()) {
                         buffer = null;
-                        encoded = encode(encoder, JieBytes.emptyBuffer(), true);
-                        if (JieBytes.isEmpty(encoded)) {
+                        encoded = encode(encoder, JieChars.emptyBuffer(), true);
+                        if (JieChars.isEmpty(encoded)) {
                             continue;
                         }
                         return encoded;
@@ -295,10 +328,10 @@ final class BytesProcessorImpl implements BytesProcessor {
                         encoded = encode(encoder, buffer, false);
                         buffer = in.read();
                         if (buffer == null) {
-                            buffer = JieBytes.emptyBuffer();
+                            buffer = JieChars.emptyBuffer();
                         }
                     }
-                    if (JieBytes.isEmpty(encoded)) {
+                    if (JieChars.isEmpty(encoded)) {
                         continue;
                     }
                     return encoded;
@@ -328,19 +361,19 @@ final class BytesProcessorImpl implements BytesProcessor {
                 return null;
             }
             return (data, end) -> {
-                ByteBuffer bytes = data;
+                CharBuffer chars = data;
                 for (Encoder encoder : encoders) {
-                    bytes = encoder.encode(bytes, end);
-                    if (bytes == null) {
+                    chars = encoder.encode(chars, end);
+                    if (chars == null) {
                         break;
                     }
                 }
-                return bytes;
+                return chars;
             };
         }
 
         @Nullable
-        private ByteBuffer encode(@Nullable Encoder encoder, ByteBuffer buf, boolean end) {
+        private CharBuffer encode(@Nullable Encoder encoder, CharBuffer buf, boolean end) {
             if (encoder == null) {
                 return buf;
             }
@@ -363,23 +396,23 @@ final class BytesProcessorImpl implements BytesProcessor {
         }
     }
 
-    private final class InputStreamBufferIn extends BaseBufferIn {
+    private final class ReaderBufferIn extends BaseBufferIn {
 
-        private final InputStream source;
+        private final Reader source;
 
-        private InputStreamBufferIn(InputStream source, int blockSize) {
+        private ReaderBufferIn(Reader source, int blockSize) {
             super(blockSize);
             this.source = source;
         }
 
         @Override
-        public ByteBuffer read() throws IOException {
+        public CharBuffer read() throws IOException {
             int readSize = remaining < 0 ? bufSize : (int) Math.min(remaining, bufSize);
             if (readSize == 0) {
                 return null;
             }
             int hasRead = 0;
-            byte[] buf = new byte[bufSize];
+            char[] buf = new char[bufSize];
             while (hasRead < readSize) {
                 int size = source.read(buf, hasRead, readSize - hasRead);
                 if (size < 0 || (size == 0 && endOnZeroRead)) {
@@ -393,24 +426,24 @@ final class BytesProcessorImpl implements BytesProcessor {
             if (readLimit > 0) {
                 remaining -= hasRead;
             }
-            return ByteBuffer.wrap(
+            return CharBuffer.wrap(
                 hasRead == bufSize ? buf : Arrays.copyOfRange(buf, 0, hasRead)
             ).asReadOnlyBuffer();
         }
     }
 
-    private final class BytesBufferIn extends BaseBufferIn {
+    private final class CharsBufferIn extends BaseBufferIn {
 
-        private final byte[] source;
+        private final char[] source;
         private int pos = 0;
 
-        private BytesBufferIn(byte[] source, int blockSize) {
+        private CharsBufferIn(char[] source, int blockSize) {
             super(blockSize);
             this.source = source;
         }
 
         @Override
-        public ByteBuffer read() {
+        public CharBuffer read() {
             int readSize = remaining < 0 ? readBlockSize : (int) Math.min(remaining, readBlockSize);
             if (readSize <= 0) {
                 return null;
@@ -420,7 +453,7 @@ final class BytesProcessorImpl implements BytesProcessor {
             }
             int newPos = Math.min(pos + readSize, source.length);
             int size = newPos - pos;
-            ByteBuffer ret = ByteBuffer.wrap(source, pos, size).slice();
+            CharBuffer ret = CharBuffer.wrap(source, pos, size).slice();
             pos = newPos;
             if (readLimit > 0) {
                 remaining -= size;
@@ -431,15 +464,15 @@ final class BytesProcessorImpl implements BytesProcessor {
 
     private final class BufferBufferIn extends BaseBufferIn {
 
-        private final ByteBuffer source;
+        private final CharBuffer source;
 
-        private BufferBufferIn(ByteBuffer source, int blockSize) {
+        private BufferBufferIn(CharBuffer source, int blockSize) {
             super(blockSize);
             this.source = source;
         }
 
         @Override
-        public ByteBuffer read() {
+        public CharBuffer read() {
             int readSize = remaining < 0 ? readBlockSize : (int) Math.min(remaining, readBlockSize);
             if (readSize <= 0) {
                 return null;
@@ -452,7 +485,7 @@ final class BytesProcessorImpl implements BytesProcessor {
             int newPos = Math.min(pos + readSize, limit);
             int size = newPos - pos;
             source.limit(newPos);
-            ByteBuffer ret = source.slice();
+            CharBuffer ret = source.slice();
             source.limit(limit);
             source.position(newPos);
             if (readLimit > 0) {
@@ -462,24 +495,74 @@ final class BytesProcessorImpl implements BytesProcessor {
         }
     }
 
-    private static final class OutputSteamBufferOut implements BufferOut {
+    private final class CharSeqBufferIn extends BaseBufferIn {
 
-        private final OutputStream dest;
+        private final CharSequence source;
+        private int pos = 0;
 
-        private OutputSteamBufferOut(OutputStream dest) {
+        private CharSeqBufferIn(CharSequence source, int blockSize) {
+            super(blockSize);
+            this.source = source;
+        }
+
+        @Override
+        public CharBuffer read() {
+            int readSize = remaining < 0 ? readBlockSize : (int) Math.min(remaining, readBlockSize);
+            if (readSize <= 0) {
+                return null;
+            }
+            if (pos >= source.length()) {
+                return null;
+            }
+            int newPos = Math.min(pos + readSize, source.length());
+            int size = newPos - pos;
+            CharBuffer ret = CharBuffer.wrap(source, pos, newPos).slice();
+            pos = newPos;
+            if (readLimit > 0) {
+                remaining -= size;
+            }
+            return ret;
+        }
+    }
+
+    private static final class AppendableBufferOut implements BufferOut {
+
+        private final Appendable dest;
+
+        private AppendableBufferOut(Appendable dest) {
             this.dest = dest;
         }
 
         @Override
-        public void write(ByteBuffer buffer) throws IOException {
+        public void write(CharBuffer buffer) throws IOException {
+            if (dest instanceof Writer) {
+                write(buffer, (Writer) dest);
+                return;
+            }
             if (buffer.hasArray()) {
                 int remaining = buffer.remaining();
-                dest.write(buffer.array(), JieBuffer.getArrayStartIndex(buffer), remaining);
+                dest.append(JieString.asChars(
+                    buffer.array(),
+                    JieBuffer.getArrayStartIndex(buffer),
+                    JieBuffer.getArrayEndIndex(buffer)
+                ));
                 buffer.position(buffer.position() + remaining);
             } else {
-                byte[] buf = new byte[buffer.remaining()];
+                char[] buf = new char[buffer.remaining()];
                 buffer.get(buf);
-                dest.write(buf);
+                dest.append(JieString.asChars(buf, 0, buf.length));
+            }
+        }
+
+        private void write(CharBuffer buffer, Writer writer) throws IOException {
+            if (buffer.hasArray()) {
+                int remaining = buffer.remaining();
+                writer.write(buffer.array(), JieBuffer.getArrayStartIndex(buffer), remaining);
+                buffer.position(buffer.position() + remaining);
+            } else {
+                char[] buf = new char[buffer.remaining()];
+                buffer.get(buf);
+                writer.write(buf);
             }
         }
     }
@@ -489,23 +572,23 @@ final class BytesProcessorImpl implements BytesProcessor {
         static final NullBufferOut SINGLETON = new NullBufferOut();
 
         @Override
-        public void write(ByteBuffer buffer) {
+        public void write(CharBuffer buffer) {
             // Do nothing
         }
     }
 
-    private final class StreamIn extends InputStream {
+    private final class ReaderIn extends Reader {
 
         private final EnReader enReader;
-        private ByteBuffer buffer = JieBytes.emptyBuffer();
+        private CharBuffer buffer = JieChars.emptyBuffer();
         private boolean closed = false;
 
-        private StreamIn(BufferIn in) {
+        private ReaderIn(BufferIn in) {
             this.enReader = new EnReader(in);
         }
 
         @Nullable
-        private ByteBuffer read0() throws IOException {
+        private CharBuffer read0() throws IOException {
             try {
                 return enReader.read();
             } catch (Exception e) {
@@ -520,20 +603,21 @@ final class BytesProcessorImpl implements BytesProcessor {
                 return -1;
             }
             if (buffer.hasRemaining()) {
-                return buffer.get() & 0xff;
+                return buffer.get() & 0xffff;
             }
-            ByteBuffer newBuf = read0();
+            CharBuffer newBuf = read0();
             if (newBuf == null) {
                 buffer = null;
                 return -1;
             }
             buffer = newBuf;
-            return buffer.get() & 0xff;
+            return buffer.get() & 0xffff;
         }
 
-        public int read(byte[] dst, int off, int len) throws IOException {
+        @Override
+        public int read(char[] dst, int off, int len) throws IOException {
             checkClosed();
-            IOBack.checkReadBounds(dst, off, len);
+            JieCheck.checkOffsetLength(dst, off, len);
             if (len <= 0) {
                 return 0;
             }
@@ -544,7 +628,7 @@ final class BytesProcessorImpl implements BytesProcessor {
             int pos = off;
             while (pos < endPos) {
                 if (!buffer.hasRemaining()) {
-                    ByteBuffer newBuf = read0();
+                    CharBuffer newBuf = read0();
                     if (newBuf == null) {
                         buffer = null;
                         return pos - off;
@@ -558,6 +642,7 @@ final class BytesProcessorImpl implements BytesProcessor {
             return pos - off;
         }
 
+        @Override
         public long skip(long n) throws IOException {
             checkClosed();
             if (n <= 0 || buffer == null) {
@@ -566,7 +651,7 @@ final class BytesProcessorImpl implements BytesProcessor {
             int pos = 0;
             while (pos < n) {
                 if (!buffer.hasRemaining()) {
-                    ByteBuffer newBuf = read0();
+                    CharBuffer newBuf = read0();
                     if (newBuf == null) {
                         buffer = null;
                         return pos;
@@ -580,10 +665,7 @@ final class BytesProcessorImpl implements BytesProcessor {
             return pos;
         }
 
-        public int available() {
-            return buffer == null ? 0 : buffer.remaining();
-        }
-
+        @Override
         public void close() throws IOException {
             if (closed) {
                 return;
@@ -602,26 +684,26 @@ final class BytesProcessorImpl implements BytesProcessor {
 
         private void checkClosed() throws IOException {
             if (closed) {
-                throw new IOException("Stream closed.");
+                throw new IOException("Reader closed.");
             }
         }
     }
 
-    private static abstract class AbsEncoder implements Encoder {
+    private static abstract class AbsEncoder implements CharsProcessor.Encoder {
 
-        protected final Encoder encoder;
-        protected byte[] buf = JieBytes.emptyBytes();
+        protected final CharsProcessor.Encoder encoder;
+        protected char[] buf = JieChars.emptyChars();
 
-        protected AbsEncoder(Encoder encoder) {
+        protected AbsEncoder(CharsProcessor.Encoder encoder) {
             this.encoder = encoder;
         }
 
         // buf will be set null after total
-        protected ByteBuffer totalData(ByteBuffer data) {
+        protected CharBuffer totalData(CharBuffer data) {
             if (JieArray.isEmpty(buf)) {
                 return data;
             }
-            ByteBuffer total = ByteBuffer.allocate(totalSize(data));
+            CharBuffer total = CharBuffer.allocate(totalSize(data));
             total.put(buf);
             total.put(data);
             total.flip();
@@ -629,7 +711,7 @@ final class BytesProcessorImpl implements BytesProcessor {
             return total;
         }
 
-        protected int totalSize(ByteBuffer data) {
+        protected int totalSize(CharBuffer data) {
             return buf.length + data.remaining();
         }
     }
@@ -638,19 +720,19 @@ final class BytesProcessorImpl implements BytesProcessor {
 
         private final int expectedBlockSize;
 
-        RoundEncoder(Encoder encoder, int expectedBlockSize) {
+        RoundEncoder(CharsProcessor.Encoder encoder, int expectedBlockSize) {
             super(encoder);
             this.expectedBlockSize = expectedBlockSize;
         }
 
         @Override
-        public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) throws Exception {
+        public @Nullable CharBuffer encode(CharBuffer data, boolean end) throws Exception {
             if (end) {
                 return encoder.encode(totalData(data), true);
             }
             int size = totalSize(data);
             if (size < expectedBlockSize) {
-                byte[] newBuf = new byte[size];
+                char[] newBuf = new char[size];
                 System.arraycopy(buf, 0, newBuf, 0, buf.length);
                 data.get(newBuf, buf.length, data.remaining());
                 buf = newBuf;
@@ -658,22 +740,22 @@ final class BytesProcessorImpl implements BytesProcessor {
             }
             int remainder = size % expectedBlockSize;
             if (remainder == 0) {
-                ByteBuffer total = totalData(data);
-                buf = JieBytes.emptyBytes();
+                CharBuffer total = totalData(data);
+                buf = JieChars.emptyChars();
                 return encoder.encode(total, false);
             }
             int roundSize = size / expectedBlockSize * expectedBlockSize;
-            ByteBuffer round = roundData(data, roundSize);
-            buf = new byte[remainder];
+            CharBuffer round = roundData(data, roundSize);
+            buf = new char[remainder];
             data.get(buf);
             return encoder.encode(round, false);
         }
 
-        private ByteBuffer roundData(ByteBuffer data, int roundSize) {
-            ByteBuffer round = ByteBuffer.allocate(roundSize);
+        private CharBuffer roundData(CharBuffer data, int roundSize) {
+            CharBuffer round = CharBuffer.allocate(roundSize);
             round.put(buf);
             int sliceSize = roundSize - buf.length;
-            ByteBuffer slice = JieBytes.slice(data, 0, sliceSize);
+            CharBuffer slice = JieChars.slice(data, 0, sliceSize);
             data.position(data.position() + sliceSize);
             round.put(slice);
             round.flip();
@@ -683,23 +765,23 @@ final class BytesProcessorImpl implements BytesProcessor {
 
     static final class BufferedEncoder extends AbsEncoder {
 
-        BufferedEncoder(Encoder encoder) {
+        BufferedEncoder(CharsProcessor.Encoder encoder) {
             super(encoder);
         }
 
         @Override
-        public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) throws Exception {
-            ByteBuffer total = totalData(data);
-            ByteBuffer ret = encoder.encode(total, end);
+        public @Nullable CharBuffer encode(CharBuffer data, boolean end) throws Exception {
+            CharBuffer total = totalData(data);
+            CharBuffer ret = encoder.encode(total, end);
             if (end) {
                 return ret;
             }
             if (total.hasRemaining()) {
-                buf = new byte[total.remaining()];
+                buf = new char[total.remaining()];
                 total.get(buf);
                 return ret;
             }
-            buf = JieBytes.emptyBytes();
+            buf = JieChars.emptyChars();
             return ret;
         }
     }
@@ -714,60 +796,60 @@ final class BytesProcessorImpl implements BytesProcessor {
         }
 
         @Override
-        public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) throws Exception {
-            ByteBuffer total = totalData(data);
+        public @Nullable CharBuffer encode(CharBuffer data, boolean end) throws Exception {
+            CharBuffer total = totalData(data);
             int totalSize = total.remaining();
             int times = totalSize / size;
             if (times == 0) {
                 if (end) {
                     return encoder.encode(total, true);
                 }
-                buf = new byte[totalSize];
+                buf = new char[totalSize];
                 total.get(buf);
                 return null;
             }
             if (times == 1) {
-                ByteBuffer slice = JieBytes.slice(total, 0, size);
-                ByteBuffer ret1 = Jie.nonNull(encoder.encode(slice, false), JieBytes.emptyBuffer());
+                CharBuffer slice = JieChars.slice(total, 0, size);
+                CharBuffer ret1 = Jie.nonNull(encoder.encode(slice, false), JieChars.emptyBuffer());
                 total.position(total.position() + size);
                 if (end) {
-                    ByteBuffer ret2 = Jie.nonNull(encoder.encode(total, true), JieBytes.emptyBuffer());
+                    CharBuffer ret2 = Jie.nonNull(encoder.encode(total, true), JieChars.emptyBuffer());
                     int size12 = ret1.remaining() + ret2.remaining();
                     if (size12 <= 0) {
                         return null;
                     }
-                    ByteBuffer ret = ByteBuffer.allocate(size12);
+                    CharBuffer ret = CharBuffer.allocate(size12);
                     ret.put(ret1);
                     ret.put(ret2);
                     ret.flip();
                     return ret;
                 }
-                buf = new byte[total.remaining()];
+                buf = new char[total.remaining()];
                 total.get(buf);
                 return ret1;
             }
-            BytesBuilder bytesBuilder = new BytesBuilder();
+            CharsBuilder charsBuilder = new CharsBuilder();
             for (int i = 0; i < times; i++) {
-                ByteBuffer slice = JieBytes.slice(total, 0, size);
-                ByteBuffer ret = encoder.encode(slice, false);
+                CharBuffer slice = JieChars.slice(total, 0, size);
+                CharBuffer ret = encoder.encode(slice, false);
                 total.position(total.position() + size);
-                if (!JieBytes.isEmpty(ret)) {
-                    bytesBuilder.append(ret);
+                if (!JieChars.isEmpty(ret)) {
+                    charsBuilder.append(ret);
                 }
             }
             if (end) {
-                ByteBuffer lastRet = encoder.encode(total, true);
-                if (!JieBytes.isEmpty(lastRet)) {
-                    bytesBuilder.append(lastRet);
+                CharBuffer lastRet = encoder.encode(total, true);
+                if (!JieChars.isEmpty(lastRet)) {
+                    charsBuilder.append(lastRet);
                 }
             } else {
-                buf = new byte[total.remaining()];
+                buf = new char[total.remaining()];
                 total.get(buf);
             }
-            if (bytesBuilder.size() <= 0) {
+            if (charsBuilder.size() <= 0) {
                 return null;
             }
-            return bytesBuilder.toByteBuffer();
+            return charsBuilder.toCharBuffer();
         }
     }
 }

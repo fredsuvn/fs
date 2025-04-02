@@ -2,7 +2,7 @@ package xyz.sunqian.common.encode;
 
 import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.UnreachablePointException;
-import xyz.sunqian.common.io.BytesProcessor;
+import xyz.sunqian.common.base.bytes.BytesProcessor;
 
 import java.util.Arrays;
 

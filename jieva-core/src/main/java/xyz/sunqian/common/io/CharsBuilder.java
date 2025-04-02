@@ -1,6 +1,7 @@
 package xyz.sunqian.common.io;
 
-import xyz.sunqian.common.base.JieChars;
+import xyz.sunqian.common.base.JieCheck;
+import xyz.sunqian.common.base.chars.JieChars;
 
 import java.io.CharArrayWriter;
 import java.io.Reader;
@@ -83,7 +84,7 @@ public class CharsBuilder extends Writer implements CharSequence {
      * @param len the specified number
      */
     public void write(char[] b, int off, int len) {
-        IOBack.checkReadBounds(b, off, len);
+        JieCheck.checkOffsetLength(b, off, len);
         ensureCapacity(count + len);
         System.arraycopy(b, off, buf, count, len);
         count += len;

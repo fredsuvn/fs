@@ -1,6 +1,6 @@
 package xyz.sunqian.common.encode;
 
-import xyz.sunqian.common.io.BytesProcessor;
+import xyz.sunqian.common.base.bytes.BytesProcessor;
 
 /**
  * This interface acts as a base for {@link ByteEncoder} and {@link ByteDecoder}, which are used for encoding and

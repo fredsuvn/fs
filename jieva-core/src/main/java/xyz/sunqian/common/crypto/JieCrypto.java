@@ -1,10 +1,9 @@
 package xyz.sunqian.common.crypto;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.JieBytes;
+import xyz.sunqian.common.base.bytes.BytesProcessor;
+import xyz.sunqian.common.base.bytes.JieBytes;
 import xyz.sunqian.common.coll.JieArray;
-import xyz.sunqian.common.io.BytesProcessor;
-import xyz.sunqian.common.io.JieIO;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -121,7 +120,7 @@ public class JieCrypto {
      * block size. If {@code onlyFinal} is true, the encoder uses only the {@code doFinal} method. Otherwise, the
      * encoder invokes the {@code update} method to process data when {@code end} is false, and invokes {@code doFinal}
      * for final processing when {@code end} is true. Returned encoder is a fixed size encoder from
-     * {@link JieIO#fixedSizeEncoder(int, BytesProcessor.Encoder)}, and its fixed size is the specified block size.
+     * {@link JieBytes#fixedSizeEncoder(int, BytesProcessor.Encoder)}, and its fixed size is the specified block size.
      *
      * @param cipher    specified {@link Cipher}, should be initialized
      * @param blockSize specified block size
@@ -147,7 +146,7 @@ public class JieCrypto {
                 return ret;
             }
         };
-        return JieIO.fixedSizeEncoder(blockSize, encoder);
+        return JieBytes.fixedSizeEncoder(blockSize, encoder);
     }
 
     private static ByteBuffer doFinal(Cipher cipher, ByteBuffer input) throws Exception {
@@ -182,7 +181,7 @@ public class JieCrypto {
      * Returns a {@link BytesProcessor.Encoder} for the specified {@link MessageDigest} operations in blocks, using
      * specified block size. The encoder invokes the {@code update} method to process data when {@code end} is false,
      * and invokes {@code doFinal} for final processing when {@code end} is true. Returned encoder is a fixed size
-     * encoder from {@link JieIO#fixedSizeEncoder(int, BytesProcessor.Encoder)}, and its fixed size is the specified
+     * encoder from {@link JieBytes#fixedSizeEncoder(int, BytesProcessor.Encoder)}, and its fixed size is the specified
      * block size.
      *
      * @param digest    specified {@link MessageDigest}, should be initialized
@@ -203,7 +202,7 @@ public class JieCrypto {
                 return ret;
             }
         };
-        return JieIO.fixedSizeEncoder(blockSize, encoder);
+        return JieBytes.fixedSizeEncoder(blockSize, encoder);
     }
 
     private static byte[] doFinal(MessageDigest digest, ByteBuffer input) throws Exception {
@@ -227,7 +226,7 @@ public class JieCrypto {
      * Returns a {@link BytesProcessor.Encoder} for the specified {@link Mac} operations in blocks, using specified
      * block size. The encoder invokes the {@code update} method to process data when {@code end} is false, and invokes
      * {@code doFinal} for final processing when {@code end} is true. Returned encoder is a fixed size encoder from
-     * {@link JieIO#fixedSizeEncoder(int, BytesProcessor.Encoder)}, and its fixed size is the specified block size.
+     * {@link JieBytes#fixedSizeEncoder(int, BytesProcessor.Encoder)}, and its fixed size is the specified block size.
      *
      * @param mac       specified {@link Mac}, should be initialized
      * @param blockSize specified block size
@@ -247,7 +246,7 @@ public class JieCrypto {
                 return ret;
             }
         };
-        return JieIO.fixedSizeEncoder(blockSize, encoder);
+        return JieBytes.fixedSizeEncoder(blockSize, encoder);
     }
 
     private static byte[] doFinal(Mac mac, ByteBuffer input) throws Exception {

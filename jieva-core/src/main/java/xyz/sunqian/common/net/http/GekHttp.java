@@ -1,6 +1,6 @@
 package xyz.sunqian.common.net.http;
 
-import xyz.sunqian.common.base.JieChars;
+import xyz.sunqian.common.base.chars.JieChars;
 
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;

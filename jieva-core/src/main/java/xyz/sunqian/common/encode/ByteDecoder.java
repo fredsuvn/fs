@@ -1,7 +1,7 @@
 package xyz.sunqian.common.encode;
 
-import xyz.sunqian.common.base.JieChars;
 import xyz.sunqian.common.base.JieString;
+import xyz.sunqian.common.base.chars.JieChars;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;

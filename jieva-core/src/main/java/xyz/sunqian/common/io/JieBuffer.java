@@ -1,12 +1,13 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.JieChars;
 import xyz.sunqian.common.base.JieCheck;
+import xyz.sunqian.common.base.chars.JieChars;
 
 import java.io.OutputStream;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.nio.ReadOnlyBufferException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,31 +16,35 @@ import java.util.List;
 import java.util.function.IntFunction;
 
 /**
- * This is a static utilities class provides utilities for {@link Buffer}.
+ * Static utility class for {@link Buffer}.
  *
- * @author fresduvn
+ * @author sunqian
  */
 public class JieBuffer {
 
     /**
-     * Returns actual start index (inclusive) of backing array in given buffer.
+     * Returns the actual start index (inclusive) of the backing array in the given buffer.
      *
-     * @param buffer given buffer
-     * @return actual start index (inclusive) of backing array in given buffer
-     * @throws UnsupportedOperationException if this buffer is not backed by an array
+     * @param buffer the given buffer
+     * @return the actual start index (inclusive) of the backing array in the given buffer
+     * @throws ReadOnlyBufferException       If the buffer is backed by an array but is read-only
+     * @throws UnsupportedOperationException If the buffer is not backed by an accessible array
      */
-    public static int getArrayStartIndex(Buffer buffer) throws UnsupportedOperationException {
+    public static int getArrayStartIndex(Buffer buffer)
+        throws ReadOnlyBufferException, UnsupportedOperationException {
         return buffer.arrayOffset() + buffer.position();
     }
 
     /**
-     * Returns actual start index (exclusive) of backing array in given buffer.
+     * Returns the actual start index (exclusive) of the backing array in the given buffer.
      *
-     * @param buffer given buffer
-     * @return actual start index (exclusive) of backing array in given buffer
-     * @throws UnsupportedOperationException if this buffer is not backed by an array
+     * @param buffer the given buffer
+     * @return the actual start index (exclusive) of the backing array in the given buffer
+     * @throws ReadOnlyBufferException       If the buffer is backed by an array but is read-only
+     * @throws UnsupportedOperationException If the buffer is not backed by an accessible array
      */
-    public static int getArrayEndIndex(Buffer buffer) throws UnsupportedOperationException {
+    public static int getArrayEndIndex(Buffer buffer)
+        throws ReadOnlyBufferException, UnsupportedOperationException {
         return buffer.arrayOffset() + buffer.position() + buffer.remaining();
     }
 

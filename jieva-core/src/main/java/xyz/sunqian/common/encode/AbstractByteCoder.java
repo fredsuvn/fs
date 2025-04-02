@@ -1,9 +1,8 @@
 package xyz.sunqian.common.encode;
 
-import xyz.sunqian.common.base.JieBytes;
-import xyz.sunqian.common.io.BytesProcessor;
+import xyz.sunqian.common.base.bytes.BytesProcessor;
+import xyz.sunqian.common.base.bytes.JieBytes;
 import xyz.sunqian.common.io.JieBuffer;
-import xyz.sunqian.common.io.JieIO;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -271,7 +270,7 @@ public abstract class AbstractByteCoder implements ByteCoder {
      * This method generated a {@link BytesProcessor.Encoder} based on encoding/decoding algorithm of
      * {@link #getOutputSize(int, long, boolean)} and
      * {@link #doCode(byte[], int, int, byte[], int, int, long, boolean)}, and then wrap the generated encoder via
-     * {@link JieIO#bufferedEncoder(BytesProcessor.Encoder)}.
+     * {@link JieBytes#bufferedEncoder(BytesProcessor.Encoder)}.
      *
      * @return a {@link BytesProcessor.Encoder} based on current encoding/decoding algorithm
      */
@@ -289,7 +288,7 @@ public abstract class AbstractByteCoder implements ByteCoder {
                 return ret;
             }
         };
-        return JieIO.bufferedEncoder(encoder);
+        return JieBytes.bufferedEncoder(encoder);
     }
 
     /**

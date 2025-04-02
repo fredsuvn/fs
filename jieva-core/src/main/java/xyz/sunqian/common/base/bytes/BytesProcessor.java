@@ -1,7 +1,12 @@
-package xyz.sunqian.common.io;
+package xyz.sunqian.common.base.bytes;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.JieChars;
+import xyz.sunqian.common.base.chars.CharsProcessor;
+import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.io.BytesBuilder;
+import xyz.sunqian.common.io.IOEncodingException;
+import xyz.sunqian.common.io.IORuntimeException;
+import xyz.sunqian.common.io.JieIO;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -102,13 +107,13 @@ public interface BytesProcessor {
      * This is an optional setting method. Additionally, there are also more helper methods:
      * <ul>
      *     <li>
-     *         For fixed-size: {@link #encoder(int, Encoder)}, {@link JieIO#fixedSizeEncoder(int, Encoder)};
+     *         For fixed-size: {@link #encoder(int, Encoder)}, {@link JieBytes#fixedSizeEncoder(int, Encoder)};
      *     </li>
      *     <li>
-     *         For round size: {@link #roundEncoder(int, Encoder)}, {@link JieIO#roundEncoder(int, Encoder)};
+     *         For round size: {@link #roundEncoder(int, Encoder)}, {@link JieBytes#roundEncoder(int, Encoder)};
      *     </li>
      *     <li>
-     *         for buffering: {@link #bufferedEncoder(Encoder)}, {@link JieIO#bufferedEncoder(Encoder)};
+     *         for buffering: {@link #bufferedEncoder(Encoder)}, {@link JieBytes#bufferedEncoder(Encoder)};
      *     </li>
      * </ul>
      *
@@ -127,10 +132,10 @@ public interface BytesProcessor {
      * @param size    specified fixed-size
      * @param encoder encoder for encoding data from read operation
      * @return this
-     * @see JieIO#fixedSizeEncoder(int, CharsProcessor.Encoder)
+     * @see JieBytes#fixedSizeEncoder(int, Encoder)
      */
     default BytesProcessor encoder(int size, Encoder encoder) {
-        return encoder(JieIO.fixedSizeEncoder(size, encoder));
+        return encoder(JieBytes.fixedSizeEncoder(size, encoder));
     }
 
     /**
@@ -144,10 +149,10 @@ public interface BytesProcessor {
      * @param size    specified size
      * @param encoder encoder for encoding data from read operation
      * @return this
-     * @see JieIO#roundEncoder(int, Encoder)
+     * @see JieBytes#roundEncoder(int, Encoder)
      */
     default BytesProcessor roundEncoder(int size, Encoder encoder) {
-        return encoder(JieIO.roundEncoder(size, encoder));
+        return encoder(JieBytes.roundEncoder(size, encoder));
     }
 
     /**
@@ -160,10 +165,10 @@ public interface BytesProcessor {
      *
      * @param encoder encoder for encoding data from read operation
      * @return this
-     * @see JieIO#bufferedEncoder(Encoder)
+     * @see JieBytes#bufferedEncoder(Encoder)
      */
     default BytesProcessor bufferedEncoder(Encoder encoder) {
-        return encoder(JieIO.bufferedEncoder(encoder));
+        return encoder(JieBytes.bufferedEncoder(encoder));
     }
 
     /**
@@ -338,7 +343,7 @@ public interface BytesProcessor {
      * @return a new {@link CharsProcessor} converted from this byte processor with specified charset
      */
     default CharsProcessor toCharProcessor(Charset charset) {
-        return JieIO.processChars(JieIO.reader(toInputStream(), charset));
+        return JieChars.processor(JieIO.reader(toInputStream(), charset));
     }
 
     /**

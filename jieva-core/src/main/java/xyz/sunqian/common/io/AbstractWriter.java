@@ -1,13 +1,14 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.JieCheck;
 
 import java.io.IOException;
 import java.io.Writer;
 
 /**
- * This class is a skeletal implementation for the {@link Writer}. The complete implementation is based on the following
- * methods:
+ * This class is a skeletal implementation for the {@link Writer}. Implementing the following methods is sufficient to
+ * create a fully functional {@link Writer}：
  * <ul>
  *     <li>{@link #doWrite(char)};</li>
  *     <li>{@link #doWrite(char[], int, int)};</li>
@@ -78,7 +79,7 @@ public abstract class AbstractWriter extends Writer {
 
     @Override
     public void write(char[] cbuf, int off, int len) throws IOException {
-        IOBack.checkReadBounds(cbuf, off, len);
+        JieCheck.checkOffsetLength(cbuf, off, len);
         if (len <= 0) {
             return;
         }
@@ -107,7 +108,7 @@ public abstract class AbstractWriter extends Writer {
 
     @Override
     public void write(String str, int off, int len) throws IOException {
-        IOBack.checkReadBounds(str, off, len);
+        JieCheck.checkOffsetLength(str, off, len);
         if (len <= 0) {
             return;
         }
@@ -127,7 +128,7 @@ public abstract class AbstractWriter extends Writer {
     @Override
     public Writer append(@Nullable CharSequence csq, int start, int end) throws IOException {
         CharSequence cs = nonNull(csq);
-        IOBack.checkReadBounds(cs, start, end - start);
+        JieCheck.checkOffsetLength(cs, start, end - start);
         if (start == end) {
             return this;
         }

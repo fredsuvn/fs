@@ -5,11 +5,62 @@ import xyz.sunqian.annotations.Nullable;
 import java.util.NoSuchElementException;
 
 /**
- * Utilities for checking parameters.
+ * Utilities for checking and verifying.
  *
- * @author fredsuvn
+ * @author sunqian
  */
 public class JieCheck {
+
+    /**
+     * Checks whether the range in the given array, starting at the given offset up to the given length, is valid.
+     *
+     * @param array the given array
+     * @param off   the given offset
+     * @param len   the given length
+     * @throws NullPointerException      if the given array is null
+     * @throws IndexOutOfBoundsException if the range is out of bounds
+     */
+    public static void checkOffsetLength(byte[] array, int off, int len) {
+        if (array == null) {
+            throw new NullPointerException();
+        } else if (off < 0 || len < 0 || len > array.length - off) {
+            throw new IndexOutOfBoundsException();
+        }
+    }
+
+    /**
+     * Checks whether the range in the given array, starting at the given offset up to the given length, is valid.
+     *
+     * @param array the given array
+     * @param off   the given offset
+     * @param len   the given length
+     * @throws NullPointerException      if the given array is null
+     * @throws IndexOutOfBoundsException if the range is out of bounds
+     */
+    public static void checkOffsetLength(char[] array, int off, int len) {
+        if (array == null) {
+            throw new NullPointerException();
+        } else if (off < 0 || len < 0 || len > array.length - off) {
+            throw new IndexOutOfBoundsException();
+        }
+    }
+
+    /**
+     * Checks whether the range in the given array, starting at the given offset up to the given length, is valid.
+     *
+     * @param array the given array
+     * @param off   the given offset
+     * @param len   the given length
+     * @throws NullPointerException      if the given array is null
+     * @throws IndexOutOfBoundsException if the range is out of bounds
+     */
+    public static void checkOffsetLength(CharSequence array, int off, int len) {
+        if (array == null) {
+            throw new NullPointerException();
+        } else if (off < 0 || len < 0 || len > array.length() - off) {
+            throw new IndexOutOfBoundsException();
+        }
+    }
 
     /**
      * Checks whether given object is null, if it is, throw a {@link NullPointerException}.

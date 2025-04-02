@@ -4,7 +4,7 @@
 //import org.testng.annotations.Test;
 //import xyz.fslabo.annotations.Nullable;
 //import xyz.sunqian.common.base.Jie;
-//import xyz.sunqian.common.base.JieChars;
+//import xyz.sunqian.common.base.chars.JieChars;
 //import xyz.sunqian.common.base.JieLog;
 //import xyz.sunqian.common.base.JieString;
 //import xyz.sunqian.common.coll.JieColl;

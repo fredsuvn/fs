@@ -2,7 +2,12 @@ package test.base;
 
 import org.testng.annotations.Test;
 import test.TU;
-import xyz.sunqian.common.base.*;
+import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.JieRandom;
+import xyz.sunqian.common.base.JieSystem;
+import xyz.sunqian.common.base.Tuple;
+import xyz.sunqian.common.base.bytes.JieBytes;
+import xyz.sunqian.common.base.chars.JieChars;
 
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
@@ -18,12 +23,12 @@ public class BaseTest {
     public void testNullExpr() {
         assertEquals(Jie.nonNull("123", "456"), "123");
         assertEquals(Jie.nonNull(null, "456"), "456");
-        assertEquals(Jie.nonNull("123", ()->"456"), "123");
-        assertEquals(Jie.nonNull(null, ()->"456"), "456");
+        assertEquals(Jie.nonNull("123", () -> "456"), "123");
+        assertEquals(Jie.nonNull(null, () -> "456"), "456");
         assertEquals(Jie.nullable("123", "456"), "456");
         assertNull(Jie.nullable(null, "456"));
-        assertEquals(Jie.nullable("123", ()->"456"), "456");
-        assertNull(Jie.nullable(null, ()->"456"));
+        assertEquals(Jie.nullable("123", () -> "456"), "456");
+        assertNull(Jie.nullable(null, () -> "456"));
     }
 
     @Test

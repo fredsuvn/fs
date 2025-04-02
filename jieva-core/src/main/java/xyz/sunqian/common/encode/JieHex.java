@@ -1,7 +1,7 @@
 package xyz.sunqian.common.encode;
 
 import xyz.sunqian.annotations.ThreadSafe;
-import xyz.sunqian.common.io.BytesProcessor;
+import xyz.sunqian.common.base.bytes.BytesProcessor;
 
 /**
  * This is a static utilities class for {@code hex} encoding and decoding, provides encoder and decoder implementations:

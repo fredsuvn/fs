@@ -1,7 +1,7 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.common.base.BaseConfigurator;
-import xyz.sunqian.common.base.JieChars;
+import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.base.JieString;
 
 import java.io.InputStream;

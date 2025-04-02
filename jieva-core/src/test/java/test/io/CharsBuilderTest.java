@@ -2,8 +2,8 @@ package test.io;
 
 import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.JieChars;
 import xyz.sunqian.common.base.JieRandom;
+import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.io.CharsBuilder;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieIO;

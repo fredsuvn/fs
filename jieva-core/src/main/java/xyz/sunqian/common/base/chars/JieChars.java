@@ -1,7 +1,11 @@
-package xyz.sunqian.common.base;
+package xyz.sunqian.common.base.chars;
 
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.JieCheck;
+import xyz.sunqian.common.base.JieSystem;
+import xyz.sunqian.common.base.bytes.JieBytes;
 
+import java.io.Reader;
 import java.nio.BufferOverflowException;
 import java.nio.ByteOrder;
 import java.nio.CharBuffer;
@@ -27,6 +31,8 @@ public class JieChars {
 
     private static final char[] EMPTY_CHARS = {};
     private static final CharBuffer EMPTY_BUFFER = CharBuffer.wrap(EMPTY_CHARS);
+
+    //---------------- Common Begin ----------------//
 
     /**
      * Returns default charset: {@link #UTF_8}.
@@ -294,4 +300,123 @@ public class JieChars {
             return null;
         }
     }
+
+    //---------------- Common End ----------------//
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    //---------------- Processors Begin ----------------//
+
+    /**
+     * Returns a new {@link CharsProcessor} to process the specified data.
+     *
+     * @param data the specified data
+     * @return a new {@link CharsProcessor}
+     */
+    public static CharsProcessor processor(Reader data) {
+        return new CharsProcessorImpl(data);
+    }
+
+    /**
+     * Returns a new {@link CharsProcessor} to process the specified data.
+     *
+     * @param data the specified data
+     * @return a new {@link CharsProcessor}
+     */
+    public static CharsProcessor processor(char[] data) {
+        return new CharsProcessorImpl(data);
+    }
+
+    /**
+     * Returns a new {@link CharsProcessor} to process the specified data from the specified offset up to the specified
+     * length.
+     *
+     * @param data   the specified data
+     * @param offset the specified offset
+     * @param length the specified length
+     * @return a new {@link CharsProcessor}
+     * @throws IndexOutOfBoundsException if an index is out of bounds
+     */
+    public static CharsProcessor processor(char[] data, int offset, int length) throws IndexOutOfBoundsException {
+        JieCheck.checkOffsetLength(data, offset, length);
+        if (offset == 0 && length == data.length) {
+            return processor(data);
+        }
+        CharBuffer buffer = CharBuffer.wrap(data, offset, length);
+        return processor(buffer);
+    }
+
+    /**
+     * Returns a new {@link CharsProcessor} to process the specified data.
+     *
+     * @param data the specified data
+     * @return a new {@link CharsProcessor}
+     */
+    public static CharsProcessor processor(CharBuffer data) {
+        return new CharsProcessorImpl(data);
+    }
+
+    /**
+     * Returns a new {@link CharsProcessor} to process the specified data.
+     *
+     * @param data the specified data
+     * @return a new {@link CharsProcessor}
+     */
+    public static CharsProcessor processor(CharSequence data) {
+        return new CharsProcessorImpl(data);
+    }
+
+
+    /**
+     * Returns a {@link CharsProcessor.Encoder} that wraps the given encoder to encode data in fixed-size blocks. The
+     * returned encoder splits incoming data into blocks of the specified block size, and for each block, it
+     * sequentially calls the given encoder, passing the block as the data parameter. If incoming data is insufficient
+     * to form a full block, it is buffered until enough data is received to form a full block.
+     * <p>
+     * In the last invocation (when {@code end == true}) of the returned encoder, even if the remainder data after
+     * splitting is insufficient to form a full block, it will still be passed to the given encoder as the last block,
+     * and this call is the given encoder's last invocation.
+     *
+     * @param size    the specified block size
+     * @param encoder the given encoder
+     * @return a new {@link CharsProcessor.Encoder} that wraps the given encoder to encode data in fixed-size blocks
+     */
+    public static CharsProcessor.Encoder fixedSizeEncoder(int size, CharsProcessor.Encoder encoder) {
+        return new CharsProcessorImpl.FixedSizeEncoder(encoder, size);
+    }
+
+    /**
+     * Returns a {@link CharsProcessor.Encoder} to round down incoming data for the given encoder, it is typically used
+     * for the encoder which requires consuming data in multiples of the specified size. The returned encoder rounds
+     * down incoming data to the largest multiple of the specified size and passes the rounded data to the given
+     * encoder. The remainder data will be buffered until enough data is received to round.
+     * <p>
+     * However, in the last invocation (when {@code end == true}), all remaining data will be passed directly to the
+     * given encoder.
+     *
+     * @param size    the specified size
+     * @param encoder the given encoder
+     * @return a {@link CharsProcessor.Encoder} to round down incoming data for the given encoder
+     */
+    public static CharsProcessor.Encoder roundEncoder(int size, CharsProcessor.Encoder encoder) {
+        return new CharsProcessorImpl.RoundEncoder(encoder, size);
+    }
+
+    /**
+     * Returns a {@link CharsProcessor.Encoder} that buffers unconsumed data of the given encoder, it is typically used
+     * for the encoder which may not fully consume the passed data, requires buffering and consuming data in next
+     * invocation. This encoder passes incoming data to the given encoder. The unconsumed remaining data after encoding
+     * of the given encoder will be buffered and used in the next invocation.
+     * <p>
+     * However, in the last invocation (when {@code end == true}), no data will be buffered.
+     *
+     * @param encoder the given encoder
+     * @return a {@link CharsProcessor.Encoder} that buffers unconsumed data of the given encoder
+     */
+    public static CharsProcessor.Encoder bufferedEncoder(CharsProcessor.Encoder encoder) {
+        return new CharsProcessorImpl.BufferedEncoder(encoder);
+    }
+
+    //---------------- Processors End ----------------//
 }

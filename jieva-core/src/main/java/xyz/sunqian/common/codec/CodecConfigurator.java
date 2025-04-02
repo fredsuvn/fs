@@ -1,8 +1,8 @@
 package xyz.sunqian.common.codec;
 
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.base.JieChars;
 import xyz.sunqian.common.base.JieString;
+import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.io.IOConfigurator;
 
 /**
