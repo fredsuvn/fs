@@ -3,13 +3,13 @@ package test.encode;
 import org.apache.commons.codec.binary.Hex;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.JieRandom;
+import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.bytes.JieBytes;
 import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.base.exception.ProcessingException;
 import xyz.sunqian.common.encode.DecodingException;
 import xyz.sunqian.common.encode.EncodingException;
 import xyz.sunqian.common.encode.JieHex;
-import xyz.sunqian.common.io.BytesBuilder;
-import xyz.sunqian.common.io.IOEncodingException;
 import xyz.sunqian.common.io.JieIO;
 
 import static org.testng.Assert.*;
@@ -90,9 +90,9 @@ public class HexTest {
                 error[0] = null;
             }
             try {
-                JieBytes.processor(en).readBlockSize(1)
+                JieBytes.process(en).readBlockSize(1)
                     .encoder(JieHex.decoder().streamEncoder()).writeTo(new BytesBuilder());
-            } catch (IOEncodingException e) {
+            } catch (ProcessingException e) {
                 error[0] = e.getCause().getMessage();
             } finally {
                 assertEquals(error[0], "Invalid hex char at pos 11: Q.");

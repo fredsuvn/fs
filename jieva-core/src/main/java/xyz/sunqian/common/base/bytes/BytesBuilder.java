@@ -1,7 +1,9 @@
-package xyz.sunqian.common.io;
+package xyz.sunqian.common.base.bytes;
 
 import xyz.sunqian.common.base.JieCheck;
-import xyz.sunqian.common.base.bytes.JieBytes;
+import xyz.sunqian.common.io.IORuntimeException;
+import xyz.sunqian.common.io.JieBuffer;
+import xyz.sunqian.common.io.JieIO;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -315,7 +317,6 @@ public class BytesBuilder extends OutputStream {
      *
      * @param builder the given builder
      * @return this builder
-     * @throws IORuntimeException if an I/O error occurs
      */
     public BytesBuilder append(BytesBuilder builder) {
         write(builder.buf, 0, builder.count);

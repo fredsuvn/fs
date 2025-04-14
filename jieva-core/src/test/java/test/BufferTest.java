@@ -2,7 +2,7 @@
 //
 //import org.testng.Assert;
 //import org.testng.annotations.Test;
-//import xyz.sunqian.common.io.BytesBuilder;
+//import xyz.sunqian.common.base.bytes.BytesBuilder;
 //import xyz.sunqian.common.base.JieString;
 //import xyz.sunqian.common.io.JieIO;
 //

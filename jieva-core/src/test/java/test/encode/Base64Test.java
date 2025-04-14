@@ -2,14 +2,14 @@ package test.encode;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.JieRandom;
+import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.bytes.JieBytes;
 import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.base.exception.ProcessingException;
 import xyz.sunqian.common.encode.ByteEncoder;
 import xyz.sunqian.common.encode.DecodingException;
 import xyz.sunqian.common.encode.EncodingException;
 import xyz.sunqian.common.encode.JieBase64;
-import xyz.sunqian.common.io.BytesBuilder;
-import xyz.sunqian.common.io.IOEncodingException;
 import xyz.sunqian.common.io.JieIO;
 import xyz.sunqian.test.JieTest;
 
@@ -170,9 +170,9 @@ public class Base64Test {
                 error[0] = null;
             }
             try {
-                JieBytes.processor(s.getBytes(JieChars.latinCharset())).readBlockSize(1)
+                JieBytes.process(s.getBytes(JieChars.latinCharset())).readBlockSize(1)
                     .encoder(JieBase64.decoder().streamEncoder()).writeTo(new BytesBuilder());
-            } catch (IOEncodingException e) {
+            } catch (ProcessingException e) {
                 error[0] = e.getCause().getMessage();
             } finally {
                 assertEquals(error[0], "Invalid base64 char at pos 9: =.");
@@ -191,9 +191,9 @@ public class Base64Test {
                 error[0] = null;
             }
             try {
-                JieBytes.processor(s.getBytes(JieChars.latinCharset())).readBlockSize(1)
+                JieBytes.process(s.getBytes(JieChars.latinCharset())).readBlockSize(1)
                     .encoder(JieBase64.decoder().streamEncoder()).writeTo(new BytesBuilder());
-            } catch (IOEncodingException e) {
+            } catch (ProcessingException e) {
                 error[0] = e.getCause().getMessage();
             } finally {
                 assertEquals(error[0], "Invalid base64 char at pos 11: A.");
@@ -212,9 +212,9 @@ public class Base64Test {
                 error[0] = null;
             }
             try {
-                JieBytes.processor(s.getBytes(JieChars.latinCharset())).readBlockSize(1)
+                JieBytes.process(s.getBytes(JieChars.latinCharset())).readBlockSize(1)
                     .encoder(JieBase64.decoder().streamEncoder()).writeTo(new BytesBuilder());
-            } catch (IOEncodingException e) {
+            } catch (ProcessingException e) {
                 error[0] = e.getCause().getMessage();
             } finally {
                 assertEquals(error[0], "Invalid base64 tail, must be xx, xxx, xx== or xxx=.");

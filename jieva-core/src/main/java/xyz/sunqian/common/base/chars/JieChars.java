@@ -7,6 +7,7 @@ import xyz.sunqian.common.base.bytes.JieBytes;
 
 import java.io.Reader;
 import java.nio.BufferOverflowException;
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -97,10 +98,10 @@ public class JieChars {
     }
 
     /**
-     * Returns whether given buffer is null or empty.
+     * Returns whether the given buffer is null or empty.
      *
-     * @param buffer given buffer
-     * @return whether given buffer is null or empty
+     * @param buffer the given buffer
+     * @return whether the given buffer is null or empty
      */
     public static boolean isEmpty(@Nullable CharBuffer buffer) {
         return buffer == null || !buffer.hasRemaining();
@@ -125,33 +126,27 @@ public class JieChars {
     }
 
     /**
-     * Returns a new buffer (not direct) of which content copied from given data. This method is equivalent to
-     * ({@link #copyBuffer(char[], boolean)}):
-     * <pre>
-     *     return copy(data, false);
-     * </pre>
-     * The new buffer's position will be 0, limit and capacity will be length of given data, and it is not read-only.
+     * Returns a new buffer (not direct, not readonly) of which content copied from the given data. The new buffer's
+     * position will be 0, limit and capacity will be the length of the given data.
      *
-     * @param data given data
-     * @return a new buffer (not direct) of which content copied from given data
-     * @see #copyBuffer(char[], boolean)
+     * @param data the given data
+     * @return a new buffer (not direct, not readonly) of which content copied from the given data
      */
     public static CharBuffer copyBuffer(char[] data) {
         return copyBuffer(data, false);
     }
 
     /**
-     * Returns a new buffer of which content copied from given data. The buffer will be direct if specified direct
-     * option is {@code true}, otherwise be not. The new buffer's position will be 0, limit and capacity will be length
-     * of given data, and it is not read-only.
+     * Returns a new buffer (not readonly) of which content copied from the given data. The new buffer's
+     * position will be 0, limit and capacity will be the length of the given data.
      *
-     * @param data   given data
-     * @param direct specified direct option
-     * @return a new buffer of which content copied from given data
+     * @param data   the given data
+     * @param direct whether the returned buffer is direct
+     * @return a new buffer (not readonly) of which content copied from the given data
      */
     public static CharBuffer copyBuffer(char[] data, boolean direct) {
         if (direct) {
-            byte[] bytes = toBytes(data);
+            byte[] bytes = toBytes0(data);
             return JieBytes.copyBuffer(bytes, true).order(ByteOrder.BIG_ENDIAN).asCharBuffer();
         }
         CharBuffer buffer = CharBuffer.allocate(data.length);
@@ -160,7 +155,7 @@ public class JieChars {
         return buffer;
     }
 
-    private static byte[] toBytes(char[] data) {
+    private static byte[] toBytes0(char[] data) {
         byte[] bytes = new byte[data.length * 2];
         for (int i = 0; i < data.length; i++) {
             bytes[i * 2] = (byte) (data[i] >> 8);
@@ -170,16 +165,15 @@ public class JieChars {
     }
 
     /**
-     * Returns a new buffer of which content copied from given data. The buffer will be direct if given data is direct,
-     * otherwise be not. The position of given data will not be changed, rather than incremented by its remaining. The
-     * new buffer's position will be 0, limit and capacity will be length of given data, and it is not read-only.
+     * Returns a new buffer of which content copied from the given data. The direct and readonly options inherit the
+     * given data. The new buffer's position will be 0, limit and capacity will be the length of the given data.
      *
-     * @param data given data
-     * @return a new buffer (not direct) of which content copied from given data
+     * @param data the given data
+     * @return a new buffer of which content copied from the given data
      */
     public static CharBuffer copyBuffer(CharBuffer data) {
         if (data.isDirect()) {
-            byte[] bytes = toBytes(data);
+            byte[] bytes = toBytes0(data);
             return JieBytes.copyBuffer(bytes, true).order(ByteOrder.BIG_ENDIAN).asCharBuffer();
         }
         CharBuffer buffer = CharBuffer.allocate(data.remaining());
@@ -190,7 +184,7 @@ public class JieChars {
         return buffer;
     }
 
-    private static byte[] toBytes(CharBuffer data) {
+    private static byte[] toBytes0(CharBuffer data) {
         int size = data.remaining();
         byte[] bytes = new byte[size * 2];
         for (int i = 0; i < size; i++) {
@@ -314,7 +308,7 @@ public class JieChars {
      * @param data the specified data
      * @return a new {@link CharsProcessor}
      */
-    public static CharsProcessor processor(Reader data) {
+    public static CharsProcessor process(Reader data) {
         return new CharsProcessorImpl(data);
     }
 
@@ -324,7 +318,7 @@ public class JieChars {
      * @param data the specified data
      * @return a new {@link CharsProcessor}
      */
-    public static CharsProcessor processor(char[] data) {
+    public static CharsProcessor process(char[] data) {
         return new CharsProcessorImpl(data);
     }
 
@@ -338,13 +332,13 @@ public class JieChars {
      * @return a new {@link CharsProcessor}
      * @throws IndexOutOfBoundsException if an index is out of bounds
      */
-    public static CharsProcessor processor(char[] data, int offset, int length) throws IndexOutOfBoundsException {
+    public static CharsProcessor process(char[] data, int offset, int length) throws IndexOutOfBoundsException {
         JieCheck.checkOffsetLength(data, offset, length);
         if (offset == 0 && length == data.length) {
-            return processor(data);
+            return process(data);
         }
         CharBuffer buffer = CharBuffer.wrap(data, offset, length);
-        return processor(buffer);
+        return process(buffer);
     }
 
     /**
@@ -353,7 +347,7 @@ public class JieChars {
      * @param data the specified data
      * @return a new {@link CharsProcessor}
      */
-    public static CharsProcessor processor(CharBuffer data) {
+    public static CharsProcessor process(CharBuffer data) {
         return new CharsProcessorImpl(data);
     }
 
@@ -363,7 +357,7 @@ public class JieChars {
      * @param data the specified data
      * @return a new {@link CharsProcessor}
      */
-    public static CharsProcessor processor(CharSequence data) {
+    public static CharsProcessor process(CharSequence data) {
         return new CharsProcessorImpl(data);
     }
 
@@ -387,10 +381,9 @@ public class JieChars {
     }
 
     /**
-     * Returns a {@link CharsProcessor.Encoder} to round down incoming data for the given encoder, it is typically used
-     * for the encoder which requires consuming data in multiples of the specified size. The returned encoder rounds
-     * down incoming data to the largest multiple of the specified size and passes the rounded data to the given
-     * encoder. The remainder data will be buffered until enough data is received to round.
+     * Returns a {@link CharsProcessor.Encoder} that wraps the given encoder to round down incoming data. The returned
+     * encoder rounds down incoming data to the largest multiple of the specified size, and passes the rounded data to
+     * the given encoder. The remainder data will be buffered until enough data is received to round.
      * <p>
      * However, in the last invocation (when {@code end == true}), all remaining data will be passed directly to the
      * given encoder.
@@ -404,8 +397,8 @@ public class JieChars {
     }
 
     /**
-     * Returns a {@link CharsProcessor.Encoder} that buffers unconsumed data of the given encoder, it is typically used
-     * for the encoder which may not fully consume the passed data, requires buffering and consuming data in next
+     * Returns a {@link CharsProcessor.Encoder} that wraps the given encoder to buffer unconsumed data. It is typically
+     * used for the encoder which may not fully consume the passed data, requires buffering and consuming data in next
      * invocation. This encoder passes incoming data to the given encoder. The unconsumed remaining data after encoding
      * of the given encoder will be buffered and used in the next invocation.
      * <p>

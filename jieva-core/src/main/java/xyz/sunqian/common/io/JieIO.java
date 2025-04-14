@@ -1,5 +1,6 @@
 package xyz.sunqian.common.io;
 
+import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.bytes.JieBytes;
 import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.coll.JieArray;
@@ -56,7 +57,7 @@ public class JieIO {
                     return Arrays.copyOf(bytes, c);
                 }
             } else {
-                return JieBytes.processor(source).toByteArray();
+                return JieBytes.process(source).toByteArray();
             }
         } catch (IOException e) {
             throw new IORuntimeException(e);
@@ -113,7 +114,7 @@ public class JieIO {
      * @throws IORuntimeException if an I/O error occurs
      */
     public static char[] read(Reader source) throws IORuntimeException {
-        return JieChars.processor(source).toCharArray();
+        return JieChars.process(source).toCharArray();
     }
 
     /**
@@ -184,7 +185,7 @@ public class JieIO {
      */
     public static String string(Reader source, int number) throws IORuntimeException {
         StringBuilder builder = new StringBuilder();
-        JieChars.processor(source).readLimit(number).writeTo(builder);
+        JieChars.process(source).readLimit(number).writeTo(builder);
         return builder.toString();
     }
 
@@ -292,7 +293,7 @@ public class JieIO {
      * @throws IORuntimeException if an I/O error occurs
      */
     public static int readTo(InputStream source, byte[] dest) throws IORuntimeException {
-        return (int) JieBytes.processor(source).readLimit(dest.length).writeTo(dest);
+        return (int) JieBytes.process(source).readLimit(dest.length).writeTo(dest);
     }
 
     /**
@@ -305,7 +306,7 @@ public class JieIO {
      * @throws IORuntimeException if an I/O error occurs
      */
     public static int readTo(InputStream source, ByteBuffer dest) throws IORuntimeException {
-        return (int) JieBytes.processor(source).readLimit(dest.remaining()).writeTo(dest);
+        return (int) JieBytes.process(source).readLimit(dest.remaining()).writeTo(dest);
     }
 
     /**
@@ -318,7 +319,7 @@ public class JieIO {
      * @throws IORuntimeException if an I/O error occurs
      */
     public static long readTo(InputStream source, OutputStream dest) throws IORuntimeException {
-        return JieBytes.processor(source).writeTo(dest);
+        return JieBytes.process(source).writeTo(dest);
     }
 
     /**
@@ -331,7 +332,7 @@ public class JieIO {
      * @throws IORuntimeException if an I/O error occurs
      */
     public static int readTo(Reader source, char[] dest) throws IORuntimeException {
-        return (int) JieChars.processor(source).readLimit(dest.length).writeTo(dest);
+        return (int) JieChars.process(source).readLimit(dest.length).writeTo(dest);
     }
 
     /**
@@ -344,7 +345,7 @@ public class JieIO {
      * @throws IORuntimeException if an I/O error occurs
      */
     public static int readTo(Reader source, CharBuffer dest) throws IORuntimeException {
-        return (int) JieChars.processor(source).readLimit(dest.remaining()).writeTo(dest);
+        return (int) JieChars.process(source).readLimit(dest.remaining()).writeTo(dest);
     }
 
     /**
@@ -357,7 +358,7 @@ public class JieIO {
      * @throws IORuntimeException if an I/O error occurs
      */
     public static long readTo(Reader source, Appendable dest) throws IORuntimeException {
-        return JieChars.processor(source).writeTo(dest);
+        return JieChars.process(source).writeTo(dest);
     }
 
     //---------------- Common End ----------------//

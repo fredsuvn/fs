@@ -4,8 +4,11 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieCheck;
 import xyz.sunqian.common.base.JieString;
+import xyz.sunqian.common.base.exception.ProcessingException;
 import xyz.sunqian.common.coll.JieArray;
-import xyz.sunqian.common.io.*;
+import xyz.sunqian.common.io.IORuntimeException;
+import xyz.sunqian.common.io.JieBuffer;
+import xyz.sunqian.common.io.JieIO;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -49,7 +52,7 @@ final class CharsProcessorImpl implements CharsProcessor {
     @Override
     public CharsProcessor readBlockSize(int readBlockSize) {
         if (readBlockSize <= 0) {
-            throw new IORuntimeException("readBlockSize must > 0!");
+            throw new IllegalArgumentException("readBlockSize must > 0!");
         }
         this.readBlockSize = readBlockSize;
         return this;
@@ -144,7 +147,7 @@ final class CharsProcessorImpl implements CharsProcessor {
                 }
             }
             return startInBlock();
-        } catch (IOEncodingException e) {
+        } catch (ProcessingException e) {
             throw e;
         } catch (Exception e) {
             throw new IORuntimeException(e);
@@ -336,7 +339,7 @@ final class CharsProcessorImpl implements CharsProcessor {
                     }
                     return encoded;
                 }
-            } catch (IOEncodingException e) {
+            } catch (ProcessingException e) {
                 throw e;
             } catch (Exception e) {
                 throw new IORuntimeException(e);
@@ -380,7 +383,7 @@ final class CharsProcessorImpl implements CharsProcessor {
             try {
                 return encoder.encode(buf, end);
             } catch (Exception e) {
-                throw new IOEncodingException(e);
+                throw new ProcessingException(e);
             }
         }
     }

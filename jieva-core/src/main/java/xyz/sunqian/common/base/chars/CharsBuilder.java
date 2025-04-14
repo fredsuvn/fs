@@ -1,7 +1,9 @@
-package xyz.sunqian.common.io;
+package xyz.sunqian.common.base.chars;
 
 import xyz.sunqian.common.base.JieCheck;
-import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.io.IORuntimeException;
+import xyz.sunqian.common.io.JieBuffer;
+import xyz.sunqian.common.io.JieIO;
 
 import java.io.CharArrayWriter;
 import java.io.Reader;
@@ -258,6 +260,7 @@ public class CharsBuilder extends Writer implements CharSequence {
      *
      * @param reader the given reader
      * @return this builder
+     * @throws IORuntimeException if an I/O error occurs
      */
     public CharsBuilder append(Reader reader) throws IORuntimeException {
         return append(reader, JieIO.BUFFER_SIZE);

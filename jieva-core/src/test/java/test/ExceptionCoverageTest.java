@@ -2,12 +2,12 @@ package test;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.ShouldNotHappenException;
+import xyz.sunqian.common.base.exception.ProcessingException;
 import xyz.sunqian.common.codec.CodecException;
 import xyz.sunqian.common.crypto.CryptoException;
 import xyz.sunqian.common.encode.DecodingException;
 import xyz.sunqian.common.encode.EncodingException;
 import xyz.sunqian.common.invoke.InvocationException;
-import xyz.sunqian.common.io.IOEncodingException;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.objects.data.BeanException;
 import xyz.sunqian.common.objects.data.DataObjectException;
@@ -33,6 +33,10 @@ public class ExceptionCoverageTest {
         });
         expectThrows(ShouldNotHappenException.class, () -> {
             throw new ShouldNotHappenException(new RuntimeException());
+        });
+
+        expectThrows(ProcessingException.class, () -> {
+            throw new ProcessingException(new RuntimeException());
         });
 
         expectThrows(InvocationException.class, () -> {
@@ -110,18 +114,6 @@ public class ExceptionCoverageTest {
         });
         expectThrows(IORuntimeException.class, () -> {
             throw new IORuntimeException(new RuntimeException());
-        });
-        expectThrows(IOEncodingException.class, () -> {
-            throw new IOEncodingException();
-        });
-        expectThrows(IOEncodingException.class, () -> {
-            throw new IOEncodingException("");
-        });
-        expectThrows(IOEncodingException.class, () -> {
-            throw new IOEncodingException("", new RuntimeException());
-        });
-        expectThrows(IOEncodingException.class, () -> {
-            throw new IOEncodingException(new RuntimeException());
         });
 
         expectThrows(CodecException.class, () -> {

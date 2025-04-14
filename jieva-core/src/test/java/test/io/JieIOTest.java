@@ -5,7 +5,7 @@ import org.testng.annotations.Test;
 import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.base.bytes.JieBytes;
 import xyz.sunqian.common.base.chars.JieChars;
-import xyz.sunqian.common.io.BytesBuilder;
+import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieIO;
 
