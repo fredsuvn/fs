@@ -126,6 +126,33 @@ public class JieChars {
     }
 
     /**
+     * Returns a new heap buffer with the specified capacity. The new buffer's position will be 0, limit and capacity
+     * will be the specified capacity.
+     *
+     * @param capacity the specified capacity
+     * @return a new heap buffer with the specified capacity
+     */
+    public static CharBuffer buffer(int capacity) {
+        return buffer(capacity, false);
+    }
+
+    /**
+     * Returns a new buffer with the specified capacity. The new buffer's position will be 0, limit and capacity will be
+     * the specified capacity.
+     *
+     * @param capacity the specified capacity
+     * @param direct   whether the returned buffer is direct
+     * @return a new buffer with the specified capacity
+     */
+    public static CharBuffer buffer(int capacity, boolean direct) {
+        if (!direct) {
+            return CharBuffer.allocate(capacity);
+        }
+        ByteBuffer bytes = JieBytes.buffer(capacity * 2, true);
+        return bytes.order(ByteOrder.BIG_ENDIAN).asCharBuffer();
+    }
+
+    /**
      * Returns a new buffer (not direct, not readonly) of which content copied from the given data. The new buffer's
      * position will be 0, limit and capacity will be the length of the given data.
      *
@@ -137,8 +164,8 @@ public class JieChars {
     }
 
     /**
-     * Returns a new buffer (not readonly) of which content copied from the given data. The new buffer's
-     * position will be 0, limit and capacity will be the length of the given data.
+     * Returns a new buffer (not readonly) of which content copied from the given data. The new buffer's position will
+     * be 0, limit and capacity will be the length of the given data.
      *
      * @param data   the given data
      * @param direct whether the returned buffer is direct
@@ -300,7 +327,7 @@ public class JieChars {
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-    //---------------- Processors Begin ----------------//
+    //---------------- Process Begin ----------------//
 
     /**
      * Returns a new {@link CharsProcessor} to process the specified data.
@@ -411,5 +438,5 @@ public class JieChars {
         return new CharsProcessorImpl.BufferedEncoder(encoder);
     }
 
-    //---------------- Processors End ----------------//
+    //---------------- Process End ----------------//
 }

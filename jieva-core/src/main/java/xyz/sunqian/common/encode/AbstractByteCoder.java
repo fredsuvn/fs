@@ -185,8 +185,8 @@ public abstract class AbstractByteCoder implements ByteCoder {
         if (source.hasArray()) {
             doCodeResult = doCode(
                 source.array(),
-                JieBuffer.getArrayStartIndex(source),
-                JieBuffer.getArrayEndIndex(source),
+                JieBuffer.arrayStartIndex(source),
+                JieBuffer.arrayEndIndex(source),
                 dst,
                 0,
                 outputSize,
@@ -229,11 +229,11 @@ public abstract class AbstractByteCoder implements ByteCoder {
             int oldPos = source.position();
             long doCodeResult = doCode(
                 source.array(),
-                JieBuffer.getArrayStartIndex(source),
-                JieBuffer.getArrayEndIndex(source),
+                JieBuffer.arrayStartIndex(source),
+                JieBuffer.arrayEndIndex(source),
                 dest.array(),
-                JieBuffer.getArrayStartIndex(dest),
-                JieBuffer.getArrayStartIndex(dest) + outputSize,
+                JieBuffer.arrayStartIndex(dest),
+                JieBuffer.arrayStartIndex(dest) + outputSize,
                 startPos,
                 end
             );

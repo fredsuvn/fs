@@ -30,8 +30,7 @@ public class JieBuffer {
      * @throws ReadOnlyBufferException       If the buffer is backed by an array but is read-only
      * @throws UnsupportedOperationException If the buffer is not backed by an accessible array
      */
-    public static int getArrayStartIndex(Buffer buffer)
-        throws ReadOnlyBufferException, UnsupportedOperationException {
+    public static int arrayStartIndex(Buffer buffer) throws ReadOnlyBufferException, UnsupportedOperationException {
         return buffer.arrayOffset() + buffer.position();
     }
 
@@ -43,10 +42,12 @@ public class JieBuffer {
      * @throws ReadOnlyBufferException       If the buffer is backed by an array but is read-only
      * @throws UnsupportedOperationException If the buffer is not backed by an accessible array
      */
-    public static int getArrayEndIndex(Buffer buffer)
-        throws ReadOnlyBufferException, UnsupportedOperationException {
+    public static int arrayEndIndex(Buffer buffer) throws ReadOnlyBufferException, UnsupportedOperationException {
         return buffer.arrayOffset() + buffer.position() + buffer.remaining();
     }
+
+
+    //------------------------------------------------------------
 
     /**
      * Reads all bytes from source buffer into an array. Returns the array, or null if no data read out and reaches to

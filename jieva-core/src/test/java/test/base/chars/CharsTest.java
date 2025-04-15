@@ -1,7 +1,6 @@
 package test.base.chars;
 
 import org.testng.annotations.Test;
-import test.TU;
 import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.base.JieSystem;
 import xyz.sunqian.common.base.chars.JieChars;
@@ -11,9 +10,29 @@ import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotSame;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
+import static xyz.sunqian.test.MaterialBox.paddedBuffer;
 
 public class CharsTest {
+
+    @Test
+    public void testCreateBuffer() {
+        CharBuffer buffer = JieChars.buffer(100, true);
+        assertTrue(buffer.isDirect());
+        assertEquals(buffer.position(), 0);
+        assertEquals(buffer.limit(), 100);
+        assertEquals(buffer.capacity(), 100);
+        buffer = JieChars.buffer(100);
+        assertFalse(buffer.isDirect());
+        assertEquals(buffer.position(), 0);
+        assertEquals(buffer.limit(), 100);
+        assertEquals(buffer.capacity(), 100);
+    }
 
     @Test
     public void testChars() throws Exception {
@@ -61,7 +80,7 @@ public class CharsTest {
             assertEquals(bufferDir.remaining(), chars.length);
             assertEquals(JieChars.getChars(bufferDir), chars);
             assertEquals(bufferDir.remaining(), 0);
-            CharBuffer src = TU.bufferDangling(chars);
+            CharBuffer src = paddedBuffer(chars);
             CharBuffer dst = CharBuffer.allocate(chars.length * 2);
             JieChars.putBuffer(src, dst, chars.length);
             dst.flip();
@@ -69,7 +88,7 @@ public class CharsTest {
             assertEquals(JieChars.getChars(dst), chars);
             assertEquals(dst.remaining(), 0);
             assertEquals(src.remaining(), 0);
-            src = TU.bufferDangling(chars);
+            src = paddedBuffer(chars);
             CharBuffer slice = JieChars.slice(src, 2, 222);
             assertEquals(src.position(), 0);
             assertEquals(src.limit(), chars.length);

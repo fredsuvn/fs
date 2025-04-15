@@ -1,8 +1,8 @@
 package test.base.chars;
 
 import org.jetbrains.annotations.NotNull;
+import org.testng.TestException;
 import org.testng.annotations.Test;
-import test.TU;
 import xyz.sunqian.common.base.JieMath;
 import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.base.JieString;
@@ -12,8 +12,6 @@ import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.base.exception.ProcessingException;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieIO;
-import xyz.sunqian.test.JieTest;
-import xyz.sunqian.test.JieTestException;
 
 import java.io.CharArrayReader;
 import java.io.IOException;
@@ -23,7 +21,14 @@ import java.lang.reflect.Method;
 import java.nio.CharBuffer;
 import java.util.Arrays;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.expectThrows;
+import static xyz.sunqian.test.JieTest.reflectThrows;
+import static xyz.sunqian.test.MaterialBox.heapBuffer;
+import static xyz.sunqian.test.MaterialBox.paddedBuffer;
 
 public class CharsProcessorTest {
 
@@ -144,9 +149,9 @@ public class CharsProcessorTest {
         expectThrows(IORuntimeException.class, () -> JieChars.process(new char[0]).writeTo((Appendable) null));
         expectThrows(IORuntimeException.class, () -> JieChars.process((Reader) null).writeTo(new char[0]));
         Method method = JieChars.process(new char[0]).getClass().getDeclaredMethod("toBufferIn", Object.class);
-        JieTest.reflectThrows(IORuntimeException.class, method, JieChars.process(new char[0]), 1);
+        reflectThrows(IORuntimeException.class, method, JieChars.process(new char[0]), 1);
         method = JieChars.process(new char[0]).getClass().getDeclaredMethod("toBufferOut", Object.class);
-        JieTest.reflectThrows(IORuntimeException.class, method, JieChars.process(new char[0]), "");
+        reflectThrows(IORuntimeException.class, method, JieChars.process(new char[0]), "");
         expectThrows(IORuntimeException.class, () -> JieChars.process(new ThrowReader(0)).writeTo(new char[0]));
         expectThrows(IORuntimeException.class, () -> JieChars.process(new ThrowReader(1)).writeTo(new char[0]));
     }
@@ -317,7 +322,7 @@ public class CharsProcessorTest {
 
         {
             // buffer -> stream
-            CharBuffer inBuffer = TU.buffer(chars);
+            CharBuffer inBuffer = heapBuffer(chars);
             inBuffer.mark();
             CharsBuilder out = new CharsBuilder();
             long readNum = JieChars.process(inBuffer).readBlockSize(blockSize).readLimit(readLimit).writeTo(out);
@@ -335,8 +340,8 @@ public class CharsProcessorTest {
                 str.substring(0, getLength(chars.length, readLimit)),
                 new String(out.toCharArray(), 0, getLength(chars.length, readLimit))
             );
-            CharBuffer arrayIn = TU.bufferDangling(chars);
-            CharBuffer arrayOut = TU.bufferDangling(new char[chars.length]);
+            CharBuffer arrayIn = paddedBuffer(chars);
+            CharBuffer arrayOut = paddedBuffer(new char[chars.length]);
             readNum = JieChars.process(arrayIn).readBlockSize(blockSize).readLimit(readLimit).writeTo(arrayOut);
             assertEquals(readNum, getLength(chars.length, readLimit));
             arrayOut.flip();
@@ -358,7 +363,7 @@ public class CharsProcessorTest {
 
         {
             // buffer -> char[]
-            CharBuffer inBuffer = TU.buffer(chars);
+            CharBuffer inBuffer = heapBuffer(chars);
             inBuffer.mark();
             char[] outChars = new char[chars.length];
             long readNum = JieChars.process(inBuffer).readBlockSize(blockSize).writeTo(outChars);
@@ -376,7 +381,7 @@ public class CharsProcessorTest {
 
         {
             // buffer -> appender
-            CharBuffer inBuffer = TU.bufferDangling(chars);
+            CharBuffer inBuffer = paddedBuffer(chars);
             inBuffer.mark();
             CharsBuilder appender = new CharsBuilder();
             long readNum = JieChars.process(inBuffer).readBlockSize(blockSize).writeTo(appender);
@@ -394,7 +399,7 @@ public class CharsProcessorTest {
 
         {
             // buffer -> buffer
-            CharBuffer inBuffer = TU.bufferDangling(chars);
+            CharBuffer inBuffer = paddedBuffer(chars);
             inBuffer.mark();
             CharBuffer outBuffer = JieChars.copyBuffer(dirBuffer);
             long readNum = JieChars.process(inBuffer).readBlockSize(blockSize).writeTo(outBuffer);
@@ -492,12 +497,12 @@ public class CharsProcessorTest {
             Throwable[] ts = new Throwable[1];
             try {
                 JieChars.process(new char[100]).encoder((data, end) -> {
-                    throw new JieTestException("haha");
+                    throw new TestException("haha");
                 }).writeTo(new char[100]);
             } catch (ProcessingException e) {
                 ts[0] = e;
             }
-            assertEquals(ts[0].getCause().getClass(), JieTestException.class);
+            assertEquals(ts[0].getCause().getClass(), TestException.class);
             assertEquals(ts[0].getCause().getMessage(), "haha");
         }
     }

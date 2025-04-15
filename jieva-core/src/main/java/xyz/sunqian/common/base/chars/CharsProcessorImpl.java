@@ -546,8 +546,8 @@ final class CharsProcessorImpl implements CharsProcessor {
                 int remaining = buffer.remaining();
                 dest.append(JieString.asChars(
                     buffer.array(),
-                    JieBuffer.getArrayStartIndex(buffer),
-                    JieBuffer.getArrayEndIndex(buffer)
+                    JieBuffer.arrayStartIndex(buffer),
+                    JieBuffer.arrayEndIndex(buffer)
                 ));
                 buffer.position(buffer.position() + remaining);
             } else {
@@ -560,7 +560,7 @@ final class CharsProcessorImpl implements CharsProcessor {
         private void write(CharBuffer buffer, Writer writer) throws IOException {
             if (buffer.hasArray()) {
                 int remaining = buffer.remaining();
-                writer.write(buffer.array(), JieBuffer.getArrayStartIndex(buffer), remaining);
+                writer.write(buffer.array(), JieBuffer.arrayStartIndex(buffer), remaining);
                 buffer.position(buffer.position() + remaining);
             } else {
                 char[] buf = new char[buffer.remaining()];

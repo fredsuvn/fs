@@ -1,21 +1,34 @@
 package test.base.bytes;
 
 import org.testng.annotations.Test;
-import test.TU;
 import xyz.sunqian.common.base.JieRandom;
-import xyz.sunqian.common.base.JieSystem;
 import xyz.sunqian.common.base.bytes.JieBytes;
-import xyz.sunqian.common.base.chars.JieChars;
 
-import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotSame;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
+import static xyz.sunqian.test.MaterialBox.paddedBuffer;
 
 public class BytesTest {
+
+    @Test
+    public void testCreateBuffer() {
+        ByteBuffer buffer = JieBytes.buffer(100, true);
+        assertTrue(buffer.isDirect());
+        assertEquals(buffer.position(), 0);
+        assertEquals(buffer.limit(), 100);
+        assertEquals(buffer.capacity(), 100);
+        buffer = JieBytes.buffer(100);
+        assertFalse(buffer.isDirect());
+        assertEquals(buffer.position(), 0);
+        assertEquals(buffer.limit(), 100);
+        assertEquals(buffer.capacity(), 100);
+    }
 
     @Test
     public void testBytes() {
@@ -63,7 +76,7 @@ public class BytesTest {
             assertEquals(bufferDir.remaining(), bytes.length);
             assertEquals(JieBytes.getBytes(bufferDir), bytes);
             assertEquals(bufferDir.remaining(), 0);
-            ByteBuffer src = TU.bufferDangling(bytes);
+            ByteBuffer src = paddedBuffer(bytes);
             ByteBuffer dst = ByteBuffer.allocateDirect(bytes.length * 2);
             JieBytes.putBuffer(src, dst, bytes.length);
             dst.flip();
@@ -71,7 +84,7 @@ public class BytesTest {
             assertEquals(JieBytes.getBytes(dst), bytes);
             assertEquals(dst.remaining(), 0);
             assertEquals(src.remaining(), 0);
-            src = TU.bufferDangling(bytes);
+            src = paddedBuffer(bytes);
             ByteBuffer slice = JieBytes.slice(src, 2, 222);
             assertEquals(src.position(), 0);
             assertEquals(src.limit(), bytes.length);

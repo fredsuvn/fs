@@ -478,7 +478,7 @@ final class BytesProcessorImpl implements BytesProcessor {
         public void write(ByteBuffer buffer) throws IOException {
             if (buffer.hasArray()) {
                 int remaining = buffer.remaining();
-                dest.write(buffer.array(), JieBuffer.getArrayStartIndex(buffer), remaining);
+                dest.write(buffer.array(), JieBuffer.arrayStartIndex(buffer), remaining);
                 buffer.position(buffer.position() + remaining);
             } else {
                 byte[] buf = new byte[buffer.remaining()];

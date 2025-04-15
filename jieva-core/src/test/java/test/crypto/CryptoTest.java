@@ -2,7 +2,6 @@ package test.crypto;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.testng.annotations.Test;
-import test.TU;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
@@ -18,12 +17,17 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import java.lang.reflect.Method;
-import java.security.*;
+import java.security.Key;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
+import java.security.Provider;
 import java.util.Arrays;
 import java.util.Base64;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.expectThrows;
+import static xyz.sunqian.test.MaterialBox.directBuffer;
 
 public class CryptoTest {
 
@@ -80,7 +84,7 @@ public class CryptoTest {
         // de
         cipher.init(Cipher.DECRYPT_MODE, deKey);
         byte[] jieDe = JieBytes.process(javaEn)
-            .encoder(((data, end) -> TU.bufferDirect(JieBytes.getBytes(data))))
+            .encoder(((data, end) -> directBuffer(JieBytes.getBytes(data))))
             .encoder(JieCrypto.encoder(cipher, Math.abs(deBlock), deBlock <= 0)).toByteArray();
         assertEquals(jieDe, src);
         cipher.init(Cipher.DECRYPT_MODE, deKey);
@@ -145,7 +149,7 @@ public class CryptoTest {
             byte[] jieEn1 = JieBytes.process(src).encoder(JieCrypto.encoder(digest, blockSize)).toByteArray();
             assertEquals(jieEn1, javaEn);
             byte[] jieEn2 = JieBytes.process(src)
-                .encoder(((data, end) -> TU.bufferDirect(JieBytes.getBytes(data))))
+                .encoder(((data, end) -> directBuffer(JieBytes.getBytes(data))))
                 .encoder(JieCrypto.encoder(digest, blockSize))
                 .toByteArray();
             assertEquals(jieEn2, javaEn);
@@ -161,7 +165,7 @@ public class CryptoTest {
             byte[] jieEn1 = JieBytes.process(src).encoder(JieCrypto.encoder(mac, blockSize)).toByteArray();
             assertEquals(jieEn1, javaEn);
             byte[] jieEn2 = JieBytes.process(src)
-                .encoder(((data, end) -> TU.bufferDirect(JieBytes.getBytes(data))))
+                .encoder(((data, end) -> directBuffer(JieBytes.getBytes(data))))
                 .encoder(JieCrypto.encoder(mac, blockSize))
                 .toByteArray();
             assertEquals(jieEn2, javaEn);

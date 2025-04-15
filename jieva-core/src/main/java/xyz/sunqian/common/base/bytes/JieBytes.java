@@ -17,7 +17,7 @@ public class JieBytes {
     private static final byte[] EMPTY_BYTES = new byte[0];
     private static final ByteBuffer EMPTY_BUFFER = ByteBuffer.wrap(EMPTY_BYTES);
 
-    //---------------- Common Begin ----------------//
+    //---------------- Bytes Begin ----------------//
 
     /**
      * Returns whether the given buffer is null or empty.
@@ -46,6 +46,30 @@ public class JieBytes {
     public static ByteBuffer emptyBuffer() {
         return EMPTY_BUFFER;
     }
+
+    /**
+     * Returns a new heap buffer with the specified capacity. The new buffer's position will be 0, limit and capacity
+     * will be the specified capacity.
+     *
+     * @param capacity the specified capacity
+     * @return a new heap buffer with the specified capacity
+     */
+    public static ByteBuffer buffer(int capacity) {
+        return buffer(capacity, false);
+    }
+
+    /**
+     * Returns a new buffer with the specified capacity. The new buffer's position will be 0, limit and capacity will be
+     * the specified capacity.
+     *
+     * @param capacity the specified capacity
+     * @param direct   whether the returned buffer is direct
+     * @return a new buffer with the specified capacity
+     */
+    public static ByteBuffer buffer(int capacity, boolean direct) {
+        return direct ? ByteBuffer.allocateDirect(capacity) : ByteBuffer.allocate(capacity);
+    }
+
 
     /**
      * Returns a new buffer (not direct, not readonly) of which content copied from the given data. The new buffer's
@@ -134,6 +158,10 @@ public class JieBytes {
         source.position(source.position() + length);
     }
 
+    public static ByteBuffer slice(ByteBuffer buffer, int length) throws IllegalArgumentException {
+        return slice(buffer, 0, length);
+    }
+
     /**
      * Returns a new buffer whose content is a shared subsequence of given buffer's content. The content of the new
      * buffer will start at specified offset from given buffer's current position, up to specified length. Changes to
@@ -165,12 +193,12 @@ public class JieBytes {
         return slice;
     }
 
-    //---------------- Common End ----------------//
+    //---------------- Bytes End ----------------//
 
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-    //---------------- Processors Begin ----------------//
+    //---------------- Process Begin ----------------//
 
     /**
      * Returns a new {@link BytesProcessor} to process the specified data.
@@ -270,5 +298,5 @@ public class JieBytes {
         return new BytesProcessorImpl.BufferedEncoder(encoder);
     }
 
-    //---------------- Processors End ----------------//
+    //---------------- Process End ----------------//
 }

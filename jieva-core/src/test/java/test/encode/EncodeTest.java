@@ -1,18 +1,19 @@
 package test.encode;
 
-import test.TU;
+import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.bytes.JieBytes;
 import xyz.sunqian.common.encode.ByteDecoder;
 import xyz.sunqian.common.encode.ByteEncoder;
 import xyz.sunqian.common.encode.DecodingException;
 import xyz.sunqian.common.encode.EncodingException;
-import xyz.sunqian.common.base.bytes.BytesBuilder;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.expectThrows;
+import static xyz.sunqian.test.MaterialBox.directBuffer;
+import static xyz.sunqian.test.MaterialBox.paddedBuffer;
 
 public class EncodeTest {
 
@@ -31,9 +32,9 @@ public class EncodeTest {
             // -> buffer
             ByteBuffer encoded = encoder.encode(ByteBuffer.wrap(source));
             assertEquals(encoded, ByteBuffer.wrap(target));
-            encoded = encoder.encode(TU.bufferDangling(source));
+            encoded = encoder.encode(paddedBuffer(source));
             assertEquals(encoded, ByteBuffer.wrap(target));
-            encoded = encoder.encode(TU.bufferDirect(source));
+            encoded = encoder.encode(directBuffer(source));
             assertEquals(encoded, ByteBuffer.wrap(target));
         }
         {
@@ -48,38 +49,38 @@ public class EncodeTest {
             encoder.encode(ByteBuffer.wrap(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
-            dst = TU.bufferDangling(new byte[target.length]);
+            dst = paddedBuffer(new byte[target.length]);
             encoder.encode(ByteBuffer.wrap(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
-            dst = TU.bufferDirect(new byte[target.length]);
+            dst = directBuffer(new byte[target.length]);
             encoder.encode(ByteBuffer.wrap(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
 
             dst = ByteBuffer.allocate(target.length);
-            encoder.encode(TU.bufferDangling(source), dst);
+            encoder.encode(paddedBuffer(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
-            dst = TU.bufferDangling(new byte[target.length]);
-            encoder.encode(TU.bufferDangling(source), dst);
+            dst = paddedBuffer(new byte[target.length]);
+            encoder.encode(paddedBuffer(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
-            dst = TU.bufferDirect(new byte[target.length]);
-            encoder.encode(TU.bufferDangling(source), dst);
+            dst = directBuffer(new byte[target.length]);
+            encoder.encode(paddedBuffer(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
 
             dst = ByteBuffer.allocate(target.length);
-            encoder.encode(TU.bufferDirect(source), dst);
+            encoder.encode(directBuffer(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
-            dst = TU.bufferDangling(new byte[target.length]);
-            encoder.encode(TU.bufferDirect(source), dst);
+            dst = paddedBuffer(new byte[target.length]);
+            encoder.encode(directBuffer(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
-            dst = TU.bufferDirect(new byte[target.length]);
-            encoder.encode(TU.bufferDirect(source), dst);
+            dst = directBuffer(new byte[target.length]);
+            encoder.encode(directBuffer(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
         }
@@ -120,9 +121,9 @@ public class EncodeTest {
             // -> buffer
             ByteBuffer decoded = decoder.decode(ByteBuffer.wrap(source));
             assertEquals(decoded, ByteBuffer.wrap(target));
-            decoded = decoder.decode(TU.bufferDangling(source));
+            decoded = decoder.decode(paddedBuffer(source));
             assertEquals(decoded, ByteBuffer.wrap(target));
-            decoded = decoder.decode(TU.bufferDirect(source));
+            decoded = decoder.decode(directBuffer(source));
             assertEquals(decoded, ByteBuffer.wrap(target));
         }
         {
@@ -137,38 +138,38 @@ public class EncodeTest {
             decoder.decode(ByteBuffer.wrap(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
-            dst = TU.bufferDangling(new byte[target.length]);
+            dst = paddedBuffer(new byte[target.length]);
             decoder.decode(ByteBuffer.wrap(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
-            dst = TU.bufferDirect(new byte[target.length]);
+            dst = directBuffer(new byte[target.length]);
             decoder.decode(ByteBuffer.wrap(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
 
             dst = ByteBuffer.allocate(target.length);
-            decoder.decode(TU.bufferDangling(source), dst);
+            decoder.decode(paddedBuffer(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
-            dst = TU.bufferDangling(new byte[target.length]);
-            decoder.decode(TU.bufferDangling(source), dst);
+            dst = paddedBuffer(new byte[target.length]);
+            decoder.decode(paddedBuffer(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
-            dst = TU.bufferDirect(new byte[target.length]);
-            decoder.decode(TU.bufferDangling(source), dst);
+            dst = directBuffer(new byte[target.length]);
+            decoder.decode(paddedBuffer(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
 
             dst = ByteBuffer.allocate(target.length);
-            decoder.decode(TU.bufferDirect(source), dst);
+            decoder.decode(directBuffer(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
-            dst = TU.bufferDangling(new byte[target.length]);
-            decoder.decode(TU.bufferDirect(source), dst);
+            dst = paddedBuffer(new byte[target.length]);
+            decoder.decode(directBuffer(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
-            dst = TU.bufferDirect(new byte[target.length]);
-            decoder.decode(TU.bufferDirect(source), dst);
+            dst = directBuffer(new byte[target.length]);
+            decoder.decode(directBuffer(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
         }

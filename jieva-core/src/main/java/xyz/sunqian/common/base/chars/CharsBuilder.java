@@ -246,7 +246,7 @@ public class CharsBuilder extends Writer implements CharSequence {
             return this;
         }
         if (chars.hasArray()) {
-            write(chars.array(), JieBuffer.getArrayStartIndex(chars), chars.remaining());
+            write(chars.array(), JieBuffer.arrayStartIndex(chars), chars.remaining());
             chars.position(chars.position() + chars.remaining());
         } else {
             char[] remaining = JieChars.getChars(chars);

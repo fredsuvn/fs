@@ -1,8 +1,8 @@
 package test.base.bytes;
 
 import org.jetbrains.annotations.NotNull;
+import org.testng.TestException;
 import org.testng.annotations.Test;
-import test.TU;
 import xyz.sunqian.common.base.JieMath;
 import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
@@ -12,15 +12,23 @@ import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.base.exception.ProcessingException;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieIO;
-import xyz.sunqian.test.JieTest;
-import xyz.sunqian.test.JieTestException;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.expectThrows;
+import static xyz.sunqian.test.JieTest.reflectThrows;
+import static xyz.sunqian.test.MaterialBox.paddedBuffer;
 
 public class BytesProcessorTest {
 
@@ -131,9 +139,9 @@ public class BytesProcessorTest {
         expectThrows(IORuntimeException.class, () -> JieBytes.process(new byte[0]).writeTo((OutputStream) null));
         expectThrows(IORuntimeException.class, () -> JieBytes.process((InputStream) null).writeTo(new byte[0]));
         Method method = JieBytes.process(new byte[0]).getClass().getDeclaredMethod("toBufferIn", Object.class);
-        JieTest.reflectThrows(IORuntimeException.class, method, JieBytes.process(new byte[0]), "");
+        reflectThrows(IORuntimeException.class, method, JieBytes.process(new byte[0]), "");
         method = JieBytes.process(new byte[0]).getClass().getDeclaredMethod("toBufferOut", Object.class);
-        JieTest.reflectThrows(IORuntimeException.class, method, JieBytes.process(new byte[0]), "");
+        reflectThrows(IORuntimeException.class, method, JieBytes.process(new byte[0]), "");
         expectThrows(IORuntimeException.class, () -> JieBytes.process(new ThrowIn(0)).writeTo(new byte[0]));
         expectThrows(IORuntimeException.class, () -> JieBytes.process(new ThrowIn(1)).writeTo(new byte[0]));
     }
@@ -181,7 +189,7 @@ public class BytesProcessorTest {
             outBuffer.flip();
             byte[] outBytes = JieBytes.getBytes(outBuffer);
             assertEquals(str, new String(outBytes, JieChars.defaultCharset()));
-            outBuffer = TU.bufferDangling(bytes);
+            outBuffer = paddedBuffer(bytes);
             in.reset();
             readNum = JieBytes.process(in).readBlockSize(blockSize).writeTo(outBuffer);
             assertEquals(readNum, bytes.length);
@@ -261,7 +269,7 @@ public class BytesProcessorTest {
                 str.substring(0, getLength(bytes.length, readLimit)),
                 new String(out.toByteArray(), 0, getLength(bytes.length, readLimit), JieChars.defaultCharset())
             );
-            ByteBuffer inArray = TU.bufferDangling(bytes);
+            ByteBuffer inArray = paddedBuffer(bytes);
             out.reset();
             readNum = JieBytes.process(inArray).readBlockSize(blockSize).readLimit(readLimit).writeTo(out);
             assertEquals(readNum, getLength(bytes.length, readLimit));
@@ -288,15 +296,15 @@ public class BytesProcessorTest {
 
         {
             // buffer -> buffer
-            ByteBuffer inBuffer = TU.bufferDangling(bytes);
+            ByteBuffer inBuffer = paddedBuffer(bytes);
             ByteBuffer outBuffer = ByteBuffer.allocateDirect(bytes.length);
             long readNum = JieBytes.process(inBuffer).readBlockSize(blockSize).readLimit(readLimit).writeTo(outBuffer);
             assertEquals(readNum, getLength(totalSize, readLimit));
             inBuffer.flip();
             outBuffer.flip();
             assertEquals(JieBytes.getBytes(inBuffer), JieBytes.getBytes(outBuffer));
-            inBuffer = TU.bufferDangling(bytes);
-            outBuffer = TU.bufferDangling(bytes);
+            inBuffer = paddedBuffer(bytes);
+            outBuffer = paddedBuffer(bytes);
             readNum = JieBytes.process(inBuffer).readBlockSize(blockSize).readLimit(readLimit).writeTo(outBuffer);
             assertEquals(readNum, getLength(totalSize, readLimit));
             inBuffer.flip();
@@ -343,12 +351,12 @@ public class BytesProcessorTest {
             Throwable[] ts = new Throwable[1];
             try {
                 JieBytes.process(new byte[100]).encoder((data, end) -> {
-                    throw new JieTestException("haha");
+                    throw new TestException("haha");
                 }).writeTo(new byte[100]);
             } catch (ProcessingException e) {
                 ts[0] = e;
             }
-            assertEquals(ts[0].getCause().getClass(), JieTestException.class);
+            assertEquals(ts[0].getCause().getClass(), TestException.class);
             assertEquals(ts[0].getCause().getMessage(), "haha");
         }
     }
