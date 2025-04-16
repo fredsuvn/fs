@@ -156,10 +156,11 @@ public interface CharProcessor {
      * Size of passed data is uncertain. If it is the first encoder, the size may match the {@link #readBlockSize(int)}.
      * (except for the last reading, which may be smaller than the read block size).
      * <p>
-     * Passed {@link CharBuffer} object, which is the first argument of {@link CharEncoder#encode(CharBuffer, boolean)},
-     * can be read-only (for example, when the source is a reader), or writable (for example, when the source is a char
-     * array or char buffer), and will be discarded after each invocation. The returned {@link CharBuffer} will be
-     * treated as read-only;
+     * The passed input data, which is the first argument of the {@link CharEncoder#encode(CharBuffer, boolean)},
+     * depends on the encoder's upstream. If the upstream is the data source of this processor (i.e., it is the first
+     * encoder), the data's size is determined by the {@link #readBlockSize(int)} method, and the data can be writeable
+     * if the source is an array or writeable buffer. Otherwise, the data is the result of the previous encoder, and the
+     * write ability is defined by the previous encoder.
      * <p>
      * This is an optional setting method. There are also more specific encoder wrappers available, such as:
      * <ul>
