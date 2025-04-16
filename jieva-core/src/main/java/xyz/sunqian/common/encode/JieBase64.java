@@ -2,7 +2,8 @@ package xyz.sunqian.common.encode;
 
 import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.UnreachablePointException;
-import xyz.sunqian.common.base.bytes.BytesProcessor;
+import xyz.sunqian.common.base.bytes.ByteEncoder;
+import xyz.sunqian.common.base.bytes.ByteProcessor;
 
 import java.util.Arrays;
 
@@ -161,12 +162,12 @@ public class JieBase64 {
     }
 
     /**
-     * The implementation of {@link ByteEncoder} for {@code base64} encoding, thread-safe.
+     * The implementation of {@link DataEncoder} for {@code base64} encoding, thread-safe.
      *
      * @author sunqian
      */
     @ThreadSafe
-    public interface Encoder extends ByteEncoder.ToLatin {
+    public interface Encoder extends DataEncoder.ToLatin {
 
         /**
          * Returns -1. The {@code base64} doesn't require encoding in blocks.
@@ -189,24 +190,24 @@ public class JieBase64 {
         int getOutputSize(int inputSize) throws EncodingException;
 
         /**
-         * Returns a new {@link BytesProcessor.Encoder} which encapsulates current base64 encoding, supports any size of
-         * input data, not thread-safe.
+         * Returns a new {@link ByteEncoder} which encapsulates current base64 encoding, supports any size of input
+         * data, not thread-safe.
          *
-         * @return a {@link BytesProcessor.Encoder} with current base64 encoding logic
-         * @see BytesProcessor
-         * @see BytesProcessor.Encoder
+         * @return a {@link ByteEncoder} with current base64 encoding logic
+         * @see ByteProcessor
+         * @see ByteEncoder
          */
         @Override
-        BytesProcessor.Encoder streamEncoder();
+        ByteEncoder streamEncoder();
     }
 
     /**
-     * The implementation of {@link ByteEncoder} for {@code base64} decoding, thread-safe.
+     * The implementation of {@link DataEncoder} for {@code base64} decoding, thread-safe.
      *
      * @author sunqian
      */
     @ThreadSafe
-    public interface Decoder extends ByteDecoder.FromLatin {
+    public interface Decoder extends DataDecoder.FromLatin {
 
         /**
          * Returns -1. The {@code base64} decoding may not determine block size.
@@ -229,18 +230,18 @@ public class JieBase64 {
         int getOutputSize(int inputSize) throws DecodingException;
 
         /**
-         * Returns a new {@link BytesProcessor.Encoder} which encapsulates current base64 decoding, supports any size of
-         * input data, not thread-safe.
+         * Returns a new {@link ByteEncoder} which encapsulates current base64 decoding, supports any size of input
+         * data, not thread-safe.
          *
-         * @return a {@link BytesProcessor.Encoder} with current base64 decoding logic
-         * @see BytesProcessor
-         * @see BytesProcessor.Encoder
+         * @return a {@link ByteEncoder} with current base64 decoding logic
+         * @see ByteProcessor
+         * @see ByteEncoder
          */
         @Override
-        BytesProcessor.Encoder streamEncoder();
+        ByteEncoder streamEncoder();
     }
 
-    private static abstract class AbsEncoder extends AbstractByteCoder.En implements Encoder {
+    private static abstract class AbsEncoder extends AbstractBaseDataEncoder.En implements Encoder {
 
         private static final char[] DICT = {
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
@@ -547,7 +548,7 @@ public class JieBase64 {
         }
     }
 
-    private static abstract class AbsDecoder extends AbstractByteCoder.De implements Decoder {
+    private static abstract class AbsDecoder extends AbstractBaseDataEncoder.De implements Decoder {
 
         protected static final byte[] DICT = new byte[Byte.MAX_VALUE];
 

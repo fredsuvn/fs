@@ -1,16 +1,17 @@
 package xyz.sunqian.common.encode;
 
-import xyz.sunqian.common.base.bytes.BytesProcessor;
+import xyz.sunqian.common.base.bytes.ByteEncoder;
+import xyz.sunqian.common.base.bytes.ByteProcessor;
 
 /**
- * This interface acts as a base for {@link ByteEncoder} and {@link ByteDecoder}, which are used for encoding and
+ * This interface acts as a base for {@link DataEncoder} and {@link DataDecoder}, which are used for encoding and
  * decoding in bytes respectively.
  *
  * @author sunqian
- * @see ByteEncoder
- * @see ByteDecoder
+ * @see DataEncoder
+ * @see DataDecoder
  */
-public interface ByteCoder {
+public interface BaseDataEncoder {
 
     /**
      * This method is used to estimate the output size in bytes of input data of specified size after encoding/decoding.
@@ -33,15 +34,15 @@ public interface ByteCoder {
     int getBlockSize();
 
     /**
-     * Returns a {@link BytesProcessor.Encoder} which encapsulates current encoding/decoding algorithm for processing
-     * within {@link BytesProcessor}.
+     * Returns a {@link ByteEncoder} which encapsulates current encoding/decoding algorithm for processing within
+     * {@link ByteProcessor}.
      * <p>
-     * Note that different {@link BytesProcessor.Encoder} implementations may have specific requirements, such as
-     * specified block size, for the data to be encoded/decoded.
+     * Note that different {@link ByteEncoder} implementations may have specific requirements, such as specified block
+     * size, for the data to be encoded/decoded.
      *
-     * @return a {@link BytesProcessor.Encoder} encapsulates current encoding/decoding algorithm
-     * @see BytesProcessor
-     * @see BytesProcessor.Encoder
+     * @return a {@link ByteEncoder} encapsulates current encoding/decoding algorithm
+     * @see ByteProcessor
+     * @see ByteEncoder
      */
-    BytesProcessor.Encoder streamEncoder();
+    ByteEncoder streamEncoder();
 }

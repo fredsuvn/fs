@@ -1,6 +1,5 @@
 package xyz.sunqian.common.base.chars;
 
-import xyz.sunqian.common.base.JieCheck;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieBuffer;
 import xyz.sunqian.common.io.JieIO;
@@ -10,6 +9,8 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.CharBuffer;
 import java.util.Arrays;
+
+import static xyz.sunqian.common.base.JieCheck.checkOffsetLength;
 
 /**
  * {@code CharsBuilder} is used to build char arrays and their derived objects by appending char data. It is similar to
@@ -86,7 +87,7 @@ public class CharsBuilder extends Writer implements CharSequence {
      * @param len the specified number
      */
     public void write(char[] b, int off, int len) {
-        JieCheck.checkOffsetLength(b, off, len);
+        checkOffsetLength(b.length, off, len);
         ensureCapacity(count + len);
         System.arraycopy(b, off, buf, count, len);
         count += len;
@@ -249,7 +250,7 @@ public class CharsBuilder extends Writer implements CharSequence {
             write(chars.array(), JieBuffer.arrayStartIndex(chars), chars.remaining());
             chars.position(chars.position() + chars.remaining());
         } else {
-            char[] remaining = JieChars.getChars(chars);
+            char[] remaining = JieBuffer.read(chars);
             write(remaining, 0, remaining.length);
         }
         return this;

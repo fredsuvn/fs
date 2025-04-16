@@ -3,18 +3,26 @@ package test.io;
 import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.JieRandom;
-import xyz.sunqian.common.base.bytes.JieBytes;
-import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
+import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieIO;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.CharArrayReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.util.Arrays;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.expectThrows;
+import static xyz.sunqian.test.MaterialBox.copyBytes;
 
 public class JieIOTest {
 
@@ -136,7 +144,7 @@ public class JieIOTest {
             c = JieIO.readTo(in, dstBuffer);
             assertEquals(c, size);
             dstBuffer.flip();
-            assertEquals(JieBytes.copyBytes(dstBuffer), src);
+            assertEquals(copyBytes(dstBuffer), src);
             BytesBuilder dstOut = new BytesBuilder();
             in.reset();
             c = JieIO.readTo(in, dstOut);
@@ -159,7 +167,7 @@ public class JieIOTest {
             c = JieIO.readTo(in, dstBuffer);
             assertEquals(c, size);
             dstBuffer.flip();
-            assertEquals(JieChars.copyChars(dstBuffer), src);
+            assertEquals(copyBytes(dstBuffer), src);
             StringBuilder dstOut = new StringBuilder();
             in.reset();
             c = JieIO.readTo(in, dstOut);

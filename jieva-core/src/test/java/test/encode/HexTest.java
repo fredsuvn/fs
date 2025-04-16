@@ -3,8 +3,8 @@ package test.encode;
 import org.apache.commons.codec.binary.Hex;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.JieRandom;
+import xyz.sunqian.common.base.bytes.ByteProcessor;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
-import xyz.sunqian.common.base.bytes.JieBytes;
 import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.base.exception.ProcessingException;
 import xyz.sunqian.common.encode.DecodingException;
@@ -12,7 +12,9 @@ import xyz.sunqian.common.encode.EncodingException;
 import xyz.sunqian.common.encode.JieHex;
 import xyz.sunqian.common.io.JieIO;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.expectThrows;
 
 public class HexTest {
 
@@ -90,7 +92,7 @@ public class HexTest {
                 error[0] = null;
             }
             try {
-                JieBytes.process(en).readBlockSize(1)
+                ByteProcessor.from(en).readBlockSize(1)
                     .encoder(JieHex.decoder().streamEncoder()).writeTo(new BytesBuilder());
             } catch (ProcessingException e) {
                 error[0] = e.getCause().getMessage();

@@ -377,7 +377,7 @@ public class JieRandom {
 
     private static float nextFloatJdkVer8(float startInclusive, float endExclusive) {
         float f = (float) nextDouble(startInclusive, endExclusive);
-        return JieCheck.makeIn(f, startInclusive, endExclusive);
+        return JieMath.makeIn(f, startInclusive, endExclusive);
     }
 
     /**

@@ -1,7 +1,8 @@
 package xyz.sunqian.common.encode;
 
 import xyz.sunqian.annotations.ThreadSafe;
-import xyz.sunqian.common.base.bytes.BytesProcessor;
+import xyz.sunqian.common.base.bytes.ByteEncoder;
+import xyz.sunqian.common.base.bytes.ByteProcessor;
 
 /**
  * This is a static utilities class for {@code hex} encoding and decoding, provides encoder and decoder implementations:
@@ -32,12 +33,12 @@ public class JieHex {
     }
 
     /**
-     * The implementation of {@link ByteEncoder} for {@code hex} encoding, thread-safe.
+     * The implementation of {@link DataEncoder} for {@code hex} encoding, thread-safe.
      *
      * @author sunqian
      */
     @ThreadSafe
-    public interface Encoder extends ByteEncoder.ToLatin {
+    public interface Encoder extends DataEncoder.ToLatin {
 
         /**
          * Returns -1. The {@code hex} doesn't require encoding in blocks.
@@ -60,24 +61,24 @@ public class JieHex {
         int getOutputSize(int inputSize) throws EncodingException;
 
         /**
-         * Returns a new {@link BytesProcessor.Encoder} which encapsulates current hex encoding, supports any size of
-         * input data, not thread-safe.
+         * Returns a new {@link ByteEncoder} which encapsulates current hex encoding, supports any size of input data,
+         * not thread-safe.
          *
-         * @return a {@link BytesProcessor.Encoder} with current hex encoding logic
-         * @see BytesProcessor
-         * @see BytesProcessor.Encoder
+         * @return a {@link ByteEncoder} with current hex encoding logic
+         * @see ByteProcessor
+         * @see ByteEncoder
          */
         @Override
-        BytesProcessor.Encoder streamEncoder();
+        ByteEncoder streamEncoder();
     }
 
     /**
-     * The implementation of {@link ByteDecoder} for {@code hex} decoding, thread-safe.
+     * The implementation of {@link DataDecoder} for {@code hex} decoding, thread-safe.
      *
      * @author sunqian
      */
     @ThreadSafe
-    public interface Decoder extends ByteDecoder.FromLatin {
+    public interface Decoder extends DataDecoder.FromLatin {
 
         /**
          * Returns 2. The size of {@code hex} data is even.
@@ -100,18 +101,18 @@ public class JieHex {
         int getOutputSize(int inputSize) throws DecodingException;
 
         /**
-         * Returns a new {@link BytesProcessor.Encoder} which encapsulates current hex decoding, supports any size of
-         * input data, not thread-safe.
+         * Returns a new {@link ByteEncoder} which encapsulates current hex decoding, supports any size of input data,
+         * not thread-safe.
          *
-         * @return a {@link BytesProcessor.Encoder} with current hex decoding logic
-         * @see BytesProcessor
-         * @see BytesProcessor.Encoder
+         * @return a {@link ByteEncoder} with current hex decoding logic
+         * @see ByteProcessor
+         * @see ByteEncoder
          */
         @Override
-        BytesProcessor.Encoder streamEncoder();
+        ByteEncoder streamEncoder();
     }
 
-    private static final class HexEncoder extends AbstractByteCoder.En implements Encoder {
+    private static final class HexEncoder extends AbstractBaseDataEncoder.En implements Encoder {
 
         private static final HexEncoder SINGLETON = new HexEncoder();
 
@@ -137,7 +138,7 @@ public class JieHex {
         }
     }
 
-    private static final class HexDecoder extends AbstractByteCoder.De implements Decoder {
+    private static final class HexDecoder extends AbstractBaseDataEncoder.De implements Decoder {
 
         private static final HexDecoder SINGLETON = new HexDecoder();
 

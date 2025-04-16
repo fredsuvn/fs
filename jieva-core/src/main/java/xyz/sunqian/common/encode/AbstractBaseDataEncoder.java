@@ -1,14 +1,16 @@
 package xyz.sunqian.common.encode;
 
-import xyz.sunqian.common.base.bytes.BytesProcessor;
+import xyz.sunqian.common.base.bytes.ByteEncoder;
 import xyz.sunqian.common.base.bytes.JieBytes;
 import xyz.sunqian.common.io.JieBuffer;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
+import static xyz.sunqian.common.base.bytes.ByteEncoder.withBuffering;
+
 /**
- * This abstract class provides skeletal implementation methods for {@link ByteEncoder} and {@link ByteDecoder}, and
+ * This abstract class provides skeletal implementation methods for {@link DataEncoder} and {@link DataDecoder}, and
  * skeletal implementation classes: {@link En} and {@link De}. The following example shows declaring an encoder based on
  * {@link En}:
  * <pre>{@code
@@ -39,7 +41,7 @@ import java.util.Arrays;
  *
  * @author sunqian
  */
-public abstract class AbstractByteCoder implements ByteCoder {
+public abstract class AbstractBaseDataEncoder implements BaseDataEncoder {
 
     private static final String REMAINING_NOT_ENOUGH = "Remaining space is not enough.";
     private static final String INPUT_SIZE_ILLEGAL = "Input size is illegal: ";
@@ -267,16 +269,16 @@ public abstract class AbstractByteCoder implements ByteCoder {
     }
 
     /**
-     * This method generated a {@link BytesProcessor.Encoder} based on encoding/decoding algorithm of
+     * This method generates a {@link ByteEncoder} based on encoding/decoding algorithm of
      * {@link #getOutputSize(int, long, boolean)} and
      * {@link #doCode(byte[], int, int, byte[], int, int, long, boolean)}, and then wrap the generated encoder via
-     * {@link JieBytes#bufferedEncoder(BytesProcessor.Encoder)}.
+     * {@link ByteEncoder#withBuffering(ByteEncoder)}.
      *
-     * @return a {@link BytesProcessor.Encoder} based on current encoding/decoding algorithm
+     * @return a {@link ByteEncoder} based on current encoding/decoding algorithm
      */
     @Override
-    public BytesProcessor.Encoder streamEncoder() {
-        BytesProcessor.Encoder encoder = new BytesProcessor.Encoder() {
+    public ByteEncoder streamEncoder() {
+        ByteEncoder encoder = new ByteEncoder() {
 
             private long startPos = 0;
 
@@ -288,16 +290,16 @@ public abstract class AbstractByteCoder implements ByteCoder {
                 return ret;
             }
         };
-        return JieBytes.bufferedEncoder(encoder);
+        return withBuffering(encoder);
     }
 
     /**
-     * Abstract skeletal implementation of {@link ByteEncoder}, see {@link AbstractByteCoder} for more detail.
+     * Abstract skeletal implementation of {@link DataEncoder}, see {@link AbstractBaseDataEncoder} for more detail.
      *
      * @author sunqian
-     * @see AbstractByteCoder
+     * @see AbstractBaseDataEncoder
      */
-    public abstract static class En extends AbstractByteCoder implements ByteEncoder {
+    public abstract static class En extends AbstractBaseDataEncoder implements DataEncoder {
 
         @Override
         public byte[] encode(byte[] source) throws EncodingException {
@@ -334,12 +336,12 @@ public abstract class AbstractByteCoder implements ByteCoder {
     }
 
     /**
-     * Abstract skeletal implementation of {@link ByteDecoder}, see {@link AbstractByteCoder} for more detail.
+     * Abstract skeletal implementation of {@link DataDecoder}, see {@link AbstractBaseDataEncoder} for more detail.
      *
      * @author sunqian
-     * @see AbstractByteCoder
+     * @see AbstractBaseDataEncoder
      */
-    public abstract static class De extends AbstractByteCoder implements ByteDecoder {
+    public abstract static class De extends AbstractBaseDataEncoder implements DataDecoder {
 
         @Override
         public byte[] decode(byte[] data) throws DecodingException {

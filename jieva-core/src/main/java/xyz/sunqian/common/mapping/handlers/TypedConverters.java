@@ -22,7 +22,14 @@ import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
-import java.time.*;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
@@ -267,7 +274,7 @@ public class TypedConverters {
             }
             if (source instanceof ByteBuffer) {
                 Charset charset = options.getCharset(targetProperty);
-                byte[] bytes = JieBuffer.readReset((ByteBuffer) source);
+                byte[] bytes = JieBuffer.read((ByteBuffer) source);
                 if (charset != null) {
                     return new String(bytes, charset);
                 }
@@ -313,7 +320,7 @@ public class TypedConverters {
                 return ((byte[]) source).clone();
             }
             if (source instanceof ByteBuffer) {
-                return JieBuffer.readReset((ByteBuffer) source);
+                return JieBuffer.read((ByteBuffer) source);
             }
             if (source instanceof InputStream) {
                 return JieIO.read((InputStream) source);
@@ -354,7 +361,7 @@ public class TypedConverters {
                 return new BigInteger((byte[]) source);
             }
             if (source instanceof ByteBuffer) {
-                return new BigInteger(JieBuffer.readReset((ByteBuffer) source));
+                return new BigInteger(JieBuffer.read((ByteBuffer) source));
             }
             if (source instanceof Character) {
                 char c = (Character) source;

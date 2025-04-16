@@ -1,10 +1,11 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.JieCheck;
 
 import java.io.IOException;
 import java.io.Writer;
+
+import static xyz.sunqian.common.base.JieCheck.checkOffsetLength;
 
 /**
  * This class is a skeletal implementation for the {@link Writer}. Implementing the following methods is sufficient to
@@ -79,7 +80,7 @@ public abstract class AbstractWriter extends Writer {
 
     @Override
     public void write(char[] cbuf, int off, int len) throws IOException {
-        JieCheck.checkOffsetLength(cbuf, off, len);
+        checkOffsetLength(cbuf.length, off, len);
         if (len <= 0) {
             return;
         }
@@ -108,7 +109,7 @@ public abstract class AbstractWriter extends Writer {
 
     @Override
     public void write(String str, int off, int len) throws IOException {
-        JieCheck.checkOffsetLength(str, off, len);
+        checkOffsetLength(str.length(), off, len);
         if (len <= 0) {
             return;
         }
@@ -128,7 +129,7 @@ public abstract class AbstractWriter extends Writer {
     @Override
     public Writer append(@Nullable CharSequence csq, int start, int end) throws IOException {
         CharSequence cs = nonNull(csq);
-        JieCheck.checkOffsetLength(cs, start, end - start);
+        checkOffsetLength(cs.length(), start, end - start);
         if (start == end) {
             return this;
         }

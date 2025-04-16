@@ -2,11 +2,12 @@ package test.encode;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.JieRandom;
+import xyz.sunqian.common.base.bytes.ByteProcessor;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.bytes.JieBytes;
 import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.base.exception.ProcessingException;
-import xyz.sunqian.common.encode.ByteEncoder;
+import xyz.sunqian.common.encode.DataEncoder;
 import xyz.sunqian.common.encode.DecodingException;
 import xyz.sunqian.common.encode.EncodingException;
 import xyz.sunqian.common.encode.JieBase64;
@@ -88,10 +89,10 @@ public class Base64Test {
         byte[] pemTarget = new org.apache.commons.codec.binary.Base64(
             64, new byte[]{(byte) '\r', (byte) '\n'}
         ).encode(source);
-        ByteEncoder lineEncoder = JieBase64.lineEncoder(
+        DataEncoder lineEncoder = JieBase64.lineEncoder(
             76, new byte[]{(byte) '\r', (byte) '\n'}, true, false, false
         );
-        ByteEncoder lineEncoderUrl = JieBase64.lineEncoder(
+        DataEncoder lineEncoderUrl = JieBase64.lineEncoder(
             76, new byte[]{(byte) '\r', (byte) '\n'}, true, false, true
         );
         byte[] mimeTargetUrl = Arrays.copyOf(mimeTarget, mimeTarget.length);
@@ -170,7 +171,7 @@ public class Base64Test {
                 error[0] = null;
             }
             try {
-                JieBytes.process(s.getBytes(JieChars.latinCharset())).readBlockSize(1)
+                ByteProcessor.from(s.getBytes(JieChars.latinCharset())).readBlockSize(1)
                     .encoder(JieBase64.decoder().streamEncoder()).writeTo(new BytesBuilder());
             } catch (ProcessingException e) {
                 error[0] = e.getCause().getMessage();
@@ -191,7 +192,7 @@ public class Base64Test {
                 error[0] = null;
             }
             try {
-                JieBytes.process(s.getBytes(JieChars.latinCharset())).readBlockSize(1)
+                ByteProcessor.from(s.getBytes(JieChars.latinCharset())).readBlockSize(1)
                     .encoder(JieBase64.decoder().streamEncoder()).writeTo(new BytesBuilder());
             } catch (ProcessingException e) {
                 error[0] = e.getCause().getMessage();
@@ -212,7 +213,7 @@ public class Base64Test {
                 error[0] = null;
             }
             try {
-                JieBytes.process(s.getBytes(JieChars.latinCharset())).readBlockSize(1)
+                ByteProcessor.from(s.getBytes(JieChars.latinCharset())).readBlockSize(1)
                     .encoder(JieBase64.decoder().streamEncoder()).writeTo(new BytesBuilder());
             } catch (ProcessingException e) {
                 error[0] = e.getCause().getMessage();
@@ -225,7 +226,7 @@ public class Base64Test {
 
     @Test
     public void testUnreachablePoint() throws Exception {
-        ByteEncoder encoder = JieBase64.lineEncoder(16, new byte[]{'\t'}, true, true, false);
+        DataEncoder encoder = JieBase64.lineEncoder(16, new byte[]{'\t'}, true, true, false);
         Method getOutputSize = encoder.getClass().getDeclaredMethod("getOutputSize", int.class, long.class, boolean.class);
         JieTest.reflectThrows(EncodingException.class, getOutputSize, encoder, 0, 0L, false);
     }

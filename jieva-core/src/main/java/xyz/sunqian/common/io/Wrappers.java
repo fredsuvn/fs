@@ -1,12 +1,24 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.JieCheck;
 
-import java.io.*;
+import java.io.Closeable;
+import java.io.Flushable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.RandomAccessFile;
+import java.io.Reader;
+import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.nio.charset.*;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CharsetEncoder;
+import java.nio.charset.CoderResult;
+import java.nio.charset.CodingErrorAction;
+
+import static xyz.sunqian.common.base.JieCheck.checkOffsetLength;
 
 final class Wrappers {
 
@@ -122,7 +134,7 @@ final class Wrappers {
         }
 
         BytesInputStream(byte[] buf, int offset, int length) {
-            JieCheck.checkOffsetLength(buf, offset, length);
+            checkOffsetLength(buf.length, offset, length);
             this.buf = buf;
             this.pos = offset;
             this.count = Math.min(offset + length, buf.length);
@@ -133,7 +145,7 @@ final class Wrappers {
         }
 
         public int read(byte[] b, int off, int len) {
-            JieCheck.checkOffsetLength(b, off, len);
+            checkOffsetLength(b.length, off, len);
             if (len <= 0) {
                 return 0;
             }
@@ -209,7 +221,7 @@ final class Wrappers {
 
         @Override
         public int read(byte[] b, int off, int len) throws IOException {
-            JieCheck.checkOffsetLength(b, off, len);
+            checkOffsetLength(b.length, off, len);
             if (len <= 0) {
                 return 0;
             }
@@ -321,7 +333,7 @@ final class Wrappers {
 
         @Override
         public int read(byte[] b, int off, int len) throws IOException {
-            JieCheck.checkOffsetLength(b, off, len);
+            checkOffsetLength(b.length, off, len);
             checkClosed();
             if (len <= 0) {
                 return 0;
@@ -425,7 +437,7 @@ final class Wrappers {
 
         @Override
         public int read(byte[] b, int off, int len) throws IOException {
-            JieCheck.checkOffsetLength(b, off, len);
+            checkOffsetLength(b.length, off, len);
             if (len <= 0) {
                 return 0;
             }
@@ -482,7 +494,7 @@ final class Wrappers {
         }
 
         BufferReader(char[] cbuf, int offset, int length) {
-            JieCheck.checkOffsetLength(cbuf, offset, length);
+            checkOffsetLength(cbuf.length, offset, length);
             this.buffer = CharBuffer.wrap(cbuf, offset, length);
         }
 
@@ -512,7 +524,7 @@ final class Wrappers {
 
         @Override
         public int read(char[] c, int off, int len) throws IOException {
-            JieCheck.checkOffsetLength(c, off, len);
+            checkOffsetLength(c.length, off, len);
             if (len <= 0) {
                 return 0;
             }
@@ -629,7 +641,7 @@ final class Wrappers {
 
         @Override
         public int read(char[] c, int off, int len) throws IOException {
-            JieCheck.checkOffsetLength(c, off, len);
+            checkOffsetLength(c.length, off, len);
             checkClosed();
             if (len <= 0) {
                 return 0;
@@ -753,7 +765,7 @@ final class Wrappers {
         }
 
         BytesOutputStream(byte[] buf, int offset, int length) {
-            JieCheck.checkOffsetLength(buf, offset, length);
+            checkOffsetLength(buf.length, offset, length);
             this.buf = buf;
             this.end = offset + length;
             this.pos = offset;
@@ -770,7 +782,7 @@ final class Wrappers {
 
         @Override
         public void write(byte[] b, int off, int len) throws IOException {
-            JieCheck.checkOffsetLength(b, off, len);
+            checkOffsetLength(b.length, off, len);
             if (len <= 0) {
                 return;
             }
@@ -801,7 +813,7 @@ final class Wrappers {
 
         @Override
         public void write(byte[] b, int off, int len) throws IOException {
-            JieCheck.checkOffsetLength(b, off, len);
+            checkOffsetLength(b.length, off, len);
             if (len <= 0) {
                 return;
             }
@@ -857,7 +869,7 @@ final class Wrappers {
 
         @Override
         public void write(byte[] b, int off, int len) throws IOException {
-            JieCheck.checkOffsetLength(b, off, len);
+            checkOffsetLength(b.length, off, len);
             checkClosed();
             if (len <= 0) {
                 return;
@@ -976,7 +988,7 @@ final class Wrappers {
 
         @Override
         public void write(byte[] b, int off, int len) throws IOException {
-            JieCheck.checkOffsetLength(b, off, len);
+            checkOffsetLength(b.length, off, len);
             if (len <= 0) {
                 return;
             }
@@ -1008,7 +1020,7 @@ final class Wrappers {
         }
 
         BufferWriter(char[] cbuf, int offset, int length) {
-            JieCheck.checkOffsetLength(cbuf, offset, length);
+            checkOffsetLength(cbuf.length, offset, length);
             this.buffer = CharBuffer.wrap(cbuf, offset, length);
         }
 

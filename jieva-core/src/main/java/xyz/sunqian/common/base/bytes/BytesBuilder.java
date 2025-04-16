@@ -1,6 +1,5 @@
 package xyz.sunqian.common.base.bytes;
 
-import xyz.sunqian.common.base.JieCheck;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieBuffer;
 import xyz.sunqian.common.io.JieIO;
@@ -12,6 +11,8 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+
+import static xyz.sunqian.common.base.JieCheck.checkOffsetLength;
 
 /**
  * {@code BytesBuilder} is used to build byte arrays and their derived objects by appending byte data. It is similar to
@@ -90,7 +91,7 @@ public class BytesBuilder extends OutputStream {
      */
     @Override
     public void write(byte[] b, int off, int len) {
-        JieCheck.checkOffsetLength(b, off, len);
+        checkOffsetLength(b.length, off, len);
         ensureCapacity(count + len);
         System.arraycopy(b, off, buf, count, len);
         count += len;
@@ -272,7 +273,7 @@ public class BytesBuilder extends OutputStream {
             write(bytes.array(), JieBuffer.arrayStartIndex(bytes), bytes.remaining());
             bytes.position(bytes.position() + bytes.remaining());
         } else {
-            byte[] remaining = JieBytes.getBytes(bytes);
+            byte[] remaining = JieBuffer.read(bytes);
             write(remaining, 0, remaining.length);
         }
         return this;

@@ -1,6 +1,7 @@
 package test;
 
 import org.testng.annotations.Test;
+import xyz.sunqian.test.JieTestException;
 import xyz.sunqian.test.MaterialBox;
 
 import java.lang.reflect.Method;
@@ -18,6 +19,8 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 import static xyz.sunqian.test.JieTest.reflectEquals;
 import static xyz.sunqian.test.JieTest.reflectThrows;
+import static xyz.sunqian.test.MaterialBox.copyBuffer;
+import static xyz.sunqian.test.MaterialBox.copyBytes;
 import static xyz.sunqian.test.MaterialBox.copyDirect;
 import static xyz.sunqian.test.MaterialBox.copyHeap;
 import static xyz.sunqian.test.MaterialBox.copyPadding;
@@ -74,6 +77,15 @@ public class TestForTest {
             ByteBuffer heapBuffer = MaterialBox.copyHeap(bytes);
             assertEquals(heapBuffer, ByteBuffer.wrap(bytes));
             assertFalse(heapBuffer.isDirect());
+            assertEquals(bytes, copyBytes(ByteBuffer.wrap(bytes)));
+
+            // copy buffer
+            ByteBuffer copyHeap = copyBuffer(ByteBuffer.wrap(bytes));
+            assertFalse(copyHeap.isDirect());
+            assertEquals(copyHeap, ByteBuffer.wrap(bytes));
+            ByteBuffer copyDirect = copyBuffer(copyDirect(bytes));
+            assertTrue(copyDirect.isDirect());
+            assertEquals(copyDirect, copyDirect(bytes));
         }
         {
             // chars
@@ -90,7 +102,32 @@ public class TestForTest {
             CharBuffer heapBuffer = copyHeap(chars);
             assertEquals(heapBuffer, CharBuffer.wrap(chars));
             assertFalse(heapBuffer.isDirect());
+            assertEquals(chars, copyBytes(CharBuffer.wrap(chars)));
+
+            // copy buffer
+            CharBuffer copyHeap = copyBuffer(CharBuffer.wrap(chars));
+            assertFalse(copyHeap.isDirect());
+            assertEquals(copyHeap, CharBuffer.wrap(chars));
+            CharBuffer copyDirect = copyBuffer(copyDirect(chars));
+            assertTrue(copyDirect.isDirect());
+            assertEquals(copyDirect, copyDirect(chars));
         }
+    }
+
+    @Test
+    public void testException() throws Exception {
+        expectThrows(JieTestException.class, () -> {
+            throw new JieTestException();
+        });
+        expectThrows(JieTestException.class, () -> {
+            throw new JieTestException("");
+        });
+        expectThrows(JieTestException.class, () -> {
+            throw new JieTestException("", new RuntimeException());
+        });
+        expectThrows(JieTestException.class, () -> {
+            throw new JieTestException(new RuntimeException());
+        });
     }
 
     private static final class Tt {

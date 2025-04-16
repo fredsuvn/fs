@@ -1,7 +1,6 @@
 package xyz.sunqian.common.base.bytes;
 
-import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.chars.CharsProcessor;
+import xyz.sunqian.common.base.chars.CharProcessor;
 import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.base.exception.ProcessingException;
 import xyz.sunqian.common.io.IORuntimeException;
@@ -12,24 +11,27 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
+import static xyz.sunqian.common.base.JieCheck.checkOffsetLength;
+
 /**
- * Bytes processor is used to process byte data, from the specified data source, through zero or more intermediate
- * operations (such as {@link #encoder(Encoder)}), and finally produces a result or side effect. The following example
- * shows an encoding-then-writing operation:
+ * Byte processor is used to process byte data, from the specified data source, through zero or more intermediate
+ * operations (such as {@link #encoder(ByteEncoder)}), and finally produces a result or side effect. The following
+ * example shows a read-encode-write operation:
  * <pre>{@code
- *     JieBytes.process(input)
+ *     ByteProcessor.from(input)
  *         .readBlockSize(1024)
- *         .encoder(en1)
- *         .encoder(en2, 64)
+ *         .encoder(withFixedSize(64, (b, e) -> {
+ *             //...
+ *         }))
  *         .writeTo(output);
  * }</pre>
  * There are types of methods in this interface:
  * <ul>
  *     <li>
- *         Setting methods, to set the data processing arguments before a terminal method has invoked;
+ *         Setting methods: to set the data processing arguments before a terminal method has invoked;
  *     </li>
  *     <li>
- *         Terminal methods, to start the data processing. Once a terminal method is invoked, the state of current
+ *         Terminal methods: to start the data processing. Once a terminal method is invoked, the state of current
  *         processor will become undefined, and no safe guarantees for further operations;
  *     </li>
  * </ul>
@@ -38,7 +40,56 @@ import java.nio.charset.Charset;
  *
  * @author sunqian
  */
-public interface BytesProcessor {
+public interface ByteProcessor {
+
+    /**
+     * Returns a new {@link ByteProcessor} to process the specified data.
+     *
+     * @param data the specified data
+     * @return a new {@link ByteProcessor}
+     */
+    static ByteProcessor from(InputStream data) {
+        return new ByteProcessorImpl(data);
+    }
+
+    /**
+     * Returns a new {@link ByteProcessor} to process the specified data.
+     *
+     * @param data the specified data
+     * @return a new {@link ByteProcessor}
+     */
+    static ByteProcessor from(byte[] data) {
+        return new ByteProcessorImpl(data);
+    }
+
+    /**
+     * Returns a new {@link ByteProcessor} to process the specified data from the specified offset up to the specified
+     * length.
+     *
+     * @param data   the specified data
+     * @param offset the specified offset
+     * @param length the specified length
+     * @return a new {@link ByteProcessor}
+     * @throws IndexOutOfBoundsException if an index is out of bounds
+     */
+    static ByteProcessor from(byte[] data, int offset, int length) throws IndexOutOfBoundsException {
+        checkOffsetLength(data.length, offset, length);
+        if (offset == 0 && length == data.length) {
+            return from(data);
+        }
+        ByteBuffer buffer = ByteBuffer.wrap(data, offset, length);
+        return from(buffer);
+    }
+
+    /**
+     * Returns a new {@link ByteProcessor} to process the specified data.
+     *
+     * @param data the specified data
+     * @return a new {@link ByteProcessor}
+     */
+    static ByteProcessor from(ByteBuffer data) {
+        return new ByteProcessorImpl(data);
+    }
 
     /**
      * Sets the maximum number of bytes to read from the data source. This can be negative, meaning read until the end,
@@ -49,7 +100,7 @@ public interface BytesProcessor {
      * @param readLimit the maximum number of bytes to read from the data source
      * @return this
      */
-    BytesProcessor readLimit(long readLimit);
+    ByteProcessor readLimit(long readLimit);
 
     /**
      * Sets the number of bytes for each read operation from the data source.
@@ -62,7 +113,7 @@ public interface BytesProcessor {
      * @param readBlockSize the number of bytes for each read operation from the data source
      * @return this
      */
-    BytesProcessor readBlockSize(int readBlockSize);
+    ByteProcessor readBlockSize(int readBlockSize);
 
     /**
      * Sets whether reading 0 byte from the data source should be treated as reaching to the end and break the read
@@ -74,7 +125,7 @@ public interface BytesProcessor {
      *                      break the read loop
      * @return this
      */
-    BytesProcessor endOnZeroRead(boolean endOnZeroRead);
+    ByteProcessor endOnZeroRead(boolean endOnZeroRead);
 
     /**
      * Adds an encoder for this processor. When the data processing starts, all encoders will be invoked after each read
@@ -97,74 +148,28 @@ public interface BytesProcessor {
      * Size of passed data is uncertain. If it is the first encoder, the size may match the {@link #readBlockSize(int)}.
      * (except for the last reading, which may be smaller than the read block size).
      * <p>
-     * Passed {@link ByteBuffer} object, which is the first argument of {@link Encoder#encode(ByteBuffer, boolean)}, can
-     * be read-only (for example, when the source is an input stream), or writable (for example, when the source is a
-     * byte array or byte buffer), and will be discarded after each invocation. The returned {@link ByteBuffer} will be
-     * treated as read-only;
+     * Passed {@link ByteBuffer} object, which is the first argument of {@link ByteEncoder#encode(ByteBuffer, boolean)},
+     * can be read-only (for example, when the source is an input stream), or writable (for example, when the source is
+     * a byte array or byte buffer), and will be discarded after each invocation. The returned {@link ByteBuffer} will
+     * be treated as read-only;
      * <p>
-     * This is an optional setting method. There are also more specific encoder methods available, such as:
+     * This is an optional setting method. There are also more specific encoder wrappers available, such as:
      * <ul>
      *     <li>
-     *         For fixed-size: {@link #encoder(int, Encoder)}, {@link JieBytes#fixedSizeEncoder(int, Encoder)};
+     *         For fixed-size: {@link ByteEncoder#withFixedSize(int, ByteEncoder)};
      *     </li>
      *     <li>
-     *         For rounding size: {@link #roundEncoder(int, Encoder)}, {@link JieBytes#roundEncoder(int, Encoder)};
+     *         For rounding size: {@link ByteEncoder#withRounding(int, ByteEncoder)};
      *     </li>
      *     <li>
-     *         for buffering: {@link #bufferedEncoder(Encoder)}, {@link JieBytes#bufferedEncoder(Encoder)};
+     *         for buffering: {@link ByteEncoder#withBuffering(ByteEncoder)};
      *     </li>
      * </ul>
      *
      * @param encoder the encoder
      * @return this
      */
-    BytesProcessor encoder(Encoder encoder);
-
-    /**
-     * Adds an encoder wrapped by {@link JieBytes#fixedSizeEncoder(int, Encoder)} for this processor. This is a specific
-     * encoder, typically used for consuming data in fixed-size blocks. The behavior of this method is equivalent to:
-     * <pre>{@code
-     *     encoder(JieBytes.fixedSizeEncoder(size, encoder));
-     * }</pre>
-     *
-     * @param size    the specified fixed-size
-     * @param encoder the encoder
-     * @return this
-     */
-    default BytesProcessor encoder(int size, Encoder encoder) {
-        return encoder(JieBytes.fixedSizeEncoder(size, encoder));
-    }
-
-    /**
-     * Adds an encoder wrapped by {@link JieBytes#roundEncoder(int, Encoder)} for this processor. This is a specific
-     * encoder, typically used for consuming data in multiples of the specified size. The behavior of this method is
-     * equivalent to:
-     * <pre>{@code
-     *     encoder(JieBytes.roundEncoder(size, encoder));
-     * }</pre>
-     *
-     * @param size    the specified size
-     * @param encoder the encoder
-     * @return this
-     */
-    default BytesProcessor roundEncoder(int size, Encoder encoder) {
-        return encoder(JieBytes.roundEncoder(size, encoder));
-    }
-
-    /**
-     * Adds an encoder wrapped by {@link JieBytes#bufferedEncoder(Encoder)} for this processor. This is a specific
-     * encoder, typically used for the encoder which may not fully consume current passed data, requires buffering and
-     * consuming in next invocation. The behavior of this method is equivalent to:
-     * <pre>{@code
-     *     encoder(JieBytes.bufferedEncoder(encoder));
-     * }</pre>
-     *
-     * @param encoder the encoder
-     * @return this
-     */
-    default BytesProcessor bufferedEncoder(Encoder encoder) {
-        return encoder(JieBytes.bufferedEncoder(encoder));
-    }
+    ByteProcessor encoder(ByteEncoder encoder);
 
     /**
      * Starts data processing, writes the result into the specified destination, and returns the actual number of bytes
@@ -336,35 +341,14 @@ public interface BytesProcessor {
     InputStream toInputStream();
 
     /**
-     * Converts this {@link BytesProcessor} to a {@link CharsProcessor} with the specified charset.
+     * Converts this {@link ByteProcessor} to a {@link CharProcessor} with the specified charset.
      * <p>
      * This is a terminal method.
      *
      * @param charset the specified charset
-     * @return a new {@link CharsProcessor} converted from this {@link BytesProcessor} with the specified charset
+     * @return a new {@link CharProcessor} converted from this {@link ByteProcessor} with the specified charset
      */
-    default CharsProcessor toCharProcessor(Charset charset) {
-        return JieChars.process(JieIO.reader(toInputStream(), charset));
-    }
-
-    /**
-     * Encoder for encoding data in the data processing.
-     */
-    interface Encoder {
-
-        /**
-         * Encodes the specified input data and return the result. The specified input data will not be null (but may be
-         * empty), and the return value can be null.
-         * <p>
-         * If it returns null, the next encoder will not be invoked and the encoding chain will be interrupted; If it
-         * returns an empty buffer, the encoding chain will continue.
-         *
-         * @param data the specified input data
-         * @param end  whether the current encoding is the last invocation
-         * @return the result of encoding
-         * @throws Exception thrown for any problems
-         */
-        @Nullable
-        ByteBuffer encode(ByteBuffer data, boolean end) throws Exception;
+    default CharProcessor toCharProcessor(Charset charset) {
+        return CharProcessor.from(JieIO.reader(toInputStream(), charset));
     }
 }

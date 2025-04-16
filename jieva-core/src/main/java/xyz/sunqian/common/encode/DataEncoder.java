@@ -1,7 +1,7 @@
 package xyz.sunqian.common.encode;
 
-import xyz.sunqian.common.base.bytes.JieBytes;
 import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.io.JieBuffer;
 
 import java.nio.ByteBuffer;
 
@@ -12,7 +12,7 @@ import java.nio.ByteBuffer;
  * @see JieHex.Encoder
  * @see JieBase64.Encoder
  */
-public interface ByteEncoder extends ByteCoder {
+public interface DataEncoder extends BaseDataEncoder {
 
     /**
      * Encodes given source into a new byte array.
@@ -61,9 +61,9 @@ public interface ByteEncoder extends ByteCoder {
     int encode(ByteBuffer source, ByteBuffer dest) throws EncodingException;
 
     /**
-     * Expansion of {@link ByteEncoder}, provides methods to encode to string with {@link JieChars#latinCharset()}.
+     * Expansion of {@link DataEncoder}, provides methods to encode to string with {@link JieChars#latinCharset()}.
      */
-    interface ToLatin extends ByteEncoder {
+    interface ToLatin extends DataEncoder {
 
         /**
          * Encodes given source to string with {@link JieChars#latinCharset()}.
@@ -85,7 +85,7 @@ public interface ByteEncoder extends ByteCoder {
          */
         default String toLatin(ByteBuffer source) throws EncodingException {
             ByteBuffer encoded = encode(source);
-            byte[] bytes = JieBytes.getBytes(encoded);
+            byte[] bytes = JieBuffer.read(encoded);
             return new String(bytes, JieChars.latinCharset());
         }
     }

@@ -2,6 +2,7 @@ package xyz.sunqian.common.encode;
 
 import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.io.JieBuffer;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -13,7 +14,7 @@ import java.nio.CharBuffer;
  * @see JieHex.Decoder
  * @see JieBase64.Decoder
  */
-public interface ByteDecoder extends ByteCoder {
+public interface DataDecoder extends BaseDataEncoder {
 
     /**
      * Decodes given data into a new byte array.
@@ -62,9 +63,9 @@ public interface ByteDecoder extends ByteCoder {
     int decode(ByteBuffer data, ByteBuffer dest) throws DecodingException;
 
     /**
-     * Expansion of {@link ByteDecoder}, provides methods to decode string with {@link JieChars#latinCharset()}.
+     * Expansion of {@link DataDecoder}, provides methods to decode string with {@link JieChars#latinCharset()}.
      */
-    interface FromLatin extends ByteDecoder {
+    interface FromLatin extends DataDecoder {
 
         /**
          * Decodes given data with {@link JieChars#latinCharset()}.
@@ -98,7 +99,7 @@ public interface ByteDecoder extends ByteCoder {
          * @throws DecodingException for decoding error
          */
         default ByteBuffer fromLatin(CharBuffer data) throws DecodingException {
-            char[] chars = JieChars.getChars(data);
+            char[] chars = JieBuffer.read(data);
             byte[] bytes = JieString.getBytes(chars);
             return decode(ByteBuffer.wrap(bytes));
         }

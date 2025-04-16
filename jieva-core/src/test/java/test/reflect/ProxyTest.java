@@ -1,7 +1,6 @@
 package test.reflect;
 
 import org.objectweb.asm.MethodVisitor;
-import org.testng.TestException;
 import org.testng.annotations.Test;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
@@ -11,6 +10,7 @@ import xyz.sunqian.common.reflect.proxy.MethodProxyHandler;
 import xyz.sunqian.common.reflect.proxy.ProxyClass;
 import xyz.sunqian.common.reflect.proxy.ProxyException;
 import xyz.sunqian.common.reflect.proxy.ProxyInvoker;
+import xyz.sunqian.test.JieTestException;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -194,7 +194,7 @@ public class ProxyTest {
         proxy.ppc_void();
         assertEquals("ppc_void", TestHandler.superStack.get(0));
         assertEquals("ppc_void", TestHandler.superStack.get(1));
-        expectThrows(TestException.class, proxy::ppc_Throw);
+        expectThrows(JieTestException.class, proxy::ppc_Throw);
         assertEquals(ClassP.ppc_static(), "non-proxy");
         assertEquals(proxy.ppc_i(), 3);
         assertEquals(proxy.pp_Proxied("", 2), TestHandler.superStack.get(0));
@@ -206,7 +206,7 @@ public class ProxyTest {
             expectThrows(AbstractMethodError.class, inter1::ppi1_boolean);
             expectThrows(AbstractMethodError.class, () -> inter1.ppi1_double(1, "a"));
         }
-        expectThrows(TestException.class, inter1::ppi1_Throw);
+        expectThrows(JieTestException.class, inter1::ppi1_Throw);
         assertEquals(inter1.ppi1_String(1, 1, "s"), TestHandler.superStack.get(0) + "-proxy");
         assertEquals(inter1.ppi1_String(1, 1, "s"), 1 + 1.0 + "s" + "-proxy");
         assertEquals(Inter1.ppi1_static(), "non-proxy");
@@ -217,7 +217,7 @@ public class ProxyTest {
             expectThrows(AbstractMethodError.class, inter2::ppi2_boolean);
             expectThrows(AbstractMethodError.class, () -> inter2.ppi2_double(1, "a"));
         }
-        expectThrows(TestException.class, inter2::ppi2_Throw);
+        expectThrows(JieTestException.class, inter2::ppi2_Throw);
         assertEquals(inter2.ppi2_String(1, 1, "s"), TestHandler.superStack.get(0) + "-proxy");
         assertEquals(inter2.ppi2_String(1, 1, "s"), 1 + 1.0 + "s" + "-proxy");
         assertEquals(Inter2.ppi2_static(), "non-proxy");
@@ -230,11 +230,11 @@ public class ProxyTest {
         Object proxy = JieProxy.jdkProxyBuilder().interfaces(Jie.list(Inter1.class, Inter2.class)).proxyHandler(testHandler).build().newInstance();
         Inter1<?> i1 = (Inter1<?>) proxy;
         expectThrows(AbstractMethodError.class, i1::ppi1_boolean);
-        expectThrows(TestException.class, i1::ppi1_Throw);
+        expectThrows(JieTestException.class, i1::ppi1_Throw);
         expectThrows(ProxyException.class, i1::ppi1_nonProxied);
         Inter2<?> i2 = (Inter2<?>) proxy;
         expectThrows(AbstractMethodError.class, i2::ppi2_boolean);
-        expectThrows(TestException.class, i2::ppi2_Throw);
+        expectThrows(JieTestException.class, i2::ppi2_Throw);
         assertEquals(Inter2.ppi2_static(), "non-proxy");
 
         ProxyClass renameProxy = JieProxy.jdkProxyBuilder()
@@ -384,7 +384,7 @@ public class ProxyTest {
         }
 
         default void ppi1_Throw() {
-            throw new TestException("");
+            throw new JieTestException();
         }
 
         default void ppi1_nonProxied() {
@@ -420,7 +420,7 @@ public class ProxyTest {
         }
 
         default void ppi2_Throw() {
-            throw new TestException("");
+            throw new JieTestException();
         }
 
         void ppi2_nonProxied();
@@ -531,7 +531,7 @@ public class ProxyTest {
         }
 
         public void ppc_Throw() {
-            throw new TestException("");
+            throw new JieTestException();
         }
 
         public String pp_Proxied(String s1, long s2) {

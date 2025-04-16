@@ -12,52 +12,41 @@ import java.util.NoSuchElementException;
 public class JieCheck {
 
     /**
-     * Checks whether the range in the given array, starting at the given offset up to the given length, is valid.
+     * Checks whether the sub-range defined by the given offset and length is within the specified range. Its logic is
+     * the same as the following code:
+     * <pre>{@code
+     *     if (offset < 0 || length < 0 || length > range - offset) {
+     *         throw new IndexOutOfBoundsException();
+     *     }
+     * }</pre>
      *
-     * @param array the given array
-     * @param off   the given offset
-     * @param len   the given length
-     * @throws NullPointerException      if the given array is null
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @param range  the specified range
+     * @param offset the given offset
+     * @param length the given length
+     * @throws IndexOutOfBoundsException if the sub-range is out of the specified range
      */
-    public static void checkOffsetLength(byte[] array, int off, int len) {
-        if (array == null) {
-            throw new NullPointerException();
-        } else if (off < 0 || len < 0 || len > array.length - off) {
+    public static void checkOffsetLength(int range, int offset, int length) throws IndexOutOfBoundsException {
+        if (offset < 0 || length < 0 || length > range - offset) {
             throw new IndexOutOfBoundsException();
         }
     }
 
     /**
-     * Checks whether the range in the given array, starting at the given offset up to the given length, is valid.
+     * Checks whether the sub-range defined by the given offset and length is within the specified range. Its logic is
+     * the same as the following code:
+     * <pre>{@code
+     *     if (offset < 0 || length < 0 || length > range - offset) {
+     *         throw new IndexOutOfBoundsException();
+     *     }
+     * }</pre>
      *
-     * @param array the given array
-     * @param off   the given offset
-     * @param len   the given length
-     * @throws NullPointerException      if the given array is null
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @param range  the specified range
+     * @param offset the given offset
+     * @param length the given length
+     * @throws IndexOutOfBoundsException if the sub-range is out of the specified range
      */
-    public static void checkOffsetLength(char[] array, int off, int len) {
-        if (array == null) {
-            throw new NullPointerException();
-        } else if (off < 0 || len < 0 || len > array.length - off) {
-            throw new IndexOutOfBoundsException();
-        }
-    }
-
-    /**
-     * Checks whether the range in the given array, starting at the given offset up to the given length, is valid.
-     *
-     * @param array the given array
-     * @param off   the given offset
-     * @param len   the given length
-     * @throws NullPointerException      if the given array is null
-     * @throws IndexOutOfBoundsException if the range is out of bounds
-     */
-    public static void checkOffsetLength(CharSequence array, int off, int len) {
-        if (array == null) {
-            throw new NullPointerException();
-        } else if (off < 0 || len < 0 || len > array.length() - off) {
+    public static void checkOffsetLength(long range, long offset, long length) throws IndexOutOfBoundsException {
+        if (offset < 0 || length < 0 || length > range - offset) {
             throw new IndexOutOfBoundsException();
         }
     }
@@ -488,45 +477,5 @@ public class JieCheck {
         if (!isRangeInBounds(startRange, endRange, startIndex, endIndex)) {
             throw new IndexOutOfBoundsException(message.toString());
         }
-    }
-
-    /**
-     * If given float value in bounds of specified start value inclusive and end value exclusive, returns itself.
-     * Otherwise, if the float value less than {@code startInclusive}, return {@code startInclusive}, else return
-     * {@link Math#nextDown(float)} of {@code endExclusive}.
-     *
-     * @param value          given float value
-     * @param startInclusive specified start value inclusive
-     * @param endExclusive   specified end value exclusive
-     * @return the float value in bounds
-     */
-    public static float makeIn(float value, float startInclusive, float endExclusive) {
-        if (value < startInclusive) {
-            return startInclusive;
-        }
-        if (value >= endExclusive) {
-            return Math.nextDown(endExclusive);
-        }
-        return value;
-    }
-
-    /**
-     * If given double value in bounds of specified start value inclusive and end value exclusive, returns itself.
-     * Otherwise, if the double value less than {@code startInclusive}, return {@code startInclusive}, else return
-     * {@link Math#nextDown(float)} of {@code endExclusive}.
-     *
-     * @param value          given double value
-     * @param startInclusive specified start value inclusive
-     * @param endExclusive   specified end value exclusive
-     * @return the double value in bounds
-     */
-    public static double makeIn(double value, double startInclusive, double endExclusive) {
-        if (value < startInclusive) {
-            return startInclusive;
-        }
-        if (value >= endExclusive) {
-            return Math.nextDown(endExclusive);
-        }
-        return value;
     }
 }

@@ -1,12 +1,15 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.JieCheck;
+import xyz.sunqian.common.base.bytes.ByteProcessor;
+import xyz.sunqian.common.base.chars.CharProcessor;
 import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.coll.JieArray;
 
 import java.io.OutputStream;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.ReadOnlyBufferException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -14,6 +17,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.IntFunction;
+
+import static xyz.sunqian.common.base.JieCheck.checkOffsetLength;
 
 /**
  * Static utility class for {@link Buffer}.
@@ -46,24 +51,20 @@ public class JieBuffer {
         return buffer.arrayOffset() + buffer.position() + buffer.remaining();
     }
 
-
-    //------------------------------------------------------------
-
     /**
-     * Reads all bytes from source buffer into an array. Returns the array, or null if no data read out and reaches to
-     * the end of buffer.
+     * Reads all data from the source buffer into a new array, continuing until the end of the buffer, and returns the
+     * array.
      *
-     * @param source source buffer
-     * @return the array, or null if no data read out and reaches to the end of buffer
-     * @throws IORuntimeException IO exception
+     * @param source the source buffer
+     * @return the array containing the data
+     * @throws IORuntimeException if an I/O error occurs
      */
-    @Nullable
     public static byte[] read(ByteBuffer source) throws IORuntimeException {
         try {
             int length = source.remaining();
-            // if (length <= 0) {
-            //     return null;
-            // }
+            if (length <= 0) {
+                return new byte[0];
+            }
             byte[] result = new byte[length];
             source.get(result);
             return result;
@@ -73,20 +74,21 @@ public class JieBuffer {
     }
 
     /**
-     * Reads specified number of bytes from source buffer into an array. Returns the array, or null if no data read out
-     * and reaches to the end of buffer.
-     * <p>
-     * If the number &lt; 0, read all as {@link #read(ByteBuffer)}; els if the number is 0, no read and return an empty
-     * array; else this method will keep reading until the read number reaches to the specified number, or the reading
-     * reaches the end of the buffer.
+     * Reads the specified number of data from the source buffer into a new array, and returns the array. If
+     * {@code number < 0}, this method performs as {@link #read(ByteBuffer)}. If {@code number == 0}, returns an empty
+     * array without reading. Otherwise, this method keeps reading until the read number reaches the specified number or
+     * the end of the buffer has been reached.
      *
-     * @param source source buffer
-     * @param number specified number
-     * @return the array, or null if no data read out and reaches to the end of buffer
-     * @throws IORuntimeException IO exception
+     * @param source the source buffer
+     * @param number the specified number
+     * @return the array containing the data
+     * @throws IORuntimeException if an I/O error occurs
      */
     @Nullable
     public static byte[] read(ByteBuffer source, int number) throws IORuntimeException {
+        if (!source.hasRemaining()) {
+            return new byte[0];
+        }
         if (number < 0) {
             return read(source);
         }
@@ -95,9 +97,6 @@ public class JieBuffer {
         }
         try {
             int length = Math.min(number, source.remaining());
-            if (length <= 0) {
-                return null;
-            }
             byte[] result = new byte[length];
             source.get(result);
             return result;
@@ -107,229 +106,284 @@ public class JieBuffer {
     }
 
     /**
-     * Marks and reads all bytes from source buffer into an array, resets the buffer after reading. Returns the array,
-     * or null if no data read out and reaches to the end of buffer.
+     * Reads all data from the source buffer into a new array, continuing until the end of the buffer, and returns the
+     * array.
      *
-     * @param source source buffer
-     * @return the array, or null if no data read out and reaches to the end of buffer
-     * @throws IORuntimeException IO exception
+     * @param source the source buffer
+     * @return the array containing the data
+     * @throws IORuntimeException if an I/O error occurs
      */
-    @Nullable
-    public static byte[] readReset(ByteBuffer source) throws IORuntimeException {
+    public static char[] read(CharBuffer source) throws IORuntimeException {
         try {
-            source.mark();
-            byte[] result = read(source);
-            source.reset();
-            return result;
-        } catch (Exception e) {
-            throw new IORuntimeException(e);
-        }
-    }
-
-    /**
-     * Marks and reads specified number of bytes from source buffer into an array, resets the buffer after reading.
-     * Returns the array, or null if no data read out and reaches to the end of buffer.
-     * <p>
-     * If the number &lt; 0, read all as {@link #read(ByteBuffer)}; els if the number is 0, no read and return an empty
-     * array; else this method will keep reading until the read number reaches to the specified number, or the reading
-     * reaches the end of the buffer.
-     *
-     * @param source source buffer
-     * @param number specified number
-     * @return the array, or null if no data read out and reaches to the end of buffer
-     * @throws IORuntimeException IO exception
-     */
-    @Nullable
-    public static byte[] readReset(ByteBuffer source, int number) throws IORuntimeException {
-        try {
-            source.mark();
-            byte[] result = read(source, number);
-            source.reset();
-            return result;
-        } catch (Exception e) {
-            throw new IORuntimeException(e);
-        }
-    }
-
-    /**
-     * Reads bytes from source buffer into dest buffer, returns actual read number, or -1 if no data read out and
-     * reaches to the end of buffer. This method will keep reading until the dest buffer is filled up, or the reading
-     * reaches the end of the buffer.
-     *
-     * @param source source buffer
-     * @param dest   dest buffer
-     * @return actual read number, or -1 if no data read out and reaches to the end of buffer
-     * @throws IORuntimeException IO exception
-     */
-    public static int readTo(ByteBuffer source, ByteBuffer dest) throws IORuntimeException {
-        try {
-            int sr = source.remaining();
-            int dr = dest.remaining();
-            if (sr <= dr) {
-                dest.put(source);
-                return sr;
+            int length = source.remaining();
+            if (length <= 0) {
+                return new char[0];
             }
-            ByteBuffer slice = readSlice(source, dr);
-            dest.put(slice);
-            return dr;
+            char[] result = new char[length];
+            source.get(result);
+            return result;
         } catch (Exception e) {
             throw new IORuntimeException(e);
         }
     }
 
     /**
-     * Reads specified number of bytes from source buffer into dest buffer, returns actual read number, or -1 if no data
-     * read out and reaches to the end of buffer.
-     * <p>
-     * If the number &lt; 0, read as {@link #readTo(ByteBuffer, ByteBuffer)}; els if the number is 0, no read and return
-     * 0; else this method will keep reading until the read number reaches to the specified number, or the reading
-     * reaches the end of the buffer (of source or dest).
+     * Reads the specified number of data from the source buffer into a new array, and returns the array. If
+     * {@code number < 0}, this method performs as {@link #read(CharBuffer)}. If {@code number == 0}, returns an empty
+     * array without reading. Otherwise, this method keeps reading until the read number reaches the specified number or
+     * the end of the buffer has been reached.
      *
-     * @param source source buffer
-     * @param dest   dest buffer
-     * @param number specified number
-     * @return actual read number, or -1 if no data read out and reaches to the end of buffer
-     * @throws IORuntimeException IO exception
+     * @param source the source buffer
+     * @param number the specified number
+     * @return the array containing the data
+     * @throws IORuntimeException if an I/O error occurs
      */
-    public static int readTo(ByteBuffer source, ByteBuffer dest, int number) throws IORuntimeException {
+    public static char[] read(CharBuffer source, int number) throws IORuntimeException {
+        if (!source.hasRemaining()) {
+            return new char[0];
+        }
         if (number < 0) {
-            return readTo(source, dest);
+            return read(source);
         }
         if (number == 0) {
-            return 0;
+            return new char[0];
         }
         try {
-            ByteBuffer src = source.remaining() == number ? source : slice(source, number);
-            int readNum = readTo(src, dest);
-            if (readNum > 0) {
-                source.position(source.position() + readNum);
-            }
-            return readNum;
+            int length = Math.min(number, source.remaining());
+            char[] result = new char[length];
+            source.get(result);
+            return result;
         } catch (Exception e) {
             throw new IORuntimeException(e);
         }
     }
 
     /**
-     * Reads specified number of bytes from source buffer into dest array, returns actual read number, or -1 if no data
-     * read out and reaches to the end of buffer or array.
+     * Reads all data from the source buffer into a string, continuing until the end of the buffer, and returns the
+     * string.
      *
-     * @param source source buffer
-     * @param dest   dest array
-     * @return actual read number, or -1 if no data read out and reaches to the end of buffer or array
-     * @throws IORuntimeException IO exception
+     * @param source the source buffer
+     * @return the string containing the data
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static String string(CharBuffer source) throws IORuntimeException {
+        StringBuilder builder = new StringBuilder();
+        readTo(source, builder);
+        return builder.toString();
+    }
+
+    /**
+     * Reads the specified number of data from the source buffer into a string, and returns the string. If
+     * {@code number < 0}, this method performs as {@link #string(CharBuffer)}. If {@code number == 0}, returns an empty
+     * array without reading. Otherwise, this method keeps reading until the read number reaches the specified number or
+     * the end of the buffer has been reached.
+     *
+     * @param source the source buffer
+     * @param number the specified number
+     * @return the array containing the data
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static String string(CharBuffer source, int number) throws IORuntimeException {
+        StringBuilder builder = new StringBuilder();
+        CharProcessor.from(source).readLimit(number).writeTo(builder);
+        return builder.toString();
+    }
+
+    /**
+     * Reads all bytes from the source buffer and returns them as a string with {@link JieChars#defaultCharset()}.
+     *
+     * @param source the source buffer
+     * @return the string
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static String string(ByteBuffer source) throws IORuntimeException {
+        return string(source, JieChars.defaultCharset());
+    }
+
+    /**
+     * Reads all bytes from the source buffer and returns them as a string with the specified charset.
+     *
+     * @param source  the source buffer
+     * @param charset the specified charset
+     * @return the string
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static String string(ByteBuffer source, Charset charset) throws IORuntimeException {
+        byte[] bytes = read(source);
+        if (JieArray.isEmpty(bytes)) {
+            return "";
+        }
+        return new String(bytes, charset);
+    }
+
+    /**
+     * Reads data from the source buffer into the specified array until the array is completely filled or the end of the
+     * buffer is reached. Returns the actual number of bytes read
+     *
+     * @param source the source buffer
+     * @param dest   the specified array
+     * @return the actual number of bytes read
+     * @throws IORuntimeException if an I/O error occurs
      */
     public static int readTo(ByteBuffer source, byte[] dest) throws IORuntimeException {
-        return readTo(source, dest, 0);
+        return (int) ByteProcessor.from(source).readLimit(dest.length).writeTo(dest);
     }
 
     /**
-     * Reads specified number of bytes from source buffer into dest array starting from given offset, returns actual
-     * read number, or -1 if no data read out and reaches to the end of buffer or array.
+     * Reads data from the source buffer into the specified buffer until the buffer is completely filled or the end of
+     * the buffer is reached. Returns the actual number of bytes read
      *
-     * @param source source buffer
-     * @param dest   dest array
-     * @param offset given offset
-     * @return actual read number, or -1 if no data read out and reaches to the end of buffer or array
-     * @throws IORuntimeException IO exception
+     * @param source the source buffer
+     * @param dest   the specified buffer
+     * @return the actual number of bytes read
+     * @throws IORuntimeException if an I/O error occurs
      */
-    public static int readTo(ByteBuffer source, byte[] dest, int offset) throws IORuntimeException {
-        try {
-            JieCheck.checkInBounds(offset, 0, dest.length);
-            int minLen = Math.min(source.remaining(), dest.length - offset);
-            if (minLen <= 0) {
-                return 0;
-            }
-            if (source.remaining() >= minLen) {
-                source.get(dest, offset, minLen);
-            } else {
-                ByteBuffer slice = readSlice(source, minLen);
-                slice.get(dest, offset, minLen);
-            }
-            return minLen;
-        } catch (Exception e) {
-            throw new IORuntimeException(e);
-        }
+    public static int readTo(ByteBuffer source, ByteBuffer dest) throws IORuntimeException {
+        return (int) ByteProcessor.from(source).readLimit(dest.remaining()).writeTo(dest);
     }
 
     /**
-     * Reads bytes from source buffer into dest stream, returns actual read number, or -1 if no data read out and
-     * reaches to the end of buffer. This method will keep reading until the reading reaches the end of the buffer.
+     * Reads data from the source buffer into the specified output buffer until the end of the source buffer is reached.
+     * Returns the actual number of bytes read
      *
-     * @param source source buffer
-     * @param dest   dest stream
-     * @return actual read number, or -1 if no data read out and reaches to the end of buffer
-     * @throws IORuntimeException IO exception
+     * @param source the source buffer
+     * @param dest   the specified output buffer
+     * @return the actual number of bytes read
+     * @throws IORuntimeException if an I/O error occurs
      */
-    public static int readTo(ByteBuffer source, OutputStream dest) throws IORuntimeException {
-        try {
-            if (source.hasArray()) {
-                int remaining = source.remaining();
-                dest.write(source.array(), source.arrayOffset() + source.position(), remaining);
-                source.position(source.position() + remaining);
-                return remaining;
-            }
-            byte[] bytes = read(source);
-            dest.write(bytes);
-            return bytes.length;
-        } catch (Exception e) {
-            throw new IORuntimeException(e);
-        }
+    public static long readTo(ByteBuffer source, OutputStream dest) throws IORuntimeException {
+        return ByteProcessor.from(source).writeTo(dest);
     }
 
     /**
-     * Reads all bytes from source buffer into a string with {@link JieChars#defaultCharset()}. Returns the string, or
-     * null if no data read out and reaches to the end of buffer.
+     * Reads data from the source buffer into the specified array until the array is completely filled or the end of the
+     * buffer is reached. Returns the actual number of chars read
      *
-     * @param source source buffer
-     * @return the string, or null if no data read out and reaches to the end of buffer
-     * @throws IORuntimeException IO exception
+     * @param source the source buffer
+     * @param dest   the specified array
+     * @return the actual number of chars read
+     * @throws IORuntimeException if an I/O error occurs
      */
-    @Nullable
-    public static String readString(ByteBuffer source) throws IORuntimeException {
-        return readString(source, JieChars.defaultCharset());
+    public static int readTo(CharBuffer source, char[] dest) throws IORuntimeException {
+        return (int) CharProcessor.from(source).readLimit(dest.length).writeTo(dest);
     }
 
     /**
-     * Reads all bytes from source buffer into a string with specified charset. Returns the string, or null if no data
-     * read out and reaches to the end of buffer.
+     * Reads data from the source buffer into the specified buffer until the buffer is completely filled or the end of
+     * the buffer is reached. Returns the actual number of chars read
      *
-     * @param source  source buffer
-     * @param charset specified charset
-     * @return the string, or null if no data read out and reaches to the end of buffer
-     * @throws IORuntimeException IO exception
+     * @param source the source buffer
+     * @param dest   the specified buffer
+     * @return the actual number of chars read
+     * @throws IORuntimeException if an I/O error occurs
      */
-    @Nullable
-    public static String readString(ByteBuffer source, Charset charset) throws IORuntimeException {
-        try {
-            byte[] bytes = read(source);
-            if (bytes == null) {
-                return null;
-            }
-            return new String(bytes, charset);
-        } catch (Exception e) {
-            throw new IORuntimeException(e);
-        }
+    public static int readTo(CharBuffer source, CharBuffer dest) throws IORuntimeException {
+        return (int) CharProcessor.from(source).readLimit(dest.remaining()).writeTo(dest);
     }
 
     /**
-     * Returns slice of given buffer by {@link ByteBuffer#slice()}, and sets the slice's limit to specified number (or
-     * remaining if remaining is less than specified number). Position of given buffer will not be changed.
+     * Reads data from the source buffer into the specified appender until the end of the buffer is reached. Returns the
+     * actual number of chars read
      *
-     * @param buffer given buffer
-     * @param number specified number
-     * @return the slice buffer
-     * @throws IORuntimeException IO exception
+     * @param source the source buffer
+     * @param dest   the specified appender
+     * @return the actual number of chars read
+     * @throws IORuntimeException if an I/O error occurs
      */
-    public static ByteBuffer slice(ByteBuffer buffer, int number) throws IORuntimeException {
-        try {
-            ByteBuffer slice = buffer.slice();
-            slice.limit(Math.min(number, buffer.remaining()));
-            return slice;
-        } catch (Exception e) {
-            throw new IORuntimeException(e);
-        }
+    public static long readTo(CharBuffer source, Appendable dest) throws IORuntimeException {
+        return CharProcessor.from(source).writeTo(dest);
     }
+
+    /**
+     * Creates a new buffer whose content is a shared subsequence of the given buffer's content. The content of the new
+     * buffer will start at the given buffer's current position, and extends for the specified length.
+     * <p>
+     * Changes to the given buffer's content will be visible in the new buffer, and vice versa. The new buffer's
+     * position will be zero, its capacity and limit will be the specified length. The new buffer will be direct if, and
+     * only if, the given buffer is direct, and it will be read-only if, and only if, the given buffer is read-only.
+     *
+     * @param buffer the given buffer
+     * @param length the specified length
+     * @return a new buffer whose content is a shared subsequence of the given buffer's content
+     * @throws IndexOutOfBoundsException if the offset and length is out of bounds
+     */
+    public static ByteBuffer slice(ByteBuffer buffer, int length) throws IndexOutOfBoundsException {
+        return slice(buffer, 0, length);
+    }
+
+    /**
+     * Creates a new buffer whose content is a shared subsequence of the given buffer's content. The content of the new
+     * buffer will start at the specified offset from the given buffer's current position, and extends for the specified
+     * length.
+     * <p>
+     * Changes to the given buffer's content will be visible in the new buffer, and vice versa. The new buffer's
+     * position will be zero, its capacity and limit will be the specified length. The new buffer will be direct if, and
+     * only if, the given buffer is direct, and it will be read-only if, and only if, the given buffer is read-only.
+     *
+     * @param buffer the given buffer
+     * @param offset the specified offset
+     * @param length the specified length
+     * @return a new buffer whose content is a shared subsequence of the given buffer's content
+     * @throws IndexOutOfBoundsException if the offset and length is out of bounds
+     */
+    public static ByteBuffer slice(ByteBuffer buffer, int offset, int length) throws IndexOutOfBoundsException {
+        checkOffsetLength(buffer.remaining(), offset, length);
+        int pos = buffer.position();
+        int limit = buffer.limit();
+        buffer.position(pos + offset);
+        buffer.limit(pos + offset + length);
+        ByteBuffer slice = buffer.slice();
+        buffer.position(pos);
+        buffer.limit(limit);
+        return slice;
+    }
+
+    /**
+     * Creates a new buffer whose content is a shared subsequence of the given buffer's content. The content of the new
+     * buffer will start at the given buffer's current position, and extends for the specified length.
+     * <p>
+     * Changes to the given buffer's content will be visible in the new buffer, and vice versa. The new buffer's
+     * position will be zero, its capacity and limit will be the specified length. The new buffer will be direct if, and
+     * only if, the given buffer is direct, and it will be read-only if, and only if, the given buffer is read-only.
+     *
+     * @param buffer the given buffer
+     * @param length the specified length
+     * @return a new buffer whose content is a shared subsequence of the given buffer's content
+     * @throws IndexOutOfBoundsException if the offset and length is out of bounds
+     */
+    public static CharBuffer slice(CharBuffer buffer, int length) throws IndexOutOfBoundsException {
+        return slice(buffer, 0, length);
+    }
+
+    /**
+     * Creates a new buffer whose content is a shared subsequence of the given buffer's content. The content of the new
+     * buffer will start at the specified offset from the given buffer's current position, and extends for the specified
+     * length.
+     * <p>
+     * Changes to the given buffer's content will be visible in the new buffer, and vice versa. The new buffer's
+     * position will be zero, its capacity and limit will be the specified length. The new buffer will be direct if, and
+     * only if, the given buffer is direct, and it will be read-only if, and only if, the given buffer is read-only.
+     *
+     * @param buffer the given buffer
+     * @param offset the specified offset
+     * @param length the specified length
+     * @return a new buffer whose content is a shared subsequence of the given buffer's content
+     * @throws IndexOutOfBoundsException if the offset and length is out of bounds
+     */
+    public static CharBuffer slice(CharBuffer buffer, int offset, int length) throws IndexOutOfBoundsException {
+        checkOffsetLength(buffer.remaining(), offset, length);
+        int pos = buffer.position();
+        int limit = buffer.limit();
+        buffer.position(pos + offset);
+        buffer.limit(pos + offset + length);
+        CharBuffer slice = buffer.slice();
+        buffer.position(pos);
+        buffer.limit(limit);
+        return slice;
+    }
+
+    //------------------------------------------------------------//
+    //------------------------------------------------------------//
 
     /**
      * Returns slice of given buffer by {@link ByteBuffer#slice()}, and sets the slice's limit to specified number (or
@@ -346,55 +400,6 @@ public class JieBuffer {
             ByteBuffer slice = buffer.slice();
             slice.limit(Math.min(number, buffer.remaining()));
             buffer.position(buffer.position() + slice.remaining());
-            return slice;
-        } catch (Exception e) {
-            throw new IORuntimeException(e);
-        }
-    }
-
-    /**
-     * Returns a sub-range view of given buffer, starting from given offset to buffer's limit. The two buffers will
-     * share the same data so any operation will reflect each other.
-     * <p>
-     * Note the offset is counted from 0, not {@code buffer.position()}.
-     *
-     * @param buffer given buffer
-     * @param offset given offset
-     * @return the sub-buffer
-     * @throws IORuntimeException IO exception
-     */
-    public static ByteBuffer subBuffer(ByteBuffer buffer, int offset) throws IORuntimeException {
-        try {
-            JieCheck.checkInBounds(offset, 0, buffer.limit());
-            int pos = buffer.position();
-            buffer.position(offset);
-            ByteBuffer slice = buffer.slice();
-            buffer.position(pos);
-            return slice;
-        } catch (Exception e) {
-            throw new IORuntimeException(e);
-        }
-    }
-
-    /**
-     * Returns a sub-range view of given buffer, starting from given offset to specified length. The two buffers will
-     * share the same data so any operation will reflect each other.
-     * <p>
-     * Note the offset is counted from 0, not {@code buffer.position()}.
-     *
-     * @param buffer given buffer
-     * @param offset given offset
-     * @param length specified length
-     * @return the sub-buffer
-     * @throws IORuntimeException IO exception
-     */
-    public static ByteBuffer subBuffer(ByteBuffer buffer, int offset, int length) throws IORuntimeException {
-        try {
-            JieCheck.checkRangeInBounds(offset, offset + length, 0, buffer.limit());
-            int pos = buffer.position();
-            buffer.position(offset);
-            ByteBuffer slice = slice(buffer, length);
-            buffer.position(pos);
             return slice;
         } catch (Exception e) {
             throw new IORuntimeException(e);

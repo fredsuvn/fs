@@ -1,24 +1,24 @@
 package test.encode;
 
+import xyz.sunqian.common.base.bytes.ByteProcessor;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
-import xyz.sunqian.common.base.bytes.JieBytes;
-import xyz.sunqian.common.encode.ByteDecoder;
-import xyz.sunqian.common.encode.ByteEncoder;
+import xyz.sunqian.common.encode.DataDecoder;
+import xyz.sunqian.common.encode.DataEncoder;
 import xyz.sunqian.common.encode.DecodingException;
 import xyz.sunqian.common.encode.EncodingException;
+import xyz.sunqian.test.MaterialBox;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.expectThrows;
-import static xyz.sunqian.test.MaterialBox.directBuffer;
-import static xyz.sunqian.test.MaterialBox.paddedBuffer;
+import static xyz.sunqian.common.base.bytes.ByteEncoder.withFixedSize;
 
 public class EncodeTest {
 
     static void testEncoding(
-        ByteEncoder encoder,
+        DataEncoder encoder,
         byte[] source,
         byte[] target,
         int blockSize
@@ -32,9 +32,9 @@ public class EncodeTest {
             // -> buffer
             ByteBuffer encoded = encoder.encode(ByteBuffer.wrap(source));
             assertEquals(encoded, ByteBuffer.wrap(target));
-            encoded = encoder.encode(paddedBuffer(source));
+            encoded = encoder.encode(MaterialBox.copyPadding(source));
             assertEquals(encoded, ByteBuffer.wrap(target));
-            encoded = encoder.encode(directBuffer(source));
+            encoded = encoder.encode(MaterialBox.copyDirect(source));
             assertEquals(encoded, ByteBuffer.wrap(target));
         }
         {
@@ -49,45 +49,45 @@ public class EncodeTest {
             encoder.encode(ByteBuffer.wrap(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
-            dst = paddedBuffer(new byte[target.length]);
+            dst = MaterialBox.copyPadding(new byte[target.length]);
             encoder.encode(ByteBuffer.wrap(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
-            dst = directBuffer(new byte[target.length]);
+            dst = MaterialBox.copyDirect(new byte[target.length]);
             encoder.encode(ByteBuffer.wrap(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
 
             dst = ByteBuffer.allocate(target.length);
-            encoder.encode(paddedBuffer(source), dst);
+            encoder.encode(MaterialBox.copyPadding(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
-            dst = paddedBuffer(new byte[target.length]);
-            encoder.encode(paddedBuffer(source), dst);
+            dst = MaterialBox.copyPadding(new byte[target.length]);
+            encoder.encode(MaterialBox.copyPadding(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
-            dst = directBuffer(new byte[target.length]);
-            encoder.encode(paddedBuffer(source), dst);
+            dst = MaterialBox.copyDirect(new byte[target.length]);
+            encoder.encode(MaterialBox.copyPadding(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
 
             dst = ByteBuffer.allocate(target.length);
-            encoder.encode(directBuffer(source), dst);
+            encoder.encode(MaterialBox.copyDirect(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
-            dst = paddedBuffer(new byte[target.length]);
-            encoder.encode(directBuffer(source), dst);
+            dst = MaterialBox.copyPadding(new byte[target.length]);
+            encoder.encode(MaterialBox.copyDirect(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
-            dst = directBuffer(new byte[target.length]);
-            encoder.encode(directBuffer(source), dst);
+            dst = MaterialBox.copyDirect(new byte[target.length]);
+            encoder.encode(MaterialBox.copyDirect(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
         }
         {
             // stream
             BytesBuilder bb = new BytesBuilder();
-            long c = JieBytes.process(source).encoder(blockSize, encoder.streamEncoder()).writeTo(bb);
+            long c = ByteProcessor.from(source).encoder(withFixedSize(blockSize, encoder.streamEncoder())).writeTo(bb);
             if (source.length == 0) {
                 assertEquals(c, 0);
             } else {
@@ -107,7 +107,7 @@ public class EncodeTest {
     }
 
     static void testDecoding(
-        ByteDecoder decoder,
+        DataDecoder decoder,
         byte[] source,
         byte[] target,
         int blockSize
@@ -121,9 +121,9 @@ public class EncodeTest {
             // -> buffer
             ByteBuffer decoded = decoder.decode(ByteBuffer.wrap(source));
             assertEquals(decoded, ByteBuffer.wrap(target));
-            decoded = decoder.decode(paddedBuffer(source));
+            decoded = decoder.decode(MaterialBox.copyPadding(source));
             assertEquals(decoded, ByteBuffer.wrap(target));
-            decoded = decoder.decode(directBuffer(source));
+            decoded = decoder.decode(MaterialBox.copyDirect(source));
             assertEquals(decoded, ByteBuffer.wrap(target));
         }
         {
@@ -138,45 +138,45 @@ public class EncodeTest {
             decoder.decode(ByteBuffer.wrap(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
-            dst = paddedBuffer(new byte[target.length]);
+            dst = MaterialBox.copyPadding(new byte[target.length]);
             decoder.decode(ByteBuffer.wrap(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
-            dst = directBuffer(new byte[target.length]);
+            dst = MaterialBox.copyDirect(new byte[target.length]);
             decoder.decode(ByteBuffer.wrap(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
 
             dst = ByteBuffer.allocate(target.length);
-            decoder.decode(paddedBuffer(source), dst);
+            decoder.decode(MaterialBox.copyPadding(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
-            dst = paddedBuffer(new byte[target.length]);
-            decoder.decode(paddedBuffer(source), dst);
+            dst = MaterialBox.copyPadding(new byte[target.length]);
+            decoder.decode(MaterialBox.copyPadding(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
-            dst = directBuffer(new byte[target.length]);
-            decoder.decode(paddedBuffer(source), dst);
+            dst = MaterialBox.copyDirect(new byte[target.length]);
+            decoder.decode(MaterialBox.copyPadding(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
 
             dst = ByteBuffer.allocate(target.length);
-            decoder.decode(directBuffer(source), dst);
+            decoder.decode(MaterialBox.copyDirect(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
-            dst = paddedBuffer(new byte[target.length]);
-            decoder.decode(directBuffer(source), dst);
+            dst = MaterialBox.copyPadding(new byte[target.length]);
+            decoder.decode(MaterialBox.copyDirect(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
-            dst = directBuffer(new byte[target.length]);
-            decoder.decode(directBuffer(source), dst);
+            dst = MaterialBox.copyDirect(new byte[target.length]);
+            decoder.decode(MaterialBox.copyDirect(source), dst);
             dst.flip();
             assertEquals(dst, ByteBuffer.wrap(target));
         }
         {
             // stream
             BytesBuilder bb = new BytesBuilder();
-            long c = JieBytes.process(source).encoder(blockSize, decoder.streamEncoder()).writeTo(bb);
+            long c = ByteProcessor.from(source).encoder(withFixedSize(blockSize, decoder.streamEncoder())).writeTo(bb);
             if (source.length == 0) {
                 assertEquals(c, 0);
             } else {

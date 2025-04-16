@@ -1,12 +1,12 @@
 package test.invoke;
 
-import org.testng.TestException;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.invoke.InvocationException;
 import xyz.sunqian.common.invoke.JieHandle;
 import xyz.sunqian.common.reflect.JieReflect;
+import xyz.sunqian.test.JieTestException;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -184,17 +184,17 @@ public class InvokeTest {
         try {
             Invocable.reflect(ttc).invoke(null, 1);
         } catch (InvocationException e) {
-            assertEquals(TestException.class, e.getCause().getClass());
+            assertEquals(JieTestException.class, e.getCause().getClass());
         }
         try {
             Invocable.reflect(tttStatic).invoke(null);
         } catch (InvocationException e) {
-            assertEquals(TestException.class, e.getCause().getClass());
+            assertEquals(JieTestException.class, e.getCause().getClass());
         }
         try {
             Invocable.reflect(ttt).invoke(tt);
         } catch (InvocationException e) {
-            assertEquals(TestException.class, e.getCause().getClass());
+            assertEquals(JieTestException.class, e.getCause().getClass());
         }
         expectThrows(InvocationException.class, () ->
             Invocable.handle(tttStatic).invoke(null));
@@ -203,39 +203,39 @@ public class InvokeTest {
         try {
             Invocable.handle(ttc).invoke(null, 1);
         } catch (InvocationException e) {
-            assertEquals(TestException.class, e.getCause().getClass());
+            assertEquals(JieTestException.class, e.getCause().getClass());
         }
         try {
             Invocable.handle(tttStatic).invoke(null);
         } catch (InvocationException e) {
-            assertEquals(TestException.class, e.getCause().getClass());
+            assertEquals(JieTestException.class, e.getCause().getClass());
         }
         try {
             Invocable.handle(ttt).invoke(tt);
         } catch (InvocationException e) {
-            assertEquals(TestException.class, e.getCause().getClass());
+            assertEquals(JieTestException.class, e.getCause().getClass());
         }
-        expectThrows(TestException.class, () ->
+        expectThrows(JieTestException.class, () ->
             JieHandle.invokeStatic(MethodHandles.lookup().unreflect(tttStatic)));
-        expectThrows(TestException.class, () ->
+        expectThrows(JieTestException.class, () ->
             JieHandle.invokeStatic(MethodHandles.lookup().unreflect(ttt), tt));
     }
 
     public static class TestThrow {
 
         public static void tttStatic() {
-            throw new TestException("");
+            throw new JieTestException();
         }
 
         public TestThrow() {
         }
 
         public TestThrow(int i) {
-            throw new TestException("");
+            throw new JieTestException();
         }
 
         public void ttt() {
-            throw new TestException("");
+            throw new JieTestException();
         }
     }
 

@@ -1,14 +1,19 @@
 package xyz.sunqian.common.codec;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.bytes.JieBytes;
+import xyz.sunqian.common.base.bytes.ByteProcessor;
 import xyz.sunqian.common.io.JieIO;
 
 import javax.crypto.Cipher;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.security.*;
+import java.security.AlgorithmParameters;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.Provider;
+import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.spec.AlgorithmParameterSpec;
 
@@ -254,7 +259,7 @@ public class CipherCodec implements CodecConfigurator<CipherCodec> {
             } else {
                 throw new CodecException("Unknown input type: " + input.getClass());
             }
-            return JieBytes.process(source).readBlockSize(blockSize).encoder((data, end) ->
+            return ByteProcessor.from(source).readBlockSize(blockSize).encoder((data, end) ->
                     ByteBuffer.wrap(JieCodec.doCipher(cipher, data)))
                 .toInputStream();
         } catch (CodecException e) {

@@ -57,6 +57,38 @@ public class MaterialBox {
     }
 
     /**
+     * Returns a buffer whose content are copied from the given buffer. The returned buffer is direct if, and only if
+     * the given buffer is direct. The position of the given buffer will not be changed.
+     *
+     * @param buffer the given buffer
+     * @return a buffer whose content are copied from the given buffer
+     */
+    public static ByteBuffer copyBuffer(ByteBuffer buffer) {
+        ByteBuffer ret = buffer.isDirect() ? ByteBuffer.allocateDirect(buffer.remaining())
+            : ByteBuffer.allocate(buffer.remaining());
+        int pos = buffer.position();
+        ret.put(buffer);
+        buffer.position(pos);
+        ret.flip();
+        return ret;
+    }
+
+    /**
+     * Returns a new array whose content are copied from the given buffer. The position of the given buffer will not be
+     * changed.
+     *
+     * @param buffer the given buffer
+     * @return a new array whose content are copied from the given buffer
+     */
+    public static byte[] copyBytes(ByteBuffer buffer) {
+        byte[] array = new byte[buffer.remaining()];
+        int pos = buffer.position();
+        buffer.get(array);
+        buffer.position(pos);
+        return array;
+    }
+
+    /**
      * Returns a buffer backed by the middle of an extended array. The extended array is longer than and copied from the
      * given array, with the copied data positioned in the middle (not occupying the start or end of the extended
      * array). The returned buffer contains the portion of the extended array that holds the copied data. The buffer's
@@ -96,6 +128,45 @@ public class MaterialBox {
         buffer.put(array);
         buffer.flip();
         return buffer;
+    }
+
+    /**
+     * Returns a buffer whose content are copied from the given buffer. The returned buffer is direct if, and only if
+     * the given buffer is direct. The position of the given buffer will not be changed.
+     *
+     * @param buffer the given buffer
+     * @return a buffer whose content are copied from the given buffer
+     */
+    public static CharBuffer copyBuffer(CharBuffer buffer) {
+        if (buffer.isDirect()) {
+            char[] chars = copyBytes(buffer);
+            ByteBuffer bb = ByteBuffer.allocateDirect(chars.length * 2);
+            CharBuffer ret = bb.asCharBuffer();
+            ret.put(chars);
+            ret.flip();
+            return ret;
+        }
+        CharBuffer ret = CharBuffer.allocate(buffer.remaining());
+        int pos = buffer.position();
+        ret.put(buffer);
+        buffer.position(pos);
+        ret.flip();
+        return ret;
+    }
+
+    /**
+     * Returns a new array whose content are copied from the given buffer. The position of the given buffer will not be
+     * changed.
+     *
+     * @param buffer the given buffer
+     * @return a new array whose content are copied from the given buffer
+     */
+    public static char[] copyBytes(CharBuffer buffer) {
+        char[] array = new char[buffer.remaining()];
+        int pos = buffer.position();
+        buffer.get(array);
+        buffer.position(pos);
+        return array;
     }
 
     /**
