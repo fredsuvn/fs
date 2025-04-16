@@ -24,7 +24,7 @@ public class MaterialBox {
      * @param array the given array
      * @return a buffer backed by the middle of an extended array
      */
-    public static ByteBuffer paddedBuffer(byte[] array) {
+    public static ByteBuffer copyPadding(byte[] array) {
         byte[] back = new byte[array.length + 20];
         System.arraycopy(array, 0, back, 10, array.length);
         return ByteBuffer.wrap(back, 10, array.length).slice();
@@ -36,7 +36,7 @@ public class MaterialBox {
      * @param array the given array
      * @return a direct buffer whose content are copied from the given array
      */
-    public static ByteBuffer directBuffer(byte[] array) {
+    public static ByteBuffer copyDirect(byte[] array) {
         ByteBuffer buffer = ByteBuffer.allocateDirect(array.length);
         buffer.put(array);
         buffer.flip();
@@ -49,7 +49,7 @@ public class MaterialBox {
      * @param array the given array
      * @return a heap buffer whose content are copied from the given array
      */
-    public static ByteBuffer heapBuffer(byte[] array) {
+    public static ByteBuffer copyHeap(byte[] array) {
         ByteBuffer buffer = ByteBuffer.allocate(array.length);
         buffer.put(array);
         buffer.flip();
@@ -65,7 +65,7 @@ public class MaterialBox {
      * @param array the given array
      * @return a buffer backed by the middle of an extended array
      */
-    public static CharBuffer paddedBuffer(char[] array) {
+    public static CharBuffer copyPadding(char[] array) {
         char[] back = new char[array.length + 20];
         System.arraycopy(array, 0, back, 10, array.length);
         return CharBuffer.wrap(back, 10, array.length).slice();
@@ -77,7 +77,7 @@ public class MaterialBox {
      * @param array the given array
      * @return a direct buffer whose content are copied from the given array
      */
-    public static CharBuffer directBuffer(char[] array) {
+    public static CharBuffer copyDirect(char[] array) {
         CharBuffer buffer =
             ByteBuffer.allocateDirect(array.length * 2).order(ByteOrder.BIG_ENDIAN).asCharBuffer();
         buffer.put(array);
@@ -91,7 +91,7 @@ public class MaterialBox {
      * @param array the given array
      * @return a heap buffer whose content are copied from the given array
      */
-    public static CharBuffer heapBuffer(char[] array) {
+    public static CharBuffer copyHeap(char[] array) {
         CharBuffer buffer = CharBuffer.allocate(array.length);
         buffer.put(array);
         buffer.flip();
@@ -104,7 +104,7 @@ public class MaterialBox {
      * @param path the specified path
      * @param data the specified data
      */
-    public static void createFile(Path path, byte[] data) {
+    public static void newFile(Path path, byte[] data) {
         try {
             File file = path.toFile();
             if (file.createNewFile()) {
