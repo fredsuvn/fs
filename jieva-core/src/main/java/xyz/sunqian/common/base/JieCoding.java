@@ -1,0 +1,57 @@
+package xyz.sunqian.common.base;
+
+import xyz.sunqian.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Function;
+
+/**
+ * Provides coding utilities.
+ *
+ * @author sunqian
+ */
+public class JieCoding {
+
+    /**
+     * If the {@code old} is null, return the {@code added}. Otherwise, returns a new {@link ArrayList} contains the
+     * {@code old} and {@code added}.
+     *
+     * @param old   the old
+     * @param added the added
+     * @return the {@code added} or a new {@link ArrayList} contains the {@code old} and {@code added}
+     */
+    public static Object ifAdd(@Nullable Object old, @Nullable Object added) {
+        if (old == null) {
+            return added;
+        }
+        List<Object> list = new ArrayList<>(2);
+        list.add(old);
+        list.add(added);
+        return list;
+    }
+
+    /**
+     * If the {@code objOrColl} is null, return the result of the {@code merger} with an empty collection. If the
+     * {@code objOrColl} is a collection, return the result of the {@code merger} with the collection. Otherwise, the
+     * {@code objOrColl} will be treated as a collection, and this method returns the result of the {@code merger} with
+     * the collection.
+     *
+     * @param objOrColl the {@code objOrColl}
+     * @param merger    the {@code merger}
+     * @param <T>       component type of the collection
+     * @return the result of the {@code merger}
+     */
+    public static <T> T ifMerge(@Nullable Object objOrColl, Function<Collection<? extends T>, ? extends T> merger) {
+        if (objOrColl == null) {
+            return merger.apply(Collections.emptyList());
+        }
+        if (objOrColl instanceof Collection<?>) {
+            Collection<T> collection = Jie.as(objOrColl);
+            return merger.apply(collection);
+        }
+        return merger.apply(Collections.singletonList(Jie.as(objOrColl)));
+    }
+}
