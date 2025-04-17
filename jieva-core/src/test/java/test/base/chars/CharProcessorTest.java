@@ -29,7 +29,6 @@ import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 import static xyz.sunqian.common.base.chars.CharEncoder.withBuffering;
-import static xyz.sunqian.common.base.chars.CharEncoder.withFixedSize;
 import static xyz.sunqian.common.base.chars.CharEncoder.withRounding;
 import static xyz.sunqian.test.JieTest.reflectThrows;
 import static xyz.sunqian.test.MaterialBox.copyBuffer;
@@ -54,113 +53,6 @@ public class CharProcessorTest {
         testProcessing(100, 10, 0);
         testProcessing(100, 10, 100);
         testProcessing(6666, 99, 77777);
-
-        {
-            // empty
-            CharsBuilder bb = new CharsBuilder();
-            long c;
-            c = CharProcessor.from(new char[0]).writeTo(bb);
-            assertEquals(c, 0);
-            assertEquals(bb.toCharArray(), new char[0]);
-            c = CharProcessor.from(new char[0]).writeTo(new char[0]);
-            assertEquals(c, 0);
-            assertEquals(bb.toCharArray(), new char[0]);
-            c = CharProcessor.from(new char[0]).writeTo(CharBuffer.allocate(0));
-            assertEquals(c, 0);
-            assertEquals(bb.toCharArray(), new char[0]);
-            c = CharProcessor.from(JieChars.emptyBuffer()).writeTo(bb);
-            assertEquals(c, 0);
-            assertEquals(bb.toCharArray(), new char[0]);
-            c = CharProcessor.from(JieChars.emptyBuffer()).writeTo(new char[0]);
-            assertEquals(c, 0);
-            assertEquals(bb.toCharArray(), new char[0]);
-            c = CharProcessor.from(JieChars.emptyBuffer()).writeTo(CharBuffer.allocate(0));
-            assertEquals(c, 0);
-            assertEquals(bb.toCharArray(), new char[0]);
-            c = CharProcessor.from(new CharArrayReader(new char[0])).writeTo(bb);
-            assertEquals(c, 0);
-            assertEquals(bb.toCharArray(), new char[0]);
-            c = CharProcessor.from("").writeTo(new char[0]);
-            assertEquals(c, 0);
-            assertEquals(bb.toCharArray(), new char[0]);
-            c = CharProcessor.from("").writeTo(bb);
-            assertEquals(c, 0);
-            assertEquals(bb.toCharArray(), new char[0]);
-        }
-
-        {
-            // endOnZeroRead
-            CharsBuilder bb = new CharsBuilder();
-            long c;
-            c = CharProcessor.from(new NioReader()).endOnZeroRead(true)
-                .encoder((data, end) -> data)
-                .writeTo(bb);
-            assertEquals(c, 0);
-            assertEquals(bb.toCharArray(), new char[0]);
-            c = CharProcessor.from(new NioReader(new CharArrayReader(new char[0]))).endOnZeroRead(false)
-                .encoder((data, end) -> data)
-                .writeTo(bb);
-            assertEquals(c, 0);
-            assertEquals(bb.toCharArray(), new char[0]);
-        }
-
-        {
-            // writeable
-            char[] src = new char[1024];
-            char[] target = new char[1024];
-            Arrays.fill(src, (char) 1);
-            Arrays.fill(target, (char) 2);
-            assertNotEquals(src, target);
-            CharProcessor.from(src).readBlockSize(3).encoder(((data, end) -> {
-                assertFalse(data.isReadOnly());
-                while (data.hasRemaining()) {
-                    data.put((char) 2);
-                }
-                return data;
-            })).writeTo();
-            assertEquals(src, target);
-            Arrays.fill(src, (char) 1);
-            assertNotEquals(src, target);
-            CharProcessor.from(CharBuffer.wrap(src)).readBlockSize(3).encoder(((data, end) -> {
-                assertFalse(data.isReadOnly());
-                while (data.hasRemaining()) {
-                    data.put((char) 2);
-                }
-                return data;
-            })).writeTo();
-            assertEquals(src, target);
-            CharProcessor.from(new CharArrayReader(src)).readBlockSize(3).encoder(((data, end) -> {
-                assertTrue(data.isReadOnly());
-                return data;
-            })).writeTo();
-            CharProcessor.from(new String(src)).readBlockSize(3).encoder(((data, end) -> {
-                assertTrue(data.isReadOnly());
-                return data;
-            })).writeTo();
-        }
-
-        {
-            // writeTo
-            String str = "1234567890qwertyuiop[]中文";
-            char[] strChars = str.toCharArray();
-            assertEquals(CharProcessor.from(str).toCharArray(), strChars);
-            assertEquals(CharProcessor.from(str).toCharBuffer(), CharBuffer.wrap(strChars));
-            assertEquals(CharProcessor.from(str).toString(), str);
-        }
-
-        // error
-        expectThrows(IllegalArgumentException.class, () -> testProcessing(666, 0, 0));
-        expectThrows(IORuntimeException.class, () -> CharProcessor.from((Reader) null).writeTo((Appendable) null));
-        expectThrows(IndexOutOfBoundsException.class, () -> CharProcessor.from(new char[0], 0, 100));
-        expectThrows(IORuntimeException.class, () -> CharProcessor.from(new char[0]).writeTo(new char[0], 0, 100));
-        expectThrows(IORuntimeException.class, () -> CharProcessor.from(new char[0]).writeTo((Appendable) null));
-        expectThrows(IORuntimeException.class, () -> CharProcessor.from((Reader) null).writeTo(new char[0]));
-        Method method = CharProcessor.from(new char[0]).getClass().getDeclaredMethod("toBufferIn", Object.class);
-        reflectThrows(IORuntimeException.class, method, CharProcessor.from(new char[0]), 1);
-        method = CharProcessor.from(new char[0]).getClass().getDeclaredMethod("toBufferOut", Object.class);
-        reflectThrows(IORuntimeException.class, method, CharProcessor.from(new char[0]), "");
-        expectThrows(IORuntimeException.class, () -> CharProcessor.from(new ThrowReader(0)).writeTo(new char[0]));
-        expectThrows(IORuntimeException.class, () -> CharProcessor.from(new ThrowReader(1)).writeTo(new char[0]));
     }
 
     private void testProcessing(int totalSize, int blockSize, int readLimit) throws Exception {
@@ -476,7 +368,7 @@ public class CharProcessorTest {
                     counter[0] += data.remaining();
                     return data;
                 }))
-                .writeTo();
+                .process();
             assertEquals(readNum, getLength(totalSize, readLimit));
             assertEquals(counter[0], getLength(totalSize, readLimit));
         }
@@ -596,7 +488,7 @@ public class CharProcessorTest {
                     buffer[0] = !buffer[0];
                     return ret;
                 }))
-                .encoder(withFixedSize(10, (data, end) -> {
+                .encoder(10, (data, end) -> {
                     if (data.remaining() == 10) {
                         char[] ret = new char[11];
                         data.get(ret, 0, 10);
@@ -605,7 +497,7 @@ public class CharProcessorTest {
                     } else {
                         return data;
                     }
-                }))
+                })
                 .writeTo(bb);
             assertEquals(count, totalSize);
             assertEquals(bb.toCharArray(), proc);
@@ -656,18 +548,18 @@ public class CharProcessorTest {
     }
 
     @Test
-    public void testRoundEncoder() {
-        testRoundEncoder(100, 5, 6);
-        testRoundEncoder(100, 200, 60);
-        testRoundEncoder(10086, 11, 333);
-        testRoundEncoder(10086, 333, 11);
-        testRoundEncoder(10086, 22, 22);
-        testRoundEncoder(10086, 222, 1);
-        testRoundEncoder(222, 10086, 1);
-        testRoundEncoder(223, 2233, 2);
+    public void testRoundingEncoder() {
+        testRoundingEncoder(100, 5, 6);
+        testRoundingEncoder(100, 200, 60);
+        testRoundingEncoder(10086, 11, 333);
+        testRoundingEncoder(10086, 333, 11);
+        testRoundingEncoder(10086, 22, 22);
+        testRoundingEncoder(10086, 222, 1);
+        testRoundingEncoder(222, 10086, 1);
+        testRoundingEncoder(223, 2233, 2);
     }
 
-    private void testRoundEncoder(int totalSize, int blockSize, int expectedBlockSize) {
+    private void testRoundingEncoder(int totalSize, int blockSize, int expectedBlockSize) {
         {
             char[] src = JieRandom.fill(new char[totalSize]);
             char[] dst = new char[src.length * 2];
@@ -733,18 +625,18 @@ public class CharProcessorTest {
     }
 
     @Test
-    public void testBufferedEncoder() {
-        testBufferedEncoder(100, 5, 6);
-        testBufferedEncoder(100, 200, 60);
-        testBufferedEncoder(10086, 11, 333);
-        testBufferedEncoder(10086, 333, 11);
-        testBufferedEncoder(10086, 22, 22);
-        testBufferedEncoder(10086, 333, 1);
-        testBufferedEncoder(333, 10086, 1);
-        testBufferedEncoder(233, 2333, 2);
+    public void testBufferingEncoder() {
+        testBufferingEncoder(100, 5, 6);
+        testBufferingEncoder(100, 200, 60);
+        testBufferingEncoder(10086, 11, 333);
+        testBufferingEncoder(10086, 333, 11);
+        testBufferingEncoder(10086, 22, 22);
+        testBufferingEncoder(10086, 333, 1);
+        testBufferingEncoder(333, 10086, 1);
+        testBufferingEncoder(233, 2333, 2);
     }
 
-    private void testBufferedEncoder(int size, int blockSize, int eatNum) {
+    private void testBufferingEncoder(int size, int blockSize, int eatNum) {
         {
             char[] src = JieRandom.fill(new char[size]);
             char[] dst = new char[src.length];
@@ -813,7 +705,7 @@ public class CharProcessorTest {
             int portion = JieMath.leastPortion(totalSize, fixedSize);
             char[] dst = new char[src.length + portion * 2];
             long len = CharProcessor.from(src).readBlockSize(blockSize).
-                encoder(withFixedSize(fixedSize, (data, end) -> {
+                encoder(fixedSize, (data, end) -> {
                     int remaining = data.remaining();
                     if (remaining == 0) {
                         return JieChars.emptyBuffer();
@@ -823,7 +715,7 @@ public class CharProcessorTest {
                     bb[remaining] = '\r';
                     bb[remaining + 1] = '\n';
                     return CharBuffer.wrap(bb);
-                }))
+                })
                 .writeTo(dst);
             assertEquals(dst, charsBuilder.toCharArray());
             assertEquals(len, src.length);
@@ -833,7 +725,7 @@ public class CharProcessorTest {
             char[] src = JieRandom.fill(new char[totalSize]);
             CharsBuilder builder = new CharsBuilder();
             CharProcessor.from(src).readBlockSize(blockSize)
-                .encoder(withFixedSize(fixedSize, (data, end) -> null))
+                .encoder(fixedSize, (data, end) -> null)
                 .writeTo(builder);
             assertEquals(builder.size(), 0);
         }
@@ -993,6 +885,117 @@ public class CharProcessorTest {
             );
             assertEquals(converted, bytes);
         }
+    }
+
+    @Test
+    public void testSpecial() throws Exception {
+
+        {
+            // empty
+            CharsBuilder bb = new CharsBuilder();
+            long c;
+            c = CharProcessor.from(new char[0]).writeTo(bb);
+            assertEquals(c, 0);
+            assertEquals(bb.toCharArray(), new char[0]);
+            c = CharProcessor.from(new char[0]).writeTo(new char[0]);
+            assertEquals(c, 0);
+            assertEquals(bb.toCharArray(), new char[0]);
+            c = CharProcessor.from(new char[0]).writeTo(CharBuffer.allocate(0));
+            assertEquals(c, 0);
+            assertEquals(bb.toCharArray(), new char[0]);
+            c = CharProcessor.from(JieChars.emptyBuffer()).writeTo(bb);
+            assertEquals(c, 0);
+            assertEquals(bb.toCharArray(), new char[0]);
+            c = CharProcessor.from(JieChars.emptyBuffer()).writeTo(new char[0]);
+            assertEquals(c, 0);
+            assertEquals(bb.toCharArray(), new char[0]);
+            c = CharProcessor.from(JieChars.emptyBuffer()).writeTo(CharBuffer.allocate(0));
+            assertEquals(c, 0);
+            assertEquals(bb.toCharArray(), new char[0]);
+            c = CharProcessor.from(new CharArrayReader(new char[0])).writeTo(bb);
+            assertEquals(c, 0);
+            assertEquals(bb.toCharArray(), new char[0]);
+            c = CharProcessor.from("").writeTo(new char[0]);
+            assertEquals(c, 0);
+            assertEquals(bb.toCharArray(), new char[0]);
+            c = CharProcessor.from("").writeTo(bb);
+            assertEquals(c, 0);
+            assertEquals(bb.toCharArray(), new char[0]);
+        }
+
+        {
+            // endOnZeroRead
+            CharsBuilder bb = new CharsBuilder();
+            long c;
+            c = CharProcessor.from(new NioReader()).endOnZeroRead(true)
+                .encoder((data, end) -> data)
+                .writeTo(bb);
+            assertEquals(c, 0);
+            assertEquals(bb.toCharArray(), new char[0]);
+            c = CharProcessor.from(new NioReader(new CharArrayReader(new char[0]))).endOnZeroRead(false)
+                .encoder((data, end) -> data)
+                .writeTo(bb);
+            assertEquals(c, 0);
+            assertEquals(bb.toCharArray(), new char[0]);
+        }
+
+        {
+            // writeable
+            char[] src = new char[1024];
+            char[] target = new char[1024];
+            Arrays.fill(src, (char) 1);
+            Arrays.fill(target, (char) 2);
+            assertNotEquals(src, target);
+            CharProcessor.from(src).readBlockSize(3).encoder(((data, end) -> {
+                assertFalse(data.isReadOnly());
+                while (data.hasRemaining()) {
+                    data.put((char) 2);
+                }
+                return data;
+            })).process();
+            assertEquals(src, target);
+            Arrays.fill(src, (char) 1);
+            assertNotEquals(src, target);
+            CharProcessor.from(CharBuffer.wrap(src)).readBlockSize(3).encoder(((data, end) -> {
+                assertFalse(data.isReadOnly());
+                while (data.hasRemaining()) {
+                    data.put((char) 2);
+                }
+                return data;
+            })).process();
+            assertEquals(src, target);
+            CharProcessor.from(new CharArrayReader(src)).readBlockSize(3).encoder(((data, end) -> {
+                assertTrue(data.isReadOnly());
+                return data;
+            })).process();
+            CharProcessor.from(new String(src)).readBlockSize(3).encoder(((data, end) -> {
+                assertTrue(data.isReadOnly());
+                return data;
+            })).process();
+        }
+
+        {
+            // writeTo
+            String str = "1234567890qwertyuiop[]中文";
+            char[] strChars = str.toCharArray();
+            assertEquals(CharProcessor.from(str).toCharArray(), strChars);
+            assertEquals(CharProcessor.from(str).toCharBuffer(), CharBuffer.wrap(strChars));
+            assertEquals(CharProcessor.from(str).toString(), str);
+        }
+
+        // error
+        expectThrows(IllegalArgumentException.class, () -> testProcessing(666, 0, 0));
+        expectThrows(IORuntimeException.class, () -> CharProcessor.from((Reader) null).writeTo((Appendable) null));
+        expectThrows(IndexOutOfBoundsException.class, () -> CharProcessor.from(new char[0], 0, 100));
+        expectThrows(IORuntimeException.class, () -> CharProcessor.from(new char[0]).writeTo(new char[0], 0, 100));
+        expectThrows(IORuntimeException.class, () -> CharProcessor.from(new char[0]).writeTo((Appendable) null));
+        expectThrows(IORuntimeException.class, () -> CharProcessor.from((Reader) null).writeTo(new char[0]));
+        Method method = CharProcessor.from(new char[0]).getClass().getDeclaredMethod("toBufferIn", Object.class);
+        reflectThrows(IORuntimeException.class, method, CharProcessor.from(new char[0]), 1);
+        method = CharProcessor.from(new char[0]).getClass().getDeclaredMethod("toBufferOut", Object.class);
+        reflectThrows(IORuntimeException.class, method, CharProcessor.from(new char[0]), "");
+        expectThrows(IORuntimeException.class, () -> CharProcessor.from(new ThrowReader(0)).writeTo(new char[0]));
+        expectThrows(IORuntimeException.class, () -> CharProcessor.from(new ThrowReader(1)).writeTo(new char[0]));
     }
 
     private static final class NioReader extends Reader {

@@ -52,20 +52,20 @@ clean {
   //delete(javadoc.destinationDir)
 }
 
-tasks.register('sourcesJar', Jar) {
-  group "build"
-  classifier "sources"
-  from sourceSets.main.allSource
-}
+//tasks.register('sourcesJar', Jar) {
+//  group "build"
+//  classifier "sources"
+//  from sourceSets.main.allSource
+//}
 
-tasks.register('javadocJar', Jar) {
-  group "build"
-  dependsOn dokkaJavadoc {
-    outputDirectory = javadoc.destinationDir
-  }
-  classifier "javadoc"
-  from javadoc.destinationDir
-}
+//tasks.register('javadocJar', Jar) {
+//  group "build"
+//  dependsOn dokkaJavadoc {
+//    outputDirectory = javadoc.destinationDir
+//  }
+//  classifier "javadoc"
+//  from javadoc.destinationDir
+//}
 
 sourceSets {
   main.kotlin.srcDirs += ['src/main/kotlin', 'src/main/java']

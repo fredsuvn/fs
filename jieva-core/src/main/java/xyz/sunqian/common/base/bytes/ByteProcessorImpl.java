@@ -71,6 +71,12 @@ final class ByteProcessorImpl implements ByteProcessor {
     }
 
     @Override
+    public long process() {
+        this.dest = NullBufferOut.SINGLETON;
+        return start();
+    }
+
+    @Override
     public long writeTo(OutputStream dest) {
         this.dest = dest;
         return start();
@@ -98,12 +104,6 @@ final class ByteProcessorImpl implements ByteProcessor {
     @Override
     public long writeTo(ByteBuffer dest) {
         this.dest = dest;
-        return start();
-    }
-
-    @Override
-    public long writeTo() {
-        this.dest = NullBufferOut.SINGLETON;
         return start();
     }
 
@@ -639,11 +639,11 @@ final class ByteProcessorImpl implements ByteProcessor {
         }
     }
 
-    static final class RoundEncoder extends AbsEncoder {
+    static final class RoundingEncoder extends AbsEncoder {
 
         private final int expectedBlockSize;
 
-        RoundEncoder(ByteEncoder encoder, int expectedBlockSize) {
+        RoundingEncoder(ByteEncoder encoder, int expectedBlockSize) {
             super(encoder);
             this.expectedBlockSize = expectedBlockSize;
         }
@@ -686,9 +686,9 @@ final class ByteProcessorImpl implements ByteProcessor {
         }
     }
 
-    static final class BufferedEncoder extends AbsEncoder {
+    static final class BufferingEncoder extends AbsEncoder {
 
-        BufferedEncoder(ByteEncoder encoder) {
+        BufferingEncoder(ByteEncoder encoder) {
             super(encoder);
         }
 

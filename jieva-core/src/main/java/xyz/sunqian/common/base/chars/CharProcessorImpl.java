@@ -1,7 +1,7 @@
 package xyz.sunqian.common.base.chars;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.JieCoding;
 import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.base.exception.ProcessingException;
 import xyz.sunqian.common.coll.JieArray;
@@ -15,7 +15,9 @@ import java.io.Writer;
 import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 
 import static xyz.sunqian.common.base.JieCheck.checkOffsetLength;
 
@@ -75,6 +77,12 @@ final class CharProcessorImpl implements CharProcessor {
     }
 
     @Override
+    public long process() {
+        this.dest = NullBufferOut.SINGLETON;
+        return start();
+    }
+
+    @Override
     public long writeTo(Appendable dest) {
         this.dest = dest;
         return start();
@@ -99,12 +107,6 @@ final class CharProcessorImpl implements CharProcessor {
     @Override
     public long writeTo(CharBuffer dest) {
         this.dest = dest;
-        return start();
-    }
-
-    @Override
-    public long writeTo() {
-        this.dest = NullBufferOut.SINGLETON;
         return start();
     }
 
@@ -693,6 +695,32 @@ final class CharProcessorImpl implements CharProcessor {
         }
     }
 
+    private static final class BufferMerger implements Function<Collection<CharBuffer>, CharBuffer> {
+
+        private static final BufferMerger SINGLETON = new BufferMerger();
+
+        @Override
+        public CharBuffer apply(Collection<CharBuffer> charBuffers) {
+            if (charBuffers.isEmpty()) {
+                return null;
+            }
+            int size = 0;
+            for (CharBuffer charBuffer : charBuffers) {
+                if (charBuffer != null) {
+                    size += charBuffer.remaining();
+                }
+            }
+            CharBuffer result = CharBuffer.allocate(size);
+            for (CharBuffer charBuffer : charBuffers) {
+                if (charBuffer != null) {
+                    result.put(charBuffer);
+                }
+            }
+            result.flip();
+            return result;
+        }
+    }
+
     private static abstract class AbsEncoder implements CharEncoder {
 
         protected final CharEncoder encoder;
@@ -720,11 +748,11 @@ final class CharProcessorImpl implements CharProcessor {
         }
     }
 
-    static final class RoundEncoder extends AbsEncoder {
+    static final class RoundingEncoder extends AbsEncoder {
 
         private final int expectedBlockSize;
 
-        RoundEncoder(CharEncoder encoder, int expectedBlockSize) {
+        RoundingEncoder(CharEncoder encoder, int expectedBlockSize) {
             super(encoder);
             this.expectedBlockSize = expectedBlockSize;
         }
@@ -767,9 +795,9 @@ final class CharProcessorImpl implements CharProcessor {
         }
     }
 
-    static final class BufferedEncoder extends AbsEncoder {
+    static final class BufferingEncoder extends AbsEncoder {
 
-        BufferedEncoder(CharEncoder encoder) {
+        BufferingEncoder(CharEncoder encoder) {
             super(encoder);
         }
 
@@ -794,6 +822,9 @@ final class CharProcessorImpl implements CharProcessor {
 
         private final int size;
 
+        // Capacity is always the size.
+        private @Nullable CharBuffer buffer;
+
         FixedSizeEncoder(CharEncoder encoder, int size) {
             super(encoder);
             this.size = size;
@@ -801,59 +832,110 @@ final class CharProcessorImpl implements CharProcessor {
 
         @Override
         public @Nullable CharBuffer encode(CharBuffer data, boolean end) throws Exception {
-            CharBuffer total = totalData(data);
-            int totalSize = total.remaining();
-            int times = totalSize / size;
-            if (times == 0) {
+            @Nullable Object result = null;
+
+            // clean buffer
+            if (buffer != null && buffer.position() > 0) {
+                JieBuffer.readTo(data, buffer);
+                if (end && !data.hasRemaining()) {
+                    buffer.flip();
+                    return encoder.encode(buffer, true);
+                }
+                if (buffer.hasRemaining()) {
+                    return null;
+                }
+                buffer.flip();
+                result = JieCoding.ifAdd(result, encoder.encode(buffer, false));
+                buffer.clear();
+            }
+
+            // split
+            int pos = data.position();
+            int limit = data.limit();
+            while (limit - pos >= size) {
+                data.position(pos);
+                data.limit(pos + size);
+                CharBuffer slice = data.slice();
+                pos += size;
+                if (end && !data.hasRemaining()) {
+                    result = JieCoding.ifAdd(result, encoder.encode(slice, true));
+                }
+                result = JieCoding.ifAdd(result, encoder.encode(slice, false));
+            }
+            data.position(pos);
+            data.limit(limit);
+
+            // buffering
+            if (data.hasRemaining()) {
+                if (buffer == null) {
+                    buffer = CharBuffer.allocate(size);
+                }
+                JieBuffer.readTo(data, buffer);
                 if (end) {
-                    return encoder.encode(total, true);
-                }
-                buf = new char[totalSize];
-                total.get(buf);
-                return null;
-            }
-            if (times == 1) {
-                CharBuffer slice = JieBuffer.slice(total, size);
-                CharBuffer ret1 = Jie.nonNull(encoder.encode(slice, false), JieChars.emptyBuffer());
-                total.position(total.position() + size);
-                if (end) {
-                    CharBuffer ret2 = Jie.nonNull(encoder.encode(total, true), JieChars.emptyBuffer());
-                    int size12 = ret1.remaining() + ret2.remaining();
-                    if (size12 <= 0) {
-                        return null;
-                    }
-                    CharBuffer ret = CharBuffer.allocate(size12);
-                    ret.put(ret1);
-                    ret.put(ret2);
-                    ret.flip();
-                    return ret;
-                }
-                buf = new char[total.remaining()];
-                total.get(buf);
-                return ret1;
-            }
-            CharsBuilder charsBuilder = new CharsBuilder();
-            for (int i = 0; i < times; i++) {
-                CharBuffer slice = JieBuffer.slice(total, size);
-                CharBuffer ret = encoder.encode(slice, false);
-                total.position(total.position() + size);
-                if (!JieChars.isEmpty(ret)) {
-                    charsBuilder.append(ret);
+                    buffer.flip();
+                    result = JieCoding.ifAdd(result, encoder.encode(buffer, true));
+                    return JieCoding.ifMerge(result, BufferMerger.SINGLETON);
                 }
             }
-            if (end) {
-                CharBuffer lastRet = encoder.encode(total, true);
-                if (!JieChars.isEmpty(lastRet)) {
-                    charsBuilder.append(lastRet);
-                }
-            } else {
-                buf = new char[total.remaining()];
-                total.get(buf);
-            }
-            if (charsBuilder.size() <= 0) {
-                return null;
-            }
-            return charsBuilder.toCharBuffer();
+
+            return JieCoding.ifMerge(result, BufferMerger.SINGLETON);
         }
+
+        // @Override
+        // public @Nullable CharBuffer encode(CharBuffer data, boolean end) throws Exception {
+        //     CharBuffer total = totalData(data);
+        //     int totalSize = total.remaining();
+        //     int times = totalSize / size;
+        //     if (times == 0) {
+        //         if (end) {
+        //             return encoder.encode(total, true);
+        //         }
+        //         buf = new char[totalSize];
+        //         total.get(buf);
+        //         return null;
+        //     }
+        //     if (times == 1) {
+        //         CharBuffer slice = JieBuffer.slice(total, size);
+        //         CharBuffer ret1 = Jie.nonNull(encoder.encode(slice, false), JieChars.emptyBuffer());
+        //         total.position(total.position() + size);
+        //         if (end) {
+        //             CharBuffer ret2 = Jie.nonNull(encoder.encode(total, true), JieChars.emptyBuffer());
+        //             int size12 = ret1.remaining() + ret2.remaining();
+        //             if (size12 <= 0) {
+        //                 return null;
+        //             }
+        //             CharBuffer ret = CharBuffer.allocate(size12);
+        //             ret.put(ret1);
+        //             ret.put(ret2);
+        //             ret.flip();
+        //             return ret;
+        //         }
+        //         buf = new char[total.remaining()];
+        //         total.get(buf);
+        //         return ret1;
+        //     }
+        //     CharsBuilder charsBuilder = new CharsBuilder();
+        //     for (int i = 0; i < times; i++) {
+        //         CharBuffer slice = JieBuffer.slice(total, size);
+        //         CharBuffer ret = encoder.encode(slice, false);
+        //         total.position(total.position() + size);
+        //         if (!JieChars.isEmpty(ret)) {
+        //             charsBuilder.append(ret);
+        //         }
+        //     }
+        //     if (end) {
+        //         CharBuffer lastRet = encoder.encode(total, true);
+        //         if (!JieChars.isEmpty(lastRet)) {
+        //             charsBuilder.append(lastRet);
+        //         }
+        //     } else {
+        //         buf = new char[total.remaining()];
+        //         total.get(buf);
+        //     }
+        //     if (charsBuilder.size() <= 0) {
+        //         return null;
+        //     }
+        //     return charsBuilder.toCharBuffer();
+        // }
     }
 }

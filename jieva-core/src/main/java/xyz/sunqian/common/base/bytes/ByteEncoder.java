@@ -27,51 +27,61 @@ public interface ByteEncoder {
     ByteBuffer encode(ByteBuffer data, boolean end) throws Exception;
 
     /**
-     * Returns a new {@link ByteEncoder} that wraps the given encoder to encode data in fixed-size blocks. The returned
-     * encoder splits incoming data into blocks of the specified block size, and for each block, it sequentially calls
-     * the given encoder, passing the block as the data parameter. If incoming data is insufficient to form a full
-     * block, it is buffered until enough data is received to form a full block.
+     * Returns a wrapper {@link ByteEncoder} that wraps the given encoder to encode data in fixed-size blocks.
      * <p>
-     * In the last invocation (when {@code end == true}) of the returned encoder, even if the remainder data after
-     * splitting is insufficient to form a full block, it will still be passed to the given encoder as the last block,
-     * and this call is the given encoder's last invocation.
+     * The wrapper splits the original data into blocks of the specified fixed size by {@link ByteBuffer#slice()}, and
+     * each block will be passed to the given encoder sequentially. The remainder data, which is insufficient to form a
+     * full block, will be buffered until enough data is received. The content of the block is shared with the
+     * sub-content of the original data if, and only if, it is sliced by {@link ByteBuffer#slice()}. If a block is
+     * formed by concatenating multiple original data pieces, its content is not shared.
+     * <p>
+     * Specially, in the last invocation (when {@code end == true}) of the given encoder, the last block's size may be
+     * less than the specified fixed size.
      *
-     * @param size    the specified block size
+     * @param size    the specified fixed size
      * @param encoder the given encoder
-     * @return a new {@link ByteEncoder} that wraps the given encoder to encode data in fixed-size blocks
+     * @return a wrapper {@link ByteEncoder} that wraps the given encoder to encode data in fixed-size blocks
      */
     static ByteEncoder withFixedSize(int size, ByteEncoder encoder) {
         return new ByteProcessorImpl.FixedSizeEncoder(encoder, size);
     }
 
     /**
-     * Returns a new {@link ByteEncoder} that wraps the given encoder to round down incoming data. The returned encoder
-     * rounds down incoming data to the largest multiple of the specified size, and passes the rounded data to the given
-     * encoder. The remainder data will be buffered until enough data is received to round.
+     * Returns a wrapper {@link ByteEncoder} that wraps the given encoder to encode data in rounding down blocks.
      * <p>
-     * However, in the last invocation (when {@code end == true}), all remaining data will be passed directly to the
-     * given encoder.
+     * The wrapper rounds down the size of the original data to the largest multiple ({@code >= 1}) of the specified
+     * size that does not exceed it, and splits the original data into the block of the rounded size by
+     * {@link ByteBuffer#slice()}. The block will be passed to the given encoder. The remainder data, of which size is
+     * less than one multiple of the specified size, will be buffered until enough data is received. The content of the
+     * block is shared with the sub-content of the original data if, and only if, it is sliced by
+     * {@link ByteBuffer#slice()}. If a block is formed by concatenating multiple original data pieces, its content is
+     * not shared.
+     * <p>
+     * Specially, in the last invocation (when {@code end == true}) of the given encoder, the last block's size may be
+     * less than one multiple of the specified size.
      *
      * @param size    the specified size
      * @param encoder the given encoder
-     * @return a {@link ByteEncoder} to round down incoming data for the given encoder
+     * @return a wrapper {@link ByteEncoder} that wraps the given encoder to encode data in rounding down blocks
      */
     static ByteEncoder withRounding(int size, ByteEncoder encoder) {
-        return new ByteProcessorImpl.RoundEncoder(encoder, size);
+        return new ByteProcessorImpl.RoundingEncoder(encoder, size);
     }
 
     /**
-     * Returns a new {@link ByteEncoder} that wraps the given encoder to buffer unconsumed data. It is typically used
-     * for the encoder which may not fully consume the passed data, requires buffering and consuming data in next
-     * invocation. This encoder passes incoming data to the given encoder. The unconsumed remaining data after encoding
-     * of the given encoder will be buffered and used in the next invocation.
+     * Returns a wrapper {@link ByteEncoder} that wraps the given encoder to support buffering unconsumed data.
      * <p>
-     * However, in the last invocation (when {@code end == true}), no data will be buffered.
+     * When the wrapper is invoked, if no buffered data exists, the original data is directly passed to the given
+     * encoder; if buffered data exists, a new buffer concatenating the buffered data followed by the original data is
+     * passed to the given. After the execution of the given encoder, any unconsumed data remaining in passed buffer
+     * will be buffered.
+     * <p>
+     * Specially, in the last invocation (when {@code end == true}) of the wrapper, no data buffered.
      *
      * @param encoder the given encoder
-     * @return a {@link ByteEncoder} that buffers unconsumed data of the given encoder
+     * @return a wrapper {@link ByteEncoder} that wraps the given encoder to support buffering unconsumed data
      */
     static ByteEncoder withBuffering(ByteEncoder encoder) {
-        return new ByteProcessorImpl.BufferedEncoder(encoder);
+        return new ByteProcessorImpl.BufferingEncoder(encoder);
     }
 }

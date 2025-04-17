@@ -218,7 +218,7 @@ public class JieBuffer {
 
     /**
      * Reads data from the source buffer into the specified array until the array is completely filled or the end of the
-     * buffer is reached. Returns the actual number of bytes read
+     * buffer is reached. Returns the actual number of bytes read.
      *
      * @param source the source buffer
      * @param dest   the specified array
@@ -230,21 +230,29 @@ public class JieBuffer {
     }
 
     /**
-     * Reads data from the source buffer into the specified buffer until the buffer is completely filled or the end of
-     * the buffer is reached. Returns the actual number of bytes read
+     * Reads data from the source buffer into the dest buffer until the dest buffer is completely filled or the end of
+     * the source buffer is reached. Returns the actual number of bytes read.
      *
      * @param source the source buffer
-     * @param dest   the specified buffer
+     * @param dest   the dest buffer
      * @return the actual number of bytes read
      * @throws IORuntimeException if an I/O error occurs
      */
     public static int readTo(ByteBuffer source, ByteBuffer dest) throws IORuntimeException {
-        return (int) ByteProcessor.from(source).readLimit(dest.remaining()).writeTo(dest);
+        int limit = Math.min(source.remaining(), dest.remaining());
+        if (limit <= 0) {
+            return 0;
+        }
+        int srcLimit = source.limit();
+        source.limit(source.position() + limit);
+        dest.put(source);
+        source.limit(srcLimit);
+        return limit;
     }
 
     /**
      * Reads data from the source buffer into the specified output buffer until the end of the source buffer is reached.
-     * Returns the actual number of bytes read
+     * Returns the actual number of bytes read.
      *
      * @param source the source buffer
      * @param dest   the specified output buffer
@@ -257,7 +265,7 @@ public class JieBuffer {
 
     /**
      * Reads data from the source buffer into the specified array until the array is completely filled or the end of the
-     * buffer is reached. Returns the actual number of chars read
+     * buffer is reached. Returns the actual number of chars read.
      *
      * @param source the source buffer
      * @param dest   the specified array
@@ -269,21 +277,29 @@ public class JieBuffer {
     }
 
     /**
-     * Reads data from the source buffer into the specified buffer until the buffer is completely filled or the end of
-     * the buffer is reached. Returns the actual number of chars read
+     * Reads data from the source buffer into the dest buffer until the dest buffer is completely filled or the end of
+     * the source buffer is reached. Returns the actual number of chars read.
      *
      * @param source the source buffer
-     * @param dest   the specified buffer
+     * @param dest   the dest buffer
      * @return the actual number of chars read
      * @throws IORuntimeException if an I/O error occurs
      */
     public static int readTo(CharBuffer source, CharBuffer dest) throws IORuntimeException {
-        return (int) CharProcessor.from(source).readLimit(dest.remaining()).writeTo(dest);
+        int limit = Math.min(source.remaining(), dest.remaining());
+        if (limit <= 0) {
+            return 0;
+        }
+        int srcLimit = source.limit();
+        source.limit(source.position() + limit);
+        dest.put(source);
+        source.limit(srcLimit);
+        return limit;
     }
 
     /**
      * Reads data from the source buffer into the specified appender until the end of the buffer is reached. Returns the
-     * actual number of chars read
+     * actual number of chars read.
      *
      * @param source the source buffer
      * @param dest   the specified appender

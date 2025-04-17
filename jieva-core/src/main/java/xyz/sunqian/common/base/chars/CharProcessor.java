@@ -10,6 +10,7 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 
 import static xyz.sunqian.common.base.JieCheck.checkOffsetLength;
+import static xyz.sunqian.common.base.chars.CharEncoder.withFixedSize;
 
 /**
  * Char processor is used to process char data, from the specified data source, through zero or more intermediate
@@ -136,8 +137,8 @@ public interface CharProcessor {
     CharProcessor endOnZeroRead(boolean endOnZeroRead);
 
     /**
-     * Adds an encoder for this processor. When the data processing starts, all encoders will be invoked after each read
-     * operation as following:
+     * Adds the given encoder for this processor. When the data processing starts, all encoders will be invoked after
+     * each read operation as following:
      * <pre>{@code
      *     read-operation -> encoder-1 -> encoder-2 ... -> encoder-n -> terminal-operation
      * }</pre>
@@ -159,8 +160,8 @@ public interface CharProcessor {
      * The passed input data, which is the first argument of the {@link CharEncoder#encode(CharBuffer, boolean)},
      * depends on the encoder's upstream. If the upstream is the data source of this processor (i.e., it is the first
      * encoder), the data's size is determined by the {@link #readBlockSize(int)} method, and the data can be writeable
-     * if the source is an array or writeable buffer. Otherwise, the data is the result of the previous encoder, and the
-     * write ability is defined by the previous encoder.
+     * if the source is an array or writeable buffer. Otherwise, the data is the result of the previous encoder, and its
+     * abilities is defined by the previous encoder.
      * <p>
      * This is an optional setting method. There are also more specific encoder wrappers available, such as:
      * <ul>
@@ -175,10 +176,40 @@ public interface CharProcessor {
      *     </li>
      * </ul>
      *
-     * @param encoder the encoder
+     * @param encoder the given encoder
      * @return this
      */
     CharProcessor encoder(CharEncoder encoder);
+
+    /**
+     * Adds the given encoder wrapped by {@link CharEncoder#withFixedSize(int, CharEncoder)} for this processor. This
+     * method is equivalent to:
+     * <pre>{@code
+     *     return encoder(withFixedSize(size, encoder));
+     * }</pre>
+     *
+     * @param size    the specified fixed size for the {@link CharEncoder#withFixedSize(int, CharEncoder)}
+     * @param encoder the given encoder
+     * @return this
+     */
+    default CharProcessor encoder(int size, CharEncoder encoder) {
+        return encoder(withFixedSize(size, encoder));
+    }
+
+    /**
+     * Starts data processing and returns the actual number of bytes processed. If an exception is thrown during the
+     * processing, it will be wrapped by {@link ProcessingException} and rethrown.
+     * <p>
+     * If the source and/or destination is a buffer or reader/writer, its position will be incremented by actual
+     * affected length.
+     * <p>
+     * This is a terminal method, and it is typically used to product side effects.
+     *
+     * @return the actual number of bytes processed
+     * @throws ProcessingException to wrap the original exception during the processing
+     * @throws IORuntimeException  if an I/O error occurs
+     */
+    long process() throws ProcessingException, IORuntimeException;
 
     /**
      * Starts data processing, writes the result into the specified destination, and returns the actual number of bytes
@@ -249,21 +280,6 @@ public interface CharProcessor {
      * @throws IORuntimeException  if an I/O error occurs
      */
     long writeTo(CharBuffer dest) throws ProcessingException, IORuntimeException;
-
-    /**
-     * Starts data processing without writing any result, and returns the actual number of bytes processed. If an
-     * exception is thrown during the processing, it will be wrapped by {@link ProcessingException} and rethrown.
-     * <p>
-     * If the source and/or destination is a buffer or reader/writer, its position will be incremented by actual
-     * affected length.
-     * <p>
-     * This is a terminal method.
-     *
-     * @return the actual number of bytes processed
-     * @throws ProcessingException to wrap the original exception during the processing
-     * @throws IORuntimeException  if an I/O error occurs
-     */
-    long writeTo() throws ProcessingException, IORuntimeException;
 
     /**
      * Starts data processing, and returns the result as a new array. This method is equivalent to:

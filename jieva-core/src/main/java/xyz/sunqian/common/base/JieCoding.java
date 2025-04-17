@@ -44,7 +44,7 @@ public class JieCoding {
      * @param <T>       component type of the collection
      * @return the result of the {@code merger}
      */
-    public static <T> T ifMerge(@Nullable Object objOrColl, Function<Collection<? extends T>, ? extends T> merger) {
+    public static <T> T ifMerge(@Nullable Object objOrColl, Function<Collection<T>, T> merger) {
         if (objOrColl == null) {
             return merger.apply(Collections.emptyList());
         }
