@@ -1,5 +1,8 @@
 package xyz.sunqian.common.io;
 
+import java.io.Reader;
+import java.nio.CharBuffer;
+
 /**
  * This interface represents the data segment reader to read char data as {@link CharSegment} from the data source,
  * which may be a char sequence or a stream.
@@ -7,6 +10,74 @@ package xyz.sunqian.common.io;
  * @author sunqian
  */
 public interface CharReader {
+
+    /**
+     * Returns a new {@link CharReader} with the given data source.
+     *
+     * @param source the given data source
+     * @return a new {@link CharReader} with the given data source
+     */
+    static CharReader from(Reader source) {
+        return ReaderBack.of(source);
+    }
+
+    /**
+     * Returns a new {@link CharReader} with the given data source.
+     *
+     * @param source the given data source
+     * @return a new {@link CharReader} with the given data source
+     */
+    static CharReader from(char[] source) {
+        return from(source, 0, source.length);
+    }
+
+    /**
+     * Returns a new {@link CharReader} with the given data source, starting at the specified offset and up to the
+     * specified length.
+     *
+     * @param source the given data source
+     * @param offset the specified offset
+     * @param length the specified length
+     * @return a new {@link CharReader} with the given data source
+     * @throws IndexOutOfBoundsException if the specified offset or length is out of bounds
+     */
+    static CharReader from(char[] source, int offset, int length) throws IndexOutOfBoundsException {
+        return ReaderBack.of(source, offset, length);
+    }
+
+    /**
+     * Returns a new {@link CharReader} with the given data source.
+     *
+     * @param source the given data source
+     * @return a new {@link CharReader} with the given data source
+     */
+    static CharReader from(CharSequence source) {
+        return from(source, 0, source.length());
+    }
+
+    /**
+     * Returns a new {@link CharReader} with the given data source, starting at the specified offset and up to the
+     * specified length.
+     *
+     * @param source the given data source
+     * @param offset the specified offset
+     * @param length the specified length
+     * @return a new {@link CharReader} with the given data source
+     * @throws IndexOutOfBoundsException if the specified offset or length is out of bounds
+     */
+    static CharReader from(CharSequence source, int offset, int length) throws IndexOutOfBoundsException {
+        return ReaderBack.of(source, offset, length);
+    }
+
+    /**
+     * Returns a new {@link CharReader} with the given data source.
+     *
+     * @param source the given data source
+     * @return a new {@link CharReader} with the given data source
+     */
+    static CharReader from(CharBuffer source) {
+        return ReaderBack.of(source);
+    }
 
     /**
      * Reads and returns the next data segment with the specified size from the data source. This method never return

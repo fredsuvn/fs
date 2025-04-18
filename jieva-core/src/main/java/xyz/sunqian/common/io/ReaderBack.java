@@ -16,10 +16,6 @@ final class ReaderBack {
         return new ByteStreamReader(source);
     }
 
-    static ByteReader of(byte[] source) {
-        return of(source, 0, source.length);
-    }
-
     static ByteReader of(byte[] source, int offset, int length) throws IndexOutOfBoundsException {
         return new ByteArrayReader(source, offset, length);
     }
@@ -36,16 +32,8 @@ final class ReaderBack {
         return new CharStreamReader(source);
     }
 
-    static CharReader of(char[] source) {
-        return of(source, 0, source.length);
-    }
-
     static CharReader of(char[] source, int offset, int length) throws IndexOutOfBoundsException {
         return new CharArrayReader(source, offset, length);
-    }
-
-    static CharReader of(CharSequence source) {
-        return of(source, 0, source.length());
     }
 
     static CharReader of(CharSequence source, int offset, int length) throws IndexOutOfBoundsException {
@@ -112,7 +100,7 @@ final class ReaderBack {
         }
     }
 
-    static final class ByteStreamReader implements ByteReader {
+    private static final class ByteStreamReader implements ByteReader {
 
         private final InputStream source;
         private boolean end = false;
@@ -163,7 +151,7 @@ final class ReaderBack {
         }
     }
 
-    static final class ByteArrayReader implements ByteReader {
+    private static final class ByteArrayReader implements ByteReader {
 
         private final byte[] source;
         private final int endPos;
@@ -197,7 +185,7 @@ final class ReaderBack {
         }
     }
 
-    static final class ByteBufferReader implements ByteReader {
+    private static final class ByteBufferReader implements ByteReader {
 
         private final ByteBuffer source;
 
@@ -224,7 +212,7 @@ final class ReaderBack {
         }
     }
 
-    static final class LimitedByteReader implements ByteReader {
+    private static final class LimitedByteReader implements ByteReader {
 
         private final ByteReader source;
         private long remaining;
@@ -293,7 +281,7 @@ final class ReaderBack {
         }
     }
 
-    static final class CharStreamReader implements CharReader {
+    private static final class CharStreamReader implements CharReader {
 
         private final Reader source;
         private boolean end = false;
@@ -344,7 +332,7 @@ final class ReaderBack {
         }
     }
 
-    static final class CharArrayReader implements CharReader {
+    private static final class CharArrayReader implements CharReader {
 
         private final char[] source;
         private final int endPos;
@@ -378,7 +366,7 @@ final class ReaderBack {
         }
     }
 
-    static final class CharSequenceReader implements CharReader {
+    private static final class CharSequenceReader implements CharReader {
 
         private final CharSequence source;
         private final int endPos;
@@ -412,7 +400,7 @@ final class ReaderBack {
         }
     }
 
-    static final class CharBufferReader implements CharReader {
+    private static final class CharBufferReader implements CharReader {
 
         private final CharBuffer source;
 
@@ -439,7 +427,7 @@ final class ReaderBack {
         }
     }
 
-    static final class LimitedCharReader implements CharReader {
+    private static final class LimitedCharReader implements CharReader {
 
         private final CharReader source;
         private long remaining;

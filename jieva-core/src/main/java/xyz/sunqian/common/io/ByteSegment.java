@@ -12,7 +12,7 @@ import java.nio.ByteBuffer;
 public interface ByteSegment {
 
     /**
-     * Returns the data content of this segment.
+     * Returns the data content of this segment. This method never return null, but can return an empty buffer.
      *
      * @return the data content of this segment
      */
