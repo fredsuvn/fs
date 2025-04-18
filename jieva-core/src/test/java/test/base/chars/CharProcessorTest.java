@@ -683,6 +683,8 @@ public class CharProcessorTest {
         testFixedSizeEncoder(333, 10086, 1);
         testFixedSizeEncoder(10086, 20, 19);
         testFixedSizeEncoder(20, 40, 19);
+        testFixedSizeEncoder(10240, 1024, 512);
+        testFixedSizeEncoder(1024, 1024, 1024);
     }
 
     private void testFixedSizeEncoder(int totalSize, int blockSize, int fixedSize) {

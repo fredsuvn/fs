@@ -3,6 +3,7 @@ package xyz.sunqian.common.base.chars;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.JieCoding;
 import xyz.sunqian.common.base.JieString;
+import xyz.sunqian.common.base.bytes.JieBytes;
 import xyz.sunqian.common.base.exception.ProcessingException;
 import xyz.sunqian.common.coll.JieArray;
 import xyz.sunqian.common.io.IORuntimeException;
@@ -12,6 +13,7 @@ import xyz.sunqian.common.io.JieIO;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,6 +31,7 @@ final class CharProcessorImpl implements CharProcessor {
     private int readBlockSize = JieIO.BUFFER_SIZE;
     private boolean endOnZeroRead = false;
     private List<CharEncoder> encoders;
+    private CharEncoder theOneEncoder;
 
     CharProcessorImpl(Reader source) {
         this.source = source;
@@ -78,7 +81,7 @@ final class CharProcessorImpl implements CharProcessor {
 
     @Override
     public long process() {
-        this.dest = NullBufferOut.SINGLETON;
+        this.dest = NullDataWriter.SINGLETON;
         return start();
     }
 
@@ -117,7 +120,7 @@ final class CharProcessorImpl implements CharProcessor {
 
     @Override
     public Reader toReader() {
-        return new ReaderIn(toBufferIn(source));
+        return new ProcessorReader(toBufferIn(source));
     }
 
     private long start() {
@@ -149,7 +152,7 @@ final class CharProcessorImpl implements CharProcessor {
                     return charSeqToAppender((CharSequence) source, (Appendable) dest);
                 }
             }
-            return startInBlock();
+            return startInBlocks();
         } catch (ProcessingException e) {
             throw e;
         } catch (Exception e) {
@@ -212,41 +215,41 @@ final class CharProcessorImpl implements CharProcessor {
         return readLimit < 0 ? srcSize : Math.min(srcSize, (int) readLimit);
     }
 
-    private long startInBlock() throws Exception {
-        BufferIn in = toBufferIn(source);
-        BufferOut out = toBufferOut(dest);
+    private long startInBlocks() throws Exception {
+        DataReader in = toBufferIn(source);
+        DataWriter out = toBufferOut(dest);
         return readTo(in, out);
     }
 
-    private BufferIn toBufferIn(Object src) {
+    private DataReader toBufferIn(Object src) {
         int actualBlockSize = getActualBlockSize();
         if (src instanceof Reader) {
-            return new ReaderBufferIn((Reader) src, actualBlockSize);
+            return new ReaderDataReader((Reader) src, actualBlockSize);
         }
         if (src instanceof char[]) {
-            return new CharsBufferIn((char[]) src, actualBlockSize);
+            return new CharsDataReader((char[]) src, actualBlockSize);
         }
         if (src instanceof CharBuffer) {
-            return new BufferBufferIn((CharBuffer) src, actualBlockSize);
+            return new BufferDataReader((CharBuffer) src, actualBlockSize);
         }
         if (src instanceof CharSequence) {
-            return new CharSeqBufferIn((CharSequence) src, actualBlockSize);
+            return new CharSeqDataReader((CharSequence) src, actualBlockSize);
         }
         throw new IORuntimeException("Unexpected source type: " + src.getClass());
     }
 
-    private BufferOut toBufferOut(Object dst) {
-        if (dst instanceof BufferOut) {
-            return (BufferOut) dst;
+    private DataWriter toBufferOut(Object dst) {
+        if (dst instanceof DataWriter) {
+            return (DataWriter) dst;
         }
         if (dst instanceof char[]) {
-            return new AppendableBufferOut(CharBuffer.wrap((char[]) dst));
+            return new AppendableDataWriter(CharBuffer.wrap((char[]) dst));
         }
         if (dst instanceof CharBuffer) {
-            return new AppendableBufferOut(JieIO.writer((CharBuffer) dst));
+            return new AppendableDataWriter(JieIO.writer((CharBuffer) dst));
         }
         if (dst instanceof Appendable) {
-            return new AppendableBufferOut((Appendable) dst);
+            return new AppendableDataWriter((Appendable) dst);
         }
         throw new IORuntimeException("Unexpected destination type: " + dst.getClass());
     }
@@ -258,35 +261,69 @@ final class CharProcessorImpl implements CharProcessor {
         return (int) Math.min(readLimit, readBlockSize);
     }
 
-    private long readTo(BufferIn in, BufferOut out) throws Exception {
-        EnReader enReader = new EnReader(in);
-        while (true) {
-            CharBuffer buffer = enReader.read();
-            if (buffer == null) {
-                break;
-            }
-            out.write(buffer);
+    private long readTo(DataReader in, DataWriter out) throws Exception {
+        if (theOneEncoder == null) {
+            theOneEncoder = buildOneEncoder();
         }
-        return enReader.count();
+        long count = 0;
+        while (true) {
+            DataBlock block = in.read();
+            if (block == null) {
+                // Sends an empty buffer and the end signal.
+                CharBuffer encoded = theOneEncoder.encode(JieChars.emptyBuffer(), true);
+                out.write(encoded);
+                return count;
+            }
+            count += block.data.remaining();
+            CharBuffer encoded = theOneEncoder.encode(block.data, block.end);
+            out.write(encoded);
+        }
     }
 
-    private interface BufferIn {
+    private CharEncoder buildOneEncoder() {
+        if (encoders == null) {
+            return CharEncoder.emptyEncoder();
+        }
+        return (data, end) -> {
+            CharBuffer chars = data;
+            for (CharEncoder encoder : encoders) {
+                chars = encoder.encode(chars, end);
+                if (chars == null) {
+                    break;
+                }
+            }
+            return chars;
+        };
+    }
+
+    private interface DataReader {
 
         /*
          * Returns null if reaches the end of the input.
          * If the returned buffer is non-null, then it is definitely non-empty.
          */
         @Nullable
-        CharBuffer read() throws Exception;
+        DataBlock read() throws Exception;
     }
 
-    private interface BufferOut {
+    private static final class DataBlock {
+
+        private CharBuffer data;
+        private boolean end;
+
+        public DataBlock(CharBuffer data, boolean end) {
+            this.data = data;
+            this.end = end;
+        }
+    }
+
+    private interface DataWriter {
         void write(CharBuffer buffer) throws Exception;
     }
 
-    private final class EnReader {
+    private final class EncodingReader {
 
-        private final BufferIn in;
+        private final DataReader in;
 
         // null:  break end;
         // empty: for last empty invocation
@@ -296,7 +333,7 @@ final class CharProcessorImpl implements CharProcessor {
         // init when a terminal method has invoked
         private CharEncoder en;
 
-        private EnReader(BufferIn in) {
+        private EncodingReader(DataReader in) {
             this.in = in;
         }
 
@@ -391,28 +428,28 @@ final class CharProcessorImpl implements CharProcessor {
         }
     }
 
-    private abstract class BaseBufferIn implements BufferIn {
+    private abstract class BaseDataReader implements DataReader {
 
         protected final int bufSize;
         protected long remaining;
 
-        private BaseBufferIn(int blockSize) {
+        private BaseDataReader(int blockSize) {
             this.bufSize = readLimit < 0 ? blockSize : (int) Math.min(blockSize, readLimit);
             this.remaining = readLimit;
         }
     }
 
-    private final class ReaderBufferIn extends BaseBufferIn {
+    private final class ReaderDataReader extends BaseDataReader {
 
         private final Reader source;
 
-        private ReaderBufferIn(Reader source, int blockSize) {
+        private ReaderDataReader(Reader source, int blockSize) {
             super(blockSize);
             this.source = source;
         }
 
         @Override
-        public CharBuffer read() throws IOException {
+        public DataBlock read() throws IOException {
             int readSize = remaining < 0 ? bufSize : (int) Math.min(remaining, bufSize);
             if (readSize == 0) {
                 return null;
@@ -432,24 +469,25 @@ final class CharProcessorImpl implements CharProcessor {
             if (readLimit > 0) {
                 remaining -= hasRead;
             }
-            return CharBuffer.wrap(
+            CharBuffer buffer = CharBuffer.wrap(
                 hasRead == bufSize ? buf : Arrays.copyOfRange(buf, 0, hasRead)
             ).asReadOnlyBuffer();
+            return new DataBlock(buffer, remaining == 0);
         }
     }
 
-    private final class CharsBufferIn extends BaseBufferIn {
+    private final class CharsDataReader extends BaseDataReader {
 
         private final char[] source;
         private int pos = 0;
 
-        private CharsBufferIn(char[] source, int blockSize) {
+        private CharsDataReader(char[] source, int blockSize) {
             super(blockSize);
             this.source = source;
         }
 
         @Override
-        public CharBuffer read() {
+        public DataBlock read() {
             int readSize = remaining < 0 ? readBlockSize : (int) Math.min(remaining, readBlockSize);
             if (readSize <= 0) {
                 return null;
@@ -464,21 +502,21 @@ final class CharProcessorImpl implements CharProcessor {
             if (readLimit > 0) {
                 remaining -= size;
             }
-            return ret;
+            return new DataBlock(ret, remaining == 0 || pos >= source.length);
         }
     }
 
-    private final class BufferBufferIn extends BaseBufferIn {
+    private final class BufferDataReader extends BaseDataReader {
 
         private final CharBuffer source;
 
-        private BufferBufferIn(CharBuffer source, int blockSize) {
+        private BufferDataReader(CharBuffer source, int blockSize) {
             super(blockSize);
             this.source = source;
         }
 
         @Override
-        public CharBuffer read() {
+        public DataBlock read() {
             int readSize = remaining < 0 ? readBlockSize : (int) Math.min(remaining, readBlockSize);
             if (readSize <= 0) {
                 return null;
@@ -497,22 +535,22 @@ final class CharProcessorImpl implements CharProcessor {
             if (readLimit > 0) {
                 remaining -= size;
             }
-            return ret;
+            return new DataBlock(ret, remaining == 0 || !source.hasRemaining());
         }
     }
 
-    private final class CharSeqBufferIn extends BaseBufferIn {
+    private final class CharSeqDataReader extends BaseDataReader {
 
         private final CharSequence source;
         private int pos = 0;
 
-        private CharSeqBufferIn(CharSequence source, int blockSize) {
+        private CharSeqDataReader(CharSequence source, int blockSize) {
             super(blockSize);
             this.source = source;
         }
 
         @Override
-        public CharBuffer read() {
+        public DataBlock read() {
             int readSize = remaining < 0 ? readBlockSize : (int) Math.min(remaining, readBlockSize);
             if (readSize <= 0) {
                 return null;
@@ -527,15 +565,15 @@ final class CharProcessorImpl implements CharProcessor {
             if (readLimit > 0) {
                 remaining -= size;
             }
-            return ret;
+            return new DataBlock(ret, remaining == 0 || pos >= source.length());
         }
     }
 
-    private static final class AppendableBufferOut implements BufferOut {
+    private static final class AppendableDataWriter implements DataWriter {
 
         private final Appendable dest;
 
-        private AppendableBufferOut(Appendable dest) {
+        private AppendableDataWriter(Appendable dest) {
             this.dest = dest;
         }
 
@@ -573,9 +611,9 @@ final class CharProcessorImpl implements CharProcessor {
         }
     }
 
-    private static final class NullBufferOut implements BufferOut {
+    private static final class NullDataWriter implements DataWriter {
 
-        static final NullBufferOut SINGLETON = new NullBufferOut();
+        static final NullDataWriter SINGLETON = new NullDataWriter();
 
         @Override
         public void write(CharBuffer buffer) {
@@ -583,20 +621,20 @@ final class CharProcessorImpl implements CharProcessor {
         }
     }
 
-    private final class ReaderIn extends Reader {
+    private final class ProcessorReader extends Reader {
 
-        private final EnReader enReader;
+        private final EncodingReader encodingReader;
         private CharBuffer buffer = JieChars.emptyBuffer();
         private boolean closed = false;
 
-        private ReaderIn(BufferIn in) {
-            this.enReader = new EnReader(in);
+        private ProcessorReader(DataReader in) {
+            this.encodingReader = new EncodingReader(in);
         }
 
         @Nullable
         private CharBuffer read0() throws IOException {
             try {
-                return enReader.read();
+                return encodingReader.read();
             } catch (Exception e) {
                 throw new IOException(e);
             }
@@ -859,8 +897,9 @@ final class CharProcessorImpl implements CharProcessor {
                 pos += size;
                 if (end && !data.hasRemaining()) {
                     result = JieCoding.ifAdd(result, encoder.encode(slice, true));
+                } else {
+                    result = JieCoding.ifAdd(result, encoder.encode(slice, false));
                 }
-                result = JieCoding.ifAdd(result, encoder.encode(slice, false));
             }
             data.position(pos);
             data.limit(limit);
@@ -880,62 +919,15 @@ final class CharProcessorImpl implements CharProcessor {
 
             return JieCoding.ifMerge(result, BufferMerger.SINGLETON);
         }
+    }
 
-        // @Override
-        // public @Nullable CharBuffer encode(CharBuffer data, boolean end) throws Exception {
-        //     CharBuffer total = totalData(data);
-        //     int totalSize = total.remaining();
-        //     int times = totalSize / size;
-        //     if (times == 0) {
-        //         if (end) {
-        //             return encoder.encode(total, true);
-        //         }
-        //         buf = new char[totalSize];
-        //         total.get(buf);
-        //         return null;
-        //     }
-        //     if (times == 1) {
-        //         CharBuffer slice = JieBuffer.slice(total, size);
-        //         CharBuffer ret1 = Jie.nonNull(encoder.encode(slice, false), JieChars.emptyBuffer());
-        //         total.position(total.position() + size);
-        //         if (end) {
-        //             CharBuffer ret2 = Jie.nonNull(encoder.encode(total, true), JieChars.emptyBuffer());
-        //             int size12 = ret1.remaining() + ret2.remaining();
-        //             if (size12 <= 0) {
-        //                 return null;
-        //             }
-        //             CharBuffer ret = CharBuffer.allocate(size12);
-        //             ret.put(ret1);
-        //             ret.put(ret2);
-        //             ret.flip();
-        //             return ret;
-        //         }
-        //         buf = new char[total.remaining()];
-        //         total.get(buf);
-        //         return ret1;
-        //     }
-        //     CharsBuilder charsBuilder = new CharsBuilder();
-        //     for (int i = 0; i < times; i++) {
-        //         CharBuffer slice = JieBuffer.slice(total, size);
-        //         CharBuffer ret = encoder.encode(slice, false);
-        //         total.position(total.position() + size);
-        //         if (!JieChars.isEmpty(ret)) {
-        //             charsBuilder.append(ret);
-        //         }
-        //     }
-        //     if (end) {
-        //         CharBuffer lastRet = encoder.encode(total, true);
-        //         if (!JieChars.isEmpty(lastRet)) {
-        //             charsBuilder.append(lastRet);
-        //         }
-        //     } else {
-        //         buf = new char[total.remaining()];
-        //         total.get(buf);
-        //     }
-        //     if (charsBuilder.size() <= 0) {
-        //         return null;
-        //     }
-        //     return charsBuilder.toCharBuffer();
-        // }
+    static final class EmptyEncoder implements CharEncoder {
+
+        static final EmptyEncoder SINGLETON = new EmptyEncoder();
+
+        @Override
+        public @Nullable CharBuffer encode(CharBuffer data, boolean end) {
+            return data;
+        }
     }
 }

@@ -84,4 +84,13 @@ public interface CharEncoder {
     static CharEncoder withBuffering(CharEncoder encoder) {
         return new CharProcessorImpl.BufferingEncoder(encoder);
     }
+
+    /**
+     * Returns an empty {@link CharEncoder} which does nothing.
+     *
+     * @return an empty {@link CharEncoder} which does nothing
+     */
+    static CharEncoder emptyEncoder() {
+        return CharProcessorImpl.EmptyEncoder.SINGLETON;
+    }
 }

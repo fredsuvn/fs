@@ -5,6 +5,9 @@ import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.base.exception.ProcessingException;
 import xyz.sunqian.common.coll.JieArray;
+import xyz.sunqian.common.coll.JieColl;
+import xyz.sunqian.common.io.ByteReader;
+import xyz.sunqian.common.io.ByteSegment;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieBuffer;
 import xyz.sunqian.common.io.JieIO;
@@ -27,6 +30,7 @@ final class ByteProcessorImpl implements ByteProcessor {
     private int readBlockSize = JieIO.BUFFER_SIZE;
     private boolean endOnZeroRead = false;
     private List<ByteEncoder> encoders;
+    private ByteEncoder theOneEncoder;
 
     ByteProcessorImpl(InputStream source) {
         this.source = source;
@@ -72,7 +76,7 @@ final class ByteProcessorImpl implements ByteProcessor {
 
     @Override
     public long process() {
-        this.dest = NullBufferOut.SINGLETON;
+        this.dest = NullDataWriter.SINGLETON;
         return start();
     }
 
@@ -114,7 +118,7 @@ final class ByteProcessorImpl implements ByteProcessor {
 
     @Override
     public InputStream toInputStream() {
-        return new StreamIn(toBufferIn(source));
+        return new ProcessorInputStream(toBufferIn(source));
     }
 
     private long start() {
@@ -142,7 +146,7 @@ final class ByteProcessorImpl implements ByteProcessor {
                     }
                 }
             }
-            return startInBlock();
+            return startInBlocks();
         } catch (ProcessingException e) {
             throw e;
         } catch (Exception e) {
@@ -181,88 +185,112 @@ final class ByteProcessorImpl implements ByteProcessor {
         return readLimit < 0 ? srcSize : Math.min(srcSize, (int) readLimit);
     }
 
-    private long startInBlock() throws Exception {
-        BufferIn in = toBufferIn(source);
-        BufferOut out = toBufferOut(dest);
+    private long startInBlocks() throws Exception {
+        ByteReader in = toByteReader(source);
+        DataWriter out = toBufferOut(dest);
         return readTo(in, out);
     }
 
-    private BufferIn toBufferIn(Object src) {
-        int actualBlockSize = getActualBlockSize();
+    private ByteReader toByteReader(Object src) {
         if (src instanceof InputStream) {
-            return new InputStreamBufferIn((InputStream) src, actualBlockSize);
+            return ByteReader.from((InputStream) src);
         }
         if (src instanceof byte[]) {
-            return new BytesBufferIn((byte[]) src, actualBlockSize);
+            return ByteReader.from((byte[]) src);
         }
         if (src instanceof ByteBuffer) {
-            return new BufferBufferIn((ByteBuffer) src, actualBlockSize);
+            return ByteReader.from((ByteBuffer) src);
         }
         throw new IORuntimeException("Unexpected source type: " + src.getClass());
     }
 
-    private BufferOut toBufferOut(Object dst) {
-        if (dst instanceof BufferOut) {
-            return (BufferOut) dst;
+    private DataWriter toBufferOut(Object dst) {
+        if (dst instanceof DataWriter) {
+            return (DataWriter) dst;
         }
         if (dst instanceof OutputStream) {
-            return new OutputSteamBufferOut((OutputStream) dst);
+            return new OutputSteamDataWriter((OutputStream) dst);
         }
         if (dst instanceof byte[]) {
-            return new OutputSteamBufferOut(JieIO.outStream((byte[]) dst));
+            return new OutputSteamDataWriter(JieIO.outStream((byte[]) dst));
         }
         if (dst instanceof ByteBuffer) {
-            return new OutputSteamBufferOut(JieIO.outStream((ByteBuffer) dst));
+            return new OutputSteamDataWriter(JieIO.outStream((ByteBuffer) dst));
         }
         throw new IORuntimeException("Unexpected destination type: " + dst.getClass());
     }
 
-    private int getActualBlockSize() {
-        if (readLimit < 0) {
-            return readBlockSize;
+    private long readTo(ByteReader in, DataWriter out) throws Exception {
+        if (theOneEncoder == null) {
+            theOneEncoder = buildOneEncoder();
         }
-        return (int) Math.min(readLimit, readBlockSize);
-    }
-
-    private long readTo(BufferIn in, BufferOut out) throws Exception {
-        EnReader enReader = new EnReader(in);
+        ByteReader reader = readLimit < 0 ? in : in.withReadLimit(readLimit);
+        long count = 0;
         while (true) {
-            ByteBuffer buffer = enReader.read();
-            if (buffer == null) {
-                break;
+            ByteSegment segment = reader.read(readBlockSize, endOnZeroRead);
+            count += segment.data().remaining();
+            ByteBuffer encoded = theOneEncoder.encode(segment.data(), segment.end());
+            out.write(encoded);
+            if (segment.end()) {
+                return count;
             }
-            out.write(buffer);
         }
-        return enReader.count();
     }
 
-    private interface BufferIn {
+    private ByteEncoder buildOneEncoder() {
+        if (JieColl.isEmpty(encoders)) {
+            return ByteEncoder.emptyEncoder();
+        }
+        return (data, end) -> {
+            ByteBuffer bytes = data;
+            for (ByteEncoder encoder : encoders) {
+                bytes = encoder.encode(bytes, end);
+                if (bytes == null) {
+                    break;
+                }
+            }
+            return bytes;
+        };
+    }
+
+    private interface DataReader {
 
         /*
          * Returns null if reaches the end of the input.
          * If the returned buffer is non-null, then it is definitely non-empty.
          */
         @Nullable
-        ByteBuffer read() throws Exception;
+        DataBlock read() throws Exception;
     }
 
-    private interface BufferOut {
+    private static final class DataBlock {
+
+        private ByteBuffer data;
+        private boolean end;
+
+        public DataBlock(ByteBuffer data, boolean end) {
+            this.data = data;
+            this.end = end;
+        }
+    }
+
+    private interface DataWriter {
         void write(ByteBuffer buffer) throws Exception;
     }
 
-    private final class EnReader {
+    private final class EncodingReader {
 
-        private final BufferIn in;
+        private final DataReader in;
 
         // null:  break end;
         // empty: for last empty invocation
-        private ByteBuffer buffer;
-        private long count = -1;
+        private DataBlock buffer;
+        private long count = 0;
 
         // init when a terminal method has invoked
         private ByteEncoder en;
 
-        private EnReader(BufferIn in) {
+        private EncodingReader(DataReader in) {
             this.in = in;
         }
 
@@ -272,6 +300,18 @@ final class ByteProcessorImpl implements ByteProcessor {
          */
         @Nullable
         private ByteBuffer read() {
+            try {
+                if (buffer == null) {
+                    buffer = in.read();
+                }
+
+            } catch (ProcessingException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new IORuntimeException(e);
+            }
+
+
             try {
                 if (count == -1) {
                     buffer = in.read();
@@ -283,7 +323,7 @@ final class ByteProcessorImpl implements ByteProcessor {
                     }
                     ByteEncoder encoder = getEncoder();
                     ByteBuffer encoded;
-                    if (!buffer.hasRemaining()) {
+                    if (!buffer.data.hasRemaining()) {
                         buffer = null;
                         encoded = encode(encoder, JieBytes.emptyBuffer(), true);
                         if (JieBytes.isEmpty(encoded)) {
@@ -357,28 +397,28 @@ final class ByteProcessorImpl implements ByteProcessor {
         }
     }
 
-    private abstract class BaseBufferIn implements BufferIn {
+    private abstract class BaseDataReader implements DataReader {
 
         protected final int bufSize;
         protected long remaining;
 
-        private BaseBufferIn(int blockSize) {
+        private BaseDataReader(int blockSize) {
             this.bufSize = readLimit < 0 ? blockSize : (int) Math.min(blockSize, readLimit);
             this.remaining = readLimit;
         }
     }
 
-    private final class InputStreamBufferIn extends BaseBufferIn {
+    private final class InputStreamDataReader extends BaseDataReader {
 
         private final InputStream source;
 
-        private InputStreamBufferIn(InputStream source, int blockSize) {
+        private InputStreamDataReader(InputStream source, int blockSize) {
             super(blockSize);
             this.source = source;
         }
 
         @Override
-        public ByteBuffer read() throws IOException {
+        public DataBlock read() throws IOException {
             int readSize = remaining < 0 ? bufSize : (int) Math.min(remaining, bufSize);
             if (readSize == 0) {
                 return null;
@@ -398,24 +438,25 @@ final class ByteProcessorImpl implements ByteProcessor {
             if (readLimit > 0) {
                 remaining -= hasRead;
             }
-            return ByteBuffer.wrap(
+            ByteBuffer buffer = ByteBuffer.wrap(
                 hasRead == bufSize ? buf : Arrays.copyOfRange(buf, 0, hasRead)
             ).asReadOnlyBuffer();
+            return new DataBlock(buffer, remaining == 0);
         }
     }
 
-    private final class BytesBufferIn extends BaseBufferIn {
+    private final class BytesDataReader extends BaseDataReader {
 
         private final byte[] source;
         private int pos = 0;
 
-        private BytesBufferIn(byte[] source, int blockSize) {
+        private BytesDataReader(byte[] source, int blockSize) {
             super(blockSize);
             this.source = source;
         }
 
         @Override
-        public ByteBuffer read() {
+        public DataBlock read() {
             int readSize = remaining < 0 ? readBlockSize : (int) Math.min(remaining, readBlockSize);
             if (readSize <= 0) {
                 return null;
@@ -430,21 +471,21 @@ final class ByteProcessorImpl implements ByteProcessor {
             if (readLimit > 0) {
                 remaining -= size;
             }
-            return ret;
+            return new DataBlock(ret, remaining == 0 || pos >= source.length);
         }
     }
 
-    private final class BufferBufferIn extends BaseBufferIn {
+    private final class BufferDataReader extends BaseDataReader {
 
         private final ByteBuffer source;
 
-        private BufferBufferIn(ByteBuffer source, int blockSize) {
+        private BufferDataReader(ByteBuffer source, int blockSize) {
             super(blockSize);
             this.source = source;
         }
 
         @Override
-        public ByteBuffer read() {
+        public DataBlock read() {
             int readSize = remaining < 0 ? readBlockSize : (int) Math.min(remaining, readBlockSize);
             if (readSize <= 0) {
                 return null;
@@ -463,15 +504,15 @@ final class ByteProcessorImpl implements ByteProcessor {
             if (readLimit > 0) {
                 remaining -= size;
             }
-            return ret;
+            return new DataBlock(ret, remaining == 0 || !source.hasRemaining());
         }
     }
 
-    private static final class OutputSteamBufferOut implements BufferOut {
+    private static final class OutputSteamDataWriter implements DataWriter {
 
         private final OutputStream dest;
 
-        private OutputSteamBufferOut(OutputStream dest) {
+        private OutputSteamDataWriter(OutputStream dest) {
             this.dest = dest;
         }
 
@@ -489,9 +530,9 @@ final class ByteProcessorImpl implements ByteProcessor {
         }
     }
 
-    private static final class NullBufferOut implements BufferOut {
+    private static final class NullDataWriter implements DataWriter {
 
-        static final NullBufferOut SINGLETON = new NullBufferOut();
+        static final NullDataWriter SINGLETON = new NullDataWriter();
 
         @Override
         public void write(ByteBuffer buffer) {
@@ -499,20 +540,21 @@ final class ByteProcessorImpl implements ByteProcessor {
         }
     }
 
-    private final class StreamIn extends InputStream {
+    private final class ProcessorInputStream extends InputStream {
 
-        private final EnReader enReader;
-        private ByteBuffer buffer = JieBytes.emptyBuffer();
+        // private final EncodingReader encodingReader;
+        private final ByteReader in;
+        private ByteSegment buffer = null;
         private boolean closed = false;
 
-        private StreamIn(BufferIn in) {
-            this.enReader = new EnReader(in);
+        private ProcessorInputStream(ByteReader in) {
+            this.in = in;
+            // this.encodingReader = new EncodingReader(in);
         }
 
-        @Nullable
-        private ByteBuffer read0() throws IOException {
+        private ByteSegment read0()throws IOException {
             try {
-                return enReader.read();
+                return in.read(readBlockSize, endOnZeroRead);
             } catch (Exception e) {
                 throw new IOException(e);
             }
@@ -522,18 +564,17 @@ final class ByteProcessorImpl implements ByteProcessor {
         public int read() throws IOException {
             checkClosed();
             if (buffer == null) {
-                return -1;
+                buffer = read0();
             }
-            if (buffer.hasRemaining()) {
-                return buffer.get() & 0xff;
+            while (true) {
+                if (buffer.data().hasRemaining()) {
+                    return buffer.data().get() & 0xff;
+                }
+                if (buffer.end()) {
+                    return -1;
+                }
+                buffer = read0();
             }
-            ByteBuffer newBuf = read0();
-            if (newBuf == null) {
-                buffer = null;
-                return -1;
-            }
-            buffer = newBuf;
-            return buffer.get() & 0xff;
         }
 
         public int read(byte[] dst, int off, int len) throws IOException {
@@ -543,50 +584,56 @@ final class ByteProcessorImpl implements ByteProcessor {
                 return 0;
             }
             if (buffer == null) {
-                return -1;
+                buffer = read0();
             }
-            final int endPos = off + len;
             int pos = off;
-            while (pos < endPos) {
-                if (!buffer.hasRemaining()) {
-                    ByteBuffer newBuf = read0();
-                    if (newBuf == null) {
-                        buffer = null;
-                        return pos - off;
-                    }
-                    buffer = newBuf;
+            while (pos < off + len) {
+                if (buffer.data().hasRemaining()) {
+                    int readSize = Math.min(buffer.data().remaining(), len);
+                    buffer.data().get(dst, pos, readSize);
+                    pos += readSize;
+                    continue;
                 }
-                int getLen = Math.min(buffer.remaining(), endPos - pos);
-                buffer.get(dst, pos, getLen);
-                pos += getLen;
+                if (buffer.end()) {
+                    break;
+                }
+                buffer = read0();
+            }
+            if (buffer.end() && pos == off) {
+                return -1;
             }
             return pos - off;
         }
 
         public long skip(long n) throws IOException {
             checkClosed();
-            if (n <= 0 || buffer == null) {
+            if (n <= 0) {
                 return 0;
             }
-            int pos = 0;
-            while (pos < n) {
-                if (!buffer.hasRemaining()) {
-                    ByteBuffer newBuf = read0();
-                    if (newBuf == null) {
-                        buffer = null;
-                        return pos;
-                    }
-                    buffer = newBuf;
-                }
-                int getLen = (int) Math.min(buffer.remaining(), n - pos);
-                buffer.position(buffer.position() + getLen);
-                pos += getLen;
+            if (buffer == null) {
+                buffer = read0();
             }
-            return pos;
+            int pos = off;
+            while (pos < off + len) {
+                if (buffer.data().hasRemaining()) {
+                    int readSize = Math.min(buffer.data().remaining(), len);
+                    buffer.data().get(dst, pos, readSize);
+                    pos += readSize;
+                    continue;
+                }
+                if (buffer.end()) {
+                    break;
+                }
+                buffer = read0();
+            }
+            if (buffer.end() && pos == off) {
+                return -1;
+            }
+            return pos - off;
         }
 
         public int available() {
-            return buffer == null ? 0 : buffer.remaining();
+            return buffer == null ? 0 : buffer.data.remaining();
         }
 
         public void close() throws IOException {
@@ -773,6 +820,16 @@ final class ByteProcessorImpl implements ByteProcessor {
                 return null;
             }
             return bytesBuilder.toByteBuffer();
+        }
+    }
+
+    static final class EmptyEncoder implements ByteEncoder {
+
+        static final EmptyEncoder SINGLETON = new EmptyEncoder();
+
+        @Override
+        public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) {
+            return data;
         }
     }
 }

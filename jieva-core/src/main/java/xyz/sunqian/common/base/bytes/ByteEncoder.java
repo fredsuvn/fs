@@ -84,4 +84,13 @@ public interface ByteEncoder {
     static ByteEncoder withBuffering(ByteEncoder encoder) {
         return new ByteProcessorImpl.BufferingEncoder(encoder);
     }
+
+    /**
+     * Returns an empty {@link ByteEncoder} which does nothing.
+     *
+     * @return an empty {@link ByteEncoder} which does nothing
+     */
+    static ByteEncoder emptyEncoder() {
+        return ByteProcessorImpl.EmptyEncoder.SINGLETON;
+    }
 }
