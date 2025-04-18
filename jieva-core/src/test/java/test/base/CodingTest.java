@@ -16,6 +16,11 @@ public class CodingTest {
         assertNull(JieCoding.ifAdd(null, null));
         assertEquals(JieCoding.ifAdd(null, "111"), "111");
         assertEquals(JieCoding.ifAdd("111", "222"), asList("111", "222"));
+        Object objOrList = null;
+        objOrList = JieCoding.ifAdd(objOrList, "111");
+        objOrList = JieCoding.ifAdd(objOrList, "222");
+        objOrList = JieCoding.ifAdd(objOrList, "333");
+        assertEquals(objOrList, asList("111", "222", "333"));
     }
 
     @Test

@@ -16,8 +16,9 @@ import java.util.function.Function;
 public class JieCoding {
 
     /**
-     * If the {@code old} is null, return the {@code added}. Otherwise, returns a new {@link ArrayList} contains the
-     * {@code old} and {@code added}.
+     * If the {@code old} is null, return the {@code added}. If the {@code old} is a collection, adding the
+     * {@code added} into the {@code old}, returns the {@code old}. Otherwise, returns a new {@link ArrayList} contains
+     * the {@code old} and {@code added}.
      *
      * @param old   the old
      * @param added the added
@@ -27,6 +28,11 @@ public class JieCoding {
         if (old == null) {
             return added;
         }
+        if (old instanceof Collection) {
+            Collection<Object> oldList = Jie.as(old);
+            oldList.add(added);
+            return old;
+        }
         List<Object> list = new ArrayList<>(2);
         list.add(old);
         list.add(added);
@@ -34,10 +40,10 @@ public class JieCoding {
     }
 
     /**
-     * If the {@code objOrColl} is null, return the result of the {@code merger} with an empty collection. If the
-     * {@code objOrColl} is a collection, return the result of the {@code merger} with the collection. Otherwise, the
-     * {@code objOrColl} will be treated as a collection, and this method returns the result of the {@code merger} with
-     * the collection.
+     * If the {@code objOrColl} is null, returns the result of the {@code merger} with an empty collection. If the
+     * {@code objOrColl} is a collection, returns the result of the {@code merger} with the collection. Otherwise, the
+     * {@code objOrColl} is treated as a collection, and this method returns the result of the {@code merger} with the
+     * collection.
      *
      * @param objOrColl the {@code objOrColl}
      * @param merger    the {@code merger}
