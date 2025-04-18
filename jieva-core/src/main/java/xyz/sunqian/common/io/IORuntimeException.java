@@ -40,7 +40,7 @@ public class IORuntimeException extends RuntimeException {
      * @param cause exception cause
      */
     public IORuntimeException(Throwable cause) {
-        super(cause);
+        super(cause instanceof IOException ? cause.getCause() : cause);
     }
 
     /**
