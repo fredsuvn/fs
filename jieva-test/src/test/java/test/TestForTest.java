@@ -31,7 +31,7 @@ public class TestForTest {
     @Test
     public void testThrows() throws Exception {
         Method throwError = Tt.class.getDeclaredMethod("throwError");
-        assertEquals(reflectThrows(TestException.class, throwError, null).getClass(), TestException.class);
+        assertEquals(reflectThrows(JieTestException.class, throwError, null).getClass(), JieTestException.class);
     }
 
     @Test
@@ -133,26 +133,11 @@ public class TestForTest {
     private static final class Tt {
 
         private static void throwError() {
-            throw new TestException();
+            throw new JieTestException();
         }
 
         private static String string() {
             return "123";
-        }
-    }
-
-    public static class TestException extends RuntimeException {
-
-        public TestException() {
-            super();
-        }
-
-        public TestException(String message) {
-            super(message);
-        }
-
-        public TestException(String message, Throwable cause) {
-            super(message, cause);
         }
     }
 }
