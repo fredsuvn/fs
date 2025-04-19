@@ -52,6 +52,46 @@ public class JieCheck {
     }
 
     /**
+     * Checks whether the sub-range defined by the given start position and end position is within the specified range.
+     * Its logic is the same as the following code:
+     * <pre>{@code
+     *     if (start < 0 || end < start || end > range) {
+     *         throw new IndexOutOfBoundsException();
+     *     }
+     * }</pre>
+     *
+     * @param range the specified range
+     * @param start the given start position
+     * @param end   the given end position
+     * @throws IndexOutOfBoundsException if the sub-range is out of the specified range
+     */
+    public static void checkStartEnd(int range, int start, int end) throws IndexOutOfBoundsException {
+        if (start < 0 || end < start || end > range) {
+            throw new IndexOutOfBoundsException();
+        }
+    }
+
+    /**
+     * Checks whether the sub-range defined by the given start position and end position is within the specified range.
+     * Its logic is the same as the following code:
+     * <pre>{@code
+     *     if (start < 0 || end < start || end > range) {
+     *         throw new IndexOutOfBoundsException();
+     *     }
+     * }</pre>
+     *
+     * @param range the specified range
+     * @param start the given start position
+     * @param end   the given end position
+     * @throws IndexOutOfBoundsException if the sub-range is out of the specified range
+     */
+    public static void checkStartEnd(long range, long start, long end) throws IndexOutOfBoundsException {
+        if (start < 0 || end < start || end > range) {
+            throw new IndexOutOfBoundsException();
+        }
+    }
+
+    /**
      * Checks whether given object is null, if it is, throw a {@link NullPointerException}.
      *
      * @param obj given object
