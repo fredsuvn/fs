@@ -384,7 +384,7 @@ public class JieIO {
      * @return the given array as an {@link InputStream}
      */
     public static InputStream inStream(byte[] array) {
-        return Wrappers.in(array);
+        return WrapperBack.in(array);
     }
 
     /**
@@ -399,7 +399,7 @@ public class JieIO {
      * @return the given array as an {@link InputStream}
      */
     public static InputStream inStream(byte[] array, int offset, int length) {
-        return Wrappers.in(array, offset, length);
+        return WrapperBack.in(array, offset, length);
     }
 
     /**
@@ -412,7 +412,7 @@ public class JieIO {
      * @return the given buffer as an {@link InputStream}
      */
     public static InputStream inStream(ByteBuffer buffer) {
-        return Wrappers.in(buffer);
+        return WrapperBack.in(buffer);
     }
 
     /**
@@ -428,7 +428,7 @@ public class JieIO {
      * @throws IORuntimeException if an I/O error occurs
      */
     public static InputStream inStream(RandomAccessFile random, long offset) throws IORuntimeException {
-        return Wrappers.in(random, offset);
+        return WrapperBack.in(random, offset);
     }
 
     /**
@@ -457,7 +457,7 @@ public class JieIO {
      * @return the given reader as an {@link InputStream}
      */
     public static InputStream inStream(Reader reader, Charset charset) {
-        return Wrappers.in(reader, charset);
+        return WrapperBack.in(reader, charset);
     }
 
     /**
@@ -470,7 +470,7 @@ public class JieIO {
      * @return the given array as an {@link Reader}
      */
     public static Reader reader(char[] array) {
-        return Wrappers.reader(array);
+        return WrapperBack.reader(array);
     }
 
     /**
@@ -485,7 +485,7 @@ public class JieIO {
      * @return the given array as an {@link Reader}
      */
     public static Reader reader(char[] array, int offset, int length) {
-        return Wrappers.reader(array, offset, length);
+        return WrapperBack.reader(array, offset, length);
     }
 
     /**
@@ -498,7 +498,7 @@ public class JieIO {
      * @return the given array as an {@link Reader}
      */
     public static Reader reader(CharSequence chars) {
-        return Wrappers.reader(chars);
+        return WrapperBack.reader(chars);
     }
 
     /**
@@ -511,7 +511,7 @@ public class JieIO {
      * @return the given buffer as an {@link Reader}
      */
     public static Reader reader(CharBuffer buffer) {
-        return Wrappers.reader(buffer);
+        return WrapperBack.reader(buffer);
     }
 
     /**
@@ -540,7 +540,7 @@ public class JieIO {
      * @return the given stream as an {@link Reader}
      */
     public static Reader reader(InputStream stream, Charset charset) {
-        return Wrappers.reader(stream, charset);
+        return WrapperBack.reader(stream, charset);
     }
 
     /**
@@ -552,7 +552,7 @@ public class JieIO {
      * @return the given array as an {@link OutputStream}
      */
     public static OutputStream outStream(byte[] array) {
-        return Wrappers.out(array);
+        return WrapperBack.out(array);
     }
 
     /**
@@ -567,7 +567,7 @@ public class JieIO {
      * @return the given array as an {@link OutputStream}
      */
     public static OutputStream outStream(byte[] array, int offset, int length) {
-        return Wrappers.out(array, offset, length);
+        return WrapperBack.out(array, offset, length);
     }
 
     /**
@@ -579,7 +579,7 @@ public class JieIO {
      * @return the given buffer as an {@link OutputStream}
      */
     public static OutputStream outStream(ByteBuffer buffer) {
-        return Wrappers.out(buffer);
+        return WrapperBack.out(buffer);
     }
 
     /**
@@ -594,7 +594,7 @@ public class JieIO {
      * @throws IORuntimeException if an I/O error occurs
      */
     public static OutputStream outStream(RandomAccessFile random, long offset) throws IORuntimeException {
-        return Wrappers.out(random, offset);
+        return WrapperBack.out(random, offset);
     }
 
     /**
@@ -623,7 +623,7 @@ public class JieIO {
      * @return the given appender as an {@link OutputStream}
      */
     public static OutputStream outStream(Appendable appender, Charset charset) {
-        return Wrappers.out(appender, charset);
+        return WrapperBack.out(appender, charset);
     }
 
     /**
@@ -635,7 +635,7 @@ public class JieIO {
      * @return the given array as an {@link Writer}
      */
     public static Writer writer(char[] array) {
-        return Wrappers.writer(array);
+        return WrapperBack.writer(array);
     }
 
     /**
@@ -650,7 +650,7 @@ public class JieIO {
      * @return the given array as an {@link Writer}
      */
     public static Writer writer(char[] array, int offset, int length) {
-        return Wrappers.writer(array, offset, length);
+        return WrapperBack.writer(array, offset, length);
     }
 
     /**
@@ -662,7 +662,7 @@ public class JieIO {
      * @return the given array as an {@link Writer}
      */
     public static Writer writer(CharBuffer buffer) {
-        return Wrappers.writer(buffer);
+        return WrapperBack.writer(buffer);
     }
 
     /**
@@ -691,7 +691,7 @@ public class JieIO {
      * @return the given appender as an {@link Writer}
      */
     public static Writer writer(OutputStream stream, Charset charset) {
-        return Wrappers.writer(stream, charset);
+        return WrapperBack.writer(stream, charset);
     }
 
     /**
@@ -700,7 +700,7 @@ public class JieIO {
      * @return an empty {@link InputStream}
      */
     public static InputStream emptyInStream() {
-        return Wrappers.emptyIn();
+        return WrapperBack.emptyIn();
     }
 
     /**
@@ -709,7 +709,7 @@ public class JieIO {
      * @return an empty {@link Reader}
      */
     public static Reader emptyReader() {
-        return Wrappers.emptyReader();
+        return WrapperBack.emptyReader();
     }
 
     /**
@@ -718,7 +718,7 @@ public class JieIO {
      * @return an {@link OutputStream} that infinitely accepts data but immediately discards them
      */
     public static OutputStream nullOutStream() {
-        return Wrappers.nullOut();
+        return WrapperBack.nullOut();
     }
 
     /**
@@ -727,7 +727,7 @@ public class JieIO {
      * @return an {@link Writer} that infinitely accepts data but immediately discards them
      */
     public static Writer nullWriter() {
-        return Wrappers.nullWriter();
+        return WrapperBack.nullWriter();
     }
 
     //---------------- Wrappers End ----------------//

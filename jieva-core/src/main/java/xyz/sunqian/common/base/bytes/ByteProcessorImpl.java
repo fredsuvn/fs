@@ -150,7 +150,7 @@ final class ByteProcessorImpl implements ByteProcessor {
         } catch (ProcessingException e) {
             throw e;
         } catch (Exception e) {
-            throw new IORuntimeException(e);
+            throw new ProcessingException(e);
         }
     }
 
@@ -201,7 +201,9 @@ final class ByteProcessorImpl implements ByteProcessor {
             ByteSegment segment = reader.read(readBlockSize, endOnZeroRead);
             count += segment.data().remaining();
             ByteBuffer encoded = theOneEncoder.encode(segment.data(), segment.end());
-            out.write(encoded);
+            if (encoded != null) {
+                out.write(encoded);
+            }
             if (segment.end()) {
                 return count;
             }
