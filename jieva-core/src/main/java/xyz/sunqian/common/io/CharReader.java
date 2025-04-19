@@ -23,6 +23,9 @@ public interface CharReader {
 
     /**
      * Returns a new {@link CharReader} with the given data source.
+     * <p>
+     * The content of the buffer returned from the {@link CharReader} is shared with the content of the given data
+     * source. Changes to the buffer's content will be visible in the given data source, and vice versa.
      *
      * @param source the given data source
      * @return a new {@link CharReader} with the given data source
@@ -34,6 +37,9 @@ public interface CharReader {
     /**
      * Returns a new {@link CharReader} with the given data source, starting at the specified offset and up to the
      * specified length.
+     * <p>
+     * The content of the buffer returned from the {@link CharReader} is shared with the content of the given data
+     * source. Changes to the buffer's content will be visible in the given data source, and vice versa.
      *
      * @param source the given data source
      * @param offset the specified offset
@@ -47,6 +53,9 @@ public interface CharReader {
 
     /**
      * Returns a new {@link CharReader} with the given data source.
+     * <p>
+     * The content of the buffer returned from the {@link CharReader} is shared with the content of the given data
+     * source. Changes to the buffer's content will be visible in the given data source, and vice versa.
      *
      * @param source the given data source
      * @return a new {@link CharReader} with the given data source
@@ -56,21 +65,27 @@ public interface CharReader {
     }
 
     /**
-     * Returns a new {@link CharReader} with the given data source, starting at the specified offset and up to the
-     * specified length.
+     * Returns a new {@link CharReader} with the given data source, starting at the specified start position inclusive
+     * and end at the specified end position exclusive.
+     * <p>
+     * The content of the buffer returned from the {@link CharReader} is shared with the content of the given data
+     * source. Changes to the buffer's content will be visible in the given data source, and vice versa.
      *
      * @param source the given data source
-     * @param offset the specified offset
-     * @param length the specified length
+     * @param start  the specified start position inclusive
+     * @param end    the specified end position exclusive
      * @return a new {@link CharReader} with the given data source
-     * @throws IndexOutOfBoundsException if the specified offset or length is out of bounds
+     * @throws IndexOutOfBoundsException if the specified start or end position is out of bounds
      */
-    static CharReader from(CharSequence source, int offset, int length) throws IndexOutOfBoundsException {
-        return ReaderBack.of(source, offset, length);
+    static CharReader from(CharSequence source, int start, int end) throws IndexOutOfBoundsException {
+        return ReaderBack.of(source, start, end);
     }
 
     /**
      * Returns a new {@link CharReader} with the given data source.
+     * <p>
+     * The content of the buffer returned from the {@link CharReader} is shared with the content of the given data
+     * source. Changes to the buffer's content will be visible in the given data source, and vice versa.
      *
      * @param source the given data source
      * @return a new {@link CharReader} with the given data source

@@ -23,6 +23,9 @@ public interface ByteReader {
 
     /**
      * Returns a new {@link ByteReader} with the given data source.
+     * <p>
+     * The content of the buffer returned from the {@link ByteReader} is shared with the content of the given data
+     * source. Changes to the buffer's content will be visible in the given data source, and vice versa.
      *
      * @param source the given data source
      * @return a new {@link ByteReader} with the given data source
@@ -34,6 +37,9 @@ public interface ByteReader {
     /**
      * Returns a new {@link ByteReader} with the given data source, starting at the specified offset and up to the
      * specified length.
+     * <p>
+     * The content of the buffer returned from the {@link ByteReader} is shared with the content of the given data
+     * source. Changes to the buffer's content will be visible in the given data source, and vice versa.
      *
      * @param source the given data source
      * @param offset the specified offset
@@ -47,6 +53,9 @@ public interface ByteReader {
 
     /**
      * Returns a new {@link ByteReader} with the given data source.
+     * <p>
+     * The content of the buffer returned from the {@link ByteReader} is shared with the content of the given data
+     * source. Changes to the buffer's content will be visible in the given data source, and vice versa.
      *
      * @param source the given data source
      * @return a new {@link ByteReader} with the given data source

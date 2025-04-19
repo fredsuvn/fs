@@ -36,8 +36,8 @@ final class ReaderBack {
         return new CharArrayReader(source, offset, length);
     }
 
-    static CharReader of(CharSequence source, int offset, int length) throws IndexOutOfBoundsException {
-        return new CharSequenceReader(source, offset, length);
+    static CharReader of(CharSequence source, int start, int end) throws IndexOutOfBoundsException {
+        return new CharSequenceReader(source, start, end);
     }
 
     static CharReader of(CharBuffer source) {
@@ -208,6 +208,7 @@ final class ReaderBack {
             source.limit(newPos);
             ByteBuffer data = source.slice();
             source.position(newPos);
+            source.limit(limit);
             return new ByteBlock(data, newPos >= limit);
         }
     }
@@ -220,6 +221,7 @@ final class ReaderBack {
         LimitedByteReader(ByteReader source, long readLimit) throws IllegalArgumentException {
             checkReadLimit(readLimit);
             this.source = source;
+            this.remaining = readLimit;
         }
 
         @Override
@@ -372,11 +374,11 @@ final class ReaderBack {
         private final int endPos;
         private int pos;
 
-        CharSequenceReader(CharSequence source, int offset, int length) throws IndexOutOfBoundsException {
-            JieCheck.checkOffsetLength(source.length(), offset, length);
+        CharSequenceReader(CharSequence source, int start, int end) throws IndexOutOfBoundsException {
+            JieCheck.checkStartEnd(source.length(), start, end);
             this.source = source;
-            this.pos = offset;
-            this.endPos = offset + length;
+            this.pos = start;
+            this.endPos = end;
         }
 
         @Override
@@ -390,11 +392,11 @@ final class ReaderBack {
             }
             int remaining = endPos - pos;
             if (remaining >= size) {
-                CharBuffer data = CharBuffer.wrap(source, pos, size).slice();
+                CharBuffer data = CharBuffer.wrap(source, pos, pos + size).slice();
                 pos += size;
                 return new CharBlock(data, false);
             }
-            CharBuffer data = CharBuffer.wrap(source, pos, remaining).slice();
+            CharBuffer data = CharBuffer.wrap(source, pos, pos + remaining).slice();
             pos += remaining;
             return new CharBlock(data, true);
         }
@@ -423,6 +425,7 @@ final class ReaderBack {
             source.limit(newPos);
             CharBuffer data = source.slice();
             source.position(newPos);
+            source.limit(limit);
             return new CharBlock(data, newPos >= limit);
         }
     }
@@ -435,6 +438,7 @@ final class ReaderBack {
         LimitedCharReader(CharReader source, long readLimit) throws IllegalArgumentException {
             checkReadLimit(readLimit);
             this.source = source;
+            this.remaining = readLimit;
         }
 
         @Override
