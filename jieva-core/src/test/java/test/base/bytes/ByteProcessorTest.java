@@ -21,7 +21,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -32,7 +31,6 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 import static xyz.sunqian.common.base.bytes.ByteEncoder.withBuffering;
 import static xyz.sunqian.common.base.bytes.ByteEncoder.withRounding;
-import static xyz.sunqian.test.JieTest.reflectThrows;
 import static xyz.sunqian.test.MaterialBox.copyDirect;
 
 public class ByteProcessorTest {
@@ -823,10 +821,6 @@ public class ByteProcessorTest {
                 return data;
             })).process();
             assertEquals(src, target);
-            ByteProcessor.from(new ByteArrayInputStream(src)).readBlockSize(3).encoder(((data, end) -> {
-                assertTrue(data.isReadOnly());
-                return data;
-            })).process();
         }
 
         {
@@ -845,10 +839,6 @@ public class ByteProcessorTest {
         expectThrows(IORuntimeException.class, () -> ByteProcessor.from(new byte[0]).writeTo(new byte[0], 0, 100));
         expectThrows(IORuntimeException.class, () -> ByteProcessor.from(new byte[0]).writeTo((OutputStream) null));
         expectThrows(IORuntimeException.class, () -> ByteProcessor.from((InputStream) null).writeTo(new byte[0]));
-        Method method = ByteProcessor.from(new byte[0]).getClass().getDeclaredMethod("toBufferIn", Object.class);
-        reflectThrows(IORuntimeException.class, method, ByteProcessor.from(new byte[0]), "");
-        method = ByteProcessor.from(new byte[0]).getClass().getDeclaredMethod("toBufferOut", Object.class);
-        reflectThrows(IORuntimeException.class, method, ByteProcessor.from(new byte[0]), "");
         expectThrows(IORuntimeException.class, () -> ByteProcessor.from(new ThrowIn(0)).writeTo(new byte[0]));
         expectThrows(IORuntimeException.class, () -> ByteProcessor.from(new ThrowIn(1)).writeTo(new byte[0]));
     }

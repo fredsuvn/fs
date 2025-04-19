@@ -16,7 +16,6 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.CharBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
@@ -153,7 +152,7 @@ final class CharProcessorImpl implements CharProcessor {
                 }
             }
             return startInBlocks();
-        } catch (ProcessingException e) {
+        } catch (ProcessingException | IORuntimeException e) {
             throw e;
         } catch (Exception e) {
             throw new ProcessingException(e);
@@ -288,170 +287,8 @@ final class CharProcessorImpl implements CharProcessor {
         throw new IORuntimeException("Unexpected destination type: " + dst.getClass());
     }
 
-    private interface DataReader {
-
-        /*
-         * Returns null if reaches the end of the input.
-         * If the returned buffer is non-null, then it is definitely non-empty.
-         */
-        @Nullable
-        DataBlock read() throws Exception;
-    }
-
-    private static final class DataBlock {
-
-        private CharBuffer data;
-        private boolean end;
-
-        public DataBlock(CharBuffer data, boolean end) {
-            this.data = data;
-            this.end = end;
-        }
-    }
-
     private interface DataWriter {
         void write(CharBuffer buffer) throws Exception;
-    }
-
-    private abstract class BaseDataReader implements DataReader {
-
-        protected final int bufSize;
-        protected long remaining;
-
-        private BaseDataReader(int blockSize) {
-            this.bufSize = readLimit < 0 ? blockSize : (int) Math.min(blockSize, readLimit);
-            this.remaining = readLimit;
-        }
-    }
-
-    private final class ReaderDataReader extends BaseDataReader {
-
-        private final Reader source;
-
-        private ReaderDataReader(Reader source, int blockSize) {
-            super(blockSize);
-            this.source = source;
-        }
-
-        @Override
-        public DataBlock read() throws IOException {
-            int readSize = remaining < 0 ? bufSize : (int) Math.min(remaining, bufSize);
-            if (readSize == 0) {
-                return null;
-            }
-            int hasRead = 0;
-            char[] buf = new char[bufSize];
-            while (hasRead < readSize) {
-                int size = source.read(buf, hasRead, readSize - hasRead);
-                if (size < 0 || (size == 0 && endOnZeroRead)) {
-                    break;
-                }
-                hasRead += size;
-            }
-            if (hasRead == 0) {
-                return null;
-            }
-            if (readLimit > 0) {
-                remaining -= hasRead;
-            }
-            CharBuffer buffer = CharBuffer.wrap(
-                hasRead == bufSize ? buf : Arrays.copyOfRange(buf, 0, hasRead)
-            ).asReadOnlyBuffer();
-            return new DataBlock(buffer, remaining == 0);
-        }
-    }
-
-    private final class CharsDataReader extends BaseDataReader {
-
-        private final char[] source;
-        private int pos = 0;
-
-        private CharsDataReader(char[] source, int blockSize) {
-            super(blockSize);
-            this.source = source;
-        }
-
-        @Override
-        public DataBlock read() {
-            int readSize = remaining < 0 ? readBlockSize : (int) Math.min(remaining, readBlockSize);
-            if (readSize <= 0) {
-                return null;
-            }
-            if (pos >= source.length) {
-                return null;
-            }
-            int newPos = Math.min(pos + readSize, source.length);
-            int size = newPos - pos;
-            CharBuffer ret = CharBuffer.wrap(source, pos, size).slice();
-            pos = newPos;
-            if (readLimit > 0) {
-                remaining -= size;
-            }
-            return new DataBlock(ret, remaining == 0 || pos >= source.length);
-        }
-    }
-
-    private final class BufferDataReader extends BaseDataReader {
-
-        private final CharBuffer source;
-
-        private BufferDataReader(CharBuffer source, int blockSize) {
-            super(blockSize);
-            this.source = source;
-        }
-
-        @Override
-        public DataBlock read() {
-            int readSize = remaining < 0 ? readBlockSize : (int) Math.min(remaining, readBlockSize);
-            if (readSize <= 0) {
-                return null;
-            }
-            if (!source.hasRemaining()) {
-                return null;
-            }
-            int pos = source.position();
-            int limit = source.limit();
-            int newPos = Math.min(pos + readSize, limit);
-            int size = newPos - pos;
-            source.limit(newPos);
-            CharBuffer ret = source.slice();
-            source.limit(limit);
-            source.position(newPos);
-            if (readLimit > 0) {
-                remaining -= size;
-            }
-            return new DataBlock(ret, remaining == 0 || !source.hasRemaining());
-        }
-    }
-
-    private final class CharSeqDataReader extends BaseDataReader {
-
-        private final CharSequence source;
-        private int pos = 0;
-
-        private CharSeqDataReader(CharSequence source, int blockSize) {
-            super(blockSize);
-            this.source = source;
-        }
-
-        @Override
-        public DataBlock read() {
-            int readSize = remaining < 0 ? readBlockSize : (int) Math.min(remaining, readBlockSize);
-            if (readSize <= 0) {
-                return null;
-            }
-            if (pos >= source.length()) {
-                return null;
-            }
-            int newPos = Math.min(pos + readSize, source.length());
-            int size = newPos - pos;
-            CharBuffer ret = CharBuffer.wrap(source, pos, newPos).slice();
-            pos = newPos;
-            if (readLimit > 0) {
-                remaining -= size;
-            }
-            return new DataBlock(ret, remaining == 0 || pos >= source.length());
-        }
     }
 
     private static final class AppendableDataWriter implements DataWriter {

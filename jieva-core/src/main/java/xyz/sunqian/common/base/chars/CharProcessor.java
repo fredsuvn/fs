@@ -30,12 +30,12 @@ import static xyz.sunqian.common.base.chars.CharEncoder.withFixedSize;
  *         Setting methods: to set the data processing arguments before a terminal method has invoked;
  *     </li>
  *     <li>
- *         Terminal methods: to start the data processing. Once a terminal method is invoked, the state of current
+ *         Terminal methods: to start the data processing. Note once a terminal method is invoked, the state of current
  *         processor will become undefined, and no safe guarantees for further operations;
  *     </li>
  * </ul>
- * Char processor is lazy, operations on the source data are only performed when a terminal method is invoked, and source
- * data are consumed only as needed.
+ * Char processor is lazy, operations on the source data are only performed when a terminal method is invoked, and
+ * source data are consumed only as needed.
  *
  * @author sunqian
  */
