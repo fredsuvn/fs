@@ -230,7 +230,7 @@ final class CharProcessorImpl implements CharProcessor {
             CharSegment segment = reader.read(readBlockSize, endOnZeroRead);
             count += segment.data().remaining();
             CharBuffer encoded = theOneEncoder.encode(segment.data(), segment.end());
-            if (encoded != null) {
+            if (!JieChars.isEmpty(encoded)) {
                 out.write(encoded);
             }
             if (segment.end()) {

@@ -237,7 +237,7 @@ public class CharsBuilder extends Writer implements CharSequence {
     }
 
     /**
-     * Appends all chars from the given buffer.
+     * Reads and appends all chars from the given buffer.
      *
      * @param chars the given buffer
      * @return this builder
@@ -257,7 +257,7 @@ public class CharsBuilder extends Writer implements CharSequence {
     }
 
     /**
-     * Appends all chars from the given reader.
+     * Reads and appends all chars from the given reader.
      *
      * @param reader the given reader
      * @return this builder
@@ -268,7 +268,7 @@ public class CharsBuilder extends Writer implements CharSequence {
     }
 
     /**
-     * Appends all chars from the given reader with the specified buffer size for each reading.
+     * Reads and appends all chars from the given reader with the specified buffer size for each reading.
      *
      * @param reader     the given reader
      * @param bufferSize the specified buffer size for each reading

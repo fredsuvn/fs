@@ -191,16 +191,14 @@ final class ByteProcessorImpl implements ByteProcessor {
     }
 
     private long readTo(ByteReader in, DataWriter out) throws Exception {
-        if (theOneEncoder == null) {
-            theOneEncoder = buildOneEncoder();
-        }
+        ByteEncoder oneEncoder = getTheOneEncoder();
         ByteReader reader = readLimit < 0 ? in : in.withReadLimit(readLimit);
         long count = 0;
         while (true) {
             ByteSegment segment = reader.read(readBlockSize, endOnZeroRead);
             count += segment.data().remaining();
-            ByteBuffer encoded = theOneEncoder.encode(segment.data(), segment.end());
-            if (encoded != null) {
+            ByteBuffer encoded = oneEncoder.encode(segment.data(), segment.end());
+            if (!JieBytes.isEmpty(encoded)) {
                 out.write(encoded);
             }
             if (segment.end()) {
@@ -209,11 +207,15 @@ final class ByteProcessorImpl implements ByteProcessor {
         }
     }
 
-    private ByteEncoder buildOneEncoder() {
-        if (JieColl.isEmpty(encoders)) {
-            return ByteEncoder.emptyEncoder();
+    private ByteEncoder getTheOneEncoder() {
+        if (theOneEncoder != null) {
+            return theOneEncoder;
         }
-        return (data, end) -> {
+        if (JieColl.isEmpty(encoders)) {
+            theOneEncoder = ByteEncoder.emptyEncoder();
+            return theOneEncoder;
+        }
+        theOneEncoder = (data, end) -> {
             ByteBuffer bytes = data;
             for (ByteEncoder encoder : encoders) {
                 bytes = encoder.encode(bytes, end);
@@ -223,6 +225,7 @@ final class ByteProcessorImpl implements ByteProcessor {
             }
             return bytes;
         };
+        return theOneEncoder;
     }
 
     private ByteReader toByteReader(Object src) {
@@ -293,7 +296,7 @@ final class ByteProcessorImpl implements ByteProcessor {
     private final class ProcessorInputStream extends InputStream {
 
         private final ByteReader in;
-        private ByteSegment buffer = null;
+        private ByteSegment nextSeg = null;
         private boolean closed = false;
 
         private ProcessorInputStream(ByteReader in) {
@@ -302,7 +305,13 @@ final class ByteProcessorImpl implements ByteProcessor {
 
         private ByteSegment read0() throws IOException {
             try {
-                return in.read(readBlockSize, endOnZeroRead);
+                ByteEncoder oneEncoder = getTheOneEncoder();
+                ByteSegment s0 = in.read(readBlockSize, endOnZeroRead);
+                ByteBuffer encoded = oneEncoder.encode(s0.data(), s0.end());
+                if (encoded == s0.data()) {
+                    return s0;
+                }
+                return ByteSegment.of(encoded, s0.end());
             } catch (Exception e) {
                 throw new IOException(e);
             }
@@ -311,17 +320,21 @@ final class ByteProcessorImpl implements ByteProcessor {
         @Override
         public int read() throws IOException {
             checkClosed();
-            if (buffer == null) {
-                buffer = read0();
-            }
             while (true) {
-                if (buffer.data().hasRemaining()) {
-                    return buffer.data().get() & 0xff;
+                if (nextSeg == null) {
+                    nextSeg = read0();
                 }
-                if (buffer.end()) {
+                if (nextSeg == ByteSegment.empty(true)) {
                     return -1;
                 }
-                buffer = read0();
+                if (nextSeg.data().hasRemaining()) {
+                    return nextSeg.data().get() & 0xff;
+                }
+                if (nextSeg.end()) {
+                    nextSeg = ByteSegment.empty(true);
+                    return -1;
+                }
+                nextSeg = null;
             }
         }
 
@@ -337,23 +350,30 @@ final class ByteProcessorImpl implements ByteProcessor {
             if (len <= 0) {
                 return 0;
             }
-            if (buffer == null) {
-                buffer = read0();
-            }
             int pos = off;
-            while (pos < off + len) {
-                if (buffer.data().hasRemaining()) {
-                    int readSize = Math.min(buffer.data().remaining(), len);
-                    buffer.data().get(dst, pos, readSize);
+            int remaining = len;
+            while (remaining > 0) {
+                if (nextSeg == null) {
+                    nextSeg = read0();
+                }
+                if (nextSeg == ByteSegment.empty(true)) {
+                    return -1;
+                }
+                if (nextSeg.data().hasRemaining()) {
+                    int readSize = (int) Math.min(nextSeg.data().remaining(), remaining);
+                    nextSeg.data().get(dst, pos, readSize);
                     pos += readSize;
+                    remaining -= readSize;
                     continue;
                 }
-                if (buffer.end()) {
+                if (nextSeg.end()) {
+                    nextSeg = ByteSegment.empty(true);
                     break;
+                } else {
+                    nextSeg = null;
                 }
-                buffer = read0();
             }
-            if (buffer.end() && pos == off) {
+            if (nextSeg.end() && pos == off) {
                 return -1;
             }
             return pos - off;
@@ -365,23 +385,30 @@ final class ByteProcessorImpl implements ByteProcessor {
             if (n <= 0) {
                 return 0;
             }
-            if (buffer == null) {
-                buffer = read0();
-            }
-            int pos = 0;
-            while (pos < n) {
-                if (buffer.data().hasRemaining()) {
-                    int readSize = (int) Math.min(buffer.data().remaining(), n);
-                    buffer.data().position(buffer.data().position() + readSize);
+            long pos = 0;
+            long remaining = n;
+            while (remaining > 0) {
+                if (nextSeg == null) {
+                    nextSeg = read0();
+                }
+                if (nextSeg == ByteSegment.empty(true)) {
+                    return 0;
+                }
+                if (nextSeg.data().hasRemaining()) {
+                    int readSize = (int) Math.min(nextSeg.data().remaining(), remaining);
+                    nextSeg.data().position(nextSeg.data().position() + readSize);
                     pos += readSize;
+                    remaining -= readSize;
                     continue;
                 }
-                if (buffer.end()) {
+                if (nextSeg.end()) {
+                    nextSeg = ByteSegment.empty(true);
                     break;
+                } else {
+                    nextSeg = null;
                 }
-                buffer = read0();
             }
-            if (buffer.end() && pos == 0) {
+            if (nextSeg.end() && pos == 0) {
                 return 0;
             }
             return pos;
@@ -389,7 +416,7 @@ final class ByteProcessorImpl implements ByteProcessor {
 
         @Override
         public int available() {
-            return buffer == null ? 0 : buffer.data().remaining();
+            return nextSeg == null ? 0 : nextSeg.data().remaining();
         }
 
         @Override

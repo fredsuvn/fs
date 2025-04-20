@@ -11,12 +11,14 @@ import xyz.sunqian.test.ReadOps;
 import xyz.sunqian.test.TestInputStream;
 
 import java.io.ByteArrayInputStream;
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertNotSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
@@ -121,7 +123,7 @@ public class ByteReaderTest {
     }
 
     @Test
-    public void testExpReader() {
+    public void testExpReader() throws Exception {
         byte[] bytes = JieRandom.fill(new byte[64]);
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);
         TestInputStream testIn = new TestInputStream(in);
@@ -162,11 +164,40 @@ public class ByteReaderTest {
             fillBuffer(segmentCopy.data());
             assertNotEquals(segmentCopy.data(), ByteBuffer.wrap(bytesCopy));
         }
+        {
+            // test seg impl
+            ByteReader reader = ByteReader.from(bytes).withReadLimit(5);
+            Method makeTure = reader.getClass().getDeclaredMethod("makeTrue", ByteSegment.class);
+            makeTure.setAccessible(true);
+            TestSeg ts = new TestSeg();
+            assertFalse(ts.end());
+            ByteSegment bs = (ByteSegment) makeTure.invoke(reader, new TestSeg());
+            assertNotSame(ts, bs);
+            assertTrue(bs.end());
+        }
     }
 
     private void fillBuffer(ByteBuffer buffer) {
         while (buffer.hasRemaining()) {
             buffer.put((byte) 6);
+        }
+    }
+
+    private static final class TestSeg implements ByteSegment {
+
+        @Override
+        public ByteBuffer data() {
+            return JieBytes.emptyBuffer();
+        }
+
+        @Override
+        public boolean end() {
+            return false;
+        }
+
+        @Override
+        public ByteSegment clone() {
+            return null;
         }
     }
 }

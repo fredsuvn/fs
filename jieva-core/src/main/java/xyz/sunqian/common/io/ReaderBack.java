@@ -60,19 +60,19 @@ final class ReaderBack {
         }
     }
 
-    private static final class ByteBlock implements ByteSegment {
+    static final class ByteSegmentImpl implements ByteSegment {
 
-        private static final ByteBlock EMPTY_END = new ByteBlock(JieBytes.emptyBuffer(), true);
-        private static final ByteBlock EMPTY_SEG = new ByteBlock(JieBytes.emptyBuffer(), false);
+        private static final ByteSegmentImpl EMPTY_END = new ByteSegmentImpl(JieBytes.emptyBuffer(), true);
+        private static final ByteSegmentImpl EMPTY_SEG = new ByteSegmentImpl(JieBytes.emptyBuffer(), false);
 
-        public static ByteBlock empty(boolean end) {
+        public static ByteSegmentImpl empty(boolean end) {
             return end ? EMPTY_END : EMPTY_SEG;
         }
 
         private final ByteBuffer data;
         private boolean end;
 
-        private ByteBlock(ByteBuffer data, boolean end) {
+        ByteSegmentImpl(ByteBuffer data, boolean end) {
             this.data = data;
             this.end = end;
         }
@@ -96,7 +96,47 @@ final class ReaderBack {
             data.position(pos);
             data.limit(limit);
             copy.flip();
-            return new ByteBlock(copy, end);
+            return new ByteSegmentImpl(copy, end);
+        }
+    }
+
+    static final class CharSegmentImpl implements CharSegment {
+
+        private static final CharSegmentImpl EMPTY_END = new CharSegmentImpl(JieChars.emptyBuffer(), true);
+        private static final CharSegmentImpl EMPTY_SEG = new CharSegmentImpl(JieChars.emptyBuffer(), false);
+
+        public static CharSegmentImpl empty(boolean end) {
+            return end ? EMPTY_END : EMPTY_SEG;
+        }
+
+        private final CharBuffer data;
+        private boolean end;
+
+        CharSegmentImpl(CharBuffer data, boolean end) {
+            this.data = data;
+            this.end = end;
+        }
+
+        @Override
+        public CharBuffer data() {
+            return data;
+        }
+
+        @Override
+        public boolean end() {
+            return end;
+        }
+
+        @Override
+        public CharSegment clone() {
+            CharBuffer copy = CharBuffer.allocate(data.remaining());
+            int pos = data.position();
+            int limit = data.limit();
+            copy.put(data);
+            data.position(pos);
+            data.limit(limit);
+            copy.flip();
+            return CharSegment.of(copy, end);
         }
     }
 
@@ -121,7 +161,7 @@ final class ReaderBack {
 
         private ByteSegment read0(int size, boolean endOnZeroRead) throws Exception {
             if (size == 0) {
-                return ByteBlock.empty(end);
+                return ByteSegment.empty(end);
             }
             int hasRead = 0;
             byte[] buf = new byte[size];
@@ -142,12 +182,12 @@ final class ReaderBack {
                 hasRead += onceSize;
             }
             if (hasRead == 0) {
-                return ByteBlock.empty(true);
+                return ByteSegment.empty(true);
             }
             ByteBuffer data = ByteBuffer.wrap(
                 hasRead == size ? buf : Arrays.copyOfRange(buf, 0, hasRead)
             );
-            return new ByteBlock(data, end);
+            return ByteSegment.of(data, end);
         }
     }
 
@@ -168,20 +208,20 @@ final class ReaderBack {
         public ByteSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
             checkSize(size);
             if (pos == endPos) {
-                return ByteBlock.EMPTY_END;
+                return ByteSegment.empty(true);
             }
             if (size == 0) {
-                return ByteBlock.EMPTY_SEG;
+                return ByteSegment.empty(false);
             }
             int remaining = endPos - pos;
             if (remaining >= size) {
                 ByteBuffer data = ByteBuffer.wrap(source, pos, size).slice();
                 pos += size;
-                return new ByteBlock(data, false);
+                return ByteSegment.of(data, remaining == size);
             }
             ByteBuffer data = ByteBuffer.wrap(source, pos, remaining).slice();
             pos += remaining;
-            return new ByteBlock(data, true);
+            return ByteSegment.of(data, true);
         }
     }
 
@@ -197,10 +237,10 @@ final class ReaderBack {
         public ByteSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
             checkSize(size);
             if (!source.hasRemaining()) {
-                return ByteBlock.EMPTY_END;
+                return ByteSegment.empty(true);
             }
             if (size == 0) {
-                return ByteBlock.EMPTY_SEG;
+                return ByteSegment.empty(false);
             }
             int pos = source.position();
             int limit = source.limit();
@@ -209,7 +249,7 @@ final class ReaderBack {
             ByteBuffer data = source.slice();
             source.position(newPos);
             source.limit(limit);
-            return new ByteBlock(data, newPos >= limit);
+            return ByteSegment.of(data, newPos >= limit);
         }
     }
 
@@ -228,58 +268,26 @@ final class ReaderBack {
         public ByteSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
             checkSize(size);
             if (remaining <= 0) {
-                return ByteBlock.EMPTY_END;
+                return ByteSegment.empty(true);
             }
             if (size == 0) {
-                return ByteBlock.EMPTY_SEG;
+                return ByteSegment.empty(false);
             }
             int readSize = (int) Math.min(size, remaining);
-            ByteBlock block = (ByteBlock) source.read(readSize, endOnZeroRead);
+            ByteSegment seg = source.read(readSize, endOnZeroRead);
             remaining -= readSize;
-            if (remaining <= 0 && !block.end) {
-                block.end = true;
+            if (remaining <= 0 && !seg.end()) {
+                return makeTrue(seg);
             }
-            return block;
-        }
-    }
-
-    private static final class CharBlock implements CharSegment {
-
-        private static final CharBlock EMPTY_END = new CharBlock(JieChars.emptyBuffer(), true);
-        private static final CharBlock EMPTY_SEG = new CharBlock(JieChars.emptyBuffer(), false);
-
-        public static CharBlock empty(boolean end) {
-            return end ? EMPTY_END : EMPTY_SEG;
+            return seg;
         }
 
-        private final CharBuffer data;
-        private boolean end;
-
-        private CharBlock(CharBuffer data, boolean end) {
-            this.data = data;
-            this.end = end;
-        }
-
-        @Override
-        public CharBuffer data() {
-            return data;
-        }
-
-        @Override
-        public boolean end() {
-            return end;
-        }
-
-        @Override
-        public CharSegment clone() {
-            CharBuffer copy = CharBuffer.allocate(data.remaining());
-            int pos = data.position();
-            int limit = data.limit();
-            copy.put(data);
-            data.position(pos);
-            data.limit(limit);
-            copy.flip();
-            return new CharBlock(copy, end);
+        private ByteSegment makeTrue(ByteSegment seg) {
+            if (seg instanceof ByteSegmentImpl) {
+                ((ByteSegmentImpl) seg).end = true;
+                return seg;
+            }
+            return ByteSegment.of(seg.data(), true);
         }
     }
 
@@ -304,7 +312,7 @@ final class ReaderBack {
 
         private CharSegment read0(int size, boolean endOnZeroRead) throws Exception {
             if (size == 0) {
-                return CharBlock.empty(end);
+                return CharSegment.empty(end);
             }
             int hasRead = 0;
             char[] buf = new char[size];
@@ -325,12 +333,12 @@ final class ReaderBack {
                 hasRead += onceSize;
             }
             if (hasRead == 0) {
-                return CharBlock.empty(true);
+                return CharSegment.empty(true);
             }
             CharBuffer data = CharBuffer.wrap(
                 hasRead == size ? buf : Arrays.copyOfRange(buf, 0, hasRead)
             );
-            return new CharBlock(data, end);
+            return CharSegment.of(data, end);
         }
     }
 
@@ -351,20 +359,20 @@ final class ReaderBack {
         public CharSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
             checkSize(size);
             if (pos == endPos) {
-                return CharBlock.EMPTY_END;
+                return CharSegment.empty(true);
             }
             if (size == 0) {
-                return CharBlock.EMPTY_SEG;
+                return CharSegment.empty(false);
             }
             int remaining = endPos - pos;
             if (remaining >= size) {
                 CharBuffer data = CharBuffer.wrap(source, pos, size).slice();
                 pos += size;
-                return new CharBlock(data, false);
+                return CharSegment.of(data, remaining == size);
             }
             CharBuffer data = CharBuffer.wrap(source, pos, remaining).slice();
             pos += remaining;
-            return new CharBlock(data, true);
+            return CharSegment.of(data, true);
         }
     }
 
@@ -385,20 +393,20 @@ final class ReaderBack {
         public CharSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
             checkSize(size);
             if (pos == endPos) {
-                return CharBlock.EMPTY_END;
+                return CharSegment.empty(true);
             }
             if (size == 0) {
-                return CharBlock.EMPTY_SEG;
+                return CharSegment.empty(false);
             }
             int remaining = endPos - pos;
             if (remaining >= size) {
                 CharBuffer data = CharBuffer.wrap(source, pos, pos + size).slice();
                 pos += size;
-                return new CharBlock(data, false);
+                return CharSegment.of(data, false);
             }
             CharBuffer data = CharBuffer.wrap(source, pos, pos + remaining).slice();
             pos += remaining;
-            return new CharBlock(data, true);
+            return CharSegment.of(data, true);
         }
     }
 
@@ -414,10 +422,10 @@ final class ReaderBack {
         public CharSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
             checkSize(size);
             if (!source.hasRemaining()) {
-                return CharBlock.EMPTY_END;
+                return CharSegment.empty(true);
             }
             if (size == 0) {
-                return CharBlock.EMPTY_SEG;
+                return CharSegment.empty(false);
             }
             int pos = source.position();
             int limit = source.limit();
@@ -426,7 +434,7 @@ final class ReaderBack {
             CharBuffer data = source.slice();
             source.position(newPos);
             source.limit(limit);
-            return new CharBlock(data, newPos >= limit);
+            return CharSegment.of(data, newPos >= limit);
         }
     }
 
@@ -445,18 +453,26 @@ final class ReaderBack {
         public CharSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
             checkSize(size);
             if (remaining <= 0) {
-                return CharBlock.EMPTY_END;
+                return CharSegment.empty(true);
             }
             if (size == 0) {
-                return CharBlock.EMPTY_SEG;
+                return CharSegment.empty(false);
             }
             int readSize = (int) Math.min(size, remaining);
-            CharBlock block = (CharBlock) source.read(readSize, endOnZeroRead);
+            CharSegment seg = source.read(readSize, endOnZeroRead);
             remaining -= readSize;
-            if (remaining <= 0 && !block.end) {
-                block.end = true;
+            if (remaining <= 0 && !seg.end()) {
+                return makeTrue(seg);
             }
-            return block;
+            return seg;
+        }
+
+        private CharSegment makeTrue(CharSegment seg) {
+            if (seg instanceof CharSegmentImpl) {
+                ((CharSegmentImpl) seg).end = true;
+                return seg;
+            }
+            return CharSegment.of(seg.data(), true);
         }
     }
 }

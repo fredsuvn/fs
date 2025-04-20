@@ -12,6 +12,28 @@ import java.nio.ByteBuffer;
 public interface ByteSegment {
 
     /**
+     * Returns a new {@link ByteSegment} with the given data and end flag.
+     *
+     * @param data the given data
+     * @param end  the given end flag
+     * @return a new {@link ByteSegment} with the given data and end flag
+     */
+    static ByteSegment of(ByteBuffer data, boolean end) {
+        return new ReaderBack.ByteSegmentImpl(data, end);
+    }
+
+    /**
+     * Returns an empty {@link ByteSegment} with the given end flag. This method returns the same instance for each
+     * flag.
+     *
+     * @param end the given end flag
+     * @return an empty {@link ByteSegment} with the given end flag
+     */
+    static ByteSegment empty(boolean end) {
+        return ReaderBack.ByteSegmentImpl.empty(end);
+    }
+
+    /**
      * Returns the data content of this segment. This method never return null, but can return an empty buffer.
      *
      * @return the data content of this segment

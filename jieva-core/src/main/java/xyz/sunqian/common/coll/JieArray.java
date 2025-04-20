@@ -5,7 +5,11 @@ import xyz.sunqian.common.base.Jie;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
-import java.util.*;
+import java.util.AbstractList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.RandomAccess;
 import java.util.function.Function;
 
 /**
@@ -193,6 +197,51 @@ public class JieArray {
      */
     public static boolean isNotEmpty(@Nullable double[] array) {
         return !isEmpty(array);
+    }
+
+    public static boolean[] fill(boolean[] array, boolean value) {
+        Arrays.fill(array, value);
+        return array;
+    }
+
+    public static byte[] fill(byte[] array, byte value) {
+        Arrays.fill(array, value);
+        return array;
+    }
+
+    public static char[] fill(char[] array, char value) {
+        Arrays.fill(array, value);
+        return array;
+    }
+
+    public static short[] fill(short[] array, short value) {
+        Arrays.fill(array, value);
+        return array;
+    }
+
+    public static int[] fill(int[] array, int value) {
+        Arrays.fill(array, value);
+        return array;
+    }
+
+    public static long[] fill(long[] array, long value) {
+        Arrays.fill(array, value);
+        return array;
+    }
+
+    public static float[] fill(float[] array, float value) {
+        Arrays.fill(array, value);
+        return array;
+    }
+
+    public static double[] fill(double[] array, double value) {
+        Arrays.fill(array, value);
+        return array;
+    }
+
+    public static <T> T[] fill(T[] array, T value) {
+        Arrays.fill(array, value);
+        return array;
     }
 
     /**

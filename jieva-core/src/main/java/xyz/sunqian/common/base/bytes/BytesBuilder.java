@@ -260,7 +260,7 @@ public class BytesBuilder extends OutputStream {
     }
 
     /**
-     * Appends all bytes from the given buffer.
+     * Reads and appends all bytes from the given buffer.
      *
      * @param bytes the given buffer
      * @return this builder
@@ -280,7 +280,7 @@ public class BytesBuilder extends OutputStream {
     }
 
     /**
-     * Appends all bytes from the given stream.
+     * Reads and appends all bytes from the given stream.
      *
      * @param in the given stream
      * @return this builder
@@ -291,7 +291,7 @@ public class BytesBuilder extends OutputStream {
     }
 
     /**
-     * Appends all bytes from the given stream with the specified buffer size for each reading.
+     * Reads and appends all bytes from the given stream with the specified buffer size for each reading.
      *
      * @param in         the given stream
      * @param bufferSize the specified buffer size for each reading

@@ -159,9 +159,9 @@ public interface CharProcessor {
      * <p>
      * The passed input data, which is the first argument of the {@link CharEncoder#encode(CharBuffer, boolean)},
      * depends on the encoder's upstream. If the upstream is the data source of this processor (i.e., it is the first
-     * encoder), the data's size is determined by the {@link #readBlockSize(int)} method, and the data can be writeable
-     * if the source is an array or writeable buffer. Otherwise, the data is the result of the previous encoder, and its
-     * abilities is defined by the previous encoder.
+     * encoder), the data's position is 0, limit equals to capacity, size is determined by the
+     * {@link #readBlockSize(int)} method, and the data can be writeable if the source is an array or writeable buffer.
+     * Otherwise, the data is the result of the previous encoder, and its abilities is defined by the previous encoder.
      * <p>
      * This is an optional setting method. There are also more specific encoder wrappers available, such as:
      * <ul>

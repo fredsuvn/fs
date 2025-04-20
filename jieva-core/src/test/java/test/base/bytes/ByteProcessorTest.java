@@ -4,12 +4,12 @@ import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.JieMath;
 import xyz.sunqian.common.base.JieRandom;
-import xyz.sunqian.common.base.bytes.ByteEncoder;
 import xyz.sunqian.common.base.bytes.ByteProcessor;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.bytes.JieBytes;
 import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.base.exception.ProcessingException;
+import xyz.sunqian.common.coll.JieArray;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieBuffer;
 import xyz.sunqian.common.io.JieIO;
@@ -269,142 +269,70 @@ public class ByteProcessorTest {
 
     private void testEncoder(int totalSize, int blockSize) {
         {
-            // simple
-            byte[] src = JieRandom.fill(new byte[totalSize]);
-            int portion = JieMath.leastPortion(totalSize, blockSize);
-            BytesBuilder bb = new BytesBuilder();
-            int start = 0;
-            for (int i = 0; i < portion; i++) {
-                int end = Math.min(start + blockSize, totalSize);
-                bb.append(Arrays.copyOfRange(src, start, end));
-                bb.append(Arrays.copyOfRange(src, start, end));
-                bb.append(Arrays.copyOfRange(src, start, end));
-                bb.append(Arrays.copyOfRange(src, start, end));
-                start += blockSize;
-            }
-            byte[] expectDst = bb.toByteArray();
-            bb.reset();
-            ByteEncoder encoder = (data, end) -> {
-                byte[] bytes = JieBuffer.read(data);
-                byte[] ret = new byte[bytes.length * 2];
-                System.arraycopy(bytes, 0, ret, 0, bytes.length);
-                System.arraycopy(bytes, 0, ret, bytes.length, bytes.length);
-                return ByteBuffer.wrap(ret);
-            };
-            long count = ByteProcessor.from(src).readBlockSize(blockSize).encoder(encoder).encoder(encoder).writeTo(bb);
-            assertEquals(count, totalSize);
-            assertEquals(bb.toByteArray(), expectDst);
+            // from byte array
+            byte[] src = JieArray.fill(new byte[totalSize], (byte) 6);
+            BytesBuilder dst = new BytesBuilder();
+            ByteProcessor.from(src).readBlockSize(blockSize).encoder((d, e) -> {
+                BytesBuilder dst0 = new BytesBuilder();
+                while (d.hasRemaining()) {
+                    byte b = d.get();
+                    dst0.append(b);
+                    dst0.append(b);
+                }
+                d.flip();
+                while (d.hasRemaining()) {
+                    d.put((byte) 9);
+                }
+                return dst0.toByteBuffer();
+            }).writeTo(dst);
+            assertEquals(dst.toByteArray(), JieArray.fill(new byte[totalSize * 2], (byte) 6));
+            assertEquals(src, JieArray.fill(new byte[totalSize], (byte) 9));
         }
         {
-            // complex
-            byte[] src = JieRandom.fill(new byte[totalSize]);
-            BytesBuilder bb = new BytesBuilder();
-            for (int i = 0, j = 0; i < src.length; i++) {
-                if (j == 2) {
-                    j = 0;
-                    continue;
+            // from byte buffer
+            byte[] srcBytes = JieArray.fill(new byte[totalSize], (byte) 6);
+            ByteBuffer src = ByteBuffer.allocateDirect(srcBytes.length);
+            src.put(srcBytes);
+            src.flip();
+            BytesBuilder dst = new BytesBuilder();
+            ByteProcessor.from(src).readBlockSize(blockSize).encoder((d, e) -> {
+                BytesBuilder dst0 = new BytesBuilder();
+                while (d.hasRemaining()) {
+                    byte b = d.get();
+                    dst0.append(b);
+                    dst0.append(b);
                 }
-                bb.append(src[i]);
-                j++;
-            }
-            byte[] proc = bb.toByteArray();
-            bb.reset();
-            for (int i = 0, j = 0; i < proc.length; i++) {
-                bb.append(proc[i]);
-                if (j == 9) {
-                    j = 0;
-                    bb.append((byte) '\r');
-                } else {
-                    j++;
+                d.flip();
+                while (d.hasRemaining()) {
+                    d.put((byte) 9);
                 }
-            }
-            proc = bb.toByteArray();
-            bb.reset();
-            boolean[] buffer = {true};
-            long count = ByteProcessor.from(src).readBlockSize(blockSize)
-                .encoder(withRounding(3, (data, end) -> {
-                    BytesBuilder ret = new BytesBuilder();
-                    int j = 0;
-                    while (data.hasRemaining()) {
-                        byte b = data.get();
-                        if (j == 2) {
-                            j = 0;
-                            continue;
-                        }
-                        ret.append(b);
-                        j++;
-                    }
-                    return ret.toByteBuffer();
-                }))
-                .encoder(withBuffering((data, end) -> {
-                    if (end) {
-                        return data;
-                    }
-                    ByteBuffer ret;
-                    if (buffer[0]) {
-                        ret = JieBytes.emptyBuffer();
-                    } else {
-                        ret = data;
-                    }
-                    buffer[0] = !buffer[0];
-                    return ret;
-                }))
-                .encoder(10, (data, end) -> {
-                    if (data.remaining() == 10) {
-                        byte[] ret = new byte[11];
-                        data.get(ret, 0, 10);
-                        ret[10] = '\r';
-                        return ByteBuffer.wrap(ret);
-                    } else {
-                        return data;
-                    }
-                })
-                .writeTo(bb);
-            assertEquals(count, totalSize);
-            assertEquals(bb.toByteArray(), proc);
+                return dst0.toByteBuffer();
+            }).writeTo(dst);
+            assertEquals(dst.toByteArray(), JieArray.fill(new byte[totalSize * 2], (byte) 6));
+            src.flip();
+            assertEquals(JieBuffer.read(src), JieArray.fill(new byte[totalSize], (byte) 9));
         }
         {
-            // null
-            byte[] src = JieRandom.fill(new byte[totalSize]);
-            byte[] dst = new byte[src.length];
-            int[] pos = {0};
-            BytesBuilder dst0 = new BytesBuilder();
-            long c = ByteProcessor.from(src)
-                .encoder((data, end) -> {
-                    int len = data.remaining();
-                    data.get(dst, pos[0], len);
-                    pos[0] += len;
-                    return null;
-                }).encoder((data, end) -> data)
-                .writeTo(dst0);
-            assertEquals(c, totalSize);
-            assertEquals(dst, src);
-            assertEquals(dst0.size(), 0);
-            byte[] dst1 = new byte[src.length];
-            boolean[] buffer = {true};
-            c = ByteProcessor.from(src)
-                .encoder(withBuffering((data, end) -> {
-                    boolean b = buffer[0];
-                    buffer[0] = !b;
-                    return b ? data : null;
-                }))
-                .encoder((data, end) -> data)
-                .writeTo(dst1);
-            assertEquals(c, totalSize);
-            assertEquals(dst1, src);
-            byte[] dst2 = new byte[src.length];
-            boolean[] hit = {false};
-            c = ByteProcessor.from(src)
-                .encoder((data, end) -> null)
-                .encoder((data, end) -> {
-                    hit[0] = true;
-                    return data;
-                })
-                .writeTo(dst0);
-            assertEquals(c, totalSize);
-            assertEquals(dst2, new byte[src.length]);
-            assertEquals(dst0.size(), 0);
-            assertFalse(hit[0]);
+            // from stream
+            byte[] srcBytes = JieArray.fill(new byte[totalSize], (byte) 6);
+            ByteArrayInputStream src = new ByteArrayInputStream(srcBytes);
+            BytesBuilder dst = new BytesBuilder();
+            ByteProcessor.from(src).readBlockSize(blockSize).encoder((d, e) -> {
+                BytesBuilder dst0 = new BytesBuilder();
+                while (d.hasRemaining()) {
+                    byte b = d.get();
+                    dst0.append(b);
+                    dst0.append(b);
+                }
+                d.flip();
+                while (d.hasRemaining()) {
+                    d.put((byte) 9);
+                }
+                return dst0.toByteBuffer();
+            }).writeTo(dst);
+            assertEquals(dst.toByteArray(), JieArray.fill(new byte[totalSize * 2], (byte) 6));
+            src.reset();
+            assertEquals(JieIO.read(src), JieArray.fill(new byte[totalSize], (byte) 6));
         }
     }
 

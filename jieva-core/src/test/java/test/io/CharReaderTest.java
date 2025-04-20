@@ -11,13 +11,14 @@ import xyz.sunqian.test.ReadOps;
 import xyz.sunqian.test.TestReader;
 
 import java.io.CharArrayReader;
-import java.io.IOException;
+import java.lang.reflect.Method;
 import java.nio.CharBuffer;
 import java.util.Arrays;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertNotSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
@@ -147,7 +148,7 @@ public class CharReaderTest {
     }
 
     @Test
-    public void testExpReader() throws IOException {
+    public void testExpReader() throws Exception {
         char[] chars = JieRandom.fill(new char[64]);
         CharArrayReader in = new CharArrayReader(chars);
         TestReader testIn = new TestReader(in);
@@ -188,11 +189,40 @@ public class CharReaderTest {
             fillBuffer(segmentCopy.data());
             assertNotEquals(segmentCopy.data(), CharBuffer.wrap(charsCopy));
         }
+        {
+            // test seg impl
+            CharReader reader = CharReader.from(chars).withReadLimit(5);
+            Method makeTure = reader.getClass().getDeclaredMethod("makeTrue", CharSegment.class);
+            makeTure.setAccessible(true);
+            TestSeg ts = new TestSeg();
+            assertFalse(ts.end());
+            CharSegment bs = (CharSegment) makeTure.invoke(reader, new TestSeg());
+            assertNotSame(ts, bs);
+            assertTrue(bs.end());
+        }
     }
 
     private void fillBuffer(CharBuffer buffer) {
         while (buffer.hasRemaining()) {
             buffer.put((char) 6);
+        }
+    }
+
+    private static final class TestSeg implements CharSegment {
+
+        @Override
+        public CharBuffer data() {
+            return JieChars.emptyBuffer();
+        }
+
+        @Override
+        public boolean end() {
+            return false;
+        }
+
+        @Override
+        public CharSegment clone() {
+            return null;
         }
     }
 }
