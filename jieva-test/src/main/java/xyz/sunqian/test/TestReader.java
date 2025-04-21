@@ -5,7 +5,7 @@ import java.io.Reader;
 import java.util.Objects;
 
 /**
- * This is a testing reader. It wraps a normal reader, then provides the {@link #setNextReadOption(ReadOps)} to set
+ * This is a testing reader. It wraps a normal reader, then provides the {@link #setNextOperation(ReadOps)} to set
  * behavior for next read operation.
  *
  * @author sunqian
@@ -14,6 +14,8 @@ public class TestReader extends Reader {
 
     private final Reader in;
     private ReadOps readOps = ReadOps.READ_NORMAL;
+    private int times = 0;
+    private Boolean markSupported = null;
 
     /**
      * Constructs with the specified wrapped reader.
@@ -25,21 +27,28 @@ public class TestReader extends Reader {
     }
 
     /**
-     * Sets the behavior for next read operation, including:
-     * <ul>
-     *     <li>{@link ReadOps#READ_NORMAL}</li>
-     *     <li>{@link ReadOps#READ_ZERO}</li>
-     *     <li>{@link ReadOps#REACH_END}</li>
-     *     <li>{@link ReadOps#THROW}</li>
-     * </ul>
-     * The read operation includes read, skip, and available methods.
-     * <p>
-     * For the {@link #read()} method, {@link ReadOps#READ_ZERO} and {@link ReadOps#REACH_END} have the same effect.
+     * Sets the behavior for the next I/O operation. This method is equivalent to:
+     * <pre>{@code
+     *     setNextOperations(readOps, 1);
+     * }</pre>
      *
-     * @param readOps the behavior for next read operation
+     * @param readOps the behavior for the next I/O operation
+     * @see #setNextOperations(ReadOps, int)
      */
-    public void setNextReadOption(ReadOps readOps) {
+    public void setNextOperation(ReadOps readOps) {
+        setNextOperations(readOps, 1);
+    }
+
+    /**
+     * Set the behaviors for the next specified number of I/O operations. After executing the specified number of times,
+     * the behaviors will be reset to normal.
+     *
+     * @param readOps the behaviors for the next specified number of I/O operations
+     * @param times   the number of I/O operations
+     */
+    public void setNextOperations(ReadOps readOps, int times) {
         this.readOps = readOps;
+        this.times = times;
     }
 
     @Override
@@ -49,11 +58,11 @@ public class TestReader extends Reader {
                 return in.read();
             case READ_ZERO:
             case REACH_END: {
-                readOps = ReadOps.READ_NORMAL;
+                reduceTimes();
                 return -1;
             }
             default: {
-                readOps = ReadOps.READ_NORMAL;
+                reduceTimes();
                 throw new IOException();
             }
         }
@@ -70,15 +79,15 @@ public class TestReader extends Reader {
             case READ_NORMAL:
                 return in.read(b, off, len);
             case READ_ZERO: {
-                readOps = ReadOps.READ_NORMAL;
+                reduceTimes();
                 return 0;
             }
             case REACH_END: {
-                readOps = ReadOps.READ_NORMAL;
+                reduceTimes();
                 return -1;
             }
             default: {
-                readOps = ReadOps.READ_NORMAL;
+                reduceTimes();
                 throw new IOException();
             }
         }
@@ -91,25 +100,38 @@ public class TestReader extends Reader {
                 return in.skip(n);
             case READ_ZERO:
             case REACH_END: {
-                readOps = ReadOps.READ_NORMAL;
+                reduceTimes();
                 return 0;
             }
             default: {
-                readOps = ReadOps.READ_NORMAL;
+                reduceTimes();
                 throw new IOException();
             }
         }
     }
 
+    /**
+     * Sets the mark-supported for this {@link Reader}. If the {@code markSupported} is null, this {@link Reader} will
+     * directly use the mark-supported flag of wrapped source.
+     *
+     * @param markSupported the mark-supported flag, can be null
+     */
+    public void markSupported(Boolean markSupported) {
+        this.markSupported = markSupported;
+    }
+
     @Override
     public boolean markSupported() {
-        return in.markSupported();
+        if (markSupported == null) {
+            return in.markSupported();
+        }
+        return markSupported;
     }
 
     @Override
     public synchronized void mark(int readlimit) throws IOException {
         if (Objects.equals(readOps, ReadOps.THROW)) {
-            readOps = ReadOps.READ_NORMAL;
+            reduceTimes();
             throw new IOException();
         } else {
             in.mark(readlimit);
@@ -119,7 +141,7 @@ public class TestReader extends Reader {
     @Override
     public synchronized void reset() throws IOException {
         if (Objects.equals(readOps, ReadOps.THROW)) {
-            readOps = ReadOps.READ_NORMAL;
+            reduceTimes();
             throw new IOException();
         } else {
             in.reset();
@@ -129,10 +151,18 @@ public class TestReader extends Reader {
     @Override
     public void close() throws IOException {
         if (Objects.equals(readOps, ReadOps.THROW)) {
-            readOps = ReadOps.READ_NORMAL;
+            reduceTimes();
             throw new IOException();
         } else {
             in.close();
+        }
+    }
+
+    private void reduceTimes() {
+        times--;
+        if (times <= 0) {
+            times = 0;
+            readOps = ReadOps.READ_NORMAL;
         }
     }
 }

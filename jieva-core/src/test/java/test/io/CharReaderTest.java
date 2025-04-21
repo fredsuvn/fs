@@ -61,6 +61,7 @@ public class CharReaderTest {
             // char array
             char[] data = JieRandom.fill(new char[dataSize]);
             CharReader reader = CharReader.from(data);
+            reader.close();
             testRead0(reader, dataSize, true);
             testReader(reader, data, 0, dataSize, bufferSize, true);
             testSkip(
@@ -69,6 +70,7 @@ public class CharReaderTest {
             );
             char[] limitedData = JieRandom.fill(new char[dataSize + 5]);
             CharReader limitedReader = CharReader.from(limitedData).withReadLimit(dataSize);
+            limitedReader.close();
             testRead0(limitedReader, dataSize, true);
             testReader(limitedReader, limitedData, 0, dataSize, bufferSize, true);
             testSkip(
@@ -81,6 +83,7 @@ public class CharReaderTest {
             if (dataSize >= 3) {
                 char[] data = JieRandom.fill(new char[dataSize]);
                 CharReader reader = CharReader.from(data, 1, dataSize - 2);
+                reader.close();
                 testRead0(reader, dataSize - 2, true);
                 testReader(reader, data, 1, dataSize - 2, bufferSize, true);
                 testSkip(
@@ -90,6 +93,7 @@ public class CharReaderTest {
                 char[] limitedData = JieRandom.fill(new char[dataSize + 5]);
                 CharReader limitedReader = CharReader.from(limitedData, 1, dataSize - 2)
                     .withReadLimit(dataSize);
+                limitedReader.close();
                 testRead0(limitedReader, dataSize, true);
                 testReader(limitedReader, limitedData, 1, dataSize - 2, bufferSize, true);
                 testSkip(
@@ -102,6 +106,7 @@ public class CharReaderTest {
             // char buffer
             char[] data = JieRandom.fill(new char[dataSize]);
             CharReader reader = CharReader.from(CharBuffer.wrap(data));
+            reader.close();
             testRead0(reader, dataSize, true);
             testReader(reader, data, 0, dataSize, bufferSize, true);
             testSkip(
@@ -110,6 +115,7 @@ public class CharReaderTest {
             );
             char[] limitedData = JieRandom.fill(new char[dataSize + 5]);
             CharReader limitedReader = CharReader.from(CharBuffer.wrap(limitedData)).withReadLimit(dataSize);
+            limitedReader.close();
             testRead0(limitedReader, dataSize, true);
             testReader(limitedReader, limitedData, 0, dataSize, bufferSize, true);
             testSkip(
@@ -121,6 +127,7 @@ public class CharReaderTest {
             // char sequence
             char[] data = JieRandom.fill(new char[dataSize]);
             CharReader reader = CharReader.from(new String(data));
+            reader.close();
             testRead0(reader, dataSize, true);
             testReader(reader, data, 0, dataSize, bufferSize, false);
             testSkip(
@@ -129,6 +136,7 @@ public class CharReaderTest {
             );
             char[] limitedData = JieRandom.fill(new char[dataSize + 5]);
             CharReader limitedReader = CharReader.from(new String(limitedData)).withReadLimit(dataSize);
+            limitedReader.close();
             testRead0(limitedReader, dataSize, true);
             testReader(limitedReader, limitedData, 0, dataSize, bufferSize, false);
             testSkip(
@@ -141,6 +149,7 @@ public class CharReaderTest {
             if (dataSize >= 3) {
                 char[] data = JieRandom.fill(new char[dataSize]);
                 CharReader reader = CharReader.from(new String(data), 1, dataSize - 1);
+                reader.close();
                 testRead0(reader, dataSize - 2, true);
                 testReader(reader, data, 1, dataSize - 2, bufferSize, false);
                 testSkip(
@@ -150,6 +159,7 @@ public class CharReaderTest {
                 char[] limitedData = JieRandom.fill(new char[dataSize + 5]);
                 CharReader limitedReader = CharReader.from(new String(limitedData), 1, dataSize - 1)
                     .withReadLimit(dataSize);
+                limitedReader.close();
                 testRead0(limitedReader, dataSize, true);
                 testReader(limitedReader, limitedData, 1, dataSize - 2, bufferSize, false);
                 testSkip(
@@ -162,6 +172,9 @@ public class CharReaderTest {
 
     private void testReader(CharReader reader, char[] chars, int offset, int length, int readSize, boolean shared) {
         if (reader.markSupported()) {
+            reader.mark();
+            assertEquals(reader.skip(length + 100), length);
+            reader.reset();
             reader.mark();
         }
         testReader0(reader, chars, offset, length, readSize, shared);
@@ -215,32 +228,46 @@ public class CharReaderTest {
     }
 
     @Test
-    public void testExpReader() throws Exception {
+    public void testSpecial() throws Exception {
         char[] chars = JieRandom.fill(new char[64]);
         CharArrayReader in = new CharArrayReader(chars);
         TestReader testIn = new TestReader(in);
         {
             // NIO tests
             CharReader reader = CharReader.from(testIn);
-            testIn.setNextReadOption(ReadOps.READ_ZERO);
+            testIn.setNextOperation(ReadOps.READ_ZERO);
             CharSegment s0 = reader.read(chars.length, true);
             assertEquals(s0.data(), JieChars.emptyBuffer());
             assertTrue(s0.end());
             in.reset();
             CharReader reader2 = CharReader.from(testIn);
-            testIn.setNextReadOption(ReadOps.READ_ZERO);
+            testIn.setNextOperation(ReadOps.READ_ZERO);
             CharSegment s2 = reader2.read(chars.length);
             assertEquals(s2.data(), CharBuffer.wrap(chars));
             assertFalse(s2.end());
+            testIn.setNextOperation(ReadOps.READ_ZERO);
+            assertEquals(reader.skip(66, true), 0);
+            TestReader testIn2 = new TestReader(new CharArrayReader(new char[2]));
+            testIn2.setNextOperation(ReadOps.READ_ZERO);
+            assertEquals(CharReader.from(testIn2).skip(66), 2);
         }
         {
             // Exception tests
             CharReader reader = CharReader.from(testIn);
             in.reset();
-            testIn.setNextReadOption(ReadOps.THROW);
+            testIn.setNextOperation(ReadOps.THROW);
             expectThrows(IORuntimeException.class, () -> reader.read(66));
             expectThrows(IllegalArgumentException.class, () -> reader.read(-66));
             expectThrows(IllegalArgumentException.class, () -> reader.withReadLimit(-66));
+            expectThrows(IllegalArgumentException.class, () -> reader.skip(-66));
+            testIn.setNextOperation(ReadOps.THROW);
+            expectThrows(IORuntimeException.class, () -> reader.skip(66));
+            testIn.setNextOperation(ReadOps.THROW);
+            expectThrows(IORuntimeException.class, reader::mark);
+            testIn.setNextOperation(ReadOps.THROW);
+            expectThrows(IORuntimeException.class, reader::reset);
+            testIn.setNextOperation(ReadOps.THROW);
+            expectThrows(IORuntimeException.class, reader::close);
         }
         {
             // for segment
@@ -266,6 +293,16 @@ public class CharReaderTest {
             CharSegment bs = (CharSegment) makeTure.invoke(reader, new TestSeg());
             assertNotSame(ts, bs);
             assertTrue(bs.end());
+        }
+        {
+            // special mark/reset
+            TestReader tin = new TestReader(new CharArrayReader(new char[2]));
+            CharReader reader = CharReader.from(tin).withReadLimit(1);
+            assertTrue(reader.markSupported());
+            tin.markSupported(false);
+            assertFalse(reader.markSupported());
+            reader.mark();
+            reader.reset();
         }
     }
 

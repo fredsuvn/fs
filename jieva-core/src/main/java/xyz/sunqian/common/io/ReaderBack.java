@@ -182,7 +182,11 @@ final class ReaderBack {
 
         @Override
         public void mark() throws IORuntimeException {
-            source.mark(0);
+            try {
+                source.mark(Integer.MAX_VALUE);
+            } catch (Exception e) {
+                throw new IORuntimeException(e);
+            }
         }
 
         @Override
@@ -245,8 +249,12 @@ final class ReaderBack {
                 if (onceSize == 0) {
                     if (endOnZeroRead) {
                         break;
+                    }
+                    // tests whether reaches the end
+                    if (source.read() == -1) {
+                        break;
                     } else {
-                        continue;
+                        hasRead++;
                     }
                 }
                 hasRead += onceSize;
@@ -299,12 +307,9 @@ final class ReaderBack {
                 return 0;
             }
             int remaining = endPos - pos;
-            if (remaining >= size) {
-                pos += (int) size;
-                return size;
-            }
-            pos += remaining;
-            return remaining;
+            int skipped = (int) Math.min(remaining, size);
+            pos += skipped;
+            return skipped;
         }
 
         @Override
@@ -428,7 +433,7 @@ final class ReaderBack {
             if (size == 0) {
                 return 0;
             }
-            int readSize = (int) Math.min(size, remaining);
+            long readSize = Math.min(size, remaining);
             long skipped = source.skip(readSize, endOnZeroRead);
             remaining -= skipped;
             return skipped;
@@ -445,6 +450,7 @@ final class ReaderBack {
                 source.mark();
                 mark = remaining;
             }
+
         }
 
         @Override
@@ -571,8 +577,12 @@ final class ReaderBack {
                 if (onceSize == 0) {
                     if (endOnZeroRead) {
                         break;
+                    }
+                    // tests whether reaches the end
+                    if (source.read() == -1) {
+                        break;
                     } else {
-                        continue;
+                        hasRead++;
                     }
                 }
                 hasRead += onceSize;
@@ -625,12 +635,9 @@ final class ReaderBack {
                 return 0;
             }
             int remaining = endPos - pos;
-            if (remaining >= size) {
-                pos += (int) size;
-                return size;
-            }
-            pos += remaining;
-            return remaining;
+            int skipped = (int) Math.min(remaining, size);
+            pos += skipped;
+            return skipped;
         }
 
         @Override
@@ -697,12 +704,9 @@ final class ReaderBack {
                 return 0;
             }
             int remaining = endPos - pos;
-            if (remaining >= size) {
-                pos += (int) size;
-                return size;
-            }
-            pos += remaining;
-            return remaining;
+            int skipped = (int) Math.min(remaining, size);
+            pos += skipped;
+            return skipped;
         }
 
         @Override
@@ -826,7 +830,7 @@ final class ReaderBack {
             if (size == 0) {
                 return 0;
             }
-            int readSize = (int) Math.min(size, remaining);
+            long readSize = Math.min(size, remaining);
             long skipped = source.skip(readSize, endOnZeroRead);
             remaining -= skipped;
             return skipped;

@@ -12,7 +12,9 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
 public class SpecialReaderTest {
@@ -31,12 +33,24 @@ public class SpecialReaderTest {
         test.mark(0);
         test.reset();
         test.close();
-        test.setNextReadOption(ReadOps.THROW);
+        test.setNextOperation(ReadOps.THROW);
         expectThrows(TestIOException.class, () -> test.mark(0));
-        test.setNextReadOption(ReadOps.THROW);
+        test.setNextOperation(ReadOps.THROW);
         expectThrows(IOException.class, test::reset);
-        test.setNextReadOption(ReadOps.THROW);
+        test.setNextOperations(ReadOps.THROW, 2);
         expectThrows(IOException.class, test::close);
+        expectThrows(IOException.class, test::close);
+        test.close();
+        test.setNextOperations(ReadOps.THROW, 2);
+        test.setNextOperation(ReadOps.READ_NORMAL);
+        test.close();
+        boolean ms = test.markSupported();
+        test.markSupported(false);
+        assertFalse(test.markSupported());
+        test.markSupported(true);
+        assertTrue(test.markSupported());
+        test.markSupported(null);
+        assertEquals(ms, test.markSupported());
     }
 
     public void testReadBytes() throws Exception {
@@ -49,25 +63,25 @@ public class SpecialReaderTest {
         in.reset();
         Arrays.fill(dest, (byte) 9);
 
-        test.setNextReadOption(ReadOps.READ_NORMAL);
+        test.setNextOperation(ReadOps.READ_NORMAL);
         test.read(dest);
         assertEquals(dest, bytes);
         in.reset();
         Arrays.fill(dest, (byte) 9);
 
-        test.setNextReadOption(ReadOps.READ_ZERO);
+        test.setNextOperation(ReadOps.READ_ZERO);
         assertEquals(test.read(dest), 0);
         assertNotEquals(dest, bytes);
         in.reset();
         Arrays.fill(dest, (byte) 9);
 
-        test.setNextReadOption(ReadOps.REACH_END);
+        test.setNextOperation(ReadOps.REACH_END);
         assertEquals(test.read(dest), -1);
         assertNotEquals(dest, bytes);
         in.reset();
         Arrays.fill(dest, (byte) 9);
 
-        test.setNextReadOption(ReadOps.THROW);
+        test.setNextOperation(ReadOps.THROW);
         expectThrows(IOException.class, () -> test.read(dest));
         in.reset();
         Arrays.fill(dest, (byte) 9);
@@ -80,20 +94,20 @@ public class SpecialReaderTest {
         assertEquals(test.read(), 1);
         in.reset();
 
-        test.setNextReadOption(ReadOps.READ_NORMAL);
+        test.setNextOperation(ReadOps.READ_NORMAL);
         ;
         assertEquals(test.read(), 1);
         in.reset();
 
-        test.setNextReadOption(ReadOps.READ_ZERO);
+        test.setNextOperation(ReadOps.READ_ZERO);
         assertEquals(test.read(), -1);
         in.reset();
 
-        test.setNextReadOption(ReadOps.REACH_END);
+        test.setNextOperation(ReadOps.REACH_END);
         assertEquals(test.read(), -1);
         in.reset();
 
-        test.setNextReadOption(ReadOps.THROW);
+        test.setNextOperation(ReadOps.THROW);
         expectThrows(IOException.class, () -> test.read());
         in.reset();
     }
@@ -105,20 +119,20 @@ public class SpecialReaderTest {
         assertEquals(test.skip(6), 6);
         in.reset();
 
-        test.setNextReadOption(ReadOps.READ_NORMAL);
+        test.setNextOperation(ReadOps.READ_NORMAL);
         ;
         assertEquals(test.skip(6), 6);
         in.reset();
 
-        test.setNextReadOption(ReadOps.READ_ZERO);
+        test.setNextOperation(ReadOps.READ_ZERO);
         assertEquals(test.skip(6), 0);
         in.reset();
 
-        test.setNextReadOption(ReadOps.REACH_END);
+        test.setNextOperation(ReadOps.REACH_END);
         assertEquals(test.skip(6), 0);
         in.reset();
 
-        test.setNextReadOption(ReadOps.THROW);
+        test.setNextOperation(ReadOps.THROW);
         expectThrows(IOException.class, () -> test.skip(6));
         in.reset();
     }
@@ -130,19 +144,19 @@ public class SpecialReaderTest {
         assertEquals(test.available(), 6);
         in.reset();
 
-        test.setNextReadOption(ReadOps.READ_NORMAL);
+        test.setNextOperation(ReadOps.READ_NORMAL);
         assertEquals(test.available(), 6);
         in.reset();
 
-        test.setNextReadOption(ReadOps.READ_ZERO);
+        test.setNextOperation(ReadOps.READ_ZERO);
         assertEquals(test.available(), 0);
         in.reset();
 
-        test.setNextReadOption(ReadOps.REACH_END);
+        test.setNextOperation(ReadOps.REACH_END);
         assertEquals(test.available(), 0);
         in.reset();
 
-        test.setNextReadOption(ReadOps.THROW);
+        test.setNextOperation(ReadOps.THROW);
         expectThrows(IOException.class, () -> test.available());
         in.reset();
     }
@@ -161,12 +175,24 @@ public class SpecialReaderTest {
         test.mark(0);
         test.reset();
         test.close();
-        test.setNextReadOption(ReadOps.THROW);
+        test.setNextOperation(ReadOps.THROW);
         expectThrows(IOException.class, () -> test.mark(0));
-        test.setNextReadOption(ReadOps.THROW);
+        test.setNextOperation(ReadOps.THROW);
         expectThrows(IOException.class, test::reset);
-        test.setNextReadOption(ReadOps.THROW);
+        test.setNextOperations(ReadOps.THROW, 2);
         expectThrows(IOException.class, test::close);
+        expectThrows(IOException.class, test::close);
+        test.close();
+        test.setNextOperations(ReadOps.THROW, 2);
+        test.setNextOperation(ReadOps.READ_NORMAL);
+        test.close();
+        boolean ms = test.markSupported();
+        test.markSupported(false);
+        assertFalse(test.markSupported());
+        test.markSupported(true);
+        assertTrue(test.markSupported());
+        test.markSupported(null);
+        assertEquals(ms, test.markSupported());
     }
 
     public void testReadChars() throws Exception {
@@ -179,25 +205,25 @@ public class SpecialReaderTest {
         in.reset();
         Arrays.fill(dest, (char) 9);
 
-        test.setNextReadOption(ReadOps.READ_NORMAL);
+        test.setNextOperation(ReadOps.READ_NORMAL);
         test.read(dest);
         assertEquals(dest, chars);
         in.reset();
         Arrays.fill(dest, (char) 9);
 
-        test.setNextReadOption(ReadOps.READ_ZERO);
+        test.setNextOperation(ReadOps.READ_ZERO);
         assertEquals(test.read(dest), 0);
         assertNotEquals(dest, chars);
         in.reset();
         Arrays.fill(dest, (char) 9);
 
-        test.setNextReadOption(ReadOps.REACH_END);
+        test.setNextOperation(ReadOps.REACH_END);
         assertEquals(test.read(dest), -1);
         assertNotEquals(dest, chars);
         in.reset();
         Arrays.fill(dest, (char) 9);
 
-        test.setNextReadOption(ReadOps.THROW);
+        test.setNextOperation(ReadOps.THROW);
         expectThrows(IOException.class, () -> test.read(dest));
         in.reset();
         Arrays.fill(dest, (char) 9);
@@ -210,20 +236,20 @@ public class SpecialReaderTest {
         assertEquals(test.read(), 1);
         in.reset();
 
-        test.setNextReadOption(ReadOps.READ_NORMAL);
+        test.setNextOperation(ReadOps.READ_NORMAL);
         ;
         assertEquals(test.read(), 1);
         in.reset();
 
-        test.setNextReadOption(ReadOps.READ_ZERO);
+        test.setNextOperation(ReadOps.READ_ZERO);
         assertEquals(test.read(), -1);
         in.reset();
 
-        test.setNextReadOption(ReadOps.REACH_END);
+        test.setNextOperation(ReadOps.REACH_END);
         assertEquals(test.read(), -1);
         in.reset();
 
-        test.setNextReadOption(ReadOps.THROW);
+        test.setNextOperation(ReadOps.THROW);
         expectThrows(IOException.class, () -> test.read());
         in.reset();
     }
@@ -235,20 +261,20 @@ public class SpecialReaderTest {
         assertEquals(test.skip(6), 6);
         in.reset();
 
-        test.setNextReadOption(ReadOps.READ_NORMAL);
+        test.setNextOperation(ReadOps.READ_NORMAL);
         ;
         assertEquals(test.skip(6), 6);
         in.reset();
 
-        test.setNextReadOption(ReadOps.READ_ZERO);
+        test.setNextOperation(ReadOps.READ_ZERO);
         assertEquals(test.skip(6), 0);
         in.reset();
 
-        test.setNextReadOption(ReadOps.REACH_END);
+        test.setNextOperation(ReadOps.REACH_END);
         assertEquals(test.skip(6), 0);
         in.reset();
 
-        test.setNextReadOption(ReadOps.THROW);
+        test.setNextOperation(ReadOps.THROW);
         expectThrows(IOException.class, () -> test.skip(6));
         in.reset();
     }
