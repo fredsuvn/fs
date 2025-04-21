@@ -1,7 +1,7 @@
 package xyz.sunqian.common.base.bytes;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.JieCoding;
 import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.base.exception.ProcessingException;
 import xyz.sunqian.common.coll.JieArray;
@@ -17,7 +17,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 
 import static xyz.sunqian.common.base.JieCheck.checkOffsetLength;
 
@@ -360,7 +362,7 @@ final class ByteProcessorImpl implements ByteProcessor {
                     return -1;
                 }
                 if (nextSeg.data().hasRemaining()) {
-                    int readSize = (int) Math.min(nextSeg.data().remaining(), remaining);
+                    int readSize = Math.min(nextSeg.data().remaining(), remaining);
                     nextSeg.data().get(dst, pos, readSize);
                     pos += readSize;
                     remaining -= readSize;
@@ -440,6 +442,32 @@ final class ByteProcessorImpl implements ByteProcessor {
             if (closed) {
                 throw new IOException("Stream closed.");
             }
+        }
+    }
+
+    private static final class BufferMerger implements Function<Collection<ByteBuffer>, ByteBuffer> {
+
+        private static final BufferMerger SINGLETON = new BufferMerger();
+
+        @Override
+        public ByteBuffer apply(Collection<ByteBuffer> byteBuffers) {
+            if (byteBuffers.isEmpty()) {
+                return null;
+            }
+            int size = 0;
+            for (ByteBuffer byteBuffer : byteBuffers) {
+                if (byteBuffer != null) {
+                    size += byteBuffer.remaining();
+                }
+            }
+            ByteBuffer result = ByteBuffer.allocate(size);
+            for (ByteBuffer byteBuffer : byteBuffers) {
+                if (byteBuffer != null) {
+                    result.put(byteBuffer);
+                }
+            }
+            result.flip();
+            return result;
         }
     }
 
@@ -544,6 +572,9 @@ final class ByteProcessorImpl implements ByteProcessor {
 
         private final int size;
 
+        // Capacity is always the size.
+        private @Nullable ByteBuffer buffer;
+
         FixedSizeEncoder(ByteEncoder encoder, int size) {
             super(encoder);
             this.size = size;
@@ -551,60 +582,112 @@ final class ByteProcessorImpl implements ByteProcessor {
 
         @Override
         public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) throws Exception {
-            ByteBuffer total = totalData(data);
-            int totalSize = total.remaining();
-            int times = totalSize / size;
-            if (times == 0) {
+            @Nullable Object result = null;
+
+            // clean buffer
+            if (buffer != null && buffer.position() > 0) {
+                JieBuffer.readTo(data, buffer);
+                if (end && !data.hasRemaining()) {
+                    buffer.flip();
+                    return encoder.encode(buffer, true);
+                }
+                if (buffer.hasRemaining()) {
+                    return null;
+                }
+                buffer.flip();
+                result = JieCoding.ifAdd(result, encoder.encode(buffer, false));
+                buffer.clear();
+            }
+
+            // split
+            int pos = data.position();
+            int limit = data.limit();
+            while (limit - pos >= size) {
+                data.position(pos);
+                data.limit(pos + size);
+                ByteBuffer slice = data.slice();
+                pos += size;
+                if (end && !data.hasRemaining()) {
+                    result = JieCoding.ifAdd(result, encoder.encode(slice, true));
+                } else {
+                    result = JieCoding.ifAdd(result, encoder.encode(slice, false));
+                }
+            }
+            data.position(pos);
+            data.limit(limit);
+
+            // buffering
+            if (data.hasRemaining()) {
+                if (buffer == null) {
+                    buffer = ByteBuffer.allocate(size);
+                }
+                JieBuffer.readTo(data, buffer);
                 if (end) {
-                    return encoder.encode(total, true);
-                }
-                buf = new byte[totalSize];
-                total.get(buf);
-                return null;
-            }
-            if (times == 1) {
-                ByteBuffer slice = JieBuffer.slice(total, size);
-                ByteBuffer ret1 = Jie.nonNull(encoder.encode(slice, false), JieBytes.emptyBuffer());
-                total.position(total.position() + size);
-                if (end) {
-                    ByteBuffer ret2 = Jie.nonNull(encoder.encode(total, true), JieBytes.emptyBuffer());
-                    int size12 = ret1.remaining() + ret2.remaining();
-                    if (size12 <= 0) {
-                        return null;
-                    }
-                    ByteBuffer ret = ByteBuffer.allocate(size12);
-                    ret.put(ret1);
-                    ret.put(ret2);
-                    ret.flip();
-                    return ret;
-                }
-                buf = new byte[total.remaining()];
-                total.get(buf);
-                return ret1;
-            }
-            BytesBuilder bytesBuilder = new BytesBuilder();
-            for (int i = 0; i < times; i++) {
-                ByteBuffer slice = JieBuffer.slice(total, size);
-                ByteBuffer ret = encoder.encode(slice, false);
-                total.position(total.position() + size);
-                if (!JieBytes.isEmpty(ret)) {
-                    bytesBuilder.append(ret);
+                    buffer.flip();
+                    result = JieCoding.ifAdd(result, encoder.encode(buffer, true));
+                    return JieCoding.ifMerge(result, BufferMerger.SINGLETON);
                 }
             }
-            if (end) {
-                ByteBuffer lastRet = encoder.encode(total, true);
-                if (!JieBytes.isEmpty(lastRet)) {
-                    bytesBuilder.append(lastRet);
-                }
-            } else {
-                buf = new byte[total.remaining()];
-                total.get(buf);
-            }
-            if (bytesBuilder.size() <= 0) {
-                return null;
-            }
-            return bytesBuilder.toByteBuffer();
+
+            return JieCoding.ifMerge(result, BufferMerger.SINGLETON);
         }
+
+        // @Override
+        // public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) throws Exception {
+        //     ByteBuffer total = totalData(data);
+        //     int totalSize = total.remaining();
+        //     int times = totalSize / size;
+        //     if (times == 0) {
+        //         if (end) {
+        //             return encoder.encode(total, true);
+        //         }
+        //         buf = new byte[totalSize];
+        //         total.get(buf);
+        //         return null;
+        //     }
+        //     if (times == 1) {
+        //         ByteBuffer slice = JieBuffer.slice(total, size);
+        //         ByteBuffer ret1 = Jie.nonNull(encoder.encode(slice, false), JieBytes.emptyBuffer());
+        //         total.position(total.position() + size);
+        //         if (end) {
+        //             ByteBuffer ret2 = Jie.nonNull(encoder.encode(total, true), JieBytes.emptyBuffer());
+        //             int size12 = ret1.remaining() + ret2.remaining();
+        //             if (size12 <= 0) {
+        //                 return null;
+        //             }
+        //             ByteBuffer ret = ByteBuffer.allocate(size12);
+        //             ret.put(ret1);
+        //             ret.put(ret2);
+        //             ret.flip();
+        //             return ret;
+        //         }
+        //         buf = new byte[total.remaining()];
+        //         total.get(buf);
+        //         return ret1;
+        //     }
+        //     BytesBuilder bytesBuilder = new BytesBuilder();
+        //     for (int i = 0; i < times; i++) {
+        //         ByteBuffer slice = JieBuffer.slice(total, size);
+        //         ByteBuffer ret = encoder.encode(slice, false);
+        //         total.position(total.position() + size);
+        //         if (!JieBytes.isEmpty(ret)) {
+        //             bytesBuilder.append(ret);
+        //         }
+        //     }
+        //     if (end) {
+        //         ByteBuffer lastRet = encoder.encode(total, true);
+        //         if (!JieBytes.isEmpty(lastRet)) {
+        //             bytesBuilder.append(lastRet);
+        //         }
+        //     } else {
+        //         buf = new byte[total.remaining()];
+        //         total.get(buf);
+        //     }
+        //     if (bytesBuilder.size() <= 0) {
+        //         return null;
+        //     }
+        //     return bytesBuilder.toByteBuffer();
+        // }
     }
 
     static final class EmptyEncoder implements ByteEncoder {

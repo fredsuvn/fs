@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -31,6 +32,7 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 import static xyz.sunqian.common.base.bytes.ByteEncoder.withBuffering;
 import static xyz.sunqian.common.base.bytes.ByteEncoder.withRounding;
+import static xyz.sunqian.test.JieTest.reflectThrows;
 import static xyz.sunqian.test.MaterialBox.copyDirect;
 
 public class ByteProcessorTest {
@@ -272,19 +274,22 @@ public class ByteProcessorTest {
             // from byte array
             byte[] src = JieArray.fill(new byte[totalSize], (byte) 6);
             BytesBuilder dst = new BytesBuilder();
-            ByteProcessor.from(src).readBlockSize(blockSize).encoder((d, e) -> {
-                BytesBuilder dst0 = new BytesBuilder();
-                while (d.hasRemaining()) {
-                    byte b = d.get();
-                    dst0.append(b);
-                    dst0.append(b);
-                }
-                d.flip();
-                while (d.hasRemaining()) {
-                    d.put((byte) 9);
-                }
-                return dst0.toByteBuffer();
-            }).writeTo(dst);
+            ByteProcessor.from(src).readBlockSize(blockSize)
+                .encoder((d, e) -> {
+                    BytesBuilder dst0 = new BytesBuilder();
+                    while (d.hasRemaining()) {
+                        byte b = d.get();
+                        dst0.append(b);
+                        dst0.append(b);
+                    }
+                    d.flip();
+                    while (d.hasRemaining()) {
+                        d.put((byte) 9);
+                    }
+                    return dst0.toByteBuffer();
+                })
+                .encoder((d, e) -> d)
+                .writeTo(dst);
             assertEquals(dst.toByteArray(), JieArray.fill(new byte[totalSize * 2], (byte) 6));
             assertEquals(src, JieArray.fill(new byte[totalSize], (byte) 9));
         }
@@ -333,6 +338,29 @@ public class ByteProcessorTest {
             assertEquals(dst.toByteArray(), JieArray.fill(new byte[totalSize * 2], (byte) 6));
             src.reset();
             assertEquals(JieIO.read(src), JieArray.fill(new byte[totalSize], (byte) 6));
+        }
+        {
+            // test null
+            byte[] src = JieArray.fill(new byte[totalSize], (byte) 6);
+            BytesBuilder dst = new BytesBuilder();
+            ByteProcessor.from(src).readBlockSize(blockSize)
+                .encoder((d, e) -> {
+                    BytesBuilder dst0 = new BytesBuilder();
+                    while (d.hasRemaining()) {
+                        byte b = d.get();
+                        dst0.append(b);
+                        dst0.append(b);
+                    }
+                    d.flip();
+                    while (d.hasRemaining()) {
+                        d.put((byte) 9);
+                    }
+                    return dst0.toByteBuffer();
+                })
+                .encoder((d, e) -> null)
+                .writeTo(dst);
+            assertEquals(dst.toByteArray(), new byte[0]);
+            assertEquals(src, JieArray.fill(new byte[totalSize], (byte) 9));
         }
     }
 
@@ -767,6 +795,10 @@ public class ByteProcessorTest {
         expectThrows(IORuntimeException.class, () -> ByteProcessor.from(new byte[0]).writeTo(new byte[0], 0, 100));
         expectThrows(IORuntimeException.class, () -> ByteProcessor.from(new byte[0]).writeTo((OutputStream) null));
         expectThrows(IORuntimeException.class, () -> ByteProcessor.from((InputStream) null).writeTo(new byte[0]));
+        Method method = ByteProcessor.from(new byte[0]).getClass().getDeclaredMethod("toByteReader", Object.class);
+        reflectThrows(IORuntimeException.class, method, ByteProcessor.from(new byte[0]), 1);
+        method = ByteProcessor.from(new byte[0]).getClass().getDeclaredMethod("toBufferOut", Object.class);
+        reflectThrows(IORuntimeException.class, method, ByteProcessor.from(new byte[0]), "");
         expectThrows(IORuntimeException.class, () -> ByteProcessor.from(new ThrowIn(0)).writeTo(new byte[0]));
         expectThrows(IORuntimeException.class, () -> ByteProcessor.from(new ThrowIn(1)).writeTo(new byte[0]));
     }

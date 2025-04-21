@@ -5,6 +5,7 @@ import xyz.sunqian.common.base.JieCoding;
 import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.base.exception.ProcessingException;
 import xyz.sunqian.common.coll.JieArray;
+import xyz.sunqian.common.coll.JieColl;
 import xyz.sunqian.common.io.CharReader;
 import xyz.sunqian.common.io.CharSegment;
 import xyz.sunqian.common.io.IORuntimeException;
@@ -221,15 +222,13 @@ final class CharProcessorImpl implements CharProcessor {
     }
 
     private long readTo(CharReader in, DataWriter out) throws Exception {
-        if (theOneEncoder == null) {
-            theOneEncoder = buildOneEncoder();
-        }
+        CharEncoder oneEncoder = getTheOneEncoder();
         CharReader reader = readLimit < 0 ? in : in.withReadLimit(readLimit);
         long count = 0;
         while (true) {
             CharSegment segment = reader.read(readBlockSize, endOnZeroRead);
             count += segment.data().remaining();
-            CharBuffer encoded = theOneEncoder.encode(segment.data(), segment.end());
+            CharBuffer encoded = oneEncoder.encode(segment.data(), segment.end());
             if (!JieChars.isEmpty(encoded)) {
                 out.write(encoded);
             }
@@ -239,11 +238,15 @@ final class CharProcessorImpl implements CharProcessor {
         }
     }
 
-    private CharEncoder buildOneEncoder() {
-        if (encoders == null) {
-            return CharEncoder.emptyEncoder();
+    private CharEncoder getTheOneEncoder() {
+        if (theOneEncoder != null) {
+            return theOneEncoder;
         }
-        return (data, end) -> {
+        if (JieColl.isEmpty(encoders)) {
+            theOneEncoder = CharEncoder.emptyEncoder();
+            return theOneEncoder;
+        }
+        theOneEncoder = (data, end) -> {
             CharBuffer chars = data;
             for (CharEncoder encoder : encoders) {
                 chars = encoder.encode(chars, end);
@@ -253,6 +256,7 @@ final class CharProcessorImpl implements CharProcessor {
             }
             return chars;
         };
+        return theOneEncoder;
     }
 
     private CharReader toCharReader(Object src) {
@@ -346,7 +350,7 @@ final class CharProcessorImpl implements CharProcessor {
     private final class ProcessorReader extends Reader {
 
         private final CharReader in;
-        private CharSegment buffer = null;
+        private CharSegment nextSeg = null;
         private boolean closed = false;
 
         private ProcessorReader(CharReader in) {
@@ -355,7 +359,13 @@ final class CharProcessorImpl implements CharProcessor {
 
         private CharSegment read0() throws IOException {
             try {
-                return in.read(readBlockSize, endOnZeroRead);
+                CharEncoder oneEncoder = getTheOneEncoder();
+                CharSegment s0 = in.read(readBlockSize, endOnZeroRead);
+                CharBuffer encoded = oneEncoder.encode(s0.data(), s0.end());
+                if (encoded == s0.data()) {
+                    return s0;
+                }
+                return CharSegment.of(encoded, s0.end());
             } catch (Exception e) {
                 throw new IOException(e);
             }
@@ -364,18 +374,27 @@ final class CharProcessorImpl implements CharProcessor {
         @Override
         public int read() throws IOException {
             checkClosed();
-            if (buffer == null) {
-                buffer = read0();
-            }
             while (true) {
-                if (buffer.data().hasRemaining()) {
-                    return buffer.data().get() & 0xffff;
+                if (nextSeg == null) {
+                    nextSeg = read0();
                 }
-                if (buffer.end()) {
+                if (nextSeg == CharSegment.empty(true)) {
                     return -1;
                 }
-                buffer = read0();
+                if (nextSeg.data().hasRemaining()) {
+                    return nextSeg.data().get() & 0xffff;
+                }
+                if (nextSeg.end()) {
+                    nextSeg = CharSegment.empty(true);
+                    return -1;
+                }
+                nextSeg = null;
             }
+        }
+
+        @Override
+        public int read(char[] dst) throws IOException {
+            return read(dst, 0, dst.length);
         }
 
         @Override
@@ -385,23 +404,30 @@ final class CharProcessorImpl implements CharProcessor {
             if (len <= 0) {
                 return 0;
             }
-            if (buffer == null) {
-                buffer = read0();
-            }
             int pos = off;
-            while (pos < off + len) {
-                if (buffer.data().hasRemaining()) {
-                    int readSize = Math.min(buffer.data().remaining(), len);
-                    buffer.data().get(dst, pos, readSize);
+            int remaining = len;
+            while (remaining > 0) {
+                if (nextSeg == null) {
+                    nextSeg = read0();
+                }
+                if (nextSeg == CharSegment.empty(true)) {
+                    return -1;
+                }
+                if (nextSeg.data().hasRemaining()) {
+                    int readSize = Math.min(nextSeg.data().remaining(), remaining);
+                    nextSeg.data().get(dst, pos, readSize);
                     pos += readSize;
+                    remaining -= readSize;
                     continue;
                 }
-                if (buffer.end()) {
+                if (nextSeg.end()) {
+                    nextSeg = CharSegment.empty(true);
                     break;
+                } else {
+                    nextSeg = null;
                 }
-                buffer = read0();
             }
-            if (buffer.end() && pos == off) {
+            if (nextSeg.end() && pos == off) {
                 return -1;
             }
             return pos - off;
@@ -413,23 +439,30 @@ final class CharProcessorImpl implements CharProcessor {
             if (n <= 0) {
                 return 0;
             }
-            if (buffer == null) {
-                buffer = read0();
-            }
-            int pos = 0;
-            while (pos < n) {
-                if (buffer.data().hasRemaining()) {
-                    int readSize = (int) Math.min(buffer.data().remaining(), n);
-                    buffer.data().position(buffer.data().position() + readSize);
+            long pos = 0;
+            long remaining = n;
+            while (remaining > 0) {
+                if (nextSeg == null) {
+                    nextSeg = read0();
+                }
+                if (nextSeg == CharSegment.empty(true)) {
+                    return 0;
+                }
+                if (nextSeg.data().hasRemaining()) {
+                    int readSize = (int) Math.min(nextSeg.data().remaining(), remaining);
+                    nextSeg.data().position(nextSeg.data().position() + readSize);
                     pos += readSize;
+                    remaining -= readSize;
                     continue;
                 }
-                if (buffer.end()) {
+                if (nextSeg.end()) {
+                    nextSeg = CharSegment.empty(true);
                     break;
+                } else {
+                    nextSeg = null;
                 }
-                buffer = read0();
             }
-            if (buffer.end() && pos == 0) {
+            if (nextSeg.end() && pos == 0) {
                 return 0;
             }
             return pos;
