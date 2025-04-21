@@ -2,6 +2,7 @@ package test;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.test.ReadOps;
+import xyz.sunqian.test.TestIOException;
 import xyz.sunqian.test.TestInputStream;
 import xyz.sunqian.test.TestReader;
 
@@ -14,7 +15,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.expectThrows;
 
-public class ReadTest {
+public class SpecialReaderTest {
 
     @Test
     public void testReadBytesOptions() throws Exception {
@@ -30,6 +31,12 @@ public class ReadTest {
         test.mark(0);
         test.reset();
         test.close();
+        test.setNextReadOption(ReadOps.THROW);
+        expectThrows(TestIOException.class, () -> test.mark(0));
+        test.setNextReadOption(ReadOps.THROW);
+        expectThrows(IOException.class, test::reset);
+        test.setNextReadOption(ReadOps.THROW);
+        expectThrows(IOException.class, test::close);
     }
 
     public void testReadBytes() throws Exception {
@@ -154,6 +161,12 @@ public class ReadTest {
         test.mark(0);
         test.reset();
         test.close();
+        test.setNextReadOption(ReadOps.THROW);
+        expectThrows(IOException.class, () -> test.mark(0));
+        test.setNextReadOption(ReadOps.THROW);
+        expectThrows(IOException.class, test::reset);
+        test.setNextReadOption(ReadOps.THROW);
+        expectThrows(IOException.class, test::close);
     }
 
     public void testReadChars() throws Exception {

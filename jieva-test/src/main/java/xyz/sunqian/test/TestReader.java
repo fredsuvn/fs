@@ -2,6 +2,7 @@ package xyz.sunqian.test;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Objects;
 
 /**
  * This is a testing reader. It wraps a normal reader, then provides the {@link #setNextReadOption(ReadOps)} to set
@@ -101,22 +102,37 @@ public class TestReader extends Reader {
     }
 
     @Override
-    public synchronized void mark(int readlimit) throws IOException {
-        in.mark(readlimit);
-    }
-
-    @Override
-    public synchronized void reset() throws IOException {
-        in.reset();
-    }
-
-    @Override
     public boolean markSupported() {
         return in.markSupported();
     }
 
     @Override
+    public synchronized void mark(int readlimit) throws IOException {
+        if (Objects.equals(readOps, ReadOps.THROW)) {
+            readOps = ReadOps.READ_NORMAL;
+            throw new IOException();
+        } else {
+            in.mark(readlimit);
+        }
+    }
+
+    @Override
+    public synchronized void reset() throws IOException {
+        if (Objects.equals(readOps, ReadOps.THROW)) {
+            readOps = ReadOps.READ_NORMAL;
+            throw new IOException();
+        } else {
+            in.reset();
+        }
+    }
+
+    @Override
     public void close() throws IOException {
-        in.close();
+        if (Objects.equals(readOps, ReadOps.THROW)) {
+            readOps = ReadOps.READ_NORMAL;
+            throw new IOException();
+        } else {
+            in.close();
+        }
     }
 }

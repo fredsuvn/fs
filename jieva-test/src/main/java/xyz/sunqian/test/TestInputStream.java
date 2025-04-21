@@ -2,6 +2,7 @@ package xyz.sunqian.test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 
 /**
  * This is a testing input stream. It wraps a normal stream, then provides the {@link #setNextReadOption(ReadOps)} to
@@ -118,22 +119,37 @@ public class TestInputStream extends InputStream {
     }
 
     @Override
-    public synchronized void mark(int readlimit) {
-        in.mark(readlimit);
-    }
-
-    @Override
-    public synchronized void reset() throws IOException {
-        in.reset();
-    }
-
-    @Override
     public boolean markSupported() {
         return in.markSupported();
     }
 
     @Override
+    public synchronized void mark(int readlimit) {
+        if (Objects.equals(readOps, ReadOps.THROW)) {
+            readOps = ReadOps.READ_NORMAL;
+            throw new TestIOException();
+        } else {
+            in.mark(readlimit);
+        }
+    }
+
+    @Override
+    public synchronized void reset() throws IOException {
+        if (Objects.equals(readOps, ReadOps.THROW)) {
+            readOps = ReadOps.READ_NORMAL;
+            throw new IOException();
+        } else {
+            in.reset();
+        }
+    }
+
+    @Override
     public void close() throws IOException {
-        in.close();
+        if (Objects.equals(readOps, ReadOps.THROW)) {
+            readOps = ReadOps.READ_NORMAL;
+            throw new IOException();
+        } else {
+            in.close();
+        }
     }
 }

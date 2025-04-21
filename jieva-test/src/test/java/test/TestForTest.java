@@ -3,6 +3,7 @@ package test;
 import org.testng.annotations.Test;
 import xyz.sunqian.test.JieTestException;
 import xyz.sunqian.test.MaterialBox;
+import xyz.sunqian.test.TestIOException;
 
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
@@ -115,7 +116,7 @@ public class TestForTest {
     }
 
     @Test
-    public void testException() throws Exception {
+    public void testException() {
         expectThrows(JieTestException.class, () -> {
             throw new JieTestException();
         });
@@ -127,6 +128,18 @@ public class TestForTest {
         });
         expectThrows(JieTestException.class, () -> {
             throw new JieTestException(new RuntimeException());
+        });
+        expectThrows(TestIOException.class, () -> {
+            throw new TestIOException();
+        });
+        expectThrows(TestIOException.class, () -> {
+            throw new TestIOException("");
+        });
+        expectThrows(TestIOException.class, () -> {
+            throw new TestIOException("", new RuntimeException());
+        });
+        expectThrows(TestIOException.class, () -> {
+            throw new TestIOException(new RuntimeException());
         });
     }
 
