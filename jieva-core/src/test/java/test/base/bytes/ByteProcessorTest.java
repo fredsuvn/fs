@@ -561,6 +561,7 @@ public class ByteProcessorTest {
         testToInputStream(20, 40);
         {
             InputStream in = ByteProcessor.from(new byte[0]).toInputStream();
+            assertEquals(in.read(new byte[1]), -1);
             assertEquals(in.read(), -1);
             assertEquals(in.read(), -1);
             assertEquals(in.read(new byte[1], 0, 0), 0);

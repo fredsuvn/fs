@@ -355,11 +355,11 @@ final class ByteProcessorImpl implements ByteProcessor {
             int pos = off;
             int remaining = len;
             while (remaining > 0) {
-                if (nextSeg == null) {
-                    nextSeg = read0();
-                }
                 if (nextSeg == ByteSegment.empty(true)) {
                     return -1;
+                }
+                if (nextSeg == null) {
+                    nextSeg = read0();
                 }
                 if (nextSeg.data().hasRemaining()) {
                     int readSize = Math.min(nextSeg.data().remaining(), remaining);
@@ -390,11 +390,11 @@ final class ByteProcessorImpl implements ByteProcessor {
             long pos = 0;
             long remaining = n;
             while (remaining > 0) {
-                if (nextSeg == null) {
-                    nextSeg = read0();
-                }
                 if (nextSeg == ByteSegment.empty(true)) {
                     return 0;
+                }
+                if (nextSeg == null) {
+                    nextSeg = read0();
                 }
                 if (nextSeg.data().hasRemaining()) {
                     int readSize = (int) Math.min(nextSeg.data().remaining(), remaining);

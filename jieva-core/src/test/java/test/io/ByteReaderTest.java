@@ -44,10 +44,18 @@ public class ByteReaderTest {
             ByteReader reader = ByteReader.from(new ByteArrayInputStream(data));
             testRead0(reader, dataSize, false);
             testReader(reader, data, 0, dataSize, bufferSize, false);
+            testSkip(
+                ByteReader.from(new ByteArrayInputStream(data)),
+                data, 0, dataSize, bufferSize, false
+            );
             byte[] limitedData = JieRandom.fill(new byte[dataSize + 5]);
             ByteReader limitedReader = ByteReader.from(new ByteArrayInputStream(limitedData)).withReadLimit(dataSize);
             testRead0(limitedReader, dataSize, true);
             testReader(limitedReader, limitedData, 0, dataSize, bufferSize, false);
+            testSkip(
+                ByteReader.from(new ByteArrayInputStream(limitedData)).withReadLimit(dataSize),
+                limitedData, 0, dataSize, bufferSize, false
+            );
         }
         {
             // byte array
@@ -55,10 +63,18 @@ public class ByteReaderTest {
             ByteReader reader = ByteReader.from(data);
             testRead0(reader, dataSize, true);
             testReader(reader, data, 0, dataSize, bufferSize, true);
+            testSkip(
+                ByteReader.from(data),
+                data, 0, dataSize, bufferSize, true
+            );
             byte[] limitedData = JieRandom.fill(new byte[dataSize + 5]);
             ByteReader limitedReader = ByteReader.from(limitedData).withReadLimit(dataSize);
             testRead0(limitedReader, dataSize, true);
             testReader(limitedReader, limitedData, 0, dataSize, bufferSize, true);
+            testSkip(
+                ByteReader.from(limitedData).withReadLimit(dataSize),
+                limitedData, 0, dataSize, bufferSize, true
+            );
         }
         {
             // padded byte array
@@ -67,11 +83,19 @@ public class ByteReaderTest {
                 ByteReader reader = ByteReader.from(data, 1, dataSize - 2);
                 testRead0(reader, dataSize - 2, true);
                 testReader(reader, data, 1, dataSize - 2, bufferSize, true);
+                testSkip(
+                    ByteReader.from(data, 1, dataSize - 2),
+                    data, 1, dataSize - 2, bufferSize, true
+                );
                 byte[] limitedData = JieRandom.fill(new byte[dataSize + 5]);
                 ByteReader limitedReader = ByteReader.from(limitedData, 1, dataSize - 2)
                     .withReadLimit(dataSize);
                 testRead0(limitedReader, dataSize, true);
                 testReader(limitedReader, limitedData, 1, dataSize - 2, bufferSize, true);
+                testSkip(
+                    ByteReader.from(limitedData, 1, dataSize - 2),
+                    limitedData, 1, dataSize - 2, bufferSize, true
+                );
             }
         }
         {
@@ -80,18 +104,55 @@ public class ByteReaderTest {
             ByteReader reader = ByteReader.from(ByteBuffer.wrap(data));
             testRead0(reader, dataSize, true);
             testReader(reader, data, 0, dataSize, bufferSize, true);
+            testSkip(
+                ByteReader.from(ByteBuffer.wrap(data)),
+                data, 0, dataSize, bufferSize, true
+            );
             byte[] limitedData = JieRandom.fill(new byte[dataSize + 5]);
             ByteReader limitedReader = ByteReader.from(ByteBuffer.wrap(limitedData)).withReadLimit(dataSize);
             testRead0(limitedReader, dataSize, true);
             testReader(limitedReader, limitedData, 0, dataSize, bufferSize, true);
+            testSkip(
+                ByteReader.from(ByteBuffer.wrap(limitedData)).withReadLimit(dataSize),
+                limitedData, 0, dataSize, bufferSize, true
+            );
         }
     }
 
-    private void testReader(ByteReader reader, byte[] bytes, int offset, int length, int size, boolean shared) {
+    private void testReader(ByteReader reader, byte[] bytes, int offset, int length, int readSize, boolean shared) {
+        if (reader.markSupported()) {
+            reader.mark();
+        }
+        testReader0(reader, bytes, offset, length, readSize, shared);
+        if (reader.markSupported()) {
+            reader.reset();
+            testReader0(reader, bytes, offset, length, readSize, shared);
+        }
+    }
+
+    private void testRead0(ByteReader reader, int dataSize, boolean preKnown) {
+        ByteSegment s0 = reader.read(0);
+        assertEquals(s0.data(), JieBytes.emptyBuffer());
+        if (preKnown) {
+            assertEquals(s0.end(), dataSize == 0);
+        } else {
+            assertFalse(s0.end());
+        }
+        assertEquals(reader.skip(0), 0);
+    }
+
+    private void testSkip(ByteReader reader, byte[] bytes, int offset, int length, int readSize, boolean shared) {
+        int skipNum = length / 2;
+        assertEquals(reader.skip(skipNum), skipNum);
+        int remaining = length - skipNum;
+        testReader0(reader, bytes, offset + skipNum, remaining, readSize, shared);
+    }
+
+    private void testReader0(ByteReader reader, byte[] bytes, int offset, int length, int readSize, boolean shared) {
         byte[] bytesCopy = Arrays.copyOfRange(bytes, offset, offset + length);
         BytesBuilder builder = new BytesBuilder();
         while (true) {
-            ByteSegment segment = reader.read(size);
+            ByteSegment segment = reader.read(readSize);
             ByteBuffer buffer = segment.data();
             buffer.mark();
             builder.append(buffer);
@@ -109,16 +170,6 @@ public class ByteReaderTest {
             byte[] bytesShared = new byte[length];
             Arrays.fill(bytesShared, (byte) 6);
             assertEquals(bytesShared, Arrays.copyOfRange(bytes, offset, offset + length));
-        }
-    }
-
-    private void testRead0(ByteReader reader, int dataSize, boolean preKnown) {
-        ByteSegment s0 = reader.read(0);
-        assertEquals(s0.data(), JieBytes.emptyBuffer());
-        if (preKnown) {
-            assertEquals(s0.end(), dataSize == 0);
-        } else {
-            assertFalse(s0.end());
         }
     }
 

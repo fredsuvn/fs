@@ -39,15 +39,23 @@ public class CharReaderTest {
 
     private void testReader(int dataSize, int bufferSize) {
         {
-            // input stream
+            // reader
             char[] data = JieRandom.fill(new char[dataSize]);
             CharReader reader = CharReader.from(new CharArrayReader(data));
             testRead0(reader, dataSize, false);
             testReader(reader, data, 0, dataSize, bufferSize, false);
+            testSkip(
+                CharReader.from(new CharArrayReader(data)),
+                data, 0, dataSize, bufferSize, false
+            );
             char[] limitedData = JieRandom.fill(new char[dataSize + 5]);
             CharReader limitedReader = CharReader.from(new CharArrayReader(limitedData)).withReadLimit(dataSize);
             testRead0(limitedReader, dataSize, true);
             testReader(limitedReader, limitedData, 0, dataSize, bufferSize, false);
+            testSkip(
+                CharReader.from(new CharArrayReader(limitedData)).withReadLimit(dataSize),
+                limitedData, 0, dataSize, bufferSize, false
+            );
         }
         {
             // char array
@@ -55,10 +63,18 @@ public class CharReaderTest {
             CharReader reader = CharReader.from(data);
             testRead0(reader, dataSize, true);
             testReader(reader, data, 0, dataSize, bufferSize, true);
+            testSkip(
+                CharReader.from(data),
+                data, 0, dataSize, bufferSize, true
+            );
             char[] limitedData = JieRandom.fill(new char[dataSize + 5]);
             CharReader limitedReader = CharReader.from(limitedData).withReadLimit(dataSize);
             testRead0(limitedReader, dataSize, true);
             testReader(limitedReader, limitedData, 0, dataSize, bufferSize, true);
+            testSkip(
+                CharReader.from(limitedData).withReadLimit(dataSize),
+                limitedData, 0, dataSize, bufferSize, true
+            );
         }
         {
             // padded char array
@@ -67,11 +83,19 @@ public class CharReaderTest {
                 CharReader reader = CharReader.from(data, 1, dataSize - 2);
                 testRead0(reader, dataSize - 2, true);
                 testReader(reader, data, 1, dataSize - 2, bufferSize, true);
+                testSkip(
+                    CharReader.from(data, 1, dataSize - 2),
+                    data, 1, dataSize - 2, bufferSize, true
+                );
                 char[] limitedData = JieRandom.fill(new char[dataSize + 5]);
                 CharReader limitedReader = CharReader.from(limitedData, 1, dataSize - 2)
                     .withReadLimit(dataSize);
                 testRead0(limitedReader, dataSize, true);
                 testReader(limitedReader, limitedData, 1, dataSize - 2, bufferSize, true);
+                testSkip(
+                    CharReader.from(limitedData, 1, dataSize - 2),
+                    limitedData, 1, dataSize - 2, bufferSize, true
+                );
             }
         }
         {
@@ -80,10 +104,18 @@ public class CharReaderTest {
             CharReader reader = CharReader.from(CharBuffer.wrap(data));
             testRead0(reader, dataSize, true);
             testReader(reader, data, 0, dataSize, bufferSize, true);
+            testSkip(
+                CharReader.from(CharBuffer.wrap(data)),
+                data, 0, dataSize, bufferSize, true
+            );
             char[] limitedData = JieRandom.fill(new char[dataSize + 5]);
             CharReader limitedReader = CharReader.from(CharBuffer.wrap(limitedData)).withReadLimit(dataSize);
             testRead0(limitedReader, dataSize, true);
             testReader(limitedReader, limitedData, 0, dataSize, bufferSize, true);
+            testSkip(
+                CharReader.from(CharBuffer.wrap(limitedData)).withReadLimit(dataSize),
+                limitedData, 0, dataSize, bufferSize, true
+            );
         }
         {
             // char sequence
@@ -91,10 +123,18 @@ public class CharReaderTest {
             CharReader reader = CharReader.from(new String(data));
             testRead0(reader, dataSize, true);
             testReader(reader, data, 0, dataSize, bufferSize, false);
+            testSkip(
+                CharReader.from(new String(data)),
+                data, 0, dataSize, bufferSize, false
+            );
             char[] limitedData = JieRandom.fill(new char[dataSize + 5]);
             CharReader limitedReader = CharReader.from(new String(limitedData)).withReadLimit(dataSize);
             testRead0(limitedReader, dataSize, true);
             testReader(limitedReader, limitedData, 0, dataSize, bufferSize, false);
+            testSkip(
+                CharReader.from(new String(limitedData)).withReadLimit(dataSize),
+                limitedData, 0, dataSize, bufferSize, false
+            );
         }
         {
             // padded char sequence
@@ -103,20 +143,57 @@ public class CharReaderTest {
                 CharReader reader = CharReader.from(new String(data), 1, dataSize - 1);
                 testRead0(reader, dataSize - 2, true);
                 testReader(reader, data, 1, dataSize - 2, bufferSize, false);
+                testSkip(
+                    CharReader.from(new String(data), 1, dataSize - 1),
+                    data, 1, dataSize - 2, bufferSize, false
+                );
                 char[] limitedData = JieRandom.fill(new char[dataSize + 5]);
                 CharReader limitedReader = CharReader.from(new String(limitedData), 1, dataSize - 1)
                     .withReadLimit(dataSize);
                 testRead0(limitedReader, dataSize, true);
                 testReader(limitedReader, limitedData, 1, dataSize - 2, bufferSize, false);
+                testSkip(
+                    CharReader.from(new String(limitedData), 1, dataSize - 1),
+                    limitedData, 1, dataSize - 2, bufferSize, false
+                );
             }
         }
     }
 
-    private void testReader(CharReader reader, char[] chars, int offset, int length, int size, boolean shared) {
+    private void testReader(CharReader reader, char[] chars, int offset, int length, int readSize, boolean shared) {
+        if (reader.markSupported()) {
+            reader.mark();
+        }
+        testReader0(reader, chars, offset, length, readSize, shared);
+        if (reader.markSupported()) {
+            reader.reset();
+            testReader0(reader, chars, offset, length, readSize, shared);
+        }
+    }
+
+    private void testRead0(CharReader reader, int dataSize, boolean preKnown) {
+        CharSegment s0 = reader.read(0);
+        assertEquals(s0.data(), JieChars.emptyBuffer());
+        if (preKnown) {
+            assertEquals(s0.end(), dataSize == 0);
+        } else {
+            assertFalse(s0.end());
+        }
+        assertEquals(reader.skip(0), 0);
+    }
+
+    private void testSkip(CharReader reader, char[] chars, int offset, int length, int readSize, boolean shared) {
+        int skipNum = length / 2;
+        assertEquals(reader.skip(skipNum), skipNum);
+        int remaining = length - skipNum;
+        testReader0(reader, chars, offset + skipNum, remaining, readSize, shared);
+    }
+
+    private void testReader0(CharReader reader, char[] chars, int offset, int length, int readSize, boolean shared) {
         char[] charsCopy = Arrays.copyOfRange(chars, offset, offset + length);
         CharsBuilder builder = new CharsBuilder();
         while (true) {
-            CharSegment segment = reader.read(size);
+            CharSegment segment = reader.read(readSize);
             CharBuffer buffer = segment.data();
             buffer.mark();
             builder.append(buffer);
@@ -134,16 +211,6 @@ public class CharReaderTest {
             char[] charsShared = new char[length];
             Arrays.fill(charsShared, (char) 6);
             assertEquals(charsShared, Arrays.copyOfRange(chars, offset, offset + length));
-        }
-    }
-
-    private void testRead0(CharReader reader, int dataSize, boolean preKnown) {
-        CharSegment s0 = reader.read(0);
-        assertEquals(s0.data(), JieChars.emptyBuffer());
-        if (preKnown) {
-            assertEquals(s0.end(), dataSize == 0);
-        } else {
-            assertFalse(s0.end());
         }
     }
 

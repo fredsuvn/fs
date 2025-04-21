@@ -13,6 +13,8 @@ public interface CharReader {
 
     /**
      * Returns a new {@link CharReader} with the given data source.
+     * <p>
+     * For the returned {@link CharReader}, the mark/reset operations are depends on and shared with the source.
      *
      * @param source the given data source
      * @return a new {@link CharReader} with the given data source
@@ -26,6 +28,9 @@ public interface CharReader {
      * <p>
      * The content of the buffer returned from the {@link CharReader} is shared with the content of the given data
      * source. Changes to the buffer's content will be visible in the given data source, and vice versa.
+     * <p>
+     * For the returned {@link CharReader}, the mark/reset operations are supported, and the close method has no
+     * effect.
      *
      * @param source the given data source
      * @return a new {@link CharReader} with the given data source
@@ -40,6 +45,9 @@ public interface CharReader {
      * <p>
      * The content of the buffer returned from the {@link CharReader} is shared with the content of the given data
      * source. Changes to the buffer's content will be visible in the given data source, and vice versa.
+     * <p>
+     * For the returned {@link CharReader}, the mark/reset operations are supported, and the close method has no
+     * effect.
      *
      * @param source the given data source
      * @param offset the specified offset
@@ -56,6 +64,9 @@ public interface CharReader {
      * <p>
      * The content of the buffer returned from the {@link CharReader} is shared with the content of the given data
      * source. Changes to the buffer's content will be visible in the given data source, and vice versa.
+     * <p>
+     * For the returned {@link CharReader}, the mark/reset operations are supported, and the close method has no
+     * effect.
      *
      * @param source the given data source
      * @return a new {@link CharReader} with the given data source
@@ -70,6 +81,9 @@ public interface CharReader {
      * <p>
      * The content of the buffer returned from the {@link CharReader} is shared with the content of the given data
      * source. Changes to the buffer's content will be visible in the given data source, and vice versa.
+     * <p>
+     * For the returned {@link CharReader}, the mark/reset operations are supported, and the close method has no
+     * effect.
      *
      * @param source the given data source
      * @param start  the specified start position inclusive
@@ -86,6 +100,9 @@ public interface CharReader {
      * <p>
      * The content of the buffer returned from the {@link CharReader} is shared with the content of the given data
      * source. Changes to the buffer's content will be visible in the given data source, and vice versa.
+     * <p>
+     * For the returned {@link CharReader}, the mark/reset operations are supported by and shared with the source, and
+     * the close method has no effect.
      *
      * @param source the given data source
      * @return a new {@link CharReader} with the given data source
@@ -95,8 +112,9 @@ public interface CharReader {
     }
 
     /**
-     * Reads and returns the next data segment with the specified size from the data source. This method never return
-     * null, but can return an empty segment. This method is equivalent to:
+     * Reads and returns the next data segment with the specified size from the data source. This method reads
+     * continuously until the specified number of chars is read or the end of the data source is reached. And it never
+     * returns null, but can return an empty segment. It is equivalent to:
      * <pre>{@code
      *     return read(size, false);
      * }</pre>
@@ -112,8 +130,9 @@ public interface CharReader {
     }
 
     /**
-     * Reads and returns the next data segment with the specified size from the data source. This method never return
-     * null, but can return an empty segment.
+     * Reads and returns the next data segment with the specified size from the data source. This method reads
+     * continuously until the specified number of chars is read or the end of the data source is reached. And it never
+     * returns null, but can return an empty segment.
      * <p>
      * The {@code endOnZeroRead} specifies whether a zero-char read, which could happen in NIO, should be treated as a
      * signal indicates the end of the data source has been reached.
@@ -128,8 +147,72 @@ public interface CharReader {
     CharSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException;
 
     /**
+     * Skips the data of the specified size and returns the actual skipped size. This method skips continuously until
+     * the specified number of chars is skipped or the end of the data source is reached. It is equivalent to:
+     * <pre>{@code
+     *     return skip(size, false);
+     * }</pre>
+     *
+     * @param size the specified size
+     * @return the actual skipped size
+     * @throws IllegalArgumentException if the specified size is negative
+     * @throws IORuntimeException       if an I/O error occurs
+     * @see #skip(long, boolean)
+     */
+    default long skip(long size) throws IllegalArgumentException, IORuntimeException {
+        return skip(size, false);
+    }
+
+    /**
+     * Skips the data of the specified size and returns the actual skipped size. This method skips continuously until
+     * the specified number of chars is skipped or the end of the data source is reached.
+     * <p>
+     * The {@code endOnZeroRead} specifies whether a zero-char read, which could happen in NIO, should be treated as a
+     * signal indicates the end of the data source has been reached.
+     *
+     * @param size          the specified size
+     * @param endOnZeroRead specifies whether a zero-char read should be treated as a signal indicates the end of the
+     *                      data source has been reached
+     * @return the actual skipped size
+     * @throws IllegalArgumentException if the specified size is negative
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    long skip(long size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException;
+
+    /**
+     * Returns whether this reader supports the {@link #mark()} and {@link #reset()} methods.
+     *
+     * @return whether this reader supports the {@link #mark()} and {@link #reset()} methods
+     */
+    boolean markSupported();
+
+    /**
+     * Marks the current position in this reader. This method can be used to mark a position for later
+     * {@link #reset()}.
+     *
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    void mark() throws IORuntimeException;
+
+    /**
+     * Resets this reader to the last marked position by {@link #mark()}. This method can be used to re-read the data
+     * from last marked position.
+     *
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    void reset() throws IORuntimeException;
+
+    /**
+     * Closes this reader and the data source if the data source is closable. If this reader is already closed, this
+     * method has no effect.
+     *
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    void close() throws IORuntimeException;
+
+    /**
      * Returns a new {@link CharReader} backed by this instance, with read operations limited to the specified maximum
-     * number of chars.
+     * number of chars. The mark/reset operations are supported by and shared with this instance.
      *
      * @param readLimit the specified maximum number of chars to read
      * @return a new {@link CharReader} backed by this, with read operations limited to the specified maximum number of

@@ -720,6 +720,7 @@ public class CharProcessorTest {
             Reader in = CharProcessor.from(new char[0]).toReader();
             assertEquals(in.read(), -1);
             assertEquals(in.read(), -1);
+            assertEquals(in.read(new char[1]), -1);
             assertEquals(in.read(new char[1], 0, 0), 0);
             assertEquals(in.skip(-1), 0);
             assertEquals(in.skip(0), 0);

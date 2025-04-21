@@ -4,6 +4,7 @@ import xyz.sunqian.common.base.JieCheck;
 import xyz.sunqian.common.base.bytes.JieBytes;
 import xyz.sunqian.common.base.chars.JieChars;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.nio.ByteBuffer;
@@ -48,13 +49,19 @@ final class ReaderBack {
         return new LimitedCharReader(source, readLimit);
     }
 
-    private static void checkSize(int size) {
+    private static void checkSize(int size) throws IllegalArgumentException {
         if (size < 0) {
             throw new IllegalArgumentException("The size must be >= 0.");
         }
     }
 
-    private static void checkReadLimit(long readLimit) {
+    private static void checkSize(long size) throws IllegalArgumentException {
+        if (size < 0) {
+            throw new IllegalArgumentException("The size must be >= 0.");
+        }
+    }
+
+    private static void checkReadLimit(long readLimit) throws IllegalArgumentException {
         if (readLimit < 0) {
             throw new IllegalArgumentException("The read limit must be >= 0.");
         }
@@ -143,7 +150,6 @@ final class ReaderBack {
     private static final class ByteStreamReader implements ByteReader {
 
         private final InputStream source;
-        private boolean end = false;
 
         ByteStreamReader(InputStream source) {
             this.source = source;
@@ -159,10 +165,49 @@ final class ReaderBack {
             }
         }
 
+        @Override
+        public long skip(long size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
+            checkSize(size);
+            try {
+                return skip0(size, endOnZeroRead);
+            } catch (Exception e) {
+                throw new IORuntimeException(e);
+            }
+        }
+
+        @Override
+        public boolean markSupported() {
+            return source.markSupported();
+        }
+
+        @Override
+        public void mark() throws IORuntimeException {
+            source.mark(0);
+        }
+
+        @Override
+        public void reset() throws IORuntimeException {
+            try {
+                source.reset();
+            } catch (IOException e) {
+                throw new IORuntimeException(e);
+            }
+        }
+
+        @Override
+        public void close() throws IORuntimeException {
+            try {
+                source.close();
+            } catch (IOException e) {
+                throw new IORuntimeException(e);
+            }
+        }
+
         private ByteSegment read0(int size, boolean endOnZeroRead) throws Exception {
             if (size == 0) {
-                return ByteSegment.empty(end);
+                return ByteSegment.empty(false);
             }
+            boolean end = false;
             int hasRead = 0;
             byte[] buf = new byte[size];
             while (hasRead < size) {
@@ -189,6 +234,25 @@ final class ReaderBack {
             );
             return ByteSegment.of(data, end);
         }
+
+        private long skip0(long size, boolean endOnZeroRead) throws Exception {
+            if (size == 0) {
+                return 0;
+            }
+            long hasRead = 0;
+            while (hasRead < size) {
+                long onceSize = source.skip(size - hasRead);
+                if (onceSize == 0) {
+                    if (endOnZeroRead) {
+                        break;
+                    } else {
+                        continue;
+                    }
+                }
+                hasRead += onceSize;
+            }
+            return hasRead;
+        }
     }
 
     private static final class ByteArrayReader implements ByteReader {
@@ -196,6 +260,7 @@ final class ReaderBack {
         private final byte[] source;
         private final int endPos;
         private int pos;
+        private int mark = 0;
 
         ByteArrayReader(byte[] source, int offset, int length) throws IndexOutOfBoundsException {
             JieCheck.checkOffsetLength(source.length, offset, length);
@@ -222,6 +287,43 @@ final class ReaderBack {
             ByteBuffer data = ByteBuffer.wrap(source, pos, remaining).slice();
             pos += remaining;
             return ByteSegment.of(data, true);
+        }
+
+        @Override
+        public long skip(long size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
+            checkSize(size);
+            if (pos == endPos) {
+                return 0;
+            }
+            if (size == 0) {
+                return 0;
+            }
+            int remaining = endPos - pos;
+            if (remaining >= size) {
+                pos += (int) size;
+                return size;
+            }
+            pos += remaining;
+            return remaining;
+        }
+
+        @Override
+        public boolean markSupported() {
+            return true;
+        }
+
+        @Override
+        public void mark() throws IORuntimeException {
+            mark = pos;
+        }
+
+        @Override
+        public void reset() throws IORuntimeException {
+            pos = mark;
+        }
+
+        @Override
+        public void close() throws IORuntimeException {
         }
     }
 
@@ -251,12 +353,47 @@ final class ReaderBack {
             source.limit(limit);
             return ByteSegment.of(data, newPos >= limit);
         }
+
+        @Override
+        public long skip(long size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
+            checkSize(size);
+            if (!source.hasRemaining()) {
+                return 0;
+            }
+            if (size == 0) {
+                return 0;
+            }
+            int pos = source.position();
+            int newPos = (int) Math.min(pos + size, source.limit());
+            source.position(newPos);
+            return newPos - pos;
+        }
+
+        @Override
+        public boolean markSupported() {
+            return true;
+        }
+
+        @Override
+        public void mark() throws IORuntimeException {
+            source.mark();
+        }
+
+        @Override
+        public void reset() throws IORuntimeException {
+            source.reset();
+        }
+
+        @Override
+        public void close() throws IORuntimeException {
+        }
     }
 
     private static final class LimitedByteReader implements ByteReader {
 
         private final ByteReader source;
         private long remaining;
+        private long mark;
 
         LimitedByteReader(ByteReader source, long readLimit) throws IllegalArgumentException {
             checkReadLimit(readLimit);
@@ -282,6 +419,47 @@ final class ReaderBack {
             return seg;
         }
 
+        @Override
+        public long skip(long size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
+            checkSize(size);
+            if (remaining <= 0) {
+                return 0;
+            }
+            if (size == 0) {
+                return 0;
+            }
+            int readSize = (int) Math.min(size, remaining);
+            long skipped = source.skip(readSize, endOnZeroRead);
+            remaining -= skipped;
+            return skipped;
+        }
+
+        @Override
+        public boolean markSupported() {
+            return source.markSupported();
+        }
+
+        @Override
+        public void mark() throws IORuntimeException {
+            if (source.markSupported()) {
+                source.mark();
+                mark = remaining;
+            }
+        }
+
+        @Override
+        public void reset() throws IORuntimeException {
+            if (source.markSupported()) {
+                source.reset();
+                remaining = mark;
+            }
+        }
+
+        @Override
+        public void close() throws IORuntimeException {
+            source.close();
+        }
+
         private ByteSegment makeTrue(ByteSegment seg) {
             if (seg instanceof ByteSegmentImpl) {
                 ((ByteSegmentImpl) seg).end = true;
@@ -294,7 +472,6 @@ final class ReaderBack {
     private static final class CharStreamReader implements CharReader {
 
         private final Reader source;
-        private boolean end = false;
 
         CharStreamReader(Reader source) {
             this.source = source;
@@ -310,10 +487,53 @@ final class ReaderBack {
             }
         }
 
+        @Override
+        public long skip(long size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
+            checkSize(size);
+            try {
+                return skip0(size, endOnZeroRead);
+            } catch (Exception e) {
+                throw new IORuntimeException(e);
+            }
+        }
+
+        @Override
+        public boolean markSupported() {
+            return source.markSupported();
+        }
+
+        @Override
+        public void mark() throws IORuntimeException {
+            try {
+                source.mark(0);
+            } catch (IOException e) {
+                throw new IORuntimeException(e);
+            }
+        }
+
+        @Override
+        public void reset() throws IORuntimeException {
+            try {
+                source.reset();
+            } catch (IOException e) {
+                throw new IORuntimeException(e);
+            }
+        }
+
+        @Override
+        public void close() throws IORuntimeException {
+            try {
+                source.close();
+            } catch (IOException e) {
+                throw new IORuntimeException(e);
+            }
+        }
+
         private CharSegment read0(int size, boolean endOnZeroRead) throws Exception {
             if (size == 0) {
-                return CharSegment.empty(end);
+                return CharSegment.empty(false);
             }
+            boolean end = false;
             int hasRead = 0;
             char[] buf = new char[size];
             while (hasRead < size) {
@@ -340,6 +560,25 @@ final class ReaderBack {
             );
             return CharSegment.of(data, end);
         }
+
+        private long skip0(long size, boolean endOnZeroRead) throws Exception {
+            if (size == 0) {
+                return 0;
+            }
+            long hasRead = 0;
+            while (hasRead < size) {
+                long onceSize = source.skip(size - hasRead);
+                if (onceSize == 0) {
+                    if (endOnZeroRead) {
+                        break;
+                    } else {
+                        continue;
+                    }
+                }
+                hasRead += onceSize;
+            }
+            return hasRead;
+        }
     }
 
     private static final class CharArrayReader implements CharReader {
@@ -347,6 +586,7 @@ final class ReaderBack {
         private final char[] source;
         private final int endPos;
         private int pos;
+        private int mark = 0;
 
         CharArrayReader(char[] source, int offset, int length) throws IndexOutOfBoundsException {
             JieCheck.checkOffsetLength(source.length, offset, length);
@@ -374,6 +614,43 @@ final class ReaderBack {
             pos += remaining;
             return CharSegment.of(data, true);
         }
+
+        @Override
+        public long skip(long size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
+            checkSize(size);
+            if (pos == endPos) {
+                return 0;
+            }
+            if (size == 0) {
+                return 0;
+            }
+            int remaining = endPos - pos;
+            if (remaining >= size) {
+                pos += (int) size;
+                return size;
+            }
+            pos += remaining;
+            return remaining;
+        }
+
+        @Override
+        public boolean markSupported() {
+            return true;
+        }
+
+        @Override
+        public void mark() throws IORuntimeException {
+            mark = pos;
+        }
+
+        @Override
+        public void reset() throws IORuntimeException {
+            pos = mark;
+        }
+
+        @Override
+        public void close() throws IORuntimeException {
+        }
     }
 
     private static final class CharSequenceReader implements CharReader {
@@ -381,6 +658,7 @@ final class ReaderBack {
         private final CharSequence source;
         private final int endPos;
         private int pos;
+        private int mark = 0;
 
         CharSequenceReader(CharSequence source, int start, int end) throws IndexOutOfBoundsException {
             JieCheck.checkStartEnd(source.length(), start, end);
@@ -407,6 +685,43 @@ final class ReaderBack {
             CharBuffer data = CharBuffer.wrap(source, pos, pos + remaining).slice();
             pos += remaining;
             return CharSegment.of(data, true);
+        }
+
+        @Override
+        public long skip(long size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
+            checkSize(size);
+            if (pos == endPos) {
+                return 0;
+            }
+            if (size == 0) {
+                return 0;
+            }
+            int remaining = endPos - pos;
+            if (remaining >= size) {
+                pos += (int) size;
+                return size;
+            }
+            pos += remaining;
+            return remaining;
+        }
+
+        @Override
+        public boolean markSupported() {
+            return true;
+        }
+
+        @Override
+        public void mark() throws IORuntimeException {
+            mark = pos;
+        }
+
+        @Override
+        public void reset() throws IORuntimeException {
+            pos = mark;
+        }
+
+        @Override
+        public void close() throws IORuntimeException {
         }
     }
 
@@ -436,12 +751,47 @@ final class ReaderBack {
             source.limit(limit);
             return CharSegment.of(data, newPos >= limit);
         }
+
+        @Override
+        public long skip(long size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
+            checkSize(size);
+            if (!source.hasRemaining()) {
+                return 0;
+            }
+            if (size == 0) {
+                return 0;
+            }
+            int pos = source.position();
+            int newPos = (int) Math.min(pos + size, source.limit());
+            source.position(newPos);
+            return newPos - pos;
+        }
+
+        @Override
+        public boolean markSupported() {
+            return true;
+        }
+
+        @Override
+        public void mark() throws IORuntimeException {
+            source.mark();
+        }
+
+        @Override
+        public void reset() throws IORuntimeException {
+            source.reset();
+        }
+
+        @Override
+        public void close() throws IORuntimeException {
+        }
     }
 
     private static final class LimitedCharReader implements CharReader {
 
         private final CharReader source;
         private long remaining;
+        private long mark;
 
         LimitedCharReader(CharReader source, long readLimit) throws IllegalArgumentException {
             checkReadLimit(readLimit);
@@ -465,6 +815,47 @@ final class ReaderBack {
                 return makeTrue(seg);
             }
             return seg;
+        }
+
+        @Override
+        public long skip(long size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
+            checkSize(size);
+            if (remaining <= 0) {
+                return 0;
+            }
+            if (size == 0) {
+                return 0;
+            }
+            int readSize = (int) Math.min(size, remaining);
+            long skipped = source.skip(readSize, endOnZeroRead);
+            remaining -= skipped;
+            return skipped;
+        }
+
+        @Override
+        public boolean markSupported() {
+            return source.markSupported();
+        }
+
+        @Override
+        public void mark() throws IORuntimeException {
+            if (source.markSupported()) {
+                source.mark();
+                mark = remaining;
+            }
+        }
+
+        @Override
+        public void reset() throws IORuntimeException {
+            if (source.markSupported()) {
+                source.reset();
+                remaining = mark;
+            }
+        }
+
+        @Override
+        public void close() throws IORuntimeException {
+            source.close();
         }
 
         private CharSegment makeTrue(CharSegment seg) {
