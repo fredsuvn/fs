@@ -191,8 +191,9 @@ public interface CharProcessor {
      * @param size    the specified fixed size for the {@link CharEncoder#withFixedSize(int, CharEncoder)}
      * @param encoder the given encoder
      * @return this
+     * @throws IllegalArgumentException if the specified size is less than or equal to 0
      */
-    default CharProcessor encoder(int size, CharEncoder encoder) {
+    default CharProcessor encoder(int size, CharEncoder encoder) throws IllegalArgumentException {
         return encoder(withFixedSize(size, encoder));
     }
 

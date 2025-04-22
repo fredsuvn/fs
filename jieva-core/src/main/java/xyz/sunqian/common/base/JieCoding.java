@@ -16,9 +16,9 @@ import java.util.function.Function;
 public class JieCoding {
 
     /**
-     * If the {@code old} is null, return the {@code added}. If the {@code old} is a collection, adding the
-     * {@code added} into the {@code old}, returns the {@code old}. Otherwise, returns a new {@link ArrayList} contains
-     * the {@code old} and {@code added}.
+     * If the {@code old} is null, return the {@code added}. If the {@code added} is null, return the {@code old}. If
+     * the {@code old} is a collection, adding the {@code added} into the {@code old}, returns the {@code old}.
+     * Otherwise, returns a new {@link ArrayList} contains the {@code old} and {@code added}.
      *
      * @param old   the old
      * @param added the added
@@ -27,6 +27,9 @@ public class JieCoding {
     public static Object ifAdd(@Nullable Object old, @Nullable Object added) {
         if (old == null) {
             return added;
+        }
+        if (added == null) {
+            return old;
         }
         if (old instanceof Collection) {
             Collection<Object> oldList = Jie.as(old);

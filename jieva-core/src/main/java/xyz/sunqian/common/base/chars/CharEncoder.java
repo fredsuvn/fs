@@ -41,8 +41,9 @@ public interface CharEncoder {
      * @param size    the specified fixed size
      * @param encoder the given encoder
      * @return a wrapper {@link CharEncoder} that wraps the given encoder to encode data in fixed-size blocks
+     * @throws IllegalArgumentException if the specified size is less than or equal to 0
      */
-    static CharEncoder withFixedSize(int size, CharEncoder encoder) {
+    static CharEncoder withFixedSize(int size, CharEncoder encoder) throws IllegalArgumentException {
         return new CharProcessorImpl.FixedSizeEncoder(encoder, size);
     }
 
@@ -63,8 +64,9 @@ public interface CharEncoder {
      * @param size    the specified size
      * @param encoder the given encoder
      * @return a wrapper {@link CharEncoder} that wraps the given encoder to encode data in rounding down blocks
+     * @throws IllegalArgumentException if the specified size is less than or equal to 0
      */
-    static CharEncoder withRounding(int size, CharEncoder encoder) {
+    static CharEncoder withRounding(int size, CharEncoder encoder) throws IllegalArgumentException {
         return new CharProcessorImpl.RoundingEncoder(encoder, size);
     }
 

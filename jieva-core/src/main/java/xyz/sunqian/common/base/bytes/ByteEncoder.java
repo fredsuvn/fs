@@ -41,8 +41,9 @@ public interface ByteEncoder {
      * @param size    the specified fixed size
      * @param encoder the given encoder
      * @return a wrapper {@link ByteEncoder} that wraps the given encoder to encode data in fixed-size blocks
+     * @throws IllegalArgumentException if the specified size is less than or equal to 0
      */
-    static ByteEncoder withFixedSize(int size, ByteEncoder encoder) {
+    static ByteEncoder withFixedSize(int size, ByteEncoder encoder) throws IllegalArgumentException {
         return new ByteProcessorImpl.FixedSizeEncoder(encoder, size);
     }
 
@@ -63,8 +64,9 @@ public interface ByteEncoder {
      * @param size    the specified size
      * @param encoder the given encoder
      * @return a wrapper {@link ByteEncoder} that wraps the given encoder to encode data in rounding down blocks
+     * @throws IllegalArgumentException if the specified size is less than or equal to 0
      */
-    static ByteEncoder withRounding(int size, ByteEncoder encoder) {
+    static ByteEncoder withRounding(int size, ByteEncoder encoder) throws IllegalArgumentException {
         return new ByteProcessorImpl.RoundingEncoder(encoder, size);
     }
 

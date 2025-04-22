@@ -180,8 +180,9 @@ public interface ByteProcessor {
      * @param size    the specified fixed size for the {@link ByteEncoder#withFixedSize(int, ByteEncoder)}
      * @param encoder the given encoder
      * @return this
+     * @throws IllegalArgumentException if the specified size is less than or equal to 0
      */
-    default ByteProcessor encoder(int size, ByteEncoder encoder) {
+    default ByteProcessor encoder(int size, ByteEncoder encoder) throws IllegalArgumentException {
         return encoder(withFixedSize(size, encoder));
     }
 

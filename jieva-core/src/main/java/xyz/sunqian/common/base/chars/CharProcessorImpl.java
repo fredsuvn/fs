@@ -31,6 +31,9 @@ final class CharProcessorImpl implements CharProcessor {
     private int readBlockSize = JieIO.BUFFER_SIZE;
     private boolean endOnZeroRead = false;
     private List<CharEncoder> encoders;
+
+    // initials after starting process
+    private CharReader sourceReader;
     private CharEncoder theOneEncoder;
 
     CharProcessorImpl(Reader source) {
@@ -47,6 +50,51 @@ final class CharProcessorImpl implements CharProcessor {
 
     CharProcessorImpl(CharSequence source) {
         this.source = source;
+    }
+
+    private void initProcessing() {
+        this.sourceReader = toCharReader(source);
+        this.theOneEncoder = getTheOneEncoder();
+    }
+
+    private CharReader toCharReader(Object src) {
+        if (src instanceof Reader) {
+            return CharReader.from((Reader) src);
+        }
+        if (src instanceof char[]) {
+            return CharReader.from((char[]) src);
+        }
+        if (src instanceof CharBuffer) {
+            return CharReader.from((CharBuffer) src);
+        }
+        if (src instanceof CharSequence) {
+            return CharReader.from((CharSequence) src);
+        }
+        throw new IORuntimeException("The type of source is unsupported: " + src.getClass());
+    }
+
+    private CharEncoder getTheOneEncoder() {
+        if (theOneEncoder != null) {
+            return theOneEncoder;
+        }
+        if (JieColl.isEmpty(encoders)) {
+            theOneEncoder = CharEncoder.emptyEncoder();
+            return theOneEncoder;
+        }
+        if (encoders.size() == 1) {
+            return encoders.get(0);
+        }
+        theOneEncoder = (data, end) -> {
+            CharBuffer chars = data;
+            for (CharEncoder encoder : encoders) {
+                chars = encoder.encode(chars, end);
+                if (chars == null) {
+                    break;
+                }
+            }
+            return chars;
+        };
+        return theOneEncoder;
     }
 
     @Override
@@ -216,9 +264,9 @@ final class CharProcessorImpl implements CharProcessor {
     }
 
     private long startInBlocks() throws Exception {
-        CharReader in = toCharReader(source);
+        initProcessing();
         DataWriter out = toBufferOut(dest);
-        return readTo(in, out);
+        return readTo(sourceReader, out);
     }
 
     private long readTo(CharReader in, DataWriter out) throws Exception {
@@ -238,43 +286,6 @@ final class CharProcessorImpl implements CharProcessor {
         }
     }
 
-    private CharEncoder getTheOneEncoder() {
-        if (theOneEncoder != null) {
-            return theOneEncoder;
-        }
-        if (JieColl.isEmpty(encoders)) {
-            theOneEncoder = CharEncoder.emptyEncoder();
-            return theOneEncoder;
-        }
-        theOneEncoder = (data, end) -> {
-            CharBuffer chars = data;
-            for (CharEncoder encoder : encoders) {
-                chars = encoder.encode(chars, end);
-                if (chars == null) {
-                    break;
-                }
-            }
-            return chars;
-        };
-        return theOneEncoder;
-    }
-
-    private CharReader toCharReader(Object src) {
-        if (src instanceof Reader) {
-            return CharReader.from((Reader) src);
-        }
-        if (src instanceof char[]) {
-            return CharReader.from((char[]) src);
-        }
-        if (src instanceof CharBuffer) {
-            return CharReader.from((CharBuffer) src);
-        }
-        if (src instanceof CharSequence) {
-            return CharReader.from((CharSequence) src);
-        }
-        throw new IORuntimeException("Unexpected source type: " + src.getClass());
-    }
-
     private DataWriter toBufferOut(Object dst) {
         if (dst instanceof DataWriter) {
             return (DataWriter) dst;
@@ -288,7 +299,7 @@ final class CharProcessorImpl implements CharProcessor {
         if (dst instanceof Appendable) {
             return new AppendableDataWriter((Appendable) dst);
         }
-        throw new IORuntimeException("Unexpected destination type: " + dst.getClass());
+        throw new IORuntimeException("The type of destination is unsupported: " + dst.getClass());
     }
 
     private interface DataWriter {
@@ -503,15 +514,11 @@ final class CharProcessorImpl implements CharProcessor {
             }
             int size = 0;
             for (CharBuffer charBuffer : charBuffers) {
-                if (charBuffer != null) {
-                    size += charBuffer.remaining();
-                }
+                size += charBuffer.remaining();
             }
             CharBuffer result = CharBuffer.allocate(size);
             for (CharBuffer charBuffer : charBuffers) {
-                if (charBuffer != null) {
-                    result.put(charBuffer);
-                }
+                result.put(charBuffer);
             }
             result.flip();
             return result;
@@ -542,6 +549,72 @@ final class CharProcessorImpl implements CharProcessor {
 
         protected int totalSize(CharBuffer data) {
             return buf.length + data.remaining();
+        }
+    }
+
+    static final class FixedSizeEncoder extends AbsEncoder {
+
+        private final int size;
+
+        // Capacity is always the size.
+        private @Nullable CharBuffer buffer;
+
+        FixedSizeEncoder(CharEncoder encoder, int size) throws IllegalArgumentException {
+            super(encoder);
+            checkSize(size);
+            this.size = size;
+        }
+
+        @Override
+        public @Nullable CharBuffer encode(CharBuffer data, boolean end) throws Exception {
+            @Nullable Object result = null;
+
+            // clean buffer
+            if (buffer != null && buffer.position() > 0) {
+                JieBuffer.readTo(data, buffer);
+                if (end && !data.hasRemaining()) {
+                    buffer.flip();
+                    return encoder.encode(buffer, true);
+                }
+                if (buffer.hasRemaining()) {
+                    return null;
+                }
+                buffer.flip();
+                result = JieCoding.ifAdd(result, encoder.encode(buffer, false));
+                buffer.clear();
+            }
+
+            // split
+            int pos = data.position();
+            int limit = data.limit();
+            while (limit - pos >= size) {
+                data.position(pos);
+                data.limit(pos + size);
+                CharBuffer slice = data.slice();
+                pos += size;
+                if (end && !data.hasRemaining()) {
+                    result = JieCoding.ifAdd(result, encoder.encode(slice, true));
+                } else {
+                    result = JieCoding.ifAdd(result, encoder.encode(slice, false));
+                }
+            }
+            data.position(pos);
+            data.limit(limit);
+
+            // buffering
+            if (data.hasRemaining()) {
+                if (buffer == null) {
+                    buffer = CharBuffer.allocate(size);
+                }
+                JieBuffer.readTo(data, buffer);
+                if (end) {
+                    buffer.flip();
+                    result = JieCoding.ifAdd(result, encoder.encode(buffer, true));
+                    return JieCoding.ifMerge(result, BufferMerger.SINGLETON);
+                }
+            }
+
+            return JieCoding.ifMerge(result, BufferMerger.SINGLETON);
         }
     }
 
@@ -615,71 +688,6 @@ final class CharProcessorImpl implements CharProcessor {
         }
     }
 
-    static final class FixedSizeEncoder extends AbsEncoder {
-
-        private final int size;
-
-        // Capacity is always the size.
-        private @Nullable CharBuffer buffer;
-
-        FixedSizeEncoder(CharEncoder encoder, int size) {
-            super(encoder);
-            this.size = size;
-        }
-
-        @Override
-        public @Nullable CharBuffer encode(CharBuffer data, boolean end) throws Exception {
-            @Nullable Object result = null;
-
-            // clean buffer
-            if (buffer != null && buffer.position() > 0) {
-                JieBuffer.readTo(data, buffer);
-                if (end && !data.hasRemaining()) {
-                    buffer.flip();
-                    return encoder.encode(buffer, true);
-                }
-                if (buffer.hasRemaining()) {
-                    return null;
-                }
-                buffer.flip();
-                result = JieCoding.ifAdd(result, encoder.encode(buffer, false));
-                buffer.clear();
-            }
-
-            // split
-            int pos = data.position();
-            int limit = data.limit();
-            while (limit - pos >= size) {
-                data.position(pos);
-                data.limit(pos + size);
-                CharBuffer slice = data.slice();
-                pos += size;
-                if (end && !data.hasRemaining()) {
-                    result = JieCoding.ifAdd(result, encoder.encode(slice, true));
-                } else {
-                    result = JieCoding.ifAdd(result, encoder.encode(slice, false));
-                }
-            }
-            data.position(pos);
-            data.limit(limit);
-
-            // buffering
-            if (data.hasRemaining()) {
-                if (buffer == null) {
-                    buffer = CharBuffer.allocate(size);
-                }
-                JieBuffer.readTo(data, buffer);
-                if (end) {
-                    buffer.flip();
-                    result = JieCoding.ifAdd(result, encoder.encode(buffer, true));
-                    return JieCoding.ifMerge(result, BufferMerger.SINGLETON);
-                }
-            }
-
-            return JieCoding.ifMerge(result, BufferMerger.SINGLETON);
-        }
-    }
-
     static final class EmptyEncoder implements CharEncoder {
 
         static final EmptyEncoder SINGLETON = new EmptyEncoder();
@@ -687,6 +695,12 @@ final class CharProcessorImpl implements CharProcessor {
         @Override
         public @Nullable CharBuffer encode(CharBuffer data, boolean end) {
             return data;
+        }
+    }
+
+    private static void checkSize(int size) {
+        if (size <= 0) {
+            throw new IllegalArgumentException("The size must > 0.");
         }
     }
 }
