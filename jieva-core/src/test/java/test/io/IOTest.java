@@ -7,6 +7,9 @@ import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieIO;
+import xyz.sunqian.test.ReadOps;
+import xyz.sunqian.test.TestInputStream;
+import xyz.sunqian.test.TestReader;
 
 import java.io.ByteArrayInputStream;
 import java.io.CharArrayReader;
@@ -23,7 +26,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.expectThrows;
 import static xyz.sunqian.test.MaterialBox.copyBytes;
 
-public class JieIOTest {
+public class IOTest {
 
     @Test
     public void testRead() throws Exception {
@@ -40,6 +43,8 @@ public class JieIOTest {
         String str = new String(JieRandom.fill(new char[size], 'a', 'z'));
         byte[] bytes = str.getBytes(JieChars.UTF_8);
         char[] chars = str.toCharArray();
+        TestInputStream tin = new TestInputStream(new ByteArrayInputStream(bytes));
+        TestReader tr = new TestReader(new CharArrayReader(chars));
 
         // bytes
         assertEquals(JieIO.read(bytesInput(bytes, available)), bytes);
@@ -47,10 +52,11 @@ public class JieIOTest {
         assertEquals(JieIO.read(JieIO.emptyInStream(), size), new byte[0]);
         assertEquals(JieIO.read(fakeInput(available)), new byte[0]);
         assertEquals(JieIO.read(fakeInput(available), 1), new byte[0]);
-        expectThrows(IORuntimeException.class, () -> JieIO.read(errorInput()));
         assertEquals(JieIO.read(bytesInput(bytes, available), -1), bytes);
         assertEquals(JieIO.read(bytesInput(bytes, available), 0), new byte[0]);
-        expectThrows(IORuntimeException.class, () -> JieIO.read(errorInput(), 1));
+        tin.setNextOperation(ReadOps.THROW, 2);
+        expectThrows(IORuntimeException.class, () -> JieIO.read(tin));
+        expectThrows(IORuntimeException.class, () -> JieIO.read(tin, 1));
         assertEquals(JieIO.read(bytesInput(bytes, available), offset), Arrays.copyOf(bytes, offset));
         assertEquals(JieIO.read(bytesInput(bytes, available), size + 1), bytes);
         if (size > JieIO.BUFFER_SIZE + offset) {
@@ -75,10 +81,11 @@ public class JieIOTest {
         assertEquals(JieIO.read(charsReader(chars)), chars);
         assertEquals(JieIO.read(JieIO.emptyReader()), new char[0]);
         assertEquals(JieIO.read(JieIO.emptyReader(), size), new char[0]);
-        expectThrows(IORuntimeException.class, () -> JieIO.read(errorReader()));
         assertEquals(JieIO.read(charsReader(chars), -1), chars);
         assertEquals(JieIO.read(charsReader(chars), 0), new char[0]);
-        expectThrows(IORuntimeException.class, () -> JieIO.read(errorReader(), 1));
+        tr.setNextOperation(ReadOps.THROW, 2);
+        expectThrows(IORuntimeException.class, () -> JieIO.read(tr));
+        expectThrows(IORuntimeException.class, () -> JieIO.read(tr, 1));
         assertEquals(JieIO.read(charsReader(chars), offset), Arrays.copyOf(chars, offset));
         assertEquals(JieIO.read(charsReader(chars), size + 1), chars);
         if (size > JieIO.BUFFER_SIZE + offset) {
@@ -90,12 +97,13 @@ public class JieIOTest {
         assertEquals(JieIO.string(new StringReader(str)), str);
         assertEquals(JieIO.string(new InputStreamReader(JieIO.emptyInStream())), "");
         assertEquals(JieIO.string(new InputStreamReader(JieIO.emptyInStream()), 1), "");
-        expectThrows(IORuntimeException.class, () -> JieIO.string(new InputStreamReader(errorInput())));
         assertEquals(JieIO.string(new StringReader(str), offset), str.substring(0, offset));
         assertEquals(JieIO.string(new StringReader(str), -1), str);
         assertEquals(JieIO.string(new StringReader(str), 0), "");
         assertEquals(JieIO.string(new StringReader(str), size + 1), str);
-        expectThrows(IORuntimeException.class, () -> JieIO.string(new InputStreamReader(errorInput()), 1));
+        tin.setNextOperation(ReadOps.THROW, 2);
+        expectThrows(IORuntimeException.class, () -> JieIO.string(new InputStreamReader(tin)));
+        expectThrows(IORuntimeException.class, () -> JieIO.string(new InputStreamReader(tin), 1));
         if (size > JieIO.BUFFER_SIZE + offset) {
             assertEquals(JieIO.string(new StringReader(str), JieIO.BUFFER_SIZE + offset),
                 str.substring(0, JieIO.BUFFER_SIZE + offset));
@@ -107,7 +115,8 @@ public class JieIOTest {
         assertEquals(JieIO.string(JieIO.emptyInStream()), "");
         assertEquals(JieIO.avalaibleString(bytesInput(bytes, bytes.length)), str);
         assertEquals(JieIO.avalaibleString(JieIO.emptyInStream()), "");
-        expectThrows(IORuntimeException.class, () -> JieIO.avalaibleString(errorInput()));
+        tin.setNextOperation(ReadOps.THROW);
+        expectThrows(IORuntimeException.class, () -> JieIO.avalaibleString(tin));
     }
 
     @Test
@@ -175,14 +184,6 @@ public class JieIOTest {
         return new FakeInput(available, readSize);
     }
 
-    private InputStream errorInput() {
-        return new ErrorInput();
-    }
-
-    private Reader errorReader() {
-        return new ErrorReader();
-    }
-
     private static final class BytesInput extends ByteArrayInputStream {
 
         private final int available;
@@ -228,36 +229,6 @@ public class JieIOTest {
         @Override
         public int available() throws IOException {
             return available;
-        }
-    }
-
-    private static final class ErrorInput extends InputStream {
-
-        @Override
-        public int read() throws IOException {
-            throw new IOException();
-        }
-
-        @Override
-        public synchronized int available() {
-            return 100;
-        }
-    }
-
-    private static final class ErrorReader extends Reader {
-
-        @Override
-        public int read() throws IOException {
-            throw new IOException();
-        }
-
-        @Override
-        public int read(@NotNull char[] cbuf, int off, int len) throws IOException {
-            throw new IOException();
-        }
-
-        @Override
-        public void close() throws IOException {
         }
     }
 }

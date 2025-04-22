@@ -1,6 +1,7 @@
 package xyz.sunqian.common.codec;
 
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.io.IOMisc;
 import xyz.sunqian.common.io.JieBuffer;
 import xyz.sunqian.common.io.JieIO;
 
@@ -10,7 +11,11 @@ import javax.crypto.Mac;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.security.*;
+import java.security.KeyFactory;
+import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
+import java.security.Provider;
+import java.security.Signature;
 
 /**
  * Codec utilities.
@@ -265,7 +270,7 @@ public class JieCodec {
             int outSize = 0;
             while (remaining > 0) {
                 int inSize = Math.min(remaining, blockSize);
-                ByteBuffer r = JieBuffer.readSlice(in, inSize);
+                ByteBuffer r = IOMisc.readSlice(in, inSize);
                 outSize += cipher.doFinal(r, out);
                 remaining -= inSize;
             }
@@ -300,7 +305,7 @@ public class JieCodec {
             long outSize = 0;
             while (remaining > 0) {
                 int inSize = Math.min(remaining, blockSize);
-                ByteBuffer r = JieBuffer.readSlice(in, inSize);
+                ByteBuffer r = IOMisc.readSlice(in, inSize);
                 byte[] outBytes = doCipher(cipher, r);
                 if (outBytes != null) {
                     out.write(outBytes);

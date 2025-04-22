@@ -37,11 +37,11 @@ public class SpecialReaderTest {
         expectThrows(TestIOException.class, () -> test.mark(0));
         test.setNextOperation(ReadOps.THROW);
         expectThrows(IOException.class, test::reset);
-        test.setNextOperations(ReadOps.THROW, 2);
+        test.setNextOperation(ReadOps.THROW, 2);
         expectThrows(IOException.class, test::close);
         expectThrows(IOException.class, test::close);
         test.close();
-        test.setNextOperations(ReadOps.THROW, 2);
+        test.setNextOperation(ReadOps.THROW, 2);
         test.setNextOperation(ReadOps.READ_NORMAL);
         test.close();
         boolean ms = test.markSupported();
@@ -179,11 +179,11 @@ public class SpecialReaderTest {
         expectThrows(IOException.class, () -> test.mark(0));
         test.setNextOperation(ReadOps.THROW);
         expectThrows(IOException.class, test::reset);
-        test.setNextOperations(ReadOps.THROW, 2);
+        test.setNextOperation(ReadOps.THROW, 2);
         expectThrows(IOException.class, test::close);
         expectThrows(IOException.class, test::close);
         test.close();
-        test.setNextOperations(ReadOps.THROW, 2);
+        test.setNextOperation(ReadOps.THROW, 2);
         test.setNextOperation(ReadOps.READ_NORMAL);
         test.close();
         boolean ms = test.markSupported();

@@ -1,7 +1,7 @@
 package xyz.sunqian.common.net.tcp.handlers;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.io.JieBuffer;
+import xyz.sunqian.common.io.IOMisc;
 import xyz.sunqian.common.net.tcp.GekTcpChannel;
 import xyz.sunqian.common.net.tcp.GekTcpChannelHandler;
 
@@ -21,13 +21,13 @@ import java.util.function.IntFunction;
  *     <li>
  *         Fixed length: created by {@link #LengthBasedTcpChannelHandler(int)}
  *         or {@link #LengthBasedTcpChannelHandler(int, IntFunction)},
- *         to split in fixed length with {@link JieBuffer#split(ByteBuffer, int)}
+ *         to split in fixed length with {@link IOMisc#split(ByteBuffer, int)}
  *         and make returned buffers readonly;
  *     </li>
  *     <li>
  *         Specified length: created by {@link #LengthBasedTcpChannelHandler(int, int)}
  *         or {@link #LengthBasedTcpChannelHandler(int, int, IntFunction)},
- *         to split in specified length with {@link JieBuffer#split(ByteBuffer, int, int)}
+ *         to split in specified length with {@link IOMisc#split(ByteBuffer, int, int)}
  *         and make returned buffers readonly;
  *     </li>
  * </ul>
@@ -94,12 +94,12 @@ public class LengthBasedTcpChannelHandler implements GekTcpChannelHandler<ByteBu
     }
 
     private @Nullable Object onFixed(GekTcpChannel channel, ByteBuffer message) {
-        List<ByteBuffer> result = JieBuffer.split(message, lengthOffset, generator);
+        List<ByteBuffer> result = IOMisc.split(message, lengthOffset, generator);
         return result.isEmpty() ? null : asReadOnly(result);
     }
 
     private @Nullable Object onSpecified(GekTcpChannel channel, ByteBuffer message) {
-        List<ByteBuffer> result = JieBuffer.split(message, lengthOffset, lengthSize, generator);
+        List<ByteBuffer> result = IOMisc.split(message, lengthOffset, lengthSize, generator);
         return result.isEmpty() ? null : asReadOnly(result);
     }
 

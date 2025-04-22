@@ -33,10 +33,10 @@ public class TestReader extends Reader {
      * }</pre>
      *
      * @param readOps the behavior for the next I/O operation
-     * @see #setNextOperations(ReadOps, int)
+     * @see #setNextOperation(ReadOps, int)
      */
     public void setNextOperation(ReadOps readOps) {
-        setNextOperations(readOps, 1);
+        setNextOperation(readOps, 1);
     }
 
     /**
@@ -46,7 +46,7 @@ public class TestReader extends Reader {
      * @param readOps the behaviors for the next specified number of I/O operations
      * @param times   the number of I/O operations
      */
-    public void setNextOperations(ReadOps readOps, int times) {
+    public void setNextOperation(ReadOps readOps, int times) {
         this.readOps = readOps;
         this.times = times;
     }
