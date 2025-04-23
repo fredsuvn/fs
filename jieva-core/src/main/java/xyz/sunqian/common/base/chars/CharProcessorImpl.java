@@ -2,9 +2,7 @@ package xyz.sunqian.common.base.chars;
 
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.JieCoding;
-import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.base.exception.ProcessingException;
-import xyz.sunqian.common.coll.JieArray;
 import xyz.sunqian.common.coll.JieColl;
 import xyz.sunqian.common.io.CharReader;
 import xyz.sunqian.common.io.CharSegment;
@@ -34,7 +32,7 @@ final class CharProcessorImpl implements CharProcessor {
 
     // initials after starting process
     private CharReader sourceReader;
-    private CharEncoder theOneEncoder;
+    private CharEncoder oneEncoder;
 
     CharProcessorImpl(Reader source) {
         this.source = source;
@@ -54,7 +52,7 @@ final class CharProcessorImpl implements CharProcessor {
 
     private void initProcessing() {
         this.sourceReader = toCharReader(source);
-        this.theOneEncoder = getTheOneEncoder();
+        this.oneEncoder = getTheOneEncoder(encoders);
     }
 
     private CharReader toCharReader(Object src) {
@@ -73,18 +71,14 @@ final class CharProcessorImpl implements CharProcessor {
         throw new IORuntimeException("The type of source is unsupported: " + src.getClass());
     }
 
-    private CharEncoder getTheOneEncoder() {
-        if (theOneEncoder != null) {
-            return theOneEncoder;
-        }
+    private CharEncoder getTheOneEncoder(List<CharEncoder> encoders) {
         if (JieColl.isEmpty(encoders)) {
-            theOneEncoder = CharEncoder.emptyEncoder();
-            return theOneEncoder;
+            return CharEncoder.emptyEncoder();
         }
         if (encoders.size() == 1) {
             return encoders.get(0);
         }
-        theOneEncoder = (data, end) -> {
+        return (data, end) -> {
             CharBuffer chars = data;
             for (CharEncoder encoder : encoders) {
                 chars = encoder.encode(chars, end);
@@ -94,7 +88,6 @@ final class CharProcessorImpl implements CharProcessor {
             }
             return chars;
         };
-        return theOneEncoder;
     }
 
     @Override
@@ -168,7 +161,7 @@ final class CharProcessorImpl implements CharProcessor {
 
     @Override
     public Reader toReader() {
-        return new ProcessorReader(toCharReader(source));
+        return new ProcessorReader();
     }
 
     private long start() {
@@ -222,7 +215,11 @@ final class CharProcessorImpl implements CharProcessor {
 
     private long charsToAppender(char[] src, Appendable dst) throws IOException {
         int len = getDirectLen(src.length);
-        dst.append(JieString.asChars(src, 0, len));
+        if (dst instanceof Writer) {
+            ((Writer) dst).write(src, 0, len);
+        } else {
+            dst.append(new String(src, 0, len));
+        }
         return len;
     }
 
@@ -266,11 +263,10 @@ final class CharProcessorImpl implements CharProcessor {
     private long startInBlocks() throws Exception {
         initProcessing();
         DataWriter out = toBufferOut(dest);
-        return readTo(sourceReader, out);
+        return readTo(sourceReader, oneEncoder, out);
     }
 
-    private long readTo(CharReader in, DataWriter out) throws Exception {
-        CharEncoder oneEncoder = getTheOneEncoder();
+    private long readTo(CharReader in, CharEncoder oneEncoder, DataWriter out) throws Exception {
         CharReader reader = readLimit < 0 ? in : in.withReadLimit(readLimit);
         long count = 0;
         while (true) {
@@ -322,16 +318,16 @@ final class CharProcessorImpl implements CharProcessor {
             }
             if (buffer.hasArray()) {
                 int remaining = buffer.remaining();
-                dest.append(JieString.asChars(
+                dest.append(new String(
                     buffer.array(),
                     JieBuffer.arrayStartIndex(buffer),
-                    JieBuffer.arrayEndIndex(buffer)
+                    buffer.remaining()
                 ));
                 buffer.position(buffer.position() + remaining);
             } else {
                 char[] buf = new char[buffer.remaining()];
                 buffer.get(buf);
-                dest.append(JieString.asChars(buf, 0, buf.length));
+                dest.append(new String(buf));
             }
         }
 
@@ -360,18 +356,16 @@ final class CharProcessorImpl implements CharProcessor {
 
     private final class ProcessorReader extends Reader {
 
-        private final CharReader in;
         private CharSegment nextSeg = null;
         private boolean closed = false;
 
-        private ProcessorReader(CharReader in) {
-            this.in = in;
+        private ProcessorReader() {
+            initProcessing();
         }
 
         private CharSegment read0() throws IOException {
             try {
-                CharEncoder oneEncoder = getTheOneEncoder();
-                CharSegment s0 = in.read(readBlockSize, endOnZeroRead);
+                CharSegment s0 = sourceReader.read(readBlockSize, endOnZeroRead);
                 CharBuffer encoded = oneEncoder.encode(s0.data(), s0.end());
                 if (encoded == s0.data()) {
                     return s0;
@@ -525,49 +519,24 @@ final class CharProcessorImpl implements CharProcessor {
         }
     }
 
-    private static abstract class AbsEncoder implements CharEncoder {
+    static final class FixedSizeEncoder implements CharEncoder {
 
-        protected final CharEncoder encoder;
-        protected char[] buf = JieChars.emptyChars();
-
-        protected AbsEncoder(CharEncoder encoder) {
-            this.encoder = encoder;
-        }
-
-        // buf will be set null after total
-        protected CharBuffer totalData(CharBuffer data) {
-            if (JieArray.isEmpty(buf)) {
-                return data;
-            }
-            CharBuffer total = CharBuffer.allocate(totalSize(data));
-            total.put(buf);
-            total.put(data);
-            total.flip();
-            buf = null;
-            return total;
-        }
-
-        protected int totalSize(CharBuffer data) {
-            return buf.length + data.remaining();
-        }
-    }
-
-    static final class FixedSizeEncoder extends AbsEncoder {
-
+        private final CharEncoder encoder;
         private final int size;
 
         // Capacity is always the size.
         private @Nullable CharBuffer buffer;
 
         FixedSizeEncoder(CharEncoder encoder, int size) throws IllegalArgumentException {
-            super(encoder);
             checkSize(size);
+            this.encoder = encoder;
             this.size = size;
         }
 
         @Override
         public @Nullable CharBuffer encode(CharBuffer data, boolean end) throws Exception {
             @Nullable Object result = null;
+            boolean encoded = false;
 
             // clean buffer
             if (buffer != null && buffer.position() > 0) {
@@ -581,6 +550,7 @@ final class CharProcessorImpl implements CharProcessor {
                 }
                 buffer.flip();
                 result = JieCoding.ifAdd(result, encoder.encode(buffer, false));
+                encoded = true;
                 buffer.clear();
             }
 
@@ -588,17 +558,18 @@ final class CharProcessorImpl implements CharProcessor {
             int pos = data.position();
             int limit = data.limit();
             while (limit - pos >= size) {
-                data.position(pos);
-                data.limit(pos + size);
-                CharBuffer slice = data.slice();
                 pos += size;
-                if (end && !data.hasRemaining()) {
+                data.limit(pos);
+                CharBuffer slice = data.slice();
+                data.position(pos);
+                if (end && pos == limit) {
                     result = JieCoding.ifAdd(result, encoder.encode(slice, true));
+                    return JieCoding.ifMerge(result, BufferMerger.SINGLETON);
                 } else {
                     result = JieCoding.ifAdd(result, encoder.encode(slice, false));
+                    encoded = true;
                 }
             }
-            data.position(pos);
             data.limit(limit);
 
             // buffering
@@ -610,80 +581,127 @@ final class CharProcessorImpl implements CharProcessor {
                 if (end) {
                     buffer.flip();
                     result = JieCoding.ifAdd(result, encoder.encode(buffer, true));
-                    return JieCoding.ifMerge(result, BufferMerger.SINGLETON);
+                    encoded = true;
                 }
             }
 
-            return JieCoding.ifMerge(result, BufferMerger.SINGLETON);
+            @Nullable CharBuffer ret = JieCoding.ifMerge(result, BufferMerger.SINGLETON);
+            if (end && !encoded) {
+                return encoder.encode(JieChars.emptyBuffer(), true);
+            }
+            return ret;
         }
     }
 
-    static final class RoundingEncoder extends AbsEncoder {
+    static final class RoundingEncoder implements CharEncoder {
 
-        private final int expectedBlockSize;
+        private final CharEncoder encoder;
+        private final int size;
 
-        RoundingEncoder(CharEncoder encoder, int expectedBlockSize) {
-            super(encoder);
-            this.expectedBlockSize = expectedBlockSize;
+        // Capacity is always the size.
+        private @Nullable CharBuffer buffer;
+
+        RoundingEncoder(CharEncoder encoder, int size) {
+            checkSize(size);
+            this.encoder = encoder;
+            this.size = size;
         }
 
         @Override
         public @Nullable CharBuffer encode(CharBuffer data, boolean end) throws Exception {
-            if (end) {
-                return encoder.encode(totalData(data), true);
-            }
-            int size = totalSize(data);
-            if (size < expectedBlockSize) {
-                char[] newBuf = new char[size];
-                System.arraycopy(buf, 0, newBuf, 0, buf.length);
-                data.get(newBuf, buf.length, data.remaining());
-                buf = newBuf;
-                return null;
-            }
-            int remainder = size % expectedBlockSize;
-            if (remainder == 0) {
-                CharBuffer total = totalData(data);
-                buf = JieChars.emptyChars();
-                return encoder.encode(total, false);
-            }
-            int roundSize = size / expectedBlockSize * expectedBlockSize;
-            CharBuffer round = roundData(data, roundSize);
-            buf = new char[remainder];
-            data.get(buf);
-            return encoder.encode(round, false);
-        }
+            @Nullable Object result = null;
+            boolean encoded = false;
 
-        private CharBuffer roundData(CharBuffer data, int roundSize) {
-            CharBuffer round = CharBuffer.allocate(roundSize);
-            round.put(buf);
-            int sliceSize = roundSize - buf.length;
-            CharBuffer slice = JieBuffer.slice(data, sliceSize);
-            data.position(data.position() + sliceSize);
-            round.put(slice);
-            round.flip();
-            return round;
+            // clean buffer
+            if (buffer != null && buffer.position() > 0) {
+                JieBuffer.readTo(data, buffer);
+                if (end && !data.hasRemaining()) {
+                    buffer.flip();
+                    return encoder.encode(buffer, true);
+                }
+                if (buffer.hasRemaining()) {
+                    return null;
+                }
+                buffer.flip();
+                result = JieCoding.ifAdd(result, encoder.encode(buffer, false));
+                encoded = true;
+                buffer.clear();
+            }
+
+            // rounding
+            int remaining = data.remaining();
+            int roundingSize = remaining / size * size;
+            if (roundingSize > 0) {
+                int pos = data.position();
+                pos += roundingSize;
+                int limit = data.limit();
+                data.limit(pos);
+                CharBuffer slice = data.slice();
+                data.position(pos);
+                data.limit(limit);
+                if (end && pos == limit) {
+                    result = JieCoding.ifAdd(result, encoder.encode(slice, true));
+                    return JieCoding.ifMerge(result, BufferMerger.SINGLETON);
+                } else {
+                    result = JieCoding.ifAdd(result, encoder.encode(slice, false));
+                    encoded = true;
+                }
+            }
+
+            // buffering
+            if (data.hasRemaining()) {
+                if (buffer == null) {
+                    buffer = CharBuffer.allocate(size);
+                }
+                JieBuffer.readTo(data, buffer);
+                if (end) {
+                    buffer.flip();
+                    result = JieCoding.ifAdd(result, encoder.encode(buffer, true));
+                    encoded = true;
+                }
+            }
+
+            @Nullable CharBuffer ret = JieCoding.ifMerge(result, BufferMerger.SINGLETON);
+            if (end && !encoded) {
+                return encoder.encode(JieChars.emptyBuffer(), true);
+            }
+            return ret;
         }
     }
 
-    static final class BufferingEncoder extends AbsEncoder {
+    static final class BufferingEncoder implements CharEncoder {
+
+        private final CharEncoder encoder;
+        private char[] buffer = null;
 
         BufferingEncoder(CharEncoder encoder) {
-            super(encoder);
+            this.encoder = encoder;
         }
 
         @Override
         public @Nullable CharBuffer encode(CharBuffer data, boolean end) throws Exception {
-            CharBuffer total = totalData(data);
-            CharBuffer ret = encoder.encode(total, end);
+            CharBuffer totalBuffer;
+            if (buffer != null) {
+                CharBuffer newBuffer = CharBuffer.allocate(buffer.length + data.remaining());
+                newBuffer.put(buffer);
+                newBuffer.put(data);
+                newBuffer.flip();
+                totalBuffer = newBuffer;
+            } else {
+                totalBuffer = data;
+            }
+            CharBuffer ret = encoder.encode(totalBuffer, end);
             if (end) {
+                buffer = null;
                 return ret;
             }
-            if (total.hasRemaining()) {
-                buf = new char[total.remaining()];
-                total.get(buf);
-                return ret;
+            if (totalBuffer.hasRemaining()) {
+                char[] remainingBuffer = new char[totalBuffer.remaining()];
+                totalBuffer.get(remainingBuffer);
+                buffer = remainingBuffer;
+            } else {
+                buffer = null;
             }
-            buf = JieChars.emptyChars();
             return ret;
         }
     }

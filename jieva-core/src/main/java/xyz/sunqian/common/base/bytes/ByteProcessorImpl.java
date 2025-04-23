@@ -4,7 +4,6 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.JieCoding;
 import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.base.exception.ProcessingException;
-import xyz.sunqian.common.coll.JieArray;
 import xyz.sunqian.common.coll.JieColl;
 import xyz.sunqian.common.io.ByteReader;
 import xyz.sunqian.common.io.ByteSegment;
@@ -16,7 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -35,7 +33,7 @@ final class ByteProcessorImpl implements ByteProcessor {
 
     // initials after starting process
     private ByteReader sourceReader;
-    private ByteEncoder theOneEncoder;
+    private ByteEncoder oneEncoder;
 
     ByteProcessorImpl(InputStream source) {
         this.source = source;
@@ -51,7 +49,7 @@ final class ByteProcessorImpl implements ByteProcessor {
 
     private void initProcessing() {
         this.sourceReader = toByteReader(source);
-        this.theOneEncoder = getTheOneEncoder();
+        this.oneEncoder = getTheOneEncoder(encoders);
     }
 
     private ByteReader toByteReader(Object src) {
@@ -67,18 +65,14 @@ final class ByteProcessorImpl implements ByteProcessor {
         throw new IORuntimeException("The type of source is unsupported: " + src.getClass());
     }
 
-    private ByteEncoder getTheOneEncoder() {
-        if (theOneEncoder != null) {
-            return theOneEncoder;
-        }
+    private ByteEncoder getTheOneEncoder(List<ByteEncoder> encoders) {
         if (JieColl.isEmpty(encoders)) {
-            theOneEncoder = ByteEncoder.emptyEncoder();
-            return theOneEncoder;
+            return ByteEncoder.emptyEncoder();
         }
         if (encoders.size() == 1) {
             return encoders.get(0);
         }
-        theOneEncoder = (data, end) -> {
+        return (data, end) -> {
             ByteBuffer bytes = data;
             for (ByteEncoder encoder : encoders) {
                 bytes = encoder.encode(bytes, end);
@@ -88,7 +82,6 @@ final class ByteProcessorImpl implements ByteProcessor {
             }
             return bytes;
         };
-        return theOneEncoder;
     }
 
     @Override
@@ -165,7 +158,7 @@ final class ByteProcessorImpl implements ByteProcessor {
 
     @Override
     public InputStream toInputStream() {
-        return new ProcessorInputStream(toByteReader(source));
+        return new ProcessorInputStream();
     }
 
     private long start() {
@@ -235,11 +228,10 @@ final class ByteProcessorImpl implements ByteProcessor {
     private long startInBlocks() throws Exception {
         initProcessing();
         DataWriter out = toBufferOut(dest);
-        return readTo(sourceReader, out);
+        return readTo(sourceReader, oneEncoder, out);
     }
 
-    private long readTo(ByteReader in, DataWriter out) throws Exception {
-        ByteEncoder oneEncoder = getTheOneEncoder();
+    private long readTo(ByteReader in, ByteEncoder oneEncoder, DataWriter out) throws Exception {
         ByteReader reader = readLimit < 0 ? in : in.withReadLimit(readLimit);
         long count = 0;
         while (true) {
@@ -309,18 +301,16 @@ final class ByteProcessorImpl implements ByteProcessor {
 
     private final class ProcessorInputStream extends InputStream {
 
-        private final ByteReader in;
         private ByteSegment nextSeg = null;
         private boolean closed = false;
 
-        private ProcessorInputStream(ByteReader in) {
-            this.in = in;
+        private ProcessorInputStream() {
+            initProcessing();
         }
 
         private ByteSegment read0() throws IOException {
             try {
-                ByteEncoder oneEncoder = getTheOneEncoder();
-                ByteSegment s0 = in.read(readBlockSize, endOnZeroRead);
+                ByteSegment s0 = sourceReader.read(readBlockSize, endOnZeroRead);
                 ByteBuffer encoded = oneEncoder.encode(s0.data(), s0.end());
                 if (encoded == s0.data()) {
                     return s0;
@@ -479,33 +469,6 @@ final class ByteProcessorImpl implements ByteProcessor {
         }
     }
 
-    private static abstract class AbsEncoder implements ByteEncoder {
-
-        protected final ByteEncoder encoder;
-        protected byte[] buf = JieBytes.emptyBytes();
-
-        protected AbsEncoder(ByteEncoder encoder) {
-            this.encoder = encoder;
-        }
-
-        // buf will be set null after total
-        protected ByteBuffer totalData(ByteBuffer data) {
-            if (JieArray.isEmpty(buf)) {
-                return data;
-            }
-            ByteBuffer total = ByteBuffer.allocate(totalSize(data));
-            total.put(buf);
-            total.put(data);
-            total.flip();
-            buf = null;
-            return total;
-        }
-
-        protected int totalSize(ByteBuffer data) {
-            return buf.length + data.remaining();
-        }
-    }
-
     static final class FixedSizeEncoder implements ByteEncoder {
 
         private final ByteEncoder encoder;
@@ -523,6 +486,7 @@ final class ByteProcessorImpl implements ByteProcessor {
         @Override
         public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) throws Exception {
             @Nullable Object result = null;
+            boolean encoded = false;
 
             // clean buffer
             if (buffer != null && buffer.position() > 0) {
@@ -536,6 +500,7 @@ final class ByteProcessorImpl implements ByteProcessor {
                 }
                 buffer.flip();
                 result = JieCoding.ifAdd(result, encoder.encode(buffer, false));
+                encoded = true;
                 buffer.clear();
             }
 
@@ -543,16 +508,16 @@ final class ByteProcessorImpl implements ByteProcessor {
             int pos = data.position();
             int limit = data.limit();
             while (limit - pos >= size) {
-                data.limit(pos + size);
-                ByteBuffer slice = data.slice();
                 pos += size;
+                data.limit(pos);
+                ByteBuffer slice = data.slice();
                 data.position(pos);
-                if (end && !data.hasRemaining()) {
+                if (end && pos == limit) {
                     result = JieCoding.ifAdd(result, encoder.encode(slice, true));
-                    data.limit(limit);
-                    return JieCoding.ifMerge(result, ByteProcessorImpl.BufferMerger.SINGLETON);
+                    return JieCoding.ifMerge(result, BufferMerger.SINGLETON);
                 } else {
                     result = JieCoding.ifAdd(result, encoder.encode(slice, false));
+                    encoded = true;
                 }
             }
             data.limit(limit);
@@ -566,137 +531,127 @@ final class ByteProcessorImpl implements ByteProcessor {
                 if (end) {
                     buffer.flip();
                     result = JieCoding.ifAdd(result, encoder.encode(buffer, true));
-                    return JieCoding.ifMerge(result, ByteProcessorImpl.BufferMerger.SINGLETON);
+                    encoded = true;
                 }
             }
 
-            return JieCoding.ifMerge(result, ByteProcessorImpl.BufferMerger.SINGLETON);
+            @Nullable ByteBuffer ret = JieCoding.ifMerge(result, BufferMerger.SINGLETON);
+            if (end && !encoded) {
+                return encoder.encode(JieBytes.emptyBuffer(), true);
+            }
+            return ret;
         }
-
-        // @Override
-        // public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) throws Exception {
-        //     ByteBuffer total = totalData(data);
-        //     int totalSize = total.remaining();
-        //     int times = totalSize / size;
-        //     if (times == 0) {
-        //         if (end) {
-        //             return encoder.encode(total, true);
-        //         }
-        //         buf = new byte[totalSize];
-        //         total.get(buf);
-        //         return null;
-        //     }
-        //     if (times == 1) {
-        //         ByteBuffer slice = JieBuffer.slice(total, size);
-        //         ByteBuffer ret1 = Jie.nonNull(encoder.encode(slice, false), JieBytes.emptyBuffer());
-        //         total.position(total.position() + size);
-        //         if (end) {
-        //             ByteBuffer ret2 = Jie.nonNull(encoder.encode(total, true), JieBytes.emptyBuffer());
-        //             int size12 = ret1.remaining() + ret2.remaining();
-        //             if (size12 <= 0) {
-        //                 return null;
-        //             }
-        //             ByteBuffer ret = ByteBuffer.allocate(size12);
-        //             ret.put(ret1);
-        //             ret.put(ret2);
-        //             ret.flip();
-        //             return ret;
-        //         }
-        //         buf = new byte[total.remaining()];
-        //         total.get(buf);
-        //         return ret1;
-        //     }
-        //     BytesBuilder bytesBuilder = new BytesBuilder();
-        //     for (int i = 0; i < times; i++) {
-        //         ByteBuffer slice = JieBuffer.slice(total, size);
-        //         ByteBuffer ret = encoder.encode(slice, false);
-        //         total.position(total.position() + size);
-        //         if (!JieBytes.isEmpty(ret)) {
-        //             bytesBuilder.append(ret);
-        //         }
-        //     }
-        //     if (end) {
-        //         ByteBuffer lastRet = encoder.encode(total, true);
-        //         if (!JieBytes.isEmpty(lastRet)) {
-        //             bytesBuilder.append(lastRet);
-        //         }
-        //     } else {
-        //         buf = new byte[total.remaining()];
-        //         total.get(buf);
-        //     }
-        //     if (bytesBuilder.size() <= 0) {
-        //         return null;
-        //     }
-        //     return bytesBuilder.toByteBuffer();
-        // }
     }
 
-    static final class RoundingEncoder extends AbsEncoder {
+    static final class RoundingEncoder implements ByteEncoder {
 
-        private final int expectedBlockSize;
+        private final ByteEncoder encoder;
+        private final int size;
 
-        RoundingEncoder(ByteEncoder encoder, int expectedBlockSize) {
-            super(encoder);
-            this.expectedBlockSize = expectedBlockSize;
+        // Capacity is always the size.
+        private @Nullable ByteBuffer buffer;
+
+        RoundingEncoder(ByteEncoder encoder, int size) {
+            checkSize(size);
+            this.encoder = encoder;
+            this.size = size;
         }
 
         @Override
         public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) throws Exception {
-            if (end) {
-                return encoder.encode(totalData(data), true);
-            }
-            int size = totalSize(data);
-            if (size < expectedBlockSize) {
-                byte[] newBuf = new byte[size];
-                System.arraycopy(buf, 0, newBuf, 0, buf.length);
-                data.get(newBuf, buf.length, data.remaining());
-                buf = newBuf;
-                return null;
-            }
-            int remainder = size % expectedBlockSize;
-            if (remainder == 0) {
-                ByteBuffer total = totalData(data);
-                buf = JieBytes.emptyBytes();
-                return encoder.encode(total, false);
-            }
-            int roundSize = size / expectedBlockSize * expectedBlockSize;
-            ByteBuffer round = roundData(data, roundSize);
-            buf = new byte[remainder];
-            data.get(buf);
-            return encoder.encode(round, false);
-        }
+            @Nullable Object result = null;
+            boolean encoded = false;
 
-        private ByteBuffer roundData(ByteBuffer data, int roundSize) {
-            ByteBuffer round = ByteBuffer.allocate(roundSize);
-            round.put(buf);
-            int sliceSize = roundSize - buf.length;
-            ByteBuffer slice = JieBuffer.slice(data, sliceSize);
-            data.position(data.position() + sliceSize);
-            round.put(slice);
-            round.flip();
-            return round;
+            // clean buffer
+            if (buffer != null && buffer.position() > 0) {
+                JieBuffer.readTo(data, buffer);
+                if (end && !data.hasRemaining()) {
+                    buffer.flip();
+                    return encoder.encode(buffer, true);
+                }
+                if (buffer.hasRemaining()) {
+                    return null;
+                }
+                buffer.flip();
+                result = JieCoding.ifAdd(result, encoder.encode(buffer, false));
+                encoded = true;
+                buffer.clear();
+            }
+
+            // rounding
+            int remaining = data.remaining();
+            int roundingSize = remaining / size * size;
+            if (roundingSize > 0) {
+                int pos = data.position();
+                pos += roundingSize;
+                int limit = data.limit();
+                data.limit(pos);
+                ByteBuffer slice = data.slice();
+                data.position(pos);
+                data.limit(limit);
+                if (end && pos == limit) {
+                    result = JieCoding.ifAdd(result, encoder.encode(slice, true));
+                    return JieCoding.ifMerge(result, BufferMerger.SINGLETON);
+                } else {
+                    result = JieCoding.ifAdd(result, encoder.encode(slice, false));
+                    encoded = true;
+                }
+            }
+
+            // buffering
+            if (data.hasRemaining()) {
+                if (buffer == null) {
+                    buffer = ByteBuffer.allocate(size);
+                }
+                JieBuffer.readTo(data, buffer);
+                if (end) {
+                    buffer.flip();
+                    result = JieCoding.ifAdd(result, encoder.encode(buffer, true));
+                    encoded = true;
+                }
+            }
+
+            @Nullable ByteBuffer ret = JieCoding.ifMerge(result, BufferMerger.SINGLETON);
+            if (end && !encoded) {
+                return encoder.encode(JieBytes.emptyBuffer(), true);
+            }
+            return ret;
         }
     }
 
-    static final class BufferingEncoder extends AbsEncoder {
+    static final class BufferingEncoder implements ByteEncoder {
+
+        private final ByteEncoder encoder;
+        private byte[] buffer = null;
 
         BufferingEncoder(ByteEncoder encoder) {
-            super(encoder);
+            this.encoder = encoder;
         }
 
         @Override
         public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) throws Exception {
-            ByteBuffer total = totalData(data);
-            ByteBuffer ret = encoder.encode(total, end);
+            ByteBuffer totalBuffer;
+            if (buffer != null) {
+                ByteBuffer newBuffer = ByteBuffer.allocate(buffer.length + data.remaining());
+                newBuffer.put(buffer);
+                newBuffer.put(data);
+                newBuffer.flip();
+                totalBuffer = newBuffer;
+            } else {
+                totalBuffer = data;
+            }
+            ByteBuffer ret = encoder.encode(totalBuffer, end);
             if (end) {
+                buffer = null;
                 return ret;
             }
-            if (total.hasRemaining()) {
-                buf = new byte[total.remaining()];
-                total.get(buf);
-                return ret;
+            if (totalBuffer.hasRemaining()) {
+                byte[] remainingBuffer = new byte[totalBuffer.remaining()];
+                totalBuffer.get(remainingBuffer);
+                buffer = remainingBuffer;
+            } else {
+                buffer = null;
             }
-            buf = JieBytes.emptyBytes();
             return ret;
         }
     }

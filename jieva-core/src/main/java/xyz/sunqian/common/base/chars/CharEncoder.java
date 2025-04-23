@@ -88,9 +88,9 @@ public interface CharEncoder {
     }
 
     /**
-     * Returns an empty {@link CharEncoder} which does nothing.
+     * Returns an empty {@link CharEncoder} which does nothing but only returns the input data directly.
      *
-     * @return an empty {@link CharEncoder} which does nothing
+     * @return an empty {@link CharEncoder} which does nothing but only returns the input data directly
      */
     static CharEncoder emptyEncoder() {
         return CharProcessorImpl.EmptyEncoder.SINGLETON;

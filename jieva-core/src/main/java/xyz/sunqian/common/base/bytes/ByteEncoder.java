@@ -88,9 +88,9 @@ public interface ByteEncoder {
     }
 
     /**
-     * Returns an empty {@link ByteEncoder} which does nothing.
+     * Returns an empty {@link ByteEncoder} which does nothing but only returns the input data directly.
      *
-     * @return an empty {@link ByteEncoder} which does nothing
+     * @return an empty {@link ByteEncoder} which does nothing but only returns the input data directly
      */
     static ByteEncoder emptyEncoder() {
         return ByteProcessorImpl.EmptyEncoder.SINGLETON;

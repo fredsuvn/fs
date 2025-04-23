@@ -25,6 +25,7 @@ import java.util.Arrays;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.expectThrows;
 import static xyz.sunqian.test.MaterialBox.copyBytes;
+import static xyz.sunqian.test.MaterialBox.copyChars;
 
 public class IOTest {
 
@@ -159,7 +160,7 @@ public class IOTest {
             c = JieIO.readTo(in, dstBuffer);
             assertEquals(c, size);
             dstBuffer.flip();
-            assertEquals(copyBytes(dstBuffer), src);
+            assertEquals(copyChars(dstBuffer), src);
             StringBuilder dstOut = new StringBuilder();
             in.reset();
             c = JieIO.readTo(in, dstOut);

@@ -22,9 +22,8 @@ import static xyz.sunqian.test.JieTest.reflectEquals;
 import static xyz.sunqian.test.JieTest.reflectThrows;
 import static xyz.sunqian.test.MaterialBox.copyBuffer;
 import static xyz.sunqian.test.MaterialBox.copyBytes;
+import static xyz.sunqian.test.MaterialBox.copyChars;
 import static xyz.sunqian.test.MaterialBox.copyDirect;
-import static xyz.sunqian.test.MaterialBox.copyHeap;
-import static xyz.sunqian.test.MaterialBox.copyPadding;
 import static xyz.sunqian.test.MaterialBox.newFile;
 
 public class TestForTest {
@@ -62,16 +61,21 @@ public class TestForTest {
     }
 
     @Test
-    public void testMaterialBuffer() {
+    public void testMaterialByteBuffer() {
         {
-            // bytes
-            byte[] bytes = new byte[1111];
+            // padding
+            byte[] bytes = new byte[1024];
             Arrays.fill(bytes, (byte) 66);
             ByteBuffer bb = MaterialBox.copyPadding(bytes);
             assertEquals(bb.arrayOffset(), 10);
             assertEquals(bb.position(), 0);
             assertEquals(bb.limit(), bytes.length);
             assertEquals(bb.capacity(), bytes.length);
+        }
+        {
+            // bytes copy
+            byte[] bytes = new byte[1024];
+            Arrays.fill(bytes, (byte) 66);
             ByteBuffer directBuffer = MaterialBox.copyDirect(bytes);
             assertEquals(directBuffer, ByteBuffer.wrap(bytes));
             assertTrue(directBuffer.isDirect());
@@ -79,8 +83,24 @@ public class TestForTest {
             assertEquals(heapBuffer, ByteBuffer.wrap(bytes));
             assertFalse(heapBuffer.isDirect());
             assertEquals(bytes, copyBytes(ByteBuffer.wrap(bytes)));
-
+        }
+        {
+            // buffer copy
+            byte[] bytes = new byte[1024];
+            Arrays.fill(bytes, (byte) 66);
+            ByteBuffer buffer = ByteBuffer.wrap(bytes);
+            ByteBuffer directBuffer = MaterialBox.copyDirect(buffer);
+            assertEquals(directBuffer, ByteBuffer.wrap(bytes));
+            assertTrue(directBuffer.isDirect());
+            ByteBuffer heapBuffer = MaterialBox.copyHeap(buffer);
+            assertEquals(heapBuffer, ByteBuffer.wrap(bytes));
+            assertFalse(heapBuffer.isDirect());
+            assertEquals(bytes, copyBytes(ByteBuffer.wrap(bytes)));
+        }
+        {
             // copy buffer
+            byte[] bytes = new byte[1024];
+            Arrays.fill(bytes, (byte) 66);
             ByteBuffer copyHeap = copyBuffer(ByteBuffer.wrap(bytes));
             assertFalse(copyHeap.isDirect());
             assertEquals(copyHeap, ByteBuffer.wrap(bytes));
@@ -88,24 +108,49 @@ public class TestForTest {
             assertTrue(copyDirect.isDirect());
             assertEquals(copyDirect, copyDirect(bytes));
         }
+    }
+
+    @Test
+    public void testMaterialCharBuffer() {
         {
-            // chars
-            char[] chars = new char[1111];
+            // padding
+            char[] chars = new char[1024];
             Arrays.fill(chars, (char) 66);
-            CharBuffer cb = copyPadding(chars);
-            assertEquals(cb.arrayOffset(), 10);
-            assertEquals(cb.position(), 0);
-            assertEquals(cb.limit(), chars.length);
-            assertEquals(cb.capacity(), chars.length);
-            CharBuffer directBuffer = copyDirect(chars);
+            CharBuffer bb = MaterialBox.copyPadding(chars);
+            assertEquals(bb.arrayOffset(), 10);
+            assertEquals(bb.position(), 0);
+            assertEquals(bb.limit(), chars.length);
+            assertEquals(bb.capacity(), chars.length);
+        }
+        {
+            // chars copy
+            char[] chars = new char[1024];
+            Arrays.fill(chars, (char) 66);
+            CharBuffer directBuffer = MaterialBox.copyDirect(chars);
             assertEquals(directBuffer, CharBuffer.wrap(chars));
             assertTrue(directBuffer.isDirect());
-            CharBuffer heapBuffer = copyHeap(chars);
+            CharBuffer heapBuffer = MaterialBox.copyHeap(chars);
             assertEquals(heapBuffer, CharBuffer.wrap(chars));
             assertFalse(heapBuffer.isDirect());
-            assertEquals(chars, copyBytes(CharBuffer.wrap(chars)));
-
+            assertEquals(chars, copyChars(CharBuffer.wrap(chars)));
+        }
+        {
+            // buffer copy
+            char[] chars = new char[1024];
+            Arrays.fill(chars, (char) 66);
+            CharBuffer buffer = CharBuffer.wrap(chars);
+            CharBuffer directBuffer = MaterialBox.copyDirect(buffer);
+            assertEquals(directBuffer, CharBuffer.wrap(chars));
+            assertTrue(directBuffer.isDirect());
+            CharBuffer heapBuffer = MaterialBox.copyHeap(buffer);
+            assertEquals(heapBuffer, CharBuffer.wrap(chars));
+            assertFalse(heapBuffer.isDirect());
+            assertEquals(chars, copyChars(CharBuffer.wrap(chars)));
+        }
+        {
             // copy buffer
+            char[] chars = new char[1024];
+            Arrays.fill(chars, (char) 66);
             CharBuffer copyHeap = copyBuffer(CharBuffer.wrap(chars));
             assertFalse(copyHeap.isDirect());
             assertEquals(copyHeap, CharBuffer.wrap(chars));

@@ -57,6 +57,26 @@ public class MaterialBox {
     }
 
     /**
+     * Returns a direct buffer whose content are copied from the given buffer.
+     *
+     * @param buffer the given buffer
+     * @return a direct buffer whose content are copied from the given buffer
+     */
+    public static ByteBuffer copyDirect(ByteBuffer buffer) {
+        return copyBuffer(buffer, true);
+    }
+
+    /**
+     * Returns a heap buffer whose content are copied from the given buffer.
+     *
+     * @param buffer the given buffer
+     * @return a heap buffer whose content are copied from the given buffer
+     */
+    public static ByteBuffer copyHeap(ByteBuffer buffer) {
+        return copyBuffer(buffer, false);
+    }
+
+    /**
      * Returns a buffer whose content are copied from the given buffer. The returned buffer is direct if, and only if
      * the given buffer is direct. The position of the given buffer will not be changed.
      *
@@ -64,7 +84,11 @@ public class MaterialBox {
      * @return a buffer whose content are copied from the given buffer
      */
     public static ByteBuffer copyBuffer(ByteBuffer buffer) {
-        ByteBuffer ret = buffer.isDirect() ? ByteBuffer.allocateDirect(buffer.remaining())
+        return copyBuffer(buffer, buffer.isDirect());
+    }
+
+    private static ByteBuffer copyBuffer(ByteBuffer buffer, boolean direct) {
+        ByteBuffer ret = direct ? ByteBuffer.allocateDirect(buffer.remaining())
             : ByteBuffer.allocate(buffer.remaining());
         int pos = buffer.position();
         ret.put(buffer);
@@ -131,6 +155,26 @@ public class MaterialBox {
     }
 
     /**
+     * Returns a direct buffer whose content are copied from the given buffer.
+     *
+     * @param buffer the given buffer
+     * @return a direct buffer whose content are copied from the given buffer
+     */
+    public static CharBuffer copyDirect(CharBuffer buffer) {
+        return copyBuffer(buffer, true);
+    }
+
+    /**
+     * Returns a heap buffer whose content are copied from the given buffer.
+     *
+     * @param buffer the given buffer
+     * @return a heap buffer whose content are copied from the given buffer
+     */
+    public static CharBuffer copyHeap(CharBuffer buffer) {
+        return copyBuffer(buffer, false);
+    }
+
+    /**
      * Returns a buffer whose content are copied from the given buffer. The returned buffer is direct if, and only if
      * the given buffer is direct. The position of the given buffer will not be changed.
      *
@@ -138,8 +182,12 @@ public class MaterialBox {
      * @return a buffer whose content are copied from the given buffer
      */
     public static CharBuffer copyBuffer(CharBuffer buffer) {
-        if (buffer.isDirect()) {
-            char[] chars = copyBytes(buffer);
+        return copyBuffer(buffer, buffer.isDirect());
+    }
+
+    private static CharBuffer copyBuffer(CharBuffer buffer, boolean direct) {
+        if (direct) {
+            char[] chars = copyChars(buffer);
             ByteBuffer bb = ByteBuffer.allocateDirect(chars.length * 2);
             CharBuffer ret = bb.asCharBuffer();
             ret.put(chars);
@@ -161,7 +209,7 @@ public class MaterialBox {
      * @param buffer the given buffer
      * @return a new array whose content are copied from the given buffer
      */
-    public static char[] copyBytes(CharBuffer buffer) {
+    public static char[] copyChars(CharBuffer buffer) {
         char[] array = new char[buffer.remaining()];
         int pos = buffer.position();
         buffer.get(array);
