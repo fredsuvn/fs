@@ -345,9 +345,12 @@ public interface ByteProcessor {
     }
 
     /**
-     * Returns an input stream which represents and encompasses the entire data processing. The input stream is lazy,
-     * read operations on the source data are performed only as needed, and doesn't support mark/reset operations. The
-     * {@code close()} method will close the source if the source is closable.
+     * Returns an input stream which represents and encompasses the entire data processing.
+     * <p>
+     * If there is no encoder in the processor: if the source is a stream, return the stream itself; if the source is an
+     * array or buffer, returns the stream from {@link JieIO#inStream(byte[])} or {@link JieIO#inStream(ByteBuffer)}.
+     * Otherwise, the returned stream's read operations are performed only as needed, mark/reset operations are not
+     * supported, and the {@code close()} method will close the source if the source is closable.
      * <p>
      * This is a terminal method.
      *

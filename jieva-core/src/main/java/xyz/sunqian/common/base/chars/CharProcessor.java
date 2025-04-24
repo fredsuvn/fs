@@ -337,9 +337,12 @@ public interface CharProcessor {
     String toString() throws ProcessingException, IORuntimeException;
 
     /**
-     * Returns a reader which represents and encompasses the entire data processing. The reader is lazy, read operations
-     * on the source data are performed only as needed, and doesn't support mark/reset operations. The {@code close()}
-     * method will close the source if the source is closable.
+     * Returns a reader which represents and encompasses the entire data processing.
+     * <p>
+     * If there is no encoder in the processor: if the source is a reader, return the reader itself; if the source is an
+     * array or buffer, returns the reader from {@link JieIO#reader(char[])} or {@link JieIO#reader(CharBuffer)}.
+     * Otherwise, the returned reader's read operations are performed only as needed, mark/reset operations are not
+     * supported, and the {@code close()} method will close the source if the source is closable.
      * <p>
      * This is a terminal method.
      *
