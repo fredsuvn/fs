@@ -3,19 +3,24 @@ package xyz.sunqian.annotations;
 import javax.annotation.Nonnull;
 import javax.annotation.meta.TypeQualifierDefault;
 import javax.annotation.meta.TypeQualifierNickname;
-import java.lang.annotation.*;
+import javax.annotation.meta.When;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Declares all methods, fields, parameters, local variables and type uses under the scope of annotated element must be
- * non-null.
+ * Declares all methods, fields, parameters, local variables, type parameters, and type uses under the scope of the
+ * annotated element must be non-null.
  * <p>
  * It is equivalent to use {@link NonNull} on all those points.
  *
- * @author fredsuvn
+ * @author sunqian
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Nonnull
+@Nonnull(when = When.ALWAYS)
 @TypeQualifierNickname
 @Target({
     ElementType.TYPE,
