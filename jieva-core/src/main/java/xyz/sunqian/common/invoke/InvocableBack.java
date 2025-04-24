@@ -11,43 +11,45 @@ import java.lang.reflect.Modifier;
 
 final class InvocableBack {
 
-    static Invocable ofConstructor(Constructor<?> constructor) {
-        return new OfConstructor(constructor);
+    static Invocable withReflection(Constructor<?> constructor) {
+        return new ConstructorReflection(constructor);
     }
 
-    static Invocable ofMethod(Method method) {
-        return new OfMethod(method);
+    static Invocable withReflection(Method method) {
+        return new MethodReflection(method);
     }
 
-    static Invocable ofMethodHandle(Constructor<?> constructor) {
-        return new OfMethodHandle(constructor);
+    static Invocable withMethodHandle(Constructor<?> constructor) {
+        return new StaticMethodHandle(constructor);
     }
 
-    static Invocable ofMethodHandle(Method method) {
-        return new OfMethodHandle(method);
+    static Invocable withMethodHandle(Method method) {
+        return Modifier.isStatic(method.getModifiers()) ?
+            new StaticMethodHandle(method) : new InstanceMethodHandle(method);
     }
 
     static Invocable ofMethodHandle(MethodHandle methodHandle, boolean isStatic) {
-        return new OfMethodHandle(methodHandle, isStatic);
+        return isStatic ?
+            new StaticMethodHandle(methodHandle) : new InstanceMethodHandle(methodHandle);
     }
 
-    private static InvocationException buildInvocationException(Throwable rawCause) {
-        if (rawCause instanceof InvocationTargetException) {
-            return new InvocationException(rawCause.getCause());
+    private static InvocationException buildInvocationException(Throwable original) {
+        if (original instanceof InvocationTargetException) {
+            return new InvocationException(original.getCause());
         }
-        return new InvocationException(rawCause);
+        return new InvocationException(original);
     }
 
-    private static final class OfConstructor implements Invocable {
+    private static final class ConstructorReflection implements Invocable {
 
         private final Constructor<?> constructor;
 
-        private OfConstructor(Constructor<?> constructor) {
+        private ConstructorReflection(Constructor<?> constructor) {
             this.constructor = constructor;
         }
 
         @Override
-        public @Nullable Object invoke(@Nullable Object inst, Object... args) {
+        public Object invoke(@Nullable Object inst, @Nullable Object... args) {
             try {
                 return constructor.newInstance(args);
             } catch (Exception e) {
@@ -56,16 +58,16 @@ final class InvocableBack {
         }
     }
 
-    private static final class OfMethod implements Invocable {
+    private static final class MethodReflection implements Invocable {
 
         private final Method method;
 
-        private OfMethod(Method method) {
+        private MethodReflection(Method method) {
             this.method = method;
         }
 
         @Override
-        public @Nullable Object invoke(@Nullable Object inst, Object... args) {
+        public @Nullable Object invoke(@Nullable Object inst, @Nullable Object... args) {
             try {
                 return method.invoke(inst, args);
             } catch (Exception e) {
@@ -74,39 +76,63 @@ final class InvocableBack {
         }
     }
 
-    private static final class OfMethodHandle implements Invocable {
+    private static final class InstanceMethodHandle implements Invocable {
 
         private final MethodHandle methodHandle;
-        private final boolean isStatic;
 
-        private OfMethodHandle(Method method) {
+        private InstanceMethodHandle(Method method) {
             try {
                 this.methodHandle = MethodHandles.lookup().unreflect(method);
-                this.isStatic = Modifier.isStatic(method.getModifiers());
             } catch (Exception e) {
                 throw new InvocationException(e);
             }
         }
 
-        private OfMethodHandle(Constructor<?> constructor) {
-            try {
-                this.methodHandle = MethodHandles.lookup().unreflectConstructor(constructor);
-                this.isStatic = true;
-            } catch (Exception e) {
-                throw new InvocationException(e);
-            }
-        }
-
-        private OfMethodHandle(MethodHandle methodHandle, boolean isStatic) {
+        private InstanceMethodHandle(MethodHandle methodHandle) {
             this.methodHandle = methodHandle;
-            this.isStatic = isStatic;
         }
 
         @Override
-        public @Nullable Object invoke(@Nullable Object inst, Object... args) {
+        public @Nullable Object invoke(@Nullable Object inst, @Nullable Object... args) {
+            if (inst == null) {
+                throw new InvocationException("The instance must be non-null.");
+            }
             try {
-                return isStatic ? JieHandle.invokeStatic(methodHandle, args)
-                    : JieHandle.invokeInstance(methodHandle, inst, args);
+                return JieHandle.invokeInstance(methodHandle, inst, args);
+            } catch (Throwable e) {
+                throw new InvocationException(e);
+            }
+        }
+    }
+
+    private static final class StaticMethodHandle implements Invocable {
+
+        private final MethodHandle methodHandle;
+
+        private StaticMethodHandle(Method method) {
+            try {
+                this.methodHandle = MethodHandles.lookup().unreflect(method);
+            } catch (Exception e) {
+                throw new InvocationException(e);
+            }
+        }
+
+        private StaticMethodHandle(Constructor<?> constructor) {
+            try {
+                this.methodHandle = MethodHandles.lookup().unreflectConstructor(constructor);
+            } catch (Exception e) {
+                throw new InvocationException(e);
+            }
+        }
+
+        private StaticMethodHandle(MethodHandle methodHandle) {
+            this.methodHandle = methodHandle;
+        }
+
+        @Override
+        public @Nullable Object invoke(@Nullable Object inst, @Nullable Object... args) {
+            try {
+                return JieHandle.invokeStatic(methodHandle, args);
             } catch (Throwable e) {
                 throw new InvocationException(e);
             }

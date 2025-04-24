@@ -151,13 +151,13 @@ public abstract class AbstractDataSchemaHandler implements DataSchemaParser.Hand
     protected abstract AccessorInfo resolveAccessor(Method method);
 
     /**
-     * Generates invoker for specified method. Default using {@link Invocable#handle(Method)}.
+     * Generates invoker for specified method. Default using {@link Invocable#of(Method)}.
      *
      * @param method specified method
      * @return invoker for specified method
      */
     protected Invocable buildInvoker(Method method) {
-        return Invocable.handle(method);
+        return Invocable.of(method);
     }
 
     /**

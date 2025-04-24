@@ -16,62 +16,79 @@ import java.lang.reflect.Method;
 public interface Invocable {
 
     /**
-     * Returns an {@link Invocable} that wraps the specified method based on reflection.
+     * Returns an {@link Invocable} represents the specified method.
      *
      * @param method the specified method
-     * @return an {@link Invocable} that wraps the specified method based on reflection
+     * @return an {@link Invocable} represents the specified method
      */
-    static Invocable reflect(Method method) {
-        return InvocableBack.ofMethod(method);
+    static Invocable of(Method method) {
+        return InvocableBack.withReflection(method);
     }
 
     /**
-     * Returns an {@link Invocable} that wraps the specified constructor based on reflection.
+     * Returns an {@link Invocable} represents the specified constructor.
      *
      * @param constructor the specified constructor
-     * @return an {@link Invocable} that wraps the specified constructor based on reflection
+     * @return an {@link Invocable} represents the specified constructor
      */
-    static Invocable reflect(Constructor<?> constructor) {
-        return InvocableBack.ofConstructor(constructor);
+    static Invocable of(Constructor<?> constructor) {
+        return InvocableBack.withReflection(constructor);
     }
 
     /**
-     * Returns an {@link Invocable} that wraps the specified method based on {@link MethodHandle}.
+     * Returns an {@link Invocable} represents the specified method.
      *
      * @param method the specified method
-     * @return an {@link Invocable} that wraps the specified method based on {@link MethodHandle}
+     * @param mode   specifies the implementation type of the returned instance
+     * @return an {@link Invocable} represents the specified method
      */
-    static Invocable handle(Method method) {
-        return InvocableBack.ofMethodHandle(method);
+    static Invocable of(Method method, InvocationMode mode) {
+        switch (mode) {
+            case REFLECTION:
+                return InvocableBack.withReflection(method);
+            case METHOD_HANDLE:
+                return InvocableBack.withMethodHandle(method);
+            default:
+                throw new IllegalArgumentException("The mode must be REFLECTION or METHOD_HANDLE.");
+        }
     }
 
     /**
-     * Returns an {@link Invocable} that wraps the specified constructor based on {@link MethodHandle}.
+     * Returns an {@link Invocable} represents the specified constructor.
      *
      * @param constructor the specified constructor
-     * @return an {@link Invocable} that wraps the specified constructor based on {@link MethodHandle}
+     * @param mode        specifies the implementation type of the returned instance
+     * @return an {@link Invocable} represents the specified constructor
      */
-    static Invocable handle(Constructor<?> constructor) {
-        return InvocableBack.ofMethodHandle(constructor);
+    static Invocable of(Constructor<?> constructor, InvocationMode mode) {
+        switch (mode) {
+            case REFLECTION:
+                return InvocableBack.withReflection(constructor);
+            case METHOD_HANDLE:
+                return InvocableBack.withMethodHandle(constructor);
+            default:
+                throw new IllegalArgumentException("The mode must be REFLECTION or METHOD_HANDLE.");
+        }
     }
 
     /**
-     * Returns an {@link Invocable} that wraps the specified method handle.
+     * Returns an {@link Invocable} represents the specified method handle.
      *
      * @param handle   the specified method handle
-     * @param isStatic whether the method handle is for a static method, constructor, or similar
-     * @return an {@link Invocable} that wraps the specified method handle
+     * @param isStatic specifies whether the method handle is for a static method, constructor, or similar
+     * @return an {@link Invocable} represents the specified method handle
      */
-    static Invocable handle(MethodHandle handle, boolean isStatic) {
+    static Invocable of(MethodHandle handle, boolean isStatic) {
         return InvocableBack.ofMethodHandle(handle, isStatic);
     }
 
     /**
-     * Executes this entity with an instance and invocation arguments. The instance typically represents the instance of
-     * a method or the scope of {@code this}, while the arguments typically represent the actual arguments of a method
-     * or function. The instance can be {@code null} if this entity is a static method, constructor, or other similar.
+     * Executes this invocable entity with an instance and the invocation arguments. The instance typically represents
+     * the owner object of a method or the {@code this} of a scope, while the arguments typically represent the actual
+     * arguments passed to a method or function. The instance can be {@code null} if this entity is a static method,
+     * constructor, or other similar.
      * <p>
-     * This method only throws {@link InvocationException} for any error, the raw cause can be retrieved by
+     * This method only throws {@link InvocationException} for any error, the original cause can be retrieved by
      * {@link InvocationException#getCause()}.
      *
      * @param inst the instance
@@ -80,5 +97,5 @@ public interface Invocable {
      * @throws InvocationException for any error
      */
     @Nullable
-    Object invoke(@Nullable Object inst, Object... args) throws InvocationException;
+    Object invoke(@Nullable Object inst, @Nullable Object... args) throws InvocationException;
 }

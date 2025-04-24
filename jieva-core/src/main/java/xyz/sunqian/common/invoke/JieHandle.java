@@ -5,7 +5,7 @@ import xyz.sunqian.annotations.Nullable;
 import java.lang.invoke.MethodHandle;
 
 /**
- * Static utilities class for {@link MethodHandle}.
+ * Static utility class for {@link MethodHandle}.
  *
  * @author sunqian
  */
@@ -20,7 +20,9 @@ public class JieHandle {
      * @return result of invocation
      * @throws Throwable for any error thrown by the specified method handle
      */
-    public static @Nullable Object invokeInstance(MethodHandle handle, Object inst, Object... args) throws Throwable {
+    public static @Nullable Object invokeInstance(
+        MethodHandle handle, Object inst, @Nullable Object... args
+    ) throws Throwable {
         return HandleBack.invokeInstance(handle, inst, args);
     }
 
@@ -32,7 +34,9 @@ public class JieHandle {
      * @return result of invocation
      * @throws Throwable for any error thrown by the specified method handle
      */
-    public static @Nullable Object invokeStatic(MethodHandle handle, Object... args) throws Throwable {
+    public static @Nullable Object invokeStatic(
+        MethodHandle handle, @Nullable Object... args
+    ) throws Throwable {
         return HandleBack.invokeStatic(handle, args);
     }
 }

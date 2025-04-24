@@ -125,7 +125,7 @@ public class JdkDynamicProxyBuilder implements ProxyBuilder {
                         continue;
                     }
                     if (handler.needsProxy(method)) {
-                        Invocable invocable = Invocable.handle(method);
+                        Invocable invocable = Invocable.of(method);
                         JdkProxyInvoker jdkInvoker = new JdkProxyInvoker(method, invocable);
                         invokerMap.put(method, jdkInvoker);
                     }

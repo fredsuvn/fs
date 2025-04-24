@@ -82,7 +82,7 @@ public class ProtobufBeanResolveHandler implements DataSchemaParser.Handler {
             if (JieColl.isEmpty(argsTypes)) {
                 throw new BeanException("Cannot get actual argument type for " + getterMethod.getGenericReturnType() + ".");
             }
-            Invocable getter = Invocable.reflect(getterMethod);
+            Invocable getter = Invocable.of(getterMethod);
             if (isBuilder) {
                 Method clearMethod = rawClass.getMethod("clear" + JieString.capitalize(rawName));
                 Method putAllMethod = rawClass.getMethod("putAll" + JieString.capitalize(rawName), Map.class);
@@ -113,7 +113,7 @@ public class ProtobufBeanResolveHandler implements DataSchemaParser.Handler {
             if (JieColl.isEmpty(argsTypes)) {
                 throw new BeanException("Cannot get actual argument type for " + getterMethod.getGenericReturnType() + ".");
             }
-            Invocable getter = Invocable.reflect(getterMethod);
+            Invocable getter = Invocable.of(getterMethod);
             if (isBuilder) {
                 Method clearMethod = rawClass.getMethod("clear" + JieString.capitalize(rawName));
                 Method addAllMethod = rawClass.getMethod("addAll" + JieString.capitalize(rawName), Iterable.class);
@@ -139,10 +139,10 @@ public class ProtobufBeanResolveHandler implements DataSchemaParser.Handler {
         // Simple object
         Method getterMethod = rawClass.getMethod("get" + JieString.capitalize(rawName));
         Type type = getterMethod.getGenericReturnType();
-        Invocable getter = Invocable.reflect(getterMethod);
+        Invocable getter = Invocable.of(getterMethod);
         if (isBuilder) {
             Method setterMethod = rawClass.getMethod("set" + JieString.capitalize(rawName), JieReflect.getRawType(type));
-            Invocable setter = Invocable.reflect(setterMethod);
+            Invocable setter = Invocable.of(setterMethod);
             return new Impl(rawName, type, getterMethod, setterMethod, getter, setter);
         } else {
             return new Impl(rawName, type, getterMethod, null, getter, null);

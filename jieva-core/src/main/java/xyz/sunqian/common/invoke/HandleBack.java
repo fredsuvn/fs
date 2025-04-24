@@ -6,7 +6,7 @@ import java.lang.invoke.MethodHandle;
 
 final class HandleBack {
 
-    static @Nullable Object invokeInstance(MethodHandle handle, Object inst, Object... args) throws Throwable {
+    static @Nullable Object invokeInstance(MethodHandle handle, Object inst, @Nullable Object... args) throws Throwable {
         switch (args.length) {
             case 0:
                 return handle.invoke(inst);
@@ -35,14 +35,14 @@ final class HandleBack {
         }
     }
 
-    private static Object[] buildArgs(Object inst, Object... args) {
+    private static Object[] buildArgs(Object inst, @Nullable Object... args) {
         Object[] ret = new Object[args.length + 1];
         ret[0] = inst;
         System.arraycopy(args, 0, ret, 1, args.length);
         return ret;
     }
 
-    static @Nullable Object invokeStatic(MethodHandle handle, Object... args) throws Throwable {
+    static @Nullable Object invokeStatic(MethodHandle handle, @Nullable Object... args) throws Throwable {
         switch (args.length) {
             case 0:
                 return handle.invoke();

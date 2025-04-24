@@ -1,14 +1,17 @@
 /**
- * Provides classes and interfaces for invocation and method handle.
+ * Provides interfaces and classes for invocation and method handle.
  * <p>
- * Core interfaces:
+ * Utilities:
+ * <ul>
+ *     <li>{@link xyz.sunqian.common.invoke.JieHandle};</li>
+ * </ul>
+ * Core invocation interfaces:
  * <ul>
  *     <li>{@link xyz.sunqian.common.invoke.Invocable};</li>
  * </ul>
  * <p>
- * Static utilities:
- * <ul>
- *     <li>{@link xyz.sunqian.common.invoke.JieHandle};</li>
- * </ul>
  */
+@DefaultNonNull
 package xyz.sunqian.common.invoke;
+
+import xyz.sunqian.annotations.DefaultNonNull;

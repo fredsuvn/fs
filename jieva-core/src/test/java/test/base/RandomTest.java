@@ -16,7 +16,9 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.function.Supplier;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.expectThrows;
 
 public class RandomTest {
 
@@ -178,7 +180,7 @@ public class RandomTest {
         field.setAccessible(true);
         Method supply = s1.getClass().getDeclaredMethod("supply", int.class);
         supply.setAccessible(true);
-        Invocable supplyInvocable = Invocable.reflect(supply);
+        Invocable supplyInvocable = Invocable.of(supply);
         int totalScore = (Integer) field.get(s1);
         for (int i = 0; i < totalScore * 2; i++) {
             Object node = binarySearch.invoke(s1, i);

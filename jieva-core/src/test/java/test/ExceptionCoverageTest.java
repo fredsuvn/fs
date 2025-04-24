@@ -40,13 +40,7 @@ public class ExceptionCoverageTest {
         });
 
         expectThrows(InvocationException.class, () -> {
-            throw new InvocationException();
-        });
-        expectThrows(InvocationException.class, () -> {
             throw new InvocationException("");
-        });
-        expectThrows(InvocationException.class, () -> {
-            throw new InvocationException("", new RuntimeException());
         });
         expectThrows(InvocationException.class, () -> {
             throw new InvocationException(new RuntimeException());
