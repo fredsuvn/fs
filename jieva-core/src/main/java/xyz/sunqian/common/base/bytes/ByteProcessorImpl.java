@@ -24,16 +24,16 @@ import static xyz.sunqian.common.base.JieCheck.checkOffsetLength;
 
 final class ByteProcessorImpl implements ByteProcessor {
 
-    private final Object source;
-    private Object dest;
+    private final @Nullable Object source;
+    private @Nullable Object dest;
     private long readLimit = -1;
     private int readBlockSize = JieIO.BUFFER_SIZE;
     private boolean endOnZeroRead = false;
-    private List<ByteEncoder> encoders;
+    private @Nullable List<ByteEncoder> encoders;
 
     // initials after starting process
-    private ByteReader sourceReader;
-    private ByteEncoder oneEncoder;
+    private @Nullable ByteReader sourceReader;
+    private @Nullable ByteEncoder oneEncoder;
 
     ByteProcessorImpl(InputStream source) {
         this.source = source;
@@ -47,41 +47,32 @@ final class ByteProcessorImpl implements ByteProcessor {
         this.source = source;
     }
 
-    private void initProcessing() {
-        this.sourceReader = toByteReader(source);
-        this.oneEncoder = getTheOneEncoder(encoders);
+    private Object getSource() {
+        if (source == null) {
+            throw new IORuntimeException("The source is null!");
+        }
+        return source;
     }
 
-    private ByteReader toByteReader(Object src) {
-        if (src instanceof InputStream) {
-            return ByteReader.from((InputStream) src);
+    private Object getDest() {
+        if (dest == null) {
+            throw new IORuntimeException("The destination is null!");
         }
-        if (src instanceof byte[]) {
-            return ByteReader.from((byte[]) src);
-        }
-        if (src instanceof ByteBuffer) {
-            return ByteReader.from((ByteBuffer) src);
-        }
-        throw new IORuntimeException("The type of source is unsupported: " + src.getClass());
+        return dest;
     }
 
-    private ByteEncoder getTheOneEncoder(List<ByteEncoder> encoders) {
-        if (JieColl.isEmpty(encoders)) {
-            return ByteEncoder.emptyEncoder();
+    private ByteReader getSourceReader() {
+        if (sourceReader == null) {
+            sourceReader = toByteReader(getSource());
         }
-        if (encoders.size() == 1) {
-            return encoders.get(0);
+        return sourceReader;
+    }
+
+    private ByteEncoder getEncoder() {
+        if (oneEncoder == null) {
+            oneEncoder = toOneEncoder(encoders);
         }
-        return (data, end) -> {
-            ByteBuffer bytes = data;
-            for (ByteEncoder encoder : encoders) {
-                bytes = encoder.encode(bytes, end);
-                if (bytes == null) {
-                    break;
-                }
-            }
-            return bytes;
-        };
+        return oneEncoder;
     }
 
     @Override
@@ -159,7 +150,7 @@ final class ByteProcessorImpl implements ByteProcessor {
     @Override
     public InputStream toInputStream() {
         if (JieColl.isEmpty(encoders)) {
-            return toInputStream(source);
+            return toInputStream(getSource());
         }
         return new ProcessorInputStream();
     }
@@ -178,27 +169,26 @@ final class ByteProcessorImpl implements ByteProcessor {
     }
 
     private long start() {
-        if (source == null || dest == null) {
-            throw new IORuntimeException("Source or dest is null!");
-        }
         if (readLimit == 0) {
             return 0;
         }
         try {
             if (JieColl.isEmpty(encoders)) {
-                if (source instanceof byte[]) {
-                    if (dest instanceof byte[]) {
-                        return bytesToBytes((byte[]) source, (byte[]) dest);
+                Object src = getSource();
+                Object dst = getDest();
+                if (src instanceof byte[]) {
+                    if (dst instanceof byte[]) {
+                        return bytesToBytes((byte[]) src, (byte[]) dst);
                     }
-                    if (dest instanceof ByteBuffer) {
-                        return bytesToBuffer((byte[]) source, (ByteBuffer) dest);
+                    if (dst instanceof ByteBuffer) {
+                        return bytesToBuffer((byte[]) src, (ByteBuffer) dst);
                     }
-                } else if (source instanceof ByteBuffer) {
-                    if (dest instanceof byte[]) {
-                        return bufferToBytes((ByteBuffer) source, (byte[]) dest);
+                } else if (src instanceof ByteBuffer) {
+                    if (dst instanceof byte[]) {
+                        return bufferToBytes((ByteBuffer) src, (byte[]) dst);
                     }
-                    if (dest instanceof ByteBuffer) {
-                        return bufferToBuffer((ByteBuffer) source, (ByteBuffer) dest);
+                    if (dst instanceof ByteBuffer) {
+                        return bufferToBuffer((ByteBuffer) src, (ByteBuffer) dst);
                     }
                 }
             }
@@ -242,9 +232,8 @@ final class ByteProcessorImpl implements ByteProcessor {
     }
 
     private long startInBlocks() throws Exception {
-        initProcessing();
-        DataWriter out = toBufferOut(dest);
-        return readTo(sourceReader, oneEncoder, out);
+        DataWriter out = toBufferOut(getDest());
+        return readTo(getSourceReader(), getEncoder(), out);
     }
 
     private long readTo(ByteReader in, ByteEncoder oneEncoder, DataWriter out) throws Exception {
@@ -253,7 +242,7 @@ final class ByteProcessorImpl implements ByteProcessor {
         while (true) {
             ByteSegment segment = reader.read(readBlockSize, endOnZeroRead);
             count += segment.data().remaining();
-            ByteBuffer encoded = oneEncoder.encode(segment.data(), segment.end());
+            @Nullable ByteBuffer encoded = oneEncoder.encode(segment.data(), segment.end());
             if (!JieBytes.isEmpty(encoded)) {
                 out.write(encoded);
             }
@@ -261,6 +250,19 @@ final class ByteProcessorImpl implements ByteProcessor {
                 return count;
             }
         }
+    }
+
+    private ByteReader toByteReader(Object src) {
+        if (src instanceof InputStream) {
+            return ByteReader.from((InputStream) src);
+        }
+        if (src instanceof byte[]) {
+            return ByteReader.from((byte[]) src);
+        }
+        if (src instanceof ByteBuffer) {
+            return ByteReader.from((ByteBuffer) src);
+        }
+        throw new IORuntimeException("The type of source is unsupported: " + src.getClass());
     }
 
     private DataWriter toBufferOut(Object dst) {
@@ -277,6 +279,25 @@ final class ByteProcessorImpl implements ByteProcessor {
             return new OutputSteamDataWriter(JieIO.outStream((ByteBuffer) dst));
         }
         throw new IORuntimeException("The type of destination is unsupported: " + dst.getClass());
+    }
+
+    private ByteEncoder toOneEncoder(@Nullable List<ByteEncoder> encoders) {
+        if (JieColl.isEmpty(encoders)) {
+            return ByteEncoder.emptyEncoder();
+        }
+        if (encoders.size() == 1) {
+            return encoders.get(0);
+        }
+        return (data, end) -> {
+            @Nullable ByteBuffer bytes = data;
+            for (ByteEncoder encoder : encoders) {
+                bytes = encoder.encode(bytes, end);
+                if (bytes == null) {
+                    break;
+                }
+            }
+            return bytes;
+        };
     }
 
     private interface DataWriter {
@@ -317,17 +338,16 @@ final class ByteProcessorImpl implements ByteProcessor {
 
     private final class ProcessorInputStream extends InputStream {
 
-        private ByteSegment nextSeg = null;
+        private @Nullable ByteSegment nextSeg = null;
         private boolean closed = false;
 
         private ProcessorInputStream() {
-            initProcessing();
         }
 
         private ByteSegment read0() throws IOException {
             try {
-                ByteSegment s0 = sourceReader.read(readBlockSize, endOnZeroRead);
-                ByteBuffer encoded = oneEncoder.encode(s0.data(), s0.end());
+                ByteSegment s0 = getSourceReader().read(readBlockSize, endOnZeroRead);
+                @Nullable ByteBuffer encoded = getEncoder().encode(s0.data(), s0.end());
                 if (encoded == s0.data()) {
                     return s0;
                 }
@@ -468,7 +488,7 @@ final class ByteProcessorImpl implements ByteProcessor {
         private static final BufferMerger SINGLETON = new BufferMerger();
 
         @Override
-        public ByteBuffer apply(Collection<ByteBuffer> byteBuffers) {
+        public @Nullable ByteBuffer apply(Collection<ByteBuffer> byteBuffers) {
             if (byteBuffers.isEmpty()) {
                 return null;
             }
@@ -638,7 +658,7 @@ final class ByteProcessorImpl implements ByteProcessor {
     static final class BufferingEncoder implements ByteEncoder {
 
         private final ByteEncoder encoder;
-        private byte[] buffer = null;
+        private byte @Nullable [] buffer = null;
 
         BufferingEncoder(ByteEncoder encoder) {
             this.encoder = encoder;
@@ -656,7 +676,7 @@ final class ByteProcessorImpl implements ByteProcessor {
             } else {
                 totalBuffer = data;
             }
-            ByteBuffer ret = encoder.encode(totalBuffer, end);
+            @Nullable ByteBuffer ret = encoder.encode(totalBuffer, end);
             if (end) {
                 buffer = null;
                 return ret;
@@ -677,7 +697,7 @@ final class ByteProcessorImpl implements ByteProcessor {
         static final EmptyEncoder SINGLETON = new EmptyEncoder();
 
         @Override
-        public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) {
+        public ByteBuffer encode(ByteBuffer data, boolean end) {
             return data;
         }
     }

@@ -120,7 +120,7 @@ public class JieChars {
 
     private static final class Natives {
 
-        private static final Charset NATIVE_CHARSET = searchNativeCharset();
+        private static final @Nullable Charset NATIVE_CHARSET = searchNativeCharset();
 
         @Nullable
         private static Charset searchNativeCharset() {
@@ -135,7 +135,7 @@ public class JieChars {
         private static Charset search(String... proName) {
             for (String s : proName) {
                 String prop = System.getProperty(s);
-                Charset charset = charset(prop);
+                @Nullable Charset charset = charset(prop);
                 if (charset != null) {
                     return charset;
                 }
