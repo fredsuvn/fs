@@ -6,12 +6,23 @@ import xyz.sunqian.common.base.JieSystem;
 import xyz.sunqian.common.base.chars.JieChars;
 
 import java.lang.reflect.Method;
+import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 public class CharsTest {
+
+    @Test
+    public void testChars() {
+        assertTrue(JieChars.isEmpty(null));
+        assertTrue(JieChars.isEmpty(CharBuffer.allocate(0)));
+        assertTrue(JieChars.isEmpty(CharBuffer.wrap(new char[10], 5, 0)));
+        assertTrue(JieChars.isEmpty(JieChars.emptyBuffer()));
+        assertTrue(JieChars.isEmpty(CharBuffer.wrap(JieChars.emptyChars())));
+    }
 
     @Test
     public void testCharset() throws Exception {

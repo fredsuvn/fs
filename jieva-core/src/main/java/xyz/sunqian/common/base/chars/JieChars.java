@@ -28,6 +28,34 @@ public class JieChars {
     private static final CharBuffer EMPTY_BUFFER = CharBuffer.wrap(EMPTY_CHARS);
 
     /**
+     * Returns whether the given buffer is null or empty.
+     *
+     * @param buffer the given buffer
+     * @return whether the given buffer is null or empty
+     */
+    public static boolean isEmpty(@Nullable CharBuffer buffer) {
+        return buffer == null || !buffer.hasRemaining();
+    }
+
+    /**
+     * Returns an empty char array.
+     *
+     * @return an empty char array
+     */
+    public static char[] emptyChars() {
+        return EMPTY_CHARS;
+    }
+
+    /**
+     * Returns an empty char buffer.
+     *
+     * @return an empty char buffer
+     */
+    public static CharBuffer emptyBuffer() {
+        return EMPTY_BUFFER;
+    }
+
+    /**
      * Returns the default charset: {@link #UTF_8}.
      *
      * @return the default charset: {@link #UTF_8}
@@ -88,34 +116,6 @@ public class JieChars {
         } catch (Exception e) {
             return null;
         }
-    }
-
-    /**
-     * Returns whether the given buffer is null or empty.
-     *
-     * @param buffer the given buffer
-     * @return whether the given buffer is null or empty
-     */
-    public static boolean isEmpty(@Nullable CharBuffer buffer) {
-        return buffer == null || !buffer.hasRemaining();
-    }
-
-    /**
-     * Returns an empty char array.
-     *
-     * @return an empty char array
-     */
-    public static char[] emptyChars() {
-        return EMPTY_CHARS;
-    }
-
-    /**
-     * Returns an empty char buffer.
-     *
-     * @return an empty char buffer
-     */
-    public static CharBuffer emptyBuffer() {
-        return EMPTY_BUFFER;
     }
 
     private static final class Natives {

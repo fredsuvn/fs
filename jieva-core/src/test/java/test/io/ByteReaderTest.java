@@ -1,9 +1,10 @@
 package test.io;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.JieRandom;
+import test.Constants;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.bytes.JieBytes;
+import xyz.sunqian.common.coll.JieArray;
 import xyz.sunqian.common.io.ByteReader;
 import xyz.sunqian.common.io.ByteSegment;
 import xyz.sunqian.common.io.IORuntimeException;
@@ -40,7 +41,7 @@ public class ByteReaderTest {
     private void testReader(int dataSize, int bufferSize) {
         {
             // input stream
-            byte[] data = JieRandom.fill(new byte[dataSize]);
+            byte[] data = JieArray.fill(new byte[dataSize], Constants.FILL_BYTE);
             ByteReader reader = ByteReader.from(new ByteArrayInputStream(data));
             testRead0(reader, dataSize, false);
             testReader(reader, data, 0, dataSize, bufferSize, false);
@@ -48,7 +49,7 @@ public class ByteReaderTest {
                 ByteReader.from(new ByteArrayInputStream(data)),
                 data, 0, dataSize, bufferSize, false
             );
-            byte[] limitedData = JieRandom.fill(new byte[dataSize + 5]);
+            byte[] limitedData = JieArray.fill(new byte[dataSize + 5], Constants.FILL_BYTE);
             ByteReader limitedReader = ByteReader.from(new ByteArrayInputStream(limitedData)).withReadLimit(dataSize);
             testRead0(limitedReader, dataSize, true);
             testReader(limitedReader, limitedData, 0, dataSize, bufferSize, false);
@@ -59,7 +60,7 @@ public class ByteReaderTest {
         }
         {
             // byte array
-            byte[] data = JieRandom.fill(new byte[dataSize]);
+            byte[] data = JieArray.fill(new byte[dataSize], Constants.FILL_BYTE);
             ByteReader reader = ByteReader.from(data);
             reader.close();
             testRead0(reader, dataSize, true);
@@ -68,7 +69,7 @@ public class ByteReaderTest {
                 ByteReader.from(data),
                 data, 0, dataSize, bufferSize, true
             );
-            byte[] limitedData = JieRandom.fill(new byte[dataSize + 5]);
+            byte[] limitedData = JieArray.fill(new byte[dataSize + 5], Constants.FILL_BYTE);
             ByteReader limitedReader = ByteReader.from(limitedData).withReadLimit(dataSize);
             limitedReader.close();
             testRead0(limitedReader, dataSize, true);
@@ -81,7 +82,7 @@ public class ByteReaderTest {
         {
             // padded byte array
             if (dataSize >= 3) {
-                byte[] data = JieRandom.fill(new byte[dataSize]);
+                byte[] data = JieArray.fill(new byte[dataSize], Constants.FILL_BYTE);
                 ByteReader reader = ByteReader.from(data, 1, dataSize - 2);
                 reader.close();
                 testRead0(reader, dataSize - 2, true);
@@ -90,7 +91,7 @@ public class ByteReaderTest {
                     ByteReader.from(data, 1, dataSize - 2),
                     data, 1, dataSize - 2, bufferSize, true
                 );
-                byte[] limitedData = JieRandom.fill(new byte[dataSize + 5]);
+                byte[] limitedData = JieArray.fill(new byte[dataSize + 5], Constants.FILL_BYTE);
                 ByteReader limitedReader = ByteReader.from(limitedData, 1, dataSize - 2)
                     .withReadLimit(dataSize);
                 limitedReader.close();
@@ -104,7 +105,7 @@ public class ByteReaderTest {
         }
         {
             // byte buffer
-            byte[] data = JieRandom.fill(new byte[dataSize]);
+            byte[] data = JieArray.fill(new byte[dataSize], Constants.FILL_BYTE);
             ByteReader reader = ByteReader.from(ByteBuffer.wrap(data));
             reader.close();
             testRead0(reader, dataSize, true);
@@ -113,7 +114,7 @@ public class ByteReaderTest {
                 ByteReader.from(ByteBuffer.wrap(data)),
                 data, 0, dataSize, bufferSize, true
             );
-            byte[] limitedData = JieRandom.fill(new byte[dataSize + 5]);
+            byte[] limitedData = JieArray.fill(new byte[dataSize + 5], Constants.FILL_BYTE);
             ByteReader limitedReader = ByteReader.from(ByteBuffer.wrap(limitedData)).withReadLimit(dataSize);
             limitedReader.close();
             testRead0(limitedReader, dataSize, true);
@@ -177,14 +178,14 @@ public class ByteReaderTest {
         assertEquals(builder.toByteArray(), bytesCopy);
         if (shared) {
             byte[] bytesShared = new byte[length];
-            Arrays.fill(bytesShared, (byte) 6);
+            Arrays.fill(bytesShared, Constants.SHARE_BYTE);
             assertEquals(bytesShared, Arrays.copyOfRange(bytes, offset, offset + length));
         }
     }
 
     @Test
     public void testSpecial() throws Exception {
-        byte[] bytes = JieRandom.fill(new byte[64]);
+        byte[] bytes = JieArray.fill(new byte[64], Constants.FILL_BYTE);
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);
         TestInputStream testIn = new TestInputStream(in);
         {
@@ -263,7 +264,7 @@ public class ByteReaderTest {
 
     private void fillBuffer(ByteBuffer buffer) {
         while (buffer.hasRemaining()) {
-            buffer.put((byte) 6);
+            buffer.put(Constants.SHARE_BYTE);
         }
     }
 

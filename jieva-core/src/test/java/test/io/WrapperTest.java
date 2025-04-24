@@ -50,8 +50,7 @@ public class WrapperTest {
     }
 
     private void testInput(int sourceSize) throws Exception {
-        byte[] source = new byte[sourceSize];
-        JieRandom.fill(source);
+        byte[] source = JieRandom.fill(new byte[sourceSize]);
 
         // bytes
         IOCases.testInput(JieIO.inStream(source), source, true);
@@ -126,8 +125,7 @@ public class WrapperTest {
     }
 
     private void testOutput(int sourceSize) throws Exception {
-        byte[] source = new byte[sourceSize];
-        Arrays.fill(source, (byte) 1);
+        byte[] source = JieRandom.fill(new byte[sourceSize]);
 
         // bytes
         OutputStream bytesOut = JieIO.outStream(source);
@@ -275,8 +273,7 @@ public class WrapperTest {
     }
 
     private void testReader(int sourceSize) throws Exception {
-        char[] source = new char[sourceSize];
-        JieRandom.fill(source);
+        char[] source = JieRandom.fill(new char[sourceSize], '0', '9');
 
         // chars
         IOCases.testReader(JieIO.reader(source), source);
@@ -382,8 +379,7 @@ public class WrapperTest {
     }
 
     private void testWriter(int sourceSize) throws Exception {
-        char[] source = new char[sourceSize];
-        Arrays.fill(source, (char) 1);
+        char[] source = JieRandom.fill(new char[sourceSize], '0', '9');
 
         // chars
         Writer charsOut = JieIO.writer(source);
