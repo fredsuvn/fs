@@ -158,7 +158,23 @@ final class ByteProcessorImpl implements ByteProcessor {
 
     @Override
     public InputStream toInputStream() {
+        if (JieColl.isEmpty(encoders)) {
+            return toInputStream(source);
+        }
         return new ProcessorInputStream();
+    }
+
+    private InputStream toInputStream(Object src) {
+        if (src instanceof InputStream) {
+            return (InputStream) src;
+        }
+        if (src instanceof byte[]) {
+            return JieIO.inStream((byte[]) src);
+        }
+        if (src instanceof ByteBuffer) {
+            return JieIO.inStream((ByteBuffer) src);
+        }
+        throw new IORuntimeException("The type of source is unsupported: " + src.getClass());
     }
 
     private long start() {
@@ -169,7 +185,7 @@ final class ByteProcessorImpl implements ByteProcessor {
             return 0;
         }
         try {
-            if (encoders == null) {
+            if (JieColl.isEmpty(encoders)) {
                 if (source instanceof byte[]) {
                     if (dest instanceof byte[]) {
                         return bytesToBytes((byte[]) source, (byte[]) dest);

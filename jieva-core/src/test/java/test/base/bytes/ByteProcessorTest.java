@@ -749,7 +749,32 @@ public class ByteProcessorTest {
         testToInputStream(20, 10086);
         testToInputStream(20, 40);
         {
-            InputStream in = ByteProcessor.from(new byte[0]).toInputStream();
+            // non-processor reader
+            assertEquals(
+                ByteProcessor.from(new ByteArrayInputStream(new byte[0])).toInputStream().getClass(),
+                ByteArrayInputStream.class
+            );
+            assertEquals(
+                ByteProcessor.from(new byte[0]).toInputStream().getClass(),
+                JieIO.inStream(new byte[0]).getClass()
+            );
+            assertEquals(
+                ByteProcessor.from(ByteBuffer.allocate(0)).toInputStream().getClass(),
+                JieIO.inStream(ByteBuffer.allocate(0)).getClass()
+            );
+            ByteProcessor inst = ByteProcessor.from(new byte[0]);
+            reflectThrows(
+                IORuntimeException.class,
+                inst.getClass().getDeclaredMethod("toInputStream", Object.class),
+                inst,
+                5
+            );
+        }
+        {
+            // special with encoder
+            InputStream in = ByteProcessor.from(new byte[0])
+                .encoder((d, e) -> d)
+                .toInputStream();
             assertEquals(in.read(new byte[1]), -1);
             assertEquals(in.read(), -1);
             assertEquals(in.read(), -1);
@@ -760,23 +785,32 @@ public class ByteProcessorTest {
             in.close();
             in.close();
             expectThrows(IOException.class, () -> in.read());
-            InputStream nio = ByteProcessor.from(new NioIn()).endOnZeroRead(true).toInputStream();
+            InputStream nio = ByteProcessor.from(new NioIn()).endOnZeroRead(true)
+                .encoder((d, e) -> d)
+                .toInputStream();
             assertEquals(nio.read(), -1);
-            InputStream empty = ByteProcessor.from(new byte[]{9}).encoder(((data, end) -> {
-                BytesBuilder bb = new BytesBuilder();
-                bb.append(data);
-                if (end) {
-                    bb.append(new byte[]{1, 2, 3});
-                }
-                return bb.toByteBuffer();
-            })).toInputStream();
+            InputStream empty = ByteProcessor.from(new byte[]{9})
+                .encoder(((data, end) -> {
+                    BytesBuilder bb = new BytesBuilder();
+                    bb.append(data);
+                    if (end) {
+                        bb.append(new byte[]{1, 2, 3});
+                    }
+                    return bb.toByteBuffer();
+                })).toInputStream();
             assertEquals(JieIO.read(empty), new byte[]{9, 1, 2, 3});
             assertEquals(empty.read(), -1);
-            InputStream err1 = ByteProcessor.from(new ThrowIn(0)).toInputStream();
+            InputStream err1 = ByteProcessor.from(new ThrowIn(0))
+                .encoder((d, e) -> d)
+                .toInputStream();
             expectThrows(IOException.class, () -> err1.close());
-            InputStream err2 = ByteProcessor.from(new ThrowIn(2)).toInputStream();
+            InputStream err2 = ByteProcessor.from(new ThrowIn(2))
+                .encoder((d, e) -> d)
+                .toInputStream();
             expectThrows(IOException.class, () -> err2.close());
-            InputStream err3 = ByteProcessor.from(new ThrowIn(3)).toInputStream();
+            InputStream err3 = ByteProcessor.from(new ThrowIn(3))
+                .encoder((d, e) -> d)
+                .toInputStream();
             expectThrows(IOException.class, () -> err3.read());
         }
         {

@@ -161,7 +161,26 @@ final class CharProcessorImpl implements CharProcessor {
 
     @Override
     public Reader toReader() {
+        if (JieColl.isEmpty(encoders)) {
+            return toReader(source);
+        }
         return new ProcessorReader();
+    }
+
+    private Reader toReader(Object src) {
+        if (src instanceof Reader) {
+            return (Reader) src;
+        }
+        if (src instanceof char[]) {
+            return JieIO.reader((char[]) src);
+        }
+        if (src instanceof CharBuffer) {
+            return JieIO.reader((CharBuffer) src);
+        }
+        if (src instanceof CharSequence) {
+            return JieIO.reader((CharSequence) src);
+        }
+        throw new IORuntimeException("The type of source is unsupported: " + src.getClass());
     }
 
     private long start() {
@@ -172,7 +191,7 @@ final class CharProcessorImpl implements CharProcessor {
             return 0;
         }
         try {
-            if (encoders == null) {
+            if (JieColl.isEmpty(encoders)) {
                 if (source instanceof char[]) {
                     if (dest instanceof char[]) {
                         return charsToChars((char[]) source, (char[]) dest);
