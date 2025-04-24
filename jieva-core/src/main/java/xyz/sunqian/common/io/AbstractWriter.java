@@ -34,9 +34,10 @@ public abstract class AbstractWriter extends Writer {
     protected abstract void doWrite(char c) throws Exception;
 
     /**
-     * Does write the specified number of chars from the given array, starting at the specified offset.
+     * Does write the specified number of chars from the given array, starting at the specified offset. Its behavior is
+     * equivalent to the {@link Writer#write(char[], int, int)}.
      * <p>
-     * Null there is no need to consider null pointers or boundary issues.
+     * Note there is no need to consider null pointers or boundary issues.
      *
      * @param cbuf the given array
      * @param off  the specified offset
@@ -46,9 +47,10 @@ public abstract class AbstractWriter extends Writer {
     protected abstract void doWrite(char[] cbuf, int off, int len) throws Exception;
 
     /**
-     * Does write the specified number of chars from the given string, starting at the specified offset.
+     * Does write the specified number of chars from the given string, starting at the specified offset. Its behavior is
+     * equivalent to the {@link Writer#write(String, int, int)}.
      * <p>
-     * Null there is no need to consider null pointers or boundary issues.
+     * Note there is no need to consider null pointers or boundary issues.
      *
      * @param str the given string
      * @param off the specified offset
@@ -58,16 +60,17 @@ public abstract class AbstractWriter extends Writer {
     protected abstract void doWrite(String str, int off, int len) throws Exception;
 
     /**
-     * Does write the chars from the given char sequence, starting and ending at the specified indexes.
+     * Does write the chars from the given char sequence, starting and ending at the specified indexes. Its behavior is
+     * equivalent to the {@link Appendable#append(CharSequence, int, int)}.
      * <p>
-     * Null there is no need to consider null pointers or boundary issues.
+     * Note there is no need to consider null pointers or boundary issues.
      *
      * @param csq   the given char sequence
      * @param start specified start index inclusive
      * @param end   specified end index exclusive
      * @throws Exception if any error occurs
      */
-    protected abstract void doAppend(CharSequence csq, int start, int end) throws Exception;
+    protected abstract void doAppend(@Nullable CharSequence csq, int start, int end) throws Exception;
 
     @Override
     public void write(int c) throws IOException {
@@ -122,13 +125,13 @@ public abstract class AbstractWriter extends Writer {
 
     @Override
     public Writer append(@Nullable CharSequence csq) throws IOException {
-        CharSequence cs = nonNull(csq);
+        CharSequence cs = IOBack.nonNullChars(csq);
         return append(cs, 0, cs.length());
     }
 
     @Override
     public Writer append(@Nullable CharSequence csq, int start, int end) throws IOException {
-        CharSequence cs = nonNull(csq);
+        CharSequence cs = IOBack.nonNullChars(csq);
         checkOffsetLength(cs.length(), start, end - start);
         if (start == end) {
             return this;
@@ -139,9 +142,5 @@ public abstract class AbstractWriter extends Writer {
             throw new IOException(e);
         }
         return this;
-    }
-
-    private CharSequence nonNull(@Nullable CharSequence csq) {
-        return csq == null ? "null" : csq;
     }
 }

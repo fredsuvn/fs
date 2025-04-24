@@ -338,7 +338,7 @@ final class WrapperBack {
             if (len <= 0) {
                 return 0;
             }
-            int readNum = read0(b, off, len, true);
+            int readNum = read0(b, off, len);
             return readNum == 0 ? -1 : readNum;
         }
 
@@ -348,7 +348,7 @@ final class WrapperBack {
             if (n <= 0) {
                 return 0;
             }
-            return read0(null, 0, (int) n, false);
+            return read0(null, 0, (int) n);
         }
 
         @Override
@@ -362,14 +362,14 @@ final class WrapperBack {
             closed = true;
         }
 
-        private int read0(@Nullable byte[] b, int off, int len, boolean fillBytes) throws IOException {
+        private int read0(byte @Nullable [] b, int off, int len) throws IOException {
             int readNum = 0;
             int offset = off;
             int remaining = len;
             while (true) {
                 if (outBuffer.hasRemaining()) {
                     int avail = Math.min(outBuffer.remaining(), remaining);
-                    if (fillBytes) {
+                    if (b != null) {
                         outBuffer.get(b, offset, avail);
                     } else {
                         outBuffer.position(outBuffer.position() + avail);
@@ -646,7 +646,7 @@ final class WrapperBack {
             if (len <= 0) {
                 return 0;
             }
-            int readNum = read0(c, off, len, true);
+            int readNum = read0(c, off, len);
             return readNum == 0 ? -1 : readNum;
         }
 
@@ -656,7 +656,7 @@ final class WrapperBack {
             if (n <= 0) {
                 return 0;
             }
-            return read0(null, 0, (int) n, false);
+            return read0(null, 0, (int) n);
         }
 
         @Override
@@ -670,14 +670,14 @@ final class WrapperBack {
             closed = true;
         }
 
-        private int read0(@Nullable char[] c, int off, int len, boolean fill) throws IOException {
+        private int read0(char @Nullable [] c, int off, int len) throws IOException {
             int readNum = 0;
             int offset = off;
             int remaining = len;
             while (true) {
                 if (outBuffer.hasRemaining()) {
                     int avail = Math.min(outBuffer.remaining(), remaining);
-                    if (fill) {
+                    if (c != null) {
                         outBuffer.get(c, offset, avail);
                     } else {
                         outBuffer.position(outBuffer.position() + avail);
@@ -884,7 +884,7 @@ final class WrapperBack {
                 remaining -= avail;
                 offset += avail;
                 inBuffer.flip();
-                decodeBuffer(rollbackLimit, false);
+                decodeBuffer(rollbackLimit);
             }
         }
 
@@ -915,10 +915,10 @@ final class WrapperBack {
             closed = true;
         }
 
-        private void decodeBuffer(int rollbackLimit, boolean endOfInput) throws IOException {
+        private void decodeBuffer(int rollbackLimit) throws IOException {
             while (true) {
                 outBuffer.compact();
-                CoderResult coderResult = decoder.decode(inBuffer, outBuffer, endOfInput);
+                CoderResult coderResult = decoder.decode(inBuffer, outBuffer, false);
                 if (coderResult.isUnderflow()) {
                     outBuffer.flip();
                     flushBuffer(rollbackLimit);
@@ -1044,7 +1044,7 @@ final class WrapperBack {
         }
 
         @Override
-        protected void doAppend(CharSequence csq, int start, int end) {
+        protected void doAppend(@Nullable CharSequence csq, int start, int end) {
             buffer.append(csq, start, end);
         }
 
@@ -1110,8 +1110,9 @@ final class WrapperBack {
         }
 
         @Override
-        protected void doAppend(CharSequence csq, int start, int end) throws Exception {
-            doWrite0(csq, start, end - start);
+        protected void doAppend(@Nullable CharSequence csq, int start, int end) throws Exception {
+            CharSequence chars = IOBack.nonNullChars(csq);
+            doWrite0(chars, start, end - start);
         }
 
         private void doWrite0(Object c, int off, int len) throws Exception {
@@ -1135,7 +1136,7 @@ final class WrapperBack {
                 remaining -= avail;
                 offset += avail;
                 inBuffer.flip();
-                encodeBuffer(rollbackLimit, false);
+                encodeBuffer(rollbackLimit);
             }
         }
 
@@ -1154,10 +1155,10 @@ final class WrapperBack {
             closed = true;
         }
 
-        private void encodeBuffer(int rollbackLimit, boolean endOfInput) throws IOException {
+        private void encodeBuffer(int rollbackLimit) throws IOException {
             while (true) {
                 outBuffer.compact();
-                CoderResult coderResult = encoder.encode(inBuffer, outBuffer, endOfInput);
+                CoderResult coderResult = encoder.encode(inBuffer, outBuffer, false);
                 if (coderResult.isUnderflow()) {
                     outBuffer.flip();
                     flushBuffer(rollbackLimit);
@@ -1217,11 +1218,11 @@ final class WrapperBack {
         }
 
         @Override
-        public void flush() throws IOException {
+        public void flush() {
         }
 
         @Override
-        public void close() throws IOException {
+        public void close() {
         }
     }
 }

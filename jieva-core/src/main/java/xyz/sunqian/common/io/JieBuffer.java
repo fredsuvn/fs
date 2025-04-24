@@ -1,6 +1,5 @@
 package xyz.sunqian.common.io;
 
-import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.bytes.ByteProcessor;
 import xyz.sunqian.common.base.chars.CharProcessor;
 import xyz.sunqian.common.base.chars.JieChars;
@@ -73,7 +72,6 @@ public class JieBuffer {
      * @param number the specified number
      * @return the array containing the data
      */
-    @Nullable
     public static byte[] read(ByteBuffer source, int number) {
         if (!source.hasRemaining()) {
             return new byte[0];

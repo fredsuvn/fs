@@ -94,6 +94,7 @@ final class ReaderBack {
             return end;
         }
 
+        @SuppressWarnings("MethodDoesntCallSuperMethod")
         @Override
         public ByteSegment clone() {
             ByteBuffer copy = ByteBuffer.allocate(data.remaining());
@@ -134,6 +135,7 @@ final class ReaderBack {
             return end;
         }
 
+        @SuppressWarnings("MethodDoesntCallSuperMethod")
         @Override
         public CharSegment clone() {
             CharBuffer copy = CharBuffer.allocate(data.remaining());
