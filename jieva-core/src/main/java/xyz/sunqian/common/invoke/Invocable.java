@@ -22,7 +22,7 @@ public interface Invocable {
      * @return an {@link Invocable} represents the specified method
      */
     static Invocable of(Method method) {
-        return InvocableBack.withReflection(method);
+        return of(method, InvocationMode.DEFAULT);
     }
 
     /**
@@ -32,7 +32,7 @@ public interface Invocable {
      * @return an {@link Invocable} represents the specified constructor
      */
     static Invocable of(Constructor<?> constructor) {
-        return InvocableBack.withReflection(constructor);
+        return of(constructor, InvocationMode.DEFAULT);
     }
 
     /**
@@ -47,9 +47,8 @@ public interface Invocable {
             case REFLECTION:
                 return InvocableBack.withReflection(method);
             case METHOD_HANDLE:
-                return InvocableBack.withMethodHandle(method);
             default:
-                throw new IllegalArgumentException("The mode must be REFLECTION or METHOD_HANDLE.");
+                return InvocableBack.withMethodHandle(method);
         }
     }
 
@@ -65,9 +64,8 @@ public interface Invocable {
             case REFLECTION:
                 return InvocableBack.withReflection(constructor);
             case METHOD_HANDLE:
-                return InvocableBack.withMethodHandle(constructor);
             default:
-                throw new IllegalArgumentException("The mode must be REFLECTION or METHOD_HANDLE.");
+                return InvocableBack.withMethodHandle(constructor);
         }
     }
 

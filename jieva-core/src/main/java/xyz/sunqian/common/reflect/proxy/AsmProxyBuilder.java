@@ -150,7 +150,7 @@ public class AsmProxyBuilder implements ProxyBuilder, Opcodes {
         // Generates proxy class
         Generator proxyGenerator = new Generator(
             proxyInternalName,
-            AsmMisc.generateSignature(proxied),
+            JieAsm.generateSignature(proxied),
             superInternalName,
             interfaceInternalNames,
             invokerInternalName,
@@ -329,22 +329,22 @@ public class AsmProxyBuilder implements ProxyBuilder, Opcodes {
                 for (Method method : methods) {
                     MethodVisitor override = cw.visitMethod(ACC_PUBLIC, method.getName(), JieJvm.getDescriptor(method), null, null);
                     Parameter[] parameters = method.getParameters();
-                    int extraLocalIndex = AsmMisc.countExtraLocalIndex(parameters);
+                    int extraLocalIndex = JieAsm.countExtraLocalIndex(parameters);
                     // method = this.methods[j]
                     override.visitVarInsn(ALOAD, 0);
                     override.visitFieldInsn(GETFIELD, proxyInternalName, "methods", METHOD_ARRAY_DESCRIPTOR);
-                    AsmMisc.visitPushNumber(override, methodCount);
+                    JieAsm.visitPushNumber(override, methodCount);
                     override.visitInsn(AALOAD);
                     override.visitVarInsn(ASTORE, extraLocalIndex);
                     // Object args = new Object[]{};
-                    AsmMisc.visitPushNumber(override, parameters.length);
+                    JieAsm.visitPushNumber(override, parameters.length);
                     override.visitTypeInsn(ANEWARRAY, OBJECT_INTERNAL_NAME);
                     int paramIndex = 1;
                     for (int i = 0; i < parameters.length; i++) {
                         Parameter parameter = parameters[i];
                         override.visitInsn(DUP);
-                        AsmMisc.visitPushNumber(override, i);
-                        AsmMisc.visitLoadParamAsObject(override, parameter.getType(), paramIndex);
+                        JieAsm.visitPushNumber(override, i);
+                        JieAsm.visitLoadParamAsObject(override, parameter.getType(), paramIndex);
                         override.visitInsn(AASTORE);
                         if (Objects.equals(parameter.getType(), long.class) || Objects.equals(parameter.getType(), double.class)) {
                             paramIndex += 2;
@@ -356,7 +356,7 @@ public class AsmProxyBuilder implements ProxyBuilder, Opcodes {
                     // invoker = this.invokers[i];
                     override.visitVarInsn(ALOAD, 0);
                     override.visitFieldInsn(GETFIELD, proxyInternalName, "invokers", PROXY_INVOKER_ARRAY_DESCRIPTOR);
-                    AsmMisc.visitPushNumber(override, methodCount);
+                    JieAsm.visitPushNumber(override, methodCount);
                     override.visitInsn(AALOAD);
                     override.visitVarInsn(ASTORE, extraLocalIndex + 2);
                     // handler
@@ -375,7 +375,7 @@ public class AsmProxyBuilder implements ProxyBuilder, Opcodes {
                     if (Objects.equals(method.getReturnType(), void.class)) {
                         override.visitInsn(RETURN);
                     } else {
-                        AsmMisc.visitObjectCast(override, method.getReturnType(), true);
+                        JieAsm.visitObjectCast(override, method.getReturnType(), true);
                     }
                     // override.visitMaxs(5, extraLocalIndex + 3);
                     override.visitMaxs(0, 0);
@@ -401,9 +401,9 @@ public class AsmProxyBuilder implements ProxyBuilder, Opcodes {
                     Class<?>[] params = method.getParameterTypes();
                     for (int j = 0; j < params.length; j++) {
                         callSuper.visitVarInsn(ALOAD, 3);
-                        AsmMisc.visitPushNumber(callSuper, j);
+                        JieAsm.visitPushNumber(callSuper, j);
                         callSuper.visitInsn(AALOAD);
-                        AsmMisc.visitObjectCast(callSuper, params[j], false);
+                        JieAsm.visitObjectCast(callSuper, params[j], false);
                     }
                     String methodOwnerInternalName = JieJvm.getInternalName(method.getDeclaringClass());
                     boolean hasOwner = Objects.equals(methodOwnerInternalName, superInternalName) || superInternalNames.contains(methodOwnerInternalName);
@@ -412,7 +412,7 @@ public class AsmProxyBuilder implements ProxyBuilder, Opcodes {
                     } else {
                         callSuper.visitMethodInsn(INVOKESPECIAL, superInternalName, method.getName(), JieJvm.getDescriptor(method), false);
                     }
-                    AsmMisc.returnCastObject(callSuper, method.getReturnType());
+                    JieAsm.returnCastObject(callSuper, method.getReturnType());
                     i++;
                 }
                 callSuper.visitLabel(switchLabel);
@@ -441,16 +441,16 @@ public class AsmProxyBuilder implements ProxyBuilder, Opcodes {
                     Class<?>[] params = method.getParameterTypes();
                     for (int j = 0; j < params.length; j++) {
                         callVirtual.visitVarInsn(ALOAD, 3);
-                        AsmMisc.visitPushNumber(callVirtual, j);
+                        JieAsm.visitPushNumber(callVirtual, j);
                         callVirtual.visitInsn(AALOAD);
-                        AsmMisc.visitObjectCast(callVirtual, params[j], false);
+                        JieAsm.visitObjectCast(callVirtual, params[j], false);
                     }
                     if (method.getDeclaringClass().isInterface()) {
                         callVirtual.visitMethodInsn(INVOKEINTERFACE, JieJvm.getInternalName(method.getDeclaringClass()), method.getName(), JieJvm.getDescriptor(method), true);
                     } else {
                         callVirtual.visitMethodInsn(INVOKEVIRTUAL, JieJvm.getInternalName(method.getDeclaringClass()), method.getName(), JieJvm.getDescriptor(method), false);
                     }
-                    AsmMisc.returnCastObject(callVirtual, method.getReturnType());
+                    JieAsm.returnCastObject(callVirtual, method.getReturnType());
                     i++;
                 }
                 callVirtual.visitLabel(switchLabel);

@@ -86,17 +86,14 @@ public class ProtobufBeanResolveHandler implements DataSchemaParser.Handler {
             if (isBuilder) {
                 Method clearMethod = rawClass.getMethod("clear" + JieString.capitalize(rawName));
                 Method putAllMethod = rawClass.getMethod("putAll" + JieString.capitalize(rawName), Map.class);
-                Invocable setter = new Invocable() {
-                    @Override
-                    public @Nullable Object invoke(@Nullable Object inst, Object... args) {
-                        try {
-                            clearMethod.invoke(inst);
-                            return putAllMethod.invoke(inst, args);
-                        } catch (InvocationTargetException e) {
-                            throw new BeanException(e.getCause());
-                        } catch (Exception e) {
-                            throw new BeanException(e);
-                        }
+                Invocable setter = (inst, args) -> {
+                    try {
+                        clearMethod.invoke(inst);
+                        return putAllMethod.invoke(inst, args);
+                    } catch (InvocationTargetException e) {
+                        throw new BeanException(e.getCause());
+                    } catch (Exception e) {
+                        throw new BeanException(e);
                     }
                 };
                 return new Impl(name, argsTypes.get(0), getterMethod, null, getter, setter);
@@ -117,17 +114,14 @@ public class ProtobufBeanResolveHandler implements DataSchemaParser.Handler {
             if (isBuilder) {
                 Method clearMethod = rawClass.getMethod("clear" + JieString.capitalize(rawName));
                 Method addAllMethod = rawClass.getMethod("addAll" + JieString.capitalize(rawName), Iterable.class);
-                Invocable setter = new Invocable() {
-                    @Override
-                    public @Nullable Object invoke(@Nullable Object inst, Object... args) {
-                        try {
-                            clearMethod.invoke(inst);
-                            return addAllMethod.invoke(inst, args);
-                        } catch (InvocationTargetException e) {
-                            throw new BeanException(e.getCause());
-                        } catch (Exception e) {
-                            throw new BeanException(e);
-                        }
+                Invocable setter = (inst, args) -> {
+                    try {
+                        clearMethod.invoke(inst);
+                        return addAllMethod.invoke(inst, args);
+                    } catch (InvocationTargetException e) {
+                        throw new BeanException(e.getCause());
+                    } catch (Exception e) {
+                        throw new BeanException(e);
                     }
                 };
                 return new Impl(name, argsTypes.get(0), getterMethod, null, getter, setter);

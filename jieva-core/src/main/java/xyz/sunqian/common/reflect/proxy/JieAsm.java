@@ -8,9 +8,9 @@ import xyz.sunqian.common.reflect.NotPrimitiveException;
 import java.lang.reflect.Parameter;
 import java.util.Objects;
 
-final class AsmMisc {
+public class JieAsm {
 
-    static String generateSignature(Iterable<Class<?>> uppers) {
+    public static String generateSignature(Iterable<Class<?>> uppers) {
         StringBuilder sb = new StringBuilder();
         for (Class<?> upper : uppers) {
             sb.append(JieJvm.getSignature(upper));
@@ -18,7 +18,7 @@ final class AsmMisc {
         return sb.toString();
     }
 
-    static void visitLoadParamAsObject(MethodVisitor visitor, Class<?> type, int i) {
+    public static void visitLoadParamAsObject(MethodVisitor visitor, Class<?> type, int i) {
         if (!type.isPrimitive()) {
             visitor.visitVarInsn(Opcodes.ALOAD, i);
             return;
@@ -26,7 +26,7 @@ final class AsmMisc {
         visitLoadPrimitiveParamAsObject(visitor, type, i);
     }
 
-    static void visitLoadPrimitiveParamAsObject(MethodVisitor visitor, Class<?> type, int i) {
+    public static void visitLoadPrimitiveParamAsObject(MethodVisitor visitor, Class<?> type, int i) {
         if (Objects.equals(type, boolean.class)) {
             visitor.visitVarInsn(Opcodes.ILOAD, i);
             visitor.visitMethodInsn(
@@ -78,7 +78,7 @@ final class AsmMisc {
         throw new NotPrimitiveException(type);
     }
 
-    static void visitObjectCast(MethodVisitor visitor, Class<?> type, boolean needReturn) {
+    public static void visitObjectCast(MethodVisitor visitor, Class<?> type, boolean needReturn) {
         if (!type.isPrimitive()) {
             visitor.visitTypeInsn(Opcodes.CHECKCAST, JieJvm.getInternalName(type));
             if (needReturn) {
@@ -89,7 +89,7 @@ final class AsmMisc {
         visitObjectCastPrimitive(visitor, type, needReturn);
     }
 
-    static void visitObjectCastPrimitive(MethodVisitor visitor, Class<?> type, boolean needReturn) {
+    public static void visitObjectCastPrimitive(MethodVisitor visitor, Class<?> type, boolean needReturn) {
         if (Objects.equals(type, boolean.class)) {
             visitor.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Boolean");
             visitor.visitMethodInsn(
@@ -165,7 +165,7 @@ final class AsmMisc {
         throw new NotPrimitiveException(type);
     }
 
-    static void returnCastObject(MethodVisitor visitor, Class<?> type) {
+    public static void returnCastObject(MethodVisitor visitor, Class<?> type) {
         if (!type.isPrimitive()) {
             visitor.visitInsn(Opcodes.ARETURN);
             return;
@@ -173,7 +173,7 @@ final class AsmMisc {
         returnPrimitiveCastObject(visitor, type);
     }
 
-    static void returnPrimitiveCastObject(MethodVisitor visitor, Class<?> type) {
+    public static void returnPrimitiveCastObject(MethodVisitor visitor, Class<?> type) {
         if (Objects.equals(type, boolean.class)) {
             visitor.visitMethodInsn(
                 Opcodes.INVOKESTATIC, "java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;", false);
@@ -206,7 +206,7 @@ final class AsmMisc {
         visitor.visitInsn(Opcodes.ARETURN);
     }
 
-    static void visitPushNumber(MethodVisitor visitor, int i) {
+    public static void visitPushNumber(MethodVisitor visitor, int i) {
         switch (i) {
             case 0:
                 visitor.visitInsn(Opcodes.ICONST_0);
@@ -234,7 +234,7 @@ final class AsmMisc {
         }
     }
 
-    static int countExtraLocalIndex(Parameter[] parameters) {
+    public static int countExtraLocalIndex(Parameter[] parameters) {
         int i = 1;
         for (Parameter parameter : parameters) {
             if (Objects.equals(parameter.getType(), long.class) || Objects.equals(parameter.getType(), double.class)) {

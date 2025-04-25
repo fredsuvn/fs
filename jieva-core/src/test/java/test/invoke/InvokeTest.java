@@ -2,6 +2,7 @@ package test.invoke;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.invoke.AsmBack;
 import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.invoke.InvocationException;
 import xyz.sunqian.common.invoke.InvocationMode;
@@ -20,6 +21,11 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.expectThrows;
 
 public class InvokeTest {
+
+    @Test
+    public void testAsm() throws Exception {
+        AsmBack.test();
+    }
 
     @Test
     public void testInvoke() throws Exception {
@@ -89,7 +95,7 @@ public class InvokeTest {
         Method errorStatic = JieReflect.getMethod(TestThrow.class, "errorStatic", Jie.array());
         Method error = JieReflect.getMethod(TestThrow.class, "error", Jie.array());
         expectThrows(InvocationException.class, () ->
-            Invocable.of(errorC, mode).invoke(null));
+            Invocable.of(errorC, mode).invoke(1));
         expectThrows(InvocationException.class, () ->
             Invocable.of(errorStatic, mode).invoke(null));
         expectThrows(InvocationException.class, () ->
@@ -120,11 +126,11 @@ public class InvokeTest {
         Constructor<?> errorC = JieReflect.getConstructor(TestThrow.class, Jie.array(int.class));
         Method errorStatic = JieReflect.getMethod(TestThrow.class, "errorStatic", Jie.array());
         Method error = JieReflect.getMethod(TestThrow.class, "error", Jie.array());
-        expectThrows(JieTestException.class, () ->
-            Invocable.of(MethodHandles.lookup().unreflectConstructor(errorC), true).invoke(null));
-        expectThrows(JieTestException.class, () ->
+        expectThrows(InvocationException.class, () ->
+            Invocable.of(MethodHandles.lookup().unreflectConstructor(errorC), true).invoke(1));
+        expectThrows(InvocationException.class, () ->
             Invocable.of(MethodHandles.lookup().unreflect(errorStatic), true).invoke(null));
-        expectThrows(JieTestException.class, () ->
+        expectThrows(InvocationException.class, () ->
             Invocable.of(MethodHandles.lookup().unreflect(error), false).invoke(tt));
         try {
             Invocable.of(MethodHandles.lookup().unreflectConstructor(errorC), true).invoke(null, 1);
@@ -137,7 +143,7 @@ public class InvokeTest {
             assertEquals(JieTestException.class, e.getCause().getClass());
         }
         try {
-            Invocable.of(MethodHandles.lookup().unreflectConstructor(errorC), true).invoke(tt);
+            Invocable.of(MethodHandles.lookup().unreflect(error), false).invoke(tt);
         } catch (InvocationException e) {
             assertEquals(JieTestException.class, e.getCause().getClass());
         }

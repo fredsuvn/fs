@@ -19,4 +19,6 @@ public enum InvocationMode {
      */
     METHOD_HANDLE,
     ;
+
+    static final InvocationMode DEFAULT = REFLECTION;
 }
