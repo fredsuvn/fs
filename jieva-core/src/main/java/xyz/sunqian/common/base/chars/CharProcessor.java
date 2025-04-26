@@ -340,9 +340,10 @@ public interface CharProcessor {
      * Returns a reader which represents and encompasses the entire data processing.
      * <p>
      * If there is no encoder in the processor: if the source is a reader, return the reader itself; if the source is an
-     * array or buffer, returns the reader from {@link JieIO#reader(char[])} or {@link JieIO#reader(CharBuffer)}.
-     * Otherwise, the returned reader's read operations are performed only as needed, mark/reset operations are not
-     * supported, and the {@code close()} method will close the source if the source is closable.
+     * array or buffer or char sequence, returns the reader from {@link JieIO#reader(char[])} or
+     * {@link JieIO#reader(CharBuffer)} or {@link JieIO#reader(CharSequence)}. Otherwise, the returned reader's read
+     * operations are performed only as needed, mark/reset operations are not supported, and the {@code close()} method
+     * will close the source if the source is closable.
      * <p>
      * This is a terminal method.
      *
