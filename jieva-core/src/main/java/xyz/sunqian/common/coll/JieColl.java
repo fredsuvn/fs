@@ -1082,35 +1082,4 @@ public class JieColl {
             curKey = result;
         }
     }
-
-    /**
-     * Returns a {@link Stream} from given elements, not parallel.
-     *
-     * @param elements given elements
-     * @param <T>      type of element
-     * @return a {@link Stream} from given elements, not parallel
-     */
-    public static <T> Stream<T> stream(T[] elements) {
-        if (JieArray.isEmpty(elements)) {
-            return Stream.empty();
-        }
-        return Arrays.stream(elements);
-    }
-
-    /**
-     * Returns a {@link Stream} from given elements, not parallel.
-     *
-     * @param elements given elements
-     * @param <T>      type of element
-     * @return a {@link Stream} from given elements, not parallel
-     */
-    public static <T> Stream<T> stream(Iterable<T> elements) {
-        if (isEmpty(elements)) {
-            return Stream.empty();
-        }
-        if (elements instanceof Collection) {
-            return ((Collection<T>) elements).stream();
-        }
-        return StreamSupport.stream(elements.spliterator(), false);
-    }
 }

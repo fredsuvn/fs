@@ -1,0 +1,491 @@
+package xyz.sunqian.common.coll;
+
+import java.io.Serializable;
+import java.util.AbstractList;
+import java.util.List;
+import java.util.RandomAccess;
+
+final class ListBack {
+
+    static List<Boolean> asList(boolean[] array) {
+        return new BooleanArrayList(array);
+    }
+
+    static List<Byte> asList(byte[] array) {
+        return new ByteArrayList(array);
+    }
+
+    static List<Short> asList(short[] array) {
+        return new ShortArrayList(array);
+    }
+
+    static List<Character> asList(char[] array) {
+        return new CharArrayList(array);
+    }
+
+    static List<Integer> asList(int[] array) {
+        return new IntArrayList(array);
+    }
+
+    static List<Long> asList(long[] array) {
+        return new LongArrayList(array);
+    }
+
+    static List<Float> asList(float[] array) {
+        return new FloatArrayList(array);
+    }
+
+    static List<Double> asList(double[] array) {
+        return new DoubleArrayList(array);
+    }
+
+    static <T> List<T> immutableList(T[] array) {
+        return new ImmutableList<>(array);
+    }
+
+    static List<Boolean> immutableList(boolean[] array) {
+        return new BooleanImmutableList(array);
+    }
+
+    static List<Byte> immutableList(byte[] array) {
+        return new ByteImmutableList(array);
+    }
+
+    static List<Short> immutableList(short[] array) {
+        return new ShortImmutableList(array);
+    }
+
+    static List<Character> immutableList(char[] array) {
+        return new CharImmutableList(array);
+    }
+
+    static List<Integer> immutableList(int[] array) {
+        return new IntImmutableList(array);
+    }
+
+    static List<Long> immutableList(long[] array) {
+        return new LongImmutableList(array);
+    }
+
+    static List<Float> immutableList(float[] array) {
+        return new FloatImmutableList(array);
+    }
+
+    static List<Double> immutableList(double[] array) {
+        return new DoubleImmutableList(array);
+    }
+
+    private static final class BooleanArrayList
+        extends AbstractList<Boolean> implements RandomAccess, Serializable {
+
+        private final boolean[] array;
+
+        private BooleanArrayList(boolean[] array) {
+            this.array = array;
+        }
+
+        @Override
+        public Boolean get(int index) {
+            return array[index];
+        }
+
+        @Override
+        public Boolean set(int index, Boolean element) {
+            Boolean old = array[index];
+            array[index] = element;
+            return old;
+        }
+
+        @Override
+        public int size() {
+            return array.length;
+        }
+    }
+
+    private static final class ByteArrayList
+        extends AbstractList<Byte> implements RandomAccess, Serializable {
+
+        private final byte[] array;
+
+        private ByteArrayList(byte[] array) {
+            this.array = array;
+        }
+
+        @Override
+        public Byte get(int index) {
+            return array[index];
+        }
+
+        @Override
+        public Byte set(int index, Byte element) {
+            Byte old = array[index];
+            array[index] = element;
+            return old;
+        }
+
+        @Override
+        public int size() {
+            return array.length;
+        }
+    }
+
+    private static final class ShortArrayList
+        extends AbstractList<Short> implements RandomAccess, Serializable {
+
+        private final short[] array;
+
+        private ShortArrayList(short[] array) {
+            this.array = array;
+        }
+
+        @Override
+        public Short get(int index) {
+            return array[index];
+        }
+
+        @Override
+        public Short set(int index, Short element) {
+            short old = array[index];
+            array[index] = element;
+            return old;
+        }
+
+        @Override
+        public int size() {
+            return array.length;
+        }
+    }
+
+    private static final class CharArrayList
+        extends AbstractList<Character> implements RandomAccess, Serializable {
+
+        private final char[] array;
+
+        private CharArrayList(char[] array) {
+            this.array = array;
+        }
+
+        @Override
+        public Character get(int index) {
+            return array[index];
+        }
+
+        @Override
+        public Character set(int index, Character element) {
+            Character old = array[index];
+            array[index] = element;
+            return old;
+        }
+
+        @Override
+        public int size() {
+            return array.length;
+        }
+    }
+
+    private static final class IntArrayList
+        extends AbstractList<Integer> implements RandomAccess, Serializable {
+
+        private final int[] array;
+
+        private IntArrayList(int[] array) {
+            this.array = array;
+        }
+
+        @Override
+        public Integer get(int index) {
+            return array[index];
+        }
+
+        @Override
+        public Integer set(int index, Integer element) {
+            Integer old = array[index];
+            array[index] = element;
+            return old;
+        }
+
+        @Override
+        public int size() {
+            return array.length;
+        }
+    }
+
+    private static final class LongArrayList
+        extends AbstractList<Long> implements RandomAccess, Serializable {
+
+        private final long[] array;
+
+        private LongArrayList(long[] array) {
+            this.array = array;
+        }
+
+        @Override
+        public Long get(int index) {
+            return array[index];
+        }
+
+        @Override
+        public Long set(int index, Long element) {
+            Long old = array[index];
+            array[index] = element;
+            return old;
+        }
+
+        @Override
+        public int size() {
+            return array.length;
+        }
+    }
+
+    private static final class FloatArrayList
+        extends AbstractList<Float> implements RandomAccess, Serializable {
+
+        private final float[] array;
+
+        private FloatArrayList(float[] array) {
+            this.array = array;
+        }
+
+        @Override
+        public Float get(int index) {
+            return array[index];
+        }
+
+        @Override
+        public Float set(int index, Float element) {
+            Float old = array[index];
+            array[index] = element;
+            return old;
+        }
+
+        @Override
+        public int size() {
+            return array.length;
+        }
+    }
+
+    private static final class DoubleArrayList
+        extends AbstractList<Double> implements RandomAccess, Serializable {
+
+        private final double[] array;
+
+        private DoubleArrayList(double[] array) {
+            this.array = array;
+        }
+
+        @Override
+        public Double get(int index) {
+            return array[index];
+        }
+
+        @Override
+        public Double set(int index, Double element) {
+            Double old = array[index];
+            array[index] = element;
+            return old;
+        }
+
+        @Override
+        public int size() {
+            return array.length;
+        }
+    }
+
+    private static final class ImmutableList<T>
+        extends AbstractList<T> implements RandomAccess, Serializable {
+
+        private static final long serialVersionUID = 0L;
+
+        private final T[] array;
+
+        private ImmutableList(T[] array) {
+            this.array = array;
+        }
+
+        @Override
+        public T get(int index) {
+            return array[index];
+        }
+
+        @Override
+        public int size() {
+            return array.length;
+        }
+    }
+
+    private static final class BooleanImmutableList
+        extends AbstractList<Boolean> implements RandomAccess, Serializable {
+
+        private static final long serialVersionUID = 0L;
+
+        private final boolean[] array;
+
+        private BooleanImmutableList(boolean[] array) {
+            this.array = array;
+        }
+
+        @Override
+        public Boolean get(int index) {
+            return array[index];
+        }
+
+        @Override
+        public int size() {
+            return array.length;
+        }
+    }
+
+    private static final class ByteImmutableList
+        extends AbstractList<Byte> implements RandomAccess, Serializable {
+
+        private static final long serialVersionUID = 0L;
+
+        private final byte[] array;
+
+        private ByteImmutableList(byte[] array) {
+            this.array = array;
+        }
+
+        @Override
+        public Byte get(int index) {
+            return array[index];
+        }
+
+        @Override
+        public int size() {
+            return array.length;
+        }
+    }
+
+    private static final class ShortImmutableList
+        extends AbstractList<Short> implements RandomAccess, Serializable {
+
+        private static final long serialVersionUID = 0L;
+
+        private final short[] array;
+
+        private ShortImmutableList(short[] array) {
+            this.array = array;
+        }
+
+        @Override
+        public Short get(int index) {
+            return array[index];
+        }
+
+        @Override
+        public int size() {
+            return array.length;
+        }
+    }
+
+    private static final class CharImmutableList
+        extends AbstractList<Character> implements RandomAccess, Serializable {
+
+        private static final long serialVersionUID = 0L;
+
+        private final char[] array;
+
+        private CharImmutableList(char[] array) {
+            this.array = array;
+        }
+
+        @Override
+        public Character get(int index) {
+            return array[index];
+        }
+
+        @Override
+        public int size() {
+            return array.length;
+        }
+    }
+
+    private static final class IntImmutableList
+        extends AbstractList<Integer> implements RandomAccess, Serializable {
+
+        private static final long serialVersionUID = 0L;
+
+        private final int[] array;
+
+        private IntImmutableList(int[] array) {
+            this.array = array;
+        }
+
+        @Override
+        public Integer get(int index) {
+            return array[index];
+        }
+
+        @Override
+        public int size() {
+            return array.length;
+        }
+    }
+
+    private static final class LongImmutableList
+        extends AbstractList<Long> implements RandomAccess, Serializable {
+
+        private static final long serialVersionUID = 0L;
+
+        private final long[] array;
+
+        private LongImmutableList(long[] array) {
+            this.array = array;
+        }
+
+        @Override
+        public Long get(int index) {
+            return array[index];
+        }
+
+        @Override
+        public int size() {
+            return array.length;
+        }
+    }
+
+    private static final class FloatImmutableList
+        extends AbstractList<Float> implements RandomAccess, Serializable {
+
+        private static final long serialVersionUID = 0L;
+
+        private final float[] array;
+
+        private FloatImmutableList(float[] array) {
+            this.array = array;
+        }
+
+        @Override
+        public Float get(int index) {
+            return array[index];
+        }
+
+        @Override
+        public int size() {
+            return array.length;
+        }
+    }
+
+    private static final class DoubleImmutableList
+        extends AbstractList<Double> implements RandomAccess, Serializable {
+
+        private static final long serialVersionUID = 0L;
+
+        private final double[] array;
+
+        private DoubleImmutableList(double[] array) {
+            this.array = array;
+        }
+
+        @Override
+        public Double get(int index) {
+            return array[index];
+        }
+
+        @Override
+        public int size() {
+            return array.length;
+        }
+    }
+}

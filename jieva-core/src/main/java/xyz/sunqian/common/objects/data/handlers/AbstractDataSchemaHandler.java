@@ -218,9 +218,9 @@ public abstract class AbstractDataSchemaHandler implements DataSchemaParser.Hand
             this.setter = setter;
             this.setterInvocable = setter == null ? null : buildInvoker(setter);
             this.field = findField(name, rawType);
-            this.getterAnnotations = getter == null ? Collections.emptyList() : JieArray.listOf(getter.getAnnotations());
-            this.setterAnnotations = setter == null ? Collections.emptyList() : JieArray.listOf(setter.getAnnotations());
-            this.fieldAnnotations = field == null ? Collections.emptyList() : JieArray.listOf(field.getAnnotations());
+            this.getterAnnotations = getter == null ? Collections.emptyList() : JieArray.immutableList(getter.getAnnotations());
+            this.setterAnnotations = setter == null ? Collections.emptyList() : JieArray.immutableList(setter.getAnnotations());
+            this.fieldAnnotations = field == null ? Collections.emptyList() : JieArray.immutableList(field.getAnnotations());
             int size = getGetterAnnotations().size() + getSetterAnnotations().size() + getFieldAnnotations().size();
             Annotation[] array = new Annotation[size];
             int i = 0;
@@ -233,7 +233,7 @@ public abstract class AbstractDataSchemaHandler implements DataSchemaParser.Hand
             for (Annotation annotation : fieldAnnotations) {
                 array[i++] = annotation;
             }
-            this.allAnnotations = JieArray.listOf(array);
+            this.allAnnotations = JieArray.immutableList(array);
         }
 
         @Override

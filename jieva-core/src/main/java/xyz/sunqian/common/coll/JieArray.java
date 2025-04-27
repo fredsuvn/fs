@@ -1,11 +1,12 @@
 package xyz.sunqian.common.coll;
 
+import xyz.sunqian.annotations.Immutable;
+import xyz.sunqian.annotations.NonNull;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.base.Jie;
 
-import java.io.Serializable;
 import java.lang.reflect.Array;
-import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -20,247 +21,321 @@ import java.util.function.Function;
 public class JieArray {
 
     /**
-     * Returns whether given array is null or empty.
+     * Returns whether the given array is null or empty.
      *
-     * @param array given array
-     * @return whether given array is null or empty
+     * @param array the given array
+     * @param <T>   the component type of the given array
+     * @return whether the given array is null or empty
      */
-    public static <T> boolean isEmpty(@Nullable T[] array) {
+    public static <T> boolean isEmpty(@Nullable T @Nullable [] array) {
         return array == null || array.length == 0;
     }
 
     /**
-     * Returns whether given array is null or empty.
+     * Returns whether the given array is null or empty.
      *
-     * @param array given array
-     * @return whether given array is null or empty
+     * @param array the given array
+     * @return whether the given array is null or empty
      */
-    public static boolean isEmpty(@Nullable boolean[] array) {
+    public static boolean isEmpty(boolean @Nullable [] array) {
         return array == null || array.length == 0;
     }
 
     /**
-     * Returns whether given array is null or empty.
+     * Returns whether the given array is null or empty.
      *
-     * @param array given array
-     * @return whether given array is null or empty
+     * @param array the given array
+     * @return whether the given array is null or empty
      */
-    public static boolean isEmpty(@Nullable byte[] array) {
+    public static boolean isEmpty(byte @Nullable [] array) {
         return array == null || array.length == 0;
     }
 
     /**
-     * Returns whether given array is null or empty.
+     * Returns whether the given array is null or empty.
      *
-     * @param array given array
-     * @return whether given array is null or empty
+     * @param array the given array
+     * @return whether the given array is null or empty
      */
-    public static boolean isEmpty(@Nullable short[] array) {
+    public static boolean isEmpty(short @Nullable [] array) {
         return array == null || array.length == 0;
     }
 
     /**
-     * Returns whether given array is null or empty.
+     * Returns whether the given array is null or empty.
      *
-     * @param array given array
-     * @return whether given array is null or empty
+     * @param array the given array
+     * @return whether the given array is null or empty
      */
-    public static boolean isEmpty(@Nullable char[] array) {
+    public static boolean isEmpty(char @Nullable [] array) {
         return array == null || array.length == 0;
     }
 
     /**
-     * Returns whether given array is null or empty.
+     * Returns whether the given array is null or empty.
      *
-     * @param array given array
-     * @return whether given array is null or empty
+     * @param array the given array
+     * @return whether the given array is null or empty
      */
-    public static boolean isEmpty(@Nullable int[] array) {
+    public static boolean isEmpty(int @Nullable [] array) {
         return array == null || array.length == 0;
     }
 
     /**
-     * Returns whether given array is null or empty.
+     * Returns whether the given array is null or empty.
      *
-     * @param array given array
-     * @return whether given array is null or empty
+     * @param array the given array
+     * @return whether the given array is null or empty
      */
-    public static boolean isEmpty(@Nullable long[] array) {
+    public static boolean isEmpty(long @Nullable [] array) {
         return array == null || array.length == 0;
     }
 
     /**
-     * Returns whether given array is null or empty.
+     * Returns whether the given array is null or empty.
      *
-     * @param array given array
-     * @return whether given array is null or empty
+     * @param array the given array
+     * @return whether the given array is null or empty
      */
-    public static boolean isEmpty(@Nullable float[] array) {
+    public static boolean isEmpty(float @Nullable [] array) {
         return array == null || array.length == 0;
     }
 
     /**
-     * Returns whether given array is null or empty.
+     * Returns whether the given array is null or empty.
      *
-     * @param array given array
-     * @return whether given array is null or empty
+     * @param array the given array
+     * @return whether the given array is null or empty
      */
-    public static boolean isEmpty(@Nullable double[] array) {
+    public static boolean isEmpty(double @Nullable [] array) {
         return array == null || array.length == 0;
     }
 
     /**
-     * Returns whether given array is not null and empty.
+     * Returns whether the given array is not null and empty.
      *
-     * @param array given array
-     * @return whether given array is not null and empty
+     * @param array the given array
+     * @param <T>   the component type of the given array
+     * @return whether the given array is not null and empty
      */
-    public static <T> boolean isNotEmpty(@Nullable T[] array) {
+    public static <T> boolean isNotEmpty(@Nullable T @Nullable [] array) {
         return !isEmpty(array);
     }
 
     /**
-     * Returns whether given array is not null and empty.
+     * Returns whether the given array is not null and empty.
      *
-     * @param array given array
-     * @return whether given array is not null and empty
+     * @param array the given array
+     * @return whether the given array is not null and empty
      */
-    public static boolean isNotEmpty(@Nullable boolean[] array) {
+    public static boolean isNotEmpty(boolean @Nullable [] array) {
         return !isEmpty(array);
     }
 
     /**
-     * Returns whether given array is not null and empty.
+     * Returns whether the given array is not null and empty.
      *
-     * @param array given array
-     * @return whether given array is not null and empty
+     * @param array the given array
+     * @return whether the given array is not null and empty
      */
-    public static boolean isNotEmpty(@Nullable byte[] array) {
+    public static boolean isNotEmpty(byte @Nullable [] array) {
         return !isEmpty(array);
     }
 
     /**
-     * Returns whether given array is not null and empty.
+     * Returns whether the given array is not null and empty.
      *
-     * @param array given array
-     * @return whether given array is not null and empty
+     * @param array the given array
+     * @return whether the given array is not null and empty
      */
-    public static boolean isNotEmpty(@Nullable short[] array) {
+    public static boolean isNotEmpty(short @Nullable [] array) {
         return !isEmpty(array);
     }
 
     /**
-     * Returns whether given array is not null and empty.
+     * Returns whether the given array is not null and empty.
      *
-     * @param array given array
-     * @return whether given array is not null and empty
+     * @param array the given array
+     * @return whether the given array is not null and empty
      */
-    public static boolean isNotEmpty(@Nullable char[] array) {
+    public static boolean isNotEmpty(char @Nullable [] array) {
         return !isEmpty(array);
     }
 
     /**
-     * Returns whether given array is not null and empty.
+     * Returns whether the given array is not null and empty.
      *
-     * @param array given array
-     * @return whether given array is not null and empty
+     * @param array the given array
+     * @return whether the given array is not null and empty
      */
-    public static boolean isNotEmpty(@Nullable int[] array) {
+    public static boolean isNotEmpty(int @Nullable [] array) {
         return !isEmpty(array);
     }
 
     /**
-     * Returns whether given array is not null and empty.
+     * Returns whether the given array is not null and empty.
      *
-     * @param array given array
-     * @return whether given array is not null and empty
+     * @param array the given array
+     * @return whether the given array is not null and empty
      */
-    public static boolean isNotEmpty(@Nullable long[] array) {
+    public static boolean isNotEmpty(long @Nullable [] array) {
         return !isEmpty(array);
     }
 
     /**
-     * Returns whether given array is not null and empty.
+     * Returns whether the given array is not null and empty.
      *
-     * @param array given array
-     * @return whether given array is not null and empty
+     * @param array the given array
+     * @return whether the given array is not null and empty
      */
-    public static boolean isNotEmpty(@Nullable float[] array) {
+    public static boolean isNotEmpty(float @Nullable [] array) {
         return !isEmpty(array);
     }
 
     /**
-     * Returns whether given array is not null and empty.
+     * Returns whether the given array is not null and empty.
      *
-     * @param array given array
-     * @return whether given array is not null and empty
+     * @param array the given array
+     * @return whether the given array is not null and empty
      */
-    public static boolean isNotEmpty(@Nullable double[] array) {
+    public static boolean isNotEmpty(double @Nullable [] array) {
         return !isEmpty(array);
     }
 
+    /**
+     * Fills the given array with the given value and returns the given array.
+     *
+     * @param array the given array
+     * @param value the given value
+     * @param <T>   the component type of the given array
+     * @return the given array
+     */
+    public static <T> @Nullable T@Nullable[] fill(@Nullable T[] array, @Nullable T value) {
+        Arrays.fill(array, value);
+        return array;
+    }
+
+    /**
+     * Fills the given array with the given value and returns the given array.
+     *
+     * @param array the given array
+     * @param value the given value
+     * @return the given array
+     */
     public static boolean[] fill(boolean[] array, boolean value) {
+        @Nullable String@Nullable[] ss = fill(new String[1], null);
+            Arrays.fill(array, value);
+        return array;
+    }
+
+    /**
+     * Fills the given array with the given value and returns the given array.
+     *
+     * @param array the given array
+     * @param value the given value
+     * @return the given array
+     */
+    public static byte[] fill(  @Nullable Byte  []  array, byte value) {
+        if (array != null) {
+            Byte b = array[0];
+            if (b != null) {
+
+            }
+        }
         Arrays.fill(array, value);
         return array;
     }
 
-    public static byte[] fill(byte[] array, byte value) {
-        Arrays.fill(array, value);
-        return array;
-    }
-
-    public static char[] fill(char[] array, char value) {
-        Arrays.fill(array, value);
-        return array;
-    }
-
+    /**
+     * Fills the given array with the given value and returns the given array.
+     *
+     * @param array the given array
+     * @param value the given value
+     * @return the given array
+     */
     public static short[] fill(short[] array, short value) {
         Arrays.fill(array, value);
         return array;
     }
 
-    public static int[] fill(int[] array, int value) {
-        Arrays.fill(array, value);
-        return array;
-    }
-
-    public static long[] fill(long[] array, long value) {
-        Arrays.fill(array, value);
-        return array;
-    }
-
-    public static float[] fill(float[] array, float value) {
-        Arrays.fill(array, value);
-        return array;
-    }
-
-    public static double[] fill(double[] array, double value) {
-        Arrays.fill(array, value);
-        return array;
-    }
-
-    public static <T> T[] fill(T[] array, T value) {
+    /**
+     * Fills the given array with the given value and returns the given array.
+     *
+     * @param array the given array
+     * @param value the given value
+     * @return the given array
+     */
+    public static char[] fill(char[] array, char value) {
         Arrays.fill(array, value);
         return array;
     }
 
     /**
-     * Maps source array (component type {@code T}) to dest array (component type {@code R}) by specified mapper.
+     * Fills the given array with the given value and returns the given array.
+     *
+     * @param array the given array
+     * @param value the given value
+     * @return the given array
+     */
+    public static int[] fill(int[] array, int value) {
+        Arrays.fill(array, value);
+        return array;
+    }
+
+    /**
+     * Fills the given array with the given value and returns the given array.
+     *
+     * @param array the given array
+     * @param value the given value
+     * @return the given array
+     */
+    public static long[] fill(long[] array, long value) {
+        Arrays.fill(array, value);
+        return array;
+    }
+
+    /**
+     * Fills the given array with the given value and returns the given array.
+     *
+     * @param array the given array
+     * @param value the given value
+     * @return the given array
+     */
+    public static float[] fill(float[] array, float value) {
+        Arrays.fill(array, value);
+        return array;
+    }
+
+    /**
+     * Fills the given array with the given value and returns the given array.
+     *
+     * @param array the given array
+     * @param value the given value
+     * @return the given array
+     */
+    public static double[] fill(double[] array, double value) {
+        Arrays.fill(array, value);
+        return array;
+    }
+
+    /**
+     * Maps the source array (component type {@code T}) to the dest array (component type {@code R}) by specified
+     * mapper.
      * <p>
-     * If given dest array's length equals to source array, the given dest array will be returned, otherwise, a new
-     * array with same length of source array will be created and returned.
+     * If the dest array's length equals to the source array's length, the dest array will be returned. Otherwise, a new
+     * array with same length of the source array will be created and returned.
      * <p>
-     * Each element of source array will be mapped to a new element by specified mapper, then set into the result array
-     * at corresponding index.
+     * Each element of the source array will be mapped to a new element by the specified mapper, then be set into the
+     * result array at corresponding index.
      *
      * @param source the source array
      * @param dest   the dest array
-     * @param mapper specified mapper
-     * @param <T>    component type of source array
-     * @param <R>    component type of dest array
+     * @param mapper the specified mapper
+     * @param <T>    the component type of the source array
+     * @param <R>    the component type of the dest array
      * @return the given dest or a new result array
      */
-    public static <T, R> R[] map(T[] source, R[] dest, Function<? super T, ? extends R> mapper) {
+    public static <T, R> R[] map(T[] source, R[] dest, Function<? super T, @Nullable ? extends R> mapper) {
         R[] result;
         if (dest.length == source.length) {
             result = dest;
@@ -272,22 +347,21 @@ public class JieArray {
     }
 
     /**
-     * Maps source array (component type {@code T}) to dest array (component type {@code R}) by specified mapper.
+     * Maps the source array (component type {@code T}) to the dest array (component type {@code R}) by the specified
+     * mapper.
      * <p>
-     * This method will try to create a new array as mapping result. The element type of the new array will be
-     * determined by the type of the first non-null value returned by the specified mapper. If returned value of mapper
-     * are null, an {@link UnsupportedOperationException} will be thrown.
-     * <p>
-     * Each element of source array will be mapped to a new element by specified mapper, then set into the result array
-     * at corresponding index.
+     * This method tries to create a new array to receive the mapping result. Each element of the source array will be
+     * mapped to a new element by the specified mapper, then be set into the new array at corresponding index. The
+     * component type of the new array is the type of the first non-null new element. If all new elements are null, an
+     * {@link UnsupportedOperationException} will be thrown.
      *
      * @param source the source array
-     * @param mapper specified mapper
-     * @param <T>    component type of source array
-     * @param <R>    component type of dest array
+     * @param mapper the specified mapper
+     * @param <T>    the component type of the source array
+     * @param <R>    the component type of the dest array
      * @return a new result array
      */
-    public static <T, R> R[] map(T[] source, Function<? super T, ? extends R> mapper) {
+    public static <@Nullable T, @Nullable R> R[] map(@Nullable T[] source, Function<? super T, ? extends R> mapper) {
         for (int i = 0; i < source.length; i++) {
             R r = mapper.apply(source[i]);
             if (r != null) {
@@ -296,38 +370,43 @@ public class JieArray {
                 return dest;
             }
         }
-        throw new UnsupportedOperationException(Impls.UNABLE_NULL_TYPE);
+        throw new UnsupportedOperationException("Can not resolve the component type.");
     }
 
-    private static <T, R> void map0(T[] source, R[] dest, int start, Function<? super T, ? extends R> mapper) {
+    private static <T, R> void map0(@Nullable T[] source, R[] dest, int start, @NonNull Function<? super T, ? extends R> mapper) {
         for (int i = start; i < source.length; i++) {
+            T t = source[i];
+            if (t != null) {
+
+            }
+            R r = mapper.apply(t);
             dest[i] = mapper.apply(source[i]);
         }
     }
 
     /**
-     * Creates a new array of given component type and length, all elements will be initialized to {@code null}.
+     * Creates a new empty array with the specified component type and length.
      *
-     * @param componentType given component type
-     * @param length        given length
-     * @param <A>           type of array, including primitive array
-     * @return created array
+     * @param componentType the specified component type
+     * @param length        the specified length
+     * @param <A>           the type of created array, not the component type
+     * @return the created array
      */
     public static <A> A newArray(Class<?> componentType, int length) {
         return Jie.as(Array.newInstance(componentType, length));
     }
 
     /**
-     * Returns value from given array at specified index, if the value is null or failed to obtain, return default
-     * value.
+     * Returns the value from the given array at the specified index. If the array or value is null, or the index is out
+     * of bounds, returns the default value.
      *
-     * @param array        given array
-     * @param index        specified index
-     * @param defaultValue default value
-     * @param <T>          component type
-     * @return value from given array at specified index, if the value is null or failed to obtain, return default value
+     * @param array        the given array
+     * @param index        the specified index
+     * @param defaultValue the default value
+     * @param <T>          the component type
+     * @return the value from the given array at the specified index
      */
-    public static <T> T get(@Nullable T[] array, int index, @Nullable T defaultValue) {
+    public static <T> T get(@Nullable T @Nullable [] array, int index, @Nullable T defaultValue) {
         if (array == null || index < 0 || index >= array.length) {
             return defaultValue;
         }
@@ -336,14 +415,15 @@ public class JieArray {
     }
 
     /**
-     * Returns value from given array at specified index, if failed to obtain, return default value.
+     * Returns the value from the given array at the specified index. If the array is null, or the index is out of
+     * bounds, returns the default value.
      *
-     * @param array        given array
-     * @param index        specified index
-     * @param defaultValue default value
-     * @return value from given array at specified index, if failed to obtain, return default value
+     * @param array        the given array
+     * @param index        the specified index
+     * @param defaultValue the default value
+     * @return the value from the given array at the specified index
      */
-    public static boolean get(@Nullable boolean[] array, int index, boolean defaultValue) {
+    public static boolean get(boolean @Nullable [] array, int index, boolean defaultValue) {
         if (array == null || index < 0 || index >= array.length) {
             return defaultValue;
         }
@@ -351,14 +431,15 @@ public class JieArray {
     }
 
     /**
-     * Returns value from given array at specified index, if failed to obtain, return default value.
+     * Returns the value from the given array at the specified index. If the array is null, or the index is out of
+     * bounds, returns the default value.
      *
-     * @param array        given array
-     * @param index        specified index
-     * @param defaultValue default value
-     * @return value from given array at specified index, if failed to obtain, return default value
+     * @param array        the given array
+     * @param index        the specified index
+     * @param defaultValue the default value
+     * @return the value from the given array at the specified index
      */
-    public static byte get(@Nullable byte[] array, int index, byte defaultValue) {
+    public static byte get(byte @Nullable [] array, int index, byte defaultValue) {
         if (array == null || index < 0 || index >= array.length) {
             return defaultValue;
         }
@@ -366,14 +447,15 @@ public class JieArray {
     }
 
     /**
-     * Returns value from given array at specified index, if failed to obtain, return default value.
+     * Returns the value from the given array at the specified index. If the array is null, or the index is out of
+     * bounds, returns the default value.
      *
-     * @param array        given array
-     * @param index        specified index
-     * @param defaultValue default value
-     * @return value from given array at specified index, if failed to obtain, return default value
+     * @param array        the given array
+     * @param index        the specified index
+     * @param defaultValue the default value
+     * @return the value from the given array at the specified index
      */
-    public static short get(@Nullable short[] array, int index, short defaultValue) {
+    public static short get(short @Nullable [] array, int index, short defaultValue) {
         if (array == null || index < 0 || index >= array.length) {
             return defaultValue;
         }
@@ -381,14 +463,15 @@ public class JieArray {
     }
 
     /**
-     * Returns value from given array at specified index, if failed to obtain, return default value.
+     * Returns the value from the given array at the specified index. If the array is null, or the index is out of
+     * bounds, returns the default value.
      *
-     * @param array        given array
-     * @param index        specified index
-     * @param defaultValue default value
-     * @return value from given array at specified index, if failed to obtain, return default value
+     * @param array        the given array
+     * @param index        the specified index
+     * @param defaultValue the default value
+     * @return the value from the given array at the specified index
      */
-    public static char get(@Nullable char[] array, int index, char defaultValue) {
+    public static char get(char @Nullable [] array, int index, char defaultValue) {
         if (array == null || index < 0 || index >= array.length) {
             return defaultValue;
         }
@@ -396,14 +479,15 @@ public class JieArray {
     }
 
     /**
-     * Returns value from given array at specified index, if failed to obtain, return default value.
+     * Returns the value from the given array at the specified index. If the array is null, or the index is out of
+     * bounds, returns the default value.
      *
-     * @param array        given array
-     * @param index        specified index
-     * @param defaultValue default value
-     * @return value from given array at specified index, if failed to obtain, return default value
+     * @param array        the given array
+     * @param index        the specified index
+     * @param defaultValue the default value
+     * @return the value from the given array at the specified index
      */
-    public static int get(@Nullable int[] array, int index, int defaultValue) {
+    public static int get(int @Nullable [] array, int index, int defaultValue) {
         if (array == null || index < 0 || index >= array.length) {
             return defaultValue;
         }
@@ -411,14 +495,15 @@ public class JieArray {
     }
 
     /**
-     * Returns value from given array at specified index, if failed to obtain, return default value.
+     * Returns the value from the given array at the specified index. If the array is null, or the index is out of
+     * bounds, returns the default value.
      *
-     * @param array        given array
-     * @param index        specified index
-     * @param defaultValue default value
-     * @return value from given array at specified index, if failed to obtain, return default value
+     * @param array        the given array
+     * @param index        the specified index
+     * @param defaultValue the default value
+     * @return the value from the given array at the specified index
      */
-    public static long get(@Nullable long[] array, int index, long defaultValue) {
+    public static long get(long @Nullable [] array, int index, long defaultValue) {
         if (array == null || index < 0 || index >= array.length) {
             return defaultValue;
         }
@@ -426,14 +511,15 @@ public class JieArray {
     }
 
     /**
-     * Returns value from given array at specified index, if failed to obtain, return default value.
+     * Returns the value from the given array at the specified index. If the array is null, or the index is out of
+     * bounds, returns the default value.
      *
-     * @param array        given array
-     * @param index        specified index
-     * @param defaultValue default value
-     * @return value from given array at specified index, if failed to obtain, return default value
+     * @param array        the given array
+     * @param index        the specified index
+     * @param defaultValue the default value
+     * @return the value from the given array at the specified index
      */
-    public static float get(@Nullable float[] array, int index, float defaultValue) {
+    public static float get(float @Nullable [] array, int index, float defaultValue) {
         if (array == null || index < 0 || index >= array.length) {
             return defaultValue;
         }
@@ -441,14 +527,15 @@ public class JieArray {
     }
 
     /**
-     * Returns value from given array at specified index, if failed to obtain, return default value.
+     * Returns the value from the given array at the specified index. If the array is null, or the index is out of
+     * bounds, returns the default value.
      *
-     * @param array        given array
-     * @param index        specified index
-     * @param defaultValue default value
-     * @return value from given array at specified index, if failed to obtain, return default value
+     * @param array        the given array
+     * @param index        the specified index
+     * @param defaultValue the default value
+     * @return the value from the given array at the specified index
      */
-    public static double get(@Nullable double[] array, int index, double defaultValue) {
+    public static double get(double @Nullable [] array, int index, double defaultValue) {
         if (array == null || index < 0 || index >= array.length) {
             return defaultValue;
         }
@@ -456,14 +543,15 @@ public class JieArray {
     }
 
     /**
-     * Returns first index of given element at given array, or -1 if not found.
+     * Returns the first index of the element same with the specified element at the given array. If the element is not
+     * found, returns -1.
      *
-     * @param array   given array
-     * @param element given element
-     * @param <T>     component type
-     * @return first index of given element at given array, or -1 if not found
+     * @param array   the given array
+     * @param element the specified element
+     * @param <T>     the component type
+     * @return the first index of the element same with the specified element at the given array
      */
-    public static <T> int indexOf(T[] array, T element) {
+    public static <T> int indexOf(T[] array, @Nullable T element) {
         for (int i = 0; i < array.length; i++) {
             if (Objects.equals(element, array[i])) {
                 return i;
@@ -473,11 +561,12 @@ public class JieArray {
     }
 
     /**
-     * Returns first index of given element at given array, or -1 if not found.
+     * Returns the first index of the element same with the specified element at the given array. If the element is not
+     * found, returns -1.
      *
-     * @param array   given array
-     * @param element given element
-     * @return first index of given element at given array, or -1 if not found
+     * @param array   the given array
+     * @param element the specified element
+     * @return the first index of the element same with the specified element at the given array
      */
     public static int indexOf(boolean[] array, boolean element) {
         for (int i = 0; i < array.length; i++) {
@@ -489,11 +578,12 @@ public class JieArray {
     }
 
     /**
-     * Returns first index of given element at given array, or -1 if not found.
+     * Returns the first index of the element same with the specified element at the given array. If the element is not
+     * found, returns -1.
      *
-     * @param array   given array
-     * @param element given element
-     * @return first index of given element at given array, or -1 if not found
+     * @param array   the given array
+     * @param element the specified element
+     * @return the first index of the element same with the specified element at the given array
      */
     public static int indexOf(byte[] array, byte element) {
         for (int i = 0; i < array.length; i++) {
@@ -505,11 +595,12 @@ public class JieArray {
     }
 
     /**
-     * Returns first index of given element at given array, or -1 if not found.
+     * Returns the first index of the element same with the specified element at the given array. If the element is not
+     * found, returns -1.
      *
-     * @param array   given array
-     * @param element given element
-     * @return first index of given element at given array, or -1 if not found
+     * @param array   the given array
+     * @param element the specified element
+     * @return the first index of the element same with the specified element at the given array
      */
     public static int indexOf(short[] array, short element) {
         for (int i = 0; i < array.length; i++) {
@@ -521,11 +612,12 @@ public class JieArray {
     }
 
     /**
-     * Returns first index of given element at given array, or -1 if not found.
+     * Returns the first index of the element same with the specified element at the given array. If the element is not
+     * found, returns -1.
      *
-     * @param array   given array
-     * @param element given element
-     * @return first index of given element at given array, or -1 if not found
+     * @param array   the given array
+     * @param element the specified element
+     * @return the first index of the element same with the specified element at the given array
      */
     public static int indexOf(char[] array, char element) {
         for (int i = 0; i < array.length; i++) {
@@ -537,11 +629,12 @@ public class JieArray {
     }
 
     /**
-     * Returns first index of given element at given array, or -1 if not found.
+     * Returns the first index of the element same with the specified element at the given array. If the element is not
+     * found, returns -1.
      *
-     * @param array   given array
-     * @param element given element
-     * @return first index of given element at given array, or -1 if not found
+     * @param array   the given array
+     * @param element the specified element
+     * @return the first index of the element same with the specified element at the given array
      */
     public static int indexOf(int[] array, int element) {
         for (int i = 0; i < array.length; i++) {
@@ -553,11 +646,12 @@ public class JieArray {
     }
 
     /**
-     * Returns first index of given element at given array, or -1 if not found.
+     * Returns the first index of the element same with the specified element at the given array. If the element is not
+     * found, returns -1.
      *
-     * @param array   given array
-     * @param element given element
-     * @return first index of given element at given array, or -1 if not found
+     * @param array   the given array
+     * @param element the specified element
+     * @return the first index of the element same with the specified element at the given array
      */
     public static int indexOf(long[] array, long element) {
         for (int i = 0; i < array.length; i++) {
@@ -569,11 +663,12 @@ public class JieArray {
     }
 
     /**
-     * Returns first index of given element at given array, or -1 if not found.
+     * Returns the first index of the element same with the specified element at the given array. If the element is not
+     * found, returns -1.
      *
-     * @param array   given array
-     * @param element given element
-     * @return first index of given element at given array, or -1 if not found
+     * @param array   the given array
+     * @param element the specified element
+     * @return the first index of the element same with the specified element at the given array
      */
     public static int indexOf(float[] array, float element) {
         for (int i = 0; i < array.length; i++) {
@@ -585,11 +680,12 @@ public class JieArray {
     }
 
     /**
-     * Returns first index of given element at given array, or -1 if not found.
+     * Returns the first index of the element same with the specified element at the given array. If the element is not
+     * found, returns -1.
      *
-     * @param array   given array
-     * @param element given element
-     * @return first index of given element at given array, or -1 if not found
+     * @param array   the given array
+     * @param element the specified element
+     * @return the first index of the element same with the specified element at the given array
      */
     public static int indexOf(double[] array, double element) {
         for (int i = 0; i < array.length; i++) {
@@ -601,14 +697,15 @@ public class JieArray {
     }
 
     /**
-     * Returns last index of given element at given array, or -1 if not found.
+     * Returns the last index of the element same with the specified element at the given array. If the element is not
+     * found, returns -1.
      *
-     * @param array   given array
-     * @param element given element
-     * @param <T>     component type
-     * @return last index of given element at given array, or -1 if not found
+     * @param array   the given array
+     * @param element the specified element
+     * @param <T>     the component type
+     * @return the last index of the element same with the specified element at the given array
      */
-    public static <T> int lastIndexOf(T[] array, T element) {
+    public static <T> int lastIndexOf(T[] array, @Nullable T element) {
         for (int i = array.length - 1; i >= 0; i--) {
             if (Objects.equals(element, array[i])) {
                 return i;
@@ -618,11 +715,12 @@ public class JieArray {
     }
 
     /**
-     * Returns last index of given element at given array, or -1 if not found.
+     * Returns the last index of the element same with the specified element at the given array. If the element is not
+     * found, returns -1.
      *
-     * @param array   given array
-     * @param element given element
-     * @return last index of given element at given array, or -1 if not found
+     * @param array   the given array
+     * @param element the specified element
+     * @return the last index of the element same with the specified element at the given array
      */
     public static int lastIndexOf(boolean[] array, boolean element) {
         for (int i = array.length - 1; i >= 0; i--) {
@@ -634,11 +732,12 @@ public class JieArray {
     }
 
     /**
-     * Returns last index of given element at given array, or -1 if not found.
+     * Returns the last index of the element same with the specified element at the given array. If the element is not
+     * found, returns -1.
      *
-     * @param array   given array
-     * @param element given element
-     * @return last index of given element at given array, or -1 if not found
+     * @param array   the given array
+     * @param element the specified element
+     * @return the last index of the element same with the specified element at the given array
      */
     public static int lastIndexOf(byte[] array, byte element) {
         for (int i = array.length - 1; i >= 0; i--) {
@@ -650,11 +749,12 @@ public class JieArray {
     }
 
     /**
-     * Returns last index of given element at given array, or -1 if not found.
+     * Returns the last index of the element same with the specified element at the given array. If the element is not
+     * found, returns -1.
      *
-     * @param array   given array
-     * @param element given element
-     * @return last index of given element at given array, or -1 if not found
+     * @param array   the given array
+     * @param element the specified element
+     * @return the last index of the element same with the specified element at the given array
      */
     public static int lastIndexOf(short[] array, short element) {
         for (int i = array.length - 1; i >= 0; i--) {
@@ -666,11 +766,12 @@ public class JieArray {
     }
 
     /**
-     * Returns last index of given element at given array, or -1 if not found.
+     * Returns the last index of the element same with the specified element at the given array. If the element is not
+     * found, returns -1.
      *
-     * @param array   given array
-     * @param element given element
-     * @return last index of given element at given array, or -1 if not found
+     * @param array   the given array
+     * @param element the specified element
+     * @return the last index of the element same with the specified element at the given array
      */
     public static int lastIndexOf(char[] array, char element) {
         for (int i = array.length - 1; i >= 0; i--) {
@@ -682,11 +783,12 @@ public class JieArray {
     }
 
     /**
-     * Returns last index of given element at given array, or -1 if not found.
+     * Returns the last index of the element same with the specified element at the given array. If the element is not
+     * found, returns -1.
      *
-     * @param array   given array
-     * @param element given element
-     * @return last index of given element at given array, or -1 if not found
+     * @param array   the given array
+     * @param element the specified element
+     * @return the last index of the element same with the specified element at the given array
      */
     public static int lastIndexOf(int[] array, int element) {
         for (int i = array.length - 1; i >= 0; i--) {
@@ -698,11 +800,12 @@ public class JieArray {
     }
 
     /**
-     * Returns last index of given element at given array, or -1 if not found.
+     * Returns the last index of the element same with the specified element at the given array. If the element is not
+     * found, returns -1.
      *
-     * @param array   given array
-     * @param element given element
-     * @return last index of given element at given array, or -1 if not found
+     * @param array   the given array
+     * @param element the specified element
+     * @return the last index of the element same with the specified element at the given array
      */
     public static int lastIndexOf(long[] array, long element) {
         for (int i = array.length - 1; i >= 0; i--) {
@@ -714,11 +817,12 @@ public class JieArray {
     }
 
     /**
-     * Returns last index of given element at given array, or -1 if not found.
+     * Returns the last index of the element same with the specified element at the given array. If the element is not
+     * found, returns -1.
      *
-     * @param array   given array
-     * @param element given element
-     * @return last index of given element at given array, or -1 if not found
+     * @param array   the given array
+     * @param element the specified element
+     * @return the last index of the element same with the specified element at the given array
      */
     public static int lastIndexOf(float[] array, float element) {
         for (int i = array.length - 1; i >= 0; i--) {
@@ -730,11 +834,12 @@ public class JieArray {
     }
 
     /**
-     * Returns last index of given element at given array, or -1 if not found.
+     * Returns the last index of the element same with the specified element at the given array. If the element is not
+     * found, returns -1.
      *
-     * @param array   given array
-     * @param element given element
-     * @return last index of given element at given array, or -1 if not found
+     * @param array   the given array
+     * @param element the specified element
+     * @return the last index of the element same with the specified element at the given array
      */
     public static int lastIndexOf(double[] array, double element) {
         for (int i = array.length - 1; i >= 0; i--) {
@@ -746,11 +851,11 @@ public class JieArray {
     }
 
     /**
-     * RReturns given elements directly. This method is used to cast variable arguments to array.
+     * Directly returns the given variable arguments as an array.
      *
-     * @param elements given elements
-     * @param <T>      component type
-     * @return given elements itself as an array
+     * @param elements the given variable arguments
+     * @param <T>      the component type
+     * @return the given variable arguments as an array
      */
     @SafeVarargs
     public static <T> T[] array(T... elements) {
@@ -758,609 +863,205 @@ public class JieArray {
     }
 
     /**
-     * Wraps and returns given array as a mutable and size-fixed list, the elements directly come from given array, any
-     * modification will reflect each other.
+     * Returns a fixed-size list backed by the given array. Changes to the returned list "write through" to the array,
+     * and vice versa. The returned list is serializable and implements {@link RandomAccess}.
      *
-     * @param array given array
-     * @param <T>   component type
-     * @return given array as a mutable and size-fixed list
+     * @param array the given array
+     * @param <T>   the component type
+     * @return a fixed-size list backed by the given array
      */
     @SafeVarargs
-    public static <T> List<T> asList(T... array) {
+    public static <T> List<T> asList(T @RetainedParam ... array) {
         return Arrays.asList(array);
     }
 
     /**
-     * Wraps and returns given array as a mutable and size-fixed list, the elements directly come from given array, any
-     * modification will reflect each other.
+     * Returns a fixed-size list backed by the given array. Changes to the returned list "write through" to the array,
+     * and vice versa. The returned list is serializable and implements {@link RandomAccess}.
      *
-     * @param array given array
-     * @return given array as a mutable and size-fixed list
+     * @param array the given array
+     * @return a fixed-size list backed by the given array
      */
-    public static List<Boolean> asList(boolean[] array) {
-        return new BooleanArrayList(array);
+    public static List<Boolean> asList(boolean @RetainedParam ... array) {
+        return ListBack.asList(array);
     }
 
     /**
-     * Wraps and returns given array as a mutable and size-fixed list, the elements directly come from given array, any
-     * modification will reflect each other.
+     * Returns a fixed-size list backed by the given array. Changes to the returned list "write through" to the array,
+     * and vice versa. The returned list is serializable and implements {@link RandomAccess}.
      *
-     * @param array given array
-     * @return given array as a mutable and size-fixed list
+     * @param array the given array
+     * @return a fixed-size list backed by the given array
      */
-    public static List<Byte> asList(byte[] array) {
-        return new ByteArrayList(array);
+    public static List<Byte> asList(byte @RetainedParam ... array) {
+        return ListBack.asList(array);
     }
 
     /**
-     * Wraps and returns given array as a mutable and size-fixed list, the elements directly come from given array, any
-     * modification will reflect each other.
+     * Returns a fixed-size list backed by the given array. Changes to the returned list "write through" to the array,
+     * and vice versa. The returned list is serializable and implements {@link RandomAccess}.
      *
-     * @param array given array
-     * @return given array as a mutable and size-fixed list
+     * @param array the given array
+     * @return a fixed-size list backed by the given array
      */
-    public static List<Short> asList(short[] array) {
-        return new ShortArrayList(array);
+    public static List<Short> asList(short @RetainedParam ... array) {
+        return ListBack.asList(array);
     }
 
     /**
-     * Wraps and returns given array as a mutable and size-fixed list, the elements directly come from given array, any
-     * modification will reflect each other.
+     * Returns a fixed-size list backed by the given array. Changes to the returned list "write through" to the array,
+     * and vice versa. The returned list is serializable and implements {@link RandomAccess}.
      *
-     * @param array given array
-     * @return given array as a mutable and size-fixed list
+     * @param array the given array
+     * @return a fixed-size list backed by the given array
      */
-    public static List<Character> asList(char[] array) {
-        return new CharacterArrayList(array);
+    public static List<Character> asList(char @RetainedParam ... array) {
+        return ListBack.asList(array);
     }
 
     /**
-     * Wraps and returns given array as a mutable and size-fixed list, the elements directly come from given array, any
-     * modification will reflect each other.
+     * Returns a fixed-size list backed by the given array. Changes to the returned list "write through" to the array,
+     * and vice versa. The returned list is serializable and implements {@link RandomAccess}.
      *
-     * @param array given array
-     * @return given array as a mutable and size-fixed list
+     * @param array the given array
+     * @return a fixed-size list backed by the given array
      */
-    public static List<Integer> asList(int[] array) {
-        return new IntegerArrayList(array);
+    public static List<Integer> asList(int @RetainedParam ... array) {
+        return ListBack.asList(array);
     }
 
     /**
-     * Wraps and returns given array as a mutable and size-fixed list, the elements directly come from given array, any
-     * modification will reflect each other.
+     * Returns a fixed-size list backed by the given array. Changes to the returned list "write through" to the array,
+     * and vice versa. The returned list is serializable and implements {@link RandomAccess}.
      *
-     * @param array given array
-     * @return given array as a mutable and size-fixed list
+     * @param array the given array
+     * @return a fixed-size list backed by the given array
      */
-    public static List<Long> asList(long[] array) {
-        return new LongArrayList(array);
+    public static List<Long> asList(long @RetainedParam ... array) {
+        return ListBack.asList(array);
     }
 
     /**
-     * Wraps and returns given array as a mutable and size-fixed list, the elements directly come from given array, any
-     * modification will reflect each other.
+     * Returns a fixed-size list backed by the given array. Changes to the returned list "write through" to the array,
+     * and vice versa. The returned list is serializable and implements {@link RandomAccess}.
      *
-     * @param array given array
-     * @return given array as a mutable and size-fixed list
+     * @param array the given array
+     * @return a fixed-size list backed by the given array
      */
-    public static List<Float> asList(float[] array) {
-        return new FloatArrayList(array);
+    public static List<Float> asList(float @RetainedParam ... array) {
+        return ListBack.asList(array);
     }
 
     /**
-     * Wraps and returns given array as a mutable and size-fixed list, the elements directly come from given array, any
-     * modification will reflect each other.
+     * Returns a fixed-size list backed by the given array. Changes to the returned list "write through" to the array,
+     * and vice versa. The returned list is serializable and implements {@link RandomAccess}.
      *
-     * @param array given array
-     * @return given array as a mutable and size-fixed list
+     * @param array the given array
+     * @return a fixed-size list backed by the given array
      */
-    public static List<Double> asList(double[] array) {
-        return new DoubleArrayList(array);
+    public static List<Double> asList(double @RetainedParam ... array) {
+        return ListBack.asList(array);
     }
 
     /**
-     * Wraps and returns given array as an immutable list, the elements directly come from given array, any modification
-     * will reflect returned list.
+     * Returns an immutable list backed by the given array. Changes to the backing array "write through" to the returned
+     * list, but the list is immutable. The returned list is serializable and implements {@link RandomAccess}.
      *
-     * @param array given array
-     * @param <T>   component type
-     * @return given array as an immutable list
+     * @param array the given array
+     * @param <T>   the component type
+     * @return a fixed-size list backed by the given array
      */
+    @Immutable
     @SafeVarargs
-    public static <T> List<T> listOf(T... array) {
-        return new ImmutableList<>(array);
+    public static <T> List<T> immutableList(T... array) {
+        return ListBack.immutableList(array);
     }
 
     /**
-     * Wraps and returns given array as an immutable list, the elements directly come from given array, any modification
-     * will reflect returned list.
+     * Returns an immutable list backed by the given array. Changes to the backing array "write through" to the returned
+     * list, but the list is immutable. The returned list is serializable and implements {@link RandomAccess}.
      *
-     * @param array given array
-     * @return given array as an immutable list
+     * @param array the given array
+     * @return a fixed-size list backed by the given array
      */
-    public static List<Boolean> listOf(boolean[] array) {
-        return new BooleanImmutableList(array);
+    public static List<Boolean> immutableList(boolean[] array) {
+        return ListBack.immutableList(array);
     }
 
     /**
-     * Wraps and returns given array as an immutable list, the elements directly come from given array, any modification
-     * will reflect returned list.
+     * Returns an immutable list backed by the given array. Changes to the backing array "write through" to the returned
+     * list, but the list is immutable. The returned list is serializable and implements {@link RandomAccess}.
      *
-     * @param array given array
-     * @return given array as an immutable list
+     * @param array the given array
+     * @return a fixed-size list backed by the given array
      */
-    public static List<Byte> listOf(byte[] array) {
-        return new ByteImmutableList(array);
+    public static List<Byte> immutableList(byte[] array) {
+        return ListBack.immutableList(array);
     }
 
     /**
-     * Wraps and returns given array as an immutable list, the elements directly come from given array, any modification
-     * will reflect returned list.
+     * Returns an immutable list backed by the given array. Changes to the backing array "write through" to the returned
+     * list, but the list is immutable. The returned list is serializable and implements {@link RandomAccess}.
      *
-     * @param array given array
-     * @return given array as an immutable list
+     * @param array the given array
+     * @return a fixed-size list backed by the given array
      */
-    public static List<Short> listOf(short[] array) {
-        return new ShortImmutableList(array);
+    public static List<Short> immutableList(short[] array) {
+        return ListBack.immutableList(array);
     }
 
     /**
-     * Wraps and returns given array as an immutable list, the elements directly come from given array, any modification
-     * will reflect returned list.
+     * Returns an immutable list backed by the given array. Changes to the backing array "write through" to the returned
+     * list, but the list is immutable. The returned list is serializable and implements {@link RandomAccess}.
      *
-     * @param array given array
-     * @return given array as an immutable list
+     * @param array the given array
+     * @return a fixed-size list backed by the given array
      */
-    public static List<Character> listOf(char[] array) {
-        return new CharImmutableList(array);
+    public static List<Character> immutableList(char[] array) {
+        return ListBack.immutableList(array);
     }
 
     /**
-     * Wraps and returns given array as an immutable list, the elements directly come from given array, any modification
-     * will reflect returned list.
+     * Returns an immutable list backed by the given array. Changes to the backing array "write through" to the returned
+     * list, but the list is immutable. The returned list is serializable and implements {@link RandomAccess}.
      *
-     * @param array given array
-     * @return given array as an immutable list
+     * @param array the given array
+     * @return a fixed-size list backed by the given array
      */
-    public static List<Integer> listOf(int[] array) {
-        return new IntImmutableList(array);
+    public static List<Integer> immutableList(int[] array) {
+        return ListBack.immutableList(array);
     }
 
     /**
-     * Wraps and returns given array as an immutable list, the elements directly come from given array, any modification
-     * will reflect returned list.
+     * Returns an immutable list backed by the given array. Changes to the backing array "write through" to the returned
+     * list, but the list is immutable. The returned list is serializable and implements {@link RandomAccess}.
      *
-     * @param array given array
-     * @return given array as an immutable list
+     * @param array the given array
+     * @return a fixed-size list backed by the given array
      */
-    public static List<Long> listOf(long[] array) {
-        return new LongImmutableList(array);
+    public static List<Long> immutableList(long[] array) {
+        return ListBack.immutableList(array);
     }
 
     /**
-     * Wraps and returns given array as an immutable list, the elements directly come from given array, any modification
-     * will reflect returned list.
+     * Returns an immutable list backed by the given array. Changes to the backing array "write through" to the returned
+     * list, but the list is immutable. The returned list is serializable and implements {@link RandomAccess}.
      *
-     * @param array given array
-     * @return given array as an immutable list
+     * @param array the given array
+     * @return a fixed-size list backed by the given array
      */
-    public static List<Float> listOf(float[] array) {
-        return new FloatImmutableList(array);
+    public static List<Float> immutableList(float[] array) {
+        return ListBack.immutableList(array);
     }
 
     /**
-     * Wraps and returns given array as an immutable list, the elements directly come from given array, any modification
-     * will reflect returned list.
+     * Returns an immutable list backed by the given array. Changes to the backing array "write through" to the returned
+     * list, but the list is immutable. The returned list is serializable and implements {@link RandomAccess}.
      *
-     * @param array given array
-     * @return given array as an immutable list
+     * @param array the given array
+     * @return a fixed-size list backed by the given array
      */
-    public static List<Double> listOf(double[] array) {
-        return new DoubleImmutableList(array);
-    }
-
-    private static final class BooleanArrayList extends AbstractList<Boolean> {
-
-        private final boolean[] array;
-
-        private BooleanArrayList(boolean[] array) {
-            this.array = array;
-        }
-
-        @Override
-        public Boolean get(int index) {
-            return array[index];
-        }
-
-        @Override
-        public Boolean set(int index, Boolean element) {
-            Boolean old = array[index];
-            array[index] = element;
-            return old;
-        }
-
-        @Override
-        public int size() {
-            return array.length;
-        }
-    }
-
-    private static final class ByteArrayList extends AbstractList<Byte> {
-
-        private final byte[] array;
-
-        private ByteArrayList(byte[] array) {
-            this.array = array;
-        }
-
-        @Override
-        public Byte get(int index) {
-            return array[index];
-        }
-
-        @Override
-        public Byte set(int index, Byte element) {
-            Byte old = array[index];
-            array[index] = element;
-            return old;
-        }
-
-        @Override
-        public int size() {
-            return array.length;
-        }
-    }
-
-    private static final class ShortArrayList extends AbstractList<Short> {
-
-        private final short[] array;
-
-        private ShortArrayList(short[] array) {
-            this.array = array;
-        }
-
-        @Override
-        public Short get(int index) {
-            return array[index];
-        }
-
-        @Override
-        public Short set(int index, Short element) {
-            short old = array[index];
-            array[index] = element;
-            return old;
-        }
-
-        @Override
-        public int size() {
-            return array.length;
-        }
-    }
-
-    private static final class CharacterArrayList extends AbstractList<Character> {
-
-        private final char[] array;
-
-        private CharacterArrayList(char[] array) {
-            this.array = array;
-        }
-
-        @Override
-        public Character get(int index) {
-            return array[index];
-        }
-
-        @Override
-        public Character set(int index, Character element) {
-            Character old = array[index];
-            array[index] = element;
-            return old;
-        }
-
-        @Override
-        public int size() {
-            return array.length;
-        }
-    }
-
-    private static final class IntegerArrayList extends AbstractList<Integer> {
-
-        private final int[] array;
-
-        private IntegerArrayList(int[] array) {
-            this.array = array;
-        }
-
-        @Override
-        public Integer get(int index) {
-            return array[index];
-        }
-
-        @Override
-        public Integer set(int index, Integer element) {
-            Integer old = array[index];
-            array[index] = element;
-            return old;
-        }
-
-        @Override
-        public int size() {
-            return array.length;
-        }
-    }
-
-    private static final class LongArrayList extends AbstractList<Long> {
-
-        private final long[] array;
-
-        private LongArrayList(long[] array) {
-            this.array = array;
-        }
-
-        @Override
-        public Long get(int index) {
-            return array[index];
-        }
-
-        @Override
-        public Long set(int index, Long element) {
-            Long old = array[index];
-            array[index] = element;
-            return old;
-        }
-
-        @Override
-        public int size() {
-            return array.length;
-        }
-    }
-
-    private static final class FloatArrayList extends AbstractList<Float> {
-
-        private final float[] array;
-
-        private FloatArrayList(float[] array) {
-            this.array = array;
-        }
-
-        @Override
-        public Float get(int index) {
-            return array[index];
-        }
-
-        @Override
-        public Float set(int index, Float element) {
-            Float old = array[index];
-            array[index] = element;
-            return old;
-        }
-
-        @Override
-        public int size() {
-            return array.length;
-        }
-    }
-
-    private static final class DoubleArrayList extends AbstractList<Double> {
-
-        private final double[] array;
-
-        private DoubleArrayList(double[] array) {
-            this.array = array;
-        }
-
-        @Override
-        public Double get(int index) {
-            return array[index];
-        }
-
-        @Override
-        public Double set(int index, Double element) {
-            Double old = array[index];
-            array[index] = element;
-            return old;
-        }
-
-        @Override
-        public int size() {
-            return array.length;
-        }
-    }
-
-    private static final class ImmutableList<T> extends AbstractList<T> implements RandomAccess, Serializable {
-
-        private static final long serialVersionUID = 0L;
-
-        private final T[] array;
-
-        private ImmutableList(T[] array) {
-            this.array = array;
-        }
-
-        @Override
-        public T get(int index) {
-            return array[index];
-        }
-
-        @Override
-        public int size() {
-            return array.length;
-        }
-    }
-
-    private static final class BooleanImmutableList
-        extends AbstractList<Boolean> implements RandomAccess, Serializable {
-
-        private static final long serialVersionUID = 0L;
-
-        private final boolean[] array;
-
-        private BooleanImmutableList(boolean[] array) {
-            this.array = array;
-        }
-
-        @Override
-        public Boolean get(int index) {
-            return array[index];
-        }
-
-        @Override
-        public int size() {
-            return array.length;
-        }
-    }
-
-    private static final class ByteImmutableList
-        extends AbstractList<Byte> implements RandomAccess, Serializable {
-
-        private static final long serialVersionUID = 0L;
-
-        private final byte[] array;
-
-        private ByteImmutableList(byte[] array) {
-            this.array = array;
-        }
-
-        @Override
-        public Byte get(int index) {
-            return array[index];
-        }
-
-        @Override
-        public int size() {
-            return array.length;
-        }
-    }
-
-    private static final class ShortImmutableList
-        extends AbstractList<Short> implements RandomAccess, Serializable {
-
-        private static final long serialVersionUID = 0L;
-
-        private final short[] array;
-
-        private ShortImmutableList(short[] array) {
-            this.array = array;
-        }
-
-        @Override
-        public Short get(int index) {
-            return array[index];
-        }
-
-        @Override
-        public int size() {
-            return array.length;
-        }
-    }
-
-    private static final class CharImmutableList
-        extends AbstractList<Character> implements RandomAccess, Serializable {
-
-        private static final long serialVersionUID = 0L;
-
-        private final char[] array;
-
-        private CharImmutableList(char[] array) {
-            this.array = array;
-        }
-
-        @Override
-        public Character get(int index) {
-            return array[index];
-        }
-
-        @Override
-        public int size() {
-            return array.length;
-        }
-    }
-
-    private static final class IntImmutableList
-        extends AbstractList<Integer> implements RandomAccess, Serializable {
-
-        private static final long serialVersionUID = 0L;
-
-        private final int[] array;
-
-        private IntImmutableList(int[] array) {
-            this.array = array;
-        }
-
-        @Override
-        public Integer get(int index) {
-            return array[index];
-        }
-
-        @Override
-        public int size() {
-            return array.length;
-        }
-    }
-
-    private static final class LongImmutableList
-        extends AbstractList<Long> implements RandomAccess, Serializable {
-
-        private static final long serialVersionUID = 0L;
-
-        private final long[] array;
-
-        private LongImmutableList(long[] array) {
-            this.array = array;
-        }
-
-        @Override
-        public Long get(int index) {
-            return array[index];
-        }
-
-        @Override
-        public int size() {
-            return array.length;
-        }
-    }
-
-    private static final class FloatImmutableList
-        extends AbstractList<Float> implements RandomAccess, Serializable {
-
-        private static final long serialVersionUID = 0L;
-
-        private final float[] array;
-
-        private FloatImmutableList(float[] array) {
-            this.array = array;
-        }
-
-        @Override
-        public Float get(int index) {
-            return array[index];
-        }
-
-        @Override
-        public int size() {
-            return array.length;
-        }
-    }
-
-    private static final class DoubleImmutableList
-        extends AbstractList<Double> implements RandomAccess, Serializable {
-
-        private static final long serialVersionUID = 0L;
-
-        private final double[] array;
-
-        private DoubleImmutableList(double[] array) {
-            this.array = array;
-        }
-
-        @Override
-        public Double get(int index) {
-            return array[index];
-        }
-
-        @Override
-        public int size() {
-            return array.length;
-        }
+    public static List<Double> immutableList(double[] array) {
+        return ListBack.immutableList(array);
     }
 }

@@ -40,7 +40,7 @@ public interface DataSchemaParser {
      * @return a new {@link DataSchemaParser} with given handlers
      */
     static DataSchemaParser withHandlers(@RetainedParam Handler... handlers) {
-        return withHandlers(JieArray.listOf(handlers));
+        return withHandlers(JieArray.immutableList(handlers));
     }
 
     /**
