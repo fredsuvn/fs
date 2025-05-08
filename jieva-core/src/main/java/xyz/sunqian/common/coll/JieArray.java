@@ -14,9 +14,9 @@ import java.util.RandomAccess;
 import java.util.function.Function;
 
 /**
- * This is a static utilities class provides utilities for {@code array}.
+ * Static utility class for array.
  *
- * @author fredsuvn
+ * @author sunqian
  */
 public class JieArray {
 
@@ -210,7 +210,7 @@ public class JieArray {
      * @param <T>   the component type of the given array
      * @return the given array
      */
-    public static <T> @Nullable T@Nullable[] fill(@Nullable T[] array, @Nullable T value) {
+    public static <T> @Nullable T @Nullable [] fill(@Nullable T[] array, @Nullable T value) {
         Arrays.fill(array, value);
         return array;
     }
@@ -223,8 +223,7 @@ public class JieArray {
      * @return the given array
      */
     public static boolean[] fill(boolean[] array, boolean value) {
-        @Nullable String@Nullable[] ss = fill(new String[1], null);
-            Arrays.fill(array, value);
+        Arrays.fill(array, value);
         return array;
     }
 
@@ -235,13 +234,7 @@ public class JieArray {
      * @param value the given value
      * @return the given array
      */
-    public static byte[] fill(  @Nullable Byte  []  array, byte value) {
-        if (array != null) {
-            Byte b = array[0];
-            if (b != null) {
-
-            }
-        }
+    public static byte[] fill(@Nullable Byte[] array, byte value) {
         Arrays.fill(array, value);
         return array;
     }
