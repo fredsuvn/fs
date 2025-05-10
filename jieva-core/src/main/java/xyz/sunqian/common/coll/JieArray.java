@@ -1,18 +1,18 @@
 package xyz.sunqian.common.coll;
 
-import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.function.IndexedDoublePredicate;
+import xyz.sunqian.common.base.function.IndexedIntPredicate;
+import xyz.sunqian.common.base.function.IndexedLongPredicate;
+import xyz.sunqian.common.base.function.IndexedPredicate;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.RandomAccess;
 import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.IntStream;
 
 /**
  * Static utility class for array.
@@ -540,16 +540,16 @@ public class JieArray {
 
     /**
      * Returns the first index of the element which can pass the specified predication (return true) at the given array.
-     * If the element is not found, returns -1.
+     * If none of the elements pass the predication, returns -1.
      *
-     * @param array the given array
+     * @param array     the given array
      * @param predicate the specified predication
-     * @param <T>   the component type
+     * @param <T>       the component type
      * @return the first index of the element which can pass the specified predication (return true) at the given array
      */
-    public static <T> int indexOf(@Nullable T[] array, Predicate<@Nullable T> predicate) {
+    public static <T> int indexOf(@Nullable T[] array, IndexedPredicate<@Nullable T> predicate) {
         for (int i = 0; i < array.length; i++) {
-            if (predicate.test(array[i])) {
+            if (predicate.test(i, array[i])) {
                 return i;
             }
         }
@@ -557,16 +557,18 @@ public class JieArray {
     }
 
     /**
-     * Returns the first index of the element same with the specified element at the given array. If the element is not
-     * found, returns -1.
+     * Returns the first index of the element which can pass the specified predication (return true) at the given array.
+     * If the element is {@code true}, the passed argument is 1, otherwise 0. If none of the elements pass the
+     * predication, returns -1.
      *
-     * @param array   the given array
-     * @param element the specified element
-     * @return the first index of the element same with the specified element at the given array
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the first index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int indexOf(boolean[] array, Pre) {
+    public static int indexOf(boolean[] array, IndexedIntPredicate predicate) {
         for (int i = 0; i < array.length; i++) {
-            if (element == array[i]) {
+            int v = array[i] ? 1 : 0;
+            if (predicate.test(i, v)) {
                 return i;
             }
         }
@@ -574,16 +576,17 @@ public class JieArray {
     }
 
     /**
-     * Returns the first index of the element same with the specified element at the given array. If the element is not
-     * found, returns -1.
+     * Returns the first index of the element which can pass the specified predication (return true) at the given array.
+     * Each element will be passed as {@code int}. If none of the elements pass the predication, returns -1.
      *
-     * @param array   the given array
-     * @param element the specified element
-     * @return the first index of the element same with the specified element at the given array
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the first index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int indexOf(byte[] array, byte element) {
+    public static int indexOf(byte[] array, IndexedIntPredicate predicate) {
         for (int i = 0; i < array.length; i++) {
-            if (element == array[i]) {
+            int v = array[i];
+            if (predicate.test(i, v)) {
                 return i;
             }
         }
@@ -591,16 +594,17 @@ public class JieArray {
     }
 
     /**
-     * Returns the first index of the element same with the specified element at the given array. If the element is not
-     * found, returns -1.
+     * Returns the first index of the element which can pass the specified predication (return true) at the given array.
+     * Each element will be passed as {@code int}. If none of the elements pass the predication, returns -1.
      *
-     * @param array   the given array
-     * @param element the specified element
-     * @return the first index of the element same with the specified element at the given array
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the first index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int indexOf(short[] array, short element) {
+    public static int indexOf(short[] array, IndexedIntPredicate predicate) {
         for (int i = 0; i < array.length; i++) {
-            if (element == array[i]) {
+            int v = array[i];
+            if (predicate.test(i, v)) {
                 return i;
             }
         }
@@ -608,16 +612,17 @@ public class JieArray {
     }
 
     /**
-     * Returns the first index of the element same with the specified element at the given array. If the element is not
-     * found, returns -1.
+     * Returns the first index of the element which can pass the specified predication (return true) at the given array.
+     * Each element will be passed as {@code int}. If none of the elements pass the predication, returns -1.
      *
-     * @param array   the given array
-     * @param element the specified element
-     * @return the first index of the element same with the specified element at the given array
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the first index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int indexOf(char[] array, char element) {
+    public static int indexOf(char[] array, IndexedIntPredicate predicate) {
         for (int i = 0; i < array.length; i++) {
-            if (element == array[i]) {
+            int v = array[i];
+            if (predicate.test(i, v)) {
                 return i;
             }
         }
@@ -625,16 +630,17 @@ public class JieArray {
     }
 
     /**
-     * Returns the first index of the element same with the specified element at the given array. If the element is not
-     * found, returns -1.
+     * Returns the first index of the element which can pass the specified predication (return true) at the given array.
+     * If none of the elements pass the predication, returns -1.
      *
-     * @param array   the given array
-     * @param element the specified element
-     * @return the first index of the element same with the specified element at the given array
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the first index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int indexOf(int[] array, int element) {
+    public static int indexOf(int[] array, IndexedIntPredicate predicate) {
         for (int i = 0; i < array.length; i++) {
-            if (element == array[i]) {
+            int v = array[i];
+            if (predicate.test(i, v)) {
                 return i;
             }
         }
@@ -642,16 +648,17 @@ public class JieArray {
     }
 
     /**
-     * Returns the first index of the element same with the specified element at the given array. If the element is not
-     * found, returns -1.
+     * Returns the first index of the element which can pass the specified predication (return true) at the given array.
+     * If none of the elements pass the predication, returns -1.
      *
-     * @param array   the given array
-     * @param element the specified element
-     * @return the first index of the element same with the specified element at the given array
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the first index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int indexOf(long[] array, long element) {
+    public static int indexOf(long[] array, IndexedLongPredicate predicate) {
         for (int i = 0; i < array.length; i++) {
-            if (element == array[i]) {
+            long v = array[i];
+            if (predicate.test(i, v)) {
                 return i;
             }
         }
@@ -659,16 +666,17 @@ public class JieArray {
     }
 
     /**
-     * Returns the first index of the element same with the specified element at the given array. If the element is not
-     * found, returns -1.
+     * Returns the first index of the element which can pass the specified predication (return true) at the given array.
+     * Each element will be passed as {@code double}. If none of the elements pass the predication, returns -1.
      *
-     * @param array   the given array
-     * @param element the specified element
-     * @return the first index of the element same with the specified element at the given array
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the first index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int indexOf(float[] array, float element) {
+    public static int indexOf(float[] array, IndexedDoublePredicate predicate) {
         for (int i = 0; i < array.length; i++) {
-            if (element == array[i]) {
+            double v = array[i];
+            if (predicate.test(i, v)) {
                 return i;
             }
         }
@@ -676,16 +684,17 @@ public class JieArray {
     }
 
     /**
-     * Returns the first index of the element same with the specified element at the given array. If the element is not
-     * found, returns -1.
+     * Returns the first index of the element which can pass the specified predication (return true) at the given array.
+     * If none of the elements pass the predication, returns -1.
      *
-     * @param array   the given array
-     * @param element the specified element
-     * @return the first index of the element same with the specified element at the given array
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the first index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int indexOf(double[] array, double element) {
+    public static int indexOf(double[] array, IndexedDoublePredicate predicate) {
         for (int i = 0; i < array.length; i++) {
-            if (element == array[i]) {
+            double v = array[i];
+            if (predicate.test(i, v)) {
                 return i;
             }
         }
@@ -693,17 +702,19 @@ public class JieArray {
     }
 
     /**
-     * Returns the last index of the element same with the specified element at the given array. If the element is not
-     * found, returns -1.
+     * Returns the last index of the element which can pass the specified predication (return true) at the given array.
+     * If none of the elements pass the predication, returns -1.
+     * <p>
+     * It is the reverse order method of the {@link #indexOf(Object[], IndexedPredicate)}.
      *
-     * @param array   the given array
-     * @param element the specified element
-     * @param <T>     the component type
-     * @return the last index of the element same with the specified element at the given array
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @param <T>       the component type
+     * @return the last index of the element which can pass the specified predication (return true) at the given array
      */
-    public static <T> int lastIndexOf(T[] array, @Nullable T element) {
+    public static <T> int lastIndexOf(@Nullable T[] array, IndexedPredicate<@Nullable T> predicate) {
         for (int i = array.length - 1; i >= 0; i--) {
-            if (Objects.equals(element, array[i])) {
+            if (predicate.test(i, array[i])) {
                 return i;
             }
         }
@@ -711,16 +722,20 @@ public class JieArray {
     }
 
     /**
-     * Returns the last index of the element same with the specified element at the given array. If the element is not
-     * found, returns -1.
+     * Returns the last index of the element which can pass the specified predication (return true) at the given array.
+     * If the element is {@code true}, the passed argument is 1, otherwise 0. If none of the elements pass the
+     * predication, returns -1.
+     * <p>
+     * It is the reverse order method of the {@link #indexOf(boolean[], IndexedIntPredicate)}.
      *
-     * @param array   the given array
-     * @param element the specified element
-     * @return the last index of the element same with the specified element at the given array
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the last index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int lastIndexOf(boolean[] array, boolean element) {
+    public static int lastIndexOf(boolean[] array, IndexedIntPredicate predicate) {
         for (int i = array.length - 1; i >= 0; i--) {
-            if (element == array[i]) {
+            int v = array[i] ? 1 : 0;
+            if (predicate.test(i, v)) {
                 return i;
             }
         }
@@ -728,16 +743,19 @@ public class JieArray {
     }
 
     /**
-     * Returns the last index of the element same with the specified element at the given array. If the element is not
-     * found, returns -1.
+     * Returns the last index of the element which can pass the specified predication (return true) at the given array.
+     * Each element will be passed as {@code int}. If none of the elements pass the predication, returns -1.
+     * <p>
+     * It is the reverse order method of the {@link #indexOf(byte[], IndexedIntPredicate)}.
      *
-     * @param array   the given array
-     * @param element the specified element
-     * @return the last index of the element same with the specified element at the given array
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the last index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int lastIndexOf(byte[] array, byte element) {
+    public static int lastIndexOf(byte[] array, IndexedIntPredicate predicate) {
         for (int i = array.length - 1; i >= 0; i--) {
-            if (element == array[i]) {
+            int v = array[i];
+            if (predicate.test(i, v)) {
                 return i;
             }
         }
@@ -745,16 +763,19 @@ public class JieArray {
     }
 
     /**
-     * Returns the last index of the element same with the specified element at the given array. If the element is not
-     * found, returns -1.
+     * Returns the last index of the element which can pass the specified predication (return true) at the given array.
+     * Each element will be passed as {@code int}. If none of the elements pass the predication, returns -1.
+     * <p>
+     * It is the reverse order method of the {@link #indexOf(short[], IndexedIntPredicate)}.
      *
-     * @param array   the given array
-     * @param element the specified element
-     * @return the last index of the element same with the specified element at the given array
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the last index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int lastIndexOf(short[] array, short element) {
+    public static int lastIndexOf(short[] array, IndexedIntPredicate predicate) {
         for (int i = array.length - 1; i >= 0; i--) {
-            if (element == array[i]) {
+            int v = array[i];
+            if (predicate.test(i, v)) {
                 return i;
             }
         }
@@ -762,16 +783,19 @@ public class JieArray {
     }
 
     /**
-     * Returns the last index of the element same with the specified element at the given array. If the element is not
-     * found, returns -1.
+     * Returns the last index of the element which can pass the specified predication (return true) at the given array.
+     * Each element will be passed as {@code int}. If none of the elements pass the predication, returns -1.
+     * <p>
+     * It is the reverse order method of the {@link #indexOf(char[], IndexedIntPredicate)}.
      *
-     * @param array   the given array
-     * @param element the specified element
-     * @return the last index of the element same with the specified element at the given array
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the last index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int lastIndexOf(char[] array, char element) {
+    public static int lastIndexOf(char[] array, IndexedIntPredicate predicate) {
         for (int i = array.length - 1; i >= 0; i--) {
-            if (element == array[i]) {
+            int v = array[i];
+            if (predicate.test(i, v)) {
                 return i;
             }
         }
@@ -779,16 +803,19 @@ public class JieArray {
     }
 
     /**
-     * Returns the last index of the element same with the specified element at the given array. If the element is not
-     * found, returns -1.
+     * Returns the last index of the element which can pass the specified predication (return true) at the given array.
+     * If none of the elements pass the predication, returns -1.
+     * <p>
+     * It is the reverse order method of the {@link #indexOf(int[], IndexedIntPredicate)}.
      *
-     * @param array   the given array
-     * @param element the specified element
-     * @return the last index of the element same with the specified element at the given array
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the last index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int lastIndexOf(int[] array, int element) {
+    public static int lastIndexOf(int[] array, IndexedIntPredicate predicate) {
         for (int i = array.length - 1; i >= 0; i--) {
-            if (element == array[i]) {
+            int v = array[i];
+            if (predicate.test(i, v)) {
                 return i;
             }
         }
@@ -796,16 +823,19 @@ public class JieArray {
     }
 
     /**
-     * Returns the last index of the element same with the specified element at the given array. If the element is not
-     * found, returns -1.
+     * Returns the last index of the element which can pass the specified predication (return true) at the given array.
+     * If none of the elements pass the predication, returns -1.
+     * <p>
+     * It is the reverse order method of the {@link #indexOf(long[], IndexedLongPredicate)}.
      *
-     * @param array   the given array
-     * @param element the specified element
-     * @return the last index of the element same with the specified element at the given array
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the last index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int lastIndexOf(long[] array, long element) {
+    public static int lastIndexOf(long[] array, IndexedLongPredicate predicate) {
         for (int i = array.length - 1; i >= 0; i--) {
-            if (element == array[i]) {
+            long v = array[i];
+            if (predicate.test(i, v)) {
                 return i;
             }
         }
@@ -813,16 +843,19 @@ public class JieArray {
     }
 
     /**
-     * Returns the last index of the element same with the specified element at the given array. If the element is not
-     * found, returns -1.
+     * Returns the last index of the element which can pass the specified predication (return true) at the given array.
+     * Each element will be passed as {@code double}. If none of the elements pass the predication, returns -1.
+     * <p>
+     * It is the reverse order method of the {@link #indexOf(float[], IndexedDoublePredicate)}.
      *
-     * @param array   the given array
-     * @param element the specified element
-     * @return the last index of the element same with the specified element at the given array
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the last index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int lastIndexOf(float[] array, float element) {
+    public static int lastIndexOf(float[] array, IndexedDoublePredicate predicate) {
         for (int i = array.length - 1; i >= 0; i--) {
-            if (element == array[i]) {
+            double v = array[i];
+            if (predicate.test(i, v)) {
                 return i;
             }
         }
@@ -830,16 +863,19 @@ public class JieArray {
     }
 
     /**
-     * Returns the last index of the element same with the specified element at the given array. If the element is not
-     * found, returns -1.
+     * Returns the last index of the element which can pass the specified predication (return true) at the given array.
+     * If none of the elements pass the predication, returns -1.
+     * <p>
+     * It is the reverse order method of the {@link #indexOf(double[], IndexedDoublePredicate)}.
      *
-     * @param array   the given array
-     * @param element the specified element
-     * @return the last index of the element same with the specified element at the given array
+     * @param array     the given array
+     * @param predicate the specified predication
+     * @return the last index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int lastIndexOf(double[] array, double element) {
+    public static int lastIndexOf(double[] array, IndexedDoublePredicate predicate) {
         for (int i = array.length - 1; i >= 0; i--) {
-            if (element == array[i]) {
+            double v = array[i];
+            if (predicate.test(i, v)) {
                 return i;
             }
         }
@@ -854,7 +890,7 @@ public class JieArray {
      * @return the given variable arguments as an array
      */
     @SafeVarargs
-    public static <T> T[] array(T... elements) {
+    public static <T> @Nullable T[] array(@Nullable T @RetainedParam ... elements) {
         return elements;
     }
 
@@ -867,7 +903,7 @@ public class JieArray {
      * @return a fixed-size list backed by the given array
      */
     @SafeVarargs
-    public static <T> List<T> asList(T @RetainedParam ... array) {
+    public static <T> List<@Nullable T> asList(@Nullable T @RetainedParam ... array) {
         return Arrays.asList(array);
     }
 
@@ -957,107 +993,5 @@ public class JieArray {
      */
     public static List<Double> asList(double @RetainedParam ... array) {
         return ListBack.asList(array);
-    }
-
-    /**
-     * Returns an immutable list backed by the given array. Changes to the backing array "write through" to the returned
-     * list, but the list is immutable. The returned list is serializable and implements {@link RandomAccess}.
-     *
-     * @param array the given array
-     * @param <T>   the component type
-     * @return a fixed-size list backed by the given array
-     */
-    @Immutable
-    @SafeVarargs
-    public static <T> List<T> immutableList(T... array) {
-        return ListBack.immutableList(array);
-    }
-
-    /**
-     * Returns an immutable list backed by the given array. Changes to the backing array "write through" to the returned
-     * list, but the list is immutable. The returned list is serializable and implements {@link RandomAccess}.
-     *
-     * @param array the given array
-     * @return a fixed-size list backed by the given array
-     */
-    public static List<Boolean> immutableList(boolean[] array) {
-        return ListBack.immutableList(array);
-    }
-
-    /**
-     * Returns an immutable list backed by the given array. Changes to the backing array "write through" to the returned
-     * list, but the list is immutable. The returned list is serializable and implements {@link RandomAccess}.
-     *
-     * @param array the given array
-     * @return a fixed-size list backed by the given array
-     */
-    public static List<Byte> immutableList(byte[] array) {
-        return ListBack.immutableList(array);
-    }
-
-    /**
-     * Returns an immutable list backed by the given array. Changes to the backing array "write through" to the returned
-     * list, but the list is immutable. The returned list is serializable and implements {@link RandomAccess}.
-     *
-     * @param array the given array
-     * @return a fixed-size list backed by the given array
-     */
-    public static List<Short> immutableList(short[] array) {
-        return ListBack.immutableList(array);
-    }
-
-    /**
-     * Returns an immutable list backed by the given array. Changes to the backing array "write through" to the returned
-     * list, but the list is immutable. The returned list is serializable and implements {@link RandomAccess}.
-     *
-     * @param array the given array
-     * @return a fixed-size list backed by the given array
-     */
-    public static List<Character> immutableList(char[] array) {
-        return ListBack.immutableList(array);
-    }
-
-    /**
-     * Returns an immutable list backed by the given array. Changes to the backing array "write through" to the returned
-     * list, but the list is immutable. The returned list is serializable and implements {@link RandomAccess}.
-     *
-     * @param array the given array
-     * @return a fixed-size list backed by the given array
-     */
-    public static List<Integer> immutableList(int[] array) {
-        return ListBack.immutableList(array);
-    }
-
-    /**
-     * Returns an immutable list backed by the given array. Changes to the backing array "write through" to the returned
-     * list, but the list is immutable. The returned list is serializable and implements {@link RandomAccess}.
-     *
-     * @param array the given array
-     * @return a fixed-size list backed by the given array
-     */
-    public static List<Long> immutableList(long[] array) {
-        return ListBack.immutableList(array);
-    }
-
-    /**
-     * Returns an immutable list backed by the given array. Changes to the backing array "write through" to the returned
-     * list, but the list is immutable. The returned list is serializable and implements {@link RandomAccess}.
-     *
-     * @param array the given array
-     * @return a fixed-size list backed by the given array
-     */
-    public static List<Float> immutableList(float[] array) {
-        return ListBack.immutableList(array);
-    }
-
-    /**
-     * Returns an immutable list backed by the given array. Changes to the backing array "write through" to the returned
-     * list, but the list is immutable. The returned list is serializable and implements {@link RandomAccess}.
-     *
-     * @param array the given array
-     * @return a fixed-size list backed by the given array
-     */
-    public static List<Double> immutableList(double[] array) {
-        return ListBack.immutableList(array);
     }
 }

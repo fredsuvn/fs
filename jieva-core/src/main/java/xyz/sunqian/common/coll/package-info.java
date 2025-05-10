@@ -1,15 +1,12 @@
 /**
- * Provides interfaces and classes for byte.
+ * Provides interfaces and classes for collection and array.
  * <p>
  * Utilities:
  * <ul>
- *     <li>{@link xyz.sunqian.common.base.bytes.JieBytes}</li>
- * </ul>
- * Core interfaces and classes:
- * <ul>
- *     <li>{@link xyz.sunqian.common.base.bytes.BytesBuilder}</li>
- *     <li>{@link xyz.sunqian.common.base.bytes.ByteProcessor}</li>
- *     <li>{@link xyz.sunqian.common.base.bytes.ByteEncoder}</li>
+ *     <li>{@link xyz.sunqian.common.coll.JieColl}</li>
+ *     <li>{@link xyz.sunqian.common.coll.JieList}</li>
+ *     <li>{@link xyz.sunqian.common.coll.JieSet}</li>
+ *     <li>{@link xyz.sunqian.common.coll.JieArray}</li>
  * </ul>
  */
 @DefaultNonNull

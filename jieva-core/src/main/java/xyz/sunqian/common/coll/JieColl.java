@@ -2,21 +2,46 @@ package xyz.sunqian.common.coll;
 
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.base.Jie;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Properties;
+import java.util.Set;
+import java.util.Vector;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 /**
- * This is a static utilities class provides utilities for {@code collection}.
+ * Static utility class for {@link Collection}.
  *
- * @author fresduvn
+ * @author sunqian
  */
 public class JieColl {
+
+    /**
+     * Returns an immutable collection backed by the given array. The returned collection is immutable but the backing
+     * array is not, changes to the backing array "write through" to the returned collection.
+     *
+     * @param array the given array
+     * @param <T>   the component type
+     * @return an immutable collection backed by the given array
+     */
+    @Immutable
+    @SafeVarargs
+    public static <T> Collection<@Nullable T> collection(@Nullable T @RetainedParam ... array) {
+        return CollBack.immutableColl(array);
+    }
 
     /**
      * Returns whether given iterable is null or empty.

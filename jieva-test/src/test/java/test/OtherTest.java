@@ -1,5 +1,6 @@
 package test;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
 import org.testng.annotations.Test;
 
 import java.lang.annotation.Annotation;
