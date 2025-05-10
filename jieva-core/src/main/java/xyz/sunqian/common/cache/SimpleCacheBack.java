@@ -5,7 +5,11 @@ import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.value.Val;
 import xyz.sunqian.common.base.value.Var;
 
-import java.lang.ref.*;
+import java.lang.ref.PhantomReference;
+import java.lang.ref.Reference;
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
 import java.time.Duration;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -93,7 +97,8 @@ final class SimpleCacheBack {
         };
 
         private static final RemovalListener<?, ?> EMPTY_LISTENER =
-            (key, value, cause) -> {};
+            (key, value, cause) -> {
+            };
 
         private final ReferenceQueue<Object> queue = new ReferenceQueue<>();
         private final ConcurrentMap<Object, ReferenceValue<K, V>> map = new ConcurrentHashMap<>();
@@ -153,7 +158,7 @@ final class SimpleCacheBack {
         }
 
         @Override
-        public <V1 extends V> @Nullable V get(K key, Function<? super K, @Nullable V1> producer) {
+        public @Nullable V get(K key, Function<? super K, ? extends @Nullable V> producer) {
             clean();
             Var<V> value = Var.of(null);
             map.compute(key, (k, old) -> {
@@ -164,16 +169,17 @@ final class SimpleCacheBack {
                         return old;
                     }
                 }
-                V1 v1 = producer.apply(key);
-                value.set(v1);
-                return newReferenceValue(key, maskValue(v1), expiration(null));
+                @Nullable V newV = producer.apply(key);
+                value.set(newV);
+                return newReferenceValue(key, maskValue(newV), expiration(null));
             });
             return Jie.as(value.get());
         }
 
         @Override
-        public @Nullable <V1 extends ValueInfo<? extends V>> Val<V> getVal(
-            K key, Function<? super K, @Nullable V1> producer) {
+        public @Nullable Val<V> getVal(
+            K key, Function<? super K, ? extends @Nullable ValueInfo<? extends V>> producer
+        ) {
             clean();
             Var<Object> value = Var.of(null);
             map.compute(key, (k, old) -> {
@@ -184,14 +190,14 @@ final class SimpleCacheBack {
                         return old;
                     }
                 }
-                V1 v1 = producer.apply(key);
-                if (v1 == null) {
+                ValueInfo<? extends V> newV = producer.apply(key);
+                if (newV == null) {
                     value.set(NULL_VAL);
                     return null;
                 }
-                @Nullable V nv = v1.value();
+                @Nullable V nv = newV.value();
                 value.set(nv);
-                return newReferenceValue(key, maskValue(nv), expiration(v1.duration()));
+                return newReferenceValue(key, maskValue(nv), expiration(newV.duration()));
             });
             @Nullable Object v = value.get();
             if (v == NULL_VAL) {

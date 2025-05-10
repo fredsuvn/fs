@@ -14,8 +14,8 @@ import java.util.function.Function;
  * The {@code SimpleCache} interface is a simplified cache interface with key-value mapping, and it provides convenient,
  * atomic and thread-safe cache operations. {@code SimpleCache} supports null values but does not allow null keys.
  *
- * @param <K> type of the keys
- * @param <V> type of the values
+ * @param <K> the type of the keys
+ * @param <V> the type of the values
  * @author sunqian
  */
 @ThreadSafe
@@ -25,8 +25,8 @@ public interface SimpleCache<K, V> {
      * Returns a new {@link SimpleCache} based on {@link WeakReference}. The default cache duration is permanent until
      * the entry is removed by garbage collection.
      *
-     * @param <K> type of the cache keys
-     * @param <V> type of the cache values
+     * @param <K> the type of the cache keys
+     * @param <V> the type of the cache values
      * @return a new {@link SimpleCache} based on {@link WeakReference}
      */
     static <K, V> SimpleCache<K, V> weak() {
@@ -41,8 +41,8 @@ public interface SimpleCache<K, V> {
      *
      * @param duration        the  default cache duration
      * @param removalListener an optional callback function for the removal of entries
-     * @param <K>             type of the cache keys
-     * @param <V>             type of the cache values
+     * @param <K>             the type of the cache keys
+     * @param <V>             the type of the cache values
      * @return a new {@link SimpleCache} based on {@link WeakReference}
      */
     static <K, V> SimpleCache<K, V> weak(
@@ -56,8 +56,8 @@ public interface SimpleCache<K, V> {
      * Returns a new {@link SimpleCache} based on {@link SoftReference}. The default cache duration is permanent until
      * the entry is removed by garbage collection.
      *
-     * @param <K> type of the cache keys
-     * @param <V> type of the cache values
+     * @param <K> the type of the cache keys
+     * @param <V> the type of the cache values
      * @return a new {@link SimpleCache} based on {@link SoftReference}
      */
     static <K, V> SimpleCache<K, V> soft() {
@@ -72,8 +72,8 @@ public interface SimpleCache<K, V> {
      *
      * @param duration        the  default cache duration
      * @param removalListener an optional callback function for the removal of entries
-     * @param <K>             type of the cache keys
-     * @param <V>             type of the cache values
+     * @param <K>             the type of the cache keys
+     * @param <V>             the type of the cache values
      * @return a new {@link SimpleCache} based on {@link SoftReference}
      */
     static <K, V> SimpleCache<K, V> soft(
@@ -92,8 +92,8 @@ public interface SimpleCache<K, V> {
      * typically used for testing.
      *
      * @param removalListener an optional callback function for the removal of entries
-     * @param <K>             type of the cache keys
-     * @param <V>             type of the cache values
+     * @param <K>             the type of the cache keys
+     * @param <V>             the type of the cache values
      * @return a new {@link SimpleCache} based on {@link PhantomReference}
      */
     static <K, V> SimpleCache<K, V> phantom(@Nullable SimpleCache.RemovalListener<K, V> removalListener
@@ -106,7 +106,7 @@ public interface SimpleCache<K, V> {
      *
      * @param value    the specified value, may be {@code null}
      * @param duration the specified duration, may be {@code null} for using the default cache duration
-     * @param <V>      type of the value
+     * @param <V>      the type of the value
      * @return a new {@link ValueInfo} instance with the specified value and duration
      */
     static <V> ValueInfo<V> valueInfo(@Nullable V value, @Nullable Duration duration) {
@@ -153,11 +153,10 @@ public interface SimpleCache<K, V> {
      *
      * @param key      the specified key
      * @param producer the producer to generate new value
-     * @param <V1>     type of the generated value
      * @return the value for the specified key
      */
     @Nullable
-    <V1 extends V> V get(K key, Function<? super K, @Nullable V1> producer);
+    V get(K key, Function<? super K, ? extends @Nullable V> producer);
 
     /**
      * Returns the value wrapped by {@link Val} for the specified key. If the value is invalid, the {@code producer}
@@ -169,11 +168,10 @@ public interface SimpleCache<K, V> {
      *
      * @param key      the specified key
      * @param producer the producer to generate new {@link ValueInfo} instance
-     * @param <V1>     type of the generated {@link ValueInfo} instance
      * @return the value wrapped by {@link Val} for the specified key
      */
     @Nullable
-    <V1 extends ValueInfo<? extends V>> Val<V> getVal(K key, Function<? super K, @Nullable V1> producer);
+    Val<V> getVal(K key, Function<? super K, ? extends @Nullable ValueInfo<? extends V>> producer);
 
     /**
      * Puts the key mapping the value into this cache with default settings.
@@ -187,7 +185,7 @@ public interface SimpleCache<K, V> {
      * Puts the key mapping a value based on given {@link ValueInfo}.
      *
      * @param key   the key
-     * @param value given {@link ValueInfo}
+     * @param value the given {@link ValueInfo}
      */
     void put(K key, ValueInfo<? extends V> value);
 
@@ -216,9 +214,9 @@ public interface SimpleCache<K, V> {
     void expire(K key, Duration duration);
 
     /**
-     * Returns size of this cache.
+     * Returns the size of this cache.
      *
-     * @return size of this cache
+     * @return the size of this cache
      */
     int size();
 
@@ -235,7 +233,7 @@ public interface SimpleCache<K, V> {
     /**
      * Detailed value info for {@link SimpleCache}.
      *
-     * @param <V> type of the actual value to be cached
+     * @param <V> the type of the actual value to be cached
      */
     interface ValueInfo<V> {
 
@@ -244,12 +242,13 @@ public interface SimpleCache<K, V> {
          *
          * @return the actual value to be cached
          */
+        @Nullable
         V value();
 
         /**
-         * Returns cache duration for this value, or {@code null} if default duration is applied.
+         * Returns the cache duration for this value, or {@code null} if default duration is applied.
          *
-         * @return cache duration for this value, or {@code null} if default duration is applied
+         * @return the cache duration for this value, or {@code null} if default duration is applied
          */
         @Nullable
         Duration duration();
@@ -258,8 +257,8 @@ public interface SimpleCache<K, V> {
     /**
      * Listener for the cached value's removal.
      *
-     * @param <K> type of the cache key
-     * @param <V> type of the cache value
+     * @param <K> the type of the cache key
+     * @param <V> the type of the cache value
      */
     interface RemovalListener<K, V> {
 
@@ -270,7 +269,7 @@ public interface SimpleCache<K, V> {
          *
          * @param key   the key of the removed value
          * @param value the removed value wrapped by {@link Val}, may be {@code null}
-         * @param cause cause for the cached value's removal
+         * @param cause the cause for the cached value's removal
          */
         void onRemoval(K key, @Nullable Val<V> value, RemovalCause cause);
     }
