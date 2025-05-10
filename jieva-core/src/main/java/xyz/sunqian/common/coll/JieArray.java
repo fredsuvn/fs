@@ -1,7 +1,6 @@
 package xyz.sunqian.common.coll;
 
 import xyz.sunqian.annotations.Immutable;
-import xyz.sunqian.annotations.NonNull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.base.Jie;
@@ -12,6 +11,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.RandomAccess;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.IntStream;
 
 /**
  * Static utility class for array.
@@ -234,7 +235,7 @@ public class JieArray {
      * @param value the given value
      * @return the given array
      */
-    public static byte[] fill(@Nullable Byte[] array, byte value) {
+    public static byte[] fill(byte[] array, byte value) {
         Arrays.fill(array, value);
         return array;
     }
@@ -312,8 +313,7 @@ public class JieArray {
     }
 
     /**
-     * Maps the source array (component type {@code T}) to the dest array (component type {@code R}) by specified
-     * mapper.
+     * Maps the source array to the dest array by specified mapper.
      * <p>
      * If the dest array's length equals to the source array's length, the dest array will be returned. Otherwise, a new
      * array with same length of the source array will be created and returned.
@@ -328,8 +328,10 @@ public class JieArray {
      * @param <R>    the component type of the dest array
      * @return the given dest or a new result array
      */
-    public static <T, R> R[] map(T[] source, R[] dest, Function<? super T, @Nullable ? extends R> mapper) {
-        R[] result;
+    public static <T, R> @Nullable R[] map(
+        @Nullable T[] source, @Nullable R[] dest, Function<? super @Nullable T, ? extends @Nullable R> mapper
+    ) {
+        @Nullable R[] result;
         if (dest.length == source.length) {
             result = dest;
         } else {
@@ -340,25 +342,27 @@ public class JieArray {
     }
 
     /**
-     * Maps the source array (component type {@code T}) to the dest array (component type {@code R}) by the specified
-     * mapper.
+     * Maps the source array to the dest array by the specified mapper.
      * <p>
-     * This method tries to create a new array to receive the mapping result. Each element of the source array will be
-     * mapped to a new element by the specified mapper, then be set into the new array at corresponding index. The
-     * component type of the new array is the type of the first non-null new element. If all new elements are null, an
-     * {@link UnsupportedOperationException} will be thrown.
+     * This method tries to create a new array to receive the mapping result and return. Each element of the source
+     * array will be mapped to a new element by the specified mapper, then be set into the created new array at
+     * corresponding index. The component type of the new array is the type of the first non-null new element. If all
+     * new elements are null, an {@link UnsupportedOperationException} will be thrown.
      *
      * @param source the source array
      * @param mapper the specified mapper
      * @param <T>    the component type of the source array
      * @param <R>    the component type of the dest array
      * @return a new result array
+     * @throws UnsupportedOperationException if all new elements are null
      */
-    public static <@Nullable T, @Nullable R> R[] map(@Nullable T[] source, Function<? super T, ? extends R> mapper) {
+    public static <T, R> @Nullable R[] map(
+        @Nullable T[] source, Function<? super @Nullable T, ? extends @Nullable R> mapper
+    ) throws UnsupportedOperationException {
         for (int i = 0; i < source.length; i++) {
-            R r = mapper.apply(source[i]);
+            @Nullable R r = mapper.apply(source[i]);
             if (r != null) {
-                R[] dest = newArray(r.getClass(), source.length);
+                @Nullable R[] dest = newArray(r.getClass(), source.length);
                 map0(source, dest, i, mapper);
                 return dest;
             }
@@ -366,14 +370,13 @@ public class JieArray {
         throw new UnsupportedOperationException("Can not resolve the component type.");
     }
 
-    private static <T, R> void map0(@Nullable T[] source, R[] dest, int start, @NonNull Function<? super T, ? extends R> mapper) {
+    private static <T, R> void map0(
+        @Nullable T[] source, @Nullable R[] dest, int start, Function<? super @Nullable T, ? extends @Nullable R> mapper
+    ) {
         for (int i = start; i < source.length; i++) {
-            T t = source[i];
-            if (t != null) {
-
-            }
-            R r = mapper.apply(t);
-            dest[i] = mapper.apply(source[i]);
+            @Nullable T t = source[i];
+            @Nullable R r = mapper.apply(t);
+            dest[i] = r;
         }
     }
 
@@ -390,8 +393,8 @@ public class JieArray {
     }
 
     /**
-     * Returns the value from the given array at the specified index. If the array or value is null, or the index is out
-     * of bounds, returns the default value.
+     * Returns the value from the given array at the specified index. If the array or the value is null, or the index is
+     * out of bounds, returns the default value.
      *
      * @param array        the given array
      * @param index        the specified index
@@ -399,11 +402,11 @@ public class JieArray {
      * @param <T>          the component type
      * @return the value from the given array at the specified index
      */
-    public static <T> T get(@Nullable T @Nullable [] array, int index, @Nullable T defaultValue) {
+    public static <T> T get(@Nullable T @Nullable [] array, int index, T defaultValue) {
         if (array == null || index < 0 || index >= array.length) {
             return defaultValue;
         }
-        T value = array[index];
+        @Nullable T value = array[index];
         return value == null ? defaultValue : value;
     }
 
@@ -536,17 +539,17 @@ public class JieArray {
     }
 
     /**
-     * Returns the first index of the element same with the specified element at the given array. If the element is not
-     * found, returns -1.
+     * Returns the first index of the element which can pass the specified predication (return true) at the given array.
+     * If the element is not found, returns -1.
      *
-     * @param array   the given array
-     * @param element the specified element
-     * @param <T>     the component type
-     * @return the first index of the element same with the specified element at the given array
+     * @param array the given array
+     * @param predicate the specified predication
+     * @param <T>   the component type
+     * @return the first index of the element which can pass the specified predication (return true) at the given array
      */
-    public static <T> int indexOf(T[] array, @Nullable T element) {
+    public static <T> int indexOf(@Nullable T[] array, Predicate<@Nullable T> predicate) {
         for (int i = 0; i < array.length; i++) {
-            if (Objects.equals(element, array[i])) {
+            if (predicate.test(array[i])) {
                 return i;
             }
         }
@@ -561,7 +564,7 @@ public class JieArray {
      * @param element the specified element
      * @return the first index of the element same with the specified element at the given array
      */
-    public static int indexOf(boolean[] array, boolean element) {
+    public static int indexOf(boolean[] array, Pre) {
         for (int i = 0; i < array.length; i++) {
             if (element == array[i]) {
                 return i;
