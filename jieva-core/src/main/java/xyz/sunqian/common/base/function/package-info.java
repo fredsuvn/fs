@@ -22,6 +22,11 @@
  *     <li>{@link xyz.sunqian.common.base.function.IndexedLongPredicate}</li>
  *     <li>{@link xyz.sunqian.common.base.function.IndexedDoublePredicate}</li>
  * </ul>
+ * Sub-function:
+ * <ul>
+ *     <li>{@link xyz.sunqian.common.base.function.SubFunction}</li>
+ *     <li>{@link xyz.sunqian.common.base.function.LongSubFunction}</li>
+ * </ul>
  */
 package xyz.sunqian.common.base.function;
 
