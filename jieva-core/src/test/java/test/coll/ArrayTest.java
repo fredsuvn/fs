@@ -1,7 +1,7 @@
 package test.coll;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.coll.JieArray;
+import xyz.sunqian.common.collection.JieArray;
 
 import java.util.List;
 

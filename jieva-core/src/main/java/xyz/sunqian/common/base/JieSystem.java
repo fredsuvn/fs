@@ -1,7 +1,7 @@
 package xyz.sunqian.common.base;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.coll.JieColl;
+import xyz.sunqian.common.collection.JieCollection;
 
 import java.util.Map;
 
@@ -441,7 +441,7 @@ public class JieSystem {
      * @return all system properties
      */
     public static Map<String, String> allProperties() {
-        return JieColl.toStringMap(System.getProperties());
+        return JieCollection.toStringMap(System.getProperties());
     }
 
     /**

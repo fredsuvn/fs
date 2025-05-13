@@ -1,6 +1,5 @@
 package xyz.sunqian.annotations;
 
-import javax.annotation.Nonnull;
 import javax.annotation.meta.TypeQualifierNickname;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -14,7 +13,7 @@ import java.lang.annotation.Target;
  * @author sunqian
  */
 @Documented
-@Nonnull
+@javax.annotation.Nonnull
 @Retention(RetentionPolicy.RUNTIME)
 @TypeQualifierNickname
 @Target({
@@ -24,5 +23,5 @@ import java.lang.annotation.Target;
     ElementType.LOCAL_VARIABLE,
     ElementType.TYPE_USE,
 })
-public @interface NonNull {
+public @interface Nonnull {
 }

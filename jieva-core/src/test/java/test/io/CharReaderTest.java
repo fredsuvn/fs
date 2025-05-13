@@ -4,7 +4,7 @@ import org.testng.annotations.Test;
 import test.Constants;
 import xyz.sunqian.common.base.chars.CharsBuilder;
 import xyz.sunqian.common.base.chars.JieChars;
-import xyz.sunqian.common.coll.JieArray;
+import xyz.sunqian.common.collection.JieArray;
 import xyz.sunqian.common.io.CharReader;
 import xyz.sunqian.common.io.CharSegment;
 import xyz.sunqian.common.io.IORuntimeException;

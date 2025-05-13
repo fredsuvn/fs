@@ -3,7 +3,7 @@ package xyz.sunqian.common.net.http;
 import lombok.EqualsAndHashCode;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.coll.JieColl;
+import xyz.sunqian.common.collection.JieCollection;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -97,7 +97,7 @@ public class GekHttpHeaders {
     @Nullable
     public String getHeaderFirst(String key) {
         List<String> list = headerMap.get(key);
-        return JieColl.isEmpty(list) ? null : list.get(0);
+        return JieCollection.isEmpty(list) ? null : list.get(0);
     }
 
     /**

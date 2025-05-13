@@ -1,8 +1,8 @@
 package xyz.sunqian.common.reflect;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.coll.JieArray;
-import xyz.sunqian.common.coll.JieColl;
+import xyz.sunqian.common.collection.JieArray;
+import xyz.sunqian.common.collection.JieCollection;
 
 import java.lang.reflect.*;
 import java.util.Arrays;
@@ -37,7 +37,7 @@ public class JieType {
      * @return a {@link ParameterizedType}
      */
     public static ParameterizedType parameterized(Class<?> rawType, Iterable<Type> actualTypeArgs) {
-        return parameterized(rawType, JieColl.toArray(actualTypeArgs, Type.class));
+        return parameterized(rawType, JieCollection.toArray(actualTypeArgs, Type.class));
     }
 
     /**
@@ -65,7 +65,7 @@ public class JieType {
      */
     public static ParameterizedType parameterized(
         Class<?> rawType, Iterable<Type> actualTypeArgs, @Nullable Type ownerType) {
-        return parameterized(rawType, JieColl.toArray(actualTypeArgs, Type.class), ownerType);
+        return parameterized(rawType, JieCollection.toArray(actualTypeArgs, Type.class), ownerType);
     }
 
     /**

@@ -6,8 +6,8 @@ import xyz.sunqian.annotations.OutParam;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.cache.SimpleCache;
-import xyz.sunqian.common.coll.JieArray;
-import xyz.sunqian.common.coll.JieColl;
+import xyz.sunqian.common.collection.JieArray;
+import xyz.sunqian.common.collection.JieCollection;
 
 import java.lang.reflect.*;
 import java.util.*;
@@ -601,7 +601,7 @@ public class JieReflect {
         Set<Type> stack = new HashSet<>();
         return Arrays.stream(typeParameters)
             .map(it -> {
-                Type nestedValue = JieColl.getRecursive(typeArguments, it, stack);
+                Type nestedValue = JieCollection.getRecursive(typeArguments, it, stack);
                 stack.clear();
                 return nestedValue == null ? it : nestedValue;
             }).collect(Collectors.toList());
@@ -627,7 +627,7 @@ public class JieReflect {
      *     K -&gt; Integer
      *     V -&gt; Long
      * </pre>
-     * It is recommended using {@link JieColl#getRecursive(Map, Object, Set)} to get actual type of type variable in the
+     * It is recommended using {@link JieCollection#getRecursive(Map, Object, Set)} to get actual type of type variable in the
      * result.
      *
      * @param type given type

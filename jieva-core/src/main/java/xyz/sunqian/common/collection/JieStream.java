@@ -1,6 +1,4 @@
-package xyz.sunqian.common.coll;
-
-import xyz.sunqian.annotations.Nullable;
+package xyz.sunqian.common.collection;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -15,11 +13,11 @@ import java.util.stream.StreamSupport;
 public class JieStream {
 
     /**
-     * Returns a {@link Stream} from the given elements, not parallel.
+     * Returns a {@link Stream} from the given elements.
      *
      * @param elements the given elements
      * @param <T>      the component type
-     * @return a {@link Stream} from the given elements, not parallel
+     * @return a {@link Stream} from the given elements
      */
     public static <T> Stream<T> stream(T[] elements) {
         if (JieArray.isEmpty(elements)) {
@@ -29,34 +27,14 @@ public class JieStream {
     }
 
     /**
-     * Returns a {@link Stream} from the given elements, not parallel.
+     * Returns a {@link Stream} from the given elements.
      *
      * @param elements the given elements
      * @param <T>      the component type
-     * @return a {@link Stream} from the given elements, not parallel
+     * @return a {@link Stream} from the given elements
      */
     public static <T> Stream<T> stream(Iterable<T> elements) {
-
-
-
-        @Nullable String @Nullable [] arr = new String[]{"a", "b", "c", null};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        stream(arr);
-
-        if (JieColl.isEmpty(elements)) {
+        if (JieCollection.isEmpty(elements)) {
             return Stream.empty();
         }
         if (elements instanceof Collection) {

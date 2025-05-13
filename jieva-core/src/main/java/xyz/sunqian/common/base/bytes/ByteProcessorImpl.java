@@ -4,7 +4,7 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.JieCoding;
 import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.base.exception.ProcessingException;
-import xyz.sunqian.common.coll.JieColl;
+import xyz.sunqian.common.collection.JieCollection;
 import xyz.sunqian.common.io.ByteReader;
 import xyz.sunqian.common.io.ByteSegment;
 import xyz.sunqian.common.io.IORuntimeException;
@@ -149,7 +149,7 @@ final class ByteProcessorImpl implements ByteProcessor {
 
     @Override
     public InputStream toInputStream() {
-        if (JieColl.isEmpty(encoders)) {
+        if (JieCollection.isEmpty(encoders)) {
             return toInputStream(getSource());
         }
         return new ProcessorInputStream();
@@ -173,7 +173,7 @@ final class ByteProcessorImpl implements ByteProcessor {
             return 0;
         }
         try {
-            if (JieColl.isEmpty(encoders)) {
+            if (JieCollection.isEmpty(encoders)) {
                 Object src = getSource();
                 Object dst = getDest();
                 if (src instanceof byte[]) {
@@ -282,7 +282,7 @@ final class ByteProcessorImpl implements ByteProcessor {
     }
 
     private ByteEncoder toOneEncoder(@Nullable List<ByteEncoder> encoders) {
-        if (JieColl.isEmpty(encoders)) {
+        if (JieCollection.isEmpty(encoders)) {
             return ByteEncoder.emptyEncoder();
         }
         if (encoders.size() == 1) {

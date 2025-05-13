@@ -1,6 +1,5 @@
 package xyz.sunqian.annotations;
 
-import javax.annotation.Nonnull;
 import javax.annotation.meta.TypeQualifierDefault;
 import javax.annotation.meta.TypeQualifierNickname;
 import javax.annotation.meta.When;
@@ -14,13 +13,13 @@ import java.lang.annotation.Target;
  * Declares all methods, fields, parameters, local variables, type parameters, and type uses under the scope of the
  * annotated element must be non-null.
  * <p>
- * It is equivalent to use {@link NonNull} on all those points.
+ * It is equivalent to use {@link Nonnull} on all those points.
  *
  * @author sunqian
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Nonnull(when = When.ALWAYS)
+@javax.annotation.Nonnull(when = When.ALWAYS)
 @TypeQualifierNickname
 @Target({
     ElementType.TYPE,

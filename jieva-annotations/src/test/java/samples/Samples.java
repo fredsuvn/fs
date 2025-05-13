@@ -2,7 +2,7 @@ package samples;
 
 import xyz.sunqian.annotations.DefaultNonNull;
 import xyz.sunqian.annotations.DefaultNullable;
-import xyz.sunqian.annotations.NonNull;
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 
 public class Samples {
@@ -11,7 +11,7 @@ public class Samples {
     private @Nullable String nullable;
 
     // Non-null field
-    private final @NonNull String nonNull = "Nonnull";
+    private final @Nonnull String nonNull = "Nonnull";
 
     // All fields are nullable by default
     @DefaultNullable

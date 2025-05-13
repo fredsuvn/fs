@@ -2,7 +2,7 @@ package test.pkg1;
 
 import org.testng.annotations.Test;
 
-public class NonNullTest {
+public class NonnullTest {
 
     private String nonNullStr;
 

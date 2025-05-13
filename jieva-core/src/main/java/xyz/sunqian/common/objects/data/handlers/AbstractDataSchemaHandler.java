@@ -2,8 +2,8 @@ package xyz.sunqian.common.objects.data.handlers;
 
 import lombok.Data;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.coll.JieArray;
-import xyz.sunqian.common.coll.JieColl;
+import xyz.sunqian.common.collection.JieArray;
+import xyz.sunqian.common.collection.JieCollection;
 import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.objects.data.DataObjectException;
 import xyz.sunqian.common.objects.data.DataPropertyBase;
@@ -44,7 +44,7 @@ public abstract class AbstractDataSchemaHandler implements DataSchemaParser.Hand
             return type;
         }
         stack.clear();
-        Type result = JieColl.getRecursive(typeParameterMapping, type, stack);
+        Type result = JieCollection.getRecursive(typeParameterMapping, type, stack);
         if (result != null) {
             return result;
         }

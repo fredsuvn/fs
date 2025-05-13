@@ -1,7 +1,7 @@
 package xyz.sunqian.common.base;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.coll.JieColl;
+import xyz.sunqian.common.collection.JieCollection;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -96,7 +96,7 @@ final class CaseFormatterImpls {
 
         @Override
         public String format(List<? extends CharSequence> wordList) {
-            if (JieColl.isEmpty(wordList)) {
+            if (JieCollection.isEmpty(wordList)) {
                 return "";
             }
             int length = 0;

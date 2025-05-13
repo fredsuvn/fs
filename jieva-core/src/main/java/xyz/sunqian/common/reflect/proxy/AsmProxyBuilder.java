@@ -4,7 +4,7 @@ import org.objectweb.asm.*;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieString;
-import xyz.sunqian.common.coll.JieColl;
+import xyz.sunqian.common.collection.JieCollection;
 import xyz.sunqian.common.reflect.JieJvm;
 import xyz.sunqian.common.reflect.JieReflect;
 
@@ -98,7 +98,7 @@ public class AsmProxyBuilder implements ProxyBuilder, Opcodes {
     }
 
     private ProxyClass build0() {
-        if (superClass == null && JieColl.isEmpty(interfaces)) {
+        if (superClass == null && JieCollection.isEmpty(interfaces)) {
             throw new ProxyException("No super class or interface to proxy.");
         }
         if (handler == null) {

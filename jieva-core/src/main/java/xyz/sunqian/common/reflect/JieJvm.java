@@ -2,7 +2,7 @@ package xyz.sunqian.common.reflect;
 
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieString;
-import xyz.sunqian.common.coll.JieArray;
+import xyz.sunqian.common.collection.JieArray;
 
 import java.lang.reflect.*;
 import java.nio.ByteBuffer;

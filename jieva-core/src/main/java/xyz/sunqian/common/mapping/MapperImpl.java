@@ -4,7 +4,7 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Flag;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.objects.data.DataProperty;
-import xyz.sunqian.common.coll.JieColl;
+import xyz.sunqian.common.collection.JieCollection;
 import xyz.sunqian.common.mapping.handlers.*;
 
 import java.lang.reflect.Type;
@@ -26,7 +26,7 @@ final class MapperImpl implements Mapper, Mapper.Handler {
     private final MappingOptions defaultOptions;
 
     MapperImpl(Iterable<Mapper.Handler> handlers, MappingOptions defaultOptions) {
-        this.handlers = JieColl.toList(handlers);
+        this.handlers = JieCollection.toList(handlers);
         this.defaultOptions = defaultOptions;
     }
 

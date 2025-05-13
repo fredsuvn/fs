@@ -3,7 +3,7 @@ package xyz.sunqian.common.crypto;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.bytes.ByteEncoder;
 import xyz.sunqian.common.base.bytes.JieBytes;
-import xyz.sunqian.common.coll.JieArray;
+import xyz.sunqian.common.collection.JieArray;
 import xyz.sunqian.common.io.JieBuffer;
 
 import javax.crypto.Cipher;

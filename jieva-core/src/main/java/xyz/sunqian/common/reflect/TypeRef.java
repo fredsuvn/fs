@@ -1,6 +1,6 @@
 package xyz.sunqian.common.reflect;
 
-import xyz.sunqian.common.coll.JieColl;
+import xyz.sunqian.common.collection.JieCollection;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -41,7 +41,7 @@ public abstract class TypeRef<T> {
     }
 
     private Type get0(List<Type> typeArgs) {
-        if (JieColl.isEmpty(typeArgs)) {
+        if (JieCollection.isEmpty(typeArgs)) {
             throw new ReflectionException("Failed to get actual type of current TypeRef: " + getClass() + ".");
         }
         return typeArgs.get(0);

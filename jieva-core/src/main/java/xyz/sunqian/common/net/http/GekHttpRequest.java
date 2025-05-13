@@ -1,7 +1,7 @@
 package xyz.sunqian.common.net.http;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.coll.JieColl;
+import xyz.sunqian.common.collection.JieCollection;
 
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -109,7 +109,7 @@ public interface GekHttpRequest {
          */
         public Builder url(String url, Map<String, String> queryString) {
             try {
-                if (JieColl.isEmpty(queryString)) {
+                if (JieCollection.isEmpty(queryString)) {
                     this.url = new URL(url);
                 } else {
                     String query = queryString.entrySet().stream().map(it ->

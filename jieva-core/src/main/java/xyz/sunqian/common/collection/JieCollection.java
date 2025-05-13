@@ -1,4 +1,4 @@
-package xyz.sunqian.common.coll;
+package xyz.sunqian.common.collection;
 
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nullable;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
  *
  * @author sunqian
  */
-public class JieColl {
+public class JieCollection {
 
     /**
      * Returns an immutable collection backed by the given array. The returned collection is immutable but the backing
@@ -39,17 +39,17 @@ public class JieColl {
      */
     @Immutable
     @SafeVarargs
-    public static <T> Collection<@Nullable T> collection(@Nullable T @RetainedParam ... array) {
-        return CollBack.immutableColl(array);
+    public static <T> Collection<T> collection(T @RetainedParam ... array) {
+        return CollectionBack.immutableColl(array);
     }
 
     /**
-     * Returns whether given iterable is null or empty.
+     * Returns whether the given iterable is null or empty.
      *
-     * @param iterable given iterable
-     * @return whether given iterable is null or empty
+     * @param iterable the given iterable
+     * @return whether the given iterable is null or empty
      */
-    public static boolean isEmpty(@Nullable Iterable<?> iterable) {
+    public static boolean isEmpty(Iterable<?> iterable) {
         if (iterable == null) {
             return true;
         }
@@ -60,22 +60,22 @@ public class JieColl {
     }
 
     /**
-     * Returns whether given iterable is not null and empty.
+     * Returns whether the given iterable is not null and empty.
      *
-     * @param iterable given iterable
-     * @return whether given iterable is not null and empty
+     * @param iterable the given iterable
+     * @return whether the given iterable is not null and empty
      */
-    public static boolean isNotEmpty(@Nullable Iterable<?> iterable) {
+    public static boolean isNotEmpty(Iterable<?> iterable) {
         return !isEmpty(iterable);
     }
 
     /**
-     * Returns whether given map is null or empty.
+     * Returns whether the given map is null or empty.
      *
-     * @param map given map
-     * @return whether given map is null or empty
+     * @param map the given map
+     * @return whether the given map is null or empty
      */
-    public static boolean isEmpty(@Nullable Map<?, ?> map) {
+    public static boolean isEmpty(Map<?, ?> map) {
         if (map == null) {
             return true;
         }
@@ -83,57 +83,26 @@ public class JieColl {
     }
 
     /**
-     * Returns whether given map is not null and empty.
+     * Returns whether the given map is not null and empty.
      *
-     * @param map given map
-     * @return whether given map is not null and empty
+     * @param map the given map
+     * @return whether the given map is not null and empty
      */
-    public static boolean isNotEmpty(@Nullable Map<?, ?> map) {
+    public static boolean isNotEmpty( Map<?, ?> map) {
         return !isEmpty(map);
-    }
-
-    /**
-     * Returns give elements as an immutable list.
-     * <p>
-     * Note that although the returned list is immutable, the list directly references the given element array, any
-     * changing for the content of the array will correspondingly change the content of the list.
-     *
-     * @param elements given elements
-     * @param <T>      type of element
-     * @return immutable list
-     */
-    @Immutable
-    public static <T> List<T> asImmutableList(T[] elements) {
-        return JieArray.isEmpty(elements) ? Collections.emptyList() : Impls.immutableList(elements);
-    }
-
-    /**
-     * Collects given elements into an {@link Object} array. If given elements is empty, return an empty array.
-     *
-     * @param elements given elements
-     * @return an {@link Object} array
-     */
-    public static Object[] toObjectArray(@Nullable Iterable<?> elements) {
-        if (isEmpty(elements)) {
-            return new Object[0];
-        }
-        if (elements instanceof Collection) {
-            return ((Collection<?>) elements).toArray();
-        }
-        return stream(elements).toArray();
     }
 
     /**
      * Collects given elements into an array.
      * <p>
      * This method will try to create a new array as result. The element type of the new array will be determined by the
-     * type of the first non-null value of given elements. If given elements is null or all given elements are null, an
+     * type of the first nonnull value of given elements. If given elements is null or all given elements are null, an
      * {@link UnsupportedOperationException} will be thrown.
      *
      * @param elements given elements
      * @return a new array as result
      */
-    public static <T> T[] toArray(Iterable<T> elements) {
+    public static Object[] toArray(Iterable<?> elements) {
         if (isEmpty(elements)) {
             throw new UnsupportedOperationException("Given elements is empty.");
         }
@@ -148,7 +117,7 @@ public class JieColl {
      * Collects given elements into an array.
      * <p>
      * This method will try to create a new array as result. The element type of the new array will be determined by the
-     * type of the first non-null value of given elements. If given elements is null or all given elements are null, an
+     * type of the first nonnull value of given elements. If given elements is null or all given elements are null, an
      * {@link UnsupportedOperationException} will be thrown.
      *
      * @param elements given elements

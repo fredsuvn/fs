@@ -1,4 +1,4 @@
-package xyz.sunqian.common.coll;
+package xyz.sunqian.common.collection;
 
 import java.io.Serializable;
 import java.util.AbstractCollection;
@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-final class CollBack {
+final class CollectionBack {
 
     static <T> Collection<T> immutableColl(T[] array) {
         return new ImmutableColl<>(array);

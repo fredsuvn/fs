@@ -1,7 +1,8 @@
-package xyz.sunqian.common.coll;
+package xyz.sunqian.common.collection;
 
 import java.io.Serializable;
 import java.util.AbstractList;
+import java.util.Collections;
 import java.util.List;
 import java.util.RandomAccess;
 
@@ -40,39 +41,39 @@ final class ListBack {
     }
 
     static <T> List<T> immutableList(T[] array) {
-        return new ImmutableList<>(array);
+        return JieArray.isEmpty(array) ? Collections.emptyList() : new ImmutableList<>(array);
     }
 
     static List<Boolean> immutableList(boolean[] array) {
-        return new BooleanImmutableList(array);
+        return JieArray.isEmpty(array) ? Collections.emptyList() : new BooleanImmutableList(array);
     }
 
     static List<Byte> immutableList(byte[] array) {
-        return new ByteImmutableList(array);
+        return JieArray.isEmpty(array) ? Collections.emptyList() : new ByteImmutableList(array);
     }
 
     static List<Short> immutableList(short[] array) {
-        return new ShortImmutableList(array);
+        return JieArray.isEmpty(array) ? Collections.emptyList() : new ShortImmutableList(array);
     }
 
     static List<Character> immutableList(char[] array) {
-        return new CharImmutableList(array);
+        return JieArray.isEmpty(array) ? Collections.emptyList() : new CharImmutableList(array);
     }
 
     static List<Integer> immutableList(int[] array) {
-        return new IntImmutableList(array);
+        return JieArray.isEmpty(array) ? Collections.emptyList() : new IntImmutableList(array);
     }
 
     static List<Long> immutableList(long[] array) {
-        return new LongImmutableList(array);
+        return JieArray.isEmpty(array) ? Collections.emptyList() : new LongImmutableList(array);
     }
 
     static List<Float> immutableList(float[] array) {
-        return new FloatImmutableList(array);
+        return JieArray.isEmpty(array) ? Collections.emptyList() : new FloatImmutableList(array);
     }
 
     static List<Double> immutableList(double[] array) {
-        return new DoubleImmutableList(array);
+        return JieArray.isEmpty(array) ? Collections.emptyList() : new DoubleImmutableList(array);
     }
 
     private static final class BooleanArrayList

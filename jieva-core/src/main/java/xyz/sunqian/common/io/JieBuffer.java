@@ -3,7 +3,7 @@ package xyz.sunqian.common.io;
 import xyz.sunqian.common.base.bytes.ByteProcessor;
 import xyz.sunqian.common.base.chars.CharProcessor;
 import xyz.sunqian.common.base.chars.JieChars;
-import xyz.sunqian.common.coll.JieArray;
+import xyz.sunqian.common.collection.JieArray;
 
 import java.io.OutputStream;
 import java.nio.Buffer;

@@ -95,7 +95,7 @@ final class InvocableBack {
         @Override
         public @Nullable Object invoke(@Nullable Object inst, @Nullable Object... args) {
             if (inst == null) {
-                throw new InvocationException("The instance must be non-null.");
+                throw new InvocationException("The instance must be nonnull.");
             }
             try {
                 return JieHandle.invokeInstance(methodHandle, inst, args);

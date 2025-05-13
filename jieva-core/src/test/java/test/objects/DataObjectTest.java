@@ -4,10 +4,10 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.testng.annotations.Test;
-import xyz.sunqian.annotations.NonNull;
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.coll.JieColl;
+import xyz.sunqian.common.collection.JieCollection;
 import xyz.sunqian.common.objects.data.*;
 import xyz.sunqian.common.reflect.JieReflect;
 import xyz.sunqian.common.reflect.JieType;
@@ -40,7 +40,7 @@ public class DataObjectTest {
         assertFalse(b1.equals(DataSchema.get(new TypeRef<Inner<Long, Long>>() {
         }.getType())));
         assertEquals(
-            JieColl.putAll(new HashMap<>(), b1.getProperties(), k -> k, DataPropertyBase::getType),
+            JieCollection.putAll(new HashMap<>(), b1.getProperties(), k -> k, DataPropertyBase::getType),
             Jie.hashMap("ffFf1", String.class
                 , "ffFf2", Short.class
                 , "ffFf3", Long.class
@@ -68,7 +68,7 @@ public class DataObjectTest {
 
         DataSchema b3 = DataSchema.get(Inner.class);
         assertEquals(
-            JieColl.putAll(new HashMap<>(), b3.getProperties(), k -> k, DataPropertyBase::getType),
+            JieCollection.putAll(new HashMap<>(), b3.getProperties(), k -> k, DataPropertyBase::getType),
             Jie.hashMap("ffFf1", String.class
                 , "ffFf2", Inner.class.getTypeParameters()[0]
                 , "ffFf3", Inner.class.getTypeParameters()[1]
@@ -145,7 +145,7 @@ public class DataObjectTest {
         assertEquals(p2.getField(), Inner.class.getDeclaredField("ffFf2"));
         assertEquals(c1.getField(), InnerSuper.class.getDeclaredField("c1"));
         assertFalse(p1.equals(c1));
-        assertNull(p1.getAnnotation(NonNull.class));
+        assertNull(p1.getAnnotation(Nonnull.class));
 
         Inner<Short, Long> inner = new Inner<>();
         inner.setFfFf2((short) 22);

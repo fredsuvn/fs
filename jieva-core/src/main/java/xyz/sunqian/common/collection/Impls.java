@@ -1,4 +1,4 @@
-package xyz.sunqian.common.coll;
+package xyz.sunqian.common.collection;
 
 import xyz.sunqian.common.base.Jie;
 

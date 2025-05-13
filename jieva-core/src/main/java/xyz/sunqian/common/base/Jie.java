@@ -2,8 +2,8 @@ package xyz.sunqian.common.base;
 
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.coll.JieArray;
-import xyz.sunqian.common.coll.JieColl;
+import xyz.sunqian.common.collection.JieArray;
+import xyz.sunqian.common.collection.JieCollection;
 import xyz.sunqian.common.mapping.BeanMapper;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingOptions;
@@ -635,12 +635,12 @@ public class Jie {
      * @param elements given elements
      * @param <T>      type of element
      * @return immutable list
-     * @see JieColl#asImmutableList(Object[])
+     * @see JieCollection#asImmutableList(Object[])
      */
     @Immutable
     @SafeVarargs
     public static <T> List<T> list(T... elements) {
-        return JieColl.asImmutableList(elements);
+        return JieCollection.asImmutableList(elements);
     }
 
     /**
@@ -649,11 +649,11 @@ public class Jie {
      * @param elements given elements
      * @param <T>      type of element
      * @return a new {@link ArrayList} and add all given elements
-     * @see JieColl#addAll(Collection, Object[])
+     * @see JieCollection#addAll(Collection, Object[])
      */
     @SafeVarargs
     public static <T> ArrayList<T> arrayList(T... elements) {
-        return JieColl.addAll(new ArrayList<>(elements.length), elements);
+        return JieCollection.addAll(new ArrayList<>(elements.length), elements);
     }
 
     /**
@@ -662,11 +662,11 @@ public class Jie {
      * @param elements given elements
      * @param <T>      type of element
      * @return a new {@link LinkedList} and add all given elements
-     * @see JieColl#addAll(Collection, Object[])
+     * @see JieCollection#addAll(Collection, Object[])
      */
     @SafeVarargs
     public static <T> LinkedList<T> linkedList(T... elements) {
-        return JieColl.addAll(new LinkedList<>(), elements);
+        return JieCollection.addAll(new LinkedList<>(), elements);
     }
 
     /**
@@ -675,12 +675,12 @@ public class Jie {
      * @param elements given elements
      * @param <T>      type of element
      * @return an immutable {@link Set} which is added all given elements
-     * @see JieColl#toSet(Object[])
+     * @see JieCollection#toSet(Object[])
      */
     @Immutable
     @SafeVarargs
     public static <T> Set<T> set(T... elements) {
-        return JieColl.toSet(elements);
+        return JieCollection.toSet(elements);
     }
 
     /**
@@ -689,11 +689,11 @@ public class Jie {
      * @param elements given elements
      * @param <T>      type of element
      * @return a new {@link HashSet} and add all given elements
-     * @see JieColl#addAll(Collection, Object[])
+     * @see JieCollection#addAll(Collection, Object[])
      */
     @SafeVarargs
     public static <T> HashSet<T> hashSet(T... elements) {
-        return JieColl.addAll(new HashSet<>(elements.length), elements);
+        return JieCollection.addAll(new HashSet<>(elements.length), elements);
     }
 
     /**
@@ -702,11 +702,11 @@ public class Jie {
      * @param elements given elements
      * @param <T>      type of element
      * @return a new {@link LinkedHashSet} and add all given elements
-     * @see JieColl#addAll(Collection, Object[])
+     * @see JieCollection#addAll(Collection, Object[])
      */
     @SafeVarargs
     public static <T> LinkedHashSet<T> linkedHashSet(T... elements) {
-        return JieColl.addAll(new LinkedHashSet<>(elements.length), elements);
+        return JieCollection.addAll(new LinkedHashSet<>(elements.length), elements);
     }
 
 
@@ -721,12 +721,12 @@ public class Jie {
      * @param <V>      type of values
      * @param <T>      type of element
      * @return an immutable {@link Map} which is added all given elements
-     * @see JieColl#toMap(Object...)
+     * @see JieCollection#toMap(Object...)
      */
     @Immutable
     @SafeVarargs
     public static <K, V, T> Map<K, V> map(T... elements) {
-        return JieColl.toMap(elements);
+        return JieCollection.toMap(elements);
     }
 
     /**
@@ -740,11 +740,11 @@ public class Jie {
      * @param <V>      type of values
      * @param <T>      type of element
      * @return a new {@link HashMap} and add all given elements
-     * @see JieColl#putAll(Map, Object[])
+     * @see JieCollection#putAll(Map, Object[])
      */
     @SafeVarargs
     public static <K, V, T> HashMap<K, V> hashMap(T... elements) {
-        return JieColl.putAll(new HashMap<>(), elements);
+        return JieCollection.putAll(new HashMap<>(), elements);
     }
 
     /**
@@ -758,10 +758,10 @@ public class Jie {
      * @param <V>      type of values
      * @param <T>      type of element
      * @return a new {@link LinkedHashMap} and add all given elements
-     * @see JieColl#putAll(Map, Object[])
+     * @see JieCollection#putAll(Map, Object[])
      */
     @SafeVarargs
     public static <K, V, T> LinkedHashMap<K, V> linkedHashMap(T... elements) {
-        return JieColl.putAll(new LinkedHashMap<>(), elements);
+        return JieCollection.putAll(new LinkedHashMap<>(), elements);
     }
 }

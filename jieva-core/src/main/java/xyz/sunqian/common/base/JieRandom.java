@@ -2,8 +2,8 @@ package xyz.sunqian.common.base;
 
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.coll.JieArray;
-import xyz.sunqian.common.coll.JieColl;
+import xyz.sunqian.common.collection.JieArray;
+import xyz.sunqian.common.collection.JieCollection;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -507,7 +507,7 @@ public class JieRandom {
      * @return a {@link Supplier} which products a random object for each {@link Supplier#get()}
      */
     public static <T> Supplier<T> supplier(Iterable<Score<T>> scores) {
-        if (JieColl.isEmpty(scores)) {
+        if (JieCollection.isEmpty(scores)) {
             throw new IllegalArgumentException("Empty scores!");
         }
         return new RandomSupplier<>(JieRandom::random, scores);
@@ -560,7 +560,7 @@ public class JieRandom {
      * @return a {@link Supplier} which products a random object for each {@link Supplier#get()}
      */
     public static <T> Supplier<T> supplier(Random random, Iterable<Score<T>> scores) {
-        if (JieColl.isEmpty(scores)) {
+        if (JieCollection.isEmpty(scores)) {
             throw new IllegalArgumentException("Empty scores!");
         }
         return new RandomSupplier<>(() -> random, scores);
@@ -636,7 +636,7 @@ public class JieRandom {
                 nodeList.add(new Node<>(totalScore, totalScore + score.score, score.supplier));
                 totalScore += score.score;
             }
-            this.nodes = JieColl.toArray(nodeList);
+            this.nodes = JieCollection.toArray(nodeList);
             this.totalScore = totalScore;
         }
 

@@ -7,7 +7,7 @@ import java.util.Collections;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
-import static xyz.sunqian.common.coll.JieArray.asList;
+import static xyz.sunqian.common.collection.JieArray.asList;
 
 public class CodingTest {
 
