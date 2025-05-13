@@ -2,9 +2,14 @@ package xyz.sunqian.common.base;
 
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.base.function.SubFunction;
 
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.StringJoiner;
 import java.util.function.Supplier;
 
 /**

@@ -1,5 +1,5 @@
 /**
- * This package provides extended function interfaces. And it doesn't have the default nullable/nonnull configuration.
+ * This package provides functional interfaces.
  * <p>
  * Indexed functions:
  * <ul>
