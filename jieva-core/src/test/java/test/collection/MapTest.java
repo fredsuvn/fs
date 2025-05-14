@@ -82,6 +82,7 @@ public class MapTest {
             Object::toString
         );
         assertEquals(strMap2, JieMap.toMap(Arrays.asList("1", "2", "3", "6")));
+        expectThrows(UnsupportedOperationException.class, () -> strMap2.put("", ""));
     }
 
     @Test
