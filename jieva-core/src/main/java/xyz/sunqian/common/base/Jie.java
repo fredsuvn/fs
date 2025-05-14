@@ -1,9 +1,13 @@
 package xyz.sunqian.common.base;
 
 import xyz.sunqian.annotations.Immutable;
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.collection.JieArray;
-import xyz.sunqian.common.collection.JieCollection;
+import xyz.sunqian.common.collection.JieList;
+import xyz.sunqian.common.collection.JieMap;
+import xyz.sunqian.common.collection.JieSet;
 import xyz.sunqian.common.mapping.BeanMapper;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingOptions;
@@ -13,7 +17,20 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.time.Duration;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.RandomAccess;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
@@ -614,154 +631,148 @@ public class Jie {
     }
 
     /**
-     * Returns given elements directly. This method is used to cast variable arguments to array.
+     * Directly returns the given variable arguments as an array.
      *
-     * @param elements given elements
-     * @param <T>      component type
-     * @return given elements itself as an array
-     * @see JieArray#array(Object[])
+     * @param elements the given variable arguments
+     * @param <T>      the component type
+     * @return the given variable arguments as an array
      */
     @SafeVarargs
-    public static <T> T[] array(T... elements) {
+    public static <T> T @Nonnull [] array(T @Nonnull @RetainedParam ... elements) {
         return JieArray.array(elements);
     }
 
     /**
-     * Returns give elements as an immutable list.
+     * Returns an immutable list backed by the given array. The returned list is immutable but the backing array is not,
+     * changes to the backing array "write through" to the returned list. The returned list is serializable and
+     * implements {@link RandomAccess}.
+     *
+     * @param array the given array
+     * @param <T>   the component type
+     * @return an immutable list backed by the given array
+     */
+    @SafeVarargs
+    public static <T> @Nonnull @Immutable List<T> list(T @Nonnull @RetainedParam ... array) {
+        return JieList.list(array);
+    }
+
+    /**
+     * Returns a new {@link ArrayList} initialing with the given array.
+     *
+     * @param array the given array
+     * @param <T>   the component type
+     * @return a new {@link ArrayList} initialing with the given array
+     */
+    @SafeVarargs
+    public static <T> @Nonnull ArrayList<T> arrayList(T @Nonnull ... array) {
+        return JieList.arrayList(array);
+    }
+
+    /**
+     * Returns a new {@link LinkedList} initialing with the given array.
+     *
+     * @param array the given array
+     * @param <T>   the component type
+     * @return a new {@link LinkedList} initialing with the given array
+     */
+    @SafeVarargs
+    public static <T> @Nonnull LinkedList<T> linkedList(T @Nonnull ... array) {
+        return JieList.linkedList(array);
+    }
+
+    /**
+     * Returns a new immutable set of which content is added from the given array. The content of the set is added in
+     * array order, and the duplicate elements will be ignored. The behavior of this method is equivalent to:
+     * <pre>{@code
+     * return Collections.unmodifiableSet(linkedHashSet(array));
+     * }</pre>
+     *
+     * @param array the given array
+     * @param <T>   the component type
+     * @return a new immutable set of which content is added from the given array
+     */
+    @SafeVarargs
+    public static <T> @Nonnull @Immutable Set<T> set(T @Nonnull ... array) {
+        return JieSet.set(array);
+    }
+
+    /**
+     * Returns a new {@link HashSet} initialing with the given array.
+     *
+     * @param array the given array
+     * @param <T>   the component type
+     * @return a new {@link HashSet} initialing with the given array
+     */
+    @SafeVarargs
+    public static <T> @Nonnull HashSet<T> hashSet(T @Nonnull ... array) {
+        return JieSet.hashSet(array);
+    }
+
+    /**
+     * Returns a new {@link LinkedHashSet} initialing with the given array.
+     *
+     * @param array the given array
+     * @param <T>   the component type
+     * @return a new {@link LinkedHashSet} initialing with the given array
+     */
+    @SafeVarargs
+    public static <T> @Nonnull LinkedHashSet<T> linkedHashSet(T @Nonnull ... array) {
+        return JieSet.linkedHashSet(array);
+    }
+
+    /**
+     * Returns a new immutable map of which content is added from the given array.
      * <p>
-     * Note that although the returned list is immutable, the list directly references the given element array, any
-     * changing for the content of the array will correspondingly change the content of the list.
-     *
-     * @param elements given elements
-     * @param <T>      type of element
-     * @return immutable list
-     * @see JieCollection#asImmutableList(Object[])
-     */
-    @Immutable
-    @SafeVarargs
-    public static <T> List<T> list(T... elements) {
-        return JieCollection.asImmutableList(elements);
-    }
-
-    /**
-     * Returns a new {@link ArrayList} and add all given elements.
-     *
-     * @param elements given elements
-     * @param <T>      type of element
-     * @return a new {@link ArrayList} and add all given elements
-     * @see JieCollection#addAll(Collection, Object[])
-     */
-    @SafeVarargs
-    public static <T> ArrayList<T> arrayList(T... elements) {
-        return JieCollection.addAll(new ArrayList<>(elements.length), elements);
-    }
-
-    /**
-     * Returns a new {@link LinkedList} and add all given elements.
-     *
-     * @param elements given elements
-     * @param <T>      type of element
-     * @return a new {@link LinkedList} and add all given elements
-     * @see JieCollection#addAll(Collection, Object[])
-     */
-    @SafeVarargs
-    public static <T> LinkedList<T> linkedList(T... elements) {
-        return JieCollection.addAll(new LinkedList<>(), elements);
-    }
-
-    /**
-     * Returns an immutable {@link Set} which is added all given elements.
-     *
-     * @param elements given elements
-     * @param <T>      type of element
-     * @return an immutable {@link Set} which is added all given elements
-     * @see JieCollection#toSet(Object[])
-     */
-    @Immutable
-    @SafeVarargs
-    public static <T> Set<T> set(T... elements) {
-        return JieCollection.toSet(elements);
-    }
-
-    /**
-     * Returns a new {@link HashSet} and add all given elements.
-     *
-     * @param elements given elements
-     * @param <T>      type of element
-     * @return a new {@link HashSet} and add all given elements
-     * @see JieCollection#addAll(Collection, Object[])
-     */
-    @SafeVarargs
-    public static <T> HashSet<T> hashSet(T... elements) {
-        return JieCollection.addAll(new HashSet<>(elements.length), elements);
-    }
-
-    /**
-     * Returns a new {@link LinkedHashSet} and add all given elements.
-     *
-     * @param elements given elements
-     * @param <T>      type of element
-     * @return a new {@link LinkedHashSet} and add all given elements
-     * @see JieCollection#addAll(Collection, Object[])
-     */
-    @SafeVarargs
-    public static <T> LinkedHashSet<T> linkedHashSet(T... elements) {
-        return JieCollection.addAll(new LinkedHashSet<>(elements.length), elements);
-    }
-
-
-    /**
-     * Returns an immutable {@link Map} which is added all given elements.
+     * Every two elements of the array form a key-value pair, that means, the {@code array[0]} and {@code array[1]} will
+     * be the first key-value pair, the {@code array[2]} and {@code array[3]} will be the second key-value pair, and so
+     * on. If the length of the array is odd and the last key cannot match the value, then the last pair will be the
+     * key-{@code null} pair to put.
      * <p>
-     * The first element is key-1, second is value-1, third is key-2, fourth is value-2 and so on. If last key-{@code n}
-     * is not followed by a value-{@code n}, it will be ignored.
+     * The behavior of this method is equivalent to:
+     * <pre>{@code
+     *  return Collections.unmodifiableMap(linkedHashMap(array));
+     *  }</pre>
      *
-     * @param elements given elements
-     * @param <K>      type of keys
-     * @param <V>      type of values
-     * @param <T>      type of element
-     * @return an immutable {@link Map} which is added all given elements
-     * @see JieCollection#toMap(Object...)
+     * @param array the given array
+     * @param <K>>  the key type
+     * @param <V>>  the value type
+     * @return a new {@link HashMap} initialing with the given array
      */
-    @Immutable
-    @SafeVarargs
-    public static <K, V, T> Map<K, V> map(T... elements) {
-        return JieCollection.toMap(elements);
+    public static <K, V> @Nonnull @Immutable Map<K, V> map(Object @Nonnull ... array) {
+        return JieMap.map(array);
     }
 
     /**
-     * Returns a new {@link HashMap} and add all given elements.
+     * Returns a new {@link HashMap} initialing with the given array.
      * <p>
-     * The first element is key-1, second is value-1, third is key-2, fourth is value-2 and so on. If last key-{@code n}
-     * is not followed by a value-{@code n}, it will be ignored.
+     * Every two elements of the array form a key-value pair, that means, the {@code array[0]} and {@code array[1]} will
+     * be the first key-value pair, the {@code array[2]} and {@code array[3]} will be the second key-value pair, and so
+     * on. If the length of the array is odd and the last key cannot match the value, then the last pair will be the
+     * key-{@code null} pair to put.
      *
-     * @param elements given elements
-     * @param <K>      type of keys
-     * @param <V>      type of values
-     * @param <T>      type of element
-     * @return a new {@link HashMap} and add all given elements
-     * @see JieCollection#putAll(Map, Object[])
+     * @param array the given array
+     * @param <K>>  the key type
+     * @param <V>>  the value type
+     * @return a new {@link HashMap} initialing with the given array
      */
-    @SafeVarargs
-    public static <K, V, T> HashMap<K, V> hashMap(T... elements) {
-        return JieCollection.putAll(new HashMap<>(), elements);
+    public static <K, V> @Nonnull HashMap<K, V> hashMap(Object @Nonnull ... array) {
+        return JieMap.hashMap(array);
     }
 
     /**
-     * Returns a new {@link LinkedHashMap} and add all given elements.
+     * Returns a new {@link LinkedHashMap} initialing with the given array
      * <p>
-     * The first element is key-1, second is value-1, third is key-2, fourth is value-2 and so on. If last key-{@code n}
-     * is not followed by a value-{@code n}, it will be ignored.
+     * Every two elements of the array form a key-value pair, that means, the {@code array[0]} and {@code array[1]} will
+     * be the first key-value pair, the {@code array[2]} and {@code array[3]} will be the second key-value pair, and so
+     * on. If the length of the array is odd and the last key cannot match the value, then the last pair will be the
+     * key-{@code null} pair to put.
      *
-     * @param elements given elements
-     * @param <K>      type of keys
-     * @param <V>      type of values
-     * @param <T>      type of element
-     * @return a new {@link LinkedHashMap} and add all given elements
-     * @see JieCollection#putAll(Map, Object[])
+     * @param array the given array
+     * @param <K>>  the key type
+     * @param <V>>  the value type
+     * @return a new {@link HashMap} initialing with the given array
      */
-    @SafeVarargs
-    public static <K, V, T> LinkedHashMap<K, V> linkedHashMap(T... elements) {
-        return JieCollection.putAll(new LinkedHashMap<>(), elements);
+    public static <K, V> @Nonnull LinkedHashMap<K, V> linkedHashMap(Object @Nonnull ... array) {
+        return JieMap.linkedHashMap(array);
     }
 }

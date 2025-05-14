@@ -2,8 +2,10 @@ package xyz.sunqian.common.objects.data.handlers;
 
 import lombok.Data;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.collection.JieArray;
 import xyz.sunqian.common.collection.JieCollection;
+import xyz.sunqian.common.collection.JieMap;
 import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.objects.data.DataObjectException;
 import xyz.sunqian.common.objects.data.DataPropertyBase;
@@ -44,7 +46,7 @@ public abstract class AbstractDataSchemaHandler implements DataSchemaParser.Hand
             return type;
         }
         stack.clear();
-        Type result = JieCollection.getRecursive(typeParameterMapping, type, stack);
+        Type result = JieMap.resolveChain(typeParameterMapping, type, stack);
         if (result != null) {
             return result;
         }
@@ -218,9 +220,9 @@ public abstract class AbstractDataSchemaHandler implements DataSchemaParser.Hand
             this.setter = setter;
             this.setterInvocable = setter == null ? null : buildInvoker(setter);
             this.field = findField(name, rawType);
-            this.getterAnnotations = getter == null ? Collections.emptyList() : JieArray.immutableList(getter.getAnnotations());
-            this.setterAnnotations = setter == null ? Collections.emptyList() : JieArray.immutableList(setter.getAnnotations());
-            this.fieldAnnotations = field == null ? Collections.emptyList() : JieArray.immutableList(field.getAnnotations());
+            this.getterAnnotations = getter == null ? Collections.emptyList() : Jie.list(getter.getAnnotations());
+            this.setterAnnotations = setter == null ? Collections.emptyList() : Jie.list(setter.getAnnotations());
+            this.fieldAnnotations = field == null ? Collections.emptyList() : Jie.list(field.getAnnotations());
             int size = getGetterAnnotations().size() + getSetterAnnotations().size() + getFieldAnnotations().size();
             Annotation[] array = new Annotation[size];
             int i = 0;
@@ -233,7 +235,7 @@ public abstract class AbstractDataSchemaHandler implements DataSchemaParser.Hand
             for (Annotation annotation : fieldAnnotations) {
                 array[i++] = annotation;
             }
-            this.allAnnotations = JieArray.immutableList(array);
+            this.allAnnotations = Jie.list(array);
         }
 
         @Override

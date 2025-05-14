@@ -7,8 +7,13 @@ import org.testng.annotations.Test;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.collection.JieCollection;
-import xyz.sunqian.common.objects.data.*;
+import xyz.sunqian.common.objects.data.BeanException;
+import xyz.sunqian.common.objects.data.DataObjectException;
+import xyz.sunqian.common.objects.data.DataProperty;
+import xyz.sunqian.common.objects.data.DataPropertyBase;
+import xyz.sunqian.common.objects.data.DataSchema;
+import xyz.sunqian.common.objects.data.DataSchemaParser;
+import xyz.sunqian.common.objects.data.JieDataObject;
 import xyz.sunqian.common.reflect.JieReflect;
 import xyz.sunqian.common.reflect.JieType;
 import xyz.sunqian.common.reflect.TypeRef;
@@ -16,10 +21,22 @@ import xyz.sunqian.common.reflect.TypeRef;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNotSame;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.expectThrows;
 
 public class DataObjectTest {
 
@@ -40,7 +57,10 @@ public class DataObjectTest {
         assertFalse(b1.equals(DataSchema.get(new TypeRef<Inner<Long, Long>>() {
         }.getType())));
         assertEquals(
-            JieCollection.putAll(new HashMap<>(), b1.getProperties(), k -> k, DataPropertyBase::getType),
+            // JieCollection.putAll(new HashMap<>(), b1.getProperties(), k -> k, DataPropertyBase::getType),
+            b1.getProperties().entrySet().stream().collect(Collectors.toMap(
+                Map.Entry::getKey, e -> e.getValue().getType())
+            ),
             Jie.hashMap("ffFf1", String.class
                 , "ffFf2", Short.class
                 , "ffFf3", Long.class
@@ -68,7 +88,10 @@ public class DataObjectTest {
 
         DataSchema b3 = DataSchema.get(Inner.class);
         assertEquals(
-            JieCollection.putAll(new HashMap<>(), b3.getProperties(), k -> k, DataPropertyBase::getType),
+            b3.getProperties().entrySet().stream().collect(Collectors.toMap(
+                Map.Entry::getKey, e -> e.getValue().getType())
+            ),
+            // JieCollection.putAll(new HashMap<>(), b3.getProperties(), k -> k, DataPropertyBase::getType),
             Jie.hashMap("ffFf1", String.class
                 , "ffFf2", Inner.class.getTypeParameters()[0]
                 , "ffFf3", Inner.class.getTypeParameters()[1]

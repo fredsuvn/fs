@@ -1,11 +1,16 @@
-package test.coll;
+package test.collection;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.common.collection.JieArray;
 
 import java.util.List;
+import java.util.Objects;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.expectThrows;
 
 public class ArrayTest {
 
@@ -140,94 +145,103 @@ public class ArrayTest {
     public void testIndexOf() {
         // Test object array
         Integer[] objArray = {1, 2, 3, 4, 5, 3, 2, 1};
-        assertEquals(JieArray.indexOf(objArray, 3), 2);
-        assertEquals(JieArray.indexOf(objArray, 6), -1);
-        assertEquals(JieArray.indexOf(objArray, 1), 0);
-        assertEquals(JieArray.lastIndexOf(objArray, 3), 5);
-        assertEquals(JieArray.lastIndexOf(objArray, 6), -1);
-        assertEquals(JieArray.lastIndexOf(objArray, 1), 7);
+        assertEquals(JieArray.indexOf(objArray, (i, t) -> Objects.equals(t, 3)), 2);
+        assertEquals(JieArray.indexOf(objArray, (i, t) -> Objects.equals(t, 6)), -1);
+        assertEquals(JieArray.indexOf(objArray, (i, t) -> Objects.equals(t, 1)), 0);
+        assertEquals(JieArray.lastIndexOf(objArray, (i, t) -> Objects.equals(t, 3)), 5);
+        assertEquals(JieArray.lastIndexOf(objArray, (i, t) -> Objects.equals(t, 6)), -1);
+        assertEquals(JieArray.lastIndexOf(objArray, (i, t) -> Objects.equals(t, 1)), 7);
 
         // Test int array
         int[] intArray = {1, 2, 3, 4, 5, 3, 2, 1};
-        assertEquals(JieArray.indexOf(intArray, 3), 2);
-        assertEquals(JieArray.indexOf(intArray, 6), -1);
-        assertEquals(JieArray.indexOf(intArray, 1), 0);
-        assertEquals(JieArray.lastIndexOf(intArray, 3), 5);
-        assertEquals(JieArray.lastIndexOf(intArray, 6), -1);
-        assertEquals(JieArray.lastIndexOf(intArray, 1), 7);
+        assertEquals(JieArray.indexOf(intArray, (i, t) -> t == 3), 2);
+        assertEquals(JieArray.indexOf(intArray, (i, t) -> t == 6), -1);
+        assertEquals(JieArray.indexOf(intArray, (i, t) -> t == 1), 0);
+        assertEquals(JieArray.lastIndexOf(intArray, (i, t) -> t == 3), 5);
+        assertEquals(JieArray.lastIndexOf(intArray, (i, t) -> t == 6), -1);
+        assertEquals(JieArray.lastIndexOf(intArray, (i, t) -> t == 1), 7);
 
         // Test long array
         long[] longArray = {10L, 20L, 30L, 40L, 50L, 30L, 20L, 10L};
-        assertEquals(JieArray.indexOf(longArray, 30L), 2);
-        assertEquals(JieArray.indexOf(longArray, 60L), -1);
-        assertEquals(JieArray.indexOf(longArray, 10L), 0);
-        assertEquals(JieArray.lastIndexOf(longArray, 30L), 5);
-        assertEquals(JieArray.lastIndexOf(longArray, 60L), -1);
-        assertEquals(JieArray.lastIndexOf(longArray, 10L), 7);
+        assertEquals(JieArray.indexOf(longArray, (i, t) -> t == 30L), 2);
+        assertEquals(JieArray.indexOf(longArray, (i, t) -> t == 60L), -1);
+        assertEquals(JieArray.indexOf(longArray, (i, t) -> t == 10L), 0);
+        assertEquals(JieArray.lastIndexOf(longArray, (i, t) -> t == 30L), 5);
+        assertEquals(JieArray.lastIndexOf(longArray, (i, t) -> t == 60L), -1);
+        assertEquals(JieArray.lastIndexOf(longArray, (i, t) -> t == 10L), 7);
 
         // Test float array
         float[] floatArray = {1.5f, 2.5f, 3.5f, 4.5f, 5.5f, 3.5f, 2.5f, 1.5f};
-        assertEquals(JieArray.indexOf(floatArray, 3.5f), 2);
-        assertEquals(JieArray.indexOf(floatArray, 6.5f), -1);
-        assertEquals(JieArray.indexOf(floatArray, 1.5f), 0);
-        assertEquals(JieArray.lastIndexOf(floatArray, 3.5f), 5);
-        assertEquals(JieArray.lastIndexOf(floatArray, 6.5f), -1);
-        assertEquals(JieArray.lastIndexOf(floatArray, 1.5f), 7);
+        assertEquals(JieArray.indexOf(floatArray, (i, t) -> t == 3.5f), 2);
+        assertEquals(JieArray.indexOf(floatArray, (i, t) -> t == 6.5f), -1);
+        assertEquals(JieArray.indexOf(floatArray, (i, t) -> t == 1.5f), 0);
+        assertEquals(JieArray.lastIndexOf(floatArray, (i, t) -> t == 3.5f), 5);
+        assertEquals(JieArray.lastIndexOf(floatArray, (i, t) -> t == 6.5f), -1);
+        assertEquals(JieArray.lastIndexOf(floatArray, (i, t) -> t == 1.5f), 7);
 
         // Test double array
         double[] doubleArray = {1.5, 2.5, 3.5, 4.5, 5.5, 3.5, 2.5, 1.5};
-        assertEquals(JieArray.indexOf(doubleArray, 3.5), 2);
-        assertEquals(JieArray.indexOf(doubleArray, 6.5), -1);
-        assertEquals(JieArray.indexOf(doubleArray, 1.5), 0);
-        assertEquals(JieArray.lastIndexOf(doubleArray, 3.5), 5);
-        assertEquals(JieArray.lastIndexOf(doubleArray, 6.5), -1);
-        assertEquals(JieArray.lastIndexOf(doubleArray, 1.5), 7);
+        assertEquals(JieArray.indexOf(doubleArray, (i, t) -> t == 3.5), 2);
+        assertEquals(JieArray.indexOf(doubleArray, (i, t) -> t == 6.5), -1);
+        assertEquals(JieArray.indexOf(doubleArray, (i, t) -> t == 1.5), 0);
+        assertEquals(JieArray.lastIndexOf(doubleArray, (i, t) -> t == 3.5), 5);
+        assertEquals(JieArray.lastIndexOf(doubleArray, (i, t) -> t == 6.5), -1);
+        assertEquals(JieArray.lastIndexOf(doubleArray, (i, t) -> t == 1.5), 7);
 
         // Test boolean array
         boolean[] booleanArray = {true, false, true, false, true, true, false, true};
-        assertEquals(JieArray.indexOf(booleanArray, true), 0);
-        assertEquals(JieArray.indexOf(booleanArray, false), 1);
-        assertEquals(JieArray.lastIndexOf(booleanArray, true), 7);
-        assertEquals(JieArray.lastIndexOf(booleanArray, false), 6);
-        assertEquals(JieArray.indexOf(new boolean[]{false}, true), -1);
-        assertEquals(JieArray.lastIndexOf(new boolean[]{false}, true), -1);
+        assertEquals(JieArray.indexOf(booleanArray, (i, t) -> t == 1), 0);
+        assertEquals(JieArray.indexOf(booleanArray, (i, t) -> t == 0), 1);
+        assertEquals(JieArray.lastIndexOf(booleanArray, (i, t) -> t == 1), 7);
+        assertEquals(JieArray.lastIndexOf(booleanArray, (i, t) -> t == 0), 6);
+        assertEquals(JieArray.indexOf(new boolean[]{false}, (i, t) -> t == 1), -1);
+        assertEquals(JieArray.lastIndexOf(new boolean[]{false}, (i, t) -> t == 1), -1);
 
         // Test byte array
         byte[] byteArray = {1, 2, 3, 4, 5, 3, 2, 1};
-        assertEquals(JieArray.indexOf(byteArray, (byte) 3), 2);
-        assertEquals(JieArray.indexOf(byteArray, (byte) 6), -1);
-        assertEquals(JieArray.indexOf(byteArray, (byte) 1), 0);
-        assertEquals(JieArray.lastIndexOf(byteArray, (byte) 3), 5);
-        assertEquals(JieArray.lastIndexOf(byteArray, (byte) 6), -1);
-        assertEquals(JieArray.lastIndexOf(byteArray, (byte) 1), 7);
+        assertEquals(JieArray.indexOf(byteArray, (i, t) -> t == 3), 2);
+        assertEquals(JieArray.indexOf(byteArray, (i, t) -> t == 6), -1);
+        assertEquals(JieArray.indexOf(byteArray, (i, t) -> t == 1), 0);
+        assertEquals(JieArray.lastIndexOf(byteArray, (i, t) -> t == 3), 5);
+        assertEquals(JieArray.lastIndexOf(byteArray, (i, t) -> t == 6), -1);
+        assertEquals(JieArray.lastIndexOf(byteArray, (i, t) -> t == 1), 7);
 
         // Test short array
         short[] shortArray = {100, 200, 300, 400, 500, 300, 200, 100};
-        assertEquals(JieArray.indexOf(shortArray, (short) 300), 2);
-        assertEquals(JieArray.indexOf(shortArray, (short) 600), -1);
-        assertEquals(JieArray.indexOf(shortArray, (short) 100), 0);
-        assertEquals(JieArray.lastIndexOf(shortArray, (short) 300), 5);
-        assertEquals(JieArray.lastIndexOf(shortArray, (short) 600), -1);
-        assertEquals(JieArray.lastIndexOf(shortArray, (short) 100), 7);
+        assertEquals(JieArray.indexOf(shortArray, (i, t) -> t == 300), 2);
+        assertEquals(JieArray.indexOf(shortArray, (i, t) -> t == 600), -1);
+        assertEquals(JieArray.indexOf(shortArray, (i, t) -> t == 100), 0);
+        assertEquals(JieArray.lastIndexOf(shortArray, (i, t) -> t == 300), 5);
+        assertEquals(JieArray.lastIndexOf(shortArray, (i, t) -> t == 600), -1);
+        assertEquals(JieArray.lastIndexOf(shortArray, (i, t) -> t == 100), 7);
 
         // Test char array
         char[] charArray = {'a', 'b', 'c', 'd', 'e', 'c', 'b', 'a'};
-        assertEquals(JieArray.indexOf(charArray, 'c'), 2);
-        assertEquals(JieArray.indexOf(charArray, 'f'), -1);
-        assertEquals(JieArray.indexOf(charArray, 'a'), 0);
-        assertEquals(JieArray.lastIndexOf(charArray, 'c'), 5);
-        assertEquals(JieArray.lastIndexOf(charArray, 'f'), -1);
-        assertEquals(JieArray.lastIndexOf(charArray, 'a'), 7);
+        assertEquals(JieArray.indexOf(charArray, (i, t) -> t == 'c'), 2);
+        assertEquals(JieArray.indexOf(charArray, (i, t) -> t == 'f'), -1);
+        assertEquals(JieArray.indexOf(charArray, (i, t) -> t == 'a'), 0);
+        assertEquals(JieArray.lastIndexOf(charArray, (i, t) -> t == 'c'), 5);
+        assertEquals(JieArray.lastIndexOf(charArray, (i, t) -> t == 'f'), -1);
+        assertEquals(JieArray.lastIndexOf(charArray, (i, t) -> t == 'a'), 7);
     }
 
     @Test
     public void testAsList() {
+        // Test string array
+        String[] stringArray = {"hello", "world", "java", "test", "array"};
+        List<String> stringList = JieArray.asList(stringArray);
+        assertEquals(stringList.size(), 5);
+        assertEquals(stringList.get(2), "java");
+        String oldValueString = stringList.set(2, "modified");
+        assertEquals(oldValueString, "java");
+        assertEquals(stringList.get(2), "modified");
+
         // Test int array
         int[] intArray = {1, 2, 3, 4, 5};
         List<Integer> intList = JieArray.asList(intArray);
         assertEquals(intList.size(), 5);
         assertEquals(intList.get(2), 3);
-        Integer oldValueInt = intList.set(2, 10); // 修改索引 2 的元素为 10
+        Integer oldValueInt = intList.set(2, 10);
         assertEquals(oldValueInt, 3);
         assertEquals(intList.get(2), 10);
 
@@ -236,7 +250,7 @@ public class ArrayTest {
         List<Long> longList = JieArray.asList(longArray);
         assertEquals(longList.size(), 5);
         assertEquals(longList.get(2), 30L);
-        Long oldValueLong = longList.set(2, 100L); // 修改索引 2 的元素为 100
+        Long oldValueLong = longList.set(2, 100L);
         assertEquals(oldValueLong, 30L);
         assertEquals(longList.get(2), 100L);
 
@@ -245,7 +259,7 @@ public class ArrayTest {
         List<Float> floatList = JieArray.asList(floatArray);
         assertEquals(floatList.size(), 5);
         assertEquals(floatList.get(2), 3.5f);
-        Float oldValueFloat = floatList.set(2, 10.5f); // 修改索引 2 的元素为 10.5
+        Float oldValueFloat = floatList.set(2, 10.5f);
         assertEquals(oldValueFloat, 3.5f);
         assertEquals(floatList.get(2), 10.5f);
 
@@ -254,7 +268,7 @@ public class ArrayTest {
         List<Double> doubleList = JieArray.asList(doubleArray);
         assertEquals(doubleList.size(), 5);
         assertEquals(doubleList.get(2), 3.5);
-        Double oldValueDouble = doubleList.set(2, 10.5); // 修改索引 2 的元素为 10.5
+        Double oldValueDouble = doubleList.set(2, 10.5);
         assertEquals(oldValueDouble, 3.5);
         assertEquals(doubleList.get(2), 10.5);
 
@@ -263,7 +277,7 @@ public class ArrayTest {
         List<Boolean> booleanList = JieArray.asList(booleanArray);
         assertEquals(booleanList.size(), 5);
         assertEquals(booleanList.get(2), true);
-        Boolean oldValueBoolean = booleanList.set(2, false); // 修改索引 2 的元素为 false
+        Boolean oldValueBoolean = booleanList.set(2, false);
         assertEquals(oldValueBoolean, true);
         assertEquals(booleanList.get(2), false);
 
@@ -272,7 +286,7 @@ public class ArrayTest {
         List<Byte> byteList = JieArray.asList(byteArray);
         assertEquals(byteList.size(), 5);
         assertEquals(byteList.get(2), (byte) 3);
-        Byte oldValueByte = byteList.set(2, (byte) 10); // 修改索引 2 的元素为 10
+        Byte oldValueByte = byteList.set(2, (byte) 10);
         assertEquals(oldValueByte, (byte) 3);
         assertEquals(byteList.get(2), (byte) 10);
 
@@ -281,7 +295,7 @@ public class ArrayTest {
         List<Short> shortList = JieArray.asList(shortArray);
         assertEquals(shortList.size(), 5);
         assertEquals(shortList.get(2), (short) 300);
-        Short oldValueShort = shortList.set(2, (short) 1000); // 修改索引 2 的元素为 1000
+        Short oldValueShort = shortList.set(2, (short) 1000);
         assertEquals(oldValueShort, (short) 300);
         assertEquals(shortList.get(2), (short) 1000);
 
@@ -290,95 +304,39 @@ public class ArrayTest {
         List<Character> charList = JieArray.asList(charArray);
         assertEquals(charList.size(), 5);
         assertEquals(charList.get(2), 'c');
-        Character oldValueChar = charList.set(2, 'z'); // 修改索引 2 的元素为 'z'
+        Character oldValueChar = charList.set(2, 'z');
         assertEquals(oldValueChar, 'c');
         assertEquals(charList.get(2), 'z');
-
-        // Test string array
-        String[] stringArray = {"hello", "world", "java", "test", "array"};
-        List<String> stringList = JieArray.asList(stringArray);
-        assertEquals(stringList.size(), 5);
-        assertEquals(stringList.get(2), "java");
-        String oldValueString = stringList.set(2, "modified"); // 修改索引 2 的元素为 "modified"
-        assertEquals(oldValueString, "java");
-        assertEquals(stringList.get(2), "modified");
-    }
-
-    @Test
-    public void testListOf() {
-        // Test int array
-        int[] intArray = {1, 2, 3, 4, 5};
-        List<Integer> intList = JieArray.immutableList(intArray);
-        assertEquals(intList.size(), 5);
-        assertEquals(intList.get(2), 3);
-        expectThrows(UnsupportedOperationException.class, () -> intList.set(2, 10));
-
-        // Test long array
-        long[] longArray = {10L, 20L, 30L, 40L, 50L};
-        List<Long> longList = JieArray.immutableList(longArray);
-        assertEquals(longList.size(), 5);
-        assertEquals(longList.get(2), 30L);
-        expectThrows(UnsupportedOperationException.class, () -> longList.set(2, 100L));
-
-        // Test float array
-        float[] floatArray = {1.5f, 2.5f, 3.5f, 4.5f, 5.5f};
-        List<Float> floatList = JieArray.immutableList(floatArray);
-        assertEquals(floatList.size(), 5);
-        assertEquals(floatList.get(2), 3.5f);
-        expectThrows(UnsupportedOperationException.class, () -> floatList.set(2, 10.5f));
-
-        // Test double array
-        double[] doubleArray = {1.5, 2.5, 3.5, 4.5, 5.5};
-        List<Double> doubleList = JieArray.immutableList(doubleArray);
-        assertEquals(doubleList.size(), 5);
-        assertEquals(doubleList.get(2), 3.5);
-        expectThrows(UnsupportedOperationException.class, () -> doubleList.set(2, 10.5));
-
-        // Test boolean array
-        boolean[] booleanArray = {true, false, true, false, true};
-        List<Boolean> booleanList = JieArray.immutableList(booleanArray);
-        assertEquals(booleanList.size(), 5);
-        assertEquals(booleanList.get(2), true);
-        expectThrows(UnsupportedOperationException.class, () -> booleanList.set(2, false));
-
-        // Test byte array
-        byte[] byteArray = {1, 2, 3, 4, 5};
-        List<Byte> byteList = JieArray.immutableList(byteArray);
-        assertEquals(byteList.size(), 5);
-        assertEquals(byteList.get(2), (byte) 3);
-        expectThrows(UnsupportedOperationException.class, () -> byteList.set(2, (byte) 10));
-
-        // Test short array
-        short[] shortArray = {100, 200, 300, 400, 500};
-        List<Short> shortList = JieArray.immutableList(shortArray);
-        assertEquals(shortList.size(), 5);
-        assertEquals(shortList.get(2), (short) 300);
-        expectThrows(UnsupportedOperationException.class, () -> shortList.set(2, (short) 1000));
-
-        // Test char array
-        char[] charArray = {'a', 'b', 'c', 'd', 'e'};
-        List<Character> charList = JieArray.immutableList(charArray);
-        assertEquals(charList.size(), 5);
-        assertEquals(charList.get(2), 'c');
-        expectThrows(UnsupportedOperationException.class, () -> charList.set(2, 'z'));
-
-        // Test string array
-        String[] stringArray = {"hello", "world", "java", "test", "array"};
-        List<String> stringList = JieArray.immutableList(stringArray);
-        assertEquals(stringList.size(), 5);
-        assertEquals(stringList.get(2), "java");
-        expectThrows(UnsupportedOperationException.class, () -> stringList.set(2, "modified"));
     }
 
     @Test
     public void testMap() {
-        Character[] chars = {'a', 'b', 'c'};
-        Integer[] asciiValues = {97, 98, 99};
-        assertEquals(JieArray.map(chars, new Integer[0], c -> (int) c), asciiValues);
-        assertEquals(JieArray.map(chars, new Integer[3], c -> (int) c), asciiValues);
-        assertEquals(JieArray.map(chars, c -> (int) c), asciiValues);
+        Character[] chars = {'a', 'b', null, 'c'};
+        Integer[] asciiValues = {97, 98, null, 99};
+        assertEquals(JieArray.map(chars, new Integer[0], c -> c == null ? null : (int) c), asciiValues);
+        assertEquals(JieArray.map(chars, new Integer[4], c -> c == null ? null : (int) c), asciiValues);
+        assertEquals(JieArray.map(chars, c -> c == null ? null : (int) c), asciiValues);
+        Integer[] asciiValues2 = {null, 98, null, 99};
+        assertEquals(JieArray.map(chars, c -> c == null ? null : (c == 'a' ? null : (int) c)), asciiValues2);
         expectThrows(UnsupportedOperationException.class, () -> JieArray.map(chars, c -> null));
-        Integer[] asciiValues2 = {null, 98, 99};
-        assertEquals(JieArray.map(chars, c -> c == 'a' ? null : (int) c), asciiValues2);
+    }
+
+    @Test
+    public void testArray() {
+        Integer[] array = new Integer[]{1, 2, 3};
+        assertSame(JieArray.array(array), array);
+    }
+
+    @Test
+    public void testFill() {
+        assertEquals(JieArray.fill(new Integer[3], 6), new Integer[]{6, 6, 6});
+        assertEquals(JieArray.fill(new int[3], 6), new int[]{6, 6, 6});
+        assertEquals(JieArray.fill(new long[3], 6), new long[]{6, 6, 6});
+        assertEquals(JieArray.fill(new float[3], 6), new float[]{6, 6, 6});
+        assertEquals(JieArray.fill(new double[3], 6), new double[]{6, 6, 6});
+        assertEquals(JieArray.fill(new boolean[3], true), new boolean[]{true, true, true});
+        assertEquals(JieArray.fill(new byte[3], (byte) 6), new byte[]{6, 6, 6});
+        assertEquals(JieArray.fill(new short[3], (short) 6), new short[]{6, 6, 6});
+        assertEquals(JieArray.fill(new char[3], (char) 6), new char[]{6, 6, 6});
     }
 }

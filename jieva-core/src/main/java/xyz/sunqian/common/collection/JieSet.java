@@ -1,6 +1,7 @@
 package xyz.sunqian.common.collection;
 
 import xyz.sunqian.annotations.Immutable;
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.Jie;
 
 import java.util.Arrays;
@@ -8,7 +9,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -30,7 +30,7 @@ public class JieSet {
      * @return a new immutable set of which content is added from the given array
      */
     @SafeVarargs
-    public static <T> @Immutable Set<T> set(T... array) {
+    public static <T> @Nonnull @Immutable Set<T> set(T @Nonnull ... array) {
         return Collections.unmodifiableSet(linkedHashSet(array));
     }
 
@@ -42,7 +42,7 @@ public class JieSet {
      * @return a new {@link HashSet} initialing with the given array
      */
     @SafeVarargs
-    public static <T> HashSet<T> hashSet(T... array) {
+    public static <T> @Nonnull HashSet<T> hashSet(T @Nonnull ... array) {
         return new HashSet<>(Arrays.asList(array));
     }
 
@@ -54,7 +54,7 @@ public class JieSet {
      * @return a new {@link LinkedHashSet} initialing with the given array
      */
     @SafeVarargs
-    public static <T> LinkedHashSet<T> linkedHashSet(T... array) {
+    public static <T> @Nonnull LinkedHashSet<T> linkedHashSet(T @Nonnull ... array) {
         return new LinkedHashSet<>(Arrays.asList(array));
     }
 
@@ -67,7 +67,7 @@ public class JieSet {
      * @param <T> the component type
      * @return a new immutable set of which content is added from the given iterable
      */
-    public static <T> @Immutable List<T> toSet(Iterable<? extends T> it) {
+    public static <T> @Nonnull @Immutable Set<T> toSet(@Nonnull Iterable<? extends T> it) {
         Object[] array = JieCollection.toArray(it);
         Set<Object> set = set(array);
         return Jie.as(set);
@@ -80,7 +80,7 @@ public class JieSet {
      * @param <T> the component type
      * @return a new {@link HashSet} initialing with the given iterable
      */
-    public static <T> HashSet<T> toHashSet(Iterable<T> it) {
+    public static <T> @Nonnull HashSet<T> toHashSet(@Nonnull Iterable<T> it) {
         if (it instanceof Collection) {
             return new HashSet<>((Collection<T>) it);
         }
@@ -94,7 +94,7 @@ public class JieSet {
      * @param <T> the component type
      * @return a new {@link LinkedHashSet} initialing with the given iterable
      */
-    public static <T> LinkedHashSet<T> toLinkedHashSet(Iterable<T> it) {
+    public static <T> @Nonnull LinkedHashSet<T> toLinkedHashSet(@Nonnull Iterable<T> it) {
         if (it instanceof Collection) {
             return new LinkedHashSet<>((Collection<T>) it);
         }

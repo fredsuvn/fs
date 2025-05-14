@@ -1,6 +1,8 @@
 package xyz.sunqian.common.collection;
 
 import xyz.sunqian.annotations.Immutable;
+import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 
 import java.util.Collections;
@@ -8,6 +10,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Static utility class for {@link Map}.
@@ -34,7 +39,7 @@ public class JieMap {
      * @param <V>>  the value type
      * @return a new {@link HashMap} initialing with the given array
      */
-    public static <K, V> @Immutable Map<K, V> map(Object... array) {
+    public static <K, V> @Nonnull @Immutable Map<K, V> map(Object @Nonnull ... array) {
         return Collections.unmodifiableMap(linkedHashMap(array));
     }
 
@@ -51,7 +56,7 @@ public class JieMap {
      * @param <V>>  the value type
      * @return a new {@link HashMap} initialing with the given array
      */
-    public static <K, V> HashMap<K, V> hashMap(Object... array) {
+    public static <K, V> @Nonnull HashMap<K, V> hashMap(Object @Nonnull ... array) {
         return putAll(new HashMap<>(), array);
     }
 
@@ -68,7 +73,7 @@ public class JieMap {
      * @param <V>>  the value type
      * @return a new {@link HashMap} initialing with the given array
      */
-    public static <K, V> LinkedHashMap<K, V> linkedHashMap(Object... array) {
+    public static <K, V> @Nonnull LinkedHashMap<K, V> linkedHashMap(Object @Nonnull ... array) {
         return putAll(new LinkedHashMap<>(), array);
     }
 
@@ -85,9 +90,45 @@ public class JieMap {
      * @param <V>> the value type
      * @return a new {@link HashMap} initialing with the given iterable
      */
-    public static <K, V> @Immutable Map<K, V> toMap(Iterable<?> it) {
+    public static <K, V> @Nonnull @Immutable Map<K, V> toMap(@Nonnull Iterable<?> it) {
         Object[] array = JieCollection.toArray(it);
         return map(array);
+    }
+
+    /**
+     * Returns a new immutable map of which entries are put from the given map, and all key-value pairs are mapped from
+     * the old type to the new type during the put operation. The behavior is equivalent to:
+     * <pre>{@code
+     * return Collections.unmodifiableMap(
+     *     map.entrySet().stream().collect(Collectors.toMap(
+     *         entry -> keyMapper.apply(entry.getKey()),
+     *         entry -> valueMapper.apply(entry.getValue()),
+     *         (v1, v2) -> v2,
+     *         LinkedHashMap::new
+     *     ))
+     * );
+     * }</pre>
+     *
+     * @param map   the given map
+     * @param <KO>> the old key type
+     * @param <VO>> the old value type
+     * @param <KN>  the new key type
+     * @param <VN>  the new value type
+     * @return a new immutable map of which entries are put from the given map
+     */
+    public static <KO, VO, KN, VN> @Nonnull @Immutable Map<KN, VN> toMap(
+        @Nonnull Map<KO, VO> map,
+        @Nonnull Function<? super KO, ? extends KN> keyMapper,
+        @Nonnull Function<? super VO, ? extends VN> valueMapper
+    ) {
+        return Collections.unmodifiableMap(
+            map.entrySet().stream().collect(Collectors.toMap(
+                entry -> keyMapper.apply(entry.getKey()),
+                entry -> valueMapper.apply(entry.getValue()),
+                (v1, v2) -> v2,
+                LinkedHashMap::new
+            ))
+        );
     }
 
     /**
@@ -103,7 +144,7 @@ public class JieMap {
      * @param <V>> the value type
      * @return a new {@link HashMap} initialing with the given iterable
      */
-    public static <K, V> HashMap<K, V> toHashMap(Iterable<?> it) {
+    public static <K, V> @Nonnull HashMap<K, V> toHashMap(@Nonnull Iterable<?> it) {
         Object[] array = JieCollection.toArray(it);
         return hashMap(array);
     }
@@ -121,7 +162,7 @@ public class JieMap {
      * @param <V>> the value type
      * @return a new {@link HashMap} initialing with the given iterable
      */
-    public static <K, V> LinkedHashMap<K, V> toLinkedHashMap(Iterable<?> it) {
+    public static <K, V> @Nonnull LinkedHashMap<K, V> toLinkedHashMap(@Nonnull Iterable<?> it) {
         Object[] array = JieCollection.toArray(it);
         return linkedHashMap(array);
     }
@@ -141,7 +182,7 @@ public class JieMap {
      * @param <M>   the type of the given map
      * @return the given map
      */
-    public static <K, V, M extends Map<K, V>> M putAll(M map, Object... array) {
+    public static <K, V, M extends Map<K, V>> @Nonnull M putAll(@Nonnull M map, Object @Nonnull ... array) {
         int end = array.length / 2 * 2;
         int i = 0;
         while (i < end) {
@@ -170,7 +211,7 @@ public class JieMap {
      * @param <M> the type of the given map
      * @return the given map
      */
-    public static <K, V, M extends Map<K, V>> M putAll(M map, Iterable<?> it) {
+    public static <K, V, M extends Map<K, V>> @Nonnull M putAll(@Nonnull M map, @Nonnull Iterable<?> it) {
         Iterator<?> iterator = it.iterator();
         while (iterator.hasNext()) {
             K key = Jie.as(iterator.next());
@@ -178,5 +219,38 @@ public class JieMap {
             map.put(key, value);
         }
         return map;
+    }
+
+    /**
+     * Resolves the final value in a chain. For example, a map contains: [{@code A -> B, B -> C, C -> D}],
+     * {@code resolveChain(map, A, stack)} will return D.
+     * <p>
+     * This method gets the value with the given key by {@link Map#get(Object)}, and then uses that value as the next
+     * key to get the next value. This loop continues until the get method returns null when a value is used as the key,
+     * and that value will be returned. If the given key doesn't map a value, or the loop is infinite, it will return
+     * null.
+     *
+     * @param map   the given map
+     * @param key   the given key
+     * @param stack the stack to check infinite loop
+     * @param <T>   the value type
+     * @return the final value in a chain
+     */
+    public static <T> @Nullable T resolveChain(@Nonnull Map<?, T> map, T key, @Nonnull Set<T> stack) {
+        if (!map.containsKey(key)) {
+            return null;
+        }
+        stack.add(key);
+        T nextKey = map.get(key);
+        while (true) {
+            if (stack.contains(nextKey)) {
+                return null;
+            }
+            if (!map.containsKey(nextKey)) {
+                return nextKey;
+            }
+            stack.add(nextKey);
+            nextKey = map.get(nextKey);
+        }
     }
 }

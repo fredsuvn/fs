@@ -1,5 +1,7 @@
 package xyz.sunqian.common.collection;
 
+import xyz.sunqian.annotations.Nonnull;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Stream;
@@ -19,7 +21,8 @@ public class JieStream {
      * @param <T>      the component type
      * @return a {@link Stream} from the given elements
      */
-    public static <T> Stream<T> stream(T[] elements) {
+    @SafeVarargs
+    public static <T> @Nonnull Stream<T> stream(T @Nonnull ... elements) {
         if (JieArray.isEmpty(elements)) {
             return Stream.empty();
         }
@@ -33,7 +36,7 @@ public class JieStream {
      * @param <T>      the component type
      * @return a {@link Stream} from the given elements
      */
-    public static <T> Stream<T> stream(Iterable<T> elements) {
+    public static <T> @Nonnull Stream<T> stream(@Nonnull Iterable<T> elements) {
         if (JieCollection.isEmpty(elements)) {
             return Stream.empty();
         }

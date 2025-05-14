@@ -4,6 +4,7 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.collection.JieCollection;
+import xyz.sunqian.common.collection.JieList;
 import xyz.sunqian.common.io.JieBuffer;
 import xyz.sunqian.common.io.JieIO;
 import xyz.sunqian.common.net.GekNetException;
@@ -278,7 +279,7 @@ public interface GekUdpServer extends GekUdpClient {
                 this.port = builder.port;
                 this.address = builder.address;
                 this.serverHandler = Jie.nonNull(builder.serverHandler, EMPTY_SERVER_HANDLER);
-                this.packetHandlers = JieCollection.toList(builder.packetHandlers);
+                this.packetHandlers = JieList.toList(builder.packetHandlers);
                 if (packetHandlers.isEmpty()) {
                     throw new GekNetException("Packet handlers are empty.");
                 }

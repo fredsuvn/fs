@@ -636,7 +636,7 @@ public class JieRandom {
                 nodeList.add(new Node<>(totalScore, totalScore + score.score, score.supplier));
                 totalScore += score.score;
             }
-            this.nodes = JieCollection.toArray(nodeList);
+            this.nodes = JieCollection.toArray(nodeList, Node.class);
             this.totalScore = totalScore;
         }
 

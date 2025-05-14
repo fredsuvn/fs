@@ -3,6 +3,7 @@ package xyz.sunqian.common.objects.data;
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.collection.JieCollection;
+import xyz.sunqian.common.collection.JieMap;
 import xyz.sunqian.common.reflect.JieReflect;
 
 import java.lang.annotation.Annotation;
@@ -10,7 +11,14 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -138,7 +146,7 @@ public class JieDataObject {
                 Type pt = p.getType();
                 if (pt instanceof TypeVariable) {
                     stack.clear();
-                    Type newType = JieCollection.getRecursive(extraTypeVarMapping, pt, stack);
+                    Type newType = JieMap.resolveChain(extraTypeVarMapping, pt, stack);
                     if (newType != null) {
                         mapping.put(p, newType);
                     }

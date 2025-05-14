@@ -3,7 +3,6 @@ package xyz.sunqian.common.objects.data;
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.collection.JieCollection;
 import xyz.sunqian.common.objects.data.handlers.JavaBeanDataSchemaHandler;
 
 import java.lang.annotation.Annotation;
@@ -14,6 +13,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 final class DataSchemaParserImpl implements DataSchemaParser, DataSchemaParser.Handler {
 
@@ -96,7 +96,11 @@ final class DataSchemaParserImpl implements DataSchemaParser, DataSchemaParser.H
             Map<String, DataPropertyBase> properties
         ) {
             this.type = type;
-            this.properties = JieCollection.toMap(properties, name -> name, DataPropertyImpl::new);
+            this.properties = properties.entrySet().stream().collect(Collectors.toMap(
+                Map.Entry::getKey,
+                e -> new DataPropertyImpl(e.getValue())
+            ));
+            // JieCollection.toMap(properties, name -> name, DataPropertyImpl::new);
         }
 
         @Override

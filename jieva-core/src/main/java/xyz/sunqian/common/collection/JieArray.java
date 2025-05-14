@@ -211,7 +211,7 @@ public class JieArray {
      * @param <T>   the component type of the given array
      * @return the given array
      */
-    public static <T> T[] fill(T @Nonnull [] array, T value) {
+    public static <T> T @Nonnull [] fill(T @Nonnull [] array, T value) {
         Arrays.fill(array, value);
         return array;
     }
@@ -223,7 +223,7 @@ public class JieArray {
      * @param value the given value
      * @return the given array
      */
-    public static boolean[] fill(boolean @Nonnull [] array, boolean value) {
+    public static boolean @Nonnull [] fill(boolean @Nonnull [] array, boolean value) {
         Arrays.fill(array, value);
         return array;
     }
@@ -235,7 +235,7 @@ public class JieArray {
      * @param value the given value
      * @return the given array
      */
-    public static byte[] fill(byte @Nonnull [] array, byte value) {
+    public static byte @Nonnull [] fill(byte @Nonnull [] array, byte value) {
         Arrays.fill(array, value);
         return array;
     }
@@ -247,7 +247,7 @@ public class JieArray {
      * @param value the given value
      * @return the given array
      */
-    public static short[] fill(short @Nonnull [] array, short value) {
+    public static short @Nonnull [] fill(short @Nonnull [] array, short value) {
         Arrays.fill(array, value);
         return array;
     }
@@ -259,7 +259,7 @@ public class JieArray {
      * @param value the given value
      * @return the given array
      */
-    public static char[] fill(char @Nonnull [] array, char value) {
+    public static char @Nonnull [] fill(char @Nonnull [] array, char value) {
         Arrays.fill(array, value);
         return array;
     }
@@ -271,7 +271,7 @@ public class JieArray {
      * @param value the given value
      * @return the given array
      */
-    public static int[] fill(int @Nonnull [] array, int value) {
+    public static int @Nonnull [] fill(int @Nonnull [] array, int value) {
         Arrays.fill(array, value);
         return array;
     }
@@ -283,7 +283,7 @@ public class JieArray {
      * @param value the given value
      * @return the given array
      */
-    public static long[] fill(long @Nonnull [] array, long value) {
+    public static long @Nonnull [] fill(long @Nonnull [] array, long value) {
         Arrays.fill(array, value);
         return array;
     }
@@ -295,7 +295,7 @@ public class JieArray {
      * @param value the given value
      * @return the given array
      */
-    public static float[] fill(float @Nonnull [] array, float value) {
+    public static float @Nonnull [] fill(float @Nonnull [] array, float value) {
         Arrays.fill(array, value);
         return array;
     }
@@ -307,7 +307,7 @@ public class JieArray {
      * @param value the given value
      * @return the given array
      */
-    public static double[] fill(double @Nonnull [] array, double value) {
+    public static double @Nonnull [] fill(double @Nonnull [] array, double value) {
         Arrays.fill(array, value);
         return array;
     }
@@ -328,7 +328,7 @@ public class JieArray {
      * @param <R>    the component type of the dest array
      * @return the given dest or a new result array
      */
-    public static <T, R> R[] map(
+    public static <T, R> R @Nonnull [] map(
         T @Nonnull [] source, R @Nonnull [] dest, @Nonnull Function<? super T, ? extends R> mapper
     ) {
         R[] result;
@@ -356,7 +356,7 @@ public class JieArray {
      * @return a new result array
      * @throws UnsupportedOperationException if all new elements are null
      */
-    public static <T, R> R[] map(
+    public static <T, R> R @Nonnull [] map(
         T @Nonnull [] source, @Nonnull Function<? super T, ? extends R> mapper
     ) throws UnsupportedOperationException {
         for (int i = 0; i < source.length; i++) {
@@ -388,7 +388,7 @@ public class JieArray {
      * @param <A>           the type of created array, not the component type
      * @return the created array
      */
-    public static <A> A newArray(Class<?> componentType, int length) {
+    public static <A> @Nonnull A newArray(@Nonnull Class<?> componentType, int length) {
         return Jie.as(Array.newInstance(componentType, length));
     }
 
@@ -547,7 +547,7 @@ public class JieArray {
      * @param <T>       the component type
      * @return the first index of the element which can pass the specified predication (return true) at the given array
      */
-    public static <T> int indexOf(T[] array, IndexedPredicate<T> predicate) {
+    public static <T> int indexOf(T @Nonnull [] array, @Nonnull IndexedPredicate<T> predicate) {
         for (int i = 0; i < array.length; i++) {
             if (predicate.test(i, array[i])) {
                 return i;
@@ -565,7 +565,7 @@ public class JieArray {
      * @param predicate the specified predication
      * @return the first index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int indexOf(boolean[] array, IndexedIntPredicate predicate) {
+    public static int indexOf(boolean @Nonnull [] array, @Nonnull IndexedIntPredicate predicate) {
         for (int i = 0; i < array.length; i++) {
             int v = array[i] ? 1 : 0;
             if (predicate.test(i, v)) {
@@ -583,7 +583,7 @@ public class JieArray {
      * @param predicate the specified predication
      * @return the first index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int indexOf(byte[] array, IndexedIntPredicate predicate) {
+    public static int indexOf(byte @Nonnull [] array, @Nonnull IndexedIntPredicate predicate) {
         for (int i = 0; i < array.length; i++) {
             int v = array[i];
             if (predicate.test(i, v)) {
@@ -601,7 +601,7 @@ public class JieArray {
      * @param predicate the specified predication
      * @return the first index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int indexOf(short[] array, IndexedIntPredicate predicate) {
+    public static int indexOf(short @Nonnull [] array, @Nonnull IndexedIntPredicate predicate) {
         for (int i = 0; i < array.length; i++) {
             int v = array[i];
             if (predicate.test(i, v)) {
@@ -619,7 +619,7 @@ public class JieArray {
      * @param predicate the specified predication
      * @return the first index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int indexOf(char[] array, IndexedIntPredicate predicate) {
+    public static int indexOf(char @Nonnull [] array, @Nonnull IndexedIntPredicate predicate) {
         for (int i = 0; i < array.length; i++) {
             int v = array[i];
             if (predicate.test(i, v)) {
@@ -637,7 +637,7 @@ public class JieArray {
      * @param predicate the specified predication
      * @return the first index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int indexOf(int[] array, IndexedIntPredicate predicate) {
+    public static int indexOf(int @Nonnull [] array, @Nonnull IndexedIntPredicate predicate) {
         for (int i = 0; i < array.length; i++) {
             int v = array[i];
             if (predicate.test(i, v)) {
@@ -655,7 +655,7 @@ public class JieArray {
      * @param predicate the specified predication
      * @return the first index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int indexOf(long[] array, IndexedLongPredicate predicate) {
+    public static int indexOf(long @Nonnull [] array, @Nonnull IndexedLongPredicate predicate) {
         for (int i = 0; i < array.length; i++) {
             long v = array[i];
             if (predicate.test(i, v)) {
@@ -673,7 +673,7 @@ public class JieArray {
      * @param predicate the specified predication
      * @return the first index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int indexOf(float[] array, IndexedDoublePredicate predicate) {
+    public static int indexOf(float @Nonnull [] array, @Nonnull IndexedDoublePredicate predicate) {
         for (int i = 0; i < array.length; i++) {
             double v = array[i];
             if (predicate.test(i, v)) {
@@ -691,7 +691,7 @@ public class JieArray {
      * @param predicate the specified predication
      * @return the first index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int indexOf(double[] array, IndexedDoublePredicate predicate) {
+    public static int indexOf(double @Nonnull [] array, @Nonnull IndexedDoublePredicate predicate) {
         for (int i = 0; i < array.length; i++) {
             double v = array[i];
             if (predicate.test(i, v)) {
@@ -712,7 +712,7 @@ public class JieArray {
      * @param <T>       the component type
      * @return the last index of the element which can pass the specified predication (return true) at the given array
      */
-    public static <T> int lastIndexOf(T[] array, IndexedPredicate<T> predicate) {
+    public static <T> int lastIndexOf(T @Nonnull [] array, @Nonnull IndexedPredicate<T> predicate) {
         for (int i = array.length - 1; i >= 0; i--) {
             if (predicate.test(i, array[i])) {
                 return i;
@@ -732,7 +732,7 @@ public class JieArray {
      * @param predicate the specified predication
      * @return the last index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int lastIndexOf(boolean[] array, IndexedIntPredicate predicate) {
+    public static int lastIndexOf(boolean @Nonnull [] array, @Nonnull IndexedIntPredicate predicate) {
         for (int i = array.length - 1; i >= 0; i--) {
             int v = array[i] ? 1 : 0;
             if (predicate.test(i, v)) {
@@ -752,7 +752,7 @@ public class JieArray {
      * @param predicate the specified predication
      * @return the last index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int lastIndexOf(byte[] array, IndexedIntPredicate predicate) {
+    public static int lastIndexOf(byte @Nonnull [] array, @Nonnull IndexedIntPredicate predicate) {
         for (int i = array.length - 1; i >= 0; i--) {
             int v = array[i];
             if (predicate.test(i, v)) {
@@ -772,7 +772,7 @@ public class JieArray {
      * @param predicate the specified predication
      * @return the last index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int lastIndexOf(short[] array, IndexedIntPredicate predicate) {
+    public static int lastIndexOf(short @Nonnull [] array, @Nonnull IndexedIntPredicate predicate) {
         for (int i = array.length - 1; i >= 0; i--) {
             int v = array[i];
             if (predicate.test(i, v)) {
@@ -792,7 +792,7 @@ public class JieArray {
      * @param predicate the specified predication
      * @return the last index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int lastIndexOf(char[] array, IndexedIntPredicate predicate) {
+    public static int lastIndexOf(char @Nonnull [] array, @Nonnull IndexedIntPredicate predicate) {
         for (int i = array.length - 1; i >= 0; i--) {
             int v = array[i];
             if (predicate.test(i, v)) {
@@ -812,7 +812,7 @@ public class JieArray {
      * @param predicate the specified predication
      * @return the last index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int lastIndexOf(int[] array, IndexedIntPredicate predicate) {
+    public static int lastIndexOf(int @Nonnull [] array, @Nonnull IndexedIntPredicate predicate) {
         for (int i = array.length - 1; i >= 0; i--) {
             int v = array[i];
             if (predicate.test(i, v)) {
@@ -832,7 +832,7 @@ public class JieArray {
      * @param predicate the specified predication
      * @return the last index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int lastIndexOf(long[] array, IndexedLongPredicate predicate) {
+    public static int lastIndexOf(long @Nonnull [] array, @Nonnull IndexedLongPredicate predicate) {
         for (int i = array.length - 1; i >= 0; i--) {
             long v = array[i];
             if (predicate.test(i, v)) {
@@ -852,7 +852,7 @@ public class JieArray {
      * @param predicate the specified predication
      * @return the last index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int lastIndexOf(float[] array, IndexedDoublePredicate predicate) {
+    public static int lastIndexOf(float @Nonnull [] array, @Nonnull IndexedDoublePredicate predicate) {
         for (int i = array.length - 1; i >= 0; i--) {
             double v = array[i];
             if (predicate.test(i, v)) {
@@ -872,7 +872,7 @@ public class JieArray {
      * @param predicate the specified predication
      * @return the last index of the element which can pass the specified predication (return true) at the given array
      */
-    public static int lastIndexOf(double[] array, IndexedDoublePredicate predicate) {
+    public static int lastIndexOf(double @Nonnull [] array, @Nonnull IndexedDoublePredicate predicate) {
         for (int i = array.length - 1; i >= 0; i--) {
             double v = array[i];
             if (predicate.test(i, v)) {
@@ -890,7 +890,7 @@ public class JieArray {
      * @return the given variable arguments as an array
      */
     @SafeVarargs
-    public static <T> T[] array(T @RetainedParam ... elements) {
+    public static <T> T @Nonnull [] array(T @Nonnull @RetainedParam ... elements) {
         return elements;
     }
 
@@ -903,7 +903,7 @@ public class JieArray {
      * @return a fixed-size list backed by the given array
      */
     @SafeVarargs
-    public static <T> List<T> asList(T @RetainedParam ... array) {
+    public static <T> @Nonnull List<T> asList(T @Nonnull @RetainedParam ... array) {
         return Arrays.asList(array);
     }
 
@@ -914,7 +914,7 @@ public class JieArray {
      * @param array the given array
      * @return a fixed-size list backed by the given array
      */
-    public static List<Boolean> asList(boolean @RetainedParam ... array) {
+    public static @Nonnull List<@Nonnull Boolean> asList(boolean @Nonnull @RetainedParam ... array) {
         return ListBack.asList(array);
     }
 
@@ -925,7 +925,7 @@ public class JieArray {
      * @param array the given array
      * @return a fixed-size list backed by the given array
      */
-    public static List<Byte> asList(byte @RetainedParam ... array) {
+    public static @Nonnull List<@Nonnull Byte> asList(byte @Nonnull @RetainedParam ... array) {
         return ListBack.asList(array);
     }
 
@@ -936,7 +936,7 @@ public class JieArray {
      * @param array the given array
      * @return a fixed-size list backed by the given array
      */
-    public static List<Short> asList(short @RetainedParam ... array) {
+    public static @Nonnull List<@Nonnull Short> asList(short @Nonnull @RetainedParam ... array) {
         return ListBack.asList(array);
     }
 
@@ -947,7 +947,7 @@ public class JieArray {
      * @param array the given array
      * @return a fixed-size list backed by the given array
      */
-    public static List<Character> asList(char @RetainedParam ... array) {
+    public static @Nonnull List<@Nonnull Character> asList(char @Nonnull @RetainedParam ... array) {
         return ListBack.asList(array);
     }
 
@@ -958,7 +958,7 @@ public class JieArray {
      * @param array the given array
      * @return a fixed-size list backed by the given array
      */
-    public static List<Integer> asList(int @RetainedParam ... array) {
+    public static @Nonnull List<@Nonnull Integer> asList(int @Nonnull @RetainedParam ... array) {
         return ListBack.asList(array);
     }
 
@@ -969,7 +969,7 @@ public class JieArray {
      * @param array the given array
      * @return a fixed-size list backed by the given array
      */
-    public static List<Long> asList(long @RetainedParam ... array) {
+    public static @Nonnull List<@Nonnull Long> asList(long @Nonnull @RetainedParam ... array) {
         return ListBack.asList(array);
     }
 
@@ -980,7 +980,7 @@ public class JieArray {
      * @param array the given array
      * @return a fixed-size list backed by the given array
      */
-    public static List<Float> asList(float @RetainedParam ... array) {
+    public static @Nonnull List<@Nonnull Float> asList(float @Nonnull @RetainedParam ... array) {
         return ListBack.asList(array);
     }
 
@@ -991,7 +991,7 @@ public class JieArray {
      * @param array the given array
      * @return a fixed-size list backed by the given array
      */
-    public static List<Double> asList(double @RetainedParam ... array) {
+    public static @Nonnull List<@Nonnull Double> asList(double @Nonnull @RetainedParam ... array) {
         return ListBack.asList(array);
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Provides interfaces and classes for collection and array.
+ * Provides interfaces and classes for array, collection and stream.
  * <p>
  * Utilities:
  * <ul>

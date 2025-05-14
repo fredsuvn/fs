@@ -4,7 +4,7 @@ import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.annotations.ThreadSafe;
-import xyz.sunqian.common.collection.JieArray;
+import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.objects.data.handlers.AbstractDataSchemaHandler;
 import xyz.sunqian.common.objects.data.handlers.JavaBeanDataSchemaHandler;
 
@@ -40,7 +40,7 @@ public interface DataSchemaParser {
      * @return a new {@link DataSchemaParser} with given handlers
      */
     static DataSchemaParser withHandlers(@RetainedParam Handler... handlers) {
-        return withHandlers(JieArray.immutableList(handlers));
+        return withHandlers(Jie.list(handlers));
     }
 
     /**
