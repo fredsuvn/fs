@@ -1,26 +1,33 @@
 package xyz.sunqian.common.thread;
 
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
+import java.util.function.LongConsumer;
 
 final class LatchBack {
 
-    static ThreadLatch newLatch() {
-        return new NoConsumerThreadLatch();
+    static <T> @Nonnull ThreadLatch<T> newLatch() {
+        return new NoConsumerThreadLatch<>();
     }
 
-    static ThreadLatch newLatch(Consumer<Object> signalConsumer) {
-        return new ConsumerThreadLatch(signalConsumer);
+    static <T> @Nonnull ThreadLatch<T> newLatch(@Nonnull Consumer<? super @Nullable T> signalConsumer) {
+        return new ConsumerThreadLatch<>(signalConsumer);
     }
 
-    private static abstract class AbsThreadLatch implements ThreadLatch {
+    static @Nonnull CountLatch newCountLatch(long initialCount) {
+        return new CountLatchImpl<>(initialCount);
+    }
+
+    private static abstract class AbsThreadLatch<T> implements ThreadLatch<T>, ThreadLatch.Waiter<T> {
 
         private volatile @Nonnull CountDownLatch latch = new CountDownLatch(1);
-        private final Object lock = new Object();
+        private final @Nonnull Object lock = new Object();
 
         @Override
         public void await() throws InterruptedRuntimeException {
@@ -40,12 +47,21 @@ final class LatchBack {
             }
         }
 
-        private CountDownLatch getLatch() {
+        private @Nonnull CountDownLatch getLatch() {
             return latch;
         }
 
         @Override
-        public void lock() {
+        public @Nonnull State state() {
+            return latch.getCount() <= 0 ? State.UNLATCHED : State.LATCHED;
+        }
+
+        @Override
+        public void signal(@Nullable T o) {
+        }
+
+        @Override
+        public void latch() {
             synchronized (lock) {
                 CountDownLatch oldLatch = this.latch;
                 if (oldLatch.getCount() <= 0) {
@@ -55,84 +71,85 @@ final class LatchBack {
         }
 
         @Override
-        public void unlock() {
+        public void unlatch() {
             synchronized (lock) {
                 latch.countDown();
             }
         }
 
         @Override
-        public @Nonnull State state() {
-            return latch.getCount() <= 0 ? State.UNLOCKED : State.LOCKED;
+        public @Nonnull Waiter<T> waiter() {
+            return this;
         }
     }
 
-    private static final class NoConsumerThreadLatch extends AbsThreadLatch {
-
-        @Override
-        public Waiter waiter() {
-            return new NoConsumerWaiter(this);
-        }
+    private static final class NoConsumerThreadLatch<T> extends AbsThreadLatch<T> {
     }
 
-    private static final class ConsumerThreadLatch extends AbsThreadLatch {
+    private static final class ConsumerThreadLatch<T> extends AbsThreadLatch<T> {
 
-        private final Consumer<Object> consumer;
+        private final @Nonnull Consumer<? super @Nullable T> consumer;
 
-        private ConsumerThreadLatch(Consumer<Object> consumer) {
+        private ConsumerThreadLatch(@Nonnull Consumer<? super @Nullable T> consumer) {
             this.consumer = consumer;
         }
 
         @Override
-        public Waiter waiter() {
-            return new ConsumerWaiter(this);
+        public void signal(@Nullable T o) {
+            consumer.accept(o);
         }
     }
 
-    private static abstract class AbsWaiter<T extends ThreadLatch> implements ThreadLatch.Waiter {
+    private static final class CountLatchImpl<T>
+        extends AbsThreadLatch<Long>
+        implements CountLatch, CountLatch.Waiter {
 
-        protected final T latch;
+        private final @Nonnull AtomicLong counter;
+        private final @Nonnull LongConsumer consumer;
 
-        protected AbsWaiter(T latch) {
-            this.latch = latch;
+        public CountLatchImpl(long initialCount) {
+            this.counter = new AtomicLong(initialCount);
+            this.consumer = counter::addAndGet;
         }
 
         @Override
-        public void await() throws InterruptedRuntimeException {
-            latch.await();
+        public @Nonnull State state() {
+            return counter.get() == 0 ? State.UNLATCHED : State.LATCHED;
         }
 
         @Override
-        public boolean await(@Nonnull Duration duration) throws InterruptedRuntimeException {
-            return latch.await(duration);
+        public void signal(long i) {
+            consumer.accept(i);
         }
 
         @Override
-        public ThreadLatch.@Nonnull State state() {
-            return latch.state();
-        }
-    }
-
-    private static final class NoConsumerWaiter extends AbsWaiter<NoConsumerThreadLatch> {
-
-        NoConsumerWaiter(NoConsumerThreadLatch latch) {
-            super(latch);
+        public void countDown() {
+            CountLatch.super.countDown();
         }
 
         @Override
-        public void signal(Object o) {
-        }
-    }
-
-    private static final class ConsumerWaiter extends AbsWaiter<ConsumerThreadLatch> {
-
-        ConsumerWaiter(ConsumerThreadLatch latch) {
-            super(latch);
+        public void countUp() {
+            CountLatch.super.countUp();
         }
 
         @Override
-        public void signal(Object o) {
-            latch.consumer.accept(o);
+        public long count() {
+            return counter.get();
+        }
+
+        @Override
+        public void latch() {
+            CountLatch.super.latch();
+        }
+
+        @Override
+        public void unlatch() {
+            CountLatch.super.unlatch();
+        }
+
+        @Override
+        public @Nonnull CountLatch.Waiter waiter() {
+            return this;
         }
     }
 }

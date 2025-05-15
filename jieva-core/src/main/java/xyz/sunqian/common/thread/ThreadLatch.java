@@ -1,28 +1,36 @@
 package xyz.sunqian.common.thread;
 
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.annotations.ThreadSafe;
 
 import java.time.Duration;
 import java.util.function.Consumer;
 
 /**
- * This interface represents a thread latch that can block or pass the threads. It has two states: locked and unlocked.
- * If it is locked, its {@link #await()} and {@link #await(Duration)} methods block the current thread until the state
- * becomes unlocked. The initialized state is locked.
+ * This interface represents a thread latch that can block or pass the threads. It has two states: latched and
+ * unlatched. If it is latched, its {@link #await()} and {@link #await(Duration)} methods block the current thread until
+ * the state becomes unlatched. The initialized state is latched.
  * <p>
- * {@code ThreadLatch} can produce waiters by {@link #waiter()}, which only have waiting methods for awaiting and signal
- * methods to send signals to the {@code ThreadLatch} where the {@code Waiter} is produced.
+ * {@link ThreadLatch} can send signals to itself by {@link #signal(Object)}. How to handle the signals is determined by
+ * the specified signal consumer such as {@link #newLatch(Consumer)}.
+ * <p>
+ * {@link Waiter} interface is a narrowed interface of this interface, which only has portion of the methods of the
+ * {@link ThreadLatch}. It is produced by {@link #waiter()}, and be shared the state with the {@link ThreadLatch}.
  *
+ * @param <T> the type of the signal object
  * @author sunqian
  */
-public interface ThreadLatch {
+@ThreadSafe
+public interface ThreadLatch<T> {
 
     /**
      * Returns a new {@link ThreadLatch}. The signal from its {@link #waiter()} will be ignored.
      *
+     * @param <T> the type of the signal object
      * @return a new {@link ThreadLatch}
      */
-    static ThreadLatch newLatch() {
+    static <T> @Nonnull ThreadLatch<T> newLatch() {
         return LatchBack.newLatch();
     }
 
@@ -31,9 +39,10 @@ public interface ThreadLatch {
      * be consumed by that consumer. Note thread safety is not guaranteed when invoking the consumer.
      *
      * @param signalConsumer the specified signal consumer
+     * @param <T>            the type of the signal object
      * @return a new {@link ThreadLatch}
      */
-    static ThreadLatch newLatch(Consumer<Object> signalConsumer) {
+    static <T> @Nonnull ThreadLatch<T> newLatch(@Nonnull Consumer<? super @Nullable T> signalConsumer) {
         return LatchBack.newLatch(signalConsumer);
     }
 
@@ -56,16 +65,6 @@ public interface ThreadLatch {
     boolean await(@Nonnull Duration duration) throws InterruptedRuntimeException;
 
     /**
-     * Set current state to locked.
-     */
-    void lock();
-
-    /**
-     * Set current state to unlocked.
-     */
-    void unlock();
-
-    /**
      * Returns the current state.
      *
      * @return the current state
@@ -74,18 +73,38 @@ public interface ThreadLatch {
     State state();
 
     /**
+     * Sends a signal to this latch.
+     *
+     * @param o the signal object
+     */
+    void signal(@Nullable T o);
+
+    /**
+     * Sets current state to latched.
+     */
+    void latch();
+
+    /**
+     * Sets current state to unlatched.
+     */
+    void unlatch();
+
+    /**
      * Produces and returns a {@link Waiter} which is shared the state with this latch as host.
      *
      * @return a {@link Waiter} which is shared the state with this latch as host
      */
-    Waiter waiter();
+    @Nonnull
+    Waiter<T> waiter();
 
     /**
-     * {@code Waiter} is produced from a {@link ThreadLatch} which as the host and shares the state with the
-     * {@code Waiter}. It only provides passive waiting methods and signal methods to send signals to the host
-     * {@link ThreadLatch}.
+     * This interface is a narrowed interface of the {@link ThreadLatch}, which only has waiting methods and signal
+     * methods, without latch methods. A {@link Waiter} is produced from a {@link ThreadLatch} which as the host and
+     * shares the state with the {@link Waiter}.
+     *
+     * @param <T> the type of the signal object
      */
-    interface Waiter {
+    interface Waiter<T> {
 
         /**
          * Blocks the current thread until the state becomes unlocked, unless the thread is interrupted.
@@ -118,7 +137,7 @@ public interface ThreadLatch {
          *
          * @param o the signal object
          */
-        void signal(Object o);
+        void signal(@Nullable T o);
     }
 
     /**
@@ -127,13 +146,13 @@ public interface ThreadLatch {
     enum State {
 
         /**
-         * State: locked.
+         * State: latched.
          */
-        LOCKED,
+        LATCHED,
 
         /**
-         * State: unlocked.
+         * State: unlatched.
          */
-        UNLOCKED,
+        UNLATCHED,
     }
 }
