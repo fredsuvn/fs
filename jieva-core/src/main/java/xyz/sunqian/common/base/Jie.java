@@ -12,6 +12,8 @@ import xyz.sunqian.common.mapping.BeanMapper;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingOptions;
 import xyz.sunqian.common.reflect.TypeRef;
+import xyz.sunqian.common.thread.InterruptedRuntimeException;
+import xyz.sunqian.common.thread.JieThread;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -569,29 +571,24 @@ public class Jie {
     }
 
     /**
-     * Sleeps current thread for specified milliseconds.
+     * Sleeps the current thread for the specified milliseconds.
      *
-     * @param millis specified milliseconds
+     * @param millis the specified milliseconds
+     * @throws IllegalArgumentException    if the value of {@code millis} is negative
+     * @throws InterruptedRuntimeException if any thread has interrupted the current thread
      */
-    public static void sleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            throw new IllegalStateException(e);
-        }
+    public static void sleep(long millis) throws IllegalArgumentException, InterruptedRuntimeException {
+        JieThread.sleep(millis);
     }
 
     /**
-     * Sleeps current thread for specified duration.
+     * Sleeps the current thread for the specified duration.
      *
-     * @param duration specified duration
+     * @param duration the specified duration
+     * @throws InterruptedRuntimeException if any thread has interrupted the current thread
      */
-    public static void sleep(Duration duration) {
-        try {
-            Thread.sleep(duration.toMillis(), duration.getNano());
-        } catch (InterruptedException e) {
-            throw new IllegalStateException(e);
-        }
+    public static void sleep(@Nonnull Duration duration) throws InterruptedRuntimeException {
+        JieThread.sleep(duration);
     }
 
     /**
