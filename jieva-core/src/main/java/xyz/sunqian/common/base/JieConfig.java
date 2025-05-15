@@ -1,5 +1,7 @@
 package xyz.sunqian.common.base;
 
+import xyz.sunqian.common.base.exception.JieRuntimeException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -28,7 +30,7 @@ public class JieConfig {
             in.close();
             return result;
         } catch (IOException e) {
-            throw new JieException(e);
+            throw new JieRuntimeException(e);
         }
     }
 

@@ -1,13 +1,13 @@
 package xyz.sunqian.common.invoke;
 
-import xyz.sunqian.common.base.JieException;
+import xyz.sunqian.common.base.exception.JieRuntimeException;
 
 /**
  * Invocation exception.
  *
  * @author sunqian
  */
-public class InvocationException extends JieException {
+public class InvocationException extends JieRuntimeException {
 
     /**
      * Constructs with the message.

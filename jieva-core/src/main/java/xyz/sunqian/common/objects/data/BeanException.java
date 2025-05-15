@@ -1,13 +1,13 @@
 package xyz.sunqian.common.objects.data;
 
-import xyz.sunqian.common.base.JieException;
+import xyz.sunqian.common.base.exception.JieRuntimeException;
 
 /**
  * Exception for bean.
  *
  * @author fredsuvn
  */
-public class BeanException extends JieException {
+public class BeanException extends JieRuntimeException {
 
     /**
      * Empty constructor.

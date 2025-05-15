@@ -1,5 +1,7 @@
 package xyz.sunqian.common.base;
 
+import xyz.sunqian.common.base.exception.UnsafeException;
+
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 

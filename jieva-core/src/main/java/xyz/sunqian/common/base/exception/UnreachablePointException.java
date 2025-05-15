@@ -1,11 +1,11 @@
-package xyz.sunqian.common.base;
+package xyz.sunqian.common.base.exception;
 
 /**
  * This exception should be thrown if and only if execution reaches a logically unreachable point.
  *
  * @author sunqian
  */
-public class UnreachablePointException extends JieException {
+public class UnreachablePointException extends JieRuntimeException {
 
     /**
      * Empty constructor.
@@ -15,7 +15,7 @@ public class UnreachablePointException extends JieException {
     }
 
     /**
-     * Constructs with message.
+     * Constructs with the message.
      *
      * @param message the message
      */
@@ -24,7 +24,7 @@ public class UnreachablePointException extends JieException {
     }
 
     /**
-     * Constructs with message and cause.
+     * Constructs with the message and cause.
      *
      * @param message the message
      * @param cause   the cause
@@ -34,7 +34,7 @@ public class UnreachablePointException extends JieException {
     }
 
     /**
-     * Constructs with cause.
+     * Constructs with the cause.
      *
      * @param cause the cause
      */

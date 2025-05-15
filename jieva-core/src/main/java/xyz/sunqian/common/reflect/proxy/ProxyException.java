@@ -1,13 +1,13 @@
 package xyz.sunqian.common.reflect.proxy;
 
-import xyz.sunqian.common.base.JieException;
+import xyz.sunqian.common.base.exception.JieRuntimeException;
 
 /**
  * Exception for proxy.
  *
  * @author fredsuvn
  */
-public class ProxyException extends JieException {
+public class ProxyException extends JieRuntimeException {
 
     /**
      * Empty constructor.

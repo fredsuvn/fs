@@ -169,6 +169,25 @@ public class IOTest {
         }
     }
 
+    @Test
+    public void testIORuntimeException() throws Exception {
+        expectThrows(IORuntimeException.class, () -> {
+            throw new IORuntimeException();
+        });
+        expectThrows(IORuntimeException.class, () -> {
+            throw new IORuntimeException("");
+        });
+        expectThrows(IORuntimeException.class, () -> {
+            throw new IORuntimeException("", new RuntimeException());
+        });
+        expectThrows(IORuntimeException.class, () -> {
+            throw new IORuntimeException(new RuntimeException());
+        });
+        expectThrows(IORuntimeException.class, () -> {
+            throw new IORuntimeException(new IOException());
+        });
+    }
+
     private InputStream bytesInput(byte[] array, int available) {
         return new BytesInput(array, available);
     }
