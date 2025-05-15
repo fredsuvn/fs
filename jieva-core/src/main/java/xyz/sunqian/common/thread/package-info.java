@@ -5,7 +5,7 @@
  * <ul>
  *     <li>{@link xyz.sunqian.common.thread.JieThread}</li>
  * </ul>
- *  Interfaces for thread:
+ * Interfaces for thread:
  * <ul>
  *     <li>{@link xyz.sunqian.common.thread.ThreadLatch}</li>
  * </ul>

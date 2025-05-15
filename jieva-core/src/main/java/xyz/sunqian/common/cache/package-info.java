@@ -1,11 +1,9 @@
 /**
- * Provides classes and interfaces for caching.
+ * The package for cache.
  * <p>
- * Core interfaces:
+ * Core cache interfaces:
  * <ul>
- *     <li>{@link xyz.sunqian.common.cache.SimpleCache};</li>
- *     <li>{@link xyz.sunqian.common.cache.SimpleCache.RemovalListener}</li>
- *     <li>{@link xyz.sunqian.common.cache.SimpleCache.RemovalCause}</li>
+ *     <li>{@link xyz.sunqian.common.cache.SimpleCache}</li>
  * </ul>
  */
 package xyz.sunqian.common.cache;

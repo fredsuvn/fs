@@ -9,7 +9,7 @@ import java.util.Map;
 
 final class DataObjectBack {
 
-    private static final SimpleCache<Type, Object> CACHE = SimpleCache.soft();
+    private static final SimpleCache<Type, Object> CACHE = SimpleCache.ofSoft();
 
     static DataSchema getDataSchema(Type type, @Nullable DataSchemaParser parser) {
         DataSchemaParser p = parser == null ? DataSchemaParser.defaultParser() : parser;

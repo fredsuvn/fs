@@ -1,5 +1,6 @@
 package xyz.sunqian.common.cache;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.value.Val;
@@ -7,121 +8,74 @@ import xyz.sunqian.common.base.value.Val;
 import java.lang.ref.PhantomReference;
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
-import java.time.Duration;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
- * The {@code SimpleCache} interface is a simplified cache interface with key-value mapping, and it provides convenient,
- * atomic and thread-safe cache operations. {@code SimpleCache} supports null values but does not allow null keys.
+ * This interface is a simplified key-value pair cache interface. It only provides get, put, remove and clean
+ * operations, and supports null value but does not allow null key. It is suitable for scenarios that require simple
+ * cache operations and do not care about the cache lifecycle.
  *
- * @param <K> the type of the keys
- * @param <V> the type of the values
+ * @param <K> the key type
+ * @param <V> the value type
  * @author sunqian
  */
 @ThreadSafe
 public interface SimpleCache<K, V> {
 
     /**
-     * Returns a new {@link SimpleCache} based on {@link WeakReference}. The default cache duration is permanent until
-     * the entry is removed by garbage collection.
+     * Returns a new {@link SimpleCache} based on {@link WeakReference}. The values of the returned cache will be
+     * automatically collected by the garbage collection based on the characteristics of {@link WeakReference}. Its
+     * {@link #clean()} method releases all entries of which values are collected, and this method is automatically
+     * invoked once every time another method is executed.
      *
-     * @param <K> the type of the cache keys
-     * @param <V> the type of the cache values
+     * @param <K> the key type
+     * @param <V> the value type
      * @return a new {@link SimpleCache} based on {@link WeakReference}
      */
-    static <K, V> SimpleCache<K, V> weak() {
-        return weak(null, null);
+    static <K, V> SimpleCache<K, V> ofWeak() {
+        return RefBack.ofWeak();
     }
 
     /**
-     * Returns a new {@link SimpleCache} based on {@link WeakReference}. The cache automatically removes invalid entries
-     * by calling {@link #clean()} during each method invocation. The {@code duration} parameter specifies the default
-     * cache duration, may be {@code null} if the duration is permanent until the entry is removed by garbage
-     * collection. The {@code removalListener} is an optional callback function for the removal of entries.
+     * Returns a new {@link SimpleCache} based on {@link SoftReference}. The values of the returned cache will be
+     * automatically collected by the garbage collection based on the characteristics of {@link SoftReference}. Its
+     * {@link #clean()} method releases all entries of which values are collected, and this method is automatically
+     * invoked once every time another method is executed.
      *
-     * @param duration        the  default cache duration
-     * @param removalListener an optional callback function for the removal of entries
-     * @param <K>             the type of the cache keys
-     * @param <V>             the type of the cache values
-     * @return a new {@link SimpleCache} based on {@link WeakReference}
-     */
-    static <K, V> SimpleCache<K, V> weak(
-        @Nullable Duration duration,
-        @Nullable SimpleCache.RemovalListener<K, V> removalListener
-    ) {
-        return SimpleCacheBack.newSimpleCache(true, duration, removalListener);
-    }
-
-    /**
-     * Returns a new {@link SimpleCache} based on {@link SoftReference}. The default cache duration is permanent until
-     * the entry is removed by garbage collection.
-     *
-     * @param <K> the type of the cache keys
-     * @param <V> the type of the cache values
+     * @param <K> the key type
+     * @param <V> the value type
      * @return a new {@link SimpleCache} based on {@link SoftReference}
      */
-    static <K, V> SimpleCache<K, V> soft() {
-        return soft(null, null);
+    static <K, V> SimpleCache<K, V> ofSoft() {
+        return RefBack.ofSoft();
     }
 
     /**
-     * Returns a new {@link SimpleCache} based on {@link SoftReference}. The cache automatically removes invalid entries
-     * by calling {@link #clean()} during each method invocation. The {@code duration} parameter specifies the default
-     * cache duration, may be {@code null} if the duration is permanent until the entry is removed by garbage
-     * collection. The {@code removalListener} is an optional callback function for the removal of entries.
+     * Returns a new {@link SimpleCache} based on {@link PhantomReference}. The values of the returned cache will be
+     * automatically collected by the garbage collection based on the characteristics of {@link PhantomReference}. Its
+     * {@link #clean()} method releases all entries of which values are collected, and this method is automatically
+     * invoked once every time another method is executed.
      *
-     * @param duration        the  default cache duration
-     * @param removalListener an optional callback function for the removal of entries
-     * @param <K>             the type of the cache keys
-     * @param <V>             the type of the cache values
-     * @return a new {@link SimpleCache} based on {@link SoftReference}
-     */
-    static <K, V> SimpleCache<K, V> soft(
-        @Nullable Duration duration,
-        @Nullable SimpleCache.RemovalListener<K, V> removalListener
-    ) {
-        return SimpleCacheBack.newSimpleCache(false, duration, removalListener);
-    }
-
-    /**
-     * Returns a new {@link SimpleCache} based on {@link PhantomReference}. The cache automatically removes invalid
-     * entries by calling {@link #clean()} during each method invocation. The {@code removalListener} is an optional
-     * callback function for the removal of entries.
-     * <p>
-     * Actually, this cache cannot retain valid entries due to the features of {@link PhantomReference}, so it is
-     * typically used for testing.
-     *
-     * @param removalListener an optional callback function for the removal of entries
-     * @param <K>             the type of the cache keys
-     * @param <V>             the type of the cache values
+     * @param <K> the key type
+     * @param <V> the value type
      * @return a new {@link SimpleCache} based on {@link PhantomReference}
      */
-    static <K, V> SimpleCache<K, V> phantom(@Nullable SimpleCache.RemovalListener<K, V> removalListener
-    ) {
-        return SimpleCacheBack.newSimpleCache(removalListener);
+    static <K, V> SimpleCache<K, V> ofPhantom() {
+        return RefBack.ofPhantom();
     }
 
     /**
-     * Creates a new {@link ValueInfo} instance with the specified value and duration.
+     * Returns a new {@link SimpleCache} based on strong reference. The values of the returned cache will never
+     * automatically be invalid, and its {@link #clean()} method does nothing. The behavior of the returned cache is
+     * just like a regular {@link Map}.
      *
-     * @param value    the specified value, may be {@code null}
-     * @param duration the specified duration, may be {@code null} for using the default cache duration
-     * @param <V>      the type of the value
-     * @return a new {@link ValueInfo} instance with the specified value and duration
+     * @param <K> the key type
+     * @param <V> the value type
+     * @return a new {@link SimpleCache} based on strong reference
      */
-    static <V> ValueInfo<V> valueInfo(@Nullable V value, @Nullable Duration duration) {
-        return new ValueInfo<V>() {
-
-            @Override
-            public V value() {
-                return value;
-            }
-
-            @Override
-            public @Nullable Duration duration() {
-                return duration;
-            }
-        };
+    static <K, V> SimpleCache<K, V> ofStrong() {
+        return RefBack.ofStrong();
     }
 
     /**
@@ -132,7 +86,7 @@ public interface SimpleCache<K, V> {
      * @return the value for the specified key
      */
     @Nullable
-    V get(K key);
+    V get(@Nonnull K key);
 
     /**
      * Returns the value wrapped by {@link Val} for the specified key, or null if the value is invalid.
@@ -141,84 +95,55 @@ public interface SimpleCache<K, V> {
      * @return the value wrapped by {@link Val} for the specified key
      */
     @Nullable
-    Val<V> getVal(K key);
+    Val<@Nullable V> getVal(@Nonnull K key);
 
     /**
      * Returns the value for the specified key. If the value is invalid, the {@code producer} will be called to generate
-     * a new value, and the new value will be cached with default settings. If an exception is thrown during the
-     * generation, the exception will be thrown directly. This operation is atomic.
+     * a new value, and the new value will be cached and returned. And this operation is atomic. If an exception is
+     * thrown during the generation, the exception will be thrown directly.
      * <p>
-     * Any value (including {@code null}) generated by the {@code producer} will be cached. For more detailed control,
-     * try {@link #getVal(Object, Function)}.
+     * Any value, including {@code null}, generated by the {@code producer} will be cached. To distinguish between null
+     * value or not cached, try {@link #getVal(Object, Function)}.
      *
      * @param key      the specified key
      * @param producer the producer to generate new value
      * @return the value for the specified key
      */
     @Nullable
-    V get(K key, Function<? super K, ? extends @Nullable V> producer);
+    V get(@Nonnull K key, @Nonnull Function<? super @Nonnull K, ? extends @Nullable V> producer);
 
     /**
      * Returns the value wrapped by {@link Val} for the specified key. If the value is invalid, the {@code producer}
-     * will be called to generate a new {@link ValueInfo} instance, and a new value will be cached based on the
-     * {@link ValueInfo} instance. If an exception is thrown during the generation, the exception will be thrown
-     * directly. This operation is atomic.
+     * will be called to generate a new value wrapped by {@link Val}, and the new value will be cached and returned. And
+     * this operation is atomic. If an exception is thrown during the generation, the exception will be thrown
+     * directly.
      * <p>
-     * If the {@code producer} generates {@code null}, no value will be cached, and this method will return null.
+     * If the {@code producer} generates a {@code null}, no value will be cached, and this method will return null.
      *
      * @param key      the specified key
-     * @param producer the producer to generate new {@link ValueInfo} instance
+     * @param producer the producer to generate new value wrapped by {@link Val}
      * @return the value wrapped by {@link Val} for the specified key
      */
     @Nullable
-    Val<V> getVal(K key, Function<? super K, ? extends @Nullable ValueInfo<? extends V>> producer);
+    Val<@Nullable V> getVal(
+        @Nonnull K key,
+        @Nonnull Function<? super @Nonnull K, ? extends @Nullable Val<? extends @Nullable V>> producer
+    );
 
     /**
-     * Puts the key mapping the value into this cache with default settings.
+     * Puts the key mapping the value into this cache.
      *
      * @param key   the key
      * @param value the value
      */
-    void put(K key, @Nullable V value);
-
-    /**
-     * Puts the key mapping a value based on given {@link ValueInfo}.
-     *
-     * @param key   the key
-     * @param value the given {@link ValueInfo}
-     */
-    void put(K key, ValueInfo<? extends V> value);
+    void put(@Nonnull K key, @Nullable V value);
 
     /**
      * Removes the value mapped by the key from this cache.
      *
      * @param key the key
      */
-    void remove(K key);
-
-    /**
-     * Returns whether this cache contains a valid value mapped by the key.
-     *
-     * @param key the key
-     * @return whether this cache contains a valid value mapped by the key
-     */
-    boolean contains(K key);
-
-    /**
-     * Sets a new duration for the value mapped by the key and resets its expiration from now. If there is no mapping
-     * for the key or the value has already expired, this method has no effect.
-     *
-     * @param key      the key
-     * @param duration a new cache duration
-     */
-    void expire(K key, Duration duration);
-
-    /**
-     * Returns the size of this cache.
-     *
-     * @return the size of this cache
-     */
-    int size();
+    void remove(@Nonnull K key);
 
     /**
      * Removes all entries from this cache.
@@ -226,82 +151,7 @@ public interface SimpleCache<K, V> {
     void clear();
 
     /**
-     * Removes invalid entries, such as expired ones, from this cache.
+     * Tries to release invalid entries from this cache.
      */
     void clean();
-
-    /**
-     * Detailed value info for {@link SimpleCache}.
-     *
-     * @param <V> the type of the actual value to be cached
-     */
-    interface ValueInfo<V> {
-
-        /**
-         * Returns the actual value to be cached.
-         *
-         * @return the actual value to be cached
-         */
-        @Nullable
-        V value();
-
-        /**
-         * Returns the cache duration for this value, or {@code null} if default duration is applied.
-         *
-         * @return the cache duration for this value, or {@code null} if default duration is applied
-         */
-        @Nullable
-        Duration duration();
-    }
-
-    /**
-     * Listener for the cached value's removal.
-     *
-     * @param <K> the type of the cache key
-     * @param <V> the type of the cache value
-     */
-    interface RemovalListener<K, V> {
-
-        /**
-         * Callback method invoked after a value is removed from the cache. This method is invoked exactly once for the
-         * value. If an exception is thrown during the invocation, the exception will be thrown directly. The passed
-         * value wrapped by {@link Val} may be {@code null} in cases such as garbage-collection.
-         *
-         * @param key   the key of the removed value
-         * @param value the removed value wrapped by {@link Val}, may be {@code null}
-         * @param cause the cause for the cached value's removal
-         */
-        void onRemoval(K key, @Nullable Val<V> value, RemovalCause cause);
-    }
-
-    /**
-     * Cause for the cached value's removal.
-     */
-    enum RemovalCause {
-
-        /**
-         * Manually removed.
-         */
-        EXPLICIT,
-
-        /**
-         * Potentially removed due to replacement.
-         */
-        REPLACED,
-
-        /**
-         * Automatically removed by the garbage collection.
-         */
-        COLLECTED,
-
-        /**
-         * Removed due to expiration.
-         */
-        EXPIRED,
-
-        /**
-         * Evicted due to size constraints.
-         */
-        SIZE,
-    }
 }

@@ -59,7 +59,7 @@ public class JieReflect {
         double.class, "[D"
     );
 
-    private static final SimpleCache<Type, Map<TypeVariable<?>, Type>> TYPE_PARAMETER_MAPPING_CACHE = SimpleCache.soft();
+    private static final SimpleCache<Type, Map<TypeVariable<?>, Type>> TYPE_PARAMETER_MAPPING_CACHE = SimpleCache.ofSoft();
 
     /**
      * Returns last name of given class. The last name is sub-string after last dot, for example:
