@@ -1,11 +1,10 @@
 package xyz.sunqian.common.base.value;
 
-import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 
 final class VarBack {
 
-    static <T> Var<T> of(@Nullable T value) {
+    static <T> Var<T> of(T value) {
         return new VarImpl<>(value);
     }
 
@@ -45,17 +44,17 @@ final class VarBack {
 
         private Object value;
 
-        private VarImpl(@Nullable T value) {
+        private VarImpl(T value) {
             this.value = value;
         }
 
         @Override
-        public @Nullable T get() {
+        public T get() {
             return Jie.as(value);
         }
 
         @Override
-        public Var<T> set(@Nullable T value) {
+        public Var<T> set(T value) {
             this.value = value;
             return this;
         }

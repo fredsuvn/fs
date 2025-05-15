@@ -1,7 +1,6 @@
 package xyz.sunqian.common.base.value;
 
 import xyz.sunqian.annotations.Immutable;
-import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 
 /**
@@ -33,7 +32,7 @@ public interface Val<T> {
      * @param <T>   type of the held value
      * @return a {@link Val} holding the specified value
      */
-    static <T> Val<T> of(@Nullable T value) {
+    static <T> Val<T> of(T value) {
         return value == null ? ofNull() : ValBack.of(value);
     }
 
@@ -42,6 +41,6 @@ public interface Val<T> {
      *
      * @return the held value
      */
-    @Nullable
+
     T get();
 }

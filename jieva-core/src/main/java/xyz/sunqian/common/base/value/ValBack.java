@@ -1,7 +1,5 @@
 package xyz.sunqian.common.base.value;
 
-import xyz.sunqian.annotations.Nullable;
-
 final class ValBack {
 
     static Val<?> OF_NULL = of(null);
@@ -15,7 +13,7 @@ final class ValBack {
     static FloatVal OF_ZERO_FLOAT = ValBack.of(0.0f);
     static DoubleVal OF_ZERO_DOUBLE = ValBack.of(0.0);
 
-    static <T> Val<T> of(@Nullable T value) {
+    static <T> Val<T> of(T value) {
         return new ValImpl<>(value);
     }
 
@@ -55,12 +53,12 @@ final class ValBack {
 
         private final T value;
 
-        private ValImpl(@Nullable T value) {
+        private ValImpl(T value) {
             this.value = value;
         }
 
         @Override
-        public @Nullable T get() {
+        public T get() {
             return value;
         }
     }
