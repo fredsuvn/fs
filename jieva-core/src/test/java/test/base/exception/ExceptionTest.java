@@ -1,32 +1,14 @@
 package test.base.exception;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.exception.JieException;
 import xyz.sunqian.common.base.exception.JieRuntimeException;
 import xyz.sunqian.common.base.exception.ProcessingException;
 import xyz.sunqian.common.base.exception.UnreachablePointException;
 import xyz.sunqian.common.base.exception.UnsafeException;
 
-import java.io.IOException;
-
-import static org.testng.Assert.assertNotEquals;
-import static org.testng.Assert.assertSame;
 import static org.testng.Assert.expectThrows;
 
 public class ExceptionTest {
-
-    @Test
-    public void testUtilities() {
-        RuntimeException exception = new RuntimeException();
-        assertSame(
-            JieException.getCauseIfTypeMatches(new IOException(exception), IOException.class),
-            exception
-        );
-        assertNotEquals(
-            JieException.getCauseIfTypeMatches(new IOException(exception), NullPointerException.class),
-            exception
-        );
-    }
 
     @Test
     public void testExceptionConstructors() {
