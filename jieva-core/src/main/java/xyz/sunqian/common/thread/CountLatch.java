@@ -7,10 +7,9 @@ import xyz.sunqian.annotations.ThreadSafe;
 /**
  * This is a specific class of {@link ThreadLatch} of which signal type is {@link Long}.
  * <p>
- * This class maintains a long counter. The value of the counter can be positive, negative, or zero. When the latch
- * receives a signal, the counter's value will become the current value plus the signal value. If, and only if the
- * counter's value equals to {@code 0}, the latch's state will become unlatched, otherwise latched. {@link #latch()} and
- * {@link #unlatch()} methods are invalid in this interface.
+ * This class maintains a counter. The value of the counter can be positive, negative, or zero. When the latch receives
+ * a signal, the counter's value will be added with the signal value. If, and only if the counter's value equals to
+ * {@code 0}, the latch's state will become unlatched, otherwise latched.
  * <p>
  * All methods and operations in this class, including consuming signals, are thread safety.
  *
@@ -56,14 +55,14 @@ public interface CountLatch extends ThreadLatch<Long> {
     void signal(long i);
 
     /**
-     * Sends a {@code -1} to this latch, it is equivalent to {@code signal(-1)}.
+     * Counts down 1 to the counter, it is equivalent to {@code signal(-1)}.
      */
     default void countDown() {
         signal(-1);
     }
 
     /**
-     * Sends a {@code 1} to this latch, it is equivalent to {@code signal(1)}.
+     * Counts up 1 to the counter, it is equivalent to {@code signal(1)}.
      */
     default void countUp() {
         signal(1);
@@ -77,17 +76,26 @@ public interface CountLatch extends ThreadLatch<Long> {
     long count();
 
     /**
-     * This method does nothing in {@link CountLatch}.
+     * Resets the current value of counter to the given new count value.
+     *
+     * @param newCount the given new count value
      */
+    void reset(long newCount);
+
+    /**
+     * Sets the current value of counter to {@code 1}, it is equivalent to {@code reset(1)}.
+     */
+    @Override
     default void latch() {
-        // Does nothing
+        reset(1);
     }
 
     /**
-     * This method does nothing in {@link CountLatch}.
+     * Sets the current value of counter to {@code 0}, it is equivalent to {@code reset(0)}.
      */
+    @Override
     default void unlatch() {
-        // Does nothing
+        reset(0);
     }
 
     /**

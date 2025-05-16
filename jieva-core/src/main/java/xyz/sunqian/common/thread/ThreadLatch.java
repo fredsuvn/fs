@@ -5,7 +5,7 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.ThreadSafe;
 
 import java.time.Duration;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 /**
  * This interface represents a thread latch that can block or pass the threads. It has two states: latched and
@@ -13,7 +13,7 @@ import java.util.function.Consumer;
  * the state becomes unlatched. The initialized state is latched.
  * <p>
  * {@link ThreadLatch} can send signals to itself by {@link #signal(Object)}. How to handle the signals is determined by
- * the specified signal consumer such as {@link #newLatch(Consumer)}.
+ * the specified signal consumer such as {@link #newLatch(BiConsumer)}.
  * <p>
  * {@link Waiter} interface is a narrowed interface of this interface, which only has portion of the methods of the
  * {@link ThreadLatch}. It is produced by {@link #waiter()}, and be shared the state with the {@link ThreadLatch}.
@@ -25,7 +25,7 @@ import java.util.function.Consumer;
 public interface ThreadLatch<T> {
 
     /**
-     * Returns a new {@link ThreadLatch}. The signal from its {@link #waiter()} will be ignored.
+     * Returns a new {@link ThreadLatch}. The signal will be ignored.
      *
      * @param <T> the type of the signal object
      * @return a new {@link ThreadLatch}
@@ -35,31 +35,36 @@ public interface ThreadLatch<T> {
     }
 
     /**
-     * Returns a new {@link ThreadLatch} with the specified signal consumer, the signal from its {@link #waiter()} will
-     * be consumed by that consumer. Note thread safety is not guaranteed when invoking the consumer.
+     * Returns a new {@link ThreadLatch} with the specified signal consumer, the signal will be consumed by that
+     * consumer. The first argument is the returned latch itself, and the second argument is the signal.
+     * <p>
+     * Note thread safety is not guaranteed for invoking of the consumer, the consumer need to handle thread safety by
+     * itself.
      *
      * @param signalConsumer the specified signal consumer
      * @param <T>            the type of the signal object
      * @return a new {@link ThreadLatch}
      */
-    static <T> @Nonnull ThreadLatch<T> newLatch(@Nonnull Consumer<? super @Nullable T> signalConsumer) {
+    static <T> @Nonnull ThreadLatch<T> newLatch(
+        @Nonnull BiConsumer<ThreadLatch<T>, ? super @Nullable T> signalConsumer
+    ) {
         return LatchBack.newLatch(signalConsumer);
     }
 
     /**
-     * Blocks the current thread until the state becomes unlocked, unless the thread is interrupted.
+     * Blocks the current thread until the state becomes unlatched, unless the thread is interrupted.
      *
      * @throws InterruptedRuntimeException if the current thread is interrupted while waiting
      */
     void await() throws InterruptedRuntimeException;
 
     /**
-     * Blocks the current thread until the state becomes unlocked, unless the thread is interrupted, or the specified
-     * waiting time elapses. Returns {@code true} if the state become unlocked and {@code false} if the waiting time
+     * Blocks the current thread until the state becomes unlatched, unless the thread is interrupted, or the specified
+     * waiting time elapses. Returns {@code true} if the state become unlatched and {@code false} if the waiting time
      * elapsed.
      *
      * @param duration the maximum time to wait
-     * @return {@code true} if the state become unlocked and {@code false} if the waiting time elapsed
+     * @return {@code true} if the state become unlatched and {@code false} if the waiting time elapsed
      * @throws InterruptedRuntimeException if the current thread is interrupted while waiting
      */
     boolean await(@Nonnull Duration duration) throws InterruptedRuntimeException;
@@ -107,19 +112,19 @@ public interface ThreadLatch<T> {
     interface Waiter<T> {
 
         /**
-         * Blocks the current thread until the state becomes unlocked, unless the thread is interrupted.
+         * Blocks the current thread until the state becomes unlatched, unless the thread is interrupted.
          *
          * @throws InterruptedRuntimeException if the current thread is interrupted while waiting
          */
         void await() throws InterruptedRuntimeException;
 
         /**
-         * Blocks the current thread until the state becomes unlocked, unless the thread is interrupted, or the
-         * specified waiting time elapses. Returns {@code true} if the state become unlocked and {@code false} if the
+         * Blocks the current thread until the state becomes unlatched, unless the thread is interrupted, or the
+         * specified waiting time elapses. Returns {@code true} if the state become unlatched and {@code false} if the
          * waiting time elapsed.
          *
          * @param duration the maximum time to wait
-         * @return {@code true} if the state become unlocked and {@code false} if the waiting time elapsed
+         * @return {@code true} if the state become unlatched and {@code false} if the waiting time elapsed
          * @throws InterruptedRuntimeException if the current thread is interrupted while waiting
          */
         boolean await(@Nonnull Duration duration) throws InterruptedRuntimeException;

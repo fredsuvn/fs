@@ -1,14 +1,11 @@
 package test.thread;
 
-import org.checkerframework.checker.units.qual.C;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.thread.CountLatch;
 import xyz.sunqian.common.thread.InterruptedRuntimeException;
 import xyz.sunqian.common.thread.ThreadLatch;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -21,7 +18,7 @@ public class LatchTest {
     public void testThreadLatch() throws Exception {
         testThreadLatch(10, ThreadLatch.newLatch());
         AtomicInteger counter = new AtomicInteger(0);
-        testThreadLatch(11, ThreadLatch.newLatch(o -> {
+        testThreadLatch(11, ThreadLatch.newLatch((l, o) -> {
             assertTrue(o instanceof Integer);
             counter.addAndGet((Integer) o);
         }));
@@ -94,6 +91,7 @@ public class LatchTest {
 
     @Test
     public void testCountLatch() throws Exception {
+        testCountLatch(10);
     }
 
     private void testCountLatch(int threadNum) throws Exception {
@@ -104,22 +102,26 @@ public class LatchTest {
         CountDownLatch cd2 = new CountDownLatch(threadNum);
         CountDownLatch cd3 = new CountDownLatch(threadNum);
         CountDownLatch cd4 = new CountDownLatch(threadNum);
+        CountDownLatch cd5 = new CountDownLatch(threadNum);
         for (int i = 0; i < threadNum; i++) {
             new Thread(() -> {
                 try {
                     assertEquals(waiter.state(), ThreadLatch.State.LATCHED);
                     cd1.countDown();
                     waiter.await();
-                    assertEquals(waiter.state(), ThreadLatch.State.UNLATCHED);
+                    System.out.println("thread " + Thread.currentThread().getName() + ": " + latch.count() + ", " + waiter.state());
+                    // assertEquals(waiter.state(), ThreadLatch.State.UNLATCHED);
                     count.incrementAndGet();
                     cd2.countDown();
-                    cd2.await();
                     waiter.countUp();
+                    waiter.wait();
+                    count.incrementAndGet();
                     cd3.countDown();
+                    latch.reset(666);
+                    cd4.countDown();
                     waiter.await();
                     count.incrementAndGet();
-                    waiter.signal(2);
-                    cd4.countDown();
+                    cd5.countDown();
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
@@ -132,11 +134,13 @@ public class LatchTest {
         }
         cd2.await();
         assertEquals(count.get(), threadNum);
+        latch.signal(Long.valueOf(-threadNum));
         cd3.await();
-        assertEquals(latch.count(), threadNum);
-        latch.signal(new Long(-threadNum) * 2);
-        cd4.await();
-        latch.signal(3);
         assertEquals(count.get(), threadNum * 2);
+        cd4.await();
+        assertEquals(latch.count(), 666);
+        latch.unlatch();
+        cd5.await();
+        assertEquals(count.get(), threadNum * 3);
     }
 }

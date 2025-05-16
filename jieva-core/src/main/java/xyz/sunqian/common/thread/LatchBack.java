@@ -7,7 +7,7 @@ import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.function.LongConsumer;
 
 final class LatchBack {
@@ -16,12 +16,14 @@ final class LatchBack {
         return new NoConsumerThreadLatch<>();
     }
 
-    static <T> @Nonnull ThreadLatch<T> newLatch(@Nonnull Consumer<? super @Nullable T> signalConsumer) {
+    static <T> @Nonnull ThreadLatch<T> newLatch(
+        @Nonnull BiConsumer<ThreadLatch<T>, ? super @Nullable T> signalConsumer
+    ) {
         return new ConsumerThreadLatch<>(signalConsumer);
     }
 
     static @Nonnull CountLatch newCountLatch(long initialCount) {
-        return new CountLatchImpl<>(initialCount);
+        return new CountLatchImpl(initialCount);
     }
 
     private static abstract class AbsThreadLatch<T> implements ThreadLatch<T>, ThreadLatch.Waiter<T> {
@@ -88,33 +90,52 @@ final class LatchBack {
 
     private static final class ConsumerThreadLatch<T> extends AbsThreadLatch<T> {
 
-        private final @Nonnull Consumer<? super @Nullable T> consumer;
+        private final @Nonnull BiConsumer<ThreadLatch<T>, ? super @Nullable T> consumer;
 
-        private ConsumerThreadLatch(@Nonnull Consumer<? super @Nullable T> consumer) {
+        private ConsumerThreadLatch(@Nonnull BiConsumer<ThreadLatch<T>, ? super @Nullable T> consumer) {
             this.consumer = consumer;
         }
 
         @Override
         public void signal(@Nullable T o) {
-            consumer.accept(o);
+            consumer.accept(this, o);
         }
     }
 
-    private static final class CountLatchImpl<T>
-        extends AbsThreadLatch<Long>
-        implements CountLatch, CountLatch.Waiter {
+    private static final class CountLatchImpl implements CountLatch, CountLatch.Waiter {
 
+        private final ThreadLatch<?> latch = ThreadLatch.newLatch();
         private final @Nonnull AtomicLong counter;
         private final @Nonnull LongConsumer consumer;
 
         public CountLatchImpl(long initialCount) {
             this.counter = new AtomicLong(initialCount);
-            this.consumer = counter::addAndGet;
+            this.consumer = (value) -> {
+                synchronized (latch) {
+                    long newValue = counter.addAndGet(value);
+                    afterSettingCounter(newValue);
+                }
+            };
+        }
+
+        @Override
+        public void await() throws InterruptedRuntimeException {
+            latch.await();
+        }
+
+        @Override
+        public boolean await(@Nonnull Duration duration) throws InterruptedRuntimeException {
+            return latch.await(duration);
         }
 
         @Override
         public @Nonnull State state() {
-            return counter.get() == 0 ? State.UNLATCHED : State.LATCHED;
+            return latch.state();
+        }
+
+        @Override
+        public void signal(@Nullable Long o) {
+            CountLatch.super.signal(o);
         }
 
         @Override
@@ -138,13 +159,17 @@ final class LatchBack {
         }
 
         @Override
-        public void latch() {
-            CountLatch.super.latch();
+        public void reset(long newCount) {
+            counter.set(newCount);
+            afterSettingCounter(newCount);
         }
 
-        @Override
-        public void unlatch() {
-            CountLatch.super.unlatch();
+        private void afterSettingCounter(long newValue) {
+            if (newValue == 0) {
+                latch.unlatch();
+            } else {
+                latch.latch();
+            }
         }
 
         @Override
