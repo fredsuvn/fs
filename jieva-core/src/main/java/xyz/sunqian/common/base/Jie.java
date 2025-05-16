@@ -4,7 +4,7 @@ import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.RetainedParam;
-import xyz.sunqian.common.base.thread.InterruptedRuntimeException;
+import xyz.sunqian.common.base.exception.AwaitingException;
 import xyz.sunqian.common.base.thread.JieThread;
 import xyz.sunqian.common.collection.JieArray;
 import xyz.sunqian.common.collection.JieList;
@@ -574,10 +574,9 @@ public class Jie {
      * Sleeps the current thread for the specified milliseconds.
      *
      * @param millis the specified milliseconds
-     * @throws IllegalArgumentException    if the value of {@code millis} is negative
-     * @throws InterruptedRuntimeException if any thread has interrupted the current thread
+     * @throws AwaitingException if the current thread is interrupted or an error occurs while sleeping
      */
-    public static void sleep(long millis) throws IllegalArgumentException, InterruptedRuntimeException {
+    public static void sleep(long millis) throws AwaitingException {
         JieThread.sleep(millis);
     }
 
@@ -585,9 +584,9 @@ public class Jie {
      * Sleeps the current thread for the specified duration.
      *
      * @param duration the specified duration
-     * @throws InterruptedRuntimeException if any thread has interrupted the current thread
+     * @throws AwaitingException if the current thread is interrupted or an error occurs while sleeping
      */
-    public static void sleep(@Nonnull Duration duration) throws InterruptedRuntimeException {
+    public static void sleep(@Nonnull Duration duration) throws AwaitingException {
         JieThread.sleep(duration);
     }
 

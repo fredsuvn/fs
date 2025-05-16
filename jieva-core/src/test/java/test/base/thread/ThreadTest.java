@@ -1,14 +1,13 @@
 package test.base.thread;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.thread.InterruptedRuntimeException;
+import xyz.sunqian.common.base.exception.AwaitingException;
 import xyz.sunqian.common.base.thread.JieThread;
 
 import java.time.Duration;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
 
 public class ThreadTest {
 
@@ -22,7 +21,7 @@ public class ThreadTest {
             Thread thread = new Thread(() -> {
                 try {
                     JieThread.sleep(999999999999999999L);
-                } catch (InterruptedRuntimeException e) {
+                } catch (AwaitingException e) {
                     assertEquals(e.getCause().getClass(), InterruptedException.class);
                 }
             });
@@ -37,22 +36,12 @@ public class ThreadTest {
             Thread thread = new Thread(() -> {
                 try {
                     JieThread.sleep(Duration.ofMillis(999999999999999999L));
-                } catch (InterruptedRuntimeException e) {
+                } catch (AwaitingException e) {
                     assertEquals(e.getCause().getClass(), InterruptedException.class);
                 }
             });
             thread.start();
             thread.interrupt();
         }
-    }
-
-    @Test
-    public void testInterruptedRuntimeException() {
-        expectThrows(InterruptedRuntimeException.class, () -> {
-            throw new InterruptedRuntimeException("msg");
-        });
-        expectThrows(InterruptedRuntimeException.class, () -> {
-            throw new InterruptedRuntimeException(new InterruptedException());
-        });
     }
 }

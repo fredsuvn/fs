@@ -2,6 +2,7 @@ package xyz.sunqian.common.base.thread;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.exception.AwaitingException;
 
 import java.time.Duration;
 import java.util.concurrent.locks.AbstractQueuedSynchronizer;
@@ -29,20 +30,20 @@ final class LatchBack {
         protected final @Nonnull LatchSync sync = new LatchSync();
 
         @Override
-        public void await() throws InterruptedRuntimeException {
+        public void await() throws AwaitingException {
             try {
                 sync.acquireSharedInterruptibly(1);
             } catch (InterruptedException e) {
-                throw new InterruptedRuntimeException(e);
+                throw new AwaitingException(e);
             }
         }
 
         @Override
-        public boolean await(@Nonnull Duration duration) throws InterruptedRuntimeException {
+        public boolean await(@Nonnull Duration duration) throws AwaitingException {
             try {
                 return sync.tryAcquireSharedNanos(1, duration.toNanos());
             } catch (InterruptedException e) {
-                throw new InterruptedRuntimeException(e);
+                throw new AwaitingException(e);
             }
         }
 

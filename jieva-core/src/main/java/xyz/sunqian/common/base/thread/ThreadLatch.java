@@ -3,6 +3,7 @@ package xyz.sunqian.common.base.thread;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.ThreadSafe;
+import xyz.sunqian.common.base.exception.AwaitingException;
 
 import java.time.Duration;
 import java.util.function.BiConsumer;
@@ -54,9 +55,9 @@ public interface ThreadLatch<T> {
     /**
      * Blocks the current thread until the state becomes unlatched, unless the thread is interrupted.
      *
-     * @throws InterruptedRuntimeException if the current thread is interrupted while waiting
+     * @throws AwaitingException if the current thread is interrupted or an error occurs while awaiting
      */
-    void await() throws InterruptedRuntimeException;
+    void await() throws AwaitingException;
 
     /**
      * Blocks the current thread until the state becomes unlatched, unless the thread is interrupted, or the specified
@@ -65,9 +66,9 @@ public interface ThreadLatch<T> {
      *
      * @param duration the maximum time to wait
      * @return {@code true} if the state become unlatched and {@code false} if the waiting time elapsed
-     * @throws InterruptedRuntimeException if the current thread is interrupted while waiting
+     * @throws AwaitingException if the current thread is interrupted or an error occurs while awaiting
      */
-    boolean await(@Nonnull Duration duration) throws InterruptedRuntimeException;
+    boolean await(@Nonnull Duration duration) throws AwaitingException;
 
     /**
      * Returns the current state.
@@ -114,9 +115,9 @@ public interface ThreadLatch<T> {
         /**
          * Blocks the current thread until the state becomes unlatched, unless the thread is interrupted.
          *
-         * @throws InterruptedRuntimeException if the current thread is interrupted while waiting
+         * @throws AwaitingException if the current thread is interrupted or an error occurs while awaiting
          */
-        void await() throws InterruptedRuntimeException;
+        void await() throws AwaitingException;
 
         /**
          * Blocks the current thread until the state becomes unlatched, unless the thread is interrupted, or the
@@ -125,9 +126,9 @@ public interface ThreadLatch<T> {
          *
          * @param duration the maximum time to wait
          * @return {@code true} if the state become unlatched and {@code false} if the waiting time elapsed
-         * @throws InterruptedRuntimeException if the current thread is interrupted while waiting
+         * @throws AwaitingException if the current thread is interrupted or an error occurs while awaiting
          */
-        boolean await(@Nonnull Duration duration) throws InterruptedRuntimeException;
+        boolean await(@Nonnull Duration duration) throws AwaitingException;
 
         /**
          * Returns the current state.

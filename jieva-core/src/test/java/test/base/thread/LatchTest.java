@@ -3,8 +3,8 @@ package test.base.thread;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieRandom;
+import xyz.sunqian.common.base.exception.AwaitingException;
 import xyz.sunqian.common.base.thread.CountLatch;
-import xyz.sunqian.common.base.thread.InterruptedRuntimeException;
 import xyz.sunqian.common.base.thread.ThreadLatch;
 
 import java.time.Duration;
@@ -32,7 +32,7 @@ public class LatchTest {
             Thread thread1 = new Thread(() -> {
                 try {
                     latch.waiter().await();
-                } catch (InterruptedRuntimeException e) {
+                } catch (AwaitingException e) {
                     assertEquals(e.getCause().getClass(), InterruptedException.class);
                 }
             });
@@ -41,7 +41,7 @@ public class LatchTest {
             Thread thread2 = new Thread(() -> {
                 try {
                     latch.waiter().await(Duration.ofDays(1));
-                } catch (InterruptedRuntimeException e) {
+                } catch (AwaitingException e) {
                     assertEquals(e.getCause().getClass(), InterruptedException.class);
                 }
             });
@@ -61,7 +61,7 @@ public class LatchTest {
                     latch.waiter().signal(null);
                     assertEquals(latch.state(), ThreadLatch.State.UNLATCHED);
                     cd.countDown();
-                } catch (InterruptedRuntimeException e) {
+                } catch (AwaitingException e) {
                     assertEquals(e.getCause().getClass(), InterruptedException.class);
                 }
             }).start();
