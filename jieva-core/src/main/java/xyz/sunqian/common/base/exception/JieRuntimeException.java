@@ -1,7 +1,9 @@
 package xyz.sunqian.common.base.exception;
 
+import xyz.sunqian.annotations.Nullable;
+
 /**
- * Root runtime exception for Jieva.
+ * This is the root runtime exception for jieva.
  *
  * @author sunqian
  */
@@ -19,7 +21,7 @@ public class JieRuntimeException extends RuntimeException {
      *
      * @param message the message
      */
-    public JieRuntimeException(String message) {
+    public JieRuntimeException(@Nullable String message) {
         super(message);
     }
 
@@ -29,7 +31,7 @@ public class JieRuntimeException extends RuntimeException {
      * @param message the message
      * @param cause   the cause
      */
-    public JieRuntimeException(String message, Throwable cause) {
+    public JieRuntimeException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
@@ -38,7 +40,7 @@ public class JieRuntimeException extends RuntimeException {
      *
      * @param cause the cause
      */
-    public JieRuntimeException(Throwable cause) {
+    public JieRuntimeException(@Nullable Throwable cause) {
         super(cause);
     }
 }

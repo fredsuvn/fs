@@ -1,7 +1,9 @@
 package xyz.sunqian.common.base.exception;
 
+import xyz.sunqian.annotations.Nullable;
+
 /**
- * This exception should be thrown if and only if execution reaches a logically unreachable point.
+ * This exception will be thrown if, and only if the execution reaches an unreachable point.
  *
  * @author sunqian
  */
@@ -19,7 +21,7 @@ public class UnreachablePointException extends JieRuntimeException {
      *
      * @param message the message
      */
-    public UnreachablePointException(String message) {
+    public UnreachablePointException(@Nullable String message) {
         super(message);
     }
 
@@ -29,7 +31,7 @@ public class UnreachablePointException extends JieRuntimeException {
      * @param message the message
      * @param cause   the cause
      */
-    public UnreachablePointException(String message, Throwable cause) {
+    public UnreachablePointException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
@@ -38,7 +40,7 @@ public class UnreachablePointException extends JieRuntimeException {
      *
      * @param cause the cause
      */
-    public UnreachablePointException(Throwable cause) {
+    public UnreachablePointException(@Nullable Throwable cause) {
         super(cause);
     }
 }

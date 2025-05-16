@@ -3,17 +3,17 @@ package xyz.sunqian.common.base.exception;
 import xyz.sunqian.annotations.Nullable;
 
 /**
- * This runtime exception is typically used for wrapping exceptions thrown during the processing. The
+ * This runtime exception is typically used for wrapping exceptions thrown during the await operation. The
  * {@link #getCause()} method returns the wrapped original cause (if any).
  *
  * @author sunqian
  */
-public class ProcessingException extends JieRuntimeException {
+public class AwaitingException extends JieRuntimeException {
 
     /**
      * Empty constructor.
      */
-    public ProcessingException() {
+    public AwaitingException() {
         super();
     }
 
@@ -22,7 +22,7 @@ public class ProcessingException extends JieRuntimeException {
      *
      * @param message the message
      */
-    public ProcessingException(@Nullable String message) {
+    public AwaitingException(@Nullable String message) {
         super(message);
     }
 
@@ -32,7 +32,7 @@ public class ProcessingException extends JieRuntimeException {
      * @param message the message
      * @param cause   the cause
      */
-    public ProcessingException(@Nullable String message, @Nullable Throwable cause) {
+    public AwaitingException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
@@ -41,7 +41,7 @@ public class ProcessingException extends JieRuntimeException {
      *
      * @param cause the cause
      */
-    public ProcessingException(@Nullable Throwable cause) {
+    public AwaitingException(@Nullable Throwable cause) {
         this(JieException.getMessage(cause), cause);
     }
 }
