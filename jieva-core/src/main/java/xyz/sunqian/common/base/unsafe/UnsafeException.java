@@ -1,4 +1,6 @@
-package xyz.sunqian.common.base.exception;
+package xyz.sunqian.common.base.unsafe;
+
+import xyz.sunqian.common.base.exception.JieRuntimeException;
 
 /**
  * Runtime exception for unsafe.

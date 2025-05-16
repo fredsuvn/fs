@@ -1,6 +1,6 @@
-package xyz.sunqian.common.base;
+package xyz.sunqian.common.base.unsafe;
 
-import xyz.sunqian.common.base.exception.UnsafeException;
+import xyz.sunqian.common.base.JieSystem;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
