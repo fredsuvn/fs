@@ -1,4 +1,4 @@
-package xyz.sunqian.common.thread;
+package xyz.sunqian.common.base.thread;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;

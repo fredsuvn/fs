@@ -1,4 +1,4 @@
-package xyz.sunqian.common.thread;
+package xyz.sunqian.common.base.thread;
 
 /**
  * Runtime exception for {@link InterruptedException}.

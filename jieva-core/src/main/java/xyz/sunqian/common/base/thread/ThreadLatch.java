@@ -1,4 +1,4 @@
-package xyz.sunqian.common.thread;
+package xyz.sunqian.common.base.thread;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
@@ -153,11 +153,18 @@ public interface ThreadLatch<T> {
         /**
          * State: latched.
          */
-        LATCHED,
+        LATCHED(1),
 
         /**
          * State: unlatched.
          */
-        UNLATCHED,
+        UNLATCHED(0),
+        ;
+
+        final int value;
+
+        State(int value) {
+            this.value = value;
+        }
     }
 }

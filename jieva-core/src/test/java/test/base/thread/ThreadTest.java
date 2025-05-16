@@ -1,8 +1,8 @@
-package test.thread;
+package test.base.thread;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.thread.InterruptedRuntimeException;
-import xyz.sunqian.common.thread.JieThread;
+import xyz.sunqian.common.base.thread.InterruptedRuntimeException;
+import xyz.sunqian.common.base.thread.JieThread;
 
 import java.time.Duration;
 

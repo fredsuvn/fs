@@ -1,12 +1,10 @@
-package xyz.sunqian.common.thread;
+package xyz.sunqian.common.base.thread;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 
 import java.time.Duration;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.AbstractQueuedSynchronizer;
 import java.util.function.BiConsumer;
 import java.util.function.LongConsumer;
 
@@ -28,13 +26,12 @@ final class LatchBack {
 
     private static abstract class AbsThreadLatch<T> implements ThreadLatch<T>, ThreadLatch.Waiter<T> {
 
-        private volatile @Nonnull CountDownLatch latch = new CountDownLatch(1);
-        private final @Nonnull Object lock = new Object();
+        protected final @Nonnull LatchSync sync = new LatchSync();
 
         @Override
         public void await() throws InterruptedRuntimeException {
             try {
-                getLatch().await();
+                sync.acquireSharedInterruptibly(1);
             } catch (InterruptedException e) {
                 throw new InterruptedRuntimeException(e);
             }
@@ -43,19 +40,15 @@ final class LatchBack {
         @Override
         public boolean await(@Nonnull Duration duration) throws InterruptedRuntimeException {
             try {
-                return getLatch().await(duration.toNanos(), TimeUnit.NANOSECONDS);
+                return sync.tryAcquireSharedNanos(1, duration.toNanos());
             } catch (InterruptedException e) {
                 throw new InterruptedRuntimeException(e);
             }
         }
 
-        private @Nonnull CountDownLatch getLatch() {
-            return latch;
-        }
-
         @Override
         public @Nonnull State state() {
-            return latch.getCount() <= 0 ? State.UNLATCHED : State.LATCHED;
+            return (sync.getCount() == State.LATCHED.value) ? State.LATCHED : State.UNLATCHED;
         }
 
         @Override
@@ -64,28 +57,44 @@ final class LatchBack {
 
         @Override
         public void latch() {
-            synchronized (lock) {
-                CountDownLatch oldLatch = this.latch;
-                if (oldLatch.getCount() <= 0) {
-                    this.latch = new CountDownLatch(1);
-                }
-            }
+            sync.releaseShared(State.LATCHED.value);
         }
 
         @Override
         public void unlatch() {
-            synchronized (lock) {
-                latch.countDown();
-            }
+            sync.releaseShared(State.UNLATCHED.value);
         }
 
         @Override
         public @Nonnull Waiter<T> waiter() {
             return this;
         }
+
+        private static final class LatchSync extends AbstractQueuedSynchronizer {
+
+            private LatchSync() {
+                setState(ThreadLatch.State.LATCHED.value);
+            }
+
+            private int getCount() {
+                return getState();
+            }
+
+            protected int tryAcquireShared(int acquires) {
+                return (getState() == ThreadLatch.State.LATCHED.value) ? -1 : 1;
+            }
+
+            protected boolean tryReleaseShared(int releases) {
+                setState(releases);
+                return releases == ThreadLatch.State.UNLATCHED.value;
+            }
+        }
     }
 
     private static final class NoConsumerThreadLatch<T> extends AbsThreadLatch<T> {
+
+        private NoConsumerThreadLatch() {
+        }
     }
 
     private static final class ConsumerThreadLatch<T> extends AbsThreadLatch<T> {
@@ -102,35 +111,23 @@ final class LatchBack {
         }
     }
 
-    private static final class CountLatchImpl implements CountLatch, CountLatch.Waiter {
+    private static final class CountLatchImpl
+        extends AbsThreadLatch<Long>
+        implements CountLatch, CountLatch.Waiter {
 
-        private final ThreadLatch<?> latch = ThreadLatch.newLatch();
-        private final @Nonnull AtomicLong counter;
+        private long count;
         private final @Nonnull LongConsumer consumer;
 
         public CountLatchImpl(long initialCount) {
-            this.counter = new AtomicLong(initialCount);
+            this.count = initialCount;
             this.consumer = (value) -> {
-                synchronized (latch) {
-                    long newValue = counter.addAndGet(value);
-                    afterSettingCounter(newValue);
+                synchronized (this) {
+                    long newValue = count + value;
+                    count = newValue;
+                    doLatch(newValue);
                 }
             };
-        }
-
-        @Override
-        public void await() throws InterruptedRuntimeException {
-            latch.await();
-        }
-
-        @Override
-        public boolean await(@Nonnull Duration duration) throws InterruptedRuntimeException {
-            return latch.await(duration);
-        }
-
-        @Override
-        public @Nonnull State state() {
-            return latch.state();
+            doLatch(initialCount);
         }
 
         @Override
@@ -155,20 +152,32 @@ final class LatchBack {
 
         @Override
         public long count() {
-            return counter.get();
+            return count;
         }
 
         @Override
         public void reset(long newCount) {
-            counter.set(newCount);
-            afterSettingCounter(newCount);
+            synchronized (this) {
+                count = newCount;
+                doLatch(newCount);
+            }
         }
 
-        private void afterSettingCounter(long newValue) {
+        @Override
+        public void latch() {
+            CountLatch.super.latch();
+        }
+
+        @Override
+        public void unlatch() {
+            CountLatch.super.unlatch();
+        }
+
+        private void doLatch(long newValue) {
             if (newValue == 0) {
-                latch.unlatch();
+                sync.releaseShared(State.UNLATCHED.value);
             } else {
-                latch.latch();
+                sync.releaseShared(State.LATCHED.value);
             }
         }
 
