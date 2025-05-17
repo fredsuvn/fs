@@ -3,7 +3,7 @@ package xyz.sunqian.common.base.exception;
 import xyz.sunqian.annotations.Nullable;
 
 /**
- * This exception will be thrown if, and only if the execution reaches an unreachable point.
+ * This exception will be thrown if, and only if, the execution reaches an unreachable point.
  *
  * @author sunqian
  */
