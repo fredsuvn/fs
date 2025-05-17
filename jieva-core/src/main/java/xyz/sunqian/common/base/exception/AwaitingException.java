@@ -44,4 +44,13 @@ public class AwaitingException extends JieRuntimeException {
     public AwaitingException(@Nullable Throwable cause) {
         this(JieException.getMessage(cause), cause);
     }
+
+    /**
+     * Returns whether the cause is an {@link InterruptedException}.
+     *
+     * @return whether the cause is an {@link InterruptedException}
+     */
+    public boolean isInterrupted() {
+        return getCause() instanceof InterruptedException;
+    }
 }

@@ -8,8 +8,10 @@ import xyz.sunqian.common.base.exception.ProcessingException;
 import xyz.sunqian.common.base.exception.UnreachablePointException;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
 public class ExceptionTest {
@@ -96,6 +98,8 @@ public class ExceptionTest {
             AwaitingException e = new AwaitingException(cause);
             assertEquals(e.getMessage(), message);
             assertSame(e.getCause(), cause);
+            assertTrue(new AwaitingException(new InterruptedException()).isInterrupted());
+            assertFalse(new AwaitingException().isInterrupted());
         }
     }
 }
