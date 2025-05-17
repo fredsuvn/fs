@@ -4,7 +4,10 @@ import java.util.concurrent.Callable;
 
 /**
  * This interface represents an executable task, such as a {@link Runnable}, {@link Callable}, a third process, or other
- * executable body. This is a functional interface whose functional method is {@link #doWork()}.
+ * executable body.
+ * <p>
+ * This is a functional interface whose functional method is {@link #doWork()}, and it inherits {@link Runnable} and
+ * {@link Callable}.
  *
  * @param <T> the result type of the work
  * @author sunqian
@@ -25,7 +28,7 @@ public interface Work<T> extends Runnable, Callable<T> {
         try {
             doWork();
         } catch (Exception e) {
-            throw new WorkingException(e);
+            throw new WorkException(e);
         }
     }
 
