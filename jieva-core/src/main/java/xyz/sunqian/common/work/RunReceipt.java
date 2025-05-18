@@ -4,11 +4,10 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.exception.AwaitingException;
 
 import java.time.Duration;
-import java.util.concurrent.Future;
 
 /**
- * This interface represents a receipt for a submitted work which has no result. It can be used to track the progress
- * and status of the work, similar to a {@link Future} without any result.
+ * This interface represents a receipt for a submitted {@link Runnable}. It can be used to track the progress and status
+ * of the {@link Runnable}. This interface is the no return version of {@link WorkReceipt}.
  *
  * @author sunqian
  */

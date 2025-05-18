@@ -4,19 +4,21 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.exception.JieException;
 import xyz.sunqian.common.base.exception.JieRuntimeException;
 
+import java.util.concurrent.RejectedExecutionException;
+
 /**
- * This runtime exception is typically used for wrapping exceptions thrown for
- * {@linkplain xyz.sunqian.common.work work}. The {@link #getCause()} method returns the wrapped original cause (if
+ * This runtime exception is typically used for wrapping exceptions that occur when submitting a work to an executor.
+ * The {@link #getCause()} method returns the wrapped original cause such as {@link RejectedExecutionException} (if
  * any).
  *
  * @author sunqian
  */
-public class WorkException extends JieRuntimeException {
+public class SubmissionException extends JieRuntimeException {
 
     /**
      * Empty constructor.
      */
-    public WorkException() {
+    public SubmissionException() {
         super();
     }
 
@@ -25,7 +27,7 @@ public class WorkException extends JieRuntimeException {
      *
      * @param message the message
      */
-    public WorkException(@Nullable String message) {
+    public SubmissionException(@Nullable String message) {
         super(message);
     }
 
@@ -35,7 +37,7 @@ public class WorkException extends JieRuntimeException {
      * @param message the message
      * @param cause   the cause
      */
-    public WorkException(@Nullable String message, @Nullable Throwable cause) {
+    public SubmissionException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
@@ -44,7 +46,7 @@ public class WorkException extends JieRuntimeException {
      *
      * @param cause the cause
      */
-    public WorkException(@Nullable Throwable cause) {
+    public SubmissionException(@Nullable Throwable cause) {
         this(JieException.getMessage(cause), cause);
     }
 }

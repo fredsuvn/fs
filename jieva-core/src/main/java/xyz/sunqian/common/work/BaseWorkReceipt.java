@@ -3,6 +3,7 @@ package xyz.sunqian.common.work;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 
+import java.time.Duration;
 import java.util.Objects;
 
 /**
@@ -10,7 +11,7 @@ import java.util.Objects;
  *
  * @author sunqian
  */
-public interface BaseWorkReceipt {
+interface BaseWorkReceipt {
 
     /**
      * Returns the state of the work.
@@ -69,4 +70,12 @@ public interface BaseWorkReceipt {
      */
     @Nullable
     Throwable getException();
+
+    /**
+     * Returns the remaining delay of the work execution, or null if the work is not delayed.
+     *
+     * @return the remaining delay of the work execution, or null if the work is not delayed
+     */
+    @Nullable
+    Duration getDelay();
 }

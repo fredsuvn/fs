@@ -1,13 +1,12 @@
 package xyz.sunqian.common.work;
 
+import xyz.sunqian.common.base.exception.JieException;
+
 import java.util.concurrent.Callable;
 
 /**
- * This interface represents an executable task, such as a {@link Runnable}, {@link Callable}, a third process, or other
- * executable body.
- * <p>
- * This is a functional interface whose functional method is {@link #doWork()}, and it inherits {@link Runnable} and
- * {@link Callable}.
+ * This interface represents an executable body, which is also a functional interface whose functional method is
+ * {@link #doWork()}. And it inherits {@link Runnable} and {@link Callable}.
  *
  * @param <T> the result type of the work
  * @author sunqian
@@ -28,7 +27,7 @@ public interface Work<T> extends Runnable, Callable<T> {
         try {
             doWork();
         } catch (Exception e) {
-            throw new WorkException(e);
+            throw new RuntimeException(JieException.getMessage(e), e);
         }
     }
 
