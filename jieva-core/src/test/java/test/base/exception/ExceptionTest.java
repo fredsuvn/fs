@@ -6,6 +6,7 @@ import xyz.sunqian.common.base.exception.JieException;
 import xyz.sunqian.common.base.exception.JieRuntimeException;
 import xyz.sunqian.common.base.exception.ProcessingException;
 import xyz.sunqian.common.base.exception.UnreachablePointException;
+import xyz.sunqian.common.base.exception.WrappedException;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -100,6 +101,11 @@ public class ExceptionTest {
             assertSame(e.getCause(), cause);
             assertTrue(new AwaitingException(new InterruptedException()).isInterrupted());
             assertFalse(new AwaitingException().isInterrupted());
+        }
+        {
+            // WrappedException
+            assertEquals(new WrappedException(cause).getMessage(), message);
+            assertSame(new WrappedException(cause).getCause(), cause);
         }
     }
 }
