@@ -1,6 +1,6 @@
 package xyz.sunqian.common.work;
 
-import xyz.sunqian.common.base.exception.JieException;
+import xyz.sunqian.common.base.exception.WrappedException;
 
 import java.util.concurrent.Callable;
 
@@ -27,7 +27,7 @@ public interface Work<T> extends Runnable, Callable<T> {
         try {
             doWork();
         } catch (Exception e) {
-            throw new RuntimeException(JieException.getMessage(e), e);
+            throw new WrappedException(e);
         }
     }
 

@@ -3,6 +3,7 @@ package xyz.sunqian.common.work;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.base.exception.AwaitingException;
+import xyz.sunqian.common.base.exception.WrappedException;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -34,7 +35,18 @@ public interface WorkExecutor {
      * @param work the given work
      * @throws SubmissionException if an error occurs during the submitting
      */
-    void run(@Nonnull Callable<?> work) throws SubmissionException;
+    default void run(@Nonnull Callable<?> work) throws SubmissionException {
+        if (work instanceof Runnable) {
+            run((Runnable) work);
+        }
+        run(() -> {
+            try {
+                work.call();
+            } catch (Exception e) {
+                throw new WrappedException(e);
+            }
+        });
+    }
 
     /**
      * Submits the given work to this executor, returns a {@link RunReceipt} for the work.
