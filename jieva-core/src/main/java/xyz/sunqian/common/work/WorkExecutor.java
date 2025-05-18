@@ -267,4 +267,67 @@ public interface WorkExecutor {
         @Nonnull Duration initialDelay,
         @Nonnull Duration delay
     ) throws SubmissionException;
+
+    /**
+     * Closes this executor and returns immediately. The previously submitted works are executed, but no new work will
+     * be accepted. Invocation has no additional effect if already closed.
+     * <p>
+     * NOTE: This method does not wait for previously submitted works to complete execution. Use {@link #await()} or
+     * {@link #await(Duration)} to do that.
+     */
+    void close();
+
+    /**
+     * Closes this executor and attempts to stop all actively executing works, halts the processing of waiting works,
+     * and returns a list of the works as {@link Runnable} that were awaiting execution. A closed executor no longer
+     * accepts new works, and invocation has no additional effect if already closed.
+     * <p>
+     * NOTE1: This method does not wait for previously submitted works to complete execution. Use {@link #await()} or
+     * {@link #await(Duration)} to do that.
+     * <p>
+     * NOTE2: There are no guarantees beyond best-effort attempts to stop processing actively executing works. For
+     * example, typical implementations will cancel via {@link Thread#interrupt}, so any task that fails to respond to
+     * interrupts may never terminate.
+     *
+     * @return a list of works as {@link Runnable} that never commenced execution
+     */
+    List<Runnable> closeNow();
+
+    /**
+     * Returns {@code true} if this executor has been closed.
+     *
+     * @return {@code true} if this executor has been closed
+     */
+    boolean isClosed();
+
+    /**
+     * Blocks the current thread until all works have been done.
+     * <p>
+     * NOTE: This method should be invoked after a {@link #close()} or {@link #closeNow()} is invoked to prevent the
+     * submission of new works cause blocking this method indefinitely.
+     *
+     * @throws AwaitingException if the current thread is interrupted or an error occurs while awaiting
+     */
+    void await() throws AwaitingException;
+
+    /**
+     * Blocks the current thread until all works have been done, or the timeout occurs, or the current thread is
+     * interrupted.
+     * <p>
+     * NOTE: This method should be invoked after a {@link #close()} or {@link #closeNow()} is invoked to prevent the
+     * submission of new works cause blocking this method to timeout.
+     *
+     * @param duration the maximum time to wait
+     * @return {@code true} if this executor terminated and {@code false} if the timeout elapsed before termination
+     * @throws AwaitingException if the current thread is interrupted or an error occurs while awaiting
+     */
+    boolean await(@Nonnull Duration duration) throws AwaitingException;
+
+    /**
+     * Returns {@code true} if all works have been done and the executor is closed. Note that this method never returns
+     * {@code true} unless either {@link #close()} or {@link #closeNow()} was called first.
+     *
+     * @return {@code true} if all works have been done and the executor is closed
+     */
+    boolean isTerminated();
 }

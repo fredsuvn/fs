@@ -14,14 +14,14 @@ import java.time.Duration;
 public interface RunReceipt extends BaseWorkReceipt {
 
     /**
-     * Blocks current thread until the work is completed or canceled.
+     * Blocks the current thread until the work is completed or canceled.
      *
      * @throws AwaitingException if the current thread is interrupted or an error occurs while awaiting
      */
     void await() throws AwaitingException;
 
     /**
-     * Blocks current thread until the work is completed or canceled, or the specified waiting time elapses.
+     * Blocks the current thread until the work is completed or canceled, or the specified waiting time elapses.
      *
      * @param duration the maximum time to wait
      * @throws AwaitingException if the current thread is interrupted or an error occurs while awaiting

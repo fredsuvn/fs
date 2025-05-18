@@ -15,7 +15,7 @@ import java.time.Duration;
 public interface WorkReceipt<T> extends BaseWorkReceipt {
 
     /**
-     * Blocks current thread until the work is completed or canceled, returns the result.
+     * Blocks the current thread until the work is completed or canceled, returns the result.
      *
      * @return the result of the work
      * @throws AwaitingException if the current thread is interrupted or an error occurs while awaiting
@@ -23,8 +23,8 @@ public interface WorkReceipt<T> extends BaseWorkReceipt {
     T await() throws AwaitingException;
 
     /**
-     * Blocks current thread until the work is completed or canceled, or the specified waiting time elapses. Returns the
-     * result.
+     * Blocks the current thread until the work is completed or canceled, or the specified waiting time elapses. Returns
+     * the result.
      *
      * @param duration the maximum time to wait
      * @return the result of the work
