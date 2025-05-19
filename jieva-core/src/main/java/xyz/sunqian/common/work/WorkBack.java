@@ -5,6 +5,7 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.AwaitingException;
+import xyz.sunqian.common.base.thread.JieThread;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -18,9 +19,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 final class WorkBack {
 
@@ -32,21 +35,19 @@ final class WorkBack {
                 Integer.MAX_VALUE,
                 0L,
                 TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>()
+                new SynchronousQueue<>()
             );
         return newExecutor(service);
     }
 
-    static @Nonnull WorkExecutor newExecutor(int core, int max, boolean scheduled) {
-        ExecutorService service = scheduled ?
-            new ScheduledThreadPoolExecutor(core) :
-            new ThreadPoolExecutor(
-                core,
-                max,
-                60L,
-                TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>()
-            );
+    static @Nonnull WorkExecutor newExecutor(int coreThreadSize, int maxThreadSize, int maxQueueSize) {
+        ThreadPoolExecutor service = new ThreadPoolExecutor(
+            coreThreadSize,
+            maxThreadSize,
+            60L,
+            TimeUnit.SECONDS,
+            maxQueueSize <= 0 ? new LinkedBlockingQueue<>() : new LinkedBlockingQueue<>(maxQueueSize)
+        );
         return newExecutor(service);
     }
 
@@ -55,6 +56,8 @@ final class WorkBack {
     }
 
     private static final class WorkExecutorImpl implements WorkExecutor {
+
+        private static final Duration AWAITING_UNIT = Duration.ofSeconds(1);
 
         private final @Nonnull ExecutorService service;
 
@@ -74,8 +77,8 @@ final class WorkBack {
         @Override
         public @Nonnull RunReceipt submit(@Nonnull Runnable work) throws SubmissionException {
             try {
-                AbsWork<?> absWork = new RunnableWork(work);
-                Future<?> future = service.submit((Runnable) absWork);
+                RunnableWork absWork = new RunnableWork(Objects.requireNonNull(work));
+                Future<?> future = service.submit(absWork.asRunnable());
                 return new RunReceiptImpl(future, absWork);
             } catch (Exception e) {
                 throw new SubmissionException(e);
@@ -85,8 +88,8 @@ final class WorkBack {
         @Override
         public @Nonnull <T> WorkReceipt<T> submit(@Nonnull Callable<? extends T> work) throws SubmissionException {
             try {
-                AbsWork<T> absWork = new CallableWork<>(work);
-                Future<T> future = service.submit((Callable<T>) absWork);
+                CallableWork<T> absWork = new CallableWork<>(Objects.requireNonNull(work));
+                Future<T> future = service.submit(absWork.asCallable());
                 return new WorkReceiptImpl<>(future, absWork);
             } catch (Exception e) {
                 throw new SubmissionException(e);
@@ -148,9 +151,9 @@ final class WorkBack {
         private <T> @Nonnull List<@Nonnull AbsWork<T>> callablesToAbsWorks(
             @Nonnull Collection<? extends @Nonnull Callable<? extends T>> works
         ) {
-            return works.stream()
-                .map(it -> (AbsWork<T>) new CallableWork<T>(it))
-                .collect(Collectors.toList());
+            Stream<@Nonnull AbsWork<T>> stream = works.stream()
+                .map(it -> new CallableWork<>(Objects.requireNonNull(it)));
+            return stream.collect(Collectors.toList());
         }
 
         private <T> @Nonnull List<@Nonnull WorkReceipt<T>> futuresToReceipts(
@@ -163,74 +166,6 @@ final class WorkBack {
                 result.add(new WorkReceiptImpl<>(future, workList.get(c++)));
             }
             return result;
-        }
-
-        @Override
-        public @Nonnull RunReceipt schedule(
-            @Nonnull Runnable work, @Nonnull Duration delay
-        ) throws SubmissionException {
-            try {
-                ScheduledExecutorService scheduledService = getScheduledService();
-                RunnableWork absWork = new RunnableWork(work);
-                ScheduledFuture<?> future = scheduledService.schedule(
-                    (Runnable) absWork, delay.toNanos(), TimeUnit.NANOSECONDS);
-                return new RunReceiptImpl(future, absWork);
-            } catch (Exception e) {
-                throw new SubmissionException(e);
-            }
-        }
-
-        @Override
-        public @Nonnull <T> WorkReceipt<T> schedule(
-            @Nonnull Callable<? extends T> work, @Nonnull Duration delay
-        ) throws SubmissionException {
-            try {
-                ScheduledExecutorService scheduledService = getScheduledService();
-                CallableWork<T> absWork = new CallableWork<>(work);
-                ScheduledFuture<T> future = scheduledService.schedule(
-                    (Callable<T>) absWork, delay.toNanos(), TimeUnit.NANOSECONDS);
-                return new WorkReceiptImpl<>(future, absWork);
-            } catch (Exception e) {
-                throw new SubmissionException(e);
-            }
-        }
-
-        @Override
-        public @Nonnull RunReceipt scheduleWithRate(
-            @Nonnull Runnable work, @Nonnull Duration initialDelay, @Nonnull Duration period
-        ) throws SubmissionException {
-            try {
-                ScheduledExecutorService scheduledService = getScheduledService();
-                RunnableWork absWork = new RunnableWork(work);
-                ScheduledFuture<?> future = scheduledService.scheduleAtFixedRate(
-                    absWork, initialDelay.toNanos(), period.toNanos(), TimeUnit.NANOSECONDS);
-                return new RunReceiptImpl(future, absWork);
-            } catch (Exception e) {
-                throw new SubmissionException(e);
-            }
-        }
-
-        @Override
-        public @Nonnull RunReceipt scheduleWithDelay(
-            @Nonnull Runnable work, @Nonnull Duration initialDelay, @Nonnull Duration delay
-        ) throws SubmissionException {
-            try {
-                ScheduledExecutorService scheduledService = getScheduledService();
-                RunnableWork absWork = new RunnableWork(work);
-                ScheduledFuture<?> future = scheduledService.scheduleWithFixedDelay(
-                    absWork, initialDelay.toNanos(), delay.toNanos(), TimeUnit.NANOSECONDS);
-                return new RunReceiptImpl(future, absWork);
-            } catch (Exception e) {
-                throw new SubmissionException(e);
-            }
-        }
-
-        private @Nonnull ScheduledExecutorService getScheduledService() {
-            try {
-                return (ScheduledExecutorService) service;
-            } catch (Exception e) {
-                throw new UnsupportedOperationException("Current executor does not support Scheduling.");
-            }
         }
 
         @Override
@@ -250,15 +185,7 @@ final class WorkBack {
 
         @Override
         public void await() throws AwaitingException {
-            try {
-                while (true) {
-                    if (service.awaitTermination(1, TimeUnit.SECONDS)) {
-                        return;
-                    }
-                }
-            } catch (Exception e) {
-                throw new AwaitingException(e);
-            }
+            JieThread.until(() -> await(AWAITING_UNIT));
         }
 
         @Override
@@ -273,6 +200,79 @@ final class WorkBack {
         @Override
         public boolean isTerminated() {
             return service.isTerminated();
+        }
+
+        @Override
+        public boolean isScheduled() {
+            return service instanceof ScheduledExecutorService;
+        }
+
+        @Override
+        public @Nonnull RunReceipt schedule(
+            @Nonnull Runnable work, @Nonnull Duration delay
+        ) throws SubmissionException {
+            try {
+                ScheduledExecutorService scheduledService = getScheduledService();
+                RunnableWork absWork = new RunnableWork(Objects.requireNonNull(work));
+                ScheduledFuture<?> future = scheduledService.schedule(
+                    (Runnable) absWork, delay.toNanos(), TimeUnit.NANOSECONDS);
+                return new RunReceiptImpl(future, absWork);
+            } catch (Exception e) {
+                throw new SubmissionException(e);
+            }
+        }
+
+        @Override
+        public @Nonnull <T> WorkReceipt<T> schedule(
+            @Nonnull Callable<? extends T> work, @Nonnull Duration delay
+        ) throws SubmissionException {
+            try {
+                ScheduledExecutorService scheduledService = getScheduledService();
+                CallableWork<T> absWork = new CallableWork<>(Objects.requireNonNull(work));
+                ScheduledFuture<T> future = scheduledService.schedule(
+                    (Callable<T>) absWork, delay.toNanos(), TimeUnit.NANOSECONDS);
+                return new WorkReceiptImpl<>(future, absWork);
+            } catch (Exception e) {
+                throw new SubmissionException(e);
+            }
+        }
+
+        @Override
+        public @Nonnull RunReceipt scheduleWithRate(
+            @Nonnull Runnable work, @Nonnull Duration initialDelay, @Nonnull Duration period
+        ) throws SubmissionException {
+            try {
+                ScheduledExecutorService scheduledService = getScheduledService();
+                RunnableWork absWork = new RunnableWork(Objects.requireNonNull(work));
+                ScheduledFuture<?> future = scheduledService.scheduleAtFixedRate(
+                    absWork, initialDelay.toNanos(), period.toNanos(), TimeUnit.NANOSECONDS);
+                return new RunReceiptImpl(future, absWork);
+            } catch (Exception e) {
+                throw new SubmissionException(e);
+            }
+        }
+
+        @Override
+        public @Nonnull RunReceipt scheduleWithDelay(
+            @Nonnull Runnable work, @Nonnull Duration initialDelay, @Nonnull Duration delay
+        ) throws SubmissionException {
+            try {
+                ScheduledExecutorService scheduledService = getScheduledService();
+                RunnableWork absWork = new RunnableWork(Objects.requireNonNull(work));
+                ScheduledFuture<?> future = scheduledService.scheduleWithFixedDelay(
+                    absWork, initialDelay.toNanos(), delay.toNanos(), TimeUnit.NANOSECONDS);
+                return new RunReceiptImpl(future, absWork);
+            } catch (Exception e) {
+                throw new SubmissionException(e);
+            }
+        }
+
+        private @Nonnull ScheduledExecutorService getScheduledService() {
+            try {
+                return (ScheduledExecutorService) service;
+            } catch (Exception e) {
+                throw new UnsupportedOperationException("Current executor does not support Scheduling.");
+            }
         }
     }
 

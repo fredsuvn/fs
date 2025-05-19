@@ -20,7 +20,7 @@ public class JieWork {
      * @param callable the given callable
      * @return a {@link Runnable} wraps the given callable
      */
-    public static @Nonnull Runnable toRunnable(Callable<?> callable) {
+    public static @Nonnull Runnable toRunnable(@Nonnull Callable<?> callable) {
         if (callable instanceof Runnable) {
             return (Runnable) callable;
         }
@@ -166,6 +166,6 @@ public class JieWork {
     }
 
     private static final class ScheduleHolder {
-        private static final WorkExecutor executor = WorkExecutor.newExecutor(true);
+        private static final WorkExecutor executor = WorkExecutor.newScheduler();
     }
 }

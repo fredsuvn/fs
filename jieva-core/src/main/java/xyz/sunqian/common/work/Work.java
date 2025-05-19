@@ -12,7 +12,7 @@ import java.util.concurrent.Callable;
  * @author sunqian
  */
 @FunctionalInterface
-public interface Work<T> extends Runnable, Callable<T> {
+interface Work<T> extends Runnable, Callable<T> {
 
     /**
      * Does the task work and returns a result, or throws an exception if unable to do so.
@@ -34,5 +34,23 @@ public interface Work<T> extends Runnable, Callable<T> {
     @Override
     default T call() throws Exception {
         return doWork();
+    }
+
+    /**
+     * Returns this as type of the {@link Runnable}.
+     *
+     * @return this as type of the {@link Runnable}
+     */
+    default Runnable asRunnable() {
+        return this;
+    }
+
+    /**
+     * Returns this as type of the {@link Callable}.
+     *
+     * @return this as type of the {@link Callable}
+     */
+    default Callable<T> asCallable() {
+        return this;
     }
 }

@@ -9,9 +9,11 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * This interface represents the executor for works, which can be represented by {@link Work}, {@link Runnable} and
@@ -30,45 +32,56 @@ public interface WorkExecutor {
      * @return a new {@link WorkExecutor} which starts a new thread for each new work
      */
     static @Nonnull WorkExecutor newExecutor() {
-        return newExecutor(false);
+        return WorkBack.newExecutor(false);
     }
 
     /**
      * Returns a new {@link WorkExecutor} which starts a new thread for each new work, and destroys the thread after the
-     * work has been done. The {@code scheduled} specifies whether the returned {@link WorkExecutor} supports
+     * work has been done. The returned {@link WorkExecutor} supports scheduling.
+     *
+     * @return a new {@link WorkExecutor} which starts a new thread for each new work, supporting scheduling
+     */
+    static @Nonnull WorkExecutor newScheduler() {
+        return WorkBack.newExecutor(true);
+    }
+
+    /**
+     * Returns a new {@link WorkExecutor} based on a thread pool (which refers to {@link ThreadPoolExecutor}). The
+     * pool's core pool size is specified by {@code coreThreadSize}. The returned {@link WorkExecutor} does not support
      * scheduling.
      *
-     * @param scheduled specifies whether the returned {@link WorkExecutor} supports scheduling
-     * @return a new {@link WorkExecutor} which starts a new thread for each new work
+     * @param coreThreadSize the specified core pool size
+     * @return a new {@link WorkExecutor} based on a thread pool
      */
-    static @Nonnull WorkExecutor newExecutor(boolean scheduled) {
-        return WorkBack.newExecutor(scheduled);
+    static @Nonnull WorkExecutor newExecutor(int coreThreadSize) {
+        return WorkBack.newExecutor(coreThreadSize, Integer.MAX_VALUE, -1);
     }
 
     /**
-     * Returns a new {@link WorkExecutor} based on a thread pool. The pool's core pool size and maximum pool size are
-     * specified by {@code core} and {@code max}. The returned {@link WorkExecutor} does not support scheduling.
+     * Returns a new {@link WorkExecutor} based on a thread pool (which refers to {@link ThreadPoolExecutor}). The
+     * pool's core pool size and maximum pool size are specified by {@code coreThreadSize} and {@code maxThreadSize}.
+     * The returned {@link WorkExecutor} does not support scheduling.
      *
-     * @param core the specified core pool size
-     * @param max  the specified maximum pool size
+     * @param coreThreadSize the specified core pool size
+     * @param maxThreadSize  the specified maximum pool size
      * @return a new {@link WorkExecutor} based on a thread pool
      */
-    static @Nonnull WorkExecutor newExecutor(int core, int max) {
-        return newExecutor(core, max, false);
+    static @Nonnull WorkExecutor newExecutor(int coreThreadSize, int maxThreadSize) {
+        return WorkBack.newExecutor(coreThreadSize, maxThreadSize, -1);
     }
 
     /**
-     * Returns a new {@link WorkExecutor} based on a thread pool. The pool's core pool size and maximum pool size are
-     * specified by {@code core} and {@code max}, and the {@code scheduled} specifies whether the returned
-     * {@link WorkExecutor} supports scheduling.
+     * Returns a new {@link WorkExecutor} based on a thread pool (which refers to {@link ThreadPoolExecutor}). The
+     * pool's core pool size, maximum pool size and maximum queue size are specified by {@code coreThreadSize},
+     * {@code maxThreadSize} and {@code maxQueueSize}. The returned {@link WorkExecutor} does not support scheduling.
      *
-     * @param core      the specified core pool size
-     * @param max       the specified maximum pool size
-     * @param scheduled specifies whether the returned {@link WorkExecutor} supports scheduling
+     * @param coreThreadSize the specified core pool size
+     * @param maxThreadSize  the specified maximum pool size
+     * @param maxQueueSize   the specified maximum queue size
      * @return a new {@link WorkExecutor} based on a thread pool
      */
-    static @Nonnull WorkExecutor newExecutor(int core, int max, boolean scheduled) {
-        return WorkBack.newExecutor(core, max, scheduled);
+    static @Nonnull WorkExecutor newExecutor(int coreThreadSize, int maxThreadSize, int maxQueueSize) {
+        return WorkBack.newExecutor(coreThreadSize, maxThreadSize, maxQueueSize);
     }
 
     /**
@@ -98,7 +111,13 @@ public interface WorkExecutor {
      * @throws SubmissionException if an error occurs during the submitting
      */
     default void run(@Nonnull Callable<?> work) throws SubmissionException {
-        run(JieWork.toRunnable(work));
+        try {
+            run(JieWork.toRunnable(Objects.requireNonNull(work)));
+        } catch (SubmissionException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new SubmissionException(e);
+        }
     }
 
     /**
@@ -183,6 +202,74 @@ public interface WorkExecutor {
     ) throws AwaitingException;
 
     /**
+     * Closes this executor and returns immediately. The previously submitted works are executed, but no new work will
+     * be accepted. Invocation has no additional effect if already closed.
+     * <p>
+     * NOTE: This method does not wait for previously submitted works to complete execution. Use {@link #await()} or
+     * {@link #await(Duration)} to do that.
+     */
+    void close();
+
+    /**
+     * Closes this executor and attempts to stop all actively executing works, halts the processing of waiting works,
+     * and returns a list of the works as {@link Runnable} that were awaiting execution. A closed executor no longer
+     * accepts new works, and invocation has no additional effect if already closed.
+     * <p>
+     * NOTE1: This method does not wait for previously submitted works to complete execution. Use {@link #await()} or
+     * {@link #await(Duration)} to do that.
+     * <p>
+     * NOTE2: There are no guarantees beyond best-effort attempts to stop processing actively executing works. For
+     * example, typical implementations will cancel via {@link Thread#interrupt}, so any task that fails to respond to
+     * interrupts may never terminate.
+     *
+     * @return a list of works as {@link Runnable} that never commenced execution
+     */
+    List<Runnable> closeNow();
+
+    /**
+     * Returns {@code true} if this executor has been closed.
+     *
+     * @return {@code true} if this executor has been closed
+     */
+    boolean isClosed();
+
+    /**
+     * Blocks the current thread until all works have been done after a close operation.
+     * <p>
+     * NOTE: This method should be invoked after a {@link #close()} or {@link #closeNow()} is invoked.
+     *
+     * @throws AwaitingException if the current thread is interrupted or an error occurs while awaiting
+     */
+    void await() throws AwaitingException;
+
+    /**
+     * Blocks the current thread until all works have been done after a close operation, or the timeout occurs, or the
+     * current thread is interrupted.
+     * <p>
+     * NOTE: This method should be invoked after a {@link #close()} or {@link #closeNow()} is invoked.
+     *
+     * @param duration the maximum time to wait
+     * @return {@code true} if this executor terminated and {@code false} if the timeout elapsed before termination
+     * @throws AwaitingException if the current thread is interrupted or an error occurs while awaiting
+     */
+    boolean await(@Nonnull Duration duration) throws AwaitingException;
+
+    /**
+     * Returns {@code true} if all works have been done and the executor is closed. Note that this method never returns
+     * {@code true} unless either {@link #close()} or {@link #closeNow()} was called first.
+     *
+     * @return {@code true} if all works have been done and the executor is closed
+     */
+    boolean isTerminated();
+
+    /**
+     * Returns whether the current implementation supports scheduling.
+     *
+     * @return {@code true} if the current implementation supports scheduling, {@code false} otherwise
+     */
+    boolean isScheduled();
+
+    /**
      * Schedules the given work with a specified delay time from now, returns a {@link RunReceipt} for the work. The
      * work becomes enabled after the given delay.
      * <p>
@@ -225,7 +312,13 @@ public interface WorkExecutor {
      * @throws SubmissionException if an error occurs during the submitting
      */
     default @Nonnull RunReceipt scheduleAt(@Nonnull Runnable work, @Nonnull Instant time) throws SubmissionException {
-        return schedule(work, Duration.between(Instant.now(), time));
+        try {
+            return schedule(work, Duration.between(Instant.now(), time));
+        } catch (SubmissionException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new SubmissionException(e);
+        }
     }
 
     /**
@@ -244,7 +337,13 @@ public interface WorkExecutor {
         @Nonnull Callable<? extends T> work,
         @Nonnull Instant time
     ) throws SubmissionException {
-        return schedule(work, Duration.between(Instant.now(), time));
+        try {
+            return schedule(work, Duration.between(Instant.now(), time));
+        } catch (SubmissionException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new SubmissionException(e);
+        }
     }
 
     /**
@@ -259,7 +358,13 @@ public interface WorkExecutor {
      * @throws SubmissionException if an error occurs during the submitting
      */
     default @Nonnull RunReceipt scheduleAt(@Nonnull Runnable work, @Nonnull Date time) throws SubmissionException {
-        return schedule(work, Duration.between(Instant.now(), time.toInstant()));
+        try {
+            return scheduleAt(work, time.toInstant());
+        } catch (SubmissionException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new SubmissionException(e);
+        }
     }
 
     /**
@@ -278,7 +383,13 @@ public interface WorkExecutor {
         @Nonnull Callable<? extends T> work,
         @Nonnull Date time
     ) throws SubmissionException {
-        return schedule(work, Duration.between(Instant.now(), time.toInstant()));
+        try {
+            return scheduleAt(work, time.toInstant());
+        } catch (SubmissionException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new SubmissionException(e);
+        }
     }
 
     /**
@@ -326,67 +437,4 @@ public interface WorkExecutor {
         @Nonnull Duration initialDelay,
         @Nonnull Duration delay
     ) throws SubmissionException;
-
-    /**
-     * Closes this executor and returns immediately. The previously submitted works are executed, but no new work will
-     * be accepted. Invocation has no additional effect if already closed.
-     * <p>
-     * NOTE: This method does not wait for previously submitted works to complete execution. Use {@link #await()} or
-     * {@link #await(Duration)} to do that.
-     */
-    void close();
-
-    /**
-     * Closes this executor and attempts to stop all actively executing works, halts the processing of waiting works,
-     * and returns a list of the works as {@link Runnable} that were awaiting execution. A closed executor no longer
-     * accepts new works, and invocation has no additional effect if already closed.
-     * <p>
-     * NOTE1: This method does not wait for previously submitted works to complete execution. Use {@link #await()} or
-     * {@link #await(Duration)} to do that.
-     * <p>
-     * NOTE2: There are no guarantees beyond best-effort attempts to stop processing actively executing works. For
-     * example, typical implementations will cancel via {@link Thread#interrupt}, so any task that fails to respond to
-     * interrupts may never terminate.
-     *
-     * @return a list of works as {@link Runnable} that never commenced execution
-     */
-    List<Runnable> closeNow();
-
-    /**
-     * Returns {@code true} if this executor has been closed.
-     *
-     * @return {@code true} if this executor has been closed
-     */
-    boolean isClosed();
-
-    /**
-     * Blocks the current thread until all works have been done.
-     * <p>
-     * NOTE: This method should be invoked after a {@link #close()} or {@link #closeNow()} is invoked to prevent the
-     * submission of new works cause blocking this method indefinitely.
-     *
-     * @throws AwaitingException if the current thread is interrupted or an error occurs while awaiting
-     */
-    void await() throws AwaitingException;
-
-    /**
-     * Blocks the current thread until all works have been done, or the timeout occurs, or the current thread is
-     * interrupted.
-     * <p>
-     * NOTE: This method should be invoked after a {@link #close()} or {@link #closeNow()} is invoked to prevent the
-     * submission of new works cause blocking this method to timeout.
-     *
-     * @param duration the maximum time to wait
-     * @return {@code true} if this executor terminated and {@code false} if the timeout elapsed before termination
-     * @throws AwaitingException if the current thread is interrupted or an error occurs while awaiting
-     */
-    boolean await(@Nonnull Duration duration) throws AwaitingException;
-
-    /**
-     * Returns {@code true} if all works have been done and the executor is closed. Note that this method never returns
-     * {@code true} unless either {@link #close()} or {@link #closeNow()} was called first.
-     *
-     * @return {@code true} if all works have been done and the executor is closed
-     */
-    boolean isTerminated();
 }
