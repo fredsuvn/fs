@@ -3,7 +3,6 @@ package xyz.sunqian.common.work;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.base.exception.AwaitingException;
-import xyz.sunqian.common.base.exception.WrappedException;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -11,15 +10,78 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
- * This interface represents the executor for {@link Work}. It provides methods to submit or schedule (if the current
- * implementation supports) works, and executes submitted works. The execution can be immediate or delayed, synchronous
- * or asynchronous, depending on the implementation.
+ * This interface represents the executor for works, which can be represented by {@link Work}, {@link Runnable} and
+ * {@link Callable}. It provides methods to submit or schedule (if the current implementation supports) works, and
+ * executes submitted works. The execution can be immediate or delayed, synchronous or asynchronous, depending on the
+ * implementation.
  *
  * @author sunqian
  */
 public interface WorkExecutor {
+
+    /**
+     * Returns a new {@link WorkExecutor} which starts a new thread for each new work, and destroys the thread after the
+     * work has been done. The returned {@link WorkExecutor} does not support scheduling.
+     *
+     * @return a new {@link WorkExecutor} which starts a new thread for each new work
+     */
+    static @Nonnull WorkExecutor newExecutor() {
+        return newExecutor(false);
+    }
+
+    /**
+     * Returns a new {@link WorkExecutor} which starts a new thread for each new work, and destroys the thread after the
+     * work has been done. The {@code scheduled} specifies whether the returned {@link WorkExecutor} supports
+     * scheduling.
+     *
+     * @param scheduled specifies whether the returned {@link WorkExecutor} supports scheduling
+     * @return a new {@link WorkExecutor} which starts a new thread for each new work
+     */
+    static @Nonnull WorkExecutor newExecutor(boolean scheduled) {
+        return WorkBack.newExecutor(scheduled);
+    }
+
+    /**
+     * Returns a new {@link WorkExecutor} based on a thread pool. The pool's core pool size and maximum pool size are
+     * specified by {@code core} and {@code max}. The returned {@link WorkExecutor} does not support scheduling.
+     *
+     * @param core the specified core pool size
+     * @param max  the specified maximum pool size
+     * @return a new {@link WorkExecutor} based on a thread pool
+     */
+    static @Nonnull WorkExecutor newExecutor(int core, int max) {
+        return newExecutor(core, max, false);
+    }
+
+    /**
+     * Returns a new {@link WorkExecutor} based on a thread pool. The pool's core pool size and maximum pool size are
+     * specified by {@code core} and {@code max}, and the {@code scheduled} specifies whether the returned
+     * {@link WorkExecutor} supports scheduling.
+     *
+     * @param core      the specified core pool size
+     * @param max       the specified maximum pool size
+     * @param scheduled specifies whether the returned {@link WorkExecutor} supports scheduling
+     * @return a new {@link WorkExecutor} based on a thread pool
+     */
+    static @Nonnull WorkExecutor newExecutor(int core, int max, boolean scheduled) {
+        return WorkBack.newExecutor(core, max, scheduled);
+    }
+
+    /**
+     * Returns a new {@link WorkExecutor} based on the given {@link ExecutorService}. If the given
+     * {@link ExecutorService} is an instance of {@link ScheduledExecutorService}, the returned {@link WorkExecutor}
+     * supports scheduling, otherwise not.
+     *
+     * @param service the given {@link ExecutorService}
+     * @return a new {@link WorkExecutor} based on the given {@link ExecutorService}
+     */
+    static @Nonnull WorkExecutor newExecutor(@Nonnull ExecutorService service) {
+        return WorkBack.newExecutor(service);
+    }
 
     /**
      * Submits the given work to this executor. This method does not return a {@link WorkReceipt}.
@@ -36,16 +98,7 @@ public interface WorkExecutor {
      * @throws SubmissionException if an error occurs during the submitting
      */
     default void run(@Nonnull Callable<?> work) throws SubmissionException {
-        if (work instanceof Runnable) {
-            run((Runnable) work);
-        }
-        run(() -> {
-            try {
-                work.call();
-            } catch (Exception e) {
-                throw new WrappedException(e);
-            }
-        });
+        run(JieWork.toRunnable(work));
     }
 
     /**
@@ -69,16 +122,6 @@ public interface WorkExecutor {
     <T> @Nonnull WorkReceipt<T> submit(@Nonnull Callable<? extends T> work) throws SubmissionException;
 
     /**
-     * Submits the given work to this executor, returns a {@link WorkReceipt} for the work.
-     *
-     * @param work the given work
-     * @param <T>  the type of the work result
-     * @return the receipt of the work
-     * @throws SubmissionException if an error occurs during the submitting
-     */
-    <T> @Nonnull WorkReceipt<T> submit(@Nonnull Work<? extends T> work) throws SubmissionException;
-
-    /**
      * Executes the given works, returning a list of {@link WorkReceipt} holding their status and results when all works
      * are done ({@link WorkReceipt#isDone()} is {@code true} for each element of the returned list). Note that
      * '{@code done}' does not necessarily mean {@link WorkState#SUCCEEDED}.
@@ -89,7 +132,7 @@ public interface WorkExecutor {
      * @throws AwaitingException if an error occurs during the awaiting
      */
     <T> @Nonnull List<@Nonnull WorkReceipt<T>> executeAll(
-        @RetainedParam @Nonnull Collection<? extends @Nonnull Work<? extends T>> works
+        @RetainedParam @Nonnull Collection<? extends @Nonnull Callable<? extends T>> works
     ) throws AwaitingException;
 
     /**
@@ -98,15 +141,15 @@ public interface WorkExecutor {
      * waiting time elapses. Upon return, works that have not done are cancelled. Note that '{@code done}' does not
      * necessarily mean {@link WorkState#SUCCEEDED}.
      *
-     * @param works   the given works
-     * @param timeout the maximum time to wait
-     * @param <T>     the type of the work result
+     * @param works    the given works
+     * @param duration the maximum time to wait
+     * @param <T>      the type of the work result
      * @return a list of {@link WorkReceipt} of the given works, in the same order
      * @throws AwaitingException if an error occurs during the awaiting
      */
     <T> @Nonnull List<@Nonnull WorkReceipt<T>> executeAll(
-        @RetainedParam @Nonnull Collection<? extends @Nonnull Work<? extends T>> works,
-        @Nonnull Duration timeout
+        @RetainedParam @Nonnull Collection<? extends @Nonnull Callable<? extends T>> works,
+        @Nonnull Duration duration
     ) throws AwaitingException;
 
     /**
@@ -120,7 +163,7 @@ public interface WorkExecutor {
      * @throws AwaitingException if an error occurs during the awaiting
      */
     <T> T executeAny(
-        @RetainedParam @Nonnull Collection<? extends @Nonnull Work<? extends T>> works
+        @RetainedParam @Nonnull Collection<? extends @Nonnull Callable<? extends T>> works
     ) throws AwaitingException;
 
     /**
@@ -135,7 +178,7 @@ public interface WorkExecutor {
      * @throws AwaitingException if an error occurs during the awaiting
      */
     <T> T executeAny(
-        @RetainedParam @Nonnull Collection<? extends @Nonnull Work<? extends T>> works,
+        @RetainedParam @Nonnull Collection<? extends @Nonnull Callable<? extends T>> works,
         @Nonnull Duration duration
     ) throws AwaitingException;
 
@@ -143,7 +186,7 @@ public interface WorkExecutor {
      * Schedules the given work with a specified delay time from now, returns a {@link RunReceipt} for the work. The
      * work becomes enabled after the given delay.
      * <p>
-     * Note this method requires that the current implementation supports scheduling.
+     * NOTE: This method requires that the current implementation supports scheduling.
      *
      * @param work  the given work
      * @param delay the specified delay time
@@ -157,7 +200,7 @@ public interface WorkExecutor {
      * Schedules the given work with a specified delay time from now, returns a {@link WorkReceipt} for the work. The
      * work becomes enabled after the given delay.
      * <p>
-     * Note this method requires that the current implementation supports scheduling.
+     * NOTE: This method requires that the current implementation supports scheduling.
      *
      * @param work  the given work
      * @param delay the specified delay time
@@ -166,7 +209,7 @@ public interface WorkExecutor {
      * @throws SubmissionException if an error occurs during the submitting
      */
     <T> @Nonnull WorkReceipt<T> schedule(
-        @Nonnull Work<? extends T> work,
+        @Nonnull Callable<? extends T> work,
         @Nonnull Duration delay
     ) throws SubmissionException;
 
@@ -198,7 +241,7 @@ public interface WorkExecutor {
      * @throws SubmissionException if an error occurs during the submitting
      */
     default <T> @Nonnull WorkReceipt<T> scheduleAt(
-        @Nonnull Work<? extends T> work,
+        @Nonnull Callable<? extends T> work,
         @Nonnull Instant time
     ) throws SubmissionException {
         return schedule(work, Duration.between(Instant.now(), time));
@@ -232,7 +275,7 @@ public interface WorkExecutor {
      * @throws SubmissionException if an error occurs during the submitting
      */
     default <T> @Nonnull WorkReceipt<T> scheduleAt(
-        @Nonnull Work<? extends T> work,
+        @Nonnull Callable<? extends T> work,
         @Nonnull Date time
     ) throws SubmissionException {
         return schedule(work, Duration.between(Instant.now(), time.toInstant()));
@@ -246,6 +289,8 @@ public interface WorkExecutor {
      * If any execution of the work fails, subsequent executions are suppressed. Otherwise, the work will only terminate
      * via cancellation or termination of the executor. If any execution of this work takes longer than its period, then
      * subsequent executions may start late, but will not concurrently execute.
+     * <p>
+     * NOTE: This method requires that the current implementation supports scheduling.
      *
      * @param work         the given periodic work
      * @param initialDelay the given initial delay for first execution
@@ -266,6 +311,8 @@ public interface WorkExecutor {
      * <p>
      * If any execution of the work fails, subsequent executions are suppressed. Otherwise, the work will only terminate
      * via cancellation or termination of the executor.
+     * <p>
+     * NOTE: This method requires that the current implementation supports scheduling.
      *
      * @param work         the given periodic work
      * @param initialDelay the given initial delay for first execution
