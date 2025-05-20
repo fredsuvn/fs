@@ -12,7 +12,7 @@ import static org.testng.Assert.assertTrue;
 public class ThreadTest {
 
     @Test
-    public void testSleep() throws Exception {
+    public void testSleep() {
         {
             long t1 = System.currentTimeMillis();
             JieThread.sleep(10);
