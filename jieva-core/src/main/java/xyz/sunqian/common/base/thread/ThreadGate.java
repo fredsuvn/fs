@@ -12,7 +12,7 @@ import java.time.Duration;
  *
  * @author sunqian
  */
-public interface ThreadGate extends Interruptible {
+public interface ThreadGate {
 
     /**
      * Returns a new {@link ThreadGate}.
@@ -49,35 +49,20 @@ public interface ThreadGate extends Interruptible {
 
     /**
      * Blocks the current thread until this thread gate is opened.
-     * <p>
-     * This is an unchecked version of {@link #awaitInterruptibly()}.
      *
      * @throws AwaitingException if the current thread is interrupted or an error occurs while awaiting
      */
-    default void await() throws AwaitingException {
-        Interruptible.super.await();
-    }
+    void await() throws AwaitingException;
 
     /**
      * Blocks the current thread until this thread gate is opened, or the specified waiting time elapses. Returns
      * {@code true} if this thread gate become opened and {@code false} if the waiting time elapsed.
-     * <p>
-     * This is an unchecked version of {@link #awaitInterruptibly(Duration)}.
      *
-     * @param duration the maximum time to wait
+     * @param millis the maximum milliseconds to wait
      * @return {@code true} if this thread gate become opened and {@code false} if the waiting time elapsed
      * @throws AwaitingException if the current thread is interrupted or an error occurs while awaiting
      */
-    default boolean await(@Nonnull Duration duration) throws AwaitingException {
-        return Interruptible.super.await(duration);
-    }
-
-    /**
-     * Blocks the current thread until this thread gate is opened.
-     *
-     * @throws AwaitingException if the current thread is interrupted
-     */
-    void awaitInterruptibly() throws InterruptedException;
+    boolean await(long millis) throws AwaitingException;
 
     /**
      * Blocks the current thread until this thread gate is opened, or the specified waiting time elapses. Returns
@@ -85,7 +70,7 @@ public interface ThreadGate extends Interruptible {
      *
      * @param duration the maximum time to wait
      * @return {@code true} if this thread gate become opened and {@code false} if the waiting time elapsed
-     * @throws AwaitingException if the current thread is interrupted
+     * @throws AwaitingException if the current thread is interrupted or an error occurs while awaiting
      */
-    boolean awaitInterruptibly(@Nonnull Duration duration) throws InterruptedException;
+    boolean await(@Nonnull Duration duration) throws AwaitingException;
 }

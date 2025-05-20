@@ -14,17 +14,22 @@ import java.util.function.BooleanSupplier;
 public class JieThread {
 
     /**
+     * Sleeps the current thread until it is interrupted.
+     *
+     * @throws AwaitingException if the current thread is interrupted or an error occurs while sleeping
+     */
+    public static void sleep() throws AwaitingException {
+        Sleeper.INSTANCE.await();
+    }
+
+    /**
      * Sleeps the current thread for the specified milliseconds.
      *
      * @param millis the specified milliseconds
      * @throws AwaitingException if the current thread is interrupted or an error occurs while sleeping
      */
     public static void sleep(long millis) throws AwaitingException {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            throw new AwaitingException(e);
-        }
+        Sleeper.INSTANCE.await(millis);
     }
 
     /**
@@ -34,26 +39,7 @@ public class JieThread {
      * @throws AwaitingException if the current thread is interrupted or an error occurs while sleeping
      */
     public static void sleep(@Nonnull Duration duration) throws AwaitingException {
-        try {
-            Thread.sleep(duration.toMillis(), duration.getNano() / 1000);
-        } catch (InterruptedException e) {
-            throw new AwaitingException(e);
-        }
-    }
-
-    /**
-     * Sleeps the current thread until it is interrupted.
-     *
-     * @throws AwaitingException if the current thread is interrupted
-     */
-    public static void sleep() throws AwaitingException {
-        try {
-            while (true) {
-                Thread.sleep(Integer.MAX_VALUE);
-            }
-        } catch (InterruptedException e) {
-            throw new AwaitingException(e);
-        }
+        Sleeper.INSTANCE.await(duration);
     }
 
     /**
@@ -66,6 +52,30 @@ public class JieThread {
             if (action.getAsBoolean()) {
                 return;
             }
+        }
+    }
+
+    private static final class Sleeper implements AwaitingAdaptor {
+
+        private final static Sleeper INSTANCE = new Sleeper();
+
+        @Override
+        public void awaitInterruptibly() throws Exception {
+            while (true) {
+                Thread.sleep(Integer.MAX_VALUE);
+            }
+        }
+
+        @Override
+        public boolean awaitInterruptibly(long millis) throws Exception {
+            Thread.sleep(millis);
+            return true;
+        }
+
+        @Override
+        public boolean awaitInterruptibly(@Nonnull Duration duration) throws Exception {
+            Thread.sleep(duration.toMillis(), duration.getNano() / 1000);
+            return true;
         }
     }
 }

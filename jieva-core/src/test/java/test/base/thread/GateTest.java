@@ -44,7 +44,7 @@ public class GateTest {
         gate.close();
         assertFalse(gate.isOpened());
         assertTrue(gate.isClosed());
-        assertFalse(gate.await(Duration.ofMillis(1)));
+        assertFalse(gate.await(1));
         gate.open();
         assertTrue(gate.await(Duration.ofMillis(1)));
     }
