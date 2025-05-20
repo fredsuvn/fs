@@ -5,6 +5,7 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.AwaitingException;
+import xyz.sunqian.common.base.exception.WrappedException;
 import xyz.sunqian.common.base.thread.JieThread;
 
 import java.time.Duration;
@@ -13,6 +14,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -25,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-final class WorkBack {
+final class ExecutorBack {
 
     static @Nonnull WorkExecutor newExecutor(boolean scheduled) {
         ExecutorService service = scheduled ?
@@ -79,7 +82,7 @@ final class WorkBack {
             try {
                 RunnableWork absWork = new RunnableWork(Objects.requireNonNull(work));
                 Future<?> future = service.submit(absWork.asRunnable());
-                return new RunReceiptImpl(future, absWork);
+                return new RunnableReceipt(future, absWork);
             } catch (Exception e) {
                 throw new SubmissionException(e);
             }
@@ -90,7 +93,7 @@ final class WorkBack {
             try {
                 CallableWork<T> absWork = new CallableWork<>(Objects.requireNonNull(work));
                 Future<T> future = service.submit(absWork.asCallable());
-                return new WorkReceiptImpl<>(future, absWork);
+                return new CallableReceipt<>(future, absWork);
             } catch (Exception e) {
                 throw new SubmissionException(e);
             }
@@ -101,7 +104,7 @@ final class WorkBack {
             @RetainedParam @Nonnull Collection<? extends @Nonnull Callable<? extends T>> works
         ) throws AwaitingException {
             try {
-                List<@Nonnull AbsWork<T>> workList = callablesToAbsWorks(works);
+                List<@Nonnull Work<T>> workList = callablesToAbsWorks(works);
                 List<@Nonnull Future<T>> futureList = service.invokeAll(workList);
                 return futuresToReceipts(futureList, workList);
             } catch (Exception e) {
@@ -115,7 +118,7 @@ final class WorkBack {
             @Nonnull Duration duration
         ) throws AwaitingException {
             try {
-                List<@Nonnull AbsWork<T>> workList = callablesToAbsWorks(works);
+                List<@Nonnull Work<T>> workList = callablesToAbsWorks(works);
                 List<@Nonnull Future<T>> futureList = service.invokeAll(workList, duration.toNanos(), TimeUnit.NANOSECONDS);
                 return futuresToReceipts(futureList, workList);
             } catch (Exception e) {
@@ -128,7 +131,7 @@ final class WorkBack {
             @RetainedParam @Nonnull Collection<? extends @Nonnull Callable<? extends T>> works
         ) throws AwaitingException {
             try {
-                List<@Nonnull AbsWork<T>> workList = callablesToAbsWorks(works);
+                List<@Nonnull Work<T>> workList = callablesToAbsWorks(works);
                 return service.invokeAny(workList);
             } catch (Exception e) {
                 throw new AwaitingException(e);
@@ -141,29 +144,29 @@ final class WorkBack {
             @Nonnull Duration duration
         ) throws AwaitingException {
             try {
-                List<@Nonnull AbsWork<T>> workList = callablesToAbsWorks(works);
+                List<@Nonnull Work<T>> workList = callablesToAbsWorks(works);
                 return service.invokeAny(workList, duration.toNanos(), TimeUnit.NANOSECONDS);
             } catch (Exception e) {
                 throw new AwaitingException(e);
             }
         }
 
-        private <T> @Nonnull List<@Nonnull AbsWork<T>> callablesToAbsWorks(
+        private <T> @Nonnull List<@Nonnull Work<T>> callablesToAbsWorks(
             @Nonnull Collection<? extends @Nonnull Callable<? extends T>> works
         ) {
-            Stream<@Nonnull AbsWork<T>> stream = works.stream()
+            Stream<@Nonnull Work<T>> stream = works.stream()
                 .map(it -> new CallableWork<>(Objects.requireNonNull(it)));
             return stream.collect(Collectors.toList());
         }
 
         private <T> @Nonnull List<@Nonnull WorkReceipt<T>> futuresToReceipts(
             @Nonnull List<@Nonnull Future<T>> futureList,
-            @Nonnull List<@Nonnull AbsWork<T>> workList
+            @Nonnull List<@Nonnull Work<T>> workList
         ) {
             List<@Nonnull WorkReceipt<T>> result = new ArrayList<>(futureList.size());
             int c = 0;
             for (@Nonnull Future<T> future : futureList) {
-                result.add(new WorkReceiptImpl<>(future, workList.get(c++)));
+                result.add(new CallableReceipt<>(future, workList.get(c++)));
             }
             return result;
         }
@@ -216,7 +219,7 @@ final class WorkBack {
                 RunnableWork absWork = new RunnableWork(Objects.requireNonNull(work));
                 ScheduledFuture<?> future = scheduledService.schedule(
                     (Runnable) absWork, delay.toNanos(), TimeUnit.NANOSECONDS);
-                return new RunReceiptImpl(future, absWork);
+                return new RunnableReceipt(future, absWork);
             } catch (Exception e) {
                 throw new SubmissionException(e);
             }
@@ -231,7 +234,7 @@ final class WorkBack {
                 CallableWork<T> absWork = new CallableWork<>(Objects.requireNonNull(work));
                 ScheduledFuture<T> future = scheduledService.schedule(
                     (Callable<T>) absWork, delay.toNanos(), TimeUnit.NANOSECONDS);
-                return new WorkReceiptImpl<>(future, absWork);
+                return new CallableReceipt<>(future, absWork);
             } catch (Exception e) {
                 throw new SubmissionException(e);
             }
@@ -246,7 +249,7 @@ final class WorkBack {
                 RunnableWork absWork = new RunnableWork(Objects.requireNonNull(work));
                 ScheduledFuture<?> future = scheduledService.scheduleAtFixedRate(
                     absWork, initialDelay.toNanos(), period.toNanos(), TimeUnit.NANOSECONDS);
-                return new RunReceiptImpl(future, absWork);
+                return new RunnableReceipt(future, absWork);
             } catch (Exception e) {
                 throw new SubmissionException(e);
             }
@@ -261,7 +264,7 @@ final class WorkBack {
                 RunnableWork absWork = new RunnableWork(Objects.requireNonNull(work));
                 ScheduledFuture<?> future = scheduledService.scheduleWithFixedDelay(
                     absWork, initialDelay.toNanos(), delay.toNanos(), TimeUnit.NANOSECONDS);
-                return new RunReceiptImpl(future, absWork);
+                return new RunnableReceipt(future, absWork);
             } catch (Exception e) {
                 throw new SubmissionException(e);
             }
@@ -276,16 +279,15 @@ final class WorkBack {
         }
     }
 
-    private static abstract class AbsWork<T> implements Work<T> {
+    private static abstract class Work<T> implements Runnable, Callable<T> {
 
         volatile @Nonnull WorkState state = WorkState.WAITING;
         volatile @Nullable Exception exception;
 
-        @Override
-        public T doWork() throws Exception {
+        public T work() throws Exception {
             state = WorkState.EXECUTING;
             try {
-                T result = runWork();
+                T result = doWork();
                 state = WorkState.SUCCEEDED;
                 return result;
             } catch (Exception e) {
@@ -295,10 +297,32 @@ final class WorkBack {
             }
         }
 
-        protected abstract T runWork() throws Exception;
+        protected abstract T doWork() throws Exception;
+
+        @Override
+        public void run() {
+            try {
+                work();
+            } catch (Exception e) {
+                throw new WrappedException(e);
+            }
+        }
+
+        @Override
+        public T call() throws Exception {
+            return work();
+        }
+
+        public Runnable asRunnable() {
+            return this;
+        }
+
+        public Callable<T> asCallable() {
+            return this;
+        }
     }
 
-    private static final class RunnableWork extends AbsWork<Object> {
+    private static final class RunnableWork extends Work<Object> {
 
         private final @Nonnull Runnable runnable;
 
@@ -307,13 +331,13 @@ final class WorkBack {
         }
 
         @Override
-        protected Object runWork() {
+        protected Object doWork() {
             runnable.run();
             return null;
         }
     }
 
-    private static final class CallableWork<T> extends AbsWork<T> {
+    private static final class CallableWork<T> extends Work<T> {
 
         private final @Nonnull Callable<? extends T> callable;
 
@@ -322,17 +346,17 @@ final class WorkBack {
         }
 
         @Override
-        protected T runWork() throws Exception {
+        protected T doWork() throws Exception {
             return callable.call();
         }
     }
 
-    private static abstract class AbsReceipt implements BaseWorkReceipt {
+    private static abstract class Receipt implements BaseWorkReceipt {
 
         private final @Nonnull Future<?> future;
-        private final @Nonnull AbsWork<?> work;
+        private final @Nonnull ExecutorBack.Work<?> work;
 
-        private AbsReceipt(@Nonnull Future<?> future, AbsWork<?> work) {
+        private Receipt(@Nonnull Future<?> future, Work<?> work) {
             this.future = future;
             this.work = work;
         }
@@ -378,9 +402,40 @@ final class WorkBack {
         }
     }
 
-    private static final class WorkReceiptImpl<T> extends AbsReceipt implements WorkReceipt<T> {
+    private static final class RunnableReceipt extends Receipt implements RunReceipt {
 
-        private WorkReceiptImpl(@Nonnull Future<T> future, AbsWork<T> work) {
+        private RunnableReceipt(@Nonnull Future<?> future, Work<?> work) {
+            super(future, work);
+        }
+
+        @Override
+        public void await() throws AwaitingException {
+            try {
+                Future<?> future = getFuture();
+                future.get();
+            } catch (ExecutionException | CancellationException e) {
+                // do nothing
+            } catch (Exception e) {
+                throw new AwaitingException(e);
+            }
+        }
+
+        @Override
+        public void await(@Nonnull Duration duration) throws AwaitingException {
+            try {
+                Future<?> future = getFuture();
+                future.get(duration.toNanos(), TimeUnit.NANOSECONDS);
+            } catch (ExecutionException | CancellationException e) {
+                // do nothing
+            } catch (Exception e) {
+                throw new AwaitingException(e);
+            }
+        }
+    }
+
+    private static final class CallableReceipt<T> extends Receipt implements WorkReceipt<T> {
+
+        private CallableReceipt(@Nonnull Future<T> future, Work<T> work) {
             super(future, work);
         }
 
@@ -399,33 +454,6 @@ final class WorkBack {
             try {
                 Future<T> future = getFuture();
                 return future.get(duration.toNanos(), TimeUnit.NANOSECONDS);
-            } catch (Exception e) {
-                throw new AwaitingException(e);
-            }
-        }
-    }
-
-    private static final class RunReceiptImpl extends AbsReceipt implements RunReceipt {
-
-        private RunReceiptImpl(@Nonnull Future<?> future, AbsWork<?> work) {
-            super(future, work);
-        }
-
-        @Override
-        public void await() throws AwaitingException {
-            try {
-                Future<?> future = getFuture();
-                future.get();
-            } catch (Exception e) {
-                throw new AwaitingException(e);
-            }
-        }
-
-        @Override
-        public void await(@Nonnull Duration duration) throws AwaitingException {
-            try {
-                Future<?> future = getFuture();
-                future.get(duration.toNanos(), TimeUnit.NANOSECONDS);
             } catch (Exception e) {
                 throw new AwaitingException(e);
             }

@@ -1,4 +1,4 @@
-package test.work;
+package test.utils;
 
 import org.jetbrains.annotations.NotNull;
 

@@ -11,12 +11,12 @@ import java.util.function.LongConsumer;
 
 final class LatchBack {
 
-    static <T> @Nonnull ThreadLatch<T> newLatch() {
+    static <T> @Nonnull ThreadLatch2<T> newLatch() {
         return new NoConsumerThreadLatch<>();
     }
 
-    static <T> @Nonnull ThreadLatch<T> newLatch(
-        @Nonnull BiConsumer<ThreadLatch<T>, ? super @Nullable T> signalConsumer
+    static <T> @Nonnull ThreadLatch2<T> newLatch(
+        @Nonnull BiConsumer<ThreadLatch2<T>, ? super @Nullable T> signalConsumer
     ) {
         return new ConsumerThreadLatch<>(signalConsumer);
     }
@@ -25,7 +25,7 @@ final class LatchBack {
         return new CountLatchImpl(initialCount);
     }
 
-    private static abstract class AbsThreadLatch<T> implements ThreadLatch<T>, ThreadLatch.Waiter<T> {
+    private static abstract class AbsThreadLatch<T> implements ThreadLatch2<T>, ThreadLatch2.Waiter<T> {
 
         protected final @Nonnull LatchSync sync = new LatchSync();
 
@@ -74,7 +74,7 @@ final class LatchBack {
         private static final class LatchSync extends AbstractQueuedSynchronizer {
 
             private LatchSync() {
-                setState(ThreadLatch.State.LATCHED.value);
+                setState(ThreadLatch2.State.LATCHED.value);
             }
 
             private int getCount() {
@@ -82,12 +82,12 @@ final class LatchBack {
             }
 
             protected int tryAcquireShared(int acquires) {
-                return (getState() == ThreadLatch.State.LATCHED.value) ? -1 : 1;
+                return (getState() == ThreadLatch2.State.LATCHED.value) ? -1 : 1;
             }
 
             protected boolean tryReleaseShared(int releases) {
                 setState(releases);
-                return releases == ThreadLatch.State.UNLATCHED.value;
+                return releases == ThreadLatch2.State.UNLATCHED.value;
             }
         }
     }
@@ -100,9 +100,9 @@ final class LatchBack {
 
     private static final class ConsumerThreadLatch<T> extends AbsThreadLatch<T> {
 
-        private final @Nonnull BiConsumer<ThreadLatch<T>, ? super @Nullable T> consumer;
+        private final @Nonnull BiConsumer<ThreadLatch2<T>, ? super @Nullable T> consumer;
 
-        private ConsumerThreadLatch(@Nonnull BiConsumer<ThreadLatch<T>, ? super @Nullable T> consumer) {
+        private ConsumerThreadLatch(@Nonnull BiConsumer<ThreadLatch2<T>, ? super @Nullable T> consumer) {
             this.consumer = consumer;
         }
 

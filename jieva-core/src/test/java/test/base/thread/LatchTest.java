@@ -5,7 +5,7 @@ import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.base.exception.AwaitingException;
 import xyz.sunqian.common.base.thread.CountLatch;
-import xyz.sunqian.common.base.thread.ThreadLatch;
+import xyz.sunqian.common.base.thread.ThreadLatch2;
 
 import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
@@ -18,9 +18,9 @@ public class LatchTest {
 
     @Test
     public void testThreadLatch() throws Exception {
-        testThreadLatch(30, ThreadLatch.newLatch());
+        testThreadLatch(30, ThreadLatch2.newLatch());
         AtomicInteger counter = new AtomicInteger(0);
-        testThreadLatch(11, ThreadLatch.newLatch((l, o) -> {
+        testThreadLatch(11, ThreadLatch2.newLatch((l, o) -> {
             assertTrue(o instanceof Integer);
             counter.addAndGet((Integer) o);
         }));
@@ -28,7 +28,7 @@ public class LatchTest {
 
         {
             // interrupted
-            ThreadLatch<?> latch = ThreadLatch.newLatch();
+            ThreadLatch2<?> latch = ThreadLatch2.newLatch();
             Thread thread1 = new Thread(() -> {
                 try {
                     latch.waiter().await();
@@ -51,27 +51,27 @@ public class LatchTest {
 
         {
             // unlatch self
-            ThreadLatch<?> latch = ThreadLatch.newLatch((l, o) -> {
+            ThreadLatch2<?> latch = ThreadLatch2.newLatch((l, o) -> {
                 l.unlatch();
             });
             CountDownLatch cd = new CountDownLatch(1);
             new Thread(() -> {
                 try {
-                    assertEquals(latch.state(), ThreadLatch.State.LATCHED);
+                    assertEquals(latch.state(), ThreadLatch2.State.LATCHED);
                     latch.waiter().signal(null);
-                    assertEquals(latch.state(), ThreadLatch.State.UNLATCHED);
+                    assertEquals(latch.state(), ThreadLatch2.State.UNLATCHED);
                     cd.countDown();
                 } catch (AwaitingException e) {
                     assertEquals(e.getCause().getClass(), InterruptedException.class);
                 }
             }).start();
             cd.await();
-            assertEquals(latch.state(), ThreadLatch.State.UNLATCHED);
+            assertEquals(latch.state(), ThreadLatch2.State.UNLATCHED);
         }
     }
 
-    private void testThreadLatch(int threadNum, ThreadLatch<Object> latch) throws Exception {
-        ThreadLatch.Waiter<Object> waiter = latch.waiter();
+    private void testThreadLatch(int threadNum, ThreadLatch2<Object> latch) throws Exception {
+        ThreadLatch2.Waiter<Object> waiter = latch.waiter();
         AtomicInteger count = new AtomicInteger(0);
         CountDownLatch cd1 = new CountDownLatch(threadNum);
         CountDownLatch cd2 = new CountDownLatch(threadNum);
@@ -80,7 +80,7 @@ public class LatchTest {
         for (int i = 0; i < threadNum; i++) {
             new Thread(() -> {
                 try {
-                    assertEquals(waiter.state(), ThreadLatch.State.LATCHED);
+                    assertEquals(waiter.state(), ThreadLatch2.State.LATCHED);
                     sleep();
                     cd1.countDown();
                     sleep();
@@ -88,7 +88,7 @@ public class LatchTest {
                     sleep();
                     waiter.signal(1);
                     sleep();
-                    assertEquals(waiter.state(), ThreadLatch.State.UNLATCHED);
+                    assertEquals(waiter.state(), ThreadLatch2.State.UNLATCHED);
                     sleep();
                     count.incrementAndGet();
                     sleep();
@@ -159,13 +159,13 @@ public class LatchTest {
         for (int i = 0; i < threadNum; i++) {
             new Thread(() -> {
                 try {
-                    assertEquals(waiter.state(), ThreadLatch.State.LATCHED);
+                    assertEquals(waiter.state(), ThreadLatch2.State.LATCHED);
                     sleep();
                     cd1.countDown();
                     sleep();
                     waiter.await();
                     sleep();
-                    assertEquals(waiter.state(), ThreadLatch.State.UNLATCHED);
+                    assertEquals(waiter.state(), ThreadLatch2.State.UNLATCHED);
                     sleep();
                     count.incrementAndGet();
                     sleep();

@@ -5,7 +5,7 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.ThreadSafe;
 
 /**
- * This is a specific class of {@link ThreadLatch} of which signal type is {@link Long}.
+ * This is a specific class of {@link ThreadLatch2} of which signal type is {@link Long}.
  * <p>
  * This class maintains a counter. The value of the counter can be positive, negative, or zero. When the latch receives
  * a signal, the counter's value will be added with the signal value. If, and only if the counter's value equals to
@@ -16,7 +16,7 @@ import xyz.sunqian.annotations.ThreadSafe;
  * @author sunqian
  */
 @ThreadSafe
-public interface CountLatch extends ThreadLatch<Long> {
+public interface CountLatch extends ThreadLatch2<Long> {
 
     /**
      * Returns a new {@link CountLatch} with initial counter value of 1.
@@ -112,7 +112,7 @@ public interface CountLatch extends ThreadLatch<Long> {
      * methods, without latch methods. A {@link CountLatch.Waiter} is produced from a {@link CountLatch} which as the
      * host and shares the state with the {@link CountLatch.Waiter}.
      */
-    interface Waiter extends ThreadLatch.Waiter<Long> {
+    interface Waiter extends ThreadLatch2.Waiter<Long> {
 
         /**
          * Sends a long signal to the {@link CountLatch} where it was produced. If the signal is null, it is equivalent

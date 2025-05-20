@@ -16,10 +16,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
- * This interface represents the executor for works, which can be represented by {@link Work}, {@link Runnable} and
- * {@link Callable}. It provides methods to submit or schedule (if the current implementation supports) works, and
- * executes submitted works. The execution can be immediate or delayed, synchronous or asynchronous, depending on the
- * implementation.
+ * This interface represents the executor for works, which can be represented by {@link Runnable} or {@link Callable}.
+ * It provides methods to submit or schedule (if the current implementation supports) works, and executes submitted
+ * works. The execution can be immediate or delayed, synchronous or asynchronous, depending on the implementation.
  *
  * @author sunqian
  */
@@ -32,7 +31,7 @@ public interface WorkExecutor {
      * @return a new {@link WorkExecutor} which starts a new thread for each new work
      */
     static @Nonnull WorkExecutor newExecutor() {
-        return WorkBack.newExecutor(false);
+        return ExecutorBack.newExecutor(false);
     }
 
     /**
@@ -42,7 +41,7 @@ public interface WorkExecutor {
      * @return a new {@link WorkExecutor} which starts a new thread for each new work, supporting scheduling
      */
     static @Nonnull WorkExecutor newScheduler() {
-        return WorkBack.newExecutor(true);
+        return ExecutorBack.newExecutor(true);
     }
 
     /**
@@ -54,7 +53,7 @@ public interface WorkExecutor {
      * @return a new {@link WorkExecutor} based on a thread pool
      */
     static @Nonnull WorkExecutor newExecutor(int coreThreadSize) {
-        return WorkBack.newExecutor(coreThreadSize, Integer.MAX_VALUE, -1);
+        return ExecutorBack.newExecutor(coreThreadSize, Integer.MAX_VALUE, -1);
     }
 
     /**
@@ -67,7 +66,7 @@ public interface WorkExecutor {
      * @return a new {@link WorkExecutor} based on a thread pool
      */
     static @Nonnull WorkExecutor newExecutor(int coreThreadSize, int maxThreadSize) {
-        return WorkBack.newExecutor(coreThreadSize, maxThreadSize, -1);
+        return ExecutorBack.newExecutor(coreThreadSize, maxThreadSize, -1);
     }
 
     /**
@@ -81,7 +80,7 @@ public interface WorkExecutor {
      * @return a new {@link WorkExecutor} based on a thread pool
      */
     static @Nonnull WorkExecutor newExecutor(int coreThreadSize, int maxThreadSize, int maxQueueSize) {
-        return WorkBack.newExecutor(coreThreadSize, maxThreadSize, maxQueueSize);
+        return ExecutorBack.newExecutor(coreThreadSize, maxThreadSize, maxQueueSize);
     }
 
     /**
@@ -93,7 +92,7 @@ public interface WorkExecutor {
      * @return a new {@link WorkExecutor} based on the given {@link ExecutorService}
      */
     static @Nonnull WorkExecutor newExecutor(@Nonnull ExecutorService service) {
-        return WorkBack.newExecutor(service);
+        return ExecutorBack.newExecutor(service);
     }
 
     /**

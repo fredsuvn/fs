@@ -42,6 +42,21 @@ public class JieThread {
     }
 
     /**
+     * Sleeps the current thread until it is interrupted.
+     *
+     * @throws AwaitingException if the current thread is interrupted
+     */
+    public static void sleep() throws AwaitingException {
+        try {
+            while (true) {
+                Thread.sleep(Integer.MAX_VALUE);
+            }
+        } catch (InterruptedException e) {
+            throw new AwaitingException(e);
+        }
+    }
+
+    /**
      * Executes the given action until it returns {@code true}.
      *
      * @param action the given action to be executed
