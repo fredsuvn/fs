@@ -24,6 +24,20 @@ public class ExceptionTest {
     }
 
     @Test
+    public void testCheckedWrapper() {
+        assertEquals(JieException.wrapChecked(() -> 1, RuntimeException::new), 1);
+        Exception cause = new Exception();
+        expectThrows(RuntimeException.class, () -> {
+            JieException.wrapChecked(() -> {
+                throw cause;
+            }, e -> {
+                assertSame(e, cause);
+                throw new RuntimeException(e);
+            });
+        });
+    }
+
+    @Test
     public void testExceptionConstructors() {
 
         String message = "hello";
