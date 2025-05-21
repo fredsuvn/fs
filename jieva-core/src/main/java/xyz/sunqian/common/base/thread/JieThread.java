@@ -79,6 +79,7 @@ public class JieThread {
 
         private final static Sleeper INSTANCE = new Sleeper();
 
+        @SuppressWarnings({"InfiniteLoopStatement", "BusyWait"})
         @Override
         public void awaitInterruptibly() throws Exception {
             while (true) {

@@ -3,9 +3,9 @@ package test.base.thread;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.exception.AwaitingException;
 import xyz.sunqian.common.base.thread.JieThread;
-import xyz.sunqian.common.base.thread.ThreadGate;
 
 import java.time.Duration;
+import java.util.Objects;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -28,13 +28,18 @@ public class ThreadTest {
             assertTrue(t2 - t1 >= 10);
         }
         {
-            ThreadGate gate = ThreadGate.newThreadGate();
-            Thread thread = new Thread(() -> {
-                gate.open();
-                JieThread.sleep();
-            });
+            Thread thread = new Thread(JieThread::sleep);
             thread.start();
-            gate.await();
+            JieThread.until(() -> {
+                StackTraceElement[] traceElements = thread.getStackTrace();
+                for (StackTraceElement traceElement : traceElements) {
+                    if (Objects.equals("sleep", traceElement.getMethodName())
+                        && Objects.equals(Thread.class.getName(), traceElement.getClassName())) {
+                        return true;
+                    }
+                }
+                return false;
+            });
             thread.interrupt();
         }
     }
@@ -44,6 +49,8 @@ public class ThreadTest {
         int[] i = {0};
         JieThread.until(() -> i[0]++ >= 10);
         assertEquals(i[0], 11);
-        expectThrows(AwaitingException.class, () -> JieThread.until(() -> {throw new RuntimeException();}));
+        expectThrows(AwaitingException.class, () -> JieThread.until(() -> {
+            throw new RuntimeException();
+        }));
     }
 }
