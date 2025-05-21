@@ -5,8 +5,8 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.AwaitingException;
+import xyz.sunqian.common.base.exception.JieException;
 import xyz.sunqian.common.base.exception.WrappedException;
-import xyz.sunqian.common.base.thread.AwaitingAdaptor;
 import xyz.sunqian.common.base.thread.JieThread;
 
 import java.time.Duration;
@@ -31,6 +31,7 @@ import java.util.stream.Stream;
 
 final class ExecutorBack {
 
+    @SuppressWarnings("ScheduledThreadPoolExecutorWithZeroCoreThreads")
     static @Nonnull TaskExecutor newExecutor(boolean scheduled) {
         ExecutorService service = scheduled ?
             new ScheduledThreadPoolExecutor(0) :
@@ -59,7 +60,7 @@ final class ExecutorBack {
         return new TaskExecutorImpl(service);
     }
 
-    private static final class TaskExecutorImpl implements TaskExecutor, AwaitingAdaptor {
+    private static final class TaskExecutorImpl implements TaskExecutor {
 
         private final @Nonnull ExecutorService service;
 
@@ -187,32 +188,28 @@ final class ExecutorBack {
 
         @Override
         public void await() throws AwaitingException {
-            AwaitingAdaptor.super.await();
+            JieException.wrapChecked(
+                () -> JieThread.untilChecked(
+                    () -> service.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS)
+                ),
+                AwaitingException::new
+            );
         }
 
         @Override
         public boolean await(long millis) throws AwaitingException {
-            return AwaitingAdaptor.super.await(millis);
+            return JieException.wrapChecked(
+                () -> service.awaitTermination(millis, TimeUnit.MILLISECONDS),
+                AwaitingException::new
+            );
         }
 
         @Override
         public boolean await(@Nonnull Duration duration) throws AwaitingException {
-            return AwaitingAdaptor.super.await(duration);
-        }
-
-        @Override
-        public void awaitInterruptibly() throws Exception {
-            JieThread.untilChecked(() -> awaitInterruptibly(Long.MAX_VALUE));
-        }
-
-        @Override
-        public boolean awaitInterruptibly(long millis) throws Exception {
-            return service.awaitTermination(millis, TimeUnit.MILLISECONDS);
-        }
-
-        @Override
-        public boolean awaitInterruptibly(@Nonnull Duration duration) throws Exception {
-            return service.awaitTermination(duration.toNanos(), TimeUnit.NANOSECONDS);
+            return JieException.wrapChecked(
+                () -> service.awaitTermination(duration.toNanos(), TimeUnit.NANOSECONDS),
+                AwaitingException::new
+            );
         }
 
         @Override

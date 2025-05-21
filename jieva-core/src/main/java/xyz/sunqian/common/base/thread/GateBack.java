@@ -2,6 +2,7 @@ package xyz.sunqian.common.base.thread;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.exception.AwaitingException;
+import xyz.sunqian.common.base.exception.JieException;
 
 import java.time.Duration;
 import java.util.concurrent.locks.AbstractQueuedSynchronizer;
@@ -12,7 +13,7 @@ final class GateBack {
         return new ThreadGateImpl();
     }
 
-    private static final class ThreadGateImpl implements ThreadGate, AwaitingAdaptor {
+    private static final class ThreadGateImpl implements ThreadGate {
 
         private static final int OPENED = 1;
         private static final int CLOSED = 0;
@@ -41,32 +42,26 @@ final class GateBack {
 
         @Override
         public void await() throws AwaitingException {
-            AwaitingAdaptor.super.await();
+            JieException.wrapChecked(
+                () -> sync.acquireSharedInterruptibly(1),
+                AwaitingException::new
+            );
         }
 
         @Override
         public boolean await(long millis) throws AwaitingException {
-            return AwaitingAdaptor.super.await(millis);
+            return JieException.wrapChecked(
+                () -> sync.tryAcquireSharedNanos(1, millis * 1000000L),
+                AwaitingException::new
+            );
         }
 
         @Override
         public boolean await(@Nonnull Duration duration) throws AwaitingException {
-            return AwaitingAdaptor.super.await(duration);
-        }
-
-        @Override
-        public void awaitInterruptibly() throws Exception {
-            sync.acquireSharedInterruptibly(1);
-        }
-
-        @Override
-        public boolean awaitInterruptibly(long millis) throws Exception {
-            return sync.tryAcquireSharedNanos(1, millis * 1000000L);
-        }
-
-        @Override
-        public boolean awaitInterruptibly(@Nonnull Duration duration) throws Exception {
-            return sync.tryAcquireSharedNanos(1, duration.toNanos());
+            return JieException.wrapChecked(
+                () -> sync.tryAcquireSharedNanos(1, duration.toNanos()),
+                AwaitingException::new
+            );
         }
 
         private static final class Sync extends AbstractQueuedSynchronizer {

@@ -19,6 +19,7 @@ public class JieThread {
      *
      * @throws AwaitingException if the current thread is interrupted or an error occurs while sleeping
      */
+    @SuppressWarnings({"InfiniteLoopStatement", "BusyWait"})
     public static void sleep() throws AwaitingException {
         JieException.wrapChecked(
             () -> {
@@ -115,29 +116,4 @@ public class JieThread {
             }
         }
     }
-
-    // private static final class Sleeper implements AwaitingAdaptor {
-    //
-    //     private final static Sleeper INSTANCE = new Sleeper();
-    //
-    //     @SuppressWarnings({"InfiniteLoopStatement", "BusyWait"})
-    //     @Override
-    //     public void awaitInterruptibly() throws Exception {
-    //         while (true) {
-    //             Thread.sleep(Integer.MAX_VALUE);
-    //         }
-    //     }
-    //
-    //     @Override
-    //     public boolean awaitInterruptibly(long millis) throws Exception {
-    //         Thread.sleep(millis);
-    //         return true;
-    //     }
-    //
-    //     @Override
-    //     public boolean awaitInterruptibly(@Nonnull Duration duration) throws Exception {
-    //         Thread.sleep(duration.toMillis(), duration.getNano() / 1000);
-    //         return true;
-    //     }
-    // }
 }
