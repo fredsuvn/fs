@@ -2,7 +2,7 @@ package xyz.sunqian.common.base.thread;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.exception.AwaitingException;
-import xyz.sunqian.common.base.function.BooleanRunnable;
+import xyz.sunqian.common.base.function.BooleanCallable;
 
 import java.time.Duration;
 
@@ -43,25 +43,35 @@ public class JieThread {
     }
 
     /**
-     * Executes the given action until it returns {@code true}. Its logic is as follows:
+     * Executes the given task until it returns {@code true}, and may throw an {@link AwaitingException} if an error
+     * occurs while awaiting. Its logic is as follows:
      * <pre>{@code
-     * while (true) {
-     *     if (action.run()) {
-     *         return;
+     * try {
+     *     while (true) {
+     *         if (task.call()) {
+     *             return;
+     *         }
      *     }
+     * } catch (Exception e) {
+     *     throw new AwaitingException(e);
      * }
      * }</pre>
      * <p>
-     * Note this method may cause high CPU usage. When the action determines to return {@code false}, consider adding
-     * some measures (such as sleep the current thread in a very short time) to avoid it.
+     * Note this method may cause high CPU usage. When the task determines to return {@code false}, consider adding some
+     * measures (such as sleep the current thread in a very short time) to avoid it.
      *
-     * @param action the given action to be executed
+     * @param task the given task to be executed
+     * @throws AwaitingException if an error occurs while awaiting
      */
-    public static void until(@Nonnull BooleanRunnable action) {
-        while (true) {
-            if (action.run()) {
-                return;
+    public static void until(@Nonnull BooleanCallable task) throws AwaitingException {
+        try {
+            while (true) {
+                if (task.call()) {
+                    return;
+                }
             }
+        } catch (Exception e) {
+            throw new AwaitingException(e);
         }
     }
 

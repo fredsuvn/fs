@@ -1,6 +1,7 @@
 package test.base.thread;
 
 import org.testng.annotations.Test;
+import xyz.sunqian.common.base.exception.AwaitingException;
 import xyz.sunqian.common.base.thread.JieThread;
 import xyz.sunqian.common.base.thread.ThreadGate;
 
@@ -8,6 +9,7 @@ import java.time.Duration;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.expectThrows;
 
 public class ThreadTest {
 
@@ -42,5 +44,6 @@ public class ThreadTest {
         int[] i = {0};
         JieThread.until(() -> i[0]++ >= 10);
         assertEquals(i[0], 11);
+        expectThrows(AwaitingException.class, () -> JieThread.until(() -> {throw new RuntimeException();}));
     }
 }
