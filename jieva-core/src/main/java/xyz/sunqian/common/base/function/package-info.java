@@ -27,6 +27,10 @@
  *     <li>{@link xyz.sunqian.common.base.function.SubFunction}</li>
  *     <li>{@link xyz.sunqian.common.base.function.LongSubFunction}</li>
  * </ul>
+ * Runnable-function:
+ * <ul>
+ *     <li>{@link xyz.sunqian.common.base.function.BooleanRunnable}</li>
+ * </ul>
  */
 package xyz.sunqian.common.base.function;
 
