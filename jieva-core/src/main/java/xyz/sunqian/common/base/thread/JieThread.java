@@ -2,9 +2,9 @@ package xyz.sunqian.common.base.thread;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.exception.AwaitingException;
+import xyz.sunqian.common.base.function.BooleanRunnable;
 
 import java.time.Duration;
-import java.util.function.BooleanSupplier;
 
 /**
  * Static utility class for thread.
@@ -43,13 +43,23 @@ public class JieThread {
     }
 
     /**
-     * Executes the given action until it returns {@code true}.
+     * Executes the given action until it returns {@code true}. Its logic is as follows:
+     * <pre>{@code
+     * while (true) {
+     *     if (action.run()) {
+     *         return;
+     *     }
+     * }
+     * }</pre>
+     * <p>
+     * Note this method may cause high CPU usage. When the action determines to return {@code false}, consider adding
+     * some measures (such as sleep the current thread in a very short time) to avoid it.
      *
      * @param action the given action to be executed
      */
-    public static void until(@Nonnull BooleanSupplier action) {
+    public static void until(@Nonnull BooleanRunnable action) {
         while (true) {
-            if (action.getAsBoolean()) {
+            if (action.run()) {
                 return;
             }
         }
