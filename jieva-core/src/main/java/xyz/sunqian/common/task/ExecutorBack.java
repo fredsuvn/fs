@@ -297,18 +297,23 @@ final class ExecutorBack {
 
     private static abstract class Task<T> implements Runnable, Callable<T> {
 
-        volatile @Nonnull TaskState state = TaskState.WAITING;
+        static final int WAITING = 0;
+        static final int EXECUTING = 1;
+        static final int SUCCEEDED = 2;
+        static final int FAILED = 3;
+
+        volatile @Nonnull int state = WAITING;
         volatile @Nullable Exception exception;
 
         public T execute() throws Exception {
-            state = TaskState.EXECUTING;
+            state = EXECUTING;
             try {
                 T result = doExecute();
-                state = TaskState.SUCCEEDED;
+                state = SUCCEEDED;
                 return result;
             } catch (Exception e) {
                 exception = e;
-                state = TaskState.FAILED;
+                state = FAILED;
                 throw e;
             }
         }
@@ -376,18 +381,22 @@ final class ExecutorBack {
         @Override
         public @Nonnull TaskState getState() {
             if (future.isDone()) {
-                TaskState state = task.state;
-                if (Objects.equals(state, TaskState.WAITING)) {
-                    task.state = TaskState.CANCELED;
-                    return TaskState.CANCELED;
-                }
+                int state = task.state;
                 if (future.isCancelled()) {
-                    task.state = TaskState.CANCELED_EXECUTING;
+                    if (state == Task.WAITING) {
+                        return TaskState.CANCELED;
+                    }
                     return TaskState.CANCELED_EXECUTING;
                 }
-                return state;
+                if (state == Task.SUCCEEDED) {
+                    return TaskState.SUCCEEDED;
+                }
+                return TaskState.FAILED;
             }
-            return task.state;
+            if (task.state == Task.WAITING) {
+                return TaskState.WAITING;
+            }
+            return TaskState.EXECUTING;
         }
 
         @Override
@@ -456,6 +465,8 @@ final class ExecutorBack {
             try {
                 Future<T> future = getFuture();
                 return future.get();
+            } catch (ExecutionException | CancellationException e) {
+                return null;
             } catch (Exception e) {
                 throw new AwaitingException(e);
             }
@@ -466,6 +477,8 @@ final class ExecutorBack {
             try {
                 Future<T> future = getFuture();
                 return future.get(duration.toNanos(), TimeUnit.NANOSECONDS);
+            } catch (ExecutionException | CancellationException e) {
+                return null;
             } catch (Exception e) {
                 throw new AwaitingException(e);
             }

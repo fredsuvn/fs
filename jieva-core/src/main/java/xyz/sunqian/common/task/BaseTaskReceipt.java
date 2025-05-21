@@ -42,7 +42,6 @@ interface BaseTaskReceipt {
 
     /**
      * Returns {@code true} if the task's state is {@link TaskState#CANCELED} or {@link TaskState#CANCELED_EXECUTING}.
-     * normally.
      *
      * @return {@code true} if the task's state is {@link TaskState#CANCELED} or {@link TaskState#CANCELED_EXECUTING},
      * else {@code false}
