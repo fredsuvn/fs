@@ -1,11 +1,11 @@
 package test.base.thread;
 
 import org.testng.annotations.Test;
+import test.utils.ThreadUtil;
 import xyz.sunqian.common.base.exception.AwaitingException;
 import xyz.sunqian.common.base.thread.JieThread;
 
 import java.time.Duration;
-import java.util.Objects;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -30,16 +30,7 @@ public class ThreadTest {
         {
             Thread thread = new Thread(JieThread::sleep);
             thread.start();
-            JieThread.until(() -> {
-                StackTraceElement[] traceElements = thread.getStackTrace();
-                for (StackTraceElement traceElement : traceElements) {
-                    if (Objects.equals("sleep", traceElement.getMethodName())
-                        && Objects.equals(Thread.class.getName(), traceElement.getClassName())) {
-                        return true;
-                    }
-                }
-                return false;
-            });
+            ThreadUtil.awaitUntilExecuteTo(thread, Thread.class.getName(), "sleep");
             thread.interrupt();
         }
     }

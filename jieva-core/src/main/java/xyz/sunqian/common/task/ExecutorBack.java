@@ -190,7 +190,7 @@ final class ExecutorBack {
         public void await() throws AwaitingException {
             JieException.wrapChecked(
                 () -> JieThread.untilChecked(
-                    () -> service.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS)
+                    () -> awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS)
                 ),
                 AwaitingException::new
             );
@@ -199,7 +199,7 @@ final class ExecutorBack {
         @Override
         public boolean await(long millis) throws AwaitingException {
             return JieException.wrapChecked(
-                () -> service.awaitTermination(millis, TimeUnit.MILLISECONDS),
+                () -> awaitTermination(millis, TimeUnit.MILLISECONDS),
                 AwaitingException::new
             );
         }
@@ -207,9 +207,13 @@ final class ExecutorBack {
         @Override
         public boolean await(@Nonnull Duration duration) throws AwaitingException {
             return JieException.wrapChecked(
-                () -> service.awaitTermination(duration.toNanos(), TimeUnit.NANOSECONDS),
+                () -> awaitTermination(duration.toNanos(), TimeUnit.NANOSECONDS),
                 AwaitingException::new
             );
+        }
+
+        private boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+            return service.awaitTermination(timeout, unit);
         }
 
         @Override
@@ -313,11 +317,7 @@ final class ExecutorBack {
 
         @Override
         public void run() {
-            try {
-                execute();
-            } catch (Exception e) {
-                throw new WrappedException(e);
-            }
+            JieException.wrapChecked(this::execute, WrappedException::new);
         }
 
         @Override

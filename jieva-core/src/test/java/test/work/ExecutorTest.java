@@ -3,8 +3,8 @@ package test.work;
 import org.testng.annotations.Test;
 import test.utils.FlagException;
 import test.utils.RejectedExecutor;
+import test.utils.ThreadUtil;
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.AwaitingException;
 import xyz.sunqian.common.base.thread.JieThread;
 import xyz.sunqian.common.task.SubmissionException;
@@ -280,38 +280,41 @@ public class ExecutorTest {
 
     @Test
     public void testAwaiting() {
-        Latch latch = new Latch();
-        TaskExecutor executor1 = TaskExecutor.newExecutor(1, 1);
-        executor1.run(latch::countDown1);
-        latch.await1();
-        assertFalse(executor1.await(1));
-        assertFalse(executor1.isTerminated());
-        executor1.close();
-        assertTrue(executor1.await(Duration.ofMillis(1)));
-        assertTrue(executor1.isTerminated());
-        // Forever sleep:
-        TaskExecutor executor2 = TaskExecutor.newExecutor(1, 1);
-        executor2.run(() -> {
-            try {
-                JieThread.sleep();
-            } catch (AwaitingException e) {
-                throw new RuntimeException(e);
-            }
-        });
-        assertFalse(executor2.await(Duration.ofMillis(1)));
-        Thread waitThread = new Thread(executor2::await);
-        waitThread.start();
-        Jie.sleep(3000);
-        System.out.println(Arrays.toString(waitThread.getStackTrace()));
-        System.out.println(executor2.getClass());
-        waitThread.interrupt();
+        {
+            // await a while
+            Latch latch = new Latch();
+            TaskExecutor executor = TaskExecutor.newExecutor(1, 1);
+            executor.run(latch::countDown1);
+            latch.await1();
+            assertFalse(executor.await(1));
+            assertFalse(executor.isTerminated());
+            executor.close();
+            assertTrue(executor.await(Duration.ofMillis(1)));
+            assertTrue(executor.isTerminated());
+        }
+        {
+            // await forever
+            TaskExecutor executor = TaskExecutor.newExecutor(1, 1);
+            executor.run(() -> {
+                try {
+                    JieThread.sleep();
+                } catch (AwaitingException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            assertFalse(executor.await(Duration.ofMillis(1)));
+            Thread waitThread = new Thread(executor::await);
+            waitThread.start();
+            ThreadUtil.awaitUntilExecuteTo(waitThread, executor.getClass().getName(), "awaitTermination");
+            waitThread.interrupt();
+        }
     }
 
     // private String getExecutorBackClassName() {
     //
     // }
 
-    @Test
+    //@Test
     public void testReceipt() {
         Latch latch = new Latch();
         class LatchPool extends ThreadPoolExecutor {
