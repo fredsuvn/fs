@@ -3,19 +3,19 @@ package test.work;
 import org.testng.annotations.Test;
 import test.utils.FlagException;
 import xyz.sunqian.common.base.exception.WrappedException;
-import xyz.sunqian.common.work.JieWork;
+import xyz.sunqian.common.task.JieTask;
 
 import java.util.concurrent.Callable;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.expectThrows;
 
-public class WorkTest {
+public class TaskTest {
 
     @Test
     public void testToRunnable() {
         int[] i = {0};
-        Runnable runnable = JieWork.toRunnable(() -> {
+        Runnable runnable = JieTask.toRunnable(() -> {
             i[0]++;
             return null;
         });
@@ -34,13 +34,13 @@ public class WorkTest {
                 return null;
             }
         };
-        Runnable workRunnable1 = JieWork.toRunnable(work1);
+        Runnable workRunnable1 = JieTask.toRunnable(work1);
         workRunnable1.run();
         assertEquals(i[0], 2);
         Callable<?> work2 = (Callable<Object>) () -> {
             throw new FlagException(i);
         };
-        Runnable workRunnable2 = JieWork.toRunnable(work2);
+        Runnable workRunnable2 = JieTask.toRunnable(work2);
         expectThrows(WrappedException.class, workRunnable2::run);
         assertEquals(i[0], 3);
     }

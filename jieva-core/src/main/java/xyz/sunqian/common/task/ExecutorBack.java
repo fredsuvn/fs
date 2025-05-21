@@ -1,4 +1,4 @@
-package xyz.sunqian.common.work;
+package xyz.sunqian.common.task;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
@@ -6,6 +6,7 @@ import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.AwaitingException;
 import xyz.sunqian.common.base.exception.WrappedException;
+import xyz.sunqian.common.base.thread.AwaitingAdaptor;
 import xyz.sunqian.common.base.thread.JieThread;
 
 import java.time.Duration;
@@ -30,7 +31,7 @@ import java.util.stream.Stream;
 
 final class ExecutorBack {
 
-    static @Nonnull WorkExecutor newExecutor(boolean scheduled) {
+    static @Nonnull TaskExecutor newExecutor(boolean scheduled) {
         ExecutorService service = scheduled ?
             new ScheduledThreadPoolExecutor(0) :
             new ThreadPoolExecutor(
@@ -43,7 +44,7 @@ final class ExecutorBack {
         return newExecutor(service);
     }
 
-    static @Nonnull WorkExecutor newExecutor(int coreThreadSize, int maxThreadSize, int maxQueueSize) {
+    static @Nonnull TaskExecutor newExecutor(int coreThreadSize, int maxThreadSize, int maxQueueSize) {
         ThreadPoolExecutor service = new ThreadPoolExecutor(
             coreThreadSize,
             maxThreadSize,
@@ -54,17 +55,15 @@ final class ExecutorBack {
         return newExecutor(service);
     }
 
-    static @Nonnull WorkExecutor newExecutor(@Nonnull ExecutorService service) {
-        return new WorkExecutorImpl(service);
+    static @Nonnull TaskExecutor newExecutor(@Nonnull ExecutorService service) {
+        return new TaskExecutorImpl(service);
     }
 
-    private static final class WorkExecutorImpl implements WorkExecutor {
-
-        private static final Duration AWAITING_UNIT = Duration.ofSeconds(1);
+    private static final class TaskExecutorImpl implements TaskExecutor, AwaitingAdaptor {
 
         private final @Nonnull ExecutorService service;
 
-        private WorkExecutorImpl(@Nonnull ExecutorService service) {
+        private TaskExecutorImpl(@Nonnull ExecutorService service) {
             this.service = service;
         }
 
@@ -78,9 +77,9 @@ final class ExecutorBack {
         }
 
         @Override
-        public @Nonnull RunReceipt submit(@Nonnull Runnable work) throws SubmissionException {
+        public @Nonnull VoidReceipt submit(@Nonnull Runnable work) throws SubmissionException {
             try {
-                RunnableWork absWork = new RunnableWork(Objects.requireNonNull(work));
+                RunnableTask absWork = new RunnableTask(Objects.requireNonNull(work));
                 Future<?> future = service.submit(absWork.asRunnable());
                 return new RunnableReceipt(future, absWork);
             } catch (Exception e) {
@@ -89,9 +88,9 @@ final class ExecutorBack {
         }
 
         @Override
-        public @Nonnull <T> WorkReceipt<T> submit(@Nonnull Callable<? extends T> work) throws SubmissionException {
+        public @Nonnull <T> TaskReceipt<T> submit(@Nonnull Callable<? extends T> work) throws SubmissionException {
             try {
-                CallableWork<T> absWork = new CallableWork<>(Objects.requireNonNull(work));
+                CallableTask<T> absWork = new CallableTask<>(Objects.requireNonNull(work));
                 Future<T> future = service.submit(absWork.asCallable());
                 return new CallableReceipt<>(future, absWork);
             } catch (Exception e) {
@@ -100,27 +99,27 @@ final class ExecutorBack {
         }
 
         @Override
-        public @Nonnull <T> List<@Nonnull WorkReceipt<T>> executeAll(
+        public @Nonnull <T> List<@Nonnull TaskReceipt<T>> executeAll(
             @RetainedParam @Nonnull Collection<? extends @Nonnull Callable<? extends T>> works
         ) throws AwaitingException {
             try {
-                List<@Nonnull Work<T>> workList = callablesToAbsWorks(works);
-                List<@Nonnull Future<T>> futureList = service.invokeAll(workList);
-                return futuresToReceipts(futureList, workList);
+                List<@Nonnull Task<T>> taskList = callablesToAbsWorks(works);
+                List<@Nonnull Future<T>> futureList = service.invokeAll(taskList);
+                return futuresToReceipts(futureList, taskList);
             } catch (Exception e) {
                 throw new AwaitingException(e);
             }
         }
 
         @Override
-        public @Nonnull <T> List<@Nonnull WorkReceipt<T>> executeAll(
+        public @Nonnull <T> List<@Nonnull TaskReceipt<T>> executeAll(
             @RetainedParam @Nonnull Collection<? extends @Nonnull Callable<? extends T>> works,
             @Nonnull Duration duration
         ) throws AwaitingException {
             try {
-                List<@Nonnull Work<T>> workList = callablesToAbsWorks(works);
-                List<@Nonnull Future<T>> futureList = service.invokeAll(workList, duration.toNanos(), TimeUnit.NANOSECONDS);
-                return futuresToReceipts(futureList, workList);
+                List<@Nonnull Task<T>> taskList = callablesToAbsWorks(works);
+                List<@Nonnull Future<T>> futureList = service.invokeAll(taskList, duration.toNanos(), TimeUnit.NANOSECONDS);
+                return futuresToReceipts(futureList, taskList);
             } catch (Exception e) {
                 throw new AwaitingException(e);
             }
@@ -131,8 +130,8 @@ final class ExecutorBack {
             @RetainedParam @Nonnull Collection<? extends @Nonnull Callable<? extends T>> works
         ) throws AwaitingException {
             try {
-                List<@Nonnull Work<T>> workList = callablesToAbsWorks(works);
-                return service.invokeAny(workList);
+                List<@Nonnull Task<T>> taskList = callablesToAbsWorks(works);
+                return service.invokeAny(taskList);
             } catch (Exception e) {
                 throw new AwaitingException(e);
             }
@@ -144,29 +143,29 @@ final class ExecutorBack {
             @Nonnull Duration duration
         ) throws AwaitingException {
             try {
-                List<@Nonnull Work<T>> workList = callablesToAbsWorks(works);
-                return service.invokeAny(workList, duration.toNanos(), TimeUnit.NANOSECONDS);
+                List<@Nonnull Task<T>> taskList = callablesToAbsWorks(works);
+                return service.invokeAny(taskList, duration.toNanos(), TimeUnit.NANOSECONDS);
             } catch (Exception e) {
                 throw new AwaitingException(e);
             }
         }
 
-        private <T> @Nonnull List<@Nonnull Work<T>> callablesToAbsWorks(
+        private <T> @Nonnull List<@Nonnull Task<T>> callablesToAbsWorks(
             @Nonnull Collection<? extends @Nonnull Callable<? extends T>> works
         ) {
-            Stream<@Nonnull Work<T>> stream = works.stream()
-                .map(it -> new CallableWork<>(Objects.requireNonNull(it)));
+            Stream<@Nonnull Task<T>> stream = works.stream()
+                .map(it -> new CallableTask<>(Objects.requireNonNull(it)));
             return stream.collect(Collectors.toList());
         }
 
-        private <T> @Nonnull List<@Nonnull WorkReceipt<T>> futuresToReceipts(
+        private <T> @Nonnull List<@Nonnull TaskReceipt<T>> futuresToReceipts(
             @Nonnull List<@Nonnull Future<T>> futureList,
-            @Nonnull List<@Nonnull Work<T>> workList
+            @Nonnull List<@Nonnull Task<T>> taskList
         ) {
-            List<@Nonnull WorkReceipt<T>> result = new ArrayList<>(futureList.size());
+            List<@Nonnull TaskReceipt<T>> result = new ArrayList<>(futureList.size());
             int c = 0;
             for (@Nonnull Future<T> future : futureList) {
-                result.add(new CallableReceipt<>(future, workList.get(c++)));
+                result.add(new CallableReceipt<>(future, taskList.get(c++)));
             }
             return result;
         }
@@ -188,16 +187,32 @@ final class ExecutorBack {
 
         @Override
         public void await() throws AwaitingException {
-            JieThread.until(() -> await(AWAITING_UNIT));
+            AwaitingAdaptor.super.await();
+        }
+
+        @Override
+        public boolean await(long millis) throws AwaitingException {
+            return AwaitingAdaptor.super.await(millis);
         }
 
         @Override
         public boolean await(@Nonnull Duration duration) throws AwaitingException {
-            try {
-                return service.awaitTermination(duration.toNanos(), TimeUnit.NANOSECONDS);
-            } catch (Exception e) {
-                throw new AwaitingException(e);
-            }
+            return AwaitingAdaptor.super.await(duration);
+        }
+
+        @Override
+        public void awaitInterruptibly() throws Exception {
+            JieThread.untilChecked(() -> awaitInterruptibly(Long.MAX_VALUE));
+        }
+
+        @Override
+        public boolean awaitInterruptibly(long millis) throws Exception {
+            return service.awaitTermination(millis, TimeUnit.MILLISECONDS);
+        }
+
+        @Override
+        public boolean awaitInterruptibly(@Nonnull Duration duration) throws Exception {
+            return service.awaitTermination(duration.toNanos(), TimeUnit.NANOSECONDS);
         }
 
         @Override
@@ -211,12 +226,12 @@ final class ExecutorBack {
         }
 
         @Override
-        public @Nonnull RunReceipt schedule(
+        public @Nonnull VoidReceipt schedule(
             @Nonnull Runnable work, @Nonnull Duration delay
         ) throws SubmissionException {
             try {
                 ScheduledExecutorService scheduledService = getScheduledService();
-                RunnableWork absWork = new RunnableWork(Objects.requireNonNull(work));
+                RunnableTask absWork = new RunnableTask(Objects.requireNonNull(work));
                 ScheduledFuture<?> future = scheduledService.schedule(
                     (Runnable) absWork, delay.toNanos(), TimeUnit.NANOSECONDS);
                 return new RunnableReceipt(future, absWork);
@@ -226,12 +241,12 @@ final class ExecutorBack {
         }
 
         @Override
-        public @Nonnull <T> WorkReceipt<T> schedule(
+        public @Nonnull <T> TaskReceipt<T> schedule(
             @Nonnull Callable<? extends T> work, @Nonnull Duration delay
         ) throws SubmissionException {
             try {
                 ScheduledExecutorService scheduledService = getScheduledService();
-                CallableWork<T> absWork = new CallableWork<>(Objects.requireNonNull(work));
+                CallableTask<T> absWork = new CallableTask<>(Objects.requireNonNull(work));
                 ScheduledFuture<T> future = scheduledService.schedule(
                     (Callable<T>) absWork, delay.toNanos(), TimeUnit.NANOSECONDS);
                 return new CallableReceipt<>(future, absWork);
@@ -241,12 +256,12 @@ final class ExecutorBack {
         }
 
         @Override
-        public @Nonnull RunReceipt scheduleWithRate(
+        public @Nonnull VoidReceipt scheduleWithRate(
             @Nonnull Runnable work, @Nonnull Duration initialDelay, @Nonnull Duration period
         ) throws SubmissionException {
             try {
                 ScheduledExecutorService scheduledService = getScheduledService();
-                RunnableWork absWork = new RunnableWork(Objects.requireNonNull(work));
+                RunnableTask absWork = new RunnableTask(Objects.requireNonNull(work));
                 ScheduledFuture<?> future = scheduledService.scheduleAtFixedRate(
                     absWork, initialDelay.toNanos(), period.toNanos(), TimeUnit.NANOSECONDS);
                 return new RunnableReceipt(future, absWork);
@@ -256,12 +271,12 @@ final class ExecutorBack {
         }
 
         @Override
-        public @Nonnull RunReceipt scheduleWithDelay(
+        public @Nonnull VoidReceipt scheduleWithDelay(
             @Nonnull Runnable work, @Nonnull Duration initialDelay, @Nonnull Duration delay
         ) throws SubmissionException {
             try {
                 ScheduledExecutorService scheduledService = getScheduledService();
-                RunnableWork absWork = new RunnableWork(Objects.requireNonNull(work));
+                RunnableTask absWork = new RunnableTask(Objects.requireNonNull(work));
                 ScheduledFuture<?> future = scheduledService.scheduleWithFixedDelay(
                     absWork, initialDelay.toNanos(), delay.toNanos(), TimeUnit.NANOSECONDS);
                 return new RunnableReceipt(future, absWork);
@@ -279,30 +294,30 @@ final class ExecutorBack {
         }
     }
 
-    private static abstract class Work<T> implements Runnable, Callable<T> {
+    private static abstract class Task<T> implements Runnable, Callable<T> {
 
-        volatile @Nonnull WorkState state = WorkState.WAITING;
+        volatile @Nonnull TaskState state = TaskState.WAITING;
         volatile @Nullable Exception exception;
 
-        public T work() throws Exception {
-            state = WorkState.EXECUTING;
+        public T execute() throws Exception {
+            state = TaskState.EXECUTING;
             try {
-                T result = doWork();
-                state = WorkState.SUCCEEDED;
+                T result = doExecute();
+                state = TaskState.SUCCEEDED;
                 return result;
             } catch (Exception e) {
                 exception = e;
-                state = WorkState.FAILED;
+                state = TaskState.FAILED;
                 throw e;
             }
         }
 
-        protected abstract T doWork() throws Exception;
+        protected abstract T doExecute() throws Exception;
 
         @Override
         public void run() {
             try {
-                work();
+                execute();
             } catch (Exception e) {
                 throw new WrappedException(e);
             }
@@ -310,7 +325,7 @@ final class ExecutorBack {
 
         @Override
         public T call() throws Exception {
-            return work();
+            return execute();
         }
 
         public Runnable asRunnable() {
@@ -322,60 +337,60 @@ final class ExecutorBack {
         }
     }
 
-    private static final class RunnableWork extends Work<Object> {
+    private static final class RunnableTask extends Task<Object> {
 
         private final @Nonnull Runnable runnable;
 
-        private RunnableWork(@Nonnull Runnable runnable) {
+        private RunnableTask(@Nonnull Runnable runnable) {
             this.runnable = runnable;
         }
 
         @Override
-        protected Object doWork() {
+        protected Object doExecute() {
             runnable.run();
             return null;
         }
     }
 
-    private static final class CallableWork<T> extends Work<T> {
+    private static final class CallableTask<T> extends Task<T> {
 
         private final @Nonnull Callable<? extends T> callable;
 
-        private CallableWork(@Nonnull Callable<? extends T> callable) {
+        private CallableTask(@Nonnull Callable<? extends T> callable) {
             this.callable = callable;
         }
 
         @Override
-        protected T doWork() throws Exception {
+        protected T doExecute() throws Exception {
             return callable.call();
         }
     }
 
-    private static abstract class Receipt implements BaseWorkReceipt {
+    private static abstract class Receipt implements BaseTaskReceipt {
 
         private final @Nonnull Future<?> future;
-        private final @Nonnull ExecutorBack.Work<?> work;
+        private final @Nonnull ExecutorBack.Task<?> task;
 
-        private Receipt(@Nonnull Future<?> future, Work<?> work) {
+        private Receipt(@Nonnull Future<?> future, Task<?> task) {
             this.future = future;
-            this.work = work;
+            this.task = task;
         }
 
         @Override
-        public @Nonnull WorkState getState() {
+        public @Nonnull TaskState getState() {
             if (future.isDone()) {
-                WorkState state = work.state;
-                if (Objects.equals(state, WorkState.WAITING)) {
-                    work.state = WorkState.CANCELED;
-                    return WorkState.CANCELED;
+                TaskState state = task.state;
+                if (Objects.equals(state, TaskState.WAITING)) {
+                    task.state = TaskState.CANCELED;
+                    return TaskState.CANCELED;
                 }
                 if (future.isCancelled()) {
-                    work.state = WorkState.CANCELED_DURING;
-                    return WorkState.CANCELED_DURING;
+                    task.state = TaskState.CANCELED_EXECUTING;
+                    return TaskState.CANCELED_EXECUTING;
                 }
                 return state;
             }
-            return work.state;
+            return task.state;
         }
 
         @Override
@@ -385,7 +400,7 @@ final class ExecutorBack {
 
         @Override
         public @Nullable Throwable getException() {
-            return work.exception;
+            return task.exception;
         }
 
         public @Nullable Duration getDelay() {
@@ -402,10 +417,10 @@ final class ExecutorBack {
         }
     }
 
-    private static final class RunnableReceipt extends Receipt implements RunReceipt {
+    private static final class RunnableReceipt extends Receipt implements VoidReceipt {
 
-        private RunnableReceipt(@Nonnull Future<?> future, Work<?> work) {
-            super(future, work);
+        private RunnableReceipt(@Nonnull Future<?> future, Task<?> task) {
+            super(future, task);
         }
 
         @Override
@@ -433,10 +448,10 @@ final class ExecutorBack {
         }
     }
 
-    private static final class CallableReceipt<T> extends Receipt implements WorkReceipt<T> {
+    private static final class CallableReceipt<T> extends Receipt implements TaskReceipt<T> {
 
-        private CallableReceipt(@Nonnull Future<T> future, Work<T> work) {
-            super(future, work);
+        private CallableReceipt(@Nonnull Future<T> future, Task<T> task) {
+            super(future, task);
         }
 
         @Override

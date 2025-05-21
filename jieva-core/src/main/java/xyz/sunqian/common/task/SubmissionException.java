@@ -1,4 +1,4 @@
-package xyz.sunqian.common.work;
+package xyz.sunqian.common.task;
 
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.exception.JieException;
@@ -7,7 +7,7 @@ import xyz.sunqian.common.base.exception.JieRuntimeException;
 import java.util.concurrent.RejectedExecutionException;
 
 /**
- * This runtime exception is typically used for wrapping exceptions that occur when submitting a work to an executor.
+ * This runtime exception is typically used for wrapping exceptions that occur when submitting a task to an executor.
  * The {@link #getCause()} method returns the wrapped original cause such as {@link RejectedExecutionException} (if
  * any).
  *
