@@ -1,5 +1,7 @@
 package xyz.sunqian.common.base.value;
 
+import xyz.sunqian.annotations.Nonnull;
+
 /**
  * Primitive {@code char} version of {@link Var}.
  *
@@ -13,7 +15,7 @@ public interface CharVar extends CharVal, PrimitiveToVar<Character> {
      * @param value the specified value
      * @return a {@link CharVar} initialized with the specified value
      */
-    static CharVar of(char value) {
+    static @Nonnull CharVar of(char value) {
         return VarBack.of(value);
     }
 
@@ -23,7 +25,7 @@ public interface CharVar extends CharVal, PrimitiveToVar<Character> {
      * @param value the specified value
      * @return a {@link CharVar} initialized with the specified value
      */
-    static CharVar of(int value) {
+    static @Nonnull CharVar of(int value) {
         return of((char) value);
     }
 
@@ -33,6 +35,7 @@ public interface CharVar extends CharVal, PrimitiveToVar<Character> {
      * @param value the specified value
      * @return this
      */
+    @Nonnull
     CharVar set(char value);
 
     /**
@@ -41,7 +44,7 @@ public interface CharVar extends CharVal, PrimitiveToVar<Character> {
      * @param value the specified value
      * @return this
      */
-    default CharVar set(int value) {
+    default @Nonnull CharVar set(int value) {
         return set((char) value);
     }
 
@@ -51,10 +54,11 @@ public interface CharVar extends CharVal, PrimitiveToVar<Character> {
      * @param value the specified value
      * @return this itself
      */
+    @Nonnull
     CharVar add(int value);
 
     @Override
-    default Var<Character> toVar() {
+    default @Nonnull Var<Character> toVar() {
         return Var.of(get());
     }
 

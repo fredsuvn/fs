@@ -1,6 +1,7 @@
 package xyz.sunqian.common.base.value;
 
 import xyz.sunqian.annotations.Immutable;
+import xyz.sunqian.annotations.Nonnull;
 
 /**
  * Primitive {@code short} version of {@link Val}.
@@ -15,7 +16,7 @@ public interface ShortVal extends PrimitiveToVal<Short> {
      *
      * @return a {@link ShortVal} holding the {@code 0}
      */
-    static ShortVal ofZero() {
+    static @Nonnull ShortVal ofZero() {
         return ValBack.OF_ZERO_SHORT;
     }
 
@@ -25,7 +26,7 @@ public interface ShortVal extends PrimitiveToVal<Short> {
      * @param value the specified value
      * @return a {@link ShortVal} holding the specified value
      */
-    static ShortVal of(short value) {
+    static @Nonnull ShortVal of(short value) {
         return ValBack.of(value);
     }
 
@@ -35,7 +36,7 @@ public interface ShortVal extends PrimitiveToVal<Short> {
      * @param value the specified value
      * @return a {@link ShortVal} holding the specified value
      */
-    static ShortVal of(int value) {
+    static @Nonnull ShortVal of(int value) {
         return of((short) value);
     }
 
@@ -47,7 +48,7 @@ public interface ShortVal extends PrimitiveToVal<Short> {
     short get();
 
     @Override
-    default Val<Short> toVal() {
+    default @Nonnull Val<Short> toVal() {
         return Val.of(get());
     }
 }

@@ -1,5 +1,7 @@
 package xyz.sunqian.common.base.value;
 
+import xyz.sunqian.annotations.Nonnull;
+
 /**
  * Primitive {@code float} version of {@link Var}.
  *
@@ -13,7 +15,7 @@ public interface FloatVar extends FloatVal, PrimitiveToVar<Float> {
      * @param value the specified value
      * @return a {@link FloatVar} initialized with the specified value
      */
-    static FloatVar of(float value) {
+    static @Nonnull FloatVar of(float value) {
         return VarBack.of(value);
     }
 
@@ -23,7 +25,7 @@ public interface FloatVar extends FloatVal, PrimitiveToVar<Float> {
      * @param value the specified value
      * @return a {@link FloatVar} initialized with the specified value
      */
-    static FloatVar of(double value) {
+    static @Nonnull FloatVar of(double value) {
         return of((float) value);
     }
 
@@ -33,6 +35,7 @@ public interface FloatVar extends FloatVal, PrimitiveToVar<Float> {
      * @param value the specified value
      * @return this
      */
+    @Nonnull
     FloatVar set(float value);
 
     /**
@@ -41,7 +44,7 @@ public interface FloatVar extends FloatVal, PrimitiveToVar<Float> {
      * @param value the specified value
      * @return this
      */
-    default FloatVar set(double value) {
+    default @Nonnull FloatVar set(double value) {
         return set((float) value);
     }
 
@@ -51,6 +54,7 @@ public interface FloatVar extends FloatVal, PrimitiveToVar<Float> {
      * @param value the specified value
      * @return this itself
      */
+    @Nonnull
     FloatVar add(float value);
 
     /**
@@ -59,12 +63,12 @@ public interface FloatVar extends FloatVal, PrimitiveToVar<Float> {
      * @param value the specified value
      * @return this itself
      */
-    default FloatVar add(double value) {
+    default @Nonnull FloatVar add(double value) {
         return add((float) value);
     }
 
     @Override
-    default Var<Float> toVar() {
+    default @Nonnull Var<Float> toVar() {
         return Var.of(get());
     }
 }

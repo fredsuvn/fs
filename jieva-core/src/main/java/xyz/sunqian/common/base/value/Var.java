@@ -1,5 +1,7 @@
 package xyz.sunqian.common.base.value;
 
+import xyz.sunqian.annotations.Nonnull;
+
 /**
  * This interface represents a mutable container holding a value. There are also primitive type versions:
  * {@link BooleanVar}, {@link ByteVar}, {@link CharVar}, {@link ShortVar}, {@link IntVar}, {@link LongVar},
@@ -17,7 +19,7 @@ public interface Var<T> extends Val<T> {
      * @param <T>   type of the held value
      * @return a {@link Var} initialized with the specified value
      */
-    static <T> Var<T> of(T value) {
+    static <T> @Nonnull Var<T> of(T value) {
         return VarBack.of(value);
     }
 
@@ -27,5 +29,6 @@ public interface Var<T> extends Val<T> {
      * @param value the specified value
      * @return this {@link Var} itself
      */
+    @Nonnull
     Var<T> set(T value);
 }

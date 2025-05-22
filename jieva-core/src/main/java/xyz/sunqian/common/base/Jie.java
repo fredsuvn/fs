@@ -5,6 +5,7 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.base.exception.AwaitingException;
+import xyz.sunqian.common.base.function.BooleanCallable;
 import xyz.sunqian.common.base.thread.JieThread;
 import xyz.sunqian.common.collection.JieArray;
 import xyz.sunqian.common.collection.JieList;
@@ -14,11 +15,17 @@ import xyz.sunqian.common.mapping.BeanMapper;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingOptions;
 import xyz.sunqian.common.reflect.TypeRef;
+import xyz.sunqian.common.task.JieTask;
+import xyz.sunqian.common.task.SubmissionException;
+import xyz.sunqian.common.task.TaskExecutor;
+import xyz.sunqian.common.task.TaskReceipt;
+import xyz.sunqian.common.task.VoidReceipt;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,6 +40,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.RandomAccess;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
@@ -571,26 +579,6 @@ public class Jie {
     }
 
     /**
-     * Sleeps the current thread for the specified milliseconds.
-     *
-     * @param millis the specified milliseconds
-     * @throws AwaitingException if the current thread is interrupted or an error occurs while sleeping
-     */
-    public static void sleep(long millis) throws AwaitingException {
-        JieThread.sleep(millis);
-    }
-
-    /**
-     * Sleeps the current thread for the specified duration.
-     *
-     * @param duration the specified duration
-     * @throws AwaitingException if the current thread is interrupted or an error occurs while sleeping
-     */
-    public static void sleep(@Nonnull Duration duration) throws AwaitingException {
-        JieThread.sleep(duration);
-    }
-
-    /**
      * Returns a new starter to build and start a {@link Thread}.
      *
      * @return a new starter to build and start a {@link Thread}
@@ -628,6 +616,8 @@ public class Jie {
 
     /**
      * Directly returns the given variable arguments as an array.
+     * <p>
+     * This method is a shortcut to the {@link JieArray#array(Object[])}.
      *
      * @param elements the given variable arguments
      * @param <T>      the component type
@@ -642,6 +632,8 @@ public class Jie {
      * Returns an immutable list backed by the given array. The returned list is immutable but the backing array is not,
      * changes to the backing array "write through" to the returned list. The returned list is serializable and
      * implements {@link RandomAccess}.
+     * <p>
+     * This method is a shortcut to the {@link JieList#list(Object[])}.
      *
      * @param array the given array
      * @param <T>   the component type
@@ -654,6 +646,8 @@ public class Jie {
 
     /**
      * Returns a new {@link ArrayList} initialing with the given array.
+     * <p>
+     * This method is a shortcut to the {@link JieList#arrayList(Object[])}.
      *
      * @param array the given array
      * @param <T>   the component type
@@ -666,6 +660,8 @@ public class Jie {
 
     /**
      * Returns a new {@link LinkedList} initialing with the given array.
+     * <p>
+     * This method is a shortcut to the {@link JieList#linkedList(Object[])}.
      *
      * @param array the given array
      * @param <T>   the component type
@@ -682,6 +678,8 @@ public class Jie {
      * <pre>{@code
      * return Collections.unmodifiableSet(linkedHashSet(array));
      * }</pre>
+     * <p>
+     * This method is a shortcut to the {@link JieSet#set(Object[])}.
      *
      * @param array the given array
      * @param <T>   the component type
@@ -694,6 +692,8 @@ public class Jie {
 
     /**
      * Returns a new {@link HashSet} initialing with the given array.
+     * <p>
+     * This method is a shortcut to the {@link JieSet#hashSet(Object[])}.
      *
      * @param array the given array
      * @param <T>   the component type
@@ -706,6 +706,8 @@ public class Jie {
 
     /**
      * Returns a new {@link LinkedHashSet} initialing with the given array.
+     * <p>
+     * This method is a shortcut to the {@link JieSet#linkedHashSet(Object[])}.
      *
      * @param array the given array
      * @param <T>   the component type
@@ -728,6 +730,8 @@ public class Jie {
      * <pre>{@code
      *  return Collections.unmodifiableMap(linkedHashMap(array));
      *  }</pre>
+     * <p>
+     * This method is a shortcut to the {@link JieMap#map(Object[])}.
      *
      * @param array the given array
      * @param <K>>  the key type
@@ -745,6 +749,8 @@ public class Jie {
      * be the first key-value pair, the {@code array[2]} and {@code array[3]} will be the second key-value pair, and so
      * on. If the length of the array is odd and the last key cannot match the value, then the last pair will be the
      * key-{@code null} pair to put.
+     * <p>
+     * This method is a shortcut to the {@link JieMap#hashMap(Object[])}.
      *
      * @param array the given array
      * @param <K>>  the key type
@@ -762,6 +768,8 @@ public class Jie {
      * be the first key-value pair, the {@code array[2]} and {@code array[3]} will be the second key-value pair, and so
      * on. If the length of the array is odd and the last key cannot match the value, then the last pair will be the
      * key-{@code null} pair to put.
+     * <p>
+     * This method is a shortcut to the {@link JieMap#linkedHashMap(Object[])}.
      *
      * @param array the given array
      * @param <K>>  the key type
@@ -771,4 +779,249 @@ public class Jie {
     public static <K, V> @Nonnull LinkedHashMap<K, V> linkedHashMap(Object @Nonnull ... array) {
         return JieMap.linkedHashMap(array);
     }
+
+    //---------------- Thread Begin ----------------//
+
+    /**
+     * Sleeps the current thread until it is interrupted.
+     * <p>
+     * This method is a shortcut to the {@link JieThread#sleep()}.
+     *
+     * @throws AwaitingException if the current thread is interrupted or an error occurs while sleeping
+     */
+    public static void sleep() throws AwaitingException {
+        JieThread.sleep();
+    }
+
+    /**
+     * Sleeps the current thread for the specified milliseconds.
+     * <p>
+     * This method is a shortcut to the {@link JieThread#sleep(long)}.
+     *
+     * @param millis the specified milliseconds
+     * @throws AwaitingException if the current thread is interrupted or an error occurs while sleeping
+     */
+    public static void sleep(long millis) throws AwaitingException {
+        JieThread.sleep(millis);
+    }
+
+    /**
+     * Sleeps the current thread for the specified duration.
+     * <p>
+     * This method is a shortcut to the {@link JieThread#sleep(Duration)}.
+     *
+     * @param duration the specified duration
+     * @throws AwaitingException if the current thread is interrupted or an error occurs while sleeping
+     */
+    public static void sleep(@Nonnull Duration duration) throws AwaitingException {
+        JieThread.sleep(duration);
+    }
+
+    /**
+     * Executes the given task until it returns {@code true} or throws an exception. The exception will be wrapped by
+     * {@link AwaitingException} then thrown. This is the unchecked version of {@link #untilChecked(BooleanCallable)},
+     * and its logic is as follows:
+     * <pre>{@code
+     * try {
+     *     while (true) {
+     *         if (task.call()) {
+     *             return;
+     *         }
+     *     }
+     * } catch (Exception e) {
+     *     throw new AwaitingException(e);
+     * }
+     * }</pre>
+     * <p>
+     * Note this method may cause high CPU usage. When the task determines to return {@code false}, consider adding some
+     * measures (such as sleep the current thread in a very short time) to avoid it.
+     * <p>
+     * This method is a shortcut to the {@link JieThread#until(BooleanCallable)}.
+     *
+     * @param task the given task to be executed
+     * @throws AwaitingException if an error occurs while awaiting
+     */
+    public static void until(@Nonnull BooleanCallable task) throws AwaitingException {
+        JieThread.until(task);
+    }
+
+    /**
+     * Executes the given task until it returns {@code true} or throws an {@link Exception}. Its logic is as follows:
+     * <pre>{@code
+     * while (true) {
+     *     if (task.call()) {
+     *         return;
+     *     }
+     * }
+     * }</pre>
+     * <p>
+     * Note this method may cause high CPU usage. When the task determines to return {@code false}, consider adding some
+     * measures (such as sleep the current thread in a very short time) to avoid it.
+     * <p>
+     * This method is a shortcut to the {@link JieThread#untilChecked(BooleanCallable)}.
+     *
+     * @param task the given task to be executed
+     * @throws Exception if the {@link Exception} thrown by the given task
+     */
+    public static void untilChecked(@Nonnull BooleanCallable task) throws Exception {
+        JieThread.untilChecked(task);
+    }
+
+    //---------------- Thread End ----------------//
+
+    //---------------- Task Begin ----------------//
+
+    /**
+     * Runs the given task asynchronously.
+     * <p>
+     * This method is backed by a global executor from {@link TaskExecutor#newExecutor()}, and is a shortcut to the
+     * {@link JieTask#run(Runnable)}.
+     *
+     * @param task the task to run
+     * @throws SubmissionException if an error occurs during the submitting
+     */
+    public static void run(@Nonnull Runnable task) throws SubmissionException {
+        JieTask.run(task);
+    }
+
+    /**
+     * Runs the given task asynchronously, and returns the receipt of the task.
+     * <p>
+     * This method is backed by a global executor from {@link TaskExecutor#newExecutor()}, and is a shortcut to the
+     * {@link JieTask#run(Callable)}.
+     *
+     * @param task the task to run
+     * @param <T>  the type of the task result
+     * @return the receipt of the task
+     * @throws SubmissionException if an error occurs during the submitting
+     */
+    public static <T> @Nonnull TaskReceipt<T> run(@Nonnull Callable<? extends T> task) throws SubmissionException {
+        return JieTask.run(task);
+    }
+
+    /**
+     * Schedules the given task with a specified delay time from now, returns a {@link VoidReceipt} for the task. The
+     * task becomes enabled after the given delay.
+     * <p>
+     * This method is backed by a global executor from {@link TaskExecutor#newScheduler()}, and is a shortcut to the
+     * {@link JieTask#schedule(Runnable, Duration)}.
+     *
+     * @param task  the given task
+     * @param delay the specified delay time
+     * @return the receipt of the task
+     * @throws SubmissionException if an error occurs during the submitting
+     */
+    public static @Nonnull VoidReceipt schedule(@Nonnull Runnable task, @Nonnull Duration delay) throws SubmissionException {
+        return JieTask.schedule(task, delay);
+    }
+
+    /**
+     * Schedules the given task with a specified delay time from now, returns a {@link TaskReceipt} for the task. The
+     * task becomes enabled after the given delay.
+     * <p>
+     * This method is backed by a global executor from {@link TaskExecutor#newScheduler()}, and is a shortcut to the
+     * {@link JieTask#schedule(Callable, Duration)}.
+     *
+     * @param task  the given task
+     * @param delay the specified delay time
+     * @param <T>   the type of the task result
+     * @return the receipt of the task
+     * @throws SubmissionException if an error occurs during the submitting
+     */
+    public static <T> @Nonnull TaskReceipt<T> schedule(
+        @Nonnull Callable<? extends T> task,
+        @Nonnull Duration delay
+    ) throws SubmissionException {
+        return JieTask.schedule(task, delay);
+    }
+
+    /**
+     * Schedules the given task to be executed at the specified time, returns a {@link VoidReceipt} for the task. The
+     * task becomes enabled after the given time.
+     * <p>
+     * This method is backed by a global executor from {@link TaskExecutor#newScheduler()}, and is a shortcut to the
+     * {@link JieTask#scheduleAt(Runnable, Instant)}.
+     *
+     * @param task the given task
+     * @param time the specified time to execute the task
+     * @return the receipt of the task
+     * @throws SubmissionException if an error occurs during the submitting
+     */
+    public static @Nonnull VoidReceipt scheduleAt(
+        @Nonnull Runnable task, @Nonnull Instant time
+    ) throws SubmissionException {
+        return JieTask.scheduleAt(task, time);
+    }
+
+    /**
+     * Schedules the given task to be executed at the specified time, returns a {@link VoidReceipt} for the task. The
+     * task becomes enabled after the given time.
+     * <p>
+     * This method is backed by a global executor from {@link TaskExecutor#newScheduler()}, and is a shortcut to the
+     * {@link JieTask#scheduleAt(Callable, Instant)}.
+     *
+     * @param task the given task
+     * @param time the specified time to execute the task
+     * @param <T>  the type of the task result
+     * @return the receipt of the task
+     * @throws SubmissionException if an error occurs during the submitting
+     */
+    public static <T> @Nonnull TaskReceipt<T> scheduleAt(
+        @Nonnull Callable<? extends T> task,
+        @Nonnull Instant time
+    ) throws SubmissionException {
+        return JieTask.scheduleAt(task, time);
+    }
+
+    /**
+     * Schedules the given periodic task that becomes enabled first after the given initial delay, and subsequently with
+     * the given period. That is, the executions will commence after {@code initialDelay} then
+     * {@code initialDelay + period}, then {@code initialDelay + 2 * period}, and so on.
+     * <p>
+     * If any execution of the task fails, subsequent executions are suppressed. Otherwise, the task will only terminate
+     * via cancellation or termination of the executor. If any execution of this task takes longer than its period, then
+     * subsequent executions may start late, but will not concurrently execute.
+     * <p>
+     * This method is backed by a global executor from {@link TaskExecutor#newScheduler()}, and is a shortcut to the
+     * {@link JieTask#scheduleWithRate(Runnable, Duration, Duration)}.
+     *
+     * @param task         the given periodic task
+     * @param initialDelay the given initial delay for first execution
+     * @param period       the given period between successive executions
+     * @return the receipt representing pending completion of the task
+     * @throws SubmissionException if an error occurs during the submitting
+     */
+    public static @Nonnull VoidReceipt scheduleWithRate(
+        @Nonnull Runnable task,
+        @Nonnull Duration initialDelay,
+        @Nonnull Duration period
+    ) throws SubmissionException {
+        return JieTask.scheduleWithRate(task, initialDelay, period);
+    }
+
+    /**
+     * Schedules the given periodic task that becomes enabled first after the given initial delay, and subsequently with
+     * the given delay between the termination of one execution and the commencement of the next.
+     * <p>
+     * If any execution of the task fails, subsequent executions are suppressed. Otherwise, the task will only terminate
+     * via cancellation or termination of the executor.
+     * <p>
+     * This method is backed by a global executor from {@link TaskExecutor#newScheduler()}, and is a shortcut to the
+     * {@link JieTask#scheduleWithDelay(Runnable, Duration, Duration)}.
+     *
+     * @param task         the given periodic task
+     * @param initialDelay the given initial delay for first execution
+     * @param delay        the given delay between the termination of one execution and the commencement of the next
+     * @return the receipt representing pending completion of the task
+     * @throws SubmissionException if an error occurs during the submitting
+     */
+    public static @Nonnull VoidReceipt scheduleWithDelay(
+        @Nonnull Runnable task,
+        @Nonnull Duration initialDelay,
+        @Nonnull Duration delay
+    ) throws SubmissionException {
+        return JieTask.scheduleWithDelay(task, initialDelay, delay);
+    }
+
+    //---------------- Task End ----------------//
 }

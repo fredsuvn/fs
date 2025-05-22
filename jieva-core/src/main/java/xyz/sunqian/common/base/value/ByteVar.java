@@ -1,5 +1,7 @@
 package xyz.sunqian.common.base.value;
 
+import xyz.sunqian.annotations.Nonnull;
+
 /**
  * Primitive {@code byte} version of {@link Var}.
  *
@@ -13,7 +15,7 @@ public interface ByteVar extends ByteVal, PrimitiveToVar<Byte> {
      * @param value the specified value
      * @return a {@link ByteVar} initialized with the specified value
      */
-    static ByteVar of(byte value) {
+    static @Nonnull ByteVar of(byte value) {
         return VarBack.of(value);
     }
 
@@ -23,7 +25,7 @@ public interface ByteVar extends ByteVal, PrimitiveToVar<Byte> {
      * @param value the specified value
      * @return a {@link ByteVar} initialized with the specified value
      */
-    static ByteVar of(int value) {
+    static @Nonnull ByteVar of(int value) {
         return of((byte) value);
     }
 
@@ -33,6 +35,7 @@ public interface ByteVar extends ByteVal, PrimitiveToVar<Byte> {
      * @param value the specified value
      * @return this
      */
+    @Nonnull
     ByteVar set(byte value);
 
     /**
@@ -41,7 +44,7 @@ public interface ByteVar extends ByteVal, PrimitiveToVar<Byte> {
      * @param value the specified value
      * @return this
      */
-    default ByteVar set(int value) {
+    default @Nonnull ByteVar set(int value) {
         return set((byte) value);
     }
 
@@ -51,10 +54,11 @@ public interface ByteVar extends ByteVal, PrimitiveToVar<Byte> {
      * @param value the specified value
      * @return this itself
      */
+    @Nonnull
     ByteVar add(int value);
 
     @Override
-    default Var<Byte> toVar() {
+    default @Nonnull Var<Byte> toVar() {
         return Var.of(get());
     }
 

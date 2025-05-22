@@ -1,6 +1,7 @@
 package xyz.sunqian.common.base.value;
 
 import xyz.sunqian.annotations.Immutable;
+import xyz.sunqian.annotations.Nonnull;
 
 /**
  * Primitive {@code float} version of {@link Val}.
@@ -15,7 +16,7 @@ public interface FloatVal extends PrimitiveToVal<Float> {
      *
      * @return a {@link FloatVal} holding the {@code 0}
      */
-    static FloatVal ofZero() {
+    static @Nonnull FloatVal ofZero() {
         return ValBack.OF_ZERO_FLOAT;
     }
 
@@ -25,7 +26,7 @@ public interface FloatVal extends PrimitiveToVal<Float> {
      * @param value the specified value
      * @return a {@link FloatVal} holding the specified value
      */
-    static FloatVal of(float value) {
+    static @Nonnull FloatVal of(float value) {
         return ValBack.of(value);
     }
 
@@ -35,7 +36,7 @@ public interface FloatVal extends PrimitiveToVal<Float> {
      * @param value the specified value
      * @return a {@link FloatVal} holding the specified value
      */
-    static FloatVal of(double value) {
+    static @Nonnull FloatVal of(double value) {
         return of((float) value);
     }
 
@@ -47,7 +48,7 @@ public interface FloatVal extends PrimitiveToVal<Float> {
     float get();
 
     @Override
-    default Val<Float> toVal() {
+    default @Nonnull Val<Float> toVal() {
         return Val.of(get());
     }
 }

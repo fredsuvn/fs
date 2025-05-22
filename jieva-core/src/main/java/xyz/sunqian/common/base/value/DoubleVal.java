@@ -1,6 +1,7 @@
 package xyz.sunqian.common.base.value;
 
 import xyz.sunqian.annotations.Immutable;
+import xyz.sunqian.annotations.Nonnull;
 
 /**
  * Primitive {@code double} version of {@link Val}.
@@ -15,7 +16,7 @@ public interface DoubleVal extends PrimitiveToVal<Double> {
      *
      * @return a {@link DoubleVal} holding the {@code 0}
      */
-    static DoubleVal ofZero() {
+    static @Nonnull DoubleVal ofZero() {
         return ValBack.OF_ZERO_DOUBLE;
     }
 
@@ -25,7 +26,7 @@ public interface DoubleVal extends PrimitiveToVal<Double> {
      * @param value the specified value
      * @return a {@link DoubleVal} holding the specified value
      */
-    static DoubleVal of(double value) {
+    static @Nonnull DoubleVal of(double value) {
         return ValBack.of(value);
     }
 
@@ -37,7 +38,7 @@ public interface DoubleVal extends PrimitiveToVal<Double> {
     double get();
 
     @Override
-    default Val<Double> toVal() {
+    default @Nonnull Val<Double> toVal() {
         return Val.of(get());
     }
 }

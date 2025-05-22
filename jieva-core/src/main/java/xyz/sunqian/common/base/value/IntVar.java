@@ -1,5 +1,7 @@
 package xyz.sunqian.common.base.value;
 
+import xyz.sunqian.annotations.Nonnull;
+
 /**
  * Primitive {@code int} version of {@link Var}.
  *
@@ -13,7 +15,7 @@ public interface IntVar extends IntVal, PrimitiveToVar<Integer> {
      * @param value the specified value
      * @return a {@link IntVar} initialized with the specified value
      */
-    static IntVar of(int value) {
+    static @Nonnull IntVar of(int value) {
         return VarBack.of(value);
     }
 
@@ -23,6 +25,7 @@ public interface IntVar extends IntVal, PrimitiveToVar<Integer> {
      * @param value the specified value
      * @return this
      */
+    @Nonnull
     IntVar set(int value);
 
     /**
@@ -31,10 +34,11 @@ public interface IntVar extends IntVal, PrimitiveToVar<Integer> {
      * @param value the specified value
      * @return this itself
      */
+    @Nonnull
     IntVar add(int value);
 
     @Override
-    default Var<Integer> toVar() {
+    default @Nonnull Var<Integer> toVar() {
         return Var.of(get());
     }
 

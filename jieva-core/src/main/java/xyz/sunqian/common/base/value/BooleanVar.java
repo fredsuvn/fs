@@ -1,5 +1,7 @@
 package xyz.sunqian.common.base.value;
 
+import xyz.sunqian.annotations.Nonnull;
+
 /**
  * Primitive {@code boolean} version of {@link Var}.
  *
@@ -13,7 +15,7 @@ public interface BooleanVar extends BooleanVal, PrimitiveToVar<Boolean> {
      * @param value the specified value
      * @return a {@link BooleanVar} initialized with the specified value
      */
-    static BooleanVar of(boolean value) {
+    static @Nonnull BooleanVar of(boolean value) {
         return VarBack.of(value);
     }
 
@@ -23,6 +25,7 @@ public interface BooleanVar extends BooleanVal, PrimitiveToVar<Boolean> {
      * @param value the specified value
      * @return this
      */
+    @Nonnull
     BooleanVar set(boolean value);
 
     /**
@@ -30,10 +33,11 @@ public interface BooleanVar extends BooleanVal, PrimitiveToVar<Boolean> {
      *
      * @return this itself
      */
+    @Nonnull
     BooleanVar toggle();
 
     @Override
-    default Var<Boolean> toVar() {
+    default @Nonnull Var<Boolean> toVar() {
         return Var.of(get());
     }
 

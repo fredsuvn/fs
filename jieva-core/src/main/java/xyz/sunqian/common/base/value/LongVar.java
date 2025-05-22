@@ -1,5 +1,7 @@
 package xyz.sunqian.common.base.value;
 
+import xyz.sunqian.annotations.Nonnull;
+
 /**
  * Primitive {@code long} version of {@link Var}.
  *
@@ -13,7 +15,7 @@ public interface LongVar extends LongVal, PrimitiveToVar<Long> {
      * @param value the specified value
      * @return a {@link LongVar} initialized with the specified value
      */
-    static LongVar of(long value) {
+    static @Nonnull LongVar of(long value) {
         return VarBack.of(value);
     }
 
@@ -23,6 +25,7 @@ public interface LongVar extends LongVal, PrimitiveToVar<Long> {
      * @param value the specified value
      * @return this
      */
+    @Nonnull
     LongVar set(long value);
 
     /**
@@ -31,10 +34,11 @@ public interface LongVar extends LongVal, PrimitiveToVar<Long> {
      * @param value the specified value
      * @return this itself
      */
+    @Nonnull
     LongVar add(long value);
 
     @Override
-    default Var<Long> toVar() {
+    default @Nonnull Var<Long> toVar() {
         return Var.of(get());
     }
 

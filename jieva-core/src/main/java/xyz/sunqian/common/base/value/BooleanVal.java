@@ -1,6 +1,7 @@
 package xyz.sunqian.common.base.value;
 
 import xyz.sunqian.annotations.Immutable;
+import xyz.sunqian.annotations.Nonnull;
 
 /**
  * Primitive {@code boolean} version of {@link Val}.
@@ -15,7 +16,7 @@ public interface BooleanVal extends PrimitiveToVal<Boolean> {
      *
      * @return a {@link BooleanVal} holding the {@code true}
      */
-    static BooleanVal ofTrue() {
+    static @Nonnull BooleanVal ofTrue() {
         return ValBack.OF_TRUE;
     }
 
@@ -24,7 +25,7 @@ public interface BooleanVal extends PrimitiveToVal<Boolean> {
      *
      * @return a {@link BooleanVal} holding the {@code true}
      */
-    static BooleanVal ofFalse() {
+    static @Nonnull BooleanVal ofFalse() {
         return ValBack.OF_FALSE;
     }
 
@@ -34,7 +35,7 @@ public interface BooleanVal extends PrimitiveToVal<Boolean> {
      * @param value the specified value
      * @return a {@link BooleanVal} holding the specified value
      */
-    static BooleanVal of(boolean value) {
+    static @Nonnull BooleanVal of(boolean value) {
         return ValBack.of(value);
     }
 
@@ -46,7 +47,7 @@ public interface BooleanVal extends PrimitiveToVal<Boolean> {
     boolean get();
 
     @Override
-    default Val<Boolean> toVal() {
+    default @Nonnull Val<Boolean> toVal() {
         return Val.of(get());
     }
 }

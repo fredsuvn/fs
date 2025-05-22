@@ -1,42 +1,43 @@
 package xyz.sunqian.common.base.value;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.Jie;
 
 final class VarBack {
 
-    static <T> Var<T> of(T value) {
+    static <T> @Nonnull Var<T> of(T value) {
         return new VarImpl<>(value);
     }
 
-    static BooleanVar of(boolean value) {
+    static @Nonnull BooleanVar of(boolean value) {
         return new BooleanVarImpl(value);
     }
 
-    static ByteVar of(byte value) {
+    static @Nonnull ByteVar of(byte value) {
         return new ByteVarImpl(value);
     }
 
-    static ShortVar of(short value) {
+    static @Nonnull ShortVar of(short value) {
         return new ShortVarImpl(value);
     }
 
-    static CharVar of(char value) {
+    static @Nonnull CharVar of(char value) {
         return new CharVarImpl(value);
     }
 
-    static IntVar of(int value) {
+    static @Nonnull IntVar of(int value) {
         return new IntVarImpl(value);
     }
 
-    static LongVar of(long value) {
+    static @Nonnull LongVar of(long value) {
         return new LongVarImpl(value);
     }
 
-    static FloatVar of(float value) {
+    static @Nonnull FloatVar of(float value) {
         return new FloatVarImpl(value);
     }
 
-    static DoubleVar of(double value) {
+    static @Nonnull DoubleVar of(double value) {
         return new DoubleVarImpl(value);
     }
 
@@ -54,7 +55,7 @@ final class VarBack {
         }
 
         @Override
-        public Var<T> set(T value) {
+        public @Nonnull Var<T> set(T value) {
             this.value = value;
             return this;
         }
@@ -74,13 +75,13 @@ final class VarBack {
         }
 
         @Override
-        public BooleanVar set(boolean value) {
+        public @Nonnull BooleanVar set(boolean value) {
             this.value = value;
             return this;
         }
 
         @Override
-        public BooleanVar toggle() {
+        public @Nonnull BooleanVar toggle() {
             value = !value;
             return this;
         }
@@ -111,7 +112,7 @@ final class VarBack {
         }
 
         @Override
-        public ByteVar set(byte value) {
+        public @Nonnull ByteVar set(byte value) {
             this.value = value;
             return this;
         }
@@ -127,7 +128,7 @@ final class VarBack {
         }
 
         @Override
-        public ByteVar add(int value) {
+        public @Nonnull ByteVar add(int value) {
             this.value += (byte) value;
             return this;
         }
@@ -147,7 +148,7 @@ final class VarBack {
         }
 
         @Override
-        public ShortVar set(short value) {
+        public @Nonnull ShortVar set(short value) {
             this.value = value;
             return this;
         }
@@ -163,7 +164,7 @@ final class VarBack {
         }
 
         @Override
-        public ShortVar add(int value) {
+        public @Nonnull ShortVar add(int value) {
             this.value += (short) value;
             return this;
         }
@@ -183,13 +184,13 @@ final class VarBack {
         }
 
         @Override
-        public CharVar set(char value) {
+        public @Nonnull CharVar set(char value) {
             this.value = value;
             return this;
         }
 
         @Override
-        public CharVar add(int value) {
+        public @Nonnull CharVar add(int value) {
             this.value += (char) value;
             return this;
         }
@@ -219,7 +220,7 @@ final class VarBack {
         }
 
         @Override
-        public IntVar set(int value) {
+        public @Nonnull IntVar set(int value) {
             this.value = value;
             return this;
         }
@@ -235,7 +236,7 @@ final class VarBack {
         }
 
         @Override
-        public IntVar add(int value) {
+        public @Nonnull IntVar add(int value) {
             this.value += value;
             return this;
         }
@@ -255,7 +256,7 @@ final class VarBack {
         }
 
         @Override
-        public LongVar set(long value) {
+        public @Nonnull LongVar set(long value) {
             this.value = value;
             return this;
         }
@@ -271,7 +272,7 @@ final class VarBack {
         }
 
         @Override
-        public LongVar add(long value) {
+        public @Nonnull LongVar add(long value) {
             this.value += value;
             return this;
         }
@@ -291,13 +292,13 @@ final class VarBack {
         }
 
         @Override
-        public FloatVar set(float value) {
+        public @Nonnull FloatVar set(float value) {
             this.value = value;
             return this;
         }
 
         @Override
-        public FloatVar add(float value) {
+        public @Nonnull FloatVar add(float value) {
             this.value += value;
             return this;
         }
@@ -317,13 +318,13 @@ final class VarBack {
         }
 
         @Override
-        public DoubleVar set(double value) {
+        public @Nonnull DoubleVar set(double value) {
             this.value = value;
             return this;
         }
 
         @Override
-        public DoubleVar add(double value) {
+        public @Nonnull DoubleVar add(double value) {
             this.value += value;
             return this;
         }

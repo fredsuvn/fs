@@ -1,5 +1,7 @@
 package xyz.sunqian.common.base.value;
 
+import xyz.sunqian.annotations.Nonnull;
+
 /**
  * Primitive {@code short} version of {@link Var}.
  *
@@ -13,7 +15,7 @@ public interface ShortVar extends ShortVal, PrimitiveToVar<Short> {
      * @param value the specified value
      * @return a {@link ShortVar} initialized with the specified value
      */
-    static ShortVar of(short value) {
+    static @Nonnull ShortVar of(short value) {
         return VarBack.of(value);
     }
 
@@ -23,7 +25,7 @@ public interface ShortVar extends ShortVal, PrimitiveToVar<Short> {
      * @param value the specified value
      * @return a {@link ShortVar} initialized with the specified value
      */
-    static ShortVar of(int value) {
+    static @Nonnull ShortVar of(int value) {
         return of((short) value);
     }
 
@@ -33,6 +35,7 @@ public interface ShortVar extends ShortVal, PrimitiveToVar<Short> {
      * @param value the specified value
      * @return this
      */
+    @Nonnull
     ShortVar set(short value);
 
     /**
@@ -41,7 +44,7 @@ public interface ShortVar extends ShortVal, PrimitiveToVar<Short> {
      * @param value the specified value
      * @return this
      */
-    default ShortVar set(int value) {
+    default @Nonnull ShortVar set(int value) {
         return set((short) value);
     }
 
@@ -51,10 +54,11 @@ public interface ShortVar extends ShortVal, PrimitiveToVar<Short> {
      * @param value the specified value
      * @return this itself
      */
+    @Nonnull
     ShortVar add(int value);
 
     @Override
-    default Var<Short> toVar() {
+    default @Nonnull Var<Short> toVar() {
         return Var.of(get());
     }
 

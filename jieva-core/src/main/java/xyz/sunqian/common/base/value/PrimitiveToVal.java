@@ -1,5 +1,7 @@
 package xyz.sunqian.common.base.value;
 
+import xyz.sunqian.annotations.Nonnull;
+
 /**
  * This interface is used to convert {@code Val} of primitive type to {@link Val} of wrapper type, such as
  * {@link IntVal} to {@code Val<Integer>}.
@@ -14,5 +16,6 @@ public interface PrimitiveToVal<T> {
      *
      * @return a {@link Val} holding the wrapper type of current primitive type
      */
+    @Nonnull
     Val<T> toVal();
 }

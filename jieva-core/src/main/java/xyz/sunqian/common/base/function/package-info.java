@@ -8,6 +8,7 @@
  *     <li>{@link xyz.sunqian.common.base.function.IndexedLongFunction}</li>
  *     <li>{@link xyz.sunqian.common.base.function.IndexedDoubleFunction}</li>
  * </ul>
+ * <p>
  * Indexed consumers:
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.function.IndexedConsumer}</li>
@@ -15,6 +16,7 @@
  *     <li>{@link xyz.sunqian.common.base.function.IndexedLongConsumer}</li>
  *     <li>{@link xyz.sunqian.common.base.function.IndexedDoubleConsumer}</li>
  * </ul>
+ * <p>
  * Indexed predicates:
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.function.IndexedPredicate}</li>
@@ -22,11 +24,13 @@
  *     <li>{@link xyz.sunqian.common.base.function.IndexedLongPredicate}</li>
  *     <li>{@link xyz.sunqian.common.base.function.IndexedDoublePredicate}</li>
  * </ul>
+ * <p>
  * Sub-function:
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.function.SubFunction}</li>
  *     <li>{@link xyz.sunqian.common.base.function.LongSubFunction}</li>
  * </ul>
+ * <p>
  * Callable-function:
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.function.BooleanCallable}</li>

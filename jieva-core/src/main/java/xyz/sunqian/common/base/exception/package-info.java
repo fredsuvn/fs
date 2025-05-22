@@ -5,10 +5,12 @@
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.exception.JieException}</li>
  * </ul>
+ * <p>
  * Base runtime exception:
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.exception.JieRuntimeException}</li>
  * </ul>
+ * <p>
  * Other exceptions:
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.exception.ProcessingException}</li>

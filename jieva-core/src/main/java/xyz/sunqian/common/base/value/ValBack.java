@@ -1,51 +1,53 @@
 package xyz.sunqian.common.base.value;
 
+import xyz.sunqian.annotations.Nonnull;
+
 final class ValBack {
 
-    static Val<?> OF_NULL = of(null);
-    static BooleanVal OF_TRUE = of(true);
-    static BooleanVal OF_FALSE = of(false);
-    static ByteVal OF_ZERO_BYTE = of((byte) 0);
-    static ShortVal OF_ZERO_SHORT = of((short) 0);
-    static CharVal OF_ZERO_CHAR = of('0');
-    static IntVal OF_ZERO_INT = of(0);
-    static LongVal OF_ZERO_LONG = ValBack.of(0L);
-    static FloatVal OF_ZERO_FLOAT = ValBack.of(0.0f);
-    static DoubleVal OF_ZERO_DOUBLE = ValBack.of(0.0);
+    static final @Nonnull Val<?> OF_NULL = of(null);
+    static final @Nonnull BooleanVal OF_TRUE = of(true);
+    static final @Nonnull BooleanVal OF_FALSE = of(false);
+    static final @Nonnull ByteVal OF_ZERO_BYTE = of((byte) 0);
+    static final @Nonnull ShortVal OF_ZERO_SHORT = of((short) 0);
+    static final @Nonnull CharVal OF_ZERO_CHAR = of('0');
+    static final @Nonnull IntVal OF_ZERO_INT = of(0);
+    static final @Nonnull LongVal OF_ZERO_LONG = ValBack.of(0L);
+    static final @Nonnull FloatVal OF_ZERO_FLOAT = ValBack.of(0.0f);
+    static final @Nonnull DoubleVal OF_ZERO_DOUBLE = ValBack.of(0.0);
 
-    static <T> Val<T> of(T value) {
+    static <T> @Nonnull Val<T> of(T value) {
         return new ValImpl<>(value);
     }
 
-    static BooleanVal of(boolean value) {
+    static @Nonnull BooleanVal of(boolean value) {
         return new BooleanValImpl(value);
     }
 
-    static ByteVal of(byte value) {
+    static @Nonnull ByteVal of(byte value) {
         return new ByteValImpl(value);
     }
 
-    static ShortVal of(short value) {
+    static @Nonnull ShortVal of(short value) {
         return new ShortValImpl(value);
     }
 
-    static CharVal of(char value) {
+    static @Nonnull CharVal of(char value) {
         return new CharValImpl(value);
     }
 
-    static IntVal of(int value) {
+    static @Nonnull IntVal of(int value) {
         return new IntValImpl(value);
     }
 
-    static LongVal of(long value) {
+    static @Nonnull LongVal of(long value) {
         return new LongValImpl(value);
     }
 
-    static FloatVal of(float value) {
+    static @Nonnull FloatVal of(float value) {
         return new FloatValImpl(value);
     }
 
-    static DoubleVal of(double value) {
+    static @Nonnull DoubleVal of(double value) {
         return new DoubleValImpl(value);
     }
 
