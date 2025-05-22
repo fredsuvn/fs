@@ -6,17 +6,17 @@ import static org.testng.Assert.assertTrue;
 
 public class TaskUtil {
 
-    static final int DELAY_MILLIS = 1000;
+    static final int DELAY_MILLIS = 10;
 
-    public static void shouldAfterNow(Instant startTime, long delayTime) {
+    public static void shouldAfterNow(Instant startTime, long delayMillis) {
         Instant now = Instant.now();
         long startSecond = startTime.getEpochSecond();
         long startNano = startTime.getNano();
-        long delaySecond = delayTime / 1000;
-        long delayNano = (delayTime - (delayTime / 1000 * 1000)) * 1000000;
+        long delaySecond = delayMillis / 1000;
+        long delayNano = (delayMillis - (delayMillis / 1000 * 1000)) * 1000000;
         long diffSecond = now.getEpochSecond() - startSecond;
         long diffNanos = now.getNano() - startNano;
-        boolean isDelay = diffSecond >= delaySecond && diffNanos >= delayNano;
+        boolean isDelay = diffSecond == delaySecond ? (diffNanos >= delayNano) : (diffSecond > delaySecond);
         System.out.println(
             "now: " + now
                 + ", delaySecond: " + delaySecond

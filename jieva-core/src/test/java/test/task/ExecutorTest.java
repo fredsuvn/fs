@@ -16,7 +16,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -176,13 +175,13 @@ public class ExecutorTest {
             latch.reset();
             count.set(0);
             Instant now = Instant.now();
-            long time = now.getEpochSecond() * 1000 + TaskUtil.DELAY_MILLIS;
+            Instant time = now.plusMillis(TaskUtil.DELAY_MILLIS);
             executor.scheduleAt(() -> {
                 TaskUtil.shouldAfterNow(now, TaskUtil.DELAY_MILLIS);
                 latch.await1();
                 count.incrementAndGet();
                 latch.countDown2();
-            }, new Date(time));
+            }, time);
             assertEquals(count.get(), 0);
             latch.countDown1();
             latch.await2();
@@ -193,14 +192,14 @@ public class ExecutorTest {
             latch.reset();
             count.set(0);
             Instant now = Instant.now();
-            long time = now.getEpochSecond() * 1000 + TaskUtil.DELAY_MILLIS;
+            Instant time = now.plusMillis(TaskUtil.DELAY_MILLIS);
             executor.scheduleAt(() -> {
                 TaskUtil.shouldAfterNow(now, TaskUtil.DELAY_MILLIS);
                 latch.await1();
                 count.incrementAndGet();
                 latch.countDown2();
                 return null;
-            }, Instant.ofEpochMilli(time));
+            }, time);
             assertEquals(count.get(), 0);
             latch.countDown1();
             latch.await2();
@@ -232,9 +231,7 @@ public class ExecutorTest {
             // exceptions
             expectThrows(SubmissionException.class, () -> executor.schedule((Runnable) null, null));
             expectThrows(SubmissionException.class, () -> executor.schedule((Callable<?>) null, null));
-            expectThrows(SubmissionException.class, () -> executor.scheduleAt((Runnable) null, (Date) null));
-            expectThrows(SubmissionException.class, () -> executor.scheduleAt((Callable<?>) null, (Date) null));
-            expectThrows(SubmissionException.class, () -> executor.scheduleAt((Runnable) null, (Instant) null));
+            expectThrows(SubmissionException.class, () -> executor.scheduleAt((Runnable) null, null));
             expectThrows(SubmissionException.class, () -> executor.scheduleAt((Callable<?>) null, (Instant) null));
             expectThrows(SubmissionException.class, () -> executor.scheduleWithRate(null, null, null));
             expectThrows(SubmissionException.class, () -> executor.scheduleWithDelay(null, null, null));
@@ -243,32 +240,39 @@ public class ExecutorTest {
 
     @Test
     public void testClose() {
-        Latch latch = new Latch();
-        int[] c = {0};
-        TaskExecutor executor1 = TaskExecutor.newExecutor(1, 1);
-        executor1.run(() -> {
-            c[0]++;
-            try {
-                JieThread.sleep();
-            } catch (AwaitingException e) {
+        {
+            Latch latch = new Latch();
+            int[] c = {0};
+            TaskExecutor executor = TaskExecutor.newExecutor(1, 1);
+            executor.run(() -> {
                 c[0]++;
                 latch.countDown1();
-            }
-        });
-        executor1.run(() -> {
-            c[0]++;
-        });
-        assertFalse(executor1.isClosed());
-        assertFalse(executor1.isTerminated());
-        assertEquals(executor1.closeNow().size(), 1);
-        latch.await1();
-        assertEquals(c[0], 2);
-        assertTrue(executor1.isClosed());
-        TaskExecutor executor2 = TaskExecutor.newExecutor(1, 1);
-        executor2.close();
-        assertTrue(executor2.isClosed());
-        expectThrows(SubmissionException.class, () -> executor2.run(() -> {
-        }));
+                try {
+                    JieThread.sleep();
+                } catch (AwaitingException e) {
+                    c[0]++;
+                    latch.countDown2();
+                }
+            });
+            executor.run(() -> {
+                c[0]++;
+            });
+            latch.await1();
+            assertEquals(c[0], 1);
+            assertFalse(executor.isClosed());
+            assertFalse(executor.isTerminated());
+            assertEquals(executor.closeNow().size(), 1);
+            latch.await2();
+            assertEquals(c[0], 2);
+            assertTrue(executor.isClosed());
+        }
+        {
+            TaskExecutor executor = TaskExecutor.newExecutor(1, 1);
+            executor.close();
+            assertTrue(executor.isClosed());
+            expectThrows(SubmissionException.class, () -> executor.run(() -> {
+            }));
+        }
     }
 
     @Test

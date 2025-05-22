@@ -6,6 +6,7 @@ import xyz.sunqian.common.base.exception.WrappedException;
 import xyz.sunqian.common.task.JieTask;
 import xyz.sunqian.common.task.SubmissionException;
 import xyz.sunqian.common.task.TaskReceipt;
+import xyz.sunqian.common.task.VoidReceipt;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -67,62 +68,68 @@ public class TaskTest {
         {
             Instant now = Instant.now();
             CountDownLatch latch = new CountDownLatch(1);
-            JieTask.schedule(() -> {
+            VoidReceipt receipt = JieTask.schedule(() -> {
                 TaskUtil.shouldAfterNow(now, TaskUtil.DELAY_MILLIS);
                 latch.countDown();
             }, Duration.ofMillis(TaskUtil.DELAY_MILLIS));
             latch.await();
+            receipt.await();
         }
         {
             Instant now = Instant.now();
             CountDownLatch latch = new CountDownLatch(1);
-            JieTask.schedule(() -> {
+            TaskReceipt<Integer> receipt = JieTask.schedule(() -> {
                 TaskUtil.shouldAfterNow(now, TaskUtil.DELAY_MILLIS);
                 latch.countDown();
-                return 1;
+                return 66;
             }, Duration.ofMillis(TaskUtil.DELAY_MILLIS));
             latch.await();
+            assertEquals(receipt.await(), 66);
         }
         {
             Instant now = Instant.now();
-            long time = now.getEpochSecond() * 1000 + TaskUtil.DELAY_MILLIS;
+            Instant time = now.plusMillis(TaskUtil.DELAY_MILLIS);
             CountDownLatch latch = new CountDownLatch(1);
-            JieTask.scheduleAt(() -> {
+            VoidReceipt receipt = JieTask.scheduleAt(() -> {
                 TaskUtil.shouldAfterNow(now, TaskUtil.DELAY_MILLIS);
                 latch.countDown();
-            }, Instant.ofEpochMilli(time));
+            }, time);
             latch.await();
+            receipt.await();
         }
         {
             Instant now = Instant.now();
-            long time = now.getEpochSecond() * 1000 + TaskUtil.DELAY_MILLIS;
+            Instant time = now.plusMillis(TaskUtil.DELAY_MILLIS);
             CountDownLatch latch = new CountDownLatch(1);
-            JieTask.scheduleAt(() -> {
+            TaskReceipt<Integer> receipt = JieTask.scheduleAt(() -> {
                 TaskUtil.shouldAfterNow(now, TaskUtil.DELAY_MILLIS);
                 latch.countDown();
-                return 1;
-            }, Instant.ofEpochMilli(time));
+                return 66;
+            }, time);
             latch.await();
+            assertEquals(receipt.await(), 66);
         }
         {
             Instant now = Instant.now();
             CountDownLatch latch = new CountDownLatch(1);
-            JieTask.scheduleWithRate(() -> {
+            VoidReceipt receipt = JieTask.scheduleWithRate(() -> {
                 TaskUtil.shouldAfterNow(now, TaskUtil.DELAY_MILLIS);
                 latch.countDown();
                 throw new RuntimeException();
             }, Duration.ofMillis(TaskUtil.DELAY_MILLIS), Duration.ofMillis(TaskUtil.DELAY_MILLIS));
             latch.await();
+            receipt.await();
         }
         {
             Instant now = Instant.now();
             CountDownLatch latch = new CountDownLatch(1);
-            JieTask.scheduleWithDelay(() -> {
+            VoidReceipt receipt = JieTask.scheduleWithDelay(() -> {
                 TaskUtil.shouldAfterNow(now, TaskUtil.DELAY_MILLIS);
                 latch.countDown();
                 throw new RuntimeException();
             }, Duration.ofMillis(TaskUtil.DELAY_MILLIS), Duration.ofMillis(TaskUtil.DELAY_MILLIS));
             latch.await();
+            receipt.await();
         }
     }
 

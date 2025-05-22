@@ -7,7 +7,6 @@ import xyz.sunqian.common.base.exception.AwaitingException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
@@ -353,52 +352,6 @@ public interface TaskExecutor {
         try {
             Duration diff = Duration.between(Instant.now(), time);
             return schedule(task, diff);
-        } catch (SubmissionException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new SubmissionException(e);
-        }
-    }
-
-    /**
-     * Schedules the given task to be executed at the specified time, returns a {@link VoidReceipt} for the task. The
-     * task becomes enabled after the given time.
-     * <p>
-     * NOTE: This method requires that the current implementation supports scheduling.
-     *
-     * @param task the given task
-     * @param time the specified time to execute the task
-     * @return the receipt of the task
-     * @throws SubmissionException if an error occurs during the submitting
-     */
-    default @Nonnull VoidReceipt scheduleAt(@Nonnull Runnable task, @Nonnull Date time) throws SubmissionException {
-        try {
-            return scheduleAt(task, time.toInstant());
-        } catch (SubmissionException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new SubmissionException(e);
-        }
-    }
-
-    /**
-     * Schedules the given task to be executed at the specified time, returns a {@link VoidReceipt} for the task. The
-     * task becomes enabled after the given time.
-     * <p>
-     * NOTE: This method requires that the current implementation supports scheduling.
-     *
-     * @param task the given task
-     * @param time the specified time to execute the task
-     * @param <T>  the type of the task result
-     * @return the receipt of the task
-     * @throws SubmissionException if an error occurs during the submitting
-     */
-    default <T> @Nonnull TaskReceipt<T> scheduleAt(
-        @Nonnull Callable<? extends T> task,
-        @Nonnull Date time
-    ) throws SubmissionException {
-        try {
-            return scheduleAt(task, time.toInstant());
         } catch (SubmissionException e) {
             throw e;
         } catch (Exception e) {
