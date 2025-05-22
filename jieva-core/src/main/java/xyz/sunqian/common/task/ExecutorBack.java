@@ -7,6 +7,7 @@ import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.AwaitingException;
 import xyz.sunqian.common.base.exception.JieException;
 import xyz.sunqian.common.base.exception.WrappedException;
+import xyz.sunqian.common.base.function.VoidCallable;
 import xyz.sunqian.common.base.thread.JieThread;
 
 import java.time.Duration;
@@ -431,26 +432,31 @@ final class ExecutorBack {
 
         @Override
         public void await() throws AwaitingException {
-            try {
+            doAwait(() -> {
                 Future<?> future = getFuture();
                 future.get();
-            } catch (ExecutionException | CancellationException e) {
-                // do nothing
-            } catch (Exception e) {
-                throw new AwaitingException(e);
-            }
+            });
         }
 
         @Override
         public void await(@Nonnull Duration duration) throws AwaitingException {
-            try {
+            doAwait(() -> {
                 Future<?> future = getFuture();
                 future.get(duration.toNanos(), TimeUnit.NANOSECONDS);
-            } catch (ExecutionException | CancellationException e) {
-                // do nothing
-            } catch (Exception e) {
-                throw new AwaitingException(e);
-            }
+            });
+        }
+
+        private void doAwait(VoidCallable callable) throws AwaitingException {
+            JieException.wrapChecked(
+                () -> {
+                    try {
+                        callable.call();
+                    } catch (ExecutionException | CancellationException e) {
+                        // do nothing
+                    }
+                },
+                AwaitingException::new
+            );
         }
     }
 
@@ -461,27 +467,32 @@ final class ExecutorBack {
         }
 
         @Override
-        public T await() throws AwaitingException {
-            try {
+        public @Nullable T await() throws AwaitingException {
+            return doAwait(() -> {
                 Future<T> future = getFuture();
                 return future.get();
-            } catch (ExecutionException | CancellationException e) {
-                return null;
-            } catch (Exception e) {
-                throw new AwaitingException(e);
-            }
+            });
         }
 
         @Override
-        public T await(@Nonnull Duration duration) throws AwaitingException {
-            try {
+        public @Nullable T await(@Nonnull Duration duration) throws AwaitingException {
+            return doAwait(() -> {
                 Future<T> future = getFuture();
                 return future.get(duration.toNanos(), TimeUnit.NANOSECONDS);
-            } catch (ExecutionException | CancellationException e) {
-                return null;
-            } catch (Exception e) {
-                throw new AwaitingException(e);
-            }
+            });
+        }
+
+        private @Nullable T doAwait(Callable<T> callable) throws AwaitingException {
+            return JieException.wrapChecked(
+                () -> {
+                    try {
+                        return callable.call();
+                    } catch (ExecutionException | CancellationException e) {
+                        return null;
+                    }
+                },
+                AwaitingException::new
+            );
         }
     }
 }

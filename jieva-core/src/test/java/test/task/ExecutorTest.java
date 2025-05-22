@@ -1,9 +1,8 @@
-package test.work;
+package test.task;
 
 import org.testng.annotations.Test;
-import test.utils.FlagException;
 import test.utils.RejectedExecutor;
-import test.utils.ThreadUtil;
+import test.utils.Utils;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.exception.AwaitingException;
 import xyz.sunqian.common.base.thread.JieThread;
@@ -24,10 +23,12 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
@@ -155,6 +156,16 @@ public class ExecutorTest {
             TaskExecutor rejectedExecutor = TaskExecutor.newExecutor(new RejectedExecutor());
             expectThrows(SubmissionException.class, () -> rejectedExecutor.run(() -> null));
         }
+        {
+            // no delay
+            if (executor.isScheduled()) {
+                assertNotNull(executor.submit(() -> {
+                }).getDelay());
+            } else {
+                assertNull(executor.submit(() -> {
+                }).getDelay());
+            }
+        }
     }
 
     private void testScheduledExecution(TaskExecutor executor) {
@@ -164,15 +175,14 @@ public class ExecutorTest {
             // executor.scheduleAt
             latch.reset();
             count.set(0);
-            long now = System.currentTimeMillis();
-            Date after = new Date(now + 500);
+            Instant now = Instant.now();
+            long time = now.getEpochSecond() * 1000 + TaskUtil.DELAY_MILLIS;
             executor.scheduleAt(() -> {
-                long n = System.currentTimeMillis();
-                assertTrue(n >= after.getTime());
+                TaskUtil.shouldAfterNow(now, TaskUtil.DELAY_MILLIS);
                 latch.await1();
                 count.incrementAndGet();
                 latch.countDown2();
-            }, after);
+            }, new Date(time));
             assertEquals(count.get(), 0);
             latch.countDown1();
             latch.await2();
@@ -182,16 +192,15 @@ public class ExecutorTest {
             // executor.scheduleAt callable
             latch.reset();
             count.set(0);
-            long now = System.currentTimeMillis();
-            Date after = new Date(now + 500);
+            Instant now = Instant.now();
+            long time = now.getEpochSecond() * 1000 + TaskUtil.DELAY_MILLIS;
             executor.scheduleAt(() -> {
-                long n = System.currentTimeMillis();
-                assertTrue(n >= after.getTime());
+                TaskUtil.shouldAfterNow(now, TaskUtil.DELAY_MILLIS);
                 latch.await1();
                 count.incrementAndGet();
                 latch.countDown2();
                 return null;
-            }, after);
+            }, Instant.ofEpochMilli(time));
             assertEquals(count.get(), 0);
             latch.countDown1();
             latch.await2();
@@ -200,40 +209,24 @@ public class ExecutorTest {
         {
             // executor.schedule rate
             latch.reset();
-            count.set(0);
-            VoidReceipt receipt = executor.scheduleWithRate(() -> {
-                latch.await1();
-                int c = count.get();
-                if (c >= 2) {
-                    latch.countDown2();
-                } else {
-                    count.incrementAndGet();
-                }
-            }, Duration.ofSeconds(0), Duration.ofMillis(10));
-            assertEquals(count.get(), 0);
-            latch.countDown1();
+            Instant now = Instant.now();
+            executor.scheduleWithRate(() -> {
+                TaskUtil.shouldAfterNow(now, TaskUtil.DELAY_MILLIS);
+                latch.countDown2();
+                throw new RuntimeException();
+            }, Duration.ofMillis(TaskUtil.DELAY_MILLIS), Duration.ofMillis(TaskUtil.DELAY_MILLIS));
             latch.await2();
-            assertEquals(count.get(), 2);
-            receipt.cancel();
         }
         {
             // executor.schedule delay
             latch.reset();
-            count.set(0);
-            VoidReceipt receipt = executor.scheduleWithDelay(() -> {
-                latch.await1();
-                int c = count.get();
-                if (c >= 2) {
-                    latch.countDown2();
-                } else {
-                    count.incrementAndGet();
-                }
-            }, Duration.ofSeconds(0), Duration.ofMillis(10));
-            assertEquals(count.get(), 0);
-            latch.countDown1();
+            Instant now = Instant.now();
+            executor.scheduleWithDelay(() -> {
+                TaskUtil.shouldAfterNow(now, TaskUtil.DELAY_MILLIS);
+                latch.countDown2();
+                throw new RuntimeException();
+            }, Duration.ofMillis(TaskUtil.DELAY_MILLIS), Duration.ofMillis(TaskUtil.DELAY_MILLIS));
             latch.await2();
-            assertEquals(count.get(), 2);
-            receipt.cancel();
         }
         {
             // exceptions
@@ -295,26 +288,16 @@ public class ExecutorTest {
         {
             // await forever
             TaskExecutor executor = TaskExecutor.newExecutor(1, 1);
-            executor.run(() -> {
-                try {
-                    JieThread.sleep();
-                } catch (AwaitingException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+            executor.run(() -> JieThread.sleep());
             assertFalse(executor.await(Duration.ofMillis(1)));
             Thread waitThread = new Thread(executor::await);
             waitThread.start();
-            ThreadUtil.awaitUntilExecuteTo(waitThread, executor.getClass().getName(), "awaitTermination");
+            Utils.awaitUntilExecuteTo(waitThread, executor.getClass().getName(), "awaitTermination");
             waitThread.interrupt();
         }
     }
 
-    // private String getExecutorBackClassName() {
-    //
-    // }
-
-    //@Test
+    @Test
     public void testReceipt() {
         Latch latch = new Latch();
         class LatchPool extends ThreadPoolExecutor {
@@ -336,7 +319,7 @@ public class ExecutorTest {
             }
         }
         {
-            // RunReceipt succeeded
+            // VoidReceipt succeeded
             TaskExecutor executor = TaskExecutor.newExecutor(new LatchPool());
             latch.reset();
             int[] c = {0};
@@ -353,11 +336,13 @@ public class ExecutorTest {
             assertEquals(receipt.getState(), TaskState.EXECUTING);
             latch.countDown3();
             receipt.await();
+            assertTrue(receipt.isDone());
+            assertFalse(receipt.isCancelled());
             assertEquals(receipt.getState(), TaskState.SUCCEEDED);
             assertNull(receipt.getException());
         }
         {
-            // RunReceipt failed
+            // VoidReceipt failed
             TaskExecutor executor = TaskExecutor.newExecutor(new LatchPool());
             latch.reset();
             RuntimeException error = new RuntimeException();
@@ -372,11 +357,13 @@ public class ExecutorTest {
             assertEquals(receipt.getState(), TaskState.EXECUTING);
             latch.countDown3();
             receipt.await();
+            assertTrue(receipt.isDone());
+            assertFalse(receipt.isCancelled());
             assertEquals(receipt.getState(), TaskState.FAILED);
             assertSame(receipt.getException(), error);
         }
         {
-            // RunReceipt canceled-during
+            // VoidReceipt canceled-executing
             TaskExecutor executor = TaskExecutor.newExecutor(new LatchPool());
             latch.reset();
             VoidReceipt receipt = executor.submit(() -> {
@@ -388,11 +375,13 @@ public class ExecutorTest {
             latch.await2();
             assertEquals(receipt.getState(), TaskState.EXECUTING);
             assertTrue(receipt.cancel());
+            assertTrue(receipt.isDone());
+            assertTrue(receipt.isCancelled());
             assertEquals(receipt.getState(), TaskState.CANCELED_EXECUTING);
             assertNull(receipt.getException());
         }
         {
-            // RunReceipt canceled-during
+            // VoidReceipt canceled
             TaskExecutor executor = TaskExecutor.newExecutor(new LatchPool());
             latch.reset();
             VoidReceipt receipt = executor.submit(() -> {
@@ -400,59 +389,53 @@ public class ExecutorTest {
             assertEquals(receipt.getState(), TaskState.WAITING);
             assertTrue(receipt.cancel());
             latch.countDown1();
+            receipt.await();
+            assertTrue(receipt.isDone());
+            assertTrue(receipt.isCancelled());
             assertEquals(receipt.getState(), TaskState.CANCELED);
             assertNull(receipt.getException());
         }
         {
-            // RunReceipt failed -- for await duration
-            TaskExecutor executor = TaskExecutor.newExecutor(new LatchPool());
-            latch.reset();
-            int[] ef = {0};
-            VoidReceipt receipt = executor.submit((Runnable) () -> {
-                latch.countDown2();
-                latch.await3();
-                throw new FlagException(ef);
+            // VoidReceipt
+            TaskExecutor executor = TaskExecutor.newExecutor();
+            VoidReceipt receipt1 = executor.submit(() -> {
             });
-            assertEquals(receipt.getState(), TaskState.WAITING);
-            latch.countDown1();
-            latch.await2();
-            assertEquals(receipt.getState(), TaskState.EXECUTING);
-            latch.countDown3();
-            JieThread.until(() -> {
-                try {
-                    receipt.await(Duration.ofDays(1));
-                    return true;
-                } catch (AwaitingException e) {
-                    return false;
-                }
+            receipt1.await();
+            RuntimeException err = new RuntimeException();
+            VoidReceipt receipt2 = executor.submit((Runnable) () -> {
+                throw err;
             });
-            assertEquals(receipt.getState(), TaskState.FAILED);
-            assertTrue(receipt.getException() instanceof FlagException);
-        }
-        {
-            // RunReceipt awaiting interrupted
-            TaskExecutor executor = TaskExecutor.newExecutor(new LatchPool());
-            latch.reset();
-            VoidReceipt receipt = executor.submit(() -> {
-                latch.countDown2();
+            receipt2.await();
+            assertSame(receipt2.getException(), err);
+            VoidReceipt receipt3 = executor.submit(() -> {
                 JieThread.sleep();
             });
-            latch.countDown1();
-            latch.await2();
-            assertEquals(receipt.getState(), TaskState.EXECUTING);
-            Thread thread = new Thread(() -> {
-                try {
-                    receipt.await();
-                } catch (AwaitingException e) {
-                    assertEquals(receipt.getState(), TaskState.FAILED);
-                    assertEquals(receipt.getException().getClass(), AwaitingException.class);
-                }
+            try {
+                receipt3.await(Duration.ofMillis(1));
+            } catch (AwaitingException e) {
+                assertTrue(e.getCause() instanceof TimeoutException);
+            }
+        }
+        {
+            // TaskReceipt
+            TaskExecutor executor = TaskExecutor.newExecutor();
+            TaskReceipt<Integer> receipt1 = executor.submit(() -> 111);
+            assertEquals(receipt1.await(), 111);
+            Exception err = new Exception();
+            TaskReceipt<?> receipt2 = executor.submit(() -> {
+                throw err;
             });
-            thread.start();
-            latch.await3();
-            thread.interrupt();
-            assertEquals(receipt.getState(), TaskState.FAILED);
-            // assertTrue(receipt.getException() instanceof FlagException);
+            assertNull(receipt2.await());
+            assertSame(receipt2.getException(), err);
+            TaskReceipt<?> receipt3 = executor.submit(() -> {
+                JieThread.sleep();
+                return 1;
+            });
+            try {
+                receipt3.await(Duration.ofMillis(1));
+            } catch (AwaitingException e) {
+                assertTrue(e.getCause() instanceof TimeoutException);
+            }
         }
     }
 

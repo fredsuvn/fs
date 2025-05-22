@@ -4,7 +4,7 @@ import xyz.sunqian.common.base.thread.JieThread;
 
 import java.util.Objects;
 
-public class ThreadUtil {
+public class Utils {
 
     public static void awaitUntilExecuteTo(Thread thread, String className, String methodName) {
         JieThread.until(() -> {

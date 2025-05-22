@@ -1,7 +1,7 @@
 package test.base.thread;
 
 import org.testng.annotations.Test;
-import test.utils.ThreadUtil;
+import test.utils.Utils;
 import xyz.sunqian.common.base.exception.AwaitingException;
 import xyz.sunqian.common.base.thread.JieThread;
 
@@ -30,7 +30,7 @@ public class ThreadTest {
         {
             Thread thread = new Thread(JieThread::sleep);
             thread.start();
-            ThreadUtil.awaitUntilExecuteTo(thread, Thread.class.getName(), "sleep");
+            Utils.awaitUntilExecuteTo(thread, Thread.class.getName(), "sleep");
             thread.interrupt();
         }
     }

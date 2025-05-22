@@ -325,7 +325,8 @@ public interface TaskExecutor {
      */
     default @Nonnull VoidReceipt scheduleAt(@Nonnull Runnable task, @Nonnull Instant time) throws SubmissionException {
         try {
-            return schedule(task, Duration.between(Instant.now(), time));
+            Duration diff = Duration.between(Instant.now(), time);
+            return schedule(task, diff);
         } catch (SubmissionException e) {
             throw e;
         } catch (Exception e) {
@@ -350,7 +351,8 @@ public interface TaskExecutor {
         @Nonnull Instant time
     ) throws SubmissionException {
         try {
-            return schedule(task, Duration.between(Instant.now(), time));
+            Duration diff = Duration.between(Instant.now(), time);
+            return schedule(task, diff);
         } catch (SubmissionException e) {
             throw e;
         } catch (Exception e) {
