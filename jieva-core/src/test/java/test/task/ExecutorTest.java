@@ -4,8 +4,8 @@ import org.testng.annotations.Test;
 import test.utils.RejectedExecutor;
 import test.utils.Utils;
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.AwaitingException;
-import xyz.sunqian.common.base.thread.JieThread;
 import xyz.sunqian.common.task.SubmissionException;
 import xyz.sunqian.common.task.TaskExecutor;
 import xyz.sunqian.common.task.TaskReceipt;
@@ -248,7 +248,7 @@ public class ExecutorTest {
                 c[0]++;
                 latch.countDown1();
                 try {
-                    JieThread.sleep();
+                    Jie.sleep();
                 } catch (AwaitingException e) {
                     c[0]++;
                     latch.countDown2();
@@ -292,7 +292,7 @@ public class ExecutorTest {
         {
             // await forever
             TaskExecutor executor = TaskExecutor.newExecutor(1, 1);
-            executor.run(() -> JieThread.sleep());
+            executor.run(() -> Jie.sleep());
             assertFalse(executor.await(Duration.ofMillis(1)));
             Thread waitThread = new Thread(executor::await);
             waitThread.start();
@@ -412,7 +412,7 @@ public class ExecutorTest {
             receipt2.await();
             assertSame(receipt2.getException(), err);
             VoidReceipt receipt3 = executor.submit(() -> {
-                JieThread.sleep();
+                Jie.sleep();
             });
             try {
                 receipt3.await(Duration.ofMillis(1));
@@ -432,7 +432,7 @@ public class ExecutorTest {
             assertNull(receipt2.await());
             assertSame(receipt2.getException(), err);
             TaskReceipt<?> receipt3 = executor.submit(() -> {
-                JieThread.sleep();
+                Jie.sleep();
                 return 1;
             });
             try {

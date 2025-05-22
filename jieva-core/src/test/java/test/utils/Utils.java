@@ -1,13 +1,14 @@
 package test.utils;
 
-import xyz.sunqian.common.base.thread.JieThread;
+
+import xyz.sunqian.common.base.Jie;
 
 import java.util.Objects;
 
 public class Utils {
 
     public static void awaitUntilExecuteTo(Thread thread, String className, String methodName) {
-        JieThread.until(() -> {
+        Jie.until(() -> {
             StackTraceElement[] traceElements = thread.getStackTrace();
             for (StackTraceElement traceElement : traceElements) {
                 if (Objects.equals(className, traceElement.getClassName())
