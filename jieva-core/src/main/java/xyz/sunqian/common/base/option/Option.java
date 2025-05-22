@@ -3,7 +3,7 @@ package xyz.sunqian.common.base.option;
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.collection.JieArray;
+import xyz.sunqian.common.collect.JieArray;
 
 import java.util.Objects;
 

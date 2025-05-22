@@ -4,7 +4,7 @@ import org.testng.annotations.Test;
 import xyz.sunqian.common.base.option.Option;
 
 import static org.testng.Assert.assertEquals;
-import static xyz.sunqian.common.collection.JieArray.array;
+import static xyz.sunqian.common.collect.JieArray.array;
 
 public class OptionTest {
 

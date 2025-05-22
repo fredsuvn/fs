@@ -2,8 +2,8 @@ package xyz.sunqian.common.objects.data;
 
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.collection.JieCollection;
-import xyz.sunqian.common.collection.JieMap;
+import xyz.sunqian.common.collect.JieCollect;
+import xyz.sunqian.common.collect.JieMap;
 import xyz.sunqian.common.reflect.JieReflect;
 
 import java.lang.annotation.Annotation;
@@ -139,7 +139,7 @@ public class JieDataObject {
     public static DataSchema withExtraTypeVariableMapping(
         DataSchema dataSchema, @Nullable Map<TypeVariable<?>, Type> extraTypeVarMapping
     ) throws DataObjectException {
-        if (JieCollection.isNotEmpty(extraTypeVarMapping)) {
+        if (JieCollect.isNotEmpty(extraTypeVarMapping)) {
             Map<DataProperty, Type> mapping = new HashMap<>();
             Set<Type> stack = new HashSet<>();
             dataSchema.getProperties().forEach((n, p) -> {

@@ -1,6 +1,6 @@
 package xyz.sunqian.common.base;
 
-import xyz.sunqian.common.collection.JieCollection;
+import xyz.sunqian.common.collect.JieCollect;
 import xyz.sunqian.common.io.JieIO;
 
 import java.io.File;
@@ -337,7 +337,7 @@ public abstract class ProcessStarter implements BaseStarter<Process, ProcessStar
      */
     @Override
     public Process start() {
-        if (JieCollection.isEmpty(command)) {
+        if (JieCollect.isEmpty(command)) {
             throw new IllegalArgumentException("Command is empty.");
         }
         try {

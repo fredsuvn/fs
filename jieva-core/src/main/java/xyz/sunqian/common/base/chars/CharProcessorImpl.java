@@ -3,7 +3,7 @@ package xyz.sunqian.common.base.chars;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.JieCoding;
 import xyz.sunqian.common.base.exception.ProcessingException;
-import xyz.sunqian.common.collection.JieCollection;
+import xyz.sunqian.common.collect.JieCollect;
 import xyz.sunqian.common.io.CharReader;
 import xyz.sunqian.common.io.CharSegment;
 import xyz.sunqian.common.io.IORuntimeException;
@@ -149,7 +149,7 @@ final class CharProcessorImpl implements CharProcessor {
 
     @Override
     public Reader toReader() {
-        if (JieCollection.isEmpty(encoders)) {
+        if (JieCollect.isEmpty(encoders)) {
             return toReader(getSource());
         }
         return new ProcessorReader();
@@ -176,7 +176,7 @@ final class CharProcessorImpl implements CharProcessor {
             return 0;
         }
         try {
-            if (JieCollection.isEmpty(encoders)) {
+            if (JieCollect.isEmpty(encoders)) {
                 Object src = getSource();
                 Object dst = getDest();
                 if (src instanceof char[]) {
@@ -320,7 +320,7 @@ final class CharProcessorImpl implements CharProcessor {
     }
 
     private CharEncoder toOneEncoder(@Nullable List<CharEncoder> encoders) {
-        if (JieCollection.isEmpty(encoders)) {
+        if (JieCollect.isEmpty(encoders)) {
             return CharEncoder.emptyEncoder();
         }
         if (encoders.size() == 1) {

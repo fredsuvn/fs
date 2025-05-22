@@ -1,4 +1,4 @@
-package xyz.sunqian.common.collection;
+package xyz.sunqian.common.collect;
 
 import xyz.sunqian.annotations.Nonnull;
 
@@ -37,7 +37,7 @@ public class JieStream {
      * @return a {@link Stream} from the given elements
      */
     public static <T> @Nonnull Stream<T> stream(@Nonnull Iterable<T> elements) {
-        if (JieCollection.isEmpty(elements)) {
+        if (JieCollect.isEmpty(elements)) {
             return Stream.empty();
         }
         if (elements instanceof Collection) {

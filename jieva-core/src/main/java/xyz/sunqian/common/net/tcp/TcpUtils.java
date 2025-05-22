@@ -1,7 +1,7 @@
 package xyz.sunqian.common.net.tcp;
 
 import xyz.sunqian.common.base.bytes.JieBytes;
-import xyz.sunqian.common.collection.JieArray;
+import xyz.sunqian.common.collect.JieArray;
 
 import java.nio.ByteBuffer;
 import java.util.function.IntFunction;

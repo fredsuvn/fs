@@ -3,15 +3,29 @@ package xyz.sunqian.common.mapping.handlers;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Flag;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.objects.data.DataProperty;
-import xyz.sunqian.common.collection.JieCollection;
+import xyz.sunqian.common.collect.JieCollect;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingException;
 import xyz.sunqian.common.mapping.MappingOptions;
+import xyz.sunqian.common.objects.data.DataProperty;
 import xyz.sunqian.common.reflect.JieReflect;
 
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Array;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.IntFunction;
@@ -217,7 +231,7 @@ public class CollectionMappingHandler implements Mapper.Handler {
         }
         if (type instanceof ParameterizedType) {
             List<Type> sourceComponent = JieReflect.getActualTypeArguments(type, Iterable.class);
-            if (JieCollection.isEmpty(sourceComponent)) {
+            if (JieCollect.isEmpty(sourceComponent)) {
                 return null;
             }
             return sourceComponent.get(0);

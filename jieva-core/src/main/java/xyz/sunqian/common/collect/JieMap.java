@@ -1,4 +1,4 @@
-package xyz.sunqian.common.collection;
+package xyz.sunqian.common.collect;
 
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nonnull;
@@ -91,7 +91,7 @@ public class JieMap {
      * @return a new {@link HashMap} initialing with the given iterable
      */
     public static <K, V> @Nonnull @Immutable Map<K, V> toMap(@Nonnull Iterable<?> it) {
-        Object[] array = JieCollection.toArray(it);
+        Object[] array = JieCollect.toArray(it);
         return map(array);
     }
 
@@ -145,7 +145,7 @@ public class JieMap {
      * @return a new {@link HashMap} initialing with the given iterable
      */
     public static <K, V> @Nonnull HashMap<K, V> toHashMap(@Nonnull Iterable<?> it) {
-        Object[] array = JieCollection.toArray(it);
+        Object[] array = JieCollect.toArray(it);
         return hashMap(array);
     }
 
@@ -163,7 +163,7 @@ public class JieMap {
      * @return a new {@link HashMap} initialing with the given iterable
      */
     public static <K, V> @Nonnull LinkedHashMap<K, V> toLinkedHashMap(@Nonnull Iterable<?> it) {
-        Object[] array = JieCollection.toArray(it);
+        Object[] array = JieCollect.toArray(it);
         return linkedHashMap(array);
     }
 

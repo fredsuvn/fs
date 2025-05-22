@@ -1,7 +1,7 @@
 package test.io;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.collection.JieArray;
+import xyz.sunqian.common.collect.JieArray;
 import xyz.sunqian.common.io.JieBuffer;
 import xyz.sunqian.test.MaterialBox;
 

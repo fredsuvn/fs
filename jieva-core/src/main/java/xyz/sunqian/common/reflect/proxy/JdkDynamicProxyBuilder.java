@@ -4,7 +4,7 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieConfig;
 import xyz.sunqian.common.base.JieSystem;
-import xyz.sunqian.common.collection.JieCollection;
+import xyz.sunqian.common.collect.JieCollect;
 import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.invoke.InvocationException;
 
@@ -69,7 +69,7 @@ public class JdkDynamicProxyBuilder implements ProxyBuilder {
 
     @Override
     public ProxyClass build() throws ProxyException {
-        if (JieCollection.isEmpty(interfaces)) {
+        if (JieCollect.isEmpty(interfaces)) {
             throw new ProxyException("No interface to proxy.");
         }
         if (handler == null) {

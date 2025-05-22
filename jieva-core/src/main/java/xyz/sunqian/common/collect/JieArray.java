@@ -1,6 +1,7 @@
-package xyz.sunqian.common.collection;
+package xyz.sunqian.common.collect;
 
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.function.IndexedDoublePredicate;
@@ -28,7 +29,7 @@ public class JieArray {
      * @param <T>   the component type of the given array
      * @return whether the given array is null or empty
      */
-    public static <T> boolean isEmpty(T[] array) {
+    public static <T> boolean isEmpty(T @Nullable [] array) {
         return array == null || array.length == 0;
     }
 
@@ -38,7 +39,7 @@ public class JieArray {
      * @param array the given array
      * @return whether the given array is null or empty
      */
-    public static boolean isEmpty(boolean[] array) {
+    public static boolean isEmpty(boolean @Nullable [] array) {
         return array == null || array.length == 0;
     }
 
@@ -48,7 +49,7 @@ public class JieArray {
      * @param array the given array
      * @return whether the given array is null or empty
      */
-    public static boolean isEmpty(byte[] array) {
+    public static boolean isEmpty(byte @Nullable [] array) {
         return array == null || array.length == 0;
     }
 
@@ -58,7 +59,7 @@ public class JieArray {
      * @param array the given array
      * @return whether the given array is null or empty
      */
-    public static boolean isEmpty(short[] array) {
+    public static boolean isEmpty(short @Nullable [] array) {
         return array == null || array.length == 0;
     }
 
@@ -68,7 +69,7 @@ public class JieArray {
      * @param array the given array
      * @return whether the given array is null or empty
      */
-    public static boolean isEmpty(char[] array) {
+    public static boolean isEmpty(char @Nullable [] array) {
         return array == null || array.length == 0;
     }
 
@@ -78,7 +79,7 @@ public class JieArray {
      * @param array the given array
      * @return whether the given array is null or empty
      */
-    public static boolean isEmpty(int[] array) {
+    public static boolean isEmpty(int @Nullable [] array) {
         return array == null || array.length == 0;
     }
 
@@ -88,7 +89,7 @@ public class JieArray {
      * @param array the given array
      * @return whether the given array is null or empty
      */
-    public static boolean isEmpty(long[] array) {
+    public static boolean isEmpty(long @Nullable [] array) {
         return array == null || array.length == 0;
     }
 
@@ -98,7 +99,7 @@ public class JieArray {
      * @param array the given array
      * @return whether the given array is null or empty
      */
-    public static boolean isEmpty(float[] array) {
+    public static boolean isEmpty(float @Nullable [] array) {
         return array == null || array.length == 0;
     }
 
@@ -108,7 +109,7 @@ public class JieArray {
      * @param array the given array
      * @return whether the given array is null or empty
      */
-    public static boolean isEmpty(double[] array) {
+    public static boolean isEmpty(double @Nullable [] array) {
         return array == null || array.length == 0;
     }
 
@@ -119,7 +120,7 @@ public class JieArray {
      * @param <T>   the component type of the given array
      * @return whether the given array is not null and empty
      */
-    public static <T> boolean isNotEmpty(T[] array) {
+    public static <T> boolean isNotEmpty(T @Nullable [] array) {
         return !isEmpty(array);
     }
 
@@ -129,7 +130,7 @@ public class JieArray {
      * @param array the given array
      * @return whether the given array is not null and empty
      */
-    public static boolean isNotEmpty(boolean[] array) {
+    public static boolean isNotEmpty(boolean @Nullable [] array) {
         return !isEmpty(array);
     }
 
@@ -139,7 +140,7 @@ public class JieArray {
      * @param array the given array
      * @return whether the given array is not null and empty
      */
-    public static boolean isNotEmpty(byte[] array) {
+    public static boolean isNotEmpty(byte @Nullable [] array) {
         return !isEmpty(array);
     }
 
@@ -149,7 +150,7 @@ public class JieArray {
      * @param array the given array
      * @return whether the given array is not null and empty
      */
-    public static boolean isNotEmpty(short[] array) {
+    public static boolean isNotEmpty(short @Nullable [] array) {
         return !isEmpty(array);
     }
 
@@ -159,7 +160,7 @@ public class JieArray {
      * @param array the given array
      * @return whether the given array is not null and empty
      */
-    public static boolean isNotEmpty(char[] array) {
+    public static boolean isNotEmpty(char @Nullable [] array) {
         return !isEmpty(array);
     }
 
@@ -169,7 +170,7 @@ public class JieArray {
      * @param array the given array
      * @return whether the given array is not null and empty
      */
-    public static boolean isNotEmpty(int[] array) {
+    public static boolean isNotEmpty(int @Nullable [] array) {
         return !isEmpty(array);
     }
 
@@ -179,7 +180,7 @@ public class JieArray {
      * @param array the given array
      * @return whether the given array is not null and empty
      */
-    public static boolean isNotEmpty(long[] array) {
+    public static boolean isNotEmpty(long @Nullable [] array) {
         return !isEmpty(array);
     }
 
@@ -189,7 +190,7 @@ public class JieArray {
      * @param array the given array
      * @return whether the given array is not null and empty
      */
-    public static boolean isNotEmpty(float[] array) {
+    public static boolean isNotEmpty(float @Nullable [] array) {
         return !isEmpty(array);
     }
 
@@ -199,7 +200,7 @@ public class JieArray {
      * @param array the given array
      * @return whether the given array is not null and empty
      */
-    public static boolean isNotEmpty(double[] array) {
+    public static boolean isNotEmpty(double @Nullable [] array) {
         return !isEmpty(array);
     }
 
@@ -402,7 +403,7 @@ public class JieArray {
      * @param <T>          the component type
      * @return the value from the given array at the specified index
      */
-    public static <T> T get(T[] array, int index, T defaultValue) {
+    public static <T> T get(T @Nullable [] array, int index, T defaultValue) {
         if (array == null || index < 0 || index >= array.length) {
             return defaultValue;
         }
@@ -419,7 +420,7 @@ public class JieArray {
      * @param defaultValue the default value
      * @return the value from the given array at the specified index
      */
-    public static boolean get(boolean[] array, int index, boolean defaultValue) {
+    public static boolean get(boolean @Nullable [] array, int index, boolean defaultValue) {
         if (array == null || index < 0 || index >= array.length) {
             return defaultValue;
         }
@@ -435,7 +436,7 @@ public class JieArray {
      * @param defaultValue the default value
      * @return the value from the given array at the specified index
      */
-    public static byte get(byte[] array, int index, byte defaultValue) {
+    public static byte get(byte @Nullable [] array, int index, byte defaultValue) {
         if (array == null || index < 0 || index >= array.length) {
             return defaultValue;
         }
@@ -451,7 +452,7 @@ public class JieArray {
      * @param defaultValue the default value
      * @return the value from the given array at the specified index
      */
-    public static short get(short[] array, int index, short defaultValue) {
+    public static short get(short @Nullable [] array, int index, short defaultValue) {
         if (array == null || index < 0 || index >= array.length) {
             return defaultValue;
         }
@@ -467,7 +468,7 @@ public class JieArray {
      * @param defaultValue the default value
      * @return the value from the given array at the specified index
      */
-    public static char get(char[] array, int index, char defaultValue) {
+    public static char get(char @Nullable [] array, int index, char defaultValue) {
         if (array == null || index < 0 || index >= array.length) {
             return defaultValue;
         }
@@ -483,7 +484,7 @@ public class JieArray {
      * @param defaultValue the default value
      * @return the value from the given array at the specified index
      */
-    public static int get(int[] array, int index, int defaultValue) {
+    public static int get(int @Nullable [] array, int index, int defaultValue) {
         if (array == null || index < 0 || index >= array.length) {
             return defaultValue;
         }
@@ -499,7 +500,7 @@ public class JieArray {
      * @param defaultValue the default value
      * @return the value from the given array at the specified index
      */
-    public static long get(long[] array, int index, long defaultValue) {
+    public static long get(long @Nullable [] array, int index, long defaultValue) {
         if (array == null || index < 0 || index >= array.length) {
             return defaultValue;
         }
@@ -515,7 +516,7 @@ public class JieArray {
      * @param defaultValue the default value
      * @return the value from the given array at the specified index
      */
-    public static float get(float[] array, int index, float defaultValue) {
+    public static float get(float @Nullable [] array, int index, float defaultValue) {
         if (array == null || index < 0 || index >= array.length) {
             return defaultValue;
         }
@@ -531,7 +532,7 @@ public class JieArray {
      * @param defaultValue the default value
      * @return the value from the given array at the specified index
      */
-    public static double get(double[] array, int index, double defaultValue) {
+    public static double get(double @Nullable [] array, int index, double defaultValue) {
         if (array == null || index < 0 || index >= array.length) {
             return defaultValue;
         }

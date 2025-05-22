@@ -1,4 +1,4 @@
-package xyz.sunqian.common.collection;
+package xyz.sunqian.common.collect;
 
 import java.io.Serializable;
 import java.util.AbstractList;

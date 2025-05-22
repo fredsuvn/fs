@@ -3,8 +3,8 @@ package xyz.sunqian.common.net.tcp;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.collection.JieCollection;
-import xyz.sunqian.common.collection.JieList;
+import xyz.sunqian.common.collect.JieCollect;
+import xyz.sunqian.common.collect.JieList;
 import xyz.sunqian.common.data.GekData;
 import xyz.sunqian.common.io.JieBuffer;
 import xyz.sunqian.common.io.JieIO;
@@ -183,7 +183,7 @@ public interface GekTcpServer extends GekTcpEndpoint {
          * @return this builder
          */
         public Builder addChannelHandlers(Iterable<GekTcpChannelHandler<?>> channelHandlers) {
-            JieCollection.addAll(this.channelHandlers, channelHandlers);
+            JieCollect.addAll(this.channelHandlers, channelHandlers);
             return this;
         }
 

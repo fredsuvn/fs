@@ -3,9 +3,7 @@ package xyz.sunqian.common.objects.data.handlers;
 import lombok.Data;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.collection.JieArray;
-import xyz.sunqian.common.collection.JieCollection;
-import xyz.sunqian.common.collection.JieMap;
+import xyz.sunqian.common.collect.JieMap;
 import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.objects.data.DataObjectException;
 import xyz.sunqian.common.objects.data.DataPropertyBase;
@@ -17,7 +15,13 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * This is a skeletal implementation of the {@link DataSchemaParser.Handler} to minimize the effort required to

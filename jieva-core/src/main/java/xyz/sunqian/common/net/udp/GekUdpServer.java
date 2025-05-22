@@ -3,8 +3,8 @@ package xyz.sunqian.common.net.udp;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.collection.JieCollection;
-import xyz.sunqian.common.collection.JieList;
+import xyz.sunqian.common.collect.JieCollect;
+import xyz.sunqian.common.collect.JieList;
 import xyz.sunqian.common.io.JieBuffer;
 import xyz.sunqian.common.io.JieIO;
 import xyz.sunqian.common.net.GekNetException;
@@ -225,7 +225,7 @@ public interface GekUdpServer extends GekUdpClient {
          * @return this builder
          */
         public Builder addPacketHandlers(Iterable<GekUdpPacketHandler<?>> packetHandlers) {
-            JieCollection.addAll(this.packetHandlers, packetHandlers);
+            JieCollect.addAll(this.packetHandlers, packetHandlers);
             return this;
         }
 

@@ -1,10 +1,14 @@
 package xyz.sunqian.common.reflect.proxy;
 
-import org.objectweb.asm.*;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieString;
-import xyz.sunqian.common.collection.JieCollection;
+import xyz.sunqian.common.collect.JieCollect;
 import xyz.sunqian.common.reflect.JieJvm;
 import xyz.sunqian.common.reflect.JieReflect;
 
@@ -12,7 +16,13 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -98,7 +108,7 @@ public class AsmProxyBuilder implements ProxyBuilder, Opcodes {
     }
 
     private ProxyClass build0() {
-        if (superClass == null && JieCollection.isEmpty(interfaces)) {
+        if (superClass == null && JieCollect.isEmpty(interfaces)) {
             throw new ProxyException("No super class or interface to proxy.");
         }
         if (handler == null) {

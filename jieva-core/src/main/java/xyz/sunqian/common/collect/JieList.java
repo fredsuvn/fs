@@ -1,4 +1,4 @@
-package xyz.sunqian.common.collection;
+package xyz.sunqian.common.collect;
 
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nonnull;
@@ -162,7 +162,7 @@ public class JieList {
      * @return a new immutable list of which content is added from the given iterable
      */
     public static <T> @Nonnull @Immutable List<T> toList(@Nonnull Iterable<? extends T> it) {
-        Object[] array = JieCollection.toArray(it);
+        Object[] array = JieCollect.toArray(it);
         List<Object> list = list(array);
         return Jie.as(list);
     }
@@ -178,7 +178,7 @@ public class JieList {
         if (it instanceof Collection) {
             return new ArrayList<>((Collection<T>) it);
         }
-        return JieCollection.addAll(new ArrayList<>(), it);
+        return JieCollect.addAll(new ArrayList<>(), it);
     }
 
     /**
@@ -192,6 +192,6 @@ public class JieList {
         if (it instanceof Collection) {
             return new LinkedList<>((Collection<T>) it);
         }
-        return JieCollection.addAll(new LinkedList<>(), it);
+        return JieCollect.addAll(new LinkedList<>(), it);
     }
 }

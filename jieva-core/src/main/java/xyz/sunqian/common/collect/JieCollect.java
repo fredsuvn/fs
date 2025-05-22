@@ -1,6 +1,7 @@
-package xyz.sunqian.common.collection;
+package xyz.sunqian.common.collect;
 
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,7 +16,7 @@ import java.util.Map;
  *
  * @author sunqian
  */
-public class JieCollection {
+public class JieCollect {
 
     /**
      * Returns whether the given iterable is null or empty.
@@ -23,7 +24,7 @@ public class JieCollection {
      * @param iterable the given iterable
      * @return whether the given iterable is null or empty
      */
-    public static boolean isEmpty(Iterable<?> iterable) {
+    public static boolean isEmpty(@Nullable Iterable<?> iterable) {
         if (iterable == null) {
             return true;
         }
@@ -39,7 +40,7 @@ public class JieCollection {
      * @param iterable the given iterable
      * @return whether the given iterable is not null and empty
      */
-    public static boolean isNotEmpty(Iterable<?> iterable) {
+    public static boolean isNotEmpty(@Nullable Iterable<?> iterable) {
         return !isEmpty(iterable);
     }
 
@@ -49,7 +50,7 @@ public class JieCollection {
      * @param map the given map
      * @return whether the given map is null or empty
      */
-    public static boolean isEmpty(Map<?, ?> map) {
+    public static boolean isEmpty(@Nullable Map<?, ?> map) {
         if (map == null) {
             return true;
         }
@@ -62,7 +63,7 @@ public class JieCollection {
      * @param map the given map
      * @return whether the given map is not null and empty
      */
-    public static boolean isNotEmpty(Map<?, ?> map) {
+    public static boolean isNotEmpty(@Nullable Map<?, ?> map) {
         return !isEmpty(map);
     }
 

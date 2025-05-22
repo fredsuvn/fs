@@ -1,7 +1,7 @@
-package test.collection;
+package test.collect;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.collection.JieStream;
+import xyz.sunqian.common.collect.JieStream;
 
 import java.util.Arrays;
 import java.util.Collections;

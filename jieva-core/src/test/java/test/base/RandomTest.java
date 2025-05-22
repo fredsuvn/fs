@@ -4,7 +4,7 @@ import org.testng.annotations.Test;
 import test.Log;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieRandom;
-import xyz.sunqian.common.collection.JieArray;
+import xyz.sunqian.common.collect.JieArray;
 import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.invoke.InvocationException;
 

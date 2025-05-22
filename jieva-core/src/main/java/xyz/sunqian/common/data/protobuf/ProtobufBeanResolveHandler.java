@@ -4,7 +4,7 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.JieString;
-import xyz.sunqian.common.collection.JieCollection;
+import xyz.sunqian.common.collect.JieCollect;
 import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.mapping.MappingException;
 import xyz.sunqian.common.objects.data.BeanException;
@@ -79,7 +79,7 @@ public class ProtobufBeanResolveHandler implements DataSchemaParser.Handler {
             String name = rawName + "Map";
             Method getterMethod = rawClass.getMethod("get" + JieString.capitalize(name));
             List<Type> argsTypes = JieReflect.getActualTypeArguments(getterMethod.getGenericReturnType(), Map.class);
-            if (JieCollection.isEmpty(argsTypes)) {
+            if (JieCollect.isEmpty(argsTypes)) {
                 throw new BeanException("Cannot get actual argument type for " + getterMethod.getGenericReturnType() + ".");
             }
             Invocable getter = Invocable.of(getterMethod);
@@ -107,7 +107,7 @@ public class ProtobufBeanResolveHandler implements DataSchemaParser.Handler {
             String name = rawName + "List";
             Method getterMethod = rawClass.getMethod("get" + JieString.capitalize(name));
             List<Type> argsTypes = JieReflect.getActualTypeArguments(getterMethod.getGenericReturnType(), List.class);
-            if (JieCollection.isEmpty(argsTypes)) {
+            if (JieCollect.isEmpty(argsTypes)) {
                 throw new BeanException("Cannot get actual argument type for " + getterMethod.getGenericReturnType() + ".");
             }
             Invocable getter = Invocable.of(getterMethod);

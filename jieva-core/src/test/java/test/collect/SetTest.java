@@ -1,7 +1,7 @@
-package test.collection;
+package test.collect;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.collection.JieSet;
+import xyz.sunqian.common.collect.JieSet;
 
 import java.util.Arrays;
 import java.util.HashSet;

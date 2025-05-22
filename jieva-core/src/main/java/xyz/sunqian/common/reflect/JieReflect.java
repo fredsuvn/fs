@@ -6,9 +6,9 @@ import xyz.sunqian.annotations.OutParam;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.cache.SimpleCache;
-import xyz.sunqian.common.collection.JieArray;
-import xyz.sunqian.common.collection.JieCollection;
-import xyz.sunqian.common.collection.JieMap;
+import xyz.sunqian.common.collect.JieArray;
+import xyz.sunqian.common.collect.JieCollect;
+import xyz.sunqian.common.collect.JieMap;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -643,8 +643,8 @@ public class JieReflect {
      *     K -&gt; Integer
      *     V -&gt; Long
      * </pre>
-     * It is recommended using {@link JieCollection#getRecursive(Map, Object, Set)} to get actual type of type variable
-     * in the result.
+     * It is recommended using {@link JieCollect#getRecursive(Map, Object, Set)} to get actual type of type variable in
+     * the result.
      *
      * @param type given type
      * @return a mapping of type parameters for given type
