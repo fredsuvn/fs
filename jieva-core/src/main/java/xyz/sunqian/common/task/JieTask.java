@@ -35,6 +35,8 @@ public class JieTask {
 
     /**
      * Runs the given task asynchronously.
+     * <p>
+     * This method is backed by a global executor from {@link TaskExecutor#newExecutor()}.
      *
      * @param task the task to run
      * @throws SubmissionException if an error occurs during the submitting
@@ -45,6 +47,8 @@ public class JieTask {
 
     /**
      * Runs the given task asynchronously, and returns the receipt of the task.
+     * <p>
+     * This method is backed by a global executor from {@link TaskExecutor#newExecutor()}.
      *
      * @param task the task to run
      * @param <T>  the type of the task result
@@ -58,6 +62,8 @@ public class JieTask {
     /**
      * Schedules the given task with a specified delay time from now, returns a {@link VoidReceipt} for the task. The
      * task becomes enabled after the given delay.
+     * <p>
+     * This method is backed by a global executor from {@link TaskExecutor#newScheduler()}.
      *
      * @param task  the given task
      * @param delay the specified delay time
@@ -71,6 +77,8 @@ public class JieTask {
     /**
      * Schedules the given task with a specified delay time from now, returns a {@link TaskReceipt} for the task. The
      * task becomes enabled after the given delay.
+     * <p>
+     * This method is backed by a global executor from {@link TaskExecutor#newScheduler()}.
      *
      * @param task  the given task
      * @param delay the specified delay time
@@ -88,6 +96,8 @@ public class JieTask {
     /**
      * Schedules the given task to be executed at the specified time, returns a {@link VoidReceipt} for the task. The
      * task becomes enabled after the given time.
+     * <p>
+     * This method is backed by a global executor from {@link TaskExecutor#newScheduler()}.
      *
      * @param task the given task
      * @param time the specified time to execute the task
@@ -103,6 +113,8 @@ public class JieTask {
     /**
      * Schedules the given task to be executed at the specified time, returns a {@link VoidReceipt} for the task. The
      * task becomes enabled after the given time.
+     * <p>
+     * This method is backed by a global executor from {@link TaskExecutor#newScheduler()}.
      *
      * @param task the given task
      * @param time the specified time to execute the task
@@ -125,6 +137,8 @@ public class JieTask {
      * If any execution of the task fails, subsequent executions are suppressed. Otherwise, the task will only terminate
      * via cancellation or termination of the executor. If any execution of this task takes longer than its period, then
      * subsequent executions may start late, but will not concurrently execute.
+     * <p>
+     * This method is backed by a global executor from {@link TaskExecutor#newScheduler()}.
      *
      * @param task         the given periodic task
      * @param initialDelay the given initial delay for first execution
@@ -146,6 +160,8 @@ public class JieTask {
      * <p>
      * If any execution of the task fails, subsequent executions are suppressed. Otherwise, the task will only terminate
      * via cancellation or termination of the executor.
+     * <p>
+     * This method is backed by a global executor from {@link TaskExecutor#newScheduler()}.
      *
      * @param task         the given periodic task
      * @param initialDelay the given initial delay for first execution
