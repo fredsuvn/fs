@@ -31,9 +31,10 @@ public class JieTest {
         assertFalse(Jie.equalsWith(new boolean[]{true}, new boolean[]{true}, false, false));
         assertTrue(Jie.equals("", "", ""));
         assertFalse(Jie.equals("1", "2", "3"));
+        assertTrue(Jie.equals());
+        assertTrue(Jie.equals(new Object[]{""}));
         assertTrue(Jie.equals(new Object[]{"", ""}));
         assertFalse(Jie.equals(new Object[]{"1", "2"}));
-        assertTrue(Jie.equals());
 
         // boolean
         assertTrue(Jie.equals(new boolean[]{true}, new boolean[]{true}));

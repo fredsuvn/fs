@@ -258,12 +258,6 @@ public class Jie {
      * @return whether the given objects are equal
      */
     public static boolean equals(Object @Nonnull ... objects) {
-        if (objects.length <= 1) {
-            return true;
-        }
-        if (objects.length == 2) {
-            return equals(objects[0], objects[1]);
-        }
         for (int i = 0; i < objects.length - 1; i++) {
             if (!equals(objects[i], objects[i + 1])) {
                 return false;
