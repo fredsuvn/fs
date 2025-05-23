@@ -9,7 +9,11 @@ import xyz.sunqian.common.objects.data.DataSchemaParser;
 import xyz.sunqian.common.reflect.JieReflect;
 
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiFunction;
 
 final class BeanMapperImpl implements BeanMapper {
@@ -176,7 +180,7 @@ final class BeanMapperImpl implements BeanMapper {
     }
 
     private List<Type> getMapTypeArgs(Type mapType) {
-        return JieReflect.getActualTypeArguments(mapType, Map.class);
+        return JieReflect.resolveActualTypeArguments(mapType, Map.class);
     }
 
     private void putToMap(

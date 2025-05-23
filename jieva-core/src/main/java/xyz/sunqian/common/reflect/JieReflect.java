@@ -4,8 +4,10 @@ import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.OutParam;
+import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieString;
+import xyz.sunqian.common.base.exception.UnreachablePointException;
 import xyz.sunqian.common.cache.SimpleCache;
 import xyz.sunqian.common.collect.JieArray;
 import xyz.sunqian.common.collect.JieCollect;
@@ -23,10 +25,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
  */
 public class JieReflect {
 
-    private static final Map<Class<?>, Class<?>> CLASS_WRAPPERS = Jie.map(
+    private static final @Nonnull Map<Class<?>, Class<?>> CLASS_WRAPPERS = Jie.map(
         boolean.class, Boolean.class,
         byte.class, Byte.class,
         short.class, Short.class,
@@ -51,7 +51,7 @@ public class JieReflect {
         void.class, Void.class
     );
 
-    private static final Map<Class<?>, String> PRIMITIVE_ARRAY_CLASS_NAMES = Jie.map(
+    private static final @Nonnull Map<Class<?>, String> PRIMITIVE_ARRAY_CLASS_NAMES = Jie.map(
         boolean.class, "[Z",
         byte.class, "[B",
         short.class, "[S",
@@ -138,271 +138,190 @@ public class JieReflect {
     }
 
     /**
-     * Returns the super classes as {@link Iterator} for the given class.
+     * Returns the field of the specified name from the given class, or {@code null} if not found.
+     * <p>
+     * This method searches via {@link Class#getField(String)}. If not found then {@link Class#getDeclaredField(String)}
+     * will be used next. If still not found, this method will recursively call itself with superclass (from
+     * {@link Class#getSuperclass()}) and interfaces (from {@link Class#getInterfaces()}) until found.
      *
-     * @param cls the given class
-     * @return the super classes as {@link Iterator} for the given class
-     */
-    public static @Nonnull Iterator<Class<?>> getSuperTypes(@Nonnull Class<?> cls) {
-        return new Iterator<Class<?>>() {
-
-            private @Nullable Class<?>[] superInters = null;
-            private int cur = -2;
-            private @Nullable Class<?> next = getNext();
-
-            @Override
-            public boolean hasNext() {
-                return next != null;
-            }
-
-            @Override
-            public Class<?> next() {
-                if (next == null) {
-                    throw new NoSuchElementException();
-                }
-                Class<?> result = next;
-                next = getNext();
-                return result;
-            }
-
-            private @Nullable Class<?> getNext() {
-                if (cur == -2) {
-                    cur++;
-                    Class<?> superClass = cls.getSuperclass();
-                    if (superClass != null) {
-                        return superClass;
-                    }
-                }
-                if (cur == -1) {
-                    superInters = cls.getInterfaces();
-                    if (JieArray.isEmpty(superInters)) {
-                        return null;
-                    }
-                    cur++;
-                }
-                if (cur < superInters.length) {
-                    return superInters[cur++];
-                }
-                return null;
-            }
-        };
-    }
-
-    private static final class SuperTypesIterator implements Iterator<Class<?>> {
-
-        private @Nullable SuperDeclaration declaration;
-
-        private SuperTypesIterator(@Nonnull Class<?> cls) {
-            this.declaration = getSuperDeclaration(cls);
-        }
-
-        @Override
-        public boolean hasNext() {
-            return declaration != null;
-        }
-
-        @Override
-        public Class<?> next() {
-            SuperDeclaration declaration = this.declaration;
-            if (declaration == null) {
-                throw new NoSuchElementException();
-            }
-            if (declaration.index == -1) {
-                declaration.index++;
-                if (declaration.superclass != null) {
-                    return declaration.superclass;
-                }
-            }
-            if (declaration.index < declaration.interfaces.length) {
-                return declaration.interfaces[declaration.index++];
-            }
-            return null;
-        }
-
-        private @Nullable SuperDeclaration getSuperDeclaration(@Nonnull Class<?> cls) {
-            if (Jie.equals(cls, Object.class)) {
-                return null;
-            }
-            Class<?> superclass = cls.getSuperclass();
-            Class<?>[] interfaces = cls.getInterfaces();
-            return new SuperDeclaration(superclass, interfaces);
-        }
-
-        private static final class SuperDeclaration {
-
-            private final @Nullable Class<?> superclass;
-            private final @Nonnull Class<?>[] interfaces;
-            private int index = -1;
-
-            private SuperDeclaration(Class<?> superclass, Class<?>[] interfaces) {
-                this.superclass = superclass;
-                this.interfaces = interfaces;
-            }
-        }
-    }
-
-    /**
-     * Searches and returns the field of the specified name from the given type, or returns {@code null} for searching
-     * failed. This method is equivalent to ({@link #searchField(Type, String, boolean)}):
-     * <pre>{@code
-     * return getField(type, name, true);
-     * }</pre>
-     *
-     * @param type the given type
+     * @param cls  the given class
      * @param name the specified field name
-     * @return the field of the specified name from the given type
+     * @return the field of the specified name from the given class, or {@code null} if not found
      */
-    public static @Nullable Field getField(@Nonnull Type type, @Nonnull String name) {
-        return searchField(type, name, true);
+    public static @Nullable Field getField(@Nonnull Class<?> cls, @Nonnull String name) {
+        return getField(cls, name, true, true);
     }
 
     /**
-     * Searches and returns the field of the specified name from the given type.
+     * Returns the field of the specified name from the given class, or {@code null} if not found.
      * <p>
-     * The searching in order of {@link Class#getField(String)} then {@link Class#getDeclaredField(String)}. If
-     * {@code searchSuper} is true and the searching is failed in current type, this method will recursively call
-     * {@link Class#getGenericSuperclass()} to search super types. If still not found, recursively call
-     * {@link Class#getGenericInterfaces()}.
-     * <p>
-     * Returns {@code null} for searching failed.
+     * This method searches via {@link Class#getField(String)}. If not found and the {@code searchDeclared} is true,
+     * then {@link Class#getDeclaredField(String)} will be used next. If still not found and the {@code searchSuper} is
+     * true, this method will recursively call itself with superclass (from {@link Class#getSuperclass()}) and
+     * interfaces (from {@link Class#getInterfaces()}) until found.
      *
-     * @param type        the given type
-     * @param name        the specified field name
-     * @param searchSuper whether recursively searches super types
-     * @return the field of the specified name from the given type
-     */
-    public static @Nullable Field searchField(@Nonnull Type type, @Nonnull String name, boolean searchSuper) {
-        Class<?> rawType = getRawType(type);
-        if (rawType == null) {
-            return null;
-        }
-        try {
-            return rawType.getField(name);
-        } catch (NoSuchFieldException e) {
-            try {
-                return rawType.getDeclaredField(name);
-            } catch (NoSuchFieldException ex) {
-                if (!searchSuper) {
-                    return null;
-                }
-                Iterator<Class<?>> superTypes = getSuperTypes(rawType);
-                while (superTypes.hasNext()) {
-                    Field f = searchField(superTypes.next(), name, true);
-                    if (f != null) {
-                        return f;
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Searches and returns the method of the specified name and parameter types from the given type. returns
-     * {@code null} for searching failed. This method is equivalent to
-     * ({@link #getMethod(Type, String, Class[], boolean)}):
-     * <pre>{@code
-     * return getMethod(type, name, parameterTypes, true);
-     * }</pre>
-     *
-     * @param type           the given type
+     * @param cls            the given class
      * @param name           the specified field name
-     * @param parameterTypes the specified parameter types
-     * @return the method of the specified name and parameter types from the given type
+     * @param searchDeclared specifies whether searches declared fields
+     * @param searchSuper    specifies whether searches superclasses and interfaces recursively
+     * @return the field of the specified name from the given class, or {@code null} if not found
      */
-    public static @Nullable Method getMethod(
-        @Nonnull Type type,
+    public static @Nullable Field getField(
+        @Nonnull Class<?> cls,
         @Nonnull String name,
-        @Nonnull Class<?>[] parameterTypes
-    ) {
-        return getMethod(type, name, parameterTypes, true);
-    }
-
-    /**
-     * Searches and returns the method of the specified name and parameter types from the given type.
-     * <p>
-     * The searching in order of {@link Class#getMethod(String, Class[])} then
-     * {@link Class#getDeclaredMethod(String, Class[])}. if {@code searchSuper} is true, and if searching failed in
-     * current type, this method will recursively call {@link Class#getGenericSuperclass()} to search super types. If
-     * still not found, recursively call {@link Class#getGenericInterfaces()}.
-     * <p>
-     * Returns {@code null} for searching failed.
-     *
-     * @param type           the given type
-     * @param name           the specified field name
-     * @param parameterTypes the specified parameter types
-     * @param searchSuper    whether recursively searches super types
-     * @return the method of the specified name and parameter types from the given type
-     */
-    public static @Nullable Method getMethod(
-        @Nonnull Type type,
-        @Nonnull String name,
-        @Nonnull Class<?>[] parameterTypes,
+        boolean searchDeclared,
         boolean searchSuper
     ) {
-        Class<?> rawType = getRawType(type);
-        if (rawType == null) {
-            return null;
-        }
         try {
-            return rawType.getMethod(name, parameterTypes);
-        } catch (NoSuchMethodException e) {
-            try {
-                return rawType.getDeclaredMethod(name, parameterTypes);
-            } catch (NoSuchMethodException ex) {
-                if (!searchSuper) {
-                    return null;
-                }
-                Iterator<Class<?>> superTypes = getSuperTypes(rawType);
-                while (superTypes.hasNext()) {
-                    Method m = getMethod(superTypes.next(), name, parameterTypes, true);
-                    if (m != null) {
-                        return m;
+            return cls.getField(name);
+        } catch (NoSuchFieldException e) {
+            if (searchDeclared) {
+                try {
+                    return cls.getDeclaredField(name);
+                } catch (NoSuchFieldException ex) {
+                    if (!searchSuper) {
+                        return null;
+                    }
+                    // Searches super class:
+                    Class<?> superclass = cls.getSuperclass();
+                    if (superclass != null) {
+                        Field result = getField(superclass, name, true, true);
+                        if (result != null) {
+                            return result;
+                        }
+                    }
+                    // Searches interfaces:
+                    Class<?>[] interfaces = cls.getInterfaces();
+                    for (Class<?> anInterface : interfaces) {
+                        Field result = getField(anInterface, name, true, true);
+                        if (result != null) {
+                            return result;
+                        }
                     }
                 }
             }
+
         }
         return null;
     }
 
     /**
-     * Searches and returns the constructor of the specified parameter types from the given type. returns {@code null}
-     * for searching failed. This method is equivalent to ({@link #getConstructor(Class, Class[], boolean)}):
-     * <pre>{@code
-     * return getConstructor(type, parameterTypes, true);
-     * }</pre>
+     * Returns the method of the specified name and parameter types from the given class, or {@code null} if not found.
+     * <p>
+     * This method searches via {@link Class#getMethod(String, Class[])}. If not found, then
+     * {@link Class#getDeclaredMethod(String, Class[])} will be used next. If still not found, this method will
+     * recursively call itself with superclass (from {@link Class#getSuperclass()}) and interfaces (from
+     * {@link Class#getInterfaces()}) until found.
      *
-     * @param type           the given type
+     * @param cls            the given class
+     * @param name           the specified method name
      * @param parameterTypes the specified parameter types
-     * @return the constructor of the specified parameter types from the given type
+     * @return the method of the specified name and parameter types from the given class, or {@code null} if not found
      */
-    public static @Nullable Constructor<?> getConstructor(Class<?> type, Class<?>[] parameterTypes) {
-        return getConstructor(type, parameterTypes, true);
+    public static @Nullable Method getMethod(
+        @Nonnull Class<?> cls,
+        @Nonnull String name,
+        @Nonnull @RetainedParam Class<?>[] parameterTypes
+    ) {
+        return getMethod(cls, name, parameterTypes, true, true);
     }
 
     /**
-     * Searches and returns the constructor of the specified parameter types from the given type.
+     * Returns the method of the specified name and parameter types from the given class, or {@code null} if not found.
      * <p>
-     * The method uses {@link Class#getConstructor(Class[])} to find the constructor. If searching failed and
-     * {@code searchDeclared} is true, this method will try {@link Class#getDeclaredConstructor(Class[])}.
-     * <p>
-     * Returns {@code null} for searching failed.
+     * This method searches via {@link Class#getMethod(String, Class[])}. If not found and the {@code searchDeclared} is
+     * true, then {@link Class#getDeclaredMethod(String, Class[])} will be used next. If still not found and the
+     * {@code searchSuper} is true, this method will recursively call itself with superclass (from
+     * {@link Class#getSuperclass()}) and interfaces (from {@link Class#getInterfaces()}) until found.
      *
-     * @param type           the given type
+     * @param cls            the given class
+     * @param name           the specified method name
      * @param parameterTypes the specified parameter types
-     * @param searchDeclared whether searches declared constructors
-     * @return the constructor of the specified parameter types from the given type
+     * @param searchDeclared specifies whether searches declared methods
+     * @param searchSuper    specifies whether searches superclasses and interfaces recursively
+     * @return the method of the specified name and parameter types from the given class, or {@code null} if not found
      */
-    @Nullable
-    public static Constructor<?> getConstructor(Class<?> type, Class<?>[] parameterTypes, boolean searchDeclared) {
+    public static @Nullable Method getMethod(
+        @Nonnull Class<?> cls,
+        @Nonnull String name,
+        @Nonnull @RetainedParam Class<?>[] parameterTypes,
+        boolean searchDeclared,
+        boolean searchSuper
+    ) {
         try {
-            return type.getConstructor(parameterTypes);
+            return cls.getMethod(name, parameterTypes);
+        } catch (NoSuchMethodException e) {
+            if (searchDeclared) {
+                try {
+                    return cls.getDeclaredMethod(name, parameterTypes);
+                } catch (NoSuchMethodException ex) {
+                    if (!searchSuper) {
+                        return null;
+                    }
+                    // Searches super class:
+                    Class<?> superclass = cls.getSuperclass();
+                    if (superclass != null) {
+                        Method result = getMethod(superclass, name, parameterTypes, true, true);
+                        if (result != null) {
+                            return result;
+                        }
+                    }
+                    // Searches interfaces:
+                    Class<?>[] interfaces = cls.getInterfaces();
+                    for (Class<?> anInterface : interfaces) {
+                        Method result = getMethod(anInterface, name, parameterTypes, true, true);
+                        if (result != null) {
+                            return result;
+                        }
+                    }
+                }
+            }
+
+        }
+        return null;
+    }
+
+    /**
+     * Returns the constructor of the given class with the specified parameter types, or {@code null} if not found.
+     * <p>
+     * This method searches via {@link Class#getConstructor(Class[])}. If not found, then
+     * {@link Class#getDeclaredConstructor(Class[])} will be used next.
+     *
+     * @param cls            the given class
+     * @param parameterTypes the specified parameter types
+     * @return the constructor of the given class with the specified parameter types, or {@code null} if not found
+     */
+    public static @Nullable Constructor<?> getConstructor(
+        @Nonnull Class<?> cls,
+        @Nonnull @RetainedParam Class<?>[] parameterTypes
+    ) {
+        return getConstructor(cls, parameterTypes, true);
+    }
+
+    /**
+     * Returns the constructor of the given class with the specified parameter types, or {@code null} if not found.
+     * <p>
+     * This method searches via {@link Class#getConstructor(Class[])}. If not found and the {@code searchDeclared} is
+     * true, then {@link Class#getDeclaredConstructor(Class[])} will be used next.
+     *
+     * @param cls            the given class
+     * @param parameterTypes the specified parameter types
+     * @param searchDeclared specifies whether searches declared constructors
+     * @return the constructor of the given class with the specified parameter types, or {@code null} if not found
+     */
+    public static @Nullable Constructor<?> getConstructor(
+        @Nonnull Class<?> cls,
+        @Nonnull @RetainedParam Class<?>[] parameterTypes,
+        boolean searchDeclared
+    ) {
+        try {
+            return cls.getConstructor(parameterTypes);
         } catch (NoSuchMethodException e) {
             if (!searchDeclared) {
                 return null;
             }
             try {
-                return type.getDeclaredConstructor(parameterTypes);
+                return cls.getDeclaredConstructor(parameterTypes);
             } catch (NoSuchMethodException ex) {
                 return null;
             }
@@ -410,37 +329,31 @@ public class JieReflect {
     }
 
     /**
-     * Returns new instance for given class name.
+     * Returns a new instance for the given class name with the empty constructor, may be {@code null} if fails.
      * <p>
-     * This method first uses {@link #classForName(String, ClassLoader)} to load given class, then call
-     * {@link #newInstance(Class)} to create instance.
-     * <p>
-     * Returns {@code null} if failed.
+     * This method first uses {@link #classForName(String, ClassLoader)} to get the class of the given class name, then
+     * call {@link #newInstance(Class)} to create a new instance.
      *
-     * @param className given class name
-     * @param <T>       type of result
-     * @return a new instance of given class name with empty constructor or null
+     * @param className the given class name
+     * @param <T>       the instance's type
+     * @return a new instance for the given class name with the empty constructor, may be {@code null} if fails
      */
-    @Nullable
-    public static <T> T newInstance(String className) {
+    public static <T> @Nullable T newInstance(@Nonnull String className) {
         return newInstance(className, null);
     }
 
     /**
-     * Returns new instance for given class name.
+     * Returns a new instance for the given class name with the empty constructor, may be {@code null} if fails.
      * <p>
-     * This method first uses {@link #classForName(String, ClassLoader)} to load given class, then call
-     * {@link #newInstance(Class)} to create instance.
-     * <p>
-     * Returns {@code null} if failed.
+     * This method first uses {@link #classForName(String, ClassLoader)} to get the class of the given class name, then
+     * call {@link #newInstance(Class)} to create a new instance.
      *
-     * @param className given class name
-     * @param loader    given class loader, may be {@code null} if loaded by default loader
-     * @param <T>       type of result
-     * @return a new instance of given class name with empty constructor or null
+     * @param className the given class name
+     * @param loader    the given class loader, may be {@code null} if loaded by the default loader
+     * @param <T>       the instance's type
+     * @return a new instance for the given class name with the empty constructor, may be {@code null} if fails
      */
-    @Nullable
-    public static <T> T newInstance(String className, @Nullable ClassLoader loader) {
+    public static <T> @Nullable T newInstance(@Nonnull String className, @Nullable ClassLoader loader) {
         Class<?> cls = classForName(className, loader);
         if (cls == null) {
             return null;
@@ -449,14 +362,12 @@ public class JieReflect {
     }
 
     /**
-     * Creates a new instance of given type with empty constructor, may be {@code null} if failed.
+     * Returns a new instance for the given class with the empty constructor, may be {@code null} if fails.
      *
-     * @param type given type
-     * @param <T>  type of instance
-     * @return a new instance of given type with empty constructor or null
+     * @param <T> the instance's type
+     * @return a new instance for the given class with the empty constructor, may be {@code null} if fails
      */
-    @Nullable
-    public static <T> T newInstance(Class<?> type) {
+    public static <T> @Nullable T newInstance(@Nonnull Class<?> type) {
         try {
             Constructor<?> constructor = type.getConstructor();
             return newInstance(constructor);
@@ -466,15 +377,14 @@ public class JieReflect {
     }
 
     /**
-     * Creates a new instance with given constructor and arguments, may be {@code null} if failed.
+     * Creates a new instance with the given constructor and arguments, may be {@code null} if fails.
      *
-     * @param constructor given constructor
-     * @param args        arguments
-     * @param <T>         type of instance
-     * @return a new instance with given constructor and arguments
+     * @param constructor the given constructor
+     * @param args        the given arguments
+     * @param <T>         the instance's type
+     * @return a new instance with the given constructor and arguments, may be {@code null} if fails
      */
-    @Nullable
-    public static <T> T newInstance(Constructor<?> constructor, Object... args) {
+    public static <T> @Nullable T newInstance(@Nonnull Constructor<?> constructor, Object @Nonnull ... args) {
         try {
             return Jie.as(constructor.newInstance(args));
         } catch (Exception e) {
@@ -483,85 +393,76 @@ public class JieReflect {
     }
 
     /**
-     * Returns array class of given component type.
+     * Returns the array class whose component type is the specified type, may be {@code null} if fails. Note
+     * {@link TypeVariable} and {@link WildcardType} are unsupported.
      *
-     * @param componentType given component type
-     * @return array class of given component type
-     * @throws ReflectionException if any reflection problem occurs
+     * @param componentType the specified component type
+     * @return the array class whose component type is the specified type, may be {@code null} if fails
      */
-    public static Class<?> arrayClass(Type componentType) throws ReflectionException {
-        return arrayClass(componentType, null);
+    public static @Nullable Class<?> arrayClass(@Nonnull Type componentType) {
+        Class<?> componentClass = toRuntimeClass(componentType);
+        if (componentClass == null) {
+            return null;
+        }
+        String name = arrayClassName(componentClass);
+        if (name == null) {
+            return null;
+        }
+        return classForName(name, componentClass.getClassLoader());
     }
 
     /**
-     * Returns array class of given component type with specified class loader.
+     * Returns the array class name whose component type is the specified type, may be {@code null} if fails.
      *
-     * @param componentType given component type
-     * @param classLoader   specified class loader
-     * @return array class of given component type
-     * @throws ReflectionException if any reflection problem occurs
+     * @param componentType the specified component type
+     * @return the array class name whose component type is the specified type, may be {@code null} if fails
      */
-    public static Class<?> arrayClass(
-        Type componentType, @Nullable ClassLoader classLoader
-    ) throws ReflectionException {
-        if (componentType instanceof Class) {
-            String name = arrayClassName((Class<?>) componentType);
-            return classForName(name, classLoader);
-        }
-        if (componentType instanceof ParameterizedType) {
-            return arrayClass(((ParameterizedType) componentType).getRawType(), classLoader);
-        }
-        if (componentType instanceof GenericArrayType) {
-            StringBuilder name = new StringBuilder();
-            Type cur = componentType;
-            do {
-                name.append("[");
-                if (cur instanceof GenericArrayType) {
-                    cur = ((GenericArrayType) cur).getGenericComponentType();
-                } else if (cur instanceof Class) {
-                    name.append("L").append(((Class<?>) cur).getName()).append(";");
-                    break;
-                } else if (cur instanceof ParameterizedType) {
-                    name.append("L").append(((Class<?>) ((ParameterizedType) cur).getRawType()).getName()).append(";");
-                    break;
-                } else {
-                    throw new ReflectionException("Illegal component type: " + componentType);
-                }
-            } while (true);
-            return classForName(name.toString(), classLoader);
-        }
-        throw new ReflectionException("Illegal component type: " + componentType);
-    }
-
-    /**
-     * Returns array class name of which component type is specified type.
-     *
-     * @param componentType specified component type
-     * @return array class name of which component type is specified type
-     * @throws ReflectionException if any reflection problem occurs
-     */
-    public static String arrayClassName(Class<?> componentType) throws ReflectionException {
+    public static @Nullable String arrayClassName(@Nonnull Class<?> componentType) {
         if (componentType.isArray()) {
             return "[" + componentType.getName();
         }
         if (componentType.isPrimitive()) {
-            String name = PRIMITIVE_ARRAY_CLASS_NAMES.get(componentType);
-            if (name != null) {
-                return name;
-            }
-            // void
-            throw new ReflectionException("Array class doesn't exists: " + componentType.getName() + ".");
+            // No void[]
+            return PRIMITIVE_ARRAY_CLASS_NAMES.get(componentType);
         }
         return "[L" + componentType.getName() + ";";
     }
 
     /**
-     * Returns wrapper class if given class is primitive, else return itself.
+     * Returns the runtime class of the given type, may be {@code null} if fails. Note {@link TypeVariable} and
+     * {@link WildcardType} are unsupported.
      *
-     * @param cls given class
-     * @return wrapper class if given class is primitive, else return itself
+     * @param type the given type
+     * @return the runtime class of the given type, may be {@code null} if fails
      */
-    public static Class<?> wrapper(Class<?> cls) {
+    public static @Nullable Class<?> toRuntimeClass(@Nonnull Type type) {
+        if (type instanceof Class) {
+            return (Class<?>) type;
+        }
+        if (type instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) type;
+            Type rawType = parameterizedType.getRawType();
+            return toRuntimeClass(rawType);
+        }
+        if (type instanceof GenericArrayType) {
+            GenericArrayType arrayType = (GenericArrayType) type;
+            Type componentType = arrayType.getGenericComponentType();
+            Class<?> componentClass = toRuntimeClass(componentType);
+            if (componentClass == null) {
+                return null;
+            }
+            return arrayClass(componentClass);
+        }
+        return null;
+    }
+
+    /**
+     * Returns the wrapper class if the given class is primitive, else return the given class itself.
+     *
+     * @param cls the given class
+     * @return the wrapper class if the given class is primitive, else return the given class itself
+     */
+    public static @Nonnull Class<?> wrapperClass(@Nonnull Class<?> cls) {
         if (!cls.isPrimitive()) {
             return cls;
         }
@@ -573,41 +474,43 @@ public class JieReflect {
         if (wrapper != null) {
             return wrapper;
         }
-        throw new NotPrimitiveException(cls);
+        throw new UnreachablePointException("Unknown primitive type: " + cls + ".");
     }
 
     /**
-     * Returns whether current runtime exists the class specified by given class name.
+     * Returns whether the current runtime exists the class specified by the given class name and loaded by the default
+     * class loader.
      *
-     * @param className given class name
-     * @return whether current runtime exists the class specified by given class name
+     * @param className the given class name
+     * @return whether the current runtime exists the class specified by the given class name and loaded by the default
+     * class loader
      */
-    public static boolean classExists(String className) {
+    public static boolean classExists(@Nonnull String className) {
         return classExists(className, null);
     }
 
     /**
-     * Returns whether current runtime exists the class specified by given class name and loaded by given class loader.
+     * Returns whether the current runtime exists the class specified by the given class name and loaded by the given
+     * class loader.
      *
-     * @param className given class name
-     * @param loader    given class loader, may be {@code null} if loaded by default loader
-     * @return whether current runtime exists the class specified by given class name and loaded by given class loader
+     * @param className the given class name
+     * @param loader    the given class loader, may be {@code null} if loaded by the default loader
+     * @return whether the current runtime exists the class specified by the given class name and loaded by the given
+     * class loader
      */
-    public static boolean classExists(String className, @Nullable ClassLoader loader) {
+    public static boolean classExists(@Nonnull String className, @Nullable ClassLoader loader) {
         return classForName(className, loader) != null;
     }
 
     /**
-     * Returns the Class object associated with the class or interface with the given string name. This method calls
-     * {@link Class#forName(String)} if given class loader is {@code null}, or
-     * {@link Class#forName(String, boolean, ClassLoader)} if it is not {@code null}.
+     * Returns the {@link Class} object whose name is the given name. This method calls {@link Class#forName(String)} if
+     * the given class loader is {@code null}, or {@link Class#forName(String, boolean, ClassLoader)} if not.
      *
-     * @param name   name of class or interface
-     * @param loader given class loader, may be {@code null} if loaded by default loader
-     * @return the Class object associated with the class or interface with the given string name
+     * @param name   the given name of the class or interface
+     * @param loader the given class loader, may be {@code null}
+     * @return the {@link Class} object whose name is the given name
      */
-    @Nullable
-    public static Class<?> classForName(String name, @Nullable ClassLoader loader) {
+    public static @Nullable Class<?> classForName(@Nonnull String name, @Nullable ClassLoader loader) {
         try {
             return loader == null ? Class.forName(name) : Class.forName(name, true, loader);
         } catch (ClassNotFoundException e) {
@@ -624,7 +527,7 @@ public class JieReflect {
      * @param assignee the assignee type
      * @return whether a type can be assigned by another type
      */
-    public static boolean isAssignable(Type assigned, Type assignee) {
+    public static boolean isAssignable(@Nonnull Type assigned, @Nonnull Type assignee) {
         return TypePattern.defaultPattern().isAssignable(assigned, assignee);
     }
 
@@ -646,31 +549,44 @@ public class JieReflect {
      * Typically, the given type is same with or subtype of the specified raw type. And this method returns an empty
      * list if failed to get actual type arguments.
      *
-     * @param type    given type
-     * @param rawType specified raw type
+     * @param type     given type
+     * @param baseType specified raw type
      * @return a list to describe the generalized representation of the given type from the specified raw type
      */
-    public static List<Type> getActualTypeArguments(Type type, Class<?> rawType) {
-        boolean supportedType = false;
-        if (type instanceof Class<?>) {
-            supportedType = true;
-            Class<?> subType = (Class<?>) type;
-            if (!rawType.isAssignableFrom(subType)) {
-                return Collections.emptyList();
-            }
+    public static @Nonnull List<Type> resolveActualTypeArguments(
+        @Nonnull Type type, @Nonnull Class<?> baseType
+    ) throws ReflectionException {
+        Class<?> cls = toRuntimeClass(type);
+        if (cls == null) {
+            throw new ReflectionException("Unsupported type: " + type + ".");
         }
-        if (type instanceof ParameterizedType) {
-            supportedType = true;
-            ParameterizedType subType = (ParameterizedType) type;
-            Class<?> subRawType = (Class<?>) subType.getRawType();
-            if (!rawType.isAssignableFrom(subRawType)) {
-                return Collections.emptyList();
-            }
+        if (!baseType.isAssignableFrom(cls)) {
+            throw new ReflectionException("Unsupported resolving between " + type + " and " + baseType);
         }
-        if (!supportedType) {
-            return Collections.emptyList();
-        }
-        TypeVariable<?>[] typeParameters = rawType.getTypeParameters();
+
+        // boolean supportedType = false;
+        // if (type instanceof Class<?>) {
+        //     supportedType = true;
+        //     Class<?> subType = (Class<?>) type;
+        //     if (!baseType.isAssignableFrom(subType)) {
+        //         throw new ReflectionException(
+        //             type.getTypeName() + " is not subtype of " + baseType.getTypeName() + "."
+        //         );
+        //     }
+        // }
+        // if (type instanceof ParameterizedType) {
+        //     supportedType = true;
+        //     ParameterizedType subType = (ParameterizedType) type;
+        //     Class<?> subRawType = (Class<?>) subType.getRawType();
+        //     if (!baseType.isAssignableFrom(subRawType)) {
+        //         return Collections.emptyList();
+        //     }
+        // }
+        // if (!supportedType) {
+        //     return Collections.emptyList();
+        // }
+
+        TypeVariable<?>[] typeParameters = baseType.getTypeParameters();
         if (JieArray.isEmpty(typeParameters)) {
             return Collections.emptyList();
         }

@@ -36,7 +36,7 @@ public abstract class TypeRef<T> {
                 return parameterizedSuper.getActualTypeArguments()[0];
             }
         }
-        List<Type> typeArgs = JieReflect.getActualTypeArguments(genericSuper, TypeRef.class);
+        List<Type> typeArgs = JieReflect.resolveActualTypeArguments(genericSuper, TypeRef.class);
         return get0(typeArgs);
     }
 

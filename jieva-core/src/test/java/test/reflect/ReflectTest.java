@@ -123,12 +123,12 @@ public class ReflectTest {
         assertEquals(JieReflect.getMethod(Inner.class, "m1", Jie.array(int.class)), m1);
         assertEquals(JieReflect.getMethod(Inner.class, "m2", Jie.array()), m2);
 
-        assertNull(JieReflect.getField(JieType.other(), "1"));
+        //assertNull(JieReflect.getField(JieType.other(), "1"));
         assertNull(JieReflect.getField(Inner.class, "1"));
-        assertNull(JieReflect.searchField(Inner.class, "1", false));
-        assertNull(JieReflect.getMethod(JieType.other(), "1", Jie.array()));
+        assertNull(JieReflect.getField(Inner.class, "1", false, false));
+        //assertNull(JieReflect.getMethod(JieType.other(), "1", Jie.array()));
         assertNull(JieReflect.getMethod(Inner.class, "1", Jie.array()));
-        assertNull(JieReflect.getMethod(Inner.class, "1", Jie.array(), false));
+        assertNull(JieReflect.getMethod(Inner.class, "1", Jie.array(), false, false));
 
         Constructor<?> c1 = Inner.class.getConstructor();
         Constructor<?> c2 = Inner.class.getConstructor(int.class, String.class);
@@ -186,16 +186,16 @@ public class ReflectTest {
 
     @Test
     public void testWrapper() throws Exception {
-        assertEquals(JieReflect.wrapper(boolean.class), Boolean.class);
-        assertEquals(JieReflect.wrapper(byte.class), Byte.class);
-        assertEquals(JieReflect.wrapper(short.class), Short.class);
-        assertEquals(JieReflect.wrapper(char.class), Character.class);
-        assertEquals(JieReflect.wrapper(int.class), Integer.class);
-        assertEquals(JieReflect.wrapper(long.class), Long.class);
-        assertEquals(JieReflect.wrapper(float.class), Float.class);
-        assertEquals(JieReflect.wrapper(double.class), Double.class);
-        assertEquals(JieReflect.wrapper(void.class), Void.class);
-        assertEquals(JieReflect.wrapper(Object.class), Object.class);
+        assertEquals(JieReflect.wrapperClass(boolean.class), Boolean.class);
+        assertEquals(JieReflect.wrapperClass(byte.class), Byte.class);
+        assertEquals(JieReflect.wrapperClass(short.class), Short.class);
+        assertEquals(JieReflect.wrapperClass(char.class), Character.class);
+        assertEquals(JieReflect.wrapperClass(int.class), Integer.class);
+        assertEquals(JieReflect.wrapperClass(long.class), Long.class);
+        assertEquals(JieReflect.wrapperClass(float.class), Float.class);
+        assertEquals(JieReflect.wrapperClass(double.class), Double.class);
+        assertEquals(JieReflect.wrapperClass(void.class), Void.class);
+        assertEquals(JieReflect.wrapperClass(Object.class), Object.class);
 
         // exception
         Method wrapperPrimitive = JieReflect.class.getDeclaredMethod("wrapperPrimitive", Class.class);
@@ -229,7 +229,7 @@ public class ReflectTest {
     }
 
     private void doTestActualTypeArgs(Type type, Class<?> rawType, Type... args) {
-        List<Type> argsList = JieReflect.getActualTypeArguments(type, rawType);
+        List<Type> argsList = JieReflect.resolveActualTypeArguments(type, rawType);
         assertEquals(argsList.size(), args.length);
         for (int i = 0; i < argsList.size(); i++) {
             assertEquals(argsList.get(i), args[i]);

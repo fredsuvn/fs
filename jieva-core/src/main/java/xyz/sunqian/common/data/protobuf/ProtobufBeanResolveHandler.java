@@ -78,7 +78,7 @@ public class ProtobufBeanResolveHandler implements DataSchemaParser.Handler {
         if (field.isMapField()) {
             String name = rawName + "Map";
             Method getterMethod = rawClass.getMethod("get" + JieString.capitalize(name));
-            List<Type> argsTypes = JieReflect.getActualTypeArguments(getterMethod.getGenericReturnType(), Map.class);
+            List<Type> argsTypes = JieReflect.resolveActualTypeArguments(getterMethod.getGenericReturnType(), Map.class);
             if (JieCollect.isEmpty(argsTypes)) {
                 throw new BeanException("Cannot get actual argument type for " + getterMethod.getGenericReturnType() + ".");
             }
@@ -106,7 +106,7 @@ public class ProtobufBeanResolveHandler implements DataSchemaParser.Handler {
         if (field.isRepeated()) {
             String name = rawName + "List";
             Method getterMethod = rawClass.getMethod("get" + JieString.capitalize(name));
-            List<Type> argsTypes = JieReflect.getActualTypeArguments(getterMethod.getGenericReturnType(), List.class);
+            List<Type> argsTypes = JieReflect.resolveActualTypeArguments(getterMethod.getGenericReturnType(), List.class);
             if (JieCollect.isEmpty(argsTypes)) {
                 throw new BeanException("Cannot get actual argument type for " + getterMethod.getGenericReturnType() + ".");
             }

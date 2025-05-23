@@ -230,7 +230,7 @@ public class CollectionMappingHandler implements Mapper.Handler {
             return null;
         }
         if (type instanceof ParameterizedType) {
-            List<Type> sourceComponent = JieReflect.getActualTypeArguments(type, Iterable.class);
+            List<Type> sourceComponent = JieReflect.resolveActualTypeArguments(type, Iterable.class);
             if (JieCollect.isEmpty(sourceComponent)) {
                 return null;
             }
