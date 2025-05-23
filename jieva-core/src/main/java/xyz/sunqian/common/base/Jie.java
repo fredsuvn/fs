@@ -237,54 +237,35 @@ public class Jie {
     }
 
     /**
-     * Returns result of equaling follows:
-     * <ul>
-     *     <li>
-     *         returns {@code Objects.equals} for given objects if they are not arrays;
-     *     </li>
-     *     <li>
-     *         if given objects are arrays of which types are same primitive type, returns {@code Arrays.equals} for them;
-     *     </li>
-     *     <li>
-     *         if given objects are object array, returns {@code Arrays.deepEquals} for them;
-     *     </li>
-     *     <li>
-     *         else returns {@code Objects.equals} for given objects;
-     *     </li>
-     * </ul>
-     * This method is same as: {@code equals(a, b, true, true)}.
+     * Returns whether the given objects are equal. If the given objects are arrays, uses {@code Arrays.equals} or
+     * {@code Arrays.deepEquals} if necessary.
+     * <p>
+     * This method is equivalent to ({@link #equalsWith(Object, Object, boolean, boolean)}):
+     * {@code equalsWith(a, b, true, true)}.
      *
-     * @param a given object a
-     * @param b given object b
-     * @return the result of equaling
+     * @param a the given object a
+     * @param b the given object b
+     * @return whether the given objects are equal
      */
     public static boolean equals(@Nullable Object a, @Nullable Object b) {
         return equalsWith(a, b, true, true);
     }
 
     /**
-     * Returns whether given objects are equals each other by {@link #equals(Object, Object)}. It is equivalent to:
-     * <pre>
-     *     for (int i = 0; i < objs.length - 2; i++) {
-     *         if (!equals(objs[i], objs[i + 1])) {
-     *             return false;
-     *         }
-     *     }
-     *     return true;
-     * </pre>
+     * Returns whether the given objects are equal each other by {@link #equals(Object, Object)}.
      *
-     * @param objs given objects
-     * @return the result of equaling
+     * @param objects the given objects
+     * @return whether the given objects are equal
      */
-    public static boolean equals(Object... objs) {
-        if (objs.length <= 1) {
+    public static boolean equals(Object @Nonnull ... objects) {
+        if (objects.length <= 1) {
             return true;
         }
-        if (objs.length == 2) {
-            return equals(objs[0], objs[1]);
+        if (objects.length == 2) {
+            return equals(objects[0], objects[1]);
         }
-        for (int i = 0; i < objs.length - 1; i++) {
-            if (!equals(objs[i], objs[i + 1])) {
+        for (int i = 0; i < objects.length - 1; i++) {
+            if (!equals(objects[i], objects[i + 1])) {
                 return false;
             }
         }
@@ -292,68 +273,61 @@ public class Jie {
     }
 
     /**
-     * Returns result of equaling follows:
+     * Returns whether the given objects are equal. This method follows the following logic:
      * <ul>
      *     <li>
-     *         if given objects are arrays of which types are same primitive type and {@code arrayCheck} is {@code true},
-     *         returns {@code Arrays.equals} for them;
-     *     </li>
-     *     <li>if given objects are object array and both {@code arrayCheck} and {@code deepEquals} are {@code true},
-     *     returns {@code Arrays.deepEquals} for them;
+     *         If {@code a == b}, returns {@code true};
      *     </li>
      *     <li>
-     *         if given objects are object array and {@code arrayCheck} is {@code true} and {@code deepEquals} is
-     *         {@code false}, returns {@code Arrays.equals} for them;
+     *         If the {@code arrayEquals} is {@code true}:
+     *         <ul>
+     *             <li>
+     *                 If the {@code deep} is {@code true}, uses {@code Arrays.deepEquals} for them. Otherwise, uses
+     *                 {@code Arrays.equals}.
+     *             </li>
+     *         </ul>
      *     </li>
      *     <li>
-     *         else returns {@code Objects.equals} for given objects,
+     *         Returns {@link Objects#equals(Object, Object)} otherwise.
      *     </li>
      * </ul>
      *
-     * @param a          given object a
-     * @param b          given object b
-     * @param arrayCheck the array-check
-     * @param deepEquals whether deep-equals
-     * @return the result of equaling
+     * @param a           the given object a
+     * @param b           the given object b
+     * @param arrayEquals the arrayEquals option
+     * @param deep        the deep option
+     * @return whether the given objects are equal
      */
-    public static boolean equalsWith(@Nullable Object a, @Nullable Object b, boolean arrayCheck, boolean deepEquals) {
-        if (a == null && b == null) {
+    public static boolean equalsWith(@Nullable Object a, @Nullable Object b, boolean arrayEquals, boolean deep) {
+        if (a == b) {
             return true;
         }
         if (a == null || b == null) {
             return false;
         }
-        if (!arrayCheck) {
+        if (!arrayEquals) {
             return Objects.equals(a, b);
         }
         Class<?> typeA = a.getClass();
         Class<?> typeB = b.getClass();
         if (typeA.isArray() && typeB.isArray()) {
             if (a instanceof Object[] && b instanceof Object[]) {
-                return deepEquals ? Arrays.deepEquals((Object[]) a, (Object[]) b) : Arrays.equals((Object[]) a, (Object[]) b);
-            }
-            if (a instanceof boolean[] && b instanceof boolean[]) {
+                return deep ? Arrays.deepEquals((Object[]) a, (Object[]) b) : Arrays.equals((Object[]) a, (Object[]) b);
+            } else if (a instanceof boolean[] && b instanceof boolean[]) {
                 return Arrays.equals((boolean[]) a, (boolean[]) b);
-            }
-            if (a instanceof byte[] && b instanceof byte[]) {
+            } else if (a instanceof byte[] && b instanceof byte[]) {
                 return Arrays.equals((byte[]) a, (byte[]) b);
-            }
-            if (a instanceof short[] && b instanceof short[]) {
+            } else if (a instanceof short[] && b instanceof short[]) {
                 return Arrays.equals((short[]) a, (short[]) b);
-            }
-            if (a instanceof char[] && b instanceof char[]) {
+            } else if (a instanceof char[] && b instanceof char[]) {
                 return Arrays.equals((char[]) a, (char[]) b);
-            }
-            if (a instanceof int[] && b instanceof int[]) {
+            } else if (a instanceof int[] && b instanceof int[]) {
                 return Arrays.equals((int[]) a, (int[]) b);
-            }
-            if (a instanceof long[] && b instanceof long[]) {
+            } else if (a instanceof long[] && b instanceof long[]) {
                 return Arrays.equals((long[]) a, (long[]) b);
-            }
-            if (a instanceof float[] && b instanceof float[]) {
+            } else if (a instanceof float[] && b instanceof float[]) {
                 return Arrays.equals((float[]) a, (float[]) b);
-            }
-            if (a instanceof double[] && b instanceof double[]) {
+            } else if (a instanceof double[] && b instanceof double[]) {
                 return Arrays.equals((double[]) a, (double[]) b);
             }
         }

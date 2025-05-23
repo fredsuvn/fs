@@ -15,12 +15,114 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
 
 public class JieTest {
 
     @Test
-    public void shortcutTest() throws Exception {
+    public void testEquals() {
+        assertTrue(Jie.equals("", ""));
+        assertFalse(Jie.equals("", null));
+        assertFalse(Jie.equals(null, ""));
+        assertFalse(Jie.equals("1", "2"));
+        assertFalse(Jie.equals(new boolean[]{true}, ""));
+        assertFalse(Jie.equalsWith(new boolean[]{true}, new boolean[]{true}, false, false));
+        assertTrue(Jie.equals("", "", ""));
+        assertFalse(Jie.equals("1", "2", "3"));
+        assertTrue(Jie.equals(new Object[]{"", ""}));
+        assertFalse(Jie.equals(new Object[]{"1", "2"}));
+        assertTrue(Jie.equals());
+
+        // boolean
+        assertTrue(Jie.equals(new boolean[]{true}, new boolean[]{true}));
+        assertFalse(Jie.equals(new boolean[]{true}, new byte[]{1}));
+        assertFalse(Jie.equals(new boolean[]{true}, new short[]{1}));
+        assertFalse(Jie.equals(new boolean[]{true}, new char[]{1}));
+        assertFalse(Jie.equals(new boolean[]{true}, new int[]{1}));
+        assertFalse(Jie.equals(new boolean[]{true}, new long[]{1}));
+        assertFalse(Jie.equals(new boolean[]{true}, new float[]{1}));
+        assertFalse(Jie.equals(new boolean[]{true}, new double[]{1}));
+
+        // byte
+        assertFalse(Jie.equals(new byte[]{1}, new boolean[]{true}));
+        assertTrue(Jie.equals(new byte[]{1}, new byte[]{1}));
+        assertFalse(Jie.equals(new byte[]{1}, new short[]{1}));
+        assertFalse(Jie.equals(new byte[]{1}, new char[]{1}));
+        assertFalse(Jie.equals(new byte[]{1}, new int[]{1}));
+        assertFalse(Jie.equals(new byte[]{1}, new long[]{1}));
+        assertFalse(Jie.equals(new byte[]{1}, new float[]{1}));
+        assertFalse(Jie.equals(new byte[]{1}, new double[]{1}));
+
+        // short
+        assertFalse(Jie.equals(new short[]{1}, new boolean[]{true}));
+        assertFalse(Jie.equals(new short[]{1}, new byte[]{1}));
+        assertTrue(Jie.equals(new short[]{1}, new short[]{1}));
+        assertFalse(Jie.equals(new short[]{1}, new char[]{1}));
+        assertFalse(Jie.equals(new short[]{1}, new int[]{1}));
+        assertFalse(Jie.equals(new short[]{1}, new long[]{1}));
+        assertFalse(Jie.equals(new short[]{1}, new float[]{1}));
+        assertFalse(Jie.equals(new short[]{1}, new double[]{1}));
+
+        // char
+        assertFalse(Jie.equals(new char[]{1}, new boolean[]{true}));
+        assertFalse(Jie.equals(new char[]{1}, new byte[]{1}));
+        assertFalse(Jie.equals(new char[]{1}, new short[]{1}));
+        assertTrue(Jie.equals(new char[]{1}, new char[]{1}));
+        assertFalse(Jie.equals(new char[]{1}, new int[]{1}));
+        assertFalse(Jie.equals(new char[]{1}, new long[]{1}));
+        assertFalse(Jie.equals(new char[]{1}, new float[]{1}));
+        assertFalse(Jie.equals(new char[]{1}, new double[]{1}));
+
+        // int
+        assertFalse(Jie.equals(new int[]{1}, new boolean[]{true}));
+        assertFalse(Jie.equals(new int[]{1}, new byte[]{1}));
+        assertFalse(Jie.equals(new int[]{1}, new short[]{1}));
+        assertFalse(Jie.equals(new int[]{1}, new char[]{1}));
+        assertTrue(Jie.equals(new int[]{1}, new int[]{1}));
+        assertFalse(Jie.equals(new int[]{1}, new long[]{1}));
+        assertFalse(Jie.equals(new int[]{1}, new float[]{1}));
+        assertFalse(Jie.equals(new int[]{1}, new double[]{1}));
+
+        // long
+        assertFalse(Jie.equals(new long[]{1}, new boolean[]{true}));
+        assertFalse(Jie.equals(new long[]{1}, new byte[]{1}));
+        assertFalse(Jie.equals(new long[]{1}, new short[]{1}));
+        assertFalse(Jie.equals(new long[]{1}, new char[]{1}));
+        assertFalse(Jie.equals(new long[]{1}, new int[]{1}));
+        assertTrue(Jie.equals(new long[]{1}, new long[]{1}));
+        assertFalse(Jie.equals(new long[]{1}, new float[]{1}));
+        assertFalse(Jie.equals(new long[]{1}, new double[]{1}));
+
+        // float
+        assertFalse(Jie.equals(new float[]{1}, new boolean[]{true}));
+        assertFalse(Jie.equals(new float[]{1}, new byte[]{1}));
+        assertFalse(Jie.equals(new float[]{1}, new short[]{1}));
+        assertFalse(Jie.equals(new float[]{1}, new char[]{1}));
+        assertFalse(Jie.equals(new float[]{1}, new int[]{1}));
+        assertFalse(Jie.equals(new float[]{1}, new long[]{1}));
+        assertTrue(Jie.equals(new float[]{1}, new float[]{1}));
+        assertFalse(Jie.equals(new float[]{1}, new double[]{1}));
+
+        // double
+        assertFalse(Jie.equals(new double[]{1}, new boolean[]{true}));
+        assertFalse(Jie.equals(new double[]{1}, new byte[]{1}));
+        assertFalse(Jie.equals(new double[]{1}, new short[]{1}));
+        assertFalse(Jie.equals(new double[]{1}, new char[]{1}));
+        assertFalse(Jie.equals(new double[]{1}, new int[]{1}));
+        assertFalse(Jie.equals(new double[]{1}, new long[]{1}));
+        assertFalse(Jie.equals(new double[]{1}, new float[]{1}));
+        assertTrue(Jie.equals(new double[]{1}, new double[]{1}));
+
+        // object
+        assertFalse(Jie.equals(new Object[]{1}, new boolean[]{true}));
+        assertTrue(Jie.equalsWith(new Object[]{1}, new Object[]{1}, true, true));
+        assertFalse(Jie.equalsWith(new Object[]{new Object[]{1}}, new Object[]{new Object[]{1}}, true, false));
+    }
+
+    @Test
+    public void testShortcut() throws Exception {
         {
             // collection
             Integer[] array = {1, 2, 3, 4};
@@ -51,14 +153,21 @@ public class JieTest {
         }
         {
             // task
-            Jie.run(() -> {});
+            Jie.run(() -> {
+            });
             Jie.run(() -> 1);
-            Jie.schedule(() -> {}, Duration.ofMillis(1));
+            Jie.schedule(() -> {
+            }, Duration.ofMillis(1));
             Jie.schedule(() -> 1, Duration.ofMillis(1));
-            Jie.scheduleAt(() -> {}, Instant.now().plusMillis(1));
+            Jie.scheduleAt(() -> {
+            }, Instant.now().plusMillis(1));
             Jie.scheduleAt(() -> 1, Instant.now().plusMillis(1));
-            Jie.scheduleWithRate(() -> {throw new RuntimeException();}, Duration.ofMillis(1), Duration.ofMillis(1));
-            Jie.scheduleWithDelay(() -> {throw new RuntimeException();}, Duration.ofMillis(1), Duration.ofMillis(1));
+            Jie.scheduleWithRate(() -> {
+                throw new RuntimeException();
+            }, Duration.ofMillis(1), Duration.ofMillis(1));
+            Jie.scheduleWithDelay(() -> {
+                throw new RuntimeException();
+            }, Duration.ofMillis(1), Duration.ofMillis(1));
         }
     }
 
