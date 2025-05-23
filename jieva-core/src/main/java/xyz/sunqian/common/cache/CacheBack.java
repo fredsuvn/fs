@@ -16,26 +16,26 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 
-final class RefBack {
+final class CacheBack {
 
     private static final RefGenerator WEAK_GENERATOR = WeakRef::new;
     private static final RefGenerator SOFT_GENERATOR = SoftRef::new;
     private static final RefGenerator PHANTOM_GENERATOR = PhantomRef::new;
     private static final RefGenerator STRONG_GENERATOR = StrongRef::new;
 
-    static <K, V> SimpleCache<K, V> ofWeak() {
+    static <K, V> @Nonnull SimpleCache<K, V> ofWeak() {
         return new QueueRefCache<>(WEAK_GENERATOR);
     }
 
-    static <K, V> SimpleCache<K, V> ofSoft() {
+    static <K, V> @Nonnull SimpleCache<K, V> ofSoft() {
         return new QueueRefCache<>(SOFT_GENERATOR);
     }
 
-    static <K, V> SimpleCache<K, V> ofPhantom() {
+    static <K, V> @Nonnull SimpleCache<K, V> ofPhantom() {
         return new QueueRefCache<>(PHANTOM_GENERATOR);
     }
 
-    static <K, V> SimpleCache<K, V> ofStrong() {
+    static <K, V> @Nonnull SimpleCache<K, V> ofStrong() {
         return new StrongRefCache<>(STRONG_GENERATOR);
     }
 
