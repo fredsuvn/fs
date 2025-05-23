@@ -125,7 +125,7 @@ public class ReflectTest {
 
         assertNull(JieReflect.getField(JieType.other(), "1"));
         assertNull(JieReflect.getField(Inner.class, "1"));
-        assertNull(JieReflect.getField(Inner.class, "1", false));
+        assertNull(JieReflect.searchField(Inner.class, "1", false));
         assertNull(JieReflect.getMethod(JieType.other(), "1", Jie.array()));
         assertNull(JieReflect.getMethod(Inner.class, "1", Jie.array()));
         assertNull(JieReflect.getMethod(Inner.class, "1", Jie.array(), false));

@@ -1,6 +1,7 @@
 package xyz.sunqian.common.reflect;
 
 import xyz.sunqian.annotations.Immutable;
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.OutParam;
 import xyz.sunqian.common.base.Jie;
@@ -25,14 +26,16 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * This is a static utilities class provides utilities for {@code reflection}.
+ * Static utility class for reflection.
  *
- * @author fredsuvn
+ * @author sunqian
  */
 public class JieReflect {
 
@@ -59,34 +62,27 @@ public class JieReflect {
         double.class, "[D"
     );
 
-    private static final SimpleCache<Type, Map<TypeVariable<?>, Type>> TYPE_PARAMETER_MAPPING_CACHE = SimpleCache.ofSoft();
-
     /**
-     * Returns last name of given class. The last name is sub-string after last dot, for example:
-     * <p>
-     * {@code String} is last name of {@code java.lang.String}.
+     * Returns the last name of the given class. The last name is sub-string after last dot. For example: {@code String}
+     * is last name of {@code java.lang.String}.
      *
-     * @param cls given class
-     * @return last name of given class
+     * @param cls the given class
+     * @return the last name of given class
      */
-    public static String getLastName(Class<?> cls) {
+    public static @Nonnull String getLastName(@Nonnull Class<?> cls) {
         String name = cls.getName();
         int index = JieString.lastIndexOf(name, ".");
-        if (index < 0) {
-            return name;
-        }
         return name.substring(index + 1);
     }
 
     /**
-     * Returns raw type of given type, the given type must be a {@link Class} or {@link ParameterizedType}. Returns null
-     * if given type neither be {@link Class} nor {@link ParameterizedType}.
+     * Returns the raw type of the given type. the given type must be a {@link Class} or {@link ParameterizedType}.
+     * Returns {@code null} if the given type neither be {@link Class} nor {@link ParameterizedType}.
      *
-     * @param type given type
-     * @return raw type of given type or null
+     * @param type the given type
+     * @return the raw type of given type or {@code null}
      */
-    @Nullable
-    public static Class<?> getRawType(Type type) {
+    public static @Nullable Class<?> getRawType(@Nonnull Type type) {
         if (type instanceof Class) {
             return (Class<?>) type;
         }
@@ -97,13 +93,13 @@ public class JieReflect {
     }
 
     /**
-     * Returns first upper bound type of given wildcard type (? extends). Note that if no upper bound is explicitly
-     * declared, return {@code Object.class}.
+     * Returns the first upper bound type of the given wildcard type ({@code ? extends}). Note that if no upper bound is
+     * explicitly declared, returns {@code Object.class}.
      *
-     * @param type given wildcard type
-     * @return first upper bound type of given wildcard type
+     * @param type the given wildcard type
+     * @return the first upper bound type of the given wildcard type
      */
-    public static Type getUpperBound(WildcardType type) {
+    public static @Nonnull Type getUpperBound(@Nonnull WildcardType type) {
         Type[] upperBounds = type.getUpperBounds();
         if (JieArray.isNotEmpty(upperBounds)) {
             return upperBounds[0];
@@ -112,13 +108,13 @@ public class JieReflect {
     }
 
     /**
-     * Returns first lower bound type of given wildcard type (? super). If given type has no lower bound, return null.
+     * Returns the first lower bound type of the given wildcard type ({@code ? super}). If given type has no lower
+     * bound, returns {@code null}.
      *
-     * @param type given wildcard type
-     * @return first lower bound type of given wildcard type or null
+     * @param type the given wildcard type
+     * @return the first lower bound type of the given wildcard type or {@code null}
      */
-    @Nullable
-    public static Type getLowerBound(WildcardType type) {
+    public static @Nullable Type getLowerBound(@Nonnull WildcardType type) {
         Type[] lowerBounds = type.getLowerBounds();
         if (JieArray.isNotEmpty(lowerBounds)) {
             return lowerBounds[0];
@@ -127,13 +123,13 @@ public class JieReflect {
     }
 
     /**
-     * Returns first bound type of given type variable (T extends). Note that if no upper bound is explicitly declared,
-     * return {@code Object.class}.
+     * Returns the first bound type of the given type variable ({@code T extends}). Note that if no upper bound is
+     * explicitly declared, returns {@code Object.class}.
      *
-     * @param type given type variable
-     * @return first upper bound type of given type variable
+     * @param type the given type variable
+     * @return the first upper bound type of the given type variable
      */
-    public static Type getFirstBound(TypeVariable<?> type) {
+    public static @Nonnull Type getFirstBound(@Nonnull TypeVariable<?> type) {
         Type[] bounds = type.getBounds();
         if (JieArray.isNotEmpty(bounds)) {
             return bounds[0];
@@ -142,130 +138,17 @@ public class JieReflect {
     }
 
     /**
-     * Searches and returns field of specified name from given type, returns {@code null} for searching failed. This
-     * method is equivalent to ({@link #getField(Type, String, boolean)}):
-     * <pre>
-     *     return getField(type, name, true);
-     * </pre>
+     * Returns the super classes as {@link Iterator} for the given class.
      *
-     * @param type given type
-     * @param name specified field name
-     * @return field of specified name from given type
+     * @param cls the given class
+     * @return the super classes as {@link Iterator} for the given class
      */
-    @Nullable
-    public static Field getField(Type type, String name) {
-        return getField(type, name, true);
-    }
+    public static @Nonnull Iterator<Class<?>> getSuperTypes(@Nonnull Class<?> cls) {
+        return new Iterator<Class<?>>() {
 
-    /**
-     * Searches and returns field of specified name from given type.
-     * <p>
-     * The searching in order of {@link Class#getField(String)} then {@link Class#getDeclaredField(String)}. if
-     * {@code searchSuper} is true, and if searching failed in current type, this method will recursively call
-     * {@link Class#getGenericSuperclass()} to search super types, if still not found, recursively call
-     * {@link Class#getGenericInterfaces()}.
-     * <p>
-     * Returns {@code null} for searching failed.
-     *
-     * @param type        given type
-     * @param name        specified field name
-     * @param searchSuper whether recursively searches super types
-     * @return field of specified name from given type
-     */
-    @Nullable
-    public static Field getField(Type type, String name, boolean searchSuper) {
-        Class<?> rawType = getRawType(type);
-        if (rawType == null) {
-            return null;
-        }
-        try {
-            return rawType.getField(name);
-        } catch (NoSuchFieldException e) {
-            try {
-                return rawType.getDeclaredField(name);
-            } catch (NoSuchFieldException ex) {
-                if (!searchSuper) {
-                    return null;
-                }
-                Iterator<Type> superTypes = getSuperTypes(rawType);
-                while (superTypes.hasNext()) {
-                    Field f = getField(superTypes.next(), name, true);
-                    if (f != null) {
-                        return f;
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Searches and returns method of specified name and parameter types from given type. returns {@code null} for
-     * searching failed. This method is equivalent to ({@link #getMethod(Type, String, Class[], boolean)}):
-     * <pre>
-     *     return getMethod(type, name, parameterTypes, true);
-     * </pre>
-     *
-     * @param type           given type
-     * @param name           specified field name
-     * @param parameterTypes specified parameter types
-     * @return method of specified name and parameter types from given type
-     */
-    @Nullable
-    public static Method getMethod(Type type, String name, Class<?>[] parameterTypes) {
-        return getMethod(type, name, parameterTypes, true);
-    }
-
-    /**
-     * Searches and returns method of specified name and parameter types from given type.
-     * <p>
-     * The searching in order of {@link Class#getMethod(String, Class[])} then
-     * {@link Class#getDeclaredMethod(String, Class[])}. if {@code searchSuper} is true, and if searching failed in
-     * current type, this method will recursively call {@link Class#getGenericSuperclass()} to search super types, if
-     * still not found, recursively call {@link Class#getGenericInterfaces()}.
-     * <p>
-     * Returns {@code null} for searching failed.
-     *
-     * @param type           given type
-     * @param name           specified field name
-     * @param parameterTypes specified parameter types
-     * @param searchSuper    whether recursively searches super types
-     * @return method of specified name and parameter types from given type
-     */
-    @Nullable
-    public static Method getMethod(Type type, String name, Class<?>[] parameterTypes, boolean searchSuper) {
-        Class<?> rawType = getRawType(type);
-        if (rawType == null) {
-            return null;
-        }
-        try {
-            return rawType.getMethod(name, parameterTypes);
-        } catch (NoSuchMethodException e) {
-            try {
-                return rawType.getDeclaredMethod(name, parameterTypes);
-            } catch (NoSuchMethodException ex) {
-                if (!searchSuper) {
-                    return null;
-                }
-                Iterator<Type> superTypes = getSuperTypes(rawType);
-                while (superTypes.hasNext()) {
-                    Method m = getMethod(superTypes.next(), name, parameterTypes, true);
-                    if (m != null) {
-                        return m;
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    @Nullable
-    private static Iterator<Type> getSuperTypes(Class<?> rawType) {
-        return new Iterator<Type>() {
-
-            private @Nullable Type[] superInters = null;
+            private @Nullable Class<?>[] superInters = null;
             private int cur = -2;
-            private @Nullable Type next = getNext();
+            private @Nullable Class<?> next = getNext();
 
             @Override
             public boolean hasNext() {
@@ -273,23 +156,25 @@ public class JieReflect {
             }
 
             @Override
-            public Type next() {
-                Type result = next;
+            public Class<?> next() {
+                if (next == null) {
+                    throw new NoSuchElementException();
+                }
+                Class<?> result = next;
                 next = getNext();
                 return result;
             }
 
-            @Nullable
-            private Type getNext() {
+            private @Nullable Class<?> getNext() {
                 if (cur == -2) {
                     cur++;
-                    Type superClass = rawType.getGenericSuperclass();
+                    Class<?> superClass = cls.getSuperclass();
                     if (superClass != null) {
                         return superClass;
                     }
                 }
                 if (cur == -1) {
-                    superInters = rawType.getGenericInterfaces();
+                    superInters = cls.getInterfaces();
                     if (JieArray.isEmpty(superInters)) {
                         return null;
                     }
@@ -303,34 +188,210 @@ public class JieReflect {
         };
     }
 
+    private static final class SuperTypesIterator implements Iterator<Class<?>> {
+
+        private @Nullable SuperDeclaration declaration;
+
+        private SuperTypesIterator(@Nonnull Class<?> cls) {
+            this.declaration = getSuperDeclaration(cls);
+        }
+
+        @Override
+        public boolean hasNext() {
+            return declaration != null;
+        }
+
+        @Override
+        public Class<?> next() {
+            SuperDeclaration declaration = this.declaration;
+            if (declaration == null) {
+                throw new NoSuchElementException();
+            }
+            if (declaration.index == -1) {
+                declaration.index++;
+                if (declaration.superclass != null) {
+                    return declaration.superclass;
+                }
+            }
+            if (declaration.index < declaration.interfaces.length) {
+                return declaration.interfaces[declaration.index++];
+            }
+            return null;
+        }
+
+        private @Nullable SuperDeclaration getSuperDeclaration(@Nonnull Class<?> cls) {
+            if (Jie.equals(cls, Object.class)) {
+                return null;
+            }
+            Class<?> superclass = cls.getSuperclass();
+            Class<?>[] interfaces = cls.getInterfaces();
+            return new SuperDeclaration(superclass, interfaces);
+        }
+
+        private static final class SuperDeclaration {
+
+            private final @Nullable Class<?> superclass;
+            private final @Nonnull Class<?>[] interfaces;
+            private int index = -1;
+
+            private SuperDeclaration(Class<?> superclass, Class<?>[] interfaces) {
+                this.superclass = superclass;
+                this.interfaces = interfaces;
+            }
+        }
+    }
+
     /**
-     * Searches and returns constructor of specified parameter types from given type. returns {@code null} for searching
-     * failed. This method is equivalent to ({@link #getConstructor(Class, Class[], boolean)}):
-     * <pre>
-     *     return getConstructor(type, parameterTypes, true);
-     * </pre>
+     * Searches and returns the field of the specified name from the given type, or returns {@code null} for searching
+     * failed. This method is equivalent to ({@link #searchField(Type, String, boolean)}):
+     * <pre>{@code
+     * return getField(type, name, true);
+     * }</pre>
      *
-     * @param type           given type
-     * @param parameterTypes specified parameter types
-     * @return method of specified name and parameter types from given type
+     * @param type the given type
+     * @param name the specified field name
+     * @return the field of the specified name from the given type
      */
-    @Nullable
-    public static Constructor<?> getConstructor(Class<?> type, Class<?>[] parameterTypes) {
+    public static @Nullable Field getField(@Nonnull Type type, @Nonnull String name) {
+        return searchField(type, name, true);
+    }
+
+    /**
+     * Searches and returns the field of the specified name from the given type.
+     * <p>
+     * The searching in order of {@link Class#getField(String)} then {@link Class#getDeclaredField(String)}. If
+     * {@code searchSuper} is true and the searching is failed in current type, this method will recursively call
+     * {@link Class#getGenericSuperclass()} to search super types. If still not found, recursively call
+     * {@link Class#getGenericInterfaces()}.
+     * <p>
+     * Returns {@code null} for searching failed.
+     *
+     * @param type        the given type
+     * @param name        the specified field name
+     * @param searchSuper whether recursively searches super types
+     * @return the field of the specified name from the given type
+     */
+    public static @Nullable Field searchField(@Nonnull Type type, @Nonnull String name, boolean searchSuper) {
+        Class<?> rawType = getRawType(type);
+        if (rawType == null) {
+            return null;
+        }
+        try {
+            return rawType.getField(name);
+        } catch (NoSuchFieldException e) {
+            try {
+                return rawType.getDeclaredField(name);
+            } catch (NoSuchFieldException ex) {
+                if (!searchSuper) {
+                    return null;
+                }
+                Iterator<Class<?>> superTypes = getSuperTypes(rawType);
+                while (superTypes.hasNext()) {
+                    Field f = searchField(superTypes.next(), name, true);
+                    if (f != null) {
+                        return f;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Searches and returns the method of the specified name and parameter types from the given type. returns
+     * {@code null} for searching failed. This method is equivalent to
+     * ({@link #getMethod(Type, String, Class[], boolean)}):
+     * <pre>{@code
+     * return getMethod(type, name, parameterTypes, true);
+     * }</pre>
+     *
+     * @param type           the given type
+     * @param name           the specified field name
+     * @param parameterTypes the specified parameter types
+     * @return the method of the specified name and parameter types from the given type
+     */
+    public static @Nullable Method getMethod(
+        @Nonnull Type type,
+        @Nonnull String name,
+        @Nonnull Class<?>[] parameterTypes
+    ) {
+        return getMethod(type, name, parameterTypes, true);
+    }
+
+    /**
+     * Searches and returns the method of the specified name and parameter types from the given type.
+     * <p>
+     * The searching in order of {@link Class#getMethod(String, Class[])} then
+     * {@link Class#getDeclaredMethod(String, Class[])}. if {@code searchSuper} is true, and if searching failed in
+     * current type, this method will recursively call {@link Class#getGenericSuperclass()} to search super types. If
+     * still not found, recursively call {@link Class#getGenericInterfaces()}.
+     * <p>
+     * Returns {@code null} for searching failed.
+     *
+     * @param type           the given type
+     * @param name           the specified field name
+     * @param parameterTypes the specified parameter types
+     * @param searchSuper    whether recursively searches super types
+     * @return the method of the specified name and parameter types from the given type
+     */
+    public static @Nullable Method getMethod(
+        @Nonnull Type type,
+        @Nonnull String name,
+        @Nonnull Class<?>[] parameterTypes,
+        boolean searchSuper
+    ) {
+        Class<?> rawType = getRawType(type);
+        if (rawType == null) {
+            return null;
+        }
+        try {
+            return rawType.getMethod(name, parameterTypes);
+        } catch (NoSuchMethodException e) {
+            try {
+                return rawType.getDeclaredMethod(name, parameterTypes);
+            } catch (NoSuchMethodException ex) {
+                if (!searchSuper) {
+                    return null;
+                }
+                Iterator<Class<?>> superTypes = getSuperTypes(rawType);
+                while (superTypes.hasNext()) {
+                    Method m = getMethod(superTypes.next(), name, parameterTypes, true);
+                    if (m != null) {
+                        return m;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Searches and returns the constructor of the specified parameter types from the given type. returns {@code null}
+     * for searching failed. This method is equivalent to ({@link #getConstructor(Class, Class[], boolean)}):
+     * <pre>{@code
+     * return getConstructor(type, parameterTypes, true);
+     * }</pre>
+     *
+     * @param type           the given type
+     * @param parameterTypes the specified parameter types
+     * @return the constructor of the specified parameter types from the given type
+     */
+    public static @Nullable Constructor<?> getConstructor(Class<?> type, Class<?>[] parameterTypes) {
         return getConstructor(type, parameterTypes, true);
     }
 
     /**
-     * Searches and returns constructor of specified parameter types from given type.
+     * Searches and returns the constructor of the specified parameter types from the given type.
      * <p>
      * The method uses {@link Class#getConstructor(Class[])} to find the constructor. If searching failed and
      * {@code searchDeclared} is true, this method will try {@link Class#getDeclaredConstructor(Class[])}.
      * <p>
      * Returns {@code null} for searching failed.
      *
-     * @param type           given type
-     * @param parameterTypes specified parameter types
-     * @param searchDeclared whether searches declare constructors
-     * @return constructor of specified parameter types from given type
+     * @param type           the given type
+     * @param parameterTypes the specified parameter types
+     * @param searchDeclared whether searches declared constructors
+     * @return the constructor of the specified parameter types from the given type
      */
     @Nullable
     public static Constructor<?> getConstructor(Class<?> type, Class<?>[] parameterTypes, boolean searchDeclared) {
@@ -651,7 +712,7 @@ public class JieReflect {
      */
     @Immutable
     public static Map<TypeVariable<?>, Type> getTypeParameterMapping(Type type) {
-        return TYPE_PARAMETER_MAPPING_CACHE.get(type, it -> {
+        return TypeParameterCache.get(type, it -> {
             Map<TypeVariable<?>, Type> result = new HashMap<>();
             getTypeParameterMapping(type, result);
             return Collections.unmodifiableMap(result);
@@ -848,5 +909,17 @@ public class JieReflect {
             }
         }
         return type;
+    }
+
+    private static final class TypeParameterCache {
+
+        private static final @Nonnull SimpleCache<Type, Map<TypeVariable<?>, Type>> cache = SimpleCache.ofSoft();
+
+        private static @Nonnull Map<TypeVariable<?>, Type> get(
+            @Nonnull Type type,
+            @Nonnull Function<@Nonnull Type, @Nonnull Map<@Nonnull TypeVariable<?>, @Nonnull Type>> producer
+        ) {
+            return Objects.requireNonNull(cache.get(type, producer));
+        }
     }
 }
