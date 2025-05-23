@@ -2,9 +2,9 @@ package xyz.sunqian.common.task;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.Jie;
 
 import java.time.Duration;
-import java.util.Objects;
 
 /**
  * Base task receipt interface of {@link TaskReceipt} and {@link VoidReceipt}.
@@ -48,8 +48,8 @@ interface BaseTaskReceipt {
      */
     default boolean isCancelled() {
         TaskState state = getState();
-        return Objects.equals(state, TaskState.CANCELED)
-            || Objects.equals(state, TaskState.CANCELED_EXECUTING);
+        return Jie.equals(state, TaskState.CANCELED)
+            || Jie.equals(state, TaskState.CANCELED_EXECUTING);
     }
 
     /**

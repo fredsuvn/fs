@@ -1,9 +1,6 @@
 package test.utils;
 
-
 import xyz.sunqian.common.base.Jie;
-
-import java.util.Objects;
 
 public class Utils {
 
@@ -11,8 +8,8 @@ public class Utils {
         Jie.until(() -> {
             StackTraceElement[] traceElements = thread.getStackTrace();
             for (StackTraceElement traceElement : traceElements) {
-                if (Objects.equals(className, traceElement.getClassName())
-                    && Objects.equals(methodName, traceElement.getMethodName())) {
+                if (Jie.equals(className, traceElement.getClassName())
+                    && Jie.equals(methodName, traceElement.getMethodName())) {
                     return true;
                 }
             }

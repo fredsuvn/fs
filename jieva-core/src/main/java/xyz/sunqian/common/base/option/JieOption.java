@@ -5,8 +5,6 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.collect.JieArray;
 
-import java.util.Objects;
-
 /**
  * Static utility class for {@link Option}.
  *
@@ -31,7 +29,7 @@ public class JieOption {
             return null;
         }
         for (Option<?, ?> option : options) {
-            if (option != null && Objects.equals(option.key(), key)) {
+            if (option != null && Jie.equals(option.key(), key)) {
                 return Jie.as(option);
             }
         }

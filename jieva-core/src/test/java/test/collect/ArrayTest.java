@@ -1,10 +1,10 @@
 package test.collect;
 
 import org.testng.annotations.Test;
+import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.collect.JieArray;
 
 import java.util.List;
-import java.util.Objects;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -145,12 +145,12 @@ public class ArrayTest {
     public void testIndexOf() {
         // Test object array
         Integer[] objArray = {1, 2, 3, 4, 5, 3, 2, 1};
-        assertEquals(JieArray.indexOf(objArray, (i, t) -> Objects.equals(t, 3)), 2);
-        assertEquals(JieArray.indexOf(objArray, (i, t) -> Objects.equals(t, 6)), -1);
-        assertEquals(JieArray.indexOf(objArray, (i, t) -> Objects.equals(t, 1)), 0);
-        assertEquals(JieArray.lastIndexOf(objArray, (i, t) -> Objects.equals(t, 3)), 5);
-        assertEquals(JieArray.lastIndexOf(objArray, (i, t) -> Objects.equals(t, 6)), -1);
-        assertEquals(JieArray.lastIndexOf(objArray, (i, t) -> Objects.equals(t, 1)), 7);
+        assertEquals(JieArray.indexOf(objArray, (i, t) -> Jie.equals(t, 3)), 2);
+        assertEquals(JieArray.indexOf(objArray, (i, t) -> Jie.equals(t, 6)), -1);
+        assertEquals(JieArray.indexOf(objArray, (i, t) -> Jie.equals(t, 1)), 0);
+        assertEquals(JieArray.lastIndexOf(objArray, (i, t) -> Jie.equals(t, 3)), 5);
+        assertEquals(JieArray.lastIndexOf(objArray, (i, t) -> Jie.equals(t, 6)), -1);
+        assertEquals(JieArray.lastIndexOf(objArray, (i, t) -> Jie.equals(t, 1)), 7);
 
         // Test int array
         int[] intArray = {1, 2, 3, 4, 5, 3, 2, 1};

@@ -1,6 +1,7 @@
 package test.collect;
 
 import org.testng.annotations.Test;
+import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.collect.JieMap;
 
 import java.util.ArrayList;
@@ -10,7 +11,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotSame;
@@ -78,7 +78,7 @@ public class MapTest {
         assertEquals(strMap1, JieMap.toMap(Arrays.asList("1", "2", "3", "4", "5", "6")));
         Map<String, String> strMap2 = JieMap.toMap(
             intMap,
-            k -> Objects.equals(k, 5) ? "3" : k.toString(),
+            k -> Jie.equals(k, 5) ? "3" : k.toString(),
             Object::toString
         );
         assertEquals(strMap2, JieMap.toMap(Arrays.asList("1", "2", "3", "6")));
