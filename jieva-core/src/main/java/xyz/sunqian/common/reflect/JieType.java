@@ -29,7 +29,7 @@ public class JieType {
      * @param actualTypeArgs actual type arguments
      * @return a {@link ParameterizedType}
      */
-    public static ParameterizedType parameterized(Class<?> rawType, Type[] actualTypeArgs) {
+    public static ParameterizedType parameterized(Type rawType, Type[] actualTypeArgs) {
         return parameterized(rawType, actualTypeArgs, null);
     }
 
@@ -40,7 +40,7 @@ public class JieType {
      * @param actualTypeArgs actual type arguments
      * @return a {@link ParameterizedType}
      */
-    public static ParameterizedType parameterized(Class<?> rawType, Iterable<Type> actualTypeArgs) {
+    public static ParameterizedType parameterized(Type rawType, Iterable<Type> actualTypeArgs) {
         return parameterized(rawType, JieCollect.toArray(actualTypeArgs, Type.class));
     }
 
@@ -55,7 +55,7 @@ public class JieType {
      * @param ownerType      given owner type
      * @return a {@link ParameterizedType}
      */
-    public static ParameterizedType parameterized(Class<?> rawType, Type[] actualTypeArgs, @Nullable Type ownerType) {
+    public static ParameterizedType parameterized(Type rawType, Type[] actualTypeArgs, @Nullable Type ownerType) {
         return new ParameterizedTypeImpl(rawType, actualTypeArgs, ownerType);
     }
 
@@ -68,7 +68,7 @@ public class JieType {
      * @return a {@link ParameterizedType}
      */
     public static ParameterizedType parameterized(
-        Class<?> rawType, Iterable<Type> actualTypeArgs, @Nullable Type ownerType) {
+        Type rawType, Iterable<Type> actualTypeArgs, @Nullable Type ownerType) {
         return parameterized(rawType, JieCollect.toArray(actualTypeArgs, Type.class), ownerType);
     }
 
@@ -147,13 +147,13 @@ public class JieType {
         private final Type[] actualTypeArguments;
         private final @Nullable Type ownerType;
 
-        private ParameterizedTypeImpl(Class<?> rawType, Type[] actualTypeArguments, @Nullable Type ownerType) {
-            this.rawType = rawType;
+        private ParameterizedTypeImpl(Type rawType, Type[] actualTypeArguments, @Nullable Type ownerType) {
+            this.rawType = (Class<?>) rawType;
             this.actualTypeArguments = actualTypeArguments;
             if (ownerType != null) {
                 this.ownerType = ownerType;
             } else {
-                this.ownerType = rawType.getDeclaringClass();
+                this.ownerType = this.rawType.getDeclaringClass();
             }
         }
 

@@ -272,7 +272,7 @@ public class DataObjectTest {
     @Test
     public void testExtra() {
         Map<TypeVariable<?>, Type> extra =
-            JieReflect.getTypeParameterMapping(new TypeRef<TestExtra<String>>() {}.getType());
+            JieReflect.mapTypeParameters(new TypeRef<TestExtra<String>>() {}.getType());
         Map<TypeVariable<?>, Type> empty = Collections.emptyMap();
         DataSchema b1 = DataSchema.get(new TypeRef<TestExtra<String>>() {}.getType());
         DataSchema b2 = JieDataObject.withExtraTypeVariableMapping(DataSchema.get(TestExtra.class), extra);
@@ -287,7 +287,7 @@ public class DataObjectTest {
         assertEquals(b4, b3);
         assertEquals(b4.getProperty("tt"), b4.getProperty("tt"));
         DataSchema b5 = JieDataObject.withExtraTypeVariableMapping(DataSchema.get(TestExtra.class),
-            JieReflect.getTypeParameterMapping(new TypeRef<TestExtra2<String>>() {}.getType()));
+            JieReflect.mapTypeParameters(new TypeRef<TestExtra2<String>>() {}.getType()));
         assertEquals(b5, b3);
         assertEquals(b5.getProperty("tt"), b3.getProperty("tt"));
 

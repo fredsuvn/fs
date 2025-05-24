@@ -117,7 +117,7 @@ public abstract class AbstractDataSchemaHandler implements DataSchemaParser.Hand
         }
 
         // Builds property base for each property info.
-        Map<TypeVariable<?>, Type> typeParameterMapping = JieReflect.getTypeParameterMapping(context.getType());
+        Map<TypeVariable<?>, Type> typeParameterMapping = JieReflect.mapTypeParameters(context.getType());
         Set<Type> stack = new HashSet<>();
         propertyInfoMap.forEach((propertyName, propertyInfo) -> {
             Method getter = propertyInfo.getGetter();

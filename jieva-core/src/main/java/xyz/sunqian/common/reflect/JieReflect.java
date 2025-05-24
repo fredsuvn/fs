@@ -1,6 +1,5 @@
 package xyz.sunqian.common.reflect;
 
-import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.OutParam;
@@ -8,10 +7,9 @@ import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.base.exception.UnreachablePointException;
-import xyz.sunqian.common.cache.SimpleCache;
 import xyz.sunqian.common.collect.JieArray;
-import xyz.sunqian.common.collect.JieCollect;
 import xyz.sunqian.common.collect.JieMap;
+import xyz.sunqian.common.collect.JieStream;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -21,7 +19,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -70,9 +66,13 @@ public class JieReflect {
      * @return the last name of given class
      */
     public static @Nonnull String getLastName(@Nonnull Class<?> cls) {
-        String name = cls.getName();
-        int index = JieString.lastIndexOf(name, ".");
-        return name.substring(index + 1);
+        String className = cls.getName();
+        return getLastName(className);
+    }
+
+    private static @Nonnull String getLastName(@Nonnull String className) {
+        int index = JieString.lastIndexOf(className, ".");
+        return className.substring(index + 1);
     }
 
     /**
@@ -221,7 +221,7 @@ public class JieReflect {
     public static @Nullable Method getMethod(
         @Nonnull Class<?> cls,
         @Nonnull String name,
-        @Nonnull @RetainedParam Class<?>[] parameterTypes
+        @Nonnull @RetainedParam Class<?> @Nonnull [] parameterTypes
     ) {
         return getMethod(cls, name, parameterTypes, true, true);
     }
@@ -244,7 +244,7 @@ public class JieReflect {
     public static @Nullable Method getMethod(
         @Nonnull Class<?> cls,
         @Nonnull String name,
-        @Nonnull @RetainedParam Class<?>[] parameterTypes,
+        @Nonnull @RetainedParam Class<?> @Nonnull [] parameterTypes,
         boolean searchDeclared,
         boolean searchSuper
     ) {
@@ -293,7 +293,7 @@ public class JieReflect {
      */
     public static @Nullable Constructor<?> getConstructor(
         @Nonnull Class<?> cls,
-        @Nonnull @RetainedParam Class<?>[] parameterTypes
+        @Nonnull @RetainedParam Class<?> @Nonnull [] parameterTypes
     ) {
         return getConstructor(cls, parameterTypes, true);
     }
@@ -311,7 +311,7 @@ public class JieReflect {
      */
     public static @Nullable Constructor<?> getConstructor(
         @Nonnull Class<?> cls,
-        @Nonnull @RetainedParam Class<?>[] parameterTypes,
+        @Nonnull @RetainedParam Class<?> @Nonnull [] parameterTypes,
         boolean searchDeclared
     ) {
         try {
@@ -400,15 +400,7 @@ public class JieReflect {
      * @return the array class whose component type is the specified type, may be {@code null} if fails
      */
     public static @Nullable Class<?> arrayClass(@Nonnull Type componentType) {
-        Class<?> componentClass = toRuntimeClass(componentType);
-        if (componentClass == null) {
-            return null;
-        }
-        String name = arrayClassName(componentClass);
-        if (name == null) {
-            return null;
-        }
-        return classForName(name, componentClass.getClassLoader());
+        return JdkBack.arrayClass(componentType);
     }
 
     /**
@@ -426,6 +418,35 @@ public class JieReflect {
             return PRIMITIVE_ARRAY_CLASS_NAMES.get(componentType);
         }
         return "[L" + componentType.getName() + ";";
+    }
+
+    /**
+     * Returns whether the given type is an array type.
+     *
+     * @param type the given type
+     * @return whether the given type is an array type
+     */
+    public static boolean isArray(@Nonnull Type type) {
+        if (type instanceof Class<?>) {
+            return ((Class<?>) type).isArray();
+        }
+        return type instanceof GenericArrayType;
+    }
+
+    /**
+     * Returns the component type of the given type if it is an array, {@code null} if it is not.
+     *
+     * @param type the given type
+     * @return the component type of the given type if it is an array, {@code null} if it is not
+     */
+    public static @Nullable Type getComponentType(@Nonnull Type type) {
+        if (type instanceof Class<?>) {
+            return ((Class<?>) type).getComponentType();
+        }
+        if (type instanceof GenericArrayType) {
+            return ((GenericArrayType) type).getGenericComponentType();
+        }
+        return null;
     }
 
     /**
@@ -532,30 +553,38 @@ public class JieReflect {
     }
 
     /**
-     * Return a list to describe the generalized representation of the given type from the specified raw type, each
-     * element of the list is actual type argument type of the raw type on given type. For example, for the types:
-     * <pre>
-     *     private static interface Z&lt;B, T, U, R&gt; {}
-     *     private static class ZS implements Z&lt;String, Integer, Long, Boolean&gt; {}
-     * </pre>
-     * The result of this method:
-     * <pre>
-     *     getActualTypeArguments(ZS.class, Z.class);
-     * </pre>
-     * will be:
-     * <pre>
-     *     [String.class, Integer.class, Long.class, Boolean.class]
-     * </pre>
-     * Typically, the given type is same with or subtype of the specified raw type. And this method returns an empty
-     * list if failed to get actual type arguments.
+     * Resolves and returns the actual type arguments of the given type, based on the type parameters of the specified
+     * base type, in order of those type parameters.
+     * <p>
+     * For example, here is a base type: {@code interface Base<A, B, C>}, and a subtype to be resolved:
+     * {@code class Sub implements Base<String, Integer, Long>}. The result of the
+     * {@code resolveActualTypeArguments(subtype, base)} will be the list of:
+     * {@code [String.class, Integer.class, Long.class]}.
+     * <p>
+     * The given type to be resolved must be a {@link Class}, {@link ParameterizedType} or array. If it is a
+     * {@link Class}, it must be a sub or same type of the base type; if it is a {@link ParameterizedType}, its raw type
+     * must be a sub or same type of the base type; if it is an array, the base type must also be an array, and this
+     * method calls itself with their component types.
+     * <p>
+     * Note this method does not guarantee that all type parameters can be resolved, and unresolved type parameters will
+     * be directly returned to the list at the corresponding index.
      *
-     * @param type     given type
-     * @param baseType specified raw type
-     * @return a list to describe the generalized representation of the given type from the specified raw type
+     * @param type     the given type to be resolved
+     * @param baseType the specified base type
+     * @return the actual type arguments of the given type, based on the type parameters of the specified base type, in
+     * order of those type parameters
+     * @throws ReflectionException if the given type cannot be resolved
      */
     public static @Nonnull List<Type> resolveActualTypeArguments(
         @Nonnull Type type, @Nonnull Class<?> baseType
     ) throws ReflectionException {
+        if (baseType.isArray()) {
+            Type componentType = getComponentType(type);
+            if (componentType == null) {
+                throw new ReflectionException("Unsupported resolving between " + type + " and " + baseType);
+            }
+            return resolveActualTypeArguments(componentType, baseType.getComponentType());
+        }
         Class<?> cls = toRuntimeClass(type);
         if (cls == null) {
             throw new ReflectionException("Unsupported type: " + type + ".");
@@ -563,279 +592,221 @@ public class JieReflect {
         if (!baseType.isAssignableFrom(cls)) {
             throw new ReflectionException("Unsupported resolving between " + type + " and " + baseType);
         }
-
-        // boolean supportedType = false;
-        // if (type instanceof Class<?>) {
-        //     supportedType = true;
-        //     Class<?> subType = (Class<?>) type;
-        //     if (!baseType.isAssignableFrom(subType)) {
-        //         throw new ReflectionException(
-        //             type.getTypeName() + " is not subtype of " + baseType.getTypeName() + "."
-        //         );
-        //     }
-        // }
-        // if (type instanceof ParameterizedType) {
-        //     supportedType = true;
-        //     ParameterizedType subType = (ParameterizedType) type;
-        //     Class<?> subRawType = (Class<?>) subType.getRawType();
-        //     if (!baseType.isAssignableFrom(subRawType)) {
-        //         return Collections.emptyList();
-        //     }
-        // }
-        // if (!supportedType) {
-        //     return Collections.emptyList();
-        // }
-
+        // Resolves:
         TypeVariable<?>[] typeParameters = baseType.getTypeParameters();
         if (JieArray.isEmpty(typeParameters)) {
             return Collections.emptyList();
         }
-        Map<TypeVariable<?>, Type> typeArguments = getTypeParameterMapping(type);
+        Map<TypeVariable<?>, Type> typeArguments = mapTypeParameters(type);
         Set<Type> stack = new HashSet<>();
-        return Arrays.stream(typeParameters)
-            .map(it -> {
-                Type nestedValue = JieMap.resolveChain(typeArguments, it, stack);
+        return JieStream.stream(typeParameters)
+            .map(typeVariable -> {
+                Type actualType = JieMap.resolveChain(typeArguments, typeVariable, stack);
                 stack.clear();
-                return nestedValue == null ? it : nestedValue;
-            }).collect(Collectors.toList());
+                return actualType == null ? typeVariable : actualType;
+            })
+            .collect(Collectors.toList());
     }
 
     /**
-     * Returns a type parameters mapping for given type, the key of mapping is type parameter, and the value is actual
-     * type argument or inherited type parameter. For example, for these types:
-     * <pre>
-     *     private static class X extends Y&lt;Integer, Long&gt;{}
-     *     private static class Y&lt;K, V&gt; implements Z&lt;Float, Double, V&gt; {}
-     *     private static interface Z&lt;T, U, R&gt;{}
-     * </pre>
-     * The result of this method
-     * <pre>
-     *     getTypeParameterMapping(x.class)
-     * </pre>
-     * will be:
-     * <pre>
-     *     T -&gt; Float
-     *     U -&gt; Double
-     *     R -&gt; V
-     *     K -&gt; Integer
-     *     V -&gt; Long
-     * </pre>
-     * It is recommended using {@link JieCollect#getRecursive(Map, Object, Set)} to get actual type of type variable in
-     * the result.
+     * Returns a map contains the mapping of type parameters for the given type, the key is type parameter, and the
+     * value is the actual type argument or inherited type parameter. For example, these types:
+     * <pre>{@code
+     *     class X extends Y<Integer, Long>
+     *     class Y<K, V> implements Z<Float, Double, V>
+     *     interface Z<T, U, R>
+     * }</pre>
+     * The result of {@code resolveTypeParameterMapping(X.class)} will be:
+     * <pre>{@code
+     *     T -> Float
+     *     U -> Double
+     *     R -> V
+     *     K -> Integer
+     *     V -> Long
+     * }</pre>
      *
-     * @param type given type
-     * @return a mapping of type parameters for given type
+     * @param type the given type
+     * @return a map contains the mapping of type parameters for the given type
      */
-    @Immutable
-    public static Map<TypeVariable<?>, Type> getTypeParameterMapping(Type type) {
-        return TypeParameterCache.get(type, it -> {
-            Map<TypeVariable<?>, Type> result = new HashMap<>();
-            getTypeParameterMapping(type, result);
-            return Collections.unmodifiableMap(result);
-        });
+    public static @Nonnull Map<@Nonnull TypeVariable<?>, @Nullable Type> mapTypeParameters(
+        @Nonnull Type type
+    ) {
+        Map<TypeVariable<?>, Type> result = new HashMap<>();
+        mapTypeParameters(type, result);
+        return result;
     }
 
-    private static void getTypeParameterMapping(Type type, @OutParam Map<TypeVariable<?>, Type> mapping) {
+    private static void mapTypeParameters(
+        @Nonnull Type type,
+        @Nonnull @OutParam Map<@Nonnull TypeVariable<?>, @Nullable Type> mapping
+    ) {
         if (type instanceof Class) {
             Class<?> cur = (Class<?>) type;
-            while (true) {
-                Type superType = cur.getGenericSuperclass();
-                if (superType != null) {
-                    mappingTypeVariables(superType, mapping);
+            while (cur != null) {
+                Type superclass = cur.getGenericSuperclass();
+                if (superclass != null) {
+                    mapTypeVariables(superclass, mapping);
                 }
-                mappingGenericInterfacesTypeArgs(cur, mapping);
+                Type[] interfaces = cur.getGenericInterfaces();
+                mapTypeVariables(interfaces, mapping);
                 cur = cur.getSuperclass();
-                if (cur == null) {
-                    return;
-                }
             }
         }
         if (type instanceof ParameterizedType) {
-            mappingTypeVariables(type, mapping);
-            getTypeParameterMapping(((ParameterizedType) type).getRawType(), mapping);
+            mapTypeVariables(type, mapping);
+            mapTypeParameters(((ParameterizedType) type).getRawType(), mapping);
         }
     }
 
-    private static void mappingGenericInterfacesTypeArgs(Class<?> cls, @OutParam Map<TypeVariable<?>, Type> mapping) {
-        Type[] genericInterfaces = cls.getGenericInterfaces();
-        if (JieArray.isEmpty(genericInterfaces)) {
+    private static void mapTypeVariables(
+        @Nonnull Type @Nonnull [] interfaces,
+        @Nonnull @OutParam Map<@Nonnull TypeVariable<?>, @Nullable Type> mapping
+    ) {
+        if (JieArray.isEmpty(interfaces)) {
             return;
         }
-        for (Type genericInterface : genericInterfaces) {
-            mappingTypeVariables(genericInterface, mapping);
-            Class<?> interfaceClass = getRawType(genericInterface);
-            // Never null for interfaceClass
-            mappingGenericInterfacesTypeArgs(interfaceClass, mapping);
+        for (Type anInterface : interfaces) {
+            mapTypeVariables(anInterface, mapping);
+            // never null
+            Class<?> rawClass = Objects.requireNonNull(getRawType(anInterface));
+            mapTypeVariables(rawClass.getGenericInterfaces(), mapping);
         }
     }
 
-    private static void mappingTypeVariables(Type type, @OutParam Map<TypeVariable<?>, Type> mapping) {
+    private static void mapTypeVariables(
+        @Nonnull Type type,
+        @Nonnull @OutParam Map<@Nonnull TypeVariable<?>, @Nullable Type> mapping
+    ) {
         if (!(type instanceof ParameterizedType)) {
             return;
         }
         ParameterizedType parameterizedType = (ParameterizedType) type;
-        Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+        Type[] typeArguments = parameterizedType.getActualTypeArguments();
         Class<?> rawClass = (Class<?>) parameterizedType.getRawType();
         TypeVariable<?>[] typeParameters = rawClass.getTypeParameters();
         for (int i = 0; i < typeParameters.length; i++) {
-            TypeVariable<?> typeVariable = typeParameters[i];
-            Type actualTypeArgument = actualTypeArguments[i];
-            mapping.put(typeVariable, actualTypeArgument);
+            TypeVariable<?> typeParameter = typeParameters[i];
+            Type typeArgument = typeArguments[i];
+            mapping.put(typeParameter, typeArgument);
         }
     }
 
     /**
-     * Replaces the types in given {@code type} (including itself) which equals to {@code matcher} with
-     * {@code replacement}. This method is equivalent to ({@link #replaceType(Type, Type, Type, boolean)}):
-     * <pre>
-     *     return replaceType(type, matcher, replacement, true);
-     * </pre>
-     *
-     * @param type        type to be replaced
-     * @param matcher     matcher type
-     * @param replacement replacement type
-     * @return type after replacing
-     */
-    public static Type replaceType(Type type, Type matcher, Type replacement) {
-        return replaceType(type, matcher, replacement, true);
-    }
-
-    /**
-     * Replaces the types in given {@code type} (including itself) which equals to {@code matcher} with
-     * {@code replacement}. This method supports:
-     * <ul>
-     *     <li>
-     *         ParameterizedType: rawType, ownerType, actualTypeArguments;
-     *     </li>
-     *     <li>
-     *         WildcardType: upperBounds, lowerBounds;
-     *     </li>
-     *     <li>
-     *         GenericArrayType: componentType;
-     *     </li>
-     * </ul>
-     * If the {@code deep} parameter is true, this method will recursively resolve unmatched types to replace.
+     * Resolves the given type and tries to replace the given type's contained types, which equals to the specified
+     * matching type, with the specified replacement. Returns the type after the replacing, may be the given type itself
+     * if no type can be replaced. For example, a type: {@code Map<String, Integer>}, the result of
+     * {@code replaceType(type, Integer.class, Long.class)} will be: {@code Map<String, Long>}. Note the given type
+     * itself can also be replaced.
      * <p>
-     * If no type is matched or the type is not supported for replacing, return given type itself.
+     * This method supports resolving {@link Class}, {@link ParameterizedType}, {@link WildcardType} and
+     * {@link GenericArrayType}.
      *
-     * @param type        type to be replaced
-     * @param matcher     matcher type
-     * @param replacement replacement type
-     * @param deep        whether to recursively replace unmatched types
-     * @return type after replacing
+     * @param type        the given type to be resolved
+     * @param matching    the specified matching type
+     * @param replacement the specified replacement
+     * @return the type after the replacing
      */
-    public static Type replaceType(Type type, Type matcher, Type replacement, boolean deep) {
-        if (Objects.equals(type, matcher)) {
+    public static @Nonnull Type replaceType(
+        @Nonnull Type type,
+        @Nonnull Type matching,
+        @Nonnull Type replacement
+    ) throws ReflectionException {
+        if (Jie.equals(type, matching)) {
             return replacement;
         }
-        boolean matched = false;
         if (type instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType) type;
-            Class<?> rawType = (Class<?>) parameterizedType.getRawType();
-            if (Objects.equals(rawType, matcher)) {
-                matched = true;
-                rawType = (Class<?>) replacement;
-            }
-            Type ownerType = parameterizedType.getOwnerType();
-            if (ownerType != null) {
-                if (Objects.equals(ownerType, matcher)) {
-                    matched = true;
-                    ownerType = replacement;
-                } else if (deep) {
-                    Type newOwnerType = replaceType(ownerType, matcher, replacement, true);
-                    if (!Objects.equals(ownerType, newOwnerType)) {
-                        matched = true;
-                        ownerType = newOwnerType;
-                    }
-                }
-            }
-            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-            for (int i = 0; i < actualTypeArguments.length; i++) {
-                Type actualTypeArgument = actualTypeArguments[i];
-                if (Objects.equals(actualTypeArgument, matcher)) {
-                    matched = true;
-                    actualTypeArguments[i] = replacement;
-                } else if (deep) {
-                    Type newActualTypeArgument = replaceType(actualTypeArgument, matcher, replacement, true);
-                    if (!Objects.equals(actualTypeArgument, newActualTypeArgument)) {
-                        matched = true;
-                        actualTypeArguments[i] = newActualTypeArgument;
-                    }
-                }
-            }
-            if (matched) {
-                return JieType.parameterized(rawType, actualTypeArguments, ownerType);
-            } else {
-                return type;
-            }
+            return replaceType((ParameterizedType) type, matching, replacement);
         }
         if (type instanceof WildcardType) {
-            WildcardType wildcardType = (WildcardType) type;
-            Type[] upperBounds = wildcardType.getUpperBounds();
-            for (int i = 0; i < upperBounds.length; i++) {
-                Type bound = upperBounds[i];
-                if (Objects.equals(bound, matcher)) {
-                    matched = true;
-                    upperBounds[i] = replacement;
-                } else if (deep) {
-                    Type newBound = replaceType(bound, matcher, replacement, true);
-                    if (!Objects.equals(bound, newBound)) {
-                        matched = true;
-                        upperBounds[i] = newBound;
-                    }
-                }
-            }
-            Type[] lowerBounds = wildcardType.getLowerBounds();
-            for (int i = 0; i < lowerBounds.length; i++) {
-                Type bound = lowerBounds[i];
-                if (Objects.equals(bound, matcher)) {
-                    matched = true;
-                    lowerBounds[i] = replacement;
-                } else if (deep) {
-                    Type newBound = replaceType(bound, matcher, replacement, true);
-                    if (!Objects.equals(bound, newBound)) {
-                        matched = true;
-                        lowerBounds[i] = newBound;
-                    }
-                }
-            }
-            if (matched) {
-                return JieType.wildcard(upperBounds, lowerBounds);
-            } else {
-                return type;
-            }
+            return replaceType((WildcardType) type, matching, replacement);
         }
         if (type instanceof GenericArrayType) {
-            GenericArrayType genericArrayType = (GenericArrayType) type;
-            Type componentType = genericArrayType.getGenericComponentType();
-            if (Objects.equals(componentType, matcher)) {
-                matched = true;
-                componentType = replacement;
-            } else if (deep) {
-                Type newComponentType = replaceType(componentType, matcher, replacement, true);
-                if (!Objects.equals(componentType, newComponentType)) {
-                    matched = true;
-                    componentType = newComponentType;
-                }
-            }
-            if (matched) {
-                return JieType.array(componentType);
-            } else {
-                return type;
-            }
+            return replaceType((GenericArrayType) type, matching, replacement);
         }
         return type;
     }
 
-    private static final class TypeParameterCache {
+    private static @Nonnull Type replaceType(
+        @Nonnull ParameterizedType type,
+        @Nonnull Type matching,
+        @Nonnull Type replacement
+    ) throws ReflectionException {
+        boolean matched = false;
+        Type rawType = type.getRawType();
+        Type newRawType = replaceType(rawType, matching, replacement);
+        if (!Jie.equals(rawType, newRawType)) {
+            matched = true;
+        }
+        Type ownerType = type.getOwnerType();
+        Type newOwnerType = null;
+        if (ownerType != null) {
+            newOwnerType = replaceType(ownerType, matching, replacement);
+            if (!Jie.equals(ownerType, newOwnerType)) {
+                matched = true;
+            }
+        }
+        Type[] actualTypeArguments = type.getActualTypeArguments();
+        for (int i = 0; i < actualTypeArguments.length; i++) {
+            Type actualTypeArgument = actualTypeArguments[i];
+            Type newActualTypeArgument = replaceType(actualTypeArgument, matching, replacement);
+            if (!Jie.equals(actualTypeArgument, newActualTypeArgument)) {
+                matched = true;
+                actualTypeArguments[i] = newActualTypeArgument;
+            }
+        }
+        if (matched) {
+            return JieType.parameterized(newRawType, actualTypeArguments, newOwnerType);
+        } else {
+            return type;
+        }
+    }
 
-        private static final @Nonnull SimpleCache<Type, Map<TypeVariable<?>, Type>> cache = SimpleCache.ofSoft();
+    private static @Nonnull Type replaceType(
+        @Nonnull WildcardType type,
+        @Nonnull Type matching,
+        @Nonnull Type replacement
+    ) throws ReflectionException {
+        boolean matched = false;
+        Type[] upperBounds = type.getUpperBounds();
+        for (int i = 0; i < upperBounds.length; i++) {
+            Type upperBound = upperBounds[i];
+            Type newUpperBound = replaceType(upperBound, matching, replacement);
+            if (!Jie.equals(upperBound, newUpperBound)) {
+                matched = true;
+                upperBounds[i] = newUpperBound;
+            }
+        }
+        Type[] lowerBounds = type.getLowerBounds();
+        for (int i = 0; i < lowerBounds.length; i++) {
+            Type lowerBound = lowerBounds[i];
+            Type newLowerBound = replaceType(lowerBound, matching, replacement);
+            if (!Jie.equals(lowerBound, newLowerBound)) {
+                matched = true;
+                lowerBounds[i] = newLowerBound;
+            }
+        }
+        if (matched) {
+            return JieType.wildcard(upperBounds, lowerBounds);
+        } else {
+            return type;
+        }
+    }
 
-        private static @Nonnull Map<TypeVariable<?>, Type> get(
-            @Nonnull Type type,
-            @Nonnull Function<@Nonnull Type, @Nonnull Map<@Nonnull TypeVariable<?>, @Nonnull Type>> producer
-        ) {
-            return Objects.requireNonNull(cache.get(type, producer));
+    private static @Nonnull Type replaceType(
+        @Nonnull GenericArrayType type,
+        @Nonnull Type matching,
+        @Nonnull Type replacement
+    ) throws ReflectionException {
+        boolean matched = false;
+        Type componentType = type.getGenericComponentType();
+        Type newComponentType = replaceType(componentType, matching, replacement);
+        if (!Jie.equals(componentType, newComponentType)) {
+            matched = true;
+        }
+        if (matched) {
+            return JieType.array(newComponentType);
+        } else {
+            return type;
         }
     }
 }
