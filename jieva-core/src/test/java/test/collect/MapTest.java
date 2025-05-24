@@ -6,6 +6,7 @@ import xyz.sunqian.common.collect.JieMap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -13,11 +14,26 @@ import java.util.List;
 import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotSame;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
 public class MapTest {
+
+    @Test
+    public void testEmpty() {
+        // Testing with empty map
+        assertTrue(JieMap.isEmpty(Collections.emptyMap()));
+        assertFalse(JieMap.isNotEmpty(Collections.emptyMap()));
+        // Testing with empty map
+        assertTrue(JieMap.isEmpty((Map<?, ?>) null));
+        assertFalse(JieMap.isNotEmpty((Map<?, ?>) null));
+        // Testing with non-empty map
+        assertFalse(JieMap.isEmpty(Collections.singletonMap("key", "value")));
+        assertTrue(JieMap.isNotEmpty(Collections.singletonMap("key", "value")));
+    }
 
     @Test
     public void testMap() {

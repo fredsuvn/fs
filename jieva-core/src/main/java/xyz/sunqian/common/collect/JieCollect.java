@@ -10,7 +10,6 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Static utility class for {@link Collection}.
@@ -43,29 +42,6 @@ public class JieCollect {
      */
     public static boolean isNotEmpty(@Nullable Iterable<?> iterable) {
         return !isEmpty(iterable);
-    }
-
-    /**
-     * Returns whether the given map is null or empty.
-     *
-     * @param map the given map
-     * @return whether the given map is null or empty
-     */
-    public static boolean isEmpty(@Nullable Map<?, ?> map) {
-        if (map == null) {
-            return true;
-        }
-        return map.isEmpty();
-    }
-
-    /**
-     * Returns whether the given map is not null and empty.
-     *
-     * @param map the given map
-     * @return whether the given map is not null and empty
-     */
-    public static boolean isNotEmpty(@Nullable Map<?, ?> map) {
-        return !isEmpty(map);
     }
 
     /**

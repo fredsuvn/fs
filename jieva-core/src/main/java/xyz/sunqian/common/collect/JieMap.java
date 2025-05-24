@@ -23,6 +23,29 @@ import java.util.stream.Collectors;
 public class JieMap {
 
     /**
+     * Returns whether the given map is null or empty.
+     *
+     * @param map the given map
+     * @return whether the given map is null or empty
+     */
+    public static boolean isEmpty(@Nullable Map<?, ?> map) {
+        if (map == null) {
+            return true;
+        }
+        return map.isEmpty();
+    }
+
+    /**
+     * Returns whether the given map is not null and empty.
+     *
+     * @param map the given map
+     * @return whether the given map is not null and empty
+     */
+    public static boolean isNotEmpty(@Nullable Map<?, ?> map) {
+        return !isEmpty(map);
+    }
+
+    /**
      * Returns a new immutable map of which content is added from the given array.
      * <p>
      * Every two elements of the array form a key-value pair, that means, the {@code array[0]} and {@code array[1]} will

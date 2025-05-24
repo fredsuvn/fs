@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Vector;
 
@@ -57,15 +56,6 @@ public class CollectTest {
         // Testing with non-empty iterable
         assertFalse(JieCollect.isEmpty(Collections.singletonList(1)));
         assertTrue(JieCollect.isNotEmpty(Collections.singletonList(1)));
-        // Testing with empty map
-        assertTrue(JieCollect.isEmpty(Collections.emptyMap()));
-        assertFalse(JieCollect.isNotEmpty(Collections.emptyMap()));
-        // Testing with empty map
-        assertTrue(JieCollect.isEmpty((Map<?, ?>) null));
-        assertFalse(JieCollect.isNotEmpty((Map<?, ?>) null));
-        // Testing with non-empty map
-        assertFalse(JieCollect.isEmpty(Collections.singletonMap("key", "value")));
-        assertTrue(JieCollect.isNotEmpty(Collections.singletonMap("key", "value")));
     }
 
     @Test
