@@ -2,6 +2,7 @@ package xyz.sunqian.common.collect;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.annotations.OutParam;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -109,7 +110,10 @@ public class JieCollect {
      * @return the given collection
      */
     @SafeVarargs
-    public static <T, C extends Collection<? super T>> @Nonnull C addAll(@Nonnull C collection, T @Nonnull ... array) {
+    public static <T, C extends Collection<? super T>> @Nonnull C addAll(
+        @Nonnull @OutParam C collection,
+        T @Nonnull ... array
+    ) {
         collection.addAll(Arrays.asList(array));
         return collection;
     }
@@ -124,7 +128,8 @@ public class JieCollect {
      * @return the given collection
      */
     public static <T, C extends Collection<? super T>> @Nonnull C addAll(
-        @Nonnull C collection, @Nonnull Iterable<? extends T> it
+        @Nonnull @OutParam C collection,
+        @Nonnull Iterable<? extends T> it
     ) {
         if (it instanceof Collection) {
             collection.addAll((Collection<? extends T>) it);

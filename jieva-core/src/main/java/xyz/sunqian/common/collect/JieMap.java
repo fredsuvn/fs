@@ -3,6 +3,7 @@ package xyz.sunqian.common.collect;
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.annotations.OutParam;
 import xyz.sunqian.common.base.Jie;
 
 import java.util.Collections;
@@ -182,7 +183,10 @@ public class JieMap {
      * @param <M>   the type of the given map
      * @return the given map
      */
-    public static <K, V, M extends Map<K, V>> @Nonnull M putAll(@Nonnull M map, Object @Nonnull ... array) {
+    public static <K, V, M extends Map<K, V>> @Nonnull M putAll(
+        @Nonnull @OutParam M map,
+        Object @Nonnull ... array
+    ) {
         int end = array.length / 2 * 2;
         int i = 0;
         while (i < end) {
@@ -211,7 +215,10 @@ public class JieMap {
      * @param <M> the type of the given map
      * @return the given map
      */
-    public static <K, V, M extends Map<K, V>> @Nonnull M putAll(@Nonnull M map, @Nonnull Iterable<?> it) {
+    public static <K, V, M extends Map<K, V>> @Nonnull M putAll(
+        @Nonnull @OutParam M map,
+        @Nonnull Iterable<?> it
+    ) {
         Iterator<?> iterator = it.iterator();
         while (iterator.hasNext()) {
             K key = Jie.as(iterator.next());

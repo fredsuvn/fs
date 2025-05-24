@@ -2,6 +2,7 @@ package xyz.sunqian.common.collect;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.annotations.OutParam;
 import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.function.IndexedDoublePredicate;
@@ -212,7 +213,7 @@ public class JieArray {
      * @param <T>   the component type of the given array
      * @return the given array
      */
-    public static <T> T @Nonnull [] fill(T @Nonnull [] array, T value) {
+    public static <T> T @Nonnull [] fill(T @Nonnull @OutParam [] array, T value) {
         Arrays.fill(array, value);
         return array;
     }
@@ -224,7 +225,7 @@ public class JieArray {
      * @param value the given value
      * @return the given array
      */
-    public static boolean @Nonnull [] fill(boolean @Nonnull [] array, boolean value) {
+    public static boolean @Nonnull [] fill(boolean @Nonnull @OutParam [] array, boolean value) {
         Arrays.fill(array, value);
         return array;
     }
@@ -236,7 +237,7 @@ public class JieArray {
      * @param value the given value
      * @return the given array
      */
-    public static byte @Nonnull [] fill(byte @Nonnull [] array, byte value) {
+    public static byte @Nonnull [] fill(byte @Nonnull @OutParam [] array, byte value) {
         Arrays.fill(array, value);
         return array;
     }
@@ -248,7 +249,7 @@ public class JieArray {
      * @param value the given value
      * @return the given array
      */
-    public static short @Nonnull [] fill(short @Nonnull [] array, short value) {
+    public static short @Nonnull [] fill(short @Nonnull @OutParam [] array, short value) {
         Arrays.fill(array, value);
         return array;
     }
@@ -260,7 +261,7 @@ public class JieArray {
      * @param value the given value
      * @return the given array
      */
-    public static char @Nonnull [] fill(char @Nonnull [] array, char value) {
+    public static char @Nonnull [] fill(char @Nonnull @OutParam [] array, char value) {
         Arrays.fill(array, value);
         return array;
     }
@@ -272,7 +273,7 @@ public class JieArray {
      * @param value the given value
      * @return the given array
      */
-    public static int @Nonnull [] fill(int @Nonnull [] array, int value) {
+    public static int @Nonnull [] fill(int @Nonnull @OutParam [] array, int value) {
         Arrays.fill(array, value);
         return array;
     }
@@ -284,7 +285,7 @@ public class JieArray {
      * @param value the given value
      * @return the given array
      */
-    public static long @Nonnull [] fill(long @Nonnull [] array, long value) {
+    public static long @Nonnull [] fill(long @Nonnull @OutParam [] array, long value) {
         Arrays.fill(array, value);
         return array;
     }
@@ -296,7 +297,7 @@ public class JieArray {
      * @param value the given value
      * @return the given array
      */
-    public static float @Nonnull [] fill(float @Nonnull [] array, float value) {
+    public static float @Nonnull [] fill(float @Nonnull @OutParam [] array, float value) {
         Arrays.fill(array, value);
         return array;
     }
@@ -308,7 +309,7 @@ public class JieArray {
      * @param value the given value
      * @return the given array
      */
-    public static double @Nonnull [] fill(double @Nonnull [] array, double value) {
+    public static double @Nonnull [] fill(double @Nonnull @OutParam [] array, double value) {
         Arrays.fill(array, value);
         return array;
     }
@@ -330,7 +331,9 @@ public class JieArray {
      * @return the given dest or a new result array
      */
     public static <T, R> R @Nonnull [] map(
-        T @Nonnull [] source, R @Nonnull [] dest, @Nonnull Function<? super T, ? extends R> mapper
+        T @Nonnull [] source,
+        R @Nonnull @OutParam [] dest,
+        @Nonnull Function<? super T, ? extends R> mapper
     ) {
         R[] result;
         if (dest.length == source.length) {
@@ -358,7 +361,8 @@ public class JieArray {
      * @throws UnsupportedOperationException if all new elements are null
      */
     public static <T, R> R @Nonnull [] map(
-        T @Nonnull [] source, @Nonnull Function<? super T, ? extends R> mapper
+        T @Nonnull [] source,
+        @Nonnull Function<? super T, ? extends R> mapper
     ) throws UnsupportedOperationException {
         for (int i = 0; i < source.length; i++) {
             R r = mapper.apply(source[i]);
@@ -372,7 +376,10 @@ public class JieArray {
     }
 
     private static <T, R> void map0(
-        T @Nonnull [] source, R @Nonnull [] dest, int start, @Nonnull Function<? super T, ? extends R> mapper
+        T @Nonnull [] source,
+        R @Nonnull @OutParam [] dest,
+        int start,
+        @Nonnull Function<? super T, ? extends R> mapper
     ) {
         for (int i = start; i < source.length; i++) {
             T t = source[i];
