@@ -53,80 +53,56 @@ import java.util.function.Supplier;
 public class Jie {
 
     /**
-     * Casts given object as specified type T.
+     * Casts and returns the given object as the specified type {@code T}. This method is equivalent to:
+     * <pre>{@code
+     * return (T) obj;
+     * }</pre>
      *
-     * @param obj given object
-     * @param <T> specified type T
-     * @return given obj as specified type T
+     * @param obj the given object
+     * @param <T> the specified type
+     * @return the given object as the specified type {@code T}
      */
+    @SuppressWarnings("noinspection unchecked")
     public static <T> T as(@Nullable Object obj) {
         return (T) obj;
     }
 
     /**
-     * Returns the default value if given object is null, or given object itself if it is not null. It is equivalent
-     * to:
-     * <pre>
-     *     return obj == null ? defaultValue : obj;
-     * </pre>
+     * Returns the default value if the given object is {@code null}, or the given object itself if it is not
+     * {@code null}. This method is equivalent to:
+     * <pre>{@code
+     * return obj == null ? defaultValue : obj;
+     * }</pre>
+     * <p>
+     * Note this method does not guarantee that the returned value must be {@code nonnull}.
      *
-     * @param obj          given object
+     * @param obj          the given object
      * @param defaultValue the default value
-     * @param <T>          type of return value
-     * @return the default value if given object is null, or given object itself if it is not null
+     * @param <T>          the type of the returned value
+     * @return the default value if the given object is {@code null}, or the given object itself if it is not
+     * {@code null}
      */
-    public static <T> T nonNull(@Nullable T obj, T defaultValue) {
+    public static <T> T nonnull(@Nullable T obj, T defaultValue) {
         return obj == null ? defaultValue : obj;
     }
 
     /**
-     * Returns result of given supplier if given object is null, or given object itself if it is not null. It is
-     * equivalent to:
-     * <pre>
-     *     return obj == null ? supplier.get() : obj;
-     * </pre>
+     * Returns the value computed from the specified supplier if the given object is {@code null}, or the given object
+     * itself if it is not {@code null}. This method is equivalent to:
+     * <pre>{@code
+     * return obj == null ? supplier.get() : obj;
+     * }</pre>
+     * <p>
+     * Note this method does not guarantee that the returned value must be {@code nonnull}.
      *
-     * @param obj      given object
-     * @param supplier given supplier
-     * @param <T>      type of return value
-     * @return result of given supplier if given object is null, or given object itself if it is not null
+     * @param obj      the given object
+     * @param supplier the specified supplier
+     * @param <T>      the type of the returned value
+     * @return the value computed from the specified supplier if the given object is {@code null}, or the given object
+     * itself if it is not {@code null}
      */
-    public static <T> T nonNull(@Nullable T obj, Supplier<? extends T> supplier) {
+    public static <T> T nonnull(@Nullable T obj, Supplier<? extends T> supplier) {
         return obj == null ? supplier.get() : obj;
-    }
-
-    /**
-     * Returns the default value if given object is <b>not</b> null, or {@code null} if given object is null. It is
-     * equivalent to:
-     * <pre>
-     *     return obj == null ? null : defaultValue;
-     * </pre>
-     *
-     * @param obj          given object
-     * @param defaultValue the default value
-     * @param <T>          type of return value
-     * @return the default value if given object is <b>not</b> null, or {@code null} if given object is null
-     */
-    @Nullable
-    public static <T> T nullable(@Nullable Object obj, T defaultValue) {
-        return obj == null ? null : defaultValue;
-    }
-
-    /**
-     * Returns result of given supplier if given object is <b>not</b> null, or {@code null} if given object is null. It
-     * is equivalent to:
-     * <pre>
-     *     return obj == null ? null : supplier.get();
-     * </pre>
-     *
-     * @param obj      given object
-     * @param supplier given supplier
-     * @param <T>      type of return value
-     * @return result of given supplier if given object is <b>not</b> null, or {@code null} if given object is null
-     */
-    @Nullable
-    public static <T> T nullable(@Nullable Object obj, Supplier<? extends T> supplier) {
-        return obj == null ? null : supplier.get();
     }
 
     /**

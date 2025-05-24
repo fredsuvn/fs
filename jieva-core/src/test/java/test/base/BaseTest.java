@@ -14,22 +14,9 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotSame;
-import static org.testng.Assert.assertNull;
 import static org.testng.Assert.expectThrows;
 
 public class BaseTest {
-
-    @Test
-    public void testNullExpr() {
-        assertEquals(Jie.nonNull("123", "456"), "123");
-        assertEquals(Jie.nonNull(null, "456"), "456");
-        assertEquals(Jie.nonNull("123", () -> "456"), "123");
-        assertEquals(Jie.nonNull(null, () -> "456"), "456");
-        assertEquals(Jie.nullable("123", "456"), "456");
-        assertNull(Jie.nullable(null, "456"));
-        assertEquals(Jie.nullable("123", () -> "456"), "456");
-        assertNull(Jie.nullable(null, () -> "456"));
-    }
 
     @Test
     public void testConvenient() {

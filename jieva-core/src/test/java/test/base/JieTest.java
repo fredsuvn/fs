@@ -22,6 +22,16 @@ import static org.testng.Assert.assertTrue;
 public class JieTest {
 
     @Test
+    public void testBase() {
+        String hello = "hello";
+        assertSame(Jie.as(hello), hello);
+        assertEquals(Jie.nonnull("123", "456"), "123");
+        assertEquals(Jie.nonnull(null, "456"), "456");
+        assertEquals(Jie.nonnull("123", () -> "456"), "123");
+        assertEquals(Jie.nonnull(null, () -> "456"), "456");
+    }
+
+    @Test
     public void testEquals() {
         assertTrue(Jie.equals("", ""));
         assertFalse(Jie.equals("", null));
