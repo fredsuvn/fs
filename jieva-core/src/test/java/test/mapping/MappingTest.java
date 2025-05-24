@@ -34,17 +34,17 @@ public class MappingTest {
         beanMapper.copyProperties(
             map1,
             new TypeRef<Map<Integer, Double>>() {
-            }.getType(),
+            }.type(),
             map2,
             new TypeRef<Map<Double, Integer>>() {
-            }.getType()
+            }.type()
         );
         assertEquals(map2, Jie.hashMap(1.0, 2, 2.0, 4));
         // map -> bean
         M1 m1 = beanMapper.copyProperties(
             map1,
             new TypeRef<Map<Integer, Double>>() {
-            }.getType(),
+            }.type(),
             new M1(),
             M1.class,
             MappingOptions.builder().nameMapper((n, t) -> "f" + n).build()
@@ -56,7 +56,7 @@ public class MappingTest {
             M1.class,
             map2,
             new TypeRef<Map<Double, Integer>>() {
-            }.getType(),
+            }.type(),
             MappingOptions.builder().nameMapper((n, t) ->
                 n.toString().startsWith("f") ? n.toString().substring(1) : n).build()
         );

@@ -219,7 +219,7 @@ public class AsmProxyBuilder implements ProxyBuilder, Opcodes {
         private static final String INIT_DESCRIPTOR =
             "(" + HANDLER_DESCRIPTOR + METHOD_ARRAY_DESCRIPTOR + ")V";
 
-        private static final String HANDLER_METHOD_DESCRIPTOR = JieJvm.getDescriptor(JieReflect.getMethod(
+        private static final String HANDLER_METHOD_DESCRIPTOR = JieJvm.getDescriptor(JieReflect.searchMethod(
             MethodProxyHandler.class, "invoke", Jie.array(Object.class, Method.class, Object[].class, ProxyInvoker.class))
         );
 
@@ -479,10 +479,10 @@ public class AsmProxyBuilder implements ProxyBuilder, Opcodes {
     private static final class InvokerGenerator implements Opcodes {
 
         private static final String INVOKE_METHOD_DESCRIPTOR = JieJvm.getDescriptor(
-            JieReflect.getMethod(ProxyInvoker.class, "invoke", Jie.array(Object.class, Object[].class))
+            JieReflect.searchMethod(ProxyInvoker.class, "invoke", Jie.array(Object.class, Object[].class))
         );
         private static final String INVOKE_SUPER_METHOD_DESCRIPTOR = JieJvm.getDescriptor(
-            JieReflect.getMethod(ProxyInvoker.class, "invokeSuper", Jie.array(Object.class, Object[].class))
+            JieReflect.searchMethod(ProxyInvoker.class, "invokeSuper", Jie.array(Object.class, Object[].class))
         );
 
         private final String proxyInternalName;

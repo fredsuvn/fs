@@ -8,17 +8,16 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * This abstract class is a utility class used for obtaining runtime {@link Type} instance:
- * <pre>
- *     TypeRef&lt;String&gt; classRef = new TypeRef&lt;String&gt;(){};
- *     Type classType = classRef.getType();
- *     Objects.equals(classType, String.class);//true
- *     TypeRef&lt;List&lt;String&gt;&gt; parameterizedRef = new TypeRef&lt;List&lt;String&gt;&gt;(){};
- *     Type parameterizedType = parameterizedRef.getType();
- *     System.out.println(parameterizedType.getTypeName());//List&lt;String&gt;
- * </pre>
+ * This abstract class is used for obtaining runtime {@link Type} instance:
+ * <pre>{@code
+ *     // To obtain a class type: String.class
+ *     Type classType = new TypeRef<String>(){}.type(); // String.class
  *
- * @author fredsuvn
+ *     // To obtain a parameterized type: List<String>
+ *     ParameterizedType paramType = new TypeRef<List<String>>(){}.asParameterized();// List<String>
+ * }</pre>
+ *
+ * @author sunqian
  */
 public abstract class TypeRef<T> {
 
@@ -52,7 +51,7 @@ public abstract class TypeRef<T> {
      *
      * @return actual type of this reference
      */
-    public Type getType() {
+    public Type type() {
         return type;
     }
 
@@ -61,7 +60,7 @@ public abstract class TypeRef<T> {
      *
      * @return actual type of this reference as {@link ParameterizedType}
      */
-    public ParameterizedType getParameterized() {
+    public ParameterizedType asParameterized() {
         return (ParameterizedType) type;
     }
 }

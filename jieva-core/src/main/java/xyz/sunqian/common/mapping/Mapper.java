@@ -252,7 +252,7 @@ public interface Mapper {
      */
     @Nullable
     default <T> T map(@Nullable Object source, TypeRef<T> targetTypeRef, MappingOptions options) {
-        Object result = map(source, source == null ? Object.class : source.getClass(), targetTypeRef.getType(), options);
+        Object result = map(source, source == null ? Object.class : source.getClass(), targetTypeRef.type(), options);
         return resolveResult(result);
     }
 

@@ -278,7 +278,7 @@ public interface GekUdpServer extends GekUdpClient {
             private SocketUdpServer(GekUdpServer.Builder builder) {
                 this.port = builder.port;
                 this.address = builder.address;
-                this.serverHandler = Jie.nonNull(builder.serverHandler, EMPTY_SERVER_HANDLER);
+                this.serverHandler = Jie.nonnull(builder.serverHandler, EMPTY_SERVER_HANDLER);
                 this.packetHandlers = JieList.toList(builder.packetHandlers);
                 if (packetHandlers.isEmpty()) {
                     throw new GekNetException("Packet handlers are empty.");

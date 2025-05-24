@@ -75,6 +75,6 @@ public class ProtobufMapperHandler implements Mapper.Handler {
 
     private Charset getCharset(@Nullable DataProperty targetProperty, MappingOptions options) {
         Charset charset = options.getCharset(targetProperty);
-        return Jie.nonNull(charset, JieChars.defaultCharset());
+        return Jie.nonnull(charset, JieChars.defaultCharset());
     }
 }

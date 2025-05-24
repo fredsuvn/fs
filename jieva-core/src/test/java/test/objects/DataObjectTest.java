@@ -42,10 +42,10 @@ public class DataObjectTest {
 
     @Test
     public void testDataSchema() {
-        DataSchema b1 = DataSchema.get(new TypeRef<Inner<Short, Long>>() {}.getType());
-        DataSchema b2 = DataSchemaParser.defaultParser().parse(new TypeRef<Inner<Short, Long>>() {}.getType());
+        DataSchema b1 = DataSchema.get(new TypeRef<Inner<Short, Long>>() {}.type());
+        DataSchema b2 = DataSchemaParser.defaultParser().parse(new TypeRef<Inner<Short, Long>>() {}.type());
         assertEquals(b1.getType(), new TypeRef<Inner<Short, Long>>() {
-        }.getType());
+        }.type());
         assertEquals(b1.getRawType(), Inner.class);
         assertNotSame(b1, b2);
         assertEquals(b1, b2);
@@ -55,7 +55,7 @@ public class DataObjectTest {
         assertFalse(b1.equals(null));
         assertFalse(b1.equals(""));
         assertFalse(b1.equals(DataSchema.get(new TypeRef<Inner<Long, Long>>() {
-        }.getType())));
+        }.type())));
         assertEquals(
             // JieCollection.putAll(new HashMap<>(), b1.getProperties(), k -> k, DataPropertyBase::getType),
             b1.getProperties().entrySet().stream().collect(Collectors.toMap(
@@ -83,7 +83,7 @@ public class DataObjectTest {
         );
         assertEquals(
             b1.getType(), new TypeRef<Inner<Short, Long>>() {
-            }.getType()
+            }.type()
         );
 
         DataSchema b3 = DataSchema.get(Inner.class);
@@ -108,9 +108,9 @@ public class DataObjectTest {
     @Test
     public void testMember() throws Exception {
         DataSchema b1 = DataSchema.get(new TypeRef<Inner<Short, Long>>() {
-        }.getType());
+        }.type());
         DataSchema b3 = DataSchemaParser.defaultParser().parse(new TypeRef<Inner<Short, Long>>() {
-        }.getType());
+        }.type());
         DataProperty p1 = b1.getProperty("ffFf1");
         assertEquals(p1.getOwner(), b1);
         assertEquals(b1.toString(), b1.getType().getTypeName());
@@ -272,9 +272,9 @@ public class DataObjectTest {
     @Test
     public void testExtra() {
         Map<TypeVariable<?>, Type> extra =
-            JieReflect.mapTypeParameters(new TypeRef<TestExtra<String>>() {}.getType());
+            JieReflect.mapTypeParameters(new TypeRef<TestExtra<String>>() {}.type());
         Map<TypeVariable<?>, Type> empty = Collections.emptyMap();
-        DataSchema b1 = DataSchema.get(new TypeRef<TestExtra<String>>() {}.getType());
+        DataSchema b1 = DataSchema.get(new TypeRef<TestExtra<String>>() {}.type());
         DataSchema b2 = JieDataObject.withExtraTypeVariableMapping(DataSchema.get(TestExtra.class), extra);
         assertNotEquals(b1, b2);
         assertNotEquals(b1.getProperty("tt"), b2.getProperty("tt"));
@@ -287,7 +287,7 @@ public class DataObjectTest {
         assertEquals(b4, b3);
         assertEquals(b4.getProperty("tt"), b4.getProperty("tt"));
         DataSchema b5 = JieDataObject.withExtraTypeVariableMapping(DataSchema.get(TestExtra.class),
-            JieReflect.mapTypeParameters(new TypeRef<TestExtra2<String>>() {}.getType()));
+            JieReflect.mapTypeParameters(new TypeRef<TestExtra2<String>>() {}.type()));
         assertEquals(b5, b3);
         assertEquals(b5.getProperty("tt"), b3.getProperty("tt"));
 

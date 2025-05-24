@@ -22,6 +22,7 @@ import java.lang.reflect.WildcardType;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -138,40 +139,29 @@ public class JieReflect {
     }
 
     /**
-     * Returns the field of the specified name from the given class, or {@code null} if not found.
-     * <p>
-     * This method searches via {@link Class#getField(String)}. If not found then {@link Class#getDeclaredField(String)}
-     * will be used next. If still not found, this method will recursively call itself with superclass (from
-     * {@link Class#getSuperclass()}) and interfaces (from {@link Class#getInterfaces()}) until found.
+     * Returns the field of the specified name from the given class, or {@code null} if not found. This method first
+     * uses {@link Class#getField(String)}. If not found, it will use {@link Class#getDeclaredField(String)} to try
+     * again.
      *
      * @param cls  the given class
      * @param name the specified field name
      * @return the field of the specified name from the given class, or {@code null} if not found
      */
     public static @Nullable Field getField(@Nonnull Class<?> cls, @Nonnull String name) {
-        return getField(cls, name, true, true);
+        return getField(cls, name, true);
     }
 
     /**
-     * Returns the field of the specified name from the given class, or {@code null} if not found.
-     * <p>
-     * This method searches via {@link Class#getField(String)}. If not found and the {@code searchDeclared} is true,
-     * then {@link Class#getDeclaredField(String)} will be used next. If still not found and the {@code searchSuper} is
-     * true, this method will recursively call itself with superclass (from {@link Class#getSuperclass()}) and
-     * interfaces (from {@link Class#getInterfaces()}) until found.
+     * Returns the field of the specified name from the given class, or {@code null} if not found. This method first
+     * uses {@link Class#getField(String)}. If not found and the {@code searchDeclared} is {@code true}, it will use
+     * {@link Class#getDeclaredField(String)} to try again.
      *
      * @param cls            the given class
      * @param name           the specified field name
      * @param searchDeclared specifies whether searches declared fields
-     * @param searchSuper    specifies whether searches superclasses and interfaces recursively
      * @return the field of the specified name from the given class, or {@code null} if not found
      */
-    public static @Nullable Field getField(
-        @Nonnull Class<?> cls,
-        @Nonnull String name,
-        boolean searchDeclared,
-        boolean searchSuper
-    ) {
+    public static @Nullable Field getField(@Nonnull Class<?> cls, @Nonnull String name, boolean searchDeclared) {
         try {
             return cls.getField(name);
         } catch (NoSuchFieldException e) {
@@ -179,39 +169,45 @@ public class JieReflect {
                 try {
                     return cls.getDeclaredField(name);
                 } catch (NoSuchFieldException ex) {
-                    if (!searchSuper) {
-                        return null;
-                    }
-                    // Searches super class:
-                    Class<?> superclass = cls.getSuperclass();
-                    if (superclass != null) {
-                        Field result = getField(superclass, name, true, true);
-                        if (result != null) {
-                            return result;
-                        }
-                    }
-                    // Searches interfaces:
-                    Class<?>[] interfaces = cls.getInterfaces();
-                    for (Class<?> anInterface : interfaces) {
-                        Field result = getField(anInterface, name, true, true);
-                        if (result != null) {
-                            return result;
-                        }
-                    }
+                    return null;
                 }
             }
+        }
+        return null;
+    }
 
+    /**
+     * Returns the field of the specified name from the given class, or {@code null} if not found.
+     * <p>
+     * This method searches via {@link Class#getField(String)}. If the field is not found, then this method will use
+     * {@link Class#getDeclaredField(String)} to search again. If the field is still not found, then this method will
+     * traverse the hierarchy of superclasses and interfaces of the given class to search via
+     * {@link Class#getDeclaredField(String)}.
+     *
+     * @param cls  the given class
+     * @param name the specified field name
+     * @return the field of the specified name from the given class, or {@code null} if not found
+     */
+    public static @Nullable Field searchField(@Nonnull Class<?> cls, @Nonnull String name) {
+        Field field = getField(cls, name);
+        if (field != null) {
+            return field;
+        }
+        Iterator<Class<?>> supertypesAndInterfaces = toSupertypesAndInterfaces(cls);
+        while (supertypesAndInterfaces.hasNext()) {
+            Class<?> next = supertypesAndInterfaces.next();
+            Field nextField = searchField(next, name);
+            if (nextField != null) {
+                return nextField;
+            }
         }
         return null;
     }
 
     /**
      * Returns the method of the specified name and parameter types from the given class, or {@code null} if not found.
-     * <p>
-     * This method searches via {@link Class#getMethod(String, Class[])}. If not found, then
-     * {@link Class#getDeclaredMethod(String, Class[])} will be used next. If still not found, this method will
-     * recursively call itself with superclass (from {@link Class#getSuperclass()}) and interfaces (from
-     * {@link Class#getInterfaces()}) until found.
+     * This method first uses {@link Class#getMethod(String, Class[])}. If not found, it will use
+     * {@link Class#getDeclaredMethod(String, Class[])} to try again.
      *
      * @param cls            the given class
      * @param name           the specified method name
@@ -223,30 +219,25 @@ public class JieReflect {
         @Nonnull String name,
         @Nonnull @RetainedParam Class<?> @Nonnull [] parameterTypes
     ) {
-        return getMethod(cls, name, parameterTypes, true, true);
+        return getMethod(cls, name, parameterTypes, true);
     }
 
     /**
      * Returns the method of the specified name and parameter types from the given class, or {@code null} if not found.
-     * <p>
-     * This method searches via {@link Class#getMethod(String, Class[])}. If not found and the {@code searchDeclared} is
-     * true, then {@link Class#getDeclaredMethod(String, Class[])} will be used next. If still not found and the
-     * {@code searchSuper} is true, this method will recursively call itself with superclass (from
-     * {@link Class#getSuperclass()}) and interfaces (from {@link Class#getInterfaces()}) until found.
+     * This method first uses {@link Class#getMethod(String, Class[])}. If not found and the {@code searchDeclared} is
+     * {@code true}, it will use {@link Class#getDeclaredMethod(String, Class[])} to try again.
      *
      * @param cls            the given class
      * @param name           the specified method name
      * @param parameterTypes the specified parameter types
      * @param searchDeclared specifies whether searches declared methods
-     * @param searchSuper    specifies whether searches superclasses and interfaces recursively
      * @return the method of the specified name and parameter types from the given class, or {@code null} if not found
      */
     public static @Nullable Method getMethod(
         @Nonnull Class<?> cls,
         @Nonnull String name,
         @Nonnull @RetainedParam Class<?> @Nonnull [] parameterTypes,
-        boolean searchDeclared,
-        boolean searchSuper
+        boolean searchDeclared
     ) {
         try {
             return cls.getMethod(name, parameterTypes);
@@ -255,41 +246,91 @@ public class JieReflect {
                 try {
                     return cls.getDeclaredMethod(name, parameterTypes);
                 } catch (NoSuchMethodException ex) {
-                    if (!searchSuper) {
-                        return null;
-                    }
-                    // Searches super class:
-                    Class<?> superclass = cls.getSuperclass();
-                    if (superclass != null) {
-                        Method result = getMethod(superclass, name, parameterTypes, true, true);
-                        if (result != null) {
-                            return result;
-                        }
-                    }
-                    // Searches interfaces:
-                    Class<?>[] interfaces = cls.getInterfaces();
-                    for (Class<?> anInterface : interfaces) {
-                        Method result = getMethod(anInterface, name, parameterTypes, true, true);
-                        if (result != null) {
-                            return result;
-                        }
-                    }
+                    return null;
                 }
             }
-
         }
         return null;
     }
 
     /**
-     * Returns the constructor of the given class with the specified parameter types, or {@code null} if not found.
+     * Returns the method of the specified name and parameter types from the given class, or {@code null} if not found.
      * <p>
-     * This method searches via {@link Class#getConstructor(Class[])}. If not found, then
-     * {@link Class#getDeclaredConstructor(Class[])} will be used next.
+     * This method searches via {@link Class#getMethod(String, Class[])}. If the method is not found, then this method
+     * will use {@link Class#getDeclaredMethod(String, Class[])} to search again. If the method is still not found, then
+     * this method will traverse the hierarchy of superclasses and interfaces of the given class to search via
+     * {@link Class#getDeclaredMethod(String, Class[])}.
+     *
+     * @param cls  the given class
+     * @param name the specified method name
+     * @return the method of the specified name and parameter types from the given class, or {@code null} if not found
+     */
+    public static @Nullable Method searchMethod(
+        @Nonnull Class<?> cls,
+        @Nonnull String name,
+        @Nonnull @RetainedParam Class<?> @Nonnull [] parameterTypes
+    ) {
+        Method method = getMethod(cls, name, parameterTypes);
+        if (method != null) {
+            return method;
+        }
+        Iterator<Class<?>> supertypesAndInterfaces = toSupertypesAndInterfaces(cls);
+        while (supertypesAndInterfaces.hasNext()) {
+            Class<?> next = supertypesAndInterfaces.next();
+            Method nextMethod = searchMethod(next, name, parameterTypes);
+            if (nextMethod != null) {
+                return nextMethod;
+            }
+        }
+        return null;
+    }
+
+    private static @Nonnull Iterator<Class<?>> toSupertypesAndInterfaces(@Nonnull Class<?> cls) {
+        return new Iterator<Class<?>>() {
+
+            private int index = -1;
+            private Class<?> @Nullable [] interfaces;
+            private @Nullable Class<?> next = getNext();
+
+            @Override
+            public boolean hasNext() {
+                return next != null;
+            }
+
+            @Override
+            public Class<?> next() {
+                Class<?> result = next;
+                next = getNext();
+                return result;
+            }
+
+            private @Nullable Class<?> getNext() {
+                if (index == -1) {
+                    index++;
+                    Class<?> superclass = cls.getSuperclass();
+                    if (superclass != null) {
+                        return superclass;
+                    }
+                }
+                if (interfaces == null) {
+                    interfaces = cls.getInterfaces();
+                }
+                if (index < interfaces.length) {
+                    return interfaces[index++];
+                }
+                return null;
+            }
+        };
+    }
+
+    /**
+     * Returns the constructor of the specified parameter types from the given class, or {@code null} if not found. This
+     * method first uses {@link Class#getConstructor(Class[])}. If not found, it will use
+     * {@link Class#getDeclaredConstructor(Class[])} to try again.
      *
      * @param cls            the given class
      * @param parameterTypes the specified parameter types
-     * @return the constructor of the given class with the specified parameter types, or {@code null} if not found
+     * @return the constructor of the specified parameter types from the given class, or {@code null} if not found
      */
     public static @Nullable Constructor<?> getConstructor(
         @Nonnull Class<?> cls,
@@ -299,15 +340,14 @@ public class JieReflect {
     }
 
     /**
-     * Returns the constructor of the given class with the specified parameter types, or {@code null} if not found.
-     * <p>
-     * This method searches via {@link Class#getConstructor(Class[])}. If not found and the {@code searchDeclared} is
-     * true, then {@link Class#getDeclaredConstructor(Class[])} will be used next.
+     * Returns the constructor of the specified parameter types from the given class, or {@code null} if not found. This
+     * method first uses {@link Class#getConstructor(Class[])}. If not found and the {@code searchDeclared} is
+     * {@code true}, it will use {@link Class#getDeclaredConstructor(Class[])} to try again.
      *
      * @param cls            the given class
      * @param parameterTypes the specified parameter types
      * @param searchDeclared specifies whether searches declared constructors
-     * @return the constructor of the given class with the specified parameter types, or {@code null} if not found
+     * @return the constructor of the specified parameter types from the given class, or {@code null} if not found
      */
     public static @Nullable Constructor<?> getConstructor(
         @Nonnull Class<?> cls,
@@ -317,15 +357,15 @@ public class JieReflect {
         try {
             return cls.getConstructor(parameterTypes);
         } catch (NoSuchMethodException e) {
-            if (!searchDeclared) {
-                return null;
-            }
-            try {
-                return cls.getDeclaredConstructor(parameterTypes);
-            } catch (NoSuchMethodException ex) {
-                return null;
+            if (searchDeclared) {
+                try {
+                    return cls.getDeclaredConstructor(parameterTypes);
+                } catch (NoSuchMethodException ex) {
+                    return null;
+                }
             }
         }
+        return null;
     }
 
     /**
@@ -603,7 +643,7 @@ public class JieReflect {
             .map(typeVariable -> {
                 Type actualType = JieMap.resolveChain(typeArguments, typeVariable, stack);
                 stack.clear();
-                return actualType == null ? typeVariable : actualType;
+                return Jie.nonnull(actualType, typeVariable);
             })
             .collect(Collectors.toList());
     }
@@ -616,6 +656,7 @@ public class JieReflect {
      *     class Y<K, V> implements Z<Float, Double, V>
      *     interface Z<T, U, R>
      * }</pre>
+     * <p>
      * The result of {@code resolveTypeParameterMapping(X.class)} will be:
      * <pre>{@code
      *     T -> Float

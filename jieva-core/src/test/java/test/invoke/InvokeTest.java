@@ -92,8 +92,8 @@ public class InvokeTest {
     private void testError(InvocationMode mode) throws Exception {
         TestThrow tt = new TestThrow();
         Constructor<?> errorC = JieReflect.getConstructor(TestThrow.class, Jie.array(int.class));
-        Method errorStatic = JieReflect.getMethod(TestThrow.class, "errorStatic", Jie.array());
-        Method error = JieReflect.getMethod(TestThrow.class, "error", Jie.array());
+        Method errorStatic = JieReflect.searchMethod(TestThrow.class, "errorStatic", Jie.array());
+        Method error = JieReflect.searchMethod(TestThrow.class, "error", Jie.array());
         expectThrows(InvocationException.class, () ->
             Invocable.of(errorC, mode).invoke(1));
         expectThrows(InvocationException.class, () ->
@@ -124,8 +124,8 @@ public class InvokeTest {
     private void testHandleError() throws Exception {
         TestThrow tt = new TestThrow();
         Constructor<?> errorC = JieReflect.getConstructor(TestThrow.class, Jie.array(int.class));
-        Method errorStatic = JieReflect.getMethod(TestThrow.class, "errorStatic", Jie.array());
-        Method error = JieReflect.getMethod(TestThrow.class, "error", Jie.array());
+        Method errorStatic = JieReflect.searchMethod(TestThrow.class, "errorStatic", Jie.array());
+        Method error = JieReflect.searchMethod(TestThrow.class, "error", Jie.array());
         expectThrows(InvocationException.class, () ->
             Invocable.of(MethodHandles.lookup().unreflectConstructor(errorC), true).invoke(1));
         expectThrows(InvocationException.class, () ->
@@ -151,7 +151,7 @@ public class InvokeTest {
 
     @Test
     public void testInvokeSpecial() throws Throwable {
-        Method tt = JieReflect.getMethod(TestInter.class, "tt", Jie.array());
+        Method tt = JieReflect.searchMethod(TestInter.class, "tt", Jie.array());
         TestChild tc = new TestChild();
         Class<?> caller = tt.getDeclaringClass();
         MethodHandle handle = MethodHandles.lookup().in(caller).unreflectSpecial(tt, caller);

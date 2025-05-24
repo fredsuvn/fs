@@ -129,7 +129,7 @@ public class BeanMapperHandler implements Mapper.Handler {
         if (targetObject == null) {
             return Flag.CONTINUE;
         }
-        BeanMapper beanMapper = Jie.nonNull(options.getBeanMapper(), BeanMapper.defaultMapper());
+        BeanMapper beanMapper = Jie.nonnull(options.getBeanMapper(), BeanMapper.defaultMapper());
         beanMapper.copyProperties(source, sourceType, targetObject, targetType, options);
         return wrapResult(generator.build(targetObject));
     }
