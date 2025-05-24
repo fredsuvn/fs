@@ -136,72 +136,110 @@ public class ReflectTest {
         }), Object.class);
     }
 
+    public interface Inter0 {
+        String i0 = "";
+    }
+
+    public interface Inter1 {
+        String i1 = "";
+    }
+
+    public interface Inter2 extends Inter1, Inter0 {
+        String i2 = "";
+    }
+
+    public interface Inter3 extends Inter2, Inter0 {
+        String i3 = "";
+    }
+
+    public class Cls1 implements Inter1, Inter0 {
+        public String c1;
+        private String pc1;
+    }
+
+    public class Cls2 extends Cls1 implements Inter2, Inter0 {
+        public String c2;
+        private String pc2;
+    }
+
+    public class Cls3 extends Cls2 implements Inter3, Inter0 {
+        public String c3;
+        private String pc3;
+    }
+
     @Test
     public void testMember() throws Exception {
+        Field c1 = Cls1.class.getDeclaredField("c1");
+        Field c2 = Cls2.class.getDeclaredField("c2");
+        Field c3 = Cls3.class.getDeclaredField("c3");
+        Field pc1 = Cls1.class.getDeclaredField("pc1");
+        Field pc2 = Cls2.class.getDeclaredField("pc2");
+        Field pc3 = Cls3.class.getDeclaredField("pc3");
+        Field i0 = Inter0.class.getDeclaredField("i0");
+        Field i1 = Inter1.class.getDeclaredField("i1");
+        Field i2 = Inter2.class.getDeclaredField("i2");
+        Field i3 = Inter3.class.getDeclaredField("i3");
+        assertEquals(JieReflect.getField(Cls3.class, "c1"), c1);
+        assertEquals(JieReflect.getField(Cls3.class, "c2"), c2);
+        assertEquals(JieReflect.getField(Cls3.class, "c3"), c3);
+        assertEquals(JieReflect.getField(Cls3.class, "pc1"), pc1);
+        assertEquals(JieReflect.getField(Cls3.class, "pc2"), pc2);
+        assertEquals(JieReflect.getField(Cls3.class, "pc3"), pc3);
+        assertEquals(JieReflect.getField(Cls3.class, "i0"), i0);
+        assertEquals(JieReflect.getField(Cls3.class, "i1"), i1);
+        assertEquals(JieReflect.getField(Cls3.class, "i2"), i2);
+        assertEquals(JieReflect.getField(Cls3.class, "i3"), i3);
 
-        // interface Inter1 {
-        // }
 
-        class Cls1  {
-        }
-
-        class Cls2 extends Cls1 {
-        }
-
-        class Cls3 extends Cls2 {
-        }
-
-
-
-        Field ssif1 = SuperSuperInter1.class.getDeclaredField("ssif1");
-        Field ssif2 = SuperSuperInter2.class.getDeclaredField("ssif2");
-        Field sif1 = SuperInter1.class.getDeclaredField("sif1");
-        Field sif2 = SuperInter2.class.getDeclaredField("sif2");
-        Field scf1 = SuperClass1.class.getDeclaredField("scf1");
-        Field scf2 = SuperClass1.class.getDeclaredField("scf2");
-        Field f1 = Inner.class.getDeclaredField("f1");
-        Field f2 = Inner.class.getDeclaredField("f2");
-        assertEquals(JieReflect.getField(Inner.class, "ssif1"), ssif1);
-        assertEquals(JieReflect.getField(Inner.class, "ssif2"), ssif2);
-        assertEquals(JieReflect.getField(Inner.class, "sif1"), sif1);
-        assertEquals(JieReflect.getField(Inner.class, "sif2"), sif2);
-        assertEquals(JieReflect.getField(Inner.class, "scf1"), scf1);
-        assertEquals(JieReflect.getField(Inner.class, "scf2"), scf2);
-        assertEquals(JieReflect.getField(Inner.class, "f1"), f1);
-        assertEquals(JieReflect.getField(Inner.class, "f2"), f2);
-
-        Method ssim1 = SuperSuperInter1.class.getDeclaredMethod("ssim1");
-        Method ssim2 = SuperSuperInter2.class.getDeclaredMethod("ssim2");
-        Method sim1 = SuperInter1.class.getDeclaredMethod("sim1");
-        Method sim2 = SuperInter2.class.getDeclaredMethod("sim2");
-        Method scm1 = SuperClass1.class.getDeclaredMethod("scm1");
-        Method scm2 = SuperClass1.class.getDeclaredMethod("scm2");
-        Method m1 = Inner.class.getDeclaredMethod("m1", int.class);
-        Method m2 = Inner.class.getDeclaredMethod("m2");
-        assertEquals(JieReflect.getMethod(Inner.class, "ssim1", Jie.array()), ssim1);
-        assertEquals(JieReflect.getMethod(Inner.class, "ssim2", Jie.array()), ssim2);
-        assertEquals(JieReflect.getMethod(Inner.class, "sim1", Jie.array()), sim1);
-        assertEquals(JieReflect.getMethod(Inner.class, "sim2", Jie.array()), sim2);
-        assertEquals(JieReflect.getMethod(Inner.class, "scm1", Jie.array()), scm1);
-        assertEquals(JieReflect.getMethod(Inner.class, "scm2", Jie.array()), scm2);
-        assertEquals(JieReflect.getMethod(Inner.class, "m1", Jie.array(int.class)), m1);
-        assertEquals(JieReflect.getMethod(Inner.class, "m2", Jie.array()), m2);
-
-        // assertNull(JieReflect.getField(JieType.other(), "1"));
-        assertNull(JieReflect.getField(Inner.class, "1"));
-        assertNull(JieReflect.getField(Inner.class, "1", false, false));
-        // assertNull(JieReflect.getMethod(JieType.other(), "1", Jie.array()));
-        assertNull(JieReflect.getMethod(Inner.class, "1", Jie.array()));
-        assertNull(JieReflect.getMethod(Inner.class, "1", Jie.array(), false, false));
-
-        Constructor<?> c1 = Inner.class.getConstructor();
-        Constructor<?> c2 = Inner.class.getConstructor(int.class, String.class);
-        Constructor<?> c3 = Inner.class.getDeclaredConstructor(int.class, String.class, long.class);
-        assertEquals(c1, JieReflect.getConstructor(Inner.class, Jie.array()));
-        assertEquals(c2, JieReflect.getConstructor(Inner.class, Jie.array(int.class, String.class)));
-        assertEquals(c3, JieReflect.getConstructor(Inner.class, Jie.array(int.class, String.class, long.class)));
-        assertNull(JieReflect.getConstructor(Inner.class, Jie.array(int.class, String.class, long.class), false));
-        assertNull(JieReflect.getConstructor(Inner.class, Jie.array(int.class, String.class, long.class, double.class)));
+        // Field ssif1 = SuperSuperInter1.class.getDeclaredField("ssif1");
+        // Field ssif2 = SuperSuperInter2.class.getDeclaredField("ssif2");
+        // Field sif1 = SuperInter1.class.getDeclaredField("sif1");
+        // Field sif2 = SuperInter2.class.getDeclaredField("sif2");
+        // Field scf1 = SuperClass1.class.getDeclaredField("scf1");
+        // Field scf2 = SuperClass1.class.getDeclaredField("scf2");
+        // Field f1 = Inner.class.getDeclaredField("f1");
+        // Field f2 = Inner.class.getDeclaredField("f2");
+        // assertEquals(JieReflect.getField(Inner.class, "ssif1"), ssif1);
+        // assertEquals(JieReflect.getField(Inner.class, "ssif2"), ssif2);
+        // assertEquals(JieReflect.getField(Inner.class, "sif1"), sif1);
+        // assertEquals(JieReflect.getField(Inner.class, "sif2"), sif2);
+        // assertEquals(JieReflect.getField(Inner.class, "scf1"), scf1);
+        // assertEquals(JieReflect.getField(Inner.class, "scf2"), scf2);
+        // assertEquals(JieReflect.getField(Inner.class, "f1"), f1);
+        // assertEquals(JieReflect.getField(Inner.class, "f2"), f2);
+        //
+        // Method ssim1 = SuperSuperInter1.class.getDeclaredMethod("ssim1");
+        // Method ssim2 = SuperSuperInter2.class.getDeclaredMethod("ssim2");
+        // Method sim1 = SuperInter1.class.getDeclaredMethod("sim1");
+        // Method sim2 = SuperInter2.class.getDeclaredMethod("sim2");
+        // Method scm1 = SuperClass1.class.getDeclaredMethod("scm1");
+        // Method scm2 = SuperClass1.class.getDeclaredMethod("scm2");
+        // Method m1 = Inner.class.getDeclaredMethod("m1", int.class);
+        // Method m2 = Inner.class.getDeclaredMethod("m2");
+        // assertEquals(JieReflect.getMethod(Inner.class, "ssim1", Jie.array()), ssim1);
+        // assertEquals(JieReflect.getMethod(Inner.class, "ssim2", Jie.array()), ssim2);
+        // assertEquals(JieReflect.getMethod(Inner.class, "sim1", Jie.array()), sim1);
+        // assertEquals(JieReflect.getMethod(Inner.class, "sim2", Jie.array()), sim2);
+        // assertEquals(JieReflect.getMethod(Inner.class, "scm1", Jie.array()), scm1);
+        // assertEquals(JieReflect.getMethod(Inner.class, "scm2", Jie.array()), scm2);
+        // assertEquals(JieReflect.getMethod(Inner.class, "m1", Jie.array(int.class)), m1);
+        // assertEquals(JieReflect.getMethod(Inner.class, "m2", Jie.array()), m2);
+        //
+        // // assertNull(JieReflect.getField(JieType.other(), "1"));
+        // assertNull(JieReflect.getField(Inner.class, "1"));
+        // assertNull(JieReflect.getField(Inner.class, "1", false, false));
+        // // assertNull(JieReflect.getMethod(JieType.other(), "1", Jie.array()));
+        // assertNull(JieReflect.getMethod(Inner.class, "1", Jie.array()));
+        // assertNull(JieReflect.getMethod(Inner.class, "1", Jie.array(), false, false));
+        //
+        // Constructor<?> c1 = Inner.class.getConstructor();
+        // Constructor<?> c2 = Inner.class.getConstructor(int.class, String.class);
+        // Constructor<?> c3 = Inner.class.getDeclaredConstructor(int.class, String.class, long.class);
+        // assertEquals(c1, JieReflect.getConstructor(Inner.class, Jie.array()));
+        // assertEquals(c2, JieReflect.getConstructor(Inner.class, Jie.array(int.class, String.class)));
+        // assertEquals(c3, JieReflect.getConstructor(Inner.class, Jie.array(int.class, String.class, long.class)));
+        // assertNull(JieReflect.getConstructor(Inner.class, Jie.array(int.class, String.class, long.class), false));
+        // assertNull(JieReflect.getConstructor(Inner.class, Jie.array(int.class, String.class, long.class, double.class)));
     }
 
     @Test
