@@ -106,115 +106,8 @@ public class Jie {
     }
 
     /**
-     * Returns hash code follows:
-     * <ul>
-     *     <li>
-     *         returns {@code Objects.hashCode} for given object if it is not an array;
-     *     </li>
-     *     <li>
-     *         if given object is primitive array, returns {@code Arrays.hashCode} for it;
-     *     </li>
-     *     <li>
-     *         if given object is Object[], returns {@code Arrays.deepHashCode} for it;
-     *     </li>
-     *     <li>
-     *         else returns {@code Objects.hashCode} for given object;
-     *     </li>
-     * </ul>
-     * This method is equivalent to ({@link #hashWith(Object, boolean, boolean)}):
-     * <pre>
-     *     return hashWith(obj, true, true);
-     * </pre>
-     *
-     * @param obj given object
-     * @return the hash code
-     */
-    public static int hash(@Nullable Object obj) {
-        return hashWith(obj, true, true);
-    }
-
-    /**
-     * Returns deep-hash-code for given objects.
-     *
-     * @param objs given objects
-     * @return the hash code
-     */
-    public static int hash(Object... objs) {
-        return Arrays.deepHashCode(objs);
-    }
-
-    /**
-     * Returns hash code follows:
-     * <ul>
-     *     <li>
-     *         if given object is primitive array and {@code arrayCheck} is {@code true}, returns
-     *         {@code Arrays.hashCode} for it;
-     *     </li>
-     *     <li>
-     *         if given object is Object[] and both {@code arrayCheck} and {@code deepHash} are {@code true},
-     *         returns {@code Arrays.deepHashCode} for it;
-     *     </li>
-     *     <li>
-     *         if given object is Object[] and {@code arrayCheck} is {@code true} and {@code deepHash} is {@code false},
-     *         returns {@code Arrays.hashCode} for it;
-     *     </li>
-     *     <li>
-     *         else returns {@code Objects.hashCode} for given object;
-     *     </li>
-     * </ul>
-     *
-     * @param obj        given object
-     * @param arrayCheck the array-check
-     * @param deepHash   whether deep-hash
-     * @return the hash code
-     */
-    public static int hashWith(@Nullable Object obj, boolean arrayCheck, boolean deepHash) {
-        if (obj == null || !arrayCheck) {
-            return Objects.hashCode(obj);
-        }
-        if (obj instanceof Object[]) {
-            return deepHash ? Arrays.deepHashCode((Object[]) obj) : Arrays.hashCode((Object[]) obj);
-        }
-        if (obj instanceof boolean[]) {
-            return Arrays.hashCode((boolean[]) obj);
-        }
-        if (obj instanceof byte[]) {
-            return Arrays.hashCode((byte[]) obj);
-        }
-        if (obj instanceof short[]) {
-            return Arrays.hashCode((short[]) obj);
-        }
-        if (obj instanceof char[]) {
-            return Arrays.hashCode((char[]) obj);
-        }
-        if (obj instanceof int[]) {
-            return Arrays.hashCode((int[]) obj);
-        }
-        if (obj instanceof long[]) {
-            return Arrays.hashCode((long[]) obj);
-        }
-        if (obj instanceof float[]) {
-            return Arrays.hashCode((float[]) obj);
-        }
-        if (obj instanceof double[]) {
-            return Arrays.hashCode((double[]) obj);
-        }
-        return obj.hashCode();
-    }
-
-    /**
-     * Returns identity hash code for given object, same as {@link System#identityHashCode(Object)}.
-     *
-     * @param obj given object
-     * @return the system hash code
-     */
-    public static int systemHash(@Nullable Object obj) {
-        return System.identityHashCode(obj);
-    }
-
-    /**
      * Returns whether the given objects are equal. If the given objects are arrays, uses {@code Arrays.equals} or
-     * {@code Arrays.deepEquals} if necessary.
+     * {@link Arrays#deepEquals(Object[], Object[])} if necessary.
      * <p>
      * This method is equivalent to ({@link #equalsWith(Object, Object, boolean, boolean)}):
      * {@code equalsWith(a, b, true, true)}.
@@ -233,7 +126,7 @@ public class Jie {
      * @param objects the given objects
      * @return whether the given objects are equal
      */
-    public static boolean equals(Object @Nonnull ... objects) {
+    public static boolean equalsAll(@Nullable Object @Nonnull ... objects) {
         for (int i = 0; i < objects.length - 1; i++) {
             if (!equals(objects[i], objects[i + 1])) {
                 return false;
@@ -252,8 +145,8 @@ public class Jie {
      *         If the {@code arrayEquals} is {@code true}:
      *         <ul>
      *             <li>
-     *                 If the {@code deep} is {@code true}, uses {@code Arrays.deepEquals} for them. Otherwise, uses
-     *                 {@code Arrays.equals}.
+     *                 If the {@code deep} is {@code true}, uses {@link Arrays#deepEquals(Object[], Object[])} for
+     *                 them. Otherwise, uses {@code Arrays.equals}.
      *             </li>
      *         </ul>
      *     </li>
@@ -302,6 +195,101 @@ public class Jie {
             }
         }
         return Objects.equals(a, b);
+    }
+
+    /**
+     * Returns the hashcode of the given object. If the given object is array, uses {@code Arrays.hashCode} or
+     * {@link Arrays#deepHashCode(Object[])} if necessary.
+     * <p>
+     * This method is equivalent to ({@link #hashWith(Object, boolean, boolean)}): {@code hashWith(obj, true, true)}.
+     *
+     * @param obj the given object
+     * @return the hashcode of the given object
+     */
+    public static int hashCode(@Nullable Object obj) {
+        return hashWith(obj, true, true);
+    }
+
+    /**
+     * Returns the hashcode of the given objects via {@link Arrays#deepHashCode(Object[])}.
+     *
+     * @param objs the given objects
+     * @return the hashcode of the given objects via {@link Arrays#deepHashCode(Object[])}
+     */
+    public static int hashAll(@Nullable Object @Nonnull ... objs) {
+        return Arrays.deepHashCode(objs);
+    }
+
+    /**
+     * Returns the hashcode of the given object. This method follows the following logic:
+     * <ul>
+     *     <li>
+     *         If the given object is not an array, returns {@link Objects#hashCode(Object)}.
+     *     </li>
+     *     <li>
+     *         If the {@code arrayHash} is {@code true}:
+     *         <ul>
+     *             <li>
+     *                 If the {@code deep} is {@code true}, uses {@link Arrays#deepHashCode(Object[])} for them.
+     *                 Otherwise, uses {@code Arrays.hashCode}.
+     *             </li>
+     *         </ul>
+     *     </li>
+     *     <li>
+     *         Returns {@link Objects#hashCode(Object)} otherwise.
+     *     </li>
+     * </ul>
+     *
+     * @param obj       the given object
+     * @param arrayHash the arrayHash option
+     * @param deep      the deep option
+     * @return the hashcode of the given object
+     */
+    public static int hashWith(@Nullable Object obj, boolean arrayHash, boolean deep) {
+        if (obj == null || !arrayHash) {
+            return Objects.hashCode(obj);
+        }
+        Class<?> cls = obj.getClass();
+        if (cls.isArray()) {
+            if (obj instanceof Object[]) {
+                return deep ? Arrays.deepHashCode((Object[]) obj) : Arrays.hashCode((Object[]) obj);
+            }
+            if (obj instanceof boolean[]) {
+                return Arrays.hashCode((boolean[]) obj);
+            }
+            if (obj instanceof byte[]) {
+                return Arrays.hashCode((byte[]) obj);
+            }
+            if (obj instanceof short[]) {
+                return Arrays.hashCode((short[]) obj);
+            }
+            if (obj instanceof char[]) {
+                return Arrays.hashCode((char[]) obj);
+            }
+            if (obj instanceof int[]) {
+                return Arrays.hashCode((int[]) obj);
+            }
+            if (obj instanceof long[]) {
+                return Arrays.hashCode((long[]) obj);
+            }
+            if (obj instanceof float[]) {
+                return Arrays.hashCode((float[]) obj);
+            }
+            if (obj instanceof double[]) {
+                return Arrays.hashCode((double[]) obj);
+            }
+        }
+        return obj.hashCode();
+    }
+
+    /**
+     * Returns identity hash code for given object, same as {@link System#identityHashCode(Object)}.
+     *
+     * @param obj given object
+     * @return the system hash code
+     */
+    public static int systemHash(@Nullable Object obj) {
+        return System.identityHashCode(obj);
     }
 
     /**

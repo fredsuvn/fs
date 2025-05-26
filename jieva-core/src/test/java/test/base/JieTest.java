@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -39,12 +40,12 @@ public class JieTest {
         assertFalse(Jie.equals("1", "2"));
         assertFalse(Jie.equals(new boolean[]{true}, ""));
         assertFalse(Jie.equalsWith(new boolean[]{true}, new boolean[]{true}, false, false));
-        assertTrue(Jie.equals("", "", ""));
-        assertFalse(Jie.equals("1", "2", "3"));
-        assertTrue(Jie.equals());
-        assertTrue(Jie.equals(new Object[]{""}));
-        assertTrue(Jie.equals(new Object[]{"", ""}));
-        assertFalse(Jie.equals(new Object[]{"1", "2"}));
+        assertTrue(Jie.equalsAll("", "", ""));
+        assertFalse(Jie.equalsAll("1", "2", "3"));
+        assertTrue(Jie.equalsAll());
+        assertTrue(Jie.equalsAll(new Object[]{""}));
+        assertTrue(Jie.equalsAll(new Object[]{"", ""}));
+        assertFalse(Jie.equalsAll(new Object[]{"1", "2"}));
 
         // boolean
         assertTrue(Jie.equals(new boolean[]{true}, new boolean[]{true}));
@@ -130,6 +131,31 @@ public class JieTest {
         assertFalse(Jie.equals(new Object[]{1}, new boolean[]{true}));
         assertTrue(Jie.equalsWith(new Object[]{1}, new Object[]{1}, true, true));
         assertFalse(Jie.equalsWith(new Object[]{new Object[]{1}}, new Object[]{new Object[]{1}}, true, false));
+    }
+
+    @Test
+    public void testHashcode() {
+        String str = "str";
+        assertEquals(Jie.hashCode(str), Objects.hashCode(str));
+        Object[] strs = {"str1", "str2"};
+        assertEquals(Jie.hashAll(strs), Arrays.hashCode(strs));
+        Object[][] strss = {{"str1", "str2"}, {"str3", "str4"}};
+        assertEquals(Jie.hashCode(strss), Arrays.deepHashCode(strss));
+        Object[][] strss2 = {{"str1", "str2"}, {"str3", "str4"}};
+        assertEquals(Jie.hashWith(strss2, true, false), Arrays.hashCode(strss2));
+        assertEquals(Jie.hashWith(strss2, false, false), Objects.hashCode(strss2));
+        assertEquals(Jie.hashCode(new boolean[]{true, false}), Arrays.hashCode(new boolean[]{true, false}));
+        assertEquals(Jie.hashCode(new byte[]{6, 66}), Arrays.hashCode(new byte[]{6, 66}));
+        assertEquals(Jie.hashCode(new short[]{6, 66}), Arrays.hashCode(new short[]{6, 66}));
+        assertEquals(Jie.hashCode(new char[]{6, 66}), Arrays.hashCode(new char[]{6, 66}));
+        assertEquals(Jie.hashCode(new int[]{6, 66}), Arrays.hashCode(new int[]{6, 66}));
+        assertEquals(Jie.hashCode(new long[]{6, 66}), Arrays.hashCode(new long[]{6, 66}));
+        assertEquals(Jie.hashCode(new float[]{6, 66}), Arrays.hashCode(new float[]{6, 66}));
+        assertEquals(Jie.hashCode(new double[]{6, 66}), Arrays.hashCode(new double[]{6, 66}));
+
+        // null:
+        assertEquals(Jie.hashCode(null), Objects.hashCode(null));
+        assertEquals(Jie.hashWith(null, false, false), Objects.hashCode(null));
     }
 
     @Test
