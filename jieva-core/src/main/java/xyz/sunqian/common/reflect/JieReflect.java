@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -741,11 +742,13 @@ public class JieReflect {
     }
 
     /**
-     * Resolves the given type and tries to replace the given type's contained types, which equals to the specified
-     * matching type, with the specified replacement. Returns the type after the replacing, may be the given type itself
-     * if no type can be replaced. For example, a type: {@code Map<String, Integer>}, the result of
-     * {@code replaceType(type, Integer.class, Long.class)} will be: {@code Map<String, Long>}. Note the given type
-     * itself can also be replaced.
+     * Resolves the given type and replaces the resolved {@link Class} types, which equal to the specified matching
+     * type, with the specified replacement. Returns the fully replaced type (or the original type itself if no
+     * replacement were made).
+     * <p>
+     * For example, for a type: {@code Map<String, Integer>}, the result of
+     * {@code replaceType(type, Integer.class, Long.class)} is: {@code Map<String, Long>}. Note the given type itself
+     * can also be replaced.
      * <p>
      * This method supports resolving {@link Class}, {@link ParameterizedType}, {@link WildcardType} and
      * {@link GenericArrayType}.
@@ -758,32 +761,60 @@ public class JieReflect {
      */
     public static @Nonnull Type replaceType(
         @Nonnull Type type,
-        @Nonnull Type matching,
+        @Nonnull Class<?> matching,
         @Nonnull Type replacement
     ) throws ReflectionException {
-        if (Jie.equals(type, matching)) {
-            return replacement;
+        return replaceType(type, t -> Jie.equals(t, matching) ? replacement : t);
+    }
+
+    /**
+     * Resolves the given type, passes resolved {@link Class} types to the given mapper, and replaces them with the
+     * mapper's results which are not equal to the original passed {@link Class} types (via
+     * {@link Objects#equals(Object, Object)}). Returns the fully replaced type (or the original type itself if no
+     * replacement were made).
+     * <p>
+     * For example, for a type: {@code Map<String, Integer>}, the result of
+     * {@code replaceType(type, t -> Objects.equals(t, Integer.class) ? Long.class : t)} is: {@code Map<String, Long>}.
+     * Note the given type itself can also be replaced if it is a {@link Class} and the mapper's result is not equals to
+     * it.
+     * <p>
+     * This method supports resolving {@link Class}, {@link ParameterizedType}, {@link WildcardType} and
+     * {@link GenericArrayType}.
+     *
+     * @param type   the given type to be resolved
+     * @param mapper the given mapper
+     * @return the type after the replacing
+     * @throws ReflectionException if an error occurs during the replacing
+     */
+    public static @Nonnull Type replaceType(
+        @Nonnull Type type,
+        @Nonnull Function<? super @Nonnull Class<?>, ? extends @Nonnull Type> mapper
+    ) throws ReflectionException {
+        if (type instanceof Class<?>) {
+            Type newType = mapper.apply((Class<?>) type);
+            if (!Jie.equals(type, newType)) {
+                return newType;
+            }
         }
         if (type instanceof ParameterizedType) {
-            return replaceType((ParameterizedType) type, matching, replacement);
+            return replaceType((ParameterizedType) type, mapper);
         }
         if (type instanceof WildcardType) {
-            return replaceType((WildcardType) type, matching, replacement);
+            return replaceType((WildcardType) type, mapper);
         }
         if (type instanceof GenericArrayType) {
-            return replaceType((GenericArrayType) type, matching, replacement);
+            return replaceType((GenericArrayType) type, mapper);
         }
         return type;
     }
 
     private static @Nonnull Type replaceType(
         @Nonnull ParameterizedType type,
-        @Nonnull Type matching,
-        @Nonnull Type replacement
+        @Nonnull Function<? super @Nonnull Class<?>, ? extends @Nonnull Type> mapper
     ) throws ReflectionException {
         boolean matched = false;
         Type rawType = type.getRawType();
-        Type newRawType = replaceType(rawType, matching, replacement);
+        Type newRawType = replaceType(rawType, mapper);
         if (!(newRawType instanceof Class<?>)) {
             throw new ReflectionException("Unsupported raw type: " + newRawType + ".");
         }
@@ -793,7 +824,7 @@ public class JieReflect {
         Type ownerType = type.getOwnerType();
         Type newOwnerType = null;
         if (ownerType != null) {
-            newOwnerType = replaceType(ownerType, matching, replacement);
+            newOwnerType = replaceType(ownerType, mapper);
             if (!Jie.equals(ownerType, newOwnerType)) {
                 matched = true;
             }
@@ -801,7 +832,7 @@ public class JieReflect {
         Type[] actualTypeArguments = type.getActualTypeArguments();
         for (int i = 0; i < actualTypeArguments.length; i++) {
             Type actualTypeArgument = actualTypeArguments[i];
-            Type newActualTypeArgument = replaceType(actualTypeArgument, matching, replacement);
+            Type newActualTypeArgument = replaceType(actualTypeArgument, mapper);
             if (!Jie.equals(actualTypeArgument, newActualTypeArgument)) {
                 matched = true;
                 actualTypeArguments[i] = newActualTypeArgument;
@@ -816,14 +847,13 @@ public class JieReflect {
 
     private static @Nonnull Type replaceType(
         @Nonnull WildcardType type,
-        @Nonnull Type matching,
-        @Nonnull Type replacement
+        @Nonnull Function<? super @Nonnull Class<?>, ? extends @Nonnull Type> mapper
     ) throws ReflectionException {
         boolean matched = false;
         Type[] upperBounds = type.getUpperBounds();
         for (int i = 0; i < upperBounds.length; i++) {
             Type upperBound = upperBounds[i];
-            Type newUpperBound = replaceType(upperBound, matching, replacement);
+            Type newUpperBound = replaceType(upperBound, mapper);
             if (!Jie.equals(upperBound, newUpperBound)) {
                 matched = true;
                 upperBounds[i] = newUpperBound;
@@ -832,7 +862,7 @@ public class JieReflect {
         Type[] lowerBounds = type.getLowerBounds();
         for (int i = 0; i < lowerBounds.length; i++) {
             Type lowerBound = lowerBounds[i];
-            Type newLowerBound = replaceType(lowerBound, matching, replacement);
+            Type newLowerBound = replaceType(lowerBound, mapper);
             if (!Jie.equals(lowerBound, newLowerBound)) {
                 matched = true;
                 lowerBounds[i] = newLowerBound;
@@ -847,12 +877,11 @@ public class JieReflect {
 
     private static @Nonnull Type replaceType(
         @Nonnull GenericArrayType type,
-        @Nonnull Type matching,
-        @Nonnull Type replacement
+        @Nonnull Function<? super @Nonnull Class<?>, ? extends @Nonnull Type> mapper
     ) throws ReflectionException {
         boolean matched = false;
         Type componentType = type.getGenericComponentType();
-        Type newComponentType = replaceType(componentType, matching, replacement);
+        Type newComponentType = replaceType(componentType, mapper);
         if (!Jie.equals(componentType, newComponentType)) {
             matched = true;
         }

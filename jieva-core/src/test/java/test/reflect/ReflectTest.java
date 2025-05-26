@@ -25,12 +25,14 @@ import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 import static xyz.sunqian.test.JieTest.reflectThrows;
@@ -244,6 +246,7 @@ public class ReflectTest {
         assertFalse(JieReflect.isArray(int.class));
 
         // component type:
+        assertNull(JieReflect.arrayClass(((ParameterizedType) l1Type).getActualTypeArguments()[0]));
         assertNull(JieReflect.getComponentType(l1Type));
         assertEquals(JieReflect.getComponentType(l2Type), l1Type);
         assertEquals(JieReflect.getComponentType(int[].class), int.class);
@@ -388,211 +391,79 @@ public class ReflectTest {
             }
         };
     }
-    //
-    // @Test
-    // public void testReplaceType() {
-    //     Type t = new TypeRef<List<Map<String, List<String>>>>() {
-    //     }.type();
-    //     Type tl = new TypeRef<List<String>>() {
-    //     }.type();
-    //     assertEquals(
-    //         JieReflect.replaceType(t, tl, Integer.class),
-    //         new TypeRef<List<Map<String, Integer>>>() {
-    //         }.type()
-    //     );
-    //     Type tm = new TypeRef<Map<String, List<String>>>() {
-    //     }.type();
-    //     assertEquals(
-    //         JieReflect.replaceType(tm, String.class, Integer.class),
-    //         new TypeRef<Map<Integer, List<Integer>>>() {
-    //         }.type()
-    //     );
-    //
-    //     Type tw = new TypeRef<Map<String, ? extends List<String>>>() {
-    //     }.type();
-    //     assertEquals(
-    //         JieReflect.replaceType(tw, String.class, Integer.class),
-    //         new TypeRef<Map<Integer, ? extends List<Integer>>>() {
-    //         }.type()
-    //     );
-    //
-    //     Type tg = new TypeRef<Map<String, ? extends List<String>>[]>() {
-    //     }.type();
-    //     assertEquals(
-    //         JieReflect.replaceType(tg, String.class, Integer.class),
-    //         new TypeRef<Map<Integer, ? extends List<Integer>>[]>() {
-    //         }.type()
-    //     );
-    //
-    //     Type ts = new TypeRef<Map<String, ? extends List<String>>[]>() {
-    //     }.type();
-    //     assertSame(
-    //         JieReflect.replaceType(ts, Integer.class, Integer.class),
-    //         ts
-    //     );
-    //
-    //     assertEquals(
-    //         JieReflect.replaceType(new TypeRef<List<List<String>>>() {
-    //         }.type(), List.class, ArrayList.class),
-    //         new TypeRef<ArrayList<ArrayList<String>>>() {
-    //         }.type()
-    //     );
-    //     assertEquals(
-    //         JieReflect.replaceType(new TypeRef<List<ArrayList<String>>>() {
-    //         }.type(), ArrayList.class, LinkedList.class),
-    //         new TypeRef<List<LinkedList<String>>>() {
-    //         }.type()
-    //     );
-    //     assertEquals(
-    //         JieReflect.replaceType(new TypeRef<List<List<? extends String>>>() {
-    //         }.type(), String.class, Integer.class),
-    //         new TypeRef<List<List<? extends Integer>>>() {
-    //         }.type()
-    //     );
-    //     assertEquals(
-    //         JieReflect.replaceType(new TypeRef<List<List<? super String>>>() {
-    //         }.type(), String.class, Integer.class),
-    //         new TypeRef<List<List<? super Integer>>>() {
-    //         }.type()
-    //     );
-    //     assertEquals(
-    //         JieReflect.replaceType(JieType.array(String.class), String.class, Integer.class),
-    //         JieType.array(Integer.class)
-    //     );
-    //     assertEquals(
-    //         JieReflect.replaceType(JieType.lowerBound(JieType.lowerBound(String.class)), String.class, Integer.class),
-    //         JieType.lowerBound(JieType.lowerBound(Integer.class))
-    //     );
-    //     assertEquals(
-    //         JieReflect.replaceType(JieType.lowerBound(JieType.lowerBound(String.class)), String.class, String.class),
-    //         JieType.lowerBound(JieType.lowerBound(String.class))
-    //     );
-    //
-    //     assertEquals(
-    //         JieReflect.replaceType(new TypeRef<Inner<NumberString1>.SubInner<String, String>>() {
-    //         }.type(), NumberString1.class, NumberString2.class),
-    //         new TypeRef<Inner<NumberString2>.SubInner<String, String>>() {
-    //         }.type()
-    //     );
-    //     assertEquals(
-    //         JieReflect.replaceType(new TypeRef<Inner<NumberString1>.SubInner<String, String>>() {
-    //         }.type(), JieType.parameterized(Inner.class, Jie.array(NumberString1.class)), String.class),
-    //         JieType.parameterized(
-    //             Inner.SubInner.class,
-    //             Jie.array(String.class, String.class),
-    //             String.class
-    //         )
-    //     );
-    // }
 
-    // public interface SuperSuperInter1<SSI11, SSI12> {
-    //     String ssif1 = null;
-    //
-    //     default void ssim1() {
-    //     }
-    // }
-    //
-    // public interface SuperSuperInter2<SSI21, SSI22> {
-    //     String ssif2 = null;
-    //
-    //     default void ssim2() {
-    //     }
-    // }
-    //
-    // public interface SuperInter1<SI11, SI12> extends SuperSuperInter1<SI11, Integer>, SuperSuperInter2<Long, SI12> {
-    //     String sif1 = null;
-    //
-    //     default void sim1() {
-    //     }
-    // }
-    //
-    // public interface SuperInter2<SI21, SSI22> {
-    //     String sif2 = null;
-    //
-    //     default void sim2() {
-    //     }
-    // }
-    //
-    // public static class SuperClass1<SC11, SC12> {
-    //     public static String scf1;
-    //     private static String scf2;
-    //
-    //     public static void scm1() {
-    //     }
-    //
-    //     private static void scm2() {
-    //     }
-    // }
-    //
-    // public static class Inner<T extends Number & CharSequence>
-    //     extends SuperClass1<T, String> implements SuperInter1<Short, Character>, SuperInter2<Float, Double> {
-    //
-    //     public Inner() {
-    //     }
-    //
-    //     public Inner(int i, String s) {
-    //     }
-    //
-    //     private Inner(int i, String s, long l) {
-    //     }
-    //
-    //     public static String f1;
-    //     private static String f2;
-    //
-    //     public static void m1(int i) {
-    //     }
-    //
-    //     private static void m2() {
-    //     }
-    //
-    //     public class SubInner<SI1, SI2> {
-    //     }
-    //
-    //     public T[] tArray;
-    // }
-    //
-    // public static class NumberString1 extends Number implements CharSequence {
-    //
-    //     @Override
-    //     public int length() {
-    //         return 0;
-    //     }
-    //
-    //     @Override
-    //     public char charAt(int index) {
-    //         return 0;
-    //     }
-    //
-    //     @Nonnull
-    //     @Override
-    //     public CharSequence subSequence(int start, int end) {
-    //         return null;
-    //     }
-    //
-    //     @Override
-    //     public int intValue() {
-    //         return 0;
-    //     }
-    //
-    //     @Override
-    //     public long longValue() {
-    //         return 0;
-    //     }
-    //
-    //     @Override
-    //     public float floatValue() {
-    //         return 0;
-    //     }
-    //
-    //     @Override
-    //     public double doubleValue() {
-    //         return 0;
-    //     }
-    // }
-    //
-    // public static class NumberString2 extends NumberString1 {
-    // }
+    @Test
+    public void testReplaceType() throws Exception {
+        class X {
+            // String:
+            private List<String> f1;
+            private List<? extends String> f2;
+            private List<? extends String>[] f3;
+            private List<? extends List<? extends String>[]> f4;
+            private Map<
+                ? super List<? extends List<? extends String>[]>,
+                ? extends List<? extends List<? extends String>[]>
+                > f5;
+            private HashMap<
+                ? super List<? extends List<? extends HashMap>[]>,
+                ? extends List<? extends List<? extends HashMap>[]>
+                > f6;
 
+            // Integer
+            private List<Integer> r1;
+            private List<? extends Integer> r2;
+            private List<? extends Integer>[] r3;
+            private List<? extends List<? extends Integer>[]> r4;
+            private Map<
+                ? super List<? extends List<? extends Integer>[]>,
+                ? extends List<? extends List<? extends Integer>[]>
+                > r5;
+            private Hashtable<
+                ? super List<? extends List<? extends Hashtable>[]>,
+                ? extends List<? extends List<? extends Hashtable>[]>
+                > r6;
+        }
+        assertEquals(JieReflect.replaceType(X.class, X.class, Object.class), Object.class);
+        Type t1 = X.class.getDeclaredField("f1").getGenericType();
+        Type r1 = X.class.getDeclaredField("r1").getGenericType();
+        Type rp1 = JieReflect.replaceType(t1, String.class, Integer.class);
+        assertEquals(rp1, r1);
+        Type t2 = X.class.getDeclaredField("f2").getGenericType();
+        Type r2 = X.class.getDeclaredField("r2").getGenericType();
+        Type rp2 = JieReflect.replaceType(t2, String.class, Integer.class);
+        assertEquals(rp2, r2);
+        Type t3 = X.class.getDeclaredField("f3").getGenericType();
+        Type r3 = X.class.getDeclaredField("r3").getGenericType();
+        Type rp3 = JieReflect.replaceType(t3, String.class, Integer.class);
+        assertEquals(rp3, r3);
+        Type t4 = X.class.getDeclaredField("f4").getGenericType();
+        Type r4 = X.class.getDeclaredField("r4").getGenericType();
+        Type rp4 = JieReflect.replaceType(t4, String.class, Integer.class);
+        assertEquals(rp4, r4);
+        Type t5 = X.class.getDeclaredField("f5").getGenericType();
+        Type r5 = X.class.getDeclaredField("r5").getGenericType();
+        Type rp5 = JieReflect.replaceType(t5, String.class, Integer.class);
+        assertEquals(rp5, r5);
+        Type t6 = X.class.getDeclaredField("f6").getGenericType();
+        Type r6 = X.class.getDeclaredField("r6").getGenericType();
+        Type rp6 = JieReflect.replaceType(t6, HashMap.class, Hashtable.class);
+        assertEquals(rp6, r6);
+
+        // same:
+        assertSame(JieReflect.replaceType(t1, Integer.class, String.class), t1);
+        assertSame(JieReflect.replaceType(t2, Integer.class, String.class), t2);
+        assertSame(JieReflect.replaceType(t3, Integer.class, String.class), t3);
+        assertSame(JieReflect.replaceType(t4, Integer.class, String.class), t4);
+        assertSame(JieReflect.replaceType(t5, Integer.class, String.class), t5);
+
+        // special:
+        expectThrows(ReflectionException.class, () ->
+            JieReflect.replaceType(errorParameterizedType(), String.class, Integer.class));
+        Type p1 = JieType.parameterized(List.class, Jie.array(), Integer.class);
+        Type p2 = JieType.parameterized(List.class, Jie.array(), Long.class);
+        assertEquals(JieReflect.replaceType(p1, Integer.class, Long.class), p2);
+        assertSame(JieReflect.replaceType(p1, Integer.class, Integer.class), p1);
+    }
 
     public interface Inter0 {
 
