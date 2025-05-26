@@ -80,11 +80,11 @@ public class JieReflect {
      * Returns the raw class of the given type. The given type must be a {@link Class} or {@link ParameterizedType}.
      * This method returns the given type itself if it is a {@link Class}, or {@link ParameterizedType#getRawType()} if
      * it is a {@link ParameterizedType}. Returns {@code null} if the given type neither be {@link Class} nor
-     * {@link ParameterizedType}.
+     * {@link ParameterizedType}, or the raw type is not a {@link Class}.
      *
      * @param type the given type
      * @return the raw class of given type, or {@code null} if the given type neither be {@link Class} nor
-     * {@link ParameterizedType}
+     * {@link ParameterizedType}, or the raw type is not a {@link Class}
      */
     public static @Nullable Class<?> getRawClass(@Nonnull Type type) {
         if (type instanceof Class) {
@@ -754,6 +754,7 @@ public class JieReflect {
      * @param matching    the specified matching type
      * @param replacement the specified replacement
      * @return the type after the replacing
+     * @throws ReflectionException if an error occurs during the replacing
      */
     public static @Nonnull Type replaceType(
         @Nonnull Type type,
@@ -783,6 +784,9 @@ public class JieReflect {
         boolean matched = false;
         Type rawType = type.getRawType();
         Type newRawType = replaceType(rawType, matching, replacement);
+        if (!(newRawType instanceof Class<?>)) {
+            throw new ReflectionException("Unsupported raw type: " + newRawType + ".");
+        }
         if (!Jie.equals(rawType, newRawType)) {
             matched = true;
         }
@@ -804,7 +808,7 @@ public class JieReflect {
             }
         }
         if (matched) {
-            return JieType.parameterized(newRawType, actualTypeArguments, newOwnerType);
+            return JieType.parameterized((Class<?>) newRawType, actualTypeArguments, newOwnerType);
         } else {
             return type;
         }

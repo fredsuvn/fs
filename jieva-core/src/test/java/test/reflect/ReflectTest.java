@@ -1,5 +1,6 @@
 package test.reflect;
 
+import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 import test.utils.ErrorConstructor;
 import xyz.sunqian.annotations.Nonnull;
@@ -9,7 +10,6 @@ import xyz.sunqian.common.base.exception.UnreachablePointException;
 import xyz.sunqian.common.reflect.JieReflect;
 import xyz.sunqian.common.reflect.JieType;
 import xyz.sunqian.common.reflect.ReflectionException;
-import xyz.sunqian.common.reflect.TypeRef;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedType;
@@ -22,18 +22,15 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 import static xyz.sunqian.test.JieTest.reflectThrows;
@@ -60,7 +57,7 @@ public class ReflectTest {
         Type listType = X.class.getDeclaredField("list").getGenericType();
         assertEquals(JieReflect.getRawClass(listType), List.class);
         assertNull(JieReflect.getRawClass(List.class.getTypeParameters()[0]));
-        assertNull(JieReflect.getRawClass(JieType.parameterized(listType, new Class<?>[0])));
+        assertNull(JieReflect.getRawClass(errorParameterizedType()));
     }
 
     @Test
@@ -195,9 +192,9 @@ public class ReflectTest {
         Constructor<?> cl3 = Cls3.class.getConstructor();
         Constructor<?> pcl3 = Cls3.class.getDeclaredConstructor(int.class);
         assertEquals(JieReflect.getConstructor(Cls3.class, params), cl3);
-        assertEquals(JieReflect.getConstructor(Cls3.class, new Class<?>[]{int.class}), pcl3);
-        assertNull(JieReflect.getConstructor(Cls3.class, new Class<?>[]{int.class}, false));
-        assertNull(JieReflect.getConstructor(Cls3.class, new Class<?>[]{long.class}));
+        assertEquals(JieReflect.getConstructor(Cls3.class, Jie.array(int.class)), pcl3);
+        assertNull(JieReflect.getConstructor(Cls3.class, Jie.array(int.class), false));
+        assertNull(JieReflect.getConstructor(Cls3.class, Jie.array(long.class)));
     }
 
     @Test
@@ -296,7 +293,8 @@ public class ReflectTest {
 
     @Test
     public void testResolvingActualTypeArguments() {
-        abstract class X<T> extends AbstractMap<String, Integer> {}
+        abstract class X<T> extends AbstractMap<String, Integer> {
+        }
         assertEquals(
             JieReflect.resolveActualTypeArguments(X.class, Map.class),
             Arrays.asList(String.class, Integer.class)
@@ -309,7 +307,8 @@ public class ReflectTest {
             JieReflect.resolveActualTypeArguments(X[].class, Object.class),
             Collections.emptyList()
         );
-        abstract class Y<T> extends X<T> {}
+        abstract class Y<T> extends X<T> {
+        }
         assertEquals(
             JieReflect.resolveActualTypeArguments(Y.class, X.class),
             Collections.singletonList(Y.class.getTypeParameters()[0])
@@ -360,13 +359,34 @@ public class ReflectTest {
         Method mapTypeVariables = JieReflect.class.getDeclaredMethod("mapTypeVariables", Type.class, Map.class);
         mapTypeVariables.setAccessible(true);
         Map<@Nonnull TypeVariable<?>, @Nullable Type> mapping = new HashMap<>();
-        Type errorParam = JieType.parameterized(cls2, new Class<?>[0]);
+        Type errorParam = errorParameterizedType();
         mapTypeVariables.invoke(null, errorParam, mapping);
         assertTrue(mapping.isEmpty());
     }
 
     private Type getTypeParameter(Map<TypeVariable<?>, Type> map, Class<?> cls, int index) {
         return map.get(cls.getTypeParameters()[index]);
+    }
+
+    private ParameterizedType errorParameterizedType() {
+        return new ParameterizedType() {
+            @Override
+            @NotNull
+            public Type[] getActualTypeArguments() {
+                return new Type[0];
+            }
+
+            @NotNull
+            @Override
+            public Type getRawType() {
+                return null;
+            }
+
+            @Override
+            public Type getOwnerType() {
+                return null;
+            }
+        };
     }
     //
     // @Test
@@ -578,28 +598,32 @@ public class ReflectTest {
 
         String i0 = "";
 
-        default void im0() {}
+        default void im0() {
+        }
     }
 
     public interface Inter1 {
 
         String i1 = "";
 
-        default void im1() {}
+        default void im1() {
+        }
     }
 
     public interface Inter2 extends Inter1, Inter0 {
 
         String i2 = "";
 
-        default void im2() {}
+        default void im2() {
+        }
     }
 
     public interface Inter3 extends Inter2, Inter0 {
 
         String i3 = "";
 
-        default void im3() {}
+        default void im3() {
+        }
     }
 
     public static class Cls1 implements Inter1, Inter0 {
@@ -607,9 +631,11 @@ public class ReflectTest {
         public String c1;
         private String pc1;
 
-        public void cm1() {}
+        public void cm1() {
+        }
 
-        private void pcm1() {}
+        private void pcm1() {
+        }
     }
 
     public static class Cls2 extends Cls1 implements Inter2, Inter0 {
@@ -617,9 +643,11 @@ public class ReflectTest {
         public String c2;
         private String pc2;
 
-        public void cm2() {}
+        public void cm2() {
+        }
 
-        private void pcm2() {}
+        private void pcm2() {
+        }
     }
 
     public static class Cls3 extends Cls2 implements Inter3, Inter0 {
@@ -627,33 +655,45 @@ public class ReflectTest {
         public String c3;
         private String pc3;
 
-        public Cls3() {}
+        public Cls3() {
+        }
 
-        private Cls3(int i) {}
+        private Cls3(int i) {
+        }
 
-        public void cm3() {}
+        public void cm3() {
+        }
 
-        private void pcm3() {}
+        private void pcm3() {
+        }
     }
 
-    public interface MappingInterA1<A11, A12> {}
+    public interface MappingInterA1<A11, A12> {
+    }
 
-    public interface MappingInterA2<A21, A22> {}
+    public interface MappingInterA2<A21, A22> {
+    }
 
-    public interface MappingInterA<A1, A2, A3, A4> extends MappingInterA1<A1, A2>, MappingInterA2<A3, A4> {}
+    public interface MappingInterA<A1, A2, A3, A4> extends MappingInterA1<A1, A2>, MappingInterA2<A3, A4> {
+    }
 
-    public interface MappingInterB1<B11, B12> {}
+    public interface MappingInterB1<B11, B12> {
+    }
 
-    public interface MappingInterB2<B21, B22> {}
+    public interface MappingInterB2<B21, B22> {
+    }
 
-    public interface MappingInterB<B1, B2, B3, B4> extends MappingInterB1<B1, B2>, MappingInterB2<B3, B4> {}
+    public interface MappingInterB<B1, B2, B3, B4> extends MappingInterB1<B1, B2>, MappingInterB2<B3, B4> {
+    }
 
     public static class MappingCls1<C1, C2> implements
         MappingInterA<Integer, Long, Float, C1>,
         MappingInterB<Boolean, Byte, Short, C2> {
     }
 
-    public static class MappingCls2<C> extends MappingCls1<String, C> {}
+    public static class MappingCls2<C> extends MappingCls1<String, C> {
+    }
 
-    public static class MappingCls3 extends MappingCls2<CharSequence> {}
+    public static class MappingCls3 extends MappingCls2<CharSequence> {
+    }
 }
