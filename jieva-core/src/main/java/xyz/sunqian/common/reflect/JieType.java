@@ -103,7 +103,7 @@ public class JieType {
      * @param componentType the component type
      * @return a {@link GenericArrayType} with the specified component type
      */
-    public static GenericArrayType array(Type componentType) {
+    public static @Nonnull GenericArrayType array(@Nonnull Type componentType) {
         return new GenericArrayTypeImpl(componentType);
     }
 
@@ -113,7 +113,7 @@ public class JieType {
      *
      * @return a new instance of {@link Type}
      */
-    public static Type other() {
+    public static @Nonnull Type other() {
         return new OtherType();
     }
 
@@ -158,14 +158,14 @@ public class JieType {
             }
             if (o instanceof ParameterizedTypeImpl) {
                 ParameterizedTypeImpl that = (ParameterizedTypeImpl) o;
-                return Objects.equals(ownerType, that.ownerType) &&
-                    Objects.equals(rawType, that.rawType) &&
+                return Jie.equals(ownerType, that.ownerType) &&
+                    Jie.equals(rawType, that.rawType) &&
                     Arrays.equals(actualTypeArguments, that.actualTypeArguments);
             }
             if (o instanceof ParameterizedType) {
                 ParameterizedType that = (ParameterizedType) o;
-                return Objects.equals(ownerType, that.getOwnerType()) &&
-                    Objects.equals(rawType, that.getRawType()) &&
+                return Jie.equals(ownerType, that.getOwnerType()) &&
+                    Jie.equals(rawType, that.getRawType()) &&
                     Arrays.equals(actualTypeArguments, that.getActualTypeArguments());
             }
             return false;
@@ -264,7 +264,7 @@ public class JieType {
                 return "? super " + lowerBounds[0].getTypeName();
             }
             if (upperBounds.length > 0) {
-                if (Objects.equals(upperBounds[0], Object.class)) {
+                if (Jie.equals(upperBounds[0], Object.class)) {
                     return "?";
                 }
                 // ? extends

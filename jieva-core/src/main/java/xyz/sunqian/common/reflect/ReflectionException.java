@@ -2,6 +2,7 @@ package xyz.sunqian.common.reflect;
 
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.exception.JieException;
+import xyz.sunqian.common.base.exception.JieRuntimeException;
 
 /**
  * This runtime exception is typically used for wrapping exceptions thrown during the reflection operation. The
@@ -9,7 +10,7 @@ import xyz.sunqian.common.base.exception.JieException;
  *
  * @author sunqian
  */
-public class ReflectionException extends RuntimeException {
+public class ReflectionException extends JieRuntimeException {
 
     /**
      * Empty constructor.

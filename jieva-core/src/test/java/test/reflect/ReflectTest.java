@@ -6,10 +6,11 @@ import test.utils.ErrorConstructor;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.base.exception.UnreachablePointException;
 import xyz.sunqian.common.reflect.JieReflect;
 import xyz.sunqian.common.reflect.JieType;
+import xyz.sunqian.common.reflect.JvmException;
 import xyz.sunqian.common.reflect.ReflectionException;
+import xyz.sunqian.common.reflect.UnknownPrimitiveTypeException;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedType;
@@ -53,7 +54,7 @@ public class ReflectTest {
     @Test
     public void testRawClass() throws Exception {
         class X {
-            private List<String> list;
+            List<String> list;
         }
         assertEquals(JieReflect.getRawClass(String.class), String.class);
         Type listType = X.class.getDeclaredField("list").getGenericType();
@@ -65,14 +66,14 @@ public class ReflectTest {
     @Test
     public void testBounds() throws Exception {
         class X<T extends String, U> {
-            public List<? extends String> upper = null;
-            public List<? super String> lower = null;
+            List<? extends String> upper = null;
+            List<? super String> lower = null;
         }
-        ParameterizedType upperParam = (ParameterizedType) X.class.getField("upper").getGenericType();
+        ParameterizedType upperParam = (ParameterizedType) X.class.getDeclaredField("upper").getGenericType();
         WildcardType upper = (WildcardType) upperParam.getActualTypeArguments()[0];
         assertEquals(JieReflect.getUpperBound(upper), String.class);
         assertNull(JieReflect.getLowerBound(upper));
-        ParameterizedType lowerParam = (ParameterizedType) X.class.getField("lower").getGenericType();
+        ParameterizedType lowerParam = (ParameterizedType) X.class.getDeclaredField("lower").getGenericType();
         WildcardType lower = (WildcardType) lowerParam.getActualTypeArguments()[0];
         assertEquals(JieReflect.getLowerBound(lower), String.class);
         assertEquals(JieReflect.getUpperBound(lower), Object.class);
@@ -227,9 +228,9 @@ public class ReflectTest {
 
         // parameterized types:
         class X {
-            public List<? extends String> l1 = null;
-            public List<? extends String>[] l2 = null;
-            public List<? extends String>[][] l3 = null;
+            List<? extends String> l1 = null;
+            List<? extends String>[] l2 = null;
+            List<? extends String>[][] l3 = null;
         }
         Type l1Type = X.class.getDeclaredField("l1").getGenericType();
         assertEquals(JieReflect.arrayClass(l1Type), List[].class);
@@ -256,8 +257,8 @@ public class ReflectTest {
     public void testRuntimeClass() throws Exception {
         assertEquals(JieReflect.toRuntimeClass(int.class), int.class);
         class X<T> {
-            public List<? extends String> l1 = null;
-            public List<? extends String>[] l2 = null;
+            List<? extends String> l1 = null;
+            List<? extends String>[] l2 = null;
         }
         Type l1Type = X.class.getDeclaredField("l1").getGenericType();
         assertEquals(JieReflect.toRuntimeClass(l1Type), List.class);
@@ -283,7 +284,7 @@ public class ReflectTest {
 
         // unreachable:
         Method wrapperPrimitive = JieReflect.class.getDeclaredMethod("wrapperPrimitive", Class.class);
-        reflectThrows(UnreachablePointException.class, wrapperPrimitive, null, Object.class);
+        reflectThrows(UnknownPrimitiveTypeException.class, wrapperPrimitive, null, Object.class);
     }
 
     @Test
@@ -328,8 +329,8 @@ public class ReflectTest {
     @Test
     public void testMappingTypeParameter() throws Exception {
         class X {
-            private MappingCls3 cls3 = null;
-            private MappingCls2<Void> cls2 = null;
+            MappingCls3 cls3 = null;
+            MappingCls2<Void> cls2 = null;
         }
         Type cls3 = X.class.getDeclaredField("cls3").getGenericType();
         Map<TypeVariable<?>, Type> map = JieReflect.mapTypeParameters(cls3);
@@ -396,29 +397,29 @@ public class ReflectTest {
     public void testReplaceType() throws Exception {
         class X {
             // String:
-            private List<String> f1;
-            private List<? extends String> f2;
-            private List<? extends String>[] f3;
-            private List<? extends List<? extends String>[]> f4;
-            private Map<
+            List<String> f1;
+            List<? extends String> f2;
+            List<? extends String>[] f3;
+            List<? extends List<? extends String>[]> f4;
+            Map<
                 ? super List<? extends List<? extends String>[]>,
                 ? extends List<? extends List<? extends String>[]>
                 > f5;
-            private HashMap<
+            HashMap<
                 ? super List<? extends List<? extends HashMap>[]>,
                 ? extends List<? extends List<? extends HashMap>[]>
                 > f6;
 
             // Integer
-            private List<Integer> r1;
-            private List<? extends Integer> r2;
-            private List<? extends Integer>[] r3;
-            private List<? extends List<? extends Integer>[]> r4;
-            private Map<
+            List<Integer> r1;
+            List<? extends Integer> r2;
+            List<? extends Integer>[] r3;
+            List<? extends List<? extends Integer>[]> r4;
+            Map<
                 ? super List<? extends List<? extends Integer>[]>,
                 ? extends List<? extends List<? extends Integer>[]>
                 > r5;
-            private Hashtable<
+            Hashtable<
                 ? super List<? extends List<? extends Hashtable>[]>,
                 ? extends List<? extends List<? extends Hashtable>[]>
                 > r6;
@@ -463,6 +464,45 @@ public class ReflectTest {
         Type p2 = JieType.parameterized(List.class, Jie.array(), Long.class);
         assertEquals(JieReflect.replaceType(p1, Integer.class, Long.class), p2);
         assertSame(JieReflect.replaceType(p1, Integer.class, Integer.class), p1);
+    }
+
+    @Test
+    public void testExceptionConstructors() {
+
+        String message = "hello";
+        Throwable cause = new RuntimeException(message);
+
+        {
+            // ReflectionException
+            expectThrows(ReflectionException.class, () -> {
+                throw new ReflectionException();
+            });
+            expectThrows(ReflectionException.class, () -> {
+                throw new ReflectionException("");
+            });
+            expectThrows(ReflectionException.class, () -> {
+                throw new ReflectionException("", new RuntimeException());
+            });
+            ReflectionException e = new ReflectionException(cause);
+            assertEquals(e.getMessage(), message);
+            assertSame(e.getCause(), cause);
+        }
+
+        {
+            // JvmException
+            expectThrows(JvmException.class, () -> {
+                throw new JvmException();
+            });
+            expectThrows(JvmException.class, () -> {
+                throw new JvmException("");
+            });
+            expectThrows(JvmException.class, () -> {
+                throw new JvmException("", new RuntimeException());
+            });
+            JvmException e = new JvmException(cause);
+            assertEquals(e.getMessage(), message);
+            assertSame(e.getCause(), cause);
+        }
     }
 
     public interface Inter0 {

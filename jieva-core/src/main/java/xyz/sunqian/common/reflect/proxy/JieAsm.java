@@ -3,7 +3,7 @@ package xyz.sunqian.common.reflect.proxy;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import xyz.sunqian.common.reflect.JieJvm;
-import xyz.sunqian.common.reflect.NotPrimitiveException;
+import xyz.sunqian.common.reflect.UnknownPrimitiveTypeException;
 
 import java.lang.reflect.Parameter;
 import java.util.Objects;
@@ -75,7 +75,7 @@ public class JieAsm {
                 Opcodes.INVOKESTATIC, "java/lang/Double", "valueOf", "(D)Ljava/lang/Double;", false);
             return;
         }
-        throw new NotPrimitiveException(type);
+        throw new UnknownPrimitiveTypeException(type);
     }
 
     public static void visitObjectCast(MethodVisitor visitor, Class<?> type, boolean needReturn) {
@@ -162,7 +162,7 @@ public class JieAsm {
             }
             return;
         }
-        throw new NotPrimitiveException(type);
+        throw new UnknownPrimitiveTypeException(type);
     }
 
     public static void returnCastObject(MethodVisitor visitor, Class<?> type) {
@@ -201,7 +201,7 @@ public class JieAsm {
         } else if (Objects.equals(type, void.class)) {
             visitor.visitInsn(Opcodes.ACONST_NULL);
         } else {
-            throw new NotPrimitiveException(type);
+            throw new UnknownPrimitiveTypeException(type);
         }
         visitor.visitInsn(Opcodes.ARETURN);
     }

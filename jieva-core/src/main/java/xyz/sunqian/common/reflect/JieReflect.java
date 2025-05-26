@@ -6,7 +6,6 @@ import xyz.sunqian.annotations.OutParam;
 import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieString;
-import xyz.sunqian.common.base.exception.UnreachablePointException;
 import xyz.sunqian.common.collect.JieArray;
 import xyz.sunqian.common.collect.JieMap;
 import xyz.sunqian.common.collect.JieStream;
@@ -36,29 +35,6 @@ import java.util.stream.Collectors;
  * @author sunqian
  */
 public class JieReflect {
-
-    private static final @Nonnull Map<Class<?>, Class<?>> CLASS_WRAPPERS = Jie.map(
-        boolean.class, Boolean.class,
-        byte.class, Byte.class,
-        short.class, Short.class,
-        char.class, Character.class,
-        int.class, Integer.class,
-        long.class, Long.class,
-        float.class, Float.class,
-        double.class, Double.class,
-        void.class, Void.class
-    );
-
-    private static final @Nonnull Map<Class<?>, String> PRIMITIVE_ARRAY_CLASS_NAMES = Jie.map(
-        boolean.class, "[Z",
-        byte.class, "[B",
-        short.class, "[S",
-        char.class, "[C",
-        int.class, "[I",
-        long.class, "[J",
-        float.class, "[F",
-        double.class, "[D"
-    );
 
     /**
      * Returns the last name of the given type. The last name is sub-string after last dot(.) For example:
@@ -460,7 +436,10 @@ public class JieReflect {
         }
         if (componentType.isPrimitive()) {
             // No void[]
-            return PRIMITIVE_ARRAY_CLASS_NAMES.get(componentType);
+            if (Jie.equals(componentType, void.class)) {
+                return null;
+            }
+            return "[" + JieJvm.getDescriptor(componentType);
         }
         return "[L" + componentType.getName() + ";";
     }
@@ -536,11 +515,34 @@ public class JieReflect {
     }
 
     private static Class<?> wrapperPrimitive(Class<?> cls) {
-        Class<?> wrapper = CLASS_WRAPPERS.get(cls);
-        if (wrapper != null) {
-            return wrapper;
+        if (Jie.equals(cls, boolean.class)) {
+            return Boolean.class;
         }
-        throw new UnreachablePointException("Unknown primitive type: " + cls + ".");
+        if (Jie.equals(cls, byte.class)) {
+            return Byte.class;
+        }
+        if (Jie.equals(cls, short.class)) {
+            return Short.class;
+        }
+        if (Jie.equals(cls, char.class)) {
+            return Character.class;
+        }
+        if (Jie.equals(cls, int.class)) {
+            return Integer.class;
+        }
+        if (Jie.equals(cls, long.class)) {
+            return Long.class;
+        }
+        if (Jie.equals(cls, float.class)) {
+            return Float.class;
+        }
+        if (Jie.equals(cls, double.class)) {
+            return Double.class;
+        }
+        if (Jie.equals(cls, void.class)) {
+            return Void.class;
+        }
+        throw new UnknownPrimitiveTypeException(cls);
     }
 
     /**

@@ -19,7 +19,7 @@ public class TypeTest {
     public void testParameterized() throws Exception {
         class X<T> {
 
-            private List<String> list;
+            List<String> list;
 
             class Y<U> {
             }
@@ -96,9 +96,9 @@ public class TypeTest {
     @Test
     public void testWildcard() throws Exception {
         class X {
-            private List<? extends String> list1;
-            private List<? super String> list2;
-            private List<?> list3;
+            List<? extends String> list1;
+            List<? super String> list2;
+            List<?> list3;
         }
         Type list1 = ((ParameterizedType) (X.class.getDeclaredField("list1").getGenericType()))
             .getActualTypeArguments()[0];
@@ -133,8 +133,8 @@ public class TypeTest {
     @Test
     public void testArray() throws Exception {
         class X {
-            private List<? extends String> list;
-            private List<? extends String>[] array;
+            List<? extends String> list;
+            List<? extends String>[] array;
         }
         Type list = X.class.getDeclaredField("list").getGenericType();
         Type array = X.class.getDeclaredField("array").getGenericType();

@@ -1,7 +1,6 @@
 package xyz.sunqian.common.reflect;
 
-import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.base.JieString;
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.collect.JieArray;
 
 import java.lang.reflect.Constructor;
@@ -12,7 +11,6 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -22,121 +20,124 @@ import java.util.Objects;
  */
 public class JieJvm {
 
-    private static final Map<Class<?>, String> DESCRIPTORS = Jie.map(
-        boolean.class, "Z",
-        byte.class, "B",
-        short.class, "S",
-        char.class, "C",
-        int.class, "I",
-        long.class, "J",
-        float.class, "F",
-        double.class, "D",
-        void.class, "V"
-    );
-
-    private static final Map<Class<?>, String> INTERNAL_NAMES = Jie.map(
-        Object.class, "java/lang/Object",
-        String.class, "java/lang/String",
-        Boolean.class, "java/lang/Boolean",
-        Byte.class, "java/lang/Byte",
-        Short.class, "java/lang/Short",
-        Character.class, "java/lang/Character",
-        Integer.class, "java/lang/Integer",
-        Long.class, "java/lang/Long",
-        Float.class, "java/lang/Float",
-        Double.class, "java/lang/Double",
-        Void.class, "java/lang/Void"
-    );
-
     /**
-     * Returns the internal name of the given class.
-     * <p>
-     * For object types, the internal name is its fully qualified name (as returned by Class. getName(), where '.' are
-     * replaced by '/'); For primitive type, this method returns its descriptor ({@link #getDescriptor(Class)}).
+     * Returns the internal name of the given class. The internal name of a class is its fully qualified name, as
+     * returned by {@link Class#getName()}, where '.' are replaced by '/'.
      *
-     * @param cls given class
-     * @return internal name of the given class
+     * @param cls the given class
+     * @return the internal name of the given class.
      */
-    public static String getInternalName(Class<?> cls) {
-        String result = INTERNAL_NAMES.get(cls);
-        return result != null ? result : JieString.replace(cls.getName(), ".", "/");
+    public static @Nonnull String getInternalName(@Nonnull Class<?> cls) {
+        return cls.getName().replace('.', '/');
     }
 
     /**
-     * Returns JVM descriptor of the given class.
+     * Returns the descriptor of the given class.
      *
-     * @param cls given class
-     * @return JVM descriptor of the given class
+     * @param cls the given class
+     * @return the descriptor of the given class
      */
-    public static String getDescriptor(Class<?> cls) {
-        if (cls.isArray()) {
-            return "[" + getDescriptor(cls.getComponentType());
-        }
-        if (!cls.isPrimitive()) {
-            return "L" + getInternalName(cls) + ";";
-        }
-        return getPrimitiveDescriptor(cls);
-    }
-
-    private static String getPrimitiveDescriptor(Class<?> cls) {
-        String result = DESCRIPTORS.get(cls);
-        if (result != null) {
-            return result;
-        }
-        throw new NotPrimitiveException(cls);
+    public static @Nonnull String getDescriptor(@Nonnull Class<?> cls) {
+        StringBuilder appender = new StringBuilder();
+        appendDescriptor(cls, appender);
+        return appender.toString();
     }
 
     /**
-     * Returns JVM descriptor of the given method.
+     * Returns the descriptor of the given method.
      *
-     * @param method given method
-     * @return JVM descriptor of the given method
+     * @param method the given method
+     * @return the descriptor of the given method
      */
     public static String getDescriptor(Method method) {
         Class<?> returnType = method.getReturnType();
-        if (Objects.equals(returnType, void.class) && method.getParameterCount() == 0) {
+        Class<?>[] parameters = method.getParameterTypes();
+        if (Objects.equals(returnType, void.class) && parameters.length == 0) {
             return "()V";
         }
-        Class<?>[] params = method.getParameterTypes();
-        StringBuilder sb = new StringBuilder();
-        sb.append("(");
-        for (Class<?> param : params) {
-            sb.append(getDescriptor(param));
+        StringBuilder appender = new StringBuilder();
+        appender.append("(");
+        for (Class<?> parameter : parameters) {
+            appendDescriptor(parameter, appender);
         }
-        sb.append(")");
-        sb.append(getDescriptor(returnType));
-        return sb.toString();
+        appender.append(")");
+        appendDescriptor(returnType, appender);
+        return appender.toString();
     }
 
     /**
-     * Returns JVM descriptor of the given constructor.
+     * Returns the descriptor of the given constructor.
      *
-     * @param constructor given constructor
-     * @return JVM descriptor of the given constructor
+     * @param constructor the given constructor
+     * @return the descriptor of the given constructor
      */
     public static String getDescriptor(Constructor<?> constructor) {
-        if (constructor.getParameterCount() == 0) {
+        Class<?>[] parameters = constructor.getParameterTypes();
+        if (parameters.length == 0) {
             return "()V";
         }
-        Class<?>[] params = constructor.getParameterTypes();
-        StringBuilder sb = new StringBuilder();
-        sb.append("(");
-        for (Class<?> param : params) {
-            sb.append(getDescriptor(param));
+        StringBuilder appender = new StringBuilder();
+        appender.append("(");
+        for (Class<?> parameter : parameters) {
+            appendDescriptor(parameter, appender);
         }
-        sb.append(")V");
-        return sb.toString();
+        appender.append(")V");
+        return appender.toString();
+    }
+
+    private static void appendDescriptor(Class<?> cls, StringBuilder appender) {
+        Class<?> curCls = cls;
+        while (curCls.isArray()) {
+            appender.append('[');
+            curCls = curCls.getComponentType();
+        }
+        if (curCls.isPrimitive()) {
+            appender.append(getPrimitiveDescriptor(curCls));
+        } else {
+            appender.append('L').append(getInternalName(curCls)).append(';');
+        }
+    }
+
+    private static char getPrimitiveDescriptor(Class<?> cls) {
+        if (Objects.equals(cls, boolean.class)) {
+            return 'Z';
+        }
+        if (Objects.equals(cls, byte.class)) {
+            return 'B';
+        }
+        if (Objects.equals(cls, short.class)) {
+            return 'S';
+        }
+        if (Objects.equals(cls, char.class)) {
+            return 'C';
+        }
+        if (Objects.equals(cls, int.class)) {
+            return 'I';
+        }
+        if (Objects.equals(cls, long.class)) {
+            return 'J';
+        }
+        if (Objects.equals(cls, float.class)) {
+            return 'F';
+        }
+        if (Objects.equals(cls, double.class)) {
+            return 'D';
+        }
+        if (Objects.equals(cls, void.class)) {
+            return 'V';
+        }
+        throw new UnknownPrimitiveTypeException(cls);
     }
 
     /**
-     * Returns JVM signature of the given type.
+     * Returns the signature of the given type.
      *
-     * @param type given type
-     * @return JVM signature of the given type
+     * @param type the given type
+     * @return the signature of the given type
      */
     public static String getSignature(Type type) {
         if (type instanceof Class<?>) {
-            return getDescriptor((Class<?>) type);
+
         }
         if (type instanceof ParameterizedType) {
             ParameterizedType pt = (ParameterizedType) type;
@@ -168,6 +169,11 @@ public class JieJvm {
         }
         throw new IllegalArgumentException("Unknown type: " + type.getTypeName());
     }
+
+    // private static String getSignature(Class<?> type) {
+    //     TypeVariable<?>[] tv = type.getTypeParameters();
+    //
+    // }
 
     /**
      * Returns JVM signature of the given method.

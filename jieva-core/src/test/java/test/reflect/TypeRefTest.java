@@ -14,7 +14,7 @@ public class TypeRefTest {
     @Test
     public void testTypeRef() throws Exception {
         class X {
-            private List<String> list;
+            List<String> list;
         }
         Type listType = X.class.getDeclaredField("list").getGenericType();
         ParameterizedType parameterizedType = new TypeRef<List<String>>() {

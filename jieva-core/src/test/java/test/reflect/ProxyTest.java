@@ -4,7 +4,7 @@ import org.objectweb.asm.MethodVisitor;
 import org.testng.annotations.Test;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.reflect.NotPrimitiveException;
+import xyz.sunqian.common.reflect.UnknownPrimitiveTypeException;
 import xyz.sunqian.common.reflect.proxy.JieProxy;
 import xyz.sunqian.common.reflect.proxy.MethodProxyHandler;
 import xyz.sunqian.common.reflect.proxy.ProxyClass;
@@ -138,13 +138,13 @@ public class ProxyTest {
         Class<?> asmMisc = Class.forName("xyz.sunqian.common.reflect.proxy.JieAsm");
         Method method = asmMisc.getDeclaredMethod(
             "visitLoadPrimitiveParamAsObject", MethodVisitor.class, Class.class, int.class);
-        reflectThrows(NotPrimitiveException.class, method, null, null, Object.class, 1);
+        reflectThrows(UnknownPrimitiveTypeException.class, method, null, null, Object.class, 1);
         method = asmMisc.getDeclaredMethod(
             "visitObjectCastPrimitive", MethodVisitor.class, Class.class, boolean.class);
-        reflectThrows(NotPrimitiveException.class, method, null, null, Object.class, true);
+        reflectThrows(UnknownPrimitiveTypeException.class, method, null, null, Object.class, true);
         method = asmMisc.getDeclaredMethod(
             "returnPrimitiveCastObject", MethodVisitor.class, Class.class);
-        reflectThrows(NotPrimitiveException.class, method, null, null, Object.class);
+        reflectThrows(UnknownPrimitiveTypeException.class, method, null, null, Object.class);
     }
 
     private void testAsm(ClassP proxy, String ppi_String, boolean absError) {

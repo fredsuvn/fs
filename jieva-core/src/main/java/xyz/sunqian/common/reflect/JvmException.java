@@ -1,43 +1,49 @@
 package xyz.sunqian.common.reflect;
 
+import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.exception.JieException;
+import xyz.sunqian.common.base.exception.JieRuntimeException;
+
 /**
- * Jvm exception.
+ * This runtime exception is typically used for wrapping exceptions thrown during the JVM operation. The
+ * {@link #getCause()} method returns the wrapped original cause (if any).
  *
  * @author sunqian
  */
-public class JvmException extends RuntimeException {
+public class JvmException extends JieRuntimeException {
 
     /**
      * Empty constructor.
      */
     public JvmException() {
+        super();
     }
 
     /**
-     * Constructs with exception message.
+     * Constructs with the message.
      *
-     * @param message exception message
+     * @param message the message
      */
-    public JvmException(String message) {
+    public JvmException(@Nullable String message) {
         super(message);
     }
 
     /**
-     * Constructs with exception message and exception cause.
+     * Constructs with the message and cause.
      *
-     * @param message exception message
-     * @param cause   exception cause
+     * @param message the message
+     * @param cause   the cause
      */
-    public JvmException(String message, Throwable cause) {
+    public JvmException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
     /**
-     * Constructs with exception cause.
+     * Constructs with the cause.
      *
-     * @param cause exception cause
+     * @param cause the cause
      */
-    public JvmException(Throwable cause) {
-        super(cause);
+    public JvmException(@Nullable Throwable cause) {
+        this(JieException.getMessage(cause), cause);
     }
 }

@@ -1,5 +1,6 @@
 package xyz.sunqian.common.reflect;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.Jie;
 
 import java.lang.reflect.ParameterizedType;
@@ -21,13 +22,13 @@ import java.util.List;
  */
 public abstract class TypeRef<T> {
 
-    private final Type type;
+    private final @Nonnull Type type;
 
     protected TypeRef() {
         this.type = resolveActualTypeArgument();
     }
 
-    private Type resolveActualTypeArgument() {
+    private @Nonnull Type resolveActualTypeArgument() {
         Type genericSuper = getClass().getGenericSuperclass();
         if (genericSuper instanceof ParameterizedType) {
             ParameterizedType parameterizedSuper = (ParameterizedType) genericSuper;
@@ -44,7 +45,7 @@ public abstract class TypeRef<T> {
      *
      * @return the actual runtime type to be obtained
      */
-    public Type type() {
+    public @Nonnull Type type() {
         return type;
     }
 
@@ -53,7 +54,7 @@ public abstract class TypeRef<T> {
      *
      * @return the actual runtime type to be obtained as {@link ParameterizedType}
      */
-    public ParameterizedType asParameterized() {
+    public @Nonnull ParameterizedType asParameterized() {
         return (ParameterizedType) type;
     }
 }
