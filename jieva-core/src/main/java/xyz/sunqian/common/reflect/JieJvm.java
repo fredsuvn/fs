@@ -49,7 +49,7 @@ public class JieJvm {
      * @param method the given method
      * @return the descriptor of the given method
      */
-    public static String getDescriptor(Method method) {
+    public static @Nonnull String getDescriptor(@Nonnull Method method) {
         Class<?> returnType = method.getReturnType();
         Class<?>[] parameters = method.getParameterTypes();
         if (Objects.equals(returnType, void.class) && parameters.length == 0) {
@@ -71,7 +71,7 @@ public class JieJvm {
      * @param constructor the given constructor
      * @return the descriptor of the given constructor
      */
-    public static String getDescriptor(Constructor<?> constructor) {
+    public static @Nonnull String getDescriptor(@Nonnull Constructor<?> constructor) {
         Class<?>[] parameters = constructor.getParameterTypes();
         if (parameters.length == 0) {
             return "()V";
@@ -85,7 +85,7 @@ public class JieJvm {
         return appender.toString();
     }
 
-    private static void appendDescriptor(Class<?> cls, StringBuilder appender) {
+    private static void appendDescriptor(@Nonnull Class<?> cls, @Nonnull StringBuilder appender) {
         Class<?> curCls = cls;
         while (curCls.isArray()) {
             appender.append('[');
@@ -98,7 +98,7 @@ public class JieJvm {
         }
     }
 
-    private static char getPrimitiveDescriptor(Class<?> cls) {
+    private static char getPrimitiveDescriptor(@Nonnull Class<?> cls) {
         if (Objects.equals(cls, boolean.class)) {
             return 'Z';
         }
@@ -135,7 +135,7 @@ public class JieJvm {
      * @param type the given type
      * @return the signature of the given type
      */
-    public static String getSignature(Type type) {
+    public static @Nonnull String getSignature(@Nonnull Type type) {
         if (type instanceof Class<?>) {
 
         }
