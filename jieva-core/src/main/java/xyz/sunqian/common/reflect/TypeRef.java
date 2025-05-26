@@ -1,11 +1,10 @@
 package xyz.sunqian.common.reflect;
 
-import xyz.sunqian.common.collect.JieCollect;
+import xyz.sunqian.common.base.Jie;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * This abstract class is used for obtaining runtime {@link Type} instance:
@@ -17,6 +16,7 @@ import java.util.Objects;
  *     ParameterizedType paramType = new TypeRef<List<String>>(){}.asParameterized();// List<String>
  * }</pre>
  *
+ * @param <T> the actual runtime type to be obtained
  * @author sunqian
  */
 public abstract class TypeRef<T> {
@@ -24,41 +24,34 @@ public abstract class TypeRef<T> {
     private final Type type;
 
     protected TypeRef() {
-        this.type = reflectToActualType();
+        this.type = resolveActualTypeArgument();
     }
 
-    private Type reflectToActualType() {
+    private Type resolveActualTypeArgument() {
         Type genericSuper = getClass().getGenericSuperclass();
         if (genericSuper instanceof ParameterizedType) {
             ParameterizedType parameterizedSuper = (ParameterizedType) genericSuper;
-            if (Objects.equals(parameterizedSuper.getRawType(), TypeRef.class)) {
+            if (Jie.equals(parameterizedSuper.getRawType(), TypeRef.class)) {
                 return parameterizedSuper.getActualTypeArguments()[0];
             }
         }
         List<Type> typeArgs = JieReflect.resolveActualTypeArguments(genericSuper, TypeRef.class);
-        return get0(typeArgs);
-    }
-
-    private Type get0(List<Type> typeArgs) {
-        if (JieCollect.isEmpty(typeArgs)) {
-            throw new ReflectionException("Failed to get actual type of current TypeRef: " + getClass() + ".");
-        }
         return typeArgs.get(0);
     }
 
     /**
-     * Returns actual type of this reference.
+     * Returns the actual runtime type to be obtained
      *
-     * @return actual type of this reference
+     * @return the actual runtime type to be obtained
      */
     public Type type() {
         return type;
     }
 
     /**
-     * Returns actual type of this reference as {@link ParameterizedType}.
+     * Returns the actual runtime type to be obtained as {@link ParameterizedType}.
      *
-     * @return actual type of this reference as {@link ParameterizedType}
+     * @return the actual runtime type to be obtained as {@link ParameterizedType}
      */
     public ParameterizedType asParameterized() {
         return (ParameterizedType) type;

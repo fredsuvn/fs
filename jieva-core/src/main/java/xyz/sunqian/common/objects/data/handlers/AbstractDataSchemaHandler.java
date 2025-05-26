@@ -77,7 +77,7 @@ public abstract class AbstractDataSchemaHandler implements DataSchemaParser.Hand
     @Override
     public @Nullable boolean doParse(DataSchemaParser.Context context) {
         Type type = context.getType();
-        Class<?> rawType = JieReflect.getRawType(type);
+        Class<?> rawType = JieReflect.getRawClass(type);
         if (rawType == null) {
             throw new DataObjectException("Not a Class or ParameterizedType: " + type + ".");
         }

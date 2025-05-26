@@ -24,7 +24,7 @@ public class ProtobufBeanGenerator implements BeanMapperHandler.BeanGenerator {
         if (!(targetType instanceof Class<?>)) {
             return BeanMapperHandler.DEFAULT_GENERATOR.generate(targetType);
         }
-        Class<?> rawType = JieReflect.getRawType(targetType);
+        Class<?> rawType = JieReflect.getRawClass(targetType);
         // Check whether it is a protobuf object
         boolean isProtobuf = false;
         boolean isBuilder = false;

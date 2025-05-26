@@ -60,14 +60,14 @@ public class JieReflect {
     );
 
     /**
-     * Returns the last name of the given class. The last name is sub-string after last dot. For example: {@code String}
-     * is last name of {@code java.lang.String}.
+     * Returns the last name of the given type. The last name is sub-string after last dot(.) For example:
+     * {@code String} is the last name of {@code java.lang.String}.
      *
-     * @param cls the given class
-     * @return the last name of given class
+     * @param cls the given type
+     * @return the last name of given type
      */
-    public static @Nonnull String getLastName(@Nonnull Class<?> cls) {
-        String className = cls.getName();
+    public static @Nonnull String getLastName(@Nonnull Type cls) {
+        String className = cls.getTypeName();
         return getLastName(className);
     }
 
@@ -77,18 +77,22 @@ public class JieReflect {
     }
 
     /**
-     * Returns the raw type of the given type. the given type must be a {@link Class} or {@link ParameterizedType}.
-     * Returns {@code null} if the given type neither be {@link Class} nor {@link ParameterizedType}.
+     * Returns the raw class of the given type. The given type must be a {@link Class} or {@link ParameterizedType}.
+     * This method returns the given type itself if it is a {@link Class}, or {@link ParameterizedType#getRawType()} if
+     * it is a {@link ParameterizedType}. Returns {@code null} if the given type neither be {@link Class} nor
+     * {@link ParameterizedType}.
      *
      * @param type the given type
-     * @return the raw type of given type or {@code null}
+     * @return the raw class of given type, or {@code null} if the given type neither be {@link Class} nor
+     * {@link ParameterizedType}
      */
-    public static @Nullable Class<?> getRawType(@Nonnull Type type) {
+    public static @Nullable Class<?> getRawClass(@Nonnull Type type) {
         if (type instanceof Class) {
             return (Class<?>) type;
         }
         if (type instanceof ParameterizedType) {
-            return (Class<?>) ((ParameterizedType) type).getRawType();
+            Type rawType = ((ParameterizedType) type).getRawType();
+            return rawType instanceof Class<?> ? (Class<?>) rawType : null;
         }
         return null;
     }
@@ -709,7 +713,7 @@ public class JieReflect {
         for (Type anInterface : interfaces) {
             mapTypeVariables(anInterface, mapping);
             // never null
-            Class<?> rawClass = Objects.requireNonNull(getRawType(anInterface));
+            Class<?> rawClass = Objects.requireNonNull(getRawClass(anInterface));
             mapTypeVariables(rawClass.getGenericInterfaces(), mapping);
         }
     }
@@ -723,7 +727,11 @@ public class JieReflect {
         }
         ParameterizedType parameterizedType = (ParameterizedType) type;
         Type[] typeArguments = parameterizedType.getActualTypeArguments();
-        Class<?> rawClass = (Class<?>) parameterizedType.getRawType();
+        Class<?> rawClass = getRawClass(parameterizedType);
+        if (rawClass == null) {
+            // unreachable
+            return;
+        }
         TypeVariable<?>[] typeParameters = rawClass.getTypeParameters();
         for (int i = 0; i < typeParameters.length; i++) {
             TypeVariable<?> typeParameter = typeParameters[i];

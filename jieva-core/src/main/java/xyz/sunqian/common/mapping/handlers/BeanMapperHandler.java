@@ -82,7 +82,7 @@ public class BeanMapperHandler implements Mapper.Handler {
             if (supplier != null) {
                 return supplier.get();
             }
-            Class<?> rawType = JieReflect.getRawType(type);
+            Class<?> rawType = JieReflect.getRawClass(type);
             if (rawType == null) {
                 return null;
             }

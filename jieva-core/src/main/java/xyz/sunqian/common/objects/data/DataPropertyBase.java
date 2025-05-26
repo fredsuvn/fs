@@ -44,7 +44,7 @@ public interface DataPropertyBase {
      */
     @Nullable
     default Class<?> getRawType() {
-        return JieReflect.getRawType(getType());
+        return JieReflect.getRawClass(getType());
     }
 
     /**

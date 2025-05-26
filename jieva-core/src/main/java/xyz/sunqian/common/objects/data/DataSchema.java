@@ -71,7 +71,7 @@ public interface DataSchema {
      * @return raw type of the {@link #getType()}
      */
     default Class<?> getRawType() {
-        return JieReflect.getRawType(getType());
+        return JieReflect.getRawClass(getType());
     }
 
     /**

@@ -34,7 +34,7 @@ public class ProtobufBeanResolveHandler implements DataSchemaParser.Handler {
     @Override
     public @Nullable boolean doParse(DataSchemaParser.Context context) {
         try {
-            Class<?> rawType = JieReflect.getRawType(context.getType());
+            Class<?> rawType = JieReflect.getRawClass(context.getType());
             if (rawType == null) {
                 return true;
             }
@@ -135,7 +135,7 @@ public class ProtobufBeanResolveHandler implements DataSchemaParser.Handler {
         Type type = getterMethod.getGenericReturnType();
         Invocable getter = Invocable.of(getterMethod);
         if (isBuilder) {
-            Method setterMethod = rawClass.getMethod("set" + JieString.capitalize(rawName), JieReflect.getRawType(type));
+            Method setterMethod = rawClass.getMethod("set" + JieString.capitalize(rawName), JieReflect.getRawClass(type));
             Invocable setter = Invocable.of(setterMethod);
             return new Impl(rawName, type, getterMethod, setterMethod, getter, setter);
         } else {

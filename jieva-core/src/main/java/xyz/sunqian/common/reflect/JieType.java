@@ -1,7 +1,6 @@
 package xyz.sunqian.common.reflect;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.collect.JieArray;
 import xyz.sunqian.common.collect.JieCollect;
 
 import java.lang.reflect.GenericArrayType;
@@ -56,7 +55,7 @@ public class JieType {
      * @return a {@link ParameterizedType}
      */
     public static ParameterizedType parameterized(Type rawType, Type[] actualTypeArgs, @Nullable Type ownerType) {
-        return new ParameterizedTypeImpl(rawType, actualTypeArgs, ownerType);
+        return TypeBack.parameterized(rawType, actualTypeArgs, ownerType);
     }
 
     /**
@@ -139,97 +138,6 @@ public class JieType {
      */
     public static Type other() {
         return new JievaType();
-    }
-
-    private static final class ParameterizedTypeImpl implements ParameterizedType {
-
-        private final Class<?> rawType;
-        private final Type[] actualTypeArguments;
-        private final @Nullable Type ownerType;
-
-        private ParameterizedTypeImpl(Type rawType, Type[] actualTypeArguments, @Nullable Type ownerType) {
-            this.rawType = (Class<?>) rawType;
-            this.actualTypeArguments = actualTypeArguments;
-            if (ownerType != null) {
-                this.ownerType = ownerType;
-            } else {
-                this.ownerType = this.rawType.getDeclaringClass();
-            }
-        }
-
-        @Override
-        public Type[] getActualTypeArguments() {
-            return actualTypeArguments.clone();
-        }
-
-        @Override
-        public Type getRawType() {
-            return rawType;
-        }
-
-        @Override
-        public Type getOwnerType() {
-            return ownerType;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null) {
-                return false;
-            }
-            if (o instanceof ParameterizedTypeImpl) {
-                ParameterizedTypeImpl that = (ParameterizedTypeImpl) o;
-                return Objects.equals(rawType, that.rawType)
-                    && Objects.equals(ownerType, that.ownerType)
-                    && Arrays.equals(actualTypeArguments, that.actualTypeArguments);
-            }
-            if (o instanceof ParameterizedType) {
-                ParameterizedType that = (ParameterizedType) o;
-                return Objects.equals(rawType, that.getRawType())
-                    && Objects.equals(ownerType, that.getOwnerType())
-                    && Arrays.equals(actualTypeArguments, that.getActualTypeArguments());
-            }
-            return false;
-        }
-
-        @Override
-        public int hashCode() {
-            return Arrays.hashCode(this.actualTypeArguments)
-                ^ Objects.hashCode(this.ownerType)
-                ^ Objects.hashCode(this.rawType);
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder sb = new StringBuilder();
-            if (ownerType != null) {
-                // test.A<T>
-                sb.append(ownerType.getTypeName());
-                // test.A<T>$
-                sb.append("$");
-                // test.A<T>$B
-                sb.append(rawType.getSimpleName());
-            } else {
-                // test.B
-                sb.append(rawType.getName());
-            }
-            if (JieArray.isNotEmpty(actualTypeArguments)) {
-                sb.append("<");
-                boolean first = true;
-                for (Type t : actualTypeArguments) {
-                    if (!first) {
-                        sb.append(", ");
-                    }
-                    sb.append(t.getTypeName());
-                    first = false;
-                }
-                sb.append(">");
-            }
-            return sb.toString();
-        }
     }
 
     private static class WildcardTypeImpl implements WildcardType {

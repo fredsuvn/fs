@@ -264,7 +264,7 @@ public class JieDataObject {
 
             @Override
             public @Nullable Class<?> getRawType() {
-                return JieReflect.getRawType(type);
+                return JieReflect.getRawClass(type);
             }
 
             @Override

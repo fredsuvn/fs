@@ -97,13 +97,13 @@ public class CollectionMappingHandler implements Mapper.Handler {
         }
         if (type instanceof GenericArrayType) {
             Type componentType = ((GenericArrayType) type).getGenericComponentType();
-            Class<?> componentClass = JieReflect.getRawType(componentType);
+            Class<?> componentClass = JieReflect.getRawClass(componentType);
             if (componentClass == null && componentType instanceof TypeVariable<?>) {
                 componentClass = Object.class;
             }
             return Array.newInstance(componentClass, size);
         }
-        Class<?> rawType = JieReflect.getRawType(type);
+        Class<?> rawType = JieReflect.getRawClass(type);
         if (rawType == null) {
             return null;
         }
