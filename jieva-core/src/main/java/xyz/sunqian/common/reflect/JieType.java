@@ -114,7 +114,7 @@ public class JieType {
      * @return a new instance of {@link Type}
      */
     public static Type other() {
-        return new JievaType();
+        return new OtherType();
     }
 
     private static final class ParameterizedTypeImpl implements ParameterizedType {
@@ -314,7 +314,7 @@ public class JieType {
         }
     }
 
-    private static final class JievaType implements Type {
+    private static final class OtherType implements Type {
 
         @Override
         public @Nonnull String getTypeName() {
