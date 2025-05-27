@@ -173,24 +173,24 @@ public class Jie {
         }
         Class<?> typeA = a.getClass();
         Class<?> typeB = b.getClass();
-        if (typeA.isArray() && typeB.isArray()) {
-            if (a instanceof Object[] && b instanceof Object[]) {
+        if (typeA.isArray() && equals(typeA, typeB)) {
+            if (a instanceof Object[]) {
                 return deep ? Arrays.deepEquals((Object[]) a, (Object[]) b) : Arrays.equals((Object[]) a, (Object[]) b);
-            } else if (a instanceof boolean[] && b instanceof boolean[]) {
+            } else if (a instanceof boolean[]) {
                 return Arrays.equals((boolean[]) a, (boolean[]) b);
-            } else if (a instanceof byte[] && b instanceof byte[]) {
+            } else if (a instanceof byte[]) {
                 return Arrays.equals((byte[]) a, (byte[]) b);
-            } else if (a instanceof short[] && b instanceof short[]) {
+            } else if (a instanceof short[]) {
                 return Arrays.equals((short[]) a, (short[]) b);
-            } else if (a instanceof char[] && b instanceof char[]) {
+            } else if (a instanceof char[]) {
                 return Arrays.equals((char[]) a, (char[]) b);
-            } else if (a instanceof int[] && b instanceof int[]) {
+            } else if (a instanceof int[]) {
                 return Arrays.equals((int[]) a, (int[]) b);
-            } else if (a instanceof long[] && b instanceof long[]) {
+            } else if (a instanceof long[]) {
                 return Arrays.equals((long[]) a, (long[]) b);
-            } else if (a instanceof float[] && b instanceof float[]) {
+            } else if (a instanceof float[]) {
                 return Arrays.equals((float[]) a, (float[]) b);
-            } else if (a instanceof double[] && b instanceof double[]) {
+            } else if (a instanceof double[]) {
                 return Arrays.equals((double[]) a, (double[]) b);
             }
         }
@@ -283,12 +283,13 @@ public class Jie {
     }
 
     /**
-     * Returns identity hash code for given object, same as {@link System#identityHashCode(Object)}.
+     * Returns the identity hashcode of the given object, this method is equivalent to
+     * {@link System#identityHashCode(Object)}.
      *
-     * @param obj given object
-     * @return the system hash code
+     * @param obj the given object
+     * @return the identity hashcode of the given object
      */
-    public static int systemHash(@Nullable Object obj) {
+    public static int hashId(@Nullable Object obj) {
         return System.identityHashCode(obj);
     }
 
