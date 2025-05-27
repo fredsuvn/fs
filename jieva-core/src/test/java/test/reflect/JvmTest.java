@@ -180,23 +180,29 @@ public class JvmTest {
             class B<U> {
             }
         }
+        class A1 extends A<String> {}
         class N<
             T, K extends String & Serializable, V extends List<? extends String> & Serializable, U extends List,
             F extends T, H extends V, I extends A<String>, J extends A<String>.B<String>
             > {
             <B> B bb(
                 int i,
-                List<? extends String> l1,
+                List<B> l1,
                 List<? super String> l2,
                 List<? super List<? extends Integer>> l3,
-                List<?> l4
+                List<?> l4,
+                String[] a1,
+                List<String>[] a2,
+                String[][] a3
             ) {
                 return null;
             }
+
+            String[] ss(A<String>[] b){return null;}
         }
         abstract class M extends N implements List {
         }
-        abstract class L extends Object implements Serializable, List<String> {
+        abstract class L extends A1 implements Serializable, List<String> {
         }
         assertEquals(JieType.questionMark(), new TypeRef<List<?>>() {
         }.asParameterized().getActualTypeArguments()[0]);
@@ -205,88 +211,7 @@ public class JvmTest {
         System.out.println(A.B.class.getSimpleName());
         ClassReader cr = new ClassReader(N.class.getName());
         cr.accept(new SignatureParser(), 0);
-
-
-        // expectThrows(IllegalArgumentException.class, () -> JieJvm.getSignature(JieType.other()));
-        // assertEquals(
-        //     JieJvm.getSignature(BaseClass.class.getMethod("m1")),
-        //     org.objectweb.asm.Type.getMethodDescriptor(BaseClass.class.getMethod("m1"))
-        // );
-        // assertEquals(
-        //     JieJvm.getSignature(BaseClass.class.getMethod("m2", String.class)),
-        //     org.objectweb.asm.Type.getMethodDescriptor(BaseClass.class.getMethod("m2", String.class))
-        // );
-        // assertEquals(
-        //     JieJvm.getSignature(BaseClass.class.getMethod("m3", String.class)),
-        //     org.objectweb.asm.Type.getMethodDescriptor(BaseClass.class.getMethod("m3", String.class))
-        // );
-        // assertEquals(
-        //     JieJvm.getSignature(BaseInter.class.getMethod("i1", String.class)),
-        //     org.objectweb.asm.Type.getMethodDescriptor(BaseInter.class.getMethod("i1", String.class))
-        // );
-        // assertEquals(
-        //     JieJvm.getSignature(BaseInter.class.getMethod("i2", String.class)),
-        //     org.objectweb.asm.Type.getMethodDescriptor(BaseInter.class.getMethod("i2", String.class))
-        // );
-        // assertEquals(
-        //     JieJvm.getSignature(BaseClass.class.getMethod("m4", String.class, List.class, List.class, List.class)),
-        //     "(Ljava/lang/String;Ljava/util/List<Ljava/lang/String;>;Ljava/util/List<-Ljava/lang/String;>;Ljava/util/List<+Ljava/lang/String;>;)Ljava/lang/String;"
-        // );
-        // assertEquals(
-        //     JieJvm.getSignature(BaseClass.class.getConstructor()),
-        //     org.objectweb.asm.Type.getConstructorDescriptor(BaseClass.class.getConstructor())
-        // );
-        // assertEquals(
-        //     JieJvm.getSignature(BaseClass.class.getConstructor(String.class, List.class, List.class, List.class)),
-        //     "(Ljava/lang/String;Ljava/util/List<Ljava/lang/String;>;Ljava/util/List<-Ljava/lang/String;>;Ljava/util/List<+Ljava/lang/String;>;)V"
-        // );
-        //
-        // assertEquals(
-        //     JieJvm.getSignature(XClass.class.getDeclaredField("f1").getGenericType()),
-        //     org.objectweb.asm.Type.getDescriptor(XClass.class.getDeclaredField("f1").getType())
-        // );
-        // assertEquals(
-        //     JieJvm.getSignature(XClass.class.getDeclaredField("f2").getGenericType()),
-        //     org.objectweb.asm.Type.getDescriptor(XClass.class.getDeclaredField("f2").getType())
-        // );
-        // assertEquals(
-        //     JieJvm.getSignature(XClass.class.getDeclaredField("f3").getGenericType()),
-        //     org.objectweb.asm.Type.getDescriptor(XClass.class.getDeclaredField("f3").getType())
-        // );
-        // assertEquals(
-        //     JieJvm.getSignature(XClass.class.getDeclaredField("f4").getGenericType()),
-        //     "Ljava/util/List<+TV;>;"
-        // );
-        // assertEquals(
-        //     JieJvm.getSignature(XClass.class.getDeclaredField("f5").getGenericType()),
-        //     "Ljava/util/List<-TV;>;"
-        // );
-        // assertEquals(
-        //     JieJvm.getSignature(XClass.class.getDeclaredField("f6").getGenericType()),
-        //     "[Ljava/util/List<+TV;>;"
-        // );
-        // assertEquals(
-        //     JieJvm.getSignature(XClass.class.getDeclaredField("f7").getGenericType()),
-        //     "[Ljava/util/List<-Ljava/lang/String;>;"
-        // );
-        //
-        // assertEquals(
-        //     JieJvm.getSignature(XClass.class.getMethod("x1", List.class, List.class, List[].class, List.class)),
-        //     "(TX;Ljava/util/List<+TT;>;[Ljava/util/List;Ljava/util/List<+Ljava/lang/String;>;)Ljava/util/List<+TU;>;"
-        // );
-        // assertEquals(
-        //     JieJvm.getSignature(XClass.class.getConstructor(List.class, List.class, List[].class, List.class)),
-        //     "(TX;Ljava/util/List<+TT;>;[Ljava/util/List;Ljava/util/List<+Ljava/lang/String;>;)V"
-        // );
-        //
-        // assertEquals(
-        //     JieJvm.declareSignature(BaseClass.class),
-        //     org.objectweb.asm.Type.getDescriptor(Object.class)
-        // );
-        // assertEquals(
-        //     JieJvm.declareSignature(XClass.class),
-        //     "<T:Ljava/lang/Number;:Ljava/lang/CharSequence;U:Ljava/lang/Object;V:TT;X::Ljava/util/List<-Ljava/lang/Integer;>;Y::Ljava/io/Serializable;W::Ljava/lang/CharSequence;:Ljava/util/RandomAccess;P:Ljava/lang/String;O:TY;M:Ljava/util/ArrayList<Ljava/lang/String;>;>Ltest/reflect/JvmTest$BaseClass;Ltest/reflect/JvmTest$BaseInter;Ltest/reflect/JvmTest$XInter<TV;TV;Ljava/lang/String;>;"
-        // );
+        System.out.println(JieJvm.getSignature(N.class));
     }
 
     @Test
@@ -319,7 +244,7 @@ public class JvmTest {
 
         @Override
         public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
-            System.out.println(signature);
+            //System.out.println(signature);
             return super.visitField(access, name, descriptor, signature, value);
         }
 
@@ -331,7 +256,7 @@ public class JvmTest {
             String signature,
             String[] exceptions
         ) {
-            System.out.println(signature);
+            //System.out.println(signature);
             signatureMap.put(name + "-" + descriptor, signature);
             return super.visitMethod(access, name, descriptor, signature, exceptions);
         }

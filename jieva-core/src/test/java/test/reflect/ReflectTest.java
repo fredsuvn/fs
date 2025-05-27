@@ -6,11 +6,11 @@ import test.utils.ErrorConstructor;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 import xyz.sunqian.common.reflect.JieReflect;
 import xyz.sunqian.common.reflect.JieType;
 import xyz.sunqian.common.reflect.JvmException;
 import xyz.sunqian.common.reflect.ReflectionException;
-import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedType;
@@ -39,6 +39,26 @@ import static org.testng.Assert.expectThrows;
 import static xyz.sunqian.test.JieTest.reflectThrows;
 
 public class ReflectTest {
+
+    @Test
+    public void testTypeCheck() throws Exception {
+        class X<T> {
+            List<String> l1;
+            List<? extends String> l2;
+            List<String>[] l3;
+        }
+        assertTrue(JieReflect.isClass(Object.class));
+        assertFalse(JieReflect.isClass(X.class.getDeclaredField("l1").getGenericType()));
+        assertTrue(JieReflect.isParameterized(X.class.getDeclaredField("l1").getGenericType()));
+        assertFalse(JieReflect.isParameterized(Object.class));
+        assertTrue(JieReflect.isWildcard(((ParameterizedType) X.class.getDeclaredField("l2").getGenericType())
+            .getActualTypeArguments()[0]));
+        assertFalse(JieReflect.isWildcard(Object.class));
+        assertTrue(JieReflect.isTypeVariable(X.class.getTypeParameters()[0]));
+        assertFalse(JieReflect.isTypeVariable(Object.class));
+        assertTrue(JieReflect.isGenericArray(X.class.getDeclaredField("l3").getGenericType()));
+        assertFalse(JieReflect.isGenericArray(Object.class));
+    }
 
     @Test
     public void testLastName() throws Exception {

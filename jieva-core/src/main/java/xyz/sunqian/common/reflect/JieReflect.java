@@ -38,6 +38,56 @@ import java.util.stream.Collectors;
 public class JieReflect {
 
     /**
+     * Returns {@code true} if the given type is a {@link Class}, {@code false} otherwise.
+     *
+     * @param type the given type
+     * @return {@code true} if the given type is a {@link Class}, {@code false} otherwise
+     */
+    public static boolean isClass(@Nonnull Type type) {
+        return type instanceof Class<?>;
+    }
+
+    /**
+     * Returns {@code true} if the given type is a {@link ParameterizedType}, {@code false} otherwise.
+     *
+     * @param type the given type
+     * @return {@code true} if the given type is a {@link ParameterizedType}, {@code false} otherwise
+     */
+    public static boolean isParameterized(@Nonnull Type type) {
+        return type instanceof ParameterizedType;
+    }
+
+    /**
+     * Returns {@code true} if the given type is a {@link WildcardType}, {@code false} otherwise.
+     *
+     * @param type the given type
+     * @return {@code true} if the given type is a {@link WildcardType}, {@code false} otherwise
+     */
+    public static boolean isWildcard(@Nonnull Type type) {
+        return type instanceof WildcardType;
+    }
+
+    /**
+     * Returns {@code true} if the given type is a {@link TypeVariable}, {@code false} otherwise.
+     *
+     * @param type the given type
+     * @return {@code true} if the given type is a {@link TypeVariable}, {@code false} otherwise
+     */
+    public static boolean isTypeVariable(@Nonnull Type type) {
+        return type instanceof TypeVariable<?>;
+    }
+
+    /**
+     * Returns {@code true} if the given type is a {@link GenericArrayType}, {@code false} otherwise.
+     *
+     * @param type the given type
+     * @return {@code true} if the given type is a {@link GenericArrayType}, {@code false} otherwise
+     */
+    public static boolean isGenericArray(@Nonnull Type type) {
+        return type instanceof GenericArrayType;
+    }
+
+    /**
      * Returns the last name of the given type. The last name is sub-string after last dot(.) For example:
      * {@code String} is the last name of {@code java.lang.String}.
      *
@@ -65,12 +115,12 @@ public class JieReflect {
      * {@link ParameterizedType}, or the raw type is not a {@link Class}
      */
     public static @Nullable Class<?> getRawClass(@Nonnull Type type) {
-        if (type instanceof Class) {
+        if (isClass(type)) {
             return (Class<?>) type;
         }
-        if (type instanceof ParameterizedType) {
+        if (isParameterized(type)) {
             Type rawType = ((ParameterizedType) type).getRawType();
-            return rawType instanceof Class<?> ? (Class<?>) rawType : null;
+            return isClass(rawType) ? (Class<?>) rawType : null;
         }
         return null;
     }
@@ -415,6 +465,19 @@ public class JieReflect {
     }
 
     /**
+     * Returns whether the given type is an array type (array {@link Class} or {@link GenericArrayType}).
+     *
+     * @param type the given type
+     * @return whether the given type is an array type (array {@link Class} or {@link GenericArrayType})
+     */
+    public static boolean isArray(@Nonnull Type type) {
+        if (isClass(type)) {
+            return ((Class<?>) type).isArray();
+        }
+        return isGenericArray(type);
+    }
+
+    /**
      * Returns the array class whose component type is the specified type, may be {@code null} if fails. Note
      * {@link TypeVariable} and {@link WildcardType} are unsupported.
      *
@@ -446,29 +509,16 @@ public class JieReflect {
     }
 
     /**
-     * Returns whether the given type is an array type.
-     *
-     * @param type the given type
-     * @return whether the given type is an array type
-     */
-    public static boolean isArray(@Nonnull Type type) {
-        if (type instanceof Class<?>) {
-            return ((Class<?>) type).isArray();
-        }
-        return type instanceof GenericArrayType;
-    }
-
-    /**
      * Returns the component type of the given type if it is an array, {@code null} if it is not.
      *
      * @param type the given type
      * @return the component type of the given type if it is an array, {@code null} if it is not
      */
     public static @Nullable Type getComponentType(@Nonnull Type type) {
-        if (type instanceof Class<?>) {
+        if (isClass(type)) {
             return ((Class<?>) type).getComponentType();
         }
-        if (type instanceof GenericArrayType) {
+        if (isGenericArray(type)) {
             return ((GenericArrayType) type).getGenericComponentType();
         }
         return null;
@@ -482,15 +532,15 @@ public class JieReflect {
      * @return the runtime class of the given type, may be {@code null} if fails
      */
     public static @Nullable Class<?> toRuntimeClass(@Nonnull Type type) {
-        if (type instanceof Class) {
+        if (isClass(type)) {
             return (Class<?>) type;
         }
-        if (type instanceof ParameterizedType) {
+        if (isParameterized(type)) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
             Type rawType = parameterizedType.getRawType();
             return toRuntimeClass(rawType);
         }
-        if (type instanceof GenericArrayType) {
+        if (isGenericArray(type)) {
             GenericArrayType arrayType = (GenericArrayType) type;
             Type componentType = arrayType.getGenericComponentType();
             @Nullable Class<?> componentClass = toRuntimeClass(componentType);
@@ -689,7 +739,7 @@ public class JieReflect {
         @Nonnull Type type,
         @Nonnull @OutParam Map<@Nonnull TypeVariable<?>, @Nullable Type> mapping
     ) {
-        if (type instanceof Class) {
+        if (isClass(type)) {
             Class<?> cur = (Class<?>) type;
             while (cur != null) {
                 @Nullable Type superclass = cur.getGenericSuperclass();
@@ -701,7 +751,7 @@ public class JieReflect {
                 cur = cur.getSuperclass();
             }
         }
-        if (type instanceof ParameterizedType) {
+        if (isParameterized(type)) {
             mapTypeVariables(type, mapping);
             mapTypeParameters(((ParameterizedType) type).getRawType(), mapping);
         }
@@ -730,7 +780,7 @@ public class JieReflect {
         @Nonnull Type type,
         @Nonnull @OutParam Map<@Nonnull TypeVariable<?>, @Nullable Type> mapping
     ) {
-        if (!(type instanceof ParameterizedType)) {
+        if (!isParameterized(type)) {
             return;
         }
         ParameterizedType parameterizedType = (ParameterizedType) type;
@@ -798,19 +848,19 @@ public class JieReflect {
         @Nonnull Type type,
         @Nonnull Function<? super @Nonnull Class<?>, ? extends @Nonnull Type> mapper
     ) throws ReflectionException {
-        if (type instanceof Class<?>) {
+        if (isClass(type)) {
             Type newType = mapper.apply((Class<?>) type);
             if (!Jie.equals(type, newType)) {
                 return newType;
             }
         }
-        if (type instanceof ParameterizedType) {
+        if (isParameterized(type)) {
             return replaceType((ParameterizedType) type, mapper);
         }
-        if (type instanceof WildcardType) {
+        if (isWildcard(type)) {
             return replaceType((WildcardType) type, mapper);
         }
-        if (type instanceof GenericArrayType) {
+        if (isGenericArray(type)) {
             return replaceType((GenericArrayType) type, mapper);
         }
         return type;
@@ -823,7 +873,7 @@ public class JieReflect {
         boolean matched = false;
         Type rawType = type.getRawType();
         Type newRawType = replaceType(rawType, mapper);
-        if (!(newRawType instanceof Class<?>)) {
+        if (!isClass(newRawType)) {
             throw new ReflectionException("Unsupported raw type: " + newRawType + ".");
         }
         if (!Jie.equals(rawType, newRawType)) {

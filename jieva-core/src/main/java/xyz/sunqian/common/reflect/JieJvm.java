@@ -16,9 +16,9 @@ import java.nio.ByteBuffer;
 import java.util.Objects;
 
 /**
- * This is a static utilities class provides utilities for {@code JVM}.
+ * Static utility class for {@code JVM}.
  *
- * @author fredsuvn
+ * @author sunqian
  */
 public class JieJvm {
 
@@ -132,51 +132,88 @@ public class JieJvm {
     }
 
     /**
+     * Returns whether the given type need a signature for JVM.
+     *
+     * @param type the given type
+     * @return whether the given type need a signature for JVM
+     */
+    public static boolean needSignature(@Nonnull Type type) {
+        if (!JieReflect.isClass(type)) {
+            return true;
+        }
+        Class<?> cls = (Class<?>) type;
+        TypeVariable<?>[] tv = cls.getTypeParameters();
+        if (tv.length > 0) {
+            return true;
+        }
+        Type superclass = cls.getGenericSuperclass();
+        if (!JieReflect.isClass(superclass)) {
+            return true;
+        }
+        Type[] interfaces = cls.getGenericInterfaces();
+        for (Type anInterface : interfaces) {
+            if (!JieReflect.isClass(anInterface)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Returns the signature of the given type.
      *
      * @param type the given type
      * @return the signature of the given type
      */
     public static @Nullable String getSignature(@Nonnull Type type) {
-        if (type instanceof Class<?>) {
-            Class<?> cls = (Class<?>) type;
-            TypeVariable<?>[] tv = cls.getTypeParameters();
-            Type superclass = cls.getGenericSuperclass();
-            Type[] interfaces = cls.getGenericInterfaces();
-
+        if (!needSignature(type)) {
+            return null;
         }
-        if (type instanceof ParameterizedType) {
-            ParameterizedType pt = (ParameterizedType) type;
-            StringBuilder sb = new StringBuilder();
-            sb.append("L");
-            sb.append(getInternalName((Class<?>) pt.getRawType()));
-            sb.append("<");
-            for (Type actualTypeArgument : pt.getActualTypeArguments()) {
-                sb.append(getSignature(actualTypeArgument));
+        StringBuilder appender = new StringBuilder();
+        Class<?> cls = (Class<?>) type;
+        TypeVariable<?>[] tvs = cls.getTypeParameters();
+        if (tvs.length > 0) {
+            appender.append('<');
+            for (TypeVariable<?> tv : tvs) {
+                appendSignature(tv, appender);
             }
-            sb.append(">;");
-            return sb.toString();
+            appender.append('>');
         }
-        if (type instanceof WildcardType) {
-            WildcardType wt = (WildcardType) type;
-            Type lower = JieReflect.getLowerBound(wt);
-            if (lower != null) {
-                return "-" + getSignature(lower);
-            }
-            return "+" + getSignature(JieReflect.getUpperBound(wt));
+        @Nullable Type superclass = cls.getGenericSuperclass();
+        if (superclass == null) {
+            appender.append("Ljava/lang/Object;");
+        } else {
+            appendSignature(superclass, appender);
         }
-        if (type instanceof TypeVariable<?>) {
-            TypeVariable<?> tv = (TypeVariable<?>) type;
-            return "T" + tv.getTypeName() + ";";
+        Type[] interfaces = cls.getGenericInterfaces();
+        for (Type anInterface : interfaces) {
+            appendSignature(anInterface, appender);
         }
-        if (type instanceof GenericArrayType) {
-            GenericArrayType at = (GenericArrayType) type;
-            return "[" + getSignature(at.getGenericComponentType());
-        }
-        throw new IllegalArgumentException("Unknown type: " + type.getTypeName());
+        return appender.toString();
     }
 
     private static void appendSignature(@Nonnull Type type, @Nonnull StringBuilder appender) {
+        if (JieReflect.isClass(type)) {
+            appendSignature((Class<?>) type, appender);
+            return;
+        }
+        if (JieReflect.isParameterized(type)) {
+            appendSignature((ParameterizedType) type, appender);
+            return;
+        }
+        if (JieReflect.isWildcard(type)) {
+            appendSignature((WildcardType) type, appender);
+            return;
+        }
+        if (JieReflect.isTypeVariable(type)) {
+            appendSignature((TypeVariable<?>) type, appender);
+            return;
+        }
+        if (JieReflect.isGenericArray(type)) {
+            appendSignature((GenericArrayType) type, appender);
+            return;
+        }
+        throw new JvmException("Unknown type: " + type + ".");
     }
 
     private static void appendSignature(@Nonnull Class<?> type, @Nonnull StringBuilder appender) {
@@ -187,10 +224,16 @@ public class JieJvm {
         Type owner = type.getOwnerType();
         Class<?> rawClass = getRawClass(type);
         if (owner != null) {
-            appender.append(getSignature(owner));
-            appender.append('.');
+            appendSignature(owner, appender);
+            int lastCharIndex = appender.length() - 1;
+            if (appender.charAt(lastCharIndex) == ';') {
+                appender.setCharAt(lastCharIndex, '.');
+            } else {
+                appender.append('.');
+            }
             appender.append(rawClass.getSimpleName());
         } else {
+            // no primitive
             appender.append('L');
             appender.append(getInternalName(rawClass));
         }
@@ -201,19 +244,44 @@ public class JieJvm {
         appender.append(">;");
     }
 
+    private static void appendSignature(@Nonnull WildcardType type, @Nonnull StringBuilder appender) {
+        @Nullable Type lower = JieReflect.getLowerBound(type);
+        Type[] bounds;
+        if (lower != null) {
+            // ? super
+            appender.append('-');
+            bounds = type.getLowerBounds();
+        } else {
+            // '?' and '? extends' are equivalent
+            appender.append('+');
+            bounds = type.getUpperBounds();
+        }
+        for (Type bound : bounds) {
+            appendSignature(bound, appender);
+        }
+    }
+
     private static void appendSignature(@Nonnull TypeVariable<?> type, @Nonnull StringBuilder appender) {
         appender.append(type.getName());
         Type[] bounds = type.getBounds();
-        for (Type bound : bounds) {
+        for (int i = 0; i < bounds.length; i++) {
+            Type bound = bounds[i];
             appender.append(':');
-            if (bound instanceof TypeVariable<?>) {
+            if (JieReflect.isTypeVariable(bound)) {
                 appender.append('T');
                 appender.append(((TypeVariable<?>) bound).getName());
+                appender.append(';');
                 continue;
             }
-            if (bound instanceof ParameterizedType) {
+            if (JieReflect.isParameterized(bound)) {
                 Class<?> rawClass = getRawClass((ParameterizedType) bound);
-                if (rawClass.isInterface()) {
+                if (rawClass.isInterface() && i == 0) {
+                    appender.append(':');
+                }
+            }
+            if (JieReflect.isClass(bound) && i == 0) {
+                Class<?> boundClass = (Class<?>) bound;
+                if (boundClass.isInterface()) {
                     appender.append(':');
                 }
             }
@@ -221,22 +289,32 @@ public class JieJvm {
         }
     }
 
-    private static void appendSignature(@Nonnull WildcardType type, @Nonnull StringBuilder appender) {
-        @Nullable Type lower = JieReflect.getLowerBound(type);
-        if (lower != null) {
-            // ? super
-            appender.append("-");
-        } else {
-            //
+    private static void appendSignature(@Nonnull GenericArrayType type, @Nonnull StringBuilder appender) {
+        Class<?> curCls = getRawClass(type);
+        while (curCls.isArray()) {
+            appender.append('[');
+            curCls = curCls.getComponentType();
         }
+        // no primitive
+        appender.append('L').append(getInternalName(curCls)).append('<');
+        appendSignature(type.getGenericComponentType(), appender);
+        appender.append(">;");
     }
 
     private static @Nonnull Class<?> getRawClass(@Nonnull ParameterizedType type) {
         Type rawType = type.getRawType();
-        if (rawType instanceof Class<?>) {
+        if (JieReflect.isClass(rawType)) {
             return (Class<?>) rawType;
         }
         throw new JvmException("Unknown raw type: " + rawType + ".");
+    }
+
+    private static @Nonnull Class<?> getRawClass(@Nonnull GenericArrayType type) {
+        @Nullable Class<?> arrayClass = JieReflect.toRuntimeClass(type);
+        if (arrayClass != null) {
+            return arrayClass;
+        }
+        throw new JvmException("Unknown array type: " + type + ".");
     }
 
     // public static void appendSignature(@Nonnull Type type, @Nonnull StringBuilder appender) {
