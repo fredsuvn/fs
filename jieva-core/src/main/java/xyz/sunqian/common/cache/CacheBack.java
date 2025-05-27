@@ -73,7 +73,7 @@ final class CacheBack {
         @Override
         public @Nullable V get(@Nonnull K key) {
             clean();
-            Ref<K> rv = map.get(key);
+            @Nullable Ref<K> rv = map.get(key);
             if (rv == null) {
                 return null;
             }
@@ -87,7 +87,7 @@ final class CacheBack {
         @Override
         public @Nullable Val<@Nullable V> getVal(@Nonnull K key) {
             clean();
-            Ref<K> rv = map.get(key);
+            @Nullable Ref<K> rv = map.get(key);
             if (rv == null) {
                 return null;
             }
@@ -152,7 +152,7 @@ final class CacheBack {
         public void put(@Nonnull K key, @Nullable V value) {
             clean();
             Ref<K> newRef = refGenerator.generate(this, key, maskValue(value));
-            Ref<K> old = map.put(key, newRef);
+            @Nullable Ref<K> old = map.put(key, newRef);
             if (old != null) {
                 old.invalid();
             }
@@ -161,7 +161,7 @@ final class CacheBack {
         @Override
         public void remove(@Nonnull K key) {
             clean();
-            Ref<K> old = map.remove(key);
+            @Nullable Ref<K> old = map.remove(key);
             if (old != null) {
                 old.invalid();
             }
@@ -187,7 +187,7 @@ final class CacheBack {
         @Override
         public void clean() {
             while (true) {
-                Reference<?> reference = queue.poll();
+                @Nullable Reference<?> reference = queue.poll();
                 if (reference == null) {
                     return;
                 }
