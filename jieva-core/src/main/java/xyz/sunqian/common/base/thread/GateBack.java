@@ -18,7 +18,7 @@ final class GateBack {
         private static final int OPENED = 1;
         private static final int CLOSED = 0;
 
-        private final Sync sync = new Sync();
+        private final @Nonnull Sync sync = new Sync();
 
         @Override
         public boolean isOpened() {
