@@ -1,6 +1,8 @@
 package xyz.sunqian.common.reflect;
 
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 import xyz.sunqian.common.collect.JieArray;
 
 import java.lang.reflect.Constructor;
@@ -135,8 +137,12 @@ public class JieJvm {
      * @param type the given type
      * @return the signature of the given type
      */
-    public static @Nonnull String getSignature(@Nonnull Type type) {
+    public static @Nullable String getSignature(@Nonnull Type type) {
         if (type instanceof Class<?>) {
+            Class<?> cls = (Class<?>) type;
+            TypeVariable<?>[] tv = cls.getTypeParameters();
+            Type superclass = cls.getGenericSuperclass();
+            Type[] interfaces = cls.getGenericInterfaces();
 
         }
         if (type instanceof ParameterizedType) {
@@ -170,9 +176,106 @@ public class JieJvm {
         throw new IllegalArgumentException("Unknown type: " + type.getTypeName());
     }
 
-    // private static String getSignature(Class<?> type) {
-    //     TypeVariable<?>[] tv = type.getTypeParameters();
+    private static void appendSignature(@Nonnull Type type, @Nonnull StringBuilder appender) {
+    }
+
+    private static void appendSignature(@Nonnull Class<?> type, @Nonnull StringBuilder appender) {
+        appender.append(getDescriptor(type));
+    }
+
+    private static void appendSignature(@Nonnull ParameterizedType type, @Nonnull StringBuilder appender) {
+        Type owner = type.getOwnerType();
+        Class<?> rawClass = getRawClass(type);
+        if (owner != null) {
+            appender.append(getSignature(owner));
+            appender.append('.');
+            appender.append(rawClass.getSimpleName());
+        } else {
+            appender.append('L');
+            appender.append(getInternalName(rawClass));
+        }
+        appender.append('<');
+        for (Type actualTypeArgument : type.getActualTypeArguments()) {
+            appendSignature(actualTypeArgument, appender);
+        }
+        appender.append(">;");
+    }
+
+    private static void appendSignature(@Nonnull TypeVariable<?> type, @Nonnull StringBuilder appender) {
+        appender.append(type.getName());
+        Type[] bounds = type.getBounds();
+        for (Type bound : bounds) {
+            appender.append(':');
+            if (bound instanceof TypeVariable<?>) {
+                appender.append('T');
+                appender.append(((TypeVariable<?>) bound).getName());
+                continue;
+            }
+            if (bound instanceof ParameterizedType) {
+                Class<?> rawClass = getRawClass((ParameterizedType) bound);
+                if (rawClass.isInterface()) {
+                    appender.append(':');
+                }
+            }
+            appendSignature(bound, appender);
+        }
+    }
+
+    private static void appendSignature(@Nonnull WildcardType type, @Nonnull StringBuilder appender) {
+        @Nullable Type lower = JieReflect.getLowerBound(type);
+        if (lower != null) {
+            // ? super
+            appender.append("-");
+        } else {
+            //
+        }
+    }
+
+    private static @Nonnull Class<?> getRawClass(@Nonnull ParameterizedType type) {
+        Type rawType = type.getRawType();
+        if (rawType instanceof Class<?>) {
+            return (Class<?>) rawType;
+        }
+        throw new JvmException("Unknown raw type: " + rawType + ".");
+    }
+
+    // public static void appendSignature(@Nonnull Type type, @Nonnull StringBuilder appender) {
+    //     if (type instanceof Class<?>) {
+    //         Class<?> cls = (Class<?>) type;
+    //         TypeVariable<?>[] tv = cls.getTypeParameters();
+    //         Type superclass = cls.getGenericSuperclass();
+    //         Type[] interfaces = cls.getGenericInterfaces();
     //
+    //     }
+    //     if (type instanceof ParameterizedType) {
+    //         ParameterizedType pt = (ParameterizedType) type;
+    //         StringBuilder sb = new StringBuilder();
+    //         sb.append("L");
+    //         sb.append(getInternalName((Class<?>) pt.getRawType()));
+    //         sb.append("<");
+    //         for (Type actualTypeArgument : pt.getActualTypeArguments()) {
+    //             sb.append(getSignature(actualTypeArgument));
+    //         }
+    //         sb.append(">;");
+    //         return sb.toString();
+    //     }
+    //     if (type instanceof WildcardType) {
+    //         WildcardType wt = (WildcardType) type;
+    //         Type lower = JieReflect.getLowerBound(wt);
+    //         if (lower != null) {
+    //             return "-" + getSignature(lower);
+    //         }
+    //         return "+" + getSignature(JieReflect.getUpperBound(wt));
+    //     }
+    //     if (type instanceof TypeVariable<?>) {
+    //         TypeVariable<?> tv = (TypeVariable<?>) type;
+    //         return "T" + tv.getTypeName() + ";";
+    //     }
+    //     if (type instanceof GenericArrayType) {
+    //         GenericArrayType at = (GenericArrayType) type;
+    //         return "[" + getSignature(at.getGenericComponentType());
+    //     }
+    //     throw new IllegalArgumentException("Unknown type: " + type.getTypeName());
     // }
 
     /**

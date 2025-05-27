@@ -2,17 +2,22 @@ package test.reflect;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.testng.annotations.Test;
+import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 import xyz.sunqian.common.reflect.JieJvm;
+import xyz.sunqian.common.reflect.JieType;
 import xyz.sunqian.common.reflect.JvmException;
-import xyz.sunqian.common.reflect.UnknownPrimitiveTypeException;
+import xyz.sunqian.common.reflect.TypeRef;
 import xyz.sunqian.test.JieTest;
 
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -155,11 +160,50 @@ public class JvmTest {
     }
 
     @Test
-    public void testSignature() throws Exception {
-        class N<T>{}
-        abstract class M extends N<String> implements List {}
+    public void testWildcard() throws Exception {
+        class X {
+            List<?> l1;
+            List<? extends Object> l2;
+        }
+        Type t1 = ((ParameterizedType) X.class.getDeclaredField("l1").getGenericType()).getActualTypeArguments()[0];
+        Type t2 = ((ParameterizedType) X.class.getDeclaredField("l2").getGenericType()).getActualTypeArguments()[0];
+        System.out.println(t1);
+        System.out.println(t2);
+        assertEquals(t1, t2);
+        ClassReader cr = new ClassReader(X.class.getName());
+        cr.accept(new SignatureParser(), 0);
+    }
 
-        ClassReader cr = new ClassReader(Object.class.getName());
+    @Test
+    public void testSignature() throws Exception {
+        class A<T> {
+            class B<U> {
+            }
+        }
+        class N<
+            T, K extends String & Serializable, V extends List<? extends String> & Serializable, U extends List,
+            F extends T, H extends V, I extends A<String>, J extends A<String>.B<String>
+            > {
+            <B> B bb(
+                int i,
+                List<? extends String> l1,
+                List<? super String> l2,
+                List<? super List<? extends Integer>> l3,
+                List<?> l4
+            ) {
+                return null;
+            }
+        }
+        abstract class M extends N implements List {
+        }
+        abstract class L extends Object implements Serializable, List<String> {
+        }
+        assertEquals(JieType.questionMark(), new TypeRef<List<?>>() {
+        }.asParameterized().getActualTypeArguments()[0]);
+        assertEquals(JieType.questionMark(), new TypeRef<List<? extends Object>>() {
+        }.asParameterized().getActualTypeArguments()[0]);
+        System.out.println(A.B.class.getSimpleName());
+        ClassReader cr = new ClassReader(N.class.getName());
         cr.accept(new SignatureParser(), 0);
 
 
@@ -274,6 +318,12 @@ public class JvmTest {
         }
 
         @Override
+        public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
+            System.out.println(signature);
+            return super.visitField(access, name, descriptor, signature, value);
+        }
+
+        @Override
         public MethodVisitor visitMethod(
             int access,
             String name,
@@ -281,6 +331,7 @@ public class JvmTest {
             String signature,
             String[] exceptions
         ) {
+            System.out.println(signature);
             signatureMap.put(name + "-" + descriptor, signature);
             return super.visitMethod(access, name, descriptor, signature, exceptions);
         }
@@ -294,45 +345,71 @@ public class JvmTest {
         }
     }
 
-    interface XI1<T> {}
+    interface XI1<T> {
+    }
 
-    interface XI2<T> {}
+    interface XI2<T> {
+    }
 
     static class X<T extends List<? extends String> & Serializable & XI1<? super String> & XI2<? extends T>, U>
         extends ArrayList<T>
         implements XI1<String>, XI2<U> {
 
-        X() {}
+        X() {
+        }
 
-        X(String a) {}
+        X(String a) {
+        }
 
-        X(String a, List<String> b) {}
+        X(String a, List<String> b) {
+        }
 
-        X(String a, List<String> b, Map<? super String, ? extends Integer> c) {}
+        X(String a, List<String> b, Map<? super String, ? extends Integer> c) {
+        }
 
-        void xm() {}
+        void xm() {
+        }
 
-        void xm(String a) {}
+        void xm(String a) {
+        }
 
-        void xm(String a, List<String> b) {}
+        void xm(String a, List<String> b) {
+        }
 
-        void xm(String a, List<String> b, Map<? super String, ? extends Integer> c) {}
+        void xm(String a, List<String> b, Map<? super String, ? extends Integer> c) {
+        }
 
-        int xmInt() {return 0;}
+        int xmInt() {
+            return 0;
+        }
 
-        int xmInt(String a) {return 0;}
+        int xmInt(String a) {
+            return 0;
+        }
 
-        int xmInt(String a, List<String> b) {return 0;}
+        int xmInt(String a, List<String> b) {
+            return 0;
+        }
 
-        int xmInt(String a, List<String> b, Map<? super String, ? extends Integer> c) {return 0;}
+        int xmInt(String a, List<String> b, Map<? super String, ? extends Integer> c) {
+            return 0;
+        }
 
-        String xmString() {return null;}
+        String xmString() {
+            return null;
+        }
 
-        String xmString(String a) {return null;}
+        String xmString(String a) {
+            return null;
+        }
 
-        String xmString(String a, List<String> b) {return null;}
+        String xmString(String a, List<String> b) {
+            return null;
+        }
 
-        String xmString(String a, List<String> b, Map<? super String, ? extends Integer> c) {return null;}
+        String xmString(String a, List<String> b, Map<? super String, ? extends Integer> c) {
+            return null;
+        }
     }
 
     public static class BaseClass {

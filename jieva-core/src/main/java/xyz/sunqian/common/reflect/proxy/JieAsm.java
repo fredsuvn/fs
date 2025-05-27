@@ -3,7 +3,7 @@ package xyz.sunqian.common.reflect.proxy;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import xyz.sunqian.common.reflect.JieJvm;
-import xyz.sunqian.common.reflect.UnknownPrimitiveTypeException;
+import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 
 import java.lang.reflect.Parameter;
 import java.util.Objects;

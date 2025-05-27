@@ -10,7 +10,7 @@ import xyz.sunqian.common.reflect.JieReflect;
 import xyz.sunqian.common.reflect.JieType;
 import xyz.sunqian.common.reflect.JvmException;
 import xyz.sunqian.common.reflect.ReflectionException;
-import xyz.sunqian.common.reflect.UnknownPrimitiveTypeException;
+import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedType;
@@ -68,6 +68,7 @@ public class ReflectTest {
         class X<T extends String, U> {
             List<? extends String> upper = null;
             List<? super String> lower = null;
+            List<?> query = null;
         }
         ParameterizedType upperParam = (ParameterizedType) X.class.getDeclaredField("upper").getGenericType();
         WildcardType upper = (WildcardType) upperParam.getActualTypeArguments()[0];
@@ -77,6 +78,10 @@ public class ReflectTest {
         WildcardType lower = (WildcardType) lowerParam.getActualTypeArguments()[0];
         assertEquals(JieReflect.getLowerBound(lower), String.class);
         assertEquals(JieReflect.getUpperBound(lower), Object.class);
+        ParameterizedType queryParam = (ParameterizedType) X.class.getDeclaredField("query").getGenericType();
+        WildcardType query = (WildcardType) queryParam.getActualTypeArguments()[0];
+        assertNull(JieReflect.getLowerBound(upper));
+        assertEquals(JieReflect.getUpperBound(query), Object.class);
         TypeVariable<?> t = X.class.getTypeParameters()[0];
         assertEquals(JieReflect.getFirstBound(t), String.class);
         TypeVariable<?> u = X.class.getTypeParameters()[1];
@@ -360,12 +365,22 @@ public class ReflectTest {
         assertEquals(map2.size(), 19);
 
         // special exception:
-        Method mapTypeVariables = JieReflect.class.getDeclaredMethod("mapTypeVariables", Type.class, Map.class);
-        mapTypeVariables.setAccessible(true);
-        Map<@Nonnull TypeVariable<?>, @Nullable Type> mapping = new HashMap<>();
-        Type errorParam = errorParameterizedType();
-        mapTypeVariables.invoke(null, errorParam, mapping);
-        assertTrue(mapping.isEmpty());
+        {
+            Method mapTypeVariables = JieReflect.class.getDeclaredMethod("mapTypeVariables", Type.class, Map.class);
+            mapTypeVariables.setAccessible(true);
+            Map<@Nonnull TypeVariable<?>, @Nullable Type> mapping = new HashMap<>();
+            Type errorParam = errorParameterizedType();
+            mapTypeVariables.invoke(null, errorParam, mapping);
+            assertTrue(mapping.isEmpty());
+        }
+        {
+            Method mapTypeVariables = JieReflect.class.getDeclaredMethod("mapTypeVariables", Type[].class, Map.class);
+            mapTypeVariables.setAccessible(true);
+            Map<@Nonnull TypeVariable<?>, @Nullable Type> mapping = new HashMap<>();
+            Type errorParam = errorParameterizedType();
+            mapTypeVariables.invoke(null, Jie.array(errorParam), mapping);
+            assertTrue(mapping.isEmpty());
+        }
     }
 
     private Type getTypeParameter(Map<TypeVariable<?>, Type> map, Class<?> cls, int index) {

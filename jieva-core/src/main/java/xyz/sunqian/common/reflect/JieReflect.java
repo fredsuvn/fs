@@ -6,6 +6,7 @@ import xyz.sunqian.annotations.OutParam;
 import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieString;
+import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 import xyz.sunqian.common.collect.JieArray;
 import xyz.sunqian.common.collect.JieMap;
 import xyz.sunqian.common.collect.JieStream;
@@ -177,7 +178,7 @@ public class JieReflect {
         Iterator<Class<?>> supertypesAndInterfaces = toSupertypesAndInterfaces(cls);
         while (supertypesAndInterfaces.hasNext()) {
             Class<?> next = supertypesAndInterfaces.next();
-            Field nextField = searchField(next, name);
+            @Nullable Field nextField = searchField(next, name);
             if (nextField != null) {
                 return nextField;
             }
@@ -258,7 +259,7 @@ public class JieReflect {
         Iterator<Class<?>> supertypesAndInterfaces = toSupertypesAndInterfaces(cls);
         while (supertypesAndInterfaces.hasNext()) {
             Class<?> next = supertypesAndInterfaces.next();
-            Method nextMethod = searchMethod(next, name, parameterTypes);
+            @Nullable Method nextMethod = searchMethod(next, name, parameterTypes);
             if (nextMethod != null) {
                 return nextMethod;
             }
@@ -375,7 +376,7 @@ public class JieReflect {
      * @return a new instance for the given class name with the empty constructor, may be {@code null} if fails
      */
     public static <T> @Nullable T newInstance(@Nonnull String className, @Nullable ClassLoader loader) {
-        Class<?> cls = classForName(className, loader);
+        @Nullable Class<?> cls = classForName(className, loader);
         if (cls == null) {
             return null;
         }
@@ -492,7 +493,7 @@ public class JieReflect {
         if (type instanceof GenericArrayType) {
             GenericArrayType arrayType = (GenericArrayType) type;
             Type componentType = arrayType.getGenericComponentType();
-            Class<?> componentClass = toRuntimeClass(componentType);
+            @Nullable Class<?> componentClass = toRuntimeClass(componentType);
             if (componentClass == null) {
                 return null;
             }
@@ -632,7 +633,7 @@ public class JieReflect {
             }
             return resolveActualTypeArguments(componentType, baseType.getComponentType());
         }
-        Class<?> cls = toRuntimeClass(type);
+        @Nullable Class<?> cls = toRuntimeClass(type);
         if (cls == null) {
             throw new ReflectionException("Unsupported type: " + type + ".");
         }
@@ -691,7 +692,7 @@ public class JieReflect {
         if (type instanceof Class) {
             Class<?> cur = (Class<?>) type;
             while (cur != null) {
-                Type superclass = cur.getGenericSuperclass();
+                @Nullable Type superclass = cur.getGenericSuperclass();
                 if (superclass != null) {
                     mapTypeVariables(superclass, mapping);
                 }
@@ -716,7 +717,11 @@ public class JieReflect {
         for (Type anInterface : interfaces) {
             mapTypeVariables(anInterface, mapping);
             // never null
-            Class<?> rawClass = Objects.requireNonNull(getRawClass(anInterface));
+            Class<?> rawClass = getRawClass(anInterface);
+            if (rawClass == null) {
+                // unreachable
+                continue;
+            }
             mapTypeVariables(rawClass.getGenericInterfaces(), mapping);
         }
     }
@@ -730,6 +735,7 @@ public class JieReflect {
         }
         ParameterizedType parameterizedType = (ParameterizedType) type;
         Type[] typeArguments = parameterizedType.getActualTypeArguments();
+        // never null
         Class<?> rawClass = getRawClass(parameterizedType);
         if (rawClass == null) {
             // unreachable
@@ -823,7 +829,7 @@ public class JieReflect {
         if (!Jie.equals(rawType, newRawType)) {
             matched = true;
         }
-        Type ownerType = type.getOwnerType();
+        @Nullable Type ownerType = type.getOwnerType();
         Type newOwnerType = null;
         if (ownerType != null) {
             newOwnerType = replaceType(ownerType, mapper);

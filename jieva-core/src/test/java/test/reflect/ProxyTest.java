@@ -4,7 +4,7 @@ import org.objectweb.asm.MethodVisitor;
 import org.testng.annotations.Test;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.reflect.UnknownPrimitiveTypeException;
+import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 import xyz.sunqian.common.reflect.proxy.JieProxy;
 import xyz.sunqian.common.reflect.proxy.MethodProxyHandler;
 import xyz.sunqian.common.reflect.proxy.ProxyClass;
