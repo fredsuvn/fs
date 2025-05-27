@@ -5,6 +5,7 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.base.exception.AwaitingException;
+import xyz.sunqian.common.base.exception.UnknownArrayTypeException;
 import xyz.sunqian.common.base.function.BooleanCallable;
 import xyz.sunqian.common.base.thread.JieThread;
 import xyz.sunqian.common.collect.JieArray;
@@ -174,27 +175,32 @@ public class Jie {
         Class<?> typeA = a.getClass();
         Class<?> typeB = b.getClass();
         if (typeA.isArray() && equals(typeA, typeB)) {
-            if (a instanceof Object[]) {
-                return deep ? Arrays.deepEquals((Object[]) a, (Object[]) b) : Arrays.equals((Object[]) a, (Object[]) b);
-            } else if (a instanceof boolean[]) {
-                return Arrays.equals((boolean[]) a, (boolean[]) b);
-            } else if (a instanceof byte[]) {
-                return Arrays.equals((byte[]) a, (byte[]) b);
-            } else if (a instanceof short[]) {
-                return Arrays.equals((short[]) a, (short[]) b);
-            } else if (a instanceof char[]) {
-                return Arrays.equals((char[]) a, (char[]) b);
-            } else if (a instanceof int[]) {
-                return Arrays.equals((int[]) a, (int[]) b);
-            } else if (a instanceof long[]) {
-                return Arrays.equals((long[]) a, (long[]) b);
-            } else if (a instanceof float[]) {
-                return Arrays.equals((float[]) a, (float[]) b);
-            } else if (a instanceof double[]) {
-                return Arrays.equals((double[]) a, (double[]) b);
-            }
+            return equalsArray(a, b, deep);
         }
         return Objects.equals(a, b);
+    }
+
+    private static boolean equalsArray(@Nonnull Object a, @Nonnull Object b, boolean deep) {
+        if (a instanceof Object[]) {
+            return deep ? Arrays.deepEquals((Object[]) a, (Object[]) b) : Arrays.equals((Object[]) a, (Object[]) b);
+        } else if (a instanceof boolean[]) {
+            return Arrays.equals((boolean[]) a, (boolean[]) b);
+        } else if (a instanceof byte[]) {
+            return Arrays.equals((byte[]) a, (byte[]) b);
+        } else if (a instanceof short[]) {
+            return Arrays.equals((short[]) a, (short[]) b);
+        } else if (a instanceof char[]) {
+            return Arrays.equals((char[]) a, (char[]) b);
+        } else if (a instanceof int[]) {
+            return Arrays.equals((int[]) a, (int[]) b);
+        } else if (a instanceof long[]) {
+            return Arrays.equals((long[]) a, (long[]) b);
+        } else if (a instanceof float[]) {
+            return Arrays.equals((float[]) a, (float[]) b);
+        } else if (a instanceof double[]) {
+            return Arrays.equals((double[]) a, (double[]) b);
+        }
+        throw new UnknownArrayTypeException(a.getClass());
     }
 
     /**
@@ -251,35 +257,40 @@ public class Jie {
         }
         Class<?> cls = obj.getClass();
         if (cls.isArray()) {
-            if (obj instanceof Object[]) {
-                return deep ? Arrays.deepHashCode((Object[]) obj) : Arrays.hashCode((Object[]) obj);
-            }
-            if (obj instanceof boolean[]) {
-                return Arrays.hashCode((boolean[]) obj);
-            }
-            if (obj instanceof byte[]) {
-                return Arrays.hashCode((byte[]) obj);
-            }
-            if (obj instanceof short[]) {
-                return Arrays.hashCode((short[]) obj);
-            }
-            if (obj instanceof char[]) {
-                return Arrays.hashCode((char[]) obj);
-            }
-            if (obj instanceof int[]) {
-                return Arrays.hashCode((int[]) obj);
-            }
-            if (obj instanceof long[]) {
-                return Arrays.hashCode((long[]) obj);
-            }
-            if (obj instanceof float[]) {
-                return Arrays.hashCode((float[]) obj);
-            }
-            if (obj instanceof double[]) {
-                return Arrays.hashCode((double[]) obj);
-            }
+            return hashArray(obj, deep);
         }
         return obj.hashCode();
+    }
+
+    private static int hashArray(@Nonnull Object obj, boolean deep) {
+        if (obj instanceof Object[]) {
+            return deep ? Arrays.deepHashCode((Object[]) obj) : Arrays.hashCode((Object[]) obj);
+        }
+        if (obj instanceof boolean[]) {
+            return Arrays.hashCode((boolean[]) obj);
+        }
+        if (obj instanceof byte[]) {
+            return Arrays.hashCode((byte[]) obj);
+        }
+        if (obj instanceof short[]) {
+            return Arrays.hashCode((short[]) obj);
+        }
+        if (obj instanceof char[]) {
+            return Arrays.hashCode((char[]) obj);
+        }
+        if (obj instanceof int[]) {
+            return Arrays.hashCode((int[]) obj);
+        }
+        if (obj instanceof long[]) {
+            return Arrays.hashCode((long[]) obj);
+        }
+        if (obj instanceof float[]) {
+            return Arrays.hashCode((float[]) obj);
+        }
+        if (obj instanceof double[]) {
+            return Arrays.hashCode((double[]) obj);
+        }
+        throw new UnknownArrayTypeException(obj.getClass());
     }
 
     /**

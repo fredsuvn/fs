@@ -1,10 +1,11 @@
 package test.base;
 
-
 import org.testng.annotations.Test;
 import test.utils.Utils;
 import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.exception.UnknownArrayTypeException;
 
+import java.lang.reflect.Method;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
@@ -19,6 +20,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
+import static xyz.sunqian.test.JieTest.reflectThrows;
 
 public class JieTest {
 
@@ -33,7 +35,7 @@ public class JieTest {
     }
 
     @Test
-    public void testEquals() {
+    public void testEquals() throws Exception {
         assertTrue(Jie.equals("", ""));
         assertFalse(Jie.equals("", null));
         assertFalse(Jie.equals(null, ""));
@@ -131,10 +133,14 @@ public class JieTest {
         assertFalse(Jie.equals(new Object[]{1}, new boolean[]{true}));
         assertTrue(Jie.equalsWith(new Object[]{1}, new Object[]{1}, true, true));
         assertFalse(Jie.equalsWith(new Object[]{new Object[]{1}}, new Object[]{new Object[]{1}}, true, false));
+
+        // unknown:
+        Method equalsArray = Jie.class.getDeclaredMethod("equalsArray", Object.class, Object.class, boolean.class);
+        reflectThrows(UnknownArrayTypeException.class, equalsArray, null, "str", "str", true);
     }
 
     @Test
-    public void testHashcode() {
+    public void testHashcode() throws Exception {
         String str = "str";
         assertEquals(Jie.hashCode(str), Objects.hashCode(str));
         Object[] strs = {"str1", "str2"};
@@ -157,6 +163,10 @@ public class JieTest {
         // null:
         assertEquals(Jie.hashCode(null), Objects.hashCode(null));
         assertEquals(Jie.hashWith(null, false, false), Objects.hashCode(null));
+
+        // unknown:
+        Method hashArray = Jie.class.getDeclaredMethod("hashArray", Object.class, boolean.class);
+        reflectThrows(UnknownArrayTypeException.class, hashArray, null, "str", true);
     }
 
     @Test
