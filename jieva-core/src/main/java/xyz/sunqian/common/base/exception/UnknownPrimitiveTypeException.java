@@ -1,11 +1,9 @@
-package xyz.sunqian.common.reflect;
-
-import xyz.sunqian.common.base.exception.JieRuntimeException;
+package xyz.sunqian.common.base.exception;
 
 import java.lang.reflect.Type;
 
 /**
- * This runtime exception indicates that occurs an unknown primitive type.
+ * This runtime exception indicates encountering an unknown primitive type.
  *
  * @author sunqian
  */

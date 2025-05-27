@@ -5,6 +5,8 @@ import xyz.sunqian.common.base.exception.AwaitingException;
 import xyz.sunqian.common.base.exception.JieException;
 import xyz.sunqian.common.base.exception.JieRuntimeException;
 import xyz.sunqian.common.base.exception.ProcessingException;
+import xyz.sunqian.common.base.exception.UnknownArrayTypeException;
+import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 import xyz.sunqian.common.base.exception.UnreachablePointException;
 import xyz.sunqian.common.base.exception.WrappedException;
 
@@ -98,6 +100,15 @@ public class ExceptionTest {
         });
         expectThrows(UnreachablePointException.class, () -> {
             throw new UnreachablePointException(new RuntimeException());
+        });
+
+        // UnknownPrimitiveTypeException
+        expectThrows(UnknownPrimitiveTypeException.class, () -> {
+            throw new UnknownPrimitiveTypeException(Object.class);
+        });
+        // UnknownArrayTypeException
+        expectThrows(UnknownArrayTypeException.class, () -> {
+            throw new UnknownArrayTypeException(Object.class);
         });
 
         {
