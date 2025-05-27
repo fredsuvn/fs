@@ -24,7 +24,10 @@ public class JieOption {
      * @return the first option whose key equals the specified key from the given options, or null if not found
      */
     @Nullable
-    public static <K, V, O extends Option<K, V>> O findOption(@Nonnull K key, Option<?, ?>... options) {
+    public static <K, V, O extends Option<K, V>> O findOption(
+        @Nonnull K key,
+        @Nonnull Option<?, ?> @Nonnull ... options
+    ) {
         if (JieArray.isEmpty(options)) {
             return null;
         }
@@ -45,7 +48,7 @@ public class JieOption {
      * @param <V>     the value type
      * @return the value of the found option, or null if not found
      */
-    public static <V> V findValue(@Nonnull Object key, Option<?, ?>... options) {
+    public static <V> V findValue(@Nonnull Object key, @Nonnull Option<?, ?> @Nonnull ... options) {
         @Nullable Option<?, V> option = findOption(key, options);
         return option == null ? null : option.value();
     }

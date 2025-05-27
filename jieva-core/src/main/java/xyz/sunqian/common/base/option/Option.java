@@ -35,7 +35,7 @@ public interface Option<K, V> {
      * @param <V>   the value type
      * @return an {@link Option} with the specified key and value
      */
-    static <K, V> Option<K, V> of(@Nonnull K key, V value) {
+    static <K, V> @Nonnull Option<K, V> of(@Nonnull K key, @Nullable V value) {
         return OptionBack.of(key, value);
     }
 
@@ -46,7 +46,7 @@ public interface Option<K, V> {
      * @param <V> the value type
      * @return an empty {@link Option} array
      */
-    static <K, V> Option<K, V>[] empty() {
+    static <K, V> @Nonnull Option<K, V>[] empty() {
         return Jie.as(OptionBack.EMPTY_OPTIONS);
     }
 
@@ -55,6 +55,7 @@ public interface Option<K, V> {
      *
      * @return the key of this option
      */
+    @Nonnull
     K key();
 
     /**
