@@ -168,7 +168,7 @@ public class AsmProxyBuilder implements ProxyBuilder, Opcodes {
             isFinal
         );
         byte[] proxyBytecode = proxyGenerator.generateBytecode();
-        Class<?> proxyClass = JieJvm.loadBytecode(proxyBytecode);
+        Class<?> proxyClass = JieJvm.loadClass(proxyBytecode);
         // Generates invoker class
         InvokerGenerator invokerGenerator = new InvokerGenerator(
             proxyInternalName,
@@ -176,7 +176,7 @@ public class AsmProxyBuilder implements ProxyBuilder, Opcodes {
             invokerInternalName
         );
         byte[] invokerBytecode = invokerGenerator.generateBytecode();
-        Class<?> invokerClass = JieJvm.loadBytecode(invokerBytecode);
+        Class<?> invokerClass = JieJvm.loadClass(invokerBytecode);
         return new AsmProxyClass(proxyClass, invokerClass, handler, methodList.toArray(new Method[0]));
     }
 

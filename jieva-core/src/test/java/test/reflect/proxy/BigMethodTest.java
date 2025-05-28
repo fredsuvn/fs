@@ -1,4 +1,4 @@
-package test.reflect;
+package test.reflect.proxy;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.annotations.Nullable;

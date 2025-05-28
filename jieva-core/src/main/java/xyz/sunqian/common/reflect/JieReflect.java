@@ -525,8 +525,8 @@ public class JieReflect {
     }
 
     /**
-     * Returns the runtime class of the given type, may be {@code null} if fails. Note {@link TypeVariable} and
-     * {@link WildcardType} are unsupported.
+     * Returns the runtime class of the given type, may be {@code null} if fails. This method supports {@link Class},
+     * {@link ParameterizedType}, {@link GenericArrayType} and {@link TypeVariable}.
      *
      * @param type the given type
      * @return the runtime class of the given type, may be {@code null} if fails
@@ -548,6 +548,9 @@ public class JieReflect {
                 return null;
             }
             return arrayClass(componentClass);
+        }
+        if (isTypeVariable(type)) {
+            return toRuntimeClass(getFirstBound((TypeVariable<?>) type));
         }
         return null;
     }

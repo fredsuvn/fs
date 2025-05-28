@@ -1,4 +1,4 @@
-package test.reflect;
+package test.reflect.proxy;
 
 import org.objectweb.asm.MethodVisitor;
 import org.testng.annotations.Test;

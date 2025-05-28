@@ -7,6 +7,7 @@ import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
+import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -35,14 +36,30 @@ public class JieJvm {
     }
 
     /**
-     * Returns the descriptor of the given class.
+     * Returns the descriptor of the given type. This method supports {@link Class}, {@link ParameterizedType},
+     * {@link GenericArrayType} and {@link TypeVariable}.
      *
-     * @param cls the given class
-     * @return the descriptor of the given class
+     * @param type the given type
+     * @return the descriptor of the given type
+     * @throws JvmException if any problem occurs
      */
-    public static @Nonnull String getDescriptor(@Nonnull Class<?> cls) {
+    public static @Nonnull String getDescriptor(@Nonnull Type type) throws JvmException {
+        if (JieReflect.isTypeVariable(type)) {
+            TypeVariable<?> tv = (TypeVariable<?>) type;
+            Type bound = JieReflect.getFirstBound(tv);
+            return getDescriptor(bound);
+        }
         StringBuilder appender = new StringBuilder();
-        appendDescriptor(cls, appender);
+        if (JieReflect.isClass(type)) {
+            appendDescriptor((Class<?>) type, appender);
+        } else if (JieReflect.isParameterized(type)) {
+            Class<?> rawClass = getRawClass((ParameterizedType) type);
+            appendDescriptor(rawClass, appender);
+        } else if (JieReflect.isGenericArray(type)) {
+            appendDescriptor(getRawClass((GenericArrayType) type), appender);
+        } else {
+            throw new JvmException("Unknown type: " + type + ".");
+        }
         return appender.toString();
     }
 
@@ -134,11 +151,18 @@ public class JieJvm {
 
     /**
      * Returns whether the given type need a signature for JVM.
+     * <p>
+     * The {@code declaration} specifies where the signature is used for. When for the declaration, {@code true} should
+     * be passed here. Otherwise, such as signature of a {@link Field}'s type, {@code false}.
      *
-     * @param type the given type
+     * @param type        the given type
+     * @param declaration whether the type is declaring
      * @return whether the given type need a signature for JVM
      */
-    public static boolean needSignature(@Nonnull Type type) {
+    public static boolean needSignature(@Nonnull Type type, boolean declaration) {
+        if (!declaration) {
+            return !JieReflect.isClass(type);
+        }
         if (!JieReflect.isClass(type)) {
             return true;
         }
@@ -147,8 +171,8 @@ public class JieJvm {
         if (tv.length > 0) {
             return true;
         }
-        Type superclass = cls.getGenericSuperclass();
-        if (!JieReflect.isClass(superclass)) {
+        @Nullable Type superclass = cls.getGenericSuperclass();
+        if (superclass != null && !JieReflect.isClass(superclass)) {
             return true;
         }
         Type[] interfaces = cls.getGenericInterfaces();
@@ -168,7 +192,7 @@ public class JieJvm {
      */
     public static boolean needSignature(@Nonnull Method method) {
         Type returnType = method.getGenericReturnType();
-        if (needSignature(returnType)) {
+        if (needSignature(returnType, false)) {
             return true;
         }
         return needSignature((Executable) method);
@@ -187,7 +211,7 @@ public class JieJvm {
     private static boolean needSignature(@Nonnull Executable executable) {
         Type[] parameters = executable.getGenericParameterTypes();
         for (Type parameter : parameters) {
-            if (needSignature(parameter)) {
+            if (needSignature(parameter, false)) {
                 return true;
             }
         }
@@ -196,28 +220,56 @@ public class JieJvm {
 
     /**
      * Returns the signature of the given type.
+     * <p>
+     * The {@code declaration} specifies where the signature is used for. When for the declaration, {@code true} should
+     * be passed here. Otherwise, such as signature of a {@link Field}'s type, {@code false}.
      *
      * @param type the given type
      * @return the signature of the given type
      */
-    public static @Nullable String getSignature(@Nonnull Type type) {
-        if (!needSignature(type)) {
+    public static @Nullable String getSignature(@Nonnull Type type, boolean declaration) {
+        if (!needSignature(type, declaration)) {
             return null;
         }
         StringBuilder appender = new StringBuilder();
-        Class<?> cls = (Class<?>) type;
-        appendSignature(cls.getTypeParameters(), appender);
-        @Nullable Type superclass = cls.getGenericSuperclass();
-        if (superclass == null) {
-            appender.append("Ljava/lang/Object;");
+        if (JieReflect.isClass(type)) {
+            Class<?> cls = (Class<?>) type;
+            appendSignature(cls.getTypeParameters(), appender);
+            @Nullable Type superclass = cls.getGenericSuperclass();
+            if (superclass == null) {
+                appender.append("Ljava/lang/Object;");
+            } else {
+                appendSignature(superclass, appender);
+            }
+            Type[] interfaces = cls.getGenericInterfaces();
+            for (Type anInterface : interfaces) {
+                appendSignature(anInterface, appender);
+            }
         } else {
-            appendSignature(superclass, appender);
-        }
-        Type[] interfaces = cls.getGenericInterfaces();
-        for (Type anInterface : interfaces) {
-            appendSignature(anInterface, appender);
+            appendSignature(type, appender);
         }
         return appender.toString();
+    }
+
+    /**
+     * Returns the given type's signature used for the declaration. This method is equivalent to
+     * ({@link #getSignature(Type, boolean)}): {@code getSignature(type, true)}.
+     *
+     * @param type the given type
+     * @return the given type's signature used for the declaration
+     */
+    public static @Nullable String getSignature(@Nonnull Type type) {
+        return getSignature(type, true);
+    }
+
+    /**
+     * Returns the signature of the given field.
+     *
+     * @param field the given field
+     * @return the signature of the given field
+     */
+    public static @Nullable String getSignature(@Nonnull Field field) {
+        return getSignature(field.getGenericType(), false);
     }
 
     /**
@@ -344,11 +396,12 @@ public class JieJvm {
         Class<?> rawClass = getRawClass(type);
         if (owner != null) {
             appendSignature(owner, appender);
-            int lastCharIndex = appender.length() - 1;
-            if (appender.charAt(lastCharIndex) == ';') {
-                appender.setCharAt(lastCharIndex, '.');
+            // it must end with a ';'
+            int semicolonIndex = appender.length() - 1;
+            if (JieReflect.isClass(owner)) {
+                appender.setCharAt(semicolonIndex, '$');
             } else {
-                appender.append('.');
+                appender.setCharAt(semicolonIndex, '.');
             }
             appender.append(rawClass.getSimpleName());
         } else {
@@ -385,18 +438,16 @@ public class JieJvm {
     }
 
     private static void appendSignature(@Nonnull GenericArrayType type, @Nonnull StringBuilder appender) {
-        Class<?> curCls = getRawClass(type);
-        while (curCls.isArray()) {
+        @Nonnull Type curType = type;
+        while (JieReflect.isArray(curType)) {
             appender.append('[');
-            curCls = curCls.getComponentType();
+            // never null
+            curType = Objects.requireNonNull(JieReflect.getComponentType(curType));
         }
-        // no primitive
-        appender.append('L').append(getInternalName(curCls)).append('<');
-        appendSignature(type.getGenericComponentType(), appender);
-        appender.append(">;");
+        appendSignature(curType, appender);
     }
 
-    private static @Nonnull Class<?> getRawClass(@Nonnull ParameterizedType type) {
+    private static @Nonnull Class<?> getRawClass(@Nonnull ParameterizedType type) throws JvmException {
         Type rawType = type.getRawType();
         if (JieReflect.isClass(rawType)) {
             return (Class<?>) rawType;
@@ -404,7 +455,7 @@ public class JieJvm {
         throw new JvmException("Unknown raw type: " + rawType + ".");
     }
 
-    private static @Nonnull Class<?> getRawClass(@Nonnull GenericArrayType type) {
+    private static @Nonnull Class<?> getRawClass(@Nonnull GenericArrayType type) throws JvmException {
         @Nullable Class<?> arrayClass = JieReflect.toRuntimeClass(type);
         if (arrayClass != null) {
             return arrayClass;
@@ -413,40 +464,28 @@ public class JieJvm {
     }
 
     /**
-     * Loads given bytecode to {@link Class}.
+     * Loads and returns a class from the specified byte data.
      *
-     * @param bytecode given bytecode
-     * @return class loaded from given bytecode
-     * @throws JvmException if any loading problem occurs
+     * @param bytes the specified byte data
+     * @return the {@link Class} instance loaded from the specified byte data
+     * @throws JvmException if any problem occurs
      */
-    public static Class<?> loadBytecode(byte[] bytecode) throws JvmException {
-        return loadBytecode(ByteBuffer.wrap(bytecode));
+    public static @Nonnull Class<?> loadClass(@Nonnull byte @Nonnull [] bytes) throws JvmException {
+        return ClassLoaderHolder.INSTANCE.load(bytes);
     }
 
     /**
-     * Loads given bytecode to {@link Class}.
+     * Loads and returns a class from the specified byte data.
      *
-     * @param bytecode given bytecode
-     * @return class loaded from given bytecode
-     * @throws JvmException if any loading problem occurs
+     * @param bytes the specified byte data
+     * @return the {@link Class} instance loaded from the specified byte data
+     * @throws JvmException if any problem occurs
      */
-    public static Class<?> loadBytecode(ByteBuffer bytecode) throws JvmException {
-        return JieClassLoader.SINGLETON.load(bytecode);
+    public static @Nonnull Class<?> loadClass(@Nonnull ByteBuffer bytes) throws JvmException {
+        return ClassLoaderHolder.INSTANCE.load(bytes);
     }
 
-    private static final class JieClassLoader extends ClassLoader {
-
-        private static final JieClassLoader SINGLETON = new JieClassLoader();
-
-        private JieClassLoader() {
-        }
-
-        public Class<?> load(ByteBuffer buffer) throws JvmException {
-            try {
-                return defineClass(null, buffer, null);
-            } catch (ClassFormatError | Exception e) {
-                throw new JvmException(e);
-            }
-        }
+    private static final class ClassLoaderHolder {
+        private static final BytesClassLoader INSTANCE = new BytesClassLoader();
     }
 }

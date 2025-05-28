@@ -1,5 +1,6 @@
 package test.reflect;
 
+import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.reflect.JieType;
@@ -158,5 +159,26 @@ public class TypeTest {
         assertNotEquals(other1, other2);
         assertEquals(other1.toString(), other2.toString());
         assertEquals(other1.hashCode(), other2.hashCode());
+    }
+
+    public static ParameterizedType errorParameterizedType() {
+        return new ParameterizedType() {
+            @Override
+            @NotNull
+            public Type[] getActualTypeArguments() {
+                return new Type[0];
+            }
+
+            @NotNull
+            @Override
+            public Type getRawType() {
+                return null;
+            }
+
+            @Override
+            public Type getOwnerType() {
+                return null;
+            }
+        };
     }
 }

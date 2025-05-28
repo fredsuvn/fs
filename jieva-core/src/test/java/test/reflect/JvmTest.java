@@ -6,24 +6,29 @@ import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.testng.annotations.Test;
+import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
+import xyz.sunqian.common.io.JieIO;
 import xyz.sunqian.common.reflect.JieJvm;
+import xyz.sunqian.common.reflect.JieType;
 import xyz.sunqian.common.reflect.JvmException;
 import xyz.sunqian.test.JieTest;
 
+import java.io.InputStream;
 import java.io.Serializable;
-import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.RandomAccess;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
 public class JvmTest {
@@ -71,76 +76,72 @@ public class JvmTest {
         assertEquals(JieJvm.getDescriptor(Object.class), asmDescriptor(Object.class));
         assertEquals(JieJvm.getDescriptor(Object[].class), asmDescriptor(Object[].class));
         assertEquals(JieJvm.getDescriptor(Object[][].class), asmDescriptor(Object[][].class));
-
-        // method:
-        assertEquals(
-            JieJvm.getDescriptor(X.class.getDeclaredMethod("xm")),
-            asmDescriptor(X.class.getDeclaredMethod("xm"))
-        );
-        assertEquals(
-            JieJvm.getDescriptor(X.class.getDeclaredMethod("xm", String.class)),
-            asmDescriptor(X.class.getDeclaredMethod("xm", String.class))
-        );
-        assertEquals(
-            JieJvm.getDescriptor(X.class.getDeclaredMethod("xm", String.class, List.class)),
-            asmDescriptor(X.class.getDeclaredMethod("xm", String.class, List.class))
-        );
-        assertEquals(
-            JieJvm.getDescriptor(X.class.getDeclaredMethod("xm", String.class, List.class, Map.class)),
-            asmDescriptor(X.class.getDeclaredMethod("xm", String.class, List.class, Map.class))
-        );
-        assertEquals(
-            JieJvm.getDescriptor(X.class.getDeclaredMethod("xmInt")),
-            asmDescriptor(X.class.getDeclaredMethod("xmInt"))
-        );
-        assertEquals(
-            JieJvm.getDescriptor(X.class.getDeclaredMethod("xmInt", String.class)),
-            asmDescriptor(X.class.getDeclaredMethod("xmInt", String.class))
-        );
-        assertEquals(
-            JieJvm.getDescriptor(X.class.getDeclaredMethod("xmInt", String.class, List.class)),
-            asmDescriptor(X.class.getDeclaredMethod("xmInt", String.class, List.class))
-        );
-        assertEquals(
-            JieJvm.getDescriptor(X.class.getDeclaredMethod("xmInt", String.class, List.class, Map.class)),
-            asmDescriptor(X.class.getDeclaredMethod("xmInt", String.class, List.class, Map.class))
-        );
-        assertEquals(
-            JieJvm.getDescriptor(X.class.getDeclaredMethod("xmString")),
-            asmDescriptor(X.class.getDeclaredMethod("xmString"))
-        );
-        assertEquals(
-            JieJvm.getDescriptor(X.class.getDeclaredMethod("xmString", String.class)),
-            asmDescriptor(X.class.getDeclaredMethod("xmString", String.class))
-        );
-        assertEquals(
-            JieJvm.getDescriptor(X.class.getDeclaredMethod("xmString", String.class, List.class)),
-            asmDescriptor(X.class.getDeclaredMethod("xmString", String.class, List.class))
-        );
-        assertEquals(
-            JieJvm.getDescriptor(X.class.getDeclaredMethod("xmString", String.class, List.class, Map.class)),
-            asmDescriptor(X.class.getDeclaredMethod("xmString", String.class, List.class, Map.class))
-        );
-
-        // constructor:
-        assertEquals(
-            JieJvm.getDescriptor(X.class.getDeclaredConstructor()),
-            asmDescriptor(X.class.getDeclaredConstructor())
-        );
-        assertEquals(
-            JieJvm.getDescriptor(X.class.getDeclaredConstructor(String.class)),
-            asmDescriptor(X.class.getDeclaredConstructor(String.class))
-        );
-        assertEquals(
-            JieJvm.getDescriptor(X.class.getDeclaredConstructor(String.class, List.class)),
-            asmDescriptor(X.class.getDeclaredConstructor(String.class, List.class))
-        );
-        assertEquals(
-            JieJvm.getDescriptor(X.class.getDeclaredConstructor(String.class, List.class, Map.class)),
-            asmDescriptor(X.class.getDeclaredConstructor(String.class, List.class, Map.class))
-        );
-
+        assertEquals(JieJvm.getDescriptor(String.class), asmDescriptor(String.class));
+        assertEquals(JieJvm.getDescriptor(String[].class), asmDescriptor(String[].class));
+        assertEquals(JieJvm.getDescriptor(String[][].class), asmDescriptor(String[][].class));
+        assertEquals(JieJvm.getDescriptor(Integer.class), asmDescriptor(Integer.class));
+        {
+            // fields
+            SignatureParser signatureParser = signatureParser(DS.class);
+            for (int i = 1; i <= DS.fieldNum; i++) {
+                String fieldName = "f" + i;
+                Field field = DS.class.getDeclaredField(fieldName);
+                String testDesc = JieJvm.getDescriptor(field.getGenericType());
+                String asmDesc = signatureParser.fieldDescriptor(fieldName);
+                assertEquals(testDesc, asmDesc);
+            }
+            // method:
+            List<Method> methods = Jie.list(DS.class.getDeclaredMethods());
+            for (int i = 1; i <= DS.methodNum; i++) {
+                String methodName = "m" + i;
+                Method method = methods.stream().filter(m -> m.getName().equals(methodName)).findFirst().get();
+                String testDesc = JieJvm.getDescriptor(method);
+                String asmDesc = signatureParser.methodDescriptor(methodName);
+                assertEquals(testDesc, asmDesc);
+            }
+            // constructor:
+            assertTrue(signatureParser.hasConstructorDescriptor(
+                JieJvm.getDescriptor(DS.class.getDeclaredConstructor())
+            ));
+            assertTrue(signatureParser.hasConstructorDescriptor(
+                JieJvm.getDescriptor(DS.class.getDeclaredConstructor(String.class))
+            ));
+            assertTrue(signatureParser.hasConstructorDescriptor(
+                JieJvm.getDescriptor(DS.class.getDeclaredConstructor(String.class, List.class))
+            ));
+            assertTrue(signatureParser.hasConstructorDescriptor(
+                JieJvm.getDescriptor(DS.class.getDeclaredConstructor(String.class, List.class, Map.class))
+            ));
+            assertTrue(signatureParser.hasConstructorDescriptor(
+                JieJvm.getDescriptor(DS.class.getDeclaredConstructor(String.class, List.class, Map.class))
+            ));
+            assertTrue(signatureParser.hasConstructorDescriptor(
+                JieJvm.getDescriptor(DS.class.getDeclaredConstructor(String.class, String.class, Integer.class))
+            ));
+        }
+        {
+            // inner class
+            // fields
+            SignatureParser signatureParser = signatureParser(ODS.class);
+            for (int i = 1; i <= ODS.fieldNum; i++) {
+                String fieldName = "f" + i;
+                Field field = ODS.class.getDeclaredField(fieldName);
+                String testDesc = JieJvm.getDescriptor(field.getGenericType());
+                String asmDesc = signatureParser.fieldDescriptor(fieldName);
+                assertEquals(testDesc, asmDesc);
+            }
+            // method:
+            List<Method> methods = Jie.list(ODS.class.getDeclaredMethods());
+            for (int i = 1; i <= ODS.methodNum; i++) {
+                String methodName = "m" + i;
+                Method method = methods.stream().filter(m -> m.getName().equals(methodName)).findFirst().get();
+                String testDesc = JieJvm.getDescriptor(method);
+                String asmDesc = signatureParser.methodDescriptor(methodName);
+                assertEquals(testDesc, asmDesc);
+            }
+        }
         // exception
+        expectThrows(JvmException.class, () -> JieJvm.getDescriptor(JieType.upperBound(String.class)));
         Method getPrimitiveDescriptor = JieJvm.class.getDeclaredMethod("getPrimitiveDescriptor", Class.class);
         JieTest.reflectThrows(UnknownPrimitiveTypeException.class, getPrimitiveDescriptor, null, Object.class);
     }
@@ -149,89 +150,151 @@ public class JvmTest {
         return org.objectweb.asm.Type.getDescriptor(cls);
     }
 
-    private String asmDescriptor(Method method) {
-        return org.objectweb.asm.Type.getMethodDescriptor(method);
-    }
-
-    private String asmDescriptor(Constructor<?> constructor) {
-        return org.objectweb.asm.Type.getConstructorDescriptor(constructor);
-    }
-
-    @Test
-    public void testWildcard() throws Exception {
-        class X {
-            List<?> l1;
-            List<? extends Object> l2;
-        }
-        Type t1 = ((ParameterizedType) X.class.getDeclaredField("l1").getGenericType()).getActualTypeArguments()[0];
-        Type t2 = ((ParameterizedType) X.class.getDeclaredField("l2").getGenericType()).getActualTypeArguments()[0];
-        System.out.println(t1);
-        System.out.println(t2);
-        assertEquals(t1, t2);
-        ClassReader cr = new ClassReader(X.class.getName());
-        cr.accept(new SignatureParser(), 0);
-    }
-
     @Test
     public void testSignature() throws Exception {
         {
             abstract class A {
             }
-            SignatureParser signatureParser = signatureParser(A.class);
-            assertEquals(JieJvm.getSignature(A.class), signatureParser.classSignature());
+            abstract class B extends Number {
+            }
+            abstract class C implements List {
+            }
+            abstract class D implements List<String> {
+            }
+            abstract class E extends Number implements List<String> {
+            }
+            abstract class F extends Number implements Map<String, String>, Serializable, RandomAccess {
+            }
+            SignatureParser a = signatureParser(A.class);
+            assertEquals(JieJvm.getSignature(A.class), a.classSignature());
+            SignatureParser b = signatureParser(B.class);
+            assertEquals(JieJvm.getSignature(B.class), b.classSignature());
+            SignatureParser c = signatureParser(C.class);
+            assertEquals(JieJvm.getSignature(C.class), c.classSignature());
+            SignatureParser d = signatureParser(D.class);
+            assertEquals(JieJvm.getSignature(D.class), d.classSignature());
+            SignatureParser e = signatureParser(E.class);
+            assertEquals(JieJvm.getSignature(E.class), e.classSignature());
+            SignatureParser f = signatureParser(F.class);
+            assertEquals(JieJvm.getSignature(F.class), f.classSignature());
         }
         {
-            abstract class A extends Number {
+            abstract class A<T> {
             }
-            SignatureParser signatureParser = signatureParser(A.class);
-            assertEquals(JieJvm.getSignature(A.class), signatureParser.classSignature());
+            abstract class B<T extends String> {
+            }
+            abstract class C<T extends String & Serializable> {
+            }
+            abstract class D<T extends CharSequence & Serializable> {
+            }
+            abstract class E<T extends CharSequence & Serializable, U extends T> {
+            }
+            abstract class F<T extends CharSequence & Serializable & RandomAccess, U extends T, W> {
+            }
+            SignatureParser a = signatureParser(A.class);
+            assertEquals(JieJvm.getSignature(A.class), a.classSignature());
+            SignatureParser b = signatureParser(B.class);
+            assertEquals(JieJvm.getSignature(B.class), b.classSignature());
+            SignatureParser c = signatureParser(C.class);
+            assertEquals(JieJvm.getSignature(C.class), c.classSignature());
+            SignatureParser d = signatureParser(D.class);
+            assertEquals(JieJvm.getSignature(D.class), d.classSignature());
+            SignatureParser e = signatureParser(E.class);
+            assertEquals(JieJvm.getSignature(E.class), e.classSignature());
+            SignatureParser f = signatureParser(F.class);
+            assertEquals(JieJvm.getSignature(F.class), f.classSignature());
         }
         {
-            abstract class A extends Number implements List, Serializable {
+            abstract class A<T extends CharSequence & Serializable & RandomAccess, U extends T, W>
+                extends Number implements Map<String, String>, Serializable, RandomAccess {
             }
-            SignatureParser signatureParser = signatureParser(A.class);
-            assertEquals(JieJvm.getSignature(A.class), signatureParser.classSignature());
+            abstract class B<T> {
+            }
+            abstract class C extends B<String> {
+            }
+            SignatureParser a = signatureParser(A.class);
+            assertEquals(JieJvm.getSignature(A.class), a.classSignature());
+            SignatureParser c = signatureParser(C.class);
+            assertEquals(JieJvm.getSignature(C.class), c.classSignature());
         }
         {
-            abstract class A extends Number implements List<String>, Serializable {
-            }
-            SignatureParser signatureParser = signatureParser(A.class);
-            assertEquals(JieJvm.getSignature(A.class), signatureParser.classSignature());
+            // for Inter
+            SignatureParser a = signatureParser(Inter.class);
+            assertEquals(JieJvm.getSignature(Inter.class), a.classSignature());
         }
         {
-            abstract class A<T extends String> extends Number implements List<T>, Serializable {
+            // for DS:
+            // fields
+            SignatureParser signatureParser = signatureParser(DS.class);
+            for (int i = 1; i <= DS.fieldNum; i++) {
+                String fieldName = "f" + i;
+                Field field = DS.class.getDeclaredField(fieldName);
+                String testSig = JieJvm.getSignature(field);
+                String asmSig = signatureParser.fieldSignature(fieldName);
+                assertEquals(testSig, asmSig);
             }
-            SignatureParser signatureParser = signatureParser(A.class);
-            assertEquals(JieJvm.getSignature(A.class), signatureParser.classSignature());
+            // method:
+            List<Method> methods = Jie.list(DS.class.getDeclaredMethods());
+            for (int i = 1; i <= DS.methodNum; i++) {
+                String methodName = "m" + i;
+                Method method = methods.stream().filter(m -> m.getName().equals(methodName)).findFirst().get();
+                String testSig = JieJvm.getSignature(method);
+                String asmSig = signatureParser.methodSignature(methodName);
+                assertEquals(testSig, asmSig);
+            }
+            // constructor:
+            assertEquals(
+                JieJvm.getSignature(DS.class.getDeclaredConstructor()),
+                signatureParser.constructorSignature(JieJvm.getDescriptor(DS.class.getDeclaredConstructor()))
+            );
+            assertEquals(
+                JieJvm.getSignature(DS.class.getDeclaredConstructor(String.class)),
+                signatureParser.constructorSignature(
+                    JieJvm.getDescriptor(DS.class.getDeclaredConstructor(String.class))
+                )
+            );
+            assertEquals(
+                JieJvm.getSignature(DS.class.getDeclaredConstructor(String.class, List.class)),
+                signatureParser.constructorSignature(
+                    JieJvm.getDescriptor(DS.class.getDeclaredConstructor(String.class, List.class))
+                )
+            );
+            assertEquals(
+                JieJvm.getSignature(DS.class.getDeclaredConstructor(String.class, List.class, Map.class)),
+                signatureParser.constructorSignature(
+                    JieJvm.getDescriptor(DS.class.getDeclaredConstructor(String.class, List.class, Map.class))
+                )
+            );
+            assertEquals(
+                JieJvm.getSignature(DS.class.getDeclaredConstructor(String.class, String.class, Integer.class)),
+                signatureParser.constructorSignature(
+                    JieJvm.getDescriptor(DS.class.getDeclaredConstructor(String.class, String.class, Integer.class))
+                )
+            );
         }
         {
-            abstract class A<T extends String, Y extends T, U, V extends U>
-                extends Number implements List<V>, Serializable {
+            // inner class
+            // fields
+            SignatureParser signatureParser = signatureParser(ODS.class);
+            for (int i = 1; i <= ODS.fieldNum; i++) {
+                String fieldName = "f" + i;
+                Field field = ODS.class.getDeclaredField(fieldName);
+                String testSig = JieJvm.getSignature(field);
+                String asmSig = signatureParser.fieldSignature(fieldName);
+                assertEquals(testSig, asmSig);
             }
-            SignatureParser signatureParser = signatureParser(A.class);
-            assertEquals(JieJvm.getSignature(A.class), signatureParser.classSignature());
+            // method:
+            List<Method> methods = Jie.list(ODS.class.getDeclaredMethods());
+            for (int i = 1; i <= ODS.methodNum; i++) {
+                String methodName = "m" + i;
+                Method method = methods.stream().filter(m -> m.getName().equals(methodName)).findFirst().get();
+                String testSig = JieJvm.getSignature(method);
+                String asmSig = signatureParser.methodSignature(methodName);
+                assertEquals(testSig, asmSig);
+            }
         }
-        {
-            abstract class A<T extends String, U, V extends U, W extends Map<? extends List<? super V>, ?>,
-                Y extends Map<? super List<? super V>, ? extends List<? extends U>>>
-                extends Number implements List<V>, Serializable {
-            }
-            SignatureParser signatureParser = signatureParser(A.class);
-            assertEquals(JieJvm.getSignature(A.class), signatureParser.classSignature());
-        }
-        {
-            class A0<T> {
-            }
-            abstract class A<
-                T extends CharSequence & Serializable,
-                U extends A0<? extends String> & CharSequence,
-                V extends U
-                >
-                extends Number implements List<V>, Serializable {
-            }
-            SignatureParser signatureParser = signatureParser(A.class);
-            assertEquals(JieJvm.getSignature(A.class), signatureParser.classSignature());
-        }
+        // exception
+        expectThrows(JvmException.class, () -> JieJvm.getSignature(JieType.other()));
     }
 
     private SignatureParser signatureParser(Class<?> cls) throws Exception {
@@ -242,82 +305,47 @@ public class JvmTest {
     }
 
     @Test
-    public void testLoadBytecode() {
-        expectThrows(JvmException.class, () -> JieJvm.loadBytecode(ByteBuffer.wrap(new byte[0])));
+    public void testRawType() throws Exception {
+        Method raw1 = JieJvm.class.getDeclaredMethod("getRawClass", ParameterizedType.class);
+        JieTest.reflectThrows(JvmException.class, raw1, null, TypeTest.errorParameterizedType());
+        Method raw2 = JieJvm.class.getDeclaredMethod("getRawClass", GenericArrayType.class);
+        JieTest.reflectThrows(JvmException.class, raw2, null, JieType.array(JieType.other()));
     }
 
-    interface XI1<T> {
-    }
-
-    interface XI2<T> {
-    }
-
-    static class X<T extends List<? extends String> & Serializable & XI1<? super String> & XI2<? extends T>, U>
-        extends ArrayList<T>
-        implements XI1<String>, XI2<U> {
-
-        X() {
+    @Test
+    public void testLoadClass() throws Exception {
+        {
+            InputStream in = ClassLoader.getSystemResourceAsStream(
+                SignatureParser.class.getName().replace('.', '/') + ".class"
+            );
+            byte[] bytes = JieIO.read(in);
+            Class<?> cls = JieJvm.loadClass(bytes);
+            assertEquals(cls.getName(), SignatureParser.class.getName());
+            assertNotEquals(cls, SignatureParser.class);
+            in.close();
         }
-
-        X(String a) {
+        {
+            InputStream in = ClassLoader.getSystemResourceAsStream(
+                DS.class.getName().replace('.', '/') + ".class"
+            );
+            byte[] bytes = JieIO.read(in);
+            Class<?> cls = JieJvm.loadClass(bytes);
+            assertEquals(cls.getName(), DS.class.getName());
+            assertNotEquals(cls, DS.class);
+            in.close();
         }
-
-        X(String a, List<String> b) {
-        }
-
-        X(String a, List<String> b, Map<? super String, ? extends Integer> c) {
-        }
-
-        void xm() {
-        }
-
-        void xm(String a) {
-        }
-
-        void xm(String a, List<String> b) {
-        }
-
-        void xm(String a, List<String> b, Map<? super String, ? extends Integer> c) {
-        }
-
-        int xmInt() {
-            return 0;
-        }
-
-        int xmInt(String a) {
-            return 0;
-        }
-
-        int xmInt(String a, List<String> b) {
-            return 0;
-        }
-
-        int xmInt(String a, List<String> b, Map<? super String, ? extends Integer> c) {
-            return 0;
-        }
-
-        String xmString() {
-            return null;
-        }
-
-        String xmString(String a) {
-            return null;
-        }
-
-        String xmString(String a, List<String> b) {
-            return null;
-        }
-
-        String xmString(String a, List<String> b, Map<? super String, ? extends Integer> c) {
-            return null;
-        }
+        expectThrows(JvmException.class, () -> JieJvm.loadClass(ByteBuffer.wrap(new byte[0])));
+        expectThrows(JvmException.class, () -> JieJvm.loadClass(new byte[0]));
     }
 
     static class SignatureParser extends ClassVisitor {
 
         private String classSignature;
-        private final Map<String, String> methodMap = new HashMap<>();
-        private final Map<String, String> fieldMap = new HashMap<>();
+        private final Map<String, String> fieldDesc = new HashMap<>();
+        private final Map<String, String> methodDesc = new HashMap<>();
+        private final Map<String, String> fieldSig = new HashMap<>();
+        private final Map<String, String> methodSig = new HashMap<>();
+        private final Map<String, String> constructorInfo = new HashMap<>();
 
         public SignatureParser() {
             super(Opcodes.ASM7);
@@ -338,7 +366,8 @@ public class JvmTest {
 
         @Override
         public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
-            fieldMap.put(name, signature);
+            fieldDesc.put(name, descriptor);
+            fieldSig.put(name, signature);
             return super.visitField(access, name, descriptor, signature, value);
         }
 
@@ -350,7 +379,11 @@ public class JvmTest {
             String signature,
             String[] exceptions
         ) {
-            methodMap.put(name + "-" + descriptor, signature);
+            if (name.equals("<init>")) {
+                constructorInfo.put(descriptor, signature);
+            }
+            methodDesc.put(name, descriptor);
+            methodSig.put(name, signature);
             return super.visitMethod(access, name, descriptor, signature, exceptions);
         }
 
@@ -359,74 +392,177 @@ public class JvmTest {
                 null : classSignature.replace("*", "+Ljava/lang/Object;");
         }
 
+        public String fieldDescriptor(String name) {
+            return fieldDesc.get(name);
+        }
+
         public String fieldSignature(String name) {
-            return fieldMap.get(name) == null ?
-                null : fieldMap.get(name).replace("*", "+Ljava/lang/Object;");
+            String sig = fieldSig.get(name);
+            return sig == null ? null : sig.replace("*", "+Ljava/lang/Object;");
         }
 
-        public String methodSignature(String name, String descriptor) {
-            return methodMap.get(name + "-" + descriptor) == null ?
-                null : methodMap.get(name + "-" + descriptor).replace("*", "+Ljava/lang/Object;");
-        }
-    }
-
-    public static class BaseClass {
-
-        public BaseClass() {
+        public String methodDescriptor(String name) {
+            return methodDesc.get(name);
         }
 
-        public BaseClass(String a, List<String> b, List<? super String> c, List<? extends String> d) {
-
+        public String methodSignature(String name) {
+            String sig = methodSig.get(name);
+            return sig == null ? null : sig.replace("*", "+Ljava/lang/Object;");
         }
 
-        public void m1() {
+        public boolean hasConstructorDescriptor(String descriptor) {
+            return constructorInfo.containsKey(descriptor);
         }
 
-        public void m2(String a) {
-        }
-
-        public String m3(String a) {
-            return null;
-        }
-
-        public String m4(String a, List<String> b, List<? super String> c, List<? extends String> d) {
-            return null;
+        public String constructorSignature(String name) {
+            String sig = constructorInfo.get(name);
+            return sig == null ? null : sig.replace("*", "+Ljava/lang/Object;");
         }
     }
 
-    public interface BaseInter {
-        default String i1(String a) {
-            return null;
+    abstract static class DS<
+        T extends String,
+        U extends T,
+        V extends Serializable & RandomAccess,
+        W extends RandomAccess & Serializable,
+        F extends List<? extends String>
+        > {
+
+        static final int fieldNum = 23;
+        static final int methodNum = 15;
+
+        int f1;
+        String f2;
+        List<String> f3;
+        List<? extends List<String>> f4;
+        Map<? extends List<String>, ? super List<String>> f5;
+        Map<?, ?> f6;
+        T f7;
+        U f8;
+        V f9;
+        W f10;
+        F f11;
+        int[] f12;
+        String[] f13;
+        List<String>[] f14;
+        List<? extends List<String>>[][] f15;
+        Map<? extends List<String>, ? super List<String>>[] f16;
+        Map<?, ?>[][] f17;
+        T[] f18;
+        U[] f19;
+        V[] f20;
+        W[] f21;
+        F[] f22;
+        F[][] f23;
+
+        DS() {
         }
 
-        String i2(String a);
+        DS(String a) {
+        }
+
+        DS(String a, List<String> b) {
+        }
+
+        DS(String a, List<String> b, Map<? super String, ? extends Integer> c) {
+        }
+
+        <O extends String, P extends O, Q extends Integer> DS(O o, P p, Q q) {
+        }
+
+        abstract void m1();
+
+        abstract void m2(String a);
+
+        abstract void m3(String a, List<String> b);
+
+        abstract void m4(String a, List<String> b, Map<? super String, ? extends Integer> c);
+
+        abstract int m5();
+
+        abstract int m6(String a);
+
+        abstract int m7(String a, List<String> b);
+
+        abstract int m8(String a, List<String> b, Map<? super String, ? extends Integer> c);
+
+        abstract String m9();
+
+        abstract String m10(String a);
+
+        abstract String m11(String a, List<String> b);
+
+        abstract String m12(String a, List<String> b, Map<? super String, ? extends Integer> c);
+
+        abstract F[][] m13(
+            String a,
+            List<String> b,
+            Map<? super String, ? extends Integer> c,
+            T t,
+            U[] u,
+            List<? extends V> v,
+            Map<? super W, ? extends W> w
+        );
+
+        abstract <
+            O extends String & List<String>,
+            P extends List<? super String> & Serializable,
+            Q extends P
+            > F[][] m14(
+            String a,
+            List<String> b,
+            Map<? super String, ? extends Integer> c,
+            T t,
+            U[] u,
+            List<? extends V> v,
+            Map<? super W, ? extends W> w,
+            O o,
+            P p,
+            Q q,
+            O[] oo,
+            P[][] pp,
+            Q[][][] qq
+        );
+
+        abstract <O extends ODS<String, String>, P extends ODS<String, String>.IDS<Integer, Integer>>
+        P m15(O o, P p, P[] pp);
     }
 
-    public interface XInter<A, B extends A, C extends String> {
+    abstract class ODS<T, U> {
+
+        abstract class IDS<O, P> {}
+
+        static final int fieldNum = 6;
+        static final int methodNum = 7;
+
+        ODS<String, String>.IDS<Integer, Integer> f1;
+        ODS<? super String, ? extends String>.IDS<? super Integer, ? extends Integer> f2;
+        ODS<? super String, ? extends String>.IDS<? super Integer, ? extends Integer>[] f3;
+        List<? extends ODS<? super String, ? extends String>.IDS<? super Integer, ? extends Integer>> f4;
+        List<? extends ODS<? super String, ? extends String>.IDS<? super Integer, ? extends Integer>>[] f5;
+        List<? extends ODS<? super String, ? extends String>.IDS<? super Integer, ? extends Integer>[]> f6;
+
+        abstract ODS<String, String>.IDS<Integer, Integer> m1(
+            ODS<String, String>.IDS<Integer, Integer> a);
+
+        abstract ODS<? super String, ? extends String>.IDS<? super Integer, ? extends Integer> m2(
+            ODS<? super String, ? extends String>.IDS<? super Integer, ? extends Integer> a);
+
+        abstract ODS<? super String, ? extends String>.IDS<? super Integer, ? extends Integer>[] m3(
+            ODS<? super String, ? extends String>.IDS<? super Integer, ? extends Integer>[] a);
+
+        abstract List<? extends ODS<? super String, ? extends String>.IDS<? super Integer, ? extends Integer>> m4(
+            List<? extends ODS<? super String, ? extends String>.IDS<? super Integer, ? extends Integer>> a);
+
+        abstract List<? extends ODS<? super String, ? extends String>.IDS<? super Integer, ? extends Integer>>[] m5(
+            List<? extends ODS<? super String, ? extends String>.IDS<? super Integer, ? extends Integer>>[] a);
+
+        abstract List<? extends ODS<? super String, ? extends String>.IDS<? super Integer, ? extends Integer>[]> m6(
+            List<? extends ODS<? super String, ? extends String>.IDS<? super Integer, ? extends Integer>[]> a);
+
+        abstract <A extends CharSequence & RandomAccess, B extends A> B m7(
+            A a, B b, ODS<String, String>.IDS<Integer, Integer> c);
     }
 
-    public static class XClass<T extends Number & CharSequence, U, V extends T, X extends List<? super Integer>,
-        Y extends Serializable, W extends CharSequence & RandomAccess, P extends String, O extends Y, M extends ArrayList<String>>
-        extends BaseClass implements BaseInter, XInter<V, V, String> {
-
-        private int f1;
-        private List f2;
-        private List[] f3;
-        private List<? extends V> f4;
-        private List<? super V> f5;
-        private List<? extends V>[] f6;
-        private List<? super String>[] f7;
-
-        public XClass(X a, List<? extends T> b, List[] c, List<? extends String> d) {
-        }
-
-        @Override
-        public String i2(String a) {
-            return "";
-        }
-
-        public List<? extends U> x1(X a, List<? extends T> b, List[] c, List<? extends String> d) {
-            return null;
-        }
-    }
+    interface Inter extends List<String> {}
 }

@@ -37,7 +37,7 @@ import static org.objectweb.asm.Opcodes.V1_8;
 public class AsmBack {
 
     public static void test() throws Exception {
-        Class<?> cls = JieJvm.loadBytecode(generateInstImpl(String.class.getMethod("subSequence", int.class, int.class)));
+        Class<?> cls = JieJvm.loadClass(generateInstImpl(String.class.getMethod("subSequence", int.class, int.class)));
         System.out.println(cls);
         Invocable invocable = (Invocable) cls.newInstance();
         System.out.println(invocable.invoke("12345", 1, 2));

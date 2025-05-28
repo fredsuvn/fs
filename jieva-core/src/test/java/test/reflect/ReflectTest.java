@@ -1,6 +1,5 @@
 package test.reflect;
 
-import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 import test.utils.ErrorConstructor;
 import xyz.sunqian.annotations.Nonnull;
@@ -9,7 +8,6 @@ import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 import xyz.sunqian.common.reflect.JieReflect;
 import xyz.sunqian.common.reflect.JieType;
-import xyz.sunqian.common.reflect.JvmException;
 import xyz.sunqian.common.reflect.ReflectionException;
 
 import java.lang.annotation.Annotation;
@@ -80,7 +78,7 @@ public class ReflectTest {
         Type listType = X.class.getDeclaredField("list").getGenericType();
         assertEquals(JieReflect.getRawClass(listType), List.class);
         assertNull(JieReflect.getRawClass(List.class.getTypeParameters()[0]));
-        assertNull(JieReflect.getRawClass(errorParameterizedType()));
+        assertNull(JieReflect.getRawClass(TypeTest.errorParameterizedType()));
     }
 
     @Test
@@ -281,7 +279,7 @@ public class ReflectTest {
     @Test
     public void testRuntimeClass() throws Exception {
         assertEquals(JieReflect.toRuntimeClass(int.class), int.class);
-        class X<T> {
+        class X<T extends String, U extends List<? extends String>> {
             List<? extends String> l1 = null;
             List<? extends String>[] l2 = null;
         }
@@ -289,9 +287,14 @@ public class ReflectTest {
         assertEquals(JieReflect.toRuntimeClass(l1Type), List.class);
         Type l2Type = X.class.getDeclaredField("l2").getGenericType();
         assertEquals(JieReflect.toRuntimeClass(l2Type), List[].class);
-        assertNull(JieReflect.toRuntimeClass(X.class.getTypeParameters()[0]));
+        assertEquals(JieReflect.toRuntimeClass(X.class.getTypeParameters()[0]), String.class);
+        assertEquals(JieReflect.toRuntimeClass(X.class.getTypeParameters()[1]), List.class);
         GenericArrayType arrayType = JieType.array(X.class.getTypeParameters()[0]);
-        assertNull(JieReflect.toRuntimeClass(arrayType));
+        assertEquals(JieReflect.toRuntimeClass(arrayType), String[].class);
+        ParameterizedType p = (ParameterizedType) JieReflect.getFirstBound(X.class.getTypeParameters()[1]);
+        Type w = p.getActualTypeArguments()[0];
+        assertNull(JieReflect.toRuntimeClass(w));
+        assertNull(JieReflect.toRuntimeClass(JieType.array(w)));
     }
 
     @Test
@@ -389,7 +392,7 @@ public class ReflectTest {
             Method mapTypeVariables = JieReflect.class.getDeclaredMethod("mapTypeVariables", Type.class, Map.class);
             mapTypeVariables.setAccessible(true);
             Map<@Nonnull TypeVariable<?>, @Nullable Type> mapping = new HashMap<>();
-            Type errorParam = errorParameterizedType();
+            Type errorParam = TypeTest.errorParameterizedType();
             mapTypeVariables.invoke(null, errorParam, mapping);
             assertTrue(mapping.isEmpty());
         }
@@ -397,7 +400,7 @@ public class ReflectTest {
             Method mapTypeVariables = JieReflect.class.getDeclaredMethod("mapTypeVariables", Type[].class, Map.class);
             mapTypeVariables.setAccessible(true);
             Map<@Nonnull TypeVariable<?>, @Nullable Type> mapping = new HashMap<>();
-            Type errorParam = errorParameterizedType();
+            Type errorParam = TypeTest.errorParameterizedType();
             mapTypeVariables.invoke(null, Jie.array(errorParam), mapping);
             assertTrue(mapping.isEmpty());
         }
@@ -407,26 +410,6 @@ public class ReflectTest {
         return map.get(cls.getTypeParameters()[index]);
     }
 
-    private ParameterizedType errorParameterizedType() {
-        return new ParameterizedType() {
-            @Override
-            @NotNull
-            public Type[] getActualTypeArguments() {
-                return new Type[0];
-            }
-
-            @NotNull
-            @Override
-            public Type getRawType() {
-                return null;
-            }
-
-            @Override
-            public Type getOwnerType() {
-                return null;
-            }
-        };
-    }
 
     @Test
     public void testReplaceType() throws Exception {
@@ -494,50 +477,11 @@ public class ReflectTest {
 
         // special:
         expectThrows(ReflectionException.class, () ->
-            JieReflect.replaceType(errorParameterizedType(), String.class, Integer.class));
+            JieReflect.replaceType(TypeTest.errorParameterizedType(), String.class, Integer.class));
         Type p1 = JieType.parameterized(List.class, Jie.array(), Integer.class);
         Type p2 = JieType.parameterized(List.class, Jie.array(), Long.class);
         assertEquals(JieReflect.replaceType(p1, Integer.class, Long.class), p2);
         assertSame(JieReflect.replaceType(p1, Integer.class, Integer.class), p1);
-    }
-
-    @Test
-    public void testExceptionConstructors() {
-
-        String message = "hello";
-        Throwable cause = new RuntimeException(message);
-
-        {
-            // ReflectionException
-            expectThrows(ReflectionException.class, () -> {
-                throw new ReflectionException();
-            });
-            expectThrows(ReflectionException.class, () -> {
-                throw new ReflectionException("");
-            });
-            expectThrows(ReflectionException.class, () -> {
-                throw new ReflectionException("", new RuntimeException());
-            });
-            ReflectionException e = new ReflectionException(cause);
-            assertEquals(e.getMessage(), message);
-            assertSame(e.getCause(), cause);
-        }
-
-        {
-            // JvmException
-            expectThrows(JvmException.class, () -> {
-                throw new JvmException();
-            });
-            expectThrows(JvmException.class, () -> {
-                throw new JvmException("");
-            });
-            expectThrows(JvmException.class, () -> {
-                throw new JvmException("", new RuntimeException());
-            });
-            JvmException e = new JvmException(cause);
-            assertEquals(e.getMessage(), message);
-            assertSame(e.getCause(), cause);
-        }
     }
 
     public interface Inter0 {
