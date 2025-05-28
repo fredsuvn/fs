@@ -2,10 +2,11 @@ package xyz.sunqian.common.reflect;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
-import xyz.sunqian.common.collect.JieArray;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -160,6 +161,40 @@ public class JieJvm {
     }
 
     /**
+     * Returns whether the given method need a signature for JVM.
+     *
+     * @param method the given method
+     * @return whether the given method need a signature for JVM
+     */
+    public static boolean needSignature(@Nonnull Method method) {
+        Type returnType = method.getGenericReturnType();
+        if (needSignature(returnType)) {
+            return true;
+        }
+        return needSignature((Executable) method);
+    }
+
+    /**
+     * Returns whether the given constructor need a signature for JVM.
+     *
+     * @param constructor the given constructor
+     * @return whether the given constructor need a signature for JVM
+     */
+    public static boolean needSignature(@Nonnull Constructor<?> constructor) {
+        return needSignature((Executable) constructor);
+    }
+
+    private static boolean needSignature(@Nonnull Executable executable) {
+        Type[] parameters = executable.getGenericParameterTypes();
+        for (Type parameter : parameters) {
+            if (needSignature(parameter)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Returns the signature of the given type.
      *
      * @param type the given type
@@ -171,14 +206,7 @@ public class JieJvm {
         }
         StringBuilder appender = new StringBuilder();
         Class<?> cls = (Class<?>) type;
-        TypeVariable<?>[] tvs = cls.getTypeParameters();
-        if (tvs.length > 0) {
-            appender.append('<');
-            for (TypeVariable<?> tv : tvs) {
-                appendSignature(tv, appender);
-            }
-            appender.append('>');
-        }
+        appendSignature(cls.getTypeParameters(), appender);
         @Nullable Type superclass = cls.getGenericSuperclass();
         if (superclass == null) {
             appender.append("Ljava/lang/Object;");
@@ -190,6 +218,97 @@ public class JieJvm {
             appendSignature(anInterface, appender);
         }
         return appender.toString();
+    }
+
+    /**
+     * Returns the signature of the given method.
+     *
+     * @param method the given method
+     * @return the signature of the given method
+     */
+    public static @Nullable String getSignature(@Nonnull Method method) {
+        if (!needSignature(method)) {
+            return null;
+        }
+        StringBuilder appender = new StringBuilder();
+        appendSignature(method, appender);
+        Type returnType = method.getGenericReturnType();
+        appendSignature(returnType, appender);
+        return appender.toString();
+    }
+
+    /**
+     * Returns the signature of the given constructor.
+     *
+     * @param constructor the given constructor
+     * @return the signature of the given constructor
+     */
+    public static @Nullable String getSignature(@Nonnull Constructor<?> constructor) {
+        if (!needSignature(constructor)) {
+            return null;
+        }
+        StringBuilder appender = new StringBuilder();
+        appendSignature(constructor, appender);
+        appender.append('V');
+        return appender.toString();
+    }
+
+    private static void appendSignature(
+        @Nonnull Executable executable,
+        @Nonnull StringBuilder appender
+    ) {
+        appendSignature(executable.getTypeParameters(), appender);
+        appender.append('(');
+        for (Type parameter : executable.getGenericParameterTypes()) {
+            appendSignature(parameter, appender);
+        }
+        appender.append(')');
+    }
+
+    private static void appendSignature(
+        @Nonnull TypeVariable<?> @Nonnull [] typeVariables,
+        @Nonnull StringBuilder appender
+    ) {
+        if (typeVariables.length > 0) {
+            appender.append('<');
+            for (TypeVariable<?> tv : typeVariables) {
+                appendTypeVariableDeclaringSignature(tv, appender);
+            }
+            appender.append('>');
+        }
+    }
+
+    private static void appendTypeVariableDeclaringSignature(
+        @Nonnull TypeVariable<?> type,
+        @Nonnull StringBuilder appender
+    ) {
+        appender.append(type.getName());
+        Type[] bounds = type.getBounds();
+        for (int i = 0; i < bounds.length; i++) {
+            Type bound = bounds[i];
+            appender.append(':');
+            if (JieReflect.isTypeVariable(bound)) {
+                appender.append('T');
+                appender.append(((TypeVariable<?>) bound).getName());
+                appender.append(';');
+                continue;
+            }
+            if (i == 0) {
+                if (JieReflect.isParameterized(bound)) {
+                    Class<?> rawClass = getRawClass((ParameterizedType) bound);
+                    if (rawClass.isInterface()) {
+                        appender.append(':');
+                    }
+                }
+                if (JieReflect.isClass(bound)) {
+                    Class<?> boundClass = Jie.as(bound);
+                    if (boundClass.isInterface()) {
+                        appender.append(':');
+                    }
+                }
+            }
+            appendSignature(bound, appender);
+        }
     }
 
     private static void appendSignature(@Nonnull Type type, @Nonnull StringBuilder appender) {
@@ -262,31 +381,7 @@ public class JieJvm {
     }
 
     private static void appendSignature(@Nonnull TypeVariable<?> type, @Nonnull StringBuilder appender) {
-        appender.append(type.getName());
-        Type[] bounds = type.getBounds();
-        for (int i = 0; i < bounds.length; i++) {
-            Type bound = bounds[i];
-            appender.append(':');
-            if (JieReflect.isTypeVariable(bound)) {
-                appender.append('T');
-                appender.append(((TypeVariable<?>) bound).getName());
-                appender.append(';');
-                continue;
-            }
-            if (JieReflect.isParameterized(bound)) {
-                Class<?> rawClass = getRawClass((ParameterizedType) bound);
-                if (rawClass.isInterface() && i == 0) {
-                    appender.append(':');
-                }
-            }
-            if (JieReflect.isClass(bound) && i == 0) {
-                Class<?> boundClass = (Class<?>) bound;
-                if (boundClass.isInterface()) {
-                    appender.append(':');
-                }
-            }
-            appendSignature(bound, appender);
-        }
+        appender.append('T').append(type.getTypeName()).append(';');
     }
 
     private static void appendSignature(@Nonnull GenericArrayType type, @Nonnull StringBuilder appender) {
@@ -315,137 +410,6 @@ public class JieJvm {
             return arrayClass;
         }
         throw new JvmException("Unknown array type: " + type + ".");
-    }
-
-    // public static void appendSignature(@Nonnull Type type, @Nonnull StringBuilder appender) {
-    //     if (type instanceof Class<?>) {
-    //         Class<?> cls = (Class<?>) type;
-    //         TypeVariable<?>[] tv = cls.getTypeParameters();
-    //         Type superclass = cls.getGenericSuperclass();
-    //         Type[] interfaces = cls.getGenericInterfaces();
-    //
-    //     }
-    //     if (type instanceof ParameterizedType) {
-    //         ParameterizedType pt = (ParameterizedType) type;
-    //         StringBuilder sb = new StringBuilder();
-    //         sb.append("L");
-    //         sb.append(getInternalName((Class<?>) pt.getRawType()));
-    //         sb.append("<");
-    //         for (Type actualTypeArgument : pt.getActualTypeArguments()) {
-    //             sb.append(getSignature(actualTypeArgument));
-    //         }
-    //         sb.append(">;");
-    //         return sb.toString();
-    //     }
-    //     if (type instanceof WildcardType) {
-    //         WildcardType wt = (WildcardType) type;
-    //         Type lower = JieReflect.getLowerBound(wt);
-    //         if (lower != null) {
-    //             return "-" + getSignature(lower);
-    //         }
-    //         return "+" + getSignature(JieReflect.getUpperBound(wt));
-    //     }
-    //     if (type instanceof TypeVariable<?>) {
-    //         TypeVariable<?> tv = (TypeVariable<?>) type;
-    //         return "T" + tv.getTypeName() + ";";
-    //     }
-    //     if (type instanceof GenericArrayType) {
-    //         GenericArrayType at = (GenericArrayType) type;
-    //         return "[" + getSignature(at.getGenericComponentType());
-    //     }
-    //     throw new IllegalArgumentException("Unknown type: " + type.getTypeName());
-    // }
-
-    /**
-     * Returns JVM signature of the given method.
-     *
-     * @param method given method
-     * @return JVM signature of the given method
-     */
-    public static String getSignature(Method method) {
-        Type returnType = method.getGenericReturnType();
-        if (Objects.equals(returnType, void.class) && method.getParameterCount() == 0) {
-            return "()V";
-        }
-        Type[] params = method.getGenericParameterTypes();
-        StringBuilder sb = new StringBuilder();
-        sb.append("(");
-        for (Type param : params) {
-            sb.append(getSignature(param));
-        }
-        sb.append(")");
-        sb.append(getSignature(returnType));
-        return sb.toString();
-    }
-
-    /**
-     * Returns JVM signature of the given constructor.
-     *
-     * @param constructor given constructor
-     * @return JVM signature of the given constructor
-     */
-    public static String getSignature(Constructor<?> constructor) {
-        if (constructor.getParameterCount() == 0) {
-            return "()V";
-        }
-        Type[] params = constructor.getGenericParameterTypes();
-        StringBuilder sb = new StringBuilder();
-        sb.append("(");
-        for (Type param : params) {
-            sb.append(getSignature(param));
-        }
-        sb.append(")V");
-        return sb.toString();
-    }
-
-    /**
-     * Returns JVM signature for declaration of a class or interface.
-     *
-     * @param cls a class or interface to declare
-     * @return JVM signature for declaration of a class or interface
-     */
-    public static String declareSignature(Class<?> cls) {
-        StringBuilder sb = new StringBuilder();
-        TypeVariable<?>[] tvs = cls.getTypeParameters();
-        if (JieArray.isNotEmpty(tvs)) {
-            sb.append("<");
-            for (TypeVariable<?> tv : tvs) {
-                sb.append(tv.getTypeName());
-                Type[] bounds = tv.getBounds();
-                for (int i = 0; i < bounds.length; i++) {
-                    Type bound = bounds[i];
-                    sb.append(declareSignature(i, bound));
-                }
-            }
-            sb.append(">");
-        }
-        Type superClass = cls.getGenericSuperclass();
-        sb.append(getSignature(superClass));
-        Type[] interfaces = cls.getGenericInterfaces();
-        if (JieArray.isNotEmpty(interfaces)) {
-            for (Type anInterface : interfaces) {
-                sb.append(getSignature(anInterface));
-            }
-        }
-        return sb.toString();
-    }
-
-    private static String declareSignature(int index, Type bound) {
-        if (index > 0) {
-            return ":" + getSignature(bound);
-        }
-        if (bound instanceof Class<?>) {
-            if (((Class<?>) bound).isInterface()) {
-                return "::" + getSignature(bound);
-            }
-        }
-        if (bound instanceof ParameterizedType) {
-            Class<?> rawType = (Class<?>) ((ParameterizedType) bound).getRawType();
-            if (rawType.isInterface()) {
-                return "::" + getSignature(bound);
-            }
-        }
-        return ":" + getSignature(bound);
     }
 
     /**

@@ -8,9 +8,7 @@ import org.objectweb.asm.Opcodes;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 import xyz.sunqian.common.reflect.JieJvm;
-import xyz.sunqian.common.reflect.JieType;
 import xyz.sunqian.common.reflect.JvmException;
-import xyz.sunqian.common.reflect.TypeRef;
 import xyz.sunqian.test.JieTest;
 
 import java.io.Serializable;
@@ -176,98 +174,76 @@ public class JvmTest {
 
     @Test
     public void testSignature() throws Exception {
-        class A<T> {
-            class B<U> {
+        {
+            abstract class A {
             }
+            SignatureParser signatureParser = signatureParser(A.class);
+            assertEquals(JieJvm.getSignature(A.class), signatureParser.classSignature());
         }
-        class A1 extends A<String> {}
-        class N<
-            T, K extends String & Serializable, V extends List<? extends String> & Serializable, U extends List,
-            F extends T, H extends V, I extends A<String>, J extends A<String>.B<String>
-            > {
-            <B> B bb(
-                int i,
-                List<B> l1,
-                List<? super String> l2,
-                List<? super List<? extends Integer>> l3,
-                List<?> l4,
-                String[] a1,
-                List<String>[] a2,
-                String[][] a3
-            ) {
-                return null;
+        {
+            abstract class A extends Number {
             }
+            SignatureParser signatureParser = signatureParser(A.class);
+            assertEquals(JieJvm.getSignature(A.class), signatureParser.classSignature());
+        }
+        {
+            abstract class A extends Number implements List, Serializable {
+            }
+            SignatureParser signatureParser = signatureParser(A.class);
+            assertEquals(JieJvm.getSignature(A.class), signatureParser.classSignature());
+        }
+        {
+            abstract class A extends Number implements List<String>, Serializable {
+            }
+            SignatureParser signatureParser = signatureParser(A.class);
+            assertEquals(JieJvm.getSignature(A.class), signatureParser.classSignature());
+        }
+        {
+            abstract class A<T extends String> extends Number implements List<T>, Serializable {
+            }
+            SignatureParser signatureParser = signatureParser(A.class);
+            assertEquals(JieJvm.getSignature(A.class), signatureParser.classSignature());
+        }
+        {
+            abstract class A<T extends String, Y extends T, U, V extends U>
+                extends Number implements List<V>, Serializable {
+            }
+            SignatureParser signatureParser = signatureParser(A.class);
+            assertEquals(JieJvm.getSignature(A.class), signatureParser.classSignature());
+        }
+        {
+            abstract class A<T extends String, U, V extends U, W extends Map<? extends List<? super V>, ?>,
+                Y extends Map<? super List<? super V>, ? extends List<? extends U>>>
+                extends Number implements List<V>, Serializable {
+            }
+            SignatureParser signatureParser = signatureParser(A.class);
+            assertEquals(JieJvm.getSignature(A.class), signatureParser.classSignature());
+        }
+        {
+            class A0<T> {
+            }
+            abstract class A<
+                T extends CharSequence & Serializable,
+                U extends A0<? extends String> & CharSequence,
+                V extends U
+                >
+                extends Number implements List<V>, Serializable {
+            }
+            SignatureParser signatureParser = signatureParser(A.class);
+            assertEquals(JieJvm.getSignature(A.class), signatureParser.classSignature());
+        }
+    }
 
-            String[] ss(A<String>[] b){return null;}
-        }
-        abstract class M extends N implements List {
-        }
-        abstract class L extends A1 implements Serializable, List<String> {
-        }
-        assertEquals(JieType.questionMark(), new TypeRef<List<?>>() {
-        }.asParameterized().getActualTypeArguments()[0]);
-        assertEquals(JieType.questionMark(), new TypeRef<List<? extends Object>>() {
-        }.asParameterized().getActualTypeArguments()[0]);
-        System.out.println(A.B.class.getSimpleName());
-        ClassReader cr = new ClassReader(N.class.getName());
-        cr.accept(new SignatureParser(), 0);
-        System.out.println(JieJvm.getSignature(N.class));
+    private SignatureParser signatureParser(Class<?> cls) throws Exception {
+        SignatureParser signatureParser = new SignatureParser();
+        ClassReader cr = new ClassReader(cls.getName());
+        cr.accept(signatureParser, 0);
+        return signatureParser;
     }
 
     @Test
     public void testLoadBytecode() {
         expectThrows(JvmException.class, () -> JieJvm.loadBytecode(ByteBuffer.wrap(new byte[0])));
-    }
-
-    static class SignatureParser extends ClassVisitor {
-
-        private final Map<String, String> signatureMap = new HashMap<>();
-        private String classSignature;
-
-        public SignatureParser() {
-            super(Opcodes.ASM7);
-        }
-
-        @Override
-        public void visit(
-            int version,
-            int access,
-            String name,
-            String signature,
-            String superName,
-            String[] interfaces
-        ) {
-            System.out.println(signature);
-            this.classSignature = signature;
-            super.visit(version, access, name, signature, superName, interfaces);
-        }
-
-        @Override
-        public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
-            //System.out.println(signature);
-            return super.visitField(access, name, descriptor, signature, value);
-        }
-
-        @Override
-        public MethodVisitor visitMethod(
-            int access,
-            String name,
-            String descriptor,
-            String signature,
-            String[] exceptions
-        ) {
-            //System.out.println(signature);
-            signatureMap.put(name + "-" + descriptor, signature);
-            return super.visitMethod(access, name, descriptor, signature, exceptions);
-        }
-
-        public String getClassSignature() {
-            return classSignature;
-        }
-
-        public String getSignature(String name, String descriptor) {
-            return signatureMap.get(name + "-" + descriptor);
-        }
     }
 
     interface XI1<T> {
@@ -334,6 +310,63 @@ public class JvmTest {
 
         String xmString(String a, List<String> b, Map<? super String, ? extends Integer> c) {
             return null;
+        }
+    }
+
+    static class SignatureParser extends ClassVisitor {
+
+        private String classSignature;
+        private final Map<String, String> methodMap = new HashMap<>();
+        private final Map<String, String> fieldMap = new HashMap<>();
+
+        public SignatureParser() {
+            super(Opcodes.ASM7);
+        }
+
+        @Override
+        public void visit(
+            int version,
+            int access,
+            String name,
+            String signature,
+            String superName,
+            String[] interfaces
+        ) {
+            this.classSignature = signature;
+            super.visit(version, access, name, signature, superName, interfaces);
+        }
+
+        @Override
+        public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
+            fieldMap.put(name, signature);
+            return super.visitField(access, name, descriptor, signature, value);
+        }
+
+        @Override
+        public MethodVisitor visitMethod(
+            int access,
+            String name,
+            String descriptor,
+            String signature,
+            String[] exceptions
+        ) {
+            methodMap.put(name + "-" + descriptor, signature);
+            return super.visitMethod(access, name, descriptor, signature, exceptions);
+        }
+
+        public String classSignature() {
+            return classSignature == null ?
+                null : classSignature.replace("*", "+Ljava/lang/Object;");
+        }
+
+        public String fieldSignature(String name) {
+            return fieldMap.get(name) == null ?
+                null : fieldMap.get(name).replace("*", "+Ljava/lang/Object;");
+        }
+
+        public String methodSignature(String name, String descriptor) {
+            return methodMap.get(name + "-" + descriptor) == null ?
+                null : methodMap.get(name + "-" + descriptor).replace("*", "+Ljava/lang/Object;");
         }
     }
 
