@@ -329,7 +329,7 @@ public class JvmTest {
                 DS.class.getName().replace('.', '/') + ".class"
             );
             byte[] bytes = JieIO.read(in);
-            Class<?> cls = JieJvm.loadClass(bytes);
+            Class<?> cls = JieJvm.loadClass(ByteBuffer.wrap(bytes));
             assertEquals(cls.getName(), DS.class.getName());
             assertNotEquals(cls, DS.class);
             in.close();
