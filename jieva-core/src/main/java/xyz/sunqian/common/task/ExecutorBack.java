@@ -5,7 +5,6 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.AwaitingException;
-import xyz.sunqian.common.base.exception.JieException;
 import xyz.sunqian.common.base.exception.WrappedException;
 import xyz.sunqian.common.base.function.VoidCallable;
 import xyz.sunqian.common.base.thread.JieThread;
@@ -189,7 +188,7 @@ final class ExecutorBack {
 
         @Override
         public void await() throws AwaitingException {
-            JieException.wrapChecked(
+            Jie.wrapChecked(
                 () -> JieThread.untilChecked(
                     () -> awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS)
                 ),
@@ -199,7 +198,7 @@ final class ExecutorBack {
 
         @Override
         public boolean await(long millis) throws AwaitingException {
-            return JieException.wrapChecked(
+            return Jie.wrapChecked(
                 () -> awaitTermination(millis, TimeUnit.MILLISECONDS),
                 AwaitingException::new
             );
@@ -207,7 +206,7 @@ final class ExecutorBack {
 
         @Override
         public boolean await(@Nonnull Duration duration) throws AwaitingException {
-            return JieException.wrapChecked(
+            return Jie.wrapChecked(
                 () -> awaitTermination(duration.toNanos(), TimeUnit.NANOSECONDS),
                 AwaitingException::new
             );
@@ -323,7 +322,7 @@ final class ExecutorBack {
 
         @Override
         public void run() {
-            JieException.wrapChecked(this::execute, WrappedException::new);
+            Jie.wrapChecked(this::execute, WrappedException::new);
         }
 
         @Override
@@ -447,7 +446,7 @@ final class ExecutorBack {
         }
 
         private void doAwait(VoidCallable callable) throws AwaitingException {
-            JieException.wrapChecked(
+            Jie.wrapChecked(
                 () -> {
                     try {
                         callable.call();
@@ -483,7 +482,7 @@ final class ExecutorBack {
         }
 
         private @Nullable T doAwait(Callable<T> callable) throws AwaitingException {
-            return JieException.wrapChecked(
+            return Jie.wrapChecked(
                 () -> {
                     try {
                         return callable.call();

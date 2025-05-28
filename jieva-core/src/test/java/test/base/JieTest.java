@@ -189,6 +189,11 @@ public class JieTest {
             assertEquals(Jie.linkedHashMap(1, 2, 3, 4), map);
         }
         {
+            // wrapChecked
+            Jie.wrapChecked(() -> {}, RuntimeException::new);
+            Jie.wrapChecked(() -> "", RuntimeException::new);
+        }
+        {
             // sleep
             Jie.sleep(1);
             Jie.sleep(Duration.ofMillis(1));

@@ -1,8 +1,8 @@
 package xyz.sunqian.common.base.thread;
 
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.AwaitingException;
-import xyz.sunqian.common.base.exception.JieException;
 
 import java.time.Duration;
 import java.util.concurrent.locks.AbstractQueuedSynchronizer;
@@ -42,7 +42,7 @@ final class GateBack {
 
         @Override
         public void await() throws AwaitingException {
-            JieException.wrapChecked(
+            Jie.wrapChecked(
                 () -> sync.acquireSharedInterruptibly(1),
                 AwaitingException::new
             );
@@ -50,7 +50,7 @@ final class GateBack {
 
         @Override
         public boolean await(long millis) throws AwaitingException {
-            return JieException.wrapChecked(
+            return Jie.wrapChecked(
                 () -> sync.tryAcquireSharedNanos(1, millis * 1000000L),
                 AwaitingException::new
             );
@@ -58,7 +58,7 @@ final class GateBack {
 
         @Override
         public boolean await(@Nonnull Duration duration) throws AwaitingException {
-            return JieException.wrapChecked(
+            return Jie.wrapChecked(
                 () -> sync.tryAcquireSharedNanos(1, duration.toNanos()),
                 AwaitingException::new
             );

@@ -1,8 +1,8 @@
 package xyz.sunqian.common.base.thread;
 
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.AwaitingException;
-import xyz.sunqian.common.base.exception.JieException;
 import xyz.sunqian.common.base.function.BooleanCallable;
 
 import java.time.Duration;
@@ -21,7 +21,7 @@ public class JieThread {
      */
     @SuppressWarnings({"InfiniteLoopStatement", "BusyWait"})
     public static void sleep() throws AwaitingException {
-        JieException.wrapChecked(
+        Jie.wrapChecked(
             () -> {
                 while (true) {
                     Thread.sleep(Integer.MAX_VALUE);
@@ -38,7 +38,7 @@ public class JieThread {
      * @throws AwaitingException if the current thread is interrupted or an error occurs while sleeping
      */
     public static void sleep(long millis) throws AwaitingException {
-        JieException.wrapChecked(
+        Jie.wrapChecked(
             () -> {
                 Thread.sleep(millis);
                 return null;
@@ -54,7 +54,7 @@ public class JieThread {
      * @throws AwaitingException if the current thread is interrupted or an error occurs while sleeping
      */
     public static void sleep(@Nonnull Duration duration) throws AwaitingException {
-        JieException.wrapChecked(
+        Jie.wrapChecked(
             () -> {
                 Thread.sleep(duration.toMillis(), duration.getNano() / 1000);
                 return null;
