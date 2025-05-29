@@ -49,7 +49,7 @@ public class ReflectTest {
             Collections.singletonList(Y.class.getTypeParameters()[0])
         );
         // exception:
-        expectThrows(ReflectionException.class, () -> JieReflect.resolveActualTypeArguments(JieType.newOtherType(), Object.class));
+        expectThrows(ReflectionException.class, () -> JieReflect.resolveActualTypeArguments(JieType.otherType(), Object.class));
         expectThrows(ReflectionException.class, () -> JieReflect.resolveActualTypeArguments(X[].class, Map.class));
         expectThrows(ReflectionException.class, () -> JieReflect.resolveActualTypeArguments(X.class, Map[].class));
         expectThrows(
@@ -182,8 +182,8 @@ public class ReflectTest {
         // special:
         expectThrows(ReflectionException.class, () ->
             JieReflect.replaceType(TypeTest.errorParameterizedType(), String.class, Integer.class));
-        Type p1 = JieType.newParameterizedType(List.class, Jie.array(), Integer.class);
-        Type p2 = JieType.newParameterizedType(List.class, Jie.array(), Long.class);
+        Type p1 = JieType.parameterizedType(List.class, Jie.array(), Integer.class);
+        Type p2 = JieType.parameterizedType(List.class, Jie.array(), Long.class);
         assertEquals(JieReflect.replaceType(p1, Integer.class, Long.class), p2);
         assertSame(JieReflect.replaceType(p1, Integer.class, Integer.class), p1);
     }

@@ -182,12 +182,12 @@ public class TypeTest {
         assertEquals(JieType.toRuntimeClass(l2Type), List[].class);
         assertEquals(JieType.toRuntimeClass(X.class.getTypeParameters()[0]), String.class);
         assertEquals(JieType.toRuntimeClass(X.class.getTypeParameters()[1]), List.class);
-        GenericArrayType arrayType = JieType.newArrayType(X.class.getTypeParameters()[0]);
+        GenericArrayType arrayType = JieType.arrayType(X.class.getTypeParameters()[0]);
         assertEquals(JieType.toRuntimeClass(arrayType), String[].class);
         ParameterizedType p = (ParameterizedType) JieType.getFirstBound(X.class.getTypeParameters()[1]);
         Type w = p.getActualTypeArguments()[0];
         assertNull(JieType.toRuntimeClass(w));
-        assertNull(JieType.toRuntimeClass(JieType.newArrayType(w)));
+        assertNull(JieType.toRuntimeClass(JieType.arrayType(w)));
     }
 
     @Test
@@ -201,16 +201,16 @@ public class TypeTest {
         }
         Type x = new TypeRef<X<String>>() {
         }.type();
-        Type xx = JieType.newParameterizedType(X.class, Jie.array(String.class));
+        Type xx = JieType.parameterizedType(X.class, Jie.array(String.class));
         assertEquals(x, xx);
         assertEquals(x.toString(), xx.toString());
         assertEquals(x.hashCode(), xx.hashCode());
         Type y = new TypeRef<X<String>.Y<Integer>>() {
         }.type();
-        Type yy = JieType.newParameterizedType(
+        Type yy = JieType.parameterizedType(
             X.Y.class,
             Jie.array(Integer.class),
-            JieType.newParameterizedType(X.class, Jie.array(String.class))
+            JieType.parameterizedType(X.class, Jie.array(String.class))
         );
         assertEquals(y, yy);
         assertEquals(y.toString(), yy.toString());
@@ -219,22 +219,22 @@ public class TypeTest {
         // hello class
         Type h = new TypeRef<Hello<String>>() {
         }.type();
-        Type hh = JieType.newParameterizedType(Hello.class, Jie.array(String.class));
+        Type hh = JieType.parameterizedType(Hello.class, Jie.array(String.class));
         assertEquals(h, hh);
         assertEquals(h.toString(), hh.toString());
         assertEquals(h.hashCode(), hh.hashCode());
         Type w1 = new TypeRef<Hello.W1<Integer>>() {
         }.type();
-        Type ww1 = JieType.newParameterizedType(Hello.W1.class, Jie.array(Integer.class));
+        Type ww1 = JieType.parameterizedType(Hello.W1.class, Jie.array(Integer.class));
         assertEquals(w1, ww1);
         assertEquals(w1.toString(), ww1.toString());
         assertEquals(w1.hashCode(), ww1.hashCode());
         Type w2 = new TypeRef<Hello<String>.W2<Integer, Long>>() {
         }.type();
-        Type ww2 = JieType.newParameterizedType(
+        Type ww2 = JieType.parameterizedType(
             Hello.W2.class,
             Jie.array(Integer.class, Long.class),
-            JieType.newParameterizedType(Hello.class, Jie.array(String.class))
+            JieType.parameterizedType(Hello.class, Jie.array(String.class))
         );
         assertEquals(w2, ww2);
         assertEquals(w2.toString(), ww2.toString());
@@ -243,19 +243,19 @@ public class TypeTest {
         // equals:
         assertEquals(ww1, ww1);
         assertFalse(ww1.equals(null));
-        Type ww3 = JieType.newParameterizedType(
+        Type ww3 = JieType.parameterizedType(
             Hello.W2.class,
             Jie.array(Integer.class, Long.class),
-            JieType.newParameterizedType(Hello.class, Jie.array(String.class))
+            JieType.parameterizedType(Hello.class, Jie.array(String.class))
         );
         assertEquals(ww2, ww3);
-        Type ww4 = JieType.newParameterizedType(
+        Type ww4 = JieType.parameterizedType(
             List.class,
             Jie.array(Integer.class, Long.class),
-            JieType.newParameterizedType(Hello.class, Jie.array(String.class))
+            JieType.parameterizedType(Hello.class, Jie.array(String.class))
         );
         assertNotEquals(ww2, ww4);
-        Type ww5 = JieType.newParameterizedType(
+        Type ww5 = JieType.parameterizedType(
             Hello.W2.class,
             Jie.array(Integer.class, Long.class),
             List.class
@@ -277,13 +277,13 @@ public class TypeTest {
         }
         Type list1 = ((ParameterizedType) (X.class.getDeclaredField("list1").getGenericType()))
             .getActualTypeArguments()[0];
-        Type l1 = JieType.newWildcardUpper(String.class);
+        Type l1 = JieType.upperWildcard(String.class);
         assertEquals(l1, list1);
         assertEquals(l1.toString(), list1.toString());
         assertEquals(l1.hashCode(), list1.hashCode());
         Type list2 = ((ParameterizedType) (X.class.getDeclaredField("list2").getGenericType()))
             .getActualTypeArguments()[0];
-        Type l2 = JieType.newWildcardLower(String.class);
+        Type l2 = JieType.lowerWildcard(String.class);
         assertEquals(l2, list2);
         assertEquals(l2.toString(), list2.toString());
         assertEquals(l2.hashCode(), list2.hashCode());
@@ -302,7 +302,7 @@ public class TypeTest {
         assertFalse(l1.equals(list2));
         assertFalse(l1.equals(list3));
         assertFalse(l1.equals(String.class));
-        assertEquals(JieType.newWildcardType(Jie.array(), Jie.array()).toString(), "??");
+        assertEquals(JieType.wildcardType(Jie.array(), Jie.array()).toString(), "??");
     }
 
     @Test
@@ -313,7 +313,7 @@ public class TypeTest {
         }
         Type list = X.class.getDeclaredField("list").getGenericType();
         Type array = X.class.getDeclaredField("array").getGenericType();
-        Type genericArray = JieType.newArrayType(list);
+        Type genericArray = JieType.arrayType(list);
         assertEquals(genericArray, array);
         assertEquals(genericArray.toString(), array.toString());
         assertEquals(genericArray.hashCode(), array.hashCode());
@@ -322,13 +322,13 @@ public class TypeTest {
         assertEquals(genericArray, genericArray);
         assertFalse(genericArray.equals(null));
         assertFalse(genericArray.equals(String.class));
-        assertNotEquals(JieType.newArrayType(String.class), JieType.newArrayType(Integer.class));
+        assertNotEquals(JieType.arrayType(String.class), JieType.arrayType(Integer.class));
     }
 
     @Test
     public void testOther() throws Exception {
-        Type other1 = JieType.newOtherType();
-        Type other2 = JieType.newOtherType();
+        Type other1 = JieType.otherType();
+        Type other2 = JieType.otherType();
         assertEquals(other1, other1);
         assertNotEquals(other1, other2);
         assertEquals(other1.toString(), other2.toString());

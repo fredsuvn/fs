@@ -141,7 +141,7 @@ public class JvmTest {
             }
         }
         // exception
-        expectThrows(JvmException.class, () -> JieJvm.getDescriptor(JieType.newWildcardUpper(String.class)));
+        expectThrows(JvmException.class, () -> JieJvm.getDescriptor(JieType.upperWildcard(String.class)));
         Method getPrimitiveDescriptor = JieJvm.class.getDeclaredMethod("getPrimitiveDescriptor", Class.class);
         JieTest.reflectThrows(UnknownPrimitiveTypeException.class, getPrimitiveDescriptor, null, Object.class);
     }
@@ -294,7 +294,7 @@ public class JvmTest {
             }
         }
         // exception
-        expectThrows(JvmException.class, () -> JieJvm.getSignature(JieType.newOtherType()));
+        expectThrows(JvmException.class, () -> JieJvm.getSignature(JieType.otherType()));
     }
 
     private SignatureParser signatureParser(Class<?> cls) throws Exception {
@@ -309,7 +309,7 @@ public class JvmTest {
         Method raw1 = JieJvm.class.getDeclaredMethod("getRawClass", ParameterizedType.class);
         JieTest.reflectThrows(JvmException.class, raw1, null, TypeTest.errorParameterizedType());
         Method raw2 = JieJvm.class.getDeclaredMethod("getRawClass", GenericArrayType.class);
-        JieTest.reflectThrows(JvmException.class, raw2, null, JieType.newArrayType(JieType.newOtherType()));
+        JieTest.reflectThrows(JvmException.class, raw2, null, JieType.arrayType(JieType.otherType()));
     }
 
     @Test

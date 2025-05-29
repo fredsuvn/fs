@@ -64,9 +64,9 @@ public class DataObjectTest {
             Jie.hashMap("ffFf1", String.class
                 , "ffFf2", Short.class
                 , "ffFf3", Long.class
-                , "ffFf4", JieType.newParameterizedType(List.class, new Type[]{String.class})
-                , "ffFf5", JieType.newArrayType(JieType.newParameterizedType(List.class, new Type[]{String.class}))
-                , "class", JieType.newParameterizedType(Class.class, new Type[]{JieType.wildcardChar()})
+                , "ffFf4", JieType.parameterizedType(List.class, new Type[]{String.class})
+                , "ffFf5", JieType.arrayType(JieType.parameterizedType(List.class, new Type[]{String.class}))
+                , "class", JieType.parameterizedType(Class.class, new Type[]{JieType.wildcardChar()})
                 , "c1", Short.class
                 , "bb", boolean.class
                 , "bb2", Boolean.class
@@ -95,9 +95,9 @@ public class DataObjectTest {
             Jie.hashMap("ffFf1", String.class
                 , "ffFf2", Inner.class.getTypeParameters()[0]
                 , "ffFf3", Inner.class.getTypeParameters()[1]
-                , "ffFf4", JieType.newParameterizedType(List.class, new Type[]{String.class})
-                , "ffFf5", JieType.newArrayType(JieType.newParameterizedType(List.class, new Type[]{String.class}))
-                , "class", JieType.newParameterizedType(Class.class, new Type[]{JieType.wildcardChar()})
+                , "ffFf4", JieType.parameterizedType(List.class, new Type[]{String.class})
+                , "ffFf5", JieType.arrayType(JieType.parameterizedType(List.class, new Type[]{String.class}))
+                , "class", JieType.parameterizedType(Class.class, new Type[]{JieType.wildcardChar()})
                 , "c1", Inner.class.getTypeParameters()[0]
                 , "bb", boolean.class
                 , "bb2", Boolean.class

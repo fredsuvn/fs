@@ -20,11 +20,11 @@ public class AssignableTest {
 
     @Test
     public void testAssignableOther() {
-        Type other = JieType.newOtherType();
+        Type other = JieType.otherType();
         Class<?> classType = String.class;
-        ParameterizedType parameterized = JieType.newParameterizedType(List.class, new Type[]{String.class});
-        WildcardType wildcard = JieType.newWildcardUpper(CharSequence.class);
-        GenericArrayType arrayType = JieType.newArrayType(String.class);
+        ParameterizedType parameterized = JieType.parameterizedType(List.class, new Type[]{String.class});
+        WildcardType wildcard = JieType.upperWildcard(CharSequence.class);
+        GenericArrayType arrayType = JieType.arrayType(String.class);
         TypeVariable<?> typeVariable = AssignableTester.class.getTypeParameters()[0];
 
         assertFalse(JieType.isAssignable(other, other));
@@ -228,8 +228,8 @@ public class AssignableTest {
             doTestParam("f8", "f51", true);
             doTestParam("f8", "f52", false);
             doTestParam("f8", "f53", true);
-            ParameterizedType p1 = JieType.newParameterizedType(List.class, new Type[]{String.class});
-            ParameterizedType p2 = JieType.newParameterizedType(List.class, new Type[]{String.class, String.class});
+            ParameterizedType p1 = JieType.parameterizedType(List.class, new Type[]{String.class});
+            ParameterizedType p2 = JieType.parameterizedType(List.class, new Type[]{String.class, String.class});
             assertFalse(JieType.isAssignable(p1, p2));
 
             // TypeVariable
@@ -265,7 +265,7 @@ public class AssignableTest {
             doTest("f23", "f4", false);
             doTest("f57", "f21", false);
             doTest("f21", "f57", true);
-            GenericArrayType a1 = JieType.newArrayType(String.class);
+            GenericArrayType a1 = JieType.arrayType(String.class);
             assertTrue(JieType.isAssignable(a1, String[].class));
             assertTrue(JieType.isAssignable(String[].class, a1));
 

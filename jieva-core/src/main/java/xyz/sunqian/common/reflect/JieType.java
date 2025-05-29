@@ -237,11 +237,11 @@ public class JieType {
      * @param actualTypeArguments the actual type arguments
      * @return a new {@link ParameterizedType} with the specified raw type and actual type arguments
      */
-    public static @Nonnull ParameterizedType newParameterizedType(
+    public static @Nonnull ParameterizedType parameterizedType(
         @Nonnull Class<?> rawType,
         @Nonnull Type @Nonnull @RetainedParam [] actualTypeArguments
     ) {
-        return newParameterizedType(rawType, actualTypeArguments, null);
+        return parameterizedType(rawType, actualTypeArguments, null);
     }
 
     /**
@@ -254,7 +254,7 @@ public class JieType {
      * @param ownerType           the owner type
      * @return a new {@link ParameterizedType} with the specified raw type, actual type arguments and owner type
      */
-    public static @Nonnull ParameterizedType newParameterizedType(
+    public static @Nonnull ParameterizedType parameterizedType(
         @Nonnull Class<?> rawType,
         @Nonnull Type @Nonnull @RetainedParam [] actualTypeArguments,
         @Nullable Type ownerType
@@ -268,7 +268,7 @@ public class JieType {
      * @param upperBound the upper bound
      * @return a new {@link WildcardType} with the specified upper bound ({@code ? extends})
      */
-    public static @Nonnull WildcardType newWildcardUpper(@Nonnull Type upperBound) {
+    public static @Nonnull WildcardType upperWildcard(@Nonnull Type upperBound) {
         return new WildcardTypeImpl(Jie.array(upperBound), WildcardTypeImpl.EMPTY_BOUNDS);
     }
 
@@ -278,22 +278,8 @@ public class JieType {
      * @param lowerBounds the lower bound
      * @return a new {@link WildcardType} with the specified lower bound ({@code ? super})
      */
-    public static @Nonnull WildcardType newWildcardLower(@Nonnull Type lowerBounds) {
+    public static @Nonnull WildcardType lowerWildcard(@Nonnull Type lowerBounds) {
         return new WildcardTypeImpl(WildcardTypeImpl.OBJECT_BOUND, Jie.array(lowerBounds));
-    }
-
-    /**
-     * Returns a new {@link WildcardType} with the specified upper bounds and lower bounds.
-     *
-     * @param upperBounds the upper bounds
-     * @param lowerBounds the lower bounds
-     * @return a new {@link WildcardType} with the specified upper bounds and lower bounds
-     */
-    public static @Nonnull WildcardType newWildcardType(
-        @Nonnull Type @Nonnull @RetainedParam [] upperBounds,
-        @Nonnull Type @Nonnull @RetainedParam [] lowerBounds
-    ) {
-        return new WildcardTypeImpl(upperBounds, lowerBounds);
     }
 
     /**
@@ -306,12 +292,26 @@ public class JieType {
     }
 
     /**
+     * Returns a new {@link WildcardType} with the specified upper bounds and lower bounds.
+     *
+     * @param upperBounds the upper bounds
+     * @param lowerBounds the lower bounds
+     * @return a new {@link WildcardType} with the specified upper bounds and lower bounds
+     */
+    public static @Nonnull WildcardType wildcardType(
+        @Nonnull Type @Nonnull @RetainedParam [] upperBounds,
+        @Nonnull Type @Nonnull @RetainedParam [] lowerBounds
+    ) {
+        return new WildcardTypeImpl(upperBounds, lowerBounds);
+    }
+
+    /**
      * Returns a new {@link GenericArrayType} with the specified component type.
      *
      * @param componentType the component type
      * @return a new {@link GenericArrayType} with the specified component type
      */
-    public static @Nonnull GenericArrayType newArrayType(@Nonnull Type componentType) {
+    public static @Nonnull GenericArrayType arrayType(@Nonnull Type componentType) {
         return new GenericArrayTypeImpl(componentType);
     }
 
@@ -321,7 +321,7 @@ public class JieType {
      *
      * @return a new instance of {@link Type}
      */
-    public static @Nonnull Type newOtherType() {
+    public static @Nonnull Type otherType() {
         return new OtherType();
     }
 
