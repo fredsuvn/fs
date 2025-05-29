@@ -3,9 +3,8 @@
  * <p>
  * Static Utilities:
  * <ul>
- *     <li>{@link xyz.sunqian.common.reflect.JieClass}</li>
  *     <li>{@link xyz.sunqian.common.reflect.JieType}</li>
- *     <li>{@link xyz.sunqian.common.reflect.JieReflect}</li>
+ *     <li>{@link xyz.sunqian.common.reflect.JieClass}</li>
  *     <li>{@link xyz.sunqian.common.reflect.JieJvm}</li>
  * </ul>
  * <p>

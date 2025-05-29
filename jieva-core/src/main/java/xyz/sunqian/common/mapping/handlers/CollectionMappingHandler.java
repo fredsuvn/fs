@@ -8,7 +8,6 @@ import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingException;
 import xyz.sunqian.common.mapping.MappingOptions;
 import xyz.sunqian.common.objects.data.DataProperty;
-import xyz.sunqian.common.reflect.JieReflect;
 import xyz.sunqian.common.reflect.JieType;
 
 import java.lang.reflect.Array;
@@ -231,7 +230,7 @@ public class CollectionMappingHandler implements Mapper.Handler {
             return null;
         }
         if (type instanceof ParameterizedType) {
-            List<Type> sourceComponent = JieReflect.resolveActualTypeArguments(type, Iterable.class);
+            List<Type> sourceComponent = JieType.resolveActualTypeArguments(type, Iterable.class);
             if (JieCollect.isEmpty(sourceComponent)) {
                 return null;
             }

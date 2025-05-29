@@ -6,7 +6,7 @@ import xyz.sunqian.common.base.value.Val;
 import xyz.sunqian.common.objects.data.DataProperty;
 import xyz.sunqian.common.objects.data.DataSchema;
 import xyz.sunqian.common.objects.data.DataSchemaParser;
-import xyz.sunqian.common.reflect.JieReflect;
+import xyz.sunqian.common.reflect.JieType;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -180,7 +180,7 @@ final class BeanMapperImpl implements BeanMapper {
     }
 
     private List<Type> getMapTypeArgs(Type mapType) {
-        return JieReflect.resolveActualTypeArguments(mapType, Map.class);
+        return JieType.resolveActualTypeArguments(mapType, Map.class);
     }
 
     private void putToMap(

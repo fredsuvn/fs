@@ -10,7 +10,6 @@ import xyz.sunqian.common.mapping.MappingException;
 import xyz.sunqian.common.objects.data.BeanException;
 import xyz.sunqian.common.objects.data.DataPropertyBase;
 import xyz.sunqian.common.objects.data.DataSchemaParser;
-import xyz.sunqian.common.reflect.JieReflect;
 import xyz.sunqian.common.reflect.JieType;
 
 import java.lang.annotation.Annotation;
@@ -79,7 +78,7 @@ public class ProtobufBeanResolveHandler implements DataSchemaParser.Handler {
         if (field.isMapField()) {
             String name = rawName + "Map";
             Method getterMethod = rawClass.getMethod("get" + JieString.capitalize(name));
-            List<Type> argsTypes = JieReflect.resolveActualTypeArguments(getterMethod.getGenericReturnType(), Map.class);
+            List<Type> argsTypes = JieType.resolveActualTypeArguments(getterMethod.getGenericReturnType(), Map.class);
             if (JieCollect.isEmpty(argsTypes)) {
                 throw new BeanException("Cannot get actual argument type for " + getterMethod.getGenericReturnType() + ".");
             }
@@ -107,7 +106,7 @@ public class ProtobufBeanResolveHandler implements DataSchemaParser.Handler {
         if (field.isRepeated()) {
             String name = rawName + "List";
             Method getterMethod = rawClass.getMethod("get" + JieString.capitalize(name));
-            List<Type> argsTypes = JieReflect.resolveActualTypeArguments(getterMethod.getGenericReturnType(), List.class);
+            List<Type> argsTypes = JieType.resolveActualTypeArguments(getterMethod.getGenericReturnType(), List.class);
             if (JieCollect.isEmpty(argsTypes)) {
                 throw new BeanException("Cannot get actual argument type for " + getterMethod.getGenericReturnType() + ".");
             }

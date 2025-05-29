@@ -14,7 +14,6 @@ import xyz.sunqian.common.objects.data.DataPropertyBase;
 import xyz.sunqian.common.objects.data.DataSchema;
 import xyz.sunqian.common.objects.data.DataSchemaParser;
 import xyz.sunqian.common.objects.data.JieDataObject;
-import xyz.sunqian.common.reflect.JieReflect;
 import xyz.sunqian.common.reflect.JieType;
 import xyz.sunqian.common.reflect.TypeRef;
 
@@ -272,7 +271,7 @@ public class DataObjectTest {
     @Test
     public void testExtra() {
         Map<TypeVariable<?>, Type> extra =
-            JieReflect.mapTypeParameters(new TypeRef<TestExtra<String>>() {}.type());
+            JieType.mapTypeParameters(new TypeRef<TestExtra<String>>() {}.type());
         Map<TypeVariable<?>, Type> empty = Collections.emptyMap();
         DataSchema b1 = DataSchema.get(new TypeRef<TestExtra<String>>() {}.type());
         DataSchema b2 = JieDataObject.withExtraTypeVariableMapping(DataSchema.get(TestExtra.class), extra);
@@ -287,7 +286,7 @@ public class DataObjectTest {
         assertEquals(b4, b3);
         assertEquals(b4.getProperty("tt"), b4.getProperty("tt"));
         DataSchema b5 = JieDataObject.withExtraTypeVariableMapping(DataSchema.get(TestExtra.class),
-            JieReflect.mapTypeParameters(new TypeRef<TestExtra2<String>>() {}.type()));
+            JieType.mapTypeParameters(new TypeRef<TestExtra2<String>>() {}.type()));
         assertEquals(b5, b3);
         assertEquals(b5.getProperty("tt"), b3.getProperty("tt"));
 

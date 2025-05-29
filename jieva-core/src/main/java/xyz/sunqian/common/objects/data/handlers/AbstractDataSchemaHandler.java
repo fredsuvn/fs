@@ -8,7 +8,6 @@ import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.objects.data.DataObjectException;
 import xyz.sunqian.common.objects.data.DataPropertyBase;
 import xyz.sunqian.common.objects.data.DataSchemaParser;
-import xyz.sunqian.common.reflect.JieReflect;
 import xyz.sunqian.common.reflect.JieType;
 
 import java.lang.annotation.Annotation;
@@ -118,7 +117,7 @@ public abstract class AbstractDataSchemaHandler implements DataSchemaParser.Hand
         }
 
         // Builds property base for each property info.
-        Map<TypeVariable<?>, Type> typeParameterMapping = JieReflect.mapTypeParameters(context.getType());
+        Map<TypeVariable<?>, Type> typeParameterMapping = JieType.mapTypeParameters(context.getType());
         Set<Type> stack = new HashSet<>();
         propertyInfoMap.forEach((propertyName, propertyInfo) -> {
             Method getter = propertyInfo.getGetter();
