@@ -9,6 +9,7 @@ import xyz.sunqian.common.objects.data.DataObjectException;
 import xyz.sunqian.common.objects.data.DataPropertyBase;
 import xyz.sunqian.common.objects.data.DataSchemaParser;
 import xyz.sunqian.common.reflect.JieReflect;
+import xyz.sunqian.common.reflect.JieType;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -77,7 +78,7 @@ public abstract class AbstractDataSchemaHandler implements DataSchemaParser.Hand
     @Override
     public @Nullable boolean doParse(DataSchemaParser.Context context) {
         Type type = context.getType();
-        Class<?> rawType = JieReflect.getRawClass(type);
+        Class<?> rawType = JieType.getRawClass(type);
         if (rawType == null) {
             throw new DataObjectException("Not a Class or ParameterizedType: " + type + ".");
         }

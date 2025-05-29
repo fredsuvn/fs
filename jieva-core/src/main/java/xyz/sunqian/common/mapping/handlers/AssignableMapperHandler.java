@@ -6,7 +6,7 @@ import xyz.sunqian.common.base.value.Val;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingOptions;
 import xyz.sunqian.common.objects.data.DataProperty;
-import xyz.sunqian.common.reflect.JieReflect;
+import xyz.sunqian.common.reflect.JieType;
 
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -58,19 +58,19 @@ public class AssignableMapperHandler implements Mapper.Handler {
             return wrapResult(source);
         }
         if (options.getCopyLevel() == MappingOptions.COPY_LEVEL_ASSIGNABLE) {
-            if (Objects.equals(targetType, Object.class) || JieReflect.isAssignable(targetType, sourceType)) {
+            if (Objects.equals(targetType, Object.class) || JieType.isAssignable(targetType, sourceType)) {
                 return wrapResult(source);
             }
         }
         if (targetType instanceof WildcardType) {
             WildcardType targetWildcard = (WildcardType) targetType;
-            Type lower = JieReflect.getLowerBound(targetWildcard);
+            Type lower = JieType.getLowerBound(targetWildcard);
             // ? super T
             if (lower != null) {
                 return new Object();
             }
             // ? extends T
-            Type upper = JieReflect.getUpperBound(targetWildcard);
+            Type upper = JieType.getUpperBound(targetWildcard);
             return mapper.asHandler().map(source, sourceType, upper, mapper, options);
         }
         if (targetType instanceof TypeVariable<?>) {
@@ -94,19 +94,19 @@ public class AssignableMapperHandler implements Mapper.Handler {
             return wrapResult(source);
         }
         if (options.getCopyLevel() == MappingOptions.COPY_LEVEL_ASSIGNABLE) {
-            if (Objects.equals(targetType, Object.class) || JieReflect.isAssignable(targetType, sourceType)) {
+            if (Objects.equals(targetType, Object.class) || JieType.isAssignable(targetType, sourceType)) {
                 return wrapResult(source);
             }
         }
         if (targetType instanceof WildcardType) {
             WildcardType targetWildcard = (WildcardType) targetType;
-            Type lower = JieReflect.getLowerBound(targetWildcard);
+            Type lower = JieType.getLowerBound(targetWildcard);
             // ? super T
             if (lower != null) {
                 return new Object();
             }
             // ? extends T
-            Type upper = JieReflect.getUpperBound(targetWildcard);
+            Type upper = JieType.getUpperBound(targetWildcard);
             return mapper.asHandler().mapProperty(source, sourceType, upper, targetProperty, mapper, options);
         }
         if (targetType instanceof TypeVariable<?>) {

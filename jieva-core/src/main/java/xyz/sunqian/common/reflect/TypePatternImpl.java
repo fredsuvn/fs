@@ -1,6 +1,10 @@
 package xyz.sunqian.common.reflect;
 
-import java.lang.reflect.*;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 import java.util.Objects;
 
 final class TypePatternImpl implements TypePattern {
@@ -86,34 +90,34 @@ final class TypePatternImpl implements TypePattern {
 
     private boolean isAssignableParameterizedArgs(WildcardType assignedArg, Type assigneeArg) {
         if (assigneeArg instanceof WildcardType) {
-            Type assignedUpper = JieReflect.getUpperBound(assignedArg);
-            Type assigneeUpper = JieReflect.getUpperBound((WildcardType) assigneeArg);
+            Type assignedUpper = JieType.getUpperBound(assignedArg);
+            Type assigneeUpper = JieType.getUpperBound((WildcardType) assigneeArg);
             if (!isAssignable(assignedUpper, assigneeUpper)) {
                 return false;
             }
-            Type assignedLower = JieReflect.getLowerBound(assignedArg);
+            Type assignedLower = JieType.getLowerBound(assignedArg);
             if (assignedLower == null) {
                 return true;
             }
-            Type assigneeLower = JieReflect.getLowerBound((WildcardType) assigneeArg);
+            Type assigneeLower = JieType.getLowerBound((WildcardType) assigneeArg);
             if (assigneeLower == null) {
                 return false;
             }
             return isAssignable(assigneeLower, assignedLower);
         }
         if (assigneeArg instanceof TypeVariable<?>) {
-            Type assignedLower = JieReflect.getLowerBound(assignedArg);
+            Type assignedLower = JieType.getLowerBound(assignedArg);
             if (assignedLower != null) {
                 return isAssignable(assigneeArg, assignedLower);
             }
-            Type assignedUpper = JieReflect.getUpperBound(assignedArg);
+            Type assignedUpper = JieType.getUpperBound(assignedArg);
             return isAssignable(assignedUpper, assigneeArg);
         }
-        Type assignedUpper = JieReflect.getUpperBound(assignedArg);
+        Type assignedUpper = JieType.getUpperBound(assignedArg);
         if (!isAssignable(assignedUpper, assigneeArg)) {
             return false;
         }
-        Type assignedLower = JieReflect.getLowerBound(assignedArg);
+        Type assignedLower = JieType.getLowerBound(assignedArg);
         return assignedLower == null || isAssignable(assigneeArg, assignedLower);
     }
 
@@ -158,7 +162,7 @@ final class TypePatternImpl implements TypePattern {
     }
 
     private boolean isAssignableWildcard(WildcardType assigned, Type assignee) {
-        Type lowerType = JieReflect.getLowerBound(assigned);
+        Type lowerType = JieType.getLowerBound(assigned);
         if (lowerType != null) {
             return isAssignable(lowerType, assignee);
         }
@@ -229,7 +233,7 @@ final class TypePatternImpl implements TypePattern {
     }
 
     public boolean isAssignableToWildcard(Type assigned, WildcardType assignee) {
-        Type assigneeUpper = JieReflect.getUpperBound(assignee);
+        Type assigneeUpper = JieType.getUpperBound(assignee);
         return isAssignable(assigned, assigneeUpper);
     }
 

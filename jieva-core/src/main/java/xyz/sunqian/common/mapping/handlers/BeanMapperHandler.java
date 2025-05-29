@@ -3,15 +3,21 @@ package xyz.sunqian.common.mapping.handlers;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Flag;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.objects.data.DataProperty;
 import xyz.sunqian.common.mapping.BeanMapper;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingOptions;
-import xyz.sunqian.common.reflect.JieReflect;
+import xyz.sunqian.common.objects.data.DataProperty;
+import xyz.sunqian.common.reflect.JieClass;
+import xyz.sunqian.common.reflect.JieType;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -82,7 +88,7 @@ public class BeanMapperHandler implements Mapper.Handler {
             if (supplier != null) {
                 return supplier.get();
             }
-            Class<?> rawType = JieReflect.getRawClass(type);
+            Class<?> rawType = JieType.getRawClass(type);
             if (rawType == null) {
                 return null;
             }
@@ -90,7 +96,7 @@ public class BeanMapperHandler implements Mapper.Handler {
             if (rawSupplier != null) {
                 return rawSupplier.get();
             }
-            return JieReflect.newInstance(rawType);
+            return JieClass.newInstance(rawType);
         }
 
         @Override

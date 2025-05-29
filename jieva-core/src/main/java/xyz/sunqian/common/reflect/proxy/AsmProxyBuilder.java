@@ -9,8 +9,8 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.collect.JieCollect;
+import xyz.sunqian.common.reflect.JieClass;
 import xyz.sunqian.common.reflect.JieJvm;
-import xyz.sunqian.common.reflect.JieReflect;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -199,7 +199,7 @@ public class AsmProxyBuilder implements ProxyBuilder, Opcodes {
         public <T> T newInstance() throws ProxyException {
             try {
                 Constructor<?> constructor =
-                    JieReflect.getConstructor(proxyClass, Jie.array(MethodProxyHandler.class, Method[].class));
+                    JieClass.getConstructor(proxyClass, Jie.array(MethodProxyHandler.class, Method[].class));
                 return Jie.as(constructor.newInstance(handler, methods));
             } catch (Exception e) {
                 throw new ProxyException(e);
@@ -219,7 +219,7 @@ public class AsmProxyBuilder implements ProxyBuilder, Opcodes {
         private static final String INIT_DESCRIPTOR =
             "(" + HANDLER_DESCRIPTOR + METHOD_ARRAY_DESCRIPTOR + ")V";
 
-        private static final String HANDLER_METHOD_DESCRIPTOR = JieJvm.getDescriptor(JieReflect.searchMethod(
+        private static final String HANDLER_METHOD_DESCRIPTOR = JieJvm.getDescriptor(JieClass.searchMethod(
             MethodProxyHandler.class, "invoke", Jie.array(Object.class, Method.class, Object[].class, ProxyInvoker.class))
         );
 
@@ -479,10 +479,10 @@ public class AsmProxyBuilder implements ProxyBuilder, Opcodes {
     private static final class InvokerGenerator implements Opcodes {
 
         private static final String INVOKE_METHOD_DESCRIPTOR = JieJvm.getDescriptor(
-            JieReflect.searchMethod(ProxyInvoker.class, "invoke", Jie.array(Object.class, Object[].class))
+            JieClass.searchMethod(ProxyInvoker.class, "invoke", Jie.array(Object.class, Object[].class))
         );
         private static final String INVOKE_SUPER_METHOD_DESCRIPTOR = JieJvm.getDescriptor(
-            JieReflect.searchMethod(ProxyInvoker.class, "invokeSuper", Jie.array(Object.class, Object[].class))
+            JieClass.searchMethod(ProxyInvoker.class, "invokeSuper", Jie.array(Object.class, Object[].class))
         );
 
         private final String proxyInternalName;
@@ -584,5 +584,6 @@ public class AsmProxyBuilder implements ProxyBuilder, Opcodes {
         }
     }
 
-    private static final class $X {}
+    private static final class $X {
+    }
 }

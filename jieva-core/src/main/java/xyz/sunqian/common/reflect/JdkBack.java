@@ -8,14 +8,14 @@ import java.lang.reflect.Type;
 final class JdkBack {
 
     static @Nullable Class<?> arrayClass(@Nonnull Type componentType) {
-        Class<?> componentClass = JieReflect.toRuntimeClass(componentType);
+        Class<?> componentClass = JieType.toRuntimeClass(componentType);
         if (componentClass == null) {
             return null;
         }
-        String name = JieReflect.arrayClassName(componentClass);
+        String name = JieClass.arrayClassName(componentClass);
         if (name == null) {
             return null;
         }
-        return JieReflect.classForName(name, componentClass.getClassLoader());
+        return JieClass.classForName(name, componentClass.getClassLoader());
     }
 }

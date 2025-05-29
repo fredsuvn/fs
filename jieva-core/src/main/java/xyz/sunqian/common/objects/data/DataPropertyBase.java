@@ -3,7 +3,7 @@ package xyz.sunqian.common.objects.data;
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.reflect.JieReflect;
+import xyz.sunqian.common.reflect.JieType;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -44,7 +44,7 @@ public interface DataPropertyBase {
      */
     @Nullable
     default Class<?> getRawType() {
-        return JieReflect.getRawClass(getType());
+        return JieType.getRawClass(getType());
     }
 
     /**

@@ -4,6 +4,8 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.JieString;
+import xyz.sunqian.common.collect.JieArray;
 import xyz.sunqian.common.collect.JieStream;
 
 import java.lang.reflect.GenericArrayType;
@@ -16,11 +18,217 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * Static class provides utility methods and implementations for {@link Type}.
+ * Static utility class for {@link Type}.
  *
  * @author sunqian
  */
 public class JieType {
+
+    /**
+     * Returns {@code true} if the given type is a {@link Class}, {@code false} otherwise.
+     *
+     * @param type the given type
+     * @return {@code true} if the given type is a {@link Class}, {@code false} otherwise
+     */
+    public static boolean isClass(@Nonnull Type type) {
+        return type instanceof Class<?>;
+    }
+
+    /**
+     * Returns {@code true} if the given type is a {@link ParameterizedType}, {@code false} otherwise.
+     *
+     * @param type the given type
+     * @return {@code true} if the given type is a {@link ParameterizedType}, {@code false} otherwise
+     */
+    public static boolean isParameterized(@Nonnull Type type) {
+        return type instanceof ParameterizedType;
+    }
+
+    /**
+     * Returns {@code true} if the given type is a {@link WildcardType}, {@code false} otherwise.
+     *
+     * @param type the given type
+     * @return {@code true} if the given type is a {@link WildcardType}, {@code false} otherwise
+     */
+    public static boolean isWildcard(@Nonnull Type type) {
+        return type instanceof WildcardType;
+    }
+
+    /**
+     * Returns {@code true} if the given type is a {@link TypeVariable}, {@code false} otherwise.
+     *
+     * @param type the given type
+     * @return {@code true} if the given type is a {@link TypeVariable}, {@code false} otherwise
+     */
+    public static boolean isTypeVariable(@Nonnull Type type) {
+        return type instanceof TypeVariable<?>;
+    }
+
+    /**
+     * Returns {@code true} if the given type is a {@link GenericArrayType}, {@code false} otherwise.
+     *
+     * @param type the given type
+     * @return {@code true} if the given type is a {@link GenericArrayType}, {@code false} otherwise
+     */
+    public static boolean isGenericArray(@Nonnull Type type) {
+        return type instanceof GenericArrayType;
+    }
+
+    /**
+     * Returns whether the given type is an array type (array {@link Class} or {@link GenericArrayType}).
+     *
+     * @param type the given type
+     * @return whether the given type is an array type (array {@link Class} or {@link GenericArrayType})
+     */
+    public static boolean isArray(@Nonnull Type type) {
+        if (isClass(type)) {
+            return ((Class<?>) type).isArray();
+        }
+        return isGenericArray(type);
+    }
+
+    /**
+     * Returns the last name of the given type. The last name is sub-string after last dot(.) For example: the last name
+     * of {@code java.lang.String} is {@code String}.
+     *
+     * @param type the given type
+     * @return the last name of given type
+     */
+    public static @Nonnull String getLastName(@Nonnull Type type) {
+        String className = type.getTypeName();
+        return getLastName(className);
+    }
+
+    private static @Nonnull String getLastName(@Nonnull String typeName) {
+        int index = JieString.lastIndexOf(typeName, ".");
+        return typeName.substring(index + 1);
+    }
+
+    /**
+     * Returns the raw class of the given type. The given type must be a {@link Class} or {@link ParameterizedType}.
+     * This method returns the given type itself if it is a {@link Class}, or {@link ParameterizedType#getRawType()} if
+     * it is a {@link ParameterizedType}. Returns {@code null} if the given type neither be {@link Class} nor
+     * {@link ParameterizedType}, or the raw type is not a {@link Class}.
+     *
+     * @param type the given type
+     * @return the raw class of given type, or {@code null} if the given type neither be {@link Class} nor
+     * {@link ParameterizedType}, or the raw type is not a {@link Class}
+     */
+    public static @Nullable Class<?> getRawClass(@Nonnull Type type) {
+        if (isClass(type)) {
+            return (Class<?>) type;
+        }
+        if (isParameterized(type)) {
+            Type rawType = ((ParameterizedType) type).getRawType();
+            return isClass(rawType) ? (Class<?>) rawType : null;
+        }
+        return null;
+    }
+
+    /**
+     * Returns the first upper bound type of the given wildcard type ({@code ? extends}). Note that if no upper bound is
+     * explicitly declared, returns {@code Object.class}.
+     *
+     * @param type the given wildcard type
+     * @return the first upper bound type of the given wildcard type
+     */
+    public static @Nonnull Type getUpperBound(@Nonnull WildcardType type) {
+        Type[] upperBounds = type.getUpperBounds();
+        if (JieArray.isNotEmpty(upperBounds)) {
+            return upperBounds[0];
+        }
+        return Object.class;
+    }
+
+    /**
+     * Returns the first lower bound type of the given wildcard type ({@code ? super}). If given type has no lower
+     * bound, returns {@code null}.
+     *
+     * @param type the given wildcard type
+     * @return the first lower bound type of the given wildcard type or {@code null}
+     */
+    public static @Nullable Type getLowerBound(@Nonnull WildcardType type) {
+        Type[] lowerBounds = type.getLowerBounds();
+        if (JieArray.isNotEmpty(lowerBounds)) {
+            return lowerBounds[0];
+        }
+        return null;
+    }
+
+    /**
+     * Returns the first bound type of the given type variable ({@code T extends}). Note that if no upper bound is
+     * explicitly declared, returns {@code Object.class}.
+     *
+     * @param type the given type variable
+     * @return the first upper bound type of the given type variable
+     */
+    public static @Nonnull Type getFirstBound(@Nonnull TypeVariable<?> type) {
+        Type[] bounds = type.getBounds();
+        if (JieArray.isNotEmpty(bounds)) {
+            return bounds[0];
+        }
+        return Object.class;
+    }
+
+    /**
+     * Returns the component type of the given type if it is an array, {@code null} if it is not.
+     *
+     * @param type the given type
+     * @return the component type of the given type if it is an array, {@code null} if it is not
+     */
+    public static @Nullable Type getComponentType(@Nonnull Type type) {
+        if (isClass(type)) {
+            return ((Class<?>) type).getComponentType();
+        }
+        if (isGenericArray(type)) {
+            return ((GenericArrayType) type).getGenericComponentType();
+        }
+        return null;
+    }
+
+    /**
+     * Returns the runtime class of the given type, may be {@code null} if fails. This method supports {@link Class},
+     * {@link ParameterizedType}, {@link GenericArrayType} and {@link TypeVariable}.
+     *
+     * @param type the given type
+     * @return the runtime class of the given type, may be {@code null} if fails
+     */
+    public static @Nullable Class<?> toRuntimeClass(@Nonnull Type type) {
+        if (isClass(type)) {
+            return (Class<?>) type;
+        }
+        if (isParameterized(type)) {
+            ParameterizedType parameterizedType = (ParameterizedType) type;
+            Type rawType = parameterizedType.getRawType();
+            return toRuntimeClass(rawType);
+        }
+        if (isGenericArray(type)) {
+            GenericArrayType arrayType = (GenericArrayType) type;
+            Type componentType = arrayType.getGenericComponentType();
+            @Nullable Class<?> componentClass = toRuntimeClass(componentType);
+            if (componentClass == null) {
+                return null;
+            }
+            return JieClass.arrayClass(componentClass);
+        }
+        if (isTypeVariable(type)) {
+            return toRuntimeClass(getFirstBound((TypeVariable<?>) type));
+        }
+        return null;
+    }
+
+    /**
+     * Returns whether a type can be assigned by another type. This method is {@link Type} version of
+     * {@link Class#isAssignableFrom(Class)}, supporting {@link Class}, {@link ParameterizedType}, {@link WildcardType},
+     * {@link TypeVariable} and {@link GenericArrayType}.
+     *
+     * @param assigned the type to be assigned
+     * @param assignee the assignee type
+     * @return whether a type can be assigned by another type
+     */
+    public static boolean isAssignable(@Nonnull Type assigned, @Nonnull Type assignee) {
+        return TypePattern.defaultPattern().isAssignable(assigned, assignee);
+    }
 
     /**
      * Returns a new {@link ParameterizedType} with the specified raw type and actual type arguments.
@@ -55,40 +263,31 @@ public class JieType {
     }
 
     /**
-     * Returns a {@link WildcardType} with the specified upper bound ({@code ? extends}).
+     * Returns a new {@link WildcardType} with the specified upper bound ({@code ? extends}).
      *
      * @param upperBound the upper bound
-     * @return a {@link WildcardType} with the specified upper bound ({@code ? extends})
+     * @return a new {@link WildcardType} with the specified upper bound ({@code ? extends})
      */
     public static @Nonnull WildcardType newWildcardUpper(@Nonnull Type upperBound) {
         return new WildcardTypeImpl(Jie.array(upperBound), WildcardTypeImpl.EMPTY_BOUNDS);
     }
 
     /**
-     * Returns a {@link WildcardType} with the specified lower bound ({@code ? super}).
+     * Returns a new {@link WildcardType} with the specified lower bound ({@code ? super}).
      *
      * @param lowerBounds the lower bound
-     * @return a {@link WildcardType} with the specified lower bound ({@code ? super})
+     * @return a new {@link WildcardType} with the specified lower bound ({@code ? super})
      */
     public static @Nonnull WildcardType newWildcardLower(@Nonnull Type lowerBounds) {
         return new WildcardTypeImpl(WildcardTypeImpl.OBJECT_BOUND, Jie.array(lowerBounds));
     }
 
     /**
-     * Returns a {@link WildcardType} represents {@code ?}.
-     *
-     * @return a {@link WildcardType} represents {@code ?}
-     */
-    public static @Nonnull WildcardType wildcardChar() {
-        return WildcardTypeImpl.QUESTION_MARK;
-    }
-
-    /**
-     * Returns a {@link WildcardType} with the specified upper bounds and lower bounds.
+     * Returns a new {@link WildcardType} with the specified upper bounds and lower bounds.
      *
      * @param upperBounds the upper bounds
      * @param lowerBounds the lower bounds
-     * @return a {@link WildcardType} with the specified upper bounds and lower bounds
+     * @return a new {@link WildcardType} with the specified upper bounds and lower bounds
      */
     public static @Nonnull WildcardType newWildcardType(
         @Nonnull Type @Nonnull @RetainedParam [] upperBounds,
@@ -98,10 +297,19 @@ public class JieType {
     }
 
     /**
-     * Returns a {@link GenericArrayType} with the specified component type.
+     * Returns a singleton {@link WildcardType} represents {@code ?}.
+     *
+     * @return a singleton {@link WildcardType} represents {@code ?}
+     */
+    public static @Nonnull WildcardType wildcardChar() {
+        return WildcardTypeImpl.QUESTION_MARK;
+    }
+
+    /**
+     * Returns a new {@link GenericArrayType} with the specified component type.
      *
      * @param componentType the component type
-     * @return a {@link GenericArrayType} with the specified component type
+     * @return a new {@link GenericArrayType} with the specified component type
      */
     public static @Nonnull GenericArrayType newArrayType(@Nonnull Type componentType) {
         return new GenericArrayTypeImpl(componentType);

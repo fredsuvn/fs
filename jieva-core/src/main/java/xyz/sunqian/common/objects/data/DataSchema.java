@@ -3,7 +3,7 @@ package xyz.sunqian.common.objects.data;
 import xyz.sunqian.annotations.CachedResult;
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.reflect.JieReflect;
+import xyz.sunqian.common.reflect.JieType;
 
 import java.beans.BeanInfo;
 import java.lang.reflect.ParameterizedType;
@@ -71,7 +71,7 @@ public interface DataSchema {
      * @return raw type of the {@link #getType()}
      */
     default Class<?> getRawType() {
-        return JieReflect.getRawClass(getType());
+        return JieType.getRawClass(getType());
     }
 
     /**

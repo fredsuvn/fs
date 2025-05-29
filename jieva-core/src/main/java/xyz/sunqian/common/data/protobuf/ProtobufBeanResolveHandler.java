@@ -11,6 +11,7 @@ import xyz.sunqian.common.objects.data.BeanException;
 import xyz.sunqian.common.objects.data.DataPropertyBase;
 import xyz.sunqian.common.objects.data.DataSchemaParser;
 import xyz.sunqian.common.reflect.JieReflect;
+import xyz.sunqian.common.reflect.JieType;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -34,7 +35,7 @@ public class ProtobufBeanResolveHandler implements DataSchemaParser.Handler {
     @Override
     public @Nullable boolean doParse(DataSchemaParser.Context context) {
         try {
-            Class<?> rawType = JieReflect.getRawClass(context.getType());
+            Class<?> rawType = JieType.getRawClass(context.getType());
             if (rawType == null) {
                 return true;
             }
@@ -135,7 +136,7 @@ public class ProtobufBeanResolveHandler implements DataSchemaParser.Handler {
         Type type = getterMethod.getGenericReturnType();
         Invocable getter = Invocable.of(getterMethod);
         if (isBuilder) {
-            Method setterMethod = rawClass.getMethod("set" + JieString.capitalize(rawName), JieReflect.getRawClass(type));
+            Method setterMethod = rawClass.getMethod("set" + JieString.capitalize(rawName), JieType.getRawClass(type));
             Invocable setter = Invocable.of(setterMethod);
             return new Impl(rawName, type, getterMethod, setterMethod, getter, setter);
         } else {

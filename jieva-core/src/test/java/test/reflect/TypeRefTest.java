@@ -21,7 +21,8 @@ public class TypeRefTest {
         }.asParameterized();
         assertEquals(parameterizedType, listType);
         ;
-        assertEquals(new TypeRef<String>() {}.type(), String.class);
+        assertEquals(new TypeRef<String>() {
+        }.type(), String.class);
 
         // inheritance:
         class TestRef extends TypeRef<String> {

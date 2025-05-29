@@ -9,6 +9,7 @@ import xyz.sunqian.common.mapping.MappingException;
 import xyz.sunqian.common.mapping.MappingOptions;
 import xyz.sunqian.common.objects.data.DataProperty;
 import xyz.sunqian.common.reflect.JieReflect;
+import xyz.sunqian.common.reflect.JieType;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
@@ -97,13 +98,13 @@ public class CollectionMappingHandler implements Mapper.Handler {
         }
         if (type instanceof GenericArrayType) {
             Type componentType = ((GenericArrayType) type).getGenericComponentType();
-            Class<?> componentClass = JieReflect.getRawClass(componentType);
+            Class<?> componentClass = JieType.getRawClass(componentType);
             if (componentClass == null && componentType instanceof TypeVariable<?>) {
                 componentClass = Object.class;
             }
             return Array.newInstance(componentClass, size);
         }
-        Class<?> rawType = JieReflect.getRawClass(type);
+        Class<?> rawType = JieType.getRawClass(type);
         if (rawType == null) {
             return null;
         }

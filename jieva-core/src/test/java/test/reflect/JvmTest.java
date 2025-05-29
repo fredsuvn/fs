@@ -530,7 +530,8 @@ public class JvmTest {
 
     abstract class ODS<T, U> {
 
-        abstract class IDS<O, P> {}
+        abstract class IDS<O, P> {
+        }
 
         static final int fieldNum = 6;
         static final int methodNum = 7;
@@ -564,5 +565,6 @@ public class JvmTest {
             A a, B b, ODS<String, String>.IDS<Integer, Integer> c);
     }
 
-    interface Inter extends List<String> {}
+    interface Inter extends List<String> {
+    }
 }

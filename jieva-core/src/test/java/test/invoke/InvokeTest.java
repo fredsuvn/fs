@@ -7,7 +7,7 @@ import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.invoke.InvocationException;
 import xyz.sunqian.common.invoke.InvocationMode;
 import xyz.sunqian.common.invoke.JieHandle;
-import xyz.sunqian.common.reflect.JieReflect;
+import xyz.sunqian.common.reflect.JieClass;
 import xyz.sunqian.test.JieTestException;
 
 import java.lang.invoke.MethodHandle;
@@ -91,9 +91,9 @@ public class InvokeTest {
 
     private void testError(InvocationMode mode) throws Exception {
         TestThrow tt = new TestThrow();
-        Constructor<?> errorC = JieReflect.getConstructor(TestThrow.class, Jie.array(int.class));
-        Method errorStatic = JieReflect.searchMethod(TestThrow.class, "errorStatic", Jie.array());
-        Method error = JieReflect.searchMethod(TestThrow.class, "error", Jie.array());
+        Constructor<?> errorC = JieClass.getConstructor(TestThrow.class, Jie.array(int.class));
+        Method errorStatic = JieClass.searchMethod(TestThrow.class, "errorStatic", Jie.array());
+        Method error = JieClass.searchMethod(TestThrow.class, "error", Jie.array());
         expectThrows(InvocationException.class, () ->
             Invocable.of(errorC, mode).invoke(1));
         expectThrows(InvocationException.class, () ->
@@ -123,9 +123,9 @@ public class InvokeTest {
 
     private void testHandleError() throws Exception {
         TestThrow tt = new TestThrow();
-        Constructor<?> errorC = JieReflect.getConstructor(TestThrow.class, Jie.array(int.class));
-        Method errorStatic = JieReflect.searchMethod(TestThrow.class, "errorStatic", Jie.array());
-        Method error = JieReflect.searchMethod(TestThrow.class, "error", Jie.array());
+        Constructor<?> errorC = JieClass.getConstructor(TestThrow.class, Jie.array(int.class));
+        Method errorStatic = JieClass.searchMethod(TestThrow.class, "errorStatic", Jie.array());
+        Method error = JieClass.searchMethod(TestThrow.class, "error", Jie.array());
         expectThrows(InvocationException.class, () ->
             Invocable.of(MethodHandles.lookup().unreflectConstructor(errorC), true).invoke(1));
         expectThrows(InvocationException.class, () ->
@@ -151,7 +151,7 @@ public class InvokeTest {
 
     @Test
     public void testInvokeSpecial() throws Throwable {
-        Method tt = JieReflect.searchMethod(TestInter.class, "tt", Jie.array());
+        Method tt = JieClass.searchMethod(TestInter.class, "tt", Jie.array());
         TestChild tc = new TestChild();
         Class<?> caller = tt.getDeclaringClass();
         MethodHandle handle = MethodHandles.lookup().in(caller).unreflectSpecial(tt, caller);

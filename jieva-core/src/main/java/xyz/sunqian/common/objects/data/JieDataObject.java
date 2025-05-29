@@ -3,7 +3,7 @@ package xyz.sunqian.common.objects.data;
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.collect.JieMap;
-import xyz.sunqian.common.reflect.JieReflect;
+import xyz.sunqian.common.reflect.JieType;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -264,7 +264,7 @@ public class JieDataObject {
 
             @Override
             public @Nullable Class<?> getRawType() {
-                return JieReflect.getRawClass(type);
+                return JieType.getRawClass(type);
             }
 
             @Override
