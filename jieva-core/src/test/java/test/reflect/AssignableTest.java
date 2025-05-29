@@ -4,21 +4,28 @@ import org.testng.annotations.Test;
 import xyz.sunqian.common.reflect.JieReflect;
 import xyz.sunqian.common.reflect.JieType;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 public class AssignableTest {
 
     @Test
     public void testAssignableOther() {
-        Type other = JieType.other();
+        Type other = JieType.newOtherType();
         Class<?> classType = String.class;
-        ParameterizedType parameterized = JieType.parameterized(List.class, new Type[]{String.class});
-        WildcardType wildcard = JieType.upperBound(CharSequence.class);
-        GenericArrayType arrayType = JieType.array(String.class);
+        ParameterizedType parameterized = JieType.newParameterizedType(List.class, new Type[]{String.class});
+        WildcardType wildcard = JieType.newWildcardUpper(CharSequence.class);
+        GenericArrayType arrayType = JieType.newArrayType(String.class);
         TypeVariable<?> typeVariable = AssignableTester.class.getTypeParameters()[0];
 
         assertFalse(JieReflect.isAssignable(other, other));
@@ -222,8 +229,8 @@ public class AssignableTest {
             doTestParam("f8", "f51", true);
             doTestParam("f8", "f52", false);
             doTestParam("f8", "f53", true);
-            ParameterizedType p1 = JieType.parameterized(List.class, new Type[]{String.class});
-            ParameterizedType p2 = JieType.parameterized(List.class, new Type[]{String.class, String.class});
+            ParameterizedType p1 = JieType.newParameterizedType(List.class, new Type[]{String.class});
+            ParameterizedType p2 = JieType.newParameterizedType(List.class, new Type[]{String.class, String.class});
             assertFalse(JieReflect.isAssignable(p1, p2));
 
             // TypeVariable
@@ -259,7 +266,7 @@ public class AssignableTest {
             doTest("f23", "f4", false);
             doTest("f57", "f21", false);
             doTest("f21", "f57", true);
-            GenericArrayType a1 = JieType.array(String.class);
+            GenericArrayType a1 = JieType.newArrayType(String.class);
             assertTrue(JieReflect.isAssignable(a1, String[].class));
             assertTrue(JieReflect.isAssignable(String[].class, a1));
 

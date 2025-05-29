@@ -16,37 +16,37 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * This class provides implementations and utilities for {@link Type}.
+ * Static class provides utility methods and implementations for {@link Type}.
  *
  * @author sunqian
  */
 public class JieType {
 
     /**
-     * Returns a {@link ParameterizedType} with the specified raw type and actual type arguments.
+     * Returns a new {@link ParameterizedType} with the specified raw type and actual type arguments.
      *
      * @param rawType             the raw type
      * @param actualTypeArguments the actual type arguments
-     * @return a {@link ParameterizedType} with the specified raw type and actual type arguments
+     * @return a new {@link ParameterizedType} with the specified raw type and actual type arguments
      */
-    public static @Nonnull ParameterizedType parameterized(
+    public static @Nonnull ParameterizedType newParameterizedType(
         @Nonnull Class<?> rawType,
         @Nonnull Type @Nonnull @RetainedParam [] actualTypeArguments
     ) {
-        return parameterized(rawType, actualTypeArguments, null);
+        return newParameterizedType(rawType, actualTypeArguments, null);
     }
 
     /**
-     * Returns a {@link ParameterizedType} with the specified raw type, actual type arguments and owner type. The owner
-     * type may be {@code null}, and if it is {@code null}, the owner type will be the result of
+     * Returns a new {@link ParameterizedType} with the specified raw type, actual type arguments and owner type. The
+     * owner type may be {@code null}, and if it is {@code null}, the owner type will be the result of
      * {@link Class#getDeclaringClass()}.
      *
      * @param rawType             the raw type
      * @param actualTypeArguments the actual type arguments
      * @param ownerType           the owner type
-     * @return a {@link ParameterizedType} with the specified raw type, actual type arguments and owner type
+     * @return a new {@link ParameterizedType} with the specified raw type, actual type arguments and owner type
      */
-    public static @Nonnull ParameterizedType parameterized(
+    public static @Nonnull ParameterizedType newParameterizedType(
         @Nonnull Class<?> rawType,
         @Nonnull Type @Nonnull @RetainedParam [] actualTypeArguments,
         @Nullable Type ownerType
@@ -60,7 +60,7 @@ public class JieType {
      * @param upperBound the upper bound
      * @return a {@link WildcardType} with the specified upper bound ({@code ? extends})
      */
-    public static @Nonnull WildcardType upperBound(@Nonnull Type upperBound) {
+    public static @Nonnull WildcardType newWildcardUpper(@Nonnull Type upperBound) {
         return new WildcardTypeImpl(Jie.array(upperBound), WildcardTypeImpl.EMPTY_BOUNDS);
     }
 
@@ -70,16 +70,16 @@ public class JieType {
      * @param lowerBounds the lower bound
      * @return a {@link WildcardType} with the specified lower bound ({@code ? super})
      */
-    public static @Nonnull WildcardType lowerBound(@Nonnull Type lowerBounds) {
+    public static @Nonnull WildcardType newWildcardLower(@Nonnull Type lowerBounds) {
         return new WildcardTypeImpl(WildcardTypeImpl.OBJECT_BOUND, Jie.array(lowerBounds));
     }
 
     /**
-     * Returns a singleton {@link WildcardType} represents {@code ?}.
+     * Returns a {@link WildcardType} represents {@code ?}.
      *
-     * @return a singleton {@link WildcardType} represents {@code ?}
+     * @return a {@link WildcardType} represents {@code ?}
      */
-    public static @Nonnull WildcardType questionMark() {
+    public static @Nonnull WildcardType wildcardChar() {
         return WildcardTypeImpl.QUESTION_MARK;
     }
 
@@ -90,7 +90,7 @@ public class JieType {
      * @param lowerBounds the lower bounds
      * @return a {@link WildcardType} with the specified upper bounds and lower bounds
      */
-    public static @Nonnull WildcardType wildcard(
+    public static @Nonnull WildcardType newWildcardType(
         @Nonnull Type @Nonnull @RetainedParam [] upperBounds,
         @Nonnull Type @Nonnull @RetainedParam [] lowerBounds
     ) {
@@ -103,7 +103,7 @@ public class JieType {
      * @param componentType the component type
      * @return a {@link GenericArrayType} with the specified component type
      */
-    public static @Nonnull GenericArrayType array(@Nonnull Type componentType) {
+    public static @Nonnull GenericArrayType newArrayType(@Nonnull Type componentType) {
         return new GenericArrayTypeImpl(componentType);
     }
 
@@ -113,7 +113,7 @@ public class JieType {
      *
      * @return a new instance of {@link Type}
      */
-    public static @Nonnull Type other() {
+    public static @Nonnull Type newOtherType() {
         return new OtherType();
     }
 

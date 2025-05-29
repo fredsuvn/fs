@@ -289,12 +289,12 @@ public class ReflectTest {
         assertEquals(JieReflect.toRuntimeClass(l2Type), List[].class);
         assertEquals(JieReflect.toRuntimeClass(X.class.getTypeParameters()[0]), String.class);
         assertEquals(JieReflect.toRuntimeClass(X.class.getTypeParameters()[1]), List.class);
-        GenericArrayType arrayType = JieType.array(X.class.getTypeParameters()[0]);
+        GenericArrayType arrayType = JieType.newArrayType(X.class.getTypeParameters()[0]);
         assertEquals(JieReflect.toRuntimeClass(arrayType), String[].class);
         ParameterizedType p = (ParameterizedType) JieReflect.getFirstBound(X.class.getTypeParameters()[1]);
         Type w = p.getActualTypeArguments()[0];
         assertNull(JieReflect.toRuntimeClass(w));
-        assertNull(JieReflect.toRuntimeClass(JieType.array(w)));
+        assertNull(JieReflect.toRuntimeClass(JieType.newArrayType(w)));
     }
 
     @Test
@@ -346,6 +346,7 @@ public class ReflectTest {
             Collections.singletonList(Y.class.getTypeParameters()[0])
         );
         // exception:
+        expectThrows(ReflectionException.class, () -> JieReflect.resolveActualTypeArguments(JieType.newOtherType(), Object.class));
         expectThrows(ReflectionException.class, () -> JieReflect.resolveActualTypeArguments(X[].class, Map.class));
         expectThrows(ReflectionException.class, () -> JieReflect.resolveActualTypeArguments(X.class, Map[].class));
         expectThrows(
@@ -478,8 +479,8 @@ public class ReflectTest {
         // special:
         expectThrows(ReflectionException.class, () ->
             JieReflect.replaceType(TypeTest.errorParameterizedType(), String.class, Integer.class));
-        Type p1 = JieType.parameterized(List.class, Jie.array(), Integer.class);
-        Type p2 = JieType.parameterized(List.class, Jie.array(), Long.class);
+        Type p1 = JieType.newParameterizedType(List.class, Jie.array(), Integer.class);
+        Type p2 = JieType.newParameterizedType(List.class, Jie.array(), Long.class);
         assertEquals(JieReflect.replaceType(p1, Integer.class, Long.class), p2);
         assertSame(JieReflect.replaceType(p1, Integer.class, Integer.class), p1);
     }

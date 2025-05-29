@@ -900,7 +900,7 @@ public class JieReflect {
             }
         }
         if (matched) {
-            return JieType.parameterized((Class<?>) newRawType, actualTypeArguments, newOwnerType);
+            return JieType.newParameterizedType((Class<?>) newRawType, actualTypeArguments, newOwnerType);
         } else {
             return type;
         }
@@ -930,7 +930,7 @@ public class JieReflect {
             }
         }
         if (matched) {
-            return JieType.wildcard(upperBounds, lowerBounds);
+            return JieType.newWildcardType(upperBounds, lowerBounds);
         } else {
             return type;
         }
@@ -947,7 +947,7 @@ public class JieReflect {
             matched = true;
         }
         if (matched) {
-            return JieType.array(newComponentType);
+            return JieType.newArrayType(newComponentType);
         } else {
             return type;
         }
