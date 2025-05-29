@@ -20,6 +20,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.expectThrows;
 import static xyz.sunqian.test.JieTest.reflectThrows;
 
 public class JieTest {
@@ -32,6 +33,36 @@ public class JieTest {
         assertEquals(Jie.nonnull(null, "456"), "456");
         assertEquals(Jie.nonnull("123", () -> "456"), "123");
         assertEquals(Jie.nonnull(null, () -> "456"), "456");
+    }
+
+    @Test
+    public void testCheckedWrapper() {
+        {
+            // no return
+            int[] i = {0};
+            assertEquals(i[0], 0);
+            Jie.uncheck(() -> {
+                i[0]++;
+            }, RuntimeException::new);
+            assertEquals(i[0], 1);
+            expectThrows(RuntimeException.class, () -> Jie.uncheck(() -> {
+                i[1]++;
+            }, e -> {
+                assertTrue(e instanceof ArrayIndexOutOfBoundsException);
+                throw new RuntimeException(e);
+            }));
+        }
+        {
+            // return
+            assertEquals(Jie.uncheck(() -> 1, RuntimeException::new), 1);
+            Exception cause = new Exception();
+            expectThrows(RuntimeException.class, () -> Jie.uncheck(() -> {
+                throw cause;
+            }, e -> {
+                assertSame(e, cause);
+                throw new RuntimeException(e);
+            }));
+        }
     }
 
     @Test
@@ -187,11 +218,6 @@ public class JieTest {
             assertEquals(Jie.map(1, 2, 3, 4), map);
             assertEquals(Jie.hashMap(1, 2, 3, 4), new HashMap<>(map));
             assertEquals(Jie.linkedHashMap(1, 2, 3, 4), map);
-        }
-        {
-            // wrapChecked
-            Jie.wrapChecked(() -> {}, RuntimeException::new);
-            Jie.wrapChecked(() -> "", RuntimeException::new);
         }
         {
             // sleep

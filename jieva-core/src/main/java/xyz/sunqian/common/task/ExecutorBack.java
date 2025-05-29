@@ -188,7 +188,7 @@ final class ExecutorBack {
 
         @Override
         public void await() throws AwaitingException {
-            Jie.wrapChecked(
+            Jie.uncheck(
                 () -> JieThread.untilChecked(
                     () -> awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS)
                 ),
@@ -198,7 +198,7 @@ final class ExecutorBack {
 
         @Override
         public boolean await(long millis) throws AwaitingException {
-            return Jie.wrapChecked(
+            return Jie.uncheck(
                 () -> awaitTermination(millis, TimeUnit.MILLISECONDS),
                 AwaitingException::new
             );
@@ -206,7 +206,7 @@ final class ExecutorBack {
 
         @Override
         public boolean await(@Nonnull Duration duration) throws AwaitingException {
-            return Jie.wrapChecked(
+            return Jie.uncheck(
                 () -> awaitTermination(duration.toNanos(), TimeUnit.NANOSECONDS),
                 AwaitingException::new
             );
@@ -322,7 +322,7 @@ final class ExecutorBack {
 
         @Override
         public void run() {
-            Jie.wrapChecked(this::execute, WrappedException::new);
+            Jie.uncheck(this::execute, WrappedException::new);
         }
 
         @Override
@@ -446,7 +446,7 @@ final class ExecutorBack {
         }
 
         private void doAwait(VoidCallable callable) throws AwaitingException {
-            Jie.wrapChecked(
+            Jie.uncheck(
                 () -> {
                     try {
                         callable.call();
@@ -482,7 +482,7 @@ final class ExecutorBack {
         }
 
         private @Nullable T doAwait(Callable<T> callable) throws AwaitingException {
-            return Jie.wrapChecked(
+            return Jie.uncheck(
                 () -> {
                     try {
                         return callable.call();

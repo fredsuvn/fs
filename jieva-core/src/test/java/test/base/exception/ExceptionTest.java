@@ -26,36 +26,6 @@ public class ExceptionTest {
     }
 
     @Test
-    public void testCheckedWrapper() {
-        {
-            // no return
-            int[] i = {0};
-            assertEquals(i[0], 0);
-            JieException.wrapChecked(() -> {
-                i[0]++;
-            }, RuntimeException::new);
-            assertEquals(i[0], 1);
-            expectThrows(RuntimeException.class, () -> JieException.wrapChecked(() -> {
-                i[1]++;
-            }, e -> {
-                assertTrue(e instanceof ArrayIndexOutOfBoundsException);
-                throw new RuntimeException(e);
-            }));
-        }
-        {
-            // return
-            assertEquals(JieException.wrapChecked(() -> 1, RuntimeException::new), 1);
-            Exception cause = new Exception();
-            expectThrows(RuntimeException.class, () -> JieException.wrapChecked(() -> {
-                throw cause;
-            }, e -> {
-                assertSame(e, cause);
-                throw new RuntimeException(e);
-            }));
-        }
-    }
-
-    @Test
     public void testExceptionConstructors() {
 
         String message = "hello";

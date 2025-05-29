@@ -21,7 +21,7 @@ public class JieThread {
      */
     @SuppressWarnings({"InfiniteLoopStatement", "BusyWait"})
     public static void sleep() throws AwaitingException {
-        Jie.wrapChecked(
+        Jie.uncheck(
             () -> {
                 while (true) {
                     Thread.sleep(Integer.MAX_VALUE);
@@ -38,7 +38,7 @@ public class JieThread {
      * @throws AwaitingException if the current thread is interrupted or an error occurs while sleeping
      */
     public static void sleep(long millis) throws AwaitingException {
-        Jie.wrapChecked(
+        Jie.uncheck(
             () -> {
                 Thread.sleep(millis);
                 return null;
@@ -54,7 +54,7 @@ public class JieThread {
      * @throws AwaitingException if the current thread is interrupted or an error occurs while sleeping
      */
     public static void sleep(@Nonnull Duration duration) throws AwaitingException {
-        Jie.wrapChecked(
+        Jie.uncheck(
             () -> {
                 Thread.sleep(duration.toMillis(), duration.getNano() / 1000);
                 return null;

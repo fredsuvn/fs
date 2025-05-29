@@ -42,7 +42,7 @@ final class GateBack {
 
         @Override
         public void await() throws AwaitingException {
-            Jie.wrapChecked(
+            Jie.uncheck(
                 () -> sync.acquireSharedInterruptibly(1),
                 AwaitingException::new
             );
@@ -50,7 +50,7 @@ final class GateBack {
 
         @Override
         public boolean await(long millis) throws AwaitingException {
-            return Jie.wrapChecked(
+            return Jie.uncheck(
                 () -> sync.tryAcquireSharedNanos(1, millis * 1000000L),
                 AwaitingException::new
             );
@@ -58,7 +58,7 @@ final class GateBack {
 
         @Override
         public boolean await(@Nonnull Duration duration) throws AwaitingException {
-            return Jie.wrapChecked(
+            return Jie.uncheck(
                 () -> sync.tryAcquireSharedNanos(1, duration.toNanos()),
                 AwaitingException::new
             );
