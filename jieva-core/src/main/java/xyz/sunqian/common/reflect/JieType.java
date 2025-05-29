@@ -236,27 +236,7 @@ public class JieType {
      * @return whether a type can be assigned by another type
      */
     public static boolean isAssignable(@Nonnull Type assigned, @Nonnull Type assignee) {
-        return TypePattern.defaultPattern().isAssignable(assigned, assignee);
-    }
-
-    private static boolean isAssignable(@Nonnull Class<?> assigned, @Nonnull Type assignee) {
-        if (Jie.equals(assigned, Object.class)) {
-            return true;
-        }
-        @Nullable Class<?> rawCLass = getRawClass(assignee);
-        if (rawCLass != null) {
-            return assigned.isAssignableFrom(rawCLass);
-        }
-        // if (isTypeVariable(assignee)) {
-        // }
-        // if (isParameterized(assignee)) {
-        //     ParameterizedType parameterizedType = (ParameterizedType) assignee;
-        //     Class<?> rawCLass = getRawClass(parameterizedType);
-        // }
-        // List<?> l = null;
-        // List o = l;
-
-        return TypePattern.defaultPattern().isAssignable(assigned, assignee);
+        return Assigner.isAssignable(assigned, assignee);
     }
 
     /**
