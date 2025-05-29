@@ -1,5 +1,6 @@
 package xyz.sunqian.common.reflect;
 
+import xyz.sunqian.annotations.JdkDependent;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.RetainedParam;
@@ -322,8 +323,17 @@ public class JieClass {
      * @param componentType the specified component type
      * @return the array class whose component type is the specified type, may be {@code null} if fails
      */
+    @JdkDependent
     public static @Nullable Class<?> arrayClass(@Nonnull Type componentType) {
-        return JdkBack.arrayClass(componentType);
+        Class<?> componentClass = JieType.toRuntimeClass(componentType);
+        if (componentClass == null) {
+            return null;
+        }
+        String name = JieClass.arrayClassName(componentClass);
+        if (name == null) {
+            return null;
+        }
+        return JieClass.classForName(name, componentClass.getClassLoader());
     }
 
     /**
