@@ -1,5 +1,7 @@
 package xyz.sunqian.common.reflect;
 
+import xyz.sunqian.annotations.Nonnull;
+
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -10,7 +12,7 @@ import java.util.Objects;
 
 final class Assigner {
 
-    public static boolean isAssignable(Type assigned, Type assignee) {
+    public static boolean isAssignable(@Nonnull Type assigned, @Nonnull Type assignee) {
         if (assigned instanceof Class<?>) {
             if (Objects.equals(assigned, assignee) || Objects.equals(assigned, Object.class)) {
                 return true;
@@ -93,11 +95,11 @@ final class Assigner {
         return false;
     }
 
-    private static boolean isAssignable(Class<?> assigned, Class<?> assignee) {
+    private static boolean isAssignable(@Nonnull Class<?> assigned, @Nonnull Class<?> assignee) {
         return assigned.isAssignableFrom(assignee);
     }
 
-    private static boolean isAssignable(Class<?> assigned, ParameterizedType assignee) {
+    private static boolean isAssignable(@Nonnull Class<?> assigned, @Nonnull ParameterizedType assignee) {
         Type assigneeRaw = assignee.getRawType();
         if (!(assigneeRaw instanceof Class<?>)) {
             return false;
@@ -105,7 +107,7 @@ final class Assigner {
         return assigned.isAssignableFrom((Class<?>) assigneeRaw);
     }
 
-    private static boolean isAssignable(Class<?> assigned, GenericArrayType assignee) {
+    private static boolean isAssignable(@Nonnull Class<?> assigned, @Nonnull GenericArrayType assignee) {
         if (!assigned.isArray()) {
             return false;
         }
@@ -114,12 +116,12 @@ final class Assigner {
         return isAssignable(assignedComponent, assigneeComponent);
     }
 
-    private static boolean isAssignable(ParameterizedType assigned, Class<?> assignee) {
+    private static boolean isAssignable(@Nonnull ParameterizedType assigned, @Nonnull Class<?> assignee) {
         Class<?> assignedRaw = (Class<?>) assigned.getRawType();
         return assignedRaw.isAssignableFrom(assignee);
     }
 
-    private static boolean isAssignable(ParameterizedType assigned, ParameterizedType assignee) {
+    private static boolean isAssignable(@Nonnull ParameterizedType assigned, @Nonnull ParameterizedType assignee) {
         Type assignedRaw = assigned.getRawType();
         if (!(assignedRaw instanceof Class<?>)) {
             return false;
@@ -152,7 +154,7 @@ final class Assigner {
         return true;
     }
 
-    private static boolean isAssignableParameterizedArgs(WildcardType assignedArg, Type assigneeArg) {
+    private static boolean isAssignableParameterizedArgs(@Nonnull WildcardType assignedArg, @Nonnull Type assigneeArg) {
         Type assignedUpper = JieType.getUpperBound(assignedArg);
         if (!isAssignable(assignedUpper, assigneeArg)) {
             return false;
@@ -161,11 +163,11 @@ final class Assigner {
         return assignedLower == null || isAssignable(assigneeArg, assignedLower);
     }
 
-    private static boolean isAssignable(ParameterizedType assigned, GenericArrayType assignee) {
+    private static boolean isAssignable(@Nonnull ParameterizedType assigned, @Nonnull GenericArrayType assignee) {
         return false;
     }
 
-    private static boolean isAssignable(WildcardType assigned, Type assignee) {
+    private static boolean isAssignable(@Nonnull WildcardType assigned, @Nonnull Type assignee) {
         Type lowerType = JieType.getLowerBound(assigned);
         if (lowerType != null) {
             return isAssignable(lowerType, assignee);
@@ -173,12 +175,12 @@ final class Assigner {
         return false;
     }
 
-    private static boolean isAssignable(Type assigned, WildcardType assignee) {
+    private static boolean isAssignable(@Nonnull Type assigned, @Nonnull WildcardType assignee) {
         Type assigneeUpper = JieType.getUpperBound(assignee);
         return isAssignable(assigned, assigneeUpper);
     }
 
-    private static boolean isAssignable(Type assigned, TypeVariable<?> assignee) {
+    private static boolean isAssignable(@Nonnull Type assigned, @Nonnull TypeVariable<?> assignee) {
         Type[] assigneeUppers = assignee.getBounds();
         for (Type assigneeUpper : assigneeUppers) {
             if (isAssignable(assigned, assigneeUpper)) {
@@ -188,19 +190,19 @@ final class Assigner {
         return false;
     }
 
-    private static boolean isAssignable(TypeVariable<?> assigned, Class<?> assignee) {
+    private static boolean isAssignable(@Nonnull TypeVariable<?> assigned, @Nonnull Class<?> assignee) {
         return false;
     }
 
-    private static boolean isAssignable(TypeVariable<?> assigned, ParameterizedType assignee) {
+    private static boolean isAssignable(@Nonnull TypeVariable<?> assigned, @Nonnull ParameterizedType assignee) {
         return false;
     }
 
-    private static boolean isAssignable(TypeVariable<?> assigned, GenericArrayType assignee) {
+    private static boolean isAssignable(@Nonnull TypeVariable<?> assigned, @Nonnull GenericArrayType assignee) {
         return false;
     }
 
-    private static boolean isAssignable(GenericArrayType assigned, Class<?> assignee) {
+    private static boolean isAssignable(@Nonnull GenericArrayType assigned, @Nonnull Class<?> assignee) {
         if (!assignee.isArray()) {
             return false;
         }
@@ -209,11 +211,11 @@ final class Assigner {
         return isAssignable(assignedComponent, assigneeComponent);
     }
 
-    private static boolean isAssignable(GenericArrayType assigned, ParameterizedType assignee) {
+    private static boolean isAssignable(@Nonnull GenericArrayType assigned, @Nonnull ParameterizedType assignee) {
         return false;
     }
 
-    private static boolean isAssignable(GenericArrayType assigned, GenericArrayType assignee) {
+    private static boolean isAssignable(@Nonnull GenericArrayType assigned, @Nonnull GenericArrayType assignee) {
         Type assignedComponent = assigned.getGenericComponentType();
         Type assigneeComponent = assignee.getGenericComponentType();
         return isAssignable(assignedComponent, assigneeComponent);
