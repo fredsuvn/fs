@@ -1,20 +1,20 @@
-package xyz.sunqian.common.reflect.proxy;
+package xyz.sunqian.common.reflect.proxy.jdk;
 
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.exception.JieException;
-import xyz.sunqian.common.base.exception.JieRuntimeException;
+import xyz.sunqian.common.reflect.proxy.ProxyException;
 
 /**
- * This runtime exception is typically used for proxy.
+ * This exception is the sub-exception of {@link ProxyException} for JDK dynamic proxy implementation.
  *
  * @author sunqian
  */
-public class ProxyException extends JieRuntimeException {
+public class JdkProxyException extends ProxyException {
 
     /**
      * Empty constructor.
      */
-    public ProxyException() {
+    public JdkProxyException() {
         super();
     }
 
@@ -23,7 +23,7 @@ public class ProxyException extends JieRuntimeException {
      *
      * @param message the message
      */
-    public ProxyException(@Nullable String message) {
+    public JdkProxyException(@Nullable String message) {
         super(message);
     }
 
@@ -33,7 +33,7 @@ public class ProxyException extends JieRuntimeException {
      * @param message the message
      * @param cause   the cause
      */
-    public ProxyException(@Nullable String message, @Nullable Throwable cause) {
+    public JdkProxyException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
@@ -42,7 +42,7 @@ public class ProxyException extends JieRuntimeException {
      *
      * @param cause the cause
      */
-    public ProxyException(@Nullable Throwable cause) {
+    public JdkProxyException(@Nullable Throwable cause) {
         this(JieException.getMessage(cause), cause);
     }
 }

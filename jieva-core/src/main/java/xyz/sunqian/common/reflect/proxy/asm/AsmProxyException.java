@@ -1,20 +1,21 @@
-package xyz.sunqian.common.reflect.proxy;
+package xyz.sunqian.common.reflect.proxy.asm;
 
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.exception.JieException;
-import xyz.sunqian.common.base.exception.JieRuntimeException;
+import xyz.sunqian.common.reflect.proxy.ProxyException;
 
 /**
- * This runtime exception is typically used for proxy.
+ * This exception is the sub-exception of {@link ProxyException} for <a href="https://asm.ow2.io/">ASM</a> proxy
+ * implementation.
  *
  * @author sunqian
  */
-public class ProxyException extends JieRuntimeException {
+public class AsmProxyException extends ProxyException {
 
     /**
      * Empty constructor.
      */
-    public ProxyException() {
+    public AsmProxyException() {
         super();
     }
 
@@ -23,7 +24,7 @@ public class ProxyException extends JieRuntimeException {
      *
      * @param message the message
      */
-    public ProxyException(@Nullable String message) {
+    public AsmProxyException(@Nullable String message) {
         super(message);
     }
 
@@ -33,7 +34,7 @@ public class ProxyException extends JieRuntimeException {
      * @param message the message
      * @param cause   the cause
      */
-    public ProxyException(@Nullable String message, @Nullable Throwable cause) {
+    public AsmProxyException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
@@ -42,7 +43,7 @@ public class ProxyException extends JieRuntimeException {
      *
      * @param cause the cause
      */
-    public ProxyException(@Nullable Throwable cause) {
+    public AsmProxyException(@Nullable Throwable cause) {
         this(JieException.getMessage(cause), cause);
     }
 }
