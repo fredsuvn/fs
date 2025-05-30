@@ -156,6 +156,43 @@ public class ClassTest {
         assertNull(JieClass.classForName("123", Thread.currentThread().getContextClassLoader()));
     }
 
+    @Test
+    public void testOverridable() throws Exception {
+        final class A {
+
+            void m1() {}
+
+            private void m2() {}
+
+            public void m3() {}
+
+            final void m4() {}
+        }
+        assertFalse(JieClass.isOverridable(A.class));
+        assertFalse(JieClass.isOverridable(A.class.getDeclaredMethod("m1")));
+        assertFalse(JieClass.isOverridable(A.class.getDeclaredMethod("m2")));
+        assertFalse(JieClass.isOverridable(A.class.getDeclaredMethod("m3")));
+        assertFalse(JieClass.isOverridable(A.class.getDeclaredMethod("m4")));
+
+        class B {
+
+            void m1() {}
+
+            private void m2() {}
+
+            public void m3() {}
+
+            final void m4() {}
+        }
+        assertTrue(JieClass.isOverridable(B.class));
+        assertTrue(JieClass.isOverridable(B.class.getDeclaredMethod("m1")));
+        assertFalse(JieClass.isOverridable(B.class.getDeclaredMethod("m2")));
+        assertTrue(JieClass.isOverridable(B.class.getDeclaredMethod("m3")));
+        assertFalse(JieClass.isOverridable(A.class.getDeclaredMethod("m4")));
+
+        assertFalse(JieClass.isOverridable(Cls3.class.getDeclaredMethod("staticMethod")));
+    }
+
     public interface Inter0 {
 
         String i0 = "";
@@ -213,6 +250,9 @@ public class ClassTest {
     }
 
     public static class Cls3 extends Cls2 implements Inter3, Inter0 {
+
+        static void staticMethod() {
+        }
 
         public String c3;
         private String pc3;

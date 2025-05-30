@@ -9,7 +9,9 @@ import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
@@ -439,5 +441,37 @@ public class JieClass {
         } catch (ClassNotFoundException e) {
             return null;
         }
+    }
+
+    /**
+     * Returns whether the given member can be overridden.
+     *
+     * @param member the given member
+     * @return whether the given member can be overridden
+     */
+    public static boolean isOverridable(@Nonnull Member member) {
+        int modifiers = member.getModifiers();
+        if (!isOverridable(modifiers)) {
+            return false;
+        }
+        Class<?> declaringClass = member.getDeclaringClass();
+        return !Modifier.isFinal(declaringClass.getModifiers());
+    }
+
+    /**
+     * Returns whether the given class can be overridden.
+     *
+     * @param cls the given class
+     * @return whether the given class can be overridden
+     */
+    public static boolean isOverridable(@Nonnull Class<?> cls) {
+        int modifiers = cls.getModifiers();
+        return isOverridable(modifiers);
+    }
+
+    private static boolean isOverridable(int mod) {
+        return !Modifier.isFinal(mod) &&
+            !Modifier.isStatic(mod) &&
+            !Modifier.isPrivate(mod);
     }
 }
