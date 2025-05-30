@@ -46,8 +46,8 @@ public interface TaskExecutor {
 
     /**
      * Returns a new {@link TaskExecutor} based on a thread pool (which refers to {@link ThreadPoolExecutor}). The
-     * pool's core pool size is specified by {@code coreThreadSize}. The returned {@link TaskExecutor} does not support
-     * scheduling.
+     * pool's core pool size is specified by {@code coreThreadSize}, and the maximum pool size and maximum queue size
+     * are unlimited. The returned {@link TaskExecutor} does not support scheduling.
      *
      * @param coreThreadSize the specified core pool size
      * @return a new {@link TaskExecutor} based on a thread pool
@@ -58,8 +58,8 @@ public interface TaskExecutor {
 
     /**
      * Returns a new {@link TaskExecutor} based on a thread pool (which refers to {@link ThreadPoolExecutor}). The
-     * pool's core pool size and maximum pool size are specified by {@code coreThreadSize} and {@code maxThreadSize}.
-     * The returned {@link TaskExecutor} does not support scheduling.
+     * pool's core pool size and maximum pool size are specified by {@code coreThreadSize} and {@code maxThreadSize},
+     * and the maximum queue size is unlimited. The returned {@link TaskExecutor} does not support scheduling.
      *
      * @param coreThreadSize the specified core pool size
      * @param maxThreadSize  the specified maximum pool size
