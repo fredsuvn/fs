@@ -14,7 +14,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
-import java.nio.ByteBuffer;
 import java.util.Objects;
 
 /**
@@ -461,31 +460,5 @@ public class JieJvm {
             return arrayClass;
         }
         throw new JvmException("Unknown array type: " + type + ".");
-    }
-
-    /**
-     * Loads and returns a class from the specified byte data.
-     *
-     * @param bytes the specified byte data
-     * @return the {@link Class} instance loaded from the specified byte data
-     * @throws JvmException if any problem occurs
-     */
-    public static @Nonnull Class<?> loadClass(@Nonnull byte @Nonnull [] bytes) throws JvmException {
-        return ClassLoaderHolder.INSTANCE.load(bytes);
-    }
-
-    /**
-     * Loads and returns a class from the specified byte data.
-     *
-     * @param bytes the specified byte data
-     * @return the {@link Class} instance loaded from the specified byte data
-     * @throws JvmException if any problem occurs
-     */
-    public static @Nonnull Class<?> loadClass(@Nonnull ByteBuffer bytes) throws JvmException {
-        return ClassLoaderHolder.INSTANCE.load(bytes);
-    }
-
-    private static final class ClassLoaderHolder {
-        private static final BytesClassLoader INSTANCE = new BytesClassLoader();
     }
 }

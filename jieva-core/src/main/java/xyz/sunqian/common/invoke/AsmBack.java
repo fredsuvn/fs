@@ -7,6 +7,7 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.springframework.asm.RecordComponentVisitor;
+import xyz.sunqian.common.reflect.BytesClassLoader;
 import xyz.sunqian.common.reflect.JieJvm;
 import xyz.sunqian.common.reflect.proxy.JieAsm;
 
@@ -36,8 +37,10 @@ import static org.objectweb.asm.Opcodes.V1_8;
 
 public class AsmBack {
 
+    private static final BytesClassLoader loader = new BytesClassLoader();
+
     public static void test() throws Exception {
-        Class<?> cls = JieJvm.loadClass(generateInstImpl(String.class.getMethod("subSequence", int.class, int.class)));
+        Class<?> cls = loader.loadClass(null, generateInstImpl(String.class.getMethod("subSequence", int.class, int.class)));
         System.out.println(cls);
         Invocable invocable = (Invocable) cls.newInstance();
         System.out.println(invocable.invoke("12345", 1, 2));

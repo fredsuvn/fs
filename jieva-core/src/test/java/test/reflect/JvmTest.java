@@ -8,26 +8,22 @@ import org.objectweb.asm.Opcodes;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
-import xyz.sunqian.common.io.JieIO;
 import xyz.sunqian.common.reflect.JieJvm;
 import xyz.sunqian.common.reflect.JieType;
 import xyz.sunqian.common.reflect.JvmException;
 import xyz.sunqian.test.JieTest;
 
-import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
-import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.RandomAccess;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
@@ -310,32 +306,6 @@ public class JvmTest {
         JieTest.reflectThrows(JvmException.class, raw1, null, TypeTest.errorParameterizedType());
         Method raw2 = JieJvm.class.getDeclaredMethod("getRawClass", GenericArrayType.class);
         JieTest.reflectThrows(JvmException.class, raw2, null, JieType.arrayType(JieType.otherType()));
-    }
-
-    @Test
-    public void testLoadClass() throws Exception {
-        {
-            InputStream in = ClassLoader.getSystemResourceAsStream(
-                SignatureParser.class.getName().replace('.', '/') + ".class"
-            );
-            byte[] bytes = JieIO.read(in);
-            Class<?> cls = JieJvm.loadClass(bytes);
-            assertEquals(cls.getName(), SignatureParser.class.getName());
-            assertNotEquals(cls, SignatureParser.class);
-            in.close();
-        }
-        {
-            InputStream in = ClassLoader.getSystemResourceAsStream(
-                DS.class.getName().replace('.', '/') + ".class"
-            );
-            byte[] bytes = JieIO.read(in);
-            Class<?> cls = JieJvm.loadClass(ByteBuffer.wrap(bytes));
-            assertEquals(cls.getName(), DS.class.getName());
-            assertNotEquals(cls, DS.class);
-            in.close();
-        }
-        expectThrows(JvmException.class, () -> JieJvm.loadClass(ByteBuffer.wrap(new byte[0])));
-        expectThrows(JvmException.class, () -> JieJvm.loadClass(new byte[0]));
     }
 
     static class SignatureParser extends ClassVisitor {

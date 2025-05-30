@@ -9,6 +9,7 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.collect.JieCollect;
+import xyz.sunqian.common.reflect.BytesClassLoader;
 import xyz.sunqian.common.reflect.JieClass;
 import xyz.sunqian.common.reflect.JieJvm;
 
@@ -40,6 +41,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author fredsuvn
  */
 public class AsmProxyBuilder implements ProxyBuilder, Opcodes {
+
+    private static final BytesClassLoader loader = new BytesClassLoader();
 
     private static final AtomicLong counter = new AtomicLong();
 
@@ -168,7 +171,7 @@ public class AsmProxyBuilder implements ProxyBuilder, Opcodes {
             isFinal
         );
         byte[] proxyBytecode = proxyGenerator.generateBytecode();
-        Class<?> proxyClass = JieJvm.loadClass(proxyBytecode);
+        Class<?> proxyClass = loader.loadClass(null, proxyBytecode);
         // Generates invoker class
         InvokerGenerator invokerGenerator = new InvokerGenerator(
             proxyInternalName,
@@ -176,7 +179,7 @@ public class AsmProxyBuilder implements ProxyBuilder, Opcodes {
             invokerInternalName
         );
         byte[] invokerBytecode = invokerGenerator.generateBytecode();
-        Class<?> invokerClass = JieJvm.loadClass(invokerBytecode);
+        Class<?> invokerClass = loader.loadClass(null, invokerBytecode);
         return new AsmProxyClass(proxyClass, invokerClass, handler, methodList.toArray(new Method[0]));
     }
 
