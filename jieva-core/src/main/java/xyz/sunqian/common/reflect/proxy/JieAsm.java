@@ -503,20 +503,40 @@ public class JieAsm {
      */
     public static void invokeVirtual(MethodVisitor visitor, Method method) {
         Class<?> declaringClass = method.getDeclaringClass();
-        if (declaringClass.isInterface()) {
+        invokeVirtual(
+            visitor,
+            JieJvm.getInternalName(declaringClass),
+            method.getName(),
+            JieJvm.getDescriptor(method),
+            declaringClass.isInterface()
+        );
+    }
+
+    /**
+     * Invokes method by {@code INVOKEINTERFACE} or {@code INVOKEVIRTUAL}.
+     *
+     * @param visitor     the {@link MethodVisitor}
+     * @param owner       the internal name of the method's owner class
+     * @param name        the method name
+     * @param descriptor  the method descriptor
+     * @param isInterface whether the method's owner class is an interface.
+     */
+    public static void invokeVirtual(
+        MethodVisitor visitor, String owner, String name, String descriptor, boolean isInterface) {
+        if (isInterface) {
             visitor.visitMethodInsn(
                 Opcodes.INVOKEINTERFACE,
-                JieJvm.getInternalName(declaringClass),
-                method.getName(),
-                JieJvm.getDescriptor(method),
+                owner,
+                name,
+                descriptor,
                 true
             );
         } else {
             visitor.visitMethodInsn(
                 Opcodes.INVOKEVIRTUAL,
-                JieJvm.getInternalName(declaringClass),
-                method.getName(),
-                JieJvm.getDescriptor(method),
+                owner,
+                name,
+                descriptor,
                 false
             );
         }

@@ -20,7 +20,12 @@ public class ClsProxy extends Cls2 {
 
     @Override
     public Long getInter(Long aLong) throws Throwable {
-        return (Long) handler.invoke(this, methods[0], invokers[0], aLong);
+        AsmProxyInvoker invoker = invokers[0];
+        if (invoker == null) {
+            invoker = new Invoker1(0);
+            invokers[0] = invoker;
+        }
+        return (Long) handler.invoke(this, methods[0], invoker, aLong, 1, 2);
     }
 
     @Override
@@ -37,7 +42,7 @@ public class ClsProxy extends Cls2 {
 
         private final int index;
 
-        private Invoker1(int index) {
+        Invoker1(int index) {
             this.index = index;
         }
 

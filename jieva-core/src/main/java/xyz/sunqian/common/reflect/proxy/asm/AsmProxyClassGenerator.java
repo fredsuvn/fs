@@ -28,240 +28,379 @@ import java.util.List;
  */
 public class AsmProxyClassGenerator implements ProxyClassGenerator {
 
+    private static final String OBJECT_INTERNAL_NAME = "java/lang/Object";
+    private static final String[] INVOKER_INTERFACE_INTERNAL_NAME = {JieJvm.getInternalName(AsmProxyInvoker.class)};
+    private static final String INVOKER_DESCRIPTOR = JieJvm.getDescriptor(AsmProxyInvoker.class);
+    private static final String HANDLER_DESCRIPTOR = JieJvm.getDescriptor(ProxyMethodHandler.class);
+    private static final String METHODS_DESCRIPTOR = JieJvm.getDescriptor(Method[].class);
+
     @Override
     public ProxyClass generate(Class<?>[] proxied, ProxyMethodHandler methodHandler) throws ProxyException {
         return null;
     }
 
-    private void createSyntheticSuperMethod(
-        @Nonnull String syntheticName,
-        @Nonnull Method method,
+    private void generateSuperInvokerMethod(
+        @Nonnull ProxyMethodInfo pmInfo,
         @Nonnull ClassWriter classWriter
     ) {
-        MethodVisitor methodVisitor = classWriter.visitMethod(
+        MethodVisitor visitor = classWriter.visitMethod(
             Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC,
-            syntheticName,
-            JieJvm.getDescriptor(method),
-            JieJvm.getSignature(method),
-            buildExceptions(method)
+            pmInfo.superInvokerName,
+            pmInfo.superInvokerDescriptor,
+            pmInfo.superInvokerSignature,
+            pmInfo.exceptions
         );
-        methodVisitor.visitVarInsn(Opcodes.ALOAD, 0);
-        int i = 0;
-        for (Parameter parameter : method.getParameters()) {
-            JieAsm.loadVar(methodVisitor, parameter.getType(), i);
-            i += JieAsm.slotCount(parameter.getType());
+        visitor.visitVarInsn(Opcodes.ALOAD, 0);
+        int pIndex = 0;
+        for (Parameter parameter : pmInfo.method.getParameters()) {
+            JieAsm.loadVar(visitor, parameter.getType(), pIndex);
+            pIndex += JieAsm.slotCount(parameter.getType());
         }
-        methodVisitor.visitMethodInsn(
+        visitor.visitMethodInsn(
             Opcodes.INVOKESPECIAL,
-            JieJvm.getInternalName(method.getDeclaringClass()),
-            method.getName(),
-            JieJvm.getDescriptor(method),
-            method.getDeclaringClass().isInterface()
+            JieJvm.getInternalName(pmInfo.method.getDeclaringClass()),
+            pmInfo.method.getName(),
+            pmInfo.descriptor,
+            pmInfo.isInterface
         );
-        JieAsm.unwrapVar(methodVisitor, method.getReturnType(), false);
-        JieAsm.visitReturn(methodVisitor, method.getReturnType(), false);
-        methodVisitor.visitMaxs(0, 0);
-        methodVisitor.visitEnd();
+        JieAsm.visitReturn(visitor, pmInfo.method.getReturnType(), false);
+        visitor.visitMaxs(0, 0);
+        visitor.visitEnd();
     }
 
-    private static final String OBJECT_INTERNAL_NAME = "java/lang/Object";
-    private static final String[] INVOKER_INTERFACE_INTERNAL_NAME = {JieJvm.getInternalName(AsmProxyInvoker.class)};
-    // private static final String INVOKE_DESCRIPTOR;
-    // private static final String INVOKE_SUPER_DESCRIPTOR;
-    //
-    // static {
-    //     try {
-    //         Method invoke = AsmProxyInvoker.class.getMethod("invoke", Object.class, Object[].class);
-    //         INVOKE_DESCRIPTOR = JieJvm.getDescriptor(invoke);
-    //         Method invokeSuper = AsmProxyInvoker.class.getMethod("invokeSuper", Object.class, Object[].class);
-    //         INVOKE_SUPER_DESCRIPTOR = JieJvm.getDescriptor(invokeSuper);
-    //     } catch (NoSuchMethodException e) {
-    //         throw new AsmProxyException(e);
-    //     }
-    // }
+    private void generateProxyMethod(
+        @Nonnull ProxyClassInfo pcInfo,
+        @Nonnull ProxyMethodInfo pmInfo,
+        int i,
+        @Nonnull ClassWriter classWriter
+    ) {
+        MethodVisitor visitor = classWriter.visitMethod(
+            Opcodes.ACC_PUBLIC,
+            pmInfo.method.getName(),
+            pmInfo.descriptor,
+            pmInfo.signature,
+            pmInfo.exceptions
+        );
+        // AsmProxyInvoker invoker = invokers[i];
+        visitor.visitVarInsn(Opcodes.ALOAD, 0);
+        visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.outerName, "invokers", INVOKER_DESCRIPTOR);
+        JieAsm.loadConst(visitor, i);
+        visitor.visitInsn(Opcodes.AALOAD);
+        int paramCount = pmInfo.method.getParameterCount();
+        int invokerPos = paramCount + 1;
+        visitor.visitVarInsn(Opcodes.ASTORE, invokerPos);
+        visitor.visitVarInsn(Opcodes.ALOAD, invokerPos);
+        Label ifNonnull = new Label();
+        visitor.visitJumpInsn(Opcodes.IFNONNULL, ifNonnull);
+        visitor.visitTypeInsn(Opcodes.NEW, pcInfo.fullInnerName);
+        visitor.visitInsn(Opcodes.DUP);
+        visitor.visitVarInsn(Opcodes.ALOAD, 0);
+        JieAsm.loadConst(visitor, i);
+        visitor.visitMethodInsn(
+            Opcodes.INVOKESPECIAL,
+            pcInfo.fullInnerName,
+            "<init>",
+            "(" + pcInfo.outerDescriptor + "I)V",
+            false
+        );
+        visitor.visitVarInsn(Opcodes.ASTORE, invokerPos);
+        visitor.visitVarInsn(Opcodes.ALOAD, 0);
+        visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.outerName, "invokers", INVOKER_DESCRIPTOR);
+        JieAsm.loadConst(visitor, i);
+        visitor.visitVarInsn(Opcodes.ALOAD, invokerPos);
+        visitor.visitInsn(Opcodes.AASTORE);
+        visitor.visitLabel(ifNonnull);
+        visitor.visitFrame(Opcodes.F_APPEND, 1, INVOKER_INTERFACE_INTERNAL_NAME, 0, null);
+        // get handler
+        visitor.visitVarInsn(Opcodes.ALOAD, 0);
+        visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.outerName, "handler", HANDLER_DESCRIPTOR);
+        // get this
+        visitor.visitVarInsn(Opcodes.ALOAD, 0);
+        // get methods[i]
+        visitor.visitVarInsn(Opcodes.ALOAD, 0);
+        visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.outerName, "methods", METHODS_DESCRIPTOR);
+        JieAsm.loadConst(visitor,i);
+        visitor.visitInsn(Opcodes.AALOAD);
+        // get invoker
+        visitor.visitVarInsn(Opcodes.ALOAD, 2);
+        // new array
+        visitor.visitInsn(Opcodes.ICONST_3);
+        visitor.visitTypeInsn(Opcodes.ANEWARRAY, OBJECT_INTERNAL_NAME);
+        // set array
+        int pIndex = 0;
+        for (Parameter parameter : pmInfo.method.getParameters()) {
+            visitor.visitInsn(Opcodes.DUP);
+            JieAsm.loadConst(visitor,pIndex);
+            JieAsm.loadVar(visitor, parameter.getType(), pIndex);
+            visitor.visitInsn(Opcodes.AASTORE);
+        }
+        // visitor.visitInsn(Opcodes.DUP);
+        // visitor.visitInsn(ICONST_0);
+        // visitor.visitVarInsn(ALOAD, 1);
+        // methodVisitor.visitInsn(AASTORE);
+        // methodVisitor.visitInsn(DUP);
+        // methodVisitor.visitInsn(ICONST_1);
+        // methodVisitor.visitInsn(ICONST_1);
+        // methodVisitor.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
+        // methodVisitor.visitInsn(AASTORE);
+        // methodVisitor.visitInsn(DUP);
+        // methodVisitor.visitInsn(ICONST_2);
+        // methodVisitor.visitInsn(ICONST_2);
+        // methodVisitor.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
+        // methodVisitor.visitInsn(AASTORE);
+        // methodVisitor.visitMethodInsn(INVOKEINTERFACE, "xyz/sunqian/common/reflect/proxy/ProxyMethodHandler", "invoke", "(Ljava/lang/Object;Ljava/lang/reflect/Method;Lxyz/sunqian/common/reflect/proxy/ProxyInvoker;[Ljava/lang/Object;)Ljava/lang/Object;", true);
+        // methodVisitor.visitTypeInsn(CHECKCAST, "java/lang/Long");
+        // methodVisitor.visitInsn(ARETURN);
+        // visitor.visitMaxs(8, 3);
+        // visitor.visitEnd();
+    }
 
-    private byte[] createProxyInvoker(
-        @Nonnull String outerName,
-        @Nonnull String innerName,
-        @Nonnull List<Method> methods
-    ) throws Exception {
-        String className = outerName + "$" + innerName;
+    private byte[] generateProxyInvokerClass(@Nonnull ProxyClassInfo pcInfo) throws Exception {
+        //String innerClassName = pcInfo.outerName + "$" + pcInfo.innerName;
         ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         classWriter.visit(
             Opcodes.V1_8,
             Opcodes.ACC_SUPER,
-            className,
+            pcInfo.fullInnerName,
             null,
             OBJECT_INTERNAL_NAME,
             INVOKER_INTERFACE_INTERNAL_NAME
         );
         classWriter.visitInnerClass(
-            className,
-            outerName,
-            innerName,
+            pcInfo.fullInnerName,
+            pcInfo.outerName,
+            pcInfo.innerName,
             Opcodes.ACC_PRIVATE
         );
         {
-            FieldVisitor fieldVisitor = classWriter.visitField(
+            // int index;
+            FieldVisitor visitor = classWriter.visitField(
                 Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL,
                 "index",
                 "I",
                 null,
                 null
             );
-            fieldVisitor.visitEnd();
+            visitor.visitEnd();
         }
-        String outerDescriptor = "L" + outerName + ";";
         {
-            FieldVisitor fieldVisitor = classWriter.visitField(
+            // Outer outer;
+            FieldVisitor visitor = classWriter.visitField(
                 Opcodes.ACC_FINAL | Opcodes.ACC_SYNTHETIC,
                 "this$0",
-                outerDescriptor,
+                pcInfo.outerDescriptor,
                 null,
                 null);
-            fieldVisitor.visitEnd();
+            visitor.visitEnd();
         }
         {
-            MethodVisitor methodVisitor = classWriter.visitMethod(
-                Opcodes.ACC_PRIVATE,
+            // constructor
+            MethodVisitor visitor = classWriter.visitMethod(
+                0,
                 "<init>",
-                "(" + outerDescriptor + "I)V",
+                "(" + pcInfo.outerDescriptor + "I)V",
                 null,
                 null
             );
-            methodVisitor.visitVarInsn(Opcodes.ALOAD, 0);
-            methodVisitor.visitVarInsn(Opcodes.ALOAD, 1);
-            methodVisitor.visitFieldInsn(Opcodes.PUTFIELD, className, "this$0", outerDescriptor);
-            methodVisitor.visitVarInsn(Opcodes.ALOAD, 0);
-            methodVisitor.visitMethodInsn(Opcodes.INVOKESPECIAL, OBJECT_INTERNAL_NAME, "<init>", "()V", false);
-            methodVisitor.visitVarInsn(Opcodes.ALOAD, 0);
-            methodVisitor.visitVarInsn(Opcodes.ILOAD, 2);
-            methodVisitor.visitFieldInsn(Opcodes.PUTFIELD, className, "index", "I");
-            methodVisitor.visitInsn(Opcodes.RETURN);
-            methodVisitor.visitMaxs(0, 0);
-            methodVisitor.visitEnd();
+            visitor.visitVarInsn(Opcodes.ALOAD, 0);
+            visitor.visitVarInsn(Opcodes.ALOAD, 1);
+            visitor.visitFieldInsn(Opcodes.PUTFIELD, pcInfo.fullInnerName, "this$0", pcInfo.outerDescriptor);
+            visitor.visitVarInsn(Opcodes.ALOAD, 0);
+            visitor.visitMethodInsn(Opcodes.INVOKESPECIAL, OBJECT_INTERNAL_NAME, "<init>", "()V", false);
+            visitor.visitVarInsn(Opcodes.ALOAD, 0);
+            visitor.visitVarInsn(Opcodes.ILOAD, 2);
+            visitor.visitFieldInsn(Opcodes.PUTFIELD, pcInfo.fullInnerName, "index", "I");
+            visitor.visitInsn(Opcodes.RETURN);
+            visitor.visitMaxs(0, 0);
+            visitor.visitEnd();
         }
         {
+            // invoke(Object inst, Object... args);
             Method invoke = AsmProxyInvoker.class.getMethod("invoke", Object.class, Object[].class);
-            String invokeDescriptor = JieJvm.getDescriptor(invoke);
-            MethodVisitor methodVisitor = classWriter.visitMethod(
+            MethodVisitor visitor = classWriter.visitMethod(
                 Opcodes.ACC_PUBLIC | Opcodes.ACC_VARARGS,
                 invoke.getName(),
-                invokeDescriptor,
+                JieJvm.getDescriptor(invoke),
                 null,
-                buildExceptions(invoke)
+                getExceptions(invoke)
             );
-            methodVisitor.visitVarInsn(Opcodes.ALOAD, 1);
-            methodVisitor.visitTypeInsn(Opcodes.CHECKCAST, outerName);
-            // ProxyInstance _this = (ProxyInstance) inst;
-            methodVisitor.visitVarInsn(Opcodes.ASTORE, 3);
-            methodVisitor.visitVarInsn(Opcodes.ALOAD, 0);
-            methodVisitor.visitFieldInsn(Opcodes.GETFIELD, className, "index", "I");
-            Label[] labels = new Label[methods.size()];
+            // Outer outer = (Outer) inst;
+            visitor.visitVarInsn(Opcodes.ALOAD, 1);
+            visitor.visitTypeInsn(Opcodes.CHECKCAST, pcInfo.outerName);
+            visitor.visitVarInsn(Opcodes.ASTORE, 3);
+            // get index;
+            visitor.visitVarInsn(Opcodes.ALOAD, 0);
+            visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.fullInnerName, "index", "I");
+            // switch (index) {}
+            Label[] labels = new Label[pcInfo.methods.size()];
             for (int i = 0; i < labels.length; i++) {
                 labels[i] = new Label();
             }
             Label labelLast = new Label();
-            methodVisitor.visitTableSwitchInsn(0, methods.size() - 1, labelLast, labels);
+            visitor.visitTableSwitchInsn(0, pcInfo.methods.size() - 1, labelLast, labels);
             int i = 0;
-            for (Method method : methods) {
-                methodVisitor.visitLabel(labels[i]);
+            for (ProxyMethodInfo pmInfo : pcInfo.methods) {
+                visitor.visitLabel(labels[i]);
                 if (i++ == 0) {
-                    methodVisitor.visitFrame(Opcodes.F_APPEND, 1, new Object[]{outerName}, 0, null);
+                    visitor.visitFrame(Opcodes.F_APPEND, 1, new Object[]{pcInfo.outerName}, 0, null);
                 } else {
-                    methodVisitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
+                    visitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
                 }
-                //_this.invoke((Long) args[0], (String) args[1]);
-                methodVisitor.visitVarInsn(Opcodes.ALOAD, 3);
+                // outer.invoke((Long) args[0], (String) args[1]);
+                // get outer
+                visitor.visitVarInsn(Opcodes.ALOAD, 3);
                 int pIndex = 0;
-                for (Parameter parameter : method.getParameters()) {
-                    methodVisitor.visitVarInsn(Opcodes.ALOAD, 2);
-                    JieAsm.loadConst(methodVisitor, pIndex++);
-                    methodVisitor.visitInsn(Opcodes.AALOAD);
-                    JieAsm.unwrapVar(methodVisitor, parameter.getType(), true);
+                for (Parameter parameter : pmInfo.method.getParameters()) {
+                    // get args
+                    visitor.visitVarInsn(Opcodes.ALOAD, 2);
+                    JieAsm.loadConst(visitor, pIndex++);
+                    // get args[pIndex]
+                    visitor.visitInsn(Opcodes.AALOAD);
+                    JieAsm.unwrapVar(visitor, parameter.getType(), true);
                 }
-                JieAsm.invokeVirtual(methodVisitor, method);
-                Class<?> returnType = method.getReturnType();
+                JieAsm.invokeVirtual(
+                    visitor, pcInfo.outerName, pmInfo.method.getName(), pmInfo.descriptor, pmInfo.isInterface);
+                Class<?> returnType = pmInfo.method.getReturnType();
                 if (Jie.equals(returnType, void.class)) {
-                    methodVisitor.visitInsn(Opcodes.ACONST_NULL);
+                    visitor.visitInsn(Opcodes.ACONST_NULL);
                 }
-                JieAsm.visitReturn(methodVisitor, returnType, false);
+                JieAsm.visitReturn(visitor, returnType, false);
             }
-            methodVisitor.visitLabel(labelLast);
-            methodVisitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
-            methodVisitor.visitInsn(Opcodes.ACONST_NULL);
-            methodVisitor.visitInsn(Opcodes.ARETURN);
-            methodVisitor.visitMaxs(0, 0);
-            methodVisitor.visitEnd();
+            visitor.visitLabel(labelLast);
+            visitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
+            visitor.visitInsn(Opcodes.ACONST_NULL);
+            visitor.visitInsn(Opcodes.ARETURN);
+            visitor.visitMaxs(0, 0);
+            visitor.visitEnd();
         }
         {
+            // invokeSuper(Object inst, Object... args);
             Method invokeSuper = AsmProxyInvoker.class.getMethod("invokeSuper", Object.class, Object[].class);
-            String invokeDescriptor = JieJvm.getDescriptor(invokeSuper);
-            MethodVisitor methodVisitor = classWriter.visitMethod(
+            MethodVisitor visitor = classWriter.visitMethod(
                 Opcodes.ACC_PUBLIC | Opcodes.ACC_VARARGS,
                 invokeSuper.getName(),
-                invokeDescriptor,
+                JieJvm.getDescriptor(invokeSuper),
                 null,
-                buildExceptions(invokeSuper)
+                getExceptions(invokeSuper)
             );
-            methodVisitor.visitVarInsn(Opcodes.ALOAD, 1);
-            methodVisitor.visitTypeInsn(Opcodes.CHECKCAST, outerName);
-            // ProxyInstance _this = (ProxyInstance) inst;
-            methodVisitor.visitVarInsn(Opcodes.ASTORE, 3);
-            methodVisitor.visitVarInsn(Opcodes.ALOAD, 0);
-            methodVisitor.visitFieldInsn(Opcodes.GETFIELD, className, "index", "I");
-            Label[] labels = new Label[methods.size()];
+            // Outer outer = (Outer) inst;
+            visitor.visitVarInsn(Opcodes.ALOAD, 1);
+            visitor.visitTypeInsn(Opcodes.CHECKCAST, pcInfo.outerName);
+            visitor.visitVarInsn(Opcodes.ASTORE, 3);
+            // get index;
+            visitor.visitVarInsn(Opcodes.ALOAD, 0);
+            visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.fullInnerName, "index", "I");
+            // switch (index) {}
+            Label[] labels = new Label[pcInfo.methods.size()];
             for (int i = 0; i < labels.length; i++) {
                 labels[i] = new Label();
             }
             Label labelLast = new Label();
-            methodVisitor.visitTableSwitchInsn(0, methods.size() - 1, labelLast, labels);
+            visitor.visitTableSwitchInsn(0, pcInfo.methods.size() - 1, labelLast, labels);
             int i = 0;
-            for (Method method : methods) {
-                methodVisitor.visitLabel(labels[i]);
+            for (ProxyMethodInfo pmInfo : pcInfo.methods) {
+                visitor.visitLabel(labels[i]);
                 if (i++ == 0) {
-                    methodVisitor.visitFrame(Opcodes.F_APPEND, 1, new Object[]{outerName}, 0, null);
+                    visitor.visitFrame(Opcodes.F_APPEND, 1, new Object[]{pcInfo.outerName}, 0, null);
                 } else {
-                    methodVisitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
+                    visitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
                 }
-                //_this.invoke((Long) args[0], (String) args[1]);
-                methodVisitor.visitVarInsn(Opcodes.ALOAD, 3);
+                // outer.invoke((Long) args[0], (String) args[1]);
+                // get outer
+                visitor.visitVarInsn(Opcodes.ALOAD, 3);
                 int pIndex = 0;
-                for (Parameter parameter : method.getParameters()) {
-                    methodVisitor.visitVarInsn(Opcodes.ALOAD, 2);
-                    JieAsm.loadConst(methodVisitor, pIndex++);
-                    methodVisitor.visitInsn(Opcodes.AALOAD);
-                    JieAsm.unwrapVar(methodVisitor, parameter.getType(), true);
+                for (Parameter parameter : pmInfo.method.getParameters()) {
+                    // get args
+                    visitor.visitVarInsn(Opcodes.ALOAD, 2);
+                    JieAsm.loadConst(visitor, pIndex++);
+                    // get args[pIndex]
+                    visitor.visitInsn(Opcodes.AALOAD);
+                    JieAsm.unwrapVar(visitor, parameter.getType(), true);
                 }
-                methodVisitor.visitMethodInsn(
+                visitor.visitMethodInsn(
                     Opcodes.INVOKESTATIC,
-                    outerName,
-                    "access$001",
-                    JieJvm.getDescriptor(method),
+                    pcInfo.outerName,
+                    pmInfo.superInvokerName,//"access$001",
+                    pmInfo.superInvokerDescriptor,
                     false
                 );
-                Class<?> returnType = method.getReturnType();
+                Class<?> returnType = pmInfo.method.getReturnType();
                 if (Jie.equals(returnType, void.class)) {
-                    methodVisitor.visitInsn(Opcodes.ACONST_NULL);
+                    visitor.visitInsn(Opcodes.ACONST_NULL);
                 }
-                JieAsm.visitReturn(methodVisitor, returnType, false);
+                JieAsm.visitReturn(visitor, returnType, false);
             }
-            methodVisitor.visitLabel(labelLast);
-            methodVisitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
-            methodVisitor.visitInsn(Opcodes.ACONST_NULL);
-            methodVisitor.visitInsn(Opcodes.ARETURN);
-            methodVisitor.visitMaxs(0, 0);
-            methodVisitor.visitEnd();
+            visitor.visitLabel(labelLast);
+            visitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
+            visitor.visitInsn(Opcodes.ACONST_NULL);
+            visitor.visitInsn(Opcodes.ARETURN);
+            visitor.visitMaxs(0, 0);
+            visitor.visitEnd();
         }
         classWriter.visitEnd();
         return classWriter.toByteArray();
     }
 
-    private @Nonnull String @Nullable [] buildExceptions(Method method) {
+    private @Nonnull String @Nullable [] getExceptions(Method method) {
         Class<?>[] exceptionTypes = method.getExceptionTypes();
         if (JieArray.isEmpty(exceptionTypes)) {
             return null;
         }
         return JieStream.stream(exceptionTypes).map(JieJvm::getInternalName).toArray(String[]::new);
+    }
+
+    private static final class ProxyClassInfo {
+
+        private final @Nonnull String outerName;
+        private final @Nonnull String outerDescriptor;
+        private final @Nonnull String innerName;
+        private final @Nonnull String fullInnerName;
+        private final @Nonnull List<ProxyMethodInfo> methods;
+
+        private ProxyClassInfo(
+            @Nonnull String outerName,
+            @Nonnull String outerDescriptor,
+            @Nonnull String innerName,
+            @Nonnull String fullInnerName,
+            @Nonnull List<ProxyMethodInfo> methods
+        ) {
+            this.outerName = outerName;
+            this.outerDescriptor = outerDescriptor;
+            this.innerName = innerName;
+            this.fullInnerName = fullInnerName;
+            this.methods = methods;
+        }
+    }
+
+    private static final class ProxyMethodInfo {
+
+        private final @Nonnull Method method;
+        private final @Nonnull String descriptor;
+        private final @Nonnull String signature;
+        private final @Nullable String[] exceptions;
+        private final @Nonnull String superInvokerName;
+        private final @Nonnull String superInvokerDescriptor;
+        private final @Nullable String superInvokerSignature;
+        private final boolean isInterface;
+
+        private ProxyMethodInfo(
+            @Nonnull Method method,
+            @Nonnull String descriptor,
+            @Nonnull String signature,
+            @Nullable String[] exceptions,
+            @Nonnull String superInvokerName,
+            @Nonnull String superInvokerDescriptor,
+            @Nullable String superInvokerSignature,
+            boolean isInterface
+        ) {
+            this.method = method;
+            this.descriptor = descriptor;
+            this.signature = signature;
+            this.exceptions = exceptions;
+            this.superInvokerName = superInvokerName;
+            this.superInvokerDescriptor = superInvokerDescriptor;
+            this.superInvokerSignature = superInvokerSignature;
+            this.isInterface = isInterface;
+        }
     }
 }
