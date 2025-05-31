@@ -10,7 +10,7 @@ import java.lang.reflect.WildcardType;
 import java.util.List;
 import java.util.Objects;
 
-final class Assigner {
+final class Assign {
 
     public static boolean isAssignable(@Nonnull Type assigned, @Nonnull Type assignee) {
         if (assigned instanceof Class<?>) {
@@ -18,7 +18,7 @@ final class Assigner {
                 return true;
             }
             if (assignee instanceof Class<?>) {
-                return isAssignable((Class<?>) assigned, (Class<?>) assignee);
+                return ((Class<?>) assigned).isAssignableFrom((Class<?>) assignee);
             }
             if (assignee instanceof ParameterizedType) {
                 return isAssignable((Class<?>) assigned, (ParameterizedType) assignee);
@@ -48,30 +48,30 @@ final class Assigner {
             if (assignee instanceof TypeVariable<?>) {
                 return isAssignable(assigned, (TypeVariable<?>) assignee);
             }
-            if (assignee instanceof GenericArrayType) {
-                return isAssignable((ParameterizedType) assigned, (GenericArrayType) assignee);
-            }
+            // if (assignee instanceof GenericArrayType) {
+            //     return false;
+            // }
         } else if (assigned instanceof WildcardType) {
             return isAssignable((WildcardType) assigned, assignee);
         } else if (assigned instanceof TypeVariable<?>) {
             if (Objects.equals(assigned, assignee)) {
                 return true;
             }
-            if (assignee instanceof Class<?>) {
-                return isAssignable((TypeVariable<?>) assigned, (Class<?>) assignee);
-            }
-            if (assignee instanceof ParameterizedType) {
-                return isAssignable((TypeVariable<?>) assigned, (ParameterizedType) assignee);
-            }
+            // if (assignee instanceof Class<?>) {
+            //     return isAssignable((TypeVariable<?>) assigned, (Class<?>) assignee);
+            // }
+            // if (assignee instanceof ParameterizedType) {
+            //     return isAssignable((TypeVariable<?>) assigned, (ParameterizedType) assignee);
+            // }
             if (assignee instanceof WildcardType) {
                 return isAssignable(assigned, (WildcardType) assignee);
             }
             if (assignee instanceof TypeVariable<?>) {
                 return isAssignable(assigned, (TypeVariable<?>) assignee);
             }
-            if (assignee instanceof GenericArrayType) {
-                return isAssignable((TypeVariable<?>) assigned, (GenericArrayType) assignee);
-            }
+            // if (assignee instanceof GenericArrayType) {
+            //     return isAssignable((TypeVariable<?>) assigned, (GenericArrayType) assignee);
+            // }
         } else if (assigned instanceof GenericArrayType) {
             if (Objects.equals(assigned, assignee)) {
                 return true;
@@ -93,10 +93,6 @@ final class Assigner {
             }
         }
         return false;
-    }
-
-    private static boolean isAssignable(@Nonnull Class<?> assigned, @Nonnull Class<?> assignee) {
-        return assigned.isAssignableFrom(assignee);
     }
 
     private static boolean isAssignable(@Nonnull Class<?> assigned, @Nonnull ParameterizedType assignee) {
@@ -163,10 +159,6 @@ final class Assigner {
         return assignedLower == null || isAssignable(assigneeArg, assignedLower);
     }
 
-    private static boolean isAssignable(@Nonnull ParameterizedType assigned, @Nonnull GenericArrayType assignee) {
-        return false;
-    }
-
     private static boolean isAssignable(@Nonnull WildcardType assigned, @Nonnull Type assignee) {
         Type lowerType = JieType.getLowerBound(assigned);
         if (lowerType != null) {
@@ -187,18 +179,6 @@ final class Assigner {
                 return true;
             }
         }
-        return false;
-    }
-
-    private static boolean isAssignable(@Nonnull TypeVariable<?> assigned, @Nonnull Class<?> assignee) {
-        return false;
-    }
-
-    private static boolean isAssignable(@Nonnull TypeVariable<?> assigned, @Nonnull ParameterizedType assignee) {
-        return false;
-    }
-
-    private static boolean isAssignable(@Nonnull TypeVariable<?> assigned, @Nonnull GenericArrayType assignee) {
         return false;
     }
 

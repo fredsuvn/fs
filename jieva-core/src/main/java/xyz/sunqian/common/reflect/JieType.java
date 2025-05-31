@@ -236,7 +236,7 @@ public class JieType {
      * @return whether a type can be assigned by another type
      */
     public static boolean isAssignable(@Nonnull Type assigned, @Nonnull Type assignee) {
-        return Assigner.isAssignable(assigned, assignee);
+        return Assign.isAssignable(assigned, assignee);
     }
 
     /**

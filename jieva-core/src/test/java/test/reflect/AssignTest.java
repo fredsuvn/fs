@@ -15,7 +15,7 @@ import java.util.Map;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 
-public class AssignerTest {
+public class AssignTest {
 
     @Test
     public void testClassAssign() {
