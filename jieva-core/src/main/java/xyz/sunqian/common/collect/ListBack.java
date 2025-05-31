@@ -1,5 +1,8 @@
 package xyz.sunqian.common.collect;
 
+import xyz.sunqian.annotations.Immutable;
+import xyz.sunqian.annotations.Nonnull;
+
 import java.io.Serializable;
 import java.util.AbstractList;
 import java.util.Collections;
@@ -8,71 +11,71 @@ import java.util.RandomAccess;
 
 final class ListBack {
 
-    static List<Boolean> asList(boolean[] array) {
+    static @Nonnull List<Boolean> asList(boolean @Nonnull [] array) {
         return new BooleanArrayList(array);
     }
 
-    static List<Byte> asList(byte[] array) {
+    static @Nonnull List<Byte> asList(byte @Nonnull [] array) {
         return new ByteArrayList(array);
     }
 
-    static List<Short> asList(short[] array) {
+    static @Nonnull List<Short> asList(short @Nonnull [] array) {
         return new ShortArrayList(array);
     }
 
-    static List<Character> asList(char[] array) {
+    static @Nonnull List<Character> asList(char @Nonnull [] array) {
         return new CharArrayList(array);
     }
 
-    static List<Integer> asList(int[] array) {
+    static @Nonnull List<Integer> asList(int @Nonnull [] array) {
         return new IntArrayList(array);
     }
 
-    static List<Long> asList(long[] array) {
+    static @Nonnull List<Long> asList(long @Nonnull [] array) {
         return new LongArrayList(array);
     }
 
-    static List<Float> asList(float[] array) {
+    static @Nonnull List<Float> asList(float @Nonnull [] array) {
         return new FloatArrayList(array);
     }
 
-    static List<Double> asList(double[] array) {
+    static @Nonnull List<Double> asList(double @Nonnull [] array) {
         return new DoubleArrayList(array);
     }
 
-    static <T> List<T> immutableList(T[] array) {
+    static <T> @Nonnull @Immutable List<T> immutableList(T @Nonnull [] array) {
         return JieArray.isEmpty(array) ? Collections.emptyList() : new ImmutableList<>(array);
     }
 
-    static List<Boolean> immutableList(boolean[] array) {
+    static @Nonnull @Immutable List<@Nonnull Boolean> immutableList(boolean @Nonnull [] array) {
         return JieArray.isEmpty(array) ? Collections.emptyList() : new BooleanImmutableList(array);
     }
 
-    static List<Byte> immutableList(byte[] array) {
+    static @Nonnull @Immutable List<@Nonnull Byte> immutableList(byte @Nonnull [] array) {
         return JieArray.isEmpty(array) ? Collections.emptyList() : new ByteImmutableList(array);
     }
 
-    static List<Short> immutableList(short[] array) {
+    static @Nonnull @Immutable List<@Nonnull Short> immutableList(short @Nonnull [] array) {
         return JieArray.isEmpty(array) ? Collections.emptyList() : new ShortImmutableList(array);
     }
 
-    static List<Character> immutableList(char[] array) {
+    static @Nonnull @Immutable List<@Nonnull Character> immutableList(char @Nonnull [] array) {
         return JieArray.isEmpty(array) ? Collections.emptyList() : new CharImmutableList(array);
     }
 
-    static List<Integer> immutableList(int[] array) {
+    static @Nonnull @Immutable List<@Nonnull Integer> immutableList(int @Nonnull [] array) {
         return JieArray.isEmpty(array) ? Collections.emptyList() : new IntImmutableList(array);
     }
 
-    static List<Long> immutableList(long[] array) {
+    static @Nonnull @Immutable List<@Nonnull Long> immutableList(long @Nonnull [] array) {
         return JieArray.isEmpty(array) ? Collections.emptyList() : new LongImmutableList(array);
     }
 
-    static List<Float> immutableList(float[] array) {
+    static @Nonnull @Immutable List<@Nonnull Float> immutableList(float @Nonnull [] array) {
         return JieArray.isEmpty(array) ? Collections.emptyList() : new FloatImmutableList(array);
     }
 
-    static List<Double> immutableList(double[] array) {
+    static @Nonnull @Immutable List<@Nonnull Double> immutableList(double @Nonnull [] array) {
         return JieArray.isEmpty(array) ? Collections.emptyList() : new DoubleImmutableList(array);
     }
 
@@ -292,6 +295,7 @@ final class ListBack {
         }
     }
 
+    @Immutable
     private static final class ImmutableList<T>
         extends AbstractList<T> implements RandomAccess, Serializable {
 
@@ -314,6 +318,7 @@ final class ListBack {
         }
     }
 
+    @Immutable
     private static final class BooleanImmutableList
         extends AbstractList<Boolean> implements RandomAccess, Serializable {
 
@@ -336,6 +341,7 @@ final class ListBack {
         }
     }
 
+    @Immutable
     private static final class ByteImmutableList
         extends AbstractList<Byte> implements RandomAccess, Serializable {
 
@@ -358,6 +364,7 @@ final class ListBack {
         }
     }
 
+    @Immutable
     private static final class ShortImmutableList
         extends AbstractList<Short> implements RandomAccess, Serializable {
 
@@ -380,6 +387,7 @@ final class ListBack {
         }
     }
 
+    @Immutable
     private static final class CharImmutableList
         extends AbstractList<Character> implements RandomAccess, Serializable {
 
@@ -402,6 +410,7 @@ final class ListBack {
         }
     }
 
+    @Immutable
     private static final class IntImmutableList
         extends AbstractList<Integer> implements RandomAccess, Serializable {
 
@@ -424,6 +433,7 @@ final class ListBack {
         }
     }
 
+    @Immutable
     private static final class LongImmutableList
         extends AbstractList<Long> implements RandomAccess, Serializable {
 
@@ -446,6 +456,7 @@ final class ListBack {
         }
     }
 
+    @Immutable
     private static final class FloatImmutableList
         extends AbstractList<Float> implements RandomAccess, Serializable {
 
@@ -468,6 +479,7 @@ final class ListBack {
         }
     }
 
+    @Immutable
     private static final class DoubleImmutableList
         extends AbstractList<Double> implements RandomAccess, Serializable {
 
