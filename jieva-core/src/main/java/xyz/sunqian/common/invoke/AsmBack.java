@@ -121,7 +121,7 @@ public class AsmBack {
                 Parameter parameter = parameters[i];
                 methodVisitor.visitVarInsn(ALOAD, 2);
                 // methodVisitor.visitInsn(ICONST_0);
-                JieAsm.visitPushNumber(methodVisitor, i);
+                JieAsm.loadConst(methodVisitor, i);
                 methodVisitor.visitInsn(AALOAD);
                 // methodVisitor.visitTypeInsn(CHECKCAST, JieJvm.getInternalName(JieReflect.wrapper(parameter.getType())));
                 JieAsm.visitObjectCast(methodVisitor, parameter.getType(), false);

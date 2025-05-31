@@ -346,17 +346,17 @@ public class AsmProxyBuilder implements ProxyBuilder, Opcodes {
                     // method = this.methods[j]
                     override.visitVarInsn(ALOAD, 0);
                     override.visitFieldInsn(GETFIELD, proxyInternalName, "methods", METHOD_ARRAY_DESCRIPTOR);
-                    JieAsm.visitPushNumber(override, methodCount);
+                    JieAsm.loadConst(override, methodCount);
                     override.visitInsn(AALOAD);
                     override.visitVarInsn(ASTORE, extraLocalIndex);
                     // Object args = new Object[]{};
-                    JieAsm.visitPushNumber(override, parameters.length);
+                    JieAsm.loadConst(override, parameters.length);
                     override.visitTypeInsn(ANEWARRAY, OBJECT_INTERNAL_NAME);
                     int paramIndex = 1;
                     for (int i = 0; i < parameters.length; i++) {
                         Parameter parameter = parameters[i];
                         override.visitInsn(DUP);
-                        JieAsm.visitPushNumber(override, i);
+                        JieAsm.loadConst(override, i);
                         JieAsm.visitLoadParamAsObject(override, parameter.getType(), paramIndex);
                         override.visitInsn(AASTORE);
                         if (Objects.equals(parameter.getType(), long.class) || Objects.equals(parameter.getType(), double.class)) {
@@ -369,7 +369,7 @@ public class AsmProxyBuilder implements ProxyBuilder, Opcodes {
                     // invoker = this.invokers[i];
                     override.visitVarInsn(ALOAD, 0);
                     override.visitFieldInsn(GETFIELD, proxyInternalName, "invokers", PROXY_INVOKER_ARRAY_DESCRIPTOR);
-                    JieAsm.visitPushNumber(override, methodCount);
+                    JieAsm.loadConst(override, methodCount);
                     override.visitInsn(AALOAD);
                     override.visitVarInsn(ASTORE, extraLocalIndex + 2);
                     // handler
@@ -414,7 +414,7 @@ public class AsmProxyBuilder implements ProxyBuilder, Opcodes {
                     Class<?>[] params = method.getParameterTypes();
                     for (int j = 0; j < params.length; j++) {
                         callSuper.visitVarInsn(ALOAD, 3);
-                        JieAsm.visitPushNumber(callSuper, j);
+                        JieAsm.loadConst(callSuper, j);
                         callSuper.visitInsn(AALOAD);
                         JieAsm.visitObjectCast(callSuper, params[j], false);
                     }
@@ -454,7 +454,7 @@ public class AsmProxyBuilder implements ProxyBuilder, Opcodes {
                     Class<?>[] params = method.getParameterTypes();
                     for (int j = 0; j < params.length; j++) {
                         callVirtual.visitVarInsn(ALOAD, 3);
-                        JieAsm.visitPushNumber(callVirtual, j);
+                        JieAsm.loadConst(callVirtual, j);
                         callVirtual.visitInsn(AALOAD);
                         JieAsm.visitObjectCast(callVirtual, params[j], false);
                     }
