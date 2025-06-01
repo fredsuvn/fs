@@ -1,5 +1,7 @@
 package xyz.sunqian.common.reflect.proxy;
 
+import xyz.sunqian.annotations.Nonnull;
+
 /**
  * This interface is the generator for generating proxy class.
  *
@@ -16,5 +18,9 @@ public interface ProxyClassGenerator {
      * @return the proxy class
      * @throws ProxyException if a problem occurs during the generating
      */
-    ProxyClass generate(Class<?>[] proxied, ProxyMethodHandler methodHandler) throws ProxyException;
+    @Nonnull
+    ProxyClass generate(
+        @Nonnull Class<?> @Nonnull [] proxied,
+        @Nonnull ProxyMethodHandler methodHandler
+    ) throws ProxyException;
 }

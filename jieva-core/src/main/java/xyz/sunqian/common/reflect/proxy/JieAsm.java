@@ -299,73 +299,12 @@ public class JieAsm {
     }
 
     /**
-     * Loads a var by {@code MethodVisitor.visitVarInsn} with the specified type and slot index, and wraps it to an
-     * object type.
+     * Converts the object var at the top of the stack to the specified type.
      *
-     * @param visitor the {@link MethodVisitor} to be invoked
+     * @param visitor the {@link MethodVisitor}
      * @param type    the specified type
-     * @param i       the slot index
      */
-    public static void loadVarToObject(@Nonnull MethodVisitor visitor, @Nonnull Class<?> type, int i) {
-        if (Objects.equals(type, boolean.class)) {
-            visitor.visitVarInsn(Opcodes.ILOAD, i);
-            visitor.visitMethodInsn(
-                Opcodes.INVOKESTATIC, "java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;", false);
-            return;
-        }
-        if (Objects.equals(type, byte.class)) {
-            visitor.visitVarInsn(Opcodes.ILOAD, i);
-            visitor.visitMethodInsn(
-                Opcodes.INVOKESTATIC, "java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;", false);
-            return;
-        }
-        if (Objects.equals(type, short.class)) {
-            visitor.visitVarInsn(Opcodes.ILOAD, i);
-            visitor.visitMethodInsn(
-                Opcodes.INVOKESTATIC, "java/lang/Short", "valueOf", "(S)Ljava/lang/Short;", false);
-            return;
-        }
-        if (Objects.equals(type, char.class)) {
-            visitor.visitVarInsn(Opcodes.ILOAD, i);
-            visitor.visitMethodInsn(
-                Opcodes.INVOKESTATIC, "java/lang/Character", "valueOf", "(C)Ljava/lang/Character;", false);
-            return;
-        }
-        if (Objects.equals(type, int.class)) {
-            visitor.visitVarInsn(Opcodes.ILOAD, i);
-            visitor.visitMethodInsn(
-                Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
-            return;
-        }
-        if (Objects.equals(type, long.class)) {
-            visitor.visitVarInsn(Opcodes.LLOAD, i);
-            visitor.visitMethodInsn(
-                Opcodes.INVOKESTATIC, "java/lang/Long", "valueOf", "(J)Ljava/lang/Long;", false);
-            return;
-        }
-        if (Objects.equals(type, float.class)) {
-            visitor.visitVarInsn(Opcodes.FLOAD, i);
-            visitor.visitMethodInsn(
-                Opcodes.INVOKESTATIC, "java/lang/Float", "valueOf", "(F)Ljava/lang/Float;", false);
-            return;
-        }
-        if (Objects.equals(type, double.class)) {
-            visitor.visitVarInsn(Opcodes.DLOAD, i);
-            visitor.visitMethodInsn(
-                Opcodes.INVOKESTATIC, "java/lang/Double", "valueOf", "(D)Ljava/lang/Double;", false);
-            return;
-        }
-        visitor.visitVarInsn(Opcodes.ALOAD, i);
-    }
-
-    /**
-     * Unwraps the boxed type to the specified type, typically used for primitive types.
-     *
-     * @param visitor      the {@link MethodVisitor}
-     * @param type         the specified type
-     * @param requiresCast whether to use the {@code CHECKCAST} for reference types
-     */
-    public static void unwrapVar(@Nonnull MethodVisitor visitor, @Nonnull Class<?> type, boolean requiresCast) {
+    public static void convertObjectTo(@Nonnull MethodVisitor visitor, @Nonnull Class<?> type) {
         if (Objects.equals(type, boolean.class)) {
             visitor.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Boolean");
             visitor.visitMethodInsn(
@@ -414,24 +353,71 @@ public class JieAsm {
                 Opcodes.INVOKEVIRTUAL, "java/lang/Double", "doubleValue", "()D", false);
             return;
         }
-        if (requiresCast) {
-            visitor.visitTypeInsn(Opcodes.CHECKCAST, JieJvm.getInternalName(type));
+        visitor.visitTypeInsn(Opcodes.CHECKCAST, JieJvm.getInternalName(type));
+    }
+
+    /**
+     * Wraps the primitive var at the top of the stack. If the var is an object type, then it has no effect.
+     *
+     * @param visitor the {@link MethodVisitor} to be invoked
+     * @param type    the type of the var
+     */
+    public static void wrapToObject(@Nonnull MethodVisitor visitor, @Nonnull Class<?> type) {
+        if (Objects.equals(type, boolean.class)) {
+            visitor.visitMethodInsn(
+                Opcodes.INVOKESTATIC, "java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;", false);
+            return;
+        }
+        if (Objects.equals(type, byte.class)) {
+            visitor.visitMethodInsn(
+                Opcodes.INVOKESTATIC, "java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;", false);
+            return;
+        }
+        if (Objects.equals(type, short.class)) {
+            visitor.visitMethodInsn(
+                Opcodes.INVOKESTATIC, "java/lang/Short", "valueOf", "(S)Ljava/lang/Short;", false);
+            return;
+        }
+        if (Objects.equals(type, char.class)) {
+            visitor.visitMethodInsn(
+                Opcodes.INVOKESTATIC, "java/lang/Character", "valueOf", "(C)Ljava/lang/Character;", false);
+            return;
+        }
+        if (Objects.equals(type, int.class)) {
+            visitor.visitMethodInsn(
+                Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
+            return;
+        }
+        if (Objects.equals(type, long.class)) {
+            visitor.visitMethodInsn(
+                Opcodes.INVOKESTATIC, "java/lang/Long", "valueOf", "(J)Ljava/lang/Long;", false);
+            return;
+        }
+        if (Objects.equals(type, float.class)) {
+            visitor.visitMethodInsn(
+                Opcodes.INVOKESTATIC, "java/lang/Float", "valueOf", "(F)Ljava/lang/Float;", false);
+            return;
+        }
+        if (Objects.equals(type, double.class)) {
+            visitor.visitMethodInsn(
+                Opcodes.INVOKESTATIC, "java/lang/Double", "valueOf", "(D)Ljava/lang/Double;", false);
+            return;
         }
     }
 
     /**
-     * Loads return instructions for the specified type.
+     * Returns var at the top of the stack. If the return type is {@code void}, that means no var at the stack.
      *
      * @param visitor      the {@link MethodVisitor}
-     * @param type         the specified type, may be {@code null} if no return
-     * @param requiresCast whether to use the {@code CHECKCAST} for reference types
-     * @param mustReturn   whether it must return a value, {@code null} for void
+     * @param type         the return type
+     * @param requiresCast whether to use the {@code CHECKCAST} for object types
+     * @param returnNull   {@code true} for returning {@code null} if the return type is {@code void}
      */
     public static void visitReturn(
         @Nonnull MethodVisitor visitor,
         @Nonnull Class<?> type,
         boolean requiresCast,
-        boolean mustReturn
+        boolean returnNull
     ) {
         if (Objects.equals(type, boolean.class)) {
             visitor.visitInsn(Opcodes.IRETURN);
@@ -466,7 +452,7 @@ public class JieAsm {
             return;
         }
         if (Objects.equals(type, void.class)) {
-            if (mustReturn) {
+            if (returnNull) {
                 visitor.visitInsn(Opcodes.ACONST_NULL);
             } else {
                 visitor.visitInsn(Opcodes.RETURN);

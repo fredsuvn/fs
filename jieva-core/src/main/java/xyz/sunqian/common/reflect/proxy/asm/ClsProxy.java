@@ -68,7 +68,17 @@ public class ClsProxy extends Cls2 {
                     _this.wait();
                     return null;
                 case 3:
-                    return _this.getInter((Long) args[0], (Integer) args[1], (Long) args[2], (Float) args[3]);
+                    return _this.mInt(
+                        (Boolean) args[0],
+                        (Byte) args[1],
+                        (Short) args[2],
+                        (Character) args[3],
+                        (Integer) args[4],
+                        (Long) args[5],
+                        (Float) args[6],
+                        (Double) args[7],
+                        (String) args[8]
+                    );
             }
             return null;
         }
