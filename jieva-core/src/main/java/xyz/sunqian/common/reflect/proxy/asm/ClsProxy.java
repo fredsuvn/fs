@@ -19,13 +19,13 @@ public class ClsProxy extends Cls2 {
     }
 
     @Override
-    public Long getInter(Long aLong) throws Throwable {
+    public Long getInter(Long aLong, int i, long l, float f) throws Throwable {
         AsmProxyInvoker invoker = invokers[0];
         if (invoker == null) {
             invoker = new Invoker1(0);
             invokers[0] = invoker;
         }
-        return (Long) handler.invoke(this, methods[0], invoker, aLong, 1, 2);
+        return (Long) handler.invoke(this, methods[0], invoker, aLong, i, l, f);
     }
 
     @Override
@@ -63,12 +63,12 @@ public class ClsProxy extends Cls2 {
                         (String) args[8]
                     );
                 case 1:
-                    return _this.getInter((Long) args[0]);
+                    return _this.getInter((Long) args[0], (Integer) args[1], (Long) args[2], (Float) args[3]);
                 case 2:
                     _this.wait();
                     return null;
                 case 3:
-                    return _this.getInter((Long) args[0]);
+                    return _this.getInter((Long) args[0], (Integer) args[1], (Long) args[2], (Float) args[3]);
             }
             return null;
         }
@@ -77,9 +77,9 @@ public class ClsProxy extends Cls2 {
         public @Nullable Object invokeSuper(@Nonnull Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
             switch (index) {
                 case 1:
-                    return ClsProxy.super.getInter((Long) args[0]);
+                    return ClsProxy.super.getInter((Long) args[0], (Integer) args[1], (Long) args[2], (Float) args[3]);
                 case 2:
-                    return ClsProxy.super.getInter((Long) args[0]);
+                    return ClsProxy.super.getInter((Long) args[0], (Integer) args[1], (Long) args[2], (Float) args[3]);
             }
             return null;
         }

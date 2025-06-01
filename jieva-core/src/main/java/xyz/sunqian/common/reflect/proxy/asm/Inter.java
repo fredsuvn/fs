@@ -2,7 +2,7 @@ package xyz.sunqian.common.reflect.proxy.asm;
 
 public interface Inter<T> {
 
-    default T getInter(T t) throws Throwable {
+    default T getInter(T t, int i, long l, float f) throws Throwable {
         return null;
     }
 

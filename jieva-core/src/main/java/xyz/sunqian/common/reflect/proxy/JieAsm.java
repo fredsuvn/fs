@@ -3,11 +3,10 @@ package xyz.sunqian.common.reflect.proxy;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import xyz.sunqian.annotations.NonExported;
-import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 import xyz.sunqian.common.reflect.JieJvm;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Objects;
 
@@ -223,97 +222,12 @@ public class JieAsm {
     }
 
     /**
-     * Unwraps the boxed type to the specified type, typically used for primitive types.
-     *
-     * @param visitor        the {@link MethodVisitor}
-     * @param type           the specified type
-     * @param requiresReturn whether returning the unwrapped var
-     */
-    public static void visitUnwrapVar(MethodVisitor visitor, Class<?> type, boolean requiresReturn) {
-        if (Objects.equals(type, boolean.class)) {
-            visitor.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Boolean");
-            visitor.visitMethodInsn(
-                Opcodes.INVOKEVIRTUAL, "java/lang/Boolean", "booleanValue", "()Z", false);
-            if (requiresReturn) {
-                visitor.visitInsn(Opcodes.IRETURN);
-            }
-            return;
-        }
-        if (Objects.equals(type, byte.class)) {
-            visitor.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Byte");
-            visitor.visitMethodInsn(
-                Opcodes.INVOKEVIRTUAL, "java/lang/Byte", "byteValue", "()B", false);
-            if (requiresReturn) {
-                visitor.visitInsn(Opcodes.IRETURN);
-            }
-            return;
-        }
-        if (Objects.equals(type, short.class)) {
-            visitor.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Short");
-            visitor.visitMethodInsn(
-                Opcodes.INVOKEVIRTUAL, "java/lang/Short", "shortValue", "()S", false);
-            if (requiresReturn) {
-                visitor.visitInsn(Opcodes.IRETURN);
-            }
-            return;
-        }
-        if (Objects.equals(type, char.class)) {
-            visitor.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Character");
-            visitor.visitMethodInsn(
-                Opcodes.INVOKEVIRTUAL, "java/lang/Character", "charValue", "()C", false);
-            if (requiresReturn) {
-                visitor.visitInsn(Opcodes.IRETURN);
-            }
-            return;
-        }
-        if (Objects.equals(type, int.class)) {
-            visitor.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Integer");
-            visitor.visitMethodInsn(
-                Opcodes.INVOKEVIRTUAL, "java/lang/Integer", "intValue", "()I", false);
-            if (requiresReturn) {
-                visitor.visitInsn(Opcodes.IRETURN);
-            }
-            return;
-        }
-        if (Objects.equals(type, long.class)) {
-            visitor.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Long");
-            visitor.visitMethodInsn(
-                Opcodes.INVOKEVIRTUAL, "java/lang/Long", "longValue", "()J", false);
-            if (requiresReturn) {
-                visitor.visitInsn(Opcodes.LRETURN);
-            }
-            return;
-        }
-        if (Objects.equals(type, float.class)) {
-            visitor.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Float");
-            visitor.visitMethodInsn(
-                Opcodes.INVOKEVIRTUAL, "java/lang/Float", "floatValue", "()F", false);
-            if (requiresReturn) {
-                visitor.visitInsn(Opcodes.FRETURN);
-            }
-            return;
-        }
-        if (Objects.equals(type, double.class)) {
-            visitor.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Double");
-            visitor.visitMethodInsn(
-                Opcodes.INVOKEVIRTUAL, "java/lang/Double", "doubleValue", "()D", false);
-            if (requiresReturn) {
-                visitor.visitInsn(Opcodes.DRETURN);
-            }
-            return;
-        }
-        if (requiresReturn) {
-            visitor.visitInsn(Opcodes.ARETURN);
-        }
-    }
-
-    /**
      * Loads a constant by {@code MethodVisitor.visitInsn}.
      *
      * @param visitor the {@link MethodVisitor} to be invoked
      * @param i       the constant
      */
-    public static void loadConst(MethodVisitor visitor, int i) {
+    public static void loadConst(@Nonnull MethodVisitor visitor, int i) {
         switch (i) {
             case 0:
                 visitor.visitInsn(Opcodes.ICONST_0);
@@ -342,13 +256,13 @@ public class JieAsm {
     }
 
     /**
-     * Loads a var by {@code MethodVisitor.visitVarInsn} with the specified type and slot index
+     * Loads a var by {@code MethodVisitor.visitVarInsn} with the specified type and slot index.
      *
      * @param visitor the {@link MethodVisitor} to be invoked
      * @param type    the specified type
      * @param i       the slot index
      */
-    public static void loadVar(MethodVisitor visitor, Class<?> type, int i) {
+    public static void loadVar(@Nonnull MethodVisitor visitor, @Nonnull Class<?> type, int i) {
         if (Objects.equals(type, boolean.class)) {
             visitor.visitVarInsn(Opcodes.ILOAD, i);
             return;
@@ -385,13 +299,73 @@ public class JieAsm {
     }
 
     /**
+     * Loads a var by {@code MethodVisitor.visitVarInsn} with the specified type and slot index, and wraps it to an
+     * object type.
+     *
+     * @param visitor the {@link MethodVisitor} to be invoked
+     * @param type    the specified type
+     * @param i       the slot index
+     */
+    public static void loadVarToObject(@Nonnull MethodVisitor visitor, @Nonnull Class<?> type, int i) {
+        if (Objects.equals(type, boolean.class)) {
+            visitor.visitVarInsn(Opcodes.ILOAD, i);
+            visitor.visitMethodInsn(
+                Opcodes.INVOKESTATIC, "java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;", false);
+            return;
+        }
+        if (Objects.equals(type, byte.class)) {
+            visitor.visitVarInsn(Opcodes.ILOAD, i);
+            visitor.visitMethodInsn(
+                Opcodes.INVOKESTATIC, "java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;", false);
+            return;
+        }
+        if (Objects.equals(type, short.class)) {
+            visitor.visitVarInsn(Opcodes.ILOAD, i);
+            visitor.visitMethodInsn(
+                Opcodes.INVOKESTATIC, "java/lang/Short", "valueOf", "(S)Ljava/lang/Short;", false);
+            return;
+        }
+        if (Objects.equals(type, char.class)) {
+            visitor.visitVarInsn(Opcodes.ILOAD, i);
+            visitor.visitMethodInsn(
+                Opcodes.INVOKESTATIC, "java/lang/Character", "valueOf", "(C)Ljava/lang/Character;", false);
+            return;
+        }
+        if (Objects.equals(type, int.class)) {
+            visitor.visitVarInsn(Opcodes.ILOAD, i);
+            visitor.visitMethodInsn(
+                Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
+            return;
+        }
+        if (Objects.equals(type, long.class)) {
+            visitor.visitVarInsn(Opcodes.LLOAD, i);
+            visitor.visitMethodInsn(
+                Opcodes.INVOKESTATIC, "java/lang/Long", "valueOf", "(J)Ljava/lang/Long;", false);
+            return;
+        }
+        if (Objects.equals(type, float.class)) {
+            visitor.visitVarInsn(Opcodes.FLOAD, i);
+            visitor.visitMethodInsn(
+                Opcodes.INVOKESTATIC, "java/lang/Float", "valueOf", "(F)Ljava/lang/Float;", false);
+            return;
+        }
+        if (Objects.equals(type, double.class)) {
+            visitor.visitVarInsn(Opcodes.DLOAD, i);
+            visitor.visitMethodInsn(
+                Opcodes.INVOKESTATIC, "java/lang/Double", "valueOf", "(D)Ljava/lang/Double;", false);
+            return;
+        }
+        visitor.visitVarInsn(Opcodes.ALOAD, i);
+    }
+
+    /**
      * Unwraps the boxed type to the specified type, typically used for primitive types.
      *
      * @param visitor      the {@link MethodVisitor}
      * @param type         the specified type
      * @param requiresCast whether to use the {@code CHECKCAST} for reference types
      */
-    public static void unwrapVar(MethodVisitor visitor, Class<?> type, boolean requiresCast) {
+    public static void unwrapVar(@Nonnull MethodVisitor visitor, @Nonnull Class<?> type, boolean requiresCast) {
         if (Objects.equals(type, boolean.class)) {
             visitor.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Boolean");
             visitor.visitMethodInsn(
@@ -451,12 +425,14 @@ public class JieAsm {
      * @param visitor      the {@link MethodVisitor}
      * @param type         the specified type, may be {@code null} if no return
      * @param requiresCast whether to use the {@code CHECKCAST} for reference types
+     * @param mustReturn   whether it must return a value, {@code null} for void
      */
-    public static void visitReturn(MethodVisitor visitor, @Nullable Class<?> type, boolean requiresCast) {
-        if (type == null) {
-            visitor.visitInsn(Opcodes.RETURN);
-            return;
-        }
+    public static void visitReturn(
+        @Nonnull MethodVisitor visitor,
+        @Nonnull Class<?> type,
+        boolean requiresCast,
+        boolean mustReturn
+    ) {
         if (Objects.equals(type, boolean.class)) {
             visitor.visitInsn(Opcodes.IRETURN);
             return;
@@ -489,27 +465,18 @@ public class JieAsm {
             visitor.visitInsn(Opcodes.DRETURN);
             return;
         }
+        if (Objects.equals(type, void.class)) {
+            if (mustReturn) {
+                visitor.visitInsn(Opcodes.ACONST_NULL);
+            } else {
+                visitor.visitInsn(Opcodes.RETURN);
+                return;
+            }
+        }
         if (requiresCast) {
             visitor.visitTypeInsn(Opcodes.CHECKCAST, JieJvm.getInternalName(type));
         }
         visitor.visitInsn(Opcodes.ARETURN);
-    }
-
-    /**
-     * Invokes method by {@code INVOKEINTERFACE} or {@code INVOKEVIRTUAL}.
-     *
-     * @param visitor the {@link MethodVisitor}
-     * @param method  the method
-     */
-    public static void invokeVirtual(MethodVisitor visitor, Method method) {
-        Class<?> declaringClass = method.getDeclaringClass();
-        invokeVirtual(
-            visitor,
-            JieJvm.getInternalName(declaringClass),
-            method.getName(),
-            JieJvm.getDescriptor(method),
-            declaringClass.isInterface()
-        );
     }
 
     /**
@@ -522,7 +489,12 @@ public class JieAsm {
      * @param isInterface whether the method's owner class is an interface.
      */
     public static void invokeVirtual(
-        MethodVisitor visitor, String owner, String name, String descriptor, boolean isInterface) {
+        @Nonnull MethodVisitor visitor,
+        @Nonnull String owner,
+        @Nonnull String name,
+        @Nonnull String descriptor,
+        boolean isInterface
+    ) {
         if (isInterface) {
             visitor.visitMethodInsn(
                 Opcodes.INVOKEINTERFACE,
@@ -543,14 +515,27 @@ public class JieAsm {
     }
 
     /**
-     * Returns the slot count of the specified type
+     * Returns the slot count of the specified type.
      *
      * @param type the specified type
      */
-    public static int slotCount(Class<?> type) {
+    public static int varSize(@Nonnull Class<?> type) {
         if (Objects.equals(type, long.class) || Objects.equals(type, double.class)) {
             return 2;
         }
         return 1;
+    }
+
+    /**
+     * Returns the all slot count of the specified parameters.
+     *
+     * @param parameters the specified parameters
+     */
+    public static int paramSize(@Nonnull Parameter @Nonnull [] parameters) {
+        int size = 0;
+        for (Parameter parameter : parameters) {
+            size += varSize(parameter.getType());
+        }
+        return size;
     }
 }
