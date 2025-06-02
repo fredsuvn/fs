@@ -3,7 +3,7 @@ package xyz.sunqian.common.base.exception;
 import xyz.sunqian.annotations.Nullable;
 
 /**
- * This is the root runtime exception for jieva.
+ * This is the root runtime exception for this lib.
  *
  * @author sunqian
  */

@@ -3,7 +3,7 @@ package xyz.sunqian.common.base.exception;
 import xyz.sunqian.annotations.Nullable;
 
 /**
- * This is the root exception for jieva, and also the utility class for exception.
+ * This is the root exception for this lib, and also the utility class for exception.
  *
  * @author sunqian
  */

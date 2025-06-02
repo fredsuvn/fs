@@ -27,6 +27,7 @@ public class JieTest {
 
     @Test
     public void testBase() {
+        assertEquals(Jie.LIB_NAME, "Jieva");
         String hello = "hello";
         assertSame(Jie.as(hello), hello);
         assertEquals(Jie.nonnull("123", "456"), "123");

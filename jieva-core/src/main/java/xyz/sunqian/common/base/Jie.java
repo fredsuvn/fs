@@ -56,6 +56,11 @@ import java.util.function.Supplier;
 public class Jie {
 
     /**
+     * Name of this lib.
+     */
+    public static final String LIB_NAME = "Jieva";
+
+    /**
      * Casts and returns the given object as the specified type {@code T}. This method is equivalent to:
      * <pre>{@code
      * return (T) obj;
