@@ -20,14 +20,14 @@ public class ClassLoaderTest {
         {
             BytesClassLoader loader = new BytesClassLoader();
             InputStream in = ClassLoader.getSystemResourceAsStream(
-                A.class.getName().replace('.', '/') + ".class"
+                LA.class.getName().replace('.', '/') + ".class"
             );
             byte[] bytes = JieIO.read(in);
-            Class<?> cls = loader.loadClass(A.class.getName(), bytes);
-            assertNotEquals(cls, A.class);
-            assertEquals(cls.getName(), A.class.getName());
+            Class<?> cls = loader.loadClass(LA.class.getName(), bytes);
+            assertNotEquals(cls, LA.class);
+            assertEquals(cls.getName(), LA.class.getName());
             assertSame(
-                loader.loadClass(A.class.getName(), ByteBuffer.wrap(bytes)),
+                loader.loadClass(LA.class.getName(), ByteBuffer.wrap(bytes)),
                 cls
             );
             in.close();
@@ -35,14 +35,14 @@ public class ClassLoaderTest {
         {
             BytesClassLoader loader = new BytesClassLoader();
             InputStream in = ClassLoader.getSystemResourceAsStream(
-                A.class.getName().replace('.', '/') + ".class"
+                LA.class.getName().replace('.', '/') + ".class"
             );
             byte[] bytes = JieIO.read(in);
-            Class<?> cls = loader.loadClass(A.class.getName(), ByteBuffer.wrap(bytes));
-            assertNotEquals(cls, A.class);
-            assertEquals(cls.getName(), A.class.getName());
+            Class<?> cls = loader.loadClass(LA.class.getName(), ByteBuffer.wrap(bytes));
+            assertNotEquals(cls, LA.class);
+            assertEquals(cls.getName(), LA.class.getName());
             assertSame(
-                loader.loadClass(A.class.getName(), bytes),
+                loader.loadClass(LA.class.getName(), bytes),
                 cls
             );
             in.close();
@@ -50,14 +50,14 @@ public class ClassLoaderTest {
         {
             BytesClassLoader loader = new BytesClassLoader();
             InputStream in = ClassLoader.getSystemResourceAsStream(
-                A.class.getName().replace('.', '/') + ".class"
+                LA.class.getName().replace('.', '/') + ".class"
             );
             byte[] bytes = JieIO.read(in);
             Class<?> cls = loader.loadClass(null, bytes);
-            assertNotEquals(cls, A.class);
-            assertEquals(cls.getName(), A.class.getName());
+            assertNotEquals(cls, LA.class);
+            assertEquals(cls.getName(), LA.class.getName());
             assertSame(
-                loader.loadClass(A.class.getName(), ByteBuffer.wrap(bytes)),
+                loader.loadClass(LA.class.getName(), ByteBuffer.wrap(bytes)),
                 cls
             );
             in.close();
@@ -65,14 +65,14 @@ public class ClassLoaderTest {
         {
             BytesClassLoader loader = new BytesClassLoader();
             InputStream in = ClassLoader.getSystemResourceAsStream(
-                A.class.getName().replace('.', '/') + ".class"
+                LA.class.getName().replace('.', '/') + ".class"
             );
             byte[] bytes = JieIO.read(in);
             Class<?> cls = loader.loadClass(null, ByteBuffer.wrap(bytes));
-            assertNotEquals(cls, A.class);
-            assertEquals(cls.getName(), A.class.getName());
+            assertNotEquals(cls, LA.class);
+            assertEquals(cls.getName(), LA.class.getName());
             assertSame(
-                loader.loadClass(A.class.getName(), bytes),
+                loader.loadClass(LA.class.getName(), bytes),
                 cls
             );
             in.close();
@@ -83,44 +83,38 @@ public class ClassLoaderTest {
     public void testLoadedClass() throws Exception {
         BytesClassLoader loader1 = new BytesClassLoader();
         InputStream in1 = ClassLoader.getSystemResourceAsStream(
-            A.class.getName().replace('.', '/') + ".class"
+            LA.class.getName().replace('.', '/') + ".class"
         );
         byte[] bytes1 = JieIO.read(in1);
-        Class<?> cls1 = loader1.loadClass(A.class.getName(), bytes1);
+        Class<?> cls1 = loader1.loadClass(LA.class.getName(), bytes1);
         in1.close();
         BytesClassLoader loader2 = new BytesClassLoader();
         InputStream in2 = ClassLoader.getSystemResourceAsStream(
-            A.class.getName().replace('.', '/') + ".class"
+            LA.class.getName().replace('.', '/') + ".class"
         );
         byte[] bytes2 = JieIO.read(in2);
-        Class<?> cls2 = loader2.loadClass(A.class.getName(), bytes2);
+        Class<?> cls2 = loader2.loadClass(LA.class.getName(), bytes2);
         in2.close();
         assertEquals(cls1.getName(), cls2.getName());
-        assertEquals(cls1.getName(), A.class.getName());
-        assertNotEquals(cls1, A.class);
-        assertNotEquals(cls2, A.class);
+        assertEquals(cls1.getName(), LA.class.getName());
+        assertNotEquals(cls1, LA.class);
+        assertNotEquals(cls2, LA.class);
         assertNotEquals(cls1, cls2);
         Object o1 = cls1.getConstructor().newInstance();
         Object o2 = cls2.getConstructor().newInstance();
-        assertFalse(o1 instanceof A);
-        assertFalse(o2 instanceof A);
+        assertFalse(o1 instanceof LA);
+        assertFalse(o2 instanceof LA);
         BytesClassLoader loader3 = new BytesClassLoader();
-        InputStream in3 = ClassLoader.getSystemResourceAsStream("reflect/AC.bytes");
+        InputStream in3 = ClassLoader.getSystemResourceAsStream("reflect/LAC");
         byte[] bytes3 = JieIO.read(in3);
-        Class<?> cls3 = loader3.loadClass(A.class.getName(), bytes3);
+        Class<?> cls3 = loader3.loadClass(LA.class.getName(), bytes3);
         in1.close();
-        assertTrue(A.class.isAssignableFrom(cls3));
-        A a = new A();
-        A ac = (A) cls3.getConstructor().newInstance();
-        System.out.println(ac.a());
-        assertEquals(a.a(), 666);
-        //assertEquals(ac.a(), a.a() * 2);
-    }
-
-    public static class A {
-
-        int a() {
-            return 666;
-        }
+        assertTrue(LA.class.isAssignableFrom(cls3));
+        LA la = new LA();
+        Object lac = cls3.getConstructor().newInstance();
+        assertTrue(lac instanceof LA);
+        String test = "test";
+        assertEquals(la.compute(test), test + test);
+        assertEquals(((LA) lac).compute(test), test);
     }
 }
