@@ -418,10 +418,6 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
                 null,
                 getExceptions(invoke)
             );
-            // Outer outer = (Outer) inst;
-            visitor.visitVarInsn(Opcodes.ALOAD, 1);
-            visitor.visitTypeInsn(Opcodes.CHECKCAST, pcInfo.outerName);
-            visitor.visitVarInsn(Opcodes.ASTORE, 3);
             // get index;
             visitor.visitVarInsn(Opcodes.ALOAD, 0);
             visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.fullInnerName, "index", "I");
@@ -434,18 +430,18 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
             visitor.visitTableSwitchInsn(0, pcInfo.methods.size() - 1, labelLast, labels);
             int i = 0;
             for (ProxyMethodInfo pmInfo : pcInfo.methods) {
-                visitor.visitLabel(labels[i]);
-                if (i++ == 0) {
-                    visitor.visitFrame(Opcodes.F_APPEND, 1, new Object[]{pcInfo.outerName}, 0, null);
-                } else {
-                    visitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
+                Method method = pmInfo.method;
+                String virtualInvokerName = JieJvm.getInternalName(method.getDeclaringClass());
+                if (Modifier.isProtected(method.getModifiers())) {
+                    virtualInvokerName = pcInfo.outerName;
                 }
-                // outer.invoke((Long) args[0], (String) args[1]);
+                visitor.visitLabel(labels[i++]);
+                visitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
                 // get outer
-                visitor.visitVarInsn(Opcodes.ALOAD, 3);
-                //visitor.visitTypeInsn(Opcodes.CHECKCAST, JieJvm.getInternalName(pmInfo.method.getDeclaringClass()));
+                visitor.visitVarInsn(Opcodes.ALOAD, 1);
+                visitor.visitTypeInsn(Opcodes.CHECKCAST, virtualInvokerName);
                 int pIndex = 0;
-                for (Parameter parameter : pmInfo.method.getParameters()) {
+                for (Parameter parameter : method.getParameters()) {
                     // get args
                     visitor.visitVarInsn(Opcodes.ALOAD, 2);
                     JieAsm.loadConst(visitor, pIndex++);
@@ -455,8 +451,9 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
                 }
                 // return outer.invoke(args0, args1...);
                 JieAsm.invokeVirtual(
-                    visitor, pcInfo.outerName, pmInfo.method.getName(), pmInfo.descriptor, pmInfo.isInterface);
-                Class<?> returnType = JieAsm.wrapToObject(visitor, pmInfo.method.getReturnType());
+                    visitor, virtualInvokerName, method.getName(), pmInfo.descriptor, pmInfo.isInterface
+                );
+                Class<?> returnType = JieAsm.wrapToObject(visitor, method.getReturnType());
                 JieAsm.visitReturn(visitor, returnType, false, true);
             }
             visitor.visitLabel(labelLast);
@@ -476,10 +473,6 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
                 null,
                 getExceptions(invokeSuper)
             );
-            // Outer outer = (Outer) inst;
-            visitor.visitVarInsn(Opcodes.ALOAD, 1);
-            visitor.visitTypeInsn(Opcodes.CHECKCAST, pcInfo.outerName);
-            visitor.visitVarInsn(Opcodes.ASTORE, 3);
             // get index;
             visitor.visitVarInsn(Opcodes.ALOAD, 0);
             visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.fullInnerName, "index", "I");
@@ -492,15 +485,11 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
             visitor.visitTableSwitchInsn(0, pcInfo.methods.size() - 1, labelLast, labels);
             int i = 0;
             for (ProxyMethodInfo pmInfo : pcInfo.methods) {
-                visitor.visitLabel(labels[i]);
-                if (i++ == 0) {
-                    visitor.visitFrame(Opcodes.F_APPEND, 1, new Object[]{pcInfo.outerName}, 0, null);
-                } else {
-                    visitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
-                }
-                // outer.invoke((Long) args[0], (String) args[1]);
+                visitor.visitLabel(labels[i++]);
+                visitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
                 // get outer
-                visitor.visitVarInsn(Opcodes.ALOAD, 3);
+                visitor.visitVarInsn(Opcodes.ALOAD, 1);
+                visitor.visitTypeInsn(Opcodes.CHECKCAST, pcInfo.outerName);
                 int pIndex = 0;
                 for (Parameter parameter : pmInfo.method.getParameters()) {
                     // get args

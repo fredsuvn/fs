@@ -24,7 +24,7 @@ import static org.testng.Assert.expectThrows;
 public class AsmProxyTest {
 
     @Test
-    public void testAsmProxy() {
+    public void testProxyClass() {
         IntVar counter = IntVar.of(0);
         {
             // InterA
@@ -133,8 +133,88 @@ public class AsmProxyTest {
             assertTrue(Modifier.isPublic(constructors[0].getModifiers()));
             counter.set(0);
         }
+    }
+
+    @Test
+    public void testProxyInvoker() {
         {
-            // test stack overflow
+            // invokeSuper
+            ProxyClassGenerator generator = new AsmProxyClassGenerator();
+            IntVar counter = IntVar.of(0);
+            ProxyClass pc = generator.generate(
+                ClsA.class, Jie.list(SameMethodA.class),
+                new ProxyMethodHandler() {
+
+                    @Override
+                    public boolean requiresProxy(Method method) {
+                        return method.getDeclaringClass().equals(ClsA.class)
+                            || method.getDeclaringClass().equals(SameMethodA.class);
+                    }
+
+                    @Override
+                    public @Nullable Object invoke(
+                        @Nonnull Object proxy,
+                        @Nonnull Method method,
+                        @Nonnull ProxyInvoker invoker,
+                        @Nullable Object @Nonnull ... args
+                    ) throws Throwable {
+                        counter.getAndIncrement();
+                        return invoker.invokeSuper(proxy, args);
+                    }
+                }
+            );
+            class ClaAProxy extends ClsA implements SameMethodA {}
+            Object asmProxy = pc.newInstance();
+            ClaAProxy manProxy = new ClaAProxy();
+            assertEquals(counter.get(), 0);
+            assertEquals(((ClsA) asmProxy).a1("666"), manProxy.a1("666"));
+            assertEquals(counter.get(), 2);
+            assertEquals(((SameMethodA) asmProxy).ss(999), manProxy.ss(999));
+            assertEquals(counter.get(), 3);
+        }
+        {
+            // invoke
+            ProxyClassGenerator generator = new AsmProxyClassGenerator();
+            IntVar counter = IntVar.of(0);
+            class ClaAProxy extends ClsA implements SameMethodA {
+                @Override
+                public String a1(String a0) {
+                    return super.a1(a0) + "888";
+                }
+            }
+            ClaAProxy manProxy = new ClaAProxy();
+            ProxyClass pc = generator.generate(
+                ClsA.class, Jie.list(SameMethodA.class),
+                new ProxyMethodHandler() {
+
+                    @Override
+                    public boolean requiresProxy(Method method) {
+                        return method.getDeclaringClass().equals(ClsA.class)
+                            || method.getDeclaringClass().equals(SameMethodA.class);
+                    }
+
+                    @Override
+                    public @Nullable Object invoke(
+                        @Nonnull Object proxy,
+                        @Nonnull Method method,
+                        @Nonnull ProxyInvoker invoker,
+                        @Nullable Object @Nonnull ... args
+                    ) throws Throwable {
+                        counter.getAndIncrement();
+                        return invoker.invoke(manProxy, args);
+                    }
+                }
+            );
+            Object asmProxy = pc.newInstance();
+            assertEquals(counter.get(), 0);
+            assertEquals(((ClsA) asmProxy).a1("666"), manProxy.a1("666"));
+            assertEquals(((ClsA) asmProxy).a1("666"), "666888");
+            assertEquals(counter.get(), 2);
+            assertEquals(((SameMethodA) asmProxy).ss(999), manProxy.ss(999));
+            assertEquals(counter.get(), 3);
+        }
+        {
+            // stack overflow
             ProxyClassGenerator generator = new AsmProxyClassGenerator();
             ProxyClass pc = generator.generate(
                 ClsA.class, Jie.list(SameMethodA.class),
@@ -142,7 +222,8 @@ public class AsmProxyTest {
 
                     @Override
                     public boolean requiresProxy(Method method) {
-                        return true;
+                        return method.getDeclaringClass().equals(ClsA.class)
+                            || method.getDeclaringClass().equals(SameMethodA.class);
                     }
 
                     @Override
@@ -156,12 +237,64 @@ public class AsmProxyTest {
                     }
                 }
             );
-            SameMethodA a2 = pc.newInstance();
-            System.out.println(a2 instanceof SameMethodA);
-            System.out.println(a2.ss(1));
-            ClsA a1 = pc.newInstance();
-            expectThrows(StackOverflowError.class, () -> a1.a1(""));
-            //expectThrows(StackOverflowError.class, () -> a2.ss(1));
+            ClsA asmProxy1 = pc.newInstance();
+            expectThrows(StackOverflowError.class, () -> asmProxy1.a1(""));
+            SameMethodA asmProxy2 = pc.newInstance();
+            expectThrows(StackOverflowError.class, () -> asmProxy2.ss(1));
+        }
+        {
+            // throws directly
+            ProxyClassGenerator generator = new AsmProxyClassGenerator();
+            ProxyClass pc1 = generator.generate(
+                ClsA.class, Jie.list(SameMethodA.class),
+                new ProxyMethodHandler() {
+
+                    @Override
+                    public boolean requiresProxy(Method method) {
+                        return method.getDeclaringClass().equals(ClsA.class)
+                            || method.getDeclaringClass().equals(SameMethodA.class);
+                    }
+
+                    @Override
+                    public @Nullable Object invoke(
+                        @Nonnull Object proxy,
+                        @Nonnull Method method,
+                        @Nonnull ProxyInvoker invoker,
+                        @Nullable Object @Nonnull ... args
+                    ) throws Throwable {
+                        throw new ProxyTestException();
+                    }
+                }
+            );
+            ClsA a1 = pc1.newInstance();
+            expectThrows(ProxyTestException.class, () -> a1.a1(""));
+            SameMethodA s1 = pc1.newInstance();
+            expectThrows(ProxyTestException.class, () -> s1.ss(1));
+            ProxyClass pc2 = generator.generate(
+                ClsA.class, Jie.list(SameMethodA.class),
+                new ProxyMethodHandler() {
+
+                    @Override
+                    public boolean requiresProxy(Method method) {
+                        return method.getDeclaringClass().equals(ClsA.class)
+                            || method.getDeclaringClass().equals(SameMethodA.class);
+                    }
+
+                    @Override
+                    public @Nullable Object invoke(
+                        @Nonnull Object proxy,
+                        @Nonnull Method method,
+                        @Nonnull ProxyInvoker invoker,
+                        @Nullable Object @Nonnull ... args
+                    ) throws Throwable {
+                        return invoker.invokeSuper(proxy, args);
+                    }
+                }
+            );
+            ClsA a2 = pc2.newInstance();
+            expectThrows(ProxyTestException.class, () -> a2.throwClsEx());
+            SameMethodA s2 = pc1.newInstance();
+            expectThrows(ProxyTestException.class, () -> s2.throwInterEx());
         }
     }
 
@@ -386,12 +519,17 @@ public class AsmProxyTest {
     }
 
     public static class ClsA {
+
         public String a1(String a0) {
             return cp(a0);
         }
 
         protected String cp(String a0) {
             return a0;
+        }
+
+        public void throwClsEx() {
+            throw new ProxyTestException();
         }
     }
 
@@ -418,7 +556,9 @@ public class AsmProxyTest {
             return i * 2;
         }
 
-        int sa(int i);
+        default void throwInterEx() {
+            throw new ProxyTestException();
+        }
     }
 
     public interface SameMethodB {

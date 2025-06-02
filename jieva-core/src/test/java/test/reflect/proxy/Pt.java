@@ -1,26 +1,8 @@
 package test.reflect.proxy;
 
-public class Pt<T> {
+public class Pt {
 
-    public void mVoid() throws Throwable {
-    }
-
-    public int mInt(
-        boolean a,
-        byte b,
-        short c,
-        char d,
-        int e,
-        long f,
-        float g,
-        double h,
-        Number i,
-        T t
-    ) throws Throwable {
-        return 666;
-    }
-
-    public T mTt(T t) throws Throwable {
-        return null;
+    public String ss1(String a, int b) {
+        return a + b;
     }
 }

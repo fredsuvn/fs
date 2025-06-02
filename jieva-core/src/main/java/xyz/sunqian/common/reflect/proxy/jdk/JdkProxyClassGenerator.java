@@ -4,6 +4,7 @@ import xyz.sunqian.annotations.JdkDependent;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.reflect.BytesClassLoader;
 import xyz.sunqian.common.reflect.proxy.ProxyBuilder;
 import xyz.sunqian.common.reflect.proxy.ProxyClass;
@@ -66,15 +67,15 @@ public class JdkProxyClassGenerator implements ProxyClassGenerator {
 
     private static final class JdkInvoker implements ProxyInvoker {
 
-        private final Method method;
+        private final Invocable invocable;
 
         private JdkInvoker(Method method) {
-            this.method = method;
+            this.invocable = Invocable.of(method);
         }
 
         @Override
         public @Nullable Object invoke(@Nonnull Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
-            return invokeMethod(inst, method, args);
+            return invocable.invoke(inst, args);
         }
 
         @Override
