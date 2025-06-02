@@ -2,6 +2,7 @@ package xyz.sunqian.common.reflect.proxy.asm;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.reflect.proxy.ProxyInvoker;
 import xyz.sunqian.common.reflect.proxy.ProxyMethodHandler;
 
 import java.lang.reflect.Method;
@@ -10,17 +11,17 @@ public class ClsProxy extends Cls2 {
 
     private final ProxyMethodHandler handler;
     private final Method[] methods;
-    private final AsmProxyInvoker[] invokers;
+    private final ProxyInvoker[] invokers;
 
-    public ClsProxy(ProxyMethodHandler handler, Method[] methods, AsmProxyInvoker[] invokers) {
+    public ClsProxy(ProxyMethodHandler handler, Method[] methods) {
         this.handler = handler;
         this.methods = methods;
-        this.invokers = invokers;
+        this.invokers = new ProxyInvoker[methods.length];
     }
 
     @Override
     public Long getInter(Long aLong, int i, long l, float f) throws Throwable {
-        AsmProxyInvoker invoker = invokers[0];
+        ProxyInvoker invoker = invokers[0];
         if (invoker == null) {
             invoker = new Invoker1(0);
             invokers[0] = invoker;
@@ -38,7 +39,7 @@ public class ClsProxy extends Cls2 {
         return super.mInt(a, b, c, d, e, f, g, h, s);
     }
 
-    private class Invoker1 implements AsmProxyInvoker {
+    private class Invoker1 implements ProxyInvoker {
 
         private final int index;
 
