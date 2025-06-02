@@ -145,6 +145,12 @@ public class ArrayTest {
     public void testIndexOf() {
         // Test object array
         Integer[] objArray = {1, 2, 3, 4, 5, 3, 2, 1};
+        assertEquals(JieArray.indexOf(objArray, 3), 2);
+        assertEquals(JieArray.indexOf(objArray, 6), -1);
+        assertEquals(JieArray.indexOf(objArray, 1), 0);
+        assertEquals(JieArray.lastIndexOf(objArray, 3), 5);
+        assertEquals(JieArray.lastIndexOf(objArray, 6), -1);
+        assertEquals(JieArray.lastIndexOf(objArray, 1), 7);
         assertEquals(JieArray.indexOf(objArray, (i, t) -> Jie.equals(t, 3)), 2);
         assertEquals(JieArray.indexOf(objArray, (i, t) -> Jie.equals(t, 6)), -1);
         assertEquals(JieArray.indexOf(objArray, (i, t) -> Jie.equals(t, 1)), 0);
@@ -154,6 +160,12 @@ public class ArrayTest {
 
         // Test int array
         int[] intArray = {1, 2, 3, 4, 5, 3, 2, 1};
+        assertEquals(JieArray.indexOf(intArray, 3), 2);
+        assertEquals(JieArray.indexOf(intArray, 6), -1);
+        assertEquals(JieArray.indexOf(intArray, 1), 0);
+        assertEquals(JieArray.lastIndexOf(intArray, 3), 5);
+        assertEquals(JieArray.lastIndexOf(intArray, 6), -1);
+        assertEquals(JieArray.lastIndexOf(intArray, 1), 7);
         assertEquals(JieArray.indexOf(intArray, (i, t) -> t == 3), 2);
         assertEquals(JieArray.indexOf(intArray, (i, t) -> t == 6), -1);
         assertEquals(JieArray.indexOf(intArray, (i, t) -> t == 1), 0);
@@ -163,6 +175,12 @@ public class ArrayTest {
 
         // Test long array
         long[] longArray = {10L, 20L, 30L, 40L, 50L, 30L, 20L, 10L};
+        assertEquals(JieArray.indexOf(longArray, 30L), 2);
+        assertEquals(JieArray.indexOf(longArray, 60L), -1);
+        assertEquals(JieArray.indexOf(longArray, 10L), 0);
+        assertEquals(JieArray.lastIndexOf(longArray, 30L), 5);
+        assertEquals(JieArray.lastIndexOf(longArray, 60L), -1);
+        assertEquals(JieArray.lastIndexOf(longArray, 10L), 7);
         assertEquals(JieArray.indexOf(longArray, (i, t) -> t == 30L), 2);
         assertEquals(JieArray.indexOf(longArray, (i, t) -> t == 60L), -1);
         assertEquals(JieArray.indexOf(longArray, (i, t) -> t == 10L), 0);
@@ -172,6 +190,12 @@ public class ArrayTest {
 
         // Test float array
         float[] floatArray = {1.5f, 2.5f, 3.5f, 4.5f, 5.5f, 3.5f, 2.5f, 1.5f};
+        assertEquals(JieArray.indexOf(floatArray, 3.5f), 2);
+        assertEquals(JieArray.indexOf(floatArray, 6.5f), -1);
+        assertEquals(JieArray.indexOf(floatArray, 1.5f), 0);
+        assertEquals(JieArray.lastIndexOf(floatArray, 3.5f), 5);
+        assertEquals(JieArray.lastIndexOf(floatArray, 6.5f), -1);
+        assertEquals(JieArray.lastIndexOf(floatArray, 1.5f), 7);
         assertEquals(JieArray.indexOf(floatArray, (i, t) -> t == 3.5f), 2);
         assertEquals(JieArray.indexOf(floatArray, (i, t) -> t == 6.5f), -1);
         assertEquals(JieArray.indexOf(floatArray, (i, t) -> t == 1.5f), 0);
@@ -181,6 +205,12 @@ public class ArrayTest {
 
         // Test double array
         double[] doubleArray = {1.5, 2.5, 3.5, 4.5, 5.5, 3.5, 2.5, 1.5};
+        assertEquals(JieArray.indexOf(doubleArray, 3.5), 2);
+        assertEquals(JieArray.indexOf(doubleArray, 6.5), -1);
+        assertEquals(JieArray.indexOf(doubleArray, 1.5), 0);
+        assertEquals(JieArray.lastIndexOf(doubleArray, 3.5), 5);
+        assertEquals(JieArray.lastIndexOf(doubleArray, 6.5), -1);
+        assertEquals(JieArray.lastIndexOf(doubleArray, 1.5), 7);
         assertEquals(JieArray.indexOf(doubleArray, (i, t) -> t == 3.5), 2);
         assertEquals(JieArray.indexOf(doubleArray, (i, t) -> t == 6.5), -1);
         assertEquals(JieArray.indexOf(doubleArray, (i, t) -> t == 1.5), 0);
@@ -190,6 +220,12 @@ public class ArrayTest {
 
         // Test boolean array
         boolean[] booleanArray = {true, false, true, false, true, true, false, true};
+        assertEquals(JieArray.indexOf(booleanArray, true), 0);
+        assertEquals(JieArray.indexOf(booleanArray, false), 1);
+        assertEquals(JieArray.lastIndexOf(booleanArray, true), 7);
+        assertEquals(JieArray.lastIndexOf(booleanArray, false), 6);
+        assertEquals(JieArray.indexOf(new boolean[]{false}, true), -1);
+        assertEquals(JieArray.lastIndexOf(new boolean[]{false}, true), -1);
         assertEquals(JieArray.indexOf(booleanArray, (i, t) -> t == 1), 0);
         assertEquals(JieArray.indexOf(booleanArray, (i, t) -> t == 0), 1);
         assertEquals(JieArray.lastIndexOf(booleanArray, (i, t) -> t == 1), 7);
@@ -199,6 +235,12 @@ public class ArrayTest {
 
         // Test byte array
         byte[] byteArray = {1, 2, 3, 4, 5, 3, 2, 1};
+        assertEquals(JieArray.indexOf(byteArray, (byte) 3), 2);
+        assertEquals(JieArray.indexOf(byteArray, (byte) 6), -1);
+        assertEquals(JieArray.indexOf(byteArray, (byte) 1), 0);
+        assertEquals(JieArray.lastIndexOf(byteArray, (byte) 3), 5);
+        assertEquals(JieArray.lastIndexOf(byteArray, (byte) 6), -1);
+        assertEquals(JieArray.lastIndexOf(byteArray, (byte) 1), 7);
         assertEquals(JieArray.indexOf(byteArray, (i, t) -> t == 3), 2);
         assertEquals(JieArray.indexOf(byteArray, (i, t) -> t == 6), -1);
         assertEquals(JieArray.indexOf(byteArray, (i, t) -> t == 1), 0);
@@ -208,6 +250,12 @@ public class ArrayTest {
 
         // Test short array
         short[] shortArray = {100, 200, 300, 400, 500, 300, 200, 100};
+        assertEquals(JieArray.indexOf(shortArray, (short) 300), 2);
+        assertEquals(JieArray.indexOf(shortArray, (short) 600), -1);
+        assertEquals(JieArray.indexOf(shortArray, (short) 100), 0);
+        assertEquals(JieArray.lastIndexOf(shortArray, (short) 300), 5);
+        assertEquals(JieArray.lastIndexOf(shortArray, (short) 600), -1);
+        assertEquals(JieArray.lastIndexOf(shortArray, (short) 100), 7);
         assertEquals(JieArray.indexOf(shortArray, (i, t) -> t == 300), 2);
         assertEquals(JieArray.indexOf(shortArray, (i, t) -> t == 600), -1);
         assertEquals(JieArray.indexOf(shortArray, (i, t) -> t == 100), 0);
@@ -217,6 +265,12 @@ public class ArrayTest {
 
         // Test char array
         char[] charArray = {'a', 'b', 'c', 'd', 'e', 'c', 'b', 'a'};
+        assertEquals(JieArray.indexOf(charArray, 'c'), 2);
+        assertEquals(JieArray.indexOf(charArray, 'f'), -1);
+        assertEquals(JieArray.indexOf(charArray, 'a'), 0);
+        assertEquals(JieArray.lastIndexOf(charArray, 'c'), 5);
+        assertEquals(JieArray.lastIndexOf(charArray, 'f'), -1);
+        assertEquals(JieArray.lastIndexOf(charArray, 'a'), 7);
         assertEquals(JieArray.indexOf(charArray, (i, t) -> t == 'c'), 2);
         assertEquals(JieArray.indexOf(charArray, (i, t) -> t == 'f'), -1);
         assertEquals(JieArray.indexOf(charArray, (i, t) -> t == 'a'), 0);

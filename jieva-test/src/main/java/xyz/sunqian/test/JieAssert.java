@@ -35,7 +35,7 @@ public class JieAssert {
      * @param method    the method to be tested
      * @param inst      the instance for the method
      * @param args      the arguments for the method
-     * @param <T>       type of the expected exception
+     * @param <T>       the type of the expected exception
      */
     public static <T extends Throwable> @Nonnull T invokeThrows(
         @Nonnull Class<T> exception,

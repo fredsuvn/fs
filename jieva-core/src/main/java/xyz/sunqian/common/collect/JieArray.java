@@ -547,6 +547,161 @@ public class JieArray {
     }
 
     /**
+     * Returns the first index of the element which equals the specified value via {@link Jie#equals(Object, Object)} at
+     * the given array. If none of the elements found, returns -1.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @param <T>   the component type
+     * @return the first index of the element which equals the specified value via {@link Jie#equals(Object, Object)} at
+     * the given array
+     */
+    public static <T> int indexOf(T @Nonnull [] array, T value) {
+        for (int i = 0; i < array.length; i++) {
+            if (Jie.equals(array[i], value)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Returns the first index of the element which equals the specified value at the given array. If the element is
+     * {@code true}, the passed argument is 1, otherwise 0. If none of the elements found, returns -1.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the first index of the element which equals the specified value at the given array
+     */
+    public static int indexOf(boolean @Nonnull [] array, boolean value) {
+        for (int i = 0; i < array.length; i++) {
+            if (Jie.equals(array[i], value)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Returns the first index of the element which equals the specified value at the given array. Each element will be
+     * passed as {@code int}. If none of the elements found, returns -1.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the first index of the element which equals the specified value at the given array
+     */
+    public static int indexOf(byte @Nonnull [] array, byte value) {
+        for (int i = 0; i < array.length; i++) {
+            if (Jie.equals(array[i], value)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Returns the first index of the element which equals the specified value at the given array. Each element will be
+     * passed as {@code int}. If none of the elements found, returns -1.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the first index of the element which equals the specified value at the given array
+     */
+    public static int indexOf(short @Nonnull [] array, short value) {
+        for (int i = 0; i < array.length; i++) {
+            if (Jie.equals(array[i], value)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Returns the first index of the element which equals the specified value at the given array. Each element will be
+     * passed as {@code int}. If none of the elements found, returns -1.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the first index of the element which equals the specified value at the given array
+     */
+    public static int indexOf(char @Nonnull [] array, char value) {
+        for (int i = 0; i < array.length; i++) {
+            if (Jie.equals(array[i], value)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Returns the first index of the element which equals the specified value at the given array. If none of the
+     * elements found, returns -1.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the first index of the element which equals the specified value at the given array
+     */
+    public static int indexOf(int @Nonnull [] array, int value) {
+        for (int i = 0; i < array.length; i++) {
+            if (Jie.equals(array[i], value)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Returns the first index of the element which equals the specified value at the given array. If none of the
+     * elements found, returns -1.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the first index of the element which equals the specified value at the given array
+     */
+    public static int indexOf(long @Nonnull [] array, long value) {
+        for (int i = 0; i < array.length; i++) {
+            if (Jie.equals(array[i], value)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Returns the first index of the element which equals the specified value at the given array. Each element will be
+     * passed as {@code double}. If none of the elements found, returns -1.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the first index of the element which equals the specified value at the given array
+     */
+    public static int indexOf(float @Nonnull [] array, float value) {
+        for (int i = 0; i < array.length; i++) {
+            if (Jie.equals(array[i], value)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Returns the first index of the element which equals the specified value at the given array. If none of the
+     * elements found, returns -1.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the first index of the element which equals the specified value at the given array
+     */
+    public static int indexOf(double @Nonnull [] array, double value) {
+        for (int i = 0; i < array.length; i++) {
+            if (Jie.equals(array[i], value)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
      * Returns the first index of the element which can pass the specified predication (return true) at the given array.
      * If none of the elements pass the predication, returns -1.
      *
@@ -703,6 +858,179 @@ public class JieArray {
         for (int i = 0; i < array.length; i++) {
             double v = array[i];
             if (predicate.test(i, v)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Returns the last index of the element which equals the specified value via {@link Jie#equals(Object, Object)} at
+     * the given array. If none of the elements found, returns -1.
+     * <p>
+     * It is the reverse order method of the {@link #indexOf(Object[], Object)}.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @param <T>   the component type
+     * @return the last index of the element which equals the specified value via {@link Jie#equals(Object, Object)} at
+     * the given array
+     */
+    public static <T> int lastIndexOf(T @Nonnull [] array, T value) {
+        for (int i = array.length - 1; i >= 0; i--) {
+            if (Jie.equals(array[i], value)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Returns the last index of the element which equals the specified value at the given array. If the element is
+     * {@code true}, the passed argument is 1, otherwise 0. If none of the elements found, returns -1.
+     * <p>
+     * It is the reverse order method of the {@link #indexOf(boolean[], boolean)}.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the last index of the element which equals the specified value at the given array
+     */
+    public static int lastIndexOf(boolean @Nonnull [] array, boolean value) {
+        for (int i = array.length - 1; i >= 0; i--) {
+            if (array[i] == value) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Returns the last index of the element which equals the specified value at the given array. Each element will be
+     * passed as {@code int}. If none of the elements found, returns -1.
+     * <p>
+     * It is the reverse order method of the {@link #indexOf(byte[], byte)}.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the last index of the element which equals the specified value at the given array
+     */
+    public static int lastIndexOf(byte @Nonnull [] array, byte value) {
+        for (int i = array.length - 1; i >= 0; i--) {
+            if (array[i] == value) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Returns the last index of the element which equals the specified value at the given array. Each element will be
+     * passed as {@code int}. If none of the elements found, returns -1.
+     * <p>
+     * It is the reverse order method of the {@link #indexOf(short[], short)}.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the last index of the element which equals the specified value at the given array
+     */
+    public static int lastIndexOf(short @Nonnull [] array, short value) {
+        for (int i = array.length - 1; i >= 0; i--) {
+            if (array[i] == value) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Returns the last index of the element which equals the specified value at the given array. Each element will be
+     * passed as {@code int}. If none of the elements found, returns -1.
+     * <p>
+     * It is the reverse order method of the {@link #indexOf(char[], char)}.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the last index of the element which equals the specified value at the given array
+     */
+    public static int lastIndexOf(char @Nonnull [] array, char value) {
+        for (int i = array.length - 1; i >= 0; i--) {
+            if (array[i] == value) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Returns the last index of the element which equals the specified value at the given array. If none of the
+     * elements found, returns -1.
+     * <p>
+     * It is the reverse order method of the {@link #indexOf(int[], int)}.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the last index of the element which equals the specified value at the given array
+     */
+    public static int lastIndexOf(int @Nonnull [] array, int value) {
+        for (int i = array.length - 1; i >= 0; i--) {
+            if (array[i] == value) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Returns the last index of the element which equals the specified value at the given array. If none of the
+     * elements found, returns -1.
+     * <p>
+     * It is the reverse order method of the {@link #indexOf(long[], long)}.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the last index of the element which equals the specified value at the given array
+     */
+    public static int lastIndexOf(long @Nonnull [] array, long value) {
+        for (int i = array.length - 1; i >= 0; i--) {
+            if (array[i] == value) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Returns the last index of the element which equals the specified value at the given array. Each element will be
+     * passed as {@code double}. If none of the elements found, returns -1.
+     * <p>
+     * It is the reverse order method of the {@link #indexOf(float[], float)}.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the last index of the element which equals the specified value at the given array
+     */
+    public static int lastIndexOf(float @Nonnull [] array, float value) {
+        for (int i = array.length - 1; i >= 0; i--) {
+            if (array[i] == value) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Returns the last index of the element which equals the specified value at the given array. If none of the
+     * elements found, returns -1.
+     * <p>
+     * It is the reverse order method of the {@link #indexOf(double[], double)}.
+     *
+     * @param array the given array
+     * @param value the specified value
+     * @return the last index of the element which equals the specified value at the given array
+     */
+    public static int lastIndexOf(double @Nonnull [] array, double value) {
+        for (int i = array.length - 1; i >= 0; i--) {
+            if (array[i] == value) {
                 return i;
             }
         }
