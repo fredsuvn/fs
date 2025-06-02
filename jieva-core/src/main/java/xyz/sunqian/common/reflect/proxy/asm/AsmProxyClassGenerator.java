@@ -7,31 +7,42 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.value.IntVar;
 import xyz.sunqian.common.collect.JieArray;
 import xyz.sunqian.common.collect.JieStream;
+import xyz.sunqian.common.reflect.BytesClassLoader;
 import xyz.sunqian.common.reflect.JieJvm;
 import xyz.sunqian.common.reflect.proxy.JieAsm;
 import xyz.sunqian.common.reflect.proxy.ProxyClass;
 import xyz.sunqian.common.reflect.proxy.ProxyClassGenerator;
-import xyz.sunqian.common.reflect.proxy.ProxyException;
 import xyz.sunqian.common.reflect.proxy.ProxyInvoker;
 import xyz.sunqian.common.reflect.proxy.ProxyMethodHandler;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 /**
- * The <a href="https://asm.ow2.io/">ASM</a> implementation for {@link ProxyClassGenerator}.
+ * The <a href="https://asm.ow2.io/">ASM</a> implementation for {@link ProxyClassGenerator}. Note the proxied class must
+ * at least have a constructor with empty parameters.
  *
  * @author sunqian
  */
 public class AsmProxyClassGenerator implements ProxyClassGenerator {
 
+    private static final AtomicLong counter = new AtomicLong();
+
     private static final String OBJECT_INTERNAL_NAME = "java/lang/Object";
-    private static final String[] INVOKER_INTERFACE_INTERNAL_NAME = {JieJvm.getInternalName(AsmProxyInvoker.class)};
-    private static final String INVOKER_DESCRIPTOR = JieJvm.getDescriptor(AsmProxyInvoker.class);
-    private static final String INVOKERS_DESCRIPTOR = JieJvm.getDescriptor(AsmProxyInvoker[].class);
+    private static final String INVOKER_INTERNAL_NAME = JieJvm.getInternalName(ProxyInvoker.class);
+    private static final String INVOKER_DESCRIPTOR = JieJvm.getDescriptor(ProxyInvoker.class);
+    private static final String INVOKERS_DESCRIPTOR = JieJvm.getDescriptor(ProxyInvoker[].class);
     private static final String HANDLER_INTERNAL_NAME = JieJvm.getInternalName(ProxyMethodHandler.class);
     private static final String HANDLER_DESCRIPTOR = JieJvm.getDescriptor(ProxyMethodHandler.class);
     private static final String METHODS_DESCRIPTOR = JieJvm.getDescriptor(Method[].class);
@@ -40,8 +51,116 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
     public @Nonnull ProxyClass generate(
         @Nonnull Class<?> @Nonnull [] proxied,
         @Nonnull ProxyMethodHandler methodHandler
-    ) throws ProxyException {
-        return null;
+    ) throws AsmProxyException {
+        if (proxied.length == 0) {
+            throw new AsmProxyException("No class or interface to be proxied.");
+        }
+        Package pkg = AsmProxyClassGenerator.class.getPackage();
+        String outerName = pkg.getName().replace('.', '/')
+            + "/" + JieAsm.generateClassSimpleName(counter.incrementAndGet());
+        String outerDescriptor = "L" + outerName + ";";
+        String outerSuperName = null;
+        if (!proxied[0].isInterface() && !Jie.equals(proxied[0], Object.class)) {
+            outerSuperName = JieJvm.getInternalName(proxied[0]);
+        }
+        String[] outerInterfaces = null;
+        List<Class<?>> interfaces = JieStream.stream(proxied).filter(Class::isInterface).collect(Collectors.toList());
+        if (!interfaces.isEmpty()) {
+            outerInterfaces = interfaces.stream().map(JieJvm::getInternalName).toArray(String[]::new);
+        }
+        String innerName = "AsmInvoker";
+        String fullInnerName = outerName + "$" + innerName;
+        Set<Method> methodSet = new LinkedHashSet<>();
+        for (Class<?> cls : proxied) {
+            Method[] methods = cls.getMethods();
+            for (Method method : methods) {
+                if (methodSet.contains(method)) {
+                    continue;
+                }
+                if (method.isSynthetic()) {
+                    continue;
+                }
+                int mod = method.getModifiers();
+                if (Modifier.isStatic(mod) || Modifier.isFinal(mod)) {
+                    continue;
+                }
+                methodSet.add(method);
+            }
+        }
+        IntVar mc = IntVar.of(0);
+        List<ProxyMethodInfo> pmInfoList = methodSet.stream().map(method -> {
+            String descriptor = JieJvm.getDescriptor(method);
+            String signature = JieJvm.getSignature(method);
+            String[] exceptions = getExceptions(method);
+            String superInvokerName = "access$super$" + mc.getAndIncrement();// access$001
+            String superInvokerDescriptor = descriptor.replace("(", "(" + outerDescriptor);
+            String superInvokerSignature =
+                signature == null ? null : signature.replace("(", "(" + outerDescriptor);
+            boolean isInterface = method.getDeclaringClass().isInterface();
+            return new ProxyMethodInfo(
+                method,
+                descriptor,
+                signature,
+                exceptions,
+                superInvokerName,
+                superInvokerDescriptor,
+                superInvokerSignature,
+                isInterface
+            );
+        }).collect(Collectors.toList());
+        ProxyClassInfo pcInfo = new ProxyClassInfo(
+            outerName,
+            outerDescriptor,
+            outerSuperName,
+            outerInterfaces,
+            innerName,
+            fullInnerName,
+            pmInfoList
+        );
+        try {
+            byte[] proxyClassBytes = generateProxyClass(pcInfo);
+            byte[] invokerClassBytes = generateInvokerClass(pcInfo);
+            // using new class loader to help collect unused classes
+            BytesClassLoader loader = new BytesClassLoader();
+            Class<?> proxyClass = loader.loadClass(null, proxyClassBytes);
+            loader.loadClass(null, invokerClassBytes);
+            return new AsmProxyClass(
+                proxyClass,
+                methodHandler,
+                methodSet.toArray(new Method[0])
+            );
+        } catch (Exception e) {
+            throw new AsmProxyException(e);
+        }
+    }
+
+    private static final class AsmProxyClass implements ProxyClass {
+
+        private final @Nonnull Class<?> proxyClass;
+        private final @Nonnull ProxyMethodHandler handler;
+        private final @Nonnull Method @Nonnull [] methods;
+
+        private AsmProxyClass(
+            @Nonnull Class<?> proxyClass,
+            @Nonnull ProxyMethodHandler handler,
+            @Nonnull Method @Nonnull [] methods) {
+            this.proxyClass = proxyClass;
+            this.handler = handler;
+            this.methods = methods;
+        }
+
+        @Override
+        public <T> @Nonnull T newInstance() throws AsmProxyException {
+            return Jie.uncheck(() -> {
+                Constructor<?> constructor = proxyClass.getConstructor(ProxyMethodHandler.class, Method[].class);
+                return Jie.as(constructor.newInstance(handler, methods));
+            }, AsmProxyException::new);
+        }
+
+        @Override
+        public @Nonnull Class<?> getProxyClass() {
+            return proxyClass;
+        }
     }
 
     private byte[] generateProxyClass(@Nonnull ProxyClassInfo pcInfo) throws Exception {
@@ -94,7 +213,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
             MethodVisitor visitor = classWriter.visitMethod(
                 Opcodes.ACC_PUBLIC,
                 "<init>",
-                "(" + HANDLER_DESCRIPTOR + METHODS_DESCRIPTOR + INVOKERS_DESCRIPTOR + ")V",
+                "(" + HANDLER_DESCRIPTOR + METHODS_DESCRIPTOR + ")V",
                 null,
                 null
             );
@@ -107,7 +226,9 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
             visitor.visitVarInsn(Opcodes.ALOAD, 2);
             visitor.visitFieldInsn(Opcodes.PUTFIELD, pcInfo.outerName, "methods", METHODS_DESCRIPTOR);
             visitor.visitVarInsn(Opcodes.ALOAD, 0);
-            visitor.visitVarInsn(Opcodes.ALOAD, 3);
+            visitor.visitVarInsn(Opcodes.ALOAD, 2);
+            visitor.visitInsn(Opcodes.ARRAYLENGTH);
+            visitor.visitTypeInsn(Opcodes.ANEWARRAY, INVOKER_INTERNAL_NAME);
             visitor.visitFieldInsn(Opcodes.PUTFIELD, pcInfo.outerName, "invokers", INVOKERS_DESCRIPTOR);
             visitor.visitInsn(Opcodes.RETURN);
             visitor.visitMaxs(0, 0);
@@ -116,7 +237,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
         int i = 0;
         for (ProxyMethodInfo pmInfo : pcInfo.methods) {
             generateProxyClassMethod(classWriter, pcInfo, pmInfo, i);
-            generateProxyClassSuperInvoker(classWriter, pmInfo);
+            generateSuperInvokerMethod(classWriter, pmInfo);
             i++;
         }
         classWriter.visitEnd();
@@ -136,9 +257,9 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
             pmInfo.signature,
             pmInfo.exceptions
         );
-        // AsmProxyInvoker invoker = invokers[i];
+        // ProxyInvoker invoker = invokers[i];
         visitor.visitVarInsn(Opcodes.ALOAD, 0);
-        visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.outerName, "invokers", INVOKER_DESCRIPTOR);
+        visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.outerName, "invokers", INVOKERS_DESCRIPTOR);
         JieAsm.loadConst(visitor, i);
         visitor.visitInsn(Opcodes.AALOAD);
         int invokerPos = JieAsm.paramSize(pmInfo.method.getParameters()) + 1;
@@ -163,14 +284,14 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
         visitor.visitVarInsn(Opcodes.ASTORE, invokerPos);
         // get invokers
         visitor.visitVarInsn(Opcodes.ALOAD, 0);
-        visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.outerName, "invokers", INVOKER_DESCRIPTOR);
+        visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.outerName, "invokers", INVOKERS_DESCRIPTOR);
         // invokers[i] = invoker;
         JieAsm.loadConst(visitor, i);
         visitor.visitVarInsn(Opcodes.ALOAD, invokerPos);
         visitor.visitInsn(Opcodes.AASTORE);
         // endif
         visitor.visitLabel(ifNonnull);
-        visitor.visitFrame(Opcodes.F_APPEND, 1, INVOKER_INTERFACE_INTERNAL_NAME, 0, null);
+        visitor.visitFrame(Opcodes.F_APPEND, 1, new String[]{INVOKER_INTERNAL_NAME}, 0, null);
         // get handler
         visitor.visitVarInsn(Opcodes.ALOAD, 0);
         visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.outerName, "handler", HANDLER_DESCRIPTOR);
@@ -199,6 +320,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
             pIndex += JieAsm.varSize(parameter.getType());
         }
         Method invoke = ProxyMethodHandler.class.getMethod("invoke", Object.class, Method.class, ProxyInvoker.class, Object[].class);
+        // return handler.invoke(this, methods[0], invoker, args);
         visitor.visitMethodInsn(
             Opcodes.INVOKEINTERFACE,
             HANDLER_INTERNAL_NAME,
@@ -206,12 +328,14 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
             JieJvm.getDescriptor(invoke),
             true
         );
+        // object -> primitive/object
+        JieAsm.convertObjectTo(visitor, pmInfo.method.getReturnType());
         JieAsm.visitReturn(visitor, pmInfo.method.getReturnType(), true, false);
         visitor.visitMaxs(0, 0);
         visitor.visitEnd();
     }
 
-    private void generateProxyClassSuperInvoker(
+    private void generateSuperInvokerMethod(
         @Nonnull ClassWriter classWriter,
         @Nonnull ProxyMethodInfo pmInfo
     ) {
@@ -240,8 +364,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
         visitor.visitEnd();
     }
 
-    private byte[] generateProxyInvokerClass(@Nonnull ProxyClassInfo pcInfo) throws Exception {
-        // String innerClassName = pcInfo.outerName + "$" + pcInfo.innerName;
+    private byte[] generateInvokerClass(@Nonnull ProxyClassInfo pcInfo) throws Exception {
         ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         classWriter.visit(
             Opcodes.V1_8,
@@ -249,7 +372,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
             pcInfo.fullInnerName,
             null,
             OBJECT_INTERNAL_NAME,
-            INVOKER_INTERFACE_INTERNAL_NAME
+            new String[]{INVOKER_INTERNAL_NAME}
         );
         classWriter.visitInnerClass(
             pcInfo.fullInnerName,
@@ -301,7 +424,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
         }
         {
             // invoke(Object inst, Object... args);
-            Method invoke = AsmProxyInvoker.class.getMethod("invoke", Object.class, Object[].class);
+            Method invoke = ProxyInvoker.class.getMethod("invoke", Object.class, Object[].class);
             MethodVisitor visitor = classWriter.visitMethod(
                 Opcodes.ACC_PUBLIC | Opcodes.ACC_VARARGS,
                 invoke.getName(),
@@ -343,10 +466,11 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
                     visitor.visitInsn(Opcodes.AALOAD);
                     JieAsm.convertObjectTo(visitor, parameter.getType());
                 }
+                // return outer.invoke(args0, args1...);
                 JieAsm.invokeVirtual(
                     visitor, pcInfo.outerName, pmInfo.method.getName(), pmInfo.descriptor, pmInfo.isInterface);
-                JieAsm.wrapToObject(visitor, pmInfo.method.getReturnType());
-                JieAsm.visitReturn(visitor, pmInfo.method.getReturnType(), false, true);
+                Class<?> returnType = JieAsm.wrapToObject(visitor, pmInfo.method.getReturnType());
+                JieAsm.visitReturn(visitor, returnType, false, true);
             }
             visitor.visitLabel(labelLast);
             visitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
@@ -357,7 +481,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
         }
         {
             // invokeSuper(Object inst, Object... args);
-            Method invokeSuper = AsmProxyInvoker.class.getMethod("invokeSuper", Object.class, Object[].class);
+            Method invokeSuper = ProxyInvoker.class.getMethod("invokeSuper", Object.class, Object[].class);
             MethodVisitor visitor = classWriter.visitMethod(
                 Opcodes.ACC_PUBLIC | Opcodes.ACC_VARARGS,
                 invokeSuper.getName(),
@@ -399,6 +523,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
                     visitor.visitInsn(Opcodes.AALOAD);
                     JieAsm.convertObjectTo(visitor, parameter.getType());
                 }
+                // return outer.invoke(inst, args0, args1...);
                 visitor.visitMethodInsn(
                     Opcodes.INVOKESTATIC,
                     pcInfo.outerName,
@@ -406,8 +531,8 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
                     pmInfo.superInvokerDescriptor,
                     false
                 );
-                JieAsm.wrapToObject(visitor, pmInfo.method.getReturnType());
-                JieAsm.visitReturn(visitor, pmInfo.method.getReturnType(), false, true);
+                Class<?> returnType = JieAsm.wrapToObject(visitor, pmInfo.method.getReturnType());
+                JieAsm.visitReturn(visitor, returnType, false, true);
             }
             visitor.visitLabel(labelLast);
             visitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
@@ -432,7 +557,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
 
         private final @Nonnull String outerName;
         private final @Nonnull String outerDescriptor;
-        private final @Nonnull String outerSuperName;
+        private final @Nullable String outerSuperName;
         private final @Nonnull String @Nullable [] outerInterfaces;
         private final @Nonnull String innerName;
         private final @Nonnull String fullInnerName;
@@ -441,7 +566,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
         private ProxyClassInfo(
             @Nonnull String outerName,
             @Nonnull String outerDescriptor,
-            @Nonnull String outerSuperName,
+            @Nullable String outerSuperName,
             @Nonnull String @Nullable [] outerInterfaces,
             @Nonnull String innerName,
             @Nonnull String fullInnerName,
@@ -461,7 +586,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
 
         private final @Nonnull Method method;
         private final @Nonnull String descriptor;
-        private final @Nonnull String signature;
+        private final @Nullable String signature;
         private final @Nullable String[] exceptions;
         private final @Nonnull String superInvokerName;
         private final @Nonnull String superInvokerDescriptor;
@@ -471,7 +596,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
         private ProxyMethodInfo(
             @Nonnull Method method,
             @Nonnull String descriptor,
-            @Nonnull String signature,
+            @Nullable String signature,
             @Nullable String[] exceptions,
             @Nonnull String superInvokerName,
             @Nonnull String superInvokerDescriptor,

@@ -17,8 +17,8 @@ public interface ProxyMethodHandler {
     /**
      * Returns whether the given method should be proxied.
      * <p>
-     * This method will be invoked once for each method from {@link Class#getMethods()} when generating the proxy
-     * class.
+     * This method will be invoked once for each given method when generating the proxy class, and the given methods
+     * typically come from {@link Class#getMethods()} but do not include static, final, or bridged.
      *
      * @param method the given method
      * @return whether the given method should be proxied

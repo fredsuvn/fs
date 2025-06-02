@@ -1,28 +1,28 @@
 package xyz.sunqian.common.reflect.proxy;
 
-import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.annotations.Nonnull;
 
 /**
- * This interface represents the generated proxy class
+ * This interface represents the generated proxy class.
+ *
+ * @author sunqian
  */
 public interface ProxyClass {
 
     /**
-     * Creates and returns a new proxy instance with empty constructor.
+     * Creates and returns a new proxy instance.
      *
-     * @param <T> type of the instance
+     * @param <T> the type of the instance
      * @return a new proxy instance
      * @throws ProxyException if any problem occurs
      */
-    <T> T newInstance() throws ProxyException;
+    <T> @Nonnull T newInstance() throws ProxyException;
 
     /**
-     * Returns actual generated proxy class.
-     * <p>
-     * This method may be return {@code null} if the implementation doesn't support.
+     * Returns the generated proxy class.
      *
      * @return actual generated proxy class
      */
-    @Nullable
+    @Nonnull
     Class<?> getProxyClass();
 }

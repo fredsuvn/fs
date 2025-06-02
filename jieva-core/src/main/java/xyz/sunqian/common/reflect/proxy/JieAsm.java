@@ -4,6 +4,7 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import xyz.sunqian.annotations.NonExported;
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 import xyz.sunqian.common.reflect.JieJvm;
 
@@ -357,52 +358,54 @@ public class JieAsm {
     }
 
     /**
-     * Wraps the primitive var at the top of the stack. If the var is an object type, then it has no effect.
+     * Wraps the primitive var at the top of the stack. If the var is an object type, then it has no effect. Returns the
+     * wrapper type.
      *
      * @param visitor the {@link MethodVisitor} to be invoked
      * @param type    the type of the var
      */
-    public static void wrapToObject(@Nonnull MethodVisitor visitor, @Nonnull Class<?> type) {
+    public static Class<?> wrapToObject(@Nonnull MethodVisitor visitor, @Nonnull Class<?> type) {
         if (Objects.equals(type, boolean.class)) {
             visitor.visitMethodInsn(
                 Opcodes.INVOKESTATIC, "java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;", false);
-            return;
+            return Boolean.class;
         }
         if (Objects.equals(type, byte.class)) {
             visitor.visitMethodInsn(
                 Opcodes.INVOKESTATIC, "java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;", false);
-            return;
+            return Byte.class;
         }
         if (Objects.equals(type, short.class)) {
             visitor.visitMethodInsn(
                 Opcodes.INVOKESTATIC, "java/lang/Short", "valueOf", "(S)Ljava/lang/Short;", false);
-            return;
+            return Short.class;
         }
         if (Objects.equals(type, char.class)) {
             visitor.visitMethodInsn(
                 Opcodes.INVOKESTATIC, "java/lang/Character", "valueOf", "(C)Ljava/lang/Character;", false);
-            return;
+            return Character.class;
         }
         if (Objects.equals(type, int.class)) {
             visitor.visitMethodInsn(
                 Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
-            return;
+            return Integer.class;
         }
         if (Objects.equals(type, long.class)) {
             visitor.visitMethodInsn(
                 Opcodes.INVOKESTATIC, "java/lang/Long", "valueOf", "(J)Ljava/lang/Long;", false);
-            return;
+            return Long.class;
         }
         if (Objects.equals(type, float.class)) {
             visitor.visitMethodInsn(
                 Opcodes.INVOKESTATIC, "java/lang/Float", "valueOf", "(F)Ljava/lang/Float;", false);
-            return;
+            return Float.class;
         }
         if (Objects.equals(type, double.class)) {
             visitor.visitMethodInsn(
                 Opcodes.INVOKESTATIC, "java/lang/Double", "valueOf", "(D)Ljava/lang/Double;", false);
-            return;
+            return Double.class;
         }
+        return type;
     }
 
     /**
@@ -523,5 +526,16 @@ public class JieAsm {
             size += varSize(parameter.getType());
         }
         return size;
+    }
+
+    /**
+     * Generates and returns a class simple name with the given count.
+     *
+     * @param count the given count
+     */
+    public static String generateClassSimpleName(long count) {
+        return "ClassGeneratedBy" + Jie.LIB_NAME
+            + "$V" + Jie.LIB_VERSION.replace('.', '_')
+            + "$C" + count;
     }
 }
