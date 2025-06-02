@@ -23,6 +23,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,8 +31,15 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 /**
- * The <a href="https://asm.ow2.io/">ASM</a> implementation for {@link ProxyClassGenerator}. Note the proxied class must
- * at least have a constructor with empty parameters.
+ * The <a href="https://asm.ow2.io/">ASM</a> implementation for {@link ProxyClassGenerator}. The runtime environment
+ * must have asm package {@code org.objectweb.asm}.
+ * <p>
+ * This generator uses inheritance to implement proxy class, just like the keywords: {@code extends} and
+ * {@code implements}. That means the superclass, which is the proxied class, cannot be {@code final} and must be
+ * {@code public}, and must have an empty constructor to ensure that the {@link ProxyClass#newInstance()} can execute
+ * correctly.
+ * <p>
+ * Note the generated proxy class is {@code final}.
  *
  * @author sunqian
  */
@@ -41,7 +49,6 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
 
     private static final String OBJECT_INTERNAL_NAME = "java/lang/Object";
     private static final String INVOKER_INTERNAL_NAME = JieJvm.getInternalName(ProxyInvoker.class);
-    private static final String INVOKER_DESCRIPTOR = JieJvm.getDescriptor(ProxyInvoker.class);
     private static final String INVOKERS_DESCRIPTOR = JieJvm.getDescriptor(ProxyInvoker[].class);
     private static final String HANDLER_INTERNAL_NAME = JieJvm.getInternalName(ProxyMethodHandler.class);
     private static final String HANDLER_DESCRIPTOR = JieJvm.getDescriptor(ProxyMethodHandler.class);
@@ -49,42 +56,41 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
 
     @Override
     public @Nonnull ProxyClass generate(
-        @Nonnull Class<?> @Nonnull [] proxied,
+        @Nullable Class<?> proxiedClass,
+        @Nonnull List<Class<?>> interfaces,
         @Nonnull ProxyMethodHandler methodHandler
     ) throws AsmProxyException {
-        if (proxied.length == 0) {
-            throw new AsmProxyException("No class or interface to be proxied.");
-        }
         Package pkg = AsmProxyClassGenerator.class.getPackage();
         String outerName = pkg.getName().replace('.', '/')
             + "/" + JieAsm.generateClassSimpleName(counter.incrementAndGet());
         String outerDescriptor = "L" + outerName + ";";
-        String outerSuperName = null;
-        if (!proxied[0].isInterface() && !Jie.equals(proxied[0], Object.class)) {
-            outerSuperName = JieJvm.getInternalName(proxied[0]);
-        }
+        Class<?> outerSuperClass = proxiedClass == null ? Object.class : proxiedClass;
+        String outerSuperName = JieJvm.getInternalName(outerSuperClass);
         String[] outerInterfaces = null;
-        List<Class<?>> interfaces = JieStream.stream(proxied).filter(Class::isInterface).collect(Collectors.toList());
         if (!interfaces.isEmpty()) {
             outerInterfaces = interfaces.stream().map(JieJvm::getInternalName).toArray(String[]::new);
         }
         String innerName = "AsmInvoker";
         String fullInnerName = outerName + "$" + innerName;
         Set<Method> methodSet = new LinkedHashSet<>();
+        Method[] declaredMethods = outerSuperClass.getDeclaredMethods();
+        for (Method declaredMethod : declaredMethods) {
+            if (canBeProxied(declaredMethod, methodHandler)) {
+                methodSet.add(declaredMethod);
+            }
+        }
+        List<Class<?>> proxied = new ArrayList<>(interfaces.size() + 1);
+        proxied.add(outerSuperClass);
+        proxied.addAll(interfaces);
         for (Class<?> cls : proxied) {
             Method[] methods = cls.getMethods();
             for (Method method : methods) {
                 if (methodSet.contains(method)) {
                     continue;
                 }
-                if (method.isSynthetic()) {
-                    continue;
+                if (canBeProxied(method, methodHandler)) {
+                    methodSet.add(method);
                 }
-                int mod = method.getModifiers();
-                if (Modifier.isStatic(mod) || Modifier.isFinal(mod)) {
-                    continue;
-                }
-                methodSet.add(method);
             }
         }
         IntVar mc = IntVar.of(0);
@@ -117,7 +123,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
             fullInnerName,
             pmInfoList
         );
-        try {
+        return Jie.uncheck(() -> {
             byte[] proxyClassBytes = generateProxyClass(pcInfo);
             byte[] invokerClassBytes = generateInvokerClass(pcInfo);
             // using new class loader to help collect unused classes
@@ -129,38 +135,18 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
                 methodHandler,
                 methodSet.toArray(new Method[0])
             );
-        } catch (Exception e) {
-            throw new AsmProxyException(e);
-        }
+        }, AsmProxyException::new);
     }
 
-    private static final class AsmProxyClass implements ProxyClass {
-
-        private final @Nonnull Class<?> proxyClass;
-        private final @Nonnull ProxyMethodHandler handler;
-        private final @Nonnull Method @Nonnull [] methods;
-
-        private AsmProxyClass(
-            @Nonnull Class<?> proxyClass,
-            @Nonnull ProxyMethodHandler handler,
-            @Nonnull Method @Nonnull [] methods) {
-            this.proxyClass = proxyClass;
-            this.handler = handler;
-            this.methods = methods;
+    private boolean canBeProxied(Method method, ProxyMethodHandler handler) {
+        if (method.isSynthetic()) {
+            return false;
         }
-
-        @Override
-        public <T> @Nonnull T newInstance() throws AsmProxyException {
-            return Jie.uncheck(() -> {
-                Constructor<?> constructor = proxyClass.getConstructor(ProxyMethodHandler.class, Method[].class);
-                return Jie.as(constructor.newInstance(handler, methods));
-            }, AsmProxyException::new);
+        int mod = method.getModifiers();
+        if (Modifier.isStatic(mod) || Modifier.isFinal(mod)) {
+            return false;
         }
-
-        @Override
-        public @Nonnull Class<?> getProxyClass() {
-            return proxyClass;
-        }
+        return handler.requiresProxy(method);
     }
 
     private byte[] generateProxyClass(@Nonnull ProxyClassInfo pcInfo) throws Exception {
@@ -236,15 +222,15 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
         }
         int i = 0;
         for (ProxyMethodInfo pmInfo : pcInfo.methods) {
-            generateProxyClassMethod(classWriter, pcInfo, pmInfo, i);
-            generateSuperInvokerMethod(classWriter, pmInfo);
+            generateProxyMethod(classWriter, pcInfo, pmInfo, i);
+            generateSuperInvoker(classWriter, pmInfo);
             i++;
         }
         classWriter.visitEnd();
         return classWriter.toByteArray();
     }
 
-    private void generateProxyClassMethod(
+    private void generateProxyMethod(
         @Nonnull ClassWriter classWriter,
         @Nonnull ProxyClassInfo pcInfo,
         @Nonnull ProxyMethodInfo pmInfo,
@@ -335,7 +321,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
         visitor.visitEnd();
     }
 
-    private void generateSuperInvokerMethod(
+    private void generateSuperInvoker(
         @Nonnull ClassWriter classWriter,
         @Nonnull ProxyMethodInfo pmInfo
     ) {
@@ -457,6 +443,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
                 // outer.invoke((Long) args[0], (String) args[1]);
                 // get outer
                 visitor.visitVarInsn(Opcodes.ALOAD, 3);
+                //visitor.visitTypeInsn(Opcodes.CHECKCAST, JieJvm.getInternalName(pmInfo.method.getDeclaringClass()));
                 int pIndex = 0;
                 for (Parameter parameter : pmInfo.method.getParameters()) {
                     // get args
@@ -557,7 +544,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
 
         private final @Nonnull String outerName;
         private final @Nonnull String outerDescriptor;
-        private final @Nullable String outerSuperName;
+        private final @Nonnull String outerSuperName;
         private final @Nonnull String @Nullable [] outerInterfaces;
         private final @Nonnull String innerName;
         private final @Nonnull String fullInnerName;
@@ -566,7 +553,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
         private ProxyClassInfo(
             @Nonnull String outerName,
             @Nonnull String outerDescriptor,
-            @Nullable String outerSuperName,
+            @Nonnull String outerSuperName,
             @Nonnull String @Nullable [] outerInterfaces,
             @Nonnull String innerName,
             @Nonnull String fullInnerName,
@@ -611,6 +598,36 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
             this.superInvokerDescriptor = superInvokerDescriptor;
             this.superInvokerSignature = superInvokerSignature;
             this.isInterface = isInterface;
+        }
+    }
+
+    private static final class AsmProxyClass implements ProxyClass {
+
+        private final @Nonnull Class<?> proxyClass;
+        private final @Nonnull ProxyMethodHandler handler;
+        private final @Nonnull Method @Nonnull [] methods;
+
+        private AsmProxyClass(
+            @Nonnull Class<?> proxyClass,
+            @Nonnull ProxyMethodHandler handler,
+            @Nonnull Method @Nonnull [] methods
+        ) {
+            this.proxyClass = proxyClass;
+            this.handler = handler;
+            this.methods = methods;
+        }
+
+        @Override
+        public <T> @Nonnull T newInstance() throws AsmProxyException {
+            return Jie.uncheck(() -> {
+                Constructor<?> constructor = proxyClass.getConstructor(ProxyMethodHandler.class, Method[].class);
+                return Jie.as(constructor.newInstance(handler, methods));
+            }, AsmProxyException::new);
+        }
+
+        @Override
+        public @Nonnull Class<?> getProxyClass() {
+            return proxyClass;
         }
     }
 }

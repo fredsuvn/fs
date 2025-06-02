@@ -18,7 +18,10 @@ public interface ProxyMethodHandler {
      * Returns whether the given method should be proxied.
      * <p>
      * This method will be invoked once for each given method when generating the proxy class, and the given methods
-     * typically come from {@link Class#getMethods()} but do not include static, final, or bridged.
+     * typically are public and protected methods of the superclass and interfaces but do not include static, final, or
+     * bridged.
+     * <p>
+     * Note that if returns {@code true} for methods with the same name and parameter types, it may cause proxy errors
      *
      * @param method the given method
      * @return whether the given method should be proxied
