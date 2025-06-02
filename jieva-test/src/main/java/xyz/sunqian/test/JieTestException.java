@@ -1,5 +1,7 @@
 package xyz.sunqian.test;
 
+import xyz.sunqian.annotations.Nullable;
+
 /**
  * Exception for tests.
  *
@@ -8,36 +10,37 @@ package xyz.sunqian.test;
 public class JieTestException extends RuntimeException {
 
     /**
-     * Constructs with no detail message.
+     * Empty constructor.
      */
     public JieTestException() {
+        super();
     }
 
     /**
-     * Constructs with the specified detail message.
+     * Constructs with the message.
      *
-     * @param message the specified detail message.
+     * @param message the message
      */
-    public JieTestException(String message) {
+    public JieTestException(@Nullable String message) {
         super(message);
     }
 
     /**
-     * Constructs with the specified detail message and cause.
+     * Constructs with the message and cause.
      *
-     * @param message the specified detail message.
-     * @param cause   the specified cause.
+     * @param message the message
+     * @param cause   the cause
      */
-    public JieTestException(String message, Throwable cause) {
+    public JieTestException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
     /**
-     * Constructs with the specified cause.
+     * Constructs with the cause.
      *
-     * @param cause the specified cause.
+     * @param cause the cause
      */
-    public JieTestException(Throwable cause) {
+    public JieTestException(@Nullable Throwable cause) {
         super(cause);
     }
 }

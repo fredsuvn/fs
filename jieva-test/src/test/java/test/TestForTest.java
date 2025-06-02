@@ -18,8 +18,8 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
-import static xyz.sunqian.test.JieTest.reflectEquals;
-import static xyz.sunqian.test.JieTest.reflectThrows;
+import static xyz.sunqian.test.JieAssert.invokeEquals;
+import static xyz.sunqian.test.JieAssert.invokeThrows;
 import static xyz.sunqian.test.MaterialBox.copyBuffer;
 import static xyz.sunqian.test.MaterialBox.copyBytes;
 import static xyz.sunqian.test.MaterialBox.copyChars;
@@ -31,15 +31,15 @@ public class TestForTest {
     @Test
     public void testThrows() throws Exception {
         Method throwError = Tt.class.getDeclaredMethod("throwError");
-        assertEquals(reflectThrows(JieTestException.class, throwError, null).getClass(), JieTestException.class);
+        assertEquals(invokeThrows(JieTestException.class, throwError, null).getClass(), JieTestException.class);
     }
 
     @Test
     public void testEquals() throws Exception {
         Method string = Tt.class.getDeclaredMethod("string");
-        reflectEquals(string, "123", null);
+        invokeEquals("123", string, null);
         expectThrows(AssertionError.class, () ->
-            reflectEquals(string, "123", null, "123")
+            invokeEquals("123", string, null, "123")
         );
     }
 

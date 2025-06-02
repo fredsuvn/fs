@@ -17,7 +17,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
-import static xyz.sunqian.test.JieTest.reflectThrows;
+import static xyz.sunqian.test.JieAssert.invokeThrows;
 
 public class ClassTest {
 
@@ -145,7 +145,7 @@ public class ClassTest {
 
         // unreachable:
         Method wrapperPrimitive = JieClass.class.getDeclaredMethod("wrapperPrimitive", Class.class);
-        reflectThrows(UnknownPrimitiveTypeException.class, wrapperPrimitive, null, Object.class);
+        invokeThrows(UnknownPrimitiveTypeException.class, wrapperPrimitive, null, Object.class);
     }
 
     @Test
@@ -160,13 +160,17 @@ public class ClassTest {
     public void testOverridable() throws Exception {
         final class A {
 
-            void m1() {}
+            void m1() {
+            }
 
-            private void m2() {}
+            private void m2() {
+            }
 
-            public void m3() {}
+            public void m3() {
+            }
 
-            final void m4() {}
+            final void m4() {
+            }
         }
         assertFalse(JieClass.isOverridable(A.class));
         assertFalse(JieClass.isOverridable(A.class.getDeclaredMethod("m1")));
@@ -176,13 +180,17 @@ public class ClassTest {
 
         class B {
 
-            void m1() {}
+            void m1() {
+            }
 
-            private void m2() {}
+            private void m2() {
+            }
 
-            public void m3() {}
+            public void m3() {
+            }
 
-            final void m4() {}
+            final void m4() {
+            }
         }
         assertTrue(JieClass.isOverridable(B.class));
         assertTrue(JieClass.isOverridable(B.class.getDeclaredMethod("m1")));

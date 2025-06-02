@@ -7,7 +7,7 @@ import xyz.sunqian.common.base.chars.CharsBuilder;
 import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieIO;
-import xyz.sunqian.test.JieTest;
+import xyz.sunqian.test.JieAssert;
 
 import java.io.CharArrayWriter;
 import java.io.IOException;
@@ -18,7 +18,9 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.util.Arrays;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.expectThrows;
 
 public class CharsBuilderTest {
 
@@ -69,7 +71,7 @@ public class CharsBuilderTest {
         cbs2.write(1);
         cbs2.write(1);
         expectThrows(IllegalStateException.class, () -> cbs2.write(1));
-        JieTest.reflectThrows(IllegalStateException.class, grow, new CharsBuilder(), MAX_ARRAY_SIZE + 10);
+        JieAssert.invokeThrows(IllegalStateException.class, grow, new CharsBuilder(), MAX_ARRAY_SIZE + 10);
         Method newCapacity = CharsBuilder.class.getDeclaredMethod("newCapacity", int.class, int.class);
         newCapacity.setAccessible(true);
         assertEquals(MAX_ARRAY_SIZE, newCapacity.invoke(new CharsBuilder(), -1, 1));

@@ -1,5 +1,8 @@
 package xyz.sunqian.test;
 
+import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.Nullable;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Objects;
@@ -12,17 +15,17 @@ import java.util.Objects;
  */
 public class TestReader extends Reader {
 
-    private final Reader in;
-    private ReadOps readOps = ReadOps.READ_NORMAL;
+    private final @Nonnull Reader in;
+    private @Nonnull ReadOps readOps = ReadOps.READ_NORMAL;
     private int times = 0;
-    private Boolean markSupported = null;
+    private @Nullable Boolean markSupported = null;
 
     /**
      * Constructs with the specified wrapped reader.
      *
      * @param in the specified wrapped reader
      */
-    public TestReader(Reader in) {
+    public TestReader(@Nonnull Reader in) {
         this.in = in;
     }
 
@@ -35,7 +38,7 @@ public class TestReader extends Reader {
      * @param readOps the behavior for the next I/O operation
      * @see #setNextOperation(ReadOps, int)
      */
-    public void setNextOperation(ReadOps readOps) {
+    public void setNextOperation(@Nonnull ReadOps readOps) {
         setNextOperation(readOps, 1);
     }
 
@@ -46,7 +49,7 @@ public class TestReader extends Reader {
      * @param readOps the behaviors for the next specified number of I/O operations
      * @param times   the number of I/O operations
      */
-    public void setNextOperation(ReadOps readOps, int times) {
+    public void setNextOperation(@Nonnull ReadOps readOps, int times) {
         this.readOps = readOps;
         this.times = times;
     }
@@ -69,12 +72,12 @@ public class TestReader extends Reader {
     }
 
     @Override
-    public int read(char[] b) throws IOException {
+    public int read(char @Nonnull [] b) throws IOException {
         return read(b, 0, b.length);
     }
 
     @Override
-    public int read(char[] b, int off, int len) throws IOException {
+    public int read(char @Nonnull [] b, int off, int len) throws IOException {
         switch (readOps) {
             case READ_NORMAL:
                 return in.read(b, off, len);
@@ -116,7 +119,7 @@ public class TestReader extends Reader {
      *
      * @param markSupported the mark-supported flag, can be null
      */
-    public void markSupported(Boolean markSupported) {
+    public void markSupported(@Nullable Boolean markSupported) {
         this.markSupported = markSupported;
     }
 

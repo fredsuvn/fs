@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
-import static xyz.sunqian.test.JieTest.reflectEquals;
+import static xyz.sunqian.test.JieAssert.invokeEquals;
 
 public class CharsTest {
 
@@ -44,8 +44,8 @@ public class CharsTest {
             assertEquals(nativeCharset, nc.get(null));
             Charset fileCharset = JieChars.charset(System.getProperty(JieSystem.KEY_OF_FILE_ENCODING));
             Method search = nativesClass.getDeclaredMethod("search", String[].class);
-            reflectEquals(search, fileCharset, null, (Object) new String[]{"UTF888", JieSystem.KEY_OF_FILE_ENCODING});
-            reflectEquals(search, null, null, (Object) new String[]{"UTF888"});
+            invokeEquals(fileCharset, search, null, (Object) new String[]{"UTF888", JieSystem.KEY_OF_FILE_ENCODING});
+            invokeEquals(search, null, null, (Object) new String[]{"UTF888"});
         }
     }
 }

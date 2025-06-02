@@ -23,7 +23,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
-import static xyz.sunqian.test.JieTest.reflectThrows;
+import static xyz.sunqian.test.JieAssert.invokeThrows;
 
 public class ProxyTest {
 
@@ -138,13 +138,13 @@ public class ProxyTest {
         Class<?> asmMisc = Class.forName("xyz.sunqian.common.reflect.proxy.JieAsm");
         Method method = asmMisc.getDeclaredMethod(
             "visitLoadPrimitiveParamAsObject", MethodVisitor.class, Class.class, int.class);
-        reflectThrows(UnknownPrimitiveTypeException.class, method, null, null, Object.class, 1);
+        invokeThrows(UnknownPrimitiveTypeException.class, method, null, null, Object.class, 1);
         method = asmMisc.getDeclaredMethod(
             "visitObjectCastPrimitive", MethodVisitor.class, Class.class, boolean.class);
-        reflectThrows(UnknownPrimitiveTypeException.class, method, null, null, Object.class, true);
+        invokeThrows(UnknownPrimitiveTypeException.class, method, null, null, Object.class, true);
         method = asmMisc.getDeclaredMethod(
             "returnPrimitiveCastObject", MethodVisitor.class, Class.class);
-        reflectThrows(UnknownPrimitiveTypeException.class, method, null, null, Object.class);
+        invokeThrows(UnknownPrimitiveTypeException.class, method, null, null, Object.class);
     }
 
     private void testAsm(ClassP proxy, String ppi_String, boolean absError) {

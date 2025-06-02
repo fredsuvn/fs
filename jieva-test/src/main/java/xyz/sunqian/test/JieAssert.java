@@ -1,6 +1,8 @@
 package xyz.sunqian.test;
 
 import org.testng.Assert;
+import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -9,11 +11,11 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.expectThrows;
 
 /**
- * Test utilities.
+ * Assert utilities for tests.
  *
  * @author sunqian
  */
-public class JieTest {
+public class JieAssert {
 
     /**
      * Tests the specified method via reflection and {@link Assert#expectThrows(Class, Assert.ThrowingRunnable)}. This
@@ -30,12 +32,17 @@ public class JieTest {
      * }</pre>
      *
      * @param exception the exception to be expected
-     * @param method    the specified method
-     * @param inst      the instance of the method
-     * @param args      the invoking arguments
+     * @param method    the method to be tested
+     * @param inst      the instance for the method
+     * @param args      the arguments for the method
      * @param <T>       type of the expected exception
      */
-    public static <T extends Throwable> T reflectThrows(Class<T> exception, Method method, Object inst, Object... args) {
+    public static <T extends Throwable> @Nonnull T invokeThrows(
+        @Nonnull Class<T> exception,
+        @Nonnull Method method,
+        @Nonnull Object inst,
+        @Nullable Object @Nonnull ... args
+    ) {
         method.setAccessible(true);
         return expectThrows(exception, () -> {
             try {
@@ -55,16 +62,22 @@ public class JieTest {
      *     try {
      *         actual = method.invoke(inst, args);
      *     } catch (Exception e) {
-     *         throw new JieTestException(e);
+     *         throw new AssertionError(e);
      *     }
-     *         assertEquals(expected, actual);
+     *     assertEquals(expected, actual);
      * }</pre>
      *
-     * @param method the specified method
-     * @param inst   the instance of the method
-     * @param args   the invoking arguments
+     * @param expected the expected result
+     * @param method   the method to be tested
+     * @param inst     the instance for the method
+     * @param args     the arguments for the method
      */
-    public static void reflectEquals(Method method, Object expected, Object inst, Object... args) {
+    public static void invokeEquals(
+        @Nonnull Object expected,
+        @Nonnull Method method,
+        @Nonnull Object inst,
+        @Nullable Object @Nonnull ... args
+    ) {
         method.setAccessible(true);
         Object actual;
         try {
@@ -72,6 +85,6 @@ public class JieTest {
         } catch (Exception e) {
             throw new AssertionError(e);
         }
-        assertEquals(expected, actual);
+        assertEquals(actual, expected);
     }
 }

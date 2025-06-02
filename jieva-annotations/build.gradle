@@ -13,11 +13,11 @@ dependencies {
 
   implementation platform(project(":jieva-dependencies"))
   implementation "com.google.code.findbugs:jsr305"
-  compileOnly 'org.projectlombok:lombok'
+  //compileOnly 'org.projectlombok:lombok'
 
-  testAnnotationProcessor platform(project(":jieva-dependencies"))
-  testAnnotationProcessor 'org.projectlombok:lombok'
-  testImplementation project(":jieva-test")
+  //testAnnotationProcessor platform(project(":jieva-dependencies"))
+  //testAnnotationProcessor 'org.projectlombok:lombok'
+  //testImplementation project(":jieva-test")
 }
 
 java {

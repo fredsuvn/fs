@@ -13,7 +13,7 @@ import xyz.sunqian.common.crypto.CryptoException;
 import xyz.sunqian.common.crypto.JieCrypto;
 import xyz.sunqian.common.encode.JieBase64;
 import xyz.sunqian.common.io.JieBuffer;
-import xyz.sunqian.test.JieTest;
+import xyz.sunqian.test.JieAssert;
 import xyz.sunqian.test.MaterialBox;
 
 import javax.crypto.Cipher;
@@ -49,7 +49,7 @@ public class CryptoTest {
 
         // null
         Method toBuffer = JieCrypto.class.getDeclaredMethod("toBuffer", byte[].class);
-        JieTest.reflectEquals(toBuffer, null, null, (Object) null);
+        JieAssert.invokeEquals(toBuffer, null, null, (Object) null);
     }
 
     private void testCipher(int totalSize, @Nullable Provider provider) throws Exception {

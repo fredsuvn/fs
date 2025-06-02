@@ -35,7 +35,7 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 import static xyz.sunqian.common.base.bytes.ByteEncoder.withBuffering;
 import static xyz.sunqian.common.base.bytes.ByteEncoder.withRounding;
-import static xyz.sunqian.test.JieTest.reflectThrows;
+import static xyz.sunqian.test.JieAssert.invokeThrows;
 import static xyz.sunqian.test.MaterialBox.copyDirect;
 
 public class ByteProcessorTest {
@@ -763,7 +763,7 @@ public class ByteProcessorTest {
                 JieIO.inStream(ByteBuffer.allocate(0)).getClass()
             );
             ByteProcessor inst = ByteProcessor.from(new byte[0]);
-            reflectThrows(
+            invokeThrows(
                 IORuntimeException.class,
                 inst.getClass().getDeclaredMethod("toInputStream", Object.class),
                 inst,
@@ -1019,9 +1019,9 @@ public class ByteProcessorTest {
         expectThrows(IORuntimeException.class, () -> ByteProcessor.from(new byte[0]).writeTo((OutputStream) null));
         expectThrows(IORuntimeException.class, () -> ByteProcessor.from((InputStream) null).writeTo(new byte[0]));
         Method method = ByteProcessor.from(new byte[0]).getClass().getDeclaredMethod("toByteReader", Object.class);
-        reflectThrows(IORuntimeException.class, method, ByteProcessor.from(new byte[0]), 1);
+        invokeThrows(IORuntimeException.class, method, ByteProcessor.from(new byte[0]), 1);
         method = ByteProcessor.from(new byte[0]).getClass().getDeclaredMethod("toBufferOut", Object.class);
-        reflectThrows(IORuntimeException.class, method, ByteProcessor.from(new byte[0]), "");
+        invokeThrows(IORuntimeException.class, method, ByteProcessor.from(new byte[0]), "");
         expectThrows(IORuntimeException.class, () -> ByteProcessor.from(new ThrowIn(0)).writeTo(new byte[0]));
         expectThrows(IORuntimeException.class, () -> ByteProcessor.from(new ThrowIn(1)).writeTo(new byte[0]));
     }

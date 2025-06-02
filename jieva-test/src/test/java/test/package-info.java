@@ -1,4 +1,0 @@
-
-@DefaultNotNull
-package test;
-

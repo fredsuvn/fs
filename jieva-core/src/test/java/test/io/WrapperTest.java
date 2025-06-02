@@ -7,7 +7,7 @@ import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.io.AbstractWriter;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieIO;
-import xyz.sunqian.test.JieTest;
+import xyz.sunqian.test.JieAssert;
 
 import java.io.CharArrayReader;
 import java.io.File;
@@ -66,11 +66,11 @@ public class WrapperTest {
         IOCases.testInput(bufferIn, source, true);
         Class<?> bufferInClass = bufferIn.getClass();
         Method read0 = bufferInClass.getDeclaredMethod("read0");
-        JieTest.reflectThrows(IOException.class, read0, bufferIn);
+        JieAssert.invokeThrows(IOException.class, read0, bufferIn);
         read0 = bufferInClass.getDeclaredMethod("read0", byte[].class, int.class, int.class);
-        JieTest.reflectThrows(IOException.class, read0, bufferIn, null, 0, 0);
+        JieAssert.invokeThrows(IOException.class, read0, bufferIn, null, 0, 0);
         read0 = bufferInClass.getDeclaredMethod("skip0", int.class);
-        JieTest.reflectThrows(IOException.class, read0, bufferIn, 99);
+        JieAssert.invokeThrows(IOException.class, read0, bufferIn, 99);
 
         // file
         Path path = Paths.get("src", "test", "resources", "io", "input.test");
@@ -292,11 +292,11 @@ public class WrapperTest {
         IOCases.testReader(bufferIn, source);
         Class<?> bufferInClass = bufferIn.getClass();
         Method read0 = bufferInClass.getDeclaredMethod("read0");
-        JieTest.reflectThrows(IOException.class, read0, bufferIn);
+        JieAssert.invokeThrows(IOException.class, read0, bufferIn);
         read0 = bufferInClass.getDeclaredMethod("read0", char[].class, int.class, int.class);
-        JieTest.reflectThrows(IOException.class, read0, bufferIn, null, 0, 0);
+        JieAssert.invokeThrows(IOException.class, read0, bufferIn, null, 0, 0);
         read0 = bufferInClass.getDeclaredMethod("skip0", int.class);
-        JieTest.reflectThrows(IOException.class, read0, bufferIn, 99);
+        JieAssert.invokeThrows(IOException.class, read0, bufferIn, 99);
 
         // bytes
         char[] chars = JieRandom.fill(new char[sourceSize], '0', '9');

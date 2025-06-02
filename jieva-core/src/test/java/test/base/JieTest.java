@@ -21,7 +21,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
-import static xyz.sunqian.test.JieTest.reflectThrows;
+import static xyz.sunqian.test.JieAssert.invokeThrows;
 
 public class JieTest {
 
@@ -167,7 +167,7 @@ public class JieTest {
 
         // unknown:
         Method equalsArray = Jie.class.getDeclaredMethod("equalsArray", Object.class, Object.class, boolean.class);
-        reflectThrows(UnknownArrayTypeException.class, equalsArray, null, "str", "str", true);
+        invokeThrows(UnknownArrayTypeException.class, equalsArray, null, "str", "str", true);
     }
 
     @Test
@@ -197,7 +197,7 @@ public class JieTest {
 
         // unknown:
         Method hashArray = Jie.class.getDeclaredMethod("hashArray", Object.class, boolean.class);
-        reflectThrows(UnknownArrayTypeException.class, hashArray, null, "str", true);
+        invokeThrows(UnknownArrayTypeException.class, hashArray, null, "str", true);
     }
 
     @Test

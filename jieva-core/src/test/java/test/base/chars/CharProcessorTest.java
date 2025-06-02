@@ -33,7 +33,7 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 import static xyz.sunqian.common.base.chars.CharEncoder.withBuffering;
 import static xyz.sunqian.common.base.chars.CharEncoder.withRounding;
-import static xyz.sunqian.test.JieTest.reflectThrows;
+import static xyz.sunqian.test.JieAssert.invokeThrows;
 import static xyz.sunqian.test.MaterialBox.copyBuffer;
 import static xyz.sunqian.test.MaterialBox.copyDirect;
 import static xyz.sunqian.test.MaterialBox.copyHeap;
@@ -967,7 +967,7 @@ public class CharProcessorTest {
                 JieIO.reader("").getClass()
             );
             CharProcessor inst = CharProcessor.from(new char[0]);
-            reflectThrows(
+            invokeThrows(
                 IORuntimeException.class,
                 inst.getClass().getDeclaredMethod("toReader", Object.class),
                 inst,
@@ -1230,9 +1230,9 @@ public class CharProcessorTest {
         expectThrows(IORuntimeException.class, () -> CharProcessor.from(new char[0]).writeTo((Appendable) null));
         expectThrows(IORuntimeException.class, () -> CharProcessor.from((Reader) null).writeTo(new char[0]));
         Method method = CharProcessor.from(new char[0]).getClass().getDeclaredMethod("toCharReader", Object.class);
-        reflectThrows(IORuntimeException.class, method, CharProcessor.from(new char[0]), 1);
+        invokeThrows(IORuntimeException.class, method, CharProcessor.from(new char[0]), 1);
         method = CharProcessor.from(new char[0]).getClass().getDeclaredMethod("toBufferOut", Object.class);
-        reflectThrows(IORuntimeException.class, method, CharProcessor.from(new char[0]), "");
+        invokeThrows(IORuntimeException.class, method, CharProcessor.from(new char[0]), "");
         expectThrows(IORuntimeException.class, () -> CharProcessor.from(new ThrowReader(0)).writeTo(new char[0]));
         expectThrows(IORuntimeException.class, () -> CharProcessor.from(new ThrowReader(1)).writeTo(new char[0]));
     }

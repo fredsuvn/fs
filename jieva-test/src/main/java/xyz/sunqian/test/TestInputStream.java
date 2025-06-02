@@ -1,5 +1,8 @@
 package xyz.sunqian.test;
 
+import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.Nullable;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
@@ -12,17 +15,17 @@ import java.util.Objects;
  */
 public class TestInputStream extends InputStream {
 
-    private final InputStream in;
-    private ReadOps readOps = ReadOps.READ_NORMAL;
+    private final @Nonnull InputStream in;
+    private @Nonnull ReadOps readOps = ReadOps.READ_NORMAL;
     private int times = 0;
-    private Boolean markSupported = null;
+    private @Nullable Boolean markSupported = null;
 
     /**
      * Constructs with the specified wrapped input stream.
      *
      * @param in the specified wrapped input stream
      */
-    public TestInputStream(InputStream in) {
+    public TestInputStream(@Nonnull InputStream in) {
         this.in = in;
     }
 
@@ -35,7 +38,7 @@ public class TestInputStream extends InputStream {
      * @param readOps the behavior for the next I/O operation
      * @see #setNextOperation(ReadOps, int)
      */
-    public void setNextOperation(ReadOps readOps) {
+    public void setNextOperation(@Nonnull ReadOps readOps) {
         setNextOperation(readOps, 1);
     }
 
@@ -46,7 +49,7 @@ public class TestInputStream extends InputStream {
      * @param readOps the behaviors for the next specified number of I/O operations
      * @param times   the number of I/O operations
      */
-    public void setNextOperation(ReadOps readOps, int times) {
+    public void setNextOperation(@Nonnull ReadOps readOps, int times) {
         this.readOps = readOps;
         this.times = times;
     }
@@ -69,12 +72,12 @@ public class TestInputStream extends InputStream {
     }
 
     @Override
-    public int read(byte[] b) throws IOException {
+    public int read(byte @Nonnull [] b) throws IOException {
         return read(b, 0, b.length);
     }
 
     @Override
-    public int read(byte[] b, int off, int len) throws IOException {
+    public int read(byte @Nonnull [] b, int off, int len) throws IOException {
         switch (readOps) {
             case READ_NORMAL:
                 return in.read(b, off, len);
@@ -133,7 +136,7 @@ public class TestInputStream extends InputStream {
      *
      * @param markSupported the mark-supported flag, can be null
      */
-    public void markSupported(Boolean markSupported) {
+    public void markSupported(@Nullable Boolean markSupported) {
         this.markSupported = markSupported;
     }
 

@@ -4,7 +4,6 @@ import org.testng.annotations.Test;
 import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.base.bytes.ByteProcessor;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
-import xyz.sunqian.common.base.bytes.JieBytes;
 import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.base.exception.ProcessingException;
 import xyz.sunqian.common.encode.DataEncoder;
@@ -12,13 +11,15 @@ import xyz.sunqian.common.encode.DecodingException;
 import xyz.sunqian.common.encode.EncodingException;
 import xyz.sunqian.common.encode.JieBase64;
 import xyz.sunqian.common.io.JieIO;
-import xyz.sunqian.test.JieTest;
+import xyz.sunqian.test.JieAssert;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Base64;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.expectThrows;
 
 public class Base64Test {
 
@@ -228,6 +229,6 @@ public class Base64Test {
     public void testUnreachablePoint() throws Exception {
         DataEncoder encoder = JieBase64.lineEncoder(16, new byte[]{'\t'}, true, true, false);
         Method getOutputSize = encoder.getClass().getDeclaredMethod("getOutputSize", int.class, long.class, boolean.class);
-        JieTest.reflectThrows(EncodingException.class, getOutputSize, encoder, 0, 0L, false);
+        JieAssert.invokeThrows(EncodingException.class, getOutputSize, encoder, 0, 0L, false);
     }
 }

@@ -1,5 +1,7 @@
 package xyz.sunqian.test;
 
+import xyz.sunqian.annotations.Nonnull;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -24,7 +26,7 @@ public class MaterialBox {
      * @param array the given array
      * @return a buffer backed by the middle of an extended array
      */
-    public static ByteBuffer copyPadding(byte[] array) {
+    public static @Nonnull ByteBuffer copyPadding(byte @Nonnull [] array) {
         byte[] back = new byte[array.length + 20];
         System.arraycopy(array, 0, back, 10, array.length);
         return ByteBuffer.wrap(back, 10, array.length).slice();
@@ -36,7 +38,7 @@ public class MaterialBox {
      * @param array the given array
      * @return a direct buffer whose content are copied from the given array
      */
-    public static ByteBuffer copyDirect(byte[] array) {
+    public static @Nonnull ByteBuffer copyDirect(byte @Nonnull [] array) {
         ByteBuffer buffer = ByteBuffer.allocateDirect(array.length);
         buffer.put(array);
         buffer.flip();
@@ -49,7 +51,7 @@ public class MaterialBox {
      * @param array the given array
      * @return a heap buffer whose content are copied from the given array
      */
-    public static ByteBuffer copyHeap(byte[] array) {
+    public static @Nonnull ByteBuffer copyHeap(byte @Nonnull [] array) {
         ByteBuffer buffer = ByteBuffer.allocate(array.length);
         buffer.put(array);
         buffer.flip();
@@ -62,7 +64,7 @@ public class MaterialBox {
      * @param buffer the given buffer
      * @return a direct buffer whose content are copied from the given buffer
      */
-    public static ByteBuffer copyDirect(ByteBuffer buffer) {
+    public static @Nonnull ByteBuffer copyDirect(@Nonnull ByteBuffer buffer) {
         return copyBuffer(buffer, true);
     }
 
@@ -72,7 +74,7 @@ public class MaterialBox {
      * @param buffer the given buffer
      * @return a heap buffer whose content are copied from the given buffer
      */
-    public static ByteBuffer copyHeap(ByteBuffer buffer) {
+    public static @Nonnull ByteBuffer copyHeap(@Nonnull ByteBuffer buffer) {
         return copyBuffer(buffer, false);
     }
 
@@ -83,11 +85,11 @@ public class MaterialBox {
      * @param buffer the given buffer
      * @return a buffer whose content are copied from the given buffer
      */
-    public static ByteBuffer copyBuffer(ByteBuffer buffer) {
+    public static @Nonnull ByteBuffer copyBuffer(@Nonnull ByteBuffer buffer) {
         return copyBuffer(buffer, buffer.isDirect());
     }
 
-    private static ByteBuffer copyBuffer(ByteBuffer buffer, boolean direct) {
+    private static @Nonnull ByteBuffer copyBuffer(@Nonnull ByteBuffer buffer, boolean direct) {
         ByteBuffer ret = direct ? ByteBuffer.allocateDirect(buffer.remaining())
             : ByteBuffer.allocate(buffer.remaining());
         int pos = buffer.position();
@@ -104,7 +106,7 @@ public class MaterialBox {
      * @param buffer the given buffer
      * @return a new array whose content are copied from the given buffer
      */
-    public static byte[] copyBytes(ByteBuffer buffer) {
+    public static byte @Nonnull [] copyBytes(@Nonnull ByteBuffer buffer) {
         byte[] array = new byte[buffer.remaining()];
         int pos = buffer.position();
         buffer.get(array);
@@ -121,7 +123,7 @@ public class MaterialBox {
      * @param array the given array
      * @return a buffer backed by the middle of an extended array
      */
-    public static CharBuffer copyPadding(char[] array) {
+    public static @Nonnull CharBuffer copyPadding(char @Nonnull [] array) {
         char[] back = new char[array.length + 20];
         System.arraycopy(array, 0, back, 10, array.length);
         return CharBuffer.wrap(back, 10, array.length).slice();
@@ -133,7 +135,7 @@ public class MaterialBox {
      * @param array the given array
      * @return a direct buffer whose content are copied from the given array
      */
-    public static CharBuffer copyDirect(char[] array) {
+    public static @Nonnull CharBuffer copyDirect(char @Nonnull [] array) {
         CharBuffer buffer =
             ByteBuffer.allocateDirect(array.length * 2).order(ByteOrder.BIG_ENDIAN).asCharBuffer();
         buffer.put(array);
@@ -147,7 +149,7 @@ public class MaterialBox {
      * @param array the given array
      * @return a heap buffer whose content are copied from the given array
      */
-    public static CharBuffer copyHeap(char[] array) {
+    public static @Nonnull CharBuffer copyHeap(char @Nonnull [] array) {
         CharBuffer buffer = CharBuffer.allocate(array.length);
         buffer.put(array);
         buffer.flip();
@@ -160,7 +162,7 @@ public class MaterialBox {
      * @param buffer the given buffer
      * @return a direct buffer whose content are copied from the given buffer
      */
-    public static CharBuffer copyDirect(CharBuffer buffer) {
+    public static @Nonnull CharBuffer copyDirect(@Nonnull CharBuffer buffer) {
         return copyBuffer(buffer, true);
     }
 
@@ -170,7 +172,7 @@ public class MaterialBox {
      * @param buffer the given buffer
      * @return a heap buffer whose content are copied from the given buffer
      */
-    public static CharBuffer copyHeap(CharBuffer buffer) {
+    public static @Nonnull CharBuffer copyHeap(@Nonnull CharBuffer buffer) {
         return copyBuffer(buffer, false);
     }
 
@@ -181,11 +183,11 @@ public class MaterialBox {
      * @param buffer the given buffer
      * @return a buffer whose content are copied from the given buffer
      */
-    public static CharBuffer copyBuffer(CharBuffer buffer) {
+    public static @Nonnull CharBuffer copyBuffer(@Nonnull CharBuffer buffer) {
         return copyBuffer(buffer, buffer.isDirect());
     }
 
-    private static CharBuffer copyBuffer(CharBuffer buffer, boolean direct) {
+    private static @Nonnull CharBuffer copyBuffer(@Nonnull CharBuffer buffer, boolean direct) {
         if (direct) {
             char[] chars = copyChars(buffer);
             ByteBuffer bb = ByteBuffer.allocateDirect(chars.length * 2);
@@ -209,7 +211,7 @@ public class MaterialBox {
      * @param buffer the given buffer
      * @return a new array whose content are copied from the given buffer
      */
-    public static char[] copyChars(CharBuffer buffer) {
+    public static char @Nonnull [] copyChars(@Nonnull CharBuffer buffer) {
         char[] array = new char[buffer.remaining()];
         int pos = buffer.position();
         buffer.get(array);
@@ -223,7 +225,7 @@ public class MaterialBox {
      * @param path the specified path
      * @param data the specified data
      */
-    public static void newFile(Path path, byte[] data) {
+    public static void newFile(@Nonnull Path path, byte @Nonnull [] data) {
         try {
             File file = path.toFile();
             if (file.createNewFile()) {
