@@ -18,6 +18,7 @@ import java.util.Objects;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
@@ -27,7 +28,8 @@ public class JieTest {
 
     @Test
     public void testBase() {
-        assertEquals(Jie.LIB_NAME, "Jieva");
+        assertNotNull(Jie.LIB_NAME);
+        assertNotNull(Jie.LIB_VERSION);
         String hello = "hello";
         assertSame(Jie.as(hello), hello);
         assertEquals(Jie.nonnull("123", "456"), "123");

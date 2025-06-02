@@ -58,7 +58,12 @@ public class Jie {
     /**
      * Name of this lib.
      */
-    public static final String LIB_NAME = "Jieva";
+    public static final @Nonnull String LIB_NAME = "Jieva";
+
+    /**
+     * Version of this lib.
+     */
+    public static final @Nonnull String LIB_VERSION = "0.0.0";
 
     /**
      * Casts and returns the given object as the specified type {@code T}. This method is equivalent to:
