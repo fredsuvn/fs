@@ -23,10 +23,10 @@ public enum InvocationMode {
      */
     METHOD_HANDLE(new OfMethodHandle()),
 
-    // /**
-    //  * Using <a href="https://asm.ow2.io/">ASM</a> to implement {@link Invocable}.
-    //  */
-    // ASM,
+    /**
+     * Using <a href="https://asm.ow2.io/">ASM</a> to implement {@link Invocable}.
+     */
+    ASM(new OfAsm()),
     ;
 
     static final InvocationMode DEFAULT = METHOD_HANDLE;

@@ -251,9 +251,9 @@ public class JieAsm {
         }
         if (i <= Byte.MAX_VALUE) {
             visitor.visitIntInsn(Opcodes.BIPUSH, i);
-        } else {
-            visitor.visitIntInsn(Opcodes.SIPUSH, i);
+            return;
         }
+        visitor.visitIntInsn(Opcodes.SIPUSH, i);
     }
 
     /**

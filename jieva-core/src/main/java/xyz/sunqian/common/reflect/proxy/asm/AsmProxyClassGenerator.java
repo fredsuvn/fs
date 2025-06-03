@@ -20,6 +20,7 @@ import xyz.sunqian.common.reflect.proxy.ProxyInvoker;
 import xyz.sunqian.common.reflect.proxy.ProxyMethodHandler;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
@@ -477,15 +478,8 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
                 // get outer
                 visitor.visitVarInsn(Opcodes.ALOAD, 1);
                 visitor.visitTypeInsn(Opcodes.CHECKCAST, methodOwnerName);
-                int pIndex = 0;
-                for (Parameter parameter : method.getParameters()) {
-                    // get args
-                    visitor.visitVarInsn(Opcodes.ALOAD, 2);
-                    JieAsm.loadConst(visitor, pIndex++);
-                    // get args[pIndex]
-                    visitor.visitInsn(Opcodes.AALOAD);
-                    JieAsm.convertObjectTo(visitor, parameter.getType());
-                }
+                // loads args
+                loadParameters(visitor, pmInfo.method);
                 // return outer.invoke(args0, args1...);
                 JieAsm.invokeVirtual(
                     visitor, methodOwnerName, method.getName(), pmInfo.descriptor, pmInfo.isInterface
@@ -527,15 +521,8 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
                 // get outer
                 visitor.visitVarInsn(Opcodes.ALOAD, 1);
                 visitor.visitTypeInsn(Opcodes.CHECKCAST, pcInfo.outerName);
-                int pIndex = 0;
-                for (Parameter parameter : pmInfo.method.getParameters()) {
-                    // get args
-                    visitor.visitVarInsn(Opcodes.ALOAD, 2);
-                    JieAsm.loadConst(visitor, pIndex++);
-                    // get args[pIndex]
-                    visitor.visitInsn(Opcodes.AALOAD);
-                    JieAsm.convertObjectTo(visitor, parameter.getType());
-                }
+                // loads args
+                loadParameters(visitor, pmInfo.method);
                 // return outer.invoke(inst, args0, args1...);
                 visitor.visitMethodInsn(
                     Opcodes.INVOKESTATIC,
@@ -556,6 +543,18 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
         }
         classWriter.visitEnd();
         return classWriter.toByteArray();
+    }
+
+    private void loadParameters(MethodVisitor visitor, Executable executable) {
+        int pIndex = 0;
+        for (Parameter parameter : executable.getParameters()) {
+            // get args
+            visitor.visitVarInsn(Opcodes.ALOAD, 2);
+            JieAsm.loadConst(visitor, pIndex++);
+            // get args[pIndex]
+            visitor.visitInsn(Opcodes.AALOAD);
+            JieAsm.convertObjectTo(visitor, parameter.getType());
+        }
     }
 
     private @Nonnull String @Nullable [] getExceptions(Method method) {

@@ -16,15 +16,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
 public class InvokeTest {
-
-    @Test
-    public void testAsm() throws Exception {
-        // AsmBack.test();
-    }
 
     @Test
     public void testInvoke() throws Exception {
@@ -128,6 +124,167 @@ public class InvokeTest {
         Object[] args = new Object[method.getParameterCount()];
         Arrays.fill(args, "6");
         return args;
+    }
+
+    @Test
+    public void testAsm() throws Exception {
+        {
+            // Cls
+            List<Method> methods = JieStream.stream(Cls.class.getMethods())
+                .filter(method -> method.getDeclaringClass().equals(Cls.class))
+                .collect(Collectors.toList());
+            Cls inst = new Cls();
+            for (Method method : methods) {
+                Invocable invocable = Invocable.of(method, InvocationMode.ASM);
+                assertEquals(
+                    invocable.invoke(inst, method.getParameterCount() > 0 ? buildArgsForAsm() : new Object[0]),
+                    method.invoke(inst, method.getParameterCount() > 0 ? buildArgsForAsm() : new Object[0])
+                );
+            }
+        }
+        {
+            // Inter
+            List<Method> methods = JieStream.stream(Inter.class.getMethods())
+                .filter(method -> method.getDeclaringClass().equals(Inter.class))
+                .collect(Collectors.toList());
+            Inter inst = new Inter() {};
+            for (Method method : methods) {
+                Invocable invocable = Invocable.of(method, InvocationMode.ASM);
+                assertEquals(
+                    invocable.invoke(inst, method.getParameterCount() > 0 ? buildArgsForAsm() : new Object[0]),
+                    method.invoke(inst, method.getParameterCount() > 0 ? buildArgsForAsm() : new Object[0])
+                );
+            }
+            class InterChild implements Inter {
+                @Override
+                public boolean b2(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, String a8) {
+                    return false;
+                }
+            }
+            InterChild ic = new InterChild();
+            Method b2 = Inter.class.getMethod(
+                "b2", boolean.class, byte.class, short.class, char.class, int.class, long.class, float.class, double.class, String.class);
+            Invocable invocable = Invocable.of(b2, InvocationMode.ASM);
+            assertEquals(invocable.invoke(ic, buildArgsForAsm()), ic.b2(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
+            assertNotEquals(invocable.invoke(inst, buildArgsForAsm()), ic.b2(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
+        }
+        {
+            // big parameter count
+            Method instanceMethod129 = JieStream.stream(LotsOfMethods.class.getMethods())
+                .filter(method -> "instanceMethod129".equals(method.getName()))
+                .findFirst().get();
+            Invocable invocable = Invocable.of(instanceMethod129, InvocationMode.ASM);
+            assertEquals(
+                invocable.invoke(new LotsOfMethods(), buildArgsForLotsOfMethods(instanceMethod129)),
+                instanceMethod129.invoke(new LotsOfMethods(), buildArgsForLotsOfMethods(instanceMethod129))
+            );
+        }
+    }
+
+    private Object[] buildArgsForAsm() {
+        return new Object[]{
+            true,
+            (byte) 1,
+            (short) 2,
+            '3',
+            4,
+            5L,
+            6.0f,
+            7.0,
+            "8"
+        };
+    }
+
+    public static class Cls {
+
+        public void b1() {
+        }
+
+        public boolean b2(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, String a8) {
+            return true;
+        }
+
+        public byte b3(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, String a8) {
+            return 11;
+        }
+
+        public short b4(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, String a8) {
+            return 22;
+        }
+
+        public char b5(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, String a8) {
+            return 33;
+        }
+
+        public int b6(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, String a8) {
+            return 44;
+        }
+
+        public long b7(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, String a8) {
+            return 55;
+        }
+
+        public float b8(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, String a8) {
+            return 66;
+        }
+
+        public double b9(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, String a8) {
+            return 77;
+        }
+
+        public String b10(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, String a8) {
+            return "88";
+        }
+
+        public <T> T b11(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, T a8) {
+            return a8;
+        }
+    }
+
+    public interface Inter {
+
+        default void b1() {
+        }
+
+        default boolean b2(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, String a8) {
+            return true;
+        }
+
+        default byte b3(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, String a8) {
+            return 11;
+        }
+
+        default short b4(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, String a8) {
+            return 22;
+        }
+
+        default char b5(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, String a8) {
+            return 33;
+        }
+
+        default int b6(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, String a8) {
+            return 44;
+        }
+
+        default long b7(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, String a8) {
+            return 55;
+        }
+
+        default float b8(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, String a8) {
+            return 66;
+        }
+
+        default double b9(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, String a8) {
+            return 77;
+        }
+
+        default String b10(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, String a8) {
+            return "88";
+        }
+
+        default <T> T b11(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, T a8) {
+            return a8;
+        }
     }
 }
 
