@@ -13,3 +13,4 @@ file("${rootDir}/").eachDirMatch(~/jieva-(?!(plugins|draft)).*/) { dir ->
   include ":${dir.name}"
 }
 // include ":docs"
+include ":tests"

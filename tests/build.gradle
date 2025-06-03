@@ -6,18 +6,19 @@ plugins {
   id 'gek-test'
 }
 
-description = 'Gek docs.'
+description = 'Jieva tests.'
 
 dependencies {
-  implementation platform(project(':gek-dependencies'))
+  implementation platform(project(':jieva-dependencies'))
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-  implementation("org.openjdk.jmh:jmh-core:1.37")
-  annotationProcessor platform(project(":gek-dependencies"))
-  annotationProcessor("org.openjdk.jmh:jmh-generator-annprocess:1.37")
-  implementation project(':gek-annotations')
-  implementation project(':gek-core')
-  implementation project(':gek-kotlin')
-  implementation project(":gek-test")
+  implementation("org.openjdk.jmh:jmh-core")
+  annotationProcessor platform(project(":jieva-dependencies"))
+  annotationProcessor("org.openjdk.jmh:jmh-generator-annprocess")
+  implementation project(':jieva-annotations')
+  implementation project(':jieva-core')
+  implementation 'cglib:cglib'
+//  implementation project(':gek-kotlin')
+//  implementation project(":gek-test")
 }
 
 //tasks.register('benchmark') {
