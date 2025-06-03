@@ -49,6 +49,17 @@ public class AsmProxyTest {
             counter.set(0);
         }
         {
+            // InterD
+            ProxyClass pc1 = generateProxy(null, Jie.list(InterD.class), counter);
+            InterD d1 = pc1.newInstance();
+            testInterD(d1, new ClsD(), counter);
+            counter.set(0);
+            ProxyClass pc2 = generateProxy(ClsD.class, Jie.list(), counter);
+            InterD d2 = pc2.newInstance();
+            testInterD(d2, new ClsD(), counter);
+            counter.set(0);
+        }
+        {
             // ClsA
             ProxyClass pc = generateProxy(ClsA.class, Jie.list(), counter);
             ClsA a = pc.newInstance();
@@ -296,6 +307,88 @@ public class AsmProxyTest {
             SameMethodA s2 = pc1.newInstance();
             expectThrows(ProxyTestException.class, () -> s2.throwInterEx());
         }
+        {
+            // indirect super: A extends B extends C: A super-> C
+            ProxyClassGenerator generator = new AsmProxyClassGenerator();
+            ClsD cd = new ClsD();
+            ProxyClass pc1 = generator.generate(
+                ClsD.class, Jie.list(),
+                new ProxyMethodHandler() {
+
+                    @Override
+                    public boolean requiresProxy(Method method) {
+                        return true;
+                    }
+
+                    @Override
+                    public @Nullable Object invoke(
+                        @Nonnull Object proxy,
+                        @Nonnull Method method,
+                        @Nonnull ProxyInvoker invoker,
+                        @Nullable Object @Nonnull ... args
+                    ) throws Throwable {
+                        return invoker.invoke(cd, args);
+                    }
+                }
+            );
+            ClsD cdp = pc1.newInstance();
+            assertEquals(
+                cdp.b3(true, (byte) 1, (short) 2, (char) 3, 4, 5, 6, 7, "8"),
+                cd.b3(true, (byte) 1, (short) 2, (char) 3, 4, 5, 6, 7, "8")
+            );
+            ClsE ce = new ClsE();
+            ProxyClass pc2 = generator.generate(
+                ClsE.class, Jie.list(),
+                new ProxyMethodHandler() {
+
+                    @Override
+                    public boolean requiresProxy(Method method) {
+                        return true;
+                    }
+
+                    @Override
+                    public @Nullable Object invoke(
+                        @Nonnull Object proxy,
+                        @Nonnull Method method,
+                        @Nonnull ProxyInvoker invoker,
+                        @Nullable Object @Nonnull ... args
+                    ) throws Throwable {
+                        return invoker.invoke(ce, args);
+                    }
+                }
+            );
+            ClsE cep = pc2.newInstance();
+            assertEquals(
+                cep.b3(true, (byte) 1, (short) 2, (char) 3, 4, 5, 6, 7, "8"),
+                ce.b3(true, (byte) 1, (short) 2, (char) 3, 4, 5, 6, 7, "8")
+            );
+            InterE ie = new ClsE();
+            ProxyClass pc3 = generator.generate(
+                null, Jie.list(InterE.class),
+                new ProxyMethodHandler() {
+
+                    @Override
+                    public boolean requiresProxy(Method method) {
+                        return true;
+                    }
+
+                    @Override
+                    public @Nullable Object invoke(
+                        @Nonnull Object proxy,
+                        @Nonnull Method method,
+                        @Nonnull ProxyInvoker invoker,
+                        @Nullable Object @Nonnull ... args
+                    ) throws Throwable {
+                        return invoker.invoke(ie, args);
+                    }
+                }
+            );
+            InterE iep = pc3.newInstance();
+            assertEquals(
+                iep.b3(true, (byte) 1, (short) 2, (char) 3, 4, 5, 6, 7, "8"),
+                ie.b3(true, (byte) 1, (short) 2, (char) 3, 4, 5, 6, 7, "8")
+            );
+        }
     }
 
     private void testInterA(InterA obj, IntVar counter) {
@@ -357,6 +450,67 @@ public class AsmProxyTest {
         expectThrows(AbstractMethodError.class, () -> obj.b10(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
         assertEquals(counter.get(), 15);
         expectThrows(AbstractMethodError.class, () -> obj.b11(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
+        assertEquals(counter.get(), 16);
+    }
+
+    private void testInterD(InterD obj, ClsD cd, IntVar counter) {
+        assertFalse(obj.equals(""));
+        assertEquals(counter.get(), 1);
+        assertEquals(obj.hashCode(), Jie.hashId(obj));
+        assertEquals(counter.get(), 2);
+        assertEquals(obj.toString(), obj.getClass().getName() + '@' + Integer.toHexString(obj.hashCode()));
+        assertEquals(counter.get(), 5);
+        assertEquals(
+            obj.b2(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"),
+            cd.b2(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8")
+        );
+        assertEquals(counter.get(), 6);
+        assertEquals(
+            obj.b3(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"),
+            cd.b3(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8")
+        );
+        assertEquals(counter.get(), 7);
+        assertEquals(
+            obj.b4(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"),
+            cd.b4(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8")
+        );
+        assertEquals(counter.get(), 8);
+        assertEquals(
+            obj.b5(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"),
+            cd.b5(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8")
+        );
+        assertEquals(counter.get(), 9);
+        assertEquals(
+            obj.b6(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"),
+            cd.b6(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8")
+        );
+        assertEquals(counter.get(), 10);
+        assertEquals(
+            obj.b7(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"),
+            cd.b7(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8")
+        );
+        assertEquals(counter.get(), 11);
+        assertEquals(
+            obj.b8(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"),
+            cd.b8(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8")
+        );
+        assertEquals(counter.get(), 12);
+        assertEquals(
+            obj.b9(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"),
+            cd.b9(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8")
+        );
+        assertEquals(counter.get(), 13);
+        assertEquals(
+            obj.b10(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"),
+            cd.b10(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8")
+        );
+        assertEquals(counter.get(), 14);
+        assertEquals(
+            obj.b11(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"),
+            cd.b11(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8")
+        );
+        assertEquals(counter.get(), 15);
+        obj.b1(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8");
         assertEquals(counter.get(), 16);
     }
 
@@ -518,6 +672,55 @@ public class AsmProxyTest {
         }
     }
 
+    public interface InterD {
+
+        default void b1(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, String a8) {
+        }
+
+        default boolean b2(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, String a8) {
+            return true;
+        }
+
+        default byte b3(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, String a8) {
+            return 1;
+        }
+
+        default short b4(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, String a8) {
+            return 2;
+        }
+
+        default char b5(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, String a8) {
+            return 3;
+        }
+
+        default int b6(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, String a8) {
+            return 4;
+        }
+
+        default long b7(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, String a8) {
+            return 5;
+        }
+
+        default float b8(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, String a8) {
+            return 6;
+        }
+
+        default double b9(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, String a8) {
+            return 7;
+        }
+
+        default String b10(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, String a8) {
+            return "8";
+        }
+
+        default <T> T b11(boolean a0, byte a1, short a2, char a3, int a4, long a5, float a6, double a7, T a8) {
+            return a8;
+        }
+    }
+
+    public interface InterE extends InterD {
+    }
+
     public static class ClsA {
 
         public String a1(String a0) {
@@ -548,6 +751,12 @@ public class AsmProxyTest {
         public String b1(String a0) {
             return super.b1(a0);
         }
+    }
+
+    public static class ClsD implements InterD {
+    }
+
+    public static class ClsE implements InterE {
     }
 
     public interface SameMethodA {

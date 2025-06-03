@@ -24,11 +24,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 /**
  * The <a href="https://asm.ow2.io/">ASM</a> implementation for {@link ProxyClassGenerator}. The runtime environment
@@ -66,54 +65,43 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
         String outerDescriptor = "L" + outerName + ";";
         Class<?> outerSuperClass = proxiedClass == null ? Object.class : proxiedClass;
         String outerSuperName = JieJvm.getInternalName(outerSuperClass);
-        String[] outerInterfaces = null;
+        String[] outerInterfaces = {};
         if (!interfaces.isEmpty()) {
             outerInterfaces = interfaces.stream().map(JieJvm::getInternalName).toArray(String[]::new);
         }
         String innerName = "AsmInvoker";
         String fullInnerName = outerName + "$" + innerName;
-        Set<Method> methodSet = new LinkedHashSet<>();
-        Method[] declaredMethods = outerSuperClass.getDeclaredMethods();
-        for (Method declaredMethod : declaredMethods) {
-            if (canBeProxied(declaredMethod, methodHandler)) {
-                methodSet.add(declaredMethod);
+        Map<Method, ProxyMethodInfo> methodMap = new LinkedHashMap<>();
+        IntVar methodCount = IntVar.of(0);
+        for (Method method : outerSuperClass.getDeclaredMethods()) {
+            if (canBeProxied(method, methodHandler)) {
+                methodMap.put(
+                    method,
+                    buildProxyMethodInfo(method, outerSuperName, outerDescriptor, false, methodCount)
+                );
             }
         }
-        List<Class<?>> proxied = new ArrayList<>(interfaces.size() + 1);
-        proxied.add(outerSuperClass);
-        proxied.addAll(interfaces);
-        for (Class<?> cls : proxied) {
-            Method[] methods = cls.getMethods();
-            for (Method method : methods) {
-                if (methodSet.contains(method)) {
-                    continue;
-                }
-                if (canBeProxied(method, methodHandler)) {
-                    methodSet.add(method);
-                }
-            }
-        }
-        IntVar mc = IntVar.of(0);
-        List<ProxyMethodInfo> pmInfoList = methodSet.stream().map(method -> {
-            String descriptor = JieJvm.getDescriptor(method);
-            String signature = JieJvm.getSignature(method);
-            String[] exceptions = getExceptions(method);
-            String superInvokerName = "access$super$" + mc.getAndIncrement();// access$001
-            String superInvokerDescriptor = descriptor.replace("(", "(" + outerDescriptor);
-            String superInvokerSignature =
-                signature == null ? null : signature.replace("(", "(" + outerDescriptor);
-            boolean isInterface = method.getDeclaringClass().isInterface();
-            return new ProxyMethodInfo(
-                method,
-                descriptor,
-                signature,
-                exceptions,
-                superInvokerName,
-                superInvokerDescriptor,
-                superInvokerSignature,
-                isInterface
+        filterProxiedMethods(
+            methodMap,
+            outerSuperClass.getMethods(),
+            methodHandler,
+            outerSuperName,
+            outerDescriptor,
+            false,
+            methodCount
+        );
+        int ii = 0;
+        for (Class<?> anInterface : interfaces) {
+            filterProxiedMethods(
+                methodMap,
+                anInterface.getMethods(),
+                methodHandler,
+                outerInterfaces[ii++],
+                outerDescriptor,
+                true,
+                methodCount
             );
-        }).collect(Collectors.toList());
+        }
         ProxyClassInfo pcInfo = new ProxyClassInfo(
             outerName,
             outerDescriptor,
@@ -121,7 +109,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
             outerInterfaces,
             innerName,
             fullInnerName,
-            pmInfoList
+            new ArrayList<>(methodMap.values())
         );
         return Jie.uncheck(() -> {
             byte[] proxyClassBytes = generateProxyClass(pcInfo);
@@ -133,9 +121,58 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
             return new AsmProxyClass(
                 proxyClass,
                 methodHandler,
-                methodSet.toArray(new Method[0])
+                methodMap.keySet().toArray(new Method[0])
             );
         }, AsmProxyException::new);
+    }
+
+    private void filterProxiedMethods(
+        @Nonnull Map<Method, ProxyMethodInfo> methodMap,
+        @Nonnull Method @Nonnull [] methods,
+        @Nonnull ProxyMethodHandler methodHandler,
+        @Nonnull String ownerName,
+        @Nonnull String outerDescriptor,
+        boolean isInterface,
+        @Nonnull IntVar methodCount
+    ) {
+        for (Method method : methods) {
+            if (methodMap.containsKey(method)) {
+                continue;
+            }
+            if (canBeProxied(method, methodHandler)) {
+                methodMap.put(
+                    method,
+                    buildProxyMethodInfo(method, ownerName, outerDescriptor, isInterface, methodCount)
+                );
+            }
+        }
+    }
+
+    private @Nonnull ProxyMethodInfo buildProxyMethodInfo(
+        @Nonnull Method method,
+        @Nonnull String ownerName,
+        @Nonnull String outerDescriptor,
+        boolean isInterface,
+        @Nonnull IntVar methodCount
+    ) {
+        String descriptor = JieJvm.getDescriptor(method);
+        String signature = JieJvm.getSignature(method);
+        String[] exceptions = getExceptions(method);
+        String superInvokerName = "access$super$" + methodCount.getAndIncrement();// access$001
+        String superInvokerDescriptor = descriptor.replace("(", "(" + outerDescriptor);
+        String superInvokerSignature =
+            signature == null ? null : signature.replace("(", "(" + outerDescriptor);
+        return new ProxyMethodInfo(
+            method,
+            ownerName,
+            descriptor,
+            signature,
+            exceptions,
+            superInvokerName,
+            superInvokerDescriptor,
+            superInvokerSignature,
+            isInterface
+        );
     }
 
     private boolean canBeProxied(Method method, ProxyMethodHandler handler) {
@@ -340,7 +377,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
         }
         visitor.visitMethodInsn(
             Opcodes.INVOKESPECIAL,
-            JieJvm.getInternalName(pmInfo.method.getDeclaringClass()),
+            pmInfo.ownerName,
             pmInfo.method.getName(),
             pmInfo.descriptor,
             pmInfo.isInterface
@@ -431,15 +468,15 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
             int i = 0;
             for (ProxyMethodInfo pmInfo : pcInfo.methods) {
                 Method method = pmInfo.method;
-                String virtualInvokerName = JieJvm.getInternalName(method.getDeclaringClass());
+                String methodOwnerName = pmInfo.ownerName;
                 if (Modifier.isProtected(method.getModifiers())) {
-                    virtualInvokerName = pcInfo.outerName;
+                    methodOwnerName = pcInfo.outerName;
                 }
                 visitor.visitLabel(labels[i++]);
                 visitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
                 // get outer
                 visitor.visitVarInsn(Opcodes.ALOAD, 1);
-                visitor.visitTypeInsn(Opcodes.CHECKCAST, virtualInvokerName);
+                visitor.visitTypeInsn(Opcodes.CHECKCAST, methodOwnerName);
                 int pIndex = 0;
                 for (Parameter parameter : method.getParameters()) {
                     // get args
@@ -451,7 +488,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
                 }
                 // return outer.invoke(args0, args1...);
                 JieAsm.invokeVirtual(
-                    visitor, virtualInvokerName, method.getName(), pmInfo.descriptor, pmInfo.isInterface
+                    visitor, methodOwnerName, method.getName(), pmInfo.descriptor, pmInfo.isInterface
                 );
                 Class<?> returnType = JieAsm.wrapToObject(visitor, method.getReturnType());
                 JieAsm.visitReturn(visitor, returnType, false, true);
@@ -561,6 +598,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
     private static final class ProxyMethodInfo {
 
         private final @Nonnull Method method;
+        private final @Nonnull String ownerName;
         private final @Nonnull String descriptor;
         private final @Nullable String signature;
         private final @Nullable String[] exceptions;
@@ -571,6 +609,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
 
         private ProxyMethodInfo(
             @Nonnull Method method,
+            @Nonnull String ownerName,
             @Nonnull String descriptor,
             @Nullable String signature,
             @Nullable String[] exceptions,
@@ -580,6 +619,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
             boolean isInterface
         ) {
             this.method = method;
+            this.ownerName = ownerName;
             this.descriptor = descriptor;
             this.signature = signature;
             this.exceptions = exceptions;
