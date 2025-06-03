@@ -7,13 +7,13 @@ import org.objectweb.asm.Opcodes;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.reflect.BytesClassLoader;
+import xyz.sunqian.common.reflect.JieClass;
 import xyz.sunqian.common.reflect.JieJvm;
 import xyz.sunqian.common.reflect.proxy.JieAsm;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -99,7 +99,7 @@ final class OfAsm implements InvocableGenerator {
         visitor.visitTryCatchBlock(start, end, handler, THROWABLE_NAME);
         visitor.visitLabel(start);
         String methodOwnerName = JieJvm.getInternalName(method.getDeclaringClass());
-        boolean isStatic = Modifier.isStatic(method.getModifiers());
+        boolean isStatic = JieClass.isStatic(method);
         if (!isStatic) {
             // get object
             visitor.visitVarInsn(Opcodes.ALOAD, 1);

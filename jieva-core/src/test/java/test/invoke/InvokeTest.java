@@ -2,7 +2,7 @@ package test.invoke;
 
 import org.testng.annotations.Test;
 import test.utils.LotsOfMethods;
-import xyz.sunqian.common.collect.JieStream;
+import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.invoke.InvocationException;
 import xyz.sunqian.common.invoke.InvocationMode;
@@ -79,7 +79,7 @@ public class InvokeTest {
     }
 
     @Test
-    public void testForMethodHandle() throws Exception {
+    public void testMethodHandle() throws Throwable {
         MethodHandle handle1 = MethodHandles.lookup().unreflectConstructor(A.class.getConstructor());
         Object a = Invocable.of(handle1, true).invoke(null);
         assertTrue(a instanceof A);
@@ -88,12 +88,17 @@ public class InvokeTest {
             Invocable.of(handle2, false).invoke(a, "aaa"),
             "aaa"
         );
+        MethodHandle handle3 = MethodHandles.lookup().unreflect(A.class.getMethod("instanceMethod", String.class));
+        assertEquals(
+            Invocable.of(handle3, false).invoke(a, "aaa"),
+            (String) handle3.invokeExact(new A(), "aaa")
+        );
     }
 
     @Test
     public void testLotsOfMethods() throws Exception {
         // static
-        List<Method> staticMethods = JieStream.stream(LotsOfMethods.class.getMethods())
+        List<Method> staticMethods = Jie.stream(LotsOfMethods.class.getMethods())
             .filter(method -> method.getName().startsWith("staticMethod"))
             .collect(Collectors.toList());
         for (Method method : staticMethods) {
@@ -104,7 +109,7 @@ public class InvokeTest {
             );
         }
         // instance
-        List<Method> instanceMethods = JieStream.stream(LotsOfMethods.class.getMethods())
+        List<Method> instanceMethods = Jie.stream(LotsOfMethods.class.getMethods())
             .filter(method -> method.getName().startsWith("instanceMethod"))
             .collect(Collectors.toList());
         LotsOfMethods inst = new LotsOfMethods();
@@ -121,7 +126,7 @@ public class InvokeTest {
     public void testAsm() throws Exception {
         {
             // Cls
-            List<Method> methods = JieStream.stream(Cls.class.getMethods())
+            List<Method> methods = Jie.stream(Cls.class.getMethods())
                 .filter(method -> method.getDeclaringClass().equals(Cls.class))
                 .collect(Collectors.toList());
             Cls inst = new Cls();
@@ -135,7 +140,7 @@ public class InvokeTest {
         }
         {
             // Inter
-            List<Method> methods = JieStream.stream(Inter.class.getMethods())
+            List<Method> methods = Jie.stream(Inter.class.getMethods())
                 .filter(method -> method.getDeclaringClass().equals(Inter.class))
                 .collect(Collectors.toList());
             Inter inst = new Inter() {};
@@ -161,7 +166,7 @@ public class InvokeTest {
         }
         {
             // big parameter count
-            Method instanceMethod129 = JieStream.stream(LotsOfMethods.class.getMethods())
+            Method instanceMethod129 = Jie.stream(LotsOfMethods.class.getMethods())
                 .filter(method -> "instanceMethod129".equals(method.getName()))
                 .findFirst().get();
             Invocable invocable = Invocable.of(instanceMethod129, InvocationMode.ASM);

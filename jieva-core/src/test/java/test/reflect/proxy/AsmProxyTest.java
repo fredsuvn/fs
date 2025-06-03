@@ -6,7 +6,6 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.value.IntVar;
-import xyz.sunqian.common.collect.JieStream;
 import xyz.sunqian.common.reflect.proxy.ProxyClass;
 import xyz.sunqian.common.reflect.proxy.ProxyClassGenerator;
 import xyz.sunqian.common.reflect.proxy.ProxyInvoker;
@@ -400,7 +399,7 @@ public class AsmProxyTest {
         ProxyClass pc = generateProxy(LotsOfMethods.class, Jie.list(), counter);
         LotsOfMethods proxy = pc.newInstance();
         LotsOfMethods inst = new LotsOfMethods();
-        List<Method> methods = JieStream.stream(inst.getClass().getMethods())
+        List<Method> methods = Jie.stream(inst.getClass().getMethods())
             .filter(m -> m.getName().startsWith("instanceMethod") && m.getParameterCount() > 0)
             .collect(Collectors.toList());
         for (Method method : methods) {

@@ -10,8 +10,8 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.value.IntVar;
 import xyz.sunqian.common.collect.JieArray;
-import xyz.sunqian.common.collect.JieStream;
 import xyz.sunqian.common.reflect.BytesClassLoader;
+import xyz.sunqian.common.reflect.JieClass;
 import xyz.sunqian.common.reflect.JieJvm;
 import xyz.sunqian.common.reflect.proxy.JieAsm;
 import xyz.sunqian.common.reflect.proxy.ProxyClass;
@@ -470,7 +470,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
             for (ProxyMethodInfo pmInfo : pcInfo.methods) {
                 Method method = pmInfo.method;
                 String methodOwnerName = pmInfo.ownerName;
-                if (Modifier.isProtected(method.getModifiers())) {
+                if (JieClass.isProtected(method)) {
                     methodOwnerName = pcInfo.outerName;
                 }
                 visitor.visitLabel(labels[i++]);
@@ -562,7 +562,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
         if (JieArray.isEmpty(exceptionTypes)) {
             return null;
         }
-        return JieStream.stream(exceptionTypes).map(JieJvm::getInternalName).toArray(String[]::new);
+        return Jie.stream(exceptionTypes).map(JieJvm::getInternalName).toArray(String[]::new);
     }
 
     private static final class ProxyClassInfo {

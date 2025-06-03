@@ -8,7 +8,6 @@ import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.collect.JieArray;
 import xyz.sunqian.common.collect.JieMap;
-import xyz.sunqian.common.collect.JieStream;
 
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
@@ -286,7 +285,7 @@ public class JieType {
         }
         Map<TypeVariable<?>, Type> typeArguments = mapTypeParameters(type);
         Set<Type> stack = new HashSet<>();
-        return JieStream.stream(typeParameters)
+        return Jie.stream(typeParameters)
             .map(typeVariable -> {
                 Type actualType = JieMap.resolveChain(typeArguments, typeVariable, stack);
                 stack.clear();
@@ -711,7 +710,7 @@ public class JieType {
             }
             // <...>
             sb.append("<");
-            sb.append(JieStream.stream(actualTypeArguments)
+            sb.append(Jie.stream(actualTypeArguments)
                 .map(Type::getTypeName)
                 .collect(Collectors.joining(", ")));
             sb.append(">");
