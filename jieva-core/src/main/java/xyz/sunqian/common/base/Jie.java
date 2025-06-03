@@ -13,6 +13,7 @@ import xyz.sunqian.common.collect.JieArray;
 import xyz.sunqian.common.collect.JieList;
 import xyz.sunqian.common.collect.JieMap;
 import xyz.sunqian.common.collect.JieSet;
+import xyz.sunqian.common.collect.JieStream;
 import xyz.sunqian.common.mapping.BeanMapper;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingOptions;
@@ -47,6 +48,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 /**
  * Utilities for object and common/base operations.
@@ -772,6 +774,20 @@ public class Jie {
      */
     public static <K, V> @Nonnull LinkedHashMap<K, V> linkedHashMap(Object @Nonnull ... array) {
         return JieMap.linkedHashMap(array);
+    }
+
+    /**
+     * Returns a {@link Stream} from the given elements.
+     * <p>
+     * This method is a shortcut to the {@link JieStream#stream(Object[])}.
+     *
+     * @param elements the given elements
+     * @param <T>      the component type
+     * @return a {@link Stream} from the given elements
+     */
+    @SafeVarargs
+    public static <T> @Nonnull Stream<T> stream(T @Nonnull ... elements) {
+        return JieStream.stream(elements);
     }
 
     //---------------- Thread Begin ----------------//
