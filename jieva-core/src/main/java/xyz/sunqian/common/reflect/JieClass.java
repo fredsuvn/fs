@@ -444,10 +444,114 @@ public class JieClass {
     }
 
     /**
-     * Returns whether the given member can be overridden.
+     * Returns whether the given member is static.
      *
      * @param member the given member
-     * @return whether the given member can be overridden
+     * @return whether the given member is static
+     */
+    public static boolean isStatic(@Nonnull Member member) {
+        return Modifier.isStatic(member.getModifiers());
+    }
+
+    /**
+     * Returns whether the given member is public.
+     *
+     * @param member the given member
+     * @return whether the given member is public
+     */
+    public static boolean isPublic(@Nonnull Member member) {
+        return Modifier.isPublic(member.getModifiers());
+    }
+
+    /**
+     * Returns whether the given member is protected.
+     *
+     * @param member the given member
+     * @return whether the given member is protected
+     */
+    public static boolean isProtected(@Nonnull Member member) {
+        return Modifier.isProtected(member.getModifiers());
+    }
+
+    /**
+     * Returns whether the given member is private.
+     *
+     * @param member the given member
+     * @return whether the given member is private
+     */
+    public static boolean isPrivate(@Nonnull Member member) {
+        return Modifier.isPrivate(member.getModifiers());
+    }
+
+    /**
+     * Returns whether the given member is package-private (no modifies).
+     *
+     * @param member the given member
+     * @return whether the given member is package-private (no modifies)
+     */
+    public static boolean isPackagePrivate(@Nonnull Member member) {
+        int mod = member.getModifiers();
+        return !Modifier.isPublic(mod) && !Modifier.isProtected(mod) && !Modifier.isPrivate(mod);
+    }
+
+    /**
+     * Returns whether the given class is static.
+     *
+     * @param cls the given class
+     * @return whether the given class is static
+     */
+    public static boolean isStatic(@Nonnull Class<?> cls) {
+        return Modifier.isStatic(cls.getModifiers());
+    }
+
+    /**
+     * Returns whether the given class is public.
+     *
+     * @param cls the given class
+     * @return whether the given class is public
+     */
+    public static boolean isPublic(@Nonnull Class<?> cls) {
+        return Modifier.isPublic(cls.getModifiers());
+    }
+
+    /**
+     * Returns whether the given class is protected.
+     *
+     * @param cls the given class
+     * @return whether the given class is protected
+     */
+    public static boolean isProtected(@Nonnull Class<?> cls) {
+        return Modifier.isProtected(cls.getModifiers());
+    }
+
+    /**
+     * Returns whether the given class is private.
+     *
+     * @param cls the given class
+     * @return whether the given class is private
+     */
+    public static boolean isPrivate(@Nonnull Class<?> cls) {
+        return Modifier.isPrivate(cls.getModifiers());
+    }
+
+    /**
+     * Returns whether the given class is package-private (no modifies).
+     *
+     * @param cls the given class
+     * @return whether the given class is package-private (no modifies)
+     */
+    public static boolean isPackagePrivate(@Nonnull Class<?> cls) {
+        int mod = cls.getModifiers();
+        return !Modifier.isPublic(mod) && !Modifier.isProtected(mod) && !Modifier.isPrivate(mod);
+    }
+
+    /**
+     * Returns whether the given member can be overridden (its owner class is no final, and itself is no final, no
+     * static and no private).
+     *
+     * @param member the given member
+     * @return whether the given member can be overridden (its owner class is no final, and itself is no final, no
+     * static and no private)
      */
     public static boolean isOverridable(@Nonnull Member member) {
         int modifiers = member.getModifiers();
@@ -459,10 +563,10 @@ public class JieClass {
     }
 
     /**
-     * Returns whether the given class can be overridden.
+     * Returns whether the given class can be overridden (no final, no static and no private).
      *
      * @param cls the given class
-     * @return whether the given class can be overridden
+     * @return whether the given class can be overridden (no final, no static and no private)
      */
     public static boolean isOverridable(@Nonnull Class<?> cls) {
         int modifiers = cls.getModifiers();

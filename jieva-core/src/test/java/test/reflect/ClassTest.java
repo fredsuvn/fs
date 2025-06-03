@@ -157,6 +157,90 @@ public class ClassTest {
     }
 
     @Test
+    public void testModifies() throws Exception {
+        {
+            // m1
+            assertTrue(JieClass.isStatic(Mod1.class.getMethod("m1")));
+            assertTrue(JieClass.isPublic(Mod1.class.getMethod("m1")));
+            assertFalse(JieClass.isProtected(Mod1.class.getMethod("m1")));
+            assertFalse(JieClass.isPrivate(Mod1.class.getMethod("m1")));
+            assertFalse(JieClass.isPackagePrivate(Mod1.class.getMethod("m1")));
+        }
+        {
+            // m2
+            assertFalse(JieClass.isStatic(Mod1.class.getMethod("m2")));
+            assertTrue(JieClass.isPublic(Mod1.class.getMethod("m2")));
+            assertFalse(JieClass.isProtected(Mod1.class.getMethod("m2")));
+            assertFalse(JieClass.isPrivate(Mod1.class.getMethod("m2")));
+            assertFalse(JieClass.isPackagePrivate(Mod1.class.getMethod("m2")));
+        }
+        {
+            // m3
+            assertFalse(JieClass.isStatic(Mod1.class.getDeclaredMethod("m3")));
+            assertFalse(JieClass.isPublic(Mod1.class.getDeclaredMethod("m3")));
+            assertTrue(JieClass.isProtected(Mod1.class.getDeclaredMethod("m3")));
+            assertFalse(JieClass.isPrivate(Mod1.class.getDeclaredMethod("m3")));
+            assertFalse(JieClass.isPackagePrivate(Mod1.class.getDeclaredMethod("m3")));
+        }
+        {
+            // m4
+            assertFalse(JieClass.isStatic(Mod1.class.getDeclaredMethod("m4")));
+            assertFalse(JieClass.isPublic(Mod1.class.getDeclaredMethod("m4")));
+            assertFalse(JieClass.isProtected(Mod1.class.getDeclaredMethod("m4")));
+            assertTrue(JieClass.isPrivate(Mod1.class.getDeclaredMethod("m4")));
+            assertFalse(JieClass.isPackagePrivate(Mod1.class.getDeclaredMethod("m4")));
+        }
+        {
+            // m5
+            assertFalse(JieClass.isStatic(Mod1.class.getDeclaredMethod("m5")));
+            assertFalse(JieClass.isPublic(Mod1.class.getDeclaredMethod("m5")));
+            assertFalse(JieClass.isProtected(Mod1.class.getDeclaredMethod("m5")));
+            assertFalse(JieClass.isPrivate(Mod1.class.getDeclaredMethod("m5")));
+            assertTrue(JieClass.isPackagePrivate(Mod1.class.getDeclaredMethod("m5")));
+        }
+        {
+            // Mod1
+            assertTrue(JieClass.isStatic(Mod1.class));
+            assertTrue(JieClass.isPublic(Mod1.class));
+            assertFalse(JieClass.isProtected(Mod1.class));
+            assertFalse(JieClass.isPrivate(Mod1.class));
+            assertFalse(JieClass.isPackagePrivate(Mod1.class));
+        }
+        {
+            // Mod2
+            assertFalse(JieClass.isStatic(Mod2.class));
+            assertTrue(JieClass.isPublic(Mod2.class));
+            assertFalse(JieClass.isProtected(Mod2.class));
+            assertFalse(JieClass.isPrivate(Mod2.class));
+            assertFalse(JieClass.isPackagePrivate(Mod2.class));
+        }
+        {
+            // Mod3
+            assertFalse(JieClass.isStatic(Mod3.class));
+            assertFalse(JieClass.isPublic(Mod3.class));
+            assertTrue(JieClass.isProtected(Mod3.class));
+            assertFalse(JieClass.isPrivate(Mod3.class));
+            assertFalse(JieClass.isPackagePrivate(Mod3.class));
+        }
+        {
+            // Mod4
+            assertFalse(JieClass.isStatic(Mod4.class));
+            assertFalse(JieClass.isPublic(Mod4.class));
+            assertFalse(JieClass.isProtected(Mod4.class));
+            assertTrue(JieClass.isPrivate(Mod4.class));
+            assertFalse(JieClass.isPackagePrivate(Mod4.class));
+        }
+        {
+            // Mod5
+            assertFalse(JieClass.isStatic(Mod5.class));
+            assertFalse(JieClass.isPublic(Mod5.class));
+            assertFalse(JieClass.isProtected(Mod5.class));
+            assertFalse(JieClass.isPrivate(Mod5.class));
+            assertTrue(JieClass.isPackagePrivate(Mod5.class));
+        }
+    }
+
+    @Test
     public void testOverridable() throws Exception {
         final class A {
 
@@ -277,4 +361,25 @@ public class ClassTest {
         private void pcm3() {
         }
     }
+
+    public static class Mod1 {
+
+        public static void m1() {}
+
+        public void m2() {}
+
+        protected void m3() {}
+
+        private void m4() {}
+
+        void m5() {}
+    }
+
+    public class Mod2 {}
+
+    protected class Mod3 {}
+
+    private class Mod4 {}
+
+    class Mod5 {}
 }
