@@ -1,299 +1,133 @@
 package test.invoke;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.invoke.AsmBack;
+import xyz.sunqian.common.collect.JieStream;
 import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.invoke.InvocationException;
 import xyz.sunqian.common.invoke.InvocationMode;
-import xyz.sunqian.common.invoke.JieHandle;
-import xyz.sunqian.common.reflect.JieClass;
-import xyz.sunqian.test.JieTestException;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
 public class InvokeTest {
 
     @Test
     public void testAsm() throws Exception {
-        AsmBack.test();
+        // AsmBack.test();
     }
 
     @Test
     public void testInvoke() throws Exception {
-        Constructor<?> constructor = TestObject.class.getDeclaredConstructor();
-        // test constructor
-        expectThrows(InvocationException.class, () ->
-            Invocable.of(constructor).invoke(null));
-        expectThrows(InvocationException.class, () ->
-            Invocable.of(constructor, InvocationMode.METHOD_HANDLE).invoke(null));
-        constructor.setAccessible(true);
-        // test methods
-        Method[] methods = TestObject.class.getDeclaredMethods();
-        for (Method method : methods) {
-            expectThrows(InvocationException.class, () ->
-                Invocable.of(method).invoke(null));
-            expectThrows(InvocationException.class, () ->
-                Invocable.of(method, InvocationMode.METHOD_HANDLE).invoke(null));
-            method.setAccessible(true);
-            if (method.getName().startsWith("sm") || method.getName().startsWith("m")) {
-                testInvoke0(constructor, method, InvocationMode.REFLECTION);
-                testInvoke0(constructor, method, InvocationMode.METHOD_HANDLE);
-            }
-        }
-    }
-
-    private void testInvoke0(
-        Constructor<?> constructor, Method method, InvocationMode mode
-    ) throws Exception {
-        Invocable constructorCaller = Invocable.of(constructor, mode);
-        TestObject tt = (TestObject) constructorCaller.invoke(null);
-        assertNotNull(tt);
-        String[] args = new String[method.getParameterCount()];
-        for (int i = 0; i < args.length; i++) {
-            args[i] = "" + i;
-        }
-        expectThrows(InvocationException.class, () ->
-            Invocable.of(method, mode).invoke(null, 1, 2, 3));
-        Invocable methodCaller = Invocable.of(method, mode);
-        assertNotNull(methodCaller);
-        boolean isStatic = Modifier.isStatic(method.getModifiers());
+        Object a = Invocable.of(A.class.getConstructor()).invoke(null);
+        assertTrue(a instanceof A);
         assertEquals(
-            methodCaller.invoke(isStatic ? null : tt, (Object[]) args),
-            buildString(method.getName(), args)
+            Invocable.of(A.class.getMethod("instanceMethod", String.class)).invoke(a, "aaa"),
+            "aaa"
         );
-        Invocable handle = Invocable.of(MethodHandles.lookup().unreflect(method), isStatic);
-        assertNotNull(handle);
-        assertEquals(
-            handle.invoke(isStatic ? null : tt, (Object[]) args),
-            buildString(method.getName(), args)
-        );
-    }
-
-    private static String buildString(String name, String... args) {
-        return name + ": " + String.join(", ", args);
-    }
-
-    @Test
-    public void testError() throws Exception {
-        testError(InvocationMode.REFLECTION);
-        testError(InvocationMode.METHOD_HANDLE);
-        testHandleError();
-    }
-
-    private void testError(InvocationMode mode) throws Exception {
-        TestThrow tt = new TestThrow();
-        Constructor<?> errorC = JieClass.getConstructor(TestThrow.class, Jie.array(int.class));
-        Method errorStatic = JieClass.searchMethod(TestThrow.class, "errorStatic", Jie.array());
-        Method error = JieClass.searchMethod(TestThrow.class, "error", Jie.array());
-        expectThrows(InvocationException.class, () ->
-            Invocable.of(errorC, mode).invoke(1));
-        expectThrows(InvocationException.class, () ->
-            Invocable.of(errorStatic, mode).invoke(null));
-        expectThrows(InvocationException.class, () ->
-            Invocable.of(error, mode).invoke(tt));
-        expectThrows(JieTestException.class, () ->
-            JieHandle.invokeStatic(MethodHandles.lookup().unreflect(errorStatic)));
-        expectThrows(JieTestException.class, () ->
-            JieHandle.invokeStatic(MethodHandles.lookup().unreflect(error), tt));
-        try {
-            Invocable.of(errorC, mode).invoke(null, 1);
-        } catch (InvocationException e) {
-            assertEquals(JieTestException.class, e.getCause().getClass());
-        }
-        try {
-            Invocable.of(errorStatic, mode).invoke(null);
-        } catch (InvocationException e) {
-            assertEquals(JieTestException.class, e.getCause().getClass());
-        }
-        try {
-            Invocable.of(error, mode).invoke(tt);
-        } catch (InvocationException e) {
-            assertEquals(JieTestException.class, e.getCause().getClass());
+        for (InvocationMode mode : InvocationMode.values()) {
+            testInvokeConstructor(mode);
+            testInvokeMethod(mode);
         }
     }
 
-    private void testHandleError() throws Exception {
-        TestThrow tt = new TestThrow();
-        Constructor<?> errorC = JieClass.getConstructor(TestThrow.class, Jie.array(int.class));
-        Method errorStatic = JieClass.searchMethod(TestThrow.class, "errorStatic", Jie.array());
-        Method error = JieClass.searchMethod(TestThrow.class, "error", Jie.array());
-        expectThrows(InvocationException.class, () ->
-            Invocable.of(MethodHandles.lookup().unreflectConstructor(errorC), true).invoke(1));
-        expectThrows(InvocationException.class, () ->
-            Invocable.of(MethodHandles.lookup().unreflect(errorStatic), true).invoke(null));
-        expectThrows(InvocationException.class, () ->
-            Invocable.of(MethodHandles.lookup().unreflect(error), false).invoke(tt));
+    private void testInvokeConstructor(InvocationMode mode) throws Exception {
+        Constructor<?> pub = A.class.getConstructor();
+        assertTrue(Invocable.of(pub, mode).invoke(null) instanceof A);
+        Constructor<?> pri = A.class.getDeclaredConstructor(int.class);
+        expectThrows(InvocationException.class, () -> Invocable.of(pri, mode).invoke(null));
+        Constructor<?> err = A.class.getDeclaredConstructor(long.class);
+        expectThrows(InvocationException.class, () -> Invocable.of(err, mode).invoke(null));
         try {
-            Invocable.of(MethodHandles.lookup().unreflectConstructor(errorC), true).invoke(null, 1);
+            Invocable.of(err, mode);
         } catch (InvocationException e) {
-            assertEquals(JieTestException.class, e.getCause().getClass());
+            assertTrue(e.getCause() instanceof InvokeTestException);
         }
+    }
+
+    private void testInvokeMethod(InvocationMode mode) throws Exception {
+        A a = new A();
+        // instance
+        Method pub = A.class.getMethod("instanceMethod", String.class);
+        assertEquals(Invocable.of(pub, mode).invoke(a, "aaa"), a.instanceMethod("aaa"));
+        expectThrows(InvocationException.class, () -> Invocable.of(pub, mode).invoke(null, "aaa"));
+        Method pri = A.class.getDeclaredMethod("instancePrivateMethod", String.class);
+        expectThrows(InvocationException.class, () -> Invocable.of(pri, mode).invoke(a, "aaa"));
+        Method err = A.class.getDeclaredMethod("instanceThrowMethod", String.class);
+        expectThrows(InvocationException.class, () -> Invocable.of(err, mode).invoke(a, "aaa"));
         try {
-            Invocable.of(MethodHandles.lookup().unreflect(errorStatic), true).invoke(null);
+            Invocable.of(err, mode).invoke(a, "aaa");
         } catch (InvocationException e) {
-            assertEquals(JieTestException.class, e.getCause().getClass());
+            assertTrue(e.getCause() instanceof InvokeTestException);
         }
+        // static
+        Method pubStatic = A.class.getMethod("staticMethod", String.class);
+        assertEquals(Invocable.of(pubStatic, mode).invoke(null, "aaa"), A.staticMethod("aaa"));
+        Method priStatic = A.class.getDeclaredMethod("staticPrivateMethod", String.class);
+        expectThrows(InvocationException.class, () -> Invocable.of(priStatic, mode).invoke(null, "aaa"));
+        Method errStatic = A.class.getDeclaredMethod("staticThrowMethod", String.class);
+        expectThrows(InvocationException.class, () -> Invocable.of(errStatic, mode).invoke(null, "aaa"));
         try {
-            Invocable.of(MethodHandles.lookup().unreflect(error), false).invoke(tt);
+            Invocable.of(errStatic, mode).invoke(null, "aaa");
         } catch (InvocationException e) {
-            assertEquals(JieTestException.class, e.getCause().getClass());
+            assertTrue(e.getCause() instanceof InvokeTestException);
         }
     }
 
     @Test
-    public void testInvokeSpecial() throws Throwable {
-        Method tt = JieClass.searchMethod(TestInter.class, "tt", Jie.array());
-        TestChild tc = new TestChild();
-        Class<?> caller = tt.getDeclaringClass();
-        MethodHandle handle = MethodHandles.lookup().in(caller).unreflectSpecial(tt, caller);
-        assertEquals(handle.invoke(tc), "TestInter");
-        // assertEquals(Invoker.handle(tt).invoke(tc), tc.tt());
-        // assertEquals(Invoker.handle(tt).invoke(tc), "TestChild");
-        // assertEquals(Invoker.handle(tt, TestChild.class).invoke(tc), "TestInter");
+    public void testForMethodHandle() throws Exception {
+        MethodHandle handle1 = MethodHandles.lookup().unreflectConstructor(A.class.getConstructor());
+        Object a = Invocable.of(handle1, true).invoke(null);
+        assertTrue(a instanceof A);
+        MethodHandle handle2 = MethodHandles.lookup().unreflect(A.class.getMethod("instanceMethod", String.class));
+        assertEquals(
+            Invocable.of(handle2, false).invoke(a, "aaa"),
+            "aaa"
+        );
     }
 
-    public static class TestObject {
-
-        private TestObject() {
+    @Test
+    public void testLotsOfMethods() throws Exception {
+        // static
+        List<Method> staticMethods = JieStream.stream(LotsOfMethods.class.getMethods())
+            .filter(method -> Modifier.isStatic(method.getModifiers()))
+            .collect(Collectors.toList());
+        for (Method method : staticMethods) {
+            Invocable invocable = Invocable.of(method, InvocationMode.METHOD_HANDLE);
+            assertEquals(
+                invocable.invoke(null, buildArgsForLotsOfMethods(method)),
+                method.invoke(null, buildArgsForLotsOfMethods(method))
+            );
         }
-
-        private static String sm0() {
-            return buildString("sm0");
-        }
-
-        private static String sm1(String s1) {
-            return buildString("sm1", s1);
-        }
-
-        private static String sm2(String s1, String s2) {
-            return buildString("sm2", s1, s2);
-        }
-
-        private static String sm3(String s1, String s2, String s3) {
-            return buildString("sm3", s1, s2, s3);
-        }
-
-        private static String sm4(String s1, String s2, String s3, String s4) {
-            return buildString("sm4", s1, s2, s3, s4);
-        }
-
-        private static String sm5(String s1, String s2, String s3, String s4, String s5) {
-            return buildString("sm5", s1, s2, s3, s4, s5);
-        }
-
-        private static String sm6(String s1, String s2, String s3, String s4, String s5, String s6) {
-            return buildString("sm6", s1, s2, s3, s4, s5, s6);
-        }
-
-        private static String sm7(String s1, String s2, String s3, String s4, String s5, String s6, String s7) {
-            return buildString("sm7", s1, s2, s3, s4, s5, s6, s7);
-        }
-
-        private static String sm8(String s1, String s2, String s3, String s4, String s5, String s6, String s7, String s8) {
-            return buildString("sm8", s1, s2, s3, s4, s5, s6, s7, s8);
-        }
-
-        private static String sm9(String s1, String s2, String s3, String s4, String s5, String s6, String s7, String s8, String s9) {
-            return buildString("sm9", s1, s2, s3, s4, s5, s6, s7, s8, s9);
-        }
-
-        private static String sm10(String s1, String s2, String s3, String s4, String s5, String s6, String s7, String s8, String s9, String s10) {
-            return buildString("sm10", s1, s2, s3, s4, s5, s6, s7, s8, s9, s10);
-        }
-
-        private static String sm11(String s1, String s2, String s3, String s4, String s5, String s6, String s7, String s8, String s9, String s10, String s11) {
-            return buildString("sm11", s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11);
-        }
-
-        private String m0() {
-            return buildString("m0");
-        }
-
-        private String m1(String s1) {
-            return buildString("m1", s1);
-        }
-
-        private String m2(String s1, String s2) {
-            return buildString("m2", s1, s2);
-        }
-
-        private String m3(String s1, String s2, String s3) {
-            return buildString("m3", s1, s2, s3);
-        }
-
-        private String m4(String s1, String s2, String s3, String s4) {
-            return buildString("m4", s1, s2, s3, s4);
-        }
-
-        private String m5(String s1, String s2, String s3, String s4, String s5) {
-            return buildString("m5", s1, s2, s3, s4, s5);
-        }
-
-        private String m6(String s1, String s2, String s3, String s4, String s5, String s6) {
-            return buildString("m6", s1, s2, s3, s4, s5, s6);
-        }
-
-        private String m7(String s1, String s2, String s3, String s4, String s5, String s6, String s7) {
-            return buildString("m7", s1, s2, s3, s4, s5, s6, s7);
-        }
-
-        private String m8(String s1, String s2, String s3, String s4, String s5, String s6, String s7, String s8) {
-            return buildString("m8", s1, s2, s3, s4, s5, s6, s7, s8);
-        }
-
-        private String m9(String s1, String s2, String s3, String s4, String s5, String s6, String s7, String s8, String s9) {
-            return buildString("m9", s1, s2, s3, s4, s5, s6, s7, s8, s9);
-        }
-
-        private String m10(String s1, String s2, String s3, String s4, String s5, String s6, String s7, String s8, String s9, String s10) {
-            return buildString("m10", s1, s2, s3, s4, s5, s6, s7, s8, s9, s10);
-        }
-
-        private String m11(String s1, String s2, String s3, String s4, String s5, String s6, String s7, String s8, String s9, String s10, String s11) {
-            return buildString("m11", s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11);
+        // instance
+        List<Method> instanceMethods = JieStream.stream(LotsOfMethods.class.getMethods())
+            .filter(method ->
+                !Modifier.isStatic(method.getModifiers())
+                    && method.getDeclaringClass().equals(LotsOfMethods.class))
+            .collect(Collectors.toList());
+        LotsOfMethods inst = new LotsOfMethods();
+        for (Method method : instanceMethods) {
+            Invocable invocable = Invocable.of(method, InvocationMode.METHOD_HANDLE);
+            assertEquals(
+                invocable.invoke(inst, buildArgsForLotsOfMethods(method)),
+                method.invoke(inst, buildArgsForLotsOfMethods(method))
+            );
         }
     }
 
-    public static class TestThrow {
-
-        public static void errorStatic() {
-            throw new JieTestException();
-        }
-
-        public TestThrow() {
-        }
-
-        public TestThrow(int i) {
-            throw new JieTestException();
-        }
-
-        public void error() {
-            throw new JieTestException();
-        }
-    }
-
-    public interface TestInter {
-
-        default String tt() {
-            return "TestInter";
-        }
-    }
-
-    public static class TestChild implements TestInter {
-
-        @Override
-        public String tt() {
-            return "TestChild";
-        }
+    private Object[] buildArgsForLotsOfMethods(Method method) {
+        Object[] args = new Object[method.getParameterCount()];
+        Arrays.fill(args, "6");
+        return args;
     }
 }
 

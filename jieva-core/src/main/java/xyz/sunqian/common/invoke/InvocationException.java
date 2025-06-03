@@ -1,9 +1,13 @@
 package xyz.sunqian.common.invoke;
 
+import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.exception.JieRuntimeException;
 
+import java.lang.reflect.InvocationTargetException;
+
 /**
- * Invocation exception.
+ * This runtime exception is used for wrapping exceptions thrown during the invocation of {@link Invocable}. The
+ * {@link #getCause()} method returns the wrapped original cause (if any).
  *
  * @author sunqian
  */
@@ -14,7 +18,7 @@ public class InvocationException extends JieRuntimeException {
      *
      * @param message the message
      */
-    public InvocationException(String message) {
+    public InvocationException(@Nullable String message) {
         super(message);
     }
 
@@ -23,7 +27,7 @@ public class InvocationException extends JieRuntimeException {
      *
      * @param cause the original cause
      */
-    public InvocationException(Throwable cause) {
-        super(cause);
+    public InvocationException(@Nullable Throwable cause) {
+        super(cause instanceof InvocationTargetException ? cause.getCause() : cause);
     }
 }
