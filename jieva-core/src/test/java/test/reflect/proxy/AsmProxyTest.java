@@ -1,10 +1,12 @@
 package test.reflect.proxy;
 
 import org.testng.annotations.Test;
+import test.utils.LotsOfMethods;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.value.IntVar;
+import xyz.sunqian.common.collect.JieStream;
 import xyz.sunqian.common.reflect.proxy.ProxyClass;
 import xyz.sunqian.common.reflect.proxy.ProxyClassGenerator;
 import xyz.sunqian.common.reflect.proxy.ProxyInvoker;
@@ -15,6 +17,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -389,6 +392,24 @@ public class AsmProxyTest {
                 ie.b3(true, (byte) 1, (short) 2, (char) 3, 4, 5, 6, 7, "8")
             );
         }
+    }
+
+    @Test
+    public void testBigParameters() throws Exception {
+        IntVar counter = IntVar.of(0);
+        ProxyClass pc = generateProxy(LotsOfMethods.class, Jie.list(), counter);
+        LotsOfMethods proxy = pc.newInstance();
+        LotsOfMethods inst = new LotsOfMethods();
+        List<Method> methods = JieStream.stream(inst.getClass().getMethods())
+            .filter(m -> m.getName().startsWith("instanceMethod") && m.getParameterCount() > 0)
+            .collect(Collectors.toList());
+        for (Method method : methods) {
+            assertEquals(
+                method.invoke(proxy, LotsOfMethods.buildArgsForLotsOfMethods(method)),
+                method.invoke(inst, LotsOfMethods.buildArgsForLotsOfMethods(method))
+            );
+        }
+        counter.set(0);
     }
 
     private void testInterA(InterA obj, IntVar counter) {

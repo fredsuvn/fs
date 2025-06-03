@@ -1,6 +1,7 @@
 package test.invoke;
 
 import org.testng.annotations.Test;
+import test.utils.LotsOfMethods;
 import xyz.sunqian.common.collect.JieStream;
 import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.invoke.InvocationException;
@@ -10,8 +11,6 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -95,35 +94,27 @@ public class InvokeTest {
     public void testLotsOfMethods() throws Exception {
         // static
         List<Method> staticMethods = JieStream.stream(LotsOfMethods.class.getMethods())
-            .filter(method -> Modifier.isStatic(method.getModifiers()))
+            .filter(method -> method.getName().startsWith("staticMethod"))
             .collect(Collectors.toList());
         for (Method method : staticMethods) {
             Invocable invocable = Invocable.of(method, InvocationMode.METHOD_HANDLE);
             assertEquals(
-                invocable.invoke(null, buildArgsForLotsOfMethods(method)),
-                method.invoke(null, buildArgsForLotsOfMethods(method))
+                invocable.invoke(null, LotsOfMethods.buildArgsForLotsOfMethods(method)),
+                method.invoke(null, LotsOfMethods.buildArgsForLotsOfMethods(method))
             );
         }
         // instance
         List<Method> instanceMethods = JieStream.stream(LotsOfMethods.class.getMethods())
-            .filter(method ->
-                !Modifier.isStatic(method.getModifiers())
-                    && method.getDeclaringClass().equals(LotsOfMethods.class))
+            .filter(method -> method.getName().startsWith("instanceMethod"))
             .collect(Collectors.toList());
         LotsOfMethods inst = new LotsOfMethods();
         for (Method method : instanceMethods) {
             Invocable invocable = Invocable.of(method, InvocationMode.METHOD_HANDLE);
             assertEquals(
-                invocable.invoke(inst, buildArgsForLotsOfMethods(method)),
-                method.invoke(inst, buildArgsForLotsOfMethods(method))
+                invocable.invoke(inst, LotsOfMethods.buildArgsForLotsOfMethods(method)),
+                method.invoke(inst, LotsOfMethods.buildArgsForLotsOfMethods(method))
             );
         }
-    }
-
-    private Object[] buildArgsForLotsOfMethods(Method method) {
-        Object[] args = new Object[method.getParameterCount()];
-        Arrays.fill(args, "6");
-        return args;
     }
 
     @Test
@@ -175,8 +166,8 @@ public class InvokeTest {
                 .findFirst().get();
             Invocable invocable = Invocable.of(instanceMethod129, InvocationMode.ASM);
             assertEquals(
-                invocable.invoke(new LotsOfMethods(), buildArgsForLotsOfMethods(instanceMethod129)),
-                instanceMethod129.invoke(new LotsOfMethods(), buildArgsForLotsOfMethods(instanceMethod129))
+                invocable.invoke(new LotsOfMethods(), LotsOfMethods.buildArgsForLotsOfMethods(instanceMethod129)),
+                instanceMethod129.invoke(new LotsOfMethods(), LotsOfMethods.buildArgsForLotsOfMethods(instanceMethod129))
             );
         }
     }

@@ -16,7 +16,7 @@ public enum InvocationMode {
     /**
      * Using reflection to implement {@link Invocable}.
      */
-    REFLECTION(new OfReflection()),
+    REFLECT(new OfReflection()),
 
     /**
      * Using {@link MethodHandle} to implement {@link Invocable}.
