@@ -17,8 +17,8 @@ public interface ProxyInvoker {
     /**
      * Invokes the method with the specified instance and arguments.
      * <p>
-     * The invocation behavior of this method is equivalent to the JVM instructions: {@code INVOKEVIRTUAL} and
-     * {@code INVOKEINTERFACE}. Therefore, this method does not expect a proxy instance to be passed in, which is the
+     * The invocation behavior of this method is equivalent to the JVM instructions: {@code invokevirtual} and
+     * {@code invokeinterface}. Therefore, this method does not expect a proxy instance to be passed in, which is the
      * first argument of {@link MethodProxyHandler#invoke(Object, Method, Object[], ProxyInvoker)}). Passing a proxy
      * instance may cause recursive invocations to the proxy method itself, eventually leading to stack overflow.
      *
@@ -34,7 +34,7 @@ public interface ProxyInvoker {
     /**
      * Invokes the {@code super} method with the specified instance and arguments.
      * <p>
-     * The invocation behavior of this method is equivalent to the JVM instruction: {@code INVOKESPECIAL}. Therefore,
+     * The invocation behavior of this method is equivalent to the JVM instruction: {@code invokespecial}. Therefore,
      * this method expects a proxy instance to be passed in.
      *
      * @param inst the specified instance
