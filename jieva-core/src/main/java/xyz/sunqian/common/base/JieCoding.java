@@ -1,5 +1,6 @@
 package xyz.sunqian.common.base;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -44,16 +45,16 @@ public class JieCoding {
 
     /**
      * If the {@code objOrColl} is null, returns the result of the {@code merger} with an empty collection. If the
-     * {@code objOrColl} is a collection, returns the result of the {@code merger} with the collection. Otherwise, the
-     * {@code objOrColl} is treated as a collection, and this method returns the result of the {@code merger} with the
-     * collection.
+     * {@code objOrColl} is a collection, returns the result of the {@code merger} with the collection. Otherwise, this
+     * method returns the result of the {@code merger} with the collection which has a singleton element:
+     * {@code objOrColl}.
      *
      * @param objOrColl the {@code objOrColl}
      * @param merger    the {@code merger}
      * @param <T>       component type of the collection
      * @return the result of the {@code merger}
      */
-    public static <T> T ifMerge(@Nullable Object objOrColl, Function<Collection<T>, T> merger) {
+    public static <T> T ifMerge(@Nullable Object objOrColl, @Nonnull Function<Collection<T>, T> merger) {
         if (objOrColl == null) {
             return merger.apply(Collections.emptyList());
         }

@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
  *
  * @author sunqian
  */
-public enum InvocationMode {
+public enum InvocationMode implements InvocableGenerator {
 
     /**
      * Using reflection to implement {@link Invocable}.
@@ -37,13 +37,11 @@ public enum InvocationMode {
         this.generator = generator;
     }
 
-    @Nonnull
-    Invocable generate(@Nonnull Method method) {
+    public @Nonnull Invocable generate(@Nonnull Method method) {
         return generator.generate(method);
     }
 
-    @Nonnull
-    Invocable generate(@Nonnull Constructor<?> constructor) {
+    public @Nonnull Invocable generate(@Nonnull Constructor<?> constructor) {
         return generator.generate(constructor);
     }
 }

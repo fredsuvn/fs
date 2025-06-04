@@ -1,5 +1,6 @@
 /**
- * This package provides <a href="https://asm.ow2.io/">ASM</a> utilities for this lib, it is non-exported.
+ * This package provides <a href="https://asm.ow2.io/">ASM</a> utilities for this lib, it is non-exported. The runtime
+ * environment must have asm package {@code org.objectweb.asm}.
  * <p>
  * Utilities:
  * <ul>

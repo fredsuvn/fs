@@ -1,39 +1,39 @@
 package xyz.sunqian.common.reflect.proxy;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.annotations.Nullable;
 
-import java.util.List;
+import java.util.function.Supplier;
 
 /**
- * This enum indicates the way of the proxy implementation. It is itself a delegate implementation of
- * {@link ProxyClassGenerator}, holding corresponding actual implementations.
+ * This enum contains all builtin implementations of the {@link ProxyClassGenerator}.
  *
  * @author sunqian
  */
-public enum ProxyMode implements ProxyClassGenerator {
+public enum ProxyMode {
 
     /**
-     * The JDK dynamic proxy via {@link JdkProxyClassGenerator}.
+     * Represents the JDK dynamic proxy implementation: {@link JdkProxyClassGenerator}.
      */
-    JDK(new JdkProxyClassGenerator()),
+    JDK(JdkProxyClassGenerator::new),
 
     /**
-     * The <a href="https://asm.ow2.io/">ASM</a> proxy via {@link AsmProxyClassGenerator}.
+     * Represents the <a href="https://asm.ow2.io/">ASM</a> proxy implementation: {@link AsmProxyClassGenerator}.
      */
-    ASM(new AsmProxyClassGenerator()),
+    ASM(AsmProxyClassGenerator::new),
     ;
 
-    private final ProxyClassGenerator generator;
+    private final Supplier<ProxyClassGenerator> supplier;
 
-    ProxyMode(ProxyClassGenerator generator) {
-        this.generator = generator;
+    ProxyMode(Supplier<ProxyClassGenerator> supplier) {
+        this.supplier = supplier;
     }
 
-    @Override
-    public @Nonnull ProxyClass generate(
-        @Nullable Class<?> proxiedClass, @Nonnull List<Class<?>> interfaces, @Nonnull ProxyMethodHandler methodHandler
-    ) throws ProxyException {
-        return generator.generate(proxiedClass, interfaces, methodHandler);
+    /**
+     * Returns a new generator represented by this mode.
+     *
+     * @return a new generator represented by this mode
+     */
+    public @Nonnull ProxyClassGenerator newGenerator() {
+        return supplier.get();
     }
 }

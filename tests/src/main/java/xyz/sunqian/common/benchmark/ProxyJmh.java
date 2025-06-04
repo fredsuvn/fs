@@ -35,7 +35,7 @@ public class ProxyJmh {
 
     static {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 100; i++) {
             sb.append(UUID.randomUUID());
         }
         UUIDS = sb.toString();
@@ -43,6 +43,8 @@ public class ProxyJmh {
 
     private static void doPrefixAndSuffix() {
         // UUIDS.matches(".+A.+");
+        StringBuilder sb = new StringBuilder(UUIDS);
+        sb.toString();
     }
 
     private static final class DirectImpl extends ForProxy.Impl {
@@ -60,47 +62,70 @@ public class ProxyJmh {
 
     private static final ForProxy directImpl = new DirectImpl();
 
-    private static final ForProxy asmImpl = ProxyMode.ASM.generate(null, Jie.list(ForProxy.class), new ProxyMethodHandler() {
-        @Override
-        public boolean requiresProxy(Method method) {
-            return true;
-        }
+    private static final ForProxy asmImpl = ProxyMode.ASM.newGenerator().generate(
+        null, Jie.list(ForProxy.class), new ProxyMethodHandler() {
+            @Override
+            public boolean requiresProxy(Method method) {
+                return true;
+            }
 
-        @Override
-        public @Nullable Object invoke(
-            @Nonnull Object proxy,
-            @Nonnull Method method,
-            @Nonnull ProxyInvoker invoker,
-            @Nullable Object @Nonnull ... args
-        ) throws Throwable {
-            doPrefixAndSuffix();
-            Object result = invoker.invokeSuper(proxy, args);
-            doPrefixAndSuffix();
-            return result;
-        }
-    }).newInstance();
+            @Override
+            public @Nullable Object invoke(
+                @Nonnull Object proxy,
+                @Nonnull Method method,
+                @Nonnull ProxyInvoker invoker,
+                @Nullable Object @Nonnull ... args
+            ) throws Throwable {
+                doPrefixAndSuffix();
+                Object result = invoker.invokeSuper(proxy, args);
+                doPrefixAndSuffix();
+                return result;
+            }
+        }).newInstance();
 
-    private static final ForProxy jdkImpl = ProxyMode.JDK.generate(null, Jie.list(ForProxy.class), new ProxyMethodHandler() {
-        @Override
-        public boolean requiresProxy(Method method) {
-            return true;
-        }
+    private static final ForProxy jdkImpl = ProxyMode.JDK.newGenerator().generate(
+        null, Jie.list(ForProxy.class), new ProxyMethodHandler() {
+            @Override
+            public boolean requiresProxy(Method method) {
+                return true;
+            }
 
-        @Override
-        public @Nullable Object invoke(
-            @Nonnull Object proxy,
-            @Nonnull Method method,
-            @Nonnull ProxyInvoker invoker,
-            @Nullable Object @Nonnull ... args
-        ) throws Throwable {
-            doPrefixAndSuffix();
-            Object result = invoker.invokeSuper(proxy, args);
-            doPrefixAndSuffix();
-            return result;
-        }
-    }).newInstance();
+            @Override
+            public @Nullable Object invoke(
+                @Nonnull Object proxy,
+                @Nonnull Method method,
+                @Nonnull ProxyInvoker invoker,
+                @Nullable Object @Nonnull ... args
+            ) throws Throwable {
+                doPrefixAndSuffix();
+                Object result = invoker.invokeSuper(proxy, args);
+                doPrefixAndSuffix();
+                return result;
+            }
+        }).newInstance();
 
-    private static final ForProxy jdkProxy = (ForProxy) Proxy.newProxyInstance(
+    private static final ForProxy jdkImplInvoke = ProxyMode.JDK.newGenerator().generate(
+        null, Jie.list(ForProxy.class), new ProxyMethodHandler() {
+            @Override
+            public boolean requiresProxy(Method method) {
+                return true;
+            }
+
+            @Override
+            public @Nullable Object invoke(
+                @Nonnull Object proxy,
+                @Nonnull Method method,
+                @Nonnull ProxyInvoker invoker,
+                @Nullable Object @Nonnull ... args
+            ) throws Throwable {
+                doPrefixAndSuffix();
+                Object result = method.invoke(impl, args);
+                doPrefixAndSuffix();
+                return result;
+            }
+        }).newInstance();
+
+    private static final ForProxy jdkProxyInvoke = (ForProxy) Proxy.newProxyInstance(
         new BytesClassLoader(),
         new Class<?>[]{ForProxy.class},
         new InvocationHandler() {
@@ -130,8 +155,13 @@ public class ProxyJmh {
     }
 
     @Benchmark
-    public void jdkProxy() {
-        jdkProxy.doSomething(UUIDS);
+    public void jdkImplInvoke() {
+        jdkImplInvoke.doSomething(UUIDS);
+    }
+
+    @Benchmark
+    public void jdkProxyInvoke() {
+        jdkProxyInvoke.doSomething(UUIDS);
     }
 
     @Benchmark
@@ -150,21 +180,28 @@ public class ProxyJmh {
     }
 
     @Benchmark
-    public void jdkProxySimple() {
-        jdkProxy.doSomeSimple(UUIDS);
+    public void jdkImplInvokeSimple() {
+        jdkImplInvoke.doSomeSimple(UUIDS);
+    }
+
+    @Benchmark
+    public void jdkProxyInvokeSimple() {
+        jdkProxyInvoke.doSomeSimple(UUIDS);
     }
 
     public static void main(String[] args) throws Exception {
         org.openjdk.jmh.Main.main(args);
     }
 
-    // Benchmark                   Mode  Cnt        Score        Error   Units
-    // ProxyJmh.asmImpl           thrpt   15     1054.900 ±     17.863  ops/ms
-    // ProxyJmh.asmImplSimple     thrpt   15   411217.788 ±  17314.753  ops/ms
-    // ProxyJmh.directImpl        thrpt   15     1057.106 ±     20.946  ops/ms
-    // ProxyJmh.directImplSimple  thrpt   15  4651567.167 ± 119688.626  ops/ms
-    // ProxyJmh.jdkImpl           thrpt   15      997.243 ±     19.840  ops/ms
-    // ProxyJmh.jdkImplSimple     thrpt   15    22619.390 ±    333.944  ops/ms
-    // ProxyJmh.jdkProxy          thrpt   15     1046.002 ±     23.540  ops/ms
-    // ProxyJmh.jdkProxySimple    thrpt   15   313120.218 ±   5717.647  ops/ms
+    // Benchmark                       Mode  Cnt    Score    Error   Units
+    // ProxyJmh.asmImpl               thrpt   15   95.049 ±  0.355  ops/ms
+    // ProxyJmh.asmImplSimple         thrpt   15  343.453 ± 11.707  ops/ms
+    // ProxyJmh.directImpl            thrpt   15   94.326 ±  1.253  ops/ms
+    // ProxyJmh.directImplSimple      thrpt   15  693.574 ±  3.400  ops/ms
+    // ProxyJmh.jdkImpl               thrpt   15   93.749 ±  0.573  ops/ms
+    // ProxyJmh.jdkImplInvoke         thrpt   15   95.372 ±  0.436  ops/ms
+    // ProxyJmh.jdkImplInvokeSimple   thrpt   15  346.993 ±  2.642  ops/ms
+    // ProxyJmh.jdkImplSimple         thrpt   15  320.095 ±  6.063  ops/ms
+    // ProxyJmh.jdkProxyInvoke        thrpt   15   95.122 ±  0.464  ops/ms
+    // ProxyJmh.jdkProxyInvokeSimple  thrpt   15  347.749 ±  1.920  ops/ms
 }

@@ -32,7 +32,7 @@ import java.util.Map;
 @ThreadSafe
 public class JdkProxyClassGenerator implements ProxyClassGenerator {
 
-    private static final Object[] EMPTY_ARGS = {};
+    private static final @Nonnull Object @Nonnull [] EMPTY_ARGS = {};
 
     @Override
     public @Nonnull ProxyClass generate(
@@ -171,13 +171,18 @@ public class JdkProxyClassGenerator implements ProxyClassGenerator {
     @JdkDependent
     private static @Nonnull MethodHandle getMethodHandleForDefaultMethod(@Nonnull Method method) throws Throwable {
         Class<?> declaringClass = method.getDeclaringClass();
-        // works on JDK 8:
-        Constructor<MethodHandles.Lookup> constructor = MethodHandles.Lookup.class
-            .getDeclaredConstructor(Class.class);
-        constructor.setAccessible(true);
-        MethodHandles.Lookup lookup = constructor.newInstance(declaringClass);
+        MethodHandles.Lookup lookup;
+        {
+            // works on JDK 8:
+            Constructor<MethodHandles.Lookup> constructor = MethodHandles.Lookup.class
+                .getDeclaredConstructor(Class.class);
+            constructor.setAccessible(true);
+            lookup = constructor.newInstance(declaringClass);
+        }
+        {
+            // works on JDK 9+:
+            // lookup = MethodHandles.lookup();
+        }
         return lookup.unreflectSpecial(method, declaringClass);
-        // works on JDK 9+:
-        // MethodHandle methodHandle = MethodHandles.lookup().unreflectSpecial(method, declaringClass);
     }
 }

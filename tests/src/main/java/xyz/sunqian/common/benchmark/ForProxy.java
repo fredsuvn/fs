@@ -11,7 +11,7 @@ public interface ForProxy {
     }
 
     default String doSomeSimple(String input) {
-        return input;
+        return input + input;
     }
 
     public static class Impl implements ForProxy {

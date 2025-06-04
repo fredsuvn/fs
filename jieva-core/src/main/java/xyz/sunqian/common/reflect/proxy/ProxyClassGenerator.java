@@ -7,7 +7,8 @@ import xyz.sunqian.annotations.ThreadSafe;
 import java.util.List;
 
 /**
- * This interface is the generator for generating proxy class.
+ * This interface is the generator for generating proxy class, all builtin implementations can be found in
+ * {@link ProxyMode}.
  *
  * @author sunqian
  */
