@@ -1,9 +1,7 @@
 package test.reflect.proxy;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.reflect.proxy.AsmProxyClassGenerator;
 import xyz.sunqian.common.reflect.proxy.ProxyException;
-import xyz.sunqian.common.reflect.proxy.JdkProxyClassGenerator;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertSame;
@@ -29,20 +27,6 @@ public class ProxyExceptionTest {
                 throw new ProxyException("", new RuntimeException());
             });
             ProxyException e = new ProxyException(cause);
-            assertEquals(e.getMessage(), message);
-            assertSame(e.getCause(), cause);
-        }
-
-        {
-            // AsmProxyException
-            AsmProxyClassGenerator.AsmProxyException e = new AsmProxyClassGenerator.AsmProxyException(cause);
-            assertEquals(e.getMessage(), message);
-            assertSame(e.getCause(), cause);
-        }
-
-        {
-            // JdkProxyException
-            JdkProxyClassGenerator.JdkProxyException e = new JdkProxyClassGenerator.JdkProxyException(cause);
             assertEquals(e.getMessage(), message);
             assertSame(e.getCause(), cause);
         }

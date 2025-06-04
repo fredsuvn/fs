@@ -5,6 +5,8 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.JieException;
+import xyz.sunqian.common.base.value.Val;
+import xyz.sunqian.common.base.value.Var;
 import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.reflect.BytesClassLoader;
 
@@ -13,9 +15,9 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.LinkedHashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 /**
  * JDK dynamic proxy implementation for {@link ProxyBuilder}, via {@link Proxy}.
@@ -36,46 +38,51 @@ public class JdkProxyClassGenerator implements ProxyClassGenerator {
             new BytesClassLoader(),
             interfaces.toArray(new Class<?>[0])
         );
-        Set<Method> methodSet = new LinkedHashSet<>();
+        Map<Method, Var<ProxyInvoker>> methodMap = new HashMap<>();
         for (Class<?> anInterface : interfaces) {
             Method[] methods = anInterface.getMethods();
             for (Method method : methods) {
-                if (methodSet.contains(method)) {
+                if (methodMap.containsKey(method)) {
                     continue;
                 }
                 if (methodHandler.requiresProxy(method)) {
-                    methodSet.add(method);
+                    methodMap.put(method, Var.of(null));
                 }
             }
         }
-        InvocationHandler handler = new InvocationHandler() {
-            @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                if (!methodSet.contains(method)) {
-                    return invokeMethod(proxy, method, args);
-                }
-                return null;
+        InvocationHandler handler = (proxy, method, args) -> {
+            Var<ProxyInvoker> invokerVar = methodMap.get(method);
+            if (invokerVar == null) {
+                return invokeSpecial(proxy, method, args);
             }
+            @Nullable ProxyInvoker invoker = invokerVar.get();
+            if (invoker == null) {
+                invoker = new JdkInvoker(method);
+                invokerVar.set(invoker);
+            }
+            return methodHandler.invoke(proxy, method, invoker, args);
         };
         return new JdkProxyClass(proxyClass, handler);
     }
 
     private static final class JdkInvoker implements ProxyInvoker {
 
-        private final Invocable invocable;
+        private final @Nonnull Method method;
+        private final @Nonnull Invocable invocable;
 
         private JdkInvoker(Method method) {
+            this.method = method;
             this.invocable = Invocable.of(method);
         }
 
         @Override
         public @Nullable Object invoke(@Nonnull Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
-            return invocable.invoke(inst, args);
+            return invocable.invokeChecked(inst, args);
         }
 
         @Override
         public @Nullable Object invokeSuper(@Nonnull Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
-            return null;
+            return invokeSpecial(inst, method, args);
         }
     }
 
@@ -106,19 +113,6 @@ public class JdkProxyClassGenerator implements ProxyClassGenerator {
         }
     }
 
-    @JdkDependent
-    private static @Nullable Object invokeMethod(
-        @Nonnull Object proxy,
-        @Nonnull Method method,
-        @Nullable Object @Nonnull [] args
-    ) throws Throwable {
-        try {
-            return method.invoke(proxy, args);
-        } catch (InvocationTargetException e) {
-            throw e.getCause();
-        }
-    }
-
     /**
      * This exception is the sub-exception of {@link ProxyException} for JDK dynamic proxy implementation.
      *
@@ -132,6 +126,17 @@ public class JdkProxyClassGenerator implements ProxyClassGenerator {
          */
         public JdkProxyException(@Nullable Throwable cause) {
             super(JieException.getMessage(cause), cause);
+        }
+    }
+
+    @JdkDependent
+    private static @Nullable Object invokeSpecial(
+        @Nonnull Object proxy, @Nonnull Method method, @Nullable Object @Nonnull [] args
+    ) throws Throwable {
+        try {
+            return method.invoke(proxy, args);
+        } catch (InvocationTargetException e) {
+            throw e.getCause();
         }
     }
 }

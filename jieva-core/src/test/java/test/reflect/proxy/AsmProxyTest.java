@@ -6,11 +6,11 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.value.IntVar;
+import xyz.sunqian.common.reflect.proxy.AsmProxyClassGenerator;
 import xyz.sunqian.common.reflect.proxy.ProxyClass;
 import xyz.sunqian.common.reflect.proxy.ProxyClassGenerator;
 import xyz.sunqian.common.reflect.proxy.ProxyInvoker;
 import xyz.sunqian.common.reflect.proxy.ProxyMethodHandler;
-import xyz.sunqian.common.reflect.proxy.AsmProxyClassGenerator;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
@@ -411,6 +412,46 @@ public class AsmProxyTest {
         counter.set(0);
     }
 
+    @Test
+    public void testOverpass() {
+        ProxyClassGenerator generator = new AsmProxyClassGenerator();
+        ProxyClass pc = generator.generate(
+            ClsOverpass111.class, Jie.list(InterOverpass111.class),
+            new ProxyMethodHandler() {
+
+                @Override
+                public boolean requiresProxy(Method method) {
+                    return true;
+                }
+
+                @Override
+                public @Nullable Object invoke(
+                    @Nonnull Object proxy,
+                    @Nonnull Method method,
+                    @Nonnull ProxyInvoker invoker,
+                    @Nullable Object @Nonnull ... args
+                ) throws Throwable {
+                    return invoker.invokeSuper(proxy, args);
+                }
+            }
+        );
+        ClsOverpass111 pc111 = pc.newInstance();
+        ClsOverpass111 c111 = new ClsOverpass111();
+        assertEquals(pc111.ooc(), c111.ooc());
+        InterOverpass11 pi111 = pc.newInstance();
+        InterOverpass11 i111 = new InterOverpass11() {};
+        assertEquals(pi111.ooi(), i111.ooi());
+    }
+
+    @Test
+    public void testAsmProxyException() {
+        String message = "hello";
+        Throwable cause = new RuntimeException(message);
+        AsmProxyClassGenerator.AsmProxyException e = new AsmProxyClassGenerator.AsmProxyException(cause);
+        assertEquals(e.getMessage(), message);
+        assertSame(e.getCause(), cause);
+    }
+
     private void testInterA(InterA obj, IntVar counter) {
         assertFalse(obj.equals(""));
         assertEquals(counter.get(), 1);
@@ -795,4 +836,26 @@ public class AsmProxyTest {
             return i * 4;
         }
     }
+
+    public interface InterOverpass1 {
+        default String ooi() {
+            return "ooi";
+        }
+    }
+
+    public interface InterOverpass11 extends InterOverpass1 {
+    }
+
+    public interface InterOverpass111 extends InterOverpass11 {
+    }
+
+    public static class ClsOverpass1 {
+        public String ooc() {
+            return "ooc";
+        }
+    }
+
+    public static class ClsOverpass11 extends ClsOverpass1 {}
+
+    public static class ClsOverpass111 extends ClsOverpass11 {}
 }
