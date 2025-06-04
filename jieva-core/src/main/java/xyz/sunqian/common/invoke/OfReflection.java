@@ -4,6 +4,7 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 final class OfReflection implements InvocableGenerator {
@@ -28,7 +29,11 @@ final class OfReflection implements InvocableGenerator {
 
         @Override
         public Object invokeChecked(@Nullable Object inst, @Nullable Object... args) throws Throwable {
-            return constructor.newInstance(args);
+            try {
+                return constructor.newInstance(args);
+            } catch (InvocationTargetException e) {
+                throw e.getCause();
+            }
         }
     }
 
@@ -42,7 +47,11 @@ final class OfReflection implements InvocableGenerator {
 
         @Override
         public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object... args) throws Throwable {
-            return method.invoke(inst, args);
+            try {
+                return method.invoke(inst, args);
+            } catch (InvocationTargetException e) {
+                throw e.getCause();
+            }
         }
     }
 }
