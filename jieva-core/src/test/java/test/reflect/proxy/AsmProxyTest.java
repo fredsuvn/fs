@@ -392,6 +392,39 @@ public class AsmProxyTest {
                 ie.b3(true, (byte) 1, (short) 2, (char) 3, 4, 5, 6, 7, "8")
             );
         }
+        {
+            // invoke filtered
+            class F extends ClsA implements InterC {
+            }
+            ProxyClassGenerator generator = new AsmProxyClassGenerator();
+            ProxyClass pc = generator.generate(
+                ClsA.class, Jie.list(InterC.class),
+                new ProxyMethodHandler() {
+
+                    @Override
+                    public boolean requiresProxy(Method method) {
+                        return !method.getName().startsWith("filtered");
+                    }
+
+                    @Override
+                    public @Nullable Object invoke(
+                        @Nonnull Object proxy,
+                        @Nonnull Method method,
+                        @Nonnull ProxyInvoker invoker,
+                        @Nullable Object @Nonnull ... args
+                    ) throws Throwable {
+                        return invoker.invoke(proxy, args);
+                    }
+                }
+            );
+            F f = new F();
+            ClsA ca = pc.newInstance();
+            expectThrows(StackOverflowError.class, () -> ca.a1(""));
+            assertEquals(ca.filteredA(), f.filteredA());
+            InterC ic = pc.newInstance();
+            expectThrows(StackOverflowError.class, () -> ic.c1(""));
+            assertEquals(ic.filteredC(), f.filteredC());
+        }
     }
 
     @Test
@@ -728,6 +761,10 @@ public class AsmProxyTest {
 
     public interface InterC<T> {
 
+        default String filteredC() {
+            return "filteredC";
+        }
+
         default T c1(T a0) {
             return a0;
         }
@@ -783,6 +820,10 @@ public class AsmProxyTest {
     }
 
     public static class ClsA {
+
+        public String filteredA() {
+            return "filteredA";
+        }
 
         public String a1(String a0) {
             return cp(a0);
