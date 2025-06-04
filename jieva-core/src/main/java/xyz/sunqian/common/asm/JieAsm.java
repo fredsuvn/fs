@@ -1,18 +1,36 @@
-package xyz.sunqian.common.reflect.proxy;
+package xyz.sunqian.common.asm;
 
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import xyz.sunqian.annotations.NonExported;
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
+import xyz.sunqian.common.collect.JieArray;
 import xyz.sunqian.common.reflect.JieJvm;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Objects;
 
 @NonExported
 public class JieAsm {
+
+    /**
+     * The internal name of {@link Object}.
+     */
+    public static final @Nonnull String OBJECT_NAME = "java/lang/Object";
+
+    /**
+     * The method name of constructor.
+     */
+    public static final @Nonnull String CONSTRUCTOR_NAME = "<init>";
+
+    /**
+     * The descriptor of constructor with empty parameter.
+     */
+    public static final @Nonnull String EMPTY_CONSTRUCTOR_DESCRIPTOR = "()V";
 
     public static String generateSignature(Iterable<Class<?>> uppers) {
         StringBuilder sb = new StringBuilder();
@@ -526,6 +544,20 @@ public class JieAsm {
             size += varSize(parameter.getType());
         }
         return size;
+    }
+
+    /**
+     * Returns the exception internal names of the specified method.
+     *
+     * @param method the specified method
+     * @return the exception internal names of the specified method
+     */
+    public static @Nonnull String @Nullable [] getExceptions(Method method) {
+        Class<?>[] exceptionTypes = method.getExceptionTypes();
+        if (JieArray.isEmpty(exceptionTypes)) {
+            return null;
+        }
+        return Jie.stream(exceptionTypes).map(JieJvm::getInternalName).toArray(String[]::new);
     }
 
     /**

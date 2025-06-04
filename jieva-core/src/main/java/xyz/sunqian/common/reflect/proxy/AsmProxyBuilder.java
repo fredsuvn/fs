@@ -6,6 +6,7 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.asm.JieAsm;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.collect.JieCollect;

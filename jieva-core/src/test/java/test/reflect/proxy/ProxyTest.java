@@ -135,7 +135,7 @@ public class ProxyTest {
 
     @Test
     public void testAsmMisc() throws Exception {
-        Class<?> asmMisc = Class.forName("xyz.sunqian.common.reflect.proxy.JieAsm");
+        Class<?> asmMisc = Class.forName("xyz.sunqian.common.asm.JieAsm");
         Method method = asmMisc.getDeclaredMethod(
             "visitLoadPrimitiveParamAsObject", MethodVisitor.class, Class.class, int.class);
         invokeThrows(UnknownPrimitiveTypeException.class, method, null, null, Object.class, 1);

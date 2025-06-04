@@ -1,9 +1,9 @@
 package test.reflect.proxy;
 
 import org.testng.annotations.Test;
+import xyz.sunqian.common.reflect.proxy.AsmProxyClassGenerator;
 import xyz.sunqian.common.reflect.proxy.ProxyException;
-import xyz.sunqian.common.reflect.proxy.asm.AsmProxyException;
-import xyz.sunqian.common.reflect.proxy.jdk.JdkProxyException;
+import xyz.sunqian.common.reflect.proxy.JdkProxyClassGenerator;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertSame;
@@ -35,32 +35,14 @@ public class ProxyExceptionTest {
 
         {
             // AsmProxyException
-            expectThrows(AsmProxyException.class, () -> {
-                throw new AsmProxyException();
-            });
-            expectThrows(AsmProxyException.class, () -> {
-                throw new AsmProxyException("");
-            });
-            expectThrows(AsmProxyException.class, () -> {
-                throw new AsmProxyException("", new RuntimeException());
-            });
-            AsmProxyException e = new AsmProxyException(cause);
+            AsmProxyClassGenerator.AsmProxyException e = new AsmProxyClassGenerator.AsmProxyException(cause);
             assertEquals(e.getMessage(), message);
             assertSame(e.getCause(), cause);
         }
 
         {
             // JdkProxyException
-            expectThrows(JdkProxyException.class, () -> {
-                throw new JdkProxyException();
-            });
-            expectThrows(JdkProxyException.class, () -> {
-                throw new JdkProxyException("");
-            });
-            expectThrows(JdkProxyException.class, () -> {
-                throw new JdkProxyException("", new RuntimeException());
-            });
-            JdkProxyException e = new JdkProxyException(cause);
+            JdkProxyClassGenerator.JdkProxyException e = new JdkProxyClassGenerator.JdkProxyException(cause);
             assertEquals(e.getMessage(), message);
             assertSame(e.getCause(), cause);
         }

@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 @BenchmarkMode(Mode.Throughput)
 @Warmup(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
-@Fork(3)
+@Fork(1)
 @State(value = Scope.Benchmark)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 public class InvokeJmh {
@@ -79,52 +79,65 @@ public class InvokeJmh {
         String result = (String) asmStatic.invoke(null, "hi");
     }
 
-    @Benchmark
-    public void reflectInstance() {
-        String result = (String) reflectInstance.invoke(hello, "hi");
-    }
-
-    @Benchmark
-    public void methodHandleInstance() {
-        String result = (String) methodHandleInstance.invoke(hello, "hi");
-    }
-
-    @Benchmark
-    public void asmInstance() {
-        String result = (String) asmInstance.invoke(hello, "hi");
-    }
+    // @Benchmark
+    // public void reflectInstance() {
+    //     String result = (String) reflectInstance.invoke(hello, "hi");
+    // }
+    //
+    // @Benchmark
+    // public void methodHandleInstance() {
+    //     String result = (String) methodHandleInstance.invoke(hello, "hi");
+    // }
+    //
+    // @Benchmark
+    // public void asmInstance() {
+    //     String result = (String) asmInstance.invoke(hello, "hi");
+    // }
 
     @Benchmark
     public void directStatic() {
         String result = Hello.staticWorld("hi");
     }
 
-    @Benchmark
-    public void directInstance() {
-        String result = hello.instanceWorld("hi");
-    }
+    // @Benchmark
+    // public void directInstance() {
+    //     String result = hello.instanceWorld("hi");
+    // }
 
     @Benchmark
     public void methodHandleExactStatic() throws Throwable {
         String result = (String) handleStatic.invokeExact("hi");
     }
 
-    @Benchmark
-    public void methodHandleExactInstance() throws Throwable {
-        String result = (String) handleInstance.invokeExact(hello, "hi");
-    }
-
-    @Benchmark
-    public void methodHandleAsTypeInstance() throws Throwable {
-        String result = (String) handleInstanceAsType.invoke(hello, "hi");
-    }
-
-    @Benchmark
-    public void methodHandleBindInstance() throws Throwable {
-        String result = (String) handleInstanceBind.invoke("hi");
-    }
+    // @Benchmark
+    // public void methodHandleExactInstance() throws Throwable {
+    //     String result = (String) handleInstance.invokeExact(hello, "hi");
+    // }
+    //
+    // @Benchmark
+    // public void methodHandleAsTypeInstance() throws Throwable {
+    //     String result = (String) handleInstanceAsType.invoke(hello, "hi");
+    // }
+    //
+    // @Benchmark
+    // public void methodHandleBindInstance() throws Throwable {
+    //     String result = (String) handleInstanceBind.invoke("hi");
+    // }
 
     public static void main(String[] args) throws Exception {
         org.openjdk.jmh.Main.main(args);
     }
+
+    //Benchmark                           Mode  Cnt        Score        Error   Units
+    // InvokeJmh.asmStatic                thrpt    3  4757199.221 ±  90299.607  ops/ms
+    // InvokeJmh.directStatic             thrpt    3  4744041.033 ± 278591.694  ops/ms
+    // InvokeJmh.methodHandleExactStatic  thrpt    3  4706264.597 ± 291910.847  ops/ms
+    // InvokeJmh.methodHandleStatic       thrpt    3     9952.359 ±    996.007  ops/ms
+    // InvokeJmh.reflectStatic            thrpt    3   331262.650 ±  56808.916  ops/ms
+    //Benchmark                           Mode  Cnt        Score         Error   Units
+    // InvokeJmh.asmStatic                thrpt    3  4190257.317 ± 6056742.541  ops/ms
+    // InvokeJmh.directStatic             thrpt    3  4461501.741 ± 1285981.057  ops/ms
+    // InvokeJmh.methodHandleExactStatic  thrpt    3  4681710.487 ± 1246135.904  ops/ms
+    // InvokeJmh.methodHandleStatic       thrpt    3    29776.693 ±   21315.126  ops/ms
+    // InvokeJmh.reflectStatic            thrpt    3   336996.100 ±   11807.109  ops/ms
 }

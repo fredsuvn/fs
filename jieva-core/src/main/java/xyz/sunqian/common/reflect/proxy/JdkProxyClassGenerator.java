@@ -1,17 +1,12 @@
-package xyz.sunqian.common.reflect.proxy.jdk;
+package xyz.sunqian.common.reflect.proxy;
 
 import xyz.sunqian.annotations.JdkDependent;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.exception.JieException;
 import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.reflect.BytesClassLoader;
-import xyz.sunqian.common.reflect.proxy.ProxyBuilder;
-import xyz.sunqian.common.reflect.proxy.ProxyClass;
-import xyz.sunqian.common.reflect.proxy.ProxyClassGenerator;
-import xyz.sunqian.common.reflect.proxy.ProxyException;
-import xyz.sunqian.common.reflect.proxy.ProxyInvoker;
-import xyz.sunqian.common.reflect.proxy.ProxyMethodHandler;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
@@ -121,6 +116,22 @@ public class JdkProxyClassGenerator implements ProxyClassGenerator {
             return method.invoke(proxy, args);
         } catch (InvocationTargetException e) {
             throw e.getCause();
+        }
+    }
+
+    /**
+     * This exception is the sub-exception of {@link ProxyException} for JDK dynamic proxy implementation.
+     *
+     * @author sunqian
+     */
+    public static class JdkProxyException extends ProxyException {
+        /**
+         * Constructs with the cause.
+         *
+         * @param cause the cause
+         */
+        public JdkProxyException(@Nullable Throwable cause) {
+            super(JieException.getMessage(cause), cause);
         }
     }
 }

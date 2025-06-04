@@ -10,7 +10,7 @@ import xyz.sunqian.common.reflect.proxy.ProxyClass;
 import xyz.sunqian.common.reflect.proxy.ProxyClassGenerator;
 import xyz.sunqian.common.reflect.proxy.ProxyInvoker;
 import xyz.sunqian.common.reflect.proxy.ProxyMethodHandler;
-import xyz.sunqian.common.reflect.proxy.asm.AsmProxyClassGenerator;
+import xyz.sunqian.common.reflect.proxy.AsmProxyClassGenerator;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;

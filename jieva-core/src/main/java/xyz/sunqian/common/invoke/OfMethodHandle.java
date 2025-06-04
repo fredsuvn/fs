@@ -6,7 +6,6 @@ import xyz.sunqian.common.reflect.JieClass;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
@@ -33,9 +32,9 @@ final class OfMethodHandle implements InvocableGenerator {
         private ForInstance(@Nonnull Method method) {
             try {
                 this.methodHandle = MethodHandles.lookup()
-                    .findVirtual(method.getDeclaringClass(), method.getName(), MethodType.methodType(method.getReturnType(), method.getParameterTypes()));
-                    //.unreflect(method)
-                    //.asType(buildMethodType(method));
+                    //.findVirtual(method.getDeclaringClass(), method.getName(), MethodType.methodType(method.getReturnType(), method.getParameterTypes()));
+                    .unreflect(method);
+                //.asType(buildMethodType(method));
             } catch (Exception e) {
                 throw new InvocationException(e);
             }
@@ -65,9 +64,9 @@ final class OfMethodHandle implements InvocableGenerator {
         private ForStatic(@Nonnull Method method) {
             try {
                 this.methodHandle = MethodHandles.lookup()
-                    //.unreflect(method)
-                    .findStatic(method.getDeclaringClass(), method.getName(), buildMethodType(method));
-                    //.asType(buildMethodType(method));
+                    //.findStatic(method.getDeclaringClass(), method.getName(), buildMethodType(method));
+                    .unreflect(method);
+                //.asType(buildMethodType(method));
             } catch (Exception e) {
                 throw new InvocationException(e);
             }
@@ -76,9 +75,9 @@ final class OfMethodHandle implements InvocableGenerator {
         private ForStatic(@Nonnull Constructor<?> constructor) {
             try {
                 this.methodHandle = MethodHandles.lookup()
-                    //.unreflectConstructor(constructor)
-                    .findConstructor(constructor.getDeclaringClass(), MethodType.methodType(void.class, constructor.getParameterTypes()));
-                    //.asType(buildMethodType(constructor));
+                    //.findConstructor(constructor.getDeclaringClass(), MethodType.methodType(void.class, constructor.getParameterTypes()));
+                    .unreflectConstructor(constructor);
+                //.asType(buildMethodType(constructor));
             } catch (Exception e) {
                 throw new InvocationException(e);
             }
@@ -92,26 +91,27 @@ final class OfMethodHandle implements InvocableGenerator {
         public @Nullable Object invoke(@Nullable Object inst, @Nullable Object... args) {
             try {
                 return JieInvoke.invokeStatic(methodHandle, args);
+                // return methodHandle.invokeWithArguments(args);
             } catch (Throwable e) {
                 throw new InvocationException(e);
             }
         }
     }
 
-    private static MethodType buildMethodType(Method method) {
-        Class<?>[] parameterTypes;
-        if (JieClass.isStatic(method)) {
-            parameterTypes = method.getParameterTypes();
-        } else {
-            parameterTypes = new Class<?>[method.getParameterCount() + 1];
-            parameterTypes[0] = method.getDeclaringClass();
-            System.arraycopy(
-                method.getParameterTypes(), 0, parameterTypes, 1, method.getParameterCount());
-        }
-        return MethodType.methodType(method.getReturnType(), parameterTypes);
-    }
-
-    private static MethodType buildMethodType(Constructor<?> constructor) {
-        return MethodType.methodType(constructor.getDeclaringClass(), constructor.getParameterTypes());
-    }
+    // private static MethodType buildMethodType(Method method) {
+    //     Class<?>[] parameterTypes;
+    //     if (JieClass.isStatic(method)) {
+    //         parameterTypes = method.getParameterTypes();
+    //     } else {
+    //         parameterTypes = new Class<?>[method.getParameterCount() + 1];
+    //         parameterTypes[0] = method.getDeclaringClass();
+    //         System.arraycopy(
+    //             method.getParameterTypes(), 0, parameterTypes, 1, method.getParameterCount());
+    //     }
+    //     return MethodType.methodType(method.getReturnType(), parameterTypes);
+    // }
+    //
+    // private static MethodType buildMethodType(Constructor<?> constructor) {
+    //     return MethodType.methodType(constructor.getDeclaringClass(), constructor.getParameterTypes());
+    // }
 }
