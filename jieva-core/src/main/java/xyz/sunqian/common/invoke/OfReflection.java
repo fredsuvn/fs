@@ -27,12 +27,8 @@ final class OfReflection implements InvocableGenerator {
         }
 
         @Override
-        public Object invoke(@Nullable Object inst, @Nullable Object... args) throws InvocationException {
-            try {
-                return constructor.newInstance(args);
-            } catch (Exception e) {
-                throw new InvocationException(e);
-            }
+        public Object invokeChecked(@Nullable Object inst, @Nullable Object... args) throws Throwable {
+            return constructor.newInstance(args);
         }
     }
 
@@ -45,12 +41,8 @@ final class OfReflection implements InvocableGenerator {
         }
 
         @Override
-        public @Nullable Object invoke(@Nullable Object inst, @Nullable Object... args) {
-            try {
-                return method.invoke(inst, args);
-            } catch (Exception e) {
-                throw new InvocationException(e);
-            }
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object... args) throws Throwable {
+            return method.invoke(inst, args);
         }
     }
 }

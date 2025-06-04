@@ -45,15 +45,11 @@ final class OfMethodHandle implements InvocableGenerator {
         }
 
         @Override
-        public @Nullable Object invoke(@Nullable Object inst, @Nullable Object... args) {
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object... args) throws Throwable {
             if (inst == null) {
                 throw new InvocationException("The instance must be nonnull.");
             }
-            try {
-                return JieInvoke.invokeInstance(methodHandle, inst, args);
-            } catch (Throwable e) {
-                throw new InvocationException(e);
-            }
+            return JieInvoke.invokeInstance(methodHandle, inst, args);
         }
     }
 
@@ -88,13 +84,9 @@ final class OfMethodHandle implements InvocableGenerator {
         }
 
         @Override
-        public @Nullable Object invoke(@Nullable Object inst, @Nullable Object... args) {
-            try {
-                return JieInvoke.invokeStatic(methodHandle, args);
-                // return methodHandle.invokeWithArguments(args);
-            } catch (Throwable e) {
-                throw new InvocationException(e);
-            }
+        public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object... args) throws Throwable {
+            return JieInvoke.invokeStatic(methodHandle, args);
+            // return methodHandle.invokeWithArguments(args);
         }
     }
 
