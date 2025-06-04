@@ -1,32 +1,37 @@
 package xyz.sunqian.common.reflect.proxy;
 
-import java.lang.reflect.Proxy;
+import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.Nullable;
+
+import java.util.List;
 
 /**
- * This is a static utilities class provides utilities for {@code class proxy}.
+ * Static utility class for proxy.
  *
- * @author fredsuvn
+ * @author sunqian
  */
 public class JieProxy {
 
     /**
-     * Returns a new proxy builder implemented by JDK dynamic proxy ({@link Proxy}).
+     * Generates the proxy class for the specified proxied class and interfaces, with the specified proxy method
+     * handler. Note that if there are methods with the same name and parameter types, it may cause generation errors.
+     * <p>
+     * This method invokes the actual underlying implementation of
+     * {@link ProxyClassGenerator#generate(Class, List, ProxyMethodHandler)} via the parameter {@code mode}.
      *
-     * @return a new proxy builder implemented by JDK dynamic proxy ({@link Proxy})
-     * @see JdkDynamicProxyBuilder
+     * @param proxiedClass  the specified class to be proxied, may be {@code null} if it is {@link Object}
+     * @param interfaces    the interfaces to be proxied, may be empty
+     * @param methodHandler the specified proxy method handler
+     * @param mode          to specifies the actual underlying implementation of the generation
+     * @return the proxy class
+     * @throws ProxyException if any problem occurs during the generating
      */
-    public static ProxyBuilder jdkProxyBuilder() {
-        return new JdkDynamicProxyBuilder();
-    }
-
-    /**
-     * Returns a new proxy builder implemented by <a href="https://asm.ow2.io/">ASM</a>. The runtime environment must
-     * have asm package {@code org.objectweb.asm}.
-     *
-     * @return a new proxy builder implemented by <a href="https://asm.ow2.io/">ASM</a>
-     * @see AsmProxyBuilder
-     */
-    public static ProxyBuilder asmProxyBuilder() {
-        return new AsmProxyBuilder();
+    public static @Nonnull ProxyClass proxy(
+        @Nullable Class<?> proxiedClass,
+        @Nonnull List<Class<?>> interfaces,
+        @Nonnull ProxyMethodHandler methodHandler,
+        @Nonnull ProxyMode mode
+    ) throws ProxyException {
+        return mode.generate(proxiedClass, interfaces, methodHandler);
     }
 }

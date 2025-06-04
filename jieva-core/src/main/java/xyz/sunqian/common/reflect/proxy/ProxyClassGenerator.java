@@ -2,6 +2,7 @@ package xyz.sunqian.common.reflect.proxy;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.annotations.ThreadSafe;
 
 import java.util.List;
 
@@ -10,6 +11,7 @@ import java.util.List;
  *
  * @author sunqian
  */
+@ThreadSafe
 public interface ProxyClassGenerator {
 
     /**

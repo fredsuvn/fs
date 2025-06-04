@@ -7,6 +7,7 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.asm.JieAsm;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.value.IntVar;
@@ -38,6 +39,7 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * @author sunqian
  */
+@ThreadSafe
 public class AsmProxyClassGenerator implements ProxyClassGenerator {
 
     private static final @Nonnull String INVOKER_NAME = JieJvm.getInternalName(ProxyInvoker.class);

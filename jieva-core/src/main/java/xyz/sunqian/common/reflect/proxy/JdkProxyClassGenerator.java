@@ -3,6 +3,7 @@ package xyz.sunqian.common.reflect.proxy;
 import xyz.sunqian.annotations.JdkDependent;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.JieException;
 import xyz.sunqian.common.base.value.Var;
@@ -22,12 +23,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * JDK dynamic proxy implementation for {@link ProxyBuilder}, via {@link Proxy}.
+ * JDK dynamic proxy implementation for {@link ProxyClassGenerator}.
  * <p>
  * This generator uses {@link Proxy} to generate proxy class, and that means it only supports proxy interfaces.
  *
  * @author sunqian
  */
+@ThreadSafe
 public class JdkProxyClassGenerator implements ProxyClassGenerator {
 
     private static final Object[] EMPTY_ARGS = {};
