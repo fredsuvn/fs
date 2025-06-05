@@ -1,9 +1,11 @@
 package xyz.sunqian.common.invoke;
 
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.common.reflect.JieClass;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 
 /**
@@ -16,7 +18,7 @@ public enum InvocationMode implements InvocableGenerator {
     /**
      * Using reflection to implement {@link Invocable}.
      */
-    REFLECT(new OfReflection()),
+    REFLECTION(new OfReflection()),
 
     /**
      * Using {@link MethodHandle} to implement {@link Invocable}.
@@ -29,7 +31,33 @@ public enum InvocationMode implements InvocableGenerator {
     ASM(new OfAsm()),
     ;
 
-    static final InvocationMode DEFAULT = METHOD_HANDLE;
+    /**
+     * Returns the recommended implementation for the specified method in current environment.
+     *
+     * @param method the specified method
+     * @return the recommended implementation for the specified method in current environment
+     */
+    public static @Nonnull InvocationMode recommended(@Nonnull Method method) {
+        return recommended(method, JieClass.isStatic(method));
+    }
+
+    /**
+     * Returns the recommended implementation for the specified constructor in current environment.
+     *
+     * @param constructor the specified constructor
+     * @return the recommended implementation for the specified constructor in current environment
+     */
+    public static @Nonnull InvocationMode recommended(@Nonnull Constructor<?> constructor) {
+        return recommended(constructor, true);
+    }
+
+    private static @Nonnull InvocationMode recommended(@Nonnull Executable executable, boolean isStatic) {
+        int paramCount = executable.getParameterCount();
+        if (isStatic) {
+            return paramCount <= OfMethodHandle.MAX_INSTANCE_ARGS_IMPL ? METHOD_HANDLE : REFLECTION;
+        }
+        return paramCount <= OfMethodHandle.MAX_INSTANCE_ARGS_IMPL ? METHOD_HANDLE : ASM;
+    }
 
     private final @Nonnull InvocableGenerator generator;
 

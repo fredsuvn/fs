@@ -19,9 +19,12 @@ import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
 
 @BenchmarkMode(Mode.Throughput)
-@Warmup(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)
-@Fork(1)
+@Warmup(iterations = 3, time = 3, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 3, time = 3, timeUnit = TimeUnit.SECONDS)
+@Fork(5)
+// @Warmup(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)
+// @Measurement(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)
+// @Fork(1)
 @State(value = Scope.Benchmark)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 public class InvokeJmh {
@@ -39,10 +42,10 @@ public class InvokeJmh {
     }
 
     private static final Hello hello = new Hello();
-    private static final Invocable reflectStatic = Invocable.of(staticWorld, InvocationMode.REFLECT);
+    private static final Invocable reflectStatic = Invocable.of(staticWorld, InvocationMode.REFLECTION);
     private static final Invocable methodHandleStatic = Invocable.of(staticWorld, InvocationMode.METHOD_HANDLE);
     private static final Invocable asmStatic = Invocable.of(staticWorld, InvocationMode.ASM);
-    private static final Invocable reflectInstance = Invocable.of(instanceWorld, InvocationMode.REFLECT);
+    private static final Invocable reflectInstance = Invocable.of(instanceWorld, InvocationMode.REFLECTION);
     private static final Invocable methodHandleInstance = Invocable.of(instanceWorld, InvocationMode.METHOD_HANDLE);
     private static final Invocable asmInstance = Invocable.of(instanceWorld, InvocationMode.ASM);
     private static final MethodHandle handleStatic;
@@ -128,17 +131,17 @@ public class InvokeJmh {
         org.openjdk.jmh.Main.main(args);
     }
 
-    // Benchmark                              Mode  Cnt        Score   Error   Units
-    // InvokeJmh.asmInstance                 thrpt       4573808.307          ops/ms
-    // InvokeJmh.asmStatic                   thrpt       4652910.352          ops/ms
-    // InvokeJmh.directInstance              thrpt       4651809.226          ops/ms
-    // InvokeJmh.directStatic                thrpt       4693646.773          ops/ms
-    // InvokeJmh.methodHandleAsTypeInstance  thrpt       4554479.629          ops/ms
-    // InvokeJmh.methodHandleBindInstance    thrpt       4681031.537          ops/ms
-    // InvokeJmh.methodHandleExactInstance   thrpt       4636784.998          ops/ms
-    // InvokeJmh.methodHandleExactStatic     thrpt       4491212.813          ops/ms
-    // InvokeJmh.methodHandleInstance        thrpt        146421.097          ops/ms
-    // InvokeJmh.methodHandleStatic          thrpt        131842.626          ops/ms
-    // InvokeJmh.reflectInstance             thrpt        127082.817          ops/ms
-    // InvokeJmh.reflectStatic               thrpt        129642.987          ops/ms
+    // Benchmark                              Mode  Cnt        Score        Error   Units
+    // InvokeJmh.asmInstance                 thrpt   15  4155501.016 ±  90799.114  ops/ms
+    // InvokeJmh.asmStatic                   thrpt   15  4190451.030 ±  22611.654  ops/ms
+    // InvokeJmh.directInstance              thrpt   15  4104759.241 ± 132020.437  ops/ms
+    // InvokeJmh.directStatic                thrpt   15  4117534.303 ± 103860.788  ops/ms
+    // InvokeJmh.methodHandleAsTypeInstance  thrpt   15  4139389.445 ±  88579.792  ops/ms
+    // InvokeJmh.methodHandleBindInstance    thrpt   15  4134561.554 ±  88977.406  ops/ms
+    // InvokeJmh.methodHandleExactInstance   thrpt   15  4120026.173 ± 109740.000  ops/ms
+    // InvokeJmh.methodHandleExactStatic     thrpt   15  4109771.586 ± 100635.355  ops/ms
+    // InvokeJmh.methodHandleInstance        thrpt   15   146004.456 ±    586.632  ops/ms
+    // InvokeJmh.methodHandleStatic          thrpt   15   144744.707 ±    570.352  ops/ms
+    // InvokeJmh.reflectInstance             thrpt   15   113840.668 ±    883.911  ops/ms
+    // InvokeJmh.reflectStatic               thrpt   15   113759.459 ±   1451.507  ops/ms
 }

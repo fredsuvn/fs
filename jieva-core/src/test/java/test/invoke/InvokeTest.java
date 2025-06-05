@@ -117,6 +117,11 @@ public class InvokeTest {
                 JieInvoke.invokeStatic(handle, args),
                 method.invoke(null, args)
             );
+            Invocable recommendedInvoker = Invocable.of(method);
+            assertEquals(
+                recommendedInvoker.invoke(null, args),
+                method.invoke(null, args)
+            );
         }
         // instance
         List<Method> instanceMethods = Jie.stream(LotsOfMethods.class.getMethods())
@@ -133,6 +138,11 @@ public class InvokeTest {
             MethodHandle handle = MethodHandles.lookup().unreflect(method);
             assertEquals(
                 JieInvoke.invokeInstance(handle, inst, args),
+                method.invoke(inst, args)
+            );
+            Invocable recommendedInvoker = Invocable.of(method);
+            assertEquals(
+                recommendedInvoker.invoke(inst, args),
                 method.invoke(inst, args)
             );
         }

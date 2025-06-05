@@ -19,23 +19,25 @@ import java.lang.reflect.Method;
 public interface Invocable {
 
     /**
-     * Returns an {@link Invocable} represents the specified method.
+     * Returns an {@link Invocable} represents the specified method, with the recommended implementation in current
+     * environment.
      *
      * @param method the specified method
      * @return an {@link Invocable} represents the specified method
      */
     static @Nonnull Invocable of(@Nonnull Method method) {
-        return of(method, InvocationMode.DEFAULT);
+        return of(method, InvocationMode.recommended(method));
     }
 
     /**
-     * Returns an {@link Invocable} represents the specified constructor.
+     * Returns an {@link Invocable} represents the specified constructor, with the recommended implementation in current
+     * environment.
      *
      * @param constructor the specified constructor
      * @return an {@link Invocable} represents the specified constructor
      */
     static @Nonnull Invocable of(@Nonnull Constructor<?> constructor) {
-        return of(constructor, InvocationMode.DEFAULT);
+        return of(constructor, InvocationMode.recommended(constructor));
     }
 
     /**
@@ -50,7 +52,7 @@ public interface Invocable {
     }
 
     /**
-     * Returns an {@link Invocable} represents the specified method.
+     * Returns an {@link Invocable} represents the specified method, with the specified implementation.
      *
      * @param method the specified method
      * @param mode   specifies the implementation of the returned instance
@@ -61,7 +63,7 @@ public interface Invocable {
     }
 
     /**
-     * Returns an {@link Invocable} represents the specified constructor.
+     * Returns an {@link Invocable} represents the specified constructor, with the specified implementation.
      *
      * @param constructor the specified constructor
      * @param mode        specifies the implementation of the returned instance

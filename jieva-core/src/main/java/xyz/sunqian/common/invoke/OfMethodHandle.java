@@ -11,6 +11,9 @@ import java.lang.reflect.Method;
 
 final class OfMethodHandle implements InvocableGenerator {
 
+    static final int MAX_STATIC_ARGS_IMPL = 16;
+    static final int MAX_INSTANCE_ARGS_IMPL = 15;
+
     static @Nonnull Invocable forHandle(@Nonnull MethodHandle methodHandle, boolean isStatic) {
         return isStatic ? new StaticInvoker(methodHandle) : new InstanceInvoker(methodHandle);
     }
