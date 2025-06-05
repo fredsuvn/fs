@@ -20,7 +20,7 @@ public interface CharReader {
      * @return a new {@link CharReader} with the given data source
      */
     static CharReader from(Reader source) {
-        return ReaderImpl.of(source);
+        return ReaderImpls.of(source);
     }
 
     /**
@@ -56,7 +56,7 @@ public interface CharReader {
      * @throws IndexOutOfBoundsException if the specified offset or length is out of bounds
      */
     static CharReader from(char[] source, int offset, int length) throws IndexOutOfBoundsException {
-        return ReaderImpl.of(source, offset, length);
+        return ReaderImpls.of(source, offset, length);
     }
 
     /**
@@ -92,7 +92,7 @@ public interface CharReader {
      * @throws IndexOutOfBoundsException if the specified start or end position is out of bounds
      */
     static CharReader from(CharSequence source, int start, int end) throws IndexOutOfBoundsException {
-        return ReaderImpl.of(source, start, end);
+        return ReaderImpls.of(source, start, end);
     }
 
     /**
@@ -108,7 +108,7 @@ public interface CharReader {
      * @return a new {@link CharReader} with the given data source
      */
     static CharReader from(CharBuffer source) {
-        return ReaderImpl.of(source);
+        return ReaderImpls.of(source);
     }
 
     /**
@@ -220,6 +220,6 @@ public interface CharReader {
      * @throws IllegalArgumentException if the specified read limit is negative
      */
     default CharReader withReadLimit(long readLimit) throws IllegalArgumentException {
-        return ReaderImpl.of(this, readLimit);
+        return ReaderImpls.of(this, readLimit);
     }
 }

@@ -20,7 +20,7 @@ public interface ByteReader {
      * @return a new {@link ByteReader} with the given data source
      */
     static ByteReader from(InputStream source) {
-        return ReaderImpl.of(source);
+        return ReaderImpls.of(source);
     }
 
     /**
@@ -56,7 +56,7 @@ public interface ByteReader {
      * @throws IndexOutOfBoundsException if the specified offset or length is out of bounds
      */
     static ByteReader from(byte[] source, int offset, int length) throws IndexOutOfBoundsException {
-        return ReaderImpl.of(source, offset, length);
+        return ReaderImpls.of(source, offset, length);
     }
 
     /**
@@ -72,7 +72,7 @@ public interface ByteReader {
      * @return a new {@link ByteReader} with the given data source
      */
     static ByteReader from(ByteBuffer source) {
-        return ReaderImpl.of(source);
+        return ReaderImpls.of(source);
     }
 
     /**
@@ -184,6 +184,6 @@ public interface ByteReader {
      * @throws IllegalArgumentException if the specified read limit is negative
      */
     default ByteReader withReadLimit(long readLimit) throws IllegalArgumentException {
-        return ReaderImpl.of(this, readLimit);
+        return ReaderImpls.of(this, readLimit);
     }
 }

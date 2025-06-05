@@ -1,5 +1,6 @@
 package xyz.sunqian.common.io;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 
 import java.io.Closeable;
@@ -20,21 +21,21 @@ import java.nio.charset.CodingErrorAction;
 
 import static xyz.sunqian.common.base.JieCheck.checkOffsetLength;
 
-final class WrapperImpl {
+final class WrapperImpls {
 
-    static InputStream in(byte[] array) {
+    static @Nonnull InputStream in(byte @Nonnull [] array) {
         return new BytesInputStream(array);
     }
 
-    static InputStream in(byte[] array, int offset, int length) {
+    static @Nonnull InputStream in(byte @Nonnull [] array, int offset, int length) {
         return new BytesInputStream(array, offset, length);
     }
 
-    static InputStream in(ByteBuffer buffer) {
+    static @Nonnull InputStream in(@Nonnull ByteBuffer buffer) {
         return new BufferInputStream(buffer);
     }
 
-    static InputStream in(RandomAccessFile random, long initialSeek) throws IORuntimeException {
+    static @Nonnull InputStream in(@Nonnull RandomAccessFile random, long initialSeek) throws IORuntimeException {
         try {
             return new RandomInputStream(random, initialSeek);
         } catch (IOException e) {
@@ -42,51 +43,51 @@ final class WrapperImpl {
         }
     }
 
-    static InputStream in(Reader reader, Charset charset) {
+    static @Nonnull InputStream in(@Nonnull Reader reader, @Nonnull Charset charset) {
         return new ReaderInputStream(reader, charset);
     }
 
-    static Reader reader(char[] array) {
+    static @Nonnull Reader reader(char @Nonnull [] array) {
         return new BufferReader(array);
     }
 
-    static Reader reader(char[] array, int offset, int length) {
+    static @Nonnull Reader reader(char @Nonnull [] array, int offset, int length) {
         return new BufferReader(array, offset, length);
     }
 
-    static Reader reader(CharSequence chars) {
+    static @Nonnull Reader reader(@Nonnull CharSequence chars) {
         return new BufferReader(chars);
     }
 
-    static Reader reader(CharBuffer buffer) {
+    static @Nonnull Reader reader(@Nonnull CharBuffer buffer) {
         return new BufferReader(buffer);
     }
 
-    static Reader reader(InputStream inputStream, Charset charset) {
+    static @Nonnull Reader reader(@Nonnull InputStream inputStream, @Nonnull Charset charset) {
         return new BytesReader(inputStream, charset);
     }
 
-    static InputStream emptyIn() {
+    static @Nonnull InputStream emptyIn() {
         return EmptyInputStream.SINGLETON;
     }
 
-    static Reader emptyReader() {
+    static @Nonnull Reader emptyReader() {
         return EmptyReader.SINGLETON;
     }
 
-    static OutputStream out(byte[] array) {
+    static @Nonnull OutputStream out(byte @Nonnull [] array) {
         return new BytesOutputStream(array);
     }
 
-    static OutputStream out(byte[] array, int offset, int length) {
+    static @Nonnull OutputStream out(byte @Nonnull [] array, int offset, int length) {
         return new BytesOutputStream(array, offset, length);
     }
 
-    static OutputStream out(ByteBuffer buffer) {
+    static @Nonnull OutputStream out(@Nonnull ByteBuffer buffer) {
         return new BufferOutputStream(buffer);
     }
 
-    static OutputStream out(RandomAccessFile random, long initialSeek) throws IORuntimeException {
+    static @Nonnull OutputStream out(@Nonnull RandomAccessFile random, long initialSeek) throws IORuntimeException {
         try {
             return new RandomOutputStream(random, initialSeek);
         } catch (IOException e) {
@@ -94,46 +95,46 @@ final class WrapperImpl {
         }
     }
 
-    static OutputStream out(Appendable appender, Charset charset) {
+    static @Nonnull OutputStream out(@Nonnull Appendable appender, @Nonnull Charset charset) {
         return new AppenderOutputStream(appender, charset);
     }
 
-    static Writer writer(char[] array) {
+    static @Nonnull Writer writer(char @Nonnull [] array) {
         return new BufferWriter(array);
     }
 
-    static Writer writer(char[] array, int offset, int length) {
+    static @Nonnull Writer writer(char @Nonnull [] array, int offset, int length) {
         return new BufferWriter(array, offset, length);
     }
 
-    static Writer writer(CharBuffer buffer) {
+    static @Nonnull Writer writer(@Nonnull CharBuffer buffer) {
         return new BufferWriter(buffer);
     }
 
-    static Writer writer(OutputStream outputStream, Charset charset) {
+    static @Nonnull Writer writer(@Nonnull OutputStream outputStream, Charset charset) {
         return new BytesWriter(outputStream, charset);
     }
 
-    static OutputStream nullOut() {
+    static @Nonnull OutputStream nullOut() {
         return NullOutputStream.SINGLETON;
     }
 
-    static Writer nullWriter() {
+    static @Nonnull Writer nullWriter() {
         return NullWriter.SINGLETON;
     }
 
     private static final class BytesInputStream extends InputStream {
 
-        private final byte[] buf;
+        private final byte @Nonnull [] buf;
         private int pos;
         private int mark = -1;
         private final int count;
 
-        BytesInputStream(byte[] buf) {
+        BytesInputStream(byte @Nonnull [] buf) {
             this(buf, 0, buf.length);
         }
 
-        BytesInputStream(byte[] buf, int offset, int length) {
+        BytesInputStream(byte @Nonnull [] buf, int offset, int length) {
             checkOffsetLength(buf.length, offset, length);
             this.buf = buf;
             this.pos = offset;
@@ -144,7 +145,7 @@ final class WrapperImpl {
             return (pos < count) ? (buf[pos++] & 0xff) : -1;
         }
 
-        public int read(byte[] b, int off, int len) {
+        public int read(byte @Nonnull [] b, int off, int len) {
             checkOffsetLength(b.length, off, len);
             if (len <= 0) {
                 return 0;
@@ -197,9 +198,9 @@ final class WrapperImpl {
 
     private static final class BufferInputStream extends InputStream {
 
-        private final ByteBuffer buffer;
+        private final @Nonnull ByteBuffer buffer;
 
-        BufferInputStream(ByteBuffer buffer) {
+        BufferInputStream(@Nonnull ByteBuffer buffer) {
             this.buffer = buffer;
         }
 
@@ -220,7 +221,7 @@ final class WrapperImpl {
         }
 
         @Override
-        public int read(byte[] b, int off, int len) throws IOException {
+        public int read(byte @Nonnull [] b, int off, int len) throws IOException {
             checkOffsetLength(b.length, off, len);
             if (len <= 0) {
                 return 0;
@@ -233,7 +234,7 @@ final class WrapperImpl {
             return avail;
         }
 
-        private void read0(byte[] b, int off, int avail) throws IOException {
+        private void read0(byte @Nonnull [] b, int off, int avail) throws IOException {
             try {
                 buffer.get(b, off, avail);
             } catch (Exception e) {
@@ -293,15 +294,15 @@ final class WrapperImpl {
 
     private static final class ReaderInputStream extends InputStream {
 
-        private final Reader reader;
-        private final CharsetEncoder encoder;
-        private final CharBuffer inBuffer;
-        private final ByteBuffer outBuffer;
+        private final @Nonnull Reader reader;
+        private final @Nonnull CharsetEncoder encoder;
+        private final @Nonnull CharBuffer inBuffer;
+        private final @Nonnull ByteBuffer outBuffer;
         private boolean endOfInput;
         private boolean closed = false;
-        private final byte[] buf = {0};
+        private final byte @Nonnull [] buf = {0};
 
-        private ReaderInputStream(Reader reader, CharsetEncoder encoder, int inBufferSize, int outBufferSize) {
+        private ReaderInputStream(@Nonnull Reader reader, @Nonnull CharsetEncoder encoder, int inBufferSize, int outBufferSize) {
             this.reader = reader;
             this.encoder = encoder;
             this.inBuffer = CharBuffer.allocate(inBufferSize);
@@ -310,7 +311,7 @@ final class WrapperImpl {
             this.outBuffer.flip();
         }
 
-        private ReaderInputStream(Reader reader, Charset charset, int inBufferSize, int outBufferSize) {
+        private ReaderInputStream(@Nonnull Reader reader, @Nonnull Charset charset, int inBufferSize, int outBufferSize) {
             this(
                 reader,
                 charset.newEncoder()
@@ -321,7 +322,7 @@ final class WrapperImpl {
             );
         }
 
-        ReaderInputStream(Reader reader, Charset charset) {
+        ReaderInputStream(@Nonnull Reader reader, @Nonnull Charset charset) {
             this(reader, charset, 64, 64);
         }
 
@@ -332,7 +333,7 @@ final class WrapperImpl {
         }
 
         @Override
-        public int read(byte[] b, int off, int len) throws IOException {
+        public int read(byte @Nonnull [] b, int off, int len) throws IOException {
             checkOffsetLength(b.length, off, len);
             checkClosed();
             if (len <= 0) {
@@ -422,10 +423,10 @@ final class WrapperImpl {
 
     private static final class RandomInputStream extends InputStream {
 
-        private final RandomAccessFile random;
+        private final @Nonnull RandomAccessFile random;
         private long mark = -1;
 
-        RandomInputStream(RandomAccessFile random, long initialSeek) throws IOException {
+        RandomInputStream(@Nonnull RandomAccessFile random, long initialSeek) throws IOException {
             this.random = random;
             this.random.seek(initialSeek);
         }
@@ -436,7 +437,7 @@ final class WrapperImpl {
         }
 
         @Override
-        public int read(byte[] b, int off, int len) throws IOException {
+        public int read(byte @Nonnull [] b, int off, int len) throws IOException {
             checkOffsetLength(b.length, off, len);
             if (len <= 0) {
                 return 0;
@@ -487,22 +488,22 @@ final class WrapperImpl {
 
     private static final class BufferReader extends Reader {
 
-        private final CharBuffer buffer;
+        private final @Nonnull CharBuffer buffer;
 
-        BufferReader(char[] cbuf) {
+        BufferReader(char @Nonnull [] cbuf) {
             this(cbuf, 0, cbuf.length);
         }
 
-        BufferReader(char[] cbuf, int offset, int length) {
+        BufferReader(char @Nonnull [] cbuf, int offset, int length) {
             checkOffsetLength(cbuf.length, offset, length);
             this.buffer = CharBuffer.wrap(cbuf, offset, length);
         }
 
-        BufferReader(CharSequence chars) {
+        BufferReader(@Nonnull CharSequence chars) {
             this.buffer = CharBuffer.wrap(chars);
         }
 
-        BufferReader(CharBuffer buffer) {
+        BufferReader(@Nonnull CharBuffer buffer) {
             this.buffer = buffer;
         }
 
@@ -523,7 +524,7 @@ final class WrapperImpl {
         }
 
         @Override
-        public int read(char[] c, int off, int len) throws IOException {
+        public int read(char @Nonnull [] c, int off, int len) throws IOException {
             checkOffsetLength(c.length, off, len);
             if (len <= 0) {
                 return 0;
@@ -536,7 +537,7 @@ final class WrapperImpl {
             return avail;
         }
 
-        private void read0(char[] c, int off, int avail) throws IOException {
+        private void read0(char @Nonnull [] c, int off, int avail) throws IOException {
             try {
                 buffer.get(c, off, avail);
             } catch (Exception e) {
@@ -545,7 +546,7 @@ final class WrapperImpl {
         }
 
         @Override
-        public int read(CharBuffer target) throws IOException {
+        public int read(@Nonnull CharBuffer target) throws IOException {
             return buffer.read(target);
         }
 
@@ -601,15 +602,15 @@ final class WrapperImpl {
 
     private static final class BytesReader extends Reader {
 
-        private final InputStream inputStream;
-        private final CharsetDecoder decoder;
-        private final ByteBuffer inBuffer;
-        private final CharBuffer outBuffer;
+        private final @Nonnull InputStream inputStream;
+        private final @Nonnull CharsetDecoder decoder;
+        private final @Nonnull ByteBuffer inBuffer;
+        private final @Nonnull CharBuffer outBuffer;
         private boolean endOfInput;
         private boolean closed = false;
-        private final char[] cbuf = {0};
+        private final char @Nonnull [] cbuf = {0};
 
-        private BytesReader(InputStream inputStream, CharsetDecoder decoder, int inBufferSize, int outBufferSize) {
+        private BytesReader(@Nonnull InputStream inputStream, @Nonnull CharsetDecoder decoder, int inBufferSize, int outBufferSize) {
             this.inputStream = inputStream;
             this.decoder = decoder;
             this.inBuffer = ByteBuffer.allocate(inBufferSize);
@@ -618,7 +619,7 @@ final class WrapperImpl {
             this.outBuffer.flip();
         }
 
-        private BytesReader(InputStream inputStream, Charset charset, int inBufferSize, int outBufferSize) {
+        private BytesReader(@Nonnull InputStream inputStream, @Nonnull Charset charset, int inBufferSize, int outBufferSize) {
             this(
                 inputStream,
                 charset.newDecoder()
@@ -629,7 +630,7 @@ final class WrapperImpl {
             );
         }
 
-        BytesReader(InputStream inputStream, Charset charset) {
+        BytesReader(@Nonnull InputStream inputStream, @Nonnull Charset charset) {
             this(inputStream, charset, 64, 64);
         }
 
@@ -640,7 +641,7 @@ final class WrapperImpl {
         }
 
         @Override
-        public int read(char[] c, int off, int len) throws IOException {
+        public int read(char @Nonnull [] c, int off, int len) throws IOException {
             checkOffsetLength(c.length, off, len);
             checkClosed();
             if (len <= 0) {
@@ -732,7 +733,7 @@ final class WrapperImpl {
 
     private static final class EmptyInputStream extends InputStream {
 
-        private static final EmptyInputStream SINGLETON = new EmptyInputStream();
+        private static final @Nonnull EmptyInputStream SINGLETON = new EmptyInputStream();
 
         @Override
         public int read() {
@@ -742,10 +743,10 @@ final class WrapperImpl {
 
     private static final class EmptyReader extends Reader {
 
-        private static final EmptyReader SINGLETON = new EmptyReader();
+        private static final @Nonnull EmptyReader SINGLETON = new EmptyReader();
 
         @Override
-        public int read(char[] cbuf, int off, int len) {
+        public int read(char @Nonnull [] cbuf, int off, int len) {
             return -1;
         }
 
@@ -756,15 +757,15 @@ final class WrapperImpl {
 
     private static final class BytesOutputStream extends OutputStream {
 
-        private final byte[] buf;
+        private final byte @Nonnull [] buf;
         private final int end;
         private int pos;
 
-        BytesOutputStream(byte[] buf) {
+        BytesOutputStream(byte @Nonnull [] buf) {
             this(buf, 0, buf.length);
         }
 
-        BytesOutputStream(byte[] buf, int offset, int length) {
+        BytesOutputStream(byte @Nonnull [] buf, int offset, int length) {
             checkOffsetLength(buf.length, offset, length);
             this.buf = buf;
             this.end = offset + length;
@@ -781,7 +782,7 @@ final class WrapperImpl {
         }
 
         @Override
-        public void write(byte[] b, int off, int len) throws IOException {
+        public void write(byte @Nonnull [] b, int off, int len) throws IOException {
             checkOffsetLength(b.length, off, len);
             if (len <= 0) {
                 return;
@@ -796,9 +797,9 @@ final class WrapperImpl {
 
     private static final class BufferOutputStream extends OutputStream {
 
-        private final ByteBuffer buffer;
+        private final @Nonnull ByteBuffer buffer;
 
-        BufferOutputStream(ByteBuffer buffer) {
+        BufferOutputStream(@Nonnull ByteBuffer buffer) {
             this.buffer = buffer;
         }
 
@@ -812,7 +813,7 @@ final class WrapperImpl {
         }
 
         @Override
-        public void write(byte[] b, int off, int len) throws IOException {
+        public void write(byte @Nonnull [] b, int off, int len) throws IOException {
             checkOffsetLength(b.length, off, len);
             if (len <= 0) {
                 return;
@@ -827,17 +828,17 @@ final class WrapperImpl {
 
     private static final class AppenderOutputStream extends OutputStream {
 
-        private final Appendable appender;
-        private final CharsetDecoder decoder;
-        private final ByteBuffer inBuffer;
+        private final @Nonnull Appendable appender;
+        private final @Nonnull CharsetDecoder decoder;
+        private final @Nonnull ByteBuffer inBuffer;
 
         // Should be keep flush to empty.
-        private final CharBuffer outBuffer;
+        private final @Nonnull CharBuffer outBuffer;
 
         private boolean closed = false;
-        private final byte[] buf = {0};
+        private final byte @Nonnull [] buf = {0};
 
-        private AppenderOutputStream(Appendable appender, CharsetDecoder decoder, int inBufferSize, int outBufferSize) {
+        private AppenderOutputStream(@Nonnull Appendable appender, @Nonnull CharsetDecoder decoder, int inBufferSize, int outBufferSize) {
             this.appender = appender;
             this.decoder = decoder;
             this.inBuffer = ByteBuffer.allocate(inBufferSize);
@@ -846,7 +847,7 @@ final class WrapperImpl {
             this.outBuffer.flip();
         }
 
-        private AppenderOutputStream(Appendable appender, Charset charset, int inBufferSize, int outBufferSize) {
+        private AppenderOutputStream(@Nonnull Appendable appender, @Nonnull Charset charset, int inBufferSize, int outBufferSize) {
             this(
                 appender,
                 charset.newDecoder()
@@ -857,7 +858,7 @@ final class WrapperImpl {
             );
         }
 
-        AppenderOutputStream(Appendable appender, Charset charset) {
+        AppenderOutputStream(@Nonnull Appendable appender, @Nonnull Charset charset) {
             this(appender, charset, 64, 64);
         }
 
@@ -868,7 +869,7 @@ final class WrapperImpl {
         }
 
         @Override
-        public void write(byte[] b, int off, int len) throws IOException {
+        public void write(byte @Nonnull [] b, int off, int len) throws IOException {
             checkOffsetLength(b.length, off, len);
             checkClosed();
             if (len <= 0) {
@@ -979,15 +980,15 @@ final class WrapperImpl {
 
     private static final class RandomOutputStream extends OutputStream {
 
-        private final RandomAccessFile random;
+        private final @Nonnull RandomAccessFile random;
 
-        RandomOutputStream(RandomAccessFile random, long initialSeek) throws IOException {
+        RandomOutputStream(@Nonnull RandomAccessFile random, long initialSeek) throws IOException {
             this.random = random;
             this.random.seek(initialSeek);
         }
 
         @Override
-        public void write(byte[] b, int off, int len) throws IOException {
+        public void write(byte @Nonnull [] b, int off, int len) throws IOException {
             checkOffsetLength(b.length, off, len);
             if (len <= 0) {
                 return;
@@ -1015,16 +1016,16 @@ final class WrapperImpl {
 
         private final CharBuffer buffer;
 
-        BufferWriter(char[] cbuf) {
+        BufferWriter(char @Nonnull [] cbuf) {
             this(cbuf, 0, cbuf.length);
         }
 
-        BufferWriter(char[] cbuf, int offset, int length) {
+        BufferWriter(char @Nonnull [] cbuf, int offset, int length) {
             checkOffsetLength(cbuf.length, offset, length);
             this.buffer = CharBuffer.wrap(cbuf, offset, length);
         }
 
-        BufferWriter(CharBuffer buffer) {
+        BufferWriter(@Nonnull CharBuffer buffer) {
             this.buffer = buffer;
         }
 
@@ -1034,12 +1035,12 @@ final class WrapperImpl {
         }
 
         @Override
-        protected void doWrite(char[] c, int off, int len) {
+        protected void doWrite(char @Nonnull [] c, int off, int len) {
             buffer.put(c, off, len);
         }
 
         @Override
-        protected void doWrite(String str, int off, int len) {
+        protected void doWrite(@Nonnull String str, int off, int len) {
             buffer.put(str, off, off + len);
         }
 
@@ -1059,17 +1060,17 @@ final class WrapperImpl {
 
     private static final class BytesWriter extends AbstractWriter {
 
-        private final OutputStream outputStream;
-        private final CharsetEncoder encoder;
-        private final CharBuffer inBuffer;
+        private final @Nonnull OutputStream outputStream;
+        private final @Nonnull CharsetEncoder encoder;
+        private final @Nonnull CharBuffer inBuffer;
 
         // Should be keep flush to empty.
-        private final ByteBuffer outBuffer;
+        private final @Nonnull ByteBuffer outBuffer;
 
         private boolean closed = false;
-        private final char[] cbuf = {0};
+        private final char @Nonnull [] cbuf = {0};
 
-        private BytesWriter(OutputStream outputStream, CharsetEncoder encoder, int inBufferSize, int outBufferSize) {
+        private BytesWriter(@Nonnull OutputStream outputStream, @Nonnull CharsetEncoder encoder, int inBufferSize, int outBufferSize) {
             this.outputStream = outputStream;
             this.encoder = encoder;
             this.inBuffer = CharBuffer.allocate(inBufferSize);
@@ -1078,7 +1079,7 @@ final class WrapperImpl {
             this.outBuffer.flip();
         }
 
-        private BytesWriter(OutputStream outputStream, Charset charset, int inBufferSize, int outBufferSize) {
+        private BytesWriter(@Nonnull OutputStream outputStream, @Nonnull Charset charset, int inBufferSize, int outBufferSize) {
             this(
                 outputStream,
                 charset.newEncoder()
@@ -1089,7 +1090,7 @@ final class WrapperImpl {
             );
         }
 
-        BytesWriter(OutputStream outputStream, Charset charset) {
+        BytesWriter(@Nonnull OutputStream outputStream, @Nonnull Charset charset) {
             this(outputStream, charset, 64, 64);
         }
 
@@ -1100,12 +1101,12 @@ final class WrapperImpl {
         }
 
         @Override
-        protected void doWrite(char[] c, int off, int len) throws Exception {
+        protected void doWrite(char @Nonnull [] c, int off, int len) throws Exception {
             doWrite0(c, off, len);
         }
 
         @Override
-        protected void doWrite(String str, int off, int len) throws Exception {
+        protected void doWrite(@Nonnull String str, int off, int len) throws Exception {
             doWrite0(str, off, len);
         }
 
@@ -1115,7 +1116,7 @@ final class WrapperImpl {
             doWrite0(chars, start, end - start);
         }
 
-        private void doWrite0(Object c, int off, int len) throws Exception {
+        private void doWrite0(@Nonnull Object c, int off, int len) throws Exception {
             checkClosed();
             int offset = off;
             int remaining = len;
@@ -1202,7 +1203,7 @@ final class WrapperImpl {
 
     private static final class NullOutputStream extends OutputStream {
 
-        private static final NullOutputStream SINGLETON = new NullOutputStream();
+        private static final @Nonnull NullOutputStream SINGLETON = new NullOutputStream();
 
         @Override
         public void write(int b) {
@@ -1211,7 +1212,7 @@ final class WrapperImpl {
 
     private static final class NullWriter extends Writer {
 
-        private static final NullWriter SINGLETON = new NullWriter();
+        private static final @Nonnull NullWriter SINGLETON = new NullWriter();
 
         @Override
         public void write(char[] cbuf, int off, int len) {
