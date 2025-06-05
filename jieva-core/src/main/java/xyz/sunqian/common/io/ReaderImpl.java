@@ -11,7 +11,7 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.util.Arrays;
 
-final class ReaderBack {
+final class ReaderImpl {
 
     static ByteReader of(InputStream source) {
         return new ByteStreamReader(source);

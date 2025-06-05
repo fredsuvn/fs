@@ -16,7 +16,7 @@ public interface ByteVar extends ByteVal, PrimitiveToVar<Byte> {
      * @return a {@link ByteVar} initialized with the specified value
      */
     static @Nonnull ByteVar of(byte value) {
-        return VarBack.of(value);
+        return VarImpls.of(value);
     }
 
     /**

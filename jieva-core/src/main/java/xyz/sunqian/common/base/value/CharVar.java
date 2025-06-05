@@ -16,7 +16,7 @@ public interface CharVar extends CharVal, PrimitiveToVar<Character> {
      * @return a {@link CharVar} initialized with the specified value
      */
     static @Nonnull CharVar of(char value) {
-        return VarBack.of(value);
+        return VarImpls.of(value);
     }
 
     /**

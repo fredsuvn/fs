@@ -17,7 +17,7 @@ public interface LongVal extends PrimitiveToVal<Long> {
      * @return a {@link LongVal} holding the {@code 0}
      */
     static @Nonnull LongVal ofZero() {
-        return ValBack.OF_ZERO_LONG;
+        return ValImpls.OF_ZERO_LONG;
     }
 
     /**
@@ -27,7 +27,7 @@ public interface LongVal extends PrimitiveToVal<Long> {
      * @return a {@link LongVal} holding the specified value
      */
     static @Nonnull LongVal of(long value) {
-        return ValBack.of(value);
+        return ValImpls.of(value);
     }
 
     /**

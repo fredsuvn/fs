@@ -16,7 +16,7 @@ public interface IntVar extends IntVal, PrimitiveToVar<Integer> {
      * @return a {@link IntVar} initialized with the specified value
      */
     static @Nonnull IntVar of(int value) {
-        return VarBack.of(value);
+        return VarImpls.of(value);
     }
 
     /**

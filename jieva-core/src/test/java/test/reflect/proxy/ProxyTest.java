@@ -34,7 +34,12 @@ public class ProxyTest {
             }
 
             @Override
-            public @Nullable Object invoke(@Nonnull Object proxy, @Nonnull Method method, @Nonnull ProxyInvoker invoker, @org.jetbrains.annotations.Nullable @Nullable Object @Nonnull ... args) throws Throwable {
+            public @Nonnull Object invoke(
+                @Nonnull Object proxy,
+                @Nonnull Method method,
+                @Nonnull ProxyInvoker invoker,
+                @Nullable Object @Nonnull ... args
+            ) throws Throwable {
                 return result;
             }
         }, mode);

@@ -19,7 +19,7 @@ public interface ByteSegment {
      * @return a new {@link ByteSegment} with the given data and end flag
      */
     static ByteSegment of(ByteBuffer data, boolean end) {
-        return new ReaderBack.ByteSegmentImpl(data, end);
+        return new ReaderImpl.ByteSegmentImpl(data, end);
     }
 
     /**
@@ -30,7 +30,7 @@ public interface ByteSegment {
      * @return an empty {@link ByteSegment} with the given end flag
      */
     static ByteSegment empty(boolean end) {
-        return ReaderBack.ByteSegmentImpl.empty(end);
+        return ReaderImpl.ByteSegmentImpl.empty(end);
     }
 
     /**

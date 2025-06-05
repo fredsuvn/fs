@@ -17,7 +17,7 @@ public interface CharVal extends PrimitiveToVal<Character> {
      * @return a {@link CharVal} holding the {@code 0}
      */
     static @Nonnull CharVal ofZero() {
-        return ValBack.OF_ZERO_CHAR;
+        return ValImpls.OF_ZERO_CHAR;
     }
 
     /**
@@ -27,7 +27,7 @@ public interface CharVal extends PrimitiveToVal<Character> {
      * @return a {@link CharVal} holding the specified value
      */
     static @Nonnull CharVal of(char value) {
-        return ValBack.of(value);
+        return ValImpls.of(value);
     }
 
     /**

@@ -16,7 +16,7 @@ public interface FloatVar extends FloatVal, PrimitiveToVar<Float> {
      * @return a {@link FloatVar} initialized with the specified value
      */
     static @Nonnull FloatVar of(float value) {
-        return VarBack.of(value);
+        return VarImpls.of(value);
     }
 
     /**

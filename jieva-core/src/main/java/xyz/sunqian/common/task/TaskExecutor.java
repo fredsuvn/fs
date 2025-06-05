@@ -31,7 +31,7 @@ public interface TaskExecutor {
      * @return a new {@link TaskExecutor} which starts a new thread for each new task
      */
     static @Nonnull TaskExecutor newExecutor() {
-        return ExecutorBack.newExecutor(false);
+        return TaskImpls.newExecutor(false);
     }
 
     /**
@@ -41,7 +41,7 @@ public interface TaskExecutor {
      * @return a new {@link TaskExecutor} which starts a new thread for each new task, supporting scheduling
      */
     static @Nonnull TaskExecutor newScheduler() {
-        return ExecutorBack.newExecutor(true);
+        return TaskImpls.newExecutor(true);
     }
 
     /**
@@ -53,7 +53,7 @@ public interface TaskExecutor {
      * @return a new {@link TaskExecutor} based on a thread pool
      */
     static @Nonnull TaskExecutor newExecutor(int coreThreadSize) {
-        return ExecutorBack.newExecutor(coreThreadSize, Integer.MAX_VALUE, -1);
+        return TaskImpls.newExecutor(coreThreadSize, Integer.MAX_VALUE, -1);
     }
 
     /**
@@ -66,7 +66,7 @@ public interface TaskExecutor {
      * @return a new {@link TaskExecutor} based on a thread pool
      */
     static @Nonnull TaskExecutor newExecutor(int coreThreadSize, int maxThreadSize) {
-        return ExecutorBack.newExecutor(coreThreadSize, maxThreadSize, -1);
+        return TaskImpls.newExecutor(coreThreadSize, maxThreadSize, -1);
     }
 
     /**
@@ -80,7 +80,7 @@ public interface TaskExecutor {
      * @return a new {@link TaskExecutor} based on a thread pool
      */
     static @Nonnull TaskExecutor newExecutor(int coreThreadSize, int maxThreadSize, int maxQueueSize) {
-        return ExecutorBack.newExecutor(coreThreadSize, maxThreadSize, maxQueueSize);
+        return TaskImpls.newExecutor(coreThreadSize, maxThreadSize, maxQueueSize);
     }
 
     /**
@@ -92,7 +92,7 @@ public interface TaskExecutor {
      * @return a new {@link TaskExecutor} based on the given {@link ExecutorService}
      */
     static @Nonnull TaskExecutor newExecutor(@Nonnull ExecutorService service) {
-        return ExecutorBack.newExecutor(service);
+        return TaskImpls.newExecutor(service);
     }
 
     /**

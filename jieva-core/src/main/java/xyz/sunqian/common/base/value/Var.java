@@ -20,7 +20,7 @@ public interface Var<T> extends Val<T> {
      * @return a {@link Var} initialized with the specified value
      */
     static <T> @Nonnull Var<T> of(T value) {
-        return VarBack.of(value);
+        return VarImpls.of(value);
     }
 
     /**

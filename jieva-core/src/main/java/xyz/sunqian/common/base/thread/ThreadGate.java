@@ -20,7 +20,7 @@ public interface ThreadGate {
      * @return a new {@link ThreadGate}
      */
     static @Nonnull ThreadGate newThreadGate() {
-        return GateBack.newThreadGate();
+        return ThreadGateImpl.newThreadGate();
     }
 
     /**

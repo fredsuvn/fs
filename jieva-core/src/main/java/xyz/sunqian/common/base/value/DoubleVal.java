@@ -17,7 +17,7 @@ public interface DoubleVal extends PrimitiveToVal<Double> {
      * @return a {@link DoubleVal} holding the {@code 0}
      */
     static @Nonnull DoubleVal ofZero() {
-        return ValBack.OF_ZERO_DOUBLE;
+        return ValImpls.OF_ZERO_DOUBLE;
     }
 
     /**
@@ -27,7 +27,7 @@ public interface DoubleVal extends PrimitiveToVal<Double> {
      * @return a {@link DoubleVal} holding the specified value
      */
     static @Nonnull DoubleVal of(double value) {
-        return ValBack.of(value);
+        return ValImpls.of(value);
     }
 
     /**

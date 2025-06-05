@@ -20,7 +20,7 @@ import java.nio.charset.CodingErrorAction;
 
 import static xyz.sunqian.common.base.JieCheck.checkOffsetLength;
 
-final class WrapperBack {
+final class WrapperImpl {
 
     static InputStream in(byte[] array) {
         return new BytesInputStream(array);

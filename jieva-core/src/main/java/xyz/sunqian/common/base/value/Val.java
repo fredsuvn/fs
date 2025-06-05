@@ -22,7 +22,7 @@ public interface Val<T> {
      * @return a {@link Val} holding the {@code null}
      */
     static <T> @Nonnull Val<T> ofNull() {
-        return Jie.as(ValBack.OF_NULL);
+        return Jie.as(ValImpls.OF_NULL);
     }
 
     /**
@@ -34,7 +34,7 @@ public interface Val<T> {
      * @return a {@link Val} holding the specified value
      */
     static <T> @Nonnull Val<T> of(T value) {
-        return value == null ? ofNull() : ValBack.of(value);
+        return value == null ? ofNull() : ValImpls.of(value);
     }
 
     /**

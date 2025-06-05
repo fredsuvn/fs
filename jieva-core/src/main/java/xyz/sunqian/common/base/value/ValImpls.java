@@ -2,7 +2,7 @@ package xyz.sunqian.common.base.value;
 
 import xyz.sunqian.annotations.Nonnull;
 
-final class ValBack {
+final class ValImpls {
 
     static final @Nonnull Val<?> OF_NULL = of(null);
     static final @Nonnull BooleanVal OF_TRUE = of(true);
@@ -11,9 +11,9 @@ final class ValBack {
     static final @Nonnull ShortVal OF_ZERO_SHORT = of((short) 0);
     static final @Nonnull CharVal OF_ZERO_CHAR = of('0');
     static final @Nonnull IntVal OF_ZERO_INT = of(0);
-    static final @Nonnull LongVal OF_ZERO_LONG = ValBack.of(0L);
-    static final @Nonnull FloatVal OF_ZERO_FLOAT = ValBack.of(0.0f);
-    static final @Nonnull DoubleVal OF_ZERO_DOUBLE = ValBack.of(0.0);
+    static final @Nonnull LongVal OF_ZERO_LONG = ValImpls.of(0L);
+    static final @Nonnull FloatVal OF_ZERO_FLOAT = ValImpls.of(0.0f);
+    static final @Nonnull DoubleVal OF_ZERO_DOUBLE = ValImpls.of(0.0);
 
     static <T> @Nonnull Val<T> of(T value) {
         return new ValImpl<>(value);

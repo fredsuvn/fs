@@ -1,5 +1,6 @@
 package xyz.sunqian.common.io;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 
 import java.io.IOException;
@@ -44,7 +45,7 @@ public abstract class AbstractWriter extends Writer {
      * @param len  the specified number
      * @throws Exception if any error occurs
      */
-    protected abstract void doWrite(char[] cbuf, int off, int len) throws Exception;
+    protected abstract void doWrite(char @Nonnull [] cbuf, int off, int len) throws Exception;
 
     /**
      * Does write the specified number of chars from the given string, starting at the specified offset. Its behavior is
@@ -57,7 +58,7 @@ public abstract class AbstractWriter extends Writer {
      * @param len the specified number
      * @throws Exception if any error occurs
      */
-    protected abstract void doWrite(String str, int off, int len) throws Exception;
+    protected abstract void doWrite(@Nonnull String str, int off, int len) throws Exception;
 
     /**
      * Does write the chars from the given char sequence, starting and ending at the specified indexes. Its behavior is
@@ -66,8 +67,8 @@ public abstract class AbstractWriter extends Writer {
      * Note there is no need to consider null pointers or boundary issues.
      *
      * @param csq   the given char sequence
-     * @param start specified start index inclusive
-     * @param end   specified end index exclusive
+     * @param start the specified start index inclusive
+     * @param end   the specified end index exclusive
      * @throws Exception if any error occurs
      */
     protected abstract void doAppend(@Nullable CharSequence csq, int start, int end) throws Exception;
@@ -82,7 +83,7 @@ public abstract class AbstractWriter extends Writer {
     }
 
     @Override
-    public void write(char[] cbuf, int off, int len) throws IOException {
+    public void write(char @Nonnull [] cbuf, int off, int len) throws IOException {
         checkOffsetLength(cbuf.length, off, len);
         if (len <= 0) {
             return;
@@ -95,12 +96,12 @@ public abstract class AbstractWriter extends Writer {
     }
 
     @Override
-    public void write(char[] cbuf) throws IOException {
+    public void write(char @Nonnull [] cbuf) throws IOException {
         write(cbuf, 0, cbuf.length);
     }
 
     @Override
-    public void write(String str) throws IOException {
+    public void write(@Nonnull String str) throws IOException {
         write(str, 0, str.length());
     }
 
@@ -111,7 +112,7 @@ public abstract class AbstractWriter extends Writer {
     }
 
     @Override
-    public void write(String str, int off, int len) throws IOException {
+    public void write(@Nonnull String str, int off, int len) throws IOException {
         checkOffsetLength(str.length(), off, len);
         if (len <= 0) {
             return;

@@ -16,7 +16,7 @@ public interface ShortVar extends ShortVal, PrimitiveToVar<Short> {
      * @return a {@link ShortVar} initialized with the specified value
      */
     static @Nonnull ShortVar of(short value) {
-        return VarBack.of(value);
+        return VarImpls.of(value);
     }
 
     /**

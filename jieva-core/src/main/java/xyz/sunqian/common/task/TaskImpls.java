@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-final class ExecutorBack {
+final class TaskImpls {
 
     @SuppressWarnings("ScheduledThreadPoolExecutorWithZeroCoreThreads")
     static @Nonnull TaskExecutor newExecutor(boolean scheduled) {
@@ -371,7 +371,7 @@ final class ExecutorBack {
     private static abstract class Receipt implements BaseTaskReceipt {
 
         private final @Nonnull Future<?> future;
-        private final @Nonnull ExecutorBack.Task<?> task;
+        private final @Nonnull TaskImpls.Task<?> task;
 
         private Receipt(@Nonnull Future<?> future, Task<?> task) {
             this.future = future;

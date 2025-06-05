@@ -16,7 +16,7 @@ public interface BooleanVar extends BooleanVal, PrimitiveToVar<Boolean> {
      * @return a {@link BooleanVar} initialized with the specified value
      */
     static @Nonnull BooleanVar of(boolean value) {
-        return VarBack.of(value);
+        return VarImpls.of(value);
     }
 
     /**

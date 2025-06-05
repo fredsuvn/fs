@@ -16,7 +16,7 @@ public interface DoubleVar extends DoubleVal, PrimitiveToVar<Double> {
      * @return a {@link DoubleVar} initialized with the specified value
      */
     static @Nonnull DoubleVar of(double value) {
-        return VarBack.of(value);
+        return VarImpls.of(value);
     }
 
     /**

@@ -17,7 +17,7 @@ public interface FloatVal extends PrimitiveToVal<Float> {
      * @return a {@link FloatVal} holding the {@code 0}
      */
     static @Nonnull FloatVal ofZero() {
-        return ValBack.OF_ZERO_FLOAT;
+        return ValImpls.OF_ZERO_FLOAT;
     }
 
     /**
@@ -27,7 +27,7 @@ public interface FloatVal extends PrimitiveToVal<Float> {
      * @return a {@link FloatVal} holding the specified value
      */
     static @Nonnull FloatVal of(float value) {
-        return ValBack.of(value);
+        return ValImpls.of(value);
     }
 
     /**
