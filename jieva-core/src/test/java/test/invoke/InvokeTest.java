@@ -6,6 +6,7 @@ import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.invoke.InvocationException;
 import xyz.sunqian.common.invoke.InvocationMode;
+import xyz.sunqian.common.invoke.JieInvoke;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -99,16 +100,22 @@ public class InvokeTest {
     }
 
     @Test
-    public void testLotsOfMethods() throws Exception {
+    public void testLotsOfMethods() throws Throwable {
         // static
         List<Method> staticMethods = Jie.stream(LotsOfMethods.class.getMethods())
             .filter(method -> method.getName().startsWith("staticMethod"))
             .collect(Collectors.toList());
         for (Method method : staticMethods) {
             Invocable invocable = Invocable.of(method, InvocationMode.METHOD_HANDLE);
+            Object[] args = LotsOfMethods.buildArgsForLotsOfMethods(method);
             assertEquals(
-                invocable.invoke(null, LotsOfMethods.buildArgsForLotsOfMethods(method)),
-                method.invoke(null, LotsOfMethods.buildArgsForLotsOfMethods(method))
+                invocable.invoke(null, args),
+                method.invoke(null, args)
+            );
+            MethodHandle handle = MethodHandles.lookup().unreflect(method);
+            assertEquals(
+                JieInvoke.invokeStatic(handle, args),
+                method.invoke(null, args)
             );
         }
         // instance
@@ -118,9 +125,15 @@ public class InvokeTest {
         LotsOfMethods inst = new LotsOfMethods();
         for (Method method : instanceMethods) {
             Invocable invocable = Invocable.of(method, InvocationMode.METHOD_HANDLE);
+            Object[] args = LotsOfMethods.buildArgsForLotsOfMethods(method);
             assertEquals(
-                invocable.invoke(inst, LotsOfMethods.buildArgsForLotsOfMethods(method)),
-                method.invoke(inst, LotsOfMethods.buildArgsForLotsOfMethods(method))
+                invocable.invoke(inst, args),
+                method.invoke(inst, args)
+            );
+            MethodHandle handle = MethodHandles.lookup().unreflect(method);
+            assertEquals(
+                JieInvoke.invokeInstance(handle, inst, args),
+                method.invoke(inst, args)
             );
         }
     }

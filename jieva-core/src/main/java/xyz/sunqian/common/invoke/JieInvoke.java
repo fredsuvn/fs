@@ -1,5 +1,6 @@
 package xyz.sunqian.common.invoke;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 
 import java.lang.invoke.MethodHandle;
@@ -21,7 +22,7 @@ public class JieInvoke {
      * @throws Throwable for anything thrown by the underlying method
      */
     public static @Nullable Object invokeInstance(
-        MethodHandle handle, Object inst, @Nullable Object... args
+        @Nonnull MethodHandle handle, Object inst, @Nullable Object... args
     ) throws Throwable {
         return HandleInvoker.invokeInstance(handle, inst, args);
     }
@@ -35,7 +36,7 @@ public class JieInvoke {
      * @throws Throwable for anything thrown by the underlying method
      */
     public static @Nullable Object invokeStatic(
-        MethodHandle handle, @Nullable Object... args
+        @Nonnull MethodHandle handle, @Nullable Object... args
     ) throws Throwable {
         return HandleInvoker.invokeStatic(handle, args);
     }

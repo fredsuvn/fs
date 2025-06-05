@@ -92,7 +92,9 @@ public interface Invocable {
      * @return the invocation result
      * @throws InvocationException for any {@link Throwable}
      */
-    default @Nullable Object invoke(@Nullable Object inst, @Nullable Object... args) throws InvocationException {
+    default @Nullable Object invoke(
+        @Nullable Object inst, @Nullable Object @Nonnull ... args
+    ) throws InvocationException {
         try {
             return invokeChecked(inst, args);
         } catch (Throwable e) {
@@ -114,5 +116,5 @@ public interface Invocable {
      * @throws Throwable directly throws any exception thrown from the underlying invocation
      */
     @Nullable
-    Object invokeChecked(@Nullable Object inst, @Nullable Object... args) throws Throwable;
+    Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable;
 }
