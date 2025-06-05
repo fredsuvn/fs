@@ -16,12 +16,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 
-final class CacheBack {
+final class CacheImpls {
 
-    private static final RefGenerator WEAK_GENERATOR = WeakRef::new;
-    private static final RefGenerator SOFT_GENERATOR = SoftRef::new;
-    private static final RefGenerator PHANTOM_GENERATOR = PhantomRef::new;
-    private static final RefGenerator STRONG_GENERATOR = StrongRef::new;
+    private static final @Nonnull RefGenerator WEAK_GENERATOR = WeakRef::new;
+    private static final @Nonnull RefGenerator SOFT_GENERATOR = SoftRef::new;
+    private static final @Nonnull RefGenerator PHANTOM_GENERATOR = PhantomRef::new;
+    private static final @Nonnull RefGenerator STRONG_GENERATOR = StrongRef::new;
 
     static <K, V> @Nonnull SimpleCache<K, V> ofWeak() {
         return new QueueRefCache<>(WEAK_GENERATOR);
@@ -50,7 +50,7 @@ final class CacheBack {
         return Jie.as(raw);
     }
 
-    private static <K, V> void compareAndRemove(Map<K, V> map, K key, V value) {
+    private static <K, V> void compareAndRemove(@Nonnull Map<K, V> map, K key, V value) {
         map.compute(key, (k, old) -> {
             if (old == value) {
                 return null;
@@ -61,10 +61,10 @@ final class CacheBack {
 
     private static abstract class RefCache<K, V> implements SimpleCache<K, V> {
 
-        protected static final Object NULL_VAL = "(╯‵□′)╯︵┻━┻";
+        protected static final @Nonnull Object NULL_VAL = "(╯‵□′)╯︵┻━┻";
 
-        protected final ConcurrentMap<Object, Ref<K>> map = new ConcurrentHashMap<>();
-        protected final RefGenerator refGenerator;
+        protected final @Nonnull ConcurrentMap<Object, Ref<K>> map = new ConcurrentHashMap<>();
+        protected final @Nonnull RefGenerator refGenerator;
 
         protected RefCache(@Nonnull RefGenerator refGenerator) {
             this.refGenerator = refGenerator;
@@ -178,7 +178,7 @@ final class CacheBack {
 
     private static final class QueueRefCache<K, V> extends RefCache<K, V> {
 
-        private final ReferenceQueue<Object> queue = new ReferenceQueue<>();
+        private final @Nonnull ReferenceQueue<Object> queue = new ReferenceQueue<>();
 
         private QueueRefCache(@Nonnull RefGenerator refGenerator) {
             super(refGenerator);
