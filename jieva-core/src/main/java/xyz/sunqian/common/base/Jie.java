@@ -790,6 +790,19 @@ public class Jie {
         return JieStream.stream(elements);
     }
 
+    /**
+     * Returns a {@link Stream} from the given elements.
+     * <p>
+     * This method is a shortcut to the {@link JieStream#stream(Iterable)}.
+     *
+     * @param elements the given elements
+     * @param <T>      the component type
+     * @return a {@link Stream} from the given elements
+     */
+    public static <T> @Nonnull Stream<T> stream(@Nonnull Iterable<T> elements) {
+        return JieStream.stream(elements);
+    }
+
     //---------------- Thread Begin ----------------//
 
     /**

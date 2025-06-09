@@ -223,6 +223,7 @@ public class JieTest {
             assertEquals(Jie.hashMap(1, 2, 3, 4), new HashMap<>(map));
             assertEquals(Jie.linkedHashMap(1, 2, 3, 4), map);
             assertEquals(Jie.stream(1, 2, 3).collect(Collectors.toList()), Jie.list(1, 2, 3));
+            assertEquals(Jie.stream(Jie.list(1, 2, 3)).collect(Collectors.toList()), Jie.list(1, 2, 3));
         }
         {
             // sleep
