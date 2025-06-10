@@ -103,7 +103,7 @@ public class JieClass {
     public static @Nullable Method getMethod(
         @Nonnull Class<?> cls,
         @Nonnull String name,
-        @Nonnull @RetainedParam Class<?> @Nonnull [] parameterTypes
+        @Nonnull Class<?> @Nonnull @RetainedParam [] parameterTypes
     ) {
         return getMethod(cls, name, parameterTypes, true);
     }
@@ -122,7 +122,7 @@ public class JieClass {
     public static @Nullable Method getMethod(
         @Nonnull Class<?> cls,
         @Nonnull String name,
-        @Nonnull @RetainedParam Class<?> @Nonnull [] parameterTypes,
+        @Nonnull Class<?> @Nonnull @RetainedParam [] parameterTypes,
         boolean searchDeclared
     ) {
         try {
@@ -154,7 +154,7 @@ public class JieClass {
     public static @Nullable Method searchMethod(
         @Nonnull Class<?> cls,
         @Nonnull String name,
-        @Nonnull @RetainedParam Class<?> @Nonnull [] parameterTypes
+        @Nonnull Class<?> @Nonnull @RetainedParam [] parameterTypes
     ) {
         Method method = getMethod(cls, name, parameterTypes);
         if (method != null) {
@@ -220,7 +220,7 @@ public class JieClass {
      */
     public static @Nullable Constructor<?> getConstructor(
         @Nonnull Class<?> cls,
-        @Nonnull @RetainedParam Class<?> @Nonnull [] parameterTypes
+        @Nonnull Class<?> @Nonnull @RetainedParam [] parameterTypes
     ) {
         return getConstructor(cls, parameterTypes, true);
     }
@@ -237,7 +237,7 @@ public class JieClass {
      */
     public static @Nullable Constructor<?> getConstructor(
         @Nonnull Class<?> cls,
-        @Nonnull @RetainedParam Class<?> @Nonnull [] parameterTypes,
+        @Nonnull Class<?> @Nonnull @RetainedParam [] parameterTypes,
         boolean searchDeclared
     ) {
         try {
