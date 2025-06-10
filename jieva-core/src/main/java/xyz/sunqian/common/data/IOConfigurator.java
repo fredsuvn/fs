@@ -1,8 +1,9 @@
-package xyz.sunqian.common.io;
+package xyz.sunqian.common.data;
 
 import xyz.sunqian.common.base.BaseConfigurator;
-import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.base.JieString;
+import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.io.JieIO;
 
 import java.io.InputStream;
 import java.io.OutputStream;
