@@ -1,6 +1,8 @@
 package xyz.sunqian.common.base.chars;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieSystem;
 
 import java.nio.CharBuffer;
@@ -71,6 +73,17 @@ public class JieChars {
      */
     public static Charset latinCharset() {
         return ISO_8859_1;
+    }
+
+    /**
+     * If the {@link #nativeCharset()} is not {@code null}, returns {@link #nativeCharset()}, otherwise returns
+     * {@link #jvmCharset()}.
+     *
+     * @return if the {@link #nativeCharset()} is not {@code null}, returns {@link #nativeCharset()}, otherwise returns
+     * {@link #jvmCharset()}.
+     */
+    public static @Nonnull Charset localCharset() {
+        return Jie.nonnull(nativeCharset(), jvmCharset());
     }
 
     /**

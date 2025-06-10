@@ -11,6 +11,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static xyz.sunqian.test.JieAssert.invokeEquals;
@@ -33,7 +34,7 @@ public class CharsTest {
         assertEquals(JieChars.jvmCharset(), JieChars.defaultCharset());
         assertEquals(JieChars.charset(StandardCharsets.UTF_8.name()), StandardCharsets.UTF_8);
         assertNull(JieChars.charset(null));
-
+        assertNotNull(JieChars.localCharset());
         {
             // native chars
             Charset nativeCharset = JieChars.nativeCharset();
@@ -45,7 +46,7 @@ public class CharsTest {
             Charset fileCharset = JieChars.charset(System.getProperty(JieSystem.KEY_OF_FILE_ENCODING));
             Method search = nativesClass.getDeclaredMethod("search", String[].class);
             invokeEquals(fileCharset, search, null, (Object) new String[]{"UTF888", JieSystem.KEY_OF_FILE_ENCODING});
-            invokeEquals(search, null, null, (Object) new String[]{"UTF888"});
+            invokeEquals(null, search, null, (Object) new String[]{"UTF888"});
         }
     }
 }

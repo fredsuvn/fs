@@ -584,15 +584,6 @@ public class Jie {
     }
 
     /**
-     * Returns a new starter to build and start a {@link Process}.
-     *
-     * @return a new starter to build and start a {@link Process}
-     */
-    public static ProcessStarter processStarter() {
-        return ProcessStarter.newInstance();
-    }
-
-    /**
      * Returns a new builder to build a {@link ExecutorService}.
      *
      * @return a new builder to build a {@link ExecutorService}
