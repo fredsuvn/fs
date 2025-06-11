@@ -2,6 +2,7 @@ package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.Jie;
 
 import java.io.Closeable;
 import java.io.Flushable;
@@ -1112,7 +1113,7 @@ final class WrapperImpls {
 
         @Override
         protected void doAppend(@Nullable CharSequence csq, int start, int end) throws Exception {
-            CharSequence chars = IOBack.nonNullChars(csq);
+            CharSequence chars = Jie.nonnull(csq, Jie.NULL_STRING);
             doWrite0(chars, start, end - start);
         }
 

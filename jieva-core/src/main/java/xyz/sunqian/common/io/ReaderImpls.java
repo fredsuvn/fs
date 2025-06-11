@@ -1,5 +1,6 @@
 package xyz.sunqian.common.io;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.JieCheck;
 import xyz.sunqian.common.base.bytes.JieBytes;
 import xyz.sunqian.common.base.chars.JieChars;
@@ -13,39 +14,39 @@ import java.util.Arrays;
 
 final class ReaderImpls {
 
-    static ByteReader of(InputStream source) {
+    static @Nonnull ByteReader of(@Nonnull InputStream source) {
         return new ByteStreamReader(source);
     }
 
-    static ByteReader of(byte[] source, int offset, int length) throws IndexOutOfBoundsException {
+    static @Nonnull ByteReader of(byte @Nonnull [] source, int offset, int length) throws IndexOutOfBoundsException {
         return new ByteArrayReader(source, offset, length);
     }
 
-    static ByteReader of(ByteBuffer source) {
+    static @Nonnull ByteReader of(@Nonnull ByteBuffer source) {
         return new ByteBufferReader(source);
     }
 
-    static ByteReader of(ByteReader source, long readLimit) throws IllegalArgumentException {
+    static @Nonnull ByteReader of(@Nonnull ByteReader source, long readLimit) throws IllegalArgumentException {
         return new LimitedByteReader(source, readLimit);
     }
 
-    static CharReader of(Reader source) {
+    static @Nonnull CharReader of(@Nonnull Reader source) {
         return new CharStreamReader(source);
     }
 
-    static CharReader of(char[] source, int offset, int length) throws IndexOutOfBoundsException {
+    static @Nonnull CharReader of(char @Nonnull [] source, int offset, int length) throws IndexOutOfBoundsException {
         return new CharArrayReader(source, offset, length);
     }
 
-    static CharReader of(CharSequence source, int start, int end) throws IndexOutOfBoundsException {
+    static @Nonnull CharReader of(@Nonnull CharSequence source, int start, int end) throws IndexOutOfBoundsException {
         return new CharSequenceReader(source, start, end);
     }
 
-    static CharReader of(CharBuffer source) {
+    static @Nonnull CharReader of(@Nonnull CharBuffer source) {
         return new CharBufferReader(source);
     }
 
-    static CharReader of(CharReader source, long readLimit) throws IllegalArgumentException {
+    static @Nonnull CharReader of(@Nonnull CharReader source, long readLimit) throws IllegalArgumentException {
         return new LimitedCharReader(source, readLimit);
     }
 
@@ -69,23 +70,23 @@ final class ReaderImpls {
 
     static final class ByteSegmentImpl implements ByteSegment {
 
-        private static final ByteSegmentImpl EMPTY_END = new ByteSegmentImpl(JieBytes.emptyBuffer(), true);
-        private static final ByteSegmentImpl EMPTY_SEG = new ByteSegmentImpl(JieBytes.emptyBuffer(), false);
+        private static final @Nonnull ByteSegmentImpl EMPTY_END = new ByteSegmentImpl(JieBytes.emptyBuffer(), true);
+        private static final @Nonnull ByteSegmentImpl EMPTY_SEG = new ByteSegmentImpl(JieBytes.emptyBuffer(), false);
 
-        public static ByteSegmentImpl empty(boolean end) {
+        public static @Nonnull ByteSegmentImpl empty(boolean end) {
             return end ? EMPTY_END : EMPTY_SEG;
         }
 
-        private final ByteBuffer data;
+        private final @Nonnull ByteBuffer data;
         private boolean end;
 
-        ByteSegmentImpl(ByteBuffer data, boolean end) {
+        ByteSegmentImpl(@Nonnull ByteBuffer data, boolean end) {
             this.data = data;
             this.end = end;
         }
 
         @Override
-        public ByteBuffer data() {
+        public @Nonnull ByteBuffer data() {
             return data;
         }
 
@@ -96,7 +97,7 @@ final class ReaderImpls {
 
         @SuppressWarnings("MethodDoesntCallSuperMethod")
         @Override
-        public ByteSegment clone() {
+        public @Nonnull ByteSegment clone() {
             ByteBuffer copy = ByteBuffer.allocate(data.remaining());
             int pos = data.position();
             int limit = data.limit();
@@ -110,23 +111,23 @@ final class ReaderImpls {
 
     static final class CharSegmentImpl implements CharSegment {
 
-        private static final CharSegmentImpl EMPTY_END = new CharSegmentImpl(JieChars.emptyBuffer(), true);
-        private static final CharSegmentImpl EMPTY_SEG = new CharSegmentImpl(JieChars.emptyBuffer(), false);
+        private static final @Nonnull CharSegmentImpl EMPTY_END = new CharSegmentImpl(JieChars.emptyBuffer(), true);
+        private static final @Nonnull CharSegmentImpl EMPTY_SEG = new CharSegmentImpl(JieChars.emptyBuffer(), false);
 
-        public static CharSegmentImpl empty(boolean end) {
+        public static @Nonnull CharSegmentImpl empty(boolean end) {
             return end ? EMPTY_END : EMPTY_SEG;
         }
 
-        private final CharBuffer data;
+        private final @Nonnull CharBuffer data;
         private boolean end;
 
-        CharSegmentImpl(CharBuffer data, boolean end) {
+        CharSegmentImpl(@Nonnull CharBuffer data, boolean end) {
             this.data = data;
             this.end = end;
         }
 
         @Override
-        public CharBuffer data() {
+        public @Nonnull CharBuffer data() {
             return data;
         }
 
@@ -137,7 +138,7 @@ final class ReaderImpls {
 
         @SuppressWarnings("MethodDoesntCallSuperMethod")
         @Override
-        public CharSegment clone() {
+        public @Nonnull CharSegment clone() {
             CharBuffer copy = CharBuffer.allocate(data.remaining());
             int pos = data.position();
             int limit = data.limit();
@@ -151,14 +152,14 @@ final class ReaderImpls {
 
     private static final class ByteStreamReader implements ByteReader {
 
-        private final InputStream source;
+        private final @Nonnull InputStream source;
 
-        ByteStreamReader(InputStream source) {
+        ByteStreamReader(@Nonnull InputStream source) {
             this.source = source;
         }
 
         @Override
-        public ByteSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
+        public @Nonnull ByteSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
             checkSize(size);
             try {
                 return read0(size, endOnZeroRead);
@@ -209,7 +210,7 @@ final class ReaderImpls {
             }
         }
 
-        private ByteSegment read0(int size, boolean endOnZeroRead) throws Exception {
+        private @Nonnull ByteSegment read0(int size, boolean endOnZeroRead) throws Exception {
             if (size == 0) {
                 return ByteSegment.empty(false);
             }
@@ -267,12 +268,12 @@ final class ReaderImpls {
 
     private static final class ByteArrayReader implements ByteReader {
 
-        private final byte[] source;
+        private final byte @Nonnull [] source;
         private final int endPos;
         private int pos;
         private int mark = 0;
 
-        ByteArrayReader(byte[] source, int offset, int length) throws IndexOutOfBoundsException {
+        ByteArrayReader(byte @Nonnull [] source, int offset, int length) throws IndexOutOfBoundsException {
             JieCheck.checkOffsetLength(source.length, offset, length);
             this.source = source;
             this.pos = offset;
@@ -280,7 +281,7 @@ final class ReaderImpls {
         }
 
         @Override
-        public ByteSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
+        public @Nonnull ByteSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
             checkSize(size);
             if (pos == endPos) {
                 return ByteSegment.empty(true);
@@ -336,14 +337,14 @@ final class ReaderImpls {
 
     private static final class ByteBufferReader implements ByteReader {
 
-        private final ByteBuffer source;
+        private final @Nonnull ByteBuffer source;
 
-        ByteBufferReader(ByteBuffer source) {
+        ByteBufferReader(@Nonnull ByteBuffer source) {
             this.source = source;
         }
 
         @Override
-        public ByteSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
+        public @Nonnull ByteSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
             checkSize(size);
             if (!source.hasRemaining()) {
                 return ByteSegment.empty(true);
@@ -398,18 +399,18 @@ final class ReaderImpls {
 
     private static final class LimitedByteReader implements ByteReader {
 
-        private final ByteReader source;
+        private final @Nonnull ByteReader source;
         private long remaining;
         private long mark;
 
-        LimitedByteReader(ByteReader source, long readLimit) throws IllegalArgumentException {
+        LimitedByteReader(@Nonnull ByteReader source, long readLimit) throws IllegalArgumentException {
             checkReadLimit(readLimit);
             this.source = source;
             this.remaining = readLimit;
         }
 
         @Override
-        public ByteSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
+        public @Nonnull ByteSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
             checkSize(size);
             if (remaining <= 0) {
                 return ByteSegment.empty(true);
@@ -468,7 +469,7 @@ final class ReaderImpls {
             source.close();
         }
 
-        private ByteSegment makeTrue(ByteSegment seg) {
+        private @Nonnull ByteSegment makeTrue(@Nonnull ByteSegment seg) {
             if (seg instanceof ByteSegmentImpl) {
                 ((ByteSegmentImpl) seg).end = true;
                 return seg;
@@ -479,14 +480,14 @@ final class ReaderImpls {
 
     private static final class CharStreamReader implements CharReader {
 
-        private final Reader source;
+        private final @Nonnull Reader source;
 
-        CharStreamReader(Reader source) {
+        CharStreamReader(@Nonnull Reader source) {
             this.source = source;
         }
 
         @Override
-        public CharSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
+        public @Nonnull CharSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
             checkSize(size);
             try {
                 return read0(size, endOnZeroRead);
@@ -537,7 +538,7 @@ final class ReaderImpls {
             }
         }
 
-        private CharSegment read0(int size, boolean endOnZeroRead) throws Exception {
+        private @Nonnull CharSegment read0(int size, boolean endOnZeroRead) throws Exception {
             if (size == 0) {
                 return CharSegment.empty(false);
             }
@@ -595,12 +596,12 @@ final class ReaderImpls {
 
     private static final class CharArrayReader implements CharReader {
 
-        private final char[] source;
+        private final char @Nonnull [] source;
         private final int endPos;
         private int pos;
         private int mark = 0;
 
-        CharArrayReader(char[] source, int offset, int length) throws IndexOutOfBoundsException {
+        CharArrayReader(char @Nonnull [] source, int offset, int length) throws IndexOutOfBoundsException {
             JieCheck.checkOffsetLength(source.length, offset, length);
             this.source = source;
             this.pos = offset;
@@ -608,7 +609,7 @@ final class ReaderImpls {
         }
 
         @Override
-        public CharSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
+        public @Nonnull CharSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
             checkSize(size);
             if (pos == endPos) {
                 return CharSegment.empty(true);
@@ -664,12 +665,12 @@ final class ReaderImpls {
 
     private static final class CharSequenceReader implements CharReader {
 
-        private final CharSequence source;
+        private final @Nonnull CharSequence source;
         private final int endPos;
         private int pos;
         private int mark = 0;
 
-        CharSequenceReader(CharSequence source, int start, int end) throws IndexOutOfBoundsException {
+        CharSequenceReader(@Nonnull CharSequence source, int start, int end) throws IndexOutOfBoundsException {
             JieCheck.checkStartEnd(source.length(), start, end);
             this.source = source;
             this.pos = start;
@@ -677,7 +678,7 @@ final class ReaderImpls {
         }
 
         @Override
-        public CharSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
+        public @Nonnull CharSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
             checkSize(size);
             if (pos == endPos) {
                 return CharSegment.empty(true);
@@ -733,14 +734,14 @@ final class ReaderImpls {
 
     private static final class CharBufferReader implements CharReader {
 
-        private final CharBuffer source;
+        private final @Nonnull CharBuffer source;
 
-        CharBufferReader(CharBuffer source) {
+        CharBufferReader(@Nonnull CharBuffer source) {
             this.source = source;
         }
 
         @Override
-        public CharSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
+        public @Nonnull CharSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
             checkSize(size);
             if (!source.hasRemaining()) {
                 return CharSegment.empty(true);
@@ -795,18 +796,18 @@ final class ReaderImpls {
 
     private static final class LimitedCharReader implements CharReader {
 
-        private final CharReader source;
+        private final @Nonnull CharReader source;
         private long remaining;
         private long mark;
 
-        LimitedCharReader(CharReader source, long readLimit) throws IllegalArgumentException {
+        LimitedCharReader(@Nonnull CharReader source, long readLimit) throws IllegalArgumentException {
             checkReadLimit(readLimit);
             this.source = source;
             this.remaining = readLimit;
         }
 
         @Override
-        public CharSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
+        public @Nonnull CharSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException {
             checkSize(size);
             if (remaining <= 0) {
                 return CharSegment.empty(true);
@@ -864,7 +865,7 @@ final class ReaderImpls {
             source.close();
         }
 
-        private CharSegment makeTrue(CharSegment seg) {
+        private @Nonnull CharSegment makeTrue(@Nonnull CharSegment seg) {
             if (seg instanceof CharSegmentImpl) {
                 ((CharSegmentImpl) seg).end = true;
                 return seg;

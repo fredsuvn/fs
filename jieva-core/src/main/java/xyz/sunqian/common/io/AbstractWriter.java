@@ -2,6 +2,7 @@ package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.Jie;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -106,7 +107,7 @@ public abstract class AbstractWriter extends Writer {
     }
 
     @Override
-    public Writer append(char c) throws IOException {
+    public @Nonnull Writer append(char c) throws IOException {
         write(c);
         return this;
     }
@@ -125,14 +126,14 @@ public abstract class AbstractWriter extends Writer {
     }
 
     @Override
-    public Writer append(@Nullable CharSequence csq) throws IOException {
-        CharSequence cs = IOBack.nonNullChars(csq);
+    public @Nonnull Writer append(@Nullable CharSequence csq) throws IOException {
+        CharSequence cs = Jie.nonnull(csq, Jie.NULL_STRING);
         return append(cs, 0, cs.length());
     }
 
     @Override
-    public Writer append(@Nullable CharSequence csq, int start, int end) throws IOException {
-        CharSequence cs = IOBack.nonNullChars(csq);
+    public @Nonnull Writer append(@Nullable CharSequence csq, int start, int end) throws IOException {
+        CharSequence cs = Jie.nonnull(csq, Jie.NULL_STRING);
         checkOffsetLength(cs.length(), start, end - start);
         if (start == end) {
             return this;

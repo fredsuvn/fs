@@ -5,9 +5,9 @@
 //import org.testng.annotations.Test;
 //import xyz.fslabo.annotations.Nullable;
 //import xyz.sunqian.common.base.JieString;
-//import xyz.sunqian.common.codec.CipherCodec;
-//import xyz.sunqian.common.codec.CodecConfigurator;
-//import xyz.sunqian.common.codec.JieCodec;
+//import xyz.sunqian.common.data.CipherCodec;
+//import xyz.sunqian.common.data.CodecConfigurator;
+//import xyz.sunqian.common.data.JieCodec;
 //import xyz.sunqian.common.io.JieIO;
 //
 //import javax.crypto.Cipher;

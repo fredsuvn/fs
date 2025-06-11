@@ -1,4 +1,7 @@
-package xyz.sunqian.common.io;
+package xyz.sunqian.common.net.data;
+
+import xyz.sunqian.common.io.IORuntimeException;
+import xyz.sunqian.common.io.JieBuffer;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;

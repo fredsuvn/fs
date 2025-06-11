@@ -1,4 +1,4 @@
-package xyz.sunqian.common.data.protobuf;
+package xyz.sunqian.common.net.data.protobuf;
 
 import xyz.sunqian.common.objects.data.DataSchemaParser;
 import xyz.sunqian.common.mapping.Mapper;

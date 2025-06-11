@@ -1,5 +1,7 @@
 package xyz.sunqian.common.io;
 
+import xyz.sunqian.annotations.Nonnull;
+
 import java.nio.CharBuffer;
 
 /**
@@ -18,7 +20,7 @@ public interface CharSegment {
      * @param end  the given end flag
      * @return a new {@link CharSegment} with the given data and end flag
      */
-    static CharSegment of(CharBuffer data, boolean end) {
+    static @Nonnull CharSegment of(@Nonnull CharBuffer data, boolean end) {
         return new ReaderImpls.CharSegmentImpl(data, end);
     }
 
@@ -29,7 +31,7 @@ public interface CharSegment {
      * @param end the given end flag
      * @return an empty {@link CharSegment} with the given end flag
      */
-    static CharSegment empty(boolean end) {
+    static @Nonnull CharSegment empty(boolean end) {
         return ReaderImpls.CharSegmentImpl.empty(end);
     }
 
@@ -38,6 +40,7 @@ public interface CharSegment {
      *
      * @return the data content of this segment
      */
+    @Nonnull
     CharBuffer data();
 
     /**
@@ -53,5 +56,6 @@ public interface CharSegment {
      *
      * @return a clone of this segment
      */
+    @Nonnull
     CharSegment clone();
 }

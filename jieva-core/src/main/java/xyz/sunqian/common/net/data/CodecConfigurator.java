@@ -1,9 +1,8 @@
-package xyz.sunqian.common.codec;
+package xyz.sunqian.common.net.data;
 
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.base.chars.JieChars;
-import xyz.sunqian.common.data.IOConfigurator;
 
 /**
  * {@link IOConfigurator} for codec operations.

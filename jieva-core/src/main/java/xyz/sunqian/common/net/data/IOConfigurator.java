@@ -1,4 +1,4 @@
-package xyz.sunqian.common.data;
+package xyz.sunqian.common.net.data;
 
 import xyz.sunqian.common.base.BaseConfigurator;
 import xyz.sunqian.common.base.JieString;

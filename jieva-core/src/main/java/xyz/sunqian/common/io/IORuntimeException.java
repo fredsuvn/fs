@@ -1,5 +1,9 @@
 package xyz.sunqian.common.io;
 
+import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.exception.JieRuntimeException;
+
 import java.io.IOException;
 
 /**
@@ -7,12 +11,13 @@ import java.io.IOException;
  *
  * @author sunqian
  */
-public class IORuntimeException extends RuntimeException {
+public class IORuntimeException extends JieRuntimeException {
 
     /**
      * Empty constructor.
      */
     public IORuntimeException() {
+        super();
     }
 
     /**
@@ -20,7 +25,7 @@ public class IORuntimeException extends RuntimeException {
      *
      * @param message the message
      */
-    public IORuntimeException(String message) {
+    public IORuntimeException(@Nullable String message) {
         super(message);
     }
 
@@ -30,7 +35,7 @@ public class IORuntimeException extends RuntimeException {
      * @param message the message
      * @param cause   the cause
      */
-    public IORuntimeException(String message, Throwable cause) {
+    public IORuntimeException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
@@ -39,8 +44,8 @@ public class IORuntimeException extends RuntimeException {
      *
      * @param cause the cause
      */
-    public IORuntimeException(Throwable cause) {
-        super(cause instanceof IOException ? cause.getCause() : cause);
+    public IORuntimeException(@Nullable Throwable cause) {
+        super(cause);
     }
 
     /**
@@ -48,7 +53,7 @@ public class IORuntimeException extends RuntimeException {
      *
      * @param cause the {@link IOException}
      */
-    public IORuntimeException(IOException cause) {
+    public IORuntimeException(@Nonnull IOException cause) {
         this(cause.getMessage(), cause.getCause());
     }
 }

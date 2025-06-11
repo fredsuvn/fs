@@ -1,4 +1,4 @@
-package xyz.sunqian.common.data;
+package xyz.sunqian.common.net.data;
 
 import xyz.sunqian.common.base.JieCheck;
 import xyz.sunqian.common.base.bytes.ByteProcessor;

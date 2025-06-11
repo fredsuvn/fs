@@ -1,5 +1,7 @@
 package xyz.sunqian.common.io;
 
+import xyz.sunqian.annotations.Nonnull;
+
 import java.io.Reader;
 import java.nio.CharBuffer;
 
@@ -19,7 +21,7 @@ public interface CharReader {
      * @param source the given data source
      * @return a new {@link CharReader} with the given data source
      */
-    static CharReader from(Reader source) {
+    static @Nonnull CharReader from(@Nonnull Reader source) {
         return ReaderImpls.of(source);
     }
 
@@ -35,7 +37,7 @@ public interface CharReader {
      * @param source the given data source
      * @return a new {@link CharReader} with the given data source
      */
-    static CharReader from(char[] source) {
+    static @Nonnull CharReader from(char @Nonnull [] source) {
         return from(source, 0, source.length);
     }
 
@@ -55,7 +57,7 @@ public interface CharReader {
      * @return a new {@link CharReader} with the given data source
      * @throws IndexOutOfBoundsException if the specified offset or length is out of bounds
      */
-    static CharReader from(char[] source, int offset, int length) throws IndexOutOfBoundsException {
+    static @Nonnull CharReader from(char @Nonnull [] source, int offset, int length) throws IndexOutOfBoundsException {
         return ReaderImpls.of(source, offset, length);
     }
 
@@ -71,7 +73,7 @@ public interface CharReader {
      * @param source the given data source
      * @return a new {@link CharReader} with the given data source
      */
-    static CharReader from(CharSequence source) {
+    static @Nonnull CharReader from(@Nonnull CharSequence source) {
         return from(source, 0, source.length());
     }
 
@@ -91,7 +93,7 @@ public interface CharReader {
      * @return a new {@link CharReader} with the given data source
      * @throws IndexOutOfBoundsException if the specified start or end position is out of bounds
      */
-    static CharReader from(CharSequence source, int start, int end) throws IndexOutOfBoundsException {
+    static @Nonnull CharReader from(@Nonnull CharSequence source, int start, int end) throws IndexOutOfBoundsException {
         return ReaderImpls.of(source, start, end);
     }
 
@@ -107,7 +109,7 @@ public interface CharReader {
      * @param source the given data source
      * @return a new {@link CharReader} with the given data source
      */
-    static CharReader from(CharBuffer source) {
+    static @Nonnull CharReader from(@Nonnull CharBuffer source) {
         return ReaderImpls.of(source);
     }
 
@@ -125,7 +127,7 @@ public interface CharReader {
      * @throws IORuntimeException       if an I/O error occurs
      * @see #read(int, boolean)
      */
-    default CharSegment read(int size) throws IllegalArgumentException, IORuntimeException {
+    default @Nonnull CharSegment read(int size) throws IllegalArgumentException, IORuntimeException {
         return read(size, false);
     }
 
@@ -144,6 +146,7 @@ public interface CharReader {
      * @throws IllegalArgumentException if the specified size is negative
      * @throws IORuntimeException       if an I/O error occurs
      */
+    @Nonnull
     CharSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException;
 
     /**
@@ -219,7 +222,7 @@ public interface CharReader {
      * chars
      * @throws IllegalArgumentException if the specified read limit is negative
      */
-    default CharReader withReadLimit(long readLimit) throws IllegalArgumentException {
+    default @Nonnull CharReader withReadLimit(long readLimit) throws IllegalArgumentException {
         return ReaderImpls.of(this, readLimit);
     }
 }

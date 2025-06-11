@@ -184,7 +184,7 @@ public interface ProcessReceipt extends TaskReceipt<Integer> {
      * @return the byte array read from the {@link #getInputStream()}
      * @throws AwaitingException if the current thread is interrupted or an error occurs while reading
      */
-    default @Nonnull byte @Nonnull [] readBytes() throws AwaitingException {
+    default byte @Nonnull [] readBytes() throws AwaitingException {
         return Jie.uncheck(() -> JieIO.read(getInputStream()), AwaitingException::new);
     }
 

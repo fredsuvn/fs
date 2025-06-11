@@ -1,5 +1,6 @@
 package xyz.sunqian.common.io;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.bytes.ByteProcessor;
 import xyz.sunqian.common.base.chars.CharProcessor;
 import xyz.sunqian.common.base.chars.JieChars;
@@ -29,7 +30,9 @@ public class JieBuffer {
      * @throws ReadOnlyBufferException       If the buffer is backed by an array but is read-only
      * @throws UnsupportedOperationException If the buffer is not backed by an accessible array
      */
-    public static int arrayStartIndex(Buffer buffer) throws ReadOnlyBufferException, UnsupportedOperationException {
+    public static int arrayStartIndex(
+        @Nonnull Buffer buffer
+    ) throws ReadOnlyBufferException, UnsupportedOperationException {
         return buffer.arrayOffset() + buffer.position();
     }
 
@@ -41,7 +44,9 @@ public class JieBuffer {
      * @throws ReadOnlyBufferException       If the buffer is backed by an array but is read-only
      * @throws UnsupportedOperationException If the buffer is not backed by an accessible array
      */
-    public static int arrayEndIndex(Buffer buffer) throws ReadOnlyBufferException, UnsupportedOperationException {
+    public static int arrayEndIndex(
+        @Nonnull Buffer buffer
+    ) throws ReadOnlyBufferException, UnsupportedOperationException {
         return buffer.arrayOffset() + buffer.position() + buffer.remaining();
     }
 
@@ -52,7 +57,7 @@ public class JieBuffer {
      * @param source the source buffer
      * @return the array containing the data
      */
-    public static byte[] read(ByteBuffer source) {
+    public static byte @Nonnull [] read(@Nonnull ByteBuffer source) {
         int length = source.remaining();
         if (length <= 0) {
             return new byte[0];
@@ -72,7 +77,7 @@ public class JieBuffer {
      * @param number the specified number
      * @return the array containing the data
      */
-    public static byte[] read(ByteBuffer source, int number) {
+    public static byte @Nonnull [] read(@Nonnull ByteBuffer source, int number) {
         if (!source.hasRemaining()) {
             return new byte[0];
         }
@@ -95,7 +100,7 @@ public class JieBuffer {
      * @param source the source buffer
      * @return the array containing the data
      */
-    public static char[] read(CharBuffer source) {
+    public static char @Nonnull [] read(@Nonnull CharBuffer source) {
         int length = source.remaining();
         if (length <= 0) {
             return new char[0];
@@ -115,7 +120,7 @@ public class JieBuffer {
      * @param number the specified number
      * @return the array containing the data
      */
-    public static char[] read(CharBuffer source, int number) {
+    public static char @Nonnull [] read(@Nonnull CharBuffer source, int number) {
         if (!source.hasRemaining()) {
             return new char[0];
         }
@@ -138,7 +143,7 @@ public class JieBuffer {
      * @param source the source buffer
      * @return the string containing the data
      */
-    public static String string(CharBuffer source) {
+    public static @Nonnull String string(@Nonnull CharBuffer source) {
         StringBuilder builder = new StringBuilder();
         readTo(source, builder);
         return builder.toString();
@@ -154,7 +159,7 @@ public class JieBuffer {
      * @param number the specified number
      * @return the array containing the data
      */
-    public static String string(CharBuffer source, int number) {
+    public static @Nonnull String string(@Nonnull CharBuffer source, int number) {
         StringBuilder builder = new StringBuilder();
         CharProcessor.from(source).readLimit(number).writeTo(builder);
         return builder.toString();
@@ -166,7 +171,7 @@ public class JieBuffer {
      * @param source the source buffer
      * @return the string
      */
-    public static String string(ByteBuffer source) {
+    public static @Nonnull String string(@Nonnull ByteBuffer source) {
         return string(source, JieChars.defaultCharset());
     }
 
@@ -177,7 +182,7 @@ public class JieBuffer {
      * @param charset the specified charset
      * @return the string
      */
-    public static String string(ByteBuffer source, Charset charset) {
+    public static @Nonnull String string(@Nonnull ByteBuffer source, @Nonnull Charset charset) {
         byte[] bytes = read(source);
         if (JieArray.isEmpty(bytes)) {
             return "";
@@ -194,7 +199,7 @@ public class JieBuffer {
      * @return the actual number of bytes read
      * @throws IORuntimeException if an I/O error occurs
      */
-    public static int readTo(ByteBuffer source, byte[] dest) throws IORuntimeException {
+    public static int readTo(@Nonnull ByteBuffer source, byte @Nonnull [] dest) throws IORuntimeException {
         return (int) ByteProcessor.from(source).readLimit(dest.length).writeTo(dest);
     }
 
@@ -207,7 +212,7 @@ public class JieBuffer {
      * @return the actual number of bytes read
      * @throws IORuntimeException if an I/O error occurs
      */
-    public static int readTo(ByteBuffer source, ByteBuffer dest) throws IORuntimeException {
+    public static int readTo(@Nonnull ByteBuffer source, @Nonnull ByteBuffer dest) throws IORuntimeException {
         int limit = Math.min(source.remaining(), dest.remaining());
         if (limit <= 0) {
             return 0;
@@ -228,7 +233,7 @@ public class JieBuffer {
      * @return the actual number of bytes read
      * @throws IORuntimeException if an I/O error occurs
      */
-    public static long readTo(ByteBuffer source, OutputStream dest) throws IORuntimeException {
+    public static long readTo(@Nonnull ByteBuffer source, @Nonnull OutputStream dest) throws IORuntimeException {
         return ByteProcessor.from(source).writeTo(dest);
     }
 
@@ -241,7 +246,7 @@ public class JieBuffer {
      * @return the actual number of chars read
      * @throws IORuntimeException if an I/O error occurs
      */
-    public static int readTo(CharBuffer source, char[] dest) throws IORuntimeException {
+    public static int readTo(@Nonnull CharBuffer source, char @Nonnull [] dest) throws IORuntimeException {
         return (int) CharProcessor.from(source).readLimit(dest.length).writeTo(dest);
     }
 
@@ -254,7 +259,7 @@ public class JieBuffer {
      * @return the actual number of chars read
      * @throws IORuntimeException if an I/O error occurs
      */
-    public static int readTo(CharBuffer source, CharBuffer dest) throws IORuntimeException {
+    public static int readTo(@Nonnull CharBuffer source, @Nonnull CharBuffer dest) throws IORuntimeException {
         int limit = Math.min(source.remaining(), dest.remaining());
         if (limit <= 0) {
             return 0;
@@ -275,7 +280,7 @@ public class JieBuffer {
      * @return the actual number of chars read
      * @throws IORuntimeException if an I/O error occurs
      */
-    public static long readTo(CharBuffer source, Appendable dest) throws IORuntimeException {
+    public static long readTo(@Nonnull CharBuffer source, @Nonnull Appendable dest) throws IORuntimeException {
         return CharProcessor.from(source).writeTo(dest);
     }
 
@@ -292,7 +297,7 @@ public class JieBuffer {
      * @return a new buffer whose content is a shared subsequence of the given buffer's content
      * @throws IndexOutOfBoundsException if the offset and length is out of bounds
      */
-    public static ByteBuffer slice(ByteBuffer buffer, int length) throws IndexOutOfBoundsException {
+    public static @Nonnull ByteBuffer slice(@Nonnull ByteBuffer buffer, int length) throws IndexOutOfBoundsException {
         return slice(buffer, 0, length);
     }
 
@@ -311,7 +316,9 @@ public class JieBuffer {
      * @return a new buffer whose content is a shared subsequence of the given buffer's content
      * @throws IndexOutOfBoundsException if the offset and length is out of bounds
      */
-    public static ByteBuffer slice(ByteBuffer buffer, int offset, int length) throws IndexOutOfBoundsException {
+    public static @Nonnull ByteBuffer slice(
+        @Nonnull ByteBuffer buffer, int offset, int length
+    ) throws IndexOutOfBoundsException {
         checkOffsetLength(buffer.remaining(), offset, length);
         int pos = buffer.position();
         int limit = buffer.limit();
@@ -336,7 +343,7 @@ public class JieBuffer {
      * @return a new buffer whose content is a shared subsequence of the given buffer's content
      * @throws IndexOutOfBoundsException if the offset and length is out of bounds
      */
-    public static CharBuffer slice(CharBuffer buffer, int length) throws IndexOutOfBoundsException {
+    public static @Nonnull CharBuffer slice(@Nonnull CharBuffer buffer, int length) throws IndexOutOfBoundsException {
         return slice(buffer, 0, length);
     }
 
@@ -355,7 +362,9 @@ public class JieBuffer {
      * @return a new buffer whose content is a shared subsequence of the given buffer's content
      * @throws IndexOutOfBoundsException if the offset and length is out of bounds
      */
-    public static CharBuffer slice(CharBuffer buffer, int offset, int length) throws IndexOutOfBoundsException {
+    public static @Nonnull CharBuffer slice(
+        @Nonnull CharBuffer buffer, int offset, int length
+    ) throws IndexOutOfBoundsException {
         checkOffsetLength(buffer.remaining(), offset, length);
         int pos = buffer.position();
         int limit = buffer.limit();

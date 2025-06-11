@@ -1,4 +1,4 @@
-package xyz.sunqian.common.codec;
+package xyz.sunqian.common.net.data;
 
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.bytes.ByteProcessor;

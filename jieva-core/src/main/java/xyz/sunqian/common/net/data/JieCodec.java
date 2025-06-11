@@ -1,7 +1,6 @@
-package xyz.sunqian.common.codec;
+package xyz.sunqian.common.net.data;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.io.IOMisc;
 import xyz.sunqian.common.io.JieBuffer;
 import xyz.sunqian.common.io.JieIO;
 

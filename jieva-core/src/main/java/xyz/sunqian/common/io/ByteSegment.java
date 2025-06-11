@@ -1,5 +1,7 @@
 package xyz.sunqian.common.io;
 
+import xyz.sunqian.annotations.Nonnull;
+
 import java.nio.ByteBuffer;
 
 /**
@@ -18,7 +20,7 @@ public interface ByteSegment {
      * @param end  the given end flag
      * @return a new {@link ByteSegment} with the given data and end flag
      */
-    static ByteSegment of(ByteBuffer data, boolean end) {
+    static @Nonnull ByteSegment of(@Nonnull ByteBuffer data, boolean end) {
         return new ReaderImpls.ByteSegmentImpl(data, end);
     }
 
@@ -29,7 +31,7 @@ public interface ByteSegment {
      * @param end the given end flag
      * @return an empty {@link ByteSegment} with the given end flag
      */
-    static ByteSegment empty(boolean end) {
+    static @Nonnull ByteSegment empty(boolean end) {
         return ReaderImpls.ByteSegmentImpl.empty(end);
     }
 
@@ -38,6 +40,7 @@ public interface ByteSegment {
      *
      * @return the data content of this segment
      */
+    @Nonnull
     ByteBuffer data();
 
     /**
@@ -53,5 +56,6 @@ public interface ByteSegment {
      *
      * @return a clone of this segment
      */
+    @Nonnull
     ByteSegment clone();
 }

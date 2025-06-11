@@ -1,4 +1,4 @@
-package xyz.sunqian.common.codec;
+package xyz.sunqian.common.net.data;
 
 /**
  * Exception for codec.

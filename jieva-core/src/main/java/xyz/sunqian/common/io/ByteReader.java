@@ -1,5 +1,7 @@
 package xyz.sunqian.common.io;
 
+import xyz.sunqian.annotations.Nonnull;
+
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
@@ -19,7 +21,7 @@ public interface ByteReader {
      * @param source the given data source
      * @return a new {@link ByteReader} with the given data source
      */
-    static ByteReader from(InputStream source) {
+    static @Nonnull ByteReader from(@Nonnull InputStream source) {
         return ReaderImpls.of(source);
     }
 
@@ -35,7 +37,7 @@ public interface ByteReader {
      * @param source the given data source
      * @return a new {@link ByteReader} with the given data source
      */
-    static ByteReader from(byte[] source) {
+    static @Nonnull ByteReader from(byte @Nonnull [] source) {
         return from(source, 0, source.length);
     }
 
@@ -55,7 +57,7 @@ public interface ByteReader {
      * @return a new {@link ByteReader} with the given data source
      * @throws IndexOutOfBoundsException if the specified offset or length is out of bounds
      */
-    static ByteReader from(byte[] source, int offset, int length) throws IndexOutOfBoundsException {
+    static @Nonnull ByteReader from(byte @Nonnull [] source, int offset, int length) throws IndexOutOfBoundsException {
         return ReaderImpls.of(source, offset, length);
     }
 
@@ -71,7 +73,7 @@ public interface ByteReader {
      * @param source the given data source
      * @return a new {@link ByteReader} with the given data source
      */
-    static ByteReader from(ByteBuffer source) {
+    static @Nonnull ByteReader from(@Nonnull ByteBuffer source) {
         return ReaderImpls.of(source);
     }
 
@@ -89,7 +91,7 @@ public interface ByteReader {
      * @throws IORuntimeException       if an I/O error occurs
      * @see #read(int, boolean)
      */
-    default ByteSegment read(int size) throws IllegalArgumentException, IORuntimeException {
+    default @Nonnull ByteSegment read(int size) throws IllegalArgumentException, IORuntimeException {
         return read(size, false);
     }
 
@@ -108,6 +110,7 @@ public interface ByteReader {
      * @throws IllegalArgumentException if the specified size is negative
      * @throws IORuntimeException       if an I/O error occurs
      */
+    @Nonnull
     ByteSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException;
 
     /**
@@ -183,7 +186,7 @@ public interface ByteReader {
      * bytes
      * @throws IllegalArgumentException if the specified read limit is negative
      */
-    default ByteReader withReadLimit(long readLimit) throws IllegalArgumentException {
+    default @Nonnull ByteReader withReadLimit(long readLimit) throws IllegalArgumentException {
         return ReaderImpls.of(this, readLimit);
     }
 }
