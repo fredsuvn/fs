@@ -30,7 +30,8 @@ public interface VoidReceipt extends BaseTaskReceipt {
      * {@link #getException()} can be used to obtain the reason.
      *
      * @param duration the maximum time to wait
-     * @throws AwaitingException if the current thread is interrupted or an error occurs while awaiting
+     * @throws AwaitingException if the current thread is interrupted, or the specified waiting time elapses, or other
+     *                           error occurs while awaiting
      */
     void await(@Nonnull Duration duration) throws AwaitingException;
 }

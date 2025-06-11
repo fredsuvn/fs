@@ -36,7 +36,8 @@ public interface TaskReceipt<T> extends BaseTaskReceipt {
      *
      * @param duration the maximum time to wait
      * @return the result of the task
-     * @throws AwaitingException if the current thread is interrupted or an error occurs while awaiting
+     * @throws AwaitingException if the current thread is interrupted, or the specified waiting time elapses, or other
+     *                           error occurs while awaiting
      */
     @Nullable
     T await(@Nonnull Duration duration) throws AwaitingException;

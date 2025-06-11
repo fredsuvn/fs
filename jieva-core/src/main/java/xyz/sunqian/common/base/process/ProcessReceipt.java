@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * This interface is the implementation of {@link TaskReceipt}, represents the receipt for a submitted {@link Process},
@@ -62,13 +63,20 @@ public interface ProcessReceipt extends TaskReceipt<Integer> {
      *
      * @param duration the maximum time to wait
      * @return the exit value of the process
-     * @throws AwaitingException if the current thread is interrupted or an error occurs while awaiting
+     * @throws AwaitingException if the current thread is interrupted, or the specified waiting time elapses, or other
+     *                           error occurs while awaiting
      */
     @Override
     default @Nonnull Integer await(@Nonnull Duration duration) throws AwaitingException {
         Process process = getProcess();
-        Jie.uncheck(() -> process.waitFor(duration.toNanos(), TimeUnit.NANOSECONDS), AwaitingException::new);
-        return process.exitValue();
+        boolean exited = Jie.uncheck(
+            () -> process.waitFor(duration.toNanos(), TimeUnit.NANOSECONDS),
+            AwaitingException::new
+        );
+        if (exited) {
+            return process.exitValue();
+        }
+        throw new AwaitingException(new TimeoutException());
     }
 
     /**
