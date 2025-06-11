@@ -6,6 +6,7 @@ plugins {
   id 'gek-test'
   id 'com.google.protobuf' version "$protobufPluginVersion"
   id 'gek-publish'
+  //id 'jacoco'
 }
 
 description = 'Core of Gek.'

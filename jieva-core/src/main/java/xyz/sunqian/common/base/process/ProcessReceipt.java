@@ -80,32 +80,6 @@ public interface ProcessReceipt extends TaskReceipt<Integer> {
     }
 
     /**
-     * Blocks the current thread until the process is terminated, returns the string read from the
-     * {@link #getInputStream()}, with the {@link JieChars#localCharset()}.
-     *
-     * @return the string read from the {@link #getInputStream()}
-     * @throws AwaitingException if the current thread is interrupted or an error occurs while reading
-     */
-    default @Nullable String readString() throws AwaitingException {
-        return readString(JieChars.localCharset());
-    }
-
-    /**
-     * Blocks the current thread until the process is terminated, returns the string read from the
-     * {@link #getInputStream()}.
-     *
-     * @param charset the specified charset
-     * @return the string read from the {@link #getInputStream()}
-     * @throws AwaitingException if the current thread is interrupted or an error occurs while reading
-     */
-    default @Nullable String readString(Charset charset) throws AwaitingException {
-        return Jie.uncheck(() -> {
-            InputStream in = getInputStream();
-            return JieIO.string(in, charset);
-        }, AwaitingException::new);
-    }
-
-    /**
      * Cancels and destroys the process forcibly (equivalent to {@code cancel(true)}). This method returns immediately
      * without waiting for the process to exit. If necessary, use {@link #await()}/{@link #await(Duration)} after
      * invoking this method to ensure the termination of the process.
@@ -189,7 +163,7 @@ public interface ProcessReceipt extends TaskReceipt<Integer> {
      *
      * @return the input stream connected to the normal output of the process
      */
-    default @Nullable InputStream getInputStream() {
+    default @Nonnull InputStream getInputStream() {
         return getProcess().getInputStream();
     }
 
@@ -199,7 +173,41 @@ public interface ProcessReceipt extends TaskReceipt<Integer> {
      *
      * @return the input stream connected to the error output of the process
      */
-    default @Nullable InputStream getErrorStream() {
+    default @Nonnull InputStream getErrorStream() {
         return getProcess().getErrorStream();
+    }
+
+    /**
+     * Blocks the current thread until the process is terminated, returns the byte array read from the
+     * {@link #getInputStream()}.
+     *
+     * @return the byte array read from the {@link #getInputStream()}
+     * @throws AwaitingException if the current thread is interrupted or an error occurs while reading
+     */
+    default @Nonnull byte[] readBytes() throws AwaitingException {
+        return Jie.uncheck(() -> JieIO.read(getInputStream()), AwaitingException::new);
+    }
+
+    /**
+     * Blocks the current thread until the process is terminated, returns the string read from the
+     * {@link #getInputStream()}, with the {@link JieChars#localCharset()}.
+     *
+     * @return the string read from the {@link #getInputStream()}
+     * @throws AwaitingException if the current thread is interrupted or an error occurs while reading
+     */
+    default @Nonnull String readString() throws AwaitingException {
+        return readString(JieChars.localCharset());
+    }
+
+    /**
+     * Blocks the current thread until the process is terminated, returns the string read from the
+     * {@link #getInputStream()}.
+     *
+     * @param charset the specified charset
+     * @return the string read from the {@link #getInputStream()}
+     * @throws AwaitingException if the current thread is interrupted or an error occurs while reading
+     */
+    default @Nonnull String readString(Charset charset) throws AwaitingException {
+        return Jie.uncheck(() -> JieIO.string(getInputStream(), charset), AwaitingException::new);
     }
 }

@@ -2,6 +2,7 @@ package test.base.process;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.JieSystem;
 import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.base.exception.AwaitingException;
 import xyz.sunqian.common.base.process.JieProcess;
@@ -22,19 +23,27 @@ import static org.testng.Assert.expectThrows;
 
 public class ProcessTest {
 
-    // @Test
-    // public void testPing() {
-    //     ProcessReceipt receipt = ProcessStarter.from("ping", "127.0.0.1").start();
-    //     System.out.println(receipt.readString());
-    // }
-    //
-    // @Test
-    // public void testProcessStater() {
-    //     ProcessReceipt receipt = ProcessStarter
-    //         .from("ping", "127.0.0.1")
-    //         .mergeErrorOutput()
-    //         .start();
-    // }
+    @Test
+    public void testProcess() {
+        {
+            if (JieSystem.isWindows()) {
+                ProcessReceipt receipt = JieProcess.start("cmd.exe", "/c", "dir");
+                receipt.getProcess().destroyForcibly();
+            } else {
+                ProcessReceipt receipt = JieProcess.start("ls", "-l");
+                receipt.getProcess().destroyForcibly();
+            }
+        }
+        {
+            if (JieSystem.isWindows()) {
+                ProcessReceipt receipt = JieProcess.start("cmd.exe /c dir");
+                receipt.getProcess().destroyForcibly();
+            } else {
+                ProcessReceipt receipt = JieProcess.start("ls -l");
+                receipt.getProcess().destroyForcibly();
+            }
+        }
+    }
 
     @Test
     public void testReceipt() throws Exception {
@@ -101,7 +110,6 @@ public class ProcessTest {
             String hello = "hello";
             Process process = JieProcess.virtualProcess(
                 JieIO.inStream(hello.getBytes(JieChars.localCharset())),
-                JieIO.inStream(hello.getBytes(JieChars.localCharset())),
                 JieIO.nullOutStream()
             );
             ProcessReceipt receipt = JieProcess.receipt(process);
@@ -109,6 +117,15 @@ public class ProcessTest {
             process.destroyForcibly();
             assertEquals(receipt.getState(), TaskState.FAILED);
             assertEquals(receipt.readString(), hello);
+        }
+        {
+            String hello = "hello";
+            Process process = JieProcess.virtualProcess(
+                JieIO.inStream(hello.getBytes(JieChars.localCharset())),
+                JieIO.nullOutStream()
+            );
+            ProcessReceipt receipt = JieProcess.receipt(process);
+            assertEquals(receipt.readBytes(), hello.getBytes(JieChars.localCharset()));
         }
     }
 
