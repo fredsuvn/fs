@@ -27,11 +27,36 @@ public class JieProcess {
 
     /**
      * Returns a virtual process.
+     * <p>
+     * For returned virtual process: {@link Process#destroy()} terminates itself normally, but the
+     * {@link Process#destroyForcibly()} occurs an abnormal termination; {@link Process#getInputStream()},
+     * {@link Process#getErrorStream()} and {@link Process#getOutputStream()} are {@link JieIO#emptyInStream()},
+     * {@link JieIO#emptyInStream()} and {@link JieIO#nullOutStream()}.
      *
      * @return a virtual process
      */
     public static Process virtualProcess() {
-        return new VirtualProcess();
+        return virtualProcess(JieIO.emptyInStream(), JieIO.emptyInStream(), JieIO.nullOutStream());
+    }
+
+    /**
+     * Returns a virtual process
+     * <p>
+     * For returned virtual process: {@link Process#destroy()} terminates itself normally, but the
+     * {@link Process#destroyForcibly()} occurs an abnormal termination; {@link Process#getInputStream()},
+     * {@link Process#getErrorStream()} and {@link Process#getOutputStream()} are specified streams.
+     *
+     * @param input  the input stream of {@link Process#getErrorStream()}
+     * @param error  the error stream of {@link Process#getErrorStream()}
+     * @param output the output stream of {@link Process#getOutputStream()}
+     * @return a virtual process
+     */
+    public static Process virtualProcess(
+        @Nonnull InputStream input,
+        @Nonnull InputStream error,
+        @Nonnull OutputStream output
+    ) {
+        return new VirtualProcess(input, error, output);
     }
 
     private static final class ProcessReceiptImpl implements ProcessReceipt {
@@ -77,26 +102,40 @@ public class JieProcess {
     private static final class VirtualProcess extends Process {
 
         private volatile boolean destroyed = false;
+        private volatile boolean normal = true;
+        private final @Nonnull InputStream input;
+        private final @Nonnull InputStream error;
+        private final @Nonnull OutputStream output;
+
+        private VirtualProcess(
+            @Nonnull InputStream input,
+            @Nonnull InputStream error,
+            @Nonnull OutputStream output
+        ) {
+            this.input = input;
+            this.error = error;
+            this.output = output;
+        }
 
         @Override
         public OutputStream getOutputStream() {
-            return JieIO.nullOutStream();
+            return output;
         }
 
         @Override
         public InputStream getInputStream() {
-            return JieIO.emptyInStream();
+            return input;
         }
 
         @Override
         public InputStream getErrorStream() {
-            return JieIO.emptyInStream();
+            return error;
         }
 
         @Override
         public int waitFor() {
             Jie.until(() -> destroyed);
-            return 0;
+            return exitValue();
         }
 
         @Override
@@ -104,12 +143,19 @@ public class JieProcess {
             if (!destroyed) {
                 throw new IllegalThreadStateException();
             }
-            return 0;
+            return normal ? 0 : 1;
         }
 
         @Override
         public void destroy() {
             destroyed = true;
+        }
+
+        @Override
+        public Process destroyForcibly() {
+            normal = false;
+            destroy();
+            return this;
         }
     }
 }
