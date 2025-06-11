@@ -3,7 +3,9 @@ package test.base;
 import org.testng.annotations.Test;
 import test.utils.Utils;
 import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.JieSystem;
 import xyz.sunqian.common.base.exception.UnknownArrayTypeException;
+import xyz.sunqian.common.base.process.ProcessReceipt;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
@@ -226,7 +228,7 @@ public class JieTest {
             assertEquals(Jie.stream(Jie.list(1, 2, 3)).collect(Collectors.toList()), Jie.list(1, 2, 3));
         }
         {
-            // sleep
+            // thread
             Jie.sleep(1);
             Jie.sleep(Duration.ofMillis(1));
             Thread thread = new Thread(Jie::sleep);
@@ -235,6 +237,27 @@ public class JieTest {
             thread.interrupt();
             Jie.until(() -> true);
             Jie.untilChecked(() -> true);
+        }
+        {
+            // process
+            {
+                if (JieSystem.isWindows()) {
+                    ProcessReceipt receipt = Jie.process("cmd.exe", "/c", "dir");
+                    receipt.getProcess().destroyForcibly();
+                } else {
+                    ProcessReceipt receipt = Jie.process("ls", "-l");
+                    receipt.getProcess().destroyForcibly();
+                }
+            }
+            {
+                if (JieSystem.isWindows()) {
+                    ProcessReceipt receipt = Jie.process("cmd.exe /c dir");
+                    receipt.getProcess().destroyForcibly();
+                } else {
+                    ProcessReceipt receipt = Jie.process("ls -l");
+                    receipt.getProcess().destroyForcibly();
+                }
+            }
         }
         {
             // task

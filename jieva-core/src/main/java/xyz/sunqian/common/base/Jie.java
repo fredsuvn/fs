@@ -8,12 +8,15 @@ import xyz.sunqian.common.base.exception.AwaitingException;
 import xyz.sunqian.common.base.exception.UnknownArrayTypeException;
 import xyz.sunqian.common.base.function.BooleanCallable;
 import xyz.sunqian.common.base.function.VoidCallable;
+import xyz.sunqian.common.base.process.JieProcess;
+import xyz.sunqian.common.base.process.ProcessReceipt;
 import xyz.sunqian.common.base.thread.JieThread;
 import xyz.sunqian.common.collect.JieArray;
 import xyz.sunqian.common.collect.JieList;
 import xyz.sunqian.common.collect.JieMap;
 import xyz.sunqian.common.collect.JieSet;
 import xyz.sunqian.common.collect.JieStream;
+import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.mapping.BeanMapper;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingOptions;
@@ -601,6 +604,8 @@ public class Jie {
         return ScheduledBuilder.newInstance();
     }
 
+    //---------------- Collection Begin ----------------//
+
     /**
      * Directly returns the given variable arguments as an array.
      * <p>
@@ -794,6 +799,8 @@ public class Jie {
         return JieStream.stream(elements);
     }
 
+    //---------------- Collection End ----------------//
+
     //---------------- Thread Begin ----------------//
 
     /**
@@ -882,6 +889,36 @@ public class Jie {
     }
 
     //---------------- Thread End ----------------//
+
+    //---------------- Process Begin ----------------//
+
+    /**
+     * Starts a new process with the specified command, returns the receipt of the process.
+     * <p>
+     * This method is a shortcut to the {@link JieProcess#start(String)}.
+     *
+     * @param command the specified command
+     * @return the receipt of the process
+     * @throws IORuntimeException if any I/O error occurs
+     */
+    public static @Nonnull ProcessReceipt process(@Nonnull String command) throws IORuntimeException {
+        return JieProcess.start(command);
+    }
+
+    /**
+     * Starts a new process with the specified command and arguments, returns the receipt of the process.
+     * <p>
+     * This method is a shortcut to the {@link JieProcess#start(String[])}.
+     *
+     * @param command the specified command and arguments
+     * @return the receipt of the process
+     * @throws IORuntimeException if any I/O error occurs
+     */
+    public static @Nonnull ProcessReceipt process(@Nonnull String @Nonnull ... command) throws IORuntimeException {
+        return JieProcess.start(command);
+    }
+
+    //---------------- Process End ----------------//
 
     //---------------- Task Begin ----------------//
 
