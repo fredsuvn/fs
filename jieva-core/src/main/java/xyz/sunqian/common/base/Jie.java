@@ -71,6 +71,11 @@ public class Jie {
     public static final @Nonnull String LIB_VERSION = "0.0.0";
 
     /**
+     * String value for {@code null}.
+     */
+    public static final @Nonnull String NULL_STRING = Objects.toString(null);
+
+    /**
      * Casts and returns the given object as the specified type {@code T}. This method is equivalent to:
      * <pre>{@code
      * return (T) obj;
@@ -357,6 +362,97 @@ public class Jie {
      */
     public static int hashId(@Nullable Object obj) {
         return System.identityHashCode(obj);
+    }
+
+    /**
+     * Returns the {@code toString} of the given object. If the given object is array, uses {@code Arrays.toString} or
+     * {@link Arrays#deepToString(Object[])} if necessary.
+     * <p>
+     * This method is equivalent to ({@link #toStringWith(Object, boolean, boolean)}):
+     * {@code toStringWith(obj, true, true)}.
+     *
+     * @param obj the given object
+     * @return the {@code toString} of the given object
+     */
+    public static @Nonnull String toString(@Nullable Object obj) {
+        return toStringWith(obj, true, true);
+    }
+
+    /**
+     * Returns the {@code toString} of the given objects via {@link Arrays#deepToString(Object[])}.
+     *
+     * @param objs the given objects
+     * @return the {@code toString} of the given objects via {@link Arrays#deepToString(Object[])}
+     */
+    public static @Nonnull String toStringAll(@Nullable Object @Nonnull ... objs) {
+        return Arrays.deepToString(objs);
+    }
+
+    /**
+     * Returns the {@code toString} of the given object. This method follows the following logic:
+     * <ul>
+     *     <li>
+     *         If the given object is not an array, returns {@link Objects#toString(Object)}.
+     *     </li>
+     *     <li>
+     *         If the {@code arrayToString} is {@code true}:
+     *         <ul>
+     *             <li>
+     *                 If the {@code deep} is {@code true}, uses {@link Arrays#deepToString(Object[])} for them.
+     *                 Otherwise, uses {@code Arrays.toString}.
+     *             </li>
+     *         </ul>
+     *     </li>
+     *     <li>
+     *         Returns {@link Objects#toString(Object)} otherwise.
+     *     </li>
+     * </ul>
+     *
+     * @param obj           the given object
+     * @param arrayToString the arrayToString option
+     * @param deep          the deep option
+     * @return the {@code toString} of the given object
+     */
+    public static @Nonnull String toStringWith(@Nullable Object obj, boolean arrayToString, boolean deep) {
+        if (obj == null || !arrayToString) {
+            return Objects.toString(obj);
+        }
+        Class<?> cls = obj.getClass();
+        if (cls.isArray()) {
+            return toStringArray(obj, deep);
+        }
+        return obj.toString();
+    }
+
+    private static @Nonnull String toStringArray(@Nonnull Object obj, boolean deep) {
+        if (obj instanceof Object[]) {
+            return deep ? Arrays.deepToString((Object[]) obj) : Arrays.toString((Object[]) obj);
+        }
+        if (obj instanceof boolean[]) {
+            return Arrays.toString((boolean[]) obj);
+        }
+        if (obj instanceof byte[]) {
+            return Arrays.toString((byte[]) obj);
+        }
+        if (obj instanceof short[]) {
+            return Arrays.toString((short[]) obj);
+        }
+        if (obj instanceof char[]) {
+            return Arrays.toString((char[]) obj);
+        }
+        if (obj instanceof int[]) {
+            return Arrays.toString((int[]) obj);
+        }
+        if (obj instanceof long[]) {
+            return Arrays.toString((long[]) obj);
+        }
+        if (obj instanceof float[]) {
+            return Arrays.toString((float[]) obj);
+        }
+        if (obj instanceof double[]) {
+            return Arrays.toString((double[]) obj);
+        }
+        throw new UnknownArrayTypeException(obj.getClass());
     }
 
     /**
