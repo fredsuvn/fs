@@ -1,7 +1,24 @@
 package test.base;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.value.*;
+import xyz.sunqian.common.base.value.BooleanVal;
+import xyz.sunqian.common.base.value.BooleanVar;
+import xyz.sunqian.common.base.value.ByteVal;
+import xyz.sunqian.common.base.value.ByteVar;
+import xyz.sunqian.common.base.value.CharVal;
+import xyz.sunqian.common.base.value.CharVar;
+import xyz.sunqian.common.base.value.DoubleVal;
+import xyz.sunqian.common.base.value.DoubleVar;
+import xyz.sunqian.common.base.value.FloatVal;
+import xyz.sunqian.common.base.value.FloatVar;
+import xyz.sunqian.common.base.value.IntVal;
+import xyz.sunqian.common.base.value.IntVar;
+import xyz.sunqian.common.base.value.LongVal;
+import xyz.sunqian.common.base.value.LongVar;
+import xyz.sunqian.common.base.value.ShortVal;
+import xyz.sunqian.common.base.value.ShortVar;
+import xyz.sunqian.common.base.value.Val;
+import xyz.sunqian.common.base.value.Var;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertSame;

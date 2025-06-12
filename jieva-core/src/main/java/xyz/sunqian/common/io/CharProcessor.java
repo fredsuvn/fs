@@ -1,16 +1,13 @@
-package xyz.sunqian.common.base.chars;
+package xyz.sunqian.common.io;
 
-import xyz.sunqian.common.base.bytes.ByteProcessor;
-import xyz.sunqian.common.base.exception.ProcessingException;
-import xyz.sunqian.common.io.IORuntimeException;
-import xyz.sunqian.common.io.JieIO;
+import xyz.sunqian.common.base.chars.CharsBuilder;
 
 import java.io.Reader;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 
 import static xyz.sunqian.common.base.JieCheck.checkOffsetLength;
-import static xyz.sunqian.common.base.chars.CharEncoder.withFixedSize;
+import static xyz.sunqian.common.io.CharEncoder.withFixedSize;
 
 /**
  * Char processor is used to process char data, from the specified data source, through zero or more intermediate
@@ -198,61 +195,45 @@ public interface CharProcessor {
     }
 
     /**
-     * Starts data processing and returns the actual number of bytes processed. If an exception is thrown during the
-     * processing, it will be wrapped by {@link ProcessingException} and rethrown.
-     * <p>
-     * If the source and/or destination is a buffer or reader/writer, its position will be incremented by actual
-     * affected length.
+     * Starts data processing and returns the actual number of bytes processed. The positions of the source and
+     * destination, if any, will be incremented by the actual length of the affected data.
      * <p>
      * This is a terminal method, and it is typically used to product side effects.
      *
      * @return the actual number of bytes processed
-     * @throws ProcessingException to wrap the original exception during the processing
-     * @throws IORuntimeException  if an I/O error occurs
+     * @throws IORuntimeException if an I/O error occurs
      */
-    long process() throws ProcessingException, IORuntimeException;
+    long process() throws IORuntimeException;
 
     /**
      * Starts data processing, writes the result into the specified destination, and returns the actual number of bytes
-     * processed. If an exception is thrown during the processing, it will be wrapped by {@link ProcessingException} and
-     * rethrown.
-     * <p>
-     * If the source and/or destination is a buffer or reader/writer, its position will be incremented by actual
-     * affected length.
+     * processed. The positions of the source and destination, if any, will be incremented by the actual length of the
+     * affected data.
      * <p>
      * This is a terminal method.
      *
      * @param dest the specified destination
      * @return the actual number of bytes processed
-     * @throws ProcessingException to wrap the original exception during the processing
-     * @throws IORuntimeException  if an I/O error occurs
+     * @throws IORuntimeException if an I/O error occurs
      */
-    long writeTo(Appendable dest) throws ProcessingException, IORuntimeException;
+    long writeTo(Appendable dest) throws IORuntimeException;
 
     /**
      * Starts data processing, writes the result into the specified destination, and returns the actual number of bytes
-     * processed. If an exception is thrown during the processing, it will be wrapped by {@link ProcessingException} and
-     * rethrown.
-     * <p>
-     * If the source and/or destination is a buffer or reader/writer, its position will be incremented by actual
-     * affected length.
+     * processed. The position of the source, if any, will be incremented by the actual length of the affected data.
      * <p>
      * This is a terminal method.
      *
      * @param dest the specified destination
      * @return the actual number of bytes processed
-     * @throws ProcessingException to wrap the original exception during the processing
-     * @throws IORuntimeException  if an I/O error occurs
+     * @throws IORuntimeException if an I/O error occurs
      */
-    long writeTo(char[] dest) throws ProcessingException, IORuntimeException;
+    long writeTo(char[] dest) throws IORuntimeException;
 
     /**
      * Starts data processing, writes the result into the specified destination (starting from the specified start index
-     * up to the specified length), and returns the actual number of bytes processed. If an exception is thrown during
-     * the processing, it will be wrapped by {@link ProcessingException} and rethrown.
-     * <p>
-     * If the source and/or destination is a buffer or reader/writer, its position will be incremented by actual
-     * affected length.
+     * up to the specified length), and returns the actual number of bytes processed. The position of the source, if
+     * any, will be incremented by the actual length of the affected data.
      * <p>
      * This is a terminal method.
      *
@@ -260,27 +241,22 @@ public interface CharProcessor {
      * @param offset the specified start index
      * @param length the specified length
      * @return the actual number of bytes processed
-     * @throws ProcessingException to wrap the original exception during the processing
-     * @throws IORuntimeException  if an I/O error occurs
+     * @throws IORuntimeException if an I/O error occurs
      */
-    long writeTo(char[] dest, int offset, int length) throws ProcessingException, IORuntimeException;
+    long writeTo(char[] dest, int offset, int length) throws IORuntimeException;
 
     /**
      * Starts data processing, writes the result into the specified destination, and returns the actual number of bytes
-     * processed. If an exception is thrown during the processing, it will be wrapped by {@link ProcessingException} and
-     * rethrown.
-     * <p>
-     * If the source and/or destination is a buffer or reader/writer, its position will be incremented by actual
-     * affected length.
+     * processed. The positions of the source and destination, if any, will be incremented by the actual length of the
+     * affected data.
      * <p>
      * This is a terminal method.
      *
      * @param dest the specified destination
      * @return the actual number of bytes processed
-     * @throws ProcessingException to wrap the original exception during the processing
-     * @throws IORuntimeException  if an I/O error occurs
+     * @throws IORuntimeException if an I/O error occurs
      */
-    long writeTo(CharBuffer dest) throws ProcessingException, IORuntimeException;
+    long writeTo(CharBuffer dest) throws IORuntimeException;
 
     /**
      * Starts data processing, and returns the result as a new array. This method is equivalent to:
@@ -292,11 +268,10 @@ public interface CharProcessor {
      * This is a terminal method.
      *
      * @return the processing result as a new array
-     * @throws ProcessingException to wrap the original exception during the processing
-     * @throws IORuntimeException  if an I/O error occurs
+     * @throws IORuntimeException if an I/O error occurs
      * @see #writeTo(Appendable)
      */
-    default char[] toCharArray() throws ProcessingException, IORuntimeException {
+    default char[] toCharArray() throws IORuntimeException {
         CharsBuilder builder = new CharsBuilder();
         writeTo(builder);
         return builder.toCharArray();
@@ -312,11 +287,10 @@ public interface CharProcessor {
      * This is a terminal method.
      *
      * @return the processing result as a new buffer
-     * @throws ProcessingException to wrap the original exception during the processing
-     * @throws IORuntimeException  if an I/O error occurs
+     * @throws IORuntimeException if an I/O error occurs
      * @see #writeTo(Appendable)
      */
-    default CharBuffer toCharBuffer() throws ProcessingException, IORuntimeException {
+    default CharBuffer toCharBuffer() throws IORuntimeException {
         CharsBuilder builder = new CharsBuilder();
         writeTo(builder);
         return builder.toCharBuffer();
@@ -330,11 +304,10 @@ public interface CharProcessor {
      * This is a terminal method.
      *
      * @return the processing result as a new string
-     * @throws ProcessingException to wrap the original exception during the processing
-     * @throws IORuntimeException  if an I/O error occurs
+     * @throws IORuntimeException if an I/O error occurs
      * @see #toCharArray()
      */
-    String toString() throws ProcessingException, IORuntimeException;
+    String toString() throws IORuntimeException;
 
     /**
      * Returns a reader which represents and encompasses the entire data processing.

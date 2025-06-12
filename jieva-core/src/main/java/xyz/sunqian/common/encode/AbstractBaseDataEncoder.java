@@ -1,13 +1,13 @@
 package xyz.sunqian.common.encode;
 
-import xyz.sunqian.common.base.bytes.ByteEncoder;
+import xyz.sunqian.common.io.ByteEncoder;
 import xyz.sunqian.common.base.bytes.JieBytes;
 import xyz.sunqian.common.io.JieBuffer;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-import static xyz.sunqian.common.base.bytes.ByteEncoder.withBuffering;
+import static xyz.sunqian.common.io.ByteEncoder.withBuffering;
 
 /**
  * This abstract class provides skeletal implementation methods for {@link DataEncoder} and {@link DataDecoder}, and

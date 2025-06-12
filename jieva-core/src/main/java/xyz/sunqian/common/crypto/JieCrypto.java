@@ -1,7 +1,7 @@
 package xyz.sunqian.common.crypto;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.bytes.ByteEncoder;
+import xyz.sunqian.common.io.ByteEncoder;
 import xyz.sunqian.common.base.bytes.JieBytes;
 import xyz.sunqian.common.collect.JieArray;
 import xyz.sunqian.common.io.JieBuffer;

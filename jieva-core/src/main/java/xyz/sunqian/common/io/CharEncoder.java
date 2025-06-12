@@ -1,15 +1,15 @@
-package xyz.sunqian.common.base.bytes;
+package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nullable;
 
-import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 
 /**
- * This interface represents an encoder, which is a type of intermediate operation for {@link ByteProcessor}.
+ * This interface represents an encoder, which is a type of intermediate operation for {@link CharProcessor}.
  *
  * @author sunqian
  */
-public interface ByteEncoder {
+public interface CharEncoder {
 
     /**
      * Encodes the specified input data and return the result. The specified input data will not be null (but may be
@@ -24,15 +24,15 @@ public interface ByteEncoder {
      * @throws Exception thrown for any problems
      */
     @Nullable
-    ByteBuffer encode(ByteBuffer data, boolean end) throws Exception;
+    CharBuffer encode(CharBuffer data, boolean end) throws Exception;
 
     /**
-     * Returns a wrapper {@link ByteEncoder} that wraps the given encoder to encode data in fixed-size blocks.
+     * Returns a wrapper {@link CharEncoder} that wraps the given encoder to encode data in fixed-size blocks.
      * <p>
-     * The wrapper splits the original data into blocks of the specified fixed size by {@link ByteBuffer#slice()}, and
+     * The wrapper splits the original data into blocks of the specified fixed size by {@link CharBuffer#slice()}, and
      * each block will be passed to the given encoder sequentially. The remainder data, which is insufficient to form a
      * full block, will be buffered until enough data is received. The content of the block is shared with the
-     * sub-content of the original data if, and only if, it is sliced by {@link ByteBuffer#slice()}. If a block is
+     * sub-content of the original data if, and only if, it is sliced by {@link CharBuffer#slice()}. If a block is
      * formed by concatenating multiple original data pieces, its content is not shared.
      * <p>
      * Specially, in the last invocation (when {@code end == true}) of the given encoder, the last block's size may be
@@ -40,22 +40,22 @@ public interface ByteEncoder {
      *
      * @param size    the specified fixed size
      * @param encoder the given encoder
-     * @return a wrapper {@link ByteEncoder} that wraps the given encoder to encode data in fixed-size blocks
+     * @return a wrapper {@link CharEncoder} that wraps the given encoder to encode data in fixed-size blocks
      * @throws IllegalArgumentException if the specified size is less than or equal to 0
      */
-    static ByteEncoder withFixedSize(int size, ByteEncoder encoder) throws IllegalArgumentException {
-        return new ByteProcessorImpl.FixedSizeEncoder(encoder, size);
+    static CharEncoder withFixedSize(int size, CharEncoder encoder) throws IllegalArgumentException {
+        return new CharProcessorImpl.FixedSizeEncoder(encoder, size);
     }
 
     /**
-     * Returns a wrapper {@link ByteEncoder} that wraps the given encoder to encode data in rounding down blocks.
+     * Returns a wrapper {@link CharEncoder} that wraps the given encoder to encode data in rounding down blocks.
      * <p>
      * The wrapper rounds down the size of the original data to the largest multiple ({@code >= 1}) of the specified
      * size that does not exceed it, and splits the original data into the block of the rounded size by
-     * {@link ByteBuffer#slice()}. The block will be passed to the given encoder. The remainder data, of which size is
+     * {@link CharBuffer#slice()}. The block will be passed to the given encoder. The remainder data, of which size is
      * less than one multiple of the specified size, will be buffered until enough data is received. The content of the
      * block is shared with the sub-content of the original data if, and only if, it is sliced by
-     * {@link ByteBuffer#slice()}. If a block is formed by concatenating multiple original data pieces, its content is
+     * {@link CharBuffer#slice()}. If a block is formed by concatenating multiple original data pieces, its content is
      * not shared.
      * <p>
      * Specially, in the last invocation (when {@code end == true}) of the given encoder, the last block's size may be
@@ -63,15 +63,15 @@ public interface ByteEncoder {
      *
      * @param size    the specified size
      * @param encoder the given encoder
-     * @return a wrapper {@link ByteEncoder} that wraps the given encoder to encode data in rounding down blocks
+     * @return a wrapper {@link CharEncoder} that wraps the given encoder to encode data in rounding down blocks
      * @throws IllegalArgumentException if the specified size is less than or equal to 0
      */
-    static ByteEncoder withRounding(int size, ByteEncoder encoder) throws IllegalArgumentException {
-        return new ByteProcessorImpl.RoundingEncoder(encoder, size);
+    static CharEncoder withRounding(int size, CharEncoder encoder) throws IllegalArgumentException {
+        return new CharProcessorImpl.RoundingEncoder(encoder, size);
     }
 
     /**
-     * Returns a wrapper {@link ByteEncoder} that wraps the given encoder to support buffering unconsumed data.
+     * Returns a wrapper {@link CharEncoder} that wraps the given encoder to support buffering unconsumed data.
      * <p>
      * When the wrapper is invoked, if no buffered data exists, the original data is directly passed to the given
      * encoder; if buffered data exists, a new buffer concatenating the buffered data followed by the original data is
@@ -81,18 +81,18 @@ public interface ByteEncoder {
      * Specially, in the last invocation (when {@code end == true}) of the wrapper, no data buffered.
      *
      * @param encoder the given encoder
-     * @return a wrapper {@link ByteEncoder} that wraps the given encoder to support buffering unconsumed data
+     * @return a wrapper {@link CharEncoder} that wraps the given encoder to support buffering unconsumed data
      */
-    static ByteEncoder withBuffering(ByteEncoder encoder) {
-        return new ByteProcessorImpl.BufferingEncoder(encoder);
+    static CharEncoder withBuffering(CharEncoder encoder) {
+        return new CharProcessorImpl.BufferingEncoder(encoder);
     }
 
     /**
-     * Returns an empty {@link ByteEncoder} which does nothing but only returns the input data directly.
+     * Returns an empty {@link CharEncoder} which does nothing but only returns the input data directly.
      *
-     * @return an empty {@link ByteEncoder} which does nothing but only returns the input data directly
+     * @return an empty {@link CharEncoder} which does nothing but only returns the input data directly
      */
-    static ByteEncoder emptyEncoder() {
-        return ByteProcessorImpl.EmptyEncoder.SINGLETON;
+    static CharEncoder emptyEncoder() {
+        return CharProcessorImpl.EmptyEncoder.SINGLETON;
     }
 }

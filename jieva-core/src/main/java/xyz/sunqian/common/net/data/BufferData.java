@@ -1,7 +1,7 @@
 package xyz.sunqian.common.net.data;
 
 import xyz.sunqian.common.base.JieCheck;
-import xyz.sunqian.common.base.bytes.ByteProcessor;
+import xyz.sunqian.common.io.ByteProcessor;
 import xyz.sunqian.common.io.JieBuffer;
 import xyz.sunqian.common.io.JieIO;
 

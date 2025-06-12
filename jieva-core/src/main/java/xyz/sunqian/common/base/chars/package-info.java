@@ -8,8 +8,6 @@
  * Core interfaces and classes:
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.chars.CharsBuilder}</li>
- *     <li>{@link xyz.sunqian.common.base.chars.CharProcessor}</li>
- *     <li>{@link xyz.sunqian.common.base.chars.CharEncoder}</li>
  * </ul>
  */
 @DefaultNonNull

@@ -3,7 +3,7 @@ package test.encode;
 import org.apache.commons.codec.binary.Hex;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.JieRandom;
-import xyz.sunqian.common.base.bytes.ByteProcessor;
+import xyz.sunqian.common.io.ByteProcessor;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.base.exception.ProcessingException;

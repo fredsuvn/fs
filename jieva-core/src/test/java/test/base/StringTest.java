@@ -1,16 +1,16 @@
-//package test;
+// package test;
 //
-//import org.jetbrains.annotations.NotNull;
-//import org.testng.Assert;
-//import org.testng.annotations.Test;
-//import xyz.sunqian.common.base.JieString;
-//import xyz.sunqian.common.coll.JieColl;
+// import org.jetbrains.annotations.NotNull;
+// import org.testng.Assert;
+// import org.testng.annotations.Test;
+// import xyz.sunqian.common.base.JieString;
+// import xyz.sunqian.common.coll.JieColl;
 //
-//import java.util.Arrays;
-//import java.util.Collections;
-//import java.util.List;
+// import java.util.Arrays;
+// import java.util.Collections;
+// import java.util.List;
 //
-//public class StringTest {
+// public class StringTest {
 //
 //    @Test
 //    public void testConcat() {

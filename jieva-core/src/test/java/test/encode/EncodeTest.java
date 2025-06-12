@@ -1,6 +1,6 @@
 package test.encode;
 
-import xyz.sunqian.common.base.bytes.ByteProcessor;
+import xyz.sunqian.common.io.ByteProcessor;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.encode.DataDecoder;
 import xyz.sunqian.common.encode.DataEncoder;
@@ -13,7 +13,7 @@ import java.util.Arrays;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.expectThrows;
-import static xyz.sunqian.common.base.bytes.ByteEncoder.withFixedSize;
+import static xyz.sunqian.common.io.ByteEncoder.withFixedSize;
 
 public class EncodeTest {
 

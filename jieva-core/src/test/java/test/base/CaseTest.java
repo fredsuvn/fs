@@ -1,15 +1,15 @@
-//package test;
+// package test;
 //
-//import com.google.common.base.CaseFormat;
-//import org.testng.Assert;
-//import org.testng.annotations.Test;
-//import xyz.sunqian.common.base.CaseFormatter;
-//import xyz.sunqian.common.base.JieString;
-//import xyz.sunqian.common.coll.JieColl;
+// import com.google.common.base.CaseFormat;
+// import org.testng.Assert;
+// import org.testng.annotations.Test;
+// import xyz.sunqian.common.base.CaseFormatter;
+// import xyz.sunqian.common.base.JieString;
+// import xyz.sunqian.common.coll.JieColl;
 //
-//import java.util.Arrays;
+// import java.util.Arrays;
 //
-//public class CaseTest {
+// public class CaseTest {
 //
 //    @Test
 //    public void testCamelCase() {
@@ -79,13 +79,10 @@
 //            "getSimpleNameOptionsBuilder");
 //    }
 //
-////    @Test
-////    public void testNumberCase() {
-////        CaseFormatter case1 = CaseFormatter.camelCase(true, CaseFormatter.AS_INDEPENDENT);
-////        Assert.assertEquals(case1.to("aaBbCc00cC0", CaseFormatter.LOWER_HYPHEN), "aa-bb-cc-00-c-c-0");
-////        CaseFormatter case2 = CaseFormatter.camelCase(true, CaseFormatter.AS_INDEPENDENT);
-////        Assert.assertEquals(case2.to("aaBbCc00cC0", CaseFormatter.LOWER_CAMEL), "aaBbCc00CC0");
-////        CaseFormatter case3 = CaseFormatter.camelCase(true, CaseFormatter.AS_UPPER);
-////        Assert.assertEquals(case3.to("aaBbCc00cC0", CaseFormatter.LOWER_CAMEL), "aaBbCc00cC0");
-////    }
+/// /    @Test /    public void testNumberCase() { /        CaseFormatter case1 = CaseFormatter.camelCase(true,
+/// CaseFormatter.AS_INDEPENDENT); /        Assert.assertEquals(case1.to("aaBbCc00cC0", CaseFormatter.LOWER_HYPHEN),
+/// "aa-bb-cc-00-c-c-0"); /        CaseFormatter case2 = CaseFormatter.camelCase(true, CaseFormatter.AS_INDEPENDENT); /
+/// Assert.assertEquals(case2.to("aaBbCc00cC0", CaseFormatter.LOWER_CAMEL), "aaBbCc00CC0"); /        CaseFormatter case3
+/// = CaseFormatter.camelCase(true, CaseFormatter.AS_UPPER); /        Assert.assertEquals(case3.to("aaBbCc00cC0",
+/// CaseFormatter.LOWER_CAMEL), "aaBbCc00cC0"); /    }
 //}

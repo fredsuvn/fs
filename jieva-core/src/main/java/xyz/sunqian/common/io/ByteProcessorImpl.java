@@ -1,15 +1,10 @@
-package xyz.sunqian.common.base.bytes;
+package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.JieCoding;
+import xyz.sunqian.common.base.bytes.JieBytes;
 import xyz.sunqian.common.base.chars.JieChars;
-import xyz.sunqian.common.base.exception.ProcessingException;
 import xyz.sunqian.common.collect.JieCollect;
-import xyz.sunqian.common.io.ByteReader;
-import xyz.sunqian.common.io.ByteSegment;
-import xyz.sunqian.common.io.IORuntimeException;
-import xyz.sunqian.common.io.JieBuffer;
-import xyz.sunqian.common.io.JieIO;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -193,10 +188,10 @@ final class ByteProcessorImpl implements ByteProcessor {
                 }
             }
             return startInBlocks();
-        } catch (ProcessingException | IORuntimeException e) {
+        } catch (IORuntimeException e) {
             throw e;
         } catch (Exception e) {
-            throw new ProcessingException(e);
+            throw new IORuntimeException(e);
         }
     }
 

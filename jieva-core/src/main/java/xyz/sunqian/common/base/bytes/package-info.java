@@ -8,8 +8,6 @@
  * Core interfaces and classes:
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.bytes.BytesBuilder}</li>
- *     <li>{@link xyz.sunqian.common.base.bytes.ByteProcessor}</li>
- *     <li>{@link xyz.sunqian.common.base.bytes.ByteEncoder}</li>
  * </ul>
  */
 @DefaultNonNull

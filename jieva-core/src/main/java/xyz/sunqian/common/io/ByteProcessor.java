@@ -1,10 +1,7 @@
-package xyz.sunqian.common.base.bytes;
+package xyz.sunqian.common.io;
 
-import xyz.sunqian.common.base.chars.CharProcessor;
+import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.chars.JieChars;
-import xyz.sunqian.common.base.exception.ProcessingException;
-import xyz.sunqian.common.io.IORuntimeException;
-import xyz.sunqian.common.io.JieIO;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -12,7 +9,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 import static xyz.sunqian.common.base.JieCheck.checkOffsetLength;
-import static xyz.sunqian.common.base.bytes.ByteEncoder.withFixedSize;
+import static xyz.sunqian.common.io.ByteEncoder.withFixedSize;
 
 /**
  * Byte processor is used to process byte data, from the specified data source, through zero or more intermediate
@@ -187,61 +184,45 @@ public interface ByteProcessor {
     }
 
     /**
-     * Starts data processing and returns the actual number of bytes processed. If an exception is thrown during the
-     * processing, it will be wrapped by {@link ProcessingException} and rethrown.
-     * <p>
-     * If the source and/or destination is a buffer or stream, its position will be incremented by actual affected
-     * length.
+     * Starts data processing and returns the actual number of bytes processed. The positions of the source and
+     * destination, if any, will be incremented by the actual length of the affected data.
      * <p>
      * This is a terminal method, and it is typically used to product side effects.
      *
      * @return the actual number of bytes processed
-     * @throws ProcessingException to wrap the original exception during the processing
-     * @throws IORuntimeException  if an I/O error occurs
+     * @throws IORuntimeException if an I/O error occurs
      */
-    long process() throws ProcessingException, IORuntimeException;
+    long process() throws IORuntimeException;
 
     /**
      * Starts data processing, writes the result into the specified destination, and returns the actual number of bytes
-     * processed. If an exception is thrown during the processing, it will be wrapped by {@link ProcessingException} and
-     * rethrown.
-     * <p>
-     * If the source and/or destination is a buffer or stream, its position will be incremented by actual affected
-     * length.
+     * processed. The positions of the source and destination, if any, will be incremented by the actual length of the
+     * affected data.
      * <p>
      * This is a terminal method.
      *
      * @param dest the specified destination
      * @return the actual number of bytes processed
-     * @throws ProcessingException to wrap the original exception during the processing
-     * @throws IORuntimeException  if an I/O error occurs
+     * @throws IORuntimeException if an I/O error occurs
      */
-    long writeTo(OutputStream dest) throws ProcessingException, IORuntimeException;
+    long writeTo(OutputStream dest) throws IORuntimeException;
 
     /**
      * Starts data processing, writes the result into the specified destination, and returns the actual number of bytes
-     * processed. If an exception is thrown during the processing, it will be wrapped by {@link ProcessingException} and
-     * rethrown.
-     * <p>
-     * If the source and/or destination is a buffer or stream, its position will be incremented by actual affected
-     * length.
+     * processed. The position of the source, if any, will be incremented by the actual length of the affected data.
      * <p>
      * This is a terminal method.
      *
      * @param dest the specified destination
      * @return the actual number of bytes processed
-     * @throws ProcessingException to wrap the original exception during the processing
-     * @throws IORuntimeException  if an I/O error occurs
+     * @throws IORuntimeException if an I/O error occurs
      */
-    long writeTo(byte[] dest) throws ProcessingException, IORuntimeException;
+    long writeTo(byte[] dest) throws IORuntimeException;
 
     /**
      * Starts data processing, writes the result into the specified destination (starting from the specified start index
-     * up to the specified length), and returns the actual number of bytes processed. If an exception is thrown during
-     * the processing, it will be wrapped by {@link ProcessingException} and rethrown.
-     * <p>
-     * If the source and/or destination is a buffer or stream, its position will be incremented by actual affected
-     * length.
+     * up to the specified length), and returns the actual number of bytes processed. The position of the source, if
+     * any, will be incremented by the actual length of the affected data.
      * <p>
      * This is a terminal method.
      *
@@ -249,27 +230,22 @@ public interface ByteProcessor {
      * @param offset the specified start index
      * @param length the specified length
      * @return the actual number of bytes processed
-     * @throws ProcessingException to wrap the original exception during the processing
-     * @throws IORuntimeException  if an I/O error occurs
+     * @throws IORuntimeException if an I/O error occurs
      */
-    long writeTo(byte[] dest, int offset, int length) throws ProcessingException, IORuntimeException;
+    long writeTo(byte[] dest, int offset, int length) throws IORuntimeException;
 
     /**
      * Starts data processing, writes the result into the specified destination, and returns the actual number of bytes
-     * processed. If an exception is thrown during the processing, it will be wrapped by {@link ProcessingException} and
-     * rethrown.
-     * <p>
-     * If the source and/or destination is a buffer or stream, its position will be incremented by actual affected
-     * length.
+     * processed. The positions of the source and destination, if any, will be incremented by the actual length of the
+     * affected data.
      * <p>
      * This is a terminal method.
      *
      * @param dest the specified destination
      * @return the actual number of bytes processed
-     * @throws ProcessingException to wrap the original exception during the processing
-     * @throws IORuntimeException  if an I/O error occurs
+     * @throws IORuntimeException if an I/O error occurs
      */
-    long writeTo(ByteBuffer dest) throws ProcessingException, IORuntimeException;
+    long writeTo(ByteBuffer dest) throws IORuntimeException;
 
     /**
      * Starts data processing, and returns the result as a new array. This method is equivalent to:
@@ -281,11 +257,10 @@ public interface ByteProcessor {
      * This is a terminal method.
      *
      * @return the processing result as a new array
-     * @throws ProcessingException to wrap the original exception during the processing
-     * @throws IORuntimeException  if an I/O error occurs
+     * @throws IORuntimeException if an I/O error occurs
      * @see #writeTo(OutputStream)
      */
-    default byte[] toByteArray() throws ProcessingException, IORuntimeException {
+    default byte[] toByteArray() throws IORuntimeException {
         BytesBuilder builder = new BytesBuilder();
         writeTo(builder);
         return builder.toByteArray();
@@ -301,11 +276,10 @@ public interface ByteProcessor {
      * This is a terminal method.
      *
      * @return the processing result as a new buffer
-     * @throws ProcessingException to wrap the original exception during the processing
-     * @throws IORuntimeException  if an I/O error occurs
+     * @throws IORuntimeException if an I/O error occurs
      * @see #writeTo(OutputStream)
      */
-    default ByteBuffer toByteBuffer() throws ProcessingException, IORuntimeException {
+    default ByteBuffer toByteBuffer() throws IORuntimeException {
         BytesBuilder builder = new BytesBuilder();
         writeTo(builder);
         return builder.toByteBuffer();
@@ -320,11 +294,10 @@ public interface ByteProcessor {
      * This is a terminal method.
      *
      * @return the processing result as a new string
-     * @throws ProcessingException to wrap the original exception during the processing
-     * @throws IORuntimeException  if an I/O error occurs
+     * @throws IORuntimeException if an I/O error occurs
      * @see #toByteArray()
      */
-    String toString() throws ProcessingException, IORuntimeException;
+    String toString() throws IORuntimeException;
 
     /**
      * Starts data processing, and returns the result as a new string with the specified charset. This method is
@@ -336,11 +309,10 @@ public interface ByteProcessor {
      *
      * @param charset the specified charset
      * @return the processing result as a new string
-     * @throws ProcessingException to wrap the original exception during the processing
-     * @throws IORuntimeException  if an I/O error occurs
+     * @throws IORuntimeException if an I/O error occurs
      * @see #toByteArray()
      */
-    default String toString(Charset charset) throws ProcessingException, IORuntimeException {
+    default String toString(Charset charset) throws IORuntimeException {
         return new String(toByteArray(), charset);
     }
 

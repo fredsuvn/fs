@@ -1,14 +1,9 @@
-package xyz.sunqian.common.base.chars;
+package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.JieCoding;
-import xyz.sunqian.common.base.exception.ProcessingException;
+import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.collect.JieCollect;
-import xyz.sunqian.common.io.CharReader;
-import xyz.sunqian.common.io.CharSegment;
-import xyz.sunqian.common.io.IORuntimeException;
-import xyz.sunqian.common.io.JieBuffer;
-import xyz.sunqian.common.io.JieIO;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -200,10 +195,10 @@ final class CharProcessorImpl implements CharProcessor {
                 }
             }
             return startInBlocks();
-        } catch (ProcessingException | IORuntimeException e) {
+        } catch (IORuntimeException e) {
             throw e;
         } catch (Exception e) {
-            throw new ProcessingException(e);
+            throw new IORuntimeException(e);
         }
     }
 

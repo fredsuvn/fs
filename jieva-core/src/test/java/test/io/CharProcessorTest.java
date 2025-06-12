@@ -1,18 +1,17 @@
-package test.base.chars;
+package test.io;
 
 import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.JieMath;
 import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.base.JieString;
-import xyz.sunqian.common.base.chars.CharEncoder;
-import xyz.sunqian.common.base.chars.CharProcessor;
 import xyz.sunqian.common.base.chars.CharsBuilder;
 import xyz.sunqian.common.base.chars.JieChars;
-import xyz.sunqian.common.base.exception.ProcessingException;
 import xyz.sunqian.common.base.value.BooleanVar;
 import xyz.sunqian.common.base.value.IntVar;
 import xyz.sunqian.common.collect.JieArray;
+import xyz.sunqian.common.io.CharEncoder;
+import xyz.sunqian.common.io.CharProcessor;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieBuffer;
 import xyz.sunqian.common.io.JieIO;
@@ -31,8 +30,8 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
-import static xyz.sunqian.common.base.chars.CharEncoder.withBuffering;
-import static xyz.sunqian.common.base.chars.CharEncoder.withRounding;
+import static xyz.sunqian.common.io.CharEncoder.withBuffering;
+import static xyz.sunqian.common.io.CharEncoder.withRounding;
 import static xyz.sunqian.test.JieAssert.invokeThrows;
 import static xyz.sunqian.test.MaterialBox.copyBuffer;
 import static xyz.sunqian.test.MaterialBox.copyDirect;
@@ -422,7 +421,7 @@ public class CharProcessorTest {
                 CharProcessor.from(new char[100]).encoder((data, end) -> {
                     throw new JieTestException("haha");
                 }).writeTo(new char[100]);
-            } catch (ProcessingException e) {
+            } catch (IORuntimeException e) {
                 ts[0] = e;
             }
             assertEquals(ts[0].getCause().getClass(), JieTestException.class);

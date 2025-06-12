@@ -1,18 +1,17 @@
-package test.base.bytes;
+package test.io;
 
 import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.JieMath;
 import xyz.sunqian.common.base.JieRandom;
-import xyz.sunqian.common.base.bytes.ByteEncoder;
-import xyz.sunqian.common.base.bytes.ByteProcessor;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.bytes.JieBytes;
 import xyz.sunqian.common.base.chars.JieChars;
-import xyz.sunqian.common.base.exception.ProcessingException;
 import xyz.sunqian.common.base.value.BooleanVar;
 import xyz.sunqian.common.base.value.IntVar;
 import xyz.sunqian.common.collect.JieArray;
+import xyz.sunqian.common.io.ByteEncoder;
+import xyz.sunqian.common.io.ByteProcessor;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieBuffer;
 import xyz.sunqian.common.io.JieIO;
@@ -33,8 +32,8 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
-import static xyz.sunqian.common.base.bytes.ByteEncoder.withBuffering;
-import static xyz.sunqian.common.base.bytes.ByteEncoder.withRounding;
+import static xyz.sunqian.common.io.ByteEncoder.withBuffering;
+import static xyz.sunqian.common.io.ByteEncoder.withRounding;
 import static xyz.sunqian.test.JieAssert.invokeThrows;
 import static xyz.sunqian.test.MaterialBox.copyDirect;
 
@@ -272,7 +271,7 @@ public class ByteProcessorTest {
                 ByteProcessor.from(new byte[100]).encoder((data, end) -> {
                     throw new JieTestException("haha");
                 }).writeTo(new byte[100]);
-            } catch (ProcessingException e) {
+            } catch (IORuntimeException e) {
                 ts[0] = e;
             }
             assertEquals(ts[0].getCause().getClass(), JieTestException.class);
