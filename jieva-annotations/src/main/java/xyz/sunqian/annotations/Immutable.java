@@ -1,15 +1,16 @@
 package xyz.sunqian.annotations;
 
 import javax.annotation.meta.TypeQualifierNickname;
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * Declares the annotated element is immutable.
- * <p>
- * In general, this annotation only indicates that the current object is immutable. Whether the other objects it
- * references are mutable is determined by the {@link #deep()} field.
  *
- * @author fredsuvn
+ * @author sunqian
  */
 @Documented
 @javax.annotation.concurrent.Immutable
@@ -25,11 +26,4 @@ import java.lang.annotation.*;
     ElementType.TYPE_USE,
 })
 public @interface Immutable {
-
-    /**
-     * To specify whether the other objects it references are mutable recursively (deep-immutable).
-     *
-     * @return whether the other objects it references are mutable recursively (deep-immutable)
-     */
-    boolean deep() default false;
 }
