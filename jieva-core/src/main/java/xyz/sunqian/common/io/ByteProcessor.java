@@ -104,7 +104,7 @@ public interface ByteProcessor {
      * Sets the number of bytes for each read operation from the data source.
      * <p>
      * This setting is typically used when the data source is an input stream, or intermediate operations are set,
-     * default is {@link JieIO#BUFFER_SIZE}.
+     * default is {@link JieIO#bufferSize()}.
      * <p>
      * This is an optional setting method.
      *

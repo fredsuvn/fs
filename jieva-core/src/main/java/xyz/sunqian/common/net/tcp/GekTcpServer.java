@@ -5,12 +5,12 @@ import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.collect.JieCollect;
 import xyz.sunqian.common.collect.JieList;
-import xyz.sunqian.common.net.data.GekData;
 import xyz.sunqian.common.io.JieBuffer;
 import xyz.sunqian.common.io.JieIO;
 import xyz.sunqian.common.net.GekNetException;
 import xyz.sunqian.common.net.GekNetServerException;
 import xyz.sunqian.common.net.GekServerStates;
+import xyz.sunqian.common.net.data.GekData;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -103,7 +103,7 @@ public interface GekTcpServer extends GekTcpEndpoint {
         private @Nullable GekTcpServerHandler serverHandler;
         private @Nullable IntFunction<ByteBuffer> bufferGenerator;
         private @Nullable ExecutorService executor;
-        private int channelBufferSize = JieIO.BUFFER_SIZE;
+        private int channelBufferSize = JieIO.bufferSize();
         private @Nullable Consumer<ServerSocket> socketConfig;
 
         /**

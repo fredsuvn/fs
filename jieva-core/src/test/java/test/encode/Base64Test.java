@@ -2,7 +2,6 @@ package test.encode;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.JieRandom;
-import xyz.sunqian.common.io.ByteProcessor;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.base.exception.ProcessingException;
@@ -10,6 +9,7 @@ import xyz.sunqian.common.encode.DataEncoder;
 import xyz.sunqian.common.encode.DecodingException;
 import xyz.sunqian.common.encode.EncodingException;
 import xyz.sunqian.common.encode.JieBase64;
+import xyz.sunqian.common.io.ByteProcessor;
 import xyz.sunqian.common.io.JieIO;
 import xyz.sunqian.test.JieAssert;
 
@@ -62,10 +62,10 @@ public class Base64Test {
         testCoding(384 * 3 + 1);
         testCoding(10086);
         testCoding(99);
-        testCoding(JieIO.BUFFER_SIZE);
-        testCoding(JieIO.BUFFER_SIZE + 10086);
-        testCoding(JieIO.BUFFER_SIZE * 11 + 384 * 3 + 1);
-        testCoding(JieIO.BUFFER_SIZE * 11 + 384 * 3 + 2);
+        testCoding(JieIO.bufferSize());
+        testCoding(JieIO.bufferSize() + 10086);
+        testCoding(JieIO.bufferSize() * 11 + 384 * 3 + 1);
+        testCoding(JieIO.bufferSize() * 11 + 384 * 3 + 2);
         testCoding(57);
         testCoding(1024);
         testCoding(1024 * 1024);
@@ -136,26 +136,26 @@ public class Base64Test {
             EncodeTest.testDecoding(JieBase64.decoder(), mixTarget, source, i);
         }
         // encode
-        EncodeTest.testEncoding(JieBase64.encoder(), source, target, JieIO.BUFFER_SIZE);
-        EncodeTest.testEncoding(JieBase64.encoder(false), source, targetNoPadding, JieIO.BUFFER_SIZE);
-        EncodeTest.testEncoding(JieBase64.urlEncoder(), source, urlTarget, JieIO.BUFFER_SIZE);
-        EncodeTest.testEncoding(JieBase64.urlEncoder(false), source, urlTargetNoPadding, JieIO.BUFFER_SIZE);
-        EncodeTest.testEncoding(JieBase64.mimeEncoder(), source, mimeTarget, JieIO.BUFFER_SIZE);
-        EncodeTest.testEncoding(JieBase64.mimeEncoder(false), source, mimeTargetNoPadding, JieIO.BUFFER_SIZE);
-        EncodeTest.testEncoding(JieBase64.pemEncoder(), source, pemTarget, JieIO.BUFFER_SIZE);
-        EncodeTest.testEncoding(lineEncoder, source, mimeTarget, JieIO.BUFFER_SIZE);
-        EncodeTest.testEncoding(lineEncoderUrl, source, mimeTargetUrl, JieIO.BUFFER_SIZE);
+        EncodeTest.testEncoding(JieBase64.encoder(), source, target, JieIO.bufferSize());
+        EncodeTest.testEncoding(JieBase64.encoder(false), source, targetNoPadding, JieIO.bufferSize());
+        EncodeTest.testEncoding(JieBase64.urlEncoder(), source, urlTarget, JieIO.bufferSize());
+        EncodeTest.testEncoding(JieBase64.urlEncoder(false), source, urlTargetNoPadding, JieIO.bufferSize());
+        EncodeTest.testEncoding(JieBase64.mimeEncoder(), source, mimeTarget, JieIO.bufferSize());
+        EncodeTest.testEncoding(JieBase64.mimeEncoder(false), source, mimeTargetNoPadding, JieIO.bufferSize());
+        EncodeTest.testEncoding(JieBase64.pemEncoder(), source, pemTarget, JieIO.bufferSize());
+        EncodeTest.testEncoding(lineEncoder, source, mimeTarget, JieIO.bufferSize());
+        EncodeTest.testEncoding(lineEncoderUrl, source, mimeTargetUrl, JieIO.bufferSize());
         // decode
-        EncodeTest.testDecoding(JieBase64.decoder(), target, source, JieIO.BUFFER_SIZE);
-        EncodeTest.testDecoding(JieBase64.decoder(), targetNoPadding, source, JieIO.BUFFER_SIZE);
-        EncodeTest.testDecoding(JieBase64.decoder(), urlTarget, source, JieIO.BUFFER_SIZE);
-        EncodeTest.testDecoding(JieBase64.decoder(), urlTargetNoPadding, source, JieIO.BUFFER_SIZE);
-        EncodeTest.testDecoding(JieBase64.decoder(), mimeTarget, source, JieIO.BUFFER_SIZE);
-        EncodeTest.testDecoding(JieBase64.decoder(), mimeTargetNoPadding, source, JieIO.BUFFER_SIZE);
-        EncodeTest.testDecoding(JieBase64.decoder(), pemTarget, source, JieIO.BUFFER_SIZE);
-        EncodeTest.testDecoding(JieBase64.decoder(), mimeTarget, source, JieIO.BUFFER_SIZE);
-        EncodeTest.testDecoding(JieBase64.decoder(), mimeTargetUrl, source, JieIO.BUFFER_SIZE);
-        EncodeTest.testDecoding(JieBase64.decoder(), mixTarget, source, JieIO.BUFFER_SIZE);
+        EncodeTest.testDecoding(JieBase64.decoder(), target, source, JieIO.bufferSize());
+        EncodeTest.testDecoding(JieBase64.decoder(), targetNoPadding, source, JieIO.bufferSize());
+        EncodeTest.testDecoding(JieBase64.decoder(), urlTarget, source, JieIO.bufferSize());
+        EncodeTest.testDecoding(JieBase64.decoder(), urlTargetNoPadding, source, JieIO.bufferSize());
+        EncodeTest.testDecoding(JieBase64.decoder(), mimeTarget, source, JieIO.bufferSize());
+        EncodeTest.testDecoding(JieBase64.decoder(), mimeTargetNoPadding, source, JieIO.bufferSize());
+        EncodeTest.testDecoding(JieBase64.decoder(), pemTarget, source, JieIO.bufferSize());
+        EncodeTest.testDecoding(JieBase64.decoder(), mimeTarget, source, JieIO.bufferSize());
+        EncodeTest.testDecoding(JieBase64.decoder(), mimeTargetUrl, source, JieIO.bufferSize());
+        EncodeTest.testDecoding(JieBase64.decoder(), mixTarget, source, JieIO.bufferSize());
     }
 
     @Test

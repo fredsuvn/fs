@@ -287,7 +287,7 @@ public class BytesBuilder extends OutputStream {
      * @throws IORuntimeException if an I/O error occurs
      */
     public BytesBuilder append(InputStream in) throws IORuntimeException {
-        return append(in, JieIO.BUFFER_SIZE);
+        return append(in, JieIO.bufferSize());
     }
 
     /**

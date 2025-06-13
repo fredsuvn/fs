@@ -3,13 +3,13 @@ package test.encode;
 import org.apache.commons.codec.binary.Hex;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.JieRandom;
-import xyz.sunqian.common.io.ByteProcessor;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.base.exception.ProcessingException;
 import xyz.sunqian.common.encode.DecodingException;
 import xyz.sunqian.common.encode.EncodingException;
 import xyz.sunqian.common.encode.JieHex;
+import xyz.sunqian.common.io.ByteProcessor;
 import xyz.sunqian.common.io.JieIO;
 
 import static org.testng.Assert.assertEquals;
@@ -37,10 +37,10 @@ public class HexTest {
         testCoding(384 * 3 + 1);
         testCoding(10086);
         testCoding(99);
-        testCoding(JieIO.BUFFER_SIZE);
-        testCoding(JieIO.BUFFER_SIZE + 10086);
-        testCoding(JieIO.BUFFER_SIZE * 11 + 1);
-        testCoding(JieIO.BUFFER_SIZE * 11 + 2);
+        testCoding(JieIO.bufferSize());
+        testCoding(JieIO.bufferSize() + 10086);
+        testCoding(JieIO.bufferSize() * 11 + 1);
+        testCoding(JieIO.bufferSize() * 11 + 2);
         testCoding(57);
         testCoding(1024);
         testCoding(1024 * 1024);
@@ -72,8 +72,8 @@ public class HexTest {
             EncodeTest.testEncoding(JieHex.encoder(), source, target, i);
             EncodeTest.testDecoding(JieHex.decoder(), target, source, i);
         }
-        EncodeTest.testEncoding(JieHex.encoder(), source, target, JieIO.BUFFER_SIZE);
-        EncodeTest.testDecoding(JieHex.decoder(), target, source, JieIO.BUFFER_SIZE);
+        EncodeTest.testEncoding(JieHex.encoder(), source, target, JieIO.bufferSize());
+        EncodeTest.testDecoding(JieHex.decoder(), target, source, JieIO.bufferSize());
     }
 
     @Test

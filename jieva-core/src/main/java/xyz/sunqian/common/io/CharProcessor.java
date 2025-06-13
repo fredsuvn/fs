@@ -112,7 +112,7 @@ public interface CharProcessor {
      * Sets the number of chars for each read operation from the data source.
      * <p>
      * This setting is typically used when the data source is a reader, or intermediate operations are set, default is
-     * {@link JieIO#BUFFER_SIZE}.
+     * {@link JieIO#bufferSize()}.
      * <p>
      * This is an optional setting method.
      *

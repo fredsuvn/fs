@@ -23,12 +23,18 @@ import java.util.Arrays;
  */
 public class JieIO {
 
-    /**
-     * The default IO buffer size: 1024 * 8 = 8192.
-     */
-    public static final int BUFFER_SIZE = 1024 * 8;
+    private static final int BUFFER_SIZE = 1024 * 8;
 
     //---------------- Common Start ----------------//
+
+    /**
+     * Returns a recommended IO buffer size, typically is 1024 * 8 = 8192.
+     *
+     * @return a recommended IO buffer size
+     */
+    public static int bufferSize() {
+        return BUFFER_SIZE;
+    }
 
     /**
      * Reads all data from the source stream into a new array, continuing until the end of the stream, and returns the
@@ -368,6 +374,27 @@ public class JieIO {
      */
     public static long readTo(@Nonnull Reader source, @Nonnull Appendable dest) throws IORuntimeException {
         return CharProcessor.from(source).writeTo(dest);
+    }
+
+    /**
+     * Writes the specified chars (starting at the specified offset up to the specified length) into the given
+     * appender.
+     *
+     * @param appender the given appender
+     * @param chars    the specified chars
+     * @param offset   the specified offset
+     * @param length   the specified length
+     * @throws IndexOutOfBoundsException if the specified offset or length is out of bounds
+     * @throws IOException               if an I/O error occurs
+     */
+    public static void write(
+        @Nonnull Appendable appender, char @Nonnull [] chars, int offset, int length
+    ) throws IndexOutOfBoundsException, IOException {
+        if (appender instanceof Writer) {
+            ((Writer) appender).write(chars, offset, length);
+            return;
+        }
+        appender.append(new String(chars, offset, length));
     }
 
     //---------------- Common End ----------------//

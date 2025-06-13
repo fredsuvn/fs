@@ -41,13 +41,13 @@ public class ByteProcessorTest {
 
     @Test
     public void testProcessing() throws Exception {
-        testProcessing(0, JieIO.BUFFER_SIZE, -1);
-        testProcessing(666, JieIO.BUFFER_SIZE, -1);
+        testProcessing(0, JieIO.bufferSize(), -1);
+        testProcessing(666, JieIO.bufferSize(), -1);
         testProcessing(0, 67, -1);
         testProcessing(666, 67, -1);
         testProcessing(666, 1, -1);
         testProcessing(100, 10, -1);
-        testProcessing(666, JieIO.BUFFER_SIZE, -1);
+        testProcessing(666, JieIO.bufferSize(), -1);
         testProcessing(0, 67, 667);
         testProcessing(666, 67, 667);
         testProcessing(666, 1, 667);

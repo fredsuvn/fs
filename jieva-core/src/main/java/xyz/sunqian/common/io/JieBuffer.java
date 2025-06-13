@@ -289,6 +289,8 @@ public class JieBuffer {
      * Changes to the given buffer's content will be visible in the new buffer, and vice versa. The new buffer's
      * position will be zero, its capacity and limit will be the specified length. The new buffer will be direct if, and
      * only if, the given buffer is direct, and it will be read-only if, and only if, the given buffer is read-only.
+     * <p>
+     * The position and limit of the given buffer will not be changed.
      *
      * @param buffer the given buffer
      * @param length the specified length
@@ -307,6 +309,8 @@ public class JieBuffer {
      * Changes to the given buffer's content will be visible in the new buffer, and vice versa. The new buffer's
      * position will be zero, its capacity and limit will be the specified length. The new buffer will be direct if, and
      * only if, the given buffer is direct, and it will be read-only if, and only if, the given buffer is read-only.
+     * <p>
+     * The position and limit of the given buffer will not be changed.
      *
      * @param buffer the given buffer
      * @param offset the specified offset
@@ -335,6 +339,8 @@ public class JieBuffer {
      * Changes to the given buffer's content will be visible in the new buffer, and vice versa. The new buffer's
      * position will be zero, its capacity and limit will be the specified length. The new buffer will be direct if, and
      * only if, the given buffer is direct, and it will be read-only if, and only if, the given buffer is read-only.
+     * <p>
+     * The position and limit of the given buffer will not be changed.
      *
      * @param buffer the given buffer
      * @param length the specified length
@@ -353,6 +359,8 @@ public class JieBuffer {
      * Changes to the given buffer's content will be visible in the new buffer, and vice versa. The new buffer's
      * position will be zero, its capacity and limit will be the specified length. The new buffer will be direct if, and
      * only if, the given buffer is direct, and it will be read-only if, and only if, the given buffer is read-only.
+     * <p>
+     * The position and limit of the given buffer will not be changed.
      *
      * @param buffer the given buffer
      * @param offset the specified offset

@@ -22,7 +22,7 @@ final class ByteProcessorImpl implements ByteProcessor {
     private final @Nullable Object source;
     private @Nullable Object dest;
     private long readLimit = -1;
-    private int readBlockSize = JieIO.BUFFER_SIZE;
+    private int readBlockSize = JieIO.bufferSize();
     private boolean endOnZeroRead = false;
     private @Nullable List<ByteEncoder> encoders;
 
@@ -231,11 +231,17 @@ final class ByteProcessorImpl implements ByteProcessor {
         return readTo(getSourceReader(), getEncoder(), out);
     }
 
-    private long readTo(ByteReader in, ByteEncoder oneEncoder, DataWriter out) throws Exception {
-        ByteReader reader = readLimit < 0 ? in : in.withReadLimit(readLimit);
+    private long readTo(ByteReader reader, ByteEncoder oneEncoder, DataWriter out) throws Exception {
+        // ByteReader reader = readLimit < 0 ? in : in.withReadLimit(readLimit);
         long count = 0;
         while (true) {
-            ByteSegment segment = reader.read(readBlockSize, endOnZeroRead);
+            ByteSegment segment;
+            int nextSize = nextReadBlockSize(count);
+            if (nextSize == 0) {
+                segment = ByteSegment.empty(true);
+            } else {
+                segment = reader.read(nextSize);
+            }
             count += segment.data().remaining();
             @Nullable ByteBuffer encoded = oneEncoder.encode(segment.data(), segment.end());
             if (!JieBytes.isEmpty(encoded)) {
@@ -245,6 +251,13 @@ final class ByteProcessorImpl implements ByteProcessor {
                 return count;
             }
         }
+    }
+
+    private int nextReadBlockSize(long count) {
+        if (readLimit < 0) {
+            return readBlockSize;
+        }
+        return (int) Math.min(readLimit - count, readBlockSize);
     }
 
     private ByteReader toByteReader(Object src) {
@@ -341,7 +354,7 @@ final class ByteProcessorImpl implements ByteProcessor {
 
         private ByteSegment read0() throws IOException {
             try {
-                ByteSegment s0 = getSourceReader().read(readBlockSize, endOnZeroRead);
+                ByteSegment s0 = getSourceReader().read(readBlockSize);
                 @Nullable ByteBuffer encoded = getEncoder().encode(s0.data(), s0.end());
                 if (encoded == s0.data()) {
                     return s0;

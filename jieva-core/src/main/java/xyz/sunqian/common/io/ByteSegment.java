@@ -21,7 +21,7 @@ public interface ByteSegment {
      * @return a new {@link ByteSegment} with the given data and end flag
      */
     static @Nonnull ByteSegment of(@Nonnull ByteBuffer data, boolean end) {
-        return new ReaderImpls.ByteSegmentImpl(data, end);
+        return new ByteReaderImpl.ByteSegmentImpl(data, end);
     }
 
     /**
@@ -32,7 +32,7 @@ public interface ByteSegment {
      * @return an empty {@link ByteSegment} with the given end flag
      */
     static @Nonnull ByteSegment empty(boolean end) {
-        return ReaderImpls.ByteSegmentImpl.empty(end);
+        return ByteReaderImpl.ByteSegmentImpl.empty(end);
     }
 
     /**
@@ -49,6 +49,15 @@ public interface ByteSegment {
      * @return whether this segment is the end of the data source
      */
     boolean end();
+
+    /**
+     * Returns the remaining data as a new byte array from the {@link #data()}.
+     *
+     * @return the remaining data as a new byte array from the {@link #data()}
+     */
+    default byte @Nonnull [] toByteArray() {
+        return JieBuffer.read(data());
+    }
 
     /**
      * Returns a clone of this segment. The {@link #data()} of the clone is an independent copy, not shared with the

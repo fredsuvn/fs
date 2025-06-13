@@ -32,9 +32,9 @@ public class IOTest {
     @Test
     public void testRead() throws Exception {
         testRead(50, -1);
-        testRead(JieIO.BUFFER_SIZE * 2, -1);
+        testRead(JieIO.bufferSize() * 2, -1);
         testRead(50, 5);
-        testRead(JieIO.BUFFER_SIZE * 2, 5);
+        testRead(JieIO.bufferSize() * 2, 5);
         testRead(50, 0);
         testRead(50, 55);
     }
@@ -60,9 +60,9 @@ public class IOTest {
         expectThrows(IORuntimeException.class, () -> JieIO.read(tin, 1));
         assertEquals(JieIO.read(bytesInput(bytes, available), offset), Arrays.copyOf(bytes, offset));
         assertEquals(JieIO.read(bytesInput(bytes, available), size + 1), bytes);
-        if (size > JieIO.BUFFER_SIZE + offset) {
-            assertEquals(JieIO.read(bytesInput(bytes, available), JieIO.BUFFER_SIZE + offset),
-                Arrays.copyOf(bytes, JieIO.BUFFER_SIZE + offset));
+        if (size > JieIO.bufferSize() + offset) {
+            assertEquals(JieIO.read(bytesInput(bytes, available), JieIO.bufferSize() + offset),
+                Arrays.copyOf(bytes, JieIO.bufferSize() + offset));
         }
         assertEquals(JieIO.available(bytesInput(bytes, bytes.length)), bytes);
         assertEquals(JieIO.available(bytesInput(bytes, offset)), Arrays.copyOf(bytes, offset));
@@ -89,9 +89,9 @@ public class IOTest {
         expectThrows(IORuntimeException.class, () -> JieIO.read(tr, 1));
         assertEquals(JieIO.read(charsReader(chars), offset), Arrays.copyOf(chars, offset));
         assertEquals(JieIO.read(charsReader(chars), size + 1), chars);
-        if (size > JieIO.BUFFER_SIZE + offset) {
-            assertEquals(JieIO.read(charsReader(chars), JieIO.BUFFER_SIZE + offset),
-                Arrays.copyOf(chars, JieIO.BUFFER_SIZE + offset));
+        if (size > JieIO.bufferSize() + offset) {
+            assertEquals(JieIO.read(charsReader(chars), JieIO.bufferSize() + offset),
+                Arrays.copyOf(chars, JieIO.bufferSize() + offset));
         }
 
         // string
@@ -105,12 +105,12 @@ public class IOTest {
         tin.setNextOperation(ReadOps.THROW, 2);
         expectThrows(IORuntimeException.class, () -> JieIO.string(new InputStreamReader(tin)));
         expectThrows(IORuntimeException.class, () -> JieIO.string(new InputStreamReader(tin), 1));
-        if (size > JieIO.BUFFER_SIZE + offset) {
-            assertEquals(JieIO.string(new StringReader(str), JieIO.BUFFER_SIZE + offset),
-                str.substring(0, JieIO.BUFFER_SIZE + offset));
+        if (size > JieIO.bufferSize() + offset) {
+            assertEquals(JieIO.string(new StringReader(str), JieIO.bufferSize() + offset),
+                str.substring(0, JieIO.bufferSize() + offset));
         }
         assertEquals(JieIO.string(new ByteArrayInputStream(bytes)), str);
-        if (size > JieIO.BUFFER_SIZE + offset) {
+        if (size > JieIO.bufferSize() + offset) {
             assertEquals(JieIO.string(new ByteArrayInputStream(bytes)), str);
         }
         assertEquals(JieIO.string(JieIO.emptyInStream()), "");

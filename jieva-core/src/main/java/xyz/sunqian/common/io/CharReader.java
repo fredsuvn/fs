@@ -22,7 +22,7 @@ public interface CharReader {
      * @return a new {@link CharReader} with the given data source
      */
     static @Nonnull CharReader from(@Nonnull Reader source) {
-        return ReaderImpls.of(source);
+        return CharReaderImpl.of(source);
     }
 
     /**
@@ -58,7 +58,7 @@ public interface CharReader {
      * @throws IndexOutOfBoundsException if the specified offset or length is out of bounds
      */
     static @Nonnull CharReader from(char @Nonnull [] source, int offset, int length) throws IndexOutOfBoundsException {
-        return ReaderImpls.of(source, offset, length);
+        return CharReaderImpl.of(source, offset, length);
     }
 
     /**
@@ -94,7 +94,7 @@ public interface CharReader {
      * @throws IndexOutOfBoundsException if the specified start or end position is out of bounds
      */
     static @Nonnull CharReader from(@Nonnull CharSequence source, int start, int end) throws IndexOutOfBoundsException {
-        return ReaderImpls.of(source, start, end);
+        return CharReaderImpl.of(source, start, end);
     }
 
     /**
@@ -110,77 +110,133 @@ public interface CharReader {
      * @return a new {@link CharReader} with the given data source
      */
     static @Nonnull CharReader from(@Nonnull CharBuffer source) {
-        return ReaderImpls.of(source);
+        return CharReaderImpl.of(source);
     }
 
     /**
      * Reads and returns the next data segment with the specified size from the data source. This method reads
      * continuously until the specified number of chars is read or the end of the data source is reached. And it never
-     * returns null, but can return an empty segment. It is equivalent to:
-     * <pre>{@code
-     *     return read(size, false);
-     * }</pre>
+     * returns null, but can return an empty segment. If the specified size is {@code 0}, this method returns an empty
+     * segment immediately without reading.
      *
      * @param size the specified size
-     * @return the next data segment
-     * @throws IllegalArgumentException if the specified size is negative
-     * @throws IORuntimeException       if an I/O error occurs
-     * @see #read(int, boolean)
-     */
-    default @Nonnull CharSegment read(int size) throws IllegalArgumentException, IORuntimeException {
-        return read(size, false);
-    }
-
-    /**
-     * Reads and returns the next data segment with the specified size from the data source. This method reads
-     * continuously until the specified number of chars is read or the end of the data source is reached. And it never
-     * returns null, but can return an empty segment.
-     * <p>
-     * The {@code endOnZeroRead} specifies whether a zero-char read, which could happen in NIO, should be treated as a
-     * signal indicates the end of the data source has been reached.
-     *
-     * @param size          the specified size
-     * @param endOnZeroRead specifies whether a zero-char read should be treated as a signal indicates the end of the
-     *                      data source has been reached
      * @return the next data segment
      * @throws IllegalArgumentException if the specified size is negative
      * @throws IORuntimeException       if an I/O error occurs
      */
     @Nonnull
-    CharSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException;
+    CharSegment read(int size) throws IllegalArgumentException, IORuntimeException;
+
+    // /**
+    //  * Reads and returns the next data segment with the specified size from the data source. This method reads
+    //  * continuously until the specified number of chars is read or the end of the data source is reached. And it never
+    //  * returns null, but can return an empty segment.
+    //  * <p>
+    //  * The {@code endOnZeroRead} specifies whether a zero-char read, which could happen in NIO, should be treated as a
+    //  * signal indicates the end of the data source has been reached.
+    //  *
+    //  * @param size          the specified size
+    //  * @param endOnZeroRead specifies whether a zero-char read should be treated as a signal indicates the end of the
+    //  *                      data source has been reached
+    //  * @return the next data segment
+    //  * @throws IllegalArgumentException if the specified size is negative
+    //  * @throws IORuntimeException       if an I/O error occurs
+    //  */
+    // @Nonnull
+    // CharSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException;
 
     /**
      * Skips the data of the specified size and returns the actual skipped size. This method skips continuously until
-     * the specified number of chars is skipped or the end of the data source is reached. It is equivalent to:
-     * <pre>{@code
-     *     return skip(size, false);
-     * }</pre>
+     * the specified number of chars is skipped or the end of the data source is reached. If the specified size is
+     * {@code 0}, this method returns {@code 0} immediately without skipping.
      *
      * @param size the specified size
      * @return the actual skipped size
      * @throws IllegalArgumentException if the specified size is negative
      * @throws IORuntimeException       if an I/O error occurs
-     * @see #skip(long, boolean)
      */
-    default long skip(long size) throws IllegalArgumentException, IORuntimeException {
-        return skip(size, false);
+    long skip(long size) throws IllegalArgumentException, IORuntimeException;
+
+    // /**
+    //  * Skips the data of the specified size and returns the actual skipped size. This method skips continuously until
+    //  * the specified number of chars is skipped or the end of the data source is reached.
+    //  * <p>
+    //  * The {@code endOnZeroRead} specifies whether a zero-char read, which could happen in NIO, should be treated as a
+    //  * signal indicates the end of the data source has been reached.
+    //  *
+    //  * @param size          the specified size
+    //  * @param endOnZeroRead specifies whether a zero-char read should be treated as a signal indicates the end of the
+    //  *                      data source has been reached
+    //  * @return the actual skipped size
+    //  * @throws IllegalArgumentException if the specified size is negative
+    //  * @throws IORuntimeException       if an I/O error occurs
+    //  */
+    // long skip(long size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException;
+
+    /**
+     * Reads from the data source into the specified destination until the destination is filled, returns the number of
+     * actual data read or {@code -1} if the end of the source has already been reached. If the remaining space of the
+     * destination is {@code 0}, this method returns {@code 0} immediately without reading.
+     *
+     * @param dest the specified destination
+     * @return the number of actual data read or {@code -1} if the end of the source has already been reached
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    default int readTo(char @Nonnull [] dest) throws IORuntimeException {
+        return readTo(dest, 0, dest.length);
     }
 
     /**
-     * Skips the data of the specified size and returns the actual skipped size. This method skips continuously until
-     * the specified number of chars is skipped or the end of the data source is reached.
-     * <p>
-     * The {@code endOnZeroRead} specifies whether a zero-char read, which could happen in NIO, should be treated as a
-     * signal indicates the end of the data source has been reached.
+     * Reads from the data source into the specified destination (starting from the specified start index up to the
+     * specified length) until the destination is filled, returns the number of actual data read or {@code -1} if the
+     * end of the source has already been reached. If the specified length is {@code 0}, this method returns {@code 0}
+     * immediately without reading.
      *
-     * @param size          the specified size
-     * @param endOnZeroRead specifies whether a zero-char read should be treated as a signal indicates the end of the
-     *                      data source has been reached
-     * @return the actual skipped size
-     * @throws IllegalArgumentException if the specified size is negative
-     * @throws IORuntimeException       if an I/O error occurs
+     * @param dest   the specified destination
+     * @param offset the specified start index
+     * @param length the specified length
+     * @return the number of actual data read or {@code -1} if the end of the source has already been reached
+     * @throws IndexOutOfBoundsException if the specified offset or length is out of bounds
+     * @throws IORuntimeException        if an I/O error occurs
      */
-    long skip(long size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException;
+    int readTo(char @Nonnull [] dest, int offset, int length) throws IndexOutOfBoundsException, IORuntimeException;
+
+    /**
+     * Reads from the data source into the specified destination until the destination is filled, returns the number of
+     * actual data read or {@code -1} if the end of the source has already been reached. The position of the destination
+     * will be incremented by the actual read number. If the remaining space of the destination is {@code 0}, this
+     * method returns {@code 0} immediately without reading.
+     *
+     * @param dest the specified destination
+     * @return the number of actual data read or {@code -1} if the end of the source has already been reached
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    int readTo(@Nonnull CharBuffer dest) throws IORuntimeException;
+
+    /**
+     * Reads all data from the data source into the specified destination, returns the number of actual data read or
+     * {@code -1} if the end of the source has already been reached.
+     *
+     * @param dest the specified destination
+     * @return the number of actual data read or {@code -1} if the end of the source has already been reached
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    default long readTo(@Nonnull Appendable dest) throws IORuntimeException {
+        return readTo(dest, -1);
+    }
+
+    /**
+     * Reads the data of the specified length from the data source into the specified destination, returns the number of
+     * actual data read or {@code -1} if the end of the source has already been reached. The length may less than 0,
+     * means all data will be transferred. If the specified length is {@code 0}, this method returns {@code 0}
+     * immediately without reading.
+     *
+     * @param dest   the specified destination
+     * @param length the specified length, may {@code < 0}, means all data will be transferred
+     * @return the number of actual data read or {@code -1} if the end of the source has already been reached
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    long readTo(@Nonnull Appendable dest, long length) throws IORuntimeException;
 
     /**
      * Returns whether this reader supports the {@link #mark()} and {@link #reset()} methods.
@@ -213,16 +269,16 @@ public interface CharReader {
      */
     void close() throws IORuntimeException;
 
-    /**
-     * Returns a new {@link CharReader} backed by this instance, with read operations limited to the specified maximum
-     * number of chars. The mark/reset operations are supported by and shared with this instance.
-     *
-     * @param readLimit the specified maximum number of chars to read
-     * @return a new {@link CharReader} backed by this, with read operations limited to the specified maximum number of
-     * chars
-     * @throws IllegalArgumentException if the specified read limit is negative
-     */
-    default @Nonnull CharReader withReadLimit(long readLimit) throws IllegalArgumentException {
-        return ReaderImpls.of(this, readLimit);
-    }
+    // /**
+    //  * Returns a new {@link CharReader} backed by this instance, with read operations limited to the specified maximum
+    //  * number of chars. The mark/reset operations are supported by and shared with this instance.
+    //  *
+    //  * @param readLimit the specified maximum number of chars to read
+    //  * @return a new {@link CharReader} backed by this, with read operations limited to the specified maximum number of
+    //  * chars
+    //  * @throws IllegalArgumentException if the specified read limit is negative
+    //  */
+    // default @Nonnull CharReader withReadLimit(long readLimit) throws IllegalArgumentException {
+    //     return CharReaderImpl.of(this, readLimit);
+    // }
 }

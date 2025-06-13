@@ -21,7 +21,7 @@ public interface CharSegment {
      * @return a new {@link CharSegment} with the given data and end flag
      */
     static @Nonnull CharSegment of(@Nonnull CharBuffer data, boolean end) {
-        return new ReaderImpls.CharSegmentImpl(data, end);
+        return new CharReaderImpl.CharSegmentImpl(data, end);
     }
 
     /**
@@ -32,7 +32,7 @@ public interface CharSegment {
      * @return an empty {@link CharSegment} with the given end flag
      */
     static @Nonnull CharSegment empty(boolean end) {
-        return ReaderImpls.CharSegmentImpl.empty(end);
+        return CharReaderImpl.CharSegmentImpl.empty(end);
     }
 
     /**
@@ -49,6 +49,15 @@ public interface CharSegment {
      * @return whether this segment is the end of the data source
      */
     boolean end();
+
+    /**
+     * Returns the remaining data as a new char array from the {@link #data()}.
+     *
+     * @return the remaining data as a new char array from the {@link #data()}
+     */
+    default char @Nonnull [] toCharArray() {
+        return JieBuffer.read(data());
+    }
 
     /**
      * Returns a clone of this segment. The {@link #data()} of the clone is an independent copy, not shared with the

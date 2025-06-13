@@ -264,7 +264,7 @@ public class CharsBuilder extends Writer implements CharSequence {
      * @throws IORuntimeException if an I/O error occurs
      */
     public CharsBuilder append(Reader reader) throws IORuntimeException {
-        return append(reader, JieIO.BUFFER_SIZE);
+        return append(reader, JieIO.bufferSize());
     }
 
     /**

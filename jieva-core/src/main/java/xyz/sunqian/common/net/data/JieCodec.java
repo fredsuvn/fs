@@ -482,7 +482,7 @@ public class JieCodec {
      * @throws CodecException codec exception
      */
     public static byte[] doDigest(MessageDigest digest, InputStream in) throws CodecException {
-        return doDigest(digest, in, JieIO.BUFFER_SIZE);
+        return doDigest(digest, in, JieIO.bufferSize());
     }
 
     /**
@@ -549,7 +549,7 @@ public class JieCodec {
      * @throws CodecException codec exception
      */
     public static byte[] doMac(Mac mac, InputStream in) throws CodecException {
-        return doMac(mac, in, JieIO.BUFFER_SIZE);
+        return doMac(mac, in, JieIO.bufferSize());
     }
 
     /**
@@ -616,7 +616,7 @@ public class JieCodec {
      * @throws CodecException codec exception
      */
     public static byte[] doSign(Signature sign, InputStream in) throws CodecException {
-        return doSign(sign, in, JieIO.BUFFER_SIZE);
+        return doSign(sign, in, JieIO.bufferSize());
     }
 
     /**
@@ -686,7 +686,7 @@ public class JieCodec {
      * @throws CodecException codec exception
      */
     public static boolean doVerify(Signature sign, InputStream in, byte[] signature) throws CodecException {
-        return doVerify(sign, in, JieIO.BUFFER_SIZE, signature);
+        return doVerify(sign, in, JieIO.bufferSize(), signature);
     }
 
     /**

@@ -21,7 +21,7 @@ final class CharProcessorImpl implements CharProcessor {
     private final @Nullable Object source;
     private @Nullable Object dest;
     private long readLimit = -1;
-    private int readBlockSize = JieIO.BUFFER_SIZE;
+    private int readBlockSize = JieIO.bufferSize();
     private boolean endOnZeroRead = false;
     private @Nullable List<CharEncoder> encoders;
 
@@ -266,11 +266,17 @@ final class CharProcessorImpl implements CharProcessor {
         return readTo(getSourceReader(), getEncoder(), out);
     }
 
-    private long readTo(CharReader in, CharEncoder oneEncoder, DataWriter out) throws Exception {
-        CharReader reader = readLimit < 0 ? in : in.withReadLimit(readLimit);
+    private long readTo(CharReader reader, CharEncoder oneEncoder, DataWriter out) throws Exception {
+        // CharReader reader = readLimit < 0 ? in : in.withReadLimit(readLimit);
         long count = 0;
         while (true) {
-            CharSegment segment = reader.read(readBlockSize, endOnZeroRead);
+            CharSegment segment;
+            int nextSize = nextReadBlockSize(count);
+            if (nextSize == 0) {
+                segment = CharSegment.empty(true);
+            } else {
+                segment = reader.read(nextSize);
+            }
             count += segment.data().remaining();
             @Nullable CharBuffer encoded = oneEncoder.encode(segment.data(), segment.end());
             if (!JieChars.isEmpty(encoded)) {
@@ -280,6 +286,13 @@ final class CharProcessorImpl implements CharProcessor {
                 return count;
             }
         }
+    }
+
+    private int nextReadBlockSize(long count) {
+        if (readLimit < 0) {
+            return readBlockSize;
+        }
+        return (int) Math.min(readLimit - count, readBlockSize);
     }
 
     private CharReader toCharReader(Object src) {
@@ -399,7 +412,7 @@ final class CharProcessorImpl implements CharProcessor {
 
         private CharSegment read0() throws IOException {
             try {
-                CharSegment s0 = getSourceReader().read(readBlockSize, endOnZeroRead);
+                CharSegment s0 = getSourceReader().read(readBlockSize);
                 @Nullable CharBuffer encoded = getEncoder().encode(s0.data(), s0.end());
                 if (encoded == s0.data()) {
                     return s0;

@@ -61,7 +61,7 @@ public interface GekHttpClient {
         /**
          * Chunk size.
          */
-        private int chunkSize = JieIO.BUFFER_SIZE;
+        private int chunkSize = JieIO.bufferSize();
         /**
          * Proxy info.
          */

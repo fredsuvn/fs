@@ -150,7 +150,7 @@ public interface GekUdpServer extends GekUdpClient {
         private final List<GekUdpPacketHandler<?>> packetHandlers = new LinkedList<>();
         private @Nullable GekUdpServerHandler serverHandler;
         private @Nullable ExecutorService executor;
-        private int packetBufferSize = JieIO.BUFFER_SIZE;
+        private int packetBufferSize = JieIO.bufferSize();
 
         /**
          * Sets local port, maybe 0 to get an available one from system.

@@ -202,7 +202,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
         return handler.requiresProxy(method);
     }
 
-    private byte[] generateProxyClass(@Nonnull ProxyClassInfo pcInfo) throws Exception {
+    private byte @Nonnull [] generateProxyClass(@Nonnull ProxyClassInfo pcInfo) throws Exception {
         ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         classWriter.visit(
             Opcodes.V1_8,
@@ -408,7 +408,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
         visitor.visitEnd();
     }
 
-    private byte[] generateInvokerClass(@Nonnull ProxyClassInfo pcInfo) throws Exception {
+    private byte @Nonnull [] generateInvokerClass(@Nonnull ProxyClassInfo pcInfo) throws Exception {
         ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         classWriter.visit(
             Opcodes.V1_8,
@@ -610,7 +610,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
         private final @Nonnull String ownerName;
         private final @Nonnull String descriptor;
         private final @Nullable String signature;
-        private final @Nullable String[] exceptions;
+        private final @Nonnull String @Nullable [] exceptions;
         private final @Nonnull String superInvokerName;
         private final @Nonnull String superInvokerDescriptor;
         private final @Nullable String superInvokerSignature;
@@ -621,7 +621,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
             @Nonnull String ownerName,
             @Nonnull String descriptor,
             @Nullable String signature,
-            @Nullable String[] exceptions,
+            @Nonnull String @Nullable [] exceptions,
             @Nonnull String superInvokerName,
             @Nonnull String superInvokerDescriptor,
             @Nullable String superInvokerSignature,
