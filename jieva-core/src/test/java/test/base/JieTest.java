@@ -266,7 +266,6 @@ public class JieTest {
             Utils.awaitUntilExecuteTo(thread, Thread.class.getName(), "sleep");
             thread.interrupt();
             Jie.until(() -> true);
-            Jie.untilChecked(() -> true);
         }
         {
             // process

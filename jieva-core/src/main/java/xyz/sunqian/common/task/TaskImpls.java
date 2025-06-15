@@ -189,7 +189,7 @@ final class TaskImpls {
         @Override
         public void await() throws AwaitingException {
             Jie.uncheck(
-                () -> JieThread.untilChecked(
+                () -> JieThread.until(
                     () -> awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS)
                 ),
                 AwaitingException::new
@@ -438,6 +438,14 @@ final class TaskImpls {
         }
 
         @Override
+        public void await(long millis) throws AwaitingException {
+            doAwait(() -> {
+                Future<?> future = getFuture();
+                future.get(millis, TimeUnit.MILLISECONDS);
+            });
+        }
+
+        @Override
         public void await(@Nonnull Duration duration) throws AwaitingException {
             doAwait(() -> {
                 Future<?> future = getFuture();
@@ -470,6 +478,14 @@ final class TaskImpls {
             return doAwait(() -> {
                 Future<T> future = getFuture();
                 return future.get();
+            });
+        }
+
+        @Override
+        public @Nullable T await(long millis) throws AwaitingException {
+            return doAwait(() -> {
+                Future<T> future = getFuture();
+                return future.get(millis, TimeUnit.MILLISECONDS);
             });
         }
 

@@ -61,6 +61,28 @@ public interface ProcessReceipt extends TaskReceipt<Integer> {
      * Blocks the current thread until the process is terminated, or the specified waiting time elapses. Returns the
      * exit value of the process.
      *
+     * @param millis the maximum milliseconds to wait
+     * @return the exit value of the process
+     * @throws AwaitingException if the current thread is interrupted, or the specified waiting time elapses, or other
+     *                           error occurs while awaiting
+     */
+    @Override
+    default @Nonnull Integer await(long millis) throws AwaitingException {
+        Process process = getProcess();
+        boolean exited = Jie.uncheck(
+            () -> process.waitFor(millis, TimeUnit.MILLISECONDS),
+            AwaitingException::new
+        );
+        if (exited) {
+            return process.exitValue();
+        }
+        throw new AwaitingException(new TimeoutException());
+    }
+
+    /**
+     * Blocks the current thread until the process is terminated, or the specified waiting time elapses. Returns the
+     * exit value of the process.
+     *
      * @param duration the maximum time to wait
      * @return the exit value of the process
      * @throws AwaitingException if the current thread is interrupted, or the specified waiting time elapses, or other
@@ -148,30 +170,27 @@ public interface ProcessReceipt extends TaskReceipt<Integer> {
     }
 
     /**
-     * Returns the output stream connected to the normal input of the process. This method is equivalent to the
-     * {@link Process#getOutputStream()}.
+     * Returns the output stream of the process. This method is equivalent to the {@link Process#getOutputStream()}.
      *
-     * @return the output stream connected to the normal input of the process
+     * @return the output stream of the process
      */
     default @Nonnull OutputStream getOutputStream() {
         return getProcess().getOutputStream();
     }
 
     /**
-     * Returns the input stream connected to the normal output of the process. This method is equivalent to the
-     * {@link Process#getInputStream()}.
+     * Returns the input stream of the process. This method is equivalent to the {@link Process#getInputStream()}.
      *
-     * @return the input stream connected to the normal output of the process
+     * @return the input stream of the process
      */
     default @Nonnull InputStream getInputStream() {
         return getProcess().getInputStream();
     }
 
     /**
-     * Returns the input stream connected to the error output of the process. This method is equivalent to the
-     * {@link Process#getErrorStream()}.
+     * Returns the error stream of the process. This method is equivalent to the {@link Process#getErrorStream()}.
      *
-     * @return the input stream connected to the error output of the process
+     * @return the error stream of the process
      */
     default @Nonnull InputStream getErrorStream() {
         return getProcess().getErrorStream();

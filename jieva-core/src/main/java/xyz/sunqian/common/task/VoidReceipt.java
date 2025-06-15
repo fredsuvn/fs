@@ -29,6 +29,18 @@ public interface VoidReceipt extends BaseTaskReceipt {
      * If the task execution is abnormal or canceled, this method will return directly. {@link #getState()} and
      * {@link #getException()} can be used to obtain the reason.
      *
+     * @param millis the maximum milliseconds to wait
+     * @throws AwaitingException if the current thread is interrupted, or the specified waiting time elapses, or other
+     *                           error occurs while awaiting
+     */
+    void await(long millis) throws AwaitingException;
+
+    /**
+     * Blocks the current thread until the task is completed or canceled, or the specified waiting time elapses.
+     * <p>
+     * If the task execution is abnormal or canceled, this method will return directly. {@link #getState()} and
+     * {@link #getException()} can be used to obtain the reason.
+     *
      * @param duration the maximum time to wait
      * @throws AwaitingException if the current thread is interrupted, or the specified waiting time elapses, or other
      *                           error occurs while awaiting

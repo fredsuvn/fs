@@ -7,6 +7,7 @@ import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.base.exception.AwaitingException;
 import xyz.sunqian.common.base.process.JieProcess;
 import xyz.sunqian.common.base.process.ProcessReceipt;
+import xyz.sunqian.common.base.process.VirtualProcess;
 import xyz.sunqian.common.io.JieIO;
 import xyz.sunqian.common.task.TaskState;
 
@@ -48,9 +49,14 @@ public class ProcessTest {
     @Test
     public void testReceipt() throws Exception {
         {
-            Process process = JieProcess.virtualProcess();
+            VirtualProcess process = new VirtualProcess();
             ProcessReceipt receipt = JieProcess.receipt(process);
             assertEquals(receipt.getState(), TaskState.EXECUTING);
+            try {
+                receipt.await(1);
+            } catch (AwaitingException e) {
+                assertTrue(e.getCause() instanceof TimeoutException);
+            }
             try {
                 receipt.await(Duration.ofMillis(1));
             } catch (AwaitingException e) {
@@ -61,19 +67,27 @@ public class ProcessTest {
             CountDownLatch latch = new CountDownLatch(1);
             Jie.run(() -> {
                 int result = receipt.await();
-                assertEquals(result, 1);
+                assertEquals(result, 0);
                 latch.countDown();
             });
             receipt.cancel();
+            latch.await();
             assertTrue(receipt.isCancelled());
             assertTrue(receipt.isDone());
-            latch.await();
             assertEquals(receipt.getState(), TaskState.CANCELED_EXECUTING);
+            process.alive(true);
+            assertFalse(receipt.isCancelled());
+            assertFalse(receipt.isDone());
         }
         {
-            Process process = JieProcess.virtualProcess();
+            VirtualProcess process = new VirtualProcess();
             ProcessReceipt receipt = JieProcess.receipt(process);
             assertEquals(receipt.getState(), TaskState.EXECUTING);
+            try {
+                receipt.await(1);
+            } catch (AwaitingException e) {
+                assertTrue(e.getCause() instanceof TimeoutException);
+            }
             try {
                 receipt.await(Duration.ofMillis(1));
             } catch (AwaitingException e) {
@@ -88,18 +102,23 @@ public class ProcessTest {
                 latch.countDown();
             });
             receipt.cancel(false);
+            latch.await();
             assertTrue(receipt.isCancelled());
             assertTrue(receipt.isDone());
-            latch.await();
             assertEquals(receipt.getState(), TaskState.CANCELED_EXECUTING);
         }
         {
-            Process process = JieProcess.virtualProcess();
+            VirtualProcess process = new VirtualProcess();
             ProcessReceipt receipt = JieProcess.receipt(process);
             assertEquals(receipt.getState(), TaskState.EXECUTING);
+            assertFalse(receipt.isCancelled());
             process.destroy();
+            assertFalse(receipt.isCancelled());
             assertEquals(receipt.getState(), TaskState.SUCCEEDED);
-            assertEquals(receipt.await(Duration.ofMillis(1)), 0);
+            assertEquals(receipt.await(1), 0);
+            process.normal(false);
+            assertEquals(receipt.getState(), TaskState.FAILED);
+            assertEquals(receipt.await(Duration.ofMillis(1)), 1);
             assertEquals(receipt.getInputStream(), JieIO.emptyInStream());
             assertEquals(receipt.getOutputStream(), JieIO.nullOutStream());
             assertEquals(receipt.getErrorStream(), JieIO.emptyInStream());
@@ -108,19 +127,16 @@ public class ProcessTest {
         }
         {
             String hello = "hello";
-            Process process = JieProcess.virtualProcess(
+            VirtualProcess process = new VirtualProcess(
                 JieIO.inStream(hello.getBytes(JieChars.localCharset())),
                 JieIO.nullOutStream()
             );
             ProcessReceipt receipt = JieProcess.receipt(process);
-            assertEquals(receipt.getState(), TaskState.EXECUTING);
-            process.destroyForcibly();
-            assertEquals(receipt.getState(), TaskState.FAILED);
             assertEquals(receipt.readString(), hello);
         }
         {
             String hello = "hello";
-            Process process = JieProcess.virtualProcess(
+            VirtualProcess process = new VirtualProcess(
                 JieIO.inStream(hello.getBytes(JieChars.localCharset())),
                 JieIO.nullOutStream()
             );
@@ -132,42 +148,22 @@ public class ProcessTest {
     @Test
     public void testVirtualProcess() throws Exception {
         {
-            Process process = JieProcess.virtualProcess();
+            VirtualProcess process = new VirtualProcess();
             assertFalse(process.waitFor(1, TimeUnit.MILLISECONDS));
             expectThrows(IllegalThreadStateException.class, process::exitValue);
-            CountDownLatch latch = new CountDownLatch(1);
-            Jie.run(() -> {
-                try {
-                    int result = process.waitFor();
-                    assertEquals(result, 0);
-                    latch.countDown();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            });
             process.destroy();
-            latch.await();
+            assertEquals(process.waitFor(), 0);
             assertEquals(process.getInputStream(), JieIO.emptyInStream());
             assertEquals(process.getOutputStream(), JieIO.nullOutStream());
             assertEquals(process.getErrorStream(), JieIO.emptyInStream());
         }
         {
-            Process process = JieProcess.virtualProcess();
+            VirtualProcess process = new VirtualProcess();
             assertFalse(process.waitFor(1, TimeUnit.MILLISECONDS));
             expectThrows(IllegalThreadStateException.class, process::exitValue);
-            CountDownLatch latch = new CountDownLatch(1);
-            Jie.run(() -> {
-                try {
-                    int result = process.waitFor();
-                    assertEquals(result, 1);
-                    latch.countDown();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-            process.destroyForcibly();
-            latch.await();
+            process.normal(false);
+            process.destroy();
+            assertEquals(process.waitFor(), 1);
         }
-
     }
 }

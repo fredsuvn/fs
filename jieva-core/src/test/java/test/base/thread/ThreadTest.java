@@ -8,8 +8,8 @@ import xyz.sunqian.common.base.thread.JieThread;
 import java.time.Duration;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
 
 public class ThreadTest {
 
@@ -40,8 +40,13 @@ public class ThreadTest {
         int[] i = {0};
         JieThread.until(() -> i[0]++ >= 10);
         assertEquals(i[0], 11);
-        expectThrows(AwaitingException.class, () -> JieThread.until(() -> {
-            throw new RuntimeException();
-        }));
+        RuntimeException cause = new RuntimeException();
+        try {
+            JieThread.until(() -> {
+                throw cause;
+            });
+        } catch (AwaitingException e) {
+            assertSame(e.getCause(), cause);
+        }
     }
 }

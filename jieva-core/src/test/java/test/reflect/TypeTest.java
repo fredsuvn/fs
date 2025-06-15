@@ -366,17 +366,24 @@ public class TypeTest {
 
             List<String> list;
 
-            class Y<U> {
-            }
+            class Y<U> {}
+
+            class Z<U> {}
         }
-        Type x = new TypeRef<X<String>>() {
-        }.type();
+        // no owner
+        Type x = new TypeRef<X<String>>() {}.type();
         Type xx = JieType.parameterizedType(X.class, Jie.array(String.class));
         assertEquals(x, xx);
         assertEquals(x.toString(), xx.toString());
         assertEquals(x.hashCode(), xx.hashCode());
-        Type y = new TypeRef<X<String>.Y<Integer>>() {
-        }.type();
+        assertTrue(xx.equals(xx));
+        assertFalse(xx.equals(null));
+        Type xf1 = JieType.parameterizedType(String.class, Jie.array(String.class));
+        assertFalse(xx.equals(xf1));
+        Type xf2 = JieType.parameterizedType(X.class, Jie.array(Integer.class));
+        assertFalse(xx.equals(xf2));
+        // has owner
+        Type y = new TypeRef<X<String>.Y<Integer>>() {}.type();
         Type yy = JieType.parameterizedType(
             X.Y.class,
             Jie.array(Integer.class),
@@ -385,57 +392,34 @@ public class TypeTest {
         assertEquals(y, yy);
         assertEquals(y.toString(), yy.toString());
         assertEquals(y.hashCode(), yy.hashCode());
+        assertTrue(yy.equals(yy));
+        assertFalse(yy.equals(null));
+        Type yf1 = JieType.parameterizedType(
+            X.class,
+            Jie.array(Integer.class),
+            JieType.parameterizedType(X.class, Jie.array(String.class))
+        );
+        assertFalse(yy.equals(yf1));
+        Type yf2 = JieType.parameterizedType(
+            X.Y.class,
+            Jie.array(String.class),
+            JieType.parameterizedType(X.class, Jie.array(String.class))
+        );
+        assertFalse(yy.equals(yf2));
+        Type yf3 = JieType.parameterizedType(
+            X.Y.class,
+            Jie.array(Integer.class),
+            JieType.parameterizedType(X.class, Jie.array(Integer.class))
+        );
+        assertFalse(yy.equals(yf3));
+        Type yf4 = new TypeRef<X<String>.Z<Integer>>() {}.type();
+        assertFalse(yy.equals(yf4));
+        Type yf5 = new TypeRef<X<Integer>.Y<Integer>>() {}.type();
+        assertFalse(yy.equals(yf5));
+        Type yf6 = new TypeRef<X<String>.Y<String>>() {}.type();
+        assertFalse(yy.equals(yf6));
 
-        // hello class
-        Type h = new TypeRef<Hello<String>>() {
-        }.type();
-        Type hh = JieType.parameterizedType(Hello.class, Jie.array(String.class));
-        assertEquals(h, hh);
-        assertEquals(h.toString(), hh.toString());
-        assertEquals(h.hashCode(), hh.hashCode());
-        Type w1 = new TypeRef<Hello.W1<Integer>>() {
-        }.type();
-        Type ww1 = JieType.parameterizedType(Hello.W1.class, Jie.array(Integer.class));
-        assertEquals(w1, ww1);
-        assertEquals(w1.toString(), ww1.toString());
-        assertEquals(w1.hashCode(), ww1.hashCode());
-        Type w2 = new TypeRef<Hello<String>.W2<Integer, Long>>() {
-        }.type();
-        Type ww2 = JieType.parameterizedType(
-            Hello.W2.class,
-            Jie.array(Integer.class, Long.class),
-            JieType.parameterizedType(Hello.class, Jie.array(String.class))
-        );
-        assertEquals(w2, ww2);
-        assertEquals(w2.toString(), ww2.toString());
-        assertEquals(w2.hashCode(), ww2.hashCode());
-
-        // equals:
-        assertEquals(ww1, ww1);
-        assertFalse(ww1.equals(null));
-        Type ww3 = JieType.parameterizedType(
-            Hello.W2.class,
-            Jie.array(Integer.class, Long.class),
-            JieType.parameterizedType(Hello.class, Jie.array(String.class))
-        );
-        assertEquals(ww2, ww3);
-        Type ww4 = JieType.parameterizedType(
-            List.class,
-            Jie.array(Integer.class, Long.class),
-            JieType.parameterizedType(Hello.class, Jie.array(String.class))
-        );
-        assertNotEquals(ww2, ww4);
-        Type ww5 = JieType.parameterizedType(
-            Hello.W2.class,
-            Jie.array(Integer.class, Long.class),
-            List.class
-        );
-        assertNotEquals(ww2, ww5);
-        assertFalse(ww1.equals(String.class));
-        assertFalse(ww1.equals(w2));
-        Type w3 = new TypeRef<Hello.W3<Integer>>() {
-        }.type();
-        assertFalse(ww1.equals(w3));
+        assertFalse(yy.equals(""));
     }
 
     @Test
@@ -466,6 +450,7 @@ public class TypeTest {
 
         // equals:
         assertEquals(l1, l1);
+        assertEquals(l1, JieType.upperWildcard(String.class));
         assertFalse(l1.equals(null));
         assertFalse(l1.equals(l2));
         assertFalse(l1.equals(l3));

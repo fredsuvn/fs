@@ -64,9 +64,9 @@ public class JieThread {
     }
 
     /**
-     * Executes the given task until it returns {@code true} or throws an exception. The exception will be wrapped by
-     * {@link AwaitingException} then thrown. This is the unchecked version of {@link #untilChecked(BooleanCallable)},
-     * and its logic is as follows:
+     * Executes the given task until it returns {@code true} or throws an exception. The original exception will be
+     * wrapped by {@link AwaitingException} then thrown, using {@link AwaitingException#getCause()} can get the original
+     * exception. The logic of this method is as follows:
      * <pre>{@code
      * try {
      *     while (true) {
@@ -87,33 +87,13 @@ public class JieThread {
      */
     public static void until(@Nonnull BooleanCallable task) throws AwaitingException {
         try {
-            untilChecked(task);
+            while (true) {
+                if (task.call()) {
+                    return;
+                }
+            }
         } catch (Exception e) {
             throw new AwaitingException(e);
-        }
-    }
-
-    /**
-     * Executes the given task until it returns {@code true} or throws an {@link Exception}. Its logic is as follows:
-     * <pre>{@code
-     * while (true) {
-     *     if (task.call()) {
-     *         return;
-     *     }
-     * }
-     * }</pre>
-     * <p>
-     * Note this method may cause high CPU usage. When the task determines to return {@code false}, consider adding some
-     * measures (such as sleep the current thread in a very short time) to avoid it.
-     *
-     * @param task the given task to be executed
-     * @throws Exception if the {@link Exception} thrown by the given task
-     */
-    public static void untilChecked(@Nonnull BooleanCallable task) throws Exception {
-        while (true) {
-            if (task.call()) {
-                return;
-            }
         }
     }
 }

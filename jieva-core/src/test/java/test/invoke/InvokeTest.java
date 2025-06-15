@@ -23,7 +23,7 @@ import static org.testng.Assert.expectThrows;
 public class InvokeTest {
 
     @Test
-    public void testInvoke() throws Exception {
+    public void testInvoke() throws Throwable {
         Object a = Invocable.of(A.class.getConstructor()).invoke(null);
         assertTrue(a instanceof A);
         assertEquals(
@@ -36,9 +36,10 @@ public class InvokeTest {
         }
     }
 
-    private void testInvokeConstructor(InvocationMode mode) throws Exception {
+    private void testInvokeConstructor(InvocationMode mode) throws Throwable {
         Constructor<?> pub = A.class.getConstructor();
         assertTrue(Invocable.of(pub, mode).invoke(null) instanceof A);
+        assertTrue(Invocable.of(pub, mode).invokeChecked(null) instanceof A);
         Constructor<?> pri = A.class.getDeclaredConstructor(int.class);
         expectThrows(InvocationException.class, () -> Invocable.of(pri, mode).invoke(null, 1));
         Constructor<?> err = A.class.getConstructor(long.class);
@@ -51,11 +52,12 @@ public class InvokeTest {
         expectThrows(InvokeTestException.class, () -> Invocable.of(err, mode).invokeChecked(null, 1L));
     }
 
-    private void testInvokeMethod(InvocationMode mode) throws Exception {
+    private void testInvokeMethod(InvocationMode mode) throws Throwable {
         A a = new A();
         // instance
         Method pub = A.class.getMethod("instanceMethod", String.class);
         assertEquals(Invocable.of(pub, mode).invoke(a, "aaa"), a.instanceMethod("aaa"));
+        assertEquals(Invocable.of(pub, mode).invokeChecked(a, "aaa"), a.instanceMethod("aaa"));
         expectThrows(InvocationException.class, () -> Invocable.of(pub, mode).invoke(null, "aaa"));
         Method pri = A.class.getDeclaredMethod("instancePrivateMethod", String.class);
         expectThrows(InvocationException.class, () -> Invocable.of(pri, mode).invoke(a, "aaa"));
