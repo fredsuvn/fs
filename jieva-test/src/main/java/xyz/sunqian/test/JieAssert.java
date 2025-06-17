@@ -47,6 +47,7 @@ public class JieAssert {
         return expectThrows(exception, () -> {
             try {
                 method.invoke(inst, args);
+                throw new NoThrows("No throws for: " + method + ".");
             } catch (InvocationTargetException e) {
                 throw e.getCause();
             }
@@ -86,5 +87,12 @@ public class JieAssert {
             throw new AssertionError(e);
         }
         assertEquals(actual, expected);
+    }
+
+    public static final class NoThrows extends RuntimeException {
+
+        private NoThrows(@Nonnull String message) {
+            super(message);
+        }
     }
 }

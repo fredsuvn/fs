@@ -1,6 +1,7 @@
 package test;
 
 import org.testng.annotations.Test;
+import xyz.sunqian.test.JieAssert;
 import xyz.sunqian.test.JieTestException;
 import xyz.sunqian.test.MaterialBox;
 import xyz.sunqian.test.TestIOException;
@@ -32,6 +33,8 @@ public class TestForTest {
     public void testThrows() throws Exception {
         Method throwError = Tt.class.getDeclaredMethod("throwError");
         assertEquals(invokeThrows(JieTestException.class, throwError, null).getClass(), JieTestException.class);
+        Method string = Tt.class.getDeclaredMethod("string");
+        assertEquals(invokeThrows(JieAssert.NoThrows.class, string, null).getClass(), JieAssert.NoThrows.class);
     }
 
     @Test
