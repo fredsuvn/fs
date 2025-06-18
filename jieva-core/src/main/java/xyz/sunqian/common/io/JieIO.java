@@ -50,7 +50,8 @@ public class JieIO {
     @SuppressWarnings("resource")
     public static byte @Nonnull [] read(@Nonnull InputStream source) throws IORuntimeException {
         try {
-            byte[] buf = new byte[Math.max(source.available(), bufferSize())];
+            int available = source.available();
+            byte[] buf = new byte[available > 0 ? available : bufferSize()];
             BytesBuilder builder = null;
             int off = 0;
             while (true) {
