@@ -14,47 +14,42 @@ import java.nio.CharBuffer;
 public interface CharReader {
 
     /**
-     * Returns a new {@link CharReader} with the given data source.
-     * <p>
-     * For the returned {@link CharReader}, the mark/reset operations are depends on and shared with the source.
+     * Returns a new {@link CharReader} with the given reader. The mark/reset operations are depends on and shared with
+     * the reader.
      *
-     * @param source the given data source
-     * @return a new {@link CharReader} with the given data source
+     * @param source the given reader
+     * @return a new {@link CharReader} with the given reader
      */
     static @Nonnull CharReader from(@Nonnull Reader source) {
         return CharReaderImpl.of(source);
     }
 
     /**
-     * Returns a new {@link CharReader} with the given data source.
+     * Returns a new {@link CharReader} with the given char array.
      * <p>
-     * The content of the buffer returned from the {@link CharReader} is shared with the content of the given data
-     * source. Changes to the buffer's content will be visible in the given data source, and vice versa.
-     * <p>
-     * For the returned {@link CharReader}, the mark/reset operations are supported, and the close method has no
-     * effect.
+     * The content of the segment returned from the {@link CharReader#read(int)} is shared with the content of the given
+     * char array. Any changes to the segment's content will be reflected in the given char array, and vice versa. The
+     * mark/reset operations are supported, and the close method has no effect.
      *
-     * @param source the given data source
-     * @return a new {@link CharReader} with the given data source
+     * @param source the given char array
+     * @return a new {@link CharReader} with the given char array
      */
     static @Nonnull CharReader from(char @Nonnull [] source) {
         return from(source, 0, source.length);
     }
 
     /**
-     * Returns a new {@link CharReader} with the given data source, starting at the specified offset and up to the
+     * Returns a new {@link CharReader} with the given char array, starting at the specified offset and up to the
      * specified length.
      * <p>
-     * The content of the buffer returned from the {@link CharReader} is shared with the content of the given data
-     * source. Changes to the buffer's content will be visible in the given data source, and vice versa.
-     * <p>
-     * For the returned {@link CharReader}, the mark/reset operations are supported, and the close method has no
-     * effect.
+     * The content of the segment returned from the {@link CharReader#read(int)} is shared with the content of the given
+     * char array. Any changes to the segment's content will be reflected in the given char array, and vice versa. The
+     * mark/reset operations are supported, and the close method has no effect.
      *
-     * @param source the given data source
+     * @param source the given char array
      * @param offset the specified offset
      * @param length the specified length
-     * @return a new {@link CharReader} with the given data source
+     * @return a new {@link CharReader} with the given char array
      * @throws IndexOutOfBoundsException if the specified offset or length is out of bounds
      */
     static @Nonnull CharReader from(char @Nonnull [] source, int offset, int length) throws IndexOutOfBoundsException {
@@ -62,62 +57,60 @@ public interface CharReader {
     }
 
     /**
-     * Returns a new {@link CharReader} with the given data source.
+     * Returns a new {@link CharReader} with the given char sequence.
      * <p>
-     * The content of the buffer returned from the {@link CharReader} is shared with the content of the given data
-     * source. Changes to the buffer's content will be visible in the given data source, and vice versa.
-     * <p>
-     * For the returned {@link CharReader}, the mark/reset operations are supported, and the close method has no
-     * effect.
+     * The content of the segment returned from the {@link CharReader#read(int)} is shared with the content of the given
+     * char sequence. Any changes to the char sequence will be reflected in the returned segment, but not vice versa.
+     * The mark/reset operations are supported, and the close method has no effect.
      *
-     * @param source the given data source
-     * @return a new {@link CharReader} with the given data source
+     * @param source the given char sequence
+     * @return a new {@link CharReader} with the given char sequence
      */
     static @Nonnull CharReader from(@Nonnull CharSequence source) {
         return from(source, 0, source.length());
     }
 
     /**
-     * Returns a new {@link CharReader} with the given data source, starting at the specified start position inclusive
-     * and end at the specified end position exclusive.
+     * Returns a new {@link CharReader} with the given char sequence, starting at the specified start index inclusive
+     * and end at the specified end index exclusive.
      * <p>
-     * The content of the buffer returned from the {@link CharReader} is shared with the content of the given data
-     * source. Changes to the buffer's content will be visible in the given data source, and vice versa.
-     * <p>
-     * For the returned {@link CharReader}, the mark/reset operations are supported, and the close method has no
-     * effect.
+     * The content of the segment returned from the {@link CharReader#read(int)} is shared with the content of the given
+     * char sequence. Any changes to the char sequence will be reflected in the returned segment, but not vice versa.
+     * The mark/reset operations are supported, and the close method has no effect.
      *
-     * @param source the given data source
-     * @param start  the specified start position inclusive
-     * @param end    the specified end position exclusive
-     * @return a new {@link CharReader} with the given data source
-     * @throws IndexOutOfBoundsException if the specified start or end position is out of bounds
+     * @param source the given char sequence
+     * @param start  the specified start index inclusive
+     * @param end    the specified end index exclusive
+     * @return a new {@link CharReader} with the given char sequence
+     * @throws IndexOutOfBoundsException if the specified offset or length is out of bounds
      */
     static @Nonnull CharReader from(@Nonnull CharSequence source, int start, int end) throws IndexOutOfBoundsException {
         return CharReaderImpl.of(source, start, end);
     }
 
     /**
-     * Returns a new {@link CharReader} with the given data source.
+     * Returns a new {@link CharReader} with the given char buffer.
      * <p>
-     * The content of the buffer returned from the {@link CharReader} is shared with the content of the given data
-     * source. Changes to the buffer's content will be visible in the given data source, and vice versa.
-     * <p>
-     * For the returned {@link CharReader}, the mark/reset operations are supported by and shared with the source, and
-     * the close method has no effect.
+     * The content of the segment returned from the {@link CharReader#read(int)} is shared with the content of the given
+     * char buffer. Any changes to the given char buffer will be reflected in the returned segment, and vice versa if
+     * the char buffer is writeable. The mark/reset operations are supported, and the close method has no effect.
      *
-     * @param source the given data source
-     * @return a new {@link CharReader} with the given data source
+     * @param source the given char buffer
+     * @return a new {@link CharReader} with the given char buffer
      */
     static @Nonnull CharReader from(@Nonnull CharBuffer source) {
         return CharReaderImpl.of(source);
     }
 
     /**
-     * Reads and returns the next data segment with the specified size from the data source. This method reads
-     * continuously until the specified number of chars is read or the end of the data source is reached. And it never
-     * returns null, but can return an empty segment. If the specified size is {@code 0}, this method returns an empty
+     * Reads and returns the next data segment of the specified size from the data source. This method reads
+     * continuously until the specified number of chars is read or the end of the data source is reached. It never
+     * returns {@code null}, but can return an empty segment. If the specified size is {@code 0}, returns an empty
      * segment immediately without reading.
+     * <p>
+     * The content of the returned segment may be shared with the content of the data source if, and only if, the data
+     * source is a char array or char buffer or char sequence. Any changes to those data source will be reflected in the
+     * returned segment, and vice versa if the data source is the char array or writeable char buffer.
      *
      * @param size the specified size
      * @return the next data segment

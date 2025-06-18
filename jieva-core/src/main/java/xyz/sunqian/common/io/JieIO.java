@@ -13,6 +13,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
@@ -37,38 +38,45 @@ public class JieIO {
     }
 
     /**
-     * Reads all data from the source stream into a new array, continuing until the end of the stream, and returns the
-     * array.
+     * Reads all data from the source stream into a new array, continuing until the end of the stream has been reached,
+     * and returns the array.
+     * <p>
+     * Note the data in the stream cannot exceed the maximum limit of the array.
      *
      * @param source the source stream
      * @return the array containing the data
      * @throws IORuntimeException if an I/O error occurs
      */
+    @SuppressWarnings("resource")
     public static byte @Nonnull [] read(@Nonnull InputStream source) throws IORuntimeException {
         try {
-            int available = source.available();
-            if (available > 0) {
-                byte[] bytes = new byte[available];
-                int c = source.read(bytes);
-                if (c == -1) {
-                    return new byte[0];
-                }
-                if (c == available) {
-                    int r = source.read();
-                    if (r == -1) {
-                        return bytes;
-                    } else {
-                        BytesBuilder builder = new BytesBuilder(available + 1);
-                        builder.append(bytes);
-                        builder.append(r);
-                        readTo(source, builder);
+            byte[] buf = new byte[Math.max(source.available(), bufferSize())];
+            BytesBuilder builder = null;
+            int off = 0;
+            while (true) {
+                int readSize = source.read(buf, off, buf.length - off);
+                if (readSize < 0) {
+                    if (builder != null) {
+                        builder.append(buf, 0, off);
                         return builder.toByteArray();
                     }
-                } else {
-                    return Arrays.copyOf(bytes, c);
+                    return Arrays.copyOfRange(buf, 0, off);
                 }
-            } else {
-                return ByteProcessor.from(source).toByteArray();
+                off += readSize;
+                if (off == buf.length) {
+                    if (builder == null) {
+                        int r = source.read();
+                        if (r == -1) {
+                            return buf;
+                        }
+                        builder = new BytesBuilder(buf.length + 1);
+                        builder.append(buf);
+                        builder.append(r);
+                    } else {
+                        builder.append(buf);
+                    }
+                    off = 0;
+                }
             }
         } catch (IOException e) {
             throw new IORuntimeException(e);
@@ -76,41 +84,126 @@ public class JieIO {
     }
 
     /**
-     * Reads the specified number of data from the source stream into a new array, and returns the array. If
-     * {@code number < 0}, this method performs as {@link #read(InputStream)}. If {@code number == 0}, returns an empty
-     * array without reading. Otherwise, this method keeps reading until the read number reaches the specified number or
+     * Reads data of the specified length from the source stream into a new array, and returns the array. If the
+     * {@code length < 0}, this method performs as {@link #read(InputStream)}. If {@code length == 0}, returns an empty
+     * array without reading. Otherwise, this method keeps reading until the read number reaches the specified length or
      * the end of the stream has been reached.
+     * <p>
+     * Note the length cannot exceed the maximum limit of the array.
      *
      * @param source the source stream
-     * @param number the specified number
+     * @param length the specified read length
      * @return the array containing the data
      * @throws IORuntimeException if an I/O error occurs
      */
-    public static byte @Nonnull [] read(@Nonnull InputStream source, int number) throws IORuntimeException {
-        if (number < 0) {
+    public static byte @Nonnull [] read(@Nonnull InputStream source, int length) throws IORuntimeException {
+        if (length < 0) {
             return read(source);
         }
-        if (number == 0) {
+        if (length == 0) {
             return new byte[0];
         }
         try {
-            int b = source.read();
-            if (b == -1) {
-                return new byte[0];
-            }
-            byte[] dest = new byte[number];
-            dest[0] = (byte) b;
-            int remaining = number - 1;
-            int offset = 1;
-            while (remaining > 0) {
-                int readSize = source.read(dest, offset, remaining);
+            byte[] buf = new byte[length];
+            int off = 0;
+            while (off < length) {
+                int readSize = source.read(buf, off, buf.length - off);
                 if (readSize < 0) {
-                    return Arrays.copyOfRange(dest, 0, number - remaining);
+                    return Arrays.copyOfRange(buf, 0, off);
                 }
-                remaining -= readSize;
-                offset += readSize;
+                off += readSize;
             }
-            return dest;
+            return buf;
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    /**
+     * Reads all data from the source channel into a new buffer, continuing until the end of the channel has been
+     * reached, and returns the buffer. The buffer's position is {@code 0}, limit equals capacity, and it has a backing
+     * array of which offset is {@code 0}.
+     * <p>
+     * Note the data in the channel cannot exceed the maximum limit of the buffer.
+     *
+     * @param source the source channel
+     * @return the buffer containing the data
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    @SuppressWarnings("resource")
+    public static @Nonnull ByteBuffer read(@Nonnull ReadableByteChannel source) throws IORuntimeException {
+        try {
+            BytesBuilder builder = null;
+            ByteBuffer buf = ByteBuffer.allocate(bufferSize());
+            while (true) {
+                int readSize = source.read(buf);
+                if (readSize < 0) {
+                    break;
+                }
+                if (buf.remaining() == 0) {
+                    if (builder == null) {
+                        ByteBuffer b = ByteBuffer.allocate(1);
+                        int r = source.read(b);
+                        if (r < 0) {
+                            buf.flip();
+                            return buf;
+                        }
+                        builder = new BytesBuilder(buf.capacity());
+                        buf.flip();
+                        builder.append(buf);
+                        builder.append(b.get(0));
+                    } else {
+                        buf.flip();
+                        builder.append(buf);
+                    }
+                    buf.flip();
+                }
+            }
+            if (builder == null) {
+                return ByteBuffer.wrap(Arrays.copyOfRange(buf.array(), 0, buf.position()));
+            } else {
+                if (buf.position() > 0) {
+                    buf.flip();
+                    builder.append(buf);
+                }
+                return builder.toByteBuffer();
+            }
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    /**
+     * Reads data of the specified length from the source channel into a new buffer, and returns the buffer. If the
+     * {@code length < 0}, this method performs as {@link #read(ReadableByteChannel)}. If {@code length == 0}, returns
+     * an empty buffer without reading. Otherwise, this method keeps reading until the read number reaches the specified
+     * length or the end of the channel has been reached.
+     * <p>
+     * The buffer's position is {@code 0}, limit equals capacity, and it has a backing array of which offset is
+     * {@code 0}. And note the length cannot exceed the maximum limit of the buffer.
+     *
+     * @param source the source channel
+     * @param length the specified read length
+     * @return the buffer containing the data
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static @Nonnull ByteBuffer read(@Nonnull ReadableByteChannel source, int length) throws IORuntimeException {
+        if (length < 0) {
+            return read(source);
+        }
+        if (length == 0) {
+            return ByteBuffer.allocate(0);
+        }
+        try {
+            ByteBuffer dst = ByteBuffer.allocate(length);
+            while (dst.remaining() > 0) {
+                int readSize = source.read(dst);
+                if (readSize < 0) {
+                    return ByteBuffer.wrap(Arrays.copyOfRange(dst.array(), 0, dst.position()));
+                }
+            }
+            dst.flip();
+            return dst;
         } catch (IOException e) {
             throw new IORuntimeException(e);
         }

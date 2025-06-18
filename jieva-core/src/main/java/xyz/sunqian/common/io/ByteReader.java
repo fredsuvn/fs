@@ -15,47 +15,42 @@ import java.nio.ByteBuffer;
 public interface ByteReader {
 
     /**
-     * Returns a new {@link ByteReader} with the given data source.
-     * <p>
-     * For the returned {@link ByteReader}, the mark/reset operations are depends on and shared with the source.
+     * Returns a new {@link ByteReader} with the given input stream. The mark/reset operations are depends on and shared
+     * with the input stream.
      *
-     * @param source the given data source
-     * @return a new {@link ByteReader} with the given data source
+     * @param source the given input stream
+     * @return a new {@link ByteReader} with the given input stream
      */
     static @Nonnull ByteReader from(@Nonnull InputStream source) {
         return ByteReaderImpl.of(source);
     }
 
     /**
-     * Returns a new {@link ByteReader} with the given data source.
+     * Returns a new {@link ByteReader} with the given byte array.
      * <p>
-     * The content of the buffer returned from the {@link ByteReader} is shared with the content of the given data
-     * source. Changes to the buffer's content will be visible in the given data source, and vice versa.
-     * <p>
-     * For the returned {@link ByteReader}, the mark/reset operations are supported, and the close method has no
-     * effect.
+     * The content of the segment returned from the {@link ByteReader#read(int)} is shared with the content of the given
+     * byte array. Any changes to the segment's content will be reflected in the given byte array, and vice versa. The
+     * mark/reset operations are supported, and the close method has no effect.
      *
-     * @param source the given data source
-     * @return a new {@link ByteReader} with the given data source
+     * @param source the given byte array
+     * @return a new {@link ByteReader} with the given byte array
      */
     static @Nonnull ByteReader from(byte @Nonnull [] source) {
         return from(source, 0, source.length);
     }
 
     /**
-     * Returns a new {@link ByteReader} with the given data source, starting at the specified offset and up to the
+     * Returns a new {@link ByteReader} with the given byte array, starting at the specified offset and up to the
      * specified length.
      * <p>
-     * The content of the buffer returned from the {@link ByteReader} is shared with the content of the given data
-     * source. Changes to the buffer's content will be visible in the given data source, and vice versa.
-     * <p>
-     * For the returned {@link ByteReader}, the mark/reset operations are supported, and the close method has no
-     * effect.
+     * The content of the segment returned from the {@link ByteReader#read(int)} is shared with the content of the given
+     * byte array. Any changes to the segment's content will be reflected in the given byte array, and vice versa. The
+     * mark/reset operations are supported, and the close method has no effect.
      *
-     * @param source the given data source
+     * @param source the given byte array
      * @param offset the specified offset
      * @param length the specified length
-     * @return a new {@link ByteReader} with the given data source
+     * @return a new {@link ByteReader} with the given byte array
      * @throws IndexOutOfBoundsException if the specified offset or length is out of bounds
      */
     static @Nonnull ByteReader from(byte @Nonnull [] source, int offset, int length) throws IndexOutOfBoundsException {
@@ -63,26 +58,28 @@ public interface ByteReader {
     }
 
     /**
-     * Returns a new {@link ByteReader} with the given data source.
+     * Returns a new {@link ByteReader} with the given byte buffer.
      * <p>
-     * The content of the buffer returned from the {@link ByteReader} is shared with the content of the given data
-     * source. Changes to the buffer's content will be visible in the given data source, and vice versa.
-     * <p>
-     * For the returned {@link ByteReader}, the mark/reset operations are supported by and shared with the source, and
-     * the close method has no effect.
+     * The content of the segment returned from the {@link ByteReader#read(int)} is shared with the content of the given
+     * byte buffer. Any changes to the given byte buffer will be reflected in the returned segment, and vice versa if
+     * the byte buffer is writeable. The mark/reset operations are supported, and the close method has no effect.
      *
-     * @param source the given data source
-     * @return a new {@link ByteReader} with the given data source
+     * @param source the given byte buffer
+     * @return a new {@link ByteReader} with the given byte buffer
      */
     static @Nonnull ByteReader from(@Nonnull ByteBuffer source) {
         return ByteReaderImpl.of(source);
     }
 
     /**
-     * Reads and returns the next data segment with the specified size from the data source. This method reads
-     * continuously until the specified number of bytes is read or the end of the data source is reached. And it never
-     * returns null, but can return an empty segment. If the specified size is {@code 0}, this method returns an empty
+     * Reads and returns the next data segment of the specified size from the data source. This method reads
+     * continuously until the specified number of bytes is read or the end of the data source is reached. It never
+     * returns {@code null}, but can return an empty segment. If the specified size is {@code 0}, returns an empty
      * segment immediately without reading.
+     * <p>
+     * The content of the returned segment may be shared with the content of the data source if, and only if, the data
+     * source is a byte array or byte buffer. Any changes to those data source will be reflected in the returned
+     * segment, and vice versa if the data source is the byte array or writeable byte buffer.
      *
      * @param size the specified size
      * @return the next data segment

@@ -9,6 +9,9 @@ import xyz.sunqian.common.io.ByteReader;
 import xyz.sunqian.common.io.ByteSegment;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieBuffer;
+import xyz.sunqian.common.io.JieIO;
+import xyz.sunqian.test.ErrorOutputStream;
+import xyz.sunqian.test.MaterialBox;
 import xyz.sunqian.test.ReadOps;
 import xyz.sunqian.test.TestInputStream;
 
@@ -20,173 +23,12 @@ import java.util.Arrays;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertNotSame;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
 public class ByteReaderTest {
-
-    // @Test
-    // public void testReader() {
-    //     testReader(10240, 1024);
-    //     testReader(10240, 10240);
-    //     testReader(1024, 10240);
-    //     testReader(333, 77);
-    //     testReader(77, 333);
-    //     testReader(0, 1);
-    //     testReader(1, 1);
-    //     testReader(1, 2);
-    //     testReader(2, 1);
-    //
-    //     // test toByteArray()
-    //     byte[] data = JieRandom.fill(new byte[1024]);
-    //     assertEquals(ByteReader.from(data).read(99999).toByteArray(), data);
-    // }
-    //
-    // private void testReader(int dataSize, int readSize) {
-    //     {
-    //         // input stream
-    //         byte[] data = JieArray.fill(new byte[dataSize], Constants.FILL_BYTE);
-    //         ByteReader reader = ByteReader.from(new ByteArrayInputStream(data));
-    //         testRead0(reader, dataSize, false);
-    //         testReader(reader, data, 0, dataSize, readSize, false);
-    //         testSkip(
-    //             ByteReader.from(new ByteArrayInputStream(data)),
-    //             data, 0, dataSize, readSize, false
-    //         );
-    //         // byte[] limitedData = JieArray.fill(new byte[dataSize + 5], Constants.FILL_BYTE);
-    //         // ByteReader limitedReader = ByteReader.from(new ByteArrayInputStream(limitedData)).withReadLimit(dataSize);
-    //         // testRead0(limitedReader, dataSize, true);
-    //         // testReader(limitedReader, limitedData, 0, dataSize, bufferSize, false);
-    //         // testSkip(
-    //         //     ByteReader.from(new ByteArrayInputStream(limitedData)).withReadLimit(dataSize),
-    //         //     limitedData, 0, dataSize, bufferSize, false
-    //         // );
-    //     }
-    //     {
-    //         // byte array
-    //         byte[] data = JieArray.fill(new byte[dataSize], Constants.FILL_BYTE);
-    //         ByteReader reader = ByteReader.from(data);
-    //         reader.close();
-    //         testRead0(reader, dataSize, true);
-    //         testReader(reader, data, 0, dataSize, readSize, true);
-    //         testSkip(
-    //             ByteReader.from(data),
-    //             data, 0, dataSize, readSize, true
-    //         );
-    //         // byte[] limitedData = JieArray.fill(new byte[dataSize + 5], Constants.FILL_BYTE);
-    //         // ByteReader limitedReader = ByteReader.from(limitedData).withReadLimit(dataSize);
-    //         // limitedReader.close();
-    //         // testRead0(limitedReader, dataSize, true);
-    //         // testReader(limitedReader, limitedData, 0, dataSize, bufferSize, true);
-    //         // testSkip(
-    //         //     ByteReader.from(limitedData).withReadLimit(dataSize),
-    //         //     limitedData, 0, dataSize, bufferSize, true
-    //         // );
-    //     }
-    //     {
-    //         // padded byte array
-    //         if (dataSize >= 3) {
-    //             byte[] data = JieArray.fill(new byte[dataSize], Constants.FILL_BYTE);
-    //             ByteReader reader = ByteReader.from(data, 1, dataSize - 2);
-    //             reader.close();
-    //             testRead0(reader, dataSize - 2, true);
-    //             testReader(reader, data, 1, dataSize - 2, readSize, true);
-    //             testSkip(
-    //                 ByteReader.from(data, 1, dataSize - 2),
-    //                 data, 1, dataSize - 2, readSize, true
-    //             );
-    //             // byte[] limitedData = JieArray.fill(new byte[dataSize + 5], Constants.FILL_BYTE);
-    //             // ByteReader limitedReader = ByteReader.from(limitedData, 1, dataSize - 2)
-    //             //     .withReadLimit(dataSize);
-    //             // limitedReader.close();
-    //             // testRead0(limitedReader, dataSize, true);
-    //             // testReader(limitedReader, limitedData, 1, dataSize - 2, bufferSize, true);
-    //             // testSkip(
-    //             //     ByteReader.from(limitedData, 1, dataSize - 2),
-    //             //     limitedData, 1, dataSize - 2, bufferSize, true
-    //             // );
-    //         }
-    //     }
-    //     {
-    //         // byte buffer
-    //         byte[] data = JieArray.fill(new byte[dataSize], Constants.FILL_BYTE);
-    //         ByteReader reader = ByteReader.from(ByteBuffer.wrap(data));
-    //         reader.close();
-    //         testRead0(reader, dataSize, true);
-    //         testReader(reader, data, 0, dataSize, readSize, true);
-    //         testSkip(
-    //             ByteReader.from(ByteBuffer.wrap(data)),
-    //             data, 0, dataSize, readSize, true
-    //         );
-    //         // byte[] limitedData = JieArray.fill(new byte[dataSize + 5], Constants.FILL_BYTE);
-    //         // ByteReader limitedReader = ByteReader.from(ByteBuffer.wrap(limitedData)).withReadLimit(dataSize);
-    //         // limitedReader.close();
-    //         // testRead0(limitedReader, dataSize, true);
-    //         // testReader(limitedReader, limitedData, 0, dataSize, bufferSize, true);
-    //         // testSkip(
-    //         //     ByteReader.from(ByteBuffer.wrap(limitedData)).withReadLimit(dataSize),
-    //         //     limitedData, 0, dataSize, bufferSize, true
-    //         // );
-    //     }
-    // }
-    //
-    // private void testReader(ByteReader reader, byte[] bytes, int offset, int length, int readSize, boolean shared) {
-    //     if (reader.markSupported()) {
-    //         reader.mark();
-    //         assertEquals(reader.skip(length + 100), length);
-    //         reader.reset();
-    //         reader.mark();
-    //     }
-    //     testReader0(reader, bytes, offset, length, readSize, shared);
-    //     if (reader.markSupported()) {
-    //         reader.reset();
-    //         testReader0(reader, bytes, offset, length, readSize, shared);
-    //     }
-    // }
-    //
-    // private void testRead0(ByteReader reader, int dataSize, boolean preKnown) {
-    //     ByteSegment s0 = reader.read(0);
-    //     assertEquals(s0.data(), JieBytes.emptyBuffer());
-    //     if (preKnown) {
-    //         assertEquals(s0.end(), dataSize == 0);
-    //     } else {
-    //         assertFalse(s0.end());
-    //     }
-    //     assertEquals(reader.skip(0), 0);
-    // }
-    //
-    // private void testSkip(ByteReader reader, byte[] bytes, int offset, int length, int readSize, boolean shared) {
-    //     int skipNum = length / 2;
-    //     assertEquals(reader.skip(skipNum), skipNum);
-    //     int remaining = length - skipNum;
-    //     testReader0(reader, bytes, offset + skipNum, remaining, readSize, shared);
-    // }
-    //
-    // private void testReader0(ByteReader reader, byte[] bytes, int offset, int length, int readSize, boolean shared) {
-    //     byte[] bytesCopy = Arrays.copyOfRange(bytes, offset, offset + length);
-    //     BytesBuilder builder = new BytesBuilder();
-    //     while (true) {
-    //         ByteSegment segment = reader.read(readSize);
-    //         ByteBuffer buffer = segment.data();
-    //         buffer.mark();
-    //         builder.append(buffer);
-    //         assertFalse(buffer.hasRemaining());
-    //         if (shared) {
-    //             buffer.reset();
-    //             fillSharedData(buffer);
-    //         }
-    //         if (segment.end()) {
-    //             break;
-    //         }
-    //     }
-    //     assertEquals(builder.toByteArray(), bytesCopy);
-    //     if (shared) {
-    //         byte[] bytesShared = new byte[length];
-    //         Arrays.fill(bytesShared, Constants.SHARE_BYTE);
-    //         assertEquals(bytesShared, Arrays.copyOfRange(bytes, offset, offset + length));
-    //     }
-    // }
 
     @Test
     public void testRead() {
@@ -203,68 +45,79 @@ public class ByteReaderTest {
     }
 
     private void testRead0(int dataSize) {
-        byte[] data = JieRandom.fill(new byte[dataSize]);
-        byte[] dataPadding = new byte[data.length + 66];
-        System.arraycopy(data, 0, dataPadding, 33, data.length);
         {
             // input stream
-            testRead0(ByteReader.from(new ByteArrayInputStream(data)), ByteBuffer.wrap(data), false, false);
+            byte[] data = JieRandom.fill(new byte[dataSize]);
             testRead0(ByteReader.from(new ByteArrayInputStream(data)), ByteBuffer.wrap(data), false, false);
             testSkip0(ByteReader.from(new ByteArrayInputStream(data)), data);
         }
         {
             // byte array
+            byte[] data = JieRandom.fill(new byte[dataSize]);
             testRead0(ByteReader.from(data), ByteBuffer.wrap(data), true, true);
+            testSkip0(ByteReader.from(data), data);
+            byte[] dataPadding = new byte[data.length + 66];
+            System.arraycopy(data, 0, dataPadding, 33, data.length);
             testRead0(
                 ByteReader.from(dataPadding, 33, data.length),
                 ByteBuffer.wrap(dataPadding, 33, data.length),
                 true, true
             );
-            testSkip0(ByteReader.from(data), data);
+            testSkip0(
+                ByteReader.from(dataPadding, 33, data.length),
+                data
+            );
         }
         {
-            // byte buffer
+            // heap buffer
+            byte[] data = JieRandom.fill(new byte[dataSize]);
             testRead0(ByteReader.from(ByteBuffer.wrap(data)), ByteBuffer.wrap(data), true, true);
             testSkip0(ByteReader.from(ByteBuffer.wrap(data)), data);
-            ByteBuffer direct1 = ByteBuffer.allocateDirect(data.length);
-            direct1.put(data);
-            direct1.flip();
-            testRead0(ByteReader.from(direct1), ByteBuffer.wrap(data), true, true);
-            ByteBuffer direct2 = ByteBuffer.allocateDirect(data.length);
-            direct2.put(data);
-            direct2.flip();
-            testSkip0(ByteReader.from(direct2), data);
+        }
+        {
+            // direct buffer
+            byte[] data = JieRandom.fill(new byte[dataSize]);
+            ByteBuffer direct = MaterialBox.copyDirect(data);
+            direct.mark();
+            testRead0(ByteReader.from(direct), direct.slice(), true, true);
+            direct.reset();
+            testSkip0(ByteReader.from(direct), data);
         }
     }
 
     private void testRead0(ByteReader reader, ByteBuffer data, boolean preKnown, boolean shared) {
-        if (reader.markSupported()) {
-            reader.mark();
-        }
+        reader.mark();
+        data.mark();
         assertFalse(reader.read(0).end());
         assertEquals(reader.read(0).data().remaining(), 0);
-        byte[] dataArray = data.array();
-        int dataOffset = data.arrayOffset() + data.position();
         int dataLength = data.remaining();
         if (dataLength == 0) {
             assertFalse(reader.read(0).end());
             assertTrue(reader.read(1).end());
         }
-        int length = 1;
-        int startIndex = 0;
-        int count = 0;
+        BytesBuilder newData = new BytesBuilder();
         if (dataLength > 0) {
+            int length = 1;
+            int startIndex = 0;
+            int count = 0;
             while (true) {
                 int endIndex = Math.min(dataLength, startIndex + length);
                 int actualLen = Math.min(length, endIndex - startIndex);
                 ByteSegment segment = reader.read(length);
-                ByteBuffer buffer = segment.data();
+                ByteBuffer readBuf = segment.data();
+                assertEquals(readBuf.remaining(), actualLen);
+                byte[] dataBuf = new byte[actualLen];
+                data.get(dataBuf);
                 assertEquals(
-                    JieBuffer.read(buffer),
-                    Arrays.copyOfRange(dataArray, startIndex + dataOffset, endIndex + dataOffset)
+                    JieBuffer.read(readBuf),
+                    dataBuf
                 );
-                buffer.flip();
-                fillSharedData(buffer);
+                if (shared) {
+                    byte[] newBytes = JieRandom.fill(new byte[actualLen]);
+                    readBuf.flip();
+                    readBuf.put(newBytes);
+                    newData.append(newBytes);
+                }
                 if (length > actualLen) {
                     assertTrue(segment.end());
                 }
@@ -284,22 +137,17 @@ public class ByteReaderTest {
             assertEquals(count, dataLength);
             assertTrue(reader.read(1).end());
         }
-        if (reader.markSupported()) {
-            reader.reset();
-            ByteSegment segment = reader.read(dataLength == 0 ? 1 : dataLength * 2);
-            assertTrue(segment.end());
-            assertEquals(
-                JieBuffer.read(segment.data()),
-                Arrays.copyOfRange(dataArray, dataOffset, dataOffset + dataLength)
-            );
-            if (shared) {
-                assertEquals(
-                    Arrays.copyOfRange(dataArray, dataOffset, dataOffset + dataLength),
-                    fillSharedData(dataLength)
-                );
-            }
-            assertTrue(reader.read(1).end());
+        reader.reset();
+        data.reset();
+        ByteSegment segment = reader.read(dataLength == 0 ? 1 : dataLength * 2);
+        assertTrue(segment.end());
+        byte[] readBuf = JieBuffer.read(segment.data());
+        byte[] dataBuf = JieBuffer.read(data);
+        assertEquals(readBuf, dataBuf);
+        if (shared) {
+            assertEquals(readBuf, newData.toByteArray());
         }
+        assertTrue(reader.read(1).end());
     }
 
     private void testSkip0(ByteReader reader, byte[] data) {
@@ -422,6 +270,13 @@ public class ByteReaderTest {
                 }
             }
             reader.reset();
+            // error
+            if (data.length > 0) {
+                expectThrows(IORuntimeException.class, () -> reader.readTo(new ErrorOutputStream()));
+                reader.reset();
+                expectThrows(IORuntimeException.class, () -> reader.readTo(new ErrorOutputStream(), 5));
+                reader.reset();
+            }
         }
         {
             // to byte array
@@ -530,6 +385,60 @@ public class ByteReaderTest {
     }
 
     @Test
+    public void testShare() {
+        int dataSize = 1024;
+        {
+            // input stream
+            byte[] data = JieRandom.fill(new byte[dataSize]);
+            testShare(ByteReader.from(new ByteArrayInputStream(data)), ByteBuffer.wrap(data), false, false);
+        }
+        {
+            // byte array
+            byte[] data = JieRandom.fill(new byte[dataSize]);
+            testShare(ByteReader.from(data), ByteBuffer.wrap(data), true, true);
+            byte[] dataPadding = new byte[data.length + 66];
+            System.arraycopy(data, 0, dataPadding, 33, data.length);
+            testShare(
+                ByteReader.from(dataPadding, 33, data.length),
+                ByteBuffer.wrap(dataPadding, 33, data.length),
+                true, true
+            );
+        }
+        {
+            // heap buffer
+            byte[] data = JieRandom.fill(new byte[dataSize]);
+            testShare(ByteReader.from(ByteBuffer.wrap(data)), ByteBuffer.wrap(data), true, true);
+        }
+        {
+            // direct buffer
+            byte[] data = JieRandom.fill(new byte[dataSize]);
+            ByteBuffer direct = MaterialBox.copyDirect(data);
+            testShare(ByteReader.from(direct), direct.slice(), true, true);
+        }
+    }
+
+    private void testShare(
+        ByteReader reader, ByteBuffer data, boolean sharedReaderToData, boolean sharedDataToReader
+    ) {
+        ByteSegment segment = reader.read(data.remaining() * 2);
+        ByteBuffer readBuf = segment.data();
+        assertEquals(readBuf, data);
+        assertTrue(segment.end());
+        if (!readBuf.isReadOnly()) {
+            for (int i = 0; i < readBuf.remaining(); i++) {
+                readBuf.put(i, (byte) (readBuf.get(i) + 1));
+            }
+            assertEquals(readBuf.equals(data), sharedReaderToData);
+        }
+        if (!data.isReadOnly()) {
+            for (int i = 0; i < data.remaining(); i++) {
+                data.put(i, (byte) (data.get(i) + 100));
+            }
+            assertEquals(data.equals(readBuf), sharedDataToReader);
+        }
+    }
+
+    @Test
     public void testSpecial() throws Exception {
         byte[] bytes = JieArray.fill(new byte[64], Constants.FILL_BYTE);
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);
@@ -564,6 +473,10 @@ public class ByteReaderTest {
             testIn.setNextOperation(ReadOps.THROW);
             expectThrows(IORuntimeException.class, () -> reader.skip(66));
             testIn.setNextOperation(ReadOps.THROW);
+            expectThrows(IORuntimeException.class, () -> reader.readTo(ByteBuffer.allocate(1)));
+            testIn.setNextOperation(ReadOps.THROW);
+            expectThrows(IORuntimeException.class, () -> reader.readTo(new byte[1]));
+            testIn.setNextOperation(ReadOps.THROW);
             expectThrows(IORuntimeException.class, reader::mark);
             testIn.setNextOperation(ReadOps.THROW);
             expectThrows(IORuntimeException.class, reader::reset);
@@ -575,26 +488,13 @@ public class ByteReaderTest {
             byte[] bytesCopy = Arrays.copyOf(bytes, bytes.length);
             ByteReader reader = ByteReader.from(bytesCopy);
             ByteSegment segment = reader.read(bytesCopy.length * 2);
-            assertEquals(segment.data(), ByteBuffer.wrap(bytesCopy));
+            assertSame(segment.data().array(), bytesCopy);
             assertTrue(segment.end());
             ByteSegment segmentCopy = segment.clone();
             assertEquals(segmentCopy.data(), ByteBuffer.wrap(bytesCopy));
             assertTrue(segmentCopy.end());
-            // fill the copy
-            fillSharedData(segmentCopy.data());
-            assertNotEquals(segmentCopy.data(), ByteBuffer.wrap(bytesCopy));
+            assertNotSame(segmentCopy.data().array(), bytesCopy);
         }
-        // {
-        //     // test seg impl
-        //     ByteReader reader = ByteReader.from(bytes);//.withReadLimit(5);
-        //     Method makeTure = reader.getClass().getDeclaredMethod("makeTrue", ByteSegment.class);
-        //     makeTure.setAccessible(true);
-        //     TestSeg ts = new TestSeg();
-        //     assertFalse(ts.end());
-        //     ByteSegment bs = (ByteSegment) makeTure.invoke(reader, new TestSeg());
-        //     assertNotSame(ts, bs);
-        //     assertTrue(bs.end());
-        // }
         {
             // special mark/reset
             TestInputStream tin = new TestInputStream(new ByteArrayInputStream(new byte[2]));
@@ -607,20 +507,9 @@ public class ByteReaderTest {
         }
         {
             // close
+            ByteReader.from(JieIO.inStream(new byte[0])).close();
             ByteReader.from(new byte[0]).close();
             ByteReader.from(ByteBuffer.allocate(0)).close();
         }
-    }
-
-    private void fillSharedData(ByteBuffer buffer) {
-        while (buffer.hasRemaining()) {
-            buffer.put(Constants.SHARE_BYTE);
-        }
-    }
-
-    private byte[] fillSharedData(int size) {
-        byte[] bytes = new byte[size];
-        Arrays.fill(bytes, Constants.SHARE_BYTE);
-        return bytes;
     }
 }

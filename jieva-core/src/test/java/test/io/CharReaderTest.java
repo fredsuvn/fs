@@ -4,13 +4,15 @@ import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 import test.Constants;
 import xyz.sunqian.common.base.JieRandom;
+import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.base.chars.CharsBuilder;
-import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.collect.JieArray;
 import xyz.sunqian.common.io.CharReader;
 import xyz.sunqian.common.io.CharSegment;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieBuffer;
+import xyz.sunqian.common.io.JieIO;
+import xyz.sunqian.test.ErrorOutputStream;
 import xyz.sunqian.test.MaterialBox;
 import xyz.sunqian.test.ReadOps;
 import xyz.sunqian.test.TestReader;
@@ -25,216 +27,177 @@ import java.util.Arrays;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertNotSame;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
 public class CharReaderTest {
 
     @Test
-    public void testReader() {
-        testReader(10240, 1024);
-        testReader(10240, 10240);
-        testReader(1024, 10240);
-        testReader(333, 77);
-        testReader(77, 333);
-        testReader(0, 1);
-        testReader(1, 1);
-        testReader(1, 2);
-        testReader(2, 1);
-
-        // test toCharArray()
-        char[] data = JieRandom.fill(new char[1024]);
-        assertEquals(CharReader.from(data).read(99999).toCharArray(), data);
+    public void testRead() {
+        testRead0(10240);
+        testRead0(10240);
+        testRead0(1024);
+        testRead0(333);
+        testRead0(77);
+        testRead0(0);
+        testRead0(1);
+        testRead0(1);
+        testRead0(2);
+        testRead0(4);
     }
 
-    private void testReader(int dataSize, int readSize) {
+    private void testRead0(int dataSize) {
         {
-            // reader
-            char[] data = JieArray.fill(new char[dataSize], Constants.FILL_CHAR);
-            CharReader reader = CharReader.from(new CharArrayReader(data));
-            testRead0(reader, dataSize, false);
-            testReader(reader, data, 0, dataSize, readSize, false);
-            testSkip(
-                CharReader.from(new CharArrayReader(data)),
-                data, 0, dataSize, readSize, false
-            );
-            // char[] limitedData = JieArray.fill(new char[dataSize + 5], Constants.FILL_CHAR);
-            // CharReader limitedReader = CharReader.from(new CharArrayReader(limitedData)).withReadLimit(dataSize);
-            // testRead0(limitedReader, dataSize, true);
-            // testReader(limitedReader, limitedData, 0, dataSize, readSize, false);
-            // testSkip(
-            //     CharReader.from(new CharArrayReader(limitedData)).withReadLimit(dataSize),
-            //     limitedData, 0, dataSize, readSize, false
-            // );
+            // input stream
+            char[] data = JieRandom.fill(new char[dataSize]);
+            testRead0(CharReader.from(new CharArrayReader(data)), CharBuffer.wrap(data), false, false);
+            testSkip0(CharReader.from(new CharArrayReader(data)), data);
         }
         {
             // char array
-            char[] data = JieArray.fill(new char[dataSize], Constants.FILL_CHAR);
-            CharReader reader = CharReader.from(data);
-            reader.close();
-            testRead0(reader, dataSize, true);
-            testReader(reader, data, 0, dataSize, readSize, true);
-            testSkip(
-                CharReader.from(data),
-                data, 0, dataSize, readSize, true
+            char[] data = JieRandom.fill(new char[dataSize]);
+            testRead0(CharReader.from(data), CharBuffer.wrap(data), true, true);
+            testSkip0(CharReader.from(data), data);
+            char[] dataPadding = new char[data.length + 66];
+            System.arraycopy(data, 0, dataPadding, 33, data.length);
+            testRead0(
+                CharReader.from(dataPadding, 33, data.length),
+                CharBuffer.wrap(dataPadding, 33, data.length),
+                true, true
             );
-            // char[] limitedData = JieArray.fill(new char[dataSize + 5], Constants.FILL_CHAR);
-            // CharReader limitedReader = CharReader.from(limitedData).withReadLimit(dataSize);
-            // limitedReader.close();
-            // testRead0(limitedReader, dataSize, true);
-            // testReader(limitedReader, limitedData, 0, dataSize, readSize, true);
-            // testSkip(
-            //     CharReader.from(limitedData).withReadLimit(dataSize),
-            //     limitedData, 0, dataSize, readSize, true
-            // );
-        }
-        {
-            // padded char array
-            if (dataSize >= 3) {
-                char[] data = JieArray.fill(new char[dataSize], Constants.FILL_CHAR);
-                CharReader reader = CharReader.from(data, 1, dataSize - 2);
-                reader.close();
-                testRead0(reader, dataSize - 2, true);
-                testReader(reader, data, 1, dataSize - 2, readSize, true);
-                testSkip(
-                    CharReader.from(data, 1, dataSize - 2),
-                    data, 1, dataSize - 2, readSize, true
-                );
-                // char[] limitedData = JieArray.fill(new char[dataSize + 5], Constants.FILL_CHAR);
-                // CharReader limitedReader = CharReader.from(limitedData, 1, dataSize - 2)
-                //     .withReadLimit(dataSize);
-                // limitedReader.close();
-                // testRead0(limitedReader, dataSize, true);
-                // testReader(limitedReader, limitedData, 1, dataSize - 2, readSize, true);
-                // testSkip(
-                //     CharReader.from(limitedData, 1, dataSize - 2),
-                //     limitedData, 1, dataSize - 2, readSize, true
-                // );
-            }
-        }
-        {
-            // char buffer
-            char[] data = JieArray.fill(new char[dataSize], Constants.FILL_CHAR);
-            CharReader reader = CharReader.from(CharBuffer.wrap(data));
-            reader.close();
-            testRead0(reader, dataSize, true);
-            testReader(reader, data, 0, dataSize, readSize, true);
-            testSkip(
-                CharReader.from(CharBuffer.wrap(data)),
-                data, 0, dataSize, readSize, true
-            );
-            // char[] limitedData = JieArray.fill(new char[dataSize + 5], Constants.FILL_CHAR);
-            // CharReader limitedReader = CharReader.from(CharBuffer.wrap(limitedData)).withReadLimit(dataSize);
-            // limitedReader.close();
-            // testRead0(limitedReader, dataSize, true);
-            // testReader(limitedReader, limitedData, 0, dataSize, readSize, true);
-            // testSkip(
-            //     CharReader.from(CharBuffer.wrap(limitedData)).withReadLimit(dataSize),
-            //     limitedData, 0, dataSize, readSize, true
-            // );
+            testSkip0(CharReader.from(dataPadding, 33, data.length), data);
         }
         {
             // char sequence
-            char[] data = JieArray.fill(new char[dataSize], Constants.FILL_CHAR);
-            CharReader reader = CharReader.from(new String(data));
-            reader.close();
-            testRead0(reader, dataSize, true);
-            testReader(reader, data, 0, dataSize, readSize, false);
-            testSkip(
-                CharReader.from(new String(data)),
-                data, 0, dataSize, readSize, false
+            char[] data = JieRandom.fill(new char[dataSize]);
+            String dataStr = new String(data);
+            testRead0(CharReader.from(dataStr), CharBuffer.wrap(data), true, false);
+            testSkip0(CharReader.from(data), data);
+            char[] dataPadding = new char[data.length + 66];
+            System.arraycopy(data, 0, dataPadding, 33, data.length);
+            String dataStrPadding = new String(dataPadding);
+            testRead0(
+                CharReader.from(dataStrPadding, 33, 33 + data.length),
+                CharBuffer.wrap(dataPadding, 33, data.length),
+                true, false
             );
-            // char[] limitedData = JieArray.fill(new char[dataSize + 5], Constants.FILL_CHAR);
-            // CharReader limitedReader = CharReader.from(new String(limitedData)).withReadLimit(dataSize);
-            // limitedReader.close();
-            // testRead0(limitedReader, dataSize, true);
-            // testReader(limitedReader, limitedData, 0, dataSize, readSize, false);
-            // testSkip(
-            //     CharReader.from(new String(limitedData)).withReadLimit(dataSize),
-            //     limitedData, 0, dataSize, readSize, false
-            // );
+            testSkip0(CharReader.from(dataStrPadding, 33, 33 + data.length), data);
         }
         {
-            // padded char sequence
-            if (dataSize >= 3) {
-                char[] data = JieArray.fill(new char[dataSize], Constants.FILL_CHAR);
-                CharReader reader = CharReader.from(new String(data), 1, dataSize - 1);
-                reader.close();
-                testRead0(reader, dataSize - 2, true);
-                testReader(reader, data, 1, dataSize - 2, readSize, false);
-                testSkip(
-                    CharReader.from(new String(data), 1, dataSize - 1),
-                    data, 1, dataSize - 2, readSize, false
+            // heap buffer
+            char[] data = JieRandom.fill(new char[dataSize]);
+            testRead0(CharReader.from(CharBuffer.wrap(data)), CharBuffer.wrap(data), true, true);
+            testSkip0(CharReader.from(CharBuffer.wrap(data)), data);
+        }
+        {
+            // direct buffer
+            char[] data = JieRandom.fill(new char[dataSize]);
+            CharBuffer direct = MaterialBox.copyDirect(data);
+            direct.mark();
+            testRead0(CharReader.from(direct), direct.slice(), true, true);
+            direct.reset();
+            testSkip0(CharReader.from(direct), data);
+        }
+    }
+
+    private void testRead0(CharReader reader, CharBuffer data, boolean preKnown, boolean shared) {
+        reader.mark();
+        data.mark();
+        assertFalse(reader.read(0).end());
+        assertEquals(reader.read(0).data().remaining(), 0);
+        int dataLength = data.remaining();
+        if (dataLength == 0) {
+            assertFalse(reader.read(0).end());
+            assertTrue(reader.read(1).end());
+        }
+        CharsBuilder newData = new CharsBuilder();
+        if (dataLength > 0) {
+            int length = 1;
+            int startIndex = 0;
+            int count = 0;
+            while (true) {
+                int endIndex = Math.min(dataLength, startIndex + length);
+                int actualLen = Math.min(length, endIndex - startIndex);
+                CharSegment segment = reader.read(length);
+                CharBuffer readBuf = segment.data();
+                assertEquals(readBuf.remaining(), actualLen);
+                char[] dataBuf = new char[actualLen];
+                data.get(dataBuf);
+                assertEquals(
+                    JieBuffer.read(readBuf),
+                    dataBuf
                 );
-                // char[] limitedData = JieArray.fill(new char[dataSize + 5], Constants.FILL_CHAR);
-                // CharReader limitedReader = CharReader.from(new String(limitedData), 1, dataSize - 1)
-                //     .withReadLimit(dataSize);
-                // limitedReader.close();
-                // testRead0(limitedReader, dataSize, true);
-                // testReader(limitedReader, limitedData, 1, dataSize - 2, readSize, false);
-                // testSkip(
-                //     CharReader.from(new String(limitedData), 1, dataSize - 1),
-                //     limitedData, 1, dataSize - 2, readSize, false
-                // );
+                if (shared) {
+                    char[] newChars = JieRandom.fill(new char[actualLen]);
+                    readBuf.flip();
+                    readBuf.put(newChars);
+                    newData.append(newChars);
+                }
+                if (length > actualLen) {
+                    assertTrue(segment.end());
+                }
+                if (length < actualLen) {
+                    assertFalse(segment.end());
+                }
+                if (length == actualLen && endIndex >= dataLength) {
+                    assertEquals(segment.end(), preKnown);
+                }
+                count += actualLen;
+                if (endIndex >= dataLength) {
+                    break;
+                }
+                length *= 2;
+                startIndex = endIndex;
             }
+            assertEquals(count, dataLength);
+            assertTrue(reader.read(1).end());
         }
+        reader.reset();
+        data.reset();
+        CharSegment segment = reader.read(dataLength == 0 ? 1 : dataLength * 2);
+        assertTrue(segment.end());
+        char[] readBuf = JieBuffer.read(segment.data());
+        char[] dataBuf = JieBuffer.read(data);
+        assertEquals(readBuf, dataBuf);
+        if (shared) {
+            assertEquals(readBuf, newData.toCharArray());
+        }
+        assertTrue(reader.read(1).end());
     }
 
-    private void testReader(CharReader reader, char[] chars, int offset, int length, int readSize, boolean shared) {
+    private void testSkip0(CharReader reader, char[] data) {
         if (reader.markSupported()) {
             reader.mark();
-            assertEquals(reader.skip(length + 100), length);
-            reader.reset();
-            reader.mark();
-        }
-        testReader0(reader, chars, offset, length, readSize, shared);
-        if (reader.markSupported()) {
-            reader.reset();
-            testReader0(reader, chars, offset, length, readSize, shared);
-        }
-    }
-
-    private void testRead0(CharReader reader, int dataSize, boolean preKnown) {
-        CharSegment s0 = reader.read(0);
-        assertEquals(s0.data(), JieChars.emptyBuffer());
-        if (preKnown) {
-            assertEquals(s0.end(), dataSize == 0);
-        } else {
-            assertFalse(s0.end());
         }
         assertEquals(reader.skip(0), 0);
-    }
-
-    private void testSkip(CharReader reader, char[] chars, int offset, int length, int readSize, boolean shared) {
-        int skipNum = length / 2;
-        assertEquals(reader.skip(skipNum), skipNum);
-        int remaining = length - skipNum;
-        testReader0(reader, chars, offset + skipNum, remaining, readSize, shared);
-    }
-
-    private void testReader0(CharReader reader, char[] chars, int offset, int length, int readSize, boolean shared) {
-        char[] charsCopy = Arrays.copyOfRange(chars, offset, offset + length);
-        CharsBuilder builder = new CharsBuilder();
-        while (true) {
-            CharSegment segment = reader.read(readSize);
-            CharBuffer buffer = segment.data();
-            buffer.mark();
-            builder.append(buffer);
-            assertFalse(buffer.hasRemaining());
-            if (shared) {
-                buffer.reset();
-                fillSharedData(buffer);
-            }
-            if (segment.end()) {
-                break;
-            }
+        if (data.length == 0) {
+            assertEquals(reader.skip(0), 0);
+            assertEquals(reader.skip(1), 0);
         }
-        assertEquals(builder.toCharArray(), charsCopy);
-        if (shared) {
-            char[] charsShared = new char[length];
-            Arrays.fill(charsShared, Constants.SHARE_CHAR);
-            assertEquals(charsShared, Arrays.copyOfRange(chars, offset, offset + length));
+        int length = 1;
+        int startIndex = 0;
+        int count = 0;
+        if (data.length > 0) {
+            while (true) {
+                int endIndex = Math.min(data.length, startIndex + length);
+                int actualLen = Math.min(length, endIndex - startIndex);
+                long actualSkipped = reader.skip(length);
+                assertEquals(actualSkipped, actualLen);
+                count += actualLen;
+                if (endIndex >= data.length) {
+                    break;
+                }
+                length *= 2;
+                startIndex = endIndex;
+            }
+            assertEquals(count, data.length);
+        }
+        if (reader.markSupported()) {
+            reader.reset();
+            long actualSkipped = reader.skip(Integer.MAX_VALUE);
+            assertEquals(actualSkipped, data.length);
         }
     }
 
@@ -290,7 +253,7 @@ public class CharReaderTest {
     }
 
     private void testReadTo0(int dataSize) {
-        char[] data = JieRandom.fill(new char[dataSize], 'A', 'Z');
+        char[] data = JieRandom.fill(new char[dataSize]);
         char[] dataPadding = new char[data.length + 66];
         System.arraycopy(data, 0, dataPadding, 33, data.length);
         {
@@ -346,6 +309,12 @@ public class CharReaderTest {
                 }
             }
             reader.reset();
+            if (data.length > 0) {
+                expectThrows(IORuntimeException.class, () -> reader.readTo(JieIO.writer(new ErrorOutputStream())));
+                reader.reset();
+                expectThrows(IORuntimeException.class, () -> reader.readTo(JieIO.writer(new ErrorOutputStream()), 5));
+                reader.reset();
+            }
         }
         {
             // to char array
@@ -454,6 +423,74 @@ public class CharReaderTest {
     }
 
     @Test
+    public void testShare() {
+        int dataSize = 1024;
+        {
+            // input stream
+            char[] data = JieRandom.fill(new char[dataSize]);
+            testShare(CharReader.from(new CharArrayReader(data)), CharBuffer.wrap(data), false, false);
+        }
+        {
+            // char array
+            char[] data = JieRandom.fill(new char[dataSize]);
+            testShare(CharReader.from(data), CharBuffer.wrap(data), true, true);
+            char[] dataPadding = new char[data.length + 66];
+            System.arraycopy(data, 0, dataPadding, 33, data.length);
+            testShare(
+                CharReader.from(dataPadding, 33, data.length),
+                CharBuffer.wrap(dataPadding, 33, data.length),
+                true, true
+            );
+        }
+        {
+            // char sequence
+            char[] data = JieRandom.fill(new char[dataSize]);
+            CharSequence dataStr = JieString.asChars(data);
+            testShare(CharReader.from(dataStr), CharBuffer.wrap(data), false, true);
+            char[] dataPadding = new char[data.length + 66];
+            System.arraycopy(data, 0, dataPadding, 33, data.length);
+            CharSequence dataStrPadding = JieString.asChars(dataPadding);
+            testShare(
+                CharReader.from(dataStrPadding, 33, 33 + data.length),
+                CharBuffer.wrap(dataPadding, 33, data.length),
+                false, true
+            );
+        }
+        {
+            // heap buffer
+            char[] data = JieRandom.fill(new char[dataSize]);
+            testShare(CharReader.from(CharBuffer.wrap(data)), CharBuffer.wrap(data), true, true);
+        }
+        {
+            // direct buffer
+            char[] data = JieRandom.fill(new char[dataSize]);
+            CharBuffer direct = MaterialBox.copyDirect(data);
+            testShare(CharReader.from(direct), direct.slice(), true, true);
+        }
+    }
+
+    private void testShare(
+        CharReader reader, CharBuffer data, boolean sharedReaderToData, boolean sharedDataToReader
+    ) {
+        CharSegment segment = reader.read(data.remaining() * 2);
+        CharBuffer readBuf = segment.data();
+        assertEquals(readBuf, data);
+        assertTrue(segment.end());
+        if (!readBuf.isReadOnly()) {
+            for (int i = 0; i < readBuf.remaining(); i++) {
+                readBuf.put(i, (char) (readBuf.get(i) + 1));
+            }
+            assertEquals(readBuf.equals(data), sharedReaderToData);
+        }
+        if (!data.isReadOnly()) {
+            for (int i = 0; i < data.remaining(); i++) {
+                data.put(i, (char) (data.get(i) + 100));
+            }
+            assertEquals(data.equals(readBuf), sharedDataToReader);
+        }
+    }
+
+    @Test
     public void testSpecial() throws Exception {
         char[] chars = JieArray.fill(new char[64], Constants.FILL_CHAR);
         CharArrayReader in = new CharArrayReader(chars);
@@ -486,6 +523,10 @@ public class CharReaderTest {
             // expectThrows(IllegalArgumentException.class, () -> reader.withReadLimit(-66));
             expectThrows(IllegalArgumentException.class, () -> reader.skip(-66));
             testIn.setNextOperation(ReadOps.THROW);
+            expectThrows(IORuntimeException.class, () -> reader.readTo(CharBuffer.allocate(1)));
+            testIn.setNextOperation(ReadOps.THROW);
+            expectThrows(IORuntimeException.class, () -> reader.readTo(new char[1]));
+            testIn.setNextOperation(ReadOps.THROW);
             expectThrows(IORuntimeException.class, () -> reader.skip(66));
             testIn.setNextOperation(ReadOps.THROW);
             expectThrows(IORuntimeException.class, reader::mark);
@@ -499,26 +540,13 @@ public class CharReaderTest {
             char[] charsCopy = Arrays.copyOf(chars, chars.length);
             CharReader reader = CharReader.from(charsCopy);
             CharSegment segment = reader.read(charsCopy.length * 2);
-            assertEquals(segment.data(), CharBuffer.wrap(charsCopy));
+            assertSame(segment.data().array(), charsCopy);
             assertTrue(segment.end());
             CharSegment segmentCopy = segment.clone();
             assertEquals(segmentCopy.data(), CharBuffer.wrap(charsCopy));
             assertTrue(segmentCopy.end());
-            // fill the copy
-            fillSharedData(segmentCopy.data());
-            assertNotEquals(segmentCopy.data(), CharBuffer.wrap(charsCopy));
+            assertNotSame(segmentCopy.data().array(), charsCopy);
         }
-        // {
-        //     // test seg impl
-        //     CharReader reader = CharReader.from(chars).withReadLimit(5);
-        //     Method makeTure = reader.getClass().getDeclaredMethod("makeTrue", CharSegment.class);
-        //     makeTure.setAccessible(true);
-        //     TestSeg ts = new TestSeg();
-        //     assertFalse(ts.end());
-        //     CharSegment bs = (CharSegment) makeTure.invoke(reader, new TestSeg());
-        //     assertNotSame(ts, bs);
-        //     assertTrue(bs.end());
-        // }
         {
             // special mark/reset
             TestReader tin = new TestReader(new CharArrayReader(new char[2]));
@@ -529,29 +557,12 @@ public class CharReaderTest {
             reader.mark();
             reader.reset();
         }
-    }
-
-    private void fillSharedData(CharBuffer buffer) {
-        while (buffer.hasRemaining()) {
-            buffer.put(Constants.SHARE_CHAR);
-        }
-    }
-
-    private static final class TestSeg implements CharSegment {
-
-        @Override
-        public CharBuffer data() {
-            return JieChars.emptyBuffer();
-        }
-
-        @Override
-        public boolean end() {
-            return false;
-        }
-
-        @Override
-        public CharSegment clone() {
-            return null;
+        {
+            // close
+            CharReader.from(JieIO.reader(new char[0])).close();
+            CharReader.from(new char[0]).close();
+            CharReader.from(CharBuffer.allocate(0)).close();
+            CharReader.from("").close();
         }
     }
 }

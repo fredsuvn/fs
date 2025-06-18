@@ -1,7 +1,6 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieCheck;
 import xyz.sunqian.common.base.bytes.JieBytes;
 
@@ -9,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.ReadableByteChannel;
 import java.util.Arrays;
 
 final class ByteReaderImpl {
@@ -84,7 +84,11 @@ final class ByteReaderImpl {
             if (size == 0) {
                 return ByteSegment.empty(false);
             }
-            return Jie.uncheck(() -> read0(size), IORuntimeException::new);
+            try {
+                return read0(size);
+            } catch (Exception e) {
+                throw new IORuntimeException(e);
+            }
         }
 
         private @Nonnull ByteSegment read0(int size) throws Exception {
@@ -122,7 +126,11 @@ final class ByteReaderImpl {
             if (size == 0) {
                 return 0;
             }
-            return Jie.uncheck(() -> skip0(size), IORuntimeException::new);
+            try {
+                return skip0(size);
+            } catch (Exception e) {
+                throw new IORuntimeException(e);
+            }
         }
 
         private long skip0(long size) throws Exception {
@@ -153,7 +161,11 @@ final class ByteReaderImpl {
             if (length == 0) {
                 return 0;
             }
-            return Jie.uncheck(() -> readTo0(dest, offset, length), IORuntimeException::new);
+            try {
+                return readTo0(dest, offset, length);
+            } catch (Exception e) {
+                throw new IORuntimeException(e);
+            }
         }
 
         private int readTo0(byte @Nonnull [] dest, int offset, int length) throws IOException {
@@ -193,7 +205,11 @@ final class ByteReaderImpl {
             if (length == 0) {
                 return 0;
             }
-            return Jie.uncheck(() -> readTo0(dest, length), IORuntimeException::new);
+            try {
+                return readTo0(dest, length);
+            } catch (Exception e) {
+                throw new IORuntimeException(e);
+            }
         }
 
         private long readTo0(@Nonnull OutputStream dest, long length) throws IOException {
@@ -272,14 +288,10 @@ final class ByteReaderImpl {
                 return ByteSegment.empty(true);
             }
             int remaining = endPos - pos;
-            if (remaining >= size) {
-                ByteBuffer data = ByteBuffer.wrap(source, pos, size).slice();
-                pos += size;
-                return ByteSegment.of(data, remaining == size);
-            }
-            ByteBuffer data = ByteBuffer.wrap(source, pos, remaining).slice();
-            pos += remaining;
-            return ByteSegment.of(data, true);
+            int actualLen = Math.min(remaining, size);
+            ByteBuffer data = ByteBuffer.wrap(source, pos, actualLen).slice();
+            pos += actualLen;
+            return ByteSegment.of(data, remaining <= size);
         }
 
         @Override
@@ -339,7 +351,11 @@ final class ByteReaderImpl {
             if (remaining == 0) {
                 return -1;
             }
-            return Jie.uncheck(() -> readTo0(dest, length, remaining), IORuntimeException::new);
+            try {
+                return readTo0(dest, length, remaining);
+            } catch (Exception e) {
+                throw new IORuntimeException(e);
+            }
         }
 
         private long readTo0(@Nonnull OutputStream dest, long length, int remaining) throws IOException {
@@ -454,7 +470,11 @@ final class ByteReaderImpl {
             if (source.remaining() == 0) {
                 return -1;
             }
-            return Jie.uncheck(() -> readTo0(dest, length), IORuntimeException::new);
+            try {
+                return readTo0(dest, length);
+            } catch (Exception e) {
+                throw new IORuntimeException(e);
+            }
         }
 
         private long readTo0(@Nonnull OutputStream dest, long length) throws IOException {
@@ -488,6 +508,169 @@ final class ByteReaderImpl {
         public void close() throws IORuntimeException {
         }
     }
+
+    // private static final class ByteChannelReader implements ByteReader {
+    //
+    //     private final @Nonnull ReadableByteChannel source;
+    //
+    //     ByteChannelReader(@Nonnull ReadableByteChannel source) {
+    //         this.source = source;
+    //     }
+    //
+    //     @Override
+    //     public @Nonnull ByteSegment read(int size) throws IllegalArgumentException, IORuntimeException {
+    //         IOChecker.checkSize(size);
+    //         if (size == 0) {
+    //             return ByteSegment.empty(false);
+    //         }
+    //         try {
+    //             return read0(size);
+    //         } catch (Exception e) {
+    //             throw new IORuntimeException(e);
+    //         }
+    //     }
+    //
+    //     private @Nonnull ByteSegment read0(int size) throws IOException {
+    //         ByteBuffer tmp = ByteBuffer.allocate(size);
+    //         int count = 0;
+    //         while (true) {
+    //             int readSize = source.read(tmp);
+    //             if (readSize < 0) {
+    //                 break;
+    //             }
+    //             count += readSize;
+    //         }
+    //         ByteBuffer buf;
+    //         if (tmp.position() == tmp.capacity()) {
+    //             buf = tmp;
+    //         } else {
+    //             buf = ByteBuffer.allocate()
+    //         }
+    //         return ByteSegment.of(
+    //             tmp.position() == tmp.capacity() ? tmp.flip() : JieBuffer.,
+    //             count < size
+    //         );
+    //     }
+    //
+    //     @Override
+    //     public long skip(long size) throws IllegalArgumentException, IORuntimeException {
+    //         IOChecker.checkSize(size);
+    //         if (size == 0) {
+    //             return 0;
+    //         }
+    //         try {
+    //             return skip0(size);
+    //         } catch (Exception e) {
+    //             throw new IORuntimeException(e);
+    //         }
+    //     }
+    //
+    //     private long skip0(long size) throws IOException {
+    //         ByteBuffer dst = ByteBuffer.allocate((int) Math.min(JieIO.bufferSize(), size));
+    //         long remaining = size;
+    //         while (true) {
+    //             int readSize;
+    //             if (remaining >= dst.remaining()) {
+    //                 readSize = source.read(dst);
+    //             } else {
+    //                 dst.limit((int) remaining);
+    //                 readSize = source.read(dst);
+    //             }
+    //             if (readSize < 0) {
+    //                 break;
+    //             }
+    //             remaining -= readSize;
+    //             if (remaining <= 0) {
+    //                 break;
+    //             }
+    //             dst.position(0);
+    //         }
+    //         return size - remaining;
+    //     }
+    //
+    //     @Override
+    //     public int readTo(
+    //         byte @Nonnull [] dest, int offset, int length
+    //     ) throws IndexOutOfBoundsException, IORuntimeException {
+    //         JieCheck.checkOffsetLength(dest.length, offset, length);
+    //         if (length == 0) {
+    //             return 0;
+    //         }
+    //         return readTo0(ByteBuffer.wrap(dest, offset, length));
+    //     }
+    //
+    //     @Override
+    //     public int readTo(@Nonnull ByteBuffer dest) throws IORuntimeException {
+    //         if (dest.remaining() == 0) {
+    //             return 0;
+    //         }
+    //         return readTo0(ByteBuffer.wrap(dest, offset, length));
+    //     }
+    //
+    //     private int readTo0(@Nonnull ByteBuffer dest) throws IORuntimeException {
+    //         if (dest.remaining() == 0) {
+    //             return 0;
+    //         }
+    //         if (source.remaining() == 0) {
+    //             return -1;
+    //         }
+    //         int copySize = Math.min(source.remaining(), dest.remaining());
+    //         if (copySize == source.remaining()) {
+    //             dest.put(source);
+    //         } else {
+    //             ByteBuffer src = JieBuffer.slice(source, copySize);
+    //             dest.put(src);
+    //             source.position(source.position() + copySize);
+    //         }
+    //         return copySize;
+    //     }
+    //
+    //     @Override
+    //     public long readTo(@Nonnull OutputStream dest, long length) throws IORuntimeException {
+    //         if (length == 0) {
+    //             return 0;
+    //         }
+    //         if (source.remaining() == 0) {
+    //             return -1;
+    //         }
+    //         try {
+    //             return readTo0(dest, length);
+    //         } catch (Exception e) {
+    //             throw new IORuntimeException(e);
+    //         }
+    //     }
+    //
+    //     private long readTo0(@Nonnull OutputStream dest, long length) throws IOException {
+    //         int copySize = (int) (length < 0 ? source.remaining() : Math.min(source.remaining(), length));
+    //         if (source.hasArray()) {
+    //             dest.write(source.array(), source.arrayOffset() + source.position(), copySize);
+    //             source.position(source.position() + copySize);
+    //         } else {
+    //             byte[] data = JieBuffer.read(source, copySize);
+    //             dest.write(data);
+    //         }
+    //         return copySize;
+    //     }
+    //
+    //     @Override
+    //     public boolean markSupported() {
+    //         return true;
+    //     }
+    //
+    //     @Override
+    //     public void mark() throws IORuntimeException {
+    //         source.mark();
+    //     }
+    //
+    //     @Override
+    //     public void reset() throws IORuntimeException {
+    //         source.reset();
+    //     }
+    //
+    //     @Override
+    //     public void close() throws IORuntimeException {
+    //     }
+    // }
 
     // private static final class LimitedByteReader implements ByteReader {
     //

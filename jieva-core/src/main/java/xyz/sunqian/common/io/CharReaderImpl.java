@@ -1,7 +1,6 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieCheck;
 import xyz.sunqian.common.base.chars.JieChars;
 
@@ -87,7 +86,11 @@ final class CharReaderImpl {
             if (size == 0) {
                 return CharSegment.empty(false);
             }
-            return Jie.uncheck(() -> read0(size), IORuntimeException::new);
+            try {
+                return read0(size);
+            } catch (Exception e) {
+                throw new IORuntimeException(e);
+            }
         }
 
         private @Nonnull CharSegment read0(int size) throws Exception {
@@ -125,7 +128,11 @@ final class CharReaderImpl {
             if (size == 0) {
                 return 0;
             }
-            return Jie.uncheck(() -> skip0(size), IORuntimeException::new);
+            try {
+                return skip0(size);
+            } catch (Exception e) {
+                throw new IORuntimeException(e);
+            }
         }
 
         private long skip0(long size) throws Exception {
@@ -156,7 +163,11 @@ final class CharReaderImpl {
             if (length == 0) {
                 return 0;
             }
-            return Jie.uncheck(() -> readTo0(dest, offset, length), IORuntimeException::new);
+            try {
+                return readTo0(dest, offset, length);
+            } catch (Exception e) {
+                throw new IORuntimeException(e);
+            }
         }
 
         private int readTo0(char @Nonnull [] dest, int offset, int length) throws IOException {
@@ -196,7 +207,11 @@ final class CharReaderImpl {
             if (length == 0) {
                 return 0;
             }
-            return Jie.uncheck(() -> readTo0(dest, length), IORuntimeException::new);
+            try {
+                return readTo0(dest, length);
+            } catch (Exception e) {
+                throw new IORuntimeException(e);
+            }
         }
 
         private long readTo0(@Nonnull Appendable dest, long length) throws IOException {
@@ -275,14 +290,10 @@ final class CharReaderImpl {
                 return CharSegment.empty(true);
             }
             int remaining = endPos - pos;
-            if (remaining >= size) {
-                CharBuffer data = CharBuffer.wrap(source, pos, size).slice();
-                pos += size;
-                return CharSegment.of(data, remaining == size);
-            }
-            CharBuffer data = CharBuffer.wrap(source, pos, remaining).slice();
-            pos += remaining;
-            return CharSegment.of(data, true);
+            int actualLen = Math.min(remaining, size);
+            CharBuffer data = CharBuffer.wrap(source, pos, actualLen).slice();
+            pos += actualLen;
+            return CharSegment.of(data, remaining <= size);
         }
 
         @Override
@@ -342,7 +353,11 @@ final class CharReaderImpl {
             if (remaining == 0) {
                 return -1;
             }
-            return Jie.uncheck(() -> readTo0(dest, length, remaining), IORuntimeException::new);
+            try {
+                return readTo0(dest, length, remaining);
+            } catch (Exception e) {
+                throw new IORuntimeException(e);
+            }
         }
 
         private long readTo0(@Nonnull Appendable dest, long length, int remaining) throws IOException {
@@ -397,14 +412,10 @@ final class CharReaderImpl {
                 return CharSegment.empty(true);
             }
             int remaining = endPos - pos;
-            if (remaining >= size) {
-                CharBuffer data = CharBuffer.wrap(source, pos, pos + size).slice();
-                pos += size;
-                return CharSegment.of(data, false);
-            }
-            CharBuffer data = CharBuffer.wrap(source, pos, pos + remaining).slice();
-            pos += remaining;
-            return CharSegment.of(data, true);
+            int actualLen = Math.min(remaining, size);
+            CharBuffer data = CharBuffer.wrap(source, pos, pos + actualLen).slice();
+            pos += actualLen;
+            return CharSegment.of(data, remaining <= size);
         }
 
         @Override
@@ -450,7 +461,11 @@ final class CharReaderImpl {
             if (remaining == 0) {
                 return -1;
             }
-            return Jie.uncheck(() -> readTo0(dest, length, remaining), IORuntimeException::new);
+            try {
+                return readTo0(dest, length, remaining);
+            } catch (Exception e) {
+                throw new IORuntimeException(e);
+            }
         }
 
         private long readTo0(@Nonnull Appendable dest, long length, int remaining) throws IOException {
@@ -580,7 +595,11 @@ final class CharReaderImpl {
             if (source.remaining() == 0) {
                 return -1;
             }
-            return Jie.uncheck(() -> readTo0(dest, length), IORuntimeException::new);
+            try {
+                return readTo0(dest, length);
+            } catch (Exception e) {
+                throw new IORuntimeException(e);
+            }
         }
 
         private long readTo0(@Nonnull Appendable dest, long length) throws IOException {

@@ -60,8 +60,8 @@ public interface ByteSegment {
     }
 
     /**
-     * Returns a clone of this segment. The {@link #data()} of the clone is an independent copy, not shared with the
-     * {@link #data()} of this segment.
+     * Returns a clone of this segment. The {@link #data()} of the returned clone is an independent copy, not be shared
+     * with the {@link #data()} of this segment.
      *
      * @return a clone of this segment
      */
