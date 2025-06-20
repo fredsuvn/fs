@@ -4,8 +4,11 @@ import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
+import xyz.sunqian.common.base.chars.CharsBuilder;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieIO;
+import xyz.sunqian.test.ErrorAppender;
+import xyz.sunqian.test.ErrorOutputStream;
 import xyz.sunqian.test.ReadOps;
 import xyz.sunqian.test.TestInputStream;
 
@@ -206,8 +209,8 @@ public class IOTest {
         testReadTo(JieIO.bufferSize() * 3 - 5);
         testReadTo(JieIO.bufferSize() * 3 + 5);
 
-        // size: 0
         {
+            // size 0: stream to stream
             byte[] data = new byte[0];
             BytesBuilder bb = new BytesBuilder();
             assertEquals(
@@ -225,6 +228,10 @@ public class IOTest {
                 -1
             );
             assertEquals(bb.size(), 0);
+        }
+        {
+            // size 0: stream to array
+            byte[] data = new byte[0];
             byte[] aar = new byte[64];
             Arrays.fill(aar, (byte) 7);
             assertEquals(
@@ -237,6 +244,10 @@ public class IOTest {
                 0
             );
             assertEquals(aar[0], (byte) 7);
+        }
+        {
+            // size 0: stream to heap buffer
+            byte[] data = new byte[0];
             ByteBuffer buf = ByteBuffer.allocate(1);
             assertEquals(
                 JieIO.readTo(new ByteArrayInputStream(data), buf),
@@ -259,21 +270,73 @@ public class IOTest {
             );
             assertEquals(buf.position(), 0);
         }
+        {
+            // size 0: stream to direct buffer
+            byte[] data = new byte[0];
+            ByteBuffer buf = ByteBuffer.allocateDirect(1);
+            assertEquals(
+                JieIO.readTo(new ByteArrayInputStream(data), buf),
+                -1
+            );
+            assertEquals(buf.position(), 0);
+            assertEquals(
+                JieIO.readTo(new ByteArrayInputStream(data), ByteBuffer.allocateDirect(0)),
+                0
+            );
+            assertEquals(buf.position(), 0);
+            assertEquals(
+                JieIO.readTo(new ByteArrayInputStream(data), buf, 1),
+                -1
+            );
+            assertEquals(buf.position(), 0);
+            assertEquals(
+                JieIO.readTo(new ByteArrayInputStream(data), buf, 0),
+                0
+            );
+            assertEquals(buf.position(), 0);
+        }
+        {
+            // size 0: channel to channel
+            byte[] data = new byte[0];
+            BytesBuilder bb = new BytesBuilder();
+            assertEquals(
+                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(bb)),
+                -1
+            );
+            assertEquals(bb.size(), 0);
+            assertEquals(
+                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(bb), 0),
+                0
+            );
+            assertEquals(bb.size(), 0);
+            assertEquals(
+                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(bb), 11),
+                -1
+            );
+            assertEquals(bb.size(), 0);
+        }
 
-        // error
-        TestInputStream tin = new TestInputStream(new ByteArrayInputStream(new byte[0]));
-        tin.setNextOperation(ReadOps.THROW, 99);
-        BytesBuilder errOut = new BytesBuilder();
-        expectThrows(IORuntimeException.class, () -> JieIO.readTo(tin, errOut));
-        expectThrows(IORuntimeException.class, () -> JieIO.readTo(tin, errOut, 1));
-        expectThrows(IllegalArgumentException.class, () -> JieIO.readTo(tin, errOut, 1, 0));
-        expectThrows(IllegalArgumentException.class, () -> JieIO.readTo(tin, errOut, 1, -1));
-        expectThrows(IORuntimeException.class, () -> JieIO.readTo(tin, new byte[1], 0, 1));
-        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.readTo(tin, new byte[0], 1, 0));
-        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.readTo(tin, new byte[0], 0, 1));
-        expectThrows(IORuntimeException.class, () ->
-            JieIO.readTo(new ByteArrayInputStream(new byte[1]), ByteBuffer.allocate(1).asReadOnlyBuffer()));
-        //expectThrows(IORuntimeException.class, () -> JieIO.readTo(tin, Channels.newChannel(errOut), ));
+        {
+            // error
+            TestInputStream tin = new TestInputStream(new ByteArrayInputStream(new byte[0]));
+            tin.setNextOperation(ReadOps.THROW, 99);
+            BytesBuilder errOut = new BytesBuilder();
+            expectThrows(IORuntimeException.class, () -> JieIO.readTo(tin, errOut));
+            expectThrows(IORuntimeException.class, () -> JieIO.readTo(tin, errOut, 1));
+            expectThrows(IllegalArgumentException.class, () -> JieIO.readTo(tin, errOut, 1, 0));
+            expectThrows(IllegalArgumentException.class, () -> JieIO.readTo(tin, errOut, 1, -1));
+            expectThrows(IORuntimeException.class, () -> JieIO.readTo(tin, new byte[1], 0, 1));
+            expectThrows(IndexOutOfBoundsException.class, () -> JieIO.readTo(tin, new byte[0], 1, 0));
+            expectThrows(IndexOutOfBoundsException.class, () -> JieIO.readTo(tin, new byte[0], 0, 1));
+            expectThrows(IORuntimeException.class, () ->
+                JieIO.readTo(new ByteArrayInputStream(new byte[1]), ByteBuffer.allocate(1).asReadOnlyBuffer()));
+            expectThrows(IllegalArgumentException.class, () ->
+                JieIO.readTo(Channels.newChannel(tin), Channels.newChannel(errOut), 1, 0));
+            expectThrows(IllegalArgumentException.class, () ->
+                JieIO.readTo(Channels.newChannel(tin), Channels.newChannel(errOut), 1, -1));
+            expectThrows(IORuntimeException.class, () ->
+                JieIO.readTo(Channels.newChannel(tin), Channels.newChannel(errOut)));
+        }
         // {
         //     // bytes
         //     int size = 1024;
@@ -474,7 +537,7 @@ public class IOTest {
             }
         }
         {
-            // stream to buffer
+            // stream to heap buffer
             byte[] data = JieRandom.fill(new byte[totalSize]);
             ByteBuffer dst = ByteBuffer.allocate(data.length);
             assertEquals(
@@ -492,18 +555,35 @@ public class IOTest {
             ));
         }
         {
-            // stream to channel
-            // stream to stream
+            // stream to direct buffer
+            byte[] data = JieRandom.fill(new byte[totalSize]);
+            ByteBuffer dst = ByteBuffer.allocateDirect(data.length);
+            assertEquals(
+                JieIO.readTo(new ByteArrayInputStream(data), dst),
+                totalSize
+            );
+            assertEquals(dst.flip(), ByteBuffer.wrap(data));
+            dst = ByteBuffer.allocateDirect(data.length);
+            assertEquals(
+                JieIO.readTo(new ByteArrayInputStream(data), dst, readSize),
+                actualReadSize(totalSize, readSize)
+            );
+            assertEquals(dst.flip(), ByteBuffer.wrap(
+                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+            ));
+        }
+        {
+            // channel to channel
             byte[] data = JieRandom.fill(new byte[totalSize]);
             BytesBuilder builder = new BytesBuilder();
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), Channels.newChannel(builder)),
+                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(builder)),
                 totalSize
             );
             assertEquals(builder.toByteArray(), data);
             builder.reset();
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), Channels.newChannel(builder), readSize),
+                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(builder), readSize),
                 actualReadSize(totalSize, readSize)
             );
             assertEquals(
@@ -512,7 +592,7 @@ public class IOTest {
             );
             builder.reset();
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), Channels.newChannel(builder), readSize, 1),
+                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(builder), readSize, 1),
                 actualReadSize(totalSize, readSize)
             );
             assertEquals(
@@ -521,7 +601,7 @@ public class IOTest {
             );
             builder.reset();
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), Channels.newChannel(builder), readSize, 2),
+                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(builder), readSize, 2),
                 actualReadSize(totalSize, readSize)
             );
             assertEquals(
@@ -530,7 +610,7 @@ public class IOTest {
             );
             builder.reset();
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), Channels.newChannel(builder), readSize, readSize > 0 ? readSize * 2 : 1111),
+                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(builder), readSize, readSize > 0 ? readSize * 2 : 1111),
                 actualReadSize(totalSize, readSize)
             );
             assertEquals(
@@ -561,6 +641,63 @@ public class IOTest {
             return totalSize;
         }
         return Math.min(readSize, totalSize);
+    }
+
+    @Test
+    public void testWrite() throws Exception {
+        {
+            // channel
+            byte[] data = JieRandom.fill(new byte[1024]);
+            BytesBuilder out = new BytesBuilder();
+            JieIO.write(Channels.newChannel(out), ByteBuffer.wrap(data));
+            assertEquals(out.toByteArray(), data);
+            expectThrows(IORuntimeException.class, () ->
+                JieIO.write(Channels.newChannel(new ErrorOutputStream()), ByteBuffer.wrap(data)));
+        }
+        {
+            // appender
+            char[] data = JieRandom.fill(new char[1024]);
+            CharsBuilder appender1 = new CharsBuilder();
+            JieIO.write(appender1, data);
+            assertEquals(appender1.toCharArray(), data);
+            appender1.reset();
+            JieIO.write(appender1, data, 33, 99);
+            assertEquals(appender1.toCharArray(), Arrays.copyOfRange(data, 33, 33 + 99));
+            class Appender implements Appendable {
+
+                private final CharsBuilder appender = new CharsBuilder();
+
+                @Override
+                public Appendable append(CharSequence csq) throws IOException {
+                    return appender.append(csq);
+                }
+
+                @Override
+                public Appendable append(CharSequence csq, int start, int end) throws IOException {
+                    return appender.append(csq, start, end);
+                }
+
+                @Override
+                public Appendable append(char c) throws IOException {
+                    return appender.append(c);
+                }
+
+                public char[] toCharArray() {
+                    return appender.toCharArray();
+                }
+
+                public void reset() {
+                    appender.reset();
+                }
+            }
+            Appender appender2 = new Appender();
+            JieIO.write(appender2, data);
+            assertEquals(appender2.toCharArray(), data);
+            appender2.reset();
+            JieIO.write(appender2, data, 33, 99);
+            assertEquals(appender2.toCharArray(), Arrays.copyOfRange(data, 33, 33 + 99));
+            expectThrows(IORuntimeException.class, () -> JieIO.write(new ErrorAppender(), data));
+        }
     }
 
     @Test
