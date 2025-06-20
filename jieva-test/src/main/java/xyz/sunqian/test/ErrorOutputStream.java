@@ -1,5 +1,7 @@
 package xyz.sunqian.test;
 
+import xyz.sunqian.annotations.Nonnull;
+
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -12,6 +14,16 @@ public class ErrorOutputStream extends OutputStream {
 
     @Override
     public void write(int b) throws IOException {
+        throw new IOException();
+    }
+
+    @Override
+    public void write(byte @Nonnull [] b) throws IOException {
+        throw new IOException();
+    }
+
+    @Override
+    public void write(byte @Nonnull [] b, int off, int len) throws IOException {
         throw new IOException();
     }
 
