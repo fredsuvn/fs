@@ -1,28 +1,24 @@
 package test.io;
 
-import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 import test.Constants;
 import xyz.sunqian.common.base.JieRandom;
-import xyz.sunqian.common.base.JieString;
-import xyz.sunqian.common.base.chars.CharsBuilder;
+import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.collect.JieArray;
-import xyz.sunqian.common.io.CharReader;
-import xyz.sunqian.common.io.CharSegment;
+import xyz.sunqian.common.io.ByteReaderX;
+import xyz.sunqian.common.io.ByteSegment;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieBuffer;
 import xyz.sunqian.common.io.JieIO;
 import xyz.sunqian.test.ErrorOutputStream;
 import xyz.sunqian.test.MaterialBox;
 import xyz.sunqian.test.ReadOps;
-import xyz.sunqian.test.TestReader;
+import xyz.sunqian.test.TestInputStream;
 
-import java.io.CharArrayReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.Reader;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.CharBuffer;
 import java.util.Arrays;
 
 import static org.testng.Assert.assertEquals;
@@ -32,7 +28,7 @@ import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
-public class CharReaderTest {
+public class ByteReaderXTest {
 
     @Test
     public void testRead() {
@@ -51,58 +47,45 @@ public class CharReaderTest {
     private void testRead0(int dataSize) {
         {
             // input stream
-            char[] data = JieRandom.fill(new char[dataSize]);
-            testRead0(CharReader.from(new CharArrayReader(data)), CharBuffer.wrap(data), false, false);
-            testSkip0(CharReader.from(new CharArrayReader(data)), data);
+            byte[] data = JieRandom.fill(new byte[dataSize]);
+            testRead0(ByteReaderX.from(new ByteArrayInputStream(data)), ByteBuffer.wrap(data), false, false);
+            testSkip0(ByteReaderX.from(new ByteArrayInputStream(data)), data);
         }
         {
-            // char array
-            char[] data = JieRandom.fill(new char[dataSize]);
-            testRead0(CharReader.from(data), CharBuffer.wrap(data), true, true);
-            testSkip0(CharReader.from(data), data);
-            char[] dataPadding = new char[data.length + 66];
+            // byte array
+            byte[] data = JieRandom.fill(new byte[dataSize]);
+            testRead0(ByteReaderX.from(data), ByteBuffer.wrap(data), true, true);
+            testSkip0(ByteReaderX.from(data), data);
+            byte[] dataPadding = new byte[data.length + 66];
             System.arraycopy(data, 0, dataPadding, 33, data.length);
             testRead0(
-                CharReader.from(dataPadding, 33, data.length),
-                CharBuffer.wrap(dataPadding, 33, data.length),
+                ByteReaderX.from(dataPadding, 33, data.length),
+                ByteBuffer.wrap(dataPadding, 33, data.length),
                 true, true
             );
-            testSkip0(CharReader.from(dataPadding, 33, data.length), data);
-        }
-        {
-            // char sequence
-            char[] data = JieRandom.fill(new char[dataSize]);
-            String dataStr = new String(data);
-            testRead0(CharReader.from(dataStr), CharBuffer.wrap(data), true, false);
-            testSkip0(CharReader.from(data), data);
-            char[] dataPadding = new char[data.length + 66];
-            System.arraycopy(data, 0, dataPadding, 33, data.length);
-            String dataStrPadding = new String(dataPadding);
-            testRead0(
-                CharReader.from(dataStrPadding, 33, 33 + data.length),
-                CharBuffer.wrap(dataPadding, 33, data.length),
-                true, false
+            testSkip0(
+                ByteReaderX.from(dataPadding, 33, data.length),
+                data
             );
-            testSkip0(CharReader.from(dataStrPadding, 33, 33 + data.length), data);
         }
         {
             // heap buffer
-            char[] data = JieRandom.fill(new char[dataSize]);
-            testRead0(CharReader.from(CharBuffer.wrap(data)), CharBuffer.wrap(data), true, true);
-            testSkip0(CharReader.from(CharBuffer.wrap(data)), data);
+            byte[] data = JieRandom.fill(new byte[dataSize]);
+            testRead0(ByteReaderX.from(ByteBuffer.wrap(data)), ByteBuffer.wrap(data), true, true);
+            testSkip0(ByteReaderX.from(ByteBuffer.wrap(data)), data);
         }
         {
             // direct buffer
-            char[] data = JieRandom.fill(new char[dataSize]);
-            CharBuffer direct = MaterialBox.copyDirect(data);
+            byte[] data = JieRandom.fill(new byte[dataSize]);
+            ByteBuffer direct = MaterialBox.copyDirect(data);
             direct.mark();
-            testRead0(CharReader.from(direct), direct.slice(), true, true);
+            testRead0(ByteReaderX.from(direct), direct.slice(), true, true);
             direct.reset();
-            testSkip0(CharReader.from(direct), data);
+            testSkip0(ByteReaderX.from(direct), data);
         }
     }
 
-    private void testRead0(CharReader reader, CharBuffer data, boolean preKnown, boolean shared) {
+    private void testRead0(ByteReaderX reader, ByteBuffer data, boolean preKnown, boolean shared) {
         reader.mark();
         data.mark();
         assertFalse(reader.read(0).end());
@@ -112,7 +95,7 @@ public class CharReaderTest {
             assertFalse(reader.read(0).end());
             assertTrue(reader.read(1).end());
         }
-        CharsBuilder newData = new CharsBuilder();
+        BytesBuilder newData = new BytesBuilder();
         if (dataLength > 0) {
             int length = 1;
             int startIndex = 0;
@@ -120,20 +103,20 @@ public class CharReaderTest {
             while (true) {
                 int endIndex = Math.min(dataLength, startIndex + length);
                 int actualLen = Math.min(length, endIndex - startIndex);
-                CharSegment segment = reader.read(length);
-                CharBuffer readBuf = segment.data();
+                ByteSegment segment = reader.read(length);
+                ByteBuffer readBuf = segment.data();
                 assertEquals(readBuf.remaining(), actualLen);
-                char[] dataBuf = new char[actualLen];
+                byte[] dataBuf = new byte[actualLen];
                 data.get(dataBuf);
                 assertEquals(
                     JieBuffer.read(readBuf),
                     dataBuf
                 );
                 if (shared) {
-                    char[] newChars = JieRandom.fill(new char[actualLen]);
+                    byte[] newBytes = JieRandom.fill(new byte[actualLen]);
                     readBuf.flip();
-                    readBuf.put(newChars);
-                    newData.append(newChars);
+                    readBuf.put(newBytes);
+                    newData.append(newBytes);
                 }
                 if (length > actualLen) {
                     assertTrue(segment.end());
@@ -156,18 +139,18 @@ public class CharReaderTest {
         }
         reader.reset();
         data.reset();
-        CharSegment segment = reader.read(dataLength == 0 ? 1 : dataLength * 2);
+        ByteSegment segment = reader.read(dataLength == 0 ? 1 : dataLength * 2);
         assertTrue(segment.end());
-        char[] readBuf = JieBuffer.read(segment.data());
-        char[] dataBuf = JieBuffer.read(data);
+        byte[] readBuf = JieBuffer.read(segment.data());
+        byte[] dataBuf = JieBuffer.read(data);
         assertEquals(readBuf, dataBuf);
         if (shared) {
-            assertEquals(readBuf, newData.toCharArray());
+            assertEquals(readBuf, newData.toByteArray());
         }
         assertTrue(reader.read(1).end());
     }
 
-    private void testSkip0(CharReader reader, char[] data) {
+    private void testSkip0(ByteReaderX reader, byte[] data) {
         if (reader.markSupported()) {
             reader.mark();
         }
@@ -212,10 +195,11 @@ public class CharReaderTest {
         testReadTo0(1);
         testReadTo0(1);
         testReadTo0(2);
+        testReadTo0(4);
 
         {
             // special: nio
-            class NioInput extends Reader {
+            class NioInput extends InputStream {
 
                 private int count = 1;
 
@@ -227,70 +211,47 @@ public class CharReaderTest {
                     }
                     return -1;
                 }
-
-                @Override
-                public int read(@NotNull char[] cbuf, int off, int len) throws IOException {
-                    int c = 0;
-                    for (int i = 0; i < len; i++) {
-                        int r = read();
-                        if (r < 0) {
-                            return c == 0 ? -1 : c;
-                        }
-                        cbuf[i + off] = (char) r;
-                        c++;
-                    }
-                    return c;
-                }
-
-                @Override
-                public void close() {
-                }
             }
-            char[] dst = new char[2];
-            assertEquals(CharReader.from(new NioInput()).readTo(dst), 1);
+            byte[] dst = new byte[2];
+            assertEquals(ByteReaderX.from(new NioInput()).readTo(dst), 1);
             assertEquals(dst[0], 66);
         }
     }
 
     private void testReadTo0(int dataSize) {
-        char[] data = JieRandom.fill(new char[dataSize]);
-        char[] dataPadding = new char[data.length + 66];
+        byte[] data = JieRandom.fill(new byte[dataSize]);
+        byte[] dataPadding = new byte[data.length + 66];
         System.arraycopy(data, 0, dataPadding, 33, data.length);
         {
             // input stream
-            testReadTo0(CharReader.from(new CharArrayReader(data)), data);
+            testReadTo0(ByteReaderX.from(new ByteArrayInputStream(data)), data);
         }
         {
-            // char array
-            testReadTo0(CharReader.from(data), data);
-            testReadTo0(CharReader.from(dataPadding, 33, data.length), data);
+            // byte array
+            testReadTo0(ByteReaderX.from(data), data);
+            testReadTo0(ByteReaderX.from(dataPadding, 33, data.length), data);
         }
         {
-            // char sequence
-            testReadTo0(CharReader.from(new String(data)), data);
-            testReadTo0(CharReader.from(new String(dataPadding), 33, 33 + data.length), data);
-        }
-        {
-            // char buffer
-            testReadTo0(CharReader.from(CharBuffer.wrap(data)), data);
-            CharBuffer direct = MaterialBox.copyDirect(data);
+            // byte buffer
+            testReadTo0(ByteReaderX.from(ByteBuffer.wrap(data)), data);
+            ByteBuffer direct = ByteBuffer.allocateDirect(data.length);
             direct.put(data);
             direct.flip();
-            testReadTo0(CharReader.from(direct), data);
+            testReadTo0(ByteReaderX.from(direct), data);
         }
     }
 
-    private void testReadTo0(CharReader reader, char[] data) {
+    private void testReadTo0(ByteReaderX reader, byte[] data) {
         reader.mark();
         {
             // to output stream
-            CharsBuilder out = new CharsBuilder();
+            BytesBuilder out = new BytesBuilder();
             assertEquals(reader.readTo(out), data.length == 0 ? -1 : data.length);
-            assertEquals(out.toCharArray(), data);
+            assertEquals(out.toByteArray(), data);
             assertEquals(reader.readTo(out), -1);
-            assertEquals(out.toCharArray(), data);
+            assertEquals(out.toByteArray(), data);
             assertEquals(reader.readTo(out, 0), 0);
-            assertEquals(out.toCharArray(), data);
+            assertEquals(out.toByteArray(), data);
             reader.reset();
             out.reset();
             int length = 1;
@@ -299,7 +260,7 @@ public class CharReaderTest {
                 while (true) {
                     int endIndex = Math.min(data.length, startIndex + length);
                     assertEquals(reader.readTo(out, length), Math.min(length, endIndex - startIndex));
-                    assertEquals(out.toCharArray(), Arrays.copyOfRange(data, startIndex, endIndex));
+                    assertEquals(out.toByteArray(), Arrays.copyOfRange(data, startIndex, endIndex));
                     out.reset();
                     if (endIndex >= data.length) {
                         break;
@@ -309,16 +270,17 @@ public class CharReaderTest {
                 }
             }
             reader.reset();
+            // error
             if (data.length > 0) {
-                expectThrows(IORuntimeException.class, () -> reader.readTo(JieIO.writer(new ErrorOutputStream())));
+                expectThrows(IORuntimeException.class, () -> reader.readTo(new ErrorOutputStream()));
                 reader.reset();
-                expectThrows(IORuntimeException.class, () -> reader.readTo(JieIO.writer(new ErrorOutputStream()), 5));
+                expectThrows(IORuntimeException.class, () -> reader.readTo(new ErrorOutputStream(), 5));
                 reader.reset();
             }
         }
         {
-            // to char array
-            char[] dst = new char[data.length];
+            // to byte array
+            byte[] dst = new byte[data.length];
             assertEquals(reader.readTo(dst), data.length);
             assertEquals(dst, data);
             assertEquals(reader.readTo(dst), dst.length == 0 ? 0 : -1);
@@ -327,7 +289,7 @@ public class CharReaderTest {
             int length = 1;
             int startIndex = 0;
             if (data.length > 0) {
-                dst = new char[data.length];
+                dst = new byte[data.length];
                 while (true) {
                     int endIndex = Math.min(data.length, startIndex + length);
                     assertEquals(
@@ -346,26 +308,26 @@ public class CharReaderTest {
         }
         {
             // to heap buffer
-            CharBuffer dst = CharBuffer.allocate(data.length);
+            ByteBuffer dst = ByteBuffer.allocate(data.length);
             assertEquals(reader.readTo(dst), data.length);
             dst.flip();
             assertEquals(JieBuffer.read(dst), data);
             reader.reset();
-            dst = CharBuffer.allocate(data.length);
+            dst = ByteBuffer.allocate(data.length);
             assertEquals(reader.readTo(dst), data.length);
             assertEquals(reader.readTo(dst), dst.remaining() == 0 ? 0 : -1);
-            assertEquals(reader.readTo(CharBuffer.allocate(1)), -1);
+            assertEquals(reader.readTo(ByteBuffer.allocate(1)), -1);
             dst.flip();
             assertEquals(JieBuffer.read(dst), data);
             reader.reset();
             int length = 1;
             int startIndex = 0;
             if (data.length > 0) {
-                dst = CharBuffer.allocate(data.length);
+                dst = ByteBuffer.allocate(data.length);
                 while (true) {
                     int endIndex = Math.min(data.length, startIndex + length);
                     int actualLen = Math.min(length, endIndex - startIndex);
-                    CharBuffer slice = JieBuffer.slice(dst, actualLen);
+                    ByteBuffer slice = JieBuffer.slice(dst, actualLen);
                     assertEquals(
                         reader.readTo(slice),
                         Math.min(length, endIndex - startIndex)
@@ -384,26 +346,26 @@ public class CharReaderTest {
         }
         {
             // to direct buffer
-            CharBuffer dst = ByteBuffer.allocateDirect(data.length * 2).order(ByteOrder.BIG_ENDIAN).asCharBuffer();
+            ByteBuffer dst = ByteBuffer.allocateDirect(data.length);
             assertEquals(reader.readTo(dst), data.length);
             dst.flip();
             assertEquals(JieBuffer.read(dst), data);
             reader.reset();
-            dst = ByteBuffer.allocateDirect(data.length * 2).order(ByteOrder.BIG_ENDIAN).asCharBuffer();
+            dst = ByteBuffer.allocateDirect(data.length);
             assertEquals(reader.readTo(dst), data.length);
             assertEquals(reader.readTo(dst), dst.remaining() == 0 ? 0 : -1);
-            assertEquals(reader.readTo(ByteBuffer.allocateDirect(2).order(ByteOrder.BIG_ENDIAN).asCharBuffer()), -1);
+            assertEquals(reader.readTo(ByteBuffer.allocateDirect(1)), -1);
             dst.flip();
             assertEquals(JieBuffer.read(dst), data);
             reader.reset();
             int length = 1;
             int startIndex = 0;
             if (data.length > 0) {
-                dst = ByteBuffer.allocateDirect(data.length * 2).order(ByteOrder.BIG_ENDIAN).asCharBuffer();
+                dst = ByteBuffer.allocateDirect(data.length);
                 while (true) {
                     int endIndex = Math.min(data.length, startIndex + length);
                     int actualLen = Math.min(length, endIndex - startIndex);
-                    CharBuffer slice = JieBuffer.slice(dst, actualLen);
+                    ByteBuffer slice = JieBuffer.slice(dst, actualLen);
                     assertEquals(
                         reader.readTo(slice),
                         Math.min(length, endIndex - startIndex)
@@ -427,64 +389,50 @@ public class CharReaderTest {
         int dataSize = 1024;
         {
             // input stream
-            char[] data = JieRandom.fill(new char[dataSize]);
-            testShare(CharReader.from(new CharArrayReader(data)), CharBuffer.wrap(data), false, false);
+            byte[] data = JieRandom.fill(new byte[dataSize]);
+            testShare(ByteReaderX.from(new ByteArrayInputStream(data)), ByteBuffer.wrap(data), false, false);
         }
         {
-            // char array
-            char[] data = JieRandom.fill(new char[dataSize]);
-            testShare(CharReader.from(data), CharBuffer.wrap(data), true, true);
-            char[] dataPadding = new char[data.length + 66];
+            // byte array
+            byte[] data = JieRandom.fill(new byte[dataSize]);
+            testShare(ByteReaderX.from(data), ByteBuffer.wrap(data), true, true);
+            byte[] dataPadding = new byte[data.length + 66];
             System.arraycopy(data, 0, dataPadding, 33, data.length);
             testShare(
-                CharReader.from(dataPadding, 33, data.length),
-                CharBuffer.wrap(dataPadding, 33, data.length),
+                ByteReaderX.from(dataPadding, 33, data.length),
+                ByteBuffer.wrap(dataPadding, 33, data.length),
                 true, true
             );
         }
         {
-            // char sequence
-            char[] data = JieRandom.fill(new char[dataSize]);
-            CharSequence dataStr = JieString.asChars(data);
-            testShare(CharReader.from(dataStr), CharBuffer.wrap(data), false, true);
-            char[] dataPadding = new char[data.length + 66];
-            System.arraycopy(data, 0, dataPadding, 33, data.length);
-            CharSequence dataStrPadding = JieString.asChars(dataPadding);
-            testShare(
-                CharReader.from(dataStrPadding, 33, 33 + data.length),
-                CharBuffer.wrap(dataPadding, 33, data.length),
-                false, true
-            );
-        }
-        {
             // heap buffer
-            char[] data = JieRandom.fill(new char[dataSize]);
-            testShare(CharReader.from(CharBuffer.wrap(data)), CharBuffer.wrap(data), true, true);
+            byte[] data = JieRandom.fill(new byte[dataSize]);
+            testShare(ByteReaderX.from(ByteBuffer.wrap(data)), ByteBuffer.wrap(data), true, true);
         }
         {
             // direct buffer
-            char[] data = JieRandom.fill(new char[dataSize]);
-            CharBuffer direct = MaterialBox.copyDirect(data);
-            testShare(CharReader.from(direct), direct.slice(), true, true);
+            byte[] data = JieRandom.fill(new byte[dataSize]);
+            ByteBuffer direct = MaterialBox.copyDirect(data);
+            testShare(ByteReaderX.from(direct), direct.slice(), true, true);
         }
     }
 
     private void testShare(
-        CharReader reader, CharBuffer data, boolean sharedReaderToData, boolean sharedDataToReader
+        ByteReaderX reader, ByteBuffer data, boolean sharedReaderToData, boolean sharedDataToReader
     ) {
-        CharSegment segment = reader.read(data.remaining() * 2);
-        CharBuffer readBuf = segment.data();
+        ByteSegment segment = reader.read(data.remaining() * 2);
+        ByteBuffer readBuf = segment.data();
         assertEquals(readBuf, data);
         assertTrue(segment.end());
         if (!readBuf.isReadOnly()) {
             for (int i = 0; i < readBuf.remaining(); i++) {
-                readBuf.put(i, (char) (readBuf.get(i) + 1));
+                readBuf.put(i, (byte) (readBuf.get(i) + 1));
             }
             assertEquals(readBuf.equals(data), sharedReaderToData);
         }
         if (!data.isReadOnly()) {
             for (int i = 0; i < data.remaining(); i++) {
-                data.put(i, (char) (data.get(i) + 100));
+                data.put(i, (byte) (data.get(i) + 100));
             }
             assertEquals(data.equals(readBuf), sharedDataToReader);
         }
@@ -492,30 +440,30 @@ public class CharReaderTest {
 
     @Test
     public void testSpecial() throws Exception {
-        char[] chars = JieArray.fill(new char[64], Constants.FILL_CHAR);
-        CharArrayReader in = new CharArrayReader(chars);
-        TestReader testIn = new TestReader(in);
+        byte[] bytes = JieArray.fill(new byte[64], Constants.FILL_BYTE);
+        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+        TestInputStream testIn = new TestInputStream(in);
         {
             // NIO tests
-            CharReader reader = CharReader.from(testIn);
+            ByteReaderX reader = ByteReaderX.from(testIn);
             testIn.setNextOperation(ReadOps.READ_ZERO, 10);
-            CharSegment s0 = reader.read(chars.length);
-            assertEquals(s0.data(), CharBuffer.wrap(chars));
+            ByteSegment s0 = reader.read(bytes.length);
+            assertEquals(s0.data(), ByteBuffer.wrap(bytes));
             assertFalse(s0.end());
             s0 = reader.read(1);
             assertTrue(s0.end());
             assertEquals(reader.skip(66), 0);
             in.reset();
-            CharReader reader2 = CharReader.from(testIn);
+            ByteReaderX reader2 = ByteReaderX.from(testIn);
             testIn.setNextOperation(ReadOps.READ_ZERO);
-            assertEquals(reader2.skip(66), chars.length);
-            // TestInputStream testIn2 = new TestInputStream(new CharArrayInputStream(new char[2]));
+            assertEquals(reader2.skip(66), bytes.length);
+            // TestInputStream testIn2 = new TestInputStream(new ByteArrayInputStream(new byte[2]));
             // testIn2.setNextOperation(ReadOps.READ_ZERO);
-            // assertEquals(CharReader.from(testIn2).skip(66), 2);
+            // assertEquals(ByteReader.from(testIn2).skip(66), 2);
         }
         {
-            // Exception tests
-            CharReader reader = CharReader.from(testIn);
+            // exception tests
+            ByteReaderX reader = ByteReaderX.from(testIn);
             in.reset();
             testIn.setNextOperation(ReadOps.THROW);
             expectThrows(IORuntimeException.class, () -> reader.read(66));
@@ -523,11 +471,11 @@ public class CharReaderTest {
             // expectThrows(IllegalArgumentException.class, () -> reader.withReadLimit(-66));
             expectThrows(IllegalArgumentException.class, () -> reader.skip(-66));
             testIn.setNextOperation(ReadOps.THROW);
-            expectThrows(IORuntimeException.class, () -> reader.readTo(CharBuffer.allocate(1)));
-            testIn.setNextOperation(ReadOps.THROW);
-            expectThrows(IORuntimeException.class, () -> reader.readTo(new char[1]));
-            testIn.setNextOperation(ReadOps.THROW);
             expectThrows(IORuntimeException.class, () -> reader.skip(66));
+            testIn.setNextOperation(ReadOps.THROW);
+            expectThrows(IORuntimeException.class, () -> reader.readTo(ByteBuffer.allocate(1)));
+            testIn.setNextOperation(ReadOps.THROW);
+            expectThrows(IORuntimeException.class, () -> reader.readTo(new byte[1]));
             testIn.setNextOperation(ReadOps.THROW);
             expectThrows(IORuntimeException.class, reader::mark);
             testIn.setNextOperation(ReadOps.THROW);
@@ -537,20 +485,20 @@ public class CharReaderTest {
         }
         {
             // for segment
-            char[] charsCopy = Arrays.copyOf(chars, chars.length);
-            CharReader reader = CharReader.from(charsCopy);
-            CharSegment segment = reader.read(charsCopy.length * 2);
-            assertSame(segment.data().array(), charsCopy);
+            byte[] bytesCopy = Arrays.copyOf(bytes, bytes.length);
+            ByteReaderX reader = ByteReaderX.from(bytesCopy);
+            ByteSegment segment = reader.read(bytesCopy.length * 2);
+            assertSame(segment.data().array(), bytesCopy);
             assertTrue(segment.end());
-            CharSegment segmentCopy = segment.clone();
-            assertEquals(segmentCopy.data(), CharBuffer.wrap(charsCopy));
+            ByteSegment segmentCopy = segment.clone();
+            assertEquals(segmentCopy.data(), ByteBuffer.wrap(bytesCopy));
             assertTrue(segmentCopy.end());
-            assertNotSame(segmentCopy.data().array(), charsCopy);
+            assertNotSame(segmentCopy.data().array(), bytesCopy);
         }
         {
             // special mark/reset
-            TestReader tin = new TestReader(new CharArrayReader(new char[2]));
-            CharReader reader = CharReader.from(tin);//.withReadLimit(1);
+            TestInputStream tin = new TestInputStream(new ByteArrayInputStream(new byte[2]));
+            ByteReaderX reader = ByteReaderX.from(tin);//.withReadLimit(1);
             assertTrue(reader.markSupported());
             tin.markSupported(false);
             assertFalse(reader.markSupported());
@@ -559,10 +507,9 @@ public class CharReaderTest {
         }
         {
             // close
-            CharReader.from(JieIO.reader(new char[0])).close();
-            CharReader.from(new char[0]).close();
-            CharReader.from(CharBuffer.allocate(0)).close();
-            CharReader.from("").close();
+            ByteReaderX.from(JieIO.inStream(new byte[0])).close();
+            ByteReaderX.from(new byte[0]).close();
+            ByteReaderX.from(ByteBuffer.allocate(0)).close();
         }
     }
 }

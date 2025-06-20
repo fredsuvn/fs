@@ -74,7 +74,7 @@ final class BufferData implements GekData.OfBuffer {
 
     @Override
     public long write(OutputStream dest) {
-        return JieIO.readTo(JieIO.inStream(buffer), dest);
+        return JieIO.readAllTo(JieIO.inStream(buffer), dest);
     }
 
     @Override

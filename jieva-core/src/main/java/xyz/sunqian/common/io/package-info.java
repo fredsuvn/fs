@@ -9,9 +9,9 @@
  * <p>
  * Core Interfaces:
  * <ul>
- *     <li>{@link xyz.sunqian.common.io.ByteReader}</li>
+ *     <li>{@link xyz.sunqian.common.io.ByteReaderX}</li>
  *     <li>{@link xyz.sunqian.common.io.ByteSegment}</li>
- *     <li>{@link xyz.sunqian.common.io.CharReader}</li>
+ *     <li>{@link xyz.sunqian.common.io.CharReaderX}</li>
  *     <li>{@link xyz.sunqian.common.io.CharSegment}</li>
  * </ul>
  * <p>

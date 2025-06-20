@@ -2,54 +2,51 @@ package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.JieCheck;
-import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.base.bytes.JieBytes;
 
 import java.io.IOException;
-import java.io.Reader;
-import java.nio.CharBuffer;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-final class CharReaderImpl {
+final class ByteReaderXImpl {
 
-    static @Nonnull CharReader of(@Nonnull Reader source) {
-        return new CharStreamReader(source);
+    static @Nonnull ByteReaderX of(@Nonnull InputStream source) {
+        return new ByteStreamReaderX(source);
     }
 
-    static @Nonnull CharReader of(char @Nonnull [] source, int offset, int length) throws IndexOutOfBoundsException {
-        return new CharArrayReader(source, offset, length);
+    static @Nonnull ByteReaderX of(byte @Nonnull [] source, int offset, int length) throws IndexOutOfBoundsException {
+        return new ByteArrayReaderX(source, offset, length);
     }
 
-    static @Nonnull CharReader of(@Nonnull CharSequence source, int start, int end) throws IndexOutOfBoundsException {
-        return new CharSequenceReader(source, start, end);
+    static @Nonnull ByteReaderX of(@Nonnull ByteBuffer source) {
+        return new ByteBufferReaderX(source);
     }
 
-    static @Nonnull CharReader of(@Nonnull CharBuffer source) {
-        return new CharBufferReader(source);
-    }
-
-    // static @Nonnull CharReader of(@Nonnull CharReader source, long readLimit) throws IllegalArgumentException {
-    //     return new LimitedCharReader(source, readLimit);
+    // static @Nonnull ByteReader of(@Nonnull ByteReader source, long readLimit) throws IllegalArgumentException {
+    //     return new LimitedByteReader(source, readLimit);
     // }
 
-    static final class CharSegmentImpl implements CharSegment {
+    static final class ByteSegmentImpl implements ByteSegment {
 
-        private static final @Nonnull CharSegmentImpl EMPTY_END = new CharSegmentImpl(JieChars.emptyBuffer(), true);
-        private static final @Nonnull CharSegmentImpl EMPTY_SEG = new CharSegmentImpl(JieChars.emptyBuffer(), false);
+        private static final @Nonnull ByteSegmentImpl EMPTY_END = new ByteSegmentImpl(JieBytes.emptyBuffer(), true);
+        private static final @Nonnull ByteSegmentImpl EMPTY_SEG = new ByteSegmentImpl(JieBytes.emptyBuffer(), false);
 
-        public static @Nonnull CharSegmentImpl empty(boolean end) {
+        public static @Nonnull ByteSegmentImpl empty(boolean end) {
             return end ? EMPTY_END : EMPTY_SEG;
         }
 
-        private final @Nonnull CharBuffer data;
+        private final @Nonnull ByteBuffer data;
         private final boolean end;
 
-        CharSegmentImpl(@Nonnull CharBuffer data, boolean end) {
+        ByteSegmentImpl(@Nonnull ByteBuffer data, boolean end) {
             this.data = data;
             this.end = end;
         }
 
         @Override
-        public @Nonnull CharBuffer data() {
+        public @Nonnull ByteBuffer data() {
             return data;
         }
 
@@ -60,31 +57,31 @@ final class CharReaderImpl {
 
         @SuppressWarnings("MethodDoesntCallSuperMethod")
         @Override
-        public @Nonnull CharSegment clone() {
-            CharBuffer copy = CharBuffer.allocate(data.remaining());
+        public @Nonnull ByteSegment clone() {
+            ByteBuffer copy = ByteBuffer.allocate(data.remaining());
             int pos = data.position();
             int limit = data.limit();
             copy.put(data);
             data.position(pos);
             data.limit(limit);
             copy.flip();
-            return CharSegment.of(copy, end);
+            return new ByteSegmentImpl(copy, end);
         }
     }
 
-    private static final class CharStreamReader implements CharReader {
+    private static final class ByteStreamReaderX implements ByteReaderX {
 
-        private final @Nonnull Reader source;
+        private final @Nonnull InputStream source;
 
-        CharStreamReader(@Nonnull Reader source) {
+        ByteStreamReaderX(@Nonnull InputStream source) {
             this.source = source;
         }
 
         @Override
-        public @Nonnull CharSegment read(int size) throws IllegalArgumentException, IORuntimeException {
+        public @Nonnull ByteSegment read(int size) throws IllegalArgumentException, IORuntimeException {
             IOChecker.checkSize(size);
             if (size == 0) {
-                return CharSegment.empty(false);
+                return ByteSegment.empty(false);
             }
             try {
                 return read0(size);
@@ -93,10 +90,10 @@ final class CharReaderImpl {
             }
         }
 
-        private @Nonnull CharSegment read0(int size) throws Exception {
+        private @Nonnull ByteSegment read0(int size) throws Exception {
             boolean end = false;
             int hasRead = 0;
-            char[] buf = new char[size];
+            byte[] buf = new byte[size];
             while (hasRead < size) {
                 int onceSize = source.read(buf, hasRead, size - hasRead);
                 if (onceSize < 0) {
@@ -114,12 +111,12 @@ final class CharReaderImpl {
                 hasRead += onceSize;
             }
             if (hasRead == 0) {
-                return CharSegment.empty(true);
+                return ByteSegment.empty(true);
             }
-            CharBuffer data = CharBuffer.wrap(
+            ByteBuffer data = ByteBuffer.wrap(
                 hasRead == size ? buf : Arrays.copyOfRange(buf, 0, hasRead)
             );
-            return CharSegment.of(data, end);
+            return ByteSegment.of(data, end);
         }
 
         @Override
@@ -157,7 +154,7 @@ final class CharReaderImpl {
 
         @Override
         public int readTo(
-            char @Nonnull [] dest, int offset, int length
+            byte @Nonnull [] dest, int offset, int length
         ) throws IndexOutOfBoundsException, IORuntimeException {
             JieCheck.checkOffsetLength(dest.length, offset, length);
             if (length == 0) {
@@ -170,7 +167,7 @@ final class CharReaderImpl {
             }
         }
 
-        private int readTo0(char @Nonnull [] dest, int offset, int length) throws IOException {
+        private int readTo0(byte @Nonnull [] dest, int offset, int length) throws IOException {
             int hasRead = 0;
             while (hasRead < length) {
                 int c = source.read(dest, offset + hasRead, length - hasRead);
@@ -183,7 +180,7 @@ final class CharReaderImpl {
         }
 
         @Override
-        public int readTo(@Nonnull CharBuffer dest) throws IORuntimeException {
+        public int readTo(@Nonnull ByteBuffer dest) throws IORuntimeException {
             if (dest.remaining() == 0) {
                 return 0;
             }
@@ -194,7 +191,7 @@ final class CharReaderImpl {
                 }
                 return ret;
             }
-            char[] buf = new char[dest.remaining()];
+            byte[] buf = new byte[dest.remaining()];
             int hasRead = readTo(buf);
             if (hasRead > 0) {
                 dest.put(buf, 0, hasRead);
@@ -203,7 +200,7 @@ final class CharReaderImpl {
         }
 
         @Override
-        public long readTo(@Nonnull Appendable dest, long length) throws IORuntimeException {
+        public long readTo(@Nonnull OutputStream dest, long length) throws IORuntimeException {
             if (length == 0) {
                 return 0;
             }
@@ -214,17 +211,17 @@ final class CharReaderImpl {
             }
         }
 
-        private long readTo0(@Nonnull Appendable dest, long length) throws IOException {
+        private long readTo0(@Nonnull OutputStream dest, long length) throws IOException {
             long count = 0;
             int bufferSize = JieIO.bufferSize();
-            char[] buf = new char[length < 0 ? bufferSize : (int) Math.min(length - count, bufferSize)];
+            byte[] buf = new byte[length < 0 ? bufferSize : (int) Math.min(length - count, bufferSize)];
             while (true) {
                 int len = (int) (length < 0 ? buf.length : Math.min(length - count, buf.length));
                 int c = source.read(buf, 0, len);
                 if (c < 0) {
                     return count == 0 ? -1 : count;
                 }
-                JieIO.write(dest, buf, 0, c);
+                dest.write(buf, 0, c);
                 count += c;
                 if (count == length) {
                     return count;
@@ -240,8 +237,8 @@ final class CharReaderImpl {
         @Override
         public void mark() throws IORuntimeException {
             try {
-                source.mark(0);
-            } catch (IOException e) {
+                source.mark(Integer.MAX_VALUE);
+            } catch (Exception e) {
                 throw new IORuntimeException(e);
             }
         }
@@ -265,14 +262,14 @@ final class CharReaderImpl {
         }
     }
 
-    private static final class CharArrayReader implements CharReader {
+    private static final class ByteArrayReaderX implements ByteReaderX {
 
-        private final char @Nonnull [] source;
+        private final byte @Nonnull [] source;
         private final int endPos;
         private int pos;
         private int mark;
 
-        CharArrayReader(char @Nonnull [] source, int offset, int length) throws IndexOutOfBoundsException {
+        ByteArrayReaderX(byte @Nonnull [] source, int offset, int length) throws IndexOutOfBoundsException {
             JieCheck.checkOffsetLength(source.length, offset, length);
             this.source = source;
             this.pos = offset;
@@ -281,19 +278,19 @@ final class CharReaderImpl {
         }
 
         @Override
-        public @Nonnull CharSegment read(int size) throws IllegalArgumentException, IORuntimeException {
+        public @Nonnull ByteSegment read(int size) throws IllegalArgumentException, IORuntimeException {
             IOChecker.checkSize(size);
             if (size == 0) {
-                return CharSegment.empty(false);
+                return ByteSegment.empty(false);
             }
             if (pos == endPos) {
-                return CharSegment.empty(true);
+                return ByteSegment.empty(true);
             }
             int remaining = endPos - pos;
             int actualLen = Math.min(remaining, size);
-            CharBuffer data = CharBuffer.wrap(source, pos, actualLen).slice();
+            ByteBuffer data = ByteBuffer.wrap(source, pos, actualLen).slice();
             pos += actualLen;
-            return CharSegment.of(data, remaining <= size);
+            return ByteSegment.of(data, remaining <= size);
         }
 
         @Override
@@ -313,7 +310,7 @@ final class CharReaderImpl {
 
         @Override
         public int readTo(
-            char @Nonnull [] dest, int offset, int length
+            byte @Nonnull [] dest, int offset, int length
         ) throws IndexOutOfBoundsException, IORuntimeException {
             JieCheck.checkOffsetLength(dest.length, offset, length);
             if (length == 0) {
@@ -330,7 +327,7 @@ final class CharReaderImpl {
         }
 
         @Override
-        public int readTo(@Nonnull CharBuffer dest) throws IORuntimeException {
+        public int readTo(@Nonnull ByteBuffer dest) throws IORuntimeException {
             if (dest.remaining() == 0) {
                 return 0;
             }
@@ -345,7 +342,7 @@ final class CharReaderImpl {
         }
 
         @Override
-        public long readTo(@Nonnull Appendable dest, long length) throws IORuntimeException {
+        public long readTo(@Nonnull OutputStream dest, long length) throws IORuntimeException {
             if (length == 0) {
                 return 0;
             }
@@ -360,9 +357,9 @@ final class CharReaderImpl {
             }
         }
 
-        private long readTo0(@Nonnull Appendable dest, long length, int remaining) throws IOException {
+        private long readTo0(@Nonnull OutputStream dest, long length, int remaining) throws IOException {
             int actual = length < 0 ? remaining : (int) Math.min(remaining, length);
-            JieIO.write(dest, source, pos, actual);
+            dest.write(source, pos, actual);
             pos += actual;
             return actual;
         }
@@ -387,154 +384,31 @@ final class CharReaderImpl {
         }
     }
 
-    private static final class CharSequenceReader implements CharReader {
+    private static final class ByteBufferReaderX implements ByteReaderX {
 
-        private final @Nonnull CharSequence source;
-        private final int endPos;
-        private int pos;
-        private int mark;
+        private final @Nonnull ByteBuffer source;
 
-        CharSequenceReader(@Nonnull CharSequence source, int start, int end) throws IndexOutOfBoundsException {
-            JieCheck.checkStartEnd(source.length(), start, end);
-            this.source = source;
-            this.pos = start;
-            this.endPos = end;
-            this.mark = pos;
-        }
-
-        @Override
-        public @Nonnull CharSegment read(int size) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkSize(size);
-            if (size == 0) {
-                return CharSegment.empty(false);
-            }
-            if (pos == endPos) {
-                return CharSegment.empty(true);
-            }
-            int remaining = endPos - pos;
-            int actualLen = Math.min(remaining, size);
-            CharBuffer data = CharBuffer.wrap(source, pos, pos + actualLen).slice();
-            pos += actualLen;
-            return CharSegment.of(data, remaining <= size);
-        }
-
-        @Override
-        public int readTo(
-            char @Nonnull [] dest, int offset, int length
-        ) throws IndexOutOfBoundsException, IORuntimeException {
-            JieCheck.checkOffsetLength(dest.length, offset, length);
-            if (length == 0) {
-                return 0;
-            }
-            int remaining = endPos - pos;
-            if (remaining == 0) {
-                return -1;
-            }
-            int copySize = Math.min(remaining, length);
-            source.toString().getChars(pos, pos + copySize, dest, offset);
-            // System.arraycopy(source, pos, dest, offset, copySize);
-            pos += copySize;
-            return copySize;
-        }
-
-        @Override
-        public int readTo(@Nonnull CharBuffer dest) throws IORuntimeException {
-            if (dest.remaining() == 0) {
-                return 0;
-            }
-            int remaining = endPos - pos;
-            if (remaining == 0) {
-                return -1;
-            }
-            int copySize = Math.min(remaining, dest.remaining());
-            dest.put(CharBuffer.wrap(source, pos, pos + copySize));
-            pos += copySize;
-            return copySize;
-        }
-
-        @Override
-        public long readTo(@Nonnull Appendable dest, long length) throws IORuntimeException {
-            if (length == 0) {
-                return 0;
-            }
-            int remaining = endPos - pos;
-            if (remaining == 0) {
-                return -1;
-            }
-            try {
-                return readTo0(dest, length, remaining);
-            } catch (Exception e) {
-                throw new IORuntimeException(e);
-            }
-        }
-
-        private long readTo0(@Nonnull Appendable dest, long length, int remaining) throws IOException {
-            int actual = length < 0 ? remaining : (int) Math.min(remaining, length);
-            dest.append(source, pos, pos + actual);
-            pos += actual;
-            return actual;
-        }
-
-        @Override
-        public long skip(long size) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkSize(size);
-            if (size == 0) {
-                return 0;
-            }
-            if (pos == endPos) {
-                return 0;
-            }
-            int remaining = endPos - pos;
-            int skipped = (int) Math.min(remaining, size);
-            pos += skipped;
-            return skipped;
-        }
-
-        @Override
-        public boolean markSupported() {
-            return true;
-        }
-
-        @Override
-        public void mark() throws IORuntimeException {
-            mark = pos;
-        }
-
-        @Override
-        public void reset() throws IORuntimeException {
-            pos = mark;
-        }
-
-        @Override
-        public void close() throws IORuntimeException {
-        }
-    }
-
-    private static final class CharBufferReader implements CharReader {
-
-        private final @Nonnull CharBuffer source;
-
-        CharBufferReader(@Nonnull CharBuffer source) {
+        ByteBufferReaderX(@Nonnull ByteBuffer source) {
             this.source = source;
         }
 
         @Override
-        public @Nonnull CharSegment read(int size) throws IllegalArgumentException, IORuntimeException {
+        public @Nonnull ByteSegment read(int size) throws IllegalArgumentException, IORuntimeException {
             IOChecker.checkSize(size);
             if (size == 0) {
-                return CharSegment.empty(false);
+                return ByteSegment.empty(false);
             }
             if (!source.hasRemaining()) {
-                return CharSegment.empty(true);
+                return ByteSegment.empty(true);
             }
             int pos = source.position();
             int limit = source.limit();
             int newPos = Math.min(pos + size, limit);
             source.limit(newPos);
-            CharBuffer data = source.slice();
+            ByteBuffer data = source.slice();
             source.position(newPos);
             source.limit(limit);
-            return CharSegment.of(data, newPos >= limit);
+            return ByteSegment.of(data, newPos >= limit);
         }
 
         @Override
@@ -554,7 +428,7 @@ final class CharReaderImpl {
 
         @Override
         public int readTo(
-            char @Nonnull [] dest, int offset, int length
+            byte @Nonnull [] dest, int offset, int length
         ) throws IndexOutOfBoundsException, IORuntimeException {
             JieCheck.checkOffsetLength(dest.length, offset, length);
             if (length == 0) {
@@ -569,7 +443,7 @@ final class CharReaderImpl {
         }
 
         @Override
-        public int readTo(@Nonnull CharBuffer dest) throws IORuntimeException {
+        public int readTo(@Nonnull ByteBuffer dest) throws IORuntimeException {
             if (dest.remaining() == 0) {
                 return 0;
             }
@@ -580,7 +454,7 @@ final class CharReaderImpl {
             if (copySize == source.remaining()) {
                 dest.put(source);
             } else {
-                CharBuffer src = JieBuffer.slice(source, copySize);
+                ByteBuffer src = JieBuffer.slice(source, copySize);
                 dest.put(src);
                 source.position(source.position() + copySize);
             }
@@ -588,7 +462,7 @@ final class CharReaderImpl {
         }
 
         @Override
-        public long readTo(@Nonnull Appendable dest, long length) throws IORuntimeException {
+        public long readTo(@Nonnull OutputStream dest, long length) throws IORuntimeException {
             if (length == 0) {
                 return 0;
             }
@@ -602,14 +476,14 @@ final class CharReaderImpl {
             }
         }
 
-        private long readTo0(@Nonnull Appendable dest, long length) throws IOException {
+        private long readTo0(@Nonnull OutputStream dest, long length) throws IOException {
             int copySize = (int) (length < 0 ? source.remaining() : Math.min(source.remaining(), length));
             if (source.hasArray()) {
-                JieIO.write(dest, source.array(), source.arrayOffset() + source.position(), copySize);
+                dest.write(source.array(), source.arrayOffset() + source.position(), copySize);
                 source.position(source.position() + copySize);
             } else {
-                char[] data = JieBuffer.read(source, copySize);
-                JieIO.write(dest, data, 0, data.length);
+                byte[] data = JieBuffer.read(source, copySize);
+                dest.write(data);
             }
             return copySize;
         }
@@ -634,29 +508,192 @@ final class CharReaderImpl {
         }
     }
 
-    // private static final class LimitedCharReader implements CharReader {
+    // private static final class ByteChannelReader implements ByteReader {
     //
-    //     private final @Nonnull CharReader source;
+    //     private final @Nonnull ReadableByteChannel source;
+    //
+    //     ByteChannelReader(@Nonnull ReadableByteChannel source) {
+    //         this.source = source;
+    //     }
+    //
+    //     @Override
+    //     public @Nonnull ByteSegment read(int size) throws IllegalArgumentException, IORuntimeException {
+    //         IOChecker.checkSize(size);
+    //         if (size == 0) {
+    //             return ByteSegment.empty(false);
+    //         }
+    //         try {
+    //             return read0(size);
+    //         } catch (Exception e) {
+    //             throw new IORuntimeException(e);
+    //         }
+    //     }
+    //
+    //     private @Nonnull ByteSegment read0(int size) throws IOException {
+    //         ByteBuffer tmp = ByteBuffer.allocate(size);
+    //         int count = 0;
+    //         while (true) {
+    //             int readSize = source.read(tmp);
+    //             if (readSize < 0) {
+    //                 break;
+    //             }
+    //             count += readSize;
+    //         }
+    //         ByteBuffer buf;
+    //         if (tmp.position() == tmp.capacity()) {
+    //             buf = tmp;
+    //         } else {
+    //             buf = ByteBuffer.allocate()
+    //         }
+    //         return ByteSegment.of(
+    //             tmp.position() == tmp.capacity() ? tmp.flip() : JieBuffer.,
+    //             count < size
+    //         );
+    //     }
+    //
+    //     @Override
+    //     public long skip(long size) throws IllegalArgumentException, IORuntimeException {
+    //         IOChecker.checkSize(size);
+    //         if (size == 0) {
+    //             return 0;
+    //         }
+    //         try {
+    //             return skip0(size);
+    //         } catch (Exception e) {
+    //             throw new IORuntimeException(e);
+    //         }
+    //     }
+    //
+    //     private long skip0(long size) throws IOException {
+    //         ByteBuffer dst = ByteBuffer.allocate((int) Math.min(JieIO.bufferSize(), size));
+    //         long remaining = size;
+    //         while (true) {
+    //             int readSize;
+    //             if (remaining >= dst.remaining()) {
+    //                 readSize = source.read(dst);
+    //             } else {
+    //                 dst.limit((int) remaining);
+    //                 readSize = source.read(dst);
+    //             }
+    //             if (readSize < 0) {
+    //                 break;
+    //             }
+    //             remaining -= readSize;
+    //             if (remaining <= 0) {
+    //                 break;
+    //             }
+    //             dst.position(0);
+    //         }
+    //         return size - remaining;
+    //     }
+    //
+    //     @Override
+    //     public int readTo(
+    //         byte @Nonnull [] dest, int offset, int length
+    //     ) throws IndexOutOfBoundsException, IORuntimeException {
+    //         JieCheck.checkOffsetLength(dest.length, offset, length);
+    //         if (length == 0) {
+    //             return 0;
+    //         }
+    //         return readTo0(ByteBuffer.wrap(dest, offset, length));
+    //     }
+    //
+    //     @Override
+    //     public int readTo(@Nonnull ByteBuffer dest) throws IORuntimeException {
+    //         if (dest.remaining() == 0) {
+    //             return 0;
+    //         }
+    //         return readTo0(ByteBuffer.wrap(dest, offset, length));
+    //     }
+    //
+    //     private int readTo0(@Nonnull ByteBuffer dest) throws IORuntimeException {
+    //         if (dest.remaining() == 0) {
+    //             return 0;
+    //         }
+    //         if (source.remaining() == 0) {
+    //             return -1;
+    //         }
+    //         int copySize = Math.min(source.remaining(), dest.remaining());
+    //         if (copySize == source.remaining()) {
+    //             dest.put(source);
+    //         } else {
+    //             ByteBuffer src = JieBuffer.slice(source, copySize);
+    //             dest.put(src);
+    //             source.position(source.position() + copySize);
+    //         }
+    //         return copySize;
+    //     }
+    //
+    //     @Override
+    //     public long readTo(@Nonnull OutputStream dest, long length) throws IORuntimeException {
+    //         if (length == 0) {
+    //             return 0;
+    //         }
+    //         if (source.remaining() == 0) {
+    //             return -1;
+    //         }
+    //         try {
+    //             return readTo0(dest, length);
+    //         } catch (Exception e) {
+    //             throw new IORuntimeException(e);
+    //         }
+    //     }
+    //
+    //     private long readTo0(@Nonnull OutputStream dest, long length) throws IOException {
+    //         int copySize = (int) (length < 0 ? source.remaining() : Math.min(source.remaining(), length));
+    //         if (source.hasArray()) {
+    //             dest.write(source.array(), source.arrayOffset() + source.position(), copySize);
+    //             source.position(source.position() + copySize);
+    //         } else {
+    //             byte[] data = JieBuffer.read(source, copySize);
+    //             dest.write(data);
+    //         }
+    //         return copySize;
+    //     }
+    //
+    //     @Override
+    //     public boolean markSupported() {
+    //         return true;
+    //     }
+    //
+    //     @Override
+    //     public void mark() throws IORuntimeException {
+    //         source.mark();
+    //     }
+    //
+    //     @Override
+    //     public void reset() throws IORuntimeException {
+    //         source.reset();
+    //     }
+    //
+    //     @Override
+    //     public void close() throws IORuntimeException {
+    //     }
+    // }
+
+    // private static final class LimitedByteReader implements ByteReader {
+    //
+    //     private final @Nonnull ByteReader source;
     //     private long remaining;
     //     private long mark;
     //
-    //     LimitedCharReader(@Nonnull CharReader source, long readLimit) throws IllegalArgumentException {
+    //     LimitedByteReader(@Nonnull ByteReader source, long readLimit) throws IllegalArgumentException {
     //         IOChecker.checkReadLimit(readLimit);
     //         this.source = source;
     //         this.remaining = readLimit;
     //     }
     //
     //     @Override
-    //     public @Nonnull CharSegment read(int size) throws IllegalArgumentException, IORuntimeException {
+    //     public @Nonnull ByteSegment read(int size) throws IllegalArgumentException, IORuntimeException {
     //         IOChecker.checkSize(size);
     //         if (remaining <= 0) {
-    //             return CharSegment.empty(true);
+    //             return ByteSegment.empty(true);
     //         }
     //         if (size == 0) {
-    //             return CharSegment.empty(false);
+    //             return ByteSegment.empty(false);
     //         }
     //         int readSize = (int) Math.min(size, remaining);
-    //         CharSegment seg = source.read(readSize);
+    //         ByteSegment seg = source.read(readSize);
     //         remaining -= readSize;
     //         if (remaining <= 0 && !seg.end()) {
     //             return makeTrue(seg);
@@ -690,6 +727,7 @@ final class CharReaderImpl {
     //             source.mark();
     //             mark = remaining;
     //         }
+    //
     //     }
     //
     //     @Override
@@ -705,12 +743,12 @@ final class CharReaderImpl {
     //         source.close();
     //     }
     //
-    //     private @Nonnull CharSegment makeTrue(@Nonnull CharSegment seg) {
-    //         if (seg instanceof CharSegmentImpl) {
-    //             ((CharSegmentImpl) seg).end = true;
+    //     private @Nonnull ByteSegment makeTrue(@Nonnull ByteSegment seg) {
+    //         if (seg instanceof ByteSegmentImpl) {
+    //             ((ByteSegmentImpl) seg).end = true;
     //             return seg;
     //         }
-    //         return CharSegment.of(seg.data(), true);
+    //         return ByteSegment.of(seg.data(), true);
     //     }
     // }
 }

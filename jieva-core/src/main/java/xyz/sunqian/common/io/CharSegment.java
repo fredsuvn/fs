@@ -21,7 +21,7 @@ public interface CharSegment {
      * @return a new {@link CharSegment} with the given data and end flag
      */
     static @Nonnull CharSegment of(@Nonnull CharBuffer data, boolean end) {
-        return new CharReaderImpl.CharSegmentImpl(data, end);
+        return new CharReaderXImpl.CharSegmentImpl(data, end);
     }
 
     /**
@@ -32,7 +32,7 @@ public interface CharSegment {
      * @return an empty {@link CharSegment} with the given end flag
      */
     static @Nonnull CharSegment empty(boolean end) {
-        return CharReaderImpl.CharSegmentImpl.empty(end);
+        return CharReaderXImpl.CharSegmentImpl.empty(end);
     }
 
     /**

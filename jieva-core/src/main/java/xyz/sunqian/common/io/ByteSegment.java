@@ -21,7 +21,7 @@ public interface ByteSegment {
      * @return a new {@link ByteSegment} with the given data and end flag
      */
     static @Nonnull ByteSegment of(@Nonnull ByteBuffer data, boolean end) {
-        return new ByteReaderImpl.ByteSegmentImpl(data, end);
+        return new ByteReaderXImpl.ByteSegmentImpl(data, end);
     }
 
     /**
@@ -32,7 +32,7 @@ public interface ByteSegment {
      * @return an empty {@link ByteSegment} with the given end flag
      */
     static @Nonnull ByteSegment empty(boolean end) {
-        return ByteReaderImpl.ByteSegmentImpl.empty(end);
+        return ByteReaderXImpl.ByteSegmentImpl.empty(end);
     }
 
     /**

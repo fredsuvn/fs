@@ -1,246 +1,1210 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.common.base.JieCheck;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 
 /**
- * This interface represents the data segment reader to read byte data as {@link ByteSegment} from the data source,
- * which may be a byte sequence or a stream.
+ * This interface is used to read bytes for {@link InputStream} and {@link ReadableByteChannel}.
  *
  * @author sunqian
  */
 public interface ByteReader {
 
     /**
-     * Returns a new {@link ByteReader} with the given input stream. The mark/reset operations are depends on and shared
-     * with the input stream.
+     * Returns the buffer size of current instance.
      *
-     * @param source the given input stream
-     * @return a new {@link ByteReader} with the given input stream
+     * @return the buffer size of current instance
      */
-    static @Nonnull ByteReader from(@Nonnull InputStream source) {
-        return ByteReaderImpl.of(source);
-    }
+    int bufferSize();
 
     /**
-     * Returns a new {@link ByteReader} with the given byte array.
+     * Reads all data from the source stream into a new array, continuing until reaches the end of the stream, and
+     * returns the array.
      * <p>
-     * The content of the segment returned from the {@link ByteReader#read(int)} is shared with the content of the given
-     * byte array. Any changes to the segment's content will be reflected in the given byte array, and vice versa. The
-     * mark/reset operations are supported, and the close method has no effect.
+     * Note the data in the stream cannot exceed the maximum limit of the array.
      *
-     * @param source the given byte array
-     * @return a new {@link ByteReader} with the given byte array
+     * @param src the source stream
+     * @return the array containing the data
+     * @throws IORuntimeException if an I/O error occurs
      */
-    static @Nonnull ByteReader from(byte @Nonnull [] source) {
-        return from(source, 0, source.length);
-    }
+    byte @Nonnull [] read(@Nonnull InputStream src) throws IORuntimeException;
 
     /**
-     * Returns a new {@link ByteReader} with the given byte array, starting at the specified offset and up to the
-     * specified length.
+     * Reads the data of the specified length from the source stream into a new array, and returns the array. If the
+     * specified length {@code = 0}, returns an empty array without reading. Otherwise, this method keeps reading until
+     * the read number reaches the specified length or reaches the end of the stream.
      * <p>
-     * The content of the segment returned from the {@link ByteReader#read(int)} is shared with the content of the given
-     * byte array. Any changes to the segment's content will be reflected in the given byte array, and vice versa. The
-     * mark/reset operations are supported, and the close method has no effect.
+     * Note the length cannot exceed the maximum limit of the array.
      *
-     * @param source the given byte array
-     * @param offset the specified offset
-     * @param length the specified length
-     * @return a new {@link ByteReader} with the given byte array
-     * @throws IndexOutOfBoundsException if the specified offset or length is out of bounds
+     * @param src the source stream
+     * @param len the specified read length, must {@code >= 0}
+     * @return the array containing the data
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
      */
-    static @Nonnull ByteReader from(byte @Nonnull [] source, int offset, int length) throws IndexOutOfBoundsException {
-        return ByteReaderImpl.of(source, offset, length);
-    }
+    byte @Nonnull [] read(@Nonnull InputStream src, int len) throws IllegalArgumentException, IORuntimeException;
 
     /**
-     * Returns a new {@link ByteReader} with the given byte buffer.
+     * Reads all data from the source channel into a new buffer, continuing until reaches the end of the channel, and
+     * returns the buffer. The buffer's position is {@code 0}, limit equals to capacity, and it has a backing array of
+     * which offset is {@code 0}.
      * <p>
-     * The content of the segment returned from the {@link ByteReader#read(int)} is shared with the content of the given
-     * byte buffer. Any changes to the given byte buffer will be reflected in the returned segment, and vice versa if
-     * the byte buffer is writeable. The mark/reset operations are supported, and the close method has no effect.
+     * Note the data in the channel cannot exceed the maximum limit of the buffer.
      *
-     * @param source the given byte buffer
-     * @return a new {@link ByteReader} with the given byte buffer
+     * @param src the source channel
+     * @return the buffer containing the data
+     * @throws IORuntimeException if an I/O error occurs
      */
-    static @Nonnull ByteReader from(@Nonnull ByteBuffer source) {
-        return ByteReaderImpl.of(source);
-    }
+    @Nonnull
+    ByteBuffer read(@Nonnull ReadableByteChannel src) throws IORuntimeException;
 
     /**
-     * Reads and returns the next data segment of the specified size from the data source. This method reads
-     * continuously until the specified number of bytes is read or the end of the data source is reached. It never
-     * returns {@code null}, but can return an empty segment. If the specified size is {@code 0}, returns an empty
-     * segment immediately without reading.
+     * Reads the data of the specified length from the source channel into a new buffer, and returns the buffer. If the
+     * specified length {@code length = 0}, returns an empty buffer without reading. Otherwise, this method keeps
+     * reading until the read number reaches the specified length or reaches the end of the channel.
      * <p>
-     * The content of the returned segment may be shared with the content of the data source if, and only if, the data
-     * source is a byte array or byte buffer. Any changes to those data source will be reflected in the returned
-     * segment, and vice versa if the data source is the byte array or writeable byte buffer.
+     * The buffer's position is {@code 0}, limit equals to capacity, and it has a backing array of which offset is
+     * {@code 0}. And note the length cannot exceed the maximum limit of the buffer.
      *
-     * @param size the specified size
-     * @return the next data segment
-     * @throws IllegalArgumentException if the specified size is negative
+     * @param src the source channel
+     * @param len the specified read length, must {@code >= 0}
+     * @return the buffer containing the data
+     * @throws IllegalArgumentException if the specified read length is illegal
      * @throws IORuntimeException       if an I/O error occurs
      */
     @Nonnull
-    ByteSegment read(int size) throws IllegalArgumentException, IORuntimeException;
-
-    // /**
-    //  * Reads and returns the next data segment with the specified size from the data source. This method reads
-    //  * continuously until the specified number of bytes is read or the end of the data source is reached. And it never
-    //  * returns null, but can return an empty segment.
-    //  * <p>
-    //  * The {@code endOnZeroRead} specifies whether a zero-byte read, which could happen in NIO, should be treated as a
-    //  * signal indicates the end of the data source has been reached.
-    //  *
-    //  * @param size          the specified size
-    //  * @param endOnZeroRead specifies whether a zero-byte read should be treated as a signal indicates the end of the
-    //  *                      data source has been reached
-    //  * @return the next data segment
-    //  * @throws IllegalArgumentException if the specified size is negative
-    //  * @throws IORuntimeException       if an I/O error occurs
-    //  */
-    // @Nonnull
-    // ByteSegment read(int size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException;
+    ByteBuffer read(@Nonnull ReadableByteChannel src, int len) throws IllegalArgumentException, IORuntimeException;
 
     /**
-     * Skips the data of the specified size and returns the actual skipped size. This method skips continuously until
-     * the specified number of bytes is skipped or the end of the data source is reached. If the specified size is
-     * {@code 0}, this method returns {@code 0} immediately without skipping.
+     * Reads all from the source stream into the specified output stream, until the read number reaches the specified
+     * length or reaches the end of the source stream, returns the actual number of bytes read to.
+     * <p>
+     * If the end of the source stream has already been reached, returns {@code -1}.
+     * <p>
+     * This method never invoke the {@link OutputStream#flush()} to force the backing buffer.
      *
-     * @param size the specified size
-     * @return the actual skipped size
-     * @throws IllegalArgumentException if the specified size is negative
+     * @param src the source stream
+     * @param dst the specified output stream
+     * @return the actual number of bytes read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    long read(@Nonnull InputStream src, @Nonnull OutputStream dst) throws IORuntimeException;
+
+    /**
+     * Reads the data of the specified length from the source stream into the specified output stream, until the read
+     * number reaches the specified length or reaches the end of the source stream, returns the actual number of bytes
+     * read to.
+     * <p>
+     * If the specified length {@code = 0}, returns {@code 0} without reading; if the end of the source stream has
+     * already been reached, returns {@code -1}.
+     * <p>
+     * This method never invoke the {@link OutputStream#flush()} to force the backing buffer.
+     *
+     * @param src the source stream
+     * @param dst the specified output stream
+     * @param len the specified length, must {@code >= 0}
+     * @return the actual number of bytes read
+     * @throws IllegalArgumentException if the specified length is illegal
      * @throws IORuntimeException       if an I/O error occurs
      */
-    long skip(long size) throws IllegalArgumentException, IORuntimeException;
-
-    // /**
-    //  * Skips the data of the specified size and returns the actual skipped size. This method skips continuously until
-    //  * the specified number of bytes is skipped or the end of the data source is reached.
-    //  * <p>
-    //  * The {@code endOnZeroRead} specifies whether a zero-byte read, which could happen in NIO, should be treated as a
-    //  * signal indicates the end of the data source has been reached.
-    //  *
-    //  * @param size          the specified size
-    //  * @param endOnZeroRead specifies whether a zero-byte read should be treated as a signal indicates the end of the
-    //  *                      data source has been reached
-    //  * @return the actual skipped size
-    //  * @throws IllegalArgumentException if the specified size is negative
-    //  * @throws IORuntimeException       if an I/O error occurs
-    //  */
-    // long skip(long size, boolean endOnZeroRead) throws IllegalArgumentException, IORuntimeException;
-
-    /**
-     * Reads from the data source into the specified destination until the destination is filled, returns the number of
-     * actual data read or {@code -1} if the end of the source has already been reached. If the remaining space of the
-     * destination is {@code 0}, this method returns {@code 0} immediately without reading.
-     *
-     * @param dest the specified destination
-     * @return the number of actual data read or {@code -1} if the end of the source has already been reached
-     * @throws IORuntimeException if an I/O error occurs
-     */
-    default int readTo(byte @Nonnull [] dest) throws IORuntimeException {
-        return readTo(dest, 0, dest.length);
+    public static long readTo(
+        @Nonnull InputStream src, @Nonnull OutputStream dst, long len
+    ) throws IllegalArgumentException, IORuntimeException {
+        return readTo(src, dst, len, bufferSize());
     }
 
     /**
-     * Reads from the data source into the specified destination (starting from the specified start index up to the
-     * specified length) until the destination is filled, returns the number of actual data read or {@code -1} if the
-     * end of the source has already been reached. If the specified length is {@code 0}, this method returns {@code 0}
-     * immediately without reading.
+     * Reads the data of the specified length from the source stream into the specified output stream, until the read
+     * number reaches the specified length or reaches the end of the source stream, returns the actual number of bytes
+     * read to.
+     * <p>
+     * If the specified length {@code = 0}, returns {@code 0} without reading; if the end of the source stream has
+     * already been reached, returns {@code -1}.
+     * <p>
+     * This method never invoke the {@link OutputStream#flush()} to force the backing buffer.
      *
-     * @param dest   the specified destination
-     * @param offset the specified start index
-     * @param length the specified length
-     * @return the number of actual data read or {@code -1} if the end of the source has already been reached
-     * @throws IndexOutOfBoundsException if the specified offset or length is out of bounds
+     * @param src     the source stream
+     * @param dst     the specified output stream
+     * @param len     the specified length, must {@code >= 0}
+     * @param bufSize specifies the buffer size for reading, must {@code > 0}
+     * @return the actual number of bytes read
+     * @throws IllegalArgumentException if the specified length or buffer size is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long readTo(
+        @Nonnull InputStream src, @Nonnull OutputStream dst, long len, int bufSize
+    ) throws IllegalArgumentException, IORuntimeException {
+        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        return readTo0(src, dst, len, bufSize);
+    }
+
+    private static long readTo0(
+        @Nonnull InputStream src, @Nonnull OutputStream dst, long len, int bufSize
+    ) throws IllegalArgumentException, IORuntimeException {
+        JieCheck.checkArgument(bufSize > 0, "bufSize must > 0.");
+        if (len == 0) {
+            return 0;
+        }
+        try {
+            byte[] buf = new byte[bufferSize(len, bufSize)];
+            long count = 0;
+            while (true) {
+                int readSize = len < 0 ?
+                    src.read(buf)
+                    :
+                    src.read(buf, 0, (int) Math.min(buf.length, len - count));
+                if (readSize < 0) {
+                    return count == 0 ? -1 : count;
+                }
+                dst.write(buf, 0, readSize);
+                count += readSize;
+                if (len > 0 && count >= len) {
+                    return count;
+                }
+            }
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    /**
+     * Reads the data from the source stream into the specified array, until the read number reaches the array's length
+     * or reaches the end of the source stream, returns the actual number of bytes read to.
+     * <p>
+     * If the array's length {@code = 0}, returns {@code 0} without reading. If the end of the source stream has already
+     * been reached, returns {@code -1}.
+     *
+     * @param src the source stream
+     * @param dst the specified array
+     * @return the actual number of bytes read
+     * @throws IndexOutOfBoundsException if the array arguments are out of bounds
      * @throws IORuntimeException        if an I/O error occurs
      */
-    int readTo(byte @Nonnull [] dest, int offset, int length) throws IndexOutOfBoundsException, IORuntimeException;
-
-    /**
-     * Reads from the data source into the specified destination until the destination is filled, returns the number of
-     * actual data read or {@code -1} if the end of the source has already been reached. The position of the destination
-     * will be incremented by the actual read number. If the remaining space of the destination is {@code 0}, this
-     * method returns {@code 0} immediately without reading.
-     *
-     * @param dest the specified destination
-     * @return the number of actual data read or {@code -1} if the end of the source has already been reached
-     * @throws IORuntimeException if an I/O error occurs
-     */
-    int readTo(@Nonnull ByteBuffer dest) throws IORuntimeException;
-
-    /**
-     * Reads all data from the data source into the specified destination, returns the number of actual data read or
-     * {@code -1} if the end of the source has already been reached.
-     *
-     * @param dest the specified destination
-     * @return the number of actual data read or {@code -1} if the end of the source has already been reached
-     * @throws IORuntimeException if an I/O error occurs
-     */
-    default long readTo(@Nonnull OutputStream dest) throws IORuntimeException {
-        return readTo(dest, -1);
+    public static int readTo(
+        @Nonnull InputStream src, byte @Nonnull [] dst
+    ) throws IndexOutOfBoundsException, IORuntimeException {
+        if (dst.length == 0) {
+            return 0;
+        }
+        return readTo0(src, dst, 0, dst.length);
     }
 
     /**
-     * Reads the data of the specified length from the data source into the specified destination, returns the number of
-     * actual data read or {@code -1} if the end of the source has already been reached. The length may less than 0,
-     * means all data will be transferred. If the specified length is {@code 0}, this method returns {@code 0}
-     * immediately without reading.
+     * Reads the data from the source stream into the specified array (starting at the specified offset and up to the
+     * specified length), until the read number reaches the specified length or reaches the end of the source stream,
+     * returns the actual number of bytes read to.
+     * <p>
+     * If the specified length {@code = 0}, returns {@code 0} without reading. If the end of the source stream has
+     * already been reached, returns {@code -1}.
      *
-     * @param dest   the specified destination
-     * @param length the specified length, may {@code < 0}, means all data will be transferred
-     * @return the number of actual data read or {@code -1} if the end of the source has already been reached
-     * @throws IORuntimeException if an I/O error occurs
+     * @param src the source stream
+     * @param dst the specified array
+     * @param off the specified offset of the array
+     * @param len the specified length to read
+     * @return the actual number of bytes read
+     * @throws IndexOutOfBoundsException if the array arguments are out of bounds
+     * @throws IORuntimeException        if an I/O error occurs
      */
-    long readTo(@Nonnull OutputStream dest, long length) throws IORuntimeException;
+    public static int readTo(
+        @Nonnull InputStream src, byte @Nonnull [] dst, int off, int len
+    ) throws IndexOutOfBoundsException, IORuntimeException {
+        JieCheck.checkOffsetLength(dst.length, off, len);
+        if (len == 0) {
+            return 0;
+        }
+        return readTo0(src, dst, off, len);
+    }
+
+    private static int readTo0(
+        @Nonnull InputStream src, byte @Nonnull [] dst, int off, int len
+    ) throws IndexOutOfBoundsException, IORuntimeException {
+        try {
+            int count = 0;
+            while (count < len) {
+                int readSize = src.read(dst, off + count, len - count);
+                if (readSize < 0) {
+                    return count == 0 ? -1 : count;
+                }
+                count += readSize;
+            }
+            return count;
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
+    }
 
     /**
-     * Returns whether this reader supports the {@link #mark()} and {@link #reset()} methods.
+     * Reads the data from the source stream into the specified buffer, until the read number reaches the buffer's
+     * remaining or reaches the end of the source stream, returns the actual number of bytes read to.
+     * <p>
+     * If the buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the source stream has
+     * already been reached, returns {@code -1}.
+     * <p>
+     * The buffer's position increments by the actual read number.
      *
-     * @return whether this reader supports the {@link #mark()} and {@link #reset()} methods
-     */
-    boolean markSupported();
-
-    /**
-     * Marks the current position in this reader. This method can be used to mark a position for later
-     * {@link #reset()}.
-     *
+     * @param src the source stream
+     * @param dst the specified buffer
+     * @return the actual number of bytes read
      * @throws IORuntimeException if an I/O error occurs
      */
-    void mark() throws IORuntimeException;
+    public static int readTo(@Nonnull InputStream src, @Nonnull ByteBuffer dst) throws IORuntimeException {
+        return readTo(src, dst, -1);
+    }
 
     /**
-     * Resets this reader to the last marked position by {@link #mark()}. This method can be used to re-read the data
-     * from last marked position.
+     * Reads the data of the specified length from the source stream into the specified buffer, until the read number
+     * reaches the buffer's remaining or reaches the end of the source stream, returns the actual number of bytes read
+     * to.
+     * <p>
+     * If the specified length {@code < 0}, this method performs as {@link #readTo(InputStream, ByteBuffer)}; if the
+     * specified length or buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the source
+     * stream has already been reached, returns {@code -1}.
+     * <p>
+     * The buffer's position increments by the actual read number.
      *
+     * @param src the source stream
+     * @param dst the specified buffer
+     * @param len the specified length
+     * @return the actual number of bytes read
      * @throws IORuntimeException if an I/O error occurs
      */
-    void reset() throws IORuntimeException;
+    public static int readTo(
+        @Nonnull InputStream src, @Nonnull ByteBuffer dst, int len
+    ) throws IORuntimeException {
+        if (len == 0 || dst.remaining() == 0) {
+            return 0;
+        }
+        try {
+            if (dst.hasArray()) {
+                byte[] buf = dst.array();
+                int off = dst.arrayOffset() + dst.position();
+                int actualLen = len < 0 ? dst.remaining() : Math.min(dst.remaining(), len);
+                int ret = readTo0(src, buf, off, actualLen);
+                if (ret <= 0) {
+                    return ret;
+                }
+                dst.position(dst.position() + ret);
+                return ret;
+            } else {
+                byte[] buf = new byte[len < 0 ? dst.remaining() : Math.min(dst.remaining(), len)];
+                int ret = readTo0(src, buf, 0, buf.length);
+                if (ret <= 0) {
+                    return ret;
+                }
+                dst.put(buf, 0, ret);
+                return ret;
+            }
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
 
     /**
-     * Closes this reader and the data source if the data source is closable. If this reader is already closed, this
-     * method has no effect.
+     * Reads all from the source channel into the specified output channel, until the read number reaches the specified
+     * length or reaches the end of the source channel, returns the actual number of bytes read to.
+     * <p>
+     * If the end of the source channel has already been reached, returns {@code -1}.
      *
+     * @param src the source channel
+     * @param dst the specified output channel
+     * @return the actual number of bytes read
      * @throws IORuntimeException if an I/O error occurs
      */
-    void close() throws IORuntimeException;
+    public static long readAllTo(
+        @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst
+    ) throws IORuntimeException {
+        return readTo0(src, dst, -1, bufferSize());
+    }
 
-    // /**
-    //  * Returns a new {@link ByteReader} backed by this instance, with read operations limited to the specified maximum
-    //  * number of bytes. The mark/reset operations are supported by and shared with this instance.
-    //  *
-    //  * @param readLimit the specified maximum number of bytes to read
-    //  * @return a new {@link ByteReader} backed by this, with read operations limited to the specified maximum number of
-    //  * bytes
-    //  * @throws IllegalArgumentException if the specified read limit is negative
-    //  */
-    // default @Nonnull ByteReader withReadLimit(long readLimit) throws IllegalArgumentException {
-    //     return ByteReaderImpl.of(this, readLimit);
+    /**
+     * Reads all from the source channel into the specified output channel, until the read number reaches the specified
+     * length or reaches the end of the source channel, returns the actual number of bytes read to.
+     * <p>
+     * If the end of the source channel has already been reached, returns {@code -1}.
+     *
+     * @param src     the source channel
+     * @param dst     the specified output channel
+     * @param bufSize specifies the buffer size for reading, must {@code > 0}
+     * @return the actual number of bytes read
+     * @throws IllegalArgumentException if the specified buffer size is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long readAllTo(
+        @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, int bufSize
+    ) throws IllegalArgumentException, IORuntimeException {
+        return readTo0(src, dst, -1, bufSize);
+    }
+
+    /**
+     * Reads the data of the specified length from the source channel into the specified output channel, until the read
+     * number reaches the specified length or reaches the end of the source channel, returns the actual number of bytes
+     * read to.
+     * <p>
+     * If the specified length {@code < 0}, this method reads all data; if the specified length {@code = 0}, returns
+     * {@code 0} without reading; if the end of the source channel has already been reached, returns {@code -1}.
+     *
+     * @param src the source channel
+     * @param dst the specified output channel
+     * @param len the specified length, must {@code >= 0}
+     * @return the actual number of bytes read
+     * @throws IllegalArgumentException if the specified length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long readTo(
+        @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, long len
+    ) throws IllegalArgumentException, IORuntimeException {
+        return readTo(src, dst, len, bufferSize());
+    }
+
+    /**
+     * Reads the data of the specified length from the source channel into the specified output channel, until the read
+     * number reaches the specified length or reaches the end of the source channel, returns the actual number of bytes
+     * read to.
+     * <p>
+     * If the specified length {@code < 0}, this method reads all data; if the specified length {@code = 0}, returns
+     * {@code 0} without reading; if the end of the source channel has already been reached, returns {@code -1}.
+     *
+     * @param src     the source channel
+     * @param dst     the specified output channel
+     * @param len     the specified length, must {@code >= 0}
+     * @param bufSize specifies the buffer size for reading, must {@code > 0}
+     * @return the actual number of bytes read
+     * @throws IllegalArgumentException if the specified length or buffer size is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long readTo(
+        @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, long len, int bufSize
+    ) throws IllegalArgumentException, IORuntimeException {
+        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        return readTo0(src, dst, len, bufSize);
+    }
+
+    private static long readTo0(
+        @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, long len, int bufSize
+    ) throws IllegalArgumentException, IORuntimeException {
+        JieCheck.checkArgument(bufSize > 0, "bufSize must > 0.");
+        if (len == 0) {
+            return 0;
+        }
+        try {
+            ByteBuffer buf = ByteBuffer.allocate(bufferSize(len, bufSize));
+            long count = 0;
+            while (true) {
+                int limit = len < 0 ? buf.remaining() : (int) Math.min(buf.remaining(), len - count);
+                buf.limit(limit);
+                int readSize = src.read(buf);
+                if (readSize < 0) {
+                    return count == 0 ? -1 : count;
+                }
+                buf.flip();
+                write(dst, buf);
+                buf.clear();
+                count += readSize;
+                if (len > 0 && count >= len) {
+                    return count;
+                }
+            }
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    /**
+     * Reads the data from the source channel into the specified array, until the read number reaches the array's length
+     * or reaches the end of the source channel, returns the actual number of bytes read to.
+     * <p>
+     * If the array's length {@code = 0}, returns {@code 0} without reading. If the end of the source channel has
+     * already been reached, returns {@code -1}.
+     *
+     * @param src the source channel
+     * @param dst the specified array
+     * @return the actual number of bytes read
+     * @throws IndexOutOfBoundsException if the array arguments are out of bounds
+     * @throws IORuntimeException        if an I/O error occurs
+     */
+    public static int readTo(
+        @Nonnull ReadableByteChannel src, byte @Nonnull [] dst
+    ) throws IndexOutOfBoundsException, IORuntimeException {
+        if (dst.length == 0) {
+            return 0;
+        }
+        return readTo0(src, ByteBuffer.wrap(dst), -1);
+    }
+
+    /**
+     * Reads the data from the source channel into the specified array (starting at the specified offset and up to the
+     * specified length), until the read number reaches the specified length or reaches the end of the source channel,
+     * returns the actual number of bytes read to.
+     * <p>
+     * If the specified length {@code = 0}, returns {@code 0} without reading. If the end of the source channel has
+     * already been reached, returns {@code -1}.
+     *
+     * @param src the source channel
+     * @param dst the specified array
+     * @param off the specified offset of the array
+     * @param len the specified length to read
+     * @return the actual number of bytes read
+     * @throws IndexOutOfBoundsException if the array arguments are out of bounds
+     * @throws IORuntimeException        if an I/O error occurs
+     */
+    public static int readTo(
+        @Nonnull ReadableByteChannel src, byte @Nonnull [] dst, int off, int len
+    ) throws IndexOutOfBoundsException, IORuntimeException {
+        JieCheck.checkOffsetLength(dst.length, off, len);
+        if (len == 0) {
+            return 0;
+        }
+        return readTo0(src, ByteBuffer.wrap(dst, off, len), len);
+    }
+
+    /**
+     * Reads the data from the source channel into the specified buffer, until the read number reaches the buffer's
+     * remaining or reaches the end of the source channel, returns the actual number of bytes read to.
+     * <p>
+     * If the buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the source channel has
+     * already been reached, returns {@code -1}.
+     * <p>
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source channel
+     * @param dst the specified buffer
+     * @return the actual number of bytes read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static int readTo(@Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst) throws IORuntimeException {
+        return readTo(src, dst, -1);
+    }
+
+    /**
+     * Reads the data of the specified length from the source channel into the specified buffer, until the read number
+     * reaches the buffer's remaining or reaches the end of the source channel, returns the actual number of bytes read
+     * to.
+     * <p>
+     * If the specified length {@code < 0}, this method performs as {@link #readTo(ReadableByteChannel, ByteBuffer)}; if
+     * the specified length or buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the
+     * source channel has already been reached, returns {@code -1}.
+     * <p>
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source channel
+     * @param dst the specified buffer
+     * @param len the specified length
+     * @return the actual number of bytes read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static int readTo(
+        @Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst, int len
+    ) throws IORuntimeException {
+        if (len == 0 || dst.remaining() == 0) {
+            return 0;
+        }
+        return readTo0(src, dst, len);
+    }
+
+    private static int readTo0(
+        @Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst, int len
+    ) throws IndexOutOfBoundsException, IORuntimeException {
+        try {
+            int oldLimit = dst.limit();
+            int newLimit = len < 0 ? oldLimit : Math.min(oldLimit, dst.position() + len);
+            dst.limit(newLimit);
+            int pos = dst.position();
+            do {
+                int readSize = src.read(dst);
+                if (readSize < 0) {
+                    dst.limit(oldLimit);
+                    int posNow = dst.position();
+                    return posNow == pos ? -1 : posNow - pos;
+                }
+            } while (dst.remaining() != 0);
+            dst.limit(oldLimit);
+            return dst.position() - pos;
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    // static class A {
+    //     /**
+    //      * Returns the recommended IO buffer size, typically is 1024 * 8 = 8192.
+    //      *
+    //      * @return the recommended IO buffer size
+    //      */
+    //     public static int bufferSize() {
+    //         return BUFFER_SIZE;
+    //     }
+    //
+    //     /**
+    //      * Determines the recommended buffer size based on the given length and the given buffer size, and its logic is as
+    //      * follows:
+    //      * <pre>{@code
+    //      * return len < 0 ? bufSize : (int) Math.min(len, bufSize);
+    //      * }</pre>
+    //      *
+    //      * @param len     the given length
+    //      * @param bufSize the given buffer size
+    //      * @return the recommended buffer size based on the given length and the given buffer size
+    //      */
+    //     public static int bufferSize(long len, int bufSize) {
+    //         return len < 0 ? bufSize : (int) Math.min(len, bufSize);
+    //     }
+    //
+    //     /**
+    //      * Reads all data from the source stream into a new array, continuing until reaches the end of the stream, and
+    //      * returns the array.
+    //      * <p>
+    //      * Note the data in the stream cannot exceed the maximum limit of the array.
+    //      *
+    //      * @param src the source stream
+    //      * @return the array containing the data
+    //      * @throws IORuntimeException if an I/O error occurs
+    //      */
+    //     @SuppressWarnings("resource")
+    //     public static byte @Nonnull [] read(@Nonnull InputStream src) throws IORuntimeException {
+    //         try {
+    //             int available = src.available();
+    //             byte[] buf = new byte[available > 0 ? available : bufferSize()];
+    //             BytesBuilder builder = null;
+    //             int off = 0;
+    //             while (true) {
+    //                 int readSize = src.read(buf, off, buf.length - off);
+    //                 if (readSize < 0) {
+    //                     if (builder != null) {
+    //                         builder.append(buf, 0, off);
+    //                         return builder.toByteArray();
+    //                     }
+    //                     return Arrays.copyOfRange(buf, 0, off);
+    //                 }
+    //                 off += readSize;
+    //                 if (off == buf.length) {
+    //                     if (builder == null) {
+    //                         int r = src.read();
+    //                         if (r == -1) {
+    //                             return buf;
+    //                         }
+    //                         builder = new BytesBuilder(buf.length + 1);
+    //                         builder.append(buf);
+    //                         builder.append(r);
+    //                     } else {
+    //                         builder.append(buf);
+    //                     }
+    //                     off = 0;
+    //                 }
+    //             }
+    //         } catch (IOException e) {
+    //             throw new IORuntimeException(e);
+    //         }
+    //     }
+    //
+    //     /**
+    //      * Reads the data of the specified length from the source stream into a new array, and returns the array. If the
+    //      * specified length {@code < 0}, this method performs as {@link #read(InputStream)}. If the specified length
+    //      * {@code = 0}, returns an empty array without reading. Otherwise, this method keeps reading until the read number
+    //      * reaches the specified length or reaches the end of the stream.
+    //      * <p>
+    //      * Note the length cannot exceed the maximum limit of the array.
+    //      *
+    //      * @param src the source stream
+    //      * @param len the specified read length
+    //      * @return the array containing the data
+    //      * @throws IORuntimeException if an I/O error occurs
+    //      */
+    //     public static byte @Nonnull [] read(@Nonnull InputStream src, int len) throws IORuntimeException {
+    //         if (len < 0) {
+    //             return read(src);
+    //         }
+    //         if (len == 0) {
+    //             return new byte[0];
+    //         }
+    //         try {
+    //             byte[] buf = new byte[len];
+    //             int off = 0;
+    //             while (off < len) {
+    //                 int readSize = src.read(buf, off, buf.length - off);
+    //                 if (readSize < 0) {
+    //                     return Arrays.copyOfRange(buf, 0, off);
+    //                 }
+    //                 off += readSize;
+    //             }
+    //             return buf;
+    //         } catch (IOException e) {
+    //             throw new IORuntimeException(e);
+    //         }
+    //     }
+    //
+    //     /**
+    //      * Reads all data from the source channel into a new buffer, continuing until reaches the end of the channel, and
+    //      * returns the buffer. The buffer's position is {@code 0}, limit equals to capacity, and it has a backing array of
+    //      * which offset is {@code 0}.
+    //      * <p>
+    //      * Note the data in the channel cannot exceed the maximum limit of the buffer.
+    //      *
+    //      * @param src the source channel
+    //      * @return the buffer containing the data
+    //      * @throws IORuntimeException if an I/O error occurs
+    //      */
+    //     @SuppressWarnings("resource")
+    //     public static @Nonnull ByteBuffer read(@Nonnull ReadableByteChannel src) throws IORuntimeException {
+    //         try {
+    //             BytesBuilder builder = null;
+    //             ByteBuffer buf = ByteBuffer.allocate(bufferSize());
+    //             while (true) {
+    //                 int readSize = src.read(buf);
+    //                 if (readSize < 0) {
+    //                     break;
+    //                 }
+    //                 if (buf.remaining() == 0) {
+    //                     if (builder == null) {
+    //                         int lastIndex = buf.capacity() - 1;
+    //                         byte b = buf.get(lastIndex);
+    //                         buf.position(lastIndex);
+    //                         int r = src.read(buf);
+    //                         buf.position(0);
+    //                         if (r < 0) {
+    //                             return buf;
+    //                         }
+    //                         builder = new BytesBuilder(buf.capacity() + 1);
+    //                         buf.limit(lastIndex);
+    //                         builder.append(buf);
+    //                         builder.append(b);
+    //                         buf.limit(buf.capacity());
+    //                         builder.append(buf);
+    //                     } else {
+    //                         buf.flip();
+    //                         builder.append(buf);
+    //                     }
+    //                     buf.flip();
+    //                 }
+    //             }
+    //             if (builder == null) {
+    //                 return ByteBuffer.wrap(Arrays.copyOfRange(buf.array(), 0, buf.position()));
+    //             } else {
+    //                 if (buf.position() > 0) {
+    //                     buf.flip();
+    //                     builder.append(buf);
+    //                 }
+    //                 return builder.toByteBuffer();
+    //             }
+    //         } catch (IOException e) {
+    //             throw new IORuntimeException(e);
+    //         }
+    //     }
+    //
+    //     /**
+    //      * Reads the data of the specified length from the source channel into a new buffer, and returns the buffer. If the
+    //      * specified length {@code < 0}, this method performs as {@link #read(ReadableByteChannel)}. If the specified length
+    //      * {@code length = 0}, returns an empty buffer without reading. Otherwise, this method keeps reading until the read
+    //      * number reaches the specified length or reaches the end of the channel.
+    //      * <p>
+    //      * The buffer's position is {@code 0}, limit equals to capacity, and it has a backing array of which offset is
+    //      * {@code 0}. And note the length cannot exceed the maximum limit of the buffer.
+    //      *
+    //      * @param src the source channel
+    //      * @param len the specified read length
+    //      * @return the buffer containing the data
+    //      * @throws IORuntimeException if an I/O error occurs
+    //      */
+    //     public static @Nonnull ByteBuffer read(@Nonnull ReadableByteChannel src, int len) throws IORuntimeException {
+    //         if (len < 0) {
+    //             return read(src);
+    //         }
+    //         if (len == 0) {
+    //             return ByteBuffer.allocate(0);
+    //         }
+    //         try {
+    //             ByteBuffer dst = ByteBuffer.allocate(len);
+    //             while (dst.remaining() > 0) {
+    //                 int readSize = src.read(dst);
+    //                 if (readSize < 0) {
+    //                     return ByteBuffer.wrap(Arrays.copyOfRange(dst.array(), 0, dst.position()));
+    //                 }
+    //             }
+    //             dst.flip();
+    //             return dst;
+    //         } catch (IOException e) {
+    //             throw new IORuntimeException(e);
+    //         }
+    //     }
+    //
+    //     /**
+    //      * Reads all from the source stream into the specified output stream, until the read number reaches the specified
+    //      * length or reaches the end of the source stream, returns the actual number of bytes read to.
+    //      * <p>
+    //      * If the end of the source stream has already been reached, returns {@code -1}.
+    //      * <p>
+    //      * This method never invoke the {@link OutputStream#flush()} to force the backing buffer.
+    //      *
+    //      * @param src the source stream
+    //      * @param dst the specified output stream
+    //      * @return the actual number of bytes read
+    //      * @throws IORuntimeException if an I/O error occurs
+    //      */
+    //     public static long readAllTo(
+    //         @Nonnull InputStream src, @Nonnull OutputStream dst
+    //     ) throws IORuntimeException {
+    //         return readTo0(src, dst, -1, bufferSize());
+    //     }
+    //
+    //     /**
+    //      * Reads all from the source stream into the specified output stream, until the read number reaches the specified
+    //      * length or reaches the end of the source stream, returns the actual number of bytes read to.
+    //      * <p>
+    //      * If the end of the source stream has already been reached, returns {@code -1}.
+    //      * <p>
+    //      * This method never invoke the {@link OutputStream#flush()} to force the backing buffer.
+    //      *
+    //      * @param src     the source stream
+    //      * @param dst     the specified output stream
+    //      * @param bufSize specifies the buffer size for reading, must {@code > 0}
+    //      * @return the actual number of bytes read
+    //      * @throws IllegalArgumentException if the specified buffer size is illegal
+    //      * @throws IORuntimeException       if an I/O error occurs
+    //      */
+    //     public static long readAllTo(
+    //         @Nonnull InputStream src, @Nonnull OutputStream dst, int bufSize
+    //     ) throws IllegalArgumentException, IORuntimeException {
+    //         return readTo0(src, dst, -1, bufSize);
+    //     }
+    //
+    //     /**
+    //      * Reads the data of the specified length from the source stream into the specified output stream, until the read
+    //      * number reaches the specified length or reaches the end of the source stream, returns the actual number of bytes
+    //      * read to.
+    //      * <p>
+    //      * If the specified length {@code = 0}, returns {@code 0} without reading; if the end of the source stream has
+    //      * already been reached, returns {@code -1}.
+    //      * <p>
+    //      * This method never invoke the {@link OutputStream#flush()} to force the backing buffer.
+    //      *
+    //      * @param src the source stream
+    //      * @param dst the specified output stream
+    //      * @param len the specified length, must {@code >= 0}
+    //      * @return the actual number of bytes read
+    //      * @throws IllegalArgumentException if the specified length is illegal
+    //      * @throws IORuntimeException       if an I/O error occurs
+    //      */
+    //     public static long readTo(
+    //         @Nonnull InputStream src, @Nonnull OutputStream dst, long len
+    //     ) throws IllegalArgumentException, IORuntimeException {
+    //         return readTo(src, dst, len, bufferSize());
+    //     }
+    //
+    //     /**
+    //      * Reads the data of the specified length from the source stream into the specified output stream, until the read
+    //      * number reaches the specified length or reaches the end of the source stream, returns the actual number of bytes
+    //      * read to.
+    //      * <p>
+    //      * If the specified length {@code = 0}, returns {@code 0} without reading; if the end of the source stream has
+    //      * already been reached, returns {@code -1}.
+    //      * <p>
+    //      * This method never invoke the {@link OutputStream#flush()} to force the backing buffer.
+    //      *
+    //      * @param src     the source stream
+    //      * @param dst     the specified output stream
+    //      * @param len     the specified length, must {@code >= 0}
+    //      * @param bufSize specifies the buffer size for reading, must {@code > 0}
+    //      * @return the actual number of bytes read
+    //      * @throws IllegalArgumentException if the specified length or buffer size is illegal
+    //      * @throws IORuntimeException       if an I/O error occurs
+    //      */
+    //     public static long readTo(
+    //         @Nonnull InputStream src, @Nonnull OutputStream dst, long len, int bufSize
+    //     ) throws IllegalArgumentException, IORuntimeException {
+    //         JieCheck.checkArgument(len >= 0, "len must >= 0.");
+    //         return readTo0(src, dst, len, bufSize);
+    //     }
+    //
+    //     private static long readTo0(
+    //         @Nonnull InputStream src, @Nonnull OutputStream dst, long len, int bufSize
+    //     ) throws IllegalArgumentException, IORuntimeException {
+    //         JieCheck.checkArgument(bufSize > 0, "bufSize must > 0.");
+    //         if (len == 0) {
+    //             return 0;
+    //         }
+    //         try {
+    //             byte[] buf = new byte[bufferSize(len, bufSize)];
+    //             long count = 0;
+    //             while (true) {
+    //                 int readSize = len < 0 ?
+    //                     src.read(buf)
+    //                     :
+    //                     src.read(buf, 0, (int) Math.min(buf.length, len - count));
+    //                 if (readSize < 0) {
+    //                     return count == 0 ? -1 : count;
+    //                 }
+    //                 dst.write(buf, 0, readSize);
+    //                 count += readSize;
+    //                 if (len > 0 && count >= len) {
+    //                     return count;
+    //                 }
+    //             }
+    //         } catch (IOException e) {
+    //             throw new IORuntimeException(e);
+    //         }
+    //     }
+    //
+    //     /**
+    //      * Reads the data from the source stream into the specified array, until the read number reaches the array's length
+    //      * or reaches the end of the source stream, returns the actual number of bytes read to.
+    //      * <p>
+    //      * If the array's length {@code = 0}, returns {@code 0} without reading. If the end of the source stream has already
+    //      * been reached, returns {@code -1}.
+    //      *
+    //      * @param src the source stream
+    //      * @param dst the specified array
+    //      * @return the actual number of bytes read
+    //      * @throws IndexOutOfBoundsException if the array arguments are out of bounds
+    //      * @throws IORuntimeException        if an I/O error occurs
+    //      */
+    //     public static int readTo(
+    //         @Nonnull InputStream src, byte @Nonnull [] dst
+    //     ) throws IndexOutOfBoundsException, IORuntimeException {
+    //         if (dst.length == 0) {
+    //             return 0;
+    //         }
+    //         return readTo0(src, dst, 0, dst.length);
+    //     }
+    //
+    //     /**
+    //      * Reads the data from the source stream into the specified array (starting at the specified offset and up to the
+    //      * specified length), until the read number reaches the specified length or reaches the end of the source stream,
+    //      * returns the actual number of bytes read to.
+    //      * <p>
+    //      * If the specified length {@code = 0}, returns {@code 0} without reading. If the end of the source stream has
+    //      * already been reached, returns {@code -1}.
+    //      *
+    //      * @param src the source stream
+    //      * @param dst the specified array
+    //      * @param off the specified offset of the array
+    //      * @param len the specified length to read
+    //      * @return the actual number of bytes read
+    //      * @throws IndexOutOfBoundsException if the array arguments are out of bounds
+    //      * @throws IORuntimeException        if an I/O error occurs
+    //      */
+    //     public static int readTo(
+    //         @Nonnull InputStream src, byte @Nonnull [] dst, int off, int len
+    //     ) throws IndexOutOfBoundsException, IORuntimeException {
+    //         JieCheck.checkOffsetLength(dst.length, off, len);
+    //         if (len == 0) {
+    //             return 0;
+    //         }
+    //         return readTo0(src, dst, off, len);
+    //     }
+    //
+    //     private static int readTo0(
+    //         @Nonnull InputStream src, byte @Nonnull [] dst, int off, int len
+    //     ) throws IndexOutOfBoundsException, IORuntimeException {
+    //         try {
+    //             int count = 0;
+    //             while (count < len) {
+    //                 int readSize = src.read(dst, off + count, len - count);
+    //                 if (readSize < 0) {
+    //                     return count == 0 ? -1 : count;
+    //                 }
+    //                 count += readSize;
+    //             }
+    //             return count;
+    //         } catch (IOException e) {
+    //             throw new IORuntimeException(e);
+    //         }
+    //     }
+    //
+    //     /**
+    //      * Reads the data from the source stream into the specified buffer, until the read number reaches the buffer's
+    //      * remaining or reaches the end of the source stream, returns the actual number of bytes read to.
+    //      * <p>
+    //      * If the buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the source stream has
+    //      * already been reached, returns {@code -1}.
+    //      * <p>
+    //      * The buffer's position increments by the actual read number.
+    //      *
+    //      * @param src the source stream
+    //      * @param dst the specified buffer
+    //      * @return the actual number of bytes read
+    //      * @throws IORuntimeException if an I/O error occurs
+    //      */
+    //     public static int readTo(@Nonnull InputStream src, @Nonnull ByteBuffer dst) throws IORuntimeException {
+    //         return readTo(src, dst, -1);
+    //     }
+    //
+    //     /**
+    //      * Reads the data of the specified length from the source stream into the specified buffer, until the read number
+    //      * reaches the buffer's remaining or reaches the end of the source stream, returns the actual number of bytes read
+    //      * to.
+    //      * <p>
+    //      * If the specified length {@code < 0}, this method performs as {@link #readTo(InputStream, ByteBuffer)}; if the
+    //      * specified length or buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the source
+    //      * stream has already been reached, returns {@code -1}.
+    //      * <p>
+    //      * The buffer's position increments by the actual read number.
+    //      *
+    //      * @param src the source stream
+    //      * @param dst the specified buffer
+    //      * @param len the specified length
+    //      * @return the actual number of bytes read
+    //      * @throws IORuntimeException if an I/O error occurs
+    //      */
+    //     public static int readTo(
+    //         @Nonnull InputStream src, @Nonnull ByteBuffer dst, int len
+    //     ) throws IORuntimeException {
+    //         if (len == 0 || dst.remaining() == 0) {
+    //             return 0;
+    //         }
+    //         try {
+    //             if (dst.hasArray()) {
+    //                 byte[] buf = dst.array();
+    //                 int off = dst.arrayOffset() + dst.position();
+    //                 int actualLen = len < 0 ? dst.remaining() : Math.min(dst.remaining(), len);
+    //                 int ret = readTo0(src, buf, off, actualLen);
+    //                 if (ret <= 0) {
+    //                     return ret;
+    //                 }
+    //                 dst.position(dst.position() + ret);
+    //                 return ret;
+    //             } else {
+    //                 byte[] buf = new byte[len < 0 ? dst.remaining() : Math.min(dst.remaining(), len)];
+    //                 int ret = readTo0(src, buf, 0, buf.length);
+    //                 if (ret <= 0) {
+    //                     return ret;
+    //                 }
+    //                 dst.put(buf, 0, ret);
+    //                 return ret;
+    //             }
+    //         } catch (Exception e) {
+    //             throw new IORuntimeException(e);
+    //         }
+    //     }
+    //
+    //     /**
+    //      * Reads all from the source channel into the specified output channel, until the read number reaches the specified
+    //      * length or reaches the end of the source channel, returns the actual number of bytes read to.
+    //      * <p>
+    //      * If the end of the source channel has already been reached, returns {@code -1}.
+    //      *
+    //      * @param src the source channel
+    //      * @param dst the specified output channel
+    //      * @return the actual number of bytes read
+    //      * @throws IORuntimeException if an I/O error occurs
+    //      */
+    //     public static long readAllTo(
+    //         @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst
+    //     ) throws IORuntimeException {
+    //         return readTo0(src, dst, -1, bufferSize());
+    //     }
+    //
+    //     /**
+    //      * Reads all from the source channel into the specified output channel, until the read number reaches the specified
+    //      * length or reaches the end of the source channel, returns the actual number of bytes read to.
+    //      * <p>
+    //      * If the end of the source channel has already been reached, returns {@code -1}.
+    //      *
+    //      * @param src     the source channel
+    //      * @param dst     the specified output channel
+    //      * @param bufSize specifies the buffer size for reading, must {@code > 0}
+    //      * @return the actual number of bytes read
+    //      * @throws IllegalArgumentException if the specified buffer size is illegal
+    //      * @throws IORuntimeException       if an I/O error occurs
+    //      */
+    //     public static long readAllTo(
+    //         @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, int bufSize
+    //     ) throws IllegalArgumentException, IORuntimeException {
+    //         return readTo0(src, dst, -1, bufSize);
+    //     }
+    //
+    //     /**
+    //      * Reads the data of the specified length from the source channel into the specified output channel, until the read
+    //      * number reaches the specified length or reaches the end of the source channel, returns the actual number of bytes
+    //      * read to.
+    //      * <p>
+    //      * If the specified length {@code < 0}, this method reads all data; if the specified length {@code = 0}, returns
+    //      * {@code 0} without reading; if the end of the source channel has already been reached, returns {@code -1}.
+    //      *
+    //      * @param src the source channel
+    //      * @param dst the specified output channel
+    //      * @param len the specified length, must {@code >= 0}
+    //      * @return the actual number of bytes read
+    //      * @throws IllegalArgumentException if the specified length is illegal
+    //      * @throws IORuntimeException       if an I/O error occurs
+    //      */
+    //     public static long readTo(
+    //         @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, long len
+    //     ) throws IllegalArgumentException, IORuntimeException {
+    //         return readTo(src, dst, len, bufferSize());
+    //     }
+    //
+    //     /**
+    //      * Reads the data of the specified length from the source channel into the specified output channel, until the read
+    //      * number reaches the specified length or reaches the end of the source channel, returns the actual number of bytes
+    //      * read to.
+    //      * <p>
+    //      * If the specified length {@code < 0}, this method reads all data; if the specified length {@code = 0}, returns
+    //      * {@code 0} without reading; if the end of the source channel has already been reached, returns {@code -1}.
+    //      *
+    //      * @param src     the source channel
+    //      * @param dst     the specified output channel
+    //      * @param len     the specified length, must {@code >= 0}
+    //      * @param bufSize specifies the buffer size for reading, must {@code > 0}
+    //      * @return the actual number of bytes read
+    //      * @throws IllegalArgumentException if the specified length or buffer size is illegal
+    //      * @throws IORuntimeException       if an I/O error occurs
+    //      */
+    //     public static long readTo(
+    //         @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, long len, int bufSize
+    //     ) throws IllegalArgumentException, IORuntimeException {
+    //         JieCheck.checkArgument(len >= 0, "len must >= 0.");
+    //         return readTo0(src, dst, len, bufSize);
+    //     }
+    //
+    //     private static long readTo0(
+    //         @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, long len, int bufSize
+    //     ) throws IllegalArgumentException, IORuntimeException {
+    //         JieCheck.checkArgument(bufSize > 0, "bufSize must > 0.");
+    //         if (len == 0) {
+    //             return 0;
+    //         }
+    //         try {
+    //             ByteBuffer buf = ByteBuffer.allocate(bufferSize(len, bufSize));
+    //             long count = 0;
+    //             while (true) {
+    //                 int limit = len < 0 ? buf.remaining() : (int) Math.min(buf.remaining(), len - count);
+    //                 buf.limit(limit);
+    //                 int readSize = src.read(buf);
+    //                 if (readSize < 0) {
+    //                     return count == 0 ? -1 : count;
+    //                 }
+    //                 buf.flip();
+    //                 write(dst, buf);
+    //                 buf.clear();
+    //                 count += readSize;
+    //                 if (len > 0 && count >= len) {
+    //                     return count;
+    //                 }
+    //             }
+    //         } catch (IOException e) {
+    //             throw new IORuntimeException(e);
+    //         }
+    //     }
+    //
+    //     /**
+    //      * Reads the data from the source channel into the specified array, until the read number reaches the array's length
+    //      * or reaches the end of the source channel, returns the actual number of bytes read to.
+    //      * <p>
+    //      * If the array's length {@code = 0}, returns {@code 0} without reading. If the end of the source channel has
+    //      * already been reached, returns {@code -1}.
+    //      *
+    //      * @param src the source channel
+    //      * @param dst the specified array
+    //      * @return the actual number of bytes read
+    //      * @throws IndexOutOfBoundsException if the array arguments are out of bounds
+    //      * @throws IORuntimeException        if an I/O error occurs
+    //      */
+    //     public static int readTo(
+    //         @Nonnull ReadableByteChannel src, byte @Nonnull [] dst
+    //     ) throws IndexOutOfBoundsException, IORuntimeException {
+    //         if (dst.length == 0) {
+    //             return 0;
+    //         }
+    //         return readTo0(src, ByteBuffer.wrap(dst), -1);
+    //     }
+    //
+    //     /**
+    //      * Reads the data from the source channel into the specified array (starting at the specified offset and up to the
+    //      * specified length), until the read number reaches the specified length or reaches the end of the source channel,
+    //      * returns the actual number of bytes read to.
+    //      * <p>
+    //      * If the specified length {@code = 0}, returns {@code 0} without reading. If the end of the source channel has
+    //      * already been reached, returns {@code -1}.
+    //      *
+    //      * @param src the source channel
+    //      * @param dst the specified array
+    //      * @param off the specified offset of the array
+    //      * @param len the specified length to read
+    //      * @return the actual number of bytes read
+    //      * @throws IndexOutOfBoundsException if the array arguments are out of bounds
+    //      * @throws IORuntimeException        if an I/O error occurs
+    //      */
+    //     public static int readTo(
+    //         @Nonnull ReadableByteChannel src, byte @Nonnull [] dst, int off, int len
+    //     ) throws IndexOutOfBoundsException, IORuntimeException {
+    //         JieCheck.checkOffsetLength(dst.length, off, len);
+    //         if (len == 0) {
+    //             return 0;
+    //         }
+    //         return readTo0(src, ByteBuffer.wrap(dst, off, len), len);
+    //     }
+    //
+    //     /**
+    //      * Reads the data from the source channel into the specified buffer, until the read number reaches the buffer's
+    //      * remaining or reaches the end of the source channel, returns the actual number of bytes read to.
+    //      * <p>
+    //      * If the buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the source channel has
+    //      * already been reached, returns {@code -1}.
+    //      * <p>
+    //      * The buffer's position increments by the actual read number.
+    //      *
+    //      * @param src the source channel
+    //      * @param dst the specified buffer
+    //      * @return the actual number of bytes read
+    //      * @throws IORuntimeException if an I/O error occurs
+    //      */
+    //     public static int readTo(@Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst) throws IORuntimeException {
+    //         return readTo(src, dst, -1);
+    //     }
+    //
+    //     /**
+    //      * Reads the data of the specified length from the source channel into the specified buffer, until the read number
+    //      * reaches the buffer's remaining or reaches the end of the source channel, returns the actual number of bytes read
+    //      * to.
+    //      * <p>
+    //      * If the specified length {@code < 0}, this method performs as {@link #readTo(ReadableByteChannel, ByteBuffer)}; if
+    //      * the specified length or buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the
+    //      * source channel has already been reached, returns {@code -1}.
+    //      * <p>
+    //      * The buffer's position increments by the actual read number.
+    //      *
+    //      * @param src the source channel
+    //      * @param dst the specified buffer
+    //      * @param len the specified length
+    //      * @return the actual number of bytes read
+    //      * @throws IORuntimeException if an I/O error occurs
+    //      */
+    //     public static int readTo(
+    //         @Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst, int len
+    //     ) throws IORuntimeException {
+    //         if (len == 0 || dst.remaining() == 0) {
+    //             return 0;
+    //         }
+    //         return readTo0(src, dst, len);
+    //     }
+    //
+    //     private static int readTo0(
+    //         @Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst, int len
+    //     ) throws IndexOutOfBoundsException, IORuntimeException {
+    //         try {
+    //             int oldLimit = dst.limit();
+    //             int newLimit = len < 0 ? oldLimit : Math.min(oldLimit, dst.position() + len);
+    //             dst.limit(newLimit);
+    //             int pos = dst.position();
+    //             do {
+    //                 int readSize = src.read(dst);
+    //                 if (readSize < 0) {
+    //                     dst.limit(oldLimit);
+    //                     int posNow = dst.position();
+    //                     return posNow == pos ? -1 : posNow - pos;
+    //                 }
+    //             } while (dst.remaining() != 0);
+    //             dst.limit(oldLimit);
+    //             return dst.position() - pos;
+    //         } catch (IOException e) {
+    //             throw new IORuntimeException(e);
+    //         }
+    //     }
     // }
 }
