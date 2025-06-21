@@ -347,7 +347,7 @@ public interface ByteReader {
     default long readTo(
         @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst
     ) throws IORuntimeException {
-        return ByteReaderBack.readTo(src, dst, -1, bufferSize());
+        return ByteReaderBack.readTo(this, src, dst, -1, bufferSize());
     }
 
     /**
@@ -369,7 +369,7 @@ public interface ByteReader {
         @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
         JieCheck.checkArgument(len >= 0, "len must >= 0.");
-        return ByteReaderBack.readTo(src, dst, len, bufferSize());
+        return ByteReaderBack.readTo(this, src, dst, len, bufferSize());
     }
 
     /**
@@ -450,6 +450,90 @@ public interface ByteReader {
      */
     default int readTo(
         @Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst, int len
+    ) throws IORuntimeException {
+        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        return ByteReaderBack.readTo(src, dst, len);
+    }
+
+    /**
+     * Reads the data from the source buffer into the specified channel, until the read number reaches the buffer's
+     * remaining or reaches the end of the source buffer, returns the actual number of bytes read to.
+     * <p>
+     * If the buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the source buffer has
+     * already been reached, returns {@code -1}.
+     * <p>
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the specified channel
+     * @return the actual number of bytes read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    default int readTo(@Nonnull ByteBuffer src, @Nonnull WritableByteChannel dst) throws IORuntimeException {
+        return ByteReaderBack.readTo(src, dst, -1);
+    }
+
+    /**
+     * Reads the data of the specified length from the source buffer into the specified channel, until the read number
+     * reaches the buffer's remaining or reaches the end of the source buffer, returns the actual number of bytes read
+     * to.
+     * <p>
+     * If the specified length or buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the
+     * source buffer has already been reached, returns {@code -1}.
+     * <p>
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the specified channel
+     * @param len the specified length, must {@code >= 0}
+     * @return the actual number of bytes read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    default int readTo(
+        @Nonnull ByteBuffer src, @Nonnull WritableByteChannel dst, int len
+    ) throws IORuntimeException {
+        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        return ByteReaderBack.readTo(src, dst, len);
+    }
+
+    /**
+     * Reads the data from the source buffer into the specified stream, until the read number reaches the buffer's
+     * remaining or reaches the end of the source buffer, returns the actual number of bytes read to.
+     * <p>
+     * If the buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the source buffer has
+     * already been reached, returns {@code -1}.
+     * <p>
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the specified stream
+     * @return the actual number of bytes read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    default int readTo(@Nonnull ByteBuffer src, @Nonnull OutputStream dst) throws IORuntimeException {
+        return ByteReaderBack.readTo(src, dst, -1);
+    }
+
+    /**
+     * Reads the data of the specified length from the source buffer into the specified stream, until the read number
+     * reaches the buffer's remaining or reaches the end of the source buffer, returns the actual number of bytes read
+     * to.
+     * <p>
+     * If the specified length or buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the
+     * source buffer has already been reached, returns {@code -1}.
+     * <p>
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the specified stream
+     * @param len the specified length, must {@code >= 0}
+     * @return the actual number of bytes read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    default int readTo(
+        @Nonnull ByteBuffer src, @Nonnull OutputStream dst, long len
     ) throws IORuntimeException {
         JieCheck.checkArgument(len >= 0, "len must >= 0.");
         return ByteReaderBack.readTo(src, dst, len);

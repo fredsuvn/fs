@@ -755,11 +755,11 @@ public class ByteProcessorTest {
             );
             assertEquals(
                 ByteProcessor.from(new byte[0]).toInputStream().getClass(),
-                JieIO.inStream(new byte[0]).getClass()
+                JieIO.newInputStream(new byte[0]).getClass()
             );
             assertEquals(
                 ByteProcessor.from(ByteBuffer.allocate(0)).toInputStream().getClass(),
-                JieIO.inStream(ByteBuffer.allocate(0)).getClass()
+                JieIO.newInputStream(ByteBuffer.allocate(0)).getClass()
             );
             ByteProcessor inst = ByteProcessor.from(new byte[0]);
             invokeThrows(

@@ -1,23 +1,28 @@
 package test.io;
 
+import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.chars.CharsBuilder;
+import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieIO;
 import xyz.sunqian.test.ErrorAppender;
-import xyz.sunqian.test.ErrorOutputStream;
+import xyz.sunqian.test.ReadOps;
+import xyz.sunqian.test.TestInputStream;
 
 import java.io.ByteArrayInputStream;
 import java.io.CharArrayReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.Channels;
 import java.util.Arrays;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.expectThrows;
 
 public class IOTest {
@@ -57,6 +62,7 @@ public class IOTest {
                 data.length
             );
             assertEquals(data, builder.toByteArray());
+            builder.reset();
             // to array
             byte[] dst = new byte[data.length];
             assertEquals(JieIO.readTo(new ByteArrayInputStream(data), dst), data.length);
@@ -92,6 +98,30 @@ public class IOTest {
                 data.length
             );
             assertEquals(data, dstBuf.array());
+            // read buffer
+            assertEquals(
+                JieIO.readTo(ByteBuffer.wrap(data), builder),
+                data.length
+            );
+            assertEquals(builder.toByteArray(), data);
+            builder.reset();
+            assertEquals(
+                JieIO.readTo(ByteBuffer.wrap(data), builder, 5),
+                5
+            );
+            assertEquals(builder.toByteArray(), Arrays.copyOf(data, 5));
+            builder.reset();
+            assertEquals(
+                JieIO.readTo(ByteBuffer.wrap(data), Channels.newChannel(builder)),
+                data.length
+            );
+            assertEquals(builder.toByteArray(), data);
+            builder.reset();
+            assertEquals(
+                JieIO.readTo(ByteBuffer.wrap(data), Channels.newChannel(builder), 5),
+                5
+            );
+            assertEquals(builder.toByteArray(), Arrays.copyOf(data, 5));
         }
         {
             // char
@@ -108,6 +138,7 @@ public class IOTest {
             builder.reset();
             assertEquals(JieIO.readTo(new CharArrayReader(data), builder, data.length), data.length);
             assertEquals(data, builder.toCharArray());
+            builder.reset();
             // to array
             char[] dst = new char[data.length];
             assertEquals(JieIO.readTo(new CharArrayReader(data), dst), data.length);
@@ -125,76 +156,120 @@ public class IOTest {
             dstBuf = CharBuffer.allocate(data.length);
             assertEquals(JieIO.readTo(new CharArrayReader(data), dstBuf, data.length), data.length);
             assertEquals(data, dstBuf.array());
+            // read buffer
+            assertEquals(
+                JieIO.readTo(CharBuffer.wrap(data), builder),
+                data.length
+            );
+            assertEquals(builder.toCharArray(), data);
+            builder.reset();
+            assertEquals(
+                JieIO.readTo(CharBuffer.wrap(data), builder, 5),
+                5
+            );
+            assertEquals(builder.toCharArray(), Arrays.copyOf(data, 5));
         }
     }
 
     @Test
     public void testWrite() throws Exception {
-        {
-            // channel
-            byte[] data = JieRandom.fill(new byte[1024]);
-            BytesBuilder out = new BytesBuilder();
-            JieIO.write(Channels.newChannel(out), ByteBuffer.wrap(data));
-            assertEquals(out.toByteArray(), data);
-            expectThrows(IORuntimeException.class, () ->
-                JieIO.write(Channels.newChannel(new ErrorOutputStream()), ByteBuffer.wrap(data)));
-        }
-        {
-            // appender
-            char[] data = JieRandom.fill(new char[1024]);
-            CharsBuilder appender1 = new CharsBuilder();
-            JieIO.write(appender1, data);
-            assertEquals(appender1.toCharArray(), data);
-            appender1.reset();
-            JieIO.write(appender1, data, 33, 99);
-            assertEquals(appender1.toCharArray(), Arrays.copyOfRange(data, 33, 33 + 99));
-            class Appender implements Appendable {
+        char[] data = JieRandom.fill(new char[1024]);
+        CharsBuilder appender1 = new CharsBuilder();
+        JieIO.write(appender1, data);
+        assertEquals(appender1.toCharArray(), data);
+        appender1.reset();
+        JieIO.write(appender1, data, 33, 99);
+        assertEquals(appender1.toCharArray(), Arrays.copyOfRange(data, 33, 33 + 99));
+        class Appender implements Appendable {
 
-                private final CharsBuilder appender = new CharsBuilder();
+            private final CharsBuilder appender = new CharsBuilder();
 
-                @Override
-                public Appendable append(CharSequence csq) throws IOException {
-                    return appender.append(csq);
-                }
-
-                @Override
-                public Appendable append(CharSequence csq, int start, int end) throws IOException {
-                    return appender.append(csq, start, end);
-                }
-
-                @Override
-                public Appendable append(char c) throws IOException {
-                    return appender.append(c);
-                }
-
-                public char[] toCharArray() {
-                    return appender.toCharArray();
-                }
-
-                public void reset() {
-                    appender.reset();
-                }
+            @Override
+            public Appendable append(CharSequence csq) throws IOException {
+                return appender.append(csq);
             }
-            Appender appender2 = new Appender();
-            JieIO.write(appender2, data);
-            assertEquals(appender2.toCharArray(), data);
-            appender2.reset();
-            JieIO.write(appender2, data, 33, 99);
-            assertEquals(appender2.toCharArray(), Arrays.copyOfRange(data, 33, 33 + 99));
-            expectThrows(IORuntimeException.class, () -> JieIO.write(new ErrorAppender(), data));
+
+            @Override
+            public Appendable append(CharSequence csq, int start, int end) throws IOException {
+                return appender.append(csq, start, end);
+            }
+
+            @Override
+            public Appendable append(char c) throws IOException {
+                return appender.append(c);
+            }
+
+            public char[] toCharArray() {
+                return appender.toCharArray();
+            }
+
+            public void reset() {
+                appender.reset();
+            }
         }
-        // {
-        //     // write buffer
-        //     char[] data = JieRandom.fill(new char[256]);
-        //     CharsBuilder builder = new CharsBuilder();
-        //     CharBuffer buffer = CharBuffer.wrap(data, 5, 100);
-        //     assertEquals(buffer.position(), 5);
-        //     assertEquals(buffer.limit(), 5 + 100);
-        //     JieIO.write(builder, buffer);
-        //     assertEquals(builder.toCharArray(), Arrays.copyOfRange(data, 5, 5 + 100));
-        //     assertEquals(buffer.position(), 5 + 100);
-        //     assertEquals(buffer.limit(), 5 + 100);
-        // }
+        Appender appender2 = new Appender();
+        JieIO.write(appender2, data);
+        assertEquals(appender2.toCharArray(), data);
+        appender2.reset();
+        JieIO.write(appender2, data, 33, 99);
+        assertEquals(appender2.toCharArray(), Arrays.copyOfRange(data, 33, 33 + 99));
+        expectThrows(IORuntimeException.class, () -> JieIO.write(new ErrorAppender(), data));
+    }
+
+    @Test
+    public void testAvailable() throws Exception {
+        byte[] data = JieRandom.fill(new byte[10]);
+        class In extends InputStream {
+
+            private final int avai;
+            private final int read;
+
+            In(int avai, int read) {
+                this.avai = avai;
+                this.read = read;
+            }
+
+            @Override
+            public int available() throws IOException {
+                return avai;
+            }
+
+            @Override
+            public int read() throws IOException {
+                return -1;
+            }
+
+            @Override
+            public int read(@NotNull byte[] b, int off, int len) throws IOException {
+                if (read < 0) {
+                    return read;
+                }
+                System.arraycopy(data, 0, b, off, len);
+                return read;
+            }
+        }
+        assertEquals(JieIO.available(new In(5, 5)), Arrays.copyOf(data, 5));
+        assertEquals(JieIO.available(new In(6, 5)), Arrays.copyOf(data, 5));
+        assertEquals(JieIO.available(new In(-1, 5)), Arrays.copyOf(data, 0));
+        assertEquals(JieIO.available(new In(0, 5)), Arrays.copyOf(data, 0));
+        assertEquals(JieIO.available(new In(5, -5)), Arrays.copyOf(data, 0));
+        TestInputStream tin = new TestInputStream(new ByteArrayInputStream(data));
+        tin.setNextOperation(ReadOps.THROW);
+        expectThrows(IORuntimeException.class, () -> JieIO.available(tin));
+    }
+
+    @Test
+    public void testOthers() throws Exception {
+        {
+            // string
+            String hello = "hello";
+            assertEquals(JieIO.string(new ByteArrayInputStream(hello.getBytes(JieChars.defaultCharset()))), hello);
+            assertEquals(
+                JieIO.string(new ByteArrayInputStream(hello.getBytes(JieChars.defaultCharset())), JieChars.defaultCharset()),
+                hello
+            );
+            assertNull(JieIO.string(new ByteArrayInputStream(new byte[0])));
+        }
     }
 
     @Test

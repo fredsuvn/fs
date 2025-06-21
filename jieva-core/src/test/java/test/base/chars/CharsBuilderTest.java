@@ -97,13 +97,13 @@ public class CharsBuilderTest {
         assertEquals(bb.toCharArray(), Arrays.copyOf(bs, 30));
         assertEquals(buffer.position(), 5);
         assertFalse(buffer.hasRemaining());
-        bb.append(JieIO.reader(Arrays.copyOfRange(bs, 30, 40)));
+        bb.append(JieIO.newReader(Arrays.copyOfRange(bs, 30, 40)));
         assertEquals(bb.toCharArray(), Arrays.copyOf(bs, 40));
         CharsBuilder bb2 = new CharsBuilder();
         bb2.append(Arrays.copyOfRange(bs, 40, 50));
         bb.append(bb2);
         assertEquals(bb.toCharArray(), Arrays.copyOf(bs, 50));
-        bb.append(JieIO.reader(Arrays.copyOfRange(bs, 50, 60)), 1);
+        bb.append(JieIO.newReader(Arrays.copyOfRange(bs, 50, 60)), 1);
         assertEquals(bb.toCharArray(), Arrays.copyOf(bs, 60));
         CharBuffer buffer2 = ByteBuffer.allocateDirect(20).asCharBuffer();
         buffer2.put(CharBuffer.wrap(Arrays.copyOfRange(bs, 60, 70)));

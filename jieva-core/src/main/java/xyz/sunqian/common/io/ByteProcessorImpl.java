@@ -155,10 +155,10 @@ final class ByteProcessorImpl implements ByteProcessor {
             return (InputStream) src;
         }
         if (src instanceof byte[]) {
-            return JieIO.inStream((byte[]) src);
+            return JieIO.newInputStream((byte[]) src);
         }
         if (src instanceof ByteBuffer) {
-            return JieIO.inStream((ByteBuffer) src);
+            return JieIO.newInputStream((ByteBuffer) src);
         }
         throw new IORuntimeException("The type of source is unsupported: " + src.getClass());
     }
@@ -281,10 +281,10 @@ final class ByteProcessorImpl implements ByteProcessor {
             return new OutputSteamDataWriter((OutputStream) dst);
         }
         if (dst instanceof byte[]) {
-            return new OutputSteamDataWriter(JieIO.outStream((byte[]) dst));
+            return new OutputSteamDataWriter(JieIO.newOutputStream((byte[]) dst));
         }
         if (dst instanceof ByteBuffer) {
-            return new OutputSteamDataWriter(JieIO.outStream((ByteBuffer) dst));
+            return new OutputSteamDataWriter(JieIO.newOutputStream((ByteBuffer) dst));
         }
         throw new IORuntimeException("The type of destination is unsupported: " + dst.getClass());
     }

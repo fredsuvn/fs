@@ -34,7 +34,7 @@ import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
-public class WrapperTest {
+public class IOImplsTest {
 
     @Test
     public void testInput() throws Exception {
@@ -43,26 +43,26 @@ public class WrapperTest {
         testInput(234);
 
         // error
-        expectThrows(NullPointerException.class, () -> JieIO.inStream(null, 2, +1));
-        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.inStream(new byte[0], 2, 1));
-        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.inStream(new byte[0], -2, 1));
-        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.inStream(new byte[0], 2, -1));
+        expectThrows(NullPointerException.class, () -> JieIO.newInputStream(null, 2, +1));
+        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.newInputStream(new byte[0], 2, 1));
+        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.newInputStream(new byte[0], -2, 1));
+        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.newInputStream(new byte[0], 2, -1));
     }
 
     private void testInput(int sourceSize) throws Exception {
         byte[] source = JieRandom.fill(new byte[sourceSize]);
 
         // bytes
-        IOCases.testInput(JieIO.inStream(source), source, true);
+        IOCases.testInput(JieIO.newInputStream(source), source, true);
         IOCases.testInput(
-            JieIO.inStream(source, 2, source.length - 10),
+            JieIO.newInputStream(source, 2, source.length - 10),
             Arrays.copyOfRange(source, 2, source.length - 8),
             true
         );
 
         // buffer
         ByteBuffer buffer = ByteBuffer.wrap(source);
-        InputStream bufferIn = JieIO.inStream(buffer);
+        InputStream bufferIn = JieIO.newInputStream(buffer);
         IOCases.testInput(bufferIn, source, true);
         Class<?> bufferInClass = bufferIn.getClass();
         Method read0 = bufferInClass.getDeclaredMethod("read0");
@@ -75,20 +75,20 @@ public class WrapperTest {
         // file
         Path path = Paths.get("src", "test", "resources", "io", "input.test");
         RandomAccessFile raf = new FakeRandomFile(path.toFile(), "r", source);
-        InputStream rafIn = JieIO.inStream(raf, 6);
+        InputStream rafIn = JieIO.newInputStream(raf, 6);
         IOCases.testInput(rafIn, Arrays.copyOfRange(source, 6, source.length), true);
         expectThrows(IORuntimeException.class, () -> rafIn.mark(66));
 
         // chars
         char[] chars = JieRandom.fill(new char[sourceSize], '0', '9');
         byte[] charBytes = new String(chars).getBytes(JieChars.UTF_8);
-        InputStream charsIn = JieIO.inStream(new CharArrayReader(chars));
+        InputStream charsIn = JieIO.newInputStream(new CharArrayReader(chars));
         IOCases.testInput(charsIn, charBytes, false);
         expectThrows(IOException.class, charsIn::read);
         // chinese: '\u4e00' - '\u9fff'
         chars = JieRandom.fill(new char[sourceSize], '\u4e00', '\u4e01');
         charBytes = new String(chars).getBytes(JieChars.UTF_8);
-        charsIn = JieIO.inStream(new CharArrayReader(chars));
+        charsIn = JieIO.newInputStream(new CharArrayReader(chars));
         IOCases.testInput(charsIn, charBytes, false);
         expectThrows(IOException.class, charsIn::read);
         // emoji: "\uD83D\uDD1E"
@@ -97,17 +97,17 @@ public class WrapperTest {
             chars[i + 1] = '\uDD1E';
         }
         charBytes = new String(chars).getBytes(JieChars.UTF_8);
-        charsIn = JieIO.inStream(new CharArrayReader(chars));
+        charsIn = JieIO.newInputStream(new CharArrayReader(chars));
         IOCases.testInput(charsIn, charBytes, false);
         expectThrows(IOException.class, charsIn::read);
         // error: U+DD88
         Arrays.fill(chars, '\uDD88');
-        charsIn = JieIO.inStream(new CharArrayReader(chars));
+        charsIn = JieIO.newInputStream(new CharArrayReader(chars));
         expectThrows(IOException.class, charsIn::read);
 
         // error
         FakeRandomFile.SEEK_ERR = true;
-        expectThrows(IORuntimeException.class, () -> JieIO.inStream(raf, 6));
+        expectThrows(IORuntimeException.class, () -> JieIO.newInputStream(raf, 6));
         FakeRandomFile.SEEK_ERR = false;
     }
 
@@ -118,28 +118,28 @@ public class WrapperTest {
         testOutput(34);
 
         // error
-        expectThrows(NullPointerException.class, () -> JieIO.outStream(null, 2, +1));
-        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.outStream(new byte[0], 2, 1));
-        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.outStream(new byte[0], -2, 1));
-        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.outStream(new byte[0], 2, -1));
+        expectThrows(NullPointerException.class, () -> JieIO.newOutputStream(null, 2, +1));
+        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.newOutputStream(new byte[0], 2, 1));
+        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.newOutputStream(new byte[0], -2, 1));
+        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.newOutputStream(new byte[0], 2, -1));
     }
 
     private void testOutput(int sourceSize) throws Exception {
         byte[] source = JieRandom.fill(new byte[sourceSize]);
 
         // bytes
-        OutputStream bytesOut = JieIO.outStream(source);
+        OutputStream bytesOut = JieIO.newOutputStream(source);
         byte[] data = JieRandom.fill(new byte[source.length]);
         testOutput(bytesOut, data);
         assertEquals(data, source);
         Arrays.fill(source, (byte) 1);
         data = JieRandom.fill(new byte[source.length - 10]);
-        OutputStream byteOut2 = JieIO.outStream(source, 2, data.length);
+        OutputStream byteOut2 = JieIO.newOutputStream(source, 2, data.length);
         testOutput(byteOut2, data);
         assertEquals(data, Arrays.copyOfRange(source, 2, data.length + 2));
 
         // buffer
-        OutputStream bufferOut = JieIO.outStream(ByteBuffer.wrap(source));
+        OutputStream bufferOut = JieIO.newOutputStream(ByteBuffer.wrap(source));
         data = JieRandom.fill(new byte[source.length]);
         testOutput(bufferOut, data);
         assertEquals(data, source);
@@ -147,7 +147,7 @@ public class WrapperTest {
         // file
         Path path = Paths.get("src", "test", "resources", "io", "input.test");
         RandomAccessFile raf = new FakeRandomFile(path.toFile(), "r", source);
-        OutputStream rafOut = JieIO.outStream(raf, 6);
+        OutputStream rafOut = JieIO.newOutputStream(raf, 6);
         data = JieRandom.fill(new byte[source.length - 6]);
         testOutput(rafOut, data);
         assertEquals(data, Arrays.copyOfRange(source, 6, data.length + 6));
@@ -159,7 +159,7 @@ public class WrapperTest {
         char[] dest = new char[sourceSize];
         char[] chars = JieRandom.fill(new char[sourceSize], '0', '9');
         byte[] charBytes = new String(chars).getBytes(JieChars.UTF_8);
-        OutputStream charsOut = JieIO.outStream(JieIO.writer(dest));
+        OutputStream charsOut = JieIO.newOutputStream(JieIO.newWriter(dest));
         testOutput(charsOut, charBytes);
         assertEquals(chars, dest);
         OutputStream charsOut1 = charsOut;
@@ -167,7 +167,7 @@ public class WrapperTest {
         // chinese: '\u4e00' - '\u9fff'
         chars = JieRandom.fill(new char[sourceSize], '\u4e00', '\u4e01');
         charBytes = new String(chars).getBytes(JieChars.UTF_8);
-        charsOut = JieIO.outStream(JieIO.writer(dest));
+        charsOut = JieIO.newOutputStream(JieIO.newWriter(dest));
         testOutput(charsOut, charBytes);
         assertEquals(chars, dest);
         OutputStream charsOut2 = charsOut;
@@ -178,7 +178,7 @@ public class WrapperTest {
             chars[i + 1] = '\uDD1E';
         }
         charBytes = new String(chars).getBytes(JieChars.UTF_8);
-        charsOut = JieIO.outStream(JieIO.writer(dest));
+        charsOut = JieIO.newOutputStream(JieIO.newWriter(dest));
         testOutput(charsOut, charBytes);
         assertEquals(chars, dest);
         OutputStream charsOut3 = charsOut;
@@ -191,7 +191,7 @@ public class WrapperTest {
             fakeChars[i * 2 + 1] = (char) fakeBytes[i];
         }
         char[] fakeDest = new char[fakeBytes.length * 2];
-        charsOut = JieIO.outStream(JieIO.writer(fakeDest), new FakeCharset(2));
+        charsOut = JieIO.newOutputStream(JieIO.newWriter(fakeDest), new FakeCharset(2));
         testOutput(charsOut, fakeBytes);
         assertEquals(fakeChars, fakeDest);
         OutputStream charsOut4 = charsOut;
@@ -199,48 +199,48 @@ public class WrapperTest {
         // error: 0xC1
         byte[] errBytes = new byte[sourceSize];
         Arrays.fill(errBytes, (byte) 0xC1);
-        charsOut = JieIO.outStream(JieIO.writer(dest));
+        charsOut = JieIO.newOutputStream(JieIO.newWriter(dest));
         OutputStream charsOut5 = charsOut;
         expectThrows(IOException.class, () -> charsOut5.write(errBytes));
         // StringBuilder
         StringBuilder sb = new StringBuilder();
-        charsOut = JieIO.outStream(sb);
+        charsOut = JieIO.newOutputStream(sb);
         charsOut.write("中文".getBytes(JieChars.UTF_8));
         charsOut.flush();
         assertEquals(sb.toString(), "中文");
         StringBuffer sbuf = new StringBuffer();
-        charsOut = JieIO.outStream(sbuf);
+        charsOut = JieIO.newOutputStream(sbuf);
         charsOut.write("中文".getBytes(JieChars.UTF_8));
         charsOut.flush();
         assertEquals(sbuf.toString(), "中文");
         CharBuffer cb = CharBuffer.allocate(10);
-        charsOut = JieIO.outStream((Appendable) cb);
+        charsOut = JieIO.newOutputStream((Appendable) cb);
         charsOut.write("中文".getBytes(JieChars.UTF_8));
         charsOut.flush();
         cb.flip();
         assertEquals(cb.toString(), "中文");
         // appender
         AutoCloseAppender aa = new AutoCloseAppender();
-        charsOut = JieIO.outStream(aa);
+        charsOut = JieIO.newOutputStream(aa);
         charsOut.write(1);
         charsOut.close();
-        charsOut = JieIO.outStream(aa);
+        charsOut = JieIO.newOutputStream(aa);
         aa.err = 1;
         OutputStream charsOut6 = charsOut;
         expectThrows(IOException.class, () -> charsOut6.write(1));
         expectThrows(IOException.class, charsOut::close);
-        charsOut = JieIO.outStream(aa);
+        charsOut = JieIO.newOutputStream(aa);
         aa.err = 2;
         OutputStream charsOut7 = charsOut;
         expectThrows(IOException.class, () -> charsOut7.write(1));
         expectThrows(IOException.class, charsOut::close);
         OnlyAppender oa = new OnlyAppender();
-        charsOut = JieIO.outStream(oa);
+        charsOut = JieIO.newOutputStream(oa);
         charsOut.close();
 
         // error
         FakeRandomFile.SEEK_ERR = true;
-        expectThrows(IORuntimeException.class, () -> JieIO.outStream(raf, 6));
+        expectThrows(IORuntimeException.class, () -> JieIO.newOutputStream(raf, 6));
         FakeRandomFile.SEEK_ERR = false;
     }
 
@@ -266,29 +266,29 @@ public class WrapperTest {
         testReader(234);
 
         // error
-        expectThrows(NullPointerException.class, () -> JieIO.reader((char[]) null, 2, +1));
-        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.reader(new char[0], 2, 1));
-        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.reader(new char[0], -2, 1));
-        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.reader(new char[0], 2, -1));
+        expectThrows(NullPointerException.class, () -> JieIO.newReader((char[]) null, 2, +1));
+        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.newReader(new char[0], 2, 1));
+        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.newReader(new char[0], -2, 1));
+        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.newReader(new char[0], 2, -1));
     }
 
     private void testReader(int sourceSize) throws Exception {
         char[] source = JieRandom.fill(new char[sourceSize], '0', '9');
 
         // chars
-        IOCases.testReader(JieIO.reader(source), source);
+        IOCases.testReader(JieIO.newReader(source), source);
         IOCases.testReader(
-            JieIO.reader(source, 2, source.length - 10),
+            JieIO.newReader(source, 2, source.length - 10),
             Arrays.copyOfRange(source, 2, source.length - 8)
         );
-        assertTrue(JieIO.reader(source).ready());
+        assertTrue(JieIO.newReader(source).ready());
 
         // string
-        IOCases.testReader(JieIO.reader(new String(source)), source);
+        IOCases.testReader(JieIO.newReader(new String(source)), source);
 
         // buffer
         CharBuffer buffer = CharBuffer.wrap(source);
-        Reader bufferIn = JieIO.reader(buffer);
+        Reader bufferIn = JieIO.newReader(buffer);
         IOCases.testReader(bufferIn, source);
         Class<?> bufferInClass = bufferIn.getClass();
         Method read0 = bufferInClass.getDeclaredMethod("read0");
@@ -301,13 +301,13 @@ public class WrapperTest {
         // bytes
         char[] chars = JieRandom.fill(new char[sourceSize], '0', '9');
         byte[] charBytes = new String(chars).getBytes(JieChars.UTF_8);
-        Reader charsIn = JieIO.reader(JieIO.inStream(charBytes));
+        Reader charsIn = JieIO.newReader(JieIO.newInputStream(charBytes));
         IOCases.testReader(charsIn, chars);
         expectThrows(IOException.class, charsIn::read);
         // chinese: '\u4e00' - '\u9fff'
         chars = JieRandom.fill(new char[sourceSize], '\u4e00', '\u4e01');
         charBytes = new String(chars).getBytes(JieChars.UTF_8);
-        charsIn = JieIO.reader(JieIO.inStream(charBytes));
+        charsIn = JieIO.newReader(JieIO.newInputStream(charBytes));
         IOCases.testReader(charsIn, chars);
         expectThrows(IOException.class, charsIn::read);
         // emoji: "\uD83D\uDD1E"
@@ -316,7 +316,7 @@ public class WrapperTest {
             chars[i + 1] = '\uDD1E';
         }
         charBytes = new String(chars).getBytes(JieChars.UTF_8);
-        charsIn = JieIO.reader(JieIO.inStream(charBytes));
+        charsIn = JieIO.newReader(JieIO.newInputStream(charBytes));
         IOCases.testReader(charsIn, chars);
         expectThrows(IOException.class, charsIn::read);
         // fake charset
@@ -327,15 +327,15 @@ public class WrapperTest {
             fakeChars[i * 3 + 1] = (char) fakeBytes[i];
             fakeChars[i * 3 + 2] = (char) fakeBytes[i];
         }
-        charsIn = JieIO.reader(JieIO.inStream(fakeBytes), new FakeCharset(3));
+        charsIn = JieIO.newReader(JieIO.newInputStream(fakeBytes), new FakeCharset(3));
         IOCases.testReader(charsIn, fakeChars);
         expectThrows(IOException.class, charsIn::read);
         // error: 0xC1
         Arrays.fill(charBytes, (byte) 0xC1);
-        charsIn = JieIO.reader(JieIO.inStream(charBytes));
+        charsIn = JieIO.newReader(JieIO.newInputStream(charBytes));
         expectThrows(IOException.class, charsIn::read);
         // ready
-        charsIn = JieIO.reader(new InputStream() {
+        charsIn = JieIO.newReader(new InputStream() {
             @Override
             public int read() {
                 return 0;
@@ -347,7 +347,7 @@ public class WrapperTest {
             }
         });
         assertTrue(charsIn.ready());
-        charsIn = JieIO.reader(new InputStream() {
+        charsIn = JieIO.newReader(new InputStream() {
             @Override
             public int read() {
                 return 0;
@@ -368,37 +368,37 @@ public class WrapperTest {
         testWriter(34);
 
         // error
-        expectThrows(NullPointerException.class, () -> JieIO.writer(null, 2, +1));
-        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.writer(new char[0], 2, 1));
-        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.writer(new char[0], -2, 1));
-        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.writer(new char[0], 2, -1));
-        expectThrows(NullPointerException.class, () -> JieIO.writer(new char[100]).write((String) null, 2, 1));
-        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.writer(new char[100]).write("", 2, 1));
-        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.writer(new char[100]).write("", -2, 1));
-        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.writer(new char[100]).write("", 2, -1));
+        expectThrows(NullPointerException.class, () -> JieIO.newWriter(null, 2, +1));
+        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.newWriter(new char[0], 2, 1));
+        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.newWriter(new char[0], -2, 1));
+        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.newWriter(new char[0], 2, -1));
+        expectThrows(NullPointerException.class, () -> JieIO.newWriter(new char[100]).write((String) null, 2, 1));
+        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.newWriter(new char[100]).write("", 2, 1));
+        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.newWriter(new char[100]).write("", -2, 1));
+        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.newWriter(new char[100]).write("", 2, -1));
     }
 
     private void testWriter(int sourceSize) throws Exception {
         char[] source = JieRandom.fill(new char[sourceSize], '0', '9');
 
         // chars
-        Writer charsOut = JieIO.writer(source);
+        Writer charsOut = JieIO.newWriter(source);
         char[] data = JieRandom.fill(new char[source.length]);
         testWriter(charsOut, data);
         assertEquals(data, source);
         Arrays.fill(source, (char) 1);
         data = JieRandom.fill(new char[source.length - 10]);
-        Writer charsOut2 = JieIO.writer(source, 2, data.length);
+        Writer charsOut2 = JieIO.newWriter(source, 2, data.length);
         testWriter(charsOut2, data);
         assertEquals(data, Arrays.copyOfRange(source, 2, data.length + 2));
         char[] nullChars = new char[4];
-        Writer nullWriter = JieIO.writer(nullChars);
+        Writer nullWriter = JieIO.newWriter(nullChars);
         nullWriter.append(null);
         nullWriter.write("null", 0, 0);
         assertEquals(nullChars, "null".toCharArray());
 
         // buffer
-        Writer bufferOut = JieIO.writer(CharBuffer.wrap(source));
+        Writer bufferOut = JieIO.newWriter(CharBuffer.wrap(source));
         data = JieRandom.fill(new char[source.length]);
         testWriter(bufferOut, data);
         assertEquals(data, source);
@@ -439,7 +439,7 @@ public class WrapperTest {
         char[] chars = JieRandom.fill(new char[sourceSize], '0', '9');
         byte[] charBytes = new String(chars).getBytes(JieChars.UTF_8);
         byte[] dest = new byte[charBytes.length];
-        Writer bytesOut = JieIO.writer(JieIO.outStream(dest));
+        Writer bytesOut = JieIO.newWriter(JieIO.newOutputStream(dest));
         testWriter(bytesOut, chars);
         assertEquals(charBytes, dest);
         Writer bytesOut1 = bytesOut;
@@ -448,7 +448,7 @@ public class WrapperTest {
         chars = JieRandom.fill(new char[sourceSize], '\u4e00', '\u4e01');
         charBytes = new String(chars).getBytes(JieChars.UTF_8);
         dest = new byte[charBytes.length];
-        bytesOut = JieIO.writer(JieIO.outStream(dest));
+        bytesOut = JieIO.newWriter(JieIO.newOutputStream(dest));
         testWriter(bytesOut, chars);
         assertEquals(charBytes, dest);
         Writer bytesOut2 = bytesOut;
@@ -460,14 +460,14 @@ public class WrapperTest {
         }
         charBytes = new String(chars).getBytes(JieChars.UTF_8);
         dest = new byte[charBytes.length];
-        bytesOut = JieIO.writer(JieIO.outStream(dest));
+        bytesOut = JieIO.newWriter(JieIO.newOutputStream(dest));
         testWriter(bytesOut, chars);
         assertEquals(charBytes, dest);
         Writer bytesOut3 = bytesOut;
         expectThrows(IOException.class, () -> bytesOut3.write(1));
         // error: U+DD88
         dest = new byte[charBytes.length];
-        bytesOut = JieIO.writer(JieIO.outStream(dest));
+        bytesOut = JieIO.newWriter(JieIO.newOutputStream(dest));
         Writer bytesOut4 = bytesOut;
         expectThrows(IOException.class, () -> bytesOut4.write('\uDD88'));
         // close
@@ -496,30 +496,30 @@ public class WrapperTest {
 
     @Test
     public void testEmptyAndNull() throws Exception {
-        assertEquals(JieIO.emptyInStream().read(), -1);
+        assertEquals(JieIO.emptyInputStream().read(), -1);
         assertEquals(JieIO.emptyReader().read(), -1);
         JieIO.emptyReader().close();
-        assertSame(JieIO.emptyInStream(), JieIO.emptyInStream());
+        assertSame(JieIO.emptyInputStream(), JieIO.emptyInputStream());
         assertSame(JieIO.emptyReader(), JieIO.emptyReader());
-        JieIO.nullOutStream().write(JieRandom.fill(new byte[10086]));
-        JieIO.nullOutStream().close();
+        JieIO.nullOutputStream().write(JieRandom.fill(new byte[10086]));
+        JieIO.nullOutputStream().close();
         JieIO.nullWriter().write(JieRandom.fill(new char[10086]));
         JieIO.nullWriter().close();
-        assertSame(JieIO.nullOutStream(), JieIO.nullOutStream());
+        assertSame(JieIO.nullOutputStream(), JieIO.nullOutputStream());
         assertSame(JieIO.nullWriter(), JieIO.nullWriter());
         JieIO.nullWriter().flush();
     }
 
     @Test
     public void testSpecial() throws Exception {
-        assertEquals(JieIO.inStream(new byte[0]).skip(999), 0);
-        assertEquals(JieIO.inStream(ByteBuffer.allocate(0)).skip(999), 0);
+        assertEquals(JieIO.newInputStream(new byte[0]).skip(999), 0);
+        assertEquals(JieIO.newInputStream(ByteBuffer.allocate(0)).skip(999), 0);
         char[] src = new char[]{9};
         char[] dst = new char[2];
         CharBuffer dstBuffer = CharBuffer.wrap(dst);
-        assertEquals(JieIO.reader(src).read(dstBuffer), 1);
+        assertEquals(JieIO.newReader(src).read(dstBuffer), 1);
         assertEquals(dst, new char[]{9, 0});
-        assertEquals(JieIO.reader(new char[0]).skip(999), 0);
+        assertEquals(JieIO.newReader(new char[0]).skip(999), 0);
     }
 
     private static final class FakeRandomFile extends RandomAccessFile {
@@ -539,7 +539,7 @@ public class WrapperTest {
 
         private InputStream getIn() {
             if (in == null) {
-                in = JieIO.inStream(data, seek, data.length - seek);
+                in = JieIO.newInputStream(data, seek, data.length - seek);
             }
             return in;
         }
@@ -589,7 +589,7 @@ public class WrapperTest {
 
         private OutputStream getOut() {
             if (out == null) {
-                out = JieIO.outStream(data, seek, data.length - seek);
+                out = JieIO.newOutputStream(data, seek, data.length - seek);
             }
             return out;
         }

@@ -253,7 +253,7 @@ public class CipherCodec implements CodecConfigurator<CipherCodec> {
             initCipher(cipher);
             InputStream source;
             if (input instanceof ByteBuffer) {
-                source = JieIO.inStream((ByteBuffer) input);
+                source = JieIO.newInputStream((ByteBuffer) input);
             } else if (input instanceof InputStream) {
                 source = (InputStream) input;
             } else {

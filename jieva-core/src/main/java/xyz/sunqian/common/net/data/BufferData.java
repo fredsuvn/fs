@@ -69,17 +69,17 @@ final class BufferData implements GekData.OfBuffer {
 
     @Override
     public int write(ByteBuffer dest, int length) {
-        return (int) ByteProcessor.from(JieIO.inStream(buffer)).readLimit(length).writeTo(dest);
+        return (int) ByteProcessor.from(JieIO.newInputStream(buffer)).readLimit(length).writeTo(dest);
     }
 
     @Override
     public long write(OutputStream dest) {
-        return JieIO.readTo(JieIO.inStream(buffer), dest);
+        return JieIO.readTo(JieIO.newInputStream(buffer), dest);
     }
 
     @Override
     public long write(OutputStream dest, long length) {
-        return ByteProcessor.from(JieIO.inStream(buffer)).readLimit(length).writeTo(dest);
+        return ByteProcessor.from(JieIO.newInputStream(buffer)).readLimit(length).writeTo(dest);
     }
 
     @Override
@@ -92,6 +92,6 @@ final class BufferData implements GekData.OfBuffer {
 
     @Override
     public InputStream asInputStream() {
-        return JieIO.inStream(buffer);
+        return JieIO.newInputStream(buffer);
     }
 }

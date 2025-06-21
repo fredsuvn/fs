@@ -30,10 +30,10 @@ public class VirtualProcess extends Process {
 
     /**
      * Constructs a new virtual process. The result of {@link #getInputStream()} and {@link #getErrorStream()} are
-     * {@link JieIO#emptyInStream()}, and the result of {@link #getOutputStream()} is {@link JieIO#nullOutStream()}.
+     * {@link JieIO#emptyInputStream()}, and the result of {@link #getOutputStream()} is {@link JieIO#nullOutputStream()}.
      */
     public VirtualProcess() {
-        this(JieIO.emptyInStream(), JieIO.nullOutStream());
+        this(JieIO.emptyInputStream(), JieIO.nullOutputStream());
     }
 
     /**

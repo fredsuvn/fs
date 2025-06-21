@@ -67,7 +67,7 @@ final class StreamData implements GekData.OfStream {
 
     @Override
     public int write(ByteBuffer dest, int length) {
-        return (int) ByteProcessor.from(stream).readLimit(length).writeTo(JieIO.outStream(dest));
+        return (int) ByteProcessor.from(stream).readLimit(length).writeTo(JieIO.newOutputStream(dest));
     }
 
     @Override

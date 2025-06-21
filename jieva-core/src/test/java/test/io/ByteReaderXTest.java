@@ -507,7 +507,7 @@ public class ByteReaderXTest {
         }
         {
             // close
-            ByteReaderX.from(JieIO.inStream(new byte[0])).close();
+            ByteReaderX.from(JieIO.newInputStream(new byte[0])).close();
             ByteReaderX.from(new byte[0]).close();
             ByteReaderX.from(ByteBuffer.allocate(0)).close();
         }

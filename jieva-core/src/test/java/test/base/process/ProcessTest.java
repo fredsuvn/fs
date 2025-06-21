@@ -119,17 +119,17 @@ public class ProcessTest {
             process.normal(false);
             assertEquals(receipt.getState(), TaskState.FAILED);
             assertEquals(receipt.await(Duration.ofMillis(1)), 1);
-            assertEquals(receipt.getInputStream(), JieIO.emptyInStream());
-            assertEquals(receipt.getOutputStream(), JieIO.nullOutStream());
-            assertEquals(receipt.getErrorStream(), JieIO.emptyInStream());
+            assertEquals(receipt.getInputStream(), JieIO.emptyInputStream());
+            assertEquals(receipt.getOutputStream(), JieIO.nullOutputStream());
+            assertEquals(receipt.getErrorStream(), JieIO.emptyInputStream());
             assertNull(receipt.getException());
             assertNull(receipt.getDelay());
         }
         {
             String hello = "hello";
             VirtualProcess process = new VirtualProcess(
-                JieIO.inStream(hello.getBytes(JieChars.localCharset())),
-                JieIO.nullOutStream()
+                JieIO.newInputStream(hello.getBytes(JieChars.localCharset())),
+                JieIO.nullOutputStream()
             );
             ProcessReceipt receipt = JieProcess.receipt(process);
             assertEquals(receipt.readString(), hello);
@@ -137,8 +137,8 @@ public class ProcessTest {
         {
             String hello = "hello";
             VirtualProcess process = new VirtualProcess(
-                JieIO.inStream(hello.getBytes(JieChars.localCharset())),
-                JieIO.nullOutStream()
+                JieIO.newInputStream(hello.getBytes(JieChars.localCharset())),
+                JieIO.nullOutputStream()
             );
             ProcessReceipt receipt = JieProcess.receipt(process);
             assertEquals(receipt.readBytes(), hello.getBytes(JieChars.localCharset()));
@@ -153,9 +153,9 @@ public class ProcessTest {
             expectThrows(IllegalThreadStateException.class, process::exitValue);
             process.destroy();
             assertEquals(process.waitFor(), 0);
-            assertEquals(process.getInputStream(), JieIO.emptyInStream());
-            assertEquals(process.getOutputStream(), JieIO.nullOutStream());
-            assertEquals(process.getErrorStream(), JieIO.emptyInStream());
+            assertEquals(process.getInputStream(), JieIO.emptyInputStream());
+            assertEquals(process.getOutputStream(), JieIO.nullOutputStream());
+            assertEquals(process.getErrorStream(), JieIO.emptyInputStream());
         }
         {
             VirtualProcess process = new VirtualProcess();

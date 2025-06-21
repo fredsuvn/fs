@@ -22,21 +22,21 @@ import java.nio.charset.CodingErrorAction;
 
 import static xyz.sunqian.common.base.JieCheck.checkOffsetLength;
 
-final class WrapperImpls {
+final class IOImpls {
 
-    static @Nonnull InputStream in(byte @Nonnull [] array) {
+    static @Nonnull InputStream inputStream(byte @Nonnull [] array) {
         return new BytesInputStream(array);
     }
 
-    static @Nonnull InputStream in(byte @Nonnull [] array, int offset, int length) {
+    static @Nonnull InputStream inputStream(byte @Nonnull [] array, int offset, int length) {
         return new BytesInputStream(array, offset, length);
     }
 
-    static @Nonnull InputStream in(@Nonnull ByteBuffer buffer) {
+    static @Nonnull InputStream inputStream(@Nonnull ByteBuffer buffer) {
         return new BufferInputStream(buffer);
     }
 
-    static @Nonnull InputStream in(@Nonnull RandomAccessFile random, long initialSeek) throws IORuntimeException {
+    static @Nonnull InputStream inputStream(@Nonnull RandomAccessFile random, long initialSeek) throws IORuntimeException {
         try {
             return new RandomInputStream(random, initialSeek);
         } catch (IOException e) {
@@ -44,7 +44,7 @@ final class WrapperImpls {
         }
     }
 
-    static @Nonnull InputStream in(@Nonnull Reader reader, @Nonnull Charset charset) {
+    static @Nonnull InputStream inputStream(@Nonnull Reader reader, @Nonnull Charset charset) {
         return new ReaderInputStream(reader, charset);
     }
 
@@ -68,7 +68,7 @@ final class WrapperImpls {
         return new BytesReader(inputStream, charset);
     }
 
-    static @Nonnull InputStream emptyIn() {
+    static @Nonnull InputStream emptyInputStream() {
         return EmptyInputStream.SINGLETON;
     }
 
@@ -76,19 +76,19 @@ final class WrapperImpls {
         return EmptyReader.SINGLETON;
     }
 
-    static @Nonnull OutputStream out(byte @Nonnull [] array) {
+    static @Nonnull OutputStream outputStream(byte @Nonnull [] array) {
         return new BytesOutputStream(array);
     }
 
-    static @Nonnull OutputStream out(byte @Nonnull [] array, int offset, int length) {
+    static @Nonnull OutputStream outputStream(byte @Nonnull [] array, int offset, int length) {
         return new BytesOutputStream(array, offset, length);
     }
 
-    static @Nonnull OutputStream out(@Nonnull ByteBuffer buffer) {
+    static @Nonnull OutputStream outputStream(@Nonnull ByteBuffer buffer) {
         return new BufferOutputStream(buffer);
     }
 
-    static @Nonnull OutputStream out(@Nonnull RandomAccessFile random, long initialSeek) throws IORuntimeException {
+    static @Nonnull OutputStream outputStream(@Nonnull RandomAccessFile random, long initialSeek) throws IORuntimeException {
         try {
             return new RandomOutputStream(random, initialSeek);
         } catch (IOException e) {
@@ -96,7 +96,7 @@ final class WrapperImpls {
         }
     }
 
-    static @Nonnull OutputStream out(@Nonnull Appendable appender, @Nonnull Charset charset) {
+    static @Nonnull OutputStream outputStream(@Nonnull Appendable appender, @Nonnull Charset charset) {
         return new AppenderOutputStream(appender, charset);
     }
 
@@ -116,7 +116,7 @@ final class WrapperImpls {
         return new BytesWriter(outputStream, charset);
     }
 
-    static @Nonnull OutputStream nullOut() {
+    static @Nonnull OutputStream nullOutputStream() {
         return NullOutputStream.SINGLETON;
     }
 
@@ -148,7 +148,7 @@ final class WrapperImpls {
 
         public int read(byte @Nonnull [] b, int off, int len) {
             checkOffsetLength(b.length, off, len);
-            if (len <= 0) {
+            if (len == 0) {
                 return 0;
             }
             if (pos >= count) {
@@ -224,7 +224,7 @@ final class WrapperImpls {
         @Override
         public int read(byte @Nonnull [] b, int off, int len) throws IOException {
             checkOffsetLength(b.length, off, len);
-            if (len <= 0) {
+            if (len == 0) {
                 return 0;
             }
             if (!buffer.hasRemaining()) {
@@ -303,7 +303,11 @@ final class WrapperImpls {
         private boolean closed = false;
         private final byte @Nonnull [] buf = {0};
 
-        private ReaderInputStream(@Nonnull Reader reader, @Nonnull CharsetEncoder encoder, int inBufferSize, int outBufferSize) {
+        private ReaderInputStream(
+            @Nonnull Reader reader,
+            @Nonnull CharsetEncoder encoder,
+            int inBufferSize, int outBufferSize
+        ) {
             this.reader = reader;
             this.encoder = encoder;
             this.inBuffer = CharBuffer.allocate(inBufferSize);
@@ -312,7 +316,11 @@ final class WrapperImpls {
             this.outBuffer.flip();
         }
 
-        private ReaderInputStream(@Nonnull Reader reader, @Nonnull Charset charset, int inBufferSize, int outBufferSize) {
+        private ReaderInputStream(
+            @Nonnull Reader reader,
+            @Nonnull Charset charset,
+            int inBufferSize, int outBufferSize
+        ) {
             this(
                 reader,
                 charset.newEncoder()
@@ -337,10 +345,10 @@ final class WrapperImpls {
         public int read(byte @Nonnull [] b, int off, int len) throws IOException {
             checkOffsetLength(b.length, off, len);
             checkClosed();
-            if (len <= 0) {
+            if (len == 0) {
                 return 0;
             }
-            int readNum = read0(b, off, len);
+            int readNum = (int) read0(b, off, len);
             return readNum == 0 ? -1 : readNum;
         }
 
@@ -350,7 +358,7 @@ final class WrapperImpls {
             if (n <= 0) {
                 return 0;
             }
-            return read0(null, 0, (int) n);
+            return read0(null, 0, n);
         }
 
         @Override
@@ -364,48 +372,41 @@ final class WrapperImpls {
             closed = true;
         }
 
-        private int read0(byte @Nullable [] b, int off, int len) throws IOException {
-            int readNum = 0;
-            int offset = off;
-            int remaining = len;
-            while (true) {
+        private long read0(byte @Nullable [] b, int off, long len) throws IOException {
+            long count = 0;
+            while (count < len) {
                 if (outBuffer.hasRemaining()) {
-                    int avail = Math.min(outBuffer.remaining(), remaining);
+                    int avail = (int) Math.min(outBuffer.remaining(), len - count);
                     if (b != null) {
-                        outBuffer.get(b, offset, avail);
+                        outBuffer.get(b, (int) (off + count), avail);
                     } else {
                         outBuffer.position(outBuffer.position() + avail);
                     }
-                    offset += avail;
-                    remaining -= avail;
-                    readNum += avail;
+                    count += avail;
                 } else if (endOfInput) {
                     if (inBuffer.hasRemaining()) {
-                        encodeBuffer();
+                        encodeToOutBuffer();
                     } else {
                         break;
                     }
                 } else {
-                    fillBuffer();
-                }
-                if (remaining <= 0) {
-                    break;
+                    readToInBuffer();
                 }
             }
-            return readNum;
+            return count;
         }
 
-        private void fillBuffer() throws IOException {
+        private void readToInBuffer() throws IOException {
             inBuffer.compact();
             int readSize = reader.read(inBuffer);
             if (readSize == -1) {
                 endOfInput = true;
             }
             inBuffer.flip();
-            encodeBuffer();
+            encodeToOutBuffer();
         }
 
-        private void encodeBuffer() throws IOException {
+        private void encodeToOutBuffer() throws IOException {
             outBuffer.compact();
             CoderResult coderResult = encoder.encode(inBuffer, outBuffer, endOfInput);
             if (coderResult.isUnderflow() || coderResult.isOverflow()) {
@@ -440,7 +441,7 @@ final class WrapperImpls {
         @Override
         public int read(byte @Nonnull [] b, int off, int len) throws IOException {
             checkOffsetLength(b.length, off, len);
-            if (len <= 0) {
+            if (len == 0) {
                 return 0;
             }
             return random.read(b, off, len);
@@ -527,7 +528,7 @@ final class WrapperImpls {
         @Override
         public int read(char @Nonnull [] c, int off, int len) throws IOException {
             checkOffsetLength(c.length, off, len);
-            if (len <= 0) {
+            if (len == 0) {
                 return 0;
             }
             if (!buffer.hasRemaining()) {
@@ -607,11 +608,15 @@ final class WrapperImpls {
         private final @Nonnull CharsetDecoder decoder;
         private final @Nonnull ByteBuffer inBuffer;
         private final @Nonnull CharBuffer outBuffer;
-        private boolean endOfInput;
+        private boolean endOfInput = false;
         private boolean closed = false;
         private final char @Nonnull [] cbuf = {0};
 
-        private BytesReader(@Nonnull InputStream inputStream, @Nonnull CharsetDecoder decoder, int inBufferSize, int outBufferSize) {
+        private BytesReader(
+            @Nonnull InputStream inputStream,
+            @Nonnull CharsetDecoder decoder,
+            int inBufferSize, int outBufferSize
+        ) {
             this.inputStream = inputStream;
             this.decoder = decoder;
             this.inBuffer = ByteBuffer.allocate(inBufferSize);
@@ -620,7 +625,11 @@ final class WrapperImpls {
             this.outBuffer.flip();
         }
 
-        private BytesReader(@Nonnull InputStream inputStream, @Nonnull Charset charset, int inBufferSize, int outBufferSize) {
+        private BytesReader(
+            @Nonnull InputStream inputStream,
+            @Nonnull Charset charset,
+            int inBufferSize, int outBufferSize
+        ) {
             this(
                 inputStream,
                 charset.newDecoder()
@@ -645,10 +654,10 @@ final class WrapperImpls {
         public int read(char @Nonnull [] c, int off, int len) throws IOException {
             checkOffsetLength(c.length, off, len);
             checkClosed();
-            if (len <= 0) {
+            if (len == 0) {
                 return 0;
             }
-            int readNum = read0(c, off, len);
+            int readNum = (int) read0(c, off, len);
             return readNum == 0 ? -1 : readNum;
         }
 
@@ -672,50 +681,43 @@ final class WrapperImpls {
             closed = true;
         }
 
-        private int read0(char @Nullable [] c, int off, int len) throws IOException {
-            int readNum = 0;
-            int offset = off;
-            int remaining = len;
-            while (true) {
+        private long read0(char @Nullable [] c, int off, long len) throws IOException {
+            long pos = 0;
+            while (pos < len) {
                 if (outBuffer.hasRemaining()) {
-                    int avail = Math.min(outBuffer.remaining(), remaining);
+                    int avail = (int) Math.min(outBuffer.remaining(), len - pos);
                     if (c != null) {
-                        outBuffer.get(c, offset, avail);
+                        outBuffer.get(c, (int) (pos + off), avail);
                     } else {
                         outBuffer.position(outBuffer.position() + avail);
                     }
-                    offset += avail;
-                    remaining -= avail;
-                    readNum += avail;
+                    pos += avail;
                 } else if (endOfInput) {
                     if (inBuffer.hasRemaining()) {
-                        encodeBuffer();
+                        decodeToBuffer();
                     } else {
                         break;
                     }
                 } else {
-                    fillBuffer();
-                }
-                if (remaining <= 0) {
-                    break;
+                    readToBuffer();
                 }
             }
-            return readNum;
+            return pos;
         }
 
-        private void fillBuffer() throws IOException {
+        private void readToBuffer() throws IOException {
             inBuffer.compact();
-            int readSize = inputStream.read(inBuffer.array(), inBuffer.position(), inBuffer.remaining());
+            int readSize = JieIO.readTo(inputStream, inBuffer.array(), inBuffer.position(), inBuffer.remaining());
             if (readSize == -1) {
                 endOfInput = true;
             } else {
                 inBuffer.position(inBuffer.position() + readSize);
             }
             inBuffer.flip();
-            encodeBuffer();
+            decodeToBuffer();
         }
 
-        private void encodeBuffer() throws IOException {
+        private void decodeToBuffer() throws IOException {
             outBuffer.compact();
             CoderResult coderResult = decoder.decode(inBuffer, outBuffer, endOfInput);
             if (coderResult.isUnderflow() || coderResult.isOverflow()) {

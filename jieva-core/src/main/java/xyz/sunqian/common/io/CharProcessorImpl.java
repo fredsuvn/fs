@@ -155,13 +155,13 @@ final class CharProcessorImpl implements CharProcessor {
             return (Reader) src;
         }
         if (src instanceof char[]) {
-            return JieIO.reader((char[]) src);
+            return JieIO.newReader((char[]) src);
         }
         if (src instanceof CharBuffer) {
-            return JieIO.reader((CharBuffer) src);
+            return JieIO.newReader((CharBuffer) src);
         }
         if (src instanceof CharSequence) {
-            return JieIO.reader((CharSequence) src);
+            return JieIO.newReader((CharSequence) src);
         }
         throw new IORuntimeException("The type of source is unsupported: " + src.getClass());
     }
@@ -319,7 +319,7 @@ final class CharProcessorImpl implements CharProcessor {
             return new AppendableDataWriter(CharBuffer.wrap((char[]) dst));
         }
         if (dst instanceof CharBuffer) {
-            return new AppendableDataWriter(JieIO.writer((CharBuffer) dst));
+            return new AppendableDataWriter(JieIO.newWriter((CharBuffer) dst));
         }
         if (dst instanceof Appendable) {
             return new AppendableDataWriter((Appendable) dst);

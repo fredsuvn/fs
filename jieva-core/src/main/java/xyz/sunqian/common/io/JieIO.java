@@ -2,9 +2,7 @@ package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.JieCheck;
 import xyz.sunqian.common.base.chars.JieChars;
-import xyz.sunqian.common.collect.JieArray;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -386,6 +384,88 @@ public class JieIO {
     }
 
     /**
+     * Reads the data from the source buffer into the specified channel, until the read number reaches the buffer's
+     * remaining or reaches the end of the source buffer, returns the actual number of bytes read to.
+     * <p>
+     * If the buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the source buffer has
+     * already been reached, returns {@code -1}.
+     * <p>
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the specified channel
+     * @return the actual number of bytes read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static int readTo(@Nonnull ByteBuffer src, @Nonnull WritableByteChannel dst) throws IORuntimeException {
+        return br.readTo(src, dst);
+    }
+
+    /**
+     * Reads the data of the specified length from the source buffer into the specified channel, until the read number
+     * reaches the buffer's remaining or reaches the end of the source buffer, returns the actual number of bytes read
+     * to.
+     * <p>
+     * If the specified length or buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the
+     * source buffer has already been reached, returns {@code -1}.
+     * <p>
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the specified channel
+     * @param len the specified length, must {@code >= 0}
+     * @return the actual number of bytes read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static int readTo(
+        @Nonnull ByteBuffer src, @Nonnull WritableByteChannel dst, int len
+    ) throws IORuntimeException {
+        return br.readTo(src, dst, len);
+    }
+
+    /**
+     * Reads the data from the source buffer into the specified stream, until the read number reaches the buffer's
+     * remaining or reaches the end of the source buffer, returns the actual number of bytes read to.
+     * <p>
+     * If the buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the source buffer has
+     * already been reached, returns {@code -1}.
+     * <p>
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the specified stream
+     * @return the actual number of bytes read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static int readTo(@Nonnull ByteBuffer src, @Nonnull OutputStream dst) throws IORuntimeException {
+        return br.readTo(src, dst);
+    }
+
+    /**
+     * Reads the data of the specified length from the source buffer into the specified stream, until the read number
+     * reaches the buffer's remaining or reaches the end of the source buffer, returns the actual number of bytes read
+     * to.
+     * <p>
+     * If the specified length or buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the
+     * source buffer has already been reached, returns {@code -1}.
+     * <p>
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the specified stream
+     * @param len the specified length, must {@code >= 0}
+     * @return the actual number of bytes read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static int readTo(
+        @Nonnull ByteBuffer src, @Nonnull OutputStream dst, long len
+    ) throws IORuntimeException {
+        return br.readTo(src, dst, len);
+    }
+
+    /**
      * Reads all data from the source stream into a new array, continuing until reaches the end of the stream, and
      * returns the array. If the end of the source reader has already been reached, returns {@code null}.
      * <p>
@@ -570,24 +650,46 @@ public class JieIO {
         return cr.readTo(src, dst, len);
     }
 
+
     /**
-     * Writes the data to the specified output channel from the given buffer.
+     * Reads the data from the source buffer into the specified appender, until the read number reaches the buffer's
+     * remaining or reaches the end of the source buffer, returns the actual number of chars read to.
+     * <p>
+     * If the buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the source buffer has
+     * already been reached, returns {@code -1}.
      * <p>
      * The buffer's position increments by the actual read number.
      *
-     * @param dst the specified output channel
-     * @param buf the given buffer
+     * @param src the source buffer
+     * @param dst the specified appender
+     * @return the actual number of chars read
      * @throws IORuntimeException if an I/O error occurs
      */
-    public static void write(@Nonnull WritableByteChannel dst, @Nonnull ByteBuffer buf) throws IORuntimeException {
-        try {
-            int c = buf.remaining();
-            while (c > 0) {
-                c -= dst.write(buf);
-            }
-        } catch (IOException e) {
-            throw new IORuntimeException(e);
-        }
+    public static int readTo(@Nonnull CharBuffer src, @Nonnull Appendable dst) throws IORuntimeException {
+        return cr.readTo(src, dst);
+    }
+
+    /**
+     * Reads the data of the specified length from the source buffer into the specified appender, until the read number
+     * reaches the buffer's remaining or reaches the end of the source buffer, returns the actual number of chars read
+     * to.
+     * <p>
+     * If the specified length or buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the
+     * source buffer has already been reached, returns {@code -1}.
+     * <p>
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the specified appender
+     * @param len the specified length, must {@code >= 0}
+     * @return the actual number of chars read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static int readTo(
+        @Nonnull CharBuffer src, @Nonnull Appendable dst, long len
+    ) throws IORuntimeException {
+        return cr.readTo(src, dst, len);
     }
 
     /**
@@ -627,90 +729,8 @@ public class JieIO {
     }
 
     /**
-     * Writes the data of the specified length to the specified appender from the given buffer. If the buffer's
-     * remaining {@code = 0}, this method returns immediately without writing.
-     * <p>
-     * The buffer's position increments by the actual read number.
-     *
-     * @param dst the specified appender
-     * @param src the given buffer
-     * @throws IORuntimeException if an I/O error occurs
-     */
-    public static void write(
-        @Nonnull Appendable dst, @Nonnull CharBuffer src
-    ) throws IndexOutOfBoundsException, IORuntimeException {
-        int remaining = src.remaining();
-        if (remaining == 0) {
-            return;
-        }
-        try {
-            dst.append(src, src.position(), src.limit());
-            src.position(src.limit());
-        } catch (IOException e) {
-            throw new IORuntimeException(e);
-        }
-    }
-
-    /**
-     * Writes the data of the specified length to the specified appender from the given buffer. If the specified length
-     * or buffer's remaining {@code = 0}, this method returns immediately without writing.
-     * <p>
-     * The buffer's position increments by the actual read number.
-     *
-     * @param dst the specified appender
-     * @param src the given buffer
-     * @param len the specified length, must {@code >= 0}
-     * @throws IllegalArgumentException if the specified length is illegal
-     * @throws IORuntimeException       if an I/O error occurs
-     */
-    public static void write(
-        @Nonnull Appendable dst, @Nonnull CharBuffer src, int len
-    ) throws IndexOutOfBoundsException, IORuntimeException {
-        JieCheck.checkArgument(len >= 0, "len must >= 0.");
-        if (len == 0 || src.remaining() == 0) {
-            return;
-        }
-        try {
-            int actualLen = Math.min(src.remaining(), len);
-            int newLimit = src.position() + actualLen;
-            dst.append(src, src.position(), newLimit);
-            src.position(newLimit);
-        } catch (IOException e) {
-            throw new IORuntimeException(e);
-        }
-    }
-
-    /**
-     * Reads all bytes from the source stream and returns them as a string with {@link JieChars#defaultCharset()}.
-     *
-     * @param source the source stream
-     * @return the string
-     * @throws IORuntimeException if an I/O error occurs
-     */
-    public static @Nonnull String string(@Nonnull InputStream source) throws IORuntimeException {
-        return string(source, JieChars.defaultCharset());
-    }
-
-    /**
-     * Reads all bytes from the source stream and returns them as a string with the specified charset.
-     *
-     * @param source  the source stream
-     * @param charset the specified charset
-     * @return the string
-     * @throws IORuntimeException if an I/O error occurs
-     */
-    public static @Nonnull String string(
-        @Nonnull InputStream source, @Nonnull Charset charset
-    ) throws IORuntimeException {
-        byte[] bytes = read(source);
-        if (JieArray.isEmpty(bytes)) {
-            return "";
-        }
-        return new String(bytes, charset);
-    }
-
-    /**
-     * Reads available data from the source stream into a new array and returns the array.
+     * Reads the data from the source stream without blocking into a new array, and returns the array. The array's
+     * length is based on the {@link InputStream#available()}.
      *
      * @param source the source stream
      * @return the array containing the data
@@ -719,69 +739,52 @@ public class JieIO {
     public static byte @Nonnull [] available(@Nonnull InputStream source) throws IORuntimeException {
         try {
             int available = source.available();
-            if (available > 0) {
-                byte[] bytes = new byte[available];
-                int c = source.read(bytes);
-                if (c == -1) {
-                    return new byte[0];
-                }
-                if (c == available) {
-                    return bytes;
-                }
-                return Arrays.copyOf(bytes, c);
+            if (available <= 0) {
+                return new byte[0];
             }
-            if (available == 0) {
-                byte[] b = new byte[1];
-                int readSize = source.read(b);
-                if (readSize <= 0) {
-                    return new byte[0];
-                }
-                return b;
+            byte[] bytes = new byte[available];
+            int c = source.read(bytes);
+            if (c < 0) {
+                return new byte[0];
             }
-            return new byte[0];
+            if (c == available) {
+                return bytes;
+            }
+            return Arrays.copyOf(bytes, c);
         } catch (Exception e) {
             throw new IORuntimeException(e);
         }
     }
 
     /**
-     * Reads available bytes from the source stream and returns them as a string with
-     * {@link JieChars#defaultCharset()}.
+     * Reads all bytes from the source stream and returns as a string with {@link JieChars#defaultCharset()}. If the end
+     * of the source stream has already been reached, returns {@code null}.
      *
      * @param source the source stream
-     * @return the string
+     * @return the string with {@link JieChars#defaultCharset()}
      * @throws IORuntimeException if an I/O error occurs
      */
-    public static @Nonnull String avalaibleString(@Nonnull InputStream source) throws IORuntimeException {
-        return avalaibleString(source, JieChars.defaultCharset());
+    public static @Nullable String string(@Nonnull InputStream source) throws IORuntimeException {
+        return string(source, JieChars.defaultCharset());
     }
 
     /**
-     * Reads available bytes from the source stream and returns them as a string with the specified charset.
+     * Reads all bytes from the source stream and returns them as a string with the specified charset. If the end of the
+     * source stream has already been reached, returns {@code null}.
      *
      * @param source  the source stream
      * @param charset the specified charset
-     * @return the string
+     * @return the string with the specified charset
      * @throws IORuntimeException if an I/O error occurs
      */
-    public static @Nonnull String avalaibleString(
+    public static @Nullable String string(
         @Nonnull InputStream source, @Nonnull Charset charset
     ) throws IORuntimeException {
-        try {
-            byte[] bytes = available(source);
-            if (JieArray.isEmpty(bytes)) {
-                return "";
-            }
-            return new String(bytes, charset);
-        } catch (Exception e) {
-            throw new IORuntimeException(e);
-        }
+        byte[] bytes = read(source);
+        return bytes == null ? null : new String(bytes, charset);
     }
 
     //---------------- Common End ----------------//
-
-    //------------------------------------------------------------//
-    //------------------------------------------------------------//
 
     //---------------- Wrappers Begin ----------------//
 
@@ -794,8 +797,8 @@ public class JieIO {
      * @param array the given array
      * @return the given array as an {@link InputStream}
      */
-    public static @Nonnull InputStream inStream(byte @Nonnull [] array) {
-        return WrapperImpls.in(array);
+    public static @Nonnull InputStream newInputStream(byte @Nonnull [] array) {
+        return IOImpls.inputStream(array);
     }
 
     /**
@@ -809,8 +812,8 @@ public class JieIO {
      * @param length the specified length
      * @return the given array as an {@link InputStream}
      */
-    public static @Nonnull InputStream inStream(byte @Nonnull [] array, int offset, int length) {
-        return WrapperImpls.in(array, offset, length);
+    public static @Nonnull InputStream newInputStream(byte @Nonnull [] array, int offset, int length) {
+        return IOImpls.inputStream(array, offset, length);
     }
 
     /**
@@ -822,8 +825,8 @@ public class JieIO {
      * @param buffer the given buffer
      * @return the given buffer as an {@link InputStream}
      */
-    public static @Nonnull InputStream inStream(@Nonnull ByteBuffer buffer) {
-        return WrapperImpls.in(buffer);
+    public static @Nonnull InputStream newInputStream(@Nonnull ByteBuffer buffer) {
+        return IOImpls.inputStream(buffer);
     }
 
     /**
@@ -838,10 +841,10 @@ public class JieIO {
      * @return the given random access file as an {@link InputStream}
      * @throws IORuntimeException if an I/O error occurs
      */
-    public static @Nonnull InputStream inStream(
+    public static @Nonnull InputStream newInputStream(
         @Nonnull RandomAccessFile random, long offset
     ) throws IORuntimeException {
-        return WrapperImpls.in(random, offset);
+        return IOImpls.inputStream(random, offset);
     }
 
     /**
@@ -854,8 +857,8 @@ public class JieIO {
      * @param reader the given reader
      * @return the given reader as an {@link InputStream}
      */
-    public static @Nonnull InputStream inStream(@Nonnull Reader reader) {
-        return inStream(reader, JieChars.defaultCharset());
+    public static @Nonnull InputStream newInputStream(@Nonnull Reader reader) {
+        return newInputStream(reader, JieChars.defaultCharset());
     }
 
     /**
@@ -869,8 +872,8 @@ public class JieIO {
      * @param charset the specified charset
      * @return the given reader as an {@link InputStream}
      */
-    public static @Nonnull InputStream inStream(@Nonnull Reader reader, @Nonnull Charset charset) {
-        return WrapperImpls.in(reader, charset);
+    public static @Nonnull InputStream newInputStream(@Nonnull Reader reader, @Nonnull Charset charset) {
+        return IOImpls.inputStream(reader, charset);
     }
 
     /**
@@ -882,8 +885,8 @@ public class JieIO {
      * @param array the given array
      * @return the given array as an {@link Reader}
      */
-    public static @Nonnull Reader reader(char @Nonnull [] array) {
-        return WrapperImpls.reader(array);
+    public static @Nonnull Reader newReader(char @Nonnull [] array) {
+        return IOImpls.reader(array);
     }
 
     /**
@@ -897,8 +900,8 @@ public class JieIO {
      * @param length the specified length
      * @return the given array as an {@link Reader}
      */
-    public static @Nonnull Reader reader(char @Nonnull [] array, int offset, int length) {
-        return WrapperImpls.reader(array, offset, length);
+    public static @Nonnull Reader newReader(char @Nonnull [] array, int offset, int length) {
+        return IOImpls.reader(array, offset, length);
     }
 
     /**
@@ -910,8 +913,8 @@ public class JieIO {
      * @param chars the given chars
      * @return the given array as an {@link Reader}
      */
-    public static @Nonnull Reader reader(@Nonnull CharSequence chars) {
-        return WrapperImpls.reader(chars);
+    public static @Nonnull Reader newReader(@Nonnull CharSequence chars) {
+        return IOImpls.reader(chars);
     }
 
     /**
@@ -923,8 +926,8 @@ public class JieIO {
      * @param buffer the given buffer
      * @return the given buffer as an {@link Reader}
      */
-    public static @Nonnull Reader reader(@Nonnull CharBuffer buffer) {
-        return WrapperImpls.reader(buffer);
+    public static @Nonnull Reader newReader(@Nonnull CharBuffer buffer) {
+        return IOImpls.reader(buffer);
     }
 
     /**
@@ -937,8 +940,8 @@ public class JieIO {
      * @param stream the given stream
      * @return the given stream as an {@link Reader}
      */
-    public static @Nonnull Reader reader(@Nonnull InputStream stream) {
-        return reader(stream, JieChars.defaultCharset());
+    public static @Nonnull Reader newReader(@Nonnull InputStream stream) {
+        return newReader(stream, JieChars.defaultCharset());
     }
 
     /**
@@ -952,8 +955,8 @@ public class JieIO {
      * @param charset the specified charset
      * @return the given stream as an {@link Reader}
      */
-    public static @Nonnull Reader reader(@Nonnull InputStream stream, @Nonnull Charset charset) {
-        return WrapperImpls.reader(stream, charset);
+    public static @Nonnull Reader newReader(@Nonnull InputStream stream, @Nonnull Charset charset) {
+        return IOImpls.reader(stream, charset);
     }
 
     /**
@@ -964,8 +967,8 @@ public class JieIO {
      * @param array the given array
      * @return the given array as an {@link OutputStream}
      */
-    public static @Nonnull OutputStream outStream(byte @Nonnull [] array) {
-        return WrapperImpls.out(array);
+    public static @Nonnull OutputStream newOutputStream(byte @Nonnull [] array) {
+        return IOImpls.outputStream(array);
     }
 
     /**
@@ -979,8 +982,8 @@ public class JieIO {
      * @param length the specified length
      * @return the given array as an {@link OutputStream}
      */
-    public static @Nonnull OutputStream outStream(byte @Nonnull [] array, int offset, int length) {
-        return WrapperImpls.out(array, offset, length);
+    public static @Nonnull OutputStream newOutputStream(byte @Nonnull [] array, int offset, int length) {
+        return IOImpls.outputStream(array, offset, length);
     }
 
     /**
@@ -991,8 +994,8 @@ public class JieIO {
      * @param buffer the given buffer
      * @return the given buffer as an {@link OutputStream}
      */
-    public static @Nonnull OutputStream outStream(@Nonnull ByteBuffer buffer) {
-        return WrapperImpls.out(buffer);
+    public static @Nonnull OutputStream newOutputStream(@Nonnull ByteBuffer buffer) {
+        return IOImpls.outputStream(buffer);
     }
 
     /**
@@ -1006,10 +1009,10 @@ public class JieIO {
      * @return the given random access file as an {@link OutputStream}
      * @throws IORuntimeException if an I/O error occurs
      */
-    public static @Nonnull OutputStream outStream(
+    public static @Nonnull OutputStream newOutputStream(
         @Nonnull RandomAccessFile random, long offset
     ) throws IORuntimeException {
-        return WrapperImpls.out(random, offset);
+        return IOImpls.outputStream(random, offset);
     }
 
     /**
@@ -1022,8 +1025,8 @@ public class JieIO {
      * @param appender the given appender
      * @return the given appender as an {@link OutputStream}
      */
-    public static @Nonnull OutputStream outStream(@Nonnull Appendable appender) {
-        return outStream(appender, JieChars.defaultCharset());
+    public static @Nonnull OutputStream newOutputStream(@Nonnull Appendable appender) {
+        return newOutputStream(appender, JieChars.defaultCharset());
     }
 
     /**
@@ -1037,8 +1040,8 @@ public class JieIO {
      * @param charset  the specified charset
      * @return the given appender as an {@link OutputStream}
      */
-    public static @Nonnull OutputStream outStream(@Nonnull Appendable appender, @Nonnull Charset charset) {
-        return WrapperImpls.out(appender, charset);
+    public static @Nonnull OutputStream newOutputStream(@Nonnull Appendable appender, @Nonnull Charset charset) {
+        return IOImpls.outputStream(appender, charset);
     }
 
     /**
@@ -1049,8 +1052,8 @@ public class JieIO {
      * @param array the given array
      * @return the given array as an {@link Writer}
      */
-    public static @Nonnull Writer writer(char @Nonnull [] array) {
-        return WrapperImpls.writer(array);
+    public static @Nonnull Writer newWriter(char @Nonnull [] array) {
+        return IOImpls.writer(array);
     }
 
     /**
@@ -1064,8 +1067,8 @@ public class JieIO {
      * @param length the specified length
      * @return the given array as an {@link Writer}
      */
-    public static @Nonnull Writer writer(char @Nonnull [] array, int offset, int length) {
-        return WrapperImpls.writer(array, offset, length);
+    public static @Nonnull Writer newWriter(char @Nonnull [] array, int offset, int length) {
+        return IOImpls.writer(array, offset, length);
     }
 
     /**
@@ -1076,8 +1079,8 @@ public class JieIO {
      * @param buffer the given buffer
      * @return the given array as an {@link Writer}
      */
-    public static @Nonnull Writer writer(@Nonnull CharBuffer buffer) {
-        return WrapperImpls.writer(buffer);
+    public static @Nonnull Writer newWriter(@Nonnull CharBuffer buffer) {
+        return IOImpls.writer(buffer);
     }
 
     /**
@@ -1090,8 +1093,8 @@ public class JieIO {
      * @param stream the given stream
      * @return the given appender as an {@link Writer}
      */
-    public static @Nonnull Writer writer(@Nonnull OutputStream stream) {
-        return writer(stream, JieChars.defaultCharset());
+    public static @Nonnull Writer newWriter(@Nonnull OutputStream stream) {
+        return newWriter(stream, JieChars.defaultCharset());
     }
 
     /**
@@ -1105,8 +1108,8 @@ public class JieIO {
      * @param charset the specified charset
      * @return the given appender as an {@link Writer}
      */
-    public static @Nonnull Writer writer(@Nonnull OutputStream stream, @Nonnull Charset charset) {
-        return WrapperImpls.writer(stream, charset);
+    public static @Nonnull Writer newWriter(@Nonnull OutputStream stream, @Nonnull Charset charset) {
+        return IOImpls.writer(stream, charset);
     }
 
     /**
@@ -1114,8 +1117,8 @@ public class JieIO {
      *
      * @return an empty {@link InputStream}
      */
-    public static @Nonnull InputStream emptyInStream() {
-        return WrapperImpls.emptyIn();
+    public static @Nonnull InputStream emptyInputStream() {
+        return IOImpls.emptyInputStream();
     }
 
     /**
@@ -1124,7 +1127,7 @@ public class JieIO {
      * @return an empty {@link Reader}
      */
     public static @Nonnull Reader emptyReader() {
-        return WrapperImpls.emptyReader();
+        return IOImpls.emptyReader();
     }
 
     /**
@@ -1132,8 +1135,8 @@ public class JieIO {
      *
      * @return an {@link OutputStream} that infinitely accepts data but immediately discards them
      */
-    public static @Nonnull OutputStream nullOutStream() {
-        return WrapperImpls.nullOut();
+    public static @Nonnull OutputStream nullOutputStream() {
+        return IOImpls.nullOutputStream();
     }
 
     /**
@@ -1142,7 +1145,7 @@ public class JieIO {
      * @return an {@link Writer} that infinitely accepts data but immediately discards them
      */
     public static @Nonnull Writer nullWriter() {
-        return WrapperImpls.nullWriter();
+        return IOImpls.nullWriter();
     }
 
     //---------------- Wrappers End ----------------//

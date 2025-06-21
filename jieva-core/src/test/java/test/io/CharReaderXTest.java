@@ -310,9 +310,9 @@ public class CharReaderXTest {
             }
             reader.reset();
             if (data.length > 0) {
-                expectThrows(IORuntimeException.class, () -> reader.readTo(JieIO.writer(new ErrorOutputStream())));
+                expectThrows(IORuntimeException.class, () -> reader.readTo(JieIO.newWriter(new ErrorOutputStream())));
                 reader.reset();
-                expectThrows(IORuntimeException.class, () -> reader.readTo(JieIO.writer(new ErrorOutputStream()), 5));
+                expectThrows(IORuntimeException.class, () -> reader.readTo(JieIO.newWriter(new ErrorOutputStream()), 5));
                 reader.reset();
             }
         }
@@ -559,7 +559,7 @@ public class CharReaderXTest {
         }
         {
             // close
-            CharReaderX.from(JieIO.reader(new char[0])).close();
+            CharReaderX.from(JieIO.newReader(new char[0])).close();
             CharReaderX.from(new char[0]).close();
             CharReaderX.from(CharBuffer.allocate(0)).close();
             CharReaderX.from("").close();

@@ -313,8 +313,8 @@ public interface CharProcessor {
      * Returns a reader which represents and encompasses the entire data processing.
      * <p>
      * If there is no encoder in the processor: if the source is a reader, return the reader itself; if the source is an
-     * array or buffer or char sequence, returns the reader from {@link JieIO#reader(char[])} or
-     * {@link JieIO#reader(CharBuffer)} or {@link JieIO#reader(CharSequence)}. Otherwise, the returned reader's read
+     * array or buffer or char sequence, returns the reader from {@link JieIO#newReader(char[])} or
+     * {@link JieIO#newReader(CharBuffer)} or {@link JieIO#newReader(CharSequence)}. Otherwise, the returned reader's read
      * operations are performed only as needed, mark/reset operations are not supported, and the {@code close()} method
      * will close the source if the source is closable.
      * <p>
@@ -333,6 +333,6 @@ public interface CharProcessor {
      * @return a new {@link ByteProcessor} converted from this {@link CharProcessor} with the specified charset
      */
     default ByteProcessor toByteProcessor(Charset charset) {
-        return ByteProcessor.from(JieIO.inStream(toReader(), charset));
+        return ByteProcessor.from(JieIO.newInputStream(toReader(), charset));
     }
 }

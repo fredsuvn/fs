@@ -955,15 +955,15 @@ public class CharProcessorTest {
             );
             assertEquals(
                 CharProcessor.from(new char[0]).toReader().getClass(),
-                JieIO.reader(new char[0]).getClass()
+                JieIO.newReader(new char[0]).getClass()
             );
             assertEquals(
                 CharProcessor.from(CharBuffer.allocate(0)).toReader().getClass(),
-                JieIO.reader(CharBuffer.allocate(0)).getClass()
+                JieIO.newReader(CharBuffer.allocate(0)).getClass()
             );
             assertEquals(
                 CharProcessor.from("").toReader().getClass(),
-                JieIO.reader("").getClass()
+                JieIO.newReader("").getClass()
             );
             CharProcessor inst = CharProcessor.from(new char[0]);
             invokeThrows(

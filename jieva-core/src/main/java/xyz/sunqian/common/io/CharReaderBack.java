@@ -86,4 +86,23 @@ final class CharReaderBack {
             throw new IORuntimeException(e);
         }
     }
+
+    static int readTo(
+        @Nonnull CharBuffer src, @Nonnull Appendable dst, long len
+    ) throws IndexOutOfBoundsException, IORuntimeException {
+        if (len == 0) {
+            return 0;
+        }
+        if (src.remaining() == 0) {
+            return -1;
+        }
+        try {
+            int actualLen = len < 0 ? src.remaining() : (int) Math.min(src.remaining(), len);
+            dst.append(src, 0, actualLen);
+            src.position(src.position() + actualLen);
+            return actualLen;
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
 }

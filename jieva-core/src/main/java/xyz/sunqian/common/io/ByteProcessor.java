@@ -320,7 +320,7 @@ public interface ByteProcessor {
      * Returns an input stream which represents and encompasses the entire data processing.
      * <p>
      * If there is no encoder in the processor: if the source is a stream, return the stream itself; if the source is an
-     * array or buffer, returns the stream from {@link JieIO#inStream(byte[])} or {@link JieIO#inStream(ByteBuffer)}.
+     * array or buffer, returns the stream from {@link JieIO#newInputStream(byte[])} or {@link JieIO#newInputStream(ByteBuffer)}.
      * Otherwise, the returned stream's read operations are performed only as needed, mark/reset operations are not
      * supported, and the {@code close()} method will close the source if the source is closable.
      * <p>
@@ -339,6 +339,6 @@ public interface ByteProcessor {
      * @return a new {@link CharProcessor} converted from this {@link ByteProcessor} with the specified charset
      */
     default CharProcessor toCharProcessor(Charset charset) {
-        return CharProcessor.from(JieIO.reader(toInputStream(), charset));
+        return CharProcessor.from(JieIO.newReader(toInputStream(), charset));
     }
 }

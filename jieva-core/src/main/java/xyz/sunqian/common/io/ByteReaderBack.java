@@ -91,7 +91,11 @@ final class ByteReaderBack {
     }
 
     static long readTo(
-        @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, long len, int bufSize
+        @Nonnull ByteReader reader,
+        @Nonnull ReadableByteChannel src,
+        @Nonnull WritableByteChannel dst,
+        long len,
+        int bufSize
     ) throws IllegalArgumentException, IORuntimeException {
         if (len == 0) {
             return 0;
@@ -107,7 +111,7 @@ final class ByteReaderBack {
                     return count == 0 ? -1 : count;
                 }
                 buf.flip();
-                JieIO.write(dst, buf);
+                reader.readTo(buf, dst);
                 buf.clear();
                 count += readSize;
                 if (len > 0 && count >= len) {
@@ -140,6 +144,54 @@ final class ByteReaderBack {
             } while (dst.remaining() != 0);
             dst.limit(oldLimit);
             return dst.position() - pos;
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    static int readTo(
+        @Nonnull ByteBuffer src, @Nonnull WritableByteChannel dst, int len
+    ) throws IndexOutOfBoundsException, IORuntimeException {
+        if (len == 0) {
+            return 0;
+        }
+        if (src.remaining() == 0) {
+            return -1;
+        }
+        try {
+            int actualLen = len < 0 ? src.remaining() : Math.min(src.remaining(), len);
+            int oldLimit = src.limit();
+            src.limit(src.position() + actualLen);
+            while (src.remaining() > 0) {
+                dst.write(src);
+            }
+            src.limit(oldLimit);
+            return actualLen;
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    static int readTo(
+        @Nonnull ByteBuffer src, @Nonnull OutputStream dst, long len
+    ) throws IndexOutOfBoundsException, IORuntimeException {
+        if (len == 0) {
+            return 0;
+        }
+        if (src.remaining() == 0) {
+            return -1;
+        }
+        try {
+            int actualLen = len < 0 ? src.remaining() : (int) Math.min(src.remaining(), len);
+            if (src.hasArray()) {
+                dst.write(src.array(), src.arrayOffset() + src.position(), actualLen);
+                src.position(src.position() + actualLen);
+            } else {
+                byte[] buf = new byte[actualLen];
+                src.get(buf);
+                dst.write(buf);
+            }
+            return actualLen;
         } catch (Exception e) {
             throw new IORuntimeException(e);
         }
