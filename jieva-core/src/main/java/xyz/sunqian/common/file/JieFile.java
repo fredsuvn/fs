@@ -120,7 +120,7 @@ public class JieFile {
     public static void writeBytes(Path path, long offset, long length, InputStream data) {
         try (RandomAccessFile random = new RandomAccessFile(path.toFile(), "rw")) {
             OutputStream dest = JieIO.outStream(random, offset);
-            JieIO.readAllTo(data, dest);
+            JieIO.readTo(data, dest);
             dest.flush();
         } catch (Exception e) {
             throw new FileException(e);

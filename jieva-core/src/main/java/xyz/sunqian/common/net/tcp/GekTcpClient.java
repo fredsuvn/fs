@@ -532,7 +532,7 @@ public interface GekTcpClient extends GekTcpEndpoint {
 
                 @Override
                 public synchronized void send(GekData data) {
-                    JieIO.readAllTo(data.asInputStream(), getOutputStream());
+                    JieIO.readTo(data.asInputStream(), getOutputStream());
                 }
 
                 @Override
@@ -564,7 +564,7 @@ public interface GekTcpClient extends GekTcpEndpoint {
 
                 @Override
                 public synchronized void send(InputStream data) {
-                    JieIO.readAllTo(data, getOutputStream());
+                    JieIO.readTo(data, getOutputStream());
                 }
 
                 @Override
