@@ -8,6 +8,17 @@ package xyz.sunqian.common.base;
 public class JieMath {
 
     /**
+     * Returns the integer value of given long value. If the long value is greater than {@link Integer#MAX_VALUE},
+     * returns {@link Integer#MAX_VALUE}.
+     *
+     * @param value given long value
+     * @return the integer value of given long value
+     */
+    public static int intValue(long value) {
+        return value > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) value;
+    }
+
+    /**
      * Returns the least portion number that {@code total} can be divided into specified {@code size}. It is equivalent
      * to:
      * <pre>

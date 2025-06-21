@@ -9,8 +9,10 @@ import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieIO;
 import xyz.sunqian.test.JieAssert;
 
+import java.io.ByteArrayInputStream;
 import java.io.CharArrayReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -37,10 +39,10 @@ import static org.testng.Assert.expectThrows;
 public class IOImplsTest {
 
     @Test
-    public void testInput() throws Exception {
-        testInput(1024);
-        testInput(60);
-        testInput(234);
+    public void testInputStream() throws Exception {
+        testInputStream(64);
+        testInputStream(66);
+        testInputStream(256);
 
         // error
         expectThrows(NullPointerException.class, () -> JieIO.newInputStream(null, 2, +1));
@@ -49,66 +51,232 @@ public class IOImplsTest {
         expectThrows(IndexOutOfBoundsException.class, () -> JieIO.newInputStream(new byte[0], 2, -1));
     }
 
-    private void testInput(int sourceSize) throws Exception {
-        byte[] source = JieRandom.fill(new byte[sourceSize]);
-
-        // bytes
-        IOCases.testInput(JieIO.newInputStream(source), source, true);
-        IOCases.testInput(
-            JieIO.newInputStream(source, 2, source.length - 10),
-            Arrays.copyOfRange(source, 2, source.length - 8),
-            true
-        );
-
-        // buffer
-        ByteBuffer buffer = ByteBuffer.wrap(source);
-        InputStream bufferIn = JieIO.newInputStream(buffer);
-        IOCases.testInput(bufferIn, source, true);
-        Class<?> bufferInClass = bufferIn.getClass();
-        Method read0 = bufferInClass.getDeclaredMethod("read0");
-        JieAssert.invokeThrows(IOException.class, read0, bufferIn);
-        read0 = bufferInClass.getDeclaredMethod("read0", byte[].class, int.class, int.class);
-        JieAssert.invokeThrows(IOException.class, read0, bufferIn, null, 0, 0);
-        read0 = bufferInClass.getDeclaredMethod("skip0", int.class);
-        JieAssert.invokeThrows(IOException.class, read0, bufferIn, 99);
-
-        // file
-        Path path = Paths.get("src", "test", "resources", "io", "input.test");
-        RandomAccessFile raf = new FakeRandomFile(path.toFile(), "r", source);
-        InputStream rafIn = JieIO.newInputStream(raf, 6);
-        IOCases.testInput(rafIn, Arrays.copyOfRange(source, 6, source.length), true);
-        expectThrows(IORuntimeException.class, () -> rafIn.mark(66));
-
-        // chars
-        char[] chars = JieRandom.fill(new char[sourceSize], '0', '9');
-        byte[] charBytes = new String(chars).getBytes(JieChars.UTF_8);
-        InputStream charsIn = JieIO.newInputStream(new CharArrayReader(chars));
-        IOCases.testInput(charsIn, charBytes, false);
-        expectThrows(IOException.class, charsIn::read);
-        // chinese: '\u4e00' - '\u9fff'
-        chars = JieRandom.fill(new char[sourceSize], '\u4e00', '\u4e01');
-        charBytes = new String(chars).getBytes(JieChars.UTF_8);
-        charsIn = JieIO.newInputStream(new CharArrayReader(chars));
-        IOCases.testInput(charsIn, charBytes, false);
-        expectThrows(IOException.class, charsIn::read);
-        // emoji: "\uD83D\uDD1E"
-        for (int i = 0; i < chars.length; i += 2) {
-            chars[i] = '\uD83D';
-            chars[i + 1] = '\uDD1E';
+    private void testInputStream(int dataSize) throws Exception {
+        {
+            // bytes
+            byte[] data = JieRandom.fill(new byte[dataSize]);
+            testInputStream(JieIO.newInputStream(data), data, true);
+            data = JieRandom.fill(new byte[dataSize + 12]);
+            testInputStream(
+                JieIO.newInputStream(data, 6, dataSize),
+                Arrays.copyOfRange(data, 6, data.length - 6),
+                true
+            );
         }
-        charBytes = new String(chars).getBytes(JieChars.UTF_8);
-        charsIn = JieIO.newInputStream(new CharArrayReader(chars));
-        IOCases.testInput(charsIn, charBytes, false);
-        expectThrows(IOException.class, charsIn::read);
-        // error: U+DD88
-        Arrays.fill(chars, '\uDD88');
-        charsIn = JieIO.newInputStream(new CharArrayReader(chars));
-        expectThrows(IOException.class, charsIn::read);
+        {
+            // buffer
+            byte[] data = JieRandom.fill(new byte[dataSize]);
+            ByteBuffer buffer = ByteBuffer.wrap(data);
+            InputStream bufferIn = JieIO.newInputStream(buffer);
+            testInputStream(bufferIn, data, true);
+        }
+        {
+            // file
+            // Path path = Paths.get("src", "test", "resources", "io", "input.test");
+            // RandomAccessFile raf = new FakeRandomFile(path.toFile(), "r", source);
+            byte[] data = JieRandom.fill(new byte[dataSize + 6]);
+            RandomAccessFile raf = new FakeFile("r", data);
+            InputStream rafIn = JieIO.newInputStream(raf, 6);
+            testInputStream(rafIn, Arrays.copyOfRange(data, 6, data.length), true);
+            expectThrows(IORuntimeException.class, () -> rafIn.mark(66));
+        }
+        {
+            // chars
+            char[] chars = JieRandom.fill(new char[dataSize], '0', '9');
+            byte[] charBytes = new String(chars).getBytes(JieChars.UTF_8);
+            InputStream charsIn = JieIO.newInputStream(new CharArrayReader(chars));
+            testInputStream(charsIn, charBytes, false);
+            expectThrows(IOException.class, charsIn::read);
+            // chinese: '\u4e00' - '\u9fff'
+            chars = JieRandom.fill(new char[dataSize], '\u4e00', '\u4e01');
+            charBytes = new String(chars).getBytes(JieChars.UTF_8);
+            charsIn = JieIO.newInputStream(new CharArrayReader(chars));
+            testInputStream(charsIn, charBytes, false);
+            expectThrows(IOException.class, charsIn::read);
+            // emoji: "\uD83D\uDD1E"
+            for (int i = 0; i < chars.length; i += 2) {
+                chars[i] = '\uD83D';
+                chars[i + 1] = '\uDD1E';
+            }
+            charBytes = new String(chars).getBytes(JieChars.UTF_8);
+            charsIn = JieIO.newInputStream(new CharArrayReader(chars));
+            testInputStream(charsIn, charBytes, false);
+            expectThrows(IOException.class, charsIn::read);
+            // error: U+DD88
+            // Arrays.fill(chars, '\uDD88');
+            // charsIn = JieIO.newInputStream(new CharArrayReader(chars));
+            // expectThrows(IOException.class, charsIn::read);
+            // error
+            charsIn = JieIO.newInputStream(new CharArrayReader(chars), new ErrorCharset());
+            expectThrows(IOException.class, charsIn::read);
+        }
+    }
 
-        // error
-        FakeRandomFile.SEEK_ERR = true;
-        expectThrows(IORuntimeException.class, () -> JieIO.newInputStream(raf, 6));
-        FakeRandomFile.SEEK_ERR = false;
+    private void testInputStream(InputStream in, byte[] data, boolean available) throws Exception {
+        assertEquals(in.read(new byte[10], 0, 0), 0);
+        assertEquals(in.read(new byte[0]), 0);
+        assertEquals(in.skip(0), 0);
+        assertEquals(in.skip(-1), 0);
+        expectThrows(IndexOutOfBoundsException.class, () -> in.read(new byte[10], 2, -1));
+        expectThrows(IndexOutOfBoundsException.class, () -> in.read(new byte[10], -2, 1));
+        expectThrows(IndexOutOfBoundsException.class, () -> in.read(new byte[1], 0, 2));
+
+        {
+            // mark/reset
+            expectThrows(IOException.class, in::reset);
+            in.mark(0);
+            if (in.markSupported()) {
+                in.reset();
+            } else {
+                expectThrows(IOException.class, in::reset);
+            }
+        }
+
+        if (data.length == 0) {
+            testEndInputStream(in);
+            in.close();
+            in.mark(0);
+            return;
+        }
+
+        int hasRead = 0;
+
+        {
+            // read()
+            if (available) {
+                assertEquals(in.available(), data.length - hasRead);
+            } else {
+                assertTrue(in.available() <= data.length - hasRead && in.available() >= 0);
+            }
+            if (in.markSupported()) {
+                in.mark(3);
+            }
+            assertEquals((byte) in.read(), data[0]);
+            assertEquals((byte) in.read(), data[1]);
+            assertEquals((byte) in.read(), data[2]);
+            if (in.markSupported()) {
+                in.reset();
+                assertEquals((byte) in.read(), data[0]);
+                assertEquals((byte) in.read(), data[1]);
+                assertEquals((byte) in.read(), data[2]);
+            }
+            hasRead += 3;
+        }
+        {
+            // read(byte[])
+            if (available) {
+                assertEquals(in.available(), data.length - hasRead);
+            } else {
+                assertTrue(in.available() <= data.length - hasRead && in.available() >= 0);
+            }
+            byte[] dst = new byte[13];
+            if (in.markSupported()) {
+                in.mark(dst.length);
+            }
+            assertEquals(in.read(dst), dst.length);
+            assertEquals(dst, Arrays.copyOfRange(data, hasRead, hasRead + dst.length));
+            if (in.markSupported()) {
+                in.reset();
+                dst = new byte[13];
+                assertEquals(in.read(dst), dst.length);
+                assertEquals(dst, Arrays.copyOfRange(data, hasRead, hasRead + dst.length));
+            }
+            hasRead += dst.length;
+        }
+        {
+            // read(byte[], int, int)
+            if (available) {
+                assertEquals(in.available(), data.length - hasRead);
+            } else {
+                assertTrue(in.available() <= data.length - hasRead && in.available() >= 0);
+            }
+            int readSize = 6;
+            byte[] dst = new byte[readSize + 4];
+            if (in.markSupported()) {
+                in.mark(readSize);
+            }
+            assertEquals(in.read(dst, 2, readSize), readSize);
+            assertEquals(
+                Arrays.copyOfRange(dst, 2, 2 + readSize),
+                Arrays.copyOfRange(data, hasRead, hasRead + readSize)
+            );
+            if (in.markSupported()) {
+                in.reset();
+                dst = new byte[readSize + 4];
+                assertEquals(in.read(dst, 2, readSize), readSize);
+                assertEquals(
+                    Arrays.copyOfRange(dst, 2, 2 + readSize),
+                    Arrays.copyOfRange(data, hasRead, hasRead + readSize)
+                );
+            }
+            hasRead += readSize;
+        }
+        {
+            // skip
+            if (available) {
+                assertEquals(in.available(), data.length - hasRead);
+            } else {
+                assertTrue(in.available() <= data.length - hasRead && in.available() >= 0);
+            }
+            int skip = 11;
+            if (in.markSupported()) {
+                in.mark(skip);
+            }
+            assertEquals(in.skip(0), 0);
+            assertEquals(in.skip(-1), 0);
+            assertEquals(in.skip(skip), skip);
+            if (in.markSupported()) {
+                in.reset();
+                assertEquals(in.skip(0), 0);
+                assertEquals(in.skip(-1), 0);
+                assertEquals(in.skip(skip), skip);
+            }
+            hasRead += skip;
+        }
+        {
+            // read all
+            if (available) {
+                assertEquals(in.available(), data.length - hasRead);
+            } else {
+                assertTrue(in.available() <= data.length - hasRead && in.available() >= 0);
+            }
+            if (in.markSupported()) {
+                in.mark(data.length - hasRead);
+            }
+            byte[] remaining = JieIO.read(in);
+            assertEquals(
+                remaining,
+                Arrays.copyOfRange(data, hasRead, data.length)
+            );
+            if (in.markSupported()) {
+                in.reset();
+                byte[] remaining2 = JieIO.read(in);
+                assertEquals(
+                    remaining2,
+                    Arrays.copyOfRange(data, hasRead, data.length)
+                );
+                assertEquals(
+                    remaining,
+                    remaining2
+                );
+            }
+            hasRead += remaining.length;
+        }
+        assertEquals(hasRead, data.length);
+        testEndInputStream(in);
+
+        // close
+        in.close();
+    }
+
+    private void testEndInputStream(InputStream in) throws Exception {
+        assertEquals(in.available(), 0);
+        assertEquals(in.read(), -1);
+        assertEquals(in.read(new byte[10]), -1);
+        assertEquals(in.read(new byte[10], 0, 1), -1);
+        assertEquals(in.skip(999), 0);
+        assertEquals(in.skip(0), 0);
+        assertEquals(in.skip(-1), 0);
     }
 
     @Test
@@ -520,6 +688,95 @@ public class IOImplsTest {
         assertEquals(JieIO.newReader(src).read(dstBuffer), 1);
         assertEquals(dst, new char[]{9, 0});
         assertEquals(JieIO.newReader(new char[0]).skip(999), 0);
+    }
+
+    private static final class FakeFile extends RandomAccessFile {
+
+        private final byte[] data;
+        private boolean closed = false;
+        private ByteArrayInputStream in;
+
+        public FakeFile(String mode, byte[] data) throws FileNotFoundException {
+            super(ClassLoader.getSystemResource("io/fakeRaf.txt").getFile(), mode);
+            this.data = data;
+            in = new ByteArrayInputStream(data);
+        }
+
+        @Override
+        public int read() throws IOException {
+            return in.read();
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            return in.read(b, off, len);
+        }
+
+        @Override
+        public int skipBytes(int n) throws IOException {
+            return (int) in.skip(n);
+        }
+
+        @Override
+        public long getFilePointer() throws IOException {
+            if (closed) {
+                throw new IOException();
+            }
+            return data.length - in.available();
+        }
+
+        @Override
+        public void seek(long pos) throws IOException {
+            in = new ByteArrayInputStream(data, (int) pos, data.length - (int) pos);
+        }
+
+        @Override
+        public long length() throws IOException {
+            return data.length;
+        }
+
+        @Override
+        public void close() throws IOException {
+            super.close();
+            this.closed = true;
+        }
+    }
+
+    private static final class ErrorCharset extends Charset {
+
+        private ErrorCharset() {
+            super("error", new String[0]);
+        }
+
+        @Override
+        public boolean contains(Charset cs) {
+            return false;
+        }
+
+        @Override
+        public CharsetDecoder newDecoder() {
+            return new CharsetDecoder(this, 1f, 1f) {
+                @Override
+                protected CoderResult decodeLoop(ByteBuffer in, CharBuffer out) {
+                    return CoderResult.unmappableForLength(1);
+                }
+            };
+        }
+
+        @Override
+        public CharsetEncoder newEncoder() {
+            return new CharsetEncoder(this, 1f, 1f) {
+                @Override
+                protected CoderResult encodeLoop(CharBuffer in, ByteBuffer out) {
+                    return CoderResult.unmappableForLength(1);
+                }
+
+                @Override
+                public boolean isLegalReplacement(byte[] repl) {
+                    return true;
+                }
+            };
+        }
     }
 
     private static final class FakeRandomFile extends RandomAccessFile {

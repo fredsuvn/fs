@@ -3,6 +3,7 @@ package xyz.sunqian.common.io;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.JieMath;
 
 import java.io.Closeable;
 import java.io.Flushable;
@@ -210,15 +211,7 @@ final class IOImpls {
             if (!buffer.hasRemaining()) {
                 return -1;
             }
-            return read0();
-        }
-
-        private int read0() throws IOException {
-            try {
-                return buffer.get() & 0xff;
-            } catch (Exception e) {
-                throw new IOException(e);
-            }
+            return buffer.get() & 0xff;
         }
 
         @Override
@@ -231,16 +224,8 @@ final class IOImpls {
                 return -1;
             }
             int avail = Math.min(buffer.remaining(), len);
-            read0(b, off, avail);
+            buffer.get(b, off, avail);
             return avail;
-        }
-
-        private void read0(byte @Nonnull [] b, int off, int avail) throws IOException {
-            try {
-                buffer.get(b, off, avail);
-            } catch (Exception e) {
-                throw new IOException(e);
-            }
         }
 
         @Override
@@ -252,16 +237,8 @@ final class IOImpls {
             if (avail <= 0) {
                 return 0;
             }
-            skip0(avail);
+            buffer.position(buffer.position() + avail);
             return avail;
-        }
-
-        private void skip0(int avail) throws IOException {
-            try {
-                buffer.position(buffer.position() + avail);
-            } catch (Exception e) {
-                throw new IOException(e);
-            }
         }
 
         @Override
@@ -299,7 +276,7 @@ final class IOImpls {
         private final @Nonnull CharsetEncoder encoder;
         private final @Nonnull CharBuffer inBuffer;
         private final @Nonnull ByteBuffer outBuffer;
-        private boolean endOfInput;
+        private boolean endOfInput = false;
         private boolean closed = false;
         private final byte @Nonnull [] buf = {0};
 
@@ -428,9 +405,9 @@ final class IOImpls {
         private final @Nonnull RandomAccessFile random;
         private long mark = -1;
 
-        RandomInputStream(@Nonnull RandomAccessFile random, long initialSeek) throws IOException {
+        RandomInputStream(@Nonnull RandomAccessFile random, long seek) throws IOException {
             this.random = random;
-            this.random.seek(initialSeek);
+            this.random.seek(seek);
         }
 
         @Override
@@ -457,7 +434,7 @@ final class IOImpls {
 
         @Override
         public int available() throws IOException {
-            return (int) (random.length() - random.getFilePointer());
+            return JieMath.intValue(random.length() - random.getFilePointer());
         }
 
         @Override
