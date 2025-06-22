@@ -4,6 +4,8 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.chars.JieChars;
 
+import java.io.Closeable;
+import java.io.Flushable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -27,8 +29,6 @@ public class JieIO {
     private static final int BUFFER_SIZE = 1024 * 8;
     private static final @Nonnull ByteReader br = newByteReader(bufferSize());
     private static final @Nonnull CharReader cr = newCharReader(bufferSize());
-
-    //---------------- Common Start ----------------//
 
     /**
      * Returns the recommended IO buffer size, typically is 1024 * 8 = 8192.
@@ -784,9 +784,40 @@ public class JieIO {
         return bytes == null ? null : new String(bytes, charset);
     }
 
-    //---------------- Common End ----------------//
+    /**
+     * Closes the given closeable object, which is an instance of {@link Closeable} or {@link AutoCloseable}. If the
+     * given object is not an instance of {@link Closeable} nor {@link AutoCloseable}, then invoking this method has no
+     * effect.
+     *
+     * @param closeable the given closeable object
+     * @throws IOException if an I/O error occurs
+     */
+    public static void close(Object closeable) throws IOException {
+        if (closeable instanceof Closeable) {
+            ((Closeable) closeable).close();
+        } else if (closeable instanceof AutoCloseable) {
+            try {
+                ((AutoCloseable) closeable).close();
+            } catch (IOException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+    }
 
-    //---------------- Wrappers Begin ----------------//
+    /**
+     * Closes the given flushable object, which is an instance of {@link Flushable}. If the given object is not an
+     * instance of {@link Flushable}, then invoking this method has no effect.
+     *
+     * @param flushable the given flushable object
+     * @throws IOException if an I/O error occurs
+     */
+    public static void flush(Object flushable) throws IOException {
+        if (flushable instanceof Flushable) {
+            ((Flushable) flushable).flush();
+        }
+    }
 
     /**
      * Wraps the given array as a new {@link InputStream}. It supports mark/reset operations, but the {@code close()}
@@ -1005,8 +1036,11 @@ public class JieIO {
      * @param offset the specified offset
      * @param length the specified length
      * @return the given array as an {@link OutputStream}
+     * @throws IndexOutOfBoundsException if the array arguments are out of bounds
      */
-    public static @Nonnull OutputStream newOutputStream(byte @Nonnull [] array, int offset, int length) {
+    public static @Nonnull OutputStream newOutputStream(
+        byte @Nonnull [] array, int offset, int length
+    ) throws IndexOutOfBoundsException {
         return IOImpls.outputStream(array, offset, length);
     }
 
@@ -1090,8 +1124,11 @@ public class JieIO {
      * @param offset the specified offset
      * @param length the specified length
      * @return the given array as an {@link Writer}
+     * @throws IndexOutOfBoundsException if the array arguments are out of bounds
      */
-    public static @Nonnull Writer newWriter(char @Nonnull [] array, int offset, int length) {
+    public static @Nonnull Writer newWriter(
+        char @Nonnull [] array, int offset, int length
+    ) throws IndexOutOfBoundsException {
         return IOImpls.writer(array, offset, length);
     }
 
@@ -1171,6 +1208,4 @@ public class JieIO {
     public static @Nonnull Writer nullWriter() {
         return IOImpls.nullWriter();
     }
-
-    //---------------- Wrappers End ----------------//
 }

@@ -84,9 +84,24 @@ public abstract class AbstractWriter extends Writer {
     }
 
     @Override
+    public @Nonnull Writer append(char c) throws IOException {
+        write(c);
+        return this;
+    }
+
+    @Override
+    public void write(char @Nonnull [] cbuf) throws IOException {
+        write0(cbuf, 0, cbuf.length);
+    }
+
+    @Override
     public void write(char @Nonnull [] cbuf, int off, int len) throws IOException {
         checkOffsetLength(cbuf.length, off, len);
-        if (len <= 0) {
+        write0(cbuf, off, len);
+    }
+
+    private void write0(char @Nonnull [] cbuf, int off, int len) throws IOException {
+        if (len == 0) {
             return;
         }
         try {
@@ -97,25 +112,18 @@ public abstract class AbstractWriter extends Writer {
     }
 
     @Override
-    public void write(char @Nonnull [] cbuf) throws IOException {
-        write(cbuf, 0, cbuf.length);
-    }
-
-    @Override
     public void write(@Nonnull String str) throws IOException {
-        write(str, 0, str.length());
-    }
-
-    @Override
-    public @Nonnull Writer append(char c) throws IOException {
-        write(c);
-        return this;
+        write0(str, 0, str.length());
     }
 
     @Override
     public void write(@Nonnull String str, int off, int len) throws IOException {
         checkOffsetLength(str.length(), off, len);
-        if (len <= 0) {
+        write0(str, off, len);
+    }
+
+    private void write0(@Nonnull String str, int off, int len) throws IOException {
+        if (len == 0) {
             return;
         }
         try {
@@ -128,21 +136,26 @@ public abstract class AbstractWriter extends Writer {
     @Override
     public @Nonnull Writer append(@Nullable CharSequence csq) throws IOException {
         CharSequence cs = Jie.nonnull(csq, Jie.NULL_STRING);
-        return append(cs, 0, cs.length());
+        append0(cs, 0, cs.length());
+        return this;
     }
 
     @Override
     public @Nonnull Writer append(@Nullable CharSequence csq, int start, int end) throws IOException {
         CharSequence cs = Jie.nonnull(csq, Jie.NULL_STRING);
         checkOffsetLength(cs.length(), start, end - start);
+        append0(cs, start, end);
+        return this;
+    }
+
+    private void append0(@Nonnull CharSequence csq, int start, int end) throws IOException {
         if (start == end) {
-            return this;
+            return;
         }
         try {
-            doAppend(cs, start, end);
+            doAppend(csq, start, end);
         } catch (Exception e) {
             throw new IOException(e);
         }
-        return this;
     }
 }

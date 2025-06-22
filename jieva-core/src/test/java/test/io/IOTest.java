@@ -14,6 +14,8 @@ import xyz.sunqian.test.TestInputStream;
 
 import java.io.ByteArrayInputStream;
 import java.io.CharArrayReader;
+import java.io.Closeable;
+import java.io.Flushable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -269,6 +271,37 @@ public class IOTest {
                 hello
             );
             assertNull(JieIO.string(new ByteArrayInputStream(new byte[0])));
+        }
+        {
+            // close
+            JieIO.close((Closeable) () -> {});
+            expectThrows(IOException.class, () -> {
+                JieIO.close((Closeable) () -> {
+                    throw new IOException();
+                });
+            });
+            JieIO.close((AutoCloseable) () -> {});
+            expectThrows(IOException.class, () -> {
+                JieIO.close((AutoCloseable) () -> {
+                    throw new IOException();
+                });
+            });
+            expectThrows(IOException.class, () -> {
+                JieIO.close((AutoCloseable) () -> {
+                    throw new Exception();
+                });
+            });
+            JieIO.close("");
+        }
+        {
+            // flush
+            JieIO.flush((Flushable) () -> {});
+            expectThrows(IOException.class, () -> {
+                JieIO.flush((Flushable) () -> {
+                    throw new IOException();
+                });
+            });
+            JieIO.flush("");
         }
     }
 
