@@ -7,7 +7,6 @@ import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.io.AbstractWriter;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieIO;
-import xyz.sunqian.test.JieAssert;
 
 import java.io.ByteArrayInputStream;
 import java.io.CharArrayReader;
@@ -19,7 +18,6 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.io.Reader;
 import java.io.Writer;
-import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -31,7 +29,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
@@ -44,11 +41,13 @@ public class IOImplsTest {
         testInputStream(66);
         testInputStream(256);
 
+        // empty
+        testInputStream(JieIO.emptyInputStream(), new byte[0], true);
+
         // error
-        expectThrows(NullPointerException.class, () -> JieIO.newInputStream(null, 2, +1));
-        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.newInputStream(new byte[0], 2, 1));
-        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.newInputStream(new byte[0], -2, 1));
-        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.newInputStream(new byte[0], 2, -1));
+        RandomAccessFile raf = new FakeFile("r", new byte[0]);
+        raf.close();
+        expectThrows(IORuntimeException.class, () -> JieIO.newInputStream(raf, 0));
     }
 
     private void testInputStream(int dataSize) throws Exception {
@@ -102,13 +101,13 @@ public class IOImplsTest {
             charsIn = JieIO.newInputStream(new CharArrayReader(chars));
             testInputStream(charsIn, charBytes, false);
             expectThrows(IOException.class, charsIn::read);
+            // error
+            charsIn = JieIO.newInputStream(new CharArrayReader(chars), new ErrorCharset());
+            expectThrows(IOException.class, charsIn::read);
             // error: U+DD88
             // Arrays.fill(chars, '\uDD88');
             // charsIn = JieIO.newInputStream(new CharArrayReader(chars));
             // expectThrows(IOException.class, charsIn::read);
-            // error
-            charsIn = JieIO.newInputStream(new CharArrayReader(chars), new ErrorCharset());
-            expectThrows(IOException.class, charsIn::read);
         }
     }
 
@@ -135,7 +134,9 @@ public class IOImplsTest {
         if (data.length == 0) {
             testEndInputStream(in);
             in.close();
-            in.mark(0);
+            if (in.markSupported()) {
+                in.mark(0);
+            }
             return;
         }
 
@@ -274,6 +275,260 @@ public class IOImplsTest {
         assertEquals(in.read(), -1);
         assertEquals(in.read(new byte[10]), -1);
         assertEquals(in.read(new byte[10], 0, 1), -1);
+        assertEquals(in.skip(999), 0);
+        assertEquals(in.skip(0), 0);
+        assertEquals(in.skip(-1), 0);
+    }
+
+    @Test
+    public void testReader() throws Exception {
+        testReader(128);
+        testReader(256);
+        testReader(1024);
+
+        // empty
+        testReader(JieIO.emptyReader(), new char[0], true);
+    }
+
+    private void testReader(int dataSize) throws Exception {
+        {
+            // chars
+            char[] data = JieRandom.fill(new char[dataSize]);
+            testReader(JieIO.newReader(data), data, true);
+            data = JieRandom.fill(new char[dataSize + 12]);
+            testReader(
+                JieIO.newReader(data, 6, dataSize),
+                Arrays.copyOfRange(data, 6, data.length - 6),
+                true
+            );
+        }
+        {
+            // string
+            char[] data = JieRandom.fill(new char[dataSize]);
+            testReader(JieIO.newReader(new String(data)), data, true);
+            data = JieRandom.fill(new char[dataSize + 12]);
+            testReader(
+                JieIO.newReader(new String(data), 6, data.length - 6),
+                Arrays.copyOfRange(data, 6, data.length - 6),
+                true
+            );
+        }
+        {
+            // buffer
+            char[] data = JieRandom.fill(new char[dataSize]);
+            CharBuffer buffer = CharBuffer.wrap(data);
+            Reader bufferIn = JieIO.newReader(buffer);
+            testReader(bufferIn, data, true);
+        }
+        {
+            // bytes
+            char[] chars = JieRandom.fill(new char[dataSize], '0', '9');
+            byte[] charBytes = new String(chars).getBytes(JieChars.UTF_8);
+            Reader charsIn = JieIO.newReader(JieIO.newInputStream(charBytes));
+            testReader(charsIn, chars, false);
+            expectThrows(IOException.class, charsIn::read);
+            // chinese: '\u4e00' - '\u9fff'
+            chars = JieRandom.fill(new char[dataSize], '\u4e00', '\u4e01');
+            charBytes = new String(chars).getBytes(JieChars.UTF_8);
+            charsIn = JieIO.newReader(JieIO.newInputStream(charBytes));
+            testReader(charsIn, chars, false);
+            expectThrows(IOException.class, charsIn::read);
+            // emoji: "\uD83D\uDD1E"
+            for (int i = 0; i < chars.length; i += 2) {
+                chars[i] = '\uD83D';
+                chars[i + 1] = '\uDD1E';
+            }
+            charBytes = new String(chars).getBytes(JieChars.UTF_8);
+            charsIn = JieIO.newReader(JieIO.newInputStream(charBytes));
+            testReader(charsIn, chars, false);
+            expectThrows(IOException.class, charsIn::read);
+            // error
+            charsIn = JieIO.newReader(JieIO.newInputStream(charBytes), new ErrorCharset());
+            expectThrows(IOException.class, charsIn::read);
+            // 1 byte -> 3 char
+            byte[] fakeBytes = JieRandom.fill(new byte[dataSize]);
+            char[] fakeChars = new char[fakeBytes.length * 3];
+            for (int i = 0; i < fakeBytes.length; i++) {
+                fakeChars[i * 3] = (char) fakeBytes[i];
+                fakeChars[i * 3 + 1] = (char) fakeBytes[i];
+                fakeChars[i * 3 + 2] = (char) fakeBytes[i];
+            }
+            charsIn = JieIO.newReader(JieIO.newInputStream(fakeBytes), new ByteToNCharCharset(3));
+            testReader(charsIn, fakeChars, false);
+            expectThrows(IOException.class, charsIn::read);
+            // // error: 0xC1
+            // Arrays.fill(charBytes, (byte) 0xC1);
+            // charsIn = JieIO.newReader(JieIO.newInputStream(charBytes));
+            // expectThrows(IOException.class, charsIn::read);
+        }
+    }
+
+    private void testReader(Reader in, char[] data, boolean ready) throws Exception {
+        assertEquals(in.read(new char[10], 0, 0), 0);
+        assertEquals(in.read(new char[0]), 0);
+        if (data.length > 0) {
+            assertEquals(in.read(CharBuffer.allocate(0)), 0);
+        }
+        assertEquals(in.skip(0), 0);
+        assertEquals(in.skip(-1), 0);
+        expectThrows(IndexOutOfBoundsException.class, () -> in.read(new char[10], 2, -1));
+        expectThrows(IndexOutOfBoundsException.class, () -> in.read(new char[10], -2, 1));
+        expectThrows(IndexOutOfBoundsException.class, () -> in.read(new char[1], 0, 2));
+
+        if (ready) {
+            assertTrue(in.ready());
+        } else {
+            in.ready();
+        }
+
+        {
+            // mark/reset
+            expectThrows(IOException.class, in::reset);
+            if (in.markSupported()) {
+                in.mark(0);
+                in.reset();
+            } else {
+                expectThrows(IOException.class, in::reset);
+            }
+        }
+
+        if (data.length == 0) {
+            testEndReader(in);
+            in.close();
+            if (in.markSupported()) {
+                in.mark(0);
+            }
+            return;
+        }
+
+        int hasRead = 0;
+
+        {
+            // read()
+            if (in.markSupported()) {
+                in.mark(3);
+            }
+            assertEquals((char) in.read(), data[0]);
+            assertEquals((char) in.read(), data[1]);
+            assertEquals((char) in.read(), data[2]);
+            if (in.markSupported()) {
+                in.reset();
+                assertEquals((char) in.read(), data[0]);
+                assertEquals((char) in.read(), data[1]);
+                assertEquals((char) in.read(), data[2]);
+            }
+            hasRead += 3;
+        }
+        {
+            // read(byte[])
+            char[] dst = new char[13];
+            if (in.markSupported()) {
+                in.mark(dst.length);
+            }
+            assertEquals(in.read(dst), dst.length);
+            assertEquals(dst, Arrays.copyOfRange(data, hasRead, hasRead + dst.length));
+            if (in.markSupported()) {
+                in.reset();
+                dst = new char[13];
+                assertEquals(in.read(dst), dst.length);
+                assertEquals(dst, Arrays.copyOfRange(data, hasRead, hasRead + dst.length));
+            }
+            hasRead += dst.length;
+        }
+        {
+            // read(byte[], int, int)
+            int readSize = 6;
+            char[] dst = new char[readSize + 4];
+            if (in.markSupported()) {
+                in.mark(readSize);
+            }
+            assertEquals(in.read(dst, 2, readSize), readSize);
+            assertEquals(
+                Arrays.copyOfRange(dst, 2, 2 + readSize),
+                Arrays.copyOfRange(data, hasRead, hasRead + readSize)
+            );
+            if (in.markSupported()) {
+                in.reset();
+                dst = new char[readSize + 4];
+                assertEquals(in.read(dst, 2, readSize), readSize);
+                assertEquals(
+                    Arrays.copyOfRange(dst, 2, 2 + readSize),
+                    Arrays.copyOfRange(data, hasRead, hasRead + readSize)
+                );
+            }
+            hasRead += readSize;
+        }
+        {
+            // read(CharBuffer)
+            CharBuffer dst = CharBuffer.allocate(6);
+            if (in.markSupported()) {
+                in.mark(dst.capacity());
+            }
+            assertEquals(in.read(dst), dst.capacity());
+            assertEquals(dst.position(), dst.capacity());
+            assertEquals(dst.array(), Arrays.copyOfRange(data, hasRead, hasRead + dst.capacity()));
+            if (in.markSupported()) {
+                in.reset();
+                dst = CharBuffer.allocate(6);
+                assertEquals(in.read(dst), dst.capacity());
+                assertEquals(dst.position(), dst.capacity());
+                assertEquals(dst.array(), Arrays.copyOfRange(data, hasRead, hasRead + dst.capacity()));
+            }
+            hasRead += dst.capacity();
+        }
+        {
+            // skip
+            int skip = 11;
+            if (in.markSupported()) {
+                in.mark(skip);
+            }
+            assertEquals(in.skip(0), 0);
+            assertEquals(in.skip(-1), 0);
+            assertEquals(in.skip(skip), skip);
+            if (in.markSupported()) {
+                in.reset();
+                assertEquals(in.skip(0), 0);
+                assertEquals(in.skip(-1), 0);
+                assertEquals(in.skip(skip), skip);
+            }
+            hasRead += skip;
+        }
+        {
+            // read all
+            if (in.markSupported()) {
+                in.mark(data.length - hasRead);
+            }
+            char[] remaining = JieIO.read(in);
+            assertEquals(
+                remaining,
+                Arrays.copyOfRange(data, hasRead, data.length)
+            );
+            if (in.markSupported()) {
+                in.reset();
+                char[] remaining2 = JieIO.read(in);
+                assertEquals(
+                    remaining2,
+                    Arrays.copyOfRange(data, hasRead, data.length)
+                );
+                assertEquals(
+                    remaining,
+                    remaining2
+                );
+            }
+            hasRead += remaining.length;
+        }
+        assertEquals(hasRead, data.length);
+        testEndReader(in);
+
+        // close
+        in.close();
+    }
+
+    private void testEndReader(Reader in) throws Exception {
+        assertEquals(in.read(), -1);
+        assertEquals(in.read(new char[10]), -1);
+        assertEquals(in.read(new char[10], 0, 1), -1);
+        assertEquals(in.read(CharBuffer.allocate(1)), -1);
         assertEquals(in.skip(999), 0);
         assertEquals(in.skip(0), 0);
         assertEquals(in.skip(-1), 0);
@@ -425,108 +680,6 @@ public class IOImplsTest {
         out.flush();
         out.close();
         out.close();
-    }
-
-    @Test
-    public void testReader() throws Exception {
-        testReader(1024);
-        testReader(60);
-        testReader(234);
-
-        // error
-        expectThrows(NullPointerException.class, () -> JieIO.newReader((char[]) null, 2, +1));
-        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.newReader(new char[0], 2, 1));
-        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.newReader(new char[0], -2, 1));
-        expectThrows(IndexOutOfBoundsException.class, () -> JieIO.newReader(new char[0], 2, -1));
-    }
-
-    private void testReader(int sourceSize) throws Exception {
-        char[] source = JieRandom.fill(new char[sourceSize], '0', '9');
-
-        // chars
-        IOCases.testReader(JieIO.newReader(source), source);
-        IOCases.testReader(
-            JieIO.newReader(source, 2, source.length - 10),
-            Arrays.copyOfRange(source, 2, source.length - 8)
-        );
-        assertTrue(JieIO.newReader(source).ready());
-
-        // string
-        IOCases.testReader(JieIO.newReader(new String(source)), source);
-
-        // buffer
-        CharBuffer buffer = CharBuffer.wrap(source);
-        Reader bufferIn = JieIO.newReader(buffer);
-        IOCases.testReader(bufferIn, source);
-        Class<?> bufferInClass = bufferIn.getClass();
-        Method read0 = bufferInClass.getDeclaredMethod("read0");
-        JieAssert.invokeThrows(IOException.class, read0, bufferIn);
-        read0 = bufferInClass.getDeclaredMethod("read0", char[].class, int.class, int.class);
-        JieAssert.invokeThrows(IOException.class, read0, bufferIn, null, 0, 0);
-        read0 = bufferInClass.getDeclaredMethod("skip0", int.class);
-        JieAssert.invokeThrows(IOException.class, read0, bufferIn, 99);
-
-        // bytes
-        char[] chars = JieRandom.fill(new char[sourceSize], '0', '9');
-        byte[] charBytes = new String(chars).getBytes(JieChars.UTF_8);
-        Reader charsIn = JieIO.newReader(JieIO.newInputStream(charBytes));
-        IOCases.testReader(charsIn, chars);
-        expectThrows(IOException.class, charsIn::read);
-        // chinese: '\u4e00' - '\u9fff'
-        chars = JieRandom.fill(new char[sourceSize], '\u4e00', '\u4e01');
-        charBytes = new String(chars).getBytes(JieChars.UTF_8);
-        charsIn = JieIO.newReader(JieIO.newInputStream(charBytes));
-        IOCases.testReader(charsIn, chars);
-        expectThrows(IOException.class, charsIn::read);
-        // emoji: "\uD83D\uDD1E"
-        for (int i = 0; i < chars.length; i += 2) {
-            chars[i] = '\uD83D';
-            chars[i + 1] = '\uDD1E';
-        }
-        charBytes = new String(chars).getBytes(JieChars.UTF_8);
-        charsIn = JieIO.newReader(JieIO.newInputStream(charBytes));
-        IOCases.testReader(charsIn, chars);
-        expectThrows(IOException.class, charsIn::read);
-        // fake charset
-        byte[] fakeBytes = JieRandom.fill(new byte[sourceSize]);
-        char[] fakeChars = new char[fakeBytes.length * 3];
-        for (int i = 0; i < fakeBytes.length; i++) {
-            fakeChars[i * 3] = (char) fakeBytes[i];
-            fakeChars[i * 3 + 1] = (char) fakeBytes[i];
-            fakeChars[i * 3 + 2] = (char) fakeBytes[i];
-        }
-        charsIn = JieIO.newReader(JieIO.newInputStream(fakeBytes), new FakeCharset(3));
-        IOCases.testReader(charsIn, fakeChars);
-        expectThrows(IOException.class, charsIn::read);
-        // error: 0xC1
-        Arrays.fill(charBytes, (byte) 0xC1);
-        charsIn = JieIO.newReader(JieIO.newInputStream(charBytes));
-        expectThrows(IOException.class, charsIn::read);
-        // ready
-        charsIn = JieIO.newReader(new InputStream() {
-            @Override
-            public int read() {
-                return 0;
-            }
-
-            @Override
-            public int available() {
-                return 1;
-            }
-        });
-        assertTrue(charsIn.ready());
-        charsIn = JieIO.newReader(new InputStream() {
-            @Override
-            public int read() {
-                return 0;
-            }
-
-            @Override
-            public int available() {
-                return 0;
-            }
-        });
-        assertFalse(charsIn.ready());
     }
 
     @Test
@@ -727,6 +880,9 @@ public class IOImplsTest {
 
         @Override
         public void seek(long pos) throws IOException {
+            if (closed) {
+                throw new IOException();
+            }
             in = new ByteArrayInputStream(data, (int) pos, data.length - (int) pos);
         }
 
@@ -769,6 +925,69 @@ public class IOImplsTest {
                 @Override
                 protected CoderResult encodeLoop(CharBuffer in, ByteBuffer out) {
                     return CoderResult.unmappableForLength(1);
+                }
+
+                @Override
+                public boolean isLegalReplacement(byte[] repl) {
+                    return true;
+                }
+            };
+        }
+    }
+
+    private static final class ByteToNCharCharset extends Charset {
+
+        private final int byteToNChar;
+
+        private ByteToNCharCharset(int byteToNChar) {
+            super("ByteToNChar", new String[0]);
+            this.byteToNChar = byteToNChar;
+        }
+
+        @Override
+        public boolean contains(Charset cs) {
+            return false;
+        }
+
+        @Override
+        public CharsetDecoder newDecoder() {
+            return new CharsetDecoder(
+                this, 1f, 1f
+            ) {
+                @Override
+                protected CoderResult decodeLoop(ByteBuffer in, CharBuffer out) {
+                    while (in.hasRemaining()) {
+                        if (out.remaining() >= byteToNChar) {
+                            byte b = in.get();
+                            for (int i = 0; i < byteToNChar; i++) {
+                                out.put((char) b);
+                            }
+                        } else {
+                            return CoderResult.OVERFLOW;
+                        }
+                    }
+                    return CoderResult.UNDERFLOW;
+                }
+            };
+        }
+
+        @Override
+        public CharsetEncoder newEncoder() {
+            return new CharsetEncoder(this, 1f, 1f) {
+                @Override
+                protected CoderResult encodeLoop(CharBuffer in, ByteBuffer out) {
+                    while (in.remaining() >= byteToNChar) {
+                        if (out.hasRemaining()) {
+                            char c = in.get();
+                            for (int i = 0; i < byteToNChar - 1; i++) {
+                                in.get();
+                            }
+                            out.put((byte) c);
+                        } else {
+                            return CoderResult.OVERFLOW;
+                        }
+                    }
+                    return CoderResult.UNDERFLOW;
                 }
 
                 @Override

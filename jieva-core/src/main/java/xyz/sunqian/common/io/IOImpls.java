@@ -29,7 +29,9 @@ final class IOImpls {
         return new BytesInputStream(array);
     }
 
-    static @Nonnull InputStream inputStream(byte @Nonnull [] array, int offset, int length) {
+    static @Nonnull InputStream inputStream(
+        byte @Nonnull [] array, int offset, int length
+    ) throws IndexOutOfBoundsException {
         return new BytesInputStream(array, offset, length);
     }
 
@@ -37,7 +39,9 @@ final class IOImpls {
         return new BufferInputStream(buffer);
     }
 
-    static @Nonnull InputStream inputStream(@Nonnull RandomAccessFile random, long initialSeek) throws IORuntimeException {
+    static @Nonnull InputStream inputStream(
+        @Nonnull RandomAccessFile random, long initialSeek
+    ) throws IORuntimeException {
         try {
             return new RandomInputStream(random, initialSeek);
         } catch (IOException e) {
@@ -50,15 +54,19 @@ final class IOImpls {
     }
 
     static @Nonnull Reader reader(char @Nonnull [] array) {
-        return new BufferReader(array);
+        return new CharsReader(array);
     }
 
-    static @Nonnull Reader reader(char @Nonnull [] array, int offset, int length) {
-        return new BufferReader(array, offset, length);
+    static @Nonnull Reader reader(char @Nonnull [] array, int offset, int length) throws IndexOutOfBoundsException {
+        return new CharsReader(array, offset, length);
     }
 
     static @Nonnull Reader reader(@Nonnull CharSequence chars) {
-        return new BufferReader(chars);
+        return new BufferReader(CharBuffer.wrap(chars));
+    }
+
+    static @Nonnull Reader reader(@Nonnull CharSequence chars, int start, int end) throws IndexOutOfBoundsException {
+        return new BufferReader(CharBuffer.wrap(chars, start, end));
     }
 
     static @Nonnull Reader reader(@Nonnull CharBuffer buffer) {
@@ -81,7 +89,9 @@ final class IOImpls {
         return new BytesOutputStream(array);
     }
 
-    static @Nonnull OutputStream outputStream(byte @Nonnull [] array, int offset, int length) {
+    static @Nonnull OutputStream outputStream(
+        byte @Nonnull [] array, int offset, int length
+    ) throws IndexOutOfBoundsException{
         return new BytesOutputStream(array, offset, length);
     }
 
@@ -136,7 +146,7 @@ final class IOImpls {
             this(buf, 0, buf.length);
         }
 
-        BytesInputStream(byte @Nonnull [] buf, int offset, int length) {
+        BytesInputStream(byte @Nonnull [] buf, int offset, int length) throws IndexOutOfBoundsException {
             checkOffsetLength(buf.length, offset, length);
             this.buf = buf;
             this.pos = offset;
@@ -207,7 +217,7 @@ final class IOImpls {
         }
 
         @Override
-        public int read() throws IOException {
+        public int read() {
             if (!buffer.hasRemaining()) {
                 return -1;
             }
@@ -215,7 +225,7 @@ final class IOImpls {
         }
 
         @Override
-        public int read(byte @Nonnull [] b, int off, int len) throws IOException {
+        public int read(byte @Nonnull [] b, int off, int len) {
             checkOffsetLength(b.length, off, len);
             if (len == 0) {
                 return 0;
@@ -229,7 +239,7 @@ final class IOImpls {
         }
 
         @Override
-        public long skip(long n) throws IOException {
+        public long skip(long n) {
             if (n <= 0) {
                 return 0;
             }
@@ -315,7 +325,7 @@ final class IOImpls {
         @Override
         public int read() throws IOException {
             int readNum = read(buf, 0, 1);
-            return readNum == -1 ? -1 : (buf[0] & 0xff);
+            return readNum < 0 ? -1 : (buf[0] & 0xff);
         }
 
         @Override
@@ -362,7 +372,7 @@ final class IOImpls {
                     count += avail;
                 } else if (endOfInput) {
                     if (inBuffer.hasRemaining()) {
-                        encodeToOutBuffer();
+                        flushOutBuffer();
                     } else {
                         break;
                     }
@@ -374,16 +384,20 @@ final class IOImpls {
         }
 
         private void readToInBuffer() throws IOException {
+            flushInBuffer();
+            flushOutBuffer();
+        }
+
+        private void flushInBuffer() throws IOException {
             inBuffer.compact();
             int readSize = reader.read(inBuffer);
-            if (readSize == -1) {
+            if (readSize < 0) {
                 endOfInput = true;
             }
             inBuffer.flip();
-            encodeToOutBuffer();
         }
 
-        private void encodeToOutBuffer() throws IOException {
+        private void flushOutBuffer() throws IOException {
             outBuffer.compact();
             CoderResult coderResult = encoder.encode(inBuffer, outBuffer, endOfInput);
             if (coderResult.isUnderflow() || coderResult.isOverflow()) {
@@ -465,45 +479,109 @@ final class IOImpls {
         }
     }
 
+    private static final class CharsReader extends Reader {
+
+        private final char @Nonnull [] buf;
+        private int pos;
+        private int mark = -1;
+        private final int count;
+
+        CharsReader(char @Nonnull [] buf) {
+            this(buf, 0, buf.length);
+        }
+
+        CharsReader(char @Nonnull [] buf, int offset, int length) throws IndexOutOfBoundsException {
+            checkOffsetLength(buf.length, offset, length);
+            this.buf = buf;
+            this.pos = offset;
+            this.count = Math.min(offset + length, buf.length);
+        }
+
+        public int read() {
+            return (pos < count) ? (buf[pos++] & 0xffff) : -1;
+        }
+
+        public int read(char @Nonnull [] b, int off, int len) {
+            checkOffsetLength(b.length, off, len);
+            if (len == 0) {
+                return 0;
+            }
+            if (pos >= count) {
+                return -1;
+            }
+            int avail = count - pos;
+            avail = Math.min(len, avail);
+            System.arraycopy(buf, pos, b, off, avail);
+            pos += avail;
+            return avail;
+        }
+
+        @Override
+        public int read(@Nonnull CharBuffer target) {
+            if (pos >= count) {
+                return -1;
+            }
+            int avail = count - pos;
+            avail = Math.min(target.remaining(), avail);
+            target.put(buf, pos, avail);
+            pos += avail;
+            return avail;
+        }
+
+        public long skip(long n) {
+            if (n <= 0) {
+                return 0;
+            }
+            int avail = count - pos;
+            avail = (int) Math.min(n, avail);
+            if (avail <= 0) {
+                return 0;
+            }
+            pos += avail;
+            return avail;
+        }
+
+        public boolean ready() {
+            return true;
+        }
+
+        public boolean markSupported() {
+            return true;
+        }
+
+        public void mark(int readAheadLimit) {
+            mark = pos;
+        }
+
+        public void reset() throws IOException {
+            if (mark < 0) {
+                throw new IOException("Mark has not been set.");
+            }
+            pos = mark;
+        }
+
+        public void close() {
+        }
+    }
+
     private static final class BufferReader extends Reader {
 
         private final @Nonnull CharBuffer buffer;
-
-        BufferReader(char @Nonnull [] cbuf) {
-            this(cbuf, 0, cbuf.length);
-        }
-
-        BufferReader(char @Nonnull [] cbuf, int offset, int length) {
-            checkOffsetLength(cbuf.length, offset, length);
-            this.buffer = CharBuffer.wrap(cbuf, offset, length);
-        }
-
-        BufferReader(@Nonnull CharSequence chars) {
-            this.buffer = CharBuffer.wrap(chars);
-        }
 
         BufferReader(@Nonnull CharBuffer buffer) {
             this.buffer = buffer;
         }
 
         @Override
-        public int read() throws IOException {
+        public int read() {
             if (buffer.remaining() <= 0) {
                 return -1;
             }
-            return read0();
-        }
-
-        private int read0() throws IOException {
-            try {
-                return buffer.get() & 0xffff;
-            } catch (Exception e) {
-                throw new IOException(e);
-            }
+            return buffer.get() & 0xffff;
         }
 
         @Override
-        public int read(char @Nonnull [] c, int off, int len) throws IOException {
+        public int read(char @Nonnull [] c, int off, int len) {
             checkOffsetLength(c.length, off, len);
             if (len == 0) {
                 return 0;
@@ -512,16 +590,8 @@ final class IOImpls {
                 return -1;
             }
             int avail = Math.min(buffer.remaining(), len);
-            read0(c, off, avail);
+            buffer.get(c, off, avail);
             return avail;
-        }
-
-        private void read0(char @Nonnull [] c, int off, int avail) throws IOException {
-            try {
-                buffer.get(c, off, avail);
-            } catch (Exception e) {
-                throw new IOException(e);
-            }
         }
 
         @Override
@@ -530,7 +600,7 @@ final class IOImpls {
         }
 
         @Override
-        public long skip(long n) throws IOException {
+        public long skip(long n) {
             if (n <= 0) {
                 return 0;
             }
@@ -538,16 +608,8 @@ final class IOImpls {
             if (avail <= 0) {
                 return 0;
             }
-            skip0(avail);
+            buffer.position(buffer.position() + avail);
             return avail;
-        }
-
-        private void skip0(int avail) throws IOException {
-            try {
-                buffer.position(buffer.position() + avail);
-            } catch (Exception e) {
-                throw new IOException(e);
-            }
         }
 
         @Override
@@ -624,7 +686,7 @@ final class IOImpls {
         @Override
         public int read() throws IOException {
             int readNum = read(cbuf, 0, 1);
-            return readNum == -1 ? -1 : (cbuf[0] & 0xffff);
+            return readNum < 0 ? -1 : (cbuf[0] & 0xffff);
         }
 
         @Override
@@ -644,12 +706,12 @@ final class IOImpls {
             if (n <= 0) {
                 return 0;
             }
-            return read0(null, 0, (int) n);
+            return read0(null, 0, n);
         }
 
         @Override
-        public boolean ready() throws IOException {
-            return inputStream.available() > 0;
+        public boolean ready() {
+            return outBuffer.hasRemaining();
         }
 
         @Override
@@ -658,43 +720,45 @@ final class IOImpls {
             closed = true;
         }
 
-        private long read0(char @Nullable [] c, int off, long len) throws IOException {
-            long pos = 0;
-            while (pos < len) {
+        private long read0(char @Nullable [] b, int off, long len) throws IOException {
+            long count = 0;
+            while (count < len) {
                 if (outBuffer.hasRemaining()) {
-                    int avail = (int) Math.min(outBuffer.remaining(), len - pos);
-                    if (c != null) {
-                        outBuffer.get(c, (int) (pos + off), avail);
+                    int avail = (int) Math.min(outBuffer.remaining(), len - count);
+                    if (b != null) {
+                        outBuffer.get(b, (int) (off + count), avail);
                     } else {
                         outBuffer.position(outBuffer.position() + avail);
                     }
-                    pos += avail;
+                    count += avail;
                 } else if (endOfInput) {
                     if (inBuffer.hasRemaining()) {
-                        decodeToBuffer();
+                        flushOutBuffer();
                     } else {
                         break;
                     }
                 } else {
-                    readToBuffer();
+                    flushBuffer();
                 }
             }
-            return pos;
+            return count;
         }
 
-        private void readToBuffer() throws IOException {
+        private void flushBuffer() throws IOException {
+            flushInBuffer();
+            flushOutBuffer();
+        }
+
+        private void flushInBuffer() throws IOException {
             inBuffer.compact();
-            int readSize = JieIO.readTo(inputStream, inBuffer.array(), inBuffer.position(), inBuffer.remaining());
-            if (readSize == -1) {
+            int readSize = JieIO.readTo(inputStream, inBuffer);
+            if (readSize < 0) {
                 endOfInput = true;
-            } else {
-                inBuffer.position(inBuffer.position() + readSize);
             }
             inBuffer.flip();
-            decodeToBuffer();
         }
 
-        private void decodeToBuffer() throws IOException {
+        private void flushOutBuffer() throws IOException {
             outBuffer.compact();
             CoderResult coderResult = decoder.decode(inBuffer, outBuffer, endOfInput);
             if (coderResult.isUnderflow() || coderResult.isOverflow()) {
@@ -719,6 +783,22 @@ final class IOImpls {
         public int read() {
             return -1;
         }
+
+        @Override
+        public int read(byte @Nonnull [] b) {
+            return b.length == 0 ? 0 : -1;
+        }
+
+        @Override
+        public int read(byte @Nonnull [] b, int off, int len) {
+            checkOffsetLength(b.length, off, len);
+            return len == 0 ? 0 : -1;
+        }
+
+        @Override
+        public long skip(long n) {
+            return 0;
+        }
     }
 
     private static final class EmptyReader extends Reader {
@@ -726,8 +806,34 @@ final class IOImpls {
         private static final @Nonnull EmptyReader SINGLETON = new EmptyReader();
 
         @Override
-        public int read(char @Nonnull [] cbuf, int off, int len) {
+        public int read(@Nonnull CharBuffer target) {
             return -1;
+        }
+
+        @Override
+        public int read() {
+            return -1;
+        }
+
+        @Override
+        public int read(char @Nonnull [] cbuf) {
+            return cbuf.length == 0 ? 0 : -1;
+        }
+
+        @Override
+        public int read(char @Nonnull [] cbuf, int off, int len) {
+            checkOffsetLength(cbuf.length, off, len);
+            return len == 0 ? 0 : -1;
+        }
+
+        @Override
+        public long skip(long n) {
+            return 0;
+        }
+
+        @Override
+        public boolean ready() {
+            return true;
         }
 
         @Override
@@ -745,7 +851,7 @@ final class IOImpls {
             this(buf, 0, buf.length);
         }
 
-        BytesOutputStream(byte @Nonnull [] buf, int offset, int length) {
+        BytesOutputStream(byte @Nonnull [] buf, int offset, int length) throws IndexOutOfBoundsException{
             checkOffsetLength(buf.length, offset, length);
             this.buf = buf;
             this.end = offset + length;
