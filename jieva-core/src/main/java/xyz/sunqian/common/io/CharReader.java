@@ -259,46 +259,4 @@ public interface CharReader {
         JieCheck.checkArgument(len >= 0, "len must >= 0.");
         return CharReaderBack.readTo(src, dst, len);
     }
-
-    /**
-     * Reads the data from the source buffer into the specified appender, until the read number reaches the buffer's
-     * remaining or reaches the end of the source buffer, returns the actual number of chars read to.
-     * <p>
-     * If the buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the source buffer has
-     * already been reached, returns {@code -1}.
-     * <p>
-     * The buffer's position increments by the actual read number.
-     *
-     * @param src the source buffer
-     * @param dst the specified appender
-     * @return the actual number of chars read
-     * @throws IORuntimeException if an I/O error occurs
-     */
-    default int readTo(@Nonnull CharBuffer src, @Nonnull Appendable dst) throws IORuntimeException {
-        return CharReaderBack.readTo(src, dst, -1);
-    }
-
-    /**
-     * Reads the data of the specified length from the source buffer into the specified appender, until the read number
-     * reaches the buffer's remaining or reaches the end of the source buffer, returns the actual number of chars read
-     * to.
-     * <p>
-     * If the specified length or buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the
-     * source buffer has already been reached, returns {@code -1}.
-     * <p>
-     * The buffer's position increments by the actual read number.
-     *
-     * @param src the source buffer
-     * @param dst the specified appender
-     * @param len the specified length, must {@code >= 0}
-     * @return the actual number of chars read
-     * @throws IllegalArgumentException if the specified read length is illegal
-     * @throws IORuntimeException       if an I/O error occurs
-     */
-    default int readTo(
-        @Nonnull CharBuffer src, @Nonnull Appendable dst, long len
-    ) throws IORuntimeException {
-        JieCheck.checkArgument(len >= 0, "len must >= 0.");
-        return CharReaderBack.readTo(src, dst, len);
-    }
 }

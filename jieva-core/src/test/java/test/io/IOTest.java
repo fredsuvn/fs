@@ -100,30 +100,6 @@ public class IOTest {
                 data.length
             );
             assertEquals(data, dstBuf.array());
-            // read buffer
-            assertEquals(
-                JieIO.readTo(ByteBuffer.wrap(data), builder),
-                data.length
-            );
-            assertEquals(builder.toByteArray(), data);
-            builder.reset();
-            assertEquals(
-                JieIO.readTo(ByteBuffer.wrap(data), builder, 5),
-                5
-            );
-            assertEquals(builder.toByteArray(), Arrays.copyOf(data, 5));
-            builder.reset();
-            assertEquals(
-                JieIO.readTo(ByteBuffer.wrap(data), Channels.newChannel(builder)),
-                data.length
-            );
-            assertEquals(builder.toByteArray(), data);
-            builder.reset();
-            assertEquals(
-                JieIO.readTo(ByteBuffer.wrap(data), Channels.newChannel(builder), 5),
-                5
-            );
-            assertEquals(builder.toByteArray(), Arrays.copyOf(data, 5));
         }
         {
             // byte buffer size
@@ -163,18 +139,6 @@ public class IOTest {
             dstBuf = CharBuffer.allocate(data.length);
             assertEquals(JieIO.readTo(new CharArrayReader(data), dstBuf, data.length), data.length);
             assertEquals(data, dstBuf.array());
-            // read buffer
-            assertEquals(
-                JieIO.readTo(CharBuffer.wrap(data), builder),
-                data.length
-            );
-            assertEquals(builder.toCharArray(), data);
-            builder.reset();
-            assertEquals(
-                JieIO.readTo(CharBuffer.wrap(data), builder, 5),
-                5
-            );
-            assertEquals(builder.toCharArray(), Arrays.copyOf(data, 5));
         }
         {
             // char buffer size

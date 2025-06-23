@@ -8,7 +8,6 @@ import xyz.sunqian.common.io.ByteReader;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieIO;
 import xyz.sunqian.test.ErrorOutputStream;
-import xyz.sunqian.test.MaterialBox;
 import xyz.sunqian.test.ReadOps;
 import xyz.sunqian.test.TestInputStream;
 
@@ -311,30 +310,6 @@ public class ByteReaderTest {
             );
             assertEquals(buf.position(), 0);
         }
-        {
-            // size 0: buffer to channel
-            WritableByteChannel channel = Channels.newChannel(new BytesBuilder());
-            assertEquals(
-                JieIO.readTo(ByteBuffer.allocate(0), channel),
-                -1
-            );
-            assertEquals(
-                JieIO.readTo(ByteBuffer.allocate(0), channel, 100),
-                -1
-            );
-        }
-        {
-            // size 0: buffer to stream
-            BytesBuilder out = new BytesBuilder();
-            assertEquals(
-                JieIO.readTo(ByteBuffer.allocate(0), out),
-                -1
-            );
-            assertEquals(
-                JieIO.readTo(ByteBuffer.allocate(0), out, 100),
-                -1
-            );
-        }
 
         {
             // error
@@ -370,17 +345,6 @@ public class ByteReaderTest {
                     Channels.newChannel(new ByteArrayInputStream(new byte[1])),
                     ByteBuffer.allocate(1).asReadOnlyBuffer()
                 )
-            );
-            // read buffer
-            expectThrows(IllegalArgumentException.class, () ->
-                JieIO.readTo(ByteBuffer.allocate(1), errCh, -1));
-            expectThrows(IORuntimeException.class, () ->
-                JieIO.readTo(ByteBuffer.allocate(1), errCh)
-            );
-            expectThrows(IllegalArgumentException.class, () ->
-                JieIO.readTo(ByteBuffer.allocate(1), errOut, -1));
-            expectThrows(IORuntimeException.class, () ->
-                JieIO.readTo(ByteBuffer.allocate(1), errOut)
             );
         }
     }
@@ -640,98 +604,6 @@ public class ByteReaderTest {
             assertEquals(dst.flip(), ByteBuffer.wrap(
                 (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
             ));
-        }
-        {
-            // heap buffer to channel
-            BytesBuilder builder = new BytesBuilder();
-            WritableByteChannel dst = Channels.newChannel(builder);
-            byte[] data = JieRandom.fill(new byte[totalSize]);
-            ByteBuffer src = ByteBuffer.wrap(data);
-            assertEquals(
-                reader.readTo(src, dst),
-                totalSize
-            );
-            assertEquals(builder.toByteArray(), data);
-            assertEquals(src.position(), src.limit());
-            assertEquals(src.position(), totalSize);
-            src = ByteBuffer.wrap(data);
-            builder.reset();
-            assertEquals(
-                reader.readTo(src, dst, readSize < 0 ? totalSize : readSize),
-                actualReadSize(totalSize, readSize)
-            );
-            assertEquals(
-                builder.toByteArray(),
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
-            );
-            assertEquals(src.position(), actualReadSize(totalSize, readSize));
-        }
-        {
-            // direct buffer to channel
-            BytesBuilder builder = new BytesBuilder();
-            WritableByteChannel dst = Channels.newChannel(builder);
-            byte[] data = JieRandom.fill(new byte[totalSize]);
-            ByteBuffer src = MaterialBox.copyDirect(data);
-            assertEquals(
-                reader.readTo(src, dst),
-                totalSize
-            );
-            assertEquals(builder.toByteArray(), data);
-            assertEquals(src.position(), src.limit());
-            assertEquals(src.position(), totalSize);
-            src = MaterialBox.copyDirect(data);
-            builder.reset();
-            assertEquals(
-                reader.readTo(src, dst, readSize < 0 ? totalSize : readSize),
-                actualReadSize(totalSize, readSize)
-            );
-            assertEquals(
-                builder.toByteArray(),
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
-            );
-            assertEquals(src.position(), actualReadSize(totalSize, readSize));
-        }
-        {
-            // heap buffer to stream
-            BytesBuilder dst = new BytesBuilder();
-            byte[] data = JieRandom.fill(new byte[totalSize]);
-            ByteBuffer src = ByteBuffer.wrap(data);
-            assertEquals(
-                reader.readTo(src, dst),
-                totalSize
-            );
-            assertEquals(dst.toByteArray(), data);
-            src = ByteBuffer.wrap(data);
-            dst.reset();
-            assertEquals(
-                reader.readTo(src, dst, readSize < 0 ? totalSize : readSize),
-                actualReadSize(totalSize, readSize)
-            );
-            assertEquals(
-                dst.toByteArray(),
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
-            );
-        }
-        {
-            // direct buffer to stream
-            BytesBuilder dst = new BytesBuilder();
-            byte[] data = JieRandom.fill(new byte[totalSize]);
-            ByteBuffer src = MaterialBox.copyDirect(data);
-            assertEquals(
-                reader.readTo(src, dst),
-                totalSize
-            );
-            assertEquals(dst.toByteArray(), data);
-            src = MaterialBox.copyDirect(data);
-            dst.reset();
-            assertEquals(
-                reader.readTo(src, dst, readSize < 0 ? totalSize : readSize),
-                actualReadSize(totalSize, readSize)
-            );
-            assertEquals(
-                dst.toByteArray(),
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
-            );
         }
     }
 

@@ -1354,12 +1354,12 @@ final class IOImpls {
                     CoderResult coderResult = encoder.encode(inBuffer, outBuffer, false);
                     if (coderResult.isOverflow()) {
                         outBuffer.flip();
-                        JieIO.readTo(outBuffer, outputStream);
+                        JieBuffer.readTo(outBuffer, outputStream);
                         // outputStream.append(outBuffer);
                         outBuffer.clear();
                     } else if (coderResult.isUnderflow()) {
                         outBuffer.flip();
-                        JieIO.readTo(outBuffer, outputStream);
+                        JieBuffer.readTo(outBuffer, outputStream);
                         // appender.append(outBuffer);
                         outBuffer.clear();
                         break;

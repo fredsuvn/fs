@@ -9,7 +9,6 @@ import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieBuffer;
 import xyz.sunqian.common.io.JieIO;
 import xyz.sunqian.test.ErrorAppender;
-import xyz.sunqian.test.MaterialBox;
 import xyz.sunqian.test.ReadOps;
 import xyz.sunqian.test.TestReader;
 
@@ -220,18 +219,6 @@ public class CharReaderTest {
             );
             assertEquals(buf.position(), 0);
         }
-        {
-            // size 0: buffer to appender
-            CharsBuilder out = new CharsBuilder();
-            assertEquals(
-                JieIO.readTo(CharBuffer.allocate(0), out),
-                -1
-            );
-            assertEquals(
-                JieIO.readTo(CharBuffer.allocate(0), out, 100),
-                -1
-            );
-        }
 
         {
             // error
@@ -249,12 +236,6 @@ public class CharReaderTest {
             expectThrows(IllegalArgumentException.class, () -> JieIO.readTo(tin, CharBuffer.allocate(1), -1));
             expectThrows(IORuntimeException.class, () ->
                 JieIO.readTo(new CharArrayReader(new char[1]), CharBuffer.allocate(1).asReadOnlyBuffer())
-            );
-            // read buffer
-            expectThrows(IllegalArgumentException.class, () ->
-                JieIO.readTo(CharBuffer.allocate(1), errOut, -1));
-            expectThrows(IORuntimeException.class, () ->
-                JieIO.readTo(CharBuffer.allocate(1), errOut)
             );
         }
     }
@@ -402,54 +383,6 @@ public class CharReaderTest {
             assertEquals(dst.flip(), CharBuffer.wrap(
                 (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
             ));
-        }
-        {
-            // heap buffer to appender
-            CharsBuilder dst = new CharsBuilder();
-            char[] data = JieRandom.fill(new char[totalSize]);
-            CharBuffer src = CharBuffer.wrap(data);
-            assertEquals(
-                reader.readTo(src, dst),
-                totalSize
-            );
-            assertEquals(dst.toCharArray(), data);
-            assertEquals(src.position(), src.limit());
-            assertEquals(src.position(), totalSize);
-            src = CharBuffer.wrap(data);
-            dst.reset();
-            assertEquals(
-                reader.readTo(src, dst, readSize < 0 ? totalSize : readSize),
-                actualReadSize(totalSize, readSize)
-            );
-            assertEquals(
-                dst.toCharArray(),
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
-            );
-            assertEquals(src.position(), actualReadSize(totalSize, readSize));
-        }
-        {
-            // direct buffer to appender
-            CharsBuilder dst = new CharsBuilder();
-            char[] data = JieRandom.fill(new char[totalSize]);
-            CharBuffer src = MaterialBox.copyDirect(data);
-            assertEquals(
-                reader.readTo(src, dst),
-                totalSize
-            );
-            assertEquals(dst.toCharArray(), data);
-            assertEquals(src.position(), src.limit());
-            assertEquals(src.position(), totalSize);
-            src = MaterialBox.copyDirect(data);
-            dst.reset();
-            assertEquals(
-                reader.readTo(src, dst, readSize < 0 ? totalSize : readSize),
-                actualReadSize(totalSize, readSize)
-            );
-            assertEquals(
-                dst.toCharArray(),
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
-            );
-            assertEquals(src.position(), actualReadSize(totalSize, readSize));
         }
     }
 

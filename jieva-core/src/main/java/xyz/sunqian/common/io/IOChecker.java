@@ -13,10 +13,4 @@ final class IOChecker {
             throw new IllegalArgumentException("The size must be >= 0.");
         }
     }
-
-    static void checkReadLimit(long readLimit) throws IllegalArgumentException {
-        if (readLimit < 0) {
-            throw new IllegalArgumentException("The read limit must be >= 0.");
-        }
-    }
 }

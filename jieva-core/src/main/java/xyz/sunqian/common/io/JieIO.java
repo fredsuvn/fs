@@ -388,88 +388,6 @@ public class JieIO {
     }
 
     /**
-     * Reads the data from the source buffer into the specified channel, until the read number reaches the buffer's
-     * remaining or reaches the end of the source buffer, returns the actual number of bytes read to.
-     * <p>
-     * If the buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the source buffer has
-     * already been reached, returns {@code -1}.
-     * <p>
-     * The buffer's position increments by the actual read number.
-     *
-     * @param src the source buffer
-     * @param dst the specified channel
-     * @return the actual number of bytes read
-     * @throws IORuntimeException if an I/O error occurs
-     */
-    public static int readTo(@Nonnull ByteBuffer src, @Nonnull WritableByteChannel dst) throws IORuntimeException {
-        return br.readTo(src, dst);
-    }
-
-    /**
-     * Reads the data of the specified length from the source buffer into the specified channel, until the read number
-     * reaches the buffer's remaining or reaches the end of the source buffer, returns the actual number of bytes read
-     * to.
-     * <p>
-     * If the specified length or buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the
-     * source buffer has already been reached, returns {@code -1}.
-     * <p>
-     * The buffer's position increments by the actual read number.
-     *
-     * @param src the source buffer
-     * @param dst the specified channel
-     * @param len the specified length, must {@code >= 0}
-     * @return the actual number of bytes read
-     * @throws IllegalArgumentException if the specified read length is illegal
-     * @throws IORuntimeException       if an I/O error occurs
-     */
-    public static int readTo(
-        @Nonnull ByteBuffer src, @Nonnull WritableByteChannel dst, int len
-    ) throws IORuntimeException {
-        return br.readTo(src, dst, len);
-    }
-
-    /**
-     * Reads the data from the source buffer into the specified stream, until the read number reaches the buffer's
-     * remaining or reaches the end of the source buffer, returns the actual number of bytes read to.
-     * <p>
-     * If the buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the source buffer has
-     * already been reached, returns {@code -1}.
-     * <p>
-     * The buffer's position increments by the actual read number.
-     *
-     * @param src the source buffer
-     * @param dst the specified stream
-     * @return the actual number of bytes read
-     * @throws IORuntimeException if an I/O error occurs
-     */
-    public static int readTo(@Nonnull ByteBuffer src, @Nonnull OutputStream dst) throws IORuntimeException {
-        return br.readTo(src, dst);
-    }
-
-    /**
-     * Reads the data of the specified length from the source buffer into the specified stream, until the read number
-     * reaches the buffer's remaining or reaches the end of the source buffer, returns the actual number of bytes read
-     * to.
-     * <p>
-     * If the specified length or buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the
-     * source buffer has already been reached, returns {@code -1}.
-     * <p>
-     * The buffer's position increments by the actual read number.
-     *
-     * @param src the source buffer
-     * @param dst the specified stream
-     * @param len the specified length, must {@code >= 0}
-     * @return the actual number of bytes read
-     * @throws IllegalArgumentException if the specified read length is illegal
-     * @throws IORuntimeException       if an I/O error occurs
-     */
-    public static int readTo(
-        @Nonnull ByteBuffer src, @Nonnull OutputStream dst, long len
-    ) throws IORuntimeException {
-        return br.readTo(src, dst, len);
-    }
-
-    /**
      * Reads all data from the source stream into a new array, continuing until reaches the end of the stream, and
      * returns the array. If the end of the source reader has already been reached, returns {@code null}.
      * <p>
@@ -649,48 +567,6 @@ public class JieIO {
      */
     public static int readTo(
         @Nonnull Reader src, @Nonnull CharBuffer dst, int len
-    ) throws IORuntimeException {
-        return cr.readTo(src, dst, len);
-    }
-
-
-    /**
-     * Reads the data from the source buffer into the specified appender, until the read number reaches the buffer's
-     * remaining or reaches the end of the source buffer, returns the actual number of chars read to.
-     * <p>
-     * If the buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the source buffer has
-     * already been reached, returns {@code -1}.
-     * <p>
-     * The buffer's position increments by the actual read number.
-     *
-     * @param src the source buffer
-     * @param dst the specified appender
-     * @return the actual number of chars read
-     * @throws IORuntimeException if an I/O error occurs
-     */
-    public static int readTo(@Nonnull CharBuffer src, @Nonnull Appendable dst) throws IORuntimeException {
-        return cr.readTo(src, dst);
-    }
-
-    /**
-     * Reads the data of the specified length from the source buffer into the specified appender, until the read number
-     * reaches the buffer's remaining or reaches the end of the source buffer, returns the actual number of chars read
-     * to.
-     * <p>
-     * If the specified length or buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the
-     * source buffer has already been reached, returns {@code -1}.
-     * <p>
-     * The buffer's position increments by the actual read number.
-     *
-     * @param src the source buffer
-     * @param dst the specified appender
-     * @param len the specified length, must {@code >= 0}
-     * @return the actual number of chars read
-     * @throws IllegalArgumentException if the specified read length is illegal
-     * @throws IORuntimeException       if an I/O error occurs
-     */
-    public static int readTo(
-        @Nonnull CharBuffer src, @Nonnull Appendable dst, long len
     ) throws IORuntimeException {
         return cr.readTo(src, dst, len);
     }

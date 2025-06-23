@@ -1,9 +1,9 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.JieCheck;
 import xyz.sunqian.common.base.chars.JieChars;
-import xyz.sunqian.common.collect.JieArray;
 
 import java.io.OutputStream;
 import java.nio.Buffer;
@@ -58,10 +58,10 @@ public class JieBuffer {
      * @param src the source buffer
      * @return the array containing the data
      */
-    public static byte @Nonnull [] read(@Nonnull ByteBuffer src) {
+    public static byte @Nullable [] read(@Nonnull ByteBuffer src) {
         int len = src.remaining();
         if (len == 0) {
-            return new byte[0];
+            return null;
         }
         byte[] result = new byte[len];
         src.get(result);
@@ -81,13 +81,13 @@ public class JieBuffer {
      * @return the array containing the data
      * @throws IllegalArgumentException if the specified read length is illegal
      */
-    public static byte @Nonnull [] read(@Nonnull ByteBuffer src, int len) {
+    public static byte @Nullable [] read(@Nonnull ByteBuffer src, int len) {
         JieCheck.checkArgument(len >= 0, "len must >= 0.");
-        if (!src.hasRemaining()) {
-            return new byte[0];
-        }
         if (len == 0) {
             return new byte[0];
+        }
+        if (!src.hasRemaining()) {
+            return null;
         }
         int actualLen = Math.min(len, src.remaining());
         byte[] result = new byte[actualLen];
@@ -356,147 +356,300 @@ public class JieBuffer {
     }
 
     /**
-     * Reads all data from the source buffer into a new array, continuing until the end of the buffer, and returns the
-     * array.
+     * Reads all data from the source buffer into a new array, continuing until reaches the end of the buffer, and
+     * returns the array. If the end of the source buffer has already been reached, returns {@code null}.
+     * <p>
+     * The buffer's position increments by the actual read number.
      *
-     * @param source the source buffer
+     * @param src the source buffer
      * @return the array containing the data
      */
-    public static char @Nonnull [] read(@Nonnull CharBuffer source) {
-        int length = source.remaining();
-        if (length <= 0) {
-            return new char[0];
+    public static char @Nullable [] read(@Nonnull CharBuffer src) {
+        int len = src.remaining();
+        if (len == 0) {
+            return null;
         }
-        char[] result = new char[length];
-        source.get(result);
+        char[] result = new char[len];
+        src.get(result);
         return result;
     }
 
     /**
-     * Reads the specified number of data from the source buffer into a new array, and returns the array. If
-     * {@code number < 0}, this method performs as {@link #read(CharBuffer)}. If {@code number == 0}, returns an empty
-     * array without reading. Otherwise, this method keeps reading until the read number reaches the specified number or
-     * the end of the buffer has been reached.
+     * Reads the data of the specified length from the source buffer into a new array, and returns the array. If the
+     * specified length {@code = 0}, returns an empty array without reading. Otherwise, this method keeps reading until
+     * the read number reaches the specified length or reaches the end of the buffer. If the end of the source buffer
+     * has already been reached, returns {@code null}.
+     * <p>
+     * The buffer's position increments by the actual read number.
      *
-     * @param source the source buffer
-     * @param number the specified number
+     * @param src the source buffer
+     * @param len the specified read length, must {@code >= 0}
      * @return the array containing the data
+     * @throws IllegalArgumentException if the specified read length is illegal
      */
-    public static char @Nonnull [] read(@Nonnull CharBuffer source, int number) {
-        if (!source.hasRemaining()) {
+    public static char @Nullable [] read(@Nonnull CharBuffer src, int len) {
+        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        if (len == 0) {
             return new char[0];
         }
-        if (number < 0) {
-            return read(source);
+        if (!src.hasRemaining()) {
+            return null;
         }
-        if (number == 0) {
-            return new char[0];
-        }
-        int length = Math.min(number, source.remaining());
-        char[] result = new char[length];
-        source.get(result);
+        int actualLen = Math.min(len, src.remaining());
+        char[] result = new char[actualLen];
+        src.get(result);
         return result;
     }
 
     /**
-     * Reads all data from the source buffer into a string, continuing until the end of the buffer, and returns the
-     * string.
+     * Reads the data from the source buffer into the specified array, until the read number reaches the array's length
+     * or reaches the end of the source buffer, returns the actual number of chars read to.
+     * <p>
+     * If the array's length {@code = 0}, returns {@code 0} without reading. If the end of the source buffer has already
+     * been reached, returns {@code -1}.
+     * <p>
+     * The buffer's position increments by the actual read number.
      *
-     * @param source the source buffer
-     * @return the string containing the data
-     */
-    public static @Nonnull String string(@Nonnull CharBuffer source) {
-        StringBuilder builder = new StringBuilder();
-        readTo(source, builder);
-        return builder.toString();
-    }
-
-    /**
-     * Reads the specified number of data from the source buffer into a string, and returns the string. If
-     * {@code number < 0}, this method performs as {@link #string(CharBuffer)}. If {@code number == 0}, returns an empty
-     * array without reading. Otherwise, this method keeps reading until the read number reaches the specified number or
-     * the end of the buffer has been reached.
-     *
-     * @param source the source buffer
-     * @param number the specified number
-     * @return the array containing the data
-     */
-    public static @Nonnull String string(@Nonnull CharBuffer source, int number) {
-        StringBuilder builder = new StringBuilder();
-        CharProcessor.from(source).readLimit(number).writeTo(builder);
-        return builder.toString();
-    }
-
-    /**
-     * Reads all bytes from the source buffer and returns them as a string with {@link JieChars#defaultCharset()}.
-     *
-     * @param source the source buffer
-     * @return the string
-     */
-    public static @Nonnull String string(@Nonnull ByteBuffer source) {
-        return string(source, JieChars.defaultCharset());
-    }
-
-    /**
-     * Reads all bytes from the source buffer and returns them as a string with the specified charset.
-     *
-     * @param source  the source buffer
-     * @param charset the specified charset
-     * @return the string
-     */
-    public static @Nonnull String string(@Nonnull ByteBuffer source, @Nonnull Charset charset) {
-        byte[] bytes = read(source);
-        if (JieArray.isEmpty(bytes)) {
-            return "";
-        }
-        return new String(bytes, charset);
-    }
-
-    /**
-     * Reads data from the source buffer into the specified array until the array is completely filled or the end of the
-     * buffer is reached. Returns the actual number of chars read.
-     *
-     * @param source the source buffer
-     * @param dest   the specified array
+     * @param src the source buffer
+     * @param dst the specified array
      * @return the actual number of chars read
-     * @throws IORuntimeException if an I/O error occurs
      */
-    public static int readTo(@Nonnull CharBuffer source, char @Nonnull [] dest) throws IORuntimeException {
-        return (int) CharProcessor.from(source).readLimit(dest.length).writeTo(dest);
+    public static int readTo(@Nonnull CharBuffer src, char @Nonnull [] dst) {
+        return readTo0(src, dst, 0, dst.length);
     }
 
     /**
-     * Reads data from the source buffer into the dest buffer until the dest buffer is completely filled or the end of
-     * the source buffer is reached. Returns the actual number of chars read.
+     * Reads the data from the source buffer into the specified array (starting at the specified offset and up to the
+     * specified length), until the read number reaches the specified length or reaches the end of the source buffer,
+     * returns the actual number of chars read to.
+     * <p>
+     * If the specified length {@code = 0}, returns {@code 0} without reading. If the end of the source buffer has
+     * already been reached, returns {@code -1}.
+     * <p>
+     * The buffer's position increments by the actual read number.
      *
-     * @param source the source buffer
-     * @param dest   the dest buffer
+     * @param src the source buffer
+     * @param dst the specified array
+     * @param off the specified offset of the array
+     * @param len the specified length to read
      * @return the actual number of chars read
-     * @throws IORuntimeException if an I/O error occurs
+     * @throws IndexOutOfBoundsException if the array arguments are out of bounds
      */
-    public static int readTo(@Nonnull CharBuffer source, @Nonnull CharBuffer dest) throws IORuntimeException {
-        int limit = Math.min(source.remaining(), dest.remaining());
-        if (limit <= 0) {
+    public static int readTo(
+        @Nonnull CharBuffer src, char @Nonnull [] dst, int off, int len
+    ) throws IndexOutOfBoundsException {
+        JieCheck.checkOffsetLength(dst.length, off, len);
+        return readTo0(src, dst, off, len);
+    }
+
+    private static int readTo0(
+        @Nonnull CharBuffer src, char @Nonnull [] dst, int off, int len
+    ) throws IndexOutOfBoundsException {
+        if (len == 0) {
             return 0;
         }
-        int srcLimit = source.limit();
-        source.limit(source.position() + limit);
-        dest.put(source);
-        source.limit(srcLimit);
-        return limit;
+        if (!src.hasRemaining()) {
+            return -1;
+        }
+        int actualLen = Math.min(len, src.remaining());
+        src.get(dst, off, actualLen);
+        return actualLen;
     }
 
     /**
-     * Reads data from the source buffer into the specified appender until the end of the buffer is reached. Returns the
-     * actual number of chars read.
+     * Reads the data from the source buffer into the specified buffer, until the read number reaches the buffer's
+     * remaining or reaches the end of the source buffer, returns the actual number of chars read to.
+     * <p>
+     * If the buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the source buffer has
+     * already been reached, returns {@code -1}.
+     * <p>
+     * The buffer's positions increments by the actual read number.
      *
-     * @param source the source buffer
-     * @param dest   the specified appender
+     * @param src the source buffer
+     * @param dst the specified buffer
+     * @return the actual number of chars read
+     */
+    public static int readTo(@Nonnull CharBuffer src, @Nonnull CharBuffer dst) {
+        if (!dst.hasRemaining()) {
+            return 0;
+        }
+        if (!src.hasRemaining()) {
+            return -1;
+        }
+        int actualLen = Math.min(src.remaining(), dst.remaining());
+        if (src.remaining() <= dst.remaining()) {
+            dst.put(src);
+        } else {
+            CharBuffer srcSlice = slice0(src, 0, dst.remaining());
+            dst.put(srcSlice);
+            src.position(src.position() + actualLen);
+        }
+        return actualLen;
+    }
+
+    /**
+     * Reads the data of the specified length from the source buffer into the specified buffer, until the read number
+     * reaches the buffer's remaining or reaches the end of the source buffer, returns the actual number of chars read
+     * to.
+     * <p>
+     * If the specified length or buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the
+     * source buffer has already been reached, returns {@code -1}.
+     * <p>
+     * The buffer's positions increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the specified buffer
+     * @param len the specified length, must {@code >= 0}
+     * @return the actual number of chars read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     */
+    public static int readTo(@Nonnull CharBuffer src, @Nonnull CharBuffer dst, int len) {
+        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        if (len == 0) {
+            return 0;
+        }
+        if (!dst.hasRemaining()) {
+            return 0;
+        }
+        if (!src.hasRemaining()) {
+            return -1;
+        }
+        int actualLen = Math.min(src.remaining(), dst.remaining());
+        actualLen = Math.min(len, actualLen);
+        CharBuffer srcBuf;
+        if (src.remaining() > actualLen) {
+            srcBuf = slice0(src, 0, actualLen);
+        } else {
+            srcBuf = src;
+        }
+        dst.put(srcBuf);
+        if (srcBuf != src) {
+            src.position(src.position() + actualLen);
+        }
+        return actualLen;
+    }
+
+    /**
+     * Reads the data from the source buffer into the specified appender, until the read number reaches the buffer's
+     * remaining or reaches the end of the source buffer, returns the actual number of chars read to.
+     * <p>
+     * If the buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the source buffer has
+     * already been reached, returns {@code -1}.
+     * <p>
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the specified appender
      * @return the actual number of chars read
      * @throws IORuntimeException if an I/O error occurs
      */
-    public static long readTo(@Nonnull CharBuffer source, @Nonnull Appendable dest) throws IORuntimeException {
-        return CharProcessor.from(source).writeTo(dest);
+    public static int readTo(@Nonnull CharBuffer src, @Nonnull Appendable dst) throws IORuntimeException {
+        return readTo0(src, dst, -1);
+    }
+
+    /**
+     * Reads the data of the specified length from the source buffer into the specified appender, until the read number
+     * reaches the buffer's remaining or reaches the end of the source buffer, returns the actual number of chars read
+     * to.
+     * <p>
+     * If the specified length or buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the
+     * source buffer has already been reached, returns {@code -1}.
+     * <p>
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the specified appender
+     * @param len the specified length, must {@code >= 0}
+     * @return the actual number of chars read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static int readTo(
+        @Nonnull CharBuffer src, @Nonnull Appendable dst, long len
+    ) throws IORuntimeException {
+        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        return readTo0(src, dst, len);
+    }
+
+    private static int readTo0(
+        @Nonnull CharBuffer src, @Nonnull Appendable dst, long len
+    ) throws IORuntimeException {
+        if (len == 0) {
+            return 0;
+        }
+        if (src.remaining() == 0) {
+            return -1;
+        }
+        try {
+            int actualLen = len < 0 ? src.remaining() : (int) Math.min(src.remaining(), len);
+            dst.append(src, 0, actualLen);
+            src.position(src.position() + actualLen);
+            return actualLen;
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    /**
+     * Reads all data from the source buffer into a new string, continuing until reaches the end of the buffer, and
+     * returns the string. If the end of the source buffer has already been reached, returns {@code null}.
+     * <p>
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @return the string containing the data
+     */
+    public static @Nullable String string(@Nonnull CharBuffer src) {
+        char[] chars = read(src);
+        return chars == null ? null : new String(chars);
+    }
+
+    /**
+     * Reads the data of the specified length from the source buffer into a new string, and returns the string. If the
+     * specified length {@code = 0}, returns an empty array without reading. Otherwise, this method keeps reading until
+     * the read number reaches the specified length or reaches the end of the buffer. If the end of the source buffer
+     * has already been reached, returns {@code null}.
+     * <p>
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param len the specified read length, must {@code >= 0}
+     * @return the string containing the data
+     * @throws IllegalArgumentException if the specified read length is illegal
+     */
+    public static @Nullable String string(@Nonnull CharBuffer src, int len) {
+        char[] chars = read(src, len);
+        return chars == null ? null : new String(chars);
+    }
+
+    /**
+     * Reads all data from the source buffer into a new string with the {@link JieChars#defaultCharset()}, continuing
+     * until reaches the end of the buffer, and returns the string. If the end of the source buffer has already been
+     * reached, returns {@code null}.
+     * <p>
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @return the string containing the data
+     */
+    public static @Nullable String string(@Nonnull ByteBuffer src) {
+        return string(src, JieChars.defaultCharset());
+    }
+
+    /**
+     * Reads all data from the source buffer into a new string with the specified charset, continuing until reaches the
+     * end of the buffer, and returns the string. If the end of the source buffer has already been reached, returns
+     * {@code null}.
+     * <p>
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param cs  the specified charset
+     * @return the string containing the data
+     */
+    public static @Nullable String string(@Nonnull ByteBuffer src, @Nonnull Charset cs) {
+        byte[] bytes = read(src);
+        return bytes == null ? null : new String(bytes, cs);
     }
 
     /**
