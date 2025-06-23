@@ -2,7 +2,7 @@ package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.JieCheck;
 import xyz.sunqian.common.base.JieMath;
 
 import java.io.IOException;
@@ -18,8 +18,6 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
 import java.nio.charset.CodingErrorAction;
-
-import static xyz.sunqian.common.base.JieCheck.checkOffsetLength;
 
 final class IOImpls {
 
@@ -150,7 +148,7 @@ final class IOImpls {
         return NullWriter.SINGLETON;
     }
 
-    private static final class BytesInputStream extends InputStream {
+    private static final class BytesInputStream extends DoReadStream {
 
         private final byte @Nonnull [] buf;
         private int pos;
@@ -162,18 +160,19 @@ final class IOImpls {
         }
 
         BytesInputStream(byte @Nonnull [] buf, int offset, int length) throws IndexOutOfBoundsException {
-            checkOffsetLength(buf.length, offset, length);
+            JieCheck.checkOffsetLength(buf.length, offset, length);
             this.buf = buf;
             this.pos = offset;
             this.count = Math.min(offset + length, buf.length);
         }
 
+        @Override
         public int read() {
             return (pos < count) ? (buf[pos++] & 0xff) : -1;
         }
 
-        public int read(byte @Nonnull [] b, int off, int len) {
-            checkOffsetLength(b.length, off, len);
+        @Override
+        protected int doRead(byte @Nonnull [] b, int off, int len) {
             if (len == 0) {
                 return 0;
             }
@@ -187,6 +186,7 @@ final class IOImpls {
             return avail;
         }
 
+        @Override
         public long skip(long n) {
             if (n <= 0) {
                 return 0;
@@ -200,18 +200,22 @@ final class IOImpls {
             return avail;
         }
 
+        @Override
         public int available() {
             return count - pos;
         }
 
+        @Override
         public boolean markSupported() {
             return true;
         }
 
+        @Override
         public void mark(int readAheadLimit) {
             mark = pos;
         }
 
+        @Override
         public void reset() throws IOException {
             if (mark < 0) {
                 throw new IOException(MARK_NOT_SET);
@@ -219,11 +223,12 @@ final class IOImpls {
             pos = mark;
         }
 
+        @Override
         public void close() {
         }
     }
 
-    private static final class BufferInputStream extends InputStream {
+    private static final class BufferInputStream extends DoReadStream {
 
         private final @Nonnull ByteBuffer buffer;
 
@@ -240,8 +245,7 @@ final class IOImpls {
         }
 
         @Override
-        public int read(byte @Nonnull [] b, int off, int len) {
-            checkOffsetLength(b.length, off, len);
+        protected int doRead(byte @Nonnull [] b, int off, int len) {
             if (len == 0) {
                 return 0;
             }
@@ -295,7 +299,7 @@ final class IOImpls {
         }
     }
 
-    private static final class RafInputStream extends InputStream {
+    private static final class RafInputStream extends DoReadStream {
 
         private final @Nonnull RandomAccessFile random;
         private long mark = -1;
@@ -311,8 +315,7 @@ final class IOImpls {
         }
 
         @Override
-        public int read(byte @Nonnull [] b, int off, int len) throws IOException {
-            checkOffsetLength(b.length, off, len);
+        protected int doRead(byte @Nonnull [] b, int off, int len) throws IOException {
             if (len == 0) {
                 return 0;
             }
@@ -360,7 +363,7 @@ final class IOImpls {
         }
     }
 
-    private static final class EmptyInputStream extends InputStream {
+    private static final class EmptyInputStream extends DoReadStream {
 
         private static final @Nonnull EmptyInputStream SINGLETON = new EmptyInputStream();
 
@@ -370,13 +373,7 @@ final class IOImpls {
         }
 
         @Override
-        public int read(byte @Nonnull [] b) {
-            return b.length == 0 ? 0 : -1;
-        }
-
-        @Override
-        public int read(byte @Nonnull [] b, int off, int len) {
-            checkOffsetLength(b.length, off, len);
+        protected int doRead(byte @Nonnull [] b, int off, int len) {
             return len == 0 ? 0 : -1;
         }
 
@@ -386,7 +383,7 @@ final class IOImpls {
         }
     }
 
-    private static final class CharsInputStream extends InputStream {
+    private static final class CharsInputStream extends DoReadStream {
 
         private final @Nonnull Reader reader;
         private final @Nonnull CharsetEncoder encoder;
@@ -435,8 +432,7 @@ final class IOImpls {
         }
 
         @Override
-        public int read(byte @Nonnull [] b, int off, int len) throws IOException {
-            checkOffsetLength(b.length, off, len);
+        protected int doRead(byte @Nonnull [] b, int off, int len) throws IOException {
             checkClosed();
             if (len == 0) {
                 return 0;
@@ -520,7 +516,7 @@ final class IOImpls {
         }
     }
 
-    private static final class CharsReader extends Reader {
+    private static final class CharsReader extends DoReadReader {
 
         private final char @Nonnull [] buf;
         private int pos;
@@ -532,18 +528,19 @@ final class IOImpls {
         }
 
         CharsReader(char @Nonnull [] buf, int offset, int length) throws IndexOutOfBoundsException {
-            checkOffsetLength(buf.length, offset, length);
+            JieCheck.checkOffsetLength(buf.length, offset, length);
             this.buf = buf;
             this.pos = offset;
             this.count = Math.min(offset + length, buf.length);
         }
 
+        @Override
         public int read() {
             return (pos < count) ? (buf[pos++] & 0xffff) : -1;
         }
 
-        public int read(char @Nonnull [] b, int off, int len) {
-            checkOffsetLength(b.length, off, len);
+        @Override
+        protected int doRead(char @Nonnull [] b, int off, int len) {
             if (len == 0) {
                 return 0;
             }
@@ -569,6 +566,7 @@ final class IOImpls {
             return avail;
         }
 
+        @Override
         public long skip(long n) {
             if (n <= 0) {
                 return 0;
@@ -582,18 +580,22 @@ final class IOImpls {
             return avail;
         }
 
+        @Override
         public boolean ready() {
             return true;
         }
 
+        @Override
         public boolean markSupported() {
             return true;
         }
 
+        @Override
         public void mark(int readAheadLimit) {
             mark = pos;
         }
 
+        @Override
         public void reset() throws IOException {
             if (mark < 0) {
                 throw new IOException(MARK_NOT_SET);
@@ -601,11 +603,12 @@ final class IOImpls {
             pos = mark;
         }
 
+        @Override
         public void close() {
         }
     }
 
-    private static final class BufferReader extends Reader {
+    private static final class BufferReader extends DoReadReader {
 
         private final @Nonnull CharBuffer buffer;
 
@@ -622,8 +625,7 @@ final class IOImpls {
         }
 
         @Override
-        public int read(char @Nonnull [] c, int off, int len) {
-            checkOffsetLength(c.length, off, len);
+        protected int doRead(char @Nonnull [] c, int off, int len) {
             if (len == 0) {
                 return 0;
             }
@@ -682,7 +684,41 @@ final class IOImpls {
         }
     }
 
-    private static final class BytesReader extends Reader {
+    private static final class EmptyReader extends DoReadReader {
+
+        private static final @Nonnull EmptyReader SINGLETON = new EmptyReader();
+
+        @Override
+        public int read(@Nonnull CharBuffer target) {
+            return -1;
+        }
+
+        @Override
+        public int read() {
+            return -1;
+        }
+
+        @Override
+        protected int doRead(char @Nonnull [] cbuf, int off, int len) {
+            return len == 0 ? 0 : -1;
+        }
+
+        @Override
+        public long skip(long n) {
+            return 0;
+        }
+
+        @Override
+        public boolean ready() {
+            return true;
+        }
+
+        @Override
+        public void close() {
+        }
+    }
+
+    private static final class BytesReader extends DoReadReader {
 
         private final @Nonnull InputStream inputStream;
         private final @Nonnull CharsetDecoder decoder;
@@ -731,8 +767,7 @@ final class IOImpls {
         }
 
         @Override
-        public int read(char @Nonnull [] c, int off, int len) throws IOException {
-            checkOffsetLength(c.length, off, len);
+        protected int doRead(char @Nonnull [] c, int off, int len) throws IOException {
             checkClosed();
             if (len == 0) {
                 return 0;
@@ -819,47 +854,7 @@ final class IOImpls {
         }
     }
 
-    private static final class EmptyReader extends Reader {
-
-        private static final @Nonnull EmptyReader SINGLETON = new EmptyReader();
-
-        @Override
-        public int read(@Nonnull CharBuffer target) {
-            return -1;
-        }
-
-        @Override
-        public int read() {
-            return -1;
-        }
-
-        @Override
-        public int read(char @Nonnull [] cbuf) {
-            return cbuf.length == 0 ? 0 : -1;
-        }
-
-        @Override
-        public int read(char @Nonnull [] cbuf, int off, int len) {
-            checkOffsetLength(cbuf.length, off, len);
-            return len == 0 ? 0 : -1;
-        }
-
-        @Override
-        public long skip(long n) {
-            return 0;
-        }
-
-        @Override
-        public boolean ready() {
-            return true;
-        }
-
-        @Override
-        public void close() {
-        }
-    }
-
-    private static final class BytesOutputStream extends OutputStream {
+    private static final class BytesOutputStream extends DoWriteStream {
 
         private final byte @Nonnull [] buf;
         private final int end;
@@ -870,7 +865,7 @@ final class IOImpls {
         }
 
         BytesOutputStream(byte @Nonnull [] buf, int offset, int length) throws IndexOutOfBoundsException {
-            checkOffsetLength(buf.length, offset, length);
+            JieCheck.checkOffsetLength(buf.length, offset, length);
             this.buf = buf;
             this.end = offset + length;
             this.pos = offset;
@@ -887,8 +882,7 @@ final class IOImpls {
         }
 
         @Override
-        public void write(byte @Nonnull [] b, int off, int len) throws IOException {
-            checkOffsetLength(b.length, off, len);
+        protected void doWrite(byte @Nonnull [] b, int off, int len) throws IOException {
             if (len == 0) {
                 return;
             }
@@ -901,7 +895,7 @@ final class IOImpls {
         }
     }
 
-    private static final class BufferOutputStream extends OutputStream {
+    private static final class BufferOutputStream extends DoWriteStream {
 
         private final @Nonnull ByteBuffer buffer;
 
@@ -919,8 +913,7 @@ final class IOImpls {
         }
 
         @Override
-        public void write(byte @Nonnull [] b, int off, int len) throws IOException {
-            checkOffsetLength(b.length, off, len);
+        protected void doWrite(byte @Nonnull [] b, int off, int len) throws IOException {
             if (len == 0) {
                 return;
             }
@@ -932,7 +925,7 @@ final class IOImpls {
         }
     }
 
-    private static final class RafOutputStream extends OutputStream {
+    private static final class RafOutputStream extends DoWriteStream {
 
         private final @Nonnull RandomAccessFile random;
 
@@ -947,8 +940,7 @@ final class IOImpls {
         }
 
         @Override
-        public void write(byte @Nonnull [] b, int off, int len) throws IOException {
-            checkOffsetLength(b.length, off, len);
+        protected void doWrite(byte @Nonnull [] b, int off, int len) throws IOException {
             if (len == 0) {
                 return;
             }
@@ -966,7 +958,7 @@ final class IOImpls {
         }
     }
 
-    private static final class NullOutputStream extends OutputStream {
+    private static final class NullOutputStream extends DoWriteStream {
 
         private static final @Nonnull NullOutputStream SINGLETON = new NullOutputStream();
 
@@ -975,16 +967,11 @@ final class IOImpls {
         }
 
         @Override
-        public void write(byte @Nonnull [] b) {
-        }
-
-        @Override
-        public void write(byte @Nonnull [] b, int off, int len) {
-            checkOffsetLength(b.length, off, len);
+        protected void doWrite(byte @Nonnull [] b, int off, int len) {
         }
     }
 
-    private static final class AppenderOutputStream extends OutputStream {
+    private static final class AppenderOutputStream extends DoWriteStream {
 
         private final @Nonnull Appendable appender;
         private final @Nonnull CharsetDecoder decoder;
@@ -1036,8 +1023,7 @@ final class IOImpls {
         }
 
         @Override
-        public void write(byte @Nonnull [] b, int off, int len) throws IOException {
-            checkOffsetLength(b.length, off, len);
+        protected void doWrite(byte @Nonnull [] b, int off, int len) throws IOException {
             checkClosed();
             if (len == 0) {
                 return;
@@ -1089,7 +1075,7 @@ final class IOImpls {
         }
     }
 
-    private static final class CharsWriter extends AbstractWriter {
+    private static final class CharsWriter extends DoWriteWriter {
 
         private final char @Nonnull [] buf;
         private final int end;
@@ -1100,24 +1086,24 @@ final class IOImpls {
         }
 
         CharsWriter(char @Nonnull [] buf, int offset, int length) throws IndexOutOfBoundsException {
-            checkOffsetLength(buf.length, offset, length);
+            JieCheck.checkOffsetLength(buf.length, offset, length);
             this.buf = buf;
             this.end = offset + length;
             this.pos = offset;
         }
 
         @Override
-        protected void doWrite(char c) throws Exception {
+        public void write(int c) throws IOException {
             int remaining = end - pos;
             if (remaining < 1) {
                 throw new IOException(insufficientRemainingSpace(1, remaining));
             }
-            buf[pos] = c;
+            buf[pos] = (char) c;
             pos++;
         }
 
         @Override
-        protected void doWrite(char @Nonnull [] cbuf, int off, int len) throws Exception {
+        protected void doWrite(char @Nonnull [] cbuf, int off, int len) throws IOException {
             if (len == 0) {
                 return;
             }
@@ -1130,7 +1116,7 @@ final class IOImpls {
         }
 
         @Override
-        protected void doWrite(@Nonnull String str, int off, int len) throws Exception {
+        protected void doWrite(@Nonnull String str, int off, int len) throws IOException {
             if (len == 0) {
                 return;
             }
@@ -1143,14 +1129,46 @@ final class IOImpls {
         }
 
         @Override
-        protected void doAppend(@Nullable CharSequence csq, int start, int end) throws Exception {
-            CharSequence chars = Jie.nonnull(csq, Jie.NULL_STRING);
-            if (csq instanceof String) {
-                doWrite((String) chars, start, end - start);
-            } else {
-                for (int i = start; i < end; i++) {
-                    buf[pos++] = chars.charAt(i);
-                }
+        public void flush() {
+        }
+
+        @Override
+        public void close() {
+        }
+    }
+
+    private static final class BufferWriter extends DoWriteWriter {
+
+        private final CharBuffer buffer;
+
+        BufferWriter(@Nonnull CharBuffer buffer) {
+            this.buffer = buffer;
+        }
+
+        @Override
+        public void write(int c) throws IOException {
+            try {
+                buffer.put((char) c);
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        protected void doWrite(char @Nonnull [] c, int off, int len) throws IOException {
+            try {
+                buffer.put(c, off, len);
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        protected void doWrite(@Nonnull String str, int off, int len) throws IOException {
+            try {
+                buffer.put(str, off, off + len);
+            } catch (Exception e) {
+                throw new IOException(e);
             }
         }
 
@@ -1163,49 +1181,12 @@ final class IOImpls {
         }
     }
 
-    private static final class BufferWriter extends AbstractWriter {
-
-        private final CharBuffer buffer;
-
-        BufferWriter(@Nonnull CharBuffer buffer) {
-            this.buffer = buffer;
-        }
-
-        @Override
-        protected void doWrite(char c) {
-            buffer.put(c);
-        }
-
-        @Override
-        protected void doWrite(char @Nonnull [] c, int off, int len) {
-            buffer.put(c, off, len);
-        }
-
-        @Override
-        protected void doWrite(@Nonnull String str, int off, int len) {
-            buffer.put(str, off, off + len);
-        }
-
-        @Override
-        protected void doAppend(@Nullable CharSequence csq, int start, int end) {
-            buffer.append(csq, start, end);
-        }
-
-        @Override
-        public void flush() {
-        }
-
-        @Override
-        public void close() {
-        }
-    }
-
-    private static final class NullWriter extends AbstractWriter {
+    private static final class NullWriter extends DoWriteWriter {
 
         private static final @Nonnull NullWriter SINGLETON = new NullWriter();
 
         @Override
-        protected void doWrite(char c) {
+        public void write(int c) {
         }
 
         @Override
@@ -1217,7 +1198,14 @@ final class IOImpls {
         }
 
         @Override
-        protected void doAppend(@Nullable CharSequence csq, int start, int end) {
+        public Writer append(CharSequence csq) {
+            return this;
+        }
+
+        @Override
+        public Writer append(CharSequence csq, int start, int end) {
+            JieCheck.checkOffsetLength(csq.length(), start, end - start);
+            return this;
         }
 
         @Override
@@ -1229,17 +1217,15 @@ final class IOImpls {
         }
     }
 
-    private static final class BytesWriter extends AbstractWriter {
+    private static final class BytesWriter extends DoWriteWriter {
 
         private final @Nonnull OutputStream outputStream;
         private final @Nonnull CharsetEncoder encoder;
         private final @Nonnull CharBuffer inBuffer;
-
-        // Should be keep flush to empty.
         private final @Nonnull ByteBuffer outBuffer;
 
         private boolean closed = false;
-        private final char @Nonnull [] cbuf = {0};
+        private char @Nullable [] writeOneBuf;
 
         private BytesWriter(@Nonnull OutputStream outputStream, @Nonnull CharsetEncoder encoder, int inBufferSize, int outBufferSize) {
             this.outputStream = outputStream;
@@ -1266,49 +1252,57 @@ final class IOImpls {
         }
 
         @Override
-        protected void doWrite(char c) throws Exception {
-            cbuf[0] = c;
-            doWrite(cbuf, 0, 1);
+        public void write(int c) throws IOException {
+            if (writeOneBuf == null) {
+                writeOneBuf = new char[1];
+            }
+            writeOneBuf[0] = (char) c;
+            write(writeOneBuf, 0, 1);
         }
 
         @Override
-        protected void doWrite(char @Nonnull [] c, int off, int len) throws Exception {
-            doWrite0(c, off, len);
+        protected void doWrite(char @Nonnull [] cbuf, int off, int len) throws IOException {
+            doWrite0(cbuf, off, len);
         }
 
         @Override
-        protected void doWrite(@Nonnull String str, int off, int len) throws Exception {
+        protected void doWrite(@Nonnull String str, int off, int len) throws IOException {
             doWrite0(str, off, len);
         }
 
-        @Override
-        protected void doAppend(@Nullable CharSequence csq, int start, int end) throws Exception {
-            CharSequence chars = Jie.nonnull(csq, Jie.NULL_STRING);
-            doWrite0(chars, start, end - start);
-        }
-
-        private void doWrite0(@Nonnull Object c, int off, int len) throws Exception {
+        private void doWrite0(@Nonnull Object cbuf, int off, int len) throws IOException {
             checkClosed();
-            int offset = off;
-            int remaining = len;
-            while (remaining > 0) {
-                inBuffer.compact();
-                int rollbackLimit = inBuffer.position();
-                int avail = Math.min(inBuffer.remaining(), remaining);
-                if (c instanceof char[]) {
-                    inBuffer.put((char[]) c, offset, avail);
-                } else if (c instanceof String) {
-                    inBuffer.put((String) c, offset, offset + avail);
+            if (len == 0) {
+                return;
+            }
+            int count = 0;
+            while (count < len) {
+                int actualLen = Math.min(inBuffer.remaining(), len - count);
+                if (cbuf instanceof char[]) {
+                    inBuffer.put((char[]) cbuf, off + count, actualLen);
                 } else {
-                    CharSequence cs = (CharSequence) c;
-                    for (int i = 0; i < avail; i++) {
-                        inBuffer.put(cs.charAt(i + offset));
+                    inBuffer.put((String) cbuf, off + count, off + count + actualLen);
+                }
+                inBuffer.flip();
+                while (true) {
+                    CoderResult coderResult = encoder.encode(inBuffer, outBuffer, false);
+                    if (coderResult.isOverflow()) {
+                        outBuffer.flip();
+                        JieIO.readTo(outBuffer, outputStream);
+                        // outputStream.append(outBuffer);
+                        outBuffer.clear();
+                    } else if (coderResult.isUnderflow()) {
+                        outBuffer.flip();
+                        JieIO.readTo(outBuffer, outputStream);
+                        // appender.append(outBuffer);
+                        outBuffer.clear();
+                        break;
+                    } else {
+                        throw new IOException(decodingFailed(coderResult));
                     }
                 }
-                remaining -= avail;
-                offset += avail;
-                inBuffer.flip();
-                encodeBuffer(rollbackLimit);
+                count += actualLen;
+                inBuffer.compact();
             }
         }
 
@@ -1325,44 +1319,6 @@ final class IOImpls {
             }
             outputStream.close();
             closed = true;
-        }
-
-        private void encodeBuffer(int rollbackLimit) throws IOException {
-            while (true) {
-                outBuffer.compact();
-                CoderResult coderResult = encoder.encode(inBuffer, outBuffer, false);
-                if (coderResult.isUnderflow()) {
-                    outBuffer.flip();
-                    flushBuffer(rollbackLimit);
-                    return;
-                }
-                if (coderResult.isOverflow()) {
-                    outBuffer.flip();
-                    flushBuffer(rollbackLimit);
-                    continue;
-                }
-                throw new IOException("Chars encoding failed: " + coderResult);
-            }
-        }
-
-        private void flushBuffer(int rollbackLimit) throws IOException {
-            if (!outBuffer.hasRemaining()) {
-                return;
-            }
-            try {
-                outputStream.write(outBuffer.array(), outBuffer.position(), outBuffer.remaining());
-                outBuffer.position(outBuffer.position() + outBuffer.remaining());
-            } catch (IOException e) {
-                rollbackBuffer(rollbackLimit);
-                throw e;
-            }
-        }
-
-        private void rollbackBuffer(int limit) {
-            inBuffer.position(0);
-            inBuffer.limit(limit);
-            outBuffer.position(0);
-            outBuffer.limit(0);
         }
 
         private void checkClosed() throws IOException {

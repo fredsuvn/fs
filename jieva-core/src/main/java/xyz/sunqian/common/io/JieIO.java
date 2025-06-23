@@ -820,150 +820,189 @@ public class JieIO {
     }
 
     /**
-     * Wraps the given array as a new {@link InputStream}. It supports mark/reset operations, but the {@code close()}
-     * method has no effect.
+     * Wraps the given array as a new {@link InputStream}.
      * <p>
-     * Note the returned wrapper itself does not guarantee thread safety.
+     * The result's support is as follows:
+     * <ul>
+     *     <li>mark/reset: supported and size-unlimited;</li>
+     *     <li>close: invoking has no effect;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
      *
      * @param array the given array
-     * @return the given array as an {@link InputStream}
+     * @return the given array as a new {@link InputStream}
      */
     public static @Nonnull InputStream newInputStream(byte @Nonnull [] array) {
         return IOImpls.inputStream(array);
     }
 
     /**
-     * Wraps the given array as a new {@link InputStream} from the specified offset up to the specified length. It
-     * supports mark/reset operations, but the {@code close()} method has no effect.
+     * Wraps the given array, starting at the specified offset and up to the specified length, as a new
+     * {@link InputStream}.
      * <p>
-     * Note the returned wrapper itself does not guarantee thread safety.
+     * The result's support is as follows:
+     * <ul>
+     *     <li>mark/reset: supported and size-unlimited;</li>
+     *     <li>close: invoking has no effect;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
      *
-     * @param array  the given array
-     * @param offset the specified offset
-     * @param length the specified length
-     * @return the given array as an {@link InputStream}
+     * @param array the given array
+     * @param off   the specified offset
+     * @param len   the specified length
+     * @return the given array as a new {@link InputStream}
      * @throws IndexOutOfBoundsException if the array arguments are out of bounds
      */
     public static @Nonnull InputStream newInputStream(
-        byte @Nonnull [] array, int offset, int length
+        byte @Nonnull [] array, int off, int len
     ) throws IndexOutOfBoundsException {
-        return IOImpls.inputStream(array, offset, length);
+        return IOImpls.inputStream(array, off, len);
     }
 
     /**
-     * Wraps the given buffer as a new {@link InputStream}. It supports mark/reset operations, but the {@code close()}
-     * method has no effect.
+     * Wraps the given buffer as a new {@link InputStream}.
      * <p>
-     * Note the returned wrapper itself does not guarantee thread safety.
+     * The result's support is as follows:
+     * <ul>
+     *     <li>mark/reset: supported and size-unlimited;</li>
+     *     <li>close: invoking has no effect;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
      *
      * @param buffer the given buffer
-     * @return the given buffer as an {@link InputStream}
+     * @return the given buffer as a new {@link InputStream}
      */
     public static @Nonnull InputStream newInputStream(@Nonnull ByteBuffer buffer) {
         return IOImpls.inputStream(buffer);
     }
 
     /**
-     * Wraps the given random access file as a new {@link InputStream} from the specified file pointer offset. It
-     * supports mark/reset operations, and the {@code close()} method will close both the file and stream. Any operation
-     * to the file will affect the stream.
+     * Wraps the given random access file, starting at the specified file pointer offset, as a new {@link InputStream}.
      * <p>
-     * Note the returned wrapper itself does not guarantee thread safety.
+     * The result's support is as follows:
+     * <ul>
+     *     <li>mark/reset: supports via {@link RandomAccessFile#seek(long)};</li>
+     *     <li>close: closes the random access file;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
      *
-     * @param random the given random access file
-     * @param offset the specified file pointer offset
-     * @return the given random access file as an {@link InputStream}
+     * @param raf the given random access file
+     * @param off the specified file pointer offset
+     * @return the given random access file as a new {@link InputStream}
      * @throws IORuntimeException if an I/O error occurs
      */
     public static @Nonnull InputStream newInputStream(
-        @Nonnull RandomAccessFile random, long offset
+        @Nonnull RandomAccessFile raf, long off
     ) throws IORuntimeException {
-        return IOImpls.inputStream(random, offset);
+        return IOImpls.inputStream(raf, off);
     }
 
     /**
-     * Wraps the given reader as a new {@link InputStream} with {@link JieChars#defaultCharset()}. It supports
-     * mark/reset operations. The read position of the reader may not correspond to the position of the stream, and the
-     * {@code close()} method will close both the reader and stream at their current positions.
+     * Wraps the given reader as a new {@link InputStream} with {@link JieChars#defaultCharset()}.
      * <p>
-     * Note the returned wrapper itself does not guarantee thread safety.
+     * The result's support is as follows:
+     * <ul>
+     *     <li>mark/reset: unsupported;</li>
+     *     <li>close: closes the reader;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
      *
      * @param reader the given reader
-     * @return the given reader as an {@link InputStream}
+     * @return the given reader as a new {@link InputStream}
      */
     public static @Nonnull InputStream newInputStream(@Nonnull Reader reader) {
         return newInputStream(reader, JieChars.defaultCharset());
     }
 
     /**
-     * Wraps the given reader as a new {@link InputStream} with the specified charset. It supports mark/reset
-     * operations. The read position of the reader may not correspond to the position of the stream, and the close
-     * method will {@code close()} both the reader and stream at their current positions.
+     * Wraps the given reader as a new {@link InputStream} with the specified charset.
      * <p>
-     * Note the returned wrapper itself does not guarantee thread safety.
+     * The result's support is as follows:
+     * <ul>
+     *     <li>mark/reset: unsupported;</li>
+     *     <li>close: closes the reader;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
      *
      * @param reader  the given reader
      * @param charset the specified charset
-     * @return the given reader as an {@link InputStream}
+     * @return the given reader as a new {@link InputStream}
      */
     public static @Nonnull InputStream newInputStream(@Nonnull Reader reader, @Nonnull Charset charset) {
         return IOImpls.inputStream(reader, charset);
     }
 
     /**
-     * Wraps the given array as a new {@link Reader}. It supports mark/reset operations, but the {@code close()} method
-     * has no effect.
+     * Wraps the given array as a new {@link Reader}.
      * <p>
-     * Note the returned wrapper itself does not guarantee thread safety.
+     * The result's support is as follows:
+     * <ul>
+     *     <li>mark/reset: supported and size-unlimited;</li>
+     *     <li>close: invoking has no effect;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
      *
      * @param array the given array
-     * @return the given array as an {@link Reader}
+     * @return the given array as a new {@link Reader}
      */
     public static @Nonnull Reader newReader(char @Nonnull [] array) {
         return IOImpls.reader(array);
     }
 
     /**
-     * Wraps the given array as a new {@link Reader} from the specified offset up to the specified length. It supports
-     * mark/reset operations, but the {@code close()} method has no effect.
+     * Wraps the given array, starting at the specified offset and up to the specified length, as a new {@link Reader}.
      * <p>
-     * Note the returned wrapper itself does not guarantee thread safety.
+     * The result's support is as follows:
+     * <ul>
+     *     <li>mark/reset: supported and size-unlimited;</li>
+     *     <li>close: invoking has no effect;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
      *
-     * @param array  the given array
-     * @param offset the specified offset
-     * @param length the specified length
-     * @return the given array as an {@link Reader}
+     * @param array the given array
+     * @param off   the specified offset
+     * @param len   the specified length
+     * @return the given array as a new {@link Reader}
      * @throws IndexOutOfBoundsException if the array arguments are out of bounds
      */
     public static @Nonnull Reader newReader(
-        char @Nonnull [] array, int offset, int length
+        char @Nonnull [] array, int off, int len
     ) throws IndexOutOfBoundsException {
-        return IOImpls.reader(array, offset, length);
+        return IOImpls.reader(array, off, len);
     }
 
     /**
-     * Wraps the given chars as a new {@link Reader}. It supports mark/reset operations, but the {@code close()} method
-     * has no effect.
+     * Wraps the given char sequence as a new {@link Reader}.
      * <p>
-     * Note the returned wrapper itself does not guarantee thread safety.
+     * The result's support is as follows:
+     * <ul>
+     *     <li>mark/reset: supported and size-unlimited;</li>
+     *     <li>close: invoking has no effect;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
      *
-     * @param chars the given chars
-     * @return the given array as an {@link Reader}
+     * @param chars the given char sequence
+     * @return the given char sequence as a new {@link Reader}
      */
     public static @Nonnull Reader newReader(@Nonnull CharSequence chars) {
         return IOImpls.reader(chars);
     }
 
     /**
-     * Wraps the given chars as a new {@link Reader} from the specified start index inclusive to the specified end index
-     * exclusive. It supports mark/reset operations, but the {@code close()} method has no effect.
+     * Wraps the given char sequence, starting at the specified start index inclusive and end at the specified end index
+     * exclusive, as a new {@link Reader}.
      * <p>
-     * Note the returned wrapper itself does not guarantee thread safety.
+     * The result's support is as follows:
+     * <ul>
+     *     <li>mark/reset: supported and size-unlimited;</li>
+     *     <li>close: invoking has no effect;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
      *
-     * @param chars the given chars
+     * @param chars the given char sequence
      * @param start the specified start index inclusive
      * @param end   the specified end index exclusive
-     * @return the given array as an {@link Reader}
+     * @return the given char sequence as a new {@link Reader}
      * @throws IndexOutOfBoundsException if the array arguments are out of bounds
      */
     public static @Nonnull Reader newReader(
@@ -973,237 +1012,293 @@ public class JieIO {
     }
 
     /**
-     * Wraps the given buffer as a new {@link Reader}. It supports mark/reset operations, but the {@code close()} method
-     * has no effect.
+     * Wraps the given buffer as a new {@link Reader}.
      * <p>
-     * Note the returned wrapper itself does not guarantee thread safety.
+     * The result's support is as follows:
+     * <ul>
+     *     <li>mark/reset: supported and size-unlimited;</li>
+     *     <li>close: invoking has no effect;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
      *
      * @param buffer the given buffer
-     * @return the given buffer as an {@link Reader}
+     * @return the given buffer as a new {@link Reader}
      */
     public static @Nonnull Reader newReader(@Nonnull CharBuffer buffer) {
         return IOImpls.reader(buffer);
     }
 
     /**
-     * Wraps the given stream as a new {@link Reader} with {@link JieChars#defaultCharset()}. It supports mark/reset
-     * operations. The read position of the stream may not correspond to the position of the reader, and the
-     * {@code close()} method will close both the stream and reader at their current positions.
+     * Wraps the given stream as a new {@link Reader} with {@link JieChars#defaultCharset()}.
      * <p>
-     * Note the returned wrapper itself does not guarantee thread safety.
+     * The result's support is as follows:
+     * <ul>
+     *     <li>mark/reset: unsupported;</li>
+     *     <li>close: closes the stream;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
      *
      * @param stream the given stream
-     * @return the given stream as an {@link Reader}
+     * @return the given stream as a new {@link Reader}
      */
     public static @Nonnull Reader newReader(@Nonnull InputStream stream) {
         return newReader(stream, JieChars.defaultCharset());
     }
 
     /**
-     * Wraps the given stream as a new {@link Reader} with the specified charset. It supports mark/reset operations. The
-     * read position of the stream may not correspond to the position of the reader, and the {@code close()} method will
-     * close both the stream and reader at their current positions.
+     * Wraps the given stream as a new {@link Reader} with the specified charset.
      * <p>
-     * Note the returned wrapper itself does not guarantee thread safety.
+     * The result's support is as follows:
+     * <ul>
+     *     <li>mark/reset: unsupported;</li>
+     *     <li>close: closes the reader;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
      *
      * @param stream  the given stream
      * @param charset the specified charset
-     * @return the given stream as an {@link Reader}
+     * @return the given stream as a new {@link Reader}
      */
     public static @Nonnull Reader newReader(@Nonnull InputStream stream, @Nonnull Charset charset) {
         return IOImpls.reader(stream, charset);
     }
 
     /**
-     * Wraps the given array as a new {@link OutputStream}. The {@code close()} method has no effect.
+     * Wraps the given array as a new {@link OutputStream}.
      * <p>
-     * Note the returned wrapper itself does not guarantee thread safety.
+     * The result's support is as follows:
+     * <ul>
+     *     <li>capacity: in bounds of the array;</li>
+     *     <li>close: invoking has no effect;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
      *
      * @param array the given array
-     * @return the given array as an {@link OutputStream}
+     * @return the given array as a new {@link OutputStream}
      */
     public static @Nonnull OutputStream newOutputStream(byte @Nonnull [] array) {
         return IOImpls.outputStream(array);
     }
 
     /**
-     * Wraps the given array as a new {@link OutputStream} from the specified offset up to the specified length. The
-     * {@code close()} method has no effect.
+     * Wraps the given array, starting at the specified offset and up to the specified length, as a new
+     * {@link OutputStream}.
      * <p>
-     * Note the returned wrapper itself does not guarantee thread safety.
+     * The result's support is as follows:
+     * <ul>
+     *     <li>capacity: in specified bounds of the array;</li>
+     *     <li>close: invoking has no effect;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
      *
-     * @param array  the given array
-     * @param offset the specified offset
-     * @param length the specified length
-     * @return the given array as an {@link OutputStream}
+     * @param array the given array
+     * @param off   the specified offset
+     * @param len   the specified length
+     * @return the given array as a new {@link OutputStream}
      * @throws IndexOutOfBoundsException if the array arguments are out of bounds
      */
     public static @Nonnull OutputStream newOutputStream(
-        byte @Nonnull [] array, int offset, int length
+        byte @Nonnull [] array, int off, int len
     ) throws IndexOutOfBoundsException {
-        return IOImpls.outputStream(array, offset, length);
+        return IOImpls.outputStream(array, off, len);
     }
 
     /**
-     * Wraps the given buffer as a new {@link OutputStream}. The {@code close()} method has no effect.
+     * Wraps the given buffer as a new {@link OutputStream}.
      * <p>
-     * Note the returned wrapper itself does not guarantee thread safety.
+     * The result's support is as follows:
+     * <ul>
+     *     <li>capacity: in bounds of the buffer;</li>
+     *     <li>close: invoking has no effect;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
      *
      * @param buffer the given buffer
-     * @return the given buffer as an {@link OutputStream}
+     * @return the given buffer as a new {@link OutputStream}
      */
     public static @Nonnull OutputStream newOutputStream(@Nonnull ByteBuffer buffer) {
         return IOImpls.outputStream(buffer);
     }
 
     /**
-     * Wraps the given random access file as a new {@link OutputStream} from the specified file pointer offset. The
-     * {@code close()} method will close both the file and stream. Any operation to the file will affect the stream.
+     * Wraps the given random access file, starting at the specified file pointer offset, as a new
+     * {@link OutputStream}.
      * <p>
-     * Note the returned wrapper itself does not guarantee thread safety.
+     * The result's support is as follows:
+     * <ul>
+     *     <li>capacity:determined by the random access file;</li>
+     *     <li>close: closes the random access file;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
      *
-     * @param random the given random access file
-     * @param offset the specified file pointer offset
-     * @return the given random access file as an {@link OutputStream}
+     * @param raf the given random access file
+     * @param off the specified file pointer offset
+     * @return the given random access file as a new {@link OutputStream}
      * @throws IORuntimeException if an I/O error occurs
      */
     public static @Nonnull OutputStream newOutputStream(
-        @Nonnull RandomAccessFile random, long offset
+        @Nonnull RandomAccessFile raf, long off
     ) throws IORuntimeException {
-        return IOImpls.outputStream(random, offset);
+        return IOImpls.outputStream(raf, off);
     }
 
     /**
-     * Wraps the given appender as a new {@link OutputStream} with {@link JieChars#defaultCharset()}. The write position
-     * of the appender may not correspond to the position of the stream, and the {@code close()} method will close both
-     * the appender and stream at their current positions.
+     * Wraps the given appender as a new {@link OutputStream} with {@link JieChars#defaultCharset()}.
      * <p>
-     * Note the returned wrapper itself does not guarantee thread safety.
+     * The result's support is as follows:
+     * <ul>
+     *     <li>capacity:determined by the appender;</li>
+     *     <li>close: closes the appender;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
      *
      * @param appender the given appender
-     * @return the given appender as an {@link OutputStream}
+     * @return the given appender as a new {@link InputStream}
      */
     public static @Nonnull OutputStream newOutputStream(@Nonnull Appendable appender) {
         return newOutputStream(appender, JieChars.defaultCharset());
     }
 
     /**
-     * Wraps the given appender as a new {@link OutputStream} with the specified charset. The write position of the
-     * appender may not correspond to the position of the stream, and the {@code close()} method will close both the
-     * appender and stream at their current positions.
+     * Wraps the given appender as a new {@link OutputStream} with the specified charset.
      * <p>
-     * Note the returned wrapper itself does not guarantee thread safety.
+     * The result's support is as follows:
+     * <ul>
+     *     <li>capacity:determined by the appender;</li>
+     *     <li>close: closes the appender;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
      *
      * @param appender the given appender
      * @param charset  the specified charset
-     * @return the given appender as an {@link OutputStream}
+     * @return the given appender as a new {@link OutputStream}
      */
     public static @Nonnull OutputStream newOutputStream(@Nonnull Appendable appender, @Nonnull Charset charset) {
         return IOImpls.outputStream(appender, charset);
     }
 
     /**
-     * Wraps the given array as a new {@link Writer}. The {@code close()} method has no effect.
+     * Wraps the given array as a new {@link Writer}.
      * <p>
-     * Note the returned wrapper itself does not guarantee thread safety.
+     * The result's support is as follows:
+     * <ul>
+     *     <li>capacity: in bounds of the array;</li>
+     *     <li>close: invoking has no effect;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
      *
      * @param array the given array
-     * @return the given array as an {@link Writer}
+     * @return the given array as a new {@link Writer}
      */
     public static @Nonnull Writer newWriter(char @Nonnull [] array) {
         return IOImpls.writer(array);
     }
 
     /**
-     * Wraps the given array as a new {@link Writer} from the specified offset up to the specified length. The
-     * {@code close()} method has no effect.
+     * Wraps the given array, starting at the specified offset and up to the specified length, as a new {@link Writer}.
      * <p>
-     * Note the returned wrapper itself does not guarantee thread safety.
+     * The result's support is as follows:
+     * <ul>
+     *     <li>capacity: in specified bounds of the array;</li>
+     *     <li>close: invoking has no effect;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
      *
-     * @param array  the given array
-     * @param offset the specified offset
-     * @param length the specified length
-     * @return the given array as an {@link Writer}
+     * @param array the given array
+     * @param off   the specified offset
+     * @param len   the specified length
+     * @return the given array as a new {@link Writer}
      * @throws IndexOutOfBoundsException if the array arguments are out of bounds
      */
     public static @Nonnull Writer newWriter(
-        char @Nonnull [] array, int offset, int length
+        char @Nonnull [] array, int off, int len
     ) throws IndexOutOfBoundsException {
-        return IOImpls.writer(array, offset, length);
+        return IOImpls.writer(array, off, len);
     }
 
     /**
-     * Wraps the given buffer as a new {@link Writer}. The {@code close()} method has no effect.
+     * Wraps the given buffer as a new {@link Writer}.
      * <p>
-     * Note the returned wrapper itself does not guarantee thread safety.
+     * The result's support is as follows:
+     * <ul>
+     *     <li>capacity: in bounds of the buffer;</li>
+     *     <li>close: invoking has no effect;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
      *
      * @param buffer the given buffer
-     * @return the given array as an {@link Writer}
+     * @return the given buffer as a new {@link Writer}
      */
     public static @Nonnull Writer newWriter(@Nonnull CharBuffer buffer) {
         return IOImpls.writer(buffer);
     }
 
     /**
-     * Wraps the given stream as a new {@link Writer} with {@link JieChars#defaultCharset()}. The write position of the
-     * stream may not correspond to the position of the writer, and the {@code close()} method will close both the
-     * stream and writer at their current positions.
+     * Wraps the given stream as a new {@link Writer} with {@link JieChars#defaultCharset()}.
      * <p>
-     * Note the returned wrapper itself does not guarantee thread safety.
+     * The result's support is as follows:
+     * <ul>
+     *     <li>capacity:determined by the stream;</li>
+     *     <li>close: closes the stream;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
      *
      * @param stream the given stream
-     * @return the given appender as an {@link Writer}
+     * @return the given stream as a new {@link InputStream}
      */
     public static @Nonnull Writer newWriter(@Nonnull OutputStream stream) {
         return newWriter(stream, JieChars.defaultCharset());
     }
 
     /**
-     * Wraps the given stream as a new {@link Writer} with the specified charset. The write position of the stream may
-     * not correspond to the position of the writer, and the {@code close()} method will close both the stream and
-     * writer at their current positions.
+     * Wraps the given stream as a new {@link Writer} with the specified charset.
      * <p>
-     * Note the returned wrapper itself does not guarantee thread safety.
+     * The result's support is as follows:
+     * <ul>
+     *     <li>capacity:determined by the stream;</li>
+     *     <li>close: closes the stream;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
      *
      * @param stream  the given stream
      * @param charset the specified charset
-     * @return the given appender as an {@link Writer}
+     * @return the given stream as a new {@link Writer}
      */
     public static @Nonnull Writer newWriter(@Nonnull OutputStream stream, @Nonnull Charset charset) {
         return IOImpls.writer(stream, charset);
     }
 
     /**
-     * Returns an empty {@link InputStream}.
+     * Returns a singleton empty {@link InputStream}.
      *
-     * @return an empty {@link InputStream}
+     * @return a singleton empty {@link InputStream}
      */
     public static @Nonnull InputStream emptyInputStream() {
         return IOImpls.emptyInputStream();
     }
 
     /**
-     * Returns an empty {@link Reader}.
+     * Returns a singleton empty {@link Reader}.
      *
-     * @return an empty {@link Reader}
+     * @return a singleton empty {@link Reader}
      */
     public static @Nonnull Reader emptyReader() {
         return IOImpls.emptyReader();
     }
 
     /**
-     * Returns an {@link OutputStream} that infinitely accepts data but immediately discards them.
+     * Returns a singleton {@link OutputStream} which supports writing infinitely data but immediately discards them.
      *
-     * @return an {@link OutputStream} that infinitely accepts data but immediately discards them
+     * @return a singleton {@link OutputStream} which supports writing infinitely data but immediately discards them.
      */
     public static @Nonnull OutputStream nullOutputStream() {
         return IOImpls.nullOutputStream();
     }
 
     /**
-     * Returns an {@link Writer} that infinitely accepts data but immediately discards them.
+     * Returns a singleton {@link Writer} which supports writing infinitely data but immediately discards them.
      *
-     * @return an {@link Writer} that infinitely accepts data but immediately discards them
+     * @return a singleton {@link Writer} which supports writing infinitely data but immediately discards them.
      */
     public static @Nonnull Writer nullWriter() {
         return IOImpls.nullWriter();

@@ -9,15 +9,18 @@
  * <p>
  * Core Interfaces:
  * <ul>
- *     <li>{@link xyz.sunqian.common.io.ByteReaderX}</li>
+ *     <li>{@link xyz.sunqian.common.io.ByteReader}</li>
+ *     <li>{@link xyz.sunqian.common.io.CharReader}</li>
  *     <li>{@link xyz.sunqian.common.io.ByteSegment}</li>
- *     <li>{@link xyz.sunqian.common.io.CharReaderX}</li>
  *     <li>{@link xyz.sunqian.common.io.CharSegment}</li>
  * </ul>
  * <p>
- * Skeletal implementations:
+ * Convenient implementations:
  * <ul>
- *     <li>{@link xyz.sunqian.common.io.AbstractWriter}</li>
+ *     <li>{@link xyz.sunqian.common.io.DoReadStream}</li>
+ *     <li>{@link xyz.sunqian.common.io.DoReadReader}</li>
+ *     <li>{@link xyz.sunqian.common.io.DoWriteStream}</li>
+ *     <li>{@link xyz.sunqian.common.io.DoWriteWriter}</li>
  * </ul>
  */
 package xyz.sunqian.common.io;

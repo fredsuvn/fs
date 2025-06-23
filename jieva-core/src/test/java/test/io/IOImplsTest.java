@@ -1,16 +1,21 @@
 package test.io;
 
 import org.testng.annotations.Test;
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.chars.CharsBuilder;
 import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.base.value.IntVar;
+import xyz.sunqian.common.io.DoReadReader;
+import xyz.sunqian.common.io.DoReadStream;
+import xyz.sunqian.common.io.DoWriteStream;
+import xyz.sunqian.common.io.DoWriteWriter;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieIO;
 
 import java.io.ByteArrayInputStream;
 import java.io.CharArrayReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -717,14 +722,14 @@ public class IOImplsTest {
             char[] chars = JieRandom.fill(new char[dataSize], '0', '9');
             byte[] charBytes = new String(chars).getBytes(JieChars.UTF_8);
             Writer out = JieIO.newWriter(builder);
-            testWriter(out, chars, false, false);
+            testWriter(out, chars, false, true);
             assertEquals(builder.toByteArray(), charBytes);
             // chinese: '\u4e00' - '\u9fff'
             builder.reset();
             chars = JieRandom.fill(new char[dataSize], '\u4e00', '\u4e01');
             charBytes = new String(chars).getBytes(JieChars.UTF_8);
             out = JieIO.newWriter(builder);
-            testWriter(out, chars, false, false);
+            testWriter(out, chars, false, true);
             assertEquals(builder.toByteArray(), charBytes);
             // emoji: "\uD83D\uDD1E"
             builder.reset();
@@ -734,7 +739,7 @@ public class IOImplsTest {
             }
             charBytes = new String(chars).getBytes(JieChars.UTF_8);
             out = JieIO.newWriter(builder);
-            testWriter(out, chars, false, false);
+            testWriter(out, chars, false, true);
             assertEquals(builder.toByteArray(), charBytes);
             // error: U+DD88
             builder.reset();
@@ -830,19 +835,123 @@ public class IOImplsTest {
     }
 
     @Test
-    public void testEmptyAndNull() throws Exception {
-        assertEquals(JieIO.emptyInputStream().read(), -1);
-        assertEquals(JieIO.emptyReader().read(), -1);
-        JieIO.emptyReader().close();
+    public void testSpecial() throws Exception {
         assertSame(JieIO.emptyInputStream(), JieIO.emptyInputStream());
         assertSame(JieIO.emptyReader(), JieIO.emptyReader());
-        JieIO.nullOutputStream().write(JieRandom.fill(new byte[10086]));
-        JieIO.nullOutputStream().close();
-        JieIO.nullWriter().write(JieRandom.fill(new char[10086]));
-        JieIO.nullWriter().close();
         assertSame(JieIO.nullOutputStream(), JieIO.nullOutputStream());
         assertSame(JieIO.nullWriter(), JieIO.nullWriter());
-        JieIO.nullWriter().flush();
+    }
+
+    @Test
+    public void testDoImpls() throws Exception {
+        {
+            class In extends DoReadStream {
+
+                @Override
+                protected int doRead(byte @Nonnull [] b, int off, int len) {
+                    return 8;
+                }
+
+                @Override
+                public int read() {
+                    return 0;
+                }
+            }
+            assertEquals(new In().read(new byte[1]), 8);
+            assertEquals(new In().read(new byte[1], 0, 1), 8);
+            expectThrows(IndexOutOfBoundsException.class, () -> new In().read(new byte[1], 0, -1));
+            expectThrows(IndexOutOfBoundsException.class, () -> new In().read(new byte[1], -1, 1));
+            expectThrows(IndexOutOfBoundsException.class, () -> new In().read(new byte[1], 0, 2));
+        }
+        {
+            class In extends DoReadReader {
+
+                @Override
+                protected int doRead(char @Nonnull [] b, int off, int len) {
+                    return 8;
+                }
+
+                @Override
+                public int read() {
+                    return 0;
+                }
+
+                @Override
+                public void close() {
+                }
+            }
+            assertEquals(new In().read(new char[1]), 8);
+            assertEquals(new In().read(new char[1], 0, 1), 8);
+            expectThrows(IndexOutOfBoundsException.class, () -> new In().read(new char[1], 0, -1));
+            expectThrows(IndexOutOfBoundsException.class, () -> new In().read(new char[1], -1, 1));
+            expectThrows(IndexOutOfBoundsException.class, () -> new In().read(new char[1], 0, 2));
+        }
+        {
+            IntVar v = IntVar.of(0);
+            class Out extends DoWriteStream {
+
+                @Override
+                protected void doWrite(byte @Nonnull [] b, int off, int len) {
+                    v.set(8);
+                }
+
+                @Override
+                public void write(int b) {
+                }
+            }
+            new Out().write(new byte[1]);
+            assertEquals(v.get(), 8);
+            v.set(0);
+            new Out().write(new byte[1], 0, 1);
+            assertEquals(v.get(), 8);
+            expectThrows(IndexOutOfBoundsException.class, () -> new Out().write(new byte[1], 0, -1));
+            expectThrows(IndexOutOfBoundsException.class, () -> new Out().write(new byte[1], -1, 1));
+            expectThrows(IndexOutOfBoundsException.class, () -> new Out().write(new byte[1], 0, 2));
+        }
+        {
+            IntVar v = IntVar.of(0);
+            class Out extends DoWriteWriter {
+
+                @Override
+                protected void doWrite(char @Nonnull [] b, int off, int len) {
+                    v.set(8);
+                }
+
+                @Override
+                protected void doWrite(@Nonnull String str, int off, int len) {
+                    v.set(8);
+                }
+
+                @Override
+                public void write(int b) {
+                }
+
+                @Override
+                public void flush() {
+                }
+
+                @Override
+                public void close() {
+                }
+            }
+            new Out().write(new char[1]);
+            assertEquals(v.get(), 8);
+            v.set(0);
+            new Out().write(new char[1], 0, 1);
+            assertEquals(v.get(), 8);
+            expectThrows(IndexOutOfBoundsException.class, () -> new Out().write(new char[1], 0, -1));
+            expectThrows(IndexOutOfBoundsException.class, () -> new Out().write(new char[1], -1, 1));
+            expectThrows(IndexOutOfBoundsException.class, () -> new Out().write(new char[1], 0, 2));
+            v.set(0);
+            new Out().write("1");
+            assertEquals(v.get(), 8);
+            v.set(0);
+            new Out().write("1", 0, 1);
+            assertEquals(v.get(), 8);
+            expectThrows(IndexOutOfBoundsException.class, () -> new Out().write("1", 0, -1));
+            expectThrows(IndexOutOfBoundsException.class, () -> new Out().write("1", -1, 1));
+            expectThrows(IndexOutOfBoundsException.class, () -> new Out().write("1", 0, 2));
+        }
     }
 
     private static final class FakeFile extends RandomAccessFile {
@@ -1033,205 +1142,6 @@ public class IOImplsTest {
                     return true;
                 }
             };
-        }
-    }
-
-    private static final class FakeRandomFile extends RandomAccessFile {
-
-        private static boolean SEEK_ERR = false;
-
-        private int seek = 0;
-        private final byte[] data;
-        private volatile InputStream in;
-        private volatile OutputStream out;
-        private boolean close = false;
-
-        public FakeRandomFile(File name, String mode, byte[] data) throws IOException {
-            super(name, mode);
-            this.data = data;
-        }
-
-        private InputStream getIn() {
-            if (in == null) {
-                in = JieIO.newInputStream(data, seek, data.length - seek);
-            }
-            return in;
-        }
-
-        @Override
-        public int read() throws IOException {
-            checkClose();
-            int result = getIn().read();
-            if (result >= 0) {
-                seek++;
-            }
-            return result;
-        }
-
-        @Override
-        public int read(byte[] b, int off, int len) throws IOException {
-            checkClose();
-            int result = getIn().read(b, off, len);
-            if (result >= 0) {
-                seek += result;
-            }
-            return result;
-        }
-
-        @Override
-        public long getFilePointer() throws IOException {
-            checkClose();
-            return seek;
-        }
-
-        @Override
-        public void seek(long pos) throws IOException {
-            if (SEEK_ERR) {
-                throw new IOException();
-            }
-            checkClose();
-            this.seek = (int) pos;
-            this.in = null;
-            this.out = null;
-        }
-
-        @Override
-        public long length() throws IOException {
-            checkClose();
-            return data.length;
-        }
-
-        private OutputStream getOut() {
-            if (out == null) {
-                out = JieIO.newOutputStream(data, seek, data.length - seek);
-            }
-            return out;
-        }
-
-        @Override
-        public void write(int b) throws IOException {
-            checkClose();
-            getOut().write(b);
-        }
-
-        @Override
-        public void write(byte[] b, int off, int len) throws IOException {
-            checkClose();
-            getOut().write(b, off, len);
-        }
-
-        @Override
-        public void close() throws IOException {
-            close = true;
-        }
-
-        private void checkClose() throws IOException {
-            if (close) {
-                throw new IOException("Stream closed.");
-            }
-        }
-    }
-
-    private static final class FakeCharset extends Charset {
-
-        private final int num;
-
-        private FakeCharset(int num) {
-            super("fake", new String[0]);
-            this.num = num;
-        }
-
-        @Override
-        public boolean contains(Charset cs) {
-            return false;
-        }
-
-        @Override
-        public CharsetDecoder newDecoder() {
-            return new FakeCharsetDecoder(this, 1f, 1f);
-        }
-
-        @Override
-        public CharsetEncoder newEncoder() {
-            return null;
-        }
-
-        private final class FakeCharsetDecoder extends CharsetDecoder {
-
-            private FakeCharsetDecoder(Charset cs, float averageCharsPerByte, float maxCharsPerByte) {
-                super(cs, averageCharsPerByte, maxCharsPerByte);
-            }
-
-            @Override
-            protected CoderResult decodeLoop(ByteBuffer in, CharBuffer out) {
-                while (in.hasRemaining()) {
-                    if (out.remaining() >= 2) {
-                        byte b = in.get();
-                        for (int i = 0; i < num; i++) {
-                            out.put((char) b);
-                        }
-                    } else {
-                        return CoderResult.OVERFLOW;
-                    }
-                }
-                return CoderResult.UNDERFLOW;
-            }
-        }
-    }
-
-    private static final class AutoCloseAppender implements Appendable, AutoCloseable {
-
-        private int err = 0;
-
-        @Override
-        public Appendable append(CharSequence csq) throws IOException {
-            return null;
-        }
-
-        @Override
-        public Appendable append(CharSequence csq, int start, int end) throws IOException {
-            return null;
-        }
-
-        @Override
-        public Appendable append(char c) throws IOException {
-            switch (err) {
-                case 1:
-                    throw new IOException();
-                case 2:
-                    throw new IllegalStateException();
-                default:
-                    return null;
-            }
-        }
-
-        @Override
-        public void close() throws Exception {
-            switch (err) {
-                case 1:
-                    throw new IOException();
-                case 2:
-                    throw new IllegalStateException();
-                default:
-            }
-        }
-    }
-
-    private static final class OnlyAppender implements Appendable {
-
-        @Override
-        public Appendable append(CharSequence csq) throws IOException {
-            return null;
-        }
-
-        @Override
-        public Appendable append(CharSequence csq, int start, int end) throws IOException {
-            return null;
-        }
-
-        @Override
-        public Appendable append(char c) throws IOException {
-            return null;
         }
     }
 }
