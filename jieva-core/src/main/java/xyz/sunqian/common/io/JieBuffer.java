@@ -1,6 +1,7 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.common.base.JieCheck;
 import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.collect.JieArray;
 
@@ -10,9 +11,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.CharBuffer;
 import java.nio.ReadOnlyBufferException;
+import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
-
-import static xyz.sunqian.common.base.JieCheck.checkOffsetLength;
 
 /**
  * Static utility class for {@link Buffer}.
@@ -50,46 +50,309 @@ public class JieBuffer {
     }
 
     /**
-     * Reads all data from the source buffer into a new array, continuing until the end of the buffer, and returns the
-     * array.
+     * Reads all data from the source buffer into a new array, continuing until reaches the end of the buffer, and
+     * returns the array. If the end of the source buffer has already been reached, returns {@code null}.
+     * <p>
+     * The buffer's position increments by the actual read number.
      *
-     * @param source the source buffer
+     * @param src the source buffer
      * @return the array containing the data
      */
-    public static byte @Nonnull [] read(@Nonnull ByteBuffer source) {
-        int length = source.remaining();
-        if (length <= 0) {
+    public static byte @Nonnull [] read(@Nonnull ByteBuffer src) {
+        int len = src.remaining();
+        if (len == 0) {
             return new byte[0];
         }
-        byte[] result = new byte[length];
-        source.get(result);
+        byte[] result = new byte[len];
+        src.get(result);
         return result;
     }
 
     /**
-     * Reads the specified number of data from the source buffer into a new array, and returns the array. If
-     * {@code number < 0}, this method performs as {@link #read(ByteBuffer)}. If {@code number == 0}, returns an empty
-     * array without reading. Otherwise, this method keeps reading until the read number reaches the specified number or
-     * the end of the buffer has been reached.
+     * Reads the data of the specified length from the source buffer into a new array, and returns the array. If the
+     * specified length {@code = 0}, returns an empty array without reading. Otherwise, this method keeps reading until
+     * the read number reaches the specified length or reaches the end of the buffer. If the end of the source buffer
+     * has already been reached, returns {@code null}.
+     * <p>
+     * The buffer's position increments by the actual read number.
      *
-     * @param source the source buffer
-     * @param number the specified number
+     * @param src the source buffer
+     * @param len the specified read length, must {@code >= 0}
      * @return the array containing the data
+     * @throws IllegalArgumentException if the specified read length is illegal
      */
-    public static byte @Nonnull [] read(@Nonnull ByteBuffer source, int number) {
-        if (!source.hasRemaining()) {
+    public static byte @Nonnull [] read(@Nonnull ByteBuffer src, int len) {
+        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        if (!src.hasRemaining()) {
             return new byte[0];
         }
-        if (number < 0) {
-            return read(source);
-        }
-        if (number == 0) {
+        if (len == 0) {
             return new byte[0];
         }
-        int length = Math.min(number, source.remaining());
-        byte[] result = new byte[length];
-        source.get(result);
+        int actualLen = Math.min(len, src.remaining());
+        byte[] result = new byte[actualLen];
+        src.get(result);
         return result;
+    }
+
+    /**
+     * Reads the data from the source buffer into the specified array, until the read number reaches the array's length
+     * or reaches the end of the source buffer, returns the actual number of bytes read to.
+     * <p>
+     * If the array's length {@code = 0}, returns {@code 0} without reading. If the end of the source buffer has already
+     * been reached, returns {@code -1}.
+     * <p>
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the specified array
+     * @return the actual number of bytes read
+     */
+    public static int readTo(@Nonnull ByteBuffer src, byte @Nonnull [] dst) {
+        return readTo0(src, dst, 0, dst.length);
+    }
+
+    /**
+     * Reads the data from the source buffer into the specified array (starting at the specified offset and up to the
+     * specified length), until the read number reaches the specified length or reaches the end of the source buffer,
+     * returns the actual number of bytes read to.
+     * <p>
+     * If the specified length {@code = 0}, returns {@code 0} without reading. If the end of the source buffer has
+     * already been reached, returns {@code -1}.
+     * <p>
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the specified array
+     * @param off the specified offset of the array
+     * @param len the specified length to read
+     * @return the actual number of bytes read
+     * @throws IndexOutOfBoundsException if the array arguments are out of bounds
+     */
+    public static int readTo(
+        @Nonnull ByteBuffer src, byte @Nonnull [] dst, int off, int len
+    ) throws IndexOutOfBoundsException {
+        JieCheck.checkOffsetLength(dst.length, off, len);
+        return readTo0(src, dst, off, len);
+    }
+
+    private static int readTo0(
+        @Nonnull ByteBuffer src, byte @Nonnull [] dst, int off, int len
+    ) throws IndexOutOfBoundsException {
+        if (len == 0) {
+            return 0;
+        }
+        if (!src.hasRemaining()) {
+            return -1;
+        }
+        int actualLen = Math.min(len, src.remaining());
+        src.get(dst, off, actualLen);
+        return actualLen;
+    }
+
+    /**
+     * Reads the data from the source buffer into the specified buffer, until the read number reaches the buffer's
+     * remaining or reaches the end of the source buffer, returns the actual number of bytes read to.
+     * <p>
+     * If the buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the source buffer has
+     * already been reached, returns {@code -1}.
+     * <p>
+     * The buffer's positions increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the specified buffer
+     * @return the actual number of bytes read
+     */
+    public static int readTo(@Nonnull ByteBuffer src, @Nonnull ByteBuffer dst) {
+        if (!dst.hasRemaining()) {
+            return 0;
+        }
+        if (!src.hasRemaining()) {
+            return -1;
+        }
+        int actualLen = Math.min(src.remaining(), dst.remaining());
+        if (src.remaining() <= dst.remaining()) {
+            dst.put(src);
+        } else {
+            ByteBuffer srcSlice = slice0(src, 0, dst.remaining());
+            dst.put(srcSlice);
+            src.position(src.position() + actualLen);
+        }
+        return actualLen;
+    }
+
+    /**
+     * Reads the data of the specified length from the source buffer into the specified buffer, until the read number
+     * reaches the buffer's remaining or reaches the end of the source buffer, returns the actual number of bytes read
+     * to.
+     * <p>
+     * If the specified length or buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the
+     * source buffer has already been reached, returns {@code -1}.
+     * <p>
+     * The buffer's positions increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the specified buffer
+     * @param len the specified length, must {@code >= 0}
+     * @return the actual number of bytes read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     */
+    public static int readTo(@Nonnull ByteBuffer src, @Nonnull ByteBuffer dst, int len) {
+        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        if (len == 0) {
+            return 0;
+        }
+        if (!dst.hasRemaining()) {
+            return 0;
+        }
+        if (!src.hasRemaining()) {
+            return -1;
+        }
+        int actualLen = Math.min(src.remaining(), dst.remaining());
+        actualLen = Math.min(len, actualLen);
+        ByteBuffer srcBuf;
+        if (src.remaining() > actualLen) {
+            srcBuf = slice0(src, 0, actualLen);
+        } else {
+            srcBuf = src;
+        }
+        dst.put(srcBuf);
+        if (srcBuf != src) {
+            src.position(src.position() + actualLen);
+        }
+        return actualLen;
+    }
+
+    /**
+     * Reads the data from the source buffer into the specified channel, until the read number reaches the buffer's
+     * remaining or reaches the end of the source buffer, returns the actual number of bytes read to.
+     * <p>
+     * If the buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the source buffer has
+     * already been reached, returns {@code -1}.
+     * <p>
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the specified channel
+     * @return the actual number of bytes read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static int readTo(@Nonnull ByteBuffer src, @Nonnull WritableByteChannel dst) throws IORuntimeException {
+        return readTo0(src, dst, -1);
+    }
+
+    /**
+     * Reads the data of the specified length from the source buffer into the specified channel, until the read number
+     * reaches the buffer's remaining or reaches the end of the source buffer, returns the actual number of bytes read
+     * to.
+     * <p>
+     * If the specified length or buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the
+     * source buffer has already been reached, returns {@code -1}.
+     * <p>
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the specified channel
+     * @param len the specified length, must {@code >= 0}
+     * @return the actual number of bytes read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static int readTo(
+        @Nonnull ByteBuffer src, @Nonnull WritableByteChannel dst, int len
+    ) throws IORuntimeException {
+        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        return readTo0(src, dst, len);
+    }
+
+    private static int readTo0(
+        @Nonnull ByteBuffer src, @Nonnull WritableByteChannel dst, int len
+    ) throws IndexOutOfBoundsException, IORuntimeException {
+        if (len == 0) {
+            return 0;
+        }
+        if (src.remaining() == 0) {
+            return -1;
+        }
+        try {
+            int actualLen = len < 0 ? src.remaining() : Math.min(src.remaining(), len);
+            int oldLimit = src.limit();
+            src.limit(src.position() + actualLen);
+            while (src.remaining() > 0) {
+                dst.write(src);
+            }
+            src.limit(oldLimit);
+            return actualLen;
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    /**
+     * Reads the data from the source buffer into the specified stream, until the read number reaches the buffer's
+     * remaining or reaches the end of the source buffer, returns the actual number of bytes read to.
+     * <p>
+     * If the buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the source buffer has
+     * already been reached, returns {@code -1}.
+     * <p>
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the specified stream
+     * @return the actual number of bytes read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static int readTo(@Nonnull ByteBuffer src, @Nonnull OutputStream dst) throws IORuntimeException {
+        return readTo0(src, dst, -1);
+    }
+
+    /**
+     * Reads the data of the specified length from the source buffer into the specified stream, until the read number
+     * reaches the buffer's remaining or reaches the end of the source buffer, returns the actual number of bytes read
+     * to.
+     * <p>
+     * If the specified length or buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the
+     * source buffer has already been reached, returns {@code -1}.
+     * <p>
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the specified stream
+     * @param len the specified length, must {@code >= 0}
+     * @return the actual number of bytes read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static int readTo(
+        @Nonnull ByteBuffer src, @Nonnull OutputStream dst, long len
+    ) throws IORuntimeException {
+        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        return readTo0(src, dst, len);
+    }
+
+    private static int readTo0(
+        @Nonnull ByteBuffer src, @Nonnull OutputStream dst, long len
+    ) throws IndexOutOfBoundsException, IORuntimeException {
+        if (len == 0) {
+            return 0;
+        }
+        if (src.remaining() == 0) {
+            return -1;
+        }
+        try {
+            int actualLen = len < 0 ? src.remaining() : (int) Math.min(src.remaining(), len);
+            if (src.hasArray()) {
+                dst.write(src.array(), JieBuffer.arrayStartIndex(src), actualLen);
+                src.position(src.position() + actualLen);
+            } else {
+                byte[] buf = new byte[actualLen];
+                src.get(buf);
+                dst.write(buf);
+            }
+            return actualLen;
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
     }
 
     /**
@@ -191,53 +454,6 @@ public class JieBuffer {
 
     /**
      * Reads data from the source buffer into the specified array until the array is completely filled or the end of the
-     * buffer is reached. Returns the actual number of bytes read.
-     *
-     * @param source the source buffer
-     * @param dest   the specified array
-     * @return the actual number of bytes read
-     * @throws IORuntimeException if an I/O error occurs
-     */
-    public static int readTo(@Nonnull ByteBuffer source, byte @Nonnull [] dest) throws IORuntimeException {
-        return (int) ByteProcessor.from(source).readLimit(dest.length).writeTo(dest);
-    }
-
-    /**
-     * Reads data from the source buffer into the dest buffer until the dest buffer is completely filled or the end of
-     * the source buffer is reached. Returns the actual number of bytes read.
-     *
-     * @param source the source buffer
-     * @param dest   the dest buffer
-     * @return the actual number of bytes read
-     * @throws IORuntimeException if an I/O error occurs
-     */
-    public static int readTo(@Nonnull ByteBuffer source, @Nonnull ByteBuffer dest) throws IORuntimeException {
-        int limit = Math.min(source.remaining(), dest.remaining());
-        if (limit <= 0) {
-            return 0;
-        }
-        int srcLimit = source.limit();
-        source.limit(source.position() + limit);
-        dest.put(source);
-        source.limit(srcLimit);
-        return limit;
-    }
-
-    /**
-     * Reads data from the source buffer into the specified output buffer until the end of the source buffer is reached.
-     * Returns the actual number of bytes read.
-     *
-     * @param source the source buffer
-     * @param dest   the specified output buffer
-     * @return the actual number of bytes read
-     * @throws IORuntimeException if an I/O error occurs
-     */
-    public static long readTo(@Nonnull ByteBuffer source, @Nonnull OutputStream dest) throws IORuntimeException {
-        return ByteProcessor.from(source).writeTo(dest);
-    }
-
-    /**
-     * Reads data from the source buffer into the specified array until the array is completely filled or the end of the
      * buffer is reached. Returns the actual number of chars read.
      *
      * @param source the source buffer
@@ -285,7 +501,7 @@ public class JieBuffer {
 
     /**
      * Creates a new buffer whose content is a shared subsequence of the given buffer's content. The content of the new
-     * buffer will start at the given buffer's current position, and extends for the specified length.
+     * buffer will start at the given buffer's current position, and up to the specified length.
      * <p>
      * Changes to the given buffer's content will be visible in the new buffer, and vice versa. The new buffer's
      * position will be zero, its capacity and limit will be the specified length. The new buffer will be direct if, and
@@ -293,18 +509,19 @@ public class JieBuffer {
      * <p>
      * The position and limit of the given buffer will not be changed.
      *
-     * @param buffer the given buffer
-     * @param length the specified length
+     * @param src the given buffer
+     * @param len the specified length
      * @return a new buffer whose content is a shared subsequence of the given buffer's content
-     * @throws IndexOutOfBoundsException if the offset and length is out of bounds
+     * @throws IllegalArgumentException if the specified read length is illegal
      */
-    public static @Nonnull ByteBuffer slice(@Nonnull ByteBuffer buffer, int length) throws IndexOutOfBoundsException {
-        return slice(buffer, 0, length);
+    public static @Nonnull ByteBuffer slice(@Nonnull ByteBuffer src, int len) throws IllegalArgumentException {
+        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        return slice0(src, 0, len);
     }
 
     /**
      * Creates a new buffer whose content is a shared subsequence of the given buffer's content. The content of the new
-     * buffer will start at the specified offset from the given buffer's current position, and extends for the specified
+     * buffer will start at the specified offset from the given buffer's current position, and up to the specified
      * length.
      * <p>
      * Changes to the given buffer's content will be visible in the new buffer, and vice versa. The new buffer's
@@ -313,29 +530,33 @@ public class JieBuffer {
      * <p>
      * The position and limit of the given buffer will not be changed.
      *
-     * @param buffer the given buffer
-     * @param offset the specified offset
-     * @param length the specified length
+     * @param src the given buffer
+     * @param off the specified offset
+     * @param len the specified length
      * @return a new buffer whose content is a shared subsequence of the given buffer's content
      * @throws IndexOutOfBoundsException if the offset and length is out of bounds
      */
     public static @Nonnull ByteBuffer slice(
-        @Nonnull ByteBuffer buffer, int offset, int length
+        @Nonnull ByteBuffer src, int off, int len
     ) throws IndexOutOfBoundsException {
-        checkOffsetLength(buffer.remaining(), offset, length);
-        int pos = buffer.position();
-        int limit = buffer.limit();
-        buffer.position(pos + offset);
-        buffer.limit(pos + offset + length);
-        ByteBuffer slice = buffer.slice();
-        buffer.position(pos);
-        buffer.limit(limit);
+        JieCheck.checkOffsetLength(src.remaining(), off, len);
+        return slice0(src, off, len);
+    }
+
+    private static @Nonnull ByteBuffer slice0(@Nonnull ByteBuffer src, int off, int len) {
+        int pos = src.position();
+        int limit = src.limit();
+        src.position(pos + off);
+        src.limit(pos + off + len);
+        ByteBuffer slice = src.slice();
+        src.position(pos);
+        src.limit(limit);
         return slice;
     }
 
     /**
      * Creates a new buffer whose content is a shared subsequence of the given buffer's content. The content of the new
-     * buffer will start at the given buffer's current position, and extends for the specified length.
+     * buffer will start at the given buffer's current position, and up to the specified length.
      * <p>
      * Changes to the given buffer's content will be visible in the new buffer, and vice versa. The new buffer's
      * position will be zero, its capacity and limit will be the specified length. The new buffer will be direct if, and
@@ -343,18 +564,19 @@ public class JieBuffer {
      * <p>
      * The position and limit of the given buffer will not be changed.
      *
-     * @param buffer the given buffer
-     * @param length the specified length
+     * @param src the given buffer
+     * @param len the specified length
      * @return a new buffer whose content is a shared subsequence of the given buffer's content
-     * @throws IndexOutOfBoundsException if the offset and length is out of bounds
+     * @throws IllegalArgumentException if the specified read length is illegal
      */
-    public static @Nonnull CharBuffer slice(@Nonnull CharBuffer buffer, int length) throws IndexOutOfBoundsException {
-        return slice(buffer, 0, length);
+    public static @Nonnull CharBuffer slice(@Nonnull CharBuffer src, int len) throws IllegalArgumentException {
+        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        return slice0(src, 0, len);
     }
 
     /**
      * Creates a new buffer whose content is a shared subsequence of the given buffer's content. The content of the new
-     * buffer will start at the specified offset from the given buffer's current position, and extends for the specified
+     * buffer will start at the specified offset from the given buffer's current position, and up to the specified
      * length.
      * <p>
      * Changes to the given buffer's content will be visible in the new buffer, and vice versa. The new buffer's
@@ -363,26 +585,40 @@ public class JieBuffer {
      * <p>
      * The position and limit of the given buffer will not be changed.
      *
-     * @param buffer the given buffer
-     * @param offset the specified offset
-     * @param length the specified length
+     * @param src the given buffer
+     * @param off the specified offset
+     * @param len the specified length
      * @return a new buffer whose content is a shared subsequence of the given buffer's content
      * @throws IndexOutOfBoundsException if the offset and length is out of bounds
      */
     public static @Nonnull CharBuffer slice(
-        @Nonnull CharBuffer buffer, int offset, int length
+        @Nonnull CharBuffer src, int off, int len
     ) throws IndexOutOfBoundsException {
-        checkOffsetLength(buffer.remaining(), offset, length);
-        int pos = buffer.position();
-        int limit = buffer.limit();
-        buffer.position(pos + offset);
-        buffer.limit(pos + offset + length);
-        CharBuffer slice = buffer.slice();
-        buffer.position(pos);
-        buffer.limit(limit);
+        JieCheck.checkOffsetLength(src.remaining(), off, len);
+        return slice0(src, off, len);
+    }
+
+    private static @Nonnull CharBuffer slice0(@Nonnull CharBuffer src, int off, int len) {
+        int pos = src.position();
+        int limit = src.limit();
+        src.position(pos + off);
+        src.limit(pos + off + len);
+        CharBuffer slice = src.slice();
+        src.position(pos);
+        src.limit(limit);
         return slice;
     }
 
+    /**
+     * Returns a new buffer copied from the given source buffer. The content of the new buffer is independent and copied
+     * from {@code 0} to {@code src.capacity()} (not {@code src.position()} to {@code src.limit()}).
+     * <p>
+     * The new buffer's position, limit and capacity are same with the source buffer's, and the new buffer is direct if,
+     * and only if, the source buffer is direct.
+     *
+     * @param src the given source buffer
+     * @return a new buffer copied from the given source buffer
+     */
     public static @Nonnull ByteBuffer copy(@Nonnull ByteBuffer src) {
         ByteBuffer dst = src.isDirect() ?
             ByteBuffer.allocateDirect(src.capacity())
@@ -400,6 +636,16 @@ public class JieBuffer {
         return dst;
     }
 
+    /**
+     * Returns a new buffer copied from the given source buffer. The content of the new buffer is independent and copied
+     * from {@code 0} to {@code src.capacity()} (not {@code src.position()} to {@code src.limit()}).
+     * <p>
+     * The new buffer's position, limit and capacity are same with the source buffer's, and the new buffer is direct if,
+     * and only if, the source buffer is direct.
+     *
+     * @param src the given source buffer
+     * @return a new buffer copied from the given source buffer
+     */
     public static @Nonnull CharBuffer copy(@Nonnull CharBuffer src) {
         CharBuffer dst = src.isDirect() ?
             directBuffer(src.capacity())
@@ -417,6 +663,86 @@ public class JieBuffer {
         return dst;
     }
 
+    /**
+     * Returns a new direct buffer of which content is copied from the given array.
+     * <p>
+     * Returned buffer's position is {@code 0}, limit and capacity are same with the array's length.
+     *
+     * @param src the given array
+     * @return a new direct buffer of which content is copied from the given array
+     */
+    public static @Nonnull ByteBuffer directBuffer(byte @Nonnull [] src) {
+        ByteBuffer buf = ByteBuffer.allocateDirect(src.length);
+        buf.put(src);
+        buf.flip();
+        return buf;
+    }
+
+    /**
+     * Returns a new direct buffer of which content is copied from the given array (starting at the specified offset and
+     * up to the specified length).
+     * <p>
+     * Returned buffer's position is {@code 0}, limit and capacity are same with the specified length.
+     *
+     * @param src the given array
+     * @param off the specified offset of the array
+     * @param len the specified length to read
+     * @return a new direct buffer of which content is copied from the given array
+     */
+    public static @Nonnull ByteBuffer directBuffer(
+        byte @Nonnull [] src, int off, int len
+    ) throws IndexOutOfBoundsException {
+        JieCheck.checkOffsetLength(src.length, off, len);
+        ByteBuffer buf = ByteBuffer.allocateDirect(len);
+        buf.put(src, off, len);
+        buf.flip();
+        return buf;
+    }
+
+    /**
+     * Returns a new direct buffer of which content is copied from the given array.
+     * <p>
+     * Returned buffer's position is {@code 0}, limit and capacity are same with the array's length.
+     *
+     * @param src the given array
+     * @return a new direct buffer of which content is copied from the given array
+     */
+    public static @Nonnull CharBuffer directBuffer(char @Nonnull [] src) {
+        CharBuffer buf = directBuffer(src.length);
+        buf.put(src);
+        buf.flip();
+        return buf;
+    }
+
+    /**
+     * Returns a new direct buffer of which content is copied from the given array (starting at the specified offset and
+     * up to the specified length).
+     * <p>
+     * Returned buffer's position is {@code 0}, limit and capacity are same with the specified length.
+     *
+     * @param src the given array
+     * @param off the specified offset of the array
+     * @param len the specified length to read
+     * @return a new direct buffer of which content is copied from the given array
+     */
+    public static @Nonnull CharBuffer directBuffer(
+        char @Nonnull [] src, int off, int len
+    ) throws IndexOutOfBoundsException {
+        JieCheck.checkOffsetLength(src.length, off, len);
+        CharBuffer buf = directBuffer(len);
+        buf.put(src, off, len);
+        buf.flip();
+        return buf;
+    }
+
+    /**
+     * Returns a new direct buffer with the specified capacity.
+     * <p>
+     * Returned buffer's position is {@code 0}, limit equals to the capacity.
+     *
+     * @param capacity the specified capacity
+     * @return a new direct buffer with the specified capacity
+     */
     public static @Nonnull CharBuffer directBuffer(int capacity) {
         return ByteBuffer.allocateDirect(capacity * 2).order(ByteOrder.BIG_ENDIAN).asCharBuffer();
     }

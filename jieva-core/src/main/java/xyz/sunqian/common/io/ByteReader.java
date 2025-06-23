@@ -313,9 +313,8 @@ public interface ByteReader {
      * reaches the buffer's remaining or reaches the end of the source stream, returns the actual number of bytes read
      * to.
      * <p>
-     * If the specified length {@code < 0}, this method performs as {@link #readTo(InputStream, ByteBuffer)}; if the
-     * specified length or buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the source
-     * stream has already been reached, returns {@code -1}.
+     * If the specified length or buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the
+     * source stream has already been reached, returns {@code -1}.
      * <p>
      * The buffer's position increments by the actual read number.
      *

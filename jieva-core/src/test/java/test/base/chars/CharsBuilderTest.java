@@ -6,6 +6,7 @@ import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.base.chars.CharsBuilder;
 import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.io.IORuntimeException;
+import xyz.sunqian.common.io.JieBuffer;
 import xyz.sunqian.common.io.JieIO;
 import xyz.sunqian.test.JieAssert;
 
@@ -14,7 +15,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Method;
-import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.util.Arrays;
 
@@ -105,7 +105,7 @@ public class CharsBuilderTest {
         assertEquals(bb.toCharArray(), Arrays.copyOf(bs, 50));
         bb.append(JieIO.newReader(Arrays.copyOfRange(bs, 50, 60)), 1);
         assertEquals(bb.toCharArray(), Arrays.copyOf(bs, 60));
-        CharBuffer buffer2 = ByteBuffer.allocateDirect(20).asCharBuffer();
+        CharBuffer buffer2 = JieBuffer.directBuffer(10);
         buffer2.put(CharBuffer.wrap(Arrays.copyOfRange(bs, 60, 70)));
         buffer2.flip();
         bb.append(buffer2);

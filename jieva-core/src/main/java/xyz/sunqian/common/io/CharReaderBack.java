@@ -65,7 +65,7 @@ final class CharReaderBack {
         try {
             if (dst.hasArray()) {
                 char[] buf = dst.array();
-                int off = dst.arrayOffset() + dst.position();
+                int off = JieBuffer.arrayStartIndex(dst);
                 int actualLen = len < 0 ? dst.remaining() : Math.min(dst.remaining(), len);
                 int ret = readTo(src, buf, off, actualLen);
                 if (ret <= 0) {

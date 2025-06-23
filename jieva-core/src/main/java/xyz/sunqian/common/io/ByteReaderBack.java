@@ -68,7 +68,7 @@ final class ByteReaderBack {
         try {
             if (dst.hasArray()) {
                 byte[] buf = dst.array();
-                int off = dst.arrayOffset() + dst.position();
+                int off = JieBuffer.arrayStartIndex(dst);
                 int actualLen = len < 0 ? dst.remaining() : Math.min(dst.remaining(), len);
                 int ret = readTo(src, buf, off, actualLen);
                 if (ret <= 0) {
@@ -184,7 +184,7 @@ final class ByteReaderBack {
         try {
             int actualLen = len < 0 ? src.remaining() : (int) Math.min(src.remaining(), len);
             if (src.hasArray()) {
-                dst.write(src.array(), src.arrayOffset() + src.position(), actualLen);
+                dst.write(src.array(), JieBuffer.arrayStartIndex(src), actualLen);
                 src.position(src.position() + actualLen);
             } else {
                 byte[] buf = new byte[actualLen];

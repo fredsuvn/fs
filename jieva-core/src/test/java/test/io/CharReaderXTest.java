@@ -20,8 +20,6 @@ import xyz.sunqian.test.TestReader;
 import java.io.CharArrayReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.CharBuffer;
 import java.util.Arrays;
 
@@ -384,22 +382,22 @@ public class CharReaderXTest {
         }
         {
             // to direct buffer
-            CharBuffer dst = ByteBuffer.allocateDirect(data.length * 2).order(ByteOrder.BIG_ENDIAN).asCharBuffer();
+            CharBuffer dst = JieBuffer.directBuffer(data.length * 2);
             assertEquals(reader.readTo(dst), data.length);
             dst.flip();
             assertEquals(JieBuffer.read(dst), data);
             reader.reset();
-            dst = ByteBuffer.allocateDirect(data.length * 2).order(ByteOrder.BIG_ENDIAN).asCharBuffer();
+            dst = JieBuffer.directBuffer(data.length * 2);
             assertEquals(reader.readTo(dst), data.length);
             assertEquals(reader.readTo(dst), dst.remaining() == 0 ? 0 : -1);
-            assertEquals(reader.readTo(ByteBuffer.allocateDirect(2).order(ByteOrder.BIG_ENDIAN).asCharBuffer()), -1);
+            assertEquals(reader.readTo(JieBuffer.directBuffer(2)), -1);
             dst.flip();
             assertEquals(JieBuffer.read(dst), data);
             reader.reset();
             int length = 1;
             int startIndex = 0;
             if (data.length > 0) {
-                dst = ByteBuffer.allocateDirect(data.length * 2).order(ByteOrder.BIG_ENDIAN).asCharBuffer();
+                dst = JieBuffer.directBuffer(data.length * 2);
                 while (true) {
                     int endIndex = Math.min(data.length, startIndex + length);
                     int actualLen = Math.min(length, endIndex - startIndex);

@@ -6,6 +6,7 @@ import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.base.chars.CharsBuilder;
 import xyz.sunqian.common.io.CharReader;
 import xyz.sunqian.common.io.IORuntimeException;
+import xyz.sunqian.common.io.JieBuffer;
 import xyz.sunqian.common.io.JieIO;
 import xyz.sunqian.test.ErrorAppender;
 import xyz.sunqian.test.MaterialBox;
@@ -15,7 +16,6 @@ import xyz.sunqian.test.TestReader;
 import java.io.CharArrayReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.util.Arrays;
 
@@ -198,14 +198,14 @@ public class CharReaderTest {
         {
             // size 0: reader to direct buffer
             char[] data = new char[0];
-            CharBuffer buf = ByteBuffer.allocateDirect(2).asCharBuffer();
+            CharBuffer buf = JieBuffer.directBuffer(1);
             assertEquals(
                 JieIO.readTo(new CharArrayReader(data), buf),
                 -1
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(new CharArrayReader(data), ByteBuffer.allocateDirect(0).asCharBuffer()),
+                JieIO.readTo(new CharArrayReader(data), JieBuffer.directBuffer(0)),
                 0
             );
             assertEquals(buf.position(), 0);
@@ -388,13 +388,13 @@ public class CharReaderTest {
         {
             // reader to direct buffer
             char[] data = JieRandom.fill(new char[totalSize]);
-            CharBuffer dst = ByteBuffer.allocateDirect(data.length * 2).asCharBuffer();
+            CharBuffer dst = JieBuffer.directBuffer(data.length * 2);
             assertEquals(
                 reader.readTo(new CharArrayReader(data), dst),
                 totalSize
             );
             assertEquals(dst.flip(), CharBuffer.wrap(data));
-            dst = ByteBuffer.allocateDirect(data.length * 2).asCharBuffer();
+            dst = JieBuffer.directBuffer(data.length * 2);
             assertEquals(
                 reader.readTo(new CharArrayReader(data), dst, readSize < 0 ? totalSize : readSize),
                 actualReadSize(totalSize, readSize)
