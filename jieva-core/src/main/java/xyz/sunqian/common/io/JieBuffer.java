@@ -7,6 +7,7 @@ import xyz.sunqian.common.collect.JieArray;
 import java.io.OutputStream;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.CharBuffer;
 import java.nio.ReadOnlyBufferException;
 import java.nio.charset.Charset;
@@ -380,5 +381,43 @@ public class JieBuffer {
         buffer.position(pos);
         buffer.limit(limit);
         return slice;
+    }
+
+    public static @Nonnull ByteBuffer copy(@Nonnull ByteBuffer src) {
+        ByteBuffer dst = src.isDirect() ?
+            ByteBuffer.allocateDirect(src.capacity())
+            :
+            ByteBuffer.allocate(src.capacity());
+        int pos = src.position();
+        int limit = src.limit();
+        src.position(0);
+        src.limit(src.capacity());
+        dst.put(src);
+        src.position(pos);
+        src.limit(limit);
+        dst.position(pos);
+        dst.limit(limit);
+        return dst;
+    }
+
+    public static @Nonnull CharBuffer copy(@Nonnull CharBuffer src) {
+        CharBuffer dst = src.isDirect() ?
+            directBuffer(src.capacity())
+            :
+            CharBuffer.allocate(src.capacity());
+        int pos = src.position();
+        int limit = src.limit();
+        src.position(0);
+        src.limit(src.capacity());
+        dst.put(src);
+        src.position(pos);
+        src.limit(limit);
+        dst.position(pos);
+        dst.limit(limit);
+        return dst;
+    }
+
+    public static @Nonnull CharBuffer directBuffer(int capacity) {
+        return ByteBuffer.allocateDirect(capacity * 2).order(ByteOrder.BIG_ENDIAN).asCharBuffer();
     }
 }

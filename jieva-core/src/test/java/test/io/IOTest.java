@@ -126,6 +126,11 @@ public class IOTest {
             assertEquals(builder.toByteArray(), Arrays.copyOf(data, 5));
         }
         {
+            // byte buffer size
+            expectThrows(IllegalArgumentException.class, () -> JieIO.newByteReader(0));
+            expectThrows(IllegalArgumentException.class, () -> JieIO.newByteReader(-1));
+        }
+        {
             // char
             // read all
             char[] data = JieRandom.fill(new char[1024]);
@@ -170,6 +175,11 @@ public class IOTest {
                 5
             );
             assertEquals(builder.toCharArray(), Arrays.copyOf(data, 5));
+        }
+        {
+            // char buffer size
+            expectThrows(IllegalArgumentException.class, () -> JieIO.newCharReader(0));
+            expectThrows(IllegalArgumentException.class, () -> JieIO.newCharReader(-1));
         }
     }
 
@@ -274,13 +284,15 @@ public class IOTest {
         }
         {
             // close
-            JieIO.close((Closeable) () -> {});
+            JieIO.close((Closeable) () -> {
+            });
             expectThrows(IOException.class, () -> {
                 JieIO.close((Closeable) () -> {
                     throw new IOException();
                 });
             });
-            JieIO.close((AutoCloseable) () -> {});
+            JieIO.close((AutoCloseable) () -> {
+            });
             expectThrows(IOException.class, () -> {
                 JieIO.close((AutoCloseable) () -> {
                     throw new IOException();
@@ -295,7 +307,8 @@ public class IOTest {
         }
         {
             // flush
-            JieIO.flush((Flushable) () -> {});
+            JieIO.flush((Flushable) () -> {
+            });
             expectThrows(IOException.class, () -> {
                 JieIO.flush((Flushable) () -> {
                     throw new IOException();

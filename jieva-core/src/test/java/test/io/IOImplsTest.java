@@ -78,7 +78,8 @@ public class IOImplsTest {
             RandomAccessFile raf = new FakeFile(data);
             InputStream rafIn = JieIO.newInputStream(raf, 6);
             testInputStream(rafIn, Arrays.copyOfRange(data, 6, data.length), true, true);
-            expectThrows(IORuntimeException.class, () -> rafIn.mark(66));
+            rafIn.mark(66);
+            // expectThrows(IORuntimeException.class, () -> rafIn.mark(66));
         }
         {
             // chars
@@ -136,9 +137,7 @@ public class IOImplsTest {
         if (data.length == 0) {
             testEndInputStream(in);
             in.close();
-            if (in.markSupported()) {
-                in.mark(0);
-            }
+            in.mark(0);
             return;
         }
 
@@ -151,9 +150,7 @@ public class IOImplsTest {
             } else {
                 assertTrue(in.available() <= data.length - hasRead && in.available() >= 0);
             }
-            if (in.markSupported()) {
-                in.mark(3);
-            }
+            in.mark(3);
             assertEquals((byte) in.read(), data[0]);
             assertEquals((byte) in.read(), data[1]);
             assertEquals((byte) in.read(), data[2]);
@@ -173,9 +170,7 @@ public class IOImplsTest {
                 assertTrue(in.available() <= data.length - hasRead && in.available() >= 0);
             }
             byte[] dst = new byte[13];
-            if (in.markSupported()) {
-                in.mark(dst.length);
-            }
+            in.mark(dst.length);
             assertEquals(in.read(dst), dst.length);
             assertEquals(dst, Arrays.copyOfRange(data, hasRead, hasRead + dst.length));
             if (in.markSupported()) {
@@ -195,9 +190,7 @@ public class IOImplsTest {
             }
             int readSize = 6;
             byte[] dst = new byte[readSize + 4];
-            if (in.markSupported()) {
-                in.mark(readSize);
-            }
+            in.mark(readSize);
             assertEquals(in.read(dst, 2, readSize), readSize);
             assertEquals(
                 Arrays.copyOfRange(dst, 2, 2 + readSize),
@@ -222,9 +215,7 @@ public class IOImplsTest {
                 assertTrue(in.available() <= data.length - hasRead && in.available() >= 0);
             }
             int skip = 11;
-            if (in.markSupported()) {
-                in.mark(skip);
-            }
+            in.mark(skip);
             assertEquals(in.skip(0), 0);
             assertEquals(in.skip(-1), 0);
             assertEquals(in.skip(skip), skip);
@@ -243,9 +234,7 @@ public class IOImplsTest {
             } else {
                 assertTrue(in.available() <= data.length - hasRead && in.available() >= 0);
             }
-            if (in.markSupported()) {
-                in.mark(data.length - hasRead);
-            }
+            in.mark(data.length - hasRead);
             byte[] remaining = JieIO.read(in);
             assertEquals(
                 remaining,
@@ -271,6 +260,7 @@ public class IOImplsTest {
         // close
         in.close();
         in.close();
+        in.mark(0);
         if (close) {
             expectThrows(IOException.class, () -> in.read());
             expectThrows(IOException.class, () -> in.read(new byte[1]));

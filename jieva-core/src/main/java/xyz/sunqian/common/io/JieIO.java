@@ -2,6 +2,7 @@ package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.JieCheck;
 import xyz.sunqian.common.base.chars.JieChars;
 
 import java.io.Closeable;
@@ -57,21 +58,25 @@ public class JieIO {
     /**
      * Returns a new {@link ByteReader} instance with the given buffer size.
      *
-     * @param bufSize the given buffer size
+     * @param bufSize the given buffer size, must {@code > 0}
      * @return a new {@link ByteReader} instance with the given buffer size
+     * @throws IllegalArgumentException if the given buffer size {@code <= 0}
      */
-    public static ByteReader newByteReader(int bufSize) {
-        return () -> bufSize;
+    public static ByteReader newByteReader(int bufSize) throws IllegalArgumentException {
+        JieCheck.checkArgument(bufSize > 0);
+        return new ByteReaderImpl(bufSize);
     }
 
     /**
      * Returns a new {@link CharReader} instance with the given buffer size.
      *
-     * @param bufSize the given buffer size
+     * @param bufSize the given buffer size, must {@code > 0}
      * @return a new {@link CharReader} instance with the given buffer size
+     * @throws IllegalArgumentException if the given buffer size {@code <= 0}
      */
-    public static CharReader newCharReader(int bufSize) {
-        return () -> bufSize;
+    public static CharReader newCharReader(int bufSize) throws IllegalArgumentException {
+        JieCheck.checkArgument(bufSize > 0);
+        return new CharReaderImpl(bufSize);
     }
 
     /**
@@ -902,7 +907,7 @@ public class JieIO {
      * <p>
      * The result's support is as follows:
      * <ul>
-     *     <li>mark/reset: unsupported;</li>
+     *     <li>mark/reset: based on the given reader;</li>
      *     <li>close: closes the reader;</li>
      *     <li>thread safety: no;</li>
      * </ul>
@@ -919,7 +924,7 @@ public class JieIO {
      * <p>
      * The result's support is as follows:
      * <ul>
-     *     <li>mark/reset: unsupported;</li>
+     *     <li>mark/reset: based on the given reader;</li>
      *     <li>close: closes the reader;</li>
      *     <li>thread safety: no;</li>
      * </ul>
@@ -1033,7 +1038,7 @@ public class JieIO {
      * <p>
      * The result's support is as follows:
      * <ul>
-     *     <li>mark/reset: unsupported;</li>
+     *     <li>mark/reset: based on the given stream;</li>
      *     <li>close: closes the stream;</li>
      *     <li>thread safety: no;</li>
      * </ul>
@@ -1050,8 +1055,8 @@ public class JieIO {
      * <p>
      * The result's support is as follows:
      * <ul>
-     *     <li>mark/reset: unsupported;</li>
-     *     <li>close: closes the reader;</li>
+     *     <li>mark/reset: based on the given stream;</li>
+     *     <li>close: closes the stream;</li>
      *     <li>thread safety: no;</li>
      * </ul>
      *
@@ -1302,5 +1307,33 @@ public class JieIO {
      */
     public static @Nonnull Writer nullWriter() {
         return IOImpls.nullWriter();
+    }
+
+    private static final class ByteReaderImpl implements ByteReader {
+
+        private final int bufSize;
+
+        private ByteReaderImpl(int bufSize) {
+            this.bufSize = bufSize;
+        }
+
+        @Override
+        public int bufferSize() {
+            return bufSize;
+        }
+    }
+
+    private static final class CharReaderImpl implements CharReader {
+
+        private final int bufSize;
+
+        private CharReaderImpl(int bufSize) {
+            this.bufSize = bufSize;
+        }
+
+        @Override
+        public int bufferSize() {
+            return bufSize;
+        }
     }
 }

@@ -344,8 +344,7 @@ final class IOImpls {
         public void mark(int readlimit) {
             try {
                 this.mark = random.getFilePointer();
-            } catch (IOException e) {
-                throw new IORuntimeException(e);
+            } catch (IOException ignored) {
             }
         }
 
@@ -387,11 +386,16 @@ final class IOImpls {
 
         private final @Nonnull Reader reader;
         private final @Nonnull CharsetEncoder encoder;
-        private final @Nonnull CharBuffer inBuffer;
-        private final @Nonnull ByteBuffer outBuffer;
+        private @Nonnull CharBuffer inBuffer;
+        private @Nonnull ByteBuffer outBuffer;
         private boolean endOfInput = false;
         private boolean closed = false;
         private final byte @Nonnull [] buf = {0};
+
+        // snapshot for mark/reset
+        private CharBuffer inCopy;
+        private ByteBuffer outCopy;
+        private boolean endCopy;
 
         private CharsInputStream(
             @Nonnull Reader reader,
@@ -459,6 +463,36 @@ final class IOImpls {
         public void close() throws IOException {
             reader.close();
             closed = true;
+        }
+
+        @Override
+        public boolean markSupported() {
+            return reader.markSupported();
+        }
+
+        @Override
+        public void mark(int readlimit) {
+            try {
+                reader.mark(readlimit);
+            } catch (IOException ignored) {
+            }
+            inCopy = JieBuffer.copy(inBuffer);
+            outCopy = JieBuffer.copy(outBuffer);
+            endCopy = endOfInput;
+        }
+
+        @Override
+        public void reset() throws IOException {
+            if (inCopy == null) {
+                throw new IOException(MARK_NOT_SET);
+            }
+            reader.reset();
+            inBuffer = inCopy;
+            outBuffer = outCopy;
+            endOfInput = endCopy;
+            encoder.reset();
+            inCopy = null;
+            outCopy = null;
         }
 
         private long read0(byte @Nullable [] b, int off, long len) throws IOException {
@@ -722,11 +756,16 @@ final class IOImpls {
 
         private final @Nonnull InputStream inputStream;
         private final @Nonnull CharsetDecoder decoder;
-        private final @Nonnull ByteBuffer inBuffer;
-        private final @Nonnull CharBuffer outBuffer;
+        private ByteBuffer inBuffer;
+        private CharBuffer outBuffer;
         private boolean endOfInput = false;
         private boolean closed = false;
         private final char @Nonnull [] cbuf = {0};
+
+        // snapshot for mark/reset
+        private ByteBuffer inCopy;
+        private CharBuffer outCopy;
+        private boolean endCopy;
 
         private BytesReader(
             @Nonnull InputStream inputStream,
@@ -794,6 +833,33 @@ final class IOImpls {
         public void close() throws IOException {
             inputStream.close();
             closed = true;
+        }
+
+        @Override
+        public boolean markSupported() {
+            return inputStream.markSupported();
+        }
+
+        @Override
+        public void mark(int readAheadLimit) {
+            inputStream.mark(readAheadLimit);
+            inCopy = JieBuffer.copy(inBuffer);
+            outCopy = JieBuffer.copy(outBuffer);
+            endCopy = endOfInput;
+        }
+
+        @Override
+        public void reset() throws IOException {
+            if (inCopy == null) {
+                throw new IOException(MARK_NOT_SET);
+            }
+            inputStream.reset();
+            inBuffer = inCopy;
+            outBuffer = outCopy;
+            endOfInput = endCopy;
+            decoder.reset();
+            inCopy = null;
+            outCopy = null;
         }
 
         private long read0(char @Nullable [] b, int off, long len) throws IOException {
