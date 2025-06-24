@@ -28,8 +28,8 @@ import java.util.Arrays;
 public class JieIO {
 
     private static final int BUFFER_SIZE = 1024 * 8;
-    private static final @Nonnull ByteReader br = newByteReader(bufferSize());
-    private static final @Nonnull CharReader cr = newCharReader(bufferSize());
+    private static final @Nonnull ByteOperator bo = newByteReader(bufferSize());
+    private static final @Nonnull CharOperator co = newCharReader(bufferSize());
 
     /**
      * Returns the recommended IO buffer size, typically is 1024 * 8 = 8192.
@@ -56,27 +56,27 @@ public class JieIO {
     }
 
     /**
-     * Returns a new {@link ByteReader} instance with the given buffer size.
+     * Returns a new {@link ByteOperator} instance with the given buffer size.
      *
      * @param bufSize the given buffer size, must {@code > 0}
-     * @return a new {@link ByteReader} instance with the given buffer size
+     * @return a new {@link ByteOperator} instance with the given buffer size
      * @throws IllegalArgumentException if the given buffer size {@code <= 0}
      */
-    public static ByteReader newByteReader(int bufSize) throws IllegalArgumentException {
+    public static ByteOperator newByteReader(int bufSize) throws IllegalArgumentException {
         JieCheck.checkArgument(bufSize > 0);
-        return new ByteReaderImpl(bufSize);
+        return new ByteOperatorImpl(bufSize);
     }
 
     /**
-     * Returns a new {@link CharReader} instance with the given buffer size.
+     * Returns a new {@link CharOperator} instance with the given buffer size.
      *
      * @param bufSize the given buffer size, must {@code > 0}
-     * @return a new {@link CharReader} instance with the given buffer size
+     * @return a new {@link CharOperator} instance with the given buffer size
      * @throws IllegalArgumentException if the given buffer size {@code <= 0}
      */
-    public static CharReader newCharReader(int bufSize) throws IllegalArgumentException {
+    public static CharOperator newCharReader(int bufSize) throws IllegalArgumentException {
         JieCheck.checkArgument(bufSize > 0);
-        return new CharReaderImpl(bufSize);
+        return new CharOperatorImpl(bufSize);
     }
 
     /**
@@ -90,7 +90,7 @@ public class JieIO {
      * @throws IORuntimeException if an I/O error occurs
      */
     public static byte @Nullable [] read(@Nonnull InputStream src) throws IORuntimeException {
-        return br.read(src);
+        return bo.read(src);
     }
 
     /**
@@ -110,7 +110,7 @@ public class JieIO {
     public static byte @Nullable [] read(
         @Nonnull InputStream src, int len
     ) throws IllegalArgumentException, IORuntimeException {
-        return br.read(src, len);
+        return bo.read(src, len);
     }
 
     /**
@@ -125,7 +125,7 @@ public class JieIO {
      * @throws IORuntimeException if an I/O error occurs
      */
     public static @Nullable ByteBuffer read(@Nonnull ReadableByteChannel src) throws IORuntimeException {
-        return br.read(src);
+        return bo.read(src);
     }
 
     /**
@@ -146,7 +146,7 @@ public class JieIO {
     public static @Nullable ByteBuffer read(
         @Nonnull ReadableByteChannel src, int len
     ) throws IllegalArgumentException, IORuntimeException {
-        return br.read(src, len);
+        return bo.read(src, len);
     }
 
     /**
@@ -162,7 +162,7 @@ public class JieIO {
      * @throws IORuntimeException if an I/O error occurs
      */
     public static long readTo(@Nonnull InputStream src, @Nonnull OutputStream dst) throws IORuntimeException {
-        return br.readTo(src, dst);
+        return bo.readTo(src, dst);
     }
 
     /**
@@ -185,7 +185,7 @@ public class JieIO {
     public static long readTo(
         @Nonnull InputStream src, @Nonnull OutputStream dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
-        return br.readTo(src, dst, len);
+        return bo.readTo(src, dst, len);
     }
 
     /**
@@ -203,7 +203,7 @@ public class JieIO {
     public static int readTo(
         @Nonnull InputStream src, byte @Nonnull [] dst
     ) throws IndexOutOfBoundsException, IORuntimeException {
-        return br.readTo(src, dst);
+        return bo.readTo(src, dst);
     }
 
     /**
@@ -225,7 +225,7 @@ public class JieIO {
     public static int readTo(
         @Nonnull InputStream src, byte @Nonnull [] dst, int off, int len
     ) throws IndexOutOfBoundsException, IORuntimeException {
-        return br.readTo(src, dst, off, len);
+        return bo.readTo(src, dst, off, len);
     }
 
     /**
@@ -243,7 +243,7 @@ public class JieIO {
      * @throws IORuntimeException if an I/O error occurs
      */
     public static int readTo(@Nonnull InputStream src, @Nonnull ByteBuffer dst) throws IORuntimeException {
-        return br.readTo(src, dst);
+        return bo.readTo(src, dst);
     }
 
     /**
@@ -266,7 +266,7 @@ public class JieIO {
     public static int readTo(
         @Nonnull InputStream src, @Nonnull ByteBuffer dst, int len
     ) throws IORuntimeException {
-        return br.readTo(src, dst, len);
+        return bo.readTo(src, dst, len);
     }
 
     /**
@@ -282,7 +282,7 @@ public class JieIO {
     public static long readTo(
         @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst
     ) throws IORuntimeException {
-        return br.readTo(src, dst);
+        return bo.readTo(src, dst);
     }
 
     /**
@@ -303,7 +303,7 @@ public class JieIO {
     public static long readTo(
         @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
-        return br.readTo(src, dst, len);
+        return bo.readTo(src, dst, len);
     }
 
     /**
@@ -321,7 +321,7 @@ public class JieIO {
     public static int readTo(
         @Nonnull ReadableByteChannel src, byte @Nonnull [] dst
     ) throws IndexOutOfBoundsException, IORuntimeException {
-        return br.readTo(src, dst);
+        return bo.readTo(src, dst);
     }
 
     /**
@@ -343,7 +343,7 @@ public class JieIO {
     public static int readTo(
         @Nonnull ReadableByteChannel src, byte @Nonnull [] dst, int off, int len
     ) throws IndexOutOfBoundsException, IORuntimeException {
-        return br.readTo(src, dst, off, len);
+        return bo.readTo(src, dst, off, len);
     }
 
     /**
@@ -361,7 +361,7 @@ public class JieIO {
      * @throws IORuntimeException if an I/O error occurs
      */
     public static int readTo(@Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst) throws IORuntimeException {
-        return br.readTo(src, dst);
+        return bo.readTo(src, dst);
     }
 
     /**
@@ -384,7 +384,7 @@ public class JieIO {
     public static int readTo(
         @Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst, int len
     ) throws IORuntimeException {
-        return br.readTo(src, dst, len);
+        return bo.readTo(src, dst, len);
     }
 
     /**
@@ -398,7 +398,7 @@ public class JieIO {
      * @throws IORuntimeException if an I/O error occurs
      */
     public static char @Nullable [] read(@Nonnull Reader src) throws IORuntimeException {
-        return cr.read(src);
+        return co.read(src);
     }
 
     /**
@@ -418,7 +418,7 @@ public class JieIO {
     public static char @Nullable [] read(
         @Nonnull Reader src, int len
     ) throws IllegalArgumentException, IORuntimeException {
-        return cr.read(src, len);
+        return co.read(src, len);
     }
 
     /**
@@ -432,7 +432,7 @@ public class JieIO {
      * @throws IORuntimeException if an I/O error occurs
      */
     public static @Nullable String string(@Nonnull Reader src) throws IORuntimeException {
-        return cr.string(src);
+        return co.string(src);
     }
 
     /**
@@ -452,7 +452,7 @@ public class JieIO {
     public static @Nullable String string(
         @Nonnull Reader src, int len
     ) throws IllegalArgumentException, IORuntimeException {
-        return cr.string(src, len);
+        return co.string(src, len);
     }
 
     /**
@@ -466,7 +466,7 @@ public class JieIO {
      * @throws IORuntimeException if an I/O error occurs
      */
     public static long readTo(@Nonnull Reader src, @Nonnull Appendable dst) throws IORuntimeException {
-        return cr.readTo(src, dst);
+        return co.readTo(src, dst);
     }
 
     /**
@@ -487,7 +487,7 @@ public class JieIO {
     public static long readTo(
         @Nonnull Reader src, @Nonnull Appendable dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
-        return cr.readTo(src, dst, len);
+        return co.readTo(src, dst, len);
     }
 
     /**
@@ -505,7 +505,7 @@ public class JieIO {
     public static int readTo(
         @Nonnull Reader src, char @Nonnull [] dst
     ) throws IndexOutOfBoundsException, IORuntimeException {
-        return cr.readTo(src, dst);
+        return co.readTo(src, dst);
     }
 
     /**
@@ -527,7 +527,7 @@ public class JieIO {
     public static int readTo(
         @Nonnull Reader src, char @Nonnull [] dst, int off, int len
     ) throws IndexOutOfBoundsException, IORuntimeException {
-        return cr.readTo(src, dst, off, len);
+        return co.readTo(src, dst, off, len);
     }
 
     /**
@@ -545,7 +545,7 @@ public class JieIO {
      * @throws IORuntimeException if an I/O error occurs
      */
     public static int readTo(@Nonnull Reader src, @Nonnull CharBuffer dst) throws IORuntimeException {
-        return cr.readTo(src, dst);
+        return co.readTo(src, dst);
     }
 
     /**
@@ -568,7 +568,7 @@ public class JieIO {
     public static int readTo(
         @Nonnull Reader src, @Nonnull CharBuffer dst, int len
     ) throws IORuntimeException {
-        return cr.readTo(src, dst, len);
+        return co.readTo(src, dst, len);
     }
 
     /**
@@ -1181,33 +1181,5 @@ public class JieIO {
      */
     public static @Nonnull Writer nullWriter() {
         return IOImpls.nullWriter();
-    }
-
-    private static final class ByteReaderImpl implements ByteReader {
-
-        private final int bufSize;
-
-        private ByteReaderImpl(int bufSize) {
-            this.bufSize = bufSize;
-        }
-
-        @Override
-        public int bufferSize() {
-            return bufSize;
-        }
-    }
-
-    private static final class CharReaderImpl implements CharReader {
-
-        private final int bufSize;
-
-        private CharReaderImpl(int bufSize) {
-            this.bufSize = bufSize;
-        }
-
-        @Override
-        public int bufferSize() {
-            return bufSize;
-        }
     }
 }

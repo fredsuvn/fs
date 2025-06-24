@@ -11,11 +11,11 @@ import java.nio.CharBuffer;
 import java.util.Arrays;
 
 /**
- * This interface is used to read chars for {@link Reader}.
+ * This interface is used to operate chars for {@link Reader}.
  *
  * @author sunqian
  */
-public interface CharReader {
+public interface CharOperator {
 
     /**
      * Returns the buffer size of current instance.
@@ -151,9 +151,7 @@ public interface CharReader {
      * @return the actual number of chars read
      * @throws IORuntimeException if an I/O error occurs
      */
-    default long readTo(@Nonnull Reader src, @Nonnull Appendable dst) throws IORuntimeException {
-        return CharReaderBack.readTo(src, dst, -1, bufferSize());
-    }
+    long readTo(@Nonnull Reader src, @Nonnull Appendable dst) throws IORuntimeException;
 
     /**
      * Reads the data of the specified length from the source stream into the specified output stream, until the read
@@ -170,12 +168,9 @@ public interface CharReader {
      * @throws IllegalArgumentException if the specified length is illegal
      * @throws IORuntimeException       if an I/O error occurs
      */
-    default long readTo(
+    long readTo(
         @Nonnull Reader src, @Nonnull Appendable dst, long len
-    ) throws IllegalArgumentException, IORuntimeException {
-        JieCheck.checkArgument(len >= 0, "len must >= 0.");
-        return CharReaderBack.readTo(src, dst, len, bufferSize());
-    }
+    ) throws IllegalArgumentException, IORuntimeException;
 
     /**
      * Reads the data from the source stream into the specified array, until the read number reaches the array's length
@@ -189,11 +184,9 @@ public interface CharReader {
      * @return the actual number of chars read
      * @throws IORuntimeException if an I/O error occurs
      */
-    default int readTo(
+    int readTo(
         @Nonnull Reader src, char @Nonnull [] dst
-    ) throws IndexOutOfBoundsException, IORuntimeException {
-        return CharReaderBack.readTo(src, dst, 0, dst.length);
-    }
+    ) throws IndexOutOfBoundsException, IORuntimeException;
 
     /**
      * Reads the data from the source stream into the specified array (starting at the specified offset and up to the
@@ -211,12 +204,9 @@ public interface CharReader {
      * @throws IndexOutOfBoundsException if the array arguments are out of bounds
      * @throws IORuntimeException        if an I/O error occurs
      */
-    default int readTo(
+    int readTo(
         @Nonnull Reader src, char @Nonnull [] dst, int off, int len
-    ) throws IndexOutOfBoundsException, IORuntimeException {
-        JieCheck.checkOffsetLength(dst.length, off, len);
-        return CharReaderBack.readTo(src, dst, off, len);
-    }
+    ) throws IndexOutOfBoundsException, IORuntimeException;
 
     /**
      * Reads the data from the source stream into the specified buffer, until the read number reaches the buffer's
@@ -232,9 +222,7 @@ public interface CharReader {
      * @return the actual number of chars read
      * @throws IORuntimeException if an I/O error occurs
      */
-    default int readTo(@Nonnull Reader src, @Nonnull CharBuffer dst) throws IORuntimeException {
-        return CharReaderBack.readTo(src, dst, -1);
-    }
+    int readTo(@Nonnull Reader src, @Nonnull CharBuffer dst) throws IORuntimeException;
 
     /**
      * Reads the data of the specified length from the source stream into the specified buffer, until the read number
@@ -253,10 +241,7 @@ public interface CharReader {
      * @throws IllegalArgumentException if the specified read length is illegal
      * @throws IORuntimeException       if an I/O error occurs
      */
-    default int readTo(
+    int readTo(
         @Nonnull Reader src, @Nonnull CharBuffer dst, int len
-    ) throws IORuntimeException {
-        JieCheck.checkArgument(len >= 0, "len must >= 0.");
-        return CharReaderBack.readTo(src, dst, len);
-    }
+    ) throws IllegalArgumentException, IORuntimeException;
 }

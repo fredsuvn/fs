@@ -1,13 +1,66 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.common.base.JieCheck;
 
 import java.io.Reader;
 import java.nio.CharBuffer;
 
-final class CharReaderBack {
+final class CharOperatorImpl implements CharOperator {
 
-    static long readTo(
+    private final int bufferSize;
+
+    CharOperatorImpl(int bufferSize) {
+        this.bufferSize = bufferSize;
+    }
+
+    @Override
+    public int bufferSize() {
+        return bufferSize;
+    }
+
+    @Override
+    public long readTo(@Nonnull Reader src, @Nonnull Appendable dst) throws IORuntimeException {
+        return readTo0(src, dst, -1, bufferSize());
+    }
+
+    @Override
+    public long readTo(
+        @Nonnull Reader src, @Nonnull Appendable dst, long len
+    ) throws IllegalArgumentException, IORuntimeException {
+        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        return readTo0(src, dst, len, bufferSize());
+    }
+
+    @Override
+    public int readTo(
+        @Nonnull Reader src, char @Nonnull [] dst
+    ) throws IndexOutOfBoundsException, IORuntimeException {
+        return readTo0(src, dst, 0, dst.length);
+    }
+
+    @Override
+    public int readTo(
+        @Nonnull Reader src, char @Nonnull [] dst, int off, int len
+    ) throws IndexOutOfBoundsException, IORuntimeException {
+        JieCheck.checkOffsetLength(dst.length, off, len);
+        return readTo0(src, dst, off, len);
+    }
+
+    @Override
+    public int readTo(@Nonnull Reader src, @Nonnull CharBuffer dst) throws IORuntimeException {
+        return readTo0(src, dst, -1);
+    }
+
+    @Override
+    public int readTo(
+        @Nonnull Reader src, @Nonnull CharBuffer dst, int len
+    ) throws IllegalArgumentException, IORuntimeException {
+        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        return readTo0(src, dst, len);
+    }
+
+    private long readTo0(
         @Nonnull Reader src, @Nonnull Appendable dst, long len, int bufSize
     ) throws IllegalArgumentException, IORuntimeException {
         if (len == 0) {
@@ -35,7 +88,7 @@ final class CharReaderBack {
         }
     }
 
-    static int readTo(
+    private int readTo0(
         @Nonnull Reader src, char @Nonnull [] dst, int off, int len
     ) throws IndexOutOfBoundsException, IORuntimeException {
         if (len == 0) {
@@ -56,7 +109,7 @@ final class CharReaderBack {
         }
     }
 
-    static int readTo(
+    private int readTo0(
         @Nonnull Reader src, @Nonnull CharBuffer dst, int len
     ) throws IORuntimeException {
         if (len == 0 || dst.remaining() == 0) {

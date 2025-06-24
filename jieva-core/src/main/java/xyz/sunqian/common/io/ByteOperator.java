@@ -14,11 +14,11 @@ import java.nio.channels.WritableByteChannel;
 import java.util.Arrays;
 
 /**
- * This interface is used to read bytes for {@link InputStream} and {@link ReadableByteChannel}.
+ * This interface is used to operate bytes for {@link InputStream} and {@link ReadableByteChannel}.
  *
  * @author sunqian
  */
-public interface ByteReader {
+public interface ByteOperator {
 
     /**
      * Returns the buffer size for reading and writing.
@@ -89,7 +89,7 @@ public interface ByteReader {
      * @throws IORuntimeException       if an I/O error occurs
      */
     default byte @Nullable [] read(
-        @Nonnull InputStream src, int len
+            @Nonnull InputStream src, int len
     ) throws IllegalArgumentException, IORuntimeException {
         JieCheck.checkArgument(len >= 0, "len must >= 0.");
         if (len == 0) {
@@ -157,7 +157,7 @@ public interface ByteReader {
             }
             if (builder == null) {
                 return dst.position() == 0 ? null :
-                    ByteBuffer.wrap(Arrays.copyOfRange(dst.array(), 0, dst.position()));
+                        ByteBuffer.wrap(Arrays.copyOfRange(dst.array(), 0, dst.position()));
             } else {
                 if (dst.position() > 0) {
                     dst.flip();
@@ -186,7 +186,7 @@ public interface ByteReader {
      * @throws IORuntimeException       if an I/O error occurs
      */
     default @Nullable ByteBuffer read(
-        @Nonnull ReadableByteChannel src, int len
+            @Nonnull ReadableByteChannel src, int len
     ) throws IllegalArgumentException, IORuntimeException {
         JieCheck.checkArgument(len >= 0, "len must >= 0.");
         if (len == 0) {
@@ -198,7 +198,7 @@ public interface ByteReader {
                 int readSize = src.read(dst);
                 if (readSize < 0) {
                     return dst.position() == 0 ? null :
-                        ByteBuffer.wrap(Arrays.copyOfRange(dst.array(), 0, dst.position()));
+                            ByteBuffer.wrap(Arrays.copyOfRange(dst.array(), 0, dst.position()));
                 }
             }
             dst.flip();
@@ -221,9 +221,7 @@ public interface ByteReader {
      * @return the actual number of bytes read
      * @throws IORuntimeException if an I/O error occurs
      */
-    default long readTo(@Nonnull InputStream src, @Nonnull OutputStream dst) throws IORuntimeException {
-        return ByteReaderBack.readTo(src, dst, -1, bufferSize());
-    }
+    long readTo(@Nonnull InputStream src, @Nonnull OutputStream dst) throws IORuntimeException;
 
     /**
      * Reads the data of the specified length from the source stream into the specified output stream, until the read
@@ -242,12 +240,9 @@ public interface ByteReader {
      * @throws IllegalArgumentException if the specified length is illegal
      * @throws IORuntimeException       if an I/O error occurs
      */
-    default long readTo(
-        @Nonnull InputStream src, @Nonnull OutputStream dst, long len
-    ) throws IllegalArgumentException, IORuntimeException {
-        JieCheck.checkArgument(len >= 0, "len must >= 0.");
-        return ByteReaderBack.readTo(src, dst, len, bufferSize());
-    }
+    long readTo(
+            @Nonnull InputStream src, @Nonnull OutputStream dst, long len
+    ) throws IllegalArgumentException, IORuntimeException;
 
     /**
      * Reads the data from the source stream into the specified array, until the read number reaches the array's length
@@ -261,11 +256,9 @@ public interface ByteReader {
      * @return the actual number of bytes read
      * @throws IORuntimeException if an I/O error occurs
      */
-    default int readTo(
-        @Nonnull InputStream src, byte @Nonnull [] dst
-    ) throws IndexOutOfBoundsException, IORuntimeException {
-        return ByteReaderBack.readTo(src, dst, 0, dst.length);
-    }
+    int readTo(
+            @Nonnull InputStream src, byte @Nonnull [] dst
+    ) throws IndexOutOfBoundsException, IORuntimeException;
 
     /**
      * Reads the data from the source stream into the specified array (starting at the specified offset and up to the
@@ -283,12 +276,9 @@ public interface ByteReader {
      * @throws IndexOutOfBoundsException if the array arguments are out of bounds
      * @throws IORuntimeException        if an I/O error occurs
      */
-    default int readTo(
-        @Nonnull InputStream src, byte @Nonnull [] dst, int off, int len
-    ) throws IndexOutOfBoundsException, IORuntimeException {
-        JieCheck.checkOffsetLength(dst.length, off, len);
-        return ByteReaderBack.readTo(src, dst, off, len);
-    }
+    int readTo(
+            @Nonnull InputStream src, byte @Nonnull [] dst, int off, int len
+    ) throws IndexOutOfBoundsException, IORuntimeException;
 
     /**
      * Reads the data from the source stream into the specified buffer, until the read number reaches the buffer's
@@ -304,9 +294,7 @@ public interface ByteReader {
      * @return the actual number of bytes read
      * @throws IORuntimeException if an I/O error occurs
      */
-    default int readTo(@Nonnull InputStream src, @Nonnull ByteBuffer dst) throws IORuntimeException {
-        return ByteReaderBack.readTo(src, dst, -1);
-    }
+    int readTo(@Nonnull InputStream src, @Nonnull ByteBuffer dst) throws IORuntimeException;
 
     /**
      * Reads the data of the specified length from the source stream into the specified buffer, until the read number
@@ -325,12 +313,9 @@ public interface ByteReader {
      * @throws IllegalArgumentException if the specified read length is illegal
      * @throws IORuntimeException       if an I/O error occurs
      */
-    default int readTo(
-        @Nonnull InputStream src, @Nonnull ByteBuffer dst, int len
-    ) throws IORuntimeException {
-        JieCheck.checkArgument(len >= 0, "len must >= 0.");
-        return ByteReaderBack.readTo(src, dst, len);
-    }
+    int readTo(
+            @Nonnull InputStream src, @Nonnull ByteBuffer dst, int len
+    ) throws IllegalArgumentException, IORuntimeException;
 
     /**
      * Reads all from the source channel into the specified output channel, until the read number reaches the specified
@@ -343,11 +328,9 @@ public interface ByteReader {
      * @return the actual number of bytes read
      * @throws IORuntimeException if an I/O error occurs
      */
-    default long readTo(
-        @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst
-    ) throws IORuntimeException {
-        return ByteReaderBack.readTo(this, src, dst, -1, bufferSize());
-    }
+    long readTo(
+            @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst
+    ) throws IORuntimeException;
 
     /**
      * Reads the data of the specified length from the source channel into the specified output channel, until the read
@@ -364,12 +347,9 @@ public interface ByteReader {
      * @throws IllegalArgumentException if the specified length is illegal
      * @throws IORuntimeException       if an I/O error occurs
      */
-    default long readTo(
-        @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, long len
-    ) throws IllegalArgumentException, IORuntimeException {
-        JieCheck.checkArgument(len >= 0, "len must >= 0.");
-        return ByteReaderBack.readTo(this, src, dst, len, bufferSize());
-    }
+    long readTo(
+            @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, long len
+    ) throws IllegalArgumentException, IORuntimeException;
 
     /**
      * Reads the data from the source channel into the specified array, until the read number reaches the array's length
@@ -383,11 +363,9 @@ public interface ByteReader {
      * @return the actual number of bytes read
      * @throws IORuntimeException if an I/O error occurs
      */
-    default int readTo(
-        @Nonnull ReadableByteChannel src, byte @Nonnull [] dst
-    ) throws IndexOutOfBoundsException, IORuntimeException {
-        return ByteReaderBack.readTo(src, ByteBuffer.wrap(dst), -1);
-    }
+    int readTo(
+            @Nonnull ReadableByteChannel src, byte @Nonnull [] dst
+    ) throws IndexOutOfBoundsException, IORuntimeException;
 
     /**
      * Reads the data from the source channel into the specified array (starting at the specified offset and up to the
@@ -405,12 +383,9 @@ public interface ByteReader {
      * @throws IndexOutOfBoundsException if the array arguments are out of bounds
      * @throws IORuntimeException        if an I/O error occurs
      */
-    default int readTo(
-        @Nonnull ReadableByteChannel src, byte @Nonnull [] dst, int off, int len
-    ) throws IndexOutOfBoundsException, IORuntimeException {
-        JieCheck.checkOffsetLength(dst.length, off, len);
-        return ByteReaderBack.readTo(src, ByteBuffer.wrap(dst, off, len), -1);
-    }
+    int readTo(
+            @Nonnull ReadableByteChannel src, byte @Nonnull [] dst, int off, int len
+    ) throws IndexOutOfBoundsException, IORuntimeException;
 
     /**
      * Reads the data from the source channel into the specified buffer, until the read number reaches the buffer's
@@ -426,9 +401,7 @@ public interface ByteReader {
      * @return the actual number of bytes read
      * @throws IORuntimeException if an I/O error occurs
      */
-    default int readTo(@Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst) throws IORuntimeException {
-        return ByteReaderBack.readTo(src, dst, -1);
-    }
+    int readTo(@Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst) throws IORuntimeException;
 
     /**
      * Reads the data of the specified length from the source channel into the specified buffer, until the read number
@@ -447,10 +420,7 @@ public interface ByteReader {
      * @throws IllegalArgumentException if the specified read length is illegal
      * @throws IORuntimeException       if an I/O error occurs
      */
-    default int readTo(
-        @Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst, int len
-    ) throws IORuntimeException {
-        JieCheck.checkArgument(len >= 0, "len must >= 0.");
-        return ByteReaderBack.readTo(src, dst, len);
-    }
+    int readTo(
+            @Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst, int len
+    ) throws IllegalArgumentException, IORuntimeException;
 }

@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
-import xyz.sunqian.common.io.ByteReader;
+import xyz.sunqian.common.io.ByteOperator;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieIO;
 import xyz.sunqian.test.ErrorOutputStream;
@@ -24,7 +24,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.expectThrows;
 
-public class ByteReaderTest {
+public class ByteOperatorTest {
 
     @Test
     public void testRead() throws Exception {
@@ -78,7 +78,7 @@ public class ByteReaderTest {
         testRead(JieIO.newByteReader(JieIO.bufferSize() * 2), totalSize);
     }
 
-    private void testRead(ByteReader reader, int totalSize) throws Exception {
+    private void testRead(ByteOperator reader, int totalSize) throws Exception {
         testRead(reader, totalSize, -1);
         testRead(reader, totalSize, 0);
         testRead(reader, totalSize, 1);
@@ -89,19 +89,19 @@ public class ByteReaderTest {
         testRead(reader, totalSize, totalSize * 2);
     }
 
-    private void testRead(ByteReader reader, int totalSize, int readSize) throws Exception {
+    private void testRead(ByteOperator reader, int totalSize, int readSize) throws Exception {
         {
             // stream
             byte[] data = JieRandom.fill(new byte[totalSize]);
             assertEquals(reader.read(new ByteArrayInputStream(data)), data);
             assertEquals(
-                reader.read(new ByteArrayInputStream(data), readSize < 0 ? totalSize : readSize),
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+                    reader.read(new ByteArrayInputStream(data), readSize < 0 ? totalSize : readSize),
+                    (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
             );
             assertEquals(reader.read(new OneBytePerRead(data)), data);
             assertEquals(
-                reader.read(new OneBytePerRead(data), readSize < 0 ? totalSize : readSize),
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+                    reader.read(new OneBytePerRead(data), readSize < 0 ? totalSize : readSize),
+                    (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
             );
         }
         {
@@ -110,8 +110,8 @@ public class ByteReaderTest {
             ByteBuffer dataBuf = ByteBuffer.wrap(data);
             assertEquals(reader.read(Channels.newChannel(new ByteArrayInputStream(data))), dataBuf);
             assertEquals(
-                reader.read(Channels.newChannel(new ByteArrayInputStream(data)), readSize < 0 ? totalSize : readSize),
-                ByteBuffer.wrap((readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize))
+                    reader.read(Channels.newChannel(new ByteArrayInputStream(data)), readSize < 0 ? totalSize : readSize),
+                    ByteBuffer.wrap((readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize))
             );
         }
     }
@@ -143,18 +143,18 @@ public class ByteReaderTest {
             byte[] data = new byte[0];
             BytesBuilder bb = new BytesBuilder();
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), bb),
-                -1
+                    JieIO.readTo(new ByteArrayInputStream(data), bb),
+                    -1
             );
             assertEquals(bb.size(), 0);
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), bb, 0),
-                0
+                    JieIO.readTo(new ByteArrayInputStream(data), bb, 0),
+                    0
             );
             assertEquals(bb.size(), 0);
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), bb, 11),
-                -1
+                    JieIO.readTo(new ByteArrayInputStream(data), bb, 11),
+                    -1
             );
             assertEquals(bb.size(), 0);
         }
@@ -164,13 +164,13 @@ public class ByteReaderTest {
             byte[] aar = new byte[64];
             Arrays.fill(aar, (byte) 7);
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), aar),
-                -1
+                    JieIO.readTo(new ByteArrayInputStream(data), aar),
+                    -1
             );
             assertEquals(aar[0], (byte) 7);
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), new byte[0]),
-                0
+                    JieIO.readTo(new ByteArrayInputStream(data), new byte[0]),
+                    0
             );
             assertEquals(aar[0], (byte) 7);
         }
@@ -179,23 +179,23 @@ public class ByteReaderTest {
             byte[] data = new byte[0];
             ByteBuffer buf = ByteBuffer.allocate(1);
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), buf),
-                -1
+                    JieIO.readTo(new ByteArrayInputStream(data), buf),
+                    -1
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), ByteBuffer.allocate(0)),
-                0
+                    JieIO.readTo(new ByteArrayInputStream(data), ByteBuffer.allocate(0)),
+                    0
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), buf, 1),
-                -1
+                    JieIO.readTo(new ByteArrayInputStream(data), buf, 1),
+                    -1
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), buf, 0),
-                0
+                    JieIO.readTo(new ByteArrayInputStream(data), buf, 0),
+                    0
             );
             assertEquals(buf.position(), 0);
         }
@@ -204,23 +204,23 @@ public class ByteReaderTest {
             byte[] data = new byte[0];
             ByteBuffer buf = ByteBuffer.allocateDirect(1);
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), buf),
-                -1
+                    JieIO.readTo(new ByteArrayInputStream(data), buf),
+                    -1
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), ByteBuffer.allocateDirect(0)),
-                0
+                    JieIO.readTo(new ByteArrayInputStream(data), ByteBuffer.allocateDirect(0)),
+                    0
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), buf, 1),
-                -1
+                    JieIO.readTo(new ByteArrayInputStream(data), buf, 1),
+                    -1
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), buf, 0),
-                0
+                    JieIO.readTo(new ByteArrayInputStream(data), buf, 0),
+                    0
             );
             assertEquals(buf.position(), 0);
         }
@@ -229,18 +229,18 @@ public class ByteReaderTest {
             byte[] data = new byte[0];
             BytesBuilder bb = new BytesBuilder();
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(bb)),
-                -1
+                    JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(bb)),
+                    -1
             );
             assertEquals(bb.size(), 0);
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(bb), 0),
-                0
+                    JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(bb), 0),
+                    0
             );
             assertEquals(bb.size(), 0);
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(bb), 11),
-                -1
+                    JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(bb), 11),
+                    -1
             );
             assertEquals(bb.size(), 0);
         }
@@ -250,13 +250,13 @@ public class ByteReaderTest {
             byte[] aar = new byte[64];
             Arrays.fill(aar, (byte) 7);
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), aar),
-                -1
+                    JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), aar),
+                    -1
             );
             assertEquals(aar[0], (byte) 7);
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), new byte[0]),
-                0
+                    JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), new byte[0]),
+                    0
             );
             assertEquals(aar[0], (byte) 7);
         }
@@ -265,23 +265,23 @@ public class ByteReaderTest {
             byte[] data = new byte[0];
             ByteBuffer buf = ByteBuffer.allocate(1);
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf),
-                -1
+                    JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf),
+                    -1
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), ByteBuffer.allocate(0)),
-                0
+                    JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), ByteBuffer.allocate(0)),
+                    0
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf, 1),
-                -1
+                    JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf, 1),
+                    -1
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf, 0),
-                0
+                    JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf, 0),
+                    0
             );
             assertEquals(buf.position(), 0);
         }
@@ -290,23 +290,23 @@ public class ByteReaderTest {
             byte[] data = new byte[0];
             ByteBuffer buf = ByteBuffer.allocateDirect(1);
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf),
-                -1
+                    JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf),
+                    -1
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), ByteBuffer.allocateDirect(0)),
-                0
+                    JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), ByteBuffer.allocateDirect(0)),
+                    0
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf, 1),
-                -1
+                    JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf, 1),
+                    -1
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf, 0),
-                0
+                    JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf, 0),
+                    0
             );
             assertEquals(buf.position(), 0);
         }
@@ -325,9 +325,9 @@ public class ByteReaderTest {
             expectThrows(IndexOutOfBoundsException.class, () -> JieIO.readTo(tin, new byte[0], 0, 1));
             expectThrows(IORuntimeException.class, () -> JieIO.readTo(tin, ByteBuffer.allocate(1)));
             expectThrows(IllegalArgumentException.class, () ->
-                JieIO.readTo(tin, ByteBuffer.allocate(1), -1));
+                    JieIO.readTo(tin, ByteBuffer.allocate(1), -1));
             expectThrows(IORuntimeException.class, () ->
-                JieIO.readTo(new ByteArrayInputStream(new byte[1]), ByteBuffer.allocate(1).asReadOnlyBuffer())
+                    JieIO.readTo(new ByteArrayInputStream(new byte[1]), ByteBuffer.allocate(1).asReadOnlyBuffer())
             );
             // read channel
             ReadableByteChannel tch = Channels.newChannel(tin);
@@ -341,10 +341,10 @@ public class ByteReaderTest {
             expectThrows(IORuntimeException.class, () -> JieIO.readTo(tch, ByteBuffer.allocate(1)));
             expectThrows(IllegalArgumentException.class, () -> JieIO.readTo(tch, ByteBuffer.allocate(1), -1));
             expectThrows(IORuntimeException.class, () ->
-                JieIO.readTo(
-                    Channels.newChannel(new ByteArrayInputStream(new byte[1])),
-                    ByteBuffer.allocate(1).asReadOnlyBuffer()
-                )
+                    JieIO.readTo(
+                            Channels.newChannel(new ByteArrayInputStream(new byte[1])),
+                            ByteBuffer.allocate(1).asReadOnlyBuffer()
+                    )
             );
         }
     }
@@ -358,7 +358,7 @@ public class ByteReaderTest {
         testReadTo(JieIO.newByteReader(JieIO.bufferSize() * 2), totalSize);
     }
 
-    private void testReadTo(ByteReader reader, int totalSize) throws Exception {
+    private void testReadTo(ByteOperator reader, int totalSize) throws Exception {
         testReadTo(reader, totalSize, -1);
         testReadTo(reader, totalSize, 0);
         testReadTo(reader, totalSize, 1);
@@ -369,39 +369,39 @@ public class ByteReaderTest {
         testReadTo(reader, totalSize, totalSize * 2);
     }
 
-    private void testReadTo(ByteReader reader, int totalSize, int readSize) throws Exception {
+    private void testReadTo(ByteOperator reader, int totalSize, int readSize) throws Exception {
         {
             // stream to stream
             byte[] data = JieRandom.fill(new byte[totalSize]);
             BytesBuilder builder = new BytesBuilder();
             assertEquals(
-                reader.readTo(new ByteArrayInputStream(data), builder),
-                totalSize
+                    reader.readTo(new ByteArrayInputStream(data), builder),
+                    totalSize
             );
             assertEquals(builder.toByteArray(), data);
             builder.reset();
             assertEquals(
-                reader.readTo(new ByteArrayInputStream(data), builder, readSize < 0 ? totalSize : readSize),
-                actualReadSize(totalSize, readSize)
+                    reader.readTo(new ByteArrayInputStream(data), builder, readSize < 0 ? totalSize : readSize),
+                    actualReadSize(totalSize, readSize)
             );
             assertEquals(
-                builder.toByteArray(),
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+                    builder.toByteArray(),
+                    (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
             );
             builder.reset();
             assertEquals(
-                reader.readTo(new OneBytePerRead(data), builder),
-                totalSize
+                    reader.readTo(new OneBytePerRead(data), builder),
+                    totalSize
             );
             assertEquals(builder.toByteArray(), data);
             builder.reset();
             assertEquals(
-                reader.readTo(new OneBytePerRead(data), builder, readSize < 0 ? totalSize : readSize),
-                actualReadSize(totalSize, readSize)
+                    reader.readTo(new OneBytePerRead(data), builder, readSize < 0 ? totalSize : readSize),
+                    actualReadSize(totalSize, readSize)
             );
             assertEquals(
-                builder.toByteArray(),
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+                    builder.toByteArray(),
+                    (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
             );
             builder.reset();
         }
@@ -410,50 +410,50 @@ public class ByteReaderTest {
             byte[] data = JieRandom.fill(new byte[totalSize]);
             byte[] dst = new byte[data.length];
             assertEquals(
-                reader.readTo(new ByteArrayInputStream(data), dst),
-                totalSize
+                    reader.readTo(new ByteArrayInputStream(data), dst),
+                    totalSize
             );
             assertEquals(dst, data);
             if (readSize >= 0 && readSize <= totalSize) {
                 dst = new byte[data.length];
                 assertEquals(
-                    reader.readTo(new ByteArrayInputStream(data), dst, 0, readSize),
-                    readSize
+                        reader.readTo(new ByteArrayInputStream(data), dst, 0, readSize),
+                        readSize
                 );
                 assertEquals(
-                    Arrays.copyOf(dst, readSize),
-                    Arrays.copyOf(data, readSize)
+                        Arrays.copyOf(dst, readSize),
+                        Arrays.copyOf(data, readSize)
                 );
                 if (readSize <= totalSize - 1) {
                     dst = new byte[data.length];
                     assertEquals(
-                        reader.readTo(new ByteArrayInputStream(data), dst, 1, readSize),
-                        readSize
+                            reader.readTo(new ByteArrayInputStream(data), dst, 1, readSize),
+                            readSize
                     );
                     assertEquals(
-                        Arrays.copyOfRange(dst, 1, 1 + readSize),
-                        Arrays.copyOf(data, readSize)
+                            Arrays.copyOfRange(dst, 1, 1 + readSize),
+                            Arrays.copyOf(data, readSize)
                     );
                 }
             }
             if (readSize > totalSize) {
                 dst = new byte[readSize];
                 assertEquals(
-                    reader.readTo(new ByteArrayInputStream(data), dst, 0, readSize),
-                    totalSize
+                        reader.readTo(new ByteArrayInputStream(data), dst, 0, readSize),
+                        totalSize
                 );
                 assertEquals(
-                    Arrays.copyOf(dst, totalSize),
-                    data
+                        Arrays.copyOf(dst, totalSize),
+                        data
                 );
                 dst = new byte[readSize + 1];
                 assertEquals(
-                    reader.readTo(new ByteArrayInputStream(data), dst, 1, readSize),
-                    totalSize
+                        reader.readTo(new ByteArrayInputStream(data), dst, 1, readSize),
+                        totalSize
                 );
                 assertEquals(
-                    Arrays.copyOfRange(dst, 1, 1 + totalSize),
-                    data
+                        Arrays.copyOfRange(dst, 1, 1 + totalSize),
+                        data
                 );
             }
         }
@@ -462,17 +462,17 @@ public class ByteReaderTest {
             byte[] data = JieRandom.fill(new byte[totalSize]);
             ByteBuffer dst = ByteBuffer.allocate(data.length);
             assertEquals(
-                reader.readTo(new ByteArrayInputStream(data), dst),
-                totalSize
+                    reader.readTo(new ByteArrayInputStream(data), dst),
+                    totalSize
             );
             assertEquals(dst.flip(), ByteBuffer.wrap(data));
             dst = ByteBuffer.allocate(data.length);
             assertEquals(
-                reader.readTo(new ByteArrayInputStream(data), dst, readSize < 0 ? totalSize : readSize),
-                actualReadSize(totalSize, readSize)
+                    reader.readTo(new ByteArrayInputStream(data), dst, readSize < 0 ? totalSize : readSize),
+                    actualReadSize(totalSize, readSize)
             );
             assertEquals(dst.flip(), ByteBuffer.wrap(
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+                    (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
             ));
         }
         {
@@ -480,17 +480,17 @@ public class ByteReaderTest {
             byte[] data = JieRandom.fill(new byte[totalSize]);
             ByteBuffer dst = ByteBuffer.allocateDirect(data.length);
             assertEquals(
-                reader.readTo(new ByteArrayInputStream(data), dst),
-                totalSize
+                    reader.readTo(new ByteArrayInputStream(data), dst),
+                    totalSize
             );
             assertEquals(dst.flip(), ByteBuffer.wrap(data));
             dst = ByteBuffer.allocateDirect(data.length);
             assertEquals(
-                reader.readTo(new ByteArrayInputStream(data), dst, readSize < 0 ? totalSize : readSize),
-                actualReadSize(totalSize, readSize)
+                    reader.readTo(new ByteArrayInputStream(data), dst, readSize < 0 ? totalSize : readSize),
+                    actualReadSize(totalSize, readSize)
             );
             assertEquals(dst.flip(), ByteBuffer.wrap(
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+                    (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
             ));
         }
         {
@@ -498,22 +498,22 @@ public class ByteReaderTest {
             byte[] data = JieRandom.fill(new byte[totalSize]);
             BytesBuilder builder = new BytesBuilder();
             assertEquals(
-                reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(builder)),
-                totalSize
+                    reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(builder)),
+                    totalSize
             );
             assertEquals(builder.toByteArray(), data);
             builder.reset();
             assertEquals(
-                reader.readTo(
-                    Channels.newChannel(new ByteArrayInputStream(data)),
-                    Channels.newChannel(builder),
-                    readSize < 0 ? totalSize : readSize
-                ),
-                actualReadSize(totalSize, readSize)
+                    reader.readTo(
+                            Channels.newChannel(new ByteArrayInputStream(data)),
+                            Channels.newChannel(builder),
+                            readSize < 0 ? totalSize : readSize
+                    ),
+                    actualReadSize(totalSize, readSize)
             );
             assertEquals(
-                builder.toByteArray(),
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+                    builder.toByteArray(),
+                    (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
             );
             builder.reset();
         }
@@ -522,50 +522,50 @@ public class ByteReaderTest {
             byte[] data = JieRandom.fill(new byte[totalSize]);
             byte[] dst = new byte[data.length];
             assertEquals(
-                reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst),
-                totalSize
+                    reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst),
+                    totalSize
             );
             assertEquals(dst, data);
             if (readSize >= 0 && readSize <= totalSize) {
                 dst = new byte[data.length];
                 assertEquals(
-                    reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst, 0, readSize),
-                    readSize
+                        reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst, 0, readSize),
+                        readSize
                 );
                 assertEquals(
-                    Arrays.copyOf(dst, readSize),
-                    Arrays.copyOf(data, readSize)
+                        Arrays.copyOf(dst, readSize),
+                        Arrays.copyOf(data, readSize)
                 );
                 if (readSize <= totalSize - 1) {
                     dst = new byte[data.length];
                     assertEquals(
-                        reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst, 1, readSize),
-                        readSize
+                            reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst, 1, readSize),
+                            readSize
                     );
                     assertEquals(
-                        Arrays.copyOfRange(dst, 1, 1 + readSize),
-                        Arrays.copyOf(data, readSize)
+                            Arrays.copyOfRange(dst, 1, 1 + readSize),
+                            Arrays.copyOf(data, readSize)
                     );
                 }
             }
             if (readSize > totalSize) {
                 dst = new byte[readSize];
                 assertEquals(
-                    reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst, 0, readSize),
-                    totalSize
+                        reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst, 0, readSize),
+                        totalSize
                 );
                 assertEquals(
-                    Arrays.copyOf(dst, totalSize),
-                    data
+                        Arrays.copyOf(dst, totalSize),
+                        data
                 );
                 dst = new byte[readSize + 1];
                 assertEquals(
-                    reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst, 1, readSize),
-                    totalSize
+                        reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst, 1, readSize),
+                        totalSize
                 );
                 assertEquals(
-                    Arrays.copyOfRange(dst, 1, 1 + totalSize),
-                    data
+                        Arrays.copyOfRange(dst, 1, 1 + totalSize),
+                        data
                 );
             }
         }
@@ -574,17 +574,17 @@ public class ByteReaderTest {
             byte[] data = JieRandom.fill(new byte[totalSize]);
             ByteBuffer dst = ByteBuffer.allocate(data.length);
             assertEquals(
-                reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst),
-                totalSize
+                    reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst),
+                    totalSize
             );
             assertEquals(dst.flip(), ByteBuffer.wrap(data));
             dst = ByteBuffer.allocate(data.length);
             assertEquals(
-                reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst, readSize < 0 ? totalSize : readSize),
-                actualReadSize(totalSize, readSize)
+                    reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst, readSize < 0 ? totalSize : readSize),
+                    actualReadSize(totalSize, readSize)
             );
             assertEquals(dst.flip(), ByteBuffer.wrap(
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+                    (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
             ));
         }
         {
@@ -592,17 +592,17 @@ public class ByteReaderTest {
             byte[] data = JieRandom.fill(new byte[totalSize]);
             ByteBuffer dst = ByteBuffer.allocateDirect(data.length);
             assertEquals(
-                reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst),
-                totalSize
+                    reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst),
+                    totalSize
             );
             assertEquals(dst.flip(), ByteBuffer.wrap(data));
             dst = ByteBuffer.allocateDirect(data.length);
             assertEquals(
-                reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst, readSize < 0 ? totalSize : readSize),
-                actualReadSize(totalSize, readSize)
+                    reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst, readSize < 0 ? totalSize : readSize),
+                    actualReadSize(totalSize, readSize)
             );
             assertEquals(dst.flip(), ByteBuffer.wrap(
-                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+                    (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
             ));
         }
     }

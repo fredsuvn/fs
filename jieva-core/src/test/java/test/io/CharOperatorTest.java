@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.base.chars.CharsBuilder;
-import xyz.sunqian.common.io.CharReader;
+import xyz.sunqian.common.io.CharOperator;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieBuffer;
 import xyz.sunqian.common.io.JieIO;
@@ -22,7 +22,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.expectThrows;
 
-public class CharReaderTest {
+public class CharOperatorTest {
 
     @Test
     public void testRead() throws Exception {
@@ -73,7 +73,7 @@ public class CharReaderTest {
         testRead(JieIO.newCharReader(JieIO.bufferSize() * 2), totalSize);
     }
 
-    private void testRead(CharReader reader, int totalSize) throws Exception {
+    private void testRead(CharOperator reader, int totalSize) throws Exception {
         testRead(reader, totalSize, -1);
         testRead(reader, totalSize, 0);
         testRead(reader, totalSize, 1);
@@ -84,7 +84,7 @@ public class CharReaderTest {
         testRead(reader, totalSize, totalSize * 2);
     }
 
-    private void testRead(CharReader reader, int totalSize, int readSize) throws Exception {
+    private void testRead(CharOperator reader, int totalSize, int readSize) throws Exception {
         {
             // reader
             char[] data = JieRandom.fill(new char[totalSize]);
@@ -249,7 +249,7 @@ public class CharReaderTest {
         testReadTo(JieIO.newCharReader(JieIO.bufferSize() * 2), totalSize);
     }
 
-    private void testReadTo(CharReader reader, int totalSize) throws Exception {
+    private void testReadTo(CharOperator reader, int totalSize) throws Exception {
         testReadTo(reader, totalSize, -1);
         testReadTo(reader, totalSize, 0);
         testReadTo(reader, totalSize, 1);
@@ -260,7 +260,7 @@ public class CharReaderTest {
         testReadTo(reader, totalSize, totalSize * 2);
     }
 
-    private void testReadTo(CharReader reader, int totalSize, int readSize) throws Exception {
+    private void testReadTo(CharOperator reader, int totalSize, int readSize) throws Exception {
         {
             // reader to appender
             char[] data = JieRandom.fill(new char[totalSize]);
