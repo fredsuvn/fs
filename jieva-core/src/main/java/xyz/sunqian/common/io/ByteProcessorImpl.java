@@ -27,7 +27,7 @@ final class ByteProcessorImpl implements ByteProcessor {
     private @Nullable List<ByteEncoder> encoders;
 
     // initials after starting process
-    private @Nullable ByteReaderX sourceReader;
+    private @Nullable ByteReader sourceReader;
     private @Nullable ByteEncoder oneEncoder;
 
     ByteProcessorImpl(InputStream source) {
@@ -56,7 +56,7 @@ final class ByteProcessorImpl implements ByteProcessor {
         return dest;
     }
 
-    private ByteReaderX getSourceReader() {
+    private ByteReader getSourceReader() {
         if (sourceReader == null) {
             sourceReader = toByteReader(getSource());
         }
@@ -231,7 +231,7 @@ final class ByteProcessorImpl implements ByteProcessor {
         return readTo(getSourceReader(), getEncoder(), out);
     }
 
-    private long readTo(ByteReaderX reader, ByteEncoder oneEncoder, DataWriter out) throws Exception {
+    private long readTo(ByteReader reader, ByteEncoder oneEncoder, DataWriter out) throws Exception {
         // ByteReader reader = readLimit < 0 ? in : in.withReadLimit(readLimit);
         long count = 0;
         while (true) {
@@ -260,15 +260,15 @@ final class ByteProcessorImpl implements ByteProcessor {
         return (int) Math.min(readLimit - count, readBlockSize);
     }
 
-    private ByteReaderX toByteReader(Object src) {
+    private ByteReader toByteReader(Object src) {
         if (src instanceof InputStream) {
-            return ByteReaderX.from((InputStream) src);
+            return ByteReader.from((InputStream) src);
         }
         if (src instanceof byte[]) {
-            return ByteReaderX.from((byte[]) src);
+            return ByteReader.from((byte[]) src);
         }
         if (src instanceof ByteBuffer) {
-            return ByteReaderX.from((ByteBuffer) src);
+            return ByteReader.from((ByteBuffer) src);
         }
         throw new IORuntimeException("The type of source is unsupported: " + src.getClass());
     }

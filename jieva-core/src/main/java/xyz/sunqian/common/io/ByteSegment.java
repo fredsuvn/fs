@@ -5,9 +5,8 @@ import xyz.sunqian.annotations.Nonnull;
 import java.nio.ByteBuffer;
 
 /**
- * This interface represents a segment of data in the data source, which may be a byte sequence or a stream. It includes
- * the {@link #data()} which is the content of this segment, and the {@link #end()} which indicates whether this segment
- * is the end of the data source.
+ * This interface represents a segment of byte data in the data source. It includes the {@link #data()}, which is the
+ * content of this segment, and the {@link #end()}, which indicates whether this segment is the end of the data.
  *
  * @author sunqian
  */
@@ -17,26 +16,26 @@ public interface ByteSegment {
      * Returns a new {@link ByteSegment} with the given data and end flag.
      *
      * @param data the given data
-     * @param end  the given end flag
+     * @param end  the end flag
      * @return a new {@link ByteSegment} with the given data and end flag
      */
     static @Nonnull ByteSegment of(@Nonnull ByteBuffer data, boolean end) {
-        return new ByteReaderXImpl.ByteSegmentImpl(data, end);
+        return new ByteReaderImpl.ByteSegmentImpl(data, end);
     }
 
     /**
-     * Returns an empty {@link ByteSegment} with the given end flag. This method returns the same instance for each
-     * flag.
+     * Returns an empty singleton {@link ByteSegment} with the end flag.
      *
-     * @param end the given end flag
-     * @return an empty {@link ByteSegment} with the given end flag
+     * @param end the end flag
+     * @return an empty singleton {@link ByteSegment} with the end flag
      */
     static @Nonnull ByteSegment empty(boolean end) {
-        return ByteReaderXImpl.ByteSegmentImpl.empty(end);
+        return ByteReaderImpl.ByteSegmentImpl.empty(end);
     }
 
     /**
-     * Returns the data content of this segment. This method never return null, but can return an empty buffer.
+     * Returns the data content of this segment. This method never returns {@code null}, but can return an empty
+     * buffer.
      *
      * @return the data content of this segment
      */
@@ -51,12 +50,16 @@ public interface ByteSegment {
     boolean end();
 
     /**
-     * Returns the remaining data as a new byte array from the {@link #data()}.
+     * Returns the remaining data as a new byte array from the {@link #data()}. This method never returns {@code null},
+     * but can return an empty array.
+     * <p>
+     * The buffer's position increments by the actual read number.
      *
      * @return the remaining data as a new byte array from the {@link #data()}
      */
     default byte @Nonnull [] toByteArray() {
-        return JieBuffer.read(data());
+        byte[] ret = JieBuffer.read(data());
+        return ret == null ? new byte[0] : ret;
     }
 
     /**

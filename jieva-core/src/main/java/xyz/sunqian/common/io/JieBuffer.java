@@ -81,7 +81,7 @@ public class JieBuffer {
      * @return the array containing the data
      * @throws IllegalArgumentException if the specified read length is illegal
      */
-    public static byte @Nullable [] read(@Nonnull ByteBuffer src, int len) {
+    public static byte @Nullable [] read(@Nonnull ByteBuffer src, int len) throws IllegalArgumentException {
         JieCheck.checkArgument(len >= 0, "len must >= 0.");
         if (len == 0) {
             return new byte[0];
@@ -127,7 +127,7 @@ public class JieBuffer {
      * @param off the specified offset of the array
      * @param len the specified length to read
      * @return the actual number of bytes read
-     * @throws IndexOutOfBoundsException if the array arguments are out of bounds
+     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
      */
     public static int readTo(
         @Nonnull ByteBuffer src, byte @Nonnull [] dst, int off, int len
@@ -136,9 +136,7 @@ public class JieBuffer {
         return readTo0(src, dst, off, len);
     }
 
-    private static int readTo0(
-        @Nonnull ByteBuffer src, byte @Nonnull [] dst, int off, int len
-    ) throws IndexOutOfBoundsException {
+    private static int readTo0(@Nonnull ByteBuffer src, byte @Nonnull [] dst, int off, int len) {
         if (len == 0) {
             return 0;
         }
@@ -162,23 +160,28 @@ public class JieBuffer {
      * @param src the source buffer
      * @param dst the specified buffer
      * @return the actual number of bytes read
+     * @throws IORuntimeException if an I/O error occurs
      */
-    public static int readTo(@Nonnull ByteBuffer src, @Nonnull ByteBuffer dst) {
+    public static int readTo(@Nonnull ByteBuffer src, @Nonnull ByteBuffer dst) throws IORuntimeException {
         if (!dst.hasRemaining()) {
             return 0;
         }
         if (!src.hasRemaining()) {
             return -1;
         }
-        int actualLen = Math.min(src.remaining(), dst.remaining());
-        if (src.remaining() <= dst.remaining()) {
-            dst.put(src);
-        } else {
-            ByteBuffer srcSlice = slice0(src, 0, dst.remaining());
-            dst.put(srcSlice);
-            src.position(src.position() + actualLen);
+        try {
+            int actualLen = Math.min(src.remaining(), dst.remaining());
+            if (src.remaining() <= dst.remaining()) {
+                dst.put(src);
+            } else {
+                ByteBuffer srcSlice = slice0(src, 0, dst.remaining());
+                dst.put(srcSlice);
+                src.position(src.position() + actualLen);
+            }
+            return actualLen;
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
         }
-        return actualLen;
     }
 
     /**
@@ -196,8 +199,11 @@ public class JieBuffer {
      * @param len the specified length, must {@code >= 0}
      * @return the actual number of bytes read
      * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
      */
-    public static int readTo(@Nonnull ByteBuffer src, @Nonnull ByteBuffer dst, int len) {
+    public static int readTo(
+        @Nonnull ByteBuffer src, @Nonnull ByteBuffer dst, int len
+    ) throws IllegalArgumentException, IORuntimeException {
         JieCheck.checkArgument(len >= 0, "len must >= 0.");
         if (len == 0) {
             return 0;
@@ -208,19 +214,23 @@ public class JieBuffer {
         if (!src.hasRemaining()) {
             return -1;
         }
-        int actualLen = Math.min(src.remaining(), dst.remaining());
-        actualLen = Math.min(len, actualLen);
-        ByteBuffer srcBuf;
-        if (src.remaining() > actualLen) {
-            srcBuf = slice0(src, 0, actualLen);
-        } else {
-            srcBuf = src;
+        try {
+            int actualLen = Math.min(src.remaining(), dst.remaining());
+            actualLen = Math.min(len, actualLen);
+            ByteBuffer srcBuf;
+            if (src.remaining() > actualLen) {
+                srcBuf = slice0(src, 0, actualLen);
+            } else {
+                srcBuf = src;
+            }
+            dst.put(srcBuf);
+            if (srcBuf != src) {
+                src.position(src.position() + actualLen);
+            }
+            return actualLen;
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
         }
-        dst.put(srcBuf);
-        if (srcBuf != src) {
-            src.position(src.position() + actualLen);
-        }
-        return actualLen;
     }
 
     /**
@@ -260,14 +270,14 @@ public class JieBuffer {
      */
     public static int readTo(
         @Nonnull ByteBuffer src, @Nonnull WritableByteChannel dst, int len
-    ) throws IORuntimeException {
+    ) throws IllegalArgumentException, IORuntimeException {
         JieCheck.checkArgument(len >= 0, "len must >= 0.");
         return readTo0(src, dst, len);
     }
 
     private static int readTo0(
         @Nonnull ByteBuffer src, @Nonnull WritableByteChannel dst, int len
-    ) throws IndexOutOfBoundsException, IORuntimeException {
+    ) throws IORuntimeException {
         if (len == 0) {
             return 0;
         }
@@ -324,15 +334,15 @@ public class JieBuffer {
      * @throws IORuntimeException       if an I/O error occurs
      */
     public static int readTo(
-        @Nonnull ByteBuffer src, @Nonnull OutputStream dst, long len
-    ) throws IORuntimeException {
+        @Nonnull ByteBuffer src, @Nonnull OutputStream dst, int len
+    ) throws IllegalArgumentException, IORuntimeException {
         JieCheck.checkArgument(len >= 0, "len must >= 0.");
         return readTo0(src, dst, len);
     }
 
     private static int readTo0(
-        @Nonnull ByteBuffer src, @Nonnull OutputStream dst, long len
-    ) throws IndexOutOfBoundsException, IORuntimeException {
+        @Nonnull ByteBuffer src, @Nonnull OutputStream dst, int len
+    ) throws IORuntimeException {
         if (len == 0) {
             return 0;
         }
@@ -340,7 +350,7 @@ public class JieBuffer {
             return -1;
         }
         try {
-            int actualLen = len < 0 ? src.remaining() : (int) Math.min(src.remaining(), len);
+            int actualLen = len < 0 ? src.remaining() : Math.min(src.remaining(), len);
             if (src.hasArray()) {
                 dst.write(src.array(), JieBuffer.arrayStartIndex(src), actualLen);
                 src.position(src.position() + actualLen);
@@ -387,7 +397,7 @@ public class JieBuffer {
      * @return the array containing the data
      * @throws IllegalArgumentException if the specified read length is illegal
      */
-    public static char @Nullable [] read(@Nonnull CharBuffer src, int len) {
+    public static char @Nullable [] read(@Nonnull CharBuffer src, int len) throws IllegalArgumentException {
         JieCheck.checkArgument(len >= 0, "len must >= 0.");
         if (len == 0) {
             return new char[0];
@@ -433,7 +443,7 @@ public class JieBuffer {
      * @param off the specified offset of the array
      * @param len the specified length to read
      * @return the actual number of chars read
-     * @throws IndexOutOfBoundsException if the array arguments are out of bounds
+     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
      */
     public static int readTo(
         @Nonnull CharBuffer src, char @Nonnull [] dst, int off, int len
@@ -444,7 +454,7 @@ public class JieBuffer {
 
     private static int readTo0(
         @Nonnull CharBuffer src, char @Nonnull [] dst, int off, int len
-    ) throws IndexOutOfBoundsException {
+    ) {
         if (len == 0) {
             return 0;
         }
@@ -468,23 +478,28 @@ public class JieBuffer {
      * @param src the source buffer
      * @param dst the specified buffer
      * @return the actual number of chars read
+     * @throws IORuntimeException if an I/O error occurs
      */
-    public static int readTo(@Nonnull CharBuffer src, @Nonnull CharBuffer dst) {
+    public static int readTo(@Nonnull CharBuffer src, @Nonnull CharBuffer dst) throws IORuntimeException {
         if (!dst.hasRemaining()) {
             return 0;
         }
         if (!src.hasRemaining()) {
             return -1;
         }
-        int actualLen = Math.min(src.remaining(), dst.remaining());
-        if (src.remaining() <= dst.remaining()) {
-            dst.put(src);
-        } else {
-            CharBuffer srcSlice = slice0(src, 0, dst.remaining());
-            dst.put(srcSlice);
-            src.position(src.position() + actualLen);
+        try {
+            int actualLen = Math.min(src.remaining(), dst.remaining());
+            if (src.remaining() <= dst.remaining()) {
+                dst.put(src);
+            } else {
+                CharBuffer srcSlice = slice0(src, 0, dst.remaining());
+                dst.put(srcSlice);
+                src.position(src.position() + actualLen);
+            }
+            return actualLen;
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
         }
-        return actualLen;
     }
 
     /**
@@ -502,8 +517,11 @@ public class JieBuffer {
      * @param len the specified length, must {@code >= 0}
      * @return the actual number of chars read
      * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
      */
-    public static int readTo(@Nonnull CharBuffer src, @Nonnull CharBuffer dst, int len) {
+    public static int readTo(
+        @Nonnull CharBuffer src, @Nonnull CharBuffer dst, int len
+    ) throws IllegalArgumentException, IORuntimeException {
         JieCheck.checkArgument(len >= 0, "len must >= 0.");
         if (len == 0) {
             return 0;
@@ -514,19 +532,23 @@ public class JieBuffer {
         if (!src.hasRemaining()) {
             return -1;
         }
-        int actualLen = Math.min(src.remaining(), dst.remaining());
-        actualLen = Math.min(len, actualLen);
-        CharBuffer srcBuf;
-        if (src.remaining() > actualLen) {
-            srcBuf = slice0(src, 0, actualLen);
-        } else {
-            srcBuf = src;
+        try {
+            int actualLen = Math.min(src.remaining(), dst.remaining());
+            actualLen = Math.min(len, actualLen);
+            CharBuffer srcBuf;
+            if (src.remaining() > actualLen) {
+                srcBuf = slice0(src, 0, actualLen);
+            } else {
+                srcBuf = src;
+            }
+            dst.put(srcBuf);
+            if (srcBuf != src) {
+                src.position(src.position() + actualLen);
+            }
+            return actualLen;
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
         }
-        dst.put(srcBuf);
-        if (srcBuf != src) {
-            src.position(src.position() + actualLen);
-        }
-        return actualLen;
     }
 
     /**
@@ -565,14 +587,14 @@ public class JieBuffer {
      * @throws IORuntimeException       if an I/O error occurs
      */
     public static int readTo(
-        @Nonnull CharBuffer src, @Nonnull Appendable dst, long len
-    ) throws IORuntimeException {
+        @Nonnull CharBuffer src, @Nonnull Appendable dst, int len
+    ) throws IllegalArgumentException, IORuntimeException {
         JieCheck.checkArgument(len >= 0, "len must >= 0.");
         return readTo0(src, dst, len);
     }
 
     private static int readTo0(
-        @Nonnull CharBuffer src, @Nonnull Appendable dst, long len
+        @Nonnull CharBuffer src, @Nonnull Appendable dst, int len
     ) throws IORuntimeException {
         if (len == 0) {
             return 0;
@@ -581,7 +603,7 @@ public class JieBuffer {
             return -1;
         }
         try {
-            int actualLen = len < 0 ? src.remaining() : (int) Math.min(src.remaining(), len);
+            int actualLen = len < 0 ? src.remaining() : Math.min(src.remaining(), len);
             dst.append(src, 0, actualLen);
             src.position(src.position() + actualLen);
             return actualLen;
@@ -895,8 +917,10 @@ public class JieBuffer {
      *
      * @param capacity the specified capacity
      * @return a new direct buffer with the specified capacity
+     * @throws IllegalArgumentException if the specified capacity is negative
      */
-    public static @Nonnull CharBuffer directBuffer(int capacity) {
+    public static @Nonnull CharBuffer directBuffer(int capacity) throws IllegalArgumentException {
+        JieCheck.checkArgument(capacity >= 0, "capacity must >= 0");
         return ByteBuffer.allocateDirect(capacity * 2).order(ByteOrder.BIG_ENDIAN).asCharBuffer();
     }
 }

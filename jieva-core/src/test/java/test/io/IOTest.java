@@ -102,11 +102,6 @@ public class IOTest {
             assertEquals(data, dstBuf.array());
         }
         {
-            // byte buffer size
-            expectThrows(IllegalArgumentException.class, () -> JieIO.newByteReader(0));
-            expectThrows(IllegalArgumentException.class, () -> JieIO.newByteReader(-1));
-        }
-        {
             // char
             // read all
             char[] data = JieRandom.fill(new char[1024]);
@@ -139,11 +134,6 @@ public class IOTest {
             dstBuf = CharBuffer.allocate(data.length);
             assertEquals(JieIO.readTo(new CharArrayReader(data), dstBuf, data.length), data.length);
             assertEquals(data, dstBuf.array());
-        }
-        {
-            // char buffer size
-            expectThrows(IllegalArgumentException.class, () -> JieIO.newCharReader(0));
-            expectThrows(IllegalArgumentException.class, () -> JieIO.newCharReader(-1));
         }
     }
 

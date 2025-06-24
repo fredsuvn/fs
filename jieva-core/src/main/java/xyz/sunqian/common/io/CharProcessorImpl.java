@@ -26,7 +26,7 @@ final class CharProcessorImpl implements CharProcessor {
     private @Nullable List<CharEncoder> encoders;
 
     // initials after starting process
-    private @Nullable CharReaderX sourceReader;
+    private @Nullable CharReader sourceReader;
     private @Nullable CharEncoder oneEncoder;
 
     CharProcessorImpl(Reader source) {
@@ -59,7 +59,7 @@ final class CharProcessorImpl implements CharProcessor {
         return dest;
     }
 
-    private CharReaderX getSourceReader() {
+    private CharReader getSourceReader() {
         if (sourceReader == null) {
             sourceReader = toCharReader(getSource());
         }
@@ -266,7 +266,7 @@ final class CharProcessorImpl implements CharProcessor {
         return readTo(getSourceReader(), getEncoder(), out);
     }
 
-    private long readTo(CharReaderX reader, CharEncoder oneEncoder, DataWriter out) throws Exception {
+    private long readTo(CharReader reader, CharEncoder oneEncoder, DataWriter out) throws Exception {
         // CharReader reader = readLimit < 0 ? in : in.withReadLimit(readLimit);
         long count = 0;
         while (true) {
@@ -295,18 +295,18 @@ final class CharProcessorImpl implements CharProcessor {
         return (int) Math.min(readLimit - count, readBlockSize);
     }
 
-    private CharReaderX toCharReader(Object src) {
+    private CharReader toCharReader(Object src) {
         if (src instanceof Reader) {
-            return CharReaderX.from((Reader) src);
+            return CharReader.from((Reader) src);
         }
         if (src instanceof char[]) {
-            return CharReaderX.from((char[]) src);
+            return CharReader.from((char[]) src);
         }
         if (src instanceof CharBuffer) {
-            return CharReaderX.from((CharBuffer) src);
+            return CharReader.from((CharBuffer) src);
         }
         if (src instanceof CharSequence) {
-            return CharReaderX.from((CharSequence) src);
+            return CharReader.from((CharSequence) src);
         }
         throw new IORuntimeException("The type of source is unsupported: " + src.getClass());
     }

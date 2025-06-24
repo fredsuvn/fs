@@ -5,9 +5,8 @@ import xyz.sunqian.annotations.Nonnull;
 import java.nio.CharBuffer;
 
 /**
- * This interface represents a segment of data in the data source, which may be a char sequence or a stream. It includes
- * the {@link #data()} which is the content of this segment, and the {@link #end()} which indicates whether this segment
- * is the end of the data source.
+ * This interface represents a segment of char data in the data source. It includes the {@link #data()}, which is the
+ * content of this segment, and the {@link #end()}, which indicates whether this segment is the end of the data.
  *
  * @author sunqian
  */
@@ -17,26 +16,26 @@ public interface CharSegment {
      * Returns a new {@link CharSegment} with the given data and end flag.
      *
      * @param data the given data
-     * @param end  the given end flag
+     * @param end  the end flag
      * @return a new {@link CharSegment} with the given data and end flag
      */
     static @Nonnull CharSegment of(@Nonnull CharBuffer data, boolean end) {
-        return new CharReaderXImpl.CharSegmentImpl(data, end);
+        return new CharReaderImpl.CharSegmentImpl(data, end);
     }
 
     /**
-     * Returns an empty {@link CharSegment} with the given end flag. This method returns the same instance for each
-     * flag.
+     * Returns an empty singleton {@link CharSegment} with the end flag.
      *
-     * @param end the given end flag
-     * @return an empty {@link CharSegment} with the given end flag
+     * @param end the end flag
+     * @return an empty singleton {@link CharSegment} with the end flag
      */
     static @Nonnull CharSegment empty(boolean end) {
-        return CharReaderXImpl.CharSegmentImpl.empty(end);
+        return CharReaderImpl.CharSegmentImpl.empty(end);
     }
 
     /**
-     * Returns the data content of this segment. This method never return null, but can return an empty buffer.
+     * Returns the data content of this segment. This method never returns {@code null}, but can return an empty
+     * buffer.
      *
      * @return the data content of this segment
      */
@@ -51,12 +50,16 @@ public interface CharSegment {
     boolean end();
 
     /**
-     * Returns the remaining data as a new char array from the {@link #data()}.
+     * Returns the remaining data as a new char array from the {@link #data()}. This method never returns {@code null},
+     * but can return an empty array.
+     * <p>
+     * The buffer's position increments by the actual read number.
      *
      * @return the remaining data as a new char array from the {@link #data()}
      */
     default char @Nonnull [] toCharArray() {
-        return JieBuffer.read(data());
+        char[] ret = JieBuffer.read(data());
+        return ret == null ? new char[0] : ret;
     }
 
     /**

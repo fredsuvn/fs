@@ -2,7 +2,6 @@ package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.JieCheck;
 import xyz.sunqian.common.base.chars.JieChars;
 
 import java.io.Closeable;
@@ -27,9 +26,13 @@ import java.util.Arrays;
  */
 public class JieIO {
 
-    private static final int BUFFER_SIZE = 1024 * 8;
-    private static final @Nonnull ByteOperator bo = newByteReader(bufferSize());
-    private static final @Nonnull CharOperator co = newCharReader(bufferSize());
+    /**
+     * Buffer size for I/O operations: 1024 * 8 = 8192.
+     */
+    public static final int BUFFER_SIZE = 1024 * 8;
+
+    private static final @Nonnull ByteOperator bo = ByteOperator.DEFAULT_OPERATOR;
+    private static final @Nonnull CharOperator co = CharOperator.DEFAULT_OPERATOR;
 
     /**
      * Returns the recommended IO buffer size, typically is 1024 * 8 = 8192.
@@ -53,30 +56,6 @@ public class JieIO {
      */
     public static int bufferSize(long len, int bufSize) {
         return len < 0 ? bufSize : (int) Math.min(len, bufSize);
-    }
-
-    /**
-     * Returns a new {@link ByteOperator} instance with the given buffer size.
-     *
-     * @param bufSize the given buffer size, must {@code > 0}
-     * @return a new {@link ByteOperator} instance with the given buffer size
-     * @throws IllegalArgumentException if the given buffer size {@code <= 0}
-     */
-    public static ByteOperator newByteReader(int bufSize) throws IllegalArgumentException {
-        JieCheck.checkArgument(bufSize > 0);
-        return new ByteOperatorImpl(bufSize);
-    }
-
-    /**
-     * Returns a new {@link CharOperator} instance with the given buffer size.
-     *
-     * @param bufSize the given buffer size, must {@code > 0}
-     * @return a new {@link CharOperator} instance with the given buffer size
-     * @throws IllegalArgumentException if the given buffer size {@code <= 0}
-     */
-    public static CharOperator newCharReader(int bufSize) throws IllegalArgumentException {
-        JieCheck.checkArgument(bufSize > 0);
-        return new CharOperatorImpl(bufSize);
     }
 
     /**
@@ -150,15 +129,15 @@ public class JieIO {
     }
 
     /**
-     * Reads all from the source stream into the specified output stream, until the read number reaches the specified
-     * length or reaches the end of the source stream, returns the actual number of bytes read to. If the end of the
-     * source stream has already been reached, returns {@code -1}.
+     * Reads all data from the source stream into the specified output stream, until the read number reaches the
+     * specified length or reaches the end of the source stream, returns the actual number of bytes read to. If the end
+     * of the source stream has already been reached, returns {@code -1}.
      * <p>
-     * This method never invoke the {@link OutputStream#flush()} to force the backing buffer.
+     * This method never invokes the {@link OutputStream#flush()} to force the backing buffer.
      *
      * @param src the source stream
      * @param dst the specified output stream
-     * @return the actual number of bytes read
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
      * @throws IORuntimeException if an I/O error occurs
      */
     public static long readTo(@Nonnull InputStream src, @Nonnull OutputStream dst) throws IORuntimeException {
@@ -173,17 +152,56 @@ public class JieIO {
      * If the specified length {@code = 0}, returns {@code 0} without reading; if the end of the source stream has
      * already been reached, returns {@code -1}.
      * <p>
-     * This method never invoke the {@link OutputStream#flush()} to force the backing buffer.
+     * This method never invokes the {@link OutputStream#flush()} to force the backing buffer.
      *
      * @param src the source stream
      * @param dst the specified output stream
      * @param len the specified length, must {@code >= 0}
-     * @return the actual number of bytes read
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
      * @throws IllegalArgumentException if the specified length is illegal
      * @throws IORuntimeException       if an I/O error occurs
      */
     public static long readTo(
         @Nonnull InputStream src, @Nonnull OutputStream dst, long len
+    ) throws IllegalArgumentException, IORuntimeException {
+        return bo.readTo(src, dst, len);
+    }
+
+    /**
+     * Reads all data from the source stream into the specified output channel, until the read number reaches the
+     * specified length or reaches the end of the source stream, returns the actual number of bytes read to. If the end
+     * of the source stream has already been reached, returns {@code -1}.
+     * <p>
+     * This method never invokes the {@link OutputStream#flush()} to force the backing buffer.
+     *
+     * @param src the source stream
+     * @param dst the specified output channel
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static long readTo(@Nonnull InputStream src, @Nonnull WritableByteChannel dst) throws IORuntimeException {
+        return bo.readTo(src, dst);
+    }
+
+    /**
+     * Reads the data of the specified length from the source stream into the specified output channel, until the read
+     * number reaches the specified length or reaches the end of the source stream, returns the actual number of bytes
+     * read to.
+     * <p>
+     * If the specified length {@code = 0}, returns {@code 0} without reading; if the end of the source stream has
+     * already been reached, returns {@code -1}.
+     * <p>
+     * This method never invokes the {@link OutputStream#flush()} to force the backing buffer.
+     *
+     * @param src the source stream
+     * @param dst the specified output channel
+     * @param len the specified length, must {@code >= 0}
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
+     * @throws IllegalArgumentException if the specified length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long readTo(
+        @Nonnull InputStream src, @Nonnull WritableByteChannel dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
         return bo.readTo(src, dst, len);
     }
@@ -197,12 +215,10 @@ public class JieIO {
      *
      * @param src the source stream
      * @param dst the specified array
-     * @return the actual number of bytes read
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
      * @throws IORuntimeException if an I/O error occurs
      */
-    public static int readTo(
-        @Nonnull InputStream src, byte @Nonnull [] dst
-    ) throws IndexOutOfBoundsException, IORuntimeException {
+    public static int readTo(@Nonnull InputStream src, byte @Nonnull [] dst) throws IORuntimeException {
         return bo.readTo(src, dst);
     }
 
@@ -218,8 +234,8 @@ public class JieIO {
      * @param dst the specified array
      * @param off the specified offset of the array
      * @param len the specified length to read
-     * @return the actual number of bytes read
-     * @throws IndexOutOfBoundsException if the array arguments are out of bounds
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
+     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
      * @throws IORuntimeException        if an I/O error occurs
      */
     public static int readTo(
@@ -239,7 +255,7 @@ public class JieIO {
      *
      * @param src the source stream
      * @param dst the specified buffer
-     * @return the actual number of bytes read
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
      * @throws IORuntimeException if an I/O error occurs
      */
     public static int readTo(@Nonnull InputStream src, @Nonnull ByteBuffer dst) throws IORuntimeException {
@@ -259,7 +275,7 @@ public class JieIO {
      * @param src the source stream
      * @param dst the specified buffer
      * @param len the specified length, must {@code >= 0}
-     * @return the actual number of bytes read
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
      * @throws IllegalArgumentException if the specified read length is illegal
      * @throws IORuntimeException       if an I/O error occurs
      */
@@ -270,13 +286,13 @@ public class JieIO {
     }
 
     /**
-     * Reads all from the source channel into the specified output channel, until the read number reaches the specified
-     * length or reaches the end of the source channel, returns the actual number of bytes read to. If the end of the
-     * source channel has already been reached, returns {@code -1}.
+     * Reads all data from the source channel into the specified output channel, until the read number reaches the
+     * specified length or reaches the end of the source channel, returns the actual number of bytes read to. If the end
+     * of the source channel has already been reached, returns {@code -1}.
      *
      * @param src the source channel
      * @param dst the specified output channel
-     * @return the actual number of bytes read
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
      * @throws IORuntimeException if an I/O error occurs
      */
     public static long readTo(
@@ -296,12 +312,49 @@ public class JieIO {
      * @param src the source channel
      * @param dst the specified output channel
      * @param len the specified length, must {@code >= 0}
-     * @return the actual number of bytes read
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
      * @throws IllegalArgumentException if the specified length is illegal
      * @throws IORuntimeException       if an I/O error occurs
      */
     public static long readTo(
         @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, long len
+    ) throws IllegalArgumentException, IORuntimeException {
+        return bo.readTo(src, dst, len);
+    }
+
+    /**
+     * Reads all data from the source channel into the specified output stream, until the read number reaches the
+     * specified length or reaches the end of the source channel, returns the actual number of bytes read to. If the end
+     * of the source channel has already been reached, returns {@code -1}.
+     *
+     * @param src the source channel
+     * @param dst the specified output stream
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static long readTo(
+        @Nonnull ReadableByteChannel src, @Nonnull OutputStream dst
+    ) throws IORuntimeException {
+        return bo.readTo(src, dst);
+    }
+
+    /**
+     * Reads the data of the specified length from the source channel into the specified output stream, until the read
+     * number reaches the specified length or reaches the end of the source channel, returns the actual number of bytes
+     * read to.
+     * <p>
+     * If the specified length {@code < 0}, this method reads all data; if the specified length {@code = 0}, returns
+     * {@code 0} without reading; if the end of the source channel has already been reached, returns {@code -1}.
+     *
+     * @param src the source channel
+     * @param dst the specified output stream
+     * @param len the specified length, must {@code >= 0}
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
+     * @throws IllegalArgumentException if the specified length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static long readTo(
+        @Nonnull ReadableByteChannel src, @Nonnull OutputStream dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
         return bo.readTo(src, dst, len);
     }
@@ -315,12 +368,10 @@ public class JieIO {
      *
      * @param src the source channel
      * @param dst the specified array
-     * @return the actual number of bytes read
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
      * @throws IORuntimeException if an I/O error occurs
      */
-    public static int readTo(
-        @Nonnull ReadableByteChannel src, byte @Nonnull [] dst
-    ) throws IndexOutOfBoundsException, IORuntimeException {
+    public static int readTo(@Nonnull ReadableByteChannel src, byte @Nonnull [] dst) throws IORuntimeException {
         return bo.readTo(src, dst);
     }
 
@@ -336,8 +387,8 @@ public class JieIO {
      * @param dst the specified array
      * @param off the specified offset of the array
      * @param len the specified length to read
-     * @return the actual number of bytes read
-     * @throws IndexOutOfBoundsException if the array arguments are out of bounds
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
+     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
      * @throws IORuntimeException        if an I/O error occurs
      */
     public static int readTo(
@@ -357,7 +408,7 @@ public class JieIO {
      *
      * @param src the source channel
      * @param dst the specified buffer
-     * @return the actual number of bytes read
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
      * @throws IORuntimeException if an I/O error occurs
      */
     public static int readTo(@Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst) throws IORuntimeException {
@@ -377,13 +428,13 @@ public class JieIO {
      * @param src the source channel
      * @param dst the specified buffer
      * @param len the specified length, must {@code >= 0}
-     * @return the actual number of bytes read
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
      * @throws IllegalArgumentException if the specified read length is illegal
      * @throws IORuntimeException       if an I/O error occurs
      */
     public static int readTo(
         @Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst, int len
-    ) throws IORuntimeException {
+    ) throws IllegalArgumentException, IORuntimeException {
         return bo.readTo(src, dst, len);
     }
 
@@ -456,13 +507,13 @@ public class JieIO {
     }
 
     /**
-     * Reads all from the source stream into the specified output stream, until the read number reaches the specified
-     * length or reaches the end of the source stream, returns the actual number of chars read to. If the end of the
-     * source stream has already been reached, returns {@code -1}.
+     * Reads all data from the source stream into the specified output stream, until the read number reaches the
+     * specified length or reaches the end of the source stream, returns the actual number of chars read to. If the end
+     * of the source stream has already been reached, returns {@code -1}.
      *
      * @param src the source stream
      * @param dst the specified output stream
-     * @return the actual number of chars read
+     * @return the actual number of chars read, or {@code -1} if the end has already been reached
      * @throws IORuntimeException if an I/O error occurs
      */
     public static long readTo(@Nonnull Reader src, @Nonnull Appendable dst) throws IORuntimeException {
@@ -480,7 +531,7 @@ public class JieIO {
      * @param src the source stream
      * @param dst the specified output stream
      * @param len the specified length, must {@code >= 0}
-     * @return the actual number of chars read
+     * @return the actual number of chars read, or {@code -1} if the end has already been reached
      * @throws IllegalArgumentException if the specified length is illegal
      * @throws IORuntimeException       if an I/O error occurs
      */
@@ -499,12 +550,10 @@ public class JieIO {
      *
      * @param src the source stream
      * @param dst the specified array
-     * @return the actual number of chars read
+     * @return the actual number of chars read, or {@code -1} if the end has already been reached
      * @throws IORuntimeException if an I/O error occurs
      */
-    public static int readTo(
-        @Nonnull Reader src, char @Nonnull [] dst
-    ) throws IndexOutOfBoundsException, IORuntimeException {
+    public static int readTo(@Nonnull Reader src, char @Nonnull [] dst) throws IORuntimeException {
         return co.readTo(src, dst);
     }
 
@@ -520,8 +569,8 @@ public class JieIO {
      * @param dst the specified array
      * @param off the specified offset of the array
      * @param len the specified length to read
-     * @return the actual number of chars read
-     * @throws IndexOutOfBoundsException if the array arguments are out of bounds
+     * @return the actual number of chars read, or {@code -1} if the end has already been reached
+     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
      * @throws IORuntimeException        if an I/O error occurs
      */
     public static int readTo(
@@ -541,7 +590,7 @@ public class JieIO {
      *
      * @param src the source stream
      * @param dst the specified buffer
-     * @return the actual number of chars read
+     * @return the actual number of chars read, or {@code -1} if the end has already been reached
      * @throws IORuntimeException if an I/O error occurs
      */
     public static int readTo(@Nonnull Reader src, @Nonnull CharBuffer dst) throws IORuntimeException {
@@ -561,13 +610,13 @@ public class JieIO {
      * @param src the source stream
      * @param dst the specified buffer
      * @param len the specified length, must {@code >= 0}
-     * @return the actual number of chars read
+     * @return the actual number of chars read, or {@code -1} if the end has already been reached
      * @throws IllegalArgumentException if the specified read length is illegal
      * @throws IORuntimeException       if an I/O error occurs
      */
     public static int readTo(
         @Nonnull Reader src, @Nonnull CharBuffer dst, int len
-    ) throws IORuntimeException {
+    ) throws IllegalArgumentException, IORuntimeException {
         return co.readTo(src, dst, len);
     }
 
@@ -730,7 +779,7 @@ public class JieIO {
      * @param off   the specified offset
      * @param len   the specified length
      * @return the given array as a new {@link InputStream}
-     * @throws IndexOutOfBoundsException if the array arguments are out of bounds
+     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
      */
     public static @Nonnull InputStream newInputStream(
         byte @Nonnull [] array, int off, int len
@@ -842,7 +891,7 @@ public class JieIO {
      * @param off   the specified offset
      * @param len   the specified length
      * @return the given array as a new {@link Reader}
-     * @throws IndexOutOfBoundsException if the array arguments are out of bounds
+     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
      */
     public static @Nonnull Reader newReader(
         char @Nonnull [] array, int off, int len
@@ -882,7 +931,7 @@ public class JieIO {
      * @param start the specified start index inclusive
      * @param end   the specified end index exclusive
      * @return the given char sequence as a new {@link Reader}
-     * @throws IndexOutOfBoundsException if the array arguments are out of bounds
+     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
      */
     public static @Nonnull Reader newReader(
         @Nonnull CharSequence chars, int start, int end
@@ -974,7 +1023,7 @@ public class JieIO {
      * @param off   the specified offset
      * @param len   the specified length
      * @return the given array as a new {@link OutputStream}
-     * @throws IndexOutOfBoundsException if the array arguments are out of bounds
+     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
      */
     public static @Nonnull OutputStream newOutputStream(
         byte @Nonnull [] array, int off, int len
@@ -1087,7 +1136,7 @@ public class JieIO {
      * @param off   the specified offset
      * @param len   the specified length
      * @return the given array as a new {@link Writer}
-     * @throws IndexOutOfBoundsException if the array arguments are out of bounds
+     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
      */
     public static @Nonnull Writer newWriter(
         char @Nonnull [] array, int off, int len

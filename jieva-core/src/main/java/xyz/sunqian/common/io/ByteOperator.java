@@ -21,6 +21,24 @@ import java.util.Arrays;
 public interface ByteOperator {
 
     /**
+     * The default {@link ByteOperator} instance with the default buffer size ({@link JieIO#bufferSize()}).
+     */
+    @Nonnull
+    ByteOperator DEFAULT_OPERATOR = newOperator(JieIO.bufferSize());
+
+    /**
+     * Returns a new {@link ByteOperator} instance with the given buffer size.
+     *
+     * @param bufSize the given buffer size, must {@code > 0}
+     * @return a new {@link ByteOperator} instance with the given buffer size
+     * @throws IllegalArgumentException if the given buffer size {@code <= 0}
+     */
+    static ByteOperator newOperator(int bufSize) throws IllegalArgumentException {
+        JieCheck.checkArgument(bufSize > 0, "bufSize > 0.");
+        return new ByteOperatorImpl(bufSize);
+    }
+
+    /**
      * Returns the buffer size for reading and writing.
      *
      * @return the buffer size for reading and writing
@@ -209,19 +227,21 @@ public interface ByteOperator {
     }
 
     /**
-     * Reads all from the source stream into the specified output stream, until the read number reaches the specified
-     * length or reaches the end of the source stream, returns the actual number of bytes read to.
+     * Reads all data from the source stream into the specified output stream, until the read number reaches the
+     * specified length or reaches the end of the source stream, returns the actual number of bytes read to.
      * <p>
      * If the end of the source stream has already been reached, returns {@code -1}.
      * <p>
-     * This method never invoke the {@link OutputStream#flush()} to force the backing buffer.
+     * This method never invokes the {@link OutputStream#flush()} to force the backing buffer.
      *
      * @param src the source stream
      * @param dst the specified output stream
-     * @return the actual number of bytes read
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
      * @throws IORuntimeException if an I/O error occurs
      */
-    long readTo(@Nonnull InputStream src, @Nonnull OutputStream dst) throws IORuntimeException;
+    default long readTo(@Nonnull InputStream src, @Nonnull OutputStream dst) throws IORuntimeException {
+        return ByteOperatorImpl.readTo0(src, dst, -1, bufferSize());
+    }
 
     /**
      * Reads the data of the specified length from the source stream into the specified output stream, until the read
@@ -231,18 +251,62 @@ public interface ByteOperator {
      * If the specified length {@code = 0}, returns {@code 0} without reading; if the end of the source stream has
      * already been reached, returns {@code -1}.
      * <p>
-     * This method never invoke the {@link OutputStream#flush()} to force the backing buffer.
+     * This method never invokes the {@link OutputStream#flush()} to force the backing buffer.
      *
      * @param src the source stream
      * @param dst the specified output stream
      * @param len the specified length, must {@code >= 0}
-     * @return the actual number of bytes read
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
      * @throws IllegalArgumentException if the specified length is illegal
      * @throws IORuntimeException       if an I/O error occurs
      */
-    long readTo(
+    default long readTo(
             @Nonnull InputStream src, @Nonnull OutputStream dst, long len
-    ) throws IllegalArgumentException, IORuntimeException;
+    ) throws IllegalArgumentException, IORuntimeException {
+        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        return ByteOperatorImpl.readTo0(src, dst, len, bufferSize());
+    }
+
+    /**
+     * Reads all data from the source stream into the specified output channel, until the read number reaches the
+     * specified length or reaches the end of the source stream, returns the actual number of bytes read to.
+     * <p>
+     * If the end of the source stream has already been reached, returns {@code -1}.
+     * <p>
+     * This method never invokes the {@link OutputStream#flush()} to force the backing buffer.
+     *
+     * @param src the source stream
+     * @param dst the specified output channel
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    default long readTo(@Nonnull InputStream src, @Nonnull WritableByteChannel dst) throws IORuntimeException {
+        return ByteOperatorImpl.readTo0(src, dst, -1, bufferSize());
+    }
+
+    /**
+     * Reads the data of the specified length from the source stream into the specified output channel, until the read
+     * number reaches the specified length or reaches the end of the source stream, returns the actual number of bytes
+     * read to.
+     * <p>
+     * If the specified length {@code = 0}, returns {@code 0} without reading; if the end of the source stream has
+     * already been reached, returns {@code -1}.
+     * <p>
+     * This method never invokes the {@link OutputStream#flush()} to force the backing buffer.
+     *
+     * @param src the source stream
+     * @param dst the specified output channel
+     * @param len the specified length, must {@code >= 0}
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
+     * @throws IllegalArgumentException if the specified length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    default long readTo(
+            @Nonnull InputStream src, @Nonnull WritableByteChannel dst, long len
+    ) throws IllegalArgumentException, IORuntimeException {
+        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        return ByteOperatorImpl.readTo0(src, dst, len, bufferSize());
+    }
 
     /**
      * Reads the data from the source stream into the specified array, until the read number reaches the array's length
@@ -253,12 +317,12 @@ public interface ByteOperator {
      *
      * @param src the source stream
      * @param dst the specified array
-     * @return the actual number of bytes read
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
      * @throws IORuntimeException if an I/O error occurs
      */
-    int readTo(
-            @Nonnull InputStream src, byte @Nonnull [] dst
-    ) throws IndexOutOfBoundsException, IORuntimeException;
+    default int readTo(@Nonnull InputStream src, byte @Nonnull [] dst) throws IORuntimeException {
+        return ByteOperatorImpl.readTo0(src, dst, 0, dst.length);
+    }
 
     /**
      * Reads the data from the source stream into the specified array (starting at the specified offset and up to the
@@ -272,13 +336,16 @@ public interface ByteOperator {
      * @param dst the specified array
      * @param off the specified offset of the array
      * @param len the specified length to read
-     * @return the actual number of bytes read
-     * @throws IndexOutOfBoundsException if the array arguments are out of bounds
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
+     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
      * @throws IORuntimeException        if an I/O error occurs
      */
-    int readTo(
+    default int readTo(
             @Nonnull InputStream src, byte @Nonnull [] dst, int off, int len
-    ) throws IndexOutOfBoundsException, IORuntimeException;
+    ) throws IndexOutOfBoundsException, IORuntimeException {
+        JieCheck.checkOffsetLength(dst.length, off, len);
+        return ByteOperatorImpl.readTo0(src, dst, off, len);
+    }
 
     /**
      * Reads the data from the source stream into the specified buffer, until the read number reaches the buffer's
@@ -291,10 +358,12 @@ public interface ByteOperator {
      *
      * @param src the source stream
      * @param dst the specified buffer
-     * @return the actual number of bytes read
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
      * @throws IORuntimeException if an I/O error occurs
      */
-    int readTo(@Nonnull InputStream src, @Nonnull ByteBuffer dst) throws IORuntimeException;
+    default int readTo(@Nonnull InputStream src, @Nonnull ByteBuffer dst) throws IORuntimeException {
+        return ByteOperatorImpl.readTo0(src, dst, -1);
+    }
 
     /**
      * Reads the data of the specified length from the source stream into the specified buffer, until the read number
@@ -309,28 +378,33 @@ public interface ByteOperator {
      * @param src the source stream
      * @param dst the specified buffer
      * @param len the specified length, must {@code >= 0}
-     * @return the actual number of bytes read
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
      * @throws IllegalArgumentException if the specified read length is illegal
      * @throws IORuntimeException       if an I/O error occurs
      */
-    int readTo(
+    default int readTo(
             @Nonnull InputStream src, @Nonnull ByteBuffer dst, int len
-    ) throws IllegalArgumentException, IORuntimeException;
+    ) throws IllegalArgumentException, IORuntimeException {
+        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        return ByteOperatorImpl.readTo0(src, dst, len);
+    }
 
     /**
-     * Reads all from the source channel into the specified output channel, until the read number reaches the specified
-     * length or reaches the end of the source channel, returns the actual number of bytes read to.
+     * Reads all data from the source channel into the specified output channel, until the read number reaches the
+     * specified length or reaches the end of the source channel, returns the actual number of bytes read to.
      * <p>
      * If the end of the source channel has already been reached, returns {@code -1}.
      *
      * @param src the source channel
      * @param dst the specified output channel
-     * @return the actual number of bytes read
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
      * @throws IORuntimeException if an I/O error occurs
      */
-    long readTo(
+    default long readTo(
             @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst
-    ) throws IORuntimeException;
+    ) throws IORuntimeException {
+        return ByteOperatorImpl.readTo0(src, dst, -1, bufferSize());
+    }
 
     /**
      * Reads the data of the specified length from the source channel into the specified output channel, until the read
@@ -343,13 +417,55 @@ public interface ByteOperator {
      * @param src the source channel
      * @param dst the specified output channel
      * @param len the specified length, must {@code >= 0}
-     * @return the actual number of bytes read
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
      * @throws IllegalArgumentException if the specified length is illegal
      * @throws IORuntimeException       if an I/O error occurs
      */
-    long readTo(
+    default long readTo(
             @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, long len
-    ) throws IllegalArgumentException, IORuntimeException;
+    ) throws IllegalArgumentException, IORuntimeException {
+        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        return ByteOperatorImpl.readTo0(src, dst, len, bufferSize());
+    }
+
+    /**
+     * Reads all data from the source channel into the specified output stream, until the read number reaches the
+     * specified length or reaches the end of the source channel, returns the actual number of bytes read to.
+     * <p>
+     * If the end of the source channel has already been reached, returns {@code -1}.
+     *
+     * @param src the source channel
+     * @param dst the specified output stream
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    default long readTo(
+            @Nonnull ReadableByteChannel src, @Nonnull OutputStream dst
+    ) throws IORuntimeException {
+        return ByteOperatorImpl.readTo0(src, dst, -1, bufferSize());
+    }
+
+    /**
+     * Reads the data of the specified length from the source channel into the specified output stream, until the read
+     * number reaches the specified length or reaches the end of the source channel, returns the actual number of bytes
+     * read to.
+     * <p>
+     * If the specified length {@code < 0}, this method reads all data; if the specified length {@code = 0}, returns
+     * {@code 0} without reading; if the end of the source channel has already been reached, returns {@code -1}.
+     *
+     * @param src the source channel
+     * @param dst the specified output stream
+     * @param len the specified length, must {@code >= 0}
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
+     * @throws IllegalArgumentException if the specified length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    default long readTo(
+            @Nonnull ReadableByteChannel src, @Nonnull OutputStream dst, long len
+    ) throws IllegalArgumentException, IORuntimeException {
+        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        return ByteOperatorImpl.readTo0(src, dst, len, bufferSize());
+    }
 
     /**
      * Reads the data from the source channel into the specified array, until the read number reaches the array's length
@@ -360,12 +476,12 @@ public interface ByteOperator {
      *
      * @param src the source channel
      * @param dst the specified array
-     * @return the actual number of bytes read
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
      * @throws IORuntimeException if an I/O error occurs
      */
-    int readTo(
-            @Nonnull ReadableByteChannel src, byte @Nonnull [] dst
-    ) throws IndexOutOfBoundsException, IORuntimeException;
+    default int readTo(@Nonnull ReadableByteChannel src, byte @Nonnull [] dst) throws IORuntimeException {
+        return ByteOperatorImpl.readTo0(src, ByteBuffer.wrap(dst), -1);
+    }
 
     /**
      * Reads the data from the source channel into the specified array (starting at the specified offset and up to the
@@ -379,13 +495,16 @@ public interface ByteOperator {
      * @param dst the specified array
      * @param off the specified offset of the array
      * @param len the specified length to read
-     * @return the actual number of bytes read
-     * @throws IndexOutOfBoundsException if the array arguments are out of bounds
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
+     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
      * @throws IORuntimeException        if an I/O error occurs
      */
-    int readTo(
+    default int readTo(
             @Nonnull ReadableByteChannel src, byte @Nonnull [] dst, int off, int len
-    ) throws IndexOutOfBoundsException, IORuntimeException;
+    ) throws IndexOutOfBoundsException, IORuntimeException {
+        JieCheck.checkOffsetLength(dst.length, off, len);
+        return ByteOperatorImpl.readTo0(src, ByteBuffer.wrap(dst, off, len), -1);
+    }
 
     /**
      * Reads the data from the source channel into the specified buffer, until the read number reaches the buffer's
@@ -398,10 +517,12 @@ public interface ByteOperator {
      *
      * @param src the source channel
      * @param dst the specified buffer
-     * @return the actual number of bytes read
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
      * @throws IORuntimeException if an I/O error occurs
      */
-    int readTo(@Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst) throws IORuntimeException;
+    default int readTo(@Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst) throws IORuntimeException {
+        return ByteOperatorImpl.readTo0(src, dst, -1);
+    }
 
     /**
      * Reads the data of the specified length from the source channel into the specified buffer, until the read number
@@ -416,11 +537,14 @@ public interface ByteOperator {
      * @param src the source channel
      * @param dst the specified buffer
      * @param len the specified length, must {@code >= 0}
-     * @return the actual number of bytes read
+     * @return the actual number of bytes read, or {@code -1} if the end has already been reached
      * @throws IllegalArgumentException if the specified read length is illegal
      * @throws IORuntimeException       if an I/O error occurs
      */
-    int readTo(
+    default int readTo(
             @Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst, int len
-    ) throws IllegalArgumentException, IORuntimeException;
+    ) throws IllegalArgumentException, IORuntimeException {
+        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        return ByteOperatorImpl.readTo0(src, dst, len);
+    }
 }

@@ -70,12 +70,12 @@ public class ByteOperatorTest {
     }
 
     private void testRead(int totalSize) throws Exception {
-        testRead(JieIO.newByteReader(JieIO.bufferSize()), totalSize);
-        testRead(JieIO.newByteReader(1), totalSize);
-        testRead(JieIO.newByteReader(2), totalSize);
-        testRead(JieIO.newByteReader(JieIO.bufferSize() - 1), totalSize);
-        testRead(JieIO.newByteReader(JieIO.bufferSize() + 1), totalSize);
-        testRead(JieIO.newByteReader(JieIO.bufferSize() * 2), totalSize);
+        testRead(ByteOperator.newOperator(JieIO.bufferSize()), totalSize);
+        testRead(ByteOperator.newOperator(1), totalSize);
+        testRead(ByteOperator.newOperator(2), totalSize);
+        testRead(ByteOperator.newOperator(JieIO.bufferSize() - 1), totalSize);
+        testRead(ByteOperator.newOperator(JieIO.bufferSize() + 1), totalSize);
+        testRead(ByteOperator.newOperator(JieIO.bufferSize() * 2), totalSize);
     }
 
     private void testRead(ByteOperator reader, int totalSize) throws Exception {
@@ -350,12 +350,12 @@ public class ByteOperatorTest {
     }
 
     private void testReadTo(int totalSize) throws Exception {
-        testReadTo(JieIO.newByteReader(JieIO.bufferSize()), totalSize);
-        testReadTo(JieIO.newByteReader(1), totalSize);
-        testReadTo(JieIO.newByteReader(2), totalSize);
-        testReadTo(JieIO.newByteReader(JieIO.bufferSize() - 1), totalSize);
-        testReadTo(JieIO.newByteReader(JieIO.bufferSize() + 1), totalSize);
-        testReadTo(JieIO.newByteReader(JieIO.bufferSize() * 2), totalSize);
+        testReadTo(ByteOperator.newOperator(JieIO.bufferSize()), totalSize);
+        testReadTo(ByteOperator.newOperator(1), totalSize);
+        testReadTo(ByteOperator.newOperator(2), totalSize);
+        testReadTo(ByteOperator.newOperator(JieIO.bufferSize() - 1), totalSize);
+        testReadTo(ByteOperator.newOperator(JieIO.bufferSize() + 1), totalSize);
+        testReadTo(ByteOperator.newOperator(JieIO.bufferSize() * 2), totalSize);
     }
 
     private void testReadTo(ByteOperator reader, int totalSize) throws Exception {
@@ -618,6 +618,12 @@ public class ByteOperatorTest {
             return totalSize;
         }
         return Math.min(readSize, totalSize);
+    }
+
+    @Test
+    public void testError() {
+        expectThrows(IllegalArgumentException.class, () -> ByteOperator.newOperator(0));
+        expectThrows(IllegalArgumentException.class, () -> ByteOperator.newOperator(-1));
     }
 
     private static class OneBytePerRead extends InputStream {

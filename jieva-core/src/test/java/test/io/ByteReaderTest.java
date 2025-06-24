@@ -5,7 +5,7 @@ import test.Constants;
 import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.collect.JieArray;
-import xyz.sunqian.common.io.ByteReaderX;
+import xyz.sunqian.common.io.ByteReader;
 import xyz.sunqian.common.io.ByteSegment;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieBuffer;
@@ -28,7 +28,7 @@ import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
-public class ByteReaderXTest {
+public class ByteReaderTest {
 
     @Test
     public void testRead() {
@@ -48,44 +48,44 @@ public class ByteReaderXTest {
         {
             // input stream
             byte[] data = JieRandom.fill(new byte[dataSize]);
-            testRead0(ByteReaderX.from(new ByteArrayInputStream(data)), ByteBuffer.wrap(data), false, false);
-            testSkip0(ByteReaderX.from(new ByteArrayInputStream(data)), data);
+            testRead0(ByteReader.from(new ByteArrayInputStream(data)), ByteBuffer.wrap(data), false, false);
+            testSkip0(ByteReader.from(new ByteArrayInputStream(data)), data);
         }
         {
             // byte array
             byte[] data = JieRandom.fill(new byte[dataSize]);
-            testRead0(ByteReaderX.from(data), ByteBuffer.wrap(data), true, true);
-            testSkip0(ByteReaderX.from(data), data);
+            testRead0(ByteReader.from(data), ByteBuffer.wrap(data), true, true);
+            testSkip0(ByteReader.from(data), data);
             byte[] dataPadding = new byte[data.length + 66];
             System.arraycopy(data, 0, dataPadding, 33, data.length);
             testRead0(
-                ByteReaderX.from(dataPadding, 33, data.length),
+                ByteReader.from(dataPadding, 33, data.length),
                 ByteBuffer.wrap(dataPadding, 33, data.length),
                 true, true
             );
             testSkip0(
-                ByteReaderX.from(dataPadding, 33, data.length),
+                ByteReader.from(dataPadding, 33, data.length),
                 data
             );
         }
         {
             // heap buffer
             byte[] data = JieRandom.fill(new byte[dataSize]);
-            testRead0(ByteReaderX.from(ByteBuffer.wrap(data)), ByteBuffer.wrap(data), true, true);
-            testSkip0(ByteReaderX.from(ByteBuffer.wrap(data)), data);
+            testRead0(ByteReader.from(ByteBuffer.wrap(data)), ByteBuffer.wrap(data), true, true);
+            testSkip0(ByteReader.from(ByteBuffer.wrap(data)), data);
         }
         {
             // direct buffer
             byte[] data = JieRandom.fill(new byte[dataSize]);
             ByteBuffer direct = MaterialBox.copyDirect(data);
             direct.mark();
-            testRead0(ByteReaderX.from(direct), direct.slice(), true, true);
+            testRead0(ByteReader.from(direct), direct.slice(), true, true);
             direct.reset();
-            testSkip0(ByteReaderX.from(direct), data);
+            testSkip0(ByteReader.from(direct), data);
         }
     }
 
-    private void testRead0(ByteReaderX reader, ByteBuffer data, boolean preKnown, boolean shared) {
+    private void testRead0(ByteReader reader, ByteBuffer data, boolean preKnown, boolean shared) {
         reader.mark();
         data.mark();
         assertFalse(reader.read(0).end());
@@ -150,7 +150,7 @@ public class ByteReaderXTest {
         assertTrue(reader.read(1).end());
     }
 
-    private void testSkip0(ByteReaderX reader, byte[] data) {
+    private void testSkip0(ByteReader reader, byte[] data) {
         if (reader.markSupported()) {
             reader.mark();
         }
@@ -213,7 +213,7 @@ public class ByteReaderXTest {
                 }
             }
             byte[] dst = new byte[2];
-            assertEquals(ByteReaderX.from(new NioInput()).readTo(dst), 1);
+            assertEquals(ByteReader.from(new NioInput()).readTo(dst), 1);
             assertEquals(dst[0], 66);
         }
     }
@@ -224,24 +224,24 @@ public class ByteReaderXTest {
         System.arraycopy(data, 0, dataPadding, 33, data.length);
         {
             // input stream
-            testReadTo0(ByteReaderX.from(new ByteArrayInputStream(data)), data);
+            testReadTo0(ByteReader.from(new ByteArrayInputStream(data)), data);
         }
         {
             // byte array
-            testReadTo0(ByteReaderX.from(data), data);
-            testReadTo0(ByteReaderX.from(dataPadding, 33, data.length), data);
+            testReadTo0(ByteReader.from(data), data);
+            testReadTo0(ByteReader.from(dataPadding, 33, data.length), data);
         }
         {
             // byte buffer
-            testReadTo0(ByteReaderX.from(ByteBuffer.wrap(data)), data);
+            testReadTo0(ByteReader.from(ByteBuffer.wrap(data)), data);
             ByteBuffer direct = ByteBuffer.allocateDirect(data.length);
             direct.put(data);
             direct.flip();
-            testReadTo0(ByteReaderX.from(direct), data);
+            testReadTo0(ByteReader.from(direct), data);
         }
     }
 
-    private void testReadTo0(ByteReaderX reader, byte[] data) {
+    private void testReadTo0(ByteReader reader, byte[] data) {
         reader.mark();
         {
             // to output stream
@@ -390,16 +390,16 @@ public class ByteReaderXTest {
         {
             // input stream
             byte[] data = JieRandom.fill(new byte[dataSize]);
-            testShare(ByteReaderX.from(new ByteArrayInputStream(data)), ByteBuffer.wrap(data), false, false);
+            testShare(ByteReader.from(new ByteArrayInputStream(data)), ByteBuffer.wrap(data), false, false);
         }
         {
             // byte array
             byte[] data = JieRandom.fill(new byte[dataSize]);
-            testShare(ByteReaderX.from(data), ByteBuffer.wrap(data), true, true);
+            testShare(ByteReader.from(data), ByteBuffer.wrap(data), true, true);
             byte[] dataPadding = new byte[data.length + 66];
             System.arraycopy(data, 0, dataPadding, 33, data.length);
             testShare(
-                ByteReaderX.from(dataPadding, 33, data.length),
+                ByteReader.from(dataPadding, 33, data.length),
                 ByteBuffer.wrap(dataPadding, 33, data.length),
                 true, true
             );
@@ -407,18 +407,18 @@ public class ByteReaderXTest {
         {
             // heap buffer
             byte[] data = JieRandom.fill(new byte[dataSize]);
-            testShare(ByteReaderX.from(ByteBuffer.wrap(data)), ByteBuffer.wrap(data), true, true);
+            testShare(ByteReader.from(ByteBuffer.wrap(data)), ByteBuffer.wrap(data), true, true);
         }
         {
             // direct buffer
             byte[] data = JieRandom.fill(new byte[dataSize]);
             ByteBuffer direct = MaterialBox.copyDirect(data);
-            testShare(ByteReaderX.from(direct), direct.slice(), true, true);
+            testShare(ByteReader.from(direct), direct.slice(), true, true);
         }
     }
 
     private void testShare(
-        ByteReaderX reader, ByteBuffer data, boolean sharedReaderToData, boolean sharedDataToReader
+        ByteReader reader, ByteBuffer data, boolean sharedReaderToData, boolean sharedDataToReader
     ) {
         ByteSegment segment = reader.read(data.remaining() * 2);
         ByteBuffer readBuf = segment.data();
@@ -445,7 +445,7 @@ public class ByteReaderXTest {
         TestInputStream testIn = new TestInputStream(in);
         {
             // NIO tests
-            ByteReaderX reader = ByteReaderX.from(testIn);
+            ByteReader reader = ByteReader.from(testIn);
             testIn.setNextOperation(ReadOps.READ_ZERO, 10);
             ByteSegment s0 = reader.read(bytes.length);
             assertEquals(s0.data(), ByteBuffer.wrap(bytes));
@@ -454,7 +454,7 @@ public class ByteReaderXTest {
             assertTrue(s0.end());
             assertEquals(reader.skip(66), 0);
             in.reset();
-            ByteReaderX reader2 = ByteReaderX.from(testIn);
+            ByteReader reader2 = ByteReader.from(testIn);
             testIn.setNextOperation(ReadOps.READ_ZERO);
             assertEquals(reader2.skip(66), bytes.length);
             // TestInputStream testIn2 = new TestInputStream(new ByteArrayInputStream(new byte[2]));
@@ -463,7 +463,7 @@ public class ByteReaderXTest {
         }
         {
             // exception tests
-            ByteReaderX reader = ByteReaderX.from(testIn);
+            ByteReader reader = ByteReader.from(testIn);
             in.reset();
             testIn.setNextOperation(ReadOps.THROW);
             expectThrows(IORuntimeException.class, () -> reader.read(66));
@@ -486,7 +486,7 @@ public class ByteReaderXTest {
         {
             // for segment
             byte[] bytesCopy = Arrays.copyOf(bytes, bytes.length);
-            ByteReaderX reader = ByteReaderX.from(bytesCopy);
+            ByteReader reader = ByteReader.from(bytesCopy);
             ByteSegment segment = reader.read(bytesCopy.length * 2);
             assertSame(segment.data().array(), bytesCopy);
             assertTrue(segment.end());
@@ -498,7 +498,7 @@ public class ByteReaderXTest {
         {
             // special mark/reset
             TestInputStream tin = new TestInputStream(new ByteArrayInputStream(new byte[2]));
-            ByteReaderX reader = ByteReaderX.from(tin);//.withReadLimit(1);
+            ByteReader reader = ByteReader.from(tin);//.withReadLimit(1);
             assertTrue(reader.markSupported());
             tin.markSupported(false);
             assertFalse(reader.markSupported());
@@ -507,9 +507,9 @@ public class ByteReaderXTest {
         }
         {
             // close
-            ByteReaderX.from(JieIO.newInputStream(new byte[0])).close();
-            ByteReaderX.from(new byte[0]).close();
-            ByteReaderX.from(ByteBuffer.allocate(0)).close();
+            ByteReader.from(JieIO.newInputStream(new byte[0])).close();
+            ByteReader.from(new byte[0]).close();
+            ByteReader.from(ByteBuffer.allocate(0)).close();
         }
     }
 }

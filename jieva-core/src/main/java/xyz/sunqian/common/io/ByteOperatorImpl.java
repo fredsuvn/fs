@@ -1,7 +1,6 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.JieCheck;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -22,93 +21,9 @@ final class ByteOperatorImpl implements ByteOperator {
         return bufferSize;
     }
 
-    @Override
-    public long readTo(@Nonnull InputStream src, @Nonnull OutputStream dst) throws IORuntimeException {
-        return readTo0(src, dst, -1, bufferSize());
-    }
-
-    @Override
-    public long readTo(
-        @Nonnull InputStream src, @Nonnull OutputStream dst, long len
-    ) throws IllegalArgumentException, IORuntimeException {
-        JieCheck.checkArgument(len >= 0, "len must >= 0.");
-        return readTo0(src, dst, len, bufferSize());
-    }
-
-    @Override
-    public int readTo(
-        @Nonnull InputStream src, byte @Nonnull [] dst
-    ) throws IndexOutOfBoundsException, IORuntimeException {
-        return readTo0(src, dst, 0, dst.length);
-    }
-
-    @Override
-    public int readTo(
-        @Nonnull InputStream src, byte @Nonnull [] dst, int off, int len
-    ) throws IndexOutOfBoundsException, IORuntimeException {
-        JieCheck.checkOffsetLength(dst.length, off, len);
-        return readTo0(src, dst, off, len);
-    }
-
-    @Override
-    public int readTo(@Nonnull InputStream src, @Nonnull ByteBuffer dst) throws IORuntimeException {
-        return readTo0(src, dst, -1);
-    }
-
-    @Override
-    public int readTo(
-        @Nonnull InputStream src, @Nonnull ByteBuffer dst, int len
-    ) throws IllegalArgumentException, IORuntimeException {
-        JieCheck.checkArgument(len >= 0, "len must >= 0.");
-        return readTo0(src, dst, len);
-    }
-
-    @Override
-    public long readTo(
-        @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst
-    ) throws IORuntimeException {
-        return readTo0(src, dst, -1, bufferSize());
-    }
-
-    @Override
-    public long readTo(
-        @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, long len
-    ) throws IllegalArgumentException, IORuntimeException {
-        JieCheck.checkArgument(len >= 0, "len must >= 0.");
-        return readTo0(src, dst, len, bufferSize());
-    }
-
-    @Override
-    public int readTo(
-        @Nonnull ReadableByteChannel src, byte @Nonnull [] dst
-    ) throws IndexOutOfBoundsException, IORuntimeException {
-        return readTo0(src, ByteBuffer.wrap(dst), -1);
-    }
-
-    @Override
-    public int readTo(
-        @Nonnull ReadableByteChannel src, byte @Nonnull [] dst, int off, int len
-    ) throws IndexOutOfBoundsException, IORuntimeException {
-        JieCheck.checkOffsetLength(dst.length, off, len);
-        return readTo0(src, ByteBuffer.wrap(dst, off, len), -1);
-    }
-
-    @Override
-    public int readTo(@Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst) throws IORuntimeException {
-        return readTo0(src, dst, -1);
-    }
-
-    @Override
-    public int readTo(
-        @Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst, int len
-    ) throws IllegalArgumentException, IORuntimeException {
-        JieCheck.checkArgument(len >= 0, "len must >= 0.");
-        return readTo0(src, dst, len);
-    }
-
-    private long readTo0(
+    static long readTo0(
         @Nonnull InputStream src, @Nonnull OutputStream dst, long len, int bufSize
-    ) throws IllegalArgumentException, IORuntimeException {
+    ) throws IORuntimeException {
         if (len == 0) {
             return 0;
         }
@@ -134,9 +49,40 @@ final class ByteOperatorImpl implements ByteOperator {
         }
     }
 
-    private int readTo0(
+    static long readTo0(
+        @Nonnull InputStream src, @Nonnull WritableByteChannel dst, long len, int bufSize
+    ) throws IORuntimeException {
+        if (len == 0) {
+            return 0;
+        }
+        try {
+            byte[] arr = new byte[JieIO.bufferSize(len, bufSize)];
+            ByteBuffer buf = ByteBuffer.wrap(arr);
+            long count = 0;
+            while (true) {
+                int readSize = len < 0 ?
+                    src.read(arr)
+                    :
+                    src.read(arr, 0, (int) Math.min(arr.length, len - count));
+                if (readSize < 0) {
+                    return count == 0 ? -1 : count;
+                }
+                buf.position(0);
+                buf.limit(readSize);
+                dst.write(buf);
+                count += readSize;
+                if (len > 0 && count >= len) {
+                    return count;
+                }
+            }
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    static int readTo0(
         @Nonnull InputStream src, byte @Nonnull [] dst, int off, int len
-    ) throws IndexOutOfBoundsException, IORuntimeException {
+    ) throws IORuntimeException {
         if (len == 0) {
             return 0;
         }
@@ -155,7 +101,7 @@ final class ByteOperatorImpl implements ByteOperator {
         }
     }
 
-    private int readTo0(
+    static int readTo0(
         @Nonnull InputStream src, @Nonnull ByteBuffer dst, int len
     ) throws IORuntimeException {
         if (len == 0 || dst.remaining() == 0) {
@@ -166,7 +112,7 @@ final class ByteOperatorImpl implements ByteOperator {
                 byte[] buf = dst.array();
                 int off = JieBuffer.arrayStartIndex(dst);
                 int actualLen = len < 0 ? dst.remaining() : Math.min(dst.remaining(), len);
-                int ret = readTo(src, buf, off, actualLen);
+                int ret = readTo0(src, buf, off, actualLen);
                 if (ret <= 0) {
                     return ret;
                 }
@@ -174,7 +120,7 @@ final class ByteOperatorImpl implements ByteOperator {
                 return ret;
             } else {
                 byte[] buf = new byte[len < 0 ? dst.remaining() : Math.min(dst.remaining(), len)];
-                int ret = readTo(src, buf, 0, buf.length);
+                int ret = readTo0(src, buf, 0, buf.length);
                 if (ret <= 0) {
                     return ret;
                 }
@@ -186,12 +132,12 @@ final class ByteOperatorImpl implements ByteOperator {
         }
     }
 
-    private long readTo0(
+    static long readTo0(
         @Nonnull ReadableByteChannel src,
         @Nonnull WritableByteChannel dst,
         long len,
         int bufSize
-    ) throws IllegalArgumentException, IORuntimeException {
+    ) throws IORuntimeException {
         if (len == 0) {
             return 0;
         }
@@ -218,9 +164,41 @@ final class ByteOperatorImpl implements ByteOperator {
         }
     }
 
-    private int readTo0(
+    static long readTo0(
+        @Nonnull ReadableByteChannel src,
+        @Nonnull OutputStream dst,
+        long len,
+        int bufSize
+    ) throws IORuntimeException {
+        if (len == 0) {
+            return 0;
+        }
+        try {
+            ByteBuffer buf = ByteBuffer.allocate(JieIO.bufferSize(len, bufSize));
+            long count = 0;
+            while (true) {
+                int limit = len < 0 ? buf.remaining() : (int) Math.min(buf.remaining(), len - count);
+                buf.limit(limit);
+                int readSize = src.read(buf);
+                if (readSize < 0) {
+                    return count == 0 ? -1 : count;
+                }
+                buf.flip();
+                JieBuffer.readTo(buf, dst);
+                buf.clear();
+                count += readSize;
+                if (len > 0 && count >= len) {
+                    return count;
+                }
+            }
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    static int readTo0(
         @Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst, int len
-    ) throws IndexOutOfBoundsException, IORuntimeException {
+    ) throws IORuntimeException {
         if (len == 0 || dst.remaining() == 0) {
             return 0;
         }

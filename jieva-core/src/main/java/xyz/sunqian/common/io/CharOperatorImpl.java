@@ -1,7 +1,6 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.JieCheck;
 
 import java.io.Reader;
 import java.nio.CharBuffer;
@@ -19,50 +18,9 @@ final class CharOperatorImpl implements CharOperator {
         return bufferSize;
     }
 
-    @Override
-    public long readTo(@Nonnull Reader src, @Nonnull Appendable dst) throws IORuntimeException {
-        return readTo0(src, dst, -1, bufferSize());
-    }
-
-    @Override
-    public long readTo(
-        @Nonnull Reader src, @Nonnull Appendable dst, long len
-    ) throws IllegalArgumentException, IORuntimeException {
-        JieCheck.checkArgument(len >= 0, "len must >= 0.");
-        return readTo0(src, dst, len, bufferSize());
-    }
-
-    @Override
-    public int readTo(
-        @Nonnull Reader src, char @Nonnull [] dst
-    ) throws IndexOutOfBoundsException, IORuntimeException {
-        return readTo0(src, dst, 0, dst.length);
-    }
-
-    @Override
-    public int readTo(
-        @Nonnull Reader src, char @Nonnull [] dst, int off, int len
-    ) throws IndexOutOfBoundsException, IORuntimeException {
-        JieCheck.checkOffsetLength(dst.length, off, len);
-        return readTo0(src, dst, off, len);
-    }
-
-    @Override
-    public int readTo(@Nonnull Reader src, @Nonnull CharBuffer dst) throws IORuntimeException {
-        return readTo0(src, dst, -1);
-    }
-
-    @Override
-    public int readTo(
-        @Nonnull Reader src, @Nonnull CharBuffer dst, int len
-    ) throws IllegalArgumentException, IORuntimeException {
-        JieCheck.checkArgument(len >= 0, "len must >= 0.");
-        return readTo0(src, dst, len);
-    }
-
-    private long readTo0(
+    static long readTo0(
         @Nonnull Reader src, @Nonnull Appendable dst, long len, int bufSize
-    ) throws IllegalArgumentException, IORuntimeException {
+    ) throws IORuntimeException {
         if (len == 0) {
             return 0;
         }
@@ -88,9 +46,9 @@ final class CharOperatorImpl implements CharOperator {
         }
     }
 
-    private int readTo0(
+    static int readTo0(
         @Nonnull Reader src, char @Nonnull [] dst, int off, int len
-    ) throws IndexOutOfBoundsException, IORuntimeException {
+    ) throws IORuntimeException {
         if (len == 0) {
             return 0;
         }
@@ -109,7 +67,7 @@ final class CharOperatorImpl implements CharOperator {
         }
     }
 
-    private int readTo0(
+    static int readTo0(
         @Nonnull Reader src, @Nonnull CharBuffer dst, int len
     ) throws IORuntimeException {
         if (len == 0 || dst.remaining() == 0) {
@@ -120,7 +78,7 @@ final class CharOperatorImpl implements CharOperator {
                 char[] buf = dst.array();
                 int off = JieBuffer.arrayStartIndex(dst);
                 int actualLen = len < 0 ? dst.remaining() : Math.min(dst.remaining(), len);
-                int ret = readTo(src, buf, off, actualLen);
+                int ret = readTo0(src, buf, off, actualLen);
                 if (ret <= 0) {
                     return ret;
                 }
@@ -128,7 +86,7 @@ final class CharOperatorImpl implements CharOperator {
                 return ret;
             } else {
                 char[] buf = new char[len < 0 ? dst.remaining() : Math.min(dst.remaining(), len)];
-                int ret = readTo(src, buf, 0, buf.length);
+                int ret = readTo0(src, buf, 0, buf.length);
                 if (ret <= 0) {
                     return ret;
                 }

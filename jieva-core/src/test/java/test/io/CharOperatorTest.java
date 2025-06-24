@@ -65,12 +65,12 @@ public class CharOperatorTest {
     }
 
     private void testRead(int totalSize) throws Exception {
-        testRead(JieIO.newCharReader(JieIO.bufferSize()), totalSize);
-        testRead(JieIO.newCharReader(1), totalSize);
-        testRead(JieIO.newCharReader(2), totalSize);
-        testRead(JieIO.newCharReader(JieIO.bufferSize() - 1), totalSize);
-        testRead(JieIO.newCharReader(JieIO.bufferSize() + 1), totalSize);
-        testRead(JieIO.newCharReader(JieIO.bufferSize() * 2), totalSize);
+        testRead(CharOperator.newOperator(JieIO.bufferSize()), totalSize);
+        testRead(CharOperator.newOperator(1), totalSize);
+        testRead(CharOperator.newOperator(2), totalSize);
+        testRead(CharOperator.newOperator(JieIO.bufferSize() - 1), totalSize);
+        testRead(CharOperator.newOperator(JieIO.bufferSize() + 1), totalSize);
+        testRead(CharOperator.newOperator(JieIO.bufferSize() * 2), totalSize);
     }
 
     private void testRead(CharOperator reader, int totalSize) throws Exception {
@@ -241,12 +241,12 @@ public class CharOperatorTest {
     }
 
     private void testReadTo(int totalSize) throws Exception {
-        testReadTo(JieIO.newCharReader(JieIO.bufferSize()), totalSize);
-        testReadTo(JieIO.newCharReader(1), totalSize);
-        testReadTo(JieIO.newCharReader(2), totalSize);
-        testReadTo(JieIO.newCharReader(JieIO.bufferSize() - 1), totalSize);
-        testReadTo(JieIO.newCharReader(JieIO.bufferSize() + 1), totalSize);
-        testReadTo(JieIO.newCharReader(JieIO.bufferSize() * 2), totalSize);
+        testReadTo(CharOperator.newOperator(JieIO.bufferSize()), totalSize);
+        testReadTo(CharOperator.newOperator(1), totalSize);
+        testReadTo(CharOperator.newOperator(2), totalSize);
+        testReadTo(CharOperator.newOperator(JieIO.bufferSize() - 1), totalSize);
+        testReadTo(CharOperator.newOperator(JieIO.bufferSize() + 1), totalSize);
+        testReadTo(CharOperator.newOperator(JieIO.bufferSize() * 2), totalSize);
     }
 
     private void testReadTo(CharOperator reader, int totalSize) throws Exception {
@@ -397,6 +397,12 @@ public class CharOperatorTest {
             return totalSize;
         }
         return Math.min(readSize, totalSize);
+    }
+
+    @Test
+    public void testError() {
+        expectThrows(IllegalArgumentException.class, () -> CharOperator.newOperator(0));
+        expectThrows(IllegalArgumentException.class, () -> CharOperator.newOperator(-1));
     }
 
     private static class OneCharPerRead extends Reader {

@@ -18,6 +18,24 @@ import java.util.Arrays;
 public interface CharOperator {
 
     /**
+     * The default {@link CharOperator} instance with the default buffer size ({@link JieIO#bufferSize()}).
+     */
+    @Nonnull
+    CharOperator DEFAULT_OPERATOR = newOperator(JieIO.bufferSize());
+
+    /**
+     * Returns a new {@link CharOperator} instance with the given buffer size.
+     *
+     * @param bufSize the given buffer size, must {@code > 0}
+     * @return a new {@link CharOperator} instance with the given buffer size
+     * @throws IllegalArgumentException if the given buffer size {@code <= 0}
+     */
+    static CharOperator newOperator(int bufSize) throws IllegalArgumentException {
+        JieCheck.checkArgument(bufSize > 0, "bufSize > 0.");
+        return new CharOperatorImpl(bufSize);
+    }
+
+    /**
      * Returns the buffer size of current instance.
      *
      * @return the buffer size of current instance
@@ -25,12 +43,12 @@ public interface CharOperator {
     int bufferSize();
 
     /**
-     * Reads all data from the source stream into a new array, continuing until reaches the end of the stream, and
+     * Reads all data from the source reader into a new array, continuing until reaches the end of the reader, and
      * returns the array. If the end of the source reader has already been reached, returns {@code null}.
      * <p>
-     * Note the data in the stream cannot exceed the maximum limit of the array.
+     * Note the data in the reader cannot exceed the maximum limit of the array.
      *
-     * @param src the source stream
+     * @param src the source reader
      * @return the array containing the data
      * @throws IORuntimeException if an I/O error occurs
      */
@@ -71,14 +89,14 @@ public interface CharOperator {
     }
 
     /**
-     * Reads the data of the specified length from the source stream into a new array, and returns the array. If the
+     * Reads the data of the specified length from the source reader into a new array, and returns the array. If the
      * specified length {@code = 0}, returns an empty array without reading. Otherwise, this method keeps reading until
-     * the read number reaches the specified length or reaches the end of the stream. If the end of the source reader
+     * the read number reaches the specified length or reaches the end of the reader. If the end of the source reader
      * has already been reached, returns {@code null}.
      * <p>
      * Note the length cannot exceed the maximum limit of the array.
      *
-     * @param src the source stream
+     * @param src the source reader
      * @param len the specified read length, must {@code >= 0}
      * @return the array containing the data
      * @throws IllegalArgumentException if the specified read length is illegal
@@ -108,12 +126,12 @@ public interface CharOperator {
     }
 
     /**
-     * Reads all data from the source stream into a new string, continuing until reaches the end of the stream, and
+     * Reads all data from the source reader into a new string, continuing until reaches the end of the reader, and
      * returns the string. If the end of the source reader has already been reached, returns {@code null}.
      * <p>
-     * Note the data in the stream cannot exceed the maximum limit of the string.
+     * Note the data in the reader cannot exceed the maximum limit of the string.
      *
-     * @param src the source stream
+     * @param src the source reader
      * @return the string containing the data
      * @throws IORuntimeException if an I/O error occurs
      */
@@ -123,14 +141,14 @@ public interface CharOperator {
     }
 
     /**
-     * Reads the data of the specified length from the source stream into a new string, and returns the string. If the
+     * Reads the data of the specified length from the source reader into a new string, and returns the string. If the
      * specified length {@code = 0}, returns an empty string without reading. Otherwise, this method keeps reading until
-     * the read number reaches the specified length or reaches the end of the stream. If the end of the source reader
+     * the read number reaches the specified length or reaches the end of the reader. If the end of the source reader
      * has already been reached, returns {@code null}.
      * <p>
      * Note the length cannot exceed the maximum limit of the string.
      *
-     * @param src the source stream
+     * @param src the source reader
      * @param len the specified read length, must {@code >= 0}
      * @return the string containing the data
      * @throws IllegalArgumentException if the specified read length is illegal
@@ -142,106 +160,119 @@ public interface CharOperator {
     }
 
     /**
-     * Reads all from the source stream into the specified output stream, until the read number reaches the specified
-     * length or reaches the end of the source stream, returns the actual number of chars read to. If the end of the
-     * source stream has already been reached, returns {@code -1}.
+     * Reads all data from the source reader into the specified output appender, until the read number reaches the
+     * specified length or reaches the end of the source reader, returns the actual number of chars read to. If the end
+     * of the source reader has already been reached, returns {@code -1}.
      *
-     * @param src the source stream
-     * @param dst the specified output stream
-     * @return the actual number of chars read
+     * @param src the source reader
+     * @param dst the specified output appender
+     * @return the actual number of chars read, or {@code -1} if the end has already been reached
      * @throws IORuntimeException if an I/O error occurs
      */
-    long readTo(@Nonnull Reader src, @Nonnull Appendable dst) throws IORuntimeException;
+    default long readTo(@Nonnull Reader src, @Nonnull Appendable dst) throws IORuntimeException {
+        return CharOperatorImpl.readTo0(src, dst, -1, bufferSize());
+    }
 
     /**
-     * Reads the data of the specified length from the source stream into the specified output stream, until the read
-     * number reaches the specified length or reaches the end of the source stream, returns the actual number of chars
+     * Reads the data of the specified length from the source reader into the specified output appender, until the read
+     * number reaches the specified length or reaches the end of the source reader, returns the actual number of chars
      * read to.
      * <p>
-     * If the specified length {@code = 0}, returns {@code 0} without reading; if the end of the source stream has
+     * If the specified length {@code = 0}, returns {@code 0} without reading; if the end of the source reader has
      * already been reached, returns {@code -1}.
      *
-     * @param src the source stream
-     * @param dst the specified output stream
+     * @param src the source reader
+     * @param dst the specified output appender
      * @param len the specified length, must {@code >= 0}
-     * @return the actual number of chars read
+     * @return the actual number of chars read, or {@code -1} if the end has already been reached
      * @throws IllegalArgumentException if the specified length is illegal
      * @throws IORuntimeException       if an I/O error occurs
      */
-    long readTo(
+    default long readTo(
         @Nonnull Reader src, @Nonnull Appendable dst, long len
-    ) throws IllegalArgumentException, IORuntimeException;
+    ) throws IllegalArgumentException, IORuntimeException {
+        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        return CharOperatorImpl.readTo0(src, dst, len, bufferSize());
+    }
 
     /**
-     * Reads the data from the source stream into the specified array, until the read number reaches the array's length
-     * or reaches the end of the source stream, returns the actual number of chars read to.
+     * Reads the data from the source reader into the specified array, until the read number reaches the array's length
+     * or reaches the end of the source reader, returns the actual number of chars read to.
      * <p>
-     * If the array's length {@code = 0}, returns {@code 0} without reading. If the end of the source stream has already
+     * If the array's length {@code = 0}, returns {@code 0} without reading. If the end of the source reader has already
      * been reached, returns {@code -1}.
      *
-     * @param src the source stream
+     * @param src the source reader
      * @param dst the specified array
-     * @return the actual number of chars read
+     * @return the actual number of chars read, or {@code -1} if the end has already been reached
      * @throws IORuntimeException if an I/O error occurs
      */
-    int readTo(
-        @Nonnull Reader src, char @Nonnull [] dst
-    ) throws IndexOutOfBoundsException, IORuntimeException;
+    default int readTo(@Nonnull Reader src, char @Nonnull [] dst) throws IORuntimeException {
+        return CharOperatorImpl.readTo0(src, dst, 0, dst.length);
+    }
 
     /**
-     * Reads the data from the source stream into the specified array (starting at the specified offset and up to the
-     * specified length), until the read number reaches the specified length or reaches the end of the source stream,
+     * Reads the data from the source reader into the specified array (starting at the specified offset and up to the
+     * specified length), until the read number reaches the specified length or reaches the end of the source reader,
      * returns the actual number of chars read to.
      * <p>
-     * If the specified length {@code = 0}, returns {@code 0} without reading. If the end of the source stream has
+     * If the specified length {@code = 0}, returns {@code 0} without reading. If the end of the source reader has
      * already been reached, returns {@code -1}.
      *
-     * @param src the source stream
+     * @param src the source reader
      * @param dst the specified array
      * @param off the specified offset of the array
      * @param len the specified length to read
-     * @return the actual number of chars read
-     * @throws IndexOutOfBoundsException if the array arguments are out of bounds
+     * @return the actual number of chars read, or {@code -1} if the end has already been reached
+     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
      * @throws IORuntimeException        if an I/O error occurs
      */
-    int readTo(
+    default int readTo(
         @Nonnull Reader src, char @Nonnull [] dst, int off, int len
-    ) throws IndexOutOfBoundsException, IORuntimeException;
+    ) throws IndexOutOfBoundsException, IORuntimeException {
+        JieCheck.checkOffsetLength(dst.length, off, len);
+        return CharOperatorImpl.readTo0(src, dst, off, len);
+    }
 
     /**
-     * Reads the data from the source stream into the specified buffer, until the read number reaches the buffer's
-     * remaining or reaches the end of the source stream, returns the actual number of chars read to.
+     * Reads the data from the source reader into the specified buffer, until the read number reaches the buffer's
+     * remaining or reaches the end of the source reader, returns the actual number of chars read to.
      * <p>
-     * If the buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the source stream has
+     * If the buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the source reader has
      * already been reached, returns {@code -1}.
      * <p>
      * The buffer's position increments by the actual read number.
      *
-     * @param src the source stream
+     * @param src the source reader
      * @param dst the specified buffer
-     * @return the actual number of chars read
+     * @return the actual number of chars read, or {@code -1} if the end has already been reached
      * @throws IORuntimeException if an I/O error occurs
      */
-    int readTo(@Nonnull Reader src, @Nonnull CharBuffer dst) throws IORuntimeException;
+    default int readTo(@Nonnull Reader src, @Nonnull CharBuffer dst) throws IORuntimeException {
+        return CharOperatorImpl.readTo0(src, dst, -1);
+    }
 
     /**
-     * Reads the data of the specified length from the source stream into the specified buffer, until the read number
-     * reaches the buffer's remaining or reaches the end of the source stream, returns the actual number of chars read
+     * Reads the data of the specified length from the source reader into the specified buffer, until the read number
+     * reaches the buffer's remaining or reaches the end of the source reader, returns the actual number of chars read
      * to.
      * <p>
      * If the specified length or buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the
-     * source stream has already been reached, returns {@code -1}.
+     * source reader has already been reached, returns {@code -1}.
      * <p>
      * The buffer's position increments by the actual read number.
      *
-     * @param src the source stream
+     * @param src the source reader
      * @param dst the specified buffer
      * @param len the specified length, must {@code >= 0}
-     * @return the actual number of chars read
+     * @return the actual number of chars read, or {@code -1} if the end has already been reached
      * @throws IllegalArgumentException if the specified read length is illegal
      * @throws IORuntimeException       if an I/O error occurs
      */
-    int readTo(
+    default int readTo(
         @Nonnull Reader src, @Nonnull CharBuffer dst, int len
-    ) throws IllegalArgumentException, IORuntimeException;
+    ) throws IllegalArgumentException, IORuntimeException {
+        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        return CharOperatorImpl.readTo0(src, dst, len);
+    }
 }
