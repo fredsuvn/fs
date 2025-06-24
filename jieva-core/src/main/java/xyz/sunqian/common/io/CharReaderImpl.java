@@ -2,6 +2,7 @@ package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.JieCheck;
+import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.base.chars.JieChars;
 
 import java.io.IOException;
@@ -11,7 +12,6 @@ import java.nio.CharBuffer;
 final class CharReaderImpl {
 
     static @Nonnull CharReader of(@Nonnull Reader src, int bufSize) throws IllegalArgumentException {
-        JieCheck.checkArgument(bufSize > 0, "bufSize > 0.");
         return new CharStreamReader(src, bufSize);
     }
 
@@ -77,10 +77,9 @@ final class CharReaderImpl {
         private final @Nonnull Reader source;
         private final @Nonnull CharOperator operator;
 
-        CharStreamReader(@Nonnull Reader source, int bufferSize) {
-            this.source = source;
-            this.operator = bufferSize == CharOperator.DEFAULT_OPERATOR.bufferSize() ?
-                CharOperator.DEFAULT_OPERATOR : CharOperator.newOperator(bufferSize);
+        CharStreamReader(@Nonnull Reader src, int bufSize) throws IllegalArgumentException {
+            this.source = src;
+            this.operator = CharOperator.get(bufSize);
         }
 
         @Override
@@ -451,7 +450,7 @@ final class CharReaderImpl {
             }
             int remaining = endPos - pos;
             int copySize = Math.min(remaining, len);
-            System.arraycopy(source, pos, dst, off, copySize);
+            JieString.charsCopy(source, pos, dst, off, copySize);
             pos += copySize;
             return copySize;
         }

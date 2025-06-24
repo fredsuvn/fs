@@ -18,10 +18,25 @@ import java.util.Arrays;
 public interface CharOperator {
 
     /**
-     * The default {@link CharOperator} instance with the default buffer size ({@link JieIO#bufferSize()}).
+     * Returns the default {@link CharOperator} instance of which buffer size is {@link JieIO#bufferSize()}.
+     *
+     * @return the default {@link CharOperator} instance of which buffer size is {@link JieIO#bufferSize()}
      */
-    @Nonnull
-    CharOperator DEFAULT_OPERATOR = newOperator(JieIO.bufferSize());
+    static CharOperator defaultOperator() {
+        return JieIO.defaultCharOperator();
+    }
+
+    /**
+     * Returns a {@link CharOperator} instance with the given buffer size. If the buffer size equals to the default
+     * buffer size, returns the default {@link CharOperator} instance, otherwise returns a new one.
+     *
+     * @param bufSize the given buffer size, must {@code > 0}
+     * @return a {@link CharOperator} instance with the given buffer size
+     * @throws IllegalArgumentException if the given buffer size {@code <= 0}
+     */
+    static CharOperator get(int bufSize) throws IllegalArgumentException {
+        return bufSize == JieIO.bufferSize() ? defaultOperator() : newOperator(bufSize);
+    }
 
     /**
      * Returns a new {@link CharOperator} instance with the given buffer size.

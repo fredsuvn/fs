@@ -26,13 +26,16 @@ import java.util.Arrays;
  */
 public class JieIO {
 
-    /**
-     * Buffer size for I/O operations: 1024 * 8 = 8192.
-     */
-    public static final int BUFFER_SIZE = 1024 * 8;
+    private static final @Nonnull ByteOperator bo = ByteOperator.newOperator(bufferSize());
+    private static final @Nonnull CharOperator co = CharOperator.newOperator(bufferSize());
 
-    private static final @Nonnull ByteOperator bo = ByteOperator.DEFAULT_OPERATOR;
-    private static final @Nonnull CharOperator co = CharOperator.DEFAULT_OPERATOR;
+    static @Nonnull ByteOperator defaultByteOperator() {
+        return bo;
+    }
+
+    static @Nonnull CharOperator defaultCharOperator() {
+        return co;
+    }
 
     /**
      * Returns the recommended IO buffer size, typically is 1024 * 8 = 8192.
@@ -40,7 +43,7 @@ public class JieIO {
      * @return the recommended IO buffer size
      */
     public static int bufferSize() {
-        return BUFFER_SIZE;
+        return 1024 * 8;
     }
 
     /**

@@ -1,5 +1,6 @@
 package xyz.sunqian.common.base;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.base.function.SubFunction;
@@ -787,6 +788,35 @@ public class JieString {
             }
             for (int i = 0; i < end - start; i++) {
                 dest[offset + i] = chars.charAt(start + i);
+            }
+        }
+    }
+
+    /**
+     * Copies chars of the specified length from the given source (starting at the specified source offset) to the given
+     * destination array (starting at the specified destination offset).
+     *
+     * @param src    the given source
+     * @param srcOff the specified source offset
+     * @param dst    the given destination
+     * @param dstOff the specified destination offset
+     * @param len    the specified copy length
+     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
+     */
+    public static void charsCopy(
+        @Nonnull CharSequence src,
+        int srcOff,
+        char @Nonnull [] dst,
+        int dstOff,
+        int len
+    ) throws IndexOutOfBoundsException {
+        if (src instanceof String) {
+            ((String) src).getChars(srcOff, srcOff + len, dst, dstOff);
+        } else {
+            JieCheck.checkOffsetLength(src.length(), srcOff, len);
+            JieCheck.checkOffsetLength(dst.length, dstOff, len);
+            for (int i = 0; i < len; i++) {
+                dst[dstOff + i] = src.charAt(srcOff + i);
             }
         }
     }

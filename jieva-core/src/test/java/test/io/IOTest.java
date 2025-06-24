@@ -45,9 +45,24 @@ public class IOTest {
                 JieIO.read(Channels.newChannel(new ByteArrayInputStream(data)), 5),
                 ByteBuffer.wrap(Arrays.copyOf(data, 5))
             );
-            // to stream
+            // to stream/channel
             BytesBuilder builder = new BytesBuilder();
-            assertEquals(JieIO.readTo(new ByteArrayInputStream(data), builder), data.length);
+            assertEquals(
+                JieIO.readTo(new ByteArrayInputStream(data), builder),
+                data.length
+            );
+            assertEquals(data, builder.toByteArray());
+            builder.reset();
+            assertEquals(
+                JieIO.readTo(new ByteArrayInputStream(data), Channels.newChannel(builder)),
+                data.length
+            );
+            assertEquals(data, builder.toByteArray());
+            builder.reset();
+            assertEquals(
+                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), builder),
+                data.length
+            );
             assertEquals(data, builder.toByteArray());
             builder.reset();
             assertEquals(
@@ -56,7 +71,22 @@ public class IOTest {
             );
             assertEquals(data, builder.toByteArray());
             builder.reset();
-            assertEquals(JieIO.readTo(new ByteArrayInputStream(data), builder, data.length), data.length);
+            assertEquals(
+                JieIO.readTo(new ByteArrayInputStream(data), builder, data.length),
+                data.length
+            );
+            assertEquals(data, builder.toByteArray());
+            builder.reset();
+            assertEquals(
+                JieIO.readTo(new ByteArrayInputStream(data), Channels.newChannel(builder), data.length),
+                data.length
+            );
+            assertEquals(data, builder.toByteArray());
+            builder.reset();
+            assertEquals(
+                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), builder, data.length),
+                data.length
+            );
             assertEquals(data, builder.toByteArray());
             builder.reset();
             assertEquals(

@@ -51,6 +51,7 @@ public class BufferTest {
             directBuffer.flip();
             assertEquals(directBuffer, heapBuffer);
             assertTrue(directBuffer.isDirect());
+            expectThrows(IllegalArgumentException.class, () -> JieBuffer.directBuffer(-1));
         }
         {
             // byte
@@ -278,6 +279,10 @@ public class BufferTest {
                 JieBuffer.readTo(ByteBuffer.allocate(1), new ErrorOutputStream()));
             expectThrows(IllegalArgumentException.class, () ->
                 JieBuffer.readTo(ByteBuffer.allocate(1), new ByteArrayOutputStream(), -1));
+            expectThrows(IORuntimeException.class, () ->
+                JieBuffer.readTo(ByteBuffer.allocate(1), ByteBuffer.allocate(1).asReadOnlyBuffer()));
+            expectThrows(IORuntimeException.class, () ->
+                JieBuffer.readTo(ByteBuffer.allocate(1), ByteBuffer.allocate(1).asReadOnlyBuffer(), 1));
         }
     }
 
@@ -403,6 +408,10 @@ public class BufferTest {
                 JieBuffer.readTo(CharBuffer.allocate(1), new ErrorAppender()));
             expectThrows(IllegalArgumentException.class, () ->
                 JieBuffer.readTo(CharBuffer.allocate(1), new CharArrayWriter(), -1));
+            expectThrows(IORuntimeException.class, () ->
+                JieBuffer.readTo(CharBuffer.allocate(1), CharBuffer.allocate(1).asReadOnlyBuffer()));
+            expectThrows(IORuntimeException.class, () ->
+                JieBuffer.readTo(CharBuffer.allocate(1), CharBuffer.allocate(1).asReadOnlyBuffer(), 1));
         }
     }
 

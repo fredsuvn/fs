@@ -21,10 +21,25 @@ import java.util.Arrays;
 public interface ByteOperator {
 
     /**
-     * The default {@link ByteOperator} instance with the default buffer size ({@link JieIO#bufferSize()}).
+     * Returns the default {@link ByteOperator} instance of which buffer size is {@link JieIO#bufferSize()}.
+     *
+     * @return the default {@link ByteOperator} instance of which buffer size is {@link JieIO#bufferSize()}
      */
-    @Nonnull
-    ByteOperator DEFAULT_OPERATOR = newOperator(JieIO.bufferSize());
+    static ByteOperator defaultOperator() {
+        return JieIO.defaultByteOperator();
+    }
+
+    /**
+     * Returns a {@link ByteOperator} instance with the given buffer size. If the buffer size equals to the default
+     * buffer size, returns the default {@link ByteOperator} instance, otherwise returns a new one.
+     *
+     * @param bufSize the given buffer size, must {@code > 0}
+     * @return a {@link ByteOperator} instance with the given buffer size
+     * @throws IllegalArgumentException if the given buffer size {@code <= 0}
+     */
+    static ByteOperator get(int bufSize) throws IllegalArgumentException {
+        return bufSize == JieIO.bufferSize() ? defaultOperator() : newOperator(bufSize);
+    }
 
     /**
      * Returns a new {@link ByteOperator} instance with the given buffer size.
@@ -107,7 +122,7 @@ public interface ByteOperator {
      * @throws IORuntimeException       if an I/O error occurs
      */
     default byte @Nullable [] read(
-            @Nonnull InputStream src, int len
+        @Nonnull InputStream src, int len
     ) throws IllegalArgumentException, IORuntimeException {
         JieCheck.checkArgument(len >= 0, "len must >= 0.");
         if (len == 0) {
@@ -175,7 +190,7 @@ public interface ByteOperator {
             }
             if (builder == null) {
                 return dst.position() == 0 ? null :
-                        ByteBuffer.wrap(Arrays.copyOfRange(dst.array(), 0, dst.position()));
+                    ByteBuffer.wrap(Arrays.copyOfRange(dst.array(), 0, dst.position()));
             } else {
                 if (dst.position() > 0) {
                     dst.flip();
@@ -204,7 +219,7 @@ public interface ByteOperator {
      * @throws IORuntimeException       if an I/O error occurs
      */
     default @Nullable ByteBuffer read(
-            @Nonnull ReadableByteChannel src, int len
+        @Nonnull ReadableByteChannel src, int len
     ) throws IllegalArgumentException, IORuntimeException {
         JieCheck.checkArgument(len >= 0, "len must >= 0.");
         if (len == 0) {
@@ -216,7 +231,7 @@ public interface ByteOperator {
                 int readSize = src.read(dst);
                 if (readSize < 0) {
                     return dst.position() == 0 ? null :
-                            ByteBuffer.wrap(Arrays.copyOfRange(dst.array(), 0, dst.position()));
+                        ByteBuffer.wrap(Arrays.copyOfRange(dst.array(), 0, dst.position()));
                 }
             }
             dst.flip();
@@ -261,7 +276,7 @@ public interface ByteOperator {
      * @throws IORuntimeException       if an I/O error occurs
      */
     default long readTo(
-            @Nonnull InputStream src, @Nonnull OutputStream dst, long len
+        @Nonnull InputStream src, @Nonnull OutputStream dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
         JieCheck.checkArgument(len >= 0, "len must >= 0.");
         return ByteOperatorImpl.readTo0(src, dst, len, bufferSize());
@@ -302,7 +317,7 @@ public interface ByteOperator {
      * @throws IORuntimeException       if an I/O error occurs
      */
     default long readTo(
-            @Nonnull InputStream src, @Nonnull WritableByteChannel dst, long len
+        @Nonnull InputStream src, @Nonnull WritableByteChannel dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
         JieCheck.checkArgument(len >= 0, "len must >= 0.");
         return ByteOperatorImpl.readTo0(src, dst, len, bufferSize());
@@ -341,7 +356,7 @@ public interface ByteOperator {
      * @throws IORuntimeException        if an I/O error occurs
      */
     default int readTo(
-            @Nonnull InputStream src, byte @Nonnull [] dst, int off, int len
+        @Nonnull InputStream src, byte @Nonnull [] dst, int off, int len
     ) throws IndexOutOfBoundsException, IORuntimeException {
         JieCheck.checkOffsetLength(dst.length, off, len);
         return ByteOperatorImpl.readTo0(src, dst, off, len);
@@ -383,7 +398,7 @@ public interface ByteOperator {
      * @throws IORuntimeException       if an I/O error occurs
      */
     default int readTo(
-            @Nonnull InputStream src, @Nonnull ByteBuffer dst, int len
+        @Nonnull InputStream src, @Nonnull ByteBuffer dst, int len
     ) throws IllegalArgumentException, IORuntimeException {
         JieCheck.checkArgument(len >= 0, "len must >= 0.");
         return ByteOperatorImpl.readTo0(src, dst, len);
@@ -401,7 +416,7 @@ public interface ByteOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default long readTo(
-            @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst
+        @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst
     ) throws IORuntimeException {
         return ByteOperatorImpl.readTo0(src, dst, -1, bufferSize());
     }
@@ -422,7 +437,7 @@ public interface ByteOperator {
      * @throws IORuntimeException       if an I/O error occurs
      */
     default long readTo(
-            @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, long len
+        @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
         JieCheck.checkArgument(len >= 0, "len must >= 0.");
         return ByteOperatorImpl.readTo0(src, dst, len, bufferSize());
@@ -440,7 +455,7 @@ public interface ByteOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default long readTo(
-            @Nonnull ReadableByteChannel src, @Nonnull OutputStream dst
+        @Nonnull ReadableByteChannel src, @Nonnull OutputStream dst
     ) throws IORuntimeException {
         return ByteOperatorImpl.readTo0(src, dst, -1, bufferSize());
     }
@@ -461,7 +476,7 @@ public interface ByteOperator {
      * @throws IORuntimeException       if an I/O error occurs
      */
     default long readTo(
-            @Nonnull ReadableByteChannel src, @Nonnull OutputStream dst, long len
+        @Nonnull ReadableByteChannel src, @Nonnull OutputStream dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
         JieCheck.checkArgument(len >= 0, "len must >= 0.");
         return ByteOperatorImpl.readTo0(src, dst, len, bufferSize());
@@ -500,7 +515,7 @@ public interface ByteOperator {
      * @throws IORuntimeException        if an I/O error occurs
      */
     default int readTo(
-            @Nonnull ReadableByteChannel src, byte @Nonnull [] dst, int off, int len
+        @Nonnull ReadableByteChannel src, byte @Nonnull [] dst, int off, int len
     ) throws IndexOutOfBoundsException, IORuntimeException {
         JieCheck.checkOffsetLength(dst.length, off, len);
         return ByteOperatorImpl.readTo0(src, ByteBuffer.wrap(dst, off, len), -1);
@@ -542,7 +557,7 @@ public interface ByteOperator {
      * @throws IORuntimeException       if an I/O error occurs
      */
     default int readTo(
-            @Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst, int len
+        @Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst, int len
     ) throws IllegalArgumentException, IORuntimeException {
         JieCheck.checkArgument(len >= 0, "len must >= 0.");
         return ByteOperatorImpl.readTo0(src, dst, len);

@@ -14,12 +14,10 @@ import java.nio.channels.WritableByteChannel;
 final class ByteReaderImpl {
 
     static @Nonnull ByteReader of(@Nonnull InputStream src, int bufSize) throws IllegalArgumentException {
-        JieCheck.checkArgument(bufSize > 0, "bufSize > 0.");
         return new ByteStreamReader(src, bufSize);
     }
 
     static @Nonnull ByteReader of(@Nonnull ReadableByteChannel src, int bufSize) throws IllegalArgumentException {
-        JieCheck.checkArgument(bufSize > 0, "bufSize > 0.");
         return new ByteChannelReader(src, bufSize);
     }
 
@@ -77,10 +75,9 @@ final class ByteReaderImpl {
         private final @Nonnull InputStream source;
         private final @Nonnull ByteOperator operator;
 
-        ByteStreamReader(@Nonnull InputStream source, int bufferSize) {
-            this.source = source;
-            this.operator = bufferSize == ByteOperator.DEFAULT_OPERATOR.bufferSize() ?
-                ByteOperator.DEFAULT_OPERATOR : ByteOperator.newOperator(bufferSize);
+        ByteStreamReader(@Nonnull InputStream src, int bufSize) throws IllegalArgumentException {
+            this.source = src;
+            this.operator = ByteOperator.get(bufSize);
         }
 
         @Override
@@ -201,10 +198,9 @@ final class ByteReaderImpl {
         private final @Nonnull ReadableByteChannel source;
         private final @Nonnull ByteOperator operator;
 
-        ByteChannelReader(@Nonnull ReadableByteChannel source, int bufferSize) {
-            this.source = source;
-            this.operator = bufferSize == ByteOperator.DEFAULT_OPERATOR.bufferSize() ?
-                ByteOperator.DEFAULT_OPERATOR : ByteOperator.newOperator(bufferSize);
+        ByteChannelReader(@Nonnull ReadableByteChannel src, int bufSize) throws IllegalArgumentException {
+            this.source = src;
+            this.operator = ByteOperator.get(bufSize);
         }
 
         @Override
