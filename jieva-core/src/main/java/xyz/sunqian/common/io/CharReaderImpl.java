@@ -84,11 +84,14 @@ final class CharReaderImpl {
 
         @Override
         public @Nonnull CharSegment read(int len) throws IllegalArgumentException, IORuntimeException {
+            if (len == 0) {
+                return CharSegment.empty(false);
+            }
             char[] chars = operator.read(source, len);
             if (chars == null) {
                 return CharSegment.empty(true);
             }
-            return CharSegment.of(CharBuffer.wrap(chars), chars.length == len);
+            return CharSegment.of(CharBuffer.wrap(chars), chars.length < len);
         }
 
         @Override

@@ -82,6 +82,9 @@ final class ByteReaderImpl {
 
         @Override
         public @Nonnull ByteSegment read(int len) throws IllegalArgumentException, IORuntimeException {
+            if (len == 0) {
+                return ByteSegment.empty(false);
+            }
             byte[] bytes = operator.read(source, len);
             if (bytes == null) {
                 return ByteSegment.empty(true);
@@ -205,6 +208,9 @@ final class ByteReaderImpl {
 
         @Override
         public @Nonnull ByteSegment read(int len) throws IllegalArgumentException, IORuntimeException {
+            if (len == 0) {
+                return ByteSegment.empty(false);
+            }
             ByteBuffer buf = operator.read(source, len);
             if (buf == null) {
                 return ByteSegment.empty(true);

@@ -63,6 +63,16 @@ public interface ByteSegment {
     }
 
     /**
+     * Returns a new array copied from the remaining content of the {@link #data()}. Position of the {@link #data()}
+     * will not be changed.
+     *
+     * @return a new array copied from the remaining content of the {@link #data()}
+     */
+    default byte @Nonnull [] copyByteArray() {
+        return JieBuffer.copyContent(data());
+    }
+
+    /**
      * Returns a clone of this segment. The {@link #data()} of the returned clone is an independent copy, not be shared
      * with the {@link #data()} of this segment.
      *

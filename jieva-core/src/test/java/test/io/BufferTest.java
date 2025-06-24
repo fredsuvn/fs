@@ -91,7 +91,7 @@ public class BufferTest {
     public void testCopy() {
         {
             // byte
-            byte[] data = JieRandom.fill(new byte[1024]);
+            byte[] data = JieRandom.fill(new byte[128]);
             ByteBuffer b1 = ByteBuffer.wrap(data, 6, 66);
             b1.get(new byte[5]);
             ByteBuffer b2 = JieBuffer.copy(b1);
@@ -102,10 +102,14 @@ public class BufferTest {
             ByteBuffer b4 = JieBuffer.copy(b3);
             assertEquals(b4, b3);
             assertTrue(b4.isDirect());
+            ByteBuffer b5 = ByteBuffer.wrap(data, 6, 66);
+            assertEquals(JieBuffer.copyContent(b5), Arrays.copyOfRange(data, 6, 6 + 66));
+            assertEquals(b5.position(), 6);
+            assertEquals(b5.remaining(), 66);
         }
         {
             // char
-            char[] data = JieRandom.fill(new char[1024]);
+            char[] data = JieRandom.fill(new char[128]);
             CharBuffer b1 = CharBuffer.wrap(data, 6, 66);
             b1.get(new char[5]);
             CharBuffer b2 = JieBuffer.copy(b1);
@@ -118,6 +122,10 @@ public class BufferTest {
             CharBuffer b4 = JieBuffer.copy(b3);
             assertEquals(b4, b3);
             assertTrue(b4.isDirect());
+            CharBuffer b5 = CharBuffer.wrap(data, 6, 66);
+            assertEquals(JieBuffer.copyContent(b5), Arrays.copyOfRange(data, 6, 6 + 66));
+            assertEquals(b5.position(), 6);
+            assertEquals(b5.remaining(), 66);
         }
     }
 

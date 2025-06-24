@@ -34,16 +34,14 @@ public class CharReaderTest {
 
     @Test
     public void testRead() {
-        testRead0(10240);
-        testRead0(10240);
-        testRead0(1024);
-        testRead0(333);
-        testRead0(77);
         testRead0(0);
         testRead0(1);
-        testRead0(1);
-        testRead0(2);
-        testRead0(4);
+        testRead0(32);
+        testRead0(33);
+        testRead0(133);
+        testRead0(1337);
+        testRead0(13379);
+        testRead0(133799);
     }
 
     private void testRead0(int dataSize) {
@@ -92,11 +90,9 @@ public class CharReaderTest {
         {
             // direct buffer
             char[] data = JieRandom.fill(new char[dataSize]);
-            CharBuffer direct = MaterialBox.copyDirect(data);
-            direct.mark();
-            testRead0(CharReader.from(direct), direct.slice(), true, true);
-            direct.reset();
-            testSkip0(CharReader.from(direct), data);
+            CharBuffer buffer = JieBuffer.directBuffer(data);
+            testRead0(CharReader.from(buffer), buffer.slice(), true, true);
+            testSkip0(CharReader.from(JieBuffer.directBuffer(data)), data);
         }
     }
 
@@ -119,18 +115,16 @@ public class CharReaderTest {
                 int endIndex = Math.min(dataLength, startIndex + length);
                 int actualLen = Math.min(length, endIndex - startIndex);
                 CharSegment segment = reader.read(length);
-                CharBuffer readBuf = segment.data();
-                assertEquals(readBuf.remaining(), actualLen);
+                assertEquals(segment.data().remaining(), actualLen);
                 char[] dataBuf = new char[actualLen];
                 data.get(dataBuf);
                 assertEquals(
-                    JieBuffer.read(readBuf),
+                    segment.copyCharArray(),
                     dataBuf
                 );
                 if (shared) {
                     char[] newChars = JieRandom.fill(new char[actualLen]);
-                    readBuf.flip();
-                    readBuf.put(newChars);
+                    segment.data().put(newChars);
                     newData.append(newChars);
                 }
                 if (length > actualLen) {
@@ -156,11 +150,9 @@ public class CharReaderTest {
         data.reset();
         CharSegment segment = reader.read(dataLength == 0 ? 1 : dataLength * 2);
         assertTrue(segment.end());
-        char[] readBuf = JieBuffer.read(segment.data());
-        char[] dataBuf = JieBuffer.read(data);
-        assertEquals(readBuf, dataBuf);
+        assertEquals(segment.copyCharArray(), JieBuffer.copyContent(data));
         if (shared) {
-            assertEquals(readBuf, newData.toCharArray());
+            assertEquals(segment.copyCharArray(), newData.toCharArray());
         }
         assertTrue(reader.read(1).end());
     }

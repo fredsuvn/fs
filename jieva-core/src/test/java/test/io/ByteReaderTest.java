@@ -19,6 +19,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
 import java.util.Arrays;
 
 import static org.testng.Assert.assertEquals;
@@ -32,16 +33,14 @@ public class ByteReaderTest {
 
     @Test
     public void testRead() {
-        testRead0(10240);
-        testRead0(10240);
-        testRead0(1024);
-        testRead0(333);
-        testRead0(77);
         testRead0(0);
         testRead0(1);
-        testRead0(1);
-        testRead0(2);
-        testRead0(4);
+        testRead0(32);
+        testRead0(33);
+        testRead0(133);
+        testRead0(1337);
+        testRead0(13379);
+        testRead0(133799);
     }
 
     private void testRead0(int dataSize) {
@@ -77,11 +76,9 @@ public class ByteReaderTest {
         {
             // direct buffer
             byte[] data = JieRandom.fill(new byte[dataSize]);
-            ByteBuffer direct = MaterialBox.copyDirect(data);
-            direct.mark();
-            testRead0(ByteReader.from(direct), direct.slice(), true, true);
-            direct.reset();
-            testSkip0(ByteReader.from(direct), data);
+            ByteBuffer buffer = JieBuffer.directBuffer(data);
+            testRead0(ByteReader.from(buffer), buffer.slice(), true, true);
+            testSkip0(ByteReader.from(JieBuffer.directBuffer(data)), data);
         }
     }
 
@@ -104,18 +101,16 @@ public class ByteReaderTest {
                 int endIndex = Math.min(dataLength, startIndex + length);
                 int actualLen = Math.min(length, endIndex - startIndex);
                 ByteSegment segment = reader.read(length);
-                ByteBuffer readBuf = segment.data();
-                assertEquals(readBuf.remaining(), actualLen);
+                assertEquals(segment.data().remaining(), actualLen);
                 byte[] dataBuf = new byte[actualLen];
                 data.get(dataBuf);
                 assertEquals(
-                    JieBuffer.read(readBuf),
+                    segment.copyByteArray(),
                     dataBuf
                 );
                 if (shared) {
                     byte[] newBytes = JieRandom.fill(new byte[actualLen]);
-                    readBuf.flip();
-                    readBuf.put(newBytes);
+                    segment.data().put(newBytes);
                     newData.append(newBytes);
                 }
                 if (length > actualLen) {
@@ -141,11 +136,9 @@ public class ByteReaderTest {
         data.reset();
         ByteSegment segment = reader.read(dataLength == 0 ? 1 : dataLength * 2);
         assertTrue(segment.end());
-        byte[] readBuf = JieBuffer.read(segment.data());
-        byte[] dataBuf = JieBuffer.read(data);
-        assertEquals(readBuf, dataBuf);
+        assertEquals(segment.copyByteArray(), JieBuffer.copyContent(data));
         if (shared) {
-            assertEquals(readBuf, newData.toByteArray());
+            assertEquals(segment.toByteArray(), newData.toByteArray());
         }
         assertTrue(reader.read(1).end());
     }
@@ -186,16 +179,12 @@ public class ByteReaderTest {
 
     @Test
     public void testReadTo() {
-        testReadTo0(10240);
-        testReadTo0(10240);
-        testReadTo0(1024);
-        testReadTo0(333);
-        testReadTo0(77);
         testReadTo0(0);
         testReadTo0(1);
-        testReadTo0(1);
-        testReadTo0(2);
-        testReadTo0(4);
+        testReadTo0(32);
+        testReadTo0(33);
+        testReadTo0(133);
+        testRead0(1337);
 
         {
             // special: nio
@@ -227,6 +216,10 @@ public class ByteReaderTest {
             testReadTo0(ByteReader.from(new ByteArrayInputStream(data)), data);
         }
         {
+            // channel
+            testReadTo0(ByteReader.from(Channels.newChannel(new ByteArrayInputStream(data))), data);
+        }
+        {
             // byte array
             testReadTo0(ByteReader.from(data), data);
             testReadTo0(ByteReader.from(dataPadding, 33, data.length), data);
@@ -234,10 +227,7 @@ public class ByteReaderTest {
         {
             // byte buffer
             testReadTo0(ByteReader.from(ByteBuffer.wrap(data)), data);
-            ByteBuffer direct = ByteBuffer.allocateDirect(data.length);
-            direct.put(data);
-            direct.flip();
-            testReadTo0(ByteReader.from(direct), data);
+            testReadTo0(ByteReader.from(JieBuffer.directBuffer(data)), data);
         }
     }
 

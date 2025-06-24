@@ -788,8 +788,8 @@ public class JieBuffer {
      * Returns a new buffer copied from the given source buffer. The content of the new buffer is independent and copied
      * from {@code 0} to {@code src.capacity()} (not {@code src.position()} to {@code src.limit()}).
      * <p>
-     * The new buffer's position, limit and capacity are same with the source buffer's, and the new buffer is direct if,
-     * and only if, the source buffer is direct.
+     * Position of the source buffer will not be changed. The new buffer's position, limit and capacity are same with
+     * the source buffer's, and the new buffer is direct if, and only if, the source buffer is direct.
      *
      * @param src the given source buffer
      * @return a new buffer copied from the given source buffer
@@ -815,8 +815,8 @@ public class JieBuffer {
      * Returns a new buffer copied from the given source buffer. The content of the new buffer is independent and copied
      * from {@code 0} to {@code src.capacity()} (not {@code src.position()} to {@code src.limit()}).
      * <p>
-     * The new buffer's position, limit and capacity are same with the source buffer's, and the new buffer is direct if,
-     * and only if, the source buffer is direct.
+     * Position of the source buffer will not be changed. The new buffer's position, limit and capacity are same with
+     * the source buffer's, and the new buffer is direct if, and only if, the source buffer is direct.
      *
      * @param src the given source buffer
      * @return a new buffer copied from the given source buffer
@@ -836,6 +836,36 @@ public class JieBuffer {
         dst.position(pos);
         dst.limit(limit);
         return dst;
+    }
+
+    /**
+     * Returns a new array copied from the remaining content of the given source buffer. Position of the source buffer
+     * will not be changed.
+     *
+     * @param src the given source buffer
+     * @return a new array copied from the remaining content of the given source buffer
+     */
+    public static byte @Nonnull [] copyContent(@Nonnull ByteBuffer src) {
+        byte[] ret = new byte[src.remaining()];
+        int pos = src.position();
+        src.get(ret);
+        src.position(pos);
+        return ret;
+    }
+
+    /**
+     * Returns a new array copied from the remaining content of the given source buffer. Position of the source buffer
+     * will not be changed.
+     *
+     * @param src the given source buffer
+     * @return a new array copied from the remaining content of the given source buffer
+     */
+    public static char @Nonnull [] copyContent(@Nonnull CharBuffer src) {
+        char[] ret = new char[src.remaining()];
+        int pos = src.position();
+        src.get(ret);
+        src.position(pos);
+        return ret;
     }
 
     /**
