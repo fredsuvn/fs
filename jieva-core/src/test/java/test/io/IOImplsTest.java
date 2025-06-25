@@ -40,9 +40,10 @@ public class IOImplsTest {
 
     @Test
     public void testInputStream() throws Exception {
-        testInputStream(64);
-        testInputStream(66);
+        testInputStream(128);
         testInputStream(256);
+        testInputStream(512);
+        testInputStream(1024);
 
         // empty
         testInputStream(JieIO.emptyInputStream(), new byte[0], true, false);
@@ -103,13 +104,29 @@ public class IOImplsTest {
             charsIn = JieIO.newInputStream(new CharArrayReader(chars));
             testInputStream(charsIn, charBytes, false, false);
             expectThrows(IOException.class, charsIn::read);
-            // error
+            // error: U+DD88
             charsIn = JieIO.newInputStream(new CharArrayReader(chars), new ErrorCharset());
             expectThrows(IOException.class, charsIn::read);
-            // error: U+DD88
-            // Arrays.fill(chars, '\uDD88');
-            // charsIn = JieIO.newInputStream(new CharArrayReader(chars));
-            // expectThrows(IOException.class, charsIn::read);
+        }
+        {
+            // limited
+            byte[] data = JieRandom.fill(new byte[dataSize]);
+            testInputStream(
+                JieIO.limitedInputStream(JieIO.newInputStream(data), data.length), data,
+                true, false
+            );
+            testInputStream(
+                JieIO.limitedInputStream(
+                    JieIO.newInputStream(data), data.length * 2),
+                data,
+                true, false
+            );
+            testInputStream(
+                JieIO.limitedInputStream(
+                    JieIO.newInputStream(data), data.length - 5),
+                Arrays.copyOf(data, data.length - 5),
+                true, false
+            );
         }
     }
 
@@ -235,16 +252,21 @@ public class IOImplsTest {
                 assertTrue(in.available() <= data.length - hasRead && in.available() >= 0);
             }
             in.mark(data.length - hasRead);
-            byte[] remaining = JieIO.read(in);
+            int remainingSize = data.length - hasRead;
+            byte[] remaining = new byte[remainingSize * 2];
+            assertEquals(in.read(remaining), remainingSize);
+            assertEquals(in.read(), -1);
             assertEquals(
-                remaining,
+                Arrays.copyOf(remaining, remainingSize),
                 Arrays.copyOfRange(data, hasRead, data.length)
             );
             if (in.markSupported()) {
                 in.reset();
-                byte[] remaining2 = JieIO.read(in);
+                byte[] remaining2 = new byte[remainingSize * 2];
+                assertEquals(in.read(remaining2), remainingSize);
+                assertEquals(in.read(), -1);
                 assertEquals(
-                    remaining2,
+                    Arrays.copyOf(remaining2, remainingSize),
                     Arrays.copyOfRange(data, hasRead, data.length)
                 );
                 assertEquals(
@@ -252,7 +274,7 @@ public class IOImplsTest {
                     remaining2
                 );
             }
-            hasRead += remaining.length;
+            hasRead += remainingSize;
         }
         assertEquals(hasRead, data.length);
         testEndInputStream(in);
@@ -283,6 +305,7 @@ public class IOImplsTest {
     public void testReader() throws Exception {
         testReader(128);
         testReader(256);
+        testReader(512);
         testReader(1024);
 
         // empty
@@ -355,6 +378,26 @@ public class IOImplsTest {
             charsIn = JieIO.newReader(JieIO.newInputStream(fakeBytes), new ByteToNCharCharset(3));
             testReader(charsIn, fakeChars, false, false);
             expectThrows(IOException.class, charsIn::read);
+        }
+        {
+            // limited
+            char[] data = JieRandom.fill(new char[dataSize]);
+            testReader(
+                JieIO.limitedReader(JieIO.newReader(data), data.length), data,
+                true, false
+            );
+            testReader(
+                JieIO.limitedReader(
+                    JieIO.newReader(data), data.length * 2),
+                data,
+                true, false
+            );
+            testReader(
+                JieIO.limitedReader(
+                    JieIO.newReader(data), data.length - 5),
+                Arrays.copyOf(data, data.length - 5),
+                true, false
+            );
         }
     }
 
@@ -494,16 +537,21 @@ public class IOImplsTest {
             if (in.markSupported()) {
                 in.mark(data.length - hasRead);
             }
-            char[] remaining = JieIO.read(in);
+            int remainingSize = data.length - hasRead;
+            char[] remaining = new char[remainingSize * 2];
+            assertEquals(in.read(remaining), remainingSize);
+            assertEquals(in.read(), -1);
             assertEquals(
-                remaining,
+                Arrays.copyOf(remaining, remainingSize),
                 Arrays.copyOfRange(data, hasRead, data.length)
             );
             if (in.markSupported()) {
                 in.reset();
-                char[] remaining2 = JieIO.read(in);
+                char[] remaining2 = new char[remainingSize * 2];
+                assertEquals(in.read(remaining2), remainingSize);
+                assertEquals(in.read(), -1);
                 assertEquals(
-                    remaining2,
+                    Arrays.copyOf(remaining2, remainingSize),
                     Arrays.copyOfRange(data, hasRead, data.length)
                 );
                 assertEquals(
@@ -511,7 +559,7 @@ public class IOImplsTest {
                     remaining2
                 );
             }
-            hasRead += remaining.length;
+            hasRead += remainingSize;
         }
         assertEquals(hasRead, data.length);
         testEndReader(in);
@@ -540,9 +588,10 @@ public class IOImplsTest {
 
     @Test
     public void testOutputStream() throws Exception {
-        testOutputStream(64);
         testOutputStream(128);
         testOutputStream(256);
+        testOutputStream(512);
+        testOutputStream(1024);
 
         // null
         testOutputStream(JieIO.nullOutputStream(), new byte[1024], false, false);
@@ -624,6 +673,24 @@ public class IOImplsTest {
             OutputStream errOut = JieIO.newOutputStream(builder, new ErrorCharset());
             expectThrows(IOException.class, () -> errOut.write(new byte[10]));
         }
+        {
+            // limited
+            byte[] data = JieRandom.fill(new byte[dataSize]);
+            BytesBuilder builder = new BytesBuilder();
+            testOutputStream(
+                JieIO.limitedOutputStream(builder, data.length),
+                data,
+                true, false
+            );
+            assertEquals(builder.toByteArray(), data);
+            builder.reset();
+            testOutputStream(
+                JieIO.limitedOutputStream(builder, data.length - 5),
+                Arrays.copyOf(data, data.length - 5),
+                true, false
+            );
+            assertEquals(builder.toByteArray(), Arrays.copyOf(data, data.length - 5));
+        }
     }
 
     private void testOutputStream(OutputStream out, byte[] data, boolean limited, boolean close) throws Exception {
@@ -677,9 +744,10 @@ public class IOImplsTest {
 
     @Test
     public void testWriter() throws Exception {
-        testWriter(64);
         testWriter(128);
         testWriter(256);
+        testWriter(512);
+        testWriter(1024);
 
         // null
         testWriter(JieIO.nullWriter(), new char[1024], false, false);
@@ -735,6 +803,24 @@ public class IOImplsTest {
             builder.reset();
             Writer errOut = JieIO.newWriter(builder, new ErrorCharset());
             expectThrows(IOException.class, () -> errOut.write(new char[10]));
+        }
+        {
+            // limited
+            char[] data = JieRandom.fill(new char[dataSize]);
+            CharsBuilder builder = new CharsBuilder();
+            testWriter(
+                JieIO.limitedWriter(builder, data.length),
+                data,
+                true, false
+            );
+            assertEquals(builder.toCharArray(), data);
+            builder.reset();
+            testWriter(
+                JieIO.limitedWriter(builder, data.length - 5),
+                Arrays.copyOf(data, data.length - 5),
+                true, false
+            );
+            assertEquals(builder.toCharArray(), Arrays.copyOf(data, data.length - 5));
         }
     }
 

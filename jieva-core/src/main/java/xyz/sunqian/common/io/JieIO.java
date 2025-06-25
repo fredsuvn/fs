@@ -864,6 +864,33 @@ public class JieIO {
     }
 
     /**
+     * Wraps the given stream as a new {@link InputStream} of which readable number is limited to the specified limit.
+     * <p>
+     * The result's support is as follows:
+     * <ul>
+     *     <li>mark/reset: based on the given stream;</li>
+     *     <li>close: closes the given stream;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
+     *
+     * @param stream the given stream
+     * @param limit  the specified limit
+     * @return the given stream as a new {@link InputStream} of which readable number is limited to the specified limit
+     */
+    public static @Nonnull InputStream limitedInputStream(@Nonnull InputStream stream, int limit) {
+        return IOImpls.inputStream(stream, limit);
+    }
+
+    /**
+     * Returns a singleton empty {@link InputStream}.
+     *
+     * @return a singleton empty {@link InputStream}
+     */
+    public static @Nonnull InputStream emptyInputStream() {
+        return IOImpls.emptyInputStream();
+    }
+
+    /**
      * Wraps the given array as a new {@link Reader}.
      * <p>
      * The result's support is as follows:
@@ -995,12 +1022,40 @@ public class JieIO {
     }
 
     /**
+     * Wraps the given reader as a new {@link Reader} of which readable number is limited to the specified limit.
+     * <p>
+     * The result's support is as follows:
+     * <ul>
+     *     <li>mark/reset: based on the given reader;</li>
+     *     <li>close: closes the given reader;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
+     *
+     * @param reader the given reader
+     * @param limit  the specified limit
+     * @return the given reader as a new {@link Reader} of which readable number is limited to the specified limit
+     */
+    public static @Nonnull Reader limitedReader(@Nonnull Reader reader, int limit) {
+        return IOImpls.reader(reader, limit);
+    }
+
+    /**
+     * Returns a singleton empty {@link Reader}.
+     *
+     * @return a singleton empty {@link Reader}
+     */
+    public static @Nonnull Reader emptyReader() {
+        return IOImpls.emptyReader();
+    }
+
+    /**
      * Wraps the given array as a new {@link OutputStream}.
      * <p>
      * The result's support is as follows:
      * <ul>
      *     <li>capacity: in bounds of the array;</li>
      *     <li>close: invoking has no effect;</li>
+     *     <li>flush: invoking has no effect;</li>
      *     <li>thread safety: no;</li>
      * </ul>
      *
@@ -1019,6 +1074,7 @@ public class JieIO {
      * <ul>
      *     <li>capacity: in specified bounds of the array;</li>
      *     <li>close: invoking has no effect;</li>
+     *     <li>flush: invoking has no effect;</li>
      *     <li>thread safety: no;</li>
      * </ul>
      *
@@ -1041,6 +1097,7 @@ public class JieIO {
      * <ul>
      *     <li>capacity: in bounds of the buffer;</li>
      *     <li>close: invoking has no effect;</li>
+     *     <li>flush: invoking has no effect;</li>
      *     <li>thread safety: no;</li>
      * </ul>
      *
@@ -1059,6 +1116,7 @@ public class JieIO {
      * <ul>
      *     <li>capacity:determined by the random access file;</li>
      *     <li>close: closes the random access file;</li>
+     *     <li>flush: flushes the random access file;</li>
      *     <li>thread safety: no;</li>
      * </ul>
      *
@@ -1080,6 +1138,7 @@ public class JieIO {
      * <ul>
      *     <li>capacity:determined by the appender;</li>
      *     <li>close: closes the appender;</li>
+     *     <li>flush: flushes the appender;</li>
      *     <li>thread safety: no;</li>
      * </ul>
      *
@@ -1097,6 +1156,7 @@ public class JieIO {
      * <ul>
      *     <li>capacity:determined by the appender;</li>
      *     <li>close: closes the appender;</li>
+     *     <li>flush: flushes the appender;</li>
      *     <li>thread safety: no;</li>
      * </ul>
      *
@@ -1109,12 +1169,43 @@ public class JieIO {
     }
 
     /**
+     * Wraps the given stream as a new {@link OutputStream} of which writeable number is limited to the specified
+     * limit.
+     * <p>
+     * The result's support is as follows:
+     * <ul>
+     *     <li>capacity: based on the given stream and limited by the specified limit;</li>
+     *     <li>close: closes the given stream;</li>
+     *     <li>flush: flushes the given stream;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
+     *
+     * @param stream the given stream
+     * @param limit  the specified limit
+     * @return the given stream as a new {@link OutputStream} of which writeable number is limited to the specified
+     * limit
+     */
+    public static @Nonnull OutputStream limitedOutputStream(@Nonnull OutputStream stream, int limit) {
+        return IOImpls.outputStream(stream, limit);
+    }
+
+    /**
+     * Returns a singleton {@link OutputStream} which supports writing infinitely data but immediately discards them.
+     *
+     * @return a singleton {@link OutputStream} which supports writing infinitely data but immediately discards them.
+     */
+    public static @Nonnull OutputStream nullOutputStream() {
+        return IOImpls.nullOutputStream();
+    }
+
+    /**
      * Wraps the given array as a new {@link Writer}.
      * <p>
      * The result's support is as follows:
      * <ul>
      *     <li>capacity: in bounds of the array;</li>
      *     <li>close: invoking has no effect;</li>
+     *     <li>flush: invoking has no effect;</li>
      *     <li>thread safety: no;</li>
      * </ul>
      *
@@ -1132,6 +1223,7 @@ public class JieIO {
      * <ul>
      *     <li>capacity: in specified bounds of the array;</li>
      *     <li>close: invoking has no effect;</li>
+     *     <li>flush: invoking has no effect;</li>
      *     <li>thread safety: no;</li>
      * </ul>
      *
@@ -1154,6 +1246,7 @@ public class JieIO {
      * <ul>
      *     <li>capacity: in bounds of the buffer;</li>
      *     <li>close: invoking has no effect;</li>
+     *     <li>flush: invoking has no effect;</li>
      *     <li>thread safety: no;</li>
      * </ul>
      *
@@ -1171,6 +1264,7 @@ public class JieIO {
      * <ul>
      *     <li>capacity:determined by the stream;</li>
      *     <li>close: closes the stream;</li>
+     *     <li>flush: flushes the stream;</li>
      *     <li>thread safety: no;</li>
      * </ul>
      *
@@ -1188,6 +1282,7 @@ public class JieIO {
      * <ul>
      *     <li>capacity:determined by the stream;</li>
      *     <li>close: closes the stream;</li>
+     *     <li>flush: flushes the stream;</li>
      *     <li>thread safety: no;</li>
      * </ul>
      *
@@ -1200,30 +1295,22 @@ public class JieIO {
     }
 
     /**
-     * Returns a singleton empty {@link InputStream}.
+     * Wraps the given writer as a new {@link Writer} of which writeable number is limited to the specified limit.
+     * <p>
+     * The result's support is as follows:
+     * <ul>
+     *     <li>capacity: based on the given writer and limited by the specified limit;</li>
+     *     <li>close: closes the given writer;</li>
+     *     <li>flush: flushes the given writer;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
      *
-     * @return a singleton empty {@link InputStream}
+     * @param writer the given writer
+     * @param limit  the specified limit
+     * @return the given writer as a new {@link Writer} of which writeable number is limited to the specified limit
      */
-    public static @Nonnull InputStream emptyInputStream() {
-        return IOImpls.emptyInputStream();
-    }
-
-    /**
-     * Returns a singleton empty {@link Reader}.
-     *
-     * @return a singleton empty {@link Reader}
-     */
-    public static @Nonnull Reader emptyReader() {
-        return IOImpls.emptyReader();
-    }
-
-    /**
-     * Returns a singleton {@link OutputStream} which supports writing infinitely data but immediately discards them.
-     *
-     * @return a singleton {@link OutputStream} which supports writing infinitely data but immediately discards them.
-     */
-    public static @Nonnull OutputStream nullOutputStream() {
-        return IOImpls.nullOutputStream();
+    public static @Nonnull Writer limitedWriter(@Nonnull Writer writer, int limit) {
+        return IOImpls.writer(writer, limit);
     }
 
     /**

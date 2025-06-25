@@ -29,6 +29,10 @@ final class IOImpls {
         return "Insufficient remaining space: " + len + " to " + remaining + ".";
     }
 
+    private static @Nonnull String insufficientRemainingSpace(int len, long remaining) {
+        return "Insufficient remaining space: " + len + " to " + remaining + ".";
+    }
+
     private static @Nonnull String encodingFailed(CoderResult result) {
         return "Chars encoding failed: " + result + ".";
     }
@@ -63,6 +67,10 @@ final class IOImpls {
         return new CharsInputStream(reader, charset);
     }
 
+    static @Nonnull InputStream inputStream(@Nonnull InputStream in, int limit) {
+        return new LimitedInputStream(in, limit);
+    }
+
     static @Nonnull InputStream emptyInputStream() {
         return EmptyInputStream.SINGLETON;
     }
@@ -89,6 +97,10 @@ final class IOImpls {
 
     static @Nonnull Reader reader(@Nonnull InputStream inputStream, @Nonnull Charset charset) {
         return new BytesReader(inputStream, charset);
+    }
+
+    static @Nonnull Reader reader(@Nonnull Reader in, int limit) {
+        return new LimitedReader(in, limit);
     }
 
     static @Nonnull Reader emptyReader() {
@@ -121,6 +133,10 @@ final class IOImpls {
         return new AppenderOutputStream(appender, charset);
     }
 
+    static @Nonnull OutputStream outputStream(@Nonnull OutputStream in, int limit) {
+        return new LimitedOutputStream(in, limit);
+    }
+
     static @Nonnull OutputStream nullOutputStream() {
         return NullOutputStream.SINGLETON;
     }
@@ -139,6 +155,10 @@ final class IOImpls {
 
     static @Nonnull Writer writer(@Nonnull OutputStream outputStream, Charset charset) {
         return new BytesWriter(outputStream, charset);
+    }
+
+    static @Nonnull Writer writer(@Nonnull Writer in, int limit) {
+        return new LimitedWriter(in, limit);
     }
 
     static @Nonnull Writer nullWriter() {
@@ -324,7 +344,7 @@ final class IOImpls {
             if (n <= 0) {
                 return 0;
             }
-            return raf.skipBytes((int) n);
+            return raf.skipBytes(JieMath.intValue(n));
         }
 
         @Override
@@ -527,77 +547,80 @@ final class IOImpls {
         }
     }
 
-    // private static final class LimitedInputStream extends DoReadStream {
-    //
-    //     private final @Nonnull InputStream in;
-    //     private long limit;
-    //
-    //     LimitedInputStream(@Nonnull InputStream in, long limit) {
-    //         this.in = in;
-    //         this.limit = limit;
-    //     }
-    //
-    //     @Override
-    //     public int read() {
-    //         return (pos < count) ? (buf[pos++] & 0xff) : -1;
-    //     }
-    //
-    //     @Override
-    //     protected int doRead(byte @Nonnull [] b, int off, int len) {
-    //         if (len == 0) {
-    //             return 0;
-    //         }
-    //         if (pos >= count) {
-    //             return -1;
-    //         }
-    //         int avail = count - pos;
-    //         avail = Math.min(len, avail);
-    //         System.arraycopy(buf, pos, b, off, avail);
-    //         pos += avail;
-    //         return avail;
-    //     }
-    //
-    //     @Override
-    //     public long skip(long n) {
-    //         if (n <= 0) {
-    //             return 0;
-    //         }
-    //         int avail = count - pos;
-    //         avail = (int) Math.min(n, avail);
-    //         if (avail <= 0) {
-    //             return 0;
-    //         }
-    //         pos += avail;
-    //         return avail;
-    //     }
-    //
-    //     @Override
-    //     public int available() {
-    //         return count - pos;
-    //     }
-    //
-    //     @Override
-    //     public boolean markSupported() {
-    //         return true;
-    //     }
-    //
-    //     @Override
-    //     public void mark(int readAheadLimit) {
-    //         mark = pos;
-    //     }
-    //
-    //     @Override
-    //     public void reset() throws IOException {
-    //         if (mark < 0) {
-    //             throw new IOException(MARK_NOT_SET);
-    //         }
-    //         pos = mark;
-    //     }
-    //
-    //     @Override
-    //     public void close() {
-    //     }
-    // }
+    private static final class LimitedInputStream extends DoReadStream {
+
+        private final @Nonnull InputStream in;
+        private final long limit;
+
+        private long pos = 0;
+        private long mark = 0;
+
+        LimitedInputStream(@Nonnull InputStream in, long limit) {
+            this.in = in;
+            this.limit = limit;
+        }
+
+        @Override
+        public int read() throws IOException {
+            if (pos >= limit) {
+                return -1;
+            }
+            int ret = in.read();
+            if (ret == -1) {
+                return -1;
+            }
+            pos++;
+            return ret;
+        }
+
+        @Override
+        protected int doRead(byte @Nonnull [] b, int off, int len) throws IOException {
+            if (pos >= limit) {
+                return -1;
+            }
+            int ret = in.read(b, off, (int) Math.min(limit - pos, len));
+            if (ret < 0) {
+                return -1;
+            }
+            pos += ret;
+            return ret;
+        }
+
+        @Override
+        public long skip(long n) throws IOException {
+            long remaining = limit - pos;
+            long ret = in.skip(Math.min(n, remaining));
+            pos += ret;
+            return ret;
+        }
+
+        @Override
+        public int available() throws IOException {
+            return Math.min(in.available(), JieMath.intValue(limit - pos));
+        }
+
+        @Override
+        public boolean markSupported() {
+            return in.markSupported();
+        }
+
+        @Override
+        public void mark(int readAheadLimit) {
+            in.mark(readAheadLimit);
+            mark = pos;
+        }
+
+        @Override
+        public void reset() throws IOException {
+            in.reset();
+            pos = mark;
+        }
+
+        @Override
+        public void close() throws IOException {
+            in.close();
+        }
+    }
 
     private static final class EmptyInputStream extends DoReadStream {
 
@@ -955,6 +978,81 @@ final class IOImpls {
         }
     }
 
+    private static final class LimitedReader extends DoReadReader {
+
+        private final @Nonnull Reader in;
+        private final long limit;
+
+        private long pos = 0;
+        private long mark = 0;
+
+        LimitedReader(@Nonnull Reader in, long limit) {
+            this.in = in;
+            this.limit = limit;
+        }
+
+        @Override
+        public int read() throws IOException {
+            if (pos >= limit) {
+                return -1;
+            }
+            int ret = in.read();
+            if (ret == -1) {
+                return -1;
+            }
+            pos++;
+            return ret;
+        }
+
+        @Override
+        protected int doRead(char @Nonnull [] b, int off, int len) throws IOException {
+            if (pos >= limit) {
+                return -1;
+            }
+            int ret = in.read(b, off, (int) Math.min(limit - pos, len));
+            if (ret < 0) {
+                return -1;
+            }
+            pos += ret;
+            return ret;
+        }
+
+        @Override
+        public long skip(long n) throws IOException {
+            long remaining = limit - pos;
+            long ret = in.skip(Math.min(n, remaining));
+            pos += ret;
+            return ret;
+        }
+
+        @Override
+        public boolean ready() throws IOException {
+            return in.ready();
+        }
+
+        @Override
+        public boolean markSupported() {
+            return in.markSupported();
+        }
+
+        @Override
+        public void mark(int readAheadLimit) throws IOException {
+            in.mark(readAheadLimit);
+            mark = pos;
+        }
+
+        @Override
+        public void reset() throws IOException {
+            in.reset();
+            pos = mark;
+        }
+
+        @Override
+        public void close() throws IOException {
+            in.close();
+        }
+    }
+
     private static final class EmptyReader extends DoReadReader {
 
         private static final @Nonnull EmptyReader SINGLETON = new EmptyReader();
@@ -1010,7 +1108,7 @@ final class IOImpls {
         public void write(int b) throws IOException {
             int remaining = end - pos;
             if (remaining < 1) {
-                throw new IOException(insufficientRemainingSpace(1, remaining));
+                throw new IOException(insufficientRemainingSpace(1, 0));
             }
             buf[pos] = (byte) b;
             pos++;
@@ -1194,6 +1292,48 @@ final class IOImpls {
             if (closed) {
                 throw new IOException(STREAM_CLOSED);
             }
+        }
+    }
+
+    private static final class LimitedOutputStream extends DoWriteStream {
+
+        private final @Nonnull OutputStream out;
+        private final long limit;
+
+        private long pos;
+
+        LimitedOutputStream(@Nonnull OutputStream out, long limit) {
+            this.out = out;
+            this.limit = limit;
+        }
+
+        @Override
+        public void write(int b) throws IOException {
+            if (pos >= limit) {
+                throw new IOException(insufficientRemainingSpace(1, 0));
+            }
+            out.write(b);
+            pos++;
+        }
+
+        @Override
+        protected void doWrite(byte @Nonnull [] b, int off, int len) throws IOException {
+            long remaining = limit - pos;
+            if (remaining < len) {
+                throw new IOException(insufficientRemainingSpace(len, remaining));
+            }
+            out.write(b, off, len);
+            pos += len;
+        }
+
+        @Override
+        public void flush() throws IOException {
+            out.flush();
+        }
+
+        @Override
+        public void close() throws IOException {
+            out.close();
         }
     }
 
@@ -1424,6 +1564,58 @@ final class IOImpls {
             if (closed) {
                 throw new IOException(STREAM_CLOSED);
             }
+        }
+    }
+
+    private static final class LimitedWriter extends DoWriteWriter {
+
+        private final @Nonnull Writer out;
+        private final long limit;
+
+        private long pos;
+
+        LimitedWriter(@Nonnull Writer out, long limit) {
+            this.out = out;
+            this.limit = limit;
+        }
+
+        @Override
+        public void write(int c) throws IOException {
+            if (pos >= limit) {
+                throw new IOException(insufficientRemainingSpace(1, 0));
+            }
+            out.write(c);
+            pos++;
+        }
+
+        @Override
+        protected void doWrite(char @Nonnull [] cbuf, int off, int len) throws IOException {
+            long remaining = limit - pos;
+            if (remaining < len) {
+                throw new IOException(insufficientRemainingSpace(len, remaining));
+            }
+            out.write(cbuf, off, len);
+            pos += len;
+        }
+
+        @Override
+        protected void doWrite(@Nonnull String str, int off, int len) throws IOException {
+            long remaining = limit - pos;
+            if (remaining < len) {
+                throw new IOException(insufficientRemainingSpace(len, remaining));
+            }
+            out.write(str, off, len);
+            pos += len;
+        }
+
+        @Override
+        public void flush() throws IOException {
+            out.flush();
+        }
+
+        @Override
+        public void close() throws IOException {
+            out.close();
         }
     }
 
