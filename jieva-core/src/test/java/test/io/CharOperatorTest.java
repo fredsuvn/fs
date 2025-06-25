@@ -75,12 +75,11 @@ public class CharOperatorTest {
     }
 
     private void testRead(CharOperator reader, int totalSize) throws Exception {
-        testRead(reader, totalSize, -1);
+        testRead(reader, totalSize, totalSize);
         testRead(reader, totalSize, 0);
         testRead(reader, totalSize, 1);
         testRead(reader, totalSize, totalSize / 2);
         testRead(reader, totalSize, totalSize - 1);
-        testRead(reader, totalSize, totalSize);
         testRead(reader, totalSize, totalSize + 1);
         testRead(reader, totalSize, totalSize * 2);
     }
@@ -251,12 +250,11 @@ public class CharOperatorTest {
     }
 
     private void testReadTo(CharOperator reader, int totalSize) throws Exception {
-        testReadTo(reader, totalSize, -1);
+        testReadTo(reader, totalSize, totalSize);
         testReadTo(reader, totalSize, 0);
         testReadTo(reader, totalSize, 1);
         testReadTo(reader, totalSize, totalSize / 2);
         testReadTo(reader, totalSize, totalSize - 1);
-        testReadTo(reader, totalSize, totalSize);
         testReadTo(reader, totalSize, totalSize + 1);
         testReadTo(reader, totalSize, totalSize * 2);
     }
@@ -393,9 +391,6 @@ public class CharOperatorTest {
         }
         if (totalSize == 0) {
             return -1;
-        }
-        if (readSize < 0) {
-            return totalSize;
         }
         return Math.min(readSize, totalSize);
     }

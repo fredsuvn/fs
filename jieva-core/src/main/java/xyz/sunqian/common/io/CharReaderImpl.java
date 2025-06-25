@@ -26,10 +26,6 @@ final class CharReaderImpl {
         return new CharBufferReader(src);
     }
 
-    // static @Nonnull CharReader of(@Nonnull CharReader source, long readLimit) throws IllegalArgumentException {
-    //     return new LimitedCharReader(source, readLimit);
-    // }
-
     static final class CharSegmentImpl implements CharSegment {
 
         private static final @Nonnull CharSegmentImpl EMPTY_END = new CharSegmentImpl(JieChars.emptyBuffer(), true);
