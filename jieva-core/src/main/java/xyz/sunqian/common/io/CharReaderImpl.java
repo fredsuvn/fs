@@ -1,7 +1,6 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.JieCheck;
 import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.base.chars.JieChars;
 
@@ -96,7 +95,7 @@ final class CharReaderImpl {
 
         @Override
         public long skip(long len) throws IllegalArgumentException, IORuntimeException {
-            JieCheck.checkArgument(len >= 0, "len must >= 0.");
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return 0;
             }
@@ -194,7 +193,7 @@ final class CharReaderImpl {
         private int mark;
 
         CharArrayReader(char @Nonnull [] source, int offset, int length) throws IndexOutOfBoundsException {
-            JieCheck.checkOffsetLength(source.length, offset, length);
+            IOChecker.checkOffLen(source.length, offset, length);
             this.source = source;
             this.pos = offset;
             this.endPos = offset + length;
@@ -203,7 +202,7 @@ final class CharReaderImpl {
 
         @Override
         public @Nonnull CharSegment read(int len) throws IllegalArgumentException, IORuntimeException {
-            JieCheck.checkArgument(len >= 0, "len must >= 0.");
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return CharSegment.empty(false);
             }
@@ -219,7 +218,7 @@ final class CharReaderImpl {
 
         @Override
         public long skip(long len) throws IllegalArgumentException, IORuntimeException {
-            JieCheck.checkArgument(len >= 0, "len must >= 0.");
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return 0;
             }
@@ -249,7 +248,7 @@ final class CharReaderImpl {
 
         @Override
         public long readTo(@Nonnull Appendable dst, long len) throws IllegalArgumentException, IORuntimeException {
-            JieCheck.checkArgument(len >= 0, "len must >= 0.");
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return 0;
             }
@@ -274,7 +273,7 @@ final class CharReaderImpl {
 
         @Override
         public int readTo(char @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException {
-            JieCheck.checkOffsetLength(dst.length, off, len);
+            IOChecker.checkOffLen(dst.length, off, len);
             return readTo0(dst, off, len);
         }
 
@@ -307,7 +306,7 @@ final class CharReaderImpl {
 
         @Override
         public int readTo(@Nonnull CharBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
-            JieCheck.checkArgument(len >= 0, "len must >= 0.");
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return 0;
             }
@@ -360,7 +359,7 @@ final class CharReaderImpl {
         private int mark;
 
         CharSequenceReader(@Nonnull CharSequence source, int start, int end) throws IndexOutOfBoundsException {
-            JieCheck.checkStartEnd(source.length(), start, end);
+            IOChecker.checkStartEnd(source.length(), start, end);
             this.source = source;
             this.pos = start;
             this.endPos = end;
@@ -369,7 +368,7 @@ final class CharReaderImpl {
 
         @Override
         public @Nonnull CharSegment read(int len) throws IllegalArgumentException, IORuntimeException {
-            JieCheck.checkArgument(len >= 0, "len must >= 0.");
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return CharSegment.empty(false);
             }
@@ -385,7 +384,7 @@ final class CharReaderImpl {
 
         @Override
         public long skip(long len) throws IllegalArgumentException, IORuntimeException {
-            JieCheck.checkArgument(len >= 0, "len must >= 0.");
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return 0;
             }
@@ -415,7 +414,7 @@ final class CharReaderImpl {
 
         @Override
         public long readTo(@Nonnull Appendable dst, long len) throws IllegalArgumentException, IORuntimeException {
-            JieCheck.checkArgument(len >= 0, "len must >= 0.");
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return 0;
             }
@@ -440,7 +439,7 @@ final class CharReaderImpl {
 
         @Override
         public int readTo(char @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException {
-            JieCheck.checkOffsetLength(dst.length, off, len);
+            IOChecker.checkOffLen(dst.length, off, len);
             return readTo0(dst, off, len);
         }
 
@@ -473,7 +472,7 @@ final class CharReaderImpl {
 
         @Override
         public int readTo(@Nonnull CharBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
-            JieCheck.checkArgument(len >= 0, "len must >= 0.");
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return 0;
             }
@@ -528,7 +527,7 @@ final class CharReaderImpl {
 
         @Override
         public @Nonnull CharSegment read(int len) throws IllegalArgumentException, IORuntimeException {
-            JieCheck.checkArgument(len >= 0, "len must >= 0.");
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return CharSegment.empty(false);
             }
@@ -547,7 +546,7 @@ final class CharReaderImpl {
 
         @Override
         public long skip(long len) throws IllegalArgumentException, IORuntimeException {
-            JieCheck.checkArgument(len >= 0, "len must >= 0.");
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return 0;
             }

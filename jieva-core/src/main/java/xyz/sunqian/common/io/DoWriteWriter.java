@@ -1,7 +1,6 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.JieCheck;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -51,7 +50,7 @@ public abstract class DoWriteWriter extends Writer {
 
     @Override
     public void write(char @Nonnull [] cbuf, int off, int len) throws IOException {
-        JieCheck.checkOffsetLength(cbuf.length, off, len);
+        IOChecker.checkOffLen(cbuf.length, off, len);
         doWrite(cbuf, off, len);
     }
 
@@ -62,7 +61,7 @@ public abstract class DoWriteWriter extends Writer {
 
     @Override
     public void write(@Nonnull String str, int off, int len) throws IOException {
-        JieCheck.checkOffsetLength(str.length(), off, len);
+        IOChecker.checkOffLen(str.length(), off, len);
         doWrite(str, off, len);
     }
 }

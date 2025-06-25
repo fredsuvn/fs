@@ -1,7 +1,6 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.JieCheck;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -36,7 +35,7 @@ public abstract class DoReadReader extends Reader {
 
     @Override
     public int read(char @Nonnull [] cbuf, int off, int len) throws IOException {
-        JieCheck.checkOffsetLength(cbuf.length, off, len);
+        IOChecker.checkOffLen(cbuf.length, off, len);
         return doRead(cbuf, off, len);
     }
 }

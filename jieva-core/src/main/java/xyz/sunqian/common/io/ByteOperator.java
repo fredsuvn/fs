@@ -2,7 +2,6 @@ package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.JieCheck;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
 
 import java.io.IOException;
@@ -49,7 +48,7 @@ public interface ByteOperator {
      * @throws IllegalArgumentException if the given buffer size {@code <= 0}
      */
     static ByteOperator newOperator(int bufSize) throws IllegalArgumentException {
-        JieCheck.checkArgument(bufSize > 0, "bufSize > 0.");
+        IOChecker.checkBufSize(bufSize);
         return new ByteOperatorImpl(bufSize);
     }
 
@@ -124,7 +123,7 @@ public interface ByteOperator {
     default byte @Nullable [] read(
         @Nonnull InputStream src, int len
     ) throws IllegalArgumentException, IORuntimeException {
-        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        IOChecker.checkLen(len);
         if (len == 0) {
             return new byte[0];
         }
@@ -221,7 +220,7 @@ public interface ByteOperator {
     default @Nullable ByteBuffer read(
         @Nonnull ReadableByteChannel src, int len
     ) throws IllegalArgumentException, IORuntimeException {
-        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        IOChecker.checkLen(len);
         if (len == 0) {
             return ByteBuffer.allocate(0);
         }
@@ -278,7 +277,7 @@ public interface ByteOperator {
     default long readTo(
         @Nonnull InputStream src, @Nonnull OutputStream dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
-        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        IOChecker.checkLen(len);
         return ByteOperatorImpl.readTo0(src, dst, len, bufferSize());
     }
 
@@ -319,7 +318,7 @@ public interface ByteOperator {
     default long readTo(
         @Nonnull InputStream src, @Nonnull WritableByteChannel dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
-        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        IOChecker.checkLen(len);
         return ByteOperatorImpl.readTo0(src, dst, len, bufferSize());
     }
 
@@ -358,7 +357,7 @@ public interface ByteOperator {
     default int readTo(
         @Nonnull InputStream src, byte @Nonnull [] dst, int off, int len
     ) throws IndexOutOfBoundsException, IORuntimeException {
-        JieCheck.checkOffsetLength(dst.length, off, len);
+        IOChecker.checkOffLen(dst.length, off, len);
         return ByteOperatorImpl.readTo0(src, dst, off, len);
     }
 
@@ -400,7 +399,7 @@ public interface ByteOperator {
     default int readTo(
         @Nonnull InputStream src, @Nonnull ByteBuffer dst, int len
     ) throws IllegalArgumentException, IORuntimeException {
-        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        IOChecker.checkLen(len);
         return ByteOperatorImpl.readTo0(src, dst, len);
     }
 
@@ -439,7 +438,7 @@ public interface ByteOperator {
     default long readTo(
         @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
-        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        IOChecker.checkLen(len);
         return ByteOperatorImpl.readTo0(src, dst, len, bufferSize());
     }
 
@@ -478,7 +477,7 @@ public interface ByteOperator {
     default long readTo(
         @Nonnull ReadableByteChannel src, @Nonnull OutputStream dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
-        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        IOChecker.checkLen(len);
         return ByteOperatorImpl.readTo0(src, dst, len, bufferSize());
     }
 
@@ -517,7 +516,7 @@ public interface ByteOperator {
     default int readTo(
         @Nonnull ReadableByteChannel src, byte @Nonnull [] dst, int off, int len
     ) throws IndexOutOfBoundsException, IORuntimeException {
-        JieCheck.checkOffsetLength(dst.length, off, len);
+        IOChecker.checkOffLen(dst.length, off, len);
         return ByteOperatorImpl.readTo0(src, ByteBuffer.wrap(dst, off, len), -1);
     }
 
@@ -559,7 +558,7 @@ public interface ByteOperator {
     default int readTo(
         @Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst, int len
     ) throws IllegalArgumentException, IORuntimeException {
-        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        IOChecker.checkLen(len);
         return ByteOperatorImpl.readTo0(src, dst, len);
     }
 }

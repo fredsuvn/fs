@@ -2,7 +2,6 @@ package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.JieCheck;
 import xyz.sunqian.common.base.chars.CharsBuilder;
 
 import java.io.IOException;
@@ -46,7 +45,7 @@ public interface CharOperator {
      * @throws IllegalArgumentException if the given buffer size {@code <= 0}
      */
     static CharOperator newOperator(int bufSize) throws IllegalArgumentException {
-        JieCheck.checkArgument(bufSize > 0, "bufSize > 0.");
+        IOChecker.checkBufSize(bufSize);
         return new CharOperatorImpl(bufSize);
     }
 
@@ -120,7 +119,7 @@ public interface CharOperator {
     default char @Nullable [] read(
         @Nonnull Reader src, int len
     ) throws IllegalArgumentException, IORuntimeException {
-        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        IOChecker.checkLen(len);
         if (len == 0) {
             return new char[0];
         }
@@ -206,7 +205,7 @@ public interface CharOperator {
     default long readTo(
         @Nonnull Reader src, @Nonnull Appendable dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
-        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        IOChecker.checkLen(len);
         return CharOperatorImpl.readTo0(src, dst, len, bufferSize());
     }
 
@@ -245,7 +244,7 @@ public interface CharOperator {
     default int readTo(
         @Nonnull Reader src, char @Nonnull [] dst, int off, int len
     ) throws IndexOutOfBoundsException, IORuntimeException {
-        JieCheck.checkOffsetLength(dst.length, off, len);
+        IOChecker.checkOffLen(dst.length, off, len);
         return CharOperatorImpl.readTo0(src, dst, off, len);
     }
 
@@ -287,7 +286,7 @@ public interface CharOperator {
     default int readTo(
         @Nonnull Reader src, @Nonnull CharBuffer dst, int len
     ) throws IllegalArgumentException, IORuntimeException {
-        JieCheck.checkArgument(len >= 0, "len must >= 0.");
+        IOChecker.checkLen(len);
         return CharOperatorImpl.readTo0(src, dst, len);
     }
 }

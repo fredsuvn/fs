@@ -1,7 +1,6 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.JieCheck;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,7 +35,7 @@ public abstract class DoReadStream extends InputStream {
 
     @Override
     public int read(byte @Nonnull [] b, int off, int len) throws IOException {
-        JieCheck.checkOffsetLength(b.length, off, len);
+        IOChecker.checkOffLen(b.length, off, len);
         return doRead(b, off, len);
     }
 }

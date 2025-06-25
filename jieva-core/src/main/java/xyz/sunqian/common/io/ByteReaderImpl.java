@@ -1,7 +1,6 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.JieCheck;
 import xyz.sunqian.common.base.bytes.JieBytes;
 
 import java.io.IOException;
@@ -94,7 +93,7 @@ final class ByteReaderImpl {
 
         @Override
         public long skip(long len) throws IllegalArgumentException, IORuntimeException {
-            JieCheck.checkArgument(len >= 0, "len must >= 0.");
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return 0;
             }
@@ -220,7 +219,7 @@ final class ByteReaderImpl {
 
         @Override
         public long skip(long len) throws IllegalArgumentException, IORuntimeException {
-            JieCheck.checkArgument(len >= 0, "len must >= 0.");
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return 0;
             }
@@ -321,7 +320,7 @@ final class ByteReaderImpl {
         private int mark;
 
         ByteArrayReader(byte @Nonnull [] source, int offset, int length) throws IndexOutOfBoundsException {
-            JieCheck.checkOffsetLength(source.length, offset, length);
+            IOChecker.checkOffLen(source.length, offset, length);
             this.source = source;
             this.pos = offset;
             this.endPos = offset + length;
@@ -330,7 +329,7 @@ final class ByteReaderImpl {
 
         @Override
         public @Nonnull ByteSegment read(int len) throws IllegalArgumentException, IORuntimeException {
-            JieCheck.checkArgument(len >= 0, "len must >= 0.");
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return ByteSegment.empty(false);
             }
@@ -346,7 +345,7 @@ final class ByteReaderImpl {
 
         @Override
         public long skip(long len) throws IllegalArgumentException, IORuntimeException {
-            JieCheck.checkArgument(len >= 0, "len must >= 0.");
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return 0;
             }
@@ -376,7 +375,7 @@ final class ByteReaderImpl {
 
         @Override
         public long readTo(@Nonnull OutputStream dst, long len) throws IllegalArgumentException, IORuntimeException {
-            JieCheck.checkArgument(len >= 0, "len must >= 0.");
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return 0;
             }
@@ -413,7 +412,7 @@ final class ByteReaderImpl {
         public long readTo(
             @Nonnull WritableByteChannel dst, long len
         ) throws IllegalArgumentException, IORuntimeException {
-            JieCheck.checkArgument(len >= 0, "len must >= 0.");
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return 0;
             }
@@ -438,7 +437,7 @@ final class ByteReaderImpl {
 
         @Override
         public int readTo(byte @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException {
-            JieCheck.checkOffsetLength(dst.length, off, len);
+            IOChecker.checkOffLen(dst.length, off, len);
             return readTo0(dst, off, len);
         }
 
@@ -471,7 +470,7 @@ final class ByteReaderImpl {
 
         @Override
         public int readTo(@Nonnull ByteBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
-            JieCheck.checkArgument(len >= 0, "len must >= 0.");
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return 0;
             }
@@ -526,7 +525,7 @@ final class ByteReaderImpl {
 
         @Override
         public @Nonnull ByteSegment read(int len) throws IllegalArgumentException, IORuntimeException {
-            JieCheck.checkArgument(len >= 0, "len must >= 0.");
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return ByteSegment.empty(false);
             }
@@ -545,7 +544,7 @@ final class ByteReaderImpl {
 
         @Override
         public long skip(long len) throws IllegalArgumentException, IORuntimeException {
-            JieCheck.checkArgument(len >= 0, "len must >= 0.");
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return 0;
             }
