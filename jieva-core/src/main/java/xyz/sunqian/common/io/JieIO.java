@@ -20,20 +20,21 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 
 /**
- * Static utility class for I/O operations.
+ * Static utility class for I/O operations, some methods directly use the default implementation of {@link ByteIO} and
+ * {@link CharIO}.
  *
  * @author sunqian
  */
 public class JieIO {
 
-    private static final @Nonnull ByteOperator bo = ByteOperator.newOperator(bufferSize());
-    private static final @Nonnull CharOperator co = CharOperator.newOperator(bufferSize());
+    private static final @Nonnull ByteIO bo = ByteIO.newOperator(bufferSize());
+    private static final @Nonnull CharIO co = CharIO.newOperator(bufferSize());
 
-    static @Nonnull ByteOperator defaultByteOperator() {
+    static @Nonnull ByteIO defaultByteOperator() {
         return bo;
     }
 
-    static @Nonnull CharOperator defaultCharOperator() {
+    static @Nonnull CharIO defaultCharOperator() {
         return co;
     }
 

@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.base.chars.CharsBuilder;
-import xyz.sunqian.common.io.CharOperator;
+import xyz.sunqian.common.io.CharIO;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieBuffer;
 import xyz.sunqian.common.io.JieIO;
@@ -23,7 +23,7 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.expectThrows;
 
-public class CharOperatorTest {
+public class CharIOTest {
 
     @Test
     public void testRead() throws Exception {
@@ -66,15 +66,15 @@ public class CharOperatorTest {
     }
 
     private void testRead(int totalSize) throws Exception {
-        testRead(CharOperator.get(JieIO.bufferSize()), totalSize);
-        testRead(CharOperator.get(1), totalSize);
-        testRead(CharOperator.get(2), totalSize);
-        testRead(CharOperator.get(JieIO.bufferSize() - 1), totalSize);
-        testRead(CharOperator.get(JieIO.bufferSize() + 1), totalSize);
-        testRead(CharOperator.get(JieIO.bufferSize() * 2), totalSize);
+        testRead(CharIO.get(JieIO.bufferSize()), totalSize);
+        testRead(CharIO.get(1), totalSize);
+        testRead(CharIO.get(2), totalSize);
+        testRead(CharIO.get(JieIO.bufferSize() - 1), totalSize);
+        testRead(CharIO.get(JieIO.bufferSize() + 1), totalSize);
+        testRead(CharIO.get(JieIO.bufferSize() * 2), totalSize);
     }
 
-    private void testRead(CharOperator reader, int totalSize) throws Exception {
+    private void testRead(CharIO reader, int totalSize) throws Exception {
         testRead(reader, totalSize, totalSize);
         testRead(reader, totalSize, 0);
         testRead(reader, totalSize, 1);
@@ -84,7 +84,7 @@ public class CharOperatorTest {
         testRead(reader, totalSize, totalSize * 2);
     }
 
-    private void testRead(CharOperator reader, int totalSize, int readSize) throws Exception {
+    private void testRead(CharIO reader, int totalSize, int readSize) throws Exception {
         {
             // reader
             char[] data = JieRandom.fill(new char[totalSize]);
@@ -241,15 +241,15 @@ public class CharOperatorTest {
     }
 
     private void testReadTo(int totalSize) throws Exception {
-        testReadTo(CharOperator.get(JieIO.bufferSize()), totalSize);
-        testReadTo(CharOperator.get(1), totalSize);
-        testReadTo(CharOperator.get(2), totalSize);
-        testReadTo(CharOperator.get(JieIO.bufferSize() - 1), totalSize);
-        testReadTo(CharOperator.get(JieIO.bufferSize() + 1), totalSize);
-        testReadTo(CharOperator.get(JieIO.bufferSize() * 2), totalSize);
+        testReadTo(CharIO.get(JieIO.bufferSize()), totalSize);
+        testReadTo(CharIO.get(1), totalSize);
+        testReadTo(CharIO.get(2), totalSize);
+        testReadTo(CharIO.get(JieIO.bufferSize() - 1), totalSize);
+        testReadTo(CharIO.get(JieIO.bufferSize() + 1), totalSize);
+        testReadTo(CharIO.get(JieIO.bufferSize() * 2), totalSize);
     }
 
-    private void testReadTo(CharOperator reader, int totalSize) throws Exception {
+    private void testReadTo(CharIO reader, int totalSize) throws Exception {
         testReadTo(reader, totalSize, totalSize);
         testReadTo(reader, totalSize, 0);
         testReadTo(reader, totalSize, 1);
@@ -259,7 +259,7 @@ public class CharOperatorTest {
         testReadTo(reader, totalSize, totalSize * 2);
     }
 
-    private void testReadTo(CharOperator reader, int totalSize, int readSize) throws Exception {
+    private void testReadTo(CharIO reader, int totalSize, int readSize) throws Exception {
         {
             // reader to appender
             char[] data = JieRandom.fill(new char[totalSize]);
@@ -399,13 +399,13 @@ public class CharOperatorTest {
     public void testOther() {
         {
             // get operator
-            assertSame(CharOperator.defaultOperator(), CharOperator.get(JieIO.bufferSize()));
-            assertEquals(CharOperator.newOperator(666).bufferSize(), 666);
+            assertSame(CharIO.defaultOperator(), CharIO.get(JieIO.bufferSize()));
+            assertEquals(CharIO.newOperator(666).bufferSize(), 666);
         }
         {
             // error
-            expectThrows(IllegalArgumentException.class, () -> CharOperator.newOperator(0));
-            expectThrows(IllegalArgumentException.class, () -> CharOperator.newOperator(-1));
+            expectThrows(IllegalArgumentException.class, () -> CharIO.newOperator(0));
+            expectThrows(IllegalArgumentException.class, () -> CharIO.newOperator(-1));
         }
     }
 

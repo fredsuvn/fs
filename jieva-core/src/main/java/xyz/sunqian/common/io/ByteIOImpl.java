@@ -8,11 +8,11 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
-final class ByteOperatorImpl implements ByteOperator {
+final class ByteIOImpl implements ByteIO {
 
     private final int bufferSize;
 
-    ByteOperatorImpl(int bufferSize) {
+    ByteIOImpl(int bufferSize) {
         this.bufferSize = bufferSize;
     }
 

@@ -14,6 +14,7 @@ import xyz.sunqian.test.TestInputStream;
 import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
 import java.util.Arrays;
 import java.util.function.Supplier;
 
@@ -25,6 +26,8 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
 public class ByteReaderTest {
+
+    private static final int DST_SIZE = 256;
 
     @Test
     public void testRead() {
@@ -143,26 +146,17 @@ public class ByteReaderTest {
         testReadTo0(111, 77);
         testReadTo0(111, 111);
         testReadTo0(111, 333);
+        testReadTo0(DST_SIZE, DST_SIZE);
+        testReadTo0(DST_SIZE, DST_SIZE + 6);
+        testReadTo0(DST_SIZE, DST_SIZE - 6);
 
-        // {
-        //     // special: nio
-        //     class NioInput extends InputStream {
-        //
-        //         private int count = 1;
-        //
-        //         @Override
-        //         public int read() throws IOException {
-        //             if (count > 0) {
-        //                 count--;
-        //                 return 66;
-        //             }
-        //             return -1;
-        //         }
-        //     }
-        //     byte[] dst = new byte[2];
-        //     assertEquals(ByteReader.from(new NioInput()).readTo(dst), 1);
-        //     assertEquals(dst[0], 66);
-        // }
+        {
+            // read to channel error
+            ByteReader reader = ByteReader.from(new byte[128]);
+            WritableByteChannel errCh = Channels.newChannel(new ErrorOutputStream());
+            expectThrows(IORuntimeException.class, () -> reader.readTo(errCh));
+            expectThrows(IORuntimeException.class, () -> reader.readTo(errCh, 1));
+        }
     }
 
     private void testReadTo0(int dataSize, int readSize) {
@@ -173,10 +167,10 @@ public class ByteReaderTest {
             // input stream
             testReadTo0(() -> ByteReader.from(new ByteArrayInputStream(data)), data, readSize);
         }
-        // {
-        //     // channel
-        //     testReadTo0(ByteReader.from(Channels.newChannel(new ByteArrayInputStream(data))), data);
-        // }
+        {
+            // channel
+            testReadTo0(() -> ByteReader.from(Channels.newChannel(new ByteArrayInputStream(data))), data, readSize);
+        }
         {
             // byte array
             testReadTo0(() -> ByteReader.from(data), data, readSize);
@@ -192,178 +186,276 @@ public class ByteReaderTest {
     private void testReadTo0(Supplier<ByteReader> supplier, byte[] data, int readSize) {
         {
             // to output stream
-            ByteReader reader = supplier.get();
             BytesBuilder builder = new BytesBuilder();
-            if (reader.markSupported()) {
-                reader.mark();
-            }
-            long actualLen = reader.readTo(builder, readSize);
-            assertEquals(actualLen, actualReadSize(data.length, readSize));
-            long restLen = data.length - (actualLen < 0 ? 0 : actualLen);
-            assertEquals(reader.readTo(builder), restLen == 0 ? -1 : restLen);
-            assertEquals(builder.toByteArray(), data);
-            if (reader.markSupported()) {
-                reader.reset();
-                builder.reset();
-                actualLen = reader.readTo(builder, readSize);
-                assertEquals(actualLen, actualReadSize(data.length, readSize));
-                restLen = data.length - (actualLen < 0 ? 0 : actualLen);
+            if (data.length == 0) {
+                ByteReader reader = supplier.get();
+                assertEquals(reader.readTo(builder), -1);
+                assertEquals(reader.readTo(builder, 0), 0);
+                reader.close();
+                assertEquals(reader.readTo(builder, 0), 0);
+            } else {
+                ByteReader reader = supplier.get();
+                assertEquals(reader.readTo(builder, 0), 0);
+                if (reader.markSupported()) {
+                    reader.mark();
+                }
+                long hasRead = reader.readTo(builder, readSize);
+                assertEquals(hasRead, Math.min(readSize, data.length));
+                long restLen = data.length - hasRead;
                 assertEquals(reader.readTo(builder), restLen == 0 ? -1 : restLen);
                 assertEquals(builder.toByteArray(), data);
+                if (reader.markSupported()) {
+                    reader.reset();
+                    builder.reset();
+                    hasRead = reader.readTo(builder, readSize);
+                    assertEquals(hasRead, Math.min(readSize, data.length));
+                    restLen = data.length - hasRead;
+                    assertEquals(reader.readTo(builder), restLen == 0 ? -1 : restLen);
+                    assertEquals(builder.toByteArray(), data);
+                }
+                assertEquals(reader.readTo(builder), -1);
+                assertEquals(reader.readTo(builder, 66), -1);
+                reader.close();
+                assertEquals(reader.readTo(builder, 0), 0);
             }
-            assertEquals(reader.readTo(builder), -1);
-            assertEquals(reader.readTo(builder, 66), -1);
-            reader.close();
-            assertEquals(reader.readTo(builder, 0), 0);
             // error
+            expectThrows(IllegalArgumentException.class, () -> supplier.get().readTo(builder, -1));
             if (data.length > 0) {
                 expectThrows(IORuntimeException.class, () -> supplier.get().readTo(new ErrorOutputStream()));
                 expectThrows(IORuntimeException.class, () -> supplier.get().readTo(new ErrorOutputStream(), 1));
-                expectThrows(IllegalArgumentException.class, () -> supplier.get().readTo(builder, -1));
+            }
+        }
+        {
+            // to channel
+            BytesBuilder builder = new BytesBuilder();
+            WritableByteChannel channel = Channels.newChannel(builder);
+            if (data.length == 0) {
+                ByteReader reader = supplier.get();
+                assertEquals(reader.readTo(channel), -1);
+                assertEquals(reader.readTo(channel, 0), 0);
+                reader.close();
+                assertEquals(reader.readTo(channel, 0), 0);
+            } else {
+                ByteReader reader = supplier.get();
+                assertEquals(reader.readTo(channel, 0), 0);
+                if (reader.markSupported()) {
+                    reader.mark();
+                }
+                long hasRead = reader.readTo(channel, readSize);
+                assertEquals(hasRead, Math.min(readSize, data.length));
+                long restLen = data.length - hasRead;
+                assertEquals(reader.readTo(channel), restLen == 0 ? -1 : restLen);
+                assertEquals(builder.toByteArray(), data);
+                if (reader.markSupported()) {
+                    reader.reset();
+                    builder.reset();
+                    hasRead = reader.readTo(channel, readSize);
+                    assertEquals(hasRead, Math.min(readSize, data.length));
+                    restLen = data.length - hasRead;
+                    assertEquals(reader.readTo(channel), restLen == 0 ? -1 : restLen);
+                    assertEquals(builder.toByteArray(), data);
+                }
+                assertEquals(reader.readTo(channel), -1);
+                assertEquals(reader.readTo(channel, 66), -1);
+                reader.close();
+                assertEquals(reader.readTo(channel, 0), 0);
+            }
+            // error
+            expectThrows(IllegalArgumentException.class, () -> supplier.get().readTo(builder, -1));
+            if (data.length > 0) {
+                expectThrows(IORuntimeException.class, () -> supplier.get().readTo(new ErrorOutputStream()));
+                expectThrows(IORuntimeException.class, () -> supplier.get().readTo(new ErrorOutputStream(), 1));
             }
         }
         {
             // to byte array full
-            ByteReader reader = supplier.get();
-            byte[] dst = new byte[data.length];
-            if (reader.markSupported()) {
-                reader.mark();
-            }
-            int actualLen = reader.readTo(dst);
-            assertEquals(actualLen, actualReadSize(data.length, dst.length));
-            assertEquals(data, dst);
-            if (reader.markSupported()) {
-                reader.reset();
+            if (data.length == 0) {
+                ByteReader reader = supplier.get();
+                assertEquals(reader.readTo(new byte[0]), 0);
+                assertEquals(reader.readTo(new byte[1]), -1);
+                reader.close();
+                assertEquals(reader.readTo(new byte[0]), 0);
+            } else {
+                ByteReader reader = supplier.get();
+                assertEquals(reader.readTo(new byte[0]), 0);
+                byte[] dst = new byte[DST_SIZE];
+                if (reader.markSupported()) {
+                    reader.mark();
+                }
+                int actualLen = reader.readTo(dst);
+                assertEquals(actualLen, Math.min(data.length, DST_SIZE));
+                assertEquals(Arrays.copyOf(dst, actualLen), Arrays.copyOf(data, actualLen));
+                if (reader.markSupported()) {
+                    reader.reset();
+                    dst = new byte[DST_SIZE];
+                    actualLen = reader.readTo(dst);
+                    assertEquals(actualLen, Math.min(data.length, DST_SIZE));
+                    assertEquals(Arrays.copyOf(dst, actualLen), Arrays.copyOf(data, actualLen));
+                }
+                // read all
+                reader = supplier.get();
                 dst = new byte[data.length];
-                actualLen = reader.readTo(dst);
-                assertEquals(actualLen, actualReadSize(data.length, dst.length));
-                assertEquals(data, dst);
+                assertEquals(reader.readTo(dst), data.length);
+                assertEquals(dst, data);
+                assertEquals(reader.readTo(new byte[1]), -1);
+                reader.close();
+                assertEquals(reader.readTo(new byte[0]), 0);
             }
-            assertEquals(reader.readTo(new byte[1]), -1);
-            reader.close();
-            assertEquals(reader.readTo(new byte[0]), 0);
         }
         {
             // to byte array offset
-            ByteReader reader = supplier.get();
-            byte[] dst = new byte[data.length + 6];
-            if (reader.markSupported()) {
-                reader.mark();
+            if (data.length == 0) {
+                ByteReader reader = supplier.get();
+                assertEquals(reader.readTo(new byte[0], 0, 0), 0);
+                assertEquals(reader.readTo(new byte[1], 0, 1), -1);
+                reader.close();
+                assertEquals(reader.readTo(new byte[0], 0, 0), 0);
+            } else {
+                ByteReader reader = supplier.get();
+                assertEquals(reader.readTo(new byte[0], 0, 0), 0);
+                byte[] dst = new byte[DST_SIZE + 6];
+                if (reader.markSupported()) {
+                    reader.mark();
+                }
+                int actualLen = reader.readTo(dst, 3, Math.min(readSize, DST_SIZE));
+                assertEquals(actualLen, minSize(data.length, readSize, DST_SIZE));
+                assertEquals(Arrays.copyOfRange(dst, 3, 3 + actualLen), Arrays.copyOf(data, actualLen));
+                if (reader.markSupported()) {
+                    reader.reset();
+                    dst = new byte[DST_SIZE + 6];
+                    actualLen = reader.readTo(dst, 3, Math.min(readSize, DST_SIZE));
+                    assertEquals(actualLen, minSize(data.length, readSize, DST_SIZE));
+                    assertEquals(Arrays.copyOfRange(dst, 3, 3 + actualLen), Arrays.copyOf(data, actualLen));
+                }
+                // read all
+                reader = supplier.get();
+                dst = new byte[data.length + 2];
+                assertEquals(reader.readTo(dst, 1, data.length), data.length);
+                assertEquals(Arrays.copyOfRange(dst, 1, 1 + data.length), data);
+                assertEquals(reader.readTo(new byte[1], 0, 1), -1);
+                reader.close();
+                assertEquals(reader.readTo(new byte[0], 0, 0), 0);
             }
-            int len = Math.min(data.length, readSize);
-            int actualLen = reader.readTo(dst, 3, len);
-            assertEquals(actualLen, actualReadSize(data.length, readSize, len));
-            assertEquals(data, Arrays.copyOfRange(dst, 3, 3 + Math.max(actualLen, 0)));
-            if (reader.markSupported()) {
-                reader.reset();
-                dst = new byte[data.length + 6];
-                actualLen = reader.readTo(dst, 3, len);
-                assertEquals(actualLen, actualReadSize(data.length, readSize, len));
-                assertEquals(data, Arrays.copyOfRange(dst, 3, 3 + Math.max(actualLen, 0)));
-            }
-            assertEquals(reader.readTo(new byte[1]), -1);
-            reader.close();
-            assertEquals(reader.readTo(new byte[0]), 0);
             // error
-            if (data.length > 0) {
-                expectThrows(IndexOutOfBoundsException.class, () -> reader.readTo(new byte[0], 0, -1));
-                expectThrows(IndexOutOfBoundsException.class, () -> reader.readTo(new byte[0], 0, 1));
-            }
+            expectThrows(IndexOutOfBoundsException.class, () -> supplier.get().readTo(new byte[0], 0, -1));
+            expectThrows(IndexOutOfBoundsException.class, () -> supplier.get().readTo(new byte[0], 0, 1));
         }
         {
-            // to heap buffer
-            ByteReader reader = supplier.get();
-            ByteBuffer dst = ByteBuffer.allocate(data.length);
-            if (reader.markSupported()) {
-                reader.mark();
-            }
-            int actualLen = reader.readTo(dst, readSize);
-            assertEquals(actualLen, actualReadSize(data.length, readSize));
-            int restLen = data.length - (Math.max(actualLen, 0));
-            assertEquals(reader.readTo(dst), actualReadSize(restLen, dst.remaining()));
-            dst.flip();
-            assertEquals(JieBuffer.copyContent(dst), data);
-            if (reader.markSupported()) {
-                reader.reset();
+            // to buffer full
+            if (data.length == 0) {
+                ByteReader reader = supplier.get();
+                assertEquals(reader.readTo(ByteBuffer.allocate(0)), 0);
+                assertEquals(reader.readTo(ByteBuffer.allocate(1)), -1);
+                assertEquals(reader.readTo(ByteBuffer.allocateDirect(0)), 0);
+                assertEquals(reader.readTo(ByteBuffer.allocateDirect(1)), -1);
+                reader.close();
+                assertEquals(reader.readTo(ByteBuffer.allocate(0)), 0);
+                assertEquals(reader.readTo(ByteBuffer.allocateDirect(0)), 0);
+            } else {
+                ByteReader reader = supplier.get();
+                assertEquals(reader.readTo(ByteBuffer.allocate(0)), 0);
+                assertEquals(reader.readTo(ByteBuffer.allocateDirect(0)), 0);
+                ByteBuffer dst = ByteBuffer.allocate(DST_SIZE);
+                if (reader.markSupported()) {
+                    reader.mark();
+                }
+                int actualLen = reader.readTo(dst);
+                assertEquals(actualLen, Math.min(data.length, DST_SIZE));
+                dst.flip();
+                assertEquals(JieBuffer.copyContent(dst), Arrays.copyOf(data, actualLen));
+                if (reader.markSupported()) {
+                    reader.reset();
+                    dst = ByteBuffer.allocateDirect(DST_SIZE);
+                    actualLen = reader.readTo(dst);
+                    assertEquals(actualLen, Math.min(data.length, DST_SIZE));
+                    dst.flip();
+                    assertEquals(JieBuffer.copyContent(dst), Arrays.copyOf(data, actualLen));
+                }
+                // read all
+                reader = supplier.get();
                 dst = ByteBuffer.allocate(data.length);
-                actualLen = reader.readTo(dst, readSize);
-                assertEquals(actualLen, actualReadSize(data.length, readSize));
-                restLen = data.length - (Math.max(actualLen, 0));
-                assertEquals(reader.readTo(dst), actualReadSize(restLen, dst.remaining()));
+                assertEquals(reader.readTo(dst), data.length);
                 dst.flip();
                 assertEquals(JieBuffer.copyContent(dst), data);
+                assertEquals(reader.readTo(ByteBuffer.allocate(1)), -1);
+                assertEquals(reader.readTo(ByteBuffer.allocateDirect(1)), -1);
+                reader.close();
+                assertEquals(reader.readTo(ByteBuffer.allocate(0)), 0);
+                assertEquals(reader.readTo(ByteBuffer.allocateDirect(0)), 0);
             }
-            assertEquals(reader.readTo(dst), 0);
-            assertEquals(reader.readTo(dst, 66), 0);
-            assertEquals(reader.readTo(ByteBuffer.allocate(1)), -1);
-            reader.close();
-            assertEquals(reader.readTo(dst), 0);
-            assertEquals(reader.readTo(dst, 0), 0);
-            assertEquals(reader.readTo(dst, 66), 0);
             // error
             if (data.length > 0) {
-                ByteBuffer buf = ByteBuffer.allocate(6);
-                expectThrows(IORuntimeException.class, () -> supplier.get().readTo(buf.asReadOnlyBuffer()));
-                expectThrows(IllegalArgumentException.class, () -> supplier.get().readTo(buf, -1));
+                expectThrows(IORuntimeException.class, () ->
+                    supplier.get().readTo(ByteBuffer.allocate(1).asReadOnlyBuffer()));
+                expectThrows(IORuntimeException.class, () ->
+                    supplier.get().readTo(ByteBuffer.allocateDirect(1).asReadOnlyBuffer()));
             }
         }
         {
-            // to heap buffer
-            ByteReader reader = supplier.get();
-            ByteBuffer dst = ByteBuffer.allocateDirect(data.length);
-            if (reader.markSupported()) {
-                reader.mark();
-            }
-            int actualLen = reader.readTo(dst, readSize);
-            assertEquals(actualLen, actualReadSize(data.length, readSize));
-            int restLen = data.length - (Math.max(actualLen, 0));
-            assertEquals(reader.readTo(dst), actualReadSize(restLen, dst.remaining()));
-            dst.flip();
-            assertEquals(JieBuffer.copyContent(dst), data);
-            if (reader.markSupported()) {
-                reader.reset();
-                dst = ByteBuffer.allocateDirect(data.length);
-                actualLen = reader.readTo(dst, readSize);
-                assertEquals(actualLen, actualReadSize(data.length, readSize));
-                restLen = data.length - (Math.max(actualLen, 0));
-                assertEquals(reader.readTo(dst), actualReadSize(restLen, dst.remaining()));
+            // to buffer offset
+            if (data.length == 0) {
+                ByteReader reader = supplier.get();
+                assertEquals(reader.readTo(ByteBuffer.allocate(1), 0), 0);
+                assertEquals(reader.readTo(ByteBuffer.allocate(0), 1), 0);
+                assertEquals(reader.readTo(ByteBuffer.allocate(1), 1), -1);
+                assertEquals(reader.readTo(ByteBuffer.allocateDirect(1), 0), 0);
+                assertEquals(reader.readTo(ByteBuffer.allocateDirect(0), 1), 0);
+                assertEquals(reader.readTo(ByteBuffer.allocateDirect(1), 1), -1);
+                reader.close();
+                assertEquals(reader.readTo(ByteBuffer.allocate(1), 0), 0);
+                assertEquals(reader.readTo(ByteBuffer.allocate(0), 1), 0);
+                assertEquals(reader.readTo(ByteBuffer.allocateDirect(1), 0), 0);
+                assertEquals(reader.readTo(ByteBuffer.allocateDirect(0), 1), 0);
+            } else {
+                ByteReader reader = supplier.get();
+                assertEquals(reader.readTo(ByteBuffer.allocate(1), 0), 0);
+                assertEquals(reader.readTo(ByteBuffer.allocate(0), 1), 0);
+                assertEquals(reader.readTo(ByteBuffer.allocateDirect(1), 0), 0);
+                assertEquals(reader.readTo(ByteBuffer.allocateDirect(0), 1), 0);
+                ByteBuffer dst = ByteBuffer.allocate(DST_SIZE);
+                if (reader.markSupported()) {
+                    reader.mark();
+                }
+                int actualLen = reader.readTo(dst, readSize);
+                assertEquals(actualLen, minSize(data.length, readSize, DST_SIZE));
+                dst.flip();
+                assertEquals(JieBuffer.copyContent(dst), Arrays.copyOf(data, actualLen));
+                if (reader.markSupported()) {
+                    reader.reset();
+                    dst = ByteBuffer.allocateDirect(DST_SIZE);
+                    actualLen = reader.readTo(dst, readSize);
+                    assertEquals(actualLen, minSize(data.length, readSize, DST_SIZE));
+                    dst.flip();
+                    assertEquals(JieBuffer.copyContent(dst), Arrays.copyOf(data, actualLen));
+                }
+                // read all
+                reader = supplier.get();
+                dst = ByteBuffer.allocate(data.length);
+                assertEquals(reader.readTo(dst, data.length), data.length);
                 dst.flip();
                 assertEquals(JieBuffer.copyContent(dst), data);
+                assertEquals(reader.readTo(ByteBuffer.allocate(1), 1), -1);
+                assertEquals(reader.readTo(ByteBuffer.allocateDirect(1), 1), -1);
+                reader.close();
+                assertEquals(reader.readTo(ByteBuffer.allocate(1), 0), 0);
+                assertEquals(reader.readTo(ByteBuffer.allocate(0), 1), 0);
+                assertEquals(reader.readTo(ByteBuffer.allocateDirect(1), 0), 0);
+                assertEquals(reader.readTo(ByteBuffer.allocateDirect(0), 1), 0);
             }
-            assertEquals(reader.readTo(dst), 0);
-            assertEquals(reader.readTo(dst, 66), 0);
-            assertEquals(reader.readTo(ByteBuffer.allocateDirect(1)), -1);
-            reader.close();
-            assertEquals(reader.readTo(dst), 0);
-            assertEquals(reader.readTo(dst, 0), 0);
-            assertEquals(reader.readTo(dst, 66), 0);
             // error
+            expectThrows(IllegalArgumentException.class, () ->
+                supplier.get().readTo(ByteBuffer.allocate(1), -1));
             if (data.length > 0) {
-                ByteBuffer buf = ByteBuffer.allocateDirect(6);
-                expectThrows(IORuntimeException.class, () -> supplier.get().readTo(buf.asReadOnlyBuffer()));
-                expectThrows(IllegalArgumentException.class, () -> supplier.get().readTo(buf, -1));
+                expectThrows(IORuntimeException.class, () ->
+                    supplier.get().readTo(ByteBuffer.allocate(1).asReadOnlyBuffer(), 1));
+                expectThrows(IORuntimeException.class, () ->
+                    supplier.get().readTo(ByteBuffer.allocateDirect(1).asReadOnlyBuffer(), 1));
             }
         }
     }
 
-    private int actualReadSize(int totalSize, int readSize) {
-        if (readSize == 0) {
-            return 0;
-        }
-        if (totalSize == 0) {
-            return -1;
-        }
-        return Math.min(readSize, totalSize);
-    }
-
-    private int actualReadSize(int totalSize, int readSize, int range) {
-        if (readSize == 0 || range == 0) {
-            return 0;
-        }
-        if (totalSize == 0) {
-            return -1;
-        }
-        return Math.min(readSize, totalSize);
+    private int minSize(int totalSize, int readSize, int remaining) {
+        return Math.min(remaining, Math.min(totalSize, readSize));
     }
 
     @Test
@@ -433,78 +525,20 @@ public class ByteReaderTest {
         assertEquals(segment.toByteArray(), new byte[0]);
     }
 
-    // @Test
-    // public void testSpecial() throws Exception {
-    //     byte[] bytes = JieArray.fill(new byte[64], Constants.FILL_BYTE);
-    //     ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-    //     TestInputStream testIn = new TestInputStream(in);
-    //     {
-    //         // NIO tests
-    //         ByteReader reader = ByteReader.from(testIn);
-    //         testIn.setNextOperation(ReadOps.READ_ZERO, 10);
-    //         ByteSegment s0 = reader.read(bytes.length);
-    //         assertEquals(s0.data(), ByteBuffer.wrap(bytes));
-    //         assertFalse(s0.end());
-    //         s0 = reader.read(1);
-    //         assertTrue(s0.end());
-    //         assertEquals(reader.skip(66), 0);
-    //         in.reset();
-    //         ByteReader reader2 = ByteReader.from(testIn);
-    //         testIn.setNextOperation(ReadOps.READ_ZERO);
-    //         assertEquals(reader2.skip(66), bytes.length);
-    //         // TestInputStream testIn2 = new TestInputStream(new ByteArrayInputStream(new byte[2]));
-    //         // testIn2.setNextOperation(ReadOps.READ_ZERO);
-    //         // assertEquals(ByteReader.from(testIn2).skip(66), 2);
-    //     }
-    //     {
-    //         // exception tests
-    //         ByteReader reader = ByteReader.from(testIn);
-    //         in.reset();
-    //         testIn.setNextOperation(ReadOps.THROW);
-    //         expectThrows(IORuntimeException.class, () -> reader.read(66));
-    //         expectThrows(IllegalArgumentException.class, () -> reader.read(-66));
-    //         // expectThrows(IllegalArgumentException.class, () -> reader.withReadLimit(-66));
-    //         expectThrows(IllegalArgumentException.class, () -> reader.skip(-66));
-    //         testIn.setNextOperation(ReadOps.THROW);
-    //         expectThrows(IORuntimeException.class, () -> reader.skip(66));
-    //         testIn.setNextOperation(ReadOps.THROW);
-    //         expectThrows(IORuntimeException.class, () -> reader.readTo(ByteBuffer.allocate(1)));
-    //         testIn.setNextOperation(ReadOps.THROW);
-    //         expectThrows(IORuntimeException.class, () -> reader.readTo(new byte[1]));
-    //         testIn.setNextOperation(ReadOps.THROW);
-    //         expectThrows(IORuntimeException.class, reader::mark);
-    //         testIn.setNextOperation(ReadOps.THROW);
-    //         expectThrows(IORuntimeException.class, reader::reset);
-    //         testIn.setNextOperation(ReadOps.THROW);
-    //         expectThrows(IORuntimeException.class, reader::close);
-    //     }
-    //     {
-    //         // for segment
-    //         byte[] bytesCopy = Arrays.copyOf(bytes, bytes.length);
-    //         ByteReader reader = ByteReader.from(bytesCopy);
-    //         ByteSegment segment = reader.read(bytesCopy.length * 2);
-    //         assertSame(segment.data().array(), bytesCopy);
-    //         assertTrue(segment.end());
-    //         ByteSegment segmentCopy = segment.clone();
-    //         assertEquals(segmentCopy.data(), ByteBuffer.wrap(bytesCopy));
-    //         assertTrue(segmentCopy.end());
-    //         assertNotSame(segmentCopy.data().array(), bytesCopy);
-    //     }
-    //     {
-    //         // special mark/reset
-    //         TestInputStream tin = new TestInputStream(new ByteArrayInputStream(new byte[2]));
-    //         ByteReader reader = ByteReader.from(tin);//.withReadLimit(1);
-    //         assertTrue(reader.markSupported());
-    //         tin.markSupported(false);
-    //         assertFalse(reader.markSupported());
-    //         reader.mark();
-    //         reader.reset();
-    //     }
-    //     {
-    //         // close
-    //         ByteReader.from(JieIO.newInputStream(new byte[0])).close();
-    //         ByteReader.from(new byte[0]).close();
-    //         ByteReader.from(ByteBuffer.allocate(0)).close();
-    //     }
-    // }
+    @Test
+    public void testOthers() throws Exception {
+        TestInputStream tin = new TestInputStream(new ByteArrayInputStream(new byte[0]));
+        tin.setNextOperation(ReadOps.THROW, 99);
+        {
+            // mark/reset error
+            ByteReader reader = ByteReader.from(tin);
+            expectThrows(IORuntimeException.class, reader::mark);
+            expectThrows(IORuntimeException.class, reader::reset);
+            expectThrows(IORuntimeException.class, reader::close);
+            reader = ByteReader.from(Channels.newChannel(tin));
+            expectThrows(IORuntimeException.class, reader::mark);
+            expectThrows(IORuntimeException.class, reader::reset);
+            expectThrows(IORuntimeException.class, reader::close);
+        }
+    }
 }

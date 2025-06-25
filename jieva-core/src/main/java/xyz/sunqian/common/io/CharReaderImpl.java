@@ -70,11 +70,11 @@ final class CharReaderImpl {
     private static final class CharStreamReader implements CharReader {
 
         private final @Nonnull Reader source;
-        private final @Nonnull CharOperator operator;
+        private final @Nonnull CharIO operator;
 
         CharStreamReader(@Nonnull Reader src, int bufSize) throws IllegalArgumentException {
             this.source = src;
-            this.operator = CharOperator.get(bufSize);
+            this.operator = CharIO.get(bufSize);
         }
 
         @Override
@@ -314,6 +314,7 @@ final class CharReaderImpl {
             }
             int remaining = endPos - pos;
             int putSize = Math.min(remaining, dst.remaining());
+            putSize = Math.min(putSize, len);
             return putTo0(dst, putSize);
         }
 
@@ -480,6 +481,7 @@ final class CharReaderImpl {
             }
             int remaining = endPos - pos;
             int putSize = Math.min(remaining, dst.remaining());
+            putSize = Math.min(putSize, len);
             return putTo0(dst, putSize);
         }
 

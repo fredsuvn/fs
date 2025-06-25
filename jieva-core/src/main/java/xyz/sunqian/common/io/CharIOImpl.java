@@ -5,11 +5,11 @@ import xyz.sunqian.annotations.Nonnull;
 import java.io.Reader;
 import java.nio.CharBuffer;
 
-final class CharOperatorImpl implements CharOperator {
+final class CharIOImpl implements CharIO {
 
     private final int bufferSize;
 
-    CharOperatorImpl(int bufferSize) {
+    CharIOImpl(int bufferSize) {
         this.bufferSize = bufferSize;
     }
 

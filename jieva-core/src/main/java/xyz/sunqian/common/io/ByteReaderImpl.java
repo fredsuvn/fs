@@ -72,11 +72,11 @@ final class ByteReaderImpl {
     private static final class ByteStreamReader implements ByteReader {
 
         private final @Nonnull InputStream source;
-        private final @Nonnull ByteOperator operator;
+        private final @Nonnull ByteIO operator;
 
         ByteStreamReader(@Nonnull InputStream src, int bufSize) throws IllegalArgumentException {
             this.source = src;
-            this.operator = ByteOperator.get(bufSize);
+            this.operator = ByteIO.get(bufSize);
         }
 
         @Override
@@ -198,11 +198,11 @@ final class ByteReaderImpl {
     private static final class ByteChannelReader implements ByteReader {
 
         private final @Nonnull ReadableByteChannel source;
-        private final @Nonnull ByteOperator operator;
+        private final @Nonnull ByteIO operator;
 
         ByteChannelReader(@Nonnull ReadableByteChannel src, int bufSize) throws IllegalArgumentException {
             this.source = src;
-            this.operator = ByteOperator.get(bufSize);
+            this.operator = ByteIO.get(bufSize);
         }
 
         @Override
@@ -482,6 +482,7 @@ final class ByteReaderImpl {
             }
             int remaining = endPos - pos;
             int putSize = Math.min(remaining, dst.remaining());
+            putSize = Math.min(putSize, len);
             return putTo0(dst, putSize);
         }
 

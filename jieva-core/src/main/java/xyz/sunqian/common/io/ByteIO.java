@@ -13,43 +13,43 @@ import java.nio.channels.WritableByteChannel;
 import java.util.Arrays;
 
 /**
- * This interface is used to operate bytes for {@link InputStream} and {@link ReadableByteChannel}.
+ * This interface provides {@code byte} related I/O operations.
  *
  * @author sunqian
  */
-public interface ByteOperator {
+public interface ByteIO {
 
     /**
-     * Returns the default {@link ByteOperator} instance of which buffer size is {@link JieIO#bufferSize()}.
+     * Returns the default {@link ByteIO} instance of which buffer size is {@link JieIO#bufferSize()}.
      *
-     * @return the default {@link ByteOperator} instance of which buffer size is {@link JieIO#bufferSize()}
+     * @return the default {@link ByteIO} instance of which buffer size is {@link JieIO#bufferSize()}
      */
-    static ByteOperator defaultOperator() {
+    static ByteIO defaultOperator() {
         return JieIO.defaultByteOperator();
     }
 
     /**
-     * Returns a {@link ByteOperator} instance with the given buffer size. If the buffer size equals to the default
-     * buffer size, returns the default {@link ByteOperator} instance, otherwise returns a new one.
+     * Returns a {@link ByteIO} instance with the given buffer size. If the buffer size equals to the default buffer
+     * size, returns the default {@link ByteIO} instance, otherwise returns a new one.
      *
      * @param bufSize the given buffer size, must {@code > 0}
-     * @return a {@link ByteOperator} instance with the given buffer size
+     * @return a {@link ByteIO} instance with the given buffer size
      * @throws IllegalArgumentException if the given buffer size {@code <= 0}
      */
-    static ByteOperator get(int bufSize) throws IllegalArgumentException {
+    static ByteIO get(int bufSize) throws IllegalArgumentException {
         return bufSize == JieIO.bufferSize() ? defaultOperator() : newOperator(bufSize);
     }
 
     /**
-     * Returns a new {@link ByteOperator} instance with the given buffer size.
+     * Returns a new {@link ByteIO} instance with the given buffer size.
      *
      * @param bufSize the given buffer size, must {@code > 0}
-     * @return a new {@link ByteOperator} instance with the given buffer size
+     * @return a new {@link ByteIO} instance with the given buffer size
      * @throws IllegalArgumentException if the given buffer size {@code <= 0}
      */
-    static ByteOperator newOperator(int bufSize) throws IllegalArgumentException {
+    static ByteIO newOperator(int bufSize) throws IllegalArgumentException {
         IOChecker.checkBufSize(bufSize);
-        return new ByteOperatorImpl(bufSize);
+        return new ByteIOImpl(bufSize);
     }
 
     /**
@@ -254,7 +254,7 @@ public interface ByteOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default long readTo(@Nonnull InputStream src, @Nonnull OutputStream dst) throws IORuntimeException {
-        return ByteOperatorImpl.readTo0(src, dst, -1, bufferSize());
+        return ByteIOImpl.readTo0(src, dst, -1, bufferSize());
     }
 
     /**
@@ -278,7 +278,7 @@ public interface ByteOperator {
         @Nonnull InputStream src, @Nonnull OutputStream dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
         IOChecker.checkLen(len);
-        return ByteOperatorImpl.readTo0(src, dst, len, bufferSize());
+        return ByteIOImpl.readTo0(src, dst, len, bufferSize());
     }
 
     /**
@@ -295,7 +295,7 @@ public interface ByteOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default long readTo(@Nonnull InputStream src, @Nonnull WritableByteChannel dst) throws IORuntimeException {
-        return ByteOperatorImpl.readTo0(src, dst, -1, bufferSize());
+        return ByteIOImpl.readTo0(src, dst, -1, bufferSize());
     }
 
     /**
@@ -319,7 +319,7 @@ public interface ByteOperator {
         @Nonnull InputStream src, @Nonnull WritableByteChannel dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
         IOChecker.checkLen(len);
-        return ByteOperatorImpl.readTo0(src, dst, len, bufferSize());
+        return ByteIOImpl.readTo0(src, dst, len, bufferSize());
     }
 
     /**
@@ -335,7 +335,7 @@ public interface ByteOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default int readTo(@Nonnull InputStream src, byte @Nonnull [] dst) throws IORuntimeException {
-        return ByteOperatorImpl.readTo0(src, dst, 0, dst.length);
+        return ByteIOImpl.readTo0(src, dst, 0, dst.length);
     }
 
     /**
@@ -358,7 +358,7 @@ public interface ByteOperator {
         @Nonnull InputStream src, byte @Nonnull [] dst, int off, int len
     ) throws IndexOutOfBoundsException, IORuntimeException {
         IOChecker.checkOffLen(dst.length, off, len);
-        return ByteOperatorImpl.readTo0(src, dst, off, len);
+        return ByteIOImpl.readTo0(src, dst, off, len);
     }
 
     /**
@@ -376,7 +376,7 @@ public interface ByteOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default int readTo(@Nonnull InputStream src, @Nonnull ByteBuffer dst) throws IORuntimeException {
-        return ByteOperatorImpl.readTo0(src, dst, -1);
+        return ByteIOImpl.readTo0(src, dst, -1);
     }
 
     /**
@@ -400,7 +400,7 @@ public interface ByteOperator {
         @Nonnull InputStream src, @Nonnull ByteBuffer dst, int len
     ) throws IllegalArgumentException, IORuntimeException {
         IOChecker.checkLen(len);
-        return ByteOperatorImpl.readTo0(src, dst, len);
+        return ByteIOImpl.readTo0(src, dst, len);
     }
 
     /**
@@ -417,7 +417,7 @@ public interface ByteOperator {
     default long readTo(
         @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst
     ) throws IORuntimeException {
-        return ByteOperatorImpl.readTo0(src, dst, -1, bufferSize());
+        return ByteIOImpl.readTo0(src, dst, -1, bufferSize());
     }
 
     /**
@@ -439,7 +439,7 @@ public interface ByteOperator {
         @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
         IOChecker.checkLen(len);
-        return ByteOperatorImpl.readTo0(src, dst, len, bufferSize());
+        return ByteIOImpl.readTo0(src, dst, len, bufferSize());
     }
 
     /**
@@ -456,7 +456,7 @@ public interface ByteOperator {
     default long readTo(
         @Nonnull ReadableByteChannel src, @Nonnull OutputStream dst
     ) throws IORuntimeException {
-        return ByteOperatorImpl.readTo0(src, dst, -1, bufferSize());
+        return ByteIOImpl.readTo0(src, dst, -1, bufferSize());
     }
 
     /**
@@ -478,7 +478,7 @@ public interface ByteOperator {
         @Nonnull ReadableByteChannel src, @Nonnull OutputStream dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
         IOChecker.checkLen(len);
-        return ByteOperatorImpl.readTo0(src, dst, len, bufferSize());
+        return ByteIOImpl.readTo0(src, dst, len, bufferSize());
     }
 
     /**
@@ -494,7 +494,7 @@ public interface ByteOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default int readTo(@Nonnull ReadableByteChannel src, byte @Nonnull [] dst) throws IORuntimeException {
-        return ByteOperatorImpl.readTo0(src, ByteBuffer.wrap(dst), -1);
+        return ByteIOImpl.readTo0(src, ByteBuffer.wrap(dst), -1);
     }
 
     /**
@@ -517,7 +517,7 @@ public interface ByteOperator {
         @Nonnull ReadableByteChannel src, byte @Nonnull [] dst, int off, int len
     ) throws IndexOutOfBoundsException, IORuntimeException {
         IOChecker.checkOffLen(dst.length, off, len);
-        return ByteOperatorImpl.readTo0(src, ByteBuffer.wrap(dst, off, len), -1);
+        return ByteIOImpl.readTo0(src, ByteBuffer.wrap(dst, off, len), -1);
     }
 
     /**
@@ -535,7 +535,7 @@ public interface ByteOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default int readTo(@Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst) throws IORuntimeException {
-        return ByteOperatorImpl.readTo0(src, dst, -1);
+        return ByteIOImpl.readTo0(src, dst, -1);
     }
 
     /**
@@ -559,6 +559,6 @@ public interface ByteOperator {
         @Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst, int len
     ) throws IllegalArgumentException, IORuntimeException {
         IOChecker.checkLen(len);
-        return ByteOperatorImpl.readTo0(src, dst, len);
+        return ByteIOImpl.readTo0(src, dst, len);
     }
 }

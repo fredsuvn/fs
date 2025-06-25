@@ -10,43 +10,43 @@ import java.nio.CharBuffer;
 import java.util.Arrays;
 
 /**
- * This interface is used to operate chars for {@link Reader}.
+ * This interface provides {@code char} related I/O operations.
  *
  * @author sunqian
  */
-public interface CharOperator {
+public interface CharIO {
 
     /**
-     * Returns the default {@link CharOperator} instance of which buffer size is {@link JieIO#bufferSize()}.
+     * Returns the default {@link CharIO} instance of which buffer size is {@link JieIO#bufferSize()}.
      *
-     * @return the default {@link CharOperator} instance of which buffer size is {@link JieIO#bufferSize()}
+     * @return the default {@link CharIO} instance of which buffer size is {@link JieIO#bufferSize()}
      */
-    static CharOperator defaultOperator() {
+    static CharIO defaultOperator() {
         return JieIO.defaultCharOperator();
     }
 
     /**
-     * Returns a {@link CharOperator} instance with the given buffer size. If the buffer size equals to the default
-     * buffer size, returns the default {@link CharOperator} instance, otherwise returns a new one.
+     * Returns a {@link CharIO} instance with the given buffer size. If the buffer size equals to the default buffer
+     * size, returns the default {@link CharIO} instance, otherwise returns a new one.
      *
      * @param bufSize the given buffer size, must {@code > 0}
-     * @return a {@link CharOperator} instance with the given buffer size
+     * @return a {@link CharIO} instance with the given buffer size
      * @throws IllegalArgumentException if the given buffer size {@code <= 0}
      */
-    static CharOperator get(int bufSize) throws IllegalArgumentException {
+    static CharIO get(int bufSize) throws IllegalArgumentException {
         return bufSize == JieIO.bufferSize() ? defaultOperator() : newOperator(bufSize);
     }
 
     /**
-     * Returns a new {@link CharOperator} instance with the given buffer size.
+     * Returns a new {@link CharIO} instance with the given buffer size.
      *
      * @param bufSize the given buffer size, must {@code > 0}
-     * @return a new {@link CharOperator} instance with the given buffer size
+     * @return a new {@link CharIO} instance with the given buffer size
      * @throws IllegalArgumentException if the given buffer size {@code <= 0}
      */
-    static CharOperator newOperator(int bufSize) throws IllegalArgumentException {
+    static CharIO newOperator(int bufSize) throws IllegalArgumentException {
         IOChecker.checkBufSize(bufSize);
-        return new CharOperatorImpl(bufSize);
+        return new CharIOImpl(bufSize);
     }
 
     /**
@@ -184,7 +184,7 @@ public interface CharOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default long readTo(@Nonnull Reader src, @Nonnull Appendable dst) throws IORuntimeException {
-        return CharOperatorImpl.readTo0(src, dst, -1, bufferSize());
+        return CharIOImpl.readTo0(src, dst, -1, bufferSize());
     }
 
     /**
@@ -206,7 +206,7 @@ public interface CharOperator {
         @Nonnull Reader src, @Nonnull Appendable dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
         IOChecker.checkLen(len);
-        return CharOperatorImpl.readTo0(src, dst, len, bufferSize());
+        return CharIOImpl.readTo0(src, dst, len, bufferSize());
     }
 
     /**
@@ -222,7 +222,7 @@ public interface CharOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default int readTo(@Nonnull Reader src, char @Nonnull [] dst) throws IORuntimeException {
-        return CharOperatorImpl.readTo0(src, dst, 0, dst.length);
+        return CharIOImpl.readTo0(src, dst, 0, dst.length);
     }
 
     /**
@@ -245,7 +245,7 @@ public interface CharOperator {
         @Nonnull Reader src, char @Nonnull [] dst, int off, int len
     ) throws IndexOutOfBoundsException, IORuntimeException {
         IOChecker.checkOffLen(dst.length, off, len);
-        return CharOperatorImpl.readTo0(src, dst, off, len);
+        return CharIOImpl.readTo0(src, dst, off, len);
     }
 
     /**
@@ -263,7 +263,7 @@ public interface CharOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default int readTo(@Nonnull Reader src, @Nonnull CharBuffer dst) throws IORuntimeException {
-        return CharOperatorImpl.readTo0(src, dst, -1);
+        return CharIOImpl.readTo0(src, dst, -1);
     }
 
     /**
@@ -287,6 +287,6 @@ public interface CharOperator {
         @Nonnull Reader src, @Nonnull CharBuffer dst, int len
     ) throws IllegalArgumentException, IORuntimeException {
         IOChecker.checkLen(len);
-        return CharOperatorImpl.readTo0(src, dst, len);
+        return CharIOImpl.readTo0(src, dst, len);
     }
 }
