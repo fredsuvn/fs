@@ -24,6 +24,10 @@ public class IOChecker {
         JieCheck.checkArgument(len >= 0, "len must >= 0.");
     }
 
+    static void checkLimit(long limit) {
+        JieCheck.checkArgument(limit >= 0, "limit must >= 0.");
+    }
+
     static void checkCapacity(int capacity) {
         JieCheck.checkArgument(capacity >= 0, "capacity must >= 0");
     }

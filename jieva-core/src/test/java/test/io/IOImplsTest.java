@@ -15,7 +15,9 @@ import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieIO;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.CharArrayReader;
+import java.io.CharArrayWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,6 +54,16 @@ public class IOImplsTest {
         RandomAccessFile raf = new FakeFile(new byte[0]);
         raf.close();
         expectThrows(IORuntimeException.class, () -> JieIO.newInputStream(raf, 0));
+
+        // illegal argument
+        expectThrows(IllegalArgumentException.class, () ->
+            JieIO.limitedInputStream(new ByteArrayInputStream(new byte[0]), -1));
+        expectThrows(IllegalArgumentException.class, () ->
+            JieIO.limitedOutputStream(new ByteArrayOutputStream(), -1));
+        expectThrows(IllegalArgumentException.class, () ->
+            JieIO.limitedReader(new CharArrayReader(new char[0]), -1));
+        expectThrows(IllegalArgumentException.class, () ->
+            JieIO.limitedWriter(new CharArrayWriter(), -1));
     }
 
     private void testInputStream(int dataSize) throws Exception {

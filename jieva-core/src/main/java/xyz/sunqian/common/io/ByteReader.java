@@ -332,4 +332,22 @@ public interface ByteReader {
      * @throws IORuntimeException if an I/O error occurs
      */
     void close() throws IORuntimeException;
+
+    /**
+     * Wraps this reader as a new {@link ByteReader} of which readable number is limited to the specified limit.
+     * <p>
+     * The result's support is as follows:
+     * <ul>
+     *     <li>mark/reset: based on this reader;</li>
+     *     <li>close: closes this reader;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
+     *
+     * @param limit the specified limit, must {@code >= 0}
+     * @return this reader as a new {@link ByteReader} of which readable number is limited to the specified limit
+     * @throws IllegalArgumentException if the limit argument is negative
+     */
+    default ByteReader limit(long limit) throws IllegalArgumentException {
+        return ByteReaderImpl.limit(this, limit);
+    }
 }

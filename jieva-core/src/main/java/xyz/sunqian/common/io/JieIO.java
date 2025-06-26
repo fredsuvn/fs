@@ -875,10 +875,13 @@ public class JieIO {
      * </ul>
      *
      * @param stream the given stream
-     * @param limit  the specified limit
+     * @param limit  the specified limit, must {@code >= 0}
      * @return the given stream as a new {@link InputStream} of which readable number is limited to the specified limit
+     * @throws IllegalArgumentException if the limit argument is negative
      */
-    public static @Nonnull InputStream limitedInputStream(@Nonnull InputStream stream, int limit) {
+    public static @Nonnull InputStream limitedInputStream(
+        @Nonnull InputStream stream, int limit
+    ) throws IllegalArgumentException {
         return IOImpls.inputStream(stream, limit);
     }
 
@@ -1033,10 +1036,11 @@ public class JieIO {
      * </ul>
      *
      * @param reader the given reader
-     * @param limit  the specified limit
+     * @param limit  the specified limit, must {@code >= 0}
      * @return the given reader as a new {@link Reader} of which readable number is limited to the specified limit
+     * @throws IllegalArgumentException if the limit argument is negative
      */
-    public static @Nonnull Reader limitedReader(@Nonnull Reader reader, int limit) {
+    public static @Nonnull Reader limitedReader(@Nonnull Reader reader, int limit) throws IllegalArgumentException {
         return IOImpls.reader(reader, limit);
     }
 
@@ -1182,11 +1186,14 @@ public class JieIO {
      * </ul>
      *
      * @param stream the given stream
-     * @param limit  the specified limit
+     * @param limit  the specified limit, must {@code >= 0}
      * @return the given stream as a new {@link OutputStream} of which writeable number is limited to the specified
      * limit
+     * @throws IllegalArgumentException if the limit argument is negative
      */
-    public static @Nonnull OutputStream limitedOutputStream(@Nonnull OutputStream stream, int limit) {
+    public static @Nonnull OutputStream limitedOutputStream(
+        @Nonnull OutputStream stream, int limit
+    ) throws IllegalArgumentException {
         return IOImpls.outputStream(stream, limit);
     }
 
@@ -1307,10 +1314,11 @@ public class JieIO {
      * </ul>
      *
      * @param writer the given writer
-     * @param limit  the specified limit
+     * @param limit  the specified limit, must {@code >= 0}
      * @return the given writer as a new {@link Writer} of which writeable number is limited to the specified limit
+     * @throws IllegalArgumentException if the limit argument is negative
      */
-    public static @Nonnull Writer limitedWriter(@Nonnull Writer writer, int limit) {
+    public static @Nonnull Writer limitedWriter(@Nonnull Writer writer, int limit) throws IllegalArgumentException {
         return IOImpls.writer(writer, limit);
     }
 

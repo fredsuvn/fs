@@ -26,19 +26,23 @@ final class CharReaderImpl {
         return new CharBufferReader(src);
     }
 
-    static final class CharSegmentImpl implements CharSegment {
+    static @Nonnull CharSegment newSeg(@Nonnull CharBuffer data, boolean end) {
+        return new CharSegmentImpl(data, end);
+    }
+
+    static @Nonnull CharSegment emptySeg(boolean end) {
+        return end ? CharSegmentImpl.EMPTY_END : CharSegmentImpl.EMPTY_SEG;
+    }
+
+    private static final class CharSegmentImpl implements CharSegment {
 
         private static final @Nonnull CharSegmentImpl EMPTY_END = new CharSegmentImpl(JieChars.emptyBuffer(), true);
         private static final @Nonnull CharSegmentImpl EMPTY_SEG = new CharSegmentImpl(JieChars.emptyBuffer(), false);
 
-        public static @Nonnull CharSegmentImpl empty(boolean end) {
-            return end ? EMPTY_END : EMPTY_SEG;
-        }
-
         private final @Nonnull CharBuffer data;
         private final boolean end;
 
-        CharSegmentImpl(@Nonnull CharBuffer data, boolean end) {
+        private CharSegmentImpl(@Nonnull CharBuffer data, boolean end) {
             this.data = data;
             this.end = end;
         }
@@ -72,7 +76,7 @@ final class CharReaderImpl {
         private final @Nonnull Reader source;
         private final @Nonnull CharIO operator;
 
-        CharStreamReader(@Nonnull Reader src, int bufSize) throws IllegalArgumentException {
+        private CharStreamReader(@Nonnull Reader src, int bufSize) throws IllegalArgumentException {
             this.source = src;
             this.operator = CharIO.get(bufSize);
         }
@@ -188,7 +192,7 @@ final class CharReaderImpl {
         private int pos;
         private int mark;
 
-        CharArrayReader(char @Nonnull [] source, int offset, int length) throws IndexOutOfBoundsException {
+        private CharArrayReader(char @Nonnull [] source, int offset, int length) throws IndexOutOfBoundsException {
             IOChecker.checkOffLen(source.length, offset, length);
             this.source = source;
             this.pos = offset;
@@ -355,7 +359,7 @@ final class CharReaderImpl {
         private int pos;
         private int mark;
 
-        CharSequenceReader(@Nonnull CharSequence source, int start, int end) throws IndexOutOfBoundsException {
+        private CharSequenceReader(@Nonnull CharSequence source, int start, int end) throws IndexOutOfBoundsException {
             IOChecker.checkStartEnd(source.length(), start, end);
             this.source = source;
             this.pos = start;
@@ -519,7 +523,7 @@ final class CharReaderImpl {
 
         private final @Nonnull CharBuffer source;
 
-        CharBufferReader(@Nonnull CharBuffer source) {
+        private CharBufferReader(@Nonnull CharBuffer source) {
             this.source = source;
         }
 

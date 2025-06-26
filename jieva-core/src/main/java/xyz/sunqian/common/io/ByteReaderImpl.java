@@ -28,7 +28,20 @@ final class ByteReaderImpl {
         return new ByteBufferReader(src);
     }
 
-    static final class ByteSegmentImpl implements ByteSegment {
+    static @Nonnull ByteReader limit(@Nonnull ByteReader reader, long limit) throws IllegalArgumentException {
+        IOChecker.checkLimit(limit);
+        return new LimitedReader(reader, limit);
+    }
+
+    static @Nonnull ByteSegment newSeg(@Nonnull ByteBuffer data, boolean end) {
+        return new ByteSegmentImpl(data, end);
+    }
+
+    static @Nonnull ByteSegment emptySeg(boolean end) {
+        return end ? ByteSegmentImpl.EMPTY_END : ByteSegmentImpl.EMPTY_SEG;
+    }
+
+    private static final class ByteSegmentImpl implements ByteSegment {
 
         private static final @Nonnull ByteSegmentImpl EMPTY_END = new ByteSegmentImpl(JieBytes.emptyBuffer(), true);
         private static final @Nonnull ByteSegmentImpl EMPTY_SEG = new ByteSegmentImpl(JieBytes.emptyBuffer(), false);
@@ -40,7 +53,7 @@ final class ByteReaderImpl {
         private final @Nonnull ByteBuffer data;
         private final boolean end;
 
-        ByteSegmentImpl(@Nonnull ByteBuffer data, boolean end) {
+        private ByteSegmentImpl(@Nonnull ByteBuffer data, boolean end) {
             this.data = data;
             this.end = end;
         }
@@ -74,7 +87,7 @@ final class ByteReaderImpl {
         private final @Nonnull InputStream source;
         private final @Nonnull ByteIO operator;
 
-        ByteStreamReader(@Nonnull InputStream src, int bufSize) throws IllegalArgumentException {
+        private ByteStreamReader(@Nonnull InputStream src, int bufSize) throws IllegalArgumentException {
             this.source = src;
             this.operator = ByteIO.get(bufSize);
         }
@@ -200,7 +213,7 @@ final class ByteReaderImpl {
         private final @Nonnull ReadableByteChannel source;
         private final @Nonnull ByteIO operator;
 
-        ByteChannelReader(@Nonnull ReadableByteChannel src, int bufSize) throws IllegalArgumentException {
+        private ByteChannelReader(@Nonnull ReadableByteChannel src, int bufSize) throws IllegalArgumentException {
             this.source = src;
             this.operator = ByteIO.get(bufSize);
         }
@@ -319,7 +332,7 @@ final class ByteReaderImpl {
         private int pos;
         private int mark;
 
-        ByteArrayReader(byte @Nonnull [] source, int offset, int length) throws IndexOutOfBoundsException {
+        private ByteArrayReader(byte @Nonnull [] source, int offset, int length) throws IndexOutOfBoundsException {
             IOChecker.checkOffLen(source.length, offset, length);
             this.source = source;
             this.pos = offset;
@@ -514,7 +527,7 @@ final class ByteReaderImpl {
 
         private final @Nonnull ByteBuffer source;
 
-        ByteBufferReader(@Nonnull ByteBuffer source) {
+        private ByteBufferReader(@Nonnull ByteBuffer source) {
             this.source = source;
         }
 
@@ -613,6 +626,199 @@ final class ByteReaderImpl {
 
         @Override
         public void close() throws IORuntimeException {
+        }
+    }
+
+    private static final class LimitedReader implements ByteReader {
+
+        private final @Nonnull ByteReader source;
+        private final long limit;
+
+        private long pos = 0;
+        private long mark = 0;
+
+        private LimitedReader(@Nonnull ByteReader source, long limit) {
+            this.source = source;
+            this.limit = limit;
+        }
+
+        @Override
+        public @Nonnull ByteSegment read(int len) throws IllegalArgumentException, IORuntimeException {
+            IOChecker.checkLen(len);
+            if (len == 0) {
+                return ByteSegment.empty(false);
+            }
+            if (pos >= limit) {
+                return ByteSegment.empty(true);
+            }
+            int actualLen = (int) Math.min(len, limit - pos);
+            ByteSegment segment = source.read(actualLen);
+            pos += segment.data().remaining();
+            return segment;
+        }
+
+        @Override
+        public long skip(long len) throws IllegalArgumentException, IORuntimeException {
+            IOChecker.checkLen(len);
+            if (len == 0) {
+                return 0;
+            }
+            if (pos >= limit) {
+                return 0;
+            }
+            int actualLen = (int) Math.min(len, limit - pos);
+            long skipped = source.skip(actualLen);
+            pos += skipped;
+            return skipped;
+        }
+
+        @Override
+        public long readTo(@Nonnull OutputStream dst) throws IORuntimeException {
+            if (pos >= limit) {
+                return -1;
+            }
+            long readSize = source.readTo(dst, limit - pos);
+            if (readSize < 0) {
+                return readSize;
+            }
+            pos += readSize;
+            return readSize;
+        }
+
+        @Override
+        public long readTo(@Nonnull OutputStream dst, long len) throws IllegalArgumentException, IORuntimeException {
+            IOChecker.checkLen(len);
+            if (len == 0) {
+                return 0;
+            }
+            if (pos >= limit) {
+                return -1;
+            }
+            int actualLen = (int) Math.min(len, limit - pos);
+            long readSize = source.readTo(dst, actualLen);
+            if (readSize < 0) {
+                return readSize;
+            }
+            pos += readSize;
+            return readSize;
+        }
+
+        @Override
+        public long readTo(@Nonnull WritableByteChannel dst) throws IORuntimeException {
+            if (pos >= limit) {
+                return -1;
+            }
+            long readSize = source.readTo(dst, limit - pos);
+            if (readSize < 0) {
+                return readSize;
+            }
+            pos += readSize;
+            return readSize;
+        }
+
+        @Override
+        public long readTo(
+            @Nonnull WritableByteChannel dst, long len
+        ) throws IllegalArgumentException, IORuntimeException {
+            IOChecker.checkLen(len);
+            if (len == 0) {
+                return 0;
+            }
+            if (pos >= limit) {
+                return -1;
+            }
+            int actualLen = (int) Math.min(len, limit - pos);
+            long readSize = source.readTo(dst, actualLen);
+            if (readSize < 0) {
+                return readSize;
+            }
+            pos += readSize;
+            return readSize;
+        }
+
+        @Override
+        public int readTo(byte @Nonnull [] dst) throws IORuntimeException {
+            return readTo(dst, 0, dst.length);
+        }
+
+        @Override
+        public int readTo(
+            byte @Nonnull [] dst, int off, int len
+        ) throws IndexOutOfBoundsException, IORuntimeException {
+            IOChecker.checkOffLen(dst.length, off, len);
+            if (len == 0) {
+                return 0;
+            }
+            if (pos >= limit) {
+                return -1;
+            }
+            int actualLen = (int) Math.min(len, limit - pos);
+            int readSize = source.readTo(dst, off, actualLen);
+            if (readSize < 0) {
+                return readSize;
+            }
+            pos += readSize;
+            return readSize;
+        }
+
+        @Override
+        public int readTo(@Nonnull ByteBuffer dst) throws IORuntimeException {
+            if (!dst.hasRemaining()) {
+                return 0;
+            }
+            if (pos >= limit) {
+                return -1;
+            }
+            int readSize = source.readTo(dst);
+            if (readSize < 0) {
+                return readSize;
+            }
+            pos += readSize;
+            return readSize;
+        }
+
+        @Override
+        public int readTo(@Nonnull ByteBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
+            IOChecker.checkLen(len);
+            if (len == 0) {
+                return 0;
+            }
+            if (!dst.hasRemaining()) {
+                return 0;
+            }
+            if (pos >= limit) {
+                return -1;
+            }
+            int actualLen = (int) Math.min(len, limit - pos);
+            actualLen = Math.min(actualLen, dst.remaining());
+            int readSize = source.readTo(dst, actualLen);
+            if (readSize < 0) {
+                return readSize;
+            }
+            pos += readSize;
+            return readSize;
+        }
+
+        @Override
+        public boolean markSupported() {
+            return source.markSupported();
+        }
+
+        @Override
+        public void mark() throws IORuntimeException {
+            source.mark();
+            mark = pos;
+        }
+
+        @Override
+        public void reset() throws IORuntimeException {
+            source.reset();
+            pos = mark;
+        }
+
+        @Override
+        public void close() throws IORuntimeException {
+            source.close();
         }
     }
 }
