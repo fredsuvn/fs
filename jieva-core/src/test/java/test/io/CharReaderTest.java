@@ -4,10 +4,10 @@ import org.testng.annotations.Test;
 import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.base.chars.CharsBuilder;
+import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.CharReader;
 import xyz.sunqian.common.io.CharSegment;
 import xyz.sunqian.common.io.IORuntimeException;
-import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.test.ErrorAppender;
 import xyz.sunqian.test.ReadOps;
 import xyz.sunqian.test.TestReader;
@@ -99,6 +99,42 @@ public class CharReaderTest {
             testRead0(CharReader.from(CharBuffer.wrap(data)), data, readSize, true);
             testSkip0(CharReader.from(CharBuffer.wrap(data)), data, readSize);
         }
+        {
+            // limited
+            char[] data = JieRandom.fill(new char[dataSize]);
+            testRead0(
+                CharReader.from(new CharArrayReader(data)).limit(data.length),
+                data,
+                readSize, false
+            );
+            testSkip0(
+                CharReader.from(new CharArrayReader(data)),
+                data,
+                readSize
+            );
+            testRead0(
+                CharReader.from(new CharArrayReader(data)).limit(data.length + 5),
+                data,
+                readSize, false
+            );
+            testSkip0(
+                CharReader.from(new CharArrayReader(data)).limit(data.length + 5),
+                data,
+                readSize
+            );
+            if (data.length > 5) {
+                testRead0(
+                    CharReader.from(new CharArrayReader(data)).limit(data.length - 5),
+                    Arrays.copyOf(data, data.length - 5),
+                    readSize, false
+                );
+                testSkip0(
+                    CharReader.from(new CharArrayReader(data)).limit(data.length - 5),
+                    Arrays.copyOf(data, data.length - 5),
+                    readSize
+                );
+            }
+        }
     }
 
     private void testRead0(CharReader reader, char[] data, int readSize, boolean preKnown) {
@@ -181,6 +217,20 @@ public class CharReaderTest {
             // char buffer
             testReadTo0(() -> CharReader.from(CharBuffer.wrap(data)), data, readSize);
             testReadTo0(() -> CharReader.from(BufferKit.directBuffer(data)), data, readSize);
+        }
+        {
+            // limited
+            testReadTo0(() ->
+                CharReader.from(new CharArrayReader(data)).limit(data.length), data, readSize);
+            testReadTo0(() ->
+                CharReader.from(new CharArrayReader(data)).limit(data.length + 5), data, readSize);
+            if (data.length > 5) {
+                testReadTo0(() ->
+                        CharReader.from(new CharArrayReader(data)).limit(data.length - 5),
+                    Arrays.copyOf(data, data.length - 5),
+                    readSize
+                );
+            }
         }
     }
 
@@ -420,20 +470,40 @@ public class CharReaderTest {
     @Test
     public void testShare() {
         int dataSize = 1024;
+        int limitSize = dataSize / 2;
         {
             // reader
             char[] data = JieRandom.fill(new char[dataSize]);
-            testShare(CharReader.from(new CharArrayReader(data)), CharBuffer.wrap(data), false, false);
+            testShare(
+                CharReader.from(new CharArrayReader(data)),
+                CharBuffer.wrap(data),
+                false, false
+            );
+            testShare(
+                CharReader.from(new CharArrayReader(data)).limit(limitSize),
+                CharBuffer.wrap(data, 0, limitSize),
+                false, false
+            );
         }
         {
             // char array
             char[] data = JieRandom.fill(new char[dataSize]);
             testShare(CharReader.from(data), CharBuffer.wrap(data), true, true);
+            testShare(
+                CharReader.from(data).limit(limitSize),
+                CharBuffer.wrap(data, 0, limitSize),
+                true, true
+            );
             char[] dataPadding = new char[data.length + 66];
             System.arraycopy(data, 0, dataPadding, 33, data.length);
             testShare(
                 CharReader.from(dataPadding, 33, data.length),
                 CharBuffer.wrap(dataPadding, 33, data.length),
+                true, true
+            );
+            testShare(
+                CharReader.from(dataPadding, 33, data.length).limit(limitSize),
+                CharBuffer.wrap(dataPadding, 33, limitSize),
                 true, true
             );
         }
@@ -442,6 +512,11 @@ public class CharReaderTest {
             char[] data = JieRandom.fill(new char[dataSize]);
             CharSequence dataStr = JieString.asChars(data);
             testShare(CharReader.from(dataStr), CharBuffer.wrap(data), false, true);
+            testShare(
+                CharReader.from(dataStr).limit(limitSize),
+                CharBuffer.wrap(data, 0, limitSize),
+                false, true
+            );
             char[] dataPadding = new char[data.length + 66];
             System.arraycopy(data, 0, dataPadding, 33, data.length);
             CharSequence dataStrPadding = JieString.asChars(dataPadding);
@@ -450,13 +525,33 @@ public class CharReaderTest {
                 CharBuffer.wrap(dataPadding, 33, data.length),
                 false, true
             );
+            testShare(
+                CharReader.from(dataStrPadding, 33, 33 + data.length).limit(limitSize),
+                CharBuffer.wrap(dataPadding, 33, limitSize),
+                false, true
+            );
         }
         {
             // char buffer
             char[] data = JieRandom.fill(new char[dataSize]);
-            testShare(CharReader.from(CharBuffer.wrap(data)), CharBuffer.wrap(data), true, true);
+            testShare(
+                CharReader.from(CharBuffer.wrap(data)),
+                CharBuffer.wrap(data),
+                true, true
+            );
+            testShare(
+                CharReader.from(CharBuffer.wrap(data)).limit(limitSize),
+                CharBuffer.wrap(data, 0, limitSize),
+                true, true
+            );
             CharBuffer direct = BufferKit.directBuffer(data);
             testShare(CharReader.from(direct), direct.slice(), true, true);
+            direct.clear();
+            testShare(
+                CharReader.from(direct).limit(limitSize),
+                BufferKit.slice(direct, limitSize),
+                true, true
+            );
         }
     }
 

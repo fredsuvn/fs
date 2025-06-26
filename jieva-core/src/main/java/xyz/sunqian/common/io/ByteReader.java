@@ -334,7 +334,8 @@ public interface ByteReader {
     void close() throws IORuntimeException;
 
     /**
-     * Wraps this reader as a new {@link ByteReader} of which readable number is limited to the specified limit.
+     * Wraps this reader as a new {@link ByteReader} of which readable number is limited to the specified limit. The
+     * shareability of the content of the returned segment inherits this reader.
      * <p>
      * The result's support is as follows:
      * <ul>

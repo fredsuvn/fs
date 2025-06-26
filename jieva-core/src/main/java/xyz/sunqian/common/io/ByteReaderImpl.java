@@ -46,10 +46,6 @@ final class ByteReaderImpl {
         private static final @Nonnull ByteSegmentImpl EMPTY_END = new ByteSegmentImpl(JieBytes.emptyBuffer(), true);
         private static final @Nonnull ByteSegmentImpl EMPTY_SEG = new ByteSegmentImpl(JieBytes.emptyBuffer(), false);
 
-        public static @Nonnull ByteSegmentImpl empty(boolean end) {
-            return end ? EMPTY_END : EMPTY_SEG;
-        }
-
         private final @Nonnull ByteBuffer data;
         private final boolean end;
 
@@ -654,6 +650,11 @@ final class ByteReaderImpl {
             int actualLen = (int) Math.min(len, limit - pos);
             ByteSegment segment = source.read(actualLen);
             pos += segment.data().remaining();
+            if (actualLen < len) {
+                if (!segment.end()) {
+                    return newSeg(segment.data(), true);
+                }
+            }
             return segment;
         }
 
@@ -763,18 +764,7 @@ final class ByteReaderImpl {
 
         @Override
         public int readTo(@Nonnull ByteBuffer dst) throws IORuntimeException {
-            if (!dst.hasRemaining()) {
-                return 0;
-            }
-            if (pos >= limit) {
-                return -1;
-            }
-            int readSize = source.readTo(dst);
-            if (readSize < 0) {
-                return readSize;
-            }
-            pos += readSize;
-            return readSize;
+            return readTo(dst, dst.remaining());
         }
 
         @Override

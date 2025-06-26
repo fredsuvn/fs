@@ -3,10 +3,10 @@ package test.io;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
+import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.ByteReader;
 import xyz.sunqian.common.io.ByteSegment;
 import xyz.sunqian.common.io.IORuntimeException;
-import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.test.ErrorOutputStream;
 import xyz.sunqian.test.ReadOps;
 import xyz.sunqian.test.TestInputStream;
@@ -99,6 +99,42 @@ public class ByteReaderTest {
             testRead0(ByteReader.from(ByteBuffer.wrap(data)), data, readSize, true);
             testSkip0(ByteReader.from(ByteBuffer.wrap(data)), data, readSize);
         }
+        {
+            // limited
+            byte[] data = JieRandom.fill(new byte[dataSize]);
+            testRead0(
+                ByteReader.from(new ByteArrayInputStream(data)).limit(data.length),
+                data,
+                readSize, false
+            );
+            testSkip0(
+                ByteReader.from(new ByteArrayInputStream(data)),
+                data,
+                readSize
+            );
+            testRead0(
+                ByteReader.from(new ByteArrayInputStream(data)).limit(data.length + 5),
+                data,
+                readSize, false
+            );
+            testSkip0(
+                ByteReader.from(new ByteArrayInputStream(data)).limit(data.length + 5),
+                data,
+                readSize
+            );
+            if (data.length > 5) {
+                testRead0(
+                    ByteReader.from(new ByteArrayInputStream(data)).limit(data.length - 5),
+                    Arrays.copyOf(data, data.length - 5),
+                    readSize, false
+                );
+                testSkip0(
+                    ByteReader.from(new ByteArrayInputStream(data)).limit(data.length - 5),
+                    Arrays.copyOf(data, data.length - 5),
+                    readSize
+                );
+            }
+        }
     }
 
     private void testRead0(ByteReader reader, byte[] data, int readSize, boolean preKnown) {
@@ -189,6 +225,20 @@ public class ByteReaderTest {
             // byte buffer
             testReadTo0(() -> ByteReader.from(ByteBuffer.wrap(data)), data, readSize);
             testReadTo0(() -> ByteReader.from(BufferKit.directBuffer(data)), data, readSize);
+        }
+        {
+            // limited
+            testReadTo0(() ->
+                ByteReader.from(new ByteArrayInputStream(data)).limit(data.length), data, readSize);
+            testReadTo0(() ->
+                ByteReader.from(new ByteArrayInputStream(data)).limit(data.length + 5), data, readSize);
+            if (data.length > 5) {
+                testReadTo0(() ->
+                        ByteReader.from(new ByteArrayInputStream(data)).limit(data.length - 5),
+                    Arrays.copyOf(data, data.length - 5),
+                    readSize
+                );
+            }
         }
     }
 
@@ -513,15 +563,28 @@ public class ByteReaderTest {
     @Test
     public void testShare() {
         int dataSize = 1024;
+        int limitSize = dataSize / 2;
         {
             // input stream
             byte[] data = JieRandom.fill(new byte[dataSize]);
-            testShare(ByteReader.from(new ByteArrayInputStream(data)), ByteBuffer.wrap(data), false, false);
+            testShare(
+                ByteReader.from(new ByteArrayInputStream(data)), ByteBuffer.wrap(data),
+                false, false
+            );
+            testShare(
+                ByteReader.from(new ByteArrayInputStream(data)).limit(limitSize), ByteBuffer.wrap(data, 0, limitSize),
+                false, false
+            );
         }
         {
             // byte array
             byte[] data = JieRandom.fill(new byte[dataSize]);
             testShare(ByteReader.from(data), ByteBuffer.wrap(data), true, true);
+            testShare(
+                ByteReader.from(data).limit(limitSize),
+                ByteBuffer.wrap(data, 0, limitSize),
+                true, true
+            );
             byte[] dataPadding = new byte[data.length + 66];
             System.arraycopy(data, 0, dataPadding, 33, data.length);
             testShare(
@@ -529,13 +592,33 @@ public class ByteReaderTest {
                 ByteBuffer.wrap(dataPadding, 33, data.length),
                 true, true
             );
+            testShare(
+                ByteReader.from(dataPadding, 33, data.length).limit(limitSize),
+                ByteBuffer.wrap(dataPadding, 33, limitSize),
+                true, true
+            );
         }
         {
             // byte buffer
             byte[] data = JieRandom.fill(new byte[dataSize]);
-            testShare(ByteReader.from(ByteBuffer.wrap(data)), ByteBuffer.wrap(data), true, true);
+            testShare(
+                ByteReader.from(ByteBuffer.wrap(data)),
+                ByteBuffer.wrap(data),
+                true, true
+            );
+            testShare(
+                ByteReader.from(ByteBuffer.wrap(data)).limit(limitSize),
+                ByteBuffer.wrap(data, 0, limitSize),
+                true, true
+            );
             ByteBuffer direct = BufferKit.directBuffer(data);
             testShare(ByteReader.from(direct), direct.slice(), true, true);
+            direct.clear();
+            testShare(
+                ByteReader.from(direct).limit(limitSize),
+                BufferKit.slice(direct, limitSize),
+                true, true
+            );
         }
     }
 

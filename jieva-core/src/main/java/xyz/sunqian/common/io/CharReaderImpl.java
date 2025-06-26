@@ -26,6 +26,11 @@ final class CharReaderImpl {
         return new CharBufferReader(src);
     }
 
+    static @Nonnull CharReader limit(@Nonnull CharReader reader, long limit) throws IllegalArgumentException {
+        IOChecker.checkLimit(limit);
+        return new LimitedReader(reader, limit);
+    }
+
     static @Nonnull CharSegment newSeg(@Nonnull CharBuffer data, boolean end) {
         return new CharSegmentImpl(data, end);
     }
@@ -609,6 +614,160 @@ final class CharReaderImpl {
 
         @Override
         public void close() throws IORuntimeException {
+        }
+    }
+
+    private static final class LimitedReader implements CharReader {
+
+        private final @Nonnull CharReader source;
+        private final long limit;
+
+        private long pos = 0;
+        private long mark = 0;
+
+        private LimitedReader(@Nonnull CharReader source, long limit) {
+            this.source = source;
+            this.limit = limit;
+        }
+
+        @Override
+        public @Nonnull CharSegment read(int len) throws IllegalArgumentException, IORuntimeException {
+            IOChecker.checkLen(len);
+            if (len == 0) {
+                return CharSegment.empty(false);
+            }
+            if (pos >= limit) {
+                return CharSegment.empty(true);
+            }
+            int actualLen = (int) Math.min(len, limit - pos);
+            CharSegment segment = source.read(actualLen);
+            pos += segment.data().remaining();
+            if (actualLen < len) {
+                if (!segment.end()) {
+                    return newSeg(segment.data(), true);
+                }
+            }
+            return segment;
+        }
+
+        @Override
+        public long skip(long len) throws IllegalArgumentException, IORuntimeException {
+            IOChecker.checkLen(len);
+            if (len == 0) {
+                return 0;
+            }
+            if (pos >= limit) {
+                return 0;
+            }
+            int actualLen = (int) Math.min(len, limit - pos);
+            long skipped = source.skip(actualLen);
+            pos += skipped;
+            return skipped;
+        }
+
+        @Override
+        public long readTo(@Nonnull Appendable dst) throws IORuntimeException {
+            if (pos >= limit) {
+                return -1;
+            }
+            long readSize = source.readTo(dst, limit - pos);
+            if (readSize < 0) {
+                return readSize;
+            }
+            pos += readSize;
+            return readSize;
+        }
+
+        @Override
+        public long readTo(@Nonnull Appendable dst, long len) throws IllegalArgumentException, IORuntimeException {
+            IOChecker.checkLen(len);
+            if (len == 0) {
+                return 0;
+            }
+            if (pos >= limit) {
+                return -1;
+            }
+            int actualLen = (int) Math.min(len, limit - pos);
+            long readSize = source.readTo(dst, actualLen);
+            if (readSize < 0) {
+                return readSize;
+            }
+            pos += readSize;
+            return readSize;
+        }
+
+        @Override
+        public int readTo(char @Nonnull [] dst) throws IORuntimeException {
+            return readTo(dst, 0, dst.length);
+        }
+
+        @Override
+        public int readTo(
+            char @Nonnull [] dst, int off, int len
+        ) throws IndexOutOfBoundsException, IORuntimeException {
+            IOChecker.checkOffLen(dst.length, off, len);
+            if (len == 0) {
+                return 0;
+            }
+            if (pos >= limit) {
+                return -1;
+            }
+            int actualLen = (int) Math.min(len, limit - pos);
+            int readSize = source.readTo(dst, off, actualLen);
+            if (readSize < 0) {
+                return readSize;
+            }
+            pos += readSize;
+            return readSize;
+        }
+
+        @Override
+        public int readTo(@Nonnull CharBuffer dst) throws IORuntimeException {
+            return readTo(dst, dst.remaining());
+        }
+
+        @Override
+        public int readTo(@Nonnull CharBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
+            IOChecker.checkLen(len);
+            if (len == 0) {
+                return 0;
+            }
+            if (!dst.hasRemaining()) {
+                return 0;
+            }
+            if (pos >= limit) {
+                return -1;
+            }
+            int actualLen = (int) Math.min(len, limit - pos);
+            actualLen = Math.min(actualLen, dst.remaining());
+            int readSize = source.readTo(dst, actualLen);
+            if (readSize < 0) {
+                return readSize;
+            }
+            pos += readSize;
+            return readSize;
+        }
+
+        @Override
+        public boolean markSupported() {
+            return source.markSupported();
+        }
+
+        @Override
+        public void mark() throws IORuntimeException {
+            source.mark();
+            mark = pos;
+        }
+
+        @Override
+        public void reset() throws IORuntimeException {
+            source.reset();
+            pos = mark;
+        }
+
+        @Override
+        public void close() throws IORuntimeException {
+            source.close();
         }
     }
 }
