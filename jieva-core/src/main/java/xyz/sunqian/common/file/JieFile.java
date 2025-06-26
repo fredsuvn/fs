@@ -1,9 +1,13 @@
 package xyz.sunqian.common.file;
 
 import xyz.sunqian.common.base.chars.JieChars;
-import xyz.sunqian.common.io.JieIO;
+import xyz.sunqian.common.io.IOKit;
 
-import java.io.*;
+import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.RandomAccessFile;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,7 +41,7 @@ public class JieFile {
      */
     public static byte[] readBytes(Path path, long offset, long length) {
         try (RandomAccessFile random = new RandomAccessFile(path.toFile(), "r")) {
-            return JieIO.read(JieIO.newInputStream(random, offset));
+            return IOKit.read(IOKit.newInputStream(random, offset));
         } catch (Exception e) {
             throw new FileException(e);
         }
@@ -92,7 +96,7 @@ public class JieFile {
      */
     public static String readString(Path path, long offset, long length, Charset charset) {
         try (RandomAccessFile random = new RandomAccessFile(path.toFile(), "r")) {
-            return JieIO.string(JieIO.newInputStream(random, offset), charset);
+            return IOKit.string(IOKit.newInputStream(random, offset), charset);
         } catch (Exception e) {
             throw new FileException(e);
         }
@@ -119,8 +123,8 @@ public class JieFile {
      */
     public static void writeBytes(Path path, long offset, long length, InputStream data) {
         try (RandomAccessFile random = new RandomAccessFile(path.toFile(), "rw")) {
-            OutputStream dest = JieIO.newOutputStream(random, offset);
-            JieIO.readTo(data, dest);
+            OutputStream dest = IOKit.newOutputStream(random, offset);
+            IOKit.readTo(data, dest);
             dest.flush();
         } catch (Exception e) {
             throw new FileException(e);
@@ -176,7 +180,7 @@ public class JieFile {
      */
     public static void writeString(Path path, long offset, long length, CharSequence data, Charset charset) {
         try (RandomAccessFile random = new RandomAccessFile(path.toFile(), "rw")) {
-            Writer writer = JieIO.newWriter(JieIO.newOutputStream(random, offset), charset);
+            Writer writer = IOKit.newWriter(IOKit.newOutputStream(random, offset), charset);
             writer.append(data);
             writer.flush();
         } catch (Exception e) {

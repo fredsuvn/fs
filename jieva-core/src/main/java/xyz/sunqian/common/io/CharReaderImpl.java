@@ -238,7 +238,7 @@ final class CharReaderImpl {
             }
             try {
                 int remaining = endPos - pos;
-                JieIO.write(dst, source, pos, remaining);
+                IOKit.write(dst, source, pos, remaining);
                 pos += remaining;
                 return remaining;
             } catch (Exception e) {
@@ -258,7 +258,7 @@ final class CharReaderImpl {
             try {
                 int remaining = endPos - pos;
                 int actualLen = (int) Math.min(remaining, len);
-                JieIO.write(dst, source, pos, actualLen);
+                IOKit.write(dst, source, pos, actualLen);
                 pos += actualLen;
                 return actualLen;
             } catch (Exception e) {
@@ -563,33 +563,33 @@ final class CharReaderImpl {
 
         @Override
         public long readTo(@Nonnull Appendable dst) throws IORuntimeException {
-            return JieBuffer.readTo(source, dst);
+            return BufferKit.readTo(source, dst);
         }
 
         @Override
         public long readTo(@Nonnull Appendable dst, long len) throws IllegalArgumentException, IORuntimeException {
             int actualLen = (int) Math.min(Integer.MAX_VALUE, len);
-            return JieBuffer.readTo(source, dst, actualLen);
+            return BufferKit.readTo(source, dst, actualLen);
         }
 
         @Override
         public int readTo(char @Nonnull [] dst) throws IORuntimeException {
-            return JieBuffer.readTo(source, dst);
+            return BufferKit.readTo(source, dst);
         }
 
         @Override
         public int readTo(char @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException, IORuntimeException {
-            return JieBuffer.readTo(source, dst, off, len);
+            return BufferKit.readTo(source, dst, off, len);
         }
 
         @Override
         public int readTo(@Nonnull CharBuffer dst) throws IORuntimeException {
-            return JieBuffer.readTo(source, dst);
+            return BufferKit.readTo(source, dst);
         }
 
         @Override
         public int readTo(@Nonnull CharBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
-            return JieBuffer.readTo(source, dst, len);
+            return BufferKit.readTo(source, dst, len);
         }
 
         @Override

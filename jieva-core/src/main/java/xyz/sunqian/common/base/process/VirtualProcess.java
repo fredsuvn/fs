@@ -2,7 +2,7 @@ package xyz.sunqian.common.base.process;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.io.JieIO;
+import xyz.sunqian.common.io.IOKit;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -30,10 +30,11 @@ public class VirtualProcess extends Process {
 
     /**
      * Constructs a new virtual process. The result of {@link #getInputStream()} and {@link #getErrorStream()} are
-     * {@link JieIO#emptyInputStream()}, and the result of {@link #getOutputStream()} is {@link JieIO#nullOutputStream()}.
+     * {@link IOKit#emptyInputStream()}, and the result of {@link #getOutputStream()} is
+     * {@link IOKit#nullOutputStream()}.
      */
     public VirtualProcess() {
-        this(JieIO.emptyInputStream(), JieIO.nullOutputStream());
+        this(IOKit.emptyInputStream(), IOKit.nullOutputStream());
     }
 
     /**

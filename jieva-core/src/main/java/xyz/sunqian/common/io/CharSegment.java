@@ -58,7 +58,7 @@ public interface CharSegment {
      * @return the remaining data as a new char array from the {@link #data()}
      */
     default char @Nonnull [] toCharArray() {
-        char[] ret = JieBuffer.read(data());
+        char[] ret = BufferKit.read(data());
         return ret == null ? new char[0] : ret;
     }
 
@@ -69,7 +69,7 @@ public interface CharSegment {
      * @return a new array copied from the remaining content of the {@link #data()}
      */
     default char @Nonnull [] copyCharArray() {
-        return JieBuffer.copyContent(data());
+        return BufferKit.copyContent(data());
     }
 
     /**

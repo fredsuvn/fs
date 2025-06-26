@@ -1,6 +1,6 @@
 package xyz.sunqian.common.net.udp;
 
-import xyz.sunqian.common.io.JieBuffer;
+import xyz.sunqian.common.io.BufferKit;
 
 import java.net.DatagramPacket;
 import java.net.InetSocketAddress;
@@ -47,7 +47,7 @@ public interface GekUdpPacket {
      * @return UDP packet
      */
     static GekUdpPacket of(ByteBuffer buffer, InetSocketAddress address) {
-        ByteBuffer data = ByteBuffer.wrap(JieBuffer.read(buffer));
+        ByteBuffer data = ByteBuffer.wrap(BufferKit.read(buffer));
         return new GekUdpPacket() {
 
             @Override

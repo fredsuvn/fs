@@ -21,7 +21,7 @@ final class CharEncoderImpl implements CharEncoder {
     private final @Nullable Object source;
     private @Nullable Object dest;
     private long readLimit = -1;
-    private int readBlockSize = JieIO.bufferSize();
+    private int readBlockSize = IOKit.bufferSize();
     private boolean endOnZeroRead = false;
     private @Nullable List<Handler> encoders;
 
@@ -155,13 +155,13 @@ final class CharEncoderImpl implements CharEncoder {
             return (Reader) src;
         }
         if (src instanceof char[]) {
-            return JieIO.newReader((char[]) src);
+            return IOKit.newReader((char[]) src);
         }
         if (src instanceof CharBuffer) {
-            return JieIO.newReader((CharBuffer) src);
+            return IOKit.newReader((CharBuffer) src);
         }
         if (src instanceof CharSequence) {
-            return JieIO.newReader((CharSequence) src);
+            return IOKit.newReader((CharSequence) src);
         }
         throw new IORuntimeException("The type of source is unsupported: " + src.getClass());
     }
@@ -319,7 +319,7 @@ final class CharEncoderImpl implements CharEncoder {
             return new AppendableDataWriter(CharBuffer.wrap((char[]) dst));
         }
         if (dst instanceof CharBuffer) {
-            return new AppendableDataWriter(JieIO.newWriter((CharBuffer) dst));
+            return new AppendableDataWriter(IOKit.newWriter((CharBuffer) dst));
         }
         if (dst instanceof Appendable) {
             return new AppendableDataWriter((Appendable) dst);
@@ -368,7 +368,7 @@ final class CharEncoderImpl implements CharEncoder {
                 int remaining = buffer.remaining();
                 dest.append(new String(
                     buffer.array(),
-                    JieBuffer.arrayStartIndex(buffer),
+                    BufferKit.arrayStartIndex(buffer),
                     buffer.remaining()
                 ));
                 buffer.position(buffer.position() + remaining);
@@ -382,7 +382,7 @@ final class CharEncoderImpl implements CharEncoder {
         private void write(CharBuffer buffer, Writer writer) throws IOException {
             if (buffer.hasArray()) {
                 int remaining = buffer.remaining();
-                writer.write(buffer.array(), JieBuffer.arrayStartIndex(buffer), remaining);
+                writer.write(buffer.array(), BufferKit.arrayStartIndex(buffer), remaining);
                 buffer.position(buffer.position() + remaining);
             } else {
                 char[] buf = new char[buffer.remaining()];
@@ -587,7 +587,7 @@ final class CharEncoderImpl implements CharEncoder {
 
             // clean buffer
             if (buffer != null && buffer.position() > 0) {
-                JieBuffer.readTo(data, buffer);
+                BufferKit.readTo(data, buffer);
                 if (end && !data.hasRemaining()) {
                     buffer.flip();
                     return encoder.encode(buffer, true);
@@ -624,7 +624,7 @@ final class CharEncoderImpl implements CharEncoder {
                 if (buffer == null) {
                     buffer = CharBuffer.allocate(size);
                 }
-                JieBuffer.readTo(data, buffer);
+                BufferKit.readTo(data, buffer);
                 if (end) {
                     buffer.flip();
                     result = JieCoding.ifAdd(result, encoder.encode(buffer, true));
@@ -661,7 +661,7 @@ final class CharEncoderImpl implements CharEncoder {
 
             // clean buffer
             if (buffer != null && buffer.position() > 0) {
-                JieBuffer.readTo(data, buffer);
+                BufferKit.readTo(data, buffer);
                 if (end && !data.hasRemaining()) {
                     buffer.flip();
                     return encoder.encode(buffer, true);
@@ -700,7 +700,7 @@ final class CharEncoderImpl implements CharEncoder {
                 if (buffer == null) {
                     buffer = CharBuffer.allocate(size);
                 }
-                JieBuffer.readTo(data, buffer);
+                BufferKit.readTo(data, buffer);
                 if (end) {
                     buffer.flip();
                     result = JieCoding.ifAdd(result, encoder.encode(buffer, true));

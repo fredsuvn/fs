@@ -33,11 +33,11 @@ public interface BaseDataEncoder {
     int getBlockSize();
 
     /**
-     * Returns a {@link ByteEncoder.Handler} which encapsulates current encoding/decoding algorithm for processing within
-     * {@link ByteEncoder}.
+     * Returns a {@link ByteEncoder.Handler} which encapsulates current encoding/decoding algorithm for processing
+     * within {@link ByteEncoder}.
      * <p>
-     * Note that different {@link ByteEncoder.Handler} implementations may have specific requirements, such as specified block
-     * size, for the data to be encoded/decoded.
+     * Note that different {@link ByteEncoder.Handler} implementations may have specific requirements, such as specified
+     * block size, for the data to be encoded/decoded.
      *
      * @return a {@link ByteEncoder.Handler} encapsulates current encoding/decoding algorithm
      * @see ByteEncoder

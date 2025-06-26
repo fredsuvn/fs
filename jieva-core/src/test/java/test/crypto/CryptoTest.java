@@ -12,7 +12,7 @@ import xyz.sunqian.common.base.exception.ProcessingException;
 import xyz.sunqian.common.crypto.CryptoException;
 import xyz.sunqian.common.crypto.JieCrypto;
 import xyz.sunqian.common.encode.JieBase64;
-import xyz.sunqian.common.io.JieBuffer;
+import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.test.JieAssert;
 import xyz.sunqian.test.MaterialBox;
 
@@ -86,7 +86,7 @@ public class CryptoTest {
         // de
         cipher.init(Cipher.DECRYPT_MODE, deKey);
         byte[] jieDe = ByteEncoder.from(javaEn)
-            .encoder(((data, end) -> MaterialBox.copyDirect(JieBuffer.read(data))))
+            .encoder(((data, end) -> MaterialBox.copyDirect(BufferKit.read(data))))
             .encoder(JieCrypto.encoder(cipher, Math.abs(deBlock), deBlock <= 0)).toByteArray();
         assertEquals(jieDe, src);
         cipher.init(Cipher.DECRYPT_MODE, deKey);
@@ -151,7 +151,7 @@ public class CryptoTest {
             byte[] jieEn1 = ByteEncoder.from(src).encoder(JieCrypto.encoder(digest, blockSize)).toByteArray();
             assertEquals(jieEn1, javaEn);
             byte[] jieEn2 = ByteEncoder.from(src)
-                .encoder(((data, end) -> MaterialBox.copyDirect(JieBuffer.read(data))))
+                .encoder(((data, end) -> MaterialBox.copyDirect(BufferKit.read(data))))
                 .encoder(JieCrypto.encoder(digest, blockSize))
                 .toByteArray();
             assertEquals(jieEn2, javaEn);
@@ -167,7 +167,7 @@ public class CryptoTest {
             byte[] jieEn1 = ByteEncoder.from(src).encoder(JieCrypto.encoder(mac, blockSize)).toByteArray();
             assertEquals(jieEn1, javaEn);
             byte[] jieEn2 = ByteEncoder.from(src)
-                .encoder(((data, end) -> MaterialBox.copyDirect(JieBuffer.read(data))))
+                .encoder(((data, end) -> MaterialBox.copyDirect(BufferKit.read(data))))
                 .encoder(JieCrypto.encoder(mac, blockSize))
                 .toByteArray();
             assertEquals(jieEn2, javaEn);

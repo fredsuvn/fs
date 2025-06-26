@@ -7,7 +7,7 @@ import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.chars.CharsBuilder;
 import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.io.IORuntimeException;
-import xyz.sunqian.common.io.JieIO;
+import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.test.ErrorAppender;
 import xyz.sunqian.test.ReadOps;
 import xyz.sunqian.test.TestInputStream;
@@ -35,98 +35,98 @@ public class IOTest {
             // byte
             // read all
             byte[] data = JieRandom.fill(new byte[1024]);
-            assertEquals(JieIO.read(new ByteArrayInputStream(data)), data);
-            assertEquals(JieIO.read(new ByteArrayInputStream(data), 5), Arrays.copyOf(data, 5));
+            assertEquals(IOKit.read(new ByteArrayInputStream(data)), data);
+            assertEquals(IOKit.read(new ByteArrayInputStream(data), 5), Arrays.copyOf(data, 5));
             assertEquals(
-                JieIO.read(Channels.newChannel(new ByteArrayInputStream(data))),
+                IOKit.read(Channels.newChannel(new ByteArrayInputStream(data))),
                 ByteBuffer.wrap(data)
             );
             assertEquals(
-                JieIO.read(Channels.newChannel(new ByteArrayInputStream(data)), 5),
+                IOKit.read(Channels.newChannel(new ByteArrayInputStream(data)), 5),
                 ByteBuffer.wrap(Arrays.copyOf(data, 5))
             );
             // to stream/channel
             BytesBuilder builder = new BytesBuilder();
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), builder),
+                IOKit.readTo(new ByteArrayInputStream(data), builder),
                 data.length
             );
             assertEquals(data, builder.toByteArray());
             builder.reset();
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), Channels.newChannel(builder)),
+                IOKit.readTo(new ByteArrayInputStream(data), Channels.newChannel(builder)),
                 data.length
             );
             assertEquals(data, builder.toByteArray());
             builder.reset();
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), builder),
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), builder),
                 data.length
             );
             assertEquals(data, builder.toByteArray());
             builder.reset();
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(builder)),
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(builder)),
                 data.length
             );
             assertEquals(data, builder.toByteArray());
             builder.reset();
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), builder, data.length),
+                IOKit.readTo(new ByteArrayInputStream(data), builder, data.length),
                 data.length
             );
             assertEquals(data, builder.toByteArray());
             builder.reset();
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), Channels.newChannel(builder), data.length),
+                IOKit.readTo(new ByteArrayInputStream(data), Channels.newChannel(builder), data.length),
                 data.length
             );
             assertEquals(data, builder.toByteArray());
             builder.reset();
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), builder, data.length),
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), builder, data.length),
                 data.length
             );
             assertEquals(data, builder.toByteArray());
             builder.reset();
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(builder), data.length),
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(builder), data.length),
                 data.length
             );
             assertEquals(data, builder.toByteArray());
             builder.reset();
             // to array
             byte[] dst = new byte[data.length];
-            assertEquals(JieIO.readTo(new ByteArrayInputStream(data), dst), data.length);
+            assertEquals(IOKit.readTo(new ByteArrayInputStream(data), dst), data.length);
             assertEquals(data, dst);
             dst = new byte[data.length];
-            assertEquals(JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst), data.length);
+            assertEquals(IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst), data.length);
             assertEquals(data, dst);
             dst = new byte[data.length];
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), dst, 0, dst.length),
+                IOKit.readTo(new ByteArrayInputStream(data), dst, 0, dst.length),
                 data.length
             );
             assertEquals(data, dst);
             dst = new byte[data.length];
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst, 0, dst.length),
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst, 0, dst.length),
                 data.length
             );
             assertEquals(data, dst);
             // to buffer
             ByteBuffer dstBuf = ByteBuffer.allocate(data.length);
-            assertEquals(JieIO.readTo(new ByteArrayInputStream(data), dstBuf), data.length);
+            assertEquals(IOKit.readTo(new ByteArrayInputStream(data), dstBuf), data.length);
             assertEquals(data, dstBuf.array());
             dstBuf = ByteBuffer.allocate(data.length);
-            assertEquals(JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dstBuf), data.length);
+            assertEquals(IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dstBuf), data.length);
             assertEquals(data, dstBuf.array());
             dstBuf = ByteBuffer.allocate(data.length);
-            assertEquals(JieIO.readTo(new ByteArrayInputStream(data), dstBuf, data.length), data.length);
+            assertEquals(IOKit.readTo(new ByteArrayInputStream(data), dstBuf, data.length), data.length);
             assertEquals(data, dstBuf.array());
             dstBuf = ByteBuffer.allocate(data.length);
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dstBuf, data.length),
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dstBuf, data.length),
                 data.length
             );
             assertEquals(data, dstBuf.array());
@@ -135,34 +135,34 @@ public class IOTest {
             // char
             // read all
             char[] data = JieRandom.fill(new char[1024]);
-            assertEquals(JieIO.read(new CharArrayReader(data)), data);
-            assertEquals(JieIO.read(new CharArrayReader(data), 5), Arrays.copyOf(data, 5));
-            assertEquals(JieIO.string(new CharArrayReader(data)), new String(data));
-            assertEquals(JieIO.string(new CharArrayReader(data), 5), new String(Arrays.copyOf(data, 5)));
+            assertEquals(IOKit.read(new CharArrayReader(data)), data);
+            assertEquals(IOKit.read(new CharArrayReader(data), 5), Arrays.copyOf(data, 5));
+            assertEquals(IOKit.string(new CharArrayReader(data)), new String(data));
+            assertEquals(IOKit.string(new CharArrayReader(data), 5), new String(Arrays.copyOf(data, 5)));
             // to appender
             CharsBuilder builder = new CharsBuilder();
-            assertEquals(JieIO.readTo(new CharArrayReader(data), builder), data.length);
+            assertEquals(IOKit.readTo(new CharArrayReader(data), builder), data.length);
             assertEquals(data, builder.toCharArray());
             builder.reset();
-            assertEquals(JieIO.readTo(new CharArrayReader(data), builder, data.length), data.length);
+            assertEquals(IOKit.readTo(new CharArrayReader(data), builder, data.length), data.length);
             assertEquals(data, builder.toCharArray());
             builder.reset();
             // to array
             char[] dst = new char[data.length];
-            assertEquals(JieIO.readTo(new CharArrayReader(data), dst), data.length);
+            assertEquals(IOKit.readTo(new CharArrayReader(data), dst), data.length);
             assertEquals(data, dst);
             dst = new char[data.length];
             assertEquals(
-                JieIO.readTo(new CharArrayReader(data), dst, 0, dst.length),
+                IOKit.readTo(new CharArrayReader(data), dst, 0, dst.length),
                 data.length
             );
             assertEquals(data, dst);
             // to buffer
             CharBuffer dstBuf = CharBuffer.allocate(data.length);
-            assertEquals(JieIO.readTo(new CharArrayReader(data), dstBuf), data.length);
+            assertEquals(IOKit.readTo(new CharArrayReader(data), dstBuf), data.length);
             assertEquals(data, dstBuf.array());
             dstBuf = CharBuffer.allocate(data.length);
-            assertEquals(JieIO.readTo(new CharArrayReader(data), dstBuf, data.length), data.length);
+            assertEquals(IOKit.readTo(new CharArrayReader(data), dstBuf, data.length), data.length);
             assertEquals(data, dstBuf.array());
         }
     }
@@ -171,10 +171,10 @@ public class IOTest {
     public void testWrite() throws Exception {
         char[] data = JieRandom.fill(new char[1024]);
         CharsBuilder appender1 = new CharsBuilder();
-        JieIO.write(appender1, data);
+        IOKit.write(appender1, data);
         assertEquals(appender1.toCharArray(), data);
         appender1.reset();
-        JieIO.write(appender1, data, 33, 99);
+        IOKit.write(appender1, data, 33, 99);
         assertEquals(appender1.toCharArray(), Arrays.copyOfRange(data, 33, 33 + 99));
         class Appender implements Appendable {
 
@@ -204,12 +204,12 @@ public class IOTest {
             }
         }
         Appender appender2 = new Appender();
-        JieIO.write(appender2, data);
+        IOKit.write(appender2, data);
         assertEquals(appender2.toCharArray(), data);
         appender2.reset();
-        JieIO.write(appender2, data, 33, 99);
+        IOKit.write(appender2, data, 33, 99);
         assertEquals(appender2.toCharArray(), Arrays.copyOfRange(data, 33, 33 + 99));
-        expectThrows(IORuntimeException.class, () -> JieIO.write(new ErrorAppender(), data));
+        expectThrows(IORuntimeException.class, () -> IOKit.write(new ErrorAppender(), data));
     }
 
     @Test
@@ -244,14 +244,14 @@ public class IOTest {
                 return read;
             }
         }
-        assertEquals(JieIO.available(new In(5, 5)), Arrays.copyOf(data, 5));
-        assertEquals(JieIO.available(new In(6, 5)), Arrays.copyOf(data, 5));
-        assertEquals(JieIO.available(new In(-1, 5)), Arrays.copyOf(data, 0));
-        assertEquals(JieIO.available(new In(0, 5)), Arrays.copyOf(data, 0));
-        assertEquals(JieIO.available(new In(5, -5)), Arrays.copyOf(data, 0));
+        assertEquals(IOKit.available(new In(5, 5)), Arrays.copyOf(data, 5));
+        assertEquals(IOKit.available(new In(6, 5)), Arrays.copyOf(data, 5));
+        assertEquals(IOKit.available(new In(-1, 5)), Arrays.copyOf(data, 0));
+        assertEquals(IOKit.available(new In(0, 5)), Arrays.copyOf(data, 0));
+        assertEquals(IOKit.available(new In(5, -5)), Arrays.copyOf(data, 0));
         TestInputStream tin = new TestInputStream(new ByteArrayInputStream(data));
         tin.setNextOperation(ReadOps.THROW);
-        expectThrows(IORuntimeException.class, () -> JieIO.available(tin));
+        expectThrows(IORuntimeException.class, () -> IOKit.available(tin));
     }
 
     @Test
@@ -259,46 +259,46 @@ public class IOTest {
         {
             // string
             String hello = "hello";
-            assertEquals(JieIO.string(new ByteArrayInputStream(hello.getBytes(JieChars.defaultCharset()))), hello);
+            assertEquals(IOKit.string(new ByteArrayInputStream(hello.getBytes(JieChars.defaultCharset()))), hello);
             assertEquals(
-                JieIO.string(new ByteArrayInputStream(hello.getBytes(JieChars.defaultCharset())), JieChars.defaultCharset()),
+                IOKit.string(new ByteArrayInputStream(hello.getBytes(JieChars.defaultCharset())), JieChars.defaultCharset()),
                 hello
             );
-            assertNull(JieIO.string(new ByteArrayInputStream(new byte[0])));
+            assertNull(IOKit.string(new ByteArrayInputStream(new byte[0])));
         }
         {
             // close
-            JieIO.close((Closeable) () -> {
+            IOKit.close((Closeable) () -> {
             });
             expectThrows(IOException.class, () -> {
-                JieIO.close((Closeable) () -> {
+                IOKit.close((Closeable) () -> {
                     throw new IOException();
                 });
             });
-            JieIO.close((AutoCloseable) () -> {
+            IOKit.close((AutoCloseable) () -> {
             });
             expectThrows(IOException.class, () -> {
-                JieIO.close((AutoCloseable) () -> {
+                IOKit.close((AutoCloseable) () -> {
                     throw new IOException();
                 });
             });
             expectThrows(IOException.class, () -> {
-                JieIO.close((AutoCloseable) () -> {
+                IOKit.close((AutoCloseable) () -> {
                     throw new Exception();
                 });
             });
-            JieIO.close("");
+            IOKit.close("");
         }
         {
             // flush
-            JieIO.flush((Flushable) () -> {
+            IOKit.flush((Flushable) () -> {
             });
             expectThrows(IOException.class, () -> {
-                JieIO.flush((Flushable) () -> {
+                IOKit.flush((Flushable) () -> {
                     throw new IOException();
                 });
             });
-            JieIO.flush("");
+            IOKit.flush("");
         }
     }
 

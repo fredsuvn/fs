@@ -3,7 +3,7 @@ package xyz.sunqian.common.net.data;
 import xyz.sunqian.common.base.BaseConfigurator;
 import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.base.chars.JieChars;
-import xyz.sunqian.common.io.JieIO;
+import xyz.sunqian.common.io.IOKit;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -146,7 +146,7 @@ public interface IOConfigurator<T extends IOConfigurator<T>> extends BaseConfigu
      * @return result array
      */
     default byte[] finalBytes() {
-        return JieIO.read(finalStream());
+        return IOKit.read(finalStream());
     }
 
     /**

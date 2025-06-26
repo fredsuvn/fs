@@ -25,7 +25,7 @@ final class CharIOImpl implements CharIO {
             return 0;
         }
         try {
-            char[] buf = new char[JieIO.bufferSize(len, bufSize)];
+            char[] buf = new char[IOKit.bufferSize(len, bufSize)];
             long count = 0;
             while (true) {
                 int readSize = len < 0 ?
@@ -35,7 +35,7 @@ final class CharIOImpl implements CharIO {
                 if (readSize < 0) {
                     return count == 0 ? -1 : count;
                 }
-                JieIO.write(dst, buf, 0, readSize);
+                IOKit.write(dst, buf, 0, readSize);
                 count += readSize;
                 if (len > 0 && count >= len) {
                     return count;
@@ -76,7 +76,7 @@ final class CharIOImpl implements CharIO {
         try {
             if (dst.hasArray()) {
                 char[] buf = dst.array();
-                int off = JieBuffer.arrayStartIndex(dst);
+                int off = BufferKit.arrayStartIndex(dst);
                 int actualLen = len < 0 ? dst.remaining() : Math.min(dst.remaining(), len);
                 int ret = readTo0(src, buf, off, actualLen);
                 if (ret <= 0) {

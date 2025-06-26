@@ -1,9 +1,9 @@
 package xyz.sunqian.common.net.data;
 
 import xyz.sunqian.common.base.JieCheck;
+import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.ByteEncoder;
-import xyz.sunqian.common.io.JieBuffer;
-import xyz.sunqian.common.io.JieIO;
+import xyz.sunqian.common.io.IOKit;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -69,17 +69,17 @@ final class BufferData implements GekData.OfBuffer {
 
     @Override
     public int write(ByteBuffer dest, int length) {
-        return (int) ByteEncoder.from(JieIO.newInputStream(buffer)).readLimit(length).writeTo(dest);
+        return (int) ByteEncoder.from(IOKit.newInputStream(buffer)).readLimit(length).writeTo(dest);
     }
 
     @Override
     public long write(OutputStream dest) {
-        return JieIO.readTo(JieIO.newInputStream(buffer), dest);
+        return IOKit.readTo(IOKit.newInputStream(buffer), dest);
     }
 
     @Override
     public long write(OutputStream dest, long length) {
-        return ByteEncoder.from(JieIO.newInputStream(buffer)).readLimit(length).writeTo(dest);
+        return ByteEncoder.from(IOKit.newInputStream(buffer)).readLimit(length).writeTo(dest);
     }
 
     @Override
@@ -87,11 +87,11 @@ final class BufferData implements GekData.OfBuffer {
         if (!buffer.hasRemaining()) {
             return null;
         }
-        return JieBuffer.read(buffer);
+        return BufferKit.read(buffer);
     }
 
     @Override
     public InputStream asInputStream() {
-        return JieIO.newInputStream(buffer);
+        return IOKit.newInputStream(buffer);
     }
 }

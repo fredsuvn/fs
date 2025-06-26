@@ -10,7 +10,7 @@ import xyz.sunqian.common.encode.DecodingException;
 import xyz.sunqian.common.encode.EncodingException;
 import xyz.sunqian.common.encode.JieHex;
 import xyz.sunqian.common.io.ByteEncoder;
-import xyz.sunqian.common.io.JieIO;
+import xyz.sunqian.common.io.IOKit;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertSame;
@@ -37,10 +37,10 @@ public class HexTest {
         testCoding(384 * 3 + 1);
         testCoding(10086);
         testCoding(99);
-        testCoding(JieIO.bufferSize());
-        testCoding(JieIO.bufferSize() + 10086);
-        testCoding(JieIO.bufferSize() * 11 + 1);
-        testCoding(JieIO.bufferSize() * 11 + 2);
+        testCoding(IOKit.bufferSize());
+        testCoding(IOKit.bufferSize() + 10086);
+        testCoding(IOKit.bufferSize() * 11 + 1);
+        testCoding(IOKit.bufferSize() * 11 + 2);
         testCoding(57);
         testCoding(1024);
         testCoding(1024 * 1024);
@@ -72,8 +72,8 @@ public class HexTest {
             EncodeTest.testEncoding(JieHex.encoder(), source, target, i);
             EncodeTest.testDecoding(JieHex.decoder(), target, source, i);
         }
-        EncodeTest.testEncoding(JieHex.encoder(), source, target, JieIO.bufferSize());
-        EncodeTest.testDecoding(JieHex.decoder(), target, source, JieIO.bufferSize());
+        EncodeTest.testEncoding(JieHex.encoder(), source, target, IOKit.bufferSize());
+        EncodeTest.testDecoding(JieHex.decoder(), target, source, IOKit.bufferSize());
     }
 
     @Test

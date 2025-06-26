@@ -5,7 +5,7 @@ import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.io.ByteIO;
 import xyz.sunqian.common.io.IORuntimeException;
-import xyz.sunqian.common.io.JieIO;
+import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.test.ErrorOutputStream;
 import xyz.sunqian.test.ReadOps;
 import xyz.sunqian.test.TestInputStream;
@@ -30,50 +30,50 @@ public class ByteIOTest {
         testRead(128);
         testRead(256);
         testRead(1024);
-        testRead(JieIO.bufferSize());
-        testRead(JieIO.bufferSize() - 1);
-        testRead(JieIO.bufferSize() + 1);
-        testRead(JieIO.bufferSize() - 5);
-        testRead(JieIO.bufferSize() + 5);
-        testRead(JieIO.bufferSize() * 2);
-        testRead(JieIO.bufferSize() * 2 - 1);
-        testRead(JieIO.bufferSize() * 2 + 1);
-        testRead(JieIO.bufferSize() * 2 - 5);
-        testRead(JieIO.bufferSize() * 2 + 5);
-        testRead(JieIO.bufferSize() * 3);
-        testRead(JieIO.bufferSize() * 3 - 1);
-        testRead(JieIO.bufferSize() * 3 + 1);
-        testRead(JieIO.bufferSize() * 3 - 5);
-        testRead(JieIO.bufferSize() * 3 + 5);
+        testRead(IOKit.bufferSize());
+        testRead(IOKit.bufferSize() - 1);
+        testRead(IOKit.bufferSize() + 1);
+        testRead(IOKit.bufferSize() - 5);
+        testRead(IOKit.bufferSize() + 5);
+        testRead(IOKit.bufferSize() * 2);
+        testRead(IOKit.bufferSize() * 2 - 1);
+        testRead(IOKit.bufferSize() * 2 + 1);
+        testRead(IOKit.bufferSize() * 2 - 5);
+        testRead(IOKit.bufferSize() * 2 + 5);
+        testRead(IOKit.bufferSize() * 3);
+        testRead(IOKit.bufferSize() * 3 - 1);
+        testRead(IOKit.bufferSize() * 3 + 1);
+        testRead(IOKit.bufferSize() * 3 - 5);
+        testRead(IOKit.bufferSize() * 3 + 5);
 
         {
             // read stream
-            assertNull(JieIO.read(new ByteArrayInputStream(new byte[0])));
-            assertNull(JieIO.read(new ByteArrayInputStream(new byte[0]), 66));
-            assertNull(JieIO.read(Channels.newChannel(new ByteArrayInputStream(new byte[0]))));
-            assertNull(JieIO.read(Channels.newChannel(new ByteArrayInputStream(new byte[0])), 66));
+            assertNull(IOKit.read(new ByteArrayInputStream(new byte[0])));
+            assertNull(IOKit.read(new ByteArrayInputStream(new byte[0]), 66));
+            assertNull(IOKit.read(Channels.newChannel(new ByteArrayInputStream(new byte[0]))));
+            assertNull(IOKit.read(Channels.newChannel(new ByteArrayInputStream(new byte[0])), 66));
         }
 
         {
             // error
             TestInputStream tin = new TestInputStream(new ByteArrayInputStream(new byte[0]));
             tin.setNextOperation(ReadOps.THROW, 99);
-            expectThrows(IORuntimeException.class, () -> JieIO.read(tin));
-            expectThrows(IORuntimeException.class, () -> JieIO.read(tin, 1));
-            expectThrows(IllegalArgumentException.class, () -> JieIO.read(tin, -1));
-            expectThrows(IORuntimeException.class, () -> JieIO.read(Channels.newChannel(tin)));
-            expectThrows(IORuntimeException.class, () -> JieIO.read(Channels.newChannel(tin), 1));
-            expectThrows(IllegalArgumentException.class, () -> JieIO.read(Channels.newChannel(tin), -1));
+            expectThrows(IORuntimeException.class, () -> IOKit.read(tin));
+            expectThrows(IORuntimeException.class, () -> IOKit.read(tin, 1));
+            expectThrows(IllegalArgumentException.class, () -> IOKit.read(tin, -1));
+            expectThrows(IORuntimeException.class, () -> IOKit.read(Channels.newChannel(tin)));
+            expectThrows(IORuntimeException.class, () -> IOKit.read(Channels.newChannel(tin), 1));
+            expectThrows(IllegalArgumentException.class, () -> IOKit.read(Channels.newChannel(tin), -1));
         }
     }
 
     private void testRead(int totalSize) throws Exception {
-        testRead(ByteIO.get(JieIO.bufferSize()), totalSize);
+        testRead(ByteIO.get(IOKit.bufferSize()), totalSize);
         testRead(ByteIO.get(1), totalSize);
         testRead(ByteIO.get(2), totalSize);
-        testRead(ByteIO.get(JieIO.bufferSize() - 1), totalSize);
-        testRead(ByteIO.get(JieIO.bufferSize() + 1), totalSize);
-        testRead(ByteIO.get(JieIO.bufferSize() * 2), totalSize);
+        testRead(ByteIO.get(IOKit.bufferSize() - 1), totalSize);
+        testRead(ByteIO.get(IOKit.bufferSize() + 1), totalSize);
+        testRead(ByteIO.get(IOKit.bufferSize() * 2), totalSize);
     }
 
     private void testRead(ByteIO reader, int totalSize) throws Exception {
@@ -127,38 +127,38 @@ public class ByteIOTest {
         testReadTo(128);
         testReadTo(256);
         testReadTo(1024);
-        testReadTo(JieIO.bufferSize());
-        testReadTo(JieIO.bufferSize() - 1);
-        testReadTo(JieIO.bufferSize() + 1);
-        testReadTo(JieIO.bufferSize() - 5);
-        testReadTo(JieIO.bufferSize() + 5);
-        testReadTo(JieIO.bufferSize() * 2);
-        testReadTo(JieIO.bufferSize() * 2 - 1);
-        testReadTo(JieIO.bufferSize() * 2 + 1);
-        testReadTo(JieIO.bufferSize() * 2 - 5);
-        testReadTo(JieIO.bufferSize() * 2 + 5);
-        testReadTo(JieIO.bufferSize() * 3);
-        testReadTo(JieIO.bufferSize() * 3 - 1);
-        testReadTo(JieIO.bufferSize() * 3 + 1);
-        testReadTo(JieIO.bufferSize() * 3 - 5);
-        testReadTo(JieIO.bufferSize() * 3 + 5);
+        testReadTo(IOKit.bufferSize());
+        testReadTo(IOKit.bufferSize() - 1);
+        testReadTo(IOKit.bufferSize() + 1);
+        testReadTo(IOKit.bufferSize() - 5);
+        testReadTo(IOKit.bufferSize() + 5);
+        testReadTo(IOKit.bufferSize() * 2);
+        testReadTo(IOKit.bufferSize() * 2 - 1);
+        testReadTo(IOKit.bufferSize() * 2 + 1);
+        testReadTo(IOKit.bufferSize() * 2 - 5);
+        testReadTo(IOKit.bufferSize() * 2 + 5);
+        testReadTo(IOKit.bufferSize() * 3);
+        testReadTo(IOKit.bufferSize() * 3 - 1);
+        testReadTo(IOKit.bufferSize() * 3 + 1);
+        testReadTo(IOKit.bufferSize() * 3 - 5);
+        testReadTo(IOKit.bufferSize() * 3 + 5);
 
         {
             // size 0: stream to stream
             byte[] data = new byte[0];
             BytesBuilder bb = new BytesBuilder();
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), bb),
+                IOKit.readTo(new ByteArrayInputStream(data), bb),
                 -1
             );
             assertEquals(bb.size(), 0);
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), bb, 0),
+                IOKit.readTo(new ByteArrayInputStream(data), bb, 0),
                 0
             );
             assertEquals(bb.size(), 0);
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), bb, 11),
+                IOKit.readTo(new ByteArrayInputStream(data), bb, 11),
                 -1
             );
             assertEquals(bb.size(), 0);
@@ -169,17 +169,17 @@ public class ByteIOTest {
             BytesBuilder bb = new BytesBuilder();
             WritableByteChannel channel = Channels.newChannel(bb);
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), channel),
+                IOKit.readTo(new ByteArrayInputStream(data), channel),
                 -1
             );
             assertEquals(bb.size(), 0);
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), channel, 0),
+                IOKit.readTo(new ByteArrayInputStream(data), channel, 0),
                 0
             );
             assertEquals(bb.size(), 0);
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), channel, 11),
+                IOKit.readTo(new ByteArrayInputStream(data), channel, 11),
                 -1
             );
             assertEquals(bb.size(), 0);
@@ -190,12 +190,12 @@ public class ByteIOTest {
             byte[] aar = new byte[64];
             Arrays.fill(aar, (byte) 7);
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), aar),
+                IOKit.readTo(new ByteArrayInputStream(data), aar),
                 -1
             );
             assertEquals(aar[0], (byte) 7);
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), new byte[0]),
+                IOKit.readTo(new ByteArrayInputStream(data), new byte[0]),
                 0
             );
             assertEquals(aar[0], (byte) 7);
@@ -205,22 +205,22 @@ public class ByteIOTest {
             byte[] data = new byte[0];
             ByteBuffer buf = ByteBuffer.allocate(1);
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), buf),
+                IOKit.readTo(new ByteArrayInputStream(data), buf),
                 -1
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), ByteBuffer.allocate(0)),
+                IOKit.readTo(new ByteArrayInputStream(data), ByteBuffer.allocate(0)),
                 0
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), buf, 1),
+                IOKit.readTo(new ByteArrayInputStream(data), buf, 1),
                 -1
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), buf, 0),
+                IOKit.readTo(new ByteArrayInputStream(data), buf, 0),
                 0
             );
             assertEquals(buf.position(), 0);
@@ -230,22 +230,22 @@ public class ByteIOTest {
             byte[] data = new byte[0];
             ByteBuffer buf = ByteBuffer.allocateDirect(1);
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), buf),
+                IOKit.readTo(new ByteArrayInputStream(data), buf),
                 -1
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), ByteBuffer.allocateDirect(0)),
+                IOKit.readTo(new ByteArrayInputStream(data), ByteBuffer.allocateDirect(0)),
                 0
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), buf, 1),
+                IOKit.readTo(new ByteArrayInputStream(data), buf, 1),
                 -1
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(new ByteArrayInputStream(data), buf, 0),
+                IOKit.readTo(new ByteArrayInputStream(data), buf, 0),
                 0
             );
             assertEquals(buf.position(), 0);
@@ -255,17 +255,17 @@ public class ByteIOTest {
             byte[] data = new byte[0];
             BytesBuilder bb = new BytesBuilder();
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(bb)),
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(bb)),
                 -1
             );
             assertEquals(bb.size(), 0);
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(bb), 0),
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(bb), 0),
                 0
             );
             assertEquals(bb.size(), 0);
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(bb), 11),
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(bb), 11),
                 -1
             );
             assertEquals(bb.size(), 0);
@@ -276,17 +276,17 @@ public class ByteIOTest {
             BytesBuilder bb = new BytesBuilder();
             ReadableByteChannel channel = Channels.newChannel(new ByteArrayInputStream(data));
             assertEquals(
-                JieIO.readTo(channel, bb),
+                IOKit.readTo(channel, bb),
                 -1
             );
             assertEquals(bb.size(), 0);
             assertEquals(
-                JieIO.readTo(channel, bb, 0),
+                IOKit.readTo(channel, bb, 0),
                 0
             );
             assertEquals(bb.size(), 0);
             assertEquals(
-                JieIO.readTo(channel, bb, 11),
+                IOKit.readTo(channel, bb, 11),
                 -1
             );
             assertEquals(bb.size(), 0);
@@ -297,12 +297,12 @@ public class ByteIOTest {
             byte[] aar = new byte[64];
             Arrays.fill(aar, (byte) 7);
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), aar),
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), aar),
                 -1
             );
             assertEquals(aar[0], (byte) 7);
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), new byte[0]),
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), new byte[0]),
                 0
             );
             assertEquals(aar[0], (byte) 7);
@@ -312,22 +312,22 @@ public class ByteIOTest {
             byte[] data = new byte[0];
             ByteBuffer buf = ByteBuffer.allocate(1);
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf),
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf),
                 -1
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), ByteBuffer.allocate(0)),
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), ByteBuffer.allocate(0)),
                 0
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf, 1),
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf, 1),
                 -1
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf, 0),
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf, 0),
                 0
             );
             assertEquals(buf.position(), 0);
@@ -337,22 +337,22 @@ public class ByteIOTest {
             byte[] data = new byte[0];
             ByteBuffer buf = ByteBuffer.allocateDirect(1);
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf),
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf),
                 -1
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), ByteBuffer.allocateDirect(0)),
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), ByteBuffer.allocateDirect(0)),
                 0
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf, 1),
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf, 1),
                 -1
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf, 0),
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf, 0),
                 0
             );
             assertEquals(buf.position(), 0);
@@ -365,56 +365,56 @@ public class ByteIOTest {
             TestInputStream tin = new TestInputStream(new ByteArrayInputStream(new byte[0]));
             tin.setNextOperation(ReadOps.THROW, 99);
             // read stream
-            expectThrows(IORuntimeException.class, () -> JieIO.readTo(tin, errOut));
-            expectThrows(IORuntimeException.class, () -> JieIO.readTo(tin, errOut, 1));
-            expectThrows(IllegalArgumentException.class, () -> JieIO.readTo(tin, errOut, -1));
-            expectThrows(IORuntimeException.class, () -> JieIO.readTo(tin, new byte[1], 0, 1));
-            expectThrows(IndexOutOfBoundsException.class, () -> JieIO.readTo(tin, new byte[0], 1, 0));
-            expectThrows(IndexOutOfBoundsException.class, () -> JieIO.readTo(tin, new byte[0], 0, 1));
-            expectThrows(IORuntimeException.class, () -> JieIO.readTo(tin, ByteBuffer.allocate(1)));
+            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tin, errOut));
+            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tin, errOut, 1));
+            expectThrows(IllegalArgumentException.class, () -> IOKit.readTo(tin, errOut, -1));
+            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tin, new byte[1], 0, 1));
+            expectThrows(IndexOutOfBoundsException.class, () -> IOKit.readTo(tin, new byte[0], 1, 0));
+            expectThrows(IndexOutOfBoundsException.class, () -> IOKit.readTo(tin, new byte[0], 0, 1));
+            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tin, ByteBuffer.allocate(1)));
             expectThrows(IllegalArgumentException.class, () ->
-                JieIO.readTo(tin, ByteBuffer.allocate(1), -1));
+                IOKit.readTo(tin, ByteBuffer.allocate(1), -1));
             expectThrows(IORuntimeException.class, () ->
-                JieIO.readTo(new ByteArrayInputStream(new byte[1]), ByteBuffer.allocate(1).asReadOnlyBuffer())
+                IOKit.readTo(new ByteArrayInputStream(new byte[1]), ByteBuffer.allocate(1).asReadOnlyBuffer())
             );
             expectThrows(IORuntimeException.class, () ->
-                JieIO.readTo(tin, errCh)
+                IOKit.readTo(tin, errCh)
             );
             expectThrows(IllegalArgumentException.class, () ->
-                JieIO.readTo(tin, errCh, -1)
+                IOKit.readTo(tin, errCh, -1)
             );
             // read channel
             ReadableByteChannel tch = Channels.newChannel(tin);
-            expectThrows(IORuntimeException.class, () -> JieIO.readTo(tch, errCh));
-            expectThrows(IORuntimeException.class, () -> JieIO.readTo(tch, errCh, 1));
-            expectThrows(IllegalArgumentException.class, () -> JieIO.readTo(tch, errCh, -1));
-            expectThrows(IORuntimeException.class, () -> JieIO.readTo(tch, new byte[1], 0, 1));
-            expectThrows(IndexOutOfBoundsException.class, () -> JieIO.readTo(tch, new byte[0], 1, 0));
-            expectThrows(IndexOutOfBoundsException.class, () -> JieIO.readTo(tch, new byte[0], 0, 1));
-            expectThrows(IORuntimeException.class, () -> JieIO.readTo(tch, ByteBuffer.allocate(1)));
-            expectThrows(IllegalArgumentException.class, () -> JieIO.readTo(tch, ByteBuffer.allocate(1), -1));
+            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tch, errCh));
+            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tch, errCh, 1));
+            expectThrows(IllegalArgumentException.class, () -> IOKit.readTo(tch, errCh, -1));
+            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tch, new byte[1], 0, 1));
+            expectThrows(IndexOutOfBoundsException.class, () -> IOKit.readTo(tch, new byte[0], 1, 0));
+            expectThrows(IndexOutOfBoundsException.class, () -> IOKit.readTo(tch, new byte[0], 0, 1));
+            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tch, ByteBuffer.allocate(1)));
+            expectThrows(IllegalArgumentException.class, () -> IOKit.readTo(tch, ByteBuffer.allocate(1), -1));
             expectThrows(IORuntimeException.class, () ->
-                JieIO.readTo(
+                IOKit.readTo(
                     Channels.newChannel(new ByteArrayInputStream(new byte[1])),
                     ByteBuffer.allocate(1).asReadOnlyBuffer()
                 )
             );
             expectThrows(IORuntimeException.class, () ->
-                JieIO.readTo(tch, errOut)
+                IOKit.readTo(tch, errOut)
             );
             expectThrows(IllegalArgumentException.class, () ->
-                JieIO.readTo(tch, errOut, -1)
+                IOKit.readTo(tch, errOut, -1)
             );
         }
     }
 
     private void testReadTo(int totalSize) throws Exception {
-        testReadTo(ByteIO.get(JieIO.bufferSize()), totalSize);
+        testReadTo(ByteIO.get(IOKit.bufferSize()), totalSize);
         testReadTo(ByteIO.get(1), totalSize);
         testReadTo(ByteIO.get(2), totalSize);
-        testReadTo(ByteIO.get(JieIO.bufferSize() - 1), totalSize);
-        testReadTo(ByteIO.get(JieIO.bufferSize() + 1), totalSize);
-        testReadTo(ByteIO.get(JieIO.bufferSize() * 2), totalSize);
+        testReadTo(ByteIO.get(IOKit.bufferSize() - 1), totalSize);
+        testReadTo(ByteIO.get(IOKit.bufferSize() + 1), totalSize);
+        testReadTo(ByteIO.get(IOKit.bufferSize() * 2), totalSize);
     }
 
     private void testReadTo(ByteIO reader, int totalSize) throws Exception {
@@ -802,7 +802,7 @@ public class ByteIOTest {
     public void testOther() {
         {
             // get operator
-            assertSame(ByteIO.defaultOperator(), ByteIO.get(JieIO.bufferSize()));
+            assertSame(ByteIO.defaultOperator(), ByteIO.get(IOKit.bufferSize()));
             assertEquals(ByteIO.newOperator(666).bufferSize(), 666);
         }
         {

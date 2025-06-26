@@ -113,7 +113,7 @@ public interface CharEncoder {
      * Sets the number of chars for each read operation from the data source.
      * <p>
      * This setting is typically used when the data source is a reader, or intermediate operations are set, default is
-     * {@link JieIO#bufferSize()}.
+     * {@link IOKit#bufferSize()}.
      * <p>
      * This is an optional setting method.
      *
@@ -314,8 +314,8 @@ public interface CharEncoder {
      * Returns a reader which represents and encompasses the entire data processing.
      * <p>
      * If there is no encoder in the processor: if the source is a reader, return the reader itself; if the source is an
-     * array or buffer or char sequence, returns the reader from {@link JieIO#newReader(char[])} or
-     * {@link JieIO#newReader(CharBuffer)} or {@link JieIO#newReader(CharSequence)}. Otherwise, the returned reader's
+     * array or buffer or char sequence, returns the reader from {@link IOKit#newReader(char[])} or
+     * {@link IOKit#newReader(CharBuffer)} or {@link IOKit#newReader(CharSequence)}. Otherwise, the returned reader's
      * read operations are performed only as needed, mark/reset operations are not supported, and the {@code close()}
      * method will close the source if the source is closable.
      * <p>
@@ -334,7 +334,7 @@ public interface CharEncoder {
      * @return a new {@link ByteEncoder} converted from this {@link CharEncoder} with the specified charset
      */
     default ByteEncoder toByteProcessor(Charset charset) {
-        return ByteEncoder.from(JieIO.newInputStream(toReader(), charset));
+        return ByteEncoder.from(IOKit.newInputStream(toReader(), charset));
     }
 
     /**

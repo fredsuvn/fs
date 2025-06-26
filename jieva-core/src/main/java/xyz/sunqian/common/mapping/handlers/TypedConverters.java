@@ -6,8 +6,8 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.JieDate;
 import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.base.chars.JieChars;
-import xyz.sunqian.common.io.JieBuffer;
-import xyz.sunqian.common.io.JieIO;
+import xyz.sunqian.common.io.BufferKit;
+import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.mapping.MappingException;
 import xyz.sunqian.common.mapping.MappingOptions;
 import xyz.sunqian.common.objects.data.DataProperty;
@@ -232,7 +232,7 @@ public class TypedConverters {
      * Note:
      * <ul>
      *     <li>
-     *         For {@link ByteBuffer}, this converter use {@link JieBuffer#readReset(ByteBuffer)} to read and reset;
+     *         For {@link ByteBuffer}, this converter use {@link BufferKit#readReset(ByteBuffer)} to read and reset;
      *     </li>
      *     <li>
      *         If charset option is not found, use {@link JieChars#defaultCharset()};
@@ -274,7 +274,7 @@ public class TypedConverters {
             }
             if (source instanceof ByteBuffer) {
                 Charset charset = options.getCharset(targetProperty);
-                byte[] bytes = JieBuffer.read((ByteBuffer) source);
+                byte[] bytes = BufferKit.read((ByteBuffer) source);
                 if (charset != null) {
                     return new String(bytes, charset);
                 }
@@ -296,7 +296,7 @@ public class TypedConverters {
      * Note:
      * <ul>
      *     <li>
-     *         For {@link ByteBuffer}, this converter use {@link JieBuffer#readReset(ByteBuffer)} to read and reset, but no
+     *         For {@link ByteBuffer}, this converter use {@link BufferKit#readReset(ByteBuffer)} to read and reset, but no
      *         reset for {@link InputStream};
      *     </li>
      *     <li>
@@ -320,10 +320,10 @@ public class TypedConverters {
                 return ((byte[]) source).clone();
             }
             if (source instanceof ByteBuffer) {
-                return JieBuffer.read((ByteBuffer) source);
+                return BufferKit.read((ByteBuffer) source);
             }
             if (source instanceof InputStream) {
-                return JieIO.read((InputStream) source);
+                return IOKit.read((InputStream) source);
             }
             return null;
         }
@@ -339,7 +339,7 @@ public class TypedConverters {
      * Note:
      * <ul>
      *     <li>
-     *         For {@link ByteBuffer}, this converter use {@link JieBuffer#readReset(ByteBuffer)} to read and reset;
+     *         For {@link ByteBuffer}, this converter use {@link BufferKit#readReset(ByteBuffer)} to read and reset;
      *     </li>
      *     <li>
      *         For {@link Date} and {@link TemporalAccessor}, this converter map them as milliseconds;
@@ -361,7 +361,7 @@ public class TypedConverters {
                 return new BigInteger((byte[]) source);
             }
             if (source instanceof ByteBuffer) {
-                return new BigInteger(JieBuffer.read((ByteBuffer) source));
+                return new BigInteger(BufferKit.read((ByteBuffer) source));
             }
             if (source instanceof Character) {
                 char c = (Character) source;

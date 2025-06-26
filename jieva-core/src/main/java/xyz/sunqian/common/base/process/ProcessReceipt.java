@@ -5,7 +5,7 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.base.exception.AwaitingException;
-import xyz.sunqian.common.io.JieIO;
+import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.task.TaskReceipt;
 import xyz.sunqian.common.task.TaskState;
 
@@ -204,7 +204,7 @@ public interface ProcessReceipt extends TaskReceipt<Integer> {
      * @throws AwaitingException if the current thread is interrupted or an error occurs while reading
      */
     default byte @Nonnull [] readBytes() throws AwaitingException {
-        return Jie.uncheck(() -> JieIO.read(getInputStream()), AwaitingException::new);
+        return Jie.uncheck(() -> IOKit.read(getInputStream()), AwaitingException::new);
     }
 
     /**
@@ -227,6 +227,6 @@ public interface ProcessReceipt extends TaskReceipt<Integer> {
      * @throws AwaitingException if the current thread is interrupted or an error occurs while reading
      */
     default @Nonnull String readString(Charset charset) throws AwaitingException {
-        return Jie.uncheck(() -> JieIO.string(getInputStream(), charset), AwaitingException::new);
+        return Jie.uncheck(() -> IOKit.string(getInputStream(), charset), AwaitingException::new);
     }
 }

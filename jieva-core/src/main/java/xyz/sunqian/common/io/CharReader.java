@@ -27,7 +27,7 @@ public interface CharReader {
      * @return the given reader as a new {@link CharReader}
      */
     static @Nonnull CharReader from(@Nonnull Reader src) {
-        return from(src, JieIO.bufferSize());
+        return from(src, IOKit.bufferSize());
     }
 
     /**

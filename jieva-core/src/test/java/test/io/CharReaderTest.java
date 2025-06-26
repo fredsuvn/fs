@@ -7,7 +7,7 @@ import xyz.sunqian.common.base.chars.CharsBuilder;
 import xyz.sunqian.common.io.CharReader;
 import xyz.sunqian.common.io.CharSegment;
 import xyz.sunqian.common.io.IORuntimeException;
-import xyz.sunqian.common.io.JieBuffer;
+import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.test.ErrorAppender;
 import xyz.sunqian.test.ReadOps;
 import xyz.sunqian.test.TestReader;
@@ -109,7 +109,7 @@ public class CharReaderTest {
             CharSegment segment = reader.read(readSize);
             int actualLen = Math.min(readSize, data.length - hasRead);
             assertEquals(
-                JieBuffer.copyContent(segment.data()),
+                BufferKit.copyContent(segment.data()),
                 Arrays.copyOfRange(data, hasRead, hasRead + actualLen)
             );
             hasRead += actualLen;
@@ -180,7 +180,7 @@ public class CharReaderTest {
         {
             // char buffer
             testReadTo0(() -> CharReader.from(CharBuffer.wrap(data)), data, readSize);
-            testReadTo0(() -> CharReader.from(JieBuffer.directBuffer(data)), data, readSize);
+            testReadTo0(() -> CharReader.from(BufferKit.directBuffer(data)), data, readSize);
         }
     }
 
@@ -305,15 +305,15 @@ public class CharReaderTest {
                 CharReader reader = supplier.get();
                 assertEquals(reader.readTo(CharBuffer.allocate(0)), 0);
                 assertEquals(reader.readTo(CharBuffer.allocate(1)), -1);
-                assertEquals(reader.readTo(JieBuffer.directBuffer(0)), 0);
-                assertEquals(reader.readTo(JieBuffer.directBuffer(1)), -1);
+                assertEquals(reader.readTo(BufferKit.directBuffer(0)), 0);
+                assertEquals(reader.readTo(BufferKit.directBuffer(1)), -1);
                 reader.close();
                 assertEquals(reader.readTo(CharBuffer.allocate(0)), 0);
-                assertEquals(reader.readTo(JieBuffer.directBuffer(0)), 0);
+                assertEquals(reader.readTo(BufferKit.directBuffer(0)), 0);
             } else {
                 CharReader reader = supplier.get();
                 assertEquals(reader.readTo(CharBuffer.allocate(0)), 0);
-                assertEquals(reader.readTo(JieBuffer.directBuffer(0)), 0);
+                assertEquals(reader.readTo(BufferKit.directBuffer(0)), 0);
                 CharBuffer dst = CharBuffer.allocate(DST_SIZE);
                 if (reader.markSupported()) {
                     reader.mark();
@@ -321,33 +321,33 @@ public class CharReaderTest {
                 int actualLen = reader.readTo(dst);
                 assertEquals(actualLen, Math.min(data.length, DST_SIZE));
                 dst.flip();
-                assertEquals(JieBuffer.copyContent(dst), Arrays.copyOf(data, actualLen));
+                assertEquals(BufferKit.copyContent(dst), Arrays.copyOf(data, actualLen));
                 if (reader.markSupported()) {
                     reader.reset();
-                    dst = JieBuffer.directBuffer(DST_SIZE);
+                    dst = BufferKit.directBuffer(DST_SIZE);
                     actualLen = reader.readTo(dst);
                     assertEquals(actualLen, Math.min(data.length, DST_SIZE));
                     dst.flip();
-                    assertEquals(JieBuffer.copyContent(dst), Arrays.copyOf(data, actualLen));
+                    assertEquals(BufferKit.copyContent(dst), Arrays.copyOf(data, actualLen));
                 }
                 // read all
                 reader = supplier.get();
                 dst = CharBuffer.allocate(data.length);
                 assertEquals(reader.readTo(dst), data.length);
                 dst.flip();
-                assertEquals(JieBuffer.copyContent(dst), data);
+                assertEquals(BufferKit.copyContent(dst), data);
                 assertEquals(reader.readTo(CharBuffer.allocate(1)), -1);
-                assertEquals(reader.readTo(JieBuffer.directBuffer(1)), -1);
+                assertEquals(reader.readTo(BufferKit.directBuffer(1)), -1);
                 reader.close();
                 assertEquals(reader.readTo(CharBuffer.allocate(0)), 0);
-                assertEquals(reader.readTo(JieBuffer.directBuffer(0)), 0);
+                assertEquals(reader.readTo(BufferKit.directBuffer(0)), 0);
             }
             // error
             if (data.length > 0) {
                 expectThrows(IORuntimeException.class, () ->
                     supplier.get().readTo(CharBuffer.allocate(1).asReadOnlyBuffer()));
                 expectThrows(IORuntimeException.class, () ->
-                    supplier.get().readTo(JieBuffer.directBuffer(1).asReadOnlyBuffer()));
+                    supplier.get().readTo(BufferKit.directBuffer(1).asReadOnlyBuffer()));
             }
         }
         {
@@ -357,20 +357,20 @@ public class CharReaderTest {
                 assertEquals(reader.readTo(CharBuffer.allocate(1), 0), 0);
                 assertEquals(reader.readTo(CharBuffer.allocate(0), 1), 0);
                 assertEquals(reader.readTo(CharBuffer.allocate(1), 1), -1);
-                assertEquals(reader.readTo(JieBuffer.directBuffer(1), 0), 0);
-                assertEquals(reader.readTo(JieBuffer.directBuffer(0), 1), 0);
-                assertEquals(reader.readTo(JieBuffer.directBuffer(1), 1), -1);
+                assertEquals(reader.readTo(BufferKit.directBuffer(1), 0), 0);
+                assertEquals(reader.readTo(BufferKit.directBuffer(0), 1), 0);
+                assertEquals(reader.readTo(BufferKit.directBuffer(1), 1), -1);
                 reader.close();
                 assertEquals(reader.readTo(CharBuffer.allocate(1), 0), 0);
                 assertEquals(reader.readTo(CharBuffer.allocate(0), 1), 0);
-                assertEquals(reader.readTo(JieBuffer.directBuffer(1), 0), 0);
-                assertEquals(reader.readTo(JieBuffer.directBuffer(0), 1), 0);
+                assertEquals(reader.readTo(BufferKit.directBuffer(1), 0), 0);
+                assertEquals(reader.readTo(BufferKit.directBuffer(0), 1), 0);
             } else {
                 CharReader reader = supplier.get();
                 assertEquals(reader.readTo(CharBuffer.allocate(1), 0), 0);
                 assertEquals(reader.readTo(CharBuffer.allocate(0), 1), 0);
-                assertEquals(reader.readTo(JieBuffer.directBuffer(1), 0), 0);
-                assertEquals(reader.readTo(JieBuffer.directBuffer(0), 1), 0);
+                assertEquals(reader.readTo(BufferKit.directBuffer(1), 0), 0);
+                assertEquals(reader.readTo(BufferKit.directBuffer(0), 1), 0);
                 CharBuffer dst = CharBuffer.allocate(DST_SIZE);
                 if (reader.markSupported()) {
                     reader.mark();
@@ -378,28 +378,28 @@ public class CharReaderTest {
                 int actualLen = reader.readTo(dst, readSize);
                 assertEquals(actualLen, minSize(data.length, readSize, DST_SIZE));
                 dst.flip();
-                assertEquals(JieBuffer.copyContent(dst), Arrays.copyOf(data, actualLen));
+                assertEquals(BufferKit.copyContent(dst), Arrays.copyOf(data, actualLen));
                 if (reader.markSupported()) {
                     reader.reset();
-                    dst = JieBuffer.directBuffer(DST_SIZE);
+                    dst = BufferKit.directBuffer(DST_SIZE);
                     actualLen = reader.readTo(dst, readSize);
                     assertEquals(actualLen, minSize(data.length, readSize, DST_SIZE));
                     dst.flip();
-                    assertEquals(JieBuffer.copyContent(dst), Arrays.copyOf(data, actualLen));
+                    assertEquals(BufferKit.copyContent(dst), Arrays.copyOf(data, actualLen));
                 }
                 // read all
                 reader = supplier.get();
                 dst = CharBuffer.allocate(data.length);
                 assertEquals(reader.readTo(dst, data.length), data.length);
                 dst.flip();
-                assertEquals(JieBuffer.copyContent(dst), data);
+                assertEquals(BufferKit.copyContent(dst), data);
                 assertEquals(reader.readTo(CharBuffer.allocate(1), 1), -1);
-                assertEquals(reader.readTo(JieBuffer.directBuffer(1), 1), -1);
+                assertEquals(reader.readTo(BufferKit.directBuffer(1), 1), -1);
                 reader.close();
                 assertEquals(reader.readTo(CharBuffer.allocate(1), 0), 0);
                 assertEquals(reader.readTo(CharBuffer.allocate(0), 1), 0);
-                assertEquals(reader.readTo(JieBuffer.directBuffer(1), 0), 0);
-                assertEquals(reader.readTo(JieBuffer.directBuffer(0), 1), 0);
+                assertEquals(reader.readTo(BufferKit.directBuffer(1), 0), 0);
+                assertEquals(reader.readTo(BufferKit.directBuffer(0), 1), 0);
             }
             // error
             expectThrows(IllegalArgumentException.class, () ->
@@ -408,7 +408,7 @@ public class CharReaderTest {
                 expectThrows(IORuntimeException.class, () ->
                     supplier.get().readTo(CharBuffer.allocate(1).asReadOnlyBuffer(), 1));
                 expectThrows(IORuntimeException.class, () ->
-                    supplier.get().readTo(JieBuffer.directBuffer(1).asReadOnlyBuffer(), 1));
+                    supplier.get().readTo(BufferKit.directBuffer(1).asReadOnlyBuffer(), 1));
             }
         }
     }
@@ -455,7 +455,7 @@ public class CharReaderTest {
             // char buffer
             char[] data = JieRandom.fill(new char[dataSize]);
             testShare(CharReader.from(CharBuffer.wrap(data)), CharBuffer.wrap(data), true, true);
-            CharBuffer direct = JieBuffer.directBuffer(data);
+            CharBuffer direct = BufferKit.directBuffer(data);
             testShare(CharReader.from(direct), direct.slice(), true, true);
         }
     }

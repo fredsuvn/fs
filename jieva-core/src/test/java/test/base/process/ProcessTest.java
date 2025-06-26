@@ -8,7 +8,7 @@ import xyz.sunqian.common.base.exception.AwaitingException;
 import xyz.sunqian.common.base.process.JieProcess;
 import xyz.sunqian.common.base.process.ProcessReceipt;
 import xyz.sunqian.common.base.process.VirtualProcess;
-import xyz.sunqian.common.io.JieIO;
+import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.task.TaskState;
 
 import java.time.Duration;
@@ -119,17 +119,17 @@ public class ProcessTest {
             process.normal(false);
             assertEquals(receipt.getState(), TaskState.FAILED);
             assertEquals(receipt.await(Duration.ofMillis(1)), 1);
-            assertEquals(receipt.getInputStream(), JieIO.emptyInputStream());
-            assertEquals(receipt.getOutputStream(), JieIO.nullOutputStream());
-            assertEquals(receipt.getErrorStream(), JieIO.emptyInputStream());
+            assertEquals(receipt.getInputStream(), IOKit.emptyInputStream());
+            assertEquals(receipt.getOutputStream(), IOKit.nullOutputStream());
+            assertEquals(receipt.getErrorStream(), IOKit.emptyInputStream());
             assertNull(receipt.getException());
             assertNull(receipt.getDelay());
         }
         {
             String hello = "hello";
             VirtualProcess process = new VirtualProcess(
-                JieIO.newInputStream(hello.getBytes(JieChars.localCharset())),
-                JieIO.nullOutputStream()
+                IOKit.newInputStream(hello.getBytes(JieChars.localCharset())),
+                IOKit.nullOutputStream()
             );
             ProcessReceipt receipt = JieProcess.receipt(process);
             assertEquals(receipt.readString(), hello);
@@ -137,8 +137,8 @@ public class ProcessTest {
         {
             String hello = "hello";
             VirtualProcess process = new VirtualProcess(
-                JieIO.newInputStream(hello.getBytes(JieChars.localCharset())),
-                JieIO.nullOutputStream()
+                IOKit.newInputStream(hello.getBytes(JieChars.localCharset())),
+                IOKit.nullOutputStream()
             );
             ProcessReceipt receipt = JieProcess.receipt(process);
             assertEquals(receipt.readBytes(), hello.getBytes(JieChars.localCharset()));
@@ -153,9 +153,9 @@ public class ProcessTest {
             expectThrows(IllegalThreadStateException.class, process::exitValue);
             process.destroy();
             assertEquals(process.waitFor(), 0);
-            assertEquals(process.getInputStream(), JieIO.emptyInputStream());
-            assertEquals(process.getOutputStream(), JieIO.nullOutputStream());
-            assertEquals(process.getErrorStream(), JieIO.emptyInputStream());
+            assertEquals(process.getInputStream(), IOKit.emptyInputStream());
+            assertEquals(process.getOutputStream(), IOKit.nullOutputStream());
+            assertEquals(process.getErrorStream(), IOKit.emptyInputStream());
         }
         {
             VirtualProcess process = new VirtualProcess();

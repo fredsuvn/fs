@@ -1,8 +1,8 @@
 package xyz.sunqian.common.base.bytes;
 
+import xyz.sunqian.common.io.BufferKit;
+import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.io.IORuntimeException;
-import xyz.sunqian.common.io.JieBuffer;
-import xyz.sunqian.common.io.JieIO;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -270,10 +270,10 @@ public class BytesBuilder extends OutputStream {
             return this;
         }
         if (bytes.hasArray()) {
-            write(bytes.array(), JieBuffer.arrayStartIndex(bytes), bytes.remaining());
+            write(bytes.array(), BufferKit.arrayStartIndex(bytes), bytes.remaining());
             bytes.position(bytes.position() + bytes.remaining());
         } else {
-            byte[] remaining = JieBuffer.read(bytes);
+            byte[] remaining = BufferKit.read(bytes);
             write(remaining, 0, remaining.length);
         }
         return this;
@@ -287,7 +287,7 @@ public class BytesBuilder extends OutputStream {
      * @throws IORuntimeException if an I/O error occurs
      */
     public BytesBuilder append(InputStream in) throws IORuntimeException {
-        return append(in, JieIO.bufferSize());
+        return append(in, IOKit.bufferSize());
     }
 
     /**

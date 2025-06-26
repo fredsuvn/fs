@@ -1,8 +1,8 @@
 package xyz.sunqian.common.base.chars;
 
+import xyz.sunqian.common.io.BufferKit;
+import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.io.IORuntimeException;
-import xyz.sunqian.common.io.JieBuffer;
-import xyz.sunqian.common.io.JieIO;
 
 import java.io.CharArrayWriter;
 import java.io.Reader;
@@ -247,10 +247,10 @@ public class CharsBuilder extends Writer implements CharSequence {
             return this;
         }
         if (chars.hasArray()) {
-            write(chars.array(), JieBuffer.arrayStartIndex(chars), chars.remaining());
+            write(chars.array(), BufferKit.arrayStartIndex(chars), chars.remaining());
             chars.position(chars.position() + chars.remaining());
         } else {
-            char[] remaining = JieBuffer.read(chars);
+            char[] remaining = BufferKit.read(chars);
             write(remaining, 0, remaining.length);
         }
         return this;
@@ -264,7 +264,7 @@ public class CharsBuilder extends Writer implements CharSequence {
      * @throws IORuntimeException if an I/O error occurs
      */
     public CharsBuilder append(Reader reader) throws IORuntimeException {
-        return append(reader, JieIO.bufferSize());
+        return append(reader, IOKit.bufferSize());
     }
 
     /**

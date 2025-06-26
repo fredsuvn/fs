@@ -105,7 +105,7 @@ public interface ByteEncoder {
      * Sets the number of bytes for each read operation from the data source.
      * <p>
      * This setting is typically used when the data source is an input stream, or intermediate operations are set,
-     * default is {@link JieIO#bufferSize()}.
+     * default is {@link IOKit#bufferSize()}.
      * <p>
      * This is an optional setting method.
      *
@@ -321,8 +321,8 @@ public interface ByteEncoder {
      * Returns an input stream which represents and encompasses the entire data processing.
      * <p>
      * If there is no encoder in the processor: if the source is a stream, return the stream itself; if the source is an
-     * array or buffer, returns the stream from {@link JieIO#newInputStream(byte[])} or
-     * {@link JieIO#newInputStream(ByteBuffer)}. Otherwise, the returned stream's read operations are performed only as
+     * array or buffer, returns the stream from {@link IOKit#newInputStream(byte[])} or
+     * {@link IOKit#newInputStream(ByteBuffer)}. Otherwise, the returned stream's read operations are performed only as
      * needed, mark/reset operations are not supported, and the {@code close()} method will close the source if the
      * source is closable.
      * <p>
@@ -341,7 +341,7 @@ public interface ByteEncoder {
      * @return a new {@link CharEncoder} converted from this {@link ByteEncoder} with the specified charset
      */
     default CharEncoder toCharProcessor(Charset charset) {
-        return CharEncoder.from(JieIO.newReader(toInputStream(), charset));
+        return CharEncoder.from(IOKit.newReader(toInputStream(), charset));
     }
 
     /**

@@ -12,7 +12,7 @@ import xyz.sunqian.common.io.DoReadStream;
 import xyz.sunqian.common.io.DoWriteStream;
 import xyz.sunqian.common.io.DoWriteWriter;
 import xyz.sunqian.common.io.IORuntimeException;
-import xyz.sunqian.common.io.JieIO;
+import xyz.sunqian.common.io.IOKit;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -48,32 +48,42 @@ public class IOImplsTest {
         testInputStream(1024);
 
         // empty
-        testInputStream(JieIO.emptyInputStream(), new byte[0], true, false);
+        testInputStream(IOKit.emptyInputStream(), new byte[0], true, false);
 
         // error
         RandomAccessFile raf = new FakeFile(new byte[0]);
         raf.close();
-        expectThrows(IORuntimeException.class, () -> JieIO.newInputStream(raf, 0));
+        expectThrows(IORuntimeException.class, () -> IOKit.newInputStream(raf, 0));
 
         // illegal argument
         expectThrows(IllegalArgumentException.class, () ->
-            JieIO.limitedInputStream(new ByteArrayInputStream(new byte[0]), -1));
+            IOKit.limitedInputStream(new ByteArrayInputStream(new byte[0]), -1));
         expectThrows(IllegalArgumentException.class, () ->
-            JieIO.limitedOutputStream(new ByteArrayOutputStream(), -1));
+            IOKit.limitedOutputStream(new ByteArrayOutputStream(), -1));
         expectThrows(IllegalArgumentException.class, () ->
-            JieIO.limitedReader(new CharArrayReader(new char[0]), -1));
+            IOKit.limitedReader(new CharArrayReader(new char[0]), -1));
         expectThrows(IllegalArgumentException.class, () ->
-            JieIO.limitedWriter(new CharArrayWriter(), -1));
+            IOKit.limitedWriter(new CharArrayWriter(), -1));
+
+        // limited
+        assertEquals(
+            IOKit.limitedInputStream(new ByteArrayInputStream(new byte[100]), 0).read(),
+            -1
+        );
+        assertEquals(
+            IOKit.limitedInputStream(new ByteArrayInputStream(new byte[100]), 0).read(new byte[100]),
+            -1
+        );
     }
 
     private void testInputStream(int dataSize) throws Exception {
         {
             // bytes
             byte[] data = JieRandom.fill(new byte[dataSize]);
-            testInputStream(JieIO.newInputStream(data), data, true, false);
+            testInputStream(IOKit.newInputStream(data), data, true, false);
             data = JieRandom.fill(new byte[dataSize + 12]);
             testInputStream(
-                JieIO.newInputStream(data, 6, dataSize),
+                IOKit.newInputStream(data, 6, dataSize),
                 Arrays.copyOfRange(data, 6, data.length - 6),
                 true, false
             );
@@ -82,14 +92,14 @@ public class IOImplsTest {
             // buffer
             byte[] data = JieRandom.fill(new byte[dataSize]);
             ByteBuffer buffer = ByteBuffer.wrap(data);
-            InputStream bufferIn = JieIO.newInputStream(buffer);
+            InputStream bufferIn = IOKit.newInputStream(buffer);
             testInputStream(bufferIn, data, true, false);
         }
         {
             // file
             byte[] data = JieRandom.fill(new byte[dataSize + 6]);
             RandomAccessFile raf = new FakeFile(data);
-            InputStream rafIn = JieIO.newInputStream(raf, 6);
+            InputStream rafIn = IOKit.newInputStream(raf, 6);
             testInputStream(rafIn, Arrays.copyOfRange(data, 6, data.length), true, true);
             rafIn.mark(66);
             // expectThrows(IORuntimeException.class, () -> rafIn.mark(66));
@@ -98,13 +108,13 @@ public class IOImplsTest {
             // chars
             char[] chars = JieRandom.fill(new char[dataSize], '0', '9');
             byte[] charBytes = new String(chars).getBytes(JieChars.UTF_8);
-            InputStream charsIn = JieIO.newInputStream(new CharArrayReader(chars));
+            InputStream charsIn = IOKit.newInputStream(new CharArrayReader(chars));
             testInputStream(charsIn, charBytes, false, false);
             expectThrows(IOException.class, charsIn::read);
             // chinese: '\u4e00' - '\u9fff'
             chars = JieRandom.fill(new char[dataSize], '\u4e00', '\u4e01');
             charBytes = new String(chars).getBytes(JieChars.UTF_8);
-            charsIn = JieIO.newInputStream(new CharArrayReader(chars));
+            charsIn = IOKit.newInputStream(new CharArrayReader(chars));
             testInputStream(charsIn, charBytes, false, false);
             expectThrows(IOException.class, charsIn::read);
             // emoji: "\uD83D\uDD1E"
@@ -113,29 +123,29 @@ public class IOImplsTest {
                 chars[i + 1] = '\uDD1E';
             }
             charBytes = new String(chars).getBytes(JieChars.UTF_8);
-            charsIn = JieIO.newInputStream(new CharArrayReader(chars));
+            charsIn = IOKit.newInputStream(new CharArrayReader(chars));
             testInputStream(charsIn, charBytes, false, false);
             expectThrows(IOException.class, charsIn::read);
             // error: U+DD88
-            charsIn = JieIO.newInputStream(new CharArrayReader(chars), new ErrorCharset());
+            charsIn = IOKit.newInputStream(new CharArrayReader(chars), new ErrorCharset());
             expectThrows(IOException.class, charsIn::read);
         }
         {
             // limited
             byte[] data = JieRandom.fill(new byte[dataSize]);
             testInputStream(
-                JieIO.limitedInputStream(JieIO.newInputStream(data), data.length), data,
+                IOKit.limitedInputStream(IOKit.newInputStream(data), data.length), data,
                 true, false
             );
             testInputStream(
-                JieIO.limitedInputStream(
-                    JieIO.newInputStream(data), data.length * 2),
+                IOKit.limitedInputStream(
+                    IOKit.newInputStream(data), data.length * 2),
                 data,
                 true, false
             );
             testInputStream(
-                JieIO.limitedInputStream(
-                    JieIO.newInputStream(data), data.length - 5),
+                IOKit.limitedInputStream(
+                    IOKit.newInputStream(data), data.length - 5),
                 Arrays.copyOf(data, data.length - 5),
                 true, false
             );
@@ -321,17 +331,27 @@ public class IOImplsTest {
         testReader(1024);
 
         // empty
-        testReader(JieIO.emptyReader(), new char[0], true, false);
+        testReader(IOKit.emptyReader(), new char[0], true, false);
+
+        // limited
+        assertEquals(
+            IOKit.limitedReader(new CharArrayReader(new char[100]), 0).read(),
+            -1
+        );
+        assertEquals(
+            IOKit.limitedReader(new CharArrayReader(new char[100]), 0).read(new char[100]),
+            -1
+        );
     }
 
     private void testReader(int dataSize) throws Exception {
         {
             // chars
             char[] data = JieRandom.fill(new char[dataSize]);
-            testReader(JieIO.newReader(data), data, true, false);
+            testReader(IOKit.newReader(data), data, true, false);
             data = JieRandom.fill(new char[dataSize + 12]);
             testReader(
-                JieIO.newReader(data, 6, dataSize),
+                IOKit.newReader(data, 6, dataSize),
                 Arrays.copyOfRange(data, 6, data.length - 6),
                 true, false
             );
@@ -339,10 +359,10 @@ public class IOImplsTest {
         {
             // string
             char[] data = JieRandom.fill(new char[dataSize]);
-            testReader(JieIO.newReader(new String(data)), data, true, false);
+            testReader(IOKit.newReader(new String(data)), data, true, false);
             data = JieRandom.fill(new char[dataSize + 12]);
             testReader(
-                JieIO.newReader(new String(data), 6, data.length - 6),
+                IOKit.newReader(new String(data), 6, data.length - 6),
                 Arrays.copyOfRange(data, 6, data.length - 6),
                 true, false
             );
@@ -351,20 +371,20 @@ public class IOImplsTest {
             // buffer
             char[] data = JieRandom.fill(new char[dataSize]);
             CharBuffer buffer = CharBuffer.wrap(data);
-            Reader bufferIn = JieIO.newReader(buffer);
+            Reader bufferIn = IOKit.newReader(buffer);
             testReader(bufferIn, data, true, false);
         }
         {
             // bytes
             char[] chars = JieRandom.fill(new char[dataSize], '0', '9');
             byte[] charBytes = new String(chars).getBytes(JieChars.UTF_8);
-            Reader charsIn = JieIO.newReader(JieIO.newInputStream(charBytes));
+            Reader charsIn = IOKit.newReader(IOKit.newInputStream(charBytes));
             testReader(charsIn, chars, false, false);
             expectThrows(IOException.class, charsIn::read);
             // chinese: '\u4e00' - '\u9fff'
             chars = JieRandom.fill(new char[dataSize], '\u4e00', '\u4e01');
             charBytes = new String(chars).getBytes(JieChars.UTF_8);
-            charsIn = JieIO.newReader(JieIO.newInputStream(charBytes));
+            charsIn = IOKit.newReader(IOKit.newInputStream(charBytes));
             testReader(charsIn, chars, false, false);
             expectThrows(IOException.class, charsIn::read);
             // emoji: "\uD83D\uDD1E"
@@ -373,11 +393,11 @@ public class IOImplsTest {
                 chars[i + 1] = '\uDD1E';
             }
             charBytes = new String(chars).getBytes(JieChars.UTF_8);
-            charsIn = JieIO.newReader(JieIO.newInputStream(charBytes));
+            charsIn = IOKit.newReader(IOKit.newInputStream(charBytes));
             testReader(charsIn, chars, false, false);
             expectThrows(IOException.class, charsIn::read);
             // error: 0xC1
-            charsIn = JieIO.newReader(JieIO.newInputStream(charBytes), new ErrorCharset());
+            charsIn = IOKit.newReader(IOKit.newInputStream(charBytes), new ErrorCharset());
             expectThrows(IOException.class, charsIn::read);
             // 1 byte -> 3 char
             byte[] fakeBytes = JieRandom.fill(new byte[dataSize]);
@@ -387,7 +407,7 @@ public class IOImplsTest {
                 fakeChars[i * 3 + 1] = (char) fakeBytes[i];
                 fakeChars[i * 3 + 2] = (char) fakeBytes[i];
             }
-            charsIn = JieIO.newReader(JieIO.newInputStream(fakeBytes), new ByteToNCharCharset(3));
+            charsIn = IOKit.newReader(IOKit.newInputStream(fakeBytes), new ByteToNCharCharset(3));
             testReader(charsIn, fakeChars, false, false);
             expectThrows(IOException.class, charsIn::read);
         }
@@ -395,18 +415,18 @@ public class IOImplsTest {
             // limited
             char[] data = JieRandom.fill(new char[dataSize]);
             testReader(
-                JieIO.limitedReader(JieIO.newReader(data), data.length), data,
+                IOKit.limitedReader(IOKit.newReader(data), data.length), data,
                 true, false
             );
             testReader(
-                JieIO.limitedReader(
-                    JieIO.newReader(data), data.length * 2),
+                IOKit.limitedReader(
+                    IOKit.newReader(data), data.length * 2),
                 data,
                 true, false
             );
             testReader(
-                JieIO.limitedReader(
-                    JieIO.newReader(data), data.length - 5),
+                IOKit.limitedReader(
+                    IOKit.newReader(data), data.length - 5),
                 Arrays.copyOf(data, data.length - 5),
                 true, false
             );
@@ -606,12 +626,18 @@ public class IOImplsTest {
         testOutputStream(1024);
 
         // null
-        testOutputStream(JieIO.nullOutputStream(), new byte[1024], false, false);
+        testOutputStream(IOKit.nullOutputStream(), new byte[1024], false, false);
 
         // error
         RandomAccessFile raf = new FakeFile(new byte[0]);
         raf.close();
-        expectThrows(IORuntimeException.class, () -> JieIO.newOutputStream(raf, 0));
+        expectThrows(IORuntimeException.class, () -> IOKit.newOutputStream(raf, 0));
+
+        // limited
+        expectThrows(IOException.class, () ->
+            IOKit.limitedOutputStream(new BytesBuilder(), 0).write(1));
+        expectThrows(IOException.class, () ->
+            IOKit.limitedOutputStream(new BytesBuilder(), 0).write(new byte[1]));
     }
 
     private void testOutputStream(int dataSize) throws Exception {
@@ -619,11 +645,11 @@ public class IOImplsTest {
             // bytes
             byte[] data = JieRandom.fill(new byte[dataSize]);
             byte[] dst = new byte[data.length];
-            OutputStream out = JieIO.newOutputStream(dst);
+            OutputStream out = IOKit.newOutputStream(dst);
             testOutputStream(out, data, true, false);
             assertEquals(dst, data);
             dst = new byte[data.length + 10];
-            out = JieIO.newOutputStream(dst, 5, data.length);
+            out = IOKit.newOutputStream(dst, 5, data.length);
             testOutputStream(out, data, true, false);
             assertEquals(Arrays.copyOfRange(dst, 5, dst.length - 5), data);
         }
@@ -631,7 +657,7 @@ public class IOImplsTest {
             // buffer
             byte[] data = JieRandom.fill(new byte[dataSize]);
             ByteBuffer dst = ByteBuffer.allocate(data.length);
-            OutputStream out = JieIO.newOutputStream(dst);
+            OutputStream out = IOKit.newOutputStream(dst);
             testOutputStream(out, data, true, false);
             assertEquals(dst.flip(), ByteBuffer.wrap(data));
         }
@@ -640,7 +666,7 @@ public class IOImplsTest {
             byte[] data = JieRandom.fill(new byte[dataSize]);
             BytesBuilder builder = new BytesBuilder();
             RandomAccessFile raf = new FakeFile(builder);
-            OutputStream out = JieIO.newOutputStream(raf, 6);
+            OutputStream out = IOKit.newOutputStream(raf, 6);
             testOutputStream(out, data, false, true);
             assertEquals(builder.toByteArray(), data);
         }
@@ -649,14 +675,14 @@ public class IOImplsTest {
             CharsBuilder builder = new CharsBuilder();
             char[] chars = JieRandom.fill(new char[dataSize], '0', '9');
             byte[] charBytes = new String(chars).getBytes(JieChars.UTF_8);
-            OutputStream out = JieIO.newOutputStream(builder);
+            OutputStream out = IOKit.newOutputStream(builder);
             testOutputStream(out, charBytes, false, true);
             assertEquals(builder.toCharArray(), chars);
             // chinese: '\u4e00' - '\u9fff'
             builder.reset();
             chars = JieRandom.fill(new char[dataSize], '\u4e00', '\u4e01');
             charBytes = new String(chars).getBytes(JieChars.UTF_8);
-            out = JieIO.newOutputStream(builder);
+            out = IOKit.newOutputStream(builder);
             testOutputStream(out, charBytes, false, true);
             assertEquals(builder.toCharArray(), chars);
             // emoji: "\uD83D\uDD1E"
@@ -666,7 +692,7 @@ public class IOImplsTest {
                 chars[i + 1] = '\uDD1E';
             }
             charBytes = new String(chars).getBytes(JieChars.UTF_8);
-            out = JieIO.newOutputStream(builder);
+            out = IOKit.newOutputStream(builder);
             testOutputStream(out, charBytes, false, true);
             assertEquals(builder.toCharArray(), chars);
             // fake charset
@@ -677,12 +703,12 @@ public class IOImplsTest {
                 fakeChars[i * 2] = (char) fakeBytes[i];
                 fakeChars[i * 2 + 1] = (char) fakeBytes[i];
             }
-            out = JieIO.newOutputStream(builder, new ByteToNCharCharset(2));
+            out = IOKit.newOutputStream(builder, new ByteToNCharCharset(2));
             testOutputStream(out, fakeBytes, false, true);
             assertEquals(builder.toCharArray(), fakeChars);
             // error: 0xC1
             builder.reset();
-            OutputStream errOut = JieIO.newOutputStream(builder, new ErrorCharset());
+            OutputStream errOut = IOKit.newOutputStream(builder, new ErrorCharset());
             expectThrows(IOException.class, () -> errOut.write(new byte[10]));
         }
         {
@@ -690,14 +716,14 @@ public class IOImplsTest {
             byte[] data = JieRandom.fill(new byte[dataSize]);
             BytesBuilder builder = new BytesBuilder();
             testOutputStream(
-                JieIO.limitedOutputStream(builder, data.length),
+                IOKit.limitedOutputStream(builder, data.length),
                 data,
                 true, false
             );
             assertEquals(builder.toByteArray(), data);
             builder.reset();
             testOutputStream(
-                JieIO.limitedOutputStream(builder, data.length - 5),
+                IOKit.limitedOutputStream(builder, data.length - 5),
                 Arrays.copyOf(data, data.length - 5),
                 true, false
             );
@@ -762,7 +788,13 @@ public class IOImplsTest {
         testWriter(1024);
 
         // null
-        testWriter(JieIO.nullWriter(), new char[1024], false, false);
+        testWriter(IOKit.nullWriter(), new char[1024], false, false);
+
+        // limited
+        expectThrows(IOException.class, () ->
+            IOKit.limitedWriter(new CharsBuilder(), 0).write(1));
+        expectThrows(IOException.class, () ->
+            IOKit.limitedWriter(new CharsBuilder(), 0).write(new char[1]));
     }
 
     private void testWriter(int dataSize) throws Exception {
@@ -770,11 +802,11 @@ public class IOImplsTest {
             // chars
             char[] data = JieRandom.fill(new char[dataSize]);
             char[] dst = new char[data.length];
-            Writer out = JieIO.newWriter(dst);
+            Writer out = IOKit.newWriter(dst);
             testWriter(out, data, true, false);
             assertEquals(dst, data);
             dst = new char[data.length + 10];
-            out = JieIO.newWriter(dst, 5, data.length);
+            out = IOKit.newWriter(dst, 5, data.length);
             testWriter(out, data, true, false);
             assertEquals(Arrays.copyOfRange(dst, 5, dst.length - 5), data);
         }
@@ -782,7 +814,7 @@ public class IOImplsTest {
             // buffer
             char[] data = JieRandom.fill(new char[dataSize]);
             CharBuffer dst = CharBuffer.allocate(data.length);
-            Writer out = JieIO.newWriter(dst);
+            Writer out = IOKit.newWriter(dst);
             testWriter(out, data, true, false);
             assertEquals(dst.flip(), CharBuffer.wrap(data));
         }
@@ -791,14 +823,14 @@ public class IOImplsTest {
             BytesBuilder builder = new BytesBuilder();
             char[] chars = JieRandom.fill(new char[dataSize], '0', '9');
             byte[] charBytes = new String(chars).getBytes(JieChars.UTF_8);
-            Writer out = JieIO.newWriter(builder);
+            Writer out = IOKit.newWriter(builder);
             testWriter(out, chars, false, true);
             assertEquals(builder.toByteArray(), charBytes);
             // chinese: '\u4e00' - '\u9fff'
             builder.reset();
             chars = JieRandom.fill(new char[dataSize], '\u4e00', '\u4e01');
             charBytes = new String(chars).getBytes(JieChars.UTF_8);
-            out = JieIO.newWriter(builder);
+            out = IOKit.newWriter(builder);
             testWriter(out, chars, false, true);
             assertEquals(builder.toByteArray(), charBytes);
             // emoji: "\uD83D\uDD1E"
@@ -808,12 +840,12 @@ public class IOImplsTest {
                 chars[i + 1] = '\uDD1E';
             }
             charBytes = new String(chars).getBytes(JieChars.UTF_8);
-            out = JieIO.newWriter(builder);
+            out = IOKit.newWriter(builder);
             testWriter(out, chars, false, true);
             assertEquals(builder.toByteArray(), charBytes);
             // error: U+DD88
             builder.reset();
-            Writer errOut = JieIO.newWriter(builder, new ErrorCharset());
+            Writer errOut = IOKit.newWriter(builder, new ErrorCharset());
             expectThrows(IOException.class, () -> errOut.write(new char[10]));
         }
         {
@@ -821,14 +853,14 @@ public class IOImplsTest {
             char[] data = JieRandom.fill(new char[dataSize]);
             CharsBuilder builder = new CharsBuilder();
             testWriter(
-                JieIO.limitedWriter(builder, data.length),
+                IOKit.limitedWriter(builder, data.length),
                 data,
                 true, false
             );
             assertEquals(builder.toCharArray(), data);
             builder.reset();
             testWriter(
-                JieIO.limitedWriter(builder, data.length - 5),
+                IOKit.limitedWriter(builder, data.length - 5),
                 Arrays.copyOf(data, data.length - 5),
                 true, false
             );
@@ -924,10 +956,10 @@ public class IOImplsTest {
 
     @Test
     public void testSpecial() throws Exception {
-        assertSame(JieIO.emptyInputStream(), JieIO.emptyInputStream());
-        assertSame(JieIO.emptyReader(), JieIO.emptyReader());
-        assertSame(JieIO.nullOutputStream(), JieIO.nullOutputStream());
-        assertSame(JieIO.nullWriter(), JieIO.nullWriter());
+        assertSame(IOKit.emptyInputStream(), IOKit.emptyInputStream());
+        assertSame(IOKit.emptyReader(), IOKit.emptyReader());
+        assertSame(IOKit.nullOutputStream(), IOKit.nullOutputStream());
+        assertSame(IOKit.nullWriter(), IOKit.nullWriter());
     }
 
     @Test

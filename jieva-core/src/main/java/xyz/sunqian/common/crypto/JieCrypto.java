@@ -3,8 +3,8 @@ package xyz.sunqian.common.crypto;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.bytes.JieBytes;
 import xyz.sunqian.common.collect.JieArray;
+import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.ByteEncoder;
-import xyz.sunqian.common.io.JieBuffer;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -117,11 +117,12 @@ public class JieCrypto {
     }
 
     /**
-     * Returns a {@link ByteEncoder.Handler} for the specified {@link Cipher} operations in blocks, using specified block size.
-     * If {@code onlyFinal} is true, the encoder uses only the {@code doFinal} method. Otherwise, the encoder invokes
-     * the {@code update} method to process data when {@code end} is false, and invokes {@code doFinal} for final
-     * processing when {@code end} is true. Returned encoder is a fixed size encoder from
-     * {@link ByteEncoder.Handler#withFixedSize(int, ByteEncoder.Handler)}, and its fixed size is the specified block size.
+     * Returns a {@link ByteEncoder.Handler} for the specified {@link Cipher} operations in blocks, using specified
+     * block size. If {@code onlyFinal} is true, the encoder uses only the {@code doFinal} method. Otherwise, the
+     * encoder invokes the {@code update} method to process data when {@code end} is false, and invokes {@code doFinal}
+     * for final processing when {@code end} is true. Returned encoder is a fixed size encoder from
+     * {@link ByteEncoder.Handler#withFixedSize(int, ByteEncoder.Handler)}, and its fixed size is the specified block
+     * size.
      *
      * @param cipher    specified {@link Cipher}, should be initialized
      * @param blockSize specified block size
@@ -158,7 +159,7 @@ public class JieCrypto {
             );
             input.position(input.position() + input.remaining());
         } else {
-            byte[] inBytes = JieBuffer.read(input);
+            byte[] inBytes = BufferKit.read(input);
             ret = cipher.doFinal(inBytes);
         }
         return toBuffer(ret);
@@ -172,17 +173,18 @@ public class JieCrypto {
             );
             input.position(input.position() + input.remaining());
         } else {
-            byte[] inBytes = JieBuffer.read(input);
+            byte[] inBytes = BufferKit.read(input);
             ret = cipher.update(inBytes);
         }
         return toBuffer(ret);
     }
 
     /**
-     * Returns a {@link ByteEncoder.Handler} for the specified {@link MessageDigest} operations in blocks, using specified block
-     * size. The encoder invokes the {@code update} method to process data when {@code end} is false, and invokes
-     * {@code doFinal} for final processing when {@code end} is true. Returned encoder is a fixed size encoder from
-     * {@link ByteEncoder.Handler#withFixedSize(int, ByteEncoder.Handler)}, and its fixed size is the specified block size.
+     * Returns a {@link ByteEncoder.Handler} for the specified {@link MessageDigest} operations in blocks, using
+     * specified block size. The encoder invokes the {@code update} method to process data when {@code end} is false,
+     * and invokes {@code doFinal} for final processing when {@code end} is true. Returned encoder is a fixed size
+     * encoder from {@link ByteEncoder.Handler#withFixedSize(int, ByteEncoder.Handler)}, and its fixed size is the
+     * specified block size.
      *
      * @param digest    specified {@link MessageDigest}, should be initialized
      * @param blockSize specified block size
@@ -217,16 +219,17 @@ public class JieCrypto {
             );
             input.position(input.position() + input.remaining());
         } else {
-            byte[] inBytes = JieBuffer.read(input);
+            byte[] inBytes = BufferKit.read(input);
             digest.update(inBytes);
         }
     }
 
     /**
-     * Returns a {@link ByteEncoder.Handler} for the specified {@link Mac} operations in blocks, using specified block size. The
-     * encoder invokes the {@code update} method to process data when {@code end} is false, and invokes {@code doFinal}
-     * for final processing when {@code end} is true. Returned encoder is a fixed size encoder from
-     * {@link ByteEncoder.Handler#withFixedSize(int, ByteEncoder.Handler)}, and its fixed size is the specified block size.
+     * Returns a {@link ByteEncoder.Handler} for the specified {@link Mac} operations in blocks, using specified block
+     * size. The encoder invokes the {@code update} method to process data when {@code end} is false, and invokes
+     * {@code doFinal} for final processing when {@code end} is true. Returned encoder is a fixed size encoder from
+     * {@link ByteEncoder.Handler#withFixedSize(int, ByteEncoder.Handler)}, and its fixed size is the specified block
+     * size.
      *
      * @param mac       specified {@link Mac}, should be initialized
      * @param blockSize specified block size
@@ -261,7 +264,7 @@ public class JieCrypto {
             );
             input.position(input.position() + input.remaining());
         } else {
-            byte[] inBytes = JieBuffer.read(input);
+            byte[] inBytes = BufferKit.read(input);
             mac.update(inBytes);
         }
     }

@@ -5,8 +5,8 @@ import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.base.chars.CharsBuilder;
 import xyz.sunqian.common.io.CharIO;
 import xyz.sunqian.common.io.IORuntimeException;
-import xyz.sunqian.common.io.JieBuffer;
-import xyz.sunqian.common.io.JieIO;
+import xyz.sunqian.common.io.BufferKit;
+import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.test.ErrorAppender;
 import xyz.sunqian.test.ReadOps;
 import xyz.sunqian.test.TestReader;
@@ -28,47 +28,47 @@ public class CharIOTest {
         testRead(128);
         testRead(256);
         testRead(1024);
-        testRead(JieIO.bufferSize());
-        testRead(JieIO.bufferSize() - 1);
-        testRead(JieIO.bufferSize() + 1);
-        testRead(JieIO.bufferSize() - 5);
-        testRead(JieIO.bufferSize() + 5);
-        testRead(JieIO.bufferSize() * 2);
-        testRead(JieIO.bufferSize() * 2 - 1);
-        testRead(JieIO.bufferSize() * 2 + 1);
-        testRead(JieIO.bufferSize() * 2 - 5);
-        testRead(JieIO.bufferSize() * 2 + 5);
-        testRead(JieIO.bufferSize() * 3);
-        testRead(JieIO.bufferSize() * 3 - 1);
-        testRead(JieIO.bufferSize() * 3 + 1);
-        testRead(JieIO.bufferSize() * 3 - 5);
-        testRead(JieIO.bufferSize() * 3 + 5);
+        testRead(IOKit.bufferSize());
+        testRead(IOKit.bufferSize() - 1);
+        testRead(IOKit.bufferSize() + 1);
+        testRead(IOKit.bufferSize() - 5);
+        testRead(IOKit.bufferSize() + 5);
+        testRead(IOKit.bufferSize() * 2);
+        testRead(IOKit.bufferSize() * 2 - 1);
+        testRead(IOKit.bufferSize() * 2 + 1);
+        testRead(IOKit.bufferSize() * 2 - 5);
+        testRead(IOKit.bufferSize() * 2 + 5);
+        testRead(IOKit.bufferSize() * 3);
+        testRead(IOKit.bufferSize() * 3 - 1);
+        testRead(IOKit.bufferSize() * 3 + 1);
+        testRead(IOKit.bufferSize() * 3 - 5);
+        testRead(IOKit.bufferSize() * 3 + 5);
 
         {
             // read stream
-            assertNull(JieIO.read(new CharArrayReader(new char[0])));
-            assertNull(JieIO.read(new CharArrayReader(new char[0]), 66));
-            assertNull(JieIO.string(new CharArrayReader(new char[0])));
-            assertNull(JieIO.string(new CharArrayReader(new char[0]), 66));
+            assertNull(IOKit.read(new CharArrayReader(new char[0])));
+            assertNull(IOKit.read(new CharArrayReader(new char[0]), 66));
+            assertNull(IOKit.string(new CharArrayReader(new char[0])));
+            assertNull(IOKit.string(new CharArrayReader(new char[0]), 66));
         }
 
         {
             // error
             TestReader tin = new TestReader(new CharArrayReader(new char[0]));
             tin.setNextOperation(ReadOps.THROW, 99);
-            expectThrows(IORuntimeException.class, () -> JieIO.read(tin));
-            expectThrows(IORuntimeException.class, () -> JieIO.read(tin, 1));
-            expectThrows(IllegalArgumentException.class, () -> JieIO.read(tin, -1));
+            expectThrows(IORuntimeException.class, () -> IOKit.read(tin));
+            expectThrows(IORuntimeException.class, () -> IOKit.read(tin, 1));
+            expectThrows(IllegalArgumentException.class, () -> IOKit.read(tin, -1));
         }
     }
 
     private void testRead(int totalSize) throws Exception {
-        testRead(CharIO.get(JieIO.bufferSize()), totalSize);
+        testRead(CharIO.get(IOKit.bufferSize()), totalSize);
         testRead(CharIO.get(1), totalSize);
         testRead(CharIO.get(2), totalSize);
-        testRead(CharIO.get(JieIO.bufferSize() - 1), totalSize);
-        testRead(CharIO.get(JieIO.bufferSize() + 1), totalSize);
-        testRead(CharIO.get(JieIO.bufferSize() * 2), totalSize);
+        testRead(CharIO.get(IOKit.bufferSize() - 1), totalSize);
+        testRead(CharIO.get(IOKit.bufferSize() + 1), totalSize);
+        testRead(CharIO.get(IOKit.bufferSize() * 2), totalSize);
     }
 
     private void testRead(CharIO reader, int totalSize) throws Exception {
@@ -114,38 +114,38 @@ public class CharIOTest {
         testReadTo(128);
         testReadTo(256);
         testReadTo(1024);
-        testReadTo(JieIO.bufferSize());
-        testReadTo(JieIO.bufferSize() - 1);
-        testReadTo(JieIO.bufferSize() + 1);
-        testReadTo(JieIO.bufferSize() - 5);
-        testReadTo(JieIO.bufferSize() + 5);
-        testReadTo(JieIO.bufferSize() * 2);
-        testReadTo(JieIO.bufferSize() * 2 - 1);
-        testReadTo(JieIO.bufferSize() * 2 + 1);
-        testReadTo(JieIO.bufferSize() * 2 - 5);
-        testReadTo(JieIO.bufferSize() * 2 + 5);
-        testReadTo(JieIO.bufferSize() * 3);
-        testReadTo(JieIO.bufferSize() * 3 - 1);
-        testReadTo(JieIO.bufferSize() * 3 + 1);
-        testReadTo(JieIO.bufferSize() * 3 - 5);
-        testReadTo(JieIO.bufferSize() * 3 + 5);
+        testReadTo(IOKit.bufferSize());
+        testReadTo(IOKit.bufferSize() - 1);
+        testReadTo(IOKit.bufferSize() + 1);
+        testReadTo(IOKit.bufferSize() - 5);
+        testReadTo(IOKit.bufferSize() + 5);
+        testReadTo(IOKit.bufferSize() * 2);
+        testReadTo(IOKit.bufferSize() * 2 - 1);
+        testReadTo(IOKit.bufferSize() * 2 + 1);
+        testReadTo(IOKit.bufferSize() * 2 - 5);
+        testReadTo(IOKit.bufferSize() * 2 + 5);
+        testReadTo(IOKit.bufferSize() * 3);
+        testReadTo(IOKit.bufferSize() * 3 - 1);
+        testReadTo(IOKit.bufferSize() * 3 + 1);
+        testReadTo(IOKit.bufferSize() * 3 - 5);
+        testReadTo(IOKit.bufferSize() * 3 + 5);
 
         {
             // size 0: reader to appender
             char[] data = new char[0];
             CharsBuilder bb = new CharsBuilder();
             assertEquals(
-                JieIO.readTo(new CharArrayReader(data), bb),
+                IOKit.readTo(new CharArrayReader(data), bb),
                 -1
             );
             assertEquals(bb.size(), 0);
             assertEquals(
-                JieIO.readTo(new CharArrayReader(data), bb, 0),
+                IOKit.readTo(new CharArrayReader(data), bb, 0),
                 0
             );
             assertEquals(bb.size(), 0);
             assertEquals(
-                JieIO.readTo(new CharArrayReader(data), bb, 11),
+                IOKit.readTo(new CharArrayReader(data), bb, 11),
                 -1
             );
             assertEquals(bb.size(), 0);
@@ -156,12 +156,12 @@ public class CharIOTest {
             char[] aar = new char[64];
             Arrays.fill(aar, (char) 7);
             assertEquals(
-                JieIO.readTo(new CharArrayReader(data), aar),
+                IOKit.readTo(new CharArrayReader(data), aar),
                 -1
             );
             assertEquals(aar[0], (char) 7);
             assertEquals(
-                JieIO.readTo(new CharArrayReader(data), new char[0]),
+                IOKit.readTo(new CharArrayReader(data), new char[0]),
                 0
             );
             assertEquals(aar[0], (char) 7);
@@ -171,22 +171,22 @@ public class CharIOTest {
             char[] data = new char[0];
             CharBuffer buf = CharBuffer.allocate(1);
             assertEquals(
-                JieIO.readTo(new CharArrayReader(data), buf),
+                IOKit.readTo(new CharArrayReader(data), buf),
                 -1
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(new CharArrayReader(data), CharBuffer.allocate(0)),
+                IOKit.readTo(new CharArrayReader(data), CharBuffer.allocate(0)),
                 0
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(new CharArrayReader(data), buf, 1),
+                IOKit.readTo(new CharArrayReader(data), buf, 1),
                 -1
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(new CharArrayReader(data), buf, 0),
+                IOKit.readTo(new CharArrayReader(data), buf, 0),
                 0
             );
             assertEquals(buf.position(), 0);
@@ -194,24 +194,24 @@ public class CharIOTest {
         {
             // size 0: reader to direct buffer
             char[] data = new char[0];
-            CharBuffer buf = JieBuffer.directBuffer(1);
+            CharBuffer buf = BufferKit.directBuffer(1);
             assertEquals(
-                JieIO.readTo(new CharArrayReader(data), buf),
+                IOKit.readTo(new CharArrayReader(data), buf),
                 -1
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(new CharArrayReader(data), JieBuffer.directBuffer(0)),
+                IOKit.readTo(new CharArrayReader(data), BufferKit.directBuffer(0)),
                 0
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(new CharArrayReader(data), buf, 1),
+                IOKit.readTo(new CharArrayReader(data), buf, 1),
                 -1
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                JieIO.readTo(new CharArrayReader(data), buf, 0),
+                IOKit.readTo(new CharArrayReader(data), buf, 0),
                 0
             );
             assertEquals(buf.position(), 0);
@@ -223,27 +223,27 @@ public class CharIOTest {
             tin.setNextOperation(ReadOps.THROW, 99);
             ErrorAppender errOut = new ErrorAppender();
             // read stream
-            expectThrows(IORuntimeException.class, () -> JieIO.readTo(tin, errOut));
-            expectThrows(IORuntimeException.class, () -> JieIO.readTo(tin, errOut, 1));
-            expectThrows(IllegalArgumentException.class, () -> JieIO.readTo(tin, errOut, -1));
-            expectThrows(IORuntimeException.class, () -> JieIO.readTo(tin, new char[1], 0, 1));
-            expectThrows(IndexOutOfBoundsException.class, () -> JieIO.readTo(tin, new char[0], 1, 0));
-            expectThrows(IndexOutOfBoundsException.class, () -> JieIO.readTo(tin, new char[0], 0, 1));
-            expectThrows(IORuntimeException.class, () -> JieIO.readTo(tin, CharBuffer.allocate(1)));
-            expectThrows(IllegalArgumentException.class, () -> JieIO.readTo(tin, CharBuffer.allocate(1), -1));
+            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tin, errOut));
+            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tin, errOut, 1));
+            expectThrows(IllegalArgumentException.class, () -> IOKit.readTo(tin, errOut, -1));
+            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tin, new char[1], 0, 1));
+            expectThrows(IndexOutOfBoundsException.class, () -> IOKit.readTo(tin, new char[0], 1, 0));
+            expectThrows(IndexOutOfBoundsException.class, () -> IOKit.readTo(tin, new char[0], 0, 1));
+            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tin, CharBuffer.allocate(1)));
+            expectThrows(IllegalArgumentException.class, () -> IOKit.readTo(tin, CharBuffer.allocate(1), -1));
             expectThrows(IORuntimeException.class, () ->
-                JieIO.readTo(new CharArrayReader(new char[1]), CharBuffer.allocate(1).asReadOnlyBuffer())
+                IOKit.readTo(new CharArrayReader(new char[1]), CharBuffer.allocate(1).asReadOnlyBuffer())
             );
         }
     }
 
     private void testReadTo(int totalSize) throws Exception {
-        testReadTo(CharIO.get(JieIO.bufferSize()), totalSize);
+        testReadTo(CharIO.get(IOKit.bufferSize()), totalSize);
         testReadTo(CharIO.get(1), totalSize);
         testReadTo(CharIO.get(2), totalSize);
-        testReadTo(CharIO.get(JieIO.bufferSize() - 1), totalSize);
-        testReadTo(CharIO.get(JieIO.bufferSize() + 1), totalSize);
-        testReadTo(CharIO.get(JieIO.bufferSize() * 2), totalSize);
+        testReadTo(CharIO.get(IOKit.bufferSize() - 1), totalSize);
+        testReadTo(CharIO.get(IOKit.bufferSize() + 1), totalSize);
+        testReadTo(CharIO.get(IOKit.bufferSize() * 2), totalSize);
     }
 
     private void testReadTo(CharIO reader, int totalSize) throws Exception {
@@ -365,13 +365,13 @@ public class CharIOTest {
         {
             // reader to direct buffer
             char[] data = JieRandom.fill(new char[totalSize]);
-            CharBuffer dst = JieBuffer.directBuffer(data.length * 2);
+            CharBuffer dst = BufferKit.directBuffer(data.length * 2);
             assertEquals(
                 reader.readTo(new CharArrayReader(data), dst),
                 totalSize
             );
             assertEquals(dst.flip(), CharBuffer.wrap(data));
-            dst = JieBuffer.directBuffer(data.length * 2);
+            dst = BufferKit.directBuffer(data.length * 2);
             assertEquals(
                 reader.readTo(new CharArrayReader(data), dst, readSize < 0 ? totalSize : readSize),
                 actualReadSize(totalSize, readSize)
@@ -396,7 +396,7 @@ public class CharIOTest {
     public void testOther() {
         {
             // get operator
-            assertSame(CharIO.defaultOperator(), CharIO.get(JieIO.bufferSize()));
+            assertSame(CharIO.defaultOperator(), CharIO.get(IOKit.bufferSize()));
             assertEquals(CharIO.newOperator(666).bufferSize(), 666);
         }
         {

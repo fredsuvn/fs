@@ -2,7 +2,7 @@ package xyz.sunqian.common.encode;
 
 import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.base.chars.JieChars;
-import xyz.sunqian.common.io.JieBuffer;
+import xyz.sunqian.common.io.BufferKit;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -99,7 +99,7 @@ public interface DataDecoder extends BaseDataEncoder {
          * @throws DecodingException for decoding error
          */
         default ByteBuffer fromLatin(CharBuffer data) throws DecodingException {
-            char[] chars = JieBuffer.read(data);
+            char[] chars = BufferKit.read(data);
             byte[] bytes = JieString.getBytes(chars);
             return decode(ByteBuffer.wrap(bytes));
         }

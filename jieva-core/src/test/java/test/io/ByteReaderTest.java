@@ -6,7 +6,7 @@ import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.io.ByteReader;
 import xyz.sunqian.common.io.ByteSegment;
 import xyz.sunqian.common.io.IORuntimeException;
-import xyz.sunqian.common.io.JieBuffer;
+import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.test.ErrorOutputStream;
 import xyz.sunqian.test.ReadOps;
 import xyz.sunqian.test.TestInputStream;
@@ -109,7 +109,7 @@ public class ByteReaderTest {
             ByteSegment segment = reader.read(readSize);
             int actualLen = Math.min(readSize, data.length - hasRead);
             assertEquals(
-                JieBuffer.copyContent(segment.data()),
+                BufferKit.copyContent(segment.data()),
                 Arrays.copyOfRange(data, hasRead, hasRead + actualLen)
             );
             hasRead += actualLen;
@@ -188,7 +188,7 @@ public class ByteReaderTest {
         {
             // byte buffer
             testReadTo0(() -> ByteReader.from(ByteBuffer.wrap(data)), data, readSize);
-            testReadTo0(() -> ByteReader.from(JieBuffer.directBuffer(data)), data, readSize);
+            testReadTo0(() -> ByteReader.from(BufferKit.directBuffer(data)), data, readSize);
         }
     }
 
@@ -414,21 +414,21 @@ public class ByteReaderTest {
                 int actualLen = reader.readTo(dst);
                 assertEquals(actualLen, Math.min(data.length, DST_SIZE));
                 dst.flip();
-                assertEquals(JieBuffer.copyContent(dst), Arrays.copyOf(data, actualLen));
+                assertEquals(BufferKit.copyContent(dst), Arrays.copyOf(data, actualLen));
                 if (reader.markSupported()) {
                     reader.reset();
                     dst = ByteBuffer.allocateDirect(DST_SIZE);
                     actualLen = reader.readTo(dst);
                     assertEquals(actualLen, Math.min(data.length, DST_SIZE));
                     dst.flip();
-                    assertEquals(JieBuffer.copyContent(dst), Arrays.copyOf(data, actualLen));
+                    assertEquals(BufferKit.copyContent(dst), Arrays.copyOf(data, actualLen));
                 }
                 // read all
                 reader = supplier.get();
                 dst = ByteBuffer.allocate(data.length);
                 assertEquals(reader.readTo(dst), data.length);
                 dst.flip();
-                assertEquals(JieBuffer.copyContent(dst), data);
+                assertEquals(BufferKit.copyContent(dst), data);
                 assertEquals(reader.readTo(ByteBuffer.allocate(1)), -1);
                 assertEquals(reader.readTo(ByteBuffer.allocateDirect(1)), -1);
                 reader.close();
@@ -471,21 +471,21 @@ public class ByteReaderTest {
                 int actualLen = reader.readTo(dst, readSize);
                 assertEquals(actualLen, minSize(data.length, readSize, DST_SIZE));
                 dst.flip();
-                assertEquals(JieBuffer.copyContent(dst), Arrays.copyOf(data, actualLen));
+                assertEquals(BufferKit.copyContent(dst), Arrays.copyOf(data, actualLen));
                 if (reader.markSupported()) {
                     reader.reset();
                     dst = ByteBuffer.allocateDirect(DST_SIZE);
                     actualLen = reader.readTo(dst, readSize);
                     assertEquals(actualLen, minSize(data.length, readSize, DST_SIZE));
                     dst.flip();
-                    assertEquals(JieBuffer.copyContent(dst), Arrays.copyOf(data, actualLen));
+                    assertEquals(BufferKit.copyContent(dst), Arrays.copyOf(data, actualLen));
                 }
                 // read all
                 reader = supplier.get();
                 dst = ByteBuffer.allocate(data.length);
                 assertEquals(reader.readTo(dst, data.length), data.length);
                 dst.flip();
-                assertEquals(JieBuffer.copyContent(dst), data);
+                assertEquals(BufferKit.copyContent(dst), data);
                 assertEquals(reader.readTo(ByteBuffer.allocate(1), 1), -1);
                 assertEquals(reader.readTo(ByteBuffer.allocateDirect(1), 1), -1);
                 reader.close();
@@ -534,7 +534,7 @@ public class ByteReaderTest {
             // byte buffer
             byte[] data = JieRandom.fill(new byte[dataSize]);
             testShare(ByteReader.from(ByteBuffer.wrap(data)), ByteBuffer.wrap(data), true, true);
-            ByteBuffer direct = JieBuffer.directBuffer(data);
+            ByteBuffer direct = BufferKit.directBuffer(data);
             testShare(ByteReader.from(direct), direct.slice(), true, true);
         }
     }

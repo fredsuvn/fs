@@ -6,7 +6,7 @@ import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.bytes.JieBytes;
 import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.io.IORuntimeException;
-import xyz.sunqian.common.io.JieIO;
+import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.test.JieAssert;
 
 import java.io.ByteArrayOutputStream;
@@ -79,13 +79,13 @@ public class BytesBuilderTest {
         assertEquals(bb.toByteArray(), Arrays.copyOf(bs, 30));
         assertEquals(buffer.position(), 5);
         assertFalse(buffer.hasRemaining());
-        bb.append(JieIO.newInputStream(Arrays.copyOfRange(bs, 30, 40)));
+        bb.append(IOKit.newInputStream(Arrays.copyOfRange(bs, 30, 40)));
         assertEquals(bb.toByteArray(), Arrays.copyOf(bs, 40));
         BytesBuilder bb2 = new BytesBuilder();
         bb2.append(Arrays.copyOfRange(bs, 40, 50));
         bb.append(bb2);
         assertEquals(bb.toByteArray(), Arrays.copyOf(bs, 50));
-        bb.append(JieIO.newInputStream(Arrays.copyOfRange(bs, 50, 60)), 1);
+        bb.append(IOKit.newInputStream(Arrays.copyOfRange(bs, 50, 60)), 1);
         assertEquals(bb.toByteArray(), Arrays.copyOf(bs, 60));
         ByteBuffer buffer2 = ByteBuffer.allocateDirect(10);
         buffer2.put(ByteBuffer.wrap(Arrays.copyOfRange(bs, 60, 70)));

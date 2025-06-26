@@ -413,7 +413,7 @@ final class ByteReaderImpl {
             }
             int remaining = endPos - pos;
             ByteBuffer buf = ByteBuffer.wrap(source, pos, remaining);
-            int ret = JieBuffer.readTo(buf, dst);
+            int ret = BufferKit.readTo(buf, dst);
             pos += ret;
             return ret;
         }
@@ -432,7 +432,7 @@ final class ByteReaderImpl {
             int remaining = endPos - pos;
             int actualLen = (int) Math.min(remaining, len);
             ByteBuffer buf = ByteBuffer.wrap(source, pos, actualLen);
-            int ret = JieBuffer.readTo(buf, dst);
+            int ret = BufferKit.readTo(buf, dst);
             pos += ret;
             return ret;
         }
@@ -567,18 +567,18 @@ final class ByteReaderImpl {
 
         @Override
         public long readTo(@Nonnull OutputStream dst) throws IORuntimeException {
-            return JieBuffer.readTo(source, dst);
+            return BufferKit.readTo(source, dst);
         }
 
         @Override
         public long readTo(@Nonnull OutputStream dst, long len) throws IllegalArgumentException, IORuntimeException {
             int actualLen = (int) Math.min(Integer.MAX_VALUE, len);
-            return JieBuffer.readTo(source, dst, actualLen);
+            return BufferKit.readTo(source, dst, actualLen);
         }
 
         @Override
         public long readTo(@Nonnull WritableByteChannel dst) throws IORuntimeException {
-            return JieBuffer.readTo(source, dst);
+            return BufferKit.readTo(source, dst);
         }
 
         @Override
@@ -586,27 +586,27 @@ final class ByteReaderImpl {
             @Nonnull WritableByteChannel dst, long len
         ) throws IllegalArgumentException, IORuntimeException {
             int actualLen = (int) Math.min(Integer.MAX_VALUE, len);
-            return JieBuffer.readTo(source, dst, actualLen);
+            return BufferKit.readTo(source, dst, actualLen);
         }
 
         @Override
         public int readTo(byte @Nonnull [] dst) {
-            return JieBuffer.readTo(source, dst);
+            return BufferKit.readTo(source, dst);
         }
 
         @Override
         public int readTo(byte @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException {
-            return JieBuffer.readTo(source, dst, off, len);
+            return BufferKit.readTo(source, dst, off, len);
         }
 
         @Override
         public int readTo(@Nonnull ByteBuffer dst) throws IORuntimeException {
-            return JieBuffer.readTo(source, dst);
+            return BufferKit.readTo(source, dst);
         }
 
         @Override
         public int readTo(@Nonnull ByteBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
-            return JieBuffer.readTo(source, dst, len);
+            return BufferKit.readTo(source, dst, len);
         }
 
         @Override

@@ -1,7 +1,7 @@
 package xyz.sunqian.common.encode;
 
 import xyz.sunqian.common.base.chars.JieChars;
-import xyz.sunqian.common.io.JieBuffer;
+import xyz.sunqian.common.io.BufferKit;
 
 import java.nio.ByteBuffer;
 
@@ -85,7 +85,7 @@ public interface DataEncoder extends BaseDataEncoder {
          */
         default String toLatin(ByteBuffer source) throws EncodingException {
             ByteBuffer encoded = encode(source);
-            byte[] bytes = JieBuffer.read(encoded);
+            byte[] bytes = BufferKit.read(encoded);
             return new String(bytes, JieChars.latinCharset());
         }
     }

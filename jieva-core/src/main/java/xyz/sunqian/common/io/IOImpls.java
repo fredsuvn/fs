@@ -477,8 +477,8 @@ final class IOImpls {
                 reader.mark(readlimit);
             } catch (IOException ignored) {
             }
-            inCopy = JieBuffer.copy(inBuffer);
-            outCopy = JieBuffer.copy(outBuffer);
+            inCopy = BufferKit.copy(inBuffer);
+            outCopy = BufferKit.copy(outBuffer);
             endCopy = endOfInput;
         }
 
@@ -905,8 +905,8 @@ final class IOImpls {
         @Override
         public void mark(int readAheadLimit) {
             inputStream.mark(readAheadLimit);
-            inCopy = JieBuffer.copy(inBuffer);
-            outCopy = JieBuffer.copy(outBuffer);
+            inCopy = BufferKit.copy(inBuffer);
+            outCopy = BufferKit.copy(outBuffer);
             endCopy = endOfInput;
         }
 
@@ -1280,7 +1280,7 @@ final class IOImpls {
         @Override
         public void flush() throws IOException {
             checkClosed();
-            JieIO.flush(appender);
+            IOKit.flush(appender);
         }
 
         @Override
@@ -1288,7 +1288,7 @@ final class IOImpls {
             if (closed) {
                 return;
             }
-            JieIO.close(appender);
+            IOKit.close(appender);
             closed = true;
         }
 
@@ -1531,12 +1531,12 @@ final class IOImpls {
                     CoderResult coderResult = encoder.encode(inBuffer, outBuffer, false);
                     if (coderResult.isOverflow()) {
                         outBuffer.flip();
-                        JieBuffer.readTo(outBuffer, outputStream);
+                        BufferKit.readTo(outBuffer, outputStream);
                         // outputStream.append(outBuffer);
                         outBuffer.clear();
                     } else if (coderResult.isUnderflow()) {
                         outBuffer.flip();
-                        JieBuffer.readTo(outBuffer, outputStream);
+                        BufferKit.readTo(outBuffer, outputStream);
                         // appender.append(outBuffer);
                         outBuffer.clear();
                         break;

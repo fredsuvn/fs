@@ -5,9 +5,9 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Flag;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.chars.JieChars;
-import xyz.sunqian.common.objects.data.DataProperty;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingOptions;
+import xyz.sunqian.common.objects.data.DataProperty;
 
 import java.lang.reflect.Type;
 import java.nio.ByteBuffer;

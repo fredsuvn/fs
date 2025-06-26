@@ -5,8 +5,8 @@ import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.collect.JieCollect;
 import xyz.sunqian.common.collect.JieList;
-import xyz.sunqian.common.io.JieBuffer;
-import xyz.sunqian.common.io.JieIO;
+import xyz.sunqian.common.io.BufferKit;
+import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.net.GekNetException;
 import xyz.sunqian.common.net.GekServerStates;
 
@@ -150,7 +150,7 @@ public interface GekUdpServer extends GekUdpClient {
         private final List<GekUdpPacketHandler<?>> packetHandlers = new LinkedList<>();
         private @Nullable GekUdpServerHandler serverHandler;
         private @Nullable ExecutorService executor;
-        private int packetBufferSize = JieIO.bufferSize();
+        private int packetBufferSize = IOKit.bufferSize();
 
         /**
          * Sets local port, maybe 0 to get an available one from system.
@@ -316,7 +316,7 @@ public interface GekUdpServer extends GekUdpClient {
                 if (buffer.hasArray()) {
                     datagramPacket = new DatagramPacket(buffer.array(), buffer.arrayOffset(), buffer.remaining());
                 } else {
-                    byte[] bytes = JieBuffer.read(buffer);
+                    byte[] bytes = BufferKit.read(buffer);
                     datagramPacket = new DatagramPacket(bytes, bytes.length);
                 }
                 datagramPacket.setSocketAddress(packet.getHeader().getInetSocketAddress());
@@ -497,7 +497,7 @@ public interface GekUdpServer extends GekUdpClient {
                 if (!buffer.hasRemaining()) {
                     return EMPTY_BUFFER;
                 }
-                return ByteBuffer.wrap(JieBuffer.read(buffer)).asReadOnlyBuffer();
+                return ByteBuffer.wrap(BufferKit.read(buffer)).asReadOnlyBuffer();
             }
         }
     }

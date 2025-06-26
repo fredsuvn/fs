@@ -1,9 +1,9 @@
 package xyz.sunqian.common.net.data.protobuf;
 
-import xyz.sunqian.common.objects.data.DataSchemaParser;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.handlers.AssignableMapperHandler;
 import xyz.sunqian.common.mapping.handlers.BeanMapperHandler;
+import xyz.sunqian.common.objects.data.DataSchemaParser;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -20,12 +20,12 @@ import java.util.Arrays;
 public interface ByteIO {
 
     /**
-     * Returns the default {@link ByteIO} instance of which buffer size is {@link JieIO#bufferSize()}.
+     * Returns the default {@link ByteIO} instance of which buffer size is {@link IOKit#bufferSize()}.
      *
-     * @return the default {@link ByteIO} instance of which buffer size is {@link JieIO#bufferSize()}
+     * @return the default {@link ByteIO} instance of which buffer size is {@link IOKit#bufferSize()}
      */
     static ByteIO defaultOperator() {
-        return JieIO.defaultByteOperator();
+        return IOKit.defaultByteOperator();
     }
 
     /**
@@ -37,7 +37,7 @@ public interface ByteIO {
      * @throws IllegalArgumentException if the given buffer size {@code <= 0}
      */
     static ByteIO get(int bufSize) throws IllegalArgumentException {
-        return bufSize == JieIO.bufferSize() ? defaultOperator() : newOperator(bufSize);
+        return bufSize == IOKit.bufferSize() ? defaultOperator() : newOperator(bufSize);
     }
 
     /**

@@ -30,7 +30,7 @@ public interface ByteReader {
      * @return the given stream as a new {@link ByteReader}
      */
     static @Nonnull ByteReader from(@Nonnull InputStream src) {
-        return from(src, JieIO.bufferSize());
+        return from(src, IOKit.bufferSize());
     }
 
     /**
@@ -66,7 +66,7 @@ public interface ByteReader {
      * @return the given channel as a new {@link ByteReader}
      */
     static @Nonnull ByteReader from(@Nonnull ReadableByteChannel src) {
-        return from(src, JieIO.bufferSize());
+        return from(src, IOKit.bufferSize());
     }
 
     /**

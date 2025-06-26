@@ -1,8 +1,8 @@
 package xyz.sunqian.common.encode;
 
 import xyz.sunqian.annotations.ThreadSafe;
-import xyz.sunqian.common.io.ByteEncoder;
 import xyz.sunqian.common.base.exception.UnreachablePointException;
+import xyz.sunqian.common.io.ByteEncoder;
 
 import java.util.Arrays;
 
@@ -189,8 +189,8 @@ public class JieBase64 {
         int getOutputSize(int inputSize) throws EncodingException;
 
         /**
-         * Returns a new {@link ByteEncoder.Handler} which encapsulates current base64 encoding, supports any size of input
-         * data, not thread-safe.
+         * Returns a new {@link ByteEncoder.Handler} which encapsulates current base64 encoding, supports any size of
+         * input data, not thread-safe.
          *
          * @return a {@link ByteEncoder.Handler} with current base64 encoding logic
          * @see ByteEncoder
@@ -229,8 +229,8 @@ public class JieBase64 {
         int getOutputSize(int inputSize) throws DecodingException;
 
         /**
-         * Returns a new {@link ByteEncoder.Handler} which encapsulates current base64 decoding, supports any size of input
-         * data, not thread-safe.
+         * Returns a new {@link ByteEncoder.Handler} which encapsulates current base64 decoding, supports any size of
+         * input data, not thread-safe.
          *
          * @return a {@link ByteEncoder.Handler} with current base64 decoding logic
          * @see ByteEncoder

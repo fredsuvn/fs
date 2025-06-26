@@ -22,7 +22,7 @@ final class ByteEncoderImpl implements ByteEncoder {
     private final @Nullable Object source;
     private @Nullable Object dest;
     private long readLimit = -1;
-    private int readBlockSize = JieIO.bufferSize();
+    private int readBlockSize = IOKit.bufferSize();
     private boolean endOnZeroRead = false;
     private @Nullable List<Handler> encoders;
 
@@ -155,10 +155,10 @@ final class ByteEncoderImpl implements ByteEncoder {
             return (InputStream) src;
         }
         if (src instanceof byte[]) {
-            return JieIO.newInputStream((byte[]) src);
+            return IOKit.newInputStream((byte[]) src);
         }
         if (src instanceof ByteBuffer) {
-            return JieIO.newInputStream((ByteBuffer) src);
+            return IOKit.newInputStream((ByteBuffer) src);
         }
         throw new IORuntimeException("The type of source is unsupported: " + src.getClass());
     }
@@ -281,10 +281,10 @@ final class ByteEncoderImpl implements ByteEncoder {
             return new OutputSteamDataWriter((OutputStream) dst);
         }
         if (dst instanceof byte[]) {
-            return new OutputSteamDataWriter(JieIO.newOutputStream((byte[]) dst));
+            return new OutputSteamDataWriter(IOKit.newOutputStream((byte[]) dst));
         }
         if (dst instanceof ByteBuffer) {
-            return new OutputSteamDataWriter(JieIO.newOutputStream((ByteBuffer) dst));
+            return new OutputSteamDataWriter(IOKit.newOutputStream((ByteBuffer) dst));
         }
         throw new IORuntimeException("The type of destination is unsupported: " + dst.getClass());
     }
@@ -324,7 +324,7 @@ final class ByteEncoderImpl implements ByteEncoder {
         public void write(ByteBuffer buffer) throws IOException {
             if (buffer.hasArray()) {
                 int remaining = buffer.remaining();
-                dest.write(buffer.array(), JieBuffer.arrayStartIndex(buffer), remaining);
+                dest.write(buffer.array(), BufferKit.arrayStartIndex(buffer), remaining);
                 buffer.position(buffer.position() + remaining);
             } else {
                 byte[] buf = new byte[buffer.remaining()];
@@ -534,7 +534,7 @@ final class ByteEncoderImpl implements ByteEncoder {
 
             // clean buffer
             if (buffer != null && buffer.position() > 0) {
-                JieBuffer.readTo(data, buffer);
+                BufferKit.readTo(data, buffer);
                 if (end && !data.hasRemaining()) {
                     buffer.flip();
                     return encoder.encode(buffer, true);
@@ -571,7 +571,7 @@ final class ByteEncoderImpl implements ByteEncoder {
                 if (buffer == null) {
                     buffer = ByteBuffer.allocate(size);
                 }
-                JieBuffer.readTo(data, buffer);
+                BufferKit.readTo(data, buffer);
                 if (end) {
                     buffer.flip();
                     result = JieCoding.ifAdd(result, encoder.encode(buffer, true));
@@ -608,7 +608,7 @@ final class ByteEncoderImpl implements ByteEncoder {
 
             // clean buffer
             if (buffer != null && buffer.position() > 0) {
-                JieBuffer.readTo(data, buffer);
+                BufferKit.readTo(data, buffer);
                 if (end && !data.hasRemaining()) {
                     buffer.flip();
                     return encoder.encode(buffer, true);
@@ -647,7 +647,7 @@ final class ByteEncoderImpl implements ByteEncoder {
                 if (buffer == null) {
                     buffer = ByteBuffer.allocate(size);
                 }
-                JieBuffer.readTo(data, buffer);
+                BufferKit.readTo(data, buffer);
                 if (end) {
                     buffer.flip();
                     result = JieCoding.ifAdd(result, encoder.encode(buffer, true));

@@ -1,8 +1,8 @@
 package xyz.sunqian.common.net.data;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.io.JieBuffer;
-import xyz.sunqian.common.io.JieIO;
+import xyz.sunqian.common.io.BufferKit;
+import xyz.sunqian.common.io.IOKit;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -332,7 +332,7 @@ public class JieCodec {
     public static int doCipher(Cipher cipher, InputStream in, ByteBuffer out, int blockSize) throws CodecException {
         try {
             if (blockSize <= 0) {
-                byte[] inBytes = JieIO.read(in);
+                byte[] inBytes = IOKit.read(in);
                 if (inBytes == null) {
                     return 0;
                 }
@@ -341,7 +341,7 @@ public class JieCodec {
             int outSize = 0;
             byte[] inBytes = new byte[blockSize];
             while (true) {
-                int readCount = JieIO.readTo(in, inBytes);
+                int readCount = IOKit.readTo(in, inBytes);
                 if (readCount < 0) {
                     break;
                 }
@@ -374,7 +374,7 @@ public class JieCodec {
     public static long doCipher(Cipher cipher, InputStream in, OutputStream out, int blockSize) throws CodecException {
         try {
             if (blockSize <= 0) {
-                byte[] inBytes = JieIO.read(in);
+                byte[] inBytes = IOKit.read(in);
                 if (inBytes == null) {
                     return 0;
                 }
@@ -385,7 +385,7 @@ public class JieCodec {
             int outSize = 0;
             byte[] inBytes = new byte[blockSize];
             while (true) {
-                int readCount = JieIO.readTo(in, inBytes);
+                int readCount = IOKit.readTo(in, inBytes);
                 if (readCount < 0) {
                     break;
                 }
@@ -424,7 +424,7 @@ public class JieCodec {
             if (in.hasArray()) {
                 return cipher.doFinal(in.array(), in.arrayOffset() + in.position(), in.remaining());
             }
-            byte[] inBytes = JieBuffer.read(in);
+            byte[] inBytes = BufferKit.read(in);
             return cipher.doFinal(inBytes);
         } catch (Exception e) {
             throw new CodecException(e);
@@ -444,7 +444,7 @@ public class JieCodec {
     @Nullable
     public static byte[] doCipher(Cipher cipher, InputStream in) throws CodecException {
         try {
-            byte[] inBytes = JieIO.read(in);
+            byte[] inBytes = IOKit.read(in);
             if (inBytes == null) {
                 return null;
             }
@@ -482,7 +482,7 @@ public class JieCodec {
      * @throws CodecException codec exception
      */
     public static byte[] doDigest(MessageDigest digest, InputStream in) throws CodecException {
-        return doDigest(digest, in, JieIO.bufferSize());
+        return doDigest(digest, in, IOKit.bufferSize());
     }
 
     /**
@@ -498,12 +498,12 @@ public class JieCodec {
     public static byte[] doDigest(MessageDigest digest, InputStream in, int bufferSize) throws CodecException {
         try {
             if (bufferSize <= 0) {
-                byte[] input = JieIO.read(in);
+                byte[] input = IOKit.read(in);
                 return digest.digest(input);
             }
             byte[] inBytes = new byte[bufferSize];
             while (true) {
-                int readCount = JieIO.readTo(in, inBytes);
+                int readCount = IOKit.readTo(in, inBytes);
                 if (readCount < 0) {
                     break;
                 }
@@ -549,7 +549,7 @@ public class JieCodec {
      * @throws CodecException codec exception
      */
     public static byte[] doMac(Mac mac, InputStream in) throws CodecException {
-        return doMac(mac, in, JieIO.bufferSize());
+        return doMac(mac, in, IOKit.bufferSize());
     }
 
     /**
@@ -565,12 +565,12 @@ public class JieCodec {
     public static byte[] doMac(Mac mac, InputStream in, int bufferSize) throws CodecException {
         try {
             if (bufferSize <= 0) {
-                byte[] input = JieIO.read(in);
+                byte[] input = IOKit.read(in);
                 return mac.doFinal(input);
             }
             byte[] inBytes = new byte[bufferSize];
             while (true) {
-                int readCount = JieIO.readTo(in, inBytes);
+                int readCount = IOKit.readTo(in, inBytes);
                 if (readCount < 0) {
                     break;
                 }
@@ -616,7 +616,7 @@ public class JieCodec {
      * @throws CodecException codec exception
      */
     public static byte[] doSign(Signature sign, InputStream in) throws CodecException {
-        return doSign(sign, in, JieIO.bufferSize());
+        return doSign(sign, in, IOKit.bufferSize());
     }
 
     /**
@@ -632,13 +632,13 @@ public class JieCodec {
     public static byte[] doSign(Signature sign, InputStream in, int bufferSize) throws CodecException {
         try {
             if (bufferSize <= 0) {
-                byte[] input = JieIO.read(in);
+                byte[] input = IOKit.read(in);
                 sign.update(input);
                 return sign.sign();
             }
             byte[] inBytes = new byte[bufferSize];
             while (true) {
-                int readCount = JieIO.readTo(in, inBytes);
+                int readCount = IOKit.readTo(in, inBytes);
                 if (readCount < 0) {
                     break;
                 }
@@ -686,7 +686,7 @@ public class JieCodec {
      * @throws CodecException codec exception
      */
     public static boolean doVerify(Signature sign, InputStream in, byte[] signature) throws CodecException {
-        return doVerify(sign, in, JieIO.bufferSize(), signature);
+        return doVerify(sign, in, IOKit.bufferSize(), signature);
     }
 
     /**
@@ -703,13 +703,13 @@ public class JieCodec {
     public static boolean doVerify(Signature sign, InputStream in, int bufferSize, byte[] signature) throws CodecException {
         try {
             if (bufferSize <= 0) {
-                byte[] input = JieIO.read(in);
+                byte[] input = IOKit.read(in);
                 sign.update(input);
                 return sign.verify(signature);
             }
             byte[] inBytes = new byte[bufferSize];
             while (true) {
-                int readCount = JieIO.readTo(in, inBytes);
+                int readCount = IOKit.readTo(in, inBytes);
                 if (readCount < 0) {
                     break;
                 }

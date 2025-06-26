@@ -1,7 +1,7 @@
 package xyz.sunqian.common.net.data;
 
+import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IORuntimeException;
-import xyz.sunqian.common.io.JieBuffer;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -86,7 +86,7 @@ public class IOMisc {
             if (newBuffer == null) {
                 result.add(readSlice(buffer, length));
             } else {
-                JieBuffer.readTo(buffer, newBuffer);
+                BufferKit.readTo(buffer, newBuffer);
                 newBuffer.flip();
                 result.add(newBuffer);
             }
@@ -173,7 +173,7 @@ public class IOMisc {
             if (newBuffer == null) {
                 result.add(readSlice(buffer, length));
             } else {
-                JieBuffer.readTo(buffer, newBuffer);
+                BufferKit.readTo(buffer, newBuffer);
                 newBuffer.flip();
                 result.add(newBuffer);
             }
@@ -274,7 +274,7 @@ public class IOMisc {
                 if (newBuffer == null) {
                     result.add(readSlice(buffer, length));
                 } else {
-                    JieBuffer.readTo(buffer, newBuffer);
+                    BufferKit.readTo(buffer, newBuffer);
                     newBuffer.flip();
                     result.add(newBuffer);
                 }
@@ -307,7 +307,7 @@ public class IOMisc {
 
     /**
      * Returns back array if {@link #isSimpleWrapper(ByteBuffer)} returns true for given buffer, and the position will
-     * be set to {@code buffer.limit()}. Otherwise, return {@link JieBuffer#read(ByteBuffer)}.
+     * be set to {@code buffer.limit()}. Otherwise, return {@link BufferKit#read(ByteBuffer)}.
      *
      * @param buffer given buffer
      * @return back array if {@link #isSimpleWrapper(ByteBuffer)} returns true for given buffer
@@ -317,6 +317,6 @@ public class IOMisc {
             buffer.position(buffer.limit());
             return buffer.array();
         }
-        return JieBuffer.read(buffer);
+        return BufferKit.read(buffer);
     }
 }

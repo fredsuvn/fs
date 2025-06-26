@@ -1,9 +1,9 @@
 package xyz.sunqian.common.net.data;
 
 import xyz.sunqian.annotations.ThreadSafe;
-import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.base.JieCheck;
 import xyz.sunqian.common.base.JieString;
+import xyz.sunqian.common.base.chars.JieChars;
 
 import java.io.InputStream;
 import java.nio.ByteBuffer;

@@ -58,7 +58,7 @@ public interface ByteSegment {
      * @return the remaining data as a new byte array from the {@link #data()}
      */
     default byte @Nonnull [] toByteArray() {
-        byte[] ret = JieBuffer.read(data());
+        byte[] ret = BufferKit.read(data());
         return ret == null ? new byte[0] : ret;
     }
 
@@ -69,7 +69,7 @@ public interface ByteSegment {
      * @return a new array copied from the remaining content of the {@link #data()}
      */
     default byte @Nonnull [] copyByteArray() {
-        return JieBuffer.copyContent(data());
+        return BufferKit.copyContent(data());
     }
 
     /**

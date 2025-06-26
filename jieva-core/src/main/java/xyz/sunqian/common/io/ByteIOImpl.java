@@ -28,7 +28,7 @@ final class ByteIOImpl implements ByteIO {
             return 0;
         }
         try {
-            byte[] buf = new byte[JieIO.bufferSize(len, bufSize)];
+            byte[] buf = new byte[IOKit.bufferSize(len, bufSize)];
             long count = 0;
             while (true) {
                 int readSize = len < 0 ?
@@ -56,7 +56,7 @@ final class ByteIOImpl implements ByteIO {
             return 0;
         }
         try {
-            byte[] arr = new byte[JieIO.bufferSize(len, bufSize)];
+            byte[] arr = new byte[IOKit.bufferSize(len, bufSize)];
             ByteBuffer buf = ByteBuffer.wrap(arr);
             long count = 0;
             while (true) {
@@ -69,7 +69,7 @@ final class ByteIOImpl implements ByteIO {
                 }
                 buf.position(0);
                 buf.limit(readSize);
-                JieBuffer.readTo(buf, dst);
+                BufferKit.readTo(buf, dst);
                 count += readSize;
                 if (len > 0 && count >= len) {
                     return count;
@@ -110,7 +110,7 @@ final class ByteIOImpl implements ByteIO {
         try {
             if (dst.hasArray()) {
                 byte[] buf = dst.array();
-                int off = JieBuffer.arrayStartIndex(dst);
+                int off = BufferKit.arrayStartIndex(dst);
                 int actualLen = len < 0 ? dst.remaining() : Math.min(dst.remaining(), len);
                 int ret = readTo0(src, buf, off, actualLen);
                 if (ret <= 0) {
@@ -142,7 +142,7 @@ final class ByteIOImpl implements ByteIO {
             return 0;
         }
         try {
-            ByteBuffer buf = ByteBuffer.allocate(JieIO.bufferSize(len, bufSize));
+            ByteBuffer buf = ByteBuffer.allocate(IOKit.bufferSize(len, bufSize));
             long count = 0;
             while (true) {
                 int limit = len < 0 ? buf.remaining() : (int) Math.min(buf.remaining(), len - count);
@@ -152,7 +152,7 @@ final class ByteIOImpl implements ByteIO {
                     return count == 0 ? -1 : count;
                 }
                 buf.flip();
-                JieBuffer.readTo(buf, dst);
+                BufferKit.readTo(buf, dst);
                 buf.clear();
                 count += readSize;
                 if (len > 0 && count >= len) {
@@ -174,7 +174,7 @@ final class ByteIOImpl implements ByteIO {
             return 0;
         }
         try {
-            ByteBuffer buf = ByteBuffer.allocate(JieIO.bufferSize(len, bufSize));
+            ByteBuffer buf = ByteBuffer.allocate(IOKit.bufferSize(len, bufSize));
             long count = 0;
             while (true) {
                 int limit = len < 0 ? buf.remaining() : (int) Math.min(buf.remaining(), len - count);
@@ -184,7 +184,7 @@ final class ByteIOImpl implements ByteIO {
                     return count == 0 ? -1 : count;
                 }
                 buf.flip();
-                JieBuffer.readTo(buf, dst);
+                BufferKit.readTo(buf, dst);
                 buf.clear();
                 count += readSize;
                 if (len > 0 && count >= len) {

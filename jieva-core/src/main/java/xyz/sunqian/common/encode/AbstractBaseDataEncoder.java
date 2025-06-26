@@ -1,8 +1,8 @@
 package xyz.sunqian.common.encode;
 
 import xyz.sunqian.common.base.bytes.JieBytes;
+import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.ByteEncoder;
-import xyz.sunqian.common.io.JieBuffer;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -187,8 +187,8 @@ public abstract class AbstractBaseDataEncoder implements BaseDataEncoder {
         if (source.hasArray()) {
             doCodeResult = doCode(
                 source.array(),
-                JieBuffer.arrayStartIndex(source),
-                JieBuffer.arrayEndIndex(source),
+                BufferKit.arrayStartIndex(source),
+                BufferKit.arrayEndIndex(source),
                 dst,
                 0,
                 outputSize,
@@ -231,11 +231,11 @@ public abstract class AbstractBaseDataEncoder implements BaseDataEncoder {
             int oldPos = source.position();
             long doCodeResult = doCode(
                 source.array(),
-                JieBuffer.arrayStartIndex(source),
-                JieBuffer.arrayEndIndex(source),
+                BufferKit.arrayStartIndex(source),
+                BufferKit.arrayEndIndex(source),
                 dest.array(),
-                JieBuffer.arrayStartIndex(dest),
-                JieBuffer.arrayStartIndex(dest) + outputSize,
+                BufferKit.arrayStartIndex(dest),
+                BufferKit.arrayStartIndex(dest) + outputSize,
                 startPos,
                 end
             );

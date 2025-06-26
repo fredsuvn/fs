@@ -2,11 +2,15 @@ package xyz.sunqian.common.net.udp;
 
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.ThreadSafe;
-import xyz.sunqian.common.io.JieBuffer;
+import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.net.GekNetException;
 
 import java.io.IOException;
-import java.net.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketAddress;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.function.Consumer;
 
@@ -156,7 +160,7 @@ public interface GekUdpClient {
                 if (buffer.hasArray()) {
                     datagramPacket = new DatagramPacket(buffer.array(), buffer.arrayOffset(), buffer.remaining());
                 } else {
-                    byte[] bytes = JieBuffer.read(buffer);
+                    byte[] bytes = BufferKit.read(buffer);
                     datagramPacket = new DatagramPacket(bytes, bytes.length);
                 }
                 datagramPacket.setSocketAddress(packet.getHeader().getInetSocketAddress());

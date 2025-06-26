@@ -3,8 +3,8 @@
  * <p>
  * Core I/O Utilities:
  * <ul>
- *     <li>{@link xyz.sunqian.common.io.JieIO}</li>
- *     <li>{@link xyz.sunqian.common.io.JieBuffer}</li>
+ *     <li>{@link xyz.sunqian.common.io.IOKit}</li>
+ *     <li>{@link xyz.sunqian.common.io.BufferKit}</li>
  * </ul>
  * <p>
  * Core I/O Utility Interfaces:

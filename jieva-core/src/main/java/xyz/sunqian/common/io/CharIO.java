@@ -17,12 +17,12 @@ import java.util.Arrays;
 public interface CharIO {
 
     /**
-     * Returns the default {@link CharIO} instance of which buffer size is {@link JieIO#bufferSize()}.
+     * Returns the default {@link CharIO} instance of which buffer size is {@link IOKit#bufferSize()}.
      *
-     * @return the default {@link CharIO} instance of which buffer size is {@link JieIO#bufferSize()}
+     * @return the default {@link CharIO} instance of which buffer size is {@link IOKit#bufferSize()}
      */
     static CharIO defaultOperator() {
-        return JieIO.defaultCharOperator();
+        return IOKit.defaultCharOperator();
     }
 
     /**
@@ -34,7 +34,7 @@ public interface CharIO {
      * @throws IllegalArgumentException if the given buffer size {@code <= 0}
      */
     static CharIO get(int bufSize) throws IllegalArgumentException {
-        return bufSize == JieIO.bufferSize() ? defaultOperator() : newOperator(bufSize);
+        return bufSize == IOKit.bufferSize() ? defaultOperator() : newOperator(bufSize);
     }
 
     /**

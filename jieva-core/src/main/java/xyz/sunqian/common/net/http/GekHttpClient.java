@@ -3,7 +3,7 @@ package xyz.sunqian.common.net.http;
 import lombok.Getter;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.ThreadSafe;
-import xyz.sunqian.common.io.JieIO;
+import xyz.sunqian.common.io.IOKit;
 
 import java.net.Proxy;
 import java.time.Duration;
@@ -61,7 +61,7 @@ public interface GekHttpClient {
         /**
          * Chunk size.
          */
-        private int chunkSize = JieIO.bufferSize();
+        private int chunkSize = IOKit.bufferSize();
         /**
          * Proxy info.
          */

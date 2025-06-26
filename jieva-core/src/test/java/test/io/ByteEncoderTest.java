@@ -12,8 +12,8 @@ import xyz.sunqian.common.base.value.IntVar;
 import xyz.sunqian.common.collect.JieArray;
 import xyz.sunqian.common.io.ByteEncoder;
 import xyz.sunqian.common.io.IORuntimeException;
-import xyz.sunqian.common.io.JieBuffer;
-import xyz.sunqian.common.io.JieIO;
+import xyz.sunqian.common.io.BufferKit;
+import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.test.JieTestException;
 import xyz.sunqian.test.MaterialBox;
 
@@ -40,13 +40,13 @@ public class ByteEncoderTest {
 
     @Test
     public void testProcessing() throws Exception {
-        testProcessing(0, JieIO.bufferSize(), -1);
-        testProcessing(666, JieIO.bufferSize(), -1);
+        testProcessing(0, IOKit.bufferSize(), -1);
+        testProcessing(666, IOKit.bufferSize(), -1);
         testProcessing(0, 67, -1);
         testProcessing(666, 67, -1);
         testProcessing(666, 1, -1);
         testProcessing(100, 10, -1);
-        testProcessing(666, JieIO.bufferSize(), -1);
+        testProcessing(666, IOKit.bufferSize(), -1);
         testProcessing(0, 67, 667);
         testProcessing(666, 67, 667);
         testProcessing(666, 1, 667);
@@ -101,14 +101,14 @@ public class ByteEncoderTest {
             long readNum = ByteEncoder.from(in).readBlockSize(blockSize).writeTo(outBuffer);
             assertEquals(readNum, bytes.length);
             outBuffer.flip();
-            byte[] outBytes = JieBuffer.read(outBuffer);
+            byte[] outBytes = BufferKit.read(outBuffer);
             assertEquals(str, new String(outBytes, JieChars.defaultCharset()));
             outBuffer = MaterialBox.copyPadding(bytes);
             in.reset();
             readNum = ByteEncoder.from(in).readBlockSize(blockSize).writeTo(outBuffer);
             assertEquals(readNum, bytes.length);
             outBuffer.flip();
-            outBytes = JieBuffer.read(outBuffer);
+            outBytes = BufferKit.read(outBuffer);
             assertEquals(str, new String(outBytes, JieChars.defaultCharset()));
         }
 
@@ -166,12 +166,12 @@ public class ByteEncoderTest {
             long readNum = ByteEncoder.from(bytes).readBlockSize(blockSize).readLimit(readLimit).writeTo(outBuffer);
             assertEquals(readNum, getLength(totalSize, readLimit));
             outBuffer.flip();
-            assertEquals(Arrays.copyOfRange(bytes, 0, getLength(totalSize, readLimit)), JieBuffer.read(outBuffer));
+            assertEquals(Arrays.copyOfRange(bytes, 0, getLength(totalSize, readLimit)), BufferKit.read(outBuffer));
             outBuffer = ByteBuffer.allocateDirect(bytes.length);
             readNum = ByteEncoder.from(bytes).readBlockSize(blockSize).writeTo(outBuffer);
             assertEquals(readNum, bytes.length);
             outBuffer.flip();
-            byte[] outBytes = JieBuffer.read(outBuffer);
+            byte[] outBytes = BufferKit.read(outBuffer);
             assertEquals(str, new String(outBytes, JieChars.defaultCharset()));
         }
 
@@ -202,7 +202,7 @@ public class ByteEncoderTest {
             long readNum = ByteEncoder.from(inBuffer).readBlockSize(blockSize).readLimit(readLimit).writeTo(outBytes);
             assertEquals(readNum, getLength(totalSize, readLimit));
             inBuffer.flip();
-            assertEquals(JieBuffer.read(inBuffer), Arrays.copyOfRange(outBytes, 0, getLength(totalSize, readLimit)));
+            assertEquals(BufferKit.read(inBuffer), Arrays.copyOfRange(outBytes, 0, getLength(totalSize, readLimit)));
             inBuffer = copyDirect(bytes);
             outBytes = new byte[bytes.length];
             readNum = ByteEncoder.from(inBuffer).readBlockSize(blockSize).writeTo(outBytes);
@@ -218,15 +218,15 @@ public class ByteEncoderTest {
             assertEquals(readNum, getLength(totalSize, readLimit));
             inBuffer.flip();
             outBuffer.flip();
-            assertEquals(JieBuffer.read(inBuffer), JieBuffer.read(outBuffer));
+            assertEquals(BufferKit.read(inBuffer), BufferKit.read(outBuffer));
             inBuffer = MaterialBox.copyPadding(bytes);
             outBuffer = MaterialBox.copyPadding(bytes);
             readNum = ByteEncoder.from(inBuffer).readBlockSize(blockSize).readLimit(readLimit).writeTo(outBuffer);
             assertEquals(readNum, getLength(totalSize, readLimit));
             inBuffer.flip();
             outBuffer.flip();
-            byte[] outBytes = JieBuffer.read(outBuffer);
-            assertEquals(JieBuffer.read(inBuffer), outBytes);
+            byte[] outBytes = BufferKit.read(outBuffer);
+            assertEquals(BufferKit.read(inBuffer), outBytes);
         }
 
         {
@@ -340,7 +340,7 @@ public class ByteEncoderTest {
             }).writeTo(dst);
             assertEquals(dst.toByteArray(), JieArray.fill(new byte[dataSize * 2], (byte) 6));
             src.flip();
-            assertEquals(JieBuffer.read(src), JieArray.fill(new byte[dataSize], (byte) 9));
+            assertEquals(BufferKit.read(src), JieArray.fill(new byte[dataSize], (byte) 9));
             assertEquals(ec.get(), 1);
         }
         {
@@ -367,7 +367,7 @@ public class ByteEncoderTest {
             }).writeTo(dst);
             assertEquals(dst.toByteArray(), JieArray.fill(new byte[dataSize * 2], (byte) 6));
             src.reset();
-            assertEquals(JieIO.read(src), JieArray.fill(new byte[dataSize], (byte) 6));
+            assertEquals(IOKit.read(src), JieArray.fill(new byte[dataSize], (byte) 6));
             assertEquals(ec.get(), 1);
         }
         {
@@ -709,7 +709,7 @@ public class ByteEncoderTest {
                         ret.flip();
                         return ret;
                     } else {
-                        return ByteBuffer.wrap(JieBuffer.read(data));
+                        return ByteBuffer.wrap(BufferKit.read(data));
                     }
                 }))
                 .writeTo(dst);
@@ -754,11 +754,11 @@ public class ByteEncoderTest {
             );
             assertEquals(
                 ByteEncoder.from(new byte[0]).toInputStream().getClass(),
-                JieIO.newInputStream(new byte[0]).getClass()
+                IOKit.newInputStream(new byte[0]).getClass()
             );
             assertEquals(
                 ByteEncoder.from(ByteBuffer.allocate(0)).toInputStream().getClass(),
-                JieIO.newInputStream(ByteBuffer.allocate(0)).getClass()
+                IOKit.newInputStream(ByteBuffer.allocate(0)).getClass()
             );
             ByteEncoder inst = ByteEncoder.from(new byte[0]);
             invokeThrows(
@@ -796,7 +796,7 @@ public class ByteEncoderTest {
                     }
                     return bb.toByteBuffer();
                 })).toInputStream();
-            assertEquals(JieIO.read(empty), new byte[]{9, 1, 2, 3});
+            assertEquals(IOKit.read(empty), new byte[]{9, 1, 2, 3});
             assertEquals(empty.read(), -1);
             InputStream err1 = ByteEncoder.from(new ThrowIn(0))
                 .encoder((d, e) -> d)
@@ -848,7 +848,7 @@ public class ByteEncoderTest {
         {
             IntVar ec = IntVar.of(0);
             InputStream in = toInputStream(src, readBlockSize, ec);
-            assertEquals(JieIO.read(in), encoded);
+            assertEquals(IOKit.read(in), encoded);
             assertEquals(in.read(), -1);
             assertEquals(ec.get(), 1);
         }
@@ -875,7 +875,7 @@ public class ByteEncoderTest {
         }
         {
             InputStream in = ByteEncoder.from(src).readBlockSize(readBlockSize).toInputStream();
-            assertEquals(JieIO.read(in), src);
+            assertEquals(IOKit.read(in), src);
             assertEquals(in.read(), -1);
         }
     }
@@ -913,7 +913,7 @@ public class ByteEncoderTest {
         {
             char[] str = JieRandom.fill(new char[totalSize], 'a', 'z');
             byte[] bytes = new String(str).getBytes(JieChars.defaultCharset());
-            String converted = JieIO.string(
+            String converted = IOKit.string(
                 ByteEncoder.from(bytes).readBlockSize(blockSize).toCharProcessor(JieChars.defaultCharset()).toReader()
             );
             assertEquals(converted.toCharArray(), str);
@@ -921,7 +921,7 @@ public class ByteEncoderTest {
         {
             char[] str = JieRandom.fill(new char[totalSize], '\u4e00', '\u9fff');
             byte[] bytes = new String(str).getBytes(JieChars.defaultCharset());
-            String converted = JieIO.string(
+            String converted = IOKit.string(
                 ByteEncoder.from(bytes).readBlockSize(blockSize).toCharProcessor(JieChars.defaultCharset()).toReader()
             );
             assertEquals(converted.toCharArray(), str);

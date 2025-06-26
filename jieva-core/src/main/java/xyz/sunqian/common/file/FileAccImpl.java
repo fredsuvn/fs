@@ -1,8 +1,13 @@
 package xyz.sunqian.common.file;
 
-import xyz.sunqian.common.io.JieIO;
+import xyz.sunqian.common.io.IOKit;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 
@@ -74,7 +79,7 @@ final class FileAccImpl implements FileAcc {
         checkOpened();
         checkStatus();
         hasStream = true;
-        InputStream ris = JieIO.newInputStream(raf, position);
+        InputStream ris = IOKit.newInputStream(raf, position);
         return new BindedInputStream(ris);
     }
 
@@ -83,7 +88,7 @@ final class FileAccImpl implements FileAcc {
         checkOpened();
         checkStatus();
         hasStream = true;
-        OutputStream ros = JieIO.newOutputStream(raf, position);
+        OutputStream ros = IOKit.newOutputStream(raf, position);
         return new BindedOutputStream(ros);
     }
 

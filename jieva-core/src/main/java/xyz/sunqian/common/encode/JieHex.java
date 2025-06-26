@@ -60,8 +60,8 @@ public class JieHex {
         int getOutputSize(int inputSize) throws EncodingException;
 
         /**
-         * Returns a new {@link ByteEncoder.Handler} which encapsulates current hex encoding, supports any size of input data,
-         * not thread-safe.
+         * Returns a new {@link ByteEncoder.Handler} which encapsulates current hex encoding, supports any size of input
+         * data, not thread-safe.
          *
          * @return a {@link ByteEncoder.Handler} with current hex encoding logic
          * @see ByteEncoder
@@ -100,8 +100,8 @@ public class JieHex {
         int getOutputSize(int inputSize) throws DecodingException;
 
         /**
-         * Returns a new {@link ByteEncoder.Handler} which encapsulates current hex decoding, supports any size of input data,
-         * not thread-safe.
+         * Returns a new {@link ByteEncoder.Handler} which encapsulates current hex decoding, supports any size of input
+         * data, not thread-safe.
          *
          * @return a {@link ByteEncoder.Handler} with current hex decoding logic
          * @see ByteEncoder

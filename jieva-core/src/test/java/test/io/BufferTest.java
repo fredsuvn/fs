@@ -7,7 +7,7 @@ import xyz.sunqian.common.base.chars.CharsBuilder;
 import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.collect.JieArray;
 import xyz.sunqian.common.io.IORuntimeException;
-import xyz.sunqian.common.io.JieBuffer;
+import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.test.ErrorAppender;
 import xyz.sunqian.test.ErrorOutputStream;
 import xyz.sunqian.test.MaterialBox;
@@ -36,8 +36,8 @@ public class BufferTest {
         assertEquals(buffer.arrayOffset(), 10);
         assertEquals(buffer.position(), 1);
         assertEquals(buffer.remaining(), 99);
-        assertEquals(JieBuffer.arrayStartIndex(buffer), 10 + 1);
-        assertEquals(JieBuffer.arrayEndIndex(buffer), 10 + 1 + 99);
+        assertEquals(BufferKit.arrayStartIndex(buffer), 10 + 1);
+        assertEquals(BufferKit.arrayEndIndex(buffer), 10 + 1 + 99);
     }
 
     @Test
@@ -46,23 +46,23 @@ public class BufferTest {
             // direct
             char[] chars = JieRandom.fill(new char[128]);
             CharBuffer heapBuffer = CharBuffer.wrap(chars);
-            CharBuffer directBuffer = JieBuffer.directBuffer(chars.length);
+            CharBuffer directBuffer = BufferKit.directBuffer(chars.length);
             directBuffer.put(chars);
             directBuffer.flip();
             assertEquals(directBuffer, heapBuffer);
             assertTrue(directBuffer.isDirect());
-            expectThrows(IllegalArgumentException.class, () -> JieBuffer.directBuffer(-1));
+            expectThrows(IllegalArgumentException.class, () -> BufferKit.directBuffer(-1));
         }
         {
             // byte
             byte[] data = JieRandom.fill(new byte[128]);
-            ByteBuffer buffer = JieBuffer.directBuffer(data);
+            ByteBuffer buffer = BufferKit.directBuffer(data);
             assertEquals(buffer, ByteBuffer.wrap(data));
             assertEquals(buffer.position(), 0);
             assertEquals(buffer.limit(), data.length);
             assertEquals(buffer.capacity(), data.length);
             assertTrue(buffer.isDirect());
-            buffer = JieBuffer.directBuffer(data, 6, 66);
+            buffer = BufferKit.directBuffer(data, 6, 66);
             assertEquals(buffer, ByteBuffer.wrap(data, 6, 66));
             assertEquals(buffer.position(), 0);
             assertEquals(buffer.limit(), 66);
@@ -72,13 +72,13 @@ public class BufferTest {
         {
             // char
             char[] data = JieRandom.fill(new char[128]);
-            CharBuffer buffer = JieBuffer.directBuffer(data);
+            CharBuffer buffer = BufferKit.directBuffer(data);
             assertEquals(buffer, CharBuffer.wrap(data));
             assertEquals(buffer.position(), 0);
             assertEquals(buffer.limit(), data.length);
             assertEquals(buffer.capacity(), data.length);
             assertTrue(buffer.isDirect());
-            buffer = JieBuffer.directBuffer(data, 6, 66);
+            buffer = BufferKit.directBuffer(data, 6, 66);
             assertEquals(buffer, CharBuffer.wrap(data, 6, 66));
             assertEquals(buffer.position(), 0);
             assertEquals(buffer.limit(), 66);
@@ -94,16 +94,16 @@ public class BufferTest {
             byte[] data = JieRandom.fill(new byte[128]);
             ByteBuffer b1 = ByteBuffer.wrap(data, 6, 66);
             b1.get(new byte[5]);
-            ByteBuffer b2 = JieBuffer.copy(b1);
+            ByteBuffer b2 = BufferKit.copy(b1);
             assertEquals(b2, b1);
             assertFalse(b2.isDirect());
-            ByteBuffer b3 = JieBuffer.directBuffer(data);
+            ByteBuffer b3 = BufferKit.directBuffer(data);
             b3.get(new byte[5]);
-            ByteBuffer b4 = JieBuffer.copy(b3);
+            ByteBuffer b4 = BufferKit.copy(b3);
             assertEquals(b4, b3);
             assertTrue(b4.isDirect());
             ByteBuffer b5 = ByteBuffer.wrap(data, 6, 66);
-            assertEquals(JieBuffer.copyContent(b5), Arrays.copyOfRange(data, 6, 6 + 66));
+            assertEquals(BufferKit.copyContent(b5), Arrays.copyOfRange(data, 6, 6 + 66));
             assertEquals(b5.position(), 6);
             assertEquals(b5.remaining(), 66);
         }
@@ -112,18 +112,18 @@ public class BufferTest {
             char[] data = JieRandom.fill(new char[128]);
             CharBuffer b1 = CharBuffer.wrap(data, 6, 66);
             b1.get(new char[5]);
-            CharBuffer b2 = JieBuffer.copy(b1);
+            CharBuffer b2 = BufferKit.copy(b1);
             assertEquals(b2, b1);
             assertFalse(b2.isDirect());
-            CharBuffer b3 = JieBuffer.directBuffer(data.length);
+            CharBuffer b3 = BufferKit.directBuffer(data.length);
             b3.put(data);
             b3.flip();
             b3.get(new char[5]);
-            CharBuffer b4 = JieBuffer.copy(b3);
+            CharBuffer b4 = BufferKit.copy(b3);
             assertEquals(b4, b3);
             assertTrue(b4.isDirect());
             CharBuffer b5 = CharBuffer.wrap(data, 6, 66);
-            assertEquals(JieBuffer.copyContent(b5), Arrays.copyOfRange(data, 6, 6 + 66));
+            assertEquals(BufferKit.copyContent(b5), Arrays.copyOfRange(data, 6, 6 + 66));
             assertEquals(b5.position(), 6);
             assertEquals(b5.remaining(), 66);
         }
@@ -142,22 +142,22 @@ public class BufferTest {
             // exceptions
             // byte
             expectThrows(IllegalArgumentException.class, () ->
-                JieBuffer.slice(ByteBuffer.allocate(100), -1));
+                BufferKit.slice(ByteBuffer.allocate(100), -1));
             expectThrows(IndexOutOfBoundsException.class, () ->
-                JieBuffer.slice(ByteBuffer.allocate(100), 0, -1));
+                BufferKit.slice(ByteBuffer.allocate(100), 0, -1));
             expectThrows(IndexOutOfBoundsException.class, () ->
-                JieBuffer.slice(ByteBuffer.allocate(100), -1, 0));
+                BufferKit.slice(ByteBuffer.allocate(100), -1, 0));
             expectThrows(IndexOutOfBoundsException.class, () ->
-                JieBuffer.slice(ByteBuffer.allocate(100), 50, 51));
+                BufferKit.slice(ByteBuffer.allocate(100), 50, 51));
             // char
             expectThrows(IllegalArgumentException.class, () ->
-                JieBuffer.slice(CharBuffer.allocate(100), -1));
+                BufferKit.slice(CharBuffer.allocate(100), -1));
             expectThrows(IndexOutOfBoundsException.class, () ->
-                JieBuffer.slice(CharBuffer.allocate(100), 0, -1));
+                BufferKit.slice(CharBuffer.allocate(100), 0, -1));
             expectThrows(IndexOutOfBoundsException.class, () ->
-                JieBuffer.slice(CharBuffer.allocate(100), -1, 0));
+                BufferKit.slice(CharBuffer.allocate(100), -1, 0));
             expectThrows(IndexOutOfBoundsException.class, () ->
-                JieBuffer.slice(CharBuffer.allocate(100), 50, 51));
+                BufferKit.slice(CharBuffer.allocate(100), 50, 51));
         }
     }
 
@@ -166,7 +166,7 @@ public class BufferTest {
             // byte: slice(src, len)
             byte[] data = JieArray.fill(new byte[size], (byte) 6);
             ByteBuffer buffer = ByteBuffer.wrap(data);
-            ByteBuffer slice = JieBuffer.slice(buffer, length);
+            ByteBuffer slice = BufferKit.slice(buffer, length);
             assertEquals(buffer.position(), 0);
             assertEquals(buffer.limit(), size);
             assertEquals(buffer.capacity(), size);
@@ -187,7 +187,7 @@ public class BufferTest {
             // byte: slice(src, off, len)
             byte[] data = JieArray.fill(new byte[size], (byte) 6);
             ByteBuffer buffer = ByteBuffer.wrap(data);
-            ByteBuffer slice = JieBuffer.slice(buffer, offset, length);
+            ByteBuffer slice = BufferKit.slice(buffer, offset, length);
             assertEquals(buffer.position(), 0);
             assertEquals(buffer.limit(), size);
             assertEquals(buffer.capacity(), size);
@@ -212,7 +212,7 @@ public class BufferTest {
             // char: slice(src, len)
             char[] data = JieArray.fill(new char[size], (char) 6);
             CharBuffer buffer = CharBuffer.wrap(data);
-            CharBuffer slice = JieBuffer.slice(buffer, length);
+            CharBuffer slice = BufferKit.slice(buffer, length);
             assertEquals(buffer.position(), 0);
             assertEquals(buffer.limit(), size);
             assertEquals(buffer.capacity(), size);
@@ -233,7 +233,7 @@ public class BufferTest {
             // char: slice(src, off, len)
             char[] data = JieArray.fill(new char[size], (char) 6);
             CharBuffer buffer = CharBuffer.wrap(data);
-            CharBuffer slice = JieBuffer.slice(buffer, offset, length);
+            CharBuffer slice = BufferKit.slice(buffer, offset, length);
             assertEquals(buffer.position(), 0);
             assertEquals(buffer.limit(), size);
             assertEquals(buffer.capacity(), size);
@@ -269,28 +269,28 @@ public class BufferTest {
             // byte to string
             String hello = "hello";
             byte[] bytes = hello.getBytes(JieChars.defaultCharset());
-            assertEquals(JieBuffer.string(ByteBuffer.wrap(bytes)), hello);
-            assertNull(JieBuffer.string(ByteBuffer.allocate(0)));
+            assertEquals(BufferKit.string(ByteBuffer.wrap(bytes)), hello);
+            assertNull(BufferKit.string(ByteBuffer.allocate(0)));
         }
 
         {
             // error
             expectThrows(IllegalArgumentException.class, () ->
-                JieBuffer.read(ByteBuffer.allocate(1), -1));
+                BufferKit.read(ByteBuffer.allocate(1), -1));
             expectThrows(IllegalArgumentException.class, () ->
-                JieBuffer.readTo(ByteBuffer.allocate(1), ByteBuffer.allocate(1), -1));
+                BufferKit.readTo(ByteBuffer.allocate(1), ByteBuffer.allocate(1), -1));
             expectThrows(IORuntimeException.class, () ->
-                JieBuffer.readTo(ByteBuffer.allocate(1), Channels.newChannel(new ErrorOutputStream())));
+                BufferKit.readTo(ByteBuffer.allocate(1), Channels.newChannel(new ErrorOutputStream())));
             expectThrows(IllegalArgumentException.class, () ->
-                JieBuffer.readTo(ByteBuffer.allocate(1), Channels.newChannel(new ByteArrayOutputStream()), -1));
+                BufferKit.readTo(ByteBuffer.allocate(1), Channels.newChannel(new ByteArrayOutputStream()), -1));
             expectThrows(IORuntimeException.class, () ->
-                JieBuffer.readTo(ByteBuffer.allocate(1), new ErrorOutputStream()));
+                BufferKit.readTo(ByteBuffer.allocate(1), new ErrorOutputStream()));
             expectThrows(IllegalArgumentException.class, () ->
-                JieBuffer.readTo(ByteBuffer.allocate(1), new ByteArrayOutputStream(), -1));
+                BufferKit.readTo(ByteBuffer.allocate(1), new ByteArrayOutputStream(), -1));
             expectThrows(IORuntimeException.class, () ->
-                JieBuffer.readTo(ByteBuffer.allocate(1), ByteBuffer.allocate(1).asReadOnlyBuffer()));
+                BufferKit.readTo(ByteBuffer.allocate(1), ByteBuffer.allocate(1).asReadOnlyBuffer()));
             expectThrows(IORuntimeException.class, () ->
-                JieBuffer.readTo(ByteBuffer.allocate(1), ByteBuffer.allocate(1).asReadOnlyBuffer(), 1));
+                BufferKit.readTo(ByteBuffer.allocate(1), ByteBuffer.allocate(1).asReadOnlyBuffer(), 1));
         }
     }
 
@@ -300,7 +300,7 @@ public class BufferTest {
             // read all
             byte[] data = JieRandom.fill(new byte[totalSize]);
             ByteBuffer src = ByteBuffer.wrap(data);
-            byte[] ret = JieBuffer.read(src);
+            byte[] ret = BufferKit.read(src);
             if (totalSize == 0) {
                 assertNull(ret);
             } else {
@@ -308,7 +308,7 @@ public class BufferTest {
             }
             assertEquals(src.position(), src.limit());
             src.clear();
-            ret = JieBuffer.read(src, readSize);
+            ret = BufferKit.read(src, readSize);
             if (totalSize == 0 && readSize != 0) {
                 assertNull(ret);
             } else {
@@ -321,12 +321,12 @@ public class BufferTest {
             byte[] data = JieRandom.fill(new byte[totalSize]);
             ByteBuffer src = ByteBuffer.wrap(data);
             byte[] dst = new byte[readSize];
-            assertEquals(JieBuffer.readTo(src, dst), actualReadSize(totalSize, readSize));
+            assertEquals(BufferKit.readTo(src, dst), actualReadSize(totalSize, readSize));
             assertEquals(Arrays.copyOf(dst, actualLen), Arrays.copyOf(data, actualLen));
             assertEquals(src.position(), actualLen);
             src.clear();
             dst = new byte[readSize];
-            assertEquals(JieBuffer.readTo(src, dst, 0, readSize), actualReadSize(totalSize, readSize));
+            assertEquals(BufferKit.readTo(src, dst, 0, readSize), actualReadSize(totalSize, readSize));
             assertEquals(Arrays.copyOf(dst, actualLen), Arrays.copyOf(data, actualLen));
             assertEquals(src.position(), actualLen);
         }
@@ -336,20 +336,20 @@ public class BufferTest {
             ByteBuffer src = ByteBuffer.wrap(data);
             byte[] dstData = new byte[readSize];
             ByteBuffer dst = ByteBuffer.wrap(dstData);
-            assertEquals(JieBuffer.readTo(src, dst), actualReadSize(totalSize, readSize));
+            assertEquals(BufferKit.readTo(src, dst), actualReadSize(totalSize, readSize));
             assertEquals(Arrays.copyOf(dstData, actualLen), Arrays.copyOf(data, actualLen));
             assertEquals(src.position(), actualLen);
             assertEquals(dst.position(), actualLen);
             src.clear();
             dstData = new byte[readSize];
             dst = ByteBuffer.wrap(dstData);
-            assertEquals(JieBuffer.readTo(src, dst, readSize), actualReadSize(totalSize, readSize));
+            assertEquals(BufferKit.readTo(src, dst, readSize), actualReadSize(totalSize, readSize));
             assertEquals(Arrays.copyOf(dstData, actualLen), Arrays.copyOf(data, actualLen));
             assertEquals(src.position(), actualLen);
             assertEquals(dst.position(), actualLen);
             src.clear();
             dst = ByteBuffer.allocate(0);
-            assertEquals(JieBuffer.readTo(src, dst, readSize), 0);
+            assertEquals(BufferKit.readTo(src, dst, readSize), 0);
             assertEquals(src.position(), 0);
         }
         {
@@ -358,24 +358,24 @@ public class BufferTest {
             BytesBuilder builder = new BytesBuilder();
             ByteBuffer src = ByteBuffer.wrap(data);
             WritableByteChannel dst = Channels.newChannel(builder);
-            assertEquals(JieBuffer.readTo(src, dst), totalSize == 0 ? -1 : totalSize);
+            assertEquals(BufferKit.readTo(src, dst), totalSize == 0 ? -1 : totalSize);
             assertEquals(builder.toByteArray(), data);
             assertEquals(src.position(), src.limit());
             src.clear();
             builder.reset();
-            assertEquals(JieBuffer.readTo(src, dst, readSize), actualReadSize(totalSize, readSize));
+            assertEquals(BufferKit.readTo(src, dst, readSize), actualReadSize(totalSize, readSize));
             assertEquals(builder.toByteArray(), Arrays.copyOf(data, actualLen));
             assertEquals(src.position(), actualLen);
             // write one byte channel
             dst = new OneByteWriteableChannel(builder);
             src.clear();
             builder.reset();
-            assertEquals(JieBuffer.readTo(src, dst), totalSize == 0 ? -1 : totalSize);
+            assertEquals(BufferKit.readTo(src, dst), totalSize == 0 ? -1 : totalSize);
             assertEquals(builder.toByteArray(), data);
             assertEquals(src.position(), src.limit());
             src.clear();
             builder.reset();
-            assertEquals(JieBuffer.readTo(src, dst, readSize), actualReadSize(totalSize, readSize));
+            assertEquals(BufferKit.readTo(src, dst, readSize), actualReadSize(totalSize, readSize));
             assertEquals(builder.toByteArray(), Arrays.copyOf(data, actualLen));
             assertEquals(src.position(), actualLen);
         }
@@ -384,12 +384,12 @@ public class BufferTest {
             byte[] data = JieRandom.fill(new byte[totalSize]);
             BytesBuilder builder = new BytesBuilder();
             ByteBuffer src = ByteBuffer.wrap(data);
-            assertEquals(JieBuffer.readTo(src, builder), totalSize == 0 ? -1 : totalSize);
+            assertEquals(BufferKit.readTo(src, builder), totalSize == 0 ? -1 : totalSize);
             assertEquals(builder.toByteArray(), data);
             assertEquals(src.position(), src.limit());
             src.clear();
             builder.reset();
-            assertEquals(JieBuffer.readTo(src, builder, readSize), actualReadSize(totalSize, readSize));
+            assertEquals(BufferKit.readTo(src, builder, readSize), actualReadSize(totalSize, readSize));
             assertEquals(builder.toByteArray(), Arrays.copyOf(data, actualLen));
             assertEquals(src.position(), actualLen);
         }
@@ -397,13 +397,13 @@ public class BufferTest {
             // direct buffer to stream
             byte[] data = JieRandom.fill(new byte[totalSize]);
             BytesBuilder builder = new BytesBuilder();
-            ByteBuffer src = JieBuffer.directBuffer(data);
-            assertEquals(JieBuffer.readTo(src, builder), totalSize == 0 ? -1 : totalSize);
+            ByteBuffer src = BufferKit.directBuffer(data);
+            assertEquals(BufferKit.readTo(src, builder), totalSize == 0 ? -1 : totalSize);
             assertEquals(builder.toByteArray(), data);
             assertEquals(src.position(), src.limit());
             src.clear();
             builder.reset();
-            assertEquals(JieBuffer.readTo(src, builder, readSize), actualReadSize(totalSize, readSize));
+            assertEquals(BufferKit.readTo(src, builder, readSize), actualReadSize(totalSize, readSize));
             assertEquals(builder.toByteArray(), Arrays.copyOf(data, actualLen));
             assertEquals(src.position(), actualLen);
         }
@@ -421,17 +421,17 @@ public class BufferTest {
         {
             // error
             expectThrows(IllegalArgumentException.class, () ->
-                JieBuffer.read(CharBuffer.allocate(1), -1));
+                BufferKit.read(CharBuffer.allocate(1), -1));
             expectThrows(IllegalArgumentException.class, () ->
-                JieBuffer.readTo(CharBuffer.allocate(1), CharBuffer.allocate(1), -1));
+                BufferKit.readTo(CharBuffer.allocate(1), CharBuffer.allocate(1), -1));
             expectThrows(IORuntimeException.class, () ->
-                JieBuffer.readTo(CharBuffer.allocate(1), new ErrorAppender()));
+                BufferKit.readTo(CharBuffer.allocate(1), new ErrorAppender()));
             expectThrows(IllegalArgumentException.class, () ->
-                JieBuffer.readTo(CharBuffer.allocate(1), new CharArrayWriter(), -1));
+                BufferKit.readTo(CharBuffer.allocate(1), new CharArrayWriter(), -1));
             expectThrows(IORuntimeException.class, () ->
-                JieBuffer.readTo(CharBuffer.allocate(1), CharBuffer.allocate(1).asReadOnlyBuffer()));
+                BufferKit.readTo(CharBuffer.allocate(1), CharBuffer.allocate(1).asReadOnlyBuffer()));
             expectThrows(IORuntimeException.class, () ->
-                JieBuffer.readTo(CharBuffer.allocate(1), CharBuffer.allocate(1).asReadOnlyBuffer(), 1));
+                BufferKit.readTo(CharBuffer.allocate(1), CharBuffer.allocate(1).asReadOnlyBuffer(), 1));
         }
     }
 
@@ -441,7 +441,7 @@ public class BufferTest {
             // read all
             char[] data = JieRandom.fill(new char[totalSize]);
             CharBuffer src = CharBuffer.wrap(data);
-            char[] ret = JieBuffer.read(src);
+            char[] ret = BufferKit.read(src);
             if (totalSize == 0) {
                 assertNull(ret);
             } else {
@@ -449,7 +449,7 @@ public class BufferTest {
             }
             assertEquals(src.position(), src.limit());
             src.clear();
-            ret = JieBuffer.read(src, readSize);
+            ret = BufferKit.read(src, readSize);
             if (totalSize == 0 && readSize != 0) {
                 assertNull(ret);
             } else {
@@ -458,7 +458,7 @@ public class BufferTest {
             assertEquals(src.position(), actualLen);
             // string
             src.clear();
-            String str = JieBuffer.string(src);
+            String str = BufferKit.string(src);
             if (totalSize == 0) {
                 assertNull(str);
             } else {
@@ -466,7 +466,7 @@ public class BufferTest {
             }
             assertEquals(src.position(), src.limit());
             src.clear();
-            str = JieBuffer.string(src, readSize);
+            str = BufferKit.string(src, readSize);
             if (totalSize == 0 && readSize != 0) {
                 assertNull(str);
             } else {
@@ -479,12 +479,12 @@ public class BufferTest {
             char[] data = JieRandom.fill(new char[totalSize]);
             CharBuffer src = CharBuffer.wrap(data);
             char[] dst = new char[readSize];
-            assertEquals(JieBuffer.readTo(src, dst), actualReadSize(totalSize, readSize));
+            assertEquals(BufferKit.readTo(src, dst), actualReadSize(totalSize, readSize));
             assertEquals(Arrays.copyOf(dst, actualLen), Arrays.copyOf(data, actualLen));
             assertEquals(src.position(), actualLen);
             src.clear();
             dst = new char[readSize];
-            assertEquals(JieBuffer.readTo(src, dst, 0, readSize), actualReadSize(totalSize, readSize));
+            assertEquals(BufferKit.readTo(src, dst, 0, readSize), actualReadSize(totalSize, readSize));
             assertEquals(Arrays.copyOf(dst, actualLen), Arrays.copyOf(data, actualLen));
             assertEquals(src.position(), actualLen);
         }
@@ -494,20 +494,20 @@ public class BufferTest {
             CharBuffer src = CharBuffer.wrap(data);
             char[] dstData = new char[readSize];
             CharBuffer dst = CharBuffer.wrap(dstData);
-            assertEquals(JieBuffer.readTo(src, dst), actualReadSize(totalSize, readSize));
+            assertEquals(BufferKit.readTo(src, dst), actualReadSize(totalSize, readSize));
             assertEquals(Arrays.copyOf(dstData, actualLen), Arrays.copyOf(data, actualLen));
             assertEquals(src.position(), actualLen);
             assertEquals(dst.position(), actualLen);
             src.clear();
             dstData = new char[readSize];
             dst = CharBuffer.wrap(dstData);
-            assertEquals(JieBuffer.readTo(src, dst, readSize), actualReadSize(totalSize, readSize));
+            assertEquals(BufferKit.readTo(src, dst, readSize), actualReadSize(totalSize, readSize));
             assertEquals(Arrays.copyOf(dstData, actualLen), Arrays.copyOf(data, actualLen));
             assertEquals(src.position(), actualLen);
             assertEquals(dst.position(), actualLen);
             src.clear();
             dst = CharBuffer.allocate(0);
-            assertEquals(JieBuffer.readTo(src, dst, readSize), 0);
+            assertEquals(BufferKit.readTo(src, dst, readSize), 0);
             assertEquals(src.position(), 0);
         }
         {
@@ -515,12 +515,12 @@ public class BufferTest {
             char[] data = JieRandom.fill(new char[totalSize]);
             CharsBuilder builder = new CharsBuilder();
             CharBuffer src = CharBuffer.wrap(data);
-            assertEquals(JieBuffer.readTo(src, builder), totalSize == 0 ? -1 : totalSize);
+            assertEquals(BufferKit.readTo(src, builder), totalSize == 0 ? -1 : totalSize);
             assertEquals(builder.toCharArray(), data);
             assertEquals(src.position(), src.limit());
             src.clear();
             builder.reset();
-            assertEquals(JieBuffer.readTo(src, builder, readSize), actualReadSize(totalSize, readSize));
+            assertEquals(BufferKit.readTo(src, builder, readSize), actualReadSize(totalSize, readSize));
             assertEquals(builder.toCharArray(), Arrays.copyOf(data, actualLen));
             assertEquals(src.position(), actualLen);
         }
@@ -528,13 +528,13 @@ public class BufferTest {
             // direct buffer to appender
             char[] data = JieRandom.fill(new char[totalSize]);
             CharsBuilder builder = new CharsBuilder();
-            CharBuffer src = JieBuffer.directBuffer(data);
-            assertEquals(JieBuffer.readTo(src, builder), totalSize == 0 ? -1 : totalSize);
+            CharBuffer src = BufferKit.directBuffer(data);
+            assertEquals(BufferKit.readTo(src, builder), totalSize == 0 ? -1 : totalSize);
             assertEquals(builder.toCharArray(), data);
             assertEquals(src.position(), src.limit());
             src.clear();
             builder.reset();
-            assertEquals(JieBuffer.readTo(src, builder, readSize), actualReadSize(totalSize, readSize));
+            assertEquals(BufferKit.readTo(src, builder, readSize), actualReadSize(totalSize, readSize));
             assertEquals(builder.toCharArray(), Arrays.copyOf(data, actualLen));
             assertEquals(src.position(), actualLen);
         }

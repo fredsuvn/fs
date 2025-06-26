@@ -25,7 +25,7 @@ import java.util.Arrays;
  *
  * @author sunqian
  */
-public class JieIO {
+public class IOKit {
 
     private static final @Nonnull ByteIO bo = ByteIO.newOperator(bufferSize());
     private static final @Nonnull CharIO co = CharIO.newOperator(bufferSize());

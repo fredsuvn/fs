@@ -18,7 +18,7 @@ import java.nio.charset.Charset;
  *
  * @author sunqian
  */
-public class JieBuffer {
+public class BufferKit {
 
     /**
      * Returns the actual start index (inclusive) of the backing array in the given buffer.
@@ -351,7 +351,7 @@ public class JieBuffer {
         try {
             int actualLen = len < 0 ? src.remaining() : Math.min(src.remaining(), len);
             if (src.hasArray()) {
-                dst.write(src.array(), JieBuffer.arrayStartIndex(src), actualLen);
+                dst.write(src.array(), BufferKit.arrayStartIndex(src), actualLen);
                 src.position(src.position() + actualLen);
             } else {
                 byte[] buf = new byte[actualLen];

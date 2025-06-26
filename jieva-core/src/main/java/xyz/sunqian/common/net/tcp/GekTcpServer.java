@@ -5,8 +5,8 @@ import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.collect.JieCollect;
 import xyz.sunqian.common.collect.JieList;
-import xyz.sunqian.common.io.JieBuffer;
-import xyz.sunqian.common.io.JieIO;
+import xyz.sunqian.common.io.BufferKit;
+import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.net.GekNetException;
 import xyz.sunqian.common.net.GekNetServerException;
 import xyz.sunqian.common.net.GekServerStates;
@@ -103,7 +103,7 @@ public interface GekTcpServer extends GekTcpEndpoint {
         private @Nullable GekTcpServerHandler serverHandler;
         private @Nullable IntFunction<ByteBuffer> bufferGenerator;
         private @Nullable ExecutorService executor;
-        private int channelBufferSize = JieIO.bufferSize();
+        private int channelBufferSize = IOKit.bufferSize();
         private @Nullable Consumer<ServerSocket> socketConfig;
 
         /**
@@ -619,7 +619,7 @@ public interface GekTcpServer extends GekTcpEndpoint {
 
                 @Override
                 public synchronized void send(GekData data) {
-                    JieIO.readTo(data.asInputStream(), getOutputStream());
+                    IOKit.readTo(data.asInputStream(), getOutputStream());
                 }
 
                 @Override
@@ -645,13 +645,13 @@ public interface GekTcpServer extends GekTcpEndpoint {
                     if (data.hasArray()) {
                         send(data.array(), data.arrayOffset(), data.remaining());
                     } else {
-                        send(JieBuffer.read(data));
+                        send(BufferKit.read(data));
                     }
                 }
 
                 @Override
                 public synchronized void send(InputStream data) {
-                    JieIO.readTo(data, getOutputStream());
+                    IOKit.readTo(data, getOutputStream());
                 }
 
                 @Override

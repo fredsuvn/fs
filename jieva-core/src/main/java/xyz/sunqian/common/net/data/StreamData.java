@@ -2,7 +2,7 @@ package xyz.sunqian.common.net.data;
 
 import xyz.sunqian.common.base.JieCheck;
 import xyz.sunqian.common.io.ByteEncoder;
-import xyz.sunqian.common.io.JieIO;
+import xyz.sunqian.common.io.IOKit;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -54,7 +54,7 @@ final class StreamData implements GekData.OfStream {
     @Override
     public int write(byte[] dest, int offset, int length) {
         JieCheck.checkRangeInBounds(offset, offset + length, 0, dest.length);
-        byte[] buffer = JieIO.read(stream, length);
+        byte[] buffer = IOKit.read(stream, length);
         if (buffer == null) {
             return -1;
         }
@@ -67,12 +67,12 @@ final class StreamData implements GekData.OfStream {
 
     @Override
     public int write(ByteBuffer dest, int length) {
-        return (int) ByteEncoder.from(stream).readLimit(length).writeTo(JieIO.newOutputStream(dest));
+        return (int) ByteEncoder.from(stream).readLimit(length).writeTo(IOKit.newOutputStream(dest));
     }
 
     @Override
     public long write(OutputStream dest) {
-        return JieIO.readTo(stream, dest);
+        return IOKit.readTo(stream, dest);
     }
 
     @Override
@@ -82,7 +82,7 @@ final class StreamData implements GekData.OfStream {
 
     @Override
     public byte[] toArray() {
-        return JieIO.read(stream);
+        return IOKit.read(stream);
     }
 
     @Override
