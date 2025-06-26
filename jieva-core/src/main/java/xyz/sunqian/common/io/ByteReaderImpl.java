@@ -398,14 +398,11 @@ final class ByteReaderImpl {
             if (pos == endPos) {
                 return -1;
             }
-            try {
-                int remaining = endPos - pos;
-                dst.write(ByteBuffer.wrap(source, pos, remaining));
-                pos += remaining;
-                return remaining;
-            } catch (IOException e) {
-                throw new IORuntimeException(e);
-            }
+            int remaining = endPos - pos;
+            ByteBuffer buf = ByteBuffer.wrap(source, pos, remaining);
+            int ret = JieBuffer.readTo(buf, dst);
+            pos += ret;
+            return ret;
         }
 
         @Override
@@ -419,15 +416,12 @@ final class ByteReaderImpl {
             if (pos == endPos) {
                 return -1;
             }
-            try {
-                int remaining = endPos - pos;
-                int actualLen = (int) Math.min(remaining, len);
-                dst.write(ByteBuffer.wrap(source, pos, actualLen));
-                pos += actualLen;
-                return actualLen;
-            } catch (IOException e) {
-                throw new IORuntimeException(e);
-            }
+            int remaining = endPos - pos;
+            int actualLen = (int) Math.min(remaining, len);
+            ByteBuffer buf = ByteBuffer.wrap(source, pos, actualLen);
+            int ret = JieBuffer.readTo(buf, dst);
+            pos += ret;
+            return ret;
         }
 
         @Override

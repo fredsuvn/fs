@@ -1,6 +1,5 @@
 package test.io;
 
-import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.base.chars.CharsBuilder;
@@ -13,8 +12,6 @@ import xyz.sunqian.test.ReadOps;
 import xyz.sunqian.test.TestReader;
 
 import java.io.CharArrayReader;
-import java.io.IOException;
-import java.io.Reader;
 import java.nio.CharBuffer;
 import java.util.Arrays;
 
@@ -98,14 +95,14 @@ public class CharIOTest {
                 reader.string(new CharArrayReader(data), readSize < 0 ? totalSize : readSize),
                 new String((readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize))
             );
-            assertEquals(reader.read(new OneCharPerRead(data)), data);
-            assertEquals(reader.string(new OneCharPerRead(data)), new String(data));
+            assertEquals(reader.read(new OneCharReader(data)), data);
+            assertEquals(reader.string(new OneCharReader(data)), new String(data));
             assertEquals(
-                reader.read(new OneCharPerRead(data), readSize < 0 ? totalSize : readSize),
+                reader.read(new OneCharReader(data), readSize < 0 ? totalSize : readSize),
                 (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
             );
             assertEquals(
-                reader.string(new OneCharPerRead(data), readSize < 0 ? totalSize : readSize),
+                reader.string(new OneCharReader(data), readSize < 0 ? totalSize : readSize),
                 new String((readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize))
             );
         }
@@ -280,13 +277,13 @@ public class CharIOTest {
             );
             builder.reset();
             assertEquals(
-                reader.readTo(new OneCharPerRead(data), builder),
+                reader.readTo(new OneCharReader(data), builder),
                 totalSize
             );
             assertEquals(builder.toCharArray(), data);
             builder.reset();
             assertEquals(
-                reader.readTo(new OneCharPerRead(data), builder, readSize < 0 ? totalSize : readSize),
+                reader.readTo(new OneCharReader(data), builder, readSize < 0 ? totalSize : readSize),
                 actualReadSize(totalSize, readSize)
             );
             assertEquals(
@@ -406,37 +403,6 @@ public class CharIOTest {
             // error
             expectThrows(IllegalArgumentException.class, () -> CharIO.newOperator(0));
             expectThrows(IllegalArgumentException.class, () -> CharIO.newOperator(-1));
-        }
-    }
-
-    private static class OneCharPerRead extends Reader {
-
-        private final char[] data;
-        private int pos = 0;
-
-        private OneCharPerRead(char[] data) {
-            this.data = data;
-        }
-
-        @Override
-        public int read() throws IOException {
-            if (pos >= data.length) {
-                return -1;
-            }
-            return data[pos++] & 0x0000ffff;
-        }
-
-        @Override
-        public int read(@NotNull char[] b, int off, int len) throws IOException {
-            if (pos >= data.length) {
-                return -1;
-            }
-            b[off] = data[pos++];
-            return 1;
-        }
-
-        @Override
-        public void close() throws IOException {
         }
     }
 }

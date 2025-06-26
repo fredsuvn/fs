@@ -57,6 +57,8 @@ public class CharReaderTest {
             char[] data = JieRandom.fill(new char[dataSize]);
             testRead0(CharReader.from(new CharArrayReader(data)), data, readSize, false);
             testSkip0(CharReader.from(new CharArrayReader(data)), data, readSize);
+            testRead0(CharReader.from(new OneCharReader(data)), data, readSize, false);
+            testSkip0(CharReader.from(new OneCharReader(data)), data, readSize);
             TestReader tr = new TestReader(new CharArrayReader(data));
             tr.setNextOperation(ReadOps.READ_ZERO);
             testSkip0(CharReader.from(tr), data, readSize);
@@ -163,6 +165,7 @@ public class CharReaderTest {
         {
             // reader
             testReadTo0(() -> CharReader.from(new CharArrayReader(data)), data, readSize);
+            testReadTo0(() -> CharReader.from(new OneCharReader(data)), data, readSize);
         }
         {
             // char array

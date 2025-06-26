@@ -69,7 +69,7 @@ final class ByteIOImpl implements ByteIO {
                 }
                 buf.position(0);
                 buf.limit(readSize);
-                dst.write(buf);
+                JieBuffer.readTo(buf, dst);
                 count += readSize;
                 if (len > 0 && count >= len) {
                     return count;

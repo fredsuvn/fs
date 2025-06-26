@@ -59,6 +59,8 @@ public class ByteReaderTest {
             byte[] data = JieRandom.fill(new byte[dataSize]);
             testRead0(ByteReader.from(new ByteArrayInputStream(data)), data, readSize, false);
             testSkip0(ByteReader.from(new ByteArrayInputStream(data)), data, readSize);
+            testRead0(ByteReader.from(new OneByteInputStream(data)), data, readSize, false);
+            testSkip0(ByteReader.from(new OneByteInputStream(data)), data, readSize);
             TestInputStream tr = new TestInputStream(new ByteArrayInputStream(data));
             tr.setNextOperation(ReadOps.READ_ZERO);
             testSkip0(ByteReader.from(tr), data, readSize);
@@ -71,6 +73,11 @@ public class ByteReaderTest {
                 data, readSize, false
             );
             testSkip0(ByteReader.from(Channels.newChannel(new ByteArrayInputStream(data))), data, readSize);
+            testRead0(
+                ByteReader.from(Channels.newChannel(new OneByteInputStream(data))),
+                data, readSize, false
+            );
+            testSkip0(ByteReader.from(Channels.newChannel(new OneByteInputStream(data))), data, readSize);
         }
         {
             // byte array
@@ -166,10 +173,12 @@ public class ByteReaderTest {
         {
             // input stream
             testReadTo0(() -> ByteReader.from(new ByteArrayInputStream(data)), data, readSize);
+            testReadTo0(() -> ByteReader.from(new OneByteInputStream(data)), data, readSize);
         }
         {
             // channel
             testReadTo0(() -> ByteReader.from(Channels.newChannel(new ByteArrayInputStream(data))), data, readSize);
+            testReadTo0(() -> ByteReader.from(Channels.newChannel(new OneByteInputStream(data))), data, readSize);
         }
         {
             // byte array
@@ -229,6 +238,49 @@ public class ByteReaderTest {
             // to channel
             BytesBuilder builder = new BytesBuilder();
             WritableByteChannel channel = Channels.newChannel(builder);
+            if (data.length == 0) {
+                ByteReader reader = supplier.get();
+                assertEquals(reader.readTo(channel), -1);
+                assertEquals(reader.readTo(channel, 0), 0);
+                reader.close();
+                assertEquals(reader.readTo(channel, 0), 0);
+            } else {
+                ByteReader reader = supplier.get();
+                assertEquals(reader.readTo(channel, 0), 0);
+                if (reader.markSupported()) {
+                    reader.mark();
+                }
+                long hasRead = reader.readTo(channel, readSize);
+                assertEquals(hasRead, Math.min(readSize, data.length));
+                long restLen = data.length - hasRead;
+                assertEquals(reader.readTo(channel), restLen == 0 ? -1 : restLen);
+                assertEquals(builder.toByteArray(), data);
+                if (reader.markSupported()) {
+                    reader.reset();
+                    builder.reset();
+                    hasRead = reader.readTo(channel, readSize);
+                    assertEquals(hasRead, Math.min(readSize, data.length));
+                    restLen = data.length - hasRead;
+                    assertEquals(reader.readTo(channel), restLen == 0 ? -1 : restLen);
+                    assertEquals(builder.toByteArray(), data);
+                }
+                assertEquals(reader.readTo(channel), -1);
+                assertEquals(reader.readTo(channel, 66), -1);
+                reader.close();
+                assertEquals(reader.readTo(channel, 0), 0);
+            }
+            // error
+            expectThrows(IllegalArgumentException.class, () -> supplier.get().readTo(builder, -1));
+            if (data.length > 0) {
+                expectThrows(IORuntimeException.class, () -> supplier.get().readTo(new ErrorOutputStream()));
+                expectThrows(IORuntimeException.class, () -> supplier.get().readTo(new ErrorOutputStream(), 1));
+            }
+        }
+
+        {
+            // to one byte channel
+            BytesBuilder builder = new BytesBuilder();
+            WritableByteChannel channel = new OneByteWriteableChannel(builder);
             if (data.length == 0) {
                 ByteReader reader = supplier.get();
                 assertEquals(reader.readTo(channel), -1);

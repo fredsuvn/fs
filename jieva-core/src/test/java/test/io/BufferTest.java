@@ -366,6 +366,18 @@ public class BufferTest {
             assertEquals(JieBuffer.readTo(src, dst, readSize), actualReadSize(totalSize, readSize));
             assertEquals(builder.toByteArray(), Arrays.copyOf(data, actualLen));
             assertEquals(src.position(), actualLen);
+            // write one byte channel
+            dst = new OneByteWriteableChannel(builder);
+            src.clear();
+            builder.reset();
+            assertEquals(JieBuffer.readTo(src, dst), totalSize == 0 ? -1 : totalSize);
+            assertEquals(builder.toByteArray(), data);
+            assertEquals(src.position(), src.limit());
+            src.clear();
+            builder.reset();
+            assertEquals(JieBuffer.readTo(src, dst, readSize), actualReadSize(totalSize, readSize));
+            assertEquals(builder.toByteArray(), Arrays.copyOf(data, actualLen));
+            assertEquals(src.position(), actualLen);
         }
         {
             // heap buffer to stream
