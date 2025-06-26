@@ -10,7 +10,6 @@ import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.base.value.BooleanVar;
 import xyz.sunqian.common.base.value.IntVar;
 import xyz.sunqian.common.collect.JieArray;
-import xyz.sunqian.common.io.ByteEncoder;
 import xyz.sunqian.common.io.ByteProcessor;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.JieBuffer;
@@ -32,8 +31,8 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
-import static xyz.sunqian.common.io.ByteEncoder.withBuffering;
-import static xyz.sunqian.common.io.ByteEncoder.withRounding;
+import static xyz.sunqian.common.io.ByteProcessor.Handler.withBuffering;
+import static xyz.sunqian.common.io.ByteProcessor.Handler.withRounding;
 import static xyz.sunqian.test.JieAssert.invokeThrows;
 import static xyz.sunqian.test.MaterialBox.copyDirect;
 
@@ -280,9 +279,9 @@ public class ByteProcessorTest {
         {
             // special
             expectThrows(IllegalArgumentException.class, () ->
-                ByteProcessor.from(new byte[0]).encoder(-1, ByteEncoder.emptyEncoder()));
+                ByteProcessor.from(new byte[0]).encoder(-1, ByteProcessor.Handler.emptyEncoder()));
             expectThrows(IllegalArgumentException.class, () ->
-                ByteProcessor.from(new byte[0]).encoder(0, ByteEncoder.emptyEncoder()));
+                ByteProcessor.from(new byte[0]).encoder(0, ByteProcessor.Handler.emptyEncoder()));
         }
     }
 

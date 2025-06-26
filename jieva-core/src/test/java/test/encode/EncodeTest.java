@@ -13,7 +13,7 @@ import java.util.Arrays;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.expectThrows;
-import static xyz.sunqian.common.io.ByteEncoder.withFixedSize;
+import static xyz.sunqian.common.io.ByteProcessor.Handler.withFixedSize;
 
 public class EncodeTest {
 

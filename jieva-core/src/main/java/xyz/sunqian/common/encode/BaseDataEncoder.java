@@ -1,6 +1,5 @@
 package xyz.sunqian.common.encode;
 
-import xyz.sunqian.common.io.ByteEncoder;
 import xyz.sunqian.common.io.ByteProcessor;
 
 /**
@@ -34,15 +33,15 @@ public interface BaseDataEncoder {
     int getBlockSize();
 
     /**
-     * Returns a {@link ByteEncoder} which encapsulates current encoding/decoding algorithm for processing within
+     * Returns a {@link ByteProcessor.Handler} which encapsulates current encoding/decoding algorithm for processing within
      * {@link ByteProcessor}.
      * <p>
-     * Note that different {@link ByteEncoder} implementations may have specific requirements, such as specified block
+     * Note that different {@link ByteProcessor.Handler} implementations may have specific requirements, such as specified block
      * size, for the data to be encoded/decoded.
      *
-     * @return a {@link ByteEncoder} encapsulates current encoding/decoding algorithm
+     * @return a {@link ByteProcessor.Handler} encapsulates current encoding/decoding algorithm
      * @see ByteProcessor
-     * @see ByteEncoder
+     * @see ByteProcessor.Handler
      */
-    ByteEncoder streamEncoder();
+    ByteProcessor.Handler streamEncoder();
 }

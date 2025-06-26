@@ -1,7 +1,6 @@
 package xyz.sunqian.common.encode;
 
 import xyz.sunqian.annotations.ThreadSafe;
-import xyz.sunqian.common.io.ByteEncoder;
 import xyz.sunqian.common.io.ByteProcessor;
 import xyz.sunqian.common.base.exception.UnreachablePointException;
 
@@ -190,15 +189,15 @@ public class JieBase64 {
         int getOutputSize(int inputSize) throws EncodingException;
 
         /**
-         * Returns a new {@link ByteEncoder} which encapsulates current base64 encoding, supports any size of input
+         * Returns a new {@link ByteProcessor.Handler} which encapsulates current base64 encoding, supports any size of input
          * data, not thread-safe.
          *
-         * @return a {@link ByteEncoder} with current base64 encoding logic
+         * @return a {@link ByteProcessor.Handler} with current base64 encoding logic
          * @see ByteProcessor
-         * @see ByteEncoder
+         * @see ByteProcessor.Handler
          */
         @Override
-        ByteEncoder streamEncoder();
+        ByteProcessor.Handler streamEncoder();
     }
 
     /**
@@ -230,15 +229,15 @@ public class JieBase64 {
         int getOutputSize(int inputSize) throws DecodingException;
 
         /**
-         * Returns a new {@link ByteEncoder} which encapsulates current base64 decoding, supports any size of input
+         * Returns a new {@link ByteProcessor.Handler} which encapsulates current base64 decoding, supports any size of input
          * data, not thread-safe.
          *
-         * @return a {@link ByteEncoder} with current base64 decoding logic
+         * @return a {@link ByteProcessor.Handler} with current base64 decoding logic
          * @see ByteProcessor
-         * @see ByteEncoder
+         * @see ByteProcessor.Handler
          */
         @Override
-        ByteEncoder streamEncoder();
+        ByteProcessor.Handler streamEncoder();
     }
 
     private static abstract class AbsEncoder extends AbstractBaseDataEncoder.En implements Encoder {

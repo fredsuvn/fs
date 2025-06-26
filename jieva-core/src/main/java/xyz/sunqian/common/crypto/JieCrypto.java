@@ -1,9 +1,9 @@
 package xyz.sunqian.common.crypto;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.io.ByteEncoder;
 import xyz.sunqian.common.base.bytes.JieBytes;
 import xyz.sunqian.common.collect.JieArray;
+import xyz.sunqian.common.io.ByteProcessor;
 import xyz.sunqian.common.io.JieBuffer;
 
 import javax.crypto.Cipher;
@@ -117,19 +117,19 @@ public class JieCrypto {
     }
 
     /**
-     * Returns a {@link ByteEncoder} for the specified {@link Cipher} operations in blocks, using specified block size.
+     * Returns a {@link ByteProcessor.Handler} for the specified {@link Cipher} operations in blocks, using specified block size.
      * If {@code onlyFinal} is true, the encoder uses only the {@code doFinal} method. Otherwise, the encoder invokes
      * the {@code update} method to process data when {@code end} is false, and invokes {@code doFinal} for final
      * processing when {@code end} is true. Returned encoder is a fixed size encoder from
-     * {@link ByteEncoder#withFixedSize(int, ByteEncoder)}, and its fixed size is the specified block size.
+     * {@link ByteProcessor.Handler#withFixedSize(int, ByteProcessor.Handler)}, and its fixed size is the specified block size.
      *
      * @param cipher    specified {@link Cipher}, should be initialized
      * @param blockSize specified block size
      * @param onlyFinal whether the encoder uses only the {@code doFinal} method
-     * @return a {@link ByteEncoder} for the specified {@link Mac} operations in blocks
+     * @return a {@link ByteProcessor.Handler} for the specified {@link Mac} operations in blocks
      */
-    public static ByteEncoder encoder(Cipher cipher, int blockSize, boolean onlyFinal) {
-        ByteEncoder encoder = new ByteEncoder() {
+    public static ByteProcessor.Handler encoder(Cipher cipher, int blockSize, boolean onlyFinal) {
+        ByteProcessor.Handler encoder = new ByteProcessor.Handler() {
             @Override
             public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) throws Exception {
                 if (onlyFinal) {
@@ -147,7 +147,7 @@ public class JieCrypto {
                 return ret;
             }
         };
-        return ByteEncoder.withFixedSize(blockSize, encoder);
+        return ByteProcessor.Handler.withFixedSize(blockSize, encoder);
     }
 
     private static ByteBuffer doFinal(Cipher cipher, ByteBuffer input) throws Exception {
@@ -179,17 +179,17 @@ public class JieCrypto {
     }
 
     /**
-     * Returns a {@link ByteEncoder} for the specified {@link MessageDigest} operations in blocks, using specified block
+     * Returns a {@link ByteProcessor.Handler} for the specified {@link MessageDigest} operations in blocks, using specified block
      * size. The encoder invokes the {@code update} method to process data when {@code end} is false, and invokes
      * {@code doFinal} for final processing when {@code end} is true. Returned encoder is a fixed size encoder from
-     * {@link ByteEncoder#withFixedSize(int, ByteEncoder)}, and its fixed size is the specified block size.
+     * {@link ByteProcessor.Handler#withFixedSize(int, ByteProcessor.Handler)}, and its fixed size is the specified block size.
      *
      * @param digest    specified {@link MessageDigest}, should be initialized
      * @param blockSize specified block size
-     * @return a {@link ByteEncoder} for the specified {@link Mac} operations in blocks
+     * @return a {@link ByteProcessor.Handler} for the specified {@link Mac} operations in blocks
      */
-    public static ByteEncoder encoder(MessageDigest digest, int blockSize) {
-        ByteEncoder encoder = new ByteEncoder() {
+    public static ByteProcessor.Handler encoder(MessageDigest digest, int blockSize) {
+        ByteProcessor.Handler encoder = new ByteProcessor.Handler() {
             @Override
             public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) throws Exception {
                 ByteBuffer ret;
@@ -202,7 +202,7 @@ public class JieCrypto {
                 return ret;
             }
         };
-        return ByteEncoder.withFixedSize(blockSize, encoder);
+        return ByteProcessor.Handler.withFixedSize(blockSize, encoder);
     }
 
     private static byte[] doFinal(MessageDigest digest, ByteBuffer input) throws Exception {
@@ -223,17 +223,17 @@ public class JieCrypto {
     }
 
     /**
-     * Returns a {@link ByteEncoder} for the specified {@link Mac} operations in blocks, using specified block size. The
+     * Returns a {@link ByteProcessor.Handler} for the specified {@link Mac} operations in blocks, using specified block size. The
      * encoder invokes the {@code update} method to process data when {@code end} is false, and invokes {@code doFinal}
      * for final processing when {@code end} is true. Returned encoder is a fixed size encoder from
-     * {@link ByteEncoder#withFixedSize(int, ByteEncoder)}, and its fixed size is the specified block size.
+     * {@link ByteProcessor.Handler#withFixedSize(int, ByteProcessor.Handler)}, and its fixed size is the specified block size.
      *
      * @param mac       specified {@link Mac}, should be initialized
      * @param blockSize specified block size
-     * @return a {@link ByteEncoder} for the specified {@link Mac} operations in blocks
+     * @return a {@link ByteProcessor.Handler} for the specified {@link Mac} operations in blocks
      */
-    public static ByteEncoder encoder(Mac mac, int blockSize) {
-        ByteEncoder encoder = new ByteEncoder() {
+    public static ByteProcessor.Handler encoder(Mac mac, int blockSize) {
+        ByteProcessor.Handler encoder = new ByteProcessor.Handler() {
             @Override
             public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) throws Exception {
                 ByteBuffer ret;
@@ -246,7 +246,7 @@ public class JieCrypto {
                 return ret;
             }
         };
-        return ByteEncoder.withFixedSize(blockSize, encoder);
+        return ByteProcessor.Handler.withFixedSize(blockSize, encoder);
     }
 
     private static byte[] doFinal(Mac mac, ByteBuffer input) throws Exception {

@@ -23,11 +23,11 @@ final class CharProcessorImpl implements CharProcessor {
     private long readLimit = -1;
     private int readBlockSize = JieIO.bufferSize();
     private boolean endOnZeroRead = false;
-    private @Nullable List<CharEncoder> encoders;
+    private @Nullable List<Handler> encoders;
 
     // initials after starting process
     private @Nullable CharReader sourceReader;
-    private @Nullable CharEncoder oneEncoder;
+    private @Nullable CharProcessor.Handler oneEncoder;
 
     CharProcessorImpl(Reader source) {
         this.source = source;
@@ -66,7 +66,7 @@ final class CharProcessorImpl implements CharProcessor {
         return sourceReader;
     }
 
-    private CharEncoder getEncoder() {
+    private Handler getEncoder() {
         if (oneEncoder == null) {
             oneEncoder = toOneEncoder(encoders);
         }
@@ -95,7 +95,7 @@ final class CharProcessorImpl implements CharProcessor {
     }
 
     @Override
-    public CharProcessor encoder(CharEncoder encoder) {
+    public CharProcessor encoder(Handler encoder) {
         if (encoders == null) {
             encoders = new ArrayList<>();
         }
@@ -266,7 +266,7 @@ final class CharProcessorImpl implements CharProcessor {
         return readTo(getSourceReader(), getEncoder(), out);
     }
 
-    private long readTo(CharReader reader, CharEncoder oneEncoder, DataWriter out) throws Exception {
+    private long readTo(CharReader reader, Handler oneEncoder, DataWriter out) throws Exception {
         // CharReader reader = readLimit < 0 ? in : in.withReadLimit(readLimit);
         long count = 0;
         while (true) {
@@ -327,16 +327,16 @@ final class CharProcessorImpl implements CharProcessor {
         throw new IORuntimeException("The type of destination is unsupported: " + dst.getClass());
     }
 
-    private CharEncoder toOneEncoder(@Nullable List<CharEncoder> encoders) {
+    private Handler toOneEncoder(@Nullable List<Handler> encoders) {
         if (JieCollect.isEmpty(encoders)) {
-            return CharEncoder.emptyEncoder();
+            return Handler.emptyEncoder();
         }
         if (encoders.size() == 1) {
             return encoders.get(0);
         }
         return (data, end) -> {
             @Nullable CharBuffer chars = data;
-            for (CharEncoder encoder : encoders) {
+            for (Handler encoder : encoders) {
                 chars = encoder.encode(chars, end);
                 if (chars == null) {
                     break;
@@ -566,15 +566,15 @@ final class CharProcessorImpl implements CharProcessor {
         }
     }
 
-    static final class FixedSizeEncoder implements CharEncoder {
+    static final class FixedSizeEncoder implements Handler {
 
-        private final CharEncoder encoder;
+        private final Handler encoder;
         private final int size;
 
         // Capacity is always the size.
         private @Nullable CharBuffer buffer;
 
-        FixedSizeEncoder(CharEncoder encoder, int size) throws IllegalArgumentException {
+        FixedSizeEncoder(Handler encoder, int size) throws IllegalArgumentException {
             checkSize(size);
             this.encoder = encoder;
             this.size = size;
@@ -640,15 +640,15 @@ final class CharProcessorImpl implements CharProcessor {
         }
     }
 
-    static final class RoundingEncoder implements CharEncoder {
+    static final class RoundingEncoder implements Handler {
 
-        private final CharEncoder encoder;
+        private final Handler encoder;
         private final int size;
 
         // Capacity is always the size.
         private @Nullable CharBuffer buffer;
 
-        RoundingEncoder(CharEncoder encoder, int size) {
+        RoundingEncoder(Handler encoder, int size) {
             checkSize(size);
             this.encoder = encoder;
             this.size = size;
@@ -716,12 +716,12 @@ final class CharProcessorImpl implements CharProcessor {
         }
     }
 
-    static final class BufferingEncoder implements CharEncoder {
+    static final class BufferingEncoder implements Handler {
 
-        private final CharEncoder encoder;
+        private final Handler encoder;
         private char @Nullable [] buffer = null;
 
-        BufferingEncoder(CharEncoder encoder) {
+        BufferingEncoder(Handler encoder) {
             this.encoder = encoder;
         }
 
@@ -753,7 +753,7 @@ final class CharProcessorImpl implements CharProcessor {
         }
     }
 
-    static final class EmptyEncoder implements CharEncoder {
+    static final class EmptyEncoder implements Handler {
 
         static final EmptyEncoder SINGLETON = new EmptyEncoder();
 

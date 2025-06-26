@@ -1,7 +1,6 @@
 package xyz.sunqian.common.encode;
 
 import xyz.sunqian.annotations.ThreadSafe;
-import xyz.sunqian.common.io.ByteEncoder;
 import xyz.sunqian.common.io.ByteProcessor;
 
 /**
@@ -61,15 +60,15 @@ public class JieHex {
         int getOutputSize(int inputSize) throws EncodingException;
 
         /**
-         * Returns a new {@link ByteEncoder} which encapsulates current hex encoding, supports any size of input data,
+         * Returns a new {@link ByteProcessor.Handler} which encapsulates current hex encoding, supports any size of input data,
          * not thread-safe.
          *
-         * @return a {@link ByteEncoder} with current hex encoding logic
+         * @return a {@link ByteProcessor.Handler} with current hex encoding logic
          * @see ByteProcessor
-         * @see ByteEncoder
+         * @see ByteProcessor.Handler
          */
         @Override
-        ByteEncoder streamEncoder();
+        ByteProcessor.Handler streamEncoder();
     }
 
     /**
@@ -101,15 +100,15 @@ public class JieHex {
         int getOutputSize(int inputSize) throws DecodingException;
 
         /**
-         * Returns a new {@link ByteEncoder} which encapsulates current hex decoding, supports any size of input data,
+         * Returns a new {@link ByteProcessor.Handler} which encapsulates current hex decoding, supports any size of input data,
          * not thread-safe.
          *
-         * @return a {@link ByteEncoder} with current hex decoding logic
+         * @return a {@link ByteProcessor.Handler} with current hex decoding logic
          * @see ByteProcessor
-         * @see ByteEncoder
+         * @see ByteProcessor.Handler
          */
         @Override
-        ByteEncoder streamEncoder();
+        ByteProcessor.Handler streamEncoder();
     }
 
     private static final class HexEncoder extends AbstractBaseDataEncoder.En implements Encoder {

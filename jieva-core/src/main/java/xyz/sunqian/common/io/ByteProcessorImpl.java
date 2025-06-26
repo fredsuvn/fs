@@ -24,11 +24,11 @@ final class ByteProcessorImpl implements ByteProcessor {
     private long readLimit = -1;
     private int readBlockSize = JieIO.bufferSize();
     private boolean endOnZeroRead = false;
-    private @Nullable List<ByteEncoder> encoders;
+    private @Nullable List<Handler> encoders;
 
     // initials after starting process
     private @Nullable ByteReader sourceReader;
-    private @Nullable ByteEncoder oneEncoder;
+    private @Nullable ByteProcessor.Handler oneEncoder;
 
     ByteProcessorImpl(InputStream source) {
         this.source = source;
@@ -63,7 +63,7 @@ final class ByteProcessorImpl implements ByteProcessor {
         return sourceReader;
     }
 
-    private ByteEncoder getEncoder() {
+    private Handler getEncoder() {
         if (oneEncoder == null) {
             oneEncoder = toOneEncoder(encoders);
         }
@@ -92,7 +92,7 @@ final class ByteProcessorImpl implements ByteProcessor {
     }
 
     @Override
-    public ByteProcessor encoder(ByteEncoder encoder) {
+    public ByteProcessor encoder(Handler encoder) {
         if (encoders == null) {
             encoders = new ArrayList<>();
         }
@@ -231,7 +231,7 @@ final class ByteProcessorImpl implements ByteProcessor {
         return readTo(getSourceReader(), getEncoder(), out);
     }
 
-    private long readTo(ByteReader reader, ByteEncoder oneEncoder, DataWriter out) throws Exception {
+    private long readTo(ByteReader reader, Handler oneEncoder, DataWriter out) throws Exception {
         // ByteReader reader = readLimit < 0 ? in : in.withReadLimit(readLimit);
         long count = 0;
         while (true) {
@@ -289,16 +289,16 @@ final class ByteProcessorImpl implements ByteProcessor {
         throw new IORuntimeException("The type of destination is unsupported: " + dst.getClass());
     }
 
-    private ByteEncoder toOneEncoder(@Nullable List<ByteEncoder> encoders) {
+    private Handler toOneEncoder(@Nullable List<Handler> encoders) {
         if (JieCollect.isEmpty(encoders)) {
-            return ByteEncoder.emptyEncoder();
+            return Handler.emptyEncoder();
         }
         if (encoders.size() == 1) {
             return encoders.get(0);
         }
         return (data, end) -> {
             @Nullable ByteBuffer bytes = data;
-            for (ByteEncoder encoder : encoders) {
+            for (Handler encoder : encoders) {
                 bytes = encoder.encode(bytes, end);
                 if (bytes == null) {
                     break;
@@ -513,15 +513,15 @@ final class ByteProcessorImpl implements ByteProcessor {
         }
     }
 
-    static final class FixedSizeEncoder implements ByteEncoder {
+    static final class FixedSizeEncoder implements Handler {
 
-        private final ByteEncoder encoder;
+        private final Handler encoder;
         private final int size;
 
         // Capacity is always the size.
         private @Nullable ByteBuffer buffer;
 
-        FixedSizeEncoder(ByteEncoder encoder, int size) throws IllegalArgumentException {
+        FixedSizeEncoder(Handler encoder, int size) throws IllegalArgumentException {
             checkSize(size);
             this.encoder = encoder;
             this.size = size;
@@ -587,15 +587,15 @@ final class ByteProcessorImpl implements ByteProcessor {
         }
     }
 
-    static final class RoundingEncoder implements ByteEncoder {
+    static final class RoundingEncoder implements Handler {
 
-        private final ByteEncoder encoder;
+        private final Handler encoder;
         private final int size;
 
         // Capacity is always the size.
         private @Nullable ByteBuffer buffer;
 
-        RoundingEncoder(ByteEncoder encoder, int size) {
+        RoundingEncoder(Handler encoder, int size) {
             checkSize(size);
             this.encoder = encoder;
             this.size = size;
@@ -663,12 +663,12 @@ final class ByteProcessorImpl implements ByteProcessor {
         }
     }
 
-    static final class BufferingEncoder implements ByteEncoder {
+    static final class BufferingEncoder implements Handler {
 
-        private final ByteEncoder encoder;
+        private final Handler encoder;
         private byte @Nullable [] buffer = null;
 
-        BufferingEncoder(ByteEncoder encoder) {
+        BufferingEncoder(Handler encoder) {
             this.encoder = encoder;
         }
 
@@ -700,7 +700,7 @@ final class ByteProcessorImpl implements ByteProcessor {
         }
     }
 
-    static final class EmptyEncoder implements ByteEncoder {
+    static final class EmptyEncoder implements Handler {
 
         static final EmptyEncoder SINGLETON = new EmptyEncoder();
 
