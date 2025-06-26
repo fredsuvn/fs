@@ -4,9 +4,9 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.testng.annotations.Test;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.JieRandom;
-import xyz.sunqian.common.io.ByteProcessor;
+import xyz.sunqian.common.io.ByteEncoder;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
-import xyz.sunqian.common.io.CharProcessor;
+import xyz.sunqian.common.io.CharEncoder;
 import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.base.exception.ProcessingException;
 import xyz.sunqian.common.crypto.CryptoException;
@@ -42,7 +42,7 @@ public class CryptoTest {
         // error
         Cipher cipher = JieCrypto.cipher("AES", null);
         expectThrows(ProcessingException.class, () ->
-            ByteProcessor.from(new byte[10086])
+            ByteEncoder.from(new byte[10086])
                 .encoder(JieCrypto.encoder(cipher, 16, true))
                 .toByteArray()
         );
@@ -79,13 +79,13 @@ public class CryptoTest {
         cipher.init(Cipher.ENCRYPT_MODE, enKey);
         byte[] javaEn = doCipher(src, enBlock, cipher);
         cipher.init(Cipher.ENCRYPT_MODE, enKey);
-        byte[] jieEn = ByteProcessor.from(src)
+        byte[] jieEn = ByteEncoder.from(src)
             .encoder(JieCrypto.encoder(cipher, Math.abs(enBlock), enBlock <= 0)).toByteArray();
         assertEquals(jieEn.length, javaEn.length);
 
         // de
         cipher.init(Cipher.DECRYPT_MODE, deKey);
-        byte[] jieDe = ByteProcessor.from(javaEn)
+        byte[] jieDe = ByteEncoder.from(javaEn)
             .encoder(((data, end) -> MaterialBox.copyDirect(JieBuffer.read(data))))
             .encoder(JieCrypto.encoder(cipher, Math.abs(deBlock), deBlock <= 0)).toByteArray();
         assertEquals(jieDe, src);
@@ -134,7 +134,7 @@ public class CryptoTest {
         // error
         Mac mac = JieCrypto.mac("HmacSHA256", null);
         expectThrows(ProcessingException.class, () ->
-            ByteProcessor.from(new byte[10086])
+            ByteEncoder.from(new byte[10086])
                 .encoder(JieCrypto.encoder(mac, 16))
                 .toByteArray()
         );
@@ -148,9 +148,9 @@ public class CryptoTest {
             digest.reset();
             byte[] javaEn = digest.digest(src);
             digest.reset();
-            byte[] jieEn1 = ByteProcessor.from(src).encoder(JieCrypto.encoder(digest, blockSize)).toByteArray();
+            byte[] jieEn1 = ByteEncoder.from(src).encoder(JieCrypto.encoder(digest, blockSize)).toByteArray();
             assertEquals(jieEn1, javaEn);
-            byte[] jieEn2 = ByteProcessor.from(src)
+            byte[] jieEn2 = ByteEncoder.from(src)
                 .encoder(((data, end) -> MaterialBox.copyDirect(JieBuffer.read(data))))
                 .encoder(JieCrypto.encoder(digest, blockSize))
                 .toByteArray();
@@ -164,9 +164,9 @@ public class CryptoTest {
             mac.init(key);
             byte[] javaEn = mac.doFinal(src);
             mac.init(key);
-            byte[] jieEn1 = ByteProcessor.from(src).encoder(JieCrypto.encoder(mac, blockSize)).toByteArray();
+            byte[] jieEn1 = ByteEncoder.from(src).encoder(JieCrypto.encoder(mac, blockSize)).toByteArray();
             assertEquals(jieEn1, javaEn);
-            byte[] jieEn2 = ByteProcessor.from(src)
+            byte[] jieEn2 = ByteEncoder.from(src)
                 .encoder(((data, end) -> MaterialBox.copyDirect(JieBuffer.read(data))))
                 .encoder(JieCrypto.encoder(mac, blockSize))
                 .toByteArray();
@@ -190,7 +190,7 @@ public class CryptoTest {
         Key key = keyGenerator.generateKey();
         Cipher cipher = JieCrypto.cipher("AES/ECB/PKCS5Padding", null);
         cipher.init(Cipher.ENCRYPT_MODE, key);
-        String base64 = CharProcessor.from(hello)
+        String base64 = CharEncoder.from(hello)
             .toByteProcessor(JieChars.defaultCharset())
             .encoder(JieCrypto.encoder(cipher, 16, false))
             .encoder(JieBase64.encoder().streamEncoder())
@@ -198,7 +198,7 @@ public class CryptoTest {
         cipher.init(Cipher.DECRYPT_MODE, key);
 
         // jie
-        String deHello = CharProcessor.from(base64)
+        String deHello = CharEncoder.from(base64)
             .toByteProcessor(JieChars.latinCharset())
             .encoder(JieBase64.decoder().streamEncoder())
             .encoder(JieCrypto.encoder(cipher, 16, false))

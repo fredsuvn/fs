@@ -9,7 +9,7 @@ import xyz.sunqian.common.encode.DataEncoder;
 import xyz.sunqian.common.encode.DecodingException;
 import xyz.sunqian.common.encode.EncodingException;
 import xyz.sunqian.common.encode.JieBase64;
-import xyz.sunqian.common.io.ByteProcessor;
+import xyz.sunqian.common.io.ByteEncoder;
 import xyz.sunqian.common.io.JieIO;
 import xyz.sunqian.test.JieAssert;
 
@@ -172,7 +172,7 @@ public class Base64Test {
                 error[0] = null;
             }
             try {
-                ByteProcessor.from(s.getBytes(JieChars.latinCharset())).readBlockSize(1)
+                ByteEncoder.from(s.getBytes(JieChars.latinCharset())).readBlockSize(1)
                     .encoder(JieBase64.decoder().streamEncoder()).writeTo(new BytesBuilder());
             } catch (ProcessingException e) {
                 error[0] = e.getCause().getMessage();
@@ -193,7 +193,7 @@ public class Base64Test {
                 error[0] = null;
             }
             try {
-                ByteProcessor.from(s.getBytes(JieChars.latinCharset())).readBlockSize(1)
+                ByteEncoder.from(s.getBytes(JieChars.latinCharset())).readBlockSize(1)
                     .encoder(JieBase64.decoder().streamEncoder()).writeTo(new BytesBuilder());
             } catch (ProcessingException e) {
                 error[0] = e.getCause().getMessage();
@@ -214,7 +214,7 @@ public class Base64Test {
                 error[0] = null;
             }
             try {
-                ByteProcessor.from(s.getBytes(JieChars.latinCharset())).readBlockSize(1)
+                ByteEncoder.from(s.getBytes(JieChars.latinCharset())).readBlockSize(1)
                     .encoder(JieBase64.decoder().streamEncoder()).writeTo(new BytesBuilder());
             } catch (ProcessingException e) {
                 error[0] = e.getCause().getMessage();

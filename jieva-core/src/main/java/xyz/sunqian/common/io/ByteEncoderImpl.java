@@ -2,13 +2,14 @@ package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.JieCoding;
+import xyz.sunqian.common.base.bytes.JieBytes;
 import xyz.sunqian.common.base.chars.JieChars;
 import xyz.sunqian.common.collect.JieCollect;
 
 import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
-import java.nio.CharBuffer;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.function.Function;
 
 import static xyz.sunqian.common.base.JieCheck.checkOffsetLength;
 
-final class CharProcessorImpl implements CharProcessor {
+final class ByteEncoderImpl implements ByteEncoder {
 
     private final @Nullable Object source;
     private @Nullable Object dest;
@@ -26,22 +27,18 @@ final class CharProcessorImpl implements CharProcessor {
     private @Nullable List<Handler> encoders;
 
     // initials after starting process
-    private @Nullable CharReader sourceReader;
-    private @Nullable CharProcessor.Handler oneEncoder;
+    private @Nullable ByteReader sourceReader;
+    private @Nullable ByteEncoder.Handler oneEncoder;
 
-    CharProcessorImpl(Reader source) {
+    ByteEncoderImpl(InputStream source) {
         this.source = source;
     }
 
-    CharProcessorImpl(char[] source) {
+    ByteEncoderImpl(byte[] source) {
         this.source = source;
     }
 
-    CharProcessorImpl(CharBuffer source) {
-        this.source = source;
-    }
-
-    CharProcessorImpl(CharSequence source) {
+    ByteEncoderImpl(ByteBuffer source) {
         this.source = source;
     }
 
@@ -59,9 +56,9 @@ final class CharProcessorImpl implements CharProcessor {
         return dest;
     }
 
-    private CharReader getSourceReader() {
+    private ByteReader getSourceReader() {
         if (sourceReader == null) {
-            sourceReader = toCharReader(getSource());
+            sourceReader = toByteReader(getSource());
         }
         return sourceReader;
     }
@@ -74,13 +71,13 @@ final class CharProcessorImpl implements CharProcessor {
     }
 
     @Override
-    public CharProcessor readLimit(long readLimit) {
+    public ByteEncoder readLimit(long readLimit) {
         this.readLimit = readLimit;
         return this;
     }
 
     @Override
-    public CharProcessor readBlockSize(int readBlockSize) {
+    public ByteEncoder readBlockSize(int readBlockSize) {
         if (readBlockSize <= 0) {
             throw new IllegalArgumentException("readBlockSize must > 0!");
         }
@@ -89,13 +86,13 @@ final class CharProcessorImpl implements CharProcessor {
     }
 
     @Override
-    public CharProcessor endOnZeroRead(boolean endOnZeroRead) {
+    public ByteEncoder endOnZeroRead(boolean endOnZeroRead) {
         this.endOnZeroRead = endOnZeroRead;
         return this;
     }
 
     @Override
-    public CharProcessor encoder(Handler encoder) {
+    public ByteEncoder encoder(Handler encoder) {
         if (encoders == null) {
             encoders = new ArrayList<>();
         }
@@ -110,21 +107,24 @@ final class CharProcessorImpl implements CharProcessor {
     }
 
     @Override
-    public long writeTo(Appendable dest) {
+    public long writeTo(OutputStream dest) {
         this.dest = dest;
         return start();
     }
 
     @Override
-    public long writeTo(char[] dest) {
+    public long writeTo(byte[] dest) {
         this.dest = dest;
         return start();
     }
 
     @Override
-    public long writeTo(char[] dest, int offset, int length) {
+    public long writeTo(byte[] dest, int offset, int length) {
+        if (offset == 0 && length == dest.length) {
+            return writeTo(dest);
+        }
         try {
-            this.dest = CharBuffer.wrap(dest, offset, length);
+            this.dest = ByteBuffer.wrap(dest, offset, length);
         } catch (Exception e) {
             throw new IORuntimeException(e);
         }
@@ -132,36 +132,33 @@ final class CharProcessorImpl implements CharProcessor {
     }
 
     @Override
-    public long writeTo(CharBuffer dest) {
+    public long writeTo(ByteBuffer dest) {
         this.dest = dest;
         return start();
     }
 
     @Override
     public String toString() {
-        return new String(toCharArray());
+        return toString(JieChars.defaultCharset());
     }
 
     @Override
-    public Reader toReader() {
+    public InputStream toInputStream() {
         if (JieCollect.isEmpty(encoders)) {
-            return toReader(getSource());
+            return toInputStream(getSource());
         }
-        return new ProcessorReader();
+        return new ProcessorInputStream();
     }
 
-    private Reader toReader(Object src) {
-        if (src instanceof Reader) {
-            return (Reader) src;
+    private InputStream toInputStream(Object src) {
+        if (src instanceof InputStream) {
+            return (InputStream) src;
         }
-        if (src instanceof char[]) {
-            return JieIO.newReader((char[]) src);
+        if (src instanceof byte[]) {
+            return JieIO.newInputStream((byte[]) src);
         }
-        if (src instanceof CharBuffer) {
-            return JieIO.newReader((CharBuffer) src);
-        }
-        if (src instanceof CharSequence) {
-            return JieIO.newReader((CharSequence) src);
+        if (src instanceof ByteBuffer) {
+            return JieIO.newInputStream((ByteBuffer) src);
         }
         throw new IORuntimeException("The type of source is unsupported: " + src.getClass());
     }
@@ -174,24 +171,20 @@ final class CharProcessorImpl implements CharProcessor {
             if (JieCollect.isEmpty(encoders)) {
                 Object src = getSource();
                 Object dst = getDest();
-                if (src instanceof char[]) {
-                    if (dst instanceof char[]) {
-                        return charsToChars((char[]) src, (char[]) dst);
+                if (src instanceof byte[]) {
+                    if (dst instanceof byte[]) {
+                        return bytesToBytes((byte[]) src, (byte[]) dst);
                     }
-                    if (dst instanceof CharBuffer) {
-                        return charsToBuffer((char[]) src, (CharBuffer) dst);
+                    if (dst instanceof ByteBuffer) {
+                        return bytesToBuffer((byte[]) src, (ByteBuffer) dst);
                     }
-                    return charsToAppender((char[]) src, (Appendable) dst);
-                } else if (src instanceof CharBuffer) {
-                    if (dst instanceof char[]) {
-                        return bufferToChars((CharBuffer) src, (char[]) dst);
+                } else if (src instanceof ByteBuffer) {
+                    if (dst instanceof byte[]) {
+                        return bufferToBytes((ByteBuffer) src, (byte[]) dst);
                     }
-                    return bufferToAppender((CharBuffer) src, (Appendable) dst);
-                } else if (src instanceof CharSequence) {
-                    if (dst instanceof char[]) {
-                        return charSeqToChars((CharSequence) src, (char[]) dst);
+                    if (dst instanceof ByteBuffer) {
+                        return bufferToBuffer((ByteBuffer) src, (ByteBuffer) dst);
                     }
-                    return charSeqToAppender((CharSequence) src, (Appendable) dst);
                 }
             }
             return startInBlocks();
@@ -202,58 +195,30 @@ final class CharProcessorImpl implements CharProcessor {
         }
     }
 
-    private long charsToChars(char[] src, char[] dst) {
+    private long bytesToBytes(byte[] src, byte[] dst) {
         int len = getDirectLen(src.length);
         System.arraycopy(src, 0, dst, 0, len);
         return len;
     }
 
-    private long charsToBuffer(char[] src, CharBuffer dst) {
+    private long bytesToBuffer(byte[] src, ByteBuffer dst) {
         int len = getDirectLen(src.length);
         dst.put(src, 0, len);
         return len;
     }
 
-    private long charsToAppender(char[] src, Appendable dst) throws IOException {
-        int len = getDirectLen(src.length);
-        if (dst instanceof Writer) {
-            ((Writer) dst).write(src, 0, len);
-        } else {
-            dst.append(new String(src, 0, len));
-        }
-        return len;
-    }
-
-    private long bufferToChars(CharBuffer src, char[] dst) {
+    private long bufferToBytes(ByteBuffer src, byte[] dst) {
         int len = getDirectLen(src.remaining());
         src.get(dst, 0, len);
         return len;
     }
 
-    private long bufferToAppender(CharBuffer src, Appendable dst) throws IOException {
+    private long bufferToBuffer(ByteBuffer src, ByteBuffer dst) {
         int len = getDirectLen(src.remaining());
-        int pos = src.position();
-        int newPos = pos + len;
-        dst.append(src, 0, len);
-        src.position(newPos);
-        return len;
-    }
-
-    private long charSeqToChars(CharSequence src, char[] dst) throws IOException {
-        int len = getDirectLen(src.length());
-        if (src instanceof String) {
-            ((String) src).getChars(0, len, dst, 0);
-        } else {
-            for (int i = 0; i < len; i++) {
-                dst[i] = src.charAt(i);
-            }
-        }
-        return len;
-    }
-
-    private long charSeqToAppender(CharSequence src, Appendable dst) throws IOException {
-        int len = getDirectLen(src.length());
-        dst.append(src, 0, len);
+        ByteBuffer share = src.slice();
+        share.limit(len);
+        dst.put(share);
+        src.position(src.position() + len);
         return len;
     }
 
@@ -266,20 +231,20 @@ final class CharProcessorImpl implements CharProcessor {
         return readTo(getSourceReader(), getEncoder(), out);
     }
 
-    private long readTo(CharReader reader, Handler oneEncoder, DataWriter out) throws Exception {
-        // CharReader reader = readLimit < 0 ? in : in.withReadLimit(readLimit);
+    private long readTo(ByteReader reader, Handler oneEncoder, DataWriter out) throws Exception {
+        // ByteReader reader = readLimit < 0 ? in : in.withReadLimit(readLimit);
         long count = 0;
         while (true) {
-            CharSegment segment;
+            ByteSegment segment;
             int nextSize = nextReadBlockSize(count);
             if (nextSize == 0) {
-                segment = CharSegment.empty(true);
+                segment = ByteSegment.empty(true);
             } else {
                 segment = reader.read(nextSize);
             }
             count += segment.data().remaining();
-            @Nullable CharBuffer encoded = oneEncoder.encode(segment.data(), segment.end());
-            if (!JieChars.isEmpty(encoded)) {
+            @Nullable ByteBuffer encoded = oneEncoder.encode(segment.data(), segment.end());
+            if (!JieBytes.isEmpty(encoded)) {
                 out.write(encoded);
             }
             if (segment.end()) {
@@ -295,18 +260,15 @@ final class CharProcessorImpl implements CharProcessor {
         return (int) Math.min(readLimit - count, readBlockSize);
     }
 
-    private CharReader toCharReader(Object src) {
-        if (src instanceof Reader) {
-            return CharReader.from((Reader) src);
+    private ByteReader toByteReader(Object src) {
+        if (src instanceof InputStream) {
+            return ByteReader.from((InputStream) src);
         }
-        if (src instanceof char[]) {
-            return CharReader.from((char[]) src);
+        if (src instanceof byte[]) {
+            return ByteReader.from((byte[]) src);
         }
-        if (src instanceof CharBuffer) {
-            return CharReader.from((CharBuffer) src);
-        }
-        if (src instanceof CharSequence) {
-            return CharReader.from((CharSequence) src);
+        if (src instanceof ByteBuffer) {
+            return ByteReader.from((ByteBuffer) src);
         }
         throw new IORuntimeException("The type of source is unsupported: " + src.getClass());
     }
@@ -315,14 +277,14 @@ final class CharProcessorImpl implements CharProcessor {
         if (dst instanceof DataWriter) {
             return (DataWriter) dst;
         }
-        if (dst instanceof char[]) {
-            return new AppendableDataWriter(CharBuffer.wrap((char[]) dst));
+        if (dst instanceof OutputStream) {
+            return new OutputSteamDataWriter((OutputStream) dst);
         }
-        if (dst instanceof CharBuffer) {
-            return new AppendableDataWriter(JieIO.newWriter((CharBuffer) dst));
+        if (dst instanceof byte[]) {
+            return new OutputSteamDataWriter(JieIO.newOutputStream((byte[]) dst));
         }
-        if (dst instanceof Appendable) {
-            return new AppendableDataWriter((Appendable) dst);
+        if (dst instanceof ByteBuffer) {
+            return new OutputSteamDataWriter(JieIO.newOutputStream((ByteBuffer) dst));
         }
         throw new IORuntimeException("The type of destination is unsupported: " + dst.getClass());
     }
@@ -335,59 +297,39 @@ final class CharProcessorImpl implements CharProcessor {
             return encoders.get(0);
         }
         return (data, end) -> {
-            @Nullable CharBuffer chars = data;
+            @Nullable ByteBuffer bytes = data;
             for (Handler encoder : encoders) {
-                chars = encoder.encode(chars, end);
-                if (chars == null) {
+                bytes = encoder.encode(bytes, end);
+                if (bytes == null) {
                     break;
                 }
             }
-            return chars;
+            return bytes;
         };
     }
 
     private interface DataWriter {
-        void write(CharBuffer buffer) throws Exception;
+        void write(ByteBuffer buffer) throws Exception;
     }
 
-    private static final class AppendableDataWriter implements DataWriter {
+    private static final class OutputSteamDataWriter implements DataWriter {
 
-        private final Appendable dest;
+        private final OutputStream dest;
 
-        private AppendableDataWriter(Appendable dest) {
+        private OutputSteamDataWriter(OutputStream dest) {
             this.dest = dest;
         }
 
         @Override
-        public void write(CharBuffer buffer) throws IOException {
-            if (dest instanceof Writer) {
-                write(buffer, (Writer) dest);
-                return;
-            }
+        public void write(ByteBuffer buffer) throws IOException {
             if (buffer.hasArray()) {
                 int remaining = buffer.remaining();
-                dest.append(new String(
-                    buffer.array(),
-                    JieBuffer.arrayStartIndex(buffer),
-                    buffer.remaining()
-                ));
+                dest.write(buffer.array(), JieBuffer.arrayStartIndex(buffer), remaining);
                 buffer.position(buffer.position() + remaining);
             } else {
-                char[] buf = new char[buffer.remaining()];
+                byte[] buf = new byte[buffer.remaining()];
                 buffer.get(buf);
-                dest.append(new String(buf));
-            }
-        }
-
-        private void write(CharBuffer buffer, Writer writer) throws IOException {
-            if (buffer.hasArray()) {
-                int remaining = buffer.remaining();
-                writer.write(buffer.array(), JieBuffer.arrayStartIndex(buffer), remaining);
-                buffer.position(buffer.position() + remaining);
-            } else {
-                char[] buf = new char[buffer.remaining()];
-                buffer.get(buf);
-                writer.write(buf);
+                dest.write(buf);
             }
         }
     }
@@ -397,27 +339,27 @@ final class CharProcessorImpl implements CharProcessor {
         static final NullDataWriter SINGLETON = new NullDataWriter();
 
         @Override
-        public void write(CharBuffer buffer) {
+        public void write(ByteBuffer buffer) {
             // Do nothing
         }
     }
 
-    private final class ProcessorReader extends Reader {
+    private final class ProcessorInputStream extends InputStream {
 
-        private @Nullable CharSegment nextSeg = null;
+        private @Nullable ByteSegment nextSeg = null;
         private boolean closed = false;
 
-        private ProcessorReader() {
+        private ProcessorInputStream() {
         }
 
-        private CharSegment read0() throws IOException {
+        private ByteSegment read0() throws IOException {
             try {
-                CharSegment s0 = getSourceReader().read(readBlockSize);
-                @Nullable CharBuffer encoded = getEncoder().encode(s0.data(), s0.end());
+                ByteSegment s0 = getSourceReader().read(readBlockSize);
+                @Nullable ByteBuffer encoded = getEncoder().encode(s0.data(), s0.end());
                 if (encoded == s0.data()) {
                     return s0;
                 }
-                return CharSegment.of(encoded, s0.end());
+                return ByteSegment.of(encoded, s0.end());
             } catch (Exception e) {
                 throw new IOException(e);
             }
@@ -430,14 +372,14 @@ final class CharProcessorImpl implements CharProcessor {
                 if (nextSeg == null) {
                     nextSeg = read0();
                 }
-                if (nextSeg == CharSegment.empty(true)) {
+                if (nextSeg == ByteSegment.empty(true)) {
                     return -1;
                 }
                 if (nextSeg.data().hasRemaining()) {
-                    return nextSeg.data().get() & 0xffff;
+                    return nextSeg.data().get() & 0xff;
                 }
                 if (nextSeg.end()) {
-                    nextSeg = CharSegment.empty(true);
+                    nextSeg = ByteSegment.empty(true);
                     return -1;
                 }
                 nextSeg = null;
@@ -445,12 +387,12 @@ final class CharProcessorImpl implements CharProcessor {
         }
 
         @Override
-        public int read(char[] dst) throws IOException {
-            return read(dst, 0, dst.length);
+        public int read(byte[] b) throws IOException {
+            return read(b, 0, b.length);
         }
 
         @Override
-        public int read(char[] dst, int off, int len) throws IOException {
+        public int read(byte[] dst, int off, int len) throws IOException {
             checkClosed();
             checkOffsetLength(dst.length, off, len);
             if (len <= 0) {
@@ -459,7 +401,7 @@ final class CharProcessorImpl implements CharProcessor {
             int pos = off;
             int remaining = len;
             while (remaining > 0) {
-                if (nextSeg == CharSegment.empty(true)) {
+                if (nextSeg == ByteSegment.empty(true)) {
                     return -1;
                 }
                 if (nextSeg == null) {
@@ -473,7 +415,7 @@ final class CharProcessorImpl implements CharProcessor {
                     continue;
                 }
                 if (nextSeg.end()) {
-                    nextSeg = CharSegment.empty(true);
+                    nextSeg = ByteSegment.empty(true);
                     break;
                 } else {
                     nextSeg = null;
@@ -494,7 +436,7 @@ final class CharProcessorImpl implements CharProcessor {
             long pos = 0;
             long remaining = n;
             while (remaining > 0) {
-                if (nextSeg == CharSegment.empty(true)) {
+                if (nextSeg == ByteSegment.empty(true)) {
                     return 0;
                 }
                 if (nextSeg == null) {
@@ -508,7 +450,7 @@ final class CharProcessorImpl implements CharProcessor {
                     continue;
                 }
                 if (nextSeg.end()) {
-                    nextSeg = CharSegment.empty(true);
+                    nextSeg = ByteSegment.empty(true);
                     break;
                 } else {
                     nextSeg = null;
@@ -518,6 +460,11 @@ final class CharProcessorImpl implements CharProcessor {
                 return 0;
             }
             return pos;
+        }
+
+        @Override
+        public int available() {
+            return nextSeg == null ? 0 : nextSeg.data().remaining();
         }
 
         @Override
@@ -539,27 +486,27 @@ final class CharProcessorImpl implements CharProcessor {
 
         private void checkClosed() throws IOException {
             if (closed) {
-                throw new IOException("Reader closed.");
+                throw new IOException("Stream closed.");
             }
         }
     }
 
-    private static final class BufferMerger implements Function<Collection<CharBuffer>, CharBuffer> {
+    private static final class BufferMerger implements Function<Collection<ByteBuffer>, ByteBuffer> {
 
         private static final BufferMerger SINGLETON = new BufferMerger();
 
         @Override
-        public @Nullable CharBuffer apply(Collection<CharBuffer> charBuffers) {
-            if (charBuffers.isEmpty()) {
+        public @Nullable ByteBuffer apply(Collection<ByteBuffer> byteBuffers) {
+            if (byteBuffers.isEmpty()) {
                 return null;
             }
             int size = 0;
-            for (CharBuffer charBuffer : charBuffers) {
-                size += charBuffer.remaining();
+            for (ByteBuffer byteBuffer : byteBuffers) {
+                size += byteBuffer.remaining();
             }
-            CharBuffer result = CharBuffer.allocate(size);
-            for (CharBuffer charBuffer : charBuffers) {
-                result.put(charBuffer);
+            ByteBuffer result = ByteBuffer.allocate(size);
+            for (ByteBuffer byteBuffer : byteBuffers) {
+                result.put(byteBuffer);
             }
             result.flip();
             return result;
@@ -572,7 +519,7 @@ final class CharProcessorImpl implements CharProcessor {
         private final int size;
 
         // Capacity is always the size.
-        private @Nullable CharBuffer buffer;
+        private @Nullable ByteBuffer buffer;
 
         FixedSizeEncoder(Handler encoder, int size) throws IllegalArgumentException {
             checkSize(size);
@@ -581,7 +528,7 @@ final class CharProcessorImpl implements CharProcessor {
         }
 
         @Override
-        public @Nullable CharBuffer encode(CharBuffer data, boolean end) throws Exception {
+        public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) throws Exception {
             @Nullable Object result = null;
             boolean encoded = false;
 
@@ -607,7 +554,7 @@ final class CharProcessorImpl implements CharProcessor {
             while (limit - pos >= size) {
                 pos += size;
                 data.limit(pos);
-                CharBuffer slice = data.slice();
+                ByteBuffer slice = data.slice();
                 data.position(pos);
                 if (end && pos == limit) {
                     result = JieCoding.ifAdd(result, encoder.encode(slice, true));
@@ -622,7 +569,7 @@ final class CharProcessorImpl implements CharProcessor {
             // buffering
             if (data.hasRemaining()) {
                 if (buffer == null) {
-                    buffer = CharBuffer.allocate(size);
+                    buffer = ByteBuffer.allocate(size);
                 }
                 JieBuffer.readTo(data, buffer);
                 if (end) {
@@ -632,9 +579,9 @@ final class CharProcessorImpl implements CharProcessor {
                 }
             }
 
-            @Nullable CharBuffer ret = JieCoding.ifMerge(result, BufferMerger.SINGLETON);
+            @Nullable ByteBuffer ret = JieCoding.ifMerge(result, BufferMerger.SINGLETON);
             if (end && !encoded) {
-                return encoder.encode(JieChars.emptyBuffer(), true);
+                return encoder.encode(JieBytes.emptyBuffer(), true);
             }
             return ret;
         }
@@ -646,7 +593,7 @@ final class CharProcessorImpl implements CharProcessor {
         private final int size;
 
         // Capacity is always the size.
-        private @Nullable CharBuffer buffer;
+        private @Nullable ByteBuffer buffer;
 
         RoundingEncoder(Handler encoder, int size) {
             checkSize(size);
@@ -655,7 +602,7 @@ final class CharProcessorImpl implements CharProcessor {
         }
 
         @Override
-        public @Nullable CharBuffer encode(CharBuffer data, boolean end) throws Exception {
+        public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) throws Exception {
             @Nullable Object result = null;
             boolean encoded = false;
 
@@ -683,7 +630,7 @@ final class CharProcessorImpl implements CharProcessor {
                 pos += roundingSize;
                 int limit = data.limit();
                 data.limit(pos);
-                CharBuffer slice = data.slice();
+                ByteBuffer slice = data.slice();
                 data.position(pos);
                 data.limit(limit);
                 if (end && pos == limit) {
@@ -698,7 +645,7 @@ final class CharProcessorImpl implements CharProcessor {
             // buffering
             if (data.hasRemaining()) {
                 if (buffer == null) {
-                    buffer = CharBuffer.allocate(size);
+                    buffer = ByteBuffer.allocate(size);
                 }
                 JieBuffer.readTo(data, buffer);
                 if (end) {
@@ -708,9 +655,9 @@ final class CharProcessorImpl implements CharProcessor {
                 }
             }
 
-            @Nullable CharBuffer ret = JieCoding.ifMerge(result, BufferMerger.SINGLETON);
+            @Nullable ByteBuffer ret = JieCoding.ifMerge(result, BufferMerger.SINGLETON);
             if (end && !encoded) {
-                return encoder.encode(JieChars.emptyBuffer(), true);
+                return encoder.encode(JieBytes.emptyBuffer(), true);
             }
             return ret;
         }
@@ -719,17 +666,17 @@ final class CharProcessorImpl implements CharProcessor {
     static final class BufferingEncoder implements Handler {
 
         private final Handler encoder;
-        private char @Nullable [] buffer = null;
+        private byte @Nullable [] buffer = null;
 
         BufferingEncoder(Handler encoder) {
             this.encoder = encoder;
         }
 
         @Override
-        public @Nullable CharBuffer encode(CharBuffer data, boolean end) throws Exception {
-            CharBuffer totalBuffer;
+        public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) throws Exception {
+            ByteBuffer totalBuffer;
             if (buffer != null) {
-                CharBuffer newBuffer = CharBuffer.allocate(buffer.length + data.remaining());
+                ByteBuffer newBuffer = ByteBuffer.allocate(buffer.length + data.remaining());
                 newBuffer.put(buffer);
                 newBuffer.put(data);
                 newBuffer.flip();
@@ -737,13 +684,13 @@ final class CharProcessorImpl implements CharProcessor {
             } else {
                 totalBuffer = data;
             }
-            @Nullable CharBuffer ret = encoder.encode(totalBuffer, end);
+            @Nullable ByteBuffer ret = encoder.encode(totalBuffer, end);
             if (end) {
                 buffer = null;
                 return ret;
             }
             if (totalBuffer.hasRemaining()) {
-                char[] remainingBuffer = new char[totalBuffer.remaining()];
+                byte[] remainingBuffer = new byte[totalBuffer.remaining()];
                 totalBuffer.get(remainingBuffer);
                 buffer = remainingBuffer;
             } else {
@@ -758,7 +705,7 @@ final class CharProcessorImpl implements CharProcessor {
         static final EmptyEncoder SINGLETON = new EmptyEncoder();
 
         @Override
-        public CharBuffer encode(CharBuffer data, boolean end) {
+        public ByteBuffer encode(ByteBuffer data, boolean end) {
             return data;
         }
     }

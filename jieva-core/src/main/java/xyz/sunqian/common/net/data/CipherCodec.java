@@ -1,7 +1,7 @@
 package xyz.sunqian.common.net.data;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.io.ByteProcessor;
+import xyz.sunqian.common.io.ByteEncoder;
 import xyz.sunqian.common.io.JieIO;
 
 import javax.crypto.Cipher;
@@ -259,7 +259,7 @@ public class CipherCodec implements CodecConfigurator<CipherCodec> {
             } else {
                 throw new CodecException("Unknown input type: " + input.getClass());
             }
-            return ByteProcessor.from(source).readBlockSize(blockSize).encoder((data, end) ->
+            return ByteEncoder.from(source).readBlockSize(blockSize).encoder((data, end) ->
                     ByteBuffer.wrap(JieCodec.doCipher(cipher, data)))
                 .toInputStream();
         } catch (CodecException e) {

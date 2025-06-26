@@ -1,13 +1,13 @@
 package xyz.sunqian.common.encode;
 
 import xyz.sunqian.common.base.bytes.JieBytes;
-import xyz.sunqian.common.io.ByteProcessor;
+import xyz.sunqian.common.io.ByteEncoder;
 import xyz.sunqian.common.io.JieBuffer;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-import static xyz.sunqian.common.io.ByteProcessor.Handler.withBuffering;
+import static xyz.sunqian.common.io.ByteEncoder.Handler.withBuffering;
 
 /**
  * This abstract class provides skeletal implementation methods for {@link DataEncoder} and {@link DataDecoder}, and
@@ -269,16 +269,16 @@ public abstract class AbstractBaseDataEncoder implements BaseDataEncoder {
     }
 
     /**
-     * This method generates a {@link ByteProcessor.Handler} based on encoding/decoding algorithm of
+     * This method generates a {@link ByteEncoder.Handler} based on encoding/decoding algorithm of
      * {@link #getOutputSize(int, long, boolean)} and
      * {@link #doCode(byte[], int, int, byte[], int, int, long, boolean)}, and then wrap the generated encoder via
-     * {@link ByteProcessor.Handler#withBuffering(ByteProcessor.Handler)}.
+     * {@link ByteEncoder.Handler#withBuffering(ByteEncoder.Handler)}.
      *
-     * @return a {@link ByteProcessor.Handler} based on current encoding/decoding algorithm
+     * @return a {@link ByteEncoder.Handler} based on current encoding/decoding algorithm
      */
     @Override
-    public ByteProcessor.Handler streamEncoder() {
-        ByteProcessor.Handler encoder = new ByteProcessor.Handler() {
+    public ByteEncoder.Handler streamEncoder() {
+        ByteEncoder.Handler encoder = new ByteEncoder.Handler() {
 
             private long startPos = 0;
 

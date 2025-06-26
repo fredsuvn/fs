@@ -1,7 +1,7 @@
 package xyz.sunqian.common.net.data;
 
 import xyz.sunqian.common.base.JieCheck;
-import xyz.sunqian.common.io.ByteProcessor;
+import xyz.sunqian.common.io.ByteEncoder;
 import xyz.sunqian.common.io.JieIO;
 
 import java.io.InputStream;
@@ -67,7 +67,7 @@ final class StreamData implements GekData.OfStream {
 
     @Override
     public int write(ByteBuffer dest, int length) {
-        return (int) ByteProcessor.from(stream).readLimit(length).writeTo(JieIO.newOutputStream(dest));
+        return (int) ByteEncoder.from(stream).readLimit(length).writeTo(JieIO.newOutputStream(dest));
     }
 
     @Override
@@ -77,7 +77,7 @@ final class StreamData implements GekData.OfStream {
 
     @Override
     public long write(OutputStream dest, long length) {
-        return ByteProcessor.from(stream).readLimit(length).writeTo(dest);
+        return ByteEncoder.from(stream).readLimit(length).writeTo(dest);
     }
 
     @Override

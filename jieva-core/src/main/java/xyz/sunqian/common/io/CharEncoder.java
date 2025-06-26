@@ -8,7 +8,7 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 
 import static xyz.sunqian.common.base.JieCheck.checkOffsetLength;
-import static xyz.sunqian.common.io.CharProcessor.Handler.withFixedSize;
+import static xyz.sunqian.common.io.CharEncoder.Handler.withFixedSize;
 
 /**
  * Char processor is used to process char data, from the specified data source, through zero or more intermediate
@@ -37,39 +37,39 @@ import static xyz.sunqian.common.io.CharProcessor.Handler.withFixedSize;
  *
  * @author sunqian
  */
-public interface CharProcessor {
+public interface CharEncoder {
 
     /**
-     * Returns a new {@link CharProcessor} to process the specified data.
+     * Returns a new {@link CharEncoder} to process the specified data.
      *
      * @param data the specified data
-     * @return a new {@link CharProcessor}
+     * @return a new {@link CharEncoder}
      */
-    static CharProcessor from(Reader data) {
-        return new CharProcessorImpl(data);
+    static CharEncoder from(Reader data) {
+        return new CharEncoderImpl(data);
     }
 
     /**
-     * Returns a new {@link CharProcessor} to process the specified data.
+     * Returns a new {@link CharEncoder} to process the specified data.
      *
      * @param data the specified data
-     * @return a new {@link CharProcessor}
+     * @return a new {@link CharEncoder}
      */
-    static CharProcessor from(char[] data) {
-        return new CharProcessorImpl(data);
+    static CharEncoder from(char[] data) {
+        return new CharEncoderImpl(data);
     }
 
     /**
-     * Returns a new {@link CharProcessor} to process the specified data from the specified offset up to the specified
+     * Returns a new {@link CharEncoder} to process the specified data from the specified offset up to the specified
      * length.
      *
      * @param data   the specified data
      * @param offset the specified offset
      * @param length the specified length
-     * @return a new {@link CharProcessor}
+     * @return a new {@link CharEncoder}
      * @throws IndexOutOfBoundsException if an index is out of bounds
      */
-    static CharProcessor from(char[] data, int offset, int length) throws IndexOutOfBoundsException {
+    static CharEncoder from(char[] data, int offset, int length) throws IndexOutOfBoundsException {
         checkOffsetLength(data.length, offset, length);
         if (offset == 0 && length == data.length) {
             return from(data);
@@ -79,23 +79,23 @@ public interface CharProcessor {
     }
 
     /**
-     * Returns a new {@link CharProcessor} to process the specified data.
+     * Returns a new {@link CharEncoder} to process the specified data.
      *
      * @param data the specified data
-     * @return a new {@link CharProcessor}
+     * @return a new {@link CharEncoder}
      */
-    static CharProcessor from(CharBuffer data) {
-        return new CharProcessorImpl(data);
+    static CharEncoder from(CharBuffer data) {
+        return new CharEncoderImpl(data);
     }
 
     /**
-     * Returns a new {@link CharProcessor} to process the specified data.
+     * Returns a new {@link CharEncoder} to process the specified data.
      *
      * @param data the specified data
-     * @return a new {@link CharProcessor}
+     * @return a new {@link CharEncoder}
      */
-    static CharProcessor from(CharSequence data) {
-        return new CharProcessorImpl(data);
+    static CharEncoder from(CharSequence data) {
+        return new CharEncoderImpl(data);
     }
 
     /**
@@ -107,7 +107,7 @@ public interface CharProcessor {
      * @param readLimit the maximum number of chars to read from the data source
      * @return this
      */
-    CharProcessor readLimit(long readLimit);
+    CharEncoder readLimit(long readLimit);
 
     /**
      * Sets the number of chars for each read operation from the data source.
@@ -120,7 +120,7 @@ public interface CharProcessor {
      * @param readBlockSize the number of chars for each read operation from the data source
      * @return this
      */
-    CharProcessor readBlockSize(int readBlockSize);
+    CharEncoder readBlockSize(int readBlockSize);
 
     /**
      * Sets whether reading 0 char from the data source should be treated as reaching to the end and break the read
@@ -132,7 +132,7 @@ public interface CharProcessor {
      *                      break the read loop
      * @return this
      */
-    CharProcessor endOnZeroRead(boolean endOnZeroRead);
+    CharEncoder endOnZeroRead(boolean endOnZeroRead);
 
     /**
      * Adds the given encoder for this processor. When the data processing starts, all encoders will be invoked after
@@ -177,7 +177,7 @@ public interface CharProcessor {
      * @param encoder the given encoder
      * @return this
      */
-    CharProcessor encoder(Handler encoder);
+    CharEncoder encoder(Handler encoder);
 
     /**
      * Adds the given encoder wrapped by {@link Handler#withFixedSize(int, Handler)} for this processor. This method is
@@ -191,7 +191,7 @@ public interface CharProcessor {
      * @return this
      * @throws IllegalArgumentException if the specified size is less than or equal to 0
      */
-    default CharProcessor encoder(int size, Handler encoder) throws IllegalArgumentException {
+    default CharEncoder encoder(int size, Handler encoder) throws IllegalArgumentException {
         return encoder(withFixedSize(size, encoder));
     }
 
@@ -326,19 +326,19 @@ public interface CharProcessor {
     Reader toReader();
 
     /**
-     * Converts this {@link CharProcessor} to a {@link ByteProcessor} with the specified charset.
+     * Converts this {@link CharEncoder} to a {@link ByteEncoder} with the specified charset.
      * <p>
      * This is a terminal method.
      *
      * @param charset the specified charset
-     * @return a new {@link ByteProcessor} converted from this {@link CharProcessor} with the specified charset
+     * @return a new {@link ByteEncoder} converted from this {@link CharEncoder} with the specified charset
      */
-    default ByteProcessor toByteProcessor(Charset charset) {
-        return ByteProcessor.from(JieIO.newInputStream(toReader(), charset));
+    default ByteEncoder toByteProcessor(Charset charset) {
+        return ByteEncoder.from(JieIO.newInputStream(toReader(), charset));
     }
 
     /**
-     * This interface represents an encoder, which is a type of intermediate operation for {@link CharProcessor}.
+     * This interface represents an encoder, which is a type of intermediate operation for {@link CharEncoder}.
      *
      * @author sunqian
      */
@@ -377,7 +377,7 @@ public interface CharProcessor {
          * @throws IllegalArgumentException if the specified size is less than or equal to 0
          */
         static Handler withFixedSize(int size, Handler encoder) throws IllegalArgumentException {
-            return new CharProcessorImpl.FixedSizeEncoder(encoder, size);
+            return new CharEncoderImpl.FixedSizeEncoder(encoder, size);
         }
 
         /**
@@ -400,7 +400,7 @@ public interface CharProcessor {
          * @throws IllegalArgumentException if the specified size is less than or equal to 0
          */
         static Handler withRounding(int size, Handler encoder) throws IllegalArgumentException {
-            return new CharProcessorImpl.RoundingEncoder(encoder, size);
+            return new CharEncoderImpl.RoundingEncoder(encoder, size);
         }
 
         /**
@@ -417,7 +417,7 @@ public interface CharProcessor {
          * @return a wrapper {@link Handler} that wraps the given encoder to support buffering unconsumed data
          */
         static Handler withBuffering(Handler encoder) {
-            return new CharProcessorImpl.BufferingEncoder(encoder);
+            return new CharEncoderImpl.BufferingEncoder(encoder);
         }
 
         /**
@@ -426,7 +426,7 @@ public interface CharProcessor {
          * @return an empty {@link Handler} which does nothing but only returns the input data directly
          */
         static Handler emptyEncoder() {
-            return CharProcessorImpl.EmptyEncoder.SINGLETON;
+            return CharEncoderImpl.EmptyEncoder.SINGLETON;
         }
     }
 }

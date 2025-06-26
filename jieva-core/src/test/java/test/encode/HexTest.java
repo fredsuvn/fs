@@ -9,7 +9,7 @@ import xyz.sunqian.common.base.exception.ProcessingException;
 import xyz.sunqian.common.encode.DecodingException;
 import xyz.sunqian.common.encode.EncodingException;
 import xyz.sunqian.common.encode.JieHex;
-import xyz.sunqian.common.io.ByteProcessor;
+import xyz.sunqian.common.io.ByteEncoder;
 import xyz.sunqian.common.io.JieIO;
 
 import static org.testng.Assert.assertEquals;
@@ -92,7 +92,7 @@ public class HexTest {
                 error[0] = null;
             }
             try {
-                ByteProcessor.from(en).readBlockSize(1)
+                ByteEncoder.from(en).readBlockSize(1)
                     .encoder(JieHex.decoder().streamEncoder()).writeTo(new BytesBuilder());
             } catch (ProcessingException e) {
                 error[0] = e.getCause().getMessage();

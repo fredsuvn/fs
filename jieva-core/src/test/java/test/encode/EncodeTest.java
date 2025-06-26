@@ -1,6 +1,6 @@
 package test.encode;
 
-import xyz.sunqian.common.io.ByteProcessor;
+import xyz.sunqian.common.io.ByteEncoder;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.encode.DataDecoder;
 import xyz.sunqian.common.encode.DataEncoder;
@@ -13,7 +13,7 @@ import java.util.Arrays;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.expectThrows;
-import static xyz.sunqian.common.io.ByteProcessor.Handler.withFixedSize;
+import static xyz.sunqian.common.io.ByteEncoder.Handler.withFixedSize;
 
 public class EncodeTest {
 
@@ -87,7 +87,7 @@ public class EncodeTest {
         {
             // stream
             BytesBuilder bb = new BytesBuilder();
-            long c = ByteProcessor.from(source).encoder(withFixedSize(blockSize, encoder.streamEncoder())).writeTo(bb);
+            long c = ByteEncoder.from(source).encoder(withFixedSize(blockSize, encoder.streamEncoder())).writeTo(bb);
             if (source.length == 0) {
                 assertEquals(c, 0);
             } else {
@@ -176,7 +176,7 @@ public class EncodeTest {
         {
             // stream
             BytesBuilder bb = new BytesBuilder();
-            long c = ByteProcessor.from(source).encoder(withFixedSize(blockSize, decoder.streamEncoder())).writeTo(bb);
+            long c = ByteEncoder.from(source).encoder(withFixedSize(blockSize, decoder.streamEncoder())).writeTo(bb);
             if (source.length == 0) {
                 assertEquals(c, 0);
             } else {

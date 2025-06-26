@@ -1,7 +1,7 @@
 package xyz.sunqian.common.encode;
 
 import xyz.sunqian.annotations.ThreadSafe;
-import xyz.sunqian.common.io.ByteProcessor;
+import xyz.sunqian.common.io.ByteEncoder;
 import xyz.sunqian.common.base.exception.UnreachablePointException;
 
 import java.util.Arrays;
@@ -189,15 +189,15 @@ public class JieBase64 {
         int getOutputSize(int inputSize) throws EncodingException;
 
         /**
-         * Returns a new {@link ByteProcessor.Handler} which encapsulates current base64 encoding, supports any size of input
+         * Returns a new {@link ByteEncoder.Handler} which encapsulates current base64 encoding, supports any size of input
          * data, not thread-safe.
          *
-         * @return a {@link ByteProcessor.Handler} with current base64 encoding logic
-         * @see ByteProcessor
-         * @see ByteProcessor.Handler
+         * @return a {@link ByteEncoder.Handler} with current base64 encoding logic
+         * @see ByteEncoder
+         * @see ByteEncoder.Handler
          */
         @Override
-        ByteProcessor.Handler streamEncoder();
+        ByteEncoder.Handler streamEncoder();
     }
 
     /**
@@ -229,15 +229,15 @@ public class JieBase64 {
         int getOutputSize(int inputSize) throws DecodingException;
 
         /**
-         * Returns a new {@link ByteProcessor.Handler} which encapsulates current base64 decoding, supports any size of input
+         * Returns a new {@link ByteEncoder.Handler} which encapsulates current base64 decoding, supports any size of input
          * data, not thread-safe.
          *
-         * @return a {@link ByteProcessor.Handler} with current base64 decoding logic
-         * @see ByteProcessor
-         * @see ByteProcessor.Handler
+         * @return a {@link ByteEncoder.Handler} with current base64 decoding logic
+         * @see ByteEncoder
+         * @see ByteEncoder.Handler
          */
         @Override
-        ByteProcessor.Handler streamEncoder();
+        ByteEncoder.Handler streamEncoder();
     }
 
     private static abstract class AbsEncoder extends AbstractBaseDataEncoder.En implements Encoder {

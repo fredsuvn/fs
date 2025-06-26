@@ -10,7 +10,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 import static xyz.sunqian.common.base.JieCheck.checkOffsetLength;
-import static xyz.sunqian.common.io.ByteProcessor.Handler.withFixedSize;
+import static xyz.sunqian.common.io.ByteEncoder.Handler.withFixedSize;
 
 /**
  * Byte processor is used to process byte data, from the specified data source, through zero or more intermediate
@@ -39,39 +39,39 @@ import static xyz.sunqian.common.io.ByteProcessor.Handler.withFixedSize;
  *
  * @author sunqian
  */
-public interface ByteProcessor {
+public interface ByteEncoder {
 
     /**
-     * Returns a new {@link ByteProcessor} to process the specified data.
+     * Returns a new {@link ByteEncoder} to process the specified data.
      *
      * @param data the specified data
-     * @return a new {@link ByteProcessor}
+     * @return a new {@link ByteEncoder}
      */
-    static ByteProcessor from(InputStream data) {
-        return new ByteProcessorImpl(data);
+    static ByteEncoder from(InputStream data) {
+        return new ByteEncoderImpl(data);
     }
 
     /**
-     * Returns a new {@link ByteProcessor} to process the specified data.
+     * Returns a new {@link ByteEncoder} to process the specified data.
      *
      * @param data the specified data
-     * @return a new {@link ByteProcessor}
+     * @return a new {@link ByteEncoder}
      */
-    static ByteProcessor from(byte[] data) {
-        return new ByteProcessorImpl(data);
+    static ByteEncoder from(byte[] data) {
+        return new ByteEncoderImpl(data);
     }
 
     /**
-     * Returns a new {@link ByteProcessor} to process the specified data from the specified offset up to the specified
+     * Returns a new {@link ByteEncoder} to process the specified data from the specified offset up to the specified
      * length.
      *
      * @param data   the specified data
      * @param offset the specified offset
      * @param length the specified length
-     * @return a new {@link ByteProcessor}
+     * @return a new {@link ByteEncoder}
      * @throws IndexOutOfBoundsException if an index is out of bounds
      */
-    static ByteProcessor from(byte[] data, int offset, int length) throws IndexOutOfBoundsException {
+    static ByteEncoder from(byte[] data, int offset, int length) throws IndexOutOfBoundsException {
         checkOffsetLength(data.length, offset, length);
         if (offset == 0 && length == data.length) {
             return from(data);
@@ -81,13 +81,13 @@ public interface ByteProcessor {
     }
 
     /**
-     * Returns a new {@link ByteProcessor} to process the specified data.
+     * Returns a new {@link ByteEncoder} to process the specified data.
      *
      * @param data the specified data
-     * @return a new {@link ByteProcessor}
+     * @return a new {@link ByteEncoder}
      */
-    static ByteProcessor from(ByteBuffer data) {
-        return new ByteProcessorImpl(data);
+    static ByteEncoder from(ByteBuffer data) {
+        return new ByteEncoderImpl(data);
     }
 
     /**
@@ -99,7 +99,7 @@ public interface ByteProcessor {
      * @param readLimit the maximum number of bytes to read from the data source
      * @return this
      */
-    ByteProcessor readLimit(long readLimit);
+    ByteEncoder readLimit(long readLimit);
 
     /**
      * Sets the number of bytes for each read operation from the data source.
@@ -112,7 +112,7 @@ public interface ByteProcessor {
      * @param readBlockSize the number of bytes for each read operation from the data source
      * @return this
      */
-    ByteProcessor readBlockSize(int readBlockSize);
+    ByteEncoder readBlockSize(int readBlockSize);
 
     /**
      * Sets whether reading 0 byte from the data source should be treated as reaching to the end and break the read
@@ -124,7 +124,7 @@ public interface ByteProcessor {
      *                      break the read loop
      * @return this
      */
-    ByteProcessor endOnZeroRead(boolean endOnZeroRead);
+    ByteEncoder endOnZeroRead(boolean endOnZeroRead);
 
     /**
      * Adds the given encoder for this processor. When the data processing starts, all encoders will be invoked after
@@ -166,7 +166,7 @@ public interface ByteProcessor {
      * @param encoder the given encoder
      * @return this
      */
-    ByteProcessor encoder(Handler encoder);
+    ByteEncoder encoder(Handler encoder);
 
     /**
      * Adds the given encoder wrapped by {@link Handler#withFixedSize(int, Handler)} for this processor. This method is
@@ -180,7 +180,7 @@ public interface ByteProcessor {
      * @return this
      * @throws IllegalArgumentException if the specified size is less than or equal to 0
      */
-    default ByteProcessor encoder(int size, Handler encoder) throws IllegalArgumentException {
+    default ByteEncoder encoder(int size, Handler encoder) throws IllegalArgumentException {
         return encoder(withFixedSize(size, encoder));
     }
 
@@ -333,19 +333,19 @@ public interface ByteProcessor {
     InputStream toInputStream();
 
     /**
-     * Converts this {@link ByteProcessor} to a {@link CharProcessor} with the specified charset.
+     * Converts this {@link ByteEncoder} to a {@link CharEncoder} with the specified charset.
      * <p>
      * This is a terminal method.
      *
      * @param charset the specified charset
-     * @return a new {@link CharProcessor} converted from this {@link ByteProcessor} with the specified charset
+     * @return a new {@link CharEncoder} converted from this {@link ByteEncoder} with the specified charset
      */
-    default CharProcessor toCharProcessor(Charset charset) {
-        return CharProcessor.from(JieIO.newReader(toInputStream(), charset));
+    default CharEncoder toCharProcessor(Charset charset) {
+        return CharEncoder.from(JieIO.newReader(toInputStream(), charset));
     }
 
     /**
-     * This interface represents an encoder, which is a type of intermediate operation for {@link ByteProcessor}.
+     * This interface represents an encoder, which is a type of intermediate operation for {@link ByteEncoder}.
      *
      * @author sunqian
      */
@@ -384,7 +384,7 @@ public interface ByteProcessor {
          * @throws IllegalArgumentException if the specified size is less than or equal to 0
          */
         static Handler withFixedSize(int size, Handler encoder) throws IllegalArgumentException {
-            return new ByteProcessorImpl.FixedSizeEncoder(encoder, size);
+            return new ByteEncoderImpl.FixedSizeEncoder(encoder, size);
         }
 
         /**
@@ -407,7 +407,7 @@ public interface ByteProcessor {
          * @throws IllegalArgumentException if the specified size is less than or equal to 0
          */
         static Handler withRounding(int size, Handler encoder) throws IllegalArgumentException {
-            return new ByteProcessorImpl.RoundingEncoder(encoder, size);
+            return new ByteEncoderImpl.RoundingEncoder(encoder, size);
         }
 
         /**
@@ -424,7 +424,7 @@ public interface ByteProcessor {
          * @return a wrapper {@link Handler} that wraps the given encoder to support buffering unconsumed data
          */
         static Handler withBuffering(Handler encoder) {
-            return new ByteProcessorImpl.BufferingEncoder(encoder);
+            return new ByteEncoderImpl.BufferingEncoder(encoder);
         }
 
         /**
@@ -433,7 +433,7 @@ public interface ByteProcessor {
          * @return an empty {@link Handler} which does nothing but only returns the input data directly
          */
         static Handler emptyEncoder() {
-            return ByteProcessorImpl.EmptyEncoder.SINGLETON;
+            return ByteEncoderImpl.EmptyEncoder.SINGLETON;
         }
     }
 }
