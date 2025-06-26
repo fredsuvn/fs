@@ -16,6 +16,10 @@ public class IOChecker {
         JieCheck.checkArgument(bufSize > 0, "bufSize must > 0.");
     }
 
+    static void checkBlockSize(int bufSize) {
+        JieCheck.checkArgument(bufSize > 0, "blockSize must > 0.");
+    }
+
     static void checkLen(int len) {
         JieCheck.checkArgument(len >= 0, "len must >= 0.");
     }

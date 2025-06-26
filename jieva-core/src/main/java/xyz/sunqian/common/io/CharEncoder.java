@@ -7,32 +7,29 @@ import java.io.Reader;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 
-import static xyz.sunqian.common.base.JieCheck.checkOffsetLength;
 import static xyz.sunqian.common.io.CharEncoder.Handler.withFixedSize;
 
 /**
- * Char processor is used to process char data, from the specified data source, through zero or more intermediate
- * operations (such as {@link #encoder(Handler)}), and finally produces a result or side effect. The following example
- * shows a read-encode-write operation:
+ * This interface represents the encoder to encode char data, from the specified data source, through zero or more
+ * intermediate handlers, finally produces a result or side effect. The following example shows a typical encoding:
  * <pre>{@code
- *     CharProcessor.from(input)
+ *     CharEncoder.from(input)
  *         .readBlockSize(1024)
- *         .encoder(withFixedSize(64, (b, e) -> {
- *             //...
- *         }))
+ *         .readLimit(1024 * 8)
+ *         .handler(handler)
  *         .writeTo(output);
  * }</pre>
  * There are types of methods in this interface:
  * <ul>
  *     <li>
- *         Setting methods: to set the data processing arguments before a terminal method has invoked;
+ *         Setting methods: to set the encoding arguments to the current encoder before a terminal method is invoked;
  *     </li>
  *     <li>
- *         Terminal methods: to start the data processing. Note once a terminal method is invoked, the state of current
- *         processor will become undefined, and no safe guarantees for further operations;
+ *         Terminal methods: the current encoder starts the encoding and becomes invalid. Once a terminal method is
+ *         invoked, any further operations to the encoder will be undefined;
  *     </li>
  * </ul>
- * Char processor is lazy, operations on the source data are only performed when a terminal method is invoked, and
+ * The encoder is lazy, operations on the source data are only performed when a terminal method is invoked, and
  * source data are consumed only as needed.
  *
  * @author sunqian
@@ -40,87 +37,106 @@ import static xyz.sunqian.common.io.CharEncoder.Handler.withFixedSize;
 public interface CharEncoder {
 
     /**
-     * Returns a new {@link CharEncoder} to process the specified data.
+     * Returns a new {@link CharEncoder} with the specified data source.
      *
-     * @param data the specified data
-     * @return a new {@link CharEncoder}
+     * @param src the specified data source
+     * @return a new {@link CharEncoder} with the specified data source
      */
-    static CharEncoder from(Reader data) {
-        return new CharEncoderImpl(data);
+    static CharEncoder from(Reader src) {
+        return new CharEncoderImpl(src);
     }
 
     /**
-     * Returns a new {@link CharEncoder} to process the specified data.
+     * Returns a new {@link CharEncoder} with the specified data source.
      *
-     * @param data the specified data
-     * @return a new {@link CharEncoder}
+     * @param src the specified data source
+     * @return a new {@link CharEncoder} with the specified data source
      */
-    static CharEncoder from(char[] data) {
-        return new CharEncoderImpl(data);
+    static CharEncoder from(char[] src) {
+        return new CharEncoderImpl(src);
     }
 
     /**
-     * Returns a new {@link CharEncoder} to process the specified data from the specified offset up to the specified
-     * length.
+     * Returns a new {@link CharEncoder} with the specified data source, starting at the specified offset and up to the
+     * specified length.
      *
-     * @param data   the specified data
-     * @param offset the specified offset
-     * @param length the specified length
-     * @return a new {@link CharEncoder}
-     * @throws IndexOutOfBoundsException if an index is out of bounds
+     * @param src the specified data source
+     * @param off the specified offset
+     * @param len the specified length
+     * @return a new {@link CharEncoder} with the specified data source
+     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
      */
-    static CharEncoder from(char[] data, int offset, int length) throws IndexOutOfBoundsException {
-        checkOffsetLength(data.length, offset, length);
-        if (offset == 0 && length == data.length) {
-            return from(data);
+    static CharEncoder from(char[] src, int off, int len) throws IndexOutOfBoundsException {
+        IOChecker.checkOffLen(src.length, off, len);
+        if (off == 0 && len == src.length) {
+            return from(src);
         }
-        CharBuffer buffer = CharBuffer.wrap(data, offset, length);
+        CharBuffer buffer = CharBuffer.wrap(src, off, len);
         return from(buffer);
     }
 
     /**
-     * Returns a new {@link CharEncoder} to process the specified data.
+     * Returns a new {@link CharEncoder} with the specified data source.
      *
-     * @param data the specified data
-     * @return a new {@link CharEncoder}
+     * @param src the specified data source
+     * @return a new {@link CharEncoder} with the specified data source
      */
-    static CharEncoder from(CharBuffer data) {
-        return new CharEncoderImpl(data);
+    static CharEncoder from(CharSequence src) {
+        return new CharEncoderImpl(src);
     }
 
     /**
-     * Returns a new {@link CharEncoder} to process the specified data.
+     * Returns a new {@link CharEncoder} with the specified data source, starting at the specified start index inclusive
+     * and end at the specified end index exclusive.
      *
-     * @param data the specified data
-     * @return a new {@link CharEncoder}
+     * @param src   the specified data source
+     * @param start the specified start index inclusive
+     * @param end   the specified end index exclusive
+     * @return a new {@link CharEncoder} with the specified data source
+     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
      */
-    static CharEncoder from(CharSequence data) {
-        return new CharEncoderImpl(data);
+    static CharEncoder from(CharSequence src, int start, int end) throws IndexOutOfBoundsException {
+        IOChecker.checkStartEnd(src.length(), start, end);
+        if (start == 0 && end == src.length()) {
+            return from(src);
+        }
+        return from(src.subSequence(start, end));
     }
 
     /**
-     * Sets the maximum number of chars to read from the data source. This can be negative, meaning read until the end,
-     * which is the default value.
+     * Returns a new {@link CharEncoder} with the specified data source.
+     *
+     * @param src the specified data source
+     * @return a new {@link CharEncoder} with the specified data source
+     */
+    static CharEncoder from(CharBuffer src) {
+        return new CharEncoderImpl(src);
+    }
+
+    /**
+     * Sets the maximum number of chars to read from the data source.
      * <p>
      * This is an optional setting method.
      *
-     * @param readLimit the maximum number of chars to read from the data source
+     * @param readLimit the maximum number of chars to read from the data source, must {@code >= 0}
      * @return this
+     * @throws IllegalArgumentException if the limit is negative
      */
-    CharEncoder readLimit(long readLimit);
+    CharEncoder readLimit(long readLimit) throws IllegalArgumentException;
 
     /**
-     * Sets the number of chars for each read operation from the data source.
-     * <p>
-     * This setting is typically used when the data source is a reader, or intermediate operations are set, default is
+     * Sets the number of chars for each read operation from the data source, the default is
      * {@link IOKit#bufferSize()}.
      * <p>
+     * This setting is typically used for encoding in blocks.
+     * <p>
      * This is an optional setting method.
      *
-     * @param readBlockSize the number of chars for each read operation from the data source
+     * @param readBlockSize the number of chars for each read operation from the data source, must {@code > 0}
      * @return this
+     * @throws IllegalArgumentException if the block size is negative
      */
-    CharEncoder readBlockSize(int readBlockSize);
+    CharEncoder readBlockSize(int readBlockSize) throws IllegalArgumentException;
 
     /**
      * Sets whether reading 0 char from the data source should be treated as reaching to the end and break the read

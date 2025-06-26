@@ -9,32 +9,29 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
-import static xyz.sunqian.common.base.JieCheck.checkOffsetLength;
 import static xyz.sunqian.common.io.ByteEncoder.Handler.withFixedSize;
 
 /**
- * Byte processor is used to process byte data, from the specified data source, through zero or more intermediate
- * operations (such as {@link #encoder(Handler)}), and finally produces a result or side effect. The following example
- * shows a read-encode-write operation:
+ * This interface represents the encoder to encode byte data, from the specified data source, through zero or more
+ * intermediate handlers, finally produces a result or side effect. The following example shows a typical encoding:
  * <pre>{@code
- *     ByteProcessor.from(input)
+ *     ByteEncoder.from(input)
  *         .readBlockSize(1024)
- *         .encoder(withFixedSize(64, (b, e) -> {
- *             //...
- *         }))
+ *         .readLimit(1024 * 8)
+ *         .handler(handler)
  *         .writeTo(output);
  * }</pre>
  * There are types of methods in this interface:
  * <ul>
  *     <li>
- *         Setting methods: to set the data processing arguments before a terminal method has invoked;
+ *         Setting methods: to set the encoding arguments to the current encoder before a terminal method is invoked;
  *     </li>
  *     <li>
- *         Terminal methods: to start the data processing. Note once a terminal method is invoked, the state of current
- *         processor will become undefined, and no safe guarantees for further operations;
+ *         Terminal methods: the current encoder starts the encoding and becomes invalid. Once a terminal method is
+ *         invoked, any further operations to the encoder will be undefined;
  *     </li>
  * </ul>
- * Byte processor is lazy, operations on the source data are only performed when a terminal method is invoked, and
+ * The encoder is lazy, operations on the source data are only performed when a terminal method is invoked, and
  * source data are consumed only as needed.
  *
  * @author sunqian
@@ -42,113 +39,96 @@ import static xyz.sunqian.common.io.ByteEncoder.Handler.withFixedSize;
 public interface ByteEncoder {
 
     /**
-     * Returns a new {@link ByteEncoder} to process the specified data.
+     * Returns a new {@link ByteEncoder} with the specified data source.
      *
-     * @param data the specified data
-     * @return a new {@link ByteEncoder}
+     * @param src the specified data source
+     * @return a new {@link ByteEncoder} with the specified data source
      */
-    static ByteEncoder from(InputStream data) {
-        return new ByteEncoderImpl(data);
+    static ByteEncoder from(InputStream src) {
+        return new ByteEncoderImpl(src);
     }
 
     /**
-     * Returns a new {@link ByteEncoder} to process the specified data.
+     * Returns a new {@link ByteEncoder} with the specified data source.
      *
-     * @param data the specified data
-     * @return a new {@link ByteEncoder}
+     * @param src the specified data source
+     * @return a new {@link ByteEncoder} with the specified data source
      */
-    static ByteEncoder from(byte[] data) {
-        return new ByteEncoderImpl(data);
+    static ByteEncoder from(byte[] src) {
+        return new ByteEncoderImpl(src);
     }
 
     /**
-     * Returns a new {@link ByteEncoder} to process the specified data from the specified offset up to the specified
-     * length.
+     * Returns a new {@link ByteEncoder} with the specified data source, starting at the specified offset and up to the
+     * specified length.
      *
-     * @param data   the specified data
-     * @param offset the specified offset
-     * @param length the specified length
-     * @return a new {@link ByteEncoder}
-     * @throws IndexOutOfBoundsException if an index is out of bounds
+     * @param src the specified data source
+     * @param off the specified offset
+     * @param len the specified length
+     * @return a new {@link ByteEncoder} with the specified data source
+     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
      */
-    static ByteEncoder from(byte[] data, int offset, int length) throws IndexOutOfBoundsException {
-        checkOffsetLength(data.length, offset, length);
-        if (offset == 0 && length == data.length) {
-            return from(data);
+    static ByteEncoder from(byte[] src, int off, int len) throws IndexOutOfBoundsException {
+        IOChecker.checkOffLen(src.length, off, len);
+        if (off == 0 && len == src.length) {
+            return from(src);
         }
-        ByteBuffer buffer = ByteBuffer.wrap(data, offset, length);
+        ByteBuffer buffer = ByteBuffer.wrap(src, off, len);
         return from(buffer);
     }
 
     /**
-     * Returns a new {@link ByteEncoder} to process the specified data.
+     * Returns a new {@link ByteEncoder} with the specified data source.
      *
-     * @param data the specified data
-     * @return a new {@link ByteEncoder}
+     * @param src the specified data source
+     * @return a new {@link ByteEncoder} with the specified data source
      */
-    static ByteEncoder from(ByteBuffer data) {
-        return new ByteEncoderImpl(data);
+    static ByteEncoder from(ByteBuffer src) {
+        return new ByteEncoderImpl(src);
     }
 
     /**
-     * Sets the maximum number of bytes to read from the data source. This can be negative, meaning read until the end,
-     * which is the default value.
+     * Sets the maximum number of bytes to read from the data source.
      * <p>
      * This is an optional setting method.
      *
-     * @param readLimit the maximum number of bytes to read from the data source
+     * @param readLimit the maximum number of bytes to read from the data source, must {@code >= 0}
      * @return this
+     * @throws IllegalArgumentException if the limit is negative
      */
-    ByteEncoder readLimit(long readLimit);
+    ByteEncoder readLimit(long readLimit) throws IllegalArgumentException;
 
     /**
-     * Sets the number of bytes for each read operation from the data source.
+     * Sets the number of bytes for each read operation from the data source, the default is
+     * {@link IOKit#bufferSize()}.
      * <p>
-     * This setting is typically used when the data source is an input stream, or intermediate operations are set,
-     * default is {@link IOKit#bufferSize()}.
-     * <p>
-     * This is an optional setting method.
-     *
-     * @param readBlockSize the number of bytes for each read operation from the data source
-     * @return this
-     */
-    ByteEncoder readBlockSize(int readBlockSize);
-
-    /**
-     * Sets whether reading 0 byte from the data source should be treated as reaching to the end and break the read
-     * loop. A read operation returning 0 byte can occur in NIO. Default is {@code false}.
+     * This setting is typically used for encoding in blocks.
      * <p>
      * This is an optional setting method.
      *
-     * @param endOnZeroRead whether reading 0 byte from the data source should be treated as reaching to the end and
-     *                      break the read loop
+     * @param readBlockSize the number of bytes for each read operation from the data source, must {@code > 0}
      * @return this
+     * @throws IllegalArgumentException if the block size is negative
      */
-    ByteEncoder endOnZeroRead(boolean endOnZeroRead);
+    ByteEncoder readBlockSize(int readBlockSize) throws IllegalArgumentException;
 
     /**
-     * Adds the given encoder for this processor. When the data processing starts, all encoders will be invoked after
-     * each read operation as following:
+     * Adds the given handler to this encoder as the last handler.
+     * <p>
+     * When the encoding starts and the handlers are also added, the encoder reads a block of data from the data source,
+     * then passes the data block to the first handler, then passes the result of the first handler to the next handler,
+     * and so on. The last result of the last handler, which is the final result, will be written to the destination.
+     * The logic is as follows:
      * <pre>{@code
-     *     read-operation -> encoder-1 -> encoder-2 ... -> encoder-n -> terminal-operation
+     * ByteSegment segment = nextSegment(blockSize);
+     * ByteBuffer data = segment.data();
+     * for (Handler handler : handlers) {
+     *     data = handler.encode(data == null ? emptyBuffer() : data, segment.end());
+     * }
+     * if (notEmpty(data)) {
+     *     writeTo(data);
+     * }
      * }</pre>
-     * The encoder represents an intermediate operation, and all encoders can be considered as a combined encoder, of
-     * which behavior is equivalent to:
-     * <pre>{@code
-     *     ByteBuffer bytes = data;
-     *     for (Encoder encoder : encoders) {
-     *         bytes = encoder.encode(bytes, end);
-     *         if (bytes == null) {
-     *             break;
-     *         }
-     *     }
-     *     return bytes;
-     * }</pre>
-     * The passed input data, which is the first argument of the {@link Handler#encode(ByteBuffer, boolean)}, depends on
-     * the encoder's upstream. If the upstream is the data source of this processor (i.e., it is the first encoder), the
-     * data's position is 0, limit equals to capacity, size is determined by the {@link #readBlockSize(int)} method, and
-     * the data can be writeable if the source is an array or writeable buffer. Otherwise, the data is the result of the
-     * previous encoder, and its abilities is defined by the previous encoder.
      * <p>
      * This is an optional setting method. There are also more specific encoder wrappers available, such as:
      * <ul>
@@ -166,7 +146,7 @@ public interface ByteEncoder {
      * @param encoder the given encoder
      * @return this
      */
-    ByteEncoder encoder(Handler encoder);
+    ByteEncoder handler(Handler encoder);
 
     /**
      * Adds the given encoder wrapped by {@link Handler#withFixedSize(int, Handler)} for this processor. This method is
@@ -180,8 +160,8 @@ public interface ByteEncoder {
      * @return this
      * @throws IllegalArgumentException if the specified size is less than or equal to 0
      */
-    default ByteEncoder encoder(int size, Handler encoder) throws IllegalArgumentException {
-        return encoder(withFixedSize(size, encoder));
+    default ByteEncoder handler(int size, Handler encoder) throws IllegalArgumentException {
+        return handler(withFixedSize(size, encoder));
     }
 
     /**
@@ -340,7 +320,7 @@ public interface ByteEncoder {
      * @param charset the specified charset
      * @return a new {@link CharEncoder} converted from this {@link ByteEncoder} with the specified charset
      */
-    default CharEncoder toCharProcessor(Charset charset) {
+    default CharEncoder toCharEncoder(Charset charset) {
         return CharEncoder.from(IOKit.newReader(toInputStream(), charset));
     }
 

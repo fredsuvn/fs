@@ -92,7 +92,7 @@ final class ByteEncoderImpl implements ByteEncoder {
     }
 
     @Override
-    public ByteEncoder encoder(Handler encoder) {
+    public ByteEncoder handler(Handler encoder) {
         if (encoders == null) {
             encoders = new ArrayList<>();
         }

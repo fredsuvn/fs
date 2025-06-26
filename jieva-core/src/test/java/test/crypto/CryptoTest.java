@@ -43,7 +43,7 @@ public class CryptoTest {
         Cipher cipher = JieCrypto.cipher("AES", null);
         expectThrows(ProcessingException.class, () ->
             ByteEncoder.from(new byte[10086])
-                .encoder(JieCrypto.encoder(cipher, 16, true))
+                .handler(JieCrypto.encoder(cipher, 16, true))
                 .toByteArray()
         );
 
@@ -80,14 +80,14 @@ public class CryptoTest {
         byte[] javaEn = doCipher(src, enBlock, cipher);
         cipher.init(Cipher.ENCRYPT_MODE, enKey);
         byte[] jieEn = ByteEncoder.from(src)
-            .encoder(JieCrypto.encoder(cipher, Math.abs(enBlock), enBlock <= 0)).toByteArray();
+            .handler(JieCrypto.encoder(cipher, Math.abs(enBlock), enBlock <= 0)).toByteArray();
         assertEquals(jieEn.length, javaEn.length);
 
         // de
         cipher.init(Cipher.DECRYPT_MODE, deKey);
         byte[] jieDe = ByteEncoder.from(javaEn)
-            .encoder(((data, end) -> MaterialBox.copyDirect(BufferKit.read(data))))
-            .encoder(JieCrypto.encoder(cipher, Math.abs(deBlock), deBlock <= 0)).toByteArray();
+            .handler(((data, end) -> MaterialBox.copyDirect(BufferKit.read(data))))
+            .handler(JieCrypto.encoder(cipher, Math.abs(deBlock), deBlock <= 0)).toByteArray();
         assertEquals(jieDe, src);
         cipher.init(Cipher.DECRYPT_MODE, deKey);
         byte[] javaDe = doCipher(javaEn, deBlock, cipher);
@@ -135,7 +135,7 @@ public class CryptoTest {
         Mac mac = JieCrypto.mac("HmacSHA256", null);
         expectThrows(ProcessingException.class, () ->
             ByteEncoder.from(new byte[10086])
-                .encoder(JieCrypto.encoder(mac, 16))
+                .handler(JieCrypto.encoder(mac, 16))
                 .toByteArray()
         );
     }
@@ -148,11 +148,11 @@ public class CryptoTest {
             digest.reset();
             byte[] javaEn = digest.digest(src);
             digest.reset();
-            byte[] jieEn1 = ByteEncoder.from(src).encoder(JieCrypto.encoder(digest, blockSize)).toByteArray();
+            byte[] jieEn1 = ByteEncoder.from(src).handler(JieCrypto.encoder(digest, blockSize)).toByteArray();
             assertEquals(jieEn1, javaEn);
             byte[] jieEn2 = ByteEncoder.from(src)
-                .encoder(((data, end) -> MaterialBox.copyDirect(BufferKit.read(data))))
-                .encoder(JieCrypto.encoder(digest, blockSize))
+                .handler(((data, end) -> MaterialBox.copyDirect(BufferKit.read(data))))
+                .handler(JieCrypto.encoder(digest, blockSize))
                 .toByteArray();
             assertEquals(jieEn2, javaEn);
         }
@@ -164,11 +164,11 @@ public class CryptoTest {
             mac.init(key);
             byte[] javaEn = mac.doFinal(src);
             mac.init(key);
-            byte[] jieEn1 = ByteEncoder.from(src).encoder(JieCrypto.encoder(mac, blockSize)).toByteArray();
+            byte[] jieEn1 = ByteEncoder.from(src).handler(JieCrypto.encoder(mac, blockSize)).toByteArray();
             assertEquals(jieEn1, javaEn);
             byte[] jieEn2 = ByteEncoder.from(src)
-                .encoder(((data, end) -> MaterialBox.copyDirect(BufferKit.read(data))))
-                .encoder(JieCrypto.encoder(mac, blockSize))
+                .handler(((data, end) -> MaterialBox.copyDirect(BufferKit.read(data))))
+                .handler(JieCrypto.encoder(mac, blockSize))
                 .toByteArray();
             assertEquals(jieEn2, javaEn);
         }
@@ -192,16 +192,16 @@ public class CryptoTest {
         cipher.init(Cipher.ENCRYPT_MODE, key);
         String base64 = CharEncoder.from(hello)
             .toByteProcessor(JieChars.defaultCharset())
-            .encoder(JieCrypto.encoder(cipher, 16, false))
-            .encoder(JieBase64.encoder().streamEncoder())
+            .handler(JieCrypto.encoder(cipher, 16, false))
+            .handler(JieBase64.encoder().streamEncoder())
             .toString();
         cipher.init(Cipher.DECRYPT_MODE, key);
 
         // jie
         String deHello = CharEncoder.from(base64)
             .toByteProcessor(JieChars.latinCharset())
-            .encoder(JieBase64.decoder().streamEncoder())
-            .encoder(JieCrypto.encoder(cipher, 16, false))
+            .handler(JieBase64.decoder().streamEncoder())
+            .handler(JieCrypto.encoder(cipher, 16, false))
             .toString();
         assertEquals(deHello, hello);
 

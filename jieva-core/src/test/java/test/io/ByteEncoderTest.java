@@ -235,7 +235,7 @@ public class ByteEncoderTest {
             long readNum = ByteEncoder.from(new byte[totalSize])
                 .readBlockSize(blockSize)
                 .readLimit(readLimit)
-                .encoder(((data, end) -> {
+                .handler(((data, end) -> {
                     counter[0] += data.remaining();
                     return data;
                 }))
@@ -267,7 +267,7 @@ public class ByteEncoderTest {
             // error
             Throwable[] ts = new Throwable[1];
             try {
-                ByteEncoder.from(new byte[100]).encoder((data, end) -> {
+                ByteEncoder.from(new byte[100]).handler((data, end) -> {
                     throw new JieTestException("haha");
                 }).writeTo(new byte[100]);
             } catch (IORuntimeException e) {
@@ -279,9 +279,9 @@ public class ByteEncoderTest {
         {
             // special
             expectThrows(IllegalArgumentException.class, () ->
-                ByteEncoder.from(new byte[0]).encoder(-1, ByteEncoder.Handler.emptyEncoder()));
+                ByteEncoder.from(new byte[0]).handler(-1, ByteEncoder.Handler.emptyEncoder()));
             expectThrows(IllegalArgumentException.class, () ->
-                ByteEncoder.from(new byte[0]).encoder(0, ByteEncoder.Handler.emptyEncoder()));
+                ByteEncoder.from(new byte[0]).handler(0, ByteEncoder.Handler.emptyEncoder()));
         }
     }
 
@@ -292,7 +292,7 @@ public class ByteEncoderTest {
             BytesBuilder dst = new BytesBuilder();
             IntVar ec = IntVar.of(0);
             ByteEncoder.from(src).readBlockSize(readBlockSize)
-                .encoder((d, e) -> {
+                .handler((d, e) -> {
                     BytesBuilder dst0 = new BytesBuilder();
                     while (d.hasRemaining()) {
                         byte b = d.get();
@@ -308,7 +308,7 @@ public class ByteEncoderTest {
                     }
                     return dst0.toByteBuffer();
                 })
-                .encoder((d, e) -> d)
+                .handler((d, e) -> d)
                 .writeTo(dst);
             assertEquals(dst.toByteArray(), JieArray.fill(new byte[dataSize * 2], (byte) 6));
             assertEquals(src, JieArray.fill(new byte[dataSize], (byte) 9));
@@ -322,7 +322,7 @@ public class ByteEncoderTest {
             src.flip();
             BytesBuilder dst = new BytesBuilder();
             IntVar ec = IntVar.of(0);
-            ByteEncoder.from(src).readBlockSize(readBlockSize).encoder((d, e) -> {
+            ByteEncoder.from(src).readBlockSize(readBlockSize).handler((d, e) -> {
                 BytesBuilder dst0 = new BytesBuilder();
                 while (d.hasRemaining()) {
                     byte b = d.get();
@@ -349,7 +349,7 @@ public class ByteEncoderTest {
             ByteArrayInputStream src = new ByteArrayInputStream(srcBytes);
             BytesBuilder dst = new BytesBuilder();
             IntVar ec = IntVar.of(0);
-            ByteEncoder.from(src).readBlockSize(readBlockSize).encoder((d, e) -> {
+            ByteEncoder.from(src).readBlockSize(readBlockSize).handler((d, e) -> {
                 BytesBuilder dst0 = new BytesBuilder();
                 while (d.hasRemaining()) {
                     byte b = d.get();
@@ -376,7 +376,7 @@ public class ByteEncoderTest {
             BytesBuilder dst = new BytesBuilder();
             IntVar ec = IntVar.of(0);
             ByteEncoder.from(src).readBlockSize(readBlockSize)
-                .encoder((d, e) -> {
+                .handler((d, e) -> {
                     BytesBuilder dst0 = new BytesBuilder();
                     while (d.hasRemaining()) {
                         byte b = d.get();
@@ -392,15 +392,15 @@ public class ByteEncoderTest {
                     }
                     return dst0.toByteBuffer();
                 })
-                .encoder((d, e) -> null)
+                .handler((d, e) -> null)
                 .writeTo(dst);
             assertEquals(dst.toByteArray(), new byte[0]);
             assertEquals(src, JieArray.fill(new byte[dataSize], (byte) 9));
             assertEquals(ec.get(), 1);
             Arrays.fill(src, (byte) 6);
             ByteEncoder.from(src).readBlockSize(readBlockSize)
-                .encoder((d, e) -> null)
-                .encoder((d, e) -> {
+                .handler((d, e) -> null)
+                .handler((d, e) -> {
                     BytesBuilder dst0 = new BytesBuilder();
                     while (d.hasRemaining()) {
                         byte b = d.get();
@@ -462,7 +462,7 @@ public class ByteEncoderTest {
             byte[] dst = new byte[src.length + portion * 2];
             IntVar ec = IntVar.of(0);
             long len = ByteEncoder.from(src).readBlockSize(readBlockSize)
-                .encoder(fixedSize, (data, end) -> {
+                .handler(fixedSize, (data, end) -> {
                     if (end) {
                         ec.incrementAndGet();
                     }
@@ -525,7 +525,7 @@ public class ByteEncoderTest {
                 assertEquals(bytesBuilder.toByteArray(), JieArray.fill(new byte[dataSize], (byte) 6));
             }
             byte[] b6ret = ByteEncoder.from(src).readBlockSize(readBlockSize)
-                .encoder(fixedSize, (data, end) -> {
+                .handler(fixedSize, (data, end) -> {
                     byte[] b6 = JieArray.fill(new byte[data.remaining()], (byte) 6);
                     data.put(b6);
                     return ByteBuffer.wrap(b6);
@@ -539,8 +539,8 @@ public class ByteEncoderTest {
             BytesBuilder builder = new BytesBuilder();
             IntVar ec = IntVar.of(0);
             ByteEncoder.from(src).readBlockSize(readBlockSize)
-                .encoder(fixedSize, (data, end) -> null)
-                .encoder((data, end) -> {
+                .handler(fixedSize, (data, end) -> null)
+                .handler((data, end) -> {
                     if (end) {
                         ec.incrementAndGet();
                     }
@@ -578,7 +578,7 @@ public class ByteEncoderTest {
             byte[] dst2 = new byte[src.length * 2];
             IntVar ec = IntVar.of(0);
             long len = ByteEncoder.from(src).readBlockSize(readBlockSize)
-                .encoder(withRounding(roundingSize, (data, end) -> {
+                .handler(withRounding(roundingSize, (data, end) -> {
                     if (!end) {
                         assertTrue(
                             (data.remaining() >= roundingSize)
@@ -647,7 +647,7 @@ public class ByteEncoderTest {
                 assertEquals(bytesBuilder.toByteArray(), JieArray.fill(new byte[dataSize], (byte) 6));
             }
             byte[] b6ret = ByteEncoder.from(src).readBlockSize(readBlockSize)
-                .encoder(roundingSize, (data, end) -> {
+                .handler(roundingSize, (data, end) -> {
                     byte[] b6 = JieArray.fill(new byte[data.remaining()], (byte) 6);
                     data.put(b6);
                     return ByteBuffer.wrap(b6);
@@ -661,8 +661,8 @@ public class ByteEncoderTest {
             BytesBuilder builder = new BytesBuilder();
             IntVar ec = IntVar.of(0);
             ByteEncoder.from(src).readBlockSize(readBlockSize)
-                .encoder(withRounding(roundingSize, (data, end) -> null))
-                .encoder((data, end) -> {
+                .handler(withRounding(roundingSize, (data, end) -> null))
+                .handler((data, end) -> {
                     if (end) {
                         ec.incrementAndGet();
                     }
@@ -694,7 +694,7 @@ public class ByteEncoderTest {
             BooleanVar bf = BooleanVar.of(false);
             IntVar ec = IntVar.of(0);
             long len = ByteEncoder.from(src).readBlockSize(readBlockSize)
-                .encoder(withBuffering((data, end) -> {
+                .handler(withBuffering((data, end) -> {
                     if (end) {
                         ec.incrementAndGet();
                         return data;
@@ -723,8 +723,8 @@ public class ByteEncoderTest {
             BytesBuilder builder = new BytesBuilder();
             IntVar ec = IntVar.of(0);
             ByteEncoder.from(src).readBlockSize(readBlockSize)
-                .encoder(withBuffering((data, end) -> null))
-                .encoder((data, end) -> {
+                .handler(withBuffering((data, end) -> null))
+                .handler((data, end) -> {
                     if (end) {
                         ec.incrementAndGet();
                     }
@@ -771,7 +771,7 @@ public class ByteEncoderTest {
         {
             // special with encoder
             InputStream in = ByteEncoder.from(new byte[0])
-                .encoder((d, e) -> d)
+                .handler((d, e) -> d)
                 .toInputStream();
             assertEquals(in.read(new byte[1]), -1);
             assertEquals(in.read(), -1);
@@ -788,7 +788,7 @@ public class ByteEncoderTest {
                 .toInputStream();
             assertEquals(nio.read(), -1);
             InputStream empty = ByteEncoder.from(new byte[]{9})
-                .encoder(((data, end) -> {
+                .handler(((data, end) -> {
                     BytesBuilder bb = new BytesBuilder();
                     bb.append(data);
                     if (end) {
@@ -799,21 +799,21 @@ public class ByteEncoderTest {
             assertEquals(IOKit.read(empty), new byte[]{9, 1, 2, 3});
             assertEquals(empty.read(), -1);
             InputStream err1 = ByteEncoder.from(new ThrowIn(0))
-                .encoder((d, e) -> d)
+                .handler((d, e) -> d)
                 .toInputStream();
             expectThrows(IOException.class, () -> err1.close());
             InputStream err2 = ByteEncoder.from(new ThrowIn(2))
-                .encoder((d, e) -> d)
+                .handler((d, e) -> d)
                 .toInputStream();
             expectThrows(IOException.class, () -> err2.close());
             InputStream err3 = ByteEncoder.from(new ThrowIn(3))
-                .encoder((d, e) -> d)
+                .handler((d, e) -> d)
                 .toInputStream();
             expectThrows(IOException.class, () -> err3.read());
         }
         {
             boolean[] flag = {true};
-            InputStream in = ByteEncoder.from(new byte[1024]).readBlockSize(1).encoder(((data, end) -> {
+            InputStream in = ByteEncoder.from(new byte[1024]).readBlockSize(1).handler(((data, end) -> {
                 ByteBuffer ret = flag[0] ? data : JieBytes.emptyBuffer();
                 flag[0] = !flag[0];
                 return ret;
@@ -882,7 +882,7 @@ public class ByteEncoderTest {
 
     private InputStream toInputStream(byte[] src, int readBlockSize, IntVar ec) {
         return ByteEncoder.from(src).readBlockSize(readBlockSize)
-            .encoder(((data, end) -> {
+            .handler(((data, end) -> {
                 if (end) {
                     ec.incrementAndGet();
                 }
@@ -897,24 +897,24 @@ public class ByteEncoderTest {
     }
 
     @Test
-    public void testToCharProcessor() {
-        testToCharProcessor(0, 5);
-        testToCharProcessor(100, 5);
-        testToCharProcessor(10086, 11);
-        testToCharProcessor(10086, 333);
-        testToCharProcessor(10086, 22);
-        testToCharProcessor(10086, 333);
-        testToCharProcessor(10086, 20);
-        testToCharProcessor(20, 40);
-        testToCharProcessor(10086, 1);
+    public void testToCharEncoder() {
+        testToCharEncoder(0, 5);
+        testToCharEncoder(100, 5);
+        testToCharEncoder(10086, 11);
+        testToCharEncoder(10086, 333);
+        testToCharEncoder(10086, 22);
+        testToCharEncoder(10086, 333);
+        testToCharEncoder(10086, 20);
+        testToCharEncoder(20, 40);
+        testToCharEncoder(10086, 1);
     }
 
-    private void testToCharProcessor(int totalSize, int blockSize) {
+    private void testToCharEncoder(int totalSize, int blockSize) {
         {
             char[] str = JieRandom.fill(new char[totalSize], 'a', 'z');
             byte[] bytes = new String(str).getBytes(JieChars.defaultCharset());
             String converted = IOKit.string(
-                ByteEncoder.from(bytes).readBlockSize(blockSize).toCharProcessor(JieChars.defaultCharset()).toReader()
+                ByteEncoder.from(bytes).readBlockSize(blockSize).toCharEncoder(JieChars.defaultCharset()).toReader()
             );
             assertEquals(converted.toCharArray(), str);
         }
@@ -922,7 +922,7 @@ public class ByteEncoderTest {
             char[] str = JieRandom.fill(new char[totalSize], '\u4e00', '\u9fff');
             byte[] bytes = new String(str).getBytes(JieChars.defaultCharset());
             String converted = IOKit.string(
-                ByteEncoder.from(bytes).readBlockSize(blockSize).toCharProcessor(JieChars.defaultCharset()).toReader()
+                ByteEncoder.from(bytes).readBlockSize(blockSize).toCharEncoder(JieChars.defaultCharset()).toReader()
             );
             assertEquals(converted.toCharArray(), str);
         }
@@ -980,7 +980,7 @@ public class ByteEncoderTest {
             Arrays.fill(src, (byte) 1);
             Arrays.fill(target, (byte) 2);
             assertNotEquals(src, target);
-            ByteEncoder.from(src).readBlockSize(3).encoder(((data, end) -> {
+            ByteEncoder.from(src).readBlockSize(3).handler(((data, end) -> {
                 assertFalse(data.isReadOnly());
                 while (data.hasRemaining()) {
                     data.put((byte) 2);
@@ -990,7 +990,7 @@ public class ByteEncoderTest {
             assertEquals(src, target);
             Arrays.fill(src, (byte) 1);
             assertNotEquals(src, target);
-            ByteEncoder.from(ByteBuffer.wrap(src)).readBlockSize(3).encoder(((data, end) -> {
+            ByteEncoder.from(ByteBuffer.wrap(src)).readBlockSize(3).handler(((data, end) -> {
                 assertFalse(data.isReadOnly());
                 while (data.hasRemaining()) {
                     data.put((byte) 2);

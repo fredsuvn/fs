@@ -259,7 +259,7 @@ public class CipherCodec implements CodecConfigurator<CipherCodec> {
             } else {
                 throw new CodecException("Unknown input type: " + input.getClass());
             }
-            return ByteEncoder.from(source).readBlockSize(blockSize).encoder((data, end) ->
+            return ByteEncoder.from(source).readBlockSize(blockSize).handler((data, end) ->
                     ByteBuffer.wrap(JieCodec.doCipher(cipher, data)))
                 .toInputStream();
         } catch (CodecException e) {
