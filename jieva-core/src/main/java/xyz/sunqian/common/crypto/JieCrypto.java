@@ -132,7 +132,7 @@ public class JieCrypto {
     public static ByteEncoder.Handler encoder(Cipher cipher, int blockSize, boolean onlyFinal) {
         ByteEncoder.Handler encoder = new ByteEncoder.Handler() {
             @Override
-            public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) throws Exception {
+            public @Nullable ByteBuffer handle(ByteBuffer data, boolean end) throws Exception {
                 if (onlyFinal) {
                     if (JieBytes.isEmpty(data)) {
                         return null;
@@ -193,7 +193,7 @@ public class JieCrypto {
     public static ByteEncoder.Handler encoder(MessageDigest digest, int blockSize) {
         ByteEncoder.Handler encoder = new ByteEncoder.Handler() {
             @Override
-            public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) throws Exception {
+            public @Nullable ByteBuffer handle(ByteBuffer data, boolean end) throws Exception {
                 ByteBuffer ret;
                 if (end) {
                     ret = ByteBuffer.wrap(doFinal(digest, data));
@@ -238,7 +238,7 @@ public class JieCrypto {
     public static ByteEncoder.Handler encoder(Mac mac, int blockSize) {
         ByteEncoder.Handler encoder = new ByteEncoder.Handler() {
             @Override
-            public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) throws Exception {
+            public @Nullable ByteBuffer handle(ByteBuffer data, boolean end) throws Exception {
                 ByteBuffer ret;
                 if (end) {
                     ret = ByteBuffer.wrap(doFinal(mac, data));

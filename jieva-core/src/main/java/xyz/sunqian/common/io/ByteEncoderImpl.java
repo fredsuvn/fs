@@ -92,11 +92,11 @@ final class ByteEncoderImpl implements ByteEncoder {
     }
 
     @Override
-    public ByteEncoder handler(Handler encoder) {
+    public ByteEncoder handler(Handler handler) {
         if (encoders == null) {
             encoders = new ArrayList<>();
         }
-        encoders.add(encoder);
+        encoders.add(handler);
         return this;
     }
 
@@ -243,7 +243,7 @@ final class ByteEncoderImpl implements ByteEncoder {
                 segment = reader.read(nextSize);
             }
             count += segment.data().remaining();
-            @Nullable ByteBuffer encoded = oneEncoder.encode(segment.data(), segment.end());
+            @Nullable ByteBuffer encoded = oneEncoder.handle(segment.data(), segment.end());
             if (!JieBytes.isEmpty(encoded)) {
                 out.write(encoded);
             }
@@ -299,7 +299,7 @@ final class ByteEncoderImpl implements ByteEncoder {
         return (data, end) -> {
             @Nullable ByteBuffer bytes = data;
             for (Handler encoder : encoders) {
-                bytes = encoder.encode(bytes, end);
+                bytes = encoder.handle(bytes, end);
                 if (bytes == null) {
                     break;
                 }
@@ -355,7 +355,7 @@ final class ByteEncoderImpl implements ByteEncoder {
         private ByteSegment read0() throws IOException {
             try {
                 ByteSegment s0 = getSourceReader().read(readBlockSize);
-                @Nullable ByteBuffer encoded = getEncoder().encode(s0.data(), s0.end());
+                @Nullable ByteBuffer encoded = getEncoder().handle(s0.data(), s0.end());
                 if (encoded == s0.data()) {
                     return s0;
                 }
@@ -528,7 +528,7 @@ final class ByteEncoderImpl implements ByteEncoder {
         }
 
         @Override
-        public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) throws Exception {
+        public @Nullable ByteBuffer handle(ByteBuffer data, boolean end) throws Exception {
             @Nullable Object result = null;
             boolean encoded = false;
 
@@ -537,13 +537,13 @@ final class ByteEncoderImpl implements ByteEncoder {
                 BufferKit.readTo(data, buffer);
                 if (end && !data.hasRemaining()) {
                     buffer.flip();
-                    return encoder.encode(buffer, true);
+                    return encoder.handle(buffer, true);
                 }
                 if (buffer.hasRemaining()) {
                     return null;
                 }
                 buffer.flip();
-                result = JieCoding.ifAdd(result, encoder.encode(buffer, false));
+                result = JieCoding.ifAdd(result, encoder.handle(buffer, false));
                 encoded = true;
                 buffer.clear();
             }
@@ -557,10 +557,10 @@ final class ByteEncoderImpl implements ByteEncoder {
                 ByteBuffer slice = data.slice();
                 data.position(pos);
                 if (end && pos == limit) {
-                    result = JieCoding.ifAdd(result, encoder.encode(slice, true));
+                    result = JieCoding.ifAdd(result, encoder.handle(slice, true));
                     return JieCoding.ifMerge(result, BufferMerger.SINGLETON);
                 } else {
-                    result = JieCoding.ifAdd(result, encoder.encode(slice, false));
+                    result = JieCoding.ifAdd(result, encoder.handle(slice, false));
                     encoded = true;
                 }
             }
@@ -574,14 +574,14 @@ final class ByteEncoderImpl implements ByteEncoder {
                 BufferKit.readTo(data, buffer);
                 if (end) {
                     buffer.flip();
-                    result = JieCoding.ifAdd(result, encoder.encode(buffer, true));
+                    result = JieCoding.ifAdd(result, encoder.handle(buffer, true));
                     encoded = true;
                 }
             }
 
             @Nullable ByteBuffer ret = JieCoding.ifMerge(result, BufferMerger.SINGLETON);
             if (end && !encoded) {
-                return encoder.encode(JieBytes.emptyBuffer(), true);
+                return encoder.handle(JieBytes.emptyBuffer(), true);
             }
             return ret;
         }
@@ -602,7 +602,7 @@ final class ByteEncoderImpl implements ByteEncoder {
         }
 
         @Override
-        public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) throws Exception {
+        public @Nullable ByteBuffer handle(ByteBuffer data, boolean end) throws Exception {
             @Nullable Object result = null;
             boolean encoded = false;
 
@@ -611,13 +611,13 @@ final class ByteEncoderImpl implements ByteEncoder {
                 BufferKit.readTo(data, buffer);
                 if (end && !data.hasRemaining()) {
                     buffer.flip();
-                    return encoder.encode(buffer, true);
+                    return encoder.handle(buffer, true);
                 }
                 if (buffer.hasRemaining()) {
                     return null;
                 }
                 buffer.flip();
-                result = JieCoding.ifAdd(result, encoder.encode(buffer, false));
+                result = JieCoding.ifAdd(result, encoder.handle(buffer, false));
                 encoded = true;
                 buffer.clear();
             }
@@ -634,10 +634,10 @@ final class ByteEncoderImpl implements ByteEncoder {
                 data.position(pos);
                 data.limit(limit);
                 if (end && pos == limit) {
-                    result = JieCoding.ifAdd(result, encoder.encode(slice, true));
+                    result = JieCoding.ifAdd(result, encoder.handle(slice, true));
                     return JieCoding.ifMerge(result, BufferMerger.SINGLETON);
                 } else {
-                    result = JieCoding.ifAdd(result, encoder.encode(slice, false));
+                    result = JieCoding.ifAdd(result, encoder.handle(slice, false));
                     encoded = true;
                 }
             }
@@ -650,14 +650,14 @@ final class ByteEncoderImpl implements ByteEncoder {
                 BufferKit.readTo(data, buffer);
                 if (end) {
                     buffer.flip();
-                    result = JieCoding.ifAdd(result, encoder.encode(buffer, true));
+                    result = JieCoding.ifAdd(result, encoder.handle(buffer, true));
                     encoded = true;
                 }
             }
 
             @Nullable ByteBuffer ret = JieCoding.ifMerge(result, BufferMerger.SINGLETON);
             if (end && !encoded) {
-                return encoder.encode(JieBytes.emptyBuffer(), true);
+                return encoder.handle(JieBytes.emptyBuffer(), true);
             }
             return ret;
         }
@@ -673,7 +673,7 @@ final class ByteEncoderImpl implements ByteEncoder {
         }
 
         @Override
-        public @Nullable ByteBuffer encode(ByteBuffer data, boolean end) throws Exception {
+        public @Nullable ByteBuffer handle(ByteBuffer data, boolean end) throws Exception {
             ByteBuffer totalBuffer;
             if (buffer != null) {
                 ByteBuffer newBuffer = ByteBuffer.allocate(buffer.length + data.remaining());
@@ -684,7 +684,7 @@ final class ByteEncoderImpl implements ByteEncoder {
             } else {
                 totalBuffer = data;
             }
-            @Nullable ByteBuffer ret = encoder.encode(totalBuffer, end);
+            @Nullable ByteBuffer ret = encoder.handle(totalBuffer, end);
             if (end) {
                 buffer = null;
                 return ret;
@@ -705,7 +705,7 @@ final class ByteEncoderImpl implements ByteEncoder {
         static final EmptyEncoder SINGLETON = new EmptyEncoder();
 
         @Override
-        public ByteBuffer encode(ByteBuffer data, boolean end) {
+        public ByteBuffer handle(ByteBuffer data, boolean end) {
             return data;
         }
     }

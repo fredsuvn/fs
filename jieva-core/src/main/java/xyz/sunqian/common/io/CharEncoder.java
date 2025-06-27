@@ -1,13 +1,12 @@
 package xyz.sunqian.common.io;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.chars.CharsBuilder;
 
 import java.io.Reader;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
-
-import static xyz.sunqian.common.io.CharEncoder.Handler.withFixedSize;
 
 /**
  * This interface represents the encoder to encode char data, from the specified data source, through zero or more
@@ -114,6 +113,76 @@ public interface CharEncoder {
     }
 
     /**
+     * Returns a wrapper {@link Handler} that wraps the given encoder to encode data in fixed-size blocks.
+     * <p>
+     * The wrapper splits the original data into blocks of the specified fixed size by {@link CharBuffer#slice()}, and
+     * each block will be passed to the given encoder sequentially. The remainder data, which is insufficient to form a
+     * full block, will be buffered until enough data is received. The content of the block is shared with the
+     * sub-content of the original data if, and only if, it is sliced by {@link CharBuffer#slice()}. If a block is
+     * formed by concatenating multiple original data pieces, its content is not shared.
+     * <p>
+     * Specially, in the last invocation (when {@code end == true}) of the given encoder, the last block's size may be
+     * less than the specified fixed size.
+     *
+     * @param size    the specified fixed size
+     * @param encoder the given encoder
+     * @return a wrapper {@link Handler} that wraps the given encoder to encode data in fixed-size blocks
+     * @throws IllegalArgumentException if the specified size is less than or equal to 0
+     */
+    static Handler fixedSizeHandler(Handler encoder, int size) throws IllegalArgumentException {
+        return new CharEncoderImpl.FixedSizeEncoder(encoder, size);
+    }
+
+    /**
+     * Returns a wrapper {@link Handler} that wraps the given encoder to encode data in rounding down blocks.
+     * <p>
+     * The wrapper rounds down the size of the original data to the largest multiple ({@code >= 1}) of the specified
+     * size that does not exceed it, and splits the original data into the block of the rounded size by
+     * {@link CharBuffer#slice()}. The block will be passed to the given encoder. The remainder data, of which size is
+     * less than one multiple of the specified size, will be buffered until enough data is received. The content of the
+     * block is shared with the sub-content of the original data if, and only if, it is sliced by
+     * {@link CharBuffer#slice()}. If a block is formed by concatenating multiple original data pieces, its content is
+     * not shared.
+     * <p>
+     * Specially, in the last invocation (when {@code end == true}) of the given encoder, the last block's size may be
+     * less than one multiple of the specified size.
+     *
+     * @param size    the specified size
+     * @param encoder the given encoder
+     * @return a wrapper {@link Handler} that wraps the given encoder to encode data in rounding down blocks
+     * @throws IllegalArgumentException if the specified size is less than or equal to 0
+     */
+    static Handler withRounding(int size, Handler encoder) throws IllegalArgumentException {
+        return new CharEncoderImpl.RoundingEncoder(encoder, size);
+    }
+
+    /**
+     * Returns a wrapper {@link Handler} that wraps the given encoder to support buffering unconsumed data.
+     * <p>
+     * When the wrapper is invoked, if no buffered data exists, the original data is directly passed to the given
+     * encoder; if buffered data exists, a new buffer concatenating the buffered data followed by the original data is
+     * passed to the given. After the execution of the given encoder, any unconsumed data remaining in passed buffer
+     * will be buffered.
+     * <p>
+     * Specially, in the last invocation (when {@code end == true}) of the wrapper, no data buffered.
+     *
+     * @param encoder the given encoder
+     * @return a wrapper {@link Handler} that wraps the given encoder to support buffering unconsumed data
+     */
+    static Handler bufferedHandler(Handler encoder) {
+        return new CharEncoderImpl.BufferingEncoder(encoder);
+    }
+
+    /**
+     * Returns an empty {@link Handler} which does nothing but only returns the input data directly.
+     *
+     * @return an empty {@link Handler} which does nothing but only returns the input data directly
+     */
+    static Handler emptyHandler() {
+        return CharEncoderImpl.EmptyEncoder.SINGLETON;
+    }
+
+    /**
      * Sets the maximum number of chars to read from the data source.
      * <p>
      * This is an optional setting method.
@@ -151,64 +220,50 @@ public interface CharEncoder {
     CharEncoder endOnZeroRead(boolean endOnZeroRead);
 
     /**
-     * Adds the given encoder for this processor. When the data processing starts, all encoders will be invoked after
-     * each read operation as following:
-     * <pre>{@code
-     *     read-operation -> encoder-1 -> encoder-2 ... -> encoder-n -> terminal-operation
-     * }</pre>
-     * The encoder represents an intermediate operation, and all encoders can be considered as a combined encoder, of
-     * which behavior is equivalent to:
-     * <pre>{@code
-     *     CharBuffer chars = data;
-     *     for (Encoder encoder : encoders) {
-     *         chars = encoder.encode(chars, end);
-     *         if (chars == null) {
-     *             break;
-     *         }
-     *     }
-     *     return chars;
-     * }</pre>
-     * Size of passed data is uncertain. If it is the first encoder, the size may match the {@link #readBlockSize(int)}.
-     * (except for the last reading, which may be smaller than the read block size).
+     * Adds the given handler to this encoder as the last handler.
      * <p>
-     * The passed input data, which is the first argument of the {@link Handler#encode(CharBuffer, boolean)}, depends on
-     * the encoder's upstream. If the upstream is the data source of this processor (i.e., it is the first encoder), the
-     * data's position is 0, limit equals to capacity, size is determined by the {@link #readBlockSize(int)} method, and
-     * the data can be writeable if the source is an array or writeable buffer. Otherwise, the data is the result of the
-     * previous encoder, and its abilities is defined by the previous encoder.
+     * When the encoding starts and exits at least one handler, the encoder reads a block of data from the data source,
+     * then passes the data block to the first handler, then passes the result of the first handler (if it is
+     * {@code null} then replaces it with an empty buffer) to the next handler, and so on. The last result of the last
+     * handler, which is the final result, will be written to the destination if it is not empty. The logic is as
+     * follows:
+     * <pre>{@code
+     * CharSegment segment = nextSegment(blockSize);
+     * CharBuffer data = segment.data();
+     * for (Handler handler : handlers) {
+     *     data = handler.encode(data == null ? emptyBuffer() : data, segment.end());
+     * }
+     * if (notEmpty(data)) {
+     *     writeTo(data);
+     * }
+     * }</pre>
+     * Note that the data blocks are typically read by {@link CharReader#read(int)} and its content may be shared with
+     * the data source. The encoder ignores the unconsumed data (which is the remaining data) in the data passed to the
+     * handler each time, to buffer the unconsumed data, try {@link #bufferedHandler(Handler)}.
      * <p>
-     * This is an optional setting method. There are also more specific encoder wrappers available, such as:
-     * <ul>
-     *     <li>
-     *         For fixed-size: {@link Handler#withFixedSize(int, Handler)};
-     *     </li>
-     *     <li>
-     *         For rounding size: {@link Handler#withRounding(int, Handler)};
-     *     </li>
-     *     <li>
-     *         for buffering: {@link Handler#withBuffering(Handler)};
-     *     </li>
-     * </ul>
+     * This is an optional setting method. And provides some specific handler wrappers such as:
+     * {@link #fixedSizeHandler(Handler, int)}, {@link #withRounding(int, Handler)} and
+     * {@link #bufferedHandler(Handler)}.
      *
-     * @param encoder the given encoder
+     * @param handler the given handler
      * @return this
      */
-    CharEncoder encoder(Handler encoder);
+    CharEncoder handler(Handler handler);
 
     /**
-     * Adds the given encoder wrapped by {@link Handler#withFixedSize(int, Handler)} for this processor. This method is
+     * Adds the given handler wrapped by {@link #fixedSizeHandler(Handler, int)} to this encoder. This method is
      * equivalent to:
      * <pre>{@code
-     *     return encoder(withFixedSize(size, encoder));
+     *     return handler(fixedSizeHandler(handler, size));
      * }</pre>
      *
-     * @param size    the specified fixed size for the {@link Handler#withFixedSize(int, Handler)}
-     * @param encoder the given encoder
+     * @param size    the specified fixed size for the {@link #fixedSizeHandler(Handler, int)}, must {@code > 0}
+     * @param handler the given handler
      * @return this
-     * @throws IllegalArgumentException if the specified size is less than or equal to 0
+     * @throws IllegalArgumentException if the specified fixed size {@code <= 0}
      */
-    default CharEncoder encoder(int size, Handler encoder) throws IllegalArgumentException {
-        return encoder(withFixedSize(size, encoder));
+    default CharEncoder handler(Handler handler, int size) throws IllegalArgumentException {
+        return handler(fixedSizeHandler(handler, size));
     }
 
     /**
@@ -354,95 +409,25 @@ public interface CharEncoder {
     }
 
     /**
-     * This interface represents an encoder, which is a type of intermediate operation for {@link CharEncoder}.
+     * Handler of the {@link CharEncoder}, to do the specific encoding work.
      *
      * @author sunqian
      */
     interface Handler {
 
         /**
-         * Encodes the specified input data and return the result. The specified input data will not be null (but may be
-         * empty), and the return value can be null.
+         * Handles the specific encoding work with the input data, and returns the handling result. The input data will
+         * not be {@code null} (but may be empty), but the return value can be {@code null}.
          * <p>
-         * If it returns null, the next encoder will not be invoked and the encoding chain will be interrupted; If it
-         * returns an empty buffer, the encoding chain will continue.
+         * If return value is {@code null} and there exists a next handler, an empty buffer will be passed to the next
+         * handler.
          *
-         * @param data the specified input data
-         * @param end  whether the current encoding is the last invocation
-         * @return the result of encoding
-         * @throws Exception thrown for any problems
+         * @param data the input data
+         * @param end  whether the input data is the last and there is no more data
+         * @return the result of the specific encoding work
+         * @throws Exception if any problem occurs
          */
         @Nullable
-        CharBuffer encode(CharBuffer data, boolean end) throws Exception;
-
-        /**
-         * Returns a wrapper {@link Handler} that wraps the given encoder to encode data in fixed-size blocks.
-         * <p>
-         * The wrapper splits the original data into blocks of the specified fixed size by {@link CharBuffer#slice()},
-         * and each block will be passed to the given encoder sequentially. The remainder data, which is insufficient to
-         * form a full block, will be buffered until enough data is received. The content of the block is shared with
-         * the sub-content of the original data if, and only if, it is sliced by {@link CharBuffer#slice()}. If a block
-         * is formed by concatenating multiple original data pieces, its content is not shared.
-         * <p>
-         * Specially, in the last invocation (when {@code end == true}) of the given encoder, the last block's size may
-         * be less than the specified fixed size.
-         *
-         * @param size    the specified fixed size
-         * @param encoder the given encoder
-         * @return a wrapper {@link Handler} that wraps the given encoder to encode data in fixed-size blocks
-         * @throws IllegalArgumentException if the specified size is less than or equal to 0
-         */
-        static Handler withFixedSize(int size, Handler encoder) throws IllegalArgumentException {
-            return new CharEncoderImpl.FixedSizeEncoder(encoder, size);
-        }
-
-        /**
-         * Returns a wrapper {@link Handler} that wraps the given encoder to encode data in rounding down blocks.
-         * <p>
-         * The wrapper rounds down the size of the original data to the largest multiple ({@code >= 1}) of the specified
-         * size that does not exceed it, and splits the original data into the block of the rounded size by
-         * {@link CharBuffer#slice()}. The block will be passed to the given encoder. The remainder data, of which size
-         * is less than one multiple of the specified size, will be buffered until enough data is received. The content
-         * of the block is shared with the sub-content of the original data if, and only if, it is sliced by
-         * {@link CharBuffer#slice()}. If a block is formed by concatenating multiple original data pieces, its content
-         * is not shared.
-         * <p>
-         * Specially, in the last invocation (when {@code end == true}) of the given encoder, the last block's size may
-         * be less than one multiple of the specified size.
-         *
-         * @param size    the specified size
-         * @param encoder the given encoder
-         * @return a wrapper {@link Handler} that wraps the given encoder to encode data in rounding down blocks
-         * @throws IllegalArgumentException if the specified size is less than or equal to 0
-         */
-        static Handler withRounding(int size, Handler encoder) throws IllegalArgumentException {
-            return new CharEncoderImpl.RoundingEncoder(encoder, size);
-        }
-
-        /**
-         * Returns a wrapper {@link Handler} that wraps the given encoder to support buffering unconsumed data.
-         * <p>
-         * When the wrapper is invoked, if no buffered data exists, the original data is directly passed to the given
-         * encoder; if buffered data exists, a new buffer concatenating the buffered data followed by the original data
-         * is passed to the given. After the execution of the given encoder, any unconsumed data remaining in passed
-         * buffer will be buffered.
-         * <p>
-         * Specially, in the last invocation (when {@code end == true}) of the wrapper, no data buffered.
-         *
-         * @param encoder the given encoder
-         * @return a wrapper {@link Handler} that wraps the given encoder to support buffering unconsumed data
-         */
-        static Handler withBuffering(Handler encoder) {
-            return new CharEncoderImpl.BufferingEncoder(encoder);
-        }
-
-        /**
-         * Returns an empty {@link Handler} which does nothing but only returns the input data directly.
-         *
-         * @return an empty {@link Handler} which does nothing but only returns the input data directly
-         */
-        static Handler emptyEncoder() {
-            return CharEncoderImpl.EmptyEncoder.SINGLETON;
-        }
+        CharBuffer handle(@Nonnull CharBuffer data, boolean end) throws Exception;
     }
 }

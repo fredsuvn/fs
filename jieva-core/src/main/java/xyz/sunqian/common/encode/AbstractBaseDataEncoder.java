@@ -272,7 +272,7 @@ public abstract class AbstractBaseDataEncoder implements BaseDataEncoder {
      * This method generates a {@link ByteEncoder.Handler} based on encoding/decoding algorithm of
      * {@link #getOutputSize(int, long, boolean)} and
      * {@link #doCode(byte[], int, int, byte[], int, int, long, boolean)}, and then wrap the generated encoder via
-     * {@link ByteEncoder.Handler#withBuffering(ByteEncoder.Handler)}.
+     * {@link ByteEncoder.Handler#newBufferedHandler(ByteEncoder.Handler)}.
      *
      * @return a {@link ByteEncoder.Handler} based on current encoding/decoding algorithm
      */
@@ -283,7 +283,7 @@ public abstract class AbstractBaseDataEncoder implements BaseDataEncoder {
             private long startPos = 0;
 
             @Override
-            public ByteBuffer encode(ByteBuffer data, boolean end) {
+            public ByteBuffer handle(ByteBuffer data, boolean end) {
                 int pos = data.position();
                 ByteBuffer ret = doCode(data, startPos, end);
                 startPos += (data.position() - pos);

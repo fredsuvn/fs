@@ -1,5 +1,6 @@
 package xyz.sunqian.common.io;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.chars.JieChars;
@@ -8,8 +9,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-
-import static xyz.sunqian.common.io.ByteEncoder.Handler.withFixedSize;
 
 /**
  * This interface represents the encoder to encode byte data, from the specified data source, through zero or more
@@ -88,6 +87,95 @@ public interface ByteEncoder {
     }
 
     /**
+     * Returns a {@link Handler} wrapper that wraps the given handler to ensure the data received by the handler each
+     * time is of a specified fixed size.
+     * <p>
+     * The wrapper splits the original data, from the encoder or previous handler, into the specified fixed size blocks
+     * using sliced views via {@link ByteBuffer#slice()}, then passes each block to the given handler sequentially.
+     * <p>
+     * In the case that the original data, or the remainder data after splitting, is insufficient to form a full block:
+     * <ul>
+     *     <li>
+     *         if the {@code end} flag of the original data is {@code true}, the wrapper will pass the remaining data to
+     *         the given handler;
+     *     </li>
+     *     <li>
+     *         otherwise the wrapper will buffer the remaining data internally until enough data are received in the
+     *         future handling.
+     *     </li>
+     * </ul>
+     *
+     * @param handler the given handler
+     * @param size    the specified fixed size
+     * @return a {@link Handler} wrapper that wraps the given handler to ensure the data received by the handler each
+     * time is of a specified fixed size
+     * @throws IllegalArgumentException if the specified fixed size {@code <= 0}
+     */
+    static Handler newFixedSizeHandler(Handler handler, int size) throws IllegalArgumentException {
+        IOChecker.checkSize(size);
+        return new ByteEncoderImpl.FixedSizeEncoder(handler, size);
+    }
+
+    /**
+     * Returns a {@link Handler} wrapper that wraps the given handler to ensure the data received by the handler each
+     * time is of a rounded size, which is the original data length rounded down to the maximum multiples of the
+     * specified size.
+     * <p>
+     * The wrapper rounds down the original data, from the encoder or previous handler, to a block of the maximum
+     * multiples of the specified size using sliced views via {@link ByteBuffer#slice()}, then passes the block to the
+     * given handler.
+     * <p>
+     * In the case that the original data, or the remainder data after rounding, is insufficient to form a full block:
+     * <ul>
+     *     <li>
+     *         if the {@code end} flag of the original data is {@code true}, the wrapper will pass the remaining data to
+     *         the given handler;
+     *     </li>
+     *     <li>
+     *         otherwise the wrapper will buffer the remaining data internally until enough data are received in the
+     *         future handling.
+     *     </li>
+     * </ul>
+     *
+     * @param handler the given handler
+     * @param size    the specified size
+     * @return a {@link Handler} wrapper that wraps the given handler to ensure the data received by the handler each
+     * time is of a rounded size, which is the original data length rounded down to the maximum multiples of the
+     * specified size
+     * @throws IllegalArgumentException if the specified size {@code <= 0}
+     */
+    static Handler newRoundedSizeHandler(Handler handler, int size) throws IllegalArgumentException {
+        IOChecker.checkSize(size);
+        return new ByteEncoderImpl.RoundingEncoder(handler, size);
+    }
+
+    /**
+     * Returns a {@link Handler} wrapper that wraps the given handler to support buffering unconsumed data.
+     * <p>
+     * When the wrapper is invoked, if no buffered data exists, the original data is directly passed to the given
+     * encoder; if buffered data exists, a new buffer concatenating the buffered data followed by the original data is
+     * passed to the given. After the execution of the given encoder, any unconsumed data remaining in passed buffer
+     * will be buffered.
+     * <p>
+     * Specially, in the last invocation (when {@code end == true}) of the wrapper, no data buffered.
+     *
+     * @param handler the given handler
+     * @return a wrapper {@link Handler} that wraps the given encoder to support buffering unconsumed data
+     */
+    static Handler newBufferedHandler(Handler handler) {
+        return new ByteEncoderImpl.BufferingEncoder(handler);
+    }
+
+    /**
+     * Returns an empty {@link Handler} which does nothing but only returns the input data directly.
+     *
+     * @return an empty {@link Handler} which does nothing but only returns the input data directly
+     */
+    static Handler emptyHandler() {
+        return ByteEncoderImpl.EmptyEncoder.SINGLETON;
+    }
+
+    /**
      * Sets the maximum number of bytes to read from the data source.
      * <p>
      * This is an optional setting method.
@@ -115,10 +203,11 @@ public interface ByteEncoder {
     /**
      * Adds the given handler to this encoder as the last handler.
      * <p>
-     * When the encoding starts and the handlers are also added, the encoder reads a block of data from the data source,
-     * then passes the data block to the first handler, then passes the result of the first handler to the next handler,
-     * and so on. The last result of the last handler, which is the final result, will be written to the destination.
-     * The logic is as follows:
+     * When the encoding starts and exits at least one handler, the encoder reads a block of data from the data source,
+     * then passes the data block to the first handler, then passes the result of the first handler (if it is
+     * {@code null} then replaces it with an empty buffer) to the next handler, and so on. The last result of the last
+     * handler, which is the final result, will be written to the destination if it is not empty. The logic is as
+     * follows:
      * <pre>{@code
      * ByteSegment segment = nextSegment(blockSize);
      * ByteBuffer data = segment.data();
@@ -129,39 +218,34 @@ public interface ByteEncoder {
      *     writeTo(data);
      * }
      * }</pre>
+     * Note that the data blocks are typically read by {@link ByteReader#read(int)} and its content may be shared with
+     * the data source. The encoder ignores the unconsumed data (which is the remaining data) in the data passed to the
+     * handler each time, to buffer the unconsumed data, try {@link #newBufferedHandler(Handler)}.
      * <p>
-     * This is an optional setting method. There are also more specific encoder wrappers available, such as:
-     * <ul>
-     *     <li>
-     *         For fixed-size: {@link Handler#withFixedSize(int, Handler)};
-     *     </li>
-     *     <li>
-     *         For rounding size: {@link Handler#withRounding(int, Handler)};
-     *     </li>
-     *     <li>
-     *         for buffering: {@link Handler#withBuffering(Handler)};
-     *     </li>
-     * </ul>
+     * This is an optional setting method. And provides some specific handler wrappers such as:
+     * {@link #newFixedSizeHandler(Handler, int)}, {@link #withRounding(int, Handler)} and
+     * {@link #newBufferedHandler(Handler)}.
      *
-     * @param encoder the given encoder
+     * @param handler the given handler
      * @return this
      */
-    ByteEncoder handler(Handler encoder);
+    ByteEncoder handler(Handler handler);
 
     /**
-     * Adds the given encoder wrapped by {@link Handler#withFixedSize(int, Handler)} for this processor. This method is
-     * equivalent to:
+     * Adds the given handler wrapped by {@link Handler#newFixedSizeHandler(Handler, int)} to this encoder. This method
+     * is equivalent to:
      * <pre>{@code
-     *     return encoder(withFixedSize(size, encoder));
+     *     return handler(fixedSizeHandler(handler, size));
      * }</pre>
      *
-     * @param size    the specified fixed size for the {@link Handler#withFixedSize(int, Handler)}
-     * @param encoder the given encoder
+     * @param size    the specified fixed size for the {@link Handler#newFixedSizeHandler(Handler, int)}, must
+     *                {@code > 0}
+     * @param handler the given handler
      * @return this
-     * @throws IllegalArgumentException if the specified size is less than or equal to 0
+     * @throws IllegalArgumentException if the specified fixed size {@code <= 0}
      */
-    default ByteEncoder handler(int size, Handler encoder) throws IllegalArgumentException {
-        return handler(withFixedSize(size, encoder));
+    default ByteEncoder handler(Handler handler, int size) throws IllegalArgumentException {
+        return handler(newFixedSizeHandler(handler, size));
     }
 
     /**
@@ -325,95 +409,25 @@ public interface ByteEncoder {
     }
 
     /**
-     * This interface represents an encoder, which is a type of intermediate operation for {@link ByteEncoder}.
+     * Handler of the {@link ByteEncoder}, to do the specific encoding work.
      *
      * @author sunqian
      */
     interface Handler {
 
         /**
-         * Encodes the specified input data and return the result. The specified input data will not be null (but may be
-         * empty), and the return value can be null.
+         * Handles the specific encoding work with the input data, and returns the handling result. The input data will
+         * not be {@code null} (but may be empty), but the return value can be {@code null}.
          * <p>
-         * If it returns null, the next encoder will not be invoked and the encoding chain will be interrupted; If it
-         * returns an empty buffer, the encoding chain will continue.
+         * If return value is {@code null} and there exists a next handler, an empty buffer will be passed to the next
+         * handler.
          *
-         * @param data the specified input data
-         * @param end  whether the current encoding is the last invocation
-         * @return the result of encoding
-         * @throws Exception thrown for any problems
+         * @param data the input data
+         * @param end  whether the input data is the last and there is no more data
+         * @return the result of the specific encoding work
+         * @throws Exception if any problem occurs
          */
         @Nullable
-        ByteBuffer encode(ByteBuffer data, boolean end) throws Exception;
-
-        /**
-         * Returns a wrapper {@link Handler} that wraps the given encoder to encode data in fixed-size blocks.
-         * <p>
-         * The wrapper splits the original data into blocks of the specified fixed size by {@link ByteBuffer#slice()},
-         * and each block will be passed to the given encoder sequentially. The remainder data, which is insufficient to
-         * form a full block, will be buffered until enough data is received. The content of the block is shared with
-         * the sub-content of the original data if, and only if, it is sliced by {@link ByteBuffer#slice()}. If a block
-         * is formed by concatenating multiple original data pieces, its content is not shared.
-         * <p>
-         * Specially, in the last invocation (when {@code end == true}) of the given encoder, the last block's size may
-         * be less than the specified fixed size.
-         *
-         * @param size    the specified fixed size
-         * @param encoder the given encoder
-         * @return a wrapper {@link Handler} that wraps the given encoder to encode data in fixed-size blocks
-         * @throws IllegalArgumentException if the specified size is less than or equal to 0
-         */
-        static Handler withFixedSize(int size, Handler encoder) throws IllegalArgumentException {
-            return new ByteEncoderImpl.FixedSizeEncoder(encoder, size);
-        }
-
-        /**
-         * Returns a wrapper {@link Handler} that wraps the given encoder to encode data in rounding down blocks.
-         * <p>
-         * The wrapper rounds down the size of the original data to the largest multiple ({@code >= 1}) of the specified
-         * size that does not exceed it, and splits the original data into the block of the rounded size by
-         * {@link ByteBuffer#slice()}. The block will be passed to the given encoder. The remainder data, of which size
-         * is less than one multiple of the specified size, will be buffered until enough data is received. The content
-         * of the block is shared with the sub-content of the original data if, and only if, it is sliced by
-         * {@link ByteBuffer#slice()}. If a block is formed by concatenating multiple original data pieces, its content
-         * is not shared.
-         * <p>
-         * Specially, in the last invocation (when {@code end == true}) of the given encoder, the last block's size may
-         * be less than one multiple of the specified size.
-         *
-         * @param size    the specified size
-         * @param encoder the given encoder
-         * @return a wrapper {@link Handler} that wraps the given encoder to encode data in rounding down blocks
-         * @throws IllegalArgumentException if the specified size is less than or equal to 0
-         */
-        static Handler withRounding(int size, Handler encoder) throws IllegalArgumentException {
-            return new ByteEncoderImpl.RoundingEncoder(encoder, size);
-        }
-
-        /**
-         * Returns a wrapper {@link Handler} that wraps the given encoder to support buffering unconsumed data.
-         * <p>
-         * When the wrapper is invoked, if no buffered data exists, the original data is directly passed to the given
-         * encoder; if buffered data exists, a new buffer concatenating the buffered data followed by the original data
-         * is passed to the given. After the execution of the given encoder, any unconsumed data remaining in passed
-         * buffer will be buffered.
-         * <p>
-         * Specially, in the last invocation (when {@code end == true}) of the wrapper, no data buffered.
-         *
-         * @param encoder the given encoder
-         * @return a wrapper {@link Handler} that wraps the given encoder to support buffering unconsumed data
-         */
-        static Handler withBuffering(Handler encoder) {
-            return new ByteEncoderImpl.BufferingEncoder(encoder);
-        }
-
-        /**
-         * Returns an empty {@link Handler} which does nothing but only returns the input data directly.
-         *
-         * @return an empty {@link Handler} which does nothing but only returns the input data directly
-         */
-        static Handler emptyEncoder() {
-            return ByteEncoderImpl.EmptyEncoder.SINGLETON;
-        }
+        ByteBuffer handle(@Nonnull ByteBuffer data, boolean end) throws Exception;
     }
 }
