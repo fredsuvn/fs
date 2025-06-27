@@ -13,14 +13,17 @@ import java.nio.channels.WritableByteChannel;
 final class ByteReaderImpl {
 
     static @Nonnull ByteReader of(@Nonnull InputStream src, int bufSize) throws IllegalArgumentException {
+        IOChecker.checkBufSize(bufSize);
         return new ByteStreamReader(src, bufSize);
     }
 
     static @Nonnull ByteReader of(@Nonnull ReadableByteChannel src, int bufSize) throws IllegalArgumentException {
+        IOChecker.checkBufSize(bufSize);
         return new ByteChannelReader(src, bufSize);
     }
 
     static @Nonnull ByteReader of(byte @Nonnull [] src, int off, int len) throws IndexOutOfBoundsException {
+        IOChecker.checkOffLen(src.length, off, len);
         return new ByteArrayReader(src, off, len);
     }
 
@@ -83,7 +86,7 @@ final class ByteReaderImpl {
         private final @Nonnull InputStream source;
         private final @Nonnull ByteIO operator;
 
-        private ByteStreamReader(@Nonnull InputStream src, int bufSize) throws IllegalArgumentException {
+        private ByteStreamReader(@Nonnull InputStream src, int bufSize) {
             this.source = src;
             this.operator = ByteIO.get(bufSize);
         }
@@ -209,7 +212,7 @@ final class ByteReaderImpl {
         private final @Nonnull ReadableByteChannel source;
         private final @Nonnull ByteIO operator;
 
-        private ByteChannelReader(@Nonnull ReadableByteChannel src, int bufSize) throws IllegalArgumentException {
+        private ByteChannelReader(@Nonnull ReadableByteChannel src, int bufSize) {
             this.source = src;
             this.operator = ByteIO.get(bufSize);
         }
@@ -328,8 +331,7 @@ final class ByteReaderImpl {
         private int pos;
         private int mark;
 
-        private ByteArrayReader(byte @Nonnull [] source, int offset, int length) throws IndexOutOfBoundsException {
-            IOChecker.checkOffLen(source.length, offset, length);
+        private ByteArrayReader(byte @Nonnull [] source, int offset, int length) {
             this.source = source;
             this.pos = offset;
             this.endPos = offset + length;

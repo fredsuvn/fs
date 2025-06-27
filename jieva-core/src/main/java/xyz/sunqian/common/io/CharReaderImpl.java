@@ -11,14 +11,17 @@ import java.nio.CharBuffer;
 final class CharReaderImpl {
 
     static @Nonnull CharReader of(@Nonnull Reader src, int bufSize) throws IllegalArgumentException {
+        IOChecker.checkBufSize(bufSize);
         return new CharStreamReader(src, bufSize);
     }
 
     static @Nonnull CharReader of(char @Nonnull [] src, int off, int len) throws IndexOutOfBoundsException {
+        IOChecker.checkOffLen(src.length, off, len);
         return new CharArrayReader(src, off, len);
     }
 
     static @Nonnull CharReader of(@Nonnull CharSequence src, int start, int end) throws IndexOutOfBoundsException {
+        IOChecker.checkStartEnd(src.length(), start, end);
         return new CharSequenceReader(src, start, end);
     }
 
@@ -81,7 +84,7 @@ final class CharReaderImpl {
         private final @Nonnull Reader source;
         private final @Nonnull CharIO operator;
 
-        private CharStreamReader(@Nonnull Reader src, int bufSize) throws IllegalArgumentException {
+        private CharStreamReader(@Nonnull Reader src, int bufSize) {
             this.source = src;
             this.operator = CharIO.get(bufSize);
         }
@@ -197,8 +200,7 @@ final class CharReaderImpl {
         private int pos;
         private int mark;
 
-        private CharArrayReader(char @Nonnull [] source, int offset, int length) throws IndexOutOfBoundsException {
-            IOChecker.checkOffLen(source.length, offset, length);
+        private CharArrayReader(char @Nonnull [] source, int offset, int length) {
             this.source = source;
             this.pos = offset;
             this.endPos = offset + length;
@@ -364,8 +366,7 @@ final class CharReaderImpl {
         private int pos;
         private int mark;
 
-        private CharSequenceReader(@Nonnull CharSequence source, int start, int end) throws IndexOutOfBoundsException {
-            IOChecker.checkStartEnd(source.length(), start, end);
+        private CharSequenceReader(@Nonnull CharSequence source, int start, int end) {
             this.source = source;
             this.pos = start;
             this.endPos = end;

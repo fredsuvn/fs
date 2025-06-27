@@ -48,6 +48,7 @@ final class IOImpls {
     static @Nonnull InputStream inputStream(
         byte @Nonnull [] array, int offset, int length
     ) throws IndexOutOfBoundsException {
+        IOChecker.checkOffLen(array.length, offset, length);
         return new BytesInputStream(array, offset, length);
     }
 
@@ -55,7 +56,10 @@ final class IOImpls {
         return new BufferInputStream(buffer);
     }
 
-    static @Nonnull InputStream inputStream(@Nonnull RandomAccessFile raf, long seek) throws IORuntimeException {
+    static @Nonnull InputStream inputStream(
+        @Nonnull RandomAccessFile raf, long seek
+    ) throws IllegalArgumentException, IORuntimeException {
+        IOChecker.checkSeek(seek);
         try {
             return new RafInputStream(raf, seek);
         } catch (IOException e) {
@@ -81,6 +85,7 @@ final class IOImpls {
     }
 
     static @Nonnull Reader reader(char @Nonnull [] array, int offset, int length) throws IndexOutOfBoundsException {
+        IOChecker.checkOffLen(array.length, offset, length);
         return new CharsReader(array, offset, length);
     }
 
@@ -89,6 +94,7 @@ final class IOImpls {
     }
 
     static @Nonnull Reader reader(@Nonnull CharSequence chars, int start, int end) throws IndexOutOfBoundsException {
+        IOChecker.checkStartEnd(chars.length(), start, end);
         return new BufferReader(CharBuffer.wrap(chars, start, end));
     }
 
@@ -116,6 +122,7 @@ final class IOImpls {
     static @Nonnull OutputStream outputStream(
         byte @Nonnull [] array, int offset, int length
     ) throws IndexOutOfBoundsException {
+        IOChecker.checkOffLen(array.length, offset, length);
         return new BytesOutputStream(array, offset, length);
     }
 
@@ -123,7 +130,10 @@ final class IOImpls {
         return new BufferOutputStream(buffer);
     }
 
-    static @Nonnull OutputStream outputStream(@Nonnull RandomAccessFile raf, long seek) throws IORuntimeException {
+    static @Nonnull OutputStream outputStream(
+        @Nonnull RandomAccessFile raf, long seek
+    ) throws IllegalArgumentException, IORuntimeException {
+        IOChecker.checkSeek(seek);
         try {
             return new RafOutputStream(raf, seek);
         } catch (IOException e) {
@@ -149,6 +159,7 @@ final class IOImpls {
     }
 
     static @Nonnull Writer writer(char @Nonnull [] array, int offset, int length) throws IndexOutOfBoundsException {
+        IOChecker.checkOffLen(array.length, offset, length);
         return new CharsWriter(array, offset, length);
     }
 
@@ -180,8 +191,7 @@ final class IOImpls {
             this(buf, 0, buf.length);
         }
 
-        BytesInputStream(byte @Nonnull [] buf, int offset, int length) throws IndexOutOfBoundsException {
-            IOChecker.checkOffLen(buf.length, offset, length);
+        BytesInputStream(byte @Nonnull [] buf, int offset, int length) {
             this.buf = buf;
             this.pos = offset;
             this.count = Math.min(offset + length, buf.length);
@@ -657,8 +667,7 @@ final class IOImpls {
             this(buf, 0, buf.length);
         }
 
-        CharsReader(char @Nonnull [] buf, int offset, int length) throws IndexOutOfBoundsException {
-            IOChecker.checkOffLen(buf.length, offset, length);
+        CharsReader(char @Nonnull [] buf, int offset, int length) {
             this.buf = buf;
             this.pos = offset;
             this.count = Math.min(offset + length, buf.length);
@@ -1101,8 +1110,7 @@ final class IOImpls {
             this(buf, 0, buf.length);
         }
 
-        BytesOutputStream(byte @Nonnull [] buf, int offset, int length) throws IndexOutOfBoundsException {
-            IOChecker.checkOffLen(buf.length, offset, length);
+        BytesOutputStream(byte @Nonnull [] buf, int offset, int length) {
             this.buf = buf;
             this.end = offset + length;
             this.pos = offset;
@@ -1364,8 +1372,7 @@ final class IOImpls {
             this(buf, 0, buf.length);
         }
 
-        CharsWriter(char @Nonnull [] buf, int offset, int length) throws IndexOutOfBoundsException {
-            IOChecker.checkOffLen(buf.length, offset, length);
+        CharsWriter(char @Nonnull [] buf, int offset, int length) {
             this.buf = buf;
             this.end = offset + length;
             this.pos = offset;
