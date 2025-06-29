@@ -1,5 +1,6 @@
 package xyz.sunqian.common.io;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.JieCoding;
 import xyz.sunqian.common.base.bytes.JieBytes;
@@ -19,41 +20,25 @@ import static xyz.sunqian.common.base.JieCheck.checkOffsetLength;
 
 final class ByteEncoderImpl implements ByteEncoder {
 
-    private final @Nullable Object source;
-    private @Nullable Object dest;
-    private long readLimit = -1;
+    private @Nonnull ByteReader source;
     private int readBlockSize = IOKit.bufferSize();
-    private boolean endOnZeroRead = false;
+    private int readLimit = -1;
     private @Nullable List<Handler> encoders;
 
     // initials after starting process
     private @Nullable ByteReader sourceReader;
     private @Nullable ByteEncoder.Handler oneEncoder;
 
-    ByteEncoderImpl(InputStream source) {
-        this.source = source;
+    ByteEncoderImpl(InputStream src) {
+        this.source = ByteReader.from( src);
     }
 
-    ByteEncoderImpl(byte[] source) {
-        this.source = source;
+    ByteEncoderImpl(byte[] src, int off, int len) {
+        this.source = ByteReader.from( src, off, len);
     }
 
-    ByteEncoderImpl(ByteBuffer source) {
-        this.source = source;
-    }
-
-    private Object getSource() {
-        if (source == null) {
-            throw new IORuntimeException("The source is null!");
-        }
-        return source;
-    }
-
-    private Object getDest() {
-        if (dest == null) {
-            throw new IORuntimeException("The destination is null!");
-        }
-        return dest;
+    ByteEncoderImpl(ByteBuffer src) {
+        this.source = ByteReader.from( src);
     }
 
     private ByteReader getSourceReader() {
@@ -101,21 +86,21 @@ final class ByteEncoderImpl implements ByteEncoder {
     }
 
     @Override
-    public long process() {
+    public long encode() {
         this.dest = NullDataWriter.SINGLETON;
-        return start();
+        return doEncode();
     }
 
     @Override
     public long writeTo(OutputStream dest) {
         this.dest = dest;
-        return start();
+        return doEncode();
     }
 
     @Override
     public long writeTo(byte[] dest) {
         this.dest = dest;
-        return start();
+        return doEncode();
     }
 
     @Override
@@ -128,13 +113,13 @@ final class ByteEncoderImpl implements ByteEncoder {
         } catch (Exception e) {
             throw new IORuntimeException(e);
         }
-        return start();
+        return doEncode();
     }
 
     @Override
     public long writeTo(ByteBuffer dest) {
         this.dest = dest;
-        return start();
+        return doEncode();
     }
 
     @Override
@@ -143,7 +128,7 @@ final class ByteEncoderImpl implements ByteEncoder {
     }
 
     @Override
-    public InputStream toInputStream() {
+    public InputStream asInputStream() {
         if (JieCollect.isEmpty(encoders)) {
             return toInputStream(getSource());
         }
@@ -163,14 +148,28 @@ final class ByteEncoderImpl implements ByteEncoder {
         throw new IORuntimeException("The type of source is unsupported: " + src.getClass());
     }
 
-    private long start() {
+    private long doEncode(
+        @Nonnull Object src,
+        @Nullable Object dst,
+        int off
+    ) {
         if (readLimit == 0) {
             return 0;
         }
+        if (readLimit > 0) {
+            source = source.limit(readLimit);
+        }
         try {
             if (JieCollect.isEmpty(encoders)) {
-                Object src = getSource();
-                Object dst = getDest();
+                if (dst instanceof OutputStream) {
+                    return source.readTo
+                }
+                if (dst instanceof byte[]) {
+                    return source.readTo((byte[]) dst, off, ((byte[]) dst).length - off);
+                }
+                if (dst instanceof ByteBuffer) {
+                    return bufferToBuffer((ByteBuffer) src, (ByteBuffer) dst);
+                }
                 if (src instanceof byte[]) {
                     if (dst instanceof byte[]) {
                         return bytesToBytes((byte[]) src, (byte[]) dst);

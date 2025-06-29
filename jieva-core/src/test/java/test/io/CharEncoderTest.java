@@ -1118,7 +1118,7 @@ public class CharEncoderTest {
             char[] str = JieRandom.fill(new char[totalSize], 'a', 'z');
             byte[] bytes = new String(str).getBytes(JieChars.defaultCharset());
             byte[] converted = IOKit.read(
-                CharEncoder.from(str).readBlockSize(blockSize).toByteProcessor(JieChars.defaultCharset()).toInputStream()
+                CharEncoder.from(str).readBlockSize(blockSize).toByteProcessor(JieChars.defaultCharset()).asInputStream()
             );
             assertEquals(converted, bytes);
         }
@@ -1126,7 +1126,7 @@ public class CharEncoderTest {
             char[] str = JieRandom.fill(new char[totalSize], '\u4e00', '\u9fff');
             byte[] bytes = new String(str).getBytes(JieChars.defaultCharset());
             byte[] converted = IOKit.read(
-                CharEncoder.from(str).readBlockSize(blockSize).toByteProcessor(JieChars.defaultCharset()).toInputStream()
+                CharEncoder.from(str).readBlockSize(blockSize).toByteProcessor(JieChars.defaultCharset()).asInputStream()
             );
             assertEquals(converted, bytes);
         }

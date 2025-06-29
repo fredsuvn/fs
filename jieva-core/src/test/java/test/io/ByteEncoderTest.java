@@ -239,7 +239,7 @@ public class ByteEncoderTest {
                     counter[0] += data.remaining();
                     return data;
                 }))
-                .process();
+                .encode();
             assertEquals(readNum, getLength(totalSize, readLimit));
             assertEquals(counter[0], getLength(totalSize, readLimit));
         }
@@ -279,9 +279,9 @@ public class ByteEncoderTest {
         {
             // special
             expectThrows(IllegalArgumentException.class, () ->
-                ByteEncoder.from(new byte[0]).handler(-1, ByteEncoder.Handler.emptyEncoder()));
+                ByteEncoder.from(new byte[0]).handlerWithFixedSize(-1, ByteEncoder.Handler.emptyEncoder()));
             expectThrows(IllegalArgumentException.class, () ->
-                ByteEncoder.from(new byte[0]).handler(0, ByteEncoder.Handler.emptyEncoder()));
+                ByteEncoder.from(new byte[0]).handlerWithFixedSize(0, ByteEncoder.Handler.emptyEncoder()));
         }
     }
 
@@ -462,7 +462,7 @@ public class ByteEncoderTest {
             byte[] dst = new byte[src.length + portion * 2];
             IntVar ec = IntVar.of(0);
             long len = ByteEncoder.from(src).readBlockSize(readBlockSize)
-                .handler(fixedSize, (data, end) -> {
+                .handlerWithFixedSize(fixedSize, (data, end) -> {
                     if (end) {
                         ec.incrementAndGet();
                     }
@@ -525,7 +525,7 @@ public class ByteEncoderTest {
                 assertEquals(bytesBuilder.toByteArray(), JieArray.fill(new byte[dataSize], (byte) 6));
             }
             byte[] b6ret = ByteEncoder.from(src).readBlockSize(readBlockSize)
-                .handler(fixedSize, (data, end) -> {
+                .handlerWithFixedSize(fixedSize, (data, end) -> {
                     byte[] b6 = JieArray.fill(new byte[data.remaining()], (byte) 6);
                     data.put(b6);
                     return ByteBuffer.wrap(b6);
@@ -539,7 +539,7 @@ public class ByteEncoderTest {
             BytesBuilder builder = new BytesBuilder();
             IntVar ec = IntVar.of(0);
             ByteEncoder.from(src).readBlockSize(readBlockSize)
-                .handler(fixedSize, (data, end) -> null)
+                .handlerWithFixedSize(fixedSize, (data, end) -> null)
                 .handler((data, end) -> {
                     if (end) {
                         ec.incrementAndGet();
@@ -647,7 +647,7 @@ public class ByteEncoderTest {
                 assertEquals(bytesBuilder.toByteArray(), JieArray.fill(new byte[dataSize], (byte) 6));
             }
             byte[] b6ret = ByteEncoder.from(src).readBlockSize(readBlockSize)
-                .handler(roundingSize, (data, end) -> {
+                .handlerWithFixedSize(roundingSize, (data, end) -> {
                     byte[] b6 = JieArray.fill(new byte[data.remaining()], (byte) 6);
                     data.put(b6);
                     return ByteBuffer.wrap(b6);
@@ -749,21 +749,21 @@ public class ByteEncoderTest {
         {
             // non-processor reader
             assertEquals(
-                ByteEncoder.from(new ByteArrayInputStream(new byte[0])).toInputStream().getClass(),
+                ByteEncoder.from(new ByteArrayInputStream(new byte[0])).asInputStream().getClass(),
                 ByteArrayInputStream.class
             );
             assertEquals(
-                ByteEncoder.from(new byte[0]).toInputStream().getClass(),
+                ByteEncoder.from(new byte[0]).asInputStream().getClass(),
                 IOKit.newInputStream(new byte[0]).getClass()
             );
             assertEquals(
-                ByteEncoder.from(ByteBuffer.allocate(0)).toInputStream().getClass(),
+                ByteEncoder.from(ByteBuffer.allocate(0)).asInputStream().getClass(),
                 IOKit.newInputStream(ByteBuffer.allocate(0)).getClass()
             );
             ByteEncoder inst = ByteEncoder.from(new byte[0]);
             invokeThrows(
                 IORuntimeException.class,
-                inst.getClass().getDeclaredMethod("toInputStream", Object.class),
+                inst.getClass().getDeclaredMethod("asInputStream", Object.class),
                 inst,
                 5
             );
@@ -772,7 +772,7 @@ public class ByteEncoderTest {
             // special with encoder
             InputStream in = ByteEncoder.from(new byte[0])
                 .handler((d, e) -> d)
-                .toInputStream();
+                .asInputStream();
             assertEquals(in.read(new byte[1]), -1);
             assertEquals(in.read(), -1);
             assertEquals(in.read(), -1);
@@ -795,20 +795,20 @@ public class ByteEncoderTest {
                         bb.append(new byte[]{1, 2, 3});
                     }
                     return bb.toByteBuffer();
-                })).toInputStream();
+                })).asInputStream();
             assertEquals(IOKit.read(empty), new byte[]{9, 1, 2, 3});
             assertEquals(empty.read(), -1);
             InputStream err1 = ByteEncoder.from(new ThrowIn(0))
                 .handler((d, e) -> d)
-                .toInputStream();
+                .asInputStream();
             expectThrows(IOException.class, () -> err1.close());
             InputStream err2 = ByteEncoder.from(new ThrowIn(2))
                 .handler((d, e) -> d)
-                .toInputStream();
+                .asInputStream();
             expectThrows(IOException.class, () -> err2.close());
             InputStream err3 = ByteEncoder.from(new ThrowIn(3))
                 .handler((d, e) -> d)
-                .toInputStream();
+                .asInputStream();
             expectThrows(IOException.class, () -> err3.read());
         }
         {
@@ -817,7 +817,7 @@ public class ByteEncoderTest {
                 ByteBuffer ret = flag[0] ? data : JieBytes.emptyBuffer();
                 flag[0] = !flag[0];
                 return ret;
-            })).toInputStream();
+            })).asInputStream();
             BytesBuilder builder = new BytesBuilder();
             while (true) {
                 int b = in.read();
@@ -874,7 +874,7 @@ public class ByteEncoderTest {
             assertEquals(ec.get(), 666 + 1666 >= encoded.length ? 1 : 0);
         }
         {
-            InputStream in = ByteEncoder.from(src).readBlockSize(readBlockSize).toInputStream();
+            InputStream in = ByteEncoder.from(src).readBlockSize(readBlockSize).asInputStream();
             assertEquals(IOKit.read(in), src);
             assertEquals(in.read(), -1);
         }
@@ -893,7 +893,7 @@ public class ByteEncoderTest {
                 b.append(data);
                 b.append((byte) '\r');
                 return b.toByteBuffer();
-            })).toInputStream();
+            })).asInputStream();
     }
 
     @Test
@@ -986,7 +986,7 @@ public class ByteEncoderTest {
                     data.put((byte) 2);
                 }
                 return data;
-            })).process();
+            })).encode();
             assertEquals(src, target);
             Arrays.fill(src, (byte) 1);
             assertNotEquals(src, target);
@@ -996,7 +996,7 @@ public class ByteEncoderTest {
                     data.put((byte) 2);
                 }
                 return data;
-            })).process();
+            })).encode();
             assertEquals(src, target);
         }
 
