@@ -71,7 +71,7 @@ final class IOImpls {
         return new CharsInputStream(reader, charset);
     }
 
-    static @Nonnull InputStream inputStream(@Nonnull InputStream in, int limit) throws IllegalArgumentException {
+    static @Nonnull InputStream inputStream(@Nonnull InputStream in, long limit) throws IllegalArgumentException {
         IOChecker.checkLimit(limit);
         return new LimitedInputStream(in, limit);
     }
@@ -106,7 +106,7 @@ final class IOImpls {
         return new BytesReader(inputStream, charset);
     }
 
-    static @Nonnull Reader reader(@Nonnull Reader in, int limit) throws IllegalArgumentException {
+    static @Nonnull Reader reader(@Nonnull Reader in, long limit) throws IllegalArgumentException {
         IOChecker.checkLimit(limit);
         return new LimitedReader(in, limit);
     }
@@ -145,7 +145,7 @@ final class IOImpls {
         return new AppenderOutputStream(appender, charset);
     }
 
-    static @Nonnull OutputStream outputStream(@Nonnull OutputStream in, int limit) throws IllegalArgumentException {
+    static @Nonnull OutputStream outputStream(@Nonnull OutputStream in, long limit) throws IllegalArgumentException {
         IOChecker.checkLimit(limit);
         return new LimitedOutputStream(in, limit);
     }
@@ -171,7 +171,7 @@ final class IOImpls {
         return new BytesWriter(outputStream, charset);
     }
 
-    static @Nonnull Writer writer(@Nonnull Writer in, int limit) throws IllegalArgumentException {
+    static @Nonnull Writer writer(@Nonnull Writer in, long limit) throws IllegalArgumentException {
         IOChecker.checkLimit(limit);
         return new LimitedWriter(in, limit);
     }

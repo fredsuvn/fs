@@ -87,6 +87,8 @@ final class ByteReaderImpl {
         private final @Nonnull InputStream source;
         private final @Nonnull ByteIO operator;
 
+        private long limit = -1;
+
         private ByteStreamReader(@Nonnull InputStream src, int bufSize) {
             this.source = src;
             this.operator = ByteIO.get(bufSize);
@@ -97,11 +99,17 @@ final class ByteReaderImpl {
             if (len == 0) {
                 return ByteSegment.empty(false);
             }
-            byte[] bytes = operator.read(source, len);
-            if (bytes == null) {
+            if (limit == 0) {
                 return ByteSegment.empty(true);
             }
-            return ByteSegment.of(ByteBuffer.wrap(bytes), bytes.length < len);
+            int actualLen = limit < 0 ? len : (int) Math.min(len, limit);
+            byte[] bytes = operator.read(source, actualLen);
+            if (bytes == null) {
+                limit = 0;
+                return ByteSegment.empty(true);
+            }
+            limit -= bytes.length;
+            return ByteSegment.of(ByteBuffer.wrap(bytes), bytes.length < actualLen);
         }
 
         @Override
@@ -117,10 +125,11 @@ final class ByteReaderImpl {
             }
         }
 
-        private long skip0(long size) throws IOException {
+        private long skip0(long len) throws IOException {
+            long actualLen = limit < 0 ? len : Math.min(len, limit);
             long hasRead = 0;
-            while (hasRead < size) {
-                long onceSize = source.skip(size - hasRead);
+            while (hasRead < actualLen) {
+                long onceSize = source.skip(actualLen - hasRead);
                 if (onceSize == 0) {
                     if (source.read() == -1) {
                         break;
@@ -130,49 +139,134 @@ final class ByteReaderImpl {
                 }
                 hasRead += onceSize;
             }
+            if (limit > 0) {
+                limit -= hasRead;
+            }
             return hasRead;
         }
 
         @Override
         public long readTo(@Nonnull OutputStream dst) throws IORuntimeException {
-            return operator.readTo(source, dst);
+            if (limit < 0) {
+                return operator.readTo(source, dst);
+            }
+            if (limit == 0) {
+                return -1;
+            }
+            long readSize = operator.readTo(source, dst, limit);
+            if (readSize > 0) {
+                limit -= readSize;
+            }
+            return readSize;
         }
 
         @Override
         public long readTo(@Nonnull OutputStream dst, long len) throws IllegalArgumentException, IORuntimeException {
-            return operator.readTo(source, dst, len);
+            if (len == 0) {
+                return 0;
+            }
+            if (limit < 0) {
+                return operator.readTo(source, dst, len);
+            }
+            if (limit == 0) {
+                return -1;
+            }
+            long actualLen = Math.min(len, limit);
+            long readSize = operator.readTo(source, dst, actualLen);
+            if (readSize > 0) {
+                limit -= readSize;
+            }
+            return readSize;
         }
 
         @Override
         public long readTo(@Nonnull WritableByteChannel dst) throws IORuntimeException {
-            return operator.readTo(source, dst);
+            if (limit < 0) {
+                return operator.readTo(source, dst);
+            }
+            if (limit == 0) {
+                return -1;
+            }
+            long readSize = operator.readTo(source, dst, limit);
+            if (readSize > 0) {
+                limit -= readSize;
+            }
+            return readSize;
         }
 
         @Override
         public long readTo(
             @Nonnull WritableByteChannel dst, long len
         ) throws IllegalArgumentException, IORuntimeException {
-            return operator.readTo(source, dst, len);
+            if (len == 0) {
+                return 0;
+            }
+            if (limit < 0) {
+                return operator.readTo(source, dst, len);
+            }
+            if (limit == 0) {
+                return -1;
+            }
+            long actualLen = Math.min(len, limit);
+            long readSize = operator.readTo(source, dst, actualLen);
+            if (readSize > 0) {
+                limit -= readSize;
+            }
+            return readSize;
         }
 
         @Override
         public int readTo(byte @Nonnull [] dst) throws IORuntimeException {
-            return operator.readTo(source, dst);
+            return readTo(dst, 0, dst.length);
         }
 
         @Override
         public int readTo(byte @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException, IORuntimeException {
-            return operator.readTo(source, dst, off, len);
+            if (limit < 0) {
+                return operator.readTo(source, dst, off, len);
+            }
+            if (limit == 0) {
+                return -1;
+            }
+            int actualLen = (int) Math.min(len, limit);
+            int readSize = operator.readTo(source, dst, off, actualLen);
+            if (readSize > 0) {
+                limit -= readSize;
+            }
+            return readSize;
         }
 
         @Override
         public int readTo(@Nonnull ByteBuffer dst) throws IORuntimeException {
-            return operator.readTo(source, dst);
+            if (limit < 0) {
+                return operator.readTo(source, dst);
+            }
+            if (limit == 0) {
+                return -1;
+            }
+            int actualLen = (int) Math.min(dst.remaining(), limit);
+            int readSize = operator.readTo(source, dst, actualLen);
+            if (readSize > 0) {
+                limit -= readSize;
+            }
+            return readSize;
         }
 
         @Override
         public int readTo(@Nonnull ByteBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
-            return operator.readTo(source, dst, len);
+            if (limit < 0) {
+                return operator.readTo(source, dst, len);
+            }
+            if (limit == 0) {
+                return -1;
+            }
+            int actualLen = Math.min(dst.remaining(), len);
+            actualLen = (int) Math.min(actualLen, limit);
+            int readSize = operator.readTo(source, dst, actualLen);
+            if (readSize > 0) {
+                limit -= readSize;
+            }
+            return readSize;
         }
 
         @Override
@@ -208,8 +302,19 @@ final class ByteReaderImpl {
         }
 
         @Override
+        public ByteReader limit(long limit) throws IllegalArgumentException {
+            IOChecker.checkLimit(limit);
+            if (this.limit < 0) {
+                this.limit = limit;
+            } else {
+                this.limit = Math.min(this.limit, limit);
+            }
+            return this;
+        }
+
+        @Override
         public InputStream asInputStream() {
-            return source;
+            return limit < 0 ? source : IOKit.limitedInputStream(source, limit);
         }
     }
 

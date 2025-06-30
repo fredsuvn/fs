@@ -880,7 +880,7 @@ public class IOKit {
      * @throws IllegalArgumentException if the limit argument is negative
      */
     public static @Nonnull InputStream limitedInputStream(
-        @Nonnull InputStream stream, int limit
+        @Nonnull InputStream stream, long limit
     ) throws IllegalArgumentException {
         return IOImpls.inputStream(stream, limit);
     }
@@ -1040,7 +1040,7 @@ public class IOKit {
      * @return the given reader as a new {@link Reader} of which readable number is limited to the specified limit
      * @throws IllegalArgumentException if the limit argument is negative
      */
-    public static @Nonnull Reader limitedReader(@Nonnull Reader reader, int limit) throws IllegalArgumentException {
+    public static @Nonnull Reader limitedReader(@Nonnull Reader reader, long limit) throws IllegalArgumentException {
         return IOImpls.reader(reader, limit);
     }
 
@@ -1192,7 +1192,7 @@ public class IOKit {
      * @throws IllegalArgumentException if the limit argument is negative
      */
     public static @Nonnull OutputStream limitedOutputStream(
-        @Nonnull OutputStream stream, int limit
+        @Nonnull OutputStream stream, long limit
     ) throws IllegalArgumentException {
         return IOImpls.outputStream(stream, limit);
     }
@@ -1318,7 +1318,7 @@ public class IOKit {
      * @return the given writer as a new {@link Writer} of which writeable number is limited to the specified limit
      * @throws IllegalArgumentException if the limit argument is negative
      */
-    public static @Nonnull Writer limitedWriter(@Nonnull Writer writer, int limit) throws IllegalArgumentException {
+    public static @Nonnull Writer limitedWriter(@Nonnull Writer writer, long limit) throws IllegalArgumentException {
         return IOImpls.writer(writer, limit);
     }
 

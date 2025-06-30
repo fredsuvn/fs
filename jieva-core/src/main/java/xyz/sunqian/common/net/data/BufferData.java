@@ -2,7 +2,7 @@ package xyz.sunqian.common.net.data;
 
 import xyz.sunqian.common.base.JieCheck;
 import xyz.sunqian.common.io.BufferKit;
-import xyz.sunqian.common.io.ByteEncoder;
+//import xyz.sunqian.common.io.ByteEncoder;
 import xyz.sunqian.common.io.IOKit;
 
 import java.io.InputStream;
@@ -69,7 +69,7 @@ final class BufferData implements GekData.OfBuffer {
 
     @Override
     public int write(ByteBuffer dest, int length) {
-        return (int) ByteEncoder.from(IOKit.newInputStream(buffer)).readLimit(length).writeTo(dest);
+        return 0;//(int) ByteEncoder.from(IOKit.newInputStream(buffer)).readLimit(length).writeTo(dest);
     }
 
     @Override
@@ -79,7 +79,7 @@ final class BufferData implements GekData.OfBuffer {
 
     @Override
     public long write(OutputStream dest, long length) {
-        return ByteEncoder.from(IOKit.newInputStream(buffer)).readLimit(length).writeTo(dest);
+        return 0;//ByteEncoder.from(IOKit.newInputStream(buffer)).readLimit(length).writeTo(dest);
     }
 
     @Override
