@@ -7,12 +7,15 @@ import xyz.sunqian.common.base.chars.CharsBuilder;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.CharReader;
 import xyz.sunqian.common.io.CharSegment;
+import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.test.ErrorAppender;
 import xyz.sunqian.test.ReadOps;
 import xyz.sunqian.test.TestReader;
 
 import java.io.CharArrayReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.nio.CharBuffer;
 import java.util.Arrays;
 import java.util.function.Supplier;
@@ -29,7 +32,7 @@ public class CharReaderTest {
     private static final int DST_SIZE = 256;
 
     @Test
-    public void testRead() {
+    public void testRead() throws Exception {
         testRead0(0, 1);
         testRead0(1, 1);
         testRead0(32, 1);
@@ -51,7 +54,7 @@ public class CharReaderTest {
         }
     }
 
-    private void testRead0(int dataSize, int readSize) {
+    private void testRead0(int dataSize, int readSize) throws Exception {
         {
             // reader
             char[] data = JieRandom.fill(new char[dataSize]);
@@ -62,6 +65,11 @@ public class CharReaderTest {
             TestReader tr = new TestReader(new CharArrayReader(data));
             tr.setNextOperation(ReadOps.READ_ZERO);
             testSkip0(CharReader.from(tr), data, readSize);
+            if (dataSize >= 128) {
+                IOImplsTest.testReader(CharReader.from(IOKit.newReader(data)).asReader(),
+                    data, true, false, false
+                );
+            }
         }
         {
             // char array
@@ -76,6 +84,15 @@ public class CharReaderTest {
                 readSize, true
             );
             testSkip0(CharReader.from(dataPadding, 33, data.length), data, readSize);
+            if (dataSize >= 128) {
+                IOImplsTest.testReader(CharReader.from(data).asReader(),
+                    data, true, false, true
+                );
+                IOImplsTest.testReader(CharReader.from(dataPadding, 33, data.length).asReader(),
+                    Arrays.copyOfRange(dataPadding, 33, 33 + data.length),
+                    true, false, true
+                );
+            }
         }
         {
             // char sequence
@@ -92,46 +109,74 @@ public class CharReaderTest {
                 readSize, true
             );
             testSkip0(CharReader.from(dataStrPadding, 33, 33 + data.length), data, readSize);
+            if (dataSize >= 128) {
+                IOImplsTest.testReader(CharReader.from(dataStr).asReader(),
+                    data, true, false, true
+                );
+                IOImplsTest.testReader(CharReader.from(dataStrPadding, 33, 33 + data.length).asReader(),
+                    Arrays.copyOfRange(dataPadding, 33, 33 + data.length),
+                    true, false, true
+                );
+            }
         }
         {
             // buffer
             char[] data = JieRandom.fill(new char[dataSize]);
             testRead0(CharReader.from(CharBuffer.wrap(data)), data, readSize, true);
             testSkip0(CharReader.from(CharBuffer.wrap(data)), data, readSize);
+            if (dataSize >= 128) {
+                IOImplsTest.testReader(CharReader.from(CharBuffer.wrap(data)).asReader(),
+                    data, true, false, false
+                );
+            }
         }
         {
             // limited
             char[] data = JieRandom.fill(new char[dataSize]);
             testRead0(
-                CharReader.from(new CharArrayReader(data)).limit(data.length),
+                CharReader.from(data).limit(data.length),
                 data,
-                readSize, false
+                readSize, true
             );
             testSkip0(
-                CharReader.from(new CharArrayReader(data)),
+                CharReader.from(data),
                 data,
                 readSize
             );
             testRead0(
-                CharReader.from(new CharArrayReader(data)).limit(data.length + 5),
+                CharReader.from(data).limit(data.length + 5),
                 data,
-                readSize, false
+                readSize, true
             );
             testSkip0(
-                CharReader.from(new CharArrayReader(data)).limit(data.length + 5),
+                CharReader.from(data).limit(data.length + 5),
                 data,
                 readSize
             );
             if (data.length > 5) {
                 testRead0(
-                    CharReader.from(new CharArrayReader(data)).limit(data.length - 5),
+                    CharReader.from(data).limit(data.length - 5),
                     Arrays.copyOf(data, data.length - 5),
                     readSize, false
                 );
                 testSkip0(
-                    CharReader.from(new CharArrayReader(data)).limit(data.length - 5),
+                    CharReader.from(data).limit(data.length - 5),
                     Arrays.copyOf(data, data.length - 5),
                     readSize
+                );
+            }
+            if (dataSize >= 128) {
+                IOImplsTest.testReader(
+                    CharReader.from(data).limit(data.length).asReader(),
+                    data, false, false, true
+                );
+                IOImplsTest.testReader(
+                    CharReader.from(data).limit(data.length + 5).asReader(),
+                    data, false, false, true
+                );
+                IOImplsTest.testReader(
+                    CharReader.from(data).limit(data.length - 5).asReader(),
+                    Arrays.copyOf(data, data.length - 5), false, false, true
                 );
             }
         }
@@ -603,6 +648,16 @@ public class CharReaderTest {
             expectThrows(IORuntimeException.class, reader::mark);
             expectThrows(IORuntimeException.class, reader::reset);
             expectThrows(IORuntimeException.class, reader::close);
+            reader = CharReader.from(CharBuffer.allocate(1));
+            expectThrows(IORuntimeException.class, reader::reset);
+            Reader in1 = CharReader.from(CharBuffer.allocate(1)).limit(1).asReader();
+            expectThrows(IOException.class, in1::reset);
+            Reader in2 = CharReader.from(tin).limit(1).asReader();
+            expectThrows(IOException.class, () -> in2.skip(1));
+            Reader in3 = CharReader.from(tin).limit(1).asReader();
+            expectThrows(IOException.class, () -> in3.close());
+            Reader in4 = CharReader.from(tin).limit(1).asReader();
+            expectThrows(IOException.class, () -> in4.mark(1));
         }
     }
 }

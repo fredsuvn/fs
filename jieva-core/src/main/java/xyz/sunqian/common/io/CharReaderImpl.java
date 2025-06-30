@@ -103,7 +103,7 @@ final class CharReaderImpl {
 
         @Override
         public long skip(long len) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkLen(len);
+            IOChecker.checkSkip(len);
             if (len == 0) {
                 return 0;
             }
@@ -169,7 +169,7 @@ final class CharReaderImpl {
         public void mark() throws IORuntimeException {
             try {
                 source.mark(0);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new IORuntimeException(e);
             }
         }
@@ -178,7 +178,7 @@ final class CharReaderImpl {
         public void reset() throws IORuntimeException {
             try {
                 source.reset();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new IORuntimeException(e);
             }
         }
@@ -187,9 +187,14 @@ final class CharReaderImpl {
         public void close() throws IORuntimeException {
             try {
                 source.close();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new IORuntimeException(e);
             }
+        }
+
+        @Override
+        public Reader asReader() {
+            return source;
         }
     }
 
@@ -208,7 +213,7 @@ final class CharReaderImpl {
         }
 
         @Override
-        public @Nonnull CharSegment read(int len) throws IllegalArgumentException, IORuntimeException {
+        public @Nonnull CharSegment read(int len) throws IllegalArgumentException {
             IOChecker.checkLen(len);
             if (len == 0) {
                 return CharSegment.empty(false);
@@ -224,8 +229,8 @@ final class CharReaderImpl {
         }
 
         @Override
-        public long skip(long len) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkLen(len);
+        public long skip(long len) throws IllegalArgumentException {
+            IOChecker.checkSkip(len);
             if (len == 0) {
                 return 0;
             }
@@ -345,17 +350,65 @@ final class CharReaderImpl {
         }
 
         @Override
-        public void mark() throws IORuntimeException {
+        public void mark() {
             mark = pos;
         }
 
         @Override
-        public void reset() throws IORuntimeException {
+        public void reset() {
             pos = mark;
         }
 
         @Override
-        public void close() throws IORuntimeException {
+        public void close() {
+        }
+
+        @Override
+        public Reader asReader() {
+            return new Reader() {
+
+                @Override
+                public int read() {
+                    if (pos == endPos) {
+                        return -1;
+                    }
+                    return source[pos++] & 0x0000ffff;
+                }
+
+                @Override
+                public int read(char @Nonnull [] cbuf, int off, int len) throws IndexOutOfBoundsException {
+                    return CharArrayReader.this.readTo(cbuf, off, len);
+                }
+
+                @Override
+                public long skip(long n) throws IllegalArgumentException {
+                    return CharArrayReader.this.skip(n);
+                }
+
+                @Override
+                public boolean ready() {
+                    return true;
+                }
+
+                @Override
+                public void close() {
+                }
+
+                @Override
+                public void mark(int readlimit) {
+                    CharArrayReader.this.mark();
+                }
+
+                @Override
+                public void reset() {
+                    CharArrayReader.this.reset();
+                }
+
+                @Override
+                public boolean markSupported() {
+                    return true;
+                }
+            };
         }
     }
 
@@ -390,8 +443,8 @@ final class CharReaderImpl {
         }
 
         @Override
-        public long skip(long len) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkLen(len);
+        public long skip(long len) throws IllegalArgumentException {
+            IOChecker.checkSkip(len);
             if (len == 0) {
                 return 0;
             }
@@ -511,17 +564,65 @@ final class CharReaderImpl {
         }
 
         @Override
-        public void mark() throws IORuntimeException {
+        public void mark() {
             mark = pos;
         }
 
         @Override
-        public void reset() throws IORuntimeException {
+        public void reset() {
             pos = mark;
         }
 
         @Override
-        public void close() throws IORuntimeException {
+        public void close() {
+        }
+
+        @Override
+        public Reader asReader() {
+            return new Reader() {
+
+                @Override
+                public int read() {
+                    if (pos == endPos) {
+                        return -1;
+                    }
+                    return source.charAt(pos++) & 0x0000ffff;
+                }
+
+                @Override
+                public int read(char @Nonnull [] cbuf, int off, int len) throws IndexOutOfBoundsException {
+                    return CharSequenceReader.this.readTo(cbuf, off, len);
+                }
+
+                @Override
+                public long skip(long n) throws IllegalArgumentException {
+                    return CharSequenceReader.this.skip(n);
+                }
+
+                @Override
+                public boolean ready() {
+                    return true;
+                }
+
+                @Override
+                public void close() {
+                }
+
+                @Override
+                public void mark(int readlimit) {
+                    CharSequenceReader.this.mark();
+                }
+
+                @Override
+                public void reset() {
+                    CharSequenceReader.this.reset();
+                }
+
+                @Override
+                public boolean markSupported() {
+                    return true;
+                }
+            };
         }
     }
 
@@ -554,7 +655,7 @@ final class CharReaderImpl {
 
         @Override
         public long skip(long len) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkLen(len);
+            IOChecker.checkSkip(len);
             if (len == 0) {
                 return 0;
             }
@@ -610,11 +711,67 @@ final class CharReaderImpl {
 
         @Override
         public void reset() throws IORuntimeException {
-            source.reset();
+            try {
+                source.reset();
+            } catch (Exception e) {
+                throw new IORuntimeException(e);
+            }
         }
 
         @Override
         public void close() throws IORuntimeException {
+        }
+
+        @Override
+        public Reader asReader() {
+            return new Reader() {
+
+                @Override
+                public int read() {
+                    if (!source.hasRemaining()) {
+                        return -1;
+                    }
+                    return source.get() & 0x0000ffff;
+                }
+
+                @Override
+                public int read(char @Nonnull [] cbuf, int off, int len) throws IndexOutOfBoundsException {
+                    return CharBufferReader.this.readTo(cbuf, off, len);
+                }
+
+                @Override
+                public long skip(long n) throws IllegalArgumentException {
+                    return CharBufferReader.this.skip(n);
+                }
+
+                @Override
+                public boolean ready() {
+                    return true;
+                }
+
+                @Override
+                public void close() {
+                }
+
+                @Override
+                public void mark(int readlimit) {
+                    CharBufferReader.this.mark();
+                }
+
+                @Override
+                public void reset() throws IOException {
+                    try {
+                        source.reset();
+                    } catch (Exception e) {
+                        throw new IOException(e);
+                    }
+                }
+
+                @Override
+                public boolean markSupported() {
+                    return true;
+                }
+            };
         }
     }
 
@@ -653,7 +810,7 @@ final class CharReaderImpl {
 
         @Override
         public long skip(long len) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkLen(len);
+            IOChecker.checkSkip(len);
             if (len == 0) {
                 return 0;
             }
@@ -769,6 +926,75 @@ final class CharReaderImpl {
         @Override
         public void close() throws IORuntimeException {
             source.close();
+        }
+
+        @Override
+        public Reader asReader() {
+            return new Reader() {
+
+                @Override
+                public int read() {
+                    CharSegment segment = LimitedReader.this.read(1);
+                    CharBuffer buffer = segment.data();
+                    if (!buffer.hasRemaining()) {
+                        return -1;
+                    }
+                    return buffer.get() & 0x0000ffff;
+                }
+
+                @Override
+                public int read(char @Nonnull [] cbuf, int off, int len) throws IndexOutOfBoundsException {
+                    return LimitedReader.this.readTo(cbuf, off, len);
+                }
+
+                @Override
+                public long skip(long n) throws IllegalArgumentException, IOException {
+                    try {
+                        return LimitedReader.this.skip(n);
+                    } catch (IllegalArgumentException e) {
+                        throw e;
+                    } catch (Exception e) {
+                        throw new IOException(e);
+                    }
+                }
+
+                @Override
+                public boolean ready() {
+                    return false;
+                }
+
+                @Override
+                public void close() throws IOException {
+                    try {
+                        LimitedReader.this.close();
+                    } catch (Exception e) {
+                        throw new IOException(e);
+                    }
+                }
+
+                @Override
+                public void mark(int readlimit) throws IOException {
+                    try {
+                        LimitedReader.this.mark();
+                    } catch (Exception e) {
+                        throw new IOException(e);
+                    }
+                }
+
+                @Override
+                public void reset() throws IOException {
+                    try {
+                        LimitedReader.this.reset();
+                    } catch (Exception e) {
+                        throw new IOException(e);
+                    }
+                }
+
+                @Override
+                public boolean markSupported() {
+                    return LimitedReader.this.markSupported();
+                }
+            };
         }
     }
 }

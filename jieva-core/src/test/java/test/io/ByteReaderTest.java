@@ -6,12 +6,15 @@ import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.ByteReader;
 import xyz.sunqian.common.io.ByteSegment;
+import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.test.ErrorOutputStream;
 import xyz.sunqian.test.ReadOps;
 import xyz.sunqian.test.TestInputStream;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
@@ -30,7 +33,7 @@ public class ByteReaderTest {
     private static final int DST_SIZE = 256;
 
     @Test
-    public void testRead() {
+    public void testRead() throws Exception {
         testRead0(0, 1);
         testRead0(1, 1);
         testRead0(32, 1);
@@ -53,7 +56,7 @@ public class ByteReaderTest {
         }
     }
 
-    private void testRead0(int dataSize, int readSize) {
+    private void testRead0(int dataSize, int readSize) throws Exception {
         {
             // input stream
             byte[] data = JieRandom.fill(new byte[dataSize]);
@@ -64,6 +67,12 @@ public class ByteReaderTest {
             TestInputStream tr = new TestInputStream(new ByteArrayInputStream(data));
             tr.setNextOperation(ReadOps.READ_ZERO);
             testSkip0(ByteReader.from(tr), data, readSize);
+            if (dataSize >= 128) {
+                IOImplsTest.testInputStream(
+                    ByteReader.from(IOKit.newInputStream(data)).asInputStream(),
+                    data, true, false, false
+                );
+            }
         }
         {
             // channel
@@ -78,6 +87,12 @@ public class ByteReaderTest {
                 data, readSize, false
             );
             testSkip0(ByteReader.from(Channels.newChannel(new OneByteInputStream(data))), data, readSize);
+            if (dataSize >= 128) {
+                IOImplsTest.testInputStream(
+                    ByteReader.from(Channels.newChannel(new ByteArrayInputStream(data))).asInputStream(),
+                    data, false, false, false
+                );
+            }
         }
         {
             // byte array
@@ -92,46 +107,77 @@ public class ByteReaderTest {
                 readSize, true
             );
             testSkip0(ByteReader.from(dataPadding, 33, data.length), data, readSize);
+            if (dataSize >= 128) {
+                IOImplsTest.testInputStream(
+                    ByteReader.from(data).asInputStream(),
+                    data, true, false, true
+                );
+                IOImplsTest.testInputStream(
+                    ByteReader.from(dataPadding, 33, data.length).asInputStream(),
+                    Arrays.copyOfRange(dataPadding, 33, 33 + data.length),
+                    true, false, true
+                );
+            }
         }
         {
             // buffer
             byte[] data = JieRandom.fill(new byte[dataSize]);
             testRead0(ByteReader.from(ByteBuffer.wrap(data)), data, readSize, true);
             testSkip0(ByteReader.from(ByteBuffer.wrap(data)), data, readSize);
+            if (dataSize >= 128) {
+                IOImplsTest.testInputStream(
+                    ByteReader.from(ByteBuffer.wrap(data)).asInputStream(),
+                    data, true, false, false
+                );
+            }
         }
         {
             // limited
             byte[] data = JieRandom.fill(new byte[dataSize]);
             testRead0(
-                ByteReader.from(new ByteArrayInputStream(data)).limit(data.length),
+                ByteReader.from(data).limit(data.length),
                 data,
-                readSize, false
+                readSize, true
             );
             testSkip0(
-                ByteReader.from(new ByteArrayInputStream(data)),
+                ByteReader.from(data),
                 data,
                 readSize
             );
             testRead0(
-                ByteReader.from(new ByteArrayInputStream(data)).limit(data.length + 5),
+                ByteReader.from(data).limit(data.length + 5),
                 data,
-                readSize, false
+                readSize, true
             );
             testSkip0(
-                ByteReader.from(new ByteArrayInputStream(data)).limit(data.length + 5),
+                ByteReader.from(data).limit(data.length + 5),
                 data,
                 readSize
             );
             if (data.length > 5) {
                 testRead0(
-                    ByteReader.from(new ByteArrayInputStream(data)).limit(data.length - 5),
+                    ByteReader.from(data).limit(data.length - 5),
                     Arrays.copyOf(data, data.length - 5),
                     readSize, false
                 );
                 testSkip0(
-                    ByteReader.from(new ByteArrayInputStream(data)).limit(data.length - 5),
+                    ByteReader.from(data).limit(data.length - 5),
                     Arrays.copyOf(data, data.length - 5),
                     readSize
+                );
+            }
+            if (dataSize >= 128) {
+                IOImplsTest.testInputStream(
+                    ByteReader.from(data).limit(data.length).asInputStream(),
+                    data, false, false, true
+                );
+                IOImplsTest.testInputStream(
+                    ByteReader.from(data).limit(data.length + 5).asInputStream(),
+                    data, false, false, true
+                );
+                IOImplsTest.testInputStream(
+                    ByteReader.from(data).limit(data.length - 5).asInputStream(),
+                    Arrays.copyOf(data, data.length - 5), false, false, true
                 );
             }
         }
@@ -674,6 +720,14 @@ public class ByteReaderTest {
             expectThrows(IORuntimeException.class, reader::mark);
             expectThrows(IORuntimeException.class, reader::reset);
             expectThrows(IORuntimeException.class, reader::close);
+            reader = ByteReader.from(ByteBuffer.allocate(1));
+            expectThrows(IORuntimeException.class, reader::reset);
+            InputStream in1 = ByteReader.from(ByteBuffer.allocate(1)).limit(1).asInputStream();
+            expectThrows(IOException.class, in1::reset);
+            InputStream in2 = ByteReader.from(tin).limit(1).asInputStream();
+            expectThrows(IOException.class, () -> in2.skip(1));
+            InputStream in3 = ByteReader.from(tin).limit(1).asInputStream();
+            expectThrows(IOException.class, () -> in3.close());
         }
     }
 }

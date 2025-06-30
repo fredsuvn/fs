@@ -351,4 +351,18 @@ public interface ByteReader {
     default ByteReader limit(long limit) throws IllegalArgumentException {
         return ByteReaderImpl.limit(this, limit);
     }
+
+    /**
+     * Wraps this reader as a new {@link InputStream} of which content and status are shared with each other.
+     * <p>
+     * The result's support is as follows:
+     * <ul>
+     *     <li>mark/reset: based on this reader;</li>
+     *     <li>close: closes this reader;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
+     *
+     * @return a new {@link InputStream} of which content and status are shared with each other
+     */
+    InputStream asInputStream();
 }

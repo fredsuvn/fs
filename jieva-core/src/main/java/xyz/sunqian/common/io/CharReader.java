@@ -324,4 +324,18 @@ public interface CharReader {
     default CharReader limit(long limit) throws IllegalArgumentException {
         return CharReaderImpl.limit(this, limit);
     }
+
+    /**
+     * Wraps this reader as a new {@link Reader} of which content and status are shared with each other.
+     * <p>
+     * The result's support is as follows:
+     * <ul>
+     *     <li>mark/reset: based on this reader;</li>
+     *     <li>close: closes this reader;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
+     *
+     * @return a new {@link Reader} of which content and status are shared with each other
+     */
+    Reader asReader();
 }

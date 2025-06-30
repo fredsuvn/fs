@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
@@ -105,7 +106,7 @@ final class ByteReaderImpl {
 
         @Override
         public long skip(long len) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkLen(len);
+            IOChecker.checkSkip(len);
             if (len == 0) {
                 return 0;
             }
@@ -116,7 +117,7 @@ final class ByteReaderImpl {
             }
         }
 
-        private long skip0(long size) throws Exception {
+        private long skip0(long size) throws IOException {
             long hasRead = 0;
             while (hasRead < size) {
                 long onceSize = source.skip(size - hasRead);
@@ -192,7 +193,7 @@ final class ByteReaderImpl {
         public void reset() throws IORuntimeException {
             try {
                 source.reset();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new IORuntimeException(e);
             }
         }
@@ -201,9 +202,14 @@ final class ByteReaderImpl {
         public void close() throws IORuntimeException {
             try {
                 source.close();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new IORuntimeException(e);
             }
+        }
+
+        @Override
+        public InputStream asInputStream() {
+            return source;
         }
     }
 
@@ -231,7 +237,7 @@ final class ByteReaderImpl {
 
         @Override
         public long skip(long len) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkLen(len);
+            IOChecker.checkSkip(len);
             if (len == 0) {
                 return 0;
             }
@@ -322,6 +328,11 @@ final class ByteReaderImpl {
                 throw new IORuntimeException(e);
             }
         }
+
+        @Override
+        public InputStream asInputStream() {
+            return Channels.newInputStream(source);
+        }
     }
 
     private static final class ByteArrayReader implements ByteReader {
@@ -339,7 +350,7 @@ final class ByteReaderImpl {
         }
 
         @Override
-        public @Nonnull ByteSegment read(int len) throws IllegalArgumentException, IORuntimeException {
+        public @Nonnull ByteSegment read(int len) throws IllegalArgumentException {
             IOChecker.checkLen(len);
             if (len == 0) {
                 return ByteSegment.empty(false);
@@ -355,8 +366,12 @@ final class ByteReaderImpl {
         }
 
         @Override
-        public long skip(long len) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkLen(len);
+        public long skip(long len) throws IllegalArgumentException {
+            IOChecker.checkSkip(len);
+            return skip0(len);
+        }
+
+        private long skip0(long len) {
             if (len == 0) {
                 return 0;
             }
@@ -507,17 +522,68 @@ final class ByteReaderImpl {
         }
 
         @Override
-        public void mark() throws IORuntimeException {
+        public void mark() {
             mark = pos;
         }
 
         @Override
-        public void reset() throws IORuntimeException {
+        public void reset() {
             pos = mark;
         }
 
         @Override
-        public void close() throws IORuntimeException {
+        public void close() {
+        }
+
+        @Override
+        public InputStream asInputStream() {
+            return new InputStream() {
+
+                @Override
+                public int read() {
+                    if (pos == endPos) {
+                        return -1;
+                    }
+                    return source[pos++] & 0x00ff;
+                }
+
+                @Override
+                public int read(byte @Nonnull [] b, int off, int len) throws IndexOutOfBoundsException {
+                    return ByteArrayReader.this.readTo(b, off, len);
+                }
+
+                @Override
+                public long skip(long n) {
+                    if (n < 0) {
+                        return 0;
+                    }
+                    return ByteArrayReader.this.skip0(n);
+                }
+
+                @Override
+                public int available() {
+                    return endPos - pos;
+                }
+
+                @Override
+                public void close() {
+                }
+
+                @Override
+                public void mark(int readlimit) {
+                    ByteArrayReader.this.mark();
+                }
+
+                @Override
+                public void reset() {
+                    ByteArrayReader.this.reset();
+                }
+
+                @Override
+                public boolean markSupported() {
+                    return true;
+                }
+            };
         }
     }
 
@@ -549,8 +615,12 @@ final class ByteReaderImpl {
         }
 
         @Override
-        public long skip(long len) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkLen(len);
+        public long skip(long len) throws IllegalArgumentException {
+            IOChecker.checkSkip(len);
+            return skip0(len);
+        }
+
+        private long skip0(long len) {
             if (len == 0) {
                 return 0;
             }
@@ -613,17 +683,76 @@ final class ByteReaderImpl {
         }
 
         @Override
-        public void mark() throws IORuntimeException {
+        public void mark() {
             source.mark();
         }
 
         @Override
         public void reset() throws IORuntimeException {
-            source.reset();
+            try {
+                source.reset();
+            } catch (Exception e) {
+                throw new IORuntimeException(e);
+            }
         }
 
         @Override
-        public void close() throws IORuntimeException {
+        public void close() {
+        }
+
+        @Override
+        public InputStream asInputStream() {
+            return new InputStream() {
+
+                @Override
+                public int read() {
+                    if (!source.hasRemaining()) {
+                        return -1;
+                    }
+                    return source.get() & 0x00ff;
+                }
+
+                @Override
+                public int read(byte @Nonnull [] b, int off, int len) throws IndexOutOfBoundsException {
+                    return ByteBufferReader.this.readTo(b, off, len);
+                }
+
+                @Override
+                public long skip(long n) {
+                    if (n < 0) {
+                        return 0;
+                    }
+                    return ByteBufferReader.this.skip0(n);
+                }
+
+                @Override
+                public int available() {
+                    return source.remaining();
+                }
+
+                @Override
+                public void close() {
+                }
+
+                @Override
+                public void mark(int readlimit) {
+                    ByteBufferReader.this.mark();
+                }
+
+                @Override
+                public void reset() throws IOException {
+                    try {
+                        source.reset();
+                    } catch (Exception e) {
+                        throw new IOException(e);
+                    }
+                }
+
+                @Override
+                public boolean markSupported() {
+                    return true;
+                }
+            };
         }
     }
 
@@ -662,7 +791,11 @@ final class ByteReaderImpl {
 
         @Override
         public long skip(long len) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkLen(len);
+            IOChecker.checkSkip(len);
+            return skip0(len);
+        }
+
+        private long skip0(long len) throws IORuntimeException {
             if (len == 0) {
                 return 0;
             }
@@ -811,6 +944,72 @@ final class ByteReaderImpl {
         @Override
         public void close() throws IORuntimeException {
             source.close();
+        }
+
+        @Override
+        public InputStream asInputStream() {
+            return new InputStream() {
+
+                @Override
+                public int read() {
+                    ByteSegment segment = LimitedReader.this.read(1);
+                    ByteBuffer buffer = segment.data();
+                    if (!buffer.hasRemaining()) {
+                        return -1;
+                    }
+                    return buffer.get() & 0x00ff;
+                }
+
+                @Override
+                public int read(byte @Nonnull [] b, int off, int len) throws IndexOutOfBoundsException {
+                    return LimitedReader.this.readTo(b, off, len);
+                }
+
+                @Override
+                public long skip(long n) throws IOException {
+                    if (n < 0) {
+                        return 0;
+                    }
+                    try {
+                        return LimitedReader.this.skip0(n);
+                    } catch (Exception e) {
+                        throw new IOException(e);
+                    }
+                }
+
+                @Override
+                public int available() {
+                    return 0;
+                }
+
+                @Override
+                public void close() throws IOException {
+                    try {
+                        LimitedReader.this.close();
+                    } catch (Exception e) {
+                        throw new IOException(e);
+                    }
+                }
+
+                @Override
+                public void mark(int readlimit) {
+                    LimitedReader.this.mark();
+                }
+
+                @Override
+                public void reset() throws IOException {
+                    try {
+                        LimitedReader.this.reset();
+                    } catch (Exception e) {
+                        throw new IOException(e);
+                    }
+                }
+
+                @Override
+                public boolean markSupported() {
+                    return LimitedReader.this.markSupported();
+                }
+            };
         }
     }
 }
