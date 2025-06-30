@@ -706,8 +706,9 @@ final class IOImpls {
         }
 
         @Override
-        public long skip(long n) {
-            if (n <= 0) {
+        public long skip(long n) throws IllegalArgumentException {
+            IOChecker.checkSkip(n);
+            if (n == 0) {
                 return 0;
             }
             int avail = count - pos;
@@ -782,8 +783,9 @@ final class IOImpls {
         }
 
         @Override
-        public long skip(long n) {
-            if (n <= 0) {
+        public long skip(long n) throws IllegalArgumentException {
+            IOChecker.checkSkip(n);
+            if (n == 0) {
                 return 0;
             }
             int avail = (int) Math.min(buffer.remaining(), n);
@@ -887,9 +889,10 @@ final class IOImpls {
         }
 
         @Override
-        public long skip(long n) throws IOException {
+        public long skip(long n) throws IllegalArgumentException, IOException {
+            IOChecker.checkSkip(n);
             checkClosed();
-            if (n <= 0) {
+            if (n == 0) {
                 return 0;
             }
             return read0(null, 0, n);
@@ -1031,7 +1034,8 @@ final class IOImpls {
         }
 
         @Override
-        public long skip(long n) throws IOException {
+        public long skip(long n) throws IllegalArgumentException, IOException {
+            IOChecker.checkSkip(n);
             long remaining = limit - pos;
             long ret = in.skip(Math.min(n, remaining));
             pos += ret;
@@ -1086,7 +1090,8 @@ final class IOImpls {
         }
 
         @Override
-        public long skip(long n) {
+        public long skip(long n) throws IllegalArgumentException {
+            IOChecker.checkSkip(n);
             return 0;
         }
 

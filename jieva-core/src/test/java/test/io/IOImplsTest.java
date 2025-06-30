@@ -11,8 +11,8 @@ import xyz.sunqian.common.io.DoReadReader;
 import xyz.sunqian.common.io.DoReadStream;
 import xyz.sunqian.common.io.DoWriteStream;
 import xyz.sunqian.common.io.DoWriteWriter;
-import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.IOKit;
+import xyz.sunqian.common.io.IORuntimeException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -48,7 +48,7 @@ public class IOImplsTest {
         testInputStream(1024);
 
         // empty
-        testInputStream(IOKit.emptyInputStream(), new byte[0], true, false);
+        testInputStream(IOKit.emptyInputStream(), new byte[0], true, false, false);
 
         // error
         RandomAccessFile raf = new FakeFile(new byte[0]);
@@ -80,12 +80,12 @@ public class IOImplsTest {
         {
             // bytes
             byte[] data = JieRandom.fill(new byte[dataSize]);
-            testInputStream(IOKit.newInputStream(data), data, true, false);
+            testInputStream(IOKit.newInputStream(data), data, true, false, false);
             data = JieRandom.fill(new byte[dataSize + 12]);
             testInputStream(
                 IOKit.newInputStream(data, 6, dataSize),
                 Arrays.copyOfRange(data, 6, data.length - 6),
-                true, false
+                true, false, false
             );
         }
         {
@@ -93,14 +93,14 @@ public class IOImplsTest {
             byte[] data = JieRandom.fill(new byte[dataSize]);
             ByteBuffer buffer = ByteBuffer.wrap(data);
             InputStream bufferIn = IOKit.newInputStream(buffer);
-            testInputStream(bufferIn, data, true, false);
+            testInputStream(bufferIn, data, true, false, false);
         }
         {
             // file
             byte[] data = JieRandom.fill(new byte[dataSize + 6]);
             RandomAccessFile raf = new FakeFile(data);
             InputStream rafIn = IOKit.newInputStream(raf, 6);
-            testInputStream(rafIn, Arrays.copyOfRange(data, 6, data.length), true, true);
+            testInputStream(rafIn, Arrays.copyOfRange(data, 6, data.length), true, true, false);
             rafIn.mark(66);
             // expectThrows(IORuntimeException.class, () -> rafIn.mark(66));
         }
@@ -109,13 +109,13 @@ public class IOImplsTest {
             char[] chars = JieRandom.fill(new char[dataSize], '0', '9');
             byte[] charBytes = new String(chars).getBytes(JieChars.UTF_8);
             InputStream charsIn = IOKit.newInputStream(new CharArrayReader(chars));
-            testInputStream(charsIn, charBytes, false, false);
+            testInputStream(charsIn, charBytes, false, false, false);
             expectThrows(IOException.class, charsIn::read);
             // chinese: '\u4e00' - '\u9fff'
             chars = JieRandom.fill(new char[dataSize], '\u4e00', '\u4e01');
             charBytes = new String(chars).getBytes(JieChars.UTF_8);
             charsIn = IOKit.newInputStream(new CharArrayReader(chars));
-            testInputStream(charsIn, charBytes, false, false);
+            testInputStream(charsIn, charBytes, false, false, false);
             expectThrows(IOException.class, charsIn::read);
             // emoji: "\uD83D\uDD1E"
             for (int i = 0; i < chars.length; i += 2) {
@@ -124,7 +124,7 @@ public class IOImplsTest {
             }
             charBytes = new String(chars).getBytes(JieChars.UTF_8);
             charsIn = IOKit.newInputStream(new CharArrayReader(chars));
-            testInputStream(charsIn, charBytes, false, false);
+            testInputStream(charsIn, charBytes, false, false, false);
             expectThrows(IOException.class, charsIn::read);
             // error: U+DD88
             charsIn = IOKit.newInputStream(new CharArrayReader(chars), new ErrorCharset());
@@ -135,24 +135,26 @@ public class IOImplsTest {
             byte[] data = JieRandom.fill(new byte[dataSize]);
             testInputStream(
                 IOKit.limitedInputStream(IOKit.newInputStream(data), data.length), data,
-                true, false
+                true, false, false
             );
             testInputStream(
                 IOKit.limitedInputStream(
                     IOKit.newInputStream(data), data.length * 2),
                 data,
-                true, false
+                true, false, false
             );
             testInputStream(
                 IOKit.limitedInputStream(
                     IOKit.newInputStream(data), data.length - 5),
                 Arrays.copyOf(data, data.length - 5),
-                true, false
+                true, false, false
             );
         }
     }
 
-    private void testInputStream(InputStream in, byte[] data, boolean available, boolean close) throws Exception {
+    public static void testInputStream(
+        InputStream in, byte[] data, boolean available, boolean close, boolean resetFirst
+    ) throws Exception {
 
         assertEquals(in.read(new byte[10], 0, 0), 0);
         assertEquals(in.read(new byte[0]), 0);
@@ -164,7 +166,11 @@ public class IOImplsTest {
 
         {
             // mark/reset
-            expectThrows(IOException.class, in::reset);
+            if (resetFirst) {
+                in.reset();
+            } else {
+                expectThrows(IOException.class, in::reset);
+            }
             in.mark(0);
             if (in.markSupported()) {
                 in.reset();
@@ -313,7 +319,7 @@ public class IOImplsTest {
         }
     }
 
-    private void testEndInputStream(InputStream in) throws Exception {
+    private static void testEndInputStream(InputStream in) throws Exception {
         assertEquals(in.available(), 0);
         assertEquals(in.read(), -1);
         assertEquals(in.read(new byte[10]), -1);
@@ -331,7 +337,7 @@ public class IOImplsTest {
         testReader(1024);
 
         // empty
-        testReader(IOKit.emptyReader(), new char[0], true, false);
+        testReader(IOKit.emptyReader(), new char[0], true, false, false);
 
         // limited
         assertEquals(
@@ -348,23 +354,23 @@ public class IOImplsTest {
         {
             // chars
             char[] data = JieRandom.fill(new char[dataSize]);
-            testReader(IOKit.newReader(data), data, true, false);
+            testReader(IOKit.newReader(data), data, true, false, false);
             data = JieRandom.fill(new char[dataSize + 12]);
             testReader(
                 IOKit.newReader(data, 6, dataSize),
                 Arrays.copyOfRange(data, 6, data.length - 6),
-                true, false
+                true, false, false
             );
         }
         {
             // string
             char[] data = JieRandom.fill(new char[dataSize]);
-            testReader(IOKit.newReader(new String(data)), data, true, false);
+            testReader(IOKit.newReader(new String(data)), data, true, false, false);
             data = JieRandom.fill(new char[dataSize + 12]);
             testReader(
                 IOKit.newReader(new String(data), 6, data.length - 6),
                 Arrays.copyOfRange(data, 6, data.length - 6),
-                true, false
+                true, false, false
             );
         }
         {
@@ -372,20 +378,20 @@ public class IOImplsTest {
             char[] data = JieRandom.fill(new char[dataSize]);
             CharBuffer buffer = CharBuffer.wrap(data);
             Reader bufferIn = IOKit.newReader(buffer);
-            testReader(bufferIn, data, true, false);
+            testReader(bufferIn, data, true, false, false);
         }
         {
             // bytes
             char[] chars = JieRandom.fill(new char[dataSize], '0', '9');
             byte[] charBytes = new String(chars).getBytes(JieChars.UTF_8);
             Reader charsIn = IOKit.newReader(IOKit.newInputStream(charBytes));
-            testReader(charsIn, chars, false, false);
+            testReader(charsIn, chars, false, false, false);
             expectThrows(IOException.class, charsIn::read);
             // chinese: '\u4e00' - '\u9fff'
             chars = JieRandom.fill(new char[dataSize], '\u4e00', '\u4e01');
             charBytes = new String(chars).getBytes(JieChars.UTF_8);
             charsIn = IOKit.newReader(IOKit.newInputStream(charBytes));
-            testReader(charsIn, chars, false, false);
+            testReader(charsIn, chars, false, false, false);
             expectThrows(IOException.class, charsIn::read);
             // emoji: "\uD83D\uDD1E"
             for (int i = 0; i < chars.length; i += 2) {
@@ -394,7 +400,7 @@ public class IOImplsTest {
             }
             charBytes = new String(chars).getBytes(JieChars.UTF_8);
             charsIn = IOKit.newReader(IOKit.newInputStream(charBytes));
-            testReader(charsIn, chars, false, false);
+            testReader(charsIn, chars, false, false, false);
             expectThrows(IOException.class, charsIn::read);
             // error: 0xC1
             charsIn = IOKit.newReader(IOKit.newInputStream(charBytes), new ErrorCharset());
@@ -408,7 +414,7 @@ public class IOImplsTest {
                 fakeChars[i * 3 + 2] = (char) fakeBytes[i];
             }
             charsIn = IOKit.newReader(IOKit.newInputStream(fakeBytes), new ByteToNCharCharset(3));
-            testReader(charsIn, fakeChars, false, false);
+            testReader(charsIn, fakeChars, false, false, false);
             expectThrows(IOException.class, charsIn::read);
         }
         {
@@ -416,24 +422,26 @@ public class IOImplsTest {
             char[] data = JieRandom.fill(new char[dataSize]);
             testReader(
                 IOKit.limitedReader(IOKit.newReader(data), data.length), data,
-                true, false
+                true, false, false
             );
             testReader(
                 IOKit.limitedReader(
                     IOKit.newReader(data), data.length * 2),
                 data,
-                true, false
+                true, false, false
             );
             testReader(
                 IOKit.limitedReader(
                     IOKit.newReader(data), data.length - 5),
                 Arrays.copyOf(data, data.length - 5),
-                true, false
+                true, false, false
             );
         }
     }
 
-    private void testReader(Reader in, char[] data, boolean ready, boolean close) throws Exception {
+    public static void testReader(
+        Reader in, char[] data, boolean ready, boolean close, boolean resetFirst
+    ) throws Exception {
 
         assertEquals(in.read(new char[10], 0, 0), 0);
         assertEquals(in.read(new char[0]), 0);
@@ -441,7 +449,8 @@ public class IOImplsTest {
             assertEquals(in.read(CharBuffer.allocate(0)), 0);
         }
         assertEquals(in.skip(0), 0);
-        assertEquals(in.skip(-1), 0);
+        expectThrows(IllegalArgumentException.class, () -> in.skip(-1));
+        // assertEquals(in.skip(-1), 0);
         expectThrows(IndexOutOfBoundsException.class, () -> in.read(new char[10], 2, -1));
         expectThrows(IndexOutOfBoundsException.class, () -> in.read(new char[10], -2, 1));
         expectThrows(IndexOutOfBoundsException.class, () -> in.read(new char[1], 0, 2));
@@ -454,7 +463,11 @@ public class IOImplsTest {
 
         {
             // mark/reset
-            expectThrows(IOException.class, in::reset);
+            if (resetFirst) {
+                in.reset();
+            } else {
+                expectThrows(IOException.class, in::reset);
+            }
             if (in.markSupported()) {
                 in.mark(0);
                 in.reset();
@@ -554,12 +567,14 @@ public class IOImplsTest {
                 in.mark(skip);
             }
             assertEquals(in.skip(0), 0);
-            assertEquals(in.skip(-1), 0);
+            expectThrows(IllegalArgumentException.class, () -> in.skip(-1));
+            // assertEquals(in.skip(-1), 0);
             assertEquals(in.skip(skip), skip);
             if (in.markSupported()) {
                 in.reset();
                 assertEquals(in.skip(0), 0);
-                assertEquals(in.skip(-1), 0);
+                expectThrows(IllegalArgumentException.class, () -> in.skip(-1));
+                // assertEquals(in.skip(-1), 0);
                 assertEquals(in.skip(skip), skip);
             }
             hasRead += skip;
@@ -608,14 +623,15 @@ public class IOImplsTest {
         }
     }
 
-    private void testEndReader(Reader in) throws Exception {
+    private static void testEndReader(Reader in) throws Exception {
         assertEquals(in.read(), -1);
         assertEquals(in.read(new char[10]), -1);
         assertEquals(in.read(new char[10], 0, 1), -1);
         assertEquals(in.read(CharBuffer.allocate(1)), -1);
         assertEquals(in.skip(999), 0);
         assertEquals(in.skip(0), 0);
-        assertEquals(in.skip(-1), 0);
+        expectThrows(IllegalArgumentException.class, () -> in.skip(-1));
+        // assertEquals(in.skip(-1), 0);
     }
 
     @Test
