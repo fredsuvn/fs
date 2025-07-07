@@ -2,12 +2,23 @@ package xyz.sunqian.common.base.random;
 
 import xyz.sunqian.annotations.Nonnull;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 /**
  * This interface is used to generate random values.
  *
  * @author sunqian
  */
 public interface Randomer {
+
+    /**
+     * Returns a new {@link Randomer} based on the {@link ThreadLocalRandom#current()}.
+     *
+     * @return a new {@link Randomer} based on the {@link ThreadLocalRandom#current()}
+     */
+    static Randomer newRandomer() {
+        return new RandomerImpl();
+    }
 
     /**
      * Returns the next random boolean value.
@@ -57,6 +68,7 @@ public interface Randomer {
      * @param startInclusive the start value inclusive
      * @param endExclusive   the end value exclusive
      * @return the given array
+     * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
     byte @Nonnull [] fill(
         byte @Nonnull [] array, byte startInclusive, byte endExclusive
@@ -95,6 +107,7 @@ public interface Randomer {
      * @param startInclusive the start value inclusive
      * @param endExclusive   the end value exclusive
      * @return the given array
+     * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
     short @Nonnull [] fill(
         short @Nonnull [] array, short startInclusive, short endExclusive
@@ -133,6 +146,7 @@ public interface Randomer {
      * @param startInclusive the start value inclusive
      * @param endExclusive   the end value exclusive
      * @return the given array
+     * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
     char @Nonnull [] fill(
         char @Nonnull [] array, char startInclusive, char endExclusive
@@ -171,6 +185,7 @@ public interface Randomer {
      * @param startInclusive the start value inclusive
      * @param endExclusive   the end value exclusive
      * @return the given array
+     * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
     int @Nonnull [] fill(
         int @Nonnull [] array, int startInclusive, int endExclusive
@@ -209,6 +224,7 @@ public interface Randomer {
      * @param startInclusive the start value inclusive
      * @param endExclusive   the end value exclusive
      * @return the given array
+     * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
     long @Nonnull [] fill(
         long @Nonnull [] array, long startInclusive, long endExclusive
@@ -247,6 +263,7 @@ public interface Randomer {
      * @param startInclusive the start value inclusive
      * @param endExclusive   the end value exclusive
      * @return the given array
+     * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
     float @Nonnull [] fill(
         float @Nonnull [] array, float startInclusive, float endExclusive
@@ -286,6 +303,7 @@ public interface Randomer {
      * @param startInclusive the start value inclusive
      * @param endExclusive   the end value exclusive
      * @return the given array
+     * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
     double @Nonnull [] fill(
         double @Nonnull [] array, double startInclusive, double endExclusive

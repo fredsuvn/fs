@@ -99,11 +99,10 @@ public class MathKit {
     }
 
     /**
-     * If the {@code value} is {@code startInclusive <= value < endExclusive}, returns the {@code value} itself.
-     * Otherwise, if {@code value < startInclusive}, then returns {@code startInclusive}; else returns
-     * {@link Math#nextDown(float)} of the {@code endExclusive}. It is equivalent to:
+     * If {@code value <= startInclusive}, returns the {@code startInclusive}; else if {@code value >= endExclusive},
+     * returns {@link Math#nextDown(float)} for the {@code endExclusive}. It is equivalent to:
      * <pre>{@code
-     * if (value < startInclusive) {
+     * if (value <= startInclusive) {
      *     return startInclusive;
      * }
      * if (value >= endExclusive) {
@@ -115,10 +114,10 @@ public class MathKit {
      * @param value          the value
      * @param startInclusive the start value inclusive
      * @param endExclusive   the end value exclusive
-     * @return a value which is {@code startInclusive <= value < endExclusive}
+     * @return a value in the range: {@code startInclusive <= value < endExclusive}
      */
     public static float makeIn(float value, float startInclusive, float endExclusive) {
-        if (value < startInclusive) {
+        if (value <= startInclusive) {
             return startInclusive;
         }
         if (value >= endExclusive) {
@@ -128,11 +127,10 @@ public class MathKit {
     }
 
     /**
-     * If the {@code value} is {@code startInclusive <= value < endExclusive}, returns the {@code value} itself.
-     * Otherwise, if {@code value < startInclusive}, then returns {@code startInclusive}; else returns
-     * {@link Math#nextDown(float)} of the {@code endExclusive}. It is equivalent to:
+     * If {@code value <= startInclusive}, returns the {@code startInclusive}; else if {@code value >= endExclusive},
+     * returns {@link Math#nextDown(float)} for the {@code endExclusive}. It is equivalent to:
      * <pre>{@code
-     * if (value < startInclusive) {
+     * if (value <= startInclusive) {
      *     return startInclusive;
      * }
      * if (value >= endExclusive) {
@@ -144,10 +142,10 @@ public class MathKit {
      * @param value          the value
      * @param startInclusive the start value inclusive
      * @param endExclusive   the end value exclusive
-     * @return a value which is {@code startInclusive <= value < endExclusive}
+     * @return a value in the range: {@code startInclusive <= value < endExclusive}
      */
     public static double makeIn(double value, double startInclusive, double endExclusive) {
-        if (value < startInclusive) {
+        if (value <= startInclusive) {
             return startInclusive;
         }
         if (value >= endExclusive) {
