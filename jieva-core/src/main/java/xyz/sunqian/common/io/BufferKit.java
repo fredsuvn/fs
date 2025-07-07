@@ -25,8 +25,8 @@ public class BufferKit {
      *
      * @param buffer the given buffer
      * @return the actual start index (inclusive) of the backing array in the given buffer
-     * @throws ReadOnlyBufferException       If the buffer is backed by an array but is read-only
-     * @throws UnsupportedOperationException If the buffer is not backed by an accessible array
+     * @throws ReadOnlyBufferException       if the buffer is backed by an array but is read-only
+     * @throws UnsupportedOperationException if the buffer is not backed by an accessible array
      */
     public static int arrayStartIndex(
         @Nonnull Buffer buffer
@@ -39,8 +39,8 @@ public class BufferKit {
      *
      * @param buffer the given buffer
      * @return the actual start index (exclusive) of the backing array in the given buffer
-     * @throws ReadOnlyBufferException       If the buffer is backed by an array but is read-only
-     * @throws UnsupportedOperationException If the buffer is not backed by an accessible array
+     * @throws ReadOnlyBufferException       if the buffer is backed by an array but is read-only
+     * @throws UnsupportedOperationException if the buffer is not backed by an accessible array
      */
     public static int arrayEndIndex(
         @Nonnull Buffer buffer
@@ -50,12 +50,13 @@ public class BufferKit {
 
     /**
      * Reads all data from the source buffer into a new array, continuing until reaches the end of the buffer, and
-     * returns the array. If the end of the source buffer has already been reached, returns {@code null}.
+     * returns the array. If the end of the source buffer is reached and no data is read, returns {@code null}.
      * <p>
      * The buffer's position increments by the actual read number.
      *
      * @param src the source buffer
-     * @return the array containing the data
+     * @return a new array containing the read data, or {@code null} if the end of the source buffer is reached and no
+     * data is read
      */
     public static byte @Nullable [] read(@Nonnull ByteBuffer src) {
         int len = src.remaining();
@@ -70,14 +71,15 @@ public class BufferKit {
     /**
      * Reads the data of the specified length from the source buffer into a new array, and returns the array. If the
      * specified length {@code = 0}, returns an empty array without reading. Otherwise, this method keeps reading until
-     * the read number reaches the specified length or reaches the end of the buffer. If the end of the source buffer
-     * has already been reached, returns {@code null}.
+     * the read number reaches the specified length or reaches the end of the buffer. If the end of the source buffer is
+     * reached and no data is read, returns {@code null}.
      * <p>
      * The buffer's position increments by the actual read number.
      *
      * @param src the source buffer
      * @param len the specified read length, must {@code >= 0}
-     * @return the array containing the data
+     * @return a new array containing the read data, or {@code null} if the end of the source buffer is reached and no
+     * data is read
      * @throws IllegalArgumentException if the specified read length is illegal
      */
     public static byte @Nullable [] read(@Nonnull ByteBuffer src, int len) throws IllegalArgumentException {
@@ -98,17 +100,18 @@ public class BufferKit {
      * Reads the data from the source buffer into the specified array, until the read number reaches the array's length
      * or reaches the end of the source buffer, returns the actual number of bytes read to.
      * <p>
-     * If the array's length {@code = 0}, returns {@code 0} without reading. If the end of the source buffer has already
-     * been reached, returns {@code -1}.
+     * If the specified length is {@code 0}, returns {@code 0} without reading. If the end of the source buffer is
+     * reached and no data is read, returns {@code -1}.
      * <p>
      * The buffer's position increments by the actual read number.
      *
      * @param src the source buffer
      * @param dst the specified array
-     * @return the actual number of bytes read
+     * @return the actual number of bytes read to, or {@code -1} if the end of the source buffer is reached and no data
+     * is read
      */
     public static int readTo(@Nonnull ByteBuffer src, byte @Nonnull [] dst) {
-        return readTo0(src, dst, 0, dst.length);
+        return IOUnsafe.readTo(src, dst, 0, dst.length);
     }
 
     /**
@@ -116,8 +119,8 @@ public class BufferKit {
      * specified length), until the read number reaches the specified length or reaches the end of the source buffer,
      * returns the actual number of bytes read to.
      * <p>
-     * If the specified length {@code = 0}, returns {@code 0} without reading. If the end of the source buffer has
-     * already been reached, returns {@code -1}.
+     * If the specified length is {@code 0}, returns {@code 0} without reading. If the end of the source buffer is
+     * reached and no data is read, returns {@code -1}.
      * <p>
      * The buffer's position increments by the actual read number.
      *
@@ -125,26 +128,15 @@ public class BufferKit {
      * @param dst the specified array
      * @param off the specified offset of the array
      * @param len the specified length to read
-     * @return the actual number of bytes read
-     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
+     * @return the actual number of bytes read to, or {@code -1} if the end of the source buffer is reached and no data
+     * is read
+     * @throws IndexOutOfBoundsException if the arguments are out of bounds
      */
     public static int readTo(
         @Nonnull ByteBuffer src, byte @Nonnull [] dst, int off, int len
     ) throws IndexOutOfBoundsException {
         IOChecker.checkOffLen(dst.length, off, len);
-        return readTo0(src, dst, off, len);
-    }
-
-    private static int readTo0(@Nonnull ByteBuffer src, byte @Nonnull [] dst, int off, int len) {
-        if (len == 0) {
-            return 0;
-        }
-        if (!src.hasRemaining()) {
-            return -1;
-        }
-        int actualLen = Math.min(len, src.remaining());
-        src.get(dst, off, actualLen);
-        return actualLen;
+        return IOUnsafe.readTo(src, dst, off, len);
     }
 
     /**

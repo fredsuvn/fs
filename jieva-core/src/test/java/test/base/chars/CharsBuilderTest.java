@@ -2,12 +2,12 @@ package test.base.chars;
 
 import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.base.chars.CharsBuilder;
 import xyz.sunqian.common.base.chars.JieChars;
-import xyz.sunqian.common.io.IORuntimeException;
+import xyz.sunqian.common.base.random.RandomKit;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IOKit;
+import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.test.JieAssert;
 
 import java.io.CharArrayWriter;
@@ -78,7 +78,7 @@ public class CharsBuilderTest {
     }
 
     private void testCharsBuilder(int size) throws Exception {
-        char[] cs = JieRandom.fill(new char[size], '0', '9');
+        char[] cs = RandomKit.fill(new char[size], '0', '9');
         char[] bs = new String(cs).toCharArray();
         CharsBuilder bb = new CharsBuilder();
         bb.close();

@@ -1,7 +1,9 @@
-package xyz.sunqian.common.base;
+package xyz.sunqian.common.base.random;
 
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.math.MathKit;
 import xyz.sunqian.common.collect.JieArray;
 import xyz.sunqian.common.collect.JieCollect;
 
@@ -16,24 +18,25 @@ import java.util.function.Supplier;
  *
  * @author fredsuvn
  */
-public class JieRandom {
+public class RandomKit {
 
     /**
-     * Returns next random boolean value.
+     * Returns the next random boolean value.
      *
-     * @return next random boolean value
+     * @return the next random boolean value
      */
     public static boolean nextBoolean() {
         return random().nextBoolean();
     }
 
     /**
-     * Fills given array with random boolean value and returns.
+     * Fills the given array with random boolean value then returns.
      *
-     * @param array given array
-     * @return given array
+     * @param array the given array
+     * @return the given array
      */
     public static boolean[] fill(boolean[] array) {
+        random();
         for (int i = 0; i < array.length; i++) {
             array[i] = nextBoolean();
         }
@@ -41,9 +44,9 @@ public class JieRandom {
     }
 
     /**
-     * Returns next random value.
+     * Returns the next random byte value.
      *
-     * @return next random value
+     * @return the next random byte value
      */
     public static byte nextByte() {
         return (byte) nextInt();
@@ -377,7 +380,7 @@ public class JieRandom {
 
     private static float nextFloatJdkVer8(float startInclusive, float endExclusive) {
         float f = (float) nextDouble(startInclusive, endExclusive);
-        return JieMath.makeIn(f, startInclusive, endExclusive);
+        return MathKit.makeIn(f, startInclusive, endExclusive);
     }
 
     /**
@@ -485,7 +488,7 @@ public class JieRandom {
         if (JieArray.isEmpty(scores)) {
             throw new IllegalArgumentException("Empty scores!");
         }
-        return new RandomSupplier<>(JieRandom::random, Jie.list(scores));
+        return new RandomSupplier<>(RandomKit::random, Jie.list(scores));
     }
 
     /**
@@ -510,7 +513,7 @@ public class JieRandom {
         if (JieCollect.isEmpty(scores)) {
             throw new IllegalArgumentException("Empty scores!");
         }
-        return new RandomSupplier<>(JieRandom::random, scores);
+        return new RandomSupplier<>(RandomKit::random, scores);
     }
 
     /**

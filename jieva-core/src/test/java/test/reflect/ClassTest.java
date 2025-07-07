@@ -364,15 +364,20 @@ public class ClassTest {
 
     public static class Mod1 {
 
-        public static void m1() {}
+        public static void m1() {
+        }
 
-        public void m2() {}
+        public void m2() {
+        }
 
-        protected void m3() {}
+        protected void m3() {
+        }
 
-        private void m4() {}
+        private void m4() {
+        }
 
-        void m5() {}
+        void m5() {
+        }
     }
 
     public class Mod2 {}

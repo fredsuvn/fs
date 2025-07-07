@@ -1,12 +1,12 @@
 package test.io;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.base.chars.CharsBuilder;
-import xyz.sunqian.common.io.CharIO;
-import xyz.sunqian.common.io.IORuntimeException;
+import xyz.sunqian.common.base.random.RandomKit;
 import xyz.sunqian.common.io.BufferKit;
+import xyz.sunqian.common.io.CharIO;
 import xyz.sunqian.common.io.IOKit;
+import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.test.ErrorAppender;
 import xyz.sunqian.test.ReadOps;
 import xyz.sunqian.test.TestReader;
@@ -84,7 +84,7 @@ public class CharIOTest {
     private void testRead(CharIO reader, int totalSize, int readSize) throws Exception {
         {
             // reader
-            char[] data = JieRandom.fill(new char[totalSize]);
+            char[] data = RandomKit.fill(new char[totalSize]);
             assertEquals(reader.read(new CharArrayReader(data)), data);
             assertEquals(reader.string(new CharArrayReader(data)), new String(data));
             assertEquals(
@@ -259,7 +259,7 @@ public class CharIOTest {
     private void testReadTo(CharIO reader, int totalSize, int readSize) throws Exception {
         {
             // reader to appender
-            char[] data = JieRandom.fill(new char[totalSize]);
+            char[] data = RandomKit.fill(new char[totalSize]);
             CharsBuilder builder = new CharsBuilder();
             assertEquals(
                 reader.readTo(new CharArrayReader(data), builder),
@@ -294,7 +294,7 @@ public class CharIOTest {
         }
         {
             // reader to array
-            char[] data = JieRandom.fill(new char[totalSize]);
+            char[] data = RandomKit.fill(new char[totalSize]);
             char[] dst = new char[data.length];
             assertEquals(
                 reader.readTo(new CharArrayReader(data), dst),
@@ -346,7 +346,7 @@ public class CharIOTest {
         }
         {
             // reader to heap buffer
-            char[] data = JieRandom.fill(new char[totalSize]);
+            char[] data = RandomKit.fill(new char[totalSize]);
             CharBuffer dst = CharBuffer.allocate(data.length);
             assertEquals(
                 reader.readTo(new CharArrayReader(data), dst),
@@ -364,7 +364,7 @@ public class CharIOTest {
         }
         {
             // reader to direct buffer
-            char[] data = JieRandom.fill(new char[totalSize]);
+            char[] data = RandomKit.fill(new char[totalSize]);
             CharBuffer dst = BufferKit.directBuffer(data.length * 2);
             assertEquals(
                 reader.readTo(new CharArrayReader(data), dst),

@@ -1,21 +1,21 @@
-//package test;
+// package test;
 //
-//import org.testng.Assert;
-//import org.testng.annotations.Test;
-//import xyz.sunqian.common.base.chars.JieChars;
-//import xyz.sunqian.common.base.JieMath;
-//import xyz.sunqian.common.file.JieFile;
-//import xyz.sunqian.common.ref.LongVar;
-//import xyz.sunqian.common.file.FileAcc;
-//import xyz.sunqian.common.io.JieIO;
-//import xyz.sunqian.common.io.JieIOException;
+// import org.testng.Assert;
+// import org.testng.annotations.Test;
+// import xyz.sunqian.common.base.chars.JieChars;
+// import xyz.sunqian.common.base.JieMath;
+// import xyz.sunqian.common.file.JieFile;
+// import xyz.sunqian.common.ref.LongVar;
+// import xyz.sunqian.common.file.FileAcc;
+// import xyz.sunqian.common.io.JieIO;
+// import xyz.sunqian.common.io.JieIOException;
 //
-//import java.io.File;
-//import java.io.FileOutputStream;
-//import java.io.IOException;
-//import java.io.InputStream;
+// import java.io.File;
+// import java.io.FileOutputStream;
+// import java.io.IOException;
+// import java.io.InputStream;
 //
-//public class FileTest {
+// public class FileTest {
 //
 //    private static final String GENERATED_TEMP_DIR = "generated/temp/test";
 //

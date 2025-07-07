@@ -1,11 +1,11 @@
 package test.io;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
+import xyz.sunqian.common.base.random.RandomKit;
 import xyz.sunqian.common.io.ByteIO;
-import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.IOKit;
+import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.test.ErrorOutputStream;
 import xyz.sunqian.test.ReadOps;
 import xyz.sunqian.test.TestInputStream;
@@ -89,7 +89,7 @@ public class ByteIOTest {
     private void testRead(ByteIO reader, int totalSize, int readSize) throws Exception {
         {
             // stream
-            byte[] data = JieRandom.fill(new byte[totalSize]);
+            byte[] data = RandomKit.fill(new byte[totalSize]);
             assertEquals(reader.read(new ByteArrayInputStream(data)), data);
             assertEquals(
                 reader.read(new ByteArrayInputStream(data), readSize < 0 ? totalSize : readSize),
@@ -103,7 +103,7 @@ public class ByteIOTest {
         }
         {
             // channel
-            byte[] data = JieRandom.fill(new byte[totalSize]);
+            byte[] data = RandomKit.fill(new byte[totalSize]);
             ByteBuffer dataBuf = ByteBuffer.wrap(data);
             assertEquals(reader.read(Channels.newChannel(new ByteArrayInputStream(data))), dataBuf);
             assertEquals(
@@ -430,7 +430,7 @@ public class ByteIOTest {
     private void testReadTo(ByteIO reader, int totalSize, int readSize) throws Exception {
         {
             // stream to stream
-            byte[] data = JieRandom.fill(new byte[totalSize]);
+            byte[] data = RandomKit.fill(new byte[totalSize]);
             BytesBuilder builder = new BytesBuilder();
             assertEquals(
                 reader.readTo(new ByteArrayInputStream(data), builder),
@@ -465,7 +465,7 @@ public class ByteIOTest {
         }
         {
             // stream to channel
-            byte[] data = JieRandom.fill(new byte[totalSize]);
+            byte[] data = RandomKit.fill(new byte[totalSize]);
             BytesBuilder builder = new BytesBuilder();
             WritableByteChannel channel = Channels.newChannel(builder);
             assertEquals(
@@ -532,7 +532,7 @@ public class ByteIOTest {
         }
         {
             // stream to array
-            byte[] data = JieRandom.fill(new byte[totalSize]);
+            byte[] data = RandomKit.fill(new byte[totalSize]);
             byte[] dst = new byte[data.length];
             assertEquals(
                 reader.readTo(new ByteArrayInputStream(data), dst),
@@ -584,7 +584,7 @@ public class ByteIOTest {
         }
         {
             // stream to heap buffer
-            byte[] data = JieRandom.fill(new byte[totalSize]);
+            byte[] data = RandomKit.fill(new byte[totalSize]);
             ByteBuffer dst = ByteBuffer.allocate(data.length);
             assertEquals(
                 reader.readTo(new ByteArrayInputStream(data), dst),
@@ -602,7 +602,7 @@ public class ByteIOTest {
         }
         {
             // stream to direct buffer
-            byte[] data = JieRandom.fill(new byte[totalSize]);
+            byte[] data = RandomKit.fill(new byte[totalSize]);
             ByteBuffer dst = ByteBuffer.allocateDirect(data.length);
             assertEquals(
                 reader.readTo(new ByteArrayInputStream(data), dst),
@@ -620,7 +620,7 @@ public class ByteIOTest {
         }
         {
             // channel to channel
-            byte[] data = JieRandom.fill(new byte[totalSize]);
+            byte[] data = RandomKit.fill(new byte[totalSize]);
             BytesBuilder builder = new BytesBuilder();
             assertEquals(
                 reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(builder)),
@@ -676,7 +676,7 @@ public class ByteIOTest {
         }
         {
             // channel to stream
-            byte[] data = JieRandom.fill(new byte[totalSize]);
+            byte[] data = RandomKit.fill(new byte[totalSize]);
             BytesBuilder builder = new BytesBuilder();
             assertEquals(
                 reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), builder),
@@ -700,7 +700,7 @@ public class ByteIOTest {
         }
         {
             // channel to array
-            byte[] data = JieRandom.fill(new byte[totalSize]);
+            byte[] data = RandomKit.fill(new byte[totalSize]);
             byte[] dst = new byte[data.length];
             assertEquals(
                 reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst),
@@ -752,7 +752,7 @@ public class ByteIOTest {
         }
         {
             // channel to heap buffer
-            byte[] data = JieRandom.fill(new byte[totalSize]);
+            byte[] data = RandomKit.fill(new byte[totalSize]);
             ByteBuffer dst = ByteBuffer.allocate(data.length);
             assertEquals(
                 reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst),
@@ -770,7 +770,7 @@ public class ByteIOTest {
         }
         {
             // channel to direct buffer
-            byte[] data = JieRandom.fill(new byte[totalSize]);
+            byte[] data = RandomKit.fill(new byte[totalSize]);
             ByteBuffer dst = ByteBuffer.allocateDirect(data.length);
             assertEquals(
                 reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst),

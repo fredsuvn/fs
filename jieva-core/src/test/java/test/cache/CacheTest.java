@@ -2,7 +2,7 @@ package test.cache;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.base.JieRandom;
+import xyz.sunqian.common.base.random.RandomKit;
 import xyz.sunqian.common.base.value.Val;
 import xyz.sunqian.common.cache.SimpleCache;
 
@@ -122,7 +122,7 @@ public class CacheTest {
         for (int i = 0; i < 10; i++) {
             Thread thread = new Thread(() -> {
                 while (flag.get()) {
-                    cache.put(JieRandom.nextInt(), JieRandom.nextInt());
+                    cache.put(RandomKit.nextInt(), RandomKit.nextInt());
                 }
                 latch.countDown();
             });

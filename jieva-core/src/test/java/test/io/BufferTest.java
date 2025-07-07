@@ -1,13 +1,13 @@
 package test.io;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.chars.CharsBuilder;
 import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.base.random.RandomKit;
 import xyz.sunqian.common.collect.JieArray;
-import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.BufferKit;
+import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.test.ErrorAppender;
 import xyz.sunqian.test.ErrorOutputStream;
 import xyz.sunqian.test.MaterialBox;
@@ -44,7 +44,7 @@ public class BufferTest {
     public void testDirect() {
         {
             // direct
-            char[] chars = JieRandom.fill(new char[128]);
+            char[] chars = RandomKit.fill(new char[128]);
             CharBuffer heapBuffer = CharBuffer.wrap(chars);
             CharBuffer directBuffer = BufferKit.directBuffer(chars.length);
             directBuffer.put(chars);
@@ -55,7 +55,7 @@ public class BufferTest {
         }
         {
             // byte
-            byte[] data = JieRandom.fill(new byte[128]);
+            byte[] data = RandomKit.fill(new byte[128]);
             ByteBuffer buffer = BufferKit.directBuffer(data);
             assertEquals(buffer, ByteBuffer.wrap(data));
             assertEquals(buffer.position(), 0);
@@ -71,7 +71,7 @@ public class BufferTest {
         }
         {
             // char
-            char[] data = JieRandom.fill(new char[128]);
+            char[] data = RandomKit.fill(new char[128]);
             CharBuffer buffer = BufferKit.directBuffer(data);
             assertEquals(buffer, CharBuffer.wrap(data));
             assertEquals(buffer.position(), 0);
@@ -91,7 +91,7 @@ public class BufferTest {
     public void testCopy() {
         {
             // byte
-            byte[] data = JieRandom.fill(new byte[128]);
+            byte[] data = RandomKit.fill(new byte[128]);
             ByteBuffer b1 = ByteBuffer.wrap(data, 6, 66);
             b1.get(new byte[5]);
             ByteBuffer b2 = BufferKit.copy(b1);
@@ -109,7 +109,7 @@ public class BufferTest {
         }
         {
             // char
-            char[] data = JieRandom.fill(new char[128]);
+            char[] data = RandomKit.fill(new char[128]);
             CharBuffer b1 = CharBuffer.wrap(data, 6, 66);
             b1.get(new char[5]);
             CharBuffer b2 = BufferKit.copy(b1);
@@ -298,7 +298,7 @@ public class BufferTest {
         int actualLen = Math.min(totalSize, readSize);
         {
             // read all
-            byte[] data = JieRandom.fill(new byte[totalSize]);
+            byte[] data = RandomKit.fill(new byte[totalSize]);
             ByteBuffer src = ByteBuffer.wrap(data);
             byte[] ret = BufferKit.read(src);
             if (totalSize == 0) {
@@ -318,7 +318,7 @@ public class BufferTest {
         }
         {
             // buffer to array
-            byte[] data = JieRandom.fill(new byte[totalSize]);
+            byte[] data = RandomKit.fill(new byte[totalSize]);
             ByteBuffer src = ByteBuffer.wrap(data);
             byte[] dst = new byte[readSize];
             assertEquals(BufferKit.readTo(src, dst), actualReadSize(totalSize, readSize));
@@ -332,7 +332,7 @@ public class BufferTest {
         }
         {
             // buffer to buffer
-            byte[] data = JieRandom.fill(new byte[totalSize]);
+            byte[] data = RandomKit.fill(new byte[totalSize]);
             ByteBuffer src = ByteBuffer.wrap(data);
             byte[] dstData = new byte[readSize];
             ByteBuffer dst = ByteBuffer.wrap(dstData);
@@ -354,7 +354,7 @@ public class BufferTest {
         }
         {
             // buffer to channel
-            byte[] data = JieRandom.fill(new byte[totalSize]);
+            byte[] data = RandomKit.fill(new byte[totalSize]);
             BytesBuilder builder = new BytesBuilder();
             ByteBuffer src = ByteBuffer.wrap(data);
             WritableByteChannel dst = Channels.newChannel(builder);
@@ -381,7 +381,7 @@ public class BufferTest {
         }
         {
             // heap buffer to stream
-            byte[] data = JieRandom.fill(new byte[totalSize]);
+            byte[] data = RandomKit.fill(new byte[totalSize]);
             BytesBuilder builder = new BytesBuilder();
             ByteBuffer src = ByteBuffer.wrap(data);
             assertEquals(BufferKit.readTo(src, builder), totalSize == 0 ? -1 : totalSize);
@@ -395,7 +395,7 @@ public class BufferTest {
         }
         {
             // direct buffer to stream
-            byte[] data = JieRandom.fill(new byte[totalSize]);
+            byte[] data = RandomKit.fill(new byte[totalSize]);
             BytesBuilder builder = new BytesBuilder();
             ByteBuffer src = BufferKit.directBuffer(data);
             assertEquals(BufferKit.readTo(src, builder), totalSize == 0 ? -1 : totalSize);
@@ -439,7 +439,7 @@ public class BufferTest {
         int actualLen = Math.min(totalSize, readSize);
         {
             // read all
-            char[] data = JieRandom.fill(new char[totalSize]);
+            char[] data = RandomKit.fill(new char[totalSize]);
             CharBuffer src = CharBuffer.wrap(data);
             char[] ret = BufferKit.read(src);
             if (totalSize == 0) {
@@ -476,7 +476,7 @@ public class BufferTest {
         }
         {
             // buffer to array
-            char[] data = JieRandom.fill(new char[totalSize]);
+            char[] data = RandomKit.fill(new char[totalSize]);
             CharBuffer src = CharBuffer.wrap(data);
             char[] dst = new char[readSize];
             assertEquals(BufferKit.readTo(src, dst), actualReadSize(totalSize, readSize));
@@ -490,7 +490,7 @@ public class BufferTest {
         }
         {
             // buffer to buffer
-            char[] data = JieRandom.fill(new char[totalSize]);
+            char[] data = RandomKit.fill(new char[totalSize]);
             CharBuffer src = CharBuffer.wrap(data);
             char[] dstData = new char[readSize];
             CharBuffer dst = CharBuffer.wrap(dstData);
@@ -512,7 +512,7 @@ public class BufferTest {
         }
         {
             // heap buffer to appender
-            char[] data = JieRandom.fill(new char[totalSize]);
+            char[] data = RandomKit.fill(new char[totalSize]);
             CharsBuilder builder = new CharsBuilder();
             CharBuffer src = CharBuffer.wrap(data);
             assertEquals(BufferKit.readTo(src, builder), totalSize == 0 ? -1 : totalSize);
@@ -526,7 +526,7 @@ public class BufferTest {
         }
         {
             // direct buffer to appender
-            char[] data = JieRandom.fill(new char[totalSize]);
+            char[] data = RandomKit.fill(new char[totalSize]);
             CharsBuilder builder = new CharsBuilder();
             CharBuffer src = BufferKit.directBuffer(data);
             assertEquals(BufferKit.readTo(src, builder), totalSize == 0 ? -1 : totalSize);

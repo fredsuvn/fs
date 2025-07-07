@@ -2,7 +2,7 @@ package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.JieMath;
+import xyz.sunqian.common.base.math.MathKit;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -358,12 +358,12 @@ final class IOImpls {
             if (n <= 0) {
                 return 0;
             }
-            return raf.skipBytes(JieMath.intValue(n));
+            return raf.skipBytes(MathKit.intValue(n));
         }
 
         @Override
         public int available() throws IOException {
-            return JieMath.intValue(raf.length() - raf.getFilePointer());
+            return MathKit.intValue(raf.length() - raf.getFilePointer());
         }
 
         @Override
@@ -610,7 +610,7 @@ final class IOImpls {
 
         @Override
         public int available() throws IOException {
-            return Math.min(in.available(), JieMath.intValue(limit - pos));
+            return Math.min(in.available(), MathKit.intValue(limit - pos));
         }
 
         @Override

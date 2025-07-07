@@ -1,12 +1,12 @@
 package test.base.bytes;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.bytes.JieBytes;
 import xyz.sunqian.common.base.chars.JieChars;
-import xyz.sunqian.common.io.IORuntimeException;
+import xyz.sunqian.common.base.random.RandomKit;
 import xyz.sunqian.common.io.IOKit;
+import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.test.JieAssert;
 
 import java.io.ByteArrayOutputStream;
@@ -60,7 +60,7 @@ public class BytesBuilderTest {
     }
 
     private void testBytesBuilder(int size) throws Exception {
-        char[] cs = JieRandom.fill(new char[size], '0', '9');
+        char[] cs = RandomKit.fill(new char[size], '0', '9');
         byte[] bs = new String(cs).getBytes();
         BytesBuilder bb = new BytesBuilder();
         bb.close();

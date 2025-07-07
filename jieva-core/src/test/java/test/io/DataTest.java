@@ -1,18 +1,18 @@
-//package test;
+// package test;
 //
-//import org.testng.Assert;
-//import org.testng.annotations.Test;
-//import xyz.sunqian.common.base.chars.JieChars;
-//import xyz.sunqian.common.data.GekData;
-//import xyz.sunqian.common.io.JieIO;
+// import org.testng.Assert;
+// import org.testng.annotations.Test;
+// import xyz.sunqian.common.base.chars.JieChars;
+// import xyz.sunqian.common.data.GekData;
+// import xyz.sunqian.common.io.JieIO;
 //
-//import java.io.ByteArrayInputStream;
-//import java.io.ByteArrayOutputStream;
-//import java.nio.ByteBuffer;
-//import java.util.Arrays;
-//import java.util.function.Supplier;
+// import java.io.ByteArrayInputStream;
+// import java.io.ByteArrayOutputStream;
+// import java.nio.ByteBuffer;
+// import java.util.Arrays;
+// import java.util.function.Supplier;
 //
-//public class DataTest {
+// public class DataTest {
 //
 //    private static final String DATA = TestUtil.buildRandomString(256, 256);
 //

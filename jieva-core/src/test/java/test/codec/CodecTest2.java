@@ -1,27 +1,27 @@
-//package test;
+// package test;
 //
-//import org.bouncycastle.jce.provider.BouncyCastleProvider;
-//import org.testng.Assert;
-//import org.testng.annotations.Test;
-//import xyz.fslabo.annotations.Nullable;
-//import xyz.sunqian.common.base.JieString;
-//import xyz.sunqian.common.data.CipherCodec;
-//import xyz.sunqian.common.data.CodecConfigurator;
-//import xyz.sunqian.common.data.JieCodec;
-//import xyz.sunqian.common.io.JieIO;
+// import org.bouncycastle.jce.provider.BouncyCastleProvider;
+// import org.testng.Assert;
+// import org.testng.annotations.Test;
+// import xyz.fslabo.annotations.Nullable;
+// import xyz.sunqian.common.base.JieString;
+// import xyz.sunqian.common.data.CipherCodec;
+// import xyz.sunqian.common.data.CodecConfigurator;
+// import xyz.sunqian.common.data.JieCodec;
+// import xyz.sunqian.common.io.JieIO;
 //
-//import javax.crypto.Cipher;
-//import javax.crypto.KeyGenerator;
-//import javax.crypto.Mac;
-//import javax.crypto.SecretKey;
-//import java.io.ByteArrayInputStream;
-//import java.io.ByteArrayOutputStream;
-//import java.nio.ByteBuffer;
-//import java.nio.charset.StandardCharsets;
-//import java.security.*;
-//import java.util.Arrays;
+// import javax.crypto.Cipher;
+// import javax.crypto.KeyGenerator;
+// import javax.crypto.Mac;
+// import javax.crypto.SecretKey;
+// import java.io.ByteArrayInputStream;
+// import java.io.ByteArrayOutputStream;
+// import java.nio.ByteBuffer;
+// import java.nio.charset.StandardCharsets;
+// import java.security.*;
+// import java.util.Arrays;
 //
-//public class CodecTest {
+// public class CodecTest {
 //
 //    private static final Provider BC = new BouncyCastleProvider();
 //

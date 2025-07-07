@@ -2,10 +2,10 @@ package test.io;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.JieRandom;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.chars.CharsBuilder;
 import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.base.random.RandomKit;
 import xyz.sunqian.common.base.value.IntVar;
 import xyz.sunqian.common.io.DoReadReader;
 import xyz.sunqian.common.io.DoReadStream;
@@ -79,9 +79,9 @@ public class IOImplsTest {
     private void testInputStream(int dataSize) throws Exception {
         {
             // bytes
-            byte[] data = JieRandom.fill(new byte[dataSize]);
+            byte[] data = RandomKit.fill(new byte[dataSize]);
             testInputStream(IOKit.newInputStream(data), data, true, false, false);
-            data = JieRandom.fill(new byte[dataSize + 12]);
+            data = RandomKit.fill(new byte[dataSize + 12]);
             testInputStream(
                 IOKit.newInputStream(data, 6, dataSize),
                 Arrays.copyOfRange(data, 6, data.length - 6),
@@ -90,14 +90,14 @@ public class IOImplsTest {
         }
         {
             // buffer
-            byte[] data = JieRandom.fill(new byte[dataSize]);
+            byte[] data = RandomKit.fill(new byte[dataSize]);
             ByteBuffer buffer = ByteBuffer.wrap(data);
             InputStream bufferIn = IOKit.newInputStream(buffer);
             testInputStream(bufferIn, data, true, false, false);
         }
         {
             // file
-            byte[] data = JieRandom.fill(new byte[dataSize + 6]);
+            byte[] data = RandomKit.fill(new byte[dataSize + 6]);
             RandomAccessFile raf = new FakeFile(data);
             InputStream rafIn = IOKit.newInputStream(raf, 6);
             testInputStream(rafIn, Arrays.copyOfRange(data, 6, data.length), true, true, false);
@@ -106,13 +106,13 @@ public class IOImplsTest {
         }
         {
             // chars
-            char[] chars = JieRandom.fill(new char[dataSize], '0', '9');
+            char[] chars = RandomKit.fill(new char[dataSize], '0', '9');
             byte[] charBytes = new String(chars).getBytes(JieChars.UTF_8);
             InputStream charsIn = IOKit.newInputStream(new CharArrayReader(chars));
             testInputStream(charsIn, charBytes, false, false, false);
             expectThrows(IOException.class, charsIn::read);
             // chinese: '\u4e00' - '\u9fff'
-            chars = JieRandom.fill(new char[dataSize], '\u4e00', '\u4e01');
+            chars = RandomKit.fill(new char[dataSize], '\u4e00', '\u4e01');
             charBytes = new String(chars).getBytes(JieChars.UTF_8);
             charsIn = IOKit.newInputStream(new CharArrayReader(chars));
             testInputStream(charsIn, charBytes, false, false, false);
@@ -132,7 +132,7 @@ public class IOImplsTest {
         }
         {
             // limited
-            byte[] data = JieRandom.fill(new byte[dataSize]);
+            byte[] data = RandomKit.fill(new byte[dataSize]);
             testInputStream(
                 IOKit.limitedInputStream(IOKit.newInputStream(data), data.length), data,
                 true, false, false
@@ -353,9 +353,9 @@ public class IOImplsTest {
     private void testReader(int dataSize) throws Exception {
         {
             // chars
-            char[] data = JieRandom.fill(new char[dataSize]);
+            char[] data = RandomKit.fill(new char[dataSize]);
             testReader(IOKit.newReader(data), data, true, false, false);
-            data = JieRandom.fill(new char[dataSize + 12]);
+            data = RandomKit.fill(new char[dataSize + 12]);
             testReader(
                 IOKit.newReader(data, 6, dataSize),
                 Arrays.copyOfRange(data, 6, data.length - 6),
@@ -364,9 +364,9 @@ public class IOImplsTest {
         }
         {
             // string
-            char[] data = JieRandom.fill(new char[dataSize]);
+            char[] data = RandomKit.fill(new char[dataSize]);
             testReader(IOKit.newReader(new String(data)), data, true, false, false);
-            data = JieRandom.fill(new char[dataSize + 12]);
+            data = RandomKit.fill(new char[dataSize + 12]);
             testReader(
                 IOKit.newReader(new String(data), 6, data.length - 6),
                 Arrays.copyOfRange(data, 6, data.length - 6),
@@ -375,20 +375,20 @@ public class IOImplsTest {
         }
         {
             // buffer
-            char[] data = JieRandom.fill(new char[dataSize]);
+            char[] data = RandomKit.fill(new char[dataSize]);
             CharBuffer buffer = CharBuffer.wrap(data);
             Reader bufferIn = IOKit.newReader(buffer);
             testReader(bufferIn, data, true, false, false);
         }
         {
             // bytes
-            char[] chars = JieRandom.fill(new char[dataSize], '0', '9');
+            char[] chars = RandomKit.fill(new char[dataSize], '0', '9');
             byte[] charBytes = new String(chars).getBytes(JieChars.UTF_8);
             Reader charsIn = IOKit.newReader(IOKit.newInputStream(charBytes));
             testReader(charsIn, chars, false, false, false);
             expectThrows(IOException.class, charsIn::read);
             // chinese: '\u4e00' - '\u9fff'
-            chars = JieRandom.fill(new char[dataSize], '\u4e00', '\u4e01');
+            chars = RandomKit.fill(new char[dataSize], '\u4e00', '\u4e01');
             charBytes = new String(chars).getBytes(JieChars.UTF_8);
             charsIn = IOKit.newReader(IOKit.newInputStream(charBytes));
             testReader(charsIn, chars, false, false, false);
@@ -406,7 +406,7 @@ public class IOImplsTest {
             charsIn = IOKit.newReader(IOKit.newInputStream(charBytes), new ErrorCharset());
             expectThrows(IOException.class, charsIn::read);
             // 1 byte -> 3 char
-            byte[] fakeBytes = JieRandom.fill(new byte[dataSize]);
+            byte[] fakeBytes = RandomKit.fill(new byte[dataSize]);
             char[] fakeChars = new char[fakeBytes.length * 3];
             for (int i = 0; i < fakeBytes.length; i++) {
                 fakeChars[i * 3] = (char) fakeBytes[i];
@@ -419,7 +419,7 @@ public class IOImplsTest {
         }
         {
             // limited
-            char[] data = JieRandom.fill(new char[dataSize]);
+            char[] data = RandomKit.fill(new char[dataSize]);
             testReader(
                 IOKit.limitedReader(IOKit.newReader(data), data.length), data,
                 true, false, false
@@ -659,7 +659,7 @@ public class IOImplsTest {
     private void testOutputStream(int dataSize) throws Exception {
         {
             // bytes
-            byte[] data = JieRandom.fill(new byte[dataSize]);
+            byte[] data = RandomKit.fill(new byte[dataSize]);
             byte[] dst = new byte[data.length];
             OutputStream out = IOKit.newOutputStream(dst);
             testOutputStream(out, data, true, false);
@@ -671,7 +671,7 @@ public class IOImplsTest {
         }
         {
             // buffer
-            byte[] data = JieRandom.fill(new byte[dataSize]);
+            byte[] data = RandomKit.fill(new byte[dataSize]);
             ByteBuffer dst = ByteBuffer.allocate(data.length);
             OutputStream out = IOKit.newOutputStream(dst);
             testOutputStream(out, data, true, false);
@@ -679,7 +679,7 @@ public class IOImplsTest {
         }
         {
             // file
-            byte[] data = JieRandom.fill(new byte[dataSize]);
+            byte[] data = RandomKit.fill(new byte[dataSize]);
             BytesBuilder builder = new BytesBuilder();
             RandomAccessFile raf = new FakeFile(builder);
             OutputStream out = IOKit.newOutputStream(raf, 6);
@@ -689,14 +689,14 @@ public class IOImplsTest {
         {
             // chars
             CharsBuilder builder = new CharsBuilder();
-            char[] chars = JieRandom.fill(new char[dataSize], '0', '9');
+            char[] chars = RandomKit.fill(new char[dataSize], '0', '9');
             byte[] charBytes = new String(chars).getBytes(JieChars.UTF_8);
             OutputStream out = IOKit.newOutputStream(builder);
             testOutputStream(out, charBytes, false, true);
             assertEquals(builder.toCharArray(), chars);
             // chinese: '\u4e00' - '\u9fff'
             builder.reset();
-            chars = JieRandom.fill(new char[dataSize], '\u4e00', '\u4e01');
+            chars = RandomKit.fill(new char[dataSize], '\u4e00', '\u4e01');
             charBytes = new String(chars).getBytes(JieChars.UTF_8);
             out = IOKit.newOutputStream(builder);
             testOutputStream(out, charBytes, false, true);
@@ -713,7 +713,7 @@ public class IOImplsTest {
             assertEquals(builder.toCharArray(), chars);
             // fake charset
             builder.reset();
-            byte[] fakeBytes = JieRandom.fill(new byte[dataSize]);
+            byte[] fakeBytes = RandomKit.fill(new byte[dataSize]);
             char[] fakeChars = new char[fakeBytes.length * 2];
             for (int i = 0; i < fakeBytes.length; i++) {
                 fakeChars[i * 2] = (char) fakeBytes[i];
@@ -729,7 +729,7 @@ public class IOImplsTest {
         }
         {
             // limited
-            byte[] data = JieRandom.fill(new byte[dataSize]);
+            byte[] data = RandomKit.fill(new byte[dataSize]);
             BytesBuilder builder = new BytesBuilder();
             testOutputStream(
                 IOKit.limitedOutputStream(builder, data.length),
@@ -816,7 +816,7 @@ public class IOImplsTest {
     private void testWriter(int dataSize) throws Exception {
         {
             // chars
-            char[] data = JieRandom.fill(new char[dataSize]);
+            char[] data = RandomKit.fill(new char[dataSize]);
             char[] dst = new char[data.length];
             Writer out = IOKit.newWriter(dst);
             testWriter(out, data, true, false);
@@ -828,7 +828,7 @@ public class IOImplsTest {
         }
         {
             // buffer
-            char[] data = JieRandom.fill(new char[dataSize]);
+            char[] data = RandomKit.fill(new char[dataSize]);
             CharBuffer dst = CharBuffer.allocate(data.length);
             Writer out = IOKit.newWriter(dst);
             testWriter(out, data, true, false);
@@ -837,14 +837,14 @@ public class IOImplsTest {
         {
             // bytes
             BytesBuilder builder = new BytesBuilder();
-            char[] chars = JieRandom.fill(new char[dataSize], '0', '9');
+            char[] chars = RandomKit.fill(new char[dataSize], '0', '9');
             byte[] charBytes = new String(chars).getBytes(JieChars.UTF_8);
             Writer out = IOKit.newWriter(builder);
             testWriter(out, chars, false, true);
             assertEquals(builder.toByteArray(), charBytes);
             // chinese: '\u4e00' - '\u9fff'
             builder.reset();
-            chars = JieRandom.fill(new char[dataSize], '\u4e00', '\u4e01');
+            chars = RandomKit.fill(new char[dataSize], '\u4e00', '\u4e01');
             charBytes = new String(chars).getBytes(JieChars.UTF_8);
             out = IOKit.newWriter(builder);
             testWriter(out, chars, false, true);
@@ -866,7 +866,7 @@ public class IOImplsTest {
         }
         {
             // limited
-            char[] data = JieRandom.fill(new char[dataSize]);
+            char[] data = RandomKit.fill(new char[dataSize]);
             CharsBuilder builder = new CharsBuilder();
             testWriter(
                 IOKit.limitedWriter(builder, data.length),

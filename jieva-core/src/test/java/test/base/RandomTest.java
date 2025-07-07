@@ -3,7 +3,7 @@ package test.base;
 import org.testng.annotations.Test;
 import test.Log;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.base.JieRandom;
+import xyz.sunqian.common.base.random.RandomKit;
 import xyz.sunqian.common.collect.JieArray;
 import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.invoke.InvocationException;
@@ -29,110 +29,110 @@ public class RandomTest {
         final int endExclusive = 66;
 
         // boolean
-        Log.log(JieRandom.nextBoolean());
-        boolean[] bools = JieRandom.fill(new boolean[size]);
+        Log.log(RandomKit.nextBoolean());
+        boolean[] bools = RandomKit.fill(new boolean[size]);
         Log.log(JieArray.asList(bools));
 
         // byte
-        Log.log(JieRandom.nextByte());
-        byte br = JieRandom.nextByte(startInclusive, endExclusive);
+        Log.log(RandomKit.nextByte());
+        byte br = RandomKit.nextByte(startInclusive, endExclusive);
         assertTrue(br >= startInclusive && br < endExclusive);
-        br = JieRandom.nextByte((byte) startInclusive, (byte) endExclusive);
+        br = RandomKit.nextByte((byte) startInclusive, (byte) endExclusive);
         assertTrue(br >= startInclusive && br < endExclusive);
-        byte[] ib = JieRandom.fill(new byte[size]);
+        byte[] ib = RandomKit.fill(new byte[size]);
         Log.log(JieArray.asList(ib));
-        ib = JieRandom.fill(new byte[size], startInclusive, endExclusive);
+        ib = RandomKit.fill(new byte[size], startInclusive, endExclusive);
         Log.log(JieArray.asList(ib));
         for (int i : ib) {
             assertTrue(i >= startInclusive && i < endExclusive);
         }
-        ib = JieRandom.fill(new byte[size], (byte) startInclusive, (byte) endExclusive);
+        ib = RandomKit.fill(new byte[size], (byte) startInclusive, (byte) endExclusive);
         Log.log(JieArray.asList(ib));
         for (int i : ib) {
             assertTrue(i >= startInclusive && i < endExclusive);
         }
 
         // short
-        Log.log(JieRandom.nextShort());
-        short sr = JieRandom.nextShort(startInclusive, endExclusive);
+        Log.log(RandomKit.nextShort());
+        short sr = RandomKit.nextShort(startInclusive, endExclusive);
         assertTrue(sr >= startInclusive && sr < endExclusive);
-        sr = JieRandom.nextShort((short) startInclusive, (short) endExclusive);
+        sr = RandomKit.nextShort((short) startInclusive, (short) endExclusive);
         assertTrue(sr >= startInclusive && sr < endExclusive);
-        short[] sa = JieRandom.fill(new short[size]);
+        short[] sa = RandomKit.fill(new short[size]);
         Log.log(JieArray.asList(sa));
-        sa = JieRandom.fill(new short[size], startInclusive, endExclusive);
+        sa = RandomKit.fill(new short[size], startInclusive, endExclusive);
         Log.log(JieArray.asList(sa));
         for (int i : sa) {
             assertTrue(i >= startInclusive && i < endExclusive);
         }
-        sa = JieRandom.fill(new short[size], (short) startInclusive, (short) endExclusive);
+        sa = RandomKit.fill(new short[size], (short) startInclusive, (short) endExclusive);
         Log.log(JieArray.asList(sa));
         for (int i : sa) {
             assertTrue(i >= startInclusive && i < endExclusive);
         }
 
         // char
-        Log.log(JieRandom.nextChar());
-        char cr = JieRandom.nextChar(startInclusive, endExclusive);
+        Log.log(RandomKit.nextChar());
+        char cr = RandomKit.nextChar(startInclusive, endExclusive);
         assertTrue(cr >= startInclusive && cr < endExclusive);
-        cr = JieRandom.nextChar((char) startInclusive, (char) endExclusive);
+        cr = RandomKit.nextChar((char) startInclusive, (char) endExclusive);
         assertTrue(cr >= startInclusive && cr < endExclusive);
-        char[] ca = JieRandom.fill(new char[size]);
+        char[] ca = RandomKit.fill(new char[size]);
         Log.log(JieArray.asList(ca));
-        ca = JieRandom.fill(new char[size], startInclusive, endExclusive);
+        ca = RandomKit.fill(new char[size], startInclusive, endExclusive);
         Log.log(JieArray.asList(ca));
         for (int i : ca) {
             assertTrue(i >= startInclusive && i < endExclusive);
         }
-        ca = JieRandom.fill(new char[size], (char) startInclusive, (char) endExclusive);
+        ca = RandomKit.fill(new char[size], (char) startInclusive, (char) endExclusive);
         Log.log(JieArray.asList(ca));
         for (int i : ca) {
             assertTrue(i >= startInclusive && i < endExclusive);
         }
 
         // int
-        Log.log(JieRandom.nextInt());
-        int ir = JieRandom.nextInt(startInclusive, endExclusive);
+        Log.log(RandomKit.nextInt());
+        int ir = RandomKit.nextInt(startInclusive, endExclusive);
         assertTrue(ir >= startInclusive && ir < endExclusive);
-        int[] ia = JieRandom.fill(new int[size]);
+        int[] ia = RandomKit.fill(new int[size]);
         Log.log(JieArray.asList(ia));
-        ia = JieRandom.fill(new int[size], startInclusive, endExclusive);
+        ia = RandomKit.fill(new int[size], startInclusive, endExclusive);
         Log.log(JieArray.asList(ia));
         for (int i : ia) {
             assertTrue(i >= startInclusive && i < endExclusive);
         }
 
         // long
-        Log.log(JieRandom.nextLong());
-        long lr = JieRandom.nextLong(startInclusive, endExclusive);
+        Log.log(RandomKit.nextLong());
+        long lr = RandomKit.nextLong(startInclusive, endExclusive);
         assertTrue(lr >= startInclusive && lr < endExclusive);
-        long[] la = JieRandom.fill(new long[size]);
+        long[] la = RandomKit.fill(new long[size]);
         Log.log(JieArray.asList(la));
-        la = JieRandom.fill(new long[size], startInclusive, endExclusive);
+        la = RandomKit.fill(new long[size], startInclusive, endExclusive);
         Log.log(JieArray.asList(la));
         for (long i : la) {
             assertTrue(i >= startInclusive && i < endExclusive);
         }
 
         // float
-        Log.log(JieRandom.nextFloat());
-        float fr = JieRandom.nextFloat(startInclusive, endExclusive);
+        Log.log(RandomKit.nextFloat());
+        float fr = RandomKit.nextFloat(startInclusive, endExclusive);
         assertTrue(fr >= startInclusive && fr < endExclusive);
-        float[] fa = JieRandom.fill(new float[size]);
+        float[] fa = RandomKit.fill(new float[size]);
         Log.log(JieArray.asList(fa));
-        fa = JieRandom.fill(new float[size], startInclusive, endExclusive);
+        fa = RandomKit.fill(new float[size], startInclusive, endExclusive);
         Log.log(JieArray.asList(fa));
         for (float i : fa) {
             assertTrue(i >= startInclusive && i < endExclusive);
         }
 
         // double
-        Log.log(JieRandom.nextDouble());
-        double dr = JieRandom.nextDouble(startInclusive, endExclusive);
+        Log.log(RandomKit.nextDouble());
+        double dr = RandomKit.nextDouble(startInclusive, endExclusive);
         assertTrue(dr >= startInclusive && dr < endExclusive);
-        double[] da = JieRandom.fill(new double[size]);
+        double[] da = RandomKit.fill(new double[size]);
         Log.log(JieArray.asList(da));
-        da = JieRandom.fill(new double[size], startInclusive, endExclusive);
+        da = RandomKit.fill(new double[size], startInclusive, endExclusive);
         Log.log(JieArray.asList(da));
         for (double i : da) {
             assertTrue(i >= startInclusive && i < endExclusive);
@@ -141,37 +141,37 @@ public class RandomTest {
 
     @Test
     public void testSupplier() throws Exception {
-        Supplier<Integer> s1 = JieRandom.supplier(
-            JieRandom.score(20, 1),
-            JieRandom.score(30, 2),
-            JieRandom.score(30, 3),
-            JieRandom.score(30, 4),
-            JieRandom.score(30, 5),
-            JieRandom.score(30, 6),
-            JieRandom.score(30, 7),
-            JieRandom.score(30, 8),
-            JieRandom.score(30, 9),
-            JieRandom.score(50, () -> 10)
+        Supplier<Integer> s1 = RandomKit.supplier(
+            RandomKit.score(20, 1),
+            RandomKit.score(30, 2),
+            RandomKit.score(30, 3),
+            RandomKit.score(30, 4),
+            RandomKit.score(30, 5),
+            RandomKit.score(30, 6),
+            RandomKit.score(30, 7),
+            RandomKit.score(30, 8),
+            RandomKit.score(30, 9),
+            RandomKit.score(50, () -> 10)
         );
         testSupplier(s1);
-        Supplier<Integer> s2 = JieRandom.supplier(Jie.list(
-            JieRandom.score(20, 2),
-            JieRandom.score(30, 3),
-            JieRandom.score(50, () -> 5)
+        Supplier<Integer> s2 = RandomKit.supplier(Jie.list(
+            RandomKit.score(20, 2),
+            RandomKit.score(30, 3),
+            RandomKit.score(50, () -> 5)
         ));
         testSupplier(s2);
-        Supplier<Integer> s3 = JieRandom.supplier(new Random(),
-            JieRandom.score(20, 2)
+        Supplier<Integer> s3 = RandomKit.supplier(new Random(),
+            RandomKit.score(20, 2)
         );
         testSupplier(s3);
-        Supplier<Integer> s4 = JieRandom.supplier(new Random(), Jie.list(
-            JieRandom.score(20, 2)
+        Supplier<Integer> s4 = RandomKit.supplier(new Random(), Jie.list(
+            RandomKit.score(20, 2)
         ));
         testSupplier(s4);
-        expectThrows(IllegalArgumentException.class, () -> JieRandom.supplier());
-        expectThrows(IllegalArgumentException.class, () -> JieRandom.supplier(Jie.list()));
-        expectThrows(IllegalArgumentException.class, () -> JieRandom.supplier(new Random()));
-        expectThrows(IllegalArgumentException.class, () -> JieRandom.supplier(new Random(), Jie.list()));
+        expectThrows(IllegalArgumentException.class, () -> RandomKit.supplier());
+        expectThrows(IllegalArgumentException.class, () -> RandomKit.supplier(Jie.list()));
+        expectThrows(IllegalArgumentException.class, () -> RandomKit.supplier(new Random()));
+        expectThrows(IllegalArgumentException.class, () -> RandomKit.supplier(new Random(), Jie.list()));
 
         // test unreadable
         Method binarySearch = s1.getClass().getDeclaredMethod("binarySearch", int.class);

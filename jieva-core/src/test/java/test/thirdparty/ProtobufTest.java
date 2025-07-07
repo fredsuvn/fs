@@ -1,26 +1,26 @@
-//package test;
+// package test;
 //
-//import com.google.protobuf.ByteString;
-//import lombok.EqualsAndHashCode;
-//import org.testng.Assert;
-//import org.testng.annotations.Test;
-//import test.protobuf.Data;
-//import test.protobuf.Enum;
-//import test.protobuf.Request;
-//import xyz.sunqian.common.base.Jie;
-//import xyz.sunqian.common.bean.BeanInfo;
-//import xyz.sunqian.common.bean.BeanResolver;
-//import xyz.sunqian.common.bean.PropertyInfo;
-//import xyz.sunqian.common.data.protobuf.JieProtobuf;
-//import xyz.sunqian.common.mapping.Mapper;
-//import xyz.sunqian.common.reflect.TypeRef;
+// import com.google.protobuf.ByteString;
+// import lombok.EqualsAndHashCode;
+// import org.testng.Assert;
+// import org.testng.annotations.Test;
+// import test.protobuf.Data;
+// import test.protobuf.Enum;
+// import test.protobuf.Request;
+// import xyz.sunqian.common.base.Jie;
+// import xyz.sunqian.common.bean.BeanInfo;
+// import xyz.sunqian.common.bean.BeanResolver;
+// import xyz.sunqian.common.bean.PropertyInfo;
+// import xyz.sunqian.common.data.protobuf.JieProtobuf;
+// import xyz.sunqian.common.mapping.Mapper;
+// import xyz.sunqian.common.reflect.TypeRef;
 //
-//import java.nio.ByteBuffer;
-//import java.util.Arrays;
-//import java.util.List;
-//import java.util.Map;
+// import java.nio.ByteBuffer;
+// import java.util.Arrays;
+// import java.util.List;
+// import java.util.Map;
 //
-//public class ProtobufTest {
+// public class ProtobufTest {
 //
 //    @Test
 //    public void testBean() {

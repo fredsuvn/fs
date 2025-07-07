@@ -1,37 +1,76 @@
 package test.base;
 
 import org.testng.annotations.Test;
-import test.Log;
-import xyz.sunqian.common.base.JieMath;
+import xyz.sunqian.common.base.math.MathKit;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotEquals;
-import static org.testng.Assert.assertTrue;
 
 public class MathTest {
 
     @Test
-    public void testMakeIn() {
-        float f = 6.6f;
-        assertEquals(JieMath.makeIn(f, 6.5f, 6.8f), 6.6f);
-        float fd = JieMath.makeIn(f, 6.5f, 6.6f);
-        assertNotEquals(fd, f);
-        assertTrue(fd < f);
-        Log.log(fd);
-        fd = JieMath.makeIn(f, 6.6f, 6.7f);
-        assertEquals(fd, f);
-        fd = JieMath.makeIn(f, 6.7f, 6.8f);
-        assertEquals(fd, 6.7f);
+    public void testMaxMin() {
+        assertEquals(MathKit.max(1, 2, 3), 3);
+        assertEquals(MathKit.max(1, 2, 2), 2);
+        assertEquals(MathKit.max(1L, 2L, 3L), 3L);
+        assertEquals(MathKit.max(1L, 2L, 2L), 2L);
+        assertEquals(MathKit.min(1, 2, 3), 1);
+        assertEquals(MathKit.min(2, 2, 3), 2);
+        assertEquals(MathKit.min(1L, 2L, 3L), 1L);
+        assertEquals(MathKit.min(2L, 2L, 3L), 2L);
+    }
 
-        double d = 6.6;
-        assertEquals(JieMath.makeIn(d, 6.5, 6.8), 6.6);
-        double dd = JieMath.makeIn(d, 6.5, 6.6);
-        assertNotEquals(dd, d);
-        assertTrue(dd < d);
-        Log.log(dd);
-        dd = JieMath.makeIn(d, 6.6, 6.7);
-        assertEquals(dd, d);
-        dd = JieMath.makeIn(d, 6.7, 6.8);
-        assertEquals(dd, 6.7);
+    @Test
+    public void testIntValue() {
+        assertEquals(MathKit.intValue(0), 0);
+        assertEquals(MathKit.intValue(1), 1);
+        assertEquals(MathKit.intValue(-1), -1);
+        assertEquals(MathKit.intValue(Integer.MAX_VALUE), Integer.MAX_VALUE);
+        assertEquals(MathKit.intValue(Integer.MIN_VALUE), Integer.MIN_VALUE);
+        assertEquals(MathKit.intValue(Integer.MAX_VALUE + 1L), Integer.MAX_VALUE);
+        assertEquals(MathKit.intValue(Integer.MIN_VALUE - 1L), Integer.MIN_VALUE);
+    }
+
+    @Test
+    public void testPortionNum() {
+        // int
+        assertEquals(MathKit.portionNum(4, 2), 2);
+        assertEquals(MathKit.portionNum(5, 2), 3);
+        assertEquals(MathKit.portionNum(6, 2), 3);
+        assertEquals(MathKit.portionNum(7, 2), 4);
+        assertEquals(MathKit.portionNum(7, 3), 3);
+        assertEquals(MathKit.portionNum(100, 1), 100);
+        assertEquals(MathKit.portionNum(100, 7), 15);
+        // long
+        assertEquals(MathKit.portionNum(4L, 2L), 2L);
+        assertEquals(MathKit.portionNum(5L, 2L), 3L);
+        assertEquals(MathKit.portionNum(6L, 2L), 3L);
+        assertEquals(MathKit.portionNum(7L, 2L), 4L);
+        assertEquals(MathKit.portionNum(7L, 3L), 3L);
+        assertEquals(MathKit.portionNum(100L, 1L), 100L);
+        assertEquals(MathKit.portionNum(100L, 7L), 15L);
+    }
+
+    @Test
+    public void testMakeIn() {
+        {
+            // float
+            assertEquals(MathKit.makeIn(6.6f, 6.5f, 6.8f), 6.6f);
+            assertEquals(MathKit.makeIn(6.6f, 6.6f, 6.8f), 6.6f);
+            assertEquals(MathKit.makeIn(6.6f, 6.7f, 6.8f), 6.7f);
+            assertEquals(MathKit.makeIn(6.8f, 6.7f, 6.8f), Math.nextDown(6.8f));
+            float x = 6.8f;
+            float start = Math.nextDown(x);
+            assertEquals(MathKit.makeIn(x, start, x), start);
+        }
+        {
+            // double
+            assertEquals(MathKit.makeIn(6.6, 6.5, 6.8), 6.6);
+            assertEquals(MathKit.makeIn(6.6, 6.6, 6.8), 6.6);
+            assertEquals(MathKit.makeIn(6.6, 6.7, 6.8), 6.7);
+            assertEquals(MathKit.makeIn(6.8, 6.7, 6.8), Math.nextDown(6.8));
+            float x = 6.8f;
+            float start = Math.nextDown(x);
+            assertEquals(MathKit.makeIn(x, start, x), start);
+        }
     }
 }

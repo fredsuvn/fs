@@ -10,9 +10,11 @@ public class InnerClassTest {
     public void testConstructor() throws Exception {
         class X {
 
-            X() {}
+            X() {
+            }
 
-            X(String a) {}
+            X(String a) {
+            }
         }
 
         Constructor<?> c1 = X.class.getDeclaredConstructor();
