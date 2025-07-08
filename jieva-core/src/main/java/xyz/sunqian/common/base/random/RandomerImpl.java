@@ -296,4 +296,19 @@ final class RandomerImpl implements Randomer {
         }
         return array;
     }
+
+    @Override
+    public double getAsDouble() {
+        return nextDouble();
+    }
+
+    @Override
+    public int getAsInt() {
+        return nextInt();
+    }
+
+    @Override
+    public long getAsLong() {
+        return nextLong();
+    }
 }
