@@ -9,18 +9,18 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.DoubleSupplier;
 import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
-import java.util.function.Supplier;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 /**
- * Random Number Generator, the base interface to produce random numbers. It is also a {@link IntSupplier},
- * {@link LongSupplier} and {@link DoubleSupplier}, to supply random {@code int}, {@code long} and {@code double}.
+ * The Random Number Generator, base interface to produce random numbers. It extends the {@link IntSupplier},
+ * {@link LongSupplier} and {@link DoubleSupplier}, to supply random {@code int}, {@code long} and {@code double}. And,
+ * it is also extends the {@link Rog.ScoreGenerator} (as if by {@link #nextLong(long, long)}).
  *
  * @author sunqian
  */
-public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
+public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier, Rog.ScoreGenerator {
 
     /**
      * Returns the default implementation based on the {@link ThreadLocalRandom}, and it is thread-safe.
@@ -622,153 +622,8 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
         return nextDouble();
     }
 
-    /**
-     * Returns a {@link Supplier} which produces the random objects, the usage example:
-     * <pre>{@code
-     * Supplier<String> strSupplier = RandomKit.supplier(
-     *     RandomKit.probability(20, () -> "a"), // 20% hit probability
-     *     RandomKit.probability(80, () -> "b"), // 80% hit probability
-     * );
-     * }</pre>
-     * <p>
-     * Each provided {@link Probability}, which has a score and a supplier, represents the hit probability for its
-     * supplier. Let the {@code sum(score)} be the total score of all provided {@link Probability}s, the hit probability
-     * for each {@link Probability} is {@code score / sum(score)}.
-     * <p>
-     * The {@code rd} is a {@link LongSupplier} which produces a random long value, the long value is used to calculate
-     * the hit probability.
-     * <p>
-     * Note:
-     * <ul>
-     *     <li>
-     *         the score of a {@link Probability} can be negative, but it will be converted to positive value before
-     *         calculating;
-     *     </li>
-     *     <li>
-     *         the total score of all provided {@link Probability}s can not overflow the maximum value of {@code long};
-     *     </li>
-     * </ul>
-     *
-     * @param probabilities the provided {@link Probability}s
-     * @param <T>           the type of the random objects
-     * @return a {@link Supplier} which produces the random objects
-     */
-    default <T> @Nonnull Supplier<T> supplier(
-        @Nonnull Probability<? extends T> @Nonnull ... probabilities
-    ) {
-        return supplier(this, probabilities);
-    }
-
-    /**
-     * Returns a {@link Supplier} which produces the random objects, the usage example:
-     * <pre>{@code
-     * Supplier<String> strSupplier = RandomKit.supplier(
-     *     rd,
-     *     RandomKit.probability(20, () -> "a"), // 20% hit probability
-     *     RandomKit.probability(80, () -> "b"), // 80% hit probability
-     * );
-     * }</pre>
-     * <p>
-     * Each provided {@link Probability}, which has a score and a supplier, represents the hit probability for its
-     * supplier. Let the {@code sum(score)} be the total score of all provided {@link Probability}s, the hit probability
-     * for each {@link Probability} is {@code score / sum(score)}.
-     * <p>
-     * The {@code rd} is a {@link LongSupplier} which produces a random long value, the long value is used to calculate
-     * the hit probability.
-     * <p>
-     * Note:
-     * <ul>
-     *     <li>
-     *         the score of a {@link Probability} can be negative, but it will be converted to positive value before
-     *         calculating;
-     *     </li>
-     *     <li>
-     *         the total score of all provided {@link Probability}s can not overflow the maximum value of {@code long};
-     *     </li>
-     * </ul>
-     *
-     * @param rd            a {@link LongSupplier} which produces a random long value
-     * @param probabilities the provided {@link Probability}s
-     * @param <T>           the type of the random objects
-     * @return a {@link Supplier} which produces the random objects
-     */
-    default <T> @Nonnull Supplier<T> supplier(
-        @Nonnull LongSupplier rd,
-        @Nonnull Probability<? extends T> @Nonnull ... probabilities
-    ) {
-        return new RngImpl.RandomSupplier<>(rd, probabilities);
-    }
-
-    /**
-     * Returns a new {@link Probability} with the specified score and a supplier which always returns the specified
-     * object.
-     *
-     * @param score the specified score, must {@code >= 0}
-     * @param obj   the specified object
-     * @param <T>   the type of the object
-     * @return a new {@link Probability} with the specified score and a supplier which always returns the specified
-     * object
-     */
-    default <T> @Nonnull Probability<T> probability(long score, @Nonnull T obj) {
-        return probability(score, () -> obj);
-    }
-
-    /**
-     * Returns a new {@link Probability} with the specified score and supplier.
-     *
-     * @param score    the specified score, must {@code >= 0}
-     * @param supplier the specified supplier
-     * @param <T>      the type of the object
-     * @return a new {@link Probability} with the specified score and supplier
-     */
-    default <T> @Nonnull Probability<T> probability(long score, @Nonnull Supplier<T> supplier) {
-        return new Probability<>(score, supplier);
-    }
-
-    /**
-     * Represents the probability of generating an object.
-     * <p>
-     * It contains a score and a supplier, the score is used to calculate the probability of generating, and the
-     * supplier is used to generate the object.
-     *
-     * @param <T> the type of the generated object
-     * @author sunqian
-     */
-    final class Probability<T> {
-
-        private final long score;
-        private final @Nonnull Supplier<T> supplier;
-
-        /**
-         * Constructs with the specified score and supplier.
-         *
-         * @param score    the specified score, must {@code >= 0}
-         * @param supplier the specified supplier
-         */
-        public Probability(long score, @Nonnull Supplier<T> supplier) {
-            if (score < 0) {
-                throw new IllegalArgumentException("Score must >= 0!");
-            }
-            this.score = score;
-            this.supplier = supplier;
-        }
-
-        /**
-         * Returns the score.
-         *
-         * @return the score
-         */
-        public long score() {
-            return Math.abs(score);
-        }
-
-        /**
-         * Returns the supplier.
-         *
-         * @return the supplier
-         */
-        public @Nonnull Supplier<T> supplier() {
-            return supplier;
-        }
+    @Override
+    default long generateScore(long startInclusive, long endExclusive) {
+        return nextLong(startInclusive, endExclusive);
     }
 }
