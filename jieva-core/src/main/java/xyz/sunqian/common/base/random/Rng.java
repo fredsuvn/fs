@@ -1,32 +1,41 @@
 package xyz.sunqian.common.base.random;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.exception.UnreachablePointException;
+import xyz.sunqian.common.base.math.MathKit;
 
+import java.util.Arrays;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.DoubleSupplier;
 import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
-import java.util.function.Supplier;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 /**
- * Random utilities.
+ * Random Number Generator, the base interface to produce random numbers. It is also a {@link IntSupplier},
+ * {@link LongSupplier} and {@link DoubleSupplier}, to supply random {@code int}, {@code long} and {@code double}.
  *
- * @author fredsuvn
+ * @author sunqian
  */
-public class RandomKit {
+public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
 
-    private static final @Nonnull Rng rng = Rng.getDefault();
+    /**
+     * Returns the default implementation based on the {@link ThreadLocalRandom}.
+     *
+     * @return the default implementation based on the {@link ThreadLocalRandom}
+     */
+    static Rng getDefault() {
+        return new RngImpl();
+    }
 
     /**
      * Returns the next random boolean value.
      *
      * @return the next random boolean value
      */
-    public static boolean nextBoolean() {
-        return rng.nextBoolean();
+    default boolean nextBoolean() {
+        return nextInt() < 0;
     }
 
     /**
@@ -34,8 +43,8 @@ public class RandomKit {
      *
      * @return the next random byte value
      */
-    public static byte nextByte() {
-        return rng.nextByte();
+    default byte nextByte() {
+        return (byte) nextInt();
     }
 
     /**
@@ -47,8 +56,8 @@ public class RandomKit {
      * @return the next random byte {@code value} in the range: {@code startInclusive <= value < endExclusive}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    public static byte nextByte(byte startInclusive, byte endExclusive) throws IllegalArgumentException {
-        return rng.nextByte(startInclusive, endExclusive);
+    default byte nextByte(byte startInclusive, byte endExclusive) throws IllegalArgumentException {
+        return (byte) nextInt(startInclusive, endExclusive);
     }
 
     /**
@@ -56,8 +65,8 @@ public class RandomKit {
      *
      * @return the next random short value
      */
-    public static short nextShort() {
-        return rng.nextShort();
+    default short nextShort() {
+        return (short) nextInt();
     }
 
     /**
@@ -69,8 +78,8 @@ public class RandomKit {
      * @return the next random short {@code value} in the range: {@code startInclusive <= value < endExclusive}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    public static short nextShort(short startInclusive, short endExclusive) throws IllegalArgumentException {
-        return rng.nextShort(startInclusive, endExclusive);
+    default short nextShort(short startInclusive, short endExclusive) throws IllegalArgumentException {
+        return (short) nextInt(startInclusive, endExclusive);
     }
 
     /**
@@ -78,8 +87,8 @@ public class RandomKit {
      *
      * @return the next random char value
      */
-    public static char nextChar() {
-        return rng.nextChar();
+    default char nextChar() {
+        return (char) nextInt();
     }
 
     /**
@@ -91,8 +100,8 @@ public class RandomKit {
      * @return the next random char {@code value} in the range: {@code startInclusive <= value < endExclusive}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    public static char nextChar(char startInclusive, char endExclusive) throws IllegalArgumentException {
-        return rng.nextChar(startInclusive, endExclusive);
+    default char nextChar(char startInclusive, char endExclusive) throws IllegalArgumentException {
+        return (char) nextInt(startInclusive & 0x0000ffff, endExclusive & 0x0000ffff);
     }
 
     /**
@@ -100,9 +109,7 @@ public class RandomKit {
      *
      * @return the next random int value
      */
-    public static int nextInt() {
-        return rng.nextInt();
-    }
+    int nextInt();
 
     /**
      * Returns the next random int {@code value} in the range: {@code startInclusive <= value < endExclusive}. If
@@ -113,18 +120,14 @@ public class RandomKit {
      * @return the next random int {@code value} in the range: {@code startInclusive <= value < endExclusive}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    public static int nextInt(int startInclusive, int endExclusive) throws IllegalArgumentException {
-        return rng.nextInt(startInclusive, endExclusive);
-    }
+    int nextInt(int startInclusive, int endExclusive) throws IllegalArgumentException;
 
     /**
      * Returns the next random long value.
      *
      * @return the next random long value
      */
-    public static long nextLong() {
-        return rng.nextLong();
-    }
+    long nextLong();
 
     /**
      * Returns the next random long {@code value} in the range: {@code startInclusive <= value < endExclusive}. If
@@ -135,17 +138,15 @@ public class RandomKit {
      * @return the next random long {@code value} in the range: {@code startInclusive <= value < endExclusive}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    public static long nextLong(long startInclusive, long endExclusive) throws IllegalArgumentException {
-        return rng.nextLong(startInclusive, endExclusive);
-    }
+    long nextLong(long startInclusive, long endExclusive) throws IllegalArgumentException;
 
     /**
      * Returns the next random float value between {@code 0} inclusive and {@code 1} exclusive.
      *
      * @return the next random float value between {@code 0} inclusive and {@code 1} exclusive
      */
-    public static float nextFloat() {
-        return rng.nextFloat();
+    default float nextFloat() {
+        return MathKit.makeIn((float) nextDouble(), 0, 1);
     }
 
     /**
@@ -157,8 +158,11 @@ public class RandomKit {
      * @return the next random float {@code value} in the range: {@code startInclusive <= value < endExclusive}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    public static float nextFloat(float startInclusive, float endExclusive) throws IllegalArgumentException {
-        return rng.nextFloat(startInclusive, endExclusive);
+    default float nextFloat(float startInclusive, float endExclusive) throws IllegalArgumentException {
+        if (startInclusive == endExclusive) {
+            return startInclusive;
+        }
+        return MathKit.makeIn((float) nextDouble(startInclusive, endExclusive), startInclusive, endExclusive);
     }
 
     /**
@@ -166,9 +170,7 @@ public class RandomKit {
      *
      * @return the next random double value between {@code 0} inclusive and {@code 1} exclusive
      */
-    public static double nextDouble() {
-        return rng.nextDouble();
-    }
+    double nextDouble();
 
     /**
      * Returns the next random double {@code value} in the range: {@code startInclusive <= value < endExclusive}. If
@@ -179,18 +181,14 @@ public class RandomKit {
      * @return the next random double {@code value} in the range: {@code startInclusive <= value < endExclusive}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    public static double nextDouble(double startInclusive, double endExclusive) throws IllegalArgumentException {
-        return rng.nextDouble(startInclusive, endExclusive);
-    }
+    double nextDouble(double startInclusive, double endExclusive) throws IllegalArgumentException;
 
     /**
      * Returns a new unlimited {@link IntStream} that produces random {@code int} values.
      *
      * @return a new unlimited {@link IntStream} that produces random {@code int} values
      */
-    public static IntStream ints() {
-        return rng.ints();
-    }
+    IntStream ints();
 
     /**
      * Returns a new unlimited {@link IntStream} that produces random {@code int} value in the range:
@@ -203,9 +201,7 @@ public class RandomKit {
      * {@code startInclusive <= value < endExclusive}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    public static IntStream ints(int startInclusive, int endExclusive) {
-        return rng.ints(startInclusive, endExclusive);
-    }
+    IntStream ints(int startInclusive, int endExclusive);
 
     /**
      * Returns a new {@link IntSupplier} that produces random {@code int} value in the range:
@@ -218,18 +214,14 @@ public class RandomKit {
      * {@code startInclusive <= value < endExclusive}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    public static IntSupplier supplier(int startInclusive, int endExclusive) throws IllegalArgumentException {
-        return rng.supplier(startInclusive, endExclusive);
-    }
+    IntSupplier supplier(int startInclusive, int endExclusive) throws IllegalArgumentException;
 
     /**
      * Returns a new unlimited {@link LongStream} that produces random {@code long} values.
      *
      * @return a new unlimited {@link LongStream} that produces random {@code long} values
      */
-    public static LongStream longs() {
-        return rng.longs();
-    }
+    LongStream longs();
 
     /**
      * Returns a new unlimited {@link LongStream} that produces random {@code long} value in the range:
@@ -242,9 +234,7 @@ public class RandomKit {
      * {@code startInclusive <= value < endExclusive}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    public static LongStream longs(long startInclusive, long endExclusive) {
-        return rng.longs(startInclusive, endExclusive);
-    }
+    LongStream longs(long startInclusive, long endExclusive);
 
     /**
      * Returns a new {@link LongSupplier} that produces random {@code long} value in the range:
@@ -257,9 +247,7 @@ public class RandomKit {
      * {@code startInclusive <= value < endExclusive}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    public static LongSupplier supplier(long startInclusive, long endExclusive) throws IllegalArgumentException {
-        return rng.supplier(startInclusive, endExclusive);
-    }
+    LongSupplier supplier(long startInclusive, long endExclusive) throws IllegalArgumentException;
 
     /**
      * Returns a new unlimited {@link DoubleStream} that produces random {@code double} values between {@code 0}
@@ -268,9 +256,7 @@ public class RandomKit {
      * @return a new unlimited {@link DoubleStream} that produces random {@code double} values between {@code 0}
      * inclusive and {@code 1} exclusive
      */
-    public static DoubleStream doubles() {
-        return rng.doubles();
-    }
+    DoubleStream doubles();
 
     /**
      * Returns a new unlimited {@link DoubleStream} that produces random {@code double} value in the range:
@@ -283,9 +269,7 @@ public class RandomKit {
      * {@code startInclusive <= value < endExclusive}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    public static DoubleStream doubles(double startInclusive, double endExclusive) {
-        return rng.doubles(startInclusive, endExclusive);
-    }
+    DoubleStream doubles(double startInclusive, double endExclusive);
 
     /**
      * Returns a new {@link DoubleSupplier} that produces random {@code double} value in the range:
@@ -298,9 +282,7 @@ public class RandomKit {
      * {@code startInclusive <= value < endExclusive}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    public static DoubleSupplier supplier(double startInclusive, double endExclusive) throws IllegalArgumentException {
-        return rng.supplier(startInclusive, endExclusive);
-    }
+    DoubleSupplier supplier(double startInclusive, double endExclusive) throws IllegalArgumentException;
 
     /**
      * Fills the given array with random boolean values and returns the array.
@@ -308,8 +290,11 @@ public class RandomKit {
      * @param array the given array
      * @return the given array
      */
-    public static boolean @Nonnull [] fill(boolean @Nonnull [] array) {
-        return rng.fill(array);
+    default boolean @Nonnull [] fill(boolean @Nonnull [] array) {
+        for (int i = 0; i < array.length; i++) {
+            array[i] = nextBoolean();
+        }
+        return array;
     }
 
     /**
@@ -318,8 +303,11 @@ public class RandomKit {
      * @param array the given array
      * @return the given array
      */
-    public static byte @Nonnull [] fill(byte @Nonnull [] array) {
-        return rng.fill(array);
+    default byte @Nonnull [] fill(byte @Nonnull [] array) {
+        for (int i = 0; i < array.length; i++) {
+            array[i] = nextByte();
+        }
+        return array;
     }
 
     /**
@@ -331,10 +319,18 @@ public class RandomKit {
      * @return the given array
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    public static byte @Nonnull [] fill(
+    default byte @Nonnull [] fill(
         byte @Nonnull [] array, byte startInclusive, byte endExclusive
     ) throws IllegalArgumentException {
-        return rng.fill(array, startInclusive, endExclusive);
+        if (startInclusive == endExclusive) {
+            Arrays.fill(array, startInclusive);
+            return array;
+        }
+        IntSupplier supplier = supplier(startInclusive, endExclusive);
+        for (int i = 0; i < array.length; i++) {
+            array[i] = (byte) supplier.getAsInt();
+        }
+        return array;
     }
 
     /**
@@ -343,8 +339,11 @@ public class RandomKit {
      * @param array the given array
      * @return the given array
      */
-    public static short @Nonnull [] fill(short @Nonnull [] array) {
-        return rng.fill(array);
+    default short @Nonnull [] fill(short @Nonnull [] array) {
+        for (int i = 0; i < array.length; i++) {
+            array[i] = nextShort();
+        }
+        return array;
     }
 
     /**
@@ -357,10 +356,18 @@ public class RandomKit {
      * @return the given array
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    public static short @Nonnull [] fill(
+    default short @Nonnull [] fill(
         short @Nonnull [] array, short startInclusive, short endExclusive
     ) throws IllegalArgumentException {
-        return rng.fill(array, startInclusive, endExclusive);
+        if (startInclusive == endExclusive) {
+            Arrays.fill(array, startInclusive);
+            return array;
+        }
+        IntSupplier supplier = supplier(startInclusive, endExclusive);
+        for (int i = 0; i < array.length; i++) {
+            array[i] = (short) supplier.getAsInt();
+        }
+        return array;
     }
 
     /**
@@ -369,8 +376,11 @@ public class RandomKit {
      * @param array the given array
      * @return the given array
      */
-    public static char @Nonnull [] fill(char @Nonnull [] array) {
-        return rng.fill(array);
+    default char @Nonnull [] fill(char @Nonnull [] array) {
+        for (int i = 0; i < array.length; i++) {
+            array[i] = nextChar();
+        }
+        return array;
     }
 
     /**
@@ -382,10 +392,18 @@ public class RandomKit {
      * @return the given array
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    public static char @Nonnull [] fill(
+    default char @Nonnull [] fill(
         char @Nonnull [] array, char startInclusive, char endExclusive
     ) throws IllegalArgumentException {
-        return rng.fill(array, startInclusive, endExclusive);
+        if (startInclusive == endExclusive) {
+            Arrays.fill(array, startInclusive);
+            return array;
+        }
+        IntSupplier supplier = supplier(startInclusive, endExclusive);
+        for (int i = 0; i < array.length; i++) {
+            array[i] = (char) supplier.getAsInt();
+        }
+        return array;
     }
 
     /**
@@ -394,8 +412,11 @@ public class RandomKit {
      * @param array the given array
      * @return the given array
      */
-    public static int @Nonnull [] fill(int @Nonnull [] array) {
-        return rng.fill(array);
+    default int @Nonnull [] fill(int @Nonnull [] array) {
+        for (int i = 0; i < array.length; i++) {
+            array[i] = nextInt();
+        }
+        return array;
     }
 
     /**
@@ -407,10 +428,18 @@ public class RandomKit {
      * @return the given array
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    public static int @Nonnull [] fill(
+    default int @Nonnull [] fill(
         int @Nonnull [] array, int startInclusive, int endExclusive
     ) throws IllegalArgumentException {
-        return rng.fill(array, startInclusive, endExclusive);
+        if (startInclusive == endExclusive) {
+            Arrays.fill(array, startInclusive);
+            return array;
+        }
+        IntSupplier supplier = supplier(startInclusive, endExclusive);
+        for (int i = 0; i < array.length; i++) {
+            array[i] = supplier.getAsInt();
+        }
+        return array;
     }
 
     /**
@@ -419,8 +448,11 @@ public class RandomKit {
      * @param array the given array
      * @return the given array
      */
-    public static long @Nonnull [] fill(long @Nonnull [] array) {
-        return rng.fill(array);
+    default long @Nonnull [] fill(long @Nonnull [] array) {
+        for (int i = 0; i < array.length; i++) {
+            array[i] = nextLong();
+        }
+        return array;
     }
 
     /**
@@ -432,10 +464,18 @@ public class RandomKit {
      * @return the given array
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    public static long @Nonnull [] fill(
+    default long @Nonnull [] fill(
         long @Nonnull [] array, long startInclusive, long endExclusive
     ) throws IllegalArgumentException {
-        return rng.fill(array, startInclusive, endExclusive);
+        if (startInclusive == endExclusive) {
+            Arrays.fill(array, startInclusive);
+            return array;
+        }
+        LongSupplier supplier = supplier(startInclusive, endExclusive);
+        for (int i = 0; i < array.length; i++) {
+            array[i] = supplier.getAsLong();
+        }
+        return array;
     }
 
     /**
@@ -445,8 +485,11 @@ public class RandomKit {
      * @param array the given array
      * @return the given array
      */
-    public static float @Nonnull [] fill(float @Nonnull [] array) {
-        return rng.fill(array);
+    default float @Nonnull [] fill(float @Nonnull [] array) {
+        for (int i = 0; i < array.length; i++) {
+            array[i] = nextFloat();
+        }
+        return array;
     }
 
     /**
@@ -459,10 +502,18 @@ public class RandomKit {
      * @return the given array
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    public static float @Nonnull [] fill(
+    default float @Nonnull [] fill(
         float @Nonnull [] array, float startInclusive, float endExclusive
     ) throws IllegalArgumentException {
-        return rng.fill(array, startInclusive, endExclusive);
+        if (startInclusive == endExclusive) {
+            Arrays.fill(array, startInclusive);
+            return array;
+        }
+        DoubleSupplier supplier = supplier(startInclusive, endExclusive);
+        for (int i = 0; i < array.length; i++) {
+            array[i] = MathKit.makeIn((float) supplier.getAsDouble(), startInclusive, endExclusive);
+        }
+        return array;
     }
 
     /**
@@ -472,8 +523,11 @@ public class RandomKit {
      * @param array the given array
      * @return the given array
      */
-    public static double @Nonnull [] fill(double @Nonnull [] array) {
-        return rng.fill(array);
+    default double @Nonnull [] fill(double @Nonnull [] array) {
+        for (int i = 0; i < array.length; i++) {
+            array[i] = nextDouble();
+        }
+        return array;
     }
 
     /**
@@ -486,213 +540,47 @@ public class RandomKit {
      * @return the given array
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    public static double @Nonnull [] fill(
+    default double @Nonnull [] fill(
         double @Nonnull [] array, double startInclusive, double endExclusive
     ) throws IllegalArgumentException {
-        return rng.fill(array, startInclusive, endExclusive);
+        if (startInclusive == endExclusive) {
+            Arrays.fill(array, startInclusive);
+            return array;
+        }
+        DoubleSupplier supplier = supplier(startInclusive, endExclusive);
+        for (int i = 0; i < array.length; i++) {
+            array[i] = supplier.getAsDouble();
+        }
+        return array;
     }
 
     /**
-     * Returns a {@link Supplier} which produces the random objects, the usage example:
-     * <pre>{@code
-     * Supplier<String> strSupplier = RandomKit.supplier(
-     *     RandomKit.probability(20, () -> "a"), // 20% hit probability
-     *     RandomKit.probability(80, () -> "b"), // 80% hit probability
-     * );
-     * }</pre>
-     * <p>
-     * Each provided {@link Probability}, which has a score and a supplier, represents the hit probability for its
-     * supplier. Let the {@code sum(score)} be the total score of all provided {@link Probability}s, the hit probability
-     * for each {@link Probability} is {@code score / sum(score)}.
-     * <p>
-     * The {@code rd} is a {@link LongSupplier} which produces a random long value, the long value is used to calculate
-     * the hit probability.
-     * <p>
-     * Note:
-     * <ul>
-     *     <li>
-     *         the score of a {@link Probability} can be negative, but it will be converted to positive value before
-     *         calculating;
-     *     </li>
-     *     <li>
-     *         the total score of all provided {@link Probability}s can not overflow the maximum value of {@code long};
-     *     </li>
-     * </ul>
+     * Returns the next random int value.
      *
-     * @param probabilities the provided {@link Probability}s
-     * @param <T>           the type of the random objects
-     * @return a {@link Supplier} which produces the random objects
+     * @return the next random int value
      */
-    @SafeVarargs
-    public static <T> Supplier<T> supplier(
-        @Nonnull Probability<? extends T> @Nonnull ... probabilities
-    ) {
-        return supplier(rng, probabilities);
+    @Override
+    default int getAsInt() {
+        return nextInt();
     }
 
     /**
-     * Returns a {@link Supplier} which produces the random objects, the usage example:
-     * <pre>{@code
-     * Supplier<String> strSupplier = RandomKit.supplier(
-     *     rd,
-     *     RandomKit.probability(20, () -> "a"), // 20% hit probability
-     *     RandomKit.probability(80, () -> "b"), // 80% hit probability
-     * );
-     * }</pre>
-     * <p>
-     * Each provided {@link Probability}, which has a score and a supplier, represents the hit probability for its
-     * supplier. Let the {@code sum(score)} be the total score of all provided {@link Probability}s, the hit probability
-     * for each {@link Probability} is {@code score / sum(score)}.
-     * <p>
-     * The {@code rd} is a {@link LongSupplier} which produces a random long value, the long value is used to calculate
-     * the hit probability.
-     * <p>
-     * Note:
-     * <ul>
-     *     <li>
-     *         the score of a {@link Probability} can be negative, but it will be converted to positive value before
-     *         calculating;
-     *     </li>
-     *     <li>
-     *         the total score of all provided {@link Probability}s can not overflow the maximum value of {@code long};
-     *     </li>
-     * </ul>
+     * Returns the next random long value.
      *
-     * @param rd            a {@link LongSupplier} which produces a random long value
-     * @param probabilities the provided {@link Probability}s
-     * @param <T>           the type of the random objects
-     * @return a {@link Supplier} which produces the random objects
+     * @return the next random long value
      */
-    @SafeVarargs
-    public static <T> Supplier<T> supplier(
-        @Nonnull LongSupplier rd,
-        @Nonnull Probability<? extends T> @Nonnull ... probabilities
-    ) {
-        return new RandomSupplier<>(rd, probabilities);
+    @Override
+    default long getAsLong() {
+        return nextLong();
     }
 
     /**
-     * Returns a new {@link Probability} with the specified score and a supplier which always returns the specified
-     * object.
+     * Returns the next random double value between {@code 0} inclusive and {@code 1} exclusive.
      *
-     * @param score the specified score
-     * @param obj   the specified object
-     * @param <T>   the type of the object
-     * @return a new {@link Probability} with the specified score and a supplier which always returns the specified
-     * object
+     * @return the next random double value between {@code 0} inclusive and {@code 1} exclusive
      */
-    public static <T> Probability<T> probability(long score, @Nonnull T obj) {
-        return probability(score, () -> obj);
-    }
-
-    /**
-     * Returns a new {@link Probability} with the specified score and supplier.
-     *
-     * @param score    the specified score
-     * @param supplier the specified supplier
-     * @param <T>      the type of the object
-     * @return a new {@link Probability} with the specified score and supplier
-     */
-    public static <T> Probability<T> probability(long score, @Nonnull Supplier<T> supplier) {
-        return new Probability<>(score, supplier);
-    }
-
-    private static final class RandomSupplier<T> implements Supplier<T> {
-
-        private final @Nonnull LongSupplier rd;
-        private final Node<? extends T> @Nonnull [] nodes;
-        private final long totalScore;
-
-        @SuppressWarnings("unchecked")
-        private RandomSupplier(@Nonnull LongSupplier rd, Probability<? extends T> @Nonnull [] probabilities) {
-            this.rd = rd;
-            long totalScore = 0;
-            this.nodes = new Node[probabilities.length];
-            for (int i = 0; i < probabilities.length; i++) {
-                Probability<? extends T> probability = probabilities[i];
-                long score = Math.abs(probability.score);
-                nodes[i] = new Node<>(probability.supplier, totalScore, totalScore + score);
-                totalScore += score;
-            }
-            this.totalScore = totalScore;
-        }
-
-        @Override
-        public T get() {
-            long next = Math.abs(rd.getAsLong());
-            int index = binarySearch(next % totalScore);
-            if (index < 0) {
-                throw new UnreachablePointException("Score not found: " + next + ".");
-            }
-            return nodes[index].supplier.get();
-        }
-
-        private int binarySearch(long next) {
-            int left = 0;
-            int right = nodes.length - 1;
-            while (left <= right) {
-                int mid = (left + right) / 2;
-                Node<? extends T> node = nodes[mid];
-                long compare = compare(next, node);
-                if (compare == 0) {
-                    return mid;
-                }
-                if (compare > 0) {
-                    left = mid + 1;
-                } else {
-                    right = mid - 1;
-                }
-            }
-            return -1;
-        }
-
-        private static long compare(long next, Node<?> node) {
-            if (next < node.from) {
-                return -1;
-            }
-            if (next >= node.to) {
-                return 1;
-            }
-            return 0;
-        }
-
-        private static final class Node<T> {
-
-            private final @Nonnull Supplier<T> supplier;
-            private final long from;
-            private final long to;
-
-            private Node(@Nonnull Supplier<T> supplier, long from, long to) {
-                this.supplier = supplier;
-                this.from = from;
-                this.to = to;
-            }
-        }
-    }
-
-    /**
-     * Represents the probability of generating an object.
-     * <p>
-     * It contains a score and a supplier, the score is used to calculate the probability of generating, and the
-     * supplier is used to generate the object.
-     *
-     * @param <T> the type of the generated object
-     * @author sunqian
-     */
-    public static final class Probability<T> {
-
-        private final long score;
-        private final @Nonnull Supplier<T> supplier;
-
-        /**
-         * Constructs with the specified score and supplier.
-         *
-         * @param score    the specified score
-         * @param supplier the specified supplier
-         */
-        public Probability(long score, @Nonnull Supplier<T> supplier) {
-            this.score = score;
-            this.supplier = supplier;
-        }
+    @Override
+    default double getAsDouble() {
+        return nextDouble();
     }
 }
