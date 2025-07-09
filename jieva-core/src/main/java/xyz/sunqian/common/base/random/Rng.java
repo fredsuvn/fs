@@ -1,6 +1,7 @@
 package xyz.sunqian.common.base.random;
 
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.math.MathKit;
 
 import java.util.Arrays;
@@ -8,6 +9,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.DoubleSupplier;
 import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
+import java.util.function.Supplier;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
@@ -21,12 +23,12 @@ import java.util.stream.LongStream;
 public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
 
     /**
-     * Returns the default implementation based on the {@link ThreadLocalRandom}.
+     * Returns the default implementation based on the {@link ThreadLocalRandom}, and it is thread-safe.
      *
-     * @return the default implementation based on the {@link ThreadLocalRandom}
+     * @return the default implementation based on the {@link ThreadLocalRandom}, and it is thread-safe
      */
-    static Rng getDefault() {
-        return new RngImpl();
+    static @ThreadSafe Rng getDefault() {
+        return RngImpl.INST;
     }
 
     /**
@@ -188,6 +190,7 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
      *
      * @return a new unlimited {@link IntStream} that produces random {@code int} values
      */
+    @Nonnull
     IntStream ints();
 
     /**
@@ -201,7 +204,17 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
      * {@code startInclusive <= value < endExclusive}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
+    @Nonnull
     IntStream ints(int startInclusive, int endExclusive);
+
+    /**
+     * Returns a new {@link IntSupplier} that produces random {@code int} values.
+     *
+     * @return a new {@link IntSupplier} that produces random {@code int} values
+     */
+    default @Nonnull IntSupplier intSupplier() {
+        return this::nextInt;
+    }
 
     /**
      * Returns a new {@link IntSupplier} that produces random {@code int} value in the range:
@@ -214,13 +227,15 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
      * {@code startInclusive <= value < endExclusive}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    IntSupplier supplier(int startInclusive, int endExclusive) throws IllegalArgumentException;
+    @Nonnull
+    IntSupplier intSupplier(int startInclusive, int endExclusive) throws IllegalArgumentException;
 
     /**
      * Returns a new unlimited {@link LongStream} that produces random {@code long} values.
      *
      * @return a new unlimited {@link LongStream} that produces random {@code long} values
      */
+    @Nonnull
     LongStream longs();
 
     /**
@@ -234,7 +249,17 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
      * {@code startInclusive <= value < endExclusive}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
+    @Nonnull
     LongStream longs(long startInclusive, long endExclusive);
+
+    /**
+     * Returns a new {@link LongSupplier} that produces random {@code long} values.
+     *
+     * @return a new {@link LongSupplier} that produces random {@code long} values
+     */
+    default @Nonnull LongSupplier longSupplier() {
+        return this::nextLong;
+    }
 
     /**
      * Returns a new {@link LongSupplier} that produces random {@code long} value in the range:
@@ -247,7 +272,8 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
      * {@code startInclusive <= value < endExclusive}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    LongSupplier supplier(long startInclusive, long endExclusive) throws IllegalArgumentException;
+    @Nonnull
+    LongSupplier longSupplier(long startInclusive, long endExclusive) throws IllegalArgumentException;
 
     /**
      * Returns a new unlimited {@link DoubleStream} that produces random {@code double} values between {@code 0}
@@ -256,6 +282,7 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
      * @return a new unlimited {@link DoubleStream} that produces random {@code double} values between {@code 0}
      * inclusive and {@code 1} exclusive
      */
+    @Nonnull
     DoubleStream doubles();
 
     /**
@@ -269,7 +296,17 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
      * {@code startInclusive <= value < endExclusive}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
+    @Nonnull
     DoubleStream doubles(double startInclusive, double endExclusive);
+
+    /**
+     * Returns a new {@link DoubleSupplier} that produces random {@code double} values.
+     *
+     * @return a new {@link DoubleSupplier} that produces random {@code double} values
+     */
+    default @Nonnull DoubleSupplier doubleSupplier() {
+        return this::nextDouble;
+    }
 
     /**
      * Returns a new {@link DoubleSupplier} that produces random {@code double} value in the range:
@@ -282,7 +319,8 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
      * {@code startInclusive <= value < endExclusive}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    DoubleSupplier supplier(double startInclusive, double endExclusive) throws IllegalArgumentException;
+    @Nonnull
+    DoubleSupplier doubleSupplier(double startInclusive, double endExclusive) throws IllegalArgumentException;
 
     /**
      * Fills the given array with random boolean values and returns the array.
@@ -326,7 +364,7 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
             Arrays.fill(array, startInclusive);
             return array;
         }
-        IntSupplier supplier = supplier(startInclusive, endExclusive);
+        IntSupplier supplier = intSupplier(startInclusive, endExclusive);
         for (int i = 0; i < array.length; i++) {
             array[i] = (byte) supplier.getAsInt();
         }
@@ -363,7 +401,7 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
             Arrays.fill(array, startInclusive);
             return array;
         }
-        IntSupplier supplier = supplier(startInclusive, endExclusive);
+        IntSupplier supplier = intSupplier(startInclusive, endExclusive);
         for (int i = 0; i < array.length; i++) {
             array[i] = (short) supplier.getAsInt();
         }
@@ -399,7 +437,7 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
             Arrays.fill(array, startInclusive);
             return array;
         }
-        IntSupplier supplier = supplier(startInclusive, endExclusive);
+        IntSupplier supplier = intSupplier(startInclusive, endExclusive);
         for (int i = 0; i < array.length; i++) {
             array[i] = (char) supplier.getAsInt();
         }
@@ -435,7 +473,7 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
             Arrays.fill(array, startInclusive);
             return array;
         }
-        IntSupplier supplier = supplier(startInclusive, endExclusive);
+        IntSupplier supplier = intSupplier(startInclusive, endExclusive);
         for (int i = 0; i < array.length; i++) {
             array[i] = supplier.getAsInt();
         }
@@ -471,7 +509,7 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
             Arrays.fill(array, startInclusive);
             return array;
         }
-        LongSupplier supplier = supplier(startInclusive, endExclusive);
+        LongSupplier supplier = longSupplier(startInclusive, endExclusive);
         for (int i = 0; i < array.length; i++) {
             array[i] = supplier.getAsLong();
         }
@@ -509,7 +547,7 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
             Arrays.fill(array, startInclusive);
             return array;
         }
-        DoubleSupplier supplier = supplier(startInclusive, endExclusive);
+        DoubleSupplier supplier = doubleSupplier(startInclusive, endExclusive);
         for (int i = 0; i < array.length; i++) {
             array[i] = MathKit.makeIn((float) supplier.getAsDouble(), startInclusive, endExclusive);
         }
@@ -547,7 +585,7 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
             Arrays.fill(array, startInclusive);
             return array;
         }
-        DoubleSupplier supplier = supplier(startInclusive, endExclusive);
+        DoubleSupplier supplier = doubleSupplier(startInclusive, endExclusive);
         for (int i = 0; i < array.length; i++) {
             array[i] = supplier.getAsDouble();
         }
@@ -582,5 +620,155 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
     @Override
     default double getAsDouble() {
         return nextDouble();
+    }
+
+    /**
+     * Returns a {@link Supplier} which produces the random objects, the usage example:
+     * <pre>{@code
+     * Supplier<String> strSupplier = RandomKit.supplier(
+     *     RandomKit.probability(20, () -> "a"), // 20% hit probability
+     *     RandomKit.probability(80, () -> "b"), // 80% hit probability
+     * );
+     * }</pre>
+     * <p>
+     * Each provided {@link Probability}, which has a score and a supplier, represents the hit probability for its
+     * supplier. Let the {@code sum(score)} be the total score of all provided {@link Probability}s, the hit probability
+     * for each {@link Probability} is {@code score / sum(score)}.
+     * <p>
+     * The {@code rd} is a {@link LongSupplier} which produces a random long value, the long value is used to calculate
+     * the hit probability.
+     * <p>
+     * Note:
+     * <ul>
+     *     <li>
+     *         the score of a {@link Probability} can be negative, but it will be converted to positive value before
+     *         calculating;
+     *     </li>
+     *     <li>
+     *         the total score of all provided {@link Probability}s can not overflow the maximum value of {@code long};
+     *     </li>
+     * </ul>
+     *
+     * @param probabilities the provided {@link Probability}s
+     * @param <T>           the type of the random objects
+     * @return a {@link Supplier} which produces the random objects
+     */
+    default <T> @Nonnull Supplier<T> supplier(
+        @Nonnull Probability<? extends T> @Nonnull ... probabilities
+    ) {
+        return supplier(this, probabilities);
+    }
+
+    /**
+     * Returns a {@link Supplier} which produces the random objects, the usage example:
+     * <pre>{@code
+     * Supplier<String> strSupplier = RandomKit.supplier(
+     *     rd,
+     *     RandomKit.probability(20, () -> "a"), // 20% hit probability
+     *     RandomKit.probability(80, () -> "b"), // 80% hit probability
+     * );
+     * }</pre>
+     * <p>
+     * Each provided {@link Probability}, which has a score and a supplier, represents the hit probability for its
+     * supplier. Let the {@code sum(score)} be the total score of all provided {@link Probability}s, the hit probability
+     * for each {@link Probability} is {@code score / sum(score)}.
+     * <p>
+     * The {@code rd} is a {@link LongSupplier} which produces a random long value, the long value is used to calculate
+     * the hit probability.
+     * <p>
+     * Note:
+     * <ul>
+     *     <li>
+     *         the score of a {@link Probability} can be negative, but it will be converted to positive value before
+     *         calculating;
+     *     </li>
+     *     <li>
+     *         the total score of all provided {@link Probability}s can not overflow the maximum value of {@code long};
+     *     </li>
+     * </ul>
+     *
+     * @param rd            a {@link LongSupplier} which produces a random long value
+     * @param probabilities the provided {@link Probability}s
+     * @param <T>           the type of the random objects
+     * @return a {@link Supplier} which produces the random objects
+     */
+    default <T> @Nonnull Supplier<T> supplier(
+        @Nonnull LongSupplier rd,
+        @Nonnull Probability<? extends T> @Nonnull ... probabilities
+    ) {
+        return new RngImpl.RandomSupplier<>(rd, probabilities);
+    }
+
+    /**
+     * Returns a new {@link Probability} with the specified score and a supplier which always returns the specified
+     * object.
+     *
+     * @param score the specified score, must {@code >= 0}
+     * @param obj   the specified object
+     * @param <T>   the type of the object
+     * @return a new {@link Probability} with the specified score and a supplier which always returns the specified
+     * object
+     */
+    default <T> @Nonnull Probability<T> probability(long score, @Nonnull T obj) {
+        return probability(score, () -> obj);
+    }
+
+    /**
+     * Returns a new {@link Probability} with the specified score and supplier.
+     *
+     * @param score    the specified score, must {@code >= 0}
+     * @param supplier the specified supplier
+     * @param <T>      the type of the object
+     * @return a new {@link Probability} with the specified score and supplier
+     */
+    default <T> @Nonnull Probability<T> probability(long score, @Nonnull Supplier<T> supplier) {
+        return new Probability<>(score, supplier);
+    }
+
+    /**
+     * Represents the probability of generating an object.
+     * <p>
+     * It contains a score and a supplier, the score is used to calculate the probability of generating, and the
+     * supplier is used to generate the object.
+     *
+     * @param <T> the type of the generated object
+     * @author sunqian
+     */
+    final class Probability<T> {
+
+        private final long score;
+        private final @Nonnull Supplier<T> supplier;
+
+        /**
+         * Constructs with the specified score and supplier.
+         *
+         * @param score    the specified score, must {@code >= 0}
+         * @param supplier the specified supplier
+         */
+        public Probability(long score, @Nonnull Supplier<T> supplier) {
+            if (score < 0) {
+                throw new IllegalArgumentException("Score must >= 0!");
+            }
+            this.score = score;
+            this.supplier = supplier;
+        }
+
+        /**
+         * Returns the score.
+         *
+         * @return the score
+         */
+        public long score() {
+            return Math.abs(score);
+        }
+
+        /**
+         * Returns the supplier.
+         *
+         * @return the supplier
+         */
+        public @Nonnull Supplier<T> supplier() {
+            return supplier;
+        }
     }
 }

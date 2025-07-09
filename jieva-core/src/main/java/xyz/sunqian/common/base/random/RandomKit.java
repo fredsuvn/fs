@@ -1,6 +1,7 @@
 package xyz.sunqian.common.base.random;
 
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.exception.UnreachablePointException;
 
 import java.util.function.DoubleSupplier;
@@ -18,7 +19,9 @@ import java.util.stream.LongStream;
  */
 public class RandomKit {
 
-    private static final @Nonnull Rng rng = Rng.getDefault();
+    @Nonnull
+    @ThreadSafe
+    private static final Rng rng = Rng.getDefault();
 
     /**
      * Returns the next random boolean value.
@@ -188,7 +191,7 @@ public class RandomKit {
      *
      * @return a new unlimited {@link IntStream} that produces random {@code int} values
      */
-    public static IntStream ints() {
+    public static @Nonnull IntStream ints() {
         return rng.ints();
     }
 
@@ -203,8 +206,17 @@ public class RandomKit {
      * {@code startInclusive <= value < endExclusive}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    public static IntStream ints(int startInclusive, int endExclusive) {
+    public static @Nonnull IntStream ints(int startInclusive, int endExclusive) {
         return rng.ints(startInclusive, endExclusive);
+    }
+
+    /**
+     * Returns a new {@link IntSupplier} that produces random {@code int} values.
+     *
+     * @return a new {@link IntSupplier} that produces random {@code int} values
+     */
+    public static @Nonnull IntSupplier intSupplier() {
+        return rng.intSupplier();
     }
 
     /**
@@ -218,8 +230,10 @@ public class RandomKit {
      * {@code startInclusive <= value < endExclusive}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    public static IntSupplier supplier(int startInclusive, int endExclusive) throws IllegalArgumentException {
-        return rng.supplier(startInclusive, endExclusive);
+    public static @Nonnull IntSupplier intSupplier(
+        int startInclusive, int endExclusive
+    ) throws IllegalArgumentException {
+        return rng.intSupplier(startInclusive, endExclusive);
     }
 
     /**
@@ -227,7 +241,7 @@ public class RandomKit {
      *
      * @return a new unlimited {@link LongStream} that produces random {@code long} values
      */
-    public static LongStream longs() {
+    public static @Nonnull LongStream longs() {
         return rng.longs();
     }
 
@@ -242,8 +256,17 @@ public class RandomKit {
      * {@code startInclusive <= value < endExclusive}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    public static LongStream longs(long startInclusive, long endExclusive) {
+    public static @Nonnull LongStream longs(long startInclusive, long endExclusive) {
         return rng.longs(startInclusive, endExclusive);
+    }
+
+    /**
+     * Returns a new {@link LongSupplier} that produces random {@code long} values.
+     *
+     * @return a new {@link LongSupplier} that produces random {@code long} values
+     */
+    public static @Nonnull LongSupplier longSupplier() {
+        return rng.longSupplier();
     }
 
     /**
@@ -257,8 +280,10 @@ public class RandomKit {
      * {@code startInclusive <= value < endExclusive}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    public static LongSupplier supplier(long startInclusive, long endExclusive) throws IllegalArgumentException {
-        return rng.supplier(startInclusive, endExclusive);
+    public static @Nonnull LongSupplier longSupplier(
+        long startInclusive, long endExclusive
+    ) throws IllegalArgumentException {
+        return rng.longSupplier(startInclusive, endExclusive);
     }
 
     /**
@@ -268,7 +293,7 @@ public class RandomKit {
      * @return a new unlimited {@link DoubleStream} that produces random {@code double} values between {@code 0}
      * inclusive and {@code 1} exclusive
      */
-    public static DoubleStream doubles() {
+    public static @Nonnull DoubleStream doubles() {
         return rng.doubles();
     }
 
@@ -283,8 +308,17 @@ public class RandomKit {
      * {@code startInclusive <= value < endExclusive}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    public static DoubleStream doubles(double startInclusive, double endExclusive) {
+    public static @Nonnull DoubleStream doubles(double startInclusive, double endExclusive) {
         return rng.doubles(startInclusive, endExclusive);
+    }
+
+    /**
+     * Returns a new {@link DoubleSupplier} that produces random {@code double} values.
+     *
+     * @return a new {@link DoubleSupplier} that produces random {@code double} values
+     */
+    public static @Nonnull DoubleSupplier doubleSupplier() {
+        return rng.doubleSupplier();
     }
 
     /**
@@ -298,8 +332,10 @@ public class RandomKit {
      * {@code startInclusive <= value < endExclusive}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    public static DoubleSupplier supplier(double startInclusive, double endExclusive) throws IllegalArgumentException {
-        return rng.supplier(startInclusive, endExclusive);
+    public static @Nonnull DoubleSupplier doubleSupplier(
+        double startInclusive, double endExclusive
+    ) throws IllegalArgumentException {
+        return rng.doubleSupplier(startInclusive, endExclusive);
     }
 
     /**
@@ -524,7 +560,7 @@ public class RandomKit {
      * @return a {@link Supplier} which produces the random objects
      */
     @SafeVarargs
-    public static <T> Supplier<T> supplier(
+    public static <T> @Nonnull Supplier<T> supplier(
         @Nonnull Probability<? extends T> @Nonnull ... probabilities
     ) {
         return supplier(rng, probabilities);
@@ -564,7 +600,7 @@ public class RandomKit {
      * @return a {@link Supplier} which produces the random objects
      */
     @SafeVarargs
-    public static <T> Supplier<T> supplier(
+    public static <T> @Nonnull Supplier<T> supplier(
         @Nonnull LongSupplier rd,
         @Nonnull Probability<? extends T> @Nonnull ... probabilities
     ) {
@@ -581,7 +617,7 @@ public class RandomKit {
      * @return a new {@link Probability} with the specified score and a supplier which always returns the specified
      * object
      */
-    public static <T> Probability<T> probability(long score, @Nonnull T obj) {
+    public static <T> @Nonnull Probability<T> probability(long score, @Nonnull T obj) {
         return probability(score, () -> obj);
     }
 
@@ -593,106 +629,11 @@ public class RandomKit {
      * @param <T>      the type of the object
      * @return a new {@link Probability} with the specified score and supplier
      */
-    public static <T> Probability<T> probability(long score, @Nonnull Supplier<T> supplier) {
+    public static <T> @Nonnull Probability<T> probability(long score, @Nonnull Supplier<T> supplier) {
         return new Probability<>(score, supplier);
     }
 
-    private static final class RandomSupplier<T> implements Supplier<T> {
 
-        private final @Nonnull LongSupplier rd;
-        private final Node<? extends T> @Nonnull [] nodes;
-        private final long totalScore;
 
-        @SuppressWarnings("unchecked")
-        private RandomSupplier(@Nonnull LongSupplier rd, Probability<? extends T> @Nonnull [] probabilities) {
-            this.rd = rd;
-            long totalScore = 0;
-            this.nodes = new Node[probabilities.length];
-            for (int i = 0; i < probabilities.length; i++) {
-                Probability<? extends T> probability = probabilities[i];
-                long score = Math.abs(probability.score);
-                nodes[i] = new Node<>(probability.supplier, totalScore, totalScore + score);
-                totalScore += score;
-            }
-            this.totalScore = totalScore;
-        }
 
-        @Override
-        public T get() {
-            long next = Math.abs(rd.getAsLong());
-            int index = binarySearch(next % totalScore);
-            if (index < 0) {
-                throw new UnreachablePointException("Score not found: " + next + ".");
-            }
-            return nodes[index].supplier.get();
-        }
-
-        private int binarySearch(long next) {
-            int left = 0;
-            int right = nodes.length - 1;
-            while (left <= right) {
-                int mid = (left + right) / 2;
-                Node<? extends T> node = nodes[mid];
-                long compare = compare(next, node);
-                if (compare == 0) {
-                    return mid;
-                }
-                if (compare > 0) {
-                    left = mid + 1;
-                } else {
-                    right = mid - 1;
-                }
-            }
-            return -1;
-        }
-
-        private static long compare(long next, Node<?> node) {
-            if (next < node.from) {
-                return -1;
-            }
-            if (next >= node.to) {
-                return 1;
-            }
-            return 0;
-        }
-
-        private static final class Node<T> {
-
-            private final @Nonnull Supplier<T> supplier;
-            private final long from;
-            private final long to;
-
-            private Node(@Nonnull Supplier<T> supplier, long from, long to) {
-                this.supplier = supplier;
-                this.from = from;
-                this.to = to;
-            }
-        }
-    }
-
-    /**
-     * Represents the probability of generating an object.
-     * <p>
-     * It contains a score and a supplier, the score is used to calculate the probability of generating, and the
-     * supplier is used to generate the object.
-     *
-     * @param <T> the type of the generated object
-     * @author sunqian
-     */
-    public static final class Probability<T> {
-
-        private final long score;
-        private final @Nonnull Supplier<T> supplier;
-
-        /**
-         * Constructs with the specified score and supplier.
-         *
-         * @param score    the specified score
-         * @param supplier the specified supplier
-         */
-        public Probability(long score, @Nonnull Supplier<T> supplier) {
-            this.score = score;
-            this.supplier = supplier;
-        }
-    }
 }
