@@ -2,8 +2,10 @@ package xyz.sunqian.common.base.random;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.ThreadSafe;
+import xyz.sunqian.common.base.JieCheck;
 import xyz.sunqian.common.base.math.MathKit;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.DoubleSupplier;
@@ -15,17 +17,17 @@ import java.util.stream.LongStream;
 
 /**
  * The Random Number Generator, base interface to produce random numbers. It extends the {@link IntSupplier},
- * {@link LongSupplier} and {@link DoubleSupplier}, to supply random {@code int}, {@code long} and {@code double}. And,
- * it is also extends the {@link Rog.ScoreGenerator} (as if by {@link #nextLong(long, long)}).
+ * {@link LongSupplier} and {@link DoubleSupplier}, to supply random {@code int}, {@code long} and {@code double}
+ * values.
  *
  * @author sunqian
  */
-public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier, Rog.ScoreGenerator {
+public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
 
     /**
-     * Returns the default implementation based on the {@link ThreadLocalRandom}, and it is thread-safe.
+     * Returns the default implementation of {@link Rng} based on the {@link ThreadLocalRandom} (so it is thread-safe).
      *
-     * @return the default implementation based on the {@link ThreadLocalRandom}, and it is thread-safe
+     * @return the default implementation of {@link Rng} based on the {@link ThreadLocalRandom} (so it is thread-safe)
      */
     static @ThreadSafe Rng getDefault() {
         return RngImpl.INST;
@@ -186,12 +188,43 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier, Rog.Scor
     double nextDouble(double startInclusive, double endExclusive) throws IllegalArgumentException;
 
     /**
+     * Fills the given array (from the specified offset up to the specified length) with the random value.
+     *
+     * @param array the given array
+     * @param off   the specified offset
+     * @param len   the specified length
+     * @throws IndexOutOfBoundsException if {@code off < 0 || len < 0 || off + len > array.length}
+     */
+    default void nextBytes(byte @Nonnull [] array, int off, int len) throws IndexOutOfBoundsException {
+        JieCheck.checkOffsetLength(array.length, off, len);
+        for (int i = off; i < off + len; i++) {
+            array[i] = nextByte();
+        }
+    }
+
+    /**
+     * Fills the given buffer with the random value. The buffer's position increments by the filled count.
+     *
+     * @param buffer the given buffer
+     */
+    default void nextBytes(@Nonnull ByteBuffer buffer) {
+        if (buffer.hasArray()) {
+            nextBytes(buffer.array(), buffer.arrayOffset() + buffer.position(), buffer.remaining());
+            buffer.position(buffer.limit());
+        } else {
+            buffer.put(fill(new byte[buffer.remaining()]));
+        }
+    }
+
+    /**
      * Returns a new unlimited {@link IntStream} that produces random {@code int} values.
      *
      * @return a new unlimited {@link IntStream} that produces random {@code int} values
      */
     @Nonnull
-    IntStream ints();
+    default IntStream ints() {
+        return IntStream.generate(this::nextInt);
+    }
 
     /**
      * Returns a new unlimited {@link IntStream} that produces random {@code int} value in the range:
@@ -205,7 +238,10 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier, Rog.Scor
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
     @Nonnull
-    IntStream ints(int startInclusive, int endExclusive);
+    default IntStream ints(int startInclusive, int endExclusive) {
+        IntSupplier supplier = intSupplier(startInclusive, endExclusive);
+        return IntStream.generate(supplier);
+    }
 
     /**
      * Returns a new {@link IntSupplier} that produces random {@code int} values.
@@ -236,7 +272,9 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier, Rog.Scor
      * @return a new unlimited {@link LongStream} that produces random {@code long} values
      */
     @Nonnull
-    LongStream longs();
+    default LongStream longs() {
+        return LongStream.generate(this::nextLong);
+    }
 
     /**
      * Returns a new unlimited {@link LongStream} that produces random {@code long} value in the range:
@@ -250,7 +288,10 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier, Rog.Scor
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
     @Nonnull
-    LongStream longs(long startInclusive, long endExclusive);
+    default LongStream longs(long startInclusive, long endExclusive) {
+        LongSupplier supplier = longSupplier(startInclusive, endExclusive);
+        return LongStream.generate(supplier);
+    }
 
     /**
      * Returns a new {@link LongSupplier} that produces random {@code long} values.
@@ -283,7 +324,9 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier, Rog.Scor
      * inclusive and {@code 1} exclusive
      */
     @Nonnull
-    DoubleStream doubles();
+    default DoubleStream doubles() {
+        return DoubleStream.generate(this::nextDouble);
+    }
 
     /**
      * Returns a new unlimited {@link DoubleStream} that produces random {@code double} value in the range:
@@ -297,7 +340,10 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier, Rog.Scor
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
     @Nonnull
-    DoubleStream doubles(double startInclusive, double endExclusive);
+    default DoubleStream doubles(double startInclusive, double endExclusive) {
+        DoubleSupplier supplier = doubleSupplier(startInclusive, endExclusive);
+        return DoubleStream.generate(supplier);
+    }
 
     /**
      * Returns a new {@link DoubleSupplier} that produces random {@code double} values.
@@ -620,10 +666,5 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier, Rog.Scor
     @Override
     default double getAsDouble() {
         return nextDouble();
-    }
-
-    @Override
-    default long generateScore(long startInclusive, long endExclusive) {
-        return nextLong(startInclusive, endExclusive);
     }
 }

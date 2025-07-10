@@ -1,7 +1,6 @@
 package xyz.sunqian.common.base.random;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.annotations.ThreadSafe;
 
 import java.util.PrimitiveIterator;
 import java.util.concurrent.ThreadLocalRandom;
@@ -12,7 +11,6 @@ import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
-@ThreadSafe
 final class RngImpl implements Rng {
 
     static final @Nonnull RngImpl INST = new RngImpl();
@@ -150,5 +148,11 @@ final class RngImpl implements Rng {
                 return iterator.nextDouble();
             }
         };
+    }
+
+    @Override
+    public byte @Nonnull [] fill(byte @Nonnull [] array) {
+        random().nextBytes(array);
+        return array;
     }
 }

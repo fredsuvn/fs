@@ -4,25 +4,19 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.UnreachablePointException;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
 final class RogImpl implements Rog {
 
-    @Override
-    public @Nonnull <T> Supplier<T> supplier(
-        @Nonnull LongSupplier rd, @Nonnull Iterable<? extends @Nonnull Probability<? extends T>> probabilities
-    ) {
-        return new RandomSupplier<>(rd, probabilities);
-    }
+    static final @Nonnull RogImpl INST = new RogImpl();
 
     @Override
-    public @Nonnull <T> Probability<T> probability(
-        long score, @Nonnull Supplier<? extends T> supplier
-    ) throws IllegalArgumentException {
-        return new ProbabilityImpl<>(score, supplier);
+    public @Nonnull <T> Supplier<T> supplier(
+        @Nonnull LongSupplier rd, @Nonnull Collection<? extends @Nonnull Probability<? extends T>> probabilities
+    ) {
+        return new RandomSupplier<>(rd, probabilities);
     }
 
     static final class RandomSupplier<T> implements Supplier<T> {
@@ -34,37 +28,42 @@ final class RogImpl implements Rog {
         @SuppressWarnings("unchecked")
         RandomSupplier(
             @Nonnull LongSupplier rd,
-            @Nonnull Iterable<? extends @Nonnull Probability<? extends T>> probabilities
+            @Nonnull Collection<? extends @Nonnull Probability<? extends T>> probabilities
         ) {
             this.rd = rd;
-            List<Node<? extends T>> nodeList = new ArrayList<>();
+            this.nodes = new Node[probabilities.size()];
             long totalScore = 0;
+            int i = 0;
             for (Probability<? extends T> probability : probabilities) {
                 long score = probability.score();
-                nodeList.add(new Node<>(probability.supplier(), totalScore, totalScore + score));
+                this.nodes[i++] = new Node<>(probability.supplier(), totalScore, totalScore + score);
                 totalScore += score;
             }
-            this.nodes = nodeList.toArray(new Node[0]);
             this.totalScore = totalScore;
         }
 
         @Override
         public T get() {
-            long next = Math.abs(rd.getAsLong());
-            int index = binarySearch(next % totalScore);
-            if (index < 0) {
-                throw new UnreachablePointException("Score not found: " + next + ".");
-            }
-            return nodes[index].supplier.get();
+            long score = Math.abs(rd.getAsLong()) % totalScore;
+            Node<? extends T> node = getNode(score);
+            return node.supplier.get();
         }
 
-        private int binarySearch(long next) {
+        private @Nonnull Node<? extends T> getNode(long score) {
+            int index = binarySearch(score);
+            if (index < 0) {
+                throw new UnreachablePointException("Score not found: " + score + ".");
+            }
+            return nodes[index];
+        }
+
+        private int binarySearch(long score) {
             int left = 0;
             int right = nodes.length - 1;
             while (left <= right) {
                 int mid = (left + right) / 2;
                 Node<? extends T> node = nodes[mid];
-                long compare = compare(next, node);
+                long compare = compare(score, node);
                 if (compare == 0) {
                     return mid;
                 }
@@ -114,20 +113,10 @@ final class RogImpl implements Rog {
             this.supplier = Jie.as(supplier);
         }
 
-        /**
-         * Returns the score.
-         *
-         * @return the score
-         */
         public long score() {
             return Math.abs(score);
         }
 
-        /**
-         * Returns the supplier.
-         *
-         * @return the supplier
-         */
         public @Nonnull Supplier<T> supplier() {
             return supplier;
         }

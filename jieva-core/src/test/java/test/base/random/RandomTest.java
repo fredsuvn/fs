@@ -1,9 +1,15 @@
 package test.base.random;
 
 import org.testng.annotations.Test;
+import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.common.base.exception.UnreachablePointException;
 import xyz.sunqian.common.base.random.RandomKit;
 import xyz.sunqian.common.base.random.Rng;
+import xyz.sunqian.common.base.random.Rog;
+import xyz.sunqian.test.JieAssert;
 
+import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -17,6 +23,7 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.assertTrue;
 
 public class RandomTest {
@@ -27,6 +34,23 @@ public class RandomTest {
         testNext(16, 11, 122);
         testNext(24, -25, 111);
         testNext(32, -88, -8);
+
+        {
+            // next bytes
+            byte[] array = new byte[10];
+            RandomKit.nextBytes(array, 1, 8);
+            assertEquals(array[0], 0);
+            assertEquals(array[9], 0);
+            show("nextBytes", Arrays.toString(array));
+            ByteBuffer buf1 = ByteBuffer.allocate(10);
+            RandomKit.nextBytes(buf1);
+            buf1.flip();
+            show("nextBytes", buf1.toString());
+            ByteBuffer buf2 = ByteBuffer.allocateDirect(10);
+            RandomKit.nextBytes(buf2);
+            buf2.flip();
+            show("nextBytes", buf2.toString());
+        }
     }
 
     private void testNext(int size, int fromInt, int toInt) {
@@ -63,6 +87,7 @@ public class RandomTest {
                 assertEquals(e, from);
             }
             show("bytes.fill fix", Arrays.toString(array));
+
         }
         {
             // short
@@ -408,19 +433,40 @@ public class RandomTest {
     }
 
     @Test
-    public void testObjectSupplier() {
+    public void testObjectSupplier() throws Exception {
         testObjectSupplier(10);
         testObjectSupplier(100);
         testObjectSupplier(1000);
         testObjectSupplier(10000);
+
+        {
+            // always
+            Supplier<CharSequence> supplier = RandomKit.supplier(
+                () -> 5,
+                Rog.probability(10, "a"),
+                Rog.probability(10, "b")
+            );
+            for (int i = 0; i < 100; i++) {
+                assertEquals(supplier.get(), "a");
+            }
+        }
+
+        {
+            // exception
+            Supplier<CharSequence> supplier = RandomKit.supplier(
+                Rog.probability(10, "a")
+            );
+            Method getNode = supplier.getClass().getDeclaredMethod("getNode", long.class);
+            JieAssert.invokeThrows(UnreachablePointException.class, getNode, supplier, -1L);
+        }
     }
 
     private void testObjectSupplier(int size) {
         List<CharSequence> list = new ArrayList<>(size);
         Supplier<CharSequence> supplier = RandomKit.supplier(
-            RandomKit.probability(10, "a"),
-            RandomKit.probability(-30, "b"),
-            RandomKit.probability(60, "c")
+            Rog.probability(10, "a"),
+            Rog.probability(30, () -> "b"),
+            Rog.probability(60, "c")
         );
         for (int i = 0; i < size; i++) {
             list.add(supplier.get());
@@ -442,6 +488,9 @@ public class RandomTest {
         }
         assertEquals(x, 0);
         showProbability(size, ac, bc, cc);
+
+        // exception:
+        assertThrows(IllegalArgumentException.class, () -> Rog.probability(-1, "a"));
     }
 
     private void showProbability(int size, int ac, int bc, int cc) {
@@ -456,5 +505,110 @@ public class RandomTest {
 
     private String toPercent(double d) {
         return d * 100 + "%";
+    }
+
+    @Test
+    public void testNewRng() {
+        class MyRng implements Rng {
+
+            @Override
+            public int nextInt() {
+                return 66;
+            }
+
+            @Override
+            public int nextInt(int startInclusive, int endExclusive) throws IllegalArgumentException {
+                return 66;
+            }
+
+            @Override
+            public long nextLong() {
+                return 66;
+            }
+
+            @Override
+            public long nextLong(long startInclusive, long endExclusive) throws IllegalArgumentException {
+                return 66;
+            }
+
+            @Override
+            public double nextDouble() {
+                return 66;
+            }
+
+            @Override
+            public double nextDouble(double startInclusive, double endExclusive) throws IllegalArgumentException {
+                return 66;
+            }
+
+            @Override
+            public @Nonnull IntSupplier intSupplier(int startInclusive, int endExclusive) throws IllegalArgumentException {
+                return () -> 66;
+            }
+
+            @Override
+            public @Nonnull LongSupplier longSupplier(long startInclusive, long endExclusive) throws IllegalArgumentException {
+                return () -> 66;
+            }
+
+            @Override
+            public @Nonnull DoubleSupplier doubleSupplier(double startInclusive, double endExclusive) throws IllegalArgumentException {
+                return () -> 66;
+            }
+        }
+        MyRng myRng = new MyRng();
+        {
+            // int
+            int[] array = myRng.ints().limit(10).toArray();
+            for (int anInt : array) {
+                assertEquals(anInt, 66);
+            }
+            array = myRng.ints(1, 100).limit(10).toArray();
+            for (int anInt : array) {
+                assertEquals(anInt, 66);
+            }
+        }
+        {
+            // long
+            long[] array = myRng.longs().limit(10).toArray();
+            for (long anInt : array) {
+                assertEquals(anInt, 66);
+            }
+            array = myRng.longs(1, 100).limit(10).toArray();
+            for (long anInt : array) {
+                assertEquals(anInt, 66);
+            }
+        }
+        {
+            // double
+            double[] array = myRng.doubles().limit(10).toArray();
+            for (double anInt : array) {
+                assertEquals(anInt, 66);
+            }
+            array = myRng.doubles(1, 100).limit(10).toArray();
+            for (double anInt : array) {
+                assertEquals(anInt, 66);
+            }
+        }
+        {
+            // next bytes
+            byte[] array = new byte[10];
+            myRng.nextBytes(array, 3, 5);
+            for (int i = 3; i < 8; i++) {
+                assertEquals(array[i], 66);
+            }
+            ByteBuffer buf1 = ByteBuffer.allocate(10);
+            myRng.nextBytes(buf1);
+            buf1.flip();
+            while (buf1.hasRemaining()) {
+                assertEquals(buf1.get(), 66);
+            }
+            ByteBuffer buf2 = ByteBuffer.allocateDirect(10);
+            myRng.nextBytes(buf2);
+            buf2.flip();
+            while (buf2.hasRemaining()) {
+                assertEquals(buf2.get(), 66);
+            }
+        }
     }
 }
