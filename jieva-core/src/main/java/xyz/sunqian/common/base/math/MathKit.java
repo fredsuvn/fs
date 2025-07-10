@@ -100,6 +100,62 @@ public class MathKit {
 
     /**
      * If {@code value <= startInclusive}, returns the {@code startInclusive}; else if {@code value >= endExclusive},
+     * returns {@code endExclusive - 1}. It is equivalent to:
+     * <pre>{@code
+     * if (value <= startInclusive) {
+     *     return startInclusive;
+     * }
+     * if (value >= endExclusive) {
+     *     return endExclusive - 1;
+     * }
+     * return value;
+     * }</pre>
+     *
+     * @param value          the value
+     * @param startInclusive the start value inclusive
+     * @param endExclusive   the end value exclusive
+     * @return a value in the range: {@code startInclusive <= value < endExclusive}
+     */
+    public static int makeIn(int value, int startInclusive, int endExclusive) {
+        if (value <= startInclusive) {
+            return startInclusive;
+        }
+        if (value >= endExclusive) {
+            return endExclusive - 1;
+        }
+        return value;
+    }
+
+    /**
+     * If {@code value <= startInclusive}, returns the {@code startInclusive}; else if {@code value >= endExclusive},
+     * returns {@code endExclusive - 1}. It is equivalent to:
+     * <pre>{@code
+     * if (value <= startInclusive) {
+     *     return startInclusive;
+     * }
+     * if (value >= endExclusive) {
+     *     return endExclusive - 1;
+     * }
+     * return value;
+     * }</pre>
+     *
+     * @param value          the value
+     * @param startInclusive the start value inclusive
+     * @param endExclusive   the end value exclusive
+     * @return a value in the range: {@code startInclusive <= value < endExclusive}
+     */
+    public static long makeIn(long value, long startInclusive, long endExclusive) {
+        if (value <= startInclusive) {
+            return startInclusive;
+        }
+        if (value >= endExclusive) {
+            return endExclusive - 1;
+        }
+        return value;
+    }
+
+    /**
+     * If {@code value <= startInclusive}, returns the {@code startInclusive}; else if {@code value >= endExclusive},
      * returns {@link Math#nextDown(float)} for the {@code endExclusive}. It is equivalent to:
      * <pre>{@code
      * if (value <= startInclusive) {

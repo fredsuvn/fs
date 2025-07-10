@@ -1,4 +1,4 @@
-package test.base;
+package test.base.math;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.math.MathKit;
@@ -53,14 +53,31 @@ public class MathTest {
     @Test
     public void testMakeIn() {
         {
+            // int
+            assertEquals(MathKit.makeIn(1, 0, 2), 1);
+            assertEquals(MathKit.makeIn(1, 1, 2), 1);
+            assertEquals(MathKit.makeIn(2, 0, 2), 1);
+            assertEquals(MathKit.makeIn(3, 0, 2), 1);
+            assertEquals(MathKit.makeIn(-3, 0, 2), 0);
+        }
+        {
+            // long
+            assertEquals(MathKit.makeIn(1L, 0L, 2L), 1L);
+            assertEquals(MathKit.makeIn(1L, 1L, 2L), 1L);
+            assertEquals(MathKit.makeIn(2L, 0L, 2L), 1L);
+            assertEquals(MathKit.makeIn(3L, 0L, 2L), 1L);
+            assertEquals(MathKit.makeIn(-3L, 0L, 2L), 0L);
+        }
+        {
             // float
             assertEquals(MathKit.makeIn(6.6f, 6.5f, 6.8f), 6.6f);
             assertEquals(MathKit.makeIn(6.6f, 6.6f, 6.8f), 6.6f);
             assertEquals(MathKit.makeIn(6.6f, 6.7f, 6.8f), 6.7f);
             assertEquals(MathKit.makeIn(6.8f, 6.7f, 6.8f), Math.nextDown(6.8f));
-            float x = 6.8f;
-            float start = Math.nextDown(x);
-            assertEquals(MathKit.makeIn(x, start, x), start);
+            float end = 6.8f;
+            float start = Math.nextDown(end);
+            assertEquals(MathKit.makeIn(end, start, end), start);
+            assertEquals(MathKit.makeIn(end, start, start), Math.nextDown(start));
         }
         {
             // double
@@ -68,9 +85,10 @@ public class MathTest {
             assertEquals(MathKit.makeIn(6.6, 6.6, 6.8), 6.6);
             assertEquals(MathKit.makeIn(6.6, 6.7, 6.8), 6.7);
             assertEquals(MathKit.makeIn(6.8, 6.7, 6.8), Math.nextDown(6.8));
-            float x = 6.8f;
-            float start = Math.nextDown(x);
-            assertEquals(MathKit.makeIn(x, start, x), start);
+            float end = 6.8f;
+            float start = Math.nextDown(end);
+            assertEquals(MathKit.makeIn(end, start, end), start);
+            assertEquals(MathKit.makeIn(end, start, start), Math.nextDown(start));
         }
     }
 }
