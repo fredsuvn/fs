@@ -8,6 +8,7 @@ import xyz.sunqian.common.base.random.RandomKit;
 import xyz.sunqian.common.collect.JieArray;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IORuntimeException;
+import xyz.sunqian.test.DataTest;
 import xyz.sunqian.test.ErrorAppender;
 import xyz.sunqian.test.ErrorOutputStream;
 import xyz.sunqian.test.MaterialBox;
@@ -26,7 +27,7 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
-public class BufferTest {
+public class BufferTest implements DataTest {
 
     @Test
     public void testIndex() {
@@ -44,7 +45,7 @@ public class BufferTest {
     public void testDirect() {
         {
             // direct
-            char[] chars = RandomKit.fill(new char[128]);
+            char[] chars = randomChars(128);
             CharBuffer heapBuffer = CharBuffer.wrap(chars);
             CharBuffer directBuffer = BufferKit.directBuffer(chars.length);
             directBuffer.put(chars);
@@ -55,7 +56,7 @@ public class BufferTest {
         }
         {
             // byte
-            byte[] data = RandomKit.fill(new byte[128]);
+            byte[] data = randomBytes(128);
             ByteBuffer buffer = BufferKit.directBuffer(data);
             assertEquals(buffer, ByteBuffer.wrap(data));
             assertEquals(buffer.position(), 0);

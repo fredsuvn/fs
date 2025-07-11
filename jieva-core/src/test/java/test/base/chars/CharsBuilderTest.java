@@ -4,10 +4,10 @@ import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.chars.CharsBuilder;
 import xyz.sunqian.common.base.chars.JieChars;
-import xyz.sunqian.common.base.random.RandomKit;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.io.IORuntimeException;
+import xyz.sunqian.test.DataTest;
 import xyz.sunqian.test.JieAssert;
 
 import java.io.CharArrayWriter;
@@ -22,7 +22,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.expectThrows;
 
-public class CharsBuilderTest {
+public class CharsBuilderTest implements DataTest {
 
     private static int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
@@ -78,7 +78,7 @@ public class CharsBuilderTest {
     }
 
     private void testCharsBuilder(int size) throws Exception {
-        char[] cs = RandomKit.fill(new char[size], '0', '9');
+        char[] cs = randomChars(size, '0', '9');
         char[] bs = new String(cs).toCharArray();
         CharsBuilder bb = new CharsBuilder();
         bb.close();

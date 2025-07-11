@@ -4,9 +4,9 @@ import org.testng.annotations.Test;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.bytes.JieBytes;
 import xyz.sunqian.common.base.chars.JieChars;
-import xyz.sunqian.common.base.random.RandomKit;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.io.IORuntimeException;
+import xyz.sunqian.test.DataTest;
 import xyz.sunqian.test.JieAssert;
 
 import java.io.ByteArrayOutputStream;
@@ -21,7 +21,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.expectThrows;
 
-public class BytesBuilderTest {
+public class BytesBuilderTest implements DataTest {
 
     private static int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
@@ -60,7 +60,7 @@ public class BytesBuilderTest {
     }
 
     private void testBytesBuilder(int size) throws Exception {
-        char[] cs = RandomKit.fill(new char[size], '0', '9');
+        char[] cs = randomChars(size, '0', '9');
         byte[] bs = new String(cs).getBytes();
         BytesBuilder bb = new BytesBuilder();
         bb.close();
