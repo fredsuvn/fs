@@ -3,6 +3,7 @@ package test.base.chars;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.JieSystem;
 import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.test.AssertTest;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -14,9 +15,8 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
-import static xyz.sunqian.test.JieAssert.invokeEquals;
 
-public class CharsTest {
+public class CharsTest implements AssertTest {
 
     @Test
     public void testChars() {

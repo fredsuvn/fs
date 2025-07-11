@@ -1,7 +1,7 @@
 package test;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.test.JieAssert;
+import xyz.sunqian.test.AssertTest;
 import xyz.sunqian.test.JieTestException;
 import xyz.sunqian.test.MaterialBox;
 import xyz.sunqian.test.TestIOException;
@@ -19,22 +19,20 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
-import static xyz.sunqian.test.JieAssert.invokeEquals;
-import static xyz.sunqian.test.JieAssert.invokeThrows;
 import static xyz.sunqian.test.MaterialBox.copyBuffer;
 import static xyz.sunqian.test.MaterialBox.copyBytes;
 import static xyz.sunqian.test.MaterialBox.copyChars;
 import static xyz.sunqian.test.MaterialBox.copyDirect;
 import static xyz.sunqian.test.MaterialBox.newFile;
 
-public class TestForTest {
+public class AssertTestTest implements AssertTest {
 
     @Test
     public void testThrows() throws Exception {
         Method throwError = Tt.class.getDeclaredMethod("throwError");
         assertEquals(invokeThrows(JieTestException.class, throwError, null).getClass(), JieTestException.class);
         Method string = Tt.class.getDeclaredMethod("string");
-        assertEquals(invokeThrows(JieAssert.NoThrows.class, string, null).getClass(), JieAssert.NoThrows.class);
+        assertEquals(invokeThrows(AssertTest.NoThrows.class, string, null).getClass(), AssertTest.NoThrows.class);
     }
 
     @Test

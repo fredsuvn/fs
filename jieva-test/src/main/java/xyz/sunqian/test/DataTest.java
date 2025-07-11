@@ -14,8 +14,9 @@ public interface DataTest {
      *
      * @param length the specified length
      * @return a new random bytes array of the specified length
+     * @throws NegativeArraySizeException if the length is negative
      */
-    default byte[] randomBytes(int length) throws IllegalArgumentException {
+    default byte[] randomBytes(int length) throws NegativeArraySizeException {
         return fillRandomBytes(new byte[length]);
     }
 
@@ -27,8 +28,12 @@ public interface DataTest {
      * @param startInclusive the start value inclusive
      * @param endExclusive   the end value exclusive
      * @return a new random bytes array of the specified length
+     * @throws NegativeArraySizeException if the length is negative
+     * @throws IllegalArgumentException   if {@code startInclusive >= endExclusive}
      */
-    default byte[] randomBytes(int length, byte startInclusive, byte endExclusive) throws IllegalArgumentException {
+    default byte[] randomBytes(
+        int length, byte startInclusive, byte endExclusive
+    ) throws NegativeArraySizeException, IllegalArgumentException {
         return fillRandomBytes(new byte[length], startInclusive, endExclusive);
     }
 
@@ -54,8 +59,11 @@ public interface DataTest {
      * @param startInclusive the start value inclusive
      * @param endExclusive   the end value exclusive
      * @return the array
+     * @throws IllegalArgumentException if {@code startInclusive >= endExclusive}
      */
-    default byte[] fillRandomBytes(byte[] bytes, byte startInclusive, byte endExclusive) {
+    default byte[] fillRandomBytes(
+        byte[] bytes, byte startInclusive, byte endExclusive
+    ) throws IllegalArgumentException {
         ThreadLocalRandom random = ThreadLocalRandom.current();
         for (int i = 0; i < bytes.length; i++) {
             bytes[i] = (byte) random.nextInt(startInclusive, endExclusive);
@@ -68,8 +76,9 @@ public interface DataTest {
      *
      * @param length the specified length
      * @return a new random chars array of the specified length
+     * @throws NegativeArraySizeException if the length is negative
      */
-    default char[] randomChars(int length) throws IllegalArgumentException {
+    default char[] randomChars(int length) throws NegativeArraySizeException {
         return fillRandomChars(new char[length]);
     }
 
@@ -81,8 +90,12 @@ public interface DataTest {
      * @param startInclusive the start value inclusive
      * @param endExclusive   the end value exclusive
      * @return a new random chars array of the specified length
+     * @throws NegativeArraySizeException if the length is negative
+     * @throws IllegalArgumentException   if {@code startInclusive >= endExclusive}
      */
-    default char[] randomChars(int length, char startInclusive, char endExclusive) throws IllegalArgumentException {
+    default char[] randomChars(
+        int length, char startInclusive, char endExclusive
+    ) throws NegativeArraySizeException, IllegalArgumentException {
         return fillRandomChars(new char[length], startInclusive, endExclusive);
     }
 
@@ -108,8 +121,11 @@ public interface DataTest {
      * @param startInclusive the start value inclusive
      * @param endExclusive   the end value exclusive
      * @return the array
+     * @throws IllegalArgumentException if {@code startInclusive >= endExclusive}
      */
-    default char[] fillRandomChars(char[] chars, char startInclusive, char endExclusive) {
+    default char[] fillRandomChars(
+        char[] chars, char startInclusive, char endExclusive
+    ) throws IllegalArgumentException {
         ThreadLocalRandom random = ThreadLocalRandom.current();
         for (int i = 0; i < chars.length; i++) {
             chars[i] = (char) random.nextInt(startInclusive & 0xFFFF, endExclusive & 0xFFFF);

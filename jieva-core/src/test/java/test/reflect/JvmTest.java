@@ -11,7 +11,7 @@ import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 import xyz.sunqian.common.reflect.JieJvm;
 import xyz.sunqian.common.reflect.JieType;
 import xyz.sunqian.common.reflect.JvmException;
-import xyz.sunqian.test.JieAssert;
+import xyz.sunqian.test.AssertTest;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -27,7 +27,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
-public class JvmTest {
+public class JvmTest implements AssertTest {
 
     @Test
     public void testInternalName() throws Exception {
@@ -139,7 +139,7 @@ public class JvmTest {
         // exception
         expectThrows(JvmException.class, () -> JieJvm.getDescriptor(JieType.upperWildcard(String.class)));
         Method getPrimitiveDescriptor = JieJvm.class.getDeclaredMethod("getPrimitiveDescriptor", Class.class);
-        JieAssert.invokeThrows(UnknownPrimitiveTypeException.class, getPrimitiveDescriptor, null, Object.class);
+        invokeThrows(UnknownPrimitiveTypeException.class, getPrimitiveDescriptor, null, Object.class);
     }
 
     private String asmDescriptor(Class<?> cls) {
@@ -303,9 +303,9 @@ public class JvmTest {
     @Test
     public void testRawType() throws Exception {
         Method raw1 = JieJvm.class.getDeclaredMethod("getRawClass", ParameterizedType.class);
-        JieAssert.invokeThrows(JvmException.class, raw1, null, TypeTest.errorParameterizedType());
+        invokeThrows(JvmException.class, raw1, null, TypeTest.errorParameterizedType());
         Method raw2 = JieJvm.class.getDeclaredMethod("getRawClass", GenericArrayType.class);
-        JieAssert.invokeThrows(JvmException.class, raw2, null, JieType.arrayType(JieType.otherType()));
+        invokeThrows(JvmException.class, raw2, null, JieType.arrayType(JieType.otherType()));
     }
 
     static class SignatureParser extends ClassVisitor {

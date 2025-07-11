@@ -6,6 +6,7 @@ import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieSystem;
 import xyz.sunqian.common.base.exception.UnknownArrayTypeException;
 import xyz.sunqian.common.base.process.ProcessReceipt;
+import xyz.sunqian.test.AssertTest;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
@@ -25,9 +26,8 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
-import static xyz.sunqian.test.JieAssert.invokeThrows;
 
-public class JieTest {
+public class JieTest implements AssertTest {
 
     @Test
     public void testBase() {

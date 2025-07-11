@@ -5,6 +5,7 @@ import test.utils.ErrorConstructor;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 import xyz.sunqian.common.reflect.JieClass;
+import xyz.sunqian.test.AssertTest;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -17,9 +18,8 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
-import static xyz.sunqian.test.JieAssert.invokeThrows;
 
-public class ClassTest {
+public class ClassTest implements AssertTest {
 
     @Test
     public void testMember() throws Exception {

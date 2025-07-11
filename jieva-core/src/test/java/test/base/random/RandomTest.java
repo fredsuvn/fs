@@ -6,7 +6,7 @@ import xyz.sunqian.common.base.exception.UnreachablePointException;
 import xyz.sunqian.common.base.random.RandomKit;
 import xyz.sunqian.common.base.random.Rng;
 import xyz.sunqian.common.base.random.Rog;
-import xyz.sunqian.test.JieAssert;
+import xyz.sunqian.test.AssertTest;
 
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
@@ -26,7 +26,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.assertTrue;
 
-public class RandomTest {
+public class RandomTest implements AssertTest {
 
     @Test
     public void testNext() {
@@ -457,7 +457,7 @@ public class RandomTest {
                 Rog.probability(10, "a")
             );
             Method getNode = supplier.getClass().getDeclaredMethod("getNode", long.class);
-            JieAssert.invokeThrows(UnreachablePointException.class, getNode, supplier, -1L);
+            invokeThrows(UnreachablePointException.class, getNode, supplier, -1L);
         }
     }
 

@@ -7,6 +7,7 @@ import xyz.sunqian.test.TestPrinter;
 import java.util.Arrays;
 
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.expectThrows;
 
 public class DataTestTest implements DataTest, TestPrinter {
 
@@ -15,6 +16,11 @@ public class DataTestTest implements DataTest, TestPrinter {
         testRandom(10, -22, 33);
         testRandom(100, -64, 22);
         testRandom(100, -33, 44);
+
+        expectThrows(NegativeArraySizeException.class, () -> randomBytes(-1));
+        expectThrows(IllegalArgumentException.class, () -> randomBytes(10, (byte) 3, (byte) 2));
+        expectThrows(NegativeArraySizeException.class, () -> randomChars(-1));
+        expectThrows(IllegalArgumentException.class, () -> randomChars(10, '3', '2'));
     }
 
     private void testRandom(int size, int from, int to) throws Exception {
