@@ -2,14 +2,14 @@ package test;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.test.DataTest;
-import xyz.sunqian.test.TestPrinter;
+import xyz.sunqian.test.PrintTest;
 
 import java.util.Arrays;
 
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
-public class DataTestTest implements DataTest, TestPrinter {
+public class DataTestTest implements DataTest, PrintTest {
 
     @Test
     public void testRandom() throws Exception {

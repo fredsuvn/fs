@@ -10,7 +10,7 @@ import java.io.PrintStream;
  *
  * @author sunqian
  */
-public interface TestPrinter {
+public interface PrintTest {
 
     /**
      * Sets the printer for current thread. The printer may be {@code null}, int this case the printer will be set to

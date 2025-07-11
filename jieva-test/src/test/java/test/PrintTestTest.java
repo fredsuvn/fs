@@ -1,14 +1,14 @@
 package test;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.test.TestPrinter;
+import xyz.sunqian.test.PrintTest;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 import static org.testng.Assert.assertEquals;
 
-public class TestPrinterTest implements TestPrinter {
+public class PrintTestTest implements PrintTest {
 
     @Test
     public void testPrinter() throws Exception {
