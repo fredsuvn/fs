@@ -3,12 +3,12 @@ package test.io;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.base.chars.CharsBuilder;
-import xyz.sunqian.common.base.random.RandomKit;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.CharReader;
 import xyz.sunqian.common.io.CharSegment;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.io.IORuntimeException;
+import xyz.sunqian.test.DataTest;
 import xyz.sunqian.test.ErrorAppender;
 import xyz.sunqian.test.ReadOps;
 import xyz.sunqian.test.TestReader;
@@ -27,7 +27,7 @@ import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
-public class CharReaderTest {
+public class CharReaderTest implements DataTest {
 
     private static final int DST_SIZE = 256;
 
@@ -57,7 +57,7 @@ public class CharReaderTest {
     private void testRead0(int dataSize, int readSize) throws Exception {
         {
             // reader
-            char[] data = RandomKit.fill(new char[dataSize]);
+            char[] data = randomChars(dataSize);
             testRead0(CharReader.from(new CharArrayReader(data)), data, readSize, false);
             testSkip0(CharReader.from(new CharArrayReader(data)), data, readSize);
             testRead0(CharReader.from(new OneCharReader(data)), data, readSize, false);
@@ -73,7 +73,7 @@ public class CharReaderTest {
         }
         {
             // char array
-            char[] data = RandomKit.fill(new char[dataSize]);
+            char[] data = randomChars(dataSize);
             testRead0(CharReader.from(data), data, readSize, true);
             testSkip0(CharReader.from(data), data, readSize);
             char[] dataPadding = new char[data.length + 66];
@@ -96,7 +96,7 @@ public class CharReaderTest {
         }
         {
             // char sequence
-            char[] data = RandomKit.fill(new char[dataSize]);
+            char[] data = randomChars(dataSize);
             String dataStr = new String(data);
             testRead0(CharReader.from(dataStr), data, readSize, true);
             testSkip0(CharReader.from(data), data, readSize);
@@ -121,7 +121,7 @@ public class CharReaderTest {
         }
         {
             // buffer
-            char[] data = RandomKit.fill(new char[dataSize]);
+            char[] data = randomChars(dataSize);
             testRead0(CharReader.from(CharBuffer.wrap(data)), data, readSize, true);
             testSkip0(CharReader.from(CharBuffer.wrap(data)), data, readSize);
             if (dataSize >= 128) {
@@ -132,7 +132,7 @@ public class CharReaderTest {
         }
         {
             // limited
-            char[] data = RandomKit.fill(new char[dataSize]);
+            char[] data = randomChars(dataSize);
             testRead0(
                 CharReader.from(data).limit(data.length),
                 data,
@@ -240,7 +240,7 @@ public class CharReaderTest {
     }
 
     private void testReadTo0(int dataSize, int readSize) {
-        char[] data = RandomKit.fill(new char[dataSize]);
+        char[] data = randomChars(dataSize);
         char[] dataPadding = new char[data.length + 66];
         System.arraycopy(data, 0, dataPadding, 33, data.length);
         {
@@ -518,7 +518,7 @@ public class CharReaderTest {
         int limitSize = dataSize / 2;
         {
             // reader
-            char[] data = RandomKit.fill(new char[dataSize]);
+            char[] data = randomChars(dataSize);
             testShare(
                 CharReader.from(new CharArrayReader(data)),
                 CharBuffer.wrap(data),
@@ -532,7 +532,7 @@ public class CharReaderTest {
         }
         {
             // char array
-            char[] data = RandomKit.fill(new char[dataSize]);
+            char[] data = randomChars(dataSize);
             testShare(CharReader.from(data), CharBuffer.wrap(data), true, true);
             testShare(
                 CharReader.from(data).limit(limitSize),
@@ -554,7 +554,7 @@ public class CharReaderTest {
         }
         {
             // char sequence
-            char[] data = RandomKit.fill(new char[dataSize]);
+            char[] data = randomChars(dataSize);
             CharSequence dataStr = JieString.asChars(data);
             testShare(CharReader.from(dataStr), CharBuffer.wrap(data), false, true);
             testShare(
@@ -578,7 +578,7 @@ public class CharReaderTest {
         }
         {
             // char buffer
-            char[] data = RandomKit.fill(new char[dataSize]);
+            char[] data = randomChars(dataSize);
             testShare(
                 CharReader.from(CharBuffer.wrap(data)),
                 CharBuffer.wrap(data),
@@ -623,7 +623,7 @@ public class CharReaderTest {
 
     @Test
     public void testSegment() throws Exception {
-        char[] chars = RandomKit.fill(new char[64]);
+        char[] chars = randomChars(64);
         CharReader reader = CharReader.from(chars);
         CharSegment segment = reader.read(chars.length * 2);
         assertSame(segment.data().array(), chars);

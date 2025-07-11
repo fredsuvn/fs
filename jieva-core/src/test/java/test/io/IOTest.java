@@ -5,9 +5,9 @@ import org.testng.annotations.Test;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.chars.CharsBuilder;
 import xyz.sunqian.common.base.chars.JieChars;
-import xyz.sunqian.common.base.random.RandomKit;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.io.IORuntimeException;
+import xyz.sunqian.test.DataTest;
 import xyz.sunqian.test.ErrorAppender;
 import xyz.sunqian.test.ReadOps;
 import xyz.sunqian.test.TestInputStream;
@@ -27,14 +27,14 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.expectThrows;
 
-public class IOTest {
+public class IOTest implements DataTest {
 
     @Test
     public void testReader() throws Exception {
         {
             // byte
             // read all
-            byte[] data = RandomKit.fill(new byte[1024]);
+            byte[] data = randomBytes(1024);
             assertEquals(IOKit.read(new ByteArrayInputStream(data)), data);
             assertEquals(IOKit.read(new ByteArrayInputStream(data), 5), Arrays.copyOf(data, 5));
             assertEquals(
@@ -134,7 +134,7 @@ public class IOTest {
         {
             // char
             // read all
-            char[] data = RandomKit.fill(new char[1024]);
+            char[] data = randomChars(1024);
             assertEquals(IOKit.read(new CharArrayReader(data)), data);
             assertEquals(IOKit.read(new CharArrayReader(data), 5), Arrays.copyOf(data, 5));
             assertEquals(IOKit.string(new CharArrayReader(data)), new String(data));
@@ -169,7 +169,7 @@ public class IOTest {
 
     @Test
     public void testWrite() throws Exception {
-        char[] data = RandomKit.fill(new char[1024]);
+        char[] data = randomChars(1024);
         CharsBuilder appender1 = new CharsBuilder();
         IOKit.write(appender1, data);
         assertEquals(appender1.toCharArray(), data);
@@ -214,7 +214,7 @@ public class IOTest {
 
     @Test
     public void testAvailable() throws Exception {
-        byte[] data = RandomKit.fill(new byte[10]);
+        byte[] data = randomBytes(10);
         class In extends InputStream {
 
             private final int avai;

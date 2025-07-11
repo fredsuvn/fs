@@ -66,7 +66,7 @@ public interface Rog {
      * for each {@link Probability} is {@code score / sum(score)}. Note the total score of all provided
      * {@link Probability}s can not overflow the maximum value of {@code long}.
      * <p>
-     * This method uses {@link Rng#getDefault()} to generate the random long value, which is used to calculate the hit
+     * This method uses {@link Rng#threadLocal()} to generate the random long value, which is used to calculate the hit
      * probability.
      *
      * @param probabilities the provided {@link Probability}s
@@ -76,7 +76,7 @@ public interface Rog {
     default <T> @Nonnull Supplier<T> supplier(
         @Nonnull Collection<? extends @Nonnull Probability<? extends T>> probabilities
     ) {
-        return supplier(Rng.getDefault(), probabilities);
+        return supplier(Rng.threadLocal(), probabilities);
     }
 
     /**

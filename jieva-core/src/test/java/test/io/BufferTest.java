@@ -4,7 +4,6 @@ import org.testng.annotations.Test;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.chars.CharsBuilder;
 import xyz.sunqian.common.base.chars.JieChars;
-import xyz.sunqian.common.base.random.RandomKit;
 import xyz.sunqian.common.collect.JieArray;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IORuntimeException;
@@ -72,7 +71,7 @@ public class BufferTest implements DataTest {
         }
         {
             // char
-            char[] data = RandomKit.fill(new char[128]);
+            char[] data = randomChars(128);
             CharBuffer buffer = BufferKit.directBuffer(data);
             assertEquals(buffer, CharBuffer.wrap(data));
             assertEquals(buffer.position(), 0);
@@ -92,7 +91,7 @@ public class BufferTest implements DataTest {
     public void testCopy() {
         {
             // byte
-            byte[] data = RandomKit.fill(new byte[128]);
+            byte[] data = randomBytes(128);
             ByteBuffer b1 = ByteBuffer.wrap(data, 6, 66);
             b1.get(new byte[5]);
             ByteBuffer b2 = BufferKit.copy(b1);
@@ -110,7 +109,7 @@ public class BufferTest implements DataTest {
         }
         {
             // char
-            char[] data = RandomKit.fill(new char[128]);
+            char[] data = randomChars(128);
             CharBuffer b1 = CharBuffer.wrap(data, 6, 66);
             b1.get(new char[5]);
             CharBuffer b2 = BufferKit.copy(b1);
@@ -299,7 +298,7 @@ public class BufferTest implements DataTest {
         int actualLen = Math.min(totalSize, readSize);
         {
             // read all
-            byte[] data = RandomKit.fill(new byte[totalSize]);
+            byte[] data = randomBytes(totalSize);
             ByteBuffer src = ByteBuffer.wrap(data);
             byte[] ret = BufferKit.read(src);
             if (totalSize == 0) {
@@ -319,7 +318,7 @@ public class BufferTest implements DataTest {
         }
         {
             // buffer to array
-            byte[] data = RandomKit.fill(new byte[totalSize]);
+            byte[] data = randomBytes(totalSize);
             ByteBuffer src = ByteBuffer.wrap(data);
             byte[] dst = new byte[readSize];
             assertEquals(BufferKit.readTo(src, dst), actualReadSize(totalSize, readSize));
@@ -333,7 +332,7 @@ public class BufferTest implements DataTest {
         }
         {
             // buffer to buffer
-            byte[] data = RandomKit.fill(new byte[totalSize]);
+            byte[] data = randomBytes(totalSize);
             ByteBuffer src = ByteBuffer.wrap(data);
             byte[] dstData = new byte[readSize];
             ByteBuffer dst = ByteBuffer.wrap(dstData);
@@ -355,7 +354,7 @@ public class BufferTest implements DataTest {
         }
         {
             // buffer to channel
-            byte[] data = RandomKit.fill(new byte[totalSize]);
+            byte[] data = randomBytes(totalSize);
             BytesBuilder builder = new BytesBuilder();
             ByteBuffer src = ByteBuffer.wrap(data);
             WritableByteChannel dst = Channels.newChannel(builder);
@@ -382,7 +381,7 @@ public class BufferTest implements DataTest {
         }
         {
             // heap buffer to stream
-            byte[] data = RandomKit.fill(new byte[totalSize]);
+            byte[] data = randomBytes(totalSize);
             BytesBuilder builder = new BytesBuilder();
             ByteBuffer src = ByteBuffer.wrap(data);
             assertEquals(BufferKit.readTo(src, builder), totalSize == 0 ? -1 : totalSize);
@@ -396,7 +395,7 @@ public class BufferTest implements DataTest {
         }
         {
             // direct buffer to stream
-            byte[] data = RandomKit.fill(new byte[totalSize]);
+            byte[] data = randomBytes(totalSize);
             BytesBuilder builder = new BytesBuilder();
             ByteBuffer src = BufferKit.directBuffer(data);
             assertEquals(BufferKit.readTo(src, builder), totalSize == 0 ? -1 : totalSize);
@@ -440,7 +439,7 @@ public class BufferTest implements DataTest {
         int actualLen = Math.min(totalSize, readSize);
         {
             // read all
-            char[] data = RandomKit.fill(new char[totalSize]);
+            char[] data = randomChars(totalSize);
             CharBuffer src = CharBuffer.wrap(data);
             char[] ret = BufferKit.read(src);
             if (totalSize == 0) {
@@ -477,7 +476,7 @@ public class BufferTest implements DataTest {
         }
         {
             // buffer to array
-            char[] data = RandomKit.fill(new char[totalSize]);
+            char[] data = randomChars(totalSize);
             CharBuffer src = CharBuffer.wrap(data);
             char[] dst = new char[readSize];
             assertEquals(BufferKit.readTo(src, dst), actualReadSize(totalSize, readSize));
@@ -491,7 +490,7 @@ public class BufferTest implements DataTest {
         }
         {
             // buffer to buffer
-            char[] data = RandomKit.fill(new char[totalSize]);
+            char[] data = randomChars(totalSize);
             CharBuffer src = CharBuffer.wrap(data);
             char[] dstData = new char[readSize];
             CharBuffer dst = CharBuffer.wrap(dstData);
@@ -513,7 +512,7 @@ public class BufferTest implements DataTest {
         }
         {
             // heap buffer to appender
-            char[] data = RandomKit.fill(new char[totalSize]);
+            char[] data = randomChars(totalSize);
             CharsBuilder builder = new CharsBuilder();
             CharBuffer src = CharBuffer.wrap(data);
             assertEquals(BufferKit.readTo(src, builder), totalSize == 0 ? -1 : totalSize);
@@ -527,7 +526,7 @@ public class BufferTest implements DataTest {
         }
         {
             // direct buffer to appender
-            char[] data = RandomKit.fill(new char[totalSize]);
+            char[] data = randomChars(totalSize);
             CharsBuilder builder = new CharsBuilder();
             CharBuffer src = BufferKit.directBuffer(data);
             assertEquals(BufferKit.readTo(src, builder), totalSize == 0 ? -1 : totalSize);

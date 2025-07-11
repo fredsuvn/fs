@@ -1,8 +1,14 @@
 package xyz.sunqian.common.base.random;
 
+import xyz.sunqian.annotations.JdkDependent;
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.common.base.JieCheck;
+import xyz.sunqian.common.base.math.MathKit;
+import xyz.sunqian.common.collect.JieStream;
 
-import java.util.PrimitiveIterator;
+import java.nio.ByteBuffer;
+import java.security.SecureRandom;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.DoubleSupplier;
 import java.util.function.IntSupplier;
@@ -11,148 +17,331 @@ import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
-final class RngImpl implements Rng {
+final class RngImpl {
 
-    static final @Nonnull RngImpl INST = new RngImpl();
-
-    private @Nonnull ThreadLocalRandom random() {
-        return ThreadLocalRandom.current();
+    static @Nonnull Rng random(@Nonnull Random random) {
+        return new RandomRng(random);
     }
 
-    @Override
-    public int nextInt() {
-        return random().nextInt();
+    static @Nonnull Rng threadLocalRandom() {
+        return ThreadLocalRandomRng.INST;
     }
 
-    @Override
-    public int nextInt(int startInclusive, int endExclusive) throws IllegalArgumentException {
-        if (startInclusive == endExclusive) {
-            return startInclusive;
+    @JdkDependent
+    private static final class RandomRng extends AbsRngImpl {
+
+        private final @Nonnull Random random;
+
+        private RandomRng(@Nonnull Random random) {
+            this.random = random;
         }
-        return random().nextInt(startInclusive, endExclusive);
-    }
 
-    @Override
-    public long nextLong() {
-        return random().nextLong();
-    }
-
-    @Override
-    public long nextLong(long startInclusive, long endExclusive) throws IllegalArgumentException {
-        if (startInclusive == endExclusive) {
-            return startInclusive;
+        @Override
+        protected @Nonnull Random random() {
+            return random;
         }
-        return random().nextLong(startInclusive, endExclusive);
-    }
 
-    @Override
-    public double nextDouble() {
-        return random().nextDouble();
-    }
-
-    @Override
-    public double nextDouble(double startInclusive, double endExclusive) throws IllegalArgumentException {
-        if (startInclusive == endExclusive) {
-            return startInclusive;
+        @Override
+        public void reset(long seed) {
+            random.setSeed(seed);
         }
-        return random().nextDouble(startInclusive, endExclusive);
-    }
 
-    @Override
-    public @Nonnull IntStream ints() {
-        return random().ints();
-    }
-
-    @Override
-    public @Nonnull IntStream ints(int startInclusive, int endExclusive) {
-        if (startInclusive == endExclusive) {
-            return IntStream.generate(() -> startInclusive);
+        @Override
+        public int nextInt() {
+            return random().nextInt();
         }
-        return random().ints(startInclusive, endExclusive);
-    }
 
-    @Override
-    public @Nonnull IntSupplier intSupplier(int startInclusive, int endExclusive) throws IllegalArgumentException {
-        if (startInclusive == endExclusive) {
-            return () -> startInclusive;
-        }
-        return new IntSupplier() {
-
-            private final @Nonnull PrimitiveIterator.OfInt iterator =
-                random().ints(startInclusive, endExclusive).iterator();
-
-            @Override
-            public int getAsInt() {
-                return iterator.nextInt();
+        @Override
+        public int nextInt(int startInclusive, int endExclusive) throws IllegalArgumentException {
+            if (startInclusive == endExclusive) {
+                return startInclusive;
             }
-        };
-    }
-
-    @Override
-    public @Nonnull LongStream longs() {
-        return random().longs();
-    }
-
-    @Override
-    public @Nonnull LongStream longs(long startInclusive, long endExclusive) {
-        if (startInclusive == endExclusive) {
-            return LongStream.generate(() -> startInclusive);
-        }
-        return random().longs(startInclusive, endExclusive);
-    }
-
-    @Override
-    public @Nonnull LongSupplier longSupplier(long startInclusive, long endExclusive) throws IllegalArgumentException {
-        if (startInclusive == endExclusive) {
-            return () -> startInclusive;
-        }
-        return new LongSupplier() {
-
-            private final @Nonnull PrimitiveIterator.OfLong iterator =
-                random().longs(startInclusive, endExclusive).iterator();
-
-            @Override
-            public long getAsLong() {
-                return iterator.nextLong();
+            if (startInclusive > endExclusive) {
+                throw new IllegalArgumentException("startInclusive must <= endExclusive.");
             }
-        };
-    }
-
-    @Override
-    public @Nonnull DoubleStream doubles() {
-        return random().doubles();
-    }
-
-    @Override
-    public @Nonnull DoubleStream doubles(double startInclusive, double endExclusive) {
-        if (startInclusive == endExclusive) {
-            return DoubleStream.generate(() -> startInclusive);
-        }
-        return random().doubles(startInclusive, endExclusive);
-    }
-
-    @Override
-    public @Nonnull DoubleSupplier doubleSupplier(
-        double startInclusive, double endExclusive
-    ) throws IllegalArgumentException {
-        if (startInclusive == endExclusive) {
-            return () -> startInclusive;
-        }
-        return new DoubleSupplier() {
-
-            private final @Nonnull PrimitiveIterator.OfDouble iterator =
-                random().doubles(startInclusive, endExclusive).iterator();
-
-            @Override
-            public double getAsDouble() {
-                return iterator.nextDouble();
+            {
+                // from JDK8:
+                int n = endExclusive - startInclusive;
+                if (n > 0) {
+                    return random().nextInt(n) + startInclusive;
+                } else {  // range not representable as int
+                    int r;
+                    do {
+                        r = nextInt();
+                    } while (r < startInclusive || r >= endExclusive);
+                    return r;
+                }
             }
-        };
+        }
+
+        @Override
+        public long nextLong() {
+            return random().nextLong();
+        }
+
+        @SuppressWarnings("StatementWithEmptyBody")
+        @Override
+        public long nextLong(long startInclusive, long endExclusive) throws IllegalArgumentException {
+            if (startInclusive == endExclusive) {
+                return startInclusive;
+            }
+            if (startInclusive > endExclusive) {
+                throw new IllegalArgumentException("startInclusive must <= endExclusive.");
+            }
+            {
+                // from JDK8:
+                long r = nextLong();
+                long n = endExclusive - startInclusive, m = n - 1;
+                if ((n & m) == 0L)  // power of two
+                    r = (r & m) + startInclusive;
+                else if (n > 0L) {  // reject over-represented candidates
+                    for (long u = r >>> 1;            // ensure nonnegative
+                         u + m - (r = u % n) < 0L;    // rejection check
+                         u = nextLong() >>> 1) // retry
+                        ;
+                    r += startInclusive;
+                } else {              // range not representable as long
+                    while (r < startInclusive || r >= endExclusive)
+                        r = nextLong();
+                }
+                return r;
+            }
+        }
+
+        @Override
+        public double nextDouble() {
+            return random().nextDouble();
+        }
+
+        @Override
+        public double nextDouble(double startInclusive, double endExclusive) throws IllegalArgumentException {
+            if (startInclusive == endExclusive) {
+                return startInclusive;
+            }
+            if (startInclusive > endExclusive) {
+                throw new IllegalArgumentException("startInclusive must <= endExclusive.");
+            }
+            {
+                // from JDK8:
+                double r = nextDouble();
+                r = r * (endExclusive - startInclusive) + startInclusive;
+                if (r >= endExclusive) // correct for rounding
+                    r = Double.longBitsToDouble(Double.doubleToLongBits(endExclusive) - 1);
+                return r;
+            }
+        }
+
+        @Override
+        public byte @Nonnull [] nextBytes(int length) throws IllegalArgumentException {
+            return super.nextBytes(length);
+        }
+
+        @Override
+        public void nextBytes(byte @Nonnull [] bytes) {
+            random().nextBytes( bytes);
+        }
+
+        @Override
+        public void nextBytes(byte @Nonnull [] bytes, int off, int len) throws IndexOutOfBoundsException {
+            SecureRandom r = new SecureRandom();
+            //random().n
+        }
+
+        @Override
+        public void nextBytes(@Nonnull ByteBuffer bytes) {
+            super.nextBytes(bytes);
+        }
     }
 
-    @Override
-    public byte @Nonnull [] fill(byte @Nonnull [] array) {
-        random().nextBytes(array);
-        return array;
+    private static final class ThreadLocalRandomRng extends AbsRngImpl {
+
+        private static final @Nonnull ThreadLocalRandomRng INST = new ThreadLocalRandomRng();
+
+        @Override
+        protected @Nonnull ThreadLocalRandom random() {
+            return ThreadLocalRandom.current();
+        }
+
+        @Override
+        public void reset(long seed) {
+        }
+
+        @Override
+        public int nextInt() {
+            return random().nextInt();
+        }
+
+        @Override
+        public int nextInt(int startInclusive, int endExclusive) throws IllegalArgumentException {
+            if (startInclusive == endExclusive) {
+                return startInclusive;
+            }
+            return random().nextInt(startInclusive, endExclusive);
+        }
+
+        @Override
+        public long nextLong() {
+            return random().nextLong();
+        }
+
+        @Override
+        public long nextLong(long startInclusive, long endExclusive) throws IllegalArgumentException {
+            return random().nextLong(startInclusive, endExclusive);
+        }
+
+        @Override
+        public double nextDouble() {
+            return random().nextDouble();
+        }
+
+        @Override
+        public double nextDouble(double startInclusive, double endExclusive) throws IllegalArgumentException {
+            return random().nextDouble(startInclusive, endExclusive);
+        }
+    }
+
+    private static abstract class AbsRngImpl implements Rng {
+
+        protected abstract @Nonnull Random random();
+
+        @Override
+        public float nextFloat() {
+            double value = nextDouble();
+            return MathKit.makeIn((float) value, 0.0f, 1.0f);
+        }
+
+        @Override
+        public float nextFloat(float startInclusive, float endExclusive) throws IllegalArgumentException {
+            double value = nextDouble(startInclusive, endExclusive);
+            return MathKit.makeIn((float) value, startInclusive, endExclusive);
+        }
+
+        @Override
+        public void nextBytes(byte @Nonnull [] bytes) {
+            random().nextBytes(bytes);
+        }
+
+        @Override
+        public void nextBytes(byte @Nonnull [] bytes, int off, int len) throws IndexOutOfBoundsException {
+            JieCheck.checkOffsetLength(bytes.length, off, len);
+            if (off == 0 && len == bytes.length) {
+                random().nextBytes(bytes);
+                return;SecureRandom
+            }
+            int i = 0;
+            for (int words = len >> 3; words-- > 0; ) {
+                long rnd = nextLong();
+                for (int n = 8; n-- > 0; rnd >>>= Byte.SIZE) {
+                    bytes[i++] = (byte) rnd;
+                }
+            }
+            if (i < len) {
+                for (long rnd = nextLong(); i < len; rnd >>>= Byte.SIZE) {
+                    bytes[i++] = (byte) rnd;
+                }
+            }
+        }
+
+        @Override
+        public @Nonnull IntStream ints() {
+            return random().ints();
+        }
+
+        @Override
+        public @Nonnull IntStream ints(int startInclusive, int endExclusive) throws IllegalArgumentException {
+            if (startInclusive == endExclusive) {
+                return IntStream.generate(() -> startInclusive);
+            }
+            return random().ints(startInclusive, endExclusive);
+        }
+
+        @Override
+        public @Nonnull IntStream ints(long size) throws IllegalArgumentException {
+            return random().ints(size);
+        }
+
+        @Override
+        public @Nonnull IntStream ints(long size, int startInclusive, int endExclusive) throws IllegalArgumentException {
+            if (startInclusive == endExclusive) {
+                return IntStream.generate(() -> startInclusive).limit(size);
+            }
+            return random().ints(size, startInclusive, endExclusive);
+        }
+
+        @Override
+        public @Nonnull IntSupplier intSupplier(int startInclusive, int endExclusive) throws IllegalArgumentException {
+            if (startInclusive == endExclusive) {
+                return () -> startInclusive;
+            }
+            return JieStream.toSupplier(random().ints(startInclusive, endExclusive));
+        }
+
+        @Override
+        public @Nonnull LongStream longs() {
+            return random().longs();
+        }
+
+        @Override
+        public @Nonnull LongStream longs(long startInclusive, long endExclusive) throws IllegalArgumentException {
+            if (startInclusive == endExclusive) {
+                return LongStream.generate(() -> startInclusive);
+            }
+            return random().longs(startInclusive, endExclusive);
+        }
+
+        @Override
+        public @Nonnull LongStream longs(long size) throws IllegalArgumentException {
+            return random().longs(size);
+        }
+
+        @Override
+        public @Nonnull LongStream longs(long size, long startInclusive, long endExclusive) throws IllegalArgumentException {
+            if (startInclusive == endExclusive) {
+                return LongStream.generate(() -> startInclusive).limit(size);
+            }
+            return random().longs(size, startInclusive, endExclusive);
+        }
+
+        @Override
+        public @Nonnull LongSupplier longSupplier(long startInclusive, long endExclusive) throws IllegalArgumentException {
+            if (startInclusive == endExclusive) {
+                return () -> startInclusive;
+            }
+            return JieStream.toSupplier(random().longs(startInclusive, endExclusive));
+        }
+
+        @Override
+        public @Nonnull DoubleStream doubles() {
+            return random().doubles();
+        }
+
+        @Override
+        public @Nonnull DoubleStream doubles(double startInclusive, double endExclusive) throws IllegalArgumentException {
+            if (startInclusive == endExclusive) {
+                return DoubleStream.generate(() -> startInclusive);
+            }
+            return random().doubles(startInclusive, endExclusive);
+        }
+
+        @Override
+        public @Nonnull DoubleStream doubles(long size) throws IllegalArgumentException {
+            return random().doubles(size);
+        }
+
+        @Override
+        public @Nonnull DoubleStream doubles(long size, double startInclusive, double endExclusive) throws IllegalArgumentException {
+            if (startInclusive == endExclusive) {
+                return DoubleStream.generate(() -> startInclusive).limit(size);
+            }
+            return random().doubles(size, startInclusive, endExclusive);
+        }
+
+        @Override
+        public @Nonnull DoubleSupplier doubleSupplier(double startInclusive, double endExclusive) throws IllegalArgumentException {
+            if (startInclusive == endExclusive) {
+                return () -> startInclusive;
+            }
+            return JieStream.toSupplier(random().doubles(startInclusive, endExclusive));
+        }
     }
 }

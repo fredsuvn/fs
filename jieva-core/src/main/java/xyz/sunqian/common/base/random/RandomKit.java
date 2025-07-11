@@ -19,7 +19,7 @@ import java.util.stream.LongStream;
  */
 public class RandomKit {
 
-    private static final @Nonnull Rng rng = Rng.getDefault();
+    private static final @Nonnull Rng rng = Rng.threadLocal();
     private static final @Nonnull Rog rog = Rog.getDefault();
 
     /**
@@ -358,195 +358,195 @@ public class RandomKit {
         return rng.doubleSupplier(startInclusive, endExclusive);
     }
 
-    /**
-     * Fills the given array with random boolean values and returns the array.
-     *
-     * @param array the given array
-     * @return the given array
-     */
-    public static boolean @Nonnull [] fill(boolean @Nonnull [] array) {
-        return rng.fill(array);
-    }
-
-    /**
-     * Fills the given array with random byte values and returns the array.
-     *
-     * @param array the given array
-     * @return the given array
-     */
-    public static byte @Nonnull [] fill(byte @Nonnull [] array) {
-        return rng.fill(array);
-    }
-
-    /**
-     * Fills the given array with random byte values (as if by {@link #nextByte(byte, byte)}) and returns the array.
-     *
-     * @param array          the given array
-     * @param startInclusive the start value inclusive
-     * @param endExclusive   the end value exclusive
-     * @return the given array
-     * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
-     */
-    public static byte @Nonnull [] fill(
-        byte @Nonnull [] array, byte startInclusive, byte endExclusive
-    ) throws IllegalArgumentException {
-        return rng.fill(array, startInclusive, endExclusive);
-    }
-
-    /**
-     * Fills the given array with random short values and returns the array.
-     *
-     * @param array the given array
-     * @return the given array
-     */
-    public static short @Nonnull [] fill(short @Nonnull [] array) {
-        return rng.fill(array);
-    }
-
-    /**
-     * Fills the given array with random short values (as if by {@link #nextShort(short, short)}) and returns the
-     * array.
-     *
-     * @param array          the given array
-     * @param startInclusive the start value inclusive
-     * @param endExclusive   the end value exclusive
-     * @return the given array
-     * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
-     */
-    public static short @Nonnull [] fill(
-        short @Nonnull [] array, short startInclusive, short endExclusive
-    ) throws IllegalArgumentException {
-        return rng.fill(array, startInclusive, endExclusive);
-    }
-
-    /**
-     * Fills the given array with random char values and returns the array.
-     *
-     * @param array the given array
-     * @return the given array
-     */
-    public static char @Nonnull [] fill(char @Nonnull [] array) {
-        return rng.fill(array);
-    }
-
-    /**
-     * Fills the given array with random char values (as if by {@link #nextChar(char, char)}) and returns the array.
-     *
-     * @param array          the given array
-     * @param startInclusive the start value inclusive
-     * @param endExclusive   the end value exclusive
-     * @return the given array
-     * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
-     */
-    public static char @Nonnull [] fill(
-        char @Nonnull [] array, char startInclusive, char endExclusive
-    ) throws IllegalArgumentException {
-        return rng.fill(array, startInclusive, endExclusive);
-    }
-
-    /**
-     * Fills the given array with random int values and returns the array.
-     *
-     * @param array the given array
-     * @return the given array
-     */
-    public static int @Nonnull [] fill(int @Nonnull [] array) {
-        return rng.fill(array);
-    }
-
-    /**
-     * Fills the given array with random int values (as if by {@link #nextInt(int, int)}) and returns the array.
-     *
-     * @param array          the given array
-     * @param startInclusive the start value inclusive
-     * @param endExclusive   the end value exclusive
-     * @return the given array
-     * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
-     */
-    public static int @Nonnull [] fill(
-        int @Nonnull [] array, int startInclusive, int endExclusive
-    ) throws IllegalArgumentException {
-        return rng.fill(array, startInclusive, endExclusive);
-    }
-
-    /**
-     * Fills the given array with random long values and returns the array.
-     *
-     * @param array the given array
-     * @return the given array
-     */
-    public static long @Nonnull [] fill(long @Nonnull [] array) {
-        return rng.fill(array);
-    }
-
-    /**
-     * Fills the given array with random long values (as if by {@link #nextLong(long, long)}) and returns the array.
-     *
-     * @param array          the given array
-     * @param startInclusive the start value inclusive
-     * @param endExclusive   the end value exclusive
-     * @return the given array
-     * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
-     */
-    public static long @Nonnull [] fill(
-        long @Nonnull [] array, long startInclusive, long endExclusive
-    ) throws IllegalArgumentException {
-        return rng.fill(array, startInclusive, endExclusive);
-    }
-
-    /**
-     * Fills the given array with random float values (between {@code 0} inclusive and {@code 1} exclusive) and returns
-     * the array.
-     *
-     * @param array the given array
-     * @return the given array
-     */
-    public static float @Nonnull [] fill(float @Nonnull [] array) {
-        return rng.fill(array);
-    }
-
-    /**
-     * Fills the given array with random float values (as if by {@link #nextFloat(float, float)}) and returns the
-     * array.
-     *
-     * @param array          the given array
-     * @param startInclusive the start value inclusive
-     * @param endExclusive   the end value exclusive
-     * @return the given array
-     * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
-     */
-    public static float @Nonnull [] fill(
-        float @Nonnull [] array, float startInclusive, float endExclusive
-    ) throws IllegalArgumentException {
-        return rng.fill(array, startInclusive, endExclusive);
-    }
-
-    /**
-     * Fills the given array with random double values (between {@code 0} inclusive and {@code 1} exclusive) and returns
-     * the array.
-     *
-     * @param array the given array
-     * @return the given array
-     */
-    public static double @Nonnull [] fill(double @Nonnull [] array) {
-        return rng.fill(array);
-    }
-
-    /**
-     * Fills the given array with random double values (as if by {@link #nextDouble(double, double)}) and returns the
-     * array.
-     *
-     * @param array          the given array
-     * @param startInclusive the start value inclusive
-     * @param endExclusive   the end value exclusive
-     * @return the given array
-     * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
-     */
-    public static double @Nonnull [] fill(
-        double @Nonnull [] array, double startInclusive, double endExclusive
-    ) throws IllegalArgumentException {
-        return rng.fill(array, startInclusive, endExclusive);
-    }
+    // /**
+    //  * Fills the given array with random boolean values and returns the array.
+    //  *
+    //  * @param array the given array
+    //  * @return the given array
+    //  */
+    // public static boolean @Nonnull [] fill(boolean @Nonnull [] array) {
+    //     return rng.fill(array);
+    // }
+    //
+    // /**
+    //  * Fills the given array with random byte values and returns the array.
+    //  *
+    //  * @param array the given array
+    //  * @return the given array
+    //  */
+    // public static byte @Nonnull [] fill(byte @Nonnull [] array) {
+    //     return rng.fill(array);
+    // }
+    //
+    // /**
+    //  * Fills the given array with random byte values (as if by {@link #nextByte(byte, byte)}) and returns the array.
+    //  *
+    //  * @param array          the given array
+    //  * @param startInclusive the start value inclusive
+    //  * @param endExclusive   the end value exclusive
+    //  * @return the given array
+    //  * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
+    //  */
+    // public static byte @Nonnull [] fill(
+    //     byte @Nonnull [] array, byte startInclusive, byte endExclusive
+    // ) throws IllegalArgumentException {
+    //     return rng.fill(array, startInclusive, endExclusive);
+    // }
+    //
+    // /**
+    //  * Fills the given array with random short values and returns the array.
+    //  *
+    //  * @param array the given array
+    //  * @return the given array
+    //  */
+    // public static short @Nonnull [] fill(short @Nonnull [] array) {
+    //     return rng.fill(array);
+    // }
+    //
+    // /**
+    //  * Fills the given array with random short values (as if by {@link #nextShort(short, short)}) and returns the
+    //  * array.
+    //  *
+    //  * @param array          the given array
+    //  * @param startInclusive the start value inclusive
+    //  * @param endExclusive   the end value exclusive
+    //  * @return the given array
+    //  * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
+    //  */
+    // public static short @Nonnull [] fill(
+    //     short @Nonnull [] array, short startInclusive, short endExclusive
+    // ) throws IllegalArgumentException {
+    //     return rng.fill(array, startInclusive, endExclusive);
+    // }
+    //
+    // /**
+    //  * Fills the given array with random char values and returns the array.
+    //  *
+    //  * @param array the given array
+    //  * @return the given array
+    //  */
+    // public static char @Nonnull [] fill(char @Nonnull [] array) {
+    //     return rng.fill(array);
+    // }
+    //
+    // /**
+    //  * Fills the given array with random char values (as if by {@link #nextChar(char, char)}) and returns the array.
+    //  *
+    //  * @param array          the given array
+    //  * @param startInclusive the start value inclusive
+    //  * @param endExclusive   the end value exclusive
+    //  * @return the given array
+    //  * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
+    //  */
+    // public static char @Nonnull [] fill(
+    //     char @Nonnull [] array, char startInclusive, char endExclusive
+    // ) throws IllegalArgumentException {
+    //     return rng.fill(array, startInclusive, endExclusive);
+    // }
+    //
+    // /**
+    //  * Fills the given array with random int values and returns the array.
+    //  *
+    //  * @param array the given array
+    //  * @return the given array
+    //  */
+    // public static int @Nonnull [] fill(int @Nonnull [] array) {
+    //     return rng.fill(array);
+    // }
+    //
+    // /**
+    //  * Fills the given array with random int values (as if by {@link #nextInt(int, int)}) and returns the array.
+    //  *
+    //  * @param array          the given array
+    //  * @param startInclusive the start value inclusive
+    //  * @param endExclusive   the end value exclusive
+    //  * @return the given array
+    //  * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
+    //  */
+    // public static int @Nonnull [] fill(
+    //     int @Nonnull [] array, int startInclusive, int endExclusive
+    // ) throws IllegalArgumentException {
+    //     return rng.fill(array, startInclusive, endExclusive);
+    // }
+    //
+    // /**
+    //  * Fills the given array with random long values and returns the array.
+    //  *
+    //  * @param array the given array
+    //  * @return the given array
+    //  */
+    // public static long @Nonnull [] fill(long @Nonnull [] array) {
+    //     return rng.fill(array);
+    // }
+    //
+    // /**
+    //  * Fills the given array with random long values (as if by {@link #nextLong(long, long)}) and returns the array.
+    //  *
+    //  * @param array          the given array
+    //  * @param startInclusive the start value inclusive
+    //  * @param endExclusive   the end value exclusive
+    //  * @return the given array
+    //  * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
+    //  */
+    // public static long @Nonnull [] fill(
+    //     long @Nonnull [] array, long startInclusive, long endExclusive
+    // ) throws IllegalArgumentException {
+    //     return rng.fill(array, startInclusive, endExclusive);
+    // }
+    //
+    // /**
+    //  * Fills the given array with random float values (between {@code 0} inclusive and {@code 1} exclusive) and returns
+    //  * the array.
+    //  *
+    //  * @param array the given array
+    //  * @return the given array
+    //  */
+    // public static float @Nonnull [] fill(float @Nonnull [] array) {
+    //     return rng.fill(array);
+    // }
+    //
+    // /**
+    //  * Fills the given array with random float values (as if by {@link #nextFloat(float, float)}) and returns the
+    //  * array.
+    //  *
+    //  * @param array          the given array
+    //  * @param startInclusive the start value inclusive
+    //  * @param endExclusive   the end value exclusive
+    //  * @return the given array
+    //  * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
+    //  */
+    // public static float @Nonnull [] fill(
+    //     float @Nonnull [] array, float startInclusive, float endExclusive
+    // ) throws IllegalArgumentException {
+    //     return rng.fill(array, startInclusive, endExclusive);
+    // }
+    //
+    // /**
+    //  * Fills the given array with random double values (between {@code 0} inclusive and {@code 1} exclusive) and returns
+    //  * the array.
+    //  *
+    //  * @param array the given array
+    //  * @return the given array
+    //  */
+    // public static double @Nonnull [] fill(double @Nonnull [] array) {
+    //     return rng.fill(array);
+    // }
+    //
+    // /**
+    //  * Fills the given array with random double values (as if by {@link #nextDouble(double, double)}) and returns the
+    //  * array.
+    //  *
+    //  * @param array          the given array
+    //  * @param startInclusive the start value inclusive
+    //  * @param endExclusive   the end value exclusive
+    //  * @return the given array
+    //  * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
+    //  */
+    // public static double @Nonnull [] fill(
+    //     double @Nonnull [] array, double startInclusive, double endExclusive
+    // ) throws IllegalArgumentException {
+    //     return rng.fill(array, startInclusive, endExclusive);
+    // }
 
     /**
      * Returns a {@link Supplier} which produces the random objects, the usage example:
@@ -562,7 +562,7 @@ public class RandomKit {
      * probability for each {@link Rog.Probability} is {@code score / sum(score)}. Note the total score of all provided
      * {@link Rog.Probability}s can not overflow the maximum value of {@code long}.
      * <p>
-     * This method uses {@link Rng#getDefault()} to generate the random long value, which is used to calculate the hit
+     * This method uses {@link Rng#threadLocal()} to generate the random long value, which is used to calculate the hit
      * probability.
      *
      * @param probabilities the provided {@link Rog.Probability}s

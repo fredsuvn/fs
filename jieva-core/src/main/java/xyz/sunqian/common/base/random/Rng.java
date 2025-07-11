@@ -1,12 +1,10 @@
 package xyz.sunqian.common.base.random;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.JieCheck;
-import xyz.sunqian.common.base.math.MathKit;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.DoubleSupplier;
 import java.util.function.IntSupplier;
@@ -25,13 +23,42 @@ import java.util.stream.LongStream;
 public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
 
     /**
-     * Returns the default implementation of {@link Rng} based on the {@link ThreadLocalRandom} (so it is thread-safe).
+     * Returns a {@link Rng} instance based on the {@link ThreadLocalRandom}, and it is thread-safe and its
+     * {@link #reset(long)} has no effect.
      *
-     * @return the default implementation of {@link Rng} based on the {@link ThreadLocalRandom} (so it is thread-safe)
+     * @return a {@link Rng} instance based on the {@link ThreadLocalRandom}
      */
-    static @ThreadSafe Rng getDefault() {
-        return RngImpl.INST;
+    static @Nonnull Rng threadLocal() {
+        return RngImpl.threadLocalRandom();
     }
+
+    /**
+     * Returns a {@link Rng} instance.
+     *
+     * @return a {@link Rng} instance
+     */
+    static @Nonnull Rng newRng() {
+        Random random = new Random();
+        random.setSeed(System.nanoTime());
+        return RngImpl.random(random);
+    }
+
+    /**
+     * Returns a {@link Rng} instance based on the specified {@link Random}.
+     *
+     * @param random the specified {@link Random}
+     * @return a {@link Rng} instance based on the specified {@link Random}
+     */
+    static @Nonnull Rng newRng(Random random) {
+        return RngImpl.random(random);
+    }
+
+    /**
+     * Resets this {@link Rng} via the specified seed.
+     *
+     * @param seed the specified seed
+     */
+    void reset(long seed);
 
     /**
      * Returns the next random boolean value.
@@ -43,72 +70,6 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
     }
 
     /**
-     * Returns the next random byte value.
-     *
-     * @return the next random byte value
-     */
-    default byte nextByte() {
-        return (byte) nextInt();
-    }
-
-    /**
-     * Returns the next random byte {@code value} in the range: {@code startInclusive <= value < endExclusive}. If
-     * {@code startInclusive == endExclusive}, then {@code startInclusive} is returned.
-     *
-     * @param startInclusive the start value inclusive
-     * @param endExclusive   the end value exclusive
-     * @return the next random byte {@code value} in the range: {@code startInclusive <= value < endExclusive}
-     * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
-     */
-    default byte nextByte(byte startInclusive, byte endExclusive) throws IllegalArgumentException {
-        return (byte) nextInt(startInclusive, endExclusive);
-    }
-
-    /**
-     * Returns the next random short value.
-     *
-     * @return the next random short value
-     */
-    default short nextShort() {
-        return (short) nextInt();
-    }
-
-    /**
-     * Returns the next random short {@code value} in the range: {@code startInclusive <= value < endExclusive}. If
-     * {@code startInclusive == endExclusive}, then {@code startInclusive} is returned.
-     *
-     * @param startInclusive the start value inclusive
-     * @param endExclusive   the end value exclusive
-     * @return the next random short {@code value} in the range: {@code startInclusive <= value < endExclusive}
-     * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
-     */
-    default short nextShort(short startInclusive, short endExclusive) throws IllegalArgumentException {
-        return (short) nextInt(startInclusive, endExclusive);
-    }
-
-    /**
-     * Returns the next random char value.
-     *
-     * @return the next random char value
-     */
-    default char nextChar() {
-        return (char) nextInt();
-    }
-
-    /**
-     * Returns the next random char {@code value} in the range: {@code startInclusive <= value < endExclusive}. If
-     * {@code startInclusive == endExclusive}, then {@code startInclusive} is returned.
-     *
-     * @param startInclusive the start value inclusive
-     * @param endExclusive   the end value exclusive
-     * @return the next random char {@code value} in the range: {@code startInclusive <= value < endExclusive}
-     * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
-     */
-    default char nextChar(char startInclusive, char endExclusive) throws IllegalArgumentException {
-        return (char) nextInt(startInclusive & 0x0000ffff, endExclusive & 0x0000ffff);
-    }
-
-    /**
      * Returns the next random int value.
      *
      * @return the next random int value
@@ -116,12 +77,12 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
     int nextInt();
 
     /**
-     * Returns the next random int {@code value} in the range: {@code startInclusive <= value < endExclusive}. If
+     * Returns the next random int value in the range {@code [startInclusive, endExclusive)}. If
      * {@code startInclusive == endExclusive}, then {@code startInclusive} is returned.
      *
      * @param startInclusive the start value inclusive
      * @param endExclusive   the end value exclusive
-     * @return the next random int {@code value} in the range: {@code startInclusive <= value < endExclusive}
+     * @return the next random int value in the range {@code [startInclusive, endExclusive)}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
     int nextInt(int startInclusive, int endExclusive) throws IllegalArgumentException;
@@ -134,119 +95,175 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
     long nextLong();
 
     /**
-     * Returns the next random long {@code value} in the range: {@code startInclusive <= value < endExclusive}. If
+     * Returns the next random long value in the range {@code [startInclusive, endExclusive)}. If
      * {@code startInclusive == endExclusive}, then {@code startInclusive} is returned.
      *
      * @param startInclusive the start value inclusive
      * @param endExclusive   the end value exclusive
-     * @return the next random long {@code value} in the range: {@code startInclusive <= value < endExclusive}
+     * @return the next random long value in the range {@code [startInclusive, endExclusive)}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
     long nextLong(long startInclusive, long endExclusive) throws IllegalArgumentException;
 
     /**
-     * Returns the next random float value between {@code 0} inclusive and {@code 1} exclusive.
+     * Returns the next random float value in the range {@code [0.0, 1.0)}.
      *
-     * @return the next random float value between {@code 0} inclusive and {@code 1} exclusive
+     * @return the next random float value in the range {@code [0.0, 1.0)}
      */
-    default float nextFloat() {
-        return MathKit.makeIn((float) nextDouble(), 0, 1);
-    }
+    float nextFloat();
 
     /**
-     * Returns the next random float {@code value} in the range: {@code startInclusive <= value < endExclusive}. If
+     * Returns the next random float value in the range {@code [startInclusive, endExclusive)}. If
      * {@code startInclusive == endExclusive}, then {@code startInclusive} is returned.
      *
      * @param startInclusive the start value inclusive
      * @param endExclusive   the end value exclusive
-     * @return the next random float {@code value} in the range: {@code startInclusive <= value < endExclusive}
+     * @return the next random float value in the range {@code [startInclusive, endExclusive)}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    default float nextFloat(float startInclusive, float endExclusive) throws IllegalArgumentException {
-        if (startInclusive == endExclusive) {
-            return startInclusive;
-        }
-        return MathKit.makeIn((float) nextDouble(startInclusive, endExclusive), startInclusive, endExclusive);
-    }
+    float nextFloat(float startInclusive, float endExclusive) throws IllegalArgumentException;
 
     /**
-     * Returns the next random double value between {@code 0} inclusive and {@code 1} exclusive.
+     * Returns the next random double value in the range {@code [0.0, 1.0)}.
      *
-     * @return the next random double value between {@code 0} inclusive and {@code 1} exclusive
+     * @return the next random double value in the range {@code [0.0, 1.0)}
      */
     double nextDouble();
 
     /**
-     * Returns the next random double {@code value} in the range: {@code startInclusive <= value < endExclusive}. If
+     * Returns the next random double value in the range {@code [startInclusive, endExclusive)}. If
      * {@code startInclusive == endExclusive}, then {@code startInclusive} is returned.
      *
      * @param startInclusive the start value inclusive
      * @param endExclusive   the end value exclusive
-     * @return the next random double {@code value} in the range: {@code startInclusive <= value < endExclusive}
+     * @return the next random double value in the range {@code [startInclusive, endExclusive)}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
     double nextDouble(double startInclusive, double endExclusive) throws IllegalArgumentException;
 
     /**
-     * Fills the given array (from the specified offset up to the specified length) with the random value.
+     * Returns a new random byte array of the specified length.
      *
-     * @param array the given array
+     * @param length the specified length of the array
+     * @return a new random byte array of the specified length
+     * @throws IllegalArgumentException if {@code length < 0}
+     */
+    default byte @Nonnull [] nextBytes(int length) throws IllegalArgumentException {
+        if (length < 0) {
+            throw new IllegalArgumentException("The length must >= 0.");
+        }
+        byte[] bytes = new byte[length];
+        nextBytes(bytes, 0, length);
+        return bytes;
+    }
+
+    /**
+     * Fills the specified byte array with random bytes.
+     *
+     * @param bytes the specified byte array
+     */
+    default void nextBytes(byte @Nonnull [] bytes) {
+        nextBytes(bytes, 0, bytes.length);
+    }
+
+    /**
+     * Fills the specified byte array with {@code len} random bytes, starting at the specified offset.
+     *
+     * @param bytes the specified byte array
      * @param off   the specified offset
-     * @param len   the specified length
-     * @throws IndexOutOfBoundsException if {@code off < 0 || len < 0 || off + len > array.length}
+     * @param len   the number of bytes to fill
+     * @throws IndexOutOfBoundsException if {@code off < 0} or {@code len < 0} or {@code off + len > bytes.length}
      */
-    default void nextBytes(byte @Nonnull [] array, int off, int len) throws IndexOutOfBoundsException {
-        JieCheck.checkOffsetLength(array.length, off, len);
-        for (int i = off; i < off + len; i++) {
-            array[i] = nextByte();
+    default void nextBytes(byte @Nonnull [] bytes, int off, int len) throws IndexOutOfBoundsException {
+        JieCheck.checkOffsetLength(bytes.length, off, len);
+        int i = 0;
+        for (int words = len >> 3; words-- > 0; ) {
+            long rnd = nextLong();
+            for (int n = 8; n-- > 0; rnd >>>= Byte.SIZE) {
+                bytes[i++] = (byte) rnd;
+            }
+        }
+        if (i < len) {
+            for (long rnd = nextLong(); i < len; rnd >>>= Byte.SIZE) {
+                bytes[i++] = (byte) rnd;
+            }
         }
     }
 
     /**
-     * Fills the given buffer with the random value. The buffer's position increments by the filled count.
+     * Fills the specified byte buffer with random bytes. The buffer's position increments by the actual filled number.
      *
-     * @param buffer the given buffer
+     * @param bytes the specified byte buffer
      */
-    default void nextBytes(@Nonnull ByteBuffer buffer) {
-        if (buffer.hasArray()) {
-            nextBytes(buffer.array(), buffer.arrayOffset() + buffer.position(), buffer.remaining());
-            buffer.position(buffer.limit());
+    default void nextBytes(@Nonnull ByteBuffer bytes) {
+        int remaining = bytes.remaining();
+        if (bytes.hasArray()) {
+            nextBytes(bytes.array(), bytes.arrayOffset() + bytes.position(), remaining);
+            bytes.position(bytes.position() + remaining);
         } else {
-            buffer.put(fill(new byte[buffer.remaining()]));
+            byte[] rd = new byte[remaining];
+            nextBytes(rd);
+            bytes.put(rd);
         }
     }
 
     /**
-     * Returns a new unlimited {@link IntStream} that produces random {@code int} values.
+     * Returns a new unlimited {@link IntStream} that produces random int values.
      *
-     * @return a new unlimited {@link IntStream} that produces random {@code int} values
+     * @return a new unlimited {@link IntStream} that produces random int values
      */
-    @Nonnull
-    default IntStream ints() {
+    default @Nonnull IntStream ints() {
         return IntStream.generate(this::nextInt);
     }
 
     /**
-     * Returns a new unlimited {@link IntStream} that produces random {@code int} value in the range:
-     * {@code startInclusive <= value < endExclusive}. If {@code startInclusive == endExclusive}, then
-     * {@code startInclusive} is always produced.
+     * Returns a new unlimited {@link IntStream} that produces random int values in the range
+     * {@code [startInclusive, endExclusive)}. If {@code startInclusive == endExclusive}, then {@code startInclusive} is
+     * always produced.
      *
      * @param startInclusive the start value inclusive
      * @param endExclusive   the end value exclusive
-     * @return a new unlimited {@link IntStream} that produces random {@code int} value in the range:
-     * {@code startInclusive <= value < endExclusive}
+     * @return a new unlimited {@link IntStream} that produces random int values in the range
+     * {@code [startInclusive, endExclusive)}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    @Nonnull
-    default IntStream ints(int startInclusive, int endExclusive) {
+    default @Nonnull IntStream ints(int startInclusive, int endExclusive) throws IllegalArgumentException {
         IntSupplier supplier = intSupplier(startInclusive, endExclusive);
         return IntStream.generate(supplier);
     }
 
     /**
-     * Returns a new {@link IntSupplier} that produces random {@code int} values.
+     * Returns a new {@link IntStream} that produces random int values, and the stream size is limited by the given
+     * size.
      *
-     * @return a new {@link IntSupplier} that produces random {@code int} values
+     * @param size the given stream size
+     * @return a new {@link IntStream} that produces random int values, and the stream size is limited by the given size
+     * @throws IllegalArgumentException if {@code size < 0}
+     */
+    default @Nonnull IntStream ints(long size) throws IllegalArgumentException {
+        return ints().limit(size);
+    }
+
+    /**
+     * Returns a new {@link IntStream} that produces random int values in the range
+     * {@code [startInclusive, endExclusive)}, and the stream size is limited by the given size. If
+     * {@code startInclusive == endExclusive}, then {@code startInclusive} is always produced.
+     *
+     * @param size           the given stream size
+     * @param startInclusive the start value inclusive
+     * @param endExclusive   the end value exclusive
+     * @return a new {@link IntStream} that produces random int values in the range
+     * {@code [startInclusive, endExclusive)}, and the stream size is limited by the given size
+     * @throws IllegalArgumentException if {@code size < 0} or {@code startInclusive > endExclusive}
+     */
+    default @Nonnull IntStream ints(long size, int startInclusive, int endExclusive) throws IllegalArgumentException {
+        return ints(startInclusive, endExclusive).limit(size);
+    }
+
+    /**
+     * Returns a new {@link IntSupplier} that produces random int values.
+     *
+     * @return a new {@link IntSupplier} that produces random int values
      */
     default @Nonnull IntSupplier intSupplier() {
         return this::nextInt;
@@ -267,36 +284,63 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
     IntSupplier intSupplier(int startInclusive, int endExclusive) throws IllegalArgumentException;
 
     /**
-     * Returns a new unlimited {@link LongStream} that produces random {@code long} values.
+     * Returns a new unlimited {@link LongStream} that produces random long values.
      *
-     * @return a new unlimited {@link LongStream} that produces random {@code long} values
+     * @return a new unlimited {@link LongStream} that produces random long values
      */
-    @Nonnull
-    default LongStream longs() {
+    default @Nonnull LongStream longs() {
         return LongStream.generate(this::nextLong);
     }
 
     /**
-     * Returns a new unlimited {@link LongStream} that produces random {@code long} value in the range:
-     * {@code startInclusive <= value < endExclusive}. If {@code startInclusive == endExclusive}, then
-     * {@code startInclusive} is always produced.
+     * Returns a new unlimited {@link LongStream} that produces random long values in the range
+     * {@code [startInclusive, endExclusive)}. If {@code startInclusive == endExclusive}, then {@code startInclusive} is
+     * always produced.
      *
      * @param startInclusive the start value inclusive
      * @param endExclusive   the end value exclusive
-     * @return a new unlimited {@link LongStream} that produces random {@code long} value in the range:
-     * {@code startInclusive <= value < endExclusive}
+     * @return a new unlimited {@link LongStream} that produces random long values in the range
+     * {@code [startInclusive, endExclusive)}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    @Nonnull
-    default LongStream longs(long startInclusive, long endExclusive) {
+    default @Nonnull LongStream longs(long startInclusive, long endExclusive) throws IllegalArgumentException {
         LongSupplier supplier = longSupplier(startInclusive, endExclusive);
         return LongStream.generate(supplier);
     }
 
     /**
-     * Returns a new {@link LongSupplier} that produces random {@code long} values.
+     * Returns a new {@link LongStream} that produces random long values, and the stream size is limited by the given
+     * size.
      *
-     * @return a new {@link LongSupplier} that produces random {@code long} values
+     * @param size the given stream size
+     * @return a new {@link LongStream} that produces random long values, and the stream size is limited by the given
+     * size
+     * @throws IllegalArgumentException if {@code size < 0}
+     */
+    default @Nonnull LongStream longs(long size) throws IllegalArgumentException {
+        return longs().limit(size);
+    }
+
+    /**
+     * Returns a new {@link LongStream} that produces random long values in the range
+     * {@code [startInclusive, endExclusive)}, and the stream size is limited by the given size. If
+     * {@code startInclusive == endExclusive}, then {@code startInclusive} is always produced.
+     *
+     * @param size           the given stream size
+     * @param startInclusive the start value inclusive
+     * @param endExclusive   the end value exclusive
+     * @return a new {@link LongStream} that produces random long values in the range
+     * {@code [startInclusive, endExclusive)}, and the stream size is limited by the given size
+     * @throws IllegalArgumentException if {@code size < 0} or {@code startInclusive > endExclusive}
+     */
+    default @Nonnull LongStream longs(long size, long startInclusive, long endExclusive) throws IllegalArgumentException {
+        return longs(startInclusive, endExclusive).limit(size);
+    }
+
+    /**
+     * Returns a new {@link LongSupplier} that produces random long values.
+     *
+     * @return a new {@link LongSupplier} that produces random long values
      */
     default @Nonnull LongSupplier longSupplier() {
         return this::nextLong;
@@ -313,42 +357,66 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
      * {@code startInclusive <= value < endExclusive}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    @Nonnull
     LongSupplier longSupplier(long startInclusive, long endExclusive) throws IllegalArgumentException;
 
     /**
-     * Returns a new unlimited {@link DoubleStream} that produces random {@code double} values between {@code 0}
-     * inclusive and {@code 1} exclusive.
+     * Returns a new unlimited {@link DoubleStream} that produces random double values in the range {@code [0.0, 1.0)}.
      *
-     * @return a new unlimited {@link DoubleStream} that produces random {@code double} values between {@code 0}
-     * inclusive and {@code 1} exclusive
+     * @return a new unlimited {@link DoubleStream} that produces random double values in the range {@code [0.0, 1.0)}
      */
-    @Nonnull
-    default DoubleStream doubles() {
+    default @Nonnull DoubleStream doubles() {
         return DoubleStream.generate(this::nextDouble);
     }
 
     /**
-     * Returns a new unlimited {@link DoubleStream} that produces random {@code double} value in the range:
-     * {@code startInclusive <= value < endExclusive}. If {@code startInclusive == endExclusive}, then
-     * {@code startInclusive} is always produced.
+     * Returns a new unlimited {@link DoubleStream} that produces random double values in the range
+     * {@code [startInclusive, endExclusive)}. If {@code startInclusive == endExclusive}, then {@code startInclusive} is
+     * always produced.
      *
      * @param startInclusive the start value inclusive
      * @param endExclusive   the end value exclusive
-     * @return a new unlimited {@link DoubleStream} that produces random {@code double} value in the range:
-     * {@code startInclusive <= value < endExclusive}
+     * @return a new unlimited {@link DoubleStream} that produces random double values in the range
+     * {@code [startInclusive, endExclusive)}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    @Nonnull
-    default DoubleStream doubles(double startInclusive, double endExclusive) {
+    default @Nonnull DoubleStream doubles(double startInclusive, double endExclusive) throws IllegalArgumentException {
         DoubleSupplier supplier = doubleSupplier(startInclusive, endExclusive);
         return DoubleStream.generate(supplier);
     }
 
     /**
-     * Returns a new {@link DoubleSupplier} that produces random {@code double} values.
+     * Returns a new {@link DoubleStream} that produces random double values in the range {@code [0.0, 1.0)}, and the
+     * stream size is limited by the given size.
      *
-     * @return a new {@link DoubleSupplier} that produces random {@code double} values
+     * @param size the given stream size
+     * @return a new {@link DoubleStream} that produces random double values in the range {@code [0.0, 1.0)}, and the
+     * stream size is limited by the given size
+     * @throws IllegalArgumentException if {@code size < 0}
+     */
+    default @Nonnull DoubleStream doubles(long size) throws IllegalArgumentException {
+        return doubles().limit(size);
+    }
+
+    /**
+     * Returns a new {@link DoubleStream} that produces random double values in the range
+     * {@code [startInclusive, endExclusive)}, and the stream size is limited by the given size. If
+     * {@code startInclusive == endExclusive}, then {@code startInclusive} is always produced.
+     *
+     * @param size           the given stream size
+     * @param startInclusive the start value inclusive
+     * @param endExclusive   the end value exclusive
+     * @return a new {@link DoubleStream} that produces random double values in the range
+     * {@code [startInclusive, endExclusive)}, and the stream size is limited by the given size
+     * @throws IllegalArgumentException if {@code size < 0} or {@code startInclusive > endExclusive}
+     */
+    default @Nonnull DoubleStream doubles(long size, double startInclusive, double endExclusive) throws IllegalArgumentException {
+        return doubles(startInclusive, endExclusive).limit(size);
+    }
+
+    /**
+     * Returns a new {@link DoubleSupplier} that produces random double values in the range {@code [0.0, 1.0)}.
+     *
+     * @return a new {@link DoubleSupplier} that produces random double values in the range {@code [0.0, 1.0)}
      */
     default @Nonnull DoubleSupplier doubleSupplier() {
         return this::nextDouble;
@@ -367,276 +435,6 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
      */
     @Nonnull
     DoubleSupplier doubleSupplier(double startInclusive, double endExclusive) throws IllegalArgumentException;
-
-    /**
-     * Fills the given array with random boolean values and returns the array.
-     *
-     * @param array the given array
-     * @return the given array
-     */
-    default boolean @Nonnull [] fill(boolean @Nonnull [] array) {
-        for (int i = 0; i < array.length; i++) {
-            array[i] = nextBoolean();
-        }
-        return array;
-    }
-
-    /**
-     * Fills the given array with random byte values and returns the array.
-     *
-     * @param array the given array
-     * @return the given array
-     */
-    default byte @Nonnull [] fill(byte @Nonnull [] array) {
-        for (int i = 0; i < array.length; i++) {
-            array[i] = nextByte();
-        }
-        return array;
-    }
-
-    /**
-     * Fills the given array with random byte values (as if by {@link #nextByte(byte, byte)}) and returns the array.
-     *
-     * @param array          the given array
-     * @param startInclusive the start value inclusive
-     * @param endExclusive   the end value exclusive
-     * @return the given array
-     * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
-     */
-    default byte @Nonnull [] fill(
-        byte @Nonnull [] array, byte startInclusive, byte endExclusive
-    ) throws IllegalArgumentException {
-        if (startInclusive == endExclusive) {
-            Arrays.fill(array, startInclusive);
-            return array;
-        }
-        IntSupplier supplier = intSupplier(startInclusive, endExclusive);
-        for (int i = 0; i < array.length; i++) {
-            array[i] = (byte) supplier.getAsInt();
-        }
-        return array;
-    }
-
-    /**
-     * Fills the given array with random short values and returns the array.
-     *
-     * @param array the given array
-     * @return the given array
-     */
-    default short @Nonnull [] fill(short @Nonnull [] array) {
-        for (int i = 0; i < array.length; i++) {
-            array[i] = nextShort();
-        }
-        return array;
-    }
-
-    /**
-     * Fills the given array with random short values (as if by {@link #nextShort(short, short)}) and returns the
-     * array.
-     *
-     * @param array          the given array
-     * @param startInclusive the start value inclusive
-     * @param endExclusive   the end value exclusive
-     * @return the given array
-     * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
-     */
-    default short @Nonnull [] fill(
-        short @Nonnull [] array, short startInclusive, short endExclusive
-    ) throws IllegalArgumentException {
-        if (startInclusive == endExclusive) {
-            Arrays.fill(array, startInclusive);
-            return array;
-        }
-        IntSupplier supplier = intSupplier(startInclusive, endExclusive);
-        for (int i = 0; i < array.length; i++) {
-            array[i] = (short) supplier.getAsInt();
-        }
-        return array;
-    }
-
-    /**
-     * Fills the given array with random char values and returns the array.
-     *
-     * @param array the given array
-     * @return the given array
-     */
-    default char @Nonnull [] fill(char @Nonnull [] array) {
-        for (int i = 0; i < array.length; i++) {
-            array[i] = nextChar();
-        }
-        return array;
-    }
-
-    /**
-     * Fills the given array with random char values (as if by {@link #nextChar(char, char)}) and returns the array.
-     *
-     * @param array          the given array
-     * @param startInclusive the start value inclusive
-     * @param endExclusive   the end value exclusive
-     * @return the given array
-     * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
-     */
-    default char @Nonnull [] fill(
-        char @Nonnull [] array, char startInclusive, char endExclusive
-    ) throws IllegalArgumentException {
-        if (startInclusive == endExclusive) {
-            Arrays.fill(array, startInclusive);
-            return array;
-        }
-        IntSupplier supplier = intSupplier(startInclusive, endExclusive);
-        for (int i = 0; i < array.length; i++) {
-            array[i] = (char) supplier.getAsInt();
-        }
-        return array;
-    }
-
-    /**
-     * Fills the given array with random int values and returns the array.
-     *
-     * @param array the given array
-     * @return the given array
-     */
-    default int @Nonnull [] fill(int @Nonnull [] array) {
-        for (int i = 0; i < array.length; i++) {
-            array[i] = nextInt();
-        }
-        return array;
-    }
-
-    /**
-     * Fills the given array with random int values (as if by {@link #nextInt(int, int)}) and returns the array.
-     *
-     * @param array          the given array
-     * @param startInclusive the start value inclusive
-     * @param endExclusive   the end value exclusive
-     * @return the given array
-     * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
-     */
-    default int @Nonnull [] fill(
-        int @Nonnull [] array, int startInclusive, int endExclusive
-    ) throws IllegalArgumentException {
-        if (startInclusive == endExclusive) {
-            Arrays.fill(array, startInclusive);
-            return array;
-        }
-        IntSupplier supplier = intSupplier(startInclusive, endExclusive);
-        for (int i = 0; i < array.length; i++) {
-            array[i] = supplier.getAsInt();
-        }
-        return array;
-    }
-
-    /**
-     * Fills the given array with random long values and returns the array.
-     *
-     * @param array the given array
-     * @return the given array
-     */
-    default long @Nonnull [] fill(long @Nonnull [] array) {
-        for (int i = 0; i < array.length; i++) {
-            array[i] = nextLong();
-        }
-        return array;
-    }
-
-    /**
-     * Fills the given array with random long values (as if by {@link #nextLong(long, long)}) and returns the array.
-     *
-     * @param array          the given array
-     * @param startInclusive the start value inclusive
-     * @param endExclusive   the end value exclusive
-     * @return the given array
-     * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
-     */
-    default long @Nonnull [] fill(
-        long @Nonnull [] array, long startInclusive, long endExclusive
-    ) throws IllegalArgumentException {
-        if (startInclusive == endExclusive) {
-            Arrays.fill(array, startInclusive);
-            return array;
-        }
-        LongSupplier supplier = longSupplier(startInclusive, endExclusive);
-        for (int i = 0; i < array.length; i++) {
-            array[i] = supplier.getAsLong();
-        }
-        return array;
-    }
-
-    /**
-     * Fills the given array with random float values (between {@code 0} inclusive and {@code 1} exclusive) and returns
-     * the array.
-     *
-     * @param array the given array
-     * @return the given array
-     */
-    default float @Nonnull [] fill(float @Nonnull [] array) {
-        for (int i = 0; i < array.length; i++) {
-            array[i] = nextFloat();
-        }
-        return array;
-    }
-
-    /**
-     * Fills the given array with random float values (as if by {@link #nextFloat(float, float)}) and returns the
-     * array.
-     *
-     * @param array          the given array
-     * @param startInclusive the start value inclusive
-     * @param endExclusive   the end value exclusive
-     * @return the given array
-     * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
-     */
-    default float @Nonnull [] fill(
-        float @Nonnull [] array, float startInclusive, float endExclusive
-    ) throws IllegalArgumentException {
-        if (startInclusive == endExclusive) {
-            Arrays.fill(array, startInclusive);
-            return array;
-        }
-        DoubleSupplier supplier = doubleSupplier(startInclusive, endExclusive);
-        for (int i = 0; i < array.length; i++) {
-            array[i] = MathKit.makeIn((float) supplier.getAsDouble(), startInclusive, endExclusive);
-        }
-        return array;
-    }
-
-    /**
-     * Fills the given array with random double values (between {@code 0} inclusive and {@code 1} exclusive) and returns
-     * the array.
-     *
-     * @param array the given array
-     * @return the given array
-     */
-    default double @Nonnull [] fill(double @Nonnull [] array) {
-        for (int i = 0; i < array.length; i++) {
-            array[i] = nextDouble();
-        }
-        return array;
-    }
-
-    /**
-     * Fills the given array with random double values (as if by {@link #nextDouble(double, double)}) and returns the
-     * array.
-     *
-     * @param array          the given array
-     * @param startInclusive the start value inclusive
-     * @param endExclusive   the end value exclusive
-     * @return the given array
-     * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
-     */
-    default double @Nonnull [] fill(
-        double @Nonnull [] array, double startInclusive, double endExclusive
-    ) throws IllegalArgumentException {
-        if (startInclusive == endExclusive) {
-            Arrays.fill(array, startInclusive);
-            return array;
-        }
-        DoubleSupplier supplier = doubleSupplier(startInclusive, endExclusive);
-        for (int i = 0; i < array.length; i++) {
-            array[i] = supplier.getAsDouble();
-        }
-        return array;
-    }
 
     /**
      * Returns the next random int value.
@@ -659,9 +457,9 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
     }
 
     /**
-     * Returns the next random double value between {@code 0} inclusive and {@code 1} exclusive.
+     * Returns the next random double value in the range {@code [0.0, 1.0)}.
      *
-     * @return the next random double value between {@code 0} inclusive and {@code 1} exclusive
+     * @return the next random double value in the range {@code [0.0, 1.0)}
      */
     @Override
     default double getAsDouble() {

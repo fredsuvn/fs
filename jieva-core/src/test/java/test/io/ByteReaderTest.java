@@ -2,12 +2,12 @@ package test.io;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
-import xyz.sunqian.common.base.random.RandomKit;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.ByteReader;
 import xyz.sunqian.common.io.ByteSegment;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.io.IORuntimeException;
+import xyz.sunqian.test.DataTest;
 import xyz.sunqian.test.ErrorOutputStream;
 import xyz.sunqian.test.ReadOps;
 import xyz.sunqian.test.TestInputStream;
@@ -28,7 +28,7 @@ import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
-public class ByteReaderTest {
+public class ByteReaderTest implements DataTest {
 
     private static final int DST_SIZE = 256;
 
@@ -59,7 +59,7 @@ public class ByteReaderTest {
     private void testRead0(int dataSize, int readSize) throws Exception {
         {
             // input stream
-            byte[] data = RandomKit.fill(new byte[dataSize]);
+            byte[] data = randomBytes(dataSize);
             testRead0(ByteReader.from(new ByteArrayInputStream(data)), data, readSize, false);
             testSkip0(ByteReader.from(new ByteArrayInputStream(data)), data, readSize);
             testRead0(ByteReader.from(new OneByteInputStream(data)), data, readSize, false);
@@ -76,7 +76,7 @@ public class ByteReaderTest {
         }
         {
             // channel
-            byte[] data = RandomKit.fill(new byte[dataSize]);
+            byte[] data = randomBytes(dataSize);
             testRead0(
                 ByteReader.from(Channels.newChannel(new ByteArrayInputStream(data))),
                 data, readSize, false
@@ -96,7 +96,7 @@ public class ByteReaderTest {
         }
         {
             // byte array
-            byte[] data = RandomKit.fill(new byte[dataSize]);
+            byte[] data = randomBytes(dataSize);
             testRead0(ByteReader.from(data), data, readSize, true);
             testSkip0(ByteReader.from(data), data, readSize);
             byte[] dataPadding = new byte[data.length + 66];
@@ -121,7 +121,7 @@ public class ByteReaderTest {
         }
         {
             // buffer
-            byte[] data = RandomKit.fill(new byte[dataSize]);
+            byte[] data = randomBytes(dataSize);
             testRead0(ByteReader.from(ByteBuffer.wrap(data)), data, readSize, true);
             testSkip0(ByteReader.from(ByteBuffer.wrap(data)), data, readSize);
             if (dataSize >= 128) {
@@ -133,7 +133,7 @@ public class ByteReaderTest {
         }
         {
             // limited
-            byte[] data = RandomKit.fill(new byte[dataSize]);
+            byte[] data = randomBytes(dataSize);
             testRead0(
                 ByteReader.from(data).limit(data.length),
                 data,
@@ -249,7 +249,7 @@ public class ByteReaderTest {
     }
 
     private void testReadTo0(int dataSize, int readSize) {
-        byte[] data = RandomKit.fill(new byte[dataSize]);
+        byte[] data = randomBytes(dataSize);
         byte[] dataPadding = new byte[data.length + 66];
         System.arraycopy(data, 0, dataPadding, 33, data.length);
         {
@@ -612,7 +612,7 @@ public class ByteReaderTest {
         int limitSize = dataSize / 2;
         {
             // input stream
-            byte[] data = RandomKit.fill(new byte[dataSize]);
+            byte[] data = randomBytes(dataSize);
             testShare(
                 ByteReader.from(new ByteArrayInputStream(data)), ByteBuffer.wrap(data),
                 false, false
@@ -624,7 +624,7 @@ public class ByteReaderTest {
         }
         {
             // byte array
-            byte[] data = RandomKit.fill(new byte[dataSize]);
+            byte[] data = randomBytes(dataSize);
             testShare(ByteReader.from(data), ByteBuffer.wrap(data), true, true);
             testShare(
                 ByteReader.from(data).limit(limitSize),
@@ -646,7 +646,7 @@ public class ByteReaderTest {
         }
         {
             // byte buffer
-            byte[] data = RandomKit.fill(new byte[dataSize]);
+            byte[] data = randomBytes(dataSize);
             testShare(
                 ByteReader.from(ByteBuffer.wrap(data)),
                 ByteBuffer.wrap(data),
@@ -691,7 +691,7 @@ public class ByteReaderTest {
 
     @Test
     public void testSegment() throws Exception {
-        byte[] bytes = RandomKit.fill(new byte[64]);
+        byte[] bytes = randomBytes(64);
         ByteReader reader = ByteReader.from(bytes);
         ByteSegment segment = reader.read(bytes.length * 2);
         assertSame(segment.data().array(), bytes);
