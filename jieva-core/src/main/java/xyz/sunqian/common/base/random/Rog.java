@@ -19,7 +19,7 @@ public interface Rog {
      *
      * @return a {@link Rog} which uses {@link Rng#newRng()} to generate the random long value
      */
-    static Rog newRog() {
+    static @Nonnull Rog newRog() {
         return newRog(Rng.newRng());
     }
 
@@ -30,7 +30,7 @@ public interface Rog {
      * @param rng the specified random number generator
      * @return a {@link Rog} which uses the specified random number generator to generate the random long value
      */
-    static Rog newRog(LongSupplier rng) {
+    static @Nonnull Rog newRog(@Nonnull LongSupplier rng) {
         return RogImpl.rng(rng);
     }
 

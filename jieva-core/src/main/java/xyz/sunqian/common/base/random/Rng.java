@@ -2,6 +2,7 @@ package xyz.sunqian.common.base.random;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.JieCheck;
+import xyz.sunqian.common.base.math.MathKit;
 
 import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
@@ -32,7 +33,19 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
     static @Nonnull Rng newRng() {
         Random random = new Random();
         random.setSeed(System.nanoTime());
-        return RngImpl.random(random);
+        return newRng(random);
+    }
+
+    /**
+     * Returns a {@link Rng} instance with the specified seed.
+     *
+     * @param seed the specified seed
+     * @return a {@link Rng} instance with the specified seed
+     */
+    static @Nonnull Rng newRng(long seed) {
+        Random random = new Random();
+        random.setSeed(seed);
+        return newRng(random);
     }
 
     /**
@@ -41,7 +54,7 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
      * @param random the specified {@link Random}
      * @return a {@link Rng} instance based on the specified {@link Random}
      */
-    static @Nonnull Rng newRng(Random random) {
+    static @Nonnull Rng newRng(@Nonnull Random random) {
         return RngImpl.random(random);
     }
 
@@ -72,7 +85,7 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
      * @throws UnsupportedOperationException if the specified algorithm is unsupported
      * @see SecureRandom#getInstance(String)
      */
-    static @Nonnull Rng secure(String algorithm) throws UnsupportedOperationException {
+    static @Nonnull Rng secure(@Nonnull String algorithm) throws UnsupportedOperationException {
         try {
             SecureRandom secureRandom = SecureRandom.getInstance(algorithm);
             return RngImpl.random(secureRandom);
@@ -121,13 +134,18 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
     /**
      * Returns the next random int value in the range {@code [startInclusive, endExclusive)}. If
      * {@code startInclusive == endExclusive}, then {@code startInclusive} is returned.
+     * <p>
+     * Note that if this method needs to be invoked multiple times, it is recommended to use {@code ints} or
+     * {@code intSupplier} to reduce overhead.
      *
      * @param startInclusive the start value inclusive
      * @param endExclusive   the end value exclusive
      * @return the next random int value in the range {@code [startInclusive, endExclusive)}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    int nextInt(int startInclusive, int endExclusive) throws IllegalArgumentException;
+    default int nextInt(int startInclusive, int endExclusive) throws IllegalArgumentException {
+        return ints(startInclusive, endExclusive).iterator().nextInt();
+    }
 
     /**
      * Returns the next random long value.
@@ -139,31 +157,45 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
     /**
      * Returns the next random long value in the range {@code [startInclusive, endExclusive)}. If
      * {@code startInclusive == endExclusive}, then {@code startInclusive} is returned.
+     * <p>
+     * Note that if this method needs to be invoked multiple times, it is recommended to use {@code longs} or
+     * {@code longSupplier} to reduce overhead.
      *
      * @param startInclusive the start value inclusive
      * @param endExclusive   the end value exclusive
      * @return the next random long value in the range {@code [startInclusive, endExclusive)}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    long nextLong(long startInclusive, long endExclusive) throws IllegalArgumentException;
+    default long nextLong(long startInclusive, long endExclusive) throws IllegalArgumentException {
+        return longs(startInclusive, endExclusive).iterator().nextLong();
+    }
 
     /**
      * Returns the next random float value in the range {@code [0.0, 1.0)}.
      *
      * @return the next random float value in the range {@code [0.0, 1.0)}
      */
-    float nextFloat();
+    default float nextFloat() {
+        double value = nextDouble();
+        return MathKit.makeIn((float) value, 0.0f, 1.0f);
+    }
 
     /**
      * Returns the next random float value in the range {@code [startInclusive, endExclusive)}. If
      * {@code startInclusive == endExclusive}, then {@code startInclusive} is returned.
+     * <p>
+     * Note that if this method needs to be invoked multiple times, it is recommended to use {@code doubles} or
+     * {@code doubleSupplier} to reduce overhead.
      *
      * @param startInclusive the start value inclusive
      * @param endExclusive   the end value exclusive
      * @return the next random float value in the range {@code [startInclusive, endExclusive)}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    float nextFloat(float startInclusive, float endExclusive) throws IllegalArgumentException;
+    default float nextFloat(float startInclusive, float endExclusive) throws IllegalArgumentException {
+        double value = nextDouble(startInclusive, endExclusive);
+        return MathKit.makeIn((float) value, startInclusive, endExclusive);
+    }
 
     /**
      * Returns the next random double value in the range {@code [0.0, 1.0)}.
@@ -175,13 +207,18 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
     /**
      * Returns the next random double value in the range {@code [startInclusive, endExclusive)}. If
      * {@code startInclusive == endExclusive}, then {@code startInclusive} is returned.
+     * <p>
+     * Note that if this method needs to be invoked multiple times, it is recommended to use {@code doubles} or
+     * {@code doubleSupplier} to reduce overhead.
      *
      * @param startInclusive the start value inclusive
      * @param endExclusive   the end value exclusive
      * @return the next random double value in the range {@code [startInclusive, endExclusive)}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    double nextDouble(double startInclusive, double endExclusive) throws IllegalArgumentException;
+    default double nextDouble(double startInclusive, double endExclusive) throws IllegalArgumentException {
+        return doubles(startInclusive, endExclusive).iterator().nextDouble();
+    }
 
     /**
      * Returns a new random byte array of the specified length.

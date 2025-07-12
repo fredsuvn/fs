@@ -4,7 +4,6 @@ import xyz.sunqian.annotations.JdkDependent;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.JieCheck;
 import xyz.sunqian.common.base.bytes.BytesKit;
-import xyz.sunqian.common.base.math.MathKit;
 import xyz.sunqian.common.collect.StreamKit;
 
 import java.security.SecureRandom;
@@ -61,83 +60,13 @@ final class RngImpl {
         }
 
         @Override
-        public int nextInt(int startInclusive, int endExclusive) throws IllegalArgumentException {
-            if (startInclusive == endExclusive) {
-                return startInclusive;
-            }
-            if (startInclusive > endExclusive) {
-                throw new IllegalArgumentException("startInclusive must <= endExclusive.");
-            }
-            {
-                // from JDK8:
-                int n = endExclusive - startInclusive;
-                if (n > 0) {
-                    return random.nextInt(n) + startInclusive;
-                } else {  // range not representable as int
-                    int r;
-                    do {
-                        r = nextInt();
-                    } while (r < startInclusive || r >= endExclusive);
-                    return r;
-                }
-            }
-        }
-
-        @Override
         public long nextLong() {
             return random.nextLong();
-        }
-
-        @SuppressWarnings("StatementWithEmptyBody")
-        @Override
-        public long nextLong(long startInclusive, long endExclusive) throws IllegalArgumentException {
-            if (startInclusive == endExclusive) {
-                return startInclusive;
-            }
-            if (startInclusive > endExclusive) {
-                throw new IllegalArgumentException("startInclusive must <= endExclusive.");
-            }
-            {
-                // from JDK8:
-                long r = nextLong();
-                long n = endExclusive - startInclusive, m = n - 1;
-                if ((n & m) == 0L)  // power of two
-                    r = (r & m) + startInclusive;
-                else if (n > 0L) {  // reject over-represented candidates
-                    for (long u = r >>> 1;            // ensure nonnegative
-                         u + m - (r = u % n) < 0L;    // rejection check
-                         u = nextLong() >>> 1) // retry
-                        ;
-                    r += startInclusive;
-                } else {              // range not representable as long
-                    while (r < startInclusive || r >= endExclusive)
-                        r = nextLong();
-                }
-                return r;
-            }
         }
 
         @Override
         public double nextDouble() {
             return random.nextDouble();
-        }
-
-        @Override
-        public double nextDouble(double startInclusive, double endExclusive) throws IllegalArgumentException {
-            if (startInclusive == endExclusive) {
-                return startInclusive;
-            }
-            if (startInclusive > endExclusive) {
-                throw new IllegalArgumentException("startInclusive must <= endExclusive.");
-            }
-            {
-                // from JDK8:
-                double r = nextDouble();
-                r = r * (endExclusive - startInclusive) + startInclusive;
-                if (r >= endExclusive) // correct for rounding
-                    r = Double.longBitsToDouble(Double.doubleToLongBits(endExclusive) - 1);
-                return r;
-            }
         }
     }
 
@@ -201,18 +130,6 @@ final class RngImpl {
     private static abstract class AbsRngImpl implements Rng {
 
         protected abstract @Nonnull Random random();
-
-        @Override
-        public float nextFloat() {
-            double value = nextDouble();
-            return MathKit.makeIn((float) value, 0.0f, 1.0f);
-        }
-
-        @Override
-        public float nextFloat(float startInclusive, float endExclusive) throws IllegalArgumentException {
-            double value = nextDouble(startInclusive, endExclusive);
-            return MathKit.makeIn((float) value, startInclusive, endExclusive);
-        }
 
         @Override
         public void nextBytes(byte @Nonnull [] bytes) {
