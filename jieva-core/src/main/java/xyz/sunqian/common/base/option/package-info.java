@@ -1,12 +1,7 @@
 /**
  * Provides classes and interfaces for options.
  * <p>
- * Utilities:
- * <ul>
- *     <li>{@link xyz.sunqian.common.base.option.JieOption}</li>
- * </ul>
- * <p>
- * Core interfaces:
+ * Core Interfaces:
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.option.Option}</li>
  * </ul>

@@ -1,7 +1,7 @@
 /**
- * The package for {@code Math}.
+ * The package for math.
  * <p>
- * Core Utilities:
+ * Utilities:
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.math.MathKit}</li>
  * </ul>
