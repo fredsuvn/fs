@@ -2,13 +2,13 @@ package test.cache;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.base.random.RandomKit;
 import xyz.sunqian.common.base.value.Val;
 import xyz.sunqian.common.cache.SimpleCache;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -119,10 +119,11 @@ public class CacheTest {
         CountDownLatch latch = new CountDownLatch(10);
         List<Thread> threads = new ArrayList<>();
         AtomicBoolean flag = new AtomicBoolean(true);
+        Random random = new Random();
         for (int i = 0; i < 10; i++) {
             Thread thread = new Thread(() -> {
                 while (flag.get()) {
-                    cache.put(RandomKit.nextInt(), RandomKit.nextInt());
+                    cache.put(random.nextInt(), random.nextInt());
                 }
                 latch.countDown();
             });

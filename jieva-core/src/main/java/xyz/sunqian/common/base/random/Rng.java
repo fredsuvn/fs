@@ -4,6 +4,8 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.JieCheck;
 
 import java.nio.ByteBuffer;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.DoubleSupplier;
@@ -54,11 +56,40 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
     }
 
     /**
+     * Returns a {@link Rng} instance based on the {@link SecureRandom} with the specified random algorithm.
+     *
+     * @param algorithm the specified random algorithm
+     * @return a {@link Rng} instance based on the {@link SecureRandom} with the specified random algorithm
+     */
+    static @Nonnull Rng newSecure(String algorithm) throws IllegalArgumentException {
+        try {
+            SecureRandom secureRandom = SecureRandom.getInstance(algorithm);
+            return RngImpl.random(secureRandom);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Resets a random seed for this {@link Rng}.
+     */
+    default void reset() {
+        reset(nextLong());
+    }
+
+    /**
      * Resets this {@link Rng} via the specified seed.
      *
      * @param seed the specified seed
      */
     void reset(long seed);
+
+    /**
+     * Resets this {@link Rng} via the specified seed.
+     *
+     * @param seed the specified seed
+     */
+    void reset(byte @Nonnull [] seed);
 
     /**
      * Returns the next random boolean value.
@@ -146,12 +177,9 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
      *
      * @param length the specified length of the array
      * @return a new random byte array of the specified length
-     * @throws IllegalArgumentException if {@code length < 0}
+     * @throws NegativeArraySizeException if {@code length < 0}
      */
-    default byte @Nonnull [] nextBytes(int length) throws IllegalArgumentException {
-        if (length < 0) {
-            throw new IllegalArgumentException("The length must >= 0.");
-        }
+    default byte @Nonnull [] nextBytes(int length) throws NegativeArraySizeException {
         byte[] bytes = new byte[length];
         nextBytes(bytes, 0, length);
         return bytes;

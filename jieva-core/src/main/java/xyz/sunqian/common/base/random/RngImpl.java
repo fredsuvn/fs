@@ -3,10 +3,10 @@ package xyz.sunqian.common.base.random;
 import xyz.sunqian.annotations.JdkDependent;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.JieCheck;
+import xyz.sunqian.common.base.bytes.JieBytes;
 import xyz.sunqian.common.base.math.MathKit;
 import xyz.sunqian.common.collect.JieStream;
 
-import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -47,8 +47,17 @@ final class RngImpl {
         }
 
         @Override
+        public void reset(byte @Nonnull [] seed) {
+            if (random instanceof SecureRandom) {
+                ((SecureRandom) random).setSeed(seed);
+            } else {
+                random.setSeed(JieBytes.bytesToLong(seed));
+            }
+        }
+
+        @Override
         public int nextInt() {
-            return random().nextInt();
+            return random.nextInt();
         }
 
         @Override
@@ -63,7 +72,7 @@ final class RngImpl {
                 // from JDK8:
                 int n = endExclusive - startInclusive;
                 if (n > 0) {
-                    return random().nextInt(n) + startInclusive;
+                    return random.nextInt(n) + startInclusive;
                 } else {  // range not representable as int
                     int r;
                     do {
@@ -76,7 +85,7 @@ final class RngImpl {
 
         @Override
         public long nextLong() {
-            return random().nextLong();
+            return random.nextLong();
         }
 
         @SuppressWarnings("StatementWithEmptyBody")
@@ -110,7 +119,7 @@ final class RngImpl {
 
         @Override
         public double nextDouble() {
-            return random().nextDouble();
+            return random.nextDouble();
         }
 
         @Override
@@ -130,27 +139,6 @@ final class RngImpl {
                 return r;
             }
         }
-
-        @Override
-        public byte @Nonnull [] nextBytes(int length) throws IllegalArgumentException {
-            return super.nextBytes(length);
-        }
-
-        @Override
-        public void nextBytes(byte @Nonnull [] bytes) {
-            random().nextBytes( bytes);
-        }
-
-        @Override
-        public void nextBytes(byte @Nonnull [] bytes, int off, int len) throws IndexOutOfBoundsException {
-            SecureRandom r = new SecureRandom();
-            //random().n
-        }
-
-        @Override
-        public void nextBytes(@Nonnull ByteBuffer bytes) {
-            super.nextBytes(bytes);
-        }
     }
 
     private static final class ThreadLocalRandomRng extends AbsRngImpl {
@@ -164,6 +152,10 @@ final class RngImpl {
 
         @Override
         public void reset(long seed) {
+        }
+
+        @Override
+        public void reset(byte @Nonnull [] seed) {
         }
 
         @Override
@@ -226,7 +218,7 @@ final class RngImpl {
             JieCheck.checkOffsetLength(bytes.length, off, len);
             if (off == 0 && len == bytes.length) {
                 random().nextBytes(bytes);
-                return;SecureRandom
+                return;
             }
             int i = 0;
             for (int words = len >> 3; words-- > 0; ) {
