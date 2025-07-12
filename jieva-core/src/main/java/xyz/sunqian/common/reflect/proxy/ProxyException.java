@@ -1,7 +1,6 @@
 package xyz.sunqian.common.reflect.proxy;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.exception.ExceptionKit;
 import xyz.sunqian.common.base.exception.JieRuntimeException;
 
 /**
@@ -43,6 +42,6 @@ public class ProxyException extends JieRuntimeException {
      * @param cause the cause
      */
     public ProxyException(@Nullable Throwable cause) {
-        this(ExceptionKit.getMessage(cause), cause);
+        super(cause);
     }
 }

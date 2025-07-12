@@ -5,7 +5,6 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.base.exception.ExceptionKit;
 import xyz.sunqian.common.base.value.Var;
 import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.reflect.BytesClassLoader;
@@ -154,7 +153,7 @@ public class JdkProxyClassGenerator implements ProxyClassGenerator {
          * @param cause the cause
          */
         public JdkProxyException(@Nullable Throwable cause) {
-            super(ExceptionKit.getMessage(cause), cause);
+            super(cause);
         }
     }
 

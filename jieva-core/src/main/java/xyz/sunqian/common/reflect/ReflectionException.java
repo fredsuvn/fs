@@ -1,7 +1,6 @@
 package xyz.sunqian.common.reflect;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.exception.ExceptionKit;
 import xyz.sunqian.common.base.exception.JieRuntimeException;
 
 /**
@@ -44,6 +43,6 @@ public class ReflectionException extends JieRuntimeException {
      * @param cause the cause
      */
     public ReflectionException(@Nullable Throwable cause) {
-        this(ExceptionKit.getMessage(cause), cause);
+        super(cause);
     }
 }
