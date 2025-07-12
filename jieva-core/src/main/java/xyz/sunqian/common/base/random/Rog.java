@@ -2,7 +2,7 @@ package xyz.sunqian.common.base.random;
 
 import xyz.sunqian.annotations.Nonnull;
 
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
@@ -14,12 +14,54 @@ import java.util.function.Supplier;
 public interface Rog {
 
     /**
-     * Returns the default implementation of {@link Rog}.
+     * Returns a {@link Rog} which uses {@link Rng#newRng()} to generate the random long value, which is used to
+     * calculate the probability.
      *
-     * @return the default implementation of {@link Rog}
+     * @return a {@link Rog} which uses {@link Rng#newRng()} to generate the random long value
      */
-    static Rog getDefault() {
-        return RogImpl.INST;
+    static Rog newRog() {
+        return newRog(Rng.newRng());
+    }
+
+    /**
+     * Returns a {@link Rog} which uses the specified random number generator to generate the random long value, which
+     * is used to calculate the probability.
+     *
+     * @param rng the specified random number generator
+     * @return a {@link Rog} which uses the specified random number generator to generate the random long value
+     */
+    static Rog newRog(LongSupplier rng) {
+        return RogImpl.rng(rng);
+    }
+
+    /**
+     * Returns a {@link Supplier} which produces the random objects, the usage example:
+     * <pre>{@code
+     * Supplier<String> strSupplier = Rog.supplier(
+     *     Rog.probability(20, () -> "a"), // 20% hit probability
+     *     Rog.probability(80, () -> "b"), // 80% hit probability
+     * );
+     * }</pre>
+     * <p>
+     * Each provided {@link Probability}, which has a score and a supplier, represents the hit probability for its
+     * supplier. Let the {@code sum(score)} be the total score of all provided {@link Probability}s, the hit probability
+     * for each {@link Probability} is {@code score / sum(score)}. Note the total score of all provided
+     * {@link Probability}s can not overflow the maximum value of {@code long}.
+     * <p>
+     * This method uses {@link Rog#newRog()} to generate the random objects, it is equivalent to:
+     * <pre>{@code
+     * return newRog().supplier(Arrays.asList(probabilities));
+     * }</pre>
+     *
+     * @param probabilities the provided {@link Probability}s
+     * @param <T>           the type of the random objects
+     * @return a {@link Supplier} which produces the random objects
+     */
+    @SafeVarargs
+    static <T> @Nonnull Supplier<T> supplier(
+        @Nonnull Probability<? extends T> @Nonnull ... probabilities
+    ) {
+        return newRog().supplier(Arrays.asList(probabilities));
     }
 
     /**
@@ -55,7 +97,7 @@ public interface Rog {
     /**
      * Returns a {@link Supplier} which produces the random objects, the usage example:
      * <pre>{@code
-     * Supplier<String> strSupplier = Rog.supplier(asList(
+     * Supplier<String> strSupplier = rog.supplier(asList(
      *     Rog.probability(20, () -> "a"), // 20% hit probability
      *     Rog.probability(80, () -> "b")  // 80% hit probability
      * ));
@@ -73,37 +115,8 @@ public interface Rog {
      * @param <T>           the type of the random objects
      * @return a {@link Supplier} which produces the random objects
      */
-    default <T> @Nonnull Supplier<T> supplier(
-        @Nonnull Collection<? extends @Nonnull Probability<? extends T>> probabilities
-    ) {
-        return supplier(Rng.threadLocal(), probabilities);
-    }
-
-    /**
-     * Returns a {@link Supplier} which produces the random objects, the usage example:
-     * <pre>{@code
-     * Supplier<String> strSupplier = Rog.supplier(scoreGenerator, asList(
-     *     Rog.probability(20, () -> "a"), // 20% hit probability
-     *     Rog.probability(80, () -> "b"), // 80% hit probability
-     * ));
-     * }</pre>
-     * <p>
-     * Each provided {@link Probability}, which has a score and a supplier, represents the hit probability for its
-     * supplier. Let the {@code sum(score)} be the total score of all provided {@link Probability}s, the hit probability
-     * for each {@link Probability} is {@code score / sum(score)}. Note the total score of all provided
-     * {@link Probability}s can not overflow the maximum value of {@code long}.
-     * <p>
-     * The {@code scoreGenerator} is a {@link LongSupplier} which produces a random long value, the long value is used
-     * to calculate the hit probability.
-     *
-     * @param scoreGenerator a {@link LongSupplier} which produces a random long value
-     * @param probabilities  the provided {@link Probability}s
-     * @param <T>            the type of the random objects
-     * @return a {@link Supplier} which produces the random objects
-     */
     <T> @Nonnull Supplier<T> supplier(
-        @Nonnull LongSupplier scoreGenerator,
-        @Nonnull Collection<? extends @Nonnull Probability<? extends T>> probabilities
+        @Nonnull Iterable<? extends @Nonnull Probability<? extends T>> probabilities
     );
 
     /**

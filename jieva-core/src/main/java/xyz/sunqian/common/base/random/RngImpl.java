@@ -178,6 +178,9 @@ final class RngImpl {
 
         @Override
         public long nextLong(long startInclusive, long endExclusive) throws IllegalArgumentException {
+            if (startInclusive == endExclusive) {
+                return startInclusive;
+            }
             return random().nextLong(startInclusive, endExclusive);
         }
 
@@ -188,6 +191,9 @@ final class RngImpl {
 
         @Override
         public double nextDouble(double startInclusive, double endExclusive) throws IllegalArgumentException {
+            if (startInclusive == endExclusive) {
+                return startInclusive;
+            }
             return random().nextDouble(startInclusive, endExclusive);
         }
     }
@@ -215,20 +221,21 @@ final class RngImpl {
 
         @Override
         public void nextBytes(byte @Nonnull [] bytes, int off, int len) throws IndexOutOfBoundsException {
-            JieCheck.checkOffsetLength(bytes.length, off, len);
             if (off == 0 && len == bytes.length) {
                 random().nextBytes(bytes);
                 return;
             }
-            int i = 0;
+            JieCheck.checkOffsetLength(bytes.length, off, len);
+            int i = off;
+            int end = off + len;
             for (int words = len >> 3; words-- > 0; ) {
                 long rnd = nextLong();
                 for (int n = 8; n-- > 0; rnd >>>= Byte.SIZE) {
                     bytes[i++] = (byte) rnd;
                 }
             }
-            if (i < len) {
-                for (long rnd = nextLong(); i < len; rnd >>>= Byte.SIZE) {
+            if (i < end) {
+                for (long rnd = nextLong(); i < end; rnd >>>= Byte.SIZE) {
                     bytes[i++] = (byte) rnd;
                 }
             }

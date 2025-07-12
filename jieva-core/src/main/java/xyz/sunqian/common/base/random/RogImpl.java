@@ -4,19 +4,28 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.UnreachablePointException;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
 final class RogImpl implements Rog {
 
-    static final @Nonnull RogImpl INST = new RogImpl();
+    static @Nonnull RogImpl rng(@Nonnull LongSupplier rng) {
+        return new RogImpl(rng);
+    }
+
+    private final @Nonnull LongSupplier rng;
+
+    private RogImpl(@Nonnull LongSupplier rng) {
+        this.rng = rng;
+    }
 
     @Override
     public @Nonnull <T> Supplier<T> supplier(
-        @Nonnull LongSupplier rd, @Nonnull Collection<? extends @Nonnull Probability<? extends T>> probabilities
+        @Nonnull Iterable<? extends @Nonnull Probability<? extends T>> probabilities
     ) {
-        return new RandomSupplier<>(rd, probabilities);
+        return new RandomSupplier<>(rng, probabilities);
     }
 
     static final class RandomSupplier<T> implements Supplier<T> {
@@ -28,17 +37,18 @@ final class RogImpl implements Rog {
         @SuppressWarnings("unchecked")
         RandomSupplier(
             @Nonnull LongSupplier rd,
-            @Nonnull Collection<? extends @Nonnull Probability<? extends T>> probabilities
+            @Nonnull Iterable<? extends @Nonnull Probability<? extends T>> probabilities
         ) {
             this.rd = rd;
-            this.nodes = new Node[probabilities.size()];
             long totalScore = 0;
+            List<Node<? extends T>> nodeList = new ArrayList<>();
             int i = 0;
             for (Probability<? extends T> probability : probabilities) {
                 long score = probability.score();
-                this.nodes[i++] = new Node<>(probability.supplier(), totalScore, totalScore + score);
+                nodeList.add(new Node<>(probability.supplier(), totalScore, totalScore + score));
                 totalScore += score;
             }
+            this.nodes = nodeList.toArray(new Node[0]);
             this.totalScore = totalScore;
         }
 

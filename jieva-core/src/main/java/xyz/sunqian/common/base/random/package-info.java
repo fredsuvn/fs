@@ -1,11 +1,6 @@
 /**
  * The package for random.
  * <p>
- * Core Utilities:
- * <ul>
- *     <li>{@link xyz.sunqian.common.base.random.RandomKit}</li>
- * </ul>
- * <p>
  * Core Interfaces:
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.random.Rng}</li>

@@ -25,16 +25,6 @@ import java.util.stream.LongStream;
 public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
 
     /**
-     * Returns a {@link Rng} instance based on the {@link ThreadLocalRandom}, and it is thread-safe and its
-     * {@link #reset(long)} has no effect.
-     *
-     * @return a {@link Rng} instance based on the {@link ThreadLocalRandom}
-     */
-    static @Nonnull Rng threadLocal() {
-        return RngImpl.threadLocalRandom();
-    }
-
-    /**
      * Returns a {@link Rng} instance.
      *
      * @return a {@link Rng} instance
@@ -56,17 +46,38 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
     }
 
     /**
-     * Returns a {@link Rng} instance based on the {@link SecureRandom} with the specified random algorithm.
+     * Returns a {@link Rng} instance based on the {@link ThreadLocalRandom}, and it is thread-safe and its
+     * {@link #reset(long)} has no effect.
+     *
+     * @return a {@link Rng} instance based on the {@link ThreadLocalRandom}
+     */
+    static @Nonnull Rng threadLocal() {
+        return RngImpl.threadLocalRandom();
+    }
+
+    /**
+     * Returns a {@link Rng} instance based on the {@link SecureRandom} with the specified random algorithm. This method
+     * is equivalent to:
+     * <pre>{@code
+     * try {
+     *     SecureRandom secureRandom = SecureRandom.getInstance(algorithm);
+     *     return RngImpl.random(secureRandom);
+     * } catch (NoSuchAlgorithmException e) {
+     *     throw new UnsupportedOperationException(e);
+     * }
+     * }</pre>
      *
      * @param algorithm the specified random algorithm
      * @return a {@link Rng} instance based on the {@link SecureRandom} with the specified random algorithm
+     * @throws UnsupportedOperationException if the specified algorithm is unsupported
+     * @see SecureRandom#getInstance(String)
      */
-    static @Nonnull Rng newSecure(String algorithm) throws IllegalArgumentException {
+    static @Nonnull Rng secure(String algorithm) throws UnsupportedOperationException {
         try {
             SecureRandom secureRandom = SecureRandom.getInstance(algorithm);
             return RngImpl.random(secureRandom);
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+            throw new UnsupportedOperationException(e);
         }
     }
 
@@ -204,15 +215,16 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
      */
     default void nextBytes(byte @Nonnull [] bytes, int off, int len) throws IndexOutOfBoundsException {
         JieCheck.checkOffsetLength(bytes.length, off, len);
-        int i = 0;
+        int i = off;
+        int end = off + len;
         for (int words = len >> 3; words-- > 0; ) {
             long rnd = nextLong();
             for (int n = 8; n-- > 0; rnd >>>= Byte.SIZE) {
                 bytes[i++] = (byte) rnd;
             }
         }
-        if (i < len) {
-            for (long rnd = nextLong(); i < len; rnd >>>= Byte.SIZE) {
+        if (i < end) {
+            for (long rnd = nextLong(); i < end; rnd >>>= Byte.SIZE) {
                 bytes[i++] = (byte) rnd;
             }
         }
