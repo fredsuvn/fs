@@ -42,7 +42,7 @@ public class AwaitingException extends JieRuntimeException {
      * @param cause the cause
      */
     public AwaitingException(@Nullable Throwable cause) {
-        this(JieException.getMessage(cause), cause);
+        this(ExceptionKit.getMessage(cause), cause);
     }
 
     /**

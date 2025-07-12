@@ -3,7 +3,7 @@ package xyz.sunqian.common.base.exception;
 import xyz.sunqian.annotations.Nullable;
 
 /**
- * This is the root exception for this lib, and also the utility class for exception.
+ * This is the root exception for this lib.
  *
  * @author sunqian
  */
@@ -42,19 +42,5 @@ public class JieException extends Exception {
      */
     public JieException(@Nullable Throwable cause) {
         super(cause);
-    }
-
-    // --------------------------------------------------------------------------------
-    // Utility methods:
-    // --------------------------------------------------------------------------------
-
-    /**
-     * Returns the message of the given throwable.
-     *
-     * @param throwable the given throwable
-     * @return the message of the given throwable
-     */
-    public static @Nullable String getMessage(@Nullable Throwable throwable) {
-        return throwable == null ? null : throwable.getMessage();
     }
 }

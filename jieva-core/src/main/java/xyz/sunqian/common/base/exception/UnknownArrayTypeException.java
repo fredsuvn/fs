@@ -7,7 +7,7 @@ import java.lang.reflect.Type;
  *
  * @author sunqian
  */
-public class UnknownArrayTypeException extends JieRuntimeException {
+public class UnknownArrayTypeException extends UnknownTypeException {
 
     /**
      * Constructs with the unknown array type.
@@ -15,6 +15,6 @@ public class UnknownArrayTypeException extends JieRuntimeException {
      * @param type the unknown array type
      */
     public UnknownArrayTypeException(Type type) {
-        super("Unknown array type: " + type + ".");
+        super(type, "array");
     }
 }

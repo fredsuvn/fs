@@ -1,7 +1,7 @@
 package xyz.sunqian.common.task;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.exception.JieException;
+import xyz.sunqian.common.base.exception.ExceptionKit;
 import xyz.sunqian.common.base.exception.JieRuntimeException;
 
 import java.util.concurrent.RejectedExecutionException;
@@ -47,6 +47,6 @@ public class SubmissionException extends JieRuntimeException {
      * @param cause the cause
      */
     public SubmissionException(@Nullable Throwable cause) {
-        this(JieException.getMessage(cause), cause);
+        this(ExceptionKit.getMessage(cause), cause);
     }
 }

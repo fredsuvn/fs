@@ -16,6 +16,6 @@ public class WrappedException extends JieRuntimeException {
      * @param cause the original cause
      */
     public WrappedException(@Nonnull Throwable cause) {
-        super(JieException.getMessage(cause), cause);
+        super(ExceptionKit.getMessage(cause), cause);
     }
 }

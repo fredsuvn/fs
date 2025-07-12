@@ -7,7 +7,7 @@ import java.lang.reflect.Type;
  *
  * @author sunqian
  */
-public class UnknownPrimitiveTypeException extends JieRuntimeException {
+public class UnknownPrimitiveTypeException extends UnknownTypeException {
 
     /**
      * Constructs with the unknown primitive type.
@@ -15,6 +15,6 @@ public class UnknownPrimitiveTypeException extends JieRuntimeException {
      * @param type the unknown primitive type
      */
     public UnknownPrimitiveTypeException(Type type) {
-        super("Unknown primitive type: " + type + ".");
+        super(type, "primitive");
     }
 }

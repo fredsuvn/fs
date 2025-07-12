@@ -1,20 +1,23 @@
 /**
  * Provides base exceptions.
  * <p>
- * Base exception and also be the utility class for exception:
+ * Utilities:
  * <ul>
- *     <li>{@link xyz.sunqian.common.base.exception.JieException}</li>
+ *     <li>{@link xyz.sunqian.common.base.exception.ExceptionKit}</li>
  * </ul>
  * <p>
- * Base runtime exception:
+ * Root Exceptions:
  * <ul>
+ *     <li>{@link xyz.sunqian.common.base.exception.JieException}</li>
  *     <li>{@link xyz.sunqian.common.base.exception.JieRuntimeException}</li>
  * </ul>
  * <p>
- * Other exceptions:
+ * Other Exceptions:
  * <ul>
- *     <li>{@link xyz.sunqian.common.base.exception.ProcessingException}</li>
- *     <li>{@link xyz.sunqian.common.base.exception.AwaitingException}</li>
+ *     <li>{@link xyz.sunqian.common.base.exception.AwaitingException}: for awaiting;</li>
+ *     <li>{@link xyz.sunqian.common.base.exception.WrappedException}: for wrapping the cause;</li>
+ *     <li>{@link xyz.sunqian.common.base.exception.UnknownArrayTypeException}: for awaiting;</li>
+ *     <li>{@link xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException}: for awaiting;</li>
  * </ul>
  */
 package xyz.sunqian.common.base.exception;
