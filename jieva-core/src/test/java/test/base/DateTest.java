@@ -2,7 +2,7 @@
 //
 // import org.testng.Assert;
 // import org.testng.annotations.Test;
-// import xyz.sunqian.common.base.JieDate;
+// import xyz.sunqian.common.base.time.JieDate;
 //
 // import java.text.ParseException;
 // import java.text.SimpleDateFormat;

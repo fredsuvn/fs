@@ -3,7 +3,7 @@ package xyz.sunqian.common.mapping.handlers;
 import lombok.EqualsAndHashCode;
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.JieDate;
+import xyz.sunqian.common.base.time.TimeKit;
 import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.io.BufferKit;
@@ -175,7 +175,7 @@ public class TypedConverters {
             return ((TemporalConverter.StringTemporal) temporal).toInstant();
         }
         ZoneOffset offset = options.getZoneOffset(targetProperty);
-        return offset == null ? JieDate.toInstant(temporal) : JieDate.toInstant(temporal, offset);
+        return offset == null ? TimeKit.toInstant(temporal) : TimeKit.toInstant(temporal, offset);
     }
 
     private static LocalDateTime toLocalDateTime(
@@ -184,7 +184,7 @@ public class TypedConverters {
             return ((TemporalConverter.StringTemporal) temporal).toLocalDateTime();
         }
         ZoneOffset offset = options.getZoneOffset(targetProperty);
-        return offset == null ? JieDate.toLocalDateTime(temporal) : JieDate.toLocalDateTime(temporal, offset);
+        return offset == null ? TimeKit.toLocalDateTime(temporal) : TimeKit.toLocalDateTime(temporal, offset);
     }
 
     private static OffsetDateTime toOffsetDateTime(
@@ -193,7 +193,7 @@ public class TypedConverters {
             return ((TemporalConverter.StringTemporal) temporal).toOffsetDateTime();
         }
         ZoneOffset offset = options.getZoneOffset(targetProperty);
-        return offset == null ? JieDate.toOffsetDateTime(temporal) : JieDate.toOffsetDateTime(temporal, offset);
+        return offset == null ? TimeKit.toOffsetDateTime(temporal) : TimeKit.toOffsetDateTime(temporal, offset);
     }
 
     private static ZonedDateTime toZonedDateTime(
@@ -202,7 +202,7 @@ public class TypedConverters {
             return ((TemporalConverter.StringTemporal) temporal).toZonedDateTime();
         }
         ZoneOffset offset = options.getZoneOffset(targetProperty);
-        return offset == null ? JieDate.toZonedDateTime(temporal) : JieDate.toZonedDateTime(temporal, offset);
+        return offset == null ? TimeKit.toZonedDateTime(temporal) : TimeKit.toZonedDateTime(temporal, offset);
     }
 
     private static LocalDate toLocalDate(
@@ -211,7 +211,7 @@ public class TypedConverters {
             return ((TemporalConverter.StringTemporal) temporal).toLocalDate();
         }
         ZoneOffset offset = options.getZoneOffset(targetProperty);
-        return offset == null ? JieDate.toLocalDate(temporal) : JieDate.toLocalDate(temporal, offset);
+        return offset == null ? TimeKit.toLocalDate(temporal) : TimeKit.toLocalDate(temporal, offset);
     }
 
     private static LocalTime toLocalTime(
@@ -220,7 +220,7 @@ public class TypedConverters {
             return ((TemporalConverter.StringTemporal) temporal).toLocalTime();
         }
         ZoneOffset offset = options.getZoneOffset(targetProperty);
-        return offset == null ? JieDate.toLocalTime(temporal) : JieDate.toLocalTime(temporal, offset);
+        return offset == null ? TimeKit.toLocalTime(temporal) : TimeKit.toLocalTime(temporal, offset);
     }
 
     /**

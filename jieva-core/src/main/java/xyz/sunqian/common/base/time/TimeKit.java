@@ -1,10 +1,12 @@
-package xyz.sunqian.common.base;
+package xyz.sunqian.common.base.time;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,197 +18,180 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.Date;
+import java.util.function.Supplier;
 
 /**
- * Date utilities.
+ * Utilities for time and date.
  *
- * @author fredsuvn
+ * @author sunqian
  */
-public class JieDate {
+public class TimeKit {
 
     /**
-     * Default date pattern: "yyyy-MM-dd HH:mm:ss.SSS".
+     * Default format pattern: "yyyy-MM-dd HH:mm:ss.SSS".
      */
     public static final String DEFAULT_PATTERN = "yyyy-MM-dd HH:mm:ss.SSS";
 
     /**
-     * Default date formatter of {@link #DEFAULT_PATTERN} with zone at {@link ZoneId#systemDefault()}.
+     * Default date time formatter of {@link #DEFAULT_PATTERN} with the zone at {@link ZoneId#systemDefault()}.
      */
     public static final DateTimeFormatter DEFAULT_FORMATTER = DateTimeFormatter
         .ofPattern(DEFAULT_PATTERN).withZone(ZoneId.systemDefault());
 
     /**
-     * Returns {@link DateFormat} of given pattern.
+     * Returns a {@link DateFormat} of the specified pattern.
      *
-     * @param pattern given pattern
-     * @return {@link DateFormat} of given pattern
+     * @param pattern the specified pattern
+     * @return a {@link DateFormat} of the specified pattern
      */
-    public static DateFormat dateFormat(CharSequence pattern) {
-        return new SimpleDateFormat(pattern.toString());
+    public static @Nonnull DateFormat dateFormat(@Nonnull String pattern) {
+        return new SimpleDateFormat(pattern);
     }
 
     /**
-     * Formats given date with {@link #DEFAULT_PATTERN}.
+     * Formats the given date with {@link #DEFAULT_PATTERN}.
      *
-     * @param date given date
-     * @return formatted string
+     * @param date the given date
+     * @return the formatted string
      */
-    public static String format(Date date) {
+    public static @Nonnull String format(@Nonnull Date date) {
         return format(date, DEFAULT_PATTERN);
     }
 
     /**
-     * Formats given date with given pattern.
+     * Formats the given date with the specified pattern.
      *
-     * @param date    given date
-     * @param pattern given pattern
-     * @return formatted string
+     * @param date    the given date
+     * @param pattern the specified pattern
+     * @return the formatted string
      */
-    public static String format(Date date, CharSequence pattern) {
+    public static @Nonnull String format(@Nonnull Date date, @Nonnull String pattern) {
         return dateFormat(pattern).format(date);
     }
 
     /**
-     * Parses given date string with {@link #DEFAULT_PATTERN}.
+     * Parses the given date string with {@link #DEFAULT_PATTERN}.
      *
-     * @param date given date string
-     * @return parsed date
+     * @param date the given date string
+     * @return the parsed date
      */
-    public static Date parse(CharSequence date) {
+    public static @Nonnull Date parse(@Nonnull String date) {
         return parse(date, DEFAULT_PATTERN);
     }
 
     /**
-     * Parses given date string with given pattern.
+     * Parses the given date string with the specified pattern.
      *
-     * @param date    given date string
-     * @param pattern given pattern
-     * @return parsed date
+     * @param date    the given date string
+     * @param pattern the specified pattern
+     * @return the parsed date
      */
-    public static Date parse(CharSequence date, CharSequence pattern) {
+    public static @Nonnull Date parse(@Nonnull String date, @Nonnull String pattern) {
         try {
-            return dateFormat(pattern).parse(date.toString());
+            return dateFormat(pattern).parse(date);
         } catch (ParseException e) {
             throw new IllegalArgumentException(e);
         }
     }
 
     /**
-     * Formats given date with {@link #DEFAULT_PATTERN}. If given date is null, return null.
+     * Formats the given date with {@link #DEFAULT_PATTERN}. If the date is {@code null}, returns {@code null}.
      *
-     * @param date given date
-     * @return formatted string or null
+     * @param date the given date
+     * @return the formatted string
      */
-    @Nullable
-    public static String toString(@Nullable Date date) {
-        return toString(date, DEFAULT_PATTERN);
+    public static @Nullable String toString(@Nullable Date date) {
+        if (date == null) {
+            return null;
+        }
+        return format(date);
     }
 
     /**
-     * Formats given date with given pattern. If given date or pattern is null or empty, return null.
+     * Formats the given date with the specified pattern. If the date or pattern is {@code null}, returns {@code null}.
      *
-     * @param date    given date
-     * @param pattern given pattern
-     * @return formatted string or null
+     * @param date    the given date
+     * @param pattern the specified pattern
+     * @return the formatted string
      */
-    @Nullable
-    public static String toString(@Nullable Date date, @Nullable CharSequence pattern) {
-        if (date == null || JieString.isEmpty(pattern)) {
+    public static @Nullable String toString(@Nullable Date date, @Nullable String pattern) {
+        if (date == null || pattern == null) {
             return null;
         }
         return format(date, pattern);
     }
 
     /**
-     * Parses given date string with {@link #DEFAULT_PATTERN}. If given date string is null, return null.
+     * Parses the given date string with {@link #DEFAULT_PATTERN}. If the date string is {@code null}, returns
+     * {@code null}.
      *
-     * @param date given date string
-     * @return parsed date or null
+     * @param date the given date string
+     * @return the parsed date
      */
-    @Nullable
-    public static Date toDate(@Nullable CharSequence date) {
-        return toDate(date, DEFAULT_PATTERN);
+    public static @Nullable Date toDate(@Nullable String date) {
+        if (date == null) {
+            return null;
+        }
+        return parse(date);
     }
 
     /**
-     * Parses given date string with given pattern. If given date string or pattern is null or empty, return null.
+     * Parses the given date string with the specified pattern. If the date string or pattern is {@code null}, returns
+     * {@code null}.
      *
-     * @param date    given date string
-     * @param pattern given pattern
-     * @return parsed date or null
+     * @param date    the given date string
+     * @param pattern the specified pattern
+     * @return the parsed date
      */
-    @Nullable
-    public static Date toDate(@Nullable CharSequence date, @Nullable CharSequence pattern) {
-        if (JieString.isEmpty(date) || JieString.isEmpty(pattern)) {
+    public static @Nullable Date toDate(@Nullable String date, @Nullable String pattern) {
+        if (date == null || pattern == null) {
             return null;
         }
         return parse(date, pattern);
     }
 
     /**
-     * Returns current zone offset.
+     * Returns the current zone offset.
      *
-     * @return current zone offset
+     * @return the current zone offset
      */
-    public static ZoneOffset zoneOffset() {
-        ZoneId.systemDefault().getRules().isFixedOffset();
+    public static @Nonnull ZoneOffset zoneOffset() {
         return OffsetDateTime.now().getOffset();
     }
 
     /**
-     * Returns zone offset from given zone id.
-     *
-     * @param zoneId given zone id
-     * @return zone offset from given zone id
-     */
-    public static ZoneOffset toZoneOffset(ZoneId zoneId) {
-        return zoneId.getRules().getOffset(Instant.now());
-    }
-
-    /**
-     * Returns {@link Instant} from given temporal. If the given temporal lacks a zone offset, use
+     * Converts the given temporal to an {@link Instant}. If the given temporal lacks a zone offset, use
      * {@link #zoneOffset()}.
      *
-     * @param temporal given temporal
-     * @return {@link Instant} from given temporal
+     * @param temporal the given temporal
+     * @return the {@link Instant} converted from the given temporal
+     * @throws DateTimeException if the conversion fails
      */
-    @Nullable
-    public static Instant toInstant(TemporalAccessor temporal) {
-        if (temporal instanceof Instant) {
-            return (Instant) temporal;
-        }
-        if (temporal instanceof LocalDateTime) {
-            return ((LocalDateTime) temporal).toInstant(zoneOffset());
-        }
-        if (temporal instanceof ZonedDateTime) {
-            return ((ZonedDateTime) temporal).toInstant();
-        }
-        if (temporal instanceof OffsetDateTime) {
-            return ((OffsetDateTime) temporal).toInstant();
-        }
-        if (temporal instanceof LocalDate) {
-            return LocalDateTime.of((LocalDate) temporal, LocalTime.MIN).toInstant(zoneOffset());
-        }
-        if (temporal instanceof LocalTime) {
-            return LocalDateTime.of(LocalDate.MIN, (LocalTime) temporal).toInstant(zoneOffset());
-        }
-        return Instant.from(temporal);
+    public static @Nonnull Instant toInstant(@Nonnull TemporalAccessor temporal) throws DateTimeException {
+        return toInstant(temporal, TimeKit::zoneOffset);
     }
 
     /**
-     * Returns {@link Instant} from given temporal. If the given temporal lacks a zone offset, use specified zone
-     * offset.
+     * Converts the given temporal to an {@link Instant} with the specified zone offset.
      *
-     * @param temporal given temporal
+     * @param temporal the given temporal
      * @param offset   specified zone offset
-     * @return {@link Instant} from given temporal
+     * @return the {@link Instant} converted from the given temporal
+     * @throws DateTimeException if the conversion fails
      */
-    public static Instant toInstant(TemporalAccessor temporal, ZoneOffset offset) {
+    public static @Nonnull Instant toInstant(@Nonnull TemporalAccessor temporal, @Nonnull ZoneOffset offset) {
+        return toInstant(temporal, () -> offset);
+    }
+
+    private static @Nonnull Instant toInstant(
+        @Nonnull TemporalAccessor temporal,
+        @Nonnull Supplier<@Nonnull ZoneOffset> offset
+    ) {
         if (temporal instanceof Instant) {
             return (Instant) temporal;
         }
         if (temporal instanceof LocalDateTime) {
-            return ((LocalDateTime) temporal).toInstant(offset);
+            return ((LocalDateTime) temporal).toInstant(offset.get());
         }
         if (temporal instanceof ZonedDateTime) {
             return ((ZonedDateTime) temporal).toInstant();
@@ -215,12 +200,12 @@ public class JieDate {
             return ((OffsetDateTime) temporal).toInstant();
         }
         if (temporal instanceof LocalDate) {
-            return LocalDateTime.of((LocalDate) temporal, LocalTime.MIN).toInstant(offset);
+            return LocalDateTime.of((LocalDate) temporal, LocalTime.MIN).toInstant(offset.get());
         }
         if (temporal instanceof LocalTime) {
-            return LocalDateTime.of(LocalDate.MIN, (LocalTime) temporal).toInstant(offset);
+            return LocalDateTime.of(LocalDate.MIN, (LocalTime) temporal).toInstant(offset.get());
         }
-        return LocalDateTime.from(temporal).toInstant(offset);
+        return Instant.from(temporal);
     }
 
     /**

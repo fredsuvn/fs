@@ -1,5 +1,7 @@
 package xyz.sunqian.common.base;
 
+import xyz.sunqian.common.base.time.TimeKit;
+
 import java.util.Date;
 import java.util.Objects;
 
@@ -63,7 +65,7 @@ final class JieLogImpls {
                     || Objects.equals(t.getMethodName(), "error");
             });
             try {
-                appendable.append(JieDate.format(new Date()))
+                appendable.append(TimeKit.format(new Date()))
                     .append("[")
                     .append(levelToString(level))
                     .append("]");
