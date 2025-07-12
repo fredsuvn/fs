@@ -3,7 +3,7 @@ package xyz.sunqian.common.base.option;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.collect.JieArray;
+import xyz.sunqian.common.collect.ArrayKit;
 
 /**
  * Static utility class for {@link Option}.
@@ -28,7 +28,7 @@ public class JieOption {
         @Nonnull K key,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
-        if (JieArray.isEmpty(options)) {
+        if (ArrayKit.isEmpty(options)) {
             return null;
         }
         for (Option<?, ?> option : options) {

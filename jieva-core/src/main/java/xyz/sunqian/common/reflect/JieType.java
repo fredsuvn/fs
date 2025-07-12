@@ -6,8 +6,8 @@ import xyz.sunqian.annotations.OutParam;
 import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieString;
-import xyz.sunqian.common.collect.JieArray;
-import xyz.sunqian.common.collect.JieMap;
+import xyz.sunqian.common.collect.ArrayKit;
+import xyz.sunqian.common.collect.MapKit;
 
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
@@ -142,7 +142,7 @@ public class JieType {
      */
     public static @Nonnull Type getUpperBound(@Nonnull WildcardType type) {
         Type[] upperBounds = type.getUpperBounds();
-        if (JieArray.isNotEmpty(upperBounds)) {
+        if (ArrayKit.isNotEmpty(upperBounds)) {
             return upperBounds[0];
         }
         return Object.class;
@@ -157,7 +157,7 @@ public class JieType {
      */
     public static @Nullable Type getLowerBound(@Nonnull WildcardType type) {
         Type[] lowerBounds = type.getLowerBounds();
-        if (JieArray.isNotEmpty(lowerBounds)) {
+        if (ArrayKit.isNotEmpty(lowerBounds)) {
             return lowerBounds[0];
         }
         return null;
@@ -172,7 +172,7 @@ public class JieType {
      */
     public static @Nonnull Type getFirstBound(@Nonnull TypeVariable<?> type) {
         Type[] bounds = type.getBounds();
-        if (JieArray.isNotEmpty(bounds)) {
+        if (ArrayKit.isNotEmpty(bounds)) {
             return bounds[0];
         }
         return Object.class;
@@ -280,14 +280,14 @@ public class JieType {
         }
         // Resolves:
         TypeVariable<?>[] typeParameters = baseType.getTypeParameters();
-        if (JieArray.isEmpty(typeParameters)) {
+        if (ArrayKit.isEmpty(typeParameters)) {
             return Collections.emptyList();
         }
         Map<TypeVariable<?>, Type> typeArguments = mapTypeParameters(type);
         Set<Type> stack = new HashSet<>();
         return Jie.stream(typeParameters)
             .map(typeVariable -> {
-                Type actualType = JieMap.resolveChain(typeArguments, typeVariable, stack);
+                Type actualType = MapKit.resolveChain(typeArguments, typeVariable, stack);
                 stack.clear();
                 return Jie.nonnull(actualType, typeVariable);
             })
@@ -349,7 +349,7 @@ public class JieType {
         @Nonnull Type @Nonnull [] interfaces,
         @Nonnull @OutParam Map<@Nonnull TypeVariable<?>, @Nullable Type> mapping
     ) {
-        if (JieArray.isEmpty(interfaces)) {
+        if (ArrayKit.isEmpty(interfaces)) {
             return;
         }
         for (Type anInterface : interfaces) {

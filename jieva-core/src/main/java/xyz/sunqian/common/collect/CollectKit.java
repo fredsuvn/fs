@@ -16,7 +16,7 @@ import java.util.List;
  *
  * @author sunqian
  */
-public class JieCollect {
+public class CollectKit {
 
     /**
      * Returns whether the given iterable is null or empty.
@@ -68,7 +68,7 @@ public class JieCollect {
     public static <T> T @Nonnull [] toArray(@Nonnull Iterable<?> it, @Nonnull Class<?> componentType) {
         if (it instanceof Collection) {
             Collection<?> collection = (Collection<?>) it;
-            T[] array = JieArray.newArray(componentType, collection.size());
+            T[] array = ArrayKit.newArray(componentType, collection.size());
             collection.toArray(array);
             return array;
         }

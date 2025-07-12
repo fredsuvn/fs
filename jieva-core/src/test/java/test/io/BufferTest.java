@@ -4,7 +4,7 @@ import org.testng.annotations.Test;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.chars.CharsBuilder;
 import xyz.sunqian.common.base.chars.CharsKit;
-import xyz.sunqian.common.collect.JieArray;
+import xyz.sunqian.common.collect.ArrayKit;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.test.DataTest;
@@ -164,7 +164,7 @@ public class BufferTest implements DataTest {
     private void testSlice(int size, int offset, int length) {
         {
             // byte: slice(src, len)
-            byte[] data = JieArray.fill(new byte[size], (byte) 6);
+            byte[] data = ArrayKit.fill(new byte[size], (byte) 6);
             ByteBuffer buffer = ByteBuffer.wrap(data);
             ByteBuffer slice = BufferKit.slice(buffer, length);
             assertEquals(buffer.position(), 0);
@@ -173,19 +173,19 @@ public class BufferTest implements DataTest {
             assertEquals(slice.position(), 0);
             assertEquals(slice.limit(), length);
             assertEquals(slice.capacity(), length);
-            slice.put(JieArray.fill(new byte[length], (byte) 8));
+            slice.put(ArrayKit.fill(new byte[length], (byte) 8));
             assertEquals(
                 Arrays.copyOf(data, length),
-                JieArray.fill(new byte[length], (byte) 8)
+                ArrayKit.fill(new byte[length], (byte) 8)
             );
             assertEquals(
                 Arrays.copyOfRange(data, length, data.length),
-                JieArray.fill(new byte[size - length], (byte) 6)
+                ArrayKit.fill(new byte[size - length], (byte) 6)
             );
         }
         {
             // byte: slice(src, off, len)
-            byte[] data = JieArray.fill(new byte[size], (byte) 6);
+            byte[] data = ArrayKit.fill(new byte[size], (byte) 6);
             ByteBuffer buffer = ByteBuffer.wrap(data);
             ByteBuffer slice = BufferKit.slice(buffer, offset, length);
             assertEquals(buffer.position(), 0);
@@ -194,23 +194,23 @@ public class BufferTest implements DataTest {
             assertEquals(slice.position(), 0);
             assertEquals(slice.limit(), length);
             assertEquals(slice.capacity(), length);
-            slice.put(JieArray.fill(new byte[length], (byte) 8));
+            slice.put(ArrayKit.fill(new byte[length], (byte) 8));
             assertEquals(
                 Arrays.copyOfRange(data, offset, offset + length),
-                JieArray.fill(new byte[length], (byte) 8)
+                ArrayKit.fill(new byte[length], (byte) 8)
             );
             assertEquals(
                 Arrays.copyOfRange(data, 0, offset),
-                JieArray.fill(new byte[offset], (byte) 6)
+                ArrayKit.fill(new byte[offset], (byte) 6)
             );
             assertEquals(
                 Arrays.copyOfRange(data, offset + length, data.length),
-                JieArray.fill(new byte[data.length - offset - length], (byte) 6)
+                ArrayKit.fill(new byte[data.length - offset - length], (byte) 6)
             );
         }
         {
             // char: slice(src, len)
-            char[] data = JieArray.fill(new char[size], (char) 6);
+            char[] data = ArrayKit.fill(new char[size], (char) 6);
             CharBuffer buffer = CharBuffer.wrap(data);
             CharBuffer slice = BufferKit.slice(buffer, length);
             assertEquals(buffer.position(), 0);
@@ -219,19 +219,19 @@ public class BufferTest implements DataTest {
             assertEquals(slice.position(), 0);
             assertEquals(slice.limit(), length);
             assertEquals(slice.capacity(), length);
-            slice.put(JieArray.fill(new char[length], (char) 8));
+            slice.put(ArrayKit.fill(new char[length], (char) 8));
             assertEquals(
                 Arrays.copyOf(data, length),
-                JieArray.fill(new char[length], (char) 8)
+                ArrayKit.fill(new char[length], (char) 8)
             );
             assertEquals(
                 Arrays.copyOfRange(data, length, data.length),
-                JieArray.fill(new char[size - length], (char) 6)
+                ArrayKit.fill(new char[size - length], (char) 6)
             );
         }
         {
             // char: slice(src, off, len)
-            char[] data = JieArray.fill(new char[size], (char) 6);
+            char[] data = ArrayKit.fill(new char[size], (char) 6);
             CharBuffer buffer = CharBuffer.wrap(data);
             CharBuffer slice = BufferKit.slice(buffer, offset, length);
             assertEquals(buffer.position(), 0);
@@ -240,18 +240,18 @@ public class BufferTest implements DataTest {
             assertEquals(slice.position(), 0);
             assertEquals(slice.limit(), length);
             assertEquals(slice.capacity(), length);
-            slice.put(JieArray.fill(new char[length], (char) 8));
+            slice.put(ArrayKit.fill(new char[length], (char) 8));
             assertEquals(
                 Arrays.copyOfRange(data, offset, offset + length),
-                JieArray.fill(new char[length], (char) 8)
+                ArrayKit.fill(new char[length], (char) 8)
             );
             assertEquals(
                 Arrays.copyOfRange(data, 0, offset),
-                JieArray.fill(new char[offset], (char) 6)
+                ArrayKit.fill(new char[offset], (char) 6)
             );
             assertEquals(
                 Arrays.copyOfRange(data, offset + length, data.length),
-                JieArray.fill(new char[data.length - offset - length], (char) 6)
+                ArrayKit.fill(new char[data.length - offset - length], (char) 6)
             );
         }
     }

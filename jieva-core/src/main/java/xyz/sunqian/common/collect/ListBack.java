@@ -44,39 +44,39 @@ final class ListBack {
     }
 
     static <T> @Nonnull @Immutable List<T> immutableList(T @Nonnull [] array) {
-        return JieArray.isEmpty(array) ? Collections.emptyList() : new ImmutableList<>(array);
+        return ArrayKit.isEmpty(array) ? Collections.emptyList() : new ImmutableList<>(array);
     }
 
     static @Nonnull @Immutable List<@Nonnull Boolean> immutableList(boolean @Nonnull [] array) {
-        return JieArray.isEmpty(array) ? Collections.emptyList() : new BooleanImmutableList(array);
+        return ArrayKit.isEmpty(array) ? Collections.emptyList() : new BooleanImmutableList(array);
     }
 
     static @Nonnull @Immutable List<@Nonnull Byte> immutableList(byte @Nonnull [] array) {
-        return JieArray.isEmpty(array) ? Collections.emptyList() : new ByteImmutableList(array);
+        return ArrayKit.isEmpty(array) ? Collections.emptyList() : new ByteImmutableList(array);
     }
 
     static @Nonnull @Immutable List<@Nonnull Short> immutableList(short @Nonnull [] array) {
-        return JieArray.isEmpty(array) ? Collections.emptyList() : new ShortImmutableList(array);
+        return ArrayKit.isEmpty(array) ? Collections.emptyList() : new ShortImmutableList(array);
     }
 
     static @Nonnull @Immutable List<@Nonnull Character> immutableList(char @Nonnull [] array) {
-        return JieArray.isEmpty(array) ? Collections.emptyList() : new CharImmutableList(array);
+        return ArrayKit.isEmpty(array) ? Collections.emptyList() : new CharImmutableList(array);
     }
 
     static @Nonnull @Immutable List<@Nonnull Integer> immutableList(int @Nonnull [] array) {
-        return JieArray.isEmpty(array) ? Collections.emptyList() : new IntImmutableList(array);
+        return ArrayKit.isEmpty(array) ? Collections.emptyList() : new IntImmutableList(array);
     }
 
     static @Nonnull @Immutable List<@Nonnull Long> immutableList(long @Nonnull [] array) {
-        return JieArray.isEmpty(array) ? Collections.emptyList() : new LongImmutableList(array);
+        return ArrayKit.isEmpty(array) ? Collections.emptyList() : new LongImmutableList(array);
     }
 
     static @Nonnull @Immutable List<@Nonnull Float> immutableList(float @Nonnull [] array) {
-        return JieArray.isEmpty(array) ? Collections.emptyList() : new FloatImmutableList(array);
+        return ArrayKit.isEmpty(array) ? Collections.emptyList() : new FloatImmutableList(array);
     }
 
     static @Nonnull @Immutable List<@Nonnull Double> immutableList(double @Nonnull [] array) {
-        return JieArray.isEmpty(array) ? Collections.emptyList() : new DoubleImmutableList(array);
+        return ArrayKit.isEmpty(array) ? Collections.emptyList() : new DoubleImmutableList(array);
     }
 
     private static final class BooleanArrayList

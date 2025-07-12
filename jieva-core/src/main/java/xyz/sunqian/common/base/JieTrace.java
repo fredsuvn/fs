@@ -1,7 +1,7 @@
 package xyz.sunqian.common.base;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.collect.JieArray;
+import xyz.sunqian.common.collect.ArrayKit;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -32,7 +32,7 @@ public class JieTrace {
     @Nullable
     public static StackTraceElement findCallerTrace(int offset, Predicate<StackTraceElement> predicate) {
         StackTraceElement[] stackTraces = Thread.currentThread().getStackTrace();
-        if (JieArray.isEmpty(stackTraces)) {
+        if (ArrayKit.isEmpty(stackTraces)) {
             return null;
         }
         for (int i = 0; i < stackTraces.length; i++) {
@@ -120,7 +120,7 @@ public class JieTrace {
         StackTraceElement last = null;
         do {
             StackTraceElement[] traceElements = cur.getStackTrace();
-            if (JieArray.isNotEmpty(traceElements)) {
+            if (ArrayKit.isNotEmpty(traceElements)) {
                 for (int i = traceElements.length - 1; i >= 0; i--) {
                     if (predicate.test(cur, traceElements[i])) {
                         last = traceElements[i];

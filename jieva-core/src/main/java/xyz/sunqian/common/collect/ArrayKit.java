@@ -21,7 +21,7 @@ import java.util.function.Function;
  *
  * @author sunqian
  */
-public class JieArray {
+public class ArrayKit {
 
     /**
      * Returns whether the given array is null or empty.

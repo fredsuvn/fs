@@ -3,7 +3,7 @@ package xyz.sunqian.common.mapping.handlers;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Flag;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.collect.JieCollect;
+import xyz.sunqian.common.collect.CollectKit;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingException;
 import xyz.sunqian.common.mapping.MappingOptions;
@@ -231,7 +231,7 @@ public class CollectionMappingHandler implements Mapper.Handler {
         }
         if (type instanceof ParameterizedType) {
             List<Type> sourceComponent = JieType.resolveActualTypeArguments(type, Iterable.class);
-            if (JieCollect.isEmpty(sourceComponent)) {
+            if (CollectKit.isEmpty(sourceComponent)) {
                 return null;
             }
             return sourceComponent.get(0);

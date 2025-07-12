@@ -2,7 +2,7 @@ package test.collect;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.collect.JieCollect;
+import xyz.sunqian.common.collect.CollectKit;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,16 +22,16 @@ public class CollectTest {
     @Test
     public void testEmpty() {
         // Testing with null
-        assertTrue(JieCollect.isEmpty((Iterable<?>) null));
-        assertFalse(JieCollect.isNotEmpty((Iterable<?>) null));
+        assertTrue(CollectKit.isEmpty((Iterable<?>) null));
+        assertFalse(CollectKit.isNotEmpty((Iterable<?>) null));
         // Testing with empty collection
-        assertTrue(JieCollect.isEmpty(Collections.emptyList()));
-        assertFalse(JieCollect.isNotEmpty(Collections.emptyList()));
+        assertTrue(CollectKit.isEmpty(Collections.emptyList()));
+        assertFalse(CollectKit.isNotEmpty(Collections.emptyList()));
         // Testing with non-empty collection
-        assertFalse(JieCollect.isEmpty(Arrays.asList(1, 2, 3)));
-        assertTrue(JieCollect.isNotEmpty(Arrays.asList(1, 2, 3)));
+        assertFalse(CollectKit.isEmpty(Arrays.asList(1, 2, 3)));
+        assertTrue(CollectKit.isNotEmpty(Arrays.asList(1, 2, 3)));
         // Testing with empty iterable
-        assertTrue(JieCollect.isEmpty(() -> new Iterator<Object>() {
+        assertTrue(CollectKit.isEmpty(() -> new Iterator<Object>() {
             @Override
             public boolean hasNext() {
                 return false;
@@ -42,7 +42,7 @@ public class CollectTest {
                 return null;
             }
         }));
-        assertTrue(JieCollect.isNotEmpty(() -> new Iterator<Object>() {
+        assertTrue(CollectKit.isNotEmpty(() -> new Iterator<Object>() {
             @Override
             public boolean hasNext() {
                 return true;
@@ -54,20 +54,20 @@ public class CollectTest {
             }
         }));
         // Testing with non-empty iterable
-        assertFalse(JieCollect.isEmpty(Collections.singletonList(1)));
-        assertTrue(JieCollect.isNotEmpty(Collections.singletonList(1)));
+        assertFalse(CollectKit.isEmpty(Collections.singletonList(1)));
+        assertTrue(CollectKit.isNotEmpty(Collections.singletonList(1)));
     }
 
     @Test
     public void testToArray() {
-        assertEquals(JieCollect.toArray(Arrays.asList(1, 2, 3)), Arrays.asList(1, 2, 3).toArray());
-        assertEquals(JieCollect.toArray(Arrays.asList(1, 2, 3), Integer.class), Arrays.asList(1, 2, 3).toArray(new Integer[3]));
+        assertEquals(CollectKit.toArray(Arrays.asList(1, 2, 3)), Arrays.asList(1, 2, 3).toArray());
+        assertEquals(CollectKit.toArray(Arrays.asList(1, 2, 3), Integer.class), Arrays.asList(1, 2, 3).toArray(new Integer[3]));
         assertEquals(
-            JieCollect.toArray(() -> Jie.as(Arrays.asList(1, 2, 3).iterator())),
+            CollectKit.toArray(() -> Jie.as(Arrays.asList(1, 2, 3).iterator())),
             Arrays.asList(1, 2, 3).toArray()
         );
         assertEquals(
-            JieCollect.toArray(() -> Jie.as(Arrays.asList(1, 2, 3).iterator()), Integer.class),
+            CollectKit.toArray(() -> Jie.as(Arrays.asList(1, 2, 3).iterator()), Integer.class),
             Arrays.asList(1, 2, 3).toArray(new Integer[3])
         );
     }
@@ -77,7 +77,7 @@ public class CollectTest {
         {
             // it -> en
             Iterator<Integer> intIt = Arrays.asList(1, 2, 3).iterator();
-            Enumeration<Integer> intEnum = JieCollect.asEnumeration(intIt);
+            Enumeration<Integer> intEnum = CollectKit.asEnumeration(intIt);
             assertTrue(intEnum.hasMoreElements());
             assertEquals(intEnum.nextElement(), 1);
             assertTrue(intEnum.hasMoreElements());
@@ -94,7 +94,7 @@ public class CollectTest {
             vector.add(2);
             vector.add(3);
             Enumeration<Integer> intEnum = vector.elements();
-            Iterator<Integer> intIt = JieCollect.asIterator(intEnum);
+            Iterator<Integer> intIt = CollectKit.asIterator(intEnum);
             assertTrue(intIt.hasNext());
             assertEquals(intIt.next(), 1);
             assertTrue(intIt.hasNext());
@@ -108,10 +108,10 @@ public class CollectTest {
 
     @Test
     public void testAddAll() {
-        assertEquals(JieCollect.addAll(new ArrayList<>(), 1, 2, 3), Arrays.asList(1, 2, 3));
-        assertEquals(JieCollect.addAll(new ArrayList<>(), Arrays.asList(1, 2, 3)), Arrays.asList(1, 2, 3));
+        assertEquals(CollectKit.addAll(new ArrayList<>(), 1, 2, 3), Arrays.asList(1, 2, 3));
+        assertEquals(CollectKit.addAll(new ArrayList<>(), Arrays.asList(1, 2, 3)), Arrays.asList(1, 2, 3));
         assertEquals(
-            JieCollect.addAll(new ArrayList<>(), () -> Arrays.asList(1, 2, 3).iterator()),
+            CollectKit.addAll(new ArrayList<>(), () -> Arrays.asList(1, 2, 3).iterator()),
             Arrays.asList(1, 2, 3)
         );
     }

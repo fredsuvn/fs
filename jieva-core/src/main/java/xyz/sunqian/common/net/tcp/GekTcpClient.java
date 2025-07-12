@@ -3,8 +3,8 @@ package xyz.sunqian.common.net.tcp;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.collect.JieCollect;
-import xyz.sunqian.common.collect.JieList;
+import xyz.sunqian.common.collect.CollectKit;
+import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.net.GekNetException;
@@ -175,7 +175,7 @@ public interface GekTcpClient extends GekTcpEndpoint {
          * @return this builder
          */
         public Builder addChannelHandlers(Iterable<GekTcpChannelHandler<?>> channelHandlers) {
-            JieCollect.addAll(this.channelHandlers, channelHandlers);
+            CollectKit.addAll(this.channelHandlers, channelHandlers);
             return this;
         }
 
@@ -252,7 +252,7 @@ public interface GekTcpClient extends GekTcpEndpoint {
                 this.port = builder.port;
                 this.address = builder.address;
                 this.clientHandler = Jie.nonnull(builder.clientHandler, EMPTY_CLIENT_HANDLER);
-                this.channelHandlers = JieList.toList(builder.channelHandlers);
+                this.channelHandlers = ListKit.toList(builder.channelHandlers);
                 if (channelHandlers.isEmpty()) {
                     throw new GekNetException("Channel handlers are empty.");
                 }

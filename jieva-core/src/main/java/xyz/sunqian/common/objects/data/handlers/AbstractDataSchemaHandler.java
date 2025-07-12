@@ -3,7 +3,7 @@ package xyz.sunqian.common.objects.data.handlers;
 import lombok.Data;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.collect.JieMap;
+import xyz.sunqian.common.collect.MapKit;
 import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.objects.data.DataObjectException;
 import xyz.sunqian.common.objects.data.DataPropertyBase;
@@ -50,7 +50,7 @@ public abstract class AbstractDataSchemaHandler implements DataSchemaParser.Hand
             return type;
         }
         stack.clear();
-        Type result = JieMap.resolveChain(typeParameterMapping, type, stack);
+        Type result = MapKit.resolveChain(typeParameterMapping, type, stack);
         if (result != null) {
             return result;
         }

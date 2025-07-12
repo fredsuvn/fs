@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  *
  * @author sunqian
  */
-public class JieMap {
+public class MapKit {
 
     /**
      * Returns whether the given map is null or empty.
@@ -115,7 +115,7 @@ public class JieMap {
      * @return a new {@link HashMap} initialing with the given iterable
      */
     public static <K, V> @Nonnull @Immutable Map<K, V> toMap(@Nonnull Iterable<?> it) {
-        Object[] array = JieCollect.toArray(it);
+        Object[] array = CollectKit.toArray(it);
         return map(array);
     }
 
@@ -169,7 +169,7 @@ public class JieMap {
      * @return a new {@link HashMap} initialing with the given iterable
      */
     public static <K, V> @Nonnull HashMap<K, V> toHashMap(@Nonnull Iterable<?> it) {
-        Object[] array = JieCollect.toArray(it);
+        Object[] array = CollectKit.toArray(it);
         return hashMap(array);
     }
 
@@ -187,7 +187,7 @@ public class JieMap {
      * @return a new {@link HashMap} initialing with the given iterable
      */
     public static <K, V> @Nonnull LinkedHashMap<K, V> toLinkedHashMap(@Nonnull Iterable<?> it) {
-        Object[] array = JieCollect.toArray(it);
+        Object[] array = CollectKit.toArray(it);
         return linkedHashMap(array);
     }
 

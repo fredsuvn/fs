@@ -6,7 +6,7 @@ import xyz.sunqian.annotations.NonExported;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.collect.JieArray;
+import xyz.sunqian.common.collect.ArrayKit;
 import xyz.sunqian.common.reflect.JieClass;
 import xyz.sunqian.common.reflect.JieJvm;
 
@@ -361,7 +361,7 @@ public class JieAsm {
      */
     public static @Nonnull String @Nullable [] getExceptions(Method method) {
         Class<?>[] exceptionTypes = method.getExceptionTypes();
-        if (JieArray.isEmpty(exceptionTypes)) {
+        if (ArrayKit.isEmpty(exceptionTypes)) {
             return null;
         }
         return Jie.stream(exceptionTypes).map(JieJvm::getInternalName).toArray(String[]::new);

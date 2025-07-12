@@ -5,7 +5,7 @@ import xyz.sunqian.common.base.option.JieOption;
 import xyz.sunqian.common.base.option.Option;
 
 import static org.testng.Assert.assertEquals;
-import static xyz.sunqian.common.collect.JieArray.array;
+import static xyz.sunqian.common.collect.ArrayKit.array;
 
 public class OptionTest {
 

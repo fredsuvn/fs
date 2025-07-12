@@ -16,7 +16,7 @@ import java.util.Set;
  *
  * @author sunqian
  */
-public class JieSet {
+public class SetKit {
 
     /**
      * Returns a new immutable set of which content is added from the given array. The content of the set is added in
@@ -68,7 +68,7 @@ public class JieSet {
      * @return a new immutable set of which content is added from the given iterable
      */
     public static <T> @Nonnull @Immutable Set<T> toSet(@Nonnull Iterable<? extends T> it) {
-        Object[] array = JieCollect.toArray(it);
+        Object[] array = CollectKit.toArray(it);
         Set<Object> set = set(array);
         return Jie.as(set);
     }
@@ -84,7 +84,7 @@ public class JieSet {
         if (it instanceof Collection) {
             return new HashSet<>((Collection<T>) it);
         }
-        return JieCollect.addAll(new HashSet<>(), it);
+        return CollectKit.addAll(new HashSet<>(), it);
     }
 
     /**
@@ -98,6 +98,6 @@ public class JieSet {
         if (it instanceof Collection) {
             return new LinkedHashSet<>((Collection<T>) it);
         }
-        return JieCollect.addAll(new LinkedHashSet<>(), it);
+        return CollectKit.addAll(new LinkedHashSet<>(), it);
     }
 }

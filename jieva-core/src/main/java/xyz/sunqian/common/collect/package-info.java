@@ -3,12 +3,12 @@
  * <p>
  * Utilities:
  * <ul>
- *     <li>{@link xyz.sunqian.common.collect.JieCollect}</li>
- *     <li>{@link xyz.sunqian.common.collect.JieList}</li>
- *     <li>{@link xyz.sunqian.common.collect.JieSet}</li>
- *     <li>{@link xyz.sunqian.common.collect.JieMap}</li>
- *     <li>{@link xyz.sunqian.common.collect.JieArray}</li>
- *     <li>{@link xyz.sunqian.common.collect.JieStream}</li>
+ *     <li>{@link xyz.sunqian.common.collect.CollectKit}</li>
+ *     <li>{@link xyz.sunqian.common.collect.ListKit}</li>
+ *     <li>{@link xyz.sunqian.common.collect.SetKit}</li>
+ *     <li>{@link xyz.sunqian.common.collect.MapKit}</li>
+ *     <li>{@link xyz.sunqian.common.collect.ArrayKit}</li>
+ *     <li>{@link xyz.sunqian.common.collect.StreamKit}</li>
  * </ul>
  */
 package xyz.sunqian.common.collect;

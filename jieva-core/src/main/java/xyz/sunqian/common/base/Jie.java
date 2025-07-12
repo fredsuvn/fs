@@ -11,11 +11,11 @@ import xyz.sunqian.common.base.function.VoidCallable;
 import xyz.sunqian.common.base.process.JieProcess;
 import xyz.sunqian.common.base.process.ProcessReceipt;
 import xyz.sunqian.common.base.thread.JieThread;
-import xyz.sunqian.common.collect.JieArray;
-import xyz.sunqian.common.collect.JieList;
-import xyz.sunqian.common.collect.JieMap;
-import xyz.sunqian.common.collect.JieSet;
-import xyz.sunqian.common.collect.JieStream;
+import xyz.sunqian.common.collect.ArrayKit;
+import xyz.sunqian.common.collect.ListKit;
+import xyz.sunqian.common.collect.MapKit;
+import xyz.sunqian.common.collect.SetKit;
+import xyz.sunqian.common.collect.StreamKit;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.mapping.BeanMapper;
 import xyz.sunqian.common.mapping.Mapper;
@@ -488,7 +488,7 @@ public class Jie {
             }
         }
         Object[] enums = enumClass.getEnumConstants();
-        if (JieArray.isEmpty(enums)) {
+        if (ArrayKit.isEmpty(enums)) {
             return null;
         }
         for (Object anEnum : enums) {
@@ -512,7 +512,7 @@ public class Jie {
         JieCheck.checkArgument(enumClass.isEnum(), enumClass + " is not an enum.");
         JieCheck.checkArgument(index >= 0, "index must >= 0.");
         Object[] enums = enumClass.getEnumConstants();
-        if (JieArray.isEmpty(enums) || index >= enums.length) {
+        if (ArrayKit.isEmpty(enums) || index >= enums.length) {
             return null;
         }
         return as(enums[index]);
@@ -650,7 +650,7 @@ public class Jie {
      */
     public static <T> T copyProperties(Object source, T dest, Object... ignoredProperties) {
         return BeanMapper.defaultMapper().copyProperties(source, dest,
-            MappingOptions.builder().ignored(JieArray.asList(ignoredProperties)).build());
+            MappingOptions.builder().ignored(ArrayKit.asList(ignoredProperties)).build());
     }
 
     /**
@@ -705,7 +705,7 @@ public class Jie {
     /**
      * Directly returns the given variable arguments as an array.
      * <p>
-     * This method is a shortcut to the {@link JieArray#array(Object[])}.
+     * This method is a shortcut to the {@link ArrayKit#array(Object[])}.
      *
      * @param elements the given variable arguments
      * @param <T>      the component type
@@ -713,7 +713,7 @@ public class Jie {
      */
     @SafeVarargs
     public static <T> T @Nonnull [] array(T @Nonnull @RetainedParam ... elements) {
-        return JieArray.array(elements);
+        return ArrayKit.array(elements);
     }
 
     /**
@@ -721,7 +721,7 @@ public class Jie {
      * changes to the backing array "write through" to the returned list. The returned list is serializable and
      * implements {@link RandomAccess}.
      * <p>
-     * This method is a shortcut to the {@link JieList#list(Object[])}.
+     * This method is a shortcut to the {@link ListKit#list(Object[])}.
      *
      * @param array the given array
      * @param <T>   the component type
@@ -729,13 +729,13 @@ public class Jie {
      */
     @SafeVarargs
     public static <T> @Nonnull @Immutable List<T> list(T @Nonnull @RetainedParam ... array) {
-        return JieList.list(array);
+        return ListKit.list(array);
     }
 
     /**
      * Returns a new {@link ArrayList} initialing with the given array.
      * <p>
-     * This method is a shortcut to the {@link JieList#arrayList(Object[])}.
+     * This method is a shortcut to the {@link ListKit#arrayList(Object[])}.
      *
      * @param array the given array
      * @param <T>   the component type
@@ -743,13 +743,13 @@ public class Jie {
      */
     @SafeVarargs
     public static <T> @Nonnull ArrayList<T> arrayList(T @Nonnull ... array) {
-        return JieList.arrayList(array);
+        return ListKit.arrayList(array);
     }
 
     /**
      * Returns a new {@link LinkedList} initialing with the given array.
      * <p>
-     * This method is a shortcut to the {@link JieList#linkedList(Object[])}.
+     * This method is a shortcut to the {@link ListKit#linkedList(Object[])}.
      *
      * @param array the given array
      * @param <T>   the component type
@@ -757,7 +757,7 @@ public class Jie {
      */
     @SafeVarargs
     public static <T> @Nonnull LinkedList<T> linkedList(T @Nonnull ... array) {
-        return JieList.linkedList(array);
+        return ListKit.linkedList(array);
     }
 
     /**
@@ -767,7 +767,7 @@ public class Jie {
      * return Collections.unmodifiableSet(linkedHashSet(array));
      * }</pre>
      * <p>
-     * This method is a shortcut to the {@link JieSet#set(Object[])}.
+     * This method is a shortcut to the {@link SetKit#set(Object[])}.
      *
      * @param array the given array
      * @param <T>   the component type
@@ -775,13 +775,13 @@ public class Jie {
      */
     @SafeVarargs
     public static <T> @Nonnull @Immutable Set<T> set(T @Nonnull ... array) {
-        return JieSet.set(array);
+        return SetKit.set(array);
     }
 
     /**
      * Returns a new {@link HashSet} initialing with the given array.
      * <p>
-     * This method is a shortcut to the {@link JieSet#hashSet(Object[])}.
+     * This method is a shortcut to the {@link SetKit#hashSet(Object[])}.
      *
      * @param array the given array
      * @param <T>   the component type
@@ -789,13 +789,13 @@ public class Jie {
      */
     @SafeVarargs
     public static <T> @Nonnull HashSet<T> hashSet(T @Nonnull ... array) {
-        return JieSet.hashSet(array);
+        return SetKit.hashSet(array);
     }
 
     /**
      * Returns a new {@link LinkedHashSet} initialing with the given array.
      * <p>
-     * This method is a shortcut to the {@link JieSet#linkedHashSet(Object[])}.
+     * This method is a shortcut to the {@link SetKit#linkedHashSet(Object[])}.
      *
      * @param array the given array
      * @param <T>   the component type
@@ -803,7 +803,7 @@ public class Jie {
      */
     @SafeVarargs
     public static <T> @Nonnull LinkedHashSet<T> linkedHashSet(T @Nonnull ... array) {
-        return JieSet.linkedHashSet(array);
+        return SetKit.linkedHashSet(array);
     }
 
     /**
@@ -819,7 +819,7 @@ public class Jie {
      *  return Collections.unmodifiableMap(linkedHashMap(array));
      *  }</pre>
      * <p>
-     * This method is a shortcut to the {@link JieMap#map(Object[])}.
+     * This method is a shortcut to the {@link MapKit#map(Object[])}.
      *
      * @param array the given array
      * @param <K>>  the key type
@@ -827,7 +827,7 @@ public class Jie {
      * @return a new {@link HashMap} initialing with the given array
      */
     public static <K, V> @Nonnull @Immutable Map<K, V> map(Object @Nonnull ... array) {
-        return JieMap.map(array);
+        return MapKit.map(array);
     }
 
     /**
@@ -838,7 +838,7 @@ public class Jie {
      * on. If the length of the array is odd and the last key cannot match the value, then the last pair will be the
      * key-{@code null} pair to put.
      * <p>
-     * This method is a shortcut to the {@link JieMap#hashMap(Object[])}.
+     * This method is a shortcut to the {@link MapKit#hashMap(Object[])}.
      *
      * @param array the given array
      * @param <K>>  the key type
@@ -846,7 +846,7 @@ public class Jie {
      * @return a new {@link HashMap} initialing with the given array
      */
     public static <K, V> @Nonnull HashMap<K, V> hashMap(Object @Nonnull ... array) {
-        return JieMap.hashMap(array);
+        return MapKit.hashMap(array);
     }
 
     /**
@@ -857,7 +857,7 @@ public class Jie {
      * on. If the length of the array is odd and the last key cannot match the value, then the last pair will be the
      * key-{@code null} pair to put.
      * <p>
-     * This method is a shortcut to the {@link JieMap#linkedHashMap(Object[])}.
+     * This method is a shortcut to the {@link MapKit#linkedHashMap(Object[])}.
      *
      * @param array the given array
      * @param <K>>  the key type
@@ -865,13 +865,13 @@ public class Jie {
      * @return a new {@link HashMap} initialing with the given array
      */
     public static <K, V> @Nonnull LinkedHashMap<K, V> linkedHashMap(Object @Nonnull ... array) {
-        return JieMap.linkedHashMap(array);
+        return MapKit.linkedHashMap(array);
     }
 
     /**
      * Returns a {@link Stream} from the given elements.
      * <p>
-     * This method is a shortcut to the {@link JieStream#stream(Object[])}.
+     * This method is a shortcut to the {@link StreamKit#stream(Object[])}.
      *
      * @param elements the given elements
      * @param <T>      the component type
@@ -879,20 +879,20 @@ public class Jie {
      */
     @SafeVarargs
     public static <T> @Nonnull Stream<T> stream(T @Nonnull ... elements) {
-        return JieStream.stream(elements);
+        return StreamKit.stream(elements);
     }
 
     /**
      * Returns a {@link Stream} from the given elements.
      * <p>
-     * This method is a shortcut to the {@link JieStream#stream(Iterable)}.
+     * This method is a shortcut to the {@link StreamKit#stream(Iterable)}.
      *
      * @param elements the given elements
      * @param <T>      the component type
      * @return a {@link Stream} from the given elements
      */
     public static <T> @Nonnull Stream<T> stream(@Nonnull Iterable<T> elements) {
-        return JieStream.stream(elements);
+        return StreamKit.stream(elements);
     }
 
     //---------------- Collection End ----------------//

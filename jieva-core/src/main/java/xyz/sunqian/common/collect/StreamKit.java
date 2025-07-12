@@ -5,6 +5,7 @@ import xyz.sunqian.annotations.Nonnull;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.PrimitiveIterator;
 import java.util.function.DoubleSupplier;
 import java.util.function.IntSupplier;
@@ -21,7 +22,7 @@ import java.util.stream.StreamSupport;
  *
  * @author sunqian
  */
-public class JieStream {
+public class StreamKit {
 
     /**
      * Returns a {@link Stream} from the given elements.
@@ -32,7 +33,7 @@ public class JieStream {
      */
     @SafeVarargs
     public static <T> @Nonnull Stream<T> stream(T @Nonnull ... elements) {
-        if (JieArray.isEmpty(elements)) {
+        if (ArrayKit.isEmpty(elements)) {
             return Stream.empty();
         }
         return Arrays.stream(elements);
@@ -46,7 +47,7 @@ public class JieStream {
      * @return a {@link Stream} from the given elements
      */
     public static <T> @Nonnull Stream<T> stream(@Nonnull Iterable<T> elements) {
-        if (JieCollect.isEmpty(elements)) {
+        if (CollectKit.isEmpty(elements)) {
             return Stream.empty();
         }
         if (elements instanceof Collection) {
@@ -55,6 +56,14 @@ public class JieStream {
         return StreamSupport.stream(elements.spliterator(), false);
     }
 
+    /**
+     * Returns a {@link Supplier} whose result is the next element of the given {@link Stream}. Note the supplier will
+     * throw {@link NoSuchElementException} if the stream reaches the end.
+     *
+     * @param stream the given stream
+     * @param <T>    the component type
+     * @return a {@link Supplier} whose result is the next element of the given {@link Stream}
+     */
     public static <T> @Nonnull Supplier<T> toSupplier(@Nonnull Stream<? extends T> stream) {
         return new Supplier<T>() {
 
@@ -67,6 +76,13 @@ public class JieStream {
         };
     }
 
+    /**
+     * Returns a {@link IntSupplier} whose result is the next element of the given {@link IntStream}. Note the supplier
+     * will throw {@link NoSuchElementException} if the stream reaches the end.
+     *
+     * @param stream the given stream
+     * @return a {@link IntSupplier} whose result is the next element of the given {@link IntStream}
+     */
     public static @Nonnull IntSupplier toSupplier(@Nonnull IntStream stream) {
         return new IntSupplier() {
 
@@ -79,6 +95,13 @@ public class JieStream {
         };
     }
 
+    /**
+     * Returns a {@link LongSupplier} whose result is the next element of the given {@link LongStream}. Note the
+     * supplier will throw {@link NoSuchElementException} if the stream reaches the end.
+     *
+     * @param stream the given stream
+     * @return a {@link LongSupplier} whose result is the next element of the given {@link LongStream}
+     */
     public static @Nonnull LongSupplier toSupplier(@Nonnull LongStream stream) {
         return new LongSupplier() {
 
@@ -91,6 +114,13 @@ public class JieStream {
         };
     }
 
+    /**
+     * Returns a {@link DoubleSupplier} whose result is the next element of the given {@link DoubleStream}. Note the
+     * supplier will throw {@link NoSuchElementException} if the stream reaches the end.
+     *
+     * @param stream the given stream
+     * @return a {@link DoubleSupplier} whose result is the next element of the given {@link DoubleStream}
+     */
     public static @Nonnull DoubleSupplier toSupplier(@Nonnull DoubleStream stream) {
         return new DoubleSupplier() {
 

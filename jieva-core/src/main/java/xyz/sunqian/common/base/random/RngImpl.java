@@ -5,7 +5,7 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.JieCheck;
 import xyz.sunqian.common.base.bytes.BytesKit;
 import xyz.sunqian.common.base.math.MathKit;
-import xyz.sunqian.common.collect.JieStream;
+import xyz.sunqian.common.collect.StreamKit;
 
 import java.security.SecureRandom;
 import java.util.Random;
@@ -265,7 +265,7 @@ final class RngImpl {
             if (startInclusive == endExclusive) {
                 return () -> startInclusive;
             }
-            return JieStream.toSupplier(random().ints(startInclusive, endExclusive));
+            return StreamKit.toSupplier(random().ints(startInclusive, endExclusive));
         }
 
         @Override
@@ -299,7 +299,7 @@ final class RngImpl {
             if (startInclusive == endExclusive) {
                 return () -> startInclusive;
             }
-            return JieStream.toSupplier(random().longs(startInclusive, endExclusive));
+            return StreamKit.toSupplier(random().longs(startInclusive, endExclusive));
         }
 
         @Override
@@ -333,7 +333,7 @@ final class RngImpl {
             if (startInclusive == endExclusive) {
                 return () -> startInclusive;
             }
-            return JieStream.toSupplier(random().doubles(startInclusive, endExclusive));
+            return StreamKit.toSupplier(random().doubles(startInclusive, endExclusive));
         }
     }
 }

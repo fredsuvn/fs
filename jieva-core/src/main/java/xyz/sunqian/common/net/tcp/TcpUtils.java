@@ -1,7 +1,7 @@
 package xyz.sunqian.common.net.tcp;
 
 import xyz.sunqian.common.base.bytes.BytesKit;
-import xyz.sunqian.common.collect.JieArray;
+import xyz.sunqian.common.collect.ArrayKit;
 
 import java.nio.ByteBuffer;
 import java.util.function.IntFunction;
@@ -23,7 +23,7 @@ final class TcpUtils {
 
     static ByteBuffer compact(ByteBuffer buffer, byte[] newBytes, IntFunction<ByteBuffer> generator) {
         if (buffer.remaining() <= 0) {
-            if (JieArray.isEmpty(newBytes)) {
+            if (ArrayKit.isEmpty(newBytes)) {
                 return BytesKit.emptyBuffer();
             }
             ByteBuffer newBuffer = generator.apply(newBytes.length);
