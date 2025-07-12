@@ -4,7 +4,7 @@ import com.google.protobuf.ByteString;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Flag;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingOptions;
 import xyz.sunqian.common.objects.data.DataProperty;
@@ -75,6 +75,6 @@ public class ProtobufMapperHandler implements Mapper.Handler {
 
     private Charset getCharset(@Nullable DataProperty targetProperty, MappingOptions options) {
         Charset charset = options.getCharset(targetProperty);
-        return Jie.nonnull(charset, JieChars.defaultCharset());
+        return Jie.nonnull(charset, CharsKit.defaultCharset());
     }
 }

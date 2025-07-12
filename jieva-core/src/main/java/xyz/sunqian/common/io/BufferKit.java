@@ -2,7 +2,7 @@ package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.base.chars.CharsKit;
 
 import java.io.OutputStream;
 import java.nio.Buffer;
@@ -636,7 +636,7 @@ public class BufferKit {
     }
 
     /**
-     * Reads all data from the source buffer into a new string with the {@link JieChars#defaultCharset()}, continuing
+     * Reads all data from the source buffer into a new string with the {@link CharsKit#defaultCharset()}, continuing
      * until reaches the end of the buffer, and returns the string. If the end of the source buffer has already been
      * reached, returns {@code null}.
      * <p>
@@ -646,7 +646,7 @@ public class BufferKit {
      * @return the string containing the data
      */
     public static @Nullable String string(@Nonnull ByteBuffer src) {
-        return string(src, JieChars.defaultCharset());
+        return string(src, CharsKit.defaultCharset());
     }
 
     /**

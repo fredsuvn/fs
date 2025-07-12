@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.chars.CharsBuilder;
-import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.test.DataTest;
@@ -259,9 +259,9 @@ public class IOTest implements DataTest {
         {
             // string
             String hello = "hello";
-            assertEquals(IOKit.string(new ByteArrayInputStream(hello.getBytes(JieChars.defaultCharset()))), hello);
+            assertEquals(IOKit.string(new ByteArrayInputStream(hello.getBytes(CharsKit.defaultCharset()))), hello);
             assertEquals(
-                IOKit.string(new ByteArrayInputStream(hello.getBytes(JieChars.defaultCharset())), JieChars.defaultCharset()),
+                IOKit.string(new ByteArrayInputStream(hello.getBytes(CharsKit.defaultCharset())), CharsKit.defaultCharset()),
                 hello
             );
             assertNull(IOKit.string(new ByteArrayInputStream(new byte[0])));

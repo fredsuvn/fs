@@ -4,7 +4,7 @@ import org.testng.annotations.Test;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.chars.CharsBuilder;
-import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.value.IntVar;
 import xyz.sunqian.common.io.DoReadReader;
 import xyz.sunqian.common.io.DoReadStream;
@@ -107,13 +107,13 @@ public class IOImplsTest implements DataTest {
         {
             // chars
             char[] chars = randomChars(dataSize, '0', '9');
-            byte[] charBytes = new String(chars).getBytes(JieChars.UTF_8);
+            byte[] charBytes = new String(chars).getBytes(CharsKit.UTF_8);
             InputStream charsIn = IOKit.newInputStream(new CharArrayReader(chars));
             testInputStream(charsIn, charBytes, false, false, false);
             expectThrows(IOException.class, charsIn::read);
             // chinese: '\u4e00' - '\u9fff'
             chars = randomChars(dataSize, '\u4e00', '\u4e01');
-            charBytes = new String(chars).getBytes(JieChars.UTF_8);
+            charBytes = new String(chars).getBytes(CharsKit.UTF_8);
             charsIn = IOKit.newInputStream(new CharArrayReader(chars));
             testInputStream(charsIn, charBytes, false, false, false);
             expectThrows(IOException.class, charsIn::read);
@@ -122,7 +122,7 @@ public class IOImplsTest implements DataTest {
                 chars[i] = '\uD83D';
                 chars[i + 1] = '\uDD1E';
             }
-            charBytes = new String(chars).getBytes(JieChars.UTF_8);
+            charBytes = new String(chars).getBytes(CharsKit.UTF_8);
             charsIn = IOKit.newInputStream(new CharArrayReader(chars));
             testInputStream(charsIn, charBytes, false, false, false);
             expectThrows(IOException.class, charsIn::read);
@@ -386,13 +386,13 @@ public class IOImplsTest implements DataTest {
         {
             // bytes
             char[] chars = randomChars(dataSize, '0', '9');
-            byte[] charBytes = new String(chars).getBytes(JieChars.UTF_8);
+            byte[] charBytes = new String(chars).getBytes(CharsKit.UTF_8);
             Reader charsIn = IOKit.newReader(IOKit.newInputStream(charBytes));
             testReader(charsIn, chars, false, false, false);
             expectThrows(IOException.class, charsIn::read);
             // chinese: '\u4e00' - '\u9fff'
             chars = randomChars(dataSize, '\u4e00', '\u4e01');
-            charBytes = new String(chars).getBytes(JieChars.UTF_8);
+            charBytes = new String(chars).getBytes(CharsKit.UTF_8);
             charsIn = IOKit.newReader(IOKit.newInputStream(charBytes));
             testReader(charsIn, chars, false, false, false);
             expectThrows(IOException.class, charsIn::read);
@@ -401,7 +401,7 @@ public class IOImplsTest implements DataTest {
                 chars[i] = '\uD83D';
                 chars[i + 1] = '\uDD1E';
             }
-            charBytes = new String(chars).getBytes(JieChars.UTF_8);
+            charBytes = new String(chars).getBytes(CharsKit.UTF_8);
             charsIn = IOKit.newReader(IOKit.newInputStream(charBytes));
             testReader(charsIn, chars, false, false, false);
             expectThrows(IOException.class, charsIn::read);
@@ -694,14 +694,14 @@ public class IOImplsTest implements DataTest {
             // chars
             CharsBuilder builder = new CharsBuilder();
             char[] chars = randomChars(dataSize, '0', '9');
-            byte[] charBytes = new String(chars).getBytes(JieChars.UTF_8);
+            byte[] charBytes = new String(chars).getBytes(CharsKit.UTF_8);
             OutputStream out = IOKit.newOutputStream(builder);
             testOutputStream(out, charBytes, false, true);
             assertEquals(builder.toCharArray(), chars);
             // chinese: '\u4e00' - '\u9fff'
             builder.reset();
             chars = randomChars(dataSize, '\u4e00', '\u4e01');
-            charBytes = new String(chars).getBytes(JieChars.UTF_8);
+            charBytes = new String(chars).getBytes(CharsKit.UTF_8);
             out = IOKit.newOutputStream(builder);
             testOutputStream(out, charBytes, false, true);
             assertEquals(builder.toCharArray(), chars);
@@ -711,7 +711,7 @@ public class IOImplsTest implements DataTest {
                 chars[i] = '\uD83D';
                 chars[i + 1] = '\uDD1E';
             }
-            charBytes = new String(chars).getBytes(JieChars.UTF_8);
+            charBytes = new String(chars).getBytes(CharsKit.UTF_8);
             out = IOKit.newOutputStream(builder);
             testOutputStream(out, charBytes, false, true);
             assertEquals(builder.toCharArray(), chars);
@@ -844,14 +844,14 @@ public class IOImplsTest implements DataTest {
             // bytes
             BytesBuilder builder = new BytesBuilder();
             char[] chars = randomChars(dataSize, '0', '9');
-            byte[] charBytes = new String(chars).getBytes(JieChars.UTF_8);
+            byte[] charBytes = new String(chars).getBytes(CharsKit.UTF_8);
             Writer out = IOKit.newWriter(builder);
             testWriter(out, chars, false, true);
             assertEquals(builder.toByteArray(), charBytes);
             // chinese: '\u4e00' - '\u9fff'
             builder.reset();
             chars = randomChars(dataSize, '\u4e00', '\u4e01');
-            charBytes = new String(chars).getBytes(JieChars.UTF_8);
+            charBytes = new String(chars).getBytes(CharsKit.UTF_8);
             out = IOKit.newWriter(builder);
             testWriter(out, chars, false, true);
             assertEquals(builder.toByteArray(), charBytes);
@@ -861,7 +861,7 @@ public class IOImplsTest implements DataTest {
                 chars[i] = '\uD83D';
                 chars[i + 1] = '\uDD1E';
             }
-            charBytes = new String(chars).getBytes(JieChars.UTF_8);
+            charBytes = new String(chars).getBytes(CharsKit.UTF_8);
             out = IOKit.newWriter(builder);
             testWriter(out, chars, false, true);
             assertEquals(builder.toByteArray(), charBytes);

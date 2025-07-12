@@ -3,7 +3,7 @@ package xyz.sunqian.common.net.data;
 import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.JieCheck;
 import xyz.sunqian.common.base.JieString;
-import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.base.chars.CharsKit;
 
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -18,7 +18,7 @@ import java.nio.charset.Charset;
 public interface GekData extends GekDataOutput {
 
     /**
-     * Wraps given string to {@link OfArray}. The given string will be decoded by {@link JieChars#defaultCharset()}.
+     * Wraps given string to {@link OfArray}. The given string will be decoded by {@link CharsKit#defaultCharset()}.
      *
      * @param str given string
      * @return the {@link OfArray}

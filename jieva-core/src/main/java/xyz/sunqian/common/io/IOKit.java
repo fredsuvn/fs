@@ -2,7 +2,7 @@ package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.base.chars.CharsKit;
 
 import java.io.Closeable;
 import java.io.Flushable;
@@ -689,15 +689,15 @@ public class IOKit {
     }
 
     /**
-     * Reads all bytes from the source stream and returns as a string with {@link JieChars#defaultCharset()}. If the end
+     * Reads all bytes from the source stream and returns as a string with {@link CharsKit#defaultCharset()}. If the end
      * of the source stream has already been reached, returns {@code null}.
      *
      * @param source the source stream
-     * @return the string with {@link JieChars#defaultCharset()}
+     * @return the string with {@link CharsKit#defaultCharset()}
      * @throws IORuntimeException if an I/O error occurs
      */
     public static @Nullable String string(@Nonnull InputStream source) throws IORuntimeException {
-        return string(source, JieChars.defaultCharset());
+        return string(source, CharsKit.defaultCharset());
     }
 
     /**
@@ -830,7 +830,7 @@ public class IOKit {
     }
 
     /**
-     * Wraps the given reader as a new {@link InputStream} with {@link JieChars#defaultCharset()}.
+     * Wraps the given reader as a new {@link InputStream} with {@link CharsKit#defaultCharset()}.
      * <p>
      * The result's support is as follows:
      * <ul>
@@ -843,7 +843,7 @@ public class IOKit {
      * @return the given reader as a new {@link InputStream}
      */
     public static @Nonnull InputStream newInputStream(@Nonnull Reader reader) {
-        return newInputStream(reader, JieChars.defaultCharset());
+        return newInputStream(reader, CharsKit.defaultCharset());
     }
 
     /**
@@ -991,7 +991,7 @@ public class IOKit {
     }
 
     /**
-     * Wraps the given stream as a new {@link Reader} with {@link JieChars#defaultCharset()}.
+     * Wraps the given stream as a new {@link Reader} with {@link CharsKit#defaultCharset()}.
      * <p>
      * The result's support is as follows:
      * <ul>
@@ -1004,7 +1004,7 @@ public class IOKit {
      * @return the given stream as a new {@link Reader}
      */
     public static @Nonnull Reader newReader(@Nonnull InputStream stream) {
-        return newReader(stream, JieChars.defaultCharset());
+        return newReader(stream, CharsKit.defaultCharset());
     }
 
     /**
@@ -1137,7 +1137,7 @@ public class IOKit {
     }
 
     /**
-     * Wraps the given appender as a new {@link OutputStream} with {@link JieChars#defaultCharset()}.
+     * Wraps the given appender as a new {@link OutputStream} with {@link CharsKit#defaultCharset()}.
      * <p>
      * The result's support is as follows:
      * <ul>
@@ -1151,7 +1151,7 @@ public class IOKit {
      * @return the given appender as a new {@link InputStream}
      */
     public static @Nonnull OutputStream newOutputStream(@Nonnull Appendable appender) {
-        return newOutputStream(appender, JieChars.defaultCharset());
+        return newOutputStream(appender, CharsKit.defaultCharset());
     }
 
     /**
@@ -1266,7 +1266,7 @@ public class IOKit {
     }
 
     /**
-     * Wraps the given stream as a new {@link Writer} with {@link JieChars#defaultCharset()}.
+     * Wraps the given stream as a new {@link Writer} with {@link CharsKit#defaultCharset()}.
      * <p>
      * The result's support is as follows:
      * <ul>
@@ -1280,7 +1280,7 @@ public class IOKit {
      * @return the given stream as a new {@link InputStream}
      */
     public static @Nonnull Writer newWriter(@Nonnull OutputStream stream) {
-        return newWriter(stream, JieChars.defaultCharset());
+        return newWriter(stream, CharsKit.defaultCharset());
     }
 
     /**

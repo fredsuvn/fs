@@ -3,7 +3,7 @@ package xyz.sunqian.common.base.process;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.exception.AwaitingException;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.task.TaskReceipt;
@@ -209,13 +209,13 @@ public interface ProcessReceipt extends TaskReceipt<Integer> {
 
     /**
      * Blocks the current thread until the process is terminated, returns the string read from the
-     * {@link #getInputStream()}, with the {@link JieChars#localCharset()}.
+     * {@link #getInputStream()}, with the {@link CharsKit#localCharset()}.
      *
      * @return the string read from the {@link #getInputStream()}
      * @throws AwaitingException if the current thread is interrupted or an error occurs while reading
      */
     default @Nonnull String readString() throws AwaitingException {
-        return readString(JieChars.localCharset());
+        return readString(CharsKit.localCharset());
     }
 
     /**

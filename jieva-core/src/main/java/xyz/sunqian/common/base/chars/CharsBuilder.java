@@ -1,5 +1,6 @@
 package xyz.sunqian.common.base.chars;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.io.IORuntimeException;
@@ -26,7 +27,7 @@ public class CharsBuilder extends Writer implements CharSequence {
 
     private final int maxSize;
 
-    private char[] buf;
+    private char @Nonnull [] buf;
     private int count;
 
     /**
@@ -80,16 +81,28 @@ public class CharsBuilder extends Writer implements CharSequence {
     }
 
     /**
+     * Appends all chars from the given array.
+     *
+     * @param cbuf the given array
+     */
+    public void write(char @Nonnull [] cbuf) {
+        ensureCapacity(count + cbuf.length);
+        System.arraycopy(cbuf, 0, buf, count, cbuf.length);
+        count += cbuf.length;
+    }
+
+    /**
      * Appends the specified number of chars from the given array, starting at the specified offset.
      *
-     * @param b   the given array
-     * @param off the specified offset
-     * @param len the specified number
+     * @param cbuf the given array
+     * @param off  the specified offset
+     * @param len  the specified number
+     * @throws IndexOutOfBoundsException if the offset or number is out of bounds
      */
-    public void write(char[] b, int off, int len) {
-        checkOffsetLength(b.length, off, len);
+    public void write(char @Nonnull [] cbuf, int off, int len) throws IndexOutOfBoundsException {
+        checkOffsetLength(cbuf.length, off, len);
         ensureCapacity(count + len);
-        System.arraycopy(b, off, buf, count, len);
+        System.arraycopy(cbuf, off, buf, count, len);
         count += len;
     }
 
@@ -99,7 +112,7 @@ public class CharsBuilder extends Writer implements CharSequence {
      * @param out the specified writer
      * @throws IORuntimeException if an I/O error occurs
      */
-    public void writeTo(Writer out) throws IORuntimeException {
+    public void writeTo(@Nonnull Writer out) throws IORuntimeException {
         try {
             out.write(buf, 0, count);
         } catch (Exception e) {
@@ -113,7 +126,7 @@ public class CharsBuilder extends Writer implements CharSequence {
      * @param out the specified buffer
      * @throws IORuntimeException if an I/O error occurs
      */
-    public void writeTo(CharBuffer out) throws IORuntimeException {
+    public void writeTo(@Nonnull CharBuffer out) throws IORuntimeException {
         try {
             out.put(buf, 0, count);
         } catch (Exception e) {
@@ -154,7 +167,7 @@ public class CharsBuilder extends Writer implements CharSequence {
      *
      * @return a new array containing a copy of the appended data
      */
-    public char[] toCharArray() {
+    public char @Nonnull [] toCharArray() {
         return Arrays.copyOf(buf, count);
     }
 
@@ -163,7 +176,7 @@ public class CharsBuilder extends Writer implements CharSequence {
      *
      * @return a new buffer containing a copy of the appended data
      */
-    public CharBuffer toCharBuffer() {
+    public @Nonnull CharBuffer toCharBuffer() {
         return CharBuffer.wrap(toCharArray());
     }
 
@@ -172,7 +185,7 @@ public class CharsBuilder extends Writer implements CharSequence {
      *
      * @return a string from a copy of the appended data
      */
-    public String toString() {
+    public @Nonnull String toString() {
         return new String(buf, 0, count);
     }
 
@@ -193,22 +206,22 @@ public class CharsBuilder extends Writer implements CharSequence {
     /**
      * Appends the specified char to this builder.
      *
-     * @param b the specified char
+     * @param c the specified char
      * @return this builder
      */
-    public CharsBuilder append(int b) {
-        write(b);
+    public @Nonnull CharsBuilder append(int c) {
+        write(c);
         return this;
     }
 
     /**
      * Appends the specified char to this builder.
      *
-     * @param b the specified char
+     * @param c the specified char
      * @return this builder
      */
-    public CharsBuilder append(char b) {
-        write(b);
+    public @Nonnull CharsBuilder append(char c) {
+        write(c);
         return this;
     }
 
@@ -218,8 +231,8 @@ public class CharsBuilder extends Writer implements CharSequence {
      * @param chars the given array
      * @return this builder
      */
-    public CharsBuilder append(char[] chars) {
-        write(chars, 0, chars.length);
+    public @Nonnull CharsBuilder append(char @Nonnull [] chars) {
+        write(chars);
         return this;
     }
 
@@ -230,8 +243,11 @@ public class CharsBuilder extends Writer implements CharSequence {
      * @param offset the specified offset
      * @param length the specified number
      * @return this builder
+     * @throws IndexOutOfBoundsException if the offset or number is out of bounds
      */
-    public CharsBuilder append(char[] chars, int offset, int length) {
+    public @Nonnull CharsBuilder append(
+        char @Nonnull [] chars, int offset, int length
+    ) throws IndexOutOfBoundsException {
         write(chars, offset, length);
         return this;
     }
@@ -242,16 +258,18 @@ public class CharsBuilder extends Writer implements CharSequence {
      * @param chars the given buffer
      * @return this builder
      */
-    public CharsBuilder append(CharBuffer chars) {
-        if (!chars.hasRemaining()) {
+    public @Nonnull CharsBuilder append(@Nonnull CharBuffer chars) {
+        int remaining = chars.remaining();
+        if (remaining == 0) {
             return this;
         }
         if (chars.hasArray()) {
             write(chars.array(), BufferKit.arrayStartIndex(chars), chars.remaining());
             chars.position(chars.position() + chars.remaining());
         } else {
-            char[] remaining = BufferKit.read(chars);
-            write(remaining, 0, remaining.length);
+            char[] data = new char[remaining];
+            chars.get(data);
+            write(data);
         }
         return this;
     }
@@ -263,20 +281,26 @@ public class CharsBuilder extends Writer implements CharSequence {
      * @return this builder
      * @throws IORuntimeException if an I/O error occurs
      */
-    public CharsBuilder append(Reader reader) throws IORuntimeException {
+    public @Nonnull CharsBuilder append(@Nonnull Reader reader) throws IORuntimeException {
         return append(reader, IOKit.bufferSize());
     }
 
     /**
      * Reads and appends all chars from the given reader with the specified buffer size for each reading.
      *
-     * @param reader     the given reader
-     * @param bufferSize the specified buffer size for each reading
+     * @param reader  the given reader
+     * @param bufSize the specified buffer size for each reading
      * @return this builder
-     * @throws IORuntimeException if an I/O error occurs
+     * @throws IllegalArgumentException if the buffer size {@code <= 0}
+     * @throws IORuntimeException       if an I/O error occurs
      */
-    public CharsBuilder append(Reader reader, int bufferSize) throws IORuntimeException {
-        char[] buffer = new char[bufferSize];
+    public @Nonnull CharsBuilder append(
+        @Nonnull Reader reader, int bufSize
+    ) throws IllegalArgumentException, IORuntimeException {
+        if (bufSize <= 0) {
+            throw new IllegalArgumentException("The buffer size must > 0.");
+        }
+        char[] buffer = new char[bufSize];
         while (true) {
             try {
                 int readSize = reader.read(buffer);
@@ -296,7 +320,7 @@ public class CharsBuilder extends Writer implements CharSequence {
      * @param builder the given reader
      * @return this builder
      */
-    public CharsBuilder append(CharsBuilder builder) {
+    public @Nonnull CharsBuilder append(@Nonnull CharsBuilder builder) {
         write(builder.buf, 0, builder.count);
         return this;
     }
@@ -307,10 +331,7 @@ public class CharsBuilder extends Writer implements CharSequence {
     }
 
     @Override
-    public char charAt(int index) {
-        if (index < 0) {
-            throw new IllegalArgumentException("Illegal index, must >= 0: " + index + ".");
-        }
+    public char charAt(int index) throws IndexOutOfBoundsException {
         if (index >= count) {
             throw new IndexOutOfBoundsException("Index out of bounds: " + index + ".");
         }
@@ -318,7 +339,7 @@ public class CharsBuilder extends Writer implements CharSequence {
     }
 
     @Override
-    public CharSequence subSequence(int start, int end) {
+    public @Nonnull CharSequence subSequence(int start, int end) {
         return toString().subSequence(start, end);
     }
 
@@ -343,7 +364,7 @@ public class CharsBuilder extends Writer implements CharSequence {
         buf = Arrays.copyOf(buf, newCapacity);
     }
 
-    private int newCapacity(final int newCapacity, int minCapacity) {
+    private int newCapacity(int newCapacity, int minCapacity) {
         if (newCapacity <= 0 || newCapacity > maxSize) {
             return maxSize;
         }

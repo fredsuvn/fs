@@ -1,5 +1,6 @@
 package xyz.sunqian.common.base.bytes;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.io.IORuntimeException;
@@ -28,7 +29,7 @@ public class BytesBuilder extends OutputStream {
 
     private final int maxSize;
 
-    private byte[] buf;
+    private byte @Nonnull [] buf;
     private int count;
 
     /**
@@ -83,14 +84,27 @@ public class BytesBuilder extends OutputStream {
     }
 
     /**
+     * Appends all bytes from the given array.
+     *
+     * @param b the given array
+     */
+    @Override
+    public void write(byte @Nonnull [] b) {
+        ensureCapacity(count + b.length);
+        System.arraycopy(b, 0, buf, count, b.length);
+        count += b.length;
+    }
+
+    /**
      * Appends the specified number of bytes from the given array, starting at the specified offset.
      *
      * @param b   the given array
      * @param off the specified offset
      * @param len the specified number
+     * @throws IndexOutOfBoundsException if the offset or number is out of bounds
      */
     @Override
-    public void write(byte[] b, int off, int len) {
+    public void write(byte @Nonnull [] b, int off, int len) throws IndexOutOfBoundsException {
         checkOffsetLength(b.length, off, len);
         ensureCapacity(count + len);
         System.arraycopy(b, off, buf, count, len);
@@ -103,7 +117,7 @@ public class BytesBuilder extends OutputStream {
      * @param out the specified output stream
      * @throws IORuntimeException if an I/O error occurs
      */
-    public void writeTo(OutputStream out) throws IORuntimeException {
+    public void writeTo(@Nonnull OutputStream out) throws IORuntimeException {
         try {
             out.write(buf, 0, count);
         } catch (Exception e) {
@@ -117,7 +131,7 @@ public class BytesBuilder extends OutputStream {
      * @param out the specified buffer
      * @throws IORuntimeException if an I/O error occurs
      */
-    public void writeTo(ByteBuffer out) throws IORuntimeException {
+    public void writeTo(@Nonnull ByteBuffer out) throws IORuntimeException {
         try {
             out.put(buf, 0, count);
         } catch (Exception e) {
@@ -158,7 +172,7 @@ public class BytesBuilder extends OutputStream {
      *
      * @return a new array containing a copy of the appended data
      */
-    public byte[] toByteArray() {
+    public byte @Nonnull [] toByteArray() {
         return Arrays.copyOf(buf, count);
     }
 
@@ -167,7 +181,7 @@ public class BytesBuilder extends OutputStream {
      *
      * @return a new buffer containing a copy of the appended data
      */
-    public ByteBuffer toByteBuffer() {
+    public @Nonnull ByteBuffer toByteBuffer() {
         return ByteBuffer.wrap(toByteArray());
     }
 
@@ -179,7 +193,7 @@ public class BytesBuilder extends OutputStream {
      * @see ByteArrayOutputStream#toString()
      */
     @Override
-    public String toString() {
+    public @Nonnull String toString() {
         return new String(buf, 0, count);
     }
 
@@ -192,7 +206,7 @@ public class BytesBuilder extends OutputStream {
      * @throws UnsupportedEncodingException If the named charset is not supported
      * @see ByteArrayOutputStream#toString(String)
      */
-    public String toString(String charsetName) throws UnsupportedEncodingException {
+    public @Nonnull String toString(@Nonnull String charsetName) throws UnsupportedEncodingException {
         return new String(buf, 0, count, charsetName);
     }
 
@@ -202,7 +216,7 @@ public class BytesBuilder extends OutputStream {
      * @param charset the specified charset
      * @return a string decoded from the appended data using the specified charset
      */
-    public String toString(Charset charset) {
+    public @Nonnull String toString(@Nonnull Charset charset) {
         return new String(buf, 0, count, charset);
     }
 
@@ -230,7 +244,7 @@ public class BytesBuilder extends OutputStream {
      * @param b the specified byte
      * @return this builder
      */
-    public BytesBuilder append(byte b) {
+    public @Nonnull BytesBuilder append(byte b) {
         write(b);
         return this;
     }
@@ -241,8 +255,8 @@ public class BytesBuilder extends OutputStream {
      * @param bytes the given array
      * @return this builder
      */
-    public BytesBuilder append(byte[] bytes) {
-        write(bytes, 0, bytes.length);
+    public @Nonnull BytesBuilder append(byte @Nonnull [] bytes) {
+        write(bytes);
         return this;
     }
 
@@ -253,8 +267,9 @@ public class BytesBuilder extends OutputStream {
      * @param offset the specified offset
      * @param length the specified number
      * @return this builder
+     * @throws IndexOutOfBoundsException if the offset or number is out of bounds
      */
-    public BytesBuilder append(byte[] bytes, int offset, int length) {
+    public @Nonnull BytesBuilder append(byte @Nonnull [] bytes, int offset, int length) throws IndexOutOfBoundsException {
         write(bytes, offset, length);
         return this;
     }
@@ -265,16 +280,18 @@ public class BytesBuilder extends OutputStream {
      * @param bytes the given buffer
      * @return this builder
      */
-    public BytesBuilder append(ByteBuffer bytes) {
-        if (!bytes.hasRemaining()) {
+    public @Nonnull BytesBuilder append(@Nonnull ByteBuffer bytes) {
+        int remaining = bytes.remaining();
+        if (remaining == 0) {
             return this;
         }
         if (bytes.hasArray()) {
             write(bytes.array(), BufferKit.arrayStartIndex(bytes), bytes.remaining());
             bytes.position(bytes.position() + bytes.remaining());
         } else {
-            byte[] remaining = BufferKit.read(bytes);
-            write(remaining, 0, remaining.length);
+            byte[] data = new byte[remaining];
+            bytes.get(data);
+            write(data);
         }
         return this;
     }
@@ -286,20 +303,26 @@ public class BytesBuilder extends OutputStream {
      * @return this builder
      * @throws IORuntimeException if an I/O error occurs
      */
-    public BytesBuilder append(InputStream in) throws IORuntimeException {
+    public @Nonnull BytesBuilder append(@Nonnull InputStream in) throws IORuntimeException {
         return append(in, IOKit.bufferSize());
     }
 
     /**
      * Reads and appends all bytes from the given stream with the specified buffer size for each reading.
      *
-     * @param in         the given stream
-     * @param bufferSize the specified buffer size for each reading
+     * @param in      the given stream
+     * @param bufSize the specified buffer size for each reading
      * @return this builder
-     * @throws IORuntimeException if an I/O error occurs
+     * @throws IllegalArgumentException if the buffer size {@code <=0}
+     * @throws IORuntimeException       if an I/O error occurs
      */
-    public BytesBuilder append(InputStream in, int bufferSize) throws IORuntimeException {
-        byte[] buffer = new byte[bufferSize];
+    public @Nonnull BytesBuilder append(
+        @Nonnull InputStream in, int bufSize
+    ) throws IllegalArgumentException, IORuntimeException {
+        if (bufSize <= 0) {
+            throw new IllegalArgumentException("The buffer size must > 0.");
+        }
+        byte[] buffer = new byte[bufSize];
         while (true) {
             try {
                 int readSize = in.read(buffer);
@@ -319,7 +342,7 @@ public class BytesBuilder extends OutputStream {
      * @param builder the given builder
      * @return this builder
      */
-    public BytesBuilder append(BytesBuilder builder) {
+    public @Nonnull BytesBuilder append(@Nonnull BytesBuilder builder) {
         write(builder.buf, 0, builder.count);
         return this;
     }
@@ -345,7 +368,7 @@ public class BytesBuilder extends OutputStream {
         buf = Arrays.copyOf(buf, newCapacity);
     }
 
-    private int newCapacity(final int newCapacity, int minCapacity) {
+    private int newCapacity(int newCapacity, int minCapacity) {
         if (newCapacity <= 0 || newCapacity > maxSize) {
             return maxSize;
         }

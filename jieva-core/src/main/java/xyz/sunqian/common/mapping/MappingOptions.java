@@ -5,7 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.objects.data.DataProperty;
 import xyz.sunqian.common.objects.data.DataSchemaParser;
 
@@ -149,7 +149,7 @@ public class MappingOptions {
 
     /**
      * Option to determine which charset to use for character conversion. If it is {@code null}, the mapper should use
-     * {@link JieChars#defaultCharset()}.
+     * {@link CharsKit#defaultCharset()}.
      * <p>
      * Default is {@code null}.
      */
@@ -212,7 +212,7 @@ public class MappingOptions {
      * Returns {@link Charset} option from given property info and this options. If property info is not null and
      * {@link #getPropertyCharset()} is not null, obtains result of {@link #getPropertyCharset()}. Otherwise, obtains
      * result of {@link #getCharset()}. If the result is not null, returns the result, else returns
-     * {@link JieChars#UTF_8}.
+     * {@link CharsKit#UTF_8}.
      *
      * @param targetProperty given property info
      * @return {@link Charset} option
@@ -221,10 +221,10 @@ public class MappingOptions {
         if (targetProperty != null) {
             Function<DataProperty, Charset> func = getPropertyCharset();
             if (func != null) {
-                return Jie.nonnull(func.apply(targetProperty), JieChars.defaultCharset());
+                return Jie.nonnull(func.apply(targetProperty), CharsKit.defaultCharset());
             }
         }
-        return Jie.nonnull(getCharset(), JieChars.defaultCharset());
+        return Jie.nonnull(getCharset(), CharsKit.defaultCharset());
     }
 
     /**

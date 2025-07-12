@@ -3,7 +3,7 @@ package test.io;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.chars.CharsBuilder;
-import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.collect.JieArray;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IORuntimeException;
@@ -268,7 +268,7 @@ public class BufferTest implements DataTest {
         {
             // byte to string
             String hello = "hello";
-            byte[] bytes = hello.getBytes(JieChars.defaultCharset());
+            byte[] bytes = hello.getBytes(CharsKit.defaultCharset());
             assertEquals(BufferKit.string(ByteBuffer.wrap(bytes)), hello);
             assertNull(BufferKit.string(ByteBuffer.allocate(0)));
         }

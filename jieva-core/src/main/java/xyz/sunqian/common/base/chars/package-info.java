@@ -3,14 +3,11 @@
  * <p>
  * Utilities:
  * <ul>
- *     <li>{@link xyz.sunqian.common.base.chars.JieChars}</li>
+ *     <li>{@link xyz.sunqian.common.base.chars.CharsKit}</li>
  * </ul>
- * Core interfaces and classes:
+ * Core Interfaces and Classes:
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.chars.CharsBuilder}</li>
  * </ul>
  */
-@DefaultNonNull
 package xyz.sunqian.common.base.chars;
-
-import xyz.sunqian.annotations.DefaultNonNull;

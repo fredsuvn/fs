@@ -3,7 +3,7 @@ package xyz.sunqian.common.base.random;
 import xyz.sunqian.annotations.JdkDependent;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.JieCheck;
-import xyz.sunqian.common.base.bytes.JieBytes;
+import xyz.sunqian.common.base.bytes.BytesKit;
 import xyz.sunqian.common.base.math.MathKit;
 import xyz.sunqian.common.collect.JieStream;
 
@@ -51,7 +51,7 @@ final class RngImpl {
             if (random instanceof SecureRandom) {
                 ((SecureRandom) random).setSeed(seed);
             } else {
-                random.setSeed(JieBytes.bytesToLong(seed));
+                random.setSeed(BytesKit.bytesToLong(seed));
             }
         }
 

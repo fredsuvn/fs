@@ -2,7 +2,7 @@ package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.JieString;
-import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.base.chars.CharsKit;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -44,8 +44,8 @@ final class CharReaderImpl {
 
     private static final class CharSegmentImpl implements CharSegment {
 
-        private static final @Nonnull CharSegmentImpl EMPTY_END = new CharSegmentImpl(JieChars.emptyBuffer(), true);
-        private static final @Nonnull CharSegmentImpl EMPTY_SEG = new CharSegmentImpl(JieChars.emptyBuffer(), false);
+        private static final @Nonnull CharSegmentImpl EMPTY_END = new CharSegmentImpl(CharsKit.emptyBuffer(), true);
+        private static final @Nonnull CharSegmentImpl EMPTY_SEG = new CharSegmentImpl(CharsKit.emptyBuffer(), false);
 
         private final @Nonnull CharBuffer data;
         private final boolean end;

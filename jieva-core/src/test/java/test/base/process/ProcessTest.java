@@ -3,7 +3,7 @@ package test.base.process;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.JieSystem;
-import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.exception.AwaitingException;
 import xyz.sunqian.common.base.process.JieProcess;
 import xyz.sunqian.common.base.process.ProcessReceipt;
@@ -128,7 +128,7 @@ public class ProcessTest {
         {
             String hello = "hello";
             VirtualProcess process = new VirtualProcess(
-                IOKit.newInputStream(hello.getBytes(JieChars.localCharset())),
+                IOKit.newInputStream(hello.getBytes(CharsKit.localCharset())),
                 IOKit.nullOutputStream()
             );
             ProcessReceipt receipt = JieProcess.receipt(process);
@@ -137,11 +137,11 @@ public class ProcessTest {
         {
             String hello = "hello";
             VirtualProcess process = new VirtualProcess(
-                IOKit.newInputStream(hello.getBytes(JieChars.localCharset())),
+                IOKit.newInputStream(hello.getBytes(CharsKit.localCharset())),
                 IOKit.nullOutputStream()
             );
             ProcessReceipt receipt = JieProcess.receipt(process);
-            assertEquals(receipt.readBytes(), hello.getBytes(JieChars.localCharset()));
+            assertEquals(receipt.readBytes(), hello.getBytes(CharsKit.localCharset()));
         }
     }
 

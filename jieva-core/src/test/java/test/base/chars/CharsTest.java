@@ -2,7 +2,7 @@ package test.base.chars;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.JieSystem;
-import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.test.AssertTest;
 
 import java.lang.reflect.Field;
@@ -20,30 +20,30 @@ public class CharsTest implements AssertTest {
 
     @Test
     public void testChars() {
-        assertTrue(JieChars.isEmpty(null));
-        assertTrue(JieChars.isEmpty(CharBuffer.allocate(0)));
-        assertTrue(JieChars.isEmpty(CharBuffer.wrap(new char[10], 5, 0)));
-        assertTrue(JieChars.isEmpty(JieChars.emptyBuffer()));
-        assertTrue(JieChars.isEmpty(CharBuffer.wrap(JieChars.emptyChars())));
+        assertTrue(CharsKit.isEmpty(null));
+        assertTrue(CharsKit.isEmpty(CharBuffer.allocate(0)));
+        assertTrue(CharsKit.isEmpty(CharBuffer.wrap(new char[10], 5, 0)));
+        assertTrue(CharsKit.isEmpty(CharsKit.emptyBuffer()));
+        assertTrue(CharsKit.isEmpty(CharBuffer.wrap(CharsKit.emptyChars())));
     }
 
     @Test
     public void testCharset() throws Exception {
-        assertEquals(JieChars.defaultCharset(), StandardCharsets.UTF_8);
-        assertEquals(JieChars.latinCharset(), StandardCharsets.ISO_8859_1);
-        assertEquals(JieChars.jvmCharset(), JieChars.defaultCharset());
-        assertEquals(JieChars.charset(StandardCharsets.UTF_8.name()), StandardCharsets.UTF_8);
-        assertNull(JieChars.charset(null));
-        assertNotNull(JieChars.localCharset());
+        assertEquals(CharsKit.defaultCharset(), StandardCharsets.UTF_8);
+        assertEquals(CharsKit.latinCharset(), StandardCharsets.ISO_8859_1);
+        assertEquals(CharsKit.jvmCharset(), CharsKit.defaultCharset());
+        assertEquals(CharsKit.charset(StandardCharsets.UTF_8.name()), StandardCharsets.UTF_8);
+        assertNull(CharsKit.charset(null));
+        assertNotNull(CharsKit.localCharset());
         {
             // native chars
-            Charset nativeCharset = JieChars.nativeCharset();
-            String nativesClassName = JieChars.class.getName() + "$Natives";
+            Charset nativeCharset = CharsKit.nativeCharset();
+            String nativesClassName = CharsKit.class.getName() + "$Natives";
             Class<?> nativesClass = Class.forName(nativesClassName);
             Field nc = nativesClass.getDeclaredField("NATIVE_CHARSET");
             nc.setAccessible(true);
             assertEquals(nativeCharset, nc.get(null));
-            Charset fileCharset = JieChars.charset(System.getProperty(JieSystem.KEY_OF_FILE_ENCODING));
+            Charset fileCharset = CharsKit.charset(System.getProperty(JieSystem.KEY_OF_FILE_ENCODING));
             Method search = nativesClass.getDeclaredMethod("search", String[].class);
             invokeEquals(fileCharset, search, null, (Object) new String[]{"UTF888", JieSystem.KEY_OF_FILE_ENCODING});
             invokeEquals(null, search, null, (Object) new String[]{"UTF888"});

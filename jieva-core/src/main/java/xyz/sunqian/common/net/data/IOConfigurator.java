@@ -2,7 +2,7 @@ package xyz.sunqian.common.net.data;
 
 import xyz.sunqian.common.base.BaseConfigurator;
 import xyz.sunqian.common.base.JieString;
-import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.io.IOKit;
 
 import java.io.InputStream;
@@ -66,13 +66,13 @@ public interface IOConfigurator<T extends IOConfigurator<T>> extends BaseConfigu
     T input(InputStream in);
 
     /**
-     * Sets input to given string with {@link JieChars#defaultCharset()}.
+     * Sets input to given string with {@link CharsKit#defaultCharset()}.
      *
      * @param str given string
      * @return this
      */
     default T input(String str) {
-        return input(str, JieChars.defaultCharset());
+        return input(str, CharsKit.defaultCharset());
     }
 
     /**
@@ -158,12 +158,12 @@ public interface IOConfigurator<T extends IOConfigurator<T>> extends BaseConfigu
     InputStream finalStream();
 
     /**
-     * Starts and does final process, builds result as string with {@link JieChars#defaultCharset()} and returns.
+     * Starts and does final process, builds result as string with {@link CharsKit#defaultCharset()} and returns.
      *
      * @return result as string with specified charset
      */
     default String finalString() {
-        return finalString(JieChars.defaultCharset());
+        return finalString(CharsKit.defaultCharset());
     }
 
     /**

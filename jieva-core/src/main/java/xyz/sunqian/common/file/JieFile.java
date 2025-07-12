@@ -1,6 +1,6 @@
 package xyz.sunqian.common.file;
 
-import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.io.IOKit;
 
 import java.io.File;
@@ -49,13 +49,13 @@ public class JieFile {
 
     /**
      * Using {@link RandomAccessFile} to read all bytes of given path. The read bytes will be encoded to String with
-     * {@link JieChars#defaultCharset()}.
+     * {@link CharsKit#defaultCharset()}.
      *
      * @param path given path
      * @return read string
      */
     public static String readString(Path path) {
-        return readString(path, JieChars.defaultCharset());
+        return readString(path, CharsKit.defaultCharset());
     }
 
     /**
@@ -73,7 +73,7 @@ public class JieFile {
     /**
      * Using {@link RandomAccessFile} to read given length bytes of given path from offset position, the given length
      * may be set to -1 to read to end of file. The read bytes will be encoded to String with
-     * {@link JieChars#defaultCharset()}.
+     * {@link CharsKit#defaultCharset()}.
      *
      * @param path   given path
      * @param offset offset position
@@ -81,7 +81,7 @@ public class JieFile {
      * @return read string
      */
     public static String readString(Path path, long offset, long length) {
-        return readString(path, offset, length, JieChars.defaultCharset());
+        return readString(path, offset, length, CharsKit.defaultCharset());
     }
 
     /**
@@ -133,13 +133,13 @@ public class JieFile {
 
     /**
      * Using {@link RandomAccessFile} to write given data into given file. The written bytes will be decoded from given
-     * data with {@link JieChars#defaultCharset()}.
+     * data with {@link CharsKit#defaultCharset()}.
      *
      * @param path given path
      * @param data given data
      */
     public static void writeString(Path path, CharSequence data) {
-        writeString(path, data, JieChars.defaultCharset());
+        writeString(path, data, CharsKit.defaultCharset());
     }
 
     /**
@@ -157,7 +157,7 @@ public class JieFile {
     /**
      * Using {@link RandomAccessFile} to write given data into given path from offset position, the given length may be
      * set to -1 to write unlimitedly. The written bytes will be decoded from given data with
-     * {@link JieChars#defaultCharset()}.
+     * {@link CharsKit#defaultCharset()}.
      *
      * @param path   given path
      * @param offset offset position
@@ -165,7 +165,7 @@ public class JieFile {
      * @param data   given data
      */
     public static void writeString(Path path, long offset, long length, CharSequence data) {
-        writeString(path, offset, length, data, JieChars.defaultCharset());
+        writeString(path, offset, length, data, CharsKit.defaultCharset());
     }
 
     /**

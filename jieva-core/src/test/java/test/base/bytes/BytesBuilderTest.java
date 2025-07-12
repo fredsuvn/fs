@@ -2,13 +2,14 @@ package test.base.bytes;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
-import xyz.sunqian.common.base.bytes.JieBytes;
-import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.base.bytes.BytesKit;
+import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.test.AssertTest;
 import xyz.sunqian.test.DataTest;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -92,20 +93,25 @@ public class BytesBuilderTest implements DataTest, AssertTest {
         buffer2.flip();
         bb.append(buffer2);
         assertEquals(bb.toByteArray(), Arrays.copyOf(bs, 70));
+        bb.append(ByteBuffer.allocateDirect(0));
+        assertEquals(bb.toByteArray(), Arrays.copyOf(bs, 70));
         assertEquals(buffer2.position(), 10);
         assertFalse(buffer2.hasRemaining());
-        bb.append(JieBytes.emptyBuffer());
+        bb.append(BytesKit.emptyBuffer());
         expectThrows(IORuntimeException.class, () -> bb.append(new InputStream() {
             @Override
             public int read() throws IOException {
                 throw new IOException();
             }
         }));
+        expectThrows(IllegalArgumentException.class, () ->
+            bb.append(new ByteArrayInputStream(new byte[0]), -1)
+        );
         assertEquals(bb.size(), 70);
         assertEquals(bb.toByteBuffer(), ByteBuffer.wrap(bs, 0, 70));
         assertEquals(Arrays.copyOf(cs, 70), bb.toString().toCharArray());
         assertEquals(Arrays.copyOf(cs, 70), bb.toString("utf-8").toCharArray());
-        assertEquals(Arrays.copyOf(cs, 70), bb.toString(JieChars.UTF_8).toCharArray());
+        assertEquals(Arrays.copyOf(cs, 70), bb.toString(CharsKit.UTF_8).toCharArray());
         bb.reset();
         bb.append(bs[0]);
         bb.append(bs[1]);

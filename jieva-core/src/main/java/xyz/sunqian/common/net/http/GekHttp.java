@@ -1,6 +1,6 @@
 package xyz.sunqian.common.net.http;
 
-import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.base.chars.CharsKit;
 
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -169,13 +169,13 @@ public class GekHttp {
 
     /**
      * Encodes given form string (for application/x-www-form-urlencoded) with {@link URLEncoder#encode(String, String)}.
-     * Using {@link JieChars#defaultCharset()}.
+     * Using {@link CharsKit#defaultCharset()}.
      *
      * @param formString given form string
      * @return encoded string
      */
     public static String encodeForm(String formString) {
-        return encodeForm(formString, JieChars.defaultCharset());
+        return encodeForm(formString, CharsKit.defaultCharset());
     }
 
     /**
@@ -196,13 +196,13 @@ public class GekHttp {
 
     /**
      * Encodes given query string (for url after '?') with {@link URLEncoder#encode(String, String)} and replace '+' to
-     * '%20'. Using {@link JieChars#defaultCharset()}.
+     * '%20'. Using {@link CharsKit#defaultCharset()}.
      *
      * @param queryString given query string
      * @return encoded string
      */
     public static String encodeQuery(String queryString) {
-        return encodeQuery(queryString, JieChars.defaultCharset());
+        return encodeQuery(queryString, CharsKit.defaultCharset());
     }
 
     /**
@@ -219,13 +219,13 @@ public class GekHttp {
 
     /**
      * Decodes given form or query string with {@link URLDecoder#decode(String, String)}. Using
-     * {@link JieChars#defaultCharset()}.
+     * {@link CharsKit#defaultCharset()}.
      *
      * @param encoded given form or query string
      * @return decoded string
      */
     public static String decodeFormOrQuery(String encoded) {
-        return decodeFormOrQuery(encoded, JieChars.defaultCharset());
+        return decodeFormOrQuery(encoded, CharsKit.defaultCharset());
     }
 
     /**

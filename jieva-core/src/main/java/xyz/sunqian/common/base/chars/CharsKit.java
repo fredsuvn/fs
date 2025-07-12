@@ -10,24 +10,24 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Static utility class for {@code chars} and {@link Charset}.
+ * Static utility class for {@code char}, {@code char array} and {@link Charset}.
  *
  * @author sunqian
  */
-public class JieChars {
+public class CharsKit {
 
     /**
      * Charset: UTF-8.
      */
-    public static final Charset UTF_8 = StandardCharsets.UTF_8;
+    public static final @Nonnull Charset UTF_8 = StandardCharsets.UTF_8;
 
     /**
      * Charset: ISO-8859-1.
      */
-    public static final Charset ISO_8859_1 = StandardCharsets.ISO_8859_1;
+    public static final @Nonnull Charset ISO_8859_1 = StandardCharsets.ISO_8859_1;
 
-    private static final char[] EMPTY_CHARS = {};
-    private static final CharBuffer EMPTY_BUFFER = CharBuffer.wrap(EMPTY_CHARS);
+    private static final char @Nonnull [] EMPTY_CHARS = {};
+    private static final @Nonnull CharBuffer EMPTY_BUFFER = CharBuffer.wrap(EMPTY_CHARS);
 
     /**
      * Returns whether the given buffer is null or empty.
@@ -44,7 +44,7 @@ public class JieChars {
      *
      * @return an empty char array
      */
-    public static char[] emptyChars() {
+    public static char @Nonnull [] emptyChars() {
         return EMPTY_CHARS;
     }
 
@@ -53,7 +53,7 @@ public class JieChars {
      *
      * @return an empty char buffer
      */
-    public static CharBuffer emptyBuffer() {
+    public static @Nonnull CharBuffer emptyBuffer() {
         return EMPTY_BUFFER;
     }
 
@@ -62,7 +62,7 @@ public class JieChars {
      *
      * @return the default charset: {@link #UTF_8}
      */
-    public static Charset defaultCharset() {
+    public static @Nonnull Charset defaultCharset() {
         return UTF_8;
     }
 
@@ -71,7 +71,7 @@ public class JieChars {
      *
      * @return the latin charset: {@link #ISO_8859_1}
      */
-    public static Charset latinCharset() {
+    public static @Nonnull Charset latinCharset() {
         return ISO_8859_1;
     }
 
@@ -93,7 +93,7 @@ public class JieChars {
      * @return the default charset of this Java virtual machine
      * @see Charset#defaultCharset()
      */
-    public static Charset jvmCharset() {
+    public static @Nonnull Charset jvmCharset() {
         return Charset.defaultCharset();
     }
 
@@ -111,8 +111,7 @@ public class JieChars {
      *
      * @return the default charset of current native environment
      */
-    @Nullable
-    public static Charset nativeCharset() {
+    public static @Nullable Charset nativeCharset() {
         return Natives.NATIVE_CHARSET;
     }
 
@@ -122,8 +121,7 @@ public class JieChars {
      * @param name the specified name
      * @return the charset with the specified name
      */
-    @Nullable
-    public static Charset charset(String name) {
+    public static @Nullable Charset charset(String name) {
         try {
             return Charset.forName(name);
         } catch (Exception e) {
@@ -135,8 +133,7 @@ public class JieChars {
 
         private static final @Nullable Charset NATIVE_CHARSET = searchNativeCharset();
 
-        @Nullable
-        private static Charset searchNativeCharset() {
+        private static @Nullable Charset searchNativeCharset() {
             return search(
                 JieSystem.KEY_OF_NATIVE_ENCODING,
                 "sun.jnu.encoding",
@@ -144,8 +141,7 @@ public class JieChars {
             );
         }
 
-        @Nullable
-        private static Charset search(String... proName) {
+        private static @Nullable Charset search(String... proName) {
             for (String s : proName) {
                 String prop = System.getProperty(s);
                 @Nullable Charset charset = charset(prop);

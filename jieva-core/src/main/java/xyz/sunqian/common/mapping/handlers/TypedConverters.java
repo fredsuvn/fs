@@ -5,7 +5,7 @@ import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.JieDate;
 import xyz.sunqian.common.base.JieString;
-import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.mapping.MappingException;
@@ -235,7 +235,7 @@ public class TypedConverters {
      *         For {@link ByteBuffer}, this converter use {@link BufferKit#readReset(ByteBuffer)} to read and reset;
      *     </li>
      *     <li>
-     *         If charset option is not found, use {@link JieChars#defaultCharset()};
+     *         If charset option is not found, use {@link CharsKit#defaultCharset()};
      *     </li>
      * </ul>
      */
@@ -270,7 +270,7 @@ public class TypedConverters {
                 if (charset != null) {
                     return new String((byte[]) source, charset);
                 }
-                return new String((byte[]) source, JieChars.defaultCharset());
+                return new String((byte[]) source, CharsKit.defaultCharset());
             }
             if (source instanceof ByteBuffer) {
                 Charset charset = options.getCharset(targetProperty);
@@ -278,7 +278,7 @@ public class TypedConverters {
                 if (charset != null) {
                     return new String(bytes, charset);
                 }
-                return new String(bytes, JieChars.defaultCharset());
+                return new String(bytes, CharsKit.defaultCharset());
             }
             if (source instanceof char[]) {
                 return new String((char[]) source);
@@ -300,7 +300,7 @@ public class TypedConverters {
      *         reset for {@link InputStream};
      *     </li>
      *     <li>
-     *         If charset option is not found, use {@link JieChars#defaultCharset()};
+     *         If charset option is not found, use {@link CharsKit#defaultCharset()};
      *     </li>
      * </ul>
      */
@@ -314,7 +314,7 @@ public class TypedConverters {
                 if (charset != null) {
                     return source.toString().getBytes(charset);
                 }
-                return source.toString().getBytes(JieChars.defaultCharset());
+                return source.toString().getBytes(CharsKit.defaultCharset());
             }
             if (source instanceof byte[]) {
                 return ((byte[]) source).clone();

@@ -2,7 +2,7 @@ package xyz.sunqian.common.base;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.chars.JieChars;
+import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.function.SubFunction;
 
 import java.nio.charset.Charset;
@@ -21,18 +21,18 @@ import java.util.function.Supplier;
 public class JieString {
 
     /**
-     * Returns string decoding from given bytes with {@link JieChars#defaultCharset()}.
+     * Returns string decoding from given bytes with {@link CharsKit#defaultCharset()}.
      *
      * @param bytes given bytes
      * @return string decoding from given bytes and charset
      */
     public static String of(byte[] bytes) {
-        return of(bytes, JieChars.defaultCharset());
+        return of(bytes, CharsKit.defaultCharset());
     }
 
     /**
      * Returns string decoding from given bytes (from given offset to specified length) with
-     * {@link JieChars#defaultCharset()}.
+     * {@link CharsKit#defaultCharset()}.
      *
      * @param bytes  given bytes
      * @param offset given offset
@@ -40,7 +40,7 @@ public class JieString {
      * @return string decoding from given bytes and charset
      */
     public static String of(byte[] bytes, int offset, int length) {
-        return of(bytes, offset, length, JieChars.defaultCharset());
+        return of(bytes, offset, length, CharsKit.defaultCharset());
     }
 
     /**
@@ -68,13 +68,13 @@ public class JieString {
     }
 
     /**
-     * Encodes given chars into a new byte array using {@link JieChars#defaultCharset()}.
+     * Encodes given chars into a new byte array using {@link CharsKit#defaultCharset()}.
      *
      * @param chars given chars
      * @return a new byte array encoded given chars
      */
     public static byte[] getBytes(char[] chars) {
-        return getBytes(chars, JieChars.defaultCharset());
+        return getBytes(chars, CharsKit.defaultCharset());
     }
 
     /**
@@ -89,13 +89,13 @@ public class JieString {
     }
 
     /**
-     * Encodes given chars into a new byte array using {@link JieChars#defaultCharset()}.
+     * Encodes given chars into a new byte array using {@link CharsKit#defaultCharset()}.
      *
      * @param chars given chars
      * @return a new byte array encoded given chars
      */
     public static byte[] getBytes(CharSequence chars) {
-        return getBytes(chars, JieChars.defaultCharset());
+        return getBytes(chars, CharsKit.defaultCharset());
     }
 
     /**

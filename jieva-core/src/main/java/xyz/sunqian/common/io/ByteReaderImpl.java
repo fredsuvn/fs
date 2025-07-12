@@ -1,7 +1,7 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.bytes.JieBytes;
+import xyz.sunqian.common.base.bytes.BytesKit;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,8 +47,8 @@ final class ByteReaderImpl {
 
     private static final class ByteSegmentImpl implements ByteSegment {
 
-        private static final @Nonnull ByteSegmentImpl EMPTY_END = new ByteSegmentImpl(JieBytes.emptyBuffer(), true);
-        private static final @Nonnull ByteSegmentImpl EMPTY_SEG = new ByteSegmentImpl(JieBytes.emptyBuffer(), false);
+        private static final @Nonnull ByteSegmentImpl EMPTY_END = new ByteSegmentImpl(BytesKit.emptyBuffer(), true);
+        private static final @Nonnull ByteSegmentImpl EMPTY_SEG = new ByteSegmentImpl(BytesKit.emptyBuffer(), false);
 
         private final @Nonnull ByteBuffer data;
         private final boolean end;
