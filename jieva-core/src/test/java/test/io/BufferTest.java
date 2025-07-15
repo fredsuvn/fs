@@ -284,7 +284,7 @@ public class BufferTest implements DataTest {
             expectThrows(IllegalArgumentException.class, () ->
                 BufferKit.readTo(ByteBuffer.allocate(1), Channels.newChannel(new ByteArrayOutputStream()), -1));
             expectThrows(IORuntimeException.class, () ->
-                BufferKit.readTo(ByteBuffer.allocate(1), Channels.newChannel(new ErrorOutputStream()), 11));
+                BufferKit.readTo(ByteBuffer.allocate(1), Channels.newChannel(new ErrorOutputStream()), 1));
             expectThrows(IORuntimeException.class, () ->
                 BufferKit.readTo(ByteBuffer.allocate(1), new ErrorOutputStream()));
             expectThrows(IllegalArgumentException.class, () ->

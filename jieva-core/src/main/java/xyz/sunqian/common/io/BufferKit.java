@@ -296,7 +296,10 @@ public class BufferKit {
      * @throws IORuntimeException if an I/O error occurs
      */
     public static int readTo(@Nonnull ByteBuffer src, @Nonnull OutputStream dst) throws IORuntimeException {
-        return readTo0(src, dst, -1);
+        if (src.remaining() == 0) {
+            return -1;
+        }
+        return readToWithActualLen(src, dst, src.remaining());
     }
 
     /**
@@ -367,8 +370,14 @@ public class BufferKit {
         if (src.remaining() == 0) {
             return -1;
         }
+        int actualLen = Math.min(src.remaining(), len);
+        return readToWithActualLen(src, dst, actualLen);
+    }
+
+    private static int readToWithActualLen(
+        @Nonnull ByteBuffer src, @Nonnull OutputStream dst, int actualLen
+    ) throws IORuntimeException {
         try {
-            int actualLen = len < 0 ? src.remaining() : Math.min(src.remaining(), len);
             if (src.hasArray()) {
                 dst.write(src.array(), BufferKit.arrayStartIndex(src), actualLen);
                 src.position(src.position() + actualLen);
@@ -578,7 +587,10 @@ public class BufferKit {
      * @throws IORuntimeException if an I/O error occurs
      */
     public static int readTo(@Nonnull CharBuffer src, @Nonnull Appendable dst) throws IORuntimeException {
-        return readTo0(src, dst, -1);
+        if (src.remaining() == 0) {
+            return -1;
+        }
+        return readToWithActualLen(src, dst, src.remaining());
     }
 
     /**
@@ -628,8 +640,14 @@ public class BufferKit {
         if (src.remaining() == 0) {
             return -1;
         }
+        int actualLen = Math.min(src.remaining(), len);
+        return readToWithActualLen(src, dst, actualLen);
+    }
+
+    private static int readToWithActualLen(
+        @Nonnull CharBuffer src, @Nonnull Appendable dst, int actualLen
+    ) throws IORuntimeException {
         try {
-            int actualLen = len < 0 ? src.remaining() : Math.min(src.remaining(), len);
             dst.append(src, 0, actualLen);
             src.position(src.position() + actualLen);
             return actualLen;
