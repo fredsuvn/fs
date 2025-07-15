@@ -100,7 +100,7 @@ public class BufferKit {
     }
 
     /**
-     * Reads data from the source buffer into the specified array, until the read number reaches the array's length or
+     * Reads data from the source buffer into the destination array, until the read number reaches the array's length or
      * reaches the end of the source buffer, and returns the actual number of bytes read to.
      * <p>
      * If the specified length is {@code 0}, returns {@code 0} without reading. If reaches the end of the source buffer
@@ -109,7 +109,7 @@ public class BufferKit {
      * The buffer's position increments by the actual read number.
      *
      * @param src the source buffer
-     * @param dst the specified array
+     * @param dst the destination array
      * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source buffer and no data is
      * read
      */
@@ -118,7 +118,7 @@ public class BufferKit {
     }
 
     /**
-     * Reads a specified length of data from the source buffer into the specified array, starting at the specified
+     * Reads a specified length of data from the source buffer into the destination array, starting at the specified
      * offset, until the read number reaches the specified length or reaches the end of the source buffer, and returns
      * the actual number of bytes read to.
      * <p>
@@ -128,7 +128,7 @@ public class BufferKit {
      * The buffer's position increments by the actual read number.
      *
      * @param src the source buffer
-     * @param dst the specified array
+     * @param dst the destination array
      * @param off the specified offset of the array
      * @param len the specified length to read
      * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source buffer and no data is
@@ -229,7 +229,7 @@ public class BufferKit {
     }
 
     /**
-     * Reads data from the source buffer into the output channel, until reaches the end of the source buffer, and
+     * Reads data from the source buffer into the destination channel, until reaches the end of the source buffer, and
      * returns the actual number of bytes read to.
      * <p>
      * If reaches the end of the source buffer and no data is read, returns {@code -1}.
@@ -237,7 +237,7 @@ public class BufferKit {
      * The buffer's position increments by the actual read number.
      *
      * @param src the source buffer
-     * @param dst the output channel
+     * @param dst the destination channel
      * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source buffer and no data is
      * read
      * @throws IORuntimeException if an I/O error occurs
@@ -258,8 +258,9 @@ public class BufferKit {
     }
 
     /**
-     * Reads a specified length of data from the source buffer into the output channel, until the read number reaches
-     * the specified length or reaches the end of the source buffer, returns the actual number of bytes read to.
+     * Reads a specified length of data from the source buffer into the destination channel, until the read number
+     * reaches the specified length or reaches the end of the source buffer, returns the actual number of bytes read
+     * to.
      * <p>
      * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the source buffer
      * and no data is read, returns {@code -1}.
@@ -267,7 +268,7 @@ public class BufferKit {
      * The buffer's position increments by the actual read number.
      *
      * @param src the source buffer
-     * @param dst the output channel
+     * @param dst the destination channel
      * @param len the specified length, must {@code >= 0}
      * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source buffer and no data is
      * read
@@ -444,7 +445,7 @@ public class BufferKit {
     }
 
     /**
-     * Reads data from the source buffer into the specified array, until the read number reaches the array's length or
+     * Reads data from the source buffer into the destination array, until the read number reaches the array's length or
      * reaches the end of the source buffer, and returns the actual number of chars read to.
      * <p>
      * If the specified length is {@code 0}, returns {@code 0} without reading. If reaches the end of the source buffer
@@ -453,7 +454,7 @@ public class BufferKit {
      * The buffer's position increments by the actual read number.
      *
      * @param src the source buffer
-     * @param dst the specified array
+     * @param dst the destination array
      * @return the actual number of chars read to, or {@code -1} if reaches the end of the source buffer and no data is
      * read
      */
@@ -462,7 +463,7 @@ public class BufferKit {
     }
 
     /**
-     * Reads a specified length of data from the source buffer into the specified array, starting at the specified
+     * Reads a specified length of data from the source buffer into the destination array, starting at the specified
      * offset, until the read number reaches the specified length or reaches the end of the source buffer, and returns
      * the actual number of chars read to.
      * <p>
@@ -472,7 +473,7 @@ public class BufferKit {
      * The buffer's position increments by the actual read number.
      *
      * @param src the source buffer
-     * @param dst the specified array
+     * @param dst the destination array
      * @param off the specified offset of the array
      * @param len the specified length to read
      * @return the actual number of chars read to, or {@code -1} if reaches the end of the source buffer and no data is

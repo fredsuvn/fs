@@ -85,13 +85,13 @@ final class ByteReaderImpl {
     private static final class ByteStreamReader implements ByteReader {
 
         private final @Nonnull InputStream source;
-        private final @Nonnull ByteIO operator;
+        private final @Nonnull IOOperator operator;
 
         private long limit = -1;
 
         private ByteStreamReader(@Nonnull InputStream src, int bufSize) {
             this.source = src;
-            this.operator = ByteIO.get(bufSize);
+            this.operator = IOOperator.get(bufSize);
         }
 
         @Override
@@ -321,11 +321,11 @@ final class ByteReaderImpl {
     private static final class ByteChannelReader implements ByteReader {
 
         private final @Nonnull ReadableByteChannel source;
-        private final @Nonnull ByteIO operator;
+        private final @Nonnull IOOperator operator;
 
         private ByteChannelReader(@Nonnull ReadableByteChannel src, int bufSize) {
             this.source = src;
-            this.operator = ByteIO.get(bufSize);
+            this.operator = IOOperator.get(bufSize);
         }
 
         @Override

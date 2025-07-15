@@ -2,7 +2,7 @@ package test.io;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
-import xyz.sunqian.common.io.ByteIO;
+import xyz.sunqian.common.io.IOOperator;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.test.DataTest;
@@ -22,7 +22,7 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.expectThrows;
 
-public class ByteIOTest implements DataTest {
+public class IOOperatorTest implements DataTest {
 
     @Test
     public void testRead() throws Exception {
@@ -68,15 +68,15 @@ public class ByteIOTest implements DataTest {
     }
 
     private void testRead(int totalSize) throws Exception {
-        testRead(ByteIO.get(IOKit.bufferSize()), totalSize);
-        testRead(ByteIO.get(1), totalSize);
-        testRead(ByteIO.get(2), totalSize);
-        testRead(ByteIO.get(IOKit.bufferSize() - 1), totalSize);
-        testRead(ByteIO.get(IOKit.bufferSize() + 1), totalSize);
-        testRead(ByteIO.get(IOKit.bufferSize() * 2), totalSize);
+        testRead(IOOperator.get(IOKit.bufferSize()), totalSize);
+        testRead(IOOperator.get(1), totalSize);
+        testRead(IOOperator.get(2), totalSize);
+        testRead(IOOperator.get(IOKit.bufferSize() - 1), totalSize);
+        testRead(IOOperator.get(IOKit.bufferSize() + 1), totalSize);
+        testRead(IOOperator.get(IOKit.bufferSize() * 2), totalSize);
     }
 
-    private void testRead(ByteIO reader, int totalSize) throws Exception {
+    private void testRead(IOOperator reader, int totalSize) throws Exception {
         testRead(reader, totalSize, totalSize);
         testRead(reader, totalSize, 0);
         testRead(reader, totalSize, 1);
@@ -86,7 +86,7 @@ public class ByteIOTest implements DataTest {
         testRead(reader, totalSize, totalSize * 2);
     }
 
-    private void testRead(ByteIO reader, int totalSize, int readSize) throws Exception {
+    private void testRead(IOOperator reader, int totalSize, int readSize) throws Exception {
         {
             // stream
             byte[] data = randomBytes(totalSize);
@@ -409,15 +409,15 @@ public class ByteIOTest implements DataTest {
     }
 
     private void testReadTo(int totalSize) throws Exception {
-        testReadTo(ByteIO.get(IOKit.bufferSize()), totalSize);
-        testReadTo(ByteIO.get(1), totalSize);
-        testReadTo(ByteIO.get(2), totalSize);
-        testReadTo(ByteIO.get(IOKit.bufferSize() - 1), totalSize);
-        testReadTo(ByteIO.get(IOKit.bufferSize() + 1), totalSize);
-        testReadTo(ByteIO.get(IOKit.bufferSize() * 2), totalSize);
+        testReadTo(IOOperator.get(IOKit.bufferSize()), totalSize);
+        testReadTo(IOOperator.get(1), totalSize);
+        testReadTo(IOOperator.get(2), totalSize);
+        testReadTo(IOOperator.get(IOKit.bufferSize() - 1), totalSize);
+        testReadTo(IOOperator.get(IOKit.bufferSize() + 1), totalSize);
+        testReadTo(IOOperator.get(IOKit.bufferSize() * 2), totalSize);
     }
 
-    private void testReadTo(ByteIO reader, int totalSize) throws Exception {
+    private void testReadTo(IOOperator reader, int totalSize) throws Exception {
         testReadTo(reader, totalSize, totalSize);
         testReadTo(reader, totalSize, 0);
         testReadTo(reader, totalSize, 1);
@@ -427,7 +427,7 @@ public class ByteIOTest implements DataTest {
         testReadTo(reader, totalSize, totalSize * 2);
     }
 
-    private void testReadTo(ByteIO reader, int totalSize, int readSize) throws Exception {
+    private void testReadTo(IOOperator reader, int totalSize, int readSize) throws Exception {
         {
             // stream to stream
             byte[] data = randomBytes(totalSize);
@@ -802,13 +802,13 @@ public class ByteIOTest implements DataTest {
     public void testOther() {
         {
             // get operator
-            assertSame(ByteIO.defaultOperator(), ByteIO.get(IOKit.bufferSize()));
-            assertEquals(ByteIO.newOperator(666).bufferSize(), 666);
+            assertSame(IOOperator.defaultOperator(), IOOperator.get(IOKit.bufferSize()));
+            assertEquals(IOOperator.newOperator(666).bufferSize(), 666);
         }
         {
             // error
-            expectThrows(IllegalArgumentException.class, () -> ByteIO.newOperator(0));
-            expectThrows(IllegalArgumentException.class, () -> ByteIO.newOperator(-1));
+            expectThrows(IllegalArgumentException.class, () -> IOOperator.newOperator(0));
+            expectThrows(IllegalArgumentException.class, () -> IOOperator.newOperator(-1));
         }
     }
 }

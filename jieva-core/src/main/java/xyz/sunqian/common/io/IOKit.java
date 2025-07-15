@@ -20,17 +20,17 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 
 /**
- * Static utility class for I/O operations, some methods directly use the default implementation of {@link ByteIO} and
+ * Static utility class for I/O operations, some methods directly use the default implementation of {@link IOOperator} and
  * {@link CharIO}.
  *
  * @author sunqian
  */
 public class IOKit {
 
-    private static final @Nonnull ByteIO bo = ByteIO.newOperator(bufferSize());
+    private static final @Nonnull IOOperator bo = IOOperator.newOperator(bufferSize());
     private static final @Nonnull CharIO co = CharIO.newOperator(bufferSize());
 
-    static @Nonnull ByteIO defaultByteOperator() {
+    static @Nonnull IOOperator defaultByteOperator() {
         return bo;
     }
 
