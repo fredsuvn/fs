@@ -343,34 +343,34 @@ public class IOUnsafe {
     // }
 
 
-    /**
-     * Reads the data from the source buffer into the specified array (starting at the specified offset and up to the
-     * specified length), until the read number reaches the specified length or reaches the end of the source buffer,
-     * returns the actual number of bytes read to.
-     * <p>
-     * If the specified length is {@code 0}, returns {@code 0} without reading. If the end of the source buffer is
-     * reached and no data is read, returns {@code -1}.
-     * <p>
-     * The buffer's position increments by the actual read number.
-     * <p>
-     * Note this method do not validate the passed arguments, wrong arguments may cause the undefined behavior.
-     *
-     * @param src the source buffer
-     * @param dst the specified array
-     * @param off the specified offset of the array
-     * @param len the specified length to read
-     * @return the actual number of bytes read to, or {@code -1} if the end of the source buffer is reached and no data
-     * is read
-     */
-    public static int readTo(@Nonnull ByteBuffer src, byte @Nonnull [] dst, int off, int len) {
-        if (len == 0) {
-            return 0;
-        }
-        if (!src.hasRemaining()) {
-            return -1;
-        }
-        int actualLen = Math.min(len, src.remaining());
-        src.get(dst, off, actualLen);
-        return actualLen;
-    }
+    // /**
+    //  * Reads the data from the source buffer into the specified array (starting at the specified offset and up to the
+    //  * specified length), until the read number reaches the specified length or reaches the end of the source buffer,
+    //  * returns the actual number of bytes read to.
+    //  * <p>
+    //  * If the specified length is {@code 0}, returns {@code 0} without reading. If the end of the source buffer is
+    //  * reached and no data is read, returns {@code -1}.
+    //  * <p>
+    //  * The buffer's position increments by the actual read number.
+    //  * <p>
+    //  * Note this method do not validate the passed arguments, wrong arguments may cause the undefined behavior.
+    //  *
+    //  * @param src the source buffer
+    //  * @param dst the specified array
+    //  * @param off the specified offset of the array
+    //  * @param len the specified length to read
+    //  * @return the actual number of bytes read to, or {@code -1} if the end of the source buffer is reached and no data
+    //  * is read
+    //  */
+    // public static int readTo(@Nonnull ByteBuffer src, byte @Nonnull [] dst, int off, int len) {
+    //     if (len == 0) {
+    //         return 0;
+    //     }
+    //     if (!src.hasRemaining()) {
+    //         return -1;
+    //     }
+    //     int actualLen = Math.min(len, src.remaining());
+    //     src.get(dst, off, actualLen);
+    //     return actualLen;
+    // }
 }

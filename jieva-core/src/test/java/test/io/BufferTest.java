@@ -46,23 +46,23 @@ public class BufferTest implements DataTest {
             // direct
             char[] chars = randomChars(128);
             CharBuffer heapBuffer = CharBuffer.wrap(chars);
-            CharBuffer directBuffer = BufferKit.directBuffer(chars.length);
+            CharBuffer directBuffer = BufferKit.directCharBuffer(chars.length);
             directBuffer.put(chars);
             directBuffer.flip();
             assertEquals(directBuffer, heapBuffer);
             assertTrue(directBuffer.isDirect());
-            expectThrows(IllegalArgumentException.class, () -> BufferKit.directBuffer(-1));
+            expectThrows(IllegalArgumentException.class, () -> BufferKit.directCharBuffer(-1));
         }
         {
             // byte
             byte[] data = randomBytes(128);
-            ByteBuffer buffer = BufferKit.directBuffer(data);
+            ByteBuffer buffer = BufferKit.copyDirect(data);
             assertEquals(buffer, ByteBuffer.wrap(data));
             assertEquals(buffer.position(), 0);
             assertEquals(buffer.limit(), data.length);
             assertEquals(buffer.capacity(), data.length);
             assertTrue(buffer.isDirect());
-            buffer = BufferKit.directBuffer(data, 6, 66);
+            buffer = BufferKit.copyDirect(data, 6, 66);
             assertEquals(buffer, ByteBuffer.wrap(data, 6, 66));
             assertEquals(buffer.position(), 0);
             assertEquals(buffer.limit(), 66);
@@ -72,13 +72,13 @@ public class BufferTest implements DataTest {
         {
             // char
             char[] data = randomChars(128);
-            CharBuffer buffer = BufferKit.directBuffer(data);
+            CharBuffer buffer = BufferKit.copyDirect(data);
             assertEquals(buffer, CharBuffer.wrap(data));
             assertEquals(buffer.position(), 0);
             assertEquals(buffer.limit(), data.length);
             assertEquals(buffer.capacity(), data.length);
             assertTrue(buffer.isDirect());
-            buffer = BufferKit.directBuffer(data, 6, 66);
+            buffer = BufferKit.copyDirect(data, 6, 66);
             assertEquals(buffer, CharBuffer.wrap(data, 6, 66));
             assertEquals(buffer.position(), 0);
             assertEquals(buffer.limit(), 66);
@@ -97,7 +97,7 @@ public class BufferTest implements DataTest {
             ByteBuffer b2 = BufferKit.copy(b1);
             assertEquals(b2, b1);
             assertFalse(b2.isDirect());
-            ByteBuffer b3 = BufferKit.directBuffer(data);
+            ByteBuffer b3 = BufferKit.copyDirect(data);
             b3.get(new byte[5]);
             ByteBuffer b4 = BufferKit.copy(b3);
             assertEquals(b4, b3);
@@ -115,7 +115,7 @@ public class BufferTest implements DataTest {
             CharBuffer b2 = BufferKit.copy(b1);
             assertEquals(b2, b1);
             assertFalse(b2.isDirect());
-            CharBuffer b3 = BufferKit.directBuffer(data.length);
+            CharBuffer b3 = BufferKit.directCharBuffer(data.length);
             b3.put(data);
             b3.flip();
             b3.get(new char[5]);
@@ -284,6 +284,8 @@ public class BufferTest implements DataTest {
             expectThrows(IllegalArgumentException.class, () ->
                 BufferKit.readTo(ByteBuffer.allocate(1), Channels.newChannel(new ByteArrayOutputStream()), -1));
             expectThrows(IORuntimeException.class, () ->
+                BufferKit.readTo(ByteBuffer.allocate(1), Channels.newChannel(new ErrorOutputStream()), 11));
+            expectThrows(IORuntimeException.class, () ->
                 BufferKit.readTo(ByteBuffer.allocate(1), new ErrorOutputStream()));
             expectThrows(IllegalArgumentException.class, () ->
                 BufferKit.readTo(ByteBuffer.allocate(1), new ByteArrayOutputStream(), -1));
@@ -397,7 +399,7 @@ public class BufferTest implements DataTest {
             // direct buffer to stream
             byte[] data = randomBytes(totalSize);
             BytesBuilder builder = new BytesBuilder();
-            ByteBuffer src = BufferKit.directBuffer(data);
+            ByteBuffer src = BufferKit.copyDirect(data);
             assertEquals(BufferKit.readTo(src, builder), totalSize == 0 ? -1 : totalSize);
             assertEquals(builder.toByteArray(), data);
             assertEquals(src.position(), src.limit());
@@ -528,7 +530,7 @@ public class BufferTest implements DataTest {
             // direct buffer to appender
             char[] data = randomChars(totalSize);
             CharsBuilder builder = new CharsBuilder();
-            CharBuffer src = BufferKit.directBuffer(data);
+            CharBuffer src = BufferKit.copyDirect(data);
             assertEquals(BufferKit.readTo(src, builder), totalSize == 0 ? -1 : totalSize);
             assertEquals(builder.toCharArray(), data);
             assertEquals(src.position(), src.limit());

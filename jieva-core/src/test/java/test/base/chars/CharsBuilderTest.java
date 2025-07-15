@@ -106,12 +106,12 @@ public class CharsBuilderTest implements DataTest, AssertTest {
         assertEquals(bb.toCharArray(), Arrays.copyOf(bs, 50));
         bb.append(IOKit.newReader(Arrays.copyOfRange(bs, 50, 60)), 1);
         assertEquals(bb.toCharArray(), Arrays.copyOf(bs, 60));
-        CharBuffer buffer2 = BufferKit.directBuffer(10);
+        CharBuffer buffer2 = BufferKit.directCharBuffer(10);
         buffer2.put(CharBuffer.wrap(Arrays.copyOfRange(bs, 60, 70)));
         buffer2.flip();
         bb.append(buffer2);
         assertEquals(bb.toCharArray(), Arrays.copyOf(bs, 70));
-        bb.append(BufferKit.directBuffer(0));
+        bb.append(BufferKit.directCharBuffer(0));
         assertEquals(bb.toCharArray(), Arrays.copyOf(bs, 70));
         assertEquals(buffer2.position(), 10);
         assertFalse(buffer2.hasRemaining());

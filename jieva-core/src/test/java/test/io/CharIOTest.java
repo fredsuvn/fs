@@ -194,14 +194,14 @@ public class CharIOTest implements DataTest {
         {
             // size 0: reader to direct buffer
             char[] data = new char[0];
-            CharBuffer buf = BufferKit.directBuffer(1);
+            CharBuffer buf = BufferKit.directCharBuffer(1);
             assertEquals(
                 IOKit.readTo(new CharArrayReader(data), buf),
                 -1
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                IOKit.readTo(new CharArrayReader(data), BufferKit.directBuffer(0)),
+                IOKit.readTo(new CharArrayReader(data), BufferKit.directCharBuffer(0)),
                 0
             );
             assertEquals(buf.position(), 0);
@@ -365,13 +365,13 @@ public class CharIOTest implements DataTest {
         {
             // reader to direct buffer
             char[] data = randomChars(totalSize);
-            CharBuffer dst = BufferKit.directBuffer(data.length * 2);
+            CharBuffer dst = BufferKit.directCharBuffer(data.length * 2);
             assertEquals(
                 reader.readTo(new CharArrayReader(data), dst),
                 totalSize
             );
             assertEquals(dst.flip(), CharBuffer.wrap(data));
-            dst = BufferKit.directBuffer(data.length * 2);
+            dst = BufferKit.directCharBuffer(data.length * 2);
             assertEquals(
                 reader.readTo(new CharArrayReader(data), dst, readSize < 0 ? totalSize : readSize),
                 actualReadSize(totalSize, readSize)

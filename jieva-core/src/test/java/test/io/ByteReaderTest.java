@@ -270,7 +270,7 @@ public class ByteReaderTest implements DataTest {
         {
             // byte buffer
             testReadTo0(() -> ByteReader.from(ByteBuffer.wrap(data)), data, readSize);
-            testReadTo0(() -> ByteReader.from(BufferKit.directBuffer(data)), data, readSize);
+            testReadTo0(() -> ByteReader.from(BufferKit.copyDirect(data)), data, readSize);
         }
         {
             // limited
@@ -657,7 +657,7 @@ public class ByteReaderTest implements DataTest {
                 ByteBuffer.wrap(data, 0, limitSize),
                 true, true
             );
-            ByteBuffer direct = BufferKit.directBuffer(data);
+            ByteBuffer direct = BufferKit.copyDirect(data);
             testShare(ByteReader.from(direct), direct.slice(), true, true);
             direct.clear();
             testShare(

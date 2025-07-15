@@ -49,14 +49,16 @@ public class BufferKit {
     }
 
     /**
-     * Reads all data from the source buffer into a new array, continuing until reaches the end of the buffer, and
-     * returns the array. If the end of the source buffer is reached and no data is read, returns {@code null}.
+     * Reads all data from the source buffer into a new array, continuing until reaches the end of the source buffer,
+     * and returns the array.
+     * <p>
+     * If reaches the end of the source buffer and no data is read, returns {@code null}.
      * <p>
      * The buffer's position increments by the actual read number.
      *
      * @param src the source buffer
-     * @return a new array containing the read data, or {@code null} if the end of the source buffer is reached and no
-     * data is read
+     * @return a new array containing the read data, or {@code null} if reaches the end of the source buffer and no data
+     * is read
      */
     public static byte @Nullable [] read(@Nonnull ByteBuffer src) {
         int len = src.remaining();
@@ -69,17 +71,18 @@ public class BufferKit {
     }
 
     /**
-     * Reads the data of the specified length from the source buffer into a new array, and returns the array. If the
-     * specified length {@code = 0}, returns an empty array without reading. Otherwise, this method keeps reading until
-     * the read number reaches the specified length or reaches the end of the buffer. If the end of the source buffer is
-     * reached and no data is read, returns {@code null}.
+     * Reads a specified length of data from the source buffer into a new array, and returns the array. If the specified
+     * length is {@code 0}, returns an empty array without reading. Otherwise, this method keeps reading until the read
+     * number reaches the specified length or reaches the end of the source buffer.
+     * <p>
+     * If reaches the end of the source buffer and no data is read, returns {@code null}.
      * <p>
      * The buffer's position increments by the actual read number.
      *
      * @param src the source buffer
      * @param len the specified read length, must {@code >= 0}
-     * @return a new array containing the read data, or {@code null} if the end of the source buffer is reached and no
-     * data is read
+     * @return a new array containing the read data, or {@code null} if reaches the end of the source buffer and no data
+     * is read
      * @throws IllegalArgumentException if the specified read length is illegal
      */
     public static byte @Nullable [] read(@Nonnull ByteBuffer src, int len) throws IllegalArgumentException {
@@ -97,30 +100,30 @@ public class BufferKit {
     }
 
     /**
-     * Reads the data from the source buffer into the specified array, until the read number reaches the array's length
-     * or reaches the end of the source buffer, returns the actual number of bytes read to.
+     * Reads data from the source buffer into the specified array, until the read number reaches the array's length or
+     * reaches the end of the source buffer, and returns the actual number of bytes read to.
      * <p>
-     * If the specified length is {@code 0}, returns {@code 0} without reading. If the end of the source buffer is
-     * reached and no data is read, returns {@code -1}.
+     * If the specified length is {@code 0}, returns {@code 0} without reading. If reaches the end of the source buffer
+     * and no data is read, returns {@code -1}.
      * <p>
      * The buffer's position increments by the actual read number.
      *
      * @param src the source buffer
      * @param dst the specified array
-     * @return the actual number of bytes read to, or {@code -1} if the end of the source buffer is reached and no data
-     * is read
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source buffer and no data is
+     * read
      */
     public static int readTo(@Nonnull ByteBuffer src, byte @Nonnull [] dst) {
-        return IOUnsafe.readTo(src, dst, 0, dst.length);
+        return readTo0(src, dst, 0, dst.length);
     }
 
     /**
-     * Reads the data from the source buffer into the specified array (starting at the specified offset and up to the
-     * specified length), until the read number reaches the specified length or reaches the end of the source buffer,
-     * returns the actual number of bytes read to.
+     * Reads a specified length of data from the source buffer into the specified array, starting at the specified
+     * offset, until the read number reaches the specified length or reaches the end of the source buffer, and returns
+     * the actual number of bytes read to.
      * <p>
-     * If the specified length is {@code 0}, returns {@code 0} without reading. If the end of the source buffer is
-     * reached and no data is read, returns {@code -1}.
+     * If the specified length is {@code 0}, returns {@code 0} without reading. If reaches the end of the source buffer
+     * and no data is read, returns {@code -1}.
      * <p>
      * The buffer's position increments by the actual read number.
      *
@@ -128,29 +131,30 @@ public class BufferKit {
      * @param dst the specified array
      * @param off the specified offset of the array
      * @param len the specified length to read
-     * @return the actual number of bytes read to, or {@code -1} if the end of the source buffer is reached and no data
-     * is read
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source buffer and no data is
+     * read
      * @throws IndexOutOfBoundsException if the arguments are out of bounds
      */
     public static int readTo(
         @Nonnull ByteBuffer src, byte @Nonnull [] dst, int off, int len
     ) throws IndexOutOfBoundsException {
         IOChecker.checkOffLen(dst.length, off, len);
-        return IOUnsafe.readTo(src, dst, off, len);
+        return readTo0(src, dst, off, len);
     }
 
     /**
-     * Reads the data from the source buffer into the specified buffer, until the read number reaches the buffer's
-     * remaining or reaches the end of the source buffer, returns the actual number of bytes read to.
+     * Reads data from the source buffer into the destination buffer, until reaches the end of any buffer, and returns
+     * the actual number of bytes read to.
      * <p>
-     * If the buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the source buffer has
-     * already been reached, returns {@code -1}.
+     * If the destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if reaches the end of the
+     * source buffer and no data is read, returns {@code -1}.
      * <p>
-     * The buffer's positions increments by the actual read number.
+     * The both buffers' positions increments by the actual read number.
      *
      * @param src the source buffer
-     * @param dst the specified buffer
-     * @return the actual number of bytes read
+     * @param dst the destination buffer
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source buffer and no data is
+     * read
      * @throws IORuntimeException if an I/O error occurs
      */
     public static int readTo(@Nonnull ByteBuffer src, @Nonnull ByteBuffer dst) throws IORuntimeException {
@@ -176,19 +180,19 @@ public class BufferKit {
     }
 
     /**
-     * Reads the data of the specified length from the source buffer into the specified buffer, until the read number
-     * reaches the buffer's remaining or reaches the end of the source buffer, returns the actual number of bytes read
-     * to.
+     * Reads a specified length of data from the source buffer into the destination buffer, until the read number
+     * reaches the specified length or reaches the end of any buffer, and returns the actual number of bytes read to.
      * <p>
-     * If the specified length or buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the
-     * source buffer has already been reached, returns {@code -1}.
+     * If the specified length or destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if
+     * reaches the end of the source buffer and no data is read, returns {@code -1}.
      * <p>
-     * The buffer's positions increments by the actual read number.
+     * The both buffers' positions increments by the actual read number.
      *
      * @param src the source buffer
      * @param dst the specified buffer
      * @param len the specified length, must {@code >= 0}
-     * @return the actual number of bytes read
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source buffer and no data is
+     * read
      * @throws IllegalArgumentException if the specified read length is illegal
      * @throws IORuntimeException       if an I/O error occurs
      */
@@ -225,37 +229,48 @@ public class BufferKit {
     }
 
     /**
-     * Reads the data from the source buffer into the specified channel, until the read number reaches the buffer's
-     * remaining or reaches the end of the source buffer, returns the actual number of bytes read to.
+     * Reads data from the source buffer into the output channel, until reaches the end of the source buffer, and
+     * returns the actual number of bytes read to.
      * <p>
-     * If the buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the source buffer has
-     * already been reached, returns {@code -1}.
+     * If reaches the end of the source buffer and no data is read, returns {@code -1}.
      * <p>
      * The buffer's position increments by the actual read number.
      *
      * @param src the source buffer
-     * @param dst the specified channel
-     * @return the actual number of bytes read
+     * @param dst the output channel
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source buffer and no data is
+     * read
      * @throws IORuntimeException if an I/O error occurs
      */
     public static int readTo(@Nonnull ByteBuffer src, @Nonnull WritableByteChannel dst) throws IORuntimeException {
-        return readTo0(src, dst, -1);
+        if (src.remaining() == 0) {
+            return -1;
+        }
+        try {
+            int actualLen = src.remaining();
+            while (src.remaining() > 0) {
+                dst.write(src);
+            }
+            return actualLen;
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
     }
 
     /**
-     * Reads the data of the specified length from the source buffer into the specified channel, until the read number
-     * reaches the buffer's remaining or reaches the end of the source buffer, returns the actual number of bytes read
-     * to.
+     * Reads a specified length of data from the source buffer into the output channel, until the read number reaches
+     * the specified length or reaches the end of the source buffer, returns the actual number of bytes read to.
      * <p>
-     * If the specified length or buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the
-     * source buffer has already been reached, returns {@code -1}.
+     * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the source buffer
+     * and no data is read, returns {@code -1}.
      * <p>
      * The buffer's position increments by the actual read number.
      *
      * @param src the source buffer
-     * @param dst the specified channel
+     * @param dst the output channel
      * @param len the specified length, must {@code >= 0}
-     * @return the actual number of bytes read
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source buffer and no data is
+     * read
      * @throws IllegalArgumentException if the specified read length is illegal
      * @throws IORuntimeException       if an I/O error occurs
      */
@@ -266,7 +281,61 @@ public class BufferKit {
         return readTo0(src, dst, len);
     }
 
-    private static int readTo0(
+    /**
+     * Reads data from the source buffer into the output stream, until reaches the end of the source buffer, and returns
+     * the actual number of bytes read to.
+     * <p>
+     * If reaches the end of the source buffer and no data is read, returns {@code -1}.
+     * <p>
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the output stream
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source buffer and no data is
+     * read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static int readTo(@Nonnull ByteBuffer src, @Nonnull OutputStream dst) throws IORuntimeException {
+        return readTo0(src, dst, -1);
+    }
+
+    /**
+     * Reads a specified length of data from the source buffer into the output stream, until the read number reaches the
+     * specified length or reaches the end of the source buffer, returns the actual number of bytes read to.
+     * <p>
+     * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the source buffer
+     * and no data is read, returns {@code -1}.
+     * <p>
+     * The buffer's position increments by the actual read number.
+     *
+     * @param src the source buffer
+     * @param dst the output stream
+     * @param len the specified length, must {@code >= 0}
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source buffer and no data is
+     * read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static int readTo(
+        @Nonnull ByteBuffer src, @Nonnull OutputStream dst, int len
+    ) throws IllegalArgumentException, IORuntimeException {
+        IOChecker.checkLen(len);
+        return readTo0(src, dst, len);
+    }
+
+    static int readTo0(@Nonnull ByteBuffer src, byte @Nonnull [] dst, int off, int len) {
+        if (len == 0) {
+            return 0;
+        }
+        if (!src.hasRemaining()) {
+            return -1;
+        }
+        int actualLen = Math.min(len, src.remaining());
+        src.get(dst, off, actualLen);
+        return actualLen;
+    }
+
+    static int readTo0(
         @Nonnull ByteBuffer src, @Nonnull WritableByteChannel dst, int len
     ) throws IORuntimeException {
         if (len == 0) {
@@ -276,7 +345,7 @@ public class BufferKit {
             return -1;
         }
         try {
-            int actualLen = len < 0 ? src.remaining() : Math.min(src.remaining(), len);
+            int actualLen = Math.min(src.remaining(), len);
             int oldLimit = src.limit();
             src.limit(src.position() + actualLen);
             while (src.remaining() > 0) {
@@ -289,49 +358,7 @@ public class BufferKit {
         }
     }
 
-    /**
-     * Reads the data from the source buffer into the specified stream, until the read number reaches the buffer's
-     * remaining or reaches the end of the source buffer, returns the actual number of bytes read to.
-     * <p>
-     * If the buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the source buffer has
-     * already been reached, returns {@code -1}.
-     * <p>
-     * The buffer's position increments by the actual read number.
-     *
-     * @param src the source buffer
-     * @param dst the specified stream
-     * @return the actual number of bytes read
-     * @throws IORuntimeException if an I/O error occurs
-     */
-    public static int readTo(@Nonnull ByteBuffer src, @Nonnull OutputStream dst) throws IORuntimeException {
-        return readTo0(src, dst, -1);
-    }
-
-    /**
-     * Reads the data of the specified length from the source buffer into the specified stream, until the read number
-     * reaches the buffer's remaining or reaches the end of the source buffer, returns the actual number of bytes read
-     * to.
-     * <p>
-     * If the specified length or buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the
-     * source buffer has already been reached, returns {@code -1}.
-     * <p>
-     * The buffer's position increments by the actual read number.
-     *
-     * @param src the source buffer
-     * @param dst the specified stream
-     * @param len the specified length, must {@code >= 0}
-     * @return the actual number of bytes read
-     * @throws IllegalArgumentException if the specified read length is illegal
-     * @throws IORuntimeException       if an I/O error occurs
-     */
-    public static int readTo(
-        @Nonnull ByteBuffer src, @Nonnull OutputStream dst, int len
-    ) throws IllegalArgumentException, IORuntimeException {
-        IOChecker.checkLen(len);
-        return readTo0(src, dst, len);
-    }
-
-    private static int readTo0(
+    static int readTo0(
         @Nonnull ByteBuffer src, @Nonnull OutputStream dst, int len
     ) throws IORuntimeException {
         if (len == 0) {
@@ -357,13 +384,16 @@ public class BufferKit {
     }
 
     /**
-     * Reads all data from the source buffer into a new array, continuing until reaches the end of the buffer, and
-     * returns the array. If the end of the source buffer has already been reached, returns {@code null}.
+     * Reads all data from the source buffer into a new array, continuing until reaches the end of the source buffer,
+     * and returns the array.
+     * <p>
+     * If reaches the end of the source buffer and no data is read, returns {@code null}.
      * <p>
      * The buffer's position increments by the actual read number.
      *
      * @param src the source buffer
-     * @return the array containing the data
+     * @return a new array containing the read data, or {@code null} if reaches the end of the source buffer and no data
+     * is read
      */
     public static char @Nullable [] read(@Nonnull CharBuffer src) {
         int len = src.remaining();
@@ -376,16 +406,18 @@ public class BufferKit {
     }
 
     /**
-     * Reads the data of the specified length from the source buffer into a new array, and returns the array. If the
-     * specified length {@code = 0}, returns an empty array without reading. Otherwise, this method keeps reading until
-     * the read number reaches the specified length or reaches the end of the buffer. If the end of the source buffer
-     * has already been reached, returns {@code null}.
+     * Reads a specified length of data from the source buffer into a new array, and returns the array. If the specified
+     * length is {@code 0}, returns an empty array without reading. Otherwise, this method keeps reading until the read
+     * number reaches the specified length or reaches the end of the source buffer.
+     * <p>
+     * If reaches the end of the source buffer and no data is read, returns {@code null}.
      * <p>
      * The buffer's position increments by the actual read number.
      *
      * @param src the source buffer
      * @param len the specified read length, must {@code >= 0}
-     * @return the array containing the data
+     * @return a new array containing the read data, or {@code null} if reaches the end of the source buffer and no data
+     * is read
      * @throws IllegalArgumentException if the specified read length is illegal
      */
     public static char @Nullable [] read(@Nonnull CharBuffer src, int len) throws IllegalArgumentException {
@@ -403,29 +435,30 @@ public class BufferKit {
     }
 
     /**
-     * Reads the data from the source buffer into the specified array, until the read number reaches the array's length
-     * or reaches the end of the source buffer, returns the actual number of chars read to.
+     * Reads data from the source buffer into the specified array, until the read number reaches the array's length or
+     * reaches the end of the source buffer, and returns the actual number of chars read to.
      * <p>
-     * If the array's length {@code = 0}, returns {@code 0} without reading. If the end of the source buffer has already
-     * been reached, returns {@code -1}.
+     * If the specified length is {@code 0}, returns {@code 0} without reading. If reaches the end of the source buffer
+     * and no data is read, returns {@code -1}.
      * <p>
      * The buffer's position increments by the actual read number.
      *
      * @param src the source buffer
      * @param dst the specified array
-     * @return the actual number of chars read
+     * @return the actual number of chars read to, or {@code -1} if reaches the end of the source buffer and no data is
+     * read
      */
     public static int readTo(@Nonnull CharBuffer src, char @Nonnull [] dst) {
         return readTo0(src, dst, 0, dst.length);
     }
 
     /**
-     * Reads the data from the source buffer into the specified array (starting at the specified offset and up to the
-     * specified length), until the read number reaches the specified length or reaches the end of the source buffer,
-     * returns the actual number of chars read to.
+     * Reads a specified length of data from the source buffer into the specified array, starting at the specified
+     * offset, until the read number reaches the specified length or reaches the end of the source buffer, and returns
+     * the actual number of chars read to.
      * <p>
-     * If the specified length {@code = 0}, returns {@code 0} without reading. If the end of the source buffer has
-     * already been reached, returns {@code -1}.
+     * If the specified length is {@code 0}, returns {@code 0} without reading. If reaches the end of the source buffer
+     * and no data is read, returns {@code -1}.
      * <p>
      * The buffer's position increments by the actual read number.
      *
@@ -433,8 +466,9 @@ public class BufferKit {
      * @param dst the specified array
      * @param off the specified offset of the array
      * @param len the specified length to read
-     * @return the actual number of chars read
-     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
+     * @return the actual number of chars read to, or {@code -1} if reaches the end of the source buffer and no data is
+     * read
+     * @throws IndexOutOfBoundsException if the arguments are out of bounds
      */
     public static int readTo(
         @Nonnull CharBuffer src, char @Nonnull [] dst, int off, int len
@@ -443,32 +477,19 @@ public class BufferKit {
         return readTo0(src, dst, off, len);
     }
 
-    private static int readTo0(
-        @Nonnull CharBuffer src, char @Nonnull [] dst, int off, int len
-    ) {
-        if (len == 0) {
-            return 0;
-        }
-        if (!src.hasRemaining()) {
-            return -1;
-        }
-        int actualLen = Math.min(len, src.remaining());
-        src.get(dst, off, actualLen);
-        return actualLen;
-    }
-
     /**
-     * Reads the data from the source buffer into the specified buffer, until the read number reaches the buffer's
-     * remaining or reaches the end of the source buffer, returns the actual number of chars read to.
+     * Reads data from the source buffer into the destination buffer, until reaches the end of any buffer, and returns
+     * the actual number of chars read to.
      * <p>
-     * If the buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the source buffer has
-     * already been reached, returns {@code -1}.
+     * If the destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if reaches the end of the
+     * source buffer and no data is read, returns {@code -1}.
      * <p>
-     * The buffer's positions increments by the actual read number.
+     * The both buffers' positions increments by the actual read number.
      *
      * @param src the source buffer
-     * @param dst the specified buffer
-     * @return the actual number of chars read
+     * @param dst the destination buffer
+     * @return the actual number of chars read to, or {@code -1} if reaches the end of the source buffer and no data is
+     * read
      * @throws IORuntimeException if an I/O error occurs
      */
     public static int readTo(@Nonnull CharBuffer src, @Nonnull CharBuffer dst) throws IORuntimeException {
@@ -494,19 +515,19 @@ public class BufferKit {
     }
 
     /**
-     * Reads the data of the specified length from the source buffer into the specified buffer, until the read number
-     * reaches the buffer's remaining or reaches the end of the source buffer, returns the actual number of chars read
-     * to.
+     * Reads a specified length of data from the source buffer into the destination buffer, until the read number
+     * reaches the specified length or reaches the end of any buffer, and returns the actual number of chars read to.
      * <p>
-     * If the specified length or buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the
-     * source buffer has already been reached, returns {@code -1}.
+     * If the specified length or destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if
+     * reaches the end of the source buffer and no data is read, returns {@code -1}.
      * <p>
-     * The buffer's positions increments by the actual read number.
+     * The both buffers' positions increments by the actual read number.
      *
      * @param src the source buffer
      * @param dst the specified buffer
      * @param len the specified length, must {@code >= 0}
-     * @return the actual number of chars read
+     * @return the actual number of chars read to, or {@code -1} if reaches the end of the source buffer and no data is
+     * read
      * @throws IllegalArgumentException if the specified read length is illegal
      * @throws IORuntimeException       if an I/O error occurs
      */
@@ -543,17 +564,17 @@ public class BufferKit {
     }
 
     /**
-     * Reads the data from the source buffer into the specified appender, until the read number reaches the buffer's
-     * remaining or reaches the end of the source buffer, returns the actual number of chars read to.
+     * Reads data from the source buffer into the output appender, until reaches the end of the source buffer, and
+     * returns the actual number of bytes read to.
      * <p>
-     * If the buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the source buffer has
-     * already been reached, returns {@code -1}.
+     * If reaches the end of the source buffer and no data is read, returns {@code -1}.
      * <p>
      * The buffer's position increments by the actual read number.
      *
      * @param src the source buffer
-     * @param dst the specified appender
-     * @return the actual number of chars read
+     * @param dst the output appender
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source buffer and no data is
+     * read
      * @throws IORuntimeException if an I/O error occurs
      */
     public static int readTo(@Nonnull CharBuffer src, @Nonnull Appendable dst) throws IORuntimeException {
@@ -561,19 +582,19 @@ public class BufferKit {
     }
 
     /**
-     * Reads the data of the specified length from the source buffer into the specified appender, until the read number
-     * reaches the buffer's remaining or reaches the end of the source buffer, returns the actual number of chars read
-     * to.
+     * Reads a specified length of data from the source buffer into the output appender, until the read number reaches
+     * the specified length or reaches the end of the source buffer, returns the actual number of bytes read to.
      * <p>
-     * If the specified length or buffer's remaining {@code = 0}, returns {@code 0} without reading; if the end of the
-     * source buffer has already been reached, returns {@code -1}.
+     * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the source buffer
+     * and no data is read, returns {@code -1}.
      * <p>
      * The buffer's position increments by the actual read number.
      *
      * @param src the source buffer
-     * @param dst the specified appender
+     * @param dst the output appender
      * @param len the specified length, must {@code >= 0}
-     * @return the actual number of chars read
+     * @return the actual number of bytes read to, or {@code -1} if reaches the end of the source buffer and no data is
+     * read
      * @throws IllegalArgumentException if the specified read length is illegal
      * @throws IORuntimeException       if an I/O error occurs
      */
@@ -584,7 +605,21 @@ public class BufferKit {
         return readTo0(src, dst, len);
     }
 
-    private static int readTo0(
+    static int readTo0(
+        @Nonnull CharBuffer src, char @Nonnull [] dst, int off, int len
+    ) {
+        if (len == 0) {
+            return 0;
+        }
+        if (!src.hasRemaining()) {
+            return -1;
+        }
+        int actualLen = Math.min(len, src.remaining());
+        src.get(dst, off, actualLen);
+        return actualLen;
+    }
+
+    static int readTo0(
         @Nonnull CharBuffer src, @Nonnull Appendable dst, int len
     ) throws IORuntimeException {
         if (len == 0) {
@@ -604,13 +639,16 @@ public class BufferKit {
     }
 
     /**
-     * Reads all data from the source buffer into a new string, continuing until reaches the end of the buffer, and
-     * returns the string. If the end of the source buffer has already been reached, returns {@code null}.
+     * Reads all data from the source buffer as a string, continuing until reaches the end of the source buffer, and
+     * returns the string.
+     * <p>
+     * If reaches the end of the source buffer and no data is read, returns {@code null}.
      * <p>
      * The buffer's position increments by the actual read number.
      *
      * @param src the source buffer
-     * @return the string containing the data
+     * @return a string represents the read data, or {@code null} if reaches the end of the source buffer and no data is
+     * read
      */
     public static @Nullable String string(@Nonnull CharBuffer src) {
         char[] chars = read(src);
@@ -618,47 +656,53 @@ public class BufferKit {
     }
 
     /**
-     * Reads the data of the specified length from the source buffer into a new string, and returns the string. If the
-     * specified length {@code = 0}, returns an empty array without reading. Otherwise, this method keeps reading until
-     * the read number reaches the specified length or reaches the end of the buffer. If the end of the source buffer
-     * has already been reached, returns {@code null}.
+     * Reads a specified length of data from the source buffer as a string, and returns the string. If the specified
+     * length is {@code 0}, returns an empty string without reading. Otherwise, this method keeps reading until the read
+     * number reaches the specified length or reaches the end of the source buffer.
+     * <p>
+     * If reaches the end of the source buffer and no data is read, returns {@code null}.
      * <p>
      * The buffer's position increments by the actual read number.
      *
      * @param src the source buffer
      * @param len the specified read length, must {@code >= 0}
-     * @return the string containing the data
+     * @return a string represents the read data, or {@code null} if reaches the end of the source buffer and no data is
+     * read
      * @throws IllegalArgumentException if the specified read length is illegal
      */
-    public static @Nullable String string(@Nonnull CharBuffer src, int len) {
+    public static @Nullable String string(@Nonnull CharBuffer src, int len) throws IllegalArgumentException {
         char[] chars = read(src, len);
         return chars == null ? null : new String(chars);
     }
 
     /**
-     * Reads all data from the source buffer into a new string with the {@link CharsKit#defaultCharset()}, continuing
-     * until reaches the end of the buffer, and returns the string. If the end of the source buffer has already been
-     * reached, returns {@code null}.
+     * Reads all data from the source buffer as a string with {@link CharsKit#defaultCharset()}, continuing until
+     * reaches the end of the source buffer, and returns the string.
+     * <p>
+     * If reaches the end of the source buffer and no data is read, returns {@code null}.
      * <p>
      * The buffer's position increments by the actual read number.
      *
      * @param src the source buffer
-     * @return the string containing the data
+     * @return a string represents the read data, with {@link CharsKit#defaultCharset()}, or {@code null} if reaches the
+     * end of the source buffer and no data is read
      */
     public static @Nullable String string(@Nonnull ByteBuffer src) {
         return string(src, CharsKit.defaultCharset());
     }
 
     /**
-     * Reads all data from the source buffer into a new string with the specified charset, continuing until reaches the
-     * end of the buffer, and returns the string. If the end of the source buffer has already been reached, returns
-     * {@code null}.
+     * Reads all data from the source buffer as a string with the specified charset, continuing until reaches the end of
+     * the source buffer, and returns the string.
+     * <p>
+     * If reaches the end of the source buffer and no data is read, returns {@code null}.
      * <p>
      * The buffer's position increments by the actual read number.
      *
      * @param src the source buffer
      * @param cs  the specified charset
-     * @return the string containing the data
+     * @return a string represents the read data, with the specified charset, or {@code null} if reaches the end of the
+     * source buffer and no data is read
      */
     public static @Nullable String string(@Nonnull ByteBuffer src, @Nonnull Charset cs) {
         byte[] bytes = read(src);
@@ -666,8 +710,8 @@ public class BufferKit {
     }
 
     /**
-     * Creates a new buffer whose content is a shared subsequence of the given buffer's content. The content of the new
-     * buffer will start at the given buffer's current position, and up to the specified length.
+     * Creates a new buffer with the specified length. Its content is a shared subsequence of the given buffer's
+     * content, starting at the given buffer's current position.
      * <p>
      * Changes to the given buffer's content will be visible in the new buffer, and vice versa. The new buffer's
      * position will be zero, its capacity and limit will be the specified length. The new buffer will be direct if, and
@@ -686,9 +730,8 @@ public class BufferKit {
     }
 
     /**
-     * Creates a new buffer whose content is a shared subsequence of the given buffer's content. The content of the new
-     * buffer will start at the specified offset from the given buffer's current position, and up to the specified
-     * length.
+     * Creates a new buffer with the specified length. Its content is a shared subsequence of the given buffer's
+     * content, starting at the specified offset of given buffer's current position ({@code src.position() + off}).
      * <p>
      * Changes to the given buffer's content will be visible in the new buffer, and vice versa. The new buffer's
      * position will be zero, its capacity and limit will be the specified length. The new buffer will be direct if, and
@@ -721,8 +764,8 @@ public class BufferKit {
     }
 
     /**
-     * Creates a new buffer whose content is a shared subsequence of the given buffer's content. The content of the new
-     * buffer will start at the given buffer's current position, and up to the specified length.
+     * Creates a new buffer with the specified length. Its content is a shared subsequence of the given buffer's
+     * content, starting at the given buffer's current position.
      * <p>
      * Changes to the given buffer's content will be visible in the new buffer, and vice versa. The new buffer's
      * position will be zero, its capacity and limit will be the specified length. The new buffer will be direct if, and
@@ -741,9 +784,8 @@ public class BufferKit {
     }
 
     /**
-     * Creates a new buffer whose content is a shared subsequence of the given buffer's content. The content of the new
-     * buffer will start at the specified offset from the given buffer's current position, and up to the specified
-     * length.
+     * Creates a new buffer with the specified length. Its content is a shared subsequence of the given buffer's
+     * content, starting at the specified offset of given buffer's current position ({@code src.position() + off}).
      * <p>
      * Changes to the given buffer's content will be visible in the new buffer, and vice versa. The new buffer's
      * position will be zero, its capacity and limit will be the specified length. The new buffer will be direct if, and
@@ -814,7 +856,7 @@ public class BufferKit {
      */
     public static @Nonnull CharBuffer copy(@Nonnull CharBuffer src) {
         CharBuffer dst = src.isDirect() ?
-            directBuffer(src.capacity())
+            directCharBuffer(src.capacity())
             :
             CharBuffer.allocate(src.capacity());
         int pos = src.position();
@@ -862,12 +904,12 @@ public class BufferKit {
     /**
      * Returns a new direct buffer of which content is copied from the given array.
      * <p>
-     * Returned buffer's position is {@code 0}, limit and capacity are same with the array's length.
+     * Returned buffer's position is {@code 0}, limit and capacity is the array's length.
      *
      * @param src the given array
      * @return a new direct buffer of which content is copied from the given array
      */
-    public static @Nonnull ByteBuffer directBuffer(byte @Nonnull [] src) {
+    public static @Nonnull ByteBuffer copyDirect(byte @Nonnull [] src) {
         ByteBuffer buf = ByteBuffer.allocateDirect(src.length);
         buf.put(src);
         buf.flip();
@@ -875,17 +917,17 @@ public class BufferKit {
     }
 
     /**
-     * Returns a new direct buffer of which content is copied from the given array (starting at the specified offset and
-     * up to the specified length).
+     * Returns a new direct buffer of which content is a copy of data from the given array. The copied data starts at
+     * the specified offset and has the specified length.
      * <p>
-     * Returned buffer's position is {@code 0}, limit and capacity are same with the specified length.
+     * Returned buffer's position is {@code 0}, limit and capacity is the specified length.
      *
      * @param src the given array
-     * @param off the specified offset of the array
-     * @param len the specified length to read
-     * @return a new direct buffer of which content is copied from the given array
+     * @param off the specified offset
+     * @param len the specified length
+     * @return a new direct buffer of which content is a copy of data from the given array
      */
-    public static @Nonnull ByteBuffer directBuffer(
+    public static @Nonnull ByteBuffer copyDirect(
         byte @Nonnull [] src, int off, int len
     ) throws IndexOutOfBoundsException {
         IOChecker.checkOffLen(src.length, off, len);
@@ -898,49 +940,50 @@ public class BufferKit {
     /**
      * Returns a new direct buffer of which content is copied from the given array.
      * <p>
-     * Returned buffer's position is {@code 0}, limit and capacity are same with the array's length.
+     * Returned buffer's position is {@code 0}, limit and capacity is the array's length.
      *
      * @param src the given array
      * @return a new direct buffer of which content is copied from the given array
      */
-    public static @Nonnull CharBuffer directBuffer(char @Nonnull [] src) {
-        CharBuffer buf = directBuffer(src.length);
+    public static @Nonnull CharBuffer copyDirect(char @Nonnull [] src) {
+        CharBuffer buf = directCharBuffer(src.length);
         buf.put(src);
         buf.flip();
         return buf;
     }
 
     /**
-     * Returns a new direct buffer of which content is copied from the given array (starting at the specified offset and
-     * up to the specified length).
+     * Returns a new direct buffer of which content is a copy of data from the given array. The copied data starts at
+     * the specified offset and has the specified length.
      * <p>
-     * Returned buffer's position is {@code 0}, limit and capacity are same with the specified length.
+     * Returned buffer's position is {@code 0}, limit and capacity is the specified length.
      *
      * @param src the given array
-     * @param off the specified offset of the array
-     * @param len the specified length to read
-     * @return a new direct buffer of which content is copied from the given array
+     * @param off the specified offset
+     * @param len the specified length
+     * @return a new direct buffer of which content is a copy of data from the given array
      */
-    public static @Nonnull CharBuffer directBuffer(
+    public static @Nonnull CharBuffer copyDirect(
         char @Nonnull [] src, int off, int len
     ) throws IndexOutOfBoundsException {
         IOChecker.checkOffLen(src.length, off, len);
-        CharBuffer buf = directBuffer(len);
+        CharBuffer buf = directCharBuffer(len);
         buf.put(src, off, len);
         buf.flip();
         return buf;
     }
 
     /**
-     * Returns a new direct buffer with the specified capacity.
+     * Returns a new direct {@link CharBuffer} with the specified capacity, and its endian is
+     * {@link ByteOrder#BIG_ENDIAN}.
      * <p>
      * Returned buffer's position is {@code 0}, limit equals to the capacity.
      *
      * @param capacity the specified capacity
-     * @return a new direct buffer with the specified capacity
+     * @return a new direct {@link CharBuffer} with the specified capacity
      * @throws IllegalArgumentException if the specified capacity is negative
      */
-    public static @Nonnull CharBuffer directBuffer(int capacity) throws IllegalArgumentException {
+    public static @Nonnull CharBuffer directCharBuffer(int capacity) throws IllegalArgumentException {
         IOChecker.checkCapacity(capacity);
         return ByteBuffer.allocateDirect(capacity * 2).order(ByteOrder.BIG_ENDIAN).asCharBuffer();
     }
