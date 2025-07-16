@@ -712,6 +712,7 @@ public interface IOOperator {
      *
      * @param src the reader
      * @return a string represents the read data, or {@code null} if reaches the end of the reader and no data is read
+     * @throws IORuntimeException if an I/O error occurs
      */
     default @Nullable String string(@Nonnull Reader src) throws IORuntimeException {
         char[] chars = read(src);
@@ -729,8 +730,11 @@ public interface IOOperator {
      * @param len the specified read length, must {@code >= 0}
      * @return a string represents the read data, or {@code null} if reaches the end of the reader and no data is read
      * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
      */
-    default @Nullable String string(@Nonnull Reader src, int len) throws IllegalArgumentException, IORuntimeException {
+    default @Nullable String string(
+        @Nonnull Reader src, int len
+    ) throws IllegalArgumentException, IORuntimeException {
         char[] chars = read(src, len);
         return chars == null ? null : new String(chars);
     }

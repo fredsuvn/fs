@@ -46,10 +46,10 @@ final class IOImpls {
     }
 
     static @Nonnull InputStream inputStream(
-        byte @Nonnull [] array, int offset, int length
+        byte @Nonnull [] array, int off, int len
     ) throws IndexOutOfBoundsException {
-        IOHelper.checkOffLen(array.length, offset, length);
-        return new BytesInputStream(array, offset, length);
+        IOHelper.checkOffLen(array.length, off, len);
+        return new BytesInputStream(array, off, len);
     }
 
     static @Nonnull InputStream inputStream(@Nonnull ByteBuffer buffer) {
@@ -84,9 +84,9 @@ final class IOImpls {
         return new CharsReader(array);
     }
 
-    static @Nonnull Reader reader(char @Nonnull [] array, int offset, int length) throws IndexOutOfBoundsException {
-        IOHelper.checkOffLen(array.length, offset, length);
-        return new CharsReader(array, offset, length);
+    static @Nonnull Reader reader(char @Nonnull [] array, int off, int len) throws IndexOutOfBoundsException {
+        IOHelper.checkOffLen(array.length, off, len);
+        return new CharsReader(array, off, len);
     }
 
     static @Nonnull Reader reader(@Nonnull CharSequence chars) {
@@ -120,10 +120,10 @@ final class IOImpls {
     }
 
     static @Nonnull OutputStream outputStream(
-        byte @Nonnull [] array, int offset, int length
+        byte @Nonnull [] array, int off, int len
     ) throws IndexOutOfBoundsException {
-        IOHelper.checkOffLen(array.length, offset, length);
-        return new BytesOutputStream(array, offset, length);
+        IOHelper.checkOffLen(array.length, off, len);
+        return new BytesOutputStream(array, off, len);
     }
 
     static @Nonnull OutputStream outputStream(@Nonnull ByteBuffer buffer) {
@@ -158,9 +158,9 @@ final class IOImpls {
         return new CharsWriter(array);
     }
 
-    static @Nonnull Writer writer(char @Nonnull [] array, int offset, int length) throws IndexOutOfBoundsException {
-        IOHelper.checkOffLen(array.length, offset, length);
-        return new CharsWriter(array, offset, length);
+    static @Nonnull Writer writer(char @Nonnull [] array, int off, int len) throws IndexOutOfBoundsException {
+        IOHelper.checkOffLen(array.length, off, len);
+        return new CharsWriter(array, off, len);
     }
 
     static @Nonnull Writer writer(@Nonnull CharBuffer buffer) {
@@ -191,10 +191,10 @@ final class IOImpls {
             this(buf, 0, buf.length);
         }
 
-        BytesInputStream(byte @Nonnull [] buf, int offset, int length) {
+        BytesInputStream(byte @Nonnull [] buf, int off, int len) {
             this.buf = buf;
-            this.pos = offset;
-            this.count = Math.min(offset + length, buf.length);
+            this.pos = off;
+            this.count = Math.min(off + len, buf.length);
         }
 
         @Override
@@ -252,10 +252,6 @@ final class IOImpls {
                 throw new IOException(MARK_NOT_SET);
             }
             pos = mark;
-        }
-
-        @Override
-        public void close() {
         }
     }
 
@@ -323,10 +319,6 @@ final class IOImpls {
             } catch (Exception e) {
                 throw new IOException(e);
             }
-        }
-
-        @Override
-        public void close() {
         }
     }
 
@@ -667,10 +659,10 @@ final class IOImpls {
             this(buf, 0, buf.length);
         }
 
-        CharsReader(char @Nonnull [] buf, int offset, int length) {
+        CharsReader(char @Nonnull [] buf, int off, int len) {
             this.buf = buf;
-            this.pos = offset;
-            this.count = Math.min(offset + length, buf.length);
+            this.pos = off;
+            this.count = Math.min(off + len, buf.length);
         }
 
         @Override
@@ -1115,10 +1107,10 @@ final class IOImpls {
             this(buf, 0, buf.length);
         }
 
-        BytesOutputStream(byte @Nonnull [] buf, int offset, int length) {
+        BytesOutputStream(byte @Nonnull [] buf, int off, int len) {
             this.buf = buf;
-            this.end = offset + length;
-            this.pos = offset;
+            this.end = off + len;
+            this.pos = off;
         }
 
         @Override
@@ -1377,10 +1369,10 @@ final class IOImpls {
             this(buf, 0, buf.length);
         }
 
-        CharsWriter(char @Nonnull [] buf, int offset, int length) {
+        CharsWriter(char @Nonnull [] buf, int off, int len) {
             this.buf = buf;
-            this.end = offset + length;
-            this.pos = offset;
+            this.end = off + len;
+            this.pos = off;
         }
 
         @Override

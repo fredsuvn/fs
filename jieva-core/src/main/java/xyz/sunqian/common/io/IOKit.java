@@ -479,6 +479,7 @@ public class IOKit {
      *
      * @param src the reader
      * @return a string represents the read data, or {@code null} if reaches the end of the reader and no data is read
+     * @throws IORuntimeException if an I/O error occurs
      */
     public static @Nullable String string(@Nonnull Reader src) throws IORuntimeException {
         return io.string(src);
@@ -495,8 +496,11 @@ public class IOKit {
      * @param len the specified read length, must {@code >= 0}
      * @return a string represents the read data, or {@code null} if reaches the end of the reader and no data is read
      * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
      */
-    public static @Nullable String string(@Nonnull Reader src, int len) throws IllegalArgumentException, IORuntimeException {
+    public static @Nullable String string(
+        @Nonnull Reader src, int len
+    ) throws IllegalArgumentException, IORuntimeException {
         return io.string(src, len);
     }
 
@@ -614,7 +618,7 @@ public class IOKit {
     }
 
     /**
-     * Writes the data to the specified appender from the given array.
+     * Writes all data to the specified appender from the given array.
      *
      * @param dst the specified appender
      * @param src the given array
@@ -625,8 +629,8 @@ public class IOKit {
     }
 
     /**
-     * Writes the data to the specified appender from the given array, starting at the specified offset and up to the
-     * specified length.
+     * Writes a specified length of data to the specified appender from the given array, starting at the specified
+     * offset.
      *
      * @param dst the specified appender
      * @param src the given array
@@ -650,21 +654,21 @@ public class IOKit {
     }
 
     /**
-     * Reads the data from the source stream without blocking into a new array, and returns the array. The array's
-     * length is based on the {@link InputStream#available()}.
+     * Reads available data from the input stream into a new array, and returns the array. The array's length is based
+     * on the {@link InputStream#available()}.
      *
-     * @param source the source stream
-     * @return the array containing the data
+     * @param in the input stream
+     * @return the array containing the available data
      * @throws IORuntimeException if an I/O error occurs
      */
-    public static byte @Nonnull [] available(@Nonnull InputStream source) throws IORuntimeException {
+    public static byte @Nonnull [] available(@Nonnull InputStream in) throws IORuntimeException {
         try {
-            int available = source.available();
+            int available = in.available();
             if (available <= 0) {
                 return new byte[0];
             }
             byte[] bytes = new byte[available];
-            int c = source.read(bytes);
+            int c = in.read(bytes);
             if (c < 0) {
                 return new byte[0];
             }
@@ -678,30 +682,36 @@ public class IOKit {
     }
 
     /**
-     * Reads all bytes from the source stream and returns as a string with {@link CharsKit#defaultCharset()}. If the end
-     * of the source stream has already been reached, returns {@code null}.
+     * Reads all data from the input stream as a string with {@link CharsKit#defaultCharset()}, continuing until reaches
+     * the end of the input stream, and returns the string.
+     * <p>
+     * If reaches the end of the input stream and no data is read, returns {@code null}.
      *
-     * @param source the source stream
-     * @return the string with {@link CharsKit#defaultCharset()}
+     * @param in the input stream
+     * @return a string represents the read data, or {@code null} if reaches the end of the input stream and no data is
+     * read
      * @throws IORuntimeException if an I/O error occurs
      */
-    public static @Nullable String string(@Nonnull InputStream source) throws IORuntimeException {
-        return string(source, CharsKit.defaultCharset());
+    public static @Nullable String string(@Nonnull InputStream in) throws IORuntimeException {
+        return string(in, CharsKit.defaultCharset());
     }
 
     /**
-     * Reads all bytes from the source stream and returns them as a string with the specified charset. If the end of the
-     * source stream has already been reached, returns {@code null}.
+     * Reads all data from the input stream as a string with the specified charset, continuing until reaches the end of
+     * the input stream, and returns the string.
+     * <p>
+     * If reaches the end of the input stream and no data is read, returns {@code null}.
      *
-     * @param source  the source stream
+     * @param in      the input stream
      * @param charset the specified charset
-     * @return the string with the specified charset
+     * @return a string represents the read data, or {@code null} if reaches the end of the input stream and no data is
+     * read
      * @throws IORuntimeException if an I/O error occurs
      */
     public static @Nullable String string(
-        @Nonnull InputStream source, @Nonnull Charset charset
+        @Nonnull InputStream in, @Nonnull Charset charset
     ) throws IORuntimeException {
-        byte[] bytes = read(source);
+        byte[] bytes = read(in);
         return bytes == null ? null : new String(bytes, charset);
     }
 
@@ -728,7 +738,7 @@ public class IOKit {
     }
 
     /**
-     * Closes the given flushable object, which is an instance of {@link Flushable}. If the given object is not an
+     * Flushes the given flushable object, which is an instance of {@link Flushable}. If the given object is not an
      * instance of {@link Flushable}, then invoking this method has no effect.
      *
      * @param flushable the given flushable object
@@ -758,7 +768,7 @@ public class IOKit {
     }
 
     /**
-     * Wraps the given array, starting at the specified offset and up to the specified length, as a new
+     * Wraps a specified length of data from the given array, starting at the specified offset, as a new
      * {@link InputStream}.
      * <p>
      * The result's support is as follows:
@@ -901,7 +911,8 @@ public class IOKit {
     }
 
     /**
-     * Wraps the given array, starting at the specified offset and up to the specified length, as a new {@link Reader}.
+     * Wraps a specified length of data from the given array, starting at the specified offset, as a new
+     * {@link Reader}.
      * <p>
      * The result's support is as follows:
      * <ul>
@@ -1061,7 +1072,7 @@ public class IOKit {
     }
 
     /**
-     * Wraps the given array, starting at the specified offset and up to the specified length, as a new
+     * Wraps a specified length of data from the given array, starting at the specified offset, as a new
      * {@link OutputStream}.
      * <p>
      * The result's support is as follows:
@@ -1214,7 +1225,8 @@ public class IOKit {
     }
 
     /**
-     * Wraps the given array, starting at the specified offset and up to the specified length, as a new {@link Writer}.
+     * Wraps a specified length of data from the given array, starting at the specified offset, as a new
+     * {@link Writer}.
      * <p>
      * The result's support is as follows:
      * <ul>
