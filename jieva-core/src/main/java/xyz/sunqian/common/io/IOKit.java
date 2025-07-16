@@ -201,8 +201,8 @@ public class IOKit {
      * Reads data from the input stream into the destination array, until the read number reaches the array's length or
      * reaches the end of the input stream, and returns the actual number of bytes read to.
      * <p>
-     * If the specified length is {@code 0}, returns {@code 0} without reading. If reaches the end of the input stream
-     * and no data is read, returns {@code -1}.
+     * If the array's length is {@code 0}, returns {@code 0} without reading. If reaches the end of the input stream and
+     * no data is read, returns {@code -1}.
      *
      * @param src the input stream
      * @param dst the destination array
@@ -358,7 +358,7 @@ public class IOKit {
      * Reads data from the source channel into the destination array, until the read number reaches the array's length
      * or reaches the end of the source channel, and returns the actual number of bytes read to.
      * <p>
-     * If the specified length is {@code 0}, returns {@code 0} without reading. If reaches the end of the source channel
+     * If the array's length is {@code 0}, returns {@code 0} without reading. If reaches the end of the source channel
      * and no data is read, returns {@code -1}.
      *
      * @param src the source channel
@@ -543,7 +543,7 @@ public class IOKit {
      * Reads data from the reader into the destination array, until the read number reaches the array's length or
      * reaches the end of the reader, and returns the actual number of chars read to.
      * <p>
-     * If the specified length is {@code 0}, returns {@code 0} without reading. If reaches the end of the reader and no
+     * If the array's length is {@code 0}, returns {@code 0} without reading. If reaches the end of the reader and no
      * data is read, returns {@code -1}.
      *
      * @param src the reader

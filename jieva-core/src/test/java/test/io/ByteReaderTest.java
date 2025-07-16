@@ -33,19 +33,19 @@ public class ByteReaderTest implements DataTest {
     private static final int DST_SIZE = 256;
 
     @Test
-    public void testRead() throws Exception {
-        testRead0(0, 1);
-        testRead0(1, 1);
-        testRead0(32, 1);
-        testRead0(32, 16);
-        testRead0(32, 32);
-        testRead0(32, 64);
-        testRead0(128, 16);
-        testRead0(128, 33);
-        testRead0(128, 111);
-        testRead0(128, 128);
-        testRead0(128, 129);
-        testRead0(128, 1024);
+    public void testReadBytes() throws Exception {
+        testReadBytes0(0, 1);
+        testReadBytes0(1, 1);
+        testReadBytes0(32, 1);
+        testReadBytes0(32, 16);
+        testReadBytes0(32, 32);
+        testReadBytes0(32, 64);
+        testReadBytes0(128, 16);
+        testReadBytes0(128, 33);
+        testReadBytes0(128, 111);
+        testReadBytes0(128, 128);
+        testReadBytes0(128, 129);
+        testReadBytes0(128, 1024);
 
         // error
         {
@@ -56,37 +56,37 @@ public class ByteReaderTest implements DataTest {
         }
     }
 
-    private void testRead0(int dataSize, int readSize) throws Exception {
+    private void testReadBytes0(int dataSize, int readSize) throws Exception {
         {
             // input stream
             byte[] data = randomBytes(dataSize);
-            testRead0(ByteReader.from(new ByteArrayInputStream(data)), data, readSize, false);
-            testSkip0(ByteReader.from(new ByteArrayInputStream(data)), data, readSize);
-            testRead0(ByteReader.from(new OneByteInputStream(data)), data, readSize, false);
-            testSkip0(ByteReader.from(new OneByteInputStream(data)), data, readSize);
+            testReadBytes0(ByteReader.from(new ByteArrayInputStream(data)), data, readSize, false);
+            testSkipBytes0(ByteReader.from(new ByteArrayInputStream(data)), data, readSize);
+            testReadBytes0(ByteReader.from(new OneByteInputStream(data)), data, readSize, false);
+            testSkipBytes0(ByteReader.from(new OneByteInputStream(data)), data, readSize);
             TestInputStream tr = new TestInputStream(new ByteArrayInputStream(data));
             tr.setNextOperation(ReadOps.READ_ZERO);
-            testSkip0(ByteReader.from(tr), data, readSize);
+            testSkipBytes0(ByteReader.from(tr), data, readSize);
             if (dataSize >= 128) {
                 IOImplsTest.testInputStream(
                     ByteReader.from(IOKit.newInputStream(data)).asInputStream(),
-                    data, true, false, false
+                    data, false, false, false
                 );
             }
         }
         {
             // channel
             byte[] data = randomBytes(dataSize);
-            testRead0(
+            testReadBytes0(
                 ByteReader.from(Channels.newChannel(new ByteArrayInputStream(data))),
                 data, readSize, false
             );
-            testSkip0(ByteReader.from(Channels.newChannel(new ByteArrayInputStream(data))), data, readSize);
-            testRead0(
+            testSkipBytes0(ByteReader.from(Channels.newChannel(new ByteArrayInputStream(data))), data, readSize);
+            testReadBytes0(
                 ByteReader.from(Channels.newChannel(new OneByteInputStream(data))),
                 data, readSize, false
             );
-            testSkip0(ByteReader.from(Channels.newChannel(new OneByteInputStream(data))), data, readSize);
+            testSkipBytes0(ByteReader.from(Channels.newChannel(new OneByteInputStream(data))), data, readSize);
             if (dataSize >= 128) {
                 IOImplsTest.testInputStream(
                     ByteReader.from(Channels.newChannel(new ByteArrayInputStream(data))).asInputStream(),
@@ -97,70 +97,70 @@ public class ByteReaderTest implements DataTest {
         {
             // byte array
             byte[] data = randomBytes(dataSize);
-            testRead0(ByteReader.from(data), data, readSize, true);
-            testSkip0(ByteReader.from(data), data, readSize);
+            testReadBytes0(ByteReader.from(data), data, readSize, true);
+            testSkipBytes0(ByteReader.from(data), data, readSize);
             byte[] dataPadding = new byte[data.length + 66];
             System.arraycopy(data, 0, dataPadding, 33, data.length);
-            testRead0(
+            testReadBytes0(
                 ByteReader.from(dataPadding, 33, data.length),
                 Arrays.copyOfRange(dataPadding, 33, 33 + data.length),
                 readSize, true
             );
-            testSkip0(ByteReader.from(dataPadding, 33, data.length), data, readSize);
+            testSkipBytes0(ByteReader.from(dataPadding, 33, data.length), data, readSize);
             if (dataSize >= 128) {
                 IOImplsTest.testInputStream(
                     ByteReader.from(data).asInputStream(),
-                    data, true, false, true
+                    data, false, false, true
                 );
                 IOImplsTest.testInputStream(
                     ByteReader.from(dataPadding, 33, data.length).asInputStream(),
                     Arrays.copyOfRange(dataPadding, 33, 33 + data.length),
-                    true, false, true
+                    false, false, true
                 );
             }
         }
         {
             // buffer
             byte[] data = randomBytes(dataSize);
-            testRead0(ByteReader.from(ByteBuffer.wrap(data)), data, readSize, true);
-            testSkip0(ByteReader.from(ByteBuffer.wrap(data)), data, readSize);
+            testReadBytes0(ByteReader.from(ByteBuffer.wrap(data)), data, readSize, true);
+            testSkipBytes0(ByteReader.from(ByteBuffer.wrap(data)), data, readSize);
             if (dataSize >= 128) {
                 IOImplsTest.testInputStream(
                     ByteReader.from(ByteBuffer.wrap(data)).asInputStream(),
-                    data, true, false, false
+                    data, false, false, false
                 );
             }
         }
         {
             // limited
             byte[] data = randomBytes(dataSize);
-            testRead0(
+            testReadBytes0(
                 ByteReader.from(data).limit(data.length),
                 data,
                 readSize, true
             );
-            testSkip0(
+            testSkipBytes0(
                 ByteReader.from(data),
                 data,
                 readSize
             );
-            testRead0(
+            testReadBytes0(
                 ByteReader.from(data).limit(data.length + 5),
                 data,
                 readSize, true
             );
-            testSkip0(
+            testSkipBytes0(
                 ByteReader.from(data).limit(data.length + 5),
                 data,
                 readSize
             );
             if (data.length > 5) {
-                testRead0(
+                testReadBytes0(
                     ByteReader.from(data).limit(data.length - 5),
                     Arrays.copyOf(data, data.length - 5),
                     readSize, false
                 );
-                testSkip0(
+                testSkipBytes0(
                     ByteReader.from(data).limit(data.length - 5),
                     Arrays.copyOf(data, data.length - 5),
                     readSize
@@ -183,7 +183,7 @@ public class ByteReaderTest implements DataTest {
         }
     }
 
-    private void testRead0(ByteReader reader, byte[] data, int readSize, boolean preKnown) {
+    private void testReadBytes0(ByteReader reader, byte[] data, int readSize, boolean preKnown) {
         assertFalse(reader.read(0).end());
         assertFalse(reader.read(0).data().hasRemaining());
         int hasRead = 0;
@@ -209,7 +209,7 @@ public class ByteReaderTest implements DataTest {
         assertFalse(reader.read(1).data().hasRemaining());
     }
 
-    private void testSkip0(ByteReader reader, byte[] data, int readSize) {
+    private void testSkipBytes0(ByteReader reader, byte[] data, int readSize) {
         assertEquals(reader.skip(0), 0);
         int hasRead = 0;
         while (hasRead < data.length) {
@@ -223,21 +223,21 @@ public class ByteReaderTest implements DataTest {
     }
 
     @Test
-    public void testReadTo() {
-        testReadTo0(0, 0);
-        testReadTo0(0, 1);
-        testReadTo0(1, 1);
-        testReadTo0(2, 2);
-        testReadTo0(64, 1);
-        testReadTo0(64, 33);
-        testReadTo0(64, 64);
-        testReadTo0(64, 111);
-        testReadTo0(111, 77);
-        testReadTo0(111, 111);
-        testReadTo0(111, 333);
-        testReadTo0(DST_SIZE, DST_SIZE);
-        testReadTo0(DST_SIZE, DST_SIZE + 6);
-        testReadTo0(DST_SIZE, DST_SIZE - 6);
+    public void testReadBytesTo() {
+        testReadBytesTo0(0, 0);
+        testReadBytesTo0(0, 1);
+        testReadBytesTo0(1, 1);
+        testReadBytesTo0(2, 2);
+        testReadBytesTo0(64, 1);
+        testReadBytesTo0(64, 33);
+        testReadBytesTo0(64, 64);
+        testReadBytesTo0(64, 111);
+        testReadBytesTo0(111, 77);
+        testReadBytesTo0(111, 111);
+        testReadBytesTo0(111, 333);
+        testReadBytesTo0(DST_SIZE, DST_SIZE);
+        testReadBytesTo0(DST_SIZE, DST_SIZE + 6);
+        testReadBytesTo0(DST_SIZE, DST_SIZE - 6);
 
         {
             // read to channel error
@@ -248,38 +248,38 @@ public class ByteReaderTest implements DataTest {
         }
     }
 
-    private void testReadTo0(int dataSize, int readSize) {
+    private void testReadBytesTo0(int dataSize, int readSize) {
         byte[] data = randomBytes(dataSize);
         byte[] dataPadding = new byte[data.length + 66];
         System.arraycopy(data, 0, dataPadding, 33, data.length);
         {
             // input stream
-            testReadTo0(() -> ByteReader.from(new ByteArrayInputStream(data)), data, readSize);
-            testReadTo0(() -> ByteReader.from(new OneByteInputStream(data)), data, readSize);
+            testReadBytesTo0(() -> ByteReader.from(new ByteArrayInputStream(data)), data, readSize);
+            testReadBytesTo0(() -> ByteReader.from(new OneByteInputStream(data)), data, readSize);
         }
         {
             // channel
-            testReadTo0(() -> ByteReader.from(Channels.newChannel(new ByteArrayInputStream(data))), data, readSize);
-            testReadTo0(() -> ByteReader.from(Channels.newChannel(new OneByteInputStream(data))), data, readSize);
+            testReadBytesTo0(() -> ByteReader.from(Channels.newChannel(new ByteArrayInputStream(data))), data, readSize);
+            testReadBytesTo0(() -> ByteReader.from(Channels.newChannel(new OneByteInputStream(data))), data, readSize);
         }
         {
             // byte array
-            testReadTo0(() -> ByteReader.from(data), data, readSize);
-            testReadTo0(() -> ByteReader.from(dataPadding, 33, data.length), data, readSize);
+            testReadBytesTo0(() -> ByteReader.from(data), data, readSize);
+            testReadBytesTo0(() -> ByteReader.from(dataPadding, 33, data.length), data, readSize);
         }
         {
             // byte buffer
-            testReadTo0(() -> ByteReader.from(ByteBuffer.wrap(data)), data, readSize);
-            testReadTo0(() -> ByteReader.from(BufferKit.copyDirect(data)), data, readSize);
+            testReadBytesTo0(() -> ByteReader.from(ByteBuffer.wrap(data)), data, readSize);
+            testReadBytesTo0(() -> ByteReader.from(BufferKit.copyDirect(data)), data, readSize);
         }
         {
             // limited
-            testReadTo0(() ->
+            testReadBytesTo0(() ->
                 ByteReader.from(new ByteArrayInputStream(data)).limit(data.length), data, readSize);
-            testReadTo0(() ->
+            testReadBytesTo0(() ->
                 ByteReader.from(new ByteArrayInputStream(data)).limit(data.length + 5), data, readSize);
             if (data.length > 5) {
-                testReadTo0(() ->
+                testReadBytesTo0(() ->
                         ByteReader.from(new ByteArrayInputStream(data)).limit(data.length - 5),
                     Arrays.copyOf(data, data.length - 5),
                     readSize
@@ -288,7 +288,7 @@ public class ByteReaderTest implements DataTest {
         }
     }
 
-    private void testReadTo0(Supplier<ByteReader> supplier, byte[] data, int readSize) {
+    private void testReadBytesTo0(Supplier<ByteReader> supplier, byte[] data, int readSize) {
         {
             // to output stream
             BytesBuilder builder = new BytesBuilder();
@@ -607,17 +607,17 @@ public class ByteReaderTest implements DataTest {
     }
 
     @Test
-    public void testShare() {
+    public void testShareBytes() {
         int dataSize = 1024;
         int limitSize = dataSize / 2;
         {
             // input stream
             byte[] data = randomBytes(dataSize);
-            testShare(
+            testShareBytes(
                 ByteReader.from(new ByteArrayInputStream(data)), ByteBuffer.wrap(data),
                 false, false
             );
-            testShare(
+            testShareBytes(
                 ByteReader.from(new ByteArrayInputStream(data)).limit(limitSize), ByteBuffer.wrap(data, 0, limitSize),
                 false, false
             );
@@ -625,20 +625,20 @@ public class ByteReaderTest implements DataTest {
         {
             // byte array
             byte[] data = randomBytes(dataSize);
-            testShare(ByteReader.from(data), ByteBuffer.wrap(data), true, true);
-            testShare(
+            testShareBytes(ByteReader.from(data), ByteBuffer.wrap(data), true, true);
+            testShareBytes(
                 ByteReader.from(data).limit(limitSize),
                 ByteBuffer.wrap(data, 0, limitSize),
                 true, true
             );
             byte[] dataPadding = new byte[data.length + 66];
             System.arraycopy(data, 0, dataPadding, 33, data.length);
-            testShare(
+            testShareBytes(
                 ByteReader.from(dataPadding, 33, data.length),
                 ByteBuffer.wrap(dataPadding, 33, data.length),
                 true, true
             );
-            testShare(
+            testShareBytes(
                 ByteReader.from(dataPadding, 33, data.length).limit(limitSize),
                 ByteBuffer.wrap(dataPadding, 33, limitSize),
                 true, true
@@ -647,20 +647,20 @@ public class ByteReaderTest implements DataTest {
         {
             // byte buffer
             byte[] data = randomBytes(dataSize);
-            testShare(
+            testShareBytes(
                 ByteReader.from(ByteBuffer.wrap(data)),
                 ByteBuffer.wrap(data),
                 true, true
             );
-            testShare(
+            testShareBytes(
                 ByteReader.from(ByteBuffer.wrap(data)).limit(limitSize),
                 ByteBuffer.wrap(data, 0, limitSize),
                 true, true
             );
             ByteBuffer direct = BufferKit.copyDirect(data);
-            testShare(ByteReader.from(direct), direct.slice(), true, true);
+            testShareBytes(ByteReader.from(direct), direct.slice(), true, true);
             direct.clear();
-            testShare(
+            testShareBytes(
                 ByteReader.from(direct).limit(limitSize),
                 BufferKit.slice(direct, limitSize),
                 true, true
@@ -668,7 +668,7 @@ public class ByteReaderTest implements DataTest {
         }
     }
 
-    private void testShare(
+    private void testShareBytes(
         ByteReader reader, ByteBuffer data, boolean sharedReaderToData, boolean sharedDataToReader
     ) {
         ByteSegment segment = reader.read(data.remaining() * 2);
@@ -690,7 +690,7 @@ public class ByteReaderTest implements DataTest {
     }
 
     @Test
-    public void testSegment() throws Exception {
+    public void testBytesSegment() throws Exception {
         byte[] bytes = randomBytes(64);
         ByteReader reader = ByteReader.from(bytes);
         ByteSegment segment = reader.read(bytes.length * 2);
@@ -707,7 +707,7 @@ public class ByteReaderTest implements DataTest {
     }
 
     @Test
-    public void testOthers() throws Exception {
+    public void testBytesOthers() throws Exception {
         TestInputStream tin = new TestInputStream(new ByteArrayInputStream(new byte[0]));
         tin.setNextOperation(ReadOps.THROW, 99);
         {

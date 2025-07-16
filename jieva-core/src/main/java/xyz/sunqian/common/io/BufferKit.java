@@ -3,6 +3,7 @@ package xyz.sunqian.common.io;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.chars.CharsKit;
+import xyz.sunqian.common.base.math.MathKit;
 
 import java.io.OutputStream;
 import java.nio.Buffer;
@@ -103,7 +104,7 @@ public class BufferKit {
      * Reads data from the source buffer into the destination array, until the read number reaches the array's length or
      * reaches the end of the source buffer, and returns the actual number of bytes read to.
      * <p>
-     * If the specified length is {@code 0}, returns {@code 0} without reading. If reaches the end of the source buffer
+     * If the array's length is {@code 0}, returns {@code 0} without reading. If reaches the end of the source buffer
      * and no data is read, returns {@code -1}.
      * <p>
      * The buffer's position increments by the actual read number.
@@ -210,8 +211,7 @@ public class BufferKit {
             return -1;
         }
         try {
-            int actualLen = Math.min(src.remaining(), dst.remaining());
-            actualLen = Math.min(len, actualLen);
+            int actualLen = MathKit.min(src.remaining(), dst.remaining(), len);
             ByteBuffer srcBuf;
             if (src.remaining() > actualLen) {
                 srcBuf = slice0(src, 0, actualLen);
@@ -448,7 +448,7 @@ public class BufferKit {
      * Reads data from the source buffer into the destination array, until the read number reaches the array's length or
      * reaches the end of the source buffer, and returns the actual number of chars read to.
      * <p>
-     * If the specified length is {@code 0}, returns {@code 0} without reading. If reaches the end of the source buffer
+     * If the array's length is {@code 0}, returns {@code 0} without reading. If reaches the end of the source buffer
      * and no data is read, returns {@code -1}.
      * <p>
      * The buffer's position increments by the actual read number.
@@ -555,8 +555,7 @@ public class BufferKit {
             return -1;
         }
         try {
-            int actualLen = Math.min(src.remaining(), dst.remaining());
-            actualLen = Math.min(len, actualLen);
+            int actualLen = MathKit.min(src.remaining(), dst.remaining(), len);
             CharBuffer srcBuf;
             if (src.remaining() > actualLen) {
                 srcBuf = slice0(src, 0, actualLen);

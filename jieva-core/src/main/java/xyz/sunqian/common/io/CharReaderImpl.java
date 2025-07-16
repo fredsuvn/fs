@@ -3,10 +3,11 @@ package xyz.sunqian.common.io;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.base.chars.CharsKit;
+import xyz.sunqian.common.base.math.MathKit;
 
-import java.io.IOException;
 import java.io.Reader;
 import java.nio.CharBuffer;
+import java.util.Arrays;
 
 final class CharReaderImpl {
 
@@ -81,12 +82,12 @@ final class CharReaderImpl {
 
     private static final class CharStreamReader implements CharReader {
 
-        private final @Nonnull Reader source;
-        private final @Nonnull IOOperator operator;
+        private final @Nonnull Reader src;
+        private final int bufSize;
 
         private CharStreamReader(@Nonnull Reader src, int bufSize) {
-            this.source = src;
-            this.operator = IOOperator.get(bufSize);
+            this.src = src;
+            this.bufSize = bufSize;
         }
 
         @Override
@@ -94,11 +95,14 @@ final class CharReaderImpl {
             if (len == 0) {
                 return CharSegment.empty(false);
             }
-            char[] chars = operator.read(source, len);
-            if (chars == null) {
+            IOHelper.checkLen(len);
+            char[] data = new char[len];
+            int readSize = IOOperations.readTo0(src, data, 0, data.length);
+            if (readSize < 0) {
                 return CharSegment.empty(true);
             }
-            return CharSegment.of(CharBuffer.wrap(chars), chars.length < len);
+            data = readSize == len ? data : Arrays.copyOfRange(data, 0, readSize);
+            return CharSegment.of(CharBuffer.wrap(data), readSize < len);
         }
 
         @Override
@@ -114,12 +118,12 @@ final class CharReaderImpl {
             }
         }
 
-        private long skip0(long size) throws Exception {
+        private long skip0(long len) throws Exception {
             long hasRead = 0;
-            while (hasRead < size) {
-                long onceSize = source.skip(size - hasRead);
+            while (hasRead < len) {
+                long onceSize = src.skip(len - hasRead);
                 if (onceSize == 0) {
-                    if (source.read() == -1) {
+                    if (src.read() == -1) {
                         break;
                     } else {
                         hasRead++;
@@ -132,43 +136,46 @@ final class CharReaderImpl {
 
         @Override
         public long readTo(@Nonnull Appendable dst) throws IORuntimeException {
-            return operator.readTo(source, dst);
+            return IOOperations.readTo0(src, dst, bufSize);
         }
 
         @Override
         public long readTo(@Nonnull Appendable dst, long len) throws IllegalArgumentException, IORuntimeException {
-            return operator.readTo(source, dst, len);
+            IOHelper.checkLen(len);
+            return IOOperations.readTo0(src, dst, len, bufSize);
         }
 
         @Override
         public int readTo(char @Nonnull [] dst) throws IORuntimeException {
-            return operator.readTo(source, dst);
+            return IOOperations.readTo0(src, dst, 0, dst.length);
         }
 
         @Override
         public int readTo(char @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException, IORuntimeException {
-            return operator.readTo(source, dst, off, len);
+            IOHelper.checkOffLen(dst.length, off, len);
+            return IOOperations.readTo0(src, dst, off, len);
         }
 
         @Override
         public int readTo(@Nonnull CharBuffer dst) throws IORuntimeException {
-            return operator.readTo(source, dst);
+            return IOOperations.readTo0(src, dst, dst.remaining());
         }
 
         @Override
         public int readTo(@Nonnull CharBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
-            return operator.readTo(source, dst, len);
+            IOHelper.checkLen(len);
+            return IOOperations.readTo0(src, dst, len);
         }
 
         @Override
         public boolean markSupported() {
-            return source.markSupported();
+            return src.markSupported();
         }
 
         @Override
         public void mark() throws IORuntimeException {
             try {
-                source.mark(0);
+                src.mark(Integer.MAX_VALUE);
             } catch (Exception e) {
                 throw new IORuntimeException(e);
             }
@@ -177,7 +184,7 @@ final class CharReaderImpl {
         @Override
         public void reset() throws IORuntimeException {
             try {
-                source.reset();
+                src.reset();
             } catch (Exception e) {
                 throw new IORuntimeException(e);
             }
@@ -186,27 +193,22 @@ final class CharReaderImpl {
         @Override
         public void close() throws IORuntimeException {
             try {
-                source.close();
+                src.close();
             } catch (Exception e) {
                 throw new IORuntimeException(e);
             }
-        }
-
-        @Override
-        public Reader asReader() {
-            return source;
         }
     }
 
     private static final class CharArrayReader implements CharReader {
 
-        private final char @Nonnull [] source;
+        private final char @Nonnull [] src;
         private final int endPos;
         private int pos;
         private int mark;
 
-        private CharArrayReader(char @Nonnull [] source, int offset, int length) {
-            this.source = source;
+        private CharArrayReader(char @Nonnull [] src, int offset, int length) {
+            this.src = src;
             this.pos = offset;
             this.endPos = offset + length;
             this.mark = pos;
@@ -223,7 +225,7 @@ final class CharReaderImpl {
             }
             int remaining = endPos - pos;
             int actualLen = Math.min(remaining, len);
-            CharBuffer data = CharBuffer.wrap(source, pos, actualLen).slice();
+            CharBuffer data = CharBuffer.wrap(src, pos, actualLen).slice();
             pos += actualLen;
             return CharSegment.of(data, remaining <= len);
         }
@@ -250,7 +252,7 @@ final class CharReaderImpl {
             }
             try {
                 int remaining = endPos - pos;
-                IOKit.write(dst, source, pos, remaining);
+                IOKit.write(dst, src, pos, remaining);
                 pos += remaining;
                 return remaining;
             } catch (Exception e) {
@@ -270,7 +272,7 @@ final class CharReaderImpl {
             try {
                 int remaining = endPos - pos;
                 int actualLen = (int) Math.min(remaining, len);
-                IOKit.write(dst, source, pos, actualLen);
+                IOKit.write(dst, src, pos, actualLen);
                 pos += actualLen;
                 return actualLen;
             } catch (Exception e) {
@@ -298,7 +300,7 @@ final class CharReaderImpl {
             }
             int remaining = endPos - pos;
             int copySize = Math.min(remaining, len);
-            System.arraycopy(source, pos, dst, off, copySize);
+            System.arraycopy(src, pos, dst, off, copySize);
             pos += copySize;
             return copySize;
         }
@@ -329,14 +331,13 @@ final class CharReaderImpl {
                 return -1;
             }
             int remaining = endPos - pos;
-            int putSize = Math.min(remaining, dst.remaining());
-            putSize = Math.min(putSize, len);
+            int putSize = MathKit.min(remaining, dst.remaining(), len);
             return putTo0(dst, putSize);
         }
 
         private int putTo0(@Nonnull CharBuffer dst, int putSize) throws IORuntimeException {
             try {
-                dst.put(source, pos, putSize);
+                dst.put(src, pos, putSize);
                 pos += putSize;
                 return putSize;
             } catch (Exception e) {
@@ -361,54 +362,6 @@ final class CharReaderImpl {
 
         @Override
         public void close() {
-        }
-
-        @Override
-        public Reader asReader() {
-            return new Reader() {
-
-                @Override
-                public int read() {
-                    if (pos == endPos) {
-                        return -1;
-                    }
-                    return source[pos++] & 0x0000ffff;
-                }
-
-                @Override
-                public int read(char @Nonnull [] cbuf, int off, int len) throws IndexOutOfBoundsException {
-                    return CharArrayReader.this.readTo(cbuf, off, len);
-                }
-
-                @Override
-                public long skip(long n) throws IllegalArgumentException {
-                    return CharArrayReader.this.skip(n);
-                }
-
-                @Override
-                public boolean ready() {
-                    return true;
-                }
-
-                @Override
-                public void close() {
-                }
-
-                @Override
-                public void mark(int readlimit) {
-                    CharArrayReader.this.mark();
-                }
-
-                @Override
-                public void reset() {
-                    CharArrayReader.this.reset();
-                }
-
-                @Override
-                public boolean markSupported() {
-                    return true;
-                }
-            };
         }
     }
 
@@ -543,8 +496,7 @@ final class CharReaderImpl {
                 return -1;
             }
             int remaining = endPos - pos;
-            int putSize = Math.min(remaining, dst.remaining());
-            putSize = Math.min(putSize, len);
+            int putSize = MathKit.min(remaining, dst.remaining(), len);
             return putTo0(dst, putSize);
         }
 
@@ -576,62 +528,14 @@ final class CharReaderImpl {
         @Override
         public void close() {
         }
-
-        @Override
-        public Reader asReader() {
-            return new Reader() {
-
-                @Override
-                public int read() {
-                    if (pos == endPos) {
-                        return -1;
-                    }
-                    return source.charAt(pos++) & 0x0000ffff;
-                }
-
-                @Override
-                public int read(char @Nonnull [] cbuf, int off, int len) throws IndexOutOfBoundsException {
-                    return CharSequenceReader.this.readTo(cbuf, off, len);
-                }
-
-                @Override
-                public long skip(long n) throws IllegalArgumentException {
-                    return CharSequenceReader.this.skip(n);
-                }
-
-                @Override
-                public boolean ready() {
-                    return true;
-                }
-
-                @Override
-                public void close() {
-                }
-
-                @Override
-                public void mark(int readlimit) {
-                    CharSequenceReader.this.mark();
-                }
-
-                @Override
-                public void reset() {
-                    CharSequenceReader.this.reset();
-                }
-
-                @Override
-                public boolean markSupported() {
-                    return true;
-                }
-            };
-        }
     }
 
     private static final class CharBufferReader implements CharReader {
 
-        private final @Nonnull CharBuffer source;
+        private final @Nonnull CharBuffer src;
 
-        private CharBufferReader(@Nonnull CharBuffer source) {
-            this.source = source;
+        private CharBufferReader(@Nonnull CharBuffer src) {
+            this.src = src;
         }
 
         @Override
@@ -640,16 +544,16 @@ final class CharReaderImpl {
             if (len == 0) {
                 return CharSegment.empty(false);
             }
-            if (!source.hasRemaining()) {
+            if (!src.hasRemaining()) {
                 return CharSegment.empty(true);
             }
-            int pos = source.position();
-            int limit = source.limit();
+            int pos = src.position();
+            int limit = src.limit();
             int newPos = Math.min(pos + len, limit);
-            source.limit(newPos);
-            CharBuffer data = source.slice();
-            source.position(newPos);
-            source.limit(limit);
+            src.limit(newPos);
+            CharBuffer data = src.slice();
+            src.position(newPos);
+            src.limit(limit);
             return CharSegment.of(data, newPos >= limit);
         }
 
@@ -659,44 +563,45 @@ final class CharReaderImpl {
             if (len == 0) {
                 return 0;
             }
-            if (!source.hasRemaining()) {
+            if (!src.hasRemaining()) {
                 return 0;
             }
-            int pos = source.position();
-            int newPos = (int) Math.min(pos + len, source.limit());
-            source.position(newPos);
+            int pos = src.position();
+            int newPos = (int) Math.min(pos + len, src.limit());
+            src.position(newPos);
             return newPos - pos;
         }
 
         @Override
         public long readTo(@Nonnull Appendable dst) throws IORuntimeException {
-            return BufferKit.readTo(source, dst);
+            return BufferKit.readTo(src, dst);
         }
 
         @Override
         public long readTo(@Nonnull Appendable dst, long len) throws IllegalArgumentException, IORuntimeException {
+            IOHelper.checkLen(len);
             int actualLen = (int) Math.min(Integer.MAX_VALUE, len);
-            return BufferKit.readTo(source, dst, actualLen);
+            return BufferKit.readTo0(src, dst, actualLen);
         }
 
         @Override
         public int readTo(char @Nonnull [] dst) throws IORuntimeException {
-            return BufferKit.readTo(source, dst);
+            return BufferKit.readTo(src, dst);
         }
 
         @Override
         public int readTo(char @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException, IORuntimeException {
-            return BufferKit.readTo(source, dst, off, len);
+            return BufferKit.readTo(src, dst, off, len);
         }
 
         @Override
         public int readTo(@Nonnull CharBuffer dst) throws IORuntimeException {
-            return BufferKit.readTo(source, dst);
+            return BufferKit.readTo(src, dst);
         }
 
         @Override
         public int readTo(@Nonnull CharBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
-            return BufferKit.readTo(source, dst, len);
+            return BufferKit.readTo(src, dst, len);
         }
 
         @Override
@@ -706,13 +611,13 @@ final class CharReaderImpl {
 
         @Override
         public void mark() throws IORuntimeException {
-            source.mark();
+            src.mark();
         }
 
         @Override
         public void reset() throws IORuntimeException {
             try {
-                source.reset();
+                src.reset();
             } catch (Exception e) {
                 throw new IORuntimeException(e);
             }
@@ -720,58 +625,6 @@ final class CharReaderImpl {
 
         @Override
         public void close() throws IORuntimeException {
-        }
-
-        @Override
-        public Reader asReader() {
-            return new Reader() {
-
-                @Override
-                public int read() {
-                    if (!source.hasRemaining()) {
-                        return -1;
-                    }
-                    return source.get() & 0x0000ffff;
-                }
-
-                @Override
-                public int read(char @Nonnull [] cbuf, int off, int len) throws IndexOutOfBoundsException {
-                    return CharBufferReader.this.readTo(cbuf, off, len);
-                }
-
-                @Override
-                public long skip(long n) throws IllegalArgumentException {
-                    return CharBufferReader.this.skip(n);
-                }
-
-                @Override
-                public boolean ready() {
-                    return true;
-                }
-
-                @Override
-                public void close() {
-                }
-
-                @Override
-                public void mark(int readlimit) {
-                    CharBufferReader.this.mark();
-                }
-
-                @Override
-                public void reset() throws IOException {
-                    try {
-                        source.reset();
-                    } catch (Exception e) {
-                        throw new IOException(e);
-                    }
-                }
-
-                @Override
-                public boolean markSupported() {
-                    return true;
-                }
-            };
         }
     }
 
@@ -926,75 +779,6 @@ final class CharReaderImpl {
         @Override
         public void close() throws IORuntimeException {
             source.close();
-        }
-
-        @Override
-        public Reader asReader() {
-            return new Reader() {
-
-                @Override
-                public int read() {
-                    CharSegment segment = LimitedReader.this.read(1);
-                    CharBuffer buffer = segment.data();
-                    if (!buffer.hasRemaining()) {
-                        return -1;
-                    }
-                    return buffer.get() & 0x0000ffff;
-                }
-
-                @Override
-                public int read(char @Nonnull [] cbuf, int off, int len) throws IndexOutOfBoundsException {
-                    return LimitedReader.this.readTo(cbuf, off, len);
-                }
-
-                @Override
-                public long skip(long n) throws IllegalArgumentException, IOException {
-                    try {
-                        return LimitedReader.this.skip(n);
-                    } catch (IllegalArgumentException e) {
-                        throw e;
-                    } catch (Exception e) {
-                        throw new IOException(e);
-                    }
-                }
-
-                @Override
-                public boolean ready() {
-                    return false;
-                }
-
-                @Override
-                public void close() throws IOException {
-                    try {
-                        LimitedReader.this.close();
-                    } catch (Exception e) {
-                        throw new IOException(e);
-                    }
-                }
-
-                @Override
-                public void mark(int readlimit) throws IOException {
-                    try {
-                        LimitedReader.this.mark();
-                    } catch (Exception e) {
-                        throw new IOException(e);
-                    }
-                }
-
-                @Override
-                public void reset() throws IOException {
-                    try {
-                        LimitedReader.this.reset();
-                    } catch (Exception e) {
-                        throw new IOException(e);
-                    }
-                }
-
-                @Override
-                public boolean markSupported() {
-                    return LimitedReader.this.markSupported();
-                }
-            };
         }
     }
 }
