@@ -10,7 +10,6 @@
  * Core I/O Utility Interfaces:
  * <ul>
  *     <li>{@link xyz.sunqian.common.io.IOOperator}</li>
- *     <li>{@link xyz.sunqian.common.io.CharIO}</li>
  * </ul>
  * <p>
  * Core Interfaces:

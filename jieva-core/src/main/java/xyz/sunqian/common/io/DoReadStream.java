@@ -35,7 +35,7 @@ public abstract class DoReadStream extends InputStream {
 
     @Override
     public int read(byte @Nonnull [] b, int off, int len) throws IOException {
-        IOChecker.checkOffLen(b.length, off, len);
+        IOHelper.checkOffLen(b.length, off, len);
         return doRead(b, off, len);
     }
 }

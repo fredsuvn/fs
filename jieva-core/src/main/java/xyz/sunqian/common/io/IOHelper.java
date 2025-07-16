@@ -2,7 +2,9 @@ package xyz.sunqian.common.io;
 
 import xyz.sunqian.common.base.JieCheck;
 
-public class IOChecker {
+final class IOHelper {
+
+    static final int DEFAULT_BUFFER_SIZE = 1024 * 8;
 
     static void checkOffLen(int range, int off, int len) throws IndexOutOfBoundsException {
         JieCheck.checkOffsetLength(range, off, len);

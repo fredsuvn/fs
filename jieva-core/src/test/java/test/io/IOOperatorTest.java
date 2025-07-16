@@ -2,16 +2,22 @@ package test.io;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
-import xyz.sunqian.common.io.IOOperator;
+import xyz.sunqian.common.base.chars.CharsBuilder;
+import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IOKit;
+import xyz.sunqian.common.io.IOOperator;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.test.DataTest;
+import xyz.sunqian.test.ErrorAppender;
 import xyz.sunqian.test.ErrorOutputStream;
 import xyz.sunqian.test.ReadOps;
 import xyz.sunqian.test.TestInputStream;
+import xyz.sunqian.test.TestReader;
 
 import java.io.ByteArrayInputStream;
+import java.io.CharArrayReader;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
@@ -25,26 +31,26 @@ import static org.testng.Assert.expectThrows;
 public class IOOperatorTest implements DataTest {
 
     @Test
-    public void testRead() throws Exception {
-        testRead(64);
-        testRead(128);
-        testRead(256);
-        testRead(1024);
-        testRead(IOKit.bufferSize());
-        testRead(IOKit.bufferSize() - 1);
-        testRead(IOKit.bufferSize() + 1);
-        testRead(IOKit.bufferSize() - 5);
-        testRead(IOKit.bufferSize() + 5);
-        testRead(IOKit.bufferSize() * 2);
-        testRead(IOKit.bufferSize() * 2 - 1);
-        testRead(IOKit.bufferSize() * 2 + 1);
-        testRead(IOKit.bufferSize() * 2 - 5);
-        testRead(IOKit.bufferSize() * 2 + 5);
-        testRead(IOKit.bufferSize() * 3);
-        testRead(IOKit.bufferSize() * 3 - 1);
-        testRead(IOKit.bufferSize() * 3 + 1);
-        testRead(IOKit.bufferSize() * 3 - 5);
-        testRead(IOKit.bufferSize() * 3 + 5);
+    public void testReadBytes() throws Exception {
+        testReadBytes(64);
+        testReadBytes(128);
+        testReadBytes(256);
+        testReadBytes(1024);
+        testReadBytes(IOKit.bufferSize());
+        testReadBytes(IOKit.bufferSize() - 1);
+        testReadBytes(IOKit.bufferSize() + 1);
+        testReadBytes(IOKit.bufferSize() - 5);
+        testReadBytes(IOKit.bufferSize() + 5);
+        testReadBytes(IOKit.bufferSize() * 2);
+        testReadBytes(IOKit.bufferSize() * 2 - 1);
+        testReadBytes(IOKit.bufferSize() * 2 + 1);
+        testReadBytes(IOKit.bufferSize() * 2 - 5);
+        testReadBytes(IOKit.bufferSize() * 2 + 5);
+        testReadBytes(IOKit.bufferSize() * 3);
+        testReadBytes(IOKit.bufferSize() * 3 - 1);
+        testReadBytes(IOKit.bufferSize() * 3 + 1);
+        testReadBytes(IOKit.bufferSize() * 3 - 5);
+        testReadBytes(IOKit.bufferSize() * 3 + 5);
 
         {
             // read stream
@@ -67,26 +73,26 @@ public class IOOperatorTest implements DataTest {
         }
     }
 
-    private void testRead(int totalSize) throws Exception {
-        testRead(IOOperator.get(IOKit.bufferSize()), totalSize);
-        testRead(IOOperator.get(1), totalSize);
-        testRead(IOOperator.get(2), totalSize);
-        testRead(IOOperator.get(IOKit.bufferSize() - 1), totalSize);
-        testRead(IOOperator.get(IOKit.bufferSize() + 1), totalSize);
-        testRead(IOOperator.get(IOKit.bufferSize() * 2), totalSize);
+    private void testReadBytes(int totalSize) throws Exception {
+        testReadBytes(IOOperator.get(IOKit.bufferSize()), totalSize);
+        testReadBytes(IOOperator.get(1), totalSize);
+        testReadBytes(IOOperator.get(2), totalSize);
+        testReadBytes(IOOperator.get(IOKit.bufferSize() - 1), totalSize);
+        testReadBytes(IOOperator.get(IOKit.bufferSize() + 1), totalSize);
+        testReadBytes(IOOperator.get(IOKit.bufferSize() * 2), totalSize);
     }
 
-    private void testRead(IOOperator reader, int totalSize) throws Exception {
-        testRead(reader, totalSize, totalSize);
-        testRead(reader, totalSize, 0);
-        testRead(reader, totalSize, 1);
-        testRead(reader, totalSize, totalSize / 2);
-        testRead(reader, totalSize, totalSize - 1);
-        testRead(reader, totalSize, totalSize + 1);
-        testRead(reader, totalSize, totalSize * 2);
+    private void testReadBytes(IOOperator reader, int totalSize) throws Exception {
+        testReadBytes(reader, totalSize, totalSize);
+        testReadBytes(reader, totalSize, 0);
+        testReadBytes(reader, totalSize, 1);
+        testReadBytes(reader, totalSize, totalSize / 2);
+        testReadBytes(reader, totalSize, totalSize - 1);
+        testReadBytes(reader, totalSize, totalSize + 1);
+        testReadBytes(reader, totalSize, totalSize * 2);
     }
 
-    private void testRead(IOOperator reader, int totalSize, int readSize) throws Exception {
+    private void testReadBytes(IOOperator reader, int totalSize, int readSize) throws Exception {
         {
             // stream
             byte[] data = randomBytes(totalSize);
@@ -122,26 +128,26 @@ public class IOOperatorTest implements DataTest {
     }
 
     @Test
-    public void testReadTo() throws Exception {
-        testReadTo(64);
-        testReadTo(128);
-        testReadTo(256);
-        testReadTo(1024);
-        testReadTo(IOKit.bufferSize());
-        testReadTo(IOKit.bufferSize() - 1);
-        testReadTo(IOKit.bufferSize() + 1);
-        testReadTo(IOKit.bufferSize() - 5);
-        testReadTo(IOKit.bufferSize() + 5);
-        testReadTo(IOKit.bufferSize() * 2);
-        testReadTo(IOKit.bufferSize() * 2 - 1);
-        testReadTo(IOKit.bufferSize() * 2 + 1);
-        testReadTo(IOKit.bufferSize() * 2 - 5);
-        testReadTo(IOKit.bufferSize() * 2 + 5);
-        testReadTo(IOKit.bufferSize() * 3);
-        testReadTo(IOKit.bufferSize() * 3 - 1);
-        testReadTo(IOKit.bufferSize() * 3 + 1);
-        testReadTo(IOKit.bufferSize() * 3 - 5);
-        testReadTo(IOKit.bufferSize() * 3 + 5);
+    public void testReadBytesTo() throws Exception {
+        testReadBytesTo(64);
+        testReadBytesTo(128);
+        testReadBytesTo(256);
+        testReadBytesTo(1024);
+        testReadBytesTo(IOKit.bufferSize());
+        testReadBytesTo(IOKit.bufferSize() - 1);
+        testReadBytesTo(IOKit.bufferSize() + 1);
+        testReadBytesTo(IOKit.bufferSize() - 5);
+        testReadBytesTo(IOKit.bufferSize() + 5);
+        testReadBytesTo(IOKit.bufferSize() * 2);
+        testReadBytesTo(IOKit.bufferSize() * 2 - 1);
+        testReadBytesTo(IOKit.bufferSize() * 2 + 1);
+        testReadBytesTo(IOKit.bufferSize() * 2 - 5);
+        testReadBytesTo(IOKit.bufferSize() * 2 + 5);
+        testReadBytesTo(IOKit.bufferSize() * 3);
+        testReadBytesTo(IOKit.bufferSize() * 3 - 1);
+        testReadBytesTo(IOKit.bufferSize() * 3 + 1);
+        testReadBytesTo(IOKit.bufferSize() * 3 - 5);
+        testReadBytesTo(IOKit.bufferSize() * 3 + 5);
 
         {
             // size 0: stream to stream
@@ -203,52 +209,64 @@ public class IOOperatorTest implements DataTest {
         {
             // size 0: stream to heap buffer
             byte[] data = new byte[0];
-            ByteBuffer buf = ByteBuffer.allocate(1);
+            ByteBuffer dst1 = ByteBuffer.allocate(1);
             assertEquals(
-                IOKit.readTo(new ByteArrayInputStream(data), buf),
+                IOKit.readTo(new ByteArrayInputStream(data), dst1),
                 -1
             );
-            assertEquals(buf.position(), 0);
+            assertEquals(dst1.position(), 0);
             assertEquals(
-                IOKit.readTo(new ByteArrayInputStream(data), ByteBuffer.allocate(0)),
-                0
-            );
-            assertEquals(buf.position(), 0);
-            assertEquals(
-                IOKit.readTo(new ByteArrayInputStream(data), buf, 1),
+                IOKit.readTo(new ByteArrayInputStream(data), dst1, 1),
                 -1
             );
-            assertEquals(buf.position(), 0);
+            assertEquals(dst1.position(), 0);
             assertEquals(
-                IOKit.readTo(new ByteArrayInputStream(data), buf, 0),
+                IOKit.readTo(new ByteArrayInputStream(data), dst1, 0),
                 0
             );
-            assertEquals(buf.position(), 0);
+            assertEquals(dst1.position(), 0);
+            ByteBuffer dst2 = ByteBuffer.allocate(0);
+            assertEquals(
+                IOKit.readTo(new ByteArrayInputStream(data), dst2),
+                0
+            );
+            assertEquals(dst2.position(), 0);
+            assertEquals(
+                IOKit.readTo(new ByteArrayInputStream(data), dst2, 1),
+                0
+            );
+            assertEquals(dst2.position(), 0);
         }
         {
             // size 0: stream to direct buffer
             byte[] data = new byte[0];
-            ByteBuffer buf = ByteBuffer.allocateDirect(1);
+            ByteBuffer dst1 = ByteBuffer.allocateDirect(1);
             assertEquals(
-                IOKit.readTo(new ByteArrayInputStream(data), buf),
+                IOKit.readTo(new ByteArrayInputStream(data), dst1),
                 -1
             );
-            assertEquals(buf.position(), 0);
+            assertEquals(dst1.position(), 0);
             assertEquals(
-                IOKit.readTo(new ByteArrayInputStream(data), ByteBuffer.allocateDirect(0)),
-                0
-            );
-            assertEquals(buf.position(), 0);
-            assertEquals(
-                IOKit.readTo(new ByteArrayInputStream(data), buf, 1),
+                IOKit.readTo(new ByteArrayInputStream(data), dst1, 1),
                 -1
             );
-            assertEquals(buf.position(), 0);
+            assertEquals(dst1.position(), 0);
             assertEquals(
-                IOKit.readTo(new ByteArrayInputStream(data), buf, 0),
+                IOKit.readTo(new ByteArrayInputStream(data), dst1, 0),
                 0
             );
-            assertEquals(buf.position(), 0);
+            assertEquals(dst1.position(), 0);
+            ByteBuffer dst2 = ByteBuffer.allocateDirect(0);
+            assertEquals(
+                IOKit.readTo(new ByteArrayInputStream(data), dst2),
+                0
+            );
+            assertEquals(dst2.position(), 0);
+            assertEquals(
+                IOKit.readTo(new ByteArrayInputStream(data), dst2, 1),
+                0
+            );
+            assertEquals(dst2.position(), 0);
         }
         {
             // size 0: channel to channel
@@ -317,11 +335,6 @@ public class IOOperatorTest implements DataTest {
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), ByteBuffer.allocate(0)),
-                0
-            );
-            assertEquals(buf.position(), 0);
-            assertEquals(
                 IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf, 1),
                 -1
             );
@@ -331,6 +344,17 @@ public class IOOperatorTest implements DataTest {
                 0
             );
             assertEquals(buf.position(), 0);
+            ByteBuffer dst2 = ByteBuffer.allocate(0);
+            assertEquals(
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst2),
+                0
+            );
+            assertEquals(dst2.position(), 0);
+            assertEquals(
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst2, 1),
+                0
+            );
+            assertEquals(dst2.position(), 0);
         }
         {
             // size 0: channel to direct buffer
@@ -342,11 +366,6 @@ public class IOOperatorTest implements DataTest {
             );
             assertEquals(buf.position(), 0);
             assertEquals(
-                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), ByteBuffer.allocateDirect(0)),
-                0
-            );
-            assertEquals(buf.position(), 0);
-            assertEquals(
                 IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), buf, 1),
                 -1
             );
@@ -356,6 +375,17 @@ public class IOOperatorTest implements DataTest {
                 0
             );
             assertEquals(buf.position(), 0);
+            ByteBuffer dst2 = ByteBuffer.allocateDirect(0);
+            assertEquals(
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst2),
+                0
+            );
+            assertEquals(dst2.position(), 0);
+            assertEquals(
+                IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst2, 1),
+                0
+            );
+            assertEquals(dst2.position(), 0);
         }
 
         {
@@ -377,12 +407,9 @@ public class IOOperatorTest implements DataTest {
             expectThrows(IORuntimeException.class, () ->
                 IOKit.readTo(new ByteArrayInputStream(new byte[1]), ByteBuffer.allocate(1).asReadOnlyBuffer())
             );
-            expectThrows(IORuntimeException.class, () ->
-                IOKit.readTo(tin, errCh)
-            );
-            expectThrows(IllegalArgumentException.class, () ->
-                IOKit.readTo(tin, errCh, -1)
-            );
+            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tin, errCh));
+            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tin, errCh, 1));
+            expectThrows(IllegalArgumentException.class, () -> IOKit.readTo(tin, errCh, -1));
             // read channel
             ReadableByteChannel tch = Channels.newChannel(tin);
             expectThrows(IORuntimeException.class, () -> IOKit.readTo(tch, errCh));
@@ -399,35 +426,32 @@ public class IOOperatorTest implements DataTest {
                     ByteBuffer.allocate(1).asReadOnlyBuffer()
                 )
             );
-            expectThrows(IORuntimeException.class, () ->
-                IOKit.readTo(tch, errOut)
-            );
-            expectThrows(IllegalArgumentException.class, () ->
-                IOKit.readTo(tch, errOut, -1)
-            );
+            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tch, errOut));
+            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tch, errOut, 1));
+            expectThrows(IllegalArgumentException.class, () -> IOKit.readTo(tch, errOut, -1));
         }
     }
 
-    private void testReadTo(int totalSize) throws Exception {
-        testReadTo(IOOperator.get(IOKit.bufferSize()), totalSize);
-        testReadTo(IOOperator.get(1), totalSize);
-        testReadTo(IOOperator.get(2), totalSize);
-        testReadTo(IOOperator.get(IOKit.bufferSize() - 1), totalSize);
-        testReadTo(IOOperator.get(IOKit.bufferSize() + 1), totalSize);
-        testReadTo(IOOperator.get(IOKit.bufferSize() * 2), totalSize);
+    private void testReadBytesTo(int totalSize) throws Exception {
+        testReadBytesTo(IOOperator.get(IOKit.bufferSize()), totalSize);
+        testReadBytesTo(IOOperator.get(1), totalSize);
+        testReadBytesTo(IOOperator.get(2), totalSize);
+        testReadBytesTo(IOOperator.get(IOKit.bufferSize() - 1), totalSize);
+        testReadBytesTo(IOOperator.get(IOKit.bufferSize() + 1), totalSize);
+        testReadBytesTo(IOOperator.get(IOKit.bufferSize() * 2), totalSize);
     }
 
-    private void testReadTo(IOOperator reader, int totalSize) throws Exception {
-        testReadTo(reader, totalSize, totalSize);
-        testReadTo(reader, totalSize, 0);
-        testReadTo(reader, totalSize, 1);
-        testReadTo(reader, totalSize, totalSize / 2);
-        testReadTo(reader, totalSize, totalSize - 1);
-        testReadTo(reader, totalSize, totalSize + 1);
-        testReadTo(reader, totalSize, totalSize * 2);
+    private void testReadBytesTo(IOOperator reader, int totalSize) throws Exception {
+        testReadBytesTo(reader, totalSize, totalSize);
+        testReadBytesTo(reader, totalSize, 0);
+        testReadBytesTo(reader, totalSize, 1);
+        testReadBytesTo(reader, totalSize, totalSize / 2);
+        testReadBytesTo(reader, totalSize, totalSize - 1);
+        testReadBytesTo(reader, totalSize, totalSize + 1);
+        testReadBytesTo(reader, totalSize, totalSize * 2);
     }
 
-    private void testReadTo(IOOperator reader, int totalSize, int readSize) throws Exception {
+    private void testReadBytesTo(IOOperator reader, int totalSize, int readSize) throws Exception {
         {
             // stream to stream
             byte[] data = randomBytes(totalSize);
@@ -788,6 +812,383 @@ public class IOOperatorTest implements DataTest {
         }
     }
 
+    @Test
+    public void testReadChars() throws Exception {
+        testReadChars(64);
+        testReadChars(128);
+        testReadChars(256);
+        testReadChars(1024);
+        testReadChars(IOKit.bufferSize());
+        testReadChars(IOKit.bufferSize() - 1);
+        testReadChars(IOKit.bufferSize() + 1);
+        testReadChars(IOKit.bufferSize() - 5);
+        testReadChars(IOKit.bufferSize() + 5);
+        testReadChars(IOKit.bufferSize() * 2);
+        testReadChars(IOKit.bufferSize() * 2 - 1);
+        testReadChars(IOKit.bufferSize() * 2 + 1);
+        testReadChars(IOKit.bufferSize() * 2 - 5);
+        testReadChars(IOKit.bufferSize() * 2 + 5);
+        testReadChars(IOKit.bufferSize() * 3);
+        testReadChars(IOKit.bufferSize() * 3 - 1);
+        testReadChars(IOKit.bufferSize() * 3 + 1);
+        testReadChars(IOKit.bufferSize() * 3 - 5);
+        testReadChars(IOKit.bufferSize() * 3 + 5);
+
+        {
+            // read stream
+            assertNull(IOKit.read(new CharArrayReader(new char[0])));
+            assertNull(IOKit.read(new CharArrayReader(new char[0]), 66));
+            assertNull(IOKit.string(new CharArrayReader(new char[0])));
+            assertNull(IOKit.string(new CharArrayReader(new char[0]), 66));
+        }
+
+        {
+            // error
+            TestReader tin = new TestReader(new CharArrayReader(new char[0]));
+            tin.setNextOperation(ReadOps.THROW, 99);
+            expectThrows(IORuntimeException.class, () -> IOKit.read(tin));
+            expectThrows(IORuntimeException.class, () -> IOKit.read(tin, 1));
+            expectThrows(IllegalArgumentException.class, () -> IOKit.read(tin, -1));
+        }
+    }
+
+    private void testReadChars(int totalSize) throws Exception {
+        testReadChars(IOOperator.get(IOKit.bufferSize()), totalSize);
+        testReadChars(IOOperator.get(1), totalSize);
+        testReadChars(IOOperator.get(2), totalSize);
+        testReadChars(IOOperator.get(IOKit.bufferSize() - 1), totalSize);
+        testReadChars(IOOperator.get(IOKit.bufferSize() + 1), totalSize);
+        testReadChars(IOOperator.get(IOKit.bufferSize() * 2), totalSize);
+    }
+
+    private void testReadChars(IOOperator reader, int totalSize) throws Exception {
+        testReadChars(reader, totalSize, totalSize);
+        testReadChars(reader, totalSize, 0);
+        testReadChars(reader, totalSize, 1);
+        testReadChars(reader, totalSize, totalSize / 2);
+        testReadChars(reader, totalSize, totalSize - 1);
+        testReadChars(reader, totalSize, totalSize + 1);
+        testReadChars(reader, totalSize, totalSize * 2);
+    }
+
+    private void testReadChars(IOOperator reader, int totalSize, int readSize) throws Exception {
+        {
+            // reader
+            char[] data = randomChars(totalSize);
+            assertEquals(reader.read(new CharArrayReader(data)), data);
+            assertEquals(reader.string(new CharArrayReader(data)), new String(data));
+            assertEquals(
+                reader.read(new CharArrayReader(data), readSize < 0 ? totalSize : readSize),
+                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+            );
+            assertEquals(
+                reader.string(new CharArrayReader(data), readSize < 0 ? totalSize : readSize),
+                new String((readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize))
+            );
+            assertEquals(reader.read(new OneCharReader(data)), data);
+            assertEquals(reader.string(new OneCharReader(data)), new String(data));
+            assertEquals(
+                reader.read(new OneCharReader(data), readSize < 0 ? totalSize : readSize),
+                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+            );
+            assertEquals(
+                reader.string(new OneCharReader(data), readSize < 0 ? totalSize : readSize),
+                new String((readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize))
+            );
+        }
+    }
+
+    @Test
+    public void testReadCharsTo() throws Exception {
+        testReadCharsTo(64);
+        testReadCharsTo(128);
+        testReadCharsTo(256);
+        testReadCharsTo(1024);
+        testReadCharsTo(IOKit.bufferSize());
+        testReadCharsTo(IOKit.bufferSize() - 1);
+        testReadCharsTo(IOKit.bufferSize() + 1);
+        testReadCharsTo(IOKit.bufferSize() - 5);
+        testReadCharsTo(IOKit.bufferSize() + 5);
+        testReadCharsTo(IOKit.bufferSize() * 2);
+        testReadCharsTo(IOKit.bufferSize() * 2 - 1);
+        testReadCharsTo(IOKit.bufferSize() * 2 + 1);
+        testReadCharsTo(IOKit.bufferSize() * 2 - 5);
+        testReadCharsTo(IOKit.bufferSize() * 2 + 5);
+        testReadCharsTo(IOKit.bufferSize() * 3);
+        testReadCharsTo(IOKit.bufferSize() * 3 - 1);
+        testReadCharsTo(IOKit.bufferSize() * 3 + 1);
+        testReadCharsTo(IOKit.bufferSize() * 3 - 5);
+        testReadCharsTo(IOKit.bufferSize() * 3 + 5);
+
+        {
+            // size 0: reader to appender
+            char[] data = new char[0];
+            CharsBuilder bb = new CharsBuilder();
+            assertEquals(
+                IOKit.readTo(new CharArrayReader(data), bb),
+                -1
+            );
+            assertEquals(bb.size(), 0);
+            assertEquals(
+                IOKit.readTo(new CharArrayReader(data), bb, 0),
+                0
+            );
+            assertEquals(bb.size(), 0);
+            assertEquals(
+                IOKit.readTo(new CharArrayReader(data), bb, 11),
+                -1
+            );
+            assertEquals(bb.size(), 0);
+        }
+        {
+            // size 0: reader to array
+            char[] data = new char[0];
+            char[] aar = new char[64];
+            Arrays.fill(aar, (char) 7);
+            assertEquals(
+                IOKit.readTo(new CharArrayReader(data), aar),
+                -1
+            );
+            assertEquals(aar[0], (char) 7);
+            assertEquals(
+                IOKit.readTo(new CharArrayReader(data), new char[0]),
+                0
+            );
+            assertEquals(aar[0], (char) 7);
+        }
+        {
+            // size 0: reader to heap buffer
+            char[] data = new char[0];
+            CharBuffer dst1 = CharBuffer.allocate(1);
+            assertEquals(
+                IOKit.readTo(new CharArrayReader(data), dst1),
+                -1
+            );
+            assertEquals(dst1.position(), 0);
+            assertEquals(
+                IOKit.readTo(new CharArrayReader(data), CharBuffer.allocate(0)),
+                0
+            );
+            assertEquals(dst1.position(), 0);
+            assertEquals(
+                IOKit.readTo(new CharArrayReader(data), dst1, 1),
+                -1
+            );
+            assertEquals(dst1.position(), 0);
+            assertEquals(
+                IOKit.readTo(new CharArrayReader(data), dst1, 0),
+                0
+            );
+            assertEquals(dst1.position(), 0);
+            CharBuffer dst2 = CharBuffer.allocate(0);
+            assertEquals(
+                IOKit.readTo(new CharArrayReader(data), dst2),
+                0
+            );
+            assertEquals(dst2.position(), 0);
+            assertEquals(
+                IOKit.readTo(new CharArrayReader(data), dst2, 1),
+                0
+            );
+            assertEquals(dst2.position(), 0);
+        }
+        {
+            // size 0: reader to direct buffer
+            char[] data = new char[0];
+            CharBuffer dst1 = BufferKit.directCharBuffer(1);
+            assertEquals(
+                IOKit.readTo(new CharArrayReader(data), dst1),
+                -1
+            );
+            assertEquals(dst1.position(), 0);
+            assertEquals(
+                IOKit.readTo(new CharArrayReader(data), dst1, 1),
+                -1
+            );
+            assertEquals(dst1.position(), 0);
+            assertEquals(
+                IOKit.readTo(new CharArrayReader(data), dst1, 0),
+                0
+            );
+            assertEquals(dst1.position(), 0);
+            CharBuffer dst2 = BufferKit.directCharBuffer(0);
+            assertEquals(
+                IOKit.readTo(new CharArrayReader(data), dst2),
+                0
+            );
+            assertEquals(dst2.position(), 0);
+            assertEquals(
+                IOKit.readTo(new CharArrayReader(data), dst2, 1),
+                0
+            );
+            assertEquals(dst2.position(), 0);
+        }
+
+        {
+            // error
+            TestReader tin = new TestReader(new CharArrayReader(new char[0]));
+            tin.setNextOperation(ReadOps.THROW, 99);
+            ErrorAppender errOut = new ErrorAppender();
+            // read stream
+            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tin, errOut));
+            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tin, errOut, 1));
+            expectThrows(IllegalArgumentException.class, () -> IOKit.readTo(tin, errOut, -1));
+            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tin, new char[1], 0, 1));
+            expectThrows(IndexOutOfBoundsException.class, () -> IOKit.readTo(tin, new char[0], 1, 0));
+            expectThrows(IndexOutOfBoundsException.class, () -> IOKit.readTo(tin, new char[0], 0, 1));
+            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tin, CharBuffer.allocate(1)));
+            expectThrows(IllegalArgumentException.class, () -> IOKit.readTo(tin, CharBuffer.allocate(1), -1));
+            expectThrows(IORuntimeException.class, () ->
+                IOKit.readTo(new CharArrayReader(new char[1]), CharBuffer.allocate(1).asReadOnlyBuffer())
+            );
+        }
+    }
+
+    private void testReadCharsTo(int totalSize) throws Exception {
+        testReadCharsTo(IOOperator.get(IOKit.bufferSize()), totalSize);
+        testReadCharsTo(IOOperator.get(1), totalSize);
+        testReadCharsTo(IOOperator.get(2), totalSize);
+        testReadCharsTo(IOOperator.get(IOKit.bufferSize() - 1), totalSize);
+        testReadCharsTo(IOOperator.get(IOKit.bufferSize() + 1), totalSize);
+        testReadCharsTo(IOOperator.get(IOKit.bufferSize() * 2), totalSize);
+    }
+
+    private void testReadCharsTo(IOOperator reader, int totalSize) throws Exception {
+        testReadCharsTo(reader, totalSize, totalSize);
+        testReadCharsTo(reader, totalSize, 0);
+        testReadCharsTo(reader, totalSize, 1);
+        testReadCharsTo(reader, totalSize, totalSize / 2);
+        testReadCharsTo(reader, totalSize, totalSize - 1);
+        testReadCharsTo(reader, totalSize, totalSize + 1);
+        testReadCharsTo(reader, totalSize, totalSize * 2);
+    }
+
+    private void testReadCharsTo(IOOperator reader, int totalSize, int readSize) throws Exception {
+        {
+            // reader to appender
+            char[] data = randomChars(totalSize);
+            CharsBuilder builder = new CharsBuilder();
+            assertEquals(
+                reader.readTo(new CharArrayReader(data), builder),
+                totalSize
+            );
+            assertEquals(builder.toCharArray(), data);
+            builder.reset();
+            assertEquals(
+                reader.readTo(new CharArrayReader(data), builder, readSize < 0 ? totalSize : readSize),
+                actualReadSize(totalSize, readSize)
+            );
+            assertEquals(
+                builder.toCharArray(),
+                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+            );
+            builder.reset();
+            assertEquals(
+                reader.readTo(new OneCharReader(data), builder),
+                totalSize
+            );
+            assertEquals(builder.toCharArray(), data);
+            builder.reset();
+            assertEquals(
+                reader.readTo(new OneCharReader(data), builder, readSize < 0 ? totalSize : readSize),
+                actualReadSize(totalSize, readSize)
+            );
+            assertEquals(
+                builder.toCharArray(),
+                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+            );
+            builder.reset();
+        }
+        {
+            // reader to array
+            char[] data = randomChars(totalSize);
+            char[] dst = new char[data.length];
+            assertEquals(
+                reader.readTo(new CharArrayReader(data), dst),
+                totalSize
+            );
+            assertEquals(dst, data);
+            if (readSize >= 0 && readSize <= totalSize) {
+                dst = new char[data.length];
+                assertEquals(
+                    reader.readTo(new CharArrayReader(data), dst, 0, readSize),
+                    readSize
+                );
+                assertEquals(
+                    Arrays.copyOf(dst, readSize),
+                    Arrays.copyOf(data, readSize)
+                );
+                if (readSize <= totalSize - 1) {
+                    dst = new char[data.length];
+                    assertEquals(
+                        reader.readTo(new CharArrayReader(data), dst, 1, readSize),
+                        readSize
+                    );
+                    assertEquals(
+                        Arrays.copyOfRange(dst, 1, 1 + readSize),
+                        Arrays.copyOf(data, readSize)
+                    );
+                }
+            }
+            if (readSize > totalSize) {
+                dst = new char[readSize];
+                assertEquals(
+                    reader.readTo(new CharArrayReader(data), dst, 0, readSize),
+                    totalSize
+                );
+                assertEquals(
+                    Arrays.copyOf(dst, totalSize),
+                    data
+                );
+                dst = new char[readSize + 1];
+                assertEquals(
+                    reader.readTo(new CharArrayReader(data), dst, 1, readSize),
+                    totalSize
+                );
+                assertEquals(
+                    Arrays.copyOfRange(dst, 1, 1 + totalSize),
+                    data
+                );
+            }
+        }
+        {
+            // reader to heap buffer
+            char[] data = randomChars(totalSize);
+            CharBuffer dst = CharBuffer.allocate(data.length);
+            assertEquals(
+                reader.readTo(new CharArrayReader(data), dst),
+                totalSize
+            );
+            assertEquals(dst.flip(), CharBuffer.wrap(data));
+            dst = CharBuffer.allocate(data.length);
+            assertEquals(
+                reader.readTo(new CharArrayReader(data), dst, readSize < 0 ? totalSize : readSize),
+                actualReadSize(totalSize, readSize)
+            );
+            assertEquals(dst.flip(), CharBuffer.wrap(
+                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+            ));
+        }
+        {
+            // reader to direct buffer
+            char[] data = randomChars(totalSize);
+            CharBuffer dst = BufferKit.directCharBuffer(data.length * 2);
+            assertEquals(
+                reader.readTo(new CharArrayReader(data), dst),
+                totalSize
+            );
+            assertEquals(dst.flip(), CharBuffer.wrap(data));
+            dst = BufferKit.directCharBuffer(data.length * 2);
+            assertEquals(
+                reader.readTo(new CharArrayReader(data), dst, readSize < 0 ? totalSize : readSize),
+                actualReadSize(totalSize, readSize)
+            );
+            assertEquals(dst.flip(), CharBuffer.wrap(
+                (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
+            ));
+        }
+    }
+
     private int actualReadSize(int totalSize, int readSize) {
         if (readSize == 0) {
             return 0;
@@ -802,7 +1203,7 @@ public class IOOperatorTest implements DataTest {
     public void testOther() {
         {
             // get operator
-            assertSame(IOOperator.defaultOperator(), IOOperator.get(IOKit.bufferSize()));
+            assertSame(IOOperator.get(IOKit.bufferSize()), IOOperator.get(IOKit.bufferSize()));
             assertEquals(IOOperator.newOperator(666).bufferSize(), 666);
         }
         {

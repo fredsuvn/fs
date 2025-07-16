@@ -14,17 +14,17 @@ import java.nio.channels.WritableByteChannel;
 final class ByteReaderImpl {
 
     static @Nonnull ByteReader of(@Nonnull InputStream src, int bufSize) throws IllegalArgumentException {
-        IOChecker.checkBufSize(bufSize);
+        IOHelper.checkBufSize(bufSize);
         return new ByteStreamReader(src, bufSize);
     }
 
     static @Nonnull ByteReader of(@Nonnull ReadableByteChannel src, int bufSize) throws IllegalArgumentException {
-        IOChecker.checkBufSize(bufSize);
+        IOHelper.checkBufSize(bufSize);
         return new ByteChannelReader(src, bufSize);
     }
 
     static @Nonnull ByteReader of(byte @Nonnull [] src, int off, int len) throws IndexOutOfBoundsException {
-        IOChecker.checkOffLen(src.length, off, len);
+        IOHelper.checkOffLen(src.length, off, len);
         return new ByteArrayReader(src, off, len);
     }
 
@@ -33,7 +33,7 @@ final class ByteReaderImpl {
     }
 
     static @Nonnull ByteReader limit(@Nonnull ByteReader reader, long limit) throws IllegalArgumentException {
-        IOChecker.checkLimit(limit);
+        IOHelper.checkLimit(limit);
         return new LimitedReader(reader, limit);
     }
 
@@ -114,7 +114,7 @@ final class ByteReaderImpl {
 
         @Override
         public long skip(long len) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkSkip(len);
+            IOHelper.checkSkip(len);
             if (len == 0) {
                 return 0;
             }
@@ -303,7 +303,7 @@ final class ByteReaderImpl {
 
         @Override
         public ByteReader limit(long limit) throws IllegalArgumentException {
-            IOChecker.checkLimit(limit);
+            IOHelper.checkLimit(limit);
             if (this.limit < 0) {
                 this.limit = limit;
             } else {
@@ -342,7 +342,7 @@ final class ByteReaderImpl {
 
         @Override
         public long skip(long len) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkSkip(len);
+            IOHelper.checkSkip(len);
             if (len == 0) {
                 return 0;
             }
@@ -456,7 +456,7 @@ final class ByteReaderImpl {
 
         @Override
         public @Nonnull ByteSegment read(int len) throws IllegalArgumentException {
-            IOChecker.checkLen(len);
+            IOHelper.checkLen(len);
             if (len == 0) {
                 return ByteSegment.empty(false);
             }
@@ -472,7 +472,7 @@ final class ByteReaderImpl {
 
         @Override
         public long skip(long len) throws IllegalArgumentException {
-            IOChecker.checkSkip(len);
+            IOHelper.checkSkip(len);
             return skip0(len);
         }
 
@@ -506,7 +506,7 @@ final class ByteReaderImpl {
 
         @Override
         public long readTo(@Nonnull OutputStream dst, long len) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkLen(len);
+            IOHelper.checkLen(len);
             if (len == 0) {
                 return 0;
             }
@@ -540,7 +540,7 @@ final class ByteReaderImpl {
         public long readTo(
             @Nonnull WritableByteChannel dst, long len
         ) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkLen(len);
+            IOHelper.checkLen(len);
             if (len == 0) {
                 return 0;
             }
@@ -562,7 +562,7 @@ final class ByteReaderImpl {
 
         @Override
         public int readTo(byte @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException {
-            IOChecker.checkOffLen(dst.length, off, len);
+            IOHelper.checkOffLen(dst.length, off, len);
             return readTo0(dst, off, len);
         }
 
@@ -595,7 +595,7 @@ final class ByteReaderImpl {
 
         @Override
         public int readTo(@Nonnull ByteBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkLen(len);
+            IOHelper.checkLen(len);
             if (len == 0) {
                 return 0;
             }
@@ -702,7 +702,7 @@ final class ByteReaderImpl {
 
         @Override
         public @Nonnull ByteSegment read(int len) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkLen(len);
+            IOHelper.checkLen(len);
             if (len == 0) {
                 return ByteSegment.empty(false);
             }
@@ -721,7 +721,7 @@ final class ByteReaderImpl {
 
         @Override
         public long skip(long len) throws IllegalArgumentException {
-            IOChecker.checkSkip(len);
+            IOHelper.checkSkip(len);
             return skip0(len);
         }
 
@@ -876,7 +876,7 @@ final class ByteReaderImpl {
 
         @Override
         public @Nonnull ByteSegment read(int len) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkLen(len);
+            IOHelper.checkLen(len);
             if (len == 0) {
                 return ByteSegment.empty(false);
             }
@@ -896,7 +896,7 @@ final class ByteReaderImpl {
 
         @Override
         public long skip(long len) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkSkip(len);
+            IOHelper.checkSkip(len);
             return skip0(len);
         }
 
@@ -928,7 +928,7 @@ final class ByteReaderImpl {
 
         @Override
         public long readTo(@Nonnull OutputStream dst, long len) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkLen(len);
+            IOHelper.checkLen(len);
             if (len == 0) {
                 return 0;
             }
@@ -961,7 +961,7 @@ final class ByteReaderImpl {
         public long readTo(
             @Nonnull WritableByteChannel dst, long len
         ) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkLen(len);
+            IOHelper.checkLen(len);
             if (len == 0) {
                 return 0;
             }
@@ -986,7 +986,7 @@ final class ByteReaderImpl {
         public int readTo(
             byte @Nonnull [] dst, int off, int len
         ) throws IndexOutOfBoundsException, IORuntimeException {
-            IOChecker.checkOffLen(dst.length, off, len);
+            IOHelper.checkOffLen(dst.length, off, len);
             if (len == 0) {
                 return 0;
             }
@@ -1009,7 +1009,7 @@ final class ByteReaderImpl {
 
         @Override
         public int readTo(@Nonnull ByteBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkLen(len);
+            IOHelper.checkLen(len);
             if (len == 0) {
                 return 0;
             }
