@@ -1,7 +1,8 @@
-package xyz.sunqian.common.base;
+package xyz.sunqian.common.base.string;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.CheckKit;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.function.SubFunction;
 
@@ -18,7 +19,7 @@ import java.util.function.Supplier;
  *
  * @author fredsuvn
  */
-public class JieString {
+public class StringKit {
 
     /**
      * Returns string decoding from given bytes with {@link CharsKit#defaultCharset()}.
@@ -434,7 +435,7 @@ public class JieString {
      * @return split list
      */
     public static List<CharSequence> split(CharSequence chars, CharSequence separator) {
-        return split(chars, separator, JieString::subChars);
+        return split(chars, separator, StringKit::subChars);
     }
 
     /**
@@ -579,8 +580,8 @@ public class JieString {
         if (isEmpty(chars) || chars.length() < search.length()) {
             return -1;
         }
-        JieCheck.checkArgument(!isEmpty(search), "search string is empty.");
-        JieCheck.checkInBounds(from, 0, chars.length());
+        CheckKit.checkArgument(!isEmpty(search), "search string is empty.");
+        CheckKit.checkInBounds(from, 0, chars.length());
         if (chars.length() - from < search.length()) {
             return -1;
         }
@@ -630,8 +631,8 @@ public class JieString {
         if (isEmpty(chars) || chars.length() < search.length()) {
             return -1;
         }
-        JieCheck.checkArgument(!isEmpty(search), "search string is empty.");
-        JieCheck.checkInBounds(from, 0, chars.length());
+        CheckKit.checkArgument(!isEmpty(search), "search string is empty.");
+        CheckKit.checkInBounds(from, 0, chars.length());
         if (from + 1 < search.length()) {
             return -1;
         }
@@ -781,8 +782,8 @@ public class JieString {
         if (chars instanceof String) {
             ((String) chars).getChars(start, end, dest, offset);
         } else {
-            JieCheck.checkRangeInBounds(start, end, 0, chars.length());
-            JieCheck.checkRangeInBounds(offset, end - start, 0, dest.length);
+            CheckKit.checkRangeInBounds(start, end, 0, chars.length());
+            CheckKit.checkRangeInBounds(offset, end - start, 0, dest.length);
             if (start == end) {
                 return;
             }
@@ -813,8 +814,8 @@ public class JieString {
         if (src instanceof String) {
             ((String) src).getChars(srcOff, srcOff + len, dst, dstOff);
         } else {
-            JieCheck.checkOffsetLength(src.length(), srcOff, len);
-            JieCheck.checkOffsetLength(dst.length, dstOff, len);
+            CheckKit.checkOffsetLength(src.length(), srcOff, len);
+            CheckKit.checkOffsetLength(dst.length, dstOff, len);
             for (int i = 0; i < len; i++) {
                 dst[dstOff + i] = src.charAt(srcOff + i);
             }
@@ -1083,7 +1084,7 @@ public class JieString {
      * @return an instance of {@link CharSequence} wraps given char array
      */
     public static CharSequence asChars(char[] array, int start, int end) {
-        JieCheck.checkRangeInBounds(start, end, 0, array.length);
+        CheckKit.checkRangeInBounds(start, end, 0, array.length);
         return new CharsWrapper(array, start, end);
     }
 
@@ -1128,7 +1129,7 @@ public class JieString {
      * @return sub-range view of given chars
      */
     public static CharSequence subChars(CharSequence chars, int start, int end) {
-        JieCheck.checkRangeInBounds(start, end, 0, chars.length());
+        CheckKit.checkRangeInBounds(start, end, 0, chars.length());
         return new SubChars(chars, start, end);
     }
 
@@ -1156,7 +1157,7 @@ public class JieString {
 
         @Override
         public CharSequence subSequence(int start, int end) {
-            return JieString.asChars(source, this.start + start, this.start + end);
+            return StringKit.asChars(source, this.start + start, this.start + end);
         }
 
         @Override

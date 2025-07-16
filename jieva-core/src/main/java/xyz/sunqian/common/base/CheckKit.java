@@ -1,6 +1,7 @@
 package xyz.sunqian.common.base;
 
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.string.StringKit;
 
 import java.util.NoSuchElementException;
 
@@ -9,7 +10,7 @@ import java.util.NoSuchElementException;
  *
  * @author sunqian
  */
-public class JieCheck {
+public class CheckKit {
 
     /**
      * Checks whether the sub-range defined by the given offset and length is within the specified range. Its logic is
@@ -123,7 +124,7 @@ public class JieCheck {
      */
     public static void checkNull(@Nullable Object obj, Object... messageArgs) throws NullPointerException {
         if (obj == null) {
-            throw new NullPointerException(JieString.concat(messageArgs));
+            throw new NullPointerException(StringKit.concat(messageArgs));
         }
     }
 
@@ -159,7 +160,7 @@ public class JieCheck {
      */
     public static void checkNull(boolean expr, Object... messageArgs) throws NullPointerException {
         if (!expr) {
-            throw new NullPointerException(JieString.concat(messageArgs));
+            throw new NullPointerException(StringKit.concat(messageArgs));
         }
     }
 
@@ -196,7 +197,7 @@ public class JieCheck {
      */
     public static void checkArgument(boolean expr, Object... messageArgs) throws IllegalArgumentException {
         if (!expr) {
-            throw new IllegalArgumentException(JieString.concat(messageArgs));
+            throw new IllegalArgumentException(StringKit.concat(messageArgs));
         }
     }
 
@@ -233,7 +234,7 @@ public class JieCheck {
      */
     public static void checkState(boolean expr, Object... messageArgs) throws IllegalArgumentException {
         if (!expr) {
-            throw new IllegalStateException(JieString.concat(messageArgs));
+            throw new IllegalStateException(StringKit.concat(messageArgs));
         }
     }
 
@@ -270,7 +271,7 @@ public class JieCheck {
      */
     public static void checkSupported(boolean expr, Object... messageArgs) throws IllegalArgumentException {
         if (!expr) {
-            throw new UnsupportedOperationException(JieString.concat(messageArgs));
+            throw new UnsupportedOperationException(StringKit.concat(messageArgs));
         }
     }
 
@@ -307,7 +308,7 @@ public class JieCheck {
      */
     public static void checkElement(boolean expr, Object... messageArgs) throws IllegalArgumentException {
         if (!expr) {
-            throw new NoSuchElementException(JieString.concat(messageArgs));
+            throw new NoSuchElementException(StringKit.concat(messageArgs));
         }
     }
 

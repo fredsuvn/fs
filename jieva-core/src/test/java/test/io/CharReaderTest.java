@@ -1,8 +1,8 @@
 package test.io;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.base.chars.CharsBuilder;
+import xyz.sunqian.common.base.string.StringKit;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.CharReader;
 import xyz.sunqian.common.io.CharSegment;
@@ -555,7 +555,7 @@ public class CharReaderTest implements DataTest {
         {
             // char sequence
             char[] data = randomChars(dataSize);
-            CharSequence dataStr = JieString.asChars(data);
+            CharSequence dataStr = StringKit.asChars(data);
             testShareChars(CharReader.from(dataStr), CharBuffer.wrap(data), false, true);
             testShareChars(
                 CharReader.from(dataStr).limit(limitSize),
@@ -564,7 +564,7 @@ public class CharReaderTest implements DataTest {
             );
             char[] dataPadding = new char[data.length + 66];
             System.arraycopy(data, 0, dataPadding, 33, data.length);
-            CharSequence dataStrPadding = JieString.asChars(dataPadding);
+            CharSequence dataStrPadding = StringKit.asChars(dataPadding);
             testShareChars(
                 CharReader.from(dataStrPadding, 33, 33 + data.length),
                 CharBuffer.wrap(dataPadding, 33, data.length),

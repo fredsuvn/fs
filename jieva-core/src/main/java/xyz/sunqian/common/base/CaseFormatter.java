@@ -1,6 +1,7 @@
 package xyz.sunqian.common.base;
 
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.string.StringKit;
 
 import java.util.List;
 import java.util.Objects;
@@ -45,7 +46,7 @@ public interface CaseFormatter {
      *     delimiterCase("_", JieString::upperCase);
      * </pre>
      */
-    CaseFormatter UPPER_UNDERSCORE = delimiterCase("_", JieString::upperCase);
+    CaseFormatter UPPER_UNDERSCORE = delimiterCase("_", StringKit::upperCase);
 
     /**
      * Lower Underscore Delimiter Case from {@link #delimiterCase(CharSequence, Function)}. It is equivalent to
@@ -54,7 +55,7 @@ public interface CaseFormatter {
      *     delimiterCase("_", JieString::lowerCase);
      * </pre>
      */
-    CaseFormatter LOWER_UNDERSCORE = delimiterCase("_", JieString::lowerCase);
+    CaseFormatter LOWER_UNDERSCORE = delimiterCase("_", StringKit::lowerCase);
 
     /**
      * Hyphen Delimiter Case from {@link #delimiterCase(CharSequence, Function)}. It is equivalent to
@@ -72,7 +73,7 @@ public interface CaseFormatter {
      *     delimiterCase("-", JieString::upperCase);
      * </pre>
      */
-    CaseFormatter UPPER_HYPHEN = delimiterCase("-", JieString::upperCase);
+    CaseFormatter UPPER_HYPHEN = delimiterCase("-", StringKit::upperCase);
 
     /**
      * Lower Hyphen Delimiter Case from {@link #delimiterCase(CharSequence, Function)}. It is equivalent to
@@ -81,7 +82,7 @@ public interface CaseFormatter {
      *     delimiterCase("-", JieString::lowerCase);
      * </pre>
      */
-    CaseFormatter LOWER_HYPHEN = delimiterCase("-", JieString::lowerCase);
+    CaseFormatter LOWER_HYPHEN = delimiterCase("-", StringKit::lowerCase);
 
     /**
      * Returns a new {@link CaseFormatter} represents {@code Camel Case}.

@@ -1,6 +1,6 @@
 package xyz.sunqian.common.net.data;
 
-import xyz.sunqian.common.base.JieCheck;
+import xyz.sunqian.common.base.CheckKit;
 import xyz.sunqian.common.io.IOKit;
 
 import java.io.InputStream;
@@ -52,7 +52,7 @@ final class StreamData implements GekData.OfStream {
 
     @Override
     public int write(byte[] dest, int offset, int length) {
-        JieCheck.checkRangeInBounds(offset, offset + length, 0, dest.length);
+        CheckKit.checkRangeInBounds(offset, offset + length, 0, dest.length);
         byte[] buffer = IOKit.read(stream, length);
         if (buffer == null) {
             return -1;

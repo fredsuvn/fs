@@ -2,7 +2,7 @@ package xyz.sunqian.common.base.random;
 
 import xyz.sunqian.annotations.JdkDependent;
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.JieCheck;
+import xyz.sunqian.common.base.CheckKit;
 import xyz.sunqian.common.base.bytes.BytesKit;
 import xyz.sunqian.common.collect.StreamKit;
 
@@ -142,7 +142,7 @@ final class RngImpl {
                 random().nextBytes(bytes);
                 return;
             }
-            JieCheck.checkOffsetLength(bytes.length, off, len);
+            CheckKit.checkOffsetLength(bytes.length, off, len);
             int i = off;
             int end = off + len;
             for (int words = len >> 3; words-- > 0; ) {

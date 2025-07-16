@@ -1,9 +1,9 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.math.MathKit;
+import xyz.sunqian.common.base.string.StringKit;
 
 import java.io.Reader;
 import java.nio.CharBuffer;
@@ -465,7 +465,7 @@ final class CharReaderImpl {
             }
             int remaining = endPos - pos;
             int copySize = Math.min(remaining, len);
-            JieString.charsCopy(source, pos, dst, off, copySize);
+            StringKit.charsCopy(source, pos, dst, off, copySize);
             pos += copySize;
             return copySize;
         }

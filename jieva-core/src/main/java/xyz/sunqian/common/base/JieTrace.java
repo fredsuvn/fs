@@ -36,7 +36,7 @@ public class JieTrace {
             StackTraceElement stackTraceElement = stackTraces[i];
             if (predicate.test(stackTraceElement)) {
                 int targetIndex = i + 1 + offset;
-                if (JieCheck.isInBounds(targetIndex, 0, stackTraces.length)) {
+                if (CheckKit.isInBounds(targetIndex, 0, stackTraces.length)) {
                     return stackTraces[targetIndex];
                 }
                 return null;

@@ -1,8 +1,8 @@
 package xyz.sunqian.common.net.data;
 
 import xyz.sunqian.common.base.BaseConfigurator;
-import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.base.chars.CharsKit;
+import xyz.sunqian.common.base.string.StringKit;
 import xyz.sunqian.common.io.IOKit;
 
 import java.io.InputStream;
@@ -83,7 +83,7 @@ public interface IOConfigurator<T extends IOConfigurator<T>> extends BaseConfigu
      * @return this
      */
     default T input(String str, Charset charset) {
-        return input(JieString.getBytes(str, charset));
+        return input(StringKit.getBytes(str, charset));
     }
 
     /**
@@ -173,6 +173,6 @@ public interface IOConfigurator<T extends IOConfigurator<T>> extends BaseConfigu
      * @return result as string with specified charset
      */
     default String finalString(Charset charset) {
-        return JieString.of(finalBytes(), charset);
+        return StringKit.of(finalBytes(), charset);
     }
 }

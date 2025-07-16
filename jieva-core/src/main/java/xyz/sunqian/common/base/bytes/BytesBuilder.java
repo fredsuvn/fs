@@ -13,7 +13,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
-import static xyz.sunqian.common.base.JieCheck.checkOffsetLength;
+import static xyz.sunqian.common.base.CheckKit.checkOffsetLength;
 
 /**
  * {@code BytesBuilder} is used to build byte arrays and their derived objects by appending byte data. It is similar to

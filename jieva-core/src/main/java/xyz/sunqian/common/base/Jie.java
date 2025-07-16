@@ -10,6 +10,7 @@ import xyz.sunqian.common.base.function.BooleanCallable;
 import xyz.sunqian.common.base.function.VoidCallable;
 import xyz.sunqian.common.base.process.JieProcess;
 import xyz.sunqian.common.base.process.ProcessReceipt;
+import xyz.sunqian.common.base.string.StringKit;
 import xyz.sunqian.common.base.thread.JieThread;
 import xyz.sunqian.common.collect.ArrayKit;
 import xyz.sunqian.common.collect.ListKit;
@@ -479,7 +480,7 @@ public class Jie {
      */
     @Nullable
     public static <T extends Enum<T>> T findEnum(Class<?> enumClass, String name, boolean ignoreCase) {
-        JieCheck.checkArgument(enumClass.isEnum(), "Not an enum class.");
+        CheckKit.checkArgument(enumClass.isEnum(), "Not an enum class.");
         if (!ignoreCase) {
             try {
                 return Enum.valueOf(as(enumClass), name);
@@ -509,8 +510,8 @@ public class Jie {
      */
     @Nullable
     public static <T extends Enum<T>> T findEnum(Class<?> enumClass, int index) {
-        JieCheck.checkArgument(enumClass.isEnum(), enumClass + " is not an enum.");
-        JieCheck.checkArgument(index >= 0, "index must >= 0.");
+        CheckKit.checkArgument(enumClass.isEnum(), enumClass + " is not an enum.");
+        CheckKit.checkArgument(index >= 0, "index must >= 0.");
         Object[] enums = enumClass.getEnumConstants();
         if (ArrayKit.isEmpty(enums) || index >= enums.length) {
             return null;
@@ -526,7 +527,7 @@ public class Jie {
      */
     public static URL findRes(String resPath) {
         ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-        return classLoader.getResource(JieString.removeStart(resPath, "/"));
+        return classLoader.getResource(StringKit.removeStart(resPath, "/"));
     }
 
     /**
@@ -538,7 +539,7 @@ public class Jie {
     public static Set<URL> findAllRes(String resPath) {
         ClassLoader classLoader = ClassLoader.getSystemClassLoader();
         try {
-            Enumeration<URL> urls = classLoader.getResources(JieString.removeStart(resPath, "/"));
+            Enumeration<URL> urls = classLoader.getResources(StringKit.removeStart(resPath, "/"));
             if (!urls.hasMoreElements()) {
                 return Collections.emptySet();
             }

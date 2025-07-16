@@ -1,7 +1,7 @@
 package xyz.sunqian.common.base.random;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.JieCheck;
+import xyz.sunqian.common.base.CheckKit;
 import xyz.sunqian.common.base.math.MathKit;
 
 import java.nio.ByteBuffer;
@@ -251,7 +251,7 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
      * @throws IndexOutOfBoundsException if {@code off < 0} or {@code len < 0} or {@code off + len > bytes.length}
      */
     default void nextBytes(byte @Nonnull [] bytes, int off, int len) throws IndexOutOfBoundsException {
-        JieCheck.checkOffsetLength(bytes.length, off, len);
+        CheckKit.checkOffsetLength(bytes.length, off, len);
         int i = off;
         int end = off + len;
         for (int words = len >> 3; words-- > 0; ) {

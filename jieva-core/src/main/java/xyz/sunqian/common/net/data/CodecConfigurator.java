@@ -1,8 +1,8 @@
 package xyz.sunqian.common.net.data;
 
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.base.chars.CharsKit;
+import xyz.sunqian.common.base.string.StringKit;
 
 /**
  * {@link IOConfigurator} for codec operations.
@@ -20,7 +20,7 @@ public interface CodecConfigurator<T extends CodecConfigurator<T>> extends IOCon
      * @return this
      */
     default T inputLatin(String str) {
-        return Jie.as(input(JieString.getBytes(str, CharsKit.latinCharset())));
+        return Jie.as(input(StringKit.getBytes(str, CharsKit.latinCharset())));
     }
 
     /**

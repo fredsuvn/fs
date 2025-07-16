@@ -3,8 +3,8 @@ package test.base;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.expectThrows;
-import static xyz.sunqian.common.base.JieCheck.checkOffsetLength;
-import static xyz.sunqian.common.base.JieCheck.checkStartEnd;
+import static xyz.sunqian.common.base.CheckKit.checkOffsetLength;
+import static xyz.sunqian.common.base.CheckKit.checkStartEnd;
 
 public class CheckTest {
 

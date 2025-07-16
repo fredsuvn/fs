@@ -1,6 +1,7 @@
 package xyz.sunqian.common.base;
 
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.string.StringKit;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -503,7 +504,7 @@ public class JieSystem {
         if (javaVersion == null) {
             return -1;
         }
-        int dotIndex = JieString.indexOf(javaVersion, ".");
+        int dotIndex = StringKit.indexOf(javaVersion, ".");
         if (dotIndex <= 0) {
             return Integer.parseInt(javaVersion);
         }
@@ -512,7 +513,7 @@ public class JieSystem {
             return versionFirst;
         }
         if (versionFirst == 1) {
-            int nextDotIndex = JieString.indexOf(javaVersion, ".", dotIndex + 1);
+            int nextDotIndex = StringKit.indexOf(javaVersion, ".", dotIndex + 1);
             if (nextDotIndex < 0) {
                 return -1;
             }

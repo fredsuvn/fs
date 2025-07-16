@@ -3,9 +3,9 @@ package xyz.sunqian.common.mapping.handlers;
 import lombok.EqualsAndHashCode;
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.time.TimeKit;
-import xyz.sunqian.common.base.JieString;
 import xyz.sunqian.common.base.chars.CharsKit;
+import xyz.sunqian.common.base.string.StringKit;
+import xyz.sunqian.common.base.time.TimeKit;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.mapping.MappingException;
@@ -390,7 +390,7 @@ public class TypedConverters {
 
             @Override
             public int intValue() {
-                if (JieString.indexOf(string, ".") > 0) {
+                if (StringKit.indexOf(string, ".") > 0) {
                     double d = Double.parseDouble(string.toString());
                     return (int) d;
                 }
@@ -399,7 +399,7 @@ public class TypedConverters {
 
             @Override
             public long longValue() {
-                if (JieString.indexOf(string, ".") > 0) {
+                if (StringKit.indexOf(string, ".") > 0) {
                     double d = Double.parseDouble(string.toString());
                     return (long) d;
                 }

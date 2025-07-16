@@ -1,6 +1,6 @@
 package xyz.sunqian.common.net.data;
 
-import xyz.sunqian.common.base.JieCheck;
+import xyz.sunqian.common.base.CheckKit;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IOKit;
 
@@ -53,7 +53,7 @@ final class BufferData implements GekData.OfBuffer {
 
     @Override
     public int write(byte[] dest, int offset, int length) {
-        JieCheck.checkRangeInBounds(offset, offset + length, 0, dest.length);
+        CheckKit.checkRangeInBounds(offset, offset + length, 0, dest.length);
         int remaining = buffer.remaining();
         if (remaining <= 0) {
             return -1;

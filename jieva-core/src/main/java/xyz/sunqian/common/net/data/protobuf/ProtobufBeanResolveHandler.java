@@ -3,7 +3,7 @@ package xyz.sunqian.common.net.data.protobuf;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.JieString;
+import xyz.sunqian.common.base.string.StringKit;
 import xyz.sunqian.common.collect.CollectKit;
 import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.mapping.MappingException;
@@ -77,15 +77,15 @@ public class ProtobufBeanResolveHandler implements DataSchemaParser.Handler {
         // map
         if (field.isMapField()) {
             String name = rawName + "Map";
-            Method getterMethod = rawClass.getMethod("get" + JieString.capitalize(name));
+            Method getterMethod = rawClass.getMethod("get" + StringKit.capitalize(name));
             List<Type> argsTypes = JieType.resolveActualTypeArguments(getterMethod.getGenericReturnType(), Map.class);
             if (CollectKit.isEmpty(argsTypes)) {
                 throw new BeanException("Cannot get actual argument type for " + getterMethod.getGenericReturnType() + ".");
             }
             Invocable getter = Invocable.of(getterMethod);
             if (isBuilder) {
-                Method clearMethod = rawClass.getMethod("clear" + JieString.capitalize(rawName));
-                Method putAllMethod = rawClass.getMethod("putAll" + JieString.capitalize(rawName), Map.class);
+                Method clearMethod = rawClass.getMethod("clear" + StringKit.capitalize(rawName));
+                Method putAllMethod = rawClass.getMethod("putAll" + StringKit.capitalize(rawName), Map.class);
                 Invocable setter = (inst, args) -> {
                     try {
                         clearMethod.invoke(inst);
@@ -105,15 +105,15 @@ public class ProtobufBeanResolveHandler implements DataSchemaParser.Handler {
         // repeated
         if (field.isRepeated()) {
             String name = rawName + "List";
-            Method getterMethod = rawClass.getMethod("get" + JieString.capitalize(name));
+            Method getterMethod = rawClass.getMethod("get" + StringKit.capitalize(name));
             List<Type> argsTypes = JieType.resolveActualTypeArguments(getterMethod.getGenericReturnType(), List.class);
             if (CollectKit.isEmpty(argsTypes)) {
                 throw new BeanException("Cannot get actual argument type for " + getterMethod.getGenericReturnType() + ".");
             }
             Invocable getter = Invocable.of(getterMethod);
             if (isBuilder) {
-                Method clearMethod = rawClass.getMethod("clear" + JieString.capitalize(rawName));
-                Method addAllMethod = rawClass.getMethod("addAll" + JieString.capitalize(rawName), Iterable.class);
+                Method clearMethod = rawClass.getMethod("clear" + StringKit.capitalize(rawName));
+                Method addAllMethod = rawClass.getMethod("addAll" + StringKit.capitalize(rawName), Iterable.class);
                 Invocable setter = (inst, args) -> {
                     try {
                         clearMethod.invoke(inst);
@@ -131,11 +131,11 @@ public class ProtobufBeanResolveHandler implements DataSchemaParser.Handler {
         }
 
         // Simple object
-        Method getterMethod = rawClass.getMethod("get" + JieString.capitalize(rawName));
+        Method getterMethod = rawClass.getMethod("get" + StringKit.capitalize(rawName));
         Type type = getterMethod.getGenericReturnType();
         Invocable getter = Invocable.of(getterMethod);
         if (isBuilder) {
-            Method setterMethod = rawClass.getMethod("set" + JieString.capitalize(rawName), JieType.getRawClass(type));
+            Method setterMethod = rawClass.getMethod("set" + StringKit.capitalize(rawName), JieType.getRawClass(type));
             Invocable setter = Invocable.of(setterMethod);
             return new Impl(rawName, type, getterMethod, setterMethod, getter, setter);
         } else {

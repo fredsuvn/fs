@@ -1,9 +1,9 @@
 package xyz.sunqian.common.net.data;
 
 import xyz.sunqian.annotations.ThreadSafe;
-import xyz.sunqian.common.base.JieCheck;
-import xyz.sunqian.common.base.JieString;
+import xyz.sunqian.common.base.CheckKit;
 import xyz.sunqian.common.base.chars.CharsKit;
+import xyz.sunqian.common.base.string.StringKit;
 
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -24,7 +24,7 @@ public interface GekData extends GekDataOutput {
      * @return the {@link OfArray}
      */
     static GekData.OfArray wrap(String str) {
-        return wrap(JieString.getBytes(str));
+        return wrap(StringKit.getBytes(str));
     }
 
     /**
@@ -47,7 +47,7 @@ public interface GekData extends GekDataOutput {
      * @return the {@link OfArray}
      */
     static GekData.OfArray wrap(byte[] array, int offset, int length) {
-        JieCheck.checkRangeInBounds(offset, offset + length, 0, array.length);
+        CheckKit.checkRangeInBounds(offset, offset + length, 0, array.length);
         return new ArrayData(array, offset, length);
     }
 

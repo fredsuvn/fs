@@ -3,7 +3,7 @@ package xyz.sunqian.common.objects.data.handlers;
 import lombok.Data;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.CaseFormatter;
-import xyz.sunqian.common.base.JieString;
+import xyz.sunqian.common.base.string.StringKit;
 import xyz.sunqian.common.objects.data.DataSchemaParser;
 
 import java.lang.reflect.Method;
@@ -62,7 +62,7 @@ public class JavaBeanDataSchemaHandler extends AbstractDataSchemaHandler {
             return null;
         }
         CharSequence firstWord = getterNameWords.get(0);
-        if (!JieString.charEquals(firstWord, "get") && !JieString.charEquals(firstWord, "is")) {
+        if (!StringKit.charEquals(firstWord, "get") && !StringKit.charEquals(firstWord, "is")) {
             return null;
         }
         // sure it is a getter
@@ -83,7 +83,7 @@ public class JavaBeanDataSchemaHandler extends AbstractDataSchemaHandler {
             return null;
         }
         CharSequence firstWord = setterNameWords.get(0);
-        if (!JieString.charEquals(firstWord, "set")) {
+        if (!StringKit.charEquals(firstWord, "set")) {
             return null;
         }
         // sure it is a setter

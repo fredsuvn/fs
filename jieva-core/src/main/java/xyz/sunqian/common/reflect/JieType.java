@@ -5,7 +5,7 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.OutParam;
 import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.base.JieString;
+import xyz.sunqian.common.base.string.StringKit;
 import xyz.sunqian.common.collect.ArrayKit;
 import xyz.sunqian.common.collect.MapKit;
 
@@ -108,7 +108,7 @@ public class JieType {
     }
 
     private static @Nonnull String getLastName(@Nonnull String typeName) {
-        int index = JieString.lastIndexOf(typeName, ".");
+        int index = StringKit.lastIndexOf(typeName, ".");
         return typeName.substring(index + 1);
     }
 

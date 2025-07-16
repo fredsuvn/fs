@@ -1,6 +1,7 @@
 package xyz.sunqian.common.base;
 
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.string.StringKit;
 import xyz.sunqian.common.collect.CollectKit;
 
 import java.util.Collections;
@@ -25,7 +26,7 @@ final class CaseFormatterImpls {
 
         @Override
         public List<CharSequence> resolve(CharSequence name) {
-            if (JieString.isBlank(name)) {
+            if (StringKit.isBlank(name)) {
                 return Collections.emptyList();
             }
             int len = name.length();
@@ -106,7 +107,7 @@ final class CaseFormatterImpls {
             StringBuilder sb = new StringBuilder(length);
             int i = 0;
             for (CharSequence chars : wordList) {
-                if (JieString.isEmpty(chars)) {
+                if (StringKit.isEmpty(chars)) {
                     continue;
                 }
                 buildCamel(chars, sb, i++);
@@ -212,7 +213,7 @@ final class CaseFormatterImpls {
 
         @Override
         public List<CharSequence> resolve(CharSequence name) {
-            return JieString.split(name, delimiter, Word::new);
+            return StringKit.split(name, delimiter, Word::new);
         }
 
         @Override

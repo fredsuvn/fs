@@ -11,7 +11,7 @@ import java.io.Writer;
 import java.nio.CharBuffer;
 import java.util.Arrays;
 
-import static xyz.sunqian.common.base.JieCheck.checkOffsetLength;
+import static xyz.sunqian.common.base.CheckKit.checkOffsetLength;
 
 /**
  * {@code CharsBuilder} is used to build char arrays and their derived objects by appending char data. It is similar to

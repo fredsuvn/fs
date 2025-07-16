@@ -1,6 +1,6 @@
 package xyz.sunqian.common.net.data;
 
-import xyz.sunqian.common.base.JieCheck;
+import xyz.sunqian.common.base.CheckKit;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -68,7 +68,7 @@ final class ArrayData implements GekData.OfArray {
 
     @Override
     public int write(byte[] dest, int offset, int length) {
-        JieCheck.checkRangeInBounds(offset, offset + length, 0, dest.length);
+        CheckKit.checkRangeInBounds(offset, offset + length, 0, dest.length);
         if (arrayLength == 0) {
             return -1;
         }
