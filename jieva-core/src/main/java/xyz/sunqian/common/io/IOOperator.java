@@ -249,20 +249,7 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default long readTo(@Nonnull InputStream src, @Nonnull OutputStream dst) throws IORuntimeException {
-        try {
-            byte[] buf = new byte[bufferSize()];
-            long count = 0;
-            while (true) {
-                int readSize = src.read(buf);
-                if (readSize < 0) {
-                    return count == 0 ? -1 : count;
-                }
-                dst.write(buf, 0, readSize);
-                count += readSize;
-            }
-        } catch (Exception e) {
-            throw new IORuntimeException(e);
-        }
+        return IOOperations.readTo0(src, dst, bufferSize());
     }
 
     /**
@@ -300,23 +287,7 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default long readTo(@Nonnull InputStream src, @Nonnull WritableByteChannel dst) throws IORuntimeException {
-        try {
-            byte[] arr = new byte[bufferSize()];
-            ByteBuffer buf = ByteBuffer.wrap(arr);
-            long count = 0;
-            while (true) {
-                int readSize = src.read(arr);
-                if (readSize < 0) {
-                    return count == 0 ? -1 : count;
-                }
-                buf.position(0);
-                buf.limit(readSize);
-                BufferKit.readTo(buf, dst);
-                count += readSize;
-            }
-        } catch (Exception e) {
-            throw new IORuntimeException(e);
-        }
+        return IOOperations.readTo0(src, dst, bufferSize());
     }
 
     /**
@@ -345,8 +316,8 @@ public interface IOOperator {
      * Reads data from the input stream into the destination array, until the read number reaches the array's length or
      * reaches the end of the input stream, and returns the actual number of bytes read to.
      * <p>
-     * If the specified length is {@code 0}, returns {@code 0} without reading. If reaches the end of the input stream
-     * and no data is read, returns {@code -1}.
+     * If the array's length is {@code 0}, returns {@code 0} without reading. If reaches the end of the input stream and
+     * no data is read, returns {@code -1}.
      *
      * @param src the input stream
      * @param dst the destination array
@@ -398,10 +369,7 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default int readTo(@Nonnull InputStream src, @Nonnull ByteBuffer dst) throws IORuntimeException {
-        if (dst.remaining() == 0) {
-            return 0;
-        }
-        return IOOperations.readTo0WithActualLen(src, dst, dst.remaining());
+        return IOOperations.readTo0(src, dst, dst.remaining());
     }
 
     /**
@@ -441,23 +409,7 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default long readTo(@Nonnull ReadableByteChannel src, @Nonnull OutputStream dst) throws IORuntimeException {
-        try {
-            int bufSize = bufferSize();
-            ByteBuffer buf = ByteBuffer.allocate(bufSize);
-            long count = 0;
-            while (true) {
-                int readSize = src.read(buf);
-                if (readSize < 0) {
-                    return count == 0 ? -1 : count;
-                }
-                buf.flip();
-                BufferKit.readTo(buf, dst);
-                count += readSize;
-                buf.clear();
-            }
-        } catch (Exception e) {
-            throw new IORuntimeException(e);
-        }
+        return IOOperations.readTo0(src, dst, bufferSize());
     }
 
     /**
@@ -495,22 +447,7 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default long readTo(@Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst) throws IORuntimeException {
-        try {
-            ByteBuffer buf = ByteBuffer.allocate(bufferSize());
-            long count = 0;
-            while (true) {
-                int readSize = src.read(buf);
-                if (readSize < 0) {
-                    return count == 0 ? -1 : count;
-                }
-                buf.flip();
-                BufferKit.readTo(buf, dst);
-                count += readSize;
-                buf.clear();
-            }
-        } catch (Exception e) {
-            throw new IORuntimeException(e);
-        }
+        return IOOperations.readTo0(src, dst, bufferSize());
     }
 
     /**
@@ -540,7 +477,7 @@ public interface IOOperator {
      * Reads data from the source channel into the destination array, until the read number reaches the array's length
      * or reaches the end of the source channel, and returns the actual number of bytes read to.
      * <p>
-     * If the specified length is {@code 0}, returns {@code 0} without reading. If reaches the end of the source channel
+     * If the array's length is {@code 0}, returns {@code 0} without reading. If reaches the end of the source channel
      * and no data is read, returns {@code -1}.
      *
      * @param src the source channel
@@ -751,20 +688,7 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default long readTo(@Nonnull Reader src, @Nonnull Appendable dst) throws IORuntimeException {
-        try {
-            char[] buf = new char[bufferSize()];
-            long count = 0;
-            while (true) {
-                int readSize = src.read(buf);
-                if (readSize < 0) {
-                    return count == 0 ? -1 : count;
-                }
-                IOKit.write(dst, buf, 0, readSize);
-                count += readSize;
-            }
-        } catch (Exception e) {
-            throw new IORuntimeException(e);
-        }
+        return IOOperations.readTo0(src, dst, bufferSize());
     }
 
     /**
@@ -792,7 +716,7 @@ public interface IOOperator {
      * Reads data from the reader into the destination array, until the read number reaches the array's length or
      * reaches the end of the reader, and returns the actual number of chars read to.
      * <p>
-     * If the specified length is {@code 0}, returns {@code 0} without reading. If reaches the end of the reader and no
+     * If the array's length is {@code 0}, returns {@code 0} without reading. If reaches the end of the reader and no
      * data is read, returns {@code -1}.
      *
      * @param src the reader
