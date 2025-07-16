@@ -6,6 +6,8 @@ import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.chars.CharsBuilder;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.value.IntVar;
+import xyz.sunqian.common.io.ByteReader;
+import xyz.sunqian.common.io.CharReader;
 import xyz.sunqian.common.io.DoReadReader;
 import xyz.sunqian.common.io.DoReadStream;
 import xyz.sunqian.common.io.DoWriteStream;
@@ -13,6 +15,9 @@ import xyz.sunqian.common.io.DoWriteWriter;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.test.DataTest;
+import xyz.sunqian.test.ReadOps;
+import xyz.sunqian.test.TestInputStream;
+import xyz.sunqian.test.TestReader;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -46,34 +51,50 @@ public class IOImplsTest implements DataTest {
         testInputStream(256);
         testInputStream(512);
         testInputStream(1024);
-
-        // empty
-        testInputStream(IOKit.emptyInputStream(), new byte[0], true, false, false);
-
-        // error
-        RandomAccessFile raf = new FakeFile(new byte[0]);
-        raf.close();
-        expectThrows(IORuntimeException.class, () -> IOKit.newInputStream(raf, 0));
-
-        // illegal argument
-        expectThrows(IllegalArgumentException.class, () ->
-            IOKit.limitedInputStream(new ByteArrayInputStream(new byte[0]), -1));
-        expectThrows(IllegalArgumentException.class, () ->
-            IOKit.limitedOutputStream(new ByteArrayOutputStream(), -1));
-        expectThrows(IllegalArgumentException.class, () ->
-            IOKit.limitedReader(new CharArrayReader(new char[0]), -1));
-        expectThrows(IllegalArgumentException.class, () ->
-            IOKit.limitedWriter(new CharArrayWriter(), -1));
-
-        // limited
-        assertEquals(
-            IOKit.limitedInputStream(new ByteArrayInputStream(new byte[100]), 0).read(),
-            -1
-        );
-        assertEquals(
-            IOKit.limitedInputStream(new ByteArrayInputStream(new byte[100]), 0).read(new byte[100]),
-            -1
-        );
+        {
+            // empty
+            testInputStream(IOKit.emptyInputStream(), new byte[0], true, false, false);
+        }
+        {
+            // error
+            RandomAccessFile raf = new FakeFile(new byte[0]);
+            raf.close();
+            expectThrows(IORuntimeException.class, () -> IOKit.newInputStream(raf, 0));
+        }
+        {
+            // illegal argument
+            expectThrows(IllegalArgumentException.class, () ->
+                IOKit.limitedInputStream(new ByteArrayInputStream(new byte[0]), -1));
+            expectThrows(IllegalArgumentException.class, () ->
+                IOKit.limitedOutputStream(new ByteArrayOutputStream(), -1));
+            expectThrows(IllegalArgumentException.class, () ->
+                IOKit.limitedReader(new CharArrayReader(new char[0]), -1));
+            expectThrows(IllegalArgumentException.class, () ->
+                IOKit.limitedWriter(new CharArrayWriter(), -1));
+        }
+        {
+            // limited
+            assertEquals(
+                IOKit.limitedInputStream(new ByteArrayInputStream(new byte[100]), 0).read(),
+                -1
+            );
+            assertEquals(
+                IOKit.limitedInputStream(new ByteArrayInputStream(new byte[100]), 0).read(new byte[100]),
+                -1
+            );
+        }
+        {
+            // ByteReader
+            TestInputStream tin = new TestInputStream(new ByteArrayInputStream(new byte[0]));
+            tin.setNextOperation(ReadOps.THROW, 99);
+            ByteReader reader = ByteReader.from(tin);
+            InputStream in = reader.asInputStream();
+            expectThrows(IOException.class, in::read);
+            expectThrows(IOException.class, () -> in.read(new byte[10]));
+            expectThrows(IOException.class, () -> in.skip(1));
+            expectThrows(IOException.class, in::reset);
+            expectThrows(IOException.class, in::close);
+        }
     }
 
     private void testInputStream(int dataSize) throws Exception {
@@ -148,6 +169,19 @@ public class IOImplsTest implements DataTest {
                     IOKit.newInputStream(data), data.length - 5),
                 Arrays.copyOf(data, data.length - 5),
                 true, false, false
+            );
+        }
+        {
+            // ByteReader
+            byte[] data = randomBytes(dataSize);
+            ByteReader reader = ByteReader.from(data);
+            testInputStream(reader.asInputStream(), data, false, false, true);
+            data = randomBytes(dataSize + 12);
+            reader = ByteReader.from(data, 6, dataSize);
+            testInputStream(
+                reader.asInputStream(),
+                Arrays.copyOfRange(data, 6, data.length - 6),
+                false, false, true
             );
         }
     }
@@ -335,26 +369,40 @@ public class IOImplsTest implements DataTest {
         testReader(256);
         testReader(512);
         testReader(1024);
-
-        // empty
-        testReader(IOKit.emptyReader(), new char[0], true, false, false);
-
-        // limited
-        assertEquals(
-            IOKit.limitedReader(new CharArrayReader(new char[100]), 0).read(),
-            -1
-        );
-        assertEquals(
-            IOKit.limitedReader(new CharArrayReader(new char[100]), 0).read(new char[100]),
-            -1
-        );
+        {
+            // empty
+            testReader(IOKit.emptyReader(), new char[0], true, false, false);
+        }
+        {
+            // limited
+            assertEquals(
+                IOKit.limitedReader(new CharArrayReader(new char[100]), 0).read(),
+                -1
+            );
+            assertEquals(
+                IOKit.limitedReader(new CharArrayReader(new char[100]), 0).read(new char[100]),
+                -1
+            );
+        }
+        {
+            // CharReader
+            TestReader tin = new TestReader(new CharArrayReader(new char[0]));
+            tin.setNextOperation(ReadOps.THROW, 99);
+            CharReader reader = CharReader.from(tin);
+            Reader in = reader.asReader();
+            expectThrows(IOException.class, in::read);
+            expectThrows(IOException.class, () -> in.read(new char[10]));
+            expectThrows(IOException.class, () -> in.skip(1));
+            expectThrows(IOException.class, () -> in.mark(1));
+            expectThrows(IOException.class, in::reset);
+            expectThrows(IOException.class, in::close);
+        }
     }
 
     private void testReader(int dataSize) throws Exception {
         {
             // chars
             char[] data = randomChars(dataSize);
-            ;
             testReader(IOKit.newReader(data), data, true, false, false);
             data = randomChars(dataSize + 12);
             testReader(
@@ -439,6 +487,19 @@ public class IOImplsTest implements DataTest {
                     IOKit.newReader(data), data.length - 5),
                 Arrays.copyOf(data, data.length - 5),
                 true, false, false
+            );
+        }
+        {
+            // CharReader
+            char[] data = randomChars(dataSize);
+            CharReader reader = CharReader.from(data);
+            testReader(reader.asReader(), data, false, false, true);
+            data = randomChars(dataSize + 12);
+            reader = CharReader.from(data, 6, dataSize);
+            testReader(
+                reader.asReader(),
+                Arrays.copyOfRange(data, 6, data.length - 6),
+                false, false, true
             );
         }
     }

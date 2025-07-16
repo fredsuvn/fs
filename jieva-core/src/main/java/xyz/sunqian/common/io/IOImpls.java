@@ -76,6 +76,10 @@ final class IOImpls {
         return new LimitedInputStream(in, limit);
     }
 
+    static @Nonnull InputStream inputStream(@Nonnull ByteReader reader) {
+        return new ByteReaderInputStream(reader);
+    }
+
     static @Nonnull InputStream emptyInputStream() {
         return EmptyInputStream.SINGLETON;
     }
@@ -109,6 +113,10 @@ final class IOImpls {
     static @Nonnull Reader reader(@Nonnull Reader in, long limit) throws IllegalArgumentException {
         IOHelper.checkLimit(limit);
         return new LimitedReader(in, limit);
+    }
+
+    static @Nonnull Reader reader(@Nonnull CharReader reader) {
+        return new CharReaderReader(reader);
     }
 
     static @Nonnull Reader emptyReader() {
@@ -187,11 +195,11 @@ final class IOImpls {
         private int mark = -1;
         private final int count;
 
-        BytesInputStream(byte @Nonnull [] buf) {
+        private BytesInputStream(byte @Nonnull [] buf) {
             this(buf, 0, buf.length);
         }
 
-        BytesInputStream(byte @Nonnull [] buf, int off, int len) {
+        private BytesInputStream(byte @Nonnull [] buf, int off, int len) {
             this.buf = buf;
             this.pos = off;
             this.count = Math.min(off + len, buf.length);
@@ -259,7 +267,7 @@ final class IOImpls {
 
         private final @Nonnull ByteBuffer buffer;
 
-        BufferInputStream(@Nonnull ByteBuffer buffer) {
+        private BufferInputStream(@Nonnull ByteBuffer buffer) {
             this.buffer = buffer;
         }
 
@@ -327,7 +335,7 @@ final class IOImpls {
         private final @Nonnull RandomAccessFile raf;
         private long mark = -1;
 
-        RafInputStream(@Nonnull RandomAccessFile raf, long seek) throws IOException {
+        private RafInputStream(@Nonnull RandomAccessFile raf, long seek) throws IOException {
             this.raf = raf;
             this.raf.seek(seek);
         }
@@ -428,7 +436,7 @@ final class IOImpls {
             );
         }
 
-        CharsInputStream(@Nonnull Reader reader, @Nonnull Charset charset) {
+        private CharsInputStream(@Nonnull Reader reader, @Nonnull Charset charset) {
             this(reader, charset, CHARS_BUFFER_SIZE, BYTES_BUFFER_SIZE);
         }
 
@@ -561,7 +569,7 @@ final class IOImpls {
         private long pos = 0;
         private long mark = 0;
 
-        LimitedInputStream(@Nonnull InputStream in, long limit) {
+        private LimitedInputStream(@Nonnull InputStream in, long limit) {
             this.in = in;
             this.limit = limit;
         }
@@ -628,6 +636,81 @@ final class IOImpls {
         }
     }
 
+    private static final class ByteReaderInputStream extends DoReadStream {
+
+        private final @Nonnull ByteReader in;
+        private byte[] oneByte;
+
+        private ByteReaderInputStream(@Nonnull ByteReader in) {
+            this.in = in;
+        }
+
+        @Override
+        public int read() throws IOException {
+            try {
+                if (oneByte == null) {
+                    oneByte = new byte[1];
+                }
+                int ret = in.readTo(oneByte);
+                return ret < 0 ? -1 : oneByte[0] & 0xFF;
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        protected int doRead(byte @Nonnull [] b, int off, int len) throws IOException {
+            try {
+                return in.readTo(b, off, len);
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        public long skip(long n) throws IOException {
+            if (n <= 0) {
+                return 0;
+            }
+            try {
+                return in.skip(n);
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        public boolean markSupported() {
+            return in.markSupported();
+        }
+
+        @Override
+        public void mark(int readAheadLimit) {
+            try {
+                in.mark();
+            } catch (Exception ignored) {
+            }
+        }
+
+        @Override
+        public void reset() throws IOException {
+            try {
+                in.reset();
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        public void close() throws IOException {
+            try {
+                in.close();
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+    }
+
     private static final class EmptyInputStream extends DoReadStream {
 
         private static final @Nonnull EmptyInputStream SINGLETON = new EmptyInputStream();
@@ -655,11 +738,11 @@ final class IOImpls {
         private int mark = -1;
         private final int count;
 
-        CharsReader(char @Nonnull [] buf) {
+        private CharsReader(char @Nonnull [] buf) {
             this(buf, 0, buf.length);
         }
 
-        CharsReader(char @Nonnull [] buf, int off, int len) {
+        private CharsReader(char @Nonnull [] buf, int off, int len) {
             this.buf = buf;
             this.pos = off;
             this.count = Math.min(off + len, buf.length);
@@ -744,7 +827,7 @@ final class IOImpls {
 
         private final @Nonnull CharBuffer buffer;
 
-        BufferReader(@Nonnull CharBuffer buffer) {
+        private BufferReader(@Nonnull CharBuffer buffer) {
             this.buffer = buffer;
         }
 
@@ -860,7 +943,7 @@ final class IOImpls {
             );
         }
 
-        BytesReader(@Nonnull InputStream inputStream, @Nonnull Charset charset) {
+        private BytesReader(@Nonnull InputStream inputStream, @Nonnull Charset charset) {
             this(inputStream, charset, BYTES_BUFFER_SIZE, CHARS_BUFFER_SIZE);
         }
 
@@ -994,7 +1077,7 @@ final class IOImpls {
         private long pos = 0;
         private long mark = 0;
 
-        LimitedReader(@Nonnull Reader in, long limit) {
+        private LimitedReader(@Nonnull Reader in, long limit) {
             this.in = in;
             this.limit = limit;
         }
@@ -1062,6 +1145,81 @@ final class IOImpls {
         }
     }
 
+    private static final class CharReaderReader extends DoReadReader {
+
+        private final @Nonnull CharReader in;
+        private char[] oneChar;
+
+        private CharReaderReader(@Nonnull CharReader in) {
+            this.in = in;
+        }
+
+        @Override
+        public int read() throws IOException {
+            try {
+                if (oneChar == null) {
+                    oneChar = new char[1];
+                }
+                int ret = in.readTo(oneChar);
+                return ret < 0 ? -1 : oneChar[0] & 0xFFFF;
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        protected int doRead(char @Nonnull [] b, int off, int len) throws IOException {
+            try {
+                return in.readTo(b, off, len);
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        public long skip(long n) throws IllegalArgumentException, IOException {
+            try {
+                return in.skip(n);
+            } catch (IllegalArgumentException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        public boolean markSupported() {
+            return in.markSupported();
+        }
+
+        @Override
+        public void mark(int readAheadLimit) throws IOException {
+            try {
+                in.mark();
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        public void reset() throws IOException {
+            try {
+                in.reset();
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        public void close() throws IOException {
+            try {
+                in.close();
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+    }
+
     private static final class EmptyReader extends DoReadReader {
 
         private static final @Nonnull EmptyReader SINGLETON = new EmptyReader();
@@ -1103,11 +1261,11 @@ final class IOImpls {
         private final int end;
         private int pos;
 
-        BytesOutputStream(byte @Nonnull [] buf) {
+        private BytesOutputStream(byte @Nonnull [] buf) {
             this(buf, 0, buf.length);
         }
 
-        BytesOutputStream(byte @Nonnull [] buf, int off, int len) {
+        private BytesOutputStream(byte @Nonnull [] buf, int off, int len) {
             this.buf = buf;
             this.end = off + len;
             this.pos = off;
@@ -1141,7 +1299,7 @@ final class IOImpls {
 
         private final @Nonnull ByteBuffer buffer;
 
-        BufferOutputStream(@Nonnull ByteBuffer buffer) {
+        private BufferOutputStream(@Nonnull ByteBuffer buffer) {
             this.buffer = buffer;
         }
 
@@ -1171,7 +1329,7 @@ final class IOImpls {
 
         private final @Nonnull RandomAccessFile raf;
 
-        RafOutputStream(@Nonnull RandomAccessFile raf, long seek) throws IOException {
+        private RafOutputStream(@Nonnull RandomAccessFile raf, long seek) throws IOException {
             this.raf = raf;
             this.raf.seek(seek);
         }
@@ -1238,7 +1396,7 @@ final class IOImpls {
             );
         }
 
-        AppenderOutputStream(@Nonnull Appendable appender, @Nonnull Charset charset) {
+        private AppenderOutputStream(@Nonnull Appendable appender, @Nonnull Charset charset) {
             this(appender, charset, BYTES_BUFFER_SIZE, CHARS_BUFFER_SIZE);
         }
 
@@ -1311,7 +1469,7 @@ final class IOImpls {
 
         private long pos;
 
-        LimitedOutputStream(@Nonnull OutputStream out, long limit) {
+        private LimitedOutputStream(@Nonnull OutputStream out, long limit) {
             this.out = out;
             this.limit = limit;
         }
@@ -1365,11 +1523,11 @@ final class IOImpls {
         private final int end;
         private int pos;
 
-        CharsWriter(char @Nonnull [] buf) {
+        private CharsWriter(char @Nonnull [] buf) {
             this(buf, 0, buf.length);
         }
 
-        CharsWriter(char @Nonnull [] buf, int off, int len) {
+        private CharsWriter(char @Nonnull [] buf, int off, int len) {
             this.buf = buf;
             this.end = off + len;
             this.pos = off;
@@ -1424,7 +1582,7 @@ final class IOImpls {
 
         private final CharBuffer buffer;
 
-        BufferWriter(@Nonnull CharBuffer buffer) {
+        private BufferWriter(@Nonnull CharBuffer buffer) {
             this.buffer = buffer;
         }
 
@@ -1494,7 +1652,7 @@ final class IOImpls {
             );
         }
 
-        BytesWriter(@Nonnull OutputStream outputStream, @Nonnull Charset charset) {
+        private BytesWriter(@Nonnull OutputStream outputStream, @Nonnull Charset charset) {
             this(outputStream, charset, 64, 64);
         }
 
@@ -1582,7 +1740,7 @@ final class IOImpls {
 
         private long pos;
 
-        LimitedWriter(@Nonnull Writer out, long limit) {
+        private LimitedWriter(@Nonnull Writer out, long limit) {
             this.out = out;
             this.limit = limit;
         }
