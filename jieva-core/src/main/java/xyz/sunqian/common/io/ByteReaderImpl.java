@@ -337,14 +337,14 @@ final class ByteReaderImpl {
     private static final class ByteArrayReader implements ByteReader {
 
         private final byte @Nonnull [] src;
-        private final int endPos;
         private int pos;
+        private final int end;
         private int mark;
 
         private ByteArrayReader(byte @Nonnull [] src, int off, int len) {
             this.src = src;
             this.pos = off;
-            this.endPos = off + len;
+            this.end = off + len;
             this.mark = pos;
         }
 
@@ -354,10 +354,10 @@ final class ByteReaderImpl {
             if (len == 0) {
                 return ByteSegment.empty(false);
             }
-            if (pos == endPos) {
+            if (pos == end) {
                 return ByteSegment.empty(true);
             }
-            int remaining = endPos - pos;
+            int remaining = end - pos;
             int actualLen = Math.min(remaining, len);
             ByteBuffer data = ByteBuffer.wrap(src, pos, actualLen).slice();
             pos += actualLen;
@@ -374,10 +374,10 @@ final class ByteReaderImpl {
             if (len == 0) {
                 return 0;
             }
-            if (pos == endPos) {
+            if (pos == end) {
                 return 0;
             }
-            int remaining = endPos - pos;
+            int remaining = end - pos;
             int skipped = (int) Math.min(remaining, len);
             pos += skipped;
             return skipped;
@@ -385,11 +385,11 @@ final class ByteReaderImpl {
 
         @Override
         public long readTo(@Nonnull OutputStream dst) throws IORuntimeException {
-            if (pos == endPos) {
+            if (pos == end) {
                 return -1;
             }
             try {
-                int remaining = endPos - pos;
+                int remaining = end - pos;
                 dst.write(src, pos, remaining);
                 pos += remaining;
                 return remaining;
@@ -404,11 +404,11 @@ final class ByteReaderImpl {
             if (len == 0) {
                 return 0;
             }
-            if (pos == endPos) {
+            if (pos == end) {
                 return -1;
             }
             try {
-                int remaining = endPos - pos;
+                int remaining = end - pos;
                 int actualLen = (int) Math.min(remaining, len);
                 dst.write(src, pos, actualLen);
                 pos += actualLen;
@@ -420,10 +420,10 @@ final class ByteReaderImpl {
 
         @Override
         public long readTo(@Nonnull WritableByteChannel dst) throws IORuntimeException {
-            if (pos == endPos) {
+            if (pos == end) {
                 return -1;
             }
-            int remaining = endPos - pos;
+            int remaining = end - pos;
             ByteBuffer buf = ByteBuffer.wrap(src, pos, remaining);
             int ret = BufferKit.readTo(buf, dst);
             pos += ret;
@@ -438,10 +438,10 @@ final class ByteReaderImpl {
             if (len == 0) {
                 return 0;
             }
-            if (pos == endPos) {
+            if (pos == end) {
                 return -1;
             }
-            int remaining = endPos - pos;
+            int remaining = end - pos;
             int actualLen = (int) Math.min(remaining, len);
             ByteBuffer buf = ByteBuffer.wrap(src, pos, actualLen);
             int ret = BufferKit.readTo(buf, dst);
@@ -464,10 +464,10 @@ final class ByteReaderImpl {
             if (len == 0) {
                 return 0;
             }
-            if (pos == endPos) {
+            if (pos == end) {
                 return -1;
             }
-            int remaining = endPos - pos;
+            int remaining = end - pos;
             int copySize = Math.min(remaining, len);
             System.arraycopy(src, pos, dst, off, copySize);
             pos += copySize;
@@ -479,10 +479,10 @@ final class ByteReaderImpl {
             if (dst.remaining() == 0) {
                 return 0;
             }
-            if (pos == endPos) {
+            if (pos == end) {
                 return -1;
             }
-            int remaining = endPos - pos;
+            int remaining = end - pos;
             int putSize = Math.min(remaining, dst.remaining());
             return putTo0(dst, putSize);
         }
@@ -496,10 +496,10 @@ final class ByteReaderImpl {
             if (dst.remaining() == 0) {
                 return 0;
             }
-            if (pos == endPos) {
+            if (pos == end) {
                 return -1;
             }
-            int remaining = endPos - pos;
+            int remaining = end - pos;
             int putSize = MathKit.min(remaining, dst.remaining(), len);
             return putTo0(dst, putSize);
         }

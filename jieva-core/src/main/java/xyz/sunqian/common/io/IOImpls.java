@@ -42,7 +42,7 @@ final class IOImpls {
     }
 
     static @Nonnull InputStream inputStream(byte @Nonnull [] array) {
-        return new BytesInputStream(array);
+        return new BytesInputStream(array, 0, array.length);
     }
 
     static @Nonnull InputStream inputStream(
@@ -85,7 +85,7 @@ final class IOImpls {
     }
 
     static @Nonnull Reader reader(char @Nonnull [] array) {
-        return new CharsReader(array);
+        return new CharsReader(array, 0, array.length);
     }
 
     static @Nonnull Reader reader(char @Nonnull [] array, int off, int len) throws IndexOutOfBoundsException {
@@ -124,7 +124,7 @@ final class IOImpls {
     }
 
     static @Nonnull OutputStream outputStream(byte @Nonnull [] array) {
-        return new BytesOutputStream(array);
+        return new BytesOutputStream(array, 0, array.length);
     }
 
     static @Nonnull OutputStream outputStream(
@@ -163,7 +163,7 @@ final class IOImpls {
     }
 
     static @Nonnull Writer writer(char @Nonnull [] array) {
-        return new CharsWriter(array);
+        return new CharsWriter(array, 0, array.length);
     }
 
     static @Nonnull Writer writer(char @Nonnull [] array, int off, int len) throws IndexOutOfBoundsException {
@@ -192,22 +192,18 @@ final class IOImpls {
 
         private final byte @Nonnull [] buf;
         private int pos;
+        private final int end;
         private int mark = -1;
-        private final int count;
-
-        private BytesInputStream(byte @Nonnull [] buf) {
-            this(buf, 0, buf.length);
-        }
 
         private BytesInputStream(byte @Nonnull [] buf, int off, int len) {
             this.buf = buf;
             this.pos = off;
-            this.count = Math.min(off + len, buf.length);
+            this.end = off + len;
         }
 
         @Override
         public int read() {
-            return (pos < count) ? (buf[pos++] & 0xff) : -1;
+            return (pos < end) ? (buf[pos++] & 0xff) : -1;
         }
 
         @Override
@@ -215,10 +211,10 @@ final class IOImpls {
             if (len == 0) {
                 return 0;
             }
-            if (pos >= count) {
+            if (pos >= end) {
                 return -1;
             }
-            int avail = count - pos;
+            int avail = end - pos;
             avail = Math.min(len, avail);
             System.arraycopy(buf, pos, b, off, avail);
             pos += avail;
@@ -230,7 +226,7 @@ final class IOImpls {
             if (n <= 0) {
                 return 0;
             }
-            int avail = count - pos;
+            int avail = end - pos;
             avail = (int) Math.min(n, avail);
             if (avail <= 0) {
                 return 0;
@@ -241,7 +237,7 @@ final class IOImpls {
 
         @Override
         public int available() {
-            return count - pos;
+            return end - pos;
         }
 
         @Override
@@ -735,22 +731,18 @@ final class IOImpls {
 
         private final char @Nonnull [] buf;
         private int pos;
+        private final int end;
         private int mark = -1;
-        private final int count;
-
-        private CharsReader(char @Nonnull [] buf) {
-            this(buf, 0, buf.length);
-        }
 
         private CharsReader(char @Nonnull [] buf, int off, int len) {
             this.buf = buf;
             this.pos = off;
-            this.count = Math.min(off + len, buf.length);
+            this.end = off + len;
         }
 
         @Override
         public int read() {
-            return (pos < count) ? (buf[pos++] & 0xffff) : -1;
+            return (pos < end) ? (buf[pos++] & 0xffff) : -1;
         }
 
         @Override
@@ -758,10 +750,10 @@ final class IOImpls {
             if (len == 0) {
                 return 0;
             }
-            if (pos >= count) {
+            if (pos >= end) {
                 return -1;
             }
-            int avail = count - pos;
+            int avail = end - pos;
             avail = Math.min(len, avail);
             System.arraycopy(buf, pos, b, off, avail);
             pos += avail;
@@ -770,10 +762,10 @@ final class IOImpls {
 
         @Override
         public int read(@Nonnull CharBuffer target) {
-            if (pos >= count) {
+            if (pos >= end) {
                 return -1;
             }
-            int avail = count - pos;
+            int avail = end - pos;
             avail = Math.min(target.remaining(), avail);
             target.put(buf, pos, avail);
             pos += avail;
@@ -786,7 +778,7 @@ final class IOImpls {
             if (n == 0) {
                 return 0;
             }
-            int avail = count - pos;
+            int avail = end - pos;
             avail = (int) Math.min(n, avail);
             if (avail <= 0) {
                 return 0;
@@ -1258,17 +1250,13 @@ final class IOImpls {
     private static final class BytesOutputStream extends DoWriteStream {
 
         private final byte @Nonnull [] buf;
-        private final int end;
         private int pos;
-
-        private BytesOutputStream(byte @Nonnull [] buf) {
-            this(buf, 0, buf.length);
-        }
+        private final int end;
 
         private BytesOutputStream(byte @Nonnull [] buf, int off, int len) {
             this.buf = buf;
-            this.end = off + len;
             this.pos = off;
+            this.end = off + len;
         }
 
         @Override
@@ -1520,17 +1508,13 @@ final class IOImpls {
     private static final class CharsWriter extends DoWriteWriter {
 
         private final char @Nonnull [] buf;
-        private final int end;
         private int pos;
-
-        private CharsWriter(char @Nonnull [] buf) {
-            this(buf, 0, buf.length);
-        }
+        private final int end;
 
         private CharsWriter(char @Nonnull [] buf, int off, int len) {
             this.buf = buf;
-            this.end = off + len;
             this.pos = off;
+            this.end = off + len;
         }
 
         @Override

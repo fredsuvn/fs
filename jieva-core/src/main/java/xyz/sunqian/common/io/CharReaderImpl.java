@@ -203,14 +203,14 @@ final class CharReaderImpl {
     private static final class CharArrayReader implements CharReader {
 
         private final char @Nonnull [] src;
-        private final int endPos;
         private int pos;
+        private final int end;
         private int mark;
 
         private CharArrayReader(char @Nonnull [] src, int offset, int length) {
             this.src = src;
             this.pos = offset;
-            this.endPos = offset + length;
+            this.end = offset + length;
             this.mark = pos;
         }
 
@@ -220,10 +220,10 @@ final class CharReaderImpl {
             if (len == 0) {
                 return CharSegment.empty(false);
             }
-            if (pos == endPos) {
+            if (pos == end) {
                 return CharSegment.empty(true);
             }
-            int remaining = endPos - pos;
+            int remaining = end - pos;
             int actualLen = Math.min(remaining, len);
             CharBuffer data = CharBuffer.wrap(src, pos, actualLen).slice();
             pos += actualLen;
@@ -236,10 +236,10 @@ final class CharReaderImpl {
             if (len == 0) {
                 return 0;
             }
-            if (pos == endPos) {
+            if (pos == end) {
                 return 0;
             }
-            int remaining = endPos - pos;
+            int remaining = end - pos;
             int skipped = (int) Math.min(remaining, len);
             pos += skipped;
             return skipped;
@@ -247,11 +247,11 @@ final class CharReaderImpl {
 
         @Override
         public long readTo(@Nonnull Appendable dst) throws IORuntimeException {
-            if (endPos == pos) {
+            if (end == pos) {
                 return -1;
             }
             try {
-                int remaining = endPos - pos;
+                int remaining = end - pos;
                 IOKit.write(dst, src, pos, remaining);
                 pos += remaining;
                 return remaining;
@@ -266,11 +266,11 @@ final class CharReaderImpl {
             if (len == 0) {
                 return 0;
             }
-            if (endPos == pos) {
+            if (end == pos) {
                 return -1;
             }
             try {
-                int remaining = endPos - pos;
+                int remaining = end - pos;
                 int actualLen = (int) Math.min(remaining, len);
                 IOKit.write(dst, src, pos, actualLen);
                 pos += actualLen;
@@ -295,10 +295,10 @@ final class CharReaderImpl {
             if (len == 0) {
                 return 0;
             }
-            if (endPos == pos) {
+            if (end == pos) {
                 return -1;
             }
-            int remaining = endPos - pos;
+            int remaining = end - pos;
             int copySize = Math.min(remaining, len);
             System.arraycopy(src, pos, dst, off, copySize);
             pos += copySize;
@@ -310,10 +310,10 @@ final class CharReaderImpl {
             if (dst.remaining() == 0) {
                 return 0;
             }
-            if (pos == endPos) {
+            if (pos == end) {
                 return -1;
             }
-            int remaining = endPos - pos;
+            int remaining = end - pos;
             int putSize = Math.min(remaining, dst.remaining());
             return putTo0(dst, putSize);
         }
@@ -327,10 +327,10 @@ final class CharReaderImpl {
             if (dst.remaining() == 0) {
                 return 0;
             }
-            if (pos == endPos) {
+            if (pos == end) {
                 return -1;
             }
-            int remaining = endPos - pos;
+            int remaining = end - pos;
             int putSize = MathKit.min(remaining, dst.remaining(), len);
             return putTo0(dst, putSize);
         }
