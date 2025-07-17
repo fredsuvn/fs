@@ -951,8 +951,8 @@ public class IOKit {
     }
 
     /**
-     * Wraps the given char sequence, starting at the specified start index inclusive and end at the specified end index
-     * exclusive, as a new {@link Reader}.
+     * Wraps the given char sequence, starting at the specified start index inclusive and ending at the specified end
+     * index exclusive, as a new {@link Reader}.
      * <p>
      * The result's support is as follows:
      * <ul>

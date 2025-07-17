@@ -1,433 +1,462 @@
-// package xyz.sunqian.common.io;
-//
-// import xyz.sunqian.annotations.Nonnull;
-// import xyz.sunqian.annotations.Nullable;
-// import xyz.sunqian.common.base.chars.CharsBuilder;
-//
-// import java.io.Reader;
-// import java.nio.CharBuffer;
-// import java.nio.charset.Charset;
-//
-// /**
-//  * This interface represents the encoder to encode char data, from the specified data source, through zero or more
-//  * intermediate handlers, finally produces a result or side effect. The following example shows a typical encoding:
-//  * <pre>{@code
-//  *     CharEncoder.from(input)
-//  *         .readBlockSize(1024)
-//  *         .readLimit(1024 * 8)
-//  *         .handler(handler)
-//  *         .writeTo(output);
-//  * }</pre>
-//  * There are types of methods in this interface:
-//  * <ul>
-//  *     <li>
-//  *         Setting methods: to set the encoding arguments to the current encoder before a terminal method is invoked;
-//  *     </li>
-//  *     <li>
-//  *         Terminal methods: the current encoder starts the encoding and becomes invalid. Once a terminal method is
-//  *         invoked, any further operations to the encoder will be undefined;
-//  *     </li>
-//  * </ul>
-//  * The encoder is lazy, operations on the source data are only performed when a terminal method is invoked, and
-//  * source data are consumed only as needed.
-//  *
-//  * @author sunqian
-//  */
-// public interface CharEncoder {
-//
-//     /**
-//      * Returns a new {@link CharEncoder} with the specified data source.
-//      *
-//      * @param src the specified data source
-//      * @return a new {@link CharEncoder} with the specified data source
-//      */
-//     static CharEncoder from(Reader src) {
-//         return new CharEncoderImpl(src);
-//     }
-//
-//     /**
-//      * Returns a new {@link CharEncoder} with the specified data source.
-//      *
-//      * @param src the specified data source
-//      * @return a new {@link CharEncoder} with the specified data source
-//      */
-//     static CharEncoder from(char[] src) {
-//         return new CharEncoderImpl(src);
-//     }
-//
-//     /**
-//      * Returns a new {@link CharEncoder} with the specified data source, starting at the specified offset and up to the
-//      * specified length.
-//      *
-//      * @param src the specified data source
-//      * @param off the specified offset
-//      * @param len the specified length
-//      * @return a new {@link CharEncoder} with the specified data source
-//      * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
-//      */
-//     static CharEncoder from(char[] src, int off, int len) throws IndexOutOfBoundsException {
-//         IOChecker.checkOffLen(src.length, off, len);
-//         if (off == 0 && len == src.length) {
-//             return from(src);
-//         }
-//         CharBuffer buffer = CharBuffer.wrap(src, off, len);
-//         return from(buffer);
-//     }
-//
-//     /**
-//      * Returns a new {@link CharEncoder} with the specified data source.
-//      *
-//      * @param src the specified data source
-//      * @return a new {@link CharEncoder} with the specified data source
-//      */
-//     static CharEncoder from(CharSequence src) {
-//         return new CharEncoderImpl(src);
-//     }
-//
-//     /**
-//      * Returns a new {@link CharEncoder} with the specified data source, starting at the specified start index inclusive
-//      * and end at the specified end index exclusive.
-//      *
-//      * @param src   the specified data source
-//      * @param start the specified start index inclusive
-//      * @param end   the specified end index exclusive
-//      * @return a new {@link CharEncoder} with the specified data source
-//      * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
-//      */
-//     static CharEncoder from(CharSequence src, int start, int end) throws IndexOutOfBoundsException {
-//         IOChecker.checkStartEnd(src.length(), start, end);
-//         if (start == 0 && end == src.length()) {
-//             return from(src);
-//         }
-//         return from(src.subSequence(start, end));
-//     }
-//
-//     /**
-//      * Returns a new {@link CharEncoder} with the specified data source.
-//      *
-//      * @param src the specified data source
-//      * @return a new {@link CharEncoder} with the specified data source
-//      */
-//     static CharEncoder from(CharBuffer src) {
-//         return new CharEncoderImpl(src);
-//     }
-//
-//     /**
-//      * Returns a wrapper {@link Handler} that wraps the given encoder to encode data in fixed-size blocks.
-//      * <p>
-//      * The wrapper splits the original data into blocks of the specified fixed size by {@link CharBuffer#slice()}, and
-//      * each block will be passed to the given encoder sequentially. The remainder data, which is insufficient to form a
-//      * full block, will be buffered until enough data is received. The content of the block is shared with the
-//      * sub-content of the original data if, and only if, it is sliced by {@link CharBuffer#slice()}. If a block is
-//      * formed by concatenating multiple original data pieces, its content is not shared.
-//      * <p>
-//      * Specially, in the last invocation (when {@code end == true}) of the given encoder, the last block's size may be
-//      * less than the specified fixed size.
-//      *
-//      * @param size    the specified fixed size
-//      * @param encoder the given encoder
-//      * @return a wrapper {@link Handler} that wraps the given encoder to encode data in fixed-size blocks
-//      * @throws IllegalArgumentException if the specified size is less than or equal to 0
-//      */
-//     static Handler fixedSizeHandler(Handler encoder, int size) throws IllegalArgumentException {
-//         return new CharEncoderImpl.FixedSizeEncoder(encoder, size);
-//     }
-//
-//     /**
-//      * Returns a wrapper {@link Handler} that wraps the given encoder to encode data in rounding down blocks.
-//      * <p>
-//      * The wrapper rounds down the size of the original data to the largest multiple ({@code >= 1}) of the specified
-//      * size that does not exceed it, and splits the original data into the block of the rounded size by
-//      * {@link CharBuffer#slice()}. The block will be passed to the given encoder. The remainder data, of which size is
-//      * less than one multiple of the specified size, will be buffered until enough data is received. The content of the
-//      * block is shared with the sub-content of the original data if, and only if, it is sliced by
-//      * {@link CharBuffer#slice()}. If a block is formed by concatenating multiple original data pieces, its content is
-//      * not shared.
-//      * <p>
-//      * Specially, in the last invocation (when {@code end == true}) of the given encoder, the last block's size may be
-//      * less than one multiple of the specified size.
-//      *
-//      * @param size    the specified size
-//      * @param encoder the given encoder
-//      * @return a wrapper {@link Handler} that wraps the given encoder to encode data in rounding down blocks
-//      * @throws IllegalArgumentException if the specified size is less than or equal to 0
-//      */
-//     static Handler withRounding(int size, Handler encoder) throws IllegalArgumentException {
-//         return new CharEncoderImpl.RoundingEncoder(encoder, size);
-//     }
-//
-//     /**
-//      * Returns a wrapper {@link Handler} that wraps the given encoder to support buffering unconsumed data.
-//      * <p>
-//      * When the wrapper is invoked, if no buffered data exists, the original data is directly passed to the given
-//      * encoder; if buffered data exists, a new buffer concatenating the buffered data followed by the original data is
-//      * passed to the given. After the execution of the given encoder, any unconsumed data remaining in passed buffer
-//      * will be buffered.
-//      * <p>
-//      * Specially, in the last invocation (when {@code end == true}) of the wrapper, no data buffered.
-//      *
-//      * @param encoder the given encoder
-//      * @return a wrapper {@link Handler} that wraps the given encoder to support buffering unconsumed data
-//      */
-//     static Handler bufferedHandler(Handler encoder) {
-//         return new CharEncoderImpl.BufferingEncoder(encoder);
-//     }
-//
-//     /**
-//      * Returns an empty {@link Handler} which does nothing but only returns the input data directly.
-//      *
-//      * @return an empty {@link Handler} which does nothing but only returns the input data directly
-//      */
-//     static Handler emptyHandler() {
-//         return CharEncoderImpl.EmptyEncoder.SINGLETON;
-//     }
-//
-//     /**
-//      * Sets the maximum number of chars to read from the data source.
-//      * <p>
-//      * This is an optional setting method.
-//      *
-//      * @param readLimit the maximum number of chars to read from the data source, must {@code >= 0}
-//      * @return this
-//      * @throws IllegalArgumentException if the limit is negative
-//      */
-//     CharEncoder readLimit(long readLimit) throws IllegalArgumentException;
-//
-//     /**
-//      * Sets the number of chars for each read operation from the data source, the default is
-//      * {@link IOKit#bufferSize()}.
-//      * <p>
-//      * This setting is typically used for encoding in blocks.
-//      * <p>
-//      * This is an optional setting method.
-//      *
-//      * @param readBlockSize the number of chars for each read operation from the data source, must {@code > 0}
-//      * @return this
-//      * @throws IllegalArgumentException if the block size is negative
-//      */
-//     CharEncoder readBlockSize(int readBlockSize) throws IllegalArgumentException;
-//
-//     /**
-//      * Sets whether reading 0 char from the data source should be treated as reaching to the end and break the read
-//      * loop. A read operation returning 0 char can occur in NIO. Default is {@code false}.
-//      * <p>
-//      * This is an optional setting method.
-//      *
-//      * @param endOnZeroRead whether reading 0 char from the data source should be treated as reaching to the end and
-//      *                      break the read loop
-//      * @return this
-//      */
-//     CharEncoder endOnZeroRead(boolean endOnZeroRead);
-//
-//     /**
-//      * Adds the given handler to this encoder as the last handler.
-//      * <p>
-//      * When the encoding starts and exits at least one handler, the encoder reads a block of data from the data source,
-//      * then passes the data block to the first handler, then passes the result of the first handler (if it is
-//      * {@code null} then replaces it with an empty buffer) to the next handler, and so on. The last result of the last
-//      * handler, which is the final result, will be written to the destination if it is not empty. The logic is as
-//      * follows:
-//      * <pre>{@code
-//      * CharSegment segment = nextSegment(blockSize);
-//      * CharBuffer data = segment.data();
-//      * for (Handler handler : handlers) {
-//      *     data = handler.encode(data == null ? emptyBuffer() : data, segment.end());
-//      * }
-//      * if (notEmpty(data)) {
-//      *     writeTo(data);
-//      * }
-//      * }</pre>
-//      * Note that the data blocks are typically read by {@link CharReader#read(int)} and its content may be shared with
-//      * the data source. The encoder ignores the unconsumed data (which is the remaining data) in the data passed to the
-//      * handler each time, to buffer the unconsumed data, try {@link #bufferedHandler(Handler)}.
-//      * <p>
-//      * This is an optional setting method. And provides some specific handler wrappers such as:
-//      * {@link #fixedSizeHandler(Handler, int)}, {@link #withRounding(int, Handler)} and
-//      * {@link #bufferedHandler(Handler)}.
-//      *
-//      * @param handler the given handler
-//      * @return this
-//      */
-//     CharEncoder handler(Handler handler);
-//
-//     /**
-//      * Adds the given handler wrapped by {@link #fixedSizeHandler(Handler, int)} to this encoder. This method is
-//      * equivalent to:
-//      * <pre>{@code
-//      *     return handler(fixedSizeHandler(handler, size));
-//      * }</pre>
-//      *
-//      * @param size    the specified fixed size for the {@link #fixedSizeHandler(Handler, int)}, must {@code > 0}
-//      * @param handler the given handler
-//      * @return this
-//      * @throws IllegalArgumentException if the specified fixed size {@code <= 0}
-//      */
-//     default CharEncoder handler(Handler handler, int size) throws IllegalArgumentException {
-//         return handler(fixedSizeHandler(handler, size));
-//     }
-//
-//     /**
-//      * Starts data processing and returns the actual number of bytes processed. The positions of the source and
-//      * destination, if any, will be incremented by the actual length of the affected data.
-//      * <p>
-//      * This is a terminal method, and it is typically used to product side effects.
-//      *
-//      * @return the actual number of bytes processed
-//      * @throws IORuntimeException if an I/O error occurs
-//      */
-//     long process() throws IORuntimeException;
-//
-//     /**
-//      * Starts data processing, writes the result into the specified destination, and returns the actual number of bytes
-//      * processed. The positions of the source and destination, if any, will be incremented by the actual length of the
-//      * affected data.
-//      * <p>
-//      * This is a terminal method.
-//      *
-//      * @param dest the specified destination
-//      * @return the actual number of bytes processed
-//      * @throws IORuntimeException if an I/O error occurs
-//      */
-//     long writeTo(Appendable dest) throws IORuntimeException;
-//
-//     /**
-//      * Starts data processing, writes the result into the specified destination, and returns the actual number of bytes
-//      * processed. The position of the source, if any, will be incremented by the actual length of the affected data.
-//      * <p>
-//      * This is a terminal method.
-//      *
-//      * @param dest the specified destination
-//      * @return the actual number of bytes processed
-//      * @throws IORuntimeException if an I/O error occurs
-//      */
-//     long writeTo(char[] dest) throws IORuntimeException;
-//
-//     /**
-//      * Starts data processing, writes the result into the specified destination (starting from the specified start index
-//      * up to the specified length), and returns the actual number of bytes processed. The position of the source, if
-//      * any, will be incremented by the actual length of the affected data.
-//      * <p>
-//      * This is a terminal method.
-//      *
-//      * @param dest   the specified destination
-//      * @param offset the specified start index
-//      * @param length the specified length
-//      * @return the actual number of bytes processed
-//      * @throws IORuntimeException if an I/O error occurs
-//      */
-//     long writeTo(char[] dest, int offset, int length) throws IORuntimeException;
-//
-//     /**
-//      * Starts data processing, writes the result into the specified destination, and returns the actual number of bytes
-//      * processed. The positions of the source and destination, if any, will be incremented by the actual length of the
-//      * affected data.
-//      * <p>
-//      * This is a terminal method.
-//      *
-//      * @param dest the specified destination
-//      * @return the actual number of bytes processed
-//      * @throws IORuntimeException if an I/O error occurs
-//      */
-//     long writeTo(CharBuffer dest) throws IORuntimeException;
-//
-//     /**
-//      * Starts data processing, and returns the result as a new array. This method is equivalent to:
-//      * <pre>{@code
-//      *     CharsBuilder builder = new CharsBuilder();
-//      *     writeTo(builder);
-//      *     return builder.toCharArray();
-//      * }</pre>
-//      * This is a terminal method.
-//      *
-//      * @return the processing result as a new array
-//      * @throws IORuntimeException if an I/O error occurs
-//      * @see #writeTo(Appendable)
-//      */
-//     default char[] toCharArray() throws IORuntimeException {
-//         CharsBuilder builder = new CharsBuilder();
-//         writeTo(builder);
-//         return builder.toCharArray();
-//     }
-//
-//     /**
-//      * Starts data processing, and returns the result as a new buffer. This method is equivalent to:
-//      * <pre>{@code
-//      *     CharsBuilder builder = new CharsBuilder();
-//      *     writeTo(builder);
-//      *     return builder.toCharBuffer();
-//      * }</pre>
-//      * This is a terminal method.
-//      *
-//      * @return the processing result as a new buffer
-//      * @throws IORuntimeException if an I/O error occurs
-//      * @see #writeTo(Appendable)
-//      */
-//     default CharBuffer toCharBuffer() throws IORuntimeException {
-//         CharsBuilder builder = new CharsBuilder();
-//         writeTo(builder);
-//         return builder.toCharBuffer();
-//     }
-//
-//     /**
-//      * Starts data processing, and returns the result as a new string. This method is equivalent to:
-//      * <pre>{@code
-//      *     return new String(toCharArray());
-//      * }</pre>
-//      * This is a terminal method.
-//      *
-//      * @return the processing result as a new string
-//      * @throws IORuntimeException if an I/O error occurs
-//      * @see #toCharArray()
-//      */
-//     String toString() throws IORuntimeException;
-//
-//     /**
-//      * Returns a reader which represents and encompasses the entire data processing.
-//      * <p>
-//      * If there is no encoder in the processor: if the source is a reader, return the reader itself; if the source is an
-//      * array or buffer or char sequence, returns the reader from {@link IOKit#newReader(char[])} or
-//      * {@link IOKit#newReader(CharBuffer)} or {@link IOKit#newReader(CharSequence)}. Otherwise, the returned reader's
-//      * read operations are performed only as needed, mark/reset operations are not supported, and the {@code close()}
-//      * method will close the source if the source is closable.
-//      * <p>
-//      * This is a terminal method.
-//      *
-//      * @return a reader which represents and encompasses the entire data processing
-//      */
-//     Reader toReader();
-//
-//     /**
-//      * Converts this {@link CharEncoder} to a {@link ByteEncoder} with the specified charset.
-//      * <p>
-//      * This is a terminal method.
-//      *
-//      * @param charset the specified charset
-//      * @return a new {@link ByteEncoder} converted from this {@link CharEncoder} with the specified charset
-//      */
-//     default ByteEncoder toByteProcessor(Charset charset) {
-//         return ByteEncoder.from(IOKit.newInputStream(toReader(), charset));
-//     }
-//
-//     /**
-//      * Handler of the {@link CharEncoder}, to do the specific encoding work.
-//      *
-//      * @author sunqian
-//      */
-//     interface Handler {
-//
-//         /**
-//          * Handles the specific encoding work with the input data, and returns the handling result. The input data will
-//          * not be {@code null} (but may be empty), but the return value can be {@code null}.
-//          * <p>
-//          * If return value is {@code null} and there exists a next handler, an empty buffer will be passed to the next
-//          * handler.
-//          *
-//          * @param data the input data
-//          * @param end  whether the input data is the last and there is no more data
-//          * @return the result of the specific encoding work
-//          * @throws Exception if any problem occurs
-//          */
-//         @Nullable
-//         CharBuffer handle(@Nonnull CharBuffer data, boolean end) throws Exception;
-//     }
-// }
+package xyz.sunqian.common.io;
+
+import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.chars.CharsBuilder;
+
+import java.io.Reader;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
+
+/**
+ * This interface represents the encoder to encode char data, from the specified data source, through zero or more
+ * intermediate handlers, finally produces a result or side effect, and the result will be written into a destination
+ * (if any). The following example shows a typical encoding:
+ * <pre>{@code
+ *     from(input)
+ *         .readBlockSize(1024)
+ *         .readLimit(1024 * 8)
+ *         .handler(handler)
+ *         .encodeTo(output);
+ * }</pre>
+ * <p>
+ * There are types of methods in this interface:
+ * <ul>
+ *     <li>
+ *         Setting methods: set the encoding arguments to the current encoder before a terminal method is invoked;
+ *     </li>
+ *     <li>
+ *         Terminal methods: produce the encoding result or side effect. Once a terminal method is invoked, the current
+ *         encoder will be invalid, any further operations of the current encoder will be undefined;
+ *     </li>
+ * </ul>
+ * The encoder is lazy, operations on the source data are only performed when a terminal method is invoked, and the
+ * source data are consumed only as needed. Positions of the source and destination will increment by the actual read
+ * and write number.
+ *
+ * @author sunqian
+ */
+public interface CharEncoder {
+
+    /**
+     * Returns a new {@link CharEncoder} whose data source is the specified reader.
+     *
+     * @param src the specified reader
+     * @return a new {@link CharEncoder} whose data source is the specified reader
+     */
+    static @Nonnull CharEncoder from(@Nonnull Reader src) {
+        return new CharEncoderImpl(src);
+    }
+
+    /**
+     * Returns a new {@link CharEncoder} whose data source is the specified array.
+     *
+     * @param src the specified array
+     * @return a new {@link CharEncoder} whose data source is the specified array
+     */
+    static @Nonnull CharEncoder from(char @Nonnull [] src) {
+        return new CharEncoderImpl(src, 0, src.length);
+    }
+
+    /**
+     * Returns a new {@link CharEncoder} whose data source is a specified length of data from the specified array,
+     * starting at the specified offset.
+     *
+     * @param src the specified array
+     * @param off the specified offset
+     * @param len the specified length
+     * @return a new {@link CharEncoder} whose data source is a specified length of data from the specified array,
+     * starting at the specified offset
+     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
+     */
+    static @Nonnull CharEncoder from(char @Nonnull [] src, int off, int len) throws IndexOutOfBoundsException {
+        IOHelper.checkOffLen(src.length, off, len);
+        return new CharEncoderImpl(src, off, len);
+    }
+
+    /**
+     * Returns a new {@link CharEncoder} whose data source is the specified char sequence.
+     *
+     * @param src the specified char sequence
+     * @return a new {@link CharEncoder} whose data source is the specified char sequence
+     */
+    static @Nonnull CharEncoder from(@Nonnull CharSequence src) {
+        return new CharEncoderImpl(CharBuffer.wrap(src));
+    }
+
+    /**
+     * Returns a new {@link CharEncoder} whose data source is the specified char sequence, starting at the specified
+     * start index inclusive and ending at the specified end index exclusive.
+     *
+     * @param src   the specified char sequence
+     * @param start the specified start index inclusive
+     * @param end   the specified end index exclusive
+     * @return a new {@link CharEncoder} whose data source is the specified char sequence, starting at the specified
+     * start index inclusive and ending at the specified end index exclusive.
+     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
+     */
+    static @Nonnull CharEncoder from(@Nonnull CharSequence src, int start, int end) throws IndexOutOfBoundsException {
+        return new CharEncoderImpl(CharBuffer.wrap(src, start, end));
+    }
+
+    /**
+     * Returns a new {@link CharEncoder} whose data source is the specified buffer.
+     *
+     * @param src the specified buffer
+     * @return a new {@link CharEncoder} whose data source is the specified buffer
+     */
+    static @Nonnull CharEncoder from(@Nonnull CharBuffer src) {
+        return new CharEncoderImpl(src);
+    }
+
+    /**
+     * Returns a new {@link CharEncoder} whose data source is the specified {@link CharReader}.
+     *
+     * @param src the specified {@link CharReader}
+     * @return a new {@link CharEncoder} whose data source is the specified {@link CharReader}
+     */
+    static @Nonnull CharEncoder from(@Nonnull CharReader src) {
+        return new CharEncoderImpl(src);
+    }
+
+    /**
+     * Returns a {@link Handler} wrapper that wraps the given handler to ensure that the size of the data passed to it
+     * is a specified fixed size.
+     * <p>
+     * The wrapper splits the input data into blocks of a specified fixed size and sequentially passes each block to the
+     * given handler. If any remaining data is insufficient to form a full block, it will be buffered and prepended to
+     * the next input data in subsequent invocations. The combined data will be processed with the same block-splitting
+     * logic.
+     * <p>
+     * Specifically, if the {@code end} flag is {@code true}, even if the remaining data is insufficient to form a full
+     * block, it will still be passed to the given handler.
+     *
+     * @param handler the given handler
+     * @param size    the specified fixed size, must {@code > 0}
+     * @return a {@link Handler} wrapper that wraps the given handler to ensure that the size of the data passed to it
+     * is a specified fixed size
+     * @throws IllegalArgumentException if the specified fixed size {@code <= 0}
+     */
+    static @Nonnull Handler newFixedSizeHandler(@Nonnull Handler handler, int size) throws IllegalArgumentException {
+        IOHelper.checkSize(size);
+        return new CharEncoderImpl.FixedSizeEncoder(handler, size);
+    }
+
+    /**
+     * Returns a {@link Handler} wrapper that wraps the given handler to ensure that the size of the data passed to it
+     * is a multiple of the specified size. The multiple is calculated as the largest multiple of the specified size not
+     * exceeding the input length.
+     * <p>
+     * The wrapper truncates the input data to the calculated multiple length, and passes the truncated data to the
+     * given handler. If any residual data remains after truncation (shorter than the specified size), it will be
+     * buffered and prepended to the next input data in subsequent invocations. The combined data will be processed with
+     * the same truncation logic.
+     * <p>
+     * Specifically, if the {@code end} flag is {@code true}, even if the residual data is shorter than the specified
+     * size, it will still be passed to the given handler.
+     *
+     * @param handler the given handler
+     * @param size    the specified size, must {@code > 0}
+     * @return a {@link Handler} wrapper that wraps the given handler to ensure that the size of the data passed to it
+     * is a multiple of the specified size
+     * @throws IllegalArgumentException if the specified size {@code <= 0}
+     */
+    static @Nonnull Handler newMultipleSizeHandler(@Nonnull Handler handler, int size) throws IllegalArgumentException {
+        IOHelper.checkSize(size);
+        return new CharEncoderImpl.RoundingEncoder(handler, size);
+    }
+
+    /**
+     * Returns a {@link Handler} wrapper that wraps the given handler to support buffering unconsumed data.
+     * <p>
+     * The wrapper passes input data to the given handler, after processing, the unconsumed data (if any) will be
+     * buffered and prepended to the next input data in subsequent invocations. The combined data will be processed with
+     * the same buffering logic.
+     * <p>
+     * Specifically, if the {@code end} flag is {@code true}, the unconsumed data (if any) will be discarded.
+     *
+     * @param handler the given handler
+     * @return a {@link Handler} wrapper that wraps the given handler to support buffering unconsumed data
+     */
+    static @Nonnull Handler newBufferedHandler(@Nonnull Handler handler) {
+        return new CharEncoderImpl.BufferingEncoder(handler);
+    }
+
+    /**
+     * Returns an empty {@link Handler} which does nothing but only returns the input data directly.
+     *
+     * @return an empty {@link Handler} which does nothing but only returns the input data directly
+     */
+    static @Nonnull Handler emptyHandler() {
+        return CharEncoderImpl.EmptyEncoder.SINGLETON;
+    }
+
+    /**
+     * Sets the maximum number of chars to read from the data source.
+     * <p>
+     * This is an optional setting method.
+     *
+     * @param readLimit the maximum number of chars to read from the data source, must {@code >= 0}
+     * @return this
+     * @throws IllegalArgumentException if the limit is negative
+     */
+    @Nonnull
+    CharEncoder readLimit(long readLimit) throws IllegalArgumentException;
+
+    /**
+     * Sets the number of chars for each read operation from the data source. The default is {@link IOKit#bufferSize()}.
+     * This setting is typically used for block-based encoding.
+     * <p>
+     * This is an optional setting method.
+     *
+     * @param readBlockSize the number of chars for each read operation from the data source, must {@code > 0}
+     * @return this
+     * @throws IllegalArgumentException if the block size is non-positive
+     */
+    @Nonnull
+    CharEncoder readBlockSize(int readBlockSize) throws IllegalArgumentException;
+
+    /**
+     * Adds the given handler to this encoder as the last handler.
+     * <p>
+     * When the encoding starts and there is at least one handler, the encoder reads a block of data from the data
+     * source, then passes the data block to the first handler, then passes the result of the first handler to the next
+     * handler, and so on. If any handler returns {@code null}, subsequent handlers in the chain are skipped for that
+     * block. The last result of the last handler, which serves as the final result, will be written to the destination
+     * if the final result is not empty. The encoder continues this read-handle loop, until it reaches the end of the
+     * data source, or read number reaches the limit value set by {@link #readLimit(long)}. The logic is as follows:
+     * <pre>{@code
+     * while (true) {
+     *     CharSegment block = readNextBlock(blockSize);
+     *     CharBuffer data = block.data();
+     *     boolean end = block.end();
+     *     for (Handler handler : handlers) {
+     *         if (data == null) {
+     *             break;
+     *         }
+     *         data = handler.encode(data, end);
+     *     }
+     *     if (notEmpty(data)) {
+     *         writeTo(data);
+     *     }
+     *     if (end || reachLimit()) {
+     *         break;
+     *     }
+     * }
+     * }</pre>
+     * <p>
+     * The block size is typically determined by {@link #readBlockSize(int)}. And the data blocks are typically read by
+     * {@link CharReader#read(int)}, thus, their content may be shared with the data source. Changes to the data blocks
+     * may be reflected in the data source.
+     * <p>
+     * Normally, for the data block passed to the handler, the unconsumed portion is ignored by the encoder and will not
+     * be prepended to the next passed block. Use {@link #newBufferedHandler(Handler)} if it is needed.
+     * <p>
+     * This is an optional setting method. {@link CharEncoder} also provides some specific handler wrappers such as:
+     * {@link #newFixedSizeHandler(Handler, int)} and {@link #newMultipleSizeHandler(Handler, int)}.
+     *
+     * @param handler the given handler
+     * @return this
+     */
+    @Nonnull
+    CharEncoder handler(Handler handler);
+
+    /**
+     * Starts data encoding and returns the actual number of chars read. If reaches the end of the data source and no
+     * data is read, returns {@code -1}.
+     * <p>
+     * The position of the data source, if any, will be incremented by the actual read number.
+     * <p>
+     * This is a terminal method, and it is typically used to produce side effects.
+     *
+     * @return the actual number of chars read, or {@code -1} if reaches the end of the data source and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    long encode() throws IORuntimeException;
+
+    /**
+     * Starts data encoding, writes the encoding result to the specified destination, and returns the actual number of
+     * chars read. If reaches the end of the data source and no data is read, returns {@code -1}.
+     * <p>
+     * The positions of the data source and destination, if any, will be incremented by the actual read and write
+     * numbers.
+     * <p>
+     * This is a terminal method.
+     *
+     * @param dst the specified destination
+     * @return the actual number of chars read, or {@code -1} if reaches the end of the data source and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    long encodeTo(@Nonnull Appendable dst) throws IORuntimeException;
+
+    /**
+     * Starts data encoding, writes the encoding result to the specified destination, and returns the actual number of
+     * chars read. If reaches the end of the data source and no data is read, returns {@code -1}.
+     * <p>
+     * The positions of the data source and destination, if any, will be incremented by the actual read and write
+     * numbers.
+     * <p>
+     * This is a terminal method.
+     *
+     * @param dst the specified destination
+     * @return the actual number of chars read, or {@code -1} if reaches the end of the data source and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    int encodeTo(char @Nonnull [] dst) throws IORuntimeException;
+
+    /**
+     * Starts data encoding, writes the encoding result to the specified destination (starting at the specified offset),
+     * and returns the actual number of chars read. If reaches the end of the data source and no data is read, returns
+     * {@code -1}.
+     * <p>
+     * The positions of the data source and destination, if any, will be incremented by the actual read and write
+     * numbers.
+     * <p>
+     * This is a terminal method.
+     *
+     * @param dst the specified destination
+     * @param off the specified offset
+     * @return the actual number of chars read, or {@code -1} if reaches the end of the data source and no data is read
+     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
+     * @throws IORuntimeException        if an I/O error occurs
+     */
+    int encodeTo(char @Nonnull [] dst, int off) throws IndexOutOfBoundsException, IORuntimeException;
+
+    /**
+     * Starts data encoding, writes the encoding result to the specified destination, and returns the actual number of
+     * chars read. If reaches the end of the data source and no data is read, returns {@code -1}.
+     * <p>
+     * The positions of the data source and destination, if any, will be incremented by the actual read and write
+     * numbers.
+     * <p>
+     * This is a terminal method.
+     *
+     * @param dst the specified destination
+     * @return the actual number of chars read, or {@code -1} if reaches the end of the data source and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    int encodeTo(@Nonnull CharBuffer dst) throws IORuntimeException;
+
+    /**
+     * Starts the encoding, and returns the result as a new array. This method is equivalent to:
+     * <pre>{@code
+     *     CharsBuilder builder = new CharsBuilder();
+     *     encodeTo(builder);
+     *     return builder.toCharArray();
+     * }</pre>
+     * <p>
+     * The position of the data source, if any, will be incremented by the actual read number.
+     * <p>
+     * This is a terminal method.
+     *
+     * @return the encoding result as a new array
+     * @throws IORuntimeException if an I/O error occurs
+     * @see #encodeTo(Appendable)
+     */
+    default char @Nonnull [] toCharArray() throws IORuntimeException {
+        CharsBuilder builder = new CharsBuilder();
+        encodeTo(builder);
+        return builder.toCharArray();
+    }
+
+    /**
+     * Starts the encoding, and returns the result as a new buffer. This method is equivalent to:
+     * <pre>{@code
+     *     CharsBuilder builder = new CharsBuilder();
+     *     encodeTo(builder);
+     *     return builder.toCharBuffer();
+     * }</pre>
+     * <p>
+     * The position of the data source, if any, will be incremented by the actual read number.
+     * <p>
+     * This is a terminal method.
+     *
+     * @return the encoding result as a new buffer
+     * @throws IORuntimeException if an I/O error occurs
+     * @see #encodeTo(Appendable)
+     */
+    default @Nonnull CharBuffer toCharBuffer() throws IORuntimeException {
+        CharsBuilder builder = new CharsBuilder();
+        encodeTo(builder);
+        return builder.toCharBuffer();
+    }
+
+    /**
+     * Starts the encoding, and returns the result as a new string. This method is equivalent to:
+     * <pre>{@code
+     *     return new String(toCharArray());
+     * }</pre>
+     * <p>
+     * The position of the data source, if any, will be incremented by the actual read number.
+     * <p>
+     * This is a terminal method.
+     *
+     * @return the encoding result as a new string
+     * @throws IORuntimeException if an I/O error occurs
+     * @see #toCharArray()
+     */
+    @Nonnull
+    String toString() throws IORuntimeException;
+
+    /**
+     * Returns this {@link ByteEncoder} as a {@link Reader}. The status and data source of this encoder are shared with
+     * the returned {@link Reader}, and the returned {@link Reader}'s content represents the encoding result.
+     * <p>
+     * The result's support is as follows:
+     * <ul>
+     *     <li>mark/reset: based on the data source;</li>
+     *     <li>close: closes the data source;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
+     * <p>
+     * This is a terminal method.
+     *
+     * @return this {@link ByteEncoder} as a {@link Reader}
+     */
+    @Nonnull
+    Reader asReader();
+
+    /**
+     * Returns this {@link CharEncoder} as a {@link CharReader}. The status and data source of this encoder are shared
+     * with the returned {@link CharReader}, and the returned {@link CharReader}'s content represents the encoding
+     * result.
+     *
+     * @return this {@link CharEncoder} as a {@link CharReader}
+     */
+    @Nonnull
+    CharReader asCharReader();
+
+    /**
+     * Converts this {@link CharEncoder} to a {@link ByteEncoder} with the specified charset.
+     * <p>
+     * This is a terminal method.
+     *
+     * @param charset the specified charset
+     * @return a new {@link ByteEncoder} converted from this {@link CharEncoder} with the specified charset
+     */
+    default @Nonnull ByteEncoder toByteEncoder(@Nonnull Charset charset) {
+        return ByteEncoder.from(IOKit.newInputStream(asReader(), charset));
+    }
+
+    /**
+     * Handler of the {@link CharEncoder}, to do the specific encoding work.
+     *
+     * @author sunqian
+     */
+    interface Handler {
+
+        /**
+         * Handles the specific encoding work with the input data, and returns the handling result. The input data will
+         * not be {@code null} (but may be empty), but the return value can be {@code null}. If it returns {@code null},
+         * the current handling loop will be broken (see {@link #handler(Handler)}).
+         *
+         * @param data the input data
+         * @param end  whether the input data is the last and there is no more data
+         * @return the result of the specific encoding work
+         * @throws Exception if any problem occurs
+         * @see #handler(Handler)
+         */
+        @Nullable
+        CharBuffer handle(@Nonnull CharBuffer data, boolean end) throws Exception;
+    }
+}

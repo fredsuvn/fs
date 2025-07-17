@@ -115,8 +115,8 @@ public interface CharReader {
     }
 
     /**
-     * Wraps the given char sequence, starting at the specified start index inclusive and end at the specified end index
-     * exclusive, as a new {@link CharReader}.
+     * Wraps the given char sequence, starting at the specified start index inclusive and ending at the specified end
+     * index exclusive, as a new {@link CharReader}.
      * <p>
      * The content of the segment returned from the {@link CharReader#read(int)} is shared with the array. Any changes
      * in the array will be reflected to the segment's content, but not vice versa.
