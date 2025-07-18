@@ -770,7 +770,7 @@ public class BufferKit {
         return slice0(src, off, len);
     }
 
-    private static @Nonnull ByteBuffer slice0(@Nonnull ByteBuffer src, int off, int len) {
+    static @Nonnull ByteBuffer slice0(@Nonnull ByteBuffer src, int off, int len) {
         int pos = src.position();
         int limit = src.limit();
         src.position(pos + off);

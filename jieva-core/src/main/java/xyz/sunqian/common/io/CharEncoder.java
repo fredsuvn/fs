@@ -227,19 +227,19 @@ public interface CharEncoder {
      * data source, or read number reaches the limit value set by {@link #readLimit(long)}. The logic is as follows:
      * <pre>{@code
      * while (true) {
-     *     CharSegment block = readNextBlock(blockSize);
+     *     CharSegment block = readNextBlock(blockSize, readLimit);
      *     CharBuffer data = block.data();
      *     boolean end = block.end();
      *     for (Handler handler : handlers) {
      *         if (data == null) {
      *             break;
      *         }
-     *         data = handler.encode(data, end);
+     *         data = handler.handle(data, end);
      *     }
      *     if (notEmpty(data)) {
      *         writeTo(data);
      *     }
-     *     if (end || reachLimit()) {
+     *     if (end) {
      *         break;
      *     }
      * }
@@ -259,7 +259,7 @@ public interface CharEncoder {
      * @return this
      */
     @Nonnull
-    CharEncoder handler(Handler handler);
+    CharEncoder handler(@Nonnull Handler handler);
 
     /**
      * Starts data encoding and returns the actual number of chars read. If reaches the end of the data source and no
@@ -302,7 +302,7 @@ public interface CharEncoder {
      * @return the actual number of chars read, or {@code -1} if reaches the end of the data source and no data is read
      * @throws IORuntimeException if an I/O error occurs
      */
-    int encodeTo(char @Nonnull [] dst) throws IORuntimeException;
+    long encodeTo(char @Nonnull [] dst) throws IORuntimeException;
 
     /**
      * Starts data encoding, writes the encoding result to the specified destination (starting at the specified offset),
@@ -320,7 +320,7 @@ public interface CharEncoder {
      * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
      * @throws IORuntimeException        if an I/O error occurs
      */
-    int encodeTo(char @Nonnull [] dst, int off) throws IndexOutOfBoundsException, IORuntimeException;
+    long encodeTo(char @Nonnull [] dst, int off) throws IndexOutOfBoundsException, IORuntimeException;
 
     /**
      * Starts data encoding, writes the encoding result to the specified destination, and returns the actual number of
@@ -335,7 +335,7 @@ public interface CharEncoder {
      * @return the actual number of chars read, or {@code -1} if reaches the end of the data source and no data is read
      * @throws IORuntimeException if an I/O error occurs
      */
-    int encodeTo(@Nonnull CharBuffer dst) throws IORuntimeException;
+    long encodeTo(@Nonnull CharBuffer dst) throws IORuntimeException;
 
     /**
      * Starts the encoding, and returns the result as a new array. This method is equivalent to:
@@ -420,6 +420,8 @@ public interface CharEncoder {
      * Returns this {@link CharEncoder} as a {@link CharReader}. The status and data source of this encoder are shared
      * with the returned {@link CharReader}, and the returned {@link CharReader}'s content represents the encoding
      * result.
+     * <p>
+     * This is a terminal method.
      *
      * @return this {@link CharEncoder} as a {@link CharReader}
      */

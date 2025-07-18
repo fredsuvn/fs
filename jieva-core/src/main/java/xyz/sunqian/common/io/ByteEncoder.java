@@ -48,7 +48,7 @@ public interface ByteEncoder {
      * @return a new {@link ByteEncoder} whose data source is the specified input stream
      */
     static @Nonnull ByteEncoder from(@Nonnull InputStream src) {
-        return new ByteEncoderImpl(src);
+        return new ByteEncoderImpl2(ByteReader.from(src));
     }
 
     /**
@@ -58,7 +58,7 @@ public interface ByteEncoder {
      * @return a new {@link ByteEncoder} whose data source is the specified array
      */
     static @Nonnull ByteEncoder from(byte @Nonnull [] src) {
-        return new ByteEncoderImpl(src, 0, src.length);
+        return new ByteEncoderImpl2(ByteReader.from(src));
     }
 
     /**
@@ -73,8 +73,7 @@ public interface ByteEncoder {
      * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
      */
     static @Nonnull ByteEncoder from(byte @Nonnull [] src, int off, int len) throws IndexOutOfBoundsException {
-        IOHelper.checkOffLen(src.length, off, len);
-        return new ByteEncoderImpl(src, off, len);
+        return new ByteEncoderImpl2(ByteReader.from(src, off, len));
     }
 
     /**
@@ -84,7 +83,7 @@ public interface ByteEncoder {
      * @return a new {@link ByteEncoder} whose data source is the specified buffer
      */
     static @Nonnull ByteEncoder from(@Nonnull ByteBuffer src) {
-        return new ByteEncoderImpl(src);
+        return new ByteEncoderImpl2(ByteReader.from(src));
     }
 
     /**
@@ -94,7 +93,7 @@ public interface ByteEncoder {
      * @return a new {@link ByteEncoder} whose data source is the specified {@link ByteReader}
      */
     static @Nonnull ByteEncoder from(@Nonnull ByteReader src) {
-        return new ByteEncoderImpl(src);
+        return new ByteEncoderImpl2(src);
     }
 
     /**
@@ -117,7 +116,7 @@ public interface ByteEncoder {
      */
     static @Nonnull Handler newFixedSizeHandler(@Nonnull Handler handler, int size) throws IllegalArgumentException {
         IOHelper.checkSize(size);
-        return new ByteEncoderImpl.FixedSizeEncoder(handler, size);
+        return new ByteEncoderImpl2.FixedSizeHandler(handler, size);
     }
 
     /**
@@ -141,7 +140,7 @@ public interface ByteEncoder {
      */
     static @Nonnull Handler newMultipleSizeHandler(@Nonnull Handler handler, int size) throws IllegalArgumentException {
         IOHelper.checkSize(size);
-        return new ByteEncoderImpl.RoundingEncoder(handler, size);
+        return new ByteEncoderImpl2.MultipleSizeHandler(handler, size);
     }
 
     /**
@@ -157,7 +156,7 @@ public interface ByteEncoder {
      * @return a {@link Handler} wrapper that wraps the given handler to support buffering unconsumed data
      */
     static @Nonnull Handler newBufferedHandler(@Nonnull Handler handler) {
-        return new ByteEncoderImpl.BufferingEncoder(handler);
+        return new ByteEncoderImpl2.BufferedHandler(handler);
     }
 
     /**
@@ -166,7 +165,7 @@ public interface ByteEncoder {
      * @return an empty {@link Handler} which does nothing but only returns the input data directly
      */
     static @Nonnull Handler emptyHandler() {
-        return ByteEncoderImpl.EmptyEncoder.SINGLETON;
+        return ByteEncoderImpl2.EmptyHandler.SINGLETON;
     }
 
     /**
@@ -205,19 +204,19 @@ public interface ByteEncoder {
      * data source, or read number reaches the limit value set by {@link #readLimit(long)}. The logic is as follows:
      * <pre>{@code
      * while (true) {
-     *     ByteSegment block = readNextBlock(blockSize);
+     *     ByteSegment block = readNextBlock(blockSize, readLimit);
      *     ByteBuffer data = block.data();
      *     boolean end = block.end();
      *     for (Handler handler : handlers) {
      *         if (data == null) {
      *             break;
      *         }
-     *         data = handler.encode(data, end);
+     *         data = handler.handle(data, end);
      *     }
      *     if (notEmpty(data)) {
      *         writeTo(data);
      *     }
-     *     if (end || reachLimit()) {
+     *     if (end) {
      *         break;
      *     }
      * }
@@ -237,7 +236,7 @@ public interface ByteEncoder {
      * @return this
      */
     @Nonnull
-    ByteEncoder handler(Handler handler);
+    ByteEncoder handler(@Nonnull Handler handler);
 
     /**
      * Starts data encoding and returns the actual number of bytes read. If reaches the end of the data source and no
@@ -295,7 +294,7 @@ public interface ByteEncoder {
      * @return the actual number of bytes read, or {@code -1} if reaches the end of the data source and no data is read
      * @throws IORuntimeException if an I/O error occurs
      */
-    int encodeTo(byte @Nonnull [] dst) throws IORuntimeException;
+    long encodeTo(byte @Nonnull [] dst) throws IORuntimeException;
 
     /**
      * Starts data encoding, writes the encoding result to the specified destination (starting at the specified offset),
@@ -313,7 +312,7 @@ public interface ByteEncoder {
      * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
      * @throws IORuntimeException        if an I/O error occurs
      */
-    int encodeTo(byte @Nonnull [] dst, int off) throws IndexOutOfBoundsException, IORuntimeException;
+    long encodeTo(byte @Nonnull [] dst, int off) throws IndexOutOfBoundsException, IORuntimeException;
 
     /**
      * Starts data encoding, writes the encoding result to the specified destination, and returns the actual number of
@@ -328,7 +327,7 @@ public interface ByteEncoder {
      * @return the actual number of bytes read, or {@code -1} if reaches the end of the data source and no data is read
      * @throws IORuntimeException if an I/O error occurs
      */
-    int encodeTo(@Nonnull ByteBuffer dst) throws IORuntimeException;
+    long encodeTo(@Nonnull ByteBuffer dst) throws IORuntimeException;
 
     /**
      * Starts the encoding, and returns the result as a new array. This method is equivalent to:
@@ -378,7 +377,7 @@ public interface ByteEncoder {
      * Starts the encoding, and returns the result as a new string with {@link CharsKit#defaultCharset()}. This method
      * is equivalent to:
      * <pre>{@code
-     *     return new String(toByteArray(), CharKit.defaultCharset());
+     *     return new String(toByteArray(), CharsKit.defaultCharset());
      * }</pre>
      * <p>
      * The position of the data source, if any, will be incremented by the actual read number.
@@ -436,6 +435,8 @@ public interface ByteEncoder {
      * Returns this {@link ByteEncoder} as a {@link ByteReader}. The status and data source of this encoder are shared
      * with the returned {@link ByteReader}, and the returned {@link ByteReader}'s content represents the encoding
      * result.
+     * <p>
+     * This is a terminal method.
      *
      * @return this {@link ByteEncoder} as a {@link ByteReader}
      */
