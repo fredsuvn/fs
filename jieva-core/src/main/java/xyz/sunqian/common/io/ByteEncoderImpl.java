@@ -54,10 +54,8 @@ final class ByteEncoderImpl implements ByteEncoder {
                 long count = 0;
                 while (true) {
                     ByteSegment block = reader.read(readBlockSize);
-                    ByteBuffer data = block.data();
-                    count += data.remaining();
-                    boolean end = block.end();
-                    if (end) {
+                    count += block.data().remaining();
+                    if (block.end()) {
                         break;
                     }
                 }
@@ -171,8 +169,9 @@ final class ByteEncoderImpl implements ByteEncoder {
             BufferKit.readTo(data, (OutputStream) dst);
         } else if (dst instanceof WritableByteChannel) {
             BufferKit.readTo(data, (WritableByteChannel) dst);
+        } else {
+            throw new UnsupportedOperationException("Unsupported destination: " + dst.getClass() + ".");
         }
-        throw new UnsupportedOperationException("Unsupported destination: " + dst.getClass() + ".");
     }
 
     @Override
@@ -182,6 +181,14 @@ final class ByteEncoderImpl implements ByteEncoder {
             return reader.asInputStream();
         }
         return new EncoderInputStream(reader, readBlockSize, handlers);
+    }
+
+    @Override
+    public @Nonnull ByteReader asByteReader() {
+        if (handlers == null) {
+            return readLimit < 0 ? src : src.limit(readLimit);
+        }
+        return ByteReader.from(asInputStream());
     }
 
     private static final class EncoderInputStream extends InputStream {
@@ -259,35 +266,13 @@ final class ByteEncoderImpl implements ByteEncoder {
         }
 
         @Override
-        public int read(byte[] dst, int off, int len) throws IOException {
+        public int read(byte @Nonnull [] dst, int off, int len) throws IOException {
             checkClosed();
             IOHelper.checkOffLen(dst.length, off, len);
             if (len == 0) {
                 return 0;
             }
-            int pos = off;
-            final int endIndex = off + len;
-            while (pos < endIndex) {
-                if (nextSeg == null) {
-                    nextSeg = nextSeg();
-                }
-                if (nextSeg == ByteSegment.empty(true)) {
-                    return -1;
-                }
-                ByteBuffer data = nextSeg.data();
-                if (data.hasRemaining()) {
-                    int readSize = Math.min(data.remaining(), endIndex - pos);
-                    data.get(dst, pos, readSize);
-                    pos += readSize;
-                    continue;
-                }
-                if (nextSeg.end()) {
-                    nextSeg = ByteSegment.empty(true);
-                    break;
-                }
-                nextSeg = null;
-            }
-            return pos - off;
+            return read0(dst, off, len);
         }
 
         @Override
@@ -296,18 +281,26 @@ final class ByteEncoderImpl implements ByteEncoder {
             if (n <= 0) {
                 return 0;
             }
+            return read0(null, 0, n);
+        }
+
+        private int read0(byte @Nullable [] dst, int off, long len) throws IOException {
             int pos = 0;
-            while (pos < n) {
+            while (pos < len) {
                 if (nextSeg == null) {
                     nextSeg = nextSeg();
                 }
                 if (nextSeg == ByteSegment.empty(true)) {
-                    return 0;
+                    break;
                 }
                 ByteBuffer data = nextSeg.data();
                 if (data.hasRemaining()) {
-                    int readSize = (int) Math.min(data.remaining(), n - pos);
-                    data.position(data.position() + readSize);
+                    int readSize = (int) Math.min(data.remaining(), len - pos);
+                    if (dst != null) {
+                        data.get(dst, pos + off, readSize);
+                    } else {
+                        data.position(data.position() + readSize);
+                    }
                     pos += readSize;
                     continue;
                 }
@@ -317,7 +310,7 @@ final class ByteEncoderImpl implements ByteEncoder {
                 }
                 nextSeg = null;
             }
-            return pos;
+            return pos == 0 ? (dst == null ? 0 : -1) : pos;
         }
 
         @Override
@@ -343,14 +336,6 @@ final class ByteEncoderImpl implements ByteEncoder {
                 throw new IOException("Stream closed.");
             }
         }
-    }
-
-    @Override
-    public @Nonnull ByteReader asByteReader() {
-        if (handlers == null) {
-            return readLimit < 0 ? src : src.limit(readLimit);
-        }
-        return ByteReader.from(asInputStream());
     }
 
     private static abstract class ResidualSizeHandler implements Handler {
@@ -400,9 +385,6 @@ final class ByteEncoderImpl implements ByteEncoder {
                     residual.clear();
                 }
             }
-            if (!data.hasRemaining()) {
-                return previousResult;
-            }
 
             // multiple
             List<ByteBuffer> multipleResult = handleMultiple(data, end);
@@ -437,13 +419,13 @@ final class ByteEncoderImpl implements ByteEncoder {
             if (previousResult != null) {
                 totalSize += previousResult.remaining();
             }
-            if (residualResult != null) {
-                totalSize += residualResult.remaining();
-            }
             if (multipleResult != null) {
                 for (ByteBuffer buf : multipleResult) {
                     totalSize += buf.remaining();
                 }
+            }
+            if (residualResult != null) {
+                totalSize += residualResult.remaining();
             }
             if (totalSize == 0) {
                 return null;
@@ -452,13 +434,13 @@ final class ByteEncoderImpl implements ByteEncoder {
             if (previousResult != null) {
                 BufferKit.readTo(previousResult, result);
             }
-            if (residualResult != null) {
-                BufferKit.readTo(residualResult, result);
-            }
             if (multipleResult != null) {
                 for (ByteBuffer buf : multipleResult) {
                     BufferKit.readTo(buf, result);
                 }
+            }
+            if (residualResult != null) {
+                BufferKit.readTo(residualResult, result);
             }
             result.flip();
             return result;
@@ -473,8 +455,11 @@ final class ByteEncoderImpl implements ByteEncoder {
 
         @Override
         protected @Nullable List<ByteBuffer> handleMultiple(@Nonnull ByteBuffer data, boolean end) throws Exception {
-            List<ByteBuffer> multipleResult = null;
             int remainingSize = data.remaining();
+            if (remainingSize <= 0) {
+                return null;
+            }
+            List<ByteBuffer> multipleResult = null;
             int multipleSize = remainingSize / size * size;
             if (multipleSize > 0) {
                 multipleResult = new ArrayList<>(multipleSize / size);

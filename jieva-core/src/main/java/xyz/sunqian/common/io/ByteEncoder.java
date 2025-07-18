@@ -419,7 +419,7 @@ public interface ByteEncoder {
      * <p>
      * The result's support is as follows:
      * <ul>
-     *     <li>mark/reset: based on the data source;</li>
+     *     <li>mark/reset: Unsupported if any handler(s) exist, otherwise based on the data source;</li>
      *     <li>close: closes the data source;</li>
      *     <li>thread safety: no;</li>
      * </ul>
@@ -435,6 +435,13 @@ public interface ByteEncoder {
      * Returns this {@link ByteEncoder} as a {@link ByteReader}. The status and data source of this encoder are shared
      * with the returned {@link ByteReader}, and the returned {@link ByteReader}'s content represents the encoding
      * result.
+     * <p>
+     * The result's support is as follows:
+     * <ul>
+     *     <li>mark/reset: Unsupported if any handler(s) exist, otherwise based on the data source;</li>
+     *     <li>close: closes the data source;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
      * <p>
      * This is a terminal method.
      *

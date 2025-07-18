@@ -403,7 +403,7 @@ public interface CharEncoder {
      * <p>
      * The result's support is as follows:
      * <ul>
-     *     <li>mark/reset: based on the data source;</li>
+     *     <li>mark/reset: Unsupported if any handler(s) exist, otherwise based on the data source;</li>
      *     <li>close: closes the data source;</li>
      *     <li>thread safety: no;</li>
      * </ul>
@@ -419,6 +419,13 @@ public interface CharEncoder {
      * Returns this {@link CharEncoder} as a {@link CharReader}. The status and data source of this encoder are shared
      * with the returned {@link CharReader}, and the returned {@link CharReader}'s content represents the encoding
      * result.
+     * <p>
+     * The result's support is as follows:
+     * <ul>
+     *     <li>mark/reset: Unsupported if any handler(s) exist, otherwise based on the data source;</li>
+     *     <li>close: closes the data source;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
      * <p>
      * This is a terminal method.
      *

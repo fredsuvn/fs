@@ -52,10 +52,8 @@ public class CharEncoderImpl implements CharEncoder {
                 long count = 0;
                 while (true) {
                     CharSegment block = reader.read(readBlockSize);
-                    CharBuffer data = block.data();
-                    count += data.remaining();
-                    boolean end = block.end();
-                    if (end) {
+                    count += block.data().remaining();
+                    if (block.end()) {
                         break;
                     }
                 }
@@ -154,8 +152,9 @@ public class CharEncoderImpl implements CharEncoder {
     private void writeTo(@Nonnull CharBuffer data, @Nonnull Object dst) {
         if (dst instanceof Writer) {
             BufferKit.readTo(data, (Writer) dst);
+        } else {
+            throw new UnsupportedOperationException("Unsupported destination: " + dst.getClass() + ".");
         }
-        throw new UnsupportedOperationException("Unsupported destination: " + dst.getClass() + ".");
     }
 
     @Override
@@ -165,6 +164,14 @@ public class CharEncoderImpl implements CharEncoder {
             return reader.asReader();
         }
         return new CharEncoderImpl.EncoderReader(reader, readBlockSize, handlers);
+    }
+
+    @Override
+    public @Nonnull CharReader asCharReader() {
+        if (handlers == null) {
+            return readLimit < 0 ? src : src.limit(readLimit);
+        }
+        return CharReader.from(asReader());
     }
 
     private static final class EncoderReader extends Reader {
@@ -323,14 +330,6 @@ public class CharEncoderImpl implements CharEncoder {
         }
     }
 
-    @Override
-    public @Nonnull CharReader asCharReader() {
-        if (handlers == null) {
-            return readLimit < 0 ? src : src.limit(readLimit);
-        }
-        return CharReader.from(asReader());
-    }
-
     private static abstract class ResidualSizeHandler implements Handler {
 
         protected final @Nonnull Handler handler;
@@ -377,9 +376,6 @@ public class CharEncoderImpl implements CharEncoder {
                     }
                     residual.clear();
                 }
-            }
-            if (!data.hasRemaining()) {
-                return previousResult;
             }
 
             // multiple
@@ -430,13 +426,13 @@ public class CharEncoderImpl implements CharEncoder {
             if (previousResult != null) {
                 BufferKit.readTo(previousResult, result);
             }
-            if (residualResult != null) {
-                BufferKit.readTo(residualResult, result);
-            }
             if (multipleResult != null) {
                 for (CharBuffer buf : multipleResult) {
                     BufferKit.readTo(buf, result);
                 }
+            }
+            if (residualResult != null) {
+                BufferKit.readTo(residualResult, result);
             }
             result.flip();
             return result;
@@ -451,8 +447,11 @@ public class CharEncoderImpl implements CharEncoder {
 
         @Override
         protected @Nullable List<CharBuffer> handleMultiple(@Nonnull CharBuffer data, boolean end) throws Exception {
-            List<CharBuffer> multipleResult = null;
             int remainingSize = data.remaining();
+            if (remainingSize <= 0) {
+                return null;
+            }
+            List<CharBuffer> multipleResult = null;
             int multipleSize = remainingSize / size * size;
             if (multipleSize > 0) {
                 multipleResult = new ArrayList<>(multipleSize / size);
