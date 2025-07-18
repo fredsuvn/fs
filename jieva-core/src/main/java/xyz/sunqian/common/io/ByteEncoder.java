@@ -48,7 +48,7 @@ public interface ByteEncoder {
      * @return a new {@link ByteEncoder} whose data source is the specified input stream
      */
     static @Nonnull ByteEncoder from(@Nonnull InputStream src) {
-        return new ByteEncoderImpl2(ByteReader.from(src));
+        return new ByteEncoderImpl(ByteReader.from(src));
     }
 
     /**
@@ -58,7 +58,7 @@ public interface ByteEncoder {
      * @return a new {@link ByteEncoder} whose data source is the specified array
      */
     static @Nonnull ByteEncoder from(byte @Nonnull [] src) {
-        return new ByteEncoderImpl2(ByteReader.from(src));
+        return new ByteEncoderImpl(ByteReader.from(src));
     }
 
     /**
@@ -73,7 +73,7 @@ public interface ByteEncoder {
      * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
      */
     static @Nonnull ByteEncoder from(byte @Nonnull [] src, int off, int len) throws IndexOutOfBoundsException {
-        return new ByteEncoderImpl2(ByteReader.from(src, off, len));
+        return new ByteEncoderImpl(ByteReader.from(src, off, len));
     }
 
     /**
@@ -83,7 +83,7 @@ public interface ByteEncoder {
      * @return a new {@link ByteEncoder} whose data source is the specified buffer
      */
     static @Nonnull ByteEncoder from(@Nonnull ByteBuffer src) {
-        return new ByteEncoderImpl2(ByteReader.from(src));
+        return new ByteEncoderImpl(ByteReader.from(src));
     }
 
     /**
@@ -93,7 +93,7 @@ public interface ByteEncoder {
      * @return a new {@link ByteEncoder} whose data source is the specified {@link ByteReader}
      */
     static @Nonnull ByteEncoder from(@Nonnull ByteReader src) {
-        return new ByteEncoderImpl2(src);
+        return new ByteEncoderImpl(src);
     }
 
     /**
@@ -116,7 +116,7 @@ public interface ByteEncoder {
      */
     static @Nonnull Handler newFixedSizeHandler(@Nonnull Handler handler, int size) throws IllegalArgumentException {
         IOHelper.checkSize(size);
-        return new ByteEncoderImpl2.FixedSizeHandler(handler, size);
+        return new ByteEncoderImpl.FixedSizeHandler(handler, size);
     }
 
     /**
@@ -140,7 +140,7 @@ public interface ByteEncoder {
      */
     static @Nonnull Handler newMultipleSizeHandler(@Nonnull Handler handler, int size) throws IllegalArgumentException {
         IOHelper.checkSize(size);
-        return new ByteEncoderImpl2.MultipleSizeHandler(handler, size);
+        return new ByteEncoderImpl.MultipleSizeHandler(handler, size);
     }
 
     /**
@@ -156,7 +156,7 @@ public interface ByteEncoder {
      * @return a {@link Handler} wrapper that wraps the given handler to support buffering unconsumed data
      */
     static @Nonnull Handler newBufferedHandler(@Nonnull Handler handler) {
-        return new ByteEncoderImpl2.BufferedHandler(handler);
+        return new ByteEncoderImpl.BufferedHandler(handler);
     }
 
     /**
@@ -165,7 +165,7 @@ public interface ByteEncoder {
      * @return an empty {@link Handler} which does nothing but only returns the input data directly
      */
     static @Nonnull Handler emptyHandler() {
-        return ByteEncoderImpl2.EmptyHandler.SINGLETON;
+        return ByteEncoderImpl.EmptyHandler.SINGLETON;
     }
 
     /**

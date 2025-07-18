@@ -7,6 +7,7 @@ import xyz.sunqian.common.base.chars.CharsBuilder;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.io.IORuntimeException;
+import xyz.sunqian.common.io.RuntimeCloseable;
 import xyz.sunqian.test.DataTest;
 import xyz.sunqian.test.ErrorAppender;
 import xyz.sunqian.test.ReadOps;
@@ -285,6 +286,13 @@ public class IOTest implements DataTest {
             expectThrows(IOException.class, () -> {
                 IOKit.close((AutoCloseable) () -> {
                     throw new Exception();
+                });
+            });
+            IOKit.close((RuntimeCloseable) () -> {
+            });
+            expectThrows(IOException.class, () -> {
+                IOKit.close((RuntimeCloseable) () -> {
+                    throw new IORuntimeException();
                 });
             });
             IOKit.close("");

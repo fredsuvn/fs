@@ -7,7 +7,7 @@ import xyz.sunqian.common.base.exception.JieRuntimeException;
 import java.io.IOException;
 
 /**
- * Runtime exception for {@link IOException}.
+ * Unchecked version for {@link IOException}.
  *
  * @author sunqian
  */

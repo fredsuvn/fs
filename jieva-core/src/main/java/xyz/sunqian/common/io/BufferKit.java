@@ -824,7 +824,7 @@ public class BufferKit {
         return slice0(src, off, len);
     }
 
-    private static @Nonnull CharBuffer slice0(@Nonnull CharBuffer src, int off, int len) {
+    static @Nonnull CharBuffer slice0(@Nonnull CharBuffer src, int off, int len) {
         int pos = src.position();
         int limit = src.limit();
         src.position(pos + off);

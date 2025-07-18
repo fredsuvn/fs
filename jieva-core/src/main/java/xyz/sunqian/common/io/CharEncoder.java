@@ -45,7 +45,7 @@ public interface CharEncoder {
      * @return a new {@link CharEncoder} whose data source is the specified reader
      */
     static @Nonnull CharEncoder from(@Nonnull Reader src) {
-        return new CharEncoderImpl(src);
+        return new CharEncoderImpl(CharReader.from(src));
     }
 
     /**
@@ -55,7 +55,7 @@ public interface CharEncoder {
      * @return a new {@link CharEncoder} whose data source is the specified array
      */
     static @Nonnull CharEncoder from(char @Nonnull [] src) {
-        return new CharEncoderImpl(src, 0, src.length);
+        return new CharEncoderImpl(CharReader.from(src));
     }
 
     /**
@@ -70,8 +70,7 @@ public interface CharEncoder {
      * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
      */
     static @Nonnull CharEncoder from(char @Nonnull [] src, int off, int len) throws IndexOutOfBoundsException {
-        IOHelper.checkOffLen(src.length, off, len);
-        return new CharEncoderImpl(src, off, len);
+        return new CharEncoderImpl(CharReader.from(src, off, len));
     }
 
     /**
@@ -81,7 +80,7 @@ public interface CharEncoder {
      * @return a new {@link CharEncoder} whose data source is the specified char sequence
      */
     static @Nonnull CharEncoder from(@Nonnull CharSequence src) {
-        return new CharEncoderImpl(CharBuffer.wrap(src));
+        return new CharEncoderImpl(CharReader.from(src));
     }
 
     /**
@@ -96,7 +95,7 @@ public interface CharEncoder {
      * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
      */
     static @Nonnull CharEncoder from(@Nonnull CharSequence src, int start, int end) throws IndexOutOfBoundsException {
-        return new CharEncoderImpl(CharBuffer.wrap(src, start, end));
+        return new CharEncoderImpl(CharReader.from(src, start, end));
     }
 
     /**
@@ -106,7 +105,7 @@ public interface CharEncoder {
      * @return a new {@link CharEncoder} whose data source is the specified buffer
      */
     static @Nonnull CharEncoder from(@Nonnull CharBuffer src) {
-        return new CharEncoderImpl(src);
+        return new CharEncoderImpl(CharReader.from(src));
     }
 
     /**
@@ -139,7 +138,7 @@ public interface CharEncoder {
      */
     static @Nonnull Handler newFixedSizeHandler(@Nonnull Handler handler, int size) throws IllegalArgumentException {
         IOHelper.checkSize(size);
-        return new CharEncoderImpl.FixedSizeEncoder(handler, size);
+        return new CharEncoderImpl.FixedSizeHandler(handler, size);
     }
 
     /**
@@ -163,7 +162,7 @@ public interface CharEncoder {
      */
     static @Nonnull Handler newMultipleSizeHandler(@Nonnull Handler handler, int size) throws IllegalArgumentException {
         IOHelper.checkSize(size);
-        return new CharEncoderImpl.RoundingEncoder(handler, size);
+        return new CharEncoderImpl.MultipleSizeHandler(handler, size);
     }
 
     /**
@@ -179,7 +178,7 @@ public interface CharEncoder {
      * @return a {@link Handler} wrapper that wraps the given handler to support buffering unconsumed data
      */
     static @Nonnull Handler newBufferedHandler(@Nonnull Handler handler) {
-        return new CharEncoderImpl.BufferingEncoder(handler);
+        return new CharEncoderImpl.BufferedHandler(handler);
     }
 
     /**
@@ -188,7 +187,7 @@ public interface CharEncoder {
      * @return an empty {@link Handler} which does nothing but only returns the input data directly
      */
     static @Nonnull Handler emptyHandler() {
-        return CharEncoderImpl.EmptyEncoder.SINGLETON;
+        return CharEncoderImpl.EmptyHandler.SINGLETON;
     }
 
     /**

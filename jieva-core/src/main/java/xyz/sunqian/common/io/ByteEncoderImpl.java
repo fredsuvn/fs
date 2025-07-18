@@ -2,10 +2,7 @@ package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.JieCoding;
-import xyz.sunqian.common.base.bytes.JieBytes;
-import xyz.sunqian.common.base.chars.JieChars;
-import xyz.sunqian.common.collect.JieCollect;
+import xyz.sunqian.common.base.chars.CharsKit;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,71 +10,35 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.function.Function;
-
-import static xyz.sunqian.common.base.JieCheck.checkOffsetLength;
 
 final class ByteEncoderImpl implements ByteEncoder {
 
-    private static final @Nonnull ByteBuffer EMPTY_BUFFER = ByteBuffer.allocate(0);
-
-    private final @Nonnull Object source;
-    private int readBlockSize = IOKit.bufferSize();
+    private final @Nonnull ByteReader src;
     private long readLimit = -1;
-    private @Nullable List<Handler> handlers;
+    private int readBlockSize = IOKit.bufferSize();
+    private @Nullable List<Handler> handlers = null;
 
-    // initials after starting process
-    private @Nullable ByteReader sourceReader;
-    private @Nullable ByteEncoder.Handler oneEncoder;
-
-    ByteEncoderImpl(InputStream src) {
-        this.source = src;
+    ByteEncoderImpl(@Nonnull ByteReader src) {
+        this.src = src;
     }
-
-    ByteEncoderImpl(byte[] src, int off, int len) {
-        this.source = ByteReader.from(src, off, len);
-    }
-
-    ByteEncoderImpl(ByteBuffer src) {
-        this.source = ByteReader.from(src);
-    }
-
-    ByteEncoderImpl(ByteReader src) {
-        this.source = src;
-    }
-
-    // private ByteReader getSourceReader() {
-    //     if (sourceReader == null) {
-    //         sourceReader = toByteReader(getSource());
-    //     }
-    //     return sourceReader;
-    // }
-
-    // private Handler getEncoder() {
-    //     if (oneEncoder == null) {
-    //         oneEncoder = toOneEncoder(handlers);
-    //     }
-    //     return oneEncoder;
-    // }
 
     @Override
-    public ByteEncoder readLimit(long readLimit) throws IllegalArgumentException {
-        IOChecker.checkReadLimit(readLimit);
+    public @Nonnull ByteEncoder readLimit(long readLimit) throws IllegalArgumentException {
+        IOHelper.checkReadLimit(readLimit);
         this.readLimit = readLimit;
         return this;
     }
 
     @Override
-    public ByteEncoder readBlockSize(int readBlockSize) throws IllegalArgumentException {
-        IOChecker.checkReadBlockSize(readBlockSize);
+    public @Nonnull ByteEncoder readBlockSize(int readBlockSize) throws IllegalArgumentException {
+        IOHelper.checkReadBlockSize(readBlockSize);
         this.readBlockSize = readBlockSize;
         return this;
     }
 
     @Override
-    public ByteEncoder handler(Handler handler) {
+    public @Nonnull ByteEncoder handler(@Nonnull Handler handler) {
         if (handlers == null) {
             handlers = new ArrayList<>();
         }
@@ -88,9 +49,21 @@ final class ByteEncoderImpl implements ByteEncoder {
     @Override
     public long encode() throws IORuntimeException {
         try {
-            return doEncode(source, null, 0);
-        } catch (IORuntimeException e) {
-            throw e;
+            if (handlers == null) {
+                ByteReader reader = readLimit < 0 ? src : src.limit(readLimit);
+                long count = 0;
+                while (true) {
+                    ByteSegment block = reader.read(readBlockSize);
+                    ByteBuffer data = block.data();
+                    count += data.remaining();
+                    boolean end = block.end();
+                    if (end) {
+                        break;
+                    }
+                }
+                return count == 0L ? -1 : count;
+            }
+            return encode(null, handlers);
         } catch (Exception e) {
             throw new IORuntimeException(e);
         }
@@ -99,9 +72,11 @@ final class ByteEncoderImpl implements ByteEncoder {
     @Override
     public long encodeTo(@Nonnull OutputStream dst) throws IORuntimeException {
         try {
-            return doEncode(source, dst, 0);
-        } catch (IORuntimeException e) {
-            throw e;
+            if (handlers == null) {
+                ByteReader reader = readLimit < 0 ? src : src.limit(readLimit);
+                return reader.readTo(dst);
+            }
+            return encode(dst, handlers);
         } catch (Exception e) {
             throw new IORuntimeException(e);
         }
@@ -110,185 +85,151 @@ final class ByteEncoderImpl implements ByteEncoder {
     @Override
     public long encodeTo(@Nonnull WritableByteChannel dst) throws IORuntimeException {
         try {
-            return doEncode(source, dst, 0);
-        } catch (IORuntimeException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new IORuntimeException(e);
-        }
-    }
-
-    @Override
-    public int encodeTo(byte @Nonnull [] dst) throws IORuntimeException {
-        try {
-            return (int) doEncode(source, dst, 0);
-        } catch (IORuntimeException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new IORuntimeException(e);
-        }
-    }
-
-    @Override
-    public int encodeTo(byte @Nonnull [] dst, int off) throws IndexOutOfBoundsException, IORuntimeException {
-        IOChecker.checkOffLen(dst.length, off, dst.length - off);
-        try {
-            return (int) doEncode(source, dst, off);
-        } catch (IORuntimeException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new IORuntimeException(e);
-        }
-    }
-
-    @Override
-    public int encodeTo(@Nonnull ByteBuffer dst) throws IORuntimeException {
-        try {
-            return (int) doEncode(source, dst, 0);
-        } catch (IORuntimeException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new IORuntimeException(e);
-        }
-    }
-
-    @Override
-    public String toString() {
-        return toString(JieChars.defaultCharset());
-    }
-
-    @Override
-    public InputStream asInputStream() {
-        // if (JieCollect.isEmpty(handlers)) {
-        //     return toInputStream(getSource());
-        // }
-        return new EncodingInputStream();
-    }
-
-    // private InputStream toInputStream(Object src) {
-    //     if (src instanceof InputStream) {
-    //         return (InputStream) src;
-    //     }
-    //     if (src instanceof byte[]) {
-    //         return IOKit.newInputStream((byte[]) src);
-    //     }
-    //     if (src instanceof ByteBuffer) {
-    //         return IOKit.newInputStream((ByteBuffer) src);
-    //     }
-    //     throw new IORuntimeException("The type of source is unsupported: " + src.getClass());
-    // }
-
-    private long doEncode(
-        @Nonnull Object src,
-        @Nullable Object dst,
-        int off
-    ) throws Exception {
-        if (readLimit == 0) {
-            return 0;
-        }
-        ByteReader reader;
-        if (src instanceof InputStream) {
-            reader = ByteReader.from((InputStream) src, readBlockSize);
-        } else {
-            reader = (ByteReader) src;
-        }
-        if (readLimit > 0) {
-            reader = reader.limit(readLimit);
-        }
-        if (JieCollect.isEmpty(handlers)) {
-            if (dst instanceof OutputStream) {
-                return Math.max(reader.readTo((OutputStream) dst), 0);
-            } else if (dst instanceof byte[]) {
-                return Math.max(reader.readTo((byte[]) dst, off, ((byte[]) dst).length - off), 0);
-            } else if (dst instanceof ByteBuffer) {
-                return Math.max(reader.readTo((ByteBuffer) dst), 0);
-            } else if (dst == null) {
-                return Math.max(reader.readTo(IOKit.nullOutputStream()), 0);
-            } else {
-                throw new IORuntimeException("The type of destination is unsupported: " + dst.getClass() + ".");
+            if (handlers == null) {
+                ByteReader reader = readLimit < 0 ? src : src.limit(readLimit);
+                return reader.readTo(dst);
             }
+            return encode(dst, handlers);
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
         }
+    }
+
+    @Override
+    public long encodeTo(byte @Nonnull [] dst) throws IORuntimeException {
+        try {
+            OutputStream out = IOKit.newOutputStream(dst);
+            if (handlers == null) {
+                ByteReader reader = readLimit < 0 ? src : src.limit(readLimit);
+                return reader.readTo(out);
+            }
+            return encode(out, handlers);
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    @Override
+    public long encodeTo(byte @Nonnull [] dst, int off) throws IndexOutOfBoundsException, IORuntimeException {
+        try {
+            OutputStream out = IOKit.newOutputStream(dst, off, dst.length - off);
+            if (handlers == null) {
+                ByteReader reader = readLimit < 0 ? src : src.limit(readLimit);
+                return reader.readTo(out);
+            }
+            return encode(out, handlers);
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    @Override
+    public long encodeTo(@Nonnull ByteBuffer dst) throws IORuntimeException {
+        try {
+            OutputStream out = IOKit.newOutputStream(dst);
+            if (handlers == null) {
+                ByteReader reader = readLimit < 0 ? src : src.limit(readLimit);
+                return reader.readTo(out);
+            }
+            return encode(out, handlers);
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    @Override
+    public @Nonnull String toString() {
+        return new String(toByteArray(), CharsKit.defaultCharset());
+    }
+
+    private long encode(@Nullable Object dst, @Nonnull List<@Nonnull Handler> handlers) throws Exception {
+        ByteReader reader = readLimit < 0 ? src : src.limit(readLimit);
         long count = 0;
         while (true) {
-            ByteSegment segment = reader.read(readBlockSize);
-            ByteBuffer buffer = segment.data();
-            boolean end = segment.end();
+            ByteSegment block = reader.read(readBlockSize);
+            ByteBuffer data = block.data();
+            count += data.remaining();
+            boolean end = block.end();
             for (Handler handler : handlers) {
-                buffer = handler.handle(buffer == null ? EMPTY_BUFFER : buffer, end);
-            }
-            if (buffer != null && buffer.hasRemaining()) {
-                int writeSize = 0;
-                if (dst instanceof OutputStream) {
-                    writeSize = BufferKit.readTo(buffer, (OutputStream) dst);
-                } else if (dst instanceof byte[]) {
-                    writeSize = BufferKit.readTo(buffer, (byte[]) dst, off, ((byte[]) dst).length - off);
-                } else if (dst instanceof ByteBuffer) {
-                    writeSize = BufferKit.readTo(buffer, (ByteBuffer) dst);
-                } else if (dst == null) {
-                    writeSize = BufferKit.readTo(buffer, IOKit.nullOutputStream());
-                } else {
-                    throw new IORuntimeException("The type of destination is unsupported: " + dst.getClass() + ".");
+                if (data == null) {
+                    break;
                 }
-                count += Math.max(writeSize, 0);
+                data = handler.handle(data, end);
+            }
+            if (data != null && dst != null) {
+                writeTo(data, dst);
             }
             if (end) {
                 break;
             }
         }
-        return count;
+        return count == 0L ? -1 : count;
     }
 
-    // private ByteReader toByteReader(Object src) {
-    //     if (src instanceof InputStream) {
-    //         return ByteReader.from((InputStream) src);
-    //     }
-    //     if (src instanceof byte[]) {
-    //         return ByteReader.from((byte[]) src);
-    //     }
-    //     if (src instanceof ByteBuffer) {
-    //         return ByteReader.from((ByteBuffer) src);
-    //     }
-    //     throw new IORuntimeException("The type of source is unsupported: " + src.getClass());
-    // }
+    private void writeTo(@Nonnull ByteBuffer data, @Nonnull Object dst) {
+        if (dst instanceof OutputStream) {
+            BufferKit.readTo(data, (OutputStream) dst);
+        } else if (dst instanceof WritableByteChannel) {
+            BufferKit.readTo(data, (WritableByteChannel) dst);
+        }
+        throw new UnsupportedOperationException("Unsupported destination: " + dst.getClass() + ".");
+    }
 
-    // private Handler toOneEncoder(@Nullable List<Handler> encoders) {
-    //     if (JieCollect.isEmpty(encoders)) {
-    //         return Handler.emptyEncoder();
-    //     }
-    //     if (encoders.size() == 1) {
-    //         return encoders.get(0);
-    //     }
-    //     return (data, end) -> {
-    //         @Nullable ByteBuffer bytes = data;
-    //         for (Handler encoder : encoders) {
-    //             bytes = encoder.handle(bytes, end);
-    //             if (bytes == null) {
-    //                 break;
-    //             }
-    //         }
-    //         return bytes;
-    //     };
-    // }
+    @Override
+    public @Nonnull InputStream asInputStream() {
+        ByteReader reader = readLimit < 0 ? src : src.limit(readLimit);
+        if (handlers == null) {
+            return reader.asInputStream();
+        }
+        return new EncoderInputStream(reader, readBlockSize, handlers);
+    }
 
-    private final class EncodingInputStream extends InputStream {
+    private static final class EncoderInputStream extends InputStream {
+
+        private final @Nonnull ByteReader reader;
+        private final int readBlockSize;
+        private final @Nonnull List<@Nonnull Handler> handlers;
 
         private @Nullable ByteSegment nextSeg = null;
         private boolean closed = false;
 
-        private EncodingInputStream() {
+        private EncoderInputStream(
+            @Nonnull ByteReader reader, int readBlockSize, @Nonnull List<@Nonnull Handler> handlers
+        ) {
+            this.reader = reader;
+            this.readBlockSize = readBlockSize;
+            this.handlers = handlers;
         }
 
-        private ByteSegment read0() throws IOException {
+        private @Nonnull ByteSegment nextSeg() throws IOException {
             try {
-                ByteSegment s0 = getSourceReader().read(readBlockSize);
-                @Nullable ByteBuffer encoded = getEncoder().handle(s0.data(), s0.end());
-                if (encoded == s0.data()) {
-                    return s0;
-                }
-                return ByteSegment.of(encoded, s0.end());
+                ByteSegment next;
+                do {
+                    next = next();
+                } while (next == null);
+                return next;
             } catch (Exception e) {
                 throw new IOException(e);
             }
+        }
+
+        private @Nullable ByteSegment next() throws Exception {
+            ByteSegment block = reader.read(readBlockSize);
+            ByteBuffer data = block.data();
+            boolean end = block.end();
+            for (Handler handler : handlers) {
+                if (data == null) {
+                    break;
+                }
+                data = handler.handle(data, end);
+            }
+            if (data == null) {
+                return null;
+            }
+            if (data == block.data()) {
+                return block;
+            }
+            return ByteSegment.of(data, end);
         }
 
         @Override
@@ -296,7 +237,7 @@ final class ByteEncoderImpl implements ByteEncoder {
             checkClosed();
             while (true) {
                 if (nextSeg == null) {
-                    nextSeg = read0();
+                    nextSeg = nextSeg();
                 }
                 if (nextSeg == ByteSegment.empty(true)) {
                     return -1;
@@ -313,42 +254,38 @@ final class ByteEncoderImpl implements ByteEncoder {
         }
 
         @Override
-        public int read(byte[] b) throws IOException {
+        public int read(byte @Nonnull [] b) throws IOException {
             return read(b, 0, b.length);
         }
 
         @Override
         public int read(byte[] dst, int off, int len) throws IOException {
             checkClosed();
-            checkOffsetLength(dst.length, off, len);
-            if (len <= 0) {
+            IOHelper.checkOffLen(dst.length, off, len);
+            if (len == 0) {
                 return 0;
             }
             int pos = off;
-            int remaining = len;
-            while (remaining > 0) {
+            final int endIndex = off + len;
+            while (pos < endIndex) {
+                if (nextSeg == null) {
+                    nextSeg = nextSeg();
+                }
                 if (nextSeg == ByteSegment.empty(true)) {
                     return -1;
                 }
-                if (nextSeg == null) {
-                    nextSeg = read0();
-                }
-                if (nextSeg.data().hasRemaining()) {
-                    int readSize = Math.min(nextSeg.data().remaining(), remaining);
-                    nextSeg.data().get(dst, pos, readSize);
+                ByteBuffer data = nextSeg.data();
+                if (data.hasRemaining()) {
+                    int readSize = Math.min(data.remaining(), endIndex - pos);
+                    data.get(dst, pos, readSize);
                     pos += readSize;
-                    remaining -= readSize;
                     continue;
                 }
                 if (nextSeg.end()) {
                     nextSeg = ByteSegment.empty(true);
                     break;
-                } else {
-                    nextSeg = null;
                 }
-            }
-            if (nextSeg.end() && pos == off) {
-                return -1;
+                nextSeg = null;
             }
             return pos - off;
         }
@@ -359,31 +296,26 @@ final class ByteEncoderImpl implements ByteEncoder {
             if (n <= 0) {
                 return 0;
             }
-            long pos = 0;
-            long remaining = n;
-            while (remaining > 0) {
+            int pos = 0;
+            while (pos < n) {
+                if (nextSeg == null) {
+                    nextSeg = nextSeg();
+                }
                 if (nextSeg == ByteSegment.empty(true)) {
                     return 0;
                 }
-                if (nextSeg == null) {
-                    nextSeg = read0();
-                }
-                if (nextSeg.data().hasRemaining()) {
-                    int readSize = (int) Math.min(nextSeg.data().remaining(), remaining);
-                    nextSeg.data().position(nextSeg.data().position() + readSize);
+                ByteBuffer data = nextSeg.data();
+                if (data.hasRemaining()) {
+                    int readSize = (int) Math.min(data.remaining(), n - pos);
+                    data.position(data.position() + readSize);
                     pos += readSize;
-                    remaining -= readSize;
                     continue;
                 }
                 if (nextSeg.end()) {
                     nextSeg = ByteSegment.empty(true);
                     break;
-                } else {
-                    nextSeg = null;
                 }
-            }
-            if (nextSeg.end() && pos == 0) {
-                return 0;
+                nextSeg = null;
             }
             return pos;
         }
@@ -398,14 +330,10 @@ final class ByteEncoderImpl implements ByteEncoder {
             if (closed) {
                 return;
             }
-            if (source instanceof AutoCloseable) {
-                try {
-                    ((AutoCloseable) source).close();
-                } catch (IOException e) {
-                    throw e;
-                } catch (Exception e) {
-                    throw new IOException(e);
-                }
+            try {
+                reader.close();
+            } catch (Exception e) {
+                throw new IOException(e);
             }
             closed = true;
         }
@@ -417,188 +345,192 @@ final class ByteEncoderImpl implements ByteEncoder {
         }
     }
 
-    private static final class BufferMerger implements Function<Collection<ByteBuffer>, ByteBuffer> {
+    @Override
+    public @Nonnull ByteReader asByteReader() {
+        if (handlers == null) {
+            return readLimit < 0 ? src : src.limit(readLimit);
+        }
+        return ByteReader.from(asInputStream());
+    }
 
-        private static final BufferMerger SINGLETON = new BufferMerger();
+    private static abstract class ResidualSizeHandler implements Handler {
+
+        protected final @Nonnull Handler handler;
+        protected final int size;
+
+        // Residual data;
+        // Its capacity is always the size.
+        private @Nullable ByteBuffer residual;
+
+        protected ResidualSizeHandler(@Nonnull Handler handler, int size) throws IllegalArgumentException {
+            this.handler = handler;
+            this.size = size;
+        }
+
+        protected abstract @Nullable List<ByteBuffer> handleMultiple(
+            @Nonnull ByteBuffer data, boolean end
+        ) throws Exception;
 
         @Override
-        public @Nullable ByteBuffer apply(Collection<ByteBuffer> byteBuffers) {
-            if (byteBuffers.isEmpty()) {
+        public @Nullable ByteBuffer handle(@Nonnull ByteBuffer data, boolean end) throws Exception {
+
+            // clean buffer
+            ByteBuffer previousResult = null;
+            if (residual != null && residual.position() > 0) {
+                BufferKit.readTo(data, residual);
+                if (residual.hasRemaining()) {
+                    // in this case data must be empty
+                    if (end) {
+                        residual.flip();
+                        return handler.handle(residual, true);
+                    } else {
+                        return null;
+                    }
+                } else {
+                    residual.flip();
+                    if (end) {
+                        if (data.hasRemaining()) {
+                            previousResult = handler.handle(residual, false);
+                        } else {
+                            return handler.handle(residual, true);
+                        }
+                    } else {
+                        previousResult = handler.handle(residual, false);
+                    }
+                    residual.clear();
+                }
+            }
+            if (!data.hasRemaining()) {
+                return previousResult;
+            }
+
+            // multiple
+            List<ByteBuffer> multipleResult = handleMultiple(data, end);
+
+            // remainder
+            ByteBuffer residualResult = null;
+            if (data.hasRemaining()) {
+                if (residual == null) {
+                    residual = ByteBuffer.allocate(size);
+                }
+                BufferKit.readTo(data, residual);
+                if (end) {
+                    residual.flip();
+                    residualResult = handler.handle(residual, true);
+                }
+            }
+
+            // empty end
+            if (end && previousResult == null && multipleResult == null && residualResult == null) {
+                return handler.handle(ByteBuffer.allocate(0), true);
+            }
+
+            return mergeResult(previousResult, multipleResult, residualResult);
+        }
+
+        private @Nullable ByteBuffer mergeResult(
+            @Nullable ByteBuffer previousResult,
+            @Nullable List<@Nonnull ByteBuffer> multipleResult,
+            @Nullable ByteBuffer residualResult
+        ) {
+            int totalSize = 0;
+            if (previousResult != null) {
+                totalSize += previousResult.remaining();
+            }
+            if (residualResult != null) {
+                totalSize += residualResult.remaining();
+            }
+            if (multipleResult != null) {
+                for (ByteBuffer buf : multipleResult) {
+                    totalSize += buf.remaining();
+                }
+            }
+            if (totalSize == 0) {
                 return null;
             }
-            int size = 0;
-            for (ByteBuffer byteBuffer : byteBuffers) {
-                size += byteBuffer.remaining();
+            ByteBuffer result = ByteBuffer.allocate(totalSize);
+            if (previousResult != null) {
+                BufferKit.readTo(previousResult, result);
             }
-            ByteBuffer result = ByteBuffer.allocate(size);
-            for (ByteBuffer byteBuffer : byteBuffers) {
-                result.put(byteBuffer);
+            if (residualResult != null) {
+                BufferKit.readTo(residualResult, result);
+            }
+            if (multipleResult != null) {
+                for (ByteBuffer buf : multipleResult) {
+                    BufferKit.readTo(buf, result);
+                }
             }
             result.flip();
             return result;
         }
     }
 
-    static final class FixedSizeEncoder implements Handler {
+    static final class FixedSizeHandler extends ResidualSizeHandler {
 
-        private final Handler encoder;
-        private final int size;
-
-        // Capacity is always the size.
-        private @Nullable ByteBuffer buffer;
-
-        FixedSizeEncoder(Handler encoder, int size) throws IllegalArgumentException {
-            this.encoder = encoder;
-            this.size = size;
+        FixedSizeHandler(@Nonnull Handler handler, int size) throws IllegalArgumentException {
+            super(handler, size);
         }
 
         @Override
-        public @Nullable ByteBuffer handle(ByteBuffer data, boolean end) throws Exception {
-            @Nullable Object result = null;
-            boolean encoded = false;
-
-            // clean buffer
-            if (buffer != null && buffer.position() > 0) {
-                BufferKit.readTo(data, buffer);
-                if (end && !data.hasRemaining()) {
-                    buffer.flip();
-                    return encoder.handle(buffer, true);
-                }
-                if (buffer.hasRemaining()) {
-                    return null;
-                }
-                buffer.flip();
-                result = JieCoding.ifAdd(result, encoder.handle(buffer, false));
-                encoded = true;
-                buffer.clear();
-            }
-
-            // split
-            int pos = data.position();
-            int limit = data.limit();
-            while (limit - pos >= size) {
-                pos += size;
-                data.limit(pos);
-                ByteBuffer slice = data.slice();
-                data.position(pos);
-                if (end && pos == limit) {
-                    result = JieCoding.ifAdd(result, encoder.handle(slice, true));
-                    return JieCoding.ifMerge(result, BufferMerger.SINGLETON);
-                } else {
-                    result = JieCoding.ifAdd(result, encoder.handle(slice, false));
-                    encoded = true;
+        protected @Nullable List<ByteBuffer> handleMultiple(@Nonnull ByteBuffer data, boolean end) throws Exception {
+            List<ByteBuffer> multipleResult = null;
+            int remainingSize = data.remaining();
+            int multipleSize = remainingSize / size * size;
+            if (multipleSize > 0) {
+                multipleResult = new ArrayList<>(multipleSize / size);
+                int curSize = multipleSize;
+                while (curSize > 0) {
+                    ByteBuffer multiple = BufferKit.slice0(data, 0, size);
+                    data.position(data.position() + size);
+                    ByteBuffer multipleRet = handler.handle(
+                        multiple,
+                        end && multipleSize == remainingSize && curSize == size
+                    );
+                    multipleResult.add(multipleRet);
+                    curSize -= size;
                 }
             }
-            data.limit(limit);
-
-            // buffering
-            if (data.hasRemaining()) {
-                if (buffer == null) {
-                    buffer = ByteBuffer.allocate(size);
-                }
-                BufferKit.readTo(data, buffer);
-                if (end) {
-                    buffer.flip();
-                    result = JieCoding.ifAdd(result, encoder.handle(buffer, true));
-                    encoded = true;
-                }
-            }
-
-            @Nullable ByteBuffer ret = JieCoding.ifMerge(result, BufferMerger.SINGLETON);
-            if (end && !encoded) {
-                return encoder.handle(JieBytes.emptyBuffer(), true);
-            }
-            return ret;
+            return multipleResult;
         }
     }
 
-    static final class RoundingEncoder implements Handler {
+    static final class MultipleSizeHandler extends ResidualSizeHandler {
 
-        private final Handler encoder;
-        private final int size;
+        private final @Nonnull List<ByteBuffer> multipleResult = new ArrayList<>(1);
 
-        // Capacity is always the size.
-        private @Nullable ByteBuffer buffer;
-
-        RoundingEncoder(Handler encoder, int size) {
-            checkSize(size);
-            this.encoder = encoder;
-            this.size = size;
+        MultipleSizeHandler(@Nonnull Handler handler, int size) throws IllegalArgumentException {
+            super(handler, size);
         }
 
         @Override
-        public @Nullable ByteBuffer handle(ByteBuffer data, boolean end) throws Exception {
-            @Nullable Object result = null;
-            boolean encoded = false;
-
-            // clean buffer
-            if (buffer != null && buffer.position() > 0) {
-                BufferKit.readTo(data, buffer);
-                if (end && !data.hasRemaining()) {
-                    buffer.flip();
-                    return encoder.handle(buffer, true);
-                }
-                if (buffer.hasRemaining()) {
-                    return null;
-                }
-                buffer.flip();
-                result = JieCoding.ifAdd(result, encoder.handle(buffer, false));
-                encoded = true;
-                buffer.clear();
+        protected @Nullable List<ByteBuffer> handleMultiple(@Nonnull ByteBuffer data, boolean end) throws Exception {
+            int remainingSize = data.remaining();
+            int multipleSize = remainingSize / size * size;
+            if (multipleSize <= 0) {
+                return null;
             }
-
-            // rounding
-            int remaining = data.remaining();
-            int roundingSize = remaining / size * size;
-            if (roundingSize > 0) {
-                int pos = data.position();
-                pos += roundingSize;
-                int limit = data.limit();
-                data.limit(pos);
-                ByteBuffer slice = data.slice();
-                data.position(pos);
-                data.limit(limit);
-                if (end && pos == limit) {
-                    result = JieCoding.ifAdd(result, encoder.handle(slice, true));
-                    return JieCoding.ifMerge(result, BufferMerger.SINGLETON);
-                } else {
-                    result = JieCoding.ifAdd(result, encoder.handle(slice, false));
-                    encoded = true;
-                }
-            }
-
-            // buffering
-            if (data.hasRemaining()) {
-                if (buffer == null) {
-                    buffer = ByteBuffer.allocate(size);
-                }
-                BufferKit.readTo(data, buffer);
-                if (end) {
-                    buffer.flip();
-                    result = JieCoding.ifAdd(result, encoder.handle(buffer, true));
-                    encoded = true;
-                }
-            }
-
-            @Nullable ByteBuffer ret = JieCoding.ifMerge(result, BufferMerger.SINGLETON);
-            if (end && !encoded) {
-                return encoder.handle(JieBytes.emptyBuffer(), true);
-            }
-            return ret;
+            ByteBuffer multiple = BufferKit.slice0(data, 0, multipleSize);
+            data.position(data.position() + multipleSize);
+            ByteBuffer multipleRet = handler.handle(
+                multiple,
+                end && multipleSize == remainingSize
+            );
+            multipleResult.set(0, multipleRet);
+            return multipleResult;
         }
     }
 
-    static final class BufferingEncoder implements Handler {
+    static final class BufferedHandler implements Handler {
 
-        private final Handler encoder;
+        private final Handler handler;
         private byte @Nullable [] buffer = null;
 
-        BufferingEncoder(Handler encoder) {
-            this.encoder = encoder;
+        BufferedHandler(Handler handler) {
+            this.handler = handler;
         }
 
         @Override
-        public @Nullable ByteBuffer handle(ByteBuffer data, boolean end) throws Exception {
+        public @Nullable ByteBuffer handle(@Nonnull ByteBuffer data, boolean end) throws Exception {
             ByteBuffer totalBuffer;
             if (buffer != null) {
                 ByteBuffer newBuffer = ByteBuffer.allocate(buffer.length + data.remaining());
@@ -609,35 +541,23 @@ final class ByteEncoderImpl implements ByteEncoder {
             } else {
                 totalBuffer = data;
             }
-            @Nullable ByteBuffer ret = encoder.handle(totalBuffer, end);
+            ByteBuffer ret = handler.handle(totalBuffer, end);
             if (end) {
                 buffer = null;
-                return ret;
-            }
-            if (totalBuffer.hasRemaining()) {
-                byte[] remainingBuffer = new byte[totalBuffer.remaining()];
-                totalBuffer.get(remainingBuffer);
-                buffer = remainingBuffer;
             } else {
-                buffer = null;
+                buffer = BufferKit.read(totalBuffer);
             }
             return ret;
         }
     }
 
-    static final class EmptyEncoder implements Handler {
+    static final class EmptyHandler implements Handler {
 
-        static final EmptyEncoder SINGLETON = new EmptyEncoder();
+        static final EmptyHandler SINGLETON = new EmptyHandler();
 
         @Override
-        public ByteBuffer handle(ByteBuffer data, boolean end) {
+        public ByteBuffer handle(@Nonnull ByteBuffer data, boolean end) {
             return data;
-        }
-    }
-
-    private static void checkSize(int size) {
-        if (size <= 0) {
-            throw new IllegalArgumentException("The size must > 0.");
         }
     }
 }

@@ -33,18 +33,18 @@ public class CharReaderTest implements DataTest {
 
     @Test
     public void testReadChars() throws Exception {
-        testReadChars0(0, 1);
-        testReadChars0(1, 1);
-        testReadChars0(32, 1);
-        testReadChars0(32, 16);
-        testReadChars0(32, 32);
-        testReadChars0(32, 64);
-        testReadChars0(128, 16);
-        testReadChars0(128, 33);
-        testReadChars0(128, 111);
-        testReadChars0(128, 128);
-        testReadChars0(128, 129);
-        testReadChars0(128, 1024);
+        testReadChars(0, 1);
+        testReadChars(1, 1);
+        testReadChars(32, 1);
+        testReadChars(32, 16);
+        testReadChars(32, 32);
+        testReadChars(32, 64);
+        testReadChars(128, 16);
+        testReadChars(128, 33);
+        testReadChars(128, 111);
+        testReadChars(128, 128);
+        testReadChars(128, 129);
+        testReadChars(128, 1024);
 
         // error
         {
@@ -54,17 +54,17 @@ public class CharReaderTest implements DataTest {
         }
     }
 
-    private void testReadChars0(int dataSize, int readSize) throws Exception {
+    private void testReadChars(int dataSize, int readSize) throws Exception {
         {
             // reader
             char[] data = randomChars(dataSize);
-            testReadChars0(CharReader.from(new CharArrayReader(data)), data, readSize, false);
-            testSkipChars0(CharReader.from(new CharArrayReader(data)), data, readSize);
-            testReadChars0(CharReader.from(new OneCharReader(data)), data, readSize, false);
-            testSkipChars0(CharReader.from(new OneCharReader(data)), data, readSize);
+            testReadChars(CharReader.from(new CharArrayReader(data)), data, readSize, false);
+            testSkipChars(CharReader.from(new CharArrayReader(data)), data, readSize);
+            testReadChars(CharReader.from(new OneCharReader(data)), data, readSize, false);
+            testSkipChars(CharReader.from(new OneCharReader(data)), data, readSize);
             TestReader tr = new TestReader(new CharArrayReader(data));
             tr.setNextOperation(ReadOps.READ_ZERO);
-            testSkipChars0(CharReader.from(tr), data, readSize);
+            testSkipChars(CharReader.from(tr), data, readSize);
             if (dataSize >= 128) {
                 IOImplsTest.testReader(CharReader.from(IOKit.newReader(data)).asReader(),
                     data, false, false, false
@@ -74,16 +74,16 @@ public class CharReaderTest implements DataTest {
         {
             // char array
             char[] data = randomChars(dataSize);
-            testReadChars0(CharReader.from(data), data, readSize, true);
-            testSkipChars0(CharReader.from(data), data, readSize);
+            testReadChars(CharReader.from(data), data, readSize, true);
+            testSkipChars(CharReader.from(data), data, readSize);
             char[] dataPadding = new char[data.length + 66];
             System.arraycopy(data, 0, dataPadding, 33, data.length);
-            testReadChars0(
+            testReadChars(
                 CharReader.from(dataPadding, 33, data.length),
                 Arrays.copyOfRange(dataPadding, 33, 33 + data.length),
                 readSize, true
             );
-            testSkipChars0(CharReader.from(dataPadding, 33, data.length), data, readSize);
+            testSkipChars(CharReader.from(dataPadding, 33, data.length), data, readSize);
             if (dataSize >= 128) {
                 IOImplsTest.testReader(CharReader.from(data).asReader(),
                     data, false, false, true
@@ -98,17 +98,17 @@ public class CharReaderTest implements DataTest {
             // char sequence
             char[] data = randomChars(dataSize);
             String dataStr = new String(data);
-            testReadChars0(CharReader.from(dataStr), data, readSize, true);
-            testSkipChars0(CharReader.from(data), data, readSize);
+            testReadChars(CharReader.from(dataStr), data, readSize, true);
+            testSkipChars(CharReader.from(data), data, readSize);
             char[] dataPadding = new char[data.length + 66];
             System.arraycopy(data, 0, dataPadding, 33, data.length);
             String dataStrPadding = new String(dataPadding);
-            testReadChars0(
+            testReadChars(
                 CharReader.from(dataStrPadding, 33, 33 + data.length),
                 Arrays.copyOfRange(dataPadding, 33, 33 + data.length),
                 readSize, true
             );
-            testSkipChars0(CharReader.from(dataStrPadding, 33, 33 + data.length), data, readSize);
+            testSkipChars(CharReader.from(dataStrPadding, 33, 33 + data.length), data, readSize);
             if (dataSize >= 128) {
                 IOImplsTest.testReader(CharReader.from(dataStr).asReader(),
                     data, false, false, true
@@ -122,8 +122,8 @@ public class CharReaderTest implements DataTest {
         {
             // buffer
             char[] data = randomChars(dataSize);
-            testReadChars0(CharReader.from(CharBuffer.wrap(data)), data, readSize, true);
-            testSkipChars0(CharReader.from(CharBuffer.wrap(data)), data, readSize);
+            testReadChars(CharReader.from(CharBuffer.wrap(data)), data, readSize, true);
+            testSkipChars(CharReader.from(CharBuffer.wrap(data)), data, readSize);
             if (dataSize >= 128) {
                 IOImplsTest.testReader(CharReader.from(CharBuffer.wrap(data)).asReader(),
                     data, false, false, false
@@ -133,33 +133,33 @@ public class CharReaderTest implements DataTest {
         {
             // limited
             char[] data = randomChars(dataSize);
-            testReadChars0(
+            testReadChars(
                 CharReader.from(data).limit(data.length),
                 data,
                 readSize, true
             );
-            testSkipChars0(
+            testSkipChars(
                 CharReader.from(data),
                 data,
                 readSize
             );
-            testReadChars0(
+            testReadChars(
                 CharReader.from(data).limit(data.length + 5),
                 data,
                 readSize, true
             );
-            testSkipChars0(
+            testSkipChars(
                 CharReader.from(data).limit(data.length + 5),
                 data,
                 readSize
             );
             if (data.length > 5) {
-                testReadChars0(
+                testReadChars(
                     CharReader.from(data).limit(data.length - 5),
                     Arrays.copyOf(data, data.length - 5),
                     readSize, false
                 );
-                testSkipChars0(
+                testSkipChars(
                     CharReader.from(data).limit(data.length - 5),
                     Arrays.copyOf(data, data.length - 5),
                     readSize
@@ -182,7 +182,7 @@ public class CharReaderTest implements DataTest {
         }
     }
 
-    private void testReadChars0(CharReader reader, char[] data, int readSize, boolean preKnown) {
+    private void testReadChars(CharReader reader, char[] data, int readSize, boolean preKnown) {
         assertFalse(reader.read(0).end());
         assertFalse(reader.read(0).data().hasRemaining());
         int hasRead = 0;
@@ -208,7 +208,7 @@ public class CharReaderTest implements DataTest {
         assertFalse(reader.read(1).data().hasRemaining());
     }
 
-    private void testSkipChars0(CharReader reader, char[] data, int readSize) {
+    private void testSkipChars(CharReader reader, char[] data, int readSize) {
         assertEquals(reader.skip(0), 0);
         int hasRead = 0;
         while (hasRead < data.length) {
@@ -223,54 +223,54 @@ public class CharReaderTest implements DataTest {
 
     @Test
     public void testReadCharsTo() {
-        testReadCharsTo0(0, 0);
-        testReadCharsTo0(0, 1);
-        testReadCharsTo0(1, 1);
-        testReadCharsTo0(2, 2);
-        testReadCharsTo0(64, 1);
-        testReadCharsTo0(64, 33);
-        testReadCharsTo0(64, 64);
-        testReadCharsTo0(64, 111);
-        testReadCharsTo0(111, 77);
-        testReadCharsTo0(111, 111);
-        testReadCharsTo0(111, 333);
-        testReadCharsTo0(DST_SIZE, DST_SIZE);
-        testReadCharsTo0(DST_SIZE, DST_SIZE + 6);
-        testReadCharsTo0(DST_SIZE, DST_SIZE - 6);
+        testReadCharsTo(0, 0);
+        testReadCharsTo(0, 1);
+        testReadCharsTo(1, 1);
+        testReadCharsTo(2, 2);
+        testReadCharsTo(64, 1);
+        testReadCharsTo(64, 33);
+        testReadCharsTo(64, 64);
+        testReadCharsTo(64, 111);
+        testReadCharsTo(111, 77);
+        testReadCharsTo(111, 111);
+        testReadCharsTo(111, 333);
+        testReadCharsTo(DST_SIZE, DST_SIZE);
+        testReadCharsTo(DST_SIZE, DST_SIZE + 6);
+        testReadCharsTo(DST_SIZE, DST_SIZE - 6);
     }
 
-    private void testReadCharsTo0(int dataSize, int readSize) {
+    private void testReadCharsTo(int dataSize, int readSize) {
         char[] data = randomChars(dataSize);
         char[] dataPadding = new char[data.length + 66];
         System.arraycopy(data, 0, dataPadding, 33, data.length);
         {
             // reader
-            testReadCharsTo0(() -> CharReader.from(new CharArrayReader(data)), data, readSize);
-            testReadCharsTo0(() -> CharReader.from(new OneCharReader(data)), data, readSize);
+            testReadCharsTo(() -> CharReader.from(new CharArrayReader(data)), data, readSize);
+            testReadCharsTo(() -> CharReader.from(new OneCharReader(data)), data, readSize);
         }
         {
             // char array
-            testReadCharsTo0(() -> CharReader.from(data), data, readSize);
-            testReadCharsTo0(() -> CharReader.from(dataPadding, 33, data.length), data, readSize);
+            testReadCharsTo(() -> CharReader.from(data), data, readSize);
+            testReadCharsTo(() -> CharReader.from(dataPadding, 33, data.length), data, readSize);
         }
         {
             // char sequence
-            testReadCharsTo0(() -> CharReader.from(new String(data)), data, readSize);
-            testReadCharsTo0(() -> CharReader.from(new String(dataPadding), 33, 33 + data.length), data, readSize);
+            testReadCharsTo(() -> CharReader.from(new String(data)), data, readSize);
+            testReadCharsTo(() -> CharReader.from(new String(dataPadding), 33, 33 + data.length), data, readSize);
         }
         {
             // char buffer
-            testReadCharsTo0(() -> CharReader.from(CharBuffer.wrap(data)), data, readSize);
-            testReadCharsTo0(() -> CharReader.from(BufferKit.copyDirect(data)), data, readSize);
+            testReadCharsTo(() -> CharReader.from(CharBuffer.wrap(data)), data, readSize);
+            testReadCharsTo(() -> CharReader.from(BufferKit.copyDirect(data)), data, readSize);
         }
         {
             // limited
-            testReadCharsTo0(() ->
+            testReadCharsTo(() ->
                 CharReader.from(new CharArrayReader(data)).limit(data.length), data, readSize);
-            testReadCharsTo0(() ->
+            testReadCharsTo(() ->
                 CharReader.from(new CharArrayReader(data)).limit(data.length + 5), data, readSize);
             if (data.length > 5) {
-                testReadCharsTo0(() ->
+                testReadCharsTo(() ->
                         CharReader.from(new CharArrayReader(data)).limit(data.length - 5),
                     Arrays.copyOf(data, data.length - 5),
                     readSize
@@ -279,7 +279,7 @@ public class CharReaderTest implements DataTest {
         }
     }
 
-    private void testReadCharsTo0(Supplier<CharReader> supplier, char[] data, int readSize) {
+    private void testReadCharsTo(Supplier<CharReader> supplier, char[] data, int readSize) {
         {
             // to writer
             CharsBuilder builder = new CharsBuilder();
