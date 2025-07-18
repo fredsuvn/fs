@@ -334,7 +334,7 @@ public interface CharReader {
     }
 
     /**
-     * Wraps this reader as a new {@link Reader} of which content and status are shared with each other.
+     * Returns a {@link Reader} represents this reader. Its content and status are shared with this reader.
      * <p>
      * The result's support is as follows:
      * <ul>
@@ -343,7 +343,7 @@ public interface CharReader {
      *     <li>thread safety: no;</li>
      * </ul>
      *
-     * @return a new {@link Reader} of which content and status are shared with each other
+     * @return a {@link Reader} represents this reader. Its content and status are shared with this reader
      */
     default @Nonnull Reader asReader() {
         return IOImpls.reader(this);

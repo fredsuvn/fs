@@ -359,7 +359,7 @@ public interface ByteReader {
     }
 
     /**
-     * Wraps this reader as a new {@link InputStream} of which content and status are shared with each other.
+     * Returns an {@link InputStream} represents this reader. Its content and status are shared with this reader.
      * <p>
      * The result's support is as follows:
      * <ul>
@@ -368,7 +368,7 @@ public interface ByteReader {
      *     <li>thread safety: no;</li>
      * </ul>
      *
-     * @return a new {@link InputStream} of which content and status are shared with each other
+     * @return an {@link InputStream} represents this reader. Its content and status are shared with this reader
      */
     default @Nonnull InputStream asInputStream() {
         return IOImpls.inputStream(this);

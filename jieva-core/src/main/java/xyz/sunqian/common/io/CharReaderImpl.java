@@ -198,6 +198,11 @@ final class CharReaderImpl {
                 throw new IORuntimeException(e);
             }
         }
+
+        @Override
+        public @Nonnull Reader asReader() {
+            return src;
+        }
     }
 
     private static final class CharArrayReader implements CharReader {

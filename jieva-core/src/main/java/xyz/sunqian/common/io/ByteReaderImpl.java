@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.Arrays;
@@ -214,6 +215,11 @@ final class ByteReaderImpl {
                 throw new IORuntimeException(e);
             }
         }
+
+        @Override
+        public @Nonnull InputStream asInputStream() {
+            return src;
+        }
     }
 
     private static final class ByteChannelReader implements ByteReader {
@@ -331,6 +337,11 @@ final class ByteReaderImpl {
             } catch (Exception e) {
                 throw new IORuntimeException(e);
             }
+        }
+
+        @Override
+        public @Nonnull InputStream asInputStream() {
+            return Channels.newInputStream(src);
         }
     }
 
