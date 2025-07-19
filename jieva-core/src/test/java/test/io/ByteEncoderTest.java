@@ -2,10 +2,12 @@ package test.io;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
+import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.value.IntVar;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.ByteEncoder;
 import xyz.sunqian.common.io.ByteReader;
+import xyz.sunqian.common.io.ByteSegment;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.test.AssertTest;
@@ -24,6 +26,7 @@ import java.nio.channels.WritableByteChannel;
 import java.util.Arrays;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
 public class ByteEncoderTest implements DataTest, AssertTest {
@@ -31,15 +34,15 @@ public class ByteEncoderTest implements DataTest, AssertTest {
     @Test
     public void testEncode() throws Exception {
         testEncode(0, 123, 0);
-        testEncode(0, 123, 37);
+        testEncode(0, 123, 77);
         testEncode(0, 123, 123);
         testEncode(0, 123, 1333);
         testEncode(1333, 123, 0);
-        testEncode(1333, 123, 37);
+        testEncode(1333, 123, 77);
         testEncode(1333, 123, 123);
         testEncode(1333, 123, 777);
         testEncode(123, 1333, 0);
-        testEncode(123, 1333, 37);
+        testEncode(123, 1333, 77);
         testEncode(123, 1333, 123);
         testEncode(123, 1333, 777);
         testEncode(123, 123, 1333);
@@ -47,6 +50,11 @@ public class ByteEncoderTest implements DataTest, AssertTest {
         testEncode(77, 123, 1333);
         {
             // exceptions
+            expectThrows(IllegalArgumentException.class, () -> ByteEncoder.from(new byte[0]).readBlockSize(0));
+            expectThrows(IllegalArgumentException.class, () -> ByteEncoder.from(new byte[0]).readBlockSize(-1));
+            expectThrows(IllegalArgumentException.class, () -> ByteEncoder.from(new byte[0]).readLimit(-1));
+            expectThrows(IndexOutOfBoundsException.class, () -> ByteEncoder.from(new byte[0], 0, 1));
+            expectThrows(IndexOutOfBoundsException.class, () -> ByteEncoder.from(new byte[0]).encodeTo(new byte[0], 1));
             TestInputStream err = new TestInputStream(new ByteArrayInputStream(new byte[0]));
             err.setNextOperation(ReadOps.THROW, 99);
             expectThrows(IORuntimeException.class, () ->
@@ -187,20 +195,20 @@ public class ByteEncoderTest implements DataTest, AssertTest {
             // to array
             byte[] dst = new byte[totalSize];
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize).encodeTo(dst),
+                ByteEncoder.from(ByteBuffer.wrap(data)).readBlockSize(readBlockSize).encodeTo(dst),
                 totalSize == 0 ? -1 : totalSize
             );
             assertEquals(dst, data);
             dst = new byte[limitedData.length];
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit).encodeTo(dst),
+                ByteEncoder.from(ByteBuffer.wrap(data)).readBlockSize(readBlockSize).readLimit(limit).encodeTo(dst),
                 actualSize(totalSize, limit)
             );
             assertEquals(dst, limitedData);
             // with handlers
             dst = new byte[timesData.length];
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize)
+                ByteEncoder.from(ByteBuffer.wrap(data)).readBlockSize(readBlockSize)
                     .handler(timesHandler(readBlockSize, endCount))
                     .handler(timesHandler(readBlockSize, endCount))
                     .encodeTo(dst),
@@ -211,7 +219,7 @@ public class ByteEncoderTest implements DataTest, AssertTest {
             endCount.set(0);
             dst = new byte[dstSize(totalSize, limit) * 4];
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
+                ByteEncoder.from(ByteBuffer.wrap(data)).readBlockSize(readBlockSize).readLimit(limit)
                     .handler(timesHandler(readBlockSize, endCount))
                     .handler(timesHandler(readBlockSize, endCount))
                     .encodeTo(dst),
@@ -311,6 +319,167 @@ public class ByteEncoderTest implements DataTest, AssertTest {
         }
     }
 
+    @Test
+    public void testAsInputStreamAndReader() throws Exception {
+        testAsInputStreamAndReader(0, 123, 0);
+        testAsInputStreamAndReader(0, 123, 37);
+        testAsInputStreamAndReader(0, 123, 123);
+        testAsInputStreamAndReader(0, 123, 1333);
+        testAsInputStreamAndReader(1333, 123, 0);
+        testAsInputStreamAndReader(1333, 123, 37);
+        testAsInputStreamAndReader(1333, 123, 123);
+        testAsInputStreamAndReader(1333, 123, 777);
+        testAsInputStreamAndReader(123, 1333, 0);
+        testAsInputStreamAndReader(123, 1333, 37);
+        testAsInputStreamAndReader(123, 1333, 123);
+        testAsInputStreamAndReader(123, 1333, 777);
+        testAsInputStreamAndReader(123, 123, 1333);
+        testAsInputStreamAndReader(123, 77, 1333);
+        testAsInputStreamAndReader(77, 123, 1333);
+        {
+            // exception
+            TestInputStream err = new TestInputStream(new ByteArrayInputStream(new byte[0]));
+            err.setNextOperation(ReadOps.THROW, 99);
+            ByteReader reader = ByteReader.from(err);
+            expectThrows(IOException.class, () ->
+                ByteEncoder.from(reader).handler(ByteEncoder.emptyHandler()).asInputStream().read());
+            expectThrows(IOException.class, () ->
+                ByteEncoder.from(reader).handler(ByteEncoder.emptyHandler()).asInputStream().close());
+        }
+    }
+
+    private void testAsInputStreamAndReader(int totalSize, int readBlockSize, int limit) throws Exception {
+        IntVar endCount = IntVar.of(0);
+        byte[] data = randomBytes(totalSize);
+        byte[] limitedData = Arrays.copyOf(data, dstSize(totalSize, limit));
+        byte[] timesData = timesData(data);
+        byte[] limitedTimesData = timesData(limitedData);
+        {
+            assertEquals(
+                IOKit.read(ByteEncoder.from(data).readBlockSize(readBlockSize).asInputStream()),
+                data.length == 0 ? null : data
+            );
+            assertEquals(
+                IOKit.read(ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit).asInputStream()),
+                limitedData.length == 0 ? null : limitedData
+            );
+            assertEquals(
+                IOKit.read(ByteEncoder.from(data).readBlockSize(readBlockSize)
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .asInputStream()),
+                timesData.length == 0 ? null : timesData
+            );
+            assertEquals(endCount.get(), 2);
+            endCount.set(0);
+            assertEquals(
+                IOKit.read(ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .asInputStream()),
+                limitedTimesData.length == 0 ? null : limitedTimesData
+            );
+            assertEquals(endCount.get(), 2);
+            endCount.set(0);
+            IOImplsTest.testInputStream(
+                ByteEncoder.from(data).readBlockSize(readBlockSize).asInputStream(),
+                data,
+                false, false, true
+            );
+            IOImplsTest.testInputStream(
+                ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit).asInputStream(),
+                limitedData,
+                false, false, true
+            );
+            IOImplsTest.testInputStream(
+                ByteEncoder.from(data).readBlockSize(readBlockSize)
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .asInputStream(),
+                timesData,
+                false, true, false
+            );
+            assertEquals(endCount.get(), 2);
+            endCount.set(0);
+            IOImplsTest.testInputStream(
+                ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .asInputStream(),
+                limitedTimesData,
+                false, true, false
+            );
+            assertEquals(endCount.get(), 2);
+            endCount.set(0);
+        }
+        {
+            // for empty
+            assertEquals(
+                IOKit.read(ByteEncoder.from(data).readBlockSize(readBlockSize)
+                    .handler(ByteEncoder.emptyHandler())
+                    .asInputStream()),
+                data.length == 0 ? null : data
+            );
+            IOImplsTest.testInputStream(
+                ByteEncoder.from(data).readBlockSize(readBlockSize)
+                    .handler(ByteEncoder.emptyHandler())
+                    .asInputStream(),
+                data,
+                false, true, false
+            );
+            IOImplsTest.testInputStream(
+                ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
+                    .handler(ByteEncoder.emptyHandler())
+                    .asInputStream(),
+                limitedData,
+                false, true, false
+            );
+        }
+        {
+            // one by one
+            InputStream in = ByteEncoder.from(data).readBlockSize(readBlockSize)
+                .handler(ByteEncoder.emptyHandler())
+                .asInputStream();
+            BytesBuilder builder = new BytesBuilder();
+            while (true) {
+                int next = in.read();
+                if (next < 0) {
+                    break;
+                }
+                builder.append(next);
+            }
+            assertEquals(builder.toByteArray(), data);
+            assertEquals(in.read(), -1);
+        }
+        {
+            // reader
+            ByteSegment readData = ByteEncoder.from(data).readBlockSize(readBlockSize)
+                .asByteReader().read(data.length + 1);
+            assertEquals(readData.toByteArray(), data);
+            assertTrue(readData.end());
+            readData = ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
+                .asByteReader().read(limitedData.length + 1);
+            assertEquals(readData.toByteArray(), limitedData);
+            assertTrue(readData.end());
+            readData = ByteEncoder.from(data).readBlockSize(readBlockSize)
+                .handler(timesHandler(readBlockSize, endCount))
+                .handler(timesHandler(readBlockSize, endCount))
+                .asByteReader().read(timesData.length + 1);
+            assertEquals(readData.toByteArray(), timesData);
+            assertTrue(readData.end());
+            assertEquals(endCount.get(), 2);
+            endCount.set(0);
+            readData = ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
+                .handler(timesHandler(readBlockSize, endCount))
+                .handler(timesHandler(readBlockSize, endCount))
+                .asByteReader().read(limitedTimesData.length + 1);
+            assertEquals(readData.toByteArray(), limitedTimesData);
+            assertTrue(readData.end());
+            assertEquals(endCount.get(), 2);
+            endCount.set(0);
+        }
+    }
+
     private int actualSize(int totalSize, int limit) {
         if (totalSize <= 0 || limit <= 0) {
             return -1;
@@ -353,135 +522,218 @@ public class ByteEncoderTest implements DataTest, AssertTest {
     }
 
     @Test
-    public void testAsInputStreamAndReader() throws Exception {
-        testAsInputStreamAndReader(0, 123, 0);
-        testAsInputStreamAndReader(0, 123, 37);
-        testAsInputStreamAndReader(0, 123, 123);
-        testAsInputStreamAndReader(0, 123, 1333);
-        testAsInputStreamAndReader(1333, 123, 0);
-        testAsInputStreamAndReader(1333, 123, 37);
-        testAsInputStreamAndReader(1333, 123, 123);
-        testAsInputStreamAndReader(1333, 123, 777);
-        testAsInputStreamAndReader(123, 1333, 0);
-        testAsInputStreamAndReader(123, 1333, 37);
-        testAsInputStreamAndReader(123, 1333, 123);
-        testAsInputStreamAndReader(123, 1333, 777);
-        testAsInputStreamAndReader(123, 123, 1333);
-        testAsInputStreamAndReader(123, 77, 1333);
-        testAsInputStreamAndReader(77, 123, 1333);
+    public void testResidualSizeHandler() throws Exception {
+        testResidualSizeHandler(0, 123, 37);
+        testResidualSizeHandler(0, 123, 123);
+        testResidualSizeHandler(0, 123, 1333);
+        testResidualSizeHandler(1333, 123, 37);
+        testResidualSizeHandler(1333, 123, 123);
+        testResidualSizeHandler(1333, 123, 777);
+        testResidualSizeHandler(123, 1333, 37);
+        testResidualSizeHandler(123, 1333, 123);
+        testResidualSizeHandler(123, 1333, 777);
+        testResidualSizeHandler(123, 123, 1333);
+        testResidualSizeHandler(123, 77, 1333);
+        testResidualSizeHandler(77, 123, 1333);
+        testResidualSizeHandler(256, 64, 32);
+        testResidualSizeHandler(256, 32, 64);
         {
             // exception
-            TestInputStream err = new TestInputStream(new ByteArrayInputStream(new byte[0]));
-            err.setNextOperation(ReadOps.THROW, 99);
-            ByteReader reader = ByteReader.from(err);
-            expectThrows(IOException.class, () ->
-                ByteEncoder.from(reader).handler(ByteEncoder.emptyHandler()).asInputStream().read());
-            expectThrows(IOException.class, () ->
-                ByteEncoder.from(reader).handler(ByteEncoder.emptyHandler()).asInputStream().close());
+            expectThrows(IllegalArgumentException.class, () ->
+                ByteEncoder.from(new byte[0])
+                    .handler(ByteEncoder.newFixedSizeHandler(ByteEncoder.emptyHandler(), -1)));
+            expectThrows(IllegalArgumentException.class, () ->
+                ByteEncoder.from(new byte[0])
+                    .handler(ByteEncoder.newFixedSizeHandler(ByteEncoder.emptyHandler(), 0)));
+            expectThrows(IllegalArgumentException.class, () ->
+                ByteEncoder.from(new byte[0])
+                    .handler(ByteEncoder.newMultipleSizeHandler(ByteEncoder.emptyHandler(), -1)));
+            expectThrows(IllegalArgumentException.class, () ->
+                ByteEncoder.from(new byte[0])
+                    .handler(ByteEncoder.newMultipleSizeHandler(ByteEncoder.emptyHandler(), 0)));
         }
     }
 
-    private void testAsInputStreamAndReader(int totalSize, int readBlockSize, int limit) throws Exception {
-
+    private void testResidualSizeHandler(int totalSize, int readBlockSize, int blockSize) throws Exception {
         IntVar endCount = IntVar.of(0);
         byte[] data = randomBytes(totalSize);
-        byte[] limitedData = Arrays.copyOf(data, dstSize(totalSize, limit));
-        byte[] timesData = timesData(data);
-        byte[] limitedTimesData = timesData(limitedData);
-
-        assertEquals(
-            IOKit.read(ByteEncoder.from(data).readBlockSize(readBlockSize).asInputStream()),
-            data.length == 0 ? null : data
-        );
-        assertEquals(
-            IOKit.read(ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit).asInputStream()),
-            limitedData.length == 0 ? null : limitedData
-        );
-        assertEquals(
-            IOKit.read(ByteEncoder.from(data).readBlockSize(readBlockSize)
-                .handler(timesHandler(readBlockSize, endCount))
-                .handler(timesHandler(readBlockSize, endCount))
-                .asInputStream()),
-            timesData.length == 0 ? null : timesData
-        );
-        assertEquals(endCount.get(), 2);
-        endCount.set(0);
-        assertEquals(
-            IOKit.read(ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
-                .handler(timesHandler(readBlockSize, endCount))
-                .handler(timesHandler(readBlockSize, endCount))
-                .asInputStream()),
-            limitedTimesData.length == 0 ? null : limitedTimesData
-        );
-        assertEquals(endCount.get(), 2);
-        endCount.set(0);
-        IOImplsTest.testInputStream(
-            ByteEncoder.from(data).readBlockSize(readBlockSize).asInputStream(),
-            data,
-            false, false, true
-        );
-        IOImplsTest.testInputStream(
-            ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit).asInputStream(),
-            limitedData,
-            false, false, true
-        );
-        IOImplsTest.testInputStream(
-            ByteEncoder.from(data).readBlockSize(readBlockSize)
-                .handler(timesHandler(readBlockSize, endCount))
-                .handler(timesHandler(readBlockSize, endCount))
-                .asInputStream(),
-            timesData,
-            false, true, false
-        );
-        assertEquals(endCount.get(), 2);
-        endCount.set(0);
-        IOImplsTest.testInputStream(
-            ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
-                .handler(timesHandler(readBlockSize, endCount))
-                .handler(timesHandler(readBlockSize, endCount))
-                .asInputStream(),
-            limitedTimesData,
-            false, true, false
-        );
-        assertEquals(endCount.get(), 2);
-        endCount.set(0);
+        BytesBuilder builder = new BytesBuilder();
         {
-            // for empty
+            // FixedSizeHandler
             assertEquals(
-                IOKit.read(ByteEncoder.from(data).readBlockSize(readBlockSize)
-                    .handler(ByteEncoder.emptyHandler())
-                    .asInputStream()),
-                data.length == 0 ? null : data
-            );
-            IOImplsTest.testInputStream(
                 ByteEncoder.from(data).readBlockSize(readBlockSize)
-                    .handler(ByteEncoder.emptyHandler())
-                    .asInputStream(),
-                data,
-                false, true, false
+                    .handler(ByteEncoder.newFixedSizeHandler((d, e) -> {
+                        if (e) {
+                            endCount.incrementAndGet();
+                        } else {
+                            assertEquals(d.remaining(), blockSize);
+                        }
+                        return d;
+                    }, blockSize))
+                    .encodeTo(builder),
+                totalSize == 0 ? -1 : totalSize
             );
-            IOImplsTest.testInputStream(
-                ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
-                    .handler(ByteEncoder.emptyHandler())
-                    .asInputStream(),
-                limitedData,
-                false, true, false
-            );
+            assertEquals(builder.toByteArray(), data);
+            assertEquals(endCount.get(), 1);
+            builder.reset();
+            endCount.set(0);
         }
         {
-            // one by one
-            InputStream in = ByteEncoder.from(data).readBlockSize(readBlockSize)
-                .handler(ByteEncoder.emptyHandler())
-                .asInputStream();
-            BytesBuilder builder = new BytesBuilder();
-            while (true) {
-                int next = in.read();
-                if (next < 0) {
-                    break;
-                }
-                builder.append(next);
-            }
+            // MultipleSizeHandler
+            assertEquals(
+                ByteEncoder.from(data).readBlockSize(readBlockSize)
+                    .handler(ByteEncoder.newMultipleSizeHandler((d, e) -> {
+                        if (e) {
+                            endCount.incrementAndGet();
+                        } else {
+                            assertEquals(d.remaining() % blockSize, 0);
+                        }
+                        return d;
+                    }, blockSize))
+                    .encodeTo(builder),
+                totalSize == 0 ? -1 : totalSize
+            );
             assertEquals(builder.toByteArray(), data);
+            assertEquals(endCount.get(), 1);
+            builder.reset();
+            endCount.set(0);
+        }
+    }
+
+    @Test
+    public void testBufferedHandler() throws Exception {
+        testBufferedHandler(0, 123);
+        testBufferedHandler(123, 123);
+        testBufferedHandler(123, 1234);
+        testBufferedHandler(123, 1);
+        testBufferedHandler(123, 2);
+        testBufferedHandler(123, 3);
+        testBufferedHandler(128, 16);
+    }
+
+    private void testBufferedHandler(int totalSize, int readBlockSize) throws Exception {
+        IntVar endCount = IntVar.of(0);
+        byte[] data = randomBytes(totalSize);
+        BytesBuilder builder = new BytesBuilder();
+        {
+            // BufferedHandler
+            assertEquals(
+                ByteEncoder.from(data).readBlockSize(readBlockSize)
+                    .handler(ByteEncoder.newBufferedHandler((d, e) -> {
+                        if (e) {
+                            endCount.incrementAndGet();
+                            return d;
+                        }
+                        return null;
+                    }))
+                    .encodeTo(builder),
+                totalSize == 0 ? -1 : totalSize
+            );
+            assertEquals(builder.toByteArray(), data);
+            assertEquals(endCount.get(), 1);
+            builder.reset();
+            endCount.set(0);
+        }
+    }
+
+    @Test
+    public void testTo() throws Exception {
+        testTo(0, 123);
+        testTo(123, 123);
+        testTo(123, 1234);
+        testTo(123, 1);
+        testTo(123, 2);
+        testTo(123, 3);
+        testTo(128, 16);
+    }
+
+    private void testTo(int totalSize, int readBlockSize) throws Exception {
+        IntVar endCount = IntVar.of(0);
+        char[] chars = randomChars(totalSize, 'a', 'z');
+        String str = new String(chars);
+        byte[] data = str.getBytes(CharsKit.defaultCharset());
+        {
+            // toArray
+            assertEquals(
+                ByteEncoder.from(data).readBlockSize(readBlockSize)
+                    .handler(ByteEncoder.newBufferedHandler((d, e) -> {
+                        if (e) {
+                            endCount.incrementAndGet();
+                            return d;
+                        }
+                        return null;
+                    }))
+                    .toByteArray(),
+                data
+            );
+            assertEquals(endCount.get(), 1);
+            endCount.set(0);
+        }
+        {
+            // toArray
+            assertEquals(
+                ByteEncoder.from(data).readBlockSize(readBlockSize)
+                    .handler(ByteEncoder.newBufferedHandler((d, e) -> {
+                        if (e) {
+                            endCount.incrementAndGet();
+                            return d;
+                        }
+                        return null;
+                    }))
+                    .toByteBuffer(),
+                ByteBuffer.wrap(data)
+            );
+            assertEquals(endCount.get(), 1);
+            endCount.set(0);
+        }
+        {
+            // toArray
+            assertEquals(
+                ByteEncoder.from(data).readBlockSize(readBlockSize)
+                    .handler(ByteEncoder.newBufferedHandler((d, e) -> {
+                        if (e) {
+                            endCount.incrementAndGet();
+                            return d;
+                        }
+                        return null;
+                    }))
+                    .toString(),
+                str
+            );
+            assertEquals(endCount.get(), 1);
+            endCount.set(0);
+            assertEquals(
+                ByteEncoder.from(data).readBlockSize(readBlockSize)
+                    .handler(ByteEncoder.newBufferedHandler((d, e) -> {
+                        if (e) {
+                            endCount.incrementAndGet();
+                            return d;
+                        }
+                        return null;
+                    }))
+                    .toString(CharsKit.defaultCharset()),
+                str
+            );
+            assertEquals(endCount.get(), 1);
+            endCount.set(0);
+        }
+        {
+            // toEncoder
+            assertEquals(
+                ByteEncoder.from(data).readBlockSize(readBlockSize)
+                    .handler(ByteEncoder.newBufferedHandler((d, e) -> {
+                        if (e) {
+                            endCount.incrementAndGet();
+                            return d;
+                        }
+                        return null;
+                    }))
+                    .toCharEncoder(CharsKit.defaultCharset())
+                    .toString(),
+                str
+            );
+            assertEquals(endCount.get(), 1);
+            endCount.set(0);
         }
     }
 }

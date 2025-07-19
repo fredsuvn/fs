@@ -1,1343 +1,682 @@
-// package test.io;
-//
-// import org.jetbrains.annotations.NotNull;
-// import org.testng.annotations.Test;
-// import xyz.sunqian.common.base.JieMath;
-// import xyz.sunqian.common.base.JieRandom;
-// import xyz.sunqian.common.base.JieString;
-// import xyz.sunqian.common.base.chars.CharsBuilder;
-// import xyz.sunqian.common.base.chars.JieChars;
-// import xyz.sunqian.common.base.value.BooleanVar;
-// import xyz.sunqian.common.base.value.IntVar;
-// import xyz.sunqian.common.collect.JieArray;
-// import xyz.sunqian.common.io.CharEncoder;
-// import xyz.sunqian.common.io.IORuntimeException;
-// import xyz.sunqian.common.io.BufferKit;
-// import xyz.sunqian.common.io.IOKit;
-// import xyz.sunqian.test.JieTestException;
-//
-// import java.io.CharArrayReader;
-// import java.io.IOException;
-// import java.io.Reader;
-// import java.io.StringWriter;
-// import java.lang.reflect.Method;
-// import java.nio.CharBuffer;
-// import java.util.Arrays;
-//
-// import static org.testng.Assert.assertEquals;
-// import static org.testng.Assert.assertFalse;
-// import static org.testng.Assert.assertNotEquals;
-// import static org.testng.Assert.assertTrue;
-// import static org.testng.Assert.expectThrows;
-// import static xyz.sunqian.common.io.CharEncoder.Handler.withBuffering;
-// import static xyz.sunqian.common.io.CharEncoder.Handler.withRounding;
-// import static xyz.sunqian.test.JieAssert.invokeThrows;
-// import static xyz.sunqian.test.MaterialBox.copyBuffer;
-// import static xyz.sunqian.test.MaterialBox.copyDirect;
-// import static xyz.sunqian.test.MaterialBox.copyHeap;
-// import static xyz.sunqian.test.MaterialBox.copyPadding;
-//
-// public class CharEncoderTest {
-//
-//     @Test
-//     public void testProcessing() throws Exception {
-//         testProcessing(0, IOKit.bufferSize(), -1);
-//         testProcessing(666, IOKit.bufferSize(), -1);
-//         testProcessing(0, 67, -1);
-//         testProcessing(666, 67, -1);
-//         testProcessing(666, 1, -1);
-//         testProcessing(100, 10, -1);
-//         testProcessing(666, IOKit.bufferSize(), -1);
-//         testProcessing(0, 67, 667);
-//         testProcessing(666, 67, 667);
-//         testProcessing(666, 1, 667);
-//         testProcessing(100, 10, 101);
-//         testProcessing(222, 33, 55);
-//         testProcessing(100, 10, 0);
-//         testProcessing(100, 10, 100);
-//         testProcessing(6666, 99, 77777);
-//         testProcessing(0, 99, 77777);
-//     }
-//
-//     private void testProcessing(int totalSize, int blockSize, int readLimit) throws Exception {
-//         int offset = 22;
-//         String str = new String(JieRandom.fill(new char[totalSize], 'a', 'z'));
-//         char[] chars = str.toCharArray();
-//
-//         byte[] bytes = new byte[chars.length * 2];
-//         for (int i = 0; i < chars.length; i++) {
-//             bytes[i * 2] = 0;
-//             bytes[i * 2 + 1] = (byte) chars[i];
-//         }
-//         CharBuffer dirBuffer = copyDirect(chars);
-//
-//         {
-//             // stream -> stream
-//             CharArrayReader in = new CharArrayReader(chars);
-//             CharsBuilder out = new CharsBuilder();
-//             long readNum = CharEncoder.from(in).readBlockSize(blockSize).readLimit(readLimit).writeTo(out);
-//             assertEquals(readNum, getLength(chars.length, readLimit));
-//             assertEquals(
-//                 str.substring(0, getLength(chars.length, readLimit)),
-//                 new String(out.toCharArray(), 0, getLength(chars.length, readLimit))
-//             );
-//         }
-//
-//         {
-//             // string -> stream
-//             CharsBuilder out = new CharsBuilder();
-//             long readNum = CharEncoder.from(str).readBlockSize(blockSize).readLimit(readLimit).writeTo(out);
-//             assertEquals(readNum, getLength(chars.length, readLimit));
-//             assertEquals(
-//                 str.substring(0, getLength(chars.length, readLimit)),
-//                 new String(out.toCharArray(), 0, getLength(chars.length, readLimit))
-//             );
-//         }
-//
-//         {
-//             // direct -> stream
-//             CharBuffer dirInBuffer = copyBuffer(dirBuffer);
-//             CharsBuilder outBuilder = new CharsBuilder();
-//             long readNum = CharEncoder.from(dirInBuffer).readBlockSize(blockSize).readLimit(readLimit).writeTo(outBuilder);
-//             assertEquals(readNum, getLength(chars.length, readLimit));
-//             assertEquals(str.substring(0, getLength(chars.length, readLimit)), outBuilder.toString());
-//             dirInBuffer = copyBuffer(dirBuffer);
-//             outBuilder.reset();
-//             readNum = CharEncoder.from(dirInBuffer).readBlockSize(blockSize).readLimit(readLimit)
-//                 .encoder((s, e) -> copyBuffer(s)).writeTo(outBuilder);
-//             assertEquals(readNum, getLength(chars.length, readLimit));
-//             assertEquals(str.substring(0, getLength(chars.length, readLimit)), outBuilder.toString());
-//             dirInBuffer = copyBuffer(dirBuffer);
-//             StringWriter sw = new StringWriter();
-//             readNum = CharEncoder.from(dirInBuffer).readBlockSize(blockSize).readLimit(readLimit)
-//                 .encoder((s, e) -> copyBuffer(s)).writeTo(sw);
-//             assertEquals(readNum, getLength(chars.length, readLimit));
-//             assertEquals(str.substring(0, getLength(chars.length, readLimit)), sw.toString());
-//         }
-//
-//         {
-//             // stream -> char[]
-//             char[] outChars = new char[chars.length];
-//             CharArrayReader in = new CharArrayReader(chars);
-//             in.mark(0);
-//             long readNum = CharEncoder.from(in).readBlockSize(blockSize).writeTo(outChars);
-//             assertEquals(readNum, chars.length);
-//             assertEquals(str, new String(outChars));
-//             outChars = new char[chars.length + offset * 2];
-//             in.reset();
-//             readNum = CharEncoder.from(in).readBlockSize(blockSize).writeTo(outChars, offset, chars.length);
-//             assertEquals(readNum, chars.length);
-//             assertEquals(str, new String(Arrays.copyOfRange(outChars, offset, offset + chars.length)));
-//         }
-//
-//         {
-//             // stream -> buffer
-//             CharBuffer outBuffer = copyBuffer(dirBuffer);
-//             CharArrayReader in = new CharArrayReader(chars);
-//             long readNum = CharEncoder.from(in).readBlockSize(blockSize).writeTo(outBuffer);
-//             assertEquals(readNum, chars.length);
-//             outBuffer.flip();
-//             char[] outChars = BufferKit.read(outBuffer);
-//             assertEquals(str, new String(outChars));
-//         }
-//
-//         {
-//             // char[] -> stream
-//             CharsBuilder out = new CharsBuilder();
-//             long readNum = CharEncoder.from(chars).readBlockSize(blockSize).readLimit(readLimit).writeTo(out);
-//             assertEquals(readNum, getLength(chars.length, readLimit));
-//             assertEquals(
-//                 str.substring(0, getLength(chars.length, readLimit)),
-//                 new String(out.toCharArray(), 0, getLength(chars.length, readLimit))
-//             );
-//             out.reset();
-//             readNum = CharEncoder.from(chars).readBlockSize(blockSize).readLimit(readLimit)
-//                 .encoder((s, e) -> CharBuffer.wrap(BufferKit.read(s))).writeTo(out);
-//             assertEquals(readNum, getLength(chars.length, readLimit));
-//             assertEquals(
-//                 str.substring(0, getLength(chars.length, readLimit)),
-//                 new String(out.toCharArray(), 0, getLength(chars.length, readLimit))
-//             );
-//         }
-//
-//         {
-//             // char[] -> char[]
-//             char[] outChars = new char[chars.length];
-//             long readNum = CharEncoder.from(chars).readBlockSize(blockSize).writeTo(outChars);
-//             assertEquals(readNum, chars.length);
-//             assertEquals(str, new String(outChars));
-//             readNum = CharEncoder.from(chars).readBlockSize(blockSize).readLimit(readLimit).writeTo(outChars);
-//             assertEquals(readNum, getLength(chars.length, readLimit));
-//             assertEquals(
-//                 str.substring(0, getLength(chars.length, readLimit)),
-//                 new String(outChars, 0, getLength(chars.length, readLimit))
-//             );
-//             char[] inChars = new char[chars.length + offset * 2];
-//             outChars = new char[chars.length];
-//             System.arraycopy(chars, 0, inChars, offset, chars.length);
-//             readNum = CharEncoder.from(inChars, offset, chars.length).readBlockSize(blockSize).writeTo(outChars);
-//             assertEquals(readNum, chars.length);
-//             assertEquals(str, new String(outChars));
-//             outChars = new char[chars.length];
-//             readNum = CharEncoder.from(chars, 0, chars.length)
-//                 .readBlockSize(blockSize).writeTo(outChars, 0, outChars.length);
-//             assertEquals(readNum, chars.length);
-//             assertEquals(str, new String(outChars));
-//             outChars = new char[chars.length];
-//             if (bytes.length > 0) {
-//                 readNum = CharEncoder.from(chars, 0, chars.length - 1)
-//                     .readBlockSize(blockSize).writeTo(outChars, 0, outChars.length - 1);
-//                 assertEquals(readNum, chars.length - 1);
-//                 assertEquals(str.substring(0, str.length() - 1),
-//                     new String(Arrays.copyOfRange(outChars, 0, outChars.length - 1)));
-//             }
-//         }
-//
-//         {
-//             // char[] -> buffer
-//             CharBuffer outBuffer = copyDirect(chars);
-//             long readNum = CharEncoder.from(chars).readBlockSize(blockSize).writeTo(outBuffer);
-//             assertEquals(readNum, chars.length);
-//             outBuffer.flip();
-//             assertEquals(str, new String(BufferKit.read(outBuffer)));
-//             outBuffer = copyDirect(chars);
-//             readNum = CharEncoder.from(chars).readBlockSize(blockSize).readLimit(readLimit).writeTo(outBuffer);
-//             assertEquals(readNum, getLength(chars.length, readLimit));
-//             outBuffer.flip();
-//             assertEquals(
-//                 str.substring(0, getLength(chars.length, readLimit)),
-//                 new String(BufferKit.read(outBuffer), 0, getLength(chars.length, readLimit))
-//             );
-//         }
-//
-//         {
-//             // char[] -> appender
-//             CharsBuilder appender = new CharsBuilder();
-//             long readNum = CharEncoder.from(chars).readBlockSize(blockSize).writeTo(appender);
-//             assertEquals(readNum, chars.length);
-//             assertEquals(str, appender.toString());
-//             appender.reset();
-//             readNum = CharEncoder.from(chars).readBlockSize(blockSize).readLimit(readLimit).writeTo(appender);
-//             assertEquals(readNum, getLength(chars.length, readLimit));
-//             assertEquals(
-//                 str.substring(0, getLength(chars.length, readLimit)),
-//                 appender.toString()
-//             );
-//         }
-//
-//         {
-//             // char[] -> non-writer-appender
-//             NonWriterAppender appender = new NonWriterAppender();
-//             long readNum = CharEncoder.from(chars).readBlockSize(blockSize).writeTo(appender);
-//             assertEquals(readNum, chars.length);
-//             assertEquals(str, appender.toString());
-//             appender.reset();
-//             readNum = CharEncoder.from(chars).readBlockSize(blockSize).readLimit(readLimit).writeTo(appender);
-//             assertEquals(readNum, getLength(chars.length, readLimit));
-//             assertEquals(
-//                 str.substring(0, getLength(chars.length, readLimit)),
-//                 appender.toString()
-//             );
-//         }
-//
-//         {
-//             // buffer -> stream
-//             CharBuffer inBuffer = copyHeap(chars);
-//             inBuffer.mark();
-//             CharsBuilder out = new CharsBuilder();
-//             long readNum = CharEncoder.from(inBuffer).readBlockSize(blockSize).readLimit(readLimit).writeTo(out);
-//             assertEquals(readNum, getLength(chars.length, readLimit));
-//             assertEquals(
-//                 str.substring(0, getLength(chars.length, readLimit)),
-//                 new String(out.toCharArray(), 0, getLength(chars.length, readLimit))
-//             );
-//             inBuffer.reset();
-//             out.reset();
-//             readNum = CharEncoder.from(inBuffer).readBlockSize(blockSize).readLimit(readLimit)
-//                 .encoder((s, e) -> CharBuffer.wrap(BufferKit.read(s))).writeTo(out);
-//             assertEquals(readNum, getLength(chars.length, readLimit));
-//             assertEquals(
-//                 str.substring(0, getLength(chars.length, readLimit)),
-//                 new String(out.toCharArray(), 0, getLength(chars.length, readLimit))
-//             );
-//             CharBuffer arrayIn = copyPadding(chars);
-//             CharBuffer arrayOut = copyPadding(new char[chars.length]);
-//             readNum = CharEncoder.from(arrayIn).readBlockSize(blockSize).readLimit(readLimit).writeTo(arrayOut);
-//             assertEquals(readNum, getLength(chars.length, readLimit));
-//             arrayOut.flip();
-//             assertEquals(
-//                 str.substring(0, getLength(chars.length, readLimit)),
-//                 new String(BufferKit.read(arrayOut), 0, getLength(chars.length, readLimit))
-//             );
-//             arrayIn.flip();
-//             arrayOut.flip();
-//             readNum = CharEncoder.from(arrayIn).readBlockSize(blockSize).readLimit(readLimit)
-//                 .encoder((s, e) -> CharBuffer.wrap(BufferKit.read(s))).writeTo(arrayOut);
-//             assertEquals(readNum, getLength(chars.length, readLimit));
-//             arrayOut.flip();
-//             assertEquals(
-//                 str.substring(0, getLength(chars.length, readLimit)),
-//                 new String(BufferKit.read(arrayOut), 0, getLength(chars.length, readLimit))
-//             );
-//         }
-//
-//         {
-//             // buffer -> char[]
-//             CharBuffer inBuffer = copyHeap(chars);
-//             inBuffer.mark();
-//             char[] outChars = new char[chars.length];
-//             long readNum = CharEncoder.from(inBuffer).readBlockSize(blockSize).writeTo(outChars);
-//             assertEquals(readNum, chars.length);
-//             assertEquals(str, new String(outChars));
-//             inBuffer.reset();
-//             outChars = new char[chars.length];
-//             readNum = CharEncoder.from(inBuffer).readBlockSize(blockSize).readLimit(readLimit).writeTo(outChars);
-//             assertEquals(readNum, getLength(chars.length, readLimit));
-//             assertEquals(
-//                 str.substring(0, getLength(chars.length, readLimit)),
-//                 new String(outChars, 0, getLength(chars.length, readLimit))
-//             );
-//         }
-//
-//         {
-//             // buffer -> appender
-//             CharBuffer inBuffer = copyPadding(chars);
-//             inBuffer.mark();
-//             CharsBuilder appender = new CharsBuilder();
-//             long readNum = CharEncoder.from(inBuffer).readBlockSize(blockSize).writeTo(appender);
-//             assertEquals(readNum, chars.length);
-//             assertEquals(str, appender.toString());
-//             inBuffer.reset();
-//             appender.reset();
-//             readNum = CharEncoder.from(copyDirect(inBuffer)).readBlockSize(blockSize).readLimit(readLimit).writeTo(appender);
-//             assertEquals(readNum, getLength(chars.length, readLimit));
-//             assertEquals(
-//                 str.substring(0, getLength(chars.length, readLimit)),
-//                 appender.toString()
-//             );
-//         }
-//
-//         {
-//             // buffer -> buffer
-//             CharBuffer inBuffer = copyPadding(chars);
-//             inBuffer.mark();
-//             CharBuffer outBuffer = copyBuffer(dirBuffer);
-//             long readNum = CharEncoder.from(inBuffer).readBlockSize(blockSize).writeTo(outBuffer);
-//             assertEquals(readNum, chars.length);
-//             outBuffer.flip();
-//             char[] outBytes = BufferKit.read(outBuffer);
-//             assertEquals(str, new String(outBytes));
-//         }
-//
-//         {
-//             // charSeq -> char[]
-//             char[] outChars = new char[chars.length];
-//             long readNum = CharEncoder.from(str).readBlockSize(blockSize).writeTo(outChars);
-//             assertEquals(readNum, chars.length);
-//             assertEquals(str, new String(outChars));
-//             outChars = new char[chars.length];
-//             readNum = CharEncoder.from(str).readBlockSize(blockSize).readLimit(readLimit).writeTo(outChars);
-//             assertEquals(readNum, getLength(chars.length, readLimit));
-//             assertEquals(
-//                 str.substring(0, getLength(chars.length, readLimit)),
-//                 new String(outChars, 0, getLength(chars.length, readLimit))
-//             );
-//             outChars = new char[chars.length];
-//             readNum = CharEncoder.from(JieString.asChars(str.toCharArray())).readBlockSize(blockSize).writeTo(outChars);
-//             assertEquals(readNum, chars.length);
-//             assertEquals(str, new String(outChars));
-//             outChars = new char[chars.length];
-//             readNum = CharEncoder.from(JieString.asChars(str.toCharArray()))
-//                 .readBlockSize(blockSize).readLimit(readLimit).writeTo(outChars);
-//             assertEquals(readNum, getLength(chars.length, readLimit));
-//             assertEquals(
-//                 str.substring(0, getLength(chars.length, readLimit)),
-//                 new String(outChars, 0, getLength(chars.length, readLimit))
-//             );
-//         }
-//
-//         {
-//             // charSeq -> appender
-//             CharsBuilder appender = new CharsBuilder();
-//             long readNum = CharEncoder.from(str).readBlockSize(blockSize).writeTo(appender);
-//             assertEquals(readNum, chars.length);
-//             assertEquals(str, appender.toString());
-//             appender.reset();
-//             readNum = CharEncoder.from(str).readBlockSize(blockSize).readLimit(readLimit).writeTo(appender);
-//             assertEquals(readNum, getLength(chars.length, readLimit));
-//             assertEquals(
-//                 str.substring(0, getLength(chars.length, readLimit)),
-//                 appender.toString()
-//             );
-//             appender.reset();
-//             readNum = CharEncoder.from(str).readBlockSize(blockSize).readLimit(readLimit)
-//                 .encoder((s, e) -> CharBuffer.wrap(BufferKit.read(s))).writeTo(appender);
-//             assertEquals(readNum, getLength(chars.length, readLimit));
-//             assertEquals(
-//                 str.substring(0, getLength(chars.length, readLimit)),
-//                 appender.toString()
-//             );
-//         }
-//
-//         {
-//             // any -> null
-//             long[] counter = {0};
-//             long readNum = CharEncoder.from(new char[totalSize])
-//                 .readBlockSize(blockSize)
-//                 .readLimit(readLimit)
-//                 .encoder(((data, end) -> {
-//                     counter[0] += data.remaining();
-//                     return data;
-//                 }))
-//                 .process();
-//             assertEquals(readNum, getLength(totalSize, readLimit));
-//             assertEquals(counter[0], getLength(totalSize, readLimit));
-//         }
-//     }
-//
-//     private int getLength(int length, int readLimit) {
-//         if (readLimit < 0) {
-//             return length;
-//         }
-//         return Math.min(length, readLimit);
-//     }
-//
-//     @Test
-//     public void testEncoder() throws Exception {
-//         testEncoder(0, 1);
-//         testEncoder(1, 1);
-//         testEncoder(1, 10);
-//         testEncoder(99, 9);
-//         testEncoder(99, 990);
-//         testEncoder(1024, 77);
-//         testEncoder(1024 * 1024, 777);
-//         testEncoder(1024 * 1024, 1024);
-//
-//         {
-//             // error
-//             Throwable[] ts = new Throwable[1];
-//             try {
-//                 CharEncoder.from(new char[100]).encoder((data, end) -> {
-//                     throw new JieTestException("haha");
-//                 }).writeTo(new char[100]);
-//             } catch (IORuntimeException e) {
-//                 ts[0] = e;
-//             }
-//             assertEquals(ts[0].getCause().getClass(), JieTestException.class);
-//             assertEquals(ts[0].getCause().getMessage(), "haha");
-//         }
-//         {
-//             // special
-//             expectThrows(IllegalArgumentException.class, () ->
-//                 CharEncoder.from(new char[0]).encoder(-1, CharEncoder.Handler.emptyEncoder()));
-//             expectThrows(IllegalArgumentException.class, () ->
-//                 CharEncoder.from(new char[0]).encoder(0, CharEncoder.Handler.emptyEncoder()));
-//         }
-//     }
-//
-//     private void testEncoder(int dataSize, int readBlockSize) throws Exception {
-//         {
-//             // from char array
-//             char[] src = JieArray.fill(new char[dataSize], (char) 6);
-//             CharsBuilder dst = new CharsBuilder();
-//             IntVar ec = IntVar.of(0);
-//             CharEncoder.from(src).readBlockSize(readBlockSize)
-//                 .encoder((d, e) -> {
-//                     CharsBuilder dst0 = new CharsBuilder();
-//                     while (d.hasRemaining()) {
-//                         char b = d.get();
-//                         dst0.append(b);
-//                         dst0.append(b);
-//                     }
-//                     d.flip();
-//                     while (d.hasRemaining()) {
-//                         d.put((char) 9);
-//                     }
-//                     if (e) {
-//                         ec.incrementAndGet();
-//                     }
-//                     return dst0.toCharBuffer();
-//                 })
-//                 .encoder((d, e) -> d)
-//                 .writeTo(dst);
-//             assertEquals(dst.toCharArray(), JieArray.fill(new char[dataSize * 2], (char) 6));
-//             assertEquals(src, JieArray.fill(new char[dataSize], (char) 9));
-//             assertEquals(ec.get(), 1);
-//         }
-//         {
-//             // from heap char buffer
-//             char[] srcChars = JieArray.fill(new char[dataSize], (char) 6);
-//             CharBuffer src = CharBuffer.wrap(srcChars);
-//             CharsBuilder dst = new CharsBuilder();
-//             IntVar ec = IntVar.of(0);
-//             CharEncoder.from(src).readBlockSize(readBlockSize).encoder((d, e) -> {
-//                 CharsBuilder dst0 = new CharsBuilder();
-//                 while (d.hasRemaining()) {
-//                     char b = d.get();
-//                     dst0.append(b);
-//                     dst0.append(b);
-//                 }
-//                 d.flip();
-//                 while (d.hasRemaining()) {
-//                     d.put((char) 9);
-//                 }
-//                 if (e) {
-//                     ec.incrementAndGet();
-//                 }
-//                 return dst0.toCharBuffer();
-//             }).writeTo(dst);
-//             assertEquals(dst.toCharArray(), JieArray.fill(new char[dataSize * 2], (char) 6));
-//             src.flip();
-//             assertEquals(BufferKit.read(src), JieArray.fill(new char[dataSize], (char) 9));
-//             assertEquals(ec.get(), 1);
-//         }
-//         {
-//             // from direct char buffer to non-writer-appender
-//             char[] srcChars = JieArray.fill(new char[dataSize], (char) 6);
-//             CharBuffer src = CharBuffer.wrap(srcChars);
-//             NonWriterAppender dst = new NonWriterAppender();
-//             IntVar ec = IntVar.of(0);
-//             CharEncoder.from(src).readBlockSize(readBlockSize).encoder((d, e) -> {
-//                 CharsBuilder dst0 = new CharsBuilder();
-//                 while (d.hasRemaining()) {
-//                     char b = d.get();
-//                     dst0.append(b);
-//                     dst0.append(b);
-//                 }
-//                 d.flip();
-//                 while (d.hasRemaining()) {
-//                     d.put((char) 9);
-//                 }
-//                 if (e) {
-//                     ec.incrementAndGet();
-//                 }
-//                 return copyDirect(dst0.toCharBuffer());
-//             }).writeTo(dst);
-//             assertEquals(dst.toCharArray(), JieArray.fill(new char[dataSize * 2], (char) 6));
-//             src.flip();
-//             assertEquals(BufferKit.read(src), JieArray.fill(new char[dataSize], (char) 9));
-//             assertEquals(ec.get(), 1);
-//         }
-//         {
-//             // from stream
-//             char[] srcChars = JieArray.fill(new char[dataSize], (char) 6);
-//             CharArrayReader src = new CharArrayReader(srcChars);
-//             CharsBuilder dst = new CharsBuilder();
-//             IntVar ec = IntVar.of(0);
-//             CharEncoder.from(src).readBlockSize(readBlockSize).encoder((d, e) -> {
-//                 CharsBuilder dst0 = new CharsBuilder();
-//                 while (d.hasRemaining()) {
-//                     char b = d.get();
-//                     dst0.append(b);
-//                     dst0.append(b);
-//                 }
-//                 d.flip();
-//                 while (d.hasRemaining()) {
-//                     d.put((char) 9);
-//                 }
-//                 if (e) {
-//                     ec.incrementAndGet();
-//                 }
-//                 return dst0.toCharBuffer();
-//             }).writeTo(dst);
-//             assertEquals(dst.toCharArray(), JieArray.fill(new char[dataSize * 2], (char) 6));
-//             src.reset();
-//             assertEquals(IOKit.read(src), JieArray.fill(new char[dataSize], (char) 6));
-//             assertEquals(ec.get(), 1);
-//         }
-//         {
-//             // from char sequence
-//             char[] srcChars = JieArray.fill(new char[dataSize], (char) 6);
-//             CharSequence src = new String(srcChars);
-//             CharsBuilder dst = new CharsBuilder();
-//             IntVar ec = IntVar.of(0);
-//             CharEncoder.from(src).readBlockSize(readBlockSize)
-//                 .encoder((d, e) -> {
-//                     CharsBuilder dst0 = new CharsBuilder();
-//                     while (d.hasRemaining()) {
-//                         char b = d.get();
-//                         dst0.append(b);
-//                         dst0.append(b);
-//                     }
-//                     if (e) {
-//                         ec.incrementAndGet();
-//                     }
-//                     return dst0.toCharBuffer();
-//                 })
-//                 .encoder((d, e) -> d)
-//                 .writeTo(dst);
-//             assertEquals(dst.toCharArray(), JieArray.fill(new char[dataSize * 2], (char) 6));
-//             assertEquals(srcChars, JieArray.fill(new char[dataSize], (char) 6));
-//             assertEquals(ec.get(), 1);
-//         }
-//         {
-//             // test null
-//             char[] src = JieArray.fill(new char[dataSize], (char) 6);
-//             CharsBuilder dst = new CharsBuilder();
-//             IntVar ec = IntVar.of(0);
-//             CharEncoder.from(src).readBlockSize(readBlockSize)
-//                 .encoder((d, e) -> {
-//                     CharsBuilder dst0 = new CharsBuilder();
-//                     while (d.hasRemaining()) {
-//                         char b = d.get();
-//                         dst0.append(b);
-//                         dst0.append(b);
-//                     }
-//                     d.flip();
-//                     while (d.hasRemaining()) {
-//                         d.put((char) 9);
-//                     }
-//                     if (e) {
-//                         ec.incrementAndGet();
-//                     }
-//                     return dst0.toCharBuffer();
-//                 })
-//                 .encoder((d, e) -> null)
-//                 .writeTo(dst);
-//             assertEquals(dst.toCharArray(), new char[0]);
-//             assertEquals(src, JieArray.fill(new char[dataSize], (char) 9));
-//             assertEquals(ec.get(), 1);
-//             Arrays.fill(src, (char) 6);
-//             CharEncoder.from(src).readBlockSize(readBlockSize)
-//                 .encoder((d, e) -> null)
-//                 .encoder((d, e) -> {
-//                     CharsBuilder dst0 = new CharsBuilder();
-//                     while (d.hasRemaining()) {
-//                         char b = d.get();
-//                         dst0.append(b);
-//                         dst0.append(b);
-//                     }
-//                     d.flip();
-//                     while (d.hasRemaining()) {
-//                         d.put((char) 9);
-//                     }
-//                     if (e) {
-//                         ec.incrementAndGet();
-//                     }
-//                     return dst0.toCharBuffer();
-//                 })
-//                 .writeTo(dst);
-//             assertEquals(dst.toCharArray(), new char[0]);
-//             assertEquals(src, JieArray.fill(new char[dataSize], (char) 6));
-//             assertEquals(ec.get(), 1);
-//         }
-//     }
-//
-//     @Test
-//     public void testFixedSizeEncoder() {
-//         testFixedSizeEncoder(0, 5, 6);
-//         testFixedSizeEncoder(0, 6, 5);
-//         testFixedSizeEncoder(100, 5, 6);
-//         testFixedSizeEncoder(100, 200, 60);
-//         testFixedSizeEncoder(10086, 11, 333);
-//         testFixedSizeEncoder(10086, 333, 11);
-//         testFixedSizeEncoder(10086, 22, 22);
-//         testFixedSizeEncoder(10086, 333, 1);
-//         testFixedSizeEncoder(333, 10086, 1);
-//         testFixedSizeEncoder(10086, 20, 19);
-//         testFixedSizeEncoder(20, 40, 19);
-//         testFixedSizeEncoder(10240, 1024, 512);
-//         testFixedSizeEncoder(1024, 1024, 1024);
-//     }
-//
-//     private void testFixedSizeEncoder(int dataSize, int readBlockSize, int fixedSize) {
-//         {
-//             // test read
-//             char[] src = JieRandom.fill(new char[dataSize]);
-//             int times = dataSize / fixedSize;
-//             CharsBuilder charsBuilder = new CharsBuilder();
-//             int pos = 0;
-//             for (int i = 0; i < times; i++) {
-//                 charsBuilder.append(Arrays.copyOfRange(src, pos, pos + fixedSize));
-//                 charsBuilder.append('\r');
-//                 charsBuilder.append('\n');
-//                 pos += fixedSize;
-//             }
-//             if (src.length > pos) {
-//                 charsBuilder.append(Arrays.copyOfRange(src, pos, src.length));
-//                 charsBuilder.append('\r');
-//                 charsBuilder.append('\n');
-//             }
-//             int portion = JieMath.leastPortion(dataSize, fixedSize);
-//             char[] dst = new char[src.length + portion * 2];
-//             IntVar ec = IntVar.of(0);
-//             long len = CharEncoder.from(src).readBlockSize(readBlockSize).
-//                 encoder(fixedSize, (data, end) -> {
-//                     if (end) {
-//                         ec.incrementAndGet();
-//                     }
-//                     int remaining = data.remaining();
-//                     if (remaining == 0) {
-//                         return JieChars.emptyBuffer();
-//                     }
-//                     char[] bb = new char[remaining + 2];
-//                     data.get(bb, 0, remaining);
-//                     bb[remaining] = '\r';
-//                     bb[remaining + 1] = '\n';
-//                     return CharBuffer.wrap(bb);
-//                 })
-//                 .writeTo(dst);
-//             assertEquals(dst, charsBuilder.toCharArray());
-//             assertEquals(len, src.length);
-//             assertEquals(ec.get(), 1);
-//         }
-//         {
-//             // test write 6
-//             char[] src = JieRandom.fill(new char[dataSize]);
-//             CharsBuilder charsBuilder = new CharsBuilder();
-//             int totalRemaining = dataSize;
-//             int pos = 0;
-//             int bufferPos = -1;
-//             while (totalRemaining > 0) {
-//                 int readSize = Math.min(totalRemaining, readBlockSize);
-//                 if (bufferPos < 0) {
-//                     if (readSize >= fixedSize) {
-//                         int fillSize = readSize / fixedSize * fixedSize;
-//                         charsBuilder.append(JieArray.fill(new char[fillSize], (char) 6));
-//                         if (fillSize < readSize) {
-//                             bufferPos = pos + fillSize;
-//                         }
-//                     } else {
-//                         bufferPos = pos;
-//                     }
-//                 } else {
-//                     int bufferedSize = pos - bufferPos;
-//                     int nowRemaining = bufferedSize + readSize;
-//                     if (nowRemaining >= fixedSize) {
-//                         charsBuilder.append(Arrays.copyOfRange(src, bufferPos, bufferPos + fixedSize));
-//                         int restReadSize = nowRemaining - fixedSize;
-//                         int fillSize = restReadSize / fixedSize * fixedSize;
-//                         charsBuilder.append(JieArray.fill(new char[fillSize], (char) 6));
-//                         if (fillSize < restReadSize) {
-//                             bufferPos = bufferPos + fixedSize + fillSize;
-//                         } else {
-//                             bufferPos = -1;
-//                         }
-//                     }
-//                 }
-//                 pos += readSize;
-//                 totalRemaining -= readSize;
-//             }
-//             if (bufferPos >= 0) {
-//                 charsBuilder.append(Arrays.copyOfRange(src, bufferPos, src.length));
-//             }
-//             if (readBlockSize % fixedSize == 0 && dataSize % fixedSize == 0) {
-//                 assertEquals(charsBuilder.toCharArray(), JieArray.fill(new char[dataSize], (char) 6));
-//             }
-//             char[] b6ret = CharEncoder.from(src).readBlockSize(readBlockSize)
-//                 .encoder(fixedSize, (data, end) -> {
-//                     char[] b6 = JieArray.fill(new char[data.remaining()], (char) 6);
-//                     data.put(b6);
-//                     return CharBuffer.wrap(b6);
-//                 }).toCharArray();
-//             assertEquals(b6ret, JieArray.fill(new char[dataSize], (char) 6));
-//             assertEquals(src, charsBuilder.toCharArray());
-//         }
-//         {
-//             // null
-//             char[] src = JieRandom.fill(new char[dataSize]);
-//             CharsBuilder builder = new CharsBuilder();
-//             IntVar ec = IntVar.of(0);
-//             CharEncoder.from(src).readBlockSize(readBlockSize)
-//                 .encoder(fixedSize, (data, end) -> null)
-//                 .encoder((data, end) -> {
-//                     if (end) {
-//                         ec.incrementAndGet();
-//                     }
-//                     return null;
-//                 })
-//                 .writeTo(builder);
-//             assertEquals(builder.size(), 0);
-//             assertEquals(ec.get(), 0);
-//         }
-//     }
-//
-//     @Test
-//     public void testRoundingEncoder() {
-//         testRoundingEncoder(0, 5, 6);
-//         testRoundingEncoder(0, 6, 5);
-//         testRoundingEncoder(100, 5, 6);
-//         testRoundingEncoder(100, 200, 60);
-//         testRoundingEncoder(10086, 11, 333);
-//         testRoundingEncoder(10086, 333, 11);
-//         testRoundingEncoder(10086, 22, 22);
-//         testRoundingEncoder(10086, 222, 1);
-//         testRoundingEncoder(222, 10086, 1);
-//         testRoundingEncoder(223, 2233, 2);
-//     }
-//
-//     private void testRoundingEncoder(int dataSize, int readBlockSize, int roundingSize) {
-//         {
-//             // test read
-//             char[] src = JieRandom.fill(new char[dataSize]);
-//             char[] dst = new char[src.length * 2];
-//             for (int i = 0; i < src.length; i++) {
-//                 dst[i * 2] = src[i];
-//                 dst[i * 2 + 1] = (char) roundingSize;
-//             }
-//             char[] dst2 = new char[src.length * 2];
-//             IntVar ec = IntVar.of(0);
-//             long len = CharEncoder.from(src).readBlockSize(readBlockSize)
-//                 .encoder(withRounding(roundingSize, (data, end) -> {
-//                     if (!end) {
-//                         assertTrue(
-//                             (data.remaining() >= roundingSize)
-//                                 && (data.remaining() % roundingSize == 0)
-//                         );
-//                     } else {
-//                         ec.incrementAndGet();
-//                         if (roundingSize > 1) {
-//                             assertTrue(data.remaining() <= roundingSize);
-//                         }
-//                     }
-//                     CharBuffer bb = CharBuffer.allocate(data.remaining() * 2);
-//                     while (data.hasRemaining()) {
-//                         bb.put(data.get());
-//                         bb.put((char) roundingSize);
-//                     }
-//                     bb.flip();
-//                     return bb;
-//                 }))
-//                 .writeTo(dst2);
-//             assertEquals(dst2, dst);
-//             assertEquals(len, src.length);
-//             assertEquals(ec.get(), 1);
-//         }
-//         {
-//             // test write 6
-//             char[] src = JieRandom.fill(new char[dataSize]);
-//             CharsBuilder charsBuilder = new CharsBuilder();
-//             int totalRemaining = dataSize;
-//             int pos = 0;
-//             int bufferPos = -1;
-//             while (totalRemaining > 0) {
-//                 int readSize = Math.min(totalRemaining, readBlockSize);
-//                 if (bufferPos < 0) {
-//                     if (readSize >= roundingSize) {
-//                         int fillSize = readSize / roundingSize * roundingSize;
-//                         charsBuilder.append(JieArray.fill(new char[fillSize], (char) 6));
-//                         if (fillSize < readSize) {
-//                             bufferPos = pos + fillSize;
-//                         }
-//                     } else {
-//                         bufferPos = pos;
-//                     }
-//                 } else {
-//                     int bufferedSize = pos - bufferPos;
-//                     int nowRemaining = bufferedSize + readSize;
-//                     if (nowRemaining >= roundingSize) {
-//                         charsBuilder.append(Arrays.copyOfRange(src, bufferPos, bufferPos + roundingSize));
-//                         int restReadSize = nowRemaining - roundingSize;
-//                         int fillSize = restReadSize / roundingSize * roundingSize;
-//                         charsBuilder.append(JieArray.fill(new char[fillSize], (char) 6));
-//                         if (fillSize < restReadSize) {
-//                             bufferPos = bufferPos + roundingSize + fillSize;
-//                         } else {
-//                             bufferPos = -1;
-//                         }
-//                     }
-//                 }
-//                 pos += readSize;
-//                 totalRemaining -= readSize;
-//             }
-//             if (bufferPos >= 0) {
-//                 charsBuilder.append(Arrays.copyOfRange(src, bufferPos, src.length));
-//             }
-//             if (readBlockSize % roundingSize == 0 && dataSize % roundingSize == 0) {
-//                 assertEquals(charsBuilder.toCharArray(), JieArray.fill(new char[dataSize], (char) 6));
-//             }
-//             char[] b6ret = CharEncoder.from(src).readBlockSize(readBlockSize)
-//                 .encoder(roundingSize, (data, end) -> {
-//                     char[] b6 = JieArray.fill(new char[data.remaining()], (char) 6);
-//                     data.put(b6);
-//                     return CharBuffer.wrap(b6);
-//                 }).toCharArray();
-//             assertEquals(b6ret, JieArray.fill(new char[dataSize], (char) 6));
-//             assertEquals(src, charsBuilder.toCharArray());
-//         }
-//         {
-//             // null
-//             char[] src = JieRandom.fill(new char[dataSize]);
-//             CharsBuilder builder = new CharsBuilder();
-//             IntVar ec = IntVar.of(0);
-//             CharEncoder.from(src).readBlockSize(readBlockSize)
-//                 .encoder(withRounding(roundingSize, (data, end) -> null))
-//                 .encoder((data, end) -> {
-//                     if (end) {
-//                         ec.incrementAndGet();
-//                     }
-//                     return null;
-//                 })
-//                 .writeTo(builder);
-//             assertEquals(builder.size(), 0);
-//             assertEquals(ec.get(), 0);
-//         }
-//     }
-//
-//     @Test
-//     public void testBufferingEncoder() {
-//         testBufferingEncoder(0, 5);
-//         testBufferingEncoder(100, 5);
-//         testBufferingEncoder(100, 200);
-//         testBufferingEncoder(10086, 11);
-//         testBufferingEncoder(10086, 333);
-//         testBufferingEncoder(10086, 22);
-//         testBufferingEncoder(10086, 333);
-//         testBufferingEncoder(333, 10086);
-//         testBufferingEncoder(233, 2333);
-//     }
-//
-//     private void testBufferingEncoder(int dataSize, int readBlockSize) {
-//         {
-//             char[] src = JieRandom.fill(new char[dataSize]);
-//             char[] dst = new char[src.length];
-//             BooleanVar bf = BooleanVar.of(false);
-//             IntVar ec = IntVar.of(0);
-//             long len = CharEncoder.from(src).readBlockSize(readBlockSize)
-//                 .encoder(withBuffering((data, end) -> {
-//                     if (end) {
-//                         ec.incrementAndGet();
-//                         return data;
-//                     }
-//                     boolean bfv = bf.getAndToggle();
-//                     if (bfv) {
-//                         int size = data.remaining() / 2;
-//                         CharBuffer ret = CharBuffer.allocate(size);
-//                         while (ret.hasRemaining()) {
-//                             ret.put(data.get());
-//                         }
-//                         ret.flip();
-//                         return ret;
-//                     } else {
-//                         return CharBuffer.wrap(BufferKit.read(data));
-//                     }
-//                 }))
-//                 .writeTo(dst);
-//             assertEquals(dst, src);
-//             assertEquals(len, src.length);
-//             assertEquals(ec.get(), 1);
-//         }
-//         {
-//             // null
-//             char[] src = JieRandom.fill(new char[dataSize]);
-//             CharsBuilder builder = new CharsBuilder();
-//             IntVar ec = IntVar.of(0);
-//             CharEncoder.from(src).readBlockSize(readBlockSize)
-//                 .encoder(withBuffering((data, end) -> null))
-//                 .encoder((data, end) -> {
-//                     if (end) {
-//                         ec.incrementAndGet();
-//                     }
-//                     return null;
-//                 })
-//                 .writeTo(builder);
-//             assertEquals(builder.size(), 0);
-//             assertEquals(ec.get(), 0);
-//         }
-//     }
-//
-//     @Test
-//     public void testToReader() throws Exception {
-//         testToReader(0, 5);
-//         testToReader(100, 5);
-//         testToReader(10086, 11);
-//         testToReader(10086, 333);
-//         testToReader(10086, 22);
-//         testToReader(333, 10086);
-//         testToReader(20, 10086);
-//         testToReader(20, 40);
-//         {
-//             // non-processor reader
-//             assertEquals(
-//                 CharEncoder.from(new CharArrayReader(new char[0])).toReader().getClass(),
-//                 CharArrayReader.class
-//             );
-//             assertEquals(
-//                 CharEncoder.from(new char[0]).toReader().getClass(),
-//                 IOKit.newReader(new char[0]).getClass()
-//             );
-//             assertEquals(
-//                 CharEncoder.from(CharBuffer.allocate(0)).toReader().getClass(),
-//                 IOKit.newReader(CharBuffer.allocate(0)).getClass()
-//             );
-//             assertEquals(
-//                 CharEncoder.from("").toReader().getClass(),
-//                 IOKit.newReader("").getClass()
-//             );
-//             CharEncoder inst = CharEncoder.from(new char[0]);
-//             invokeThrows(
-//                 IORuntimeException.class,
-//                 inst.getClass().getDeclaredMethod("toReader", Object.class),
-//                 inst,
-//                 5
-//             );
-//         }
-//         {
-//             // special with encoder
-//             Reader in = CharEncoder.from(new char[0])
-//                 .encoder((d, e) -> d)
-//                 .toReader();
-//             assertEquals(in.read(), -1);
-//             assertEquals(in.read(), -1);
-//             assertEquals(in.read(new char[1]), -1);
-//             assertEquals(in.read(new char[1], 0, 0), 0);
-//             assertEquals(in.skip(-1), 0);
-//             assertEquals(in.skip(0), 0);
-//             in.close();
-//             in.close();
-//             expectThrows(IOException.class, () -> in.read());
-//             Reader nio = CharEncoder.from(new NioReader()).endOnZeroRead(true)
-//                 .encoder((d, e) -> d)
-//                 .toReader();
-//             assertEquals(nio.read(), -1);
-//             Reader empty = CharEncoder.from(new char[]{'9'})
-//                 .encoder(((data, end) -> {
-//                     CharsBuilder builder = new CharsBuilder();
-//                     builder.append(data);
-//                     if (end) {
-//                         builder.append(new char[]{'1', '2', '3'});
-//                     }
-//                     return CharBuffer.wrap(builder.toString());
-//                 })).toReader();
-//             assertEquals(IOKit.string(empty).toCharArray(), new char[]{'9', '1', '2', '3'});
-//             assertEquals(empty.read(), -1);
-//             Reader err1 = CharEncoder.from(new CharEncoderTest.ThrowReader(0))
-//                 .encoder((d, e) -> d)
-//                 .toReader();
-//             expectThrows(IOException.class, () -> err1.close());
-//             Reader err2 = CharEncoder.from(new CharEncoderTest.ThrowReader(2))
-//                 .encoder((d, e) -> d)
-//                 .toReader();
-//             expectThrows(IOException.class, () -> err2.close());
-//             Reader err3 = CharEncoder.from(new CharEncoderTest.ThrowReader(3))
-//                 .encoder((d, e) -> d)
-//                 .toReader();
-//             expectThrows(IOException.class, () -> err3.read());
-//         }
-//         {
-//             boolean[] flag = {true};
-//             Reader in = CharEncoder.from(new char[1024]).readBlockSize(1)
-//                 .encoder(((data, end) -> {
-//                     CharBuffer ret = flag[0] ? data : JieChars.emptyBuffer();
-//                     flag[0] = !flag[0];
-//                     return ret;
-//                 })).toReader();
-//             CharsBuilder builder = new CharsBuilder();
-//             while (true) {
-//                 int b = in.read();
-//                 if (b == -1) {
-//                     break;
-//                 }
-//                 builder.append((char) b);
-//             }
-//             assertEquals(builder.toCharArray().length, 1024 / 2);
-//         }
-//     }
-//
-//     private void testToReader(int dataSize, int readBlockSize) throws Exception {
-//         char[] src = JieRandom.fill(new char[dataSize]);
-//         int times = dataSize / readBlockSize;
-//         CharsBuilder bb = new CharsBuilder();
-//         int pos = 0;
-//         for (int i = 0; i < times; i++) {
-//             bb.append(Arrays.copyOfRange(src, pos, pos + readBlockSize));
-//             bb.append('\r');
-//             pos += readBlockSize;
-//         }
-//         if (pos < dataSize) {
-//             bb.append(Arrays.copyOfRange(src, pos, dataSize));
-//             bb.append('\r');
-//         }
-//         char[] encoded = bb.toCharArray();
-//         {
-//             IntVar ec = IntVar.of(0);
-//             Reader in = toReader(src, readBlockSize, ec);
-//             assertEquals(IOKit.string(in).toCharArray(), encoded);
-//             assertEquals(in.read(), -1);
-//             assertEquals(ec.get(), 1);
-//         }
-//         {
-//             IntVar ec = IntVar.of(0);
-//             Reader in = toReader(src, readBlockSize, ec);
-//             CharsBuilder builder = new CharsBuilder();
-//             while (true) {
-//                 int b = in.read();
-//                 if (b == -1) {
-//                     break;
-//                 }
-//                 builder.append((char) b);
-//             }
-//             assertEquals(builder.toCharArray(), encoded);
-//             assertEquals(ec.get(), 1);
-//         }
-//         {
-//             IntVar ec = IntVar.of(0);
-//             Reader in = toReader(src, readBlockSize, ec);
-//             assertEquals(in.skip(666), Math.min(666, encoded.length));
-//             assertEquals(in.skip(1666), Math.min(1666, Math.max(encoded.length - 666, 0)));
-//             assertEquals(ec.get(), 666 + 1666 >= encoded.length ? 1 : 0);
-//         }
-//         {
-//             Reader in = CharEncoder.from(src).readBlockSize(readBlockSize).toReader();
-//             assertEquals(IOKit.string(in).toCharArray(), src);
-//             assertEquals(in.read(), -1);
-//         }
-//     }
-//
-//     private Reader toReader(char[] src, int readBlockSize, IntVar ec) {
-//         return CharEncoder.from(src).readBlockSize(readBlockSize)
-//             .encoder(((data, end) -> {
-//                 if (end) {
-//                     ec.incrementAndGet();
-//                 }
-//                 if (!data.hasRemaining()) {
-//                     return data;
-//                 }
-//                 CharsBuilder b = new CharsBuilder();
-//                 b.append(data);
-//                 b.append((byte) '\r');
-//                 return b.toCharBuffer();
-//             })).toReader();
-//     }
-//
-//     @Test
-//     public void testToByteProcessor() {
-//         testToByteProcessor(0, 5);
-//         testToByteProcessor(100, 5);
-//         testToByteProcessor(10086, 11);
-//         testToByteProcessor(10086, 333);
-//         testToByteProcessor(10086, 22);
-//         testToByteProcessor(10086, 333);
-//         testToByteProcessor(10086, 20);
-//         testToByteProcessor(20, 40);
-//         testToByteProcessor(10086, 1);
-//     }
-//
-//     private void testToByteProcessor(int totalSize, int blockSize) {
-//         {
-//             char[] str = JieRandom.fill(new char[totalSize], 'a', 'z');
-//             byte[] bytes = new String(str).getBytes(JieChars.defaultCharset());
-//             byte[] converted = IOKit.read(
-//                 CharEncoder.from(str).readBlockSize(blockSize).toByteProcessor(JieChars.defaultCharset()).asInputStream()
-//             );
-//             assertEquals(converted, bytes);
-//         }
-//         {
-//             char[] str = JieRandom.fill(new char[totalSize], '\u4e00', '\u9fff');
-//             byte[] bytes = new String(str).getBytes(JieChars.defaultCharset());
-//             byte[] converted = IOKit.read(
-//                 CharEncoder.from(str).readBlockSize(blockSize).toByteProcessor(JieChars.defaultCharset()).asInputStream()
-//             );
-//             assertEquals(converted, bytes);
-//         }
-//     }
-//
-//     @Test
-//     public void testSpecial() throws Exception {
-//
-//         {
-//             // empty
-//             CharsBuilder bb = new CharsBuilder();
-//             long c;
-//             c = CharEncoder.from(new char[0]).writeTo(bb);
-//             assertEquals(c, 0);
-//             assertEquals(bb.toCharArray(), new char[0]);
-//             c = CharEncoder.from(new char[0]).writeTo(new char[0]);
-//             assertEquals(c, 0);
-//             assertEquals(bb.toCharArray(), new char[0]);
-//             c = CharEncoder.from(new char[0]).writeTo(CharBuffer.allocate(0));
-//             assertEquals(c, 0);
-//             assertEquals(bb.toCharArray(), new char[0]);
-//             c = CharEncoder.from(JieChars.emptyBuffer()).writeTo(bb);
-//             assertEquals(c, 0);
-//             assertEquals(bb.toCharArray(), new char[0]);
-//             c = CharEncoder.from(JieChars.emptyBuffer()).writeTo(new char[0]);
-//             assertEquals(c, 0);
-//             assertEquals(bb.toCharArray(), new char[0]);
-//             c = CharEncoder.from(JieChars.emptyBuffer()).writeTo(CharBuffer.allocate(0));
-//             assertEquals(c, 0);
-//             assertEquals(bb.toCharArray(), new char[0]);
-//             c = CharEncoder.from(new CharArrayReader(new char[0])).writeTo(bb);
-//             assertEquals(c, 0);
-//             assertEquals(bb.toCharArray(), new char[0]);
-//             c = CharEncoder.from("").writeTo(new char[0]);
-//             assertEquals(c, 0);
-//             assertEquals(bb.toCharArray(), new char[0]);
-//             c = CharEncoder.from("").writeTo(bb);
-//             assertEquals(c, 0);
-//             assertEquals(bb.toCharArray(), new char[0]);
-//         }
-//
-//         {
-//             // endOnZeroRead
-//             CharsBuilder bb = new CharsBuilder();
-//             long c;
-//             c = CharEncoder.from(new NioReader()).endOnZeroRead(true)
-//                 .encoder((data, end) -> data)
-//                 .writeTo(bb);
-//             assertEquals(c, 0);
-//             assertEquals(bb.toCharArray(), new char[0]);
-//             c = CharEncoder.from(new NioReader(new CharArrayReader(new char[0]))).endOnZeroRead(false)
-//                 .encoder((data, end) -> data)
-//                 .writeTo(bb);
-//             assertEquals(c, 0);
-//             assertEquals(bb.toCharArray(), new char[0]);
-//         }
-//
-//         {
-//             // writeable
-//             char[] src = new char[1024];
-//             char[] target = new char[1024];
-//             Arrays.fill(src, (char) 1);
-//             Arrays.fill(target, (char) 2);
-//             assertNotEquals(src, target);
-//             CharEncoder.from(src).readBlockSize(3).encoder(((data, end) -> {
-//                 assertFalse(data.isReadOnly());
-//                 while (data.hasRemaining()) {
-//                     data.put((char) 2);
-//                 }
-//                 return data;
-//             })).process();
-//             assertEquals(src, target);
-//             Arrays.fill(src, (char) 1);
-//             assertNotEquals(src, target);
-//             CharEncoder.from(CharBuffer.wrap(src)).readBlockSize(3).encoder(((data, end) -> {
-//                 assertFalse(data.isReadOnly());
-//                 while (data.hasRemaining()) {
-//                     data.put((char) 2);
-//                 }
-//                 return data;
-//             })).process();
-//             assertEquals(src, target);
-//         }
-//
-//         {
-//             // writeTo
-//             String str = "1234567890qwertyuiop[]中文";
-//             char[] strChars = str.toCharArray();
-//             assertEquals(CharEncoder.from(str).toCharArray(), strChars);
-//             assertEquals(CharEncoder.from(str).toCharBuffer(), CharBuffer.wrap(strChars));
-//             assertEquals(CharEncoder.from(str).toString(), str);
-//         }
-//
-//         // error
-//         expectThrows(IllegalArgumentException.class, () -> testProcessing(666, 0, 0));
-//         expectThrows(IORuntimeException.class, () -> CharEncoder.from((Reader) null).writeTo((Appendable) null));
-//         expectThrows(IndexOutOfBoundsException.class, () -> CharEncoder.from(new char[0], 0, 100));
-//         expectThrows(IORuntimeException.class, () -> CharEncoder.from(new char[0]).writeTo(new char[0], 0, 100));
-//         expectThrows(IORuntimeException.class, () -> CharEncoder.from(new char[0]).writeTo((Appendable) null));
-//         expectThrows(IORuntimeException.class, () -> CharEncoder.from((Reader) null).writeTo(new char[0]));
-//         Method method = CharEncoder.from(new char[0]).getClass().getDeclaredMethod("toCharReader", Object.class);
-//         invokeThrows(IORuntimeException.class, method, CharEncoder.from(new char[0]), 1);
-//         method = CharEncoder.from(new char[0]).getClass().getDeclaredMethod("toBufferOut", Object.class);
-//         invokeThrows(IORuntimeException.class, method, CharEncoder.from(new char[0]), "");
-//         expectThrows(IORuntimeException.class, () -> CharEncoder.from(new ThrowReader(0)).writeTo(new char[0]));
-//         expectThrows(IORuntimeException.class, () -> CharEncoder.from(new ThrowReader(1)).writeTo(new char[0]));
-//     }
-//
-//     private static final class NioReader extends Reader {
-//
-//         private int i = 0;
-//         private final Reader in;
-//
-//         public NioReader() {
-//             this(null);
-//         }
-//
-//         public NioReader(Reader in) {
-//             this.in = in;
-//         }
-//
-//         @Override
-//         public int read() throws IOException {
-//             return -1;
-//         }
-//
-//         @Override
-//         public int read(@NotNull char[] b, int off, int len) throws IOException {
-//             if (i++ < 3) {
-//                 return 0;
-//             }
-//             int actualLen = len <= 1 ? len : len / 2;
-//             if (in != null) {
-//                 return in.read(b, off, actualLen);
-//             } else {
-//                 Arrays.fill(b, off, off + actualLen, (char) 1);
-//                 return actualLen;
-//             }
-//         }
-//
-//         public void reset() {
-//             i = 0;
-//         }
-//
-//         @Override
-//         public void close() throws IOException {
-//         }
-//     }
-//
-//     private static final class ThrowReader extends Reader {
-//
-//         private final int e;
-//
-//         private ThrowReader(int e) {
-//             this.e = e;
-//         }
-//
-//         @Override
-//         public int read() throws IOException {
-//             return -1;
-//         }
-//
-//         @Override
-//         public int read(@NotNull char[] cbuf, int off, int len) throws IOException {
-//             if (e == 0) {
-//                 throw new IOException("e == 0");
-//             }
-//             throw new IllegalArgumentException("e = " + e);
-//         }
-//
-//         @Override
-//         public void close() throws IOException {
-//             if (e == 0) {
-//                 throw new IOException("e == 0");
-//             }
-//             throw new IllegalArgumentException("e = " + e);
-//         }
-//     }
-//
-//     private static final class NonWriterAppender implements Appendable {
-//
-//         private final StringBuilder sb = new StringBuilder();
-//
-//         @Override
-//         public Appendable append(CharSequence csq) {
-//             sb.append(csq);
-//             return this;
-//         }
-//
-//         @Override
-//         public Appendable append(CharSequence csq, int start, int end) {
-//             sb.append(csq, start, end);
-//             return this;
-//         }
-//
-//         @Override
-//         public Appendable append(char c) {
-//             sb.append(c);
-//             return this;
-//         }
-//
-//         public void reset() {
-//             sb.delete(0, sb.length());
-//         }
-//
-//         public String toString() {
-//             return sb.toString();
-//         }
-//
-//         public char[] toCharArray() {
-//             return sb.toString().toCharArray();
-//         }
-//     }
-// }
+package test.io;
+
+import org.testng.annotations.Test;
+import xyz.sunqian.common.base.chars.CharsBuilder;
+import xyz.sunqian.common.base.chars.CharsKit;
+import xyz.sunqian.common.base.value.IntVar;
+import xyz.sunqian.common.io.BufferKit;
+import xyz.sunqian.common.io.CharEncoder;
+import xyz.sunqian.common.io.CharReader;
+import xyz.sunqian.common.io.CharSegment;
+import xyz.sunqian.common.io.IOKit;
+import xyz.sunqian.common.io.IORuntimeException;
+import xyz.sunqian.test.AssertTest;
+import xyz.sunqian.test.DataTest;
+import xyz.sunqian.test.ErrorOutputStream;
+import xyz.sunqian.test.ReadOps;
+import xyz.sunqian.test.TestReader;
+
+import java.io.CharArrayReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
+import java.lang.reflect.Method;
+import java.nio.CharBuffer;
+import java.util.Arrays;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.expectThrows;
+
+public class CharEncoderTest implements DataTest, AssertTest {
+
+    @Test
+    public void testEncode() throws Exception {
+        testEncode(0, 123, 0);
+        testEncode(0, 123, 37);
+        testEncode(0, 123, 123);
+        testEncode(0, 123, 1333);
+        testEncode(1333, 123, 0);
+        testEncode(1333, 123, 37);
+        testEncode(1333, 123, 123);
+        testEncode(1333, 123, 777);
+        testEncode(123, 1333, 0);
+        testEncode(123, 1333, 37);
+        testEncode(123, 1333, 123);
+        testEncode(123, 1333, 777);
+        testEncode(123, 123, 1333);
+        testEncode(123, 77, 1333);
+        testEncode(77, 123, 1333);
+        {
+            // exceptions
+            expectThrows(IllegalArgumentException.class, () -> CharEncoder.from(new char[0]).readBlockSize(0));
+            expectThrows(IllegalArgumentException.class, () -> CharEncoder.from(new char[0]).readBlockSize(-1));
+            expectThrows(IllegalArgumentException.class, () -> CharEncoder.from(new char[0]).readLimit(-1));
+            expectThrows(IndexOutOfBoundsException.class, () -> CharEncoder.from(new char[0], 0, 1));
+            expectThrows(IndexOutOfBoundsException.class, () -> CharEncoder.from(new char[0]).encodeTo(new char[0], 1));
+            TestReader err = new TestReader(new CharArrayReader(new char[0]));
+            Writer errWriter = IOKit.newWriter(new ErrorOutputStream());
+            err.setNextOperation(ReadOps.THROW, 99);
+            expectThrows(IORuntimeException.class, () ->
+                CharEncoder.from(err).encode());
+            expectThrows(IORuntimeException.class, () ->
+                CharEncoder.from(new char[10]).encodeTo(errWriter));
+            expectThrows(IORuntimeException.class, () ->
+                CharEncoder.from(new char[10]).encodeTo(new char[1]));
+            expectThrows(IORuntimeException.class, () ->
+                CharEncoder.from(new char[10], 0, 5).encodeTo(new char[1], 0));
+            expectThrows(IORuntimeException.class, () ->
+                CharEncoder.from(new char[10]).encodeTo(CharBuffer.allocate(0)));
+            Method writeTo = CharEncoder.from(new char[0]).getClass()
+                .getDeclaredMethod("writeTo", CharBuffer.class, Object.class);
+            invokeThrows(UnsupportedOperationException.class, writeTo, CharEncoder.from(new char[0]),
+                CharBuffer.allocate(10), String.class);
+        }
+    }
+
+    private void testEncode(int totalSize, int readBlockSize, int limit) throws Exception {
+        IntVar endCount = IntVar.of(0);
+        char[] data = randomChars(totalSize);
+        char[] limitedData = Arrays.copyOf(data, dstSize(totalSize, limit));
+        char[] timesData = timesData(data);
+        char[] limitedTimesData = timesData(limitedData);
+        {
+            // size effect
+            assertEquals(
+                CharEncoder.from(data).readBlockSize(readBlockSize).encode(),
+                totalSize == 0 ? -1 : totalSize
+            );
+            assertEquals(
+                CharEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit).encode(),
+                actualSize(totalSize, limit)
+            );
+            // with handlers
+            assertEquals(
+                CharEncoder.from(data).readBlockSize(readBlockSize)
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .encode(),
+                totalSize == 0 ? -1 : totalSize
+            );
+            assertEquals(endCount.get(), 2);
+            endCount.set(0);
+            assertEquals(
+                CharEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .encode(),
+                actualSize(totalSize, limit)
+            );
+            assertEquals(endCount.get(), 2);
+            endCount.set(0);
+        }
+        {
+            // to OutputStream
+            CharsBuilder builder = new CharsBuilder();
+            assertEquals(
+                CharEncoder.from(data).readBlockSize(readBlockSize).encodeTo(builder),
+                totalSize == 0 ? -1 : totalSize
+            );
+            assertEquals(builder.toCharArray(), data);
+            builder.reset();
+            assertEquals(
+                CharEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit).encodeTo(builder),
+                actualSize(totalSize, limit)
+            );
+            assertEquals(builder.toCharArray(), limitedData);
+            builder.reset();
+            // with handlers
+            assertEquals(
+                CharEncoder.from(data).readBlockSize(readBlockSize)
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .encodeTo(builder),
+                totalSize == 0 ? -1 : totalSize
+            );
+            assertEquals(endCount.get(), 2);
+            assertEquals(builder.toCharArray(), timesData);
+            builder.reset();
+            endCount.set(0);
+            assertEquals(
+                CharEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .encodeTo(builder),
+                actualSize(totalSize, limit)
+            );
+            assertEquals(endCount.get(), 2);
+            assertEquals(builder.toCharArray(), limitedTimesData);
+            builder.reset();
+            endCount.set(0);
+        }
+        {
+            // to array
+            char[] dst = new char[totalSize];
+            assertEquals(
+                CharEncoder.from(CharBuffer.wrap(data)).readBlockSize(readBlockSize).encodeTo(dst),
+                totalSize == 0 ? -1 : totalSize
+            );
+            assertEquals(dst, data);
+            dst = new char[limitedData.length];
+            assertEquals(
+                CharEncoder.from(CharBuffer.wrap(data)).readBlockSize(readBlockSize).readLimit(limit).encodeTo(dst),
+                actualSize(totalSize, limit)
+            );
+            assertEquals(dst, limitedData);
+            // with handlers
+            dst = new char[timesData.length];
+            assertEquals(
+                CharEncoder.from(CharBuffer.wrap(data)).readBlockSize(readBlockSize)
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .encodeTo(dst),
+                totalSize == 0 ? -1 : totalSize
+            );
+            assertEquals(endCount.get(), 2);
+            assertEquals(dst, timesData);
+            endCount.set(0);
+            dst = new char[dstSize(totalSize, limit) * 4];
+            assertEquals(
+                CharEncoder.from(CharBuffer.wrap(data)).readBlockSize(readBlockSize).readLimit(limit)
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .encodeTo(dst),
+                actualSize(totalSize, limit)
+            );
+            assertEquals(endCount.get(), 2);
+            assertEquals(dst, limitedTimesData);
+            endCount.set(0);
+        }
+        {
+            // to array offset
+            char[] dst = new char[totalSize + 5];
+            assertEquals(
+                CharEncoder.from(data).readBlockSize(readBlockSize).encodeTo(dst, 5),
+                totalSize == 0 ? -1 : totalSize
+            );
+            assertEquals(Arrays.copyOfRange(dst, 5, dst.length), data);
+            dst = new char[limitedData.length + 5];
+            assertEquals(
+                CharEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit).encodeTo(dst, 5),
+                actualSize(totalSize, limit)
+            );
+            assertEquals(
+                Arrays.copyOfRange(dst, 5, dst.length),
+                limitedData
+            );
+            // with handlers
+            dst = new char[timesData.length + 5];
+            assertEquals(
+                CharEncoder.from(data).readBlockSize(readBlockSize)
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .encodeTo(dst, 5),
+                totalSize == 0 ? -1 : totalSize
+            );
+            assertEquals(endCount.get(), 2);
+            assertEquals(Arrays.copyOfRange(dst, 5, dst.length), timesData);
+            endCount.set(0);
+            dst = new char[limitedTimesData.length + 5];
+            assertEquals(
+                CharEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .encodeTo(dst, 5),
+                actualSize(totalSize, limit)
+            );
+            assertEquals(endCount.get(), 2);
+            assertEquals(
+                Arrays.copyOfRange(dst, 5, dst.length),
+                limitedTimesData
+            );
+            endCount.set(0);
+        }
+        {
+            // to buffer
+            CharBuffer dst = CharBuffer.allocate(totalSize);
+            assertEquals(
+                CharEncoder.from(new String(data)).readBlockSize(readBlockSize).encodeTo(dst),
+                totalSize == 0 ? -1 : totalSize
+            );
+            assertEquals(BufferKit.copyContent((CharBuffer) dst.flip()), data);
+            dst = CharBuffer.allocate(limitedData.length);
+            assertEquals(
+                CharEncoder.from(new String(data)).readBlockSize(readBlockSize).readLimit(limit).encodeTo(dst),
+                actualSize(totalSize, limit)
+            );
+            assertEquals(
+                BufferKit.copyContent((CharBuffer) dst.flip()),
+                limitedData
+            );
+            // with handlers
+            dst = CharBuffer.allocate(timesData.length);
+            assertEquals(
+                CharEncoder.from(new String(data), 0, data.length).readBlockSize(readBlockSize)
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .encodeTo(dst),
+                totalSize == 0 ? -1 : totalSize
+            );
+            assertEquals(endCount.get(), 2);
+            assertEquals(BufferKit.copyContent((CharBuffer) dst.flip()), timesData);
+            endCount.set(0);
+            dst = CharBuffer.allocate(limitedTimesData.length);
+            assertEquals(
+                CharEncoder.from(new String(data), 0, data.length).readBlockSize(readBlockSize).readLimit(limit)
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .encodeTo(dst),
+                actualSize(totalSize, limit)
+            );
+            assertEquals(endCount.get(), 2);
+            assertEquals(
+                BufferKit.copyContent((CharBuffer) dst.flip()),
+                limitedTimesData
+            );
+            endCount.set(0);
+        }
+    }
+
+    @Test
+    public void testAsInputStreamAndReader() throws Exception {
+        testAsInputStreamAndReader(0, 123, 0);
+        testAsInputStreamAndReader(0, 123, 77);
+        testAsInputStreamAndReader(0, 123, 123);
+        testAsInputStreamAndReader(0, 123, 1333);
+        testAsInputStreamAndReader(1333, 123, 0);
+        testAsInputStreamAndReader(1333, 123, 77);
+        testAsInputStreamAndReader(1333, 123, 123);
+        testAsInputStreamAndReader(1333, 123, 777);
+        testAsInputStreamAndReader(123, 1333, 0);
+        testAsInputStreamAndReader(123, 1333, 77);
+        testAsInputStreamAndReader(123, 1333, 123);
+        testAsInputStreamAndReader(123, 1333, 777);
+        testAsInputStreamAndReader(123, 123, 1333);
+        testAsInputStreamAndReader(123, 77, 1333);
+        testAsInputStreamAndReader(77, 123, 1333);
+        {
+            // exception
+            TestReader err = new TestReader(new CharArrayReader(new char[0]));
+            err.setNextOperation(ReadOps.THROW, 99);
+            CharReader reader = CharReader.from(err);
+            expectThrows(IOException.class, () ->
+                CharEncoder.from(reader).handler(CharEncoder.emptyHandler()).asReader().read());
+            expectThrows(IOException.class, () ->
+                CharEncoder.from(reader).handler(CharEncoder.emptyHandler()).asReader().close());
+        }
+    }
+
+    private void testAsInputStreamAndReader(int totalSize, int readBlockSize, int limit) throws Exception {
+        IntVar endCount = IntVar.of(0);
+        char[] data = randomChars(totalSize);
+        char[] limitedData = Arrays.copyOf(data, dstSize(totalSize, limit));
+        char[] timesData = timesData(data);
+        char[] limitedTimesData = timesData(limitedData);
+        {
+            assertEquals(
+                IOKit.read(CharEncoder.from(data).readBlockSize(readBlockSize).asReader()),
+                data.length == 0 ? null : data
+            );
+            assertEquals(
+                IOKit.read(CharEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit).asReader()),
+                limitedData.length == 0 ? null : limitedData
+            );
+            assertEquals(
+                IOKit.read(CharEncoder.from(data).readBlockSize(readBlockSize)
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .asReader()),
+                timesData.length == 0 ? null : timesData
+            );
+            assertEquals(endCount.get(), 2);
+            endCount.set(0);
+            assertEquals(
+                IOKit.read(CharEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .asReader()),
+                limitedTimesData.length == 0 ? null : limitedTimesData
+            );
+            assertEquals(endCount.get(), 2);
+            endCount.set(0);
+            IOImplsTest.testReader(
+                CharEncoder.from(data).readBlockSize(readBlockSize).asReader(),
+                data,
+                false, false, true
+            );
+            IOImplsTest.testReader(
+                CharEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit).asReader(),
+                limitedData,
+                false, false, true
+            );
+            IOImplsTest.testReader(
+                CharEncoder.from(data).readBlockSize(readBlockSize)
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .asReader(),
+                timesData,
+                false, true, false
+            );
+            assertEquals(endCount.get(), 2);
+            endCount.set(0);
+            IOImplsTest.testReader(
+                CharEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .handler(timesHandler(readBlockSize, endCount))
+                    .asReader(),
+                limitedTimesData,
+                false, true, false
+            );
+            assertEquals(endCount.get(), 2);
+            endCount.set(0);
+        }
+        {
+            // for empty
+            assertEquals(
+                IOKit.read(CharEncoder.from(data).readBlockSize(readBlockSize)
+                    .handler(CharEncoder.emptyHandler())
+                    .asReader()),
+                data.length == 0 ? null : data
+            );
+            IOImplsTest.testReader(
+                CharEncoder.from(data).readBlockSize(readBlockSize)
+                    .handler(CharEncoder.emptyHandler())
+                    .asReader(),
+                data,
+                false, true, false
+            );
+            IOImplsTest.testReader(
+                CharEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
+                    .handler(CharEncoder.emptyHandler())
+                    .asReader(),
+                limitedData,
+                false, true, false
+            );
+        }
+        {
+            // one by one
+            Reader in = CharEncoder.from(data).readBlockSize(readBlockSize)
+                .handler(CharEncoder.emptyHandler())
+                .asReader();
+            CharsBuilder builder = new CharsBuilder();
+            while (true) {
+                int next = in.read();
+                if (next < 0) {
+                    break;
+                }
+                builder.append(next);
+            }
+            assertEquals(builder.toCharArray(), data);
+            assertEquals(in.read(), -1);
+        }
+        {
+            // reader
+            CharSegment readData = CharEncoder.from(data).readBlockSize(readBlockSize)
+                .asCharReader().read(data.length + 1);
+            assertEquals(readData.toCharArray(), data);
+            assertTrue(readData.end());
+            readData = CharEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
+                .asCharReader().read(limitedData.length + 1);
+            assertEquals(readData.toCharArray(), limitedData);
+            assertTrue(readData.end());
+            readData = CharEncoder.from(data).readBlockSize(readBlockSize)
+                .handler(timesHandler(readBlockSize, endCount))
+                .handler(timesHandler(readBlockSize, endCount))
+                .asCharReader().read(timesData.length + 1);
+            assertEquals(readData.toCharArray(), timesData);
+            assertTrue(readData.end());
+            assertEquals(endCount.get(), 2);
+            endCount.set(0);
+            readData = CharEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
+                .handler(timesHandler(readBlockSize, endCount))
+                .handler(timesHandler(readBlockSize, endCount))
+                .asCharReader().read(limitedTimesData.length + 1);
+            assertEquals(readData.toCharArray(), limitedTimesData);
+            assertTrue(readData.end());
+            assertEquals(endCount.get(), 2);
+            endCount.set(0);
+        }
+    }
+
+    private int actualSize(int totalSize, int limit) {
+        if (totalSize <= 0 || limit <= 0) {
+            return -1;
+        }
+        return Math.min(totalSize, limit);
+    }
+
+    private int dstSize(int totalSize, int limit) {
+        if (totalSize <= 0 || limit <= 0) {
+            return 0;
+        }
+        return Math.min(totalSize, limit);
+    }
+
+    private CharEncoder.Handler timesHandler(int readBlockSize, IntVar endCount) {
+        return CharEncoder.newFixedSizeHandler((d, e) -> {
+            if (e) {
+                endCount.incrementAndGet();
+            }
+            CharBuffer ret = CharBuffer.allocate(d.remaining() * 2);
+            while (d.hasRemaining()) {
+                char next = d.get();
+                ret.put(next);
+                ret.put(next);
+            }
+            ret.flip();
+            return ret;
+        }, readBlockSize + 1);
+    }
+
+    private char[] timesData(char[] data) {
+        char[] ret = new char[data.length * 4];
+        for (int i = 0; i < data.length; i++) {
+            ret[i * 4] = data[i];
+            ret[i * 4 + 1] = data[i];
+            ret[i * 4 + 2] = data[i];
+            ret[i * 4 + 3] = data[i];
+        }
+        return ret;
+    }
+
+    @Test
+    public void testResidualSizeHandler() throws Exception {
+        testResidualSizeHandler(0, 123, 37);
+        testResidualSizeHandler(0, 123, 123);
+        testResidualSizeHandler(0, 123, 1333);
+        testResidualSizeHandler(1333, 123, 37);
+        testResidualSizeHandler(1333, 123, 123);
+        testResidualSizeHandler(1333, 123, 777);
+        testResidualSizeHandler(123, 1333, 37);
+        testResidualSizeHandler(123, 1333, 123);
+        testResidualSizeHandler(123, 1333, 777);
+        testResidualSizeHandler(123, 123, 1333);
+        testResidualSizeHandler(123, 77, 1333);
+        testResidualSizeHandler(77, 123, 1333);
+        testResidualSizeHandler(256, 64, 32);
+        testResidualSizeHandler(256, 32, 64);
+        {
+            // exception
+            expectThrows(IllegalArgumentException.class, () ->
+                CharEncoder.from(new char[0])
+                    .handler(CharEncoder.newFixedSizeHandler(CharEncoder.emptyHandler(), -1)));
+            expectThrows(IllegalArgumentException.class, () ->
+                CharEncoder.from(new char[0])
+                    .handler(CharEncoder.newFixedSizeHandler(CharEncoder.emptyHandler(), 0)));
+            expectThrows(IllegalArgumentException.class, () ->
+                CharEncoder.from(new char[0])
+                    .handler(CharEncoder.newMultipleSizeHandler(CharEncoder.emptyHandler(), -1)));
+            expectThrows(IllegalArgumentException.class, () ->
+                CharEncoder.from(new char[0])
+                    .handler(CharEncoder.newMultipleSizeHandler(CharEncoder.emptyHandler(), 0)));
+        }
+    }
+
+    private void testResidualSizeHandler(int totalSize, int readBlockSize, int blockSize) throws Exception {
+        IntVar endCount = IntVar.of(0);
+        char[] data = randomChars(totalSize);
+        CharsBuilder builder = new CharsBuilder();
+        {
+            // FixedSizeHandler
+            assertEquals(
+                CharEncoder.from(data).readBlockSize(readBlockSize)
+                    .handler(CharEncoder.newFixedSizeHandler((d, e) -> {
+                        if (e) {
+                            endCount.incrementAndGet();
+                        } else {
+                            assertEquals(d.remaining(), blockSize);
+                        }
+                        return d;
+                    }, blockSize))
+                    .encodeTo(builder),
+                totalSize == 0 ? -1 : totalSize
+            );
+            assertEquals(builder.toCharArray(), data);
+            assertEquals(endCount.get(), 1);
+            builder.reset();
+            endCount.set(0);
+        }
+        {
+            // MultipleSizeHandler
+            assertEquals(
+                CharEncoder.from(data).readBlockSize(readBlockSize)
+                    .handler(CharEncoder.newMultipleSizeHandler((d, e) -> {
+                        if (e) {
+                            endCount.incrementAndGet();
+                        } else {
+                            assertEquals(d.remaining() % blockSize, 0);
+                        }
+                        return d;
+                    }, blockSize))
+                    .encodeTo(builder),
+                totalSize == 0 ? -1 : totalSize
+            );
+            assertEquals(builder.toCharArray(), data);
+            assertEquals(endCount.get(), 1);
+            builder.reset();
+            endCount.set(0);
+        }
+    }
+
+    @Test
+    public void testBufferedHandler() throws Exception {
+        testBufferedHandler(0, 123);
+        testBufferedHandler(123, 123);
+        testBufferedHandler(123, 1234);
+        testBufferedHandler(123, 1);
+        testBufferedHandler(123, 2);
+        testBufferedHandler(123, 3);
+        testBufferedHandler(128, 16);
+    }
+
+    private void testBufferedHandler(int totalSize, int readBlockSize) throws Exception {
+        IntVar endCount = IntVar.of(0);
+        char[] data = randomChars(totalSize);
+        CharsBuilder builder = new CharsBuilder();
+        {
+            // BufferedHandler
+            assertEquals(
+                CharEncoder.from(data).readBlockSize(readBlockSize)
+                    .handler(CharEncoder.newBufferedHandler((d, e) -> {
+                        if (e) {
+                            endCount.incrementAndGet();
+                            return d;
+                        }
+                        return null;
+                    }))
+                    .encodeTo(builder),
+                totalSize == 0 ? -1 : totalSize
+            );
+            assertEquals(builder.toCharArray(), data);
+            assertEquals(endCount.get(), 1);
+            builder.reset();
+            endCount.set(0);
+        }
+    }
+
+    @Test
+    public void testTo() throws Exception {
+        testTo(0, 123);
+        testTo(123, 123);
+        testTo(123, 1234);
+        testTo(123, 1);
+        testTo(123, 2);
+        testTo(123, 3);
+        testTo(128, 16);
+    }
+
+    private void testTo(int totalSize, int readBlockSize) throws Exception {
+        IntVar endCount = IntVar.of(0);
+        char[] data = randomChars(totalSize, 'a', 'z');
+        String str = new String(data);
+        {
+            // toArray
+            assertEquals(
+                CharEncoder.from(data).readBlockSize(readBlockSize)
+                    .handler(CharEncoder.newBufferedHandler((d, e) -> {
+                        if (e) {
+                            endCount.incrementAndGet();
+                            return d;
+                        }
+                        return null;
+                    }))
+                    .toCharArray(),
+                data
+            );
+            assertEquals(endCount.get(), 1);
+            endCount.set(0);
+        }
+        {
+            // toArray
+            assertEquals(
+                CharEncoder.from(data).readBlockSize(readBlockSize)
+                    .handler(CharEncoder.newBufferedHandler((d, e) -> {
+                        if (e) {
+                            endCount.incrementAndGet();
+                            return d;
+                        }
+                        return null;
+                    }))
+                    .toCharBuffer(),
+                CharBuffer.wrap(data)
+            );
+            assertEquals(endCount.get(), 1);
+            endCount.set(0);
+        }
+        {
+            // toArray
+            assertEquals(
+                CharEncoder.from(data).readBlockSize(readBlockSize)
+                    .handler(CharEncoder.newBufferedHandler((d, e) -> {
+                        if (e) {
+                            endCount.incrementAndGet();
+                            return d;
+                        }
+                        return null;
+                    }))
+                    .toString(),
+                str
+            );
+            assertEquals(endCount.get(), 1);
+            endCount.set(0);
+        }
+        {
+            // toEncoder
+            assertEquals(
+                CharEncoder.from(data).readBlockSize(readBlockSize)
+                    .handler(CharEncoder.newBufferedHandler((d, e) -> {
+                        if (e) {
+                            endCount.incrementAndGet();
+                            return d;
+                        }
+                        return null;
+                    }))
+                    .toByteEncoder(CharsKit.defaultCharset())
+                    .toString(CharsKit.defaultCharset()),
+                str
+            );
+            assertEquals(endCount.get(), 1);
+            endCount.set(0);
+        }
+    }
+}

@@ -109,8 +109,8 @@ final class ByteEncoderImpl implements ByteEncoder {
 
     @Override
     public long encodeTo(byte @Nonnull [] dst, int off) throws IndexOutOfBoundsException, IORuntimeException {
+        OutputStream out = IOKit.newOutputStream(dst, off, dst.length - off);
         try {
-            OutputStream out = IOKit.newOutputStream(dst, off, dst.length - off);
             if (handlers == null) {
                 ByteReader reader = readLimit < 0 ? src : src.limit(readLimit);
                 return reader.readTo(out);
@@ -375,12 +375,12 @@ final class ByteEncoderImpl implements ByteEncoder {
                     residual.flip();
                     if (end) {
                         if (data.hasRemaining()) {
-                            previousResult = handler.handle(residual, false);
+                            previousResult = handler.handle(BufferKit.copy(residual), false);
                         } else {
                             return handler.handle(residual, true);
                         }
                     } else {
-                        previousResult = handler.handle(residual, false);
+                        previousResult = handler.handle(BufferKit.copy(residual), false);
                     }
                     residual.clear();
                 }
@@ -500,7 +500,7 @@ final class ByteEncoderImpl implements ByteEncoder {
                 multiple,
                 end && multipleSize == remainingSize
             );
-            multipleResult.set(0, multipleRet);
+            multipleResult.add(multipleRet);
             return multipleResult;
         }
     }
