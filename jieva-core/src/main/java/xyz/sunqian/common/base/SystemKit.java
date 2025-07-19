@@ -7,11 +7,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * System utilities
+ * Utilities for System.
  *
- * @author fredsuvn
+ * @author sunqian
  */
-public class JieSystem {
+public class SystemKit {
 
     /**
      * Key of system property: java.version.
