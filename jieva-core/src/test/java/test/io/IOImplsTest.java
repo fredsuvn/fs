@@ -59,6 +59,7 @@ public class IOImplsTest implements DataTest {
             // error
             RandomAccessFile raf = new FakeFile(new byte[0]);
             raf.close();
+            expectThrows(IllegalArgumentException.class, () -> IOKit.newInputStream(raf, -1));
             expectThrows(IORuntimeException.class, () -> IOKit.newInputStream(raf, 0));
         }
         {
@@ -88,7 +89,7 @@ public class IOImplsTest implements DataTest {
             TestInputStream tin = new TestInputStream(new ByteArrayInputStream(new byte[0]));
             tin.setNextOperation(ReadOps.THROW, 99);
             ByteReader reader = ByteReader.from(tin);
-            InputStream in = reader.asInputStream();
+            InputStream in = IOKit.newInputStream(reader);
             expectThrows(IOException.class, in::read);
             expectThrows(IOException.class, () -> in.read(new byte[10]));
             expectThrows(IOException.class, () -> in.skip(1));
@@ -389,7 +390,7 @@ public class IOImplsTest implements DataTest {
             TestReader tin = new TestReader(new CharArrayReader(new char[0]));
             tin.setNextOperation(ReadOps.THROW, 99);
             CharReader reader = CharReader.from(tin);
-            Reader in = reader.asReader();
+            Reader in = IOKit.newReader(reader);
             expectThrows(IOException.class, in::read);
             expectThrows(IOException.class, () -> in.read(new char[10]));
             expectThrows(IOException.class, () -> in.skip(1));
@@ -705,20 +706,24 @@ public class IOImplsTest implements DataTest {
         testOutputStream(256);
         testOutputStream(512);
         testOutputStream(1024);
-
-        // null
-        testOutputStream(IOKit.nullOutputStream(), new byte[1024], false, false);
-
-        // error
-        RandomAccessFile raf = new FakeFile(new byte[0]);
-        raf.close();
-        expectThrows(IORuntimeException.class, () -> IOKit.newOutputStream(raf, 0));
-
-        // limited
-        expectThrows(IOException.class, () ->
-            IOKit.limitedOutputStream(new BytesBuilder(), 0).write(1));
-        expectThrows(IOException.class, () ->
-            IOKit.limitedOutputStream(new BytesBuilder(), 0).write(new byte[1]));
+        {
+            // null
+            testOutputStream(IOKit.nullOutputStream(), new byte[1024], false, false);
+        }
+        {
+            // error
+            RandomAccessFile raf = new FakeFile(new byte[0]);
+            raf.close();
+            expectThrows(IllegalArgumentException.class, () -> IOKit.newOutputStream(raf, -1));
+            expectThrows(IORuntimeException.class, () -> IOKit.newOutputStream(raf, 0));
+        }
+        {
+            // limited
+            expectThrows(IOException.class, () ->
+                IOKit.limitedOutputStream(new BytesBuilder(), 0).write(1));
+            expectThrows(IOException.class, () ->
+                IOKit.limitedOutputStream(new BytesBuilder(), 0).write(new byte[1]));
+        }
     }
 
     private void testOutputStream(int dataSize) throws Exception {

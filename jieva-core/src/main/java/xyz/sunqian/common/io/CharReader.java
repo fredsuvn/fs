@@ -346,6 +346,6 @@ public interface CharReader extends RuntimeCloseable {
      * @return a {@link Reader} represents this reader. Its content and status are shared with this reader
      */
     default @Nonnull Reader asReader() {
-        return IOImpls.reader(this);
+        return IOKit.newReader(this);
     }
 }

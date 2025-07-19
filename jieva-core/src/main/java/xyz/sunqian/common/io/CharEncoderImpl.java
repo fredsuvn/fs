@@ -45,27 +45,6 @@ public class CharEncoderImpl implements CharEncoder {
     }
 
     @Override
-    public long encode() throws IORuntimeException {
-        try {
-            if (handlers == null) {
-                CharReader reader = readLimit < 0 ? src : src.limit(readLimit);
-                long count = 0;
-                while (true) {
-                    CharSegment block = reader.read(readBlockSize);
-                    count += block.data().remaining();
-                    if (block.end()) {
-                        break;
-                    }
-                }
-                return count == 0L ? -1 : count;
-            }
-            return encode(null, handlers);
-        } catch (Exception e) {
-            throw new IORuntimeException(e);
-        }
-    }
-
-    @Override
     public long encodeTo(@Nonnull Appendable dst) throws IORuntimeException {
         try {
             if (handlers == null) {
@@ -125,7 +104,7 @@ public class CharEncoderImpl implements CharEncoder {
         return new String(toCharArray());
     }
 
-    private long encode(@Nullable Object dst, @Nonnull List<@Nonnull Handler> handlers) throws Exception {
+    private long encode(@Nonnull Object dst, @Nonnull List<@Nonnull Handler> handlers) throws Exception {
         CharReader reader = readLimit < 0 ? src : src.limit(readLimit);
         long count = 0;
         while (true) {
@@ -139,7 +118,7 @@ public class CharEncoderImpl implements CharEncoder {
                 }
                 data = handler.handle(data, end);
             }
-            if (data != null && dst != null) {
+            if (data != null) {
                 writeTo(data, dst);
             }
             if (end) {

@@ -18,9 +18,11 @@
  *     <li>{@link xyz.sunqian.common.io.CharReader}</li>
  *     <li>{@link xyz.sunqian.common.io.ByteSegment}</li>
  *     <li>{@link xyz.sunqian.common.io.CharSegment}</li>
+ *     <li>{@link xyz.sunqian.common.io.ByteEncoder}</li>
+ *     <li>{@link xyz.sunqian.common.io.CharEncoder}</li>
  * </ul>
  * <p>
- * Convenient implementations:
+ * Convenient Implementations:
  * <ul>
  *     <li>{@link xyz.sunqian.common.io.DoReadStream}</li>
  *     <li>{@link xyz.sunqian.common.io.DoReadReader}</li>

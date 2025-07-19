@@ -371,6 +371,6 @@ public interface ByteReader extends RuntimeCloseable {
      * @return an {@link InputStream} represents this reader. Its content and status are shared with this reader
      */
     default @Nonnull InputStream asInputStream() {
-        return IOImpls.inputStream(this);
+        return IOKit.newInputStream(this);
     }
 }

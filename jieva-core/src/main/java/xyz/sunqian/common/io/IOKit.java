@@ -38,21 +38,6 @@ public class IOKit {
     }
 
     /**
-     * Determines the recommended buffer size based on the given length and the given buffer size, and its logic is as
-     * follows:
-     * <pre>{@code
-     * return len < 0 ? bufSize : (int) Math.min(len, bufSize);
-     * }</pre>
-     *
-     * @param len     the given length
-     * @param bufSize the given buffer size
-     * @return the recommended buffer size based on the given length and the given buffer size
-     */
-    public static int bufferSize(long len, int bufSize) {
-        return len < 0 ? bufSize : (int) Math.min(len, bufSize);
-    }
-
-    /**
      * Reads all data from the input stream into a new array, continuing until reaches the end of the input stream, and
      * returns the array.
      * <p>
@@ -826,11 +811,12 @@ public class IOKit {
      * @param raf the given random access file
      * @param off the specified file pointer offset
      * @return the given random access file as a new {@link InputStream}
-     * @throws IORuntimeException if an I/O error occurs
+     * @throws IllegalArgumentException if the offset is negative
+     * @throws IORuntimeException       if an I/O error occurs
      */
     public static @Nonnull InputStream newInputStream(
         @Nonnull RandomAccessFile raf, long off
-    ) throws IORuntimeException {
+    ) throws IllegalArgumentException, IORuntimeException {
         return IOImpls.inputStream(raf, off);
     }
 
@@ -867,6 +853,24 @@ public class IOKit {
      */
     public static @Nonnull InputStream newInputStream(@Nonnull Reader reader, @Nonnull Charset charset) {
         return IOImpls.inputStream(reader, charset);
+    }
+
+    /**
+     * Wraps the given reader as a new {@link InputStream}. Note this method returns a new wrapper object, it is not
+     * equivalent to {@link ByteReader#asInputStream()}.
+     * <p>
+     * The result's support is as follows:
+     * <ul>
+     *     <li>mark/reset: based on the given reader;</li>
+     *     <li>close: closes the reader;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
+     *
+     * @param reader the given reader
+     * @return the given reader as a new {@link InputStream}
+     */
+    public static @Nonnull InputStream newInputStream(@Nonnull ByteReader reader) {
+        return IOImpls.inputStream(reader);
     }
 
     /**
@@ -1032,6 +1036,24 @@ public class IOKit {
     }
 
     /**
+     * Wraps the given reader as a new {@link Reader}. Note this method returns a new wrapper object, it is not
+     * equivalent to {@link CharReader#asReader()}.
+     * <p>
+     * The result's support is as follows:
+     * <ul>
+     *     <li>mark/reset: based on the given reader;</li>
+     *     <li>close: closes the reader;</li>
+     *     <li>thread safety: no;</li>
+     * </ul>
+     *
+     * @param reader the given reader
+     * @return the given reader as a new {@link Reader}
+     */
+    public static @Nonnull Reader newReader(@Nonnull CharReader reader) {
+        return IOImpls.reader(reader);
+    }
+
+    /**
      * Wraps the given reader as a new {@link Reader} of which readable number is limited to the specified limit.
      * <p>
      * The result's support is as follows:
@@ -1134,11 +1156,12 @@ public class IOKit {
      * @param raf the given random access file
      * @param off the specified file pointer offset
      * @return the given random access file as a new {@link OutputStream}
-     * @throws IORuntimeException if an I/O error occurs
+     * @throws IllegalArgumentException if the offset is negative
+     * @throws IORuntimeException       if an I/O error occurs
      */
     public static @Nonnull OutputStream newOutputStream(
         @Nonnull RandomAccessFile raf, long off
-    ) throws IORuntimeException {
+    ) throws IllegalArgumentException, IORuntimeException {
         return IOImpls.outputStream(raf, off);
     }
 

@@ -244,12 +244,17 @@ public interface ByteEncoder {
      * <p>
      * The position of the data source, if any, will be incremented by the actual read number.
      * <p>
-     * This is a terminal method, and it is typically used to produce side effects.
+     * This is a terminal method, and it is typically used to produce side effects. This method is equivalent to:
+     * <pre>{@code
+     * return encodeTo(IOKit.nullOutputStream());
+     * }</pre>
      *
      * @return the actual number of bytes read, or {@code -1} if reaches the end of the data source and no data is read
      * @throws IORuntimeException if an I/O error occurs
      */
-    long encode() throws IORuntimeException;
+    default long encode() throws IORuntimeException {
+        return encodeTo(IOKit.nullOutputStream());
+    }
 
     /**
      * Starts data encoding, writes the encoding result to the specified destination, and returns the actual number of
