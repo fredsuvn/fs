@@ -2,7 +2,7 @@ package test.base.process;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.base.JieSystem;
+import xyz.sunqian.common.base.SystemKit;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.exception.AwaitingException;
 import xyz.sunqian.common.base.process.JieProcess;
@@ -27,7 +27,7 @@ public class ProcessTest {
     @Test
     public void testProcess() {
         {
-            if (JieSystem.isWindows()) {
+            if (SystemKit.isWindows()) {
                 ProcessReceipt receipt = JieProcess.start("cmd.exe", "/c", "dir");
                 receipt.getProcess().destroyForcibly();
             } else {
@@ -36,7 +36,7 @@ public class ProcessTest {
             }
         }
         {
-            if (JieSystem.isWindows()) {
+            if (SystemKit.isWindows()) {
                 ProcessReceipt receipt = JieProcess.start("cmd.exe /c dir");
                 receipt.getProcess().destroyForcibly();
             } else {

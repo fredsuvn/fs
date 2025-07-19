@@ -1,7 +1,7 @@
 package test.base.chars;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.JieSystem;
+import xyz.sunqian.common.base.SystemKit;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.test.AssertTest;
 
@@ -43,9 +43,9 @@ public class CharsTest implements AssertTest {
             Field nc = nativesClass.getDeclaredField("NATIVE_CHARSET");
             nc.setAccessible(true);
             assertEquals(nativeCharset, nc.get(null));
-            Charset fileCharset = CharsKit.charset(System.getProperty(JieSystem.KEY_OF_FILE_ENCODING));
+            Charset fileCharset = CharsKit.charset(System.getProperty(SystemKit.KEY_OF_FILE_ENCODING));
             Method search = nativesClass.getDeclaredMethod("search", String[].class);
-            invokeEquals(fileCharset, search, null, (Object) new String[]{"UTF888", JieSystem.KEY_OF_FILE_ENCODING});
+            invokeEquals(fileCharset, search, null, (Object) new String[]{"UTF888", SystemKit.KEY_OF_FILE_ENCODING});
             invokeEquals(null, search, null, (Object) new String[]{"UTF888"});
         }
     }

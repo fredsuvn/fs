@@ -3,7 +3,7 @@ package test.base;
 import org.testng.annotations.Test;
 import test.utils.Utils;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.base.JieSystem;
+import xyz.sunqian.common.base.SystemKit;
 import xyz.sunqian.common.base.exception.UnknownArrayTypeException;
 import xyz.sunqian.common.base.process.ProcessReceipt;
 import xyz.sunqian.test.AssertTest;
@@ -270,7 +270,7 @@ public class JieTest implements AssertTest {
         {
             // process
             {
-                if (JieSystem.isWindows()) {
+                if (SystemKit.isWindows()) {
                     ProcessReceipt receipt = Jie.process("cmd.exe", "/c", "dir");
                     receipt.getProcess().destroyForcibly();
                 } else {
@@ -279,7 +279,7 @@ public class JieTest implements AssertTest {
                 }
             }
             {
-                if (JieSystem.isWindows()) {
+                if (SystemKit.isWindows()) {
                     ProcessReceipt receipt = Jie.process("cmd.exe /c dir");
                     receipt.getProcess().destroyForcibly();
                 } else {
