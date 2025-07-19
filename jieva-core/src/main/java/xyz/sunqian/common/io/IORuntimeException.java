@@ -7,7 +7,8 @@ import xyz.sunqian.common.base.exception.JieRuntimeException;
 import java.io.IOException;
 
 /**
- * Unchecked version for {@link IOException}.
+ * This runtime class is used to wrap {@link IOException}, using {@link #getCause()} to get the cause. It can be used as
+ * an unchecked version of {@link IOException}.
  *
  * @author sunqian
  */

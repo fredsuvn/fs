@@ -41,7 +41,7 @@ public interface AssertTest {
     default <T extends Throwable> @Nonnull T invokeThrows(
         @Nonnull Class<T> exception,
         @Nonnull Method method,
-        @Nonnull Object inst,
+        @Nullable Object inst,
         @Nullable Object @Nonnull ... args
     ) {
         method.setAccessible(true);
