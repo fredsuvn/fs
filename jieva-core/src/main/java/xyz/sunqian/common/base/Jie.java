@@ -11,7 +11,7 @@ import xyz.sunqian.common.base.function.VoidCallable;
 import xyz.sunqian.common.base.process.JieProcess;
 import xyz.sunqian.common.base.process.ProcessReceipt;
 import xyz.sunqian.common.base.string.StringKit;
-import xyz.sunqian.common.base.thread.JieThread;
+import xyz.sunqian.common.base.thread.ThreadKit;
 import xyz.sunqian.common.collect.ArrayKit;
 import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.collect.MapKit;
@@ -903,36 +903,36 @@ public class Jie {
     /**
      * Sleeps the current thread until it is interrupted.
      * <p>
-     * This method is a shortcut to the {@link JieThread#sleep()}.
+     * This method is a shortcut to the {@link ThreadKit#sleep()}.
      *
      * @throws AwaitingException if the current thread is interrupted or an error occurs while sleeping
      */
     public static void sleep() throws AwaitingException {
-        JieThread.sleep();
+        ThreadKit.sleep();
     }
 
     /**
      * Sleeps the current thread for the specified milliseconds.
      * <p>
-     * This method is a shortcut to the {@link JieThread#sleep(long)}.
+     * This method is a shortcut to the {@link ThreadKit#sleep(long)}.
      *
      * @param millis the specified milliseconds
      * @throws AwaitingException if the current thread is interrupted or an error occurs while sleeping
      */
     public static void sleep(long millis) throws AwaitingException {
-        JieThread.sleep(millis);
+        ThreadKit.sleep(millis);
     }
 
     /**
      * Sleeps the current thread for the specified duration.
      * <p>
-     * This method is a shortcut to the {@link JieThread#sleep(Duration)}.
+     * This method is a shortcut to the {@link ThreadKit#sleep(Duration)}.
      *
      * @param duration the specified duration
      * @throws AwaitingException if the current thread is interrupted or an error occurs while sleeping
      */
     public static void sleep(@Nonnull Duration duration) throws AwaitingException {
-        JieThread.sleep(duration);
+        ThreadKit.sleep(duration);
     }
 
     /**
@@ -954,13 +954,13 @@ public class Jie {
      * Note this method may cause high CPU usage. When the task determines to return {@code false}, consider adding some
      * measures (such as sleep the current thread in a very short time) to avoid it.
      * <p>
-     * This method is a shortcut to the {@link JieThread#until(BooleanCallable)}.
+     * This method is a shortcut to the {@link ThreadKit#until(BooleanCallable)}.
      *
      * @param task the given task to be executed
      * @throws AwaitingException if an error occurs while awaiting
      */
     public static void until(@Nonnull BooleanCallable task) throws AwaitingException {
-        JieThread.until(task);
+        ThreadKit.until(task);
     }
 
     //---------------- Thread End ----------------//

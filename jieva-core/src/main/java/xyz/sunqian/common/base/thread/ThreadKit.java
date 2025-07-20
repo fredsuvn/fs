@@ -12,7 +12,7 @@ import java.time.Duration;
  *
  * @author sunqian
  */
-public class JieThread {
+public class ThreadKit {
 
     /**
      * Sleeps the current thread until it is interrupted.

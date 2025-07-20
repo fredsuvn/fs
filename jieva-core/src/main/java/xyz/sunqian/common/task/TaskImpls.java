@@ -7,7 +7,7 @@ import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.AwaitingException;
 import xyz.sunqian.common.base.exception.WrappedException;
 import xyz.sunqian.common.base.function.VoidCallable;
-import xyz.sunqian.common.base.thread.JieThread;
+import xyz.sunqian.common.base.thread.ThreadKit;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -189,7 +189,7 @@ final class TaskImpls {
         @Override
         public void await() throws AwaitingException {
             Jie.uncheck(
-                () -> JieThread.until(
+                () -> ThreadKit.until(
                     () -> awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS)
                 ),
                 AwaitingException::new
