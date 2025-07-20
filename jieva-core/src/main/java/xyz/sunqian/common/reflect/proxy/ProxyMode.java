@@ -29,9 +29,9 @@ public enum ProxyMode {
     }
 
     /**
-     * Returns a new generator represented by this mode.
+     * Returns a new proxy class generator represented by this mode.
      *
-     * @return a new generator represented by this mode
+     * @return a new proxy class generator represented by this mode
      */
     public @Nonnull ProxyClassGenerator newGenerator() {
         return supplier.get();
