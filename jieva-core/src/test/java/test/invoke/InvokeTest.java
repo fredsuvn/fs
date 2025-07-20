@@ -6,7 +6,7 @@ import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.invoke.InvocationException;
 import xyz.sunqian.common.invoke.InvocationMode;
-import xyz.sunqian.common.invoke.JieInvoke;
+import xyz.sunqian.common.invoke.InvokeKit;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -116,7 +116,7 @@ public class InvokeTest {
             );
             MethodHandle handle = MethodHandles.lookup().unreflect(method);
             assertEquals(
-                JieInvoke.invokeStatic(handle, args),
+                InvokeKit.invokeStatic(handle, args),
                 method.invoke(null, args)
             );
             Invocable recommendedInvoker = Invocable.of(method);
@@ -139,7 +139,7 @@ public class InvokeTest {
             );
             MethodHandle handle = MethodHandles.lookup().unreflect(method);
             assertEquals(
-                JieInvoke.invokeInstance(handle, inst, args),
+                InvokeKit.invokeInstance(handle, inst, args),
                 method.invoke(inst, args)
             );
             Invocable recommendedInvoker = Invocable.of(method);

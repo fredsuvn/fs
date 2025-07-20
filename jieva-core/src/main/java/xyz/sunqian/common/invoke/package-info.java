@@ -8,7 +8,7 @@
  * <p>
  * Static Utilities:
  * <ul>
- *     <li>{@link xyz.sunqian.common.invoke.JieInvoke}</li>
+ *     <li>{@link xyz.sunqian.common.invoke.InvokeKit}</li>
  * </ul>
  */
 package xyz.sunqian.common.invoke;

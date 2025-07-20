@@ -10,7 +10,7 @@ import java.lang.invoke.MethodHandle;
  *
  * @author sunqian
  */
-public class JieInvoke {
+public class InvokeKit {
 
     /**
      * Invokes the {@link MethodHandle} as an instance method, with the specified instance and invocation arguments.
