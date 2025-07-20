@@ -1,6 +1,7 @@
 package xyz.sunqian.common.io.file;
 
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.io.IORuntimeException;
 
 import java.io.File;
@@ -11,11 +12,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.List;
 
 /**
  * This interface represents a file reference used to retrieve information and manipulate the file.
@@ -110,6 +113,78 @@ public interface FileRef {
     }
 
     /**
+     * Returns all bytes of the referenced file.
+     *
+     * @return a new array contains all bytes of the referenced file
+     * @throws IORuntimeException if any error occurs
+     */
+    default byte @Nonnull [] readBytes() throws IORuntimeException {
+        try {
+            return Files.readAllBytes(getPath());
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    /**
+     * Returns string from the referenced file with the {@link CharsKit#defaultCharset()}.
+     *
+     * @return a string from the referenced file with the {@link CharsKit#defaultCharset()}
+     * @throws IORuntimeException if any error occurs
+     */
+    default @Nonnull String readString() throws IORuntimeException {
+        return readString(CharsKit.defaultCharset());
+    }
+
+    /**
+     * Returns string from the referenced file with the specified charset.
+     *
+     * @param charset the specified charset
+     * @return a string from the referenced file with the specified charset
+     * @throws IORuntimeException if any error occurs
+     */
+    default @Nonnull String readString(@Nonnull Charset charset) throws IORuntimeException {
+        return new String(readBytes(), charset);
+    }
+
+    /**
+     * Returns all lines from the referenced file with the {@link CharsKit#defaultCharset()}. This method recognizes the
+     * following as line separators:
+     * <ul>
+     *     <li>'\r\n'</li>
+     *     <li>'\n'</li>
+     *     <li>'\r'</li>
+     * </ul>
+     *
+     * @return all lines from the referenced file with the {@link CharsKit#defaultCharset()}
+     * @throws IORuntimeException if any error occurs
+     */
+    default @Nonnull List<String> readLines() throws IORuntimeException {
+        return readLines(CharsKit.defaultCharset());
+    }
+
+    /**
+     * Returns all lines from the referenced file with the specified charset. This method recognizes the following as
+     * line separators:
+     * <ul>
+     *     <li>'\r\n'</li>
+     *     <li>'\n'</li>
+     *     <li>'\r'</li>
+     * </ul>
+     *
+     * @param charset the specified charset
+     * @return all lines from the referenced file with the specified charset
+     * @throws IORuntimeException if any error occurs
+     */
+    default @Nonnull List<String> readLines(@Nonnull Charset charset) throws IORuntimeException {
+        try {
+            return Files.readAllLines(getPath(), charset);
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    /**
      * Returns a new {@link FileInputStream} for reading the referenced file.
      *
      * @return a new {@link FileInputStream} for reading the referenced file
@@ -198,7 +273,7 @@ public interface FileRef {
      * @return a new {@link FileChannel} for operating the referenced file
      * @throws IORuntimeException if any error occurs
      */
-    default @Nonnull FileChannel getFileChannel(
+    default @Nonnull FileChannel newFileChannel(
         @Nonnull OpenOption @Nonnull ... options
     ) throws IORuntimeException {
         try {
