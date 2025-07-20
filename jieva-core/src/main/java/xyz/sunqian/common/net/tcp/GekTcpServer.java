@@ -7,7 +7,7 @@ import xyz.sunqian.common.collect.CollectKit;
 import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IOKit;
-import xyz.sunqian.common.net.GekNetException;
+import xyz.sunqian.common.net.NetException;
 import xyz.sunqian.common.net.GekNetServerException;
 import xyz.sunqian.common.net.GekServerStates;
 import xyz.sunqian.common.net.data.GekData;
@@ -150,7 +150,7 @@ public interface GekTcpServer extends GekTcpEndpoint {
                 this.address = InetAddress.getByName(hostName);
                 return this;
             } catch (UnknownHostException e) {
-                throw new GekNetException(e);
+                throw new NetException(e);
             }
         }
 
@@ -266,24 +266,24 @@ public interface GekTcpServer extends GekTcpEndpoint {
                 this.serverHandler = Jie.nonnull(builder.serverHandler, EMPTY_SERVER_HANDLER);
                 this.channelHandlers = ListKit.toList(builder.channelHandlers);
                 if (channelHandlers.isEmpty()) {
-                    throw new GekNetException("Channel handlers are empty.");
+                    throw new NetException("Channel handlers are empty.");
                 }
                 this.executor = builder.executor;
                 if (executor == null) {
-                    throw new GekNetException("Executor is null.");
+                    throw new NetException("Executor is null.");
                 }
                 this.socketConfig = builder.socketConfig;
                 this.bufferGenerator = Jie.nonnull(builder.bufferGenerator, ByteBuffer::allocate);
                 this.channelBufferSize = builder.channelBufferSize;
                 if (channelBufferSize <= 0) {
-                    throw new GekNetException("Channel buffer size must > 0.");
+                    throw new NetException("Channel buffer size must > 0.");
                 }
             }
 
             @Override
             public synchronized void start(boolean block) {
                 if (!state.isCreated()) {
-                    throw new GekNetException("The server has been opened or closed.");
+                    throw new NetException("The server has been opened or closed.");
                 }
                 start0();
                 state.open();
@@ -298,7 +298,7 @@ public interface GekTcpServer extends GekTcpEndpoint {
             @Override
             public InetAddress getAddress() {
                 if (serverSocket == null) {
-                    throw new GekNetException("Server has not been initialized.");
+                    throw new NetException("Server has not been initialized.");
                 }
                 return serverSocket.getInetAddress();
             }
@@ -306,7 +306,7 @@ public interface GekTcpServer extends GekTcpEndpoint {
             @Override
             public int getPort() {
                 if (serverSocket == null) {
-                    throw new GekNetException("Server has not been initialized.");
+                    throw new NetException("Server has not been initialized.");
                 }
                 return serverSocket.getLocalPort();
             }
@@ -314,7 +314,7 @@ public interface GekTcpServer extends GekTcpEndpoint {
             @Override
             public SocketAddress getSocketAddress() {
                 if (serverSocket == null) {
-                    throw new GekNetException("Server has not been initialized.");
+                    throw new NetException("Server has not been initialized.");
                 }
                 return serverSocket.getLocalSocketAddress();
             }
@@ -338,12 +338,12 @@ public interface GekTcpServer extends GekTcpEndpoint {
                     } else {
                         latch.await(timeout.toMillis(), TimeUnit.MILLISECONDS);
                     }
-                } catch (GekNetException e) {
+                } catch (NetException e) {
                     throw e;
                 } catch (InterruptedException e) {
                     // do nothing
                 } catch (Exception e) {
-                    throw new GekNetException(e);
+                    throw new NetException(e);
                 } finally {
                     state.close();
                 }
@@ -355,10 +355,10 @@ public interface GekTcpServer extends GekTcpEndpoint {
                     close0();
                     executor.shutdown();
                     latch.countDown();
-                } catch (GekNetException e) {
+                } catch (NetException e) {
                     throw e;
                 } catch (Exception e) {
-                    throw new GekNetException(e);
+                    throw new NetException(e);
                 } finally {
                     state.close();
                 }
@@ -367,7 +367,7 @@ public interface GekTcpServer extends GekTcpEndpoint {
             @Override
             public ServerSocket getSource() {
                 if (serverSocket == null) {
-                    throw new GekNetException("Server has not been initialized.");
+                    throw new NetException("Server has not been initialized.");
                 }
                 return serverSocket;
             }
@@ -393,7 +393,7 @@ public interface GekTcpServer extends GekTcpEndpoint {
 
             private void close0() throws Exception {
                 if (!state.isOpened() || serverSocket == null) {
-                    throw new GekNetException("The server has not been opened.");
+                    throw new NetException("The server has not been opened.");
                 }
                 if (state.isClosed()) {
                     return;
@@ -414,7 +414,7 @@ public interface GekTcpServer extends GekTcpEndpoint {
                     }
                     return server;
                 } catch (Exception e) {
-                    throw new GekNetException(e);
+                    throw new NetException(e);
                 }
             }
 
@@ -596,12 +596,12 @@ public interface GekTcpServer extends GekTcpEndpoint {
                     try {
                         getOutputStream().flush();
                     } catch (IOException e) {
-                        throw new GekNetException(e);
+                        throw new NetException(e);
                     }
                     try {
                         socket.close();
                     } catch (IOException e) {
-                        throw new GekNetException(e);
+                        throw new NetException(e);
                     }
                 }
 
@@ -613,7 +613,7 @@ public interface GekTcpServer extends GekTcpEndpoint {
                     try {
                         socket.close();
                     } catch (IOException e) {
-                        throw new GekNetException(e);
+                        throw new NetException(e);
                     }
                 }
 
@@ -627,7 +627,7 @@ public interface GekTcpServer extends GekTcpEndpoint {
                     try {
                         getOutputStream().write(data);
                     } catch (IOException e) {
-                        throw new GekNetException(e);
+                        throw new NetException(e);
                     }
                 }
 
@@ -636,7 +636,7 @@ public interface GekTcpServer extends GekTcpEndpoint {
                     try {
                         getOutputStream().write(data, offset, length);
                     } catch (IOException e) {
-                        throw new GekNetException(e);
+                        throw new NetException(e);
                     }
                 }
 
@@ -659,7 +659,7 @@ public interface GekTcpServer extends GekTcpEndpoint {
                     try {
                         getOutputStream().flush();
                     } catch (IOException e) {
-                        throw new GekNetException(e);
+                        throw new NetException(e);
                     }
                 }
 
@@ -673,7 +673,7 @@ public interface GekTcpServer extends GekTcpEndpoint {
                         try {
                             out = socket.getOutputStream();
                         } catch (IOException e) {
-                            throw new GekNetException(e);
+                            throw new NetException(e);
                         }
                     }
                     return out;

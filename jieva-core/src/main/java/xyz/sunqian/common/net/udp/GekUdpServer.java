@@ -7,7 +7,7 @@ import xyz.sunqian.common.collect.CollectKit;
 import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IOKit;
-import xyz.sunqian.common.net.GekNetException;
+import xyz.sunqian.common.net.NetException;
 import xyz.sunqian.common.net.GekServerStates;
 
 import java.io.IOException;
@@ -281,23 +281,23 @@ public interface GekUdpServer extends GekUdpClient {
                 this.serverHandler = Jie.nonnull(builder.serverHandler, EMPTY_SERVER_HANDLER);
                 this.packetHandlers = ListKit.toList(builder.packetHandlers);
                 if (packetHandlers.isEmpty()) {
-                    throw new GekNetException("Packet handlers are empty.");
+                    throw new NetException("Packet handlers are empty.");
                 }
                 this.executor = builder.executor;
                 if (executor == null) {
-                    throw new GekNetException("Executor is null.");
+                    throw new NetException("Executor is null.");
                 }
                 this.socketConfig = builder.socketConfig;
                 this.packetBufferSize = builder.packetBufferSize;
                 if (packetBufferSize <= 0) {
-                    throw new GekNetException("Packet buffer size must > 0.");
+                    throw new NetException("Packet buffer size must > 0.");
                 }
             }
 
             @Override
             public synchronized void start(boolean block) {
                 if (!state.isCreated()) {
-                    throw new GekNetException("The server has been opened or closed.");
+                    throw new NetException("The server has been opened or closed.");
                 }
                 start0();
                 state.open();
@@ -323,14 +323,14 @@ public interface GekUdpServer extends GekUdpClient {
                 try {
                     serverSocket.send(datagramPacket);
                 } catch (IOException e) {
-                    throw new GekNetException(e);
+                    throw new NetException(e);
                 }
             }
 
             @Override
             public InetAddress getAddress() {
                 if (serverSocket == null) {
-                    throw new GekNetException("Server has not been initialized.");
+                    throw new NetException("Server has not been initialized.");
                 }
                 return serverSocket.getLocalAddress();
             }
@@ -338,7 +338,7 @@ public interface GekUdpServer extends GekUdpClient {
             @Override
             public int getPort() {
                 if (serverSocket == null) {
-                    throw new GekNetException("Server has not been initialized.");
+                    throw new NetException("Server has not been initialized.");
                 }
                 return serverSocket.getLocalPort();
             }
@@ -346,7 +346,7 @@ public interface GekUdpServer extends GekUdpClient {
             @Override
             public SocketAddress getSocketAddress() {
                 if (serverSocket == null) {
-                    throw new GekNetException("Server has not been initialized.");
+                    throw new NetException("Server has not been initialized.");
                 }
                 return serverSocket.getLocalSocketAddress();
             }
@@ -370,12 +370,12 @@ public interface GekUdpServer extends GekUdpClient {
                     } else {
                         latch.await(timeout.toMillis(), TimeUnit.MILLISECONDS);
                     }
-                } catch (GekNetException e) {
+                } catch (NetException e) {
                     throw e;
                 } catch (InterruptedException e) {
                     // do nothing
                 } catch (Exception e) {
-                    throw new GekNetException(e);
+                    throw new NetException(e);
                 } finally {
                     state.close();
                 }
@@ -387,10 +387,10 @@ public interface GekUdpServer extends GekUdpClient {
                     close0();
                     executor.shutdown();
                     latch.countDown();
-                } catch (GekNetException e) {
+                } catch (NetException e) {
                     throw e;
                 } catch (Exception e) {
-                    throw new GekNetException(e);
+                    throw new NetException(e);
                 } finally {
                     state.close();
                 }
@@ -399,7 +399,7 @@ public interface GekUdpServer extends GekUdpClient {
             @Override
             public DatagramSocket getSource() {
                 if (serverSocket == null) {
-                    throw new GekNetException("Server has not been initialized.");
+                    throw new NetException("Server has not been initialized.");
                 }
                 return serverSocket;
             }
@@ -423,7 +423,7 @@ public interface GekUdpServer extends GekUdpClient {
 
             private void close0() {
                 if (!state.isOpened() || serverSocket == null) {
-                    throw new GekNetException("The server has not been opened.");
+                    throw new NetException("The server has not been opened.");
                 }
                 if (state.isClosed()) {
                     return;
@@ -444,7 +444,7 @@ public interface GekUdpServer extends GekUdpClient {
                     }
                     return server;
                 } catch (Exception e) {
-                    throw new GekNetException(e);
+                    throw new NetException(e);
                 }
             }
 

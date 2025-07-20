@@ -3,7 +3,7 @@ package xyz.sunqian.common.net.udp;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.io.BufferKit;
-import xyz.sunqian.common.net.GekNetException;
+import xyz.sunqian.common.net.NetException;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -115,7 +115,7 @@ public interface GekUdpClient {
                 this.address = InetAddress.getByName(hostName);
                 return this;
             } catch (UnknownHostException e) {
-                throw new GekNetException(e);
+                throw new NetException(e);
             }
         }
 
@@ -167,7 +167,7 @@ public interface GekUdpClient {
                 try {
                     socket.send(datagramPacket);
                 } catch (IOException e) {
-                    throw new GekNetException(e);
+                    throw new NetException(e);
                 }
             }
 
@@ -189,7 +189,7 @@ public interface GekUdpClient {
             @Override
             public DatagramSocket getSource() {
                 if (socket == null) {
-                    throw new GekNetException("Server has not been initialized.");
+                    throw new NetException("Server has not been initialized.");
                 }
                 return socket;
             }
@@ -215,7 +215,7 @@ public interface GekUdpClient {
                     }
                     return socket;
                 } catch (Exception e) {
-                    throw new GekNetException(e);
+                    throw new NetException(e);
                 }
             }
         }

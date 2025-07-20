@@ -7,7 +7,7 @@ import xyz.sunqian.common.collect.CollectKit;
 import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IOKit;
-import xyz.sunqian.common.net.GekNetException;
+import xyz.sunqian.common.net.NetException;
 import xyz.sunqian.common.net.GekServerStates;
 import xyz.sunqian.common.net.data.GekData;
 
@@ -142,7 +142,7 @@ public interface GekTcpClient extends GekTcpEndpoint {
                 this.address = InetAddress.getByName(hostName);
                 return this;
             } catch (UnknownHostException e) {
-                throw new GekNetException(e);
+                throw new NetException(e);
             }
         }
 
@@ -254,13 +254,13 @@ public interface GekTcpClient extends GekTcpEndpoint {
                 this.clientHandler = Jie.nonnull(builder.clientHandler, EMPTY_CLIENT_HANDLER);
                 this.channelHandlers = ListKit.toList(builder.channelHandlers);
                 if (channelHandlers.isEmpty()) {
-                    throw new GekNetException("Channel handlers are empty.");
+                    throw new NetException("Channel handlers are empty.");
                 }
                 this.socketConfig = builder.socketConfig;
                 this.bufferGenerator = Jie.nonnull(builder.bufferGenerator, ByteBuffer::allocate);
                 this.channelBufferSize = builder.channelBufferSize;
                 if (channelBufferSize <= 0) {
-                    throw new GekNetException("Channel buffer size must > 0.");
+                    throw new NetException("Channel buffer size must > 0.");
                 }
                 this.proxy = builder.proxy;
             }
@@ -269,7 +269,7 @@ public interface GekTcpClient extends GekTcpEndpoint {
             public void start(SocketAddress address, @Nullable Duration timeout) {
                 synchronized (this) {
                     if (!state.isCreated()) {
-                        throw new GekNetException("The client has been opened or closed.");
+                        throw new NetException("The client has been opened or closed.");
                     }
                 }
                 start0(address, timeout == null ? 0 : (int) timeout.toMillis());
@@ -278,7 +278,7 @@ public interface GekTcpClient extends GekTcpEndpoint {
             @Override
             public InetAddress getAddress() {
                 if (socket == null) {
-                    throw new GekNetException("Client has not been initialized.");
+                    throw new NetException("Client has not been initialized.");
                 }
                 return socket.getLocalAddress();
             }
@@ -286,7 +286,7 @@ public interface GekTcpClient extends GekTcpEndpoint {
             @Override
             public int getPort() {
                 if (socket == null) {
-                    throw new GekNetException("Client has not been initialized.");
+                    throw new NetException("Client has not been initialized.");
                 }
                 return socket.getLocalPort();
             }
@@ -294,7 +294,7 @@ public interface GekTcpClient extends GekTcpEndpoint {
             @Override
             public SocketAddress getSocketAddress() {
                 if (socket == null) {
-                    throw new GekNetException("Client has not been initialized.");
+                    throw new NetException("Client has not been initialized.");
                 }
                 return socket.getLocalSocketAddress();
             }
@@ -318,12 +318,12 @@ public interface GekTcpClient extends GekTcpEndpoint {
                     } else {
                         latch.await(timeout.toMillis(), TimeUnit.MILLISECONDS);
                     }
-                } catch (GekNetException e) {
+                } catch (NetException e) {
                     throw e;
                 } catch (InterruptedException e) {
                     // do nothing
                 } catch (Exception e) {
-                    throw new GekNetException(e);
+                    throw new NetException(e);
                 } finally {
                     state.close();
                 }
@@ -334,10 +334,10 @@ public interface GekTcpClient extends GekTcpEndpoint {
                 try {
                     close0();
                     latch.countDown();
-                } catch (GekNetException e) {
+                } catch (NetException e) {
                     throw e;
                 } catch (Exception e) {
-                    throw new GekNetException(e);
+                    throw new NetException(e);
                 } finally {
                     state.close();
                 }
@@ -346,7 +346,7 @@ public interface GekTcpClient extends GekTcpEndpoint {
             @Override
             public Socket getSource() {
                 if (socket == null) {
-                    throw new GekNetException("Client has not been initialized.");
+                    throw new NetException("Client has not been initialized.");
                 }
                 return socket;
             }
@@ -369,7 +369,7 @@ public interface GekTcpClient extends GekTcpEndpoint {
                 try {
                     socket.connect(address, timeout);
                 } catch (IOException e) {
-                    throw new GekNetException(e);
+                    throw new NetException(e);
                 }
                 state.open();
                 ChannelImpl channel = new ChannelImpl();
@@ -395,7 +395,7 @@ public interface GekTcpClient extends GekTcpEndpoint {
 
             private void close0() throws Exception {
                 if (!state.isOpened() || socket == null) {
-                    throw new GekNetException("The Client has not been opened.");
+                    throw new NetException("The Client has not been opened.");
                 }
                 if (state.isClosed()) {
                     return;
@@ -417,7 +417,7 @@ public interface GekTcpClient extends GekTcpEndpoint {
                     }
                     return socket;
                 } catch (Exception e) {
-                    throw new GekNetException(e);
+                    throw new NetException(e);
                 }
             }
 
@@ -508,13 +508,13 @@ public interface GekTcpClient extends GekTcpEndpoint {
                         try {
                             out.flush();
                         } catch (IOException e) {
-                            throw new GekNetException(e);
+                            throw new NetException(e);
                         }
                     }
                     try {
                         socket.close();
                     } catch (IOException e) {
-                        throw new GekNetException(e);
+                        throw new NetException(e);
                     }
                 }
 
@@ -526,7 +526,7 @@ public interface GekTcpClient extends GekTcpEndpoint {
                     try {
                         socket.close();
                     } catch (IOException e) {
-                        throw new GekNetException(e);
+                        throw new NetException(e);
                     }
                 }
 
@@ -540,7 +540,7 @@ public interface GekTcpClient extends GekTcpEndpoint {
                     try {
                         getOutputStream().write(data);
                     } catch (IOException e) {
-                        throw new GekNetException(e);
+                        throw new NetException(e);
                     }
                 }
 
@@ -549,7 +549,7 @@ public interface GekTcpClient extends GekTcpEndpoint {
                     try {
                         getOutputStream().write(data, offset, length);
                     } catch (IOException e) {
-                        throw new GekNetException(e);
+                        throw new NetException(e);
                     }
                 }
 
@@ -572,7 +572,7 @@ public interface GekTcpClient extends GekTcpEndpoint {
                     try {
                         getOutputStream().flush();
                     } catch (IOException e) {
-                        throw new GekNetException(e);
+                        throw new NetException(e);
                     }
                 }
 
@@ -586,7 +586,7 @@ public interface GekTcpClient extends GekTcpEndpoint {
                         try {
                             out = socket.getOutputStream();
                         } catch (IOException e) {
-                            throw new GekNetException(e);
+                            throw new NetException(e);
                         }
                     }
                     return out;
