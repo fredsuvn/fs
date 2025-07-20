@@ -1,7 +1,8 @@
-package xyz.sunqian.common.base;
+package xyz.sunqian.common.base.coding;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.Jie;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,7 +15,7 @@ import java.util.function.Function;
  *
  * @author sunqian
  */
-public class JieCoding {
+public class CodingKit {
 
     /**
      * If the {@code old} is null, return the {@code added}. If the {@code added} is null, return the {@code old}. If
