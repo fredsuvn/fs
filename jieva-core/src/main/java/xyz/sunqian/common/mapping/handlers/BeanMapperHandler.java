@@ -7,8 +7,8 @@ import xyz.sunqian.common.mapping.BeanMapper;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingOptions;
 import xyz.sunqian.common.objects.data.DataProperty;
-import xyz.sunqian.common.reflect.JieClass;
-import xyz.sunqian.common.reflect.JieType;
+import xyz.sunqian.common.reflect.ClassKit;
+import xyz.sunqian.common.reflect.TypeKit;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -88,7 +88,7 @@ public class BeanMapperHandler implements Mapper.Handler {
             if (supplier != null) {
                 return supplier.get();
             }
-            Class<?> rawType = JieType.getRawClass(type);
+            Class<?> rawType = TypeKit.getRawClass(type);
             if (rawType == null) {
                 return null;
             }
@@ -96,7 +96,7 @@ public class BeanMapperHandler implements Mapper.Handler {
             if (rawSupplier != null) {
                 return rawSupplier.get();
             }
-            return JieClass.newInstance(rawType);
+            return ClassKit.newInstance(rawType);
         }
 
         @Override

@@ -129,7 +129,7 @@ final class Assign {
         if (!((Class<?>) assignedRaw).isAssignableFrom((Class<?>) assigneeRaw)) {
             return false;
         }
-        List<Type> assigneeArgs = JieType.resolveActualTypeArguments(assignee, (Class<?>) assignedRaw);
+        List<Type> assigneeArgs = TypeKit.resolveActualTypeArguments(assignee, (Class<?>) assignedRaw);
         Type[] assignedArgs = assigned.getActualTypeArguments();
         if (assignedArgs.length != assigneeArgs.size()) {
             return false;
@@ -151,16 +151,16 @@ final class Assign {
     }
 
     private static boolean isAssignableParameterizedArgs(@Nonnull WildcardType assignedArg, @Nonnull Type assigneeArg) {
-        Type assignedUpper = JieType.getUpperBound(assignedArg);
+        Type assignedUpper = TypeKit.getUpperBound(assignedArg);
         if (!isAssignable(assignedUpper, assigneeArg)) {
             return false;
         }
-        Type assignedLower = JieType.getLowerBound(assignedArg);
+        Type assignedLower = TypeKit.getLowerBound(assignedArg);
         return assignedLower == null || isAssignable(assigneeArg, assignedLower);
     }
 
     private static boolean isAssignable(@Nonnull WildcardType assigned, @Nonnull Type assignee) {
-        Type lowerType = JieType.getLowerBound(assigned);
+        Type lowerType = TypeKit.getLowerBound(assigned);
         if (lowerType != null) {
             return isAssignable(lowerType, assignee);
         }
@@ -168,7 +168,7 @@ final class Assign {
     }
 
     private static boolean isAssignable(@Nonnull Type assigned, @Nonnull WildcardType assignee) {
-        Type assigneeUpper = JieType.getUpperBound(assignee);
+        Type assigneeUpper = TypeKit.getUpperBound(assignee);
         return isAssignable(assigned, assigneeUpper);
     }
 

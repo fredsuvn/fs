@@ -4,7 +4,7 @@ import com.google.protobuf.Message;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.mapping.MappingException;
 import xyz.sunqian.common.mapping.handlers.BeanMapperHandler;
-import xyz.sunqian.common.reflect.JieType;
+import xyz.sunqian.common.reflect.TypeKit;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -24,7 +24,7 @@ public class ProtobufBeanGenerator implements BeanMapperHandler.BeanGenerator {
         if (!(targetType instanceof Class<?>)) {
             return BeanMapperHandler.DEFAULT_GENERATOR.generate(targetType);
         }
-        Class<?> rawType = JieType.getRawClass(targetType);
+        Class<?> rawType = TypeKit.getRawClass(targetType);
         // Check whether it is a protobuf object
         boolean isProtobuf = false;
         boolean isBuilder = false;

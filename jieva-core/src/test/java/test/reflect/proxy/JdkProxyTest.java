@@ -206,14 +206,14 @@ public class JdkProxyTest {
         counter.set(0);
     }
 
-    @Test
-    public void testJdkProxyException() {
-        String message = "hello";
-        Throwable cause = new RuntimeException(message);
-        JdkProxyClassGenerator.JdkProxyException e = new JdkProxyClassGenerator.JdkProxyException(cause);
-        assertEquals(e.getMessage(), message);
-        assertSame(e.getCause(), cause);
-    }
+    // @Test
+    // public void testJdkProxyException() {
+    //     String message = "hello";
+    //     Throwable cause = new RuntimeException(message);
+    //     JdkProxyClassGenerator.JdkProxyException e = new JdkProxyClassGenerator.JdkProxyException(cause);
+    //     assertEquals(e.getMessage(), message);
+    //     assertSame(e.getCause(), cause);
+    // }
 
     public interface InterA {
 

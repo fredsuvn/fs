@@ -14,7 +14,7 @@ import xyz.sunqian.common.objects.data.DataPropertyBase;
 import xyz.sunqian.common.objects.data.DataSchema;
 import xyz.sunqian.common.objects.data.DataSchemaParser;
 import xyz.sunqian.common.objects.data.JieDataObject;
-import xyz.sunqian.common.reflect.JieType;
+import xyz.sunqian.common.reflect.TypeKit;
 import xyz.sunqian.common.reflect.TypeRef;
 
 import java.lang.reflect.Method;
@@ -63,9 +63,9 @@ public class DataObjectTest {
             Jie.hashMap("ffFf1", String.class
                 , "ffFf2", Short.class
                 , "ffFf3", Long.class
-                , "ffFf4", JieType.parameterizedType(List.class, new Type[]{String.class})
-                , "ffFf5", JieType.arrayType(JieType.parameterizedType(List.class, new Type[]{String.class}))
-                , "class", JieType.parameterizedType(Class.class, new Type[]{JieType.wildcardChar()})
+                , "ffFf4", TypeKit.parameterizedType(List.class, new Type[]{String.class})
+                , "ffFf5", TypeKit.arrayType(TypeKit.parameterizedType(List.class, new Type[]{String.class}))
+                , "class", TypeKit.parameterizedType(Class.class, new Type[]{TypeKit.wildcardChar()})
                 , "c1", Short.class
                 , "bb", boolean.class
                 , "bb2", Boolean.class
@@ -94,9 +94,9 @@ public class DataObjectTest {
             Jie.hashMap("ffFf1", String.class
                 , "ffFf2", Inner.class.getTypeParameters()[0]
                 , "ffFf3", Inner.class.getTypeParameters()[1]
-                , "ffFf4", JieType.parameterizedType(List.class, new Type[]{String.class})
-                , "ffFf5", JieType.arrayType(JieType.parameterizedType(List.class, new Type[]{String.class}))
-                , "class", JieType.parameterizedType(Class.class, new Type[]{JieType.wildcardChar()})
+                , "ffFf4", TypeKit.parameterizedType(List.class, new Type[]{String.class})
+                , "ffFf5", TypeKit.arrayType(TypeKit.parameterizedType(List.class, new Type[]{String.class}))
+                , "class", TypeKit.parameterizedType(Class.class, new Type[]{TypeKit.wildcardChar()})
                 , "c1", Inner.class.getTypeParameters()[0]
                 , "bb", boolean.class
                 , "bb2", Boolean.class
@@ -271,7 +271,7 @@ public class DataObjectTest {
     @Test
     public void testExtra() {
         Map<TypeVariable<?>, Type> extra =
-            JieType.mapTypeParameters(new TypeRef<TestExtra<String>>() {}.type());
+            TypeKit.mapTypeParameters(new TypeRef<TestExtra<String>>() {}.type());
         Map<TypeVariable<?>, Type> empty = Collections.emptyMap();
         DataSchema b1 = DataSchema.get(new TypeRef<TestExtra<String>>() {}.type());
         DataSchema b2 = JieDataObject.withExtraTypeVariableMapping(DataSchema.get(TestExtra.class), extra);
@@ -286,7 +286,7 @@ public class DataObjectTest {
         assertEquals(b4, b3);
         assertEquals(b4.getProperty("tt"), b4.getProperty("tt"));
         DataSchema b5 = JieDataObject.withExtraTypeVariableMapping(DataSchema.get(TestExtra.class),
-            JieType.mapTypeParameters(new TypeRef<TestExtra2<String>>() {}.type()));
+            TypeKit.mapTypeParameters(new TypeRef<TestExtra2<String>>() {}.type()));
         assertEquals(b5, b3);
         assertEquals(b5.getProperty("tt"), b3.getProperty("tt"));
 

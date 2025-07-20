@@ -7,8 +7,8 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.collect.ArrayKit;
-import xyz.sunqian.common.reflect.JieClass;
-import xyz.sunqian.common.reflect.JieJvm;
+import xyz.sunqian.common.reflect.ClassKit;
+import xyz.sunqian.common.reflect.JvmKit;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -21,7 +21,7 @@ import java.util.Objects;
  * @author sunqian
  */
 @NonExported
-public class JieAsm {
+public class AsmKit {
 
     /**
      * The internal name of {@link Object}.
@@ -44,7 +44,7 @@ public class JieAsm {
      * @return whether the current runtime environment has asm package
      */
     public static boolean supportsAsm() {
-        return JieClass.classExists("org.objectweb.asm.ClassWriter");
+        return ClassKit.classExists("org.objectweb.asm.ClassWriter");
     }
 
     /**
@@ -179,7 +179,7 @@ public class JieAsm {
                 Opcodes.INVOKEVIRTUAL, "java/lang/Double", "doubleValue", "()D", false);
             return;
         }
-        visitor.visitTypeInsn(Opcodes.CHECKCAST, JieJvm.getInternalName(type));
+        visitor.visitTypeInsn(Opcodes.CHECKCAST, JvmKit.getInternalName(type));
     }
 
     /**
@@ -288,7 +288,7 @@ public class JieAsm {
             }
         }
         if (requiresCast) {
-            visitor.visitTypeInsn(Opcodes.CHECKCAST, JieJvm.getInternalName(type));
+            visitor.visitTypeInsn(Opcodes.CHECKCAST, JvmKit.getInternalName(type));
         }
         visitor.visitInsn(Opcodes.ARETURN);
     }
@@ -364,7 +364,7 @@ public class JieAsm {
         if (ArrayKit.isEmpty(exceptionTypes)) {
             return null;
         }
-        return Jie.stream(exceptionTypes).map(JieJvm::getInternalName).toArray(String[]::new);
+        return Jie.stream(exceptionTypes).map(JvmKit::getInternalName).toArray(String[]::new);
     }
 
     /**

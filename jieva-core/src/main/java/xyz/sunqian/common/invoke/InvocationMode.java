@@ -1,7 +1,7 @@
 package xyz.sunqian.common.invoke;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.reflect.JieClass;
+import xyz.sunqian.common.reflect.ClassKit;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Constructor;
@@ -38,7 +38,7 @@ public enum InvocationMode implements InvocableGenerator {
      * @return the recommended implementation for the specified method in current environment
      */
     public static @Nonnull InvocationMode recommended(@Nonnull Method method) {
-        return recommended(method, JieClass.isStatic(method));
+        return recommended(method, ClassKit.isStatic(method));
     }
 
     /**

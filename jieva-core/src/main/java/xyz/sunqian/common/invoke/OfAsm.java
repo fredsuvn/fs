@@ -4,11 +4,11 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.asm.JieAsm;
+import xyz.sunqian.common.asm.AsmKit;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.reflect.BytesClassLoader;
-import xyz.sunqian.common.reflect.JieClass;
-import xyz.sunqian.common.reflect.JieJvm;
+import xyz.sunqian.common.reflect.ClassKit;
+import xyz.sunqian.common.reflect.JvmKit;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
@@ -18,14 +18,14 @@ import java.util.concurrent.atomic.AtomicLong;
 
 final class OfAsm implements InvocableGenerator {
 
-    private static final @Nonnull String INVOCABLE_NAME = JieJvm.getInternalName(Invocable.class);
+    private static final @Nonnull String INVOCABLE_NAME = JvmKit.getInternalName(Invocable.class);
     private static final @Nonnull String @Nonnull [] INTERFACES = new String[]{INVOCABLE_NAME};
     private static final @Nonnull Method INVOKE_CHECKED = Jie.uncheck(
         () -> Invocable.class.getMethod("invokeChecked", Object.class, Object[].class),
         InvocationException::new
     );
-    private static final @Nonnull String @Nonnull [] INVOKE_CHECKED_EXCEPTIONS = {JieJvm.getInternalName(Throwable.class)};
-    private static final @Nonnull String INVOKE_CHECKED_DESCRIPTOR = JieJvm.getDescriptor(INVOKE_CHECKED);
+    private static final @Nonnull String @Nonnull [] INVOKE_CHECKED_EXCEPTIONS = {JvmKit.getInternalName(Throwable.class)};
+    private static final @Nonnull String INVOKE_CHECKED_DESCRIPTOR = JvmKit.getDescriptor(INVOKE_CHECKED);
     // private static final @Nonnull String THROWABLE_NAME = JieJvm.getInternalName(Throwable.class);
     // private static final @Nonnull String EXCEPTION_NAME = JieJvm.getInternalName(InvocationException.class);
     // private static final @Nonnull String EXCEPTION_CONSTRUCTOR_DESCRIPTOR = Jie.uncheck(
@@ -57,7 +57,7 @@ final class OfAsm implements InvocableGenerator {
 
     private String buildClassName() {
         return getClass().getPackage().getName().replace('.', '/')
-            + "/" + JieAsm.generateClassSimpleName(classCounter.incrementAndGet());
+            + "/" + AsmKit.generateClassSimpleName(classCounter.incrementAndGet());
     }
 
     private Invocable generate(byte[] bytecode) {
@@ -73,23 +73,23 @@ final class OfAsm implements InvocableGenerator {
             Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL | Opcodes.ACC_SUPER,
             className,
             null,
-            JieAsm.OBJECT_NAME,
+            AsmKit.OBJECT_NAME,
             INTERFACES
         );
         {
             MethodVisitor visitor = classWriter.visitMethod(
                 Opcodes.ACC_PUBLIC,
-                JieAsm.CONSTRUCTOR_NAME,
-                JieAsm.EMPTY_CONSTRUCTOR_DESCRIPTOR,
+                AsmKit.CONSTRUCTOR_NAME,
+                AsmKit.EMPTY_CONSTRUCTOR_DESCRIPTOR,
                 null,
                 null
             );
             visitor.visitVarInsn(Opcodes.ALOAD, 0);
             visitor.visitMethodInsn(
                 Opcodes.INVOKESPECIAL,
-                JieAsm.OBJECT_NAME,
-                JieAsm.CONSTRUCTOR_NAME,
-                JieAsm.EMPTY_CONSTRUCTOR_DESCRIPTOR,
+                AsmKit.OBJECT_NAME,
+                AsmKit.CONSTRUCTOR_NAME,
+                AsmKit.EMPTY_CONSTRUCTOR_DESCRIPTOR,
                 false
             );
             visitor.visitInsn(Opcodes.RETURN);
@@ -112,8 +112,8 @@ final class OfAsm implements InvocableGenerator {
         // Label handler = new Label();
         // visitor.visitTryCatchBlock(start, end, handler, THROWABLE_NAME);
         // visitor.visitLabel(start);
-        String methodOwnerName = JieJvm.getInternalName(method.getDeclaringClass());
-        boolean isStatic = JieClass.isStatic(method);
+        String methodOwnerName = JvmKit.getInternalName(method.getDeclaringClass());
+        boolean isStatic = ClassKit.isStatic(method);
         if (!isStatic) {
             // get object
             visitor.visitVarInsn(Opcodes.ALOAD, 1);
@@ -127,21 +127,21 @@ final class OfAsm implements InvocableGenerator {
                 Opcodes.INVOKESTATIC,
                 methodOwnerName,
                 method.getName(),
-                JieJvm.getDescriptor(method),
+                JvmKit.getDescriptor(method),
                 method.getDeclaringClass().isInterface()
             );
         } else {
-            JieAsm.invokeVirtual(
+            AsmKit.invokeVirtual(
                 visitor,
                 methodOwnerName,
                 method.getName(),
-                JieJvm.getDescriptor(method),
+                JvmKit.getDescriptor(method),
                 method.getDeclaringClass().isInterface()
             );
         }
         // visitor.visitLabel(end);
-        Class<?> returnType = JieAsm.wrapToObject(visitor, method.getReturnType());
-        JieAsm.visitReturn(visitor, returnType, false, true);
+        Class<?> returnType = AsmKit.wrapToObject(visitor, method.getReturnType());
+        AsmKit.visitReturn(visitor, returnType, false, true);
         // visitor.visitLabel(handler);
         // visitor.visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[]{THROWABLE_NAME});
         // visitor.visitVarInsn(Opcodes.ASTORE, 3);
@@ -173,7 +173,7 @@ final class OfAsm implements InvocableGenerator {
         // Label handler = new Label();
         // visitor.visitTryCatchBlock(start, end, handler, THROWABLE_NAME);
         // visitor.visitLabel(start);
-        String methodOwnerName = JieJvm.getInternalName(constructor.getDeclaringClass());
+        String methodOwnerName = JvmKit.getInternalName(constructor.getDeclaringClass());
         // new Object();
         visitor.visitTypeInsn(Opcodes.NEW, methodOwnerName);
         visitor.visitInsn(Opcodes.DUP);
@@ -183,8 +183,8 @@ final class OfAsm implements InvocableGenerator {
         visitor.visitMethodInsn(
             Opcodes.INVOKESPECIAL,
             methodOwnerName,
-            JieAsm.CONSTRUCTOR_NAME,
-            JieJvm.getDescriptor(constructor),
+            AsmKit.CONSTRUCTOR_NAME,
+            JvmKit.getDescriptor(constructor),
             false
         );
         // visitor.visitLabel(end);
@@ -212,10 +212,10 @@ final class OfAsm implements InvocableGenerator {
         for (Parameter parameter : executable.getParameters()) {
             // get args
             visitor.visitVarInsn(Opcodes.ALOAD, 2);
-            JieAsm.loadConst(visitor, pIndex++);
+            AsmKit.loadConst(visitor, pIndex++);
             // get args[pIndex]
             visitor.visitInsn(Opcodes.AALOAD);
-            JieAsm.convertObjectTo(visitor, parameter.getType());
+            AsmKit.convertObjectTo(visitor, parameter.getType());
         }
     }
 }

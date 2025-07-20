@@ -8,7 +8,7 @@ import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingException;
 import xyz.sunqian.common.mapping.MappingOptions;
 import xyz.sunqian.common.objects.data.DataProperty;
-import xyz.sunqian.common.reflect.JieType;
+import xyz.sunqian.common.reflect.TypeKit;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
@@ -97,13 +97,13 @@ public class CollectionMappingHandler implements Mapper.Handler {
         }
         if (type instanceof GenericArrayType) {
             Type componentType = ((GenericArrayType) type).getGenericComponentType();
-            Class<?> componentClass = JieType.getRawClass(componentType);
+            Class<?> componentClass = TypeKit.getRawClass(componentType);
             if (componentClass == null && componentType instanceof TypeVariable<?>) {
                 componentClass = Object.class;
             }
             return Array.newInstance(componentClass, size);
         }
-        Class<?> rawType = JieType.getRawClass(type);
+        Class<?> rawType = TypeKit.getRawClass(type);
         if (rawType == null) {
             return null;
         }
@@ -230,7 +230,7 @@ public class CollectionMappingHandler implements Mapper.Handler {
             return null;
         }
         if (type instanceof ParameterizedType) {
-            List<Type> sourceComponent = JieType.resolveActualTypeArguments(type, Iterable.class);
+            List<Type> sourceComponent = TypeKit.resolveActualTypeArguments(type, Iterable.class);
             if (CollectKit.isEmpty(sourceComponent)) {
                 return null;
             }

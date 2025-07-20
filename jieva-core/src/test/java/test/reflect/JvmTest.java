@@ -8,9 +8,9 @@ import org.objectweb.asm.Opcodes;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
-import xyz.sunqian.common.reflect.JieJvm;
-import xyz.sunqian.common.reflect.JieType;
 import xyz.sunqian.common.reflect.JvmException;
+import xyz.sunqian.common.reflect.JvmKit;
+import xyz.sunqian.common.reflect.TypeKit;
 import xyz.sunqian.test.AssertTest;
 
 import java.io.Serializable;
@@ -31,24 +31,24 @@ public class JvmTest implements AssertTest {
 
     @Test
     public void testInternalName() throws Exception {
-        assertEquals(JieJvm.getInternalName(boolean.class), asmInternalName(boolean.class));
-        assertEquals(JieJvm.getInternalName(byte.class), asmInternalName(byte.class));
-        assertEquals(JieJvm.getInternalName(short.class), asmInternalName(short.class));
-        assertEquals(JieJvm.getInternalName(char.class), asmInternalName(char.class));
-        assertEquals(JieJvm.getInternalName(int.class), asmInternalName(int.class));
-        assertEquals(JieJvm.getInternalName(long.class), asmInternalName(long.class));
-        assertEquals(JieJvm.getInternalName(float.class), asmInternalName(float.class));
-        assertEquals(JieJvm.getInternalName(double.class), asmInternalName(double.class));
-        assertEquals(JieJvm.getInternalName(void.class), asmInternalName(void.class));
-        assertEquals(JieJvm.getInternalName(Object.class), asmInternalName(Object.class));
-        assertEquals(JieJvm.getInternalName(Object[].class), asmInternalName(Object[].class));
-        assertEquals(JieJvm.getInternalName(Object[][].class), asmInternalName(Object[][].class));
-        assertEquals(JieJvm.getInternalName(String.class), asmInternalName(String.class));
-        assertEquals(JieJvm.getInternalName(String[].class), asmInternalName(String[].class));
-        assertEquals(JieJvm.getInternalName(String[][].class), asmInternalName(String[][].class));
-        assertEquals(JieJvm.getInternalName(JvmTest.class), asmInternalName(JvmTest.class));
-        assertEquals(JieJvm.getInternalName(JvmTest[].class), asmInternalName(JvmTest[].class));
-        assertEquals(JieJvm.getInternalName(JvmTest[][].class), asmInternalName(JvmTest[][].class));
+        assertEquals(JvmKit.getInternalName(boolean.class), asmInternalName(boolean.class));
+        assertEquals(JvmKit.getInternalName(byte.class), asmInternalName(byte.class));
+        assertEquals(JvmKit.getInternalName(short.class), asmInternalName(short.class));
+        assertEquals(JvmKit.getInternalName(char.class), asmInternalName(char.class));
+        assertEquals(JvmKit.getInternalName(int.class), asmInternalName(int.class));
+        assertEquals(JvmKit.getInternalName(long.class), asmInternalName(long.class));
+        assertEquals(JvmKit.getInternalName(float.class), asmInternalName(float.class));
+        assertEquals(JvmKit.getInternalName(double.class), asmInternalName(double.class));
+        assertEquals(JvmKit.getInternalName(void.class), asmInternalName(void.class));
+        assertEquals(JvmKit.getInternalName(Object.class), asmInternalName(Object.class));
+        assertEquals(JvmKit.getInternalName(Object[].class), asmInternalName(Object[].class));
+        assertEquals(JvmKit.getInternalName(Object[][].class), asmInternalName(Object[][].class));
+        assertEquals(JvmKit.getInternalName(String.class), asmInternalName(String.class));
+        assertEquals(JvmKit.getInternalName(String[].class), asmInternalName(String[].class));
+        assertEquals(JvmKit.getInternalName(String[][].class), asmInternalName(String[][].class));
+        assertEquals(JvmKit.getInternalName(JvmTest.class), asmInternalName(JvmTest.class));
+        assertEquals(JvmKit.getInternalName(JvmTest[].class), asmInternalName(JvmTest[].class));
+        assertEquals(JvmKit.getInternalName(JvmTest[][].class), asmInternalName(JvmTest[][].class));
     }
 
     private String asmInternalName(Class<?> cls) {
@@ -58,31 +58,31 @@ public class JvmTest implements AssertTest {
     @Test
     public void testDescriptor() throws Exception {
         // class:
-        assertEquals(JieJvm.getDescriptor(boolean.class), asmDescriptor(boolean.class));
-        assertEquals(JieJvm.getDescriptor(byte.class), asmDescriptor(byte.class));
-        assertEquals(JieJvm.getDescriptor(short.class), asmDescriptor(short.class));
-        assertEquals(JieJvm.getDescriptor(char.class), asmDescriptor(char.class));
-        assertEquals(JieJvm.getDescriptor(int.class), asmDescriptor(int.class));
-        assertEquals(JieJvm.getDescriptor(long.class), asmDescriptor(long.class));
-        assertEquals(JieJvm.getDescriptor(float.class), asmDescriptor(float.class));
-        assertEquals(JieJvm.getDescriptor(double.class), asmDescriptor(double.class));
-        assertEquals(JieJvm.getDescriptor(void.class), asmDescriptor(void.class));
-        assertEquals(JieJvm.getDescriptor(boolean[].class), asmDescriptor(boolean[].class));
-        assertEquals(JieJvm.getDescriptor(boolean[][].class), asmDescriptor(boolean[][].class));
-        assertEquals(JieJvm.getDescriptor(Object.class), asmDescriptor(Object.class));
-        assertEquals(JieJvm.getDescriptor(Object[].class), asmDescriptor(Object[].class));
-        assertEquals(JieJvm.getDescriptor(Object[][].class), asmDescriptor(Object[][].class));
-        assertEquals(JieJvm.getDescriptor(String.class), asmDescriptor(String.class));
-        assertEquals(JieJvm.getDescriptor(String[].class), asmDescriptor(String[].class));
-        assertEquals(JieJvm.getDescriptor(String[][].class), asmDescriptor(String[][].class));
-        assertEquals(JieJvm.getDescriptor(Integer.class), asmDescriptor(Integer.class));
+        assertEquals(JvmKit.getDescriptor(boolean.class), asmDescriptor(boolean.class));
+        assertEquals(JvmKit.getDescriptor(byte.class), asmDescriptor(byte.class));
+        assertEquals(JvmKit.getDescriptor(short.class), asmDescriptor(short.class));
+        assertEquals(JvmKit.getDescriptor(char.class), asmDescriptor(char.class));
+        assertEquals(JvmKit.getDescriptor(int.class), asmDescriptor(int.class));
+        assertEquals(JvmKit.getDescriptor(long.class), asmDescriptor(long.class));
+        assertEquals(JvmKit.getDescriptor(float.class), asmDescriptor(float.class));
+        assertEquals(JvmKit.getDescriptor(double.class), asmDescriptor(double.class));
+        assertEquals(JvmKit.getDescriptor(void.class), asmDescriptor(void.class));
+        assertEquals(JvmKit.getDescriptor(boolean[].class), asmDescriptor(boolean[].class));
+        assertEquals(JvmKit.getDescriptor(boolean[][].class), asmDescriptor(boolean[][].class));
+        assertEquals(JvmKit.getDescriptor(Object.class), asmDescriptor(Object.class));
+        assertEquals(JvmKit.getDescriptor(Object[].class), asmDescriptor(Object[].class));
+        assertEquals(JvmKit.getDescriptor(Object[][].class), asmDescriptor(Object[][].class));
+        assertEquals(JvmKit.getDescriptor(String.class), asmDescriptor(String.class));
+        assertEquals(JvmKit.getDescriptor(String[].class), asmDescriptor(String[].class));
+        assertEquals(JvmKit.getDescriptor(String[][].class), asmDescriptor(String[][].class));
+        assertEquals(JvmKit.getDescriptor(Integer.class), asmDescriptor(Integer.class));
         {
             // fields
             SignatureParser signatureParser = signatureParser(DS.class);
             for (int i = 1; i <= DS.fieldNum; i++) {
                 String fieldName = "f" + i;
                 Field field = DS.class.getDeclaredField(fieldName);
-                String testDesc = JieJvm.getDescriptor(field.getGenericType());
+                String testDesc = JvmKit.getDescriptor(field.getGenericType());
                 String asmDesc = signatureParser.fieldDescriptor(fieldName);
                 assertEquals(testDesc, asmDesc);
             }
@@ -91,28 +91,28 @@ public class JvmTest implements AssertTest {
             for (int i = 1; i <= DS.methodNum; i++) {
                 String methodName = "m" + i;
                 Method method = methods.stream().filter(m -> m.getName().equals(methodName)).findFirst().get();
-                String testDesc = JieJvm.getDescriptor(method);
+                String testDesc = JvmKit.getDescriptor(method);
                 String asmDesc = signatureParser.methodDescriptor(methodName);
                 assertEquals(testDesc, asmDesc);
             }
             // constructor:
             assertTrue(signatureParser.hasConstructorDescriptor(
-                JieJvm.getDescriptor(DS.class.getDeclaredConstructor())
+                JvmKit.getDescriptor(DS.class.getDeclaredConstructor())
             ));
             assertTrue(signatureParser.hasConstructorDescriptor(
-                JieJvm.getDescriptor(DS.class.getDeclaredConstructor(String.class))
+                JvmKit.getDescriptor(DS.class.getDeclaredConstructor(String.class))
             ));
             assertTrue(signatureParser.hasConstructorDescriptor(
-                JieJvm.getDescriptor(DS.class.getDeclaredConstructor(String.class, List.class))
+                JvmKit.getDescriptor(DS.class.getDeclaredConstructor(String.class, List.class))
             ));
             assertTrue(signatureParser.hasConstructorDescriptor(
-                JieJvm.getDescriptor(DS.class.getDeclaredConstructor(String.class, List.class, Map.class))
+                JvmKit.getDescriptor(DS.class.getDeclaredConstructor(String.class, List.class, Map.class))
             ));
             assertTrue(signatureParser.hasConstructorDescriptor(
-                JieJvm.getDescriptor(DS.class.getDeclaredConstructor(String.class, List.class, Map.class))
+                JvmKit.getDescriptor(DS.class.getDeclaredConstructor(String.class, List.class, Map.class))
             ));
             assertTrue(signatureParser.hasConstructorDescriptor(
-                JieJvm.getDescriptor(DS.class.getDeclaredConstructor(String.class, String.class, Integer.class))
+                JvmKit.getDescriptor(DS.class.getDeclaredConstructor(String.class, String.class, Integer.class))
             ));
         }
         {
@@ -122,7 +122,7 @@ public class JvmTest implements AssertTest {
             for (int i = 1; i <= ODS.fieldNum; i++) {
                 String fieldName = "f" + i;
                 Field field = ODS.class.getDeclaredField(fieldName);
-                String testDesc = JieJvm.getDescriptor(field.getGenericType());
+                String testDesc = JvmKit.getDescriptor(field.getGenericType());
                 String asmDesc = signatureParser.fieldDescriptor(fieldName);
                 assertEquals(testDesc, asmDesc);
             }
@@ -131,14 +131,14 @@ public class JvmTest implements AssertTest {
             for (int i = 1; i <= ODS.methodNum; i++) {
                 String methodName = "m" + i;
                 Method method = methods.stream().filter(m -> m.getName().equals(methodName)).findFirst().get();
-                String testDesc = JieJvm.getDescriptor(method);
+                String testDesc = JvmKit.getDescriptor(method);
                 String asmDesc = signatureParser.methodDescriptor(methodName);
                 assertEquals(testDesc, asmDesc);
             }
         }
         // exception
-        expectThrows(JvmException.class, () -> JieJvm.getDescriptor(JieType.upperWildcard(String.class)));
-        Method getPrimitiveDescriptor = JieJvm.class.getDeclaredMethod("getPrimitiveDescriptor", Class.class);
+        expectThrows(JvmException.class, () -> JvmKit.getDescriptor(TypeKit.upperWildcard(String.class)));
+        Method getPrimitiveDescriptor = JvmKit.class.getDeclaredMethod("getPrimitiveDescriptor", Class.class);
         invokeThrows(UnknownPrimitiveTypeException.class, getPrimitiveDescriptor, null, Object.class);
     }
 
@@ -162,17 +162,17 @@ public class JvmTest implements AssertTest {
             abstract class F extends Number implements Map<String, String>, Serializable, RandomAccess {
             }
             SignatureParser a = signatureParser(A.class);
-            assertEquals(JieJvm.getSignature(A.class), a.classSignature());
+            assertEquals(JvmKit.getSignature(A.class), a.classSignature());
             SignatureParser b = signatureParser(B.class);
-            assertEquals(JieJvm.getSignature(B.class), b.classSignature());
+            assertEquals(JvmKit.getSignature(B.class), b.classSignature());
             SignatureParser c = signatureParser(C.class);
-            assertEquals(JieJvm.getSignature(C.class), c.classSignature());
+            assertEquals(JvmKit.getSignature(C.class), c.classSignature());
             SignatureParser d = signatureParser(D.class);
-            assertEquals(JieJvm.getSignature(D.class), d.classSignature());
+            assertEquals(JvmKit.getSignature(D.class), d.classSignature());
             SignatureParser e = signatureParser(E.class);
-            assertEquals(JieJvm.getSignature(E.class), e.classSignature());
+            assertEquals(JvmKit.getSignature(E.class), e.classSignature());
             SignatureParser f = signatureParser(F.class);
-            assertEquals(JieJvm.getSignature(F.class), f.classSignature());
+            assertEquals(JvmKit.getSignature(F.class), f.classSignature());
         }
         {
             abstract class A<T> {
@@ -188,17 +188,17 @@ public class JvmTest implements AssertTest {
             abstract class F<T extends CharSequence & Serializable & RandomAccess, U extends T, W> {
             }
             SignatureParser a = signatureParser(A.class);
-            assertEquals(JieJvm.getSignature(A.class), a.classSignature());
+            assertEquals(JvmKit.getSignature(A.class), a.classSignature());
             SignatureParser b = signatureParser(B.class);
-            assertEquals(JieJvm.getSignature(B.class), b.classSignature());
+            assertEquals(JvmKit.getSignature(B.class), b.classSignature());
             SignatureParser c = signatureParser(C.class);
-            assertEquals(JieJvm.getSignature(C.class), c.classSignature());
+            assertEquals(JvmKit.getSignature(C.class), c.classSignature());
             SignatureParser d = signatureParser(D.class);
-            assertEquals(JieJvm.getSignature(D.class), d.classSignature());
+            assertEquals(JvmKit.getSignature(D.class), d.classSignature());
             SignatureParser e = signatureParser(E.class);
-            assertEquals(JieJvm.getSignature(E.class), e.classSignature());
+            assertEquals(JvmKit.getSignature(E.class), e.classSignature());
             SignatureParser f = signatureParser(F.class);
-            assertEquals(JieJvm.getSignature(F.class), f.classSignature());
+            assertEquals(JvmKit.getSignature(F.class), f.classSignature());
         }
         {
             abstract class A<T extends CharSequence & Serializable & RandomAccess, U extends T, W>
@@ -209,14 +209,14 @@ public class JvmTest implements AssertTest {
             abstract class C extends B<String> {
             }
             SignatureParser a = signatureParser(A.class);
-            assertEquals(JieJvm.getSignature(A.class), a.classSignature());
+            assertEquals(JvmKit.getSignature(A.class), a.classSignature());
             SignatureParser c = signatureParser(C.class);
-            assertEquals(JieJvm.getSignature(C.class), c.classSignature());
+            assertEquals(JvmKit.getSignature(C.class), c.classSignature());
         }
         {
             // for Inter
             SignatureParser a = signatureParser(Inter.class);
-            assertEquals(JieJvm.getSignature(Inter.class), a.classSignature());
+            assertEquals(JvmKit.getSignature(Inter.class), a.classSignature());
         }
         {
             // for DS:
@@ -225,7 +225,7 @@ public class JvmTest implements AssertTest {
             for (int i = 1; i <= DS.fieldNum; i++) {
                 String fieldName = "f" + i;
                 Field field = DS.class.getDeclaredField(fieldName);
-                String testSig = JieJvm.getSignature(field);
+                String testSig = JvmKit.getSignature(field);
                 String asmSig = signatureParser.fieldSignature(fieldName);
                 assertEquals(testSig, asmSig);
             }
@@ -234,37 +234,37 @@ public class JvmTest implements AssertTest {
             for (int i = 1; i <= DS.methodNum; i++) {
                 String methodName = "m" + i;
                 Method method = methods.stream().filter(m -> m.getName().equals(methodName)).findFirst().get();
-                String testSig = JieJvm.getSignature(method);
+                String testSig = JvmKit.getSignature(method);
                 String asmSig = signatureParser.methodSignature(methodName);
                 assertEquals(testSig, asmSig);
             }
             // constructor:
             assertEquals(
-                JieJvm.getSignature(DS.class.getDeclaredConstructor()),
-                signatureParser.constructorSignature(JieJvm.getDescriptor(DS.class.getDeclaredConstructor()))
+                JvmKit.getSignature(DS.class.getDeclaredConstructor()),
+                signatureParser.constructorSignature(JvmKit.getDescriptor(DS.class.getDeclaredConstructor()))
             );
             assertEquals(
-                JieJvm.getSignature(DS.class.getDeclaredConstructor(String.class)),
+                JvmKit.getSignature(DS.class.getDeclaredConstructor(String.class)),
                 signatureParser.constructorSignature(
-                    JieJvm.getDescriptor(DS.class.getDeclaredConstructor(String.class))
+                    JvmKit.getDescriptor(DS.class.getDeclaredConstructor(String.class))
                 )
             );
             assertEquals(
-                JieJvm.getSignature(DS.class.getDeclaredConstructor(String.class, List.class)),
+                JvmKit.getSignature(DS.class.getDeclaredConstructor(String.class, List.class)),
                 signatureParser.constructorSignature(
-                    JieJvm.getDescriptor(DS.class.getDeclaredConstructor(String.class, List.class))
+                    JvmKit.getDescriptor(DS.class.getDeclaredConstructor(String.class, List.class))
                 )
             );
             assertEquals(
-                JieJvm.getSignature(DS.class.getDeclaredConstructor(String.class, List.class, Map.class)),
+                JvmKit.getSignature(DS.class.getDeclaredConstructor(String.class, List.class, Map.class)),
                 signatureParser.constructorSignature(
-                    JieJvm.getDescriptor(DS.class.getDeclaredConstructor(String.class, List.class, Map.class))
+                    JvmKit.getDescriptor(DS.class.getDeclaredConstructor(String.class, List.class, Map.class))
                 )
             );
             assertEquals(
-                JieJvm.getSignature(DS.class.getDeclaredConstructor(String.class, String.class, Integer.class)),
+                JvmKit.getSignature(DS.class.getDeclaredConstructor(String.class, String.class, Integer.class)),
                 signatureParser.constructorSignature(
-                    JieJvm.getDescriptor(DS.class.getDeclaredConstructor(String.class, String.class, Integer.class))
+                    JvmKit.getDescriptor(DS.class.getDeclaredConstructor(String.class, String.class, Integer.class))
                 )
             );
         }
@@ -275,7 +275,7 @@ public class JvmTest implements AssertTest {
             for (int i = 1; i <= ODS.fieldNum; i++) {
                 String fieldName = "f" + i;
                 Field field = ODS.class.getDeclaredField(fieldName);
-                String testSig = JieJvm.getSignature(field);
+                String testSig = JvmKit.getSignature(field);
                 String asmSig = signatureParser.fieldSignature(fieldName);
                 assertEquals(testSig, asmSig);
             }
@@ -284,13 +284,13 @@ public class JvmTest implements AssertTest {
             for (int i = 1; i <= ODS.methodNum; i++) {
                 String methodName = "m" + i;
                 Method method = methods.stream().filter(m -> m.getName().equals(methodName)).findFirst().get();
-                String testSig = JieJvm.getSignature(method);
+                String testSig = JvmKit.getSignature(method);
                 String asmSig = signatureParser.methodSignature(methodName);
                 assertEquals(testSig, asmSig);
             }
         }
         // exception
-        expectThrows(JvmException.class, () -> JieJvm.getSignature(JieType.otherType()));
+        expectThrows(JvmException.class, () -> JvmKit.getSignature(TypeKit.otherType()));
     }
 
     private SignatureParser signatureParser(Class<?> cls) throws Exception {
@@ -302,10 +302,10 @@ public class JvmTest implements AssertTest {
 
     @Test
     public void testRawType() throws Exception {
-        Method raw1 = JieJvm.class.getDeclaredMethod("getRawClass", ParameterizedType.class);
+        Method raw1 = JvmKit.class.getDeclaredMethod("getRawClass", ParameterizedType.class);
         invokeThrows(JvmException.class, raw1, null, TypeTest.errorParameterizedType());
-        Method raw2 = JieJvm.class.getDeclaredMethod("getRawClass", GenericArrayType.class);
-        invokeThrows(JvmException.class, raw2, null, JieType.arrayType(JieType.otherType()));
+        Method raw2 = JvmKit.class.getDeclaredMethod("getRawClass", GenericArrayType.class);
+        invokeThrows(JvmException.class, raw2, null, TypeKit.arrayType(TypeKit.otherType()));
     }
 
     static class SignatureParser extends ClassVisitor {

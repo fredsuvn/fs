@@ -22,7 +22,7 @@ import java.util.Iterator;
  *
  * @author sunqian
  */
-public class JieClass {
+public class ClassKit {
 
     /**
      * Returns the field of the specified name from the given class, or {@code null} if not found. This method first
@@ -327,15 +327,15 @@ public class JieClass {
      */
     @JdkDependent
     public static @Nullable Class<?> arrayClass(@Nonnull Type componentType) {
-        Class<?> componentClass = JieType.toRuntimeClass(componentType);
+        Class<?> componentClass = TypeKit.toRuntimeClass(componentType);
         if (componentClass == null) {
             return null;
         }
-        String name = JieClass.arrayClassName(componentClass);
+        String name = ClassKit.arrayClassName(componentClass);
         if (name == null) {
             return null;
         }
-        return JieClass.classForName(name, componentClass.getClassLoader());
+        return ClassKit.classForName(name, componentClass.getClassLoader());
     }
 
     /**
@@ -353,7 +353,7 @@ public class JieClass {
             if (Jie.equals(componentType, void.class)) {
                 return null;
             }
-            return "[" + JieJvm.getDescriptor(componentType);
+            return "[" + JvmKit.getDescriptor(componentType);
         }
         return "[L" + componentType.getName() + ";";
     }

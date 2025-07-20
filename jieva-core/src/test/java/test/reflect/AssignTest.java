@@ -1,7 +1,7 @@
 package test.reflect;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.reflect.JieType;
+import xyz.sunqian.common.reflect.TypeKit;
 import xyz.sunqian.common.reflect.TypeRef;
 
 import java.io.Serializable;
@@ -44,18 +44,18 @@ public class AssignTest {
 
     @Test
     public <T> void testSpecials() {
-        assertFalse(JieType.isAssignable(JieType.otherType(), String.class));
-        assertFalse(JieType.isAssignable(String.class, TypeTest.errorParameterizedType()));
-        assertFalse(JieType.isAssignable(TypeTest.errorParameterizedType(), new TypeRef<List<String>>() {}.type()));
-        assertFalse(JieType.isAssignable(new TypeRef<List<String>>() {}.type(), TypeTest.errorParameterizedType()));
-        assertFalse(JieType.isAssignable(String.class, JieType.otherType()));
-        assertFalse(JieType.isAssignable(TypeTest.errorParameterizedType(), JieType.otherType()));
-        assertFalse(JieType.isAssignable(new TypeRef<T>() {}.type(), JieType.otherType()));
-        assertFalse(JieType.isAssignable(JieType.wildcardChar(), JieType.otherType()));
-        assertFalse(JieType.isAssignable(new TypeRef<T[]>() {}.type(), JieType.otherType()));
-        ParameterizedType p1 = JieType.parameterizedType(List.class, new Type[]{String.class, String.class});
-        ParameterizedType p2 = JieType.parameterizedType(List.class, new Type[]{String.class});
-        assertFalse(JieType.isAssignable(p1, p2));
+        assertFalse(TypeKit.isAssignable(TypeKit.otherType(), String.class));
+        assertFalse(TypeKit.isAssignable(String.class, TypeTest.errorParameterizedType()));
+        assertFalse(TypeKit.isAssignable(TypeTest.errorParameterizedType(), new TypeRef<List<String>>() {}.type()));
+        assertFalse(TypeKit.isAssignable(new TypeRef<List<String>>() {}.type(), TypeTest.errorParameterizedType()));
+        assertFalse(TypeKit.isAssignable(String.class, TypeKit.otherType()));
+        assertFalse(TypeKit.isAssignable(TypeTest.errorParameterizedType(), TypeKit.otherType()));
+        assertFalse(TypeKit.isAssignable(new TypeRef<T>() {}.type(), TypeKit.otherType()));
+        assertFalse(TypeKit.isAssignable(TypeKit.wildcardChar(), TypeKit.otherType()));
+        assertFalse(TypeKit.isAssignable(new TypeRef<T[]>() {}.type(), TypeKit.otherType()));
+        ParameterizedType p1 = TypeKit.parameterizedType(List.class, new Type[]{String.class, String.class});
+        ParameterizedType p2 = TypeKit.parameterizedType(List.class, new Type[]{String.class});
+        assertFalse(TypeKit.isAssignable(p1, p2));
     }
 
     public static class ClassTester<
@@ -236,7 +236,7 @@ public class AssignTest {
         }
 
         private void testAssign(Type assigned, Type assignee, boolean expected) {
-            assertEquals(JieType.isAssignable(assigned, assignee), expected,
+            assertEquals(TypeKit.isAssignable(assigned, assignee), expected,
                 String.format("Assign error: %s = %s", assigned.getTypeName(), assignee.getTypeName())
             );
         }
@@ -1060,14 +1060,14 @@ public class AssignTest {
         }
 
         private void testAssign(Type assigned, Type assignee, boolean expected) {
-            assertEquals(JieType.isAssignable(assigned, assignee), expected,
+            assertEquals(TypeKit.isAssignable(assigned, assignee), expected,
                 String.format("Assign error: %s = %s", assigned.getTypeName(), assignee.getTypeName())
             );
         }
     }
 
     private static void testAssign(Type assigned, Type assignee, boolean expected) {
-        assertEquals(JieType.isAssignable(assigned, assignee), expected,
+        assertEquals(TypeKit.isAssignable(assigned, assignee), expected,
             String.format("Assign error: %s = %s", assigned.getTypeName(), assignee.getTypeName())
         );
     }

@@ -7,8 +7,8 @@ import xyz.sunqian.common.collect.CollectKit;
 import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IOKit;
-import xyz.sunqian.common.net.NetException;
 import xyz.sunqian.common.net.GekServerStates;
+import xyz.sunqian.common.net.NetException;
 
 import java.io.IOException;
 import java.net.DatagramPacket;

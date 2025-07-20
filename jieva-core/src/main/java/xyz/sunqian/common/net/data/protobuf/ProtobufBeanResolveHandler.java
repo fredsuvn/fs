@@ -10,7 +10,7 @@ import xyz.sunqian.common.mapping.MappingException;
 import xyz.sunqian.common.objects.data.BeanException;
 import xyz.sunqian.common.objects.data.DataPropertyBase;
 import xyz.sunqian.common.objects.data.DataSchemaParser;
-import xyz.sunqian.common.reflect.JieType;
+import xyz.sunqian.common.reflect.TypeKit;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -34,7 +34,7 @@ public class ProtobufBeanResolveHandler implements DataSchemaParser.Handler {
     @Override
     public @Nullable boolean doParse(DataSchemaParser.Context context) {
         try {
-            Class<?> rawType = JieType.getRawClass(context.getType());
+            Class<?> rawType = TypeKit.getRawClass(context.getType());
             if (rawType == null) {
                 return true;
             }
@@ -78,7 +78,7 @@ public class ProtobufBeanResolveHandler implements DataSchemaParser.Handler {
         if (field.isMapField()) {
             String name = rawName + "Map";
             Method getterMethod = rawClass.getMethod("get" + StringKit.capitalize(name));
-            List<Type> argsTypes = JieType.resolveActualTypeArguments(getterMethod.getGenericReturnType(), Map.class);
+            List<Type> argsTypes = TypeKit.resolveActualTypeArguments(getterMethod.getGenericReturnType(), Map.class);
             if (CollectKit.isEmpty(argsTypes)) {
                 throw new BeanException("Cannot get actual argument type for " + getterMethod.getGenericReturnType() + ".");
             }
@@ -106,7 +106,7 @@ public class ProtobufBeanResolveHandler implements DataSchemaParser.Handler {
         if (field.isRepeated()) {
             String name = rawName + "List";
             Method getterMethod = rawClass.getMethod("get" + StringKit.capitalize(name));
-            List<Type> argsTypes = JieType.resolveActualTypeArguments(getterMethod.getGenericReturnType(), List.class);
+            List<Type> argsTypes = TypeKit.resolveActualTypeArguments(getterMethod.getGenericReturnType(), List.class);
             if (CollectKit.isEmpty(argsTypes)) {
                 throw new BeanException("Cannot get actual argument type for " + getterMethod.getGenericReturnType() + ".");
             }
@@ -135,7 +135,7 @@ public class ProtobufBeanResolveHandler implements DataSchemaParser.Handler {
         Type type = getterMethod.getGenericReturnType();
         Invocable getter = Invocable.of(getterMethod);
         if (isBuilder) {
-            Method setterMethod = rawClass.getMethod("set" + StringKit.capitalize(rawName), JieType.getRawClass(type));
+            Method setterMethod = rawClass.getMethod("set" + StringKit.capitalize(rawName), TypeKit.getRawClass(type));
             Invocable setter = Invocable.of(setterMethod);
             return new Impl(rawName, type, getterMethod, setterMethod, getter, setter);
         } else {

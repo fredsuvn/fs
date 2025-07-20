@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
@@ -474,15 +473,6 @@ public class AsmProxyTest {
         InterOverpass11 pi111 = pc.newInstance();
         InterOverpass11 i111 = new InterOverpass11() {};
         assertEquals(pi111.ooi(), i111.ooi());
-    }
-
-    @Test
-    public void testAsmProxyException() {
-        String message = "hello";
-        Throwable cause = new RuntimeException(message);
-        AsmProxyClassGenerator.AsmProxyException e = new AsmProxyClassGenerator.AsmProxyException(cause);
-        assertEquals(e.getMessage(), message);
-        assertSame(e.getCause(), cause);
     }
 
     private void testInterA(InterA obj, IntVar counter) {

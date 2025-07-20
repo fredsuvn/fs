@@ -4,7 +4,7 @@
  * <p>
  * Utilities:
  * <ul>
- *     <li>{@link xyz.sunqian.common.asm.JieAsm}</li>
+ *     <li>{@link xyz.sunqian.common.asm.AsmKit}</li>
  * </ul>
  */
 @NonExported

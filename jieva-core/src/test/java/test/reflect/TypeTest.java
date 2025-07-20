@@ -5,8 +5,8 @@ import org.testng.annotations.Test;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.reflect.JieType;
 import xyz.sunqian.common.reflect.ReflectionException;
+import xyz.sunqian.common.reflect.TypeKit;
 import xyz.sunqian.common.reflect.TypeRef;
 
 import java.lang.annotation.Annotation;
@@ -42,23 +42,23 @@ public class TypeTest {
             List<? extends String> l2;
             List<String>[] l3;
         }
-        assertTrue(JieType.isClass(Object.class));
-        assertFalse(JieType.isClass(X.class.getDeclaredField("l1").getGenericType()));
-        assertTrue(JieType.isParameterized(X.class.getDeclaredField("l1").getGenericType()));
-        assertFalse(JieType.isParameterized(Object.class));
-        assertTrue(JieType.isWildcard(((ParameterizedType) X.class.getDeclaredField("l2").getGenericType())
+        assertTrue(TypeKit.isClass(Object.class));
+        assertFalse(TypeKit.isClass(X.class.getDeclaredField("l1").getGenericType()));
+        assertTrue(TypeKit.isParameterized(X.class.getDeclaredField("l1").getGenericType()));
+        assertFalse(TypeKit.isParameterized(Object.class));
+        assertTrue(TypeKit.isWildcard(((ParameterizedType) X.class.getDeclaredField("l2").getGenericType())
             .getActualTypeArguments()[0]));
-        assertFalse(JieType.isWildcard(Object.class));
-        assertTrue(JieType.isTypeVariable(X.class.getTypeParameters()[0]));
-        assertFalse(JieType.isTypeVariable(Object.class));
-        assertTrue(JieType.isGenericArray(X.class.getDeclaredField("l3").getGenericType()));
-        assertFalse(JieType.isGenericArray(Object.class));
+        assertFalse(TypeKit.isWildcard(Object.class));
+        assertTrue(TypeKit.isTypeVariable(X.class.getTypeParameters()[0]));
+        assertFalse(TypeKit.isTypeVariable(Object.class));
+        assertTrue(TypeKit.isGenericArray(X.class.getDeclaredField("l3").getGenericType()));
+        assertFalse(TypeKit.isGenericArray(Object.class));
     }
 
     @Test
     public void testLastName() throws Exception {
-        assertEquals(JieType.getLastName(JieType.class), JieType.class.getSimpleName());
-        Method method = JieType.class.getDeclaredMethod("getLastName", String.class);
+        assertEquals(TypeKit.getLastName(TypeKit.class), TypeKit.class.getSimpleName());
+        Method method = TypeKit.class.getDeclaredMethod("getLastName", String.class);
         method.setAccessible(true);
         assertEquals(method.invoke(null, "123"), "123");
         assertEquals(method.invoke(null, ".123"), "123");
@@ -71,11 +71,11 @@ public class TypeTest {
         class X {
             List<String> list;
         }
-        assertEquals(JieType.getRawClass(String.class), String.class);
+        assertEquals(TypeKit.getRawClass(String.class), String.class);
         Type listType = X.class.getDeclaredField("list").getGenericType();
-        assertEquals(JieType.getRawClass(listType), List.class);
-        assertNull(JieType.getRawClass(List.class.getTypeParameters()[0]));
-        assertNull(JieType.getRawClass(TypeTest.errorParameterizedType()));
+        assertEquals(TypeKit.getRawClass(listType), List.class);
+        assertNull(TypeKit.getRawClass(List.class.getTypeParameters()[0]));
+        assertNull(TypeKit.getRawClass(TypeTest.errorParameterizedType()));
     }
 
     @Test
@@ -87,23 +87,23 @@ public class TypeTest {
         }
         ParameterizedType upperParam = (ParameterizedType) X.class.getDeclaredField("upper").getGenericType();
         WildcardType upper = (WildcardType) upperParam.getActualTypeArguments()[0];
-        assertEquals(JieType.getUpperBound(upper), String.class);
-        assertNull(JieType.getLowerBound(upper));
+        assertEquals(TypeKit.getUpperBound(upper), String.class);
+        assertNull(TypeKit.getLowerBound(upper));
         ParameterizedType lowerParam = (ParameterizedType) X.class.getDeclaredField("lower").getGenericType();
         WildcardType lower = (WildcardType) lowerParam.getActualTypeArguments()[0];
-        assertEquals(JieType.getLowerBound(lower), String.class);
-        assertEquals(JieType.getUpperBound(lower), Object.class);
+        assertEquals(TypeKit.getLowerBound(lower), String.class);
+        assertEquals(TypeKit.getUpperBound(lower), Object.class);
         ParameterizedType queryParam = (ParameterizedType) X.class.getDeclaredField("query").getGenericType();
         WildcardType query = (WildcardType) queryParam.getActualTypeArguments()[0];
-        assertNull(JieType.getLowerBound(upper));
-        assertEquals(JieType.getUpperBound(query), Object.class);
+        assertNull(TypeKit.getLowerBound(upper));
+        assertEquals(TypeKit.getUpperBound(query), Object.class);
         TypeVariable<?> t = X.class.getTypeParameters()[0];
-        assertEquals(JieType.getFirstBound(t), String.class);
+        assertEquals(TypeKit.getFirstBound(t), String.class);
         TypeVariable<?> u = X.class.getTypeParameters()[1];
-        assertEquals(JieType.getFirstBound(u), Object.class);
+        assertEquals(TypeKit.getFirstBound(u), Object.class);
 
         // special:
-        assertEquals(JieType.getUpperBound(new WildcardType() {
+        assertEquals(TypeKit.getUpperBound(new WildcardType() {
 
             @Override
             public Type @Nonnull [] getUpperBounds() {
@@ -115,7 +115,7 @@ public class TypeTest {
                 return new Type[0];
             }
         }), Object.class);
-        assertEquals(JieType.getFirstBound(new TypeVariable<Class<?>>() {
+        assertEquals(TypeKit.getFirstBound(new TypeVariable<Class<?>>() {
 
             @Override
             public <T extends Annotation> @Nullable T getAnnotation(@Nonnull Class<T> annotationClass) {
@@ -166,37 +166,37 @@ public class TypeTest {
         Type l3Type = X.class.getDeclaredField("l3").getGenericType();
 
         // is array:
-        assertFalse(JieType.isArray(l1Type));
-        assertTrue(JieType.isArray(l2Type));
-        assertTrue(JieType.isArray(l3Type));
-        assertTrue(JieType.isArray(int[].class));
-        assertFalse(JieType.isArray(int.class));
+        assertFalse(TypeKit.isArray(l1Type));
+        assertTrue(TypeKit.isArray(l2Type));
+        assertTrue(TypeKit.isArray(l3Type));
+        assertTrue(TypeKit.isArray(int[].class));
+        assertFalse(TypeKit.isArray(int.class));
 
         // component type:
-        assertNull(JieType.getComponentType(l1Type));
-        assertEquals(JieType.getComponentType(l2Type), l1Type);
-        assertEquals(JieType.getComponentType(int[].class), int.class);
+        assertNull(TypeKit.getComponentType(l1Type));
+        assertEquals(TypeKit.getComponentType(l2Type), l1Type);
+        assertEquals(TypeKit.getComponentType(int[].class), int.class);
     }
 
     @Test
     public void testRuntimeClass() throws Exception {
-        assertEquals(JieType.toRuntimeClass(int.class), int.class);
+        assertEquals(TypeKit.toRuntimeClass(int.class), int.class);
         class X<T extends String, U extends List<? extends String>> {
             List<? extends String> l1 = null;
             List<? extends String>[] l2 = null;
         }
         Type l1Type = X.class.getDeclaredField("l1").getGenericType();
-        assertEquals(JieType.toRuntimeClass(l1Type), List.class);
+        assertEquals(TypeKit.toRuntimeClass(l1Type), List.class);
         Type l2Type = X.class.getDeclaredField("l2").getGenericType();
-        assertEquals(JieType.toRuntimeClass(l2Type), List[].class);
-        assertEquals(JieType.toRuntimeClass(X.class.getTypeParameters()[0]), String.class);
-        assertEquals(JieType.toRuntimeClass(X.class.getTypeParameters()[1]), List.class);
-        GenericArrayType arrayType = JieType.arrayType(X.class.getTypeParameters()[0]);
-        assertEquals(JieType.toRuntimeClass(arrayType), String[].class);
-        ParameterizedType p = (ParameterizedType) JieType.getFirstBound(X.class.getTypeParameters()[1]);
+        assertEquals(TypeKit.toRuntimeClass(l2Type), List[].class);
+        assertEquals(TypeKit.toRuntimeClass(X.class.getTypeParameters()[0]), String.class);
+        assertEquals(TypeKit.toRuntimeClass(X.class.getTypeParameters()[1]), List.class);
+        GenericArrayType arrayType = TypeKit.arrayType(X.class.getTypeParameters()[0]);
+        assertEquals(TypeKit.toRuntimeClass(arrayType), String[].class);
+        ParameterizedType p = (ParameterizedType) TypeKit.getFirstBound(X.class.getTypeParameters()[1]);
         Type w = p.getActualTypeArguments()[0];
-        assertNull(JieType.toRuntimeClass(w));
-        assertNull(JieType.toRuntimeClass(JieType.arrayType(w)));
+        assertNull(TypeKit.toRuntimeClass(w));
+        assertNull(TypeKit.toRuntimeClass(TypeKit.arrayType(w)));
     }
 
     @Test
@@ -204,30 +204,30 @@ public class TypeTest {
         abstract class X<T> extends AbstractMap<String, Integer> {
         }
         assertEquals(
-            JieType.resolveActualTypeArguments(X.class, Map.class),
+            TypeKit.resolveActualTypeArguments(X.class, Map.class),
             Arrays.asList(String.class, Integer.class)
         );
         assertEquals(
-            JieType.resolveActualTypeArguments(X[].class, Map[].class),
+            TypeKit.resolveActualTypeArguments(X[].class, Map[].class),
             Arrays.asList(String.class, Integer.class)
         );
         assertEquals(
-            JieType.resolveActualTypeArguments(X[].class, Object.class),
+            TypeKit.resolveActualTypeArguments(X[].class, Object.class),
             Collections.emptyList()
         );
         abstract class Y<T> extends X<T> {
         }
         assertEquals(
-            JieType.resolveActualTypeArguments(Y.class, X.class),
+            TypeKit.resolveActualTypeArguments(Y.class, X.class),
             Collections.singletonList(Y.class.getTypeParameters()[0])
         );
         // exception:
-        expectThrows(ReflectionException.class, () -> JieType.resolveActualTypeArguments(JieType.otherType(), Object.class));
-        expectThrows(ReflectionException.class, () -> JieType.resolveActualTypeArguments(X[].class, Map.class));
-        expectThrows(ReflectionException.class, () -> JieType.resolveActualTypeArguments(X.class, Map[].class));
+        expectThrows(ReflectionException.class, () -> TypeKit.resolveActualTypeArguments(TypeKit.otherType(), Object.class));
+        expectThrows(ReflectionException.class, () -> TypeKit.resolveActualTypeArguments(X[].class, Map.class));
+        expectThrows(ReflectionException.class, () -> TypeKit.resolveActualTypeArguments(X.class, Map[].class));
         expectThrows(
             ReflectionException.class,
-            () -> JieType.resolveActualTypeArguments(X.class.getTypeParameters()[0], Map.class)
+            () -> TypeKit.resolveActualTypeArguments(X.class.getTypeParameters()[0], Map.class)
         );
     }
 
@@ -238,7 +238,7 @@ public class TypeTest {
             MappingCls2<Void> cls2 = null;
         }
         Type cls3 = X.class.getDeclaredField("cls3").getGenericType();
-        Map<TypeVariable<?>, Type> map = JieType.mapTypeParameters(cls3);
+        Map<TypeVariable<?>, Type> map = TypeKit.mapTypeParameters(cls3);
         assertEquals(getTypeParameter(map, MappingCls2.class, 0), CharSequence.class);
         assertEquals(getTypeParameter(map, MappingCls1.class, 0), String.class);
         assertEquals(getTypeParameter(map, MappingCls1.class, 1), MappingCls2.class.getTypeParameters()[0]);
@@ -260,13 +260,13 @@ public class TypeTest {
         assertEquals(getTypeParameter(map, MappingInterB2.class, 1), MappingInterB.class.getTypeParameters()[3]);
         assertEquals(map.size(), 19);
         Type cls2 = X.class.getDeclaredField("cls2").getGenericType();
-        Map<TypeVariable<?>, Type> map2 = JieType.mapTypeParameters(cls2);
+        Map<TypeVariable<?>, Type> map2 = TypeKit.mapTypeParameters(cls2);
         assertEquals(getTypeParameter(map2, MappingCls2.class, 0), Void.class);
         assertEquals(map2.size(), 19);
 
         // special exception:
         {
-            Method mapTypeVariables = JieType.class.getDeclaredMethod("mapTypeVariables", Type.class, Map.class);
+            Method mapTypeVariables = TypeKit.class.getDeclaredMethod("mapTypeVariables", Type.class, Map.class);
             mapTypeVariables.setAccessible(true);
             Map<@Nonnull TypeVariable<?>, @Nullable Type> mapping = new HashMap<>();
             Type errorParam = TypeTest.errorParameterizedType();
@@ -274,7 +274,7 @@ public class TypeTest {
             assertTrue(mapping.isEmpty());
         }
         {
-            Method mapTypeVariables = JieType.class.getDeclaredMethod("mapTypeVariables", Type[].class, Map.class);
+            Method mapTypeVariables = TypeKit.class.getDeclaredMethod("mapTypeVariables", Type[].class, Map.class);
             mapTypeVariables.setAccessible(true);
             Map<@Nonnull TypeVariable<?>, @Nullable Type> mapping = new HashMap<>();
             Type errorParam = TypeTest.errorParameterizedType();
@@ -318,46 +318,46 @@ public class TypeTest {
                 ? extends List<? extends List<? extends Hashtable>[]>
                 > r6;
         }
-        assertEquals(JieType.replaceType(X.class, X.class, Object.class), Object.class);
+        assertEquals(TypeKit.replaceType(X.class, X.class, Object.class), Object.class);
         Type t1 = X.class.getDeclaredField("f1").getGenericType();
         Type r1 = X.class.getDeclaredField("r1").getGenericType();
-        Type rp1 = JieType.replaceType(t1, String.class, Integer.class);
+        Type rp1 = TypeKit.replaceType(t1, String.class, Integer.class);
         assertEquals(rp1, r1);
         Type t2 = X.class.getDeclaredField("f2").getGenericType();
         Type r2 = X.class.getDeclaredField("r2").getGenericType();
-        Type rp2 = JieType.replaceType(t2, String.class, Integer.class);
+        Type rp2 = TypeKit.replaceType(t2, String.class, Integer.class);
         assertEquals(rp2, r2);
         Type t3 = X.class.getDeclaredField("f3").getGenericType();
         Type r3 = X.class.getDeclaredField("r3").getGenericType();
-        Type rp3 = JieType.replaceType(t3, String.class, Integer.class);
+        Type rp3 = TypeKit.replaceType(t3, String.class, Integer.class);
         assertEquals(rp3, r3);
         Type t4 = X.class.getDeclaredField("f4").getGenericType();
         Type r4 = X.class.getDeclaredField("r4").getGenericType();
-        Type rp4 = JieType.replaceType(t4, String.class, Integer.class);
+        Type rp4 = TypeKit.replaceType(t4, String.class, Integer.class);
         assertEquals(rp4, r4);
         Type t5 = X.class.getDeclaredField("f5").getGenericType();
         Type r5 = X.class.getDeclaredField("r5").getGenericType();
-        Type rp5 = JieType.replaceType(t5, String.class, Integer.class);
+        Type rp5 = TypeKit.replaceType(t5, String.class, Integer.class);
         assertEquals(rp5, r5);
         Type t6 = X.class.getDeclaredField("f6").getGenericType();
         Type r6 = X.class.getDeclaredField("r6").getGenericType();
-        Type rp6 = JieType.replaceType(t6, HashMap.class, Hashtable.class);
+        Type rp6 = TypeKit.replaceType(t6, HashMap.class, Hashtable.class);
         assertEquals(rp6, r6);
 
         // same:
-        assertSame(JieType.replaceType(t1, Integer.class, String.class), t1);
-        assertSame(JieType.replaceType(t2, Integer.class, String.class), t2);
-        assertSame(JieType.replaceType(t3, Integer.class, String.class), t3);
-        assertSame(JieType.replaceType(t4, Integer.class, String.class), t4);
-        assertSame(JieType.replaceType(t5, Integer.class, String.class), t5);
+        assertSame(TypeKit.replaceType(t1, Integer.class, String.class), t1);
+        assertSame(TypeKit.replaceType(t2, Integer.class, String.class), t2);
+        assertSame(TypeKit.replaceType(t3, Integer.class, String.class), t3);
+        assertSame(TypeKit.replaceType(t4, Integer.class, String.class), t4);
+        assertSame(TypeKit.replaceType(t5, Integer.class, String.class), t5);
 
         // special:
         expectThrows(ReflectionException.class, () ->
-            JieType.replaceType(TypeTest.errorParameterizedType(), String.class, Integer.class));
-        Type p1 = JieType.parameterizedType(List.class, Jie.array(), Integer.class);
-        Type p2 = JieType.parameterizedType(List.class, Jie.array(), Long.class);
-        assertEquals(JieType.replaceType(p1, Integer.class, Long.class), p2);
-        assertSame(JieType.replaceType(p1, Integer.class, Integer.class), p1);
+            TypeKit.replaceType(TypeTest.errorParameterizedType(), String.class, Integer.class));
+        Type p1 = TypeKit.parameterizedType(List.class, Jie.array(), Integer.class);
+        Type p2 = TypeKit.parameterizedType(List.class, Jie.array(), Long.class);
+        assertEquals(TypeKit.replaceType(p1, Integer.class, Long.class), p2);
+        assertSame(TypeKit.replaceType(p1, Integer.class, Integer.class), p1);
     }
 
     @Test
@@ -372,44 +372,44 @@ public class TypeTest {
         }
         // no owner
         Type x = new TypeRef<X<String>>() {}.type();
-        Type xx = JieType.parameterizedType(X.class, Jie.array(String.class));
+        Type xx = TypeKit.parameterizedType(X.class, Jie.array(String.class));
         assertEquals(x, xx);
         assertEquals(x.toString(), xx.toString());
         assertEquals(x.hashCode(), xx.hashCode());
         assertTrue(xx.equals(xx));
         assertFalse(xx.equals(null));
-        Type xf1 = JieType.parameterizedType(String.class, Jie.array(String.class));
+        Type xf1 = TypeKit.parameterizedType(String.class, Jie.array(String.class));
         assertFalse(xx.equals(xf1));
-        Type xf2 = JieType.parameterizedType(X.class, Jie.array(Integer.class));
+        Type xf2 = TypeKit.parameterizedType(X.class, Jie.array(Integer.class));
         assertFalse(xx.equals(xf2));
         // has owner
         Type y = new TypeRef<X<String>.Y<Integer>>() {}.type();
-        Type yy = JieType.parameterizedType(
+        Type yy = TypeKit.parameterizedType(
             X.Y.class,
             Jie.array(Integer.class),
-            JieType.parameterizedType(X.class, Jie.array(String.class))
+            TypeKit.parameterizedType(X.class, Jie.array(String.class))
         );
         assertEquals(y, yy);
         assertEquals(y.toString(), yy.toString());
         assertEquals(y.hashCode(), yy.hashCode());
         assertTrue(yy.equals(yy));
         assertFalse(yy.equals(null));
-        Type yf1 = JieType.parameterizedType(
+        Type yf1 = TypeKit.parameterizedType(
             X.class,
             Jie.array(Integer.class),
-            JieType.parameterizedType(X.class, Jie.array(String.class))
+            TypeKit.parameterizedType(X.class, Jie.array(String.class))
         );
         assertFalse(yy.equals(yf1));
-        Type yf2 = JieType.parameterizedType(
+        Type yf2 = TypeKit.parameterizedType(
             X.Y.class,
             Jie.array(String.class),
-            JieType.parameterizedType(X.class, Jie.array(String.class))
+            TypeKit.parameterizedType(X.class, Jie.array(String.class))
         );
         assertFalse(yy.equals(yf2));
-        Type yf3 = JieType.parameterizedType(
+        Type yf3 = TypeKit.parameterizedType(
             X.Y.class,
             Jie.array(Integer.class),
-            JieType.parameterizedType(X.class, Jie.array(Integer.class))
+            TypeKit.parameterizedType(X.class, Jie.array(Integer.class))
         );
         assertFalse(yy.equals(yf3));
         Type yf4 = new TypeRef<X<String>.Z<Integer>>() {}.type();
@@ -431,33 +431,33 @@ public class TypeTest {
         }
         Type list1 = ((ParameterizedType) (X.class.getDeclaredField("list1").getGenericType()))
             .getActualTypeArguments()[0];
-        Type l1 = JieType.upperWildcard(String.class);
+        Type l1 = TypeKit.upperWildcard(String.class);
         assertEquals(l1, list1);
         assertEquals(l1.toString(), list1.toString());
         assertEquals(l1.hashCode(), list1.hashCode());
         Type list2 = ((ParameterizedType) (X.class.getDeclaredField("list2").getGenericType()))
             .getActualTypeArguments()[0];
-        Type l2 = JieType.lowerWildcard(String.class);
+        Type l2 = TypeKit.lowerWildcard(String.class);
         assertEquals(l2, list2);
         assertEquals(l2.toString(), list2.toString());
         assertEquals(l2.hashCode(), list2.hashCode());
         Type list3 = ((ParameterizedType) (X.class.getDeclaredField("list3").getGenericType()))
             .getActualTypeArguments()[0];
-        Type l3 = JieType.wildcardChar();
+        Type l3 = TypeKit.wildcardChar();
         assertEquals(l3, list3);
         assertEquals(l3.toString(), list3.toString());
         assertEquals(l3.hashCode(), list3.hashCode());
 
         // equals:
         assertEquals(l1, l1);
-        assertEquals(l1, JieType.upperWildcard(String.class));
+        assertEquals(l1, TypeKit.upperWildcard(String.class));
         assertFalse(l1.equals(null));
         assertFalse(l1.equals(l2));
         assertFalse(l1.equals(l3));
         assertFalse(l1.equals(list2));
         assertFalse(l1.equals(list3));
         assertFalse(l1.equals(String.class));
-        assertEquals(JieType.wildcardType(Jie.array(), Jie.array()).toString(), "??");
+        assertEquals(TypeKit.wildcardType(Jie.array(), Jie.array()).toString(), "??");
     }
 
     @Test
@@ -468,7 +468,7 @@ public class TypeTest {
         }
         Type list = X.class.getDeclaredField("list").getGenericType();
         Type array = X.class.getDeclaredField("array").getGenericType();
-        Type genericArray = JieType.arrayType(list);
+        Type genericArray = TypeKit.arrayType(list);
         assertEquals(genericArray, array);
         assertEquals(genericArray.toString(), array.toString());
         assertEquals(genericArray.hashCode(), array.hashCode());
@@ -477,13 +477,13 @@ public class TypeTest {
         assertEquals(genericArray, genericArray);
         assertFalse(genericArray.equals(null));
         assertFalse(genericArray.equals(String.class));
-        assertNotEquals(JieType.arrayType(String.class), JieType.arrayType(Integer.class));
+        assertNotEquals(TypeKit.arrayType(String.class), TypeKit.arrayType(Integer.class));
     }
 
     @Test
     public void testOther() throws Exception {
-        Type other1 = JieType.otherType();
-        Type other2 = JieType.otherType();
+        Type other1 = TypeKit.otherType();
+        Type other2 = TypeKit.otherType();
         assertEquals(other1, other1);
         assertNotEquals(other1, other2);
         assertEquals(other1.toString(), other2.toString());

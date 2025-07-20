@@ -2,7 +2,7 @@ package xyz.sunqian.common.invoke;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.reflect.JieClass;
+import xyz.sunqian.common.reflect.ClassKit;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -61,7 +61,7 @@ final class OfMethodHandle implements InvocableGenerator {
     @Override
     public @Nonnull Invocable generate(@Nonnull Method method) {
         MethodHandle handle = methodHandle(method);
-        boolean isStatic = JieClass.isStatic(method);
+        boolean isStatic = ClassKit.isStatic(method);
         return generate(handle, isStatic);
     }
 

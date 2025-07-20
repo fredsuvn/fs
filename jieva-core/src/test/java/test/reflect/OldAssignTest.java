@@ -1,7 +1,7 @@
 package test.reflect;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.reflect.JieType;
+import xyz.sunqian.common.reflect.TypeKit;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
@@ -19,58 +19,58 @@ import static org.testng.Assert.assertTrue;
 public class OldAssignTest {
     @Test
     public void testAssignableOther() {
-        Type other = JieType.otherType();
+        Type other = TypeKit.otherType();
         Class<?> classType = String.class;
-        ParameterizedType parameterized = JieType.parameterizedType(List.class, new Type[]{String.class});
-        WildcardType wildcard = JieType.upperWildcard(CharSequence.class);
-        GenericArrayType arrayType = JieType.arrayType(String.class);
+        ParameterizedType parameterized = TypeKit.parameterizedType(List.class, new Type[]{String.class});
+        WildcardType wildcard = TypeKit.upperWildcard(CharSequence.class);
+        GenericArrayType arrayType = TypeKit.arrayType(String.class);
         TypeVariable<?> typeVariable = AssignTester.class.getTypeParameters()[0];
 
-        assertFalse(JieType.isAssignable(other, other));
-        assertFalse(JieType.isAssignable(other, classType));
-        assertFalse(JieType.isAssignable(other, parameterized));
-        assertFalse(JieType.isAssignable(other, wildcard));
-        assertFalse(JieType.isAssignable(other, arrayType));
-        assertFalse(JieType.isAssignable(other, typeVariable));
+        assertFalse(TypeKit.isAssignable(other, other));
+        assertFalse(TypeKit.isAssignable(other, classType));
+        assertFalse(TypeKit.isAssignable(other, parameterized));
+        assertFalse(TypeKit.isAssignable(other, wildcard));
+        assertFalse(TypeKit.isAssignable(other, arrayType));
+        assertFalse(TypeKit.isAssignable(other, typeVariable));
 
-        assertFalse(JieType.isAssignable(classType, other));
-        assertTrue(JieType.isAssignable(classType, classType));
-        assertFalse(JieType.isAssignable(classType, parameterized));
-        assertFalse(JieType.isAssignable(classType, wildcard));
-        assertFalse(JieType.isAssignable(classType, arrayType));
-        assertFalse(JieType.isAssignable(classType, typeVariable));
+        assertFalse(TypeKit.isAssignable(classType, other));
+        assertTrue(TypeKit.isAssignable(classType, classType));
+        assertFalse(TypeKit.isAssignable(classType, parameterized));
+        assertFalse(TypeKit.isAssignable(classType, wildcard));
+        assertFalse(TypeKit.isAssignable(classType, arrayType));
+        assertFalse(TypeKit.isAssignable(classType, typeVariable));
 
-        assertFalse(JieType.isAssignable(parameterized, other));
-        assertFalse(JieType.isAssignable(parameterized, classType));
-        assertTrue(JieType.isAssignable(parameterized, parameterized));
-        assertFalse(JieType.isAssignable(parameterized, wildcard));
-        assertFalse(JieType.isAssignable(parameterized, arrayType));
-        assertFalse(JieType.isAssignable(parameterized, typeVariable));
+        assertFalse(TypeKit.isAssignable(parameterized, other));
+        assertFalse(TypeKit.isAssignable(parameterized, classType));
+        assertTrue(TypeKit.isAssignable(parameterized, parameterized));
+        assertFalse(TypeKit.isAssignable(parameterized, wildcard));
+        assertFalse(TypeKit.isAssignable(parameterized, arrayType));
+        assertFalse(TypeKit.isAssignable(parameterized, typeVariable));
 
-        assertFalse(JieType.isAssignable(wildcard, other));
-        assertFalse(JieType.isAssignable(wildcard, classType));
-        assertFalse(JieType.isAssignable(wildcard, parameterized));
-        assertFalse(JieType.isAssignable(wildcard, wildcard));
-        assertFalse(JieType.isAssignable(wildcard, arrayType));
-        assertFalse(JieType.isAssignable(wildcard, typeVariable));
+        assertFalse(TypeKit.isAssignable(wildcard, other));
+        assertFalse(TypeKit.isAssignable(wildcard, classType));
+        assertFalse(TypeKit.isAssignable(wildcard, parameterized));
+        assertFalse(TypeKit.isAssignable(wildcard, wildcard));
+        assertFalse(TypeKit.isAssignable(wildcard, arrayType));
+        assertFalse(TypeKit.isAssignable(wildcard, typeVariable));
 
-        assertFalse(JieType.isAssignable(arrayType, other));
-        assertFalse(JieType.isAssignable(arrayType, classType));
-        assertFalse(JieType.isAssignable(arrayType, parameterized));
-        assertFalse(JieType.isAssignable(arrayType, wildcard));
-        assertTrue(JieType.isAssignable(arrayType, arrayType));
-        assertFalse(JieType.isAssignable(arrayType, typeVariable));
+        assertFalse(TypeKit.isAssignable(arrayType, other));
+        assertFalse(TypeKit.isAssignable(arrayType, classType));
+        assertFalse(TypeKit.isAssignable(arrayType, parameterized));
+        assertFalse(TypeKit.isAssignable(arrayType, wildcard));
+        assertTrue(TypeKit.isAssignable(arrayType, arrayType));
+        assertFalse(TypeKit.isAssignable(arrayType, typeVariable));
 
-        assertFalse(JieType.isAssignable(typeVariable, other));
-        assertFalse(JieType.isAssignable(typeVariable, classType));
-        assertFalse(JieType.isAssignable(typeVariable, parameterized));
-        assertFalse(JieType.isAssignable(typeVariable, wildcard));
-        assertFalse(JieType.isAssignable(typeVariable, arrayType));
-        assertTrue(JieType.isAssignable(typeVariable, typeVariable));
+        assertFalse(TypeKit.isAssignable(typeVariable, other));
+        assertFalse(TypeKit.isAssignable(typeVariable, classType));
+        assertFalse(TypeKit.isAssignable(typeVariable, parameterized));
+        assertFalse(TypeKit.isAssignable(typeVariable, wildcard));
+        assertFalse(TypeKit.isAssignable(typeVariable, arrayType));
+        assertTrue(TypeKit.isAssignable(typeVariable, typeVariable));
 
-        ParameterizedType p1 = JieType.parameterizedType(List.class, new Type[]{String.class, String.class});
-        ParameterizedType p2 = JieType.parameterizedType(List.class, new Type[]{String.class});
-        assertFalse(JieType.isAssignable(p1, p2));
+        ParameterizedType p1 = TypeKit.parameterizedType(List.class, new Type[]{String.class, String.class});
+        ParameterizedType p2 = TypeKit.parameterizedType(List.class, new Type[]{String.class});
+        assertFalse(TypeKit.isAssignable(p1, p2));
     }
 
     @Test
@@ -231,9 +231,9 @@ public class OldAssignTest {
             doTestParam("f8", "f51", true);
             doTestParam("f8", "f52", false);
             doTestParam("f8", "f53", true);
-            ParameterizedType p1 = JieType.parameterizedType(List.class, new Type[]{String.class, String.class});
-            ParameterizedType p2 = JieType.parameterizedType(List.class, new Type[]{String.class});
-            assertFalse(JieType.isAssignable(p1, p2));
+            ParameterizedType p1 = TypeKit.parameterizedType(List.class, new Type[]{String.class, String.class});
+            ParameterizedType p2 = TypeKit.parameterizedType(List.class, new Type[]{String.class});
+            assertFalse(TypeKit.isAssignable(p1, p2));
 
             // TypeVariable
             testAssign("f16", "f16", true);
@@ -268,9 +268,9 @@ public class OldAssignTest {
             testAssign("f23", "f4", false);
             testAssign("f57", "f21", false);
             testAssign("f21", "f57", true);
-            GenericArrayType a1 = JieType.arrayType(String.class);
-            assertTrue(JieType.isAssignable(a1, String[].class));
-            assertTrue(JieType.isAssignable(String[].class, a1));
+            GenericArrayType a1 = TypeKit.arrayType(String.class);
+            assertTrue(TypeKit.isAssignable(a1, String[].class));
+            assertTrue(TypeKit.isAssignable(String[].class, a1));
 
             // Wildcard
             // add
@@ -339,7 +339,7 @@ public class OldAssignTest {
                 Type assignedType = assignedField.getGenericType();
                 Field assigneeField = AssignTester.class.getDeclaredField(assignee);
                 Type assigneeType = assigneeField.getGenericType();
-                assertEquals(JieType.isAssignable(assignedType, assigneeType), isAssignable,
+                assertEquals(TypeKit.isAssignable(assignedType, assigneeType), isAssignable,
                     String.format(
                         "Assign error: %s: %s = %s: %s",
                         assigned,
@@ -359,7 +359,7 @@ public class OldAssignTest {
                 Type assignedType = assignedParamType.getActualTypeArguments()[0];
                 Field assigneeField = AssignTester.class.getDeclaredField(assignee);
                 Type assigneeType = assigneeField.getGenericType();
-                assertEquals(JieType.isAssignable(assignedType, assigneeType), isAssignable,
+                assertEquals(TypeKit.isAssignable(assignedType, assigneeType), isAssignable,
                     String.format(
                         "Assign error: (%s: %s).add(%s: %s)",
                         assigned,
@@ -380,7 +380,7 @@ public class OldAssignTest {
                 Field assigneeField = AssignTester.class.getDeclaredField(assignee);
                 ParameterizedType assigneeParamType = (ParameterizedType) assigneeField.getGenericType();
                 Type assigneeType = assigneeParamType.getActualTypeArguments()[0];
-                assertEquals(JieType.isAssignable(assignedType, assigneeType), isAssignable,
+                assertEquals(TypeKit.isAssignable(assignedType, assigneeType), isAssignable,
                     String.format(
                         "Assign error: (%s: %s).add((%s: %s).get(0))",
                         assigned,

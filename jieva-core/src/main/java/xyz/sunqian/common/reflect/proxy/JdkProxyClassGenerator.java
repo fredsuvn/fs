@@ -8,7 +8,7 @@ import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.value.Var;
 import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.reflect.BytesClassLoader;
-import xyz.sunqian.common.reflect.JieClass;
+import xyz.sunqian.common.reflect.ClassKit;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -48,7 +48,7 @@ public class JdkProxyClassGenerator implements ProxyClassGenerator {
         for (Class<?> anInterface : interfaces) {
             Method[] methods = anInterface.getMethods();
             for (Method method : methods) {
-                if (JieClass.isStatic(method)) {
+                if (ClassKit.isStatic(method)) {
                     continue;
                 }
                 if (!proxiedMethods.containsKey(method) && methodHandler.requiresProxy(method)) {

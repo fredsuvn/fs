@@ -10,7 +10,7 @@ import java.util.List;
  *
  * @author sunqian
  */
-public class JieProxy {
+public class ProxyKit {
 
     /**
      * Generates the proxy class for the specified proxied class and interfaces, with the specified proxy method

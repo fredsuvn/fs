@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  *
  * @author sunqian
  */
-public class JieType {
+public class TypeKit {
 
     /**
      * Returns {@code true} if the given type is a {@link Class}, {@code false} otherwise.
@@ -217,7 +217,7 @@ public class JieType {
             if (componentClass == null) {
                 return null;
             }
-            return JieClass.arrayClass(componentClass);
+            return ClassKit.arrayClass(componentClass);
         }
         if (isTypeVariable(type)) {
             return toRuntimeClass(getFirstBound((TypeVariable<?>) type));
@@ -265,13 +265,13 @@ public class JieType {
         @Nonnull Type type, @Nonnull Class<?> baseType
     ) throws ReflectionException {
         if (baseType.isArray()) {
-            Type componentType = JieType.getComponentType(type);
+            Type componentType = TypeKit.getComponentType(type);
             if (componentType == null) {
                 throw new ReflectionException("Unsupported resolving between " + type + " and " + baseType);
             }
             return resolveActualTypeArguments(componentType, baseType.getComponentType());
         }
-        @Nullable Class<?> cls = JieType.toRuntimeClass(type);
+        @Nullable Class<?> cls = TypeKit.toRuntimeClass(type);
         if (cls == null) {
             throw new ReflectionException("Unsupported type: " + type + ".");
         }
@@ -327,7 +327,7 @@ public class JieType {
         @Nonnull Type type,
         @Nonnull @OutParam Map<@Nonnull TypeVariable<?>, @Nullable Type> mapping
     ) {
-        if (JieType.isClass(type)) {
+        if (TypeKit.isClass(type)) {
             Class<?> cur = (Class<?>) type;
             while (cur != null) {
                 @Nullable Type superclass = cur.getGenericSuperclass();
@@ -339,7 +339,7 @@ public class JieType {
                 cur = cur.getSuperclass();
             }
         }
-        if (JieType.isParameterized(type)) {
+        if (TypeKit.isParameterized(type)) {
             mapTypeVariables(type, mapping);
             mapTypeParameters(((ParameterizedType) type).getRawType(), mapping);
         }
@@ -355,7 +355,7 @@ public class JieType {
         for (Type anInterface : interfaces) {
             mapTypeVariables(anInterface, mapping);
             // never null
-            Class<?> rawClass = JieType.getRawClass(anInterface);
+            Class<?> rawClass = TypeKit.getRawClass(anInterface);
             if (rawClass == null) {
                 // unreachable
                 continue;
@@ -368,13 +368,13 @@ public class JieType {
         @Nonnull Type type,
         @Nonnull @OutParam Map<@Nonnull TypeVariable<?>, @Nullable Type> mapping
     ) {
-        if (!JieType.isParameterized(type)) {
+        if (!TypeKit.isParameterized(type)) {
             return;
         }
         ParameterizedType parameterizedType = (ParameterizedType) type;
         Type[] typeArguments = parameterizedType.getActualTypeArguments();
         // never null
-        Class<?> rawClass = JieType.getRawClass(parameterizedType);
+        Class<?> rawClass = TypeKit.getRawClass(parameterizedType);
         if (rawClass == null) {
             // unreachable
             return;
@@ -436,19 +436,19 @@ public class JieType {
         @Nonnull Type type,
         @Nonnull Function<? super @Nonnull Class<?>, ? extends @Nonnull Type> mapper
     ) throws ReflectionException {
-        if (JieType.isClass(type)) {
+        if (TypeKit.isClass(type)) {
             Type newType = mapper.apply((Class<?>) type);
             if (!Jie.equals(type, newType)) {
                 return newType;
             }
         }
-        if (JieType.isParameterized(type)) {
+        if (TypeKit.isParameterized(type)) {
             return replaceType((ParameterizedType) type, mapper);
         }
-        if (JieType.isWildcard(type)) {
+        if (TypeKit.isWildcard(type)) {
             return replaceType((WildcardType) type, mapper);
         }
-        if (JieType.isGenericArray(type)) {
+        if (TypeKit.isGenericArray(type)) {
             return replaceType((GenericArrayType) type, mapper);
         }
         return type;
@@ -461,7 +461,7 @@ public class JieType {
         boolean matched = false;
         Type rawType = type.getRawType();
         Type newRawType = replaceType(rawType, mapper);
-        if (!JieType.isClass(newRawType)) {
+        if (!TypeKit.isClass(newRawType)) {
             throw new ReflectionException("Unsupported raw type: " + newRawType + ".");
         }
         if (!Jie.equals(rawType, newRawType)) {
@@ -485,7 +485,7 @@ public class JieType {
             }
         }
         if (matched) {
-            return JieType.parameterizedType((Class<?>) newRawType, actualTypeArguments, newOwnerType);
+            return TypeKit.parameterizedType((Class<?>) newRawType, actualTypeArguments, newOwnerType);
         } else {
             return type;
         }
@@ -515,7 +515,7 @@ public class JieType {
             }
         }
         if (matched) {
-            return JieType.wildcardType(upperBounds, lowerBounds);
+            return TypeKit.wildcardType(upperBounds, lowerBounds);
         } else {
             return type;
         }
@@ -532,7 +532,7 @@ public class JieType {
             matched = true;
         }
         if (matched) {
-            return JieType.arrayType(newComponentType);
+            return TypeKit.arrayType(newComponentType);
         } else {
             return type;
         }

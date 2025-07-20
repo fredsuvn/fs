@@ -30,13 +30,13 @@ public abstract class TypeRef<T> {
 
     private @Nonnull Type resolveActualTypeArgument() {
         Type genericSuper = getClass().getGenericSuperclass();
-        if (JieType.isParameterized(genericSuper)) {
+        if (TypeKit.isParameterized(genericSuper)) {
             ParameterizedType parameterizedSuper = (ParameterizedType) genericSuper;
             if (Jie.equals(parameterizedSuper.getRawType(), TypeRef.class)) {
                 return parameterizedSuper.getActualTypeArguments()[0];
             }
         }
-        List<Type> typeArgs = JieType.resolveActualTypeArguments(genericSuper, TypeRef.class);
+        List<Type> typeArgs = TypeKit.resolveActualTypeArguments(genericSuper, TypeRef.class);
         return typeArgs.get(0);
     }
 

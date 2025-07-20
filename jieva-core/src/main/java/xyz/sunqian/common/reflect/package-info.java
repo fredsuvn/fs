@@ -3,9 +3,9 @@
  * <p>
  * Static Utilities:
  * <ul>
- *     <li>{@link xyz.sunqian.common.reflect.JieType}</li>
- *     <li>{@link xyz.sunqian.common.reflect.JieClass}</li>
- *     <li>{@link xyz.sunqian.common.reflect.JieJvm}</li>
+ *     <li>{@link xyz.sunqian.common.reflect.TypeKit}</li>
+ *     <li>{@link xyz.sunqian.common.reflect.ClassKit}</li>
+ *     <li>{@link xyz.sunqian.common.reflect.JvmKit}</li>
  * </ul>
  * <p>
  * Helper Classes and Interfaces:

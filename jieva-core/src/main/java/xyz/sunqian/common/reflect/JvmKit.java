@@ -21,7 +21,7 @@ import java.util.Objects;
  *
  * @author sunqian
  */
-public class JieJvm {
+public class JvmKit {
 
     /**
      * Returns the internal name of the given class. The internal name of a class is its fully qualified name, as
@@ -43,18 +43,18 @@ public class JieJvm {
      * @throws JvmException if any problem occurs
      */
     public static @Nonnull String getDescriptor(@Nonnull Type type) throws JvmException {
-        if (JieType.isTypeVariable(type)) {
+        if (TypeKit.isTypeVariable(type)) {
             TypeVariable<?> tv = (TypeVariable<?>) type;
-            Type bound = JieType.getFirstBound(tv);
+            Type bound = TypeKit.getFirstBound(tv);
             return getDescriptor(bound);
         }
         StringBuilder appender = new StringBuilder();
-        if (JieType.isClass(type)) {
+        if (TypeKit.isClass(type)) {
             appendDescriptor((Class<?>) type, appender);
-        } else if (JieType.isParameterized(type)) {
+        } else if (TypeKit.isParameterized(type)) {
             Class<?> rawClass = getRawClass((ParameterizedType) type);
             appendDescriptor(rawClass, appender);
-        } else if (JieType.isGenericArray(type)) {
+        } else if (TypeKit.isGenericArray(type)) {
             appendDescriptor(getRawClass((GenericArrayType) type), appender);
         } else {
             throw new JvmException("Unknown type: " + type + ".");
@@ -160,9 +160,9 @@ public class JieJvm {
      */
     public static boolean needSignature(@Nonnull Type type, boolean declaration) {
         if (!declaration) {
-            return !JieType.isClass(type);
+            return !TypeKit.isClass(type);
         }
-        if (!JieType.isClass(type)) {
+        if (!TypeKit.isClass(type)) {
             return true;
         }
         Class<?> cls = (Class<?>) type;
@@ -171,12 +171,12 @@ public class JieJvm {
             return true;
         }
         @Nullable Type superclass = cls.getGenericSuperclass();
-        if (superclass != null && !JieType.isClass(superclass)) {
+        if (superclass != null && !TypeKit.isClass(superclass)) {
             return true;
         }
         Type[] interfaces = cls.getGenericInterfaces();
         for (Type anInterface : interfaces) {
-            if (!JieType.isClass(anInterface)) {
+            if (!TypeKit.isClass(anInterface)) {
                 return true;
             }
         }
@@ -231,7 +231,7 @@ public class JieJvm {
             return null;
         }
         StringBuilder appender = new StringBuilder();
-        if (JieType.isClass(type)) {
+        if (TypeKit.isClass(type)) {
             Class<?> cls = (Class<?>) type;
             appendSignature(cls.getTypeParameters(), appender);
             @Nullable Type superclass = cls.getGenericSuperclass();
@@ -338,20 +338,20 @@ public class JieJvm {
         for (int i = 0; i < bounds.length; i++) {
             Type bound = bounds[i];
             appender.append(':');
-            if (JieType.isTypeVariable(bound)) {
+            if (TypeKit.isTypeVariable(bound)) {
                 appender.append('T');
                 appender.append(((TypeVariable<?>) bound).getName());
                 appender.append(';');
                 continue;
             }
             if (i == 0) {
-                if (JieType.isParameterized(bound)) {
+                if (TypeKit.isParameterized(bound)) {
                     Class<?> rawClass = getRawClass((ParameterizedType) bound);
                     if (rawClass.isInterface()) {
                         appender.append(':');
                     }
                 }
-                if (JieType.isClass(bound)) {
+                if (TypeKit.isClass(bound)) {
                     Class<?> boundClass = Jie.as(bound);
                     if (boundClass.isInterface()) {
                         appender.append(':');
@@ -363,23 +363,23 @@ public class JieJvm {
     }
 
     private static void appendSignature(@Nonnull Type type, @Nonnull StringBuilder appender) {
-        if (JieType.isClass(type)) {
+        if (TypeKit.isClass(type)) {
             appendSignature((Class<?>) type, appender);
             return;
         }
-        if (JieType.isParameterized(type)) {
+        if (TypeKit.isParameterized(type)) {
             appendSignature((ParameterizedType) type, appender);
             return;
         }
-        if (JieType.isWildcard(type)) {
+        if (TypeKit.isWildcard(type)) {
             appendSignature((WildcardType) type, appender);
             return;
         }
-        if (JieType.isTypeVariable(type)) {
+        if (TypeKit.isTypeVariable(type)) {
             appendSignature((TypeVariable<?>) type, appender);
             return;
         }
-        if (JieType.isGenericArray(type)) {
+        if (TypeKit.isGenericArray(type)) {
             appendSignature((GenericArrayType) type, appender);
             return;
         }
@@ -397,7 +397,7 @@ public class JieJvm {
             appendSignature(owner, appender);
             // it must end with a ';'
             int semicolonIndex = appender.length() - 1;
-            if (JieType.isClass(owner)) {
+            if (TypeKit.isClass(owner)) {
                 appender.setCharAt(semicolonIndex, '$');
             } else {
                 appender.setCharAt(semicolonIndex, '.');
@@ -416,7 +416,7 @@ public class JieJvm {
     }
 
     private static void appendSignature(@Nonnull WildcardType type, @Nonnull StringBuilder appender) {
-        @Nullable Type lower = JieType.getLowerBound(type);
+        @Nullable Type lower = TypeKit.getLowerBound(type);
         Type[] bounds;
         if (lower != null) {
             // ? super
@@ -438,24 +438,24 @@ public class JieJvm {
 
     private static void appendSignature(@Nonnull GenericArrayType type, @Nonnull StringBuilder appender) {
         @Nonnull Type curType = type;
-        while (JieType.isArray(curType)) {
+        while (TypeKit.isArray(curType)) {
             appender.append('[');
             // never null
-            curType = Objects.requireNonNull(JieType.getComponentType(curType));
+            curType = Objects.requireNonNull(TypeKit.getComponentType(curType));
         }
         appendSignature(curType, appender);
     }
 
     private static @Nonnull Class<?> getRawClass(@Nonnull ParameterizedType type) throws JvmException {
         Type rawType = type.getRawType();
-        if (JieType.isClass(rawType)) {
+        if (TypeKit.isClass(rawType)) {
             return (Class<?>) rawType;
         }
         throw new JvmException("Unknown raw type: " + rawType + ".");
     }
 
     private static @Nonnull Class<?> getRawClass(@Nonnull GenericArrayType type) throws JvmException {
-        @Nullable Class<?> arrayClass = JieType.toRuntimeClass(type);
+        @Nullable Class<?> arrayClass = TypeKit.toRuntimeClass(type);
         if (arrayClass != null) {
             return arrayClass;
         }

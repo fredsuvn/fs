@@ -3,7 +3,7 @@
  * <p>
  * Static Utilities:
  * <ul>
- *     <li>{@link xyz.sunqian.common.reflect.proxy.JieProxy}</li>
+ *     <li>{@link xyz.sunqian.common.reflect.proxy.ProxyKit}</li>
  * </ul>
  * <p>
  * Core Interfaces and Implementations:

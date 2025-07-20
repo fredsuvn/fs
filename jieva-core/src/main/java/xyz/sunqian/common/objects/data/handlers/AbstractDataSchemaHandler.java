@@ -8,7 +8,7 @@ import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.objects.data.DataObjectException;
 import xyz.sunqian.common.objects.data.DataPropertyBase;
 import xyz.sunqian.common.objects.data.DataSchemaParser;
-import xyz.sunqian.common.reflect.JieType;
+import xyz.sunqian.common.reflect.TypeKit;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -77,7 +77,7 @@ public abstract class AbstractDataSchemaHandler implements DataSchemaParser.Hand
     @Override
     public @Nullable boolean doParse(DataSchemaParser.Context context) {
         Type type = context.getType();
-        Class<?> rawType = JieType.getRawClass(type);
+        Class<?> rawType = TypeKit.getRawClass(type);
         if (rawType == null) {
             throw new DataObjectException("Not a Class or ParameterizedType: " + type + ".");
         }
@@ -117,7 +117,7 @@ public abstract class AbstractDataSchemaHandler implements DataSchemaParser.Hand
         }
 
         // Builds property base for each property info.
-        Map<TypeVariable<?>, Type> typeParameterMapping = JieType.mapTypeParameters(context.getType());
+        Map<TypeVariable<?>, Type> typeParameterMapping = TypeKit.mapTypeParameters(context.getType());
         Set<Type> stack = new HashSet<>();
         propertyInfoMap.forEach((propertyName, propertyInfo) -> {
             Method getter = propertyInfo.getGetter();

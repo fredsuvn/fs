@@ -4,9 +4,9 @@ import org.testng.annotations.Test;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.reflect.proxy.JieProxy;
 import xyz.sunqian.common.reflect.proxy.ProxyClass;
 import xyz.sunqian.common.reflect.proxy.ProxyInvoker;
+import xyz.sunqian.common.reflect.proxy.ProxyKit;
 import xyz.sunqian.common.reflect.proxy.ProxyMethodHandler;
 import xyz.sunqian.common.reflect.proxy.ProxyMode;
 
@@ -26,7 +26,7 @@ public class ProxyTest {
 
     private void testProxy(ProxyMode mode) throws Exception {
         String result = "ssssssss";
-        ProxyClass pc = JieProxy.proxy(null, Jie.list(InterA.class), new ProxyMethodHandler() {
+        ProxyClass pc = ProxyKit.proxy(null, Jie.list(InterA.class), new ProxyMethodHandler() {
 
             @Override
             public boolean requiresProxy(Method method) {
