@@ -435,4 +435,25 @@ public interface TaskExecutor {
         @Nonnull Duration initialDelay,
         @Nonnull Duration delay
     ) throws TaskSubmissionException;
+
+    /**
+     * Returns an {@link ExecutorService} represents this {@link TaskExecutor}. Their contents are shared, and all
+     * behaviors are equivalent.
+     *
+     * @return an {@link ExecutorService} represents this {@link TaskExecutor}
+     */
+    @Nonnull
+    ExecutorService asExecutorService();
+
+    /**
+     * Returns an {@link ScheduledExecutorService} represents this {@link TaskExecutor}. Their contents are shared, and
+     * all behaviors are equivalent.
+     * <p>
+     * NOTE: This method requires that the current implementation supports scheduling.
+     *
+     * @return an {@link ScheduledExecutorService} represents this {@link TaskExecutor}
+     * @throws UnsupportedOperationException if the current implementation does not support scheduling
+     */
+    @Nonnull
+    ScheduledExecutorService asScheduledExecutorService() throws UnsupportedOperationException;
 }

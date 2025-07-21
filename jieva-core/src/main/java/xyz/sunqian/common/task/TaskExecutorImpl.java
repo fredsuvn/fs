@@ -291,7 +291,17 @@ final class TaskExecutorImpl implements TaskExecutor {
         }
     }
 
-    private @Nonnull ScheduledExecutorService getScheduledService() {
+    @Override
+    public @Nonnull ExecutorService asExecutorService() {
+        return service;
+    }
+
+    @Override
+    public @Nonnull ScheduledExecutorService asScheduledExecutorService() throws UnsupportedOperationException {
+        return getScheduledService();
+    }
+
+    private @Nonnull ScheduledExecutorService getScheduledService() throws UnsupportedOperationException {
         try {
             return (ScheduledExecutorService) service;
         } catch (Exception e) {
