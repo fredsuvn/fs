@@ -8,7 +8,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * A virtual process used for simulation. It has 3 flags:
+ * A virtual process used for simulation. It has some flags:
  * <ul>
  *     <li>{@code alive}: specifies whether this process is alive, initial is {@code true};</li>
  *     <li>

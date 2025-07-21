@@ -3,7 +3,7 @@
  * <p>
  * Utilities for process:
  * <ul>
- *     <li>{@link xyz.sunqian.common.base.process.JieProcess}</li>
+ *     <li>{@link xyz.sunqian.common.base.process.ProcessKit}</li>
  * </ul>
  * <p>
  * Interfaces and classes for process:

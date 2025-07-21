@@ -10,7 +10,7 @@ import xyz.sunqian.common.task.TaskState;
  *
  * @author sunqian
  */
-public class JieProcess {
+public class ProcessKit {
 
     /**
      * Starts a new process with the specified command, returns the receipt of the process.
@@ -47,7 +47,7 @@ public class JieProcess {
     private static final class ProcessReceiptImpl implements ProcessReceipt {
 
         private final @Nonnull Process process;
-        private int cancal = 0;
+        private int canceled = 0;
 
         ProcessReceiptImpl(@Nonnull Process process) {
             this.process = process;
@@ -61,7 +61,7 @@ public class JieProcess {
         @Override
         public @Nonnull TaskState getState() {
             return process.isAlive() ? TaskState.EXECUTING :
-                (cancal == 1 ?
+                (canceled == 1 ?
                     TaskState.CANCELED_EXECUTING :
                     (process.exitValue() == 0 ? TaskState.SUCCEEDED : TaskState.FAILED)
                 );
@@ -69,7 +69,7 @@ public class JieProcess {
 
         @Override
         public boolean cancel(boolean forcibly) {
-            cancal = 1;
+            canceled = 1;
             if (forcibly) {
                 process.destroyForcibly();
             } else {
@@ -80,7 +80,7 @@ public class JieProcess {
 
         @Override
         public boolean isCancelled() {
-            return cancal == 1 && !process.isAlive();
+            return canceled == 1 && !process.isAlive();
         }
     }
 }

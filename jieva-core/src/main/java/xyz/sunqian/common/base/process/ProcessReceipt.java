@@ -33,10 +33,22 @@ public interface ProcessReceipt extends TaskReceipt<Integer> {
     Process getProcess();
 
     /**
-     * Returns the state of the process. If the process is still alive, returns {@link TaskState#EXECUTING}; else if
-     * {@link #cancel()}/{@link #cancel(boolean)} is invoked, returns {@link TaskState#CANCELED_EXECUTING}; else if exit
-     * value of the process is {@code 0}, returns {@link TaskState#SUCCEEDED}; otherwise returns
-     * {@link TaskState#FAILED}.
+     * Returns the state of the process:
+     * <ul>
+     *     <li>
+     *         if the process is still alive, returns {@link TaskState#EXECUTING};
+     *     </li>
+     *     <li>
+     *         if the process is canceled by {@link #cancel()}/{@link #cancel(boolean)} while it is running, returns
+     *         {@link TaskState#CANCELED_EXECUTING};
+     *     </li>
+     *     <li>
+     *         if the process is exited and the exit value is {@code 0}, returns {@link TaskState#SUCCEEDED};
+     *     </li>
+     *     <li>
+     *         otherwise returns {@link TaskState#FAILED}.
+     *     </li>
+     * </ul>
      *
      * @return the state of the process
      */

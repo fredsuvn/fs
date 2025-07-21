@@ -5,7 +5,7 @@ import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.SystemKit;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.exception.AwaitingException;
-import xyz.sunqian.common.base.process.JieProcess;
+import xyz.sunqian.common.base.process.ProcessKit;
 import xyz.sunqian.common.base.process.ProcessReceipt;
 import xyz.sunqian.common.base.process.VirtualProcess;
 import xyz.sunqian.common.io.IOKit;
@@ -19,6 +19,7 @@ import java.util.concurrent.TimeoutException;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
@@ -28,19 +29,19 @@ public class ProcessTest {
     public void testProcess() {
         {
             if (SystemKit.isWindows()) {
-                ProcessReceipt receipt = JieProcess.start("cmd.exe", "/c", "dir");
+                ProcessReceipt receipt = ProcessKit.start("cmd.exe", "/c", "dir");
                 receipt.getProcess().destroyForcibly();
             } else {
-                ProcessReceipt receipt = JieProcess.start("ls", "-l");
+                ProcessReceipt receipt = ProcessKit.start("ls", "-l");
                 receipt.getProcess().destroyForcibly();
             }
         }
         {
             if (SystemKit.isWindows()) {
-                ProcessReceipt receipt = JieProcess.start("cmd.exe /c dir");
+                ProcessReceipt receipt = ProcessKit.start("cmd.exe /c dir");
                 receipt.getProcess().destroyForcibly();
             } else {
-                ProcessReceipt receipt = JieProcess.start("ls -l");
+                ProcessReceipt receipt = ProcessKit.start("ls -l");
                 receipt.getProcess().destroyForcibly();
             }
         }
@@ -50,7 +51,7 @@ public class ProcessTest {
     public void testReceipt() throws Exception {
         {
             VirtualProcess process = new VirtualProcess();
-            ProcessReceipt receipt = JieProcess.receipt(process);
+            ProcessReceipt receipt = ProcessKit.receipt(process);
             assertEquals(receipt.getState(), TaskState.EXECUTING);
             try {
                 receipt.getResult(1);
@@ -81,7 +82,7 @@ public class ProcessTest {
         }
         {
             VirtualProcess process = new VirtualProcess();
-            ProcessReceipt receipt = JieProcess.receipt(process);
+            ProcessReceipt receipt = ProcessKit.receipt(process);
             assertEquals(receipt.getState(), TaskState.EXECUTING);
             try {
                 receipt.getResult(1);
@@ -109,7 +110,7 @@ public class ProcessTest {
         }
         {
             VirtualProcess process = new VirtualProcess();
-            ProcessReceipt receipt = JieProcess.receipt(process);
+            ProcessReceipt receipt = ProcessKit.receipt(process);
             assertEquals(receipt.getState(), TaskState.EXECUTING);
             assertFalse(receipt.isCancelled());
             process.destroy();
@@ -131,7 +132,7 @@ public class ProcessTest {
                 IOKit.newInputStream(hello.getBytes(CharsKit.localCharset())),
                 IOKit.nullOutputStream()
             );
-            ProcessReceipt receipt = JieProcess.receipt(process);
+            ProcessReceipt receipt = ProcessKit.receipt(process);
             assertEquals(receipt.readString(), hello);
         }
         {
@@ -140,13 +141,18 @@ public class ProcessTest {
                 IOKit.newInputStream(hello.getBytes(CharsKit.localCharset())),
                 IOKit.nullOutputStream()
             );
-            ProcessReceipt receipt = JieProcess.receipt(process);
+            ProcessReceipt receipt = ProcessKit.receipt(process);
             assertEquals(receipt.readBytes(), hello.getBytes(CharsKit.localCharset()));
         }
     }
 
     @Test
     public void testVirtualProcess() throws Exception {
+        {
+            VirtualProcess process = new VirtualProcess();
+            assertSame(process.alive(false), process);
+            assertSame(process.normal(false), process);
+        }
         {
             VirtualProcess process = new VirtualProcess();
             assertFalse(process.waitFor(1, TimeUnit.MILLISECONDS));

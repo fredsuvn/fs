@@ -8,7 +8,7 @@ import xyz.sunqian.common.base.exception.AwaitingException;
 import xyz.sunqian.common.base.exception.UnknownArrayTypeException;
 import xyz.sunqian.common.base.function.BooleanCallable;
 import xyz.sunqian.common.base.function.VoidCallable;
-import xyz.sunqian.common.base.process.JieProcess;
+import xyz.sunqian.common.base.process.ProcessKit;
 import xyz.sunqian.common.base.process.ProcessReceipt;
 import xyz.sunqian.common.base.string.StringKit;
 import xyz.sunqian.common.base.thread.ThreadKit;
@@ -969,27 +969,27 @@ public class Jie {
     /**
      * Starts a new process with the specified command, returns the receipt of the process.
      * <p>
-     * This method is a shortcut to the {@link JieProcess#start(String)}.
+     * This method is a shortcut to the {@link ProcessKit#start(String)}.
      *
      * @param command the specified command
      * @return the receipt of the process
      * @throws IORuntimeException if any I/O error occurs
      */
     public static @Nonnull ProcessReceipt process(@Nonnull String command) throws IORuntimeException {
-        return JieProcess.start(command);
+        return ProcessKit.start(command);
     }
 
     /**
      * Starts a new process with the specified command and arguments, returns the receipt of the process.
      * <p>
-     * This method is a shortcut to the {@link JieProcess#start(String[])}.
+     * This method is a shortcut to the {@link ProcessKit#start(String[])}.
      *
      * @param command the specified command and arguments
      * @return the receipt of the process
      * @throws IORuntimeException if any I/O error occurs
      */
     public static @Nonnull ProcessReceipt process(@Nonnull String @Nonnull ... command) throws IORuntimeException {
-        return JieProcess.start(command);
+        return ProcessKit.start(command);
     }
 
     //---------------- Process End ----------------//
