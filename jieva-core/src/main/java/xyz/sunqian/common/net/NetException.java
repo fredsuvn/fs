@@ -7,7 +7,7 @@ import xyz.sunqian.common.base.exception.JieRuntimeException;
 import java.io.IOException;
 
 /**
- * Exception for net.
+ * Exception for network.
  *
  * @author sunqian
  */

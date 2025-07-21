@@ -9,7 +9,7 @@ import java.nio.ByteBuffer;
 /**
  * TCP/IP network channel callback handler.
  * <p>
- * An implementation of {@link GekTcpServer} has a list of {@link GekTcpChannelHandler}.
+ * An implementation of {@link TcpNetServerOld} has a list of {@link GekTcpChannelHandler}.
  * <p>
  * When the server receives new data from remote point, the data will be wrapped as {@link ByteBuffer} and passed to
  * {@link #onMessage(GekTcpChannel, Object)} of first handler. Returned object from first handler will be passed to next

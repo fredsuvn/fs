@@ -1,7 +1,7 @@
 package xyz.sunqian.common.net.udp;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.net.GekNetServerException;
+import xyz.sunqian.common.net.NetServerException;
 
 import java.nio.ByteBuffer;
 
@@ -13,7 +13,7 @@ import java.nio.ByteBuffer;
  * When the server receives new packet from remote point, the data will be wrapped as {@link ByteBuffer} and passed to
  * {@link #onPacket(GekUdpHeader, GekUdpClient, Object)} of first handler. Returned object from first handler will be
  * passed to next handler as {@code packet}, and so on. If null is returned, the handlers calling chain will be broken;
- * if an exception is thrown, {@link GekUdpServerHandler#onException(GekNetServerException)} or
+ * if an exception is thrown, {@link GekUdpServerHandler#onException(NetServerException)} or
  * {@link GekUdpServerHandler#onException(GekUdpHeader, GekUdpClient, Throwable, ByteBuffer)} will be called and the
  * handlers calling chain will also be broken.
  * <p>

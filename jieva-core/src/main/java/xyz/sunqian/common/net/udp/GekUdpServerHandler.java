@@ -1,6 +1,6 @@
 package xyz.sunqian.common.net.udp;
 
-import xyz.sunqian.common.net.GekNetServerException;
+import xyz.sunqian.common.net.NetServerException;
 
 import java.nio.ByteBuffer;
 
@@ -16,7 +16,7 @@ public interface GekUdpServerHandler {
      *
      * @param exception the exception for server
      */
-    default void onException(GekNetServerException exception) {
+    default void onException(NetServerException exception) {
     }
 
     /**

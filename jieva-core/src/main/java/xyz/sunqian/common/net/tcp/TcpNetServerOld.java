@@ -7,6 +7,7 @@ import xyz.sunqian.common.collect.CollectKit;
 import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IOKit;
+import xyz.sunqian.common.net.NetServerException;
 import xyz.sunqian.common.net.GekServerStates;
 import xyz.sunqian.common.net.NetException;
 import xyz.sunqian.common.net.data.GekData;
@@ -15,41 +16,44 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
 
 /**
- * TCP/IP client interface, client endpoint of {@link GekTcpEndpoint}.
- * <p>
- * A {@link GekTcpClient} implementation should support following types of handler:
+ * TCP/IP server interface, server endpoint of {@link TcpNetEndpoint}. The implementation should use
+ * {@link GekTcpChannel} to represents connection between server and remote endpoints. And should support following
+ * types of callback handler:
  * <ul>
  *     <li>
- *         one {@link GekTcpClientHandler}: to deal with client actions;
+ *         one {@link GekTcpServerHandler}: to callback for server events;
  *     </li>
  *     <li>
- *         a list of {@link GekTcpClientHandler}: to deal with actions for the connection;
+ *         a list of {@link GekTcpClientHandler}: to callback for connection events;
  *     </li>
  * </ul>
  *
  * @author fredsuvn
  */
 @ThreadSafe
-public interface GekTcpClient extends GekTcpEndpoint {
+public interface TcpNetServerOld extends TcpNetEndpoint {
 
     /**
-     * Returns new builder of {@link GekTcpClient}. The returned builder is based on {@link Socket}.
+     * Returns new builder of {@link TcpNetServerOld}. The returned builder is based on {@link ServerSocket}.
      *
      * @return new builder
      */
@@ -58,61 +62,54 @@ public interface GekTcpClient extends GekTcpEndpoint {
     }
 
     /**
-     * Starts this client and blocks until the client has been closed. Connection timeout is 30 seconds.
-     *
-     * @param address address of target endpoint
+     * Starts this server and wait until the server and all connections have been closed. This method is equivalent to
+     * {@link #start(boolean)}:
+     * <pre>
+     *     start(true);
+     * </pre>
      */
-    default void start(SocketAddress address) {
-        start(address, Duration.ofSeconds(30));
+    default void start() {
+        start(true);
     }
 
     /**
-     * Starts this client and blocks until the client has been closed. Connection timeout is 30 seconds.
+     * Starts this server. If given {@code block} is true, this method will block current thread until the server and
+     * all connections have been closed.
      *
-     * @param host host name of target endpoint
-     * @param port port of target endpoint
+     * @param block whether block current thread
      */
-    default void start(String host, int port) {
-        start(new InetSocketAddress(host, port), Duration.ofSeconds(30));
-    }
+    void start(boolean block);
 
     /**
-     * Starts this client and blocks until the client has been closed.
+     * Returns a new builder configured with this server.
      *
-     * @param address address of target endpoint
-     * @param timeout wait timeout to connect, maybe null to infinite waiting
-     */
-    void start(SocketAddress address, @Nullable Duration timeout);
-
-    /**
-     * Returns a new builder configured with this client.
-     *
-     * @return a new builder configured with this client
+     * @return a new builder configured with this server
      */
     Builder toBuilder();
 
     /**
-     * Builder for {@link GekTcpClient}, based on {@link Socket}.
+     * Builder for {@link TcpNetServerOld}, based on {@link ServerSocket}.
      */
     class Builder {
 
         private static final byte[] EMPTY_ARRAY = new byte[0];
         private static final ByteBuffer EMPTY_BUFFER = ByteBuffer.wrap(EMPTY_ARRAY);
-        private static final GekTcpClientHandler EMPTY_CLIENT_HANDLER = new GekTcpClientHandler() {
+        private static final GekTcpServerHandler EMPTY_SERVER_HANDLER = new GekTcpServerHandler() {
         };
         private final List<GekTcpChannelHandler<?>> channelHandlers = new LinkedList<>();
         private int port = 0;
+        private int maxConnection = 50;
         private @Nullable InetAddress address;
-        private @Nullable GekTcpClientHandler clientHandler;
+        private @Nullable GekTcpServerHandler serverHandler;
         private @Nullable IntFunction<ByteBuffer> bufferGenerator;
+        private @Nullable ExecutorService executor;
         private int channelBufferSize = IOKit.bufferSize();
-        private @Nullable Consumer<Socket> socketConfig;
-        private @Nullable Proxy proxy;
+        private @Nullable Consumer<ServerSocket> socketConfig;
 
         /**
-         * Sets local port.
+         * Sets server port, maybe 0 to get an available one from system.
          *
-         * @param port local port
+         * @param port server port
          * @return this builder
          */
         public Builder port(int port) {
@@ -121,9 +118,20 @@ public interface GekTcpClient extends GekTcpEndpoint {
         }
 
         /**
-         * Sets local address.
+         * Sets max connection number.
          *
-         * @param address local address
+         * @param maxConnection max connection number
+         * @return this builder
+         */
+        public Builder maxConnection(int maxConnection) {
+            this.maxConnection = maxConnection;
+            return this;
+        }
+
+        /**
+         * Sets server address.
+         *
+         * @param address server address
          * @return this builder
          */
         public Builder address(InetAddress address) {
@@ -132,9 +140,9 @@ public interface GekTcpClient extends GekTcpEndpoint {
         }
 
         /**
-         * Sets local host name.
+         * Sets server host name.
          *
-         * @param hostName local host name
+         * @param hostName server host name
          * @return this builder
          */
         public Builder hostName(String hostName) {
@@ -147,13 +155,13 @@ public interface GekTcpClient extends GekTcpEndpoint {
         }
 
         /**
-         * Sets client handler.
+         * Sets server handler.
          *
-         * @param clientHandler client handler
+         * @param serverHandler server handler
          * @return this builder
          */
-        public Builder clientHandler(GekTcpClientHandler clientHandler) {
-            this.clientHandler = clientHandler;
+        public Builder serverHandler(GekTcpServerHandler serverHandler) {
+            this.serverHandler = serverHandler;
             return this;
         }
 
@@ -181,13 +189,24 @@ public interface GekTcpClient extends GekTcpEndpoint {
 
         /**
          * Sets byte buffer generator: given an int returns a byte buffer with the int length. The generated buffer's
-         * position must be 0, and limit must be capacity. *
+         * position must be 0, and limit must be capacity.
          *
          * @param bufferGenerator byte buffer generator
          * @return this builder
          */
         public Builder bufferGenerator(IntFunction<ByteBuffer> bufferGenerator) {
             this.bufferGenerator = bufferGenerator;
+            return this;
+        }
+
+        /**
+         * Sets executor service, must be of multi-threads.
+         *
+         * @param executor executor service
+         * @return this builder
+         */
+        public Builder executor(ExecutorService executor) {
+            this.executor = executor;
             return this;
         }
 
@@ -208,53 +227,50 @@ public interface GekTcpClient extends GekTcpEndpoint {
          * @param socketConfig other socket config
          * @return this builder
          */
-        public Builder socketConfig(Consumer<Socket> socketConfig) {
+        public Builder socketConfig(Consumer<ServerSocket> socketConfig) {
             this.socketConfig = socketConfig;
             return this;
         }
 
         /**
-         * Sets proxy
+         * Builds the server.
          *
-         * @param proxy proxy
-         * @return this builder
+         * @return built server
          */
-        public Builder proxy(Proxy proxy) {
-            this.proxy = proxy;
-            return this;
+        public TcpNetServerOld build() {
+            return new SocketTcpServer(this);
         }
 
-        /**
-         * Builds the client.
-         *
-         * @return built client
-         */
-        public GekTcpClient build() {
-            return new SocketTcpClient(this);
-        }
-
-        private static final class SocketTcpClient implements GekTcpClient {
+        private static final class SocketTcpServer implements TcpNetServerOld {
 
             private final int port;
+            private final int maxConnection;
             private final InetAddress address;
-            private final GekTcpClientHandler clientHandler;
+            private final GekTcpServerHandler serverHandler;
             private final List<GekTcpChannelHandler<?>> channelHandlers;
             private final IntFunction<ByteBuffer> bufferGenerator;
+            private final ExecutorService executor;
             private final int channelBufferSize;
-            private final @Nullable Consumer<Socket> socketConfig;
-            private final @Nullable Proxy proxy;
+            private final @Nullable Consumer<ServerSocket> socketConfig;
 
             private final CountDownLatch latch = new CountDownLatch(1);
             private final GekServerStates state = new GekServerStates();
-            private @Nullable Socket socket;
+            private final Set<ChannelImpl> channels = ConcurrentHashMap.newKeySet();
+            private @Nullable ServerSocket serverSocket;
+            private volatile boolean outAcceptLoop = false;
 
-            private SocketTcpClient(Builder builder) {
+            private SocketTcpServer(Builder builder) {
                 this.port = builder.port;
+                this.maxConnection = builder.maxConnection;
                 this.address = builder.address;
-                this.clientHandler = Jie.nonnull(builder.clientHandler, EMPTY_CLIENT_HANDLER);
+                this.serverHandler = Jie.nonnull(builder.serverHandler, EMPTY_SERVER_HANDLER);
                 this.channelHandlers = ListKit.toList(builder.channelHandlers);
                 if (channelHandlers.isEmpty()) {
                     throw new NetException("Channel handlers are empty.");
+                }
+                this.executor = builder.executor;
+                if (executor == null) {
+                    throw new NetException("Executor is null.");
                 }
                 this.socketConfig = builder.socketConfig;
                 this.bufferGenerator = Jie.nonnull(builder.bufferGenerator, ByteBuffer::allocate);
@@ -262,41 +278,45 @@ public interface GekTcpClient extends GekTcpEndpoint {
                 if (channelBufferSize <= 0) {
                     throw new NetException("Channel buffer size must > 0.");
                 }
-                this.proxy = builder.proxy;
             }
 
             @Override
-            public void start(SocketAddress address, @Nullable Duration timeout) {
-                synchronized (this) {
-                    if (!state.isCreated()) {
-                        throw new NetException("The client has been opened or closed.");
+            public synchronized void start(boolean block) {
+                if (!state.isCreated()) {
+                    throw new NetException("The server has been opened or closed.");
+                }
+                start0();
+                state.open();
+                if (block) {
+                    try {
+                        latch.await();
+                    } catch (InterruptedException ignored) {
                     }
                 }
-                start0(address, timeout == null ? 0 : (int) timeout.toMillis());
             }
 
             @Override
             public InetAddress getAddress() {
-                if (socket == null) {
-                    throw new NetException("Client has not been initialized.");
+                if (serverSocket == null) {
+                    throw new NetException("Server has not been initialized.");
                 }
-                return socket.getLocalAddress();
+                return serverSocket.getInetAddress();
             }
 
             @Override
             public int getPort() {
-                if (socket == null) {
-                    throw new NetException("Client has not been initialized.");
+                if (serverSocket == null) {
+                    throw new NetException("Server has not been initialized.");
                 }
-                return socket.getLocalPort();
+                return serverSocket.getLocalPort();
             }
 
             @Override
             public SocketAddress getSocketAddress() {
-                if (socket == null) {
-                    throw new NetException("Client has not been initialized.");
+                if (serverSocket == null) {
+                    throw new NetException("Server has not been initialized.");
                 }
-                return socket.getLocalSocketAddress();
+                return serverSocket.getLocalSocketAddress();
             }
 
             @Override
@@ -333,6 +353,7 @@ public interface GekTcpClient extends GekTcpEndpoint {
             public synchronized void closeNow() {
                 try {
                     close0();
+                    executor.shutdown();
                     latch.countDown();
                 } catch (NetException e) {
                     throw e;
@@ -344,11 +365,11 @@ public interface GekTcpClient extends GekTcpEndpoint {
             }
 
             @Override
-            public Socket getSource() {
-                if (socket == null) {
-                    throw new NetException("Client has not been initialized.");
+            public ServerSocket getSource() {
+                if (serverSocket == null) {
+                    throw new NetException("Server has not been initialized.");
                 }
-                return socket;
+                return serverSocket;
             }
 
             @Override
@@ -356,80 +377,139 @@ public interface GekTcpClient extends GekTcpEndpoint {
                 return newBuilder()
                     .port(port)
                     .address(address)
-                    .proxy(proxy)
-                    .clientHandler(clientHandler)
+                    .maxConnection(maxConnection)
+                    .serverHandler(serverHandler)
                     .addChannelHandlers(channelHandlers)
                     .bufferGenerator(bufferGenerator)
+                    .executor(executor)
                     .channelBufferSize(channelBufferSize)
                     .socketConfig(socketConfig);
             }
 
-            private void start0(SocketAddress address, int timeout) {
-                this.socket = buildSocket();
-                try {
-                    socket.connect(address, timeout);
-                } catch (IOException e) {
-                    throw new NetException(e);
-                }
-                state.open();
-                ChannelImpl channel = new ChannelImpl();
-                clientHandler.onOpen(channel);
-                while (!socket.isClosed()) {
-                    try {
-                        doChannel(channel);
-                    } catch (Throwable e) {
-                        compactBuffer(channel);
-                        clientHandler.onException(channel, e, channel.buffer);
-                    }
-                }
-                try {
-                    compactBuffer(channel);
-                    clientHandler.onClose(channel, channel.buffer);
-                } catch (Throwable e) {
-                    compactBuffer(channel);
-                    clientHandler.onException(channel, e, channel.buffer);
-                } finally {
-                    latch.countDown();
-                }
+            private void start0() {
+                serverSocket = buildServerSocket();
+                loopServerSocket();
             }
 
             private void close0() throws Exception {
-                if (!state.isOpened() || socket == null) {
-                    throw new NetException("The Client has not been opened.");
+                if (!state.isOpened() || serverSocket == null) {
+                    throw new NetException("The server has not been opened.");
                 }
                 if (state.isClosed()) {
                     return;
                 }
-                socket.close();
+                serverSocket.close();
             }
 
-            private Socket buildSocket() {
+            private ServerSocket buildServerSocket() {
                 try {
-                    Socket socket;
-                    if (proxy != null) {
-                        socket = new Socket(proxy);
+                    ServerSocket server;
+                    if (address != null) {
+                        server = new ServerSocket(port, maxConnection, address);
                     } else {
-                        socket = new Socket();
+                        server = new ServerSocket(port, maxConnection);
                     }
-                    socket.bind(new InetSocketAddress(address, port));
                     if (socketConfig != null) {
-                        socketConfig.accept(socket);
+                        socketConfig.accept(server);
                     }
-                    return socket;
+                    return server;
                 } catch (Exception e) {
                     throw new NetException(e);
                 }
             }
 
+            private void loopServerSocket() {
+                executor.execute(() -> {
+                    while (!serverSocket.isClosed()) {
+                        try {
+                            Socket socket;
+                            ChannelImpl channel;
+                            try {
+                                socket = serverSocket.accept();
+                                channel = new ChannelImpl(socket);
+                            } catch (Throwable e) {
+                                executor.execute(() ->
+                                    serverHandler.onException(new NetServerException(serverSocket, e)));
+                                continue;
+                            }
+                            channels.add(channel);
+                        } catch (Throwable e) {
+                            // Ensure the loop continue
+                        }
+                    }
+                    outAcceptLoop = true;
+                });
+                executor.execute(() -> {
+                    while (true) {
+                        Iterator<ChannelImpl> it = channels.iterator();
+                        while (it.hasNext()) {
+                            ChannelImpl channel = it.next();
+                            if (channel.onClose) {
+                                it.remove();
+                            }
+                            if (channel.lock) {
+                                continue;
+                            }
+                            channel.lock = true;
+                            try {
+                                if (!channel.onOpen) {
+                                    executor.execute(() -> {
+                                        try {
+                                            serverHandler.onOpen(channel);
+                                        } catch (Throwable e) {
+                                            serverHandler.onException(channel, e, EMPTY_BUFFER);
+                                        } finally {
+                                            channel.onOpen = true;
+                                            channel.lock = false;
+                                        }
+                                    });
+                                } else {
+                                    executor.execute(() -> {
+                                        try {
+                                            doChannel(channel);
+                                        } catch (Throwable e) {
+                                            compactBuffer(channel);
+                                            serverHandler.onException(channel, e, channel.buffer);
+                                        } finally {
+                                            channel.lock = false;
+                                        }
+                                    });
+                                }
+                            } catch (Throwable e) {
+                                // Ensure the loop continue
+                            }
+                        }
+                        if (outAcceptLoop && serverSocket.isClosed() && channels.isEmpty()) {
+                            latch.countDown();
+                            break;
+                        }
+                        Jie.sleep(1);
+                    }
+                });
+            }
+
             private void doChannel(ChannelImpl channel) {
+                if (channel.onClose) {
+                    return;
+                }
                 byte[] newBytes = channel.availableOrClosed();
-                // null means channel closed or error
                 if (newBytes == null) {
+                    // null means channel closed or error
+                    try {
+                        channel.closeNow();
+                        compactBuffer(channel);
+                        serverHandler.onClose(channel, channel.buffer);
+                    } catch (Throwable e) {
+                        compactBuffer(channel);
+                        serverHandler.onException(channel, e, channel.buffer);
+                    } finally {
+                        channel.onClose = true;
+                    }
                     return;
                 }
                 if (newBytes.length == 0) {
                     compactBuffer(channel);
-                    clientHandler.onLoop(channel, false, channel.buffer);
+                    serverHandler.onLoop(channel, false, channel.buffer);
                     return;
                 }
                 compactBuffer(channel, newBytes);
@@ -443,7 +523,7 @@ public interface GekTcpClient extends GekTcpEndpoint {
                     message = result;
                 }
                 compactBuffer(channel);
-                clientHandler.onLoop(channel, true, channel.buffer);
+                serverHandler.onLoop(channel, true, channel.buffer);
             }
 
             private void compactBuffer(ChannelImpl channel) {
@@ -456,8 +536,17 @@ public interface GekTcpClient extends GekTcpEndpoint {
 
             private final class ChannelImpl implements GekTcpChannel {
 
+                private final Socket socket;
+                private volatile boolean lock = false;
+                private volatile boolean onOpen = false;
+                private volatile boolean onClose = false;
                 private volatile ByteBuffer buffer = EMPTY_BUFFER;
+
                 private volatile @Nullable OutputStream out;
+
+                private ChannelImpl(Socket socket) {
+                    this.socket = socket;
+                }
 
                 @Override
                 public InetAddress getRemoteAddress() {
@@ -504,12 +593,10 @@ public interface GekTcpClient extends GekTcpEndpoint {
                     if (socket.isClosed()) {
                         return;
                     }
-                    if (out != null) {
-                        try {
-                            out.flush();
-                        } catch (IOException e) {
-                            throw new NetException(e);
-                        }
+                    try {
+                        getOutputStream().flush();
+                    } catch (IOException e) {
+                        throw new NetException(e);
                     }
                     try {
                         socket.close();

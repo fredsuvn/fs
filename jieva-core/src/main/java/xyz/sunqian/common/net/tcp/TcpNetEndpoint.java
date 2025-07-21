@@ -9,13 +9,12 @@ import java.net.SocketAddress;
 import java.time.Duration;
 
 /**
- * This interface represent an endpoint on the TCP/IP network: server or client.
+ * This interface represent an endpoint on the TCP/IP network, base interface of {@link TcpNetServerOld} and
+ * {@link TcpNetClient}.
  *
- * @author fredsuvn
- * @see GekTcpServer
- * @see GekTcpClient
+ * @author sunqian
  */
-public interface GekTcpEndpoint {
+public interface TcpNetEndpoint {
 
     /**
      * Returns bound address of this point.
