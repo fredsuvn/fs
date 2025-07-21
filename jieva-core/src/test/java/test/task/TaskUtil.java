@@ -6,7 +6,7 @@ import static org.testng.Assert.assertTrue;
 
 public class TaskUtil {
 
-    static final int DELAY_MILLIS = 10;
+    public static final int DELAY_MILLIS = 10;
 
     public static void shouldAfterNow(Instant startTime, long delayMillis) {
         Instant now = Instant.now();

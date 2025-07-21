@@ -6,11 +6,11 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.AwaitingException;
 import xyz.sunqian.common.base.value.IntVar;
-import xyz.sunqian.common.task.SubmissionException;
+import xyz.sunqian.common.task.RunReceipt;
 import xyz.sunqian.common.task.TaskExecutor;
 import xyz.sunqian.common.task.TaskReceipt;
 import xyz.sunqian.common.task.TaskState;
-import xyz.sunqian.common.task.VoidReceipt;
+import xyz.sunqian.common.task.TaskSubmissionException;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -37,7 +37,8 @@ public class ExecutorTest {
 
     @Test
     public void testExecutor() {
-        testExecutor(TaskExecutor.newExecutor(), false);
+        testExecutor(TaskExecutor.defaultExecutor(), false);
+        testExecutor(TaskExecutor.defaultScheduler(), true);
         testExecutor(TaskExecutor.newScheduler(), true);
         testExecutor(TaskExecutor.newExecutor(1), false);
         testExecutor(TaskExecutor.newExecutor(1, 2), false);
@@ -50,9 +51,9 @@ public class ExecutorTest {
         if (executor.isScheduled()) {
             testScheduledExecution(executor);
         } else {
-            expectThrows(SubmissionException.class, () -> executor.scheduleAt(() -> {
+            expectThrows(TaskSubmissionException.class, () -> executor.scheduleAt(() -> {
             }, Instant.now()));
-            expectThrows(SubmissionException.class, () -> executor.scheduleAt(() -> "", Instant.now()));
+            expectThrows(TaskSubmissionException.class, () -> executor.scheduleAt(() -> "", Instant.now()));
         }
     }
 
@@ -92,7 +93,7 @@ public class ExecutorTest {
             // executor.submit
             latch.reset();
             count.set(0);
-            VoidReceipt receipt = executor.submit(() -> {
+            RunReceipt receipt = executor.submit(() -> {
                 latch.await1();
                 count.incrementAndGet();
             });
@@ -112,7 +113,7 @@ public class ExecutorTest {
             });
             assertEquals(count.get(), 0);
             latch.countDown1();
-            assertEquals(receipt.await(), "hello");
+            assertEquals(receipt.getResult(), "hello");
         }
         {
             // executor.execute all
@@ -123,11 +124,11 @@ public class ExecutorTest {
             }
             List<TaskReceipt<String>> receipts = executor.executeAll(works);
             for (TaskReceipt<String> receipt : receipts) {
-                assertEquals(receipt.await(), "hello");
+                assertEquals(receipt.getResult(), "hello");
             }
             receipts = executor.executeAll(works, Duration.ofSeconds(1));
             for (TaskReceipt<String> receipt : receipts) {
-                assertEquals(receipt.await(), "hello");
+                assertEquals(receipt.getResult(), "hello");
             }
         }
         {
@@ -142,10 +143,10 @@ public class ExecutorTest {
         }
         {
             // exceptions
-            expectThrows(SubmissionException.class, () -> executor.run((Runnable) null));
-            expectThrows(SubmissionException.class, () -> executor.run((Callable<?>) null));
-            expectThrows(SubmissionException.class, () -> executor.submit((Runnable) null));
-            expectThrows(SubmissionException.class, () -> executor.submit((Callable<?>) null));
+            expectThrows(TaskSubmissionException.class, () -> executor.run((Runnable) null));
+            expectThrows(TaskSubmissionException.class, () -> executor.run((Callable<?>) null));
+            expectThrows(TaskSubmissionException.class, () -> executor.submit((Runnable) null));
+            expectThrows(TaskSubmissionException.class, () -> executor.submit((Callable<?>) null));
             expectThrows(AwaitingException.class, () -> executor.executeAll(null));
             expectThrows(AwaitingException.class, () -> executor.executeAll(Arrays.asList(null, null)));
             expectThrows(AwaitingException.class, () -> executor.executeAll(null, null));
@@ -154,7 +155,7 @@ public class ExecutorTest {
             expectThrows(AwaitingException.class, () -> executor.executeAny(null, null));
             // rejected
             TaskExecutor rejectedExecutor = TaskExecutor.newExecutor(new RejectedExecutor());
-            expectThrows(SubmissionException.class, () -> rejectedExecutor.run(() -> null));
+            expectThrows(TaskSubmissionException.class, () -> rejectedExecutor.run(() -> null));
         }
         {
             // no delay
@@ -230,12 +231,12 @@ public class ExecutorTest {
         }
         {
             // exceptions
-            expectThrows(SubmissionException.class, () -> executor.schedule((Runnable) null, null));
-            expectThrows(SubmissionException.class, () -> executor.schedule((Callable<?>) null, null));
-            expectThrows(SubmissionException.class, () -> executor.scheduleAt((Runnable) null, null));
-            expectThrows(SubmissionException.class, () -> executor.scheduleAt((Callable<?>) null, null));
-            expectThrows(SubmissionException.class, () -> executor.scheduleWithRate(null, null, null));
-            expectThrows(SubmissionException.class, () -> executor.scheduleWithDelay(null, null, null));
+            expectThrows(TaskSubmissionException.class, () -> executor.schedule((Runnable) null, null));
+            expectThrows(TaskSubmissionException.class, () -> executor.schedule((Callable<?>) null, null));
+            expectThrows(TaskSubmissionException.class, () -> executor.scheduleAt((Runnable) null, null));
+            expectThrows(TaskSubmissionException.class, () -> executor.scheduleAt((Callable<?>) null, null));
+            expectThrows(TaskSubmissionException.class, () -> executor.scheduleWithRate(null, null, null));
+            expectThrows(TaskSubmissionException.class, () -> executor.scheduleWithDelay(null, null, null));
         }
     }
 
@@ -271,7 +272,7 @@ public class ExecutorTest {
             TaskExecutor executor = TaskExecutor.newExecutor(1, 1);
             executor.close();
             assertTrue(executor.isClosed());
-            expectThrows(SubmissionException.class, () -> executor.run(() -> {
+            expectThrows(TaskSubmissionException.class, () -> executor.run(() -> {
             }));
         }
     }
@@ -339,7 +340,7 @@ public class ExecutorTest {
             TaskExecutor executor = TaskExecutor.newExecutor(new LatchPool());
             latch.reset();
             int[] c = {0};
-            VoidReceipt receipt = executor.submit(() -> {
+            RunReceipt receipt = executor.submit(() -> {
                 c[0]++;
                 latch.countDown2();
                 latch.await3();
@@ -385,17 +386,17 @@ public class ExecutorTest {
             assertEquals(c[0], 1);
             assertEquals(receipt.getState(), TaskState.EXECUTING);
             latch.countDown3();
-            assertEquals(receipt.await(), "hello");
+            assertEquals(receipt.getResult(), "hello");
             assertTrue(receipt.isDone());
             assertFalse(receipt.isCancelled());
             assertEquals(receipt.getState(), TaskState.SUCCEEDED);
             assertNull(receipt.getException());
-            assertEquals(receipt.await(1), "hello");
+            assertEquals(receipt.getResult(1), "hello");
             assertTrue(receipt.isDone());
             assertFalse(receipt.isCancelled());
             assertEquals(receipt.getState(), TaskState.SUCCEEDED);
             assertNull(receipt.getException());
-            assertEquals(receipt.await(Duration.ofMillis(1)), "hello");
+            assertEquals(receipt.getResult(Duration.ofMillis(1)), "hello");
             assertTrue(receipt.isDone());
             assertFalse(receipt.isCancelled());
             assertEquals(receipt.getState(), TaskState.SUCCEEDED);
@@ -406,7 +407,7 @@ public class ExecutorTest {
             TaskExecutor executor = TaskExecutor.newExecutor(new LatchPool());
             latch.reset();
             RuntimeException error = new RuntimeException();
-            VoidReceipt receipt = executor.submit((Runnable) () -> {
+            RunReceipt receipt = executor.submit((Runnable) () -> {
                 latch.countDown2();
                 latch.await3();
                 throw error;
@@ -426,7 +427,7 @@ public class ExecutorTest {
             // VoidReceipt canceled-executing
             TaskExecutor executor = TaskExecutor.newExecutor(new LatchPool());
             latch.reset();
-            VoidReceipt receipt = executor.submit(() -> {
+            RunReceipt receipt = executor.submit(() -> {
                 latch.countDown2();
                 latch.await3();
             });
@@ -444,7 +445,7 @@ public class ExecutorTest {
             // VoidReceipt canceled
             TaskExecutor executor = TaskExecutor.newExecutor(new LatchPool());
             latch.reset();
-            VoidReceipt receipt = executor.submit(() -> {
+            RunReceipt receipt = executor.submit(() -> {
             });
             assertEquals(receipt.getState(), TaskState.WAITING);
             assertTrue(receipt.cancel());
@@ -458,18 +459,18 @@ public class ExecutorTest {
         {
             // VoidReceipt
             TaskExecutor executor = TaskExecutor.newExecutor();
-            VoidReceipt receipt1 = executor.submit(() -> {
+            RunReceipt receipt1 = executor.submit(() -> {
             });
             receipt1.await();
             RuntimeException err = new RuntimeException();
-            VoidReceipt receipt2 = executor.submit((Runnable) () -> {
+            RunReceipt receipt2 = executor.submit((Runnable) () -> {
                 throw err;
             });
             receipt2.await();
             assertSame(receipt2.getException(), err);
             receipt2.await(Duration.ofMillis(1));
             assertSame(receipt2.getException(), err);
-            VoidReceipt receipt3 = executor.submit(() -> {
+            RunReceipt receipt3 = executor.submit(() -> {
                 Jie.sleep();
             });
             try {
@@ -482,21 +483,21 @@ public class ExecutorTest {
             // TaskReceipt
             TaskExecutor executor = TaskExecutor.newExecutor();
             TaskReceipt<Integer> receipt1 = executor.submit(() -> 111);
-            assertEquals(receipt1.await(), 111);
+            assertEquals(receipt1.getResult(), 111);
             Exception err = new Exception();
             TaskReceipt<?> receipt2 = executor.submit(() -> {
                 throw err;
             });
-            assertNull(receipt2.await());
+            assertNull(receipt2.getResult());
             assertSame(receipt2.getException(), err);
-            assertNull(receipt2.await(Duration.ofMillis(1)));
+            assertNull(receipt2.getResult(Duration.ofMillis(1)));
             assertSame(receipt2.getException(), err);
             TaskReceipt<?> receipt3 = executor.submit(() -> {
                 Jie.sleep();
                 return 1;
             });
             try {
-                receipt3.await(Duration.ofMillis(1));
+                receipt3.getResult(Duration.ofMillis(1));
             } catch (AwaitingException e) {
                 assertTrue(e.getCause() instanceof TimeoutException);
             }

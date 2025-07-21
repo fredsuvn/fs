@@ -13,7 +13,7 @@ import java.time.Duration;
  * @param <T> the type of the task result
  * @author sunqian
  */
-public interface TaskReceipt<T> extends BaseTaskReceipt {
+public interface TaskReceipt<T> extends BaseReceipt {
 
     /**
      * Blocks the current thread until the task is completed or canceled, returns the result.
@@ -25,7 +25,7 @@ public interface TaskReceipt<T> extends BaseTaskReceipt {
      * @throws AwaitingException if the current thread is interrupted or an error occurs while awaiting
      */
     @Nullable
-    T await() throws AwaitingException;
+    T getResult() throws AwaitingException;
 
     /**
      * Blocks the current thread until the task is completed or canceled, or the specified waiting time elapses. Returns
@@ -40,7 +40,7 @@ public interface TaskReceipt<T> extends BaseTaskReceipt {
      *                           error occurs while awaiting
      */
     @Nullable
-    T await(long millis) throws AwaitingException;
+    T getResult(long millis) throws AwaitingException;
 
     /**
      * Blocks the current thread until the task is completed or canceled, or the specified waiting time elapses. Returns
@@ -55,5 +55,5 @@ public interface TaskReceipt<T> extends BaseTaskReceipt {
      *                           error occurs while awaiting
      */
     @Nullable
-    T await(@Nonnull Duration duration) throws AwaitingException;
+    T getResult(@Nonnull Duration duration) throws AwaitingException;
 }

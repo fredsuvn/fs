@@ -25,52 +25,79 @@ import java.util.concurrent.ThreadPoolExecutor;
 public interface TaskExecutor {
 
     /**
-     * Returns a new {@link TaskExecutor} which starts a new thread for each new task, and destroys the thread after the
-     * task has been done. The returned {@link TaskExecutor} does not support scheduling.
+     * Returns the default {@link TaskExecutor}, which creates a new thread for each task. The way of creating threads
+     * depends on the current JVM. In JVMs that support virtual threads, it will create virtual threads.
      *
-     * @return a new {@link TaskExecutor} which starts a new thread for each new task
+     * @return the default {@link TaskExecutor}, which creates a new thread for each task
+     */
+    static @Nonnull TaskExecutor defaultExecutor() {
+        return TaskExecutorImpl.DEFAULT_EXECUTOR;
+    }
+
+    /**
+     * Returns the default scheduled {@link TaskExecutor}, of which core pool size is {@code 0}. The way of creating
+     * threads depends on the current JVM. In JVMs that support virtual threads, it will create virtual threads.
+     *
+     * @return the default scheduled {@link TaskExecutor}, of which core pool size is {@code 0}
+     */
+    static @Nonnull TaskExecutor defaultScheduler() {
+        return TaskExecutorImpl.DEFAULT_SCHEDULER;
+    }
+
+    /**
+     * Returns a new {@link TaskExecutor}, which creates a new thread for each task. The way of creating threads depends
+     * on the current JVM. In JVMs that support virtual threads, it will create virtual threads.
+     *
+     * @return a new {@link TaskExecutor}, which creates a new thread for each task
      */
     static @Nonnull TaskExecutor newExecutor() {
-        return TaskImpls.newExecutor(false);
+        return TaskExecutorImpl.newExecutor(false);
     }
 
     /**
-     * Returns a new {@link TaskExecutor} which starts a new thread for each new task, and destroys the thread after the
-     * task has been done. The returned {@link TaskExecutor} supports scheduling.
+     * Returns a new scheduled {@link TaskExecutor}, of which core pool size is {@code 0}. The way of creating threads
+     * depends on the current JVM. In JVMs that support virtual threads, it will create virtual threads.
      *
-     * @return a new {@link TaskExecutor} which starts a new thread for each new task, supporting scheduling
+     * @return a new scheduled {@link TaskExecutor}, of which core pool size is {@code 0}
      */
     static @Nonnull TaskExecutor newScheduler() {
-        return TaskImpls.newExecutor(true);
+        return TaskExecutorImpl.newExecutor(true);
     }
 
     /**
-     * Returns a new {@link TaskExecutor} based on a thread pool (which refers to {@link ThreadPoolExecutor}). The
+     * Returns a new {@link TaskExecutor} based on a thread pool (typically it is {@link ThreadPoolExecutor}). The
      * pool's core pool size is specified by {@code coreThreadSize}, and the maximum pool size and maximum queue size
      * are unlimited. The returned {@link TaskExecutor} does not support scheduling.
      *
      * @param coreThreadSize the specified core pool size
      * @return a new {@link TaskExecutor} based on a thread pool
+     * @throws IllegalArgumentException if {@code coreThreadSize < 0}
      */
-    static @Nonnull TaskExecutor newExecutor(int coreThreadSize) {
-        return TaskImpls.newExecutor(coreThreadSize, Integer.MAX_VALUE, -1);
+    static @Nonnull TaskExecutor newExecutor(
+        int coreThreadSize
+    ) throws IllegalArgumentException {
+        return TaskExecutorImpl.newExecutor(coreThreadSize, Integer.MAX_VALUE, -1);
     }
 
     /**
-     * Returns a new {@link TaskExecutor} based on a thread pool (which refers to {@link ThreadPoolExecutor}). The
+     * Returns a new {@link TaskExecutor} based on a thread pool (typically it is {@link ThreadPoolExecutor}). The
      * pool's core pool size and maximum pool size are specified by {@code coreThreadSize} and {@code maxThreadSize},
      * and the maximum queue size is unlimited. The returned {@link TaskExecutor} does not support scheduling.
      *
      * @param coreThreadSize the specified core pool size
      * @param maxThreadSize  the specified maximum pool size
      * @return a new {@link TaskExecutor} based on a thread pool
+     * @throws IllegalArgumentException if {@code coreThreadSize < 0} or {@code maxThreadSize <= 0} or
+     *                                  {@code maxThreadSize < coreThreadSize}
      */
-    static @Nonnull TaskExecutor newExecutor(int coreThreadSize, int maxThreadSize) {
-        return TaskImpls.newExecutor(coreThreadSize, maxThreadSize, -1);
+    static @Nonnull TaskExecutor newExecutor(
+        int coreThreadSize, int maxThreadSize
+    ) throws IllegalArgumentException {
+        return TaskExecutorImpl.newExecutor(coreThreadSize, maxThreadSize, -1);
     }
 
     /**
-     * Returns a new {@link TaskExecutor} based on a thread pool (which refers to {@link ThreadPoolExecutor}). The
+     * Returns a new {@link TaskExecutor} based on a thread pool (typically it is {@link ThreadPoolExecutor}). The
      * pool's core pool size, maximum pool size and maximum queue size are specified by {@code coreThreadSize},
      * {@code maxThreadSize} and {@code maxQueueSize}. The returned {@link TaskExecutor} does not support scheduling.
      *
@@ -78,9 +105,13 @@ public interface TaskExecutor {
      * @param maxThreadSize  the specified maximum pool size
      * @param maxQueueSize   the specified maximum queue size
      * @return a new {@link TaskExecutor} based on a thread pool
+     * @throws IllegalArgumentException if {@code coreThreadSize < 0} or {@code maxThreadSize <= 0} or
+     *                                  {@code maxQueueSize < 0} or {@code maxThreadSize < coreThreadSize}
      */
-    static @Nonnull TaskExecutor newExecutor(int coreThreadSize, int maxThreadSize, int maxQueueSize) {
-        return TaskImpls.newExecutor(coreThreadSize, maxThreadSize, maxQueueSize);
+    static @Nonnull TaskExecutor newExecutor(
+        int coreThreadSize, int maxThreadSize, int maxQueueSize
+    ) throws IllegalArgumentException {
+        return TaskExecutorImpl.newExecutor(coreThreadSize, maxThreadSize, maxQueueSize);
     }
 
     /**
@@ -92,42 +123,42 @@ public interface TaskExecutor {
      * @return a new {@link TaskExecutor} based on the given {@link ExecutorService}
      */
     static @Nonnull TaskExecutor newExecutor(@Nonnull ExecutorService service) {
-        return TaskImpls.newExecutor(service);
+        return TaskExecutorImpl.newExecutor(service);
     }
 
     /**
-     * Submits the given task to this executor. This method does not return a {@link TaskReceipt}.
+     * Submits the given task to this executor.
      *
      * @param task the given task
-     * @throws SubmissionException if an error occurs during the submitting
+     * @throws TaskSubmissionException if an error occurs during submitting
      */
-    void run(@Nonnull Runnable task) throws SubmissionException;
+    void run(@Nonnull Runnable task) throws TaskSubmissionException;
 
     /**
-     * Submits the given task to this executor. This method does not return a {@link TaskReceipt}.
+     * Submits the given task to this executor.
      *
      * @param task the given task
-     * @throws SubmissionException if an error occurs during the submitting
+     * @throws TaskSubmissionException if an error occurs during submitting
      */
-    default void run(@Nonnull Callable<?> task) throws SubmissionException {
+    default void run(@Nonnull Callable<?> task) throws TaskSubmissionException {
         try {
-            run(JieTask.toRunnable(Objects.requireNonNull(task)));
-        } catch (SubmissionException e) {
+            run(TaskKit.toRunnable(Objects.requireNonNull(task)));
+        } catch (TaskSubmissionException e) {
             throw e;
         } catch (Exception e) {
-            throw new SubmissionException(e);
+            throw new TaskSubmissionException(e);
         }
     }
 
     /**
-     * Submits the given task to this executor, returns a {@link VoidReceipt} for the task.
+     * Submits the given task to this executor, returns a {@link RunReceipt} for the task.
      *
      * @param task the given task
      * @return the receipt of the task
-     * @throws SubmissionException if an error occurs during the submitting
+     * @throws TaskSubmissionException if an error occurs during submitting
      */
     @Nonnull
-    VoidReceipt submit(@Nonnull Runnable task) throws SubmissionException;
+    RunReceipt submit(@Nonnull Runnable task) throws TaskSubmissionException;
 
     /**
      * Submits the given task to this executor, returns a {@link TaskReceipt} for the task.
@@ -135,9 +166,9 @@ public interface TaskExecutor {
      * @param task the given task
      * @param <T>  the type of the task result
      * @return the receipt of the task
-     * @throws SubmissionException if an error occurs during the submitting
+     * @throws TaskSubmissionException if an error occurs during submitting
      */
-    <T> @Nonnull TaskReceipt<T> submit(@Nonnull Callable<? extends T> task) throws SubmissionException;
+    <T> @Nonnull TaskReceipt<T> submit(@Nonnull Callable<? extends T> task) throws TaskSubmissionException;
 
     /**
      * Executes the given tasks, returning a list of {@link TaskReceipt} holding their status and results when all tasks
@@ -281,7 +312,7 @@ public interface TaskExecutor {
     boolean isScheduled();
 
     /**
-     * Schedules the given task with a specified delay time from now, returns a {@link VoidReceipt} for the task. The
+     * Schedules the given task with a specified delay time from now, returns a {@link RunReceipt} for the task. The
      * task becomes enabled after the given delay.
      * <p>
      * NOTE: This method requires that the current implementation supports scheduling.
@@ -289,10 +320,10 @@ public interface TaskExecutor {
      * @param task  the given task
      * @param delay the specified delay time
      * @return the receipt of the task
-     * @throws SubmissionException if an error occurs during the submitting
+     * @throws TaskSubmissionException if an error occurs during submitting
      */
     @Nonnull
-    VoidReceipt schedule(@Nonnull Runnable task, @Nonnull Duration delay) throws SubmissionException;
+    RunReceipt schedule(@Nonnull Runnable task, @Nonnull Duration delay) throws TaskSubmissionException;
 
     /**
      * Schedules the given task with a specified delay time from now, returns a {@link TaskReceipt} for the task. The
@@ -304,15 +335,15 @@ public interface TaskExecutor {
      * @param delay the specified delay time
      * @param <T>   the type of the task result
      * @return the receipt of the task
-     * @throws SubmissionException if an error occurs during the submitting
+     * @throws TaskSubmissionException if an error occurs during submitting
      */
     <T> @Nonnull TaskReceipt<T> schedule(
         @Nonnull Callable<? extends T> task,
         @Nonnull Duration delay
-    ) throws SubmissionException;
+    ) throws TaskSubmissionException;
 
     /**
-     * Schedules the given task to be executed at the specified time, returns a {@link VoidReceipt} for the task. The
+     * Schedules the given task to be executed at the specified time, returns a {@link RunReceipt} for the task. The
      * task becomes enabled after the given time.
      * <p>
      * NOTE: This method requires that the current implementation supports scheduling.
@@ -320,21 +351,21 @@ public interface TaskExecutor {
      * @param task the given task
      * @param time the specified time to execute the task
      * @return the receipt of the task
-     * @throws SubmissionException if an error occurs during the submitting
+     * @throws TaskSubmissionException if an error occurs during submitting
      */
-    default @Nonnull VoidReceipt scheduleAt(@Nonnull Runnable task, @Nonnull Instant time) throws SubmissionException {
+    default @Nonnull RunReceipt scheduleAt(@Nonnull Runnable task, @Nonnull Instant time) throws TaskSubmissionException {
         try {
             Duration diff = Duration.between(Instant.now(), time);
             return schedule(task, diff);
-        } catch (SubmissionException e) {
+        } catch (TaskSubmissionException e) {
             throw e;
         } catch (Exception e) {
-            throw new SubmissionException(e);
+            throw new TaskSubmissionException(e);
         }
     }
 
     /**
-     * Schedules the given task to be executed at the specified time, returns a {@link VoidReceipt} for the task. The
+     * Schedules the given task to be executed at the specified time, returns a {@link RunReceipt} for the task. The
      * task becomes enabled after the given time.
      * <p>
      * NOTE: This method requires that the current implementation supports scheduling.
@@ -343,26 +374,26 @@ public interface TaskExecutor {
      * @param time the specified time to execute the task
      * @param <T>  the type of the task result
      * @return the receipt of the task
-     * @throws SubmissionException if an error occurs during the submitting
+     * @throws TaskSubmissionException if an error occurs during submitting
      */
     default <T> @Nonnull TaskReceipt<T> scheduleAt(
         @Nonnull Callable<? extends T> task,
         @Nonnull Instant time
-    ) throws SubmissionException {
+    ) throws TaskSubmissionException {
         try {
             Duration diff = Duration.between(Instant.now(), time);
             return schedule(task, diff);
-        } catch (SubmissionException e) {
+        } catch (TaskSubmissionException e) {
             throw e;
         } catch (Exception e) {
-            throw new SubmissionException(e);
+            throw new TaskSubmissionException(e);
         }
     }
 
     /**
-     * Schedules the given periodic task that becomes enabled first after the given initial delay, and subsequently with
-     * the given period. That is, the executions will commence after {@code initialDelay} then
-     * {@code initialDelay + period}, then {@code initialDelay + 2 * period}, and so on.
+     * Schedules the given periodic task that executes first after the given initial delay, and subsequently with the
+     * given period. That is, the executions will start after {@code initialDelay} then {@code initialDelay + period},
+     * then {@code initialDelay + 2 * period}, and so on.
      * <p>
      * If any execution of the task fails, subsequent executions are suppressed. Otherwise, the task will only terminate
      * via cancellation or termination of the executor. If any execution of this task takes longer than its period, then
@@ -373,19 +404,19 @@ public interface TaskExecutor {
      * @param task         the given periodic task
      * @param initialDelay the given initial delay for first execution
      * @param period       the given period between successive executions
-     * @return the receipt representing pending completion of the task
-     * @throws SubmissionException if an error occurs during the submitting
+     * @return the receipt of the periodic task
+     * @throws TaskSubmissionException if an error occurs during submitting
      */
     @Nonnull
-    VoidReceipt scheduleWithRate(
+    RunReceipt scheduleWithRate(
         @Nonnull Runnable task,
         @Nonnull Duration initialDelay,
         @Nonnull Duration period
-    ) throws SubmissionException;
+    ) throws TaskSubmissionException;
 
     /**
-     * Schedules the given periodic task that becomes enabled first after the given initial delay, and subsequently with
-     * the given delay between the termination of one execution and the commencement of the next.
+     * Schedules the given periodic task that executes first after the given initial delay, and subsequently with the
+     * given delay between the termination of one execution and the commencement of the next.
      * <p>
      * If any execution of the task fails, subsequent executions are suppressed. Otherwise, the task will only terminate
      * via cancellation or termination of the executor.
@@ -395,13 +426,13 @@ public interface TaskExecutor {
      * @param task         the given periodic task
      * @param initialDelay the given initial delay for first execution
      * @param delay        the given delay between the termination of one execution and the commencement of the next
-     * @return the receipt representing pending completion of the task
-     * @throws SubmissionException if an error occurs during the submitting
+     * @return the receipt of the periodic task
+     * @throws TaskSubmissionException if an error occurs during submitting
      */
     @Nonnull
-    VoidReceipt scheduleWithDelay(
+    RunReceipt scheduleWithDelay(
         @Nonnull Runnable task,
         @Nonnull Duration initialDelay,
         @Nonnull Duration delay
-    ) throws SubmissionException;
+    ) throws TaskSubmissionException;
 }

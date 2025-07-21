@@ -51,7 +51,7 @@ public interface ProcessReceipt extends TaskReceipt<Integer> {
      * @throws AwaitingException if the current thread is interrupted or an error occurs while awaiting
      */
     @Override
-    default @Nonnull Integer await() throws AwaitingException {
+    default @Nonnull Integer getResult() throws AwaitingException {
         Process process = getProcess();
         Jie.uncheck(() -> process.waitFor(), AwaitingException::new);
         return process.exitValue();
@@ -67,7 +67,7 @@ public interface ProcessReceipt extends TaskReceipt<Integer> {
      *                           error occurs while awaiting
      */
     @Override
-    default @Nonnull Integer await(long millis) throws AwaitingException {
+    default @Nonnull Integer getResult(long millis) throws AwaitingException {
         Process process = getProcess();
         boolean exited = Jie.uncheck(
             () -> process.waitFor(millis, TimeUnit.MILLISECONDS),
@@ -89,7 +89,7 @@ public interface ProcessReceipt extends TaskReceipt<Integer> {
      *                           error occurs while awaiting
      */
     @Override
-    default @Nonnull Integer await(@Nonnull Duration duration) throws AwaitingException {
+    default @Nonnull Integer getResult(@Nonnull Duration duration) throws AwaitingException {
         Process process = getProcess();
         boolean exited = Jie.uncheck(
             () -> process.waitFor(duration.toNanos(), TimeUnit.NANOSECONDS),
@@ -103,8 +103,8 @@ public interface ProcessReceipt extends TaskReceipt<Integer> {
 
     /**
      * Cancels and destroys the process forcibly (equivalent to {@code cancel(true)}). This method returns immediately
-     * without waiting for the process to exit. If necessary, use {@link #await()}/{@link #await(Duration)} after
-     * invoking this method to ensure the termination of the process.
+     * without waiting for the process to exit. If necessary, use {@link #getResult()}/{@link #getResult(Duration)}
+     * after invoking this method to ensure the termination of the process.
      * <p>
      * This method always returns {@code true}.
      *
@@ -117,9 +117,9 @@ public interface ProcessReceipt extends TaskReceipt<Integer> {
 
     /**
      * Cancels and destroys the process. This method returns immediately without waiting for the process to exit. If
-     * necessary, use {@link #await()}/{@link #await(Duration)} after invoking this method to ensure the termination of
-     * the process. The {@code forcibly} specifies whether destroys forcibly. If the {@code forcibly} is {@code false},
-     * this method does not guarantee successful termination of the process.
+     * necessary, use {@link #getResult()}/{@link #getResult(Duration)} after invoking this method to ensure the
+     * termination of the process. The {@code forcibly} specifies whether destroys forcibly. If the {@code forcibly} is
+     * {@code false}, this method does not guarantee successful termination of the process.
      * <p>
      * This method always returns {@code true}.
      *

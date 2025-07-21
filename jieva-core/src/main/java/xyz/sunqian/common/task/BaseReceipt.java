@@ -7,11 +7,11 @@ import xyz.sunqian.common.base.Jie;
 import java.time.Duration;
 
 /**
- * Base task receipt interface of {@link TaskReceipt} and {@link VoidReceipt}.
+ * Base receipt interface of {@link TaskReceipt} and {@link RunReceipt}.
  *
  * @author sunqian
  */
-interface BaseTaskReceipt {
+interface BaseReceipt {
 
     /**
      * Returns the state of the task.

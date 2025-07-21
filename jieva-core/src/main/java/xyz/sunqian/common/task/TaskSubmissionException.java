@@ -6,18 +6,18 @@ import xyz.sunqian.common.base.exception.JieRuntimeException;
 import java.util.concurrent.RejectedExecutionException;
 
 /**
- * This runtime exception is typically used for wrapping exceptions that occur when submitting a task to an executor.
- * The {@link #getCause()} method returns the wrapped original cause such as {@link RejectedExecutionException} (if
- * any).
+ * This runtime class is typically used for wrapping original exceptions that occur when submitting a task to an
+ * executor. The {@link #getCause()} method returns the wrapped original cause such as
+ * {@link RejectedExecutionException} (if any).
  *
  * @author sunqian
  */
-public class SubmissionException extends JieRuntimeException {
+public class TaskSubmissionException extends JieRuntimeException {
 
     /**
      * Empty constructor.
      */
-    public SubmissionException() {
+    public TaskSubmissionException() {
         super();
     }
 
@@ -26,7 +26,7 @@ public class SubmissionException extends JieRuntimeException {
      *
      * @param message the message
      */
-    public SubmissionException(@Nullable String message) {
+    public TaskSubmissionException(@Nullable String message) {
         super(message);
     }
 
@@ -36,7 +36,7 @@ public class SubmissionException extends JieRuntimeException {
      * @param message the message
      * @param cause   the cause
      */
-    public SubmissionException(@Nullable String message, @Nullable Throwable cause) {
+    public TaskSubmissionException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
@@ -45,7 +45,7 @@ public class SubmissionException extends JieRuntimeException {
      *
      * @param cause the cause
      */
-    public SubmissionException(@Nullable Throwable cause) {
+    public TaskSubmissionException(@Nullable Throwable cause) {
         super(cause);
     }
 }

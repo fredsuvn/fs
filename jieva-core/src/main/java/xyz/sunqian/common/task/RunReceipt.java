@@ -11,7 +11,7 @@ import java.time.Duration;
  *
  * @author sunqian
  */
-public interface VoidReceipt extends BaseTaskReceipt {
+public interface RunReceipt extends BaseReceipt {
 
     /**
      * Blocks the current thread until the task is completed or canceled.
