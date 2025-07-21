@@ -232,18 +232,18 @@ public interface TaskExecutor {
     ) throws AwaitingException;
 
     /**
-     * Closes this executor and returns immediately. The previously submitted tasks are executed, but no new task will
-     * be accepted. Invocation has no additional effect if already closed.
+     * Stops this executor and returns immediately. The previously submitted tasks are executed, but no new task will be
+     * accepted. Invocation has no additional effect if already closed.
      * <p>
      * NOTE: This method does not wait for previously submitted tasks to complete execution. Use {@link #await()} or
      * {@link #await(Duration)} to do that.
      */
-    void close();
+    void shutdown();
 
     /**
-     * Closes this executor and attempts to stop all actively executing tasks, halts the processing of waiting tasks,
-     * and returns a list of the tasks as {@link Runnable} that were awaiting execution. A closed executor no longer
-     * accepts new tasks, and invocation has no additional effect if already closed.
+     * Stops this executor and attempts to stop all actively executing tasks, halts the processing of waiting tasks, and
+     * returns a list of the tasks as {@link Runnable} that were awaiting execution. A closed executor no longer accepts
+     * new tasks, and invocation has no additional effect if already closed.
      * <p>
      * NOTE1: This method does not wait for previously submitted tasks to complete execution. Use {@link #await()} or
      * {@link #await(Duration)} to do that.
@@ -254,19 +254,19 @@ public interface TaskExecutor {
      *
      * @return a list of tasks as {@link Runnable} that never commenced execution
      */
-    List<Runnable> closeNow();
+    List<Runnable> shutdownNow();
 
     /**
-     * Returns {@code true} if this executor has been closed.
+     * Returns {@code true} if this executor has been shut down.
      *
-     * @return {@code true} if this executor has been closed
+     * @return {@code true} if this executor has been shut down
      */
-    boolean isClosed();
+    boolean isShutdown();
 
     /**
      * Blocks the current thread until all tasks have been done after a close operation.
      * <p>
-     * NOTE: This method should be invoked after a {@link #close()} or {@link #closeNow()} is invoked.
+     * NOTE: This method should be invoked after a {@link #shutdown()} or {@link #shutdownNow()} is invoked.
      *
      * @throws AwaitingException if the current thread is interrupted or an error occurs while awaiting
      */
@@ -276,7 +276,7 @@ public interface TaskExecutor {
      * Blocks the current thread until all tasks have been done after a close operation, or the timeout occurs, or the
      * current thread is interrupted.
      * <p>
-     * NOTE: This method should be invoked after a {@link #close()} or {@link #closeNow()} is invoked.
+     * NOTE: This method should be invoked after a {@link #shutdown()} or {@link #shutdownNow()} is invoked.
      *
      * @param millis the maximum milliseconds to wait
      * @return {@code true} if this executor terminated and {@code false} if the timeout elapsed before termination
@@ -288,7 +288,7 @@ public interface TaskExecutor {
      * Blocks the current thread until all tasks have been done after a close operation, or the timeout occurs, or the
      * current thread is interrupted.
      * <p>
-     * NOTE: This method should be invoked after a {@link #close()} or {@link #closeNow()} is invoked.
+     * NOTE: This method should be invoked after a {@link #shutdown()} or {@link #shutdownNow()} is invoked.
      *
      * @param duration the maximum time to wait
      * @return {@code true} if this executor terminated and {@code false} if the timeout elapsed before termination
@@ -298,7 +298,7 @@ public interface TaskExecutor {
 
     /**
      * Returns {@code true} if all tasks have been done and the executor is closed. Note that this method never returns
-     * {@code true} unless either {@link #close()} or {@link #closeNow()} was called first.
+     * {@code true} unless either {@link #shutdown()} or {@link #shutdownNow()} was called first.
      *
      * @return {@code true} if all tasks have been done and the executor is closed
      */

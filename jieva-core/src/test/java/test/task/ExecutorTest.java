@@ -261,17 +261,17 @@ public class ExecutorTest {
             });
             latch.await1();
             assertEquals(c[0], 1);
-            assertFalse(executor.isClosed());
+            assertFalse(executor.isShutdown());
             assertFalse(executor.isTerminated());
-            assertEquals(executor.closeNow().size(), 1);
+            assertEquals(executor.shutdownNow().size(), 1);
             latch.await2();
             assertEquals(c[0], 2);
-            assertTrue(executor.isClosed());
+            assertTrue(executor.isShutdown());
         }
         {
             TaskExecutor executor = TaskExecutor.newExecutor(1, 1);
-            executor.close();
-            assertTrue(executor.isClosed());
+            executor.shutdown();
+            assertTrue(executor.isShutdown());
             expectThrows(TaskSubmissionException.class, () -> executor.run(() -> {
             }));
         }
@@ -292,7 +292,7 @@ public class ExecutorTest {
             assertEquals(c.get(), 1);
             assertFalse(executor.await(1));
             assertFalse(executor.isTerminated());
-            executor.close();
+            executor.shutdown();
             assertTrue(executor.await(Duration.ofMillis(1)));
             assertTrue(executor.isTerminated());
         }
@@ -307,7 +307,7 @@ public class ExecutorTest {
             });
             latch.await1();
             assertEquals(c.get(), 1);
-            executor.close();
+            executor.shutdown();
             executor.await();
             assertTrue(executor.await(Duration.ofMillis(1)));
             assertTrue(executor.isTerminated());

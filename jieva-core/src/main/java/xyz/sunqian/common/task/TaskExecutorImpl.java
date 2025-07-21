@@ -177,17 +177,17 @@ final class TaskExecutorImpl implements TaskExecutor {
     }
 
     @Override
-    public void close() {
+    public void shutdown() {
         service.shutdown();
     }
 
     @Override
-    public List<Runnable> closeNow() {
+    public List<Runnable> shutdownNow() {
         return service.shutdownNow();
     }
 
     @Override
-    public boolean isClosed() {
+    public boolean isShutdown() {
         return service.isShutdown();
     }
 
