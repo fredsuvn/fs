@@ -2,6 +2,7 @@ package test.base.random;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.common.base.math.MathKit;
 import xyz.sunqian.common.base.random.Rng;
 import xyz.sunqian.common.collect.StreamKit;
 import xyz.sunqian.test.AssertTest;
@@ -281,13 +282,40 @@ public class RngTest implements AssertTest, PrintTest {
             }
 
             @Override
+            public int nextInt(int startInclusive, int endExclusive) throws IllegalArgumentException {
+                return intSupplier(startInclusive, endExclusive).getAsInt();
+            }
+
+            @Override
             public long nextLong() {
                 return ThreadLocalRandom.current().nextLong();
             }
 
             @Override
+            public long nextLong(long startInclusive, long endExclusive) throws IllegalArgumentException {
+                return longSupplier(startInclusive, endExclusive).getAsLong();
+            }
+
+            @Override
+            public float nextFloat() {
+                double value = nextDouble();
+                return MathKit.makeIn((float) value, 0.0f, 1.0f);
+            }
+
+            @Override
+            public float nextFloat(float startInclusive, float endExclusive) throws IllegalArgumentException {
+                double value = nextDouble(startInclusive, endExclusive);
+                return MathKit.makeIn((float) value, startInclusive, endExclusive);
+            }
+
+            @Override
             public double nextDouble() {
                 return ThreadLocalRandom.current().nextDouble();
+            }
+
+            @Override
+            public double nextDouble(double startInclusive, double endExclusive) throws IllegalArgumentException {
+                return doubleSupplier(startInclusive, endExclusive).getAsDouble();
             }
 
             @Override

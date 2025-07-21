@@ -4,6 +4,7 @@ import xyz.sunqian.annotations.JdkDependent;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.CheckKit;
 import xyz.sunqian.common.base.bytes.BytesKit;
+import xyz.sunqian.common.base.math.MathKit;
 import xyz.sunqian.common.collect.StreamKit;
 
 import java.security.SecureRandom;
@@ -60,13 +61,40 @@ final class RngImpl {
         }
 
         @Override
+        public int nextInt(int startInclusive, int endExclusive) throws IllegalArgumentException {
+            return ints(startInclusive, endExclusive).iterator().nextInt();
+        }
+
+        @Override
         public long nextLong() {
             return random.nextLong();
         }
 
         @Override
+        public long nextLong(long startInclusive, long endExclusive) throws IllegalArgumentException {
+            return longs(startInclusive, endExclusive).iterator().nextLong();
+        }
+
+        @Override
+        public float nextFloat() {
+            double value = nextDouble();
+            return MathKit.makeIn((float) value, 0.0f, 1.0f);
+        }
+
+        @Override
+        public float nextFloat(float startInclusive, float endExclusive) throws IllegalArgumentException {
+            double value = nextDouble(startInclusive, endExclusive);
+            return MathKit.makeIn((float) value, startInclusive, endExclusive);
+        }
+
+        @Override
         public double nextDouble() {
             return random.nextDouble();
+        }
+
+        @Override
+        public double nextDouble(double startInclusive, double endExclusive) throws IllegalArgumentException {
+            return doubles(startInclusive, endExclusive).iterator().nextDouble();
         }
     }
 
@@ -111,6 +139,20 @@ final class RngImpl {
                 return startInclusive;
             }
             return random().nextLong(startInclusive, endExclusive);
+        }
+
+        @JdkDependent
+        @Override
+        public float nextFloat() {
+            double value = nextDouble();
+            return MathKit.makeIn((float) value, 0.0f, 1.0f);
+        }
+
+        @JdkDependent
+        @Override
+        public float nextFloat(float startInclusive, float endExclusive) throws IllegalArgumentException {
+            double value = nextDouble(startInclusive, endExclusive);
+            return MathKit.makeIn((float) value, startInclusive, endExclusive);
         }
 
         @Override

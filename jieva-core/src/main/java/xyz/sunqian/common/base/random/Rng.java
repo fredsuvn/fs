@@ -2,7 +2,6 @@ package xyz.sunqian.common.base.random;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.CheckKit;
-import xyz.sunqian.common.base.math.MathKit;
 
 import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
@@ -143,9 +142,7 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
      * @return the next random int value in the range {@code [startInclusive, endExclusive)}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    default int nextInt(int startInclusive, int endExclusive) throws IllegalArgumentException {
-        return ints(startInclusive, endExclusive).iterator().nextInt();
-    }
+    int nextInt(int startInclusive, int endExclusive) throws IllegalArgumentException;
 
     /**
      * Returns the next random long value.
@@ -166,19 +163,14 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
      * @return the next random long value in the range {@code [startInclusive, endExclusive)}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    default long nextLong(long startInclusive, long endExclusive) throws IllegalArgumentException {
-        return longs(startInclusive, endExclusive).iterator().nextLong();
-    }
+    long nextLong(long startInclusive, long endExclusive) throws IllegalArgumentException;
 
     /**
      * Returns the next random float value in the range {@code [0.0, 1.0)}.
      *
      * @return the next random float value in the range {@code [0.0, 1.0)}
      */
-    default float nextFloat() {
-        double value = nextDouble();
-        return MathKit.makeIn((float) value, 0.0f, 1.0f);
-    }
+    float nextFloat();
 
     /**
      * Returns the next random float value in the range {@code [startInclusive, endExclusive)}. If
@@ -192,10 +184,7 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
      * @return the next random float value in the range {@code [startInclusive, endExclusive)}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    default float nextFloat(float startInclusive, float endExclusive) throws IllegalArgumentException {
-        double value = nextDouble(startInclusive, endExclusive);
-        return MathKit.makeIn((float) value, startInclusive, endExclusive);
-    }
+    float nextFloat(float startInclusive, float endExclusive) throws IllegalArgumentException;
 
     /**
      * Returns the next random double value in the range {@code [0.0, 1.0)}.
@@ -216,9 +205,7 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
      * @return the next random double value in the range {@code [startInclusive, endExclusive)}
      * @throws IllegalArgumentException if {@code startInclusive > endExclusive}
      */
-    default double nextDouble(double startInclusive, double endExclusive) throws IllegalArgumentException {
-        return doubles(startInclusive, endExclusive).iterator().nextDouble();
-    }
+    double nextDouble(double startInclusive, double endExclusive) throws IllegalArgumentException;
 
     /**
      * Returns a new random byte array of the specified length.
