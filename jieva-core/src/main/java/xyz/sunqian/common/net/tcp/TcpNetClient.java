@@ -447,11 +447,11 @@ public interface TcpNetClient extends TcpNetEndpoint {
             }
 
             private void compactBuffer(ChannelImpl channel) {
-                channel.buffer = TcpSocketBack.compact(channel.buffer, bufferGenerator);
+                channel.buffer = SocketBack.compact(channel.buffer, bufferGenerator);
             }
 
             private void compactBuffer(ChannelImpl channel, byte[] newBytes) {
-                channel.buffer = TcpSocketBack.compact(channel.buffer, newBytes, bufferGenerator);
+                channel.buffer = SocketBack.compact(channel.buffer, newBytes, bufferGenerator);
             }
 
             private final class ChannelImpl implements GekTcpChannel {

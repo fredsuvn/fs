@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.nio.ByteBuffer;
 import java.time.Duration;
 
 /**
@@ -76,4 +77,8 @@ public interface TcpNetEndpoint {
      * Closes this point immediately, without blocking and buffered operations.
      */
     void closeNow();
+
+    default void send(ByteBuffer msg) {
+
+    }
 }

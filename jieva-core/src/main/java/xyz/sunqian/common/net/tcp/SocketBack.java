@@ -5,31 +5,23 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.bytes.BytesKit;
 import xyz.sunqian.common.base.value.BooleanVar;
 import xyz.sunqian.common.collect.ArrayKit;
-import xyz.sunqian.common.io.ByteReader;
-import xyz.sunqian.common.io.ByteSegment;
+import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.net.NetException;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.time.Duration;
+import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.function.IntFunction;
 
-final class TcpSocketBack {
-
-    static @Nonnull TcpNetServer newServer(
-        int port,
-        int backlog,
-        @Nullable InetAddress bindAddr,
-        @Nonnull TcpNetListener listener,
-        @Nonnull Executor executor,
-        int bufSize
-    ) {
-        return new SimpleTcpNetServer(port, backlog, bindAddr, listener, executor, bufSize);
-    }
+final class SocketBack {
 
     static @Nonnull TcpNetServer newServer(
         @Nonnull ServerSocket serverSocket,
@@ -71,34 +63,39 @@ final class TcpSocketBack {
         return newBuffer.asReadOnlyBuffer();
     }
 
-    private static abstract class AbsTcpNetServer implements TcpNetServer {
+    private static final class SocketTcpNetServer implements TcpNetServer {
 
+        private final @Nonnull ServerSocket server;
         private final @Nonnull TcpNetListener listener;
         private final @Nonnull Executor executor;
         private final int bufSize;
 
-        protected AbsTcpNetServer(@Nonnull TcpNetListener listener, @Nonnull Executor executor, int bufSize) {
+        private CountDownLatch latch;
+
+        private SocketTcpNetServer(
+            @Nonnull ServerSocket server,
+            @Nonnull TcpNetListener listener,
+            @Nonnull Executor executor,
+            int bufSize
+        ) {
+            this.server = server;
             this.listener = listener;
             this.executor = executor;
             this.bufSize = bufSize;
         }
 
-        protected abstract @Nonnull ServerSocket getServerSocket() throws Exception;
-
         @Override
         public void start() throws NetException {
-            ServerSocket server;
-            try {
-                server = getServerSocket();
-            } catch (Exception e) {
-                throw new NetException(e);
-            }
             try {
                 listener.onOpen();
+                this.latch = new CountDownLatch(1);
             } catch (Exception e) {
                 listener.onException(this, null, e);
             }
-            doAccept(server);
+            executor.execute(() -> {
+                doAccept(server);
+                latch.countDown();
+            });
         }
 
         private void doAccept(@Nonnull ServerSocket server) {
@@ -127,88 +124,47 @@ final class TcpSocketBack {
             TcpNetEndpointImpl endpoint = new TcpNetEndpointImpl(client);
             try {
                 listener.onConnection(endpoint);
-                ByteReader reader = ByteReader.from(client.getInputStream());
+                InputStream in = client.getInputStream();
                 while (true) {
-                    ByteSegment next = reader.read(bufSize);
-                    if (next.data().hasRemaining()) {
-                        listener.onMessage(endpoint, next.data());
-                    }
-                    if (next.end()) {
+                    byte[] buf = new byte[bufSize];
+                    int readSize = in.read(buf);
+                    if (readSize < 0) {
+                        listener.onDisconnection(endpoint, !endpoint.isClosed.get());
                         break;
                     }
+                    ByteBuffer msg = ByteBuffer.wrap(buf, 0, readSize);
+                    listener.onMessage(endpoint, msg);
                 }
-                listener.onDisconnection(endpoint, !endpoint.isClosed.get());
             } catch (Exception e) {
                 listener.onException(this, endpoint, e);
+                try {
+                    listener.onDisconnection(endpoint, !endpoint.isClosed.get());
+                } catch (Exception ex) {
+                    listener.onException(this, endpoint, e);
+                }
             }
         }
 
         @Override
         public void close() throws NetException {
             try {
-                ServerSocket serverSocket = getServerSocket();
-                serverSocket.close();
+                server.close();
             } catch (Exception e) {
                 throw new NetException(e);
             }
         }
-    }
 
-    private static final class SimpleTcpNetServer extends AbsTcpNetServer {
-
-        private final int port;
-        private final int backlog;
-        private final @Nullable InetAddress bindAddr;
-
-        SimpleTcpNetServer(
-            int port,
-            int backlog,
-            @Nullable InetAddress bindAddr,
-            @Nonnull TcpNetListener listener,
-            @Nonnull Executor executor,
-            int bufSize
-        ) {
-            super(listener, executor, bufSize);
-            this.port = port;
-            this.backlog = backlog;
-            this.bindAddr = bindAddr;
-        }
-
-        protected @Nonnull ServerSocket getServerSocket() throws Exception {
-            ServerSocket newServerSocket;
-            if (bindAddr == null) {
-                if (backlog < 0) {
-                    newServerSocket = new ServerSocket(port);
-                } else {
-                    newServerSocket = new ServerSocket(port, backlog);
-                }
-            } else {
-                if (backlog < 0) {
-                    newServerSocket = new ServerSocket(port, 50, bindAddr);
-                } else {
-                    newServerSocket = new ServerSocket(port, backlog, bindAddr);
-                }
+        @Override
+        public void await() throws NetException {
+            try {
+                latch.await();
+            } catch (InterruptedException ignored) {
             }
-            return newServerSocket;
-        }
-    }
-
-    private static final class SocketTcpNetServer extends AbsTcpNetServer {
-
-        private final @Nonnull ServerSocket serverSocket;
-
-        SocketTcpNetServer(
-            @Nonnull ServerSocket serverSocket,
-            @Nonnull TcpNetListener listener,
-            @Nonnull Executor executor,
-            int bufSize
-        ) {
-            super(listener, executor, bufSize);
-            this.serverSocket = serverSocket;
         }
 
-        protected @Nonnull ServerSocket getServerSocket() throws Exception {
-            return serverSocket;
+        @Override
+        public int getPort() {
+            return server.getLocalPort();
         }
     }
 
@@ -225,7 +181,7 @@ final class TcpSocketBack {
 
         @Override
         public InetAddress getAddress() {
-            return null;
+            return socket.getInetAddress();
         }
 
         @Override
@@ -255,12 +211,21 @@ final class TcpSocketBack {
 
         @Override
         public void close(@Nullable Duration timeout) {
-
         }
 
         @Override
         public void closeNow() {
+            // socket.close();
+        }
 
+        @Override
+        public void send(ByteBuffer msg) {
+            try {
+                OutputStream out = socket.getOutputStream();
+                out.write(Objects.requireNonNull(BufferKit.read(msg)));
+                out.flush();
+            } catch (Exception ignored) {
+            }
         }
     }
 }
