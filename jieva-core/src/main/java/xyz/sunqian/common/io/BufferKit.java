@@ -728,6 +728,38 @@ public class BufferKit {
     }
 
     /**
+     * Writes string to the specified buffer with {@link CharsKit#defaultCharset()}.
+     *
+     * @param dst the specified buffer
+     * @param str the string to write to the buffer
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static void write(
+        @Nonnull ByteBuffer dst, @Nonnull String str
+    ) throws IORuntimeException {
+        write(dst, str, CharsKit.defaultCharset());
+    }
+
+    /**
+     * Writes string to the specified buffer with the specified charset.
+     *
+     * @param dst     the specified buffer
+     * @param str     the string to write to the buffer
+     * @param charset the specified charset
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static void write(
+        @Nonnull ByteBuffer dst, @Nonnull String str, @Nonnull Charset charset
+    ) throws IORuntimeException {
+        try {
+            byte[] bytes = str.getBytes(charset);
+            dst.put(bytes);
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    /**
      * Creates a new buffer with the specified length. Its content is a shared subsequence of the given buffer's
      * content, starting at the given buffer's current position.
      * <p>

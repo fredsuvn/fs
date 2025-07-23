@@ -639,6 +639,38 @@ public class IOKit {
     }
 
     /**
+     * Writes string to the specified output stream with {@link CharsKit#defaultCharset()}.
+     *
+     * @param dst the specified output stream
+     * @param str the string to write to the output stream
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static void write(
+        @Nonnull OutputStream dst, @Nonnull String str
+    ) throws IORuntimeException {
+        write(dst, str, CharsKit.defaultCharset());
+    }
+
+    /**
+     * Writes string to the specified output stream with the specified charset.
+     *
+     * @param dst     the specified output stream
+     * @param str     the string to write to the output stream
+     * @param charset the specified charset
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static void write(
+        @Nonnull OutputStream dst, @Nonnull String str, @Nonnull Charset charset
+    ) throws IORuntimeException {
+        try {
+            byte[] bytes = str.getBytes(charset);
+            dst.write(bytes);
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    /**
      * Reads available data from the input stream into a new array, and returns the array. The array's length is based
      * on the {@link InputStream#available()}.
      *

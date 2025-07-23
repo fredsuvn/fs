@@ -548,4 +548,16 @@ public class BufferTest implements DataTest {
         }
         return Math.min(totalSize, readSize);
     }
+
+    @Test
+    public void testWrite() {
+        String str = "hello world";
+        byte[] strBytes = str.getBytes(CharsKit.defaultCharset());
+        ByteBuffer dst = ByteBuffer.allocate(strBytes.length);
+        BufferKit.write(dst, str);
+        dst.flip();
+        assertEquals(BufferKit.string(dst), str);
+        ByteBuffer dst2 = ByteBuffer.allocate(strBytes.length - 1);
+        expectThrows(IORuntimeException.class, () -> BufferKit.write(dst2, str));
+    }
 }

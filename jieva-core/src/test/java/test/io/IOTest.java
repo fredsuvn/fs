@@ -14,11 +14,13 @@ import xyz.sunqian.test.ReadOps;
 import xyz.sunqian.test.TestInputStream;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.CharArrayReader;
 import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.Channels;
@@ -170,47 +172,59 @@ public class IOTest implements DataTest {
 
     @Test
     public void testWrite() throws Exception {
-        char[] data = randomChars(1024);
-        CharsBuilder appender1 = new CharsBuilder();
-        IOKit.write(appender1, data);
-        assertEquals(appender1.toCharArray(), data);
-        appender1.reset();
-        IOKit.write(appender1, data, 33, 99);
-        assertEquals(appender1.toCharArray(), Arrays.copyOfRange(data, 33, 33 + 99));
-        class Appender implements Appendable {
+        {
+            // write to appender
+            char[] data = randomChars(1024);
+            CharsBuilder appender1 = new CharsBuilder();
+            IOKit.write(appender1, data);
+            assertEquals(appender1.toCharArray(), data);
+            appender1.reset();
+            IOKit.write(appender1, data, 33, 99);
+            assertEquals(appender1.toCharArray(), Arrays.copyOfRange(data, 33, 33 + 99));
+            class Appender implements Appendable {
 
-            private final CharsBuilder appender = new CharsBuilder();
+                private final CharsBuilder appender = new CharsBuilder();
 
-            @Override
-            public Appendable append(CharSequence csq) throws IOException {
-                return appender.append(csq);
+                @Override
+                public Appendable append(CharSequence csq) throws IOException {
+                    return appender.append(csq);
+                }
+
+                @Override
+                public Appendable append(CharSequence csq, int start, int end) throws IOException {
+                    return appender.append(csq, start, end);
+                }
+
+                @Override
+                public Appendable append(char c) throws IOException {
+                    return appender.append(c);
+                }
+
+                public char[] toCharArray() {
+                    return appender.toCharArray();
+                }
+
+                public void reset() {
+                    appender.reset();
+                }
             }
-
-            @Override
-            public Appendable append(CharSequence csq, int start, int end) throws IOException {
-                return appender.append(csq, start, end);
-            }
-
-            @Override
-            public Appendable append(char c) throws IOException {
-                return appender.append(c);
-            }
-
-            public char[] toCharArray() {
-                return appender.toCharArray();
-            }
-
-            public void reset() {
-                appender.reset();
-            }
+            Appender appender2 = new Appender();
+            IOKit.write(appender2, data);
+            assertEquals(appender2.toCharArray(), data);
+            appender2.reset();
+            IOKit.write(appender2, data, 33, 99);
+            assertEquals(appender2.toCharArray(), Arrays.copyOfRange(data, 33, 33 + 99));
+            expectThrows(IORuntimeException.class, () -> IOKit.write(new ErrorAppender(), data));
         }
-        Appender appender2 = new Appender();
-        IOKit.write(appender2, data);
-        assertEquals(appender2.toCharArray(), data);
-        appender2.reset();
-        IOKit.write(appender2, data, 33, 99);
-        assertEquals(appender2.toCharArray(), Arrays.copyOfRange(data, 33, 33 + 99));
-        expectThrows(IORuntimeException.class, () -> IOKit.write(new ErrorAppender(), data));
+        {
+            // write to output stream
+            String str = "hello world";
+            ByteArrayOutputStream dst = new ByteArrayOutputStream();
+            IOKit.write(dst, str);
+            assertEquals(dst.toString("UTF-8"), str);
+            OutputStream dst2 = IOKit.newOutputStream(new byte[1]);
+            expectThrows(IORuntimeException.class, () -> IOKit.write(dst2, str));
+        }
     }
 
     @Test
