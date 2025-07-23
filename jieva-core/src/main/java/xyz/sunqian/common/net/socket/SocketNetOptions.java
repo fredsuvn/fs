@@ -1,211 +1,359 @@
 package xyz.sunqian.common.net.socket;
 
-import java.lang.annotation.Native;
+import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.common.net.NetException;
+
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketOptions;
+import java.net.StandardSocketOptions;
+import java.nio.channels.NetworkChannel;
 
 /**
- * Network options for Socket. This class provides public fields that can be directly set and get, rather than through
- * getters and setters.
+ * Options for Socket.
+ * <p>
+ * This class provides public fields that can be directly set, rather than through setters. Only need to set the
+ * required options, and the default values will be used for the unset options.
  *
  * @author sunqian
  */
 public class SocketNetOptions {
 
     /**
-     * Disable Nagle's algorithm for this connection.  Written data to the network is not buffered pending
-     * acknowledgement of previously written data.
-     * <p>
-     * Valid for TCP only: SocketImpl.
+     * TCP_NODELAY: disable the Nagle algorithm.
      *
-     * @see Socket#setTcpNoDelay
-     * @see Socket#getTcpNoDelay
+     * @see StandardSocketOptions#TCP_NODELAY
+     * @see Socket#setTcpNoDelay(boolean)
      */
-    public int tcpNoDelay;
+    public Boolean tcpNoDelay;
 
     /**
-     * Fetch the local address binding of a socket (this option cannot be "set" only "gotten", since sockets are bound
-     * at creation time, and so the locally bound address cannot be changed).  The default local address of a socket is
-     * INADDR_ANY, meaning any local address on a multi-homed host.  A multi-homed host can use this option to accept
-     * connections to only one of its addresses (in the case of a ServerSocket or DatagramSocket), or to specify its
-     * return address to the peer (for a Socket or DatagramSocket).  The parameter of this option is an InetAddress.
-     * <p>
-     * This option <B>must</B> be specified in the constructor.
-     * <p>
-     * Valid for: SocketImpl, DatagramSocketImpl
+     * SO_REUSEADDR: re-use address.
      *
-     * @see Socket#getLocalAddress
-     * @see DatagramSocket#getLocalAddress
+     * @see StandardSocketOptions#SO_REUSEADDR
+     * @see Socket#setReuseAddress(boolean)
+     * @see ServerSocket#setReuseAddress(boolean)
+     * @see DatagramSocket#setReuseAddress(boolean)
+     * @see MulticastSocket#setReuseAddress(boolean)
      */
-
-    @Native
-    public final static int SO_BINDADDR = 0x000F;
+    public Boolean soReuseAddress;
 
     /**
-     * Sets SO_REUSEADDR for a socket.  This is used only for MulticastSockets in java, and it is set by default for
-     * MulticastSockets.
-     * <p>
-     * Valid for: DatagramSocketImpl
+     * SO_BROADCAST: allow transmission of broadcast datagrams.
+     *
+     * @see StandardSocketOptions#SO_BROADCAST
+     * @see DatagramSocket#setBroadcast(boolean)
+     * @see MulticastSocket#setBroadcast(boolean)
      */
-
-    @Native
-    public final static int SO_REUSEADDR = 0x04;
+    public Boolean soBroadcast;
 
     /**
-     * Sets SO_BROADCAST for a socket. This option enables and disables the ability of the process to send broadcast
-     * messages. It is supported for only datagram sockets and only on networks that support the concept of a broadcast
-     * message (e.g. Ethernet, token ring, etc.), and it is set by default for DatagramSockets.
+     * SO_LINGER: linger on close if data is present, in seconds.
      *
-     * @since 1.4
+     * @see StandardSocketOptions#SO_LINGER
+     * @see Socket#setSoLinger(boolean, int)
      */
-
-    @Native
-    public final static int SO_BROADCAST = 0x0020;
+    public Integer soLinger;
 
     /**
-     * Set which outgoing interface on which to send multicast packets. Useful on hosts with multiple network
-     * interfaces, where applications want to use other than the system default.  Takes/returns an InetAddress.
-     * <p>
-     * Valid for Multicast: DatagramSocketImpl
+     * SO_TIMEOUT: timeout for blocking operations, in milliseconds.
      *
+     * @see SocketOptions#SO_TIMEOUT
+     * @see Socket#setSoTimeout(int)
+     * @see ServerSocket#setSoTimeout(int)
+     * @see DatagramSocket#setSoTimeout(int)
+     * @see MulticastSocket#setSoTimeout(int)
+     */
+    public Integer soTimeout;
+
+    /**
+     * SO_SNDBUF: the size of the socket send buffer.
+     *
+     * @see StandardSocketOptions#SO_SNDBUF
+     * @see Socket#setSendBufferSize(int)
+     * @see DatagramSocket#setSendBufferSize(int)
+     * @see MulticastSocket#setSendBufferSize(int)
+     */
+    public Integer soSndBuf;
+
+    /**
+     * SO_RCVBUF: the size of the socket receive buffer.
+     *
+     * @see StandardSocketOptions#SO_RCVBUF
+     * @see Socket#setReceiveBufferSize(int)
+     * @see ServerSocket#setReceiveBufferSize(int)
+     * @see DatagramSocket#setReceiveBufferSize(int)
+     * @see MulticastSocket#setReceiveBufferSize(int)
+     */
+    public Integer soRcvBuf;
+
+    /**
+     * SO_KEEPALIVE: keep connection alive.
+     *
+     * @see StandardSocketOptions#SO_KEEPALIVE
+     * @see Socket#setKeepAlive(boolean)
+     */
+    public Boolean soKeepalive;
+
+    /**
+     * SO_OOBINLIN: receipt of TCP urgent data.
+     *
+     * @see SocketOptions#SO_OOBINLINE
+     * @see Socket#setOOBInline(boolean)
+     */
+    public Boolean soOobInline;
+
+    /**
+     * IP_TOS: the Type of Service (ToS) octet in the Internet Protocol (IP) header.
+     *
+     * @see StandardSocketOptions#IP_TOS
+     * @see Socket#setTrafficClass(int)
+     * @see DatagramSocket#setTrafficClass(int)
+     * @see MulticastSocket#setTrafficClass(int)
+     */
+    public Integer ipTos;
+
+    /**
+     * IP_MULTICAST_IF: the network interface for Internet Protocol (IP) multicast datagrams.
+     *
+     * @see StandardSocketOptions#IP_MULTICAST_IF
      * @see MulticastSocket#setInterface(InetAddress)
-     * @see MulticastSocket#getInterface()
-     */
-
-    @Native
-    public final static int IP_MULTICAST_IF = 0x10;
-
-    /**
-     * Same as above. This option is introduced so that the behaviour with IP_MULTICAST_IF will be kept the same as
-     * before, while this new option can support setting outgoing interfaces with either IPv4 and IPv6 addresses.
-     * <p>
-     * NOTE: make sure there is no conflict with this
-     *
      * @see MulticastSocket#setNetworkInterface(NetworkInterface)
-     * @see MulticastSocket#getNetworkInterface()
-     * @since 1.4
      */
-    @Native
-    public final static int IP_MULTICAST_IF2 = 0x1f;
+    public NetworkInterface ipMulticastIf;
 
     /**
-     * This option enables or disables local loopback of multicast datagrams. This option is enabled by default for
-     * Multicast Sockets.
+     * IP_MULTICAST_TTL: the time-to-live for Internet Protocol (IP) multicast datagrams.
      *
-     * @since 1.4
+     * @see StandardSocketOptions#IP_MULTICAST_TTL
+     * @see MulticastSocket#setTimeToLive(int)
      */
-
-    @Native
-    public final static int IP_MULTICAST_LOOP = 0x12;
+    public Integer ipMulticastTtl;
 
     /**
-     * This option sets the type-of-service or traffic class field in the IP header for a TCP or UDP socket.
+     * IP_MULTICAST_LOOP: loopback for Internet Protocol (IP) multicast datagrams.
      *
-     * @since 1.4
+     * @see StandardSocketOptions#IP_MULTICAST_LOOP
+     * @see MulticastSocket#setLoopbackMode(boolean)
      */
-
-    @Native
-    public final static int IP_TOS = 0x3;
-
-    /**
-     * Specify a linger-on-close timeout.  This option disables/enables immediate return from a <B>close()</B> of a TCP
-     * Socket.  Enabling this option with a non-zero Integer <I>timeout</I> means that a
-     * <B>close()</B> will block pending the transmission and acknowledgement
-     * of all data written to the peer, at which point the socket is closed
-     * <I>gracefully</I>.  Upon reaching the linger timeout, the socket is
-     * closed <I>forcefully</I>, with a TCP RST. Enabling the option with a timeout of zero does a forceful close
-     * immediately. If the specified timeout value exceeds 65,535 it will be reduced to 65,535.
-     * <p>
-     * Valid only for TCP: SocketImpl
-     *
-     * @see Socket#setSoLinger
-     * @see Socket#getSoLinger
-     */
-    @Native
-    public final static int SO_LINGER = 0x0080;
+    public Boolean ipMulticastLoop;
 
     /**
-     * Set a timeout on blocking Socket operations:
-     * <PRE>
-     * ServerSocket.accept(); SocketInputStream.read(); DatagramSocket.receive();
-     * </PRE>
+     * Returns a new {@link SocketNetOptions} of which all option fields are copied from this.
      *
-     * <P> The option must be set prior to entering a blocking
-     * operation to take effect.  If the timeout expires and the operation would continue to block,
-     * <B>java.io.InterruptedIOException</B> is raised.  The Socket is
-     * not closed in this case.
-     *
-     * <P> Valid for all sockets: SocketImpl, DatagramSocketImpl
-     *
-     * @see Socket#setSoTimeout
-     * @see ServerSocket#setSoTimeout
-     * @see DatagramSocket#setSoTimeout
+     * @return a new {@link SocketNetOptions} of which all option fields are copied from this
      */
-    @Native
-    public final static int SO_TIMEOUT = 0x1006;
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+    @Override
+    public @Nonnull SocketNetOptions clone() {
+        SocketNetOptions copy = new SocketNetOptions();
+        copy.tcpNoDelay = tcpNoDelay;
+        copy.soReuseAddress = soReuseAddress;
+        copy.soBroadcast = soBroadcast;
+        copy.soLinger = soLinger;
+        copy.soTimeout = soTimeout;
+        copy.soSndBuf = soSndBuf;
+        copy.soRcvBuf = soRcvBuf;
+        copy.soKeepalive = soKeepalive;
+        copy.soOobInline = soOobInline;
+        copy.ipTos = ipTos;
+        copy.ipMulticastIf = ipMulticastIf;
+        copy.ipMulticastTtl = ipMulticastTtl;
+        copy.ipMulticastLoop = ipMulticastLoop;
+        return copy;
+    }
 
     /**
-     * Set a hint the size of the underlying buffers used by the platform for outgoing network I/O. When used in set,
-     * this is a suggestion to the kernel from the application about the size of buffers to use for the data to be sent
-     * over the socket. When used in get, this must return the size of the buffer actually used by the platform when
-     * sending out data on this socket.
-     * <p>
-     * Valid for all sockets: SocketImpl, DatagramSocketImpl
+     * Applies the current options to the given socket.
      *
-     * @see Socket#setSendBufferSize
-     * @see Socket#getSendBufferSize
-     * @see DatagramSocket#setSendBufferSize
-     * @see DatagramSocket#getSendBufferSize
+     * @param socket the given socket to apply the options to
+     * @return the given socket
+     * @throws NetException if an error occurs
      */
-    @Native
-    public final static int SO_SNDBUF = 0x1001;
+    public @Nonnull Socket applyTo(@Nonnull Socket socket) throws NetException {
+        try {
+            if (tcpNoDelay != null) {
+                socket.setTcpNoDelay(tcpNoDelay);
+            }
+            if (soReuseAddress != null) {
+                socket.setReuseAddress(soReuseAddress);
+            }
+            if (soLinger != null) {
+                socket.setSoLinger(true, soLinger);
+            }
+            if (soTimeout != null) {
+                socket.setSoTimeout(soTimeout);
+            }
+            if (soSndBuf != null) {
+                socket.setSendBufferSize(soSndBuf);
+            }
+            if (soRcvBuf != null) {
+                socket.setReceiveBufferSize(soRcvBuf);
+            }
+            if (soKeepalive != null) {
+                socket.setKeepAlive(soKeepalive);
+            }
+            if (soOobInline != null) {
+                socket.setOOBInline(soOobInline);
+            }
+            if (ipTos != null) {
+                socket.setTrafficClass(ipTos);
+            }
+            return socket;
+        } catch (Exception e) {
+            throw new NetException(e);
+        }
+    }
 
     /**
-     * Set a hint the size of the underlying buffers used by the platform for incoming network I/O. When used in set,
-     * this is a suggestion to the kernel from the application about the size of buffers to use for the data to be
-     * received over the socket. When used in get, this must return the size of the buffer actually used by the platform
-     * when receiving in data on this socket.
-     * <p>
-     * Valid for all sockets: SocketImpl, DatagramSocketImpl
+     * Applies the current options to the given socket.
      *
-     * @see Socket#setReceiveBufferSize
-     * @see Socket#getReceiveBufferSize
-     * @see DatagramSocket#setReceiveBufferSize
-     * @see DatagramSocket#getReceiveBufferSize
+     * @param socket the given socket to apply the options to
+     * @return the given socket
+     * @throws NetException if an error occurs
      */
-    @Native
-    public final static int SO_RCVBUF = 0x1002;
+    public @Nonnull ServerSocket applyTo(@Nonnull ServerSocket socket) throws NetException {
+        try {
+            if (soReuseAddress != null) {
+                socket.setReuseAddress(soReuseAddress);
+            }
+            if (soTimeout != null) {
+                socket.setSoTimeout(soTimeout);
+            }
+            if (soRcvBuf != null) {
+                socket.setReceiveBufferSize(soRcvBuf);
+            }
+            return socket;
+        } catch (Exception e) {
+            throw new NetException(e);
+        }
+    }
 
     /**
-     * When the keepalive option is set for a TCP socket and no data has been exchanged across the socket in either
-     * direction for 2 hours (NOTE: the actual value is implementation dependent), TCP automatically sends a keepalive
-     * probe to the peer. This probe is a TCP segment to which the peer must respond. One of three responses is
-     * expected: 1. The peer responds with the expected ACK. The application is not notified (since everything is OK).
-     * TCP will send another probe following another 2 hours of inactivity. 2. The peer responds with an RST, which
-     * tells the local TCP that the peer host has crashed and rebooted. The socket is closed. 3. There is no response
-     * from the peer. The socket is closed.
-     * <p>
-     * The purpose of this option is to detect if the peer host crashes.
-     * <p>
-     * Valid only for TCP socket: SocketImpl
+     * Applies the current options to the given socket.
      *
-     * @see Socket#setKeepAlive
-     * @see Socket#getKeepAlive
+     * @param socket the given socket to apply the options to
+     * @return the given socket
+     * @throws NetException if an error occurs
      */
-    @Native
-    public final static int SO_KEEPALIVE = 0x0008;
+    public @Nonnull DatagramSocket applyTo(@Nonnull DatagramSocket socket) throws NetException {
+        try {
+            if (soReuseAddress != null) {
+                socket.setReuseAddress(soReuseAddress);
+            }
+            if (soBroadcast != null) {
+                socket.setBroadcast(soBroadcast);
+            }
+            if (soTimeout != null) {
+                socket.setSoTimeout(soTimeout);
+            }
+            if (soSndBuf != null) {
+                socket.setSendBufferSize(soSndBuf);
+            }
+            if (soRcvBuf != null) {
+                socket.setReceiveBufferSize(soRcvBuf);
+            }
+            if (ipTos != null) {
+                socket.setTrafficClass(ipTos);
+            }
+            return socket;
+        } catch (Exception e) {
+            throw new NetException(e);
+        }
+    }
 
     /**
-     * When the OOBINLINE option is set, any TCP urgent data received on the socket will be received through the socket
-     * input stream. When the option is disabled (which is the default) urgent data is silently discarded.
+     * Applies the current options to the given socket.
      *
-     * @see Socket#setOOBInline
-     * @see Socket#getOOBInline
+     * @param socket the given socket to apply the options to
+     * @return the given socket
+     * @throws NetException if an error occurs
      */
-    @Native
-    public final static int SO_OOBINLINE = 0x1003;
+    public @Nonnull MulticastSocket applyTo(@Nonnull MulticastSocket socket) throws NetException {
+        try {
+            if (soReuseAddress != null) {
+                socket.setReuseAddress(soReuseAddress);
+            }
+            if (soBroadcast != null) {
+                socket.setBroadcast(soBroadcast);
+            }
+            if (soTimeout != null) {
+                socket.setSoTimeout(soTimeout);
+            }
+            if (soSndBuf != null) {
+                socket.setSendBufferSize(soSndBuf);
+            }
+            if (soRcvBuf != null) {
+                socket.setReceiveBufferSize(soRcvBuf);
+            }
+            if (ipTos != null) {
+                socket.setTrafficClass(ipTos);
+            }
+            if (ipMulticastIf != null) {
+                socket.setNetworkInterface(ipMulticastIf);
+            }
+            if (ipMulticastTtl != null) {
+                socket.setTimeToLive(ipMulticastTtl);
+            }
+            if (ipMulticastLoop != null) {
+                socket.setLoopbackMode(ipMulticastLoop);
+            }
+            return socket;
+        } catch (Exception e) {
+            throw new NetException(e);
+        }
+    }
+
+    /**
+     * Applies the current options to the network channel.
+     *
+     * @param channel the network channel to apply the options to
+     * @param <T>     the type of the network channel
+     * @return the network channel
+     * @throws NetException if an error occurs
+     */
+    public @Nonnull <T extends NetworkChannel> T applyTo(@Nonnull T channel) throws NetException {
+        try {
+            if (tcpNoDelay != null) {
+                channel.setOption(StandardSocketOptions.TCP_NODELAY, tcpNoDelay);
+            }
+            if (soReuseAddress != null) {
+                channel.setOption(StandardSocketOptions.SO_REUSEADDR, soReuseAddress);
+            }
+            if (soBroadcast != null) {
+                channel.setOption(StandardSocketOptions.SO_BROADCAST, soBroadcast);
+            }
+            if (soLinger != null) {
+                channel.setOption(StandardSocketOptions.SO_LINGER, soLinger);
+            }
+            if (soSndBuf != null) {
+                channel.setOption(StandardSocketOptions.SO_SNDBUF, soSndBuf);
+            }
+            if (soRcvBuf != null) {
+                channel.setOption(StandardSocketOptions.SO_RCVBUF, soRcvBuf);
+            }
+            if (soKeepalive != null) {
+                channel.setOption(StandardSocketOptions.SO_KEEPALIVE, soKeepalive);
+            }
+            if (ipTos != null) {
+                channel.setOption(StandardSocketOptions.IP_TOS, ipTos);
+            }
+            if (ipMulticastIf != null) {
+                channel.setOption(StandardSocketOptions.IP_MULTICAST_IF, ipMulticastIf);
+            }
+            if (ipMulticastTtl != null) {
+                channel.setOption(StandardSocketOptions.IP_MULTICAST_TTL, ipMulticastTtl);
+            }
+            if (ipMulticastLoop != null) {
+                channel.setOption(StandardSocketOptions.IP_MULTICAST_LOOP, ipMulticastLoop);
+            }
+            return channel;
+        } catch (Exception e) {
+            throw new NetException(e);
+        }
+    }
 }
