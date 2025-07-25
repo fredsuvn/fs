@@ -1,11 +1,16 @@
 package xyz.sunqian.common.net;
 
+import xyz.sunqian.annotations.Nullable;
+
+import java.net.SocketAddress;
+
 /**
  * This interface represents a network server.
  *
+ * @param <A> the type of the socket address
  * @author sunqian
  */
-public interface NetServer {
+public interface NetServer<A extends SocketAddress> {
 
     /**
      * Starts this server, and returns immediately after startup. This method will not block the current thread,
@@ -16,7 +21,7 @@ public interface NetServer {
     void start() throws NetException;
 
     /**
-     * Closes this server, releases all related resources.
+     * Closes this server.
      *
      * @throws NetException if any error occurs
      */
@@ -28,4 +33,12 @@ public interface NetServer {
      * @throws NetException if any error occurs
      */
     void await() throws NetException;
+
+    /**
+     * Returns the address this server is bound to, may be {@code null} if the server is not bound yet.
+     *
+     * @return the address this server is bound to, may be {@code null} if the server is not bound yet
+     */
+    @Nullable
+    A getBoundAddress();
 }

@@ -6,8 +6,10 @@ import xyz.sunqian.annotations.Nullable;
 import java.nio.ByteBuffer;
 
 /**
- * Event listener for {@link TcpNetServer}. Except for the {@link #onMessage(TcpNetEndpoint, ByteBuffer)}, which must be
- * implemented, all other methods have default empty methods.
+ * Event listener for {@link TcpNetServer}.
+ * <p>
+ * Except for the {@link #onMessage(TcpNetEndpoint, ByteBuffer)}, which must be implemented, all other methods have
+ * default empty methods.
  *
  * @author sunqian
  */
@@ -32,7 +34,7 @@ public interface TcpNetListener {
     }
 
     /**
-     * This method is invoked when a new connection is established.
+     * This method is invoked when a new connection is established, and only invoked once for each new connection.
      *
      * @param endpoint the remote endpoint of the new connection
      * @throws Exception if any error occurs
@@ -41,14 +43,12 @@ public interface TcpNetListener {
     }
 
     /**
-     * This method is invoked when a connection is disconnected.
+     * This method is invoked when the remote endpoint disconnects, and only invoked once for each connection.
      *
-     * @param endpoint       the remote endpoint of the connection
-     * @param closedByRemote {@code true} if the connection was disconnected by the remote endpoint, otherwise
-     *                       {@code false}
+     * @param endpoint the remote endpoint of the connection
      * @throws Exception if any error occurs
      */
-    default void onDisconnection(@Nonnull TcpNetEndpoint endpoint, boolean closedByRemote) throws Exception {
+    default void onDisconnection(@Nonnull TcpNetEndpoint endpoint) throws Exception {
     }
 
     /**

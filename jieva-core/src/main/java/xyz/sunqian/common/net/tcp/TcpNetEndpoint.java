@@ -1,84 +1,67 @@
 package xyz.sunqian.common.net.tcp;
 
-import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.common.net.NetEndpoint;
+import xyz.sunqian.common.net.NetException;
 
 import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketAddress;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.time.Duration;
+import java.nio.charset.Charset;
 
 /**
- * This interface represent an endpoint on the TCP/IP network, base interface of {@link TcpNetServerOld} and
- * {@link TcpNetClient}.
+ * This interface represent an endpoint on the TCP/IP network.
  *
  * @author sunqian
  */
-public interface TcpNetEndpoint {
+public interface TcpNetEndpoint extends NetEndpoint<InetSocketAddress> {
 
     /**
-     * Returns bound address of this point.
+     * Returns the port number to which this endpoint is bound.
      *
-     * @return bound address of this point
+     * @return the port number to which this endpoint is bound
      */
-    InetAddress getAddress();
-
-    /**
-     * Returns bound port of this point.
-     *
-     * @return bound port of this point
-     */
-    int getPort();
-
-    /**
-     * Returns bound socket address of this point.
-     *
-     * @return bound socket address of this point
-     */
-    SocketAddress getSocketAddress();
-
-    /**
-     * Returns underlying object which implements this interface, such as {@link ServerSocket} or {@link Socket}.
-     *
-     * @return underlying object
-     */
-    Object getSource();
-
-    /**
-     * Returns whether this point is opened.
-     *
-     * @return whether this point is opened
-     */
-    boolean isOpened();
-
-    /**
-     * Returns whether this point is closed.
-     *
-     * @return whether this point is closed
-     */
-    boolean isClosed();
-
-    /**
-     * Closes this point, blocks current thread for buffered operations.
-     */
-    default void close() {
-        close(null);
+    default int getPort() {
+        InetSocketAddress address = getAddress();
+        return address.getPort();
     }
 
     /**
-     * Closes this point, blocks current thread for buffered operations in given timeout.
+     * Returns the IP this endpoint is bound to.
      *
-     * @param timeout given timeout, maybe null to always wait
+     * @return the IP this endpoint is bound to
      */
-    void close(@Nullable Duration timeout);
+    default @Nonnull InetAddress getIp() {
+        InetSocketAddress address = getAddress();
+        return address.getAddress();
+    }
 
     /**
-     * Closes this point immediately, without blocking and buffered operations.
+     * Sends the message to this endpoint.
+     *
+     * @param msg the message to send
+     * @throws NetException if any error occurs
      */
-    void closeNow();
+    void send(ByteBuffer msg) throws NetException;
 
-    default void send(ByteBuffer msg) {
+    /**
+     * Sends the message to this endpoint, with {@link Charset#defaultCharset()}.
+     *
+     * @param msg the message to send
+     * @throws NetException if any error occurs
+     */
+    default void send(String msg) throws NetException {
+        send(msg, Charset.defaultCharset());
+    }
 
+    /**
+     * Sends the message to this endpoint, with the specified charset.
+     *
+     * @param msg     the message to send
+     * @param charset the specified charset
+     * @throws NetException if any error occurs
+     */
+    default void send(String msg, Charset charset) throws NetException {
+        send(ByteBuffer.wrap(msg.getBytes(charset)));
     }
 }

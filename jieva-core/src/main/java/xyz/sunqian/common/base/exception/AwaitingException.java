@@ -2,6 +2,8 @@ package xyz.sunqian.common.base.exception;
 
 import xyz.sunqian.annotations.Nullable;
 
+import java.io.InterruptedIOException;
+
 /**
  * This runtime exception is typically used for wrapping exceptions thrown during the await operation. The
  * {@link #getCause()} method returns the wrapped original cause (if any).
@@ -46,7 +48,7 @@ public class AwaitingException extends JieRuntimeException {
     }
 
     /**
-     * Returns whether the cause is an {@link InterruptedException}.
+     * Returns whether the cause is an {@link InterruptedException}, {@link InterruptedIOException}.
      *
      * @return whether the cause is an {@link InterruptedException}
      */
