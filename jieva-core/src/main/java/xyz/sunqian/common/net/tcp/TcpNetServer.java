@@ -4,15 +4,15 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.net.NetException;
+import xyz.sunqian.common.net.NetOption;
 import xyz.sunqian.common.net.NetServer;
-import xyz.sunqian.common.task.TaskExecutor;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
-import java.net.SocketOptions;
-import java.net.StandardSocketOptions;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
@@ -23,98 +23,10 @@ import java.util.concurrent.Executor;
 public interface TcpNetServer extends NetServer<InetSocketAddress> {
 
     /**
-     * Creates a new TCP/IP network server with the specified parameters.
-     *
-     * @param listener the listener to listen server events
-     * @return a new TCP/IP network server with the specified listener to listen server events
-     * @throws NetException if any error occurs
+     * Returns a new builder for generating {@link TcpNetServer}.
      */
-    static @Nonnull TcpNetServer newServer(
-        @Nonnull TcpNetListener listener
-    ) throws NetException {
-        try {
-            ServerSocket server = new ServerSocket(0);
-            return newServer(server, listener, TaskExecutor.newExecutor().asExecutorService(), IOKit.bufferSize());
-        } catch (Exception e) {
-            throw new NetException(e);
-        }
-    }
-
-    /**
-     * Creates a new TCP/IP network server with the specified parameters.
-     *
-     * @param port     the port number to bind to the server
-     * @param listener the listener to listen server events
-     * @return a new TCP/IP network server with the specified parameters
-     * @throws NetException if any error occurs
-     */
-    static @Nonnull TcpNetServer newServer(
-        int port, @Nonnull TcpNetListener listener
-    ) throws NetException {
-        try {
-            ServerSocket server = new ServerSocket(port);
-            return newServer(server, listener, TaskExecutor.newExecutor().asExecutorService(), IOKit.bufferSize());
-        } catch (Exception e) {
-            throw new NetException(e);
-        }
-    }
-
-    /**
-     * Creates a new TCP/IP network server with the specified parameters.
-     *
-     * @param port     the port number to bind to the server
-     * @param backlog  the maximum length of the queue of incoming connections
-     * @param listener the listener to listen server events
-     * @return a new TCP/IP network server with the specified parameters
-     * @throws NetException if any error occurs
-     */
-    static @Nonnull TcpNetServer newServer(
-        int port, int backlog, @Nonnull TcpNetListener listener
-    ) throws NetException {
-        try {
-            ServerSocket server = new ServerSocket(port, backlog);
-            return newServer(server, listener, TaskExecutor.newExecutor().asExecutorService(), IOKit.bufferSize());
-        } catch (Exception e) {
-            throw new NetException(e);
-        }
-    }
-
-    /**
-     * Creates a new TCP/IP network server with the specified parameters.
-     *
-     * @param port     the port number to bind to the server
-     * @param backlog  the maximum length of the queue of incoming connections
-     * @param bindAddr the local address to bind to the server
-     * @param listener the listener to listen server events
-     * @return a new TCP/IP network server with the specified parameters
-     */
-    static @Nonnull TcpNetServer newServer(
-        int port, int backlog, @Nonnull InetAddress bindAddr, @Nonnull TcpNetListener listener
-    ) throws NetException {
-        try {
-            ServerSocket server = new ServerSocket(port, backlog, bindAddr);
-            return newServer(server, listener, TaskExecutor.newExecutor().asExecutorService(), IOKit.bufferSize());
-        } catch (Exception e) {
-            throw new NetException(e);
-        }
-    }
-
-    /**
-     * Creates a new TCP/IP network server with the specified parameters.
-     *
-     * @param serverSocket the socket object to bind to the server
-     * @param listener     the listener to listen server events
-     * @param executor     the executor to execute events handling
-     * @param bufSize      the buffer size for reading data from the remote client
-     * @return a new TCP/IP network server with the specified parameters
-     */
-    static @Nonnull TcpNetServer newServer(
-        @Nonnull ServerSocket serverSocket,
-        @Nonnull TcpNetListener listener,
-        @Nonnull Executor executor,
-        int bufSize
-    ) {
-        return SocketBack.newServer(serverSocket, listener, executor, bufSize);
+    static @Nonnull Builder newBuilder() {
+        return new Builder();
     }
 
     /**
@@ -138,21 +50,37 @@ public interface TcpNetServer extends NetServer<InetSocketAddress> {
     }
 
     /**
+     * Server mode.
+     */
+    enum Mode {
+
+        /**
+         * Blocking IO mode.
+         */
+        BLOCKING,
+
+        /**
+         * Non-Blocking IO mode.
+         */
+        NON_BLOCKING,
+        ;
+    }
+
+    /**
      * Builder for creating new TCP/IP network server.
      *
      * @author sunqian
      */
     class Builder {
 
-        private @Nullable Integer boundPort;
-        private @Nullable InetAddress boundIp;
+        private @Nullable Integer port;
+        private @Nullable InetAddress ip;
+        private int backlog = 50;
         private int bufSize = IOKit.bufferSize();
         private @Nullable Executor acceptExecutor;
         private @Nullable Executor workExecutor;
-
-        private @Nullable Boolean soReuseAddr;
-        private @Nullable Integer soTimeout;
-        private @Nullable Integer soRcvBuf;
+        private @Nullable List<@Nonnull NetOption<?>> options;
+        private @Nullable TcpNetListener listener;
 
         /**
          * Sets the port number to which this server is bound.
@@ -160,8 +88,8 @@ public interface TcpNetServer extends NetServer<InetSocketAddress> {
          * @param port the port number to which this server is bound
          * @return this
          */
-        public Builder boundPort(int port) {
-            this.boundPort = port;
+        public Builder port(int port) {
+            this.port = port;
             return this;
         }
 
@@ -171,21 +99,22 @@ public interface TcpNetServer extends NetServer<InetSocketAddress> {
          * @param ip the IP this server is bound to
          * @return this
          */
-        public Builder boundIp(@Nonnull InetAddress ip) {
-            this.boundIp = ip;
+        public Builder ip(@Nonnull InetAddress ip) {
+            this.ip = ip;
             return this;
         }
 
         /**
-         * Sets the IP, specified by the given hostname, to which this server is bound.
+         * Sets the IP, specified by the given host, to which this server is bound. The host can either be a hostname,
+         * or a textual representation of its IP address.
          *
-         * @param hostname the given hostname
+         * @param host the given host
          * @return this
          * @throws NetException if the IP can not be determined
          */
-        public Builder boundHost(@Nonnull String hostname) throws NetException {
+        public Builder host(@Nonnull String host) throws NetException {
             try {
-                this.boundIp = InetAddress.getByName(hostname);
+                this.ip = InetAddress.getByName(host);
             } catch (UnknownHostException e) {
                 throw new NetException(e);
             }
@@ -198,58 +127,119 @@ public interface TcpNetServer extends NetServer<InetSocketAddress> {
          * @param address the address this server is bound to
          * @return this
          */
-        public Builder boundAddress(@Nonnull InetSocketAddress address) {
-            this.boundPort = address.getPort();
-            this.boundIp = address.getAddress();
+        public Builder address(@Nonnull InetSocketAddress address) {
+            this.port = address.getPort();
+            this.ip = address.getAddress();
             return this;
         }
 
         /**
-         * Sets the {@code SO_REUSEADDR} Socket option: re-use address.
+         * Sets requested maximum length of the queue of incoming connections
          *
-         * @param soReuseAddr the {@code SO_REUSEADDR} Socket option
+         * @param backlog requested maximum length of the queue of incoming connections
          * @return this
-         * @see StandardSocketOptions#SO_REUSEADDR
          */
-        public Builder soReuseAddr(boolean soReuseAddr) {
-            this.soReuseAddr = soReuseAddr;
+        public Builder backlog(int backlog) {
+            this.backlog = backlog;
             return this;
         }
 
         /**
-         * Sets the {@code SO_TIMEOUT} option: timeout for blocking operations, in milliseconds.
+         * Adds a network option.
          *
-         * @param soTimeout the {@code SO_TIMEOUT} option
+         * @param option the network option
          * @return this
-         * @see SocketOptions#SO_TIMEOUT
-         * @see ServerSocket#setSoTimeout(int)
          */
-        public Builder soTimeout(int soTimeout) {
-            this.soTimeout = soTimeout;
+        public Builder netOption(@Nonnull NetOption<?> option) {
+            if (options == null) {
+                options = new ArrayList<>();
+            }
+            options.add(option);
             return this;
         }
 
         /**
-         * Sets the {@code SO_RCVBUF} Socket option: the size of the socket receive buffer.
+         * Sets the network listener to listen and handle the network events.
          *
-         * @param soRcvBuf the {@code SO_RCVBUF} Socket option
+         * @param listener the network listener
          * @return this
-         * @see StandardSocketOptions#SO_RCVBUF
          */
-        public Builder soRcvBuf(int soRcvBuf) {
-            this.soRcvBuf = soRcvBuf;
+        public Builder listener(@Nonnull TcpNetListener listener) {
+            this.listener = listener;
             return this;
         }
 
+        /**
+         * Sets the executor responsible for handling accept events, which occur when the server accepts a new incoming
+         * connection.
+         *
+         * @param acceptExecutor the executor responsible for handling accept events
+         * @return this
+         */
+        public Builder acceptExecutor(@Nonnull Executor acceptExecutor) {
+            this.acceptExecutor = acceptExecutor;
+            return this;
+        }
 
-        // if (soReuseAddr != null) {
-        //     socket.setReuseAddress(soReuseAddr);
-        // }
-        //     if (soTimeout != null) {
-        //     socket.setSoTimeout(soTimeout);
-        // }
-        //     if (soRcvBuf != null) {
-        //     socket.setReceiveBufferSize(soRcvBuf);
-        // }
+        /**
+         * Sets the executor responsible for handling all non-accept server events.
+         *
+         * @param workExecutor the executor responsible for handling all non-accept server events
+         * @return this
+         */
+        public Builder workExecutor(@Nonnull Executor workExecutor) {
+            this.workExecutor = workExecutor;
+            return this;
+        }
+
+        /**
+         * Sets the buffer size for reading bytes from the remote endpoints. The default is {@link IOKit#bufferSize()}.
+         *
+         * @param bufSize the buffer size for reading bytes from the remote endpoints
+         * @return this
+         * @throws IllegalArgumentException if the buffer size is not positive
+         */
+        public Builder bufferSize(int bufSize) throws IllegalArgumentException {
+            if (bufSize <= 0) {
+                throw new IllegalArgumentException("buffer size must > 0.");
+            }
+            this.bufSize = bufSize;
+            return this;
+        }
+
+        /**
+         * Generates a new {@link TcpNetServer} with the current configurations.
+         *
+         * @param mode the mode of the server
+         * @return a new {@link TcpNetServer} with the current configurations
+         * @throws NetException if an error occurs while creating the server
+         */
+        public @Nonnull TcpNetServer build(@Nonnull Mode mode) throws NetException {
+            if (listener == null) {
+                throw new NetException("listener is null.");
+            }
+            if (acceptExecutor == null) {
+                throw new NetException("acceptExecutor is null.");
+            }
+            if (workExecutor == null) {
+                throw new NetException("workExecutor is null.");
+            }
+            try {
+                ServerSocket serverSocket;
+                if (ip == null) {
+                    serverSocket = new ServerSocket(port == null ? 0 : port, backlog);
+                } else {
+                    serverSocket = new ServerSocket(port == null ? 0 : port, backlog, ip);
+                }
+                if (options != null) {
+                    for (@Nonnull NetOption<?> option : options) {
+                        option.applyTo(serverSocket);
+                    }
+                }
+                return new BlockingTcpNetServer(serverSocket, listener, bufSize, acceptExecutor, workExecutor);
+            } catch (Exception e) {
+                throw new NetException(e);
+            }
+        }
     }
 }

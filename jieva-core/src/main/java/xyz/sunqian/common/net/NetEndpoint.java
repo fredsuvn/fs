@@ -2,15 +2,13 @@ package xyz.sunqian.common.net;
 
 import xyz.sunqian.annotations.Nonnull;
 
-import java.net.SocketAddress;
-
 /**
  * This interface represents a network endpoint in a connection.
  *
- * @param <A> the type of the socket address
+ * @param <A> the type of the address this endpoint is bound to
  * @author sunqian
  */
-public interface NetEndpoint<A extends SocketAddress> {
+public interface NetEndpoint<A> {
 
     /**
      * Closes the connection to this endpoint.

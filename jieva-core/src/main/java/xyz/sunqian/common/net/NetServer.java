@@ -2,15 +2,13 @@ package xyz.sunqian.common.net;
 
 import xyz.sunqian.annotations.Nullable;
 
-import java.net.SocketAddress;
-
 /**
  * This interface represents a network server.
  *
- * @param <A> the type of the socket address
+ * @param <A> the type of the address this server is bound to
  * @author sunqian
  */
-public interface NetServer<A extends SocketAddress> {
+public interface NetServer<A> {
 
     /**
      * Starts this server, and returns immediately after startup. This method will not block the current thread,

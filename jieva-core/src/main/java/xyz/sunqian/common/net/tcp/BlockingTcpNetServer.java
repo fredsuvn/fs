@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 
-final class SocketTcpNetServer implements TcpNetServer {
+final class BlockingTcpNetServer implements TcpNetServer {
 
     private final @Nonnull ServerSocket server;
     private final @Nonnull TcpNetListener listener;
@@ -27,7 +27,7 @@ final class SocketTcpNetServer implements TcpNetServer {
     private volatile boolean doClose = false;
     private volatile CountDownLatch latch;
 
-    SocketTcpNetServer(
+    BlockingTcpNetServer(
         @Nonnull ServerSocket server,
         @Nonnull TcpNetListener listener,
         int bufSize,
@@ -131,7 +131,7 @@ final class SocketTcpNetServer implements TcpNetServer {
 
     @Override
     public @Nullable InetSocketAddress getBoundAddress() {
-        return null;
+        return (InetSocketAddress) server.getLocalSocketAddress();
     }
 
     private static final class SocketEndpoint implements TcpNetEndpoint {
