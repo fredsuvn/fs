@@ -11,7 +11,22 @@ import xyz.sunqian.annotations.Nullable;
 public interface NetClient<A> {
 
     /**
-     * Closes this client. The connection will be disconnected, and it disconnects typically friendly.
+     * Starts this client, and returns immediately after startup. This method will not block the current thread,
+     * {@link #await()} will.
+     *
+     * @throws NetException if any error occurs
+     */
+    void start() throws NetException;
+
+    /**
+     * Blocks current thread until this client is closed.
+     *
+     * @throws NetException if any error occurs
+     */
+    void await() throws NetException;
+
+    /**
+     * Closes this client. The connection will be disconnected.
      *
      * @throws NetException if any error occurs
      */
@@ -26,10 +41,17 @@ public interface NetClient<A> {
     A getRemoteAddress();
 
     /**
-     * Returns the address this client is bound to, may be {@code null} if the client is not bound yet.
+     * Returns the local address this client is bound to, may be {@code null} if the client is not bound yet.
      *
-     * @return the address this client is bound to, may be {@code null} if the client is not bound yet
+     * @return the local address this client is bound to, may be {@code null} if the client is not bound yet
      */
     @Nullable
-    A getBoundAddress();
+    A getLocalAddress();
+
+    /**
+     * Returns the current state of this client.
+     *
+     * @return the current state of this client
+     */
+    NetState getState();
 }

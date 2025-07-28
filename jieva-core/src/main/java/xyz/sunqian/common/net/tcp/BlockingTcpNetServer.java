@@ -19,7 +19,7 @@ import java.util.concurrent.Executor;
 final class BlockingTcpNetServer implements TcpNetServer {
 
     private final @Nonnull ServerSocket server;
-    private final @Nonnull TcpNetListener listener;
+    private final @Nonnull TcpNetServer.Listener listener;
     private final int bufSize;
     private final @Nonnull Executor acceptExecutor;
     private final @Nonnull Executor workExecutor;
@@ -29,7 +29,7 @@ final class BlockingTcpNetServer implements TcpNetServer {
 
     BlockingTcpNetServer(
         @Nonnull ServerSocket server,
-        @Nonnull TcpNetListener listener,
+        @Nonnull TcpNetServer.Listener listener,
         int bufSize,
         @Nonnull Executor acceptExecutor,
         @Nonnull Executor workExecutor
