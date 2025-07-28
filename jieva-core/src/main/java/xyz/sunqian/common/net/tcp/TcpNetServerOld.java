@@ -1,5 +1,6 @@
 package xyz.sunqian.common.net.tcp;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.Jie;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
@@ -296,11 +298,16 @@ public interface TcpNetServerOld extends TcpNetEndpoint {
             }
 
             @Override
-            public InetAddress getAddress() {
+            public void close() throws NetException {
+
+            }
+
+            @Override
+            public @Nonnull InetSocketAddress getAddress() {
                 if (serverSocket == null) {
                     throw new NetException("Server has not been initialized.");
                 }
-                return serverSocket.getInetAddress();
+                return null;//serverSocket.getInetAddress();
             }
 
             @Override
@@ -312,6 +319,11 @@ public interface TcpNetServerOld extends TcpNetEndpoint {
             }
 
             @Override
+            public void send(ByteBuffer msg) throws NetException {
+
+            }
+
+            //@Override
             public SocketAddress getSocketAddress() {
                 if (serverSocket == null) {
                     throw new NetException("Server has not been initialized.");
@@ -319,17 +331,17 @@ public interface TcpNetServerOld extends TcpNetEndpoint {
                 return serverSocket.getLocalSocketAddress();
             }
 
-            @Override
+            //@Override
             public boolean isOpened() {
                 return state.isOpened();
             }
 
-            @Override
+            //@Override
             public boolean isClosed() {
                 return state.isClosed();
             }
 
-            @Override
+            //@Override
             public synchronized void close(@Nullable Duration timeout) {
                 try {
                     close0();
@@ -349,7 +361,7 @@ public interface TcpNetServerOld extends TcpNetEndpoint {
                 }
             }
 
-            @Override
+            //@Override
             public synchronized void closeNow() {
                 try {
                     close0();
@@ -364,7 +376,7 @@ public interface TcpNetServerOld extends TcpNetEndpoint {
                 }
             }
 
-            @Override
+            //@Override
             public ServerSocket getSource() {
                 if (serverSocket == null) {
                     throw new NetException("Server has not been initialized.");

@@ -1,5 +1,6 @@
 package xyz.sunqian.common.net.tcp;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.Jie;
@@ -276,11 +277,16 @@ public interface TcpNetClient2 extends TcpNetEndpoint {
             }
 
             @Override
-            public InetAddress getAddress() {
+            public void close() throws NetException {
+
+            }
+
+            @Override
+            public @Nonnull InetSocketAddress getAddress() {
                 if (socket == null) {
                     throw new NetException("Client has not been initialized.");
                 }
-                return socket.getLocalAddress();
+                return null;//socket.getLocalAddress();
             }
 
             @Override
@@ -292,6 +298,11 @@ public interface TcpNetClient2 extends TcpNetEndpoint {
             }
 
             @Override
+            public void send(ByteBuffer msg) throws NetException {
+
+            }
+
+            //@Override
             public SocketAddress getSocketAddress() {
                 if (socket == null) {
                     throw new NetException("Client has not been initialized.");
@@ -299,17 +310,17 @@ public interface TcpNetClient2 extends TcpNetEndpoint {
                 return socket.getLocalSocketAddress();
             }
 
-            @Override
+            //@Override
             public boolean isOpened() {
                 return state.isOpened();
             }
 
-            @Override
+            //@Override
             public boolean isClosed() {
                 return state.isClosed();
             }
 
-            @Override
+            //@Override
             public synchronized void close(@Nullable Duration timeout) {
                 try {
                     close0();
@@ -329,7 +340,7 @@ public interface TcpNetClient2 extends TcpNetEndpoint {
                 }
             }
 
-            @Override
+            //@Override
             public synchronized void closeNow() {
                 try {
                     close0();
@@ -343,7 +354,7 @@ public interface TcpNetClient2 extends TcpNetEndpoint {
                 }
             }
 
-            @Override
+            //@Override
             public Socket getSource() {
                 if (socket == null) {
                     throw new NetException("Client has not been initialized.");
