@@ -6,6 +6,7 @@ import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.chars.CharsBuilder;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.io.IOKit;
+import xyz.sunqian.common.io.IOMode;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.io.RuntimeCloseable;
 import xyz.sunqian.test.DataTest;
@@ -321,6 +322,11 @@ public class IOTest implements DataTest {
                 });
             });
             IOKit.flush("");
+        }
+        {
+            // mode
+            assertEquals(IOMode.valueOf("BLOCKING"), IOMode.BLOCKING);
+            assertEquals(IOMode.valueOf("NON_BLOCKING"), IOMode.NON_BLOCKING);
         }
     }
 
