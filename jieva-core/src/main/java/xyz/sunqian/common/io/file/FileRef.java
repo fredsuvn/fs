@@ -185,6 +185,47 @@ public interface FileRef {
     }
 
     /**
+     * Write bytes to the referenced file with the open options. If no option is specified, this method creates a new
+     * file or overwrites an existing file.
+     *
+     * @param bytes   the bytes to write
+     * @param options the open options
+     * @throws IORuntimeException if any error occurs
+     */
+    default void writeBytes(byte @Nonnull [] bytes, OpenOption @Nonnull ... options) throws IORuntimeException {
+        try {
+            Files.write(getPath(), bytes, options);
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    /**
+     * Write string to the referenced file with the {@link CharsKit#defaultCharset()} and open options. If no option is
+     * specified, this method creates a new file or overwrites an existing file.
+     *
+     * @param string  the string to write
+     * @param options the open options
+     * @throws IORuntimeException if any error occurs
+     */
+    default void writeString(@Nonnull String string, OpenOption @Nonnull ... options) throws IORuntimeException {
+        writeString(string, CharsKit.defaultCharset(), options);
+    }
+
+    /**
+     * Write string to the referenced file with the specified charset and open options. If no option is specified, this
+     * method creates a new file or overwrites an existing file.
+     *
+     * @param string  the string to write
+     * @param charset the specified charset
+     * @param options the open options
+     * @throws IORuntimeException if any error occurs
+     */
+    default void writeString(@Nonnull String string, Charset charset, OpenOption @Nonnull ... options) throws IORuntimeException {
+        writeBytes(string.getBytes(charset), options);
+    }
+
+    /**
      * Returns a new {@link FileInputStream} for reading the referenced file.
      *
      * @return a new {@link FileInputStream} for reading the referenced file

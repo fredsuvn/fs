@@ -115,5 +115,10 @@ public class FileTest implements DataTest, PrintTest, AssertTest {
         assertEquals(fileRef.readLines(), Collections.singleton(hello));
         expectThrows(IORuntimeException.class, errRef::readString);
         expectThrows(IORuntimeException.class, errRef::readLines);
+        // write
+        String world = "world";
+        fileRef.writeString(world);
+        assertEquals(fileRef.readString(), world);
+        expectThrows(IORuntimeException.class, () -> errRef.writeString(world));
     }
 }
