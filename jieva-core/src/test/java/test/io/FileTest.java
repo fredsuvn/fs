@@ -17,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
@@ -62,7 +63,18 @@ public class FileTest implements DataTest, PrintTest, AssertTest {
 
     @Test
     public void testFileRef() throws Exception {
-        Path path = Paths.get(ClassLoader.getSystemResource("io/fileRef.txt").toURI());
+        URL url = ClassLoader.getSystemResource("io/fileRef.txt");
+        Path path = Paths.get(url.toURI());
+        // of
+        assertEquals(FileRef.of(url).getPath(), path);
+        assertEquals(FileRef.of(url.toURI()).getPath(), path);
+        assertEquals(FileRef.of(path.toString()).getPath(), path);
+        Path sub = path.resolve("sub");
+        assertEquals(FileRef.of(path.toString(), "sub").getPath(), sub);
+        URL errUrl = new URL("http://www.123.456");
+        expectThrows(IORuntimeException.class, () -> FileRef.of(errUrl));
+
+        // FileRef
         File file = path.toFile();
         Path errPath = path.resolveSibling("/sub/fileRef2.txt");
         File errFile = errPath.toFile();

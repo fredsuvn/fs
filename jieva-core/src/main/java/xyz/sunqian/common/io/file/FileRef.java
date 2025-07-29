@@ -11,12 +11,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
+import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 
@@ -77,6 +80,52 @@ public interface FileRef {
                 return path;
             }
         };
+    }
+
+    /**
+     * Returns a new {@link FileRef} from the given path.
+     *
+     * @param path the given path
+     * @return a new {@link FileRef} from the given path
+     */
+    static @Nonnull FileRef of(@Nonnull String path) {
+        return of(Paths.get(path));
+    }
+
+    /**
+     * Returns a new {@link FileRef} from the given path string, or a sequence of strings.
+     *
+     * @param first the path string or initial part of the path string
+     * @param more  additional path string or initial parts of the path string
+     * @return a new {@link FileRef} from the given path string, or a sequence of strings
+     */
+    static @Nonnull FileRef of(@Nonnull String first, @Nonnull String @Nonnull ... more) {
+        return of(Paths.get(first, more));
+    }
+
+    /**
+     * Returns a new {@link FileRef} from the given uri.
+     *
+     * @param uri the given uri
+     * @return a new {@link FileRef} from the given uri
+     */
+    static @Nonnull FileRef of(@Nonnull URI uri) {
+        return of(Paths.get(uri));
+    }
+
+    /**
+     * Returns a new {@link FileRef} from the given url.
+     *
+     * @param url the given url
+     * @return a new {@link FileRef} from the given url
+     * @throws IORuntimeException if the url is unsupported
+     */
+    static @Nonnull FileRef of(@Nonnull URL url) throws IORuntimeException {
+        try {
+            return of(Paths.get(url.toURI()));
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
     }
 
     /**
