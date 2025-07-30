@@ -18,7 +18,7 @@ dependencies {
   implementation project(':jieva-core')
   implementation 'cglib:cglib'
 //  implementation project(':gek-kotlin')
-//  implementation project(":gek-test")
+  implementation project(":jieva-test")
 }
 
 //tasks.register('benchmark') {
