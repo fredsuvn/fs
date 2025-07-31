@@ -54,8 +54,8 @@ public enum InvocationMode {
     private static @Nonnull InvocationMode recommended(@Nonnull Executable executable, boolean isStatic) {
         int paramCount = executable.getParameterCount();
         if (isStatic) {
-            return paramCount <= OfMethodHandle.MAX_INSTANCE_ARGS_IMPL ? METHOD_HANDLE : REFLECTION;
+            return paramCount <= OfMethodHandle.MAX_STATIC_ARGS_NUM ? METHOD_HANDLE : REFLECTION;
         }
-        return paramCount <= OfMethodHandle.MAX_INSTANCE_ARGS_IMPL ? METHOD_HANDLE : ASM;
+        return paramCount <= OfMethodHandle.MAX_INST_ARGS_NUM ? METHOD_HANDLE : REFLECTION;
     }
 }

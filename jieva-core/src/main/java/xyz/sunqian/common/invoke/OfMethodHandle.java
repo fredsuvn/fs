@@ -11,8 +11,8 @@ import java.lang.reflect.Method;
 
 final class OfMethodHandle {
 
-    // static final int MAX_STATIC_ARGS_IMPL = 16;
-    static final int MAX_INSTANCE_ARGS_IMPL = 15;
+    static final int MAX_STATIC_ARGS_NUM = 16;
+    static final int MAX_INST_ARGS_NUM = 15;
 
     static @Nonnull Invocable newInvocable(@Nonnull Method method) {
         MethodHandle handle = methodHandle(method);
