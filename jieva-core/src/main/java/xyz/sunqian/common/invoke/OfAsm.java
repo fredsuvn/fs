@@ -1,9 +1,11 @@
 package xyz.sunqian.common.invoke;
 
+import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.SimpleClass;
 import xyz.sunqian.common.asm.AsmKit;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.reflect.BytesClassLoader;
@@ -25,13 +27,15 @@ final class OfAsm {
         InvocationException::new
     );
     private static final @Nonnull String @Nonnull [] INVOKE_CHECKED_EXCEPTIONS = {JvmKit.getInternalName(Throwable.class)};
-    private static final @Nonnull String INVOKE_CHECKED_DESCRIPTOR = JvmKit.getDescriptor(INVOKE_CHECKED);
+    private static final @Nonnull String INVOKE_CHECKED_DESC = JvmKit.getDescriptor(INVOKE_CHECKED);
     // private static final @Nonnull String THROWABLE_NAME = JieJvm.getInternalName(Throwable.class);
     // private static final @Nonnull String EXCEPTION_NAME = JieJvm.getInternalName(InvocationException.class);
     // private static final @Nonnull String EXCEPTION_CONSTRUCTOR_DESCRIPTOR = Jie.uncheck(
     //     () -> JieJvm.getDescriptor(InvocationException.class.getConstructor(Throwable.class)),
     //     InvocationException::new
     // );
+
+    private static final @Nonnull String SIMPLE_CLASS_DESC = JvmKit.getDescriptor(SimpleClass.class);
 
     private static final @Nonnull AtomicLong classCounter = new AtomicLong();
 
@@ -75,6 +79,10 @@ final class OfAsm {
             INTERFACES
         );
         {
+            AnnotationVisitor visitor = classWriter.visitAnnotation(SIMPLE_CLASS_DESC, true);
+            visitor.visitEnd();
+        }
+        {
             MethodVisitor visitor = classWriter.visitMethod(
                 Opcodes.ACC_PUBLIC,
                 AsmKit.CONSTRUCTOR_NAME,
@@ -101,7 +109,7 @@ final class OfAsm {
         MethodVisitor visitor = classWriter.visitMethod(
             Opcodes.ACC_PUBLIC | Opcodes.ACC_VARARGS,
             INVOKE_CHECKED.getName(),
-            INVOKE_CHECKED_DESCRIPTOR,
+            INVOKE_CHECKED_DESC,
             null,
             INVOKE_CHECKED_EXCEPTIONS
         );
@@ -162,7 +170,7 @@ final class OfAsm {
         MethodVisitor visitor = classWriter.visitMethod(
             Opcodes.ACC_PUBLIC | Opcodes.ACC_VARARGS,
             INVOKE_CHECKED.getName(),
-            INVOKE_CHECKED_DESCRIPTOR,
+            INVOKE_CHECKED_DESC,
             null,
             INVOKE_CHECKED_EXCEPTIONS
         );

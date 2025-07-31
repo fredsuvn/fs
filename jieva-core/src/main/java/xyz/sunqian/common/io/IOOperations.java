@@ -1,7 +1,7 @@
 package xyz.sunqian.common.io;
 
-import xyz.sunqian.annotations.JdkDependent;
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.SimpleClass;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -411,7 +411,7 @@ final class IOOperations {
         }
     }
 
-    @JdkDependent("Make value class")
+    @SimpleClass
     static final class IOOperatorImpl implements IOOperator {
 
         private final int bufSize;

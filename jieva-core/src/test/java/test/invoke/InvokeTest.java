@@ -2,6 +2,7 @@ package test.invoke;
 
 import org.testng.annotations.Test;
 import test.utils.LotsOfMethods;
+import xyz.sunqian.annotations.SimpleClass;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.invoke.InvocationException;
@@ -12,11 +13,13 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
@@ -202,6 +205,17 @@ public class InvokeTest {
                 invocable.invoke(new LotsOfMethods(), LotsOfMethods.buildArgsForLotsOfMethods(instanceMethod129)),
                 instanceMethod129.invoke(new LotsOfMethods(), LotsOfMethods.buildArgsForLotsOfMethods(instanceMethod129))
             );
+        }
+        {
+            // SimpleClass
+            Constructor<?> c = Cls.class.getConstructor();
+            Invocable ci = Invocable.of(c, InvocationMode.ASM);
+            assertTrue(Modifier.isFinal(ci.getClass().getModifiers()));
+            assertNotNull(ci.getClass().getAnnotation(SimpleClass.class));
+            Method m = Cls.class.getMethod("b1");
+            Invocable bi = Invocable.of(m, InvocationMode.ASM);
+            assertTrue(Modifier.isFinal(bi.getClass().getModifiers()));
+            assertNotNull(bi.getClass().getAnnotation(SimpleClass.class));
         }
     }
 
