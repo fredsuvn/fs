@@ -16,7 +16,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.concurrent.atomic.AtomicLong;
 
-final class OfAsm implements InvocableGenerator {
+final class OfAsm {
 
     private static final @Nonnull String INVOCABLE_NAME = JvmKit.getInternalName(Invocable.class);
     private static final @Nonnull String @Nonnull [] INTERFACES = new String[]{INVOCABLE_NAME};
@@ -35,8 +35,7 @@ final class OfAsm implements InvocableGenerator {
 
     private static final @Nonnull AtomicLong classCounter = new AtomicLong();
 
-    @Override
-    public @Nonnull Invocable generate(@Nonnull Method method) {
+    static @Nonnull Invocable newInvocable(@Nonnull Method method) {
         String className = buildClassName();
         ClassWriter classWriter = generateClassBody(className);
         generateMethodInvoker(classWriter, method);
@@ -45,8 +44,7 @@ final class OfAsm implements InvocableGenerator {
         return generate(bytecode);
     }
 
-    @Override
-    public @Nonnull Invocable generate(@Nonnull Constructor<?> constructor) {
+    static @Nonnull Invocable newInvocable(@Nonnull Constructor<?> constructor) {
         String className = buildClassName();
         ClassWriter classWriter = generateClassBody(className);
         generateConstructorInvoker(classWriter, constructor);
@@ -55,18 +53,18 @@ final class OfAsm implements InvocableGenerator {
         return generate(bytecode);
     }
 
-    private String buildClassName() {
-        return getClass().getPackage().getName().replace('.', '/')
+    private static String buildClassName() {
+        return OfAsm.class.getPackage().getName().replace('.', '/')
             + "/" + AsmKit.generateClassSimpleName(classCounter.incrementAndGet());
     }
 
-    private Invocable generate(byte[] bytecode) {
+    private static Invocable generate(byte[] bytecode) {
         BytesClassLoader classLoader = new BytesClassLoader();
         Class<?> cls = classLoader.loadClass(null, bytecode);
         return Jie.uncheck(() -> Jie.as(cls.getDeclaredConstructor().newInstance()), InvocationException::new);
     }
 
-    private ClassWriter generateClassBody(String className) {
+    private static ClassWriter generateClassBody(String className) {
         ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         classWriter.visit(
             Opcodes.V1_8,
@@ -99,7 +97,7 @@ final class OfAsm implements InvocableGenerator {
         return classWriter;
     }
 
-    private void generateMethodInvoker(ClassWriter classWriter, Method method) {
+    private static void generateMethodInvoker(ClassWriter classWriter, Method method) {
         MethodVisitor visitor = classWriter.visitMethod(
             Opcodes.ACC_PUBLIC | Opcodes.ACC_VARARGS,
             INVOKE_CHECKED.getName(),
@@ -160,7 +158,7 @@ final class OfAsm implements InvocableGenerator {
         visitor.visitEnd();
     }
 
-    private void generateConstructorInvoker(ClassWriter classWriter, Constructor<?> constructor) {
+    private static void generateConstructorInvoker(ClassWriter classWriter, Constructor<?> constructor) {
         MethodVisitor visitor = classWriter.visitMethod(
             Opcodes.ACC_PUBLIC | Opcodes.ACC_VARARGS,
             INVOKE_CHECKED.getName(),
@@ -207,7 +205,7 @@ final class OfAsm implements InvocableGenerator {
         visitor.visitEnd();
     }
 
-    private void loadParameters(MethodVisitor visitor, Executable executable) {
+    private static void loadParameters(MethodVisitor visitor, Executable executable) {
         int pIndex = 0;
         for (Parameter parameter : executable.getParameters()) {
             // get args

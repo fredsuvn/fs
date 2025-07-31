@@ -9,13 +9,15 @@ import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
-final class OfMethodHandle implements InvocableGenerator {
+final class OfMethodHandle {
 
-    static final int MAX_STATIC_ARGS_IMPL = 16;
+    // static final int MAX_STATIC_ARGS_IMPL = 16;
     static final int MAX_INSTANCE_ARGS_IMPL = 15;
 
-    static @Nonnull Invocable forHandle(@Nonnull MethodHandle methodHandle, boolean isStatic) {
-        return isStatic ? new StaticInvoker(methodHandle) : new InstanceInvoker(methodHandle);
+    static @Nonnull Invocable newInvocable(@Nonnull Method method) {
+        MethodHandle handle = methodHandle(method);
+        boolean isStatic = ClassKit.isStatic(method);
+        return newInvocable(handle, isStatic);
     }
 
     private static @Nonnull MethodHandle methodHandle(@Nonnull Method method) throws InvocationException {
@@ -34,6 +36,11 @@ final class OfMethodHandle implements InvocableGenerator {
         }
     }
 
+    static @Nonnull Invocable newInvocable(@Nonnull Constructor<?> constructor) {
+        MethodHandle handle = constructorHandle(constructor);
+        return newInvocable(handle, true);
+    }
+
     private static @Nonnull MethodHandle constructorHandle(@Nonnull Constructor<?> constructor) throws InvocationException {
         try {
             return MethodHandles.lookup()
@@ -49,29 +56,7 @@ final class OfMethodHandle implements InvocableGenerator {
         }
     }
 
-    private static @Nullable Object @Nonnull [] toInstanceArgs(
-        @Nullable Object inst, @Nullable Object @Nonnull ... args
-    ) {
-        Object[] instanceArgs = new Object[args.length + 1];
-        instanceArgs[0] = inst;
-        System.arraycopy(args, 0, instanceArgs, 1, args.length);
-        return instanceArgs;
-    }
-
-    @Override
-    public @Nonnull Invocable generate(@Nonnull Method method) {
-        MethodHandle handle = methodHandle(method);
-        boolean isStatic = ClassKit.isStatic(method);
-        return generate(handle, isStatic);
-    }
-
-    @Override
-    public @Nonnull Invocable generate(@Nonnull Constructor<?> constructor) {
-        MethodHandle handle = constructorHandle(constructor);
-        return generate(handle, true);
-    }
-
-    private @Nonnull Invocable generate(@Nonnull MethodHandle handle, boolean isStatic) {
+    static @Nonnull Invocable newInvocable(@Nonnull MethodHandle handle, boolean isStatic) {
         switch (handle.type().parameterCount()) {
             case 0:
                 return new StaticInvoker0(handle);
@@ -112,6 +97,10 @@ final class OfMethodHandle implements InvocableGenerator {
         }
     }
 
+    private static @Nonnull Invocable forHandle(@Nonnull MethodHandle methodHandle, boolean isStatic) {
+        return isStatic ? new StaticInvoker(methodHandle) : new InstanceInvoker(methodHandle);
+    }
+
     // public static void main(String[] args) {
     //     StringBuilder sb = new StringBuilder();
     //     for (int i = 1; i < 17; i++) {
@@ -146,7 +135,7 @@ final class OfMethodHandle implements InvocableGenerator {
 
         @Override
         public @Nullable Object invokeChecked(@Nullable Object inst, @Nullable Object @Nonnull ... args) throws Throwable {
-            return methodHandle.invokeWithArguments(toInstanceArgs(inst, args));
+            return methodHandle.invokeWithArguments(InvokeKit.toInstanceArgs(inst, args));
         }
     }
 

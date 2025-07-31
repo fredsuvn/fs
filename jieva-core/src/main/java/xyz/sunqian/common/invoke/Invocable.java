@@ -19,58 +19,72 @@ import java.lang.reflect.Method;
 public interface Invocable {
 
     /**
-     * Returns an {@link Invocable} represents the specified method, with the recommended implementation in current
+     * Returns a new {@link Invocable} represents the specified method, using recommended implementation in current
      * environment.
      *
      * @param method the specified method
-     * @return an {@link Invocable} represents the specified method
+     * @return a new {@link Invocable} represents the specified method
      */
     static @Nonnull Invocable of(@Nonnull Method method) {
         return of(method, InvocationMode.recommended(method));
     }
 
     /**
-     * Returns an {@link Invocable} represents the specified constructor, with the recommended implementation in current
+     * Returns a new {@link Invocable} represents the specified constructor, using recommended implementation in current
      * environment.
      *
      * @param constructor the specified constructor
-     * @return an {@link Invocable} represents the specified constructor
+     * @return a new {@link Invocable} represents the specified constructor
      */
     static @Nonnull Invocable of(@Nonnull Constructor<?> constructor) {
         return of(constructor, InvocationMode.recommended(constructor));
     }
 
     /**
-     * Returns an {@link Invocable} represents the specified method handle.
+     * Returns a new {@link Invocable} represents the specified method handle.
      *
      * @param handle   the specified method handle
      * @param isStatic specifies whether the method handle is for a static method, constructor, or similar
-     * @return an {@link Invocable} represents the specified method handle
+     * @return a new {@link Invocable} represents the specified method handle
      */
     static @Nonnull Invocable of(@Nonnull MethodHandle handle, boolean isStatic) {
-        return OfMethodHandle.forHandle(handle, isStatic);
+        return OfMethodHandle.newInvocable(handle, isStatic);
     }
 
     /**
-     * Returns an {@link Invocable} represents the specified method, with the specified implementation.
+     * Returns a new {@link Invocable} represents the specified method, using specified implementation.
      *
      * @param method the specified method
      * @param mode   specifies the implementation of the returned instance
-     * @return an {@link Invocable} represents the specified method
+     * @return a new {@link Invocable} represents the specified method
      */
     static @Nonnull Invocable of(@Nonnull Method method, @Nonnull InvocationMode mode) {
-        return mode.generate(method);
+        switch (mode) {
+            case METHOD_HANDLE:
+                return OfMethodHandle.newInvocable(method);
+            case ASM:
+                return OfAsm.newInvocable(method);
+            default:
+                return OfReflection.newInvocable(method);
+        }
     }
 
     /**
-     * Returns an {@link Invocable} represents the specified constructor, with the specified implementation.
+     * Returns a new {@link Invocable} represents the specified constructor, using specified implementation.
      *
      * @param constructor the specified constructor
      * @param mode        specifies the implementation of the returned instance
-     * @return an {@link Invocable} represents the specified constructor
+     * @return a new {@link Invocable} represents the specified constructor
      */
     static @Nonnull Invocable of(@Nonnull Constructor<?> constructor, @Nonnull InvocationMode mode) {
-        return mode.generate(constructor);
+        switch (mode) {
+            case METHOD_HANDLE:
+                return OfMethodHandle.newInvocable(constructor);
+            case ASM:
+                return OfAsm.newInvocable(constructor);
+            default:
+                return OfReflection.newInvocable(constructor);
+        }
     }
 
     /**

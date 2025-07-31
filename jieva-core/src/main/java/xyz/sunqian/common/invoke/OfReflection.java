@@ -7,15 +7,13 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-final class OfReflection implements InvocableGenerator {
+final class OfReflection {
 
-    @Override
-    public @Nonnull Invocable generate(@Nonnull Constructor<?> constructor) {
+    static @Nonnull Invocable newInvocable(@Nonnull Constructor<?> constructor) {
         return new ForConstructor(constructor);
     }
 
-    @Override
-    public @Nonnull Invocable generate(@Nonnull Method method) {
+    static @Nonnull Invocable newInvocable(@Nonnull Method method) {
         return new ForMethod(method);
     }
 

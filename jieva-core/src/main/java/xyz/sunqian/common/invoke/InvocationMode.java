@@ -13,22 +13,22 @@ import java.lang.reflect.Method;
  *
  * @author sunqian
  */
-public enum InvocationMode implements InvocableGenerator {
+public enum InvocationMode {
 
     /**
      * Using reflection to implement {@link Invocable}.
      */
-    REFLECTION(new OfReflection()),
+    REFLECTION,
 
     /**
      * Using {@link MethodHandle} to implement {@link Invocable}.
      */
-    METHOD_HANDLE(new OfMethodHandle()),
+    METHOD_HANDLE,
 
     /**
      * Using <a href="https://asm.ow2.io/">ASM</a> to implement {@link Invocable}.
      */
-    ASM(new OfAsm()),
+    ASM,
     ;
 
     /**
@@ -57,19 +57,5 @@ public enum InvocationMode implements InvocableGenerator {
             return paramCount <= OfMethodHandle.MAX_INSTANCE_ARGS_IMPL ? METHOD_HANDLE : REFLECTION;
         }
         return paramCount <= OfMethodHandle.MAX_INSTANCE_ARGS_IMPL ? METHOD_HANDLE : ASM;
-    }
-
-    private final @Nonnull InvocableGenerator generator;
-
-    InvocationMode(@Nonnull InvocableGenerator generator) {
-        this.generator = generator;
-    }
-
-    public @Nonnull Invocable generate(@Nonnull Method method) {
-        return generator.generate(method);
-    }
-
-    public @Nonnull Invocable generate(@Nonnull Constructor<?> constructor) {
-        return generator.generate(constructor);
     }
 }
