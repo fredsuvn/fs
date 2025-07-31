@@ -1,5 +1,6 @@
 package xyz.sunqian.common.io;
 
+import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.SimpleClass;
 
@@ -412,6 +413,7 @@ final class IOOperations {
     }
 
     @SimpleClass
+    @Immutable
     static final class IOOperatorImpl implements IOOperator {
 
         private final int bufSize;

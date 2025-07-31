@@ -2,6 +2,7 @@ package test.invoke;
 
 import org.testng.annotations.Test;
 import test.utils.LotsOfMethods;
+import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.SimpleClass;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.invoke.Invocable;
@@ -212,10 +213,12 @@ public class InvokeTest {
             Invocable ci = Invocable.of(c, InvocationMode.ASM);
             assertTrue(Modifier.isFinal(ci.getClass().getModifiers()));
             assertNotNull(ci.getClass().getAnnotation(SimpleClass.class));
+            assertNotNull(ci.getClass().getAnnotation(Immutable.class));
             Method m = Cls.class.getMethod("b1");
             Invocable bi = Invocable.of(m, InvocationMode.ASM);
             assertTrue(Modifier.isFinal(bi.getClass().getModifiers()));
             assertNotNull(bi.getClass().getAnnotation(SimpleClass.class));
+            assertNotNull(ci.getClass().getAnnotation(Immutable.class));
         }
     }
 
