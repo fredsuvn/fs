@@ -734,7 +734,7 @@ public class IOKit {
 
     /**
      * Closes the given closeable object, which is an instance of {@link Closeable} or {@link AutoCloseable} or
-     * {@link RuntimeCloseable}. If the given object is not an instance of above interfaces, then invoking this method
+     * {@link IORuntimeCloseable}. If the given object is not an instance of above interfaces, then invoking this method
      * has no effect.
      *
      * @param closeable the given closeable object
@@ -751,9 +751,9 @@ public class IOKit {
             } catch (Exception e) {
                 throw new IOException(e);
             }
-        } else if (closeable instanceof RuntimeCloseable) {
+        } else if (closeable instanceof IORuntimeCloseable) {
             try {
-                ((RuntimeCloseable) closeable).close();
+                ((IORuntimeCloseable) closeable).close();
             } catch (Exception e) {
                 throw new IOException(e);
             }

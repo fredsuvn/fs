@@ -44,7 +44,7 @@ public interface IOOperator {
      */
     static IOOperator newOperator(int bufSize) throws IllegalArgumentException {
         IOHelper.checkBufSize(bufSize);
-        return () -> bufSize;
+        return new IOOperations.IOOperatorImpl(bufSize);
     }
 
     /**

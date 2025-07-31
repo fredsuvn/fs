@@ -1,5 +1,6 @@
 package xyz.sunqian.common.io;
 
+import xyz.sunqian.annotations.JdkDependent;
 import xyz.sunqian.annotations.Nonnull;
 
 import java.io.InputStream;
@@ -12,7 +13,7 @@ import java.nio.channels.WritableByteChannel;
 
 final class IOOperations {
 
-    static final @Nonnull IOOperator DEFAULT_OPERATOR = IOOperator.newOperator(IOHelper.DEFAULT_BUFFER_SIZE);
+    static final @Nonnull IOOperator DEFAULT_OPERATOR = new IOOperatorImpl(IOHelper.DEFAULT_BUFFER_SIZE);
 
     static long readTo0(
         @Nonnull InputStream src, @Nonnull OutputStream dst, int bufSize
@@ -407,6 +408,21 @@ final class IOOperations {
             }
         } catch (Exception e) {
             throw new IORuntimeException(e);
+        }
+    }
+
+    @JdkDependent("Make value class")
+    static final class IOOperatorImpl implements IOOperator {
+
+        private final int bufSize;
+
+        IOOperatorImpl(int bufSize) {
+            this.bufSize = bufSize;
+        }
+
+        @Override
+        public int bufferSize() {
+            return bufSize;
         }
     }
 }
