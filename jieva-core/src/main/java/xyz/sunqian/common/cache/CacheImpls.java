@@ -51,7 +51,7 @@ final class CacheImpls {
     }
 
     private static <K, V> void compareAndRemove(@Nonnull Map<K, V> map, K key, V value) {
-        map.compute(key, (k, old) -> {
+        map.computeIfPresent(key, (k, old) -> {
             if (old == value) {
                 return null;
             }
@@ -101,6 +101,13 @@ final class CacheImpls {
         @Override
         public @Nullable V get(@Nonnull K key, @Nonnull Function<? super @Nonnull K, ? extends @Nullable V> producer) {
             clean();
+            @Nullable Ref<K> rv = map.get(key);
+            if (rv != null) {
+                @Nullable Object raw = rv.refValue();
+                if (raw != null) {
+                    return unmaskRawValue(raw);
+                }
+            }
             Var<V> value = Var.of(null);
             map.compute(key, (k, old) -> {
                 if (old != null) {
@@ -123,6 +130,13 @@ final class CacheImpls {
             @Nonnull Function<? super @Nonnull K, ? extends @Nullable Val<? extends @Nullable V>> producer
         ) {
             clean();
+            @Nullable Ref<K> rv = map.get(key);
+            if (rv != null) {
+                @Nullable Object raw = rv.refValue();
+                if (raw != null) {
+                    return Val.of(unmaskRawValue(raw));
+                }
+            }
             Var<Object> value = Var.of(null);
             map.compute(key, (k, old) -> {
                 if (old != null) {

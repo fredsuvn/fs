@@ -1,29 +1,32 @@
 package test.cache;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.value.Val;
 import xyz.sunqian.common.cache.SimpleCache;
+import xyz.sunqian.test.DataTest;
+import xyz.sunqian.test.PrintTest;
 
-import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
-public class CacheTest {
+public class CacheTest implements PrintTest, DataTest {
+
+    private final char[] chars = randomChars(8 * 1024, 'a', 'z');
 
     @Test
     public void testNoGc() throws Exception {
         testCache(SimpleCache.ofStrong());
     }
 
-    private void testCache(SimpleCache<Integer, Integer> cache) {
+    private void testCache(SimpleCache<Integer, Integer> cache) throws Exception {
         // get/put
         assertNull(cache.get(1));
         assertNull(cache.getVal(1));
@@ -66,6 +69,80 @@ public class CacheTest {
         assertNull(cache.getVal(2));
         assertNull(cache.getVal(3));
         assertNull(cache.getVal(4));
+
+        // compute
+        testMapCompute(cache, 100);
+        testMapComputeVal(cache, 200);
+        testMapCompute(cache, 300);
+        testMapComputeVal(cache, 400);
+    }
+
+    private void testMapCompute(SimpleCache<Integer, Integer> cache, int value) throws Exception {
+        CountDownLatch enterLatch = new CountDownLatch(1);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        Thread thread1 = new Thread(() -> {
+            cache.get(value, k -> {
+                try {
+                    enterLatch.countDown();
+                    startLatch.await();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                return value;
+            });
+        });
+        Thread thread2 = new Thread(() -> {
+            cache.get(value, k -> {
+                try {
+                    enterLatch.countDown();
+                    startLatch.await();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                return value;
+            });
+        });
+        thread1.start();
+        thread2.start();
+        enterLatch.await();
+        startLatch.countDown();
+        thread1.join();
+        thread2.join();
+        assertEquals(cache.get(value), value);
+    }
+
+    private void testMapComputeVal(SimpleCache<Integer, Integer> cache, int value) throws Exception {
+        CountDownLatch enterLatch = new CountDownLatch(1);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        Thread thread1 = new Thread(() -> {
+            cache.getVal(value, k -> {
+                try {
+                    enterLatch.countDown();
+                    startLatch.await();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                return Val.of(value);
+            });
+        });
+        Thread thread2 = new Thread(() -> {
+            cache.getVal(value, k -> {
+                try {
+                    enterLatch.countDown();
+                    startLatch.await();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                return Val.of(value);
+            });
+        });
+        thread1.start();
+        thread2.start();
+        enterLatch.await();
+        startLatch.countDown();
+        thread1.join();
+        thread2.join();
+        assertEquals(cache.get(value), value);
     }
 
     @Test
@@ -97,33 +174,61 @@ public class CacheTest {
     @Test
     public void testWeakAndSoft() {
         // Most methods are tested by testNoGc and testPhantom.
-        testSimpleOps(SimpleCache.ofWeak());
-        testSimpleOps(SimpleCache.ofSoft());
+        testWeakAndSoft(SimpleCache.ofWeak());
+        testWeakAndSoft(SimpleCache.ofSoft());
     }
 
-    private void testSimpleOps(SimpleCache<Integer, Integer> cache) {
+    private void testWeakAndSoft(SimpleCache<Integer, Integer> cache) {
         cache.put(1, 1);
         cache.get(1);
         cache.remove(1);
         cache.clean();
+        assertEquals(cache.get(6, k -> 6), 6);
+        assertNull(cache.get(7, k -> null));
+        assertEquals(cache.getVal(8, k -> Val.of(8)).get(), 8);
+        assertNull(cache.getVal(9, k -> null));
     }
 
     // Test for out of memory.
     //@Test
     public void testMemory() throws Exception {
-        testMemory(SimpleCache.ofWeak());
-        testMemory(SimpleCache.ofSoft());
+        testMemory(SimpleCache.ofWeak(), 1000000);
+        testMemory(SimpleCache.ofSoft(), 1000000);
+        testMemory(SimpleCache.ofPhantom(), 1000000);
+        // testMemory(SimpleCache.ofStrong(), 1000000);
     }
 
-    private void testMemory(SimpleCache<Integer, Integer> cache) throws Exception {
-        CountDownLatch latch = new CountDownLatch(10);
-        List<Thread> threads = new ArrayList<>();
-        AtomicBoolean flag = new AtomicBoolean(true);
-        Random random = new Random();
-        for (int i = 0; i < 10; i++) {
+    private void testMemory(SimpleCache<Long, String> cache, long valueCount) throws Exception {
+        for (long i = 0; i < valueCount; i++) {
+            cache.put(i, new String(chars));
+        }
+    }
+
+    //@Test
+    public void testThreads() throws Exception {
+        testThreads(SimpleCache.ofWeak(), 10);
+        testThreads(SimpleCache.ofSoft(), 10);
+        testThreads(SimpleCache.ofPhantom(), 10);
+        testThreads(SimpleCache.ofStrong(), 10);
+        testThreads(SimpleCache.ofWeak(), 20);
+        testThreads(SimpleCache.ofSoft(), 20);
+        testThreads(SimpleCache.ofPhantom(), 20);
+        testThreads(SimpleCache.ofStrong(), 20);
+    }
+
+    private void testThreads(SimpleCache<Integer, Integer> cache, int threadNum) throws Exception {
+        CountDownLatch latch = new CountDownLatch(threadNum);
+        List<Thread> threads = new ArrayList<>(threadNum);
+        AtomicInteger[] counters = new AtomicInteger[threadNum];
+        for (int i = 0; i < counters.length; i++) {
+            counters[i] = new AtomicInteger();
+        }
+        for (int i = 0; i < threadNum; i++) {
+            int value = i;
             Thread thread = new Thread(() -> {
-                while (flag.get()) {
-                    cache.put(random.nextInt(), random.nextInt());
+                for (int j = 0; j < 100000; j++) {
+                    int actualValue = cache.get(j, k -> value);
+                    counters[actualValue].incrementAndGet();
                 }
                 latch.countDown();
             });
@@ -132,8 +237,8 @@ public class CacheTest {
         for (Thread thread : threads) {
             thread.start();
         }
-        Jie.sleep(Duration.ofSeconds(10));
-        flag.set(false);
         latch.await();
+        printFor("Cache threads[" + threadNum + "] counters",
+            Arrays.stream(counters).map(a -> String.valueOf(a.get())).collect(Collectors.joining(", ")));
     }
 }

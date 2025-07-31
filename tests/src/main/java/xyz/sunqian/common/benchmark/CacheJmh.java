@@ -54,13 +54,14 @@ public class CacheJmh {
     private int nextKey() {
         double gs = random.nextGaussian();
         return (int) (gs * max);
+        // return (int) (random.nextDouble() * max);
     }
 
     @Benchmark
     public void simpleWeakCache() {
         int key = nextKey();
-        simpleWeakCache.get(key);
-        key = nextKey();
+        // simpleWeakCache.get(key);
+        // key = nextKey();
         simpleWeakCache.get(key, k -> value);
         // key = nextKey();
         // simpleWeakCache.put(key, value);
@@ -69,8 +70,8 @@ public class CacheJmh {
     @Benchmark
     public void simpleSoftCache() {
         int key = nextKey();
-        simpleSoftCache.get(key);
-        key = nextKey();
+        // simpleSoftCache.get(key);
+        // key = nextKey();
         simpleSoftCache.get(key, k -> value);
         // key = nextKey();
         // simpleSoftCache.put(key, value);
@@ -79,8 +80,8 @@ public class CacheJmh {
     @Benchmark
     public void caffeineWeakCache() {
         int key = nextKey();
-        caffeineWeakCache.getIfPresent(key);
-        key = nextKey();
+        // caffeineWeakCache.getIfPresent(key);
+        // key = nextKey();
         caffeineWeakCache.get(key, k -> value);
         // key = nextKey();
         // caffeineWeakCache.put(key, value);
@@ -89,8 +90,8 @@ public class CacheJmh {
     @Benchmark
     public void caffeineSoftCache() {
         int key = nextKey();
-        caffeineSoftCache.getIfPresent(key);
-        key = nextKey();
+        // caffeineSoftCache.getIfPresent(key);
+        // key = nextKey();
         caffeineSoftCache.get(key, k -> value);
         // key = nextKey();
         // caffeineSoftCache.put(key, value);
@@ -99,8 +100,8 @@ public class CacheJmh {
     @Benchmark
     public void caffeineCache() {
         int key = nextKey();
-        caffeineCache.getIfPresent(key);
-        key = nextKey();
+        // caffeineCache.getIfPresent(key);
+        // key = nextKey();
         caffeineCache.get(key, k -> value);
         // key = nextKey();
         // caffeineCache.put(key, value);
@@ -109,8 +110,8 @@ public class CacheJmh {
     @Benchmark
     public void guavaWeakCache() throws Exception {
         int key = nextKey();
-        guavaWeakCache.getIfPresent(key);
-        key = nextKey();
+        // guavaWeakCache.getIfPresent(key);
+        // key = nextKey();
         guavaWeakCache.get(key, () -> value);
         // key = nextKey();
         // guavaWeakCache.put(key, value);
@@ -119,8 +120,8 @@ public class CacheJmh {
     @Benchmark
     public void guavaSoftCache() throws Exception {
         int key = nextKey();
-        guavaSoftCache.getIfPresent(key);
-        key = nextKey();
+        // guavaSoftCache.getIfPresent(key);
+        // key = nextKey();
         guavaSoftCache.get(key, () -> value);
         // key = nextKey();
         // guavaSoftCache.put(key, value);
@@ -129,8 +130,8 @@ public class CacheJmh {
     @Benchmark
     public void guavaCache() throws Exception {
         int key = nextKey();
-        guavaCache.getIfPresent(key);
-        key = nextKey();
+        // guavaCache.getIfPresent(key);
+        // key = nextKey();
         guavaCache.get(key, () -> value);
         // key = nextKey();
         // guavaCache.put(key, value);
@@ -147,12 +148,12 @@ public class CacheJmh {
     }
 
     // Benchmark                    Mode  Cnt     Score      Error   Units
-    // CacheJmh.caffeineCache      thrpt   15  8329.264 ± 2197.013  ops/ms
-    // CacheJmh.caffeineSoftCache  thrpt   15  6052.971 ±  935.735  ops/ms
-    // CacheJmh.caffeineWeakCache  thrpt   15  6425.101 ±  571.973  ops/ms
-    // CacheJmh.guavaCache         thrpt   15  6003.908 ±  876.103  ops/ms
-    // CacheJmh.guavaSoftCache     thrpt   15  6159.012 ± 1608.401  ops/ms
-    // CacheJmh.guavaWeakCache     thrpt   15  7863.530 ±  208.349  ops/ms
-    // CacheJmh.simpleSoftCache    thrpt   15  7632.215 ±  676.453  ops/ms
-    // CacheJmh.simpleWeakCache    thrpt   15  7386.267 ±  846.319  ops/ms
+    // CacheJmh.caffeineCache      thrpt   15  9129.946 ±  980.466  ops/ms
+    // CacheJmh.caffeineSoftCache  thrpt   15  6531.363 ± 1003.614  ops/ms
+    // CacheJmh.caffeineWeakCache  thrpt   15  6959.479 ±  159.547  ops/ms
+    // CacheJmh.guavaCache         thrpt   15  6796.895 ±  521.727  ops/ms
+    // CacheJmh.guavaSoftCache     thrpt   15  8366.193 ±   87.505  ops/ms
+    // CacheJmh.guavaWeakCache     thrpt   15  8071.158 ±  749.648  ops/ms
+    // CacheJmh.simpleSoftCache    thrpt   15  9112.107 ±  980.556  ops/ms
+    // CacheJmh.simpleWeakCache    thrpt   15  7698.413 ± 1782.414  ops/ms
 }
