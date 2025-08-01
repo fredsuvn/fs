@@ -5,6 +5,7 @@ import test.task.TaskUtil;
 import test.utils.Utils;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.UnknownArrayTypeException;
+import xyz.sunqian.common.base.exception.WrappedException;
 import xyz.sunqian.common.base.process.ProcessReceipt;
 import xyz.sunqian.common.base.system.OSKit;
 import xyz.sunqian.common.task.RunReceipt;
@@ -21,9 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.testng.Assert.assertEquals;
@@ -69,6 +68,10 @@ public class JieTest implements AssertTest {
             // uncheck return
             assertEquals(Jie.uncheck(() -> 1, RuntimeException::new), 1);
             Exception cause = new Exception();
+            WrappedException we = expectThrows(WrappedException.class, () -> Jie.uncheck(() -> {
+                throw cause;
+            }));
+            assertSame(we.getCause(), cause);
             expectThrows(RuntimeException.class, () -> Jie.uncheck(() -> {
                 throw cause;
             }, e -> {
@@ -76,23 +79,21 @@ public class JieTest implements AssertTest {
                 throw new RuntimeException(e);
             }));
         }
-        // {
-        //     // getUncheck
-        //     assertEquals(Jie.getUncheck(() -> 1, 2), 1);
-        //     assertEquals(Jie.getUncheck((Callable<Integer>) () -> 1, new Function<Exception, Integer>() {
-        //         @Override
-        //         public Integer apply(Exception e) {
-        //             return 2;
-        //         }
-        //     }), 1);
-        //     // Exception cause = new Exception();
-        //     // assertEquals(Jie.getUncheck(() -> {
-        //     //     throw cause;
-        //     // }, e -> {
-        //     //     assertSame(e, cause);
-        //     //     return "2";
-        //     // }), "2");
-        // }
+        {
+            // call
+            assertEquals(Jie.call(() -> 1, 2), 1);
+            Exception cause = new Exception();
+            assertEquals(Jie.call(() -> throwEx(cause), 2), 2);
+            assertEquals(Jie.callUncheck(() -> 1, e -> 2), 1);
+            assertEquals(Jie.callUncheck(() -> throwEx(cause), e -> {
+                assertSame(e, cause);
+                return 2;
+            }), 2);
+        }
+    }
+
+    private int throwEx(Exception cause) throws Exception {
+        throw cause;
     }
 
     @Test
