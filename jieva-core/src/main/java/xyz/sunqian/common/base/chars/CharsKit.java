@@ -3,7 +3,7 @@ package xyz.sunqian.common.base.chars;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.base.SystemKit;
+import xyz.sunqian.common.base.system.SystemKeys;
 
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -135,9 +135,9 @@ public class CharsKit {
 
         private static @Nullable Charset searchNativeCharset() {
             return search(
-                SystemKit.KEY_OF_NATIVE_ENCODING,
+                SystemKeys.NATIVE_ENCODING,
                 "sun.jnu.encoding",
-                SystemKit.KEY_OF_FILE_ENCODING
+                SystemKeys.FILE_ENCODING
             );
         }
 

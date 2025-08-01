@@ -2,12 +2,12 @@ package test.base.process;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.base.SystemKit;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.exception.AwaitingException;
 import xyz.sunqian.common.base.process.ProcessKit;
 import xyz.sunqian.common.base.process.ProcessReceipt;
 import xyz.sunqian.common.base.process.VirtualProcess;
+import xyz.sunqian.common.base.system.OSKit;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.task.TaskState;
 
@@ -28,7 +28,7 @@ public class ProcessTest {
     @Test
     public void testProcess() {
         {
-            if (SystemKit.isWindows()) {
+            if (OSKit.isWindows()) {
                 ProcessReceipt receipt = ProcessKit.start("cmd.exe", "/c", "dir");
                 receipt.getProcess().destroyForcibly();
             } else {
@@ -37,7 +37,7 @@ public class ProcessTest {
             }
         }
         {
-            if (SystemKit.isWindows()) {
+            if (OSKit.isWindows()) {
                 ProcessReceipt receipt = ProcessKit.start("cmd.exe /c dir");
                 receipt.getProcess().destroyForcibly();
             } else {

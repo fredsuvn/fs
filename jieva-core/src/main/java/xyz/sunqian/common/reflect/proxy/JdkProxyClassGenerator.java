@@ -5,6 +5,7 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.system.SystemKit;
 import xyz.sunqian.common.base.value.Var;
 import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.reflect.BytesClassLoader;
@@ -36,7 +37,7 @@ public class JdkProxyClassGenerator implements ProxyClassGenerator {
     @Override
     public @Nonnull ProxyClass generate(
         @Nullable Class<?> proxiedClass,
-        @Nonnull List<Class<?>> interfaces,
+        @Nonnull List<@Nonnull Class<?>> interfaces,
         @Nonnull ProxyMethodHandler methodHandler
     ) throws ProxyException {
         Class<?> proxyClass = Proxy.getProxyClass(
@@ -97,7 +98,7 @@ public class JdkProxyClassGenerator implements ProxyClassGenerator {
         private final @Nonnull Invocable virtualInvoker;
         private final @Nonnull Invocable superInvoker;
 
-        private JdkInvoker(Method method) throws Throwable {
+        private JdkInvoker(Method method) throws Exception {
             this.virtualInvoker = Invocable.of(method);
             // if (method.is)
             this.superInvoker = buildSuperInvoker(method);
@@ -141,6 +142,30 @@ public class JdkProxyClassGenerator implements ProxyClassGenerator {
         }
     }
 
+    private static @Nonnull Invocable buildSuperInvoker(@Nonnull Method method) throws Exception {
+        if (Modifier.isAbstract(method.getModifiers())) {
+            return (inst, args) -> {
+                throw new AbstractMethodError(method.toString());
+            };
+        }
+        return getDefaultMethodInvocable(method);
+    }
+
+    @JdkDependent
+    private static @Nonnull Invocable getDefaultMethodInvocable(@Nonnull Method method) throws Exception {
+        Class<?> declaringClass = method.getDeclaringClass();
+        MethodHandles.Lookup lookup = getDefaultMethodLookUp(method);
+        if (lookup == null) {
+            return (inst, args) -> {
+                throw new JdkProxyException(new UnsupportedOperationException(
+                    "The current JDK does not support obtaining the MethodHandle of the default method: " + SystemKit.getJavaVersion()
+                ));
+            };
+        }
+        MethodHandle methodHandle = lookup.unreflectSpecial(method, declaringClass);
+        return Invocable.of(methodHandle, false);
+    }
+
     /**
      * This exception is the sub-exception of {@link ProxyException} for JDK dynamic proxy implementation.
      *
@@ -157,31 +182,36 @@ public class JdkProxyClassGenerator implements ProxyClassGenerator {
         }
     }
 
-    private static @Nonnull Invocable buildSuperInvoker(@Nonnull Method method) throws Throwable {
-        if (Modifier.isAbstract(method.getModifiers())) {
-            return (inst, args) -> {
-                throw new AbstractMethodError(method.toString());
-            };
-        }
-        MethodHandle methodHandle = getMethodHandleForDefaultMethod(method);
-        return Invocable.of(methodHandle, false);
-    }
-
     @JdkDependent
-    private static @Nonnull MethodHandle getMethodHandleForDefaultMethod(@Nonnull Method method) throws Throwable {
-        Class<?> declaringClass = method.getDeclaringClass();
-        MethodHandles.Lookup lookup;
+    private static @Nullable MethodHandles.Lookup getDefaultMethodLookUp(@Nonnull Method method) throws Exception {
+        MethodHandles.Lookup lookup = null;
         {
             // works on JDK 8:
-            Constructor<MethodHandles.Lookup> constructor = MethodHandles.Lookup.class
-                .getDeclaredConstructor(Class.class);
-            constructor.setAccessible(true);
-            lookup = constructor.newInstance(declaringClass);
+            Constructor<MethodHandles.Lookup> constructor = DefaultHandleJdk8.constructor;
+            if (constructor != null) {
+                lookup = constructor.newInstance(method.getDeclaringClass());
+            }
         }
         {
             // works on JDK 9+:
             // lookup = MethodHandles.lookup();
         }
-        return lookup.unreflectSpecial(method, declaringClass);
+        return lookup;
+    }
+
+    private static final class DefaultHandleJdk8 {
+
+        private static final Constructor<MethodHandles.Lookup> constructor = getLookUpConstructor();
+
+        private static @Nullable Constructor<MethodHandles.Lookup> getLookUpConstructor() {
+            try {
+                Constructor<MethodHandles.Lookup> c = MethodHandles.Lookup.class
+                    .getDeclaredConstructor(Class.class);
+                c.setAccessible(true);
+                return c;
+            } catch (NoSuchMethodException e) {
+                return null;
+            }
+        }
     }
 }

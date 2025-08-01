@@ -72,7 +72,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
     @Override
     public @Nonnull ProxyClass generate(
         @Nullable Class<?> proxiedClass,
-        @Nonnull List<Class<?>> interfaces,
+        @Nonnull List<@Nonnull Class<?>> interfaces,
         @Nonnull ProxyMethodHandler methodHandler
     ) throws AsmProxyException {
         Package pkg = AsmProxyClassGenerator.class.getPackage();
@@ -206,7 +206,7 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
         ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         classWriter.visit(
             Opcodes.V1_8,
-            Opcodes.ACC_PUBLIC | Opcodes.ACC_SUPER,
+            Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL | Opcodes.ACC_SUPER,
             pcInfo.outerName,
             null,
             pcInfo.outerSuperName,
@@ -408,11 +408,11 @@ public class AsmProxyClassGenerator implements ProxyClassGenerator {
         visitor.visitEnd();
     }
 
-    private byte @Nonnull [] generateInvokerClass(@Nonnull ProxyClassInfo pcInfo) throws Exception {
+    private byte @Nonnull [] generateInvokerClass(@Nonnull ProxyClassInfo pcInfo) {
         ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         classWriter.visit(
             Opcodes.V1_8,
-            Opcodes.ACC_SUPER,
+            Opcodes.ACC_FINAL | Opcodes.ACC_SUPER,
             pcInfo.fullInnerName,
             null,
             AsmKit.OBJECT_NAME,

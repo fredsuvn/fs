@@ -5,6 +5,7 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.reflect.proxy.ProxyClass;
+import xyz.sunqian.common.reflect.proxy.ProxyClassGenerator;
 import xyz.sunqian.common.reflect.proxy.ProxyInvoker;
 import xyz.sunqian.common.reflect.proxy.ProxyKit;
 import xyz.sunqian.common.reflect.proxy.ProxyMethodHandler;
@@ -26,7 +27,8 @@ public class ProxyTest {
 
     private void testProxy(ProxyMode mode) throws Exception {
         String result = "ssssssss";
-        ProxyClass pc = ProxyKit.proxy(null, Jie.list(InterA.class), new ProxyMethodHandler() {
+        ProxyClassGenerator generator = ProxyKit.newGenerator(mode);
+        ProxyClass pc = generator.generate(null, Jie.list(InterA.class), new ProxyMethodHandler() {
 
             @Override
             public boolean requiresProxy(Method method) {
@@ -42,7 +44,7 @@ public class ProxyTest {
             ) throws Throwable {
                 return result;
             }
-        }, mode);
+        });
         InterA pa = pc.newInstance();
         expectThrows(AbstractMethodError.class, pa::a1);
         assertSame(pa.a2(), result);
