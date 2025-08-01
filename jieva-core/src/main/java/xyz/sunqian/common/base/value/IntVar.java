@@ -7,7 +7,7 @@ import xyz.sunqian.annotations.Nonnull;
  *
  * @author sunqian
  */
-public interface IntVar extends IntVal, PrimitiveToVar<Integer> {
+public interface IntVar extends IntVal, PrimitiveToVar<Integer, IntVar> {
 
     /**
      * Returns a {@link IntVar} initialized with the specified value.
@@ -55,4 +55,9 @@ public interface IntVar extends IntVal, PrimitiveToVar<Integer> {
      * @return old value before increment
      */
     int getAndIncrement();
+
+    @Override
+    default IntVar clear() {
+        return set(0);
+    }
 }

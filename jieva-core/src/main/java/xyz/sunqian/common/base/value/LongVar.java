@@ -7,7 +7,7 @@ import xyz.sunqian.annotations.Nonnull;
  *
  * @author sunqian
  */
-public interface LongVar extends LongVal, PrimitiveToVar<Long> {
+public interface LongVar extends LongVal, PrimitiveToVar<Long, LongVar> {
 
     /**
      * Returns a {@link LongVar} initialized with the specified value.
@@ -55,4 +55,9 @@ public interface LongVar extends LongVal, PrimitiveToVar<Long> {
      * @return old value before increment
      */
     long getAndIncrement();
+
+    @Override
+    default LongVar clear() {
+        return set(0);
+    }
 }

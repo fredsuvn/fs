@@ -9,7 +9,7 @@ import xyz.sunqian.annotations.Nonnull;
  * @param <T> the wrapper type
  * @author sunqian
  */
-public interface PrimitiveToVar<T> extends PrimitiveToVal<T> {
+public interface PrimitiveToVar<T, VT extends PrimitiveToVar<T, VT>> extends PrimitiveToVal<T> {
 
     /**
      * Returns a {@link Var} initialized with the wrapper type of current primitive type.
@@ -18,4 +18,11 @@ public interface PrimitiveToVar<T> extends PrimitiveToVal<T> {
      */
     @Nonnull
     Var<T> toVar();
+
+    /**
+     * Clears the value to {@code 0}.
+     *
+     * @return this
+     */
+    VT clear();
 }

@@ -7,7 +7,7 @@ import xyz.sunqian.annotations.Nonnull;
  *
  * @author sunqian
  */
-public interface ShortVar extends ShortVal, PrimitiveToVar<Short> {
+public interface ShortVar extends ShortVal, PrimitiveToVar<Short, ShortVar> {
 
     /**
      * Returns a {@link ShortVar} initialized with the specified value.
@@ -75,4 +75,9 @@ public interface ShortVar extends ShortVal, PrimitiveToVar<Short> {
      * @return old value before increment
      */
     short getAndIncrement();
+
+    @Override
+    default ShortVar clear() {
+        return set(0);
+    }
 }

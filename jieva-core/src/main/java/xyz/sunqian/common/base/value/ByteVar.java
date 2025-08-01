@@ -7,7 +7,7 @@ import xyz.sunqian.annotations.Nonnull;
  *
  * @author sunqian
  */
-public interface ByteVar extends ByteVal, PrimitiveToVar<Byte> {
+public interface ByteVar extends ByteVal, PrimitiveToVar<Byte, ByteVar> {
 
     /**
      * Returns a {@link ByteVar} initialized with the specified value.
@@ -75,4 +75,8 @@ public interface ByteVar extends ByteVal, PrimitiveToVar<Byte> {
      * @return old value before increment
      */
     byte getAndIncrement();
+
+    default ByteVar clear() {
+        return set(0);
+    }
 }

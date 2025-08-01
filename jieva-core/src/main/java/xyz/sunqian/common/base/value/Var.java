@@ -31,4 +31,13 @@ public interface Var<T> extends Val<T> {
      */
     @Nonnull
     Var<T> set(T value);
+
+    /**
+     * Clears the value to {@code null}.
+     *
+     * @return this {@link Var} itself
+     */
+    default Var<T> clear() {
+        return set(null);
+    }
 }

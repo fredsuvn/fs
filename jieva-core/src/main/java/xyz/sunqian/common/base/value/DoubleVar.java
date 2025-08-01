@@ -7,7 +7,7 @@ import xyz.sunqian.annotations.Nonnull;
  *
  * @author sunqian
  */
-public interface DoubleVar extends DoubleVal, PrimitiveToVar<Double> {
+public interface DoubleVar extends DoubleVal, PrimitiveToVar<Double, DoubleVar> {
 
     /**
      * Returns a {@link DoubleVar} initialized with the specified value.
@@ -40,5 +40,10 @@ public interface DoubleVar extends DoubleVal, PrimitiveToVar<Double> {
     @Override
     default @Nonnull Var<Double> toVar() {
         return Var.of(get());
+    }
+
+    @Override
+    default DoubleVar clear() {
+        return set(0);
     }
 }

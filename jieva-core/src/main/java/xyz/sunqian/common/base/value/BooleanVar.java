@@ -7,7 +7,7 @@ import xyz.sunqian.annotations.Nonnull;
  *
  * @author sunqian
  */
-public interface BooleanVar extends BooleanVal, PrimitiveToVar<Boolean> {
+public interface BooleanVar extends BooleanVal, PrimitiveToVar<Boolean, BooleanVar> {
 
     /**
      * Returns a {@link BooleanVar} initialized with the specified value.
@@ -54,4 +54,13 @@ public interface BooleanVar extends BooleanVal, PrimitiveToVar<Boolean> {
      * @return old value before toggling
      */
     boolean getAndToggle();
+
+    /**
+     * Clears the value to {@code false}.
+     *
+     * @return this
+     */
+    default BooleanVar clear() {
+        return set(false);
+    }
 }

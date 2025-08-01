@@ -7,7 +7,7 @@ import xyz.sunqian.annotations.Nonnull;
  *
  * @author sunqian
  */
-public interface FloatVar extends FloatVal, PrimitiveToVar<Float> {
+public interface FloatVar extends FloatVal, PrimitiveToVar<Float, FloatVar> {
 
     /**
      * Returns a {@link FloatVar} initialized with the specified value.
@@ -70,5 +70,10 @@ public interface FloatVar extends FloatVal, PrimitiveToVar<Float> {
     @Override
     default @Nonnull Var<Float> toVar() {
         return Var.of(get());
+    }
+
+    @Override
+    default FloatVar clear() {
+        return set(0);
     }
 }

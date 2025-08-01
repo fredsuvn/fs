@@ -7,7 +7,7 @@ import xyz.sunqian.annotations.Nonnull;
  *
  * @author sunqian
  */
-public interface CharVar extends CharVal, PrimitiveToVar<Character> {
+public interface CharVar extends CharVal, PrimitiveToVar<Character, CharVar> {
 
     /**
      * Returns a {@link CharVar} initialized with the specified value.
@@ -75,4 +75,9 @@ public interface CharVar extends CharVal, PrimitiveToVar<Character> {
      * @return old value before increment
      */
     char getAndIncrement();
+
+    @Override
+    default CharVar clear() {
+        return set(0);
+    }
 }
