@@ -2,6 +2,7 @@ package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.chars.CharsBuilder;
 
@@ -16,10 +17,11 @@ import java.nio.channels.WritableByteChannel;
 import java.util.Arrays;
 
 /**
- * This interface provides I/O operations.
+ * This interface provides I/O operations, and it is thread-safe.
  *
  * @author sunqian
  */
+@ThreadSafe
 public interface IOOperator {
 
     /**

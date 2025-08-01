@@ -19,7 +19,7 @@ import java.lang.reflect.WildcardType;
 import java.util.Iterator;
 
 /**
- * Static utility class for {@link Class}.
+ * Utilities kit for {@link Class}.
  *
  * @author sunqian
  */

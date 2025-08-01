@@ -2,15 +2,17 @@ package xyz.sunqian.common.reflect.proxy;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.annotations.ThreadSafe;
 
 import java.util.List;
 
 /**
  * This interface is the generator for generating proxy class, all builtin implementations can be found in
- * {@link ProxyMode}.
+ * {@link ProxyMode}. The implementations should be thread-safe.
  *
  * @author sunqian
  */
+@ThreadSafe
 public interface ProxyClassGenerator {
 
     /**

@@ -7,7 +7,6 @@ import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.UnknownArrayTypeException;
 import xyz.sunqian.common.base.process.ProcessReceipt;
 import xyz.sunqian.common.base.system.OSKit;
-import xyz.sunqian.common.task.TaskReceipt;
 import xyz.sunqian.common.task.RunReceipt;
 import xyz.sunqian.common.task.TaskReceipt;
 import xyz.sunqian.test.AssertTest;
@@ -22,7 +21,9 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.testng.Assert.assertEquals;
@@ -48,9 +49,9 @@ public class JieTest implements AssertTest {
     }
 
     @Test
-    public void testCheckedWrapper() {
+    public void testUnchecked() {
         {
-            // no return
+            // uncheck no return
             int[] i = {0};
             assertEquals(i[0], 0);
             Jie.uncheck(() -> {
@@ -65,7 +66,7 @@ public class JieTest implements AssertTest {
             }));
         }
         {
-            // return
+            // uncheck return
             assertEquals(Jie.uncheck(() -> 1, RuntimeException::new), 1);
             Exception cause = new Exception();
             expectThrows(RuntimeException.class, () -> Jie.uncheck(() -> {
@@ -75,6 +76,23 @@ public class JieTest implements AssertTest {
                 throw new RuntimeException(e);
             }));
         }
+        // {
+        //     // getUncheck
+        //     assertEquals(Jie.getUncheck(() -> 1, 2), 1);
+        //     assertEquals(Jie.getUncheck((Callable<Integer>) () -> 1, new Function<Exception, Integer>() {
+        //         @Override
+        //         public Integer apply(Exception e) {
+        //             return 2;
+        //         }
+        //     }), 1);
+        //     // Exception cause = new Exception();
+        //     // assertEquals(Jie.getUncheck(() -> {
+        //     //     throw cause;
+        //     // }, e -> {
+        //     //     assertSame(e, cause);
+        //     //     return "2";
+        //     // }), "2");
+        // }
     }
 
     @Test

@@ -13,6 +13,8 @@ import java.lang.reflect.Method;
  * <p>
  * This interface provides two equivalent methods: {@link #invoke(Object, Object...)} which declares an unchecked
  * exception, and {@link #invokeChecked(Object, Object...)} which declares a checked exception.
+ * <p>
+ * The thread-safety of this interface depends on invocable entity it holds.
  *
  * @author sunqian
  */

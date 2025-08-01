@@ -1,13 +1,13 @@
 /**
- * The package for reflection.
+ * Provides utilities and interfaces for reflection.
  * <p>
- * Static Utilities:
+ * Utilities Kits:
  * <ul>
  *     <li>{@link xyz.sunqian.common.reflect.TypeKit}</li>
  *     <li>{@link xyz.sunqian.common.reflect.ClassKit}</li>
  * </ul>
  * <p>
- * Helper Classes and Interfaces:
+ * Interfaces and Classes:
  * <ul>
  *     <li>{@link xyz.sunqian.common.reflect.TypeRef}</li>
  *     <li>{@link xyz.sunqian.common.reflect.BytesClassLoader}</li>

@@ -1,12 +1,12 @@
 /**
- * The package for proxy.
+ * Provides utilities and interfaces for dynamic proxy.
  * <p>
- * Static Utilities:
+ * Utilities Kits:
  * <ul>
  *     <li>{@link xyz.sunqian.common.reflect.proxy.ProxyKit}</li>
  * </ul>
  * <p>
- * Core Interfaces and Implementations:
+ * Interfaces and Implementations:
  * <ul>
  *     <li>{@link xyz.sunqian.common.reflect.proxy.ProxyClassGenerator}</li>
  *     <li>{@link xyz.sunqian.common.reflect.proxy.AsmProxyClassGenerator}</li>

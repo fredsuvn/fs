@@ -151,7 +151,6 @@ public class JdkProxyClassGenerator implements ProxyClassGenerator {
         return getDefaultMethodInvocable(method);
     }
 
-    @JdkDependent
     private static @Nonnull Invocable getDefaultMethodInvocable(@Nonnull Method method) throws Exception {
         Class<?> declaringClass = method.getDeclaringClass();
         MethodHandles.Lookup lookup = getDefaultMethodLookUp(method);
@@ -198,6 +197,8 @@ public class JdkProxyClassGenerator implements ProxyClassGenerator {
         }
         return lookup;
     }
+
+    //private static
 
     private static final class DefaultHandleJdk8 {
 

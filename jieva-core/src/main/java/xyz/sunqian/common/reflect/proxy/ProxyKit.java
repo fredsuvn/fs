@@ -3,7 +3,7 @@ package xyz.sunqian.common.reflect.proxy;
 import xyz.sunqian.annotations.Nonnull;
 
 /**
- * Static utility class for proxy.
+ * Utilities kit for dynamic proxy.
  *
  * @author sunqian
  */

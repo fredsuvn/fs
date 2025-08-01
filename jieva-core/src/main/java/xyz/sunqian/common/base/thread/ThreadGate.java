@@ -1,6 +1,7 @@
 package xyz.sunqian.common.base.thread;
 
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.exception.AwaitingException;
 
 import java.time.Duration;
@@ -8,10 +9,13 @@ import java.time.Duration;
 /**
  * This interface represents a gate that can block or continue the current thread. It has two states: opened and closed.
  * If it is closed, its {@link #await()} and {@link #await(Duration)} methods block the current thread until the state
- * becomes opened. The initialized state is closed.
+ * becomes opened.
+ * <p>
+ * This interface is thread-safe, and its initialized state is closed.
  *
  * @author sunqian
  */
+@ThreadSafe
 public interface ThreadGate {
 
     /**
