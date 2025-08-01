@@ -155,29 +155,6 @@ public class Jie {
     }
 
     /**
-     * Runs the given action and wraps any exception into the {@link WrappedException}. The logic as follows:
-     * <pre>{@code
-     * try {
-     *     return action.call();
-     * } catch (Exception e) {
-     *     throw new WrappedException(e);
-     * }
-     * }</pre>
-     *
-     * @param action the given action
-     * @param <T>    the type of the result
-     * @return the result of the given action
-     * @throws WrappedException if any exception occurs
-     */
-    public static <T> T uncheck(@Nonnull Callable<T> action) throws WrappedException {
-        try {
-            return action.call();
-        } catch (Exception e) {
-            throw new WrappedException(e);
-        }
-    }
-
-    /**
      * Runs the given action and wraps any exception into an unchecked exception, the unchecked exception is generated
      * by the given unchecked exception generator. The logic as follows:
      * <pre>{@code
@@ -201,6 +178,29 @@ public class Jie {
             return action.call();
         } catch (Exception e) {
             throw unchecked.apply(e);
+        }
+    }
+
+    /**
+     * Runs the given action and wraps any exception into the {@link WrappedException}. The logic as follows:
+     * <pre>{@code
+     * try {
+     *     return action.call();
+     * } catch (Exception e) {
+     *     throw new WrappedException(e);
+     * }
+     * }</pre>
+     *
+     * @param action the given action
+     * @param <T>    the type of the result
+     * @return the result of the given action
+     * @throws WrappedException if any exception occurs
+     */
+    public static <T> T call(@Nonnull Callable<T> action) throws WrappedException {
+        try {
+            return action.call();
+        } catch (Exception e) {
+            throw new WrappedException(e);
         }
     }
 

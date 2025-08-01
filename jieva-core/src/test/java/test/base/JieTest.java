@@ -68,10 +68,6 @@ public class JieTest implements AssertTest {
             // uncheck return
             assertEquals(Jie.uncheck(() -> 1, RuntimeException::new), 1);
             Exception cause = new Exception();
-            WrappedException we = expectThrows(WrappedException.class, () -> Jie.uncheck(() -> {
-                throw cause;
-            }));
-            assertSame(we.getCause(), cause);
             expectThrows(RuntimeException.class, () -> Jie.uncheck(() -> {
                 throw cause;
             }, e -> {
@@ -81,8 +77,12 @@ public class JieTest implements AssertTest {
         }
         {
             // call
-            assertEquals(Jie.call(() -> 1, 2), 1);
             Exception cause = new Exception();
+            WrappedException we = expectThrows(WrappedException.class, () -> Jie.call(() -> {
+                throw cause;
+            }));
+            assertSame(we.getCause(), cause);
+            assertEquals(Jie.call(() -> 1, 2), 1);
             assertEquals(Jie.call(() -> throwEx(cause), 2), 2);
             assertEquals(Jie.callUncheck(() -> 1, e -> 2), 1);
             assertEquals(Jie.callUncheck(() -> throwEx(cause), e -> {
