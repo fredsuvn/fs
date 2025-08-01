@@ -99,7 +99,7 @@ public class CharEncoderTest implements DataTest, AssertTest {
                 totalSize == 0 ? -1 : totalSize
             );
             assertEquals(endCount.get(), 2);
-            endCount.set(0);
+            endCount.clear();
             assertEquals(
                 CharEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
                     .handler(timesHandler(readBlockSize, endCount))
@@ -108,7 +108,7 @@ public class CharEncoderTest implements DataTest, AssertTest {
                 actualSize(totalSize, limit)
             );
             assertEquals(endCount.get(), 2);
-            endCount.set(0);
+            endCount.clear();
         }
         {
             // to OutputStream
@@ -136,7 +136,7 @@ public class CharEncoderTest implements DataTest, AssertTest {
             assertEquals(endCount.get(), 2);
             assertEquals(builder.toCharArray(), timesData);
             builder.reset();
-            endCount.set(0);
+            endCount.clear();
             assertEquals(
                 CharEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
                     .handler(timesHandler(readBlockSize, endCount))
@@ -147,7 +147,7 @@ public class CharEncoderTest implements DataTest, AssertTest {
             assertEquals(endCount.get(), 2);
             assertEquals(builder.toCharArray(), limitedTimesData);
             builder.reset();
-            endCount.set(0);
+            endCount.clear();
         }
         {
             // to array
@@ -174,7 +174,7 @@ public class CharEncoderTest implements DataTest, AssertTest {
             );
             assertEquals(endCount.get(), 2);
             assertEquals(dst, timesData);
-            endCount.set(0);
+            endCount.clear();
             dst = new char[dstSize(totalSize, limit) * 4];
             assertEquals(
                 CharEncoder.from(CharBuffer.wrap(data)).readBlockSize(readBlockSize).readLimit(limit)
@@ -185,7 +185,7 @@ public class CharEncoderTest implements DataTest, AssertTest {
             );
             assertEquals(endCount.get(), 2);
             assertEquals(dst, limitedTimesData);
-            endCount.set(0);
+            endCount.clear();
         }
         {
             // to array offset
@@ -215,7 +215,7 @@ public class CharEncoderTest implements DataTest, AssertTest {
             );
             assertEquals(endCount.get(), 2);
             assertEquals(Arrays.copyOfRange(dst, 5, dst.length), timesData);
-            endCount.set(0);
+            endCount.clear();
             dst = new char[limitedTimesData.length + 5];
             assertEquals(
                 CharEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
@@ -229,7 +229,7 @@ public class CharEncoderTest implements DataTest, AssertTest {
                 Arrays.copyOfRange(dst, 5, dst.length),
                 limitedTimesData
             );
-            endCount.set(0);
+            endCount.clear();
         }
         {
             // to buffer
@@ -259,7 +259,7 @@ public class CharEncoderTest implements DataTest, AssertTest {
             );
             assertEquals(endCount.get(), 2);
             assertEquals(BufferKit.copyContent((CharBuffer) dst.flip()), timesData);
-            endCount.set(0);
+            endCount.clear();
             dst = CharBuffer.allocate(limitedTimesData.length);
             assertEquals(
                 CharEncoder.from(new String(data), 0, data.length).readBlockSize(readBlockSize).readLimit(limit)
@@ -273,7 +273,7 @@ public class CharEncoderTest implements DataTest, AssertTest {
                 BufferKit.copyContent((CharBuffer) dst.flip()),
                 limitedTimesData
             );
-            endCount.set(0);
+            endCount.clear();
         }
     }
 
@@ -329,7 +329,7 @@ public class CharEncoderTest implements DataTest, AssertTest {
                 timesData.length == 0 ? null : timesData
             );
             assertEquals(endCount.get(), 2);
-            endCount.set(0);
+            endCount.clear();
             assertEquals(
                 IOKit.read(CharEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
                     .handler(timesHandler(readBlockSize, endCount))
@@ -338,7 +338,7 @@ public class CharEncoderTest implements DataTest, AssertTest {
                 limitedTimesData.length == 0 ? null : limitedTimesData
             );
             assertEquals(endCount.get(), 2);
-            endCount.set(0);
+            endCount.clear();
             IOImplsTest.testReader(
                 CharEncoder.from(data).readBlockSize(readBlockSize).asReader(),
                 data,
@@ -358,7 +358,7 @@ public class CharEncoderTest implements DataTest, AssertTest {
                 false, true, false
             );
             assertEquals(endCount.get(), 2);
-            endCount.set(0);
+            endCount.clear();
             IOImplsTest.testReader(
                 CharEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
                     .handler(timesHandler(readBlockSize, endCount))
@@ -368,7 +368,7 @@ public class CharEncoderTest implements DataTest, AssertTest {
                 false, true, false
             );
             assertEquals(endCount.get(), 2);
-            endCount.set(0);
+            endCount.clear();
         }
         {
             // for empty
@@ -426,7 +426,7 @@ public class CharEncoderTest implements DataTest, AssertTest {
             assertEquals(readData.toCharArray(), timesData);
             assertTrue(readData.end());
             assertEquals(endCount.get(), 2);
-            endCount.set(0);
+            endCount.clear();
             readData = CharEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
                 .handler(timesHandler(readBlockSize, endCount))
                 .handler(timesHandler(readBlockSize, endCount))
@@ -434,7 +434,7 @@ public class CharEncoderTest implements DataTest, AssertTest {
             assertEquals(readData.toCharArray(), limitedTimesData);
             assertTrue(readData.end());
             assertEquals(endCount.get(), 2);
-            endCount.set(0);
+            endCount.clear();
         }
     }
 
@@ -534,7 +534,7 @@ public class CharEncoderTest implements DataTest, AssertTest {
             assertEquals(builder.toCharArray(), data);
             assertEquals(endCount.get(), 1);
             builder.reset();
-            endCount.set(0);
+            endCount.clear();
         }
         {
             // MultipleSizeHandler
@@ -554,7 +554,7 @@ public class CharEncoderTest implements DataTest, AssertTest {
             assertEquals(builder.toCharArray(), data);
             assertEquals(endCount.get(), 1);
             builder.reset();
-            endCount.set(0);
+            endCount.clear();
         }
     }
 
@@ -590,7 +590,7 @@ public class CharEncoderTest implements DataTest, AssertTest {
             assertEquals(builder.toCharArray(), data);
             assertEquals(endCount.get(), 1);
             builder.reset();
-            endCount.set(0);
+            endCount.clear();
         }
     }
 
@@ -624,7 +624,7 @@ public class CharEncoderTest implements DataTest, AssertTest {
                 data
             );
             assertEquals(endCount.get(), 1);
-            endCount.set(0);
+            endCount.clear();
         }
         {
             // toArray
@@ -641,7 +641,7 @@ public class CharEncoderTest implements DataTest, AssertTest {
                 CharBuffer.wrap(data)
             );
             assertEquals(endCount.get(), 1);
-            endCount.set(0);
+            endCount.clear();
         }
         {
             // toArray
@@ -658,7 +658,7 @@ public class CharEncoderTest implements DataTest, AssertTest {
                 str
             );
             assertEquals(endCount.get(), 1);
-            endCount.set(0);
+            endCount.clear();
         }
         {
             // toEncoder
@@ -676,7 +676,7 @@ public class CharEncoderTest implements DataTest, AssertTest {
                 str
             );
             assertEquals(endCount.get(), 1);
-            endCount.set(0);
+            endCount.clear();
         }
     }
 }

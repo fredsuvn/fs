@@ -35,8 +35,10 @@ public class BaseTest {
         map.put(1, 2);
         Map<Integer, Integer> map2 = new LinkedHashMap<>(map);
         map2.put(3, 4);
-        assertEquals(Jie.map(1, 2, 3), map);
+        assertEquals(Jie.map(1, 2), map);
         assertEquals(Jie.map(1, 2, 3, 4), map2);
+        map.put(3, null);
+        assertEquals(Jie.map(1, 2, 3), map);
     }
 
     @Test

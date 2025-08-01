@@ -59,7 +59,7 @@ public class JdkProxyTest {
             InterC c = pc1.newInstance();
             assertSame(c.cc("11", 11), result);
             assertEquals(counter.get(), 3);
-            counter.set(0);
+            counter.clear();
         }
         {
             class Cls implements InterA, InterB, InterC<String> {
@@ -92,7 +92,7 @@ public class JdkProxyTest {
             );
             InterA pa2 = pc2.newInstance();
             assertEquals(pa2.aa("11", 11), cls.aa("11", 11));
-            counter.set(0);
+            counter.clear();
         }
         {
             class Cls implements InterA, InterB, InterC<String> {
@@ -129,7 +129,7 @@ public class JdkProxyTest {
             expectThrows(StackOverflowError.class, () -> paA.aa("11", 11));
             expectThrows(StackOverflowError.class, () -> paB.bb("11", 11));
             expectThrows(StackOverflowError.class, () -> paC.cc("11", 11));
-            counter.set(0);
+            counter.clear();
             assertEquals(paA.filteredA(), cls.filteredA());
             assertEquals(paB.filteredB(), cls.filteredB());
             assertEquals(paC.filteredC(), cls.filteredC());
@@ -137,7 +137,7 @@ public class JdkProxyTest {
             assertEquals(paB.filteredB(), cls.filteredB());
             assertEquals(paC.filteredC(), cls.filteredC());
             assertEquals(counter.get(), 0);
-            counter.set(0);
+            counter.clear();
         }
         {
             ProxyClass pc4 = generator.generate(
@@ -164,7 +164,7 @@ public class JdkProxyTest {
             InterOverpass1 po = pc4.newInstance();
             assertNull(po.ooi("11", 11));
             assertEquals(counter.get(), 1);
-            counter.set(0);
+            counter.clear();
         }
     }
 
@@ -204,7 +204,7 @@ public class JdkProxyTest {
         assertEquals(counter.get(), 1);
         expectThrows(AbstractMethodError.class, psi::si2);
         assertEquals(counter.get(), 2);
-        counter.set(0);
+        counter.clear();
 
         // unsupported default method invocable
         Invocable invocable = JdkProxyClassGenerator.UNSUPPORTED_DEFAULT_METHOD_INVOCABLE;

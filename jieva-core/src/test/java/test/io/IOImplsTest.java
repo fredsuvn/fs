@@ -1110,7 +1110,7 @@ public class IOImplsTest implements DataTest {
             }
             new Out().write(new byte[1]);
             assertEquals(v.get(), 8);
-            v.set(0);
+            v.clear();
             new Out().write(new byte[1], 0, 1);
             assertEquals(v.get(), 8);
             expectThrows(IndexOutOfBoundsException.class, () -> new Out().write(new byte[1], 0, -1));
@@ -1145,16 +1145,16 @@ public class IOImplsTest implements DataTest {
             }
             new Out().write(new char[1]);
             assertEquals(v.get(), 8);
-            v.set(0);
+            v.clear();
             new Out().write(new char[1], 0, 1);
             assertEquals(v.get(), 8);
             expectThrows(IndexOutOfBoundsException.class, () -> new Out().write(new char[1], 0, -1));
             expectThrows(IndexOutOfBoundsException.class, () -> new Out().write(new char[1], -1, 1));
             expectThrows(IndexOutOfBoundsException.class, () -> new Out().write(new char[1], 0, 2));
-            v.set(0);
+            v.clear();
             new Out().write("1");
             assertEquals(v.get(), 8);
-            v.set(0);
+            v.clear();
             new Out().write("1", 0, 1);
             assertEquals(v.get(), 8);
             expectThrows(IndexOutOfBoundsException.class, () -> new Out().write("1", 0, -1));
