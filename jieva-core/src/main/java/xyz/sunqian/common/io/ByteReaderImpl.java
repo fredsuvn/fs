@@ -16,17 +16,17 @@ import java.util.Arrays;
 final class ByteReaderImpl {
 
     static @Nonnull ByteReader of(@Nonnull InputStream src, int bufSize) throws IllegalArgumentException {
-        IOHelper.checkBufSize(bufSize);
+        IOChecker.checkBufSize(bufSize);
         return new ByteStreamReader(src, bufSize);
     }
 
     static @Nonnull ByteReader of(@Nonnull ReadableByteChannel src, int bufSize) throws IllegalArgumentException {
-        IOHelper.checkBufSize(bufSize);
+        IOChecker.checkBufSize(bufSize);
         return new ByteChannelReader(src, bufSize);
     }
 
     static @Nonnull ByteReader of(byte @Nonnull [] src, int off, int len) throws IndexOutOfBoundsException {
-        IOHelper.checkOffLen(src.length, off, len);
+        IOChecker.checkOffLen(src.length, off, len);
         return new ByteArrayReader(src, off, len);
     }
 
@@ -35,7 +35,7 @@ final class ByteReaderImpl {
     }
 
     static @Nonnull ByteReader limit(@Nonnull ByteReader reader, long limit) throws IllegalArgumentException {
-        IOHelper.checkLimit(limit);
+        IOChecker.checkLimit(limit);
         return new LimitedReader(reader, limit);
     }
 
@@ -99,9 +99,9 @@ final class ByteReaderImpl {
             if (len == 0) {
                 return ByteSegment.empty(false);
             }
-            IOHelper.checkLen(len);
+            IOChecker.checkLen(len);
             byte[] data = new byte[len];
-            int readSize = IOOperations.readTo0(src, data, 0, data.length);
+            int readSize = IOKit.readTo0(src, data, 0, data.length);
             if (readSize < 0) {
                 return ByteSegment.empty(true);
             }
@@ -111,7 +111,7 @@ final class ByteReaderImpl {
 
         @Override
         public long skip(long len) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkSkip(len);
+            IOChecker.checkSkip(len);
             if (len == 0) {
                 return 0;
             }
@@ -140,48 +140,48 @@ final class ByteReaderImpl {
 
         @Override
         public long readTo(@Nonnull OutputStream dst) throws IORuntimeException {
-            return IOOperations.readTo0(src, dst, bufSize);
+            return IOKit.readTo0(src, dst, bufSize);
         }
 
         @Override
         public long readTo(@Nonnull OutputStream dst, long len) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkLen(len);
-            return IOOperations.readTo0(src, dst, len, bufSize);
+            IOChecker.checkLen(len);
+            return IOKit.readTo0(src, dst, len, bufSize);
         }
 
         @Override
         public long readTo(@Nonnull WritableByteChannel dst) throws IORuntimeException {
-            return IOOperations.readTo0(src, dst, bufSize);
+            return IOKit.readTo0(src, dst, bufSize);
         }
 
         @Override
         public long readTo(
             @Nonnull WritableByteChannel dst, long len
         ) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkLen(len);
-            return IOOperations.readTo0(src, dst, len, bufSize);
+            IOChecker.checkLen(len);
+            return IOKit.readTo0(src, dst, len, bufSize);
         }
 
         @Override
         public int readTo(byte @Nonnull [] dst) throws IORuntimeException {
-            return IOOperations.readTo0(src, dst, 0, dst.length);
+            return IOKit.readTo0(src, dst, 0, dst.length);
         }
 
         @Override
         public int readTo(byte @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException, IORuntimeException {
-            IOHelper.checkOffLen(dst.length, off, len);
-            return IOOperations.readTo0(src, dst, off, len);
+            IOChecker.checkOffLen(dst.length, off, len);
+            return IOKit.readTo0(src, dst, off, len);
         }
 
         @Override
         public int readTo(@Nonnull ByteBuffer dst) throws IORuntimeException {
-            return IOOperations.readTo0(src, dst, dst.remaining());
+            return IOKit.readTo0(src, dst, dst.remaining());
         }
 
         @Override
         public int readTo(@Nonnull ByteBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkLen(len);
-            return IOOperations.readTo0(src, dst, len);
+            IOChecker.checkLen(len);
+            return IOKit.readTo0(src, dst, len);
         }
 
         @Override
@@ -237,9 +237,9 @@ final class ByteReaderImpl {
             if (len == 0) {
                 return ByteSegment.empty(false);
             }
-            IOHelper.checkLen(len);
+            IOChecker.checkLen(len);
             byte[] data = new byte[len];
-            int readSize = IOOperations.readTo0(src, ByteBuffer.wrap(data));
+            int readSize = IOKit.readTo0(src, ByteBuffer.wrap(data));
             if (readSize < 0) {
                 return ByteSegment.empty(true);
             }
@@ -249,7 +249,7 @@ final class ByteReaderImpl {
 
         @Override
         public long skip(long len) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkSkip(len);
+            IOChecker.checkSkip(len);
             if (len == 0) {
                 return 0;
             }
@@ -261,7 +261,7 @@ final class ByteReaderImpl {
             int onceBufSize = (int) Math.min(len, bufSize);
             ByteBuffer buf = ByteBuffer.allocate(onceBufSize);
             while (hasRead < len) {
-                int onceSize = IOOperations.readTo0(src, buf, (int) Math.min(onceBufSize, len - hasRead));
+                int onceSize = IOKit.readTo0(src, buf, (int) Math.min(onceBufSize, len - hasRead));
                 if (onceSize < 0) {
                     return hasRead;
                 }
@@ -272,47 +272,47 @@ final class ByteReaderImpl {
 
         @Override
         public long readTo(@Nonnull OutputStream dst) throws IORuntimeException {
-            return IOOperations.readTo0(src, dst, bufSize);
+            return IOKit.readTo0(src, dst, bufSize);
         }
 
         @Override
         public long readTo(@Nonnull OutputStream dst, long len) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkLen(len);
-            return IOOperations.readTo0(src, dst, len, bufSize);
+            IOChecker.checkLen(len);
+            return IOKit.readTo0(src, dst, len, bufSize);
         }
 
         @Override
         public long readTo(@Nonnull WritableByteChannel dst) throws IORuntimeException {
-            return IOOperations.readTo0(src, dst, bufSize);
+            return IOKit.readTo0(src, dst, bufSize);
         }
 
         @Override
         public long readTo(
             @Nonnull WritableByteChannel dst, long len
         ) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkLen(len);
-            return IOOperations.readTo0(src, dst, len, bufSize);
+            IOChecker.checkLen(len);
+            return IOKit.readTo0(src, dst, len, bufSize);
         }
 
         @Override
         public int readTo(byte @Nonnull [] dst) throws IORuntimeException {
-            return IOOperations.readTo0(src, ByteBuffer.wrap(dst, 0, dst.length));
+            return IOKit.readTo0(src, ByteBuffer.wrap(dst, 0, dst.length));
         }
 
         @Override
         public int readTo(byte @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException, IORuntimeException {
-            return IOOperations.readTo0(src, ByteBuffer.wrap(dst, off, len));
+            return IOKit.readTo0(src, ByteBuffer.wrap(dst, off, len));
         }
 
         @Override
         public int readTo(@Nonnull ByteBuffer dst) throws IORuntimeException {
-            return IOOperations.readTo0(src, dst, dst.remaining());
+            return IOKit.readTo0(src, dst, dst.remaining());
         }
 
         @Override
         public int readTo(@Nonnull ByteBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkLen(len);
-            return IOOperations.readTo0(src, dst, len);
+            IOChecker.checkLen(len);
+            return IOKit.readTo0(src, dst, len);
         }
 
         @Override
@@ -361,7 +361,7 @@ final class ByteReaderImpl {
 
         @Override
         public @Nonnull ByteSegment read(int len) throws IllegalArgumentException {
-            IOHelper.checkLen(len);
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return ByteSegment.empty(false);
             }
@@ -377,7 +377,7 @@ final class ByteReaderImpl {
 
         @Override
         public long skip(long len) throws IllegalArgumentException {
-            IOHelper.checkSkip(len);
+            IOChecker.checkSkip(len);
             return skip0(len);
         }
 
@@ -411,7 +411,7 @@ final class ByteReaderImpl {
 
         @Override
         public long readTo(@Nonnull OutputStream dst, long len) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkLen(len);
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return 0;
             }
@@ -445,7 +445,7 @@ final class ByteReaderImpl {
         public long readTo(
             @Nonnull WritableByteChannel dst, long len
         ) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkLen(len);
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return 0;
             }
@@ -467,7 +467,7 @@ final class ByteReaderImpl {
 
         @Override
         public int readTo(byte @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException {
-            IOHelper.checkOffLen(dst.length, off, len);
+            IOChecker.checkOffLen(dst.length, off, len);
             return readTo0(dst, off, len);
         }
 
@@ -500,7 +500,7 @@ final class ByteReaderImpl {
 
         @Override
         public int readTo(@Nonnull ByteBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkLen(len);
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return 0;
             }
@@ -555,7 +555,7 @@ final class ByteReaderImpl {
 
         @Override
         public @Nonnull ByteSegment read(int len) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkLen(len);
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return ByteSegment.empty(false);
             }
@@ -574,7 +574,7 @@ final class ByteReaderImpl {
 
         @Override
         public long skip(long len) throws IllegalArgumentException {
-            IOHelper.checkSkip(len);
+            IOChecker.checkSkip(len);
             return skip0(len);
         }
 
@@ -598,7 +598,7 @@ final class ByteReaderImpl {
 
         @Override
         public long readTo(@Nonnull OutputStream dst, long len) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkLen(len);
+            IOChecker.checkLen(len);
             int actualLen = (int) Math.min(Integer.MAX_VALUE, len);
             return BufferKit.readTo0(src, dst, actualLen);
         }
@@ -612,7 +612,7 @@ final class ByteReaderImpl {
         public long readTo(
             @Nonnull WritableByteChannel dst, long len
         ) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkLen(len);
+            IOChecker.checkLen(len);
             int actualLen = (int) Math.min(Integer.MAX_VALUE, len);
             return BufferKit.readTo0(src, dst, actualLen);
         }
@@ -676,7 +676,7 @@ final class ByteReaderImpl {
 
         @Override
         public @Nonnull ByteSegment read(int len) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkLen(len);
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return ByteSegment.empty(false);
             }
@@ -696,7 +696,7 @@ final class ByteReaderImpl {
 
         @Override
         public long skip(long len) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkSkip(len);
+            IOChecker.checkSkip(len);
             if (len == 0) {
                 return 0;
             }
@@ -724,7 +724,7 @@ final class ByteReaderImpl {
 
         @Override
         public long readTo(@Nonnull OutputStream dst, long len) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkLen(len);
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return 0;
             }
@@ -757,7 +757,7 @@ final class ByteReaderImpl {
         public long readTo(
             @Nonnull WritableByteChannel dst, long len
         ) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkLen(len);
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return 0;
             }
@@ -782,7 +782,7 @@ final class ByteReaderImpl {
         public int readTo(
             byte @Nonnull [] dst, int off, int len
         ) throws IndexOutOfBoundsException, IORuntimeException {
-            IOHelper.checkOffLen(dst.length, off, len);
+            IOChecker.checkOffLen(dst.length, off, len);
             if (len == 0) {
                 return 0;
             }
@@ -805,7 +805,7 @@ final class ByteReaderImpl {
 
         @Override
         public int readTo(@Nonnull ByteBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkLen(len);
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return 0;
             }

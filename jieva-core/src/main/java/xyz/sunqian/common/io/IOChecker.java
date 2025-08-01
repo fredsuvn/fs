@@ -2,9 +2,7 @@ package xyz.sunqian.common.io;
 
 import xyz.sunqian.common.base.CheckKit;
 
-final class IOHelper {
-
-    static final int DEFAULT_BUFFER_SIZE = 1024 * 8;
+final class IOChecker {
 
     static void checkOffLen(int range, int off, int len) throws IndexOutOfBoundsException {
         CheckKit.checkOffsetLength(range, off, len);

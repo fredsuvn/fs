@@ -48,7 +48,7 @@ final class IOImpls {
     static @Nonnull InputStream inputStream(
         byte @Nonnull [] array, int off, int len
     ) throws IndexOutOfBoundsException {
-        IOHelper.checkOffLen(array.length, off, len);
+        IOChecker.checkOffLen(array.length, off, len);
         return new BytesInputStream(array, off, len);
     }
 
@@ -59,7 +59,7 @@ final class IOImpls {
     static @Nonnull InputStream inputStream(
         @Nonnull RandomAccessFile raf, long seek
     ) throws IllegalArgumentException, IORuntimeException {
-        IOHelper.checkSeek(seek);
+        IOChecker.checkSeek(seek);
         try {
             return new RafInputStream(raf, seek);
         } catch (IOException e) {
@@ -72,7 +72,7 @@ final class IOImpls {
     }
 
     static @Nonnull InputStream inputStream(@Nonnull InputStream in, long limit) throws IllegalArgumentException {
-        IOHelper.checkLimit(limit);
+        IOChecker.checkLimit(limit);
         return new LimitedInputStream(in, limit);
     }
 
@@ -89,7 +89,7 @@ final class IOImpls {
     }
 
     static @Nonnull Reader reader(char @Nonnull [] array, int off, int len) throws IndexOutOfBoundsException {
-        IOHelper.checkOffLen(array.length, off, len);
+        IOChecker.checkOffLen(array.length, off, len);
         return new CharsReader(array, off, len);
     }
 
@@ -98,7 +98,7 @@ final class IOImpls {
     }
 
     static @Nonnull Reader reader(@Nonnull CharSequence chars, int start, int end) throws IndexOutOfBoundsException {
-        IOHelper.checkStartEnd(chars.length(), start, end);
+        IOChecker.checkStartEnd(chars.length(), start, end);
         return new BufferReader(CharBuffer.wrap(chars, start, end));
     }
 
@@ -111,7 +111,7 @@ final class IOImpls {
     }
 
     static @Nonnull Reader reader(@Nonnull Reader in, long limit) throws IllegalArgumentException {
-        IOHelper.checkLimit(limit);
+        IOChecker.checkLimit(limit);
         return new LimitedReader(in, limit);
     }
 
@@ -130,7 +130,7 @@ final class IOImpls {
     static @Nonnull OutputStream outputStream(
         byte @Nonnull [] array, int off, int len
     ) throws IndexOutOfBoundsException {
-        IOHelper.checkOffLen(array.length, off, len);
+        IOChecker.checkOffLen(array.length, off, len);
         return new BytesOutputStream(array, off, len);
     }
 
@@ -141,7 +141,7 @@ final class IOImpls {
     static @Nonnull OutputStream outputStream(
         @Nonnull RandomAccessFile raf, long seek
     ) throws IllegalArgumentException, IORuntimeException {
-        IOHelper.checkSeek(seek);
+        IOChecker.checkSeek(seek);
         try {
             return new RafOutputStream(raf, seek);
         } catch (IOException e) {
@@ -154,7 +154,7 @@ final class IOImpls {
     }
 
     static @Nonnull OutputStream outputStream(@Nonnull OutputStream in, long limit) throws IllegalArgumentException {
-        IOHelper.checkLimit(limit);
+        IOChecker.checkLimit(limit);
         return new LimitedOutputStream(in, limit);
     }
 
@@ -167,7 +167,7 @@ final class IOImpls {
     }
 
     static @Nonnull Writer writer(char @Nonnull [] array, int off, int len) throws IndexOutOfBoundsException {
-        IOHelper.checkOffLen(array.length, off, len);
+        IOChecker.checkOffLen(array.length, off, len);
         return new CharsWriter(array, off, len);
     }
 
@@ -180,7 +180,7 @@ final class IOImpls {
     }
 
     static @Nonnull Writer writer(@Nonnull Writer in, long limit) throws IllegalArgumentException {
-        IOHelper.checkLimit(limit);
+        IOChecker.checkLimit(limit);
         return new LimitedWriter(in, limit);
     }
 
@@ -774,7 +774,7 @@ final class IOImpls {
 
         @Override
         public long skip(long n) throws IllegalArgumentException {
-            IOHelper.checkSkip(n);
+            IOChecker.checkSkip(n);
             if (n == 0) {
                 return 0;
             }
@@ -851,7 +851,7 @@ final class IOImpls {
 
         @Override
         public long skip(long n) throws IllegalArgumentException {
-            IOHelper.checkSkip(n);
+            IOChecker.checkSkip(n);
             if (n == 0) {
                 return 0;
             }
@@ -957,7 +957,7 @@ final class IOImpls {
 
         @Override
         public long skip(long n) throws IllegalArgumentException, IOException {
-            IOHelper.checkSkip(n);
+            IOChecker.checkSkip(n);
             checkClosed();
             if (n == 0) {
                 return 0;
@@ -1102,7 +1102,7 @@ final class IOImpls {
 
         @Override
         public long skip(long n) throws IllegalArgumentException, IOException {
-            IOHelper.checkSkip(n);
+            IOChecker.checkSkip(n);
             long remaining = limit - pos;
             long ret = in.skip(Math.min(n, remaining));
             pos += ret;
@@ -1233,7 +1233,7 @@ final class IOImpls {
 
         @Override
         public long skip(long n) throws IllegalArgumentException {
-            IOHelper.checkSkip(n);
+            IOChecker.checkSkip(n);
             return 0;
         }
 
@@ -1792,7 +1792,7 @@ final class IOImpls {
 
         @Override
         public Writer append(CharSequence csq, int start, int end) {
-            IOHelper.checkOffLen(csq.length(), start, end - start);
+            IOChecker.checkOffLen(csq.length(), start, end - start);
             return this;
         }
 

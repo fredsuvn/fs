@@ -50,7 +50,7 @@ public abstract class DoWriteWriter extends Writer {
 
     @Override
     public void write(char @Nonnull [] cbuf, int off, int len) throws IOException {
-        IOHelper.checkOffLen(cbuf.length, off, len);
+        IOChecker.checkOffLen(cbuf.length, off, len);
         doWrite(cbuf, off, len);
     }
 
@@ -61,7 +61,7 @@ public abstract class DoWriteWriter extends Writer {
 
     @Override
     public void write(@Nonnull String str, int off, int len) throws IOException {
-        IOHelper.checkOffLen(str.length(), off, len);
+        IOChecker.checkOffLen(str.length(), off, len);
         doWrite(str, off, len);
     }
 }

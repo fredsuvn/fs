@@ -12,17 +12,17 @@ import java.util.Arrays;
 final class CharReaderImpl {
 
     static @Nonnull CharReader of(@Nonnull Reader src, int bufSize) throws IllegalArgumentException {
-        IOHelper.checkBufSize(bufSize);
+        IOChecker.checkBufSize(bufSize);
         return new CharStreamReader(src, bufSize);
     }
 
     static @Nonnull CharReader of(char @Nonnull [] src, int off, int len) throws IndexOutOfBoundsException {
-        IOHelper.checkOffLen(src.length, off, len);
+        IOChecker.checkOffLen(src.length, off, len);
         return new CharArrayReader(src, off, len);
     }
 
     static @Nonnull CharReader of(@Nonnull CharSequence src, int start, int end) throws IndexOutOfBoundsException {
-        IOHelper.checkStartEnd(src.length(), start, end);
+        IOChecker.checkStartEnd(src.length(), start, end);
         return new CharSequenceReader(src, start, end);
     }
 
@@ -31,7 +31,7 @@ final class CharReaderImpl {
     }
 
     static @Nonnull CharReader limit(@Nonnull CharReader reader, long limit) throws IllegalArgumentException {
-        IOHelper.checkLimit(limit);
+        IOChecker.checkLimit(limit);
         return new LimitedReader(reader, limit);
     }
 
@@ -95,9 +95,9 @@ final class CharReaderImpl {
             if (len == 0) {
                 return CharSegment.empty(false);
             }
-            IOHelper.checkLen(len);
+            IOChecker.checkLen(len);
             char[] data = new char[len];
-            int readSize = IOOperations.readTo0(src, data, 0, data.length);
+            int readSize = IOKit.readTo0(src, data, 0, data.length);
             if (readSize < 0) {
                 return CharSegment.empty(true);
             }
@@ -107,7 +107,7 @@ final class CharReaderImpl {
 
         @Override
         public long skip(long len) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkSkip(len);
+            IOChecker.checkSkip(len);
             if (len == 0) {
                 return 0;
             }
@@ -136,35 +136,35 @@ final class CharReaderImpl {
 
         @Override
         public long readTo(@Nonnull Appendable dst) throws IORuntimeException {
-            return IOOperations.readTo0(src, dst, bufSize);
+            return IOKit.readTo0(src, dst, bufSize);
         }
 
         @Override
         public long readTo(@Nonnull Appendable dst, long len) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkLen(len);
-            return IOOperations.readTo0(src, dst, len, bufSize);
+            IOChecker.checkLen(len);
+            return IOKit.readTo0(src, dst, len, bufSize);
         }
 
         @Override
         public int readTo(char @Nonnull [] dst) throws IORuntimeException {
-            return IOOperations.readTo0(src, dst, 0, dst.length);
+            return IOKit.readTo0(src, dst, 0, dst.length);
         }
 
         @Override
         public int readTo(char @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException, IORuntimeException {
-            IOHelper.checkOffLen(dst.length, off, len);
-            return IOOperations.readTo0(src, dst, off, len);
+            IOChecker.checkOffLen(dst.length, off, len);
+            return IOKit.readTo0(src, dst, off, len);
         }
 
         @Override
         public int readTo(@Nonnull CharBuffer dst) throws IORuntimeException {
-            return IOOperations.readTo0(src, dst, dst.remaining());
+            return IOKit.readTo0(src, dst, dst.remaining());
         }
 
         @Override
         public int readTo(@Nonnull CharBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkLen(len);
-            return IOOperations.readTo0(src, dst, len);
+            IOChecker.checkLen(len);
+            return IOKit.readTo0(src, dst, len);
         }
 
         @Override
@@ -221,7 +221,7 @@ final class CharReaderImpl {
 
         @Override
         public @Nonnull CharSegment read(int len) throws IllegalArgumentException {
-            IOHelper.checkLen(len);
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return CharSegment.empty(false);
             }
@@ -237,7 +237,7 @@ final class CharReaderImpl {
 
         @Override
         public long skip(long len) throws IllegalArgumentException {
-            IOHelper.checkSkip(len);
+            IOChecker.checkSkip(len);
             if (len == 0) {
                 return 0;
             }
@@ -267,7 +267,7 @@ final class CharReaderImpl {
 
         @Override
         public long readTo(@Nonnull Appendable dst, long len) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkLen(len);
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return 0;
             }
@@ -292,7 +292,7 @@ final class CharReaderImpl {
 
         @Override
         public int readTo(char @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException {
-            IOHelper.checkOffLen(dst.length, off, len);
+            IOChecker.checkOffLen(dst.length, off, len);
             return readTo0(dst, off, len);
         }
 
@@ -325,7 +325,7 @@ final class CharReaderImpl {
 
         @Override
         public int readTo(@Nonnull CharBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkLen(len);
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return 0;
             }
@@ -386,7 +386,7 @@ final class CharReaderImpl {
 
         @Override
         public @Nonnull CharSegment read(int len) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkLen(len);
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return CharSegment.empty(false);
             }
@@ -402,7 +402,7 @@ final class CharReaderImpl {
 
         @Override
         public long skip(long len) throws IllegalArgumentException {
-            IOHelper.checkSkip(len);
+            IOChecker.checkSkip(len);
             if (len == 0) {
                 return 0;
             }
@@ -432,7 +432,7 @@ final class CharReaderImpl {
 
         @Override
         public long readTo(@Nonnull Appendable dst, long len) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkLen(len);
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return 0;
             }
@@ -457,7 +457,7 @@ final class CharReaderImpl {
 
         @Override
         public int readTo(char @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException {
-            IOHelper.checkOffLen(dst.length, off, len);
+            IOChecker.checkOffLen(dst.length, off, len);
             return readTo0(dst, off, len);
         }
 
@@ -490,7 +490,7 @@ final class CharReaderImpl {
 
         @Override
         public int readTo(@Nonnull CharBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkLen(len);
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return 0;
             }
@@ -545,7 +545,7 @@ final class CharReaderImpl {
 
         @Override
         public @Nonnull CharSegment read(int len) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkLen(len);
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return CharSegment.empty(false);
             }
@@ -564,7 +564,7 @@ final class CharReaderImpl {
 
         @Override
         public long skip(long len) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkSkip(len);
+            IOChecker.checkSkip(len);
             if (len == 0) {
                 return 0;
             }
@@ -584,7 +584,7 @@ final class CharReaderImpl {
 
         @Override
         public long readTo(@Nonnull Appendable dst, long len) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkLen(len);
+            IOChecker.checkLen(len);
             int actualLen = (int) Math.min(Integer.MAX_VALUE, len);
             return BufferKit.readTo0(src, dst, actualLen);
         }
@@ -648,7 +648,7 @@ final class CharReaderImpl {
 
         @Override
         public @Nonnull CharSegment read(int len) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkLen(len);
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return CharSegment.empty(false);
             }
@@ -668,7 +668,7 @@ final class CharReaderImpl {
 
         @Override
         public long skip(long len) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkSkip(len);
+            IOChecker.checkSkip(len);
             if (len == 0) {
                 return 0;
             }
@@ -696,7 +696,7 @@ final class CharReaderImpl {
 
         @Override
         public long readTo(@Nonnull Appendable dst, long len) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkLen(len);
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return 0;
             }
@@ -721,7 +721,7 @@ final class CharReaderImpl {
         public int readTo(
             char @Nonnull [] dst, int off, int len
         ) throws IndexOutOfBoundsException, IORuntimeException {
-            IOHelper.checkOffLen(dst.length, off, len);
+            IOChecker.checkOffLen(dst.length, off, len);
             if (len == 0) {
                 return 0;
             }
@@ -744,7 +744,7 @@ final class CharReaderImpl {
 
         @Override
         public int readTo(@Nonnull CharBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
-            IOHelper.checkLen(len);
+            IOChecker.checkLen(len);
             if (len == 0) {
                 return 0;
             }

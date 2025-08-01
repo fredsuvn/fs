@@ -26,7 +26,14 @@ import java.util.Arrays;
  */
 public class IOKit {
 
-    private static final @Nonnull IOOperator io = IOOperator.get(bufferSize());
+    /**
+     * The default IO buffer size to use in this class: {@code 1024 * 8 = 8192}. And it is also the recommended IO
+     * buffer size.
+     */
+    public static final int BUFFER_SIZE = 1024 * 8;
+
+    // The default io operator.
+    static final @Nonnull IOOperator io = IOOperator.newOperator(BUFFER_SIZE);
 
     /**
      * Returns the recommended IO buffer size, typically is 1024 * 8 = 8192.
@@ -34,7 +41,7 @@ public class IOKit {
      * @return the recommended IO buffer size
      */
     public static int bufferSize() {
-        return IOHelper.DEFAULT_BUFFER_SIZE;
+        return BUFFER_SIZE;
     }
 
     /**
@@ -58,6 +65,9 @@ public class IOKit {
      * number reaches the specified length or reaches the end of the input stream.
      * <p>
      * If reaches the end of the input stream and no data is read, returns {@code null}.
+     * <p>
+     * Note this method will allocate a new array with the specified length, and the excessive length may cause out of
+     * memory.
      *
      * @param src the input stream
      * @param len the specified read length, must {@code >= 0}
@@ -94,6 +104,9 @@ public class IOKit {
      * position is {@code 0} and limit equals its capacity.
      * <p>
      * If reaches the end of the source channel and no data is read, returns {@code null}.
+     * <p>
+     * Note this method will allocate a new array with the specified length, and the excessive length may cause out of
+     * memory.
      *
      * @param src the source channel
      * @param len the specified read length, must {@code >= 0}
@@ -442,6 +455,9 @@ public class IOKit {
      * reaches the specified length or reaches the end of the reader.
      * <p>
      * If reaches the end of the reader and no data is read, returns {@code null}.
+     * <p>
+     * Note this method will allocate a new array with the specified length, and the excessive length may cause out of
+     * memory.
      *
      * @param src the reader
      * @param len the specified read length, must {@code >= 0}
@@ -600,6 +616,402 @@ public class IOKit {
         @Nonnull Reader src, @Nonnull CharBuffer dst, int len
     ) throws IllegalArgumentException, IORuntimeException {
         return io.readTo(src, dst, len);
+    }
+
+    static long readTo0(
+        @Nonnull InputStream src, @Nonnull OutputStream dst, int bufSize
+    ) throws IORuntimeException {
+        try {
+            byte[] buf = new byte[bufSize];
+            long count = 0;
+            while (true) {
+                int readSize = src.read(buf);
+                if (readSize < 0) {
+                    return count == 0 ? -1 : count;
+                }
+                dst.write(buf, 0, readSize);
+                count += readSize;
+            }
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    static long readTo0(
+        @Nonnull InputStream src, @Nonnull OutputStream dst, long len, int bufSize
+    ) throws IORuntimeException {
+        if (len == 0) {
+            return 0;
+        }
+        try {
+            byte[] buf = new byte[(int) Math.min(len, bufSize)];
+            long count = 0;
+            while (count < len) {
+                int readSize = src.read(buf, 0, (int) Math.min(buf.length, len - count));
+                if (readSize < 0) {
+                    return count == 0 ? -1 : count;
+                }
+                dst.write(buf, 0, readSize);
+                count += readSize;
+            }
+            return count;
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    static long readTo0(
+        @Nonnull InputStream src, @Nonnull WritableByteChannel dst, int bufSize
+    ) throws IORuntimeException {
+        try {
+            byte[] arr = new byte[bufSize];
+            ByteBuffer buf = ByteBuffer.wrap(arr);
+            long count = 0;
+            while (true) {
+                int readSize = src.read(arr);
+                if (readSize < 0) {
+                    return count == 0 ? -1 : count;
+                }
+                buf.position(0);
+                buf.limit(readSize);
+                BufferKit.readTo(buf, dst);
+                count += readSize;
+            }
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    static long readTo0(
+        @Nonnull InputStream src, @Nonnull WritableByteChannel dst, long len, int bufSize
+    ) throws IORuntimeException {
+        if (len == 0) {
+            return 0;
+        }
+        try {
+            byte[] arr = new byte[(int) Math.min(len, bufSize)];
+            ByteBuffer buf = ByteBuffer.wrap(arr);
+            long count = 0;
+            while (count < len) {
+                int readSize = src.read(arr, 0, (int) Math.min(arr.length, len - count));
+                if (readSize < 0) {
+                    return count == 0 ? -1 : count;
+                }
+                buf.position(0);
+                buf.limit(readSize);
+                BufferKit.readTo(buf, dst);
+                count += readSize;
+            }
+            return count;
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    static int readTo0(
+        @Nonnull InputStream src, byte @Nonnull [] dst, int off, int len
+    ) throws IORuntimeException {
+        if (len == 0) {
+            return 0;
+        }
+        try {
+            int count = 0;
+            while (count < len) {
+                int readSize = src.read(dst, off + count, len - count);
+                if (readSize < 0) {
+                    return count == 0 ? -1 : count;
+                }
+                count += readSize;
+            }
+            return count;
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    static int readTo0(
+        @Nonnull InputStream src, @Nonnull ByteBuffer dst, int len
+    ) throws IORuntimeException {
+        if (len == 0 || dst.remaining() == 0) {
+            return 0;
+        }
+        return readTo0WithActualLen(src, dst, Math.min(dst.remaining(), len));
+    }
+
+    static long readTo0(
+        @Nonnull ReadableByteChannel src,
+        @Nonnull OutputStream dst,
+        int bufSize
+    ) throws IORuntimeException {
+        try {
+            ByteBuffer buf = ByteBuffer.allocate(bufSize);
+            long count = 0;
+            while (true) {
+                int readSize = src.read(buf);
+                if (readSize < 0) {
+                    return count == 0 ? -1 : count;
+                }
+                buf.flip();
+                BufferKit.readTo(buf, dst);
+                count += readSize;
+                buf.clear();
+            }
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    static long readTo0(
+        @Nonnull ReadableByteChannel src,
+        @Nonnull OutputStream dst,
+        long len,
+        int bufSize
+    ) throws IORuntimeException {
+        if (len == 0) {
+            return 0;
+        }
+        try {
+            int actualBufSize = (int) Math.min(len, bufSize);
+            ByteBuffer buf = ByteBuffer.allocate(actualBufSize);
+            long count = 0;
+            while (count < len) {
+                int actualSize = (int) Math.min(actualBufSize, len - count);
+                buf.limit(actualSize);
+                int readSize = src.read(buf);
+                if (readSize < 0) {
+                    return count == 0 ? -1 : count;
+                }
+                buf.flip();
+                BufferKit.readTo(buf, dst);
+                count += readSize;
+                buf.clear();
+            }
+            return count;
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    static long readTo0(
+        @Nonnull ReadableByteChannel src,
+        @Nonnull WritableByteChannel dst,
+        int bufSize
+    ) throws IORuntimeException {
+        try {
+            ByteBuffer buf = ByteBuffer.allocate(bufSize);
+            long count = 0;
+            while (true) {
+                int readSize = src.read(buf);
+                if (readSize < 0) {
+                    return count == 0 ? -1 : count;
+                }
+                buf.flip();
+                BufferKit.readTo(buf, dst);
+                count += readSize;
+                buf.clear();
+            }
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    static long readTo0(
+        @Nonnull ReadableByteChannel src,
+        @Nonnull WritableByteChannel dst,
+        long len,
+        int bufSize
+    ) throws IORuntimeException {
+        if (len == 0) {
+            return 0;
+        }
+        try {
+            int actualBufSize = (int) Math.min(len, bufSize);
+            ByteBuffer buf = ByteBuffer.allocate(actualBufSize);
+            long count = 0;
+            while (count < len) {
+                int actualSize = (int) Math.min(actualBufSize, len - count);
+                buf.limit(actualSize);
+                int readSize = src.read(buf);
+                if (readSize < 0) {
+                    return count == 0 ? -1 : count;
+                }
+                buf.flip();
+                BufferKit.readTo(buf, dst);
+                count += readSize;
+                buf.clear();
+            }
+            return count;
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    static int readTo0(
+        @Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst
+    ) throws IORuntimeException {
+        if (dst.remaining() == 0) {
+            return 0;
+        }
+        try {
+            int count = 0;
+            while (dst.hasRemaining()) {
+                int readSize = src.read(dst);
+                if (readSize < 0) {
+                    return count == 0 ? -1 : count;
+                }
+                count += readSize;
+            }
+            return count;
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    static int readTo0(
+        @Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst, int len
+    ) throws IORuntimeException {
+        if (len == 0) {
+            return 0;
+        }
+        int remaining = dst.remaining();
+        if (remaining == 0) {
+            return 0;
+        }
+        int pos = dst.position();
+        int oldLimit = dst.limit();
+        int actualLen = Math.min(remaining, len);
+        dst.limit(pos + actualLen);
+        int ret = readTo0(src, dst);
+        if (ret <= 0) {
+            return ret;
+        }
+        dst.position(pos + ret);
+        dst.limit(oldLimit);
+        return ret;
+    }
+
+    static int readTo0WithActualLen(
+        @Nonnull InputStream src, @Nonnull ByteBuffer dst, int actualLen
+    ) throws IORuntimeException {
+        try {
+            if (dst.hasArray()) {
+                int pos = dst.position();
+                int ret = readTo0(src, dst.array(), BufferKit.arrayStartIndex(dst), actualLen);
+                if (ret <= 0) {
+                    return ret;
+                }
+                dst.position(pos + ret);
+                return ret;
+            } else {
+                byte[] buf = new byte[actualLen];
+                int ret = readTo0(src, buf, 0, buf.length);
+                if (ret <= 0) {
+                    return ret;
+                }
+                dst.put(buf, 0, ret);
+                return ret;
+            }
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    static long readTo0(
+        @Nonnull Reader src, @Nonnull Appendable dst, int bufSize
+    ) throws IORuntimeException {
+        try {
+            char[] buf = new char[bufSize];
+            long count = 0;
+            while (true) {
+                int readSize = src.read(buf);
+                if (readSize < 0) {
+                    return count == 0 ? -1 : count;
+                }
+                IOKit.write(dst, buf, 0, readSize);
+                count += readSize;
+            }
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    static long readTo0(
+        @Nonnull Reader src, @Nonnull Appendable dst, long len, int bufSize
+    ) throws IORuntimeException {
+        if (len == 0) {
+            return 0;
+        }
+        try {
+            char[] buf = new char[(int) Math.min(len, bufSize)];
+            long count = 0;
+            while (count < len) {
+                int readSize = src.read(buf, 0, (int) Math.min(buf.length, len - count));
+                if (readSize < 0) {
+                    return count == 0 ? -1 : count;
+                }
+                IOKit.write(dst, buf, 0, readSize);
+                count += readSize;
+            }
+            return count;
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    static int readTo0(
+        @Nonnull Reader src, char @Nonnull [] dst, int off, int len
+    ) throws IORuntimeException {
+        if (len == 0) {
+            return 0;
+        }
+        try {
+            int count = 0;
+            while (count < len) {
+                int readSize = src.read(dst, off + count, len - count);
+                if (readSize < 0) {
+                    return count == 0 ? -1 : count;
+                }
+                count += readSize;
+            }
+            return count;
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    static int readTo0(
+        @Nonnull Reader src, @Nonnull CharBuffer dst, int len
+    ) throws IORuntimeException {
+        if (len == 0 || dst.remaining() == 0) {
+            return 0;
+        }
+        return readTo0WithActualLen(src, dst, Math.min(dst.remaining(), len));
+    }
+
+    static int readTo0WithActualLen(
+        @Nonnull Reader src, @Nonnull CharBuffer dst, int actualLen
+    ) throws IORuntimeException {
+        try {
+            if (dst.hasArray()) {
+                int pos = dst.position();
+                int ret = readTo0(src, dst.array(), BufferKit.arrayStartIndex(dst), actualLen);
+                if (ret <= 0) {
+                    return ret;
+                }
+                dst.position(pos + ret);
+                return ret;
+            } else {
+                char[] buf = new char[actualLen];
+                int ret = readTo0(src, buf, 0, buf.length);
+                if (ret <= 0) {
+                    return ret;
+                }
+                dst.put(buf, 0, ret);
+                return ret;
+            }
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
     }
 
     /**

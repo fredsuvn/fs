@@ -23,14 +23,14 @@ public class CharEncoderImpl implements CharEncoder {
 
     @Override
     public @Nonnull CharEncoder readLimit(long readLimit) throws IllegalArgumentException {
-        IOHelper.checkReadLimit(readLimit);
+        IOChecker.checkReadLimit(readLimit);
         this.readLimit = readLimit;
         return this;
     }
 
     @Override
     public @Nonnull CharEncoder readBlockSize(int readBlockSize) throws IllegalArgumentException {
-        IOHelper.checkReadBlockSize(readBlockSize);
+        IOChecker.checkReadBlockSize(readBlockSize);
         this.readBlockSize = readBlockSize;
         return this;
     }
@@ -230,7 +230,7 @@ public class CharEncoderImpl implements CharEncoder {
         @Override
         public int read(char @Nonnull [] dst, int off, int len) throws IOException {
             checkClosed();
-            IOHelper.checkOffLen(dst.length, off, len);
+            IOChecker.checkOffLen(dst.length, off, len);
             if (len == 0) {
                 return 0;
             }

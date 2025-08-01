@@ -25,14 +25,14 @@ final class ByteEncoderImpl implements ByteEncoder {
 
     @Override
     public @Nonnull ByteEncoder readLimit(long readLimit) throws IllegalArgumentException {
-        IOHelper.checkReadLimit(readLimit);
+        IOChecker.checkReadLimit(readLimit);
         this.readLimit = readLimit;
         return this;
     }
 
     @Override
     public @Nonnull ByteEncoder readBlockSize(int readBlockSize) throws IllegalArgumentException {
-        IOHelper.checkReadBlockSize(readBlockSize);
+        IOChecker.checkReadBlockSize(readBlockSize);
         this.readBlockSize = readBlockSize;
         return this;
     }
@@ -247,7 +247,7 @@ final class ByteEncoderImpl implements ByteEncoder {
         @Override
         public int read(byte @Nonnull [] dst, int off, int len) throws IOException {
             checkClosed();
-            IOHelper.checkOffLen(dst.length, off, len);
+            IOChecker.checkOffLen(dst.length, off, len);
             if (len == 0) {
                 return 0;
             }

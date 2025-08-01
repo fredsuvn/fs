@@ -162,6 +162,8 @@ public interface ByteReader extends IORuntimeCloseable {
      * The content of the returned segment may be shared with the data source, depends on the implementation, such as
      * the instances obtained from the {@link #from(byte[])}, {@link #from(byte[], int, int)} and
      * {@link #from(ByteBuffer)}.
+     * <p>
+     * Note this method may allocate the specified length of space, and the excessive length may cause out of memory.
      *
      * @param len the specified length to read, must {@code >= 0}
      * @return the next data segment

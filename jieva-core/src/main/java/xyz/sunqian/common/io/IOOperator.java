@@ -32,7 +32,8 @@ public interface IOOperator {
      * @throws IllegalArgumentException if the given buffer size {@code <= 0}
      */
     static IOOperator get(int bufSize) throws IllegalArgumentException {
-        return bufSize == IOHelper.DEFAULT_BUFFER_SIZE ? IOOperations.DEFAULT_OPERATOR : newOperator(bufSize);
+        IOOperator io = IOKit.io;
+        return bufSize == io.bufferSize() ? io : newOperator(bufSize);
     }
 
     /**
@@ -43,8 +44,8 @@ public interface IOOperator {
      * @throws IllegalArgumentException if the given buffer size {@code <= 0}
      */
     static IOOperator newOperator(int bufSize) throws IllegalArgumentException {
-        IOHelper.checkBufSize(bufSize);
-        return new IOOperations.IOOperatorImpl(bufSize);
+        IOChecker.checkBufSize(bufSize);
+        return () -> bufSize;
     }
 
     /**
@@ -108,6 +109,9 @@ public interface IOOperator {
      * number reaches the specified length or reaches the end of the input stream.
      * <p>
      * If reaches the end of the input stream and no data is read, returns {@code null}.
+     * <p>
+     * Note this method will allocate a new array with the specified length, and the excessive length may cause out of
+     * memory.
      *
      * @param src the input stream
      * @param len the specified read length, must {@code >= 0}
@@ -119,7 +123,7 @@ public interface IOOperator {
     default byte @Nullable [] read(
         @Nonnull InputStream src, int len
     ) throws IllegalArgumentException, IORuntimeException {
-        IOHelper.checkLen(len);
+        IOChecker.checkLen(len);
         if (len == 0) {
             return new byte[0];
         }
@@ -205,6 +209,9 @@ public interface IOOperator {
      * position is {@code 0} and limit equals its capacity.
      * <p>
      * If reaches the end of the source channel and no data is read, returns {@code null}.
+     * <p>
+     * Note this method will allocate a new array with the specified length, and the excessive length may cause out of
+     * memory.
      *
      * @param src the source channel
      * @param len the specified read length, must {@code >= 0}
@@ -216,7 +223,7 @@ public interface IOOperator {
     default @Nullable ByteBuffer read(
         @Nonnull ReadableByteChannel src, int len
     ) throws IllegalArgumentException, IORuntimeException {
-        IOHelper.checkLen(len);
+        IOChecker.checkLen(len);
         if (len == 0) {
             return ByteBuffer.allocate(0);
         }
@@ -249,7 +256,7 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default long readTo(@Nonnull InputStream src, @Nonnull OutputStream dst) throws IORuntimeException {
-        return IOOperations.readTo0(src, dst, bufferSize());
+        return IOKit.readTo0(src, dst, bufferSize());
     }
 
     /**
@@ -270,8 +277,8 @@ public interface IOOperator {
     default long readTo(
         @Nonnull InputStream src, @Nonnull OutputStream dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
-        IOHelper.checkLen(len);
-        return IOOperations.readTo0(src, dst, len, bufferSize());
+        IOChecker.checkLen(len);
+        return IOKit.readTo0(src, dst, len, bufferSize());
     }
 
     /**
@@ -287,7 +294,7 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default long readTo(@Nonnull InputStream src, @Nonnull WritableByteChannel dst) throws IORuntimeException {
-        return IOOperations.readTo0(src, dst, bufferSize());
+        return IOKit.readTo0(src, dst, bufferSize());
     }
 
     /**
@@ -308,8 +315,8 @@ public interface IOOperator {
     default long readTo(
         @Nonnull InputStream src, @Nonnull WritableByteChannel dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
-        IOHelper.checkLen(len);
-        return IOOperations.readTo0(src, dst, len, bufferSize());
+        IOChecker.checkLen(len);
+        return IOKit.readTo0(src, dst, len, bufferSize());
     }
 
     /**
@@ -326,7 +333,7 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default int readTo(@Nonnull InputStream src, byte @Nonnull [] dst) throws IORuntimeException {
-        return IOOperations.readTo0(src, dst, 0, dst.length);
+        return IOKit.readTo0(src, dst, 0, dst.length);
     }
 
     /**
@@ -349,8 +356,8 @@ public interface IOOperator {
     default int readTo(
         @Nonnull InputStream src, byte @Nonnull [] dst, int off, int len
     ) throws IndexOutOfBoundsException, IORuntimeException {
-        IOHelper.checkOffLen(dst.length, off, len);
-        return IOOperations.readTo0(src, dst, off, len);
+        IOChecker.checkOffLen(dst.length, off, len);
+        return IOKit.readTo0(src, dst, off, len);
     }
 
     /**
@@ -369,7 +376,7 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default int readTo(@Nonnull InputStream src, @Nonnull ByteBuffer dst) throws IORuntimeException {
-        return IOOperations.readTo0(src, dst, dst.remaining());
+        return IOKit.readTo0(src, dst, dst.remaining());
     }
 
     /**
@@ -392,8 +399,8 @@ public interface IOOperator {
     default int readTo(
         @Nonnull InputStream src, @Nonnull ByteBuffer dst, int len
     ) throws IllegalArgumentException, IORuntimeException {
-        IOHelper.checkLen(len);
-        return IOOperations.readTo0(src, dst, len);
+        IOChecker.checkLen(len);
+        return IOKit.readTo0(src, dst, len);
     }
 
     /**
@@ -409,7 +416,7 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default long readTo(@Nonnull ReadableByteChannel src, @Nonnull OutputStream dst) throws IORuntimeException {
-        return IOOperations.readTo0(src, dst, bufferSize());
+        return IOKit.readTo0(src, dst, bufferSize());
     }
 
     /**
@@ -430,8 +437,8 @@ public interface IOOperator {
     default long readTo(
         @Nonnull ReadableByteChannel src, @Nonnull OutputStream dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
-        IOHelper.checkLen(len);
-        return IOOperations.readTo0(src, dst, len, bufferSize());
+        IOChecker.checkLen(len);
+        return IOKit.readTo0(src, dst, len, bufferSize());
     }
 
     /**
@@ -447,7 +454,7 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default long readTo(@Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst) throws IORuntimeException {
-        return IOOperations.readTo0(src, dst, bufferSize());
+        return IOKit.readTo0(src, dst, bufferSize());
     }
 
     /**
@@ -469,8 +476,8 @@ public interface IOOperator {
     default long readTo(
         @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
-        IOHelper.checkLen(len);
-        return IOOperations.readTo0(src, dst, len, bufferSize());
+        IOChecker.checkLen(len);
+        return IOKit.readTo0(src, dst, len, bufferSize());
     }
 
     /**
@@ -530,7 +537,7 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default int readTo(@Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst) throws IORuntimeException {
-        return IOOperations.readTo0(src, dst);
+        return IOKit.readTo0(src, dst);
     }
 
     /**
@@ -553,8 +560,8 @@ public interface IOOperator {
     default int readTo(
         @Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst, int len
     ) throws IllegalArgumentException, IORuntimeException {
-        IOHelper.checkLen(len);
-        return IOOperations.readTo0(src, dst, len);
+        IOChecker.checkLen(len);
+        return IOKit.readTo0(src, dst, len);
     }
 
     /**
@@ -610,6 +617,9 @@ public interface IOOperator {
      * reaches the specified length or reaches the end of the reader.
      * <p>
      * If reaches the end of the reader and no data is read, returns {@code null}.
+     * <p>
+     * Note this method will allocate a new array with the specified length, and the excessive length may cause out of
+     * memory.
      *
      * @param src the reader
      * @param len the specified read length, must {@code >= 0}
@@ -621,7 +631,7 @@ public interface IOOperator {
     default char @Nullable [] read(
         @Nonnull Reader src, int len
     ) throws IllegalArgumentException, IORuntimeException {
-        IOHelper.checkLen(len);
+        IOChecker.checkLen(len);
         if (len == 0) {
             return new char[0];
         }
@@ -688,7 +698,7 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default long readTo(@Nonnull Reader src, @Nonnull Appendable dst) throws IORuntimeException {
-        return IOOperations.readTo0(src, dst, bufferSize());
+        return IOKit.readTo0(src, dst, bufferSize());
     }
 
     /**
@@ -708,8 +718,8 @@ public interface IOOperator {
     default long readTo(
         @Nonnull Reader src, @Nonnull Appendable dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
-        IOHelper.checkLen(len);
-        return IOOperations.readTo0(src, dst, len, bufferSize());
+        IOChecker.checkLen(len);
+        return IOKit.readTo0(src, dst, len, bufferSize());
     }
 
     /**
@@ -725,7 +735,7 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default int readTo(@Nonnull Reader src, char @Nonnull [] dst) throws IORuntimeException {
-        return IOOperations.readTo0(src, dst, 0, dst.length);
+        return IOKit.readTo0(src, dst, 0, dst.length);
     }
 
     /**
@@ -747,8 +757,8 @@ public interface IOOperator {
     default int readTo(
         @Nonnull Reader src, char @Nonnull [] dst, int off, int len
     ) throws IndexOutOfBoundsException, IORuntimeException {
-        IOHelper.checkOffLen(dst.length, off, len);
-        return IOOperations.readTo0(src, dst, off, len);
+        IOChecker.checkOffLen(dst.length, off, len);
+        return IOKit.readTo0(src, dst, off, len);
     }
 
     /**
@@ -769,7 +779,7 @@ public interface IOOperator {
         if (dst.remaining() == 0) {
             return 0;
         }
-        return IOOperations.readTo0WithActualLen(src, dst, dst.remaining());
+        return IOKit.readTo0WithActualLen(src, dst, dst.remaining());
     }
 
     /**
@@ -791,7 +801,7 @@ public interface IOOperator {
     default int readTo(
         @Nonnull Reader src, @Nonnull CharBuffer dst, int len
     ) throws IllegalArgumentException, IORuntimeException {
-        IOHelper.checkLen(len);
-        return IOOperations.readTo0(src, dst, len);
+        IOChecker.checkLen(len);
+        return IOKit.readTo0(src, dst, len);
     }
 }

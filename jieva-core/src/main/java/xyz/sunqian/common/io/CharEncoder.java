@@ -137,7 +137,7 @@ public interface CharEncoder {
      * @throws IllegalArgumentException if the specified fixed size {@code <= 0}
      */
     static @Nonnull Handler newFixedSizeHandler(@Nonnull Handler handler, int size) throws IllegalArgumentException {
-        IOHelper.checkSize(size);
+        IOChecker.checkSize(size);
         return new CharEncoderImpl.FixedSizeHandler(handler, size);
     }
 
@@ -161,7 +161,7 @@ public interface CharEncoder {
      * @throws IllegalArgumentException if the specified size {@code <= 0}
      */
     static @Nonnull Handler newMultipleSizeHandler(@Nonnull Handler handler, int size) throws IllegalArgumentException {
-        IOHelper.checkSize(size);
+        IOChecker.checkSize(size);
         return new CharEncoderImpl.MultipleSizeHandler(handler, size);
     }
 

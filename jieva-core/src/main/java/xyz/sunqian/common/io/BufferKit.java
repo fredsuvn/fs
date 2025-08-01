@@ -87,7 +87,7 @@ public class BufferKit {
      * @throws IllegalArgumentException if the specified read length is illegal
      */
     public static byte @Nullable [] read(@Nonnull ByteBuffer src, int len) throws IllegalArgumentException {
-        IOHelper.checkLen(len);
+        IOChecker.checkLen(len);
         if (len == 0) {
             return new byte[0];
         }
@@ -139,7 +139,7 @@ public class BufferKit {
     public static int readTo(
         @Nonnull ByteBuffer src, byte @Nonnull [] dst, int off, int len
     ) throws IndexOutOfBoundsException {
-        IOHelper.checkOffLen(dst.length, off, len);
+        IOChecker.checkOffLen(dst.length, off, len);
         return readTo0(src, dst, off, len);
     }
 
@@ -200,7 +200,7 @@ public class BufferKit {
     public static int readTo(
         @Nonnull ByteBuffer src, @Nonnull ByteBuffer dst, int len
     ) throws IllegalArgumentException, IORuntimeException {
-        IOHelper.checkLen(len);
+        IOChecker.checkLen(len);
         if (len == 0) {
             return 0;
         }
@@ -278,7 +278,7 @@ public class BufferKit {
     public static int readTo(
         @Nonnull ByteBuffer src, @Nonnull WritableByteChannel dst, int len
     ) throws IllegalArgumentException, IORuntimeException {
-        IOHelper.checkLen(len);
+        IOChecker.checkLen(len);
         return readTo0(src, dst, len);
     }
 
@@ -323,7 +323,7 @@ public class BufferKit {
     public static int readTo(
         @Nonnull ByteBuffer src, @Nonnull OutputStream dst, int len
     ) throws IllegalArgumentException, IORuntimeException {
-        IOHelper.checkLen(len);
+        IOChecker.checkLen(len);
         return readTo0(src, dst, len);
     }
 
@@ -431,7 +431,7 @@ public class BufferKit {
      * @throws IllegalArgumentException if the specified read length is illegal
      */
     public static char @Nullable [] read(@Nonnull CharBuffer src, int len) throws IllegalArgumentException {
-        IOHelper.checkLen(len);
+        IOChecker.checkLen(len);
         if (len == 0) {
             return new char[0];
         }
@@ -483,7 +483,7 @@ public class BufferKit {
     public static int readTo(
         @Nonnull CharBuffer src, char @Nonnull [] dst, int off, int len
     ) throws IndexOutOfBoundsException {
-        IOHelper.checkOffLen(dst.length, off, len);
+        IOChecker.checkOffLen(dst.length, off, len);
         return readTo0(src, dst, off, len);
     }
 
@@ -544,7 +544,7 @@ public class BufferKit {
     public static int readTo(
         @Nonnull CharBuffer src, @Nonnull CharBuffer dst, int len
     ) throws IllegalArgumentException, IORuntimeException {
-        IOHelper.checkLen(len);
+        IOChecker.checkLen(len);
         if (len == 0) {
             return 0;
         }
@@ -613,7 +613,7 @@ public class BufferKit {
     public static int readTo(
         @Nonnull CharBuffer src, @Nonnull Appendable dst, int len
     ) throws IllegalArgumentException, IORuntimeException {
-        IOHelper.checkLen(len);
+        IOChecker.checkLen(len);
         return readTo0(src, dst, len);
     }
 
@@ -775,7 +775,7 @@ public class BufferKit {
      * @throws IllegalArgumentException if the specified read length is illegal
      */
     public static @Nonnull ByteBuffer slice(@Nonnull ByteBuffer src, int len) throws IllegalArgumentException {
-        IOHelper.checkLen(len);
+        IOChecker.checkLen(len);
         return slice0(src, 0, len);
     }
 
@@ -798,7 +798,7 @@ public class BufferKit {
     public static @Nonnull ByteBuffer slice(
         @Nonnull ByteBuffer src, int off, int len
     ) throws IndexOutOfBoundsException {
-        IOHelper.checkOffLen(src.remaining(), off, len);
+        IOChecker.checkOffLen(src.remaining(), off, len);
         return slice0(src, off, len);
     }
 
@@ -829,7 +829,7 @@ public class BufferKit {
      * @throws IllegalArgumentException if the specified read length is illegal
      */
     public static @Nonnull CharBuffer slice(@Nonnull CharBuffer src, int len) throws IllegalArgumentException {
-        IOHelper.checkLen(len);
+        IOChecker.checkLen(len);
         return slice0(src, 0, len);
     }
 
@@ -852,7 +852,7 @@ public class BufferKit {
     public static @Nonnull CharBuffer slice(
         @Nonnull CharBuffer src, int off, int len
     ) throws IndexOutOfBoundsException {
-        IOHelper.checkOffLen(src.remaining(), off, len);
+        IOChecker.checkOffLen(src.remaining(), off, len);
         return slice0(src, off, len);
     }
 
@@ -980,7 +980,7 @@ public class BufferKit {
     public static @Nonnull ByteBuffer copyDirect(
         byte @Nonnull [] src, int off, int len
     ) throws IndexOutOfBoundsException {
-        IOHelper.checkOffLen(src.length, off, len);
+        IOChecker.checkOffLen(src.length, off, len);
         ByteBuffer buf = ByteBuffer.allocateDirect(len);
         buf.put(src, off, len);
         buf.flip();
@@ -1016,7 +1016,7 @@ public class BufferKit {
     public static @Nonnull CharBuffer copyDirect(
         char @Nonnull [] src, int off, int len
     ) throws IndexOutOfBoundsException {
-        IOHelper.checkOffLen(src.length, off, len);
+        IOChecker.checkOffLen(src.length, off, len);
         CharBuffer buf = directCharBuffer(len);
         buf.put(src, off, len);
         buf.flip();
@@ -1034,7 +1034,7 @@ public class BufferKit {
      * @throws IllegalArgumentException if the specified capacity is negative
      */
     public static @Nonnull CharBuffer directCharBuffer(int capacity) throws IllegalArgumentException {
-        IOHelper.checkCapacity(capacity);
+        IOChecker.checkCapacity(capacity);
         return ByteBuffer.allocateDirect(capacity * 2).order(ByteOrder.BIG_ENDIAN).asCharBuffer();
     }
 }

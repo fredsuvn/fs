@@ -115,7 +115,7 @@ public interface ByteEncoder {
      * @throws IllegalArgumentException if the specified fixed size {@code <= 0}
      */
     static @Nonnull Handler newFixedSizeHandler(@Nonnull Handler handler, int size) throws IllegalArgumentException {
-        IOHelper.checkSize(size);
+        IOChecker.checkSize(size);
         return new ByteEncoderImpl.FixedSizeHandler(handler, size);
     }
 
@@ -139,7 +139,7 @@ public interface ByteEncoder {
      * @throws IllegalArgumentException if the specified size {@code <= 0}
      */
     static @Nonnull Handler newMultipleSizeHandler(@Nonnull Handler handler, int size) throws IllegalArgumentException {
-        IOHelper.checkSize(size);
+        IOChecker.checkSize(size);
         return new ByteEncoderImpl.MultipleSizeHandler(handler, size);
     }
 

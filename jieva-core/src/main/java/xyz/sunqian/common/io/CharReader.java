@@ -168,6 +168,8 @@ public interface CharReader extends IORuntimeCloseable {
      * The content of the returned segment may be shared with the data source, depends on the implementation, such as
      * the instances obtained from the {@link #from(char[])}, {@link #from(char[], int, int)},
      * {@link #from(CharSequence)}, {@link #from(CharSequence, int, int)} and {@link #from(CharBuffer)}.
+     * <p>
+     * Note this method may allocate the specified length of space, and the excessive length may cause out of memory.
      *
      * @param len the specified length to read, must {@code >= 0}
      * @return the next data segment
