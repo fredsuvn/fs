@@ -1,7 +1,7 @@
 /**
- * The package for file.
+ * The package for file and path.
  * <p>
- * Core File Utilities:
+ * Core File Utilities Kit:
  * <ul>
  *     <li>{@link xyz.sunqian.common.io.file.FileKit}</li>
  * </ul>

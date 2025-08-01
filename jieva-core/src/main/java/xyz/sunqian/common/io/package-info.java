@@ -1,18 +1,18 @@
 /**
- * The package for I/O operations.
+ * The package for IO operations.
  * <p>
- * Core I/O Utilities:
+ * Core IO Utilities Kit:
  * <ul>
  *     <li>{@link xyz.sunqian.common.io.IOKit}</li>
  *     <li>{@link xyz.sunqian.common.io.BufferKit}</li>
  * </ul>
  * <p>
- * Core I/O Utility Interfaces:
+ * Core IO Utilities Interfaces:
  * <ul>
  *     <li>{@link xyz.sunqian.common.io.IOOperator}</li>
  * </ul>
  * <p>
- * Core Interfaces:
+ * Core IO Interfaces:
  * <ul>
  *     <li>{@link xyz.sunqian.common.io.ByteReader}</li>
  *     <li>{@link xyz.sunqian.common.io.CharReader}</li>
@@ -22,7 +22,7 @@
  *     <li>{@link xyz.sunqian.common.io.CharEncoder}</li>
  * </ul>
  * <p>
- * Convenient Implementations:
+ * Convenient IO Implementations:
  * <ul>
  *     <li>{@link xyz.sunqian.common.io.DoReadStream}</li>
  *     <li>{@link xyz.sunqian.common.io.DoReadReader}</li>
