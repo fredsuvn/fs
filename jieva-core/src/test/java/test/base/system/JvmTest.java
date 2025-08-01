@@ -33,6 +33,7 @@ public class JvmTest implements AssertTest, PrintTest {
 
     @Test
     public void testJavaVersion() {
+        printFor("JVM description", JvmKit.jvmDescription());
         printFor("JDK major version", JvmKit.javaMajorVersion());
         assertEquals(JvmKit.javaMajorVersion("1.8.0_452"), 8);
         assertEquals(JvmKit.javaMajorVersion("25"), 25);

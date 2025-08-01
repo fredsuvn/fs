@@ -25,6 +25,15 @@ import java.util.Objects;
 public class JvmKit {
 
     /**
+     * Returns a description of current JVM, in format of: {@code [JVM name]:[JVM version]:[Java version]}.
+     *
+     * @return a description of current JVM
+     */
+    public static @Nonnull String jvmDescription() {
+        return SystemKit.getJavaVmName() + ":" + SystemKit.getJavaVmVersion() + ":" + SystemKit.getJavaVersion();
+    }
+
+    /**
      * Returns the major version of current Java Runtime Environment version.
      * <p>
      * If the version {@code <= 1.8}, returns the second version number (such as {@code 6} for {@code 1.6.x}, {@code 8}

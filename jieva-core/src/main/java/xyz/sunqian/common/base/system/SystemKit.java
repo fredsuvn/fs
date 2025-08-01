@@ -317,13 +317,4 @@ public class SystemKit {
             new LinkedHashMap<>(System.getProperties())
         );
     }
-
-    /**
-     * Returns a description of current JDK, in format of: {@code [JVM name]:[JVM version]:[Java version]}.
-     *
-     * @return a description of current JDK
-     */
-    public static @Nonnull String jdkDescription() {
-        return getJavaVmName() + ":" + getJavaVmVersion() + ":" + getJavaVersion();
-    }
 }

@@ -18,7 +18,6 @@ public class SystemTest implements PrintTest {
 
     @Test
     public void testSystemProperties() throws Exception {
-        printFor("JDK description", SystemKit.jdkDescription());
         Field[] keyFields = SystemKeys.class.getFields();
         Set<String> keyset = new LinkedHashSet<>();
         for (Field keyField : keyFields) {
