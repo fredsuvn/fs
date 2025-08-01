@@ -11,6 +11,7 @@ import xyz.sunqian.common.reflect.proxy.ProxyClass;
 import xyz.sunqian.common.reflect.proxy.ProxyClassGenerator;
 import xyz.sunqian.common.reflect.proxy.ProxyInvoker;
 import xyz.sunqian.common.reflect.proxy.ProxyMethodHandler;
+import xyz.sunqian.test.PrintTest;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -23,7 +24,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
-public class AsmProxyTest {
+public class AsmProxyTest implements PrintTest {
 
     @Test
     public void testProxyClass() {
@@ -692,6 +693,7 @@ public class AsmProxyTest {
                     @Nonnull ProxyInvoker invoker,
                     @Nullable Object @Nonnull ... args
                 ) throws Throwable {
+                    //printFor("proxy method: " + method);
                     counter.incrementAndGet();
                     return invoker.invokeSuper(proxy, args);
                 }

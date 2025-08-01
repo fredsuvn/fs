@@ -5,6 +5,7 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.value.IntVar;
+import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.reflect.proxy.JdkProxyClassGenerator;
 import xyz.sunqian.common.reflect.proxy.ProxyClass;
 import xyz.sunqian.common.reflect.proxy.ProxyClassGenerator;
@@ -204,6 +205,10 @@ public class JdkProxyTest {
         expectThrows(AbstractMethodError.class, psi::si2);
         assertEquals(counter.get(), 2);
         counter.set(0);
+
+        // unsupported default method invocable
+        Invocable invocable = JdkProxyClassGenerator.UNSUPPORTED_DEFAULT_METHOD_INVOCABLE;
+        expectThrows(JdkProxyClassGenerator.JdkProxyException.class, () -> invocable.invokeChecked(null));
     }
 
     public interface InterA {

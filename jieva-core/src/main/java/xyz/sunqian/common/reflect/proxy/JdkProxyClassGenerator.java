@@ -5,13 +5,12 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.base.system.SystemKit;
+import xyz.sunqian.common.base.system.JvmKit;
 import xyz.sunqian.common.base.value.Var;
 import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.reflect.BytesClassLoader;
 import xyz.sunqian.common.reflect.ClassKit;
 
-import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
@@ -21,6 +20,7 @@ import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * JDK dynamic proxy implementation for {@link ProxyClassGenerator}.
@@ -31,6 +31,16 @@ import java.util.Map;
  */
 @ThreadSafe
 public class JdkProxyClassGenerator implements ProxyClassGenerator {
+
+    /**
+     * An {@link Invocable} instance that does not support default method of java interface.
+     */
+    public static final @Nonnull Invocable UNSUPPORTED_DEFAULT_METHOD_INVOCABLE = (inst, args) -> {
+        throw new JdkProxyException(new UnsupportedOperationException(
+            "Current Java Runtime Environment does not support obtaining MethodHandle of default method: " +
+                JvmKit.jvmDescription()
+        ));
+    };
 
     private static final @Nonnull Object @Nonnull [] EMPTY_ARGS = {};
 
@@ -152,17 +162,13 @@ public class JdkProxyClassGenerator implements ProxyClassGenerator {
     }
 
     private static @Nonnull Invocable getDefaultMethodInvocable(@Nonnull Method method) throws Exception {
-        Class<?> declaringClass = method.getDeclaringClass();
-        MethodHandles.Lookup lookup = getDefaultMethodLookUp(method);
-        if (lookup == null) {
-            return (inst, args) -> {
-                throw new JdkProxyException(new UnsupportedOperationException(
-                    "The current JDK does not support obtaining the MethodHandle of the default method: " + SystemKit.getJavaVersion()
-                ));
-            };
-        }
-        MethodHandle methodHandle = lookup.unreflectSpecial(method, declaringClass);
-        return Invocable.of(methodHandle, false);
+        Optional<MethodHandles.Lookup> lookupOpt = LookUp.getLookUp(method);
+        return lookupOpt
+            .map(lookup ->
+                Jie.call(() -> lookup.unreflectSpecial(method, method.getDeclaringClass()), null)
+            )
+            .map(methodHandle -> Invocable.of(methodHandle, false))
+            .orElse(UNSUPPORTED_DEFAULT_METHOD_INVOCABLE);
     }
 
     /**
@@ -182,37 +188,36 @@ public class JdkProxyClassGenerator implements ProxyClassGenerator {
     }
 
     @JdkDependent
-    private static @Nullable MethodHandles.Lookup getDefaultMethodLookUp(@Nonnull Method method) throws Exception {
-        MethodHandles.Lookup lookup = null;
-        {
-            // works on JDK 8:
-            Constructor<MethodHandles.Lookup> constructor = DefaultHandleJdk8.constructor;
-            if (constructor != null) {
-                lookup = constructor.newInstance(method.getDeclaringClass());
-            }
-        }
-        {
-            // works on JDK 9+:
-            // lookup = MethodHandles.lookup();
-        }
-        return lookup;
-    }
+    private static final class LookUp {
 
-    //private static
+        // ========  works on JDK 8 ======== {
 
-    private static final class DefaultHandleJdk8 {
-
-        private static final Constructor<MethodHandles.Lookup> constructor = getLookUpConstructor();
+        private static final Optional<Constructor<MethodHandles.Lookup>> csOpt =
+            Optional.ofNullable(getLookUpConstructor());
 
         private static @Nullable Constructor<MethodHandles.Lookup> getLookUpConstructor() {
-            try {
+            return Jie.call(() -> {
                 Constructor<MethodHandles.Lookup> c = MethodHandles.Lookup.class
                     .getDeclaredConstructor(Class.class);
                 c.setAccessible(true);
                 return c;
-            } catch (NoSuchMethodException e) {
-                return null;
-            }
+            }, null);
         }
+
+        private static Optional<MethodHandles.Lookup> getLookUp(@Nonnull Method method) {
+            return csOpt.map(c ->
+                Jie.call(() -> c.newInstance(method.getDeclaringClass()), null)
+            );
+        }
+
+        // } ========  works on JDK 8 ========
+
+        // ========  works on JDK 9+ ======== {
+        //
+        // private static Optional<MethodHandles.Lookup> getLookUp(@Nonnull Method method) {
+        //     return Optional.of(MethodHandles.lookup());
+        // }
+
+        // } ========  works on JDK 9+ ========
     }
 }
