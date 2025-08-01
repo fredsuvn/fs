@@ -1,18 +1,18 @@
 /**
- * The package for IO operations.
+ * Provides utilities and interfaces for IO related.
  * <p>
- * Core IO Utilities Kit:
+ * Utilities Kits:
  * <ul>
  *     <li>{@link xyz.sunqian.common.io.IOKit}</li>
  *     <li>{@link xyz.sunqian.common.io.BufferKit}</li>
  * </ul>
  * <p>
- * Core IO Utilities Interfaces:
+ * Utilities Interfaces:
  * <ul>
  *     <li>{@link xyz.sunqian.common.io.IOOperator}</li>
  * </ul>
  * <p>
- * Core IO Interfaces:
+ * IO Interfaces:
  * <ul>
  *     <li>{@link xyz.sunqian.common.io.ByteReader}</li>
  *     <li>{@link xyz.sunqian.common.io.CharReader}</li>

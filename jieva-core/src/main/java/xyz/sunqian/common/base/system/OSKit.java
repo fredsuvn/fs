@@ -3,7 +3,7 @@ package xyz.sunqian.common.base.system;
 import xyz.sunqian.annotations.Nonnull;
 
 /**
- * OS utilities kit.
+ * Utilities kit for OS.
  *
  * @author sunqian
  */

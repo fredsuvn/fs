@@ -9,7 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * System utilities kit.
+ * Utilities kit for system.
  *
  * @author sunqian
  */

@@ -20,7 +20,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 
 /**
- * Static utilities kit for IO operations, some methods are provided by {@link IOOperator}.
+ * Utilities kit for IO related, some methods are provided by {@link IOOperator}.
  *
  * @author sunqian
  */

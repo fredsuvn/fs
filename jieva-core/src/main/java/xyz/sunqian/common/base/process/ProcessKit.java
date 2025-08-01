@@ -6,7 +6,7 @@ import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.task.TaskState;
 
 /**
- * Static utility class for process.
+ * Utilities kit for process.
  *
  * @author sunqian
  */

@@ -1,7 +1,7 @@
 /**
- * Provides base exceptions.
+ * Provides utilities and common exceptions.
  * <p>
- * Utilities:
+ * Utilities Kits:
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.exception.ThrowKit}</li>
  * </ul>

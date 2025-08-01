@@ -1,11 +1,12 @@
 /**
- * Provides interfaces and classes for char and charset.
+ * Provides utilities and interfaces for char and charset.
  * <p>
- * Utilities:
+ * Utilities Kits:
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.chars.CharsKit}</li>
  * </ul>
- * Core Interfaces and Classes:
+ * <p>
+ * Interfaces:
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.chars.CharsBuilder}</li>
  * </ul>

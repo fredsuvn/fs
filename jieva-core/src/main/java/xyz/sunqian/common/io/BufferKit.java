@@ -15,7 +15,7 @@ import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
 
 /**
- * Static utility class for {@link Buffer}.
+ * Utilities kit for {@link Buffer} related.
  *
  * @author sunqian
  */

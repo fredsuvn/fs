@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.RandomAccess;
 
 /**
- * Static utility class for {@link List}.
+ * Utilities kit for {@link List}.
  *
  * @author sunqian
  */

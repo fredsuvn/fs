@@ -1,7 +1,12 @@
 /**
- * The package for cache.
+ * Provides utilities and interfaces for cache.
  * <p>
- * Core cache interfaces:
+ * Utilities Kits:
+ * <ul>
+ *     <li></li>
+ * </ul>
+ * <p>
+ * Interfaces:
  * <ul>
  *     <li>{@link xyz.sunqian.common.cache.SimpleCache}</li>
  * </ul>

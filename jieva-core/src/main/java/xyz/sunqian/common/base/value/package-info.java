@@ -1,7 +1,12 @@
 /**
- * Provides classes and interfaces for values and variables.
+ * Provides utilities and interfaces for value and variable.
  * <p>
- * Core Interfaces:
+ * Utilities Kits:
+ * <ul>
+ *     <li></li>
+ * </ul>
+ * <p>
+ * Interfaces:
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.value.Val};</li>
  *     <li>{@link xyz.sunqian.common.base.value.Var};</li>

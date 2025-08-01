@@ -16,7 +16,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Static utility class for {@link Map}.
+ * Utilities kit for {@link Map}.
  *
  * @author sunqian
  */

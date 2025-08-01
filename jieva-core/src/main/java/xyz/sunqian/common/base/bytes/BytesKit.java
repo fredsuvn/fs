@@ -6,7 +6,7 @@ import xyz.sunqian.annotations.Nullable;
 import java.nio.ByteBuffer;
 
 /**
- * Static utility class for {@code byte} and {@code byte array}.
+ * Utilities kit for {@code byte} and {@code byte array}.
  *
  * @author sunqian
  */

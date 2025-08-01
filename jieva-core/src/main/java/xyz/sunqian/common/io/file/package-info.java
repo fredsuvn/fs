@@ -1,12 +1,12 @@
 /**
- * The package for file and path.
+ * Provides utilities and interfaces for file and path.
  * <p>
- * Core File Utilities Kit:
+ * Utilities Kits:
  * <ul>
  *     <li>{@link xyz.sunqian.common.io.file.FileKit}</li>
  * </ul>
  * <p>
- * Core File Interfaces:
+ * Interfaces:
  * <ul>
  *     <li>{@link xyz.sunqian.common.io.file.FileRef}</li>
  * </ul>

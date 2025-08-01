@@ -15,7 +15,7 @@ import java.util.StringJoiner;
 import java.util.function.Supplier;
 
 /**
- * Utilities for String/CharSequence.
+ * Utilities kit for string related.
  *
  * @author fredsuvn
  */

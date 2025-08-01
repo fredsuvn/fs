@@ -1,12 +1,12 @@
 /**
- * The package for thread.
+ * Provides utilities and interfaces for thread.
  * <p>
- * Utilities for thread:
+ * Utilities Kits:
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.thread.ThreadKit}</li>
  * </ul>
  * <p>
- * Interfaces for thread:
+ * Interfaces:
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.thread.ThreadGate}</li>
  * </ul>

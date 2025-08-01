@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
- * Static utility class for {@link Stream}.
+ * Utilities kit for {@link Stream}.
  *
  * @author sunqian
  */

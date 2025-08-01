@@ -21,7 +21,7 @@ import java.util.Date;
 import java.util.function.Supplier;
 
 /**
- * Utilities for time and date.
+ * Utilities kit for time and date.
  *
  * @author sunqian
  */

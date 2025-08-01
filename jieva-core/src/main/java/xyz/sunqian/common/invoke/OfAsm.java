@@ -1,17 +1,14 @@
 package xyz.sunqian.common.invoke;
 
-import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.annotations.SimpleClass;
 import xyz.sunqian.common.asm.AsmKit;
 import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.system.JvmKit;
 import xyz.sunqian.common.reflect.BytesClassLoader;
 import xyz.sunqian.common.reflect.ClassKit;
-import xyz.sunqian.common.base.system.JvmKit;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
@@ -35,9 +32,6 @@ final class OfAsm {
     //     () -> JieJvm.getDescriptor(InvocationException.class.getConstructor(Throwable.class)),
     //     InvocationException::new
     // );
-
-    private static final @Nonnull String SIMPLE_DESC = JvmKit.getDescriptor(SimpleClass.class);
-    private static final @Nonnull String IMMUTABLE_DESC = JvmKit.getDescriptor(Immutable.class);
 
     private static final @Nonnull AtomicLong classCounter = new AtomicLong();
 
@@ -80,14 +74,6 @@ final class OfAsm {
             AsmKit.OBJECT_NAME,
             INTERFACES
         );
-        {
-            AnnotationVisitor visitor = classWriter.visitAnnotation(SIMPLE_DESC, true);
-            visitor.visitEnd();
-        }
-        {
-            AnnotationVisitor visitor = classWriter.visitAnnotation(IMMUTABLE_DESC, true);
-            visitor.visitEnd();
-        }
         {
             MethodVisitor visitor = classWriter.visitMethod(
                 Opcodes.ACC_PUBLIC,

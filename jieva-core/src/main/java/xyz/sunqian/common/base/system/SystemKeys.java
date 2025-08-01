@@ -234,11 +234,16 @@ public class SystemKeys {
     public static final @Nonnull String FILE_ENCODING = "file.encoding";
 
     /**
-     * Returns an immutable set of all keys in this class.
+     * Returns an immutable set which contains all keys in this class.
      *
-     * @return an immutable set of all keys in this class
+     * @return an immutable set which contains all keys in this class
      */
     public static @Nonnull Set<@Nonnull String> keyset() {
+
+        // The reason for writing this method is that:
+        //   if this class only has fields and no methods, the test coverage will not reach 100%.
+        // What can I say, man!
+
         return SetKit.set(
             JAVA_VERSION,
             JAVA_VENDOR,
