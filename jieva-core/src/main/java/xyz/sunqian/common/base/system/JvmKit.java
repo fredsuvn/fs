@@ -1,9 +1,10 @@
-package xyz.sunqian.common.reflect;
+package xyz.sunqian.common.base.system;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
+import xyz.sunqian.common.reflect.TypeKit;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
@@ -17,11 +18,66 @@ import java.lang.reflect.WildcardType;
 import java.util.Objects;
 
 /**
- * Static utility class for {@code JVM}.
+ * JVM utilities kit.
  *
  * @author sunqian
  */
 public class JvmKit {
+
+    /**
+     * Returns the major version of current Java Runtime Environment version.
+     * <p>
+     * If the version {@code <= 1.8}, returns the second version number (such as {@code 6} for {@code 1.6.x}, {@code 8}
+     * for {@code 1.8.x}). Otherwise, returns the first number (such as {@code 9} for {@code 9.x}, {@code 17} for
+     * {@code 17-ea.x}).
+     * <p>
+     * Returns -1 if obtain failed.
+     *
+     * @return the major version of current Java Runtime Environment version
+     */
+    public static int javaMajorVersion() {
+        return javaMajorVersion(SystemKit.getJavaVersion());
+    }
+
+    /**
+     * Returns the major version of the specified Java Runtime Environment version.
+     * <p>
+     * If the version {@code <= 1.8}, returns the second version number (such as {@code 6} for {@code 1.6.x}, {@code 8}
+     * for {@code 1.8.x}). Otherwise, returns the first number (such as {@code 9} for {@code 9.x}, {@code 17} for
+     * {@code 17-ea.x}).
+     * <p>
+     * Returns -1 if obtain failed.
+     *
+     * @param version the specified Java Runtime Environment version
+     * @return the major version of the specified Java Runtime Environment version
+     */
+    public static int javaMajorVersion(@Nonnull String version) {
+        try {
+            int dot1 = version.indexOf('.');
+            if (dot1 < 0) {
+                return versionToNumber(version);
+            }
+            int firstNum = versionToNumber(version.substring(0, dot1));
+            if (firstNum >= 9) {
+                return firstNum;
+            }
+            int dot2 = version.indexOf('.', dot1 + 1);
+            if (dot2 < 0) {
+                return versionToNumber(version.substring(dot1 + 1));
+            }
+            return versionToNumber(version.substring(dot1 + 1, dot2));
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
+    private static int versionToNumber(@Nonnull String version) {
+        int dashDot = version.indexOf('-');
+        if (dashDot < 0) {
+            return Integer.parseInt(version);
+        }
+        return Integer.parseInt(version.substring(0, dashDot));
+    }
 
     /**
      * Returns the internal name of the given class. The internal name of a class is its fully qualified name, as

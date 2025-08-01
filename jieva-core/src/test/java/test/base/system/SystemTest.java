@@ -8,6 +8,8 @@ import xyz.sunqian.test.PrintTest;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.testng.Assert.assertEquals;
@@ -18,9 +20,11 @@ public class SystemTest implements PrintTest {
     public void testSystemProperties() throws Exception {
         printFor("JDK description", SystemKit.jdkDescription());
         Field[] keyFields = SystemKeys.class.getFields();
+        Set<String> keyset = new LinkedHashSet<>();
         for (Field keyField : keyFields) {
             String fieldName = keyField.getName();
             String key = (String) keyField.get(null);
+            keyset.add(key);
             String getterName = "get" + Arrays.stream(fieldName.split("_")).map(w -> {
                 if (w.equals("IO")) {
                     return w;
@@ -31,10 +35,7 @@ public class SystemTest implements PrintTest {
             assertEquals(getter.invoke(null), System.getProperty(key));
             printFor(key, getter.invoke(null));
         }
-    }
-
-    @Test
-    public void testJavaVersion() throws Exception {
-        printFor("JDK major version", SystemKit.jdkMajorVersion());
+        assertEquals(SystemKeys.keyset(), keyset);
+        assertEquals(SystemKit.getProperties(), System.getProperties());
     }
 }

@@ -5,7 +5,6 @@
  * <ul>
  *     <li>{@link xyz.sunqian.common.reflect.TypeKit}</li>
  *     <li>{@link xyz.sunqian.common.reflect.ClassKit}</li>
- *     <li>{@link xyz.sunqian.common.reflect.JvmKit}</li>
  * </ul>
  * <p>
  * Helper Classes and Interfaces:

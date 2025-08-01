@@ -11,7 +11,7 @@ import xyz.sunqian.common.asm.AsmKit;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.reflect.BytesClassLoader;
 import xyz.sunqian.common.reflect.ClassKit;
-import xyz.sunqian.common.reflect.JvmKit;
+import xyz.sunqian.common.base.system.JvmKit;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;

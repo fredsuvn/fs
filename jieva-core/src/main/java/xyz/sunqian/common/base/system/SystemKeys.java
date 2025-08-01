@@ -1,6 +1,9 @@
 package xyz.sunqian.common.base.system;
 
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.common.collect.SetKit;
+
+import java.util.Set;
 
 /**
  * Provides keys of system properties. Most of them are standard keys which always have values, but some are not.
@@ -229,4 +232,45 @@ public class SystemKeys {
      * This is not a standard key.
      */
     public static final @Nonnull String FILE_ENCODING = "file.encoding";
+
+    /**
+     * Returns an immutable set of all keys in this class.
+     *
+     * @return an immutable set of all keys in this class
+     */
+    public static @Nonnull Set<@Nonnull String> keyset() {
+        return SetKit.set(
+            JAVA_VERSION,
+            JAVA_VENDOR,
+            JAVA_VENDOR_URL,
+            JAVA_HOME,
+            JAVA_VM_SPECIFICATION_VERSION,
+            JAVA_SPECIFICATION_MAINTENANCE_VERSION,
+            JAVA_VM_SPECIFICATION_VENDOR,
+            JAVA_VM_SPECIFICATION_NAME,
+            JAVA_VM_VERSION,
+            JAVA_VM_VENDOR,
+            JAVA_VM_NAME,
+            JAVA_SPECIFICATION_VERSION,
+            JAVA_SPECIFICATION_VENDOR,
+            JAVA_SPECIFICATION_NAME,
+            JAVA_CLASS_VERSION,
+            JAVA_CLASS_PATH,
+            JAVA_LIBRARY_PATH,
+            JAVA_IO_TMPDIR,
+            JAVA_COMPILER,
+            JAVA_EXT_DIRS,
+            OS_NAME,
+            OS_ARCH,
+            OS_VERSION,
+            FILE_SEPARATOR,
+            PATH_SEPARATOR,
+            LINE_SEPARATOR,
+            USER_NAME,
+            USER_HOME,
+            USER_DIR,
+            NATIVE_ENCODING,
+            FILE_ENCODING
+        );
+    }
 }

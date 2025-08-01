@@ -1,4 +1,4 @@
-package test.reflect;
+package test.base.system;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -6,12 +6,14 @@ import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.testng.annotations.Test;
+import test.reflect.TypeTest;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
-import xyz.sunqian.common.reflect.JvmException;
-import xyz.sunqian.common.reflect.JvmKit;
+import xyz.sunqian.common.base.system.JvmException;
+import xyz.sunqian.common.base.system.JvmKit;
 import xyz.sunqian.common.reflect.TypeKit;
 import xyz.sunqian.test.AssertTest;
+import xyz.sunqian.test.PrintTest;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -27,7 +29,20 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
-public class JvmTest implements AssertTest {
+public class JvmTest implements AssertTest, PrintTest {
+
+    @Test
+    public void testJavaVersion() {
+        printFor("JDK major version", JvmKit.javaMajorVersion());
+        assertEquals(JvmKit.javaMajorVersion("1.8.0_452"), 8);
+        assertEquals(JvmKit.javaMajorVersion("25"), 25);
+        assertEquals(JvmKit.javaMajorVersion("25.0.0-ea"), 25);
+        assertEquals(JvmKit.javaMajorVersion("17-ea"), 17);
+        assertEquals(JvmKit.javaMajorVersion("21-preview"), 21);
+        assertEquals(JvmKit.javaMajorVersion("1.8"), 8);
+        assertEquals(JvmKit.javaMajorVersion("1.8-ea"), 8);
+        assertEquals(JvmKit.javaMajorVersion("1.ea"), -1);
+    }
 
     @Test
     public void testInternalName() throws Exception {

@@ -8,7 +8,7 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.collect.ArrayKit;
 import xyz.sunqian.common.reflect.ClassKit;
-import xyz.sunqian.common.reflect.JvmKit;
+import xyz.sunqian.common.base.system.JvmKit;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
