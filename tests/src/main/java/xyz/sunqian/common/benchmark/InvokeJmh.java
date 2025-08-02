@@ -18,12 +18,12 @@
 // import java.util.concurrent.TimeUnit;
 //
 // @BenchmarkMode(Mode.Throughput)
-// @Warmup(iterations = 3, time = 3, timeUnit = TimeUnit.SECONDS)
-// @Measurement(iterations = 3, time = 3, timeUnit = TimeUnit.SECONDS)
-// @Fork(5)
-// // @Warmup(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)
-// // @Measurement(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)
-// // @Fork(1)
+// // @Warmup(iterations = 3, time = 3, timeUnit = TimeUnit.SECONDS)
+// // @Measurement(iterations = 3, time = 3, timeUnit = TimeUnit.SECONDS)
+// // @Fork(5)
+// @Warmup(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)
+// @Measurement(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)
+// @Fork(1)
 // @State(value = Scope.Benchmark)
 // @OutputTimeUnit(TimeUnit.MILLISECONDS)
 // public class InvokeJmh {
