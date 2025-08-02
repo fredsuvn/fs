@@ -15,10 +15,13 @@ import java.util.function.Function;
  * This interface is a simplified key-value pair cache interface (implementations must be thread-safe). It only provides
  * get, put, remove and clean operations, and supports null value but does not allow null key. It is suitable for
  * scenarios that require simple cache operations and do not care about the cache lifecycle.
+ * <p>
+ * It is recommended to use the skeletal implementation: {@link AbstractSimpleCache}.
  *
  * @param <K> the key type
  * @param <V> the value type
  * @author sunqian
+ * @see AbstractSimpleCache
  */
 @ThreadSafe
 public interface SimpleCache<K, V> {

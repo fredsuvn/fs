@@ -1,7 +1,11 @@
 package test.cache;
 
 import org.testng.annotations.Test;
+import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.value.BooleanVar;
 import xyz.sunqian.common.base.value.Val;
+import xyz.sunqian.common.cache.AbstractSimpleCache;
 import xyz.sunqian.common.cache.SimpleCache;
 import xyz.sunqian.test.DataTest;
 import xyz.sunqian.test.PrintTest;
@@ -16,6 +20,7 @@ import java.util.stream.Collectors;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertSame;
 
 public class CacheTest implements PrintTest, DataTest {
 
@@ -69,80 +74,44 @@ public class CacheTest implements PrintTest, DataTest {
         assertNull(cache.getVal(2));
         assertNull(cache.getVal(3));
         assertNull(cache.getVal(4));
-
-        // compute
-        testMapCompute(cache, 100);
-        testMapComputeVal(cache, 200);
-        testMapCompute(cache, 300);
-        testMapComputeVal(cache, 400);
     }
 
-    private void testMapCompute(SimpleCache<Integer, Integer> cache, int value) throws Exception {
-        CountDownLatch enterLatch = new CountDownLatch(1);
-        CountDownLatch startLatch = new CountDownLatch(1);
-        Thread thread1 = new Thread(() -> {
-            cache.get(value, k -> {
-                try {
-                    enterLatch.countDown();
-                    startLatch.await();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                return value;
-            });
-        });
-        Thread thread2 = new Thread(() -> {
-            cache.get(value, k -> {
-                try {
-                    enterLatch.countDown();
-                    startLatch.await();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                return value;
-            });
-        });
-        thread1.start();
-        thread2.start();
-        enterLatch.await();
-        startLatch.countDown();
-        thread1.join();
-        thread2.join();
-        assertEquals(cache.get(value), value);
-    }
+    @Test
+    public void testAbsImpl() throws Exception {
+        BooleanVar bv = BooleanVar.of(false);
+        String hello = "hello";
+        class XCache extends AbstractSimpleCache<Object, Object> {
 
-    private void testMapComputeVal(SimpleCache<Integer, Integer> cache, int value) throws Exception {
-        CountDownLatch enterLatch = new CountDownLatch(1);
-        CountDownLatch startLatch = new CountDownLatch(1);
-        Thread thread1 = new Thread(() -> {
-            cache.getVal(value, k -> {
-                try {
-                    enterLatch.countDown();
-                    startLatch.await();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                return Val.of(value);
-            });
-        });
-        Thread thread2 = new Thread(() -> {
-            cache.getVal(value, k -> {
-                try {
-                    enterLatch.countDown();
-                    startLatch.await();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                return Val.of(value);
-            });
-        });
-        thread1.start();
-        thread2.start();
-        enterLatch.await();
-        startLatch.countDown();
-        thread1.join();
-        thread2.join();
-        assertEquals(cache.get(value), value);
+            @Override
+            public void clean() {
+            }
+
+            @Override
+            protected @Nonnull Value<Object> generate(@Nonnull Object key, @Nonnull Object value) {
+                return new Value<Object>() {
+                    @Override
+                    public @Nonnull Object key() {
+                        return key;
+                    }
+
+                    @Override
+                    public @Nullable Object refValue() {
+                        if (bv.getAndToggle()) {
+                            return hello;
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    public void invalid() {
+                    }
+                };
+            }
+        }
+        XCache xc = new XCache();
+        xc.put(1, 1);
+        assertSame(xc.get(1, k -> 2), hello);
+        assertSame(xc.getVal(1, k -> Val.of(2)).get(), hello);
     }
 
     @Test
