@@ -25,7 +25,7 @@ import xyz.sunqian.common.mapping.MappingOptions;
 import xyz.sunqian.common.reflect.TypeRef;
 import xyz.sunqian.common.task.RunReceipt;
 import xyz.sunqian.common.task.TaskExecutor;
-import xyz.sunqian.common.task.TaskReceipt;
+import xyz.sunqian.common.task.CallReceipt;
 import xyz.sunqian.common.task.TaskSubmissionException;
 
 import java.io.IOException;
@@ -1103,7 +1103,7 @@ public class Jie {
      * @return the receipt of the task
      * @throws TaskSubmissionException if an error occurs during submitting
      */
-    public static <T> @Nonnull TaskReceipt<T> execute(
+    public static <T> @Nonnull CallReceipt<T> execute(
         @Nonnull Callable<? extends T> task
     ) throws TaskSubmissionException {
         return TaskExecutor.defaultExecutor().submit(task);
@@ -1131,7 +1131,7 @@ public class Jie {
      * @return the receipt of the task
      * @throws TaskSubmissionException if an error occurs during submitting
      */
-    public static <T> @Nonnull TaskReceipt<T> schedule(
+    public static <T> @Nonnull CallReceipt<T> schedule(
         @Nonnull Callable<? extends T> task,
         @Nonnull Duration delay
     ) throws TaskSubmissionException {
@@ -1160,7 +1160,7 @@ public class Jie {
      * @return the receipt of the task
      * @throws TaskSubmissionException if an error occurs during submitting
      */
-    public static <T> @Nonnull TaskReceipt<T> scheduleAt(
+    public static <T> @Nonnull CallReceipt<T> scheduleAt(
         @Nonnull Callable<? extends T> task,
         @Nonnull Instant time
     ) throws TaskSubmissionException {

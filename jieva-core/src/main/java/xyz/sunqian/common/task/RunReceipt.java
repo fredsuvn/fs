@@ -7,7 +7,7 @@ import java.time.Duration;
 
 /**
  * This interface represents a receipt for a submitted task that has no return value. It can be used to track the
- * progress and status of the task. That is, this a no return version of {@link TaskReceipt}.
+ * progress and status of the task. That is, this a no return version of {@link CallReceipt}.
  *
  * @author sunqian
  */

@@ -161,49 +161,49 @@ public interface TaskExecutor {
     RunReceipt submit(@Nonnull Runnable task) throws TaskSubmissionException;
 
     /**
-     * Submits the given task to this executor, returns a {@link TaskReceipt} for the task.
+     * Submits the given task to this executor, returns a {@link CallReceipt} for the task.
      *
      * @param task the given task
      * @param <T>  the type of the task result
      * @return the receipt of the task
      * @throws TaskSubmissionException if an error occurs during submitting
      */
-    <T> @Nonnull TaskReceipt<T> submit(@Nonnull Callable<? extends T> task) throws TaskSubmissionException;
+    <T> @Nonnull CallReceipt<T> submit(@Nonnull Callable<? extends T> task) throws TaskSubmissionException;
 
     /**
-     * Executes the given tasks, returning a list of {@link TaskReceipt} holding their status and results when all tasks
-     * are done ({@link TaskReceipt#isDone()} is {@code true} for each element of the returned list). Note that
+     * Executes the given tasks, returning a list of {@link CallReceipt} holding their status and results when all tasks
+     * are done ({@link CallReceipt#isDone()} is {@code true} for each element of the returned list). Note that
      * '{@code done}' does not necessarily mean {@link TaskState#SUCCEEDED}.
      *
      * @param tasks the given tasks
      * @param <T>   the type of the task result
-     * @return a list of {@link TaskReceipt} of the given tasks, in the same order
+     * @return a list of {@link CallReceipt} of the given tasks, in the same order
      * @throws AwaitingException if an error occurs during the awaiting
      */
-    <T> @Nonnull List<@Nonnull TaskReceipt<T>> executeAll(
+    <T> @Nonnull List<@Nonnull CallReceipt<T>> executeAll(
         @RetainedParam @Nonnull Collection<? extends @Nonnull Callable<? extends T>> tasks
     ) throws AwaitingException;
 
     /**
-     * Executes the given tasks, returning a list of {@link TaskReceipt} holding their status and results when all tasks
-     * are done ({@link TaskReceipt#isDone()} is {@code true} for each element of the returned list) or the specified
+     * Executes the given tasks, returning a list of {@link CallReceipt} holding their status and results when all tasks
+     * are done ({@link CallReceipt#isDone()} is {@code true} for each element of the returned list) or the specified
      * waiting time elapses. Upon return, tasks that have not done are cancelled. Note that '{@code done}' does not
      * necessarily mean {@link TaskState#SUCCEEDED}.
      *
      * @param tasks    the given tasks
      * @param duration the maximum time to wait
      * @param <T>      the type of the task result
-     * @return a list of {@link TaskReceipt} of the given tasks, in the same order
+     * @return a list of {@link CallReceipt} of the given tasks, in the same order
      * @throws AwaitingException if an error occurs during the awaiting
      */
-    <T> @Nonnull List<@Nonnull TaskReceipt<T>> executeAll(
+    <T> @Nonnull List<@Nonnull CallReceipt<T>> executeAll(
         @RetainedParam @Nonnull Collection<? extends @Nonnull Callable<? extends T>> tasks,
         @Nonnull Duration duration
     ) throws AwaitingException;
 
     /**
      * Executes the given tasks, returning the result of one that has completed successfully
-     * ({@link TaskReceipt#getState()} is {@link TaskState#SUCCEEDED}), if any do. Upon normal or exceptional return,
+     * ({@link CallReceipt#getState()} is {@link TaskState#SUCCEEDED}), if any do. Upon normal or exceptional return,
      * tasks that have not done are cancelled.
      *
      * @param tasks the given tasks
@@ -217,7 +217,7 @@ public interface TaskExecutor {
 
     /**
      * Executes the given tasks, returning the result of one that has completed successfully
-     * ({@link TaskReceipt#getState()} is {@link TaskState#SUCCEEDED}), if any do before the given timeout elapses. Upon
+     * ({@link CallReceipt#getState()} is {@link TaskState#SUCCEEDED}), if any do before the given timeout elapses. Upon
      * normal or exceptional return, tasks that have not done are cancelled.
      *
      * @param tasks    the given tasks
@@ -326,7 +326,7 @@ public interface TaskExecutor {
     RunReceipt schedule(@Nonnull Runnable task, @Nonnull Duration delay) throws TaskSubmissionException;
 
     /**
-     * Schedules the given task with a specified delay time from now, returns a {@link TaskReceipt} for the task. The
+     * Schedules the given task with a specified delay time from now, returns a {@link CallReceipt} for the task. The
      * task becomes enabled after the given delay.
      * <p>
      * NOTE: This method requires that the current implementation supports scheduling.
@@ -337,7 +337,7 @@ public interface TaskExecutor {
      * @return the receipt of the task
      * @throws TaskSubmissionException if an error occurs during submitting
      */
-    <T> @Nonnull TaskReceipt<T> schedule(
+    <T> @Nonnull CallReceipt<T> schedule(
         @Nonnull Callable<? extends T> task,
         @Nonnull Duration delay
     ) throws TaskSubmissionException;
@@ -376,7 +376,7 @@ public interface TaskExecutor {
      * @return the receipt of the task
      * @throws TaskSubmissionException if an error occurs during submitting
      */
-    default <T> @Nonnull TaskReceipt<T> scheduleAt(
+    default <T> @Nonnull CallReceipt<T> scheduleAt(
         @Nonnull Callable<? extends T> task,
         @Nonnull Instant time
     ) throws TaskSubmissionException {

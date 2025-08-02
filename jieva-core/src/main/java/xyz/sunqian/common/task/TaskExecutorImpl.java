@@ -94,18 +94,18 @@ final class TaskExecutorImpl implements TaskExecutor {
     }
 
     @Override
-    public @Nonnull <T> TaskReceipt<T> submit(@Nonnull Callable<? extends T> task) throws TaskSubmissionException {
+    public @Nonnull <T> CallReceipt<T> submit(@Nonnull Callable<? extends T> task) throws TaskSubmissionException {
         try {
             CallableTask<T> absWork = new CallableTask<>(Objects.requireNonNull(task));
             Future<T> future = service.submit(absWork.asCallable());
-            return new TaskReceiptImpl<>(future, absWork);
+            return new CallReceiptImpl<>(future, absWork);
         } catch (Exception e) {
             throw new TaskSubmissionException(e);
         }
     }
 
     @Override
-    public @Nonnull <T> List<@Nonnull TaskReceipt<T>> executeAll(
+    public @Nonnull <T> List<@Nonnull CallReceipt<T>> executeAll(
         @RetainedParam @Nonnull Collection<? extends @Nonnull Callable<? extends T>> tasks
     ) throws AwaitingException {
         try {
@@ -118,7 +118,7 @@ final class TaskExecutorImpl implements TaskExecutor {
     }
 
     @Override
-    public @Nonnull <T> List<@Nonnull TaskReceipt<T>> executeAll(
+    public @Nonnull <T> List<@Nonnull CallReceipt<T>> executeAll(
         @RetainedParam @Nonnull Collection<? extends @Nonnull Callable<? extends T>> tasks,
         @Nonnull Duration duration
     ) throws AwaitingException {
@@ -164,14 +164,14 @@ final class TaskExecutorImpl implements TaskExecutor {
         return stream.collect(Collectors.toList());
     }
 
-    private <T> @Nonnull List<@Nonnull TaskReceipt<T>> futuresToReceipts(
+    private <T> @Nonnull List<@Nonnull CallReceipt<T>> futuresToReceipts(
         @Nonnull List<@Nonnull Future<T>> futureList,
         @Nonnull List<@Nonnull Task<T>> taskList
     ) {
-        List<@Nonnull TaskReceipt<T>> result = new ArrayList<>(futureList.size());
+        List<@Nonnull CallReceipt<T>> result = new ArrayList<>(futureList.size());
         int c = 0;
         for (@Nonnull Future<T> future : futureList) {
-            result.add(new TaskReceiptImpl<>(future, taskList.get(c++)));
+            result.add(new CallReceiptImpl<>(future, taskList.get(c++)));
         }
         return result;
     }
@@ -247,7 +247,7 @@ final class TaskExecutorImpl implements TaskExecutor {
     }
 
     @Override
-    public @Nonnull <T> TaskReceipt<T> schedule(
+    public @Nonnull <T> CallReceipt<T> schedule(
         @Nonnull Callable<? extends T> task, @Nonnull Duration delay
     ) throws TaskSubmissionException {
         try {
@@ -255,7 +255,7 @@ final class TaskExecutorImpl implements TaskExecutor {
             CallableTask<T> absWork = new CallableTask<>(Objects.requireNonNull(task));
             ScheduledFuture<T> future = scheduledService.schedule(
                 (Callable<T>) absWork, delay.toNanos(), TimeUnit.NANOSECONDS);
-            return new TaskReceiptImpl<>(future, absWork);
+            return new CallReceiptImpl<>(future, absWork);
         } catch (Exception e) {
             throw new TaskSubmissionException(e);
         }
@@ -481,14 +481,14 @@ final class TaskExecutorImpl implements TaskExecutor {
         }
     }
 
-    private static final class TaskReceiptImpl<T> extends AbsReceipt implements TaskReceipt<T> {
+    private static final class CallReceiptImpl<T> extends AbsReceipt implements CallReceipt<T> {
 
-        private TaskReceiptImpl(@Nonnull Future<T> future, Task<T> task) {
+        private CallReceiptImpl(@Nonnull Future<T> future, Task<T> task) {
             super(future, task);
         }
 
         @Override
-        public @Nullable T getResult() throws AwaitingException {
+        public @Nullable T await() throws AwaitingException {
             return doAwait(() -> {
                 Future<T> future = getFuture();
                 return future.get();
@@ -496,7 +496,7 @@ final class TaskExecutorImpl implements TaskExecutor {
         }
 
         @Override
-        public @Nullable T getResult(long millis) throws AwaitingException {
+        public @Nullable T await(long millis) throws AwaitingException {
             return doAwait(() -> {
                 Future<T> future = getFuture();
                 return future.get(millis, TimeUnit.MILLISECONDS);
@@ -504,7 +504,7 @@ final class TaskExecutorImpl implements TaskExecutor {
         }
 
         @Override
-        public @Nullable T getResult(@Nonnull Duration duration) throws AwaitingException {
+        public @Nullable T await(@Nonnull Duration duration) throws AwaitingException {
             return doAwait(() -> {
                 Future<T> future = getFuture();
                 return future.get(duration.toNanos(), TimeUnit.NANOSECONDS);

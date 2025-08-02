@@ -6,7 +6,7 @@ import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.exception.AwaitingException;
 import xyz.sunqian.common.io.IOKit;
-import xyz.sunqian.common.task.TaskReceipt;
+import xyz.sunqian.common.task.CallReceipt;
 import xyz.sunqian.common.task.TaskState;
 
 import java.io.InputStream;
@@ -17,12 +17,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * This interface is the implementation of {@link TaskReceipt}, represents the receipt for a submitted {@link Process},
+ * This interface is the implementation of {@link CallReceipt}, represents the receipt for a submitted {@link Process},
  * to track the status of the process.
  *
  * @author sunqian
  */
-public interface ProcessReceipt extends TaskReceipt<Integer> {
+public interface ProcessReceipt extends CallReceipt<Integer> {
 
     /**
      * Returns the process of this receipt.
@@ -63,7 +63,7 @@ public interface ProcessReceipt extends TaskReceipt<Integer> {
      * @throws AwaitingException if the current thread is interrupted or an error occurs while awaiting
      */
     @Override
-    default @Nonnull Integer getResult() throws AwaitingException {
+    default @Nonnull Integer await() throws AwaitingException {
         Process process = getProcess();
         Jie.uncheck(() -> process.waitFor(), AwaitingException::new);
         return process.exitValue();
@@ -79,7 +79,7 @@ public interface ProcessReceipt extends TaskReceipt<Integer> {
      *                           error occurs while awaiting
      */
     @Override
-    default @Nonnull Integer getResult(long millis) throws AwaitingException {
+    default @Nonnull Integer await(long millis) throws AwaitingException {
         Process process = getProcess();
         boolean exited = Jie.uncheck(
             () -> process.waitFor(millis, TimeUnit.MILLISECONDS),
@@ -101,7 +101,7 @@ public interface ProcessReceipt extends TaskReceipt<Integer> {
      *                           error occurs while awaiting
      */
     @Override
-    default @Nonnull Integer getResult(@Nonnull Duration duration) throws AwaitingException {
+    default @Nonnull Integer await(@Nonnull Duration duration) throws AwaitingException {
         Process process = getProcess();
         boolean exited = Jie.uncheck(
             () -> process.waitFor(duration.toNanos(), TimeUnit.NANOSECONDS),
@@ -115,7 +115,7 @@ public interface ProcessReceipt extends TaskReceipt<Integer> {
 
     /**
      * Cancels and destroys the process forcibly (equivalent to {@code cancel(true)}). This method returns immediately
-     * without waiting for the process to exit. If necessary, use {@link #getResult()}/{@link #getResult(Duration)}
+     * without waiting for the process to exit. If necessary, use {@link #await()}/{@link #await(Duration)}
      * after invoking this method to ensure the termination of the process.
      * <p>
      * This method always returns {@code true}.
@@ -129,7 +129,7 @@ public interface ProcessReceipt extends TaskReceipt<Integer> {
 
     /**
      * Cancels and destroys the process. This method returns immediately without waiting for the process to exit. If
-     * necessary, use {@link #getResult()}/{@link #getResult(Duration)} after invoking this method to ensure the
+     * necessary, use {@link #await()}/{@link #await(Duration)} after invoking this method to ensure the
      * termination of the process. The {@code forcibly} specifies whether destroys forcibly. If the {@code forcibly} is
      * {@code false}, this method does not guarantee successful termination of the process.
      * <p>

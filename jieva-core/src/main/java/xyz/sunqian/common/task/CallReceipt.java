@@ -7,13 +7,13 @@ import xyz.sunqian.common.base.exception.AwaitingException;
 import java.time.Duration;
 
 /**
- * This interface represents a receipt for a submitted task. It can be used to track the progress and status of the
- * task, and retrieve the task result.
+ * This interface represents a receipt for a submitted task that has a return value. It can be used to track the
+ * progress and status of the task, and retrieve the task result.
  *
  * @param <T> the type of the task result
  * @author sunqian
  */
-public interface TaskReceipt<T> extends BaseReceipt {
+public interface CallReceipt<T> extends BaseReceipt {
 
     /**
      * Blocks the current thread until the task is completed or canceled, returns the result.
@@ -25,7 +25,7 @@ public interface TaskReceipt<T> extends BaseReceipt {
      * @throws AwaitingException if the current thread is interrupted or an error occurs while awaiting
      */
     @Nullable
-    T getResult() throws AwaitingException;
+    T await() throws AwaitingException;
 
     /**
      * Blocks the current thread until the task is completed or canceled, or the specified waiting time elapses. Returns
@@ -40,7 +40,7 @@ public interface TaskReceipt<T> extends BaseReceipt {
      *                           error occurs while awaiting
      */
     @Nullable
-    T getResult(long millis) throws AwaitingException;
+    T await(long millis) throws AwaitingException;
 
     /**
      * Blocks the current thread until the task is completed or canceled, or the specified waiting time elapses. Returns
@@ -55,5 +55,5 @@ public interface TaskReceipt<T> extends BaseReceipt {
      *                           error occurs while awaiting
      */
     @Nullable
-    T getResult(@Nonnull Duration duration) throws AwaitingException;
+    T await(@Nonnull Duration duration) throws AwaitingException;
 }

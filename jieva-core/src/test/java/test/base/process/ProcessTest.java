@@ -54,12 +54,12 @@ public class ProcessTest {
             ProcessReceipt receipt = ProcessKit.receipt(process);
             assertEquals(receipt.getState(), TaskState.EXECUTING);
             try {
-                receipt.getResult(1);
+                receipt.await(1);
             } catch (AwaitingException e) {
                 assertTrue(e.getCause() instanceof TimeoutException);
             }
             try {
-                receipt.getResult(Duration.ofMillis(1));
+                receipt.await(Duration.ofMillis(1));
             } catch (AwaitingException e) {
                 assertTrue(e.getCause() instanceof TimeoutException);
             }
@@ -67,7 +67,7 @@ public class ProcessTest {
             assertFalse(receipt.isDone());
             CountDownLatch latch = new CountDownLatch(1);
             Jie.execute(() -> {
-                int result = receipt.getResult();
+                int result = receipt.await();
                 assertEquals(result, 0);
                 latch.countDown();
             });
@@ -85,12 +85,12 @@ public class ProcessTest {
             ProcessReceipt receipt = ProcessKit.receipt(process);
             assertEquals(receipt.getState(), TaskState.EXECUTING);
             try {
-                receipt.getResult(1);
+                receipt.await(1);
             } catch (AwaitingException e) {
                 assertTrue(e.getCause() instanceof TimeoutException);
             }
             try {
-                receipt.getResult(Duration.ofMillis(1));
+                receipt.await(Duration.ofMillis(1));
             } catch (AwaitingException e) {
                 assertTrue(e.getCause() instanceof TimeoutException);
             }
@@ -98,7 +98,7 @@ public class ProcessTest {
             assertFalse(receipt.isDone());
             CountDownLatch latch = new CountDownLatch(1);
             Jie.execute(() -> {
-                int result = receipt.getResult();
+                int result = receipt.await();
                 assertEquals(result, 0);
                 latch.countDown();
             });
@@ -116,10 +116,10 @@ public class ProcessTest {
             process.destroy();
             assertFalse(receipt.isCancelled());
             assertEquals(receipt.getState(), TaskState.SUCCEEDED);
-            assertEquals(receipt.getResult(1), 0);
+            assertEquals(receipt.await(1), 0);
             process.normal(false);
             assertEquals(receipt.getState(), TaskState.FAILED);
-            assertEquals(receipt.getResult(Duration.ofMillis(1)), 1);
+            assertEquals(receipt.await(Duration.ofMillis(1)), 1);
             assertEquals(receipt.getInputStream(), IOKit.emptyInputStream());
             assertEquals(receipt.getOutputStream(), IOKit.nullOutputStream());
             assertEquals(receipt.getErrorStream(), IOKit.emptyInputStream());

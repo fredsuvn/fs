@@ -6,7 +6,7 @@ import xyz.sunqian.common.base.exception.WrappedException;
 import java.util.concurrent.Callable;
 
 /**
- * Static utility class for task-related.
+ * Utilities kit for task and its executor related.
  *
  * @author sunqian
  */

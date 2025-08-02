@@ -7,7 +7,7 @@ import xyz.sunqian.common.base.Jie;
 import java.time.Duration;
 
 /**
- * Base receipt interface of {@link TaskReceipt} and {@link RunReceipt}.
+ * Base receipt interface of task submission, superinterface of {@link CallReceipt} and {@link RunReceipt}.
  *
  * @author sunqian
  */

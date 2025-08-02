@@ -9,7 +9,7 @@ import xyz.sunqian.common.base.exception.WrappedException;
 import xyz.sunqian.common.base.process.ProcessReceipt;
 import xyz.sunqian.common.base.system.OSKit;
 import xyz.sunqian.common.task.RunReceipt;
-import xyz.sunqian.common.task.TaskReceipt;
+import xyz.sunqian.common.task.CallReceipt;
 import xyz.sunqian.test.AssertTest;
 
 import java.lang.reflect.Method;
@@ -325,8 +325,8 @@ public class JieTest implements AssertTest {
             });
             latch.await();
             assertEquals(i[0], 1);
-            TaskReceipt<Integer> receipt = Jie.execute(() -> 666);
-            assertEquals(receipt.getResult(), 666);
+            CallReceipt<Integer> receipt = Jie.execute(() -> 666);
+            assertEquals(receipt.await(), 666);
         }
         {
             Instant now = Instant.now();
@@ -341,13 +341,13 @@ public class JieTest implements AssertTest {
         {
             Instant now = Instant.now();
             CountDownLatch latch = new CountDownLatch(1);
-            TaskReceipt<Integer> receipt = Jie.schedule(() -> {
+            CallReceipt<Integer> receipt = Jie.schedule(() -> {
                 TaskUtil.shouldAfterNow(now, TaskUtil.DELAY_MILLIS);
                 latch.countDown();
                 return 66;
             }, Duration.ofMillis(TaskUtil.DELAY_MILLIS));
             latch.await();
-            assertEquals(receipt.getResult(), 66);
+            assertEquals(receipt.await(), 66);
         }
         {
             Instant now = Instant.now();
@@ -364,13 +364,13 @@ public class JieTest implements AssertTest {
             Instant now = Instant.now();
             Instant time = now.plusMillis(TaskUtil.DELAY_MILLIS);
             CountDownLatch latch = new CountDownLatch(1);
-            TaskReceipt<Integer> receipt = Jie.scheduleAt(() -> {
+            CallReceipt<Integer> receipt = Jie.scheduleAt(() -> {
                 TaskUtil.shouldAfterNow(now, TaskUtil.DELAY_MILLIS);
                 latch.countDown();
                 return 66;
             }, time);
             latch.await();
-            assertEquals(receipt.getResult(), 66);
+            assertEquals(receipt.await(), 66);
         }
         {
             Instant now = Instant.now();
