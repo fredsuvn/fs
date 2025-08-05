@@ -173,7 +173,7 @@ public class CacheTest implements PrintTest, DataTest {
         }
     }
 
-    //@Test
+    @Test
     public void testThreads() throws Exception {
         testThreads(SimpleCache.ofWeak(), 10);
         testThreads(SimpleCache.ofSoft(), 10);

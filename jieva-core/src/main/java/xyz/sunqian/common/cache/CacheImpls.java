@@ -30,12 +30,17 @@ final class CacheImpls {
     }
 
     private static <K, V> void compareAndRemove(@Nonnull Map<K, V> map, K key, V value) {
-        map.computeIfPresent(key, (k, old) -> {
-            if (old == value) {
-                return null;
-            }
-            return old;
-        });
+        V v = map.get(key);
+        if (v == value) {
+            map.remove(key);
+        }
+
+        // map.computeIfPresent(key, (k, old) -> {
+        //     if (old == value) {
+        //         return null;
+        //     }
+        //     return old;
+        // });
     }
 
     private static abstract class ReferenceCache<K, V> extends AbstractSimpleCache<K, V> {
