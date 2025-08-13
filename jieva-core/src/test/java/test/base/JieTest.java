@@ -3,11 +3,15 @@ package test.base;
 import org.testng.annotations.Test;
 import test.utils.Utils;
 import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.exception.UnknownArrayTypeException;
 import xyz.sunqian.common.base.exception.WrappedException;
 import xyz.sunqian.common.base.system.OSKit;
+import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.test.AssertTest;
+import xyz.sunqian.test.PrintTest;
 
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.Arrays;
@@ -26,7 +30,7 @@ import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
-public class JieTest implements AssertTest {
+public class JieTest implements AssertTest, PrintTest {
 
     @Test
     public void testBase() {
@@ -287,24 +291,31 @@ public class JieTest implements AssertTest {
         }
         {
             // process
-            // {
-            //     if (OSKit.isWindows()) {
-            //         ProcessReceipt receipt = Jie.process("cmd.exe", "/c", "dir");
-            //         receipt.getProcess().destroyForcibly();
-            //     } else {
-            //         ProcessReceipt receipt = Jie.process("ls", "-l");
-            //         receipt.getProcess().destroyForcibly();
-            //     }
-            // }
-            // {
-            //     if (OSKit.isWindows()) {
-            //         ProcessReceipt receipt = Jie.process("cmd.exe /c dir");
-            //         receipt.getProcess().destroyForcibly();
-            //     } else {
-            //         ProcessReceipt receipt = Jie.process("ls -l");
-            //         receipt.getProcess().destroyForcibly();
-            //     }
-            // }
+            {
+                Process process;
+                if (OSKit.isWindows()) {
+                    process = Jie.process("cmd.exe", "/c", "dir");
+                } else {
+                    process = Jie.process("ls", "-l");
+                }
+                printProcess("split cmd", process);
+                process.destroyForcibly();
+            }
+            {
+                Process process;
+                if (OSKit.isWindows()) {
+                    process = Jie.process("cmd.exe /c dir");
+                } else {
+                    process = Jie.process("ls -l");
+                }
+                printProcess("one cmd", process);
+                process.destroyForcibly();
+            }
         }
+    }
+
+    private void printProcess(String title, Process process) {
+        InputStream in = process.getInputStream();
+        printFor(title, IOKit.string(in, CharsKit.localCharset()));
     }
 }

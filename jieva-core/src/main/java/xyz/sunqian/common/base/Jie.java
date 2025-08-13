@@ -9,6 +9,7 @@ import xyz.sunqian.common.base.exception.UnknownArrayTypeException;
 import xyz.sunqian.common.base.exception.WrappedException;
 import xyz.sunqian.common.base.function.BooleanCallable;
 import xyz.sunqian.common.base.function.VoidCallable;
+import xyz.sunqian.common.base.process.ProcessKit;
 import xyz.sunqian.common.base.string.StringKit;
 import xyz.sunqian.common.base.thread.ThreadKit;
 import xyz.sunqian.common.collect.ArrayKit;
@@ -16,6 +17,7 @@ import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.collect.MapKit;
 import xyz.sunqian.common.collect.SetKit;
 import xyz.sunqian.common.collect.StreamKit;
+import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.mapping.BeanMapper;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingOptions;
@@ -1044,4 +1046,34 @@ public class Jie {
     }
 
     //---------------- Thread End ----------------//
+
+    //---------------- Process Begin ----------------//
+
+    /**
+     * Starts a new process with the specified command, returns the process.
+     * <p>
+     * This method is a shortcut to the {@link ProcessKit#start(String)}.
+     *
+     * @param command the specified command
+     * @return the process
+     * @throws IORuntimeException if any error occurs
+     */
+    public static @Nonnull Process process(@Nonnull String command) throws IORuntimeException {
+        return ProcessKit.start(command);
+    }
+
+    /**
+     * Starts a new process with the specified command and arguments, returns the process.
+     * <p>
+     * This method is a shortcut to the {@link ProcessKit#start(String...)}.
+     *
+     * @param command the specified command and arguments
+     * @return the process
+     * @throws IORuntimeException if any error occurs
+     */
+    public static @Nonnull Process process(@Nonnull String @Nonnull ... command) throws IORuntimeException {
+        return ProcessKit.start(command);
+    }
+
+    //---------------- Process Begin ----------------//
 }
