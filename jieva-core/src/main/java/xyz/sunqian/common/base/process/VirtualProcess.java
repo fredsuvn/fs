@@ -8,11 +8,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * A virtual process used for simulation. It has some flags:
+ * A virtual process used for simulation. There are protected fields:
  * <ul>
- *     <li>{@code alive}: specifies whether this process is alive, initial is {@code true};</li>
+ *     <li>{@link #alive}: to specify whether this process is alive, initial is {@code true};</li>
  *     <li>
- *         {@code normal}: specifies whether this process ends normally, the {@link #exitValue()} returns {@code 0} if
+ *         {@link #normal}: to specify whether this process ends normally, the {@link #exitValue()} returns {@code 0} if
  *         normally, otherwise {@code 1}; initial is {@code true};
  *     </li>
  * </ul>
@@ -21,8 +21,8 @@ import java.io.OutputStream;
  */
 public class VirtualProcess extends Process {
 
-    private volatile boolean alive = true;
-    private volatile boolean normal = true;
+    protected volatile boolean alive = true;
+    protected volatile boolean normal = true;
 
     private final @Nonnull InputStream input;
     private final @Nonnull InputStream error;

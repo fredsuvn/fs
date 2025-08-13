@@ -8,7 +8,6 @@
  * <p>
  * Interfaces and Classes:
  * <ul>
- *     <li>{@link xyz.sunqian.common.base.process.ProcessReceipt}</li>
  *     <li>{@link xyz.sunqian.common.base.process.VirtualProcess}</li>
  * </ul>
  */

@@ -1,20 +1,15 @@
 package test.base;
 
 import org.testng.annotations.Test;
-import test.task.TaskUtil;
 import test.utils.Utils;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.UnknownArrayTypeException;
 import xyz.sunqian.common.base.exception.WrappedException;
-import xyz.sunqian.common.base.process.ProcessReceipt;
 import xyz.sunqian.common.base.system.OSKit;
-import xyz.sunqian.common.task.RunReceipt;
-import xyz.sunqian.common.task.CallReceipt;
 import xyz.sunqian.test.AssertTest;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,7 +17,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 import static org.testng.Assert.assertEquals;
@@ -293,106 +287,24 @@ public class JieTest implements AssertTest {
         }
         {
             // process
-            {
-                if (OSKit.isWindows()) {
-                    ProcessReceipt receipt = Jie.process("cmd.exe", "/c", "dir");
-                    receipt.getProcess().destroyForcibly();
-                } else {
-                    ProcessReceipt receipt = Jie.process("ls", "-l");
-                    receipt.getProcess().destroyForcibly();
-                }
-            }
-            {
-                if (OSKit.isWindows()) {
-                    ProcessReceipt receipt = Jie.process("cmd.exe /c dir");
-                    receipt.getProcess().destroyForcibly();
-                } else {
-                    ProcessReceipt receipt = Jie.process("ls -l");
-                    receipt.getProcess().destroyForcibly();
-                }
-            }
-        }
-    }
-
-    @Test
-    public void testTask() throws Exception {
-        {
-            int[] i = {0};
-            CountDownLatch latch = new CountDownLatch(1);
-            Jie.execute(() -> {
-                i[0]++;
-                latch.countDown();
-            });
-            latch.await();
-            assertEquals(i[0], 1);
-            CallReceipt<Integer> receipt = Jie.execute(() -> 666);
-            assertEquals(receipt.await(), 666);
-        }
-        {
-            Instant now = Instant.now();
-            CountDownLatch latch = new CountDownLatch(1);
-            RunReceipt receipt = Jie.schedule(() -> {
-                TaskUtil.shouldAfterNow(now, TaskUtil.DELAY_MILLIS);
-                latch.countDown();
-            }, Duration.ofMillis(TaskUtil.DELAY_MILLIS));
-            latch.await();
-            receipt.await();
-        }
-        {
-            Instant now = Instant.now();
-            CountDownLatch latch = new CountDownLatch(1);
-            CallReceipt<Integer> receipt = Jie.schedule(() -> {
-                TaskUtil.shouldAfterNow(now, TaskUtil.DELAY_MILLIS);
-                latch.countDown();
-                return 66;
-            }, Duration.ofMillis(TaskUtil.DELAY_MILLIS));
-            latch.await();
-            assertEquals(receipt.await(), 66);
-        }
-        {
-            Instant now = Instant.now();
-            Instant time = now.plusMillis(TaskUtil.DELAY_MILLIS);
-            CountDownLatch latch = new CountDownLatch(1);
-            RunReceipt receipt = Jie.scheduleAt(() -> {
-                TaskUtil.shouldAfterNow(now, TaskUtil.DELAY_MILLIS);
-                latch.countDown();
-            }, time);
-            latch.await();
-            receipt.await();
-        }
-        {
-            Instant now = Instant.now();
-            Instant time = now.plusMillis(TaskUtil.DELAY_MILLIS);
-            CountDownLatch latch = new CountDownLatch(1);
-            CallReceipt<Integer> receipt = Jie.scheduleAt(() -> {
-                TaskUtil.shouldAfterNow(now, TaskUtil.DELAY_MILLIS);
-                latch.countDown();
-                return 66;
-            }, time);
-            latch.await();
-            assertEquals(receipt.await(), 66);
-        }
-        {
-            Instant now = Instant.now();
-            CountDownLatch latch = new CountDownLatch(1);
-            RunReceipt receipt = Jie.scheduleWithRate(() -> {
-                TaskUtil.shouldAfterNow(now, TaskUtil.DELAY_MILLIS);
-                latch.countDown();
-                throw new RuntimeException();
-            }, Duration.ofMillis(TaskUtil.DELAY_MILLIS), Duration.ofMillis(TaskUtil.DELAY_MILLIS));
-            latch.await();
-            receipt.await();
-        }
-        {
-            Instant now = Instant.now();
-            CountDownLatch latch = new CountDownLatch(1);
-            RunReceipt receipt = Jie.scheduleWithDelay(() -> {
-                TaskUtil.shouldAfterNow(now, TaskUtil.DELAY_MILLIS);
-                latch.countDown();
-                throw new RuntimeException();
-            }, Duration.ofMillis(TaskUtil.DELAY_MILLIS), Duration.ofMillis(TaskUtil.DELAY_MILLIS));
-            latch.await();
-            receipt.await();
+            // {
+            //     if (OSKit.isWindows()) {
+            //         ProcessReceipt receipt = Jie.process("cmd.exe", "/c", "dir");
+            //         receipt.getProcess().destroyForcibly();
+            //     } else {
+            //         ProcessReceipt receipt = Jie.process("ls", "-l");
+            //         receipt.getProcess().destroyForcibly();
+            //     }
+            // }
+            // {
+            //     if (OSKit.isWindows()) {
+            //         ProcessReceipt receipt = Jie.process("cmd.exe /c dir");
+            //         receipt.getProcess().destroyForcibly();
+            //     } else {
+            //         ProcessReceipt receipt = Jie.process("ls -l");
+            //         receipt.getProcess().destroyForcibly();
+            //     }
+            // }
         }
     }
 }

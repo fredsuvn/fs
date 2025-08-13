@@ -2,7 +2,9 @@ package xyz.sunqian.common.base.exception;
 
 import xyz.sunqian.annotations.Nullable;
 
-import java.io.InterruptedIOException;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * This runtime exception is typically used for wrapping exceptions thrown during the await operation. The
@@ -48,11 +50,42 @@ public class AwaitingException extends JieRuntimeException {
     }
 
     /**
-     * Returns whether the cause is an {@link InterruptedException}, {@link InterruptedIOException}.
+     * Returns {@code true} if this exception is caused by a {@link CancellationException}, and the {@link #getCause()}
+     * will returns the {@link CancellationException}.
      *
-     * @return whether the cause is an {@link InterruptedException}
+     * @return {@code true} if this exception is caused by a {@link CancellationException}
      */
-    public boolean isInterrupted() {
+    public boolean isCausedByCancellation() {
+        return getCause() instanceof CancellationException;
+    }
+
+    /**
+     * Returns {@code true} if this exception is caused by a {@link ExecutionException}, and the {@link #getCause()}
+     * will returns the {@link ExecutionException}.
+     *
+     * @return {@code true} if this exception is caused by a {@link ExecutionException}
+     */
+    public boolean isCausedByExecution() {
+        return getCause() instanceof ExecutionException;
+    }
+
+    /**
+     * Returns {@code true} if this exception is caused by a {@link InterruptedException}, and the {@link #getCause()}
+     * will returns the {@link InterruptedException}.
+     *
+     * @return {@code true} if this exception is caused by a {@link InterruptedException}
+     */
+    public boolean isCausedByInterruption() {
         return getCause() instanceof InterruptedException;
+    }
+
+    /**
+     * Returns {@code true} if this exception is caused by a {@link TimeoutException}, and the {@link #getCause()} will
+     * returns the {@link TimeoutException}.
+     *
+     * @return {@code true} if this exception is caused by a {@link TimeoutException}
+     */
+    public boolean isCausedByTimeout() {
+        return getCause() instanceof TimeoutException;
     }
 }

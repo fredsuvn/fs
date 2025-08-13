@@ -110,8 +110,8 @@ public class ExceptionTest {
             expectThrows(AwaitingException.class, () -> {
                 throw new AwaitingException("", new RuntimeException());
             });
-            assertTrue(new AwaitingException(new InterruptedException()).isInterrupted());
-            assertFalse(new AwaitingException().isInterrupted());
+            assertTrue(new AwaitingException(new InterruptedException()).isCausedByInterruption());
+            assertFalse(new AwaitingException().isCausedByInterruption());
         }
         {
             // WrappedException

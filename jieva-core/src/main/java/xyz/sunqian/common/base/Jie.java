@@ -9,8 +9,6 @@ import xyz.sunqian.common.base.exception.UnknownArrayTypeException;
 import xyz.sunqian.common.base.exception.WrappedException;
 import xyz.sunqian.common.base.function.BooleanCallable;
 import xyz.sunqian.common.base.function.VoidCallable;
-import xyz.sunqian.common.base.process.ProcessKit;
-import xyz.sunqian.common.base.process.ProcessReceipt;
 import xyz.sunqian.common.base.string.StringKit;
 import xyz.sunqian.common.base.thread.ThreadKit;
 import xyz.sunqian.common.collect.ArrayKit;
@@ -18,21 +16,15 @@ import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.collect.MapKit;
 import xyz.sunqian.common.collect.SetKit;
 import xyz.sunqian.common.collect.StreamKit;
-import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.mapping.BeanMapper;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingOptions;
 import xyz.sunqian.common.reflect.TypeRef;
-import xyz.sunqian.common.task.RunReceipt;
-import xyz.sunqian.common.task.TaskExecutor;
-import xyz.sunqian.common.task.CallReceipt;
-import xyz.sunqian.common.task.TaskSubmissionException;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1052,164 +1044,4 @@ public class Jie {
     }
 
     //---------------- Thread End ----------------//
-
-    //---------------- Process Begin ----------------//
-
-    /**
-     * Starts a new process with the specified command, returns the receipt of the process.
-     * <p>
-     * This method is a shortcut to the {@link ProcessKit#start(String)}.
-     *
-     * @param command the specified command
-     * @return the receipt of the process
-     * @throws IORuntimeException if any I/O error occurs
-     */
-    public static @Nonnull ProcessReceipt process(@Nonnull String command) throws IORuntimeException {
-        return ProcessKit.start(command);
-    }
-
-    /**
-     * Starts a new process with the specified command and arguments, returns the receipt of the process.
-     * <p>
-     * This method is a shortcut to the {@link ProcessKit#start(String[])}.
-     *
-     * @param command the specified command and arguments
-     * @return the receipt of the process
-     * @throws IORuntimeException if any I/O error occurs
-     */
-    public static @Nonnull ProcessReceipt process(@Nonnull String @Nonnull ... command) throws IORuntimeException {
-        return ProcessKit.start(command);
-    }
-
-    //---------------- Process End ----------------//
-
-    //---------------- Task Begin ----------------//
-
-    /**
-     * Executes the given task by {@link TaskExecutor#defaultExecutor()}.
-     *
-     * @param task the given task
-     * @throws TaskSubmissionException if an error occurs during submitting
-     */
-    public static void execute(@Nonnull Runnable task) throws TaskSubmissionException {
-        TaskExecutor.defaultExecutor().run(task);
-    }
-
-    /**
-     * Executes the given task by {@link TaskExecutor#defaultExecutor()}.
-     *
-     * @param task the given task
-     * @param <T>  the type of the task result
-     * @return the receipt of the task
-     * @throws TaskSubmissionException if an error occurs during submitting
-     */
-    public static <T> @Nonnull CallReceipt<T> execute(
-        @Nonnull Callable<? extends T> task
-    ) throws TaskSubmissionException {
-        return TaskExecutor.defaultExecutor().submit(task);
-    }
-
-    /**
-     * Schedules the given task with a specified delay time from now, using {@link TaskExecutor#defaultScheduler()}.
-     *
-     * @param task  the given task
-     * @param delay the specified delay time
-     * @return the receipt of the task
-     * @throws TaskSubmissionException if an error occurs during submitting
-     */
-    public static @Nonnull RunReceipt schedule(
-        @Nonnull Runnable task, @Nonnull Duration delay
-    ) throws TaskSubmissionException {
-        return TaskExecutor.defaultScheduler().schedule(task, delay);
-    }
-
-    /**
-     * Schedules the given task with a specified delay time from now, using {@link TaskExecutor#defaultScheduler()}.
-     *
-     * @param task  the given task
-     * @param delay the specified delay time
-     * @return the receipt of the task
-     * @throws TaskSubmissionException if an error occurs during submitting
-     */
-    public static <T> @Nonnull CallReceipt<T> schedule(
-        @Nonnull Callable<? extends T> task,
-        @Nonnull Duration delay
-    ) throws TaskSubmissionException {
-        return TaskExecutor.defaultScheduler().schedule(task, delay);
-    }
-
-    /**
-     * Schedules the given task to be executed at the specified time, using {@link TaskExecutor#defaultScheduler()}.
-     *
-     * @param task the given task
-     * @param time the specified time to execute the task
-     * @return the receipt of the task
-     * @throws TaskSubmissionException if an error occurs during submitting
-     */
-    public static @Nonnull RunReceipt scheduleAt(
-        @Nonnull Runnable task, @Nonnull Instant time
-    ) throws TaskSubmissionException {
-        return TaskExecutor.defaultScheduler().scheduleAt(task, time);
-    }
-
-    /**
-     * Schedules the given task to be executed at the specified time, using {@link TaskExecutor#defaultScheduler()}.
-     *
-     * @param task the given task
-     * @param time the specified time to execute the task
-     * @return the receipt of the task
-     * @throws TaskSubmissionException if an error occurs during submitting
-     */
-    public static <T> @Nonnull CallReceipt<T> scheduleAt(
-        @Nonnull Callable<? extends T> task,
-        @Nonnull Instant time
-    ) throws TaskSubmissionException {
-        return TaskExecutor.defaultScheduler().scheduleAt(task, time);
-    }
-
-    /**
-     * Schedules the given periodic task that executes first after the given initial delay, and subsequently with the
-     * given period. That is, the executions will start after {@code initialDelay} then {@code initialDelay + period},
-     * then {@code initialDelay + 2 * period}, and so on.
-     * <p>
-     * If any execution of the task fails, subsequent executions are suppressed. Otherwise, the task will only terminate
-     * via cancellation or termination of the executor. If any execution of this task takes longer than its period, then
-     * subsequent executions may start late, but will not concurrently execute.
-     *
-     * @param task         the given periodic task
-     * @param initialDelay the given initial delay for first execution
-     * @param period       the given period between successive executions
-     * @return the receipt of the periodic task
-     * @throws TaskSubmissionException if an error occurs during submitting
-     */
-    public static @Nonnull RunReceipt scheduleWithRate(
-        @Nonnull Runnable task,
-        @Nonnull Duration initialDelay,
-        @Nonnull Duration period
-    ) throws TaskSubmissionException {
-        return TaskExecutor.defaultScheduler().scheduleWithRate(task, initialDelay, period);
-    }
-
-    /**
-     * Schedules the given periodic task that executes first after the given initial delay, and subsequently with the
-     * given delay between the termination of one execution and the commencement of the next.
-     * <p>
-     * If any execution of the task fails, subsequent executions are suppressed. Otherwise, the task will only terminate
-     * via cancellation or termination of the executor.
-     *
-     * @param task         the given periodic task
-     * @param initialDelay the given initial delay for first execution
-     * @param delay        the given delay between the termination of one execution and the commencement of the next
-     * @return the receipt of the periodic task
-     * @throws TaskSubmissionException if an error occurs during submitting
-     */
-    public static @Nonnull RunReceipt scheduleWithDelay(
-        @Nonnull Runnable task,
-        @Nonnull Duration initialDelay,
-        @Nonnull Duration delay
-    ) throws TaskSubmissionException {
-        return TaskExecutor.defaultScheduler().scheduleWithDelay(task, initialDelay, delay);
-    }
-
-    //---------------- Task End ----------------//
 }
