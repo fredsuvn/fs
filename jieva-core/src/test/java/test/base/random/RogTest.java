@@ -8,9 +8,7 @@ import xyz.sunqian.test.PrintTest;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.function.Supplier;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertThrows;
@@ -26,34 +24,35 @@ public class RogTest implements AssertTest, PrintTest {
 
         {
             // always
-            Supplier<CharSequence> supplier = Rog.newRog(() -> 5).supplier(Arrays.asList(
-                Rog.probability(10, "a"),
-                Rog.probability(10, "b")
-            ));
+            Rog<CharSequence> rog = Rog.newBuilder()
+                .rng(() -> 5)
+                .weight(10, "a")
+                .weight(10, "b")
+                .build();
             for (int i = 0; i < 100; i++) {
-                assertEquals(supplier.get(), "a");
+                assertEquals(rog.next(), "a");
             }
         }
 
         {
             // exception
-            Supplier<CharSequence> supplier = Rog.supplier(
-                Rog.probability(10, "a")
-            );
-            Method getNode = supplier.getClass().getDeclaredMethod("getNode", long.class);
-            invokeThrows(UnreachablePointException.class, getNode, supplier, -1L);
+            Rog<CharSequence> rog = Rog.newBuilder()
+                .weight(10, "a")
+                .build();
+            Method getNode = rog.getClass().getDeclaredMethod("getWeight", long.class);
+            invokeThrows(UnreachablePointException.class, getNode, rog, -1L);
         }
     }
 
     private void testObjectSupplier(int size) {
         List<CharSequence> list = new ArrayList<>(size);
-        Supplier<CharSequence> supplier = Rog.supplier(
-            Rog.probability(10, "a"),
-            Rog.probability(30, () -> "b"),
-            Rog.probability(60, "c")
-        );
+        Rog<CharSequence> rog = Rog.newBuilder()
+            .weight(10, "a")
+            .weight(30, () -> "b")
+            .weight(60, "c")
+            .build();
         for (int i = 0; i < size; i++) {
-            list.add(supplier.get());
+            list.add(rog.next());
         }
         int ac = 0;
         int bc = 0;
@@ -74,7 +73,7 @@ public class RogTest implements AssertTest, PrintTest {
         showProbability(size, ac, bc, cc);
 
         // exception:
-        assertThrows(IllegalArgumentException.class, () -> Rog.probability(-1, "a"));
+        assertThrows(IllegalArgumentException.class, () -> Rog.newBuilder().weight(-1, "a"));
     }
 
     private void showProbability(int size, int ac, int bc, int cc) {
