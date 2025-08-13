@@ -321,8 +321,10 @@ public interface FileRef {
     }
 
     /**
-     * Opens and returns a new {@link InputStream} for reading the referenced file. This method is equivalent to
-     * {@link Files#newInputStream(Path, OpenOption...)}.
+     * Opens and returns a new {@link InputStream} for reading the referenced file. If no option is specified, this
+     * method opens the file for reading.
+     * <p>
+     * This method is equivalent to {@link Files#newInputStream(Path, OpenOption...)}.
      *
      * @param options options specifying how the file is opened
      * @return a new {@link InputStream} for reading the referenced file
@@ -339,8 +341,11 @@ public interface FileRef {
     }
 
     /**
-     * Opens and returns a new {@link OutputStream} for writing the referenced file. This method is equivalent to
-     * {@link Files#newOutputStream(Path, OpenOption...)}.
+     * Opens and returns a new {@link OutputStream} for writing the referenced file. If no option is specified, this
+     * method opens the file for writing, creating the file if it doesn't exist, or truncating file to {@code 0} size if
+     * it exists.
+     * <p>
+     * This method is equivalent to {@link Files#newOutputStream(Path, OpenOption...)}.
      *
      * @param options options specifying how the file is opened
      * @return a new {@link OutputStream} for writing the referenced file
@@ -357,8 +362,9 @@ public interface FileRef {
     }
 
     /**
-     * Opens and returns a new {@link FileChannel} for operating the referenced file. This method is equivalent to
-     * {@link FileChannel#open(Path, OpenOption...)}.
+     * Opens and returns a new {@link FileChannel} for operating the referenced file.
+     * <p>
+     * This method is equivalent to {@link FileChannel#open(Path, OpenOption...)}.
      *
      * @return a new {@link FileChannel} for operating the referenced file
      * @throws IORuntimeException if any error occurs
