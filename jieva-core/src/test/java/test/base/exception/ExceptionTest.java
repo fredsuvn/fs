@@ -13,6 +13,9 @@ import xyz.sunqian.common.base.exception.WrappedException;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -117,5 +120,17 @@ public class ExceptionTest {
             // WrappedException
             assertSame(new WrappedException(cause).getCause(), cause);
         }
+    }
+
+    @Test
+    public void testAwaitingException() {
+        assertTrue(new AwaitingException(new TimeoutException()).isCausedByTimeout());
+        assertFalse(new AwaitingException().isCausedByTimeout());
+        assertTrue(new AwaitingException(new CancellationException()).isCausedByCancellation());
+        assertFalse(new AwaitingException().isCausedByCancellation());
+        assertTrue(new AwaitingException(new ExecutionException(new RuntimeException())).isCausedByExecution());
+        assertFalse(new AwaitingException().isCausedByExecution());
+        assertTrue(new AwaitingException(new InterruptedException()).isCausedByInterruption());
+        assertFalse(new AwaitingException().isCausedByInterruption());
     }
 }
