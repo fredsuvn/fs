@@ -4,8 +4,6 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.io.IORuntimeException;
 
-import java.nio.file.Path;
-
 /**
  * Utilities kit for process.
  *
@@ -34,15 +32,4 @@ public class ProcessKit {
     public static @Nonnull Process start(@Nonnull String @Nonnull ... command) throws IORuntimeException {
         return Jie.uncheck(() -> Runtime.getRuntime().exec(command), IORuntimeException::new);
     }
-
-    // /**
-    //  * Starts a new process with the specified command, returns the process.
-    //  *
-    //  * @param command the specified command
-    //  * @return the process
-    //  * @throws IORuntimeException if any error occurs
-    //  */
-    // public static @Nonnull Process start(@Nonnull Path command) throws IORuntimeException {
-    //     return Jie.uncheck(() -> Runtime.getRuntime().exec(command), IORuntimeException::new);
-    // }
 }
