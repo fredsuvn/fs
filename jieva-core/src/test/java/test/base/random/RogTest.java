@@ -78,9 +78,9 @@ public class RogTest implements AssertTest, PrintTest {
 
     private void showProbability(int size, int ac, int bc, int cc) {
         double total = ac + bc + cc;
-        println(
-            "size: " + size +
-                "[a: " + toPercent(ac / total) +
+        printFor(
+            "size " + size,
+            "[a: " + toPercent(ac / total) +
                 ", b: " + toPercent(bc / total) +
                 ", c: " + toPercent(cc / total) + "]"
         );
