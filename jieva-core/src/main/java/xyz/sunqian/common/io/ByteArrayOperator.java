@@ -26,9 +26,9 @@ public interface ByteArrayOperator {
      * @param dstOff the specified offset of the destination array
      * @param len    the specified length
      * @return the actual number of bytes written
-     * @throws IORuntimeException if any error occurs
+     * @throws Exception if any error occurs
      */
     int process(
         byte @Nonnull [] src, int srcOff, byte @Nonnull [] dst, int dstOff, int len
-    ) throws IORuntimeException;
+    ) throws Exception;
 }

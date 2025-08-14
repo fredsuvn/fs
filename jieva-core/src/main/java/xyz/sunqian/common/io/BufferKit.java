@@ -1056,55 +1056,59 @@ public class BufferKit {
     public static int process(
         @Nonnull ByteBuffer src, @Nonnull ByteBuffer dst, @Nonnull ByteArrayOperator operator
     ) throws IORuntimeException {
-        int len = src.remaining();
-        int ret;
-        if (src.hasArray()) {
-            if (dst.hasArray()) {
-                ret = operator.process(
-                    src.array(),
-                    src.arrayOffset() + src.position(),
-                    dst.array(),
-                    dst.arrayOffset() + dst.position(),
-                    len
-                );
-                src.position(src.position() + len);
-                dst.position(dst.position() + ret);
+        try {
+            int len = src.remaining();
+            int ret;
+            if (src.hasArray()) {
+                if (dst.hasArray()) {
+                    ret = operator.process(
+                        src.array(),
+                        src.arrayOffset() + src.position(),
+                        dst.array(),
+                        dst.arrayOffset() + dst.position(),
+                        len
+                    );
+                    src.position(src.position() + len);
+                    dst.position(dst.position() + ret);
+                } else {
+                    byte[] dstArr = new byte[dst.remaining()];
+                    ret = operator.process(
+                        src.array(),
+                        src.arrayOffset() + src.position(),
+                        dstArr,
+                        0,
+                        len
+                    );
+                    src.position(src.position() + len);
+                    dst.put(dstArr, 0, ret);
+                }
             } else {
-                byte[] dstArr = new byte[dst.remaining()];
-                ret = operator.process(
-                    src.array(),
-                    src.arrayOffset() + src.position(),
-                    dstArr,
-                    0,
-                    len
-                );
-                src.position(src.position() + len);
-                dst.put(dstArr, 0, ret);
+                byte[] srcArr = Jie.nonnull(read(src), BytesKit.emptyBytes());
+                if (dst.hasArray()) {
+                    ret = operator.process(
+                        srcArr,
+                        0,
+                        dst.array(),
+                        dst.arrayOffset() + dst.position(),
+                        len
+                    );
+                    dst.position(dst.position() + ret);
+                } else {
+                    byte[] dstArr = new byte[dst.remaining()];
+                    ret = operator.process(
+                        srcArr,
+                        0,
+                        dstArr,
+                        0,
+                        len
+                    );
+                    dst.put(dstArr, 0, ret);
+                }
             }
-        } else {
-            byte[] srcArr = Jie.nonnull(read(src), BytesKit.emptyBytes());
-            if (dst.hasArray()) {
-                ret = operator.process(
-                    srcArr,
-                    0,
-                    dst.array(),
-                    dst.arrayOffset() + dst.position(),
-                    len
-                );
-                dst.position(dst.position() + ret);
-            } else {
-                byte[] dstArr = new byte[dst.remaining()];
-                ret = operator.process(
-                    srcArr,
-                    0,
-                    dstArr,
-                    0,
-                    len
-                );
-                dst.put(dstArr, 0, ret);
-            }
+            return ret;
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
         }
-        return ret;
     }
 
     /**
@@ -1123,54 +1127,58 @@ public class BufferKit {
     public static int process(
         @Nonnull CharBuffer src, @Nonnull CharBuffer dst, @Nonnull CharArrayOperator operator
     ) throws IORuntimeException {
-        int len = src.remaining();
-        int ret;
-        if (src.hasArray()) {
-            if (dst.hasArray()) {
-                ret = operator.process(
-                    src.array(),
-                    src.arrayOffset() + src.position(),
-                    dst.array(),
-                    dst.arrayOffset() + dst.position(),
-                    len
-                );
-                src.position(src.position() + len);
-                dst.position(dst.position() + ret);
+        try {
+            int len = src.remaining();
+            int ret;
+            if (src.hasArray()) {
+                if (dst.hasArray()) {
+                    ret = operator.process(
+                        src.array(),
+                        src.arrayOffset() + src.position(),
+                        dst.array(),
+                        dst.arrayOffset() + dst.position(),
+                        len
+                    );
+                    src.position(src.position() + len);
+                    dst.position(dst.position() + ret);
+                } else {
+                    char[] dstArr = new char[dst.remaining()];
+                    ret = operator.process(
+                        src.array(),
+                        src.arrayOffset() + src.position(),
+                        dstArr,
+                        0,
+                        len
+                    );
+                    src.position(src.position() + len);
+                    dst.put(dstArr, 0, ret);
+                }
             } else {
-                char[] dstArr = new char[dst.remaining()];
-                ret = operator.process(
-                    src.array(),
-                    src.arrayOffset() + src.position(),
-                    dstArr,
-                    0,
-                    len
-                );
-                src.position(src.position() + len);
-                dst.put(dstArr, 0, ret);
+                char[] srcArr = Jie.nonnull(read(src), CharsKit.emptyChars());
+                if (dst.hasArray()) {
+                    ret = operator.process(
+                        srcArr,
+                        0,
+                        dst.array(),
+                        dst.arrayOffset() + dst.position(),
+                        len
+                    );
+                    dst.position(dst.position() + ret);
+                } else {
+                    char[] dstArr = new char[dst.remaining()];
+                    ret = operator.process(
+                        srcArr,
+                        0,
+                        dstArr,
+                        0,
+                        len
+                    );
+                    dst.put(dstArr, 0, ret);
+                }
             }
-        } else {
-            char[] srcArr = Jie.nonnull(read(src), CharsKit.emptyChars());
-            if (dst.hasArray()) {
-                ret = operator.process(
-                    srcArr,
-                    0,
-                    dst.array(),
-                    dst.arrayOffset() + dst.position(),
-                    len
-                );
-                dst.position(dst.position() + ret);
-            } else {
-                char[] dstArr = new char[dst.remaining()];
-                ret = operator.process(
-                    srcArr,
-                    0,
-                    dstArr,
-                    0,
-                    len
-                );
-                dst.put(dstArr, 0, ret);
-            }
+            return ret;
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
         }
-        return ret;
     }
 }

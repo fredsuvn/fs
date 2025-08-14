@@ -614,6 +614,12 @@ public class BufferTest implements DataTest {
             assertEquals(dst4.position(), size * 2);
             dst4.flip();
             assertEquals(BufferKit.read(dst4), size == 0 ? null : expected);
+            // exception
+            expectThrows(IORuntimeException.class, () ->
+                BufferKit.process(src4, dst4, (src, srcOff, dst, dstOff, len) -> {
+                    throw new Exception();
+                })
+            );
         }
         {
             // chars
@@ -658,6 +664,12 @@ public class BufferTest implements DataTest {
             assertEquals(dst4.position(), size * 2);
             dst4.flip();
             assertEquals(BufferKit.read(dst4), size == 0 ? null : expected);
+            // exception
+            expectThrows(IORuntimeException.class, () ->
+                BufferKit.process(src4, dst4, (src, srcOff, dst, dstOff, len) -> {
+                    throw new Exception();
+                })
+            );
         }
     }
 }

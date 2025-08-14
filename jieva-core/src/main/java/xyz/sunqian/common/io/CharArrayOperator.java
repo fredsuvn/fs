@@ -26,9 +26,9 @@ public interface CharArrayOperator {
      * @param dstOff the specified offset of the destination array
      * @param len    the specified length
      * @return the actual number of chars written
-     * @throws IORuntimeException if any error occurs
+     * @throws Exception if any error occurs
      */
     int process(
         char @Nonnull [] src, int srcOff, char @Nonnull [] dst, int dstOff, int len
-    ) throws IORuntimeException;
+    ) throws Exception;
 }
