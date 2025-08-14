@@ -6,6 +6,8 @@ import xyz.sunqian.common.base.chars.CharsBuilder;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.collect.ArrayKit;
 import xyz.sunqian.common.io.BufferKit;
+import xyz.sunqian.common.io.ByteArrayOperator;
+import xyz.sunqian.common.io.CharArrayOperator;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.test.DataTest;
 import xyz.sunqian.test.ErrorAppender;
@@ -559,5 +561,103 @@ public class BufferTest implements DataTest {
         assertEquals(BufferKit.string(dst), str);
         ByteBuffer dst2 = ByteBuffer.allocate(strBytes.length - 1);
         expectThrows(IORuntimeException.class, () -> BufferKit.write(dst2, str));
+    }
+
+    @Test
+    public void testProcess() {
+        testProcess(0);
+        testProcess(64);
+        testProcess(111);
+    }
+
+    private void testProcess(int size) {
+        {
+            // bytes
+            ByteArrayOperator operator = (src, srcOff, dst, dstOff, len) -> {
+                System.arraycopy(src, srcOff, dst, dstOff, len);
+                System.arraycopy(src, srcOff, dst, dstOff + len, len);
+                return len * 2;
+            };
+            byte[] data = randomBytes(size);
+            byte[] expected = new byte[size * 2];
+            System.arraycopy(data, 0, expected, 0, size);
+            System.arraycopy(data, 0, expected, size, size);
+            // heap -> heap
+            ByteBuffer src1 = ByteBuffer.wrap(data);
+            ByteBuffer dst1 = ByteBuffer.allocate(size * 2);
+            assertEquals(BufferKit.process(src1, dst1, operator), size * 2);
+            assertEquals(src1.position(), size);
+            assertEquals(dst1.position(), size * 2);
+            dst1.flip();
+            assertEquals(BufferKit.read(dst1), size == 0 ? null : expected);
+            // heap -> direct
+            ByteBuffer src2 = ByteBuffer.wrap(data);
+            ByteBuffer dst2 = ByteBuffer.allocateDirect(size * 2);
+            assertEquals(BufferKit.process(src2, dst2, operator), size * 2);
+            assertEquals(src2.position(), size);
+            assertEquals(dst2.position(), size * 2);
+            dst2.flip();
+            assertEquals(BufferKit.read(dst2), size == 0 ? null : expected);
+            // direct -> heap
+            ByteBuffer src3 = BufferKit.copyDirect(data);
+            ByteBuffer dst3 = ByteBuffer.allocate(size * 2);
+            assertEquals(BufferKit.process(src3, dst3, operator), size * 2);
+            assertEquals(src3.position(), size);
+            assertEquals(dst3.position(), size * 2);
+            dst3.flip();
+            assertEquals(BufferKit.read(dst3), size == 0 ? null : expected);
+            // direct -> direct
+            ByteBuffer src4 = BufferKit.copyDirect(data);
+            ByteBuffer dst4 = ByteBuffer.allocateDirect(size * 2);
+            assertEquals(BufferKit.process(src4, dst4, operator), size * 2);
+            assertEquals(src4.position(), size);
+            assertEquals(dst4.position(), size * 2);
+            dst4.flip();
+            assertEquals(BufferKit.read(dst4), size == 0 ? null : expected);
+        }
+        {
+            // chars
+            CharArrayOperator operator = (src, srcOff, dst, dstOff, len) -> {
+                System.arraycopy(src, srcOff, dst, dstOff, len);
+                System.arraycopy(src, srcOff, dst, dstOff + len, len);
+                return len * 2;
+            };
+            char[] data = randomChars(size);
+            char[] expected = new char[size * 2];
+            System.arraycopy(data, 0, expected, 0, size);
+            System.arraycopy(data, 0, expected, size, size);
+            // heap -> heap
+            CharBuffer src1 = CharBuffer.wrap(data);
+            CharBuffer dst1 = CharBuffer.allocate(size * 2);
+            assertEquals(BufferKit.process(src1, dst1, operator), size * 2);
+            assertEquals(src1.position(), size);
+            assertEquals(dst1.position(), size * 2);
+            dst1.flip();
+            assertEquals(BufferKit.read(dst1), size == 0 ? null : expected);
+            // heap -> direct
+            CharBuffer src2 = CharBuffer.wrap(data);
+            CharBuffer dst2 = BufferKit.directCharBuffer(size * 2);
+            assertEquals(BufferKit.process(src2, dst2, operator), size * 2);
+            assertEquals(src2.position(), size);
+            assertEquals(dst2.position(), size * 2);
+            dst2.flip();
+            assertEquals(BufferKit.read(dst2), size == 0 ? null : expected);
+            // direct -> heap
+            CharBuffer src3 = BufferKit.copyDirect(data);
+            CharBuffer dst3 = CharBuffer.allocate(size * 2);
+            assertEquals(BufferKit.process(src3, dst3, operator), size * 2);
+            assertEquals(src3.position(), size);
+            assertEquals(dst3.position(), size * 2);
+            dst3.flip();
+            assertEquals(BufferKit.read(dst3), size == 0 ? null : expected);
+            // direct -> direct
+            CharBuffer src4 = BufferKit.copyDirect(data);
+            CharBuffer dst4 = BufferKit.directCharBuffer(size * 2);
+            assertEquals(BufferKit.process(src4, dst4, operator), size * 2);
+            assertEquals(src4.position(), size);
+            assertEquals(dst4.position(), size * 2);
+            dst4.flip();
+            assertEquals(BufferKit.read(dst4), size == 0 ? null : expected);
+        }
     }
 }

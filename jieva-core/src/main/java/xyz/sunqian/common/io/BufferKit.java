@@ -2,6 +2,8 @@ package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.bytes.BytesKit;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.math.MathKit;
 
@@ -1036,5 +1038,139 @@ public class BufferKit {
     public static @Nonnull CharBuffer directCharBuffer(int capacity) throws IllegalArgumentException {
         IOChecker.checkCapacity(capacity);
         return ByteBuffer.allocateDirect(capacity * 2).order(ByteOrder.BIG_ENDIAN).asCharBuffer();
+    }
+
+    /**
+     * Reads all data from the source buffer and processes them by the given operator, then writes the result into the
+     * destination buffer, returns the number of bytes written. The position of the source buffer will be increment to
+     * its limit, and position of the destination buffer will be increment by the write number.
+     * <p>
+     * Note make sure the destination has enough space to write.
+     *
+     * @param src      the given source buffer
+     * @param dst      the given destination buffer
+     * @param operator the given operator
+     * @return the number of bytes written
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static int process(
+        @Nonnull ByteBuffer src, @Nonnull ByteBuffer dst, @Nonnull ByteArrayOperator operator
+    ) throws IORuntimeException {
+        int len = src.remaining();
+        int ret;
+        if (src.hasArray()) {
+            if (dst.hasArray()) {
+                ret = operator.process(
+                    src.array(),
+                    src.arrayOffset() + src.position(),
+                    dst.array(),
+                    dst.arrayOffset() + dst.position(),
+                    len
+                );
+                src.position(src.position() + len);
+                dst.position(dst.position() + ret);
+            } else {
+                byte[] dstArr = new byte[dst.remaining()];
+                ret = operator.process(
+                    src.array(),
+                    src.arrayOffset() + src.position(),
+                    dstArr,
+                    0,
+                    len
+                );
+                src.position(src.position() + len);
+                dst.put(dstArr, 0, ret);
+            }
+        } else {
+            byte[] srcArr = Jie.nonnull(read(src), BytesKit.emptyBytes());
+            if (dst.hasArray()) {
+                ret = operator.process(
+                    srcArr,
+                    0,
+                    dst.array(),
+                    dst.arrayOffset() + dst.position(),
+                    len
+                );
+                dst.position(dst.position() + ret);
+            } else {
+                byte[] dstArr = new byte[dst.remaining()];
+                ret = operator.process(
+                    srcArr,
+                    0,
+                    dstArr,
+                    0,
+                    len
+                );
+                dst.put(dstArr, 0, ret);
+            }
+        }
+        return ret;
+    }
+
+    /**
+     * Reads all data from the source buffer and processes them by the given operator, then writes the result into the
+     * destination buffer, returns the number of chars written. The position of the source buffer will be increment to
+     * its limit, and position of the destination buffer will be increment by the write number.
+     * <p>
+     * Note make sure the destination has enough space to write. write.
+     *
+     * @param src      the given source buffer
+     * @param dst      the given destination buffer
+     * @param operator the given operator
+     * @return the number of chars written
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static int process(
+        @Nonnull CharBuffer src, @Nonnull CharBuffer dst, @Nonnull CharArrayOperator operator
+    ) throws IORuntimeException {
+        int len = src.remaining();
+        int ret;
+        if (src.hasArray()) {
+            if (dst.hasArray()) {
+                ret = operator.process(
+                    src.array(),
+                    src.arrayOffset() + src.position(),
+                    dst.array(),
+                    dst.arrayOffset() + dst.position(),
+                    len
+                );
+                src.position(src.position() + len);
+                dst.position(dst.position() + ret);
+            } else {
+                char[] dstArr = new char[dst.remaining()];
+                ret = operator.process(
+                    src.array(),
+                    src.arrayOffset() + src.position(),
+                    dstArr,
+                    0,
+                    len
+                );
+                src.position(src.position() + len);
+                dst.put(dstArr, 0, ret);
+            }
+        } else {
+            char[] srcArr = Jie.nonnull(read(src), CharsKit.emptyChars());
+            if (dst.hasArray()) {
+                ret = operator.process(
+                    srcArr,
+                    0,
+                    dst.array(),
+                    dst.arrayOffset() + dst.position(),
+                    len
+                );
+                dst.position(dst.position() + ret);
+            } else {
+                char[] dstArr = new char[dst.remaining()];
+                ret = operator.process(
+                    srcArr,
+                    0,
+                    dstArr,
+                    0,
+                    len
+                );
+                dst.put(dstArr, 0, ret);
+            }
+        }
+        return ret;
     }
 }
