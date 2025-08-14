@@ -10,90 +10,90 @@ import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CharEncoderImpl implements CharEncoder {
+public class CharProcessorImpl implements CharProcessor {
 
     private final @Nonnull CharReader src;
     private long readLimit = -1;
     private int readBlockSize = IOKit.bufferSize();
-    private @Nullable List<Handler> handlers = null;
+    private @Nullable List<CharTransformer> transformers = null;
 
-    CharEncoderImpl(@Nonnull CharReader src) {
+    CharProcessorImpl(@Nonnull CharReader src) {
         this.src = src;
     }
 
     @Override
-    public @Nonnull CharEncoder readLimit(long readLimit) throws IllegalArgumentException {
+    public @Nonnull CharProcessor readLimit(long readLimit) throws IllegalArgumentException {
         IOChecker.checkReadLimit(readLimit);
         this.readLimit = readLimit;
         return this;
     }
 
     @Override
-    public @Nonnull CharEncoder readBlockSize(int readBlockSize) throws IllegalArgumentException {
+    public @Nonnull CharProcessor readBlockSize(int readBlockSize) throws IllegalArgumentException {
         IOChecker.checkReadBlockSize(readBlockSize);
         this.readBlockSize = readBlockSize;
         return this;
     }
 
     @Override
-    public @Nonnull CharEncoder handler(@Nonnull Handler handler) {
-        if (handlers == null) {
-            handlers = new ArrayList<>();
+    public @Nonnull CharProcessor transformer(@Nonnull CharTransformer transformer) {
+        if (transformers == null) {
+            transformers = new ArrayList<>();
         }
-        handlers.add(handler);
+        transformers.add(transformer);
         return this;
     }
 
     @Override
-    public long encodeTo(@Nonnull Appendable dst) throws IORuntimeException {
+    public long processTo(@Nonnull Appendable dst) throws IORuntimeException {
         try {
-            if (handlers == null) {
+            if (transformers == null) {
                 CharReader reader = readLimit < 0 ? src : src.limit(readLimit);
                 return reader.readTo(dst);
             }
-            return encode(dst, handlers);
+            return encode(dst, transformers);
         } catch (Exception e) {
             throw new IORuntimeException(e);
         }
     }
 
     @Override
-    public long encodeTo(char @Nonnull [] dst) throws IORuntimeException {
+    public long processTo(char @Nonnull [] dst) throws IORuntimeException {
         try {
             Writer out = IOKit.newWriter(dst);
-            if (handlers == null) {
+            if (transformers == null) {
                 CharReader reader = readLimit < 0 ? src : src.limit(readLimit);
                 return reader.readTo(out);
             }
-            return encode(out, handlers);
+            return encode(out, transformers);
         } catch (Exception e) {
             throw new IORuntimeException(e);
         }
     }
 
     @Override
-    public long encodeTo(char @Nonnull [] dst, int off) throws IndexOutOfBoundsException, IORuntimeException {
+    public long processTo(char @Nonnull [] dst, int off) throws IndexOutOfBoundsException, IORuntimeException {
         Writer out = IOKit.newWriter(dst, off, dst.length - off);
         try {
-            if (handlers == null) {
+            if (transformers == null) {
                 CharReader reader = readLimit < 0 ? src : src.limit(readLimit);
                 return reader.readTo(out);
             }
-            return encode(out, handlers);
+            return encode(out, transformers);
         } catch (Exception e) {
             throw new IORuntimeException(e);
         }
     }
 
     @Override
-    public long encodeTo(@Nonnull CharBuffer dst) throws IORuntimeException {
+    public long processTo(@Nonnull CharBuffer dst) throws IORuntimeException {
         try {
             Writer out = IOKit.newWriter(dst);
-            if (handlers == null) {
+            if (transformers == null) {
                 CharReader reader = readLimit < 0 ? src : src.limit(readLimit);
                 return reader.readTo(out);
             }
-            return encode(out, handlers);
+            return encode(out, transformers);
         } catch (Exception e) {
             throw new IORuntimeException(e);
         }
@@ -104,7 +104,7 @@ public class CharEncoderImpl implements CharEncoder {
         return new String(toCharArray());
     }
 
-    private long encode(@Nonnull Object dst, @Nonnull List<@Nonnull Handler> handlers) throws Exception {
+    private long encode(@Nonnull Object dst, @Nonnull List<@Nonnull CharTransformer> transformers) throws Exception {
         CharReader reader = readLimit < 0 ? src : src.limit(readLimit);
         long count = 0;
         while (true) {
@@ -112,11 +112,11 @@ public class CharEncoderImpl implements CharEncoder {
             CharBuffer data = block.data();
             count += data.remaining();
             boolean end = block.end();
-            for (Handler handler : handlers) {
+            for (CharTransformer transformer : transformers) {
                 if (data == null) {
                     break;
                 }
-                data = handler.handle(data, end);
+                data = transformer.transform(data, end);
             }
             if (data != null) {
                 writeTo(data, dst);
@@ -139,15 +139,15 @@ public class CharEncoderImpl implements CharEncoder {
     @Override
     public @Nonnull Reader asReader() {
         CharReader reader = readLimit < 0 ? src : src.limit(readLimit);
-        if (handlers == null) {
+        if (transformers == null) {
             return reader.asReader();
         }
-        return new EncoderReader(reader, readBlockSize, handlers);
+        return new EncoderReader(reader, readBlockSize, transformers);
     }
 
     @Override
     public @Nonnull CharReader asCharReader() {
-        if (handlers == null) {
+        if (transformers == null) {
             return readLimit < 0 ? src : src.limit(readLimit);
         }
         return CharReader.from(asReader());
@@ -157,17 +157,17 @@ public class CharEncoderImpl implements CharEncoder {
 
         private final @Nonnull CharReader reader;
         private final int readBlockSize;
-        private final @Nonnull List<@Nonnull Handler> handlers;
+        private final @Nonnull List<@Nonnull CharTransformer> transformers;
 
         private @Nullable CharSegment nextSeg = null;
         private boolean closed = false;
 
         private EncoderReader(
-            @Nonnull CharReader reader, int readBlockSize, @Nonnull List<@Nonnull Handler> handlers
+            @Nonnull CharReader reader, int readBlockSize, @Nonnull List<@Nonnull CharTransformer> transformers
         ) {
             this.reader = reader;
             this.readBlockSize = readBlockSize;
-            this.handlers = handlers;
+            this.transformers = transformers;
         }
 
         private @Nonnull CharSegment nextSeg() throws IOException {
@@ -186,11 +186,11 @@ public class CharEncoderImpl implements CharEncoder {
             CharSegment block = reader.read(readBlockSize);
             CharBuffer data = block.data();
             boolean end = block.end();
-            for (Handler handler : handlers) {
+            for (CharTransformer transformer : transformers) {
                 if (data == null) {
                     break;
                 }
-                data = handler.handle(data, end);
+                data = transformer.transform(data, end);
             }
             if (data == null) {
                 return null;
@@ -298,17 +298,17 @@ public class CharEncoderImpl implements CharEncoder {
         }
     }
 
-    private static abstract class ResidualSizeHandler implements Handler {
+    private static abstract class ResidualSizeHandler implements CharTransformer {
 
-        protected final @Nonnull Handler handler;
+        protected final @Nonnull CharTransformer transformer;
         protected final int size;
 
         // Residual data;
         // Its capacity is always the size.
         private @Nullable CharBuffer residual;
 
-        protected ResidualSizeHandler(@Nonnull Handler handler, int size) throws IllegalArgumentException {
-            this.handler = handler;
+        protected ResidualSizeHandler(@Nonnull CharTransformer transformer, int size) throws IllegalArgumentException {
+            this.transformer = transformer;
             this.size = size;
         }
 
@@ -317,7 +317,7 @@ public class CharEncoderImpl implements CharEncoder {
         ) throws Exception;
 
         @Override
-        public @Nullable CharBuffer handle(@Nonnull CharBuffer data, boolean end) throws Exception {
+        public @Nullable CharBuffer transform(@Nonnull CharBuffer data, boolean end) throws Exception {
 
             // clean buffer
             CharBuffer previousResult = null;
@@ -327,7 +327,7 @@ public class CharEncoderImpl implements CharEncoder {
                     // in this case data must be empty
                     if (end) {
                         residual.flip();
-                        return handler.handle(residual, true);
+                        return transformer.transform(residual, true);
                     } else {
                         return null;
                     }
@@ -335,12 +335,12 @@ public class CharEncoderImpl implements CharEncoder {
                     residual.flip();
                     if (end) {
                         if (data.hasRemaining()) {
-                            previousResult = handler.handle(BufferKit.copy(residual), false);
+                            previousResult = transformer.transform(BufferKit.copy(residual), false);
                         } else {
-                            return handler.handle(residual, true);
+                            return transformer.transform(residual, true);
                         }
                     } else {
-                        previousResult = handler.handle(BufferKit.copy(residual), false);
+                        previousResult = transformer.transform(BufferKit.copy(residual), false);
                     }
                     residual.clear();
                 }
@@ -358,13 +358,13 @@ public class CharEncoderImpl implements CharEncoder {
                 BufferKit.readTo(data, residual);
                 if (end) {
                     residual.flip();
-                    residualResult = handler.handle(residual, true);
+                    residualResult = transformer.transform(residual, true);
                 }
             }
 
             // empty end
             if (end && previousResult == null && multipleResult == null && residualResult == null) {
-                return handler.handle(CharBuffer.allocate(0), true);
+                return transformer.transform(CharBuffer.allocate(0), true);
             }
 
             return mergeResult(previousResult, multipleResult, residualResult);
@@ -409,8 +409,8 @@ public class CharEncoderImpl implements CharEncoder {
 
     static final class FixedSizeHandler extends ResidualSizeHandler {
 
-        FixedSizeHandler(@Nonnull Handler handler, int size) throws IllegalArgumentException {
-            super(handler, size);
+        FixedSizeHandler(@Nonnull CharTransformer transformer, int size) throws IllegalArgumentException {
+            super(transformer, size);
         }
 
         @Override
@@ -427,7 +427,7 @@ public class CharEncoderImpl implements CharEncoder {
                 while (curSize > 0) {
                     CharBuffer multiple = BufferKit.slice0(data, 0, size);
                     data.position(data.position() + size);
-                    CharBuffer multipleRet = handler.handle(
+                    CharBuffer multipleRet = transformer.transform(
                         multiple,
                         end && multipleSize == remainingSize && curSize == size
                     );
@@ -443,8 +443,8 @@ public class CharEncoderImpl implements CharEncoder {
 
         private final @Nonnull List<CharBuffer> multipleResult = new ArrayList<>(1);
 
-        MultipleSizeHandler(@Nonnull Handler handler, int size) throws IllegalArgumentException {
-            super(handler, size);
+        MultipleSizeHandler(@Nonnull CharTransformer transformer, int size) throws IllegalArgumentException {
+            super(transformer, size);
         }
 
         @Override
@@ -456,7 +456,7 @@ public class CharEncoderImpl implements CharEncoder {
             }
             CharBuffer multiple = BufferKit.slice0(data, 0, multipleSize);
             data.position(data.position() + multipleSize);
-            CharBuffer multipleRet = handler.handle(
+            CharBuffer multipleRet = transformer.transform(
                 multiple,
                 end && multipleSize == remainingSize
             );
@@ -465,17 +465,17 @@ public class CharEncoderImpl implements CharEncoder {
         }
     }
 
-    static final class BufferedHandler implements Handler {
+    static final class BufferedHandler implements CharTransformer {
 
-        private final Handler handler;
+        private final CharTransformer transformer;
         private char @Nullable [] buffer = null;
 
-        BufferedHandler(Handler handler) {
-            this.handler = handler;
+        BufferedHandler(CharTransformer transformer) {
+            this.transformer = transformer;
         }
 
         @Override
-        public @Nullable CharBuffer handle(@Nonnull CharBuffer data, boolean end) throws Exception {
+        public @Nullable CharBuffer transform(@Nonnull CharBuffer data, boolean end) throws Exception {
             CharBuffer totalBuffer;
             if (buffer != null) {
                 CharBuffer newBuffer = CharBuffer.allocate(buffer.length + data.remaining());
@@ -486,7 +486,7 @@ public class CharEncoderImpl implements CharEncoder {
             } else {
                 totalBuffer = data;
             }
-            CharBuffer ret = handler.handle(totalBuffer, end);
+            CharBuffer ret = transformer.transform(totalBuffer, end);
             if (end) {
                 buffer = null;
             } else {
@@ -496,12 +496,12 @@ public class CharEncoderImpl implements CharEncoder {
         }
     }
 
-    static final class EmptyHandler implements Handler {
+    static final class EmptyHandler implements CharTransformer {
 
         static final EmptyHandler SINGLETON = new EmptyHandler();
 
         @Override
-        public CharBuffer handle(@Nonnull CharBuffer data, boolean end) {
+        public CharBuffer transform(@Nonnull CharBuffer data, boolean end) {
             return data;
         }
     }

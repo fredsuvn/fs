@@ -18,8 +18,10 @@
  *     <li>{@link xyz.sunqian.common.io.CharReader}</li>
  *     <li>{@link xyz.sunqian.common.io.ByteSegment}</li>
  *     <li>{@link xyz.sunqian.common.io.CharSegment}</li>
- *     <li>{@link xyz.sunqian.common.io.ByteEncoder}</li>
- *     <li>{@link xyz.sunqian.common.io.CharEncoder}</li>
+ *     <li>{@link xyz.sunqian.common.io.ByteProcessor}</li>
+ *     <li>{@link xyz.sunqian.common.io.ByteTransformer}</li>
+ *     <li>{@link xyz.sunqian.common.io.CharProcessor}</li>
+ *     <li>{@link xyz.sunqian.common.io.CharTransformer}</li>
  * </ul>
  * <p>
  * Convenient IO Implementations:

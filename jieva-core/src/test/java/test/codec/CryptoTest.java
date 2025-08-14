@@ -2,7 +2,7 @@ package test.codec;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.common.codec.CryptoKit;
-import xyz.sunqian.common.io.ByteEncoder;
+import xyz.sunqian.common.io.ByteProcessor;
 import xyz.sunqian.test.DataTest;
 
 import javax.crypto.Cipher;
@@ -43,14 +43,14 @@ public class CryptoTest implements DataTest {
     ) throws Exception {
         byte[] data = randomBytes(totalSize);
         cipher.init(Cipher.ENCRYPT_MODE, enKey);
-        byte[] enBytes = ByteEncoder.from(data)
+        byte[] enBytes = ByteProcessor.from(data)
             .readBlockSize(enBlock)
-            .handler(CryptoKit.cipherHandler(cipher))
+            .transformer(CryptoKit.cipherHandler(cipher))
             .toByteArray();
         cipher.init(Cipher.DECRYPT_MODE, deKey);
-        byte[] ret = ByteEncoder.from(enBytes)
+        byte[] ret = ByteProcessor.from(enBytes)
             .readBlockSize(deBlock)
-            .handler(CryptoKit.cipherHandler(cipher))
+            .transformer(CryptoKit.cipherHandler(cipher))
             .toByteArray();
         assertEquals(ret, data);
     }
@@ -63,9 +63,9 @@ public class CryptoTest implements DataTest {
 
     private void testDigest(MessageDigest digest, int totalSize, int blockSize) {
         byte[] data = randomBytes(totalSize);
-        byte[] enBytes = ByteEncoder.from(data)
+        byte[] enBytes = ByteProcessor.from(data)
             .readBlockSize(blockSize)
-            .handler(CryptoKit.digestHandler(digest))
+            .transformer(CryptoKit.digestHandler(digest))
             .toByteArray();
         assertEquals(enBytes, digest.digest(data));
     }
@@ -80,9 +80,9 @@ public class CryptoTest implements DataTest {
     private void testMac(Mac mac, Key key, int totalSize, int blockSize) throws Exception {
         byte[] data = randomBytes(totalSize);
         mac.init(key);
-        byte[] enBytes = ByteEncoder.from(data)
+        byte[] enBytes = ByteProcessor.from(data)
             .readBlockSize(blockSize)
-            .handler(CryptoKit.macHandler(mac))
+            .transformer(CryptoKit.macHandler(mac))
             .toByteArray();
         assertEquals(enBytes, mac.doFinal(data));
     }

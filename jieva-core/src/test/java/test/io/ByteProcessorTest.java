@@ -5,9 +5,10 @@ import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.value.IntVar;
 import xyz.sunqian.common.io.BufferKit;
-import xyz.sunqian.common.io.ByteEncoder;
+import xyz.sunqian.common.io.ByteProcessor;
 import xyz.sunqian.common.io.ByteReader;
 import xyz.sunqian.common.io.ByteSegment;
+import xyz.sunqian.common.io.ByteTransformer;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.test.AssertTest;
@@ -29,54 +30,54 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
-public class ByteEncoderTest implements DataTest, AssertTest {
+public class ByteProcessorTest implements DataTest, AssertTest {
 
     @Test
-    public void testEncode() throws Exception {
-        testEncode(0, 123, 0);
-        testEncode(0, 123, 77);
-        testEncode(0, 123, 123);
-        testEncode(0, 123, 1333);
-        testEncode(1333, 123, 0);
-        testEncode(1333, 123, 77);
-        testEncode(1333, 123, 123);
-        testEncode(1333, 123, 777);
-        testEncode(123, 1333, 0);
-        testEncode(123, 1333, 77);
-        testEncode(123, 1333, 123);
-        testEncode(123, 1333, 777);
-        testEncode(123, 123, 1333);
-        testEncode(123, 77, 1333);
-        testEncode(77, 123, 1333);
+    public void testProcess() throws Exception {
+        testProcess(0, 123, 0);
+        testProcess(0, 123, 77);
+        testProcess(0, 123, 123);
+        testProcess(0, 123, 1333);
+        testProcess(1333, 123, 0);
+        testProcess(1333, 123, 77);
+        testProcess(1333, 123, 123);
+        testProcess(1333, 123, 777);
+        testProcess(123, 1333, 0);
+        testProcess(123, 1333, 77);
+        testProcess(123, 1333, 123);
+        testProcess(123, 1333, 777);
+        testProcess(123, 123, 1333);
+        testProcess(123, 77, 1333);
+        testProcess(77, 123, 1333);
         {
             // exceptions
-            expectThrows(IllegalArgumentException.class, () -> ByteEncoder.from(new byte[0]).readBlockSize(0));
-            expectThrows(IllegalArgumentException.class, () -> ByteEncoder.from(new byte[0]).readBlockSize(-1));
-            expectThrows(IllegalArgumentException.class, () -> ByteEncoder.from(new byte[0]).readLimit(-1));
-            expectThrows(IndexOutOfBoundsException.class, () -> ByteEncoder.from(new byte[0], 0, 1));
-            expectThrows(IndexOutOfBoundsException.class, () -> ByteEncoder.from(new byte[0]).encodeTo(new byte[0], 1));
+            expectThrows(IllegalArgumentException.class, () -> ByteProcessor.from(new byte[0]).readBlockSize(0));
+            expectThrows(IllegalArgumentException.class, () -> ByteProcessor.from(new byte[0]).readBlockSize(-1));
+            expectThrows(IllegalArgumentException.class, () -> ByteProcessor.from(new byte[0]).readLimit(-1));
+            expectThrows(IndexOutOfBoundsException.class, () -> ByteProcessor.from(new byte[0], 0, 1));
+            expectThrows(IndexOutOfBoundsException.class, () -> ByteProcessor.from(new byte[0]).processTo(new byte[0], 1));
             TestInputStream err = new TestInputStream(new ByteArrayInputStream(new byte[0]));
             err.setNextOperation(ReadOps.THROW, 99);
             expectThrows(IORuntimeException.class, () ->
-                ByteEncoder.from(err).encode());
+                ByteProcessor.from(err).process());
             expectThrows(IORuntimeException.class, () ->
-                ByteEncoder.from(new byte[10]).encodeTo(new ErrorOutputStream()));
+                ByteProcessor.from(new byte[10]).processTo(new ErrorOutputStream()));
             expectThrows(IORuntimeException.class, () ->
-                ByteEncoder.from(new byte[10]).encodeTo(Channels.newChannel(new ErrorOutputStream())));
+                ByteProcessor.from(new byte[10]).processTo(Channels.newChannel(new ErrorOutputStream())));
             expectThrows(IORuntimeException.class, () ->
-                ByteEncoder.from(new byte[10]).encodeTo(new byte[1]));
+                ByteProcessor.from(new byte[10]).processTo(new byte[1]));
             expectThrows(IORuntimeException.class, () ->
-                ByteEncoder.from(new byte[10], 0, 5).encodeTo(new byte[1], 0));
+                ByteProcessor.from(new byte[10], 0, 5).processTo(new byte[1], 0));
             expectThrows(IORuntimeException.class, () ->
-                ByteEncoder.from(new byte[10]).encodeTo(ByteBuffer.allocate(0)));
-            Method writeTo = ByteEncoder.from(new byte[0]).getClass()
+                ByteProcessor.from(new byte[10]).processTo(ByteBuffer.allocate(0)));
+            Method writeTo = ByteProcessor.from(new byte[0]).getClass()
                 .getDeclaredMethod("writeTo", ByteBuffer.class, Object.class);
-            invokeThrows(UnsupportedOperationException.class, writeTo, ByteEncoder.from(new byte[0]),
+            invokeThrows(UnsupportedOperationException.class, writeTo, ByteProcessor.from(new byte[0]),
                 ByteBuffer.allocate(10), String.class);
         }
     }
 
-    private void testEncode(int totalSize, int readBlockSize, int limit) throws Exception {
+    private void testProcess(int totalSize, int readBlockSize, int limit) throws Exception {
         IntVar endCount = IntVar.of(0);
         byte[] data = randomBytes(totalSize);
         byte[] limitedData = Arrays.copyOf(data, dstSize(totalSize, limit));
@@ -85,28 +86,28 @@ public class ByteEncoderTest implements DataTest, AssertTest {
         {
             // size effect
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize).encode(),
+                ByteProcessor.from(data).readBlockSize(readBlockSize).process(),
                 totalSize == 0 ? -1 : totalSize
             );
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit).encode(),
+                ByteProcessor.from(data).readBlockSize(readBlockSize).readLimit(limit).process(),
                 actualSize(totalSize, limit)
             );
-            // with handlers
+            // with transformers
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize)
-                    .handler(timesHandler(readBlockSize, endCount))
-                    .handler(timesHandler(readBlockSize, endCount))
-                    .encode(),
+                ByteProcessor.from(data).readBlockSize(readBlockSize)
+                    .transformer(timesTransformer(readBlockSize, endCount))
+                    .transformer(timesTransformer(readBlockSize, endCount))
+                    .process(),
                 totalSize == 0 ? -1 : totalSize
             );
             assertEquals(endCount.get(), 2);
             endCount.clear();
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
-                    .handler(timesHandler(readBlockSize, endCount))
-                    .handler(timesHandler(readBlockSize, endCount))
-                    .encode(),
+                ByteProcessor.from(data).readBlockSize(readBlockSize).readLimit(limit)
+                    .transformer(timesTransformer(readBlockSize, endCount))
+                    .transformer(timesTransformer(readBlockSize, endCount))
+                    .process(),
                 actualSize(totalSize, limit)
             );
             assertEquals(endCount.get(), 2);
@@ -116,23 +117,23 @@ public class ByteEncoderTest implements DataTest, AssertTest {
             // to OutputStream
             BytesBuilder builder = new BytesBuilder();
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize).encodeTo(builder),
+                ByteProcessor.from(data).readBlockSize(readBlockSize).processTo(builder),
                 totalSize == 0 ? -1 : totalSize
             );
             assertEquals(builder.toByteArray(), data);
             builder.reset();
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit).encodeTo(builder),
+                ByteProcessor.from(data).readBlockSize(readBlockSize).readLimit(limit).processTo(builder),
                 actualSize(totalSize, limit)
             );
             assertEquals(builder.toByteArray(), limitedData);
             builder.reset();
-            // with handlers
+            // with transformers
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize)
-                    .handler(timesHandler(readBlockSize, endCount))
-                    .handler(timesHandler(readBlockSize, endCount))
-                    .encodeTo(builder),
+                ByteProcessor.from(data).readBlockSize(readBlockSize)
+                    .transformer(timesTransformer(readBlockSize, endCount))
+                    .transformer(timesTransformer(readBlockSize, endCount))
+                    .processTo(builder),
                 totalSize == 0 ? -1 : totalSize
             );
             assertEquals(endCount.get(), 2);
@@ -140,10 +141,10 @@ public class ByteEncoderTest implements DataTest, AssertTest {
             builder.reset();
             endCount.clear();
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
-                    .handler(timesHandler(readBlockSize, endCount))
-                    .handler(timesHandler(readBlockSize, endCount))
-                    .encodeTo(builder),
+                ByteProcessor.from(data).readBlockSize(readBlockSize).readLimit(limit)
+                    .transformer(timesTransformer(readBlockSize, endCount))
+                    .transformer(timesTransformer(readBlockSize, endCount))
+                    .processTo(builder),
                 actualSize(totalSize, limit)
             );
             assertEquals(endCount.get(), 2);
@@ -156,23 +157,23 @@ public class ByteEncoderTest implements DataTest, AssertTest {
             BytesBuilder builder = new BytesBuilder();
             WritableByteChannel channel = Channels.newChannel(builder);
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize).encodeTo(channel),
+                ByteProcessor.from(data).readBlockSize(readBlockSize).processTo(channel),
                 totalSize == 0 ? -1 : totalSize
             );
             assertEquals(builder.toByteArray(), data);
             builder.reset();
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit).encodeTo(channel),
+                ByteProcessor.from(data).readBlockSize(readBlockSize).readLimit(limit).processTo(channel),
                 actualSize(totalSize, limit)
             );
             assertEquals(builder.toByteArray(), limitedData);
             builder.reset();
-            // with handlers
+            // with transformers
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize)
-                    .handler(timesHandler(readBlockSize, endCount))
-                    .handler(timesHandler(readBlockSize, endCount))
-                    .encodeTo(channel),
+                ByteProcessor.from(data).readBlockSize(readBlockSize)
+                    .transformer(timesTransformer(readBlockSize, endCount))
+                    .transformer(timesTransformer(readBlockSize, endCount))
+                    .processTo(channel),
                 totalSize == 0 ? -1 : totalSize
             );
             assertEquals(endCount.get(), 2);
@@ -180,10 +181,10 @@ public class ByteEncoderTest implements DataTest, AssertTest {
             builder.reset();
             endCount.clear();
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
-                    .handler(timesHandler(readBlockSize, endCount))
-                    .handler(timesHandler(readBlockSize, endCount))
-                    .encodeTo(channel),
+                ByteProcessor.from(data).readBlockSize(readBlockSize).readLimit(limit)
+                    .transformer(timesTransformer(readBlockSize, endCount))
+                    .transformer(timesTransformer(readBlockSize, endCount))
+                    .processTo(channel),
                 actualSize(totalSize, limit)
             );
             assertEquals(endCount.get(), 2);
@@ -195,23 +196,23 @@ public class ByteEncoderTest implements DataTest, AssertTest {
             // to array
             byte[] dst = new byte[totalSize];
             assertEquals(
-                ByteEncoder.from(ByteBuffer.wrap(data)).readBlockSize(readBlockSize).encodeTo(dst),
+                ByteProcessor.from(ByteBuffer.wrap(data)).readBlockSize(readBlockSize).processTo(dst),
                 totalSize == 0 ? -1 : totalSize
             );
             assertEquals(dst, data);
             dst = new byte[limitedData.length];
             assertEquals(
-                ByteEncoder.from(ByteBuffer.wrap(data)).readBlockSize(readBlockSize).readLimit(limit).encodeTo(dst),
+                ByteProcessor.from(ByteBuffer.wrap(data)).readBlockSize(readBlockSize).readLimit(limit).processTo(dst),
                 actualSize(totalSize, limit)
             );
             assertEquals(dst, limitedData);
-            // with handlers
+            // with transformers
             dst = new byte[timesData.length];
             assertEquals(
-                ByteEncoder.from(ByteBuffer.wrap(data)).readBlockSize(readBlockSize)
-                    .handler(timesHandler(readBlockSize, endCount))
-                    .handler(timesHandler(readBlockSize, endCount))
-                    .encodeTo(dst),
+                ByteProcessor.from(ByteBuffer.wrap(data)).readBlockSize(readBlockSize)
+                    .transformer(timesTransformer(readBlockSize, endCount))
+                    .transformer(timesTransformer(readBlockSize, endCount))
+                    .processTo(dst),
                 totalSize == 0 ? -1 : totalSize
             );
             assertEquals(endCount.get(), 2);
@@ -219,10 +220,10 @@ public class ByteEncoderTest implements DataTest, AssertTest {
             endCount.clear();
             dst = new byte[dstSize(totalSize, limit) * 4];
             assertEquals(
-                ByteEncoder.from(ByteBuffer.wrap(data)).readBlockSize(readBlockSize).readLimit(limit)
-                    .handler(timesHandler(readBlockSize, endCount))
-                    .handler(timesHandler(readBlockSize, endCount))
-                    .encodeTo(dst),
+                ByteProcessor.from(ByteBuffer.wrap(data)).readBlockSize(readBlockSize).readLimit(limit)
+                    .transformer(timesTransformer(readBlockSize, endCount))
+                    .transformer(timesTransformer(readBlockSize, endCount))
+                    .processTo(dst),
                 actualSize(totalSize, limit)
             );
             assertEquals(endCount.get(), 2);
@@ -233,26 +234,26 @@ public class ByteEncoderTest implements DataTest, AssertTest {
             // to array offset
             byte[] dst = new byte[totalSize + 5];
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize).encodeTo(dst, 5),
+                ByteProcessor.from(data).readBlockSize(readBlockSize).processTo(dst, 5),
                 totalSize == 0 ? -1 : totalSize
             );
             assertEquals(Arrays.copyOfRange(dst, 5, dst.length), data);
             dst = new byte[limitedData.length + 5];
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit).encodeTo(dst, 5),
+                ByteProcessor.from(data).readBlockSize(readBlockSize).readLimit(limit).processTo(dst, 5),
                 actualSize(totalSize, limit)
             );
             assertEquals(
                 Arrays.copyOfRange(dst, 5, dst.length),
                 limitedData
             );
-            // with handlers
+            // with transformers
             dst = new byte[timesData.length + 5];
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize)
-                    .handler(timesHandler(readBlockSize, endCount))
-                    .handler(timesHandler(readBlockSize, endCount))
-                    .encodeTo(dst, 5),
+                ByteProcessor.from(data).readBlockSize(readBlockSize)
+                    .transformer(timesTransformer(readBlockSize, endCount))
+                    .transformer(timesTransformer(readBlockSize, endCount))
+                    .processTo(dst, 5),
                 totalSize == 0 ? -1 : totalSize
             );
             assertEquals(endCount.get(), 2);
@@ -260,10 +261,10 @@ public class ByteEncoderTest implements DataTest, AssertTest {
             endCount.clear();
             dst = new byte[limitedTimesData.length + 5];
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
-                    .handler(timesHandler(readBlockSize, endCount))
-                    .handler(timesHandler(readBlockSize, endCount))
-                    .encodeTo(dst, 5),
+                ByteProcessor.from(data).readBlockSize(readBlockSize).readLimit(limit)
+                    .transformer(timesTransformer(readBlockSize, endCount))
+                    .transformer(timesTransformer(readBlockSize, endCount))
+                    .processTo(dst, 5),
                 actualSize(totalSize, limit)
             );
             assertEquals(endCount.get(), 2);
@@ -277,26 +278,26 @@ public class ByteEncoderTest implements DataTest, AssertTest {
             // to buffer
             ByteBuffer dst = ByteBuffer.allocate(totalSize);
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize).encodeTo(dst),
+                ByteProcessor.from(data).readBlockSize(readBlockSize).processTo(dst),
                 totalSize == 0 ? -1 : totalSize
             );
             assertEquals(BufferKit.copyContent((ByteBuffer) dst.flip()), data);
             dst = ByteBuffer.allocate(limitedData.length);
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit).encodeTo(dst),
+                ByteProcessor.from(data).readBlockSize(readBlockSize).readLimit(limit).processTo(dst),
                 actualSize(totalSize, limit)
             );
             assertEquals(
                 BufferKit.copyContent((ByteBuffer) dst.flip()),
                 limitedData
             );
-            // with handlers
+            // with transformers
             dst = ByteBuffer.allocate(timesData.length);
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize)
-                    .handler(timesHandler(readBlockSize, endCount))
-                    .handler(timesHandler(readBlockSize, endCount))
-                    .encodeTo(dst),
+                ByteProcessor.from(data).readBlockSize(readBlockSize)
+                    .transformer(timesTransformer(readBlockSize, endCount))
+                    .transformer(timesTransformer(readBlockSize, endCount))
+                    .processTo(dst),
                 totalSize == 0 ? -1 : totalSize
             );
             assertEquals(endCount.get(), 2);
@@ -304,10 +305,10 @@ public class ByteEncoderTest implements DataTest, AssertTest {
             endCount.clear();
             dst = ByteBuffer.allocate(limitedTimesData.length);
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
-                    .handler(timesHandler(readBlockSize, endCount))
-                    .handler(timesHandler(readBlockSize, endCount))
-                    .encodeTo(dst),
+                ByteProcessor.from(data).readBlockSize(readBlockSize).readLimit(limit)
+                    .transformer(timesTransformer(readBlockSize, endCount))
+                    .transformer(timesTransformer(readBlockSize, endCount))
+                    .processTo(dst),
                 actualSize(totalSize, limit)
             );
             assertEquals(endCount.get(), 2);
@@ -342,9 +343,9 @@ public class ByteEncoderTest implements DataTest, AssertTest {
             err.setNextOperation(ReadOps.THROW, 99);
             ByteReader reader = ByteReader.from(err);
             expectThrows(IOException.class, () ->
-                ByteEncoder.from(reader).handler(ByteEncoder.emptyHandler()).asInputStream().read());
+                ByteProcessor.from(reader).transformer(ByteTransformer.empty()).asInputStream().read());
             expectThrows(IOException.class, () ->
-                ByteEncoder.from(reader).handler(ByteEncoder.emptyHandler()).asInputStream().close());
+                ByteProcessor.from(reader).transformer(ByteTransformer.empty()).asInputStream().close());
         }
     }
 
@@ -356,45 +357,45 @@ public class ByteEncoderTest implements DataTest, AssertTest {
         byte[] limitedTimesData = timesData(limitedData);
         {
             assertEquals(
-                IOKit.read(ByteEncoder.from(data).readBlockSize(readBlockSize).asInputStream()),
+                IOKit.read(ByteProcessor.from(data).readBlockSize(readBlockSize).asInputStream()),
                 data.length == 0 ? null : data
             );
             assertEquals(
-                IOKit.read(ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit).asInputStream()),
+                IOKit.read(ByteProcessor.from(data).readBlockSize(readBlockSize).readLimit(limit).asInputStream()),
                 limitedData.length == 0 ? null : limitedData
             );
             assertEquals(
-                IOKit.read(ByteEncoder.from(data).readBlockSize(readBlockSize)
-                    .handler(timesHandler(readBlockSize, endCount))
-                    .handler(timesHandler(readBlockSize, endCount))
+                IOKit.read(ByteProcessor.from(data).readBlockSize(readBlockSize)
+                    .transformer(timesTransformer(readBlockSize, endCount))
+                    .transformer(timesTransformer(readBlockSize, endCount))
                     .asInputStream()),
                 timesData.length == 0 ? null : timesData
             );
             assertEquals(endCount.get(), 2);
             endCount.clear();
             assertEquals(
-                IOKit.read(ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
-                    .handler(timesHandler(readBlockSize, endCount))
-                    .handler(timesHandler(readBlockSize, endCount))
+                IOKit.read(ByteProcessor.from(data).readBlockSize(readBlockSize).readLimit(limit)
+                    .transformer(timesTransformer(readBlockSize, endCount))
+                    .transformer(timesTransformer(readBlockSize, endCount))
                     .asInputStream()),
                 limitedTimesData.length == 0 ? null : limitedTimesData
             );
             assertEquals(endCount.get(), 2);
             endCount.clear();
             IOImplsTest.testInputStream(
-                ByteEncoder.from(data).readBlockSize(readBlockSize).asInputStream(),
+                ByteProcessor.from(data).readBlockSize(readBlockSize).asInputStream(),
                 data,
                 false, false, true
             );
             IOImplsTest.testInputStream(
-                ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit).asInputStream(),
+                ByteProcessor.from(data).readBlockSize(readBlockSize).readLimit(limit).asInputStream(),
                 limitedData,
                 false, false, true
             );
             IOImplsTest.testInputStream(
-                ByteEncoder.from(data).readBlockSize(readBlockSize)
-                    .handler(timesHandler(readBlockSize, endCount))
-                    .handler(timesHandler(readBlockSize, endCount))
+                ByteProcessor.from(data).readBlockSize(readBlockSize)
+                    .transformer(timesTransformer(readBlockSize, endCount))
+                    .transformer(timesTransformer(readBlockSize, endCount))
                     .asInputStream(),
                 timesData,
                 false, true, false
@@ -402,9 +403,9 @@ public class ByteEncoderTest implements DataTest, AssertTest {
             assertEquals(endCount.get(), 2);
             endCount.clear();
             IOImplsTest.testInputStream(
-                ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
-                    .handler(timesHandler(readBlockSize, endCount))
-                    .handler(timesHandler(readBlockSize, endCount))
+                ByteProcessor.from(data).readBlockSize(readBlockSize).readLimit(limit)
+                    .transformer(timesTransformer(readBlockSize, endCount))
+                    .transformer(timesTransformer(readBlockSize, endCount))
                     .asInputStream(),
                 limitedTimesData,
                 false, true, false
@@ -415,21 +416,21 @@ public class ByteEncoderTest implements DataTest, AssertTest {
         {
             // for empty
             assertEquals(
-                IOKit.read(ByteEncoder.from(data).readBlockSize(readBlockSize)
-                    .handler(ByteEncoder.emptyHandler())
+                IOKit.read(ByteProcessor.from(data).readBlockSize(readBlockSize)
+                    .transformer(ByteTransformer.empty())
                     .asInputStream()),
                 data.length == 0 ? null : data
             );
             IOImplsTest.testInputStream(
-                ByteEncoder.from(data).readBlockSize(readBlockSize)
-                    .handler(ByteEncoder.emptyHandler())
+                ByteProcessor.from(data).readBlockSize(readBlockSize)
+                    .transformer(ByteTransformer.empty())
                     .asInputStream(),
                 data,
                 false, true, false
             );
             IOImplsTest.testInputStream(
-                ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
-                    .handler(ByteEncoder.emptyHandler())
+                ByteProcessor.from(data).readBlockSize(readBlockSize).readLimit(limit)
+                    .transformer(ByteTransformer.empty())
                     .asInputStream(),
                 limitedData,
                 false, true, false
@@ -437,8 +438,8 @@ public class ByteEncoderTest implements DataTest, AssertTest {
         }
         {
             // one by one
-            InputStream in = ByteEncoder.from(data).readBlockSize(readBlockSize)
-                .handler(ByteEncoder.emptyHandler())
+            InputStream in = ByteProcessor.from(data).readBlockSize(readBlockSize)
+                .transformer(ByteTransformer.empty())
                 .asInputStream();
             BytesBuilder builder = new BytesBuilder();
             while (true) {
@@ -453,25 +454,25 @@ public class ByteEncoderTest implements DataTest, AssertTest {
         }
         {
             // reader
-            ByteSegment readData = ByteEncoder.from(data).readBlockSize(readBlockSize)
+            ByteSegment readData = ByteProcessor.from(data).readBlockSize(readBlockSize)
                 .asByteReader().read(data.length + 1);
             assertEquals(readData.toByteArray(), data);
             assertTrue(readData.end());
-            readData = ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
+            readData = ByteProcessor.from(data).readBlockSize(readBlockSize).readLimit(limit)
                 .asByteReader().read(limitedData.length + 1);
             assertEquals(readData.toByteArray(), limitedData);
             assertTrue(readData.end());
-            readData = ByteEncoder.from(data).readBlockSize(readBlockSize)
-                .handler(timesHandler(readBlockSize, endCount))
-                .handler(timesHandler(readBlockSize, endCount))
+            readData = ByteProcessor.from(data).readBlockSize(readBlockSize)
+                .transformer(timesTransformer(readBlockSize, endCount))
+                .transformer(timesTransformer(readBlockSize, endCount))
                 .asByteReader().read(timesData.length + 1);
             assertEquals(readData.toByteArray(), timesData);
             assertTrue(readData.end());
             assertEquals(endCount.get(), 2);
             endCount.clear();
-            readData = ByteEncoder.from(data).readBlockSize(readBlockSize).readLimit(limit)
-                .handler(timesHandler(readBlockSize, endCount))
-                .handler(timesHandler(readBlockSize, endCount))
+            readData = ByteProcessor.from(data).readBlockSize(readBlockSize).readLimit(limit)
+                .transformer(timesTransformer(readBlockSize, endCount))
+                .transformer(timesTransformer(readBlockSize, endCount))
                 .asByteReader().read(limitedTimesData.length + 1);
             assertEquals(readData.toByteArray(), limitedTimesData);
             assertTrue(readData.end());
@@ -494,8 +495,8 @@ public class ByteEncoderTest implements DataTest, AssertTest {
         return Math.min(totalSize, limit);
     }
 
-    private ByteEncoder.Handler timesHandler(int readBlockSize, IntVar endCount) {
-        return ByteEncoder.newFixedSizeHandler((d, e) -> {
+    private ByteTransformer timesTransformer(int readBlockSize, IntVar endCount) {
+        return ByteTransformer.withFixedSize((d, e) -> {
             if (e) {
                 endCount.incrementAndGet();
             }
@@ -522,47 +523,47 @@ public class ByteEncoderTest implements DataTest, AssertTest {
     }
 
     @Test
-    public void testResidualSizeHandler() throws Exception {
-        testResidualSizeHandler(0, 123, 37);
-        testResidualSizeHandler(0, 123, 123);
-        testResidualSizeHandler(0, 123, 1333);
-        testResidualSizeHandler(1333, 123, 37);
-        testResidualSizeHandler(1333, 123, 123);
-        testResidualSizeHandler(1333, 123, 777);
-        testResidualSizeHandler(123, 1333, 37);
-        testResidualSizeHandler(123, 1333, 123);
-        testResidualSizeHandler(123, 1333, 777);
-        testResidualSizeHandler(123, 123, 1333);
-        testResidualSizeHandler(123, 77, 1333);
-        testResidualSizeHandler(77, 123, 1333);
-        testResidualSizeHandler(256, 64, 32);
-        testResidualSizeHandler(256, 32, 64);
+    public void testResidualSizeTransformer() throws Exception {
+        testResidualSizeTransformer(0, 123, 37);
+        testResidualSizeTransformer(0, 123, 123);
+        testResidualSizeTransformer(0, 123, 1333);
+        testResidualSizeTransformer(1333, 123, 37);
+        testResidualSizeTransformer(1333, 123, 123);
+        testResidualSizeTransformer(1333, 123, 777);
+        testResidualSizeTransformer(123, 1333, 37);
+        testResidualSizeTransformer(123, 1333, 123);
+        testResidualSizeTransformer(123, 1333, 777);
+        testResidualSizeTransformer(123, 123, 1333);
+        testResidualSizeTransformer(123, 77, 1333);
+        testResidualSizeTransformer(77, 123, 1333);
+        testResidualSizeTransformer(256, 64, 32);
+        testResidualSizeTransformer(256, 32, 64);
         {
             // exception
             expectThrows(IllegalArgumentException.class, () ->
-                ByteEncoder.from(new byte[0])
-                    .handler(ByteEncoder.newFixedSizeHandler(ByteEncoder.emptyHandler(), -1)));
+                ByteProcessor.from(new byte[0])
+                    .transformer(ByteTransformer.withFixedSize(ByteTransformer.empty(), -1)));
             expectThrows(IllegalArgumentException.class, () ->
-                ByteEncoder.from(new byte[0])
-                    .handler(ByteEncoder.newFixedSizeHandler(ByteEncoder.emptyHandler(), 0)));
+                ByteProcessor.from(new byte[0])
+                    .transformer(ByteTransformer.withFixedSize(ByteTransformer.empty(), 0)));
             expectThrows(IllegalArgumentException.class, () ->
-                ByteEncoder.from(new byte[0])
-                    .handler(ByteEncoder.newMultipleSizeHandler(ByteEncoder.emptyHandler(), -1)));
+                ByteProcessor.from(new byte[0])
+                    .transformer(ByteTransformer.withMultipleSize(ByteTransformer.empty(), -1)));
             expectThrows(IllegalArgumentException.class, () ->
-                ByteEncoder.from(new byte[0])
-                    .handler(ByteEncoder.newMultipleSizeHandler(ByteEncoder.emptyHandler(), 0)));
+                ByteProcessor.from(new byte[0])
+                    .transformer(ByteTransformer.withMultipleSize(ByteTransformer.empty(), 0)));
         }
     }
 
-    private void testResidualSizeHandler(int totalSize, int readBlockSize, int blockSize) throws Exception {
+    private void testResidualSizeTransformer(int totalSize, int readBlockSize, int blockSize) throws Exception {
         IntVar endCount = IntVar.of(0);
         byte[] data = randomBytes(totalSize);
         BytesBuilder builder = new BytesBuilder();
         {
             // FixedSizeHandler
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize)
-                    .handler(ByteEncoder.newFixedSizeHandler((d, e) -> {
+                ByteProcessor.from(data).readBlockSize(readBlockSize)
+                    .transformer(ByteTransformer.withFixedSize((d, e) -> {
                         if (e) {
                             endCount.incrementAndGet();
                         } else {
@@ -570,7 +571,7 @@ public class ByteEncoderTest implements DataTest, AssertTest {
                         }
                         return d;
                     }, blockSize))
-                    .encodeTo(builder),
+                    .processTo(builder),
                 totalSize == 0 ? -1 : totalSize
             );
             assertEquals(builder.toByteArray(), data);
@@ -581,8 +582,8 @@ public class ByteEncoderTest implements DataTest, AssertTest {
         {
             // MultipleSizeHandler
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize)
-                    .handler(ByteEncoder.newMultipleSizeHandler((d, e) -> {
+                ByteProcessor.from(data).readBlockSize(readBlockSize)
+                    .transformer(ByteTransformer.withMultipleSize((d, e) -> {
                         if (e) {
                             endCount.incrementAndGet();
                         } else {
@@ -590,7 +591,7 @@ public class ByteEncoderTest implements DataTest, AssertTest {
                         }
                         return d;
                     }, blockSize))
-                    .encodeTo(builder),
+                    .processTo(builder),
                 totalSize == 0 ? -1 : totalSize
             );
             assertEquals(builder.toByteArray(), data);
@@ -601,32 +602,32 @@ public class ByteEncoderTest implements DataTest, AssertTest {
     }
 
     @Test
-    public void testBufferedHandler() throws Exception {
-        testBufferedHandler(0, 123);
-        testBufferedHandler(123, 123);
-        testBufferedHandler(123, 1234);
-        testBufferedHandler(123, 1);
-        testBufferedHandler(123, 2);
-        testBufferedHandler(123, 3);
-        testBufferedHandler(128, 16);
+    public void testBufferedTransformer() throws Exception {
+        testBufferedTransformer(0, 123);
+        testBufferedTransformer(123, 123);
+        testBufferedTransformer(123, 1234);
+        testBufferedTransformer(123, 1);
+        testBufferedTransformer(123, 2);
+        testBufferedTransformer(123, 3);
+        testBufferedTransformer(128, 16);
     }
 
-    private void testBufferedHandler(int totalSize, int readBlockSize) throws Exception {
+    private void testBufferedTransformer(int totalSize, int readBlockSize) throws Exception {
         IntVar endCount = IntVar.of(0);
         byte[] data = randomBytes(totalSize);
         BytesBuilder builder = new BytesBuilder();
         {
             // BufferedHandler
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize)
-                    .handler(ByteEncoder.newBufferedHandler((d, e) -> {
+                ByteProcessor.from(data).readBlockSize(readBlockSize)
+                    .transformer(ByteTransformer.withBuffered((d, e) -> {
                         if (e) {
                             endCount.incrementAndGet();
                             return d;
                         }
                         return null;
                     }))
-                    .encodeTo(builder),
+                    .processTo(builder),
                 totalSize == 0 ? -1 : totalSize
             );
             assertEquals(builder.toByteArray(), data);
@@ -655,8 +656,8 @@ public class ByteEncoderTest implements DataTest, AssertTest {
         {
             // toArray
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize)
-                    .handler(ByteEncoder.newBufferedHandler((d, e) -> {
+                ByteProcessor.from(data).readBlockSize(readBlockSize)
+                    .transformer(ByteTransformer.withBuffered((d, e) -> {
                         if (e) {
                             endCount.incrementAndGet();
                             return d;
@@ -672,8 +673,8 @@ public class ByteEncoderTest implements DataTest, AssertTest {
         {
             // toArray
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize)
-                    .handler(ByteEncoder.newBufferedHandler((d, e) -> {
+                ByteProcessor.from(data).readBlockSize(readBlockSize)
+                    .transformer(ByteTransformer.withBuffered((d, e) -> {
                         if (e) {
                             endCount.incrementAndGet();
                             return d;
@@ -689,8 +690,8 @@ public class ByteEncoderTest implements DataTest, AssertTest {
         {
             // toArray
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize)
-                    .handler(ByteEncoder.newBufferedHandler((d, e) -> {
+                ByteProcessor.from(data).readBlockSize(readBlockSize)
+                    .transformer(ByteTransformer.withBuffered((d, e) -> {
                         if (e) {
                             endCount.incrementAndGet();
                             return d;
@@ -703,8 +704,8 @@ public class ByteEncoderTest implements DataTest, AssertTest {
             assertEquals(endCount.get(), 1);
             endCount.clear();
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize)
-                    .handler(ByteEncoder.newBufferedHandler((d, e) -> {
+                ByteProcessor.from(data).readBlockSize(readBlockSize)
+                    .transformer(ByteTransformer.withBuffered((d, e) -> {
                         if (e) {
                             endCount.incrementAndGet();
                             return d;
@@ -720,8 +721,8 @@ public class ByteEncoderTest implements DataTest, AssertTest {
         {
             // toEncoder
             assertEquals(
-                ByteEncoder.from(data).readBlockSize(readBlockSize)
-                    .handler(ByteEncoder.newBufferedHandler((d, e) -> {
+                ByteProcessor.from(data).readBlockSize(readBlockSize)
+                    .transformer(ByteTransformer.withBuffered((d, e) -> {
                         if (e) {
                             endCount.incrementAndGet();
                             return d;
