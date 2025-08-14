@@ -1,4 +1,4 @@
-package xyz.sunqian.common.base.function;
+package xyz.sunqian.common.function.function;
 
 /**
  * Represents an operation that accepts an object and the specified range, and returns the sub-portion of the specified

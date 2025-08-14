@@ -4,7 +4,7 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.CheckKit;
 import xyz.sunqian.common.base.chars.CharsKit;
-import xyz.sunqian.common.base.function.SubFunction;
+import xyz.sunqian.common.function.function.SubFunction;
 
 import java.nio.charset.Charset;
 import java.util.Arrays;

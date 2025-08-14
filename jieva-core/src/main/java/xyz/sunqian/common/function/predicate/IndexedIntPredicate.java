@@ -1,4 +1,4 @@
-package xyz.sunqian.common.base.function;
+package xyz.sunqian.common.function.predicate;
 
 import java.util.function.IntPredicate;
 

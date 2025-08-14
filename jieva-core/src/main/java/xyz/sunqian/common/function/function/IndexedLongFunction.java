@@ -1,4 +1,4 @@
-package xyz.sunqian.common.base.function;
+package xyz.sunqian.common.function.function;
 
 import java.util.function.LongFunction;
 

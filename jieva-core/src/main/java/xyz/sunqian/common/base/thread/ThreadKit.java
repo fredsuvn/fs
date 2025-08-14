@@ -3,7 +3,7 @@ package xyz.sunqian.common.base.thread;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.AwaitingException;
-import xyz.sunqian.common.base.function.BooleanCallable;
+import xyz.sunqian.common.function.callable.BooleanCallable;
 
 import java.time.Duration;
 

@@ -5,10 +5,10 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.OutParam;
 import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.base.function.IndexedDoublePredicate;
-import xyz.sunqian.common.base.function.IndexedIntPredicate;
-import xyz.sunqian.common.base.function.IndexedLongPredicate;
-import xyz.sunqian.common.base.function.IndexedPredicate;
+import xyz.sunqian.common.function.predicate.IndexedDoublePredicate;
+import xyz.sunqian.common.function.predicate.IndexedIntPredicate;
+import xyz.sunqian.common.function.predicate.IndexedLongPredicate;
+import xyz.sunqian.common.function.predicate.IndexedPredicate;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;

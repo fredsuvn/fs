@@ -1,4 +1,4 @@
-package xyz.sunqian.common.base.function;
+package xyz.sunqian.common.function.consumer;
 
 import java.util.function.IntConsumer;
 
