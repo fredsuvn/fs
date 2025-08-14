@@ -7,7 +7,6 @@ import xyz.sunqian.common.io.ByteTransformer;
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
 import java.nio.ByteBuffer;
-import java.security.MessageDigest;
 
 /**
  * Utilities kit for crypto.
@@ -17,7 +16,7 @@ import java.security.MessageDigest;
 public class CryptoKit {
 
     /**
-     * Returns a new {@link ByteTransformer} instance for the specified {@link Cipher}. The handler uses
+     * Returns a new {@link ByteTransformer} instance for the specified {@link Cipher}. The transformer uses
      * {@link Cipher#doFinal(ByteBuffer, ByteBuffer)} to process the input data, and the input data is considered as a
      * block that needs to be encoded/decoded.
      * <p>
@@ -27,7 +26,7 @@ public class CryptoKit {
      * @param cipher the specified {@link Cipher}, should be initialized
      * @return a new {@link ByteTransformer} instance for the specified {@link Cipher}
      */
-    public static @Nonnull ByteTransformer cipherHandler(@Nonnull Cipher cipher) {
+    public static @Nonnull ByteTransformer cipherTransformer(@Nonnull Cipher cipher) {
         return new ByteTransformer() {
             @Override
             public @Nonnull ByteBuffer transform(@Nonnull ByteBuffer data, boolean end) throws Exception {
@@ -41,31 +40,9 @@ public class CryptoKit {
     }
 
     /**
-     * Returns a new {@link ByteTransformer} instance for the specified {@link MessageDigest}. The handler uses
-     * {@link MessageDigest#update(ByteBuffer)} and {@link MessageDigest#digest()} to process the input data, and before
-     * the {@code end} is {@code true}, the handler returns {@code null}.
-     * <p>
-     * If the digest requires a specified input length, try using {@link ByteProcessor#readBlockSize(int)} or
-     * {@link ByteTransformer#withFixedSize(ByteTransformer, int)} to configure it.
-     *
-     * @param digest the specified {@link MessageDigest}, should be initialized
-     * @return a new {@link ByteTransformer} instance for the specified {@link MessageDigest}
-     */
-    public static @Nonnull ByteTransformer digestHandler(@Nonnull MessageDigest digest) {
-        return (data, end) -> {
-            digest.update(data);
-            if (end) {
-                return ByteBuffer.wrap(digest.digest());
-            } else {
-                return null;
-            }
-        };
-    }
-
-    /**
-     * Returns a new {@link ByteTransformer} instance for the specified {@link Mac}. The handler uses
+     * Returns a new {@link ByteTransformer} instance for the specified {@link Mac}. The transformer uses
      * {@link Mac#update(ByteBuffer)} and {@link Mac#doFinal()} to process the input data, and before the {@code end} is
-     * {@code true}, the handler returns {@code null}.
+     * {@code true}, the transformer returns {@code null}.
      * <p>
      * If the digest requires a specified input length, try using {@link ByteProcessor#readBlockSize(int)} or
      * {@link ByteTransformer#withFixedSize(ByteTransformer, int)} to configure it.
@@ -73,7 +50,7 @@ public class CryptoKit {
      * @param mac the specified {@link Mac}, should be initialized
      * @return a new {@link ByteTransformer} instance for the specified {@link Mac}
      */
-    public static @Nonnull ByteTransformer macHandler(@Nonnull Mac mac) {
+    public static @Nonnull ByteTransformer macTransformer(@Nonnull Mac mac) {
         return (data, end) -> {
             mac.update(data);
             if (end) {
