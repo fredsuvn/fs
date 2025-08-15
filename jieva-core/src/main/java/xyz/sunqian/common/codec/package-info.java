@@ -3,6 +3,7 @@
  * <p>
  * Utilities Kits:
  * <ul>
+ *     <li>{@link xyz.sunqian.common.codec.Base64Kit}</li>
  *     <li>{@link xyz.sunqian.common.codec.HexKit}</li>
  *     <li>{@link xyz.sunqian.common.codec.CryptoKit}</li>
  *     <li>{@link xyz.sunqian.common.codec.DigestKit}</li>
