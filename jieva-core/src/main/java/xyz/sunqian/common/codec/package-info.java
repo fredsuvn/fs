@@ -10,8 +10,6 @@
  * <p>
  * Interfaces and Classes:
  * <ul>
- *     <li>{@link xyz.sunqian.common.codec.ByteEncoder}</li>
- *     <li>{@link xyz.sunqian.common.codec.ByteDecoder}</li>
  * </ul>
  */
 package xyz.sunqian.common.codec;

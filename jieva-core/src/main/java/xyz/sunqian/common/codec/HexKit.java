@@ -1,180 +1,166 @@
 package xyz.sunqian.common.codec;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.annotations.ThreadSafe;
-import xyz.sunqian.common.base.bytes.BytesKit;
+import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.exception.JieRuntimeException;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.ByteArrayOperator;
-import xyz.sunqian.common.io.ByteTransformer;
+import xyz.sunqian.common.io.IORuntimeException;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 /**
- * Utilities kit for Hex.
+ * Utilities kit for Hex (Base16).
  *
  * @author sunqian
  */
 public class HexKit {
 
     /**
-     * Returns a {@code hex} encoder. The encoder and its {@link ByteEncoder#asTransformer()} are stateless and
-     * thread-safe.
+     * Returns a {@code hex} encoder encoding in upper case. This method is equivalent to {@code encoder(true)}.
      *
-     * @return a {@code hex} encoder
+     * @return a {@code hex} encoder encoding in upper case
      */
-    public static @ThreadSafe ByteEncoder encoder() {
-        return HexEncoder.SINGLETON;
+    public static Encoder encoder() {
+        return encoder(true);
     }
 
     /**
-     * Returns a {@code hex} decoder. Note its {@link ByteEncoder#asTransformer()} are stateful and not thread-safe.
+     * Returns a {@code hex} encoder. The {@code upper} parameter specifies whether the encoder uses upper case for
+     * encoding ({@code true} for {@code A-F} and {@code false} for {@code a-f}).
      *
-     * @return a {@code hex} decoder
+     * @param upper {@code true} for upper case, otherwise {@code false}
+     * @return a {@code hex} encoder
      */
-    public static ByteDecoder decoder() {
-        return HexDecoder.SINGLETON;
+    public static Encoder encoder(boolean upper) {
+        return upper ? EncoderImpl.UPPER_SINGLETON : EncoderImpl.LOWER_SINGLETON;
     }
 
-    private static final class HexEncoder implements ByteEncoder, ByteArrayOperator, ByteTransformer {
+    /**
+     * Returns a {@code hex} decoder with the strict mode. This method is equivalent to {@code decoder(true)}.
+     *
+     * @return a {@code hex} decoder with the strict mod
+     */
+    public static Decoder decoder() {
+        return decoder(true);
+    }
 
-        private static final HexEncoder SINGLETON = new HexEncoder();
+    /**
+     * Returns a {@code hex} decoder. The {@code strict} parameter specifies whether the decoder is strict or not, a
+     * strict decoder will throw an exception if it encounters a valid hex character, and an un-strict decoder will
+     * ignore the valid hex characters.
+     *
+     * @param strict {@code true} for strict, otherwise {@code false}
+     * @return a {@code hex} decoder with the specified mod
+     */
+    public static Decoder decoder(boolean strict) {
+        return strict ? DecoderImpl.STRICT_SINGLETON : DecoderImpl.LOOSE_SINGLETON;
+    }
 
-        private static final char[] DICT = {
+    private static final class EncoderImpl implements Encoder, ByteArrayOperator {
+
+        private static final @Nonnull EncoderImpl UPPER_SINGLETON = new EncoderImpl(true);
+        private static final @Nonnull EncoderImpl LOWER_SINGLETON = new EncoderImpl(false);
+
+        private static final char @Nonnull [] UPPER_DICT = {
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
         };
 
+        private static final char @Nonnull [] LOWER_DICT = {
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
+        };
+
+        private final boolean upper;
+
+        private EncoderImpl(boolean upper) {
+            this.upper = upper;
+        }
+
         @Override
-        public byte @Nonnull [] encode(byte @Nonnull [] bytes) throws ByteEncodingException {
+        public byte @Nonnull [] encode(byte @Nonnull [] bytes) throws HexException {
             byte[] dst = new byte[bytes.length * 2];
             process(bytes, 0, dst, 0, bytes.length);
             return dst;
         }
 
         @Override
-        public @Nonnull ByteBuffer encode(@Nonnull ByteBuffer bytes) throws ByteEncodingException {
-            ByteBuffer dst = ByteBuffer.allocate(bytes.remaining() * 2);
-            BufferKit.process(bytes, dst, this);
-            dst.flip();
+        public byte @Nonnull [] encode(@Nonnull ByteBuffer buffer) throws HexException {
+            byte[] dst = new byte[buffer.remaining() * 2];
+            ByteBuffer dstBuf = ByteBuffer.wrap(dst);
+            BufferKit.process(buffer, dstBuf, this);
             return dst;
         }
 
         @Override
-        public int encode(@Nonnull ByteBuffer in, @Nonnull ByteBuffer out) throws ByteEncodingException {
-            return BufferKit.process(in, out, this);
+        public int process(byte @Nonnull [] src, int srcOff, byte @Nonnull [] dst, int dstOff, int len) {
+            char[] dict = upper ? UPPER_DICT : LOWER_DICT;
+            for (int i = srcOff, j = dstOff; i < srcOff + len; ) {
+                int bits = src[i++];
+                dst[j++] = (byte) dict[((bits >> 4) & 0x0f)];
+                dst[j++] = (byte) dict[(bits & 0x0f)];
+            }
+            return len * 2;
+        }
+    }
+
+    private static final class DecoderImpl implements Decoder, ByteArrayOperator {
+
+        private static final @Nonnull DecoderImpl STRICT_SINGLETON = new DecoderImpl(true);
+        private static final @Nonnull DecoderImpl LOOSE_SINGLETON = new DecoderImpl(false);
+
+        private final boolean strict;
+
+        private DecoderImpl(boolean strict) {
+            this.strict = strict;
         }
 
         @Override
-        public @Nonnull ByteTransformer asTransformer() {
-            return this;
+        public byte @Nonnull [] decode(byte @Nonnull [] bytes) throws HexException {
+            checkLen(bytes.length);
+            byte[] dst = new byte[bytes.length / 2];
+            int actualLen = process(bytes, 0, dst, 0, bytes.length);
+            return actualLen == dst.length ? dst : Arrays.copyOfRange(dst, 0, actualLen);
+        }
+
+        @Override
+        public byte @Nonnull [] decode(@Nonnull ByteBuffer buffer) throws HexException {
+            checkLen(buffer.remaining());
+            byte[] dst = new byte[buffer.remaining() / 2];
+            ByteBuffer dstBuf = ByteBuffer.wrap(dst);
+            try {
+                int actualLen = BufferKit.process(buffer, dstBuf, this);
+                return actualLen == dst.length ? dst : Arrays.copyOfRange(dst, 0, actualLen);
+            } catch (IORuntimeException e) {
+                throw (HexException) e.getCause();
+            }
         }
 
         @Override
         public int process(
             byte @Nonnull [] src, int srcOff, byte @Nonnull [] dst, int dstOff, int len
-        ) {
-            for (int i = srcOff, j = dstOff; i < srcOff + len; ) {
-                int bits = src[i++];
-                dst[j++] = (byte) DICT[((bits >> 4) & 0x0f)];
-                dst[j++] = (byte) DICT[(bits & 0x0f)];
+        ) throws HexException {
+            if (strict) {
+                return processStrict(src, srcOff, dst, dstOff, len);
+            } else {
+                return processLoose(src, srcOff, dst, dstOff, len);
             }
-            return len * 2;
         }
 
-        @Override
-        public @Nonnull ByteBuffer transform(@Nonnull ByteBuffer data, boolean end) {
-            return encode(data);
-        }
-    }
-
-    private static final class HexDecoder implements ByteDecoder, ByteArrayOperator {
-
-        private static final HexDecoder SINGLETON = new HexDecoder();
-
-        @Override
-        public byte @Nonnull [] decode(byte @Nonnull [] bytes) throws ByteDecodingException {
-            byte[] dst = new byte[bytes.length * 2];
-            process(bytes, 0, dst, 0, bytes.length);
-            return dst;
-        }
-
-        @Override
-        public @Nonnull ByteBuffer decode(@Nonnull ByteBuffer bytes) throws ByteDecodingException {
-            ByteBuffer dst = ByteBuffer.allocate(bytes.remaining() * 2);
-            BufferKit.process(bytes, dst, this);
-            dst.flip();
-            return dst;
-        }
-
-        @Override
-        public int decode(@Nonnull ByteBuffer in, @Nonnull ByteBuffer out) throws ByteDecodingException {
-            return BufferKit.process(in, out, this);
-        }
-
-        @Override
-        public @Nonnull ByteTransformer asTransformer() {
-            return new ByteTransformer() {
-
-                private long count = 0;
-                private int bits1 = 0;
-
-                @Override
-                public @Nonnull ByteBuffer transform(@Nonnull ByteBuffer data, boolean end) throws Exception {
-                    int totalLen = data.remaining() + (bits1 == 0 ? 0 : 1);
-                    ByteBuffer dst = null;
-
-                    try {
-                        // decodes last char
-                        if (bits1 != 0) {
-                            if (!data.hasRemaining()) {
-                                if (end) {
-                                    throw new ByteDecodingException("Invalid hex length: " + (count + 1) + ".");
-                                }
-                                return BytesKit.emptyBuffer();
-                            }
-                            int bits2 = toDigit((char) data.get(), 0);
-                            int bits = ((bits1 << 4) | bits2);
-                            dst = ByteBuffer.allocate(totalLen / 2);
-                            dst.put((byte) bits);
-                        }
-
-                        // decodes data
-                        int deLen = data.remaining() / 2 * 2;
-                        ByteBuffer deData;
-                        if (data.remaining() == deLen) {
-                            deData = data;
-                        } else {
-                            deData = BufferKit.slice(data, deLen);
-                            data.position(data.position() + deLen);
-                        }
-                        if (dst == null) {
-                            dst = ByteBuffer.allocate(deLen / 2);
-                        }
-                        BufferKit.process(deData, dst, HexDecoder.this);
-
-                        // record last char
-                        if (data.hasRemaining()) {
-                            bits1 = toDigit((char) data.get(), totalLen - 1);
-                        } else {
-                            bits1 = 0;
-                        }
-                        count += dst.capacity() * 2L;
-                        dst.flip();
-                        return dst;
-                    } catch (HexDecodingException e) {
-                        throw new ByteDecodingException(count + e.position());
-                    }
-                }
-            };
-        }
-
-        @Override
-        public int process(
-            byte @Nonnull [] src, final int srcOff, byte @Nonnull [] dst, final int dstOff, final int len
-        ) {
+        private int processStrict(
+            byte @Nonnull [] src, int srcOff, byte @Nonnull [] dst, int dstOff, int len
+        ) throws HexException {
             for (int i = 0, j = dstOff; i < len; ) {
-                int bits1 = toDigit((char) src[i + srcOff], i);
+                int bits1 = toDigit((char) src[i + srcOff]);
+                if (bits1 < 0) {
+                    throw new HexException(i, "The hex string contains invalid character at position: " + i + ".");
+                }
                 i++;
-                int bits2 = toDigit((char) src[i + srcOff], i);
+                int bits2 = toDigit((char) src[i + srcOff]);
+                if (bits2 < 0) {
+                    throw new HexException(i, "The hex string contains invalid character at position: " + i + ".");
+                }
                 i++;
                 int bits = ((bits1 << 4) | bits2);
                 dst[j++] = (byte) bits;
@@ -182,7 +168,34 @@ public class HexKit {
             return len / 2;
         }
 
-        private int toDigit(char c, long pos) throws HexDecodingException {
+        public int processLoose(
+            byte @Nonnull [] src, int srcOff, byte @Nonnull [] dst, int dstOff, int len
+        ) throws HexException {
+            int i = 0, j = dstOff, count = 0;
+            int bits1 = -1;
+            while (i < len) {
+                int bits = toDigit((char) src[i + srcOff]);
+                if (bits < 0) {
+                    i++;
+                    continue;
+                }
+                if (bits1 < 0) {
+                    bits1 = bits;
+                } else {
+                    int c = ((bits1 << 4) | bits);
+                    dst[j++] = (byte) c;
+                    count++;
+                    bits1 = -1;
+                }
+                i++;
+            }
+            if (bits1 >= 0) {
+                throw new HexException("The valid hex string is not a multiple of 2.");
+            }
+            return count;
+        }
+
+        private int toDigit(char c) {
             if (c >= '0' && c <= '9') {
                 return c - '0';
             }
@@ -192,14 +205,203 @@ public class HexKit {
             if (c >= 'A' && c <= 'F') {
                 return c - 'A' + 10;
             }
-            throw new HexDecodingException(pos);
+            return -1;
         }
 
-        private static final class HexDecodingException extends ByteDecodingException {
-
-            private HexDecodingException(long pos) {
-                super(pos);
+        private void checkLen(int len) throws HexException {
+            if (strict) {
+                if (len % 2 != 0) {
+                    throw new HexException("The length of hex string is not a multiple of 2.");
+                }
             }
+        }
+    }
+
+    /**
+     * Encoder for Hex. The implementation should be immutable and thread-safe.
+     */
+    public interface Encoder {
+
+        /**
+         * Encodes the given bytes to hex string as byte array.
+         *
+         * @param bytes the given bytes to encode
+         * @return the hex string as byte array
+         * @throws HexException if any error occurs
+         */
+        byte @Nonnull [] encode(byte @Nonnull [] bytes) throws HexException;
+
+        /**
+         * Encodes the given buffer to hex string as byte array. The position of the given buffer will increment to its
+         * limit.
+         *
+         * @param buffer the given buffer to encode
+         * @return the hex string as byte array
+         * @throws HexException if any error occurs
+         */
+        byte @Nonnull [] encode(@Nonnull ByteBuffer buffer) throws HexException;
+
+        /**
+         * Encodes the given bytes to hex string.
+         *
+         * @param bytes the given bytes to encode
+         * @return the hex string
+         * @throws HexException if any error occurs
+         */
+        default @Nonnull String encodeToString(byte @Nonnull [] bytes) throws HexException {
+            byte[] dst = encode(bytes);
+            return new String(dst, StandardCharsets.ISO_8859_1);
+        }
+
+        /**
+         * Encodes the given buffer to hex string. The position of the given buffer will increment to its limit.
+         *
+         * @param buffer the given buffer to encode
+         * @return the hex string
+         * @throws HexException if any error occurs
+         */
+        default @Nonnull String encodeToString(@Nonnull ByteBuffer buffer) throws HexException {
+            byte[] dst = encode(buffer);
+            return new String(dst, StandardCharsets.ISO_8859_1);
+        }
+    }
+
+    /**
+     * Decoder for Hex. The implementation should be immutable and thread-safe.
+     */
+    public interface Decoder {
+
+        /**
+         * Decodes the given bytes of hex string to the original bytes.
+         *
+         * @param bytes the given bytes of hex string
+         * @return the original bytes
+         * @throws HexException if any error occurs
+         */
+        byte @Nonnull [] decode(byte @Nonnull [] bytes) throws HexException;
+
+        /**
+         * Decodes the given buffer of hex string to the original bytes. The position of the given buffer will increment
+         * to its limit.
+         *
+         * @param buffer the given buffer of hex string
+         * @return the original bytes
+         * @throws HexException if any error occurs
+         */
+        byte @Nonnull [] decode(@Nonnull ByteBuffer buffer) throws HexException;
+
+        /**
+         * Decodes the given hex string to the original bytes.
+         *
+         * @param hex the given hex string
+         * @return the original bytes
+         * @throws HexException if any error occurs
+         */
+        default byte @Nonnull [] decode(@Nonnull String hex) throws HexException {
+            byte[] src = hex.getBytes(StandardCharsets.ISO_8859_1);
+            return decode(src);
+        }
+    }
+
+    /**
+     * Exception for hex encoding/decoding. The {@link #position()} returns the position where this exception occurs.
+     *
+     * @author sunqian
+     */
+    public static class HexException extends JieRuntimeException {
+
+        private final long position;
+
+        /**
+         * Empty constructor.
+         */
+        public HexException() {
+            super();
+            this.position = -1;
+        }
+
+        /**
+         * Constructs with the message.
+         *
+         * @param message the message
+         */
+        public HexException(@Nullable String message) {
+            super(message);
+            this.position = -1;
+        }
+
+        /**
+         * Constructs with the message and cause.
+         *
+         * @param message the message
+         * @param cause   the cause
+         */
+        public HexException(@Nullable String message, @Nullable Throwable cause) {
+            super(message, cause);
+            this.position = -1;
+        }
+
+        /**
+         * Constructs with the cause.
+         *
+         * @param cause the cause
+         */
+        public HexException(@Nullable Throwable cause) {
+            super(cause);
+            this.position = -1;
+        }
+
+        /**
+         * Empty with the position.
+         *
+         * @param position the position where this exception occurs
+         */
+        public HexException(long position) {
+            super();
+            this.position = position;
+        }
+
+        /**
+         * Constructs with the position and message.
+         *
+         * @param position the position where this exception occurs
+         * @param message  the message
+         */
+        public HexException(long position, @Nullable String message) {
+            super(message);
+            this.position = position;
+        }
+
+        /**
+         * Constructs with the position, message and cause.
+         *
+         * @param position the position where this exception occurs
+         * @param message  the message
+         * @param cause    the cause
+         */
+        public HexException(long position, @Nullable String message, @Nullable Throwable cause) {
+            super(message, cause);
+            this.position = position;
+        }
+
+        /**
+         * Constructs with the position and cause.
+         *
+         * @param position the position where this exception occurs
+         * @param cause    the cause
+         */
+        public HexException(long position, @Nullable Throwable cause) {
+            super(cause);
+            this.position = position;
+        }
+
+        /**
+         * Returns the position where this exception occurs, may be {@code -1} if the position is unknown.
+         *
+         * @return the position where this exception occurs, may be {@code -1} if the position is unknown
+         */
+        public long position() {
+            return position;
         }
     }
 }
