@@ -7,7 +7,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-final class OfReflection {
+final class ByReflection {
 
     static @Nonnull Invocable newInvocable(@Nonnull Constructor<?> constructor) {
         return new ForConstructor(constructor);

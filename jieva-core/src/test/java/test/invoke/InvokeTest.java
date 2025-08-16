@@ -5,7 +5,7 @@ import test.utils.LotsOfMethods;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.invoke.InvocationException;
-import xyz.sunqian.common.invoke.InvocationMode;
+import xyz.sunqian.common.invoke.InvocationBy;
 import xyz.sunqian.common.invoke.InvokeKit;
 
 import java.lang.invoke.MethodHandle;
@@ -30,13 +30,13 @@ public class InvokeTest {
             Invocable.of(A.class.getMethod("instanceMethod", String.class)).invoke(a, "aaa"),
             "aaa"
         );
-        for (InvocationMode mode : InvocationMode.values()) {
+        for (InvocationBy mode : InvocationBy.values()) {
             testInvokeConstructor(mode);
             testInvokeMethod(mode);
         }
     }
 
-    private void testInvokeConstructor(InvocationMode mode) throws Throwable {
+    private void testInvokeConstructor(InvocationBy mode) throws Throwable {
         Constructor<?> pub = A.class.getConstructor();
         assertTrue(Invocable.of(pub, mode).invoke(null) instanceof A);
         assertTrue(Invocable.of(pub, mode).invokeChecked(null) instanceof A);
@@ -52,7 +52,7 @@ public class InvokeTest {
         expectThrows(InvokeTestException.class, () -> Invocable.of(err, mode).invokeChecked(null, 1L));
     }
 
-    private void testInvokeMethod(InvocationMode mode) throws Throwable {
+    private void testInvokeMethod(InvocationBy mode) throws Throwable {
         A a = new A();
         // instance
         Method pub = A.class.getMethod("instanceMethod", String.class);
@@ -108,7 +108,7 @@ public class InvokeTest {
             .filter(method -> method.getName().startsWith("staticMethod"))
             .collect(Collectors.toList());
         for (Method method : staticMethods) {
-            Invocable invocable = Invocable.of(method, InvocationMode.METHOD_HANDLE);
+            Invocable invocable = Invocable.of(method, InvocationBy.METHOD_HANDLE);
             Object[] args = LotsOfMethods.buildArgsForLotsOfMethods(method);
             assertEquals(
                 invocable.invoke(null, args),
@@ -131,7 +131,7 @@ public class InvokeTest {
             .collect(Collectors.toList());
         LotsOfMethods inst = new LotsOfMethods();
         for (Method method : instanceMethods) {
-            Invocable invocable = Invocable.of(method, InvocationMode.METHOD_HANDLE);
+            Invocable invocable = Invocable.of(method, InvocationBy.METHOD_HANDLE);
             Object[] args = LotsOfMethods.buildArgsForLotsOfMethods(method);
             assertEquals(
                 invocable.invoke(inst, args),
@@ -159,7 +159,7 @@ public class InvokeTest {
                 .collect(Collectors.toList());
             Cls inst = new Cls();
             for (Method method : methods) {
-                Invocable invocable = Invocable.of(method, InvocationMode.ASM);
+                Invocable invocable = Invocable.of(method, InvocationBy.ASM);
                 assertEquals(
                     invocable.invoke(inst, method.getParameterCount() > 0 ? buildArgsForAsm() : new Object[0]),
                     method.invoke(inst, method.getParameterCount() > 0 ? buildArgsForAsm() : new Object[0])
@@ -173,7 +173,7 @@ public class InvokeTest {
                 .collect(Collectors.toList());
             Inter inst = new Inter() {};
             for (Method method : methods) {
-                Invocable invocable = Invocable.of(method, InvocationMode.ASM);
+                Invocable invocable = Invocable.of(method, InvocationBy.ASM);
                 assertEquals(
                     invocable.invoke(inst, method.getParameterCount() > 0 ? buildArgsForAsm() : new Object[0]),
                     method.invoke(inst, method.getParameterCount() > 0 ? buildArgsForAsm() : new Object[0])
@@ -188,7 +188,7 @@ public class InvokeTest {
             InterChild ic = new InterChild();
             Method b2 = Inter.class.getMethod(
                 "b2", boolean.class, byte.class, short.class, char.class, int.class, long.class, float.class, double.class, String.class);
-            Invocable invocable = Invocable.of(b2, InvocationMode.ASM);
+            Invocable invocable = Invocable.of(b2, InvocationBy.ASM);
             assertEquals(invocable.invoke(ic, buildArgsForAsm()), ic.b2(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
             assertNotEquals(invocable.invoke(inst, buildArgsForAsm()), ic.b2(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
         }
@@ -197,7 +197,7 @@ public class InvokeTest {
             Method instanceMethod129 = Jie.stream(LotsOfMethods.class.getMethods())
                 .filter(method -> "instanceMethod129".equals(method.getName()))
                 .findFirst().get();
-            Invocable invocable = Invocable.of(instanceMethod129, InvocationMode.ASM);
+            Invocable invocable = Invocable.of(instanceMethod129, InvocationBy.ASM);
             assertEquals(
                 invocable.invoke(new LotsOfMethods(), LotsOfMethods.buildArgsForLotsOfMethods(instanceMethod129)),
                 instanceMethod129.invoke(new LotsOfMethods(), LotsOfMethods.buildArgsForLotsOfMethods(instanceMethod129))

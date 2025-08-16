@@ -28,7 +28,7 @@ public interface Invocable {
      * @return a new {@link Invocable} represents the specified method
      */
     static @Nonnull Invocable of(@Nonnull Method method) {
-        return of(method, InvocationMode.recommended(method));
+        return of(method, InvocationBy.recommended(method));
     }
 
     /**
@@ -39,7 +39,7 @@ public interface Invocable {
      * @return a new {@link Invocable} represents the specified constructor
      */
     static @Nonnull Invocable of(@Nonnull Constructor<?> constructor) {
-        return of(constructor, InvocationMode.recommended(constructor));
+        return of(constructor, InvocationBy.recommended(constructor));
     }
 
     /**
@@ -50,24 +50,24 @@ public interface Invocable {
      * @return a new {@link Invocable} represents the specified method handle
      */
     static @Nonnull Invocable of(@Nonnull MethodHandle handle, boolean isStatic) {
-        return OfMethodHandle.newInvocable(handle, isStatic);
+        return ByMethodHandle.newInvocable(handle, isStatic);
     }
 
     /**
      * Returns a new {@link Invocable} represents the specified method, using specified implementation.
      *
      * @param method the specified method
-     * @param mode   specifies the implementation of the returned instance
+     * @param by     specifies the implementation of the returned instance
      * @return a new {@link Invocable} represents the specified method
      */
-    static @Nonnull Invocable of(@Nonnull Method method, @Nonnull InvocationMode mode) {
-        switch (mode) {
+    static @Nonnull Invocable of(@Nonnull Method method, @Nonnull InvocationBy by) {
+        switch (by) {
             case METHOD_HANDLE:
-                return OfMethodHandle.newInvocable(method);
+                return ByMethodHandle.newInvocable(method);
             case ASM:
-                return OfAsm.newInvocable(method);
+                return ByAsm.newInvocable(method);
             default:
-                return OfReflection.newInvocable(method);
+                return ByReflection.newInvocable(method);
         }
     }
 
@@ -75,17 +75,17 @@ public interface Invocable {
      * Returns a new {@link Invocable} represents the specified constructor, using specified implementation.
      *
      * @param constructor the specified constructor
-     * @param mode        specifies the implementation of the returned instance
+     * @param by          specifies the implementation of the returned instance
      * @return a new {@link Invocable} represents the specified constructor
      */
-    static @Nonnull Invocable of(@Nonnull Constructor<?> constructor, @Nonnull InvocationMode mode) {
-        switch (mode) {
+    static @Nonnull Invocable of(@Nonnull Constructor<?> constructor, @Nonnull InvocationBy by) {
+        switch (by) {
             case METHOD_HANDLE:
-                return OfMethodHandle.newInvocable(constructor);
+                return ByMethodHandle.newInvocable(constructor);
             case ASM:
-                return OfAsm.newInvocable(constructor);
+                return ByAsm.newInvocable(constructor);
             default:
-                return OfReflection.newInvocable(constructor);
+                return ByReflection.newInvocable(constructor);
         }
     }
 

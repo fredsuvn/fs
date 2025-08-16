@@ -1,7 +1,7 @@
 package test.invoke;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.invoke.InvocationMode;
+import xyz.sunqian.common.invoke.InvocationBy;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -15,15 +15,15 @@ public class InvokeModeTest {
         Constructor<?>[] cs = Cls.class.getDeclaredConstructors();
         for (Constructor<?> c : cs) {
             assertEquals(
-                InvocationMode.recommended(c),
-                c.getParameterCount() == 0 ? InvocationMode.METHOD_HANDLE : InvocationMode.REFLECTION
+                InvocationBy.recommended(c),
+                c.getParameterCount() == 0 ? InvocationBy.METHOD_HANDLE : InvocationBy.REFLECTION
             );
         }
         Method[] ms = Cls.class.getDeclaredMethods();
         for (Method m : ms) {
             assertEquals(
-                InvocationMode.recommended(m),
-                m.getParameterCount() == 0 ? InvocationMode.METHOD_HANDLE : InvocationMode.REFLECTION
+                InvocationBy.recommended(m),
+                m.getParameterCount() == 0 ? InvocationBy.METHOD_HANDLE : InvocationBy.REFLECTION
             );
         }
     }

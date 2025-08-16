@@ -9,7 +9,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
-final class OfMethodHandle {
+final class ByMethodHandle {
 
     static final int MAX_STATIC_ARGS_NUM = 16;
     static final int MAX_INST_ARGS_NUM = 15;

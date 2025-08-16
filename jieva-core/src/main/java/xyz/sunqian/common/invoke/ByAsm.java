@@ -16,7 +16,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.concurrent.atomic.AtomicLong;
 
-final class OfAsm {
+final class ByAsm {
 
     private static final @Nonnull String INVOCABLE_NAME = JvmKit.getInternalName(Invocable.class);
     private static final @Nonnull String @Nonnull [] INTERFACES = new String[]{INVOCABLE_NAME};
@@ -54,7 +54,7 @@ final class OfAsm {
     }
 
     private static String buildClassName() {
-        return OfAsm.class.getPackage().getName().replace('.', '/')
+        return ByAsm.class.getPackage().getName().replace('.', '/')
             + "/" + AsmKit.generateClassSimpleName(classCounter.incrementAndGet());
     }
 
