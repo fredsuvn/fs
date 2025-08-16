@@ -35,7 +35,7 @@ final class JdkProxyMaker implements ProxyMaker {
     /**
      * An {@link Invocable} instance that does not support default method of java interface.
      */
-    public static final @Nonnull Invocable UNSUPPORTED_DEFAULT_METHOD_INVOCABLE = (inst, args) -> {
+    private static final @Nonnull Invocable UNSUPPORTED_DEFAULT_METHOD_INVOCABLE = (inst, args) -> {
         throw new JdkProxyException(new UnsupportedOperationException(
             "Current Java Runtime Environment does not support obtaining MethodHandle of default method: " +
                 JvmKit.jvmDescription()

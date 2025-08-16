@@ -6,11 +6,13 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.value.IntVar;
 import xyz.sunqian.common.invoke.Invocable;
+import xyz.sunqian.common.reflect.proxy.ProxyException;
 import xyz.sunqian.common.reflect.proxy.ProxyFactory;
-import xyz.sunqian.common.reflect.proxy.ProxyMaker;
-import xyz.sunqian.common.reflect.proxy.ProxyInvoker;
 import xyz.sunqian.common.reflect.proxy.ProxyHandler;
+import xyz.sunqian.common.reflect.proxy.ProxyInvoker;
+import xyz.sunqian.common.reflect.proxy.ProxyMaker;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import static org.testng.Assert.assertEquals;
@@ -168,7 +170,7 @@ public class JdkProxyTest {
     }
 
     @Test
-    public void testInvokeSuper() {
+    public void testInvokeSuper() throws Exception {
         ProxyMaker generator = ProxyMaker.byJdk();
         IntVar counter = IntVar.of(0);
         SuperInter si = new SuperInter() {
@@ -205,9 +207,13 @@ public class JdkProxyTest {
         assertEquals(counter.get(), 2);
         counter.clear();
 
-        // unsupported default method invocable
-        // Invocable invocable = JdkProxyMaker.UNSUPPORTED_DEFAULT_METHOD_INVOCABLE;
-        // expectThrows(JdkProxyMaker.JdkProxyException.class, () -> invocable.invokeChecked(null));
+        {
+            // unsupported default method invocable
+            Field field = ProxyMaker.byJdk().getClass().getDeclaredField("UNSUPPORTED_DEFAULT_METHOD_INVOCABLE");
+            field.setAccessible(true);
+            Invocable invocable = (Invocable) field.get(null);
+            expectThrows(ProxyException.class, () -> invocable.invokeChecked(null));
+        }
     }
 
     public interface InterA {
