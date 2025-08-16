@@ -13,7 +13,7 @@ import java.lang.reflect.Method;
  *
  * @author sunqian
  */
-public enum InvocationBy {
+public enum InvocationMode {
 
     /**
      * Using reflection to implement {@link Invocable}.
@@ -37,7 +37,7 @@ public enum InvocationBy {
      * @param method the specified method
      * @return the recommended implementation for the specified method in current environment
      */
-    public static @Nonnull InvocationBy recommended(@Nonnull Method method) {
+    public static @Nonnull InvocationMode recommended(@Nonnull Method method) {
         return recommended(method, ClassKit.isStatic(method));
     }
 
@@ -47,11 +47,11 @@ public enum InvocationBy {
      * @param constructor the specified constructor
      * @return the recommended implementation for the specified constructor in current environment
      */
-    public static @Nonnull InvocationBy recommended(@Nonnull Constructor<?> constructor) {
+    public static @Nonnull InvocationMode recommended(@Nonnull Constructor<?> constructor) {
         return recommended(constructor, true);
     }
 
-    private static @Nonnull InvocationBy recommended(@Nonnull Executable executable, boolean isStatic) {
+    private static @Nonnull InvocationMode recommended(@Nonnull Executable executable, boolean isStatic) {
         int paramCount = executable.getParameterCount();
         if (isStatic) {
             return paramCount <= ByMethodHandle.MAX_STATIC_ARGS_NUM ? METHOD_HANDLE : REFLECTION;

@@ -28,7 +28,7 @@ public interface Invocable {
      * @return a new {@link Invocable} represents the specified method
      */
     static @Nonnull Invocable of(@Nonnull Method method) {
-        return of(method, InvocationBy.recommended(method));
+        return of(method, InvocationMode.recommended(method));
     }
 
     /**
@@ -39,7 +39,7 @@ public interface Invocable {
      * @return a new {@link Invocable} represents the specified constructor
      */
     static @Nonnull Invocable of(@Nonnull Constructor<?> constructor) {
-        return of(constructor, InvocationBy.recommended(constructor));
+        return of(constructor, InvocationMode.recommended(constructor));
     }
 
     /**
@@ -57,11 +57,11 @@ public interface Invocable {
      * Returns a new {@link Invocable} represents the specified method, using specified implementation.
      *
      * @param method the specified method
-     * @param by     specifies the implementation of the returned instance
+     * @param mode   specifies the implementation of the returned instance
      * @return a new {@link Invocable} represents the specified method
      */
-    static @Nonnull Invocable of(@Nonnull Method method, @Nonnull InvocationBy by) {
-        switch (by) {
+    static @Nonnull Invocable of(@Nonnull Method method, @Nonnull InvocationMode mode) {
+        switch (mode) {
             case METHOD_HANDLE:
                 return ByMethodHandle.newInvocable(method);
             case ASM:
@@ -75,11 +75,11 @@ public interface Invocable {
      * Returns a new {@link Invocable} represents the specified constructor, using specified implementation.
      *
      * @param constructor the specified constructor
-     * @param by          specifies the implementation of the returned instance
+     * @param mode        specifies the implementation of the returned instance
      * @return a new {@link Invocable} represents the specified constructor
      */
-    static @Nonnull Invocable of(@Nonnull Constructor<?> constructor, @Nonnull InvocationBy by) {
-        switch (by) {
+    static @Nonnull Invocable of(@Nonnull Constructor<?> constructor, @Nonnull InvocationMode mode) {
+        switch (mode) {
             case METHOD_HANDLE:
                 return ByMethodHandle.newInvocable(constructor);
             case ASM:
