@@ -1,4 +1,4 @@
-package xyz.sunqian.common.io.file;
+package xyz.sunqian.common.file;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.chars.CharsKit;

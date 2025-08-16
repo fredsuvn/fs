@@ -1,12 +1,12 @@
-package test.io;
+package test.file;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.chars.CharsKit;
+import xyz.sunqian.common.file.FileKit;
+import xyz.sunqian.common.file.FileRef;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.io.IORuntimeException;
-import xyz.sunqian.common.io.file.FileKit;
-import xyz.sunqian.common.io.file.FileRef;
 import xyz.sunqian.test.AssertTest;
 import xyz.sunqian.test.DataTest;
 import xyz.sunqian.test.PrintTest;
