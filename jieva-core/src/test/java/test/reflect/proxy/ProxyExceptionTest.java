@@ -24,17 +24,5 @@ public class ProxyExceptionTest {
                 throw new ProxyException(new RuntimeException());
             });
         }
-        // {
-        //     // AsmProxyException
-        //     expectThrows(AsmProxyMaker.AsmProxyException.class, () -> {
-        //         throw new AsmProxyMaker.AsmProxyException(new RuntimeException());
-        //     });
-        // }
-        // {
-        //     // JdkProxyException
-        //     expectThrows(JdkProxyMaker.JdkProxyException.class, () -> {
-        //         throw new JdkProxyMaker.JdkProxyException(new RuntimeException());
-        //     });
-        // }
     }
 }

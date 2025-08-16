@@ -18,7 +18,6 @@ import xyz.sunqian.common.reflect.ClassKit;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -30,17 +29,21 @@ import java.util.concurrent.atomic.AtomicLong;
  * The <a href="https://asm.ow2.io/">ASM</a> implementation for {@link ProxyMaker}. The runtime environment must have
  * asm package {@code org.objectweb.asm}.
  * <p>
- * This generator uses inheritance to implement proxy class, just like the keywords: {@code extends} and
+ * This implementation uses inheritance to implement proxy, just like the keywords: {@code extends} and
  * {@code implements}. That means the superclass, which is the proxied class, cannot be {@code final} and must be
- * {@code public}, and must have an empty constructor to ensure that the {@link ProxyFactory#newInstance()} can execute
+ * inheritable, and must have an empty constructor to ensure that the {@link ProxyFactory#newInstance()} can execute
  * correctly.
+ * <p>
+ * When the {@link #make(Class, List, ProxyHandler)} is called, and if there are methods with the same name and JVM
+ * descriptor, this implementation only passes the first one encountered to the
+ * {@link ProxyHandler#shouldProxyMethod(Method)}.
  * <p>
  * Note the generated proxy class is {@code final}.
  *
  * @author sunqian
  */
 @ThreadSafe
-final class AsmProxyMaker implements ProxyMaker {
+public class AsmProxyMaker implements ProxyMaker {
 
     private static final @Nonnull String INVOKER_NAME = JvmKit.getInternalName(ProxyInvoker.class);
     private static final @Nonnull String INVOKERS_DESCRIPTOR = JvmKit.getDescriptor(ProxyInvoker[].class);
@@ -75,59 +78,56 @@ final class AsmProxyMaker implements ProxyMaker {
         @Nonnull List<@Nonnull Class<?>> interfaces,
         @Nonnull ProxyHandler proxyHandler
     ) throws AsmProxyException {
-        Package pkg = AsmProxyMaker.class.getPackage();
-        String outerName = pkg.getName().replace('.', '/')
-            + "/" + AsmKit.generateClassSimpleName(classCounter.incrementAndGet());
-        String outerDescriptor = "L" + outerName + ";";
-        Class<?> outerSuperClass = proxiedClass == null ? Object.class : proxiedClass;
-        String outerSuperName = JvmKit.getInternalName(outerSuperClass);
-        String[] outerInterfaces = {};
-        if (!interfaces.isEmpty()) {
-            outerInterfaces = interfaces.stream().map(JvmKit::getInternalName).toArray(String[]::new);
-        }
-        String innerName = INVOKER_SIMPLE_NAME;
-        String fullInnerName = outerName + "$" + innerName;
-        Map<Method, ProxyMethodInfo> methodMap = new LinkedHashMap<>();
-        IntVar methodCount = IntVar.of(0);
-        for (Method method : outerSuperClass.getDeclaredMethods()) {
-            if (canBeProxied(method, proxyHandler)) {
-                methodMap.put(
-                    method,
-                    buildProxyMethodInfo(method, outerSuperName, outerDescriptor, false, methodCount)
-                );
+        try {
+            Package pkg = AsmProxyMaker.class.getPackage();
+            // proxy class internal name
+            String proxyName = pkg.getName().replace('.', '/')
+                + "/" + AsmKit.generateClassSimpleName(classCounter.incrementAndGet());
+            // proxy class descriptor
+            String proxyDescriptor = "L" + proxyName + ";";
+            // proxy class's superclass, which is the proxied class
+            Class<?> proxySuperClass = proxiedClass == null ? Object.class : proxiedClass;
+            String proxySuperName = JvmKit.getInternalName(proxySuperClass);
+            // proxy class's interfaces, which is the proxied interfaces
+            String[] proxyInterfaces = {};
+            if (!interfaces.isEmpty()) {
+                proxyInterfaces = interfaces.stream().map(JvmKit::getInternalName).toArray(String[]::new);
             }
-        }
-        filterProxiedMethods(
-            methodMap,
-            outerSuperClass.getMethods(),
-            proxyHandler,
-            outerSuperName,
-            outerDescriptor,
-            false,
-            methodCount
-        );
-        int ii = 0;
-        for (Class<?> anInterface : interfaces) {
-            filterProxiedMethods(
-                methodMap,
-                anInterface.getMethods(),
-                proxyHandler,
-                outerInterfaces[ii++],
-                outerDescriptor,
-                true,
-                methodCount
+            // ProxyInvoker's class internal name (inner class's simple name)
+            String invokerSimpleName = INVOKER_SIMPLE_NAME;
+            String invokerName = proxyName + "$" + invokerSimpleName;
+            // proxied methods
+            Map<Method, ProxyMethodInfo> proxiedMethodMap = new LinkedHashMap<>();
+            Map<Class<?>, List<Method>> proxiableMethods = ProxyKit.getProxiableMethods(
+                proxiedClass,
+                interfaces,
+                proxyHandler
             );
-        }
-        ProxyClassInfo pcInfo = new ProxyClassInfo(
-            outerName,
-            outerDescriptor,
-            outerSuperName,
-            outerInterfaces,
-            innerName,
-            fullInnerName,
-            new ArrayList<>(methodMap.values())
-        );
-        return Jie.uncheck(() -> {
+            IntVar methodCount = IntVar.of(0);
+            proxiableMethods.forEach((type, methods) -> {
+                String ownerName = JvmKit.getInternalName(type);
+                for (Method method : methods) {
+                    proxiedMethodMap.put(
+                        method,
+                        buildProxyMethodInfo(
+                            method,
+                            ownerName,
+                            proxyDescriptor,
+                            type.isInterface(),
+                            methodCount.getAndIncrement()
+                        )
+                    );
+                }
+            });
+            ProxyClassInfo pcInfo = new ProxyClassInfo(
+                proxyName,
+                proxyDescriptor,
+                proxySuperName,
+                proxyInterfaces,
+                invokerSimpleName,
+                invokerName,
+                new ArrayList<>(proxiedMethodMap.values())
+            );
             byte[] proxyClassBytes = generateProxyClass(pcInfo);
             byte[] invokerClassBytes = generateInvokerClass(pcInfo);
             // using new class loader to help collect unused classes
@@ -137,47 +137,27 @@ final class AsmProxyMaker implements ProxyMaker {
             return new AsmProxyFactory(
                 proxyClass,
                 proxyHandler,
-                methodMap.keySet().toArray(new Method[0])
+                proxiedMethodMap.keySet().toArray(new Method[0])
             );
-        }, AsmProxyException::new);
-    }
-
-    private void filterProxiedMethods(
-        @Nonnull Map<Method, ProxyMethodInfo> methodMap,
-        @Nonnull Method @Nonnull [] methods,
-        @Nonnull ProxyHandler methodHandler,
-        @Nonnull String ownerName,
-        @Nonnull String outerDescriptor,
-        boolean isInterface,
-        @Nonnull IntVar methodCount
-    ) {
-        for (Method method : methods) {
-            if (methodMap.containsKey(method)) {
-                continue;
-            }
-            if (canBeProxied(method, methodHandler)) {
-                methodMap.put(
-                    method,
-                    buildProxyMethodInfo(method, ownerName, outerDescriptor, isInterface, methodCount)
-                );
-            }
+        } catch (Exception e) {
+            throw new AsmProxyException(e);
         }
     }
 
     private @Nonnull ProxyMethodInfo buildProxyMethodInfo(
         @Nonnull Method method,
         @Nonnull String ownerName,
-        @Nonnull String outerDescriptor,
+        @Nonnull String proxyDescriptor,
         boolean isInterface,
-        @Nonnull IntVar methodCount
+        int methodIndex
     ) {
         String descriptor = JvmKit.getDescriptor(method);
         String signature = JvmKit.getSignature(method);
         String[] exceptions = AsmKit.getExceptions(method);
-        String superInvokerName = SUPER_INVOKER_NAME_PREFIX + methodCount.getAndIncrement();// access$001
-        String superInvokerDescriptor = descriptor.replace("(", "(" + outerDescriptor);
+        String superInvokerName = SUPER_INVOKER_NAME_PREFIX + methodIndex;// access$001
+        String superInvokerDescriptor = descriptor.replace("(", "(" + proxyDescriptor);
         String superInvokerSignature =
-            signature == null ? null : signature.replace("(", "(" + outerDescriptor);
+            signature == null ? null : signature.replace("(", "(" + proxyDescriptor);
         return new ProxyMethodInfo(
             method,
             ownerName,
@@ -191,31 +171,20 @@ final class AsmProxyMaker implements ProxyMaker {
         );
     }
 
-    private boolean canBeProxied(Method method, ProxyHandler handler) {
-        if (method.isSynthetic()) {
-            return false;
-        }
-        int mod = method.getModifiers();
-        if (Modifier.isStatic(mod) || Modifier.isFinal(mod)) {
-            return false;
-        }
-        return handler.shouldProxyMethod(method);
-    }
-
     private byte @Nonnull [] generateProxyClass(@Nonnull ProxyClassInfo pcInfo) throws Exception {
         ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         classWriter.visit(
             Opcodes.V1_8,
             Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL | Opcodes.ACC_SUPER,
-            pcInfo.outerName,
+            pcInfo.proxyName,
             null,
-            pcInfo.outerSuperName,
-            pcInfo.outerInterfaces
+            pcInfo.proxySuperName,
+            pcInfo.proxyInterfaces
         );
         classWriter.visitInnerClass(
-            pcInfo.fullInnerName,
-            pcInfo.outerName,
             pcInfo.innerName,
+            pcInfo.proxyName,
+            pcInfo.innerSimpleName,
             Opcodes.ACC_PRIVATE
         );
         {
@@ -259,22 +228,22 @@ final class AsmProxyMaker implements ProxyMaker {
             visitor.visitVarInsn(Opcodes.ALOAD, 0);
             visitor.visitMethodInsn(
                 Opcodes.INVOKESPECIAL,
-                pcInfo.outerSuperName,
+                pcInfo.proxySuperName,
                 AsmKit.CONSTRUCTOR_NAME,
                 AsmKit.EMPTY_CONSTRUCTOR_DESCRIPTOR,
                 false
             );
             visitor.visitVarInsn(Opcodes.ALOAD, 0);
             visitor.visitVarInsn(Opcodes.ALOAD, 1);
-            visitor.visitFieldInsn(Opcodes.PUTFIELD, pcInfo.outerName, "handler", HANDLER_DESCRIPTOR);
+            visitor.visitFieldInsn(Opcodes.PUTFIELD, pcInfo.proxyName, "handler", HANDLER_DESCRIPTOR);
             visitor.visitVarInsn(Opcodes.ALOAD, 0);
             visitor.visitVarInsn(Opcodes.ALOAD, 2);
-            visitor.visitFieldInsn(Opcodes.PUTFIELD, pcInfo.outerName, "methods", METHODS_DESCRIPTOR);
+            visitor.visitFieldInsn(Opcodes.PUTFIELD, pcInfo.proxyName, "methods", METHODS_DESCRIPTOR);
             visitor.visitVarInsn(Opcodes.ALOAD, 0);
             visitor.visitVarInsn(Opcodes.ALOAD, 2);
             visitor.visitInsn(Opcodes.ARRAYLENGTH);
             visitor.visitTypeInsn(Opcodes.ANEWARRAY, INVOKER_NAME);
-            visitor.visitFieldInsn(Opcodes.PUTFIELD, pcInfo.outerName, "invokers", INVOKERS_DESCRIPTOR);
+            visitor.visitFieldInsn(Opcodes.PUTFIELD, pcInfo.proxyName, "invokers", INVOKERS_DESCRIPTOR);
             visitor.visitInsn(Opcodes.RETURN);
             visitor.visitMaxs(0, 0);
             visitor.visitEnd();
@@ -304,7 +273,7 @@ final class AsmProxyMaker implements ProxyMaker {
         );
         // ProxyInvoker invoker = invokers[i];
         visitor.visitVarInsn(Opcodes.ALOAD, 0);
-        visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.outerName, "invokers", INVOKERS_DESCRIPTOR);
+        visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.proxyName, "invokers", INVOKERS_DESCRIPTOR);
         AsmKit.loadConst(visitor, i);
         visitor.visitInsn(Opcodes.AALOAD);
         int invokerPos = AsmKit.paramSize(pmInfo.method.getParameters()) + 1;
@@ -314,22 +283,22 @@ final class AsmProxyMaker implements ProxyMaker {
         Label ifNonnull = new Label();
         visitor.visitJumpInsn(Opcodes.IFNONNULL, ifNonnull);
         // new Invoker1(i);
-        visitor.visitTypeInsn(Opcodes.NEW, pcInfo.fullInnerName);
+        visitor.visitTypeInsn(Opcodes.NEW, pcInfo.innerName);
         // new Invoker1(i).init();
         visitor.visitInsn(Opcodes.DUP);
         visitor.visitVarInsn(Opcodes.ALOAD, 0);
         AsmKit.loadConst(visitor, i);
         visitor.visitMethodInsn(
             Opcodes.INVOKESPECIAL,
-            pcInfo.fullInnerName,
+            pcInfo.innerName,
             AsmKit.CONSTRUCTOR_NAME,
-            "(" + pcInfo.outerDescriptor + "I)V",
+            "(" + pcInfo.proxyDescriptor + "I)V",
             false
         );
         visitor.visitVarInsn(Opcodes.ASTORE, invokerPos);
         // get invokers
         visitor.visitVarInsn(Opcodes.ALOAD, 0);
-        visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.outerName, "invokers", INVOKERS_DESCRIPTOR);
+        visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.proxyName, "invokers", INVOKERS_DESCRIPTOR);
         // invokers[i] = invoker;
         AsmKit.loadConst(visitor, i);
         visitor.visitVarInsn(Opcodes.ALOAD, invokerPos);
@@ -339,12 +308,12 @@ final class AsmProxyMaker implements ProxyMaker {
         visitor.visitFrame(Opcodes.F_APPEND, 1, new String[]{INVOKER_NAME}, 0, null);
         // get handler
         visitor.visitVarInsn(Opcodes.ALOAD, 0);
-        visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.outerName, "handler", HANDLER_DESCRIPTOR);
+        visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.proxyName, "handler", HANDLER_DESCRIPTOR);
         // get this
         visitor.visitVarInsn(Opcodes.ALOAD, 0);
         // get methods[i]
         visitor.visitVarInsn(Opcodes.ALOAD, 0);
-        visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.outerName, "methods", METHODS_DESCRIPTOR);
+        visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.proxyName, "methods", METHODS_DESCRIPTOR);
         AsmKit.loadConst(visitor, i);
         visitor.visitInsn(Opcodes.AALOAD);
         // get invoker
@@ -413,15 +382,15 @@ final class AsmProxyMaker implements ProxyMaker {
         classWriter.visit(
             Opcodes.V1_8,
             Opcodes.ACC_FINAL | Opcodes.ACC_SUPER,
-            pcInfo.fullInnerName,
+            pcInfo.innerName,
             null,
             AsmKit.OBJECT_NAME,
             new String[]{INVOKER_NAME}
         );
         classWriter.visitInnerClass(
-            pcInfo.fullInnerName,
-            pcInfo.outerName,
             pcInfo.innerName,
+            pcInfo.proxyName,
+            pcInfo.innerSimpleName,
             Opcodes.ACC_PRIVATE
         );
         {
@@ -436,11 +405,11 @@ final class AsmProxyMaker implements ProxyMaker {
             visitor.visitEnd();
         }
         {
-            // Outer outer;
+            // outer class, which is the proxy class;
             FieldVisitor visitor = classWriter.visitField(
                 Opcodes.ACC_FINAL | Opcodes.ACC_SYNTHETIC,
                 "this$0",
-                pcInfo.outerDescriptor,
+                pcInfo.proxyDescriptor,
                 null,
                 null);
             visitor.visitEnd();
@@ -450,18 +419,24 @@ final class AsmProxyMaker implements ProxyMaker {
             MethodVisitor visitor = classWriter.visitMethod(
                 0,
                 AsmKit.CONSTRUCTOR_NAME,
-                "(" + pcInfo.outerDescriptor + "I)V",
+                "(" + pcInfo.proxyDescriptor + "I)V",
                 null,
                 null
             );
             visitor.visitVarInsn(Opcodes.ALOAD, 0);
             visitor.visitVarInsn(Opcodes.ALOAD, 1);
-            visitor.visitFieldInsn(Opcodes.PUTFIELD, pcInfo.fullInnerName, "this$0", pcInfo.outerDescriptor);
+            visitor.visitFieldInsn(Opcodes.PUTFIELD, pcInfo.innerName, "this$0", pcInfo.proxyDescriptor);
             visitor.visitVarInsn(Opcodes.ALOAD, 0);
-            visitor.visitMethodInsn(Opcodes.INVOKESPECIAL, AsmKit.OBJECT_NAME, AsmKit.CONSTRUCTOR_NAME, AsmKit.EMPTY_CONSTRUCTOR_DESCRIPTOR, false);
+            visitor.visitMethodInsn(
+                Opcodes.INVOKESPECIAL,
+                AsmKit.OBJECT_NAME,
+                AsmKit.CONSTRUCTOR_NAME,
+                AsmKit.EMPTY_CONSTRUCTOR_DESCRIPTOR,
+                false
+            );
             visitor.visitVarInsn(Opcodes.ALOAD, 0);
             visitor.visitVarInsn(Opcodes.ILOAD, 2);
-            visitor.visitFieldInsn(Opcodes.PUTFIELD, pcInfo.fullInnerName, "index", "I");
+            visitor.visitFieldInsn(Opcodes.PUTFIELD, pcInfo.innerName, "index", "I");
             visitor.visitInsn(Opcodes.RETURN);
             visitor.visitMaxs(0, 0);
             visitor.visitEnd();
@@ -477,7 +452,7 @@ final class AsmProxyMaker implements ProxyMaker {
             );
             // get index;
             visitor.visitVarInsn(Opcodes.ALOAD, 0);
-            visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.fullInnerName, "index", "I");
+            visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.innerName, "index", "I");
             // switch (index) {}
             Label[] labels = new Label[pcInfo.methods.size()];
             for (int i = 0; i < labels.length; i++) {
@@ -490,7 +465,7 @@ final class AsmProxyMaker implements ProxyMaker {
                 Method method = pmInfo.method;
                 String methodOwnerName = pmInfo.ownerName;
                 if (ClassKit.isProtected(method)) {
-                    methodOwnerName = pcInfo.outerName;
+                    methodOwnerName = pcInfo.proxyName;
                 }
                 visitor.visitLabel(labels[i++]);
                 visitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
@@ -524,7 +499,7 @@ final class AsmProxyMaker implements ProxyMaker {
             );
             // get index;
             visitor.visitVarInsn(Opcodes.ALOAD, 0);
-            visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.fullInnerName, "index", "I");
+            visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.innerName, "index", "I");
             // switch (index) {}
             Label[] labels = new Label[pcInfo.methods.size()];
             for (int i = 0; i < labels.length; i++) {
@@ -538,13 +513,13 @@ final class AsmProxyMaker implements ProxyMaker {
                 visitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
                 // get outer
                 visitor.visitVarInsn(Opcodes.ALOAD, 1);
-                visitor.visitTypeInsn(Opcodes.CHECKCAST, pcInfo.outerName);
+                visitor.visitTypeInsn(Opcodes.CHECKCAST, pcInfo.proxyName);
                 // loads args
                 loadParameters(visitor, pmInfo.method);
                 // return outer.invoke(inst, args0, args1...);
                 visitor.visitMethodInsn(
                     Opcodes.INVOKESTATIC,
-                    pcInfo.outerName,
+                    pcInfo.proxyName,
                     pmInfo.superInvokerName,//"access$001",
                     pmInfo.superInvokerDescriptor,
                     false
@@ -577,29 +552,29 @@ final class AsmProxyMaker implements ProxyMaker {
 
     private static final class ProxyClassInfo {
 
-        private final @Nonnull String outerName;
-        private final @Nonnull String outerDescriptor;
-        private final @Nonnull String outerSuperName;
-        private final @Nonnull String @Nullable [] outerInterfaces;
+        private final @Nonnull String proxyName;
+        private final @Nonnull String proxyDescriptor;
+        private final @Nonnull String proxySuperName;
+        private final @Nonnull String @Nullable [] proxyInterfaces;
+        private final @Nonnull String innerSimpleName;
         private final @Nonnull String innerName;
-        private final @Nonnull String fullInnerName;
         private final @Nonnull List<ProxyMethodInfo> methods;
 
         private ProxyClassInfo(
-            @Nonnull String outerName,
-            @Nonnull String outerDescriptor,
-            @Nonnull String outerSuperName,
-            @Nonnull String @Nullable [] outerInterfaces,
+            @Nonnull String proxyName,
+            @Nonnull String proxyDescriptor,
+            @Nonnull String proxySuperName,
+            @Nonnull String @Nullable [] proxyInterfaces,
+            @Nonnull String innerSimpleName,
             @Nonnull String innerName,
-            @Nonnull String fullInnerName,
             @Nonnull List<ProxyMethodInfo> methods
         ) {
-            this.outerName = outerName;
-            this.outerDescriptor = outerDescriptor;
-            this.outerSuperName = outerSuperName;
-            this.outerInterfaces = outerInterfaces;
+            this.proxyName = proxyName;
+            this.proxyDescriptor = proxyDescriptor;
+            this.proxySuperName = proxySuperName;
+            this.proxyInterfaces = proxyInterfaces;
+            this.innerSimpleName = innerSimpleName;
             this.innerName = innerName;
-            this.fullInnerName = fullInnerName;
             this.methods = methods;
         }
     }

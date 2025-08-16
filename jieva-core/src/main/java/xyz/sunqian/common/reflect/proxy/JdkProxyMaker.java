@@ -25,17 +25,17 @@ import java.util.Optional;
 /**
  * JDK dynamic proxy implementation for {@link ProxyMaker}.
  * <p>
- * This generator uses {@link Proxy} to generate proxy class, and that means it only supports proxy interfaces.
+ * This implementation uses {@link Proxy} to implement proxy, and that means it only supports proxy interfaces.
  *
  * @author sunqian
  */
 @ThreadSafe
-final class JdkProxyMaker implements ProxyMaker {
+public class JdkProxyMaker implements ProxyMaker {
 
     /**
      * An {@link Invocable} instance that does not support default method of java interface.
      */
-    private static final @Nonnull Invocable UNSUPPORTED_DEFAULT_METHOD_INVOCABLE = (inst, args) -> {
+    public static final @Nonnull Invocable UNSUPPORTED_DEFAULT_METHOD_INVOCABLE = (inst, args) -> {
         throw new JdkProxyException(new UnsupportedOperationException(
             "Current Java Runtime Environment does not support obtaining MethodHandle of default method: " +
                 JvmKit.jvmDescription()
@@ -54,8 +54,13 @@ final class JdkProxyMaker implements ProxyMaker {
             new BytesClassLoader(),
             interfaces.toArray(new Class<?>[0])
         );
-        Map<Method, Var<Invocable>> unproxiedMethods = new HashMap<>();
+        Map<Class<?>, List<Method>> proxiableMethods = ProxyKit.getProxiableMethods(
+            null,
+            interfaces,
+            proxyHandler
+        );
         Map<Method, Var<ProxyInvoker>> proxiedMethods = new HashMap<>();
+        Map<Method, Var<Invocable>> unproxiedMethods = new HashMap<>();
         for (Class<?> anInterface : interfaces) {
             Method[] methods = anInterface.getMethods();
             for (Method method : methods) {
@@ -69,7 +74,7 @@ final class JdkProxyMaker implements ProxyMaker {
                 }
             }
         }
-        InvocationHandler handler = getInvocationHandler(
+        InvocationHandler handler = makeInvocationHandler(
             proxyHandler,
             new HashMap<>(proxiedMethods),
             new HashMap<>(unproxiedMethods)
@@ -77,7 +82,7 @@ final class JdkProxyMaker implements ProxyMaker {
         return new JdkProxyFactory(proxyClass, handler);
     }
 
-    private static @Nonnull InvocationHandler getInvocationHandler(
+    private static @Nonnull InvocationHandler makeInvocationHandler(
         @Nonnull ProxyHandler methodHandler,
         @Nonnull Map<@Nonnull Method, @Nonnull Var<ProxyInvoker>> proxiedMap,
         @Nonnull Map<@Nonnull Method, @Nonnull Var<Invocable>> unproxiedMap
@@ -192,7 +197,8 @@ final class JdkProxyMaker implements ProxyMaker {
 
         // ========  works on JDK 8 ======== {
 
-        private static final Optional<Constructor<MethodHandles.Lookup>> csOpt =
+        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+        private static final @Nonnull Optional<Constructor<MethodHandles.Lookup>> csOpt =
             Optional.ofNullable(getLookUpConstructor());
 
         private static @Nullable Constructor<MethodHandles.Lookup> getLookUpConstructor() {
@@ -204,7 +210,7 @@ final class JdkProxyMaker implements ProxyMaker {
             }, null);
         }
 
-        private static Optional<MethodHandles.Lookup> getLookUp(@Nonnull Method method) {
+        private static @Nonnull Optional<MethodHandles.Lookup> getLookUp(@Nonnull Method method) {
             return csOpt.map(c ->
                 Jie.call(() -> c.newInstance(method.getDeclaringClass()), null)
             );

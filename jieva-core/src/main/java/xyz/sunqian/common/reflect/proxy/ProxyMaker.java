@@ -16,20 +16,20 @@ import java.util.List;
 public interface ProxyMaker {
 
     /**
-     * Returns a {@link ProxyMaker} that uses <a href="https://asm.ow2.io/">ASM</a> to generate proxy classes.
+     * Returns an instance of {@link AsmProxyMaker} which implements the {@link ProxyMaker}.
      *
-     * @return a {@link ProxyMaker} that uses <a href="https://asm.ow2.io/">ASM</a> to generate proxy classes.
+     * @return an instance of {@link AsmProxyMaker} which implements the {@link ProxyMaker}
      */
-    static @Nonnull ProxyMaker byAsm() {
+    static @Nonnull AsmProxyMaker byAsm() {
         return new AsmProxyMaker();
     }
 
     /**
-     * Returns a {@link ProxyMaker} that uses JDK to generate proxy classes.
+     * Returns an instance of {@link JdkProxyMaker} which implements the {@link ProxyMaker}.
      *
-     * @return a {@link ProxyMaker} that uses JDK to generate proxy classes.
+     * @return an instance of {@link JdkProxyMaker} which implements the {@link ProxyMaker}
      */
-    static @Nonnull ProxyMaker byJdk() {
+    static @Nonnull JdkProxyMaker byJdk() {
         return new JdkProxyMaker();
     }
 

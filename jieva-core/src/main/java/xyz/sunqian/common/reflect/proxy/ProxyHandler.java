@@ -20,9 +20,9 @@ public interface ProxyHandler {
     /**
      * Returns whether the given method should be proxied.
      * <p>
-     * Typically, the {@link ProxyMaker} invokes this method for each overrideable method of the superclass and
-     * interfaces, only once. If there are methods with the same name and parameter types, {@link ProxyMaker} will only
-     * pass the first one encountered.
+     * Typically, the {@link ProxyMaker} invokes this method for each proxiable method of the superclass and interfaces,
+     * only once. Typically, if there are methods with the same name and JVM descriptor, {@link ProxyMaker} only passes
+     * the first one encountered. However, some implementations may not have this guarantee.
      *
      * @param method the given method
      * @return whether the given method should be proxied
@@ -30,13 +30,13 @@ public interface ProxyHandler {
     boolean shouldProxyMethod(@Nonnull Method method);
 
     /**
-     * Defines the proxy behavior for the proxied method. When a proxied method is invoked on a proxy instance, it is
-     * actually this method that gets invoked.
+     * Defines the proxy behavior for the proxied method. When a proxied method is invoked on a proxy instance, this
+     * method will be called to handle the invocation.
      *
-     * @param proxy   the proxy instance
-     * @param method  the proxied method
-     * @param invoker the invoker to invoke the proxy method
-     * @param args    the arguments of the invocation
+     * @param proxy   the proxy instance on which the method was invoked
+     * @param method  the proxied method being invoked
+     * @param invoker the invoker that can be used to invoke the original behavior (call {@code super})
+     * @param args    the arguments for the method invocation
      * @return the invocation result
      * @throws Throwable the bare exception thrown by the invocation, without any wrapping
      */

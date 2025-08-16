@@ -5,7 +5,9 @@ import test.utils.LotsOfMethods;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.value.BooleanVar;
 import xyz.sunqian.common.base.value.IntVar;
+import xyz.sunqian.common.reflect.proxy.AsmProxyMaker;
 import xyz.sunqian.common.reflect.proxy.ProxyFactory;
 import xyz.sunqian.common.reflect.proxy.ProxyHandler;
 import xyz.sunqian.common.reflect.proxy.ProxyInvoker;
@@ -98,16 +100,35 @@ public class AsmProxyTest implements PrintTest {
         }
         {
             // SameMethod
-            expectThrows(ClassFormatError.class, () ->
-                generateProxy(null, Jie.list(SameMethodA.class, SameMethodB.class), counter));
             ProxyMaker generator = ProxyMaker.byAsm();
+            BooleanVar isA = BooleanVar.of(false);
             ProxyFactory pc = generator.make(
                 null, Jie.list(SameMethodA.class, SameMethodB.class),
                 new ProxyHandler() {
 
+                    private boolean encounter = false;
+
                     @Override
-                    public boolean shouldProxyMethod(Method method) {
-                        return method.getDeclaringClass().equals(SameMethodA.class);
+                    public boolean shouldProxyMethod(@Nonnull Method method) {
+                        if (method.getDeclaringClass().equals(SameMethodA.class)) {
+                            if (encounter) {
+                                return true;
+                            } else {
+                                encounter = true;
+                            }
+                            isA.set(true);
+                            return true;
+                        }
+                        if (method.getDeclaringClass().equals(SameMethodB.class)) {
+                            if (encounter) {
+                                return true;
+                            } else {
+                                encounter = true;
+                            }
+                            isA.set(false);
+                            return true;
+                        }
+                        return false;
                     }
 
                     @Override
@@ -122,15 +143,26 @@ public class AsmProxyTest implements PrintTest {
                     }
                 }
             );
-            SameMethodA obj = pc.newInstance();
-            assertFalse(obj.equals(""));
+            SameMethodA sa = pc.newInstance();
+            assertFalse(sa.equals(""));
             assertEquals(counter.get(), 0);
-            assertEquals(obj.hashCode(), Jie.hashId(obj));
+            assertEquals(sa.hashCode(), Jie.hashId(sa));
             assertEquals(counter.get(), 0);
-            assertEquals(obj.toString(), obj.getClass().getName() + '@' + Integer.toHexString(obj.hashCode()));
+            assertEquals(sa.toString(), sa.getClass().getName() + '@' + Integer.toHexString(sa.hashCode()));
             assertEquals(counter.get(), 0);
-            testSS(obj, (SameMethodB) obj, counter);
-            assertEquals(obj.ss(111), 111 * 2);
+            if (isA.get()) {
+                assertEquals(sa.ss(66), 66 * 2);
+            } else {
+                assertEquals(sa.ss(66), 66 * 4);
+            }
+            assertEquals(counter.get(), 1);
+            SameMethodA sb = pc.newInstance();
+            if (isA.get()) {
+                assertEquals(sb.ss(66), 66 * 2);
+            } else {
+                assertEquals(sb.ss(66), 66 * 4);
+            }
+            assertEquals(counter.get(), 2);
             counter.clear();
         }
         {
@@ -155,13 +187,13 @@ public class AsmProxyTest implements PrintTest {
             ProxyMaker generator = ProxyMaker.byAsm();
             IntVar counter = IntVar.of(0);
             ProxyFactory pc = generator.make(
-                ClsA.class, Jie.list(SameMethodA.class),
+                ClsA.class, Jie.list(DefaultInter.class),
                 new ProxyHandler() {
 
                     @Override
-                    public boolean shouldProxyMethod(Method method) {
+                    public boolean shouldProxyMethod(@Nonnull Method method) {
                         return method.getDeclaringClass().equals(ClsA.class)
-                            || method.getDeclaringClass().equals(SameMethodA.class);
+                            || method.getDeclaringClass().equals(DefaultInter.class);
                     }
 
                     @Override
@@ -176,34 +208,39 @@ public class AsmProxyTest implements PrintTest {
                     }
                 }
             );
-            class ClaAProxy extends ClsA implements SameMethodA {}
+            class ClaAProxy extends ClsA implements DefaultInter {}
             Object asmProxy = pc.newInstance();
             ClaAProxy manProxy = new ClaAProxy();
             assertEquals(counter.get(), 0);
             assertEquals(((ClsA) asmProxy).a1("666"), manProxy.a1("666"));
             assertEquals(counter.get(), 2);
-            assertEquals(((SameMethodA) asmProxy).ss(999), manProxy.ss(999));
+            assertEquals(((DefaultInter) asmProxy).defaultInt(999), manProxy.defaultInt(999));
             assertEquals(counter.get(), 3);
         }
         {
             // invoke
             ProxyMaker generator = ProxyMaker.byAsm();
             IntVar counter = IntVar.of(0);
-            class ClaAProxy extends ClsA implements SameMethodA {
+            class ClaAProxy extends ClsA implements DefaultInter {
                 @Override
                 public String a1(String a0) {
                     return super.a1(a0) + "888";
                 }
+
+                @Override
+                public int defaultInt(int i) {
+                    return i + 1;
+                }
             }
             ClaAProxy manProxy = new ClaAProxy();
             ProxyFactory pc = generator.make(
-                ClsA.class, Jie.list(SameMethodA.class),
+                ClsA.class, Jie.list(DefaultInter.class),
                 new ProxyHandler() {
 
                     @Override
-                    public boolean shouldProxyMethod(Method method) {
+                    public boolean shouldProxyMethod(@Nonnull Method method) {
                         return method.getDeclaringClass().equals(ClsA.class)
-                            || method.getDeclaringClass().equals(SameMethodA.class);
+                            || method.getDeclaringClass().equals(DefaultInter.class);
                     }
 
                     @Override
@@ -223,20 +260,22 @@ public class AsmProxyTest implements PrintTest {
             assertEquals(((ClsA) asmProxy).a1("666"), manProxy.a1("666"));
             assertEquals(((ClsA) asmProxy).a1("666"), "666888");
             assertEquals(counter.get(), 2);
-            assertEquals(((SameMethodA) asmProxy).ss(999), manProxy.ss(999));
+            assertEquals(((DefaultInter) asmProxy).defaultInt(999), manProxy.defaultInt(999));
             assertEquals(counter.get(), 3);
+            assertEquals(((DefaultInter) asmProxy).defaultInt(999), 999 + 1);
+            assertEquals(counter.get(), 4);
         }
         {
             // stack overflow
             ProxyMaker generator = ProxyMaker.byAsm();
             ProxyFactory pc = generator.make(
-                ClsA.class, Jie.list(SameMethodA.class),
+                ClsA.class, Jie.list(DefaultInter.class),
                 new ProxyHandler() {
 
                     @Override
-                    public boolean shouldProxyMethod(Method method) {
+                    public boolean shouldProxyMethod(@Nonnull Method method) {
                         return method.getDeclaringClass().equals(ClsA.class)
-                            || method.getDeclaringClass().equals(SameMethodA.class);
+                            || method.getDeclaringClass().equals(DefaultInter.class);
                     }
 
                     @Override
@@ -252,20 +291,20 @@ public class AsmProxyTest implements PrintTest {
             );
             ClsA asmProxy1 = pc.newInstance();
             expectThrows(StackOverflowError.class, () -> asmProxy1.a1(""));
-            SameMethodA asmProxy2 = pc.newInstance();
-            expectThrows(StackOverflowError.class, () -> asmProxy2.ss(1));
+            DefaultInter asmProxy2 = pc.newInstance();
+            expectThrows(StackOverflowError.class, () -> asmProxy2.defaultInt(1));
         }
         {
             // throws directly
             ProxyMaker generator = ProxyMaker.byAsm();
             ProxyFactory pc1 = generator.make(
-                ClsA.class, Jie.list(SameMethodA.class),
+                ClsA.class, Jie.list(DefaultInter.class),
                 new ProxyHandler() {
 
                     @Override
-                    public boolean shouldProxyMethod(Method method) {
+                    public boolean shouldProxyMethod(@Nonnull Method method) {
                         return method.getDeclaringClass().equals(ClsA.class)
-                            || method.getDeclaringClass().equals(SameMethodA.class);
+                            || method.getDeclaringClass().equals(DefaultInter.class);
                     }
 
                     @Override
@@ -281,16 +320,16 @@ public class AsmProxyTest implements PrintTest {
             );
             ClsA a1 = pc1.newInstance();
             expectThrows(ProxyTestException.class, () -> a1.a1(""));
-            SameMethodA s1 = pc1.newInstance();
-            expectThrows(ProxyTestException.class, () -> s1.ss(1));
+            DefaultInter s1 = pc1.newInstance();
+            expectThrows(ProxyTestException.class, () -> s1.defaultInt(1));
             ProxyFactory pc2 = generator.make(
-                ClsA.class, Jie.list(SameMethodA.class),
+                ClsA.class, Jie.list(DefaultInter.class),
                 new ProxyHandler() {
 
                     @Override
-                    public boolean shouldProxyMethod(Method method) {
+                    public boolean shouldProxyMethod(@Nonnull Method method) {
                         return method.getDeclaringClass().equals(ClsA.class)
-                            || method.getDeclaringClass().equals(SameMethodA.class);
+                            || method.getDeclaringClass().equals(DefaultInter.class);
                     }
 
                     @Override
@@ -305,9 +344,9 @@ public class AsmProxyTest implements PrintTest {
                 }
             );
             ClsA a2 = pc2.newInstance();
-            expectThrows(ProxyTestException.class, () -> a2.throwClsEx());
-            SameMethodA s2 = pc1.newInstance();
-            expectThrows(ProxyTestException.class, () -> s2.throwInterEx());
+            expectThrows(ProxyTestException.class, a2::throwClsEx);
+            DefaultInter s2 = pc1.newInstance();
+            expectThrows(ProxyTestException.class, () -> s2.defaultInt(1));
         }
         {
             // indirect super: A extends B extends C: A super-> C
@@ -318,7 +357,7 @@ public class AsmProxyTest implements PrintTest {
                 new ProxyHandler() {
 
                     @Override
-                    public boolean shouldProxyMethod(Method method) {
+                    public boolean shouldProxyMethod(@Nonnull Method method) {
                         return true;
                     }
 
@@ -344,7 +383,7 @@ public class AsmProxyTest implements PrintTest {
                 new ProxyHandler() {
 
                     @Override
-                    public boolean shouldProxyMethod(Method method) {
+                    public boolean shouldProxyMethod(@Nonnull Method method) {
                         return true;
                     }
 
@@ -370,7 +409,7 @@ public class AsmProxyTest implements PrintTest {
                 new ProxyHandler() {
 
                     @Override
-                    public boolean shouldProxyMethod(Method method) {
+                    public boolean shouldProxyMethod(@Nonnull Method method) {
                         return true;
                     }
 
@@ -401,7 +440,7 @@ public class AsmProxyTest implements PrintTest {
                 new ProxyHandler() {
 
                     @Override
-                    public boolean shouldProxyMethod(Method method) {
+                    public boolean shouldProxyMethod(@Nonnull Method method) {
                         return !method.getName().startsWith("filtered");
                     }
 
@@ -452,7 +491,7 @@ public class AsmProxyTest implements PrintTest {
             new ProxyHandler() {
 
                 @Override
-                public boolean shouldProxyMethod(Method method) {
+                public boolean shouldProxyMethod(@Nonnull Method method) {
                     return true;
                 }
 
@@ -473,6 +512,12 @@ public class AsmProxyTest implements PrintTest {
         InterOverpass2 pi3 = pc.newInstance();
         InterOverpass2 i3 = new InterOverpass2() {};
         assertEquals(pi3.ooi(), i3.ooi());
+    }
+
+    @Test
+    public void testException() {
+        expectThrows(AsmProxyMaker.AsmProxyException.class, () ->
+            ProxyMaker.byAsm().make(null, Jie.list(), null));
     }
 
     private void testInterA(InterA obj, IntVar counter) {
@@ -669,11 +714,6 @@ public class AsmProxyTest implements PrintTest {
         assertEquals(counter.get(), 8);
     }
 
-    private void testSS(SameMethodA obj1, SameMethodB obj2, IntVar counter) {
-        assertEquals(obj1.ss(66), obj2.ss(66));
-        assertEquals(counter.get(), 2);
-    }
-
     private ProxyFactory generateProxy(Class<?> superclass, List<Class<?>> interfaces, IntVar counter) {
         ProxyMaker generator = ProxyMaker.byAsm();
         return generator.make(
@@ -681,7 +721,7 @@ public class AsmProxyTest implements PrintTest {
             new ProxyHandler() {
 
                 @Override
-                public boolean shouldProxyMethod(Method method) {
+                public boolean shouldProxyMethod(@Nonnull Method method) {
                     return true;
                 }
 
@@ -827,6 +867,10 @@ public class AsmProxyTest implements PrintTest {
         public void throwClsEx() {
             throw new ProxyTestException();
         }
+
+        private void testModifierFilter() {
+            // test modifier filter in ProxyKit
+        }
     }
 
     public static class ClsB<T> {
@@ -852,14 +896,16 @@ public class AsmProxyTest implements PrintTest {
     public static class ClsE implements InterE {
     }
 
+    public interface DefaultInter {
+        default int defaultInt(int i) {
+            return i;
+        }
+    }
+
     public interface SameMethodA {
 
         default int ss(int i) {
             return i * 2;
-        }
-
-        default void throwInterEx() {
-            throw new ProxyTestException();
         }
     }
 

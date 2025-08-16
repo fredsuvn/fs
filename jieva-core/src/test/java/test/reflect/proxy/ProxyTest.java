@@ -27,7 +27,7 @@ public class ProxyTest {
         ProxyFactory pc = maker.make(null, Jie.list(InterA.class), new ProxyHandler() {
 
             @Override
-            public boolean shouldProxyMethod(Method method) {
+            public boolean shouldProxyMethod(@Nonnull Method method) {
                 return !method.getName().equals("a1");
             }
 

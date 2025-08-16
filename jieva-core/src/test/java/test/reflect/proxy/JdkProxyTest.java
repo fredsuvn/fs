@@ -4,15 +4,16 @@ import org.testng.annotations.Test;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.value.BooleanVar;
 import xyz.sunqian.common.base.value.IntVar;
 import xyz.sunqian.common.invoke.Invocable;
+import xyz.sunqian.common.reflect.proxy.JdkProxyMaker;
 import xyz.sunqian.common.reflect.proxy.ProxyException;
 import xyz.sunqian.common.reflect.proxy.ProxyFactory;
 import xyz.sunqian.common.reflect.proxy.ProxyHandler;
 import xyz.sunqian.common.reflect.proxy.ProxyInvoker;
 import xyz.sunqian.common.reflect.proxy.ProxyMaker;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import static org.testng.Assert.assertEquals;
@@ -34,7 +35,7 @@ public class JdkProxyTest {
                 new ProxyHandler() {
 
                     @Override
-                    public boolean shouldProxyMethod(Method method) {
+                    public boolean shouldProxyMethod(@Nonnull Method method) {
                         return true;
                     }
 
@@ -75,7 +76,7 @@ public class JdkProxyTest {
                 new ProxyHandler() {
 
                     @Override
-                    public boolean shouldProxyMethod(Method method) {
+                    public boolean shouldProxyMethod(@Nonnull Method method) {
                         return true;
                     }
 
@@ -108,7 +109,7 @@ public class JdkProxyTest {
                 new ProxyHandler() {
 
                     @Override
-                    public boolean shouldProxyMethod(Method method) {
+                    public boolean shouldProxyMethod(@Nonnull Method method) {
                         return !method.getName().startsWith("filtered");
                     }
 
@@ -142,11 +143,11 @@ public class JdkProxyTest {
         }
         {
             ProxyFactory pc4 = generator.make(
-                null, Jie.list(InterOverpass1.class, InterOverpass11.class, InterOverpass111.class),
+                null, Jie.list(InterOverpass1.class, InterOverpass2.class, InterOverpass3.class),
                 new ProxyHandler() {
 
                     @Override
-                    public boolean shouldProxyMethod(Method method) {
+                    public boolean shouldProxyMethod(@Nonnull Method method) {
                         return true;
                     }
 
@@ -184,7 +185,7 @@ public class JdkProxyTest {
             new ProxyHandler() {
 
                 @Override
-                public boolean shouldProxyMethod(Method method) {
+                public boolean shouldProxyMethod(@Nonnull Method method) {
                     return true;
                 }
 
@@ -209,11 +210,73 @@ public class JdkProxyTest {
 
         {
             // unsupported default method invocable
-            Field field = ProxyMaker.byJdk().getClass().getDeclaredField("UNSUPPORTED_DEFAULT_METHOD_INVOCABLE");
-            field.setAccessible(true);
-            Invocable invocable = (Invocable) field.get(null);
+            Invocable invocable = JdkProxyMaker.UNSUPPORTED_DEFAULT_METHOD_INVOCABLE;
             expectThrows(ProxyException.class, () -> invocable.invokeChecked(null));
         }
+    }
+
+    @Test
+    public void testSameMethod() {
+        ProxyMaker generator = ProxyMaker.byJdk();
+        IntVar counter = IntVar.of(0);
+        BooleanVar isA = BooleanVar.of(false);
+        ProxyFactory pc = generator.make(
+            null, Jie.list(SameMethodA.class, SameMethodB.class),
+            new ProxyHandler() {
+
+                private boolean encounter = false;
+
+                @Override
+                public boolean shouldProxyMethod(@Nonnull Method method) {
+                    if (method.getDeclaringClass().equals(SameMethodA.class)) {
+                        if (encounter) {
+                            return true;
+                        } else {
+                            encounter = true;
+                        }
+                        isA.set(true);
+                        return true;
+                    }
+                    if (method.getDeclaringClass().equals(SameMethodB.class)) {
+                        if (encounter) {
+                            return true;
+                        } else {
+                            encounter = true;
+                        }
+                        isA.set(false);
+                        return true;
+                    }
+                    return false;
+                }
+
+                @Override
+                public @Nullable Object invoke(
+                    @Nonnull Object proxy,
+                    @Nonnull Method method,
+                    @Nonnull ProxyInvoker invoker,
+                    @Nullable Object @Nonnull ... args
+                ) throws Throwable {
+                    counter.incrementAndGet();
+                    return invoker.invokeSuper(proxy, args);
+                }
+            }
+        );
+        assertEquals(counter.get(), 0);
+        SameMethodA sa = pc.newInstance();
+        if (isA.get()) {
+            assertEquals(sa.ss(66), 66 * 2);
+        } else {
+            assertEquals(sa.ss(66), 66 * 4);
+        }
+        assertEquals(counter.get(), 1);
+        SameMethodA sb = pc.newInstance();
+        if (isA.get()) {
+            assertEquals(sb.ss(66), 66 * 2);
+        } else {
+            assertEquals(sb.ss(66), 66 * 4);
+        }
+        assertEquals(counter.get(), 2);
+        counter.clear();
     }
 
     public interface InterA {
@@ -262,9 +325,9 @@ public class JdkProxyTest {
         }
     }
 
-    public interface InterOverpass11 extends InterOverpass1 {}
+    public interface InterOverpass2 extends InterOverpass1 {}
 
-    public interface InterOverpass111 extends InterOverpass11 {}
+    public interface InterOverpass3 extends InterOverpass2 {}
 
     public interface SuperInter {
 
@@ -273,5 +336,18 @@ public class JdkProxyTest {
         }
 
         String si2();
+    }
+
+    public interface SameMethodA {
+
+        default int ss(int i) {
+            return i * 2;
+        }
+    }
+
+    public interface SameMethodB {
+        default int ss(int i) {
+            return i * 4;
+        }
     }
 }
