@@ -12,7 +12,7 @@ import xyz.sunqian.common.mapping.handlers.CollectionMappingHandler;
 import xyz.sunqian.common.mapping.handlers.EnumMapperHandler;
 import xyz.sunqian.common.mapping.handlers.TypedMapperHandler;
 import xyz.sunqian.common.objects.data.DataProperty;
-import xyz.sunqian.common.reflect.TypeRef;
+import xyz.sunqian.common.runtime.reflect.TypeRef;
 
 import java.lang.reflect.Type;
 import java.util.List;

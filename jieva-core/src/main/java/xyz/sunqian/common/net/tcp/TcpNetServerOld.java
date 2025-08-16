@@ -8,9 +8,9 @@ import xyz.sunqian.common.collect.CollectKit;
 import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IOKit;
-import xyz.sunqian.common.net.NetServerException;
 import xyz.sunqian.common.net.GekServerStates;
 import xyz.sunqian.common.net.NetException;
+import xyz.sunqian.common.net.NetServerException;
 import xyz.sunqian.common.net.data.GekData;
 
 import java.io.IOException;
@@ -307,7 +307,7 @@ public interface TcpNetServerOld extends TcpNetEndpoint {
                 if (serverSocket == null) {
                     throw new NetException("Server has not been initialized.");
                 }
-                return null;//serverSocket.getInetAddress();
+                return null;// serverSocket.getInetAddress();
             }
 
             @Override

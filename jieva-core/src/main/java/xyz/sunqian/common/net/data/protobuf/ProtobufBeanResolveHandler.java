@@ -5,12 +5,12 @@ import com.google.protobuf.Message;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.string.StringKit;
 import xyz.sunqian.common.collect.CollectKit;
-import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.mapping.MappingException;
 import xyz.sunqian.common.objects.data.BeanException;
 import xyz.sunqian.common.objects.data.DataPropertyBase;
 import xyz.sunqian.common.objects.data.DataSchemaParser;
-import xyz.sunqian.common.reflect.TypeKit;
+import xyz.sunqian.common.runtime.invoke.Invocable;
+import xyz.sunqian.common.runtime.reflect.TypeKit;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;

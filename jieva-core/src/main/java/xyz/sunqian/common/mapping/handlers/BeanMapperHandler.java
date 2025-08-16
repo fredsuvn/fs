@@ -7,8 +7,8 @@ import xyz.sunqian.common.mapping.BeanMapper;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingOptions;
 import xyz.sunqian.common.objects.data.DataProperty;
-import xyz.sunqian.common.reflect.ClassKit;
-import xyz.sunqian.common.reflect.TypeKit;
+import xyz.sunqian.common.runtime.reflect.ClassKit;
+import xyz.sunqian.common.runtime.reflect.TypeKit;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;

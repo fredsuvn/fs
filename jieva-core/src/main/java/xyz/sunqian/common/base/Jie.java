@@ -21,7 +21,7 @@ import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.mapping.BeanMapper;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingOptions;
-import xyz.sunqian.common.reflect.TypeRef;
+import xyz.sunqian.common.runtime.reflect.TypeRef;
 
 import java.io.IOException;
 import java.lang.reflect.Type;

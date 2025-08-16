@@ -4,7 +4,7 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
-import xyz.sunqian.common.reflect.TypeKit;
+import xyz.sunqian.common.runtime.reflect.TypeKit;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;

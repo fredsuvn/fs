@@ -6,7 +6,7 @@ import xyz.sunqian.common.base.value.Val;
 import xyz.sunqian.common.objects.data.DataProperty;
 import xyz.sunqian.common.objects.data.DataSchema;
 import xyz.sunqian.common.objects.data.DataSchemaParser;
-import xyz.sunqian.common.reflect.TypeKit;
+import xyz.sunqian.common.runtime.reflect.TypeKit;
 
 import java.lang.reflect.Type;
 import java.util.Collection;

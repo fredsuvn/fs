@@ -4,11 +4,11 @@ import lombok.Data;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.collect.MapKit;
-import xyz.sunqian.common.invoke.Invocable;
 import xyz.sunqian.common.objects.data.DataObjectException;
 import xyz.sunqian.common.objects.data.DataPropertyBase;
 import xyz.sunqian.common.objects.data.DataSchemaParser;
-import xyz.sunqian.common.reflect.TypeKit;
+import xyz.sunqian.common.runtime.invoke.Invocable;
+import xyz.sunqian.common.runtime.reflect.TypeKit;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;

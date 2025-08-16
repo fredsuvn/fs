@@ -14,7 +14,6 @@ import java.net.Socket;
 import java.net.SocketOptions;
 import java.net.StandardSocketOptions;
 import java.nio.channels.DatagramChannel;
-import java.nio.channels.MulticastChannel;
 import java.nio.channels.NetworkChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
@@ -527,7 +526,7 @@ public class SocketNetBuilder {
                 if (backlog == null) {
                     channel.bind(new InetSocketAddress(bindAddr, bindPort));
                 } else {
-                    //channel.bind(new InetSocketAddress(bindAddr, bindPort), backlog);
+                    // channel.bind(new InetSocketAddress(bindAddr, bindPort), backlog);
                 }
             }
             return applyTo(channel);

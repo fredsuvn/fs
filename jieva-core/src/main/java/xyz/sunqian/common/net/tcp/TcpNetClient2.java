@@ -286,7 +286,7 @@ public interface TcpNetClient2 extends TcpNetEndpoint {
                 if (socket == null) {
                     throw new NetException("Client has not been initialized.");
                 }
-                return null;//socket.getLocalAddress();
+                return null;// socket.getLocalAddress();
             }
 
             @Override

@@ -6,12 +6,12 @@ import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.testng.annotations.Test;
-import test.reflect.TypeTest;
+import test.runtime.reflect.TypeTest;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 import xyz.sunqian.common.base.system.JvmException;
 import xyz.sunqian.common.base.system.JvmKit;
-import xyz.sunqian.common.reflect.TypeKit;
+import xyz.sunqian.common.runtime.reflect.TypeKit;
 import xyz.sunqian.test.AssertTest;
 import xyz.sunqian.test.PrintTest;
 
