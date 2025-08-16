@@ -23,14 +23,14 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * JDK dynamic proxy implementation for {@link ProxyClassGenerator}.
+ * JDK dynamic proxy implementation for {@link ProxyMaker}.
  * <p>
  * This generator uses {@link Proxy} to generate proxy class, and that means it only supports proxy interfaces.
  *
  * @author sunqian
  */
 @ThreadSafe
-public class JdkProxyClassGenerator implements ProxyClassGenerator {
+final class JdkProxyMaker implements ProxyMaker {
 
     /**
      * An {@link Invocable} instance that does not support default method of java interface.
@@ -45,10 +45,10 @@ public class JdkProxyClassGenerator implements ProxyClassGenerator {
     private static final @Nonnull Object @Nonnull [] EMPTY_ARGS = {};
 
     @Override
-    public @Nonnull ProxyClass generate(
+    public @Nonnull ProxyFactory make(
         @Nullable Class<?> proxiedClass,
         @Nonnull List<@Nonnull Class<?>> interfaces,
-        @Nonnull ProxyMethodHandler methodHandler
+        @Nonnull ProxyHandler proxyHandler
     ) throws ProxyException {
         Class<?> proxyClass = Proxy.getProxyClass(
             new BytesClassLoader(),
@@ -62,7 +62,7 @@ public class JdkProxyClassGenerator implements ProxyClassGenerator {
                 if (ClassKit.isStatic(method)) {
                     continue;
                 }
-                if (!proxiedMethods.containsKey(method) && methodHandler.requiresProxy(method)) {
+                if (!proxiedMethods.containsKey(method) && proxyHandler.shouldProxyMethod(method)) {
                     proxiedMethods.put(method, Var.of(null));
                 } else {
                     unproxiedMethods.put(method, Var.of(null));
@@ -70,15 +70,15 @@ public class JdkProxyClassGenerator implements ProxyClassGenerator {
             }
         }
         InvocationHandler handler = getInvocationHandler(
-            methodHandler,
+            proxyHandler,
             new HashMap<>(proxiedMethods),
             new HashMap<>(unproxiedMethods)
         );
-        return new JdkProxyClass(proxyClass, handler);
+        return new JdkProxyFactory(proxyClass, handler);
     }
 
     private static @Nonnull InvocationHandler getInvocationHandler(
-        @Nonnull ProxyMethodHandler methodHandler,
+        @Nonnull ProxyHandler methodHandler,
         @Nonnull Map<@Nonnull Method, @Nonnull Var<ProxyInvoker>> proxiedMap,
         @Nonnull Map<@Nonnull Method, @Nonnull Var<Invocable>> unproxiedMap
     ) {
@@ -125,12 +125,12 @@ public class JdkProxyClassGenerator implements ProxyClassGenerator {
         }
     }
 
-    private static final class JdkProxyClass implements ProxyClass {
+    private static final class JdkProxyFactory implements ProxyFactory {
 
         private final @Nonnull Class<?> proxyClass;
         private final @Nonnull InvocationHandler handler;
 
-        private JdkProxyClass(
+        private JdkProxyFactory(
             @Nonnull Class<?> proxyClass,
             @Nonnull InvocationHandler handler
         ) {
@@ -147,7 +147,7 @@ public class JdkProxyClassGenerator implements ProxyClassGenerator {
         }
 
         @Override
-        public @Nonnull Class<?> getProxyClass() {
+        public @Nonnull Class<?> proxyClass() {
             return proxyClass;
         }
     }

@@ -6,11 +6,10 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.value.IntVar;
 import xyz.sunqian.common.invoke.Invocable;
-import xyz.sunqian.common.reflect.proxy.JdkProxyClassGenerator;
-import xyz.sunqian.common.reflect.proxy.ProxyClass;
-import xyz.sunqian.common.reflect.proxy.ProxyClassGenerator;
+import xyz.sunqian.common.reflect.proxy.ProxyFactory;
+import xyz.sunqian.common.reflect.proxy.ProxyMaker;
 import xyz.sunqian.common.reflect.proxy.ProxyInvoker;
-import xyz.sunqian.common.reflect.proxy.ProxyMethodHandler;
+import xyz.sunqian.common.reflect.proxy.ProxyHandler;
 
 import java.lang.reflect.Method;
 
@@ -24,16 +23,16 @@ public class JdkProxyTest {
 
     @Test
     public void testJdkProxy() {
-        ProxyClassGenerator generator = new JdkProxyClassGenerator();
+        ProxyMaker generator = ProxyMaker.byJdk();
         IntVar counter = IntVar.of(0);
         String result = "66666";
         {
-            ProxyClass pc1 = generator.generate(
+            ProxyFactory pc1 = generator.make(
                 null, Jie.list(InterA.class, InterB.class, InterC.class),
-                new ProxyMethodHandler() {
+                new ProxyHandler() {
 
                     @Override
-                    public boolean requiresProxy(Method method) {
+                    public boolean shouldProxyMethod(Method method) {
                         return true;
                     }
 
@@ -49,7 +48,7 @@ public class JdkProxyTest {
                     }
                 }
             );
-            assertNotNull(pc1.getProxyClass());
+            assertNotNull(pc1.proxyClass());
             InterA a = pc1.newInstance();
             assertSame(a.aa("11", 11), result);
             assertEquals(counter.get(), 1);
@@ -69,12 +68,12 @@ public class JdkProxyTest {
                 }
             }
             Cls cls = new Cls();
-            ProxyClass pc2 = generator.generate(
+            ProxyFactory pc2 = generator.make(
                 null, Jie.list(InterA.class, InterB.class, InterC.class),
-                new ProxyMethodHandler() {
+                new ProxyHandler() {
 
                     @Override
-                    public boolean requiresProxy(Method method) {
+                    public boolean shouldProxyMethod(Method method) {
                         return true;
                     }
 
@@ -102,12 +101,12 @@ public class JdkProxyTest {
                 }
             }
             Cls cls = new Cls();
-            ProxyClass pc3 = generator.generate(
+            ProxyFactory pc3 = generator.make(
                 null, Jie.list(InterA.class, InterB.class, InterC.class),
-                new ProxyMethodHandler() {
+                new ProxyHandler() {
 
                     @Override
-                    public boolean requiresProxy(Method method) {
+                    public boolean shouldProxyMethod(Method method) {
                         return !method.getName().startsWith("filtered");
                     }
 
@@ -140,12 +139,12 @@ public class JdkProxyTest {
             counter.clear();
         }
         {
-            ProxyClass pc4 = generator.generate(
+            ProxyFactory pc4 = generator.make(
                 null, Jie.list(InterOverpass1.class, InterOverpass11.class, InterOverpass111.class),
-                new ProxyMethodHandler() {
+                new ProxyHandler() {
 
                     @Override
-                    public boolean requiresProxy(Method method) {
+                    public boolean shouldProxyMethod(Method method) {
                         return true;
                     }
 
@@ -170,7 +169,7 @@ public class JdkProxyTest {
 
     @Test
     public void testInvokeSuper() {
-        ProxyClassGenerator generator = new JdkProxyClassGenerator();
+        ProxyMaker generator = ProxyMaker.byJdk();
         IntVar counter = IntVar.of(0);
         SuperInter si = new SuperInter() {
             @Override
@@ -178,12 +177,12 @@ public class JdkProxyTest {
                 return "";
             }
         };
-        ProxyClass pc = generator.generate(
+        ProxyFactory pc = generator.make(
             null, Jie.list(SuperInter.class),
-            new ProxyMethodHandler() {
+            new ProxyHandler() {
 
                 @Override
-                public boolean requiresProxy(Method method) {
+                public boolean shouldProxyMethod(Method method) {
                     return true;
                 }
 
@@ -207,8 +206,8 @@ public class JdkProxyTest {
         counter.clear();
 
         // unsupported default method invocable
-        Invocable invocable = JdkProxyClassGenerator.UNSUPPORTED_DEFAULT_METHOD_INVOCABLE;
-        expectThrows(JdkProxyClassGenerator.JdkProxyException.class, () -> invocable.invokeChecked(null));
+        // Invocable invocable = JdkProxyMaker.UNSUPPORTED_DEFAULT_METHOD_INVOCABLE;
+        // expectThrows(JdkProxyMaker.JdkProxyException.class, () -> invocable.invokeChecked(null));
     }
 
     public interface InterA {

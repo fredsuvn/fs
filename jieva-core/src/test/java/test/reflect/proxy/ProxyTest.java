@@ -4,12 +4,10 @@ import org.testng.annotations.Test;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.reflect.proxy.ProxyClass;
-import xyz.sunqian.common.reflect.proxy.ProxyClassGenerator;
+import xyz.sunqian.common.reflect.proxy.ProxyFactory;
+import xyz.sunqian.common.reflect.proxy.ProxyHandler;
 import xyz.sunqian.common.reflect.proxy.ProxyInvoker;
-import xyz.sunqian.common.reflect.proxy.ProxyKit;
-import xyz.sunqian.common.reflect.proxy.ProxyMethodHandler;
-import xyz.sunqian.common.reflect.proxy.ProxyMode;
+import xyz.sunqian.common.reflect.proxy.ProxyMaker;
 
 import java.lang.reflect.Method;
 
@@ -20,18 +18,16 @@ public class ProxyTest {
 
     @Test
     public void testProxy() throws Exception {
-        for (ProxyMode mode : ProxyMode.values()) {
-            testProxy(mode);
-        }
+        testProxy(ProxyMaker.byAsm());
+        testProxy(ProxyMaker.byJdk());
     }
 
-    private void testProxy(ProxyMode mode) throws Exception {
+    private void testProxy(ProxyMaker maker) throws Exception {
         String result = "ssssssss";
-        ProxyClassGenerator generator = ProxyKit.newGenerator(mode);
-        ProxyClass pc = generator.generate(null, Jie.list(InterA.class), new ProxyMethodHandler() {
+        ProxyFactory pc = maker.make(null, Jie.list(InterA.class), new ProxyHandler() {
 
             @Override
-            public boolean requiresProxy(Method method) {
+            public boolean shouldProxyMethod(Method method) {
                 return !method.getName().equals("a1");
             }
 

@@ -8,9 +8,9 @@
  * <p>
  * Interfaces and Implementations:
  * <ul>
- *     <li>{@link xyz.sunqian.common.reflect.proxy.ProxyClassGenerator}</li>
- *     <li>{@link xyz.sunqian.common.reflect.proxy.AsmProxyClassGenerator}</li>
- *     <li>{@link xyz.sunqian.common.reflect.proxy.JdkProxyClassGenerator}</li>
+ *     <li>{@link xyz.sunqian.common.reflect.proxy.ProxyMaker}</li>
+ *     <li>{@link xyz.sunqian.common.reflect.proxy.AsmProxyMaker}</li>
+ *     <li>{@link xyz.sunqian.common.reflect.proxy.JdkProxyMaker}</li>
  * </ul>
  */
 package xyz.sunqian.common.reflect.proxy;
