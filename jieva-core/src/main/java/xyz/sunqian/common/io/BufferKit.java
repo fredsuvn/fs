@@ -1045,7 +1045,11 @@ public class BufferKit {
      * destination buffer, returns the number of bytes written. The position of the source buffer will be increment to
      * its limit, and position of the destination buffer will be increment by the write number.
      * <p>
-     * Note make sure the destination has enough space to write.
+     * Note:
+     * <ul>
+     *     <li>Make sure the destination has enough space to write;</li>
+     *     <li>If an exception occurs during processing, the status of two buffers are undefined;</li>
+     * </ul>
      *
      * @param src      the given source buffer
      * @param dst      the given destination buffer
@@ -1116,7 +1120,11 @@ public class BufferKit {
      * destination buffer, returns the number of chars written. The position of the source buffer will be increment to
      * its limit, and position of the destination buffer will be increment by the write number.
      * <p>
-     * Note make sure the destination has enough space to write. write.
+     * Note:
+     * <ul>
+     *     <li>Make sure the destination has enough space to write;</li>
+     *     <li>If an exception occurs during processing, the status of two buffers are undefined;</li>
+     * </ul>
      *
      * @param src      the given source buffer
      * @param dst      the given destination buffer

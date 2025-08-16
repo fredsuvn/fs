@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 /**
- * Utilities kit for Hex (Base16).
+ * Utilities kit for Hex.
  *
  * @author sunqian
  */
@@ -35,7 +35,7 @@ public class HexKit {
      * @return a {@code hex} encoder
      */
     public static Encoder encoder(boolean upper) {
-        return upper ? EncoderImpl.UPPER_SINGLETON : EncoderImpl.LOWER_SINGLETON;
+        return upper ? EncoderImpl.UPPER : EncoderImpl.LOWER;
     }
 
     /**
@@ -49,20 +49,20 @@ public class HexKit {
 
     /**
      * Returns a {@code hex} decoder. The {@code strict} parameter specifies whether the decoder is strict or not, a
-     * strict decoder will throw an exception if it encounters a valid hex character, and an un-strict decoder will
-     * ignore the valid hex characters.
+     * strict decoder will throw an exception if it encounters an invalid hex character, and an un-strict decoder will
+     * ignore the invalid hex characters.
      *
      * @param strict {@code true} for strict, otherwise {@code false}
      * @return a {@code hex} decoder with the specified mod
      */
     public static Decoder decoder(boolean strict) {
-        return strict ? DecoderImpl.STRICT_SINGLETON : DecoderImpl.LOOSE_SINGLETON;
+        return strict ? DecoderImpl.STRICT : DecoderImpl.LOOSE;
     }
 
     private static final class EncoderImpl implements Encoder, ByteArrayOperator {
 
-        private static final @Nonnull EncoderImpl UPPER_SINGLETON = new EncoderImpl(true);
-        private static final @Nonnull EncoderImpl LOWER_SINGLETON = new EncoderImpl(false);
+        private static final @Nonnull EncoderImpl UPPER = new EncoderImpl(true);
+        private static final @Nonnull EncoderImpl LOWER = new EncoderImpl(false);
 
         private static final char @Nonnull [] UPPER_DICT = {
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
@@ -107,8 +107,8 @@ public class HexKit {
 
     private static final class DecoderImpl implements Decoder, ByteArrayOperator {
 
-        private static final @Nonnull DecoderImpl STRICT_SINGLETON = new DecoderImpl(true);
-        private static final @Nonnull DecoderImpl LOOSE_SINGLETON = new DecoderImpl(false);
+        private static final @Nonnull DecoderImpl STRICT = new DecoderImpl(true);
+        private static final @Nonnull DecoderImpl LOOSE = new DecoderImpl(false);
 
         private final boolean strict;
 

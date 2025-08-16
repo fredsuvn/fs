@@ -105,30 +105,44 @@ public class HexTest implements DataTest {
         }
         {
             // add bad char
-            byte[] src2 = new byte[src.length * 2];
-            System.arraycopy(src, 0, src2, 0, src.length);
-            System.arraycopy(src, 0, src2, src.length, src.length);
-            String hexUpper2 = hexUpper + "hhh" + hexUpper;
-            String hexLower2 = hexLower + "hhh" + hexLower;
-            assertEquals(HexKit.decoder(false).decode(hexUpper2), src2);
-            assertEquals(HexKit.decoder(false).decode(hexLower2), src2);
-            ByteBuffer upperBuf2 = ByteBuffer.wrap(hexUpper2.getBytes(StandardCharsets.ISO_8859_1));
-            ByteBuffer lowerBuf2 = ByteBuffer.wrap(hexLower2.getBytes(StandardCharsets.ISO_8859_1));
-            assertEquals(HexKit.decoder(false).decode(upperBuf2), src2);
-            assertEquals(HexKit.decoder(false).decode(lowerBuf2), src2);
+            int midIndex = src.length / 2;
+            String defectiveUpper = '%' +
+                hexUpper.substring(0, midIndex) +
+                '%' +
+                hexUpper.substring(midIndex) +
+                '%';
+            String defectiveLower = '%' +
+                hexLower.substring(0, midIndex) +
+                '%' +
+                hexLower.substring(midIndex) +
+                '%';
+            assertEquals(HexKit.decoder(false).decode(defectiveUpper), src);
+            assertEquals(HexKit.decoder(false).decode(defectiveLower), src);
+            ByteBuffer upperBuf2 = ByteBuffer.wrap(defectiveUpper.getBytes(StandardCharsets.ISO_8859_1));
+            ByteBuffer lowerBuf2 = ByteBuffer.wrap(defectiveLower.getBytes(StandardCharsets.ISO_8859_1));
+            assertEquals(HexKit.decoder(false).decode(upperBuf2), src);
+            assertEquals(HexKit.decoder(false).decode(lowerBuf2), src);
             HexKit.HexException e;
-            e = expectThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(hexUpper2));
+            e = expectThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(defectiveUpper));
             assertEquals(e.position(), -1);
-            e = expectThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(hexLower2));
+            e = expectThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(defectiveLower));
             assertEquals(e.position(), -1);
-            String hexUpper3 = hexUpper + "hhhh" + hexUpper;
-            String hexLower3 = hexLower + "hhhh" + hexLower;
-            ByteBuffer upperBuf3 = ByteBuffer.wrap(hexUpper3.getBytes(StandardCharsets.ISO_8859_1));
-            ByteBuffer lowerBuf3 = ByteBuffer.wrap(hexLower3.getBytes(StandardCharsets.ISO_8859_1));
+            String defectiveUpper2 =
+                hexUpper.substring(0, midIndex) +
+                    "%" +
+                    hexUpper.substring(midIndex) +
+                    '%';
+            String defectiveLower2 =
+                hexLower.substring(0, midIndex) +
+                    "%" +
+                    hexLower.substring(midIndex) +
+                    '%';
+            ByteBuffer upperBuf3 = ByteBuffer.wrap(defectiveUpper2.getBytes(StandardCharsets.ISO_8859_1));
+            ByteBuffer lowerBuf3 = ByteBuffer.wrap(defectiveLower2.getBytes(StandardCharsets.ISO_8859_1));
             e = expectThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(upperBuf3));
-            assertEquals(e.position(), hexUpper.length());
+            assertEquals(e.position(), midIndex);
             e = expectThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(lowerBuf3));
-            assertEquals(e.position(), hexLower.length());
+            assertEquals(e.position(), midIndex);
             String upperTail = hexUpper + "A";
             e = expectThrows(HexKit.HexException.class, () -> HexKit.decoder(false).decode(upperTail));
             assertEquals(e.position(), -1);

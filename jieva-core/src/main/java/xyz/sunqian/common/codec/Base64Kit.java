@@ -19,9 +19,9 @@ import java.util.Arrays;
 public class Base64Kit {
 
     /**
-     * Returns a {@code base64} encoder encoding in upper case. This method is equivalent to {@code encoder(true)}.
+     * Returns a {@code base64} encoder with padding mode. This method is equivalent to {@code encoder(false, true)}.
      *
-     * @return a {@code base64} encoder encoding in upper case
+     * @return a {@code base64} encoder with padding mode
      */
     public static Encoder encoder() {
         return encoder(false, true);
@@ -29,9 +29,10 @@ public class Base64Kit {
 
     /**
      * Returns a {@code base64} encoder. The {@code url} parameter specifies whether the encoder is URL-Safe, and the
-     * {@code padding} parameter specifies whether the encoder will add padding character at tail.
+     * {@code padding} parameter specifies whether the encoder will add the padding character ('=') at end to align.
      *
-     * @param url
+     * @param url     {@code true} for URL-Safe, otherwise {@code false}
+     * @param padding {@code true} for padding mode, otherwise {@code false}
      * @return a {@code base64} encoder
      */
     public static Encoder encoder(boolean url, boolean padding) {
@@ -51,14 +52,14 @@ public class Base64Kit {
 
     /**
      * Returns a {@code base64} decoder. The {@code strict} parameter specifies whether the decoder is strict or not, a
-     * strict decoder will throw an exception if it encounters a valid base64 character, and an un-strict decoder will
-     * ignore the valid base64 characters.
+     * strict decoder will throw an exception if it encounters an invalid base64 character, and an un-strict decoder
+     * will ignore the invalid base64 characters.
      *
      * @param strict {@code true} for strict, otherwise {@code false}
      * @return a {@code base64} decoder with the specified mod
      */
     public static Decoder decoder(boolean strict) {
-        return strict ? DecoderImpl.STRICT_SINGLETON : DecoderImpl.LOOSE_SINGLETON;
+        return strict ? DecoderImpl.STRICT : DecoderImpl.LOOSE;
     }
 
     private static final class EncoderImpl implements Encoder, ByteArrayOperator {
@@ -94,14 +95,14 @@ public class Base64Kit {
 
         @Override
         public byte @Nonnull [] encode(byte @Nonnull [] bytes) throws Base64Exception {
-            byte[] dst = new byte[bytes.length * 2];
+            byte[] dst = new byte[getLength(bytes.length)];
             process(bytes, 0, dst, 0, bytes.length);
             return dst;
         }
 
         @Override
         public byte @Nonnull [] encode(@Nonnull ByteBuffer buffer) throws Base64Exception {
-            byte[] dst = new byte[buffer.remaining() * 2];
+            byte[] dst = new byte[getLength(buffer.remaining())];
             ByteBuffer dstBuf = ByteBuffer.wrap(dst);
             BufferKit.process(buffer, dstBuf, this);
             return dst;
@@ -130,7 +131,7 @@ public class Base64Kit {
                         dst[j++] = '=';
                     }
                 } else {
-                    int b1 = src[j++] & 0xff;
+                    int b1 = src[i] & 0xff;
                     dst[j++] = (byte) dict[(b0 << 4) & 0x3f | (b1 >> 4)];
                     dst[j++] = (byte) dict[(b1 << 2) & 0x3f];
                     if (padding) {
@@ -140,12 +141,39 @@ public class Base64Kit {
             }
             return j - dstOff;
         }
+
+        private int getLength(int srcLen) {
+            if (srcLen % 3 == 0) {
+                return srcLen / 3 * 4;
+            }
+            if (padding) {
+                return srcLen / 3 * 4 + 4;
+            }
+            int r = srcLen % 3;
+            if (r == 2) {
+                return srcLen / 3 * 4 + 3;
+            }
+            return srcLen / 3 * 4 + 2;
+        }
     }
 
     private static final class DecoderImpl implements Decoder, ByteArrayOperator {
 
-        private static final @Nonnull DecoderImpl STRICT_SINGLETON = new DecoderImpl(true);
-        private static final @Nonnull DecoderImpl LOOSE_SINGLETON = new DecoderImpl(false);
+        private static final @Nonnull DecoderImpl STRICT = new DecoderImpl(true);
+        private static final @Nonnull DecoderImpl LOOSE = new DecoderImpl(false);
+
+        private static final byte[] DICT = new byte[Byte.MAX_VALUE];
+
+        static {
+            Arrays.fill(DICT, (byte) -1);
+            for (int i = 0; i < EncoderImpl.BASE_DICT.length; i++) {
+                int c = EncoderImpl.BASE_DICT[i];
+                DICT[c & 0xff] = (byte) i;
+            }
+            DICT['-'] = DICT['+'];
+            DICT['_'] = DICT['/'];
+            DICT['='] = -2;
+        }
 
         private final boolean strict;
 
@@ -155,16 +183,14 @@ public class Base64Kit {
 
         @Override
         public byte @Nonnull [] decode(byte @Nonnull [] bytes) throws Base64Exception {
-            checkLen(bytes.length);
-            byte[] dst = new byte[bytes.length / 2];
+            byte[] dst = new byte[getLength(bytes.length)];
             int actualLen = process(bytes, 0, dst, 0, bytes.length);
             return actualLen == dst.length ? dst : Arrays.copyOfRange(dst, 0, actualLen);
         }
 
         @Override
         public byte @Nonnull [] decode(@Nonnull ByteBuffer buffer) throws Base64Exception {
-            checkLen(buffer.remaining());
-            byte[] dst = new byte[buffer.remaining() / 2];
+            byte[] dst = new byte[getLength(buffer.remaining())];
             ByteBuffer dstBuf = ByteBuffer.wrap(dst);
             try {
                 int actualLen = BufferKit.process(buffer, dstBuf, this);
@@ -178,79 +204,91 @@ public class Base64Kit {
         public int process(
             byte @Nonnull [] src, int srcOff, byte @Nonnull [] dst, int dstOff, int len
         ) throws Base64Exception {
-            if (strict) {
-                return processStrict(src, srcOff, dst, dstOff, len);
-            } else {
-                return processLoose(src, srcOff, dst, dstOff, len);
-            }
-        }
-
-        private int processStrict(
-            byte @Nonnull [] src, int srcOff, byte @Nonnull [] dst, int dstOff, int len
-        ) throws Base64Exception {
-            for (int i = 0, j = dstOff; i < len; ) {
-                int bits1 = toDigit((char) src[i + srcOff]);
-                if (bits1 < 0) {
-                    throw new Base64Exception(i, "The base64 string contains invalid character at position: " + i + ".");
-                }
-                i++;
-                int bits2 = toDigit((char) src[i + srcOff]);
-                if (bits2 < 0) {
-                    throw new Base64Exception(i, "The base64 string contains invalid character at position: " + i + ".");
-                }
-                i++;
-                int bits = ((bits1 << 4) | bits2);
-                dst[j++] = (byte) bits;
-            }
-            return len / 2;
-        }
-
-        public int processLoose(
-            byte @Nonnull [] src, int srcOff, byte @Nonnull [] dst, int dstOff, int len
-        ) throws Base64Exception {
-            int i = 0, j = dstOff, count = 0;
-            int bits1 = -1;
+            int bits = 0;
+            int shiftTo = 18;// must be 18, 12, 6, 0, -6.
+            int i = 0;
+            int j = dstOff;
             while (i < len) {
-                int bits = toDigit((char) src[i + srcOff]);
-                if (bits < 0) {
+                int c = src[i + srcOff] & 0xff;
+                int b = DICT[c];
+                if (b >= 0) {
+                    // base64 char
+                    bits |= (b << shiftTo);
+                    shiftTo -= 6;
+                    if (shiftTo < 0) {
+                        dst[j++] = (byte) (bits >> 16);
+                        dst[j++] = (byte) (bits >> 8);
+                        dst[j++] = (byte) (bits);
+                        shiftTo = 18;
+                        bits = 0;
+                    }
                     i++;
                     continue;
                 }
-                if (bits1 < 0) {
-                    bits1 = bits;
-                } else {
-                    int c = ((bits1 << 4) | bits);
-                    dst[j++] = (byte) c;
-                    count++;
-                    bits1 = -1;
+                if (b == -2) {
+                    // end char: '='
+                    if (shiftTo == 6) {
+                        // end with xx==
+                        i++;
+                        if (i >= len) {
+                            throw new Base64Exception(
+                                i - 1, "This base64 string should end with '==' but only one '=' found.");
+                        }
+                        int cn = src[i + srcOff] & 0xff;
+                        int bn = DICT[cn];
+                        if (bn != -2) {
+                            throw new Base64Exception(
+                                i, "This base64 string should end with '==' but only one '=' found.");
+                        }
+                        dst[j++] = (byte) (bits >> 16);
+                        i++;
+                        if (i < len) {
+                            throw new Base64Exception(
+                                i, "This base64 string should end with '==' but more character found.");
+                        }
+                        shiftTo = 18;
+                        break;
+                    } else if (shiftTo == 0) {
+                        // end with xxx=
+                        dst[j++] = (byte) (bits >> 16);
+                        dst[j++] = (byte) (bits >> 8);
+                        i++;
+                        if (i < len) {
+                            throw new Base64Exception(
+                                i, "This base64 string should end with '=' but more character found.");
+                        }
+                        shiftTo = 18;
+                        break;
+                    }
+                    throw new Base64Exception(
+                        i, "Base64 character '=' appeared in the wrong position.");
+                }
+                // Otherwise: -1
+                if (strict) {
+                    throw new Base64Exception(i);
                 }
                 i++;
             }
-            if (bits1 >= 0) {
-                throw new Base64Exception("The valid base64 string is not a multiple of 2.");
+            if (shiftTo == 6) {
+                // xx
+                dst[j++] = (byte) (bits >> 16);
+            } else if (shiftTo == 0) {
+                // xxx
+                dst[j++] = (byte) (bits >> 16);
+                dst[j++] = (byte) (bits >> 8);
             }
-            return count;
+            return j - dstOff;
         }
 
-        private int toDigit(char c) {
-            if (c >= '0' && c <= '9') {
-                return c - '0';
+        private int getLength(int srcLen) {
+            if (srcLen % 4 == 0) {
+                return srcLen / 4 * 3;
             }
-            if (c >= 'a' && c <= 'f') {
-                return c - 'a' + 10;
+            int r = srcLen % 4;
+            if (r == 3) {
+                return srcLen / 4 * 3 + 2;
             }
-            if (c >= 'A' && c <= 'F') {
-                return c - 'A' + 10;
-            }
-            return -1;
-        }
-
-        private void checkLen(int len) throws Base64Exception {
-            if (strict) {
-                if (len % 2 != 0) {
-                    throw new Base64Exception("The length of base64 string is not a multiple of 2.");
-                }
-            }
+            return srcLen / 4 * 3 + 1;
         }
     }
 
