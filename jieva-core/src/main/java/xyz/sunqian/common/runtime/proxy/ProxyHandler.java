@@ -20,9 +20,9 @@ public interface ProxyHandler {
     /**
      * Returns whether the given method should be proxied.
      * <p>
-     * Typically, the {@link ProxyMaker} invokes this method for each proxiable method of the superclass and interfaces,
-     * only once. Typically, if there are methods with the same name and JVM descriptor, {@link ProxyMaker} only passes
-     * the first one encountered. However, some implementations may not have this guarantee.
+     * Typically, the {@link ProxyMaker} invokes this method for each proxiable method of the proxied class and
+     * interfaces, only once. If there are methods with the same name and JVM descriptor, {@link ProxyMaker} only passes
+     * the first one encountered. Note some implementations may not have this guarantee.
      *
      * @param method the given method
      * @return whether the given method should be proxied
