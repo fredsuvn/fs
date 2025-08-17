@@ -329,6 +329,20 @@ public class AsmKit {
     }
 
     /**
+     * Returns the slots count for the given method's parameters.
+     *
+     * @param method the given method
+     */
+    public static int countParamSlots(@Nonnull Method method) {
+        int count = 0;
+        for (Parameter parameter : method.getParameters()) {
+            Class<?> type = parameter.getType();
+            count += varSize(type);
+        }
+        return count;
+    }
+
+    /**
      * Returns the slot count of the specified type.
      *
      * @param type the specified type
@@ -336,6 +350,9 @@ public class AsmKit {
     public static int varSize(@Nonnull Class<?> type) {
         if (Objects.equals(type, long.class) || Objects.equals(type, double.class)) {
             return 2;
+        }
+        if (Objects.equals(type, void.class)) {
+            return 0;
         }
         return 1;
     }

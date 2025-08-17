@@ -13,7 +13,6 @@ import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.system.JvmKit;
 import xyz.sunqian.common.base.value.IntVar;
 import xyz.sunqian.common.runtime.asm.AsmKit;
-import xyz.sunqian.common.runtime.proxy.ProxyException;
 import xyz.sunqian.common.runtime.proxy.ProxyHandler;
 import xyz.sunqian.common.runtime.proxy.ProxyInvoker;
 import xyz.sunqian.common.runtime.proxy.ProxyKit;
@@ -30,6 +29,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -54,28 +54,44 @@ public class AsmAspectMaker implements ProxyMaker {
 
     private static final @Nonnull String INVOKER_NAME = JvmKit.getInternalName(ProxyInvoker.class);
     private static final @Nonnull String INVOKERS_DESCRIPTOR = JvmKit.getDescriptor(ProxyInvoker[].class);
-    private static final @Nonnull String HANDLER_NAME = JvmKit.getInternalName(ProxyHandler.class);
-    private static final @Nonnull String HANDLER_DESCRIPTOR = JvmKit.getDescriptor(ProxyHandler.class);
+    private static final @Nonnull String HANDLER_NAME = JvmKit.getInternalName(AspectHandler.class);
+    private static final @Nonnull String HANDLER_DESCRIPTOR = JvmKit.getDescriptor(AspectHandler.class);
     private static final @Nonnull String METHODS_DESCRIPTOR = JvmKit.getDescriptor(Method[].class);
     private static final @Nonnull String INVOKER_SIMPLE_NAME = "AsmInvoker";
     private static final @Nonnull String SUPER_INVOKER_NAME_PREFIX = "access$super$";
     private static final @Nonnull Method HANDLER_INVOKE = Jie.uncheck(
         () -> ProxyHandler.class.getMethod("invoke", Object.class, Method.class, ProxyInvoker.class, Object[].class),
-        AsmProxyException::new
+        AsmAspectException::new
     );
     private static final @Nonnull String HANDLER_INVOKE_DESCRIPTOR = JvmKit.getDescriptor(HANDLER_INVOKE);
     private static final @Nonnull Method INVOKER_INVOKE = Jie.uncheck(
         () -> ProxyInvoker.class.getMethod("invoke", Object.class, Object[].class),
-        AsmProxyException::new
+        AsmAspectException::new
     );
     private static final @Nonnull String INVOKER_INVOKE_DESCRIPTOR = JvmKit.getDescriptor(INVOKER_INVOKE);
     private static final @Nonnull String @Nullable [] INVOKER_INVOKE_EXCEPTIONS = AsmKit.getExceptions(INVOKER_INVOKE);
     private static final @Nonnull Method INVOKER_INVOKE_SUPER = Jie.uncheck(
         () -> ProxyInvoker.class.getMethod("invokeSuper", Object.class, Object[].class),
-        AsmProxyException::new
+        AsmAspectException::new
     );
     private static final @Nonnull String INVOKER_INVOKE_SUPER_DESCRIPTOR = JvmKit.getDescriptor(INVOKER_INVOKE_SUPER);
     private static final @Nonnull String @Nullable [] INVOKER_INVOKE_SUPER_EXCEPTIONS = AsmKit.getExceptions(INVOKER_INVOKE_SUPER);
+
+    private static final @Nonnull Method BEFORE_METHOD = Jie.uncheck(
+        () -> AspectHandler.class.getMethod("beforeInvoking", Method.class, Object[].class, Object.class),
+        AsmAspectException::new
+    );
+    private static final @Nonnull String BEFORE_DESCRIPTOR = JvmKit.getDescriptor(BEFORE_METHOD);
+    private static final @Nonnull Method AFTER_METHOD = Jie.uncheck(
+        () -> AspectHandler.class.getMethod("afterReturning", Object.class, Method.class, Object[].class, Object.class),
+        AsmAspectException::new
+    );
+    private static final @Nonnull String AFTER_DESCRIPTOR = JvmKit.getDescriptor(AFTER_METHOD);
+    private static final @Nonnull Method THROW_METHOD = Jie.uncheck(
+        () -> AspectHandler.class.getMethod("afterThrowing", Throwable.class, Method.class, Object[].class, Object.class),
+        AsmAspectException::new
+    );
+    private static final @Nonnull String THROW_DESCRIPTOR = JvmKit.getDescriptor(THROW_METHOD);
 
     private static final @Nonnull AtomicLong classCounter = new AtomicLong();
 
@@ -84,7 +100,7 @@ public class AsmAspectMaker implements ProxyMaker {
         @Nullable Class<?> proxiedClass,
         @Nonnull @RetainedParam List<@Nonnull Class<?>> interfaces,
         @Nonnull ProxyHandler proxyHandler
-    ) throws AsmProxyException {
+    ) throws AsmAspectException {
         try {
             Package pkg = AsmAspectMaker.class.getPackage();
             // proxy class internal name
@@ -149,7 +165,7 @@ public class AsmAspectMaker implements ProxyMaker {
                 proxiedMethodMap.keySet().toArray(new Method[0])
             );
         } catch (Exception e) {
-            throw new AsmProxyException(e);
+            throw new AsmAspectException(e);
         }
     }
 
@@ -284,7 +300,21 @@ public class AsmAspectMaker implements ProxyMaker {
         Label labelEnd = new Label();
         Label labelHandler = new Label();
         visitor.visitTryCatchBlock(labelStart, labelEnd, labelHandler, "java/lang/Throwable");
-        int argsIndex = 0;
+        int handlerIndex = AsmKit.countParamSlots(pmInfo.method) + 1;
+        int methodIndex = handlerIndex + 1;
+        {
+            // Handler handler = this.handler;
+            // Method method = this.methods[0];
+            visitor.visitVarInsn(Opcodes.ALOAD, 0);
+            visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.proxyName, "handler", HANDLER_DESCRIPTOR);
+            visitor.visitVarInsn(Opcodes.ASTORE, handlerIndex);
+            visitor.visitVarInsn(Opcodes.ALOAD, 0);
+            visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.proxyName, "methods", METHODS_DESCRIPTOR);
+            AsmKit.loadConst(visitor, i);
+            visitor.visitInsn(Opcodes.AALOAD);
+            visitor.visitVarInsn(Opcodes.ASTORE, methodIndex);
+        }
+        int argsIndex = methodIndex + 1;
         {
             // Object[] args = new Object[]{a};
             AsmKit.loadConst(visitor, pmInfo.method.getParameterCount());
@@ -300,32 +330,96 @@ public class AsmAspectMaker implements ProxyMaker {
                 visitor.visitInsn(Opcodes.AASTORE);
                 pIndex += AsmKit.varSize(parameter.getType());
             }
-            argsIndex = pIndex;
             visitor.visitVarInsn(Opcodes.ASTORE, argsIndex);
         }
         visitor.visitLabel(labelStart);
         {
             //aspectHandler.beforeInvoking(methods[0], args, this);
-            visitor.visitVarInsn(Opcodes.ALOAD, 0);
-            visitor.visitFieldInsn(Opcodes.GETFIELD, "xyz/sunqian/common/runtime/aspect/SubSomeCls", "aspectHandler", "Lxyz/sunqian/common/runtime/aspect/AspectHandler;");
-            visitor.visitVarInsn(Opcodes.ALOAD, 0);
-            visitor.visitFieldInsn(Opcodes.GETFIELD, "xyz/sunqian/common/runtime/aspect/SubSomeCls", "methods", "[Ljava/lang/reflect/Method;");
-            AsmKit.loadConst(visitor, i);
-            visitor.visitInsn(Opcodes.AALOAD);
+            visitor.visitVarInsn(Opcodes.ALOAD, handlerIndex);
+            visitor.visitVarInsn(Opcodes.ALOAD, methodIndex);
             visitor.visitVarInsn(Opcodes.ALOAD, argsIndex);
             visitor.visitVarInsn(Opcodes.ALOAD, 0);
-            visitor.visitMethodInsn(Opcodes.INVOKEINTERFACE, "xyz/sunqian/common/runtime/aspect/AspectHandler", "beforeInvoking", "(Ljava/lang/reflect/Method;[Ljava/lang/Object;Ljava/lang/Object;)V", true);
+            visitor.visitMethodInsn(
+                Opcodes.INVOKEINTERFACE,
+                HANDLER_NAME,
+                BEFORE_METHOD.getName(),
+                BEFORE_DESCRIPTOR,
+                true
+            );
         }
-        // {
-        //     // String ret = super.s1((String) args[0]);
-        //     visitor.visitVarInsn(Opcodes.ALOAD, 0);
-        //     methodVisitor.visitVarInsn(ALOAD, 2);
-        //     methodVisitor.visitInsn(ICONST_0);
-        //     methodVisitor.visitInsn(AALOAD);
-        //     methodVisitor.visitTypeInsn(CHECKCAST, "java/lang/String");
-        //     methodVisitor.visitMethodInsn(INVOKESPECIAL, "xyz/sunqian/common/runtime/aspect/SomeCls", "s1", "(Ljava/lang/String;)Ljava/lang/String;", false);
-        //     methodVisitor.visitVarInsn(ASTORE, 3);
-        // }
+        boolean noReturn = Objects.equals(pmInfo.method.getReturnType(), void.class);
+        int returnSlot = AsmKit.varSize(pmInfo.method.getReturnType());
+        int originalResultIndex;
+        {
+            // String ret = super.s1((String) args[0]);
+            visitor.visitVarInsn(Opcodes.ALOAD, 0);
+            int pIndex = 0;
+            for (Parameter parameter : pmInfo.method.getParameters()) {
+                // get args
+                visitor.visitVarInsn(Opcodes.ASTORE, argsIndex);
+                AsmKit.loadConst(visitor, pIndex++);
+                // get args[pIndex]
+                visitor.visitInsn(Opcodes.AALOAD);
+                AsmKit.convertObjectTo(visitor, parameter.getType());
+            }
+            visitor.visitMethodInsn(
+                Opcodes.INVOKESPECIAL,
+                pcInfo.proxySuperName,
+                pmInfo.method.getName(),
+                pmInfo.descriptor,
+                false
+            );
+            if (noReturn) {
+                originalResultIndex = argsIndex;
+            } else {
+                originalResultIndex = argsIndex + 1;
+                visitor.visitVarInsn(Opcodes.ASTORE, originalResultIndex);
+            }
+        }
+        {
+            //return (String) aspectHandler.afterReturning(ret, methods[0], args, this);
+            visitor.visitVarInsn(Opcodes.ALOAD, handlerIndex);
+            if (noReturn) {
+                visitor.visitInsn(Opcodes.ACONST_NULL);
+            } else {
+                visitor.visitVarInsn(Opcodes.ALOAD, originalResultIndex);
+            }
+            visitor.visitVarInsn(Opcodes.ALOAD, argsIndex);
+            visitor.visitVarInsn(Opcodes.ALOAD, 0);
+            visitor.visitMethodInsn(
+                Opcodes.INVOKEINTERFACE,
+                HANDLER_NAME,
+                AFTER_METHOD.getName(),
+                AFTER_DESCRIPTOR,
+                true
+            );
+            if (!noReturn) {
+                AsmKit.convertObjectTo(visitor, pmInfo.method.getReturnType());
+            }
+        }
+        visitor.visitLabel(labelEnd);
+        AsmKit.visitReturn(visitor, pmInfo.method.getReturnType(), false, false);
+        visitor.visitLabel(labelHandler);
+        {
+            //return (String) aspectHandler.afterThrowing(ex, methods[0], args, this);
+        }
+        int exIndex = argsIndex + 1;
+        // visitor.visitFrame(Opcodes.F_FULL, 3, new Object[]{"xyz/sunqian/common/runtime/aspect/SubSomeCls", "java/lang/String", "[Ljava/lang/Object;"}, 1, new Object[]{"java/lang/Throwable"});
+        // visitor.visitVarInsn(Opcodes.ALOAD, handlerIndex);
+        // visitor.visitFieldInsn(GETFIELD, "xyz/sunqian/common/runtime/aspect/SubSomeCls", "aspectHandler", "Lxyz/sunqian/common/runtime/aspect/AspectHandler;");
+        // visitor.visitVarInsn(ALOAD, 3);
+        // visitor.visitVarInsn(ALOAD, 0);
+        // visitor.visitFieldInsn(GETFIELD, "xyz/sunqian/common/runtime/aspect/SubSomeCls", "methods", "[Ljava/lang/reflect/Method;");
+        // visitor.visitInsn(ICONST_0);
+        // visitor.visitInsn(AALOAD);
+        // visitor.visitVarInsn(ALOAD, 2);
+        // visitor.visitVarInsn(ALOAD, 0);
+        // visitor.visitMethodInsn(INVOKEINTERFACE, "xyz/sunqian/common/runtime/aspect/AspectHandler", "afterThrowing", "(Ljava/lang/Throwable;Ljava/lang/reflect/Method;[Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", true);
+        // visitor.visitTypeInsn(CHECKCAST, "java/lang/String");
+        // visitor.visitInsn(ARETURN);
+        // visitor.visitMaxs(5, 4);
+        // visitor.visitEnd();
+
 
 
 
@@ -723,11 +817,11 @@ public class AsmAspectMaker implements ProxyMaker {
         }
 
         @Override
-        public <T> @Nonnull T newInstance() throws AsmProxyException {
+        public <T> @Nonnull T newInstance() throws AsmAspectException {
             return Jie.uncheck(() -> {
                 Constructor<?> constructor = proxyClass.getConstructor(ProxyHandler.class, Method[].class);
                 return Jie.as(constructor.newInstance(proxyHandler, methods));
-            }, AsmProxyException::new);
+            }, AsmAspectException::new);
         }
 
         @Override
@@ -752,18 +846,18 @@ public class AsmAspectMaker implements ProxyMaker {
     }
 
     /**
-     * This exception is the sub-exception of {@link ProxyException} for <a href="https://asm.ow2.io/">ASM</a> proxy
+     * This exception is the sub-exception of {@link AspectException} for <a href="https://asm.ow2.io/">ASM</a> proxy
      * implementation.
      *
      * @author sunqian
      */
-    public static class AsmProxyException extends ProxyException {
+    public static class AsmAspectException extends AspectException {
         /**
          * Constructs with the cause.
          *
          * @param cause the cause
          */
-        public AsmProxyException(@Nullable Throwable cause) {
+        public AsmAspectException(@Nullable Throwable cause) {
             super(cause);
         }
     }
