@@ -190,12 +190,12 @@ public class AsmAspectMaker implements ProxyMaker {
             pcInfo.proxySuperName,
             pcInfo.proxyInterfaces
         );
-        classWriter.visitInnerClass(
-            pcInfo.innerName,
-            pcInfo.proxyName,
-            pcInfo.innerSimpleName,
-            Opcodes.ACC_PRIVATE
-        );
+        // classWriter.visitInnerClass(
+        //     pcInfo.innerName,
+        //     pcInfo.proxyName,
+        //     pcInfo.innerSimpleName,
+        //     Opcodes.ACC_PRIVATE
+        // );
         {
             FieldVisitor visitor = classWriter.visitField(
                 Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL,
@@ -216,16 +216,16 @@ public class AsmAspectMaker implements ProxyMaker {
             );
             visitor.visitEnd();
         }
-        {
-            FieldVisitor visitor = classWriter.visitField(
-                Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL,
-                "invokers",
-                INVOKERS_DESCRIPTOR,
-                null,
-                null
-            );
-            visitor.visitEnd();
-        }
+        // {
+        //     FieldVisitor visitor = classWriter.visitField(
+        //         Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL,
+        //         "invokers",
+        //         INVOKERS_DESCRIPTOR,
+        //         null,
+        //         null
+        //     );
+        //     visitor.visitEnd();
+        // }
         {
             MethodVisitor visitor = classWriter.visitMethod(
                 Opcodes.ACC_PUBLIC,
@@ -248,11 +248,11 @@ public class AsmAspectMaker implements ProxyMaker {
             visitor.visitVarInsn(Opcodes.ALOAD, 0);
             visitor.visitVarInsn(Opcodes.ALOAD, 2);
             visitor.visitFieldInsn(Opcodes.PUTFIELD, pcInfo.proxyName, "methods", METHODS_DESCRIPTOR);
-            visitor.visitVarInsn(Opcodes.ALOAD, 0);
-            visitor.visitVarInsn(Opcodes.ALOAD, 2);
-            visitor.visitInsn(Opcodes.ARRAYLENGTH);
-            visitor.visitTypeInsn(Opcodes.ANEWARRAY, INVOKER_NAME);
-            visitor.visitFieldInsn(Opcodes.PUTFIELD, pcInfo.proxyName, "invokers", INVOKERS_DESCRIPTOR);
+            // visitor.visitVarInsn(Opcodes.ALOAD, 0);
+            // visitor.visitVarInsn(Opcodes.ALOAD, 2);
+            // visitor.visitInsn(Opcodes.ARRAYLENGTH);
+            // visitor.visitTypeInsn(Opcodes.ANEWARRAY, INVOKER_NAME);
+            // visitor.visitFieldInsn(Opcodes.PUTFIELD, pcInfo.proxyName, "invokers", INVOKERS_DESCRIPTOR);
             visitor.visitInsn(Opcodes.RETURN);
             visitor.visitMaxs(0, 0);
             visitor.visitEnd();
@@ -260,7 +260,7 @@ public class AsmAspectMaker implements ProxyMaker {
         int i = 0;
         for (ProxyMethodInfo pmInfo : pcInfo.methods) {
             generateProxyMethod(classWriter, pcInfo, pmInfo, i);
-            generateSuperInvoker(classWriter, pmInfo);
+            //generateSuperInvoker(classWriter, pmInfo);
             i++;
         }
         classWriter.visitEnd();
@@ -280,6 +280,83 @@ public class AsmAspectMaker implements ProxyMaker {
             pmInfo.signature,
             pmInfo.exceptions
         );
+        Label labelStart = new Label();
+        Label labelEnd = new Label();
+        Label labelHandler = new Label();
+        visitor.visitTryCatchBlock(labelStart, labelEnd, labelHandler, "java/lang/Throwable");
+        int argsIndex = 0;
+        {
+            // Object[] args = new Object[]{a};
+            AsmKit.loadConst(visitor, pmInfo.method.getParameterCount());
+            visitor.visitTypeInsn(Opcodes.ANEWARRAY, AsmKit.OBJECT_NAME);
+            int aIndex = 0;
+            int pIndex = 1;
+            for (Parameter parameter : pmInfo.method.getParameters()) {
+                // args[i] = param[i]
+                visitor.visitInsn(Opcodes.DUP);
+                AsmKit.loadConst(visitor, aIndex++);
+                AsmKit.loadVar(visitor, parameter.getType(), pIndex);
+                AsmKit.wrapToObject(visitor, parameter.getType());
+                visitor.visitInsn(Opcodes.AASTORE);
+                pIndex += AsmKit.varSize(parameter.getType());
+            }
+            argsIndex = pIndex;
+            visitor.visitVarInsn(Opcodes.ASTORE, argsIndex);
+        }
+        visitor.visitLabel(labelStart);
+        {
+            //aspectHandler.beforeInvoking(methods[0], args, this);
+            visitor.visitVarInsn(Opcodes.ALOAD, 0);
+            visitor.visitFieldInsn(Opcodes.GETFIELD, "xyz/sunqian/common/runtime/aspect/SubSomeCls", "aspectHandler", "Lxyz/sunqian/common/runtime/aspect/AspectHandler;");
+            visitor.visitVarInsn(Opcodes.ALOAD, 0);
+            visitor.visitFieldInsn(Opcodes.GETFIELD, "xyz/sunqian/common/runtime/aspect/SubSomeCls", "methods", "[Ljava/lang/reflect/Method;");
+            AsmKit.loadConst(visitor, i);
+            visitor.visitInsn(Opcodes.AALOAD);
+            visitor.visitVarInsn(Opcodes.ALOAD, argsIndex);
+            visitor.visitVarInsn(Opcodes.ALOAD, 0);
+            visitor.visitMethodInsn(Opcodes.INVOKEINTERFACE, "xyz/sunqian/common/runtime/aspect/AspectHandler", "beforeInvoking", "(Ljava/lang/reflect/Method;[Ljava/lang/Object;Ljava/lang/Object;)V", true);
+        }
+        // {
+        //     // String ret = super.s1((String) args[0]);
+        //     visitor.visitVarInsn(Opcodes.ALOAD, 0);
+        //     methodVisitor.visitVarInsn(ALOAD, 2);
+        //     methodVisitor.visitInsn(ICONST_0);
+        //     methodVisitor.visitInsn(AALOAD);
+        //     methodVisitor.visitTypeInsn(CHECKCAST, "java/lang/String");
+        //     methodVisitor.visitMethodInsn(INVOKESPECIAL, "xyz/sunqian/common/runtime/aspect/SomeCls", "s1", "(Ljava/lang/String;)Ljava/lang/String;", false);
+        //     methodVisitor.visitVarInsn(ASTORE, 3);
+        // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         // ProxyInvoker invoker = invokers[i];
         visitor.visitVarInsn(Opcodes.ALOAD, 0);
         visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.proxyName, "invokers", INVOKERS_DESCRIPTOR);
