@@ -3,6 +3,7 @@ package xyz.sunqian.common.runtime.proxy;
 import xyz.sunqian.annotations.JdkDependent;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.system.JvmKit;
@@ -45,9 +46,9 @@ public class JdkProxyMaker implements ProxyMaker {
     private static final @Nonnull Object @Nonnull [] EMPTY_ARGS = {};
 
     @Override
-    public @Nonnull ProxyFactory make(
+    public @Nonnull ProxySpec make(
         @Nullable Class<?> proxiedClass,
-        @Nonnull List<@Nonnull Class<?>> interfaces,
+        @Nonnull @RetainedParam List<@Nonnull Class<?>> interfaces,
         @Nonnull ProxyHandler proxyHandler
     ) throws ProxyException {
         Class<?> proxyClass = Proxy.getProxyClass(
@@ -74,12 +75,12 @@ public class JdkProxyMaker implements ProxyMaker {
                 }
             }
         }
-        InvocationHandler handler = makeInvocationHandler(
+        InvocationHandler invocationHandler = makeInvocationHandler(
             proxyHandler,
             new HashMap<>(proxiedMethods),
             new HashMap<>(unproxiedMethods)
         );
-        return new JdkProxyFactory(proxyClass, handler);
+        return new JdkProxySpec(proxyClass, interfaces, proxyHandler, invocationHandler);
     }
 
     private static @Nonnull InvocationHandler makeInvocationHandler(
@@ -130,30 +131,51 @@ public class JdkProxyMaker implements ProxyMaker {
         }
     }
 
-    private static final class JdkProxyFactory implements ProxyFactory {
+    private static final class JdkProxySpec implements ProxySpec {
 
         private final @Nonnull Class<?> proxyClass;
-        private final @Nonnull InvocationHandler handler;
+        private final @Nonnull List<@Nonnull Class<?>> proxiedInterfaces;
+        private final @Nonnull ProxyHandler proxyHandler;
+        private final @Nonnull InvocationHandler invocationHandler;
 
-        private JdkProxyFactory(
+        private JdkProxySpec(
             @Nonnull Class<?> proxyClass,
-            @Nonnull InvocationHandler handler
+            @Nonnull List<@Nonnull Class<?>> proxiedInterfaces,
+            @Nonnull ProxyHandler proxyHandler,
+            @Nonnull InvocationHandler invocationHandler
         ) {
             this.proxyClass = proxyClass;
-            this.handler = handler;
+            this.proxiedInterfaces = proxiedInterfaces;
+            this.proxyHandler = proxyHandler;
+            this.invocationHandler = invocationHandler;
         }
 
         @Override
         public <T> @Nonnull T newInstance() throws JdkProxyException {
             return Jie.uncheck(() -> {
                 Constructor<?> constructor = proxyClass.getConstructor(InvocationHandler.class);
-                return Jie.as(constructor.newInstance(handler));
+                return Jie.as(constructor.newInstance(invocationHandler));
             }, JdkProxyException::new);
         }
 
         @Override
         public @Nonnull Class<?> proxyClass() {
             return proxyClass;
+        }
+
+        @Override
+        public @Nonnull Class<?> proxiedClass() {
+            return Object.class;
+        }
+
+        @Override
+        public @Nonnull List<@Nonnull Class<?>> proxiedInterfaces() {
+            return proxiedInterfaces;
+        }
+
+        @Override
+        public @Nonnull ProxyHandler proxyHandler() {
+            return proxyHandler;
         }
     }
 

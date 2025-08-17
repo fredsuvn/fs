@@ -8,10 +8,10 @@ import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.value.BooleanVar;
 import xyz.sunqian.common.base.value.IntVar;
 import xyz.sunqian.common.runtime.proxy.AsmProxyMaker;
-import xyz.sunqian.common.runtime.proxy.ProxyFactory;
 import xyz.sunqian.common.runtime.proxy.ProxyHandler;
 import xyz.sunqian.common.runtime.proxy.ProxyInvoker;
 import xyz.sunqian.common.runtime.proxy.ProxyMaker;
+import xyz.sunqian.common.runtime.proxy.ProxySpec;
 import xyz.sunqian.test.PrintTest;
 
 import java.lang.reflect.Constructor;
@@ -32,21 +32,21 @@ public class AsmProxyTest implements PrintTest {
         IntVar counter = IntVar.of(0);
         {
             // InterA
-            ProxyFactory pc = generateProxy(null, Jie.list(InterA.class), counter);
+            ProxySpec pc = generateProxy(null, Jie.list(InterA.class), counter);
             InterA a = pc.newInstance();
             testInterA(a, counter);
             counter.clear();
         }
         {
             // InterB
-            ProxyFactory pc = generateProxy(null, Jie.list(InterB.class), counter);
+            ProxySpec pc = generateProxy(null, Jie.list(InterB.class), counter);
             InterB b = pc.newInstance();
             testInterB(b, counter);
             counter.clear();
         }
         {
             // InterC
-            ProxyFactory pc = generateProxy(null, Jie.list(InterC.class), counter);
+            ProxySpec pc = generateProxy(null, Jie.list(InterC.class), counter);
             InterC c1 = pc.newInstance();
             InterC<String> c2 = pc.newInstance();
             testInterC(c1, c2, counter);
@@ -54,25 +54,25 @@ public class AsmProxyTest implements PrintTest {
         }
         {
             // InterD
-            ProxyFactory pc1 = generateProxy(null, Jie.list(InterD.class), counter);
+            ProxySpec pc1 = generateProxy(null, Jie.list(InterD.class), counter);
             InterD d1 = pc1.newInstance();
             testInterD(d1, new ClsD(), counter);
             counter.clear();
-            ProxyFactory pc2 = generateProxy(ClsD.class, Jie.list(), counter);
+            ProxySpec pc2 = generateProxy(ClsD.class, Jie.list(), counter);
             InterD d2 = pc2.newInstance();
             testInterD(d2, new ClsD(), counter);
             counter.clear();
         }
         {
             // ClsA
-            ProxyFactory pc = generateProxy(ClsA.class, Jie.list(), counter);
+            ProxySpec pc = generateProxy(ClsA.class, Jie.list(), counter);
             ClsA a = pc.newInstance();
             testClsA(a, counter);
             counter.clear();
         }
         {
             // ClsB
-            ProxyFactory pc = generateProxy(ClsB.class, Jie.list(), counter);
+            ProxySpec pc = generateProxy(ClsB.class, Jie.list(), counter);
             ClsB b1 = pc.newInstance();
             ClsB<String> b2 = pc.newInstance();
             testClsB(b1, b2, counter);
@@ -80,14 +80,14 @@ public class AsmProxyTest implements PrintTest {
         }
         {
             // ClsC
-            ProxyFactory pc = generateProxy(ClsC.class, Jie.list(), counter);
+            ProxySpec pc = generateProxy(ClsC.class, Jie.list(), counter);
             ClsC c = pc.newInstance();
             testClsC(c, counter);
             counter.clear();
         }
         {
             // ClsA, InterA, InterB, InterC
-            ProxyFactory pc = generateProxy(ClsA.class, Jie.list(InterA.class, InterB.class, InterC.class), counter);
+            ProxySpec pc = generateProxy(ClsA.class, Jie.list(InterA.class, InterB.class, InterC.class), counter);
             Object obj = pc.newInstance();
             testClsA((ClsA) obj, counter);
             counter.clear();
@@ -100,9 +100,9 @@ public class AsmProxyTest implements PrintTest {
         }
         {
             // SameMethod
-            ProxyMaker generator = ProxyMaker.byAsm();
+            ProxyMaker proxyMaker = ProxyMaker.byAsm();
             BooleanVar isA = BooleanVar.of(false);
-            ProxyFactory pc = generator.make(
+            ProxySpec pc = proxyMaker.make(
                 null, Jie.list(SameMethodA.class, SameMethodB.class),
                 new ProxyHandler() {
 
@@ -167,7 +167,7 @@ public class AsmProxyTest implements PrintTest {
         }
         {
             // test class
-            ProxyFactory pc = generateProxy(ClsC.class, Jie.list(), counter);
+            ProxySpec pc = generateProxy(ClsC.class, Jie.list(), counter);
             Class<?> c = pc.proxyClass();
             Constructor<?>[] constructors = c.getConstructors();
             assertEquals(constructors.length, 1);
@@ -184,9 +184,9 @@ public class AsmProxyTest implements PrintTest {
     public void testProxyInvoker() {
         {
             // invokeSuper
-            ProxyMaker generator = ProxyMaker.byAsm();
+            ProxyMaker proxyMaker = ProxyMaker.byAsm();
             IntVar counter = IntVar.of(0);
-            ProxyFactory pc = generator.make(
+            ProxySpec pc = proxyMaker.make(
                 ClsA.class, Jie.list(DefaultInter.class),
                 new ProxyHandler() {
 
@@ -219,7 +219,7 @@ public class AsmProxyTest implements PrintTest {
         }
         {
             // invoke
-            ProxyMaker generator = ProxyMaker.byAsm();
+            ProxyMaker proxyMaker = ProxyMaker.byAsm();
             IntVar counter = IntVar.of(0);
             class ClaAProxy extends ClsA implements DefaultInter {
                 @Override
@@ -233,7 +233,7 @@ public class AsmProxyTest implements PrintTest {
                 }
             }
             ClaAProxy manProxy = new ClaAProxy();
-            ProxyFactory pc = generator.make(
+            ProxySpec pc = proxyMaker.make(
                 ClsA.class, Jie.list(DefaultInter.class),
                 new ProxyHandler() {
 
@@ -267,8 +267,8 @@ public class AsmProxyTest implements PrintTest {
         }
         {
             // stack overflow
-            ProxyMaker generator = ProxyMaker.byAsm();
-            ProxyFactory pc = generator.make(
+            ProxyMaker proxyMaker = ProxyMaker.byAsm();
+            ProxySpec pc = proxyMaker.make(
                 ClsA.class, Jie.list(DefaultInter.class),
                 new ProxyHandler() {
 
@@ -296,8 +296,8 @@ public class AsmProxyTest implements PrintTest {
         }
         {
             // throws directly
-            ProxyMaker generator = ProxyMaker.byAsm();
-            ProxyFactory pc1 = generator.make(
+            ProxyMaker proxyMaker = ProxyMaker.byAsm();
+            ProxySpec pc1 = proxyMaker.make(
                 ClsA.class, Jie.list(DefaultInter.class),
                 new ProxyHandler() {
 
@@ -322,7 +322,7 @@ public class AsmProxyTest implements PrintTest {
             expectThrows(ProxyTestException.class, () -> a1.a1(""));
             DefaultInter s1 = pc1.newInstance();
             expectThrows(ProxyTestException.class, () -> s1.defaultInt(1));
-            ProxyFactory pc2 = generator.make(
+            ProxySpec pc2 = proxyMaker.make(
                 ClsA.class, Jie.list(DefaultInter.class),
                 new ProxyHandler() {
 
@@ -350,9 +350,9 @@ public class AsmProxyTest implements PrintTest {
         }
         {
             // indirect super: A extends B extends C: A super-> C
-            ProxyMaker generator = ProxyMaker.byAsm();
+            ProxyMaker proxyMaker = ProxyMaker.byAsm();
             ClsD cd = new ClsD();
-            ProxyFactory pc1 = generator.make(
+            ProxySpec pc1 = proxyMaker.make(
                 ClsD.class, Jie.list(),
                 new ProxyHandler() {
 
@@ -378,7 +378,7 @@ public class AsmProxyTest implements PrintTest {
                 cd.b3(true, (byte) 1, (short) 2, (char) 3, 4, 5, 6, 7, "8")
             );
             ClsE ce = new ClsE();
-            ProxyFactory pc2 = generator.make(
+            ProxySpec pc2 = proxyMaker.make(
                 ClsE.class, Jie.list(),
                 new ProxyHandler() {
 
@@ -404,7 +404,7 @@ public class AsmProxyTest implements PrintTest {
                 ce.b3(true, (byte) 1, (short) 2, (char) 3, 4, 5, 6, 7, "8")
             );
             InterE ie = new ClsE();
-            ProxyFactory pc3 = generator.make(
+            ProxySpec pc3 = proxyMaker.make(
                 null, Jie.list(InterE.class),
                 new ProxyHandler() {
 
@@ -434,8 +434,8 @@ public class AsmProxyTest implements PrintTest {
             // invoke filtered
             class F extends ClsA implements InterC {
             }
-            ProxyMaker generator = ProxyMaker.byAsm();
-            ProxyFactory pc = generator.make(
+            ProxyMaker proxyMaker = ProxyMaker.byAsm();
+            ProxySpec pc = proxyMaker.make(
                 ClsA.class, Jie.list(InterC.class),
                 new ProxyHandler() {
 
@@ -468,7 +468,7 @@ public class AsmProxyTest implements PrintTest {
     @Test
     public void testBigParameters() throws Exception {
         IntVar counter = IntVar.of(0);
-        ProxyFactory pc = generateProxy(LotsOfMethods.class, Jie.list(), counter);
+        ProxySpec pc = generateProxy(LotsOfMethods.class, Jie.list(), counter);
         LotsOfMethods proxy = pc.newInstance();
         LotsOfMethods inst = new LotsOfMethods();
         List<Method> methods = Jie.stream(inst.getClass().getMethods())
@@ -485,8 +485,8 @@ public class AsmProxyTest implements PrintTest {
 
     @Test
     public void testOverpass() {
-        ProxyMaker generator = ProxyMaker.byAsm();
-        ProxyFactory pc = generator.make(
+        ProxyMaker proxyMaker = ProxyMaker.byAsm();
+        ProxySpec pc = proxyMaker.make(
             ClsOverpass3.class, Jie.list(InterOverpass3.class),
             new ProxyHandler() {
 
@@ -714,30 +714,32 @@ public class AsmProxyTest implements PrintTest {
         assertEquals(counter.get(), 8);
     }
 
-    private ProxyFactory generateProxy(Class<?> superclass, List<Class<?>> interfaces, IntVar counter) {
-        ProxyMaker generator = ProxyMaker.byAsm();
-        return generator.make(
-            superclass, interfaces,
-            new ProxyHandler() {
+    private ProxySpec generateProxy(Class<?> superclass, List<Class<?>> interfaces, IntVar counter) {
+        ProxyMaker proxyMaker = ProxyMaker.byAsm();
+        ProxyHandler proxyHandler = new ProxyHandler() {
 
-                @Override
-                public boolean shouldProxyMethod(@Nonnull Method method) {
-                    return true;
-                }
-
-                @Override
-                public @Nullable Object invoke(
-                    @Nonnull Object proxy,
-                    @Nonnull Method method,
-                    @Nonnull ProxyInvoker invoker,
-                    @Nullable Object @Nonnull ... args
-                ) throws Throwable {
-                    // printFor("proxy method: " + method);
-                    counter.incrementAndGet();
-                    return invoker.invokeSuper(proxy, args);
-                }
+            @Override
+            public boolean shouldProxyMethod(@Nonnull Method method) {
+                return true;
             }
-        );
+
+            @Override
+            public @Nullable Object invoke(
+                @Nonnull Object proxy,
+                @Nonnull Method method,
+                @Nonnull ProxyInvoker invoker,
+                @Nullable Object @Nonnull ... args
+            ) throws Throwable {
+                // printFor("proxy method: " + method);
+                counter.incrementAndGet();
+                return invoker.invokeSuper(proxy, args);
+            }
+        };
+        ProxySpec spec = proxyMaker.make(superclass, interfaces, proxyHandler);
+        assertEquals(spec.proxiedClass(), superclass == null ? Object.class : superclass);
+        assertEquals(spec.proxiedInterfaces(), interfaces);
+        assertEquals(spec.proxyHandler(), proxyHandler);
+        return spec;
     }
 
     public interface InterA {

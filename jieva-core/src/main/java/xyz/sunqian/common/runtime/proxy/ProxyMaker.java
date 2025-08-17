@@ -2,6 +2,7 @@ package xyz.sunqian.common.runtime.proxy;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.annotations.ThreadSafe;
 
 import java.util.List;
@@ -34,19 +35,19 @@ public interface ProxyMaker {
     }
 
     /**
-     * Creates a new {@link ProxyFactory} instance for the specified proxied class and interfaces, with the specified
-     * proxy handler.
+     * Creates a new {@link ProxySpec} instance for the specified proxied class and interfaces, with the specified proxy
+     * handler.
      *
      * @param proxiedClass the specified class to be proxied, may be {@code null} if it is {@link Object}
-     * @param interfaces   the interfaces to be proxied, may be empty
+     * @param interfaces   the interfaces to be proxied, may be empty (note it is annotated by {@link RetainedParam})
      * @param proxyHandler the specified proxy handler
-     * @return a new {@link ProxyFactory} instance to create proxy instances
+     * @return a new {@link ProxySpec} instance to create proxy instances
      * @throws ProxyException if any problem occurs during creation
      */
     @Nonnull
-    ProxyFactory make(
+    ProxySpec make(
         @Nullable Class<?> proxiedClass,
-        @Nonnull List<@Nonnull Class<?>> interfaces,
+        @Nonnull @RetainedParam List<@Nonnull Class<?>> interfaces,
         @Nonnull ProxyHandler proxyHandler
     ) throws ProxyException;
 }

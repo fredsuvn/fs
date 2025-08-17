@@ -7,6 +7,7 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.system.JvmKit;
@@ -31,7 +32,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * <p>
  * This implementation uses inheritance to implement proxy, just like the keywords: {@code extends} and
  * {@code implements}. That means the superclass, which is the proxied class, cannot be {@code final} and must be
- * inheritable, and must have an empty constructor to ensure that the {@link ProxyFactory#newInstance()} can execute
+ * inheritable, and must have an empty constructor to ensure that the {@link ProxySpec#newInstance()} can execute
  * correctly.
  * <p>
  * When the {@link #make(Class, List, ProxyHandler)} is called, and if there are methods with the same name and JVM
@@ -73,9 +74,9 @@ public class AsmProxyMaker implements ProxyMaker {
     private static final @Nonnull AtomicLong classCounter = new AtomicLong();
 
     @Override
-    public @Nonnull ProxyFactory make(
+    public @Nonnull ProxySpec make(
         @Nullable Class<?> proxiedClass,
-        @Nonnull List<@Nonnull Class<?>> interfaces,
+        @Nonnull @RetainedParam List<@Nonnull Class<?>> interfaces,
         @Nonnull ProxyHandler proxyHandler
     ) throws AsmProxyException {
         try {
@@ -134,8 +135,10 @@ public class AsmProxyMaker implements ProxyMaker {
             BytesClassLoader loader = new BytesClassLoader();
             Class<?> proxyClass = loader.loadClass(null, proxyClassBytes);
             loader.loadClass(null, invokerClassBytes);
-            return new AsmProxyFactory(
+            return new AsmProxySpec(
                 proxyClass,
+                proxySuperClass,
+                interfaces,
                 proxyHandler,
                 proxiedMethodMap.keySet().toArray(new Method[0])
             );
@@ -614,19 +617,25 @@ public class AsmProxyMaker implements ProxyMaker {
         }
     }
 
-    private static final class AsmProxyFactory implements ProxyFactory {
+    private static final class AsmProxySpec implements ProxySpec {
 
         private final @Nonnull Class<?> proxyClass;
-        private final @Nonnull ProxyHandler handler;
+        private final @Nonnull Class<?> proxiedClass;
+        private final @Nonnull List<@Nonnull Class<?>> proxiedInterfaces;
+        private final @Nonnull ProxyHandler proxyHandler;
         private final @Nonnull Method @Nonnull [] methods;
 
-        private AsmProxyFactory(
+        private AsmProxySpec(
             @Nonnull Class<?> proxyClass,
-            @Nonnull ProxyHandler handler,
+            @Nonnull Class<?> proxiedClass,
+            @Nonnull List<@Nonnull Class<?>> proxiedInterfaces,
+            @Nonnull ProxyHandler proxyHandler,
             @Nonnull Method @Nonnull [] methods
         ) {
             this.proxyClass = proxyClass;
-            this.handler = handler;
+            this.proxiedClass = proxiedClass;
+            this.proxiedInterfaces = proxiedInterfaces;
+            this.proxyHandler = proxyHandler;
             this.methods = methods;
         }
 
@@ -634,13 +643,28 @@ public class AsmProxyMaker implements ProxyMaker {
         public <T> @Nonnull T newInstance() throws AsmProxyException {
             return Jie.uncheck(() -> {
                 Constructor<?> constructor = proxyClass.getConstructor(ProxyHandler.class, Method[].class);
-                return Jie.as(constructor.newInstance(handler, methods));
+                return Jie.as(constructor.newInstance(proxyHandler, methods));
             }, AsmProxyException::new);
         }
 
         @Override
         public @Nonnull Class<?> proxyClass() {
             return proxyClass;
+        }
+
+        @Override
+        public @Nonnull Class<?> proxiedClass() {
+            return proxiedClass;
+        }
+
+        @Override
+        public @Nonnull List<@Nonnull Class<?>> proxiedInterfaces() {
+            return proxiedInterfaces;
+        }
+
+        @Override
+        public @Nonnull ProxyHandler proxyHandler() {
+            return proxyHandler;
         }
     }
 

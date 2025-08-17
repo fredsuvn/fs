@@ -9,10 +9,10 @@ import xyz.sunqian.common.base.value.IntVar;
 import xyz.sunqian.common.runtime.invoke.Invocable;
 import xyz.sunqian.common.runtime.proxy.JdkProxyMaker;
 import xyz.sunqian.common.runtime.proxy.ProxyException;
-import xyz.sunqian.common.runtime.proxy.ProxyFactory;
 import xyz.sunqian.common.runtime.proxy.ProxyHandler;
 import xyz.sunqian.common.runtime.proxy.ProxyInvoker;
 import xyz.sunqian.common.runtime.proxy.ProxyMaker;
+import xyz.sunqian.common.runtime.proxy.ProxySpec;
 
 import java.lang.reflect.Method;
 
@@ -26,39 +26,42 @@ public class JdkProxyTest {
 
     @Test
     public void testJdkProxy() {
-        ProxyMaker generator = ProxyMaker.byJdk();
+        ProxyMaker proxyMaker = ProxyMaker.byJdk();
         IntVar counter = IntVar.of(0);
         String result = "66666";
         {
-            ProxyFactory pc1 = generator.make(
-                null, Jie.list(InterA.class, InterB.class, InterC.class),
-                new ProxyHandler() {
+            ProxyHandler proxyHandler = new ProxyHandler() {
 
-                    @Override
-                    public boolean shouldProxyMethod(@Nonnull Method method) {
-                        return true;
-                    }
-
-                    @Override
-                    public @Nullable Object invoke(
-                        @Nonnull Object proxy,
-                        @Nonnull Method method,
-                        @Nonnull ProxyInvoker invoker,
-                        @Nullable Object @Nonnull ... args
-                    ) throws Throwable {
-                        counter.incrementAndGet();
-                        return result;
-                    }
+                @Override
+                public boolean shouldProxyMethod(@Nonnull Method method) {
+                    return true;
                 }
+
+                @Override
+                public @Nullable Object invoke(
+                    @Nonnull Object proxy,
+                    @Nonnull Method method,
+                    @Nonnull ProxyInvoker invoker,
+                    @Nullable Object @Nonnull ... args
+                ) throws Throwable {
+                    counter.incrementAndGet();
+                    return result;
+                }
+            };
+            ProxySpec spec = proxyMaker.make(
+                null, Jie.list(InterA.class, InterB.class, InterC.class), proxyHandler
             );
-            assertNotNull(pc1.proxyClass());
-            InterA a = pc1.newInstance();
+            assertEquals(spec.proxiedClass(), Object.class);
+            assertEquals(spec.proxiedInterfaces(), Jie.list(InterA.class, InterB.class, InterC.class));
+            assertEquals(spec.proxyHandler(), proxyHandler);
+            assertNotNull(spec.proxyClass());
+            InterA a = spec.newInstance();
             assertSame(a.aa("11", 11), result);
             assertEquals(counter.get(), 1);
-            InterB b = pc1.newInstance();
+            InterB b = spec.newInstance();
             assertSame(b.bb("11", 11), result);
             assertEquals(counter.get(), 2);
-            InterC c = pc1.newInstance();
+            InterC c = spec.newInstance();
             assertSame(c.cc("11", 11), result);
             assertEquals(counter.get(), 3);
             counter.clear();
@@ -71,7 +74,7 @@ public class JdkProxyTest {
                 }
             }
             Cls cls = new Cls();
-            ProxyFactory pc2 = generator.make(
+            ProxySpec spec = proxyMaker.make(
                 null, Jie.list(InterA.class, InterB.class, InterC.class),
                 new ProxyHandler() {
 
@@ -92,7 +95,7 @@ public class JdkProxyTest {
                     }
                 }
             );
-            InterA pa2 = pc2.newInstance();
+            InterA pa2 = spec.newInstance();
             assertEquals(pa2.aa("11", 11), cls.aa("11", 11));
             counter.clear();
         }
@@ -104,7 +107,7 @@ public class JdkProxyTest {
                 }
             }
             Cls cls = new Cls();
-            ProxyFactory pc3 = generator.make(
+            ProxySpec spec = proxyMaker.make(
                 null, Jie.list(InterA.class, InterB.class, InterC.class),
                 new ProxyHandler() {
 
@@ -125,9 +128,9 @@ public class JdkProxyTest {
                     }
                 }
             );
-            InterA paA = pc3.newInstance();
-            InterB paB = pc3.newInstance();
-            InterC paC = pc3.newInstance();
+            InterA paA = spec.newInstance();
+            InterB paB = spec.newInstance();
+            InterC paC = spec.newInstance();
             expectThrows(StackOverflowError.class, () -> paA.aa("11", 11));
             expectThrows(StackOverflowError.class, () -> paB.bb("11", 11));
             expectThrows(StackOverflowError.class, () -> paC.cc("11", 11));
@@ -142,7 +145,7 @@ public class JdkProxyTest {
             counter.clear();
         }
         {
-            ProxyFactory pc4 = generator.make(
+            ProxySpec spec = proxyMaker.make(
                 null, Jie.list(InterOverpass1.class, InterOverpass2.class, InterOverpass3.class),
                 new ProxyHandler() {
 
@@ -163,7 +166,7 @@ public class JdkProxyTest {
                     }
                 }
             );
-            InterOverpass1 po = pc4.newInstance();
+            InterOverpass1 po = spec.newInstance();
             assertNull(po.ooi("11", 11));
             assertEquals(counter.get(), 1);
             counter.clear();
@@ -172,7 +175,7 @@ public class JdkProxyTest {
 
     @Test
     public void testInvokeSuper() throws Exception {
-        ProxyMaker generator = ProxyMaker.byJdk();
+        ProxyMaker proxyMaker = ProxyMaker.byJdk();
         IntVar counter = IntVar.of(0);
         SuperInter si = new SuperInter() {
             @Override
@@ -180,7 +183,7 @@ public class JdkProxyTest {
                 return "";
             }
         };
-        ProxyFactory pc = generator.make(
+        ProxySpec pc = proxyMaker.make(
             null, Jie.list(SuperInter.class),
             new ProxyHandler() {
 
@@ -217,10 +220,10 @@ public class JdkProxyTest {
 
     @Test
     public void testSameMethod() {
-        ProxyMaker generator = ProxyMaker.byJdk();
+        ProxyMaker proxyMaker = ProxyMaker.byJdk();
         IntVar counter = IntVar.of(0);
         BooleanVar isA = BooleanVar.of(false);
-        ProxyFactory pc = generator.make(
+        ProxySpec pc = proxyMaker.make(
             null, Jie.list(SameMethodA.class, SameMethodB.class),
             new ProxyHandler() {
 

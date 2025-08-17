@@ -4,7 +4,7 @@ import org.testng.annotations.Test;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.runtime.proxy.ProxyFactory;
+import xyz.sunqian.common.runtime.proxy.ProxySpec;
 import xyz.sunqian.common.runtime.proxy.ProxyHandler;
 import xyz.sunqian.common.runtime.proxy.ProxyInvoker;
 import xyz.sunqian.common.runtime.proxy.ProxyMaker;
@@ -24,7 +24,7 @@ public class ProxyTest {
 
     private void testProxy(ProxyMaker maker) throws Exception {
         String result = "ssssssss";
-        ProxyFactory pc = maker.make(null, Jie.list(InterA.class), new ProxyHandler() {
+        ProxySpec pc = maker.make(null, Jie.list(InterA.class), new ProxyHandler() {
 
             @Override
             public boolean shouldProxyMethod(@Nonnull Method method) {
