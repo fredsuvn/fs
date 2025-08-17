@@ -210,7 +210,7 @@ final class ByAsm {
         for (Parameter parameter : executable.getParameters()) {
             // get args
             visitor.visitVarInsn(Opcodes.ALOAD, 2);
-            AsmKit.loadConst(visitor, pIndex++);
+            AsmKit.visitConst(visitor, pIndex++);
             // get args[pIndex]
             visitor.visitInsn(Opcodes.AALOAD);
             AsmKit.convertObjectTo(visitor, parameter.getType());

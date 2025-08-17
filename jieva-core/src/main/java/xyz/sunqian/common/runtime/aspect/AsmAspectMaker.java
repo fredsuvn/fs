@@ -7,23 +7,16 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.system.JvmKit;
 import xyz.sunqian.common.base.value.IntVar;
 import xyz.sunqian.common.runtime.asm.AsmKit;
-import xyz.sunqian.common.runtime.proxy.ProxyHandler;
-import xyz.sunqian.common.runtime.proxy.ProxyInvoker;
-import xyz.sunqian.common.runtime.proxy.ProxyKit;
-import xyz.sunqian.common.runtime.proxy.ProxyMaker;
-import xyz.sunqian.common.runtime.proxy.ProxySpec;
 import xyz.sunqian.common.runtime.reflect.BytesClassLoader;
-import xyz.sunqian.common.runtime.reflect.ClassKit;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -33,50 +26,24 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * The <a href="https://asm.ow2.io/">ASM</a> implementation for {@link ProxyMaker}. The runtime environment must have
+ * The <a href="https://asm.ow2.io/">ASM</a> implementation for {@link AspectMaker}. The runtime environment must have
  * asm package {@code org.objectweb.asm}.
  * <p>
- * This implementation uses inheritance to implement proxy, just like the keywords: {@code extends} and
- * {@code implements}. That means the superclass, which is the proxied class, cannot be {@code final} and must be
- * inheritable, and must have an empty constructor to ensure that the {@link ProxySpec#newInstance()} can execute
- * correctly.
+ * This implementation uses inheritance to implement proxy, just like the keywords: {@code extends}. That means the
+ * superclass, which is the advised class, cannot be {@code final} and must be inheritable, and must have an empty
+ * constructor to ensure that the {@link AspectSpec#newInstance()} can execute correctly. And only public methods can be
+ * advised and tested by {@link AspectHandler#shouldApplyAspect(Method)}.
  * <p>
- * When the {@link #make(Class, List, ProxyHandler)} is called, and if there are methods with the same name and JVM
- * descriptor, this implementation only passes the first one encountered to the
- * {@link ProxyHandler#shouldProxyMethod(Method)}.
- * <p>
- * Note the generated proxy class is {@code final}.
+ * Note the generated aspect class is {@code final}.
  *
  * @author sunqian
  */
 @ThreadSafe
-public class AsmAspectMaker implements ProxyMaker {
+public class AsmAspectMaker implements AspectMaker {
 
-    private static final @Nonnull String INVOKER_NAME = JvmKit.getInternalName(ProxyInvoker.class);
-    private static final @Nonnull String INVOKERS_DESCRIPTOR = JvmKit.getDescriptor(ProxyInvoker[].class);
     private static final @Nonnull String HANDLER_NAME = JvmKit.getInternalName(AspectHandler.class);
     private static final @Nonnull String HANDLER_DESCRIPTOR = JvmKit.getDescriptor(AspectHandler.class);
     private static final @Nonnull String METHODS_DESCRIPTOR = JvmKit.getDescriptor(Method[].class);
-    private static final @Nonnull String INVOKER_SIMPLE_NAME = "AsmInvoker";
-    private static final @Nonnull String SUPER_INVOKER_NAME_PREFIX = "access$super$";
-    private static final @Nonnull Method HANDLER_INVOKE = Jie.uncheck(
-        () -> ProxyHandler.class.getMethod("invoke", Object.class, Method.class, ProxyInvoker.class, Object[].class),
-        AsmAspectException::new
-    );
-    private static final @Nonnull String HANDLER_INVOKE_DESCRIPTOR = JvmKit.getDescriptor(HANDLER_INVOKE);
-    private static final @Nonnull Method INVOKER_INVOKE = Jie.uncheck(
-        () -> ProxyInvoker.class.getMethod("invoke", Object.class, Object[].class),
-        AsmAspectException::new
-    );
-    private static final @Nonnull String INVOKER_INVOKE_DESCRIPTOR = JvmKit.getDescriptor(INVOKER_INVOKE);
-    private static final @Nonnull String @Nullable [] INVOKER_INVOKE_EXCEPTIONS = AsmKit.getExceptions(INVOKER_INVOKE);
-    private static final @Nonnull Method INVOKER_INVOKE_SUPER = Jie.uncheck(
-        () -> ProxyInvoker.class.getMethod("invokeSuper", Object.class, Object[].class),
-        AsmAspectException::new
-    );
-    private static final @Nonnull String INVOKER_INVOKE_SUPER_DESCRIPTOR = JvmKit.getDescriptor(INVOKER_INVOKE_SUPER);
-    private static final @Nonnull String @Nullable [] INVOKER_INVOKE_SUPER_EXCEPTIONS = AsmKit.getExceptions(INVOKER_INVOKE_SUPER);
-
     private static final @Nonnull Method BEFORE_METHOD = Jie.uncheck(
         () -> AspectHandler.class.getMethod("beforeInvoking", Method.class, Object[].class, Object.class),
         AsmAspectException::new
@@ -92,126 +59,110 @@ public class AsmAspectMaker implements ProxyMaker {
         AsmAspectException::new
     );
     private static final @Nonnull String THROW_DESCRIPTOR = JvmKit.getDescriptor(THROW_METHOD);
+    private static final @Nonnull String METHOD_NAME = JvmKit.getInternalName(Method.class);
+    private static final @Nonnull String ARGS_NAME = JvmKit.getInternalName(Object[].class);
 
     private static final @Nonnull AtomicLong classCounter = new AtomicLong();
 
     @Override
-    public @Nonnull ProxySpec make(
-        @Nullable Class<?> proxiedClass,
-        @Nonnull @RetainedParam List<@Nonnull Class<?>> interfaces,
-        @Nonnull ProxyHandler proxyHandler
+    public @Nonnull AspectSpec make(
+        @Nonnull Class<?> advisedClass,
+        @Nonnull AspectHandler aspectHandler
     ) throws AsmAspectException {
         try {
             Package pkg = AsmAspectMaker.class.getPackage();
-            // proxy class internal name
-            String proxyName = pkg.getName().replace('.', '/')
+            // aspect class internal name
+            String aspectName = pkg.getName().replace('.', '/')
                 + "/" + AsmKit.generateClassSimpleName(classCounter.incrementAndGet());
-            // proxy class descriptor
-            String proxyDescriptor = "L" + proxyName + ";";
-            // proxy class's superclass, which is the proxied class
-            Class<?> proxySuperClass = proxiedClass == null ? Object.class : proxiedClass;
-            String proxySuperName = JvmKit.getInternalName(proxySuperClass);
-            // proxy class's interfaces, which is the proxied interfaces
-            String[] proxyInterfaces = {};
-            if (!interfaces.isEmpty()) {
-                proxyInterfaces = interfaces.stream().map(JvmKit::getInternalName).toArray(String[]::new);
-            }
-            // ProxyInvoker's class internal name (inner class's simple name)
-            String invokerSimpleName = INVOKER_SIMPLE_NAME;
-            String invokerName = proxyName + "$" + invokerSimpleName;
-            // proxied methods
-            Map<Method, ProxyMethodInfo> proxiedMethodMap = new LinkedHashMap<>();
-            Map<Class<?>, List<Method>> proxiableMethods = ProxyKit.getProxiableMethods(
-                proxiedClass,
-                interfaces,
-                proxyHandler
-            );
+            // aspect class descriptor
+            // String aspectDescriptor = "L" + aspectName + ";";
+            String advisedName = JvmKit.getInternalName(advisedClass);
+            // advised methods
+            Map<Method, AspectMethodInfo> advisedMethodMap = new LinkedHashMap<>();
             IntVar methodCount = IntVar.of(0);
-            proxiableMethods.forEach((type, methods) -> {
-                String ownerName = JvmKit.getInternalName(type);
-                for (Method method : methods) {
-                    proxiedMethodMap.put(
-                        method,
-                        buildProxyMethodInfo(
-                            method,
-                            ownerName,
-                            proxyDescriptor,
-                            type.isInterface(),
-                            methodCount.getAndIncrement()
-                        )
-                    );
+            for (Method method : advisedClass.getMethods()) {
+                if (!canOverride(method)) {
+                    continue;
                 }
-            });
-            ProxyClassInfo pcInfo = new ProxyClassInfo(
-                proxyName,
-                proxyDescriptor,
-                proxySuperName,
-                proxyInterfaces,
-                invokerSimpleName,
-                invokerName,
-                new ArrayList<>(proxiedMethodMap.values())
+                if (!aspectHandler.shouldApplyAspect(method)) {
+                    continue;
+                }
+                advisedMethodMap.put(
+                    method,
+                    buildAspectMethodInfo(
+                        method
+                        // advisedName,
+                        // aspectDescriptor,
+                        // methodCount.getAndIncrement()
+                    )
+                );
+            }
+            AspectClassInfo acInfo = new AspectClassInfo(
+                aspectName,
+                // aspectDescriptor,
+                advisedName,
+                new ArrayList<>(advisedMethodMap.values())
             );
-            byte[] proxyClassBytes = generateProxyClass(pcInfo);
-            byte[] invokerClassBytes = generateInvokerClass(pcInfo);
+            byte[] aspectClassBytes = generateAspectClass(acInfo);
             // using new class loader to help collect unused classes
             BytesClassLoader loader = new BytesClassLoader();
-            Class<?> proxyClass = loader.loadClass(null, proxyClassBytes);
-            loader.loadClass(null, invokerClassBytes);
-            return new AsmProxySpec(
-                proxyClass,
-                proxySuperClass,
-                interfaces,
-                proxyHandler,
-                proxiedMethodMap.keySet().toArray(new Method[0])
+            Class<?> aspectClass = loader.loadClass(null, aspectClassBytes);
+            return new AsmAspectSpec(
+                aspectClass,
+                advisedClass,
+                aspectHandler,
+                advisedMethodMap.keySet().toArray(new Method[0])
             );
         } catch (Exception e) {
             throw new AsmAspectException(e);
         }
     }
 
-    private @Nonnull ProxyMethodInfo buildProxyMethodInfo(
-        @Nonnull Method method,
-        @Nonnull String ownerName,
-        @Nonnull String proxyDescriptor,
-        boolean isInterface,
-        int methodIndex
+    private boolean canOverride(@Nonnull Method method) {
+        if (method.isBridge()) {
+            return false;
+        }
+        int modifiers = method.getModifiers();
+        if (Modifier.isFinal(modifiers)) {
+            return false;
+        }
+        if (Modifier.isStatic(modifiers)) {
+            return false;
+        }
+        if (Modifier.isPublic(modifiers)) {
+            return true;
+        }
+        return false;
+    }
+
+    private @Nonnull AspectMethodInfo buildAspectMethodInfo(
+        @Nonnull Method method
+        //@Nonnull String ownerName,
+        //@Nonnull String aspectDescriptor,
+        // int methodIndex
     ) {
         String descriptor = JvmKit.getDescriptor(method);
         String signature = JvmKit.getSignature(method);
         String[] exceptions = AsmKit.getExceptions(method);
-        String superInvokerName = SUPER_INVOKER_NAME_PREFIX + methodIndex;// access$001
-        String superInvokerDescriptor = descriptor.replace("(", "(" + proxyDescriptor);
-        String superInvokerSignature =
-            signature == null ? null : signature.replace("(", "(" + proxyDescriptor);
-        return new ProxyMethodInfo(
+        return new AspectMethodInfo(
             method,
-            ownerName,
+            // ownerName,
             descriptor,
             signature,
-            exceptions,
-            superInvokerName,
-            superInvokerDescriptor,
-            superInvokerSignature,
-            isInterface
+            exceptions
         );
     }
 
-    private byte @Nonnull [] generateProxyClass(@Nonnull ProxyClassInfo pcInfo) throws Exception {
+    private byte @Nonnull [] generateAspectClass(@Nonnull AspectClassInfo pcInfo) throws Exception {
         ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         classWriter.visit(
             Opcodes.V1_8,
             Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL | Opcodes.ACC_SUPER,
-            pcInfo.proxyName,
+            pcInfo.aspectName,
             null,
-            pcInfo.proxySuperName,
-            pcInfo.proxyInterfaces
+            pcInfo.advisedName,
+            null
         );
-        // classWriter.visitInnerClass(
-        //     pcInfo.innerName,
-        //     pcInfo.proxyName,
-        //     pcInfo.innerSimpleName,
-        //     Opcodes.ACC_PRIVATE
-        // );
         {
             FieldVisitor visitor = classWriter.visitField(
                 Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL,
@@ -232,16 +183,6 @@ public class AsmAspectMaker implements ProxyMaker {
             );
             visitor.visitEnd();
         }
-        // {
-        //     FieldVisitor visitor = classWriter.visitField(
-        //         Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL,
-        //         "invokers",
-        //         INVOKERS_DESCRIPTOR,
-        //         null,
-        //         null
-        //     );
-        //     visitor.visitEnd();
-        // }
         {
             MethodVisitor visitor = classWriter.visitMethod(
                 Opcodes.ACC_PUBLIC,
@@ -253,79 +194,78 @@ public class AsmAspectMaker implements ProxyMaker {
             visitor.visitVarInsn(Opcodes.ALOAD, 0);
             visitor.visitMethodInsn(
                 Opcodes.INVOKESPECIAL,
-                pcInfo.proxySuperName,
+                pcInfo.advisedName,
                 AsmKit.CONSTRUCTOR_NAME,
                 AsmKit.EMPTY_CONSTRUCTOR_DESCRIPTOR,
                 false
             );
             visitor.visitVarInsn(Opcodes.ALOAD, 0);
             visitor.visitVarInsn(Opcodes.ALOAD, 1);
-            visitor.visitFieldInsn(Opcodes.PUTFIELD, pcInfo.proxyName, "handler", HANDLER_DESCRIPTOR);
+            visitor.visitFieldInsn(Opcodes.PUTFIELD, pcInfo.aspectName, "handler", HANDLER_DESCRIPTOR);
             visitor.visitVarInsn(Opcodes.ALOAD, 0);
             visitor.visitVarInsn(Opcodes.ALOAD, 2);
-            visitor.visitFieldInsn(Opcodes.PUTFIELD, pcInfo.proxyName, "methods", METHODS_DESCRIPTOR);
-            // visitor.visitVarInsn(Opcodes.ALOAD, 0);
-            // visitor.visitVarInsn(Opcodes.ALOAD, 2);
-            // visitor.visitInsn(Opcodes.ARRAYLENGTH);
-            // visitor.visitTypeInsn(Opcodes.ANEWARRAY, INVOKER_NAME);
-            // visitor.visitFieldInsn(Opcodes.PUTFIELD, pcInfo.proxyName, "invokers", INVOKERS_DESCRIPTOR);
+            visitor.visitFieldInsn(Opcodes.PUTFIELD, pcInfo.aspectName, "methods", METHODS_DESCRIPTOR);
             visitor.visitInsn(Opcodes.RETURN);
             visitor.visitMaxs(0, 0);
             visitor.visitEnd();
         }
         int i = 0;
-        for (ProxyMethodInfo pmInfo : pcInfo.methods) {
-            generateProxyMethod(classWriter, pcInfo, pmInfo, i);
-            //generateSuperInvoker(classWriter, pmInfo);
+        for (AspectMethodInfo pmInfo : pcInfo.methods) {
+            generateAspectMethod(classWriter, pcInfo, pmInfo, i);
             i++;
         }
         classWriter.visitEnd();
         return classWriter.toByteArray();
     }
 
-    private void generateProxyMethod(
+    private void generateAspectMethod(
         @Nonnull ClassWriter classWriter,
-        @Nonnull ProxyClassInfo pcInfo,
-        @Nonnull ProxyMethodInfo pmInfo,
+        @Nonnull AspectClassInfo acInfo,
+        @Nonnull AspectMethodInfo amInfo,
         int i
-    ) throws Exception {
+    ) {
         MethodVisitor visitor = classWriter.visitMethod(
             Opcodes.ACC_PUBLIC,
-            pmInfo.method.getName(),
-            pmInfo.descriptor,
-            pmInfo.signature,
-            pmInfo.exceptions
+            amInfo.method.getName(),
+            amInfo.descriptor,
+            amInfo.signature,
+            amInfo.exceptions
         );
+
+        boolean noReturn = Objects.equals(amInfo.method.getReturnType(), void.class);
+        int localSlots = AsmKit.countParamSlots(amInfo.method);
+        int handlerIndex = localSlots + 1;
+        int methodIndex = handlerIndex + 1;
+        int argsIndex = methodIndex + 1;
+        int returnIndex = noReturn ? argsIndex : argsIndex + 1;
+
         Label labelStart = new Label();
         Label labelEnd = new Label();
         Label labelHandler = new Label();
         visitor.visitTryCatchBlock(labelStart, labelEnd, labelHandler, "java/lang/Throwable");
-        int handlerIndex = AsmKit.countParamSlots(pmInfo.method) + 1;
-        int methodIndex = handlerIndex + 1;
         {
             // Handler handler = this.handler;
             // Method method = this.methods[0];
             visitor.visitVarInsn(Opcodes.ALOAD, 0);
-            visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.proxyName, "handler", HANDLER_DESCRIPTOR);
+            visitor.visitFieldInsn(Opcodes.GETFIELD, acInfo.aspectName, "handler", HANDLER_DESCRIPTOR);
             visitor.visitVarInsn(Opcodes.ASTORE, handlerIndex);
             visitor.visitVarInsn(Opcodes.ALOAD, 0);
-            visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.proxyName, "methods", METHODS_DESCRIPTOR);
-            AsmKit.loadConst(visitor, i);
+            visitor.visitFieldInsn(Opcodes.GETFIELD, acInfo.aspectName, "methods", METHODS_DESCRIPTOR);
+            AsmKit.visitConst(visitor, i);
             visitor.visitInsn(Opcodes.AALOAD);
             visitor.visitVarInsn(Opcodes.ASTORE, methodIndex);
         }
-        int argsIndex = methodIndex + 1;
         {
             // Object[] args = new Object[]{a};
-            AsmKit.loadConst(visitor, pmInfo.method.getParameterCount());
+            AsmKit.visitConst(visitor, amInfo.method.getParameterCount());
             visitor.visitTypeInsn(Opcodes.ANEWARRAY, AsmKit.OBJECT_NAME);
             int aIndex = 0;
             int pIndex = 1;
-            for (Parameter parameter : pmInfo.method.getParameters()) {
+            for (Parameter parameter : amInfo.method.getParameters()) {
                 // args[i] = param[i]
                 visitor.visitInsn(Opcodes.DUP);
-                AsmKit.loadConst(visitor, aIndex++);
-                AsmKit.loadVar(visitor, parameter.getType(), pIndex);
+                AsmKit.visitConst(visitor, aIndex++);
+                AsmKit.visitLoad(visitor, parameter.getType(), pIndex);
                 AsmKit.wrapToObject(visitor, parameter.getType());
                 visitor.visitInsn(Opcodes.AASTORE);
                 pIndex += AsmKit.varSize(parameter.getType());
@@ -334,7 +274,7 @@ public class AsmAspectMaker implements ProxyMaker {
         }
         visitor.visitLabel(labelStart);
         {
-            //aspectHandler.beforeInvoking(methods[0], args, this);
+            // aspectHandler.beforeInvoking(methods[0], args, this);
             visitor.visitVarInsn(Opcodes.ALOAD, handlerIndex);
             visitor.visitVarInsn(Opcodes.ALOAD, methodIndex);
             visitor.visitVarInsn(Opcodes.ALOAD, argsIndex);
@@ -347,43 +287,41 @@ public class AsmAspectMaker implements ProxyMaker {
                 true
             );
         }
-        boolean noReturn = Objects.equals(pmInfo.method.getReturnType(), void.class);
-        int returnSlot = AsmKit.varSize(pmInfo.method.getReturnType());
-        int originalResultIndex;
         {
             // String ret = super.s1((String) args[0]);
             visitor.visitVarInsn(Opcodes.ALOAD, 0);
             int pIndex = 0;
-            for (Parameter parameter : pmInfo.method.getParameters()) {
+            for (Parameter parameter : amInfo.method.getParameters()) {
                 // get args
-                visitor.visitVarInsn(Opcodes.ASTORE, argsIndex);
-                AsmKit.loadConst(visitor, pIndex++);
+                visitor.visitVarInsn(Opcodes.ALOAD, argsIndex);
+                AsmKit.visitConst(visitor, pIndex++);
                 // get args[pIndex]
                 visitor.visitInsn(Opcodes.AALOAD);
                 AsmKit.convertObjectTo(visitor, parameter.getType());
             }
             visitor.visitMethodInsn(
                 Opcodes.INVOKESPECIAL,
-                pcInfo.proxySuperName,
-                pmInfo.method.getName(),
-                pmInfo.descriptor,
+                acInfo.advisedName,
+                amInfo.method.getName(),
+                amInfo.descriptor,
                 false
             );
-            if (noReturn) {
-                originalResultIndex = argsIndex;
-            } else {
-                originalResultIndex = argsIndex + 1;
-                visitor.visitVarInsn(Opcodes.ASTORE, originalResultIndex);
+            if (!noReturn) {
+                // visitor.visitVarInsn(Opcodes.ASTORE, returnIndex);
+                AsmKit.visitStore(visitor, amInfo.method.getReturnType(), returnIndex);
             }
         }
         {
-            //return (String) aspectHandler.afterReturning(ret, methods[0], args, this);
+            // return (String) aspectHandler.afterReturning(ret, methods[0], args, this);
             visitor.visitVarInsn(Opcodes.ALOAD, handlerIndex);
             if (noReturn) {
                 visitor.visitInsn(Opcodes.ACONST_NULL);
             } else {
-                visitor.visitVarInsn(Opcodes.ALOAD, originalResultIndex);
+                //visitor.visitVarInsn(Opcodes.ALOAD, returnIndex);
+                AsmKit.visitLoad(visitor, amInfo.method.getReturnType(), returnIndex);
+                // TODO
             }
+            visitor.visitVarInsn(Opcodes.ALOAD, methodIndex);
             visitor.visitVarInsn(Opcodes.ALOAD, argsIndex);
             visitor.visitVarInsn(Opcodes.ALOAD, 0);
             visitor.visitMethodInsn(
@@ -393,455 +331,165 @@ public class AsmAspectMaker implements ProxyMaker {
                 AFTER_DESCRIPTOR,
                 true
             );
-            if (!noReturn) {
-                AsmKit.convertObjectTo(visitor, pmInfo.method.getReturnType());
+            if (noReturn) {
+                visitor.visitInsn(Opcodes.POP);
+            } else {
+                AsmKit.convertObjectTo(visitor, amInfo.method.getReturnType());
             }
         }
         visitor.visitLabel(labelEnd);
-        AsmKit.visitReturn(visitor, pmInfo.method.getReturnType(), false, false);
+        AsmKit.visitReturn(visitor, amInfo.method.getReturnType(), false, false);
         visitor.visitLabel(labelHandler);
         {
-            //return (String) aspectHandler.afterThrowing(ex, methods[0], args, this);
-        }
-        int exIndex = argsIndex + 1;
-        // visitor.visitFrame(Opcodes.F_FULL, 3, new Object[]{"xyz/sunqian/common/runtime/aspect/SubSomeCls", "java/lang/String", "[Ljava/lang/Object;"}, 1, new Object[]{"java/lang/Throwable"});
-        // visitor.visitVarInsn(Opcodes.ALOAD, handlerIndex);
-        // visitor.visitFieldInsn(GETFIELD, "xyz/sunqian/common/runtime/aspect/SubSomeCls", "aspectHandler", "Lxyz/sunqian/common/runtime/aspect/AspectHandler;");
-        // visitor.visitVarInsn(ALOAD, 3);
-        // visitor.visitVarInsn(ALOAD, 0);
-        // visitor.visitFieldInsn(GETFIELD, "xyz/sunqian/common/runtime/aspect/SubSomeCls", "methods", "[Ljava/lang/reflect/Method;");
-        // visitor.visitInsn(ICONST_0);
-        // visitor.visitInsn(AALOAD);
-        // visitor.visitVarInsn(ALOAD, 2);
-        // visitor.visitVarInsn(ALOAD, 0);
-        // visitor.visitMethodInsn(INVOKEINTERFACE, "xyz/sunqian/common/runtime/aspect/AspectHandler", "afterThrowing", "(Ljava/lang/Throwable;Ljava/lang/reflect/Method;[Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", true);
-        // visitor.visitTypeInsn(CHECKCAST, "java/lang/String");
-        // visitor.visitInsn(ARETURN);
-        // visitor.visitMaxs(5, 4);
-        // visitor.visitEnd();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        // ProxyInvoker invoker = invokers[i];
-        visitor.visitVarInsn(Opcodes.ALOAD, 0);
-        visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.proxyName, "invokers", INVOKERS_DESCRIPTOR);
-        AsmKit.loadConst(visitor, i);
-        visitor.visitInsn(Opcodes.AALOAD);
-        int invokerPos = AsmKit.paramSize(pmInfo.method.getParameters()) + 1;
-        visitor.visitVarInsn(Opcodes.ASTORE, invokerPos);
-        visitor.visitVarInsn(Opcodes.ALOAD, invokerPos);
-        // if (invoker == null)
-        Label ifNonnull = new Label();
-        visitor.visitJumpInsn(Opcodes.IFNONNULL, ifNonnull);
-        // new Invoker1(i);
-        visitor.visitTypeInsn(Opcodes.NEW, pcInfo.innerName);
-        // new Invoker1(i).init();
-        visitor.visitInsn(Opcodes.DUP);
-        visitor.visitVarInsn(Opcodes.ALOAD, 0);
-        AsmKit.loadConst(visitor, i);
-        visitor.visitMethodInsn(
-            Opcodes.INVOKESPECIAL,
-            pcInfo.innerName,
-            AsmKit.CONSTRUCTOR_NAME,
-            "(" + pcInfo.proxyDescriptor + "I)V",
-            false
-        );
-        visitor.visitVarInsn(Opcodes.ASTORE, invokerPos);
-        // get invokers
-        visitor.visitVarInsn(Opcodes.ALOAD, 0);
-        visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.proxyName, "invokers", INVOKERS_DESCRIPTOR);
-        // invokers[i] = invoker;
-        AsmKit.loadConst(visitor, i);
-        visitor.visitVarInsn(Opcodes.ALOAD, invokerPos);
-        visitor.visitInsn(Opcodes.AASTORE);
-        // endif
-        visitor.visitLabel(ifNonnull);
-        visitor.visitFrame(Opcodes.F_APPEND, 1, new String[]{INVOKER_NAME}, 0, null);
-        // get handler
-        visitor.visitVarInsn(Opcodes.ALOAD, 0);
-        visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.proxyName, "handler", HANDLER_DESCRIPTOR);
-        // get this
-        visitor.visitVarInsn(Opcodes.ALOAD, 0);
-        // get methods[i]
-        visitor.visitVarInsn(Opcodes.ALOAD, 0);
-        visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.proxyName, "methods", METHODS_DESCRIPTOR);
-        AsmKit.loadConst(visitor, i);
-        visitor.visitInsn(Opcodes.AALOAD);
-        // get invoker
-        visitor.visitVarInsn(Opcodes.ALOAD, invokerPos);
-        // new Object[params.size]
-        AsmKit.loadConst(visitor, pmInfo.method.getParameterCount());
-        visitor.visitTypeInsn(Opcodes.ANEWARRAY, AsmKit.OBJECT_NAME);
-        // set array
-        int aIndex = 0;
-        int pIndex = 1;
-        for (Parameter parameter : pmInfo.method.getParameters()) {
-            // array[i] = param[i]
-            visitor.visitInsn(Opcodes.DUP);
-            AsmKit.loadConst(visitor, aIndex++);
-            AsmKit.loadVar(visitor, parameter.getType(), pIndex);
-            AsmKit.wrapToObject(visitor, parameter.getType());
-            visitor.visitInsn(Opcodes.AASTORE);
-            pIndex += AsmKit.varSize(parameter.getType());
-        }
-        // return handler.invoke(this, methods[0], invoker, args);
-        visitor.visitMethodInsn(
-            Opcodes.INVOKEINTERFACE,
-            HANDLER_NAME,
-            HANDLER_INVOKE.getName(),
-            HANDLER_INVOKE_DESCRIPTOR,
-            true
-        );
-        // object -> primitive/object
-        AsmKit.convertObjectTo(visitor, pmInfo.method.getReturnType());
-        AsmKit.visitReturn(visitor, pmInfo.method.getReturnType(), true, false);
-        visitor.visitMaxs(0, 0);
-        visitor.visitEnd();
-    }
-
-    private void generateSuperInvoker(
-        @Nonnull ClassWriter classWriter,
-        @Nonnull ProxyMethodInfo pmInfo
-    ) {
-        MethodVisitor visitor = classWriter.visitMethod(
-            Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC,
-            pmInfo.superInvokerName,
-            pmInfo.superInvokerDescriptor,
-            pmInfo.superInvokerSignature,
-            pmInfo.exceptions
-        );
-        visitor.visitVarInsn(Opcodes.ALOAD, 0);
-        int pIndex = 1;
-        for (Parameter parameter : pmInfo.method.getParameters()) {
-            AsmKit.loadVar(visitor, parameter.getType(), pIndex);
-            pIndex += AsmKit.varSize(parameter.getType());
-        }
-        visitor.visitMethodInsn(
-            Opcodes.INVOKESPECIAL,
-            pmInfo.ownerName,
-            pmInfo.method.getName(),
-            pmInfo.descriptor,
-            pmInfo.isInterface
-        );
-        AsmKit.visitReturn(visitor, pmInfo.method.getReturnType(), false, false);
-        visitor.visitMaxs(0, 0);
-        visitor.visitEnd();
-    }
-
-    private byte @Nonnull [] generateInvokerClass(@Nonnull ProxyClassInfo pcInfo) {
-        ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-        classWriter.visit(
-            Opcodes.V1_8,
-            Opcodes.ACC_FINAL | Opcodes.ACC_SUPER,
-            pcInfo.innerName,
-            null,
-            AsmKit.OBJECT_NAME,
-            new String[]{INVOKER_NAME}
-        );
-        classWriter.visitInnerClass(
-            pcInfo.innerName,
-            pcInfo.proxyName,
-            pcInfo.innerSimpleName,
-            Opcodes.ACC_PRIVATE
-        );
-        {
-            // int index;
-            FieldVisitor visitor = classWriter.visitField(
-                Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL,
-                "index",
-                "I",
-                null,
-                null
+            // return (String) aspectHandler.afterThrowing(ex, methods[0], args, this);
+            List<Object> localNames = new ArrayList<>(
+                amInfo.method.getParameterCount() + 4 //+ (noReturn ? 0 : 1)
             );
-            visitor.visitEnd();
-        }
-        {
-            // outer class, which is the proxy class;
-            FieldVisitor visitor = classWriter.visitField(
-                Opcodes.ACC_FINAL | Opcodes.ACC_SYNTHETIC,
-                "this$0",
-                pcInfo.proxyDescriptor,
-                null,
-                null);
-            visitor.visitEnd();
-        }
-        {
-            // constructor
-            MethodVisitor visitor = classWriter.visitMethod(
-                0,
-                AsmKit.CONSTRUCTOR_NAME,
-                "(" + pcInfo.proxyDescriptor + "I)V",
-                null,
-                null
+            localNames.add(acInfo.aspectName);
+            for (Parameter parameter : amInfo.method.getParameters()) {
+                localNames.add(toFrameName(parameter.getType()));
+            }
+            localNames.add(HANDLER_NAME);
+            localNames.add(METHOD_NAME);
+            localNames.add(ARGS_NAME);
+            // if (!noReturn) {
+            //     localNames.add(toFrameName(amInfo.method.getReturnType()));
+            // }
+            visitor.visitFrame(
+                Opcodes.F_FULL,
+                localNames.size(),
+                localNames.toArray(),
+                1,
+                new Object[]{"java/lang/Throwable"}
             );
-            visitor.visitVarInsn(Opcodes.ALOAD, 0);
-            visitor.visitVarInsn(Opcodes.ALOAD, 1);
-            visitor.visitFieldInsn(Opcodes.PUTFIELD, pcInfo.innerName, "this$0", pcInfo.proxyDescriptor);
+            int exIndex = argsIndex + 1;
+            visitor.visitVarInsn(Opcodes.ASTORE, exIndex);
+            visitor.visitVarInsn(Opcodes.ALOAD, handlerIndex);
+            visitor.visitVarInsn(Opcodes.ALOAD, exIndex);
+            visitor.visitVarInsn(Opcodes.ALOAD, methodIndex);
+            visitor.visitVarInsn(Opcodes.ALOAD, argsIndex);
             visitor.visitVarInsn(Opcodes.ALOAD, 0);
             visitor.visitMethodInsn(
-                Opcodes.INVOKESPECIAL,
-                AsmKit.OBJECT_NAME,
-                AsmKit.CONSTRUCTOR_NAME,
-                AsmKit.EMPTY_CONSTRUCTOR_DESCRIPTOR,
-                false
+                Opcodes.INVOKEINTERFACE,
+                HANDLER_NAME,
+                THROW_METHOD.getName(),
+                THROW_DESCRIPTOR,
+                true
             );
-            visitor.visitVarInsn(Opcodes.ALOAD, 0);
-            visitor.visitVarInsn(Opcodes.ILOAD, 2);
-            visitor.visitFieldInsn(Opcodes.PUTFIELD, pcInfo.innerName, "index", "I");
-            visitor.visitInsn(Opcodes.RETURN);
+            if (noReturn) {
+                visitor.visitInsn(Opcodes.POP);
+            } else {
+                AsmKit.convertObjectTo(visitor, amInfo.method.getReturnType());
+            }
+            AsmKit.visitReturn(visitor, amInfo.method.getReturnType(), false, false);
             visitor.visitMaxs(0, 0);
             visitor.visitEnd();
-        }
-        {
-            // invoke(Object inst, Object... args);
-            MethodVisitor visitor = classWriter.visitMethod(
-                Opcodes.ACC_PUBLIC | Opcodes.ACC_VARARGS,
-                INVOKER_INVOKE.getName(),
-                INVOKER_INVOKE_DESCRIPTOR,
-                null,
-                INVOKER_INVOKE_EXCEPTIONS
-            );
-            // get index;
-            visitor.visitVarInsn(Opcodes.ALOAD, 0);
-            visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.innerName, "index", "I");
-            // switch (index) {}
-            Label[] labels = new Label[pcInfo.methods.size()];
-            for (int i = 0; i < labels.length; i++) {
-                labels[i] = new Label();
-            }
-            Label labelLast = new Label();
-            visitor.visitTableSwitchInsn(0, pcInfo.methods.size() - 1, labelLast, labels);
-            int i = 0;
-            for (ProxyMethodInfo pmInfo : pcInfo.methods) {
-                Method method = pmInfo.method;
-                String methodOwnerName = pmInfo.ownerName;
-                if (ClassKit.isProtected(method)) {
-                    methodOwnerName = pcInfo.proxyName;
-                }
-                visitor.visitLabel(labels[i++]);
-                visitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
-                // get outer
-                visitor.visitVarInsn(Opcodes.ALOAD, 1);
-                visitor.visitTypeInsn(Opcodes.CHECKCAST, methodOwnerName);
-                // loads args
-                loadParameters(visitor, pmInfo.method);
-                // return outer.invoke(args0, args1...);
-                AsmKit.invokeVirtual(
-                    visitor, methodOwnerName, method.getName(), pmInfo.descriptor, pmInfo.isInterface
-                );
-                Class<?> returnType = AsmKit.wrapToObject(visitor, method.getReturnType());
-                AsmKit.visitReturn(visitor, returnType, false, true);
-            }
-            visitor.visitLabel(labelLast);
-            visitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
-            visitor.visitInsn(Opcodes.ACONST_NULL);
-            visitor.visitInsn(Opcodes.ARETURN);
-            visitor.visitMaxs(0, 0);
-            visitor.visitEnd();
-        }
-        {
-            // invokeSuper(Object inst, Object... args);
-            MethodVisitor visitor = classWriter.visitMethod(
-                Opcodes.ACC_PUBLIC | Opcodes.ACC_VARARGS,
-                INVOKER_INVOKE_SUPER.getName(),
-                INVOKER_INVOKE_SUPER_DESCRIPTOR,
-                null,
-                INVOKER_INVOKE_SUPER_EXCEPTIONS
-            );
-            // get index;
-            visitor.visitVarInsn(Opcodes.ALOAD, 0);
-            visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.innerName, "index", "I");
-            // switch (index) {}
-            Label[] labels = new Label[pcInfo.methods.size()];
-            for (int i = 0; i < labels.length; i++) {
-                labels[i] = new Label();
-            }
-            Label labelLast = new Label();
-            visitor.visitTableSwitchInsn(0, pcInfo.methods.size() - 1, labelLast, labels);
-            int i = 0;
-            for (ProxyMethodInfo pmInfo : pcInfo.methods) {
-                visitor.visitLabel(labels[i++]);
-                visitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
-                // get outer
-                visitor.visitVarInsn(Opcodes.ALOAD, 1);
-                visitor.visitTypeInsn(Opcodes.CHECKCAST, pcInfo.proxyName);
-                // loads args
-                loadParameters(visitor, pmInfo.method);
-                // return outer.invoke(inst, args0, args1...);
-                visitor.visitMethodInsn(
-                    Opcodes.INVOKESTATIC,
-                    pcInfo.proxyName,
-                    pmInfo.superInvokerName,//"access$001",
-                    pmInfo.superInvokerDescriptor,
-                    false
-                );
-                Class<?> returnType = AsmKit.wrapToObject(visitor, pmInfo.method.getReturnType());
-                AsmKit.visitReturn(visitor, returnType, false, true);
-            }
-            visitor.visitLabel(labelLast);
-            visitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
-            visitor.visitInsn(Opcodes.ACONST_NULL);
-            visitor.visitInsn(Opcodes.ARETURN);
-            visitor.visitMaxs(0, 0);
-            visitor.visitEnd();
-        }
-        classWriter.visitEnd();
-        return classWriter.toByteArray();
-    }
-
-    private void loadParameters(MethodVisitor visitor, Executable executable) {
-        int pIndex = 0;
-        for (Parameter parameter : executable.getParameters()) {
-            // get args
-            visitor.visitVarInsn(Opcodes.ALOAD, 2);
-            AsmKit.loadConst(visitor, pIndex++);
-            // get args[pIndex]
-            visitor.visitInsn(Opcodes.AALOAD);
-            AsmKit.convertObjectTo(visitor, parameter.getType());
         }
     }
 
-    private static final class ProxyClassInfo {
+    private @Nonnull Object toFrameName(Class<?> type) {
+        if (Objects.equals(type, boolean.class)
+            || Objects.equals(type, byte.class)
+            || Objects.equals(type, short.class)
+            || Objects.equals(type, char.class)
+            || Objects.equals(type, int.class)) {
+            return Opcodes.INTEGER;
+        }
+        if (Objects.equals(type, long.class)) {
+            return Opcodes.LONG;
+        }
+        if (Objects.equals(type, float.class)) {
+            return Opcodes.FLOAT;
+        }
+        if (Objects.equals(type, double.class)) {
+            return Opcodes.DOUBLE;
+        }
+        return JvmKit.getInternalName(type);
+    }
 
-        private final @Nonnull String proxyName;
-        private final @Nonnull String proxyDescriptor;
-        private final @Nonnull String proxySuperName;
-        private final @Nonnull String @Nullable [] proxyInterfaces;
-        private final @Nonnull String innerSimpleName;
-        private final @Nonnull String innerName;
-        private final @Nonnull List<ProxyMethodInfo> methods;
+    private static final class AspectClassInfo {
 
-        private ProxyClassInfo(
-            @Nonnull String proxyName,
-            @Nonnull String proxyDescriptor,
-            @Nonnull String proxySuperName,
-            @Nonnull String @Nullable [] proxyInterfaces,
-            @Nonnull String innerSimpleName,
-            @Nonnull String innerName,
-            @Nonnull List<ProxyMethodInfo> methods
+        private final @Nonnull String aspectName;
+        // private final @Nonnull String aspectDescriptor;
+        private final @Nonnull String advisedName;
+        private final @Nonnull List<AspectMethodInfo> methods;
+
+        private AspectClassInfo(
+            @Nonnull String aspectName,
+            //@Nonnull String aspectDescriptor,
+            @Nonnull String advisedName,
+            @Nonnull List<AspectMethodInfo> methods
         ) {
-            this.proxyName = proxyName;
-            this.proxyDescriptor = proxyDescriptor;
-            this.proxySuperName = proxySuperName;
-            this.proxyInterfaces = proxyInterfaces;
-            this.innerSimpleName = innerSimpleName;
-            this.innerName = innerName;
+            this.aspectName = aspectName;
+            // this.aspectDescriptor = aspectDescriptor;
+            this.advisedName = advisedName;
             this.methods = methods;
         }
     }
 
-    private static final class ProxyMethodInfo {
+    private static final class AspectMethodInfo {
 
         private final @Nonnull Method method;
-        private final @Nonnull String ownerName;
+        // private final @Nonnull String ownerName;
         private final @Nonnull String descriptor;
         private final @Nullable String signature;
         private final @Nonnull String @Nullable [] exceptions;
-        private final @Nonnull String superInvokerName;
-        private final @Nonnull String superInvokerDescriptor;
-        private final @Nullable String superInvokerSignature;
-        private final boolean isInterface;
 
-        private ProxyMethodInfo(
+        private AspectMethodInfo(
             @Nonnull Method method,
-            @Nonnull String ownerName,
+            //@Nonnull String ownerName,
             @Nonnull String descriptor,
             @Nullable String signature,
-            @Nonnull String @Nullable [] exceptions,
-            @Nonnull String superInvokerName,
-            @Nonnull String superInvokerDescriptor,
-            @Nullable String superInvokerSignature,
-            boolean isInterface
+            @Nonnull String @Nullable [] exceptions
         ) {
             this.method = method;
-            this.ownerName = ownerName;
+            // this.ownerName = ownerName;
             this.descriptor = descriptor;
             this.signature = signature;
             this.exceptions = exceptions;
-            this.superInvokerName = superInvokerName;
-            this.superInvokerDescriptor = superInvokerDescriptor;
-            this.superInvokerSignature = superInvokerSignature;
-            this.isInterface = isInterface;
         }
     }
 
-    private static final class AsmProxySpec implements ProxySpec {
+    private static final class AsmAspectSpec implements AspectSpec {
 
-        private final @Nonnull Class<?> proxyClass;
-        private final @Nonnull Class<?> proxiedClass;
-        private final @Nonnull List<@Nonnull Class<?>> proxiedInterfaces;
-        private final @Nonnull ProxyHandler proxyHandler;
+        private final @Nonnull Class<?> aspectClass;
+        private final @Nonnull Class<?> advisedClass;
+        private final @Nonnull AspectHandler aspectHandler;
         private final @Nonnull Method @Nonnull [] methods;
 
-        private AsmProxySpec(
-            @Nonnull Class<?> proxyClass,
-            @Nonnull Class<?> proxiedClass,
-            @Nonnull List<@Nonnull Class<?>> proxiedInterfaces,
-            @Nonnull ProxyHandler proxyHandler,
+        private AsmAspectSpec(
+            @Nonnull Class<?> aspectClass,
+            @Nonnull Class<?> advisedClass,
+            @Nonnull AspectHandler aspectHandler,
             @Nonnull Method @Nonnull [] methods
         ) {
-            this.proxyClass = proxyClass;
-            this.proxiedClass = proxiedClass;
-            this.proxiedInterfaces = proxiedInterfaces;
-            this.proxyHandler = proxyHandler;
+            this.aspectClass = aspectClass;
+            this.advisedClass = advisedClass;
+            this.aspectHandler = aspectHandler;
             this.methods = methods;
         }
 
         @Override
         public <T> @Nonnull T newInstance() throws AsmAspectException {
             return Jie.uncheck(() -> {
-                Constructor<?> constructor = proxyClass.getConstructor(ProxyHandler.class, Method[].class);
-                return Jie.as(constructor.newInstance(proxyHandler, methods));
+                Constructor<?> constructor = aspectClass.getConstructor(AspectHandler.class, Method[].class);
+                return Jie.as(constructor.newInstance(aspectHandler, methods));
             }, AsmAspectException::new);
         }
 
         @Override
-        public @Nonnull Class<?> proxyClass() {
-            return proxyClass;
+        public @Nonnull Class<?> aspectClass() {
+            return aspectClass;
         }
 
         @Override
-        public @Nonnull Class<?> proxiedClass() {
-            return proxiedClass;
+        public @Nonnull Class<?> advisedClass() {
+            return advisedClass;
         }
 
         @Override
-        public @Nonnull List<@Nonnull Class<?>> proxiedInterfaces() {
-            return proxiedInterfaces;
-        }
-
-        @Override
-        public @Nonnull ProxyHandler proxyHandler() {
-            return proxyHandler;
+        public @Nonnull AspectHandler aspectHandler() {
+            return aspectHandler;
         }
     }
 

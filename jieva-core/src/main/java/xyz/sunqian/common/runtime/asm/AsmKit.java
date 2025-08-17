@@ -53,7 +53,7 @@ public class AsmKit {
      * @param visitor the {@link MethodVisitor} to be invoked
      * @param i       the constant
      */
-    public static void loadConst(@Nonnull MethodVisitor visitor, int i) {
+    public static void visitConst(@Nonnull MethodVisitor visitor, int i) {
         switch (i) {
             case 0:
                 visitor.visitInsn(Opcodes.ICONST_0);
@@ -88,7 +88,7 @@ public class AsmKit {
      * @param type    the specified type
      * @param i       the slot index
      */
-    public static void loadVar(@Nonnull MethodVisitor visitor, @Nonnull Class<?> type, int i) {
+    public static void visitLoad(@Nonnull MethodVisitor visitor, @Nonnull Class<?> type, int i) {
         if (Objects.equals(type, boolean.class)) {
             visitor.visitVarInsn(Opcodes.ILOAD, i);
             return;
@@ -122,6 +122,109 @@ public class AsmKit {
             return;
         }
         visitor.visitVarInsn(Opcodes.ALOAD, i);
+    }
+
+    /**
+     * Stores a var by {@code MethodVisitor.visitVarInsn} with the specified type and slot index.
+     *
+     * @param visitor the {@link MethodVisitor} to be invoked
+     * @param type    the specified type
+     * @param i       the slot index
+     */
+    public static void visitStore(@Nonnull MethodVisitor visitor, @Nonnull Class<?> type, int i) {
+        if (Objects.equals(type, boolean.class)) {
+            visitor.visitVarInsn(Opcodes.ISTORE, i);
+            return;
+        }
+        if (Objects.equals(type, byte.class)) {
+            visitor.visitVarInsn(Opcodes.ISTORE, i);
+            return;
+        }
+        if (Objects.equals(type, short.class)) {
+            visitor.visitVarInsn(Opcodes.ISTORE, i);
+            return;
+        }
+        if (Objects.equals(type, char.class)) {
+            visitor.visitVarInsn(Opcodes.ISTORE, i);
+            return;
+        }
+        if (Objects.equals(type, int.class)) {
+            visitor.visitVarInsn(Opcodes.ISTORE, i);
+            return;
+        }
+        if (Objects.equals(type, long.class)) {
+            visitor.visitVarInsn(Opcodes.LSTORE, i);
+            return;
+        }
+        if (Objects.equals(type, float.class)) {
+            visitor.visitVarInsn(Opcodes.FSTORE, i);
+            return;
+        }
+        if (Objects.equals(type, double.class)) {
+            visitor.visitVarInsn(Opcodes.DSTORE, i);
+            return;
+        }
+        visitor.visitVarInsn(Opcodes.ASTORE, i);
+    }
+
+    /**
+     * Returns var at the top of the stack. If the return type is {@code void}, that means no var at the stack.
+     *
+     * @param visitor      the {@link MethodVisitor}
+     * @param type         the return type
+     * @param requiresCast whether to use the {@code CHECKCAST} for object types
+     * @param returnNull   {@code true} for returning {@code null} if the return type is {@code void}
+     */
+    public static void visitReturn(
+        @Nonnull MethodVisitor visitor,
+        @Nonnull Class<?> type,
+        boolean requiresCast,
+        boolean returnNull
+    ) {
+        if (Objects.equals(type, boolean.class)) {
+            visitor.visitInsn(Opcodes.IRETURN);
+            return;
+        }
+        if (Objects.equals(type, byte.class)) {
+            visitor.visitInsn(Opcodes.IRETURN);
+            return;
+        }
+        if (Objects.equals(type, short.class)) {
+            visitor.visitInsn(Opcodes.IRETURN);
+            return;
+        }
+        if (Objects.equals(type, char.class)) {
+            visitor.visitInsn(Opcodes.IRETURN);
+            return;
+        }
+        if (Objects.equals(type, int.class)) {
+            visitor.visitInsn(Opcodes.IRETURN);
+            return;
+        }
+        if (Objects.equals(type, long.class)) {
+            visitor.visitInsn(Opcodes.LRETURN);
+            return;
+        }
+        if (Objects.equals(type, float.class)) {
+            visitor.visitInsn(Opcodes.FRETURN);
+            return;
+        }
+        if (Objects.equals(type, double.class)) {
+            visitor.visitInsn(Opcodes.DRETURN);
+            return;
+        }
+        if (Objects.equals(type, void.class)) {
+            if (returnNull) {
+                visitor.visitInsn(Opcodes.ACONST_NULL);
+            } else {
+                visitor.visitInsn(Opcodes.RETURN);
+                return;
+            }
+        }
+        if (requiresCast) {
+            visitor.visitTypeInsn(Opcodes.CHECKCAST, JvmKit.getInternalName(type));
+        }
+        visitor.visitInsn(Opcodes.ARETURN);
     }
 
     /**
@@ -231,66 +334,6 @@ public class AsmKit {
             return Double.class;
         }
         return type;
-    }
-
-    /**
-     * Returns var at the top of the stack. If the return type is {@code void}, that means no var at the stack.
-     *
-     * @param visitor      the {@link MethodVisitor}
-     * @param type         the return type
-     * @param requiresCast whether to use the {@code CHECKCAST} for object types
-     * @param returnNull   {@code true} for returning {@code null} if the return type is {@code void}
-     */
-    public static void visitReturn(
-        @Nonnull MethodVisitor visitor,
-        @Nonnull Class<?> type,
-        boolean requiresCast,
-        boolean returnNull
-    ) {
-        if (Objects.equals(type, boolean.class)) {
-            visitor.visitInsn(Opcodes.IRETURN);
-            return;
-        }
-        if (Objects.equals(type, byte.class)) {
-            visitor.visitInsn(Opcodes.IRETURN);
-            return;
-        }
-        if (Objects.equals(type, short.class)) {
-            visitor.visitInsn(Opcodes.IRETURN);
-            return;
-        }
-        if (Objects.equals(type, char.class)) {
-            visitor.visitInsn(Opcodes.IRETURN);
-            return;
-        }
-        if (Objects.equals(type, int.class)) {
-            visitor.visitInsn(Opcodes.IRETURN);
-            return;
-        }
-        if (Objects.equals(type, long.class)) {
-            visitor.visitInsn(Opcodes.LRETURN);
-            return;
-        }
-        if (Objects.equals(type, float.class)) {
-            visitor.visitInsn(Opcodes.FRETURN);
-            return;
-        }
-        if (Objects.equals(type, double.class)) {
-            visitor.visitInsn(Opcodes.DRETURN);
-            return;
-        }
-        if (Objects.equals(type, void.class)) {
-            if (returnNull) {
-                visitor.visitInsn(Opcodes.ACONST_NULL);
-            } else {
-                visitor.visitInsn(Opcodes.RETURN);
-                return;
-            }
-        }
-        if (requiresCast) {
-            visitor.visitTypeInsn(Opcodes.CHECKCAST, JvmKit.getInternalName(type));
-        }
-        visitor.visitInsn(Opcodes.ARETURN);
     }
 
     /**

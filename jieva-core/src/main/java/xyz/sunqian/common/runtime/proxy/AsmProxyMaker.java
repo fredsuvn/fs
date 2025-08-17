@@ -277,7 +277,7 @@ public class AsmProxyMaker implements ProxyMaker {
         // ProxyInvoker invoker = invokers[i];
         visitor.visitVarInsn(Opcodes.ALOAD, 0);
         visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.proxyName, "invokers", INVOKERS_DESCRIPTOR);
-        AsmKit.loadConst(visitor, i);
+        AsmKit.visitConst(visitor, i);
         visitor.visitInsn(Opcodes.AALOAD);
         int invokerPos = AsmKit.paramSize(pmInfo.method.getParameters()) + 1;
         visitor.visitVarInsn(Opcodes.ASTORE, invokerPos);
@@ -290,7 +290,7 @@ public class AsmProxyMaker implements ProxyMaker {
         // new Invoker1(i).init();
         visitor.visitInsn(Opcodes.DUP);
         visitor.visitVarInsn(Opcodes.ALOAD, 0);
-        AsmKit.loadConst(visitor, i);
+        AsmKit.visitConst(visitor, i);
         visitor.visitMethodInsn(
             Opcodes.INVOKESPECIAL,
             pcInfo.innerName,
@@ -303,7 +303,7 @@ public class AsmProxyMaker implements ProxyMaker {
         visitor.visitVarInsn(Opcodes.ALOAD, 0);
         visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.proxyName, "invokers", INVOKERS_DESCRIPTOR);
         // invokers[i] = invoker;
-        AsmKit.loadConst(visitor, i);
+        AsmKit.visitConst(visitor, i);
         visitor.visitVarInsn(Opcodes.ALOAD, invokerPos);
         visitor.visitInsn(Opcodes.AASTORE);
         // endif
@@ -317,12 +317,12 @@ public class AsmProxyMaker implements ProxyMaker {
         // get methods[i]
         visitor.visitVarInsn(Opcodes.ALOAD, 0);
         visitor.visitFieldInsn(Opcodes.GETFIELD, pcInfo.proxyName, "methods", METHODS_DESCRIPTOR);
-        AsmKit.loadConst(visitor, i);
+        AsmKit.visitConst(visitor, i);
         visitor.visitInsn(Opcodes.AALOAD);
         // get invoker
         visitor.visitVarInsn(Opcodes.ALOAD, invokerPos);
         // new Object[params.size]
-        AsmKit.loadConst(visitor, pmInfo.method.getParameterCount());
+        AsmKit.visitConst(visitor, pmInfo.method.getParameterCount());
         visitor.visitTypeInsn(Opcodes.ANEWARRAY, AsmKit.OBJECT_NAME);
         // set array
         int aIndex = 0;
@@ -330,8 +330,8 @@ public class AsmProxyMaker implements ProxyMaker {
         for (Parameter parameter : pmInfo.method.getParameters()) {
             // array[i] = param[i]
             visitor.visitInsn(Opcodes.DUP);
-            AsmKit.loadConst(visitor, aIndex++);
-            AsmKit.loadVar(visitor, parameter.getType(), pIndex);
+            AsmKit.visitConst(visitor, aIndex++);
+            AsmKit.visitLoad(visitor, parameter.getType(), pIndex);
             AsmKit.wrapToObject(visitor, parameter.getType());
             visitor.visitInsn(Opcodes.AASTORE);
             pIndex += AsmKit.varSize(parameter.getType());
@@ -365,7 +365,7 @@ public class AsmProxyMaker implements ProxyMaker {
         visitor.visitVarInsn(Opcodes.ALOAD, 0);
         int pIndex = 1;
         for (Parameter parameter : pmInfo.method.getParameters()) {
-            AsmKit.loadVar(visitor, parameter.getType(), pIndex);
+            AsmKit.visitLoad(visitor, parameter.getType(), pIndex);
             pIndex += AsmKit.varSize(parameter.getType());
         }
         visitor.visitMethodInsn(
@@ -546,7 +546,7 @@ public class AsmProxyMaker implements ProxyMaker {
         for (Parameter parameter : executable.getParameters()) {
             // get args
             visitor.visitVarInsn(Opcodes.ALOAD, 2);
-            AsmKit.loadConst(visitor, pIndex++);
+            AsmKit.visitConst(visitor, pIndex++);
             // get args[pIndex]
             visitor.visitInsn(Opcodes.AALOAD);
             AsmKit.convertObjectTo(visitor, parameter.getType());
