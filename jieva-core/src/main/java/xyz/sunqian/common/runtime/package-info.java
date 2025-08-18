@@ -1,7 +1,7 @@
 /**
- * This package and its sub packages provide varying degrees of runtime metaprogramming.
+ * This package and its subpackages provide varying degrees of runtime metaprogramming.
  * <p>
- * Sub Packages:
+ * Subpackages:
  * <ul>
  *     <li>{@link xyz.sunqian.common.runtime.reflect}: provides fundamental reflection capabilities;</li>
  *     <li>{@link xyz.sunqian.common.runtime.invoke}: provides unified invocation interfaces and related kit;</li>

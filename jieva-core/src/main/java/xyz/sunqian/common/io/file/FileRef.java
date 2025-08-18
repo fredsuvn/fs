@@ -1,6 +1,8 @@
-package xyz.sunqian.common.file;
+package xyz.sunqian.common.io.file;
 
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.io.IORuntimeException;
 
@@ -159,6 +161,19 @@ public interface FileRef {
         } catch (Exception e) {
             throw new IORuntimeException(e);
         }
+    }
+
+    /**
+     * Returns the content type of the referenced file. The return value is in form of {@code MIME}.
+     *
+     * @return the content type of the referenced file, or {@code null} if the content type cannot be determined
+     * @throws IORuntimeException if any error occurs
+     */
+    default @Nullable String getContentType() throws IORuntimeException {
+        return Jie.uncheck(
+            () -> Files.probeContentType(getPath()),
+            IORuntimeException::new
+        );
     }
 
     /**

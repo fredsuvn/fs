@@ -1,12 +1,12 @@
-package test.file;
+package test.io.file;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.chars.CharsKit;
-import xyz.sunqian.common.file.FileKit;
-import xyz.sunqian.common.file.FileRef;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.io.IORuntimeException;
+import xyz.sunqian.common.io.file.FileKit;
+import xyz.sunqian.common.io.file.FileRef;
 import xyz.sunqian.test.AssertTest;
 import xyz.sunqian.test.DataTest;
 import xyz.sunqian.test.PrintTest;
@@ -91,6 +91,7 @@ public class FileTest implements DataTest, PrintTest, AssertTest {
         assertEquals(attributes.creationTime(), attributes2.creationTime());
         assertEquals(attributes.size(), attributes2.size());
         expectThrows(IORuntimeException.class, errRef::getBasicFileAttributes);
+        assertEquals(fileRef.getContentType(), Files.probeContentType(path));
 
         String hello = "hello";
         byte[] helloBytes = hello.getBytes(CharsKit.defaultCharset());

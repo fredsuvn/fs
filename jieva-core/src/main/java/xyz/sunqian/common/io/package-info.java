@@ -1,5 +1,5 @@
 /**
- * Provides utilities and interfaces for IO related.
+ * Provides utilities and interfaces for IO related, including subpackages.
  * <p>
  * Utilities Kits:
  * <ul>
@@ -31,5 +31,11 @@
  *     <li>{@link xyz.sunqian.common.io.DoWriteStream}</li>
  *     <li>{@link xyz.sunqian.common.io.DoWriteWriter}</li>
  * </ul>
+ * <p>
+ * Subpackages:
+ * <ul>
+ *     <li>{@link xyz.sunqian.common.io.file}: file related;</li>
+ * </ul>
+ * <p>
  */
 package xyz.sunqian.common.io;
