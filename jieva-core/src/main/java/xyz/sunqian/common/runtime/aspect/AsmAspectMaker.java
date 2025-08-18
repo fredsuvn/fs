@@ -10,13 +10,12 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.system.JvmKit;
-import xyz.sunqian.common.base.value.IntVar;
 import xyz.sunqian.common.runtime.asm.AsmKit;
+import xyz.sunqian.common.runtime.proxy.ProxyKit;
 import xyz.sunqian.common.runtime.reflect.BytesClassLoader;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -31,8 +30,9 @@ import java.util.concurrent.atomic.AtomicLong;
  * <p>
  * This implementation uses inheritance to implement proxy, just like the keywords: {@code extends}. That means the
  * superclass, which is the advised class, cannot be {@code final} and must be inheritable, and must have an empty
- * constructor to ensure that the {@link AspectSpec#newInstance()} can execute correctly. And only public methods can be
- * advised and tested by {@link AspectHandler#shouldApplyAspect(Method)}.
+ * constructor to ensure that the {@link AspectSpec#newInstance()} can execute correctly. And only the methods, which
+ * can pass the {@link ProxyKit#isProxiable(Method)} and {@link AspectHandler#shouldApplyAspect(Method)}, can be
+ * advised.
  * <p>
  * Note the generated aspect class is {@code final}.
  *
@@ -79,9 +79,9 @@ public class AsmAspectMaker implements AspectMaker {
             String advisedName = JvmKit.getInternalName(advisedClass);
             // advised methods
             Map<Method, AspectMethodInfo> advisedMethodMap = new LinkedHashMap<>();
-            IntVar methodCount = IntVar.of(0);
+            // IntVar methodCount = IntVar.of(0);
             for (Method method : advisedClass.getMethods()) {
-                if (!canOverride(method)) {
+                if (!ProxyKit.isProxiable(method)) {
                     continue;
                 }
                 if (!aspectHandler.shouldApplyAspect(method)) {
@@ -116,23 +116,6 @@ public class AsmAspectMaker implements AspectMaker {
         } catch (Exception e) {
             throw new AsmAspectException(e);
         }
-    }
-
-    private boolean canOverride(@Nonnull Method method) {
-        if (method.isBridge()) {
-            return false;
-        }
-        int modifiers = method.getModifiers();
-        if (Modifier.isFinal(modifiers)) {
-            return false;
-        }
-        if (Modifier.isStatic(modifiers)) {
-            return false;
-        }
-        if (Modifier.isPublic(modifiers)) {
-            return true;
-        }
-        return false;
     }
 
     private @Nonnull AspectMethodInfo buildAspectMethodInfo(
@@ -307,8 +290,8 @@ public class AsmAspectMaker implements AspectMaker {
                 false
             );
             if (!noReturn) {
-                // visitor.visitVarInsn(Opcodes.ASTORE, returnIndex);
-                AsmKit.visitStore(visitor, amInfo.method.getReturnType(), returnIndex);
+                AsmKit.wrapToObject(visitor, amInfo.method.getReturnType());
+                visitor.visitVarInsn(Opcodes.ASTORE, returnIndex);
             }
         }
         {
@@ -317,9 +300,7 @@ public class AsmAspectMaker implements AspectMaker {
             if (noReturn) {
                 visitor.visitInsn(Opcodes.ACONST_NULL);
             } else {
-                //visitor.visitVarInsn(Opcodes.ALOAD, returnIndex);
-                AsmKit.visitLoad(visitor, amInfo.method.getReturnType(), returnIndex);
-                // TODO
+                visitor.visitVarInsn(Opcodes.ALOAD, returnIndex);
             }
             visitor.visitVarInsn(Opcodes.ALOAD, methodIndex);
             visitor.visitVarInsn(Opcodes.ALOAD, argsIndex);

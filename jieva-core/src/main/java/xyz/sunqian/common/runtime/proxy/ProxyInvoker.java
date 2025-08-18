@@ -21,7 +21,7 @@ public interface ProxyInvoker {
      * first argument of {@link ProxyHandler#invoke(Object, Method, ProxyInvoker, Object...)}. Passing a proxy instance
      * may cause recursive invocations to the proxy method itself, eventually leading to stack overflow.
      *
-     * @param inst the specified instance
+     * @param inst the specified instance, which is expected to be a non-proxy instance
      * @param args the specified arguments
      * @return the invocation result
      * @throws Throwable the bare exception thrown by the invocation, without any wrapping
@@ -36,7 +36,7 @@ public interface ProxyInvoker {
      * The invocation behavior of this method is equivalent to the JVM instruction: {@code INVOKESPECIAL}. Therefore,
      * this method expects a proxy instance to be passed in.
      *
-     * @param inst the specified instance
+     * @param inst the specified instance, which is expected to be a proxy instance
      * @param args the specified arguments
      * @return the invocation result
      * @throws Throwable the bare exception thrown by the invocation, without any wrapping

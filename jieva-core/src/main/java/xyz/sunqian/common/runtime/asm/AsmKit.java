@@ -124,48 +124,48 @@ public class AsmKit {
         visitor.visitVarInsn(Opcodes.ALOAD, i);
     }
 
-    /**
-     * Stores a var by {@code MethodVisitor.visitVarInsn} with the specified type and slot index.
-     *
-     * @param visitor the {@link MethodVisitor} to be invoked
-     * @param type    the specified type
-     * @param i       the slot index
-     */
-    public static void visitStore(@Nonnull MethodVisitor visitor, @Nonnull Class<?> type, int i) {
-        if (Objects.equals(type, boolean.class)) {
-            visitor.visitVarInsn(Opcodes.ISTORE, i);
-            return;
-        }
-        if (Objects.equals(type, byte.class)) {
-            visitor.visitVarInsn(Opcodes.ISTORE, i);
-            return;
-        }
-        if (Objects.equals(type, short.class)) {
-            visitor.visitVarInsn(Opcodes.ISTORE, i);
-            return;
-        }
-        if (Objects.equals(type, char.class)) {
-            visitor.visitVarInsn(Opcodes.ISTORE, i);
-            return;
-        }
-        if (Objects.equals(type, int.class)) {
-            visitor.visitVarInsn(Opcodes.ISTORE, i);
-            return;
-        }
-        if (Objects.equals(type, long.class)) {
-            visitor.visitVarInsn(Opcodes.LSTORE, i);
-            return;
-        }
-        if (Objects.equals(type, float.class)) {
-            visitor.visitVarInsn(Opcodes.FSTORE, i);
-            return;
-        }
-        if (Objects.equals(type, double.class)) {
-            visitor.visitVarInsn(Opcodes.DSTORE, i);
-            return;
-        }
-        visitor.visitVarInsn(Opcodes.ASTORE, i);
-    }
+    // /**
+    //  * Stores a var by {@code MethodVisitor.visitVarInsn} with the specified type and slot index.
+    //  *
+    //  * @param visitor the {@link MethodVisitor} to be invoked
+    //  * @param type    the specified type
+    //  * @param i       the slot index
+    //  */
+    // public static void visitStore(@Nonnull MethodVisitor visitor, @Nonnull Class<?> type, int i) {
+    //     if (Objects.equals(type, boolean.class)) {
+    //         visitor.visitVarInsn(Opcodes.ISTORE, i);
+    //         return;
+    //     }
+    //     if (Objects.equals(type, byte.class)) {
+    //         visitor.visitVarInsn(Opcodes.ISTORE, i);
+    //         return;
+    //     }
+    //     if (Objects.equals(type, short.class)) {
+    //         visitor.visitVarInsn(Opcodes.ISTORE, i);
+    //         return;
+    //     }
+    //     if (Objects.equals(type, char.class)) {
+    //         visitor.visitVarInsn(Opcodes.ISTORE, i);
+    //         return;
+    //     }
+    //     if (Objects.equals(type, int.class)) {
+    //         visitor.visitVarInsn(Opcodes.ISTORE, i);
+    //         return;
+    //     }
+    //     if (Objects.equals(type, long.class)) {
+    //         visitor.visitVarInsn(Opcodes.LSTORE, i);
+    //         return;
+    //     }
+    //     if (Objects.equals(type, float.class)) {
+    //         visitor.visitVarInsn(Opcodes.FSTORE, i);
+    //         return;
+    //     }
+    //     if (Objects.equals(type, double.class)) {
+    //         visitor.visitVarInsn(Opcodes.DSTORE, i);
+    //         return;
+    //     }
+    //     visitor.visitVarInsn(Opcodes.ASTORE, i);
+    // }
 
     /**
      * Returns var at the top of the stack. If the return type is {@code void}, that means no var at the stack.
@@ -394,9 +394,9 @@ public class AsmKit {
         if (Objects.equals(type, long.class) || Objects.equals(type, double.class)) {
             return 2;
         }
-        if (Objects.equals(type, void.class)) {
-            return 0;
-        }
+        // if (Objects.equals(type, void.class)) {
+        //     return 0;
+        // }
         return 1;
     }
 

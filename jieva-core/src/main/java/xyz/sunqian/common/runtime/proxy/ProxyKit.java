@@ -57,6 +57,20 @@ public class ProxyKit {
     }
 
     private static boolean isProxiable(@Nonnull Method method, @Nonnull ProxyHandler handler) {
+        if (!isProxiable(method)) {
+            return false;
+        }
+        return handler.shouldProxyMethod(method);
+    }
+
+    /**
+     * Returns whether the given method is proxiable. A proxiable method cannot be static, final, or synthetic, and
+     * should be public or protected.
+     *
+     * @param method the method to be checked
+     * @return whether the given method is proxiable
+     */
+    public static boolean isProxiable(@Nonnull Method method) {
         if (method.isSynthetic()) {
             return false;
         }
@@ -64,10 +78,7 @@ public class ProxyKit {
         if (Modifier.isStatic(mod) || Modifier.isFinal(mod)) {
             return false;
         }
-        if (Modifier.isPublic(mod) || Modifier.isProtected(mod)) {
-            return handler.shouldProxyMethod(method);
-        }
-        return false;
+        return Modifier.isPublic(mod) || Modifier.isProtected(mod);
     }
 
     private static void putProxiableMethod(
