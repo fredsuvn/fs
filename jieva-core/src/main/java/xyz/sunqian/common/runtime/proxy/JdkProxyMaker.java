@@ -1,18 +1,15 @@
 package xyz.sunqian.common.runtime.proxy;
 
-import xyz.sunqian.annotations.JdkDependent;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.base.system.JvmKit;
 import xyz.sunqian.common.base.value.Var;
 import xyz.sunqian.common.runtime.invoke.Invocable;
 import xyz.sunqian.common.runtime.reflect.BytesClassLoader;
 import xyz.sunqian.common.runtime.reflect.ClassKit;
 
-import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -21,7 +18,6 @@ import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * JDK dynamic proxy implementation for {@link ProxyMaker}.
@@ -32,16 +28,6 @@ import java.util.Optional;
  */
 @ThreadSafe
 public class JdkProxyMaker implements ProxyMaker {
-
-    /**
-     * An {@link Invocable} instance that does not support default method of java interface.
-     */
-    public static final @Nonnull Invocable UNSUPPORTED_DEFAULT_METHOD_INVOCABLE = (inst, args) -> {
-        throw new JdkProxyException(new UnsupportedOperationException(
-            "Current Java Runtime Environment does not support obtaining MethodHandle of default method: " +
-                JvmKit.jvmDescription()
-        ));
-    };
 
     private static final @Nonnull Object @Nonnull [] EMPTY_ARGS = {};
 
@@ -54,11 +40,6 @@ public class JdkProxyMaker implements ProxyMaker {
         Class<?> proxyClass = Proxy.getProxyClass(
             new BytesClassLoader(),
             interfaces.toArray(new Class<?>[0])
-        );
-        Map<Class<?>, List<Method>> proxiableMethods = ProxyKit.getProxiableMethods(
-            null,
-            interfaces,
-            proxyHandler
         );
         Map<Method, Var<ProxyInvoker>> proxiedMethods = new HashMap<>();
         Map<Method, Var<Invocable>> unproxiedMethods = new HashMap<>();
@@ -185,17 +166,7 @@ public class JdkProxyMaker implements ProxyMaker {
                 throw new AbstractMethodError(method.toString());
             };
         }
-        return getDefaultMethodInvocable(method);
-    }
-
-    private static @Nonnull Invocable getDefaultMethodInvocable(@Nonnull Method method) throws Exception {
-        Optional<MethodHandles.Lookup> lookupOpt = LookUp.getLookUp(method);
-        return lookupOpt
-            .map(lookup ->
-                Jie.call(() -> lookup.unreflectSpecial(method, method.getDeclaringClass()), null)
-            )
-            .map(methodHandle -> Invocable.of(methodHandle, false))
-            .orElse(UNSUPPORTED_DEFAULT_METHOD_INVOCABLE);
+        return Proxy8.getDefaultMethodInvocable(method);
     }
 
     /**
@@ -212,40 +183,5 @@ public class JdkProxyMaker implements ProxyMaker {
         public JdkProxyException(@Nullable Throwable cause) {
             super(cause);
         }
-    }
-
-    @JdkDependent
-    private static final class LookUp {
-
-        // ========  works on JDK 8 ======== {
-
-        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-        private static final @Nonnull Optional<Constructor<MethodHandles.Lookup>> csOpt =
-            Optional.ofNullable(getLookUpConstructor());
-
-        private static @Nullable Constructor<MethodHandles.Lookup> getLookUpConstructor() {
-            return Jie.call(() -> {
-                Constructor<MethodHandles.Lookup> c = MethodHandles.Lookup.class
-                    .getDeclaredConstructor(Class.class);
-                c.setAccessible(true);
-                return c;
-            }, null);
-        }
-
-        private static @Nonnull Optional<MethodHandles.Lookup> getLookUp(@Nonnull Method method) {
-            return csOpt.map(c ->
-                Jie.call(() -> c.newInstance(method.getDeclaringClass()), null)
-            );
-        }
-
-        // } ========  works on JDK 8 ========
-
-        // ========  works on JDK 9+ ======== {
-        //
-        // private static Optional<MethodHandles.Lookup> getLookUp(@Nonnull Method method) {
-        //     return Optional.of(MethodHandles.lookup());
-        // }
-
-        // } ========  works on JDK 9+ ========
     }
 }

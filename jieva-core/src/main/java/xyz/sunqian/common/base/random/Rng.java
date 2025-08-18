@@ -54,7 +54,7 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
      * @return a {@link Rng} instance based on the specified {@link Random}
      */
     static @Nonnull Rng newRng(@Nonnull Random random) {
-        return RngImpl.random(random);
+        return Rng8.random(random);
     }
 
     /**
@@ -64,7 +64,7 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
      * @return a {@link Rng} instance based on the {@link ThreadLocalRandom}
      */
     static @Nonnull Rng threadLocal() {
-        return RngImpl.threadLocalRandom();
+        return Rng8.threadLocalRandom();
     }
 
     /**
@@ -87,7 +87,7 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
     static @Nonnull Rng secure(@Nonnull String algorithm) throws UnsupportedOperationException {
         try {
             SecureRandom secureRandom = SecureRandom.getInstance(algorithm);
-            return RngImpl.random(secureRandom);
+            return Rng8.random(secureRandom);
         } catch (NoSuchAlgorithmException e) {
             throw new UnsupportedOperationException(e);
         }

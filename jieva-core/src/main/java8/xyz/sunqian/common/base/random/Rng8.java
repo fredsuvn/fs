@@ -1,6 +1,5 @@
 package xyz.sunqian.common.base.random;
 
-import xyz.sunqian.annotations.JdkDependent;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.CheckKit;
 import xyz.sunqian.common.base.bytes.BytesKit;
@@ -17,7 +16,7 @@ import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
-final class RngImpl {
+final class Rng8 {
 
     static @Nonnull Rng random(@Nonnull Random random) {
         return new RandomRng(random);
@@ -27,7 +26,6 @@ final class RngImpl {
         return ThreadLocalRandomRng.INST;
     }
 
-    @JdkDependent
     private static final class RandomRng extends AbsRngImpl {
 
         private final @Nonnull Random random;
@@ -141,14 +139,12 @@ final class RngImpl {
             return random().nextLong(startInclusive, endExclusive);
         }
 
-        @JdkDependent
         @Override
         public float nextFloat() {
             double value = nextDouble();
             return MathKit.makeIn((float) value, 0.0f, 1.0f);
         }
 
-        @JdkDependent
         @Override
         public float nextFloat(float startInclusive, float endExclusive) throws IllegalArgumentException {
             double value = nextDouble(startInclusive, endExclusive);

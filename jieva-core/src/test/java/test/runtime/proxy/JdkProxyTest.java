@@ -6,9 +6,6 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.value.BooleanVar;
 import xyz.sunqian.common.base.value.IntVar;
-import xyz.sunqian.common.runtime.invoke.Invocable;
-import xyz.sunqian.common.runtime.proxy.JdkProxyMaker;
-import xyz.sunqian.common.runtime.proxy.ProxyException;
 import xyz.sunqian.common.runtime.proxy.ProxyHandler;
 import xyz.sunqian.common.runtime.proxy.ProxyInvoker;
 import xyz.sunqian.common.runtime.proxy.ProxyMaker;
@@ -213,8 +210,7 @@ public class JdkProxyTest {
 
         {
             // unsupported default method invocable
-            Invocable invocable = JdkProxyMaker.UNSUPPORTED_DEFAULT_METHOD_INVOCABLE;
-            expectThrows(ProxyException.class, () -> invocable.invokeChecked(null));
+            Proxy8Test.testUnsupportedDefaultMethod();
         }
     }
 

@@ -74,12 +74,26 @@ def generatedPath = "$project.projectDir/generated"
 def protoPath = "$generatedPath/proto"
 
 sourceSets {
+  main {
+    java {
+      if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_17)) {
+        srcDirs += "src/main/java17"
+      } else if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_1_8)) {
+        srcDirs += "src/main/java8"
+      }
+    }
+  }
   test {
     proto {
       srcDirs = ["src/test/proto"]
     }
     java {
       srcDirs += "$protoPath/test/java"
+      if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_17)) {
+        srcDirs += "src/test/java17"
+      } else if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_1_8)) {
+        srcDirs += "src/test/java8"
+      }
     }
   }
 }

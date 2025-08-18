@@ -4,7 +4,6 @@ import xyz.sunqian.annotations.CachedResult;
 import xyz.sunqian.annotations.DefaultNonNull;
 import xyz.sunqian.annotations.DefaultNullable;
 import xyz.sunqian.annotations.Immutable;
-import xyz.sunqian.annotations.JdkDependent;
 import xyz.sunqian.annotations.NonExported;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
@@ -43,12 +42,6 @@ public class Samples {
     @CachedResult
     public static @Nonnull String cachedString() {
         return "123";
-    }
-
-    // Result is depends on JDK.
-    @JdkDependent
-    public static @Nonnull String withJdk8() {
-        return "withJdk8";
     }
 
     // Param is writable.
