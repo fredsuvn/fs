@@ -1,4 +1,4 @@
-package xyz.sunqian.common.net.data;
+package xyz.sunqian.common.trash.data;
 
 import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.CheckKit;

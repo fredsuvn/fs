@@ -2,7 +2,7 @@ package xyz.sunqian.common.net.tcp;
 
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.ThreadSafe;
-import xyz.sunqian.common.net.data.GekData;
+import xyz.sunqian.common.trash.data.GekData;
 
 import java.io.InputStream;
 import java.net.InetAddress;

@@ -10,7 +10,7 @@ import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.net.GekServerStates;
 import xyz.sunqian.common.net.NetException;
-import xyz.sunqian.common.net.data.GekData;
+import xyz.sunqian.common.trash.data.GekData;
 
 import java.io.IOException;
 import java.io.InputStream;

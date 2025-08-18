@@ -1,16 +1,16 @@
-package xyz.sunqian.common.net.data;
+package xyz.sunqian.common.trash.data;
 
 /**
- * Exception for codec.
+ * Exception for data.
  *
  * @author fredsuvn
  */
-public class CodecException extends RuntimeException {
+public class GekDataException extends RuntimeException {
 
     /**
      * Empty constructor.
      */
-    public CodecException() {
+    public GekDataException() {
     }
 
     /**
@@ -18,7 +18,7 @@ public class CodecException extends RuntimeException {
      *
      * @param message exception message
      */
-    public CodecException(String message) {
+    public GekDataException(String message) {
         super(message);
     }
 
@@ -28,7 +28,7 @@ public class CodecException extends RuntimeException {
      * @param message exception message
      * @param cause   exception cause
      */
-    public CodecException(String message, Throwable cause) {
+    public GekDataException(String message, Throwable cause) {
         super(message, cause);
     }
 
@@ -37,7 +37,7 @@ public class CodecException extends RuntimeException {
      *
      * @param cause exception cause
      */
-    public CodecException(Throwable cause) {
+    public GekDataException(Throwable cause) {
         super(cause);
     }
 }

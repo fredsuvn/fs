@@ -1,7 +1,7 @@
 package xyz.sunqian.common.net.tcp.handlers;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.net.data.IOMisc;
+import xyz.sunqian.common.trash.data.IOMisc;
 import xyz.sunqian.common.net.tcp.GekTcpChannel;
 import xyz.sunqian.common.net.tcp.GekTcpChannelHandler;
 

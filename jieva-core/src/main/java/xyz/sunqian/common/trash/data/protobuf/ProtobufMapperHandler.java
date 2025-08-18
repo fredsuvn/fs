@@ -1,4 +1,4 @@
-package xyz.sunqian.common.net.data.protobuf;
+package xyz.sunqian.common.trash.data.protobuf;
 
 import com.google.protobuf.ByteString;
 import xyz.sunqian.annotations.Nullable;

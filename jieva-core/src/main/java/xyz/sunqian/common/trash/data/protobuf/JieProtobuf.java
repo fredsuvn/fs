@@ -1,4 +1,4 @@
-package xyz.sunqian.common.net.data.protobuf;
+package xyz.sunqian.common.trash.data.protobuf;
 
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.handlers.AssignableMapperHandler;
