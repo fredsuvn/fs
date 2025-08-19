@@ -2,7 +2,7 @@ package xyz.sunqian.common.net.socket;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.ThreadSafe;
-import xyz.sunqian.common.io.communicate.IOChannelHandler;
+import xyz.sunqian.common.net.NetChannelHandler;
 import xyz.sunqian.common.net.NetException;
 
 /**
@@ -13,14 +13,14 @@ import xyz.sunqian.common.net.NetException;
 @ThreadSafe
 public interface SocketMaker {
 
-    /**
-     * Returns an instance of {@link NioSocketMaker} which implements the {@link SocketMaker}.
-     *
-     * @return an instance of {@link NioSocketMaker} which implements the {@link SocketMaker}
-     */
-    static @Nonnull NioSocketMaker byNio() {
-        return new NioSocketMaker();
-    }
+    // /**
+    //  * Returns an instance of {@link NioSocketMaker} which implements the {@link SocketMaker}.
+    //  *
+    //  * @return an instance of {@link NioSocketMaker} which implements the {@link SocketMaker}
+    //  */
+    // static @Nonnull NioSocketMaker byNio() {
+    //     return new NioSocketMaker();
+    // }
 
     /**
      * Creates a new {@link TcpServerSpec} instance to start server instance.
@@ -31,7 +31,5 @@ public interface SocketMaker {
      * @throws NetException if any problem occurs during creation
      */
     @Nonnull
-    TcpServerSpec makeTcpServer(
-        @Nonnull IOChannelHandler<TcpChannelContext> handler, int handlerThreadNum
-    ) throws NetException;
+    TcpServerSpec makeTcpServer(@Nonnull NetChannelHandler handler, int handlerThreadNum) throws NetException;
 }

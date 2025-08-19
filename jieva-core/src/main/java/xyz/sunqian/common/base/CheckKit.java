@@ -1,6 +1,7 @@
 package xyz.sunqian.common.base;
 
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.exception.UnreachablePointException;
 import xyz.sunqian.common.base.string.StringKit;
 
 import java.util.NoSuchElementException;
@@ -517,6 +518,19 @@ public class CheckKit {
         long startRange, long endRange, long startIndex, long endIndex, CharSequence message) throws IndexOutOfBoundsException {
         if (!isRangeInBounds(startRange, endRange, startIndex, endIndex)) {
             throw new IndexOutOfBoundsException(message.toString());
+        }
+    }
+
+    /**
+     * Checks whether the given expression is {@code true}. If it is, an {@link UnreachablePointException} will be
+     * thrown.
+     *
+     * @param expr the given expression
+     * @throws UnreachablePointException if the given expression is {@code true}
+     */
+    public static void unreachable(boolean expr) throws UnreachablePointException {
+        if (expr) {
+            throw new UnreachablePointException();
         }
     }
 }

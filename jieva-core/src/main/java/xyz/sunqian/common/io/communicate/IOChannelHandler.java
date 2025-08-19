@@ -5,10 +5,11 @@ import java.nio.ByteBuffer;
 /**
  * Handles IO events.
  *
+ * @param <A> the type of the channel address
  * @param <C> the type of the channel context
  * @author sunqian
  */
-public interface IOChannelHandler<C extends IOChannelContext> {
+public interface IOChannelHandler<A, C extends IOChannelContext<A>> {
 
     /**
      * This method is invoked after a new channel is opened, and only once for each new channel.
@@ -36,7 +37,8 @@ public interface IOChannelHandler<C extends IOChannelContext> {
     void channelRead(C context, ByteBuffer buffer) throws Exception;
 
     /**
-     * This method is invoked after catching the unhandled exception thrown from this handler.
+     * This method is invoked after catching the unhandled exception thrown from this handler. If this method still
+     * throws an exception, the channel will be closed.
      *
      * @param context the context of the channel
      * @param cause   the unhandled exception
