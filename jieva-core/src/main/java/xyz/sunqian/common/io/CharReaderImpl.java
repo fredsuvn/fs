@@ -97,7 +97,7 @@ final class CharReaderImpl {
             }
             IOChecker.checkLen(len);
             char[] data = new char[len];
-            int readSize = IOKit.readTo0(src, data, 0, data.length);
+            int readSize = IOKit.readTo0(src, data, 0, data.length, IOChecker.endChecker());
             if (readSize < 0) {
                 return CharSegment.empty(true);
             }
@@ -136,35 +136,35 @@ final class CharReaderImpl {
 
         @Override
         public long readTo(@Nonnull Appendable dst) throws IORuntimeException {
-            return IOKit.readTo0(src, dst, bufSize);
+            return IOKit.readTo0(src, dst, bufSize, IOChecker.endChecker());
         }
 
         @Override
         public long readTo(@Nonnull Appendable dst, long len) throws IllegalArgumentException, IORuntimeException {
             IOChecker.checkLen(len);
-            return IOKit.readTo0(src, dst, len, bufSize);
+            return IOKit.readTo0(src, dst, len, bufSize, IOChecker.endChecker());
         }
 
         @Override
         public int readTo(char @Nonnull [] dst) throws IORuntimeException {
-            return IOKit.readTo0(src, dst, 0, dst.length);
+            return IOKit.readTo0(src, dst, 0, dst.length, IOChecker.endChecker());
         }
 
         @Override
         public int readTo(char @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException, IORuntimeException {
             IOChecker.checkOffLen(dst.length, off, len);
-            return IOKit.readTo0(src, dst, off, len);
+            return IOKit.readTo0(src, dst, off, len, IOChecker.endChecker());
         }
 
         @Override
         public int readTo(@Nonnull CharBuffer dst) throws IORuntimeException {
-            return IOKit.readTo0(src, dst, dst.remaining());
+            return IOKit.readTo0(src, dst, dst.remaining(), IOChecker.endChecker());
         }
 
         @Override
         public int readTo(@Nonnull CharBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
             IOChecker.checkLen(len);
-            return IOKit.readTo0(src, dst, len);
+            return IOKit.readTo0(src, dst, len, IOChecker.endChecker());
         }
 
         @Override

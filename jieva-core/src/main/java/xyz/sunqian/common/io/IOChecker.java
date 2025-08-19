@@ -1,5 +1,6 @@
 package xyz.sunqian.common.io;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.CheckKit;
 
 final class IOChecker {
@@ -50,5 +51,62 @@ final class IOChecker {
 
     static void checkCapacity(int capacity) throws IllegalArgumentException {
         CheckKit.checkArgument(capacity >= 0, "capacity must >= 0");
+    }
+
+    static EndChecker endChecker() {
+        return EndChecker.SINGLETON;
+    }
+
+    static AvailableChecker availableChecker() {
+        return AvailableChecker.SINGLETON;
+    }
+
+    interface ReadChecker {
+
+        boolean readEnd(int readSize);
+
+        int actualCount(int lastReadSize, int count);
+
+        long actualCount(int lastReadSize, long count);
+    }
+
+    static final class EndChecker implements ReadChecker {
+
+        private static final @Nonnull EndChecker SINGLETON = new EndChecker();
+
+        @Override
+        public boolean readEnd(int readSize) {
+            return readSize < 0;
+        }
+
+        @Override
+        public int actualCount(int lastReadSize, int count) {
+            return count == 0 ? -1 : count;
+        }
+
+        @Override
+        public long actualCount(int lastReadSize, long count) {
+            return count == 0 ? -1 : count;
+        }
+    }
+
+    static final class AvailableChecker implements ReadChecker {
+
+        private static final @Nonnull AvailableChecker SINGLETON = new AvailableChecker();
+
+        @Override
+        public boolean readEnd(int readSize) {
+            return readSize <= 0;
+        }
+
+        @Override
+        public int actualCount(int lastReadSize, int count) {
+            return count == 0 ? (lastReadSize < 0 ? -1 : 0) : count;
+        }
+
+        @Override
+        public long actualCount(int lastReadSize, long count) {
+            return count == 0 ? (lastReadSize < 0 ? -1 : 0) : count;
+        }
     }
 }

@@ -3,10 +3,7 @@ package xyz.sunqian.common.io;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.ThreadSafe;
-import xyz.sunqian.common.base.bytes.BytesBuilder;
-import xyz.sunqian.common.base.chars.CharsBuilder;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
@@ -14,7 +11,6 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
-import java.util.Arrays;
 
 /**
  * This interface provides I/O operations, and it is thread-safe.
@@ -68,41 +64,8 @@ public interface IOOperator {
      * is read
      * @throws IORuntimeException if an I/O error occurs
      */
-    @SuppressWarnings("resource")
     default byte @Nullable [] read(@Nonnull InputStream src) throws IORuntimeException {
-        try {
-            int available = src.available();
-            byte[] buf = new byte[available > 0 ? available : bufferSize()];
-            BytesBuilder builder = null;
-            int off = 0;
-            while (true) {
-                int readSize = src.read(buf, off, buf.length - off);
-                if (readSize < 0) {
-                    if (builder != null) {
-                        builder.append(buf, 0, off);
-                        return builder.toByteArray();
-                    }
-                    return off == 0 ? null : Arrays.copyOfRange(buf, 0, off);
-                }
-                off += readSize;
-                if (off == buf.length) {
-                    if (builder == null) {
-                        int r = src.read();
-                        if (r == -1) {
-                            return buf;
-                        }
-                        builder = new BytesBuilder(buf.length + 1);
-                        builder.append(buf);
-                        builder.append(r);
-                    } else {
-                        builder.append(buf);
-                    }
-                    off = 0;
-                }
-            }
-        } catch (IOException e) {
-            throw new IORuntimeException(e);
-        }
+        return IOKit.read0(src, IOChecker.endChecker());
     }
 
     /**
@@ -125,24 +88,7 @@ public interface IOOperator {
     default byte @Nullable [] read(
         @Nonnull InputStream src, int len
     ) throws IllegalArgumentException, IORuntimeException {
-        IOChecker.checkLen(len);
-        if (len == 0) {
-            return new byte[0];
-        }
-        try {
-            byte[] buf = new byte[len];
-            int off = 0;
-            while (off < len) {
-                int readSize = src.read(buf, off, buf.length - off);
-                if (readSize < 0) {
-                    return off == 0 ? null : Arrays.copyOfRange(buf, 0, off);
-                }
-                off += readSize;
-            }
-            return buf;
-        } catch (IOException e) {
-            throw new IORuntimeException(e);
-        }
+        return IOKit.read0(src, len, IOChecker.endChecker());
     }
 
     /**
@@ -156,52 +102,8 @@ public interface IOOperator {
      * data is read
      * @throws IORuntimeException if an I/O error occurs
      */
-    @SuppressWarnings("resource")
     default @Nullable ByteBuffer read(@Nonnull ReadableByteChannel src) throws IORuntimeException {
-        try {
-            BytesBuilder builder = null;
-            ByteBuffer dst = ByteBuffer.allocate(bufferSize());
-            while (true) {
-                int readSize = src.read(dst);
-                if (readSize < 0) {
-                    break;
-                }
-                if (dst.remaining() == 0) {
-                    if (builder == null) {
-                        int lastIndex = dst.capacity() - 1;
-                        byte b = dst.get(lastIndex);
-                        dst.position(lastIndex);
-                        int r = src.read(dst);
-                        dst.position(0);
-                        if (r < 0) {
-                            return dst;
-                        }
-                        builder = new BytesBuilder(dst.capacity() + 1);
-                        dst.limit(lastIndex);
-                        builder.append(dst);
-                        builder.append(b);
-                        dst.limit(dst.capacity());
-                        builder.append(dst);
-                    } else {
-                        dst.flip();
-                        builder.append(dst);
-                    }
-                    dst.flip();
-                }
-            }
-            if (builder == null) {
-                return dst.position() == 0 ? null :
-                    ByteBuffer.wrap(Arrays.copyOfRange(dst.array(), 0, dst.position()));
-            } else {
-                if (dst.position() > 0) {
-                    dst.flip();
-                    builder.append(dst);
-                }
-                return builder.toByteBuffer();
-            }
-        } catch (IOException e) {
-            throw new IORuntimeException(e);
-        }
+        return IOKit.read0(src, IOChecker.endChecker());
     }
 
     /**
@@ -225,24 +127,7 @@ public interface IOOperator {
     default @Nullable ByteBuffer read(
         @Nonnull ReadableByteChannel src, int len
     ) throws IllegalArgumentException, IORuntimeException {
-        IOChecker.checkLen(len);
-        if (len == 0) {
-            return ByteBuffer.allocate(0);
-        }
-        try {
-            ByteBuffer dst = ByteBuffer.allocate(len);
-            while (dst.remaining() > 0) {
-                int readSize = src.read(dst);
-                if (readSize < 0) {
-                    return dst.position() == 0 ? null :
-                        ByteBuffer.wrap(Arrays.copyOfRange(dst.array(), 0, dst.position()));
-                }
-            }
-            dst.flip();
-            return dst;
-        } catch (IOException e) {
-            throw new IORuntimeException(e);
-        }
+        return IOKit.read0(src, len, IOChecker.endChecker());
     }
 
     /**
@@ -258,7 +143,7 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default long readTo(@Nonnull InputStream src, @Nonnull OutputStream dst) throws IORuntimeException {
-        return IOKit.readTo0(src, dst, bufferSize());
+        return IOKit.readTo0(src, dst, bufferSize(), IOChecker.endChecker());
     }
 
     /**
@@ -280,7 +165,7 @@ public interface IOOperator {
         @Nonnull InputStream src, @Nonnull OutputStream dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
         IOChecker.checkLen(len);
-        return IOKit.readTo0(src, dst, len, bufferSize());
+        return IOKit.readTo0(src, dst, len, bufferSize(), IOChecker.endChecker());
     }
 
     /**
@@ -296,7 +181,7 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default long readTo(@Nonnull InputStream src, @Nonnull WritableByteChannel dst) throws IORuntimeException {
-        return IOKit.readTo0(src, dst, bufferSize());
+        return IOKit.readTo0(src, dst, bufferSize(), IOChecker.endChecker());
     }
 
     /**
@@ -318,7 +203,7 @@ public interface IOOperator {
         @Nonnull InputStream src, @Nonnull WritableByteChannel dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
         IOChecker.checkLen(len);
-        return IOKit.readTo0(src, dst, len, bufferSize());
+        return IOKit.readTo0(src, dst, len, bufferSize(), IOChecker.endChecker());
     }
 
     /**
@@ -335,7 +220,7 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default int readTo(@Nonnull InputStream src, byte @Nonnull [] dst) throws IORuntimeException {
-        return IOKit.readTo0(src, dst, 0, dst.length);
+        return IOKit.readTo0(src, dst, 0, dst.length, IOChecker.endChecker());
     }
 
     /**
@@ -359,7 +244,7 @@ public interface IOOperator {
         @Nonnull InputStream src, byte @Nonnull [] dst, int off, int len
     ) throws IndexOutOfBoundsException, IORuntimeException {
         IOChecker.checkOffLen(dst.length, off, len);
-        return IOKit.readTo0(src, dst, off, len);
+        return IOKit.readTo0(src, dst, off, len, IOChecker.endChecker());
     }
 
     /**
@@ -378,7 +263,7 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default int readTo(@Nonnull InputStream src, @Nonnull ByteBuffer dst) throws IORuntimeException {
-        return IOKit.readTo0(src, dst, dst.remaining());
+        return IOKit.readTo0(src, dst, dst.remaining(), IOChecker.endChecker());
     }
 
     /**
@@ -402,7 +287,7 @@ public interface IOOperator {
         @Nonnull InputStream src, @Nonnull ByteBuffer dst, int len
     ) throws IllegalArgumentException, IORuntimeException {
         IOChecker.checkLen(len);
-        return IOKit.readTo0(src, dst, len);
+        return IOKit.readTo0(src, dst, len, IOChecker.endChecker());
     }
 
     /**
@@ -418,7 +303,7 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default long readTo(@Nonnull ReadableByteChannel src, @Nonnull OutputStream dst) throws IORuntimeException {
-        return IOKit.readTo0(src, dst, bufferSize());
+        return IOKit.readTo0(src, dst, bufferSize(), IOChecker.endChecker());
     }
 
     /**
@@ -440,7 +325,7 @@ public interface IOOperator {
         @Nonnull ReadableByteChannel src, @Nonnull OutputStream dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
         IOChecker.checkLen(len);
-        return IOKit.readTo0(src, dst, len, bufferSize());
+        return IOKit.readTo0(src, dst, len, bufferSize(), IOChecker.endChecker());
     }
 
     /**
@@ -456,7 +341,7 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default long readTo(@Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst) throws IORuntimeException {
-        return IOKit.readTo0(src, dst, bufferSize());
+        return IOKit.readTo0(src, dst, bufferSize(), IOChecker.endChecker());
     }
 
     /**
@@ -479,7 +364,7 @@ public interface IOOperator {
         @Nonnull ReadableByteChannel src, @Nonnull WritableByteChannel dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
         IOChecker.checkLen(len);
-        return IOKit.readTo0(src, dst, len, bufferSize());
+        return IOKit.readTo0(src, dst, len, bufferSize(), IOChecker.endChecker());
     }
 
     /**
@@ -539,7 +424,7 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default int readTo(@Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst) throws IORuntimeException {
-        return IOKit.readTo0(src, dst);
+        return IOKit.readTo0(src, dst, IOChecker.endChecker());
     }
 
     /**
@@ -563,7 +448,7 @@ public interface IOOperator {
         @Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst, int len
     ) throws IllegalArgumentException, IORuntimeException {
         IOChecker.checkLen(len);
-        return IOKit.readTo0(src, dst, len);
+        return IOKit.readTo0(src, dst, len, IOChecker.endChecker());
     }
 
     /**
@@ -577,40 +462,8 @@ public interface IOOperator {
      * read
      * @throws IORuntimeException if an I/O error occurs
      */
-    @SuppressWarnings("resource")
     default char @Nullable [] read(@Nonnull Reader src) throws IORuntimeException {
-        try {
-            char[] buf = new char[bufferSize()];
-            CharsBuilder builder = null;
-            int off = 0;
-            while (true) {
-                int readSize = src.read(buf, off, buf.length - off);
-                if (readSize < 0) {
-                    if (builder != null) {
-                        builder.append(buf, 0, off);
-                        return builder.toCharArray();
-                    }
-                    return off == 0 ? null : Arrays.copyOfRange(buf, 0, off);
-                }
-                off += readSize;
-                if (off == buf.length) {
-                    if (builder == null) {
-                        int r = src.read();
-                        if (r == -1) {
-                            return buf;
-                        }
-                        builder = new CharsBuilder(buf.length + 1);
-                        builder.append(buf);
-                        builder.append(r);
-                    } else {
-                        builder.append(buf);
-                    }
-                    off = 0;
-                }
-            }
-        } catch (IOException e) {
-            throw new IORuntimeException(e);
-        }
+        return IOKit.read0(src, IOChecker.endChecker());
     }
 
     /**
@@ -633,24 +486,7 @@ public interface IOOperator {
     default char @Nullable [] read(
         @Nonnull Reader src, int len
     ) throws IllegalArgumentException, IORuntimeException {
-        IOChecker.checkLen(len);
-        if (len == 0) {
-            return new char[0];
-        }
-        try {
-            char[] buf = new char[len];
-            int off = 0;
-            while (off < len) {
-                int readSize = src.read(buf, off, buf.length - off);
-                if (readSize < 0) {
-                    return off == 0 ? null : Arrays.copyOfRange(buf, 0, off);
-                }
-                off += readSize;
-            }
-            return buf;
-        } catch (IOException e) {
-            throw new IORuntimeException(e);
-        }
+        return IOKit.read0(src, len, IOChecker.endChecker());
     }
 
     /**
@@ -700,7 +536,7 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default long readTo(@Nonnull Reader src, @Nonnull Appendable dst) throws IORuntimeException {
-        return IOKit.readTo0(src, dst, bufferSize());
+        return IOKit.readTo0(src, dst, bufferSize(), IOChecker.endChecker());
     }
 
     /**
@@ -721,7 +557,7 @@ public interface IOOperator {
         @Nonnull Reader src, @Nonnull Appendable dst, long len
     ) throws IllegalArgumentException, IORuntimeException {
         IOChecker.checkLen(len);
-        return IOKit.readTo0(src, dst, len, bufferSize());
+        return IOKit.readTo0(src, dst, len, bufferSize(), IOChecker.endChecker());
     }
 
     /**
@@ -737,7 +573,7 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default int readTo(@Nonnull Reader src, char @Nonnull [] dst) throws IORuntimeException {
-        return IOKit.readTo0(src, dst, 0, dst.length);
+        return IOKit.readTo0(src, dst, 0, dst.length, IOChecker.endChecker());
     }
 
     /**
@@ -760,7 +596,7 @@ public interface IOOperator {
         @Nonnull Reader src, char @Nonnull [] dst, int off, int len
     ) throws IndexOutOfBoundsException, IORuntimeException {
         IOChecker.checkOffLen(dst.length, off, len);
-        return IOKit.readTo0(src, dst, off, len);
+        return IOKit.readTo0(src, dst, off, len, IOChecker.endChecker());
     }
 
     /**
@@ -781,7 +617,7 @@ public interface IOOperator {
         if (dst.remaining() == 0) {
             return 0;
         }
-        return IOKit.readTo0WithActualLen(src, dst, dst.remaining());
+        return IOKit.readTo0WithActualLen(src, dst, dst.remaining(), IOChecker.endChecker());
     }
 
     /**
@@ -804,6 +640,6 @@ public interface IOOperator {
         @Nonnull Reader src, @Nonnull CharBuffer dst, int len
     ) throws IllegalArgumentException, IORuntimeException {
         IOChecker.checkLen(len);
-        return IOKit.readTo0(src, dst, len);
+        return IOKit.readTo0(src, dst, len, IOChecker.endChecker());
     }
 }

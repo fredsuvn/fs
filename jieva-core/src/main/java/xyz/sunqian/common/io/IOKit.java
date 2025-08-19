@@ -2,7 +2,10 @@ package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.bytes.BytesBuilder;
+import xyz.sunqian.common.base.chars.CharsBuilder;
 import xyz.sunqian.common.base.chars.CharsKit;
+import xyz.sunqian.common.io.IOChecker.ReadChecker;
 
 import java.io.Closeable;
 import java.io.Flushable;
@@ -618,16 +621,166 @@ public class IOKit {
         return io.readTo(src, dst, len);
     }
 
+    @SuppressWarnings("resource")
+    static byte @Nullable [] read0(
+        @Nonnull InputStream src, @Nonnull ReadChecker readChecker
+    ) throws IORuntimeException {
+        try {
+            int available = src.available();
+            byte[] buf = new byte[available > 0 ? available : bufferSize()];
+            BytesBuilder builder = null;
+            int off = 0;
+            while (true) {
+                int readSize = src.read(buf, off, buf.length - off);
+                if (readChecker.readEnd(readSize)) {
+                    if (builder != null) {
+                        builder.append(buf, 0, off);
+                        return builder.toByteArray();
+                    }
+                    int actualCount = readChecker.actualCount(readSize, off);
+                    if (actualCount < 0) {
+                        return null;
+                    }
+                    return Arrays.copyOfRange(buf, 0, off);
+                }
+                off += readSize;
+                if (off == buf.length) {
+                    if (builder == null) {
+                        int r = src.read();
+                        if (readChecker.readEnd(r)) {
+                            return buf;
+                        }
+                        builder = new BytesBuilder(buf.length + 1);
+                        builder.append(buf);
+                        builder.append(r);
+                    } else {
+                        builder.append(buf);
+                    }
+                    off = 0;
+                }
+            }
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    static byte @Nullable [] read0(
+        @Nonnull InputStream src, int len, @Nonnull ReadChecker readChecker
+    ) throws IllegalArgumentException, IORuntimeException {
+        IOChecker.checkLen(len);
+        if (len == 0) {
+            return new byte[0];
+        }
+        try {
+            byte[] buf = new byte[len];
+            int off = 0;
+            while (off < len) {
+                int readSize = src.read(buf, off, buf.length - off);
+                if (readChecker.readEnd(readSize)) {
+                    int actualCount = readChecker.actualCount(readSize, off);
+                    if (actualCount < 0) {
+                        return null;
+                    }
+                    return Arrays.copyOfRange(buf, 0, off);
+                }
+                off += readSize;
+            }
+            return buf;
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    @SuppressWarnings("resource")
+    static @Nullable ByteBuffer read0(
+        @Nonnull ReadableByteChannel src, @Nonnull ReadChecker readChecker
+    ) throws IORuntimeException {
+        try {
+            BytesBuilder builder = null;
+            ByteBuffer dst = ByteBuffer.allocate(bufferSize());
+            int readSize;
+            while (true) {
+                readSize = src.read(dst);
+                if (readChecker.readEnd(readSize)) {
+                    break;
+                }
+                if (dst.remaining() == 0) {
+                    if (builder == null) {
+                        int lastIndex = dst.capacity() - 1;
+                        byte b = dst.get(lastIndex);
+                        dst.position(lastIndex);
+                        int r = src.read(dst);
+                        dst.position(0);
+                        if (readChecker.readEnd(r)) {
+                            return dst;
+                        }
+                        builder = new BytesBuilder(dst.capacity() + 1);
+                        dst.limit(lastIndex);
+                        builder.append(dst);
+                        builder.append(b);
+                        dst.limit(dst.capacity());
+                        builder.append(dst);
+                    } else {
+                        dst.flip();
+                        builder.append(dst);
+                    }
+                    dst.flip();
+                }
+            }
+            if (builder == null) {
+                int actualCount = readChecker.actualCount(readSize, dst.position());
+                if (actualCount < 0) {
+                    return null;
+                }
+                return ByteBuffer.wrap(Arrays.copyOfRange(dst.array(), 0, dst.position()));
+            } else {
+                if (dst.position() > 0) {
+                    dst.flip();
+                    builder.append(dst);
+                }
+                return builder.toByteBuffer();
+            }
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    static @Nullable ByteBuffer read0(
+        @Nonnull ReadableByteChannel src, int len, @Nonnull ReadChecker readChecker
+    ) throws IllegalArgumentException, IORuntimeException {
+        IOChecker.checkLen(len);
+        if (len == 0) {
+            return ByteBuffer.allocate(0);
+        }
+        try {
+            ByteBuffer dst = ByteBuffer.allocate(len);
+            while (dst.remaining() > 0) {
+                int readSize = src.read(dst);
+                if (readChecker.readEnd(readSize)) {
+                    int actualCount = readChecker.actualCount(readSize, dst.position());
+                    if (actualCount < 0) {
+                        return null;
+                    }
+                    return ByteBuffer.wrap(Arrays.copyOfRange(dst.array(), 0, dst.position()));
+                }
+            }
+            dst.flip();
+            return dst;
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
     static long readTo0(
-        @Nonnull InputStream src, @Nonnull OutputStream dst, int bufSize
+        @Nonnull InputStream src, @Nonnull OutputStream dst, int bufSize, @Nonnull ReadChecker readChecker
     ) throws IORuntimeException {
         try {
             byte[] buf = new byte[bufSize];
             long count = 0;
             while (true) {
                 int readSize = src.read(buf);
-                if (readSize < 0) {
-                    return count == 0 ? -1 : count;
+                if (readChecker.readEnd(readSize)) {
+                    return readChecker.actualCount(readSize, count);
                 }
                 dst.write(buf, 0, readSize);
                 count += readSize;
@@ -638,7 +791,7 @@ public class IOKit {
     }
 
     static long readTo0(
-        @Nonnull InputStream src, @Nonnull OutputStream dst, long len, int bufSize
+        @Nonnull InputStream src, @Nonnull OutputStream dst, long len, int bufSize, @Nonnull ReadChecker readChecker
     ) throws IORuntimeException {
         if (len == 0) {
             return 0;
@@ -648,8 +801,8 @@ public class IOKit {
             long count = 0;
             while (count < len) {
                 int readSize = src.read(buf, 0, (int) Math.min(buf.length, len - count));
-                if (readSize < 0) {
-                    return count == 0 ? -1 : count;
+                if (readChecker.readEnd(readSize)) {
+                    return readChecker.actualCount(readSize, count);
                 }
                 dst.write(buf, 0, readSize);
                 count += readSize;
@@ -661,7 +814,7 @@ public class IOKit {
     }
 
     static long readTo0(
-        @Nonnull InputStream src, @Nonnull WritableByteChannel dst, int bufSize
+        @Nonnull InputStream src, @Nonnull WritableByteChannel dst, int bufSize, @Nonnull ReadChecker readChecker
     ) throws IORuntimeException {
         try {
             byte[] arr = new byte[bufSize];
@@ -669,8 +822,8 @@ public class IOKit {
             long count = 0;
             while (true) {
                 int readSize = src.read(arr);
-                if (readSize < 0) {
-                    return count == 0 ? -1 : count;
+                if (readChecker.readEnd(readSize)) {
+                    return readChecker.actualCount(readSize, count);
                 }
                 buf.position(0);
                 buf.limit(readSize);
@@ -683,7 +836,11 @@ public class IOKit {
     }
 
     static long readTo0(
-        @Nonnull InputStream src, @Nonnull WritableByteChannel dst, long len, int bufSize
+        @Nonnull InputStream src,
+        @Nonnull WritableByteChannel dst,
+        long len,
+        int bufSize,
+        @Nonnull ReadChecker readChecker
     ) throws IORuntimeException {
         if (len == 0) {
             return 0;
@@ -694,8 +851,8 @@ public class IOKit {
             long count = 0;
             while (count < len) {
                 int readSize = src.read(arr, 0, (int) Math.min(arr.length, len - count));
-                if (readSize < 0) {
-                    return count == 0 ? -1 : count;
+                if (readChecker.readEnd(readSize)) {
+                    return readChecker.actualCount(readSize, count);
                 }
                 buf.position(0);
                 buf.limit(readSize);
@@ -709,7 +866,7 @@ public class IOKit {
     }
 
     static int readTo0(
-        @Nonnull InputStream src, byte @Nonnull [] dst, int off, int len
+        @Nonnull InputStream src, byte @Nonnull [] dst, int off, int len, @Nonnull ReadChecker readChecker
     ) throws IORuntimeException {
         if (len == 0) {
             return 0;
@@ -718,8 +875,8 @@ public class IOKit {
             int count = 0;
             while (count < len) {
                 int readSize = src.read(dst, off + count, len - count);
-                if (readSize < 0) {
-                    return count == 0 ? -1 : count;
+                if (readChecker.readEnd(readSize)) {
+                    return readChecker.actualCount(readSize, count);
                 }
                 count += readSize;
             }
@@ -730,26 +887,27 @@ public class IOKit {
     }
 
     static int readTo0(
-        @Nonnull InputStream src, @Nonnull ByteBuffer dst, int len
+        @Nonnull InputStream src, @Nonnull ByteBuffer dst, int len, @Nonnull ReadChecker readChecker
     ) throws IORuntimeException {
         if (len == 0 || dst.remaining() == 0) {
             return 0;
         }
-        return readTo0WithActualLen(src, dst, Math.min(dst.remaining(), len));
+        return readTo0WithActualLen(src, dst, Math.min(dst.remaining(), len), readChecker);
     }
 
     static long readTo0(
         @Nonnull ReadableByteChannel src,
         @Nonnull OutputStream dst,
-        int bufSize
+        int bufSize,
+        @Nonnull ReadChecker readChecker
     ) throws IORuntimeException {
         try {
             ByteBuffer buf = ByteBuffer.allocate(bufSize);
             long count = 0;
             while (true) {
                 int readSize = src.read(buf);
-                if (readSize < 0) {
-                    return count == 0 ? -1 : count;
+                if (readChecker.readEnd(readSize)) {
+                    return readChecker.actualCount(readSize, count);
                 }
                 buf.flip();
                 BufferKit.readTo(buf, dst);
@@ -765,7 +923,8 @@ public class IOKit {
         @Nonnull ReadableByteChannel src,
         @Nonnull OutputStream dst,
         long len,
-        int bufSize
+        int bufSize,
+        @Nonnull ReadChecker readChecker
     ) throws IORuntimeException {
         if (len == 0) {
             return 0;
@@ -778,8 +937,8 @@ public class IOKit {
                 int actualSize = (int) Math.min(actualBufSize, len - count);
                 buf.limit(actualSize);
                 int readSize = src.read(buf);
-                if (readSize < 0) {
-                    return count == 0 ? -1 : count;
+                if (readChecker.readEnd(readSize)) {
+                    return readChecker.actualCount(readSize, count);
                 }
                 buf.flip();
                 BufferKit.readTo(buf, dst);
@@ -795,15 +954,16 @@ public class IOKit {
     static long readTo0(
         @Nonnull ReadableByteChannel src,
         @Nonnull WritableByteChannel dst,
-        int bufSize
+        int bufSize,
+        @Nonnull ReadChecker readChecker
     ) throws IORuntimeException {
         try {
             ByteBuffer buf = ByteBuffer.allocate(bufSize);
             long count = 0;
             while (true) {
                 int readSize = src.read(buf);
-                if (readSize < 0) {
-                    return count == 0 ? -1 : count;
+                if (readChecker.readEnd(readSize)) {
+                    return readChecker.actualCount(readSize, count);
                 }
                 buf.flip();
                 BufferKit.readTo(buf, dst);
@@ -819,7 +979,8 @@ public class IOKit {
         @Nonnull ReadableByteChannel src,
         @Nonnull WritableByteChannel dst,
         long len,
-        int bufSize
+        int bufSize,
+        @Nonnull ReadChecker readChecker
     ) throws IORuntimeException {
         if (len == 0) {
             return 0;
@@ -832,8 +993,8 @@ public class IOKit {
                 int actualSize = (int) Math.min(actualBufSize, len - count);
                 buf.limit(actualSize);
                 int readSize = src.read(buf);
-                if (readSize < 0) {
-                    return count == 0 ? -1 : count;
+                if (readChecker.readEnd(readSize)) {
+                    return readChecker.actualCount(readSize, count);
                 }
                 buf.flip();
                 BufferKit.readTo(buf, dst);
@@ -847,7 +1008,7 @@ public class IOKit {
     }
 
     static int readTo0(
-        @Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst
+        @Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst, @Nonnull ReadChecker readChecker
     ) throws IORuntimeException {
         if (dst.remaining() == 0) {
             return 0;
@@ -856,8 +1017,8 @@ public class IOKit {
             int count = 0;
             while (dst.hasRemaining()) {
                 int readSize = src.read(dst);
-                if (readSize < 0) {
-                    return count == 0 ? -1 : count;
+                if (readChecker.readEnd(readSize)) {
+                    return readChecker.actualCount(readSize, count);
                 }
                 count += readSize;
             }
@@ -868,7 +1029,7 @@ public class IOKit {
     }
 
     static int readTo0(
-        @Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst, int len
+        @Nonnull ReadableByteChannel src, @Nonnull ByteBuffer dst, int len, @Nonnull ReadChecker readChecker
     ) throws IORuntimeException {
         if (len == 0) {
             return 0;
@@ -881,7 +1042,7 @@ public class IOKit {
         int oldLimit = dst.limit();
         int actualLen = Math.min(remaining, len);
         dst.limit(pos + actualLen);
-        int ret = readTo0(src, dst);
+        int ret = readTo0(src, dst, readChecker);
         if (ret <= 0) {
             return ret;
         }
@@ -891,12 +1052,12 @@ public class IOKit {
     }
 
     static int readTo0WithActualLen(
-        @Nonnull InputStream src, @Nonnull ByteBuffer dst, int actualLen
+        @Nonnull InputStream src, @Nonnull ByteBuffer dst, int actualLen, @Nonnull ReadChecker readChecker
     ) throws IORuntimeException {
         try {
             if (dst.hasArray()) {
                 int pos = dst.position();
-                int ret = readTo0(src, dst.array(), BufferKit.arrayStartIndex(dst), actualLen);
+                int ret = readTo0(src, dst.array(), BufferKit.arrayStartIndex(dst), actualLen, readChecker);
                 if (ret <= 0) {
                     return ret;
                 }
@@ -904,7 +1065,7 @@ public class IOKit {
                 return ret;
             } else {
                 byte[] buf = new byte[actualLen];
-                int ret = readTo0(src, buf, 0, buf.length);
+                int ret = readTo0(src, buf, 0, buf.length, readChecker);
                 if (ret <= 0) {
                     return ret;
                 }
@@ -916,16 +1077,85 @@ public class IOKit {
         }
     }
 
+    @SuppressWarnings("resource")
+    static char @Nullable [] read0(
+        @Nonnull Reader src, @Nonnull ReadChecker readChecker
+    ) throws IORuntimeException {
+        try {
+            char[] buf = new char[bufferSize()];
+            CharsBuilder builder = null;
+            int off = 0;
+            while (true) {
+                int readSize = src.read(buf, off, buf.length - off);
+                if (readChecker.readEnd(readSize)) {
+                    if (builder != null) {
+                        builder.append(buf, 0, off);
+                        return builder.toCharArray();
+                    }
+                    int actualCount = readChecker.actualCount(readSize, off);
+                    if (actualCount < 0) {
+                        return null;
+                    }
+                    return Arrays.copyOfRange(buf, 0, off);
+                }
+                off += readSize;
+                if (off == buf.length) {
+                    if (builder == null) {
+                        int r = src.read();
+                        if (readChecker.readEnd(r)) {
+                            return buf;
+                        }
+                        builder = new CharsBuilder(buf.length + 1);
+                        builder.append(buf);
+                        builder.append(r);
+                    } else {
+                        builder.append(buf);
+                    }
+                    off = 0;
+                }
+            }
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    static char @Nullable [] read0(
+        @Nonnull Reader src, int len, @Nonnull ReadChecker readChecker
+    ) throws IllegalArgumentException, IORuntimeException {
+        IOChecker.checkLen(len);
+        if (len == 0) {
+            return new char[0];
+        }
+        try {
+            char[] buf = new char[len];
+            int off = 0;
+            while (off < len) {
+                int readSize = src.read(buf, off, buf.length - off);
+                if (readChecker.readEnd(readSize)) {
+                    int actualCount = readChecker.actualCount(readSize, off);
+                    if (actualCount < 0) {
+                        return null;
+                    }
+                    return Arrays.copyOfRange(buf, 0, off);
+                }
+                off += readSize;
+            }
+            return buf;
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
     static long readTo0(
-        @Nonnull Reader src, @Nonnull Appendable dst, int bufSize
+        @Nonnull Reader src, @Nonnull Appendable dst, int bufSize, @Nonnull ReadChecker readChecker
     ) throws IORuntimeException {
         try {
             char[] buf = new char[bufSize];
             long count = 0;
             while (true) {
                 int readSize = src.read(buf);
-                if (readSize < 0) {
-                    return count == 0 ? -1 : count;
+                if (readChecker.readEnd(readSize)) {
+                    return readChecker.actualCount(readSize, count);
                 }
                 IOKit.write(dst, buf, 0, readSize);
                 count += readSize;
@@ -936,7 +1166,7 @@ public class IOKit {
     }
 
     static long readTo0(
-        @Nonnull Reader src, @Nonnull Appendable dst, long len, int bufSize
+        @Nonnull Reader src, @Nonnull Appendable dst, long len, int bufSize, @Nonnull ReadChecker readChecker
     ) throws IORuntimeException {
         if (len == 0) {
             return 0;
@@ -946,8 +1176,8 @@ public class IOKit {
             long count = 0;
             while (count < len) {
                 int readSize = src.read(buf, 0, (int) Math.min(buf.length, len - count));
-                if (readSize < 0) {
-                    return count == 0 ? -1 : count;
+                if (readChecker.readEnd(readSize)) {
+                    return readChecker.actualCount(readSize, count);
                 }
                 IOKit.write(dst, buf, 0, readSize);
                 count += readSize;
@@ -959,7 +1189,7 @@ public class IOKit {
     }
 
     static int readTo0(
-        @Nonnull Reader src, char @Nonnull [] dst, int off, int len
+        @Nonnull Reader src, char @Nonnull [] dst, int off, int len, @Nonnull ReadChecker readChecker
     ) throws IORuntimeException {
         if (len == 0) {
             return 0;
@@ -968,8 +1198,8 @@ public class IOKit {
             int count = 0;
             while (count < len) {
                 int readSize = src.read(dst, off + count, len - count);
-                if (readSize < 0) {
-                    return count == 0 ? -1 : count;
+                if (readChecker.readEnd(readSize)) {
+                    return readChecker.actualCount(readSize, count);
                 }
                 count += readSize;
             }
@@ -980,21 +1210,21 @@ public class IOKit {
     }
 
     static int readTo0(
-        @Nonnull Reader src, @Nonnull CharBuffer dst, int len
+        @Nonnull Reader src, @Nonnull CharBuffer dst, int len, @Nonnull ReadChecker readChecker
     ) throws IORuntimeException {
         if (len == 0 || dst.remaining() == 0) {
             return 0;
         }
-        return readTo0WithActualLen(src, dst, Math.min(dst.remaining(), len));
+        return readTo0WithActualLen(src, dst, Math.min(dst.remaining(), len), readChecker);
     }
 
     static int readTo0WithActualLen(
-        @Nonnull Reader src, @Nonnull CharBuffer dst, int actualLen
+        @Nonnull Reader src, @Nonnull CharBuffer dst, int actualLen, @Nonnull ReadChecker readChecker
     ) throws IORuntimeException {
         try {
             if (dst.hasArray()) {
                 int pos = dst.position();
-                int ret = readTo0(src, dst.array(), BufferKit.arrayStartIndex(dst), actualLen);
+                int ret = readTo0(src, dst.array(), BufferKit.arrayStartIndex(dst), actualLen, readChecker);
                 if (ret <= 0) {
                     return ret;
                 }
@@ -1002,7 +1232,7 @@ public class IOKit {
                 return ret;
             } else {
                 char[] buf = new char[actualLen];
-                int ret = readTo0(src, buf, 0, buf.length);
+                int ret = readTo0(src, buf, 0, buf.length, readChecker);
                 if (ret <= 0) {
                     return ret;
                 }
