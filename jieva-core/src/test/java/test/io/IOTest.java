@@ -1,6 +1,5 @@
 package test.io;
 
-import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.chars.CharsBuilder;
@@ -11,8 +10,6 @@ import xyz.sunqian.common.io.IORuntimeCloseable;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.test.DataTest;
 import xyz.sunqian.test.ErrorAppender;
-import xyz.sunqian.test.ReadOps;
-import xyz.sunqian.test.TestInputStream;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -20,7 +17,6 @@ import java.io.CharArrayReader;
 import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -226,48 +222,6 @@ public class IOTest implements DataTest {
             OutputStream dst2 = IOKit.newOutputStream(new byte[1]);
             expectThrows(IORuntimeException.class, () -> IOKit.write(dst2, str));
         }
-    }
-
-    @Test
-    public void testAvailable() throws Exception {
-        byte[] data = randomBytes(10);
-        class In extends InputStream {
-
-            private final int avai;
-            private final int read;
-
-            In(int avai, int read) {
-                this.avai = avai;
-                this.read = read;
-            }
-
-            @Override
-            public int available() throws IOException {
-                return avai;
-            }
-
-            @Override
-            public int read() throws IOException {
-                return -1;
-            }
-
-            @Override
-            public int read(@NotNull byte[] b, int off, int len) throws IOException {
-                if (read < 0) {
-                    return read;
-                }
-                System.arraycopy(data, 0, b, off, len);
-                return read;
-            }
-        }
-        assertEquals(IOKit.available(new In(5, 5)), Arrays.copyOf(data, 5));
-        assertEquals(IOKit.available(new In(6, 5)), Arrays.copyOf(data, 5));
-        assertEquals(IOKit.available(new In(-1, 5)), Arrays.copyOf(data, 0));
-        assertEquals(IOKit.available(new In(0, 5)), Arrays.copyOf(data, 0));
-        assertEquals(IOKit.available(new In(5, -5)), Arrays.copyOf(data, 0));
-        TestInputStream tin = new TestInputStream(new ByteArrayInputStream(data));
-        tin.setNextOperation(ReadOps.THROW);
-        expectThrows(IORuntimeException.class, () -> IOKit.available(tin));
     }
 
     @Test

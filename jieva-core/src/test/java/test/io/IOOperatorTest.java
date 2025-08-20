@@ -1,5 +1,6 @@
 package test.io;
 
+import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.chars.CharsBuilder;
@@ -16,6 +17,9 @@ import xyz.sunqian.test.TestReader;
 
 import java.io.ByteArrayInputStream;
 import java.io.CharArrayReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.Channels;
@@ -813,6 +817,317 @@ public class IOOperatorTest implements DataTest {
     }
 
     @Test
+    public void testAvailableBytes() throws Exception {
+        testAvailableBytes(16);
+        testAvailableBytes(32);
+        {
+            // read 0
+            ByteArrayInputStream empty = new ByteArrayInputStream(new byte[0]);
+            ReadableByteChannel emptyCh = Channels.newChannel(empty);
+            assertNull(IOKit.available(empty));
+            assertNull(IOKit.available(empty, 1));
+            assertNull(IOKit.available(emptyCh));
+            assertNull(IOKit.available(emptyCh, 1));
+            BytesBuilder builder = new BytesBuilder();
+            assertEquals(IOKit.availableTo(empty, builder), -1);
+            assertEquals(IOKit.availableTo(empty, builder, 1), -1);
+            assertEquals(IOKit.availableTo(empty, Channels.newChannel(builder)), -1);
+            assertEquals(IOKit.availableTo(empty, Channels.newChannel(builder), 1), -1);
+            assertEquals(IOKit.availableTo(empty, new byte[1]), -1);
+            assertEquals(IOKit.availableTo(empty, new byte[1], 0, 1), -1);
+            assertEquals(IOKit.availableTo(empty, ByteBuffer.allocate(1)), -1);
+            assertEquals(IOKit.availableTo(empty, ByteBuffer.allocate(1), 1), -1);
+            assertEquals(IOKit.availableTo(emptyCh, builder), -1);
+            assertEquals(IOKit.availableTo(emptyCh, builder, 1), -1);
+            assertEquals(IOKit.availableTo(emptyCh, Channels.newChannel(builder)), -1);
+            assertEquals(IOKit.availableTo(emptyCh, Channels.newChannel(builder), 1), -1);
+            assertEquals(IOKit.availableTo(emptyCh, new byte[1]), -1);
+            assertEquals(IOKit.availableTo(emptyCh, new byte[1], 0, 1), -1);
+            assertEquals(IOKit.availableTo(emptyCh, ByteBuffer.allocate(1)), -1);
+            assertEquals(IOKit.availableTo(emptyCh, ByteBuffer.allocate(1), 1), -1);
+            assertEquals(IOKit.availableTo(empty, ByteBuffer.allocate(0)), 0);
+            assertEquals(IOKit.availableTo(empty, ByteBuffer.allocate(0), 1), 0);
+            assertEquals(IOKit.availableTo(empty, ByteBuffer.allocate(1), 0), 0);
+            assertEquals(IOKit.availableTo(emptyCh, ByteBuffer.allocate(0)), 0);
+            assertEquals(IOKit.availableTo(emptyCh, ByteBuffer.allocate(0), 1), 0);
+            assertEquals(IOKit.availableTo(emptyCh, ByteBuffer.allocate(1), 0), 0);
+        }
+    }
+
+    public void testAvailableBytes(int size) throws Exception {
+        byte[] src = randomBytes(size);
+        byte[] empty = new byte[0];
+        ByteBuffer emptyBuf = ByteBuffer.allocate(0);
+
+        class In extends InputStream {
+
+            private final byte[] data = src;
+            private int pos = 0;
+            private boolean zero = true;
+
+            @Override
+            public int available() {
+                if (pos >= data.length) {
+                    return 0;
+                }
+                if (zero) {
+                    return 0;
+                }
+                return 1;
+            }
+
+            @Override
+            public int read() {
+                return pos < data.length ? data[pos++] & 0xFF : -1;
+            }
+
+            @Override
+            public int read(@NotNull byte[] b, int off, int len) {
+                if (pos >= data.length) {
+                    return -1;
+                }
+                int readSize = available();
+                if (readSize == 0) {
+                    zero = false;
+                    return 0;
+                } else {
+                    zero = true;
+                    b[off] = data[pos++];
+                    return 1;
+                }
+            }
+        }
+
+        class Cin implements ReadableByteChannel {
+
+            private final byte[] data = src;
+            private int pos = 0;
+            private boolean zero = true;
+
+            @Override
+            public int read(ByteBuffer dst) throws IOException {
+                if (pos >= data.length) {
+                    return -1;
+                }
+                if (zero) {
+                    zero = false;
+                    return 0;
+                } else {
+                    zero = true;
+                    dst.put(data[pos++]);
+                    return 1;
+                }
+            }
+
+            @Override
+            public boolean isOpen() {
+                return false;
+            }
+
+            @Override
+            public void close() {
+            }
+        }
+        {
+            // available bytes
+            In in1 = new In();
+            BytesBuilder builder = new BytesBuilder();
+            byte[] b1 = IOKit.available(in1);
+            assertEquals(b1, empty);
+            while (true) {
+                byte[] b = IOKit.available(in1);
+                if (b == null) {
+                    break;
+                }
+                builder.append(b);
+            }
+            assertEquals(builder.toByteArray(), src);
+            builder.reset();
+            In in2 = new In();
+            byte[] b2 = IOKit.available(in2, size * 2);
+            assertEquals(b2, empty);
+            while (true) {
+                byte[] b = IOKit.available(in2);
+                if (b == null) {
+                    break;
+                }
+                builder.append(b);
+            }
+            assertEquals(builder.toByteArray(), src);
+            builder.reset();
+            ReadableByteChannel c3 = new Cin();
+            ByteBuffer b3 = IOKit.available(c3);
+            assertEquals(b3, emptyBuf);
+            while (true) {
+                ByteBuffer b = IOKit.available(c3);
+                if (b == null) {
+                    break;
+                }
+                builder.append(b);
+            }
+            assertEquals(builder.toByteArray(), src);
+            builder.reset();
+            ReadableByteChannel c4 = new Cin();
+            ByteBuffer b4 = IOKit.available(c4, size * 2);
+            assertEquals(b4, emptyBuf);
+            while (true) {
+                ByteBuffer b = IOKit.available(c4);
+                if (b == null) {
+                    break;
+                }
+                builder.append(b);
+            }
+            assertEquals(builder.toByteArray(), src);
+            builder.reset();
+        }
+        {
+            // available to OutputStream
+            In in1 = new In();
+            BytesBuilder builder = new BytesBuilder();
+            assertEquals(IOKit.availableTo(in1, builder), 0);
+            while (true) {
+                long readSize = IOKit.availableTo(in1, builder);
+                if (readSize < 0) {
+                    break;
+                }
+            }
+            assertEquals(builder.toByteArray(), src);
+            builder.reset();
+            In in2 = new In();
+            assertEquals(IOKit.availableTo(in2, builder, size * 2L), 0);
+            while (true) {
+                long readSize = IOKit.availableTo(in2, builder, size * 2L);
+                if (readSize < 0) {
+                    break;
+                }
+            }
+            assertEquals(builder.toByteArray(), src);
+            builder.reset();
+            ReadableByteChannel c3 = new Cin();
+            assertEquals(IOKit.availableTo(c3, builder), 0);
+            while (true) {
+                long readSize = IOKit.availableTo(c3, builder);
+                if (readSize < 0) {
+                    break;
+                }
+            }
+            assertEquals(builder.toByteArray(), src);
+            builder.reset();
+            ReadableByteChannel c4 = new Cin();
+            assertEquals(IOKit.availableTo(c4, builder, size * 2L), 0);
+            while (true) {
+                long readSize = IOKit.availableTo(c4, builder, size * 2L);
+                if (readSize < 0) {
+                    break;
+                }
+            }
+            assertEquals(builder.toByteArray(), src);
+            builder.reset();
+        }
+        {
+            // available to Channel
+            In in1 = new In();
+            BytesBuilder builder = new BytesBuilder();
+            WritableByteChannel outChannel = Channels.newChannel(builder);
+            assertEquals(IOKit.availableTo(in1, builder), 0);
+            while (true) {
+                long readSize = IOKit.availableTo(in1, outChannel);
+                if (readSize < 0) {
+                    break;
+                }
+            }
+            assertEquals(builder.toByteArray(), src);
+            builder.reset();
+            In in2 = new In();
+            assertEquals(IOKit.availableTo(in2, builder, size * 2L), 0);
+            while (true) {
+                long readSize = IOKit.availableTo(in2, outChannel, size * 2L);
+                if (readSize < 0) {
+                    break;
+                }
+            }
+            assertEquals(builder.toByteArray(), src);
+            builder.reset();
+            ReadableByteChannel c3 = new Cin();
+            assertEquals(IOKit.availableTo(c3, builder), 0);
+            while (true) {
+                long readSize = IOKit.availableTo(c3, outChannel);
+                if (readSize < 0) {
+                    break;
+                }
+            }
+            assertEquals(builder.toByteArray(), src);
+            builder.reset();
+            ReadableByteChannel c4 = new Cin();
+            assertEquals(IOKit.availableTo(c4, builder, size * 2L), 0);
+            while (true) {
+                long readSize = IOKit.availableTo(c4, outChannel, size * 2L);
+                if (readSize < 0) {
+                    break;
+                }
+            }
+            assertEquals(builder.toByteArray(), src);
+            builder.reset();
+        }
+        {
+            // available to array
+            In in1 = new In();
+            byte[] dst = new byte[size * 2];
+            int c = 0;
+            assertEquals(IOKit.availableTo(in1, dst), 0);
+            while (c < size) {
+                long readSize = IOKit.availableTo(in1, dst, c, size - c);
+                if (readSize < 0) {
+                    break;
+                }
+                c += (int) readSize;
+            }
+            assertEquals(Arrays.copyOf(dst, size), src);
+            dst = new byte[size * 2];
+            c = 0;
+            Cin c1 = new Cin();
+            assertEquals(IOKit.availableTo(c1, dst), 0);
+            while (c < size) {
+                long readSize = IOKit.availableTo(c1, dst, c, size - c);
+                if (readSize < 0) {
+                    break;
+                }
+                c += (int) readSize;
+            }
+            assertEquals(Arrays.copyOf(dst, size), src);
+        }
+        {
+            // available to buffer
+            In in1 = new In();
+            ByteBuffer dst = ByteBuffer.allocate(size * 2);
+            int c = 0;
+            assertEquals(IOKit.availableTo(in1, dst), 0);
+            while (c < size) {
+                long readSize = IOKit.availableTo(in1, dst, size * 2);
+                if (readSize < 0) {
+                    break;
+                }
+                c += (int) readSize;
+            }
+            dst.flip();
+            assertEquals(BufferKit.read(dst), src);
+            dst = ByteBuffer.allocate(size * 2);
+            c = 0;
+            Cin c1 = new Cin();
+            assertEquals(IOKit.availableTo(c1, dst), 0);
+            while (c < size) {
+                long readSize = IOKit.availableTo(c1, dst, size * 2);
+                if (readSize < 0) {
+                    break;
+                }
+                c += (int) readSize;
+            }
+            dst.flip();
+            assertEquals(BufferKit.read(dst), src);
+        }
+    }
+
+    @Test
     public void testReadChars() throws Exception {
         testReadChars(64);
         testReadChars(128);
@@ -1186,6 +1501,187 @@ public class IOOperatorTest implements DataTest {
             assertEquals(dst.flip(), CharBuffer.wrap(
                 (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
             ));
+        }
+    }
+
+    @Test
+    public void testAvailableChars() throws Exception {
+        testAvailableChars(16);
+        testAvailableChars(32);
+        {
+            // read 0
+            CharArrayReader empty = new CharArrayReader(new char[0]);
+            assertNull(IOKit.available(empty));
+            assertNull(IOKit.available(empty, 1));
+            assertNull(IOKit.availableString(empty));
+            assertNull(IOKit.availableString(empty, 1));
+            CharsBuilder builder = new CharsBuilder();
+            assertEquals(IOKit.availableTo(empty, builder), -1);
+            assertEquals(IOKit.availableTo(empty, builder, 1), -1);
+            assertEquals(IOKit.availableTo(empty, new char[1]), -1);
+            assertEquals(IOKit.availableTo(empty, new char[1], 0, 1), -1);
+            assertEquals(IOKit.availableTo(empty, CharBuffer.allocate(1)), -1);
+            assertEquals(IOKit.availableTo(empty, CharBuffer.allocate(1), 1), -1);
+            assertEquals(IOKit.availableTo(empty, CharBuffer.allocate(0)), 0);
+            assertEquals(IOKit.availableTo(empty, CharBuffer.allocate(0), 1), 0);
+            assertEquals(IOKit.availableTo(empty, CharBuffer.allocate(1), 0), 0);
+        }
+    }
+
+    public void testAvailableChars(int size) throws Exception {
+        char[] src = randomChars(size);
+        char[] empty = new char[0];
+        String emptyStr = "";
+        CharBuffer emptyBuf = CharBuffer.allocate(0);
+
+        class In extends Reader {
+
+            private final char[] data = src;
+            private int pos = 0;
+            private boolean zero = true;
+
+            private int available() {
+                if (pos >= data.length) {
+                    return 0;
+                }
+                if (zero) {
+                    return 0;
+                }
+                return 1;
+            }
+
+            @Override
+            public int read() {
+                return pos < data.length ? data[pos++] & 0xFF : -1;
+            }
+
+            @Override
+            public int read(@NotNull char[] b, int off, int len) {
+                if (pos >= data.length) {
+                    return -1;
+                }
+                int readSize = available();
+                if (readSize == 0) {
+                    zero = false;
+                    return 0;
+                } else {
+                    zero = true;
+                    b[off] = data[pos++];
+                    return 1;
+                }
+            }
+
+            @Override
+            public void close() {
+            }
+        }
+
+        {
+            // available chars
+            In in1 = new In();
+            CharsBuilder builder = new CharsBuilder();
+            char[] s1 = IOKit.available(in1);
+            assertEquals(s1, empty);
+            while (true) {
+                char[] b = IOKit.available(in1);
+                if (b == null) {
+                    break;
+                }
+                builder.append(b);
+            }
+            assertEquals(builder.toCharArray(), src);
+            builder.reset();
+            In in2 = new In();
+            String s2 = IOKit.availableString(in2);
+            assertEquals(s2, emptyStr);
+            while (true) {
+                String b = IOKit.availableString(in2);
+                if (b == null) {
+                    break;
+                }
+                builder.append(b);
+            }
+            assertEquals(builder.toCharArray(), src);
+            builder.reset();
+            In in3 = new In();
+            char[] s3 = IOKit.available(in3, size * 2);
+            assertEquals(s3, empty);
+            while (true) {
+                char[] b = IOKit.available(in3);
+                if (b == null) {
+                    break;
+                }
+                builder.append(b);
+            }
+            assertEquals(builder.toCharArray(), src);
+            builder.reset();
+            In in4 = new In();
+            String s4 = IOKit.availableString(in4, size * 2);
+            assertEquals(s4, emptyStr);
+            while (true) {
+                String b = IOKit.availableString(in4);
+                if (b == null) {
+                    break;
+                }
+                builder.append(b);
+            }
+            assertEquals(builder.toCharArray(), src);
+            builder.reset();
+        }
+        {
+            // available to Appender
+            In in1 = new In();
+            CharsBuilder builder = new CharsBuilder();
+            assertEquals(IOKit.availableTo(in1, builder), 0);
+            while (true) {
+                long readSize = IOKit.availableTo(in1, builder);
+                if (readSize < 0) {
+                    break;
+                }
+            }
+            assertEquals(builder.toCharArray(), src);
+            builder.reset();
+            In in2 = new In();
+            assertEquals(IOKit.availableTo(in2, builder, size * 2L), 0);
+            while (true) {
+                long readSize = IOKit.availableTo(in2, builder, size * 2L);
+                if (readSize < 0) {
+                    break;
+                }
+            }
+            assertEquals(builder.toCharArray(), src);
+            builder.reset();
+        }
+        {
+            // available to array
+            In in1 = new In();
+            char[] dst = new char[size * 2];
+            int c = 0;
+            assertEquals(IOKit.availableTo(in1, dst), 0);
+            while (c < size) {
+                long readSize = IOKit.availableTo(in1, dst, c, size - c);
+                if (readSize < 0) {
+                    break;
+                }
+                c += (int) readSize;
+            }
+            assertEquals(Arrays.copyOf(dst, size), src);
+        }
+        {
+            // available to buffer
+            In in1 = new In();
+            CharBuffer dst = CharBuffer.allocate(size * 2);
+            int c = 0;
+            assertEquals(IOKit.availableTo(in1, dst), 0);
+            while (c < size) {
+                long readSize = IOKit.availableTo(in1, dst, size * 2);
+                if (readSize < 0) {
+                    break;
+                }
+                c += (int) readSize;
+            }
+            dst.flip();
+            assertEquals(BufferKit.read(dst), src);
         }
     }
 
