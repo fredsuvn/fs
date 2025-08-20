@@ -844,8 +844,8 @@ public interface IOOperator {
     }
 
     /**
-     * Reads available data from the input stream into the destination buffer, until no data is available, and returns
-     * the actual number of bytes read to.
+     * Reads available data from the input stream into the destination buffer, until reaches the end of the buffer or no
+     * data is available, and returns the actual number of bytes read to.
      * <p>
      * If the destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if reaches the end of the
      * input stream and no data is read, returns {@code -1}.
@@ -864,7 +864,8 @@ public interface IOOperator {
 
     /**
      * Reads a specified length of data from the input stream into the destination buffer, until the read number reaches
-     * the specified length or no data is available, and returns the actual number of bytes read to.
+     * the specified length or reaches the end of the buffer or no data is available, and returns the actual number of
+     * bytes read to.
      * <p>
      * If the specified length or destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if
      * reaches the end of the input stream and no data is read, returns {@code -1}.
@@ -1004,8 +1005,8 @@ public interface IOOperator {
     }
 
     /**
-     * Reads available data from the source channel into the destination buffer, until no data is available, and returns
-     * the actual number of bytes read to.
+     * Reads available data from the source channel into the destination buffer, until reaches the end of the buffer or
+     * no data is available, and returns the actual number of bytes read to.
      * <p>
      * If the destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if reaches the end of the
      * source channel and no data is read, returns {@code -1}.
@@ -1024,7 +1025,8 @@ public interface IOOperator {
 
     /**
      * Reads a specified length of data from the source channel into the destination buffer, until the read number
-     * reaches the specified length or no data is available, and returns the actual number of bytes read to.
+     * reaches the specified length or reaches the end of the buffer or no data is available, and returns the actual
+     * number of bytes read to.
      * <p>
      * If the specified length or destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if
      * reaches the end of the source channel and no data is read, returns {@code -1}.
@@ -1197,8 +1199,8 @@ public interface IOOperator {
     }
 
     /**
-     * Reads available data from the reader into the destination buffer, until no data is available, and returns the
-     * actual number of chars read to.
+     * Reads available data from the reader into the destination buffer, until reaches the end of the buffer or no data
+     * is available, and returns the actual number of chars read to.
      * <p>
      * If the destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if reaches the end of the
      * reader and no data is read, returns {@code -1}.
@@ -1220,7 +1222,8 @@ public interface IOOperator {
 
     /**
      * Reads a specified length of data from the reader into the destination buffer, until the read number reaches the
-     * specified length or no data is available, and returns the actual number of chars read to.
+     * specified length or reaches the end of the buffer or no data is available, and returns the actual number of chars
+     * read to.
      * <p>
      * If the specified length or destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if
      * reaches the end of the reader and no data is read, returns {@code -1}.
