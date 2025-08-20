@@ -3,6 +3,7 @@ package xyz.sunqian.common.io;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.bytes.BytesKit;
 import xyz.sunqian.common.base.math.MathKit;
+import xyz.sunqian.common.io.IOChecker.ReadChecker;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -140,48 +141,147 @@ final class ByteReaderImpl {
 
         @Override
         public long readTo(@Nonnull OutputStream dst) throws IORuntimeException {
-            return IOKit.readTo0(src, dst, bufSize, IOChecker.endChecker());
+            return readTo(dst, IOChecker.endChecker());
         }
 
         @Override
         public long readTo(@Nonnull OutputStream dst, long len) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkLen(len);
-            return IOKit.readTo0(src, dst, len, bufSize, IOChecker.endChecker());
+            return readTo(dst, len, IOChecker.endChecker());
         }
 
         @Override
         public long readTo(@Nonnull WritableByteChannel dst) throws IORuntimeException {
-            return IOKit.readTo0(src, dst, bufSize, IOChecker.endChecker());
+            return readTo(dst, IOChecker.endChecker());
         }
 
         @Override
         public long readTo(
             @Nonnull WritableByteChannel dst, long len
         ) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkLen(len);
-            return IOKit.readTo0(src, dst, len, bufSize, IOChecker.endChecker());
+            return readTo(dst, len, IOChecker.endChecker());
         }
 
         @Override
         public int readTo(byte @Nonnull [] dst) throws IORuntimeException {
-            return IOKit.readTo0(src, dst, 0, dst.length, IOChecker.endChecker());
+            return readTo(dst, IOChecker.endChecker());
         }
 
         @Override
         public int readTo(byte @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException, IORuntimeException {
-            IOChecker.checkOffLen(dst.length, off, len);
-            return IOKit.readTo0(src, dst, off, len, IOChecker.endChecker());
+            return readTo(dst, off, len, IOChecker.endChecker());
         }
 
         @Override
         public int readTo(@Nonnull ByteBuffer dst) throws IORuntimeException {
-            return IOKit.readTo0(src, dst, dst.remaining(), IOChecker.endChecker());
+            return readTo(dst, IOChecker.endChecker());
         }
 
         @Override
         public int readTo(@Nonnull ByteBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
+            return readTo(dst, len, IOChecker.endChecker());
+        }
+
+        @Override
+        public @Nonnull ByteSegment available() throws IORuntimeException {
+            try {
+                return read(src.available());
+            } catch (IOException e) {
+                throw new IORuntimeException(e);
+            }
+        }
+
+        @Override
+        public long availableTo(@Nonnull OutputStream dst) throws IORuntimeException {
+            return readTo(dst, IOChecker.availableChecker());
+        }
+
+        @Override
+        public long availableTo(
+            @Nonnull OutputStream dst, long len
+        ) throws IllegalArgumentException, IORuntimeException {
+            return readTo(dst, len, IOChecker.availableChecker());
+        }
+
+        @Override
+        public long availableTo(@Nonnull WritableByteChannel dst) throws IORuntimeException {
+            return readTo(dst, IOChecker.availableChecker());
+        }
+
+        @Override
+        public long availableTo(
+            @Nonnull WritableByteChannel dst, long len
+        ) throws IllegalArgumentException, IORuntimeException {
+            return readTo(dst, len, IOChecker.availableChecker());
+        }
+
+        @Override
+        public int availableTo(byte @Nonnull [] dst) throws IORuntimeException {
+            return readTo(dst, IOChecker.availableChecker());
+        }
+
+        @Override
+        public int availableTo(
+            byte @Nonnull [] dst, int off, int len
+        ) throws IndexOutOfBoundsException, IORuntimeException {
+            return readTo(dst, off, len, IOChecker.availableChecker());
+        }
+
+        @Override
+        public int availableTo(@Nonnull ByteBuffer dst) throws IORuntimeException {
+            return readTo(dst, IOChecker.availableChecker());
+        }
+
+        @Override
+        public int availableTo(@Nonnull ByteBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
+            return readTo(dst, len, IOChecker.availableChecker());
+        }
+
+        private long readTo(@Nonnull OutputStream dst, ReadChecker readChecker) throws IORuntimeException {
+            return IOKit.readTo0(src, dst, bufSize, readChecker);
+        }
+
+        private long readTo(
+            @Nonnull OutputStream dst, long len, ReadChecker readChecker
+        ) throws IllegalArgumentException, IORuntimeException {
             IOChecker.checkLen(len);
-            return IOKit.readTo0(src, dst, len, IOChecker.endChecker());
+            return IOKit.readTo0(src, dst, len, bufSize, readChecker);
+        }
+
+        private long readTo(@Nonnull WritableByteChannel dst, ReadChecker readChecker) throws IORuntimeException {
+            return IOKit.readTo0(src, dst, bufSize, readChecker);
+        }
+
+        private long readTo(
+            @Nonnull WritableByteChannel dst, long len, ReadChecker readChecker
+        ) throws IllegalArgumentException, IORuntimeException {
+            IOChecker.checkLen(len);
+            return IOKit.readTo0(src, dst, len, bufSize, readChecker);
+        }
+
+        private int readTo(
+            byte @Nonnull [] dst, ReadChecker readChecker
+        ) throws IORuntimeException {
+            return IOKit.readTo0(src, dst, 0, dst.length, readChecker);
+        }
+
+        private int readTo(
+            byte @Nonnull [] dst, int off, int len, ReadChecker readChecker
+        ) throws IndexOutOfBoundsException, IORuntimeException {
+            IOChecker.checkOffLen(dst.length, off, len);
+            return IOKit.readTo0(src, dst, off, len, readChecker);
+        }
+
+        private int readTo(
+            @Nonnull ByteBuffer dst, ReadChecker readChecker
+        ) throws IORuntimeException {
+            return IOKit.readTo0(src, dst, dst.remaining(), readChecker);
+        }
+
+        private int readTo(
+            @Nonnull ByteBuffer dst, int len, ReadChecker readChecker
+        ) throws IllegalArgumentException, IORuntimeException {
+            IOChecker.checkLen(len);
+            return IOKit.readTo0(src, dst, len, readChecker);
         }
 
         @Override
@@ -272,47 +372,146 @@ final class ByteReaderImpl {
 
         @Override
         public long readTo(@Nonnull OutputStream dst) throws IORuntimeException {
-            return IOKit.readTo0(src, dst, bufSize, IOChecker.endChecker());
+            return readTo(dst, IOChecker.endChecker());
         }
 
         @Override
         public long readTo(@Nonnull OutputStream dst, long len) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkLen(len);
-            return IOKit.readTo0(src, dst, len, bufSize, IOChecker.endChecker());
+            return readTo(dst, len, IOChecker.endChecker());
         }
 
         @Override
         public long readTo(@Nonnull WritableByteChannel dst) throws IORuntimeException {
-            return IOKit.readTo0(src, dst, bufSize, IOChecker.endChecker());
+            return readTo(dst, IOChecker.endChecker());
         }
 
         @Override
         public long readTo(
             @Nonnull WritableByteChannel dst, long len
         ) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkLen(len);
-            return IOKit.readTo0(src, dst, len, bufSize, IOChecker.endChecker());
+            return readTo(dst, len, IOChecker.endChecker());
         }
 
         @Override
         public int readTo(byte @Nonnull [] dst) throws IORuntimeException {
-            return IOKit.readTo0(src, ByteBuffer.wrap(dst, 0, dst.length), IOChecker.endChecker());
+            return readTo(dst, IOChecker.endChecker());
         }
 
         @Override
         public int readTo(byte @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException, IORuntimeException {
-            return IOKit.readTo0(src, ByteBuffer.wrap(dst, off, len), IOChecker.endChecker());
+            return readTo(dst, off, len, IOChecker.endChecker());
         }
 
         @Override
         public int readTo(@Nonnull ByteBuffer dst) throws IORuntimeException {
-            return IOKit.readTo0(src, dst, dst.remaining(), IOChecker.endChecker());
+            return readTo(dst, IOChecker.endChecker());
         }
 
         @Override
         public int readTo(@Nonnull ByteBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
+            return readTo(dst, len, IOChecker.endChecker());
+        }
+
+        @Override
+        public @Nonnull ByteSegment available() throws IORuntimeException {
+            ByteBuffer result = IOKit.available(src, bufSize);
+            if (result == null) {
+                return ByteSegment.empty(true);
+            }
+            return ByteSegment.of(result, result.remaining() < bufSize);
+        }
+
+        @Override
+        public long availableTo(@Nonnull OutputStream dst) throws IORuntimeException {
+            return readTo(dst, IOChecker.availableChecker());
+        }
+
+        @Override
+        public long availableTo(
+            @Nonnull OutputStream dst, long len
+        ) throws IllegalArgumentException, IORuntimeException {
+            return readTo(dst, len, IOChecker.availableChecker());
+        }
+
+        @Override
+        public long availableTo(@Nonnull WritableByteChannel dst) throws IORuntimeException {
+            return readTo(dst, IOChecker.availableChecker());
+        }
+
+        @Override
+        public long availableTo(
+            @Nonnull WritableByteChannel dst, long len
+        ) throws IllegalArgumentException, IORuntimeException {
+            return readTo(dst, len, IOChecker.availableChecker());
+        }
+
+        @Override
+        public int availableTo(byte @Nonnull [] dst) throws IORuntimeException {
+            return readTo(dst, IOChecker.availableChecker());
+        }
+
+        @Override
+        public int availableTo(
+            byte @Nonnull [] dst, int off, int len
+        ) throws IndexOutOfBoundsException, IORuntimeException {
+            return readTo(dst, off, len, IOChecker.availableChecker());
+        }
+
+        @Override
+        public int availableTo(@Nonnull ByteBuffer dst) throws IORuntimeException {
+            return readTo(dst, IOChecker.availableChecker());
+        }
+
+        @Override
+        public int availableTo(@Nonnull ByteBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
+            return readTo(dst, len, IOChecker.availableChecker());
+        }
+
+        private long readTo(@Nonnull OutputStream dst, ReadChecker readChecker) throws IORuntimeException {
+            return IOKit.readTo0(src, dst, bufSize, readChecker);
+        }
+
+        private long readTo(
+            @Nonnull OutputStream dst, long len, ReadChecker readChecker
+        ) throws IllegalArgumentException, IORuntimeException {
             IOChecker.checkLen(len);
-            return IOKit.readTo0(src, dst, len, IOChecker.endChecker());
+            return IOKit.readTo0(src, dst, len, bufSize, readChecker);
+        }
+
+        private long readTo(@Nonnull WritableByteChannel dst, ReadChecker readChecker) throws IORuntimeException {
+            return IOKit.readTo0(src, dst, bufSize, readChecker);
+        }
+
+        private long readTo(
+            @Nonnull WritableByteChannel dst, long len, ReadChecker readChecker
+        ) throws IllegalArgumentException, IORuntimeException {
+            IOChecker.checkLen(len);
+            return IOKit.readTo0(src, dst, len, bufSize, readChecker);
+        }
+
+        private int readTo(
+            byte @Nonnull [] dst, ReadChecker readChecker
+        ) throws IORuntimeException {
+            return IOKit.readTo0(src, ByteBuffer.wrap(dst, 0, dst.length), readChecker);
+        }
+
+        private int readTo(
+            byte @Nonnull [] dst, int off, int len, ReadChecker readChecker
+        ) throws IndexOutOfBoundsException, IORuntimeException {
+            return IOKit.readTo0(src, ByteBuffer.wrap(dst, off, len), readChecker);
+        }
+
+        private int readTo(
+            @Nonnull ByteBuffer dst, ReadChecker readChecker
+        ) throws IORuntimeException {
+            return IOKit.readTo0(src, dst, dst.remaining(), readChecker);
+        }
+
+        private int readTo(
+            @Nonnull ByteBuffer dst, int len, ReadChecker readChecker
+        ) throws IllegalArgumentException, IORuntimeException {
+            IOChecker.checkLen(len);
+            return IOKit.readTo0(src, dst, len, readChecker);
         }
 
         @Override
@@ -345,7 +544,50 @@ final class ByteReaderImpl {
         }
     }
 
-    private static final class ByteArrayReader implements ByteReader {
+    private static abstract class InMemoryReader implements ByteReader {
+
+        @Override
+        public long availableTo(@Nonnull OutputStream dst) throws IORuntimeException {
+            return readTo(dst);
+        }
+
+        @Override
+        public long availableTo(@Nonnull OutputStream dst, long len) throws IllegalArgumentException, IORuntimeException {
+            return readTo(dst, len);
+        }
+
+        @Override
+        public long availableTo(@Nonnull WritableByteChannel dst) throws IORuntimeException {
+            return readTo(dst);
+        }
+
+        @Override
+        public long availableTo(@Nonnull WritableByteChannel dst, long len) throws IllegalArgumentException, IORuntimeException {
+            return readTo(dst, len);
+        }
+
+        @Override
+        public int availableTo(byte @Nonnull [] dst) throws IORuntimeException {
+            return readTo(dst);
+        }
+
+        @Override
+        public int availableTo(byte @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException, IORuntimeException {
+            return readTo(dst, off, len);
+        }
+
+        @Override
+        public int availableTo(@Nonnull ByteBuffer dst) throws IORuntimeException {
+            return readTo(dst);
+        }
+
+        @Override
+        public int availableTo(@Nonnull ByteBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
+            return readTo(dst, len);
+        }
+    }
+
+    private static final class ByteArrayReader extends InMemoryReader {
 
         private final byte @Nonnull [] src;
         private int pos;
@@ -526,6 +768,11 @@ final class ByteReaderImpl {
         }
 
         @Override
+        public @Nonnull ByteSegment available() throws IORuntimeException {
+            return read(end - pos);
+        }
+
+        @Override
         public boolean markSupported() {
             return true;
         }
@@ -545,7 +792,7 @@ final class ByteReaderImpl {
         }
     }
 
-    private static final class ByteBufferReader implements ByteReader {
+    private static final class ByteBufferReader extends InMemoryReader {
 
         private final @Nonnull ByteBuffer src;
 
@@ -635,6 +882,11 @@ final class ByteReaderImpl {
         @Override
         public int readTo(@Nonnull ByteBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
             return BufferKit.readTo(src, dst, len);
+        }
+
+        @Override
+        public @Nonnull ByteSegment available() throws IORuntimeException {
+            return read(src.remaining());
         }
 
         @Override
@@ -818,6 +1070,128 @@ final class ByteReaderImpl {
             int actualLen = (int) MathKit.min(len, limit - pos, dst.remaining());
             int readSize = src.readTo(dst, actualLen);
             if (readSize < 0) {
+                return readSize;
+            }
+            pos += readSize;
+            return readSize;
+        }
+
+        @Override
+        public @Nonnull ByteSegment available() throws IORuntimeException {
+            return read((int) (limit - pos));
+        }
+
+        @Override
+        public long availableTo(@Nonnull OutputStream dst) throws IORuntimeException {
+            if (pos >= limit) {
+                return -1;
+            }
+            long readSize = src.availableTo(dst, limit - pos);
+            if (readSize <= 0) {
+                return readSize;
+            }
+            pos += readSize;
+            return readSize;
+        }
+
+        @Override
+        public long availableTo(
+            @Nonnull OutputStream dst, long len
+        ) throws IllegalArgumentException, IORuntimeException {
+            IOChecker.checkLen(len);
+            if (len == 0) {
+                return 0;
+            }
+            if (pos >= limit) {
+                return -1;
+            }
+            int actualLen = (int) Math.min(len, limit - pos);
+            long readSize = src.availableTo(dst, actualLen);
+            if (readSize <= 0) {
+                return readSize;
+            }
+            pos += readSize;
+            return readSize;
+        }
+
+        @Override
+        public long availableTo(@Nonnull WritableByteChannel dst) throws IORuntimeException {
+            if (pos >= limit) {
+                return -1;
+            }
+            long readSize = src.availableTo(dst, limit - pos);
+            if (readSize <= 0) {
+                return readSize;
+            }
+            pos += readSize;
+            return readSize;
+        }
+
+        @Override
+        public long availableTo(
+            @Nonnull WritableByteChannel dst, long len
+        ) throws IllegalArgumentException, IORuntimeException {
+            IOChecker.checkLen(len);
+            if (len == 0) {
+                return 0;
+            }
+            if (pos >= limit) {
+                return -1;
+            }
+            int actualLen = (int) Math.min(len, limit - pos);
+            long readSize = src.availableTo(dst, actualLen);
+            if (readSize <= 0) {
+                return readSize;
+            }
+            pos += readSize;
+            return readSize;
+        }
+
+        @Override
+        public int availableTo(byte @Nonnull [] dst) throws IORuntimeException {
+            return availableTo(dst, 0, dst.length);
+        }
+
+        @Override
+        public int availableTo(
+            byte @Nonnull [] dst, int off, int len
+        ) throws IndexOutOfBoundsException, IORuntimeException {
+            IOChecker.checkOffLen(dst.length, off, len);
+            if (len == 0) {
+                return 0;
+            }
+            if (pos >= limit) {
+                return -1;
+            }
+            int actualLen = (int) Math.min(len, limit - pos);
+            int readSize = src.availableTo(dst, off, actualLen);
+            if (readSize <= 0) {
+                return readSize;
+            }
+            pos += readSize;
+            return readSize;
+        }
+
+        @Override
+        public int availableTo(@Nonnull ByteBuffer dst) throws IORuntimeException {
+            return availableTo(dst, dst.remaining());
+        }
+
+        @Override
+        public int availableTo(@Nonnull ByteBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
+            IOChecker.checkLen(len);
+            if (len == 0) {
+                return 0;
+            }
+            if (!dst.hasRemaining()) {
+                return 0;
+            }
+            if (pos >= limit) {
+                return -1;
+            }
+            int actualLen = (int) MathKit.min(len, limit - pos, dst.remaining());
+            int readSize = src.availableTo(dst, actualLen);
+            if (readSize <= 0) {
                 return readSize;
             }
             pos += readSize;

@@ -1,5 +1,6 @@
 package test.io;
 
+import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.io.BufferKit;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.Arrays;
 import java.util.function.Supplier;
@@ -604,6 +606,277 @@ public class ByteReaderTest implements DataTest {
 
     private int minSize(int totalSize, int readSize, int remaining) {
         return Math.min(remaining, Math.min(totalSize, readSize));
+    }
+
+    @Test
+    public void testAvailable() throws Exception {
+        testAvailable(16);
+        testAvailable(32);
+        testAvailable(IOKit.bufferSize());
+        testAvailable(IOKit.bufferSize() + 1);
+
+        class ZeroIn extends InputStream {
+
+            @Override
+            public int available() {
+                return 0;
+            }
+
+            @Override
+            public int read() {
+                return -1;
+            }
+
+            @Override
+            public int read(@NotNull byte[] b, int off, int len) {
+                return 0;
+            }
+        }
+
+        {
+            // limited
+            ByteReader reader1 = ByteReader.from(new ZeroIn()).limit(11);
+            assertEquals(reader1.availableTo(IOKit.nullOutputStream()), 0);
+            assertEquals(reader1.availableTo(IOKit.nullOutputStream(), 100), 0);
+            assertEquals(reader1.availableTo(Channels.newChannel(IOKit.nullOutputStream())), 0);
+            assertEquals(reader1.availableTo(Channels.newChannel(IOKit.nullOutputStream()), 100), 0);
+            assertEquals(reader1.availableTo(new byte[1]), 0);
+            assertEquals(reader1.availableTo(new byte[1], 0, 1), 0);
+            assertEquals(reader1.availableTo(ByteBuffer.allocate(1)), 0);
+            assertEquals(reader1.availableTo(ByteBuffer.allocate(1), 1), 0);
+            // -1
+            ByteReader reader2 = ByteReader.from(new ByteArrayInputStream(new byte[10])).limit(1);
+            assertEquals(reader2.availableTo(IOKit.nullOutputStream()), 1);
+            assertEquals(reader2.availableTo(IOKit.nullOutputStream()), -1);
+            assertEquals(reader2.availableTo(IOKit.nullOutputStream(), 1), -1);
+            assertEquals(reader2.availableTo(Channels.newChannel(IOKit.nullOutputStream())), -1);
+            assertEquals(reader2.availableTo(Channels.newChannel(IOKit.nullOutputStream()), 100), -1);
+            assertEquals(reader2.availableTo(new byte[1]), -1);
+            assertEquals(reader2.availableTo(new byte[1], 0, 1), -1);
+            assertEquals(reader2.availableTo(ByteBuffer.allocate(1)), -1);
+            assertEquals(reader2.availableTo(ByteBuffer.allocate(1), 1), -1);
+            // 0
+            assertEquals(reader2.availableTo(IOKit.nullOutputStream(), 0), 0);
+            assertEquals(reader2.availableTo(Channels.newChannel(IOKit.nullOutputStream()), 0), 0);
+            assertEquals(reader2.availableTo(new byte[0]), 0);
+            assertEquals(reader2.availableTo(new byte[1], 0, 0), 0);
+            assertEquals(reader2.availableTo(ByteBuffer.allocate(0)), 0);
+            assertEquals(reader2.availableTo(ByteBuffer.allocate(0), 1), 0);
+            assertEquals(reader2.availableTo(ByteBuffer.allocate(1), 0), 0);
+            //available
+            byte[] data = randomBytes(10);
+            ByteReader reader3 = ByteReader.from(new ByteArrayInputStream(data)).limit(1);
+            ByteSegment bs1 = reader3.available();
+            assertFalse(bs1.end());
+            assertEquals(bs1.data().get(), data[0]);
+            ByteSegment bs2 = reader3.available();
+            assertTrue(bs2.end());
+            assertEquals(bs2.data().remaining(), 0);
+        }
+    }
+
+    private void testAvailable(int size) throws Exception {
+        byte[] src = randomBytes(size);
+
+        class In extends InputStream {
+
+            private final byte[] data = src;
+            private int pos = 0;
+            private boolean zero = true;
+
+            @Override
+            public int available() {
+                if (pos >= data.length) {
+                    return 0;
+                }
+                if (zero) {
+                    return 0;
+                }
+                return 1;
+            }
+
+            @Override
+            public int read() {
+                return pos < data.length ? data[pos++] & 0xFF : -1;
+            }
+
+            @Override
+            public int read(@NotNull byte[] b, int off, int len) {
+                if (pos >= data.length) {
+                    return -1;
+                }
+                int readSize = available();
+                if (readSize == 0) {
+                    zero = false;
+                    return 0;
+                } else {
+                    zero = true;
+                    b[off] = data[pos++];
+                    return 1;
+                }
+            }
+        }
+
+        class Cin implements ReadableByteChannel {
+
+            private final byte[] data = src;
+            private int pos = 0;
+            private boolean zero = true;
+
+            @Override
+            public int read(ByteBuffer dst) throws IOException {
+                if (pos >= data.length) {
+                    return -1;
+                }
+                if (zero) {
+                    zero = false;
+                    return 0;
+                } else {
+                    zero = true;
+                    dst.put(data[pos++]);
+                    return 1;
+                }
+            }
+
+            @Override
+            public boolean isOpen() {
+                return false;
+            }
+
+            @Override
+            public void close() {
+            }
+        }
+
+        // input stream
+        testAvailable(size, src, () -> ByteReader.from(new In()), () -> ByteReader.from(new In()), false);
+        // byte channel
+        testAvailable(size, src, () -> ByteReader.from(new Cin()), () -> ByteReader.from(new Cin()), false);
+        // byte array
+        testAvailable(size, src, () -> ByteReader.from(src), () -> ByteReader.from(src), true);
+        // byte buffer
+        testAvailable(
+            size, src,
+            () -> ByteReader.from(ByteBuffer.wrap(src)), () -> ByteReader.from(ByteBuffer.wrap(src)),
+            true
+        );
+        // limited
+        testAvailable(
+            size, src,
+            () -> ByteReader.from(new In()).limit(size * 2L),
+            () -> ByteReader.from(new In()).limit(size * 2L),
+            false
+        );
+    }
+
+    private void testAvailable(
+        int size, byte[] src, Supplier<ByteReader> s1, Supplier<ByteReader> s2, boolean preKnown
+    ) throws Exception {
+        {
+            // to output stream
+            BytesBuilder builder = new BytesBuilder();
+            ByteReader reader1 = s1.get();
+            assertEquals(reader1.availableTo(builder), preKnown ? size : 0);
+            while (true) {
+                long readSize = reader1.availableTo(builder);
+                if (readSize < 0) {
+                    break;
+                }
+            }
+            assertEquals(builder.toByteArray(), src);
+            builder.reset();
+            ByteReader reader2 = s2.get();
+            assertEquals(reader2.availableTo(builder, size * 2L), preKnown ? size : 0);
+            while (true) {
+                long readSize = reader2.availableTo(builder, size * 2L);
+                if (readSize < 0) {
+                    break;
+                }
+            }
+            assertEquals(builder.toByteArray(), src);
+            builder.reset();
+        }
+        {
+            // to out channel
+            BytesBuilder builder = new BytesBuilder();
+            WritableByteChannel outChannel = Channels.newChannel(builder);
+            ByteReader reader1 = s1.get();
+            assertEquals(reader1.availableTo(builder), preKnown ? size : 0);
+            while (true) {
+                long readSize = reader1.availableTo(outChannel);
+                if (readSize < 0) {
+                    break;
+                }
+            }
+            assertEquals(builder.toByteArray(), src);
+            builder.reset();
+            ByteReader reader2 = s2.get();
+            assertEquals(reader2.availableTo(builder, size * 2L), preKnown ? size : 0);
+            while (true) {
+                long readSize = reader2.availableTo(outChannel, size * 2L);
+                if (readSize < 0) {
+                    break;
+                }
+            }
+            assertEquals(builder.toByteArray(), src);
+            builder.reset();
+        }
+        {
+            // to array
+            byte[] dst = new byte[size * 2];
+            int c = 0;
+            ByteReader reader1 = s1.get();
+            assertEquals(reader1.availableTo(dst), preKnown ? size : 0);
+            while (c < size) {
+                long readSize = reader1.availableTo(dst, c, size - c);
+                if (readSize < 0) {
+                    break;
+                }
+                c += (int) readSize;
+            }
+            assertEquals(Arrays.copyOf(dst, size), src);
+            dst = new byte[size * 2];
+            c = 0;
+            ByteReader reader2 = s2.get();
+            assertEquals(reader2.availableTo(dst), preKnown ? size : 0);
+            while (c < size) {
+                long readSize = reader2.availableTo(dst, c, size - c);
+                if (readSize < 0) {
+                    break;
+                }
+                c += (int) readSize;
+            }
+            assertEquals(Arrays.copyOf(dst, size), src);
+        }
+        {
+            // to buffer
+            ByteBuffer dst = ByteBuffer.allocate(size * 2);
+            int c = 0;
+            ByteReader reader1 = s1.get();
+            assertEquals(reader1.availableTo(dst), preKnown ? size : 0);
+            while (c < size) {
+                long readSize = reader1.availableTo(dst, size * 2);
+                if (readSize < 0) {
+                    break;
+                }
+                c += (int) readSize;
+            }
+            dst.flip();
+            assertEquals(BufferKit.read(dst), src);
+            dst = ByteBuffer.allocate(size * 2);
+            c = 0;
+            ByteReader reader2 = s2.get();
+            assertEquals(reader2.availableTo(dst), preKnown ? size : 0);
+            while (c < size) {
+                long readSize = reader2.availableTo(dst, size * 2);
+                if (readSize < 0) {
+                    break;
+                }
+                c += (int) readSize;
+            }
+            dst.flip();
+            assertEquals(BufferKit.read(dst), src);
+        }
     }
 
     @Test

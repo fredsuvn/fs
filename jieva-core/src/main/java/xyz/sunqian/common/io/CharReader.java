@@ -254,8 +254,8 @@ public interface CharReader extends IORuntimeCloseable {
     int readTo(char @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException, IORuntimeException;
 
     /**
-     * Reads data from this reader into the destination buffer, until reaches the end of any buffer, and returns the
-     * actual number of chars read to.
+     * Reads data from this reader into the destination buffer, until reaches the end of the reader or buffer, and
+     * returns the actual number of chars read to.
      * <p>
      * If the destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if reaches the end of this
      * reader and no data is read, returns {@code -1}.
@@ -270,7 +270,7 @@ public interface CharReader extends IORuntimeCloseable {
 
     /**
      * Reads a specified length of data from this reader into the destination buffer, until the read number reaches the
-     * specified length or reaches the end of any buffer, and returns the actual number of chars read to.
+     * specified length or reaches the end of the reader or buffer, and returns the actual number of chars read to.
      * <p>
      * If the specified length or destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if
      * reaches the end of this reader and no data is read, returns {@code -1}.
@@ -284,6 +284,120 @@ public interface CharReader extends IORuntimeCloseable {
      * @throws IORuntimeException       if an I/O error occurs
      */
     int readTo(@Nonnull CharBuffer dst, int len) throws IllegalArgumentException, IORuntimeException;
+
+    /**
+     * Reads and returns the next available data segment. This method reads continuously until no data is available. It
+     * never returns {@code null}, but can return an empty segment.
+     * <p>
+     * The content of the returned segment may be shared with the data source, depends on the implementation, such as
+     * the instances obtained from the {@link #from(char[])}, {@link #from(char[], int, int)} and
+     * {@link #from(CharBuffer)}.
+     *
+     * @return the next available data segment
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    @Nonnull
+    CharSegment available() throws IORuntimeException;
+
+    /**
+     * Reads available data into the specified appender, until no data is available, returns the actual number of chars
+     * read to.
+     * <p>
+     * If reaches the end of this reader and no data is read, returns {@code -1}.
+     * <p>
+     * This method never invokes the {@link OutputStream#flush()} to force the backing buffer.
+     *
+     * @param dst the specified appender
+     * @return the actual number of chars read to, possibly {@code 0}, or {@code -1} if reaches the end of this reader
+     * and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    long availableTo(@Nonnull Appendable dst) throws IORuntimeException;
+
+    /**
+     * Reads a specified length of data into the specified appender, until the read number reaches the specified length
+     * or no data is available, returns the actual number of chars read to.
+     * <p>
+     * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of this reader and no
+     * data is read, returns {@code -1}.
+     * <p>
+     * This method never invokes the {@link OutputStream#flush()} to force the backing buffer.
+     *
+     * @param dst the specified appender
+     * @param len the specified length, must {@code >= 0}
+     * @return the actual number of chars read to, possibly {@code 0}, or {@code -1} if reaches the end of this reader
+     * and no data is read
+     * @throws IllegalArgumentException if the specified length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    long availableTo(@Nonnull Appendable dst, long len) throws IllegalArgumentException, IORuntimeException;
+
+    /**
+     * Reads available data from this reader into the destination array, until the read number reaches the array's
+     * length or no data is available, and returns the actual number of chars read to.
+     * <p>
+     * If the array's length is {@code 0}, returns {@code 0} without reading. If reaches the end of this reader and no
+     * data is read, returns {@code -1}.
+     *
+     * @param dst the destination array
+     * @return the actual number of chars read to, possibly {@code 0}, or {@code -1} if reaches the end of this reader
+     * and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    int availableTo(char @Nonnull [] dst) throws IORuntimeException;
+
+    /**
+     * Reads a specified length of data from this reader into the destination array, starting at the specified offset,
+     * until the read number reaches the specified length or no data is available, and returns the actual number of
+     * chars read to.
+     * <p>
+     * If the specified length is {@code 0}, returns {@code 0} without reading. If reaches the end of this reader and no
+     * data is read, returns {@code -1}.
+     *
+     * @param dst the destination array
+     * @param off the specified offset of the array
+     * @param len the specified length to read
+     * @return the actual number of chars read to, possibly {@code 0}, or {@code -1} if reaches the end of this reader
+     * and no data is read
+     * @throws IndexOutOfBoundsException if the arguments are out of bounds
+     * @throws IORuntimeException        if an I/O error occurs
+     */
+    int availableTo(char @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException, IORuntimeException;
+
+    /**
+     * Reads available data from this reader into the destination buffer, until reaches the end of the buffer or no data
+     * is available, and returns the actual number of chars read to.
+     * <p>
+     * If the destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if reaches the end of this
+     * reader and no data is read, returns {@code -1}.
+     * <p>
+     * The buffer's position increments by the actual read number.
+     *
+     * @param dst the destination buffer
+     * @return the actual number of chars read to, possibly {@code 0}, or {@code -1} if reaches the end of this reader
+     * and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    int availableTo(@Nonnull CharBuffer dst) throws IORuntimeException;
+
+    /**
+     * Reads a specified length of data from this reader into the destination buffer, until the read number reaches the
+     * specified length or reaches the end of the buffer or no data is available, and returns the actual number of chars
+     * read to.
+     * <p>
+     * If the specified length or destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if
+     * reaches the end of this reader and no data is read, returns {@code -1}.
+     * <p>
+     * The buffer's position increments by the actual read number.
+     *
+     * @param dst the specified buffer
+     * @param len the specified length, must {@code >= 0}
+     * @return the actual number of chars read to, possibly {@code 0}, or {@code -1} if reaches the end of this reader
+     * and no data is read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    int availableTo(@Nonnull CharBuffer dst, int len) throws IllegalArgumentException, IORuntimeException;
 
     /**
      * Returns whether this reader supports the {@link #mark()} and {@link #reset()} methods.

@@ -928,6 +928,7 @@ public class IOOperatorTest implements DataTest {
             public void close() {
             }
         }
+
         {
             // available bytes
             In in1 = new In();

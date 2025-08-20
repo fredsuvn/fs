@@ -168,6 +168,48 @@ final class CharReaderImpl {
         }
 
         @Override
+        public @Nonnull CharSegment available() throws IORuntimeException {
+            char[] result = IOKit.available(src, bufSize);
+            if (result == null) {
+                return CharSegment.empty(true);
+            }
+            return CharSegment.of(CharBuffer.wrap(result), false);
+        }
+
+        @Override
+        public long availableTo(@Nonnull Appendable dst) throws IORuntimeException {
+            return IOKit.readTo0(src, dst, bufSize, IOChecker.availableChecker());
+        }
+
+        @Override
+        public long availableTo(@Nonnull Appendable dst, long len) throws IllegalArgumentException, IORuntimeException {
+            IOChecker.checkLen(len);
+            return IOKit.readTo0(src, dst, len, bufSize, IOChecker.availableChecker());
+        }
+
+        @Override
+        public int availableTo(char @Nonnull [] dst) throws IORuntimeException {
+            return IOKit.readTo0(src, dst, 0, dst.length, IOChecker.availableChecker());
+        }
+
+        @Override
+        public int availableTo(char @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException, IORuntimeException {
+            IOChecker.checkOffLen(dst.length, off, len);
+            return IOKit.readTo0(src, dst, off, len, IOChecker.availableChecker());
+        }
+
+        @Override
+        public int availableTo(@Nonnull CharBuffer dst) throws IORuntimeException {
+            return IOKit.readTo0(src, dst, dst.remaining(), IOChecker.availableChecker());
+        }
+
+        @Override
+        public int availableTo(@Nonnull CharBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
+            IOChecker.checkLen(len);
+            return IOKit.readTo0(src, dst, len, IOChecker.availableChecker());
+        }
+
+        @Override
         public boolean markSupported() {
             return src.markSupported();
         }
@@ -205,7 +247,44 @@ final class CharReaderImpl {
         }
     }
 
-    private static final class CharArrayReader implements CharReader {
+    private static abstract class InMemoryReader implements CharReader {
+
+        @Override
+        public long availableTo(@Nonnull Appendable dst) throws IORuntimeException {
+            return readTo(dst);
+        }
+
+        @Override
+        public long availableTo(
+            @Nonnull Appendable dst, long len
+        ) throws IllegalArgumentException, IORuntimeException {
+            return readTo(dst, len);
+        }
+
+        @Override
+        public int availableTo(char @Nonnull [] dst) throws IORuntimeException {
+            return readTo(dst);
+        }
+
+        @Override
+        public int availableTo(
+            char @Nonnull [] dst, int off, int len
+        ) throws IndexOutOfBoundsException, IORuntimeException {
+            return readTo(dst, off, len);
+        }
+
+        @Override
+        public int availableTo(@Nonnull CharBuffer dst) throws IORuntimeException {
+            return readTo(dst);
+        }
+
+        @Override
+        public int availableTo(@Nonnull CharBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
+            return readTo(dst, len);
+        }
+    }
+
+    private static final class CharArrayReader extends InMemoryReader {
 
         private final char @Nonnull [] src;
         private int pos;
@@ -340,6 +419,11 @@ final class CharReaderImpl {
             return putTo0(dst, putSize);
         }
 
+        @Override
+        public @Nonnull CharSegment available() throws IORuntimeException {
+            return read(end - pos);
+        }
+
         private int putTo0(@Nonnull CharBuffer dst, int putSize) throws IORuntimeException {
             try {
                 dst.put(src, pos, putSize);
@@ -370,7 +454,7 @@ final class CharReaderImpl {
         }
     }
 
-    private static final class CharSequenceReader implements CharReader {
+    private static final class CharSequenceReader extends InMemoryReader {
 
         private final @Nonnull CharSequence source;
         private final int endPos;
@@ -505,6 +589,11 @@ final class CharReaderImpl {
             return putTo0(dst, putSize);
         }
 
+        @Override
+        public @Nonnull CharSegment available() throws IORuntimeException {
+            return read(endPos - pos);
+        }
+
         private int putTo0(@Nonnull CharBuffer dst, int putSize) throws IORuntimeException {
             try {
                 dst.put(CharBuffer.wrap(source, pos, pos + putSize));
@@ -535,7 +624,7 @@ final class CharReaderImpl {
         }
     }
 
-    private static final class CharBufferReader implements CharReader {
+    private static final class CharBufferReader extends InMemoryReader {
 
         private final @Nonnull CharBuffer src;
 
@@ -610,6 +699,11 @@ final class CharReaderImpl {
         }
 
         @Override
+        public @Nonnull CharSegment available() throws IORuntimeException {
+            return read(src.remaining());
+        }
+
+        @Override
         public boolean markSupported() {
             return true;
         }
@@ -635,14 +729,14 @@ final class CharReaderImpl {
 
     private static final class LimitedReader implements CharReader {
 
-        private final @Nonnull CharReader source;
+        private final @Nonnull CharReader src;
         private final long limit;
 
         private long pos = 0;
         private long mark = 0;
 
-        private LimitedReader(@Nonnull CharReader source, long limit) {
-            this.source = source;
+        private LimitedReader(@Nonnull CharReader src, long limit) {
+            this.src = src;
             this.limit = limit;
         }
 
@@ -656,7 +750,7 @@ final class CharReaderImpl {
                 return CharSegment.empty(true);
             }
             int actualLen = (int) Math.min(len, limit - pos);
-            CharSegment segment = source.read(actualLen);
+            CharSegment segment = src.read(actualLen);
             pos += segment.data().remaining();
             if (actualLen < len) {
                 if (!segment.end()) {
@@ -676,7 +770,7 @@ final class CharReaderImpl {
                 return 0;
             }
             int actualLen = (int) Math.min(len, limit - pos);
-            long skipped = source.skip(actualLen);
+            long skipped = src.skip(actualLen);
             pos += skipped;
             return skipped;
         }
@@ -686,7 +780,7 @@ final class CharReaderImpl {
             if (pos >= limit) {
                 return -1;
             }
-            long readSize = source.readTo(dst, limit - pos);
+            long readSize = src.readTo(dst, limit - pos);
             if (readSize < 0) {
                 return readSize;
             }
@@ -704,7 +798,7 @@ final class CharReaderImpl {
                 return -1;
             }
             int actualLen = (int) Math.min(len, limit - pos);
-            long readSize = source.readTo(dst, actualLen);
+            long readSize = src.readTo(dst, actualLen);
             if (readSize < 0) {
                 return readSize;
             }
@@ -729,7 +823,7 @@ final class CharReaderImpl {
                 return -1;
             }
             int actualLen = (int) Math.min(len, limit - pos);
-            int readSize = source.readTo(dst, off, actualLen);
+            int readSize = src.readTo(dst, off, actualLen);
             if (readSize < 0) {
                 return readSize;
             }
@@ -756,7 +850,7 @@ final class CharReaderImpl {
             }
             int actualLen = (int) Math.min(len, limit - pos);
             actualLen = Math.min(actualLen, dst.remaining());
-            int readSize = source.readTo(dst, actualLen);
+            int readSize = src.readTo(dst, actualLen);
             if (readSize < 0) {
                 return readSize;
             }
@@ -765,25 +859,113 @@ final class CharReaderImpl {
         }
 
         @Override
+        public @Nonnull CharSegment available() throws IORuntimeException {
+            return read((int) (limit - pos));
+        }
+
+        @Override
+        public long availableTo(@Nonnull Appendable dst) throws IORuntimeException {
+            if (pos >= limit) {
+                return -1;
+            }
+            long readSize = src.availableTo(dst, limit - pos);
+            if (readSize <= 0) {
+                return readSize;
+            }
+            pos += readSize;
+            return readSize;
+        }
+
+        @Override
+        public long availableTo(@Nonnull Appendable dst, long len) throws IllegalArgumentException, IORuntimeException {
+            IOChecker.checkLen(len);
+            if (len == 0) {
+                return 0;
+            }
+            if (pos >= limit) {
+                return -1;
+            }
+            int actualLen = (int) Math.min(len, limit - pos);
+            long readSize = src.availableTo(dst, actualLen);
+            if (readSize <= 0) {
+                return readSize;
+            }
+            pos += readSize;
+            return readSize;
+        }
+
+        @Override
+        public int availableTo(char @Nonnull [] dst) throws IORuntimeException {
+            return availableTo(dst, 0, dst.length);
+        }
+
+        @Override
+        public int availableTo(
+            char @Nonnull [] dst, int off, int len
+        ) throws IndexOutOfBoundsException, IORuntimeException {
+            IOChecker.checkOffLen(dst.length, off, len);
+            if (len == 0) {
+                return 0;
+            }
+            if (pos >= limit) {
+                return -1;
+            }
+            int actualLen = (int) Math.min(len, limit - pos);
+            int readSize = src.availableTo(dst, off, actualLen);
+            if (readSize <= 0) {
+                return readSize;
+            }
+            pos += readSize;
+            return readSize;
+        }
+
+        @Override
+        public int availableTo(@Nonnull CharBuffer dst) throws IORuntimeException {
+            return availableTo(dst, dst.remaining());
+        }
+
+        @Override
+        public int availableTo(@Nonnull CharBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
+            IOChecker.checkLen(len);
+            if (len == 0) {
+                return 0;
+            }
+            if (!dst.hasRemaining()) {
+                return 0;
+            }
+            if (pos >= limit) {
+                return -1;
+            }
+            int actualLen = (int) Math.min(len, limit - pos);
+            actualLen = Math.min(actualLen, dst.remaining());
+            int readSize = src.availableTo(dst, actualLen);
+            if (readSize <= 0) {
+                return readSize;
+            }
+            pos += readSize;
+            return readSize;
+        }
+
+        @Override
         public boolean markSupported() {
-            return source.markSupported();
+            return src.markSupported();
         }
 
         @Override
         public void mark() throws IORuntimeException {
-            source.mark();
+            src.mark();
             mark = pos;
         }
 
         @Override
         public void reset() throws IORuntimeException {
-            source.reset();
+            src.reset();
             pos = mark;
         }
 
         @Override
         public void close() throws IORuntimeException {
-            source.close();
+            src.close();
         }
     }
 }
