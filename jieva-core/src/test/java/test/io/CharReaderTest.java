@@ -24,6 +24,7 @@ import java.util.function.Supplier;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotSame;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
@@ -766,6 +767,69 @@ public class CharReaderTest implements DataTest {
     }
 
     @Test
+    public void testReadAll() throws Exception {
+        testReadAll(0);
+        testReadAll(16);
+        testReadAll(32);
+        testReadAll(IOKit.bufferSize());
+        testReadAll(IOKit.bufferSize() + 1);
+    }
+
+    private void testReadAll(int size) throws Exception {
+        char[] data = randomChars(size);
+        {
+            // input stream
+            CharReader reader = CharReader.from(new CharArrayReader(data));
+            CharBuffer buffer = reader.readAll();
+            assertEquals(buffer == null, size == 0);
+            if (buffer != null) {
+                assertEquals(buffer.array(), data);
+            }
+            assertNull(reader.readAll());
+        }
+        {
+            // array
+            CharReader reader = CharReader.from(data);
+            CharBuffer buffer = reader.readAll();
+            assertEquals(buffer == null, size == 0);
+            if (buffer != null) {
+                assertEquals(buffer.array(), data);
+            }
+            assertNull(reader.readAll());
+        }
+        {
+            // sequence
+            CharReader reader = CharReader.from(new String(data));
+            CharBuffer buffer = reader.readAll();
+            assertEquals(buffer == null, size == 0);
+            if (buffer != null) {
+                assertEquals(BufferKit.copyContent(buffer), data);
+            }
+            assertNull(reader.readAll());
+        }
+        {
+            // buffer
+            CharReader reader = CharReader.from(CharBuffer.wrap(data));
+            CharBuffer buffer = reader.readAll();
+            assertEquals(buffer == null, size == 0);
+            if (buffer != null) {
+                assertEquals(buffer.array(), data);
+            }
+            assertNull(reader.readAll());
+        }
+        {
+            // limited
+            CharReader reader = CharReader.from(data).limit(size);
+            CharBuffer buffer = reader.readAll();
+            assertEquals(buffer == null, size == 0);
+            if (buffer != null) {
+                assertEquals(buffer.array(), data);
+            }
+            assertNull(reader.readAll());
+        }
+    }
+
+    @Test
     public void testShareChars() {
         int dataSize = 1024;
         int limitSize = dataSize / 2;
@@ -885,10 +949,10 @@ public class CharReaderTest implements DataTest {
         assertEquals(segmentCopy.data(), CharBuffer.wrap(chars));
         assertTrue(segmentCopy.end());
         assertNotSame(segmentCopy.data().array(), chars);
-        assertEquals(segment.copyCharArray(), chars);
-        assertNotSame(segment.copyCharArray(), chars);
-        assertEquals(segment.toCharArray(), chars);
-        assertEquals(segment.toCharArray(), new char[0]);
+        assertEquals(segment.copyArray(), chars);
+        assertNotSame(segment.copyArray(), chars);
+        assertEquals(segment.array(), chars);
+        assertEquals(segment.array(), new char[0]);
     }
 
     @Test

@@ -1,6 +1,7 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.bytes.BytesKit;
 import xyz.sunqian.common.base.math.MathKit;
 import xyz.sunqian.common.io.IOChecker.ReadChecker;
@@ -98,6 +99,15 @@ final class ByteReaderImpl {
         @Override
         public @Nonnull ByteSegment read(int len) throws IllegalArgumentException, IORuntimeException {
             return read(len, IOChecker.endChecker());
+        }
+
+        @Override
+        public @Nullable ByteBuffer readAll() throws IORuntimeException {
+            byte[] buf = IOKit.read0(src, IOChecker.endChecker());
+            if (buf == null) {
+                return null;
+            }
+            return ByteBuffer.wrap(buf);
         }
 
         @Override
@@ -346,6 +356,11 @@ final class ByteReaderImpl {
         @Override
         public @Nonnull ByteSegment read(int len) throws IllegalArgumentException, IORuntimeException {
             return read(len, IOChecker.endChecker());
+        }
+
+        @Override
+        public @Nullable ByteBuffer readAll() throws IORuntimeException {
+            return IOKit.read0(src, IOChecker.endChecker());
         }
 
         @Override
@@ -645,6 +660,16 @@ final class ByteReaderImpl {
         }
 
         @Override
+        public @Nullable ByteBuffer readAll() throws IORuntimeException {
+            if (pos >= end) {
+                return null;
+            }
+            ByteBuffer ret = ByteBuffer.wrap(src, pos, end - pos);
+            pos = end;
+            return ret;
+        }
+
+        @Override
         public long skip(long len) throws IllegalArgumentException {
             IOChecker.checkSkip(len);
             return skip0(len);
@@ -847,6 +872,16 @@ final class ByteReaderImpl {
         }
 
         @Override
+        public @Nullable ByteBuffer readAll() throws IORuntimeException {
+            if (!src.hasRemaining()) {
+                return null;
+            }
+            ByteBuffer ret = src.slice();
+            src.position(src.limit());
+            return ret;
+        }
+
+        @Override
         public long skip(long len) throws IllegalArgumentException {
             IOChecker.checkSkip(len);
             return skip0(len);
@@ -956,6 +991,15 @@ final class ByteReaderImpl {
         @Override
         public @Nonnull ByteSegment read(int len) throws IllegalArgumentException, IORuntimeException {
             return read(len, false);
+        }
+
+        @Override
+        public @Nullable ByteBuffer readAll() throws IORuntimeException {
+            if (pos >= limit) {
+                return null;
+            }
+            int len = MathKit.intValue(limit - pos);
+            return read(len).data();
         }
 
         @Override
@@ -1095,7 +1139,7 @@ final class ByteReaderImpl {
 
         @Override
         public @Nonnull ByteSegment available() throws IORuntimeException {
-            return read((int) (limit - pos));
+            return available(MathKit.intValue(limit - pos));
         }
 
         @Override

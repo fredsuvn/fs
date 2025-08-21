@@ -456,17 +456,17 @@ public class ByteProcessorTest implements DataTest, AssertTest {
             // reader
             ByteSegment readData = ByteProcessor.from(data).readBlockSize(readBlockSize)
                 .asByteReader().read(data.length + 1);
-            assertEquals(readData.toByteArray(), data);
+            assertEquals(readData.array(), data);
             assertTrue(readData.end());
             readData = ByteProcessor.from(data).readBlockSize(readBlockSize).readLimit(limit)
                 .asByteReader().read(limitedData.length + 1);
-            assertEquals(readData.toByteArray(), limitedData);
+            assertEquals(readData.array(), limitedData);
             assertTrue(readData.end());
             readData = ByteProcessor.from(data).readBlockSize(readBlockSize)
                 .transformer(timesTransformer(readBlockSize, endCount))
                 .transformer(timesTransformer(readBlockSize, endCount))
                 .asByteReader().read(timesData.length + 1);
-            assertEquals(readData.toByteArray(), timesData);
+            assertEquals(readData.array(), timesData);
             assertTrue(readData.end());
             assertEquals(endCount.get(), 2);
             endCount.clear();
@@ -474,7 +474,7 @@ public class ByteProcessorTest implements DataTest, AssertTest {
                 .transformer(timesTransformer(readBlockSize, endCount))
                 .transformer(timesTransformer(readBlockSize, endCount))
                 .asByteReader().read(limitedTimesData.length + 1);
-            assertEquals(readData.toByteArray(), limitedTimesData);
+            assertEquals(readData.array(), limitedTimesData);
             assertTrue(readData.end());
             assertEquals(endCount.get(), 2);
             endCount.clear();

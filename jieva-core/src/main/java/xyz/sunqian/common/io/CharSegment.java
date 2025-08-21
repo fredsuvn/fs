@@ -57,7 +57,7 @@ public interface CharSegment {
      *
      * @return the remaining data as a new char array from the {@link #data()}
      */
-    default char @Nonnull [] toCharArray() {
+    default char @Nonnull [] array() {
         char[] ret = BufferKit.read(data());
         return ret == null ? new char[0] : ret;
     }
@@ -68,7 +68,7 @@ public interface CharSegment {
      *
      * @return a new array copied from the remaining content of the {@link #data()}
      */
-    default char @Nonnull [] copyCharArray() {
+    default char @Nonnull [] copyArray() {
         return BufferKit.copyContent(data());
     }
 

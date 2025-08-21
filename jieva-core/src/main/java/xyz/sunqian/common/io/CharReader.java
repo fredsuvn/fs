@@ -1,6 +1,7 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.Nullable;
 
 import java.io.OutputStream;
 import java.io.Reader;
@@ -178,6 +179,21 @@ public interface CharReader extends IORuntimeCloseable {
      */
     @Nonnull
     CharSegment read(int len) throws IllegalArgumentException, IORuntimeException;
+
+    /**
+     * Reads all data from this reader, and returns an array contains the data. This method reads continuously until
+     * reaches the end of this reader. It may return {@code null} if the reader has already reached the end of the
+     * source and no data read out.
+     * <p>
+     * The content of the returned segment may be shared with the data source, depends on the implementation, such as
+     * the instances obtained from the {@link #from(char[])}, {@link #from(char[], int, int)},
+     * {@link #from(CharSequence)}, {@link #from(CharSequence, int, int)} and {@link #from(CharBuffer)}.
+     *
+     * @return the all data as buffer
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    @Nullable
+    CharBuffer readAll() throws IORuntimeException;
 
     /**
      * Skips the next specified length of data segment. This method skips continuously until the skipped number reaches

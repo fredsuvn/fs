@@ -1,6 +1,7 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.math.MathKit;
 import xyz.sunqian.common.base.string.StringKit;
@@ -94,6 +95,15 @@ final class CharReaderImpl {
         @Override
         public @Nonnull CharSegment read(int len) throws IllegalArgumentException, IORuntimeException {
             return read(len, IOChecker.endChecker());
+        }
+
+        @Override
+        public @Nullable CharBuffer readAll() throws IORuntimeException {
+            char[] buf = IOKit.read0(src, IOChecker.endChecker());
+            if (buf == null) {
+                return null;
+            }
+            return CharBuffer.wrap(buf);
         }
 
         @Override
@@ -361,6 +371,16 @@ final class CharReaderImpl {
         }
 
         @Override
+        public @Nullable CharBuffer readAll() throws IORuntimeException {
+            if (pos >= end) {
+                return null;
+            }
+            CharBuffer ret = CharBuffer.wrap(src, pos, end - pos);
+            pos = end;
+            return ret;
+        }
+
+        @Override
         public long skip(long len) throws IllegalArgumentException {
             IOChecker.checkSkip(len);
             if (len == 0) {
@@ -502,13 +522,13 @@ final class CharReaderImpl {
 
     private static final class CharSequenceReader extends InMemoryReader {
 
-        private final @Nonnull CharSequence source;
+        private final @Nonnull CharSequence src;
         private final int endPos;
         private int pos;
         private int mark;
 
-        private CharSequenceReader(@Nonnull CharSequence source, int start, int end) {
-            this.source = source;
+        private CharSequenceReader(@Nonnull CharSequence src, int start, int end) {
+            this.src = src;
             this.pos = start;
             this.endPos = end;
             this.mark = pos;
@@ -525,9 +545,19 @@ final class CharReaderImpl {
             }
             int remaining = endPos - pos;
             int actualLen = Math.min(remaining, len);
-            CharBuffer data = CharBuffer.wrap(source, pos, pos + actualLen).slice();
+            CharBuffer data = CharBuffer.wrap(src, pos, pos + actualLen).slice();
             pos += actualLen;
             return CharSegment.of(data, remaining <= len);
+        }
+
+        @Override
+        public @Nullable CharBuffer readAll() throws IORuntimeException {
+            if (pos >= endPos) {
+                return null;
+            }
+            CharBuffer ret = CharBuffer.wrap(src, pos, endPos);
+            pos = endPos;
+            return ret;
         }
 
         @Override
@@ -552,7 +582,7 @@ final class CharReaderImpl {
             }
             try {
                 int remaining = endPos - pos;
-                dst.append(source, pos, pos + remaining);
+                dst.append(src, pos, pos + remaining);
                 pos += remaining;
                 return remaining;
             } catch (Exception e) {
@@ -572,7 +602,7 @@ final class CharReaderImpl {
             try {
                 int remaining = endPos - pos;
                 int actualLen = (int) Math.min(remaining, len);
-                dst.append(source, pos, pos + actualLen);
+                dst.append(src, pos, pos + actualLen);
                 pos += actualLen;
                 return actualLen;
             } catch (Exception e) {
@@ -600,7 +630,7 @@ final class CharReaderImpl {
             }
             int remaining = endPos - pos;
             int copySize = Math.min(remaining, len);
-            StringKit.charsCopy(source, pos, dst, off, copySize);
+            StringKit.charsCopy(src, pos, dst, off, copySize);
             pos += copySize;
             return copySize;
         }
@@ -642,7 +672,7 @@ final class CharReaderImpl {
 
         private int putTo0(@Nonnull CharBuffer dst, int putSize) throws IORuntimeException {
             try {
-                dst.put(CharBuffer.wrap(source, pos, pos + putSize));
+                dst.put(CharBuffer.wrap(src, pos, pos + putSize));
                 pos += putSize;
                 return putSize;
             } catch (Exception e) {
@@ -695,6 +725,16 @@ final class CharReaderImpl {
             src.position(newPos);
             src.limit(limit);
             return CharSegment.of(data, newPos >= limit);
+        }
+
+        @Override
+        public @Nullable CharBuffer readAll() throws IORuntimeException {
+            if (!src.hasRemaining()) {
+                return null;
+            }
+            CharBuffer ret = src.slice();
+            src.position(src.limit());
+            return ret;
         }
 
         @Override
@@ -789,6 +829,15 @@ final class CharReaderImpl {
         @Override
         public @Nonnull CharSegment read(int len) throws IllegalArgumentException, IORuntimeException {
             return read(len, false);
+        }
+
+        @Override
+        public @Nullable CharBuffer readAll() throws IORuntimeException {
+            if (pos >= limit) {
+                return null;
+            }
+            int len = MathKit.intValue(limit - pos);
+            return read(len).data();
         }
 
         @Override

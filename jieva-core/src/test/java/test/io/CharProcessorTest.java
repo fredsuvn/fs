@@ -414,17 +414,17 @@ public class CharProcessorTest implements DataTest, AssertTest {
             // reader
             CharSegment readData = CharProcessor.from(data).readBlockSize(readBlockSize)
                 .asCharReader().read(data.length + 1);
-            assertEquals(readData.toCharArray(), data);
+            assertEquals(readData.array(), data);
             assertTrue(readData.end());
             readData = CharProcessor.from(data).readBlockSize(readBlockSize).readLimit(limit)
                 .asCharReader().read(limitedData.length + 1);
-            assertEquals(readData.toCharArray(), limitedData);
+            assertEquals(readData.array(), limitedData);
             assertTrue(readData.end());
             readData = CharProcessor.from(data).readBlockSize(readBlockSize)
                 .transformer(timesTransformer(readBlockSize, endCount))
                 .transformer(timesTransformer(readBlockSize, endCount))
                 .asCharReader().read(timesData.length + 1);
-            assertEquals(readData.toCharArray(), timesData);
+            assertEquals(readData.array(), timesData);
             assertTrue(readData.end());
             assertEquals(endCount.get(), 2);
             endCount.clear();
@@ -432,7 +432,7 @@ public class CharProcessorTest implements DataTest, AssertTest {
                 .transformer(timesTransformer(readBlockSize, endCount))
                 .transformer(timesTransformer(readBlockSize, endCount))
                 .asCharReader().read(limitedTimesData.length + 1);
-            assertEquals(readData.toCharArray(), limitedTimesData);
+            assertEquals(readData.array(), limitedTimesData);
             assertTrue(readData.end());
             assertEquals(endCount.get(), 2);
             endCount.clear();

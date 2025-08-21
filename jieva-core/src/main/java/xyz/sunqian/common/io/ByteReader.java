@@ -1,6 +1,7 @@
 package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.Nullable;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -172,6 +173,21 @@ public interface ByteReader extends IORuntimeCloseable {
      */
     @Nonnull
     ByteSegment read(int len) throws IllegalArgumentException, IORuntimeException;
+
+    /**
+     * Reads all data from this reader, and returns an array contains the data. This method reads continuously until
+     * reaches the end of this reader. It may return {@code null} if the reader has already reached the end of the
+     * source and no data read out.
+     * <p>
+     * The content of the returned segment may be shared with the data source, depends on the implementation, such as
+     * the instances obtained from the {@link #from(byte[])}, {@link #from(byte[], int, int)} and
+     * {@link #from(ByteBuffer)}.
+     *
+     * @return the all data as buffer
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    @Nullable
+    ByteBuffer readAll() throws IORuntimeException;
 
     /**
      * Skips the next specified length of data segment. This method skips continuously until the skipped number reaches

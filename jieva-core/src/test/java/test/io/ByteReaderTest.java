@@ -26,6 +26,7 @@ import java.util.function.Supplier;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotSame;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
@@ -920,6 +921,69 @@ public class ByteReaderTest implements DataTest {
     }
 
     @Test
+    public void testReadAll() throws Exception {
+        testReadAll(0);
+        testReadAll(16);
+        testReadAll(32);
+        testReadAll(IOKit.bufferSize());
+        testReadAll(IOKit.bufferSize() + 1);
+    }
+
+    private void testReadAll(int size) throws Exception {
+        byte[] data = randomBytes(size);
+        {
+            // input stream
+            ByteReader reader = ByteReader.from(new ByteArrayInputStream(data));
+            ByteBuffer buffer = reader.readAll();
+            assertEquals(buffer == null, size == 0);
+            if (buffer != null) {
+                assertEquals(buffer.array(), data);
+            }
+            assertNull(reader.readAll());
+        }
+        {
+            // readable channel
+            ByteReader reader = ByteReader.from(Channels.newChannel(new ByteArrayInputStream(data)));
+            ByteBuffer buffer = reader.readAll();
+            assertEquals(buffer == null, size == 0);
+            if (buffer != null) {
+                assertEquals(buffer.array(), data);
+            }
+            assertNull(reader.readAll());
+        }
+        {
+            // array
+            ByteReader reader = ByteReader.from(data);
+            ByteBuffer buffer = reader.readAll();
+            assertEquals(buffer == null, size == 0);
+            if (buffer != null) {
+                assertEquals(buffer.array(), data);
+            }
+            assertNull(reader.readAll());
+        }
+        {
+            // buffer
+            ByteReader reader = ByteReader.from(ByteBuffer.wrap(data));
+            ByteBuffer buffer = reader.readAll();
+            assertEquals(buffer == null, size == 0);
+            if (buffer != null) {
+                assertEquals(buffer.array(), data);
+            }
+            assertNull(reader.readAll());
+        }
+        {
+            // limited
+            ByteReader reader = ByteReader.from(data).limit(size);
+            ByteBuffer buffer = reader.readAll();
+            assertEquals(buffer == null, size == 0);
+            if (buffer != null) {
+                assertEquals(buffer.array(), data);
+            }
+            assertNull(reader.readAll());
+        }
+    }
+
+    @Test
     public void testShareBytes() {
         int dataSize = 1024;
         int limitSize = dataSize / 2;
@@ -1013,10 +1077,10 @@ public class ByteReaderTest implements DataTest {
         assertEquals(segmentCopy.data(), ByteBuffer.wrap(bytes));
         assertTrue(segmentCopy.end());
         assertNotSame(segmentCopy.data().array(), bytes);
-        assertEquals(segment.copyByteArray(), bytes);
-        assertNotSame(segment.copyByteArray(), bytes);
-        assertEquals(segment.toByteArray(), bytes);
-        assertEquals(segment.toByteArray(), new byte[0]);
+        assertEquals(segment.copyArray(), bytes);
+        assertNotSame(segment.copyArray(), bytes);
+        assertEquals(segment.array(), bytes);
+        assertEquals(segment.array(), new byte[0]);
     }
 
     @Test
