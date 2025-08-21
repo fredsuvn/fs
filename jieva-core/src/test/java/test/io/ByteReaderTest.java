@@ -156,11 +156,21 @@ public class ByteReaderTest implements DataTest {
                 data,
                 readSize
             );
+            testReadBytes(
+                ByteReader.from(new ByteArrayInputStream(data)).limit(data.length + 5),
+                data,
+                readSize, false
+            );
+            testSkipBytes(
+                ByteReader.from(new ByteArrayInputStream(data)).limit(data.length + 5),
+                data,
+                readSize
+            );
             if (data.length > 5) {
                 testReadBytes(
                     ByteReader.from(data).limit(data.length - 5),
                     Arrays.copyOf(data, data.length - 5),
-                    readSize, false
+                    readSize, true
                 );
                 testSkipBytes(
                     ByteReader.from(data).limit(data.length - 5),
@@ -740,33 +750,72 @@ public class ByteReaderTest implements DataTest {
         }
 
         // input stream
-        testAvailable(size, src, () -> ByteReader.from(new In()), () -> ByteReader.from(new In()), false);
+        testAvailable(size, src, () -> ByteReader.from(new In()), false);
         // byte channel
-        testAvailable(size, src, () -> ByteReader.from(new Cin()), () -> ByteReader.from(new Cin()), false);
+        testAvailable(size, src, () -> ByteReader.from(new Cin()), false);
         // byte array
-        testAvailable(size, src, () -> ByteReader.from(src), () -> ByteReader.from(src), true);
+        testAvailable(size, src, () -> ByteReader.from(src), true);
         // byte buffer
-        testAvailable(
-            size, src,
-            () -> ByteReader.from(ByteBuffer.wrap(src)), () -> ByteReader.from(ByteBuffer.wrap(src)),
-            true
-        );
+        testAvailable(size, src, () -> ByteReader.from(ByteBuffer.wrap(src)), true);
         // limited
+        testAvailable(size, src, () -> ByteReader.from(new In()).limit(size), false);
+        testAvailable(size, src, () -> ByteReader.from(new In()).limit(size + 1), false);
         testAvailable(
-            size, src,
-            () -> ByteReader.from(new In()).limit(size * 2L),
-            () -> ByteReader.from(new In()).limit(size * 2L),
+            size - 1,
+            Arrays.copyOf(src, size - 1),
+            () -> ByteReader.from(new In()).limit(size - 1),
             false
+        );
+        testAvailable(size, src, () -> ByteReader.from(src).limit(size), true);
+        testAvailable(size, src, () -> ByteReader.from(src).limit(size + 1), true);
+        testAvailable(
+            size - 1,
+            Arrays.copyOf(src, size - 1),
+            () -> ByteReader.from(src).limit(size - 1),
+            true
         );
     }
 
     private void testAvailable(
-        int size, byte[] src, Supplier<ByteReader> s1, Supplier<ByteReader> s2, boolean preKnown
+        int size, byte[] src, Supplier<ByteReader> supplier, boolean preKnown
     ) throws Exception {
+        {
+            // available
+            ByteReader reader = supplier.get();
+            assertFalse(reader.available(0).end());
+            assertFalse(reader.available(0).data().hasRemaining());
+            if (preKnown) {
+                ByteSegment s = reader.available(size);
+                assertTrue(s.end());
+                assertEquals(BufferKit.copyContent(s.data()), src);
+                assertTrue(reader.available(1).end());
+            } else {
+                ByteSegment s0 = reader.available(size);
+                assertFalse(s0.end());
+                assertEquals(BufferKit.copyContent(s0.data()).length, 0);
+                ByteSegment s1 = reader.available(size);
+                assertEquals(s1.end(), preKnown);
+                assertEquals(BufferKit.copyContent(s1.data()).length, 1);
+                assertEquals(s1.data().get(), src[0]);
+                BytesBuilder builder = new BytesBuilder();
+                builder.append(src[0]);
+                while (true) {
+                    ByteSegment s = reader.available(size);
+                    builder.append(s.data());
+                    if (s.end()) {
+                        break;
+                    }
+                }
+                assertEquals(builder.toByteArray(), src);
+                ByteSegment se = reader.available(size);
+                assertTrue(se.end());
+                assertFalse(se.data().hasRemaining());
+            }
+        }
         {
             // to output stream
             BytesBuilder builder = new BytesBuilder();
-            ByteReader reader1 = s1.get();
+            ByteReader reader1 = supplier.get();
             assertEquals(reader1.availableTo(builder), preKnown ? size : 0);
             while (true) {
                 long readSize = reader1.availableTo(builder);
@@ -776,7 +825,7 @@ public class ByteReaderTest implements DataTest {
             }
             assertEquals(builder.toByteArray(), src);
             builder.reset();
-            ByteReader reader2 = s2.get();
+            ByteReader reader2 = supplier.get();
             assertEquals(reader2.availableTo(builder, size * 2L), preKnown ? size : 0);
             while (true) {
                 long readSize = reader2.availableTo(builder, size * 2L);
@@ -791,7 +840,7 @@ public class ByteReaderTest implements DataTest {
             // to out channel
             BytesBuilder builder = new BytesBuilder();
             WritableByteChannel outChannel = Channels.newChannel(builder);
-            ByteReader reader1 = s1.get();
+            ByteReader reader1 = supplier.get();
             assertEquals(reader1.availableTo(builder), preKnown ? size : 0);
             while (true) {
                 long readSize = reader1.availableTo(outChannel);
@@ -801,7 +850,7 @@ public class ByteReaderTest implements DataTest {
             }
             assertEquals(builder.toByteArray(), src);
             builder.reset();
-            ByteReader reader2 = s2.get();
+            ByteReader reader2 = supplier.get();
             assertEquals(reader2.availableTo(builder, size * 2L), preKnown ? size : 0);
             while (true) {
                 long readSize = reader2.availableTo(outChannel, size * 2L);
@@ -816,7 +865,7 @@ public class ByteReaderTest implements DataTest {
             // to array
             byte[] dst = new byte[size * 2];
             int c = 0;
-            ByteReader reader1 = s1.get();
+            ByteReader reader1 = supplier.get();
             assertEquals(reader1.availableTo(dst), preKnown ? size : 0);
             while (c < size) {
                 long readSize = reader1.availableTo(dst, c, size - c);
@@ -828,7 +877,7 @@ public class ByteReaderTest implements DataTest {
             assertEquals(Arrays.copyOf(dst, size), src);
             dst = new byte[size * 2];
             c = 0;
-            ByteReader reader2 = s2.get();
+            ByteReader reader2 = supplier.get();
             assertEquals(reader2.availableTo(dst), preKnown ? size : 0);
             while (c < size) {
                 long readSize = reader2.availableTo(dst, c, size - c);
@@ -843,7 +892,7 @@ public class ByteReaderTest implements DataTest {
             // to buffer
             ByteBuffer dst = ByteBuffer.allocate(size * 2);
             int c = 0;
-            ByteReader reader1 = s1.get();
+            ByteReader reader1 = supplier.get();
             assertEquals(reader1.availableTo(dst), preKnown ? size : 0);
             while (c < size) {
                 long readSize = reader1.availableTo(dst, size * 2);
@@ -856,7 +905,7 @@ public class ByteReaderTest implements DataTest {
             assertEquals(BufferKit.read(dst), src);
             dst = ByteBuffer.allocate(size * 2);
             c = 0;
-            ByteReader reader2 = s2.get();
+            ByteReader reader2 = supplier.get();
             assertEquals(reader2.availableTo(dst), preKnown ? size : 0);
             while (c < size) {
                 long readSize = reader2.availableTo(dst, size * 2);

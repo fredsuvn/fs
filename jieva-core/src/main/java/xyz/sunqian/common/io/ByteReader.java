@@ -328,8 +328,8 @@ public interface ByteReader extends IORuntimeCloseable {
      * @throws IllegalArgumentException if the specified length {@code < 0}
      * @throws IORuntimeException       if an I/O error occurs
      */
-    //@Nonnull
-    //ByteSegment available(int len) throws IllegalArgumentException, IORuntimeException;
+    @Nonnull
+    ByteSegment available(int len) throws IllegalArgumentException, IORuntimeException;
 
     /**
      * Reads and returns the next available data segment. This method reads continuously until no data is immediately

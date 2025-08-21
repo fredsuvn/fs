@@ -286,6 +286,27 @@ public interface CharReader extends IORuntimeCloseable {
     int readTo(@Nonnull CharBuffer dst, int len) throws IllegalArgumentException, IORuntimeException;
 
     /**
+     * Reads and returns the next specified length of data segment. This method reads continuously until the read number
+     * reaches the specified length or no data is immediately available. It never returns {@code null}, but can return
+     * an empty segment.
+     * <p>
+     * If the specified length is {@code 0}, returns an empty segment immediately without reading.
+     * <p>
+     * The content of the returned segment may be shared with the data source, depends on the implementation, such as
+     * the instances obtained from the {@link #from(char[])}, {@link #from(char[], int, int)},
+     * {@link #from(CharSequence)}, {@link #from(CharSequence, int, int)} and {@link #from(CharBuffer)}.
+     * <p>
+     * Note this method may allocate the specified length of space, and the excessive length may cause out of memory.
+     *
+     * @param len the specified length to read, must {@code >= 0}
+     * @return the next data segment
+     * @throws IllegalArgumentException if the specified length {@code < 0}
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    @Nonnull
+    CharSegment available(int len) throws IllegalArgumentException, IORuntimeException;
+
+    /**
      * Reads and returns the next available data segment. This method reads continuously until no data is immediately
      * available. It never returns {@code null}, but can return an empty segment.
      * <p>

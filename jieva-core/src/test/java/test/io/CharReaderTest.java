@@ -154,11 +154,21 @@ public class CharReaderTest implements DataTest {
                 data,
                 readSize
             );
+            testReadChars(
+                CharReader.from(new CharArrayReader(data)).limit(data.length + 5),
+                data,
+                readSize, false
+            );
+            testSkipChars(
+                CharReader.from(new CharArrayReader(data)).limit(data.length + 5),
+                data,
+                readSize
+            );
             if (data.length > 5) {
                 testReadChars(
                     CharReader.from(data).limit(data.length - 5),
                     Arrays.copyOf(data, data.length - 5),
-                    readSize, false
+                    readSize, true
                 );
                 testSkipChars(
                     CharReader.from(data).limit(data.length - 5),
@@ -611,31 +621,72 @@ public class CharReaderTest implements DataTest {
         }
 
         // input stream
-        testAvailable(size, src, () -> CharReader.from(new In()), () -> CharReader.from(new In()), false);
+        testAvailable(size, src, () -> CharReader.from(new In()), false);
         // char array
-        testAvailable(size, src, () -> CharReader.from(src), () -> CharReader.from(src), true);
+        testAvailable(size, src, () -> CharReader.from(src), true);
+        // char sequence
+        testAvailable(size, src, () -> CharReader.from(new String(src)), true);
         // char buffer
-        testAvailable(
-            size, src,
-            () -> CharReader.from(CharBuffer.wrap(src)), () -> CharReader.from(CharBuffer.wrap(src)),
-            true
-        );
+        testAvailable(size, src, () -> CharReader.from(CharBuffer.wrap(src)), true);
         // limited
+        testAvailable(size, src, () -> CharReader.from(new In()).limit(size), false);
+        testAvailable(size, src, () -> CharReader.from(new In()).limit(size + 1), false);
         testAvailable(
-            size, src,
-            () -> CharReader.from(new In()).limit(size * 2L),
-            () -> CharReader.from(new In()).limit(size * 2L),
+            size - 1,
+            Arrays.copyOf(src, size - 1),
+            () -> CharReader.from(new In()).limit(size - 1),
             false
+        );
+        testAvailable(size, src, () -> CharReader.from(src).limit(size), true);
+        testAvailable(size, src, () -> CharReader.from(src).limit(size + 1), true);
+        testAvailable(
+            size - 1,
+            Arrays.copyOf(src, size - 1),
+            () -> CharReader.from(src).limit(size - 1),
+            true
         );
     }
 
     private void testAvailable(
-        int size, char[] src, Supplier<CharReader> s1, Supplier<CharReader> s2, boolean preKnown
+        int size, char[] src, Supplier<CharReader> supplier, boolean preKnown
     ) throws Exception {
+        {
+            // available
+            CharReader reader = supplier.get();
+            assertFalse(reader.available(0).end());
+            assertFalse(reader.available(0).data().hasRemaining());
+            if (preKnown) {
+                CharSegment s = reader.available(size);
+                assertTrue(s.end());
+                assertEquals(BufferKit.copyContent(s.data()), src);
+                assertTrue(reader.available(1).end());
+            } else {
+                CharSegment s0 = reader.available(size);
+                assertFalse(s0.end());
+                assertEquals(BufferKit.copyContent(s0.data()).length, 0);
+                CharSegment s1 = reader.available(size);
+                assertEquals(s1.end(), preKnown);
+                assertEquals(BufferKit.copyContent(s1.data()).length, 1);
+                assertEquals(s1.data().get(), src[0]);
+                CharsBuilder builder = new CharsBuilder();
+                builder.append(src[0]);
+                while (true) {
+                    CharSegment s = reader.available(size);
+                    builder.append(s.data());
+                    if (s.end()) {
+                        break;
+                    }
+                }
+                assertEquals(builder.toCharArray(), src);
+                CharSegment se = reader.available(size);
+                assertTrue(se.end());
+                assertFalse(se.data().hasRemaining());
+            }
+        }
         {
             // to output stream
             CharsBuilder builder = new CharsBuilder();
-            CharReader reader1 = s1.get();
+            CharReader reader1 = supplier.get();
             assertEquals(reader1.availableTo(builder), preKnown ? size : 0);
             while (true) {
                 long readSize = reader1.availableTo(builder);
@@ -645,7 +696,7 @@ public class CharReaderTest implements DataTest {
             }
             assertEquals(builder.toCharArray(), src);
             builder.reset();
-            CharReader reader2 = s2.get();
+            CharReader reader2 = supplier.get();
             assertEquals(reader2.availableTo(builder, size * 2L), preKnown ? size : 0);
             while (true) {
                 long readSize = reader2.availableTo(builder, size * 2L);
@@ -660,7 +711,7 @@ public class CharReaderTest implements DataTest {
             // to array
             char[] dst = new char[size * 2];
             int c = 0;
-            CharReader reader1 = s1.get();
+            CharReader reader1 = supplier.get();
             assertEquals(reader1.availableTo(dst), preKnown ? size : 0);
             while (c < size) {
                 long readSize = reader1.availableTo(dst, c, size - c);
@@ -672,7 +723,7 @@ public class CharReaderTest implements DataTest {
             assertEquals(Arrays.copyOf(dst, size), src);
             dst = new char[size * 2];
             c = 0;
-            CharReader reader2 = s2.get();
+            CharReader reader2 = supplier.get();
             assertEquals(reader2.availableTo(dst), preKnown ? size : 0);
             while (c < size) {
                 long readSize = reader2.availableTo(dst, c, size - c);
@@ -687,7 +738,7 @@ public class CharReaderTest implements DataTest {
             // to buffer
             CharBuffer dst = CharBuffer.allocate(size * 2);
             int c = 0;
-            CharReader reader1 = s1.get();
+            CharReader reader1 = supplier.get();
             assertEquals(reader1.availableTo(dst), preKnown ? size : 0);
             while (c < size) {
                 long readSize = reader1.availableTo(dst, size * 2);
@@ -700,7 +751,7 @@ public class CharReaderTest implements DataTest {
             assertEquals(BufferKit.read(dst), src);
             dst = CharBuffer.allocate(size * 2);
             c = 0;
-            CharReader reader2 = s2.get();
+            CharReader reader2 = supplier.get();
             assertEquals(reader2.availableTo(dst), preKnown ? size : 0);
             while (c < size) {
                 long readSize = reader2.availableTo(dst, size * 2);

@@ -156,6 +156,11 @@ final class CharReaderImpl {
         }
 
         @Override
+        public @Nonnull CharSegment available(int len) throws IllegalArgumentException, IORuntimeException {
+            return read(len, IOChecker.availableChecker());
+        }
+
+        @Override
         public @Nonnull CharSegment available() throws IORuntimeException {
             char[] result = IOKit.available(src, bufSize);
             if (result == null) {
@@ -209,7 +214,7 @@ final class CharReaderImpl {
                 return CharSegment.empty(true);
             }
             data = readSize == len ? data : Arrays.copyOfRange(data, 0, readSize);
-            return CharSegment.of(CharBuffer.wrap(data), readSize < len);
+            return CharSegment.of(CharBuffer.wrap(data), readChecker.isEnd(readSize, len));
         }
 
         private long readTo(@Nonnull Appendable dst, ReadChecker readChecker) throws IORuntimeException {
@@ -284,6 +289,11 @@ final class CharReaderImpl {
     }
 
     private static abstract class InMemoryReader implements CharReader {
+
+        @Override
+        public @Nonnull CharSegment available(int len) throws IllegalArgumentException, IORuntimeException {
+            return read(len);
+        }
 
         @Override
         public long availableTo(@Nonnull Appendable dst) throws IORuntimeException {
@@ -778,22 +788,7 @@ final class CharReaderImpl {
 
         @Override
         public @Nonnull CharSegment read(int len) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkLen(len);
-            if (len == 0) {
-                return CharSegment.empty(false);
-            }
-            if (pos >= limit) {
-                return CharSegment.empty(true);
-            }
-            int actualLen = (int) Math.min(len, limit - pos);
-            CharSegment segment = src.read(actualLen);
-            pos += segment.data().remaining();
-            if (actualLen < len) {
-                if (!segment.end()) {
-                    return newSeg(segment.data(), true);
-                }
-            }
-            return segment;
+            return read(len, false);
         }
 
         @Override
@@ -895,6 +890,11 @@ final class CharReaderImpl {
         }
 
         @Override
+        public @Nonnull CharSegment available(int len) throws IllegalArgumentException, IORuntimeException {
+            return read(len, true);
+        }
+
+        @Override
         public @Nonnull CharSegment available() throws IORuntimeException {
             return read((int) (limit - pos));
         }
@@ -980,6 +980,25 @@ final class CharReaderImpl {
             }
             pos += readSize;
             return readSize;
+        }
+
+        private @Nonnull CharSegment read(int len, boolean available) throws IllegalArgumentException, IORuntimeException {
+            IOChecker.checkLen(len);
+            if (len == 0) {
+                return CharSegment.empty(false);
+            }
+            if (pos >= limit) {
+                return CharSegment.empty(true);
+            }
+            int maxLen = (int) Math.min(len, limit - pos);
+            CharSegment segment = available ? src.available(maxLen) : src.read(maxLen);
+            pos += segment.data().remaining();
+            if (!segment.end()) {
+                if (pos >= limit) {
+                    return newSeg(segment.data(), true);
+                }
+            }
+            return segment;
         }
 
         @Override

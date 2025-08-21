@@ -68,6 +68,8 @@ final class IOChecker {
         int actualCount(int lastReadSize, int count);
 
         long actualCount(int lastReadSize, long count);
+
+        boolean isEnd(int readSize, int len);
     }
 
     static final class EndChecker implements ReadChecker {
@@ -88,6 +90,11 @@ final class IOChecker {
         public long actualCount(int lastReadSize, long count) {
             return count == 0 ? -1 : count;
         }
+
+        @Override
+        public boolean isEnd(int readSize, int len) {
+            return readSize < len;
+        }
     }
 
     static final class AvailableChecker implements ReadChecker {
@@ -107,6 +114,11 @@ final class IOChecker {
         @Override
         public long actualCount(int lastReadSize, long count) {
             return count == 0 ? (lastReadSize < 0 ? -1 : 0) : count;
+        }
+
+        @Override
+        public boolean isEnd(int readSize, int len) {
+            return readSize < 0;
         }
     }
 }
