@@ -1,15 +1,16 @@
 package xyz.sunqian.common.net;
 
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.Nullable;
 
-import java.nio.ByteBuffer;
+import java.nio.channels.ReadableByteChannel;
 
 /**
  * Wraps a given {@link NetChannelHandler} to provide centralized exception handling.
  * <p>
  * This wrapper ensures that exceptions occurring during {@link #channelOpen(NetChannelContext)},
- * {@link #channelClose(NetChannelContext)}, or {@link #channelRead(NetChannelContext, ByteBuffer)} operations are
- * automatically routed to the {@link #exceptionCaught(NetChannelContext, Throwable)} method.
+ * {@link #channelClose(NetChannelContext)}, or {@link #channelRead(NetChannelContext, ReadableByteChannel)} operations
+ * are automatically routed to the {@link #exceptionCaught(NetChannelContext, Throwable)} method.
  *
  * @author sunqian
  */
@@ -22,7 +23,7 @@ public class NetChannelHandlerWrapper implements NetChannelHandler {
     }
 
     @Override
-    public void channelOpen(NetChannelContext context) throws Exception {
+    public void channelOpen(NetChannelContext context) {
         try {
             handler.channelOpen(context);
         } catch (Exception e) {
@@ -31,7 +32,7 @@ public class NetChannelHandlerWrapper implements NetChannelHandler {
     }
 
     @Override
-    public void channelClose(NetChannelContext context) throws Exception {
+    public void channelClose(NetChannelContext context) {
         try {
             handler.channelClose(context);
         } catch (Exception e) {
@@ -40,32 +41,16 @@ public class NetChannelHandlerWrapper implements NetChannelHandler {
     }
 
     @Override
-    public void channelRead(NetChannelContext context, ByteBuffer buffer) throws Exception {
+    public void channelRead(NetChannelContext context, ReadableByteChannel reader) {
         try {
-            handler.channelRead(context, buffer);
+            handler.channelRead(context, reader);
         } catch (Exception e) {
             exceptionCaught(context, e);
         }
     }
 
-    /**
-     * This method is invoked after catching the unhandled exception thrown from this handler. If this method still
-     * throws an exception, the channel will be closed. Typically, this method does not throw an exception, and even if
-     * it does, it will be a {@link NetException}.
-     *
-     * @param context the context of the channel
-     * @param cause   the unhandled exception
-     */
     @Override
-    public void exceptionCaught(NetChannelContext context, Throwable cause) {
-        try {
-            handler.exceptionCaught(context, cause);
-        } catch (Exception e) {
-            try {
-                context.close();
-            } catch (Exception ex) {
-                throw new NetException(ex);
-            }
-        }
+    public void exceptionCaught(@Nullable NetChannelContext context, Throwable cause) {
+        handler.exceptionCaught(context, cause);
     }
 }
