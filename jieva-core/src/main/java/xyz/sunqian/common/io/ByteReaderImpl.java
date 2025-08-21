@@ -97,17 +97,7 @@ final class ByteReaderImpl {
 
         @Override
         public @Nonnull ByteSegment read(int len) throws IllegalArgumentException, IORuntimeException {
-            if (len == 0) {
-                return ByteSegment.empty(false);
-            }
-            IOChecker.checkLen(len);
-            byte[] data = new byte[len];
-            int readSize = IOKit.readTo0(src, data, 0, data.length, IOChecker.endChecker());
-            if (readSize < 0) {
-                return ByteSegment.empty(true);
-            }
-            data = readSize == len ? data : Arrays.copyOfRange(data, 0, readSize);
-            return ByteSegment.of(ByteBuffer.wrap(data), readSize < len);
+            return read(len, IOChecker.endChecker());
         }
 
         @Override
@@ -181,13 +171,18 @@ final class ByteReaderImpl {
             return readTo(dst, len, IOChecker.endChecker());
         }
 
+        // @Override
+        // public @Nonnull ByteSegment available(int len) throws IllegalArgumentException, IORuntimeException {
+        //     return null;
+        // }
+
         @Override
         public @Nonnull ByteSegment available() throws IORuntimeException {
-            try {
-                return read(src.available());
-            } catch (IOException e) {
-                throw new IORuntimeException(e);
+            byte[] data = IOKit.read0(src, IOChecker.availableChecker());
+            if (data == null) {
+                return ByteSegment.empty(true);
             }
+            return ByteSegment.of(ByteBuffer.wrap(data), false);
         }
 
         @Override
@@ -234,6 +229,22 @@ final class ByteReaderImpl {
         @Override
         public int availableTo(@Nonnull ByteBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
             return readTo(dst, len, IOChecker.availableChecker());
+        }
+
+        private @Nonnull ByteSegment read(
+            int len, ReadChecker readChecker
+        ) throws IllegalArgumentException, IORuntimeException {
+            if (len == 0) {
+                return ByteSegment.empty(false);
+            }
+            IOChecker.checkLen(len);
+            byte[] data = new byte[len];
+            int readSize = IOKit.readTo0(src, data, 0, data.length, readChecker);
+            if (readSize < 0) {
+                return ByteSegment.empty(true);
+            }
+            data = readSize == len ? data : Arrays.copyOfRange(data, 0, readSize);
+            return ByteSegment.of(ByteBuffer.wrap(data), readSize < len);
         }
 
         private long readTo(@Nonnull OutputStream dst, ReadChecker readChecker) throws IORuntimeException {
@@ -334,17 +345,7 @@ final class ByteReaderImpl {
 
         @Override
         public @Nonnull ByteSegment read(int len) throws IllegalArgumentException, IORuntimeException {
-            if (len == 0) {
-                return ByteSegment.empty(false);
-            }
-            IOChecker.checkLen(len);
-            byte[] data = new byte[len];
-            int readSize = IOKit.readTo0(src, ByteBuffer.wrap(data), IOChecker.endChecker());
-            if (readSize < 0) {
-                return ByteSegment.empty(true);
-            }
-            data = readSize == len ? data : Arrays.copyOfRange(data, 0, readSize);
-            return ByteSegment.of(ByteBuffer.wrap(data), readSize < len);
+            return read(len, IOChecker.endChecker());
         }
 
         @Override
@@ -414,11 +415,11 @@ final class ByteReaderImpl {
 
         @Override
         public @Nonnull ByteSegment available() throws IORuntimeException {
-            ByteBuffer result = IOKit.available(src, bufSize);
-            if (result == null) {
+            ByteBuffer data = IOKit.read0(src, IOChecker.availableChecker());
+            if (data == null) {
                 return ByteSegment.empty(true);
             }
-            return ByteSegment.of(result, result.remaining() < bufSize);
+            return ByteSegment.of(data, false);
         }
 
         @Override
@@ -465,6 +466,22 @@ final class ByteReaderImpl {
         @Override
         public int availableTo(@Nonnull ByteBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
             return readTo(dst, len, IOChecker.availableChecker());
+        }
+
+        private @Nonnull ByteSegment read(
+            int len, ReadChecker readChecker
+        ) throws IllegalArgumentException, IORuntimeException {
+            if (len == 0) {
+                return ByteSegment.empty(false);
+            }
+            IOChecker.checkLen(len);
+            byte[] data = new byte[len];
+            int readSize = IOKit.readTo0(src, ByteBuffer.wrap(data), readChecker);
+            if (readSize < 0) {
+                return ByteSegment.empty(true);
+            }
+            data = readSize == len ? data : Arrays.copyOfRange(data, 0, readSize);
+            return ByteSegment.of(ByteBuffer.wrap(data), readSize < len);
         }
 
         private long readTo(@Nonnull OutputStream dst, ReadChecker readChecker) throws IORuntimeException {

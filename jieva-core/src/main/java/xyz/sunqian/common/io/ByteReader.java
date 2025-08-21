@@ -311,8 +311,29 @@ public interface ByteReader extends IORuntimeCloseable {
     int readTo(@Nonnull ByteBuffer dst, int len) throws IllegalArgumentException, IORuntimeException;
 
     /**
-     * Reads and returns the next available data segment. This method reads continuously until no data is available. It
-     * never returns {@code null}, but can return an empty segment.
+     * Reads and returns the next specified length of data segment. This method reads continuously until the read number
+     * reaches the specified length or no data is immediately available. It never returns {@code null}, but can return
+     * an empty segment.
+     * <p>
+     * If the specified length is {@code 0}, returns an empty segment immediately without reading.
+     * <p>
+     * The content of the returned segment may be shared with the data source, depends on the implementation, such as
+     * the instances obtained from the {@link #from(byte[])}, {@link #from(byte[], int, int)} and
+     * {@link #from(ByteBuffer)}.
+     * <p>
+     * Note this method may allocate the specified length of space, and the excessive length may cause out of memory.
+     *
+     * @param len the specified length to read, must {@code >= 0}
+     * @return the next data segment
+     * @throws IllegalArgumentException if the specified length {@code < 0}
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    //@Nonnull
+    //ByteSegment available(int len) throws IllegalArgumentException, IORuntimeException;
+
+    /**
+     * Reads and returns the next available data segment. This method reads continuously until no data is immediately
+     * available. It never returns {@code null}, but can return an empty segment.
      * <p>
      * The content of the returned segment may be shared with the data source, depends on the implementation, such as
      * the instances obtained from the {@link #from(byte[])}, {@link #from(byte[], int, int)} and
@@ -325,8 +346,8 @@ public interface ByteReader extends IORuntimeCloseable {
     ByteSegment available() throws IORuntimeException;
 
     /**
-     * Reads available data into the specified output stream, until no data is available, returns the actual number of
-     * bytes read to.
+     * Reads available data into the specified output stream, until no data is immediately available, returns the actual
+     * number of bytes read to.
      * <p>
      * If reaches the end of this reader and no data is read, returns {@code -1}.
      * <p>
@@ -341,7 +362,7 @@ public interface ByteReader extends IORuntimeCloseable {
 
     /**
      * Reads a specified length of data into the specified output stream, until the read number reaches the specified
-     * length or no data is available, returns the actual number of bytes read to.
+     * length or no data is immediately available, returns the actual number of bytes read to.
      * <p>
      * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of this reader and no
      * data is read, returns {@code -1}.
@@ -358,8 +379,8 @@ public interface ByteReader extends IORuntimeCloseable {
     long availableTo(@Nonnull OutputStream dst, long len) throws IllegalArgumentException, IORuntimeException;
 
     /**
-     * Reads available data into the specified output channel, until no data is available, returns the actual number of
-     * bytes read to.
+     * Reads available data into the specified output channel, until no data is immediately available, returns the
+     * actual number of bytes read to.
      * <p>
      * If reaches the end of this reader and no data is read, returns {@code -1}.
      * <p>
@@ -374,7 +395,7 @@ public interface ByteReader extends IORuntimeCloseable {
 
     /**
      * Reads a specified length of data into the specified output channel, until the read number reaches the specified
-     * length or no data is available, returns the actual number of bytes read to.
+     * length or no data is immediately available, returns the actual number of bytes read to.
      * <p>
      * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of this reader and no
      * data is read, returns {@code -1}.
@@ -392,7 +413,7 @@ public interface ByteReader extends IORuntimeCloseable {
 
     /**
      * Reads available data from this reader into the destination array, until the read number reaches the array's
-     * length or no data is available, and returns the actual number of bytes read to.
+     * length or no data is immediately available, and returns the actual number of bytes read to.
      * <p>
      * If the array's length is {@code 0}, returns {@code 0} without reading. If reaches the end of this reader and no
      * data is read, returns {@code -1}.
@@ -406,8 +427,8 @@ public interface ByteReader extends IORuntimeCloseable {
 
     /**
      * Reads a specified length of data from this reader into the destination array, starting at the specified offset,
-     * until the read number reaches the specified length or no data is available, and returns the actual number of
-     * bytes read to.
+     * until the read number reaches the specified length or no data is immediately available, and returns the actual
+     * number of bytes read to.
      * <p>
      * If the specified length is {@code 0}, returns {@code 0} without reading. If reaches the end of this reader and no
      * data is read, returns {@code -1}.
@@ -424,7 +445,7 @@ public interface ByteReader extends IORuntimeCloseable {
 
     /**
      * Reads available data from this reader into the destination buffer, until reaches the end of the buffer or no data
-     * is available, and returns the actual number of bytes read to.
+     * is immediately available, and returns the actual number of bytes read to.
      * <p>
      * If the destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if reaches the end of this
      * reader and no data is read, returns {@code -1}.
@@ -440,8 +461,8 @@ public interface ByteReader extends IORuntimeCloseable {
 
     /**
      * Reads a specified length of data from this reader into the destination buffer, until the read number reaches the
-     * specified length or reaches the end of the buffer or no data is available, and returns the actual number of bytes
-     * read to.
+     * specified length or reaches the end of the buffer or no data is immediately available, and returns the actual
+     * number of bytes read to.
      * <p>
      * If the specified length or destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if
      * reaches the end of this reader and no data is read, returns {@code -1}.

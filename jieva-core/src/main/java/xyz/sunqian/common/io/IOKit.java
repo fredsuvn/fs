@@ -623,8 +623,8 @@ public class IOKit {
     }
 
     /**
-     * Reads available data from the input stream into a new array, continuing until no data is available, and returns
-     * the array.
+     * Reads available data from the input stream into a new array, continuing until no data is immediately available,
+     * and returns the array.
      * <p>
      * If reaches the end of the input stream and no data is read, returns {@code null}.
      *
@@ -640,7 +640,7 @@ public class IOKit {
     /**
      * Reads a specified length of data from the input stream into a new array, and returns the array. If the specified
      * length is {@code 0}, returns an empty array without reading. Otherwise, this method keeps reading until the read
-     * number reaches the specified length or no data is available.
+     * number reaches the specified length or no data is immediately available.
      * <p>
      * If reaches the end of the input stream and no data is read, returns {@code null}.
      * <p>
@@ -661,8 +661,8 @@ public class IOKit {
     }
 
     /**
-     * Reads available data from the source channel into a new buffer, continuing until no data is available, and
-     * returns the buffer. The new buffer's position is {@code 0} and limit equals its capacity.
+     * Reads available data from the source channel into a new buffer, continuing until no data is immediately
+     * available, and returns the buffer. The new buffer's position is {@code 0} and limit equals its capacity.
      * <p>
      * If reaches the end of the source channel and no data is read, returns {@code null}.
      *
@@ -678,8 +678,8 @@ public class IOKit {
     /**
      * Reads a specified length of data from the source channel into a new buffer, and returns the buffer. If the
      * specified length is {@code 0}, returns an empty buffer without reading. Otherwise, this method keeps reading
-     * until the read number reaches the specified length or no data is available. The new buffer's position is
-     * {@code 0} and limit equals its capacity.
+     * until the read number reaches the specified length or no data is immediately available. The new buffer's position
+     * is {@code 0} and limit equals its capacity.
      * <p>
      * If reaches the end of the source channel and no data is read, returns {@code null}.
      * <p>
@@ -700,8 +700,8 @@ public class IOKit {
     }
 
     /**
-     * Reads available data from the input stream into the output stream, until no data is available, and returns the
-     * actual number of bytes read to.
+     * Reads available data from the input stream into the output stream, until no data is immediately available, and
+     * returns the actual number of bytes read to.
      * <p>
      * If reaches the end of the input stream and no data is read, returns {@code -1}.
      *
@@ -717,7 +717,7 @@ public class IOKit {
 
     /**
      * Reads a specified length of data from the input stream into the output stream, until the read number reaches the
-     * specified length or no data is available, returns the actual number of bytes read to.
+     * specified length or no data is immediately available, returns the actual number of bytes read to.
      * <p>
      * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the input stream
      * and no data is read, returns {@code -1}.
@@ -737,8 +737,8 @@ public class IOKit {
     }
 
     /**
-     * Reads available data from the input stream into the output channel, until no data is available, and returns the
-     * actual number of bytes read to.
+     * Reads available data from the input stream into the output channel, until no data is immediately available, and
+     * returns the actual number of bytes read to.
      * <p>
      * If reaches the end of the input stream and no data is read, returns {@code -1}.
      *
@@ -756,7 +756,7 @@ public class IOKit {
 
     /**
      * Reads a specified length of data from the input stream into the output channel, until the read number reaches the
-     * specified length or no data is available, returns the actual number of bytes read to.
+     * specified length or no data is immediately available, returns the actual number of bytes read to.
      * <p>
      * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the input stream
      * and no data is read, returns {@code -1}.
@@ -777,7 +777,7 @@ public class IOKit {
 
     /**
      * Reads available data from the input stream into the destination array, until the read number reaches the array's
-     * length or no data is available, and returns the actual number of bytes read to.
+     * length or no data is immediately available, and returns the actual number of bytes read to.
      * <p>
      * If the array's length is {@code 0}, returns {@code 0} without reading. If reaches the end of the input stream and
      * no data is read, returns {@code -1}.
@@ -794,8 +794,8 @@ public class IOKit {
 
     /**
      * Reads a specified length of data from the input stream into the destination array, starting at the specified
-     * offset, until the read number reaches the specified length or no data is available, and returns the actual number
-     * of bytes read to.
+     * offset, until the read number reaches the specified length or no data is immediately available, and returns the
+     * actual number of bytes read to.
      * <p>
      * If the specified length is {@code 0}, returns {@code 0} without reading. If reaches the end of the input stream
      * and no data is read, returns {@code -1}.
@@ -817,7 +817,7 @@ public class IOKit {
 
     /**
      * Reads available data from the input stream into the destination buffer, until reaches the end of the buffer or no
-     * data is available, and returns the actual number of bytes read to.
+     * data is immediately available, and returns the actual number of bytes read to.
      * <p>
      * If the destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if reaches the end of the
      * input stream and no data is read, returns {@code -1}.
@@ -836,8 +836,8 @@ public class IOKit {
 
     /**
      * Reads a specified length of data from the input stream into the destination buffer, until the read number reaches
-     * the specified length or reaches the end of the buffer or no data is available, and returns the actual number of
-     * bytes read to.
+     * the specified length or reaches the end of the buffer or no data is immediately available, and returns the actual
+     * number of bytes read to.
      * <p>
      * If the specified length or destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if
      * reaches the end of the input stream and no data is read, returns {@code -1}.
@@ -859,8 +859,8 @@ public class IOKit {
     }
 
     /**
-     * Reads available data from the input channel into the output stream, until no data is available, and returns the
-     * actual number of bytes read to.
+     * Reads available data from the input channel into the output stream, until no data is immediately available, and
+     * returns the actual number of bytes read to.
      * <p>
      * If reaches the end of the input channel and no data is read, returns {@code -1}.
      *
@@ -878,7 +878,7 @@ public class IOKit {
 
     /**
      * Reads a specified length of data from the input channel into the output stream, until the read number reaches the
-     * specified length or no data is available, returns the actual number of bytes read to.
+     * specified length or no data is immediately available, returns the actual number of bytes read to.
      * <p>
      * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the input channel
      * and no data is read, returns {@code -1}.
@@ -898,8 +898,8 @@ public class IOKit {
     }
 
     /**
-     * Reads available data from the source channel into the destination channel, until no data is available, and
-     * returns the actual number of bytes read to.
+     * Reads available data from the source channel into the destination channel, until no data is immediately
+     * available, and returns the actual number of bytes read to.
      * <p>
      * If reaches the end of the source channel and no data is read, returns {@code -1}.
      *
@@ -917,7 +917,7 @@ public class IOKit {
 
     /**
      * Reads a specified length of data from the source channel into the destination channel, until the read number
-     * reaches the specified length or no data is available, returns the actual number of bytes read to.
+     * reaches the specified length or no data is immediately available, returns the actual number of bytes read to.
      * <p>
      * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the source channel
      * and no data is read, returns {@code -1}.
@@ -938,7 +938,7 @@ public class IOKit {
 
     /**
      * Reads available data from the source channel into the destination array, until the read number reaches the
-     * array's length or no data is available, and returns the actual number of bytes read to.
+     * array's length or no data is immediately available, and returns the actual number of bytes read to.
      * <p>
      * If the array's length is {@code 0}, returns {@code 0} without reading. If reaches the end of the source channel
      * and no data is read, returns {@code -1}.
@@ -955,8 +955,8 @@ public class IOKit {
 
     /**
      * Reads a specified length of data from the source channel into the destination array, starting at the specified
-     * offset, until the read number reaches the specified length or no data is available, and returns the actual number
-     * of bytes read to.
+     * offset, until the read number reaches the specified length or no data is immediately available, and returns the
+     * actual number of bytes read to.
      * <p>
      * If the specified length is {@code 0}, returns {@code 0} without reading. If reaches the end of the source channel
      * and no data is read, returns {@code -1}.
@@ -978,7 +978,7 @@ public class IOKit {
 
     /**
      * Reads available data from the source channel into the destination buffer, until reaches the end of the buffer or
-     * no data is available, and returns the actual number of bytes read to.
+     * no data is immediately available, and returns the actual number of bytes read to.
      * <p>
      * If the destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if reaches the end of the
      * source channel and no data is read, returns {@code -1}.
@@ -999,8 +999,8 @@ public class IOKit {
 
     /**
      * Reads a specified length of data from the source channel into the destination buffer, until the read number
-     * reaches the specified length or reaches the end of the buffer or no data is available, and returns the actual
-     * number of bytes read to.
+     * reaches the specified length or reaches the end of the buffer or no data is immediately available, and returns
+     * the actual number of bytes read to.
      * <p>
      * If the specified length or destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if
      * reaches the end of the source channel and no data is read, returns {@code -1}.
@@ -1022,7 +1022,7 @@ public class IOKit {
     }
 
     /**
-     * Reads available data from the reader, continuing until no data is available, and returns the string.
+     * Reads available data from the reader, continuing until no data is immediately available, and returns the string.
      * <p>
      * If reaches the end of the reader and no data is read, returns {@code null}.
      *
@@ -1038,7 +1038,7 @@ public class IOKit {
     /**
      * Reads a specified length of data from the reader, and returns the string. If the specified length is {@code 0},
      * returns an empty string without reading. Otherwise, this method keeps reading until the read number reaches the
-     * specified length or no data is available.
+     * specified length or no data is immediately available.
      * <p>
      * If reaches the end of the reader and no data is read, returns {@code null}.
      *
@@ -1056,7 +1056,8 @@ public class IOKit {
     }
 
     /**
-     * Reads available data from the reader as a string, continuing until no data is available, and returns the string.
+     * Reads available data from the reader as a string, continuing until no data is immediately available, and returns
+     * the string.
      * <p>
      * If reaches the end of the reader and no data is read, returns {@code null}.
      *
@@ -1072,7 +1073,7 @@ public class IOKit {
     /**
      * Reads a specified length of data from the reader as a string, and returns the string. If the specified length is
      * {@code 0}, returns an empty string without reading. Otherwise, this method keeps reading until the read number
-     * reaches the specified length or no data is available.
+     * reaches the specified length or no data is immediately available.
      * <p>
      * If reaches the end of the reader and no data is read, returns {@code null}.
      *
@@ -1090,8 +1091,8 @@ public class IOKit {
     }
 
     /**
-     * Reads available data from the reader into the appender, until no data is available, and returns the actual number
-     * of chars read to.
+     * Reads available data from the reader into the appender, until no data is immediately available, and returns the
+     * actual number of chars read to.
      * <p>
      * If reaches the end of the reader and no data is read, returns {@code -1}.
      *
@@ -1107,7 +1108,7 @@ public class IOKit {
 
     /**
      * Reads a specified length of data from the reader into the appender, until the read number reaches the specified
-     * length or no data is available, returns the actual number of chars read to.
+     * length or no data is immediately available, returns the actual number of chars read to.
      * <p>
      * If the specified length is {@code 0}, returns {@code 0} without reading; if reaches the end of the reader and no
      * data is read, returns {@code -1}.
@@ -1128,7 +1129,7 @@ public class IOKit {
 
     /**
      * Reads available data from the reader into the destination array, until the read number reaches the array's length
-     * or no data is available, and returns the actual number of chars read to.
+     * or no data is immediately available, and returns the actual number of chars read to.
      * <p>
      * If the array's length is {@code 0}, returns {@code 0} without reading. If reaches the end of the reader and no
      * data is read, returns {@code -1}.
@@ -1145,8 +1146,8 @@ public class IOKit {
 
     /**
      * Reads a specified length of data from the reader into the destination array, starting at the specified offset,
-     * until the read number reaches the specified length or no data is available, and returns the actual number of
-     * chars read to.
+     * until the read number reaches the specified length or no data is immediately available, and returns the actual
+     * number of chars read to.
      * <p>
      * If the specified length is {@code 0}, returns {@code 0} without reading. If reaches the end of the reader and no
      * data is read, returns {@code -1}.
@@ -1168,7 +1169,7 @@ public class IOKit {
 
     /**
      * Reads available data from the reader into the destination buffer, until reaches the end of the buffer or no data
-     * is available, and returns the actual number of chars read to.
+     * is immediately available, and returns the actual number of chars read to.
      * <p>
      * If the destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if reaches the end of the
      * reader and no data is read, returns {@code -1}.
@@ -1187,8 +1188,8 @@ public class IOKit {
 
     /**
      * Reads a specified length of data from the reader into the destination buffer, until the read number reaches the
-     * specified length or reaches the end of the buffer or no data is available, and returns the actual number of chars
-     * read to.
+     * specified length or reaches the end of the buffer or no data is immediately available, and returns the actual
+     * number of chars read to.
      * <p>
      * If the specified length or destination buffer's remaining is {@code 0}, returns {@code 0} without reading; if
      * reaches the end of the reader and no data is read, returns {@code -1}.

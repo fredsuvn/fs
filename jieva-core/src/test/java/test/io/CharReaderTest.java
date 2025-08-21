@@ -1,5 +1,6 @@
 package test.io;
 
+import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.chars.CharsBuilder;
 import xyz.sunqian.common.base.string.StringKit;
@@ -510,6 +511,207 @@ public class CharReaderTest implements DataTest {
 
     private int minSize(int totalSize, int readSize, int remaining) {
         return Math.min(remaining, Math.min(totalSize, readSize));
+    }
+
+    @Test
+    public void testAvailable() throws Exception {
+        testAvailable(16);
+        testAvailable(32);
+        testAvailable(IOKit.bufferSize());
+        testAvailable(IOKit.bufferSize() + 1);
+
+        class ZeroIn extends Reader {
+
+            @Override
+            public int read() {
+                return -1;
+            }
+
+            @Override
+            public int read(@NotNull char[] b, int off, int len) {
+                return 0;
+            }
+
+            @Override
+            public void close() {
+            }
+        }
+
+        {
+            // limited
+            CharReader reader1 = CharReader.from(new ZeroIn()).limit(11);
+            assertEquals(reader1.availableTo(IOKit.nullWriter()), 0);
+            assertEquals(reader1.availableTo(IOKit.nullWriter(), 100), 0);
+            assertEquals(reader1.availableTo(new char[1]), 0);
+            assertEquals(reader1.availableTo(new char[1], 0, 1), 0);
+            assertEquals(reader1.availableTo(CharBuffer.allocate(1)), 0);
+            assertEquals(reader1.availableTo(CharBuffer.allocate(1), 1), 0);
+            // -1
+            CharReader reader2 = CharReader.from(new CharArrayReader(new char[10])).limit(1);
+            assertEquals(reader2.availableTo(IOKit.nullWriter()), 1);
+            assertEquals(reader2.availableTo(IOKit.nullWriter()), -1);
+            assertEquals(reader2.availableTo(IOKit.nullWriter(), 1), -1);
+            assertEquals(reader2.availableTo(new char[1]), -1);
+            assertEquals(reader2.availableTo(new char[1], 0, 1), -1);
+            assertEquals(reader2.availableTo(CharBuffer.allocate(1)), -1);
+            assertEquals(reader2.availableTo(CharBuffer.allocate(1), 1), -1);
+            // 0
+            assertEquals(reader2.availableTo(IOKit.nullWriter(), 0), 0);
+            assertEquals(reader2.availableTo(new char[0]), 0);
+            assertEquals(reader2.availableTo(new char[1], 0, 0), 0);
+            assertEquals(reader2.availableTo(CharBuffer.allocate(0)), 0);
+            assertEquals(reader2.availableTo(CharBuffer.allocate(0), 1), 0);
+            assertEquals(reader2.availableTo(CharBuffer.allocate(1), 0), 0);
+        }
+    }
+
+    private void testAvailable(int size) throws Exception {
+        char[] src = randomChars(size);
+
+        class In extends Reader {
+
+            private final char[] data = src;
+            private int pos = 0;
+            private boolean zero = true;
+
+            private int available() {
+                if (pos >= data.length) {
+                    return 0;
+                }
+                if (zero) {
+                    return 0;
+                }
+                return 1;
+            }
+
+            @Override
+            public int read() {
+                return pos < data.length ? data[pos++] & 0xFF : -1;
+            }
+
+            @Override
+            public int read(@NotNull char[] b, int off, int len) {
+                if (pos >= data.length) {
+                    return -1;
+                }
+                int readSize = available();
+                if (readSize == 0) {
+                    zero = false;
+                    return 0;
+                } else {
+                    zero = true;
+                    b[off] = data[pos++];
+                    return 1;
+                }
+            }
+
+            @Override
+            public void close() {
+            }
+        }
+
+        // input stream
+        testAvailable(size, src, () -> CharReader.from(new In()), () -> CharReader.from(new In()), false);
+        // char array
+        testAvailable(size, src, () -> CharReader.from(src), () -> CharReader.from(src), true);
+        // char buffer
+        testAvailable(
+            size, src,
+            () -> CharReader.from(CharBuffer.wrap(src)), () -> CharReader.from(CharBuffer.wrap(src)),
+            true
+        );
+        // limited
+        testAvailable(
+            size, src,
+            () -> CharReader.from(new In()).limit(size * 2L),
+            () -> CharReader.from(new In()).limit(size * 2L),
+            false
+        );
+    }
+
+    private void testAvailable(
+        int size, char[] src, Supplier<CharReader> s1, Supplier<CharReader> s2, boolean preKnown
+    ) throws Exception {
+        {
+            // to output stream
+            CharsBuilder builder = new CharsBuilder();
+            CharReader reader1 = s1.get();
+            assertEquals(reader1.availableTo(builder), preKnown ? size : 0);
+            while (true) {
+                long readSize = reader1.availableTo(builder);
+                if (readSize < 0) {
+                    break;
+                }
+            }
+            assertEquals(builder.toCharArray(), src);
+            builder.reset();
+            CharReader reader2 = s2.get();
+            assertEquals(reader2.availableTo(builder, size * 2L), preKnown ? size : 0);
+            while (true) {
+                long readSize = reader2.availableTo(builder, size * 2L);
+                if (readSize < 0) {
+                    break;
+                }
+            }
+            assertEquals(builder.toCharArray(), src);
+            builder.reset();
+        }
+        {
+            // to array
+            char[] dst = new char[size * 2];
+            int c = 0;
+            CharReader reader1 = s1.get();
+            assertEquals(reader1.availableTo(dst), preKnown ? size : 0);
+            while (c < size) {
+                long readSize = reader1.availableTo(dst, c, size - c);
+                if (readSize < 0) {
+                    break;
+                }
+                c += (int) readSize;
+            }
+            assertEquals(Arrays.copyOf(dst, size), src);
+            dst = new char[size * 2];
+            c = 0;
+            CharReader reader2 = s2.get();
+            assertEquals(reader2.availableTo(dst), preKnown ? size : 0);
+            while (c < size) {
+                long readSize = reader2.availableTo(dst, c, size - c);
+                if (readSize < 0) {
+                    break;
+                }
+                c += (int) readSize;
+            }
+            assertEquals(Arrays.copyOf(dst, size), src);
+        }
+        {
+            // to buffer
+            CharBuffer dst = CharBuffer.allocate(size * 2);
+            int c = 0;
+            CharReader reader1 = s1.get();
+            assertEquals(reader1.availableTo(dst), preKnown ? size : 0);
+            while (c < size) {
+                long readSize = reader1.availableTo(dst, size * 2);
+                if (readSize < 0) {
+                    break;
+                }
+                c += (int) readSize;
+            }
+            dst.flip();
+            assertEquals(BufferKit.read(dst), src);
+            dst = CharBuffer.allocate(size * 2);
+            c = 0;
+            CharReader reader2 = s2.get();
+            assertEquals(reader2.availableTo(dst), preKnown ? size : 0);
+            while (c < size) {
+                long readSize = reader2.availableTo(dst, size * 2);
+                if (readSize < 0) {
+                    break;
+                }
+                c += (int) readSize;
+            }
+            dst.flip();
+            assertEquals(BufferKit.read(dst), src);
+        }
     }
 
     @Test

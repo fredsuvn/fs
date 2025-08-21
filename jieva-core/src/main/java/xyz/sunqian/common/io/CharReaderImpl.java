@@ -4,6 +4,7 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.math.MathKit;
 import xyz.sunqian.common.base.string.StringKit;
+import xyz.sunqian.common.io.IOChecker.ReadChecker;
 
 import java.io.Reader;
 import java.nio.CharBuffer;
@@ -92,17 +93,7 @@ final class CharReaderImpl {
 
         @Override
         public @Nonnull CharSegment read(int len) throws IllegalArgumentException, IORuntimeException {
-            if (len == 0) {
-                return CharSegment.empty(false);
-            }
-            IOChecker.checkLen(len);
-            char[] data = new char[len];
-            int readSize = IOKit.readTo0(src, data, 0, data.length, IOChecker.endChecker());
-            if (readSize < 0) {
-                return CharSegment.empty(true);
-            }
-            data = readSize == len ? data : Arrays.copyOfRange(data, 0, readSize);
-            return CharSegment.of(CharBuffer.wrap(data), readSize < len);
+            return read(len, IOChecker.endChecker());
         }
 
         @Override
@@ -136,35 +127,32 @@ final class CharReaderImpl {
 
         @Override
         public long readTo(@Nonnull Appendable dst) throws IORuntimeException {
-            return IOKit.readTo0(src, dst, bufSize, IOChecker.endChecker());
+            return readTo(dst, IOChecker.endChecker());
         }
 
         @Override
         public long readTo(@Nonnull Appendable dst, long len) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkLen(len);
-            return IOKit.readTo0(src, dst, len, bufSize, IOChecker.endChecker());
+            return readTo(dst, len, IOChecker.endChecker());
         }
 
         @Override
         public int readTo(char @Nonnull [] dst) throws IORuntimeException {
-            return IOKit.readTo0(src, dst, 0, dst.length, IOChecker.endChecker());
+            return readTo(dst, IOChecker.endChecker());
         }
 
         @Override
         public int readTo(char @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException, IORuntimeException {
-            IOChecker.checkOffLen(dst.length, off, len);
-            return IOKit.readTo0(src, dst, off, len, IOChecker.endChecker());
+            return readTo(dst, off, len, IOChecker.endChecker());
         }
 
         @Override
         public int readTo(@Nonnull CharBuffer dst) throws IORuntimeException {
-            return IOKit.readTo0(src, dst, dst.remaining(), IOChecker.endChecker());
+            return readTo(dst, IOChecker.endChecker());
         }
 
         @Override
         public int readTo(@Nonnull CharBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkLen(len);
-            return IOKit.readTo0(src, dst, len, IOChecker.endChecker());
+            return readTo(dst, len, IOChecker.endChecker());
         }
 
         @Override
@@ -178,35 +166,83 @@ final class CharReaderImpl {
 
         @Override
         public long availableTo(@Nonnull Appendable dst) throws IORuntimeException {
-            return IOKit.readTo0(src, dst, bufSize, IOChecker.availableChecker());
+            return readTo(dst, IOChecker.availableChecker());
         }
 
         @Override
         public long availableTo(@Nonnull Appendable dst, long len) throws IllegalArgumentException, IORuntimeException {
-            IOChecker.checkLen(len);
-            return IOKit.readTo0(src, dst, len, bufSize, IOChecker.availableChecker());
+            return readTo(dst, len, IOChecker.availableChecker());
         }
 
         @Override
         public int availableTo(char @Nonnull [] dst) throws IORuntimeException {
-            return IOKit.readTo0(src, dst, 0, dst.length, IOChecker.availableChecker());
+            return readTo(dst, IOChecker.availableChecker());
         }
 
         @Override
-        public int availableTo(char @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException, IORuntimeException {
-            IOChecker.checkOffLen(dst.length, off, len);
-            return IOKit.readTo0(src, dst, off, len, IOChecker.availableChecker());
+        public int availableTo(
+            char @Nonnull [] dst, int off, int len
+        ) throws IndexOutOfBoundsException, IORuntimeException {
+            return readTo(dst, off, len, IOChecker.availableChecker());
         }
 
         @Override
         public int availableTo(@Nonnull CharBuffer dst) throws IORuntimeException {
-            return IOKit.readTo0(src, dst, dst.remaining(), IOChecker.availableChecker());
+            return readTo(dst, IOChecker.availableChecker());
         }
 
         @Override
         public int availableTo(@Nonnull CharBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
+            return readTo(dst, len, IOChecker.availableChecker());
+        }
+
+        private @Nonnull CharSegment read(
+            int len, ReadChecker readChecker
+        ) throws IllegalArgumentException, IORuntimeException {
+            if (len == 0) {
+                return CharSegment.empty(false);
+            }
             IOChecker.checkLen(len);
-            return IOKit.readTo0(src, dst, len, IOChecker.availableChecker());
+            char[] data = new char[len];
+            int readSize = IOKit.readTo0(src, data, 0, data.length, readChecker);
+            if (readSize < 0) {
+                return CharSegment.empty(true);
+            }
+            data = readSize == len ? data : Arrays.copyOfRange(data, 0, readSize);
+            return CharSegment.of(CharBuffer.wrap(data), readSize < len);
+        }
+
+        private long readTo(@Nonnull Appendable dst, ReadChecker readChecker) throws IORuntimeException {
+            return IOKit.readTo0(src, dst, bufSize, readChecker);
+        }
+
+        private long readTo(
+            @Nonnull Appendable dst, long len, ReadChecker readChecker
+        ) throws IllegalArgumentException, IORuntimeException {
+            IOChecker.checkLen(len);
+            return IOKit.readTo0(src, dst, len, bufSize, readChecker);
+        }
+
+        private int readTo(char @Nonnull [] dst, ReadChecker readChecker) throws IORuntimeException {
+            return IOKit.readTo0(src, dst, 0, dst.length, readChecker);
+        }
+
+        private int readTo(
+            char @Nonnull [] dst, int off, int len, ReadChecker readChecker
+        ) throws IndexOutOfBoundsException, IORuntimeException {
+            IOChecker.checkOffLen(dst.length, off, len);
+            return IOKit.readTo0(src, dst, off, len, readChecker);
+        }
+
+        private int readTo(@Nonnull CharBuffer dst, ReadChecker readChecker) throws IORuntimeException {
+            return IOKit.readTo0(src, dst, dst.remaining(), readChecker);
+        }
+
+        private int readTo(
+            @Nonnull CharBuffer dst, int len, ReadChecker readChecker
+        ) throws IllegalArgumentException, IORuntimeException {
+            IOChecker.checkLen(len);
+            return IOKit.readTo0(src, dst, len, readChecker);
         }
 
         @Override

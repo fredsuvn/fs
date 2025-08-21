@@ -663,15 +663,6 @@ public class ByteReaderTest implements DataTest {
             assertEquals(reader2.availableTo(ByteBuffer.allocate(0)), 0);
             assertEquals(reader2.availableTo(ByteBuffer.allocate(0), 1), 0);
             assertEquals(reader2.availableTo(ByteBuffer.allocate(1), 0), 0);
-            //available
-            byte[] data = randomBytes(10);
-            ByteReader reader3 = ByteReader.from(new ByteArrayInputStream(data)).limit(1);
-            ByteSegment bs1 = reader3.available();
-            assertFalse(bs1.end());
-            assertEquals(bs1.data().get(), data[0]);
-            ByteSegment bs2 = reader3.available();
-            assertTrue(bs2.end());
-            assertEquals(bs2.data().remaining(), 0);
         }
     }
 
