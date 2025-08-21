@@ -65,7 +65,7 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default byte @Nullable [] read(@Nonnull InputStream src) throws IORuntimeException {
-        return IOKit.read0(src, IOChecker.endChecker());
+        return IOKit.read0(src, bufferSize(), IOChecker.endChecker());
     }
 
     /**
@@ -89,7 +89,7 @@ public interface IOOperator {
         @Nonnull InputStream src, int len
     ) throws IllegalArgumentException, IORuntimeException {
         IOChecker.checkLen(len);
-        return IOKit.read0(src, len, IOChecker.endChecker());
+        return IOKit.read0(src, len, bufferSize(), IOChecker.endChecker());
     }
 
     /**
@@ -104,7 +104,7 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default @Nullable ByteBuffer read(@Nonnull ReadableByteChannel src) throws IORuntimeException {
-        return IOKit.read0(src, IOChecker.endChecker());
+        return IOKit.read0(src, bufferSize(), IOChecker.endChecker());
     }
 
     /**
@@ -129,7 +129,7 @@ public interface IOOperator {
         @Nonnull ReadableByteChannel src, int len
     ) throws IllegalArgumentException, IORuntimeException {
         IOChecker.checkLen(len);
-        return IOKit.read0(src, len, IOChecker.endChecker());
+        return IOKit.read0(src, len, bufferSize(), IOChecker.endChecker());
     }
 
     /**
@@ -466,7 +466,7 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default char @Nullable [] read(@Nonnull Reader src) throws IORuntimeException {
-        return IOKit.read0(src, IOChecker.endChecker());
+        return IOKit.read0(src, bufferSize(), IOChecker.endChecker());
     }
 
     /**
@@ -490,7 +490,7 @@ public interface IOOperator {
         @Nonnull Reader src, int len
     ) throws IllegalArgumentException, IORuntimeException {
         IOChecker.checkLen(len);
-        return IOKit.read0(src, len, IOChecker.endChecker());
+        return IOKit.read0(src, len, bufferSize(), IOChecker.endChecker());
     }
 
     /**
@@ -659,7 +659,7 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default byte @Nullable [] available(@Nonnull InputStream src) throws IORuntimeException {
-        return IOKit.read0(src, IOChecker.availableChecker());
+        return IOKit.read0(src, bufferSize(), IOChecker.availableChecker());
     }
 
     /**
@@ -683,7 +683,7 @@ public interface IOOperator {
         @Nonnull InputStream src, int len
     ) throws IllegalArgumentException, IORuntimeException {
         IOChecker.checkLen(len);
-        return IOKit.read0(src, len, IOChecker.availableChecker());
+        return IOKit.read0(src, len, bufferSize(), IOChecker.availableChecker());
     }
 
     /**
@@ -698,7 +698,7 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default @Nullable ByteBuffer available(@Nonnull ReadableByteChannel src) throws IORuntimeException {
-        return IOKit.read0(src, IOChecker.availableChecker());
+        return IOKit.read0(src, bufferSize(), IOChecker.availableChecker());
     }
 
     /**
@@ -723,7 +723,7 @@ public interface IOOperator {
         @Nonnull ReadableByteChannel src, int len
     ) throws IllegalArgumentException, IORuntimeException {
         IOChecker.checkLen(len);
-        return IOKit.read0(src, len, IOChecker.availableChecker());
+        return IOKit.read0(src, len, bufferSize(), IOChecker.availableChecker());
     }
 
     /**
@@ -1059,7 +1059,7 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default char @Nullable [] available(@Nonnull Reader src) throws IORuntimeException {
-        return IOKit.read0(src, IOChecker.availableChecker());
+        return IOKit.read0(src, bufferSize(), IOChecker.availableChecker());
     }
 
     /**
@@ -1080,7 +1080,7 @@ public interface IOOperator {
         @Nonnull Reader src, int len
     ) throws IllegalArgumentException, IORuntimeException {
         IOChecker.checkLen(len);
-        return IOKit.read0(src, len, IOChecker.availableChecker());
+        return IOKit.read0(src, len, bufferSize(), IOChecker.availableChecker());
     }
 
     /**

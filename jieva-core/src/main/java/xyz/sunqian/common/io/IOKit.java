@@ -1212,11 +1212,11 @@ public class IOKit {
 
     @SuppressWarnings("resource")
     static byte @Nullable [] read0(
-        @Nonnull InputStream src, @Nonnull ReadChecker readChecker
+        @Nonnull InputStream src, int bufSize, @Nonnull ReadChecker readChecker
     ) throws IORuntimeException {
         try {
             int available = src.available();
-            byte[] buf = new byte[available > 0 ? available : bufferSize()];
+            byte[] buf = new byte[available > 0 ? available : bufSize];
             BytesBuilder builder = null;
             int off = 0;
             while (true) {
@@ -1236,7 +1236,7 @@ public class IOKit {
                 if (off == buf.length) {
                     if (builder == null) {
                         int r = src.read();
-                        if (readChecker.readEnd(r)) {
+                        if (r < 0) {
                             return buf;
                         }
                         builder = new BytesBuilder(buf.length + 1);
@@ -1254,7 +1254,7 @@ public class IOKit {
     }
 
     static byte @Nullable [] read0(
-        @Nonnull InputStream src, int len, @Nonnull ReadChecker readChecker
+        @Nonnull InputStream src, int len, int bufSize, @Nonnull ReadChecker readChecker
     ) throws IllegalArgumentException, IORuntimeException {
         if (len == 0) {
             return new byte[0];
@@ -1281,11 +1281,11 @@ public class IOKit {
 
     @SuppressWarnings("resource")
     static @Nullable ByteBuffer read0(
-        @Nonnull ReadableByteChannel src, @Nonnull ReadChecker readChecker
+        @Nonnull ReadableByteChannel src, int bufSize, @Nonnull ReadChecker readChecker
     ) throws IORuntimeException {
         try {
             BytesBuilder builder = null;
-            ByteBuffer dst = ByteBuffer.allocate(bufferSize());
+            ByteBuffer dst = ByteBuffer.allocate(bufSize);
             int readSize;
             while (true) {
                 readSize = src.read(dst);
@@ -1334,7 +1334,7 @@ public class IOKit {
     }
 
     static @Nullable ByteBuffer read0(
-        @Nonnull ReadableByteChannel src, int len, @Nonnull ReadChecker readChecker
+        @Nonnull ReadableByteChannel src, int len, int bufSize, @Nonnull ReadChecker readChecker
     ) throws IllegalArgumentException, IORuntimeException {
         if (len == 0) {
             return ByteBuffer.allocate(0);
@@ -1666,10 +1666,10 @@ public class IOKit {
 
     @SuppressWarnings("resource")
     static char @Nullable [] read0(
-        @Nonnull Reader src, @Nonnull ReadChecker readChecker
+        @Nonnull Reader src, int bufSize, @Nonnull ReadChecker readChecker
     ) throws IORuntimeException {
         try {
-            char[] buf = new char[bufferSize()];
+            char[] buf = new char[bufSize];
             CharsBuilder builder = null;
             int off = 0;
             while (true) {
@@ -1689,7 +1689,7 @@ public class IOKit {
                 if (off == buf.length) {
                     if (builder == null) {
                         int r = src.read();
-                        if (readChecker.readEnd(r)) {
+                        if (r < 0) {
                             return buf;
                         }
                         builder = new CharsBuilder(buf.length + 1);
@@ -1707,7 +1707,7 @@ public class IOKit {
     }
 
     static char @Nullable [] read0(
-        @Nonnull Reader src, int len, @Nonnull ReadChecker readChecker
+        @Nonnull Reader src, int len, int bufSize, @Nonnull ReadChecker readChecker
     ) throws IllegalArgumentException, IORuntimeException {
         if (len == 0) {
             return new char[0];

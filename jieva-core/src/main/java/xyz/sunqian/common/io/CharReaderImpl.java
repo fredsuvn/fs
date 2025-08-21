@@ -9,7 +9,6 @@ import xyz.sunqian.common.io.IOChecker.ReadChecker;
 
 import java.io.Reader;
 import java.nio.CharBuffer;
-import java.util.Arrays;
 
 final class CharReaderImpl {
 
@@ -94,12 +93,17 @@ final class CharReaderImpl {
 
         @Override
         public @Nonnull CharSegment read(int len) throws IllegalArgumentException, IORuntimeException {
-            return read(len, IOChecker.endChecker());
+            IOChecker.checkLen(len);
+            char[] data = IOKit.read0(src, len, bufSize, IOChecker.endChecker());
+            if (data == null) {
+                return CharSegment.empty(true);
+            }
+            return CharSegment.of(CharBuffer.wrap(data), data.length < len);
         }
 
         @Override
-        public @Nullable CharBuffer readAll() throws IORuntimeException {
-            char[] buf = IOKit.read0(src, IOChecker.endChecker());
+        public @Nullable CharBuffer read() throws IORuntimeException {
+            char[] buf = IOKit.read0(src, bufSize, IOChecker.endChecker());
             if (buf == null) {
                 return null;
             }
@@ -167,16 +171,21 @@ final class CharReaderImpl {
 
         @Override
         public @Nonnull CharSegment available(int len) throws IllegalArgumentException, IORuntimeException {
-            return read(len, IOChecker.availableChecker());
+            IOChecker.checkLen(len);
+            char[] data = IOKit.read0(src, len, bufSize, IOChecker.availableChecker());
+            if (data == null) {
+                return CharSegment.empty(true);
+            }
+            return CharSegment.of(CharBuffer.wrap(data), false);
         }
 
         @Override
         public @Nonnull CharSegment available() throws IORuntimeException {
-            char[] result = IOKit.available(src, bufSize);
-            if (result == null) {
+            char[] data = IOKit.read0(src, bufSize, IOChecker.availableChecker());
+            if (data == null) {
                 return CharSegment.empty(true);
             }
-            return CharSegment.of(CharBuffer.wrap(result), false);
+            return CharSegment.of(CharBuffer.wrap(data), false);
         }
 
         @Override
@@ -209,22 +218,6 @@ final class CharReaderImpl {
         @Override
         public int availableTo(@Nonnull CharBuffer dst, int len) throws IllegalArgumentException, IORuntimeException {
             return readTo(dst, len, IOChecker.availableChecker());
-        }
-
-        private @Nonnull CharSegment read(
-            int len, ReadChecker readChecker
-        ) throws IllegalArgumentException, IORuntimeException {
-            if (len == 0) {
-                return CharSegment.empty(false);
-            }
-            IOChecker.checkLen(len);
-            char[] data = new char[len];
-            int readSize = IOKit.readTo0(src, data, 0, data.length, readChecker);
-            if (readSize < 0) {
-                return CharSegment.empty(true);
-            }
-            data = readSize == len ? data : Arrays.copyOfRange(data, 0, readSize);
-            return CharSegment.of(CharBuffer.wrap(data), readChecker.isEnd(readSize, len));
         }
 
         private long readTo(@Nonnull Appendable dst, ReadChecker readChecker) throws IORuntimeException {
@@ -371,7 +364,7 @@ final class CharReaderImpl {
         }
 
         @Override
-        public @Nullable CharBuffer readAll() throws IORuntimeException {
+        public @Nullable CharBuffer read() throws IORuntimeException {
             if (pos >= end) {
                 return null;
             }
@@ -551,7 +544,7 @@ final class CharReaderImpl {
         }
 
         @Override
-        public @Nullable CharBuffer readAll() throws IORuntimeException {
+        public @Nullable CharBuffer read() throws IORuntimeException {
             if (pos >= endPos) {
                 return null;
             }
@@ -728,7 +721,7 @@ final class CharReaderImpl {
         }
 
         @Override
-        public @Nullable CharBuffer readAll() throws IORuntimeException {
+        public @Nullable CharBuffer read() throws IORuntimeException {
             if (!src.hasRemaining()) {
                 return null;
             }
@@ -832,7 +825,7 @@ final class CharReaderImpl {
         }
 
         @Override
-        public @Nullable CharBuffer readAll() throws IORuntimeException {
+        public @Nullable CharBuffer read() throws IORuntimeException {
             if (pos >= limit) {
                 return null;
             }
@@ -945,7 +938,7 @@ final class CharReaderImpl {
 
         @Override
         public @Nonnull CharSegment available() throws IORuntimeException {
-            return read((int) (limit - pos));
+            return available(MathKit.intValue(limit - pos));
         }
 
         @Override

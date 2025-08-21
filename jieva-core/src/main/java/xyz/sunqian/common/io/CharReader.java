@@ -193,7 +193,7 @@ public interface CharReader extends IORuntimeCloseable {
      * @throws IORuntimeException if an I/O error occurs
      */
     @Nullable
-    CharBuffer readAll() throws IORuntimeException;
+    CharBuffer read() throws IORuntimeException;
 
     /**
      * Skips the next specified length of data segment. This method skips continuously until the skipped number reaches

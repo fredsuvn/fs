@@ -657,24 +657,21 @@ public class CharReaderTest implements DataTest {
             assertFalse(reader.available(0).end());
             assertFalse(reader.available(0).data().hasRemaining());
             if (preKnown) {
-                CharSegment s = reader.available(size);
+                CharSegment s = reader.available();
                 assertTrue(s.end());
                 assertEquals(BufferKit.copyContent(s.data()), src);
                 assertTrue(reader.available(1).end());
             } else {
-                CharSegment s0 = reader.available(size);
+                CharSegment s0 = reader.available();
                 assertFalse(s0.end());
                 assertEquals(BufferKit.copyContent(s0.data()).length, 0);
-                CharSegment s1 = reader.available(size);
-                assertEquals(s1.end(), preKnown);
-                assertEquals(BufferKit.copyContent(s1.data()).length, 1);
-                assertEquals(s1.data().get(), src[0]);
                 CharsBuilder builder = new CharsBuilder();
-                builder.append(src[0]);
                 while (true) {
-                    CharSegment s = reader.available(size);
-                    builder.append(s.data());
-                    if (s.end()) {
+                    CharSegment s1 = reader.available();
+                    builder.append(s1.data());
+                    CharSegment s2 = reader.available(size);
+                    builder.append(s2.data());
+                    if (s2.end()) {
                         break;
                     }
                 }
@@ -780,52 +777,52 @@ public class CharReaderTest implements DataTest {
         {
             // input stream
             CharReader reader = CharReader.from(new CharArrayReader(data));
-            CharBuffer buffer = reader.readAll();
+            CharBuffer buffer = reader.read();
             assertEquals(buffer == null, size == 0);
             if (buffer != null) {
                 assertEquals(buffer.array(), data);
             }
-            assertNull(reader.readAll());
+            assertNull(reader.read());
         }
         {
             // array
             CharReader reader = CharReader.from(data);
-            CharBuffer buffer = reader.readAll();
+            CharBuffer buffer = reader.read();
             assertEquals(buffer == null, size == 0);
             if (buffer != null) {
                 assertEquals(buffer.array(), data);
             }
-            assertNull(reader.readAll());
+            assertNull(reader.read());
         }
         {
             // sequence
             CharReader reader = CharReader.from(new String(data));
-            CharBuffer buffer = reader.readAll();
+            CharBuffer buffer = reader.read();
             assertEquals(buffer == null, size == 0);
             if (buffer != null) {
                 assertEquals(BufferKit.copyContent(buffer), data);
             }
-            assertNull(reader.readAll());
+            assertNull(reader.read());
         }
         {
             // buffer
             CharReader reader = CharReader.from(CharBuffer.wrap(data));
-            CharBuffer buffer = reader.readAll();
+            CharBuffer buffer = reader.read();
             assertEquals(buffer == null, size == 0);
             if (buffer != null) {
                 assertEquals(buffer.array(), data);
             }
-            assertNull(reader.readAll());
+            assertNull(reader.read());
         }
         {
             // limited
             CharReader reader = CharReader.from(data).limit(size);
-            CharBuffer buffer = reader.readAll();
+            CharBuffer buffer = reader.read();
             assertEquals(buffer == null, size == 0);
             if (buffer != null) {
                 assertEquals(buffer.array(), data);
             }
-            assertNull(reader.readAll());
+            assertNull(reader.read());
         }
     }
 

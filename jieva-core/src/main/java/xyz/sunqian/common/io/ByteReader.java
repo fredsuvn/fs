@@ -187,7 +187,7 @@ public interface ByteReader extends IORuntimeCloseable {
      * @throws IORuntimeException if an I/O error occurs
      */
     @Nullable
-    ByteBuffer readAll() throws IORuntimeException;
+    ByteBuffer read() throws IORuntimeException;
 
     /**
      * Skips the next specified length of data segment. This method skips continuously until the skipped number reaches

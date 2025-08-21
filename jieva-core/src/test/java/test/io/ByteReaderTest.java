@@ -786,24 +786,21 @@ public class ByteReaderTest implements DataTest {
             assertFalse(reader.available(0).end());
             assertFalse(reader.available(0).data().hasRemaining());
             if (preKnown) {
-                ByteSegment s = reader.available(size);
+                ByteSegment s = reader.available();
                 assertTrue(s.end());
                 assertEquals(BufferKit.copyContent(s.data()), src);
                 assertTrue(reader.available(1).end());
             } else {
-                ByteSegment s0 = reader.available(size);
+                ByteSegment s0 = reader.available();
                 assertFalse(s0.end());
                 assertEquals(BufferKit.copyContent(s0.data()).length, 0);
-                ByteSegment s1 = reader.available(size);
-                assertEquals(s1.end(), preKnown);
-                assertEquals(BufferKit.copyContent(s1.data()).length, 1);
-                assertEquals(s1.data().get(), src[0]);
                 BytesBuilder builder = new BytesBuilder();
-                builder.append(src[0]);
                 while (true) {
-                    ByteSegment s = reader.available(size);
-                    builder.append(s.data());
-                    if (s.end()) {
+                    ByteSegment s1 = reader.available();
+                    builder.append(s1.data());
+                    ByteSegment s2 = reader.available(size);
+                    builder.append(s2.data());
+                    if (s2.end()) {
                         break;
                     }
                 }
@@ -934,52 +931,52 @@ public class ByteReaderTest implements DataTest {
         {
             // input stream
             ByteReader reader = ByteReader.from(new ByteArrayInputStream(data));
-            ByteBuffer buffer = reader.readAll();
+            ByteBuffer buffer = reader.read();
             assertEquals(buffer == null, size == 0);
             if (buffer != null) {
                 assertEquals(buffer.array(), data);
             }
-            assertNull(reader.readAll());
+            assertNull(reader.read());
         }
         {
             // readable channel
             ByteReader reader = ByteReader.from(Channels.newChannel(new ByteArrayInputStream(data)));
-            ByteBuffer buffer = reader.readAll();
+            ByteBuffer buffer = reader.read();
             assertEquals(buffer == null, size == 0);
             if (buffer != null) {
                 assertEquals(buffer.array(), data);
             }
-            assertNull(reader.readAll());
+            assertNull(reader.read());
         }
         {
             // array
             ByteReader reader = ByteReader.from(data);
-            ByteBuffer buffer = reader.readAll();
+            ByteBuffer buffer = reader.read();
             assertEquals(buffer == null, size == 0);
             if (buffer != null) {
                 assertEquals(buffer.array(), data);
             }
-            assertNull(reader.readAll());
+            assertNull(reader.read());
         }
         {
             // buffer
             ByteReader reader = ByteReader.from(ByteBuffer.wrap(data));
-            ByteBuffer buffer = reader.readAll();
+            ByteBuffer buffer = reader.read();
             assertEquals(buffer == null, size == 0);
             if (buffer != null) {
                 assertEquals(buffer.array(), data);
             }
-            assertNull(reader.readAll());
+            assertNull(reader.read());
         }
         {
             // limited
             ByteReader reader = ByteReader.from(data).limit(size);
-            ByteBuffer buffer = reader.readAll();
+            ByteBuffer buffer = reader.read();
             assertEquals(buffer == null, size == 0);
             if (buffer != null) {
                 assertEquals(buffer.array(), data);
             }
-            assertNull(reader.readAll());
+            assertNull(reader.read());
         }
     }
 
