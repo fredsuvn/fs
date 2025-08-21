@@ -48,6 +48,10 @@ final class ByteReaderImpl {
         return end ? ByteSegmentImpl.EMPTY_END : ByteSegmentImpl.EMPTY_SEG;
     }
 
+    static @Nonnull InputStream asInputStream(@Nonnull ByteReader reader) {
+        return new AsInputStream(reader);
+    }
+
     private static final class ByteSegmentImpl implements ByteSegment {
 
         private static final @Nonnull ByteSegmentImpl EMPTY_END = new ByteSegmentImpl(BytesKit.emptyBuffer(), true);
@@ -1285,6 +1289,86 @@ final class ByteReaderImpl {
         @Override
         public void close() throws IORuntimeException {
             src.close();
+        }
+    }
+
+    private static final class AsInputStream extends DoReadStream {
+
+        private final @Nonnull ByteReader in;
+        private byte[] oneByte;
+
+        private AsInputStream(@Nonnull ByteReader in) {
+            this.in = in;
+        }
+
+        @Override
+        public int read() throws IOException {
+            try {
+                if (oneByte == null) {
+                    oneByte = new byte[1];
+                }
+                int ret = in.readTo(oneByte);
+                return ret < 0 ? -1 : oneByte[0] & 0xFF;
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        protected int doRead(byte @Nonnull [] b, int off, int len) throws IOException {
+            try {
+                return in.readTo(b, off, len);
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        public long skip(long n) throws IOException {
+            if (n <= 0) {
+                return 0;
+            }
+            try {
+                return in.skip(n);
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        public boolean markSupported() {
+            return in.markSupported();
+        }
+
+        @Override
+        public void mark(int readAheadLimit) {
+            try {
+                in.mark();
+            } catch (Exception ignored) {
+            }
+        }
+
+        @Override
+        public void reset() throws IOException {
+            try {
+                in.reset();
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        public void close() throws IOException {
+            try {
+                in.close();
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        public int available() throws IOException {
+            return super.available();
         }
     }
 }

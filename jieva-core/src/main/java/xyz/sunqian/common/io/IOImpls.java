@@ -76,10 +76,6 @@ final class IOImpls {
         return new LimitedInputStream(in, limit);
     }
 
-    static @Nonnull InputStream inputStream(@Nonnull ByteReader reader) {
-        return new ByteReaderInputStream(reader);
-    }
-
     static @Nonnull InputStream emptyInputStream() {
         return EmptyInputStream.SINGLETON;
     }
@@ -113,10 +109,6 @@ final class IOImpls {
     static @Nonnull Reader reader(@Nonnull Reader in, long limit) throws IllegalArgumentException {
         IOChecker.checkLimit(limit);
         return new LimitedReader(in, limit);
-    }
-
-    static @Nonnull Reader reader(@Nonnull CharReader reader) {
-        return new CharReaderReader(reader);
     }
 
     static @Nonnull Reader emptyReader() {
@@ -632,81 +624,6 @@ final class IOImpls {
         }
     }
 
-    private static final class ByteReaderInputStream extends DoReadStream {
-
-        private final @Nonnull ByteReader in;
-        private byte[] oneByte;
-
-        private ByteReaderInputStream(@Nonnull ByteReader in) {
-            this.in = in;
-        }
-
-        @Override
-        public int read() throws IOException {
-            try {
-                if (oneByte == null) {
-                    oneByte = new byte[1];
-                }
-                int ret = in.readTo(oneByte);
-                return ret < 0 ? -1 : oneByte[0] & 0xFF;
-            } catch (Exception e) {
-                throw new IOException(e);
-            }
-        }
-
-        @Override
-        protected int doRead(byte @Nonnull [] b, int off, int len) throws IOException {
-            try {
-                return in.readTo(b, off, len);
-            } catch (Exception e) {
-                throw new IOException(e);
-            }
-        }
-
-        @Override
-        public long skip(long n) throws IOException {
-            if (n <= 0) {
-                return 0;
-            }
-            try {
-                return in.skip(n);
-            } catch (Exception e) {
-                throw new IOException(e);
-            }
-        }
-
-        @Override
-        public boolean markSupported() {
-            return in.markSupported();
-        }
-
-        @Override
-        public void mark(int readAheadLimit) {
-            try {
-                in.mark();
-            } catch (Exception ignored) {
-            }
-        }
-
-        @Override
-        public void reset() throws IOException {
-            try {
-                in.reset();
-            } catch (Exception e) {
-                throw new IOException(e);
-            }
-        }
-
-        @Override
-        public void close() throws IOException {
-            try {
-                in.close();
-            } catch (Exception e) {
-                throw new IOException(e);
-            }
-        }
-    }
-
     private static final class EmptyInputStream extends DoReadStream {
 
         private static final @Nonnull EmptyInputStream SINGLETON = new EmptyInputStream();
@@ -1134,81 +1051,6 @@ final class IOImpls {
         @Override
         public void close() throws IOException {
             in.close();
-        }
-    }
-
-    private static final class CharReaderReader extends DoReadReader {
-
-        private final @Nonnull CharReader in;
-        private char[] oneChar;
-
-        private CharReaderReader(@Nonnull CharReader in) {
-            this.in = in;
-        }
-
-        @Override
-        public int read() throws IOException {
-            try {
-                if (oneChar == null) {
-                    oneChar = new char[1];
-                }
-                int ret = in.readTo(oneChar);
-                return ret < 0 ? -1 : oneChar[0] & 0xFFFF;
-            } catch (Exception e) {
-                throw new IOException(e);
-            }
-        }
-
-        @Override
-        protected int doRead(char @Nonnull [] b, int off, int len) throws IOException {
-            try {
-                return in.readTo(b, off, len);
-            } catch (Exception e) {
-                throw new IOException(e);
-            }
-        }
-
-        @Override
-        public long skip(long n) throws IllegalArgumentException, IOException {
-            try {
-                return in.skip(n);
-            } catch (IllegalArgumentException e) {
-                throw e;
-            } catch (Exception e) {
-                throw new IOException(e);
-            }
-        }
-
-        @Override
-        public boolean markSupported() {
-            return in.markSupported();
-        }
-
-        @Override
-        public void mark(int readAheadLimit) throws IOException {
-            try {
-                in.mark();
-            } catch (Exception e) {
-                throw new IOException(e);
-            }
-        }
-
-        @Override
-        public void reset() throws IOException {
-            try {
-                in.reset();
-            } catch (Exception e) {
-                throw new IOException(e);
-            }
-        }
-
-        @Override
-        public void close() throws IOException {
-            try {
-                in.close();
-            } catch (Exception e) {
-                throw new IOException(e);
-            }
         }
     }
 

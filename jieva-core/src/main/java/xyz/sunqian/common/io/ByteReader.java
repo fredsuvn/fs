@@ -557,6 +557,6 @@ public interface ByteReader extends IORuntimeCloseable {
      * @return an {@link InputStream} represents this reader. Its content and status are shared with this reader
      */
     default @Nonnull InputStream asInputStream() {
-        return IOKit.newInputStream(this);
+        return ByteReaderImpl.asInputStream(this);
     }
 }

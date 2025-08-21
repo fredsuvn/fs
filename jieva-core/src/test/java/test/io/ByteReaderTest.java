@@ -70,12 +70,6 @@ public class ByteReaderTest implements DataTest {
             TestInputStream tr = new TestInputStream(new ByteArrayInputStream(data));
             tr.setNextOperation(ReadOps.READ_ZERO);
             testSkipBytes(ByteReader.from(tr), data, readSize);
-            if (dataSize >= 128) {
-                IOImplsTest.testInputStream(
-                    ByteReader.from(IOKit.newInputStream(data)).asInputStream(),
-                    data, false, false, false
-                );
-            }
         }
         {
             // channel
@@ -90,12 +84,6 @@ public class ByteReaderTest implements DataTest {
                 data, readSize, false
             );
             testSkipBytes(ByteReader.from(Channels.newChannel(new OneByteInputStream(data))), data, readSize);
-            if (dataSize >= 128) {
-                IOImplsTest.testInputStream(
-                    ByteReader.from(Channels.newChannel(new ByteArrayInputStream(data))).asInputStream(),
-                    data, false, false, false
-                );
-            }
         }
         {
             // byte array
@@ -110,29 +98,12 @@ public class ByteReaderTest implements DataTest {
                 readSize, true
             );
             testSkipBytes(ByteReader.from(dataPadding, 33, data.length), data, readSize);
-            if (dataSize >= 128) {
-                IOImplsTest.testInputStream(
-                    ByteReader.from(data).asInputStream(),
-                    data, false, false, true
-                );
-                IOImplsTest.testInputStream(
-                    ByteReader.from(dataPadding, 33, data.length).asInputStream(),
-                    Arrays.copyOfRange(dataPadding, 33, 33 + data.length),
-                    false, false, true
-                );
-            }
         }
         {
             // buffer
             byte[] data = randomBytes(dataSize);
             testReadBytes(ByteReader.from(ByteBuffer.wrap(data)), data, readSize, true);
             testSkipBytes(ByteReader.from(ByteBuffer.wrap(data)), data, readSize);
-            if (dataSize >= 128) {
-                IOImplsTest.testInputStream(
-                    ByteReader.from(ByteBuffer.wrap(data)).asInputStream(),
-                    data, false, false, false
-                );
-            }
         }
         {
             // limited
@@ -177,20 +148,6 @@ public class ByteReaderTest implements DataTest {
                     ByteReader.from(data).limit(data.length - 5),
                     Arrays.copyOf(data, data.length - 5),
                     readSize
-                );
-            }
-            if (dataSize >= 128) {
-                IOImplsTest.testInputStream(
-                    ByteReader.from(data).limit(data.length).asInputStream(),
-                    data, false, false, true
-                );
-                IOImplsTest.testInputStream(
-                    ByteReader.from(data).limit(data.length + 5).asInputStream(),
-                    data, false, false, true
-                );
-                IOImplsTest.testInputStream(
-                    ByteReader.from(data).limit(data.length - 5).asInputStream(),
-                    Arrays.copyOf(data, data.length - 5), false, false, true
                 );
             }
         }
@@ -1081,6 +1038,101 @@ public class ByteReaderTest implements DataTest {
     }
 
     @Test
+    public void testAsInputStream() throws Exception {
+        testAsInputStream(128);
+        testAsInputStream(IOKit.bufferSize());
+        testAsInputStream(IOKit.bufferSize() + 1);
+    }
+
+    private void testAsInputStream(int size) throws Exception {
+        byte[] data = randomBytes(size);
+        BytesBuilder builder = new BytesBuilder(size);
+        {
+            // input stream
+            IOImplsTest.testInputStream(
+                ByteReader.from(IOKit.newInputStream(new FakeFile(data), 0)).asInputStream(),
+                data,
+                true,
+                true,
+                false
+            );
+            testReadToBuilder(ByteReader.from(new ByteArrayInputStream(data)), data, builder);
+        }
+        {
+            // channel
+            IOImplsTest.testInputStream(
+                ByteReader.from(Channels.newChannel(IOKit.newInputStream(new FakeFile(data), 0))).asInputStream(),
+                data,
+                false,
+                false,
+                false
+            );
+            testReadToBuilder(
+                ByteReader.from(Channels.newChannel(new ByteArrayInputStream(data))), data, builder
+            );
+        }
+        {
+            // array
+            IOImplsTest.testInputStream(
+                ByteReader.from(data).asInputStream(),
+                data,
+                false,
+                false,
+                true
+            );
+            testReadToBuilder(ByteReader.from(data), data, builder);
+        }
+        {
+            // buffer
+            IOImplsTest.testInputStream(
+                ByteReader.from(ByteBuffer.wrap(data)).asInputStream(),
+                data,
+                false,
+                false,
+                false
+            );
+            testReadToBuilder(ByteReader.from(ByteBuffer.wrap(data)), data, builder);
+        }
+        {
+            // limited
+            IOImplsTest.testInputStream(
+                ByteReader.from(data).limit(size).asInputStream(),
+                data,
+                false,
+                false,
+                true
+            );
+            testReadToBuilder(ByteReader.from(data).limit(size), data, builder);
+            IOImplsTest.testInputStream(
+                ByteReader.from(data).limit(size - 5).asInputStream(),
+                Arrays.copyOf(data, size - 5),
+                false,
+                false,
+                true
+            );
+            testReadToBuilder(
+                ByteReader.from(data).limit(size - 5), Arrays.copyOf(data, size - 5), builder
+            );
+            IOImplsTest.testInputStream(
+                ByteReader.from(data).limit(size + 5).asInputStream(),
+                data,
+                false,
+                false,
+                true
+            );
+            testReadToBuilder(ByteReader.from(data).limit(size + 5), data, builder);
+        }
+    }
+
+    public static void testReadToBuilder(ByteReader reader, byte[] data, BytesBuilder builder) {
+        builder.reset();
+        InputStream asIn = reader.asInputStream();
+        reader.readTo(builder, 1);
+        IOKit.readTo(asIn, builder);
+        assertEquals(builder.toByteArray(), data);
+    }
+
+    @Test
     public void testBytesOthers() throws Exception {
         TestInputStream tin = new TestInputStream(new ByteArrayInputStream(new byte[0]));
         tin.setNextOperation(ReadOps.THROW, 99);
@@ -1096,12 +1148,19 @@ public class ByteReaderTest implements DataTest {
             expectThrows(IORuntimeException.class, reader::close);
             reader = ByteReader.from(ByteBuffer.allocate(1));
             expectThrows(IORuntimeException.class, reader::reset);
+        }
+        {
+            // asInputStream
             InputStream in1 = ByteReader.from(ByteBuffer.allocate(1)).limit(1).asInputStream();
             expectThrows(IOException.class, in1::reset);
             InputStream in2 = ByteReader.from(tin).limit(1).asInputStream();
             expectThrows(IOException.class, () -> in2.skip(1));
             InputStream in3 = ByteReader.from(tin).limit(1).asInputStream();
             expectThrows(IOException.class, () -> in3.close());
+            TestInputStream errIn = new TestInputStream(new ByteArrayInputStream(new byte[0]));
+            errIn.setNextOperation(ReadOps.THROW, 99);
+            expectThrows(IOException.class, () -> ByteReader.from(errIn).limit(1).asInputStream().read());
+            expectThrows(IOException.class, () -> ByteReader.from(errIn).limit(1).asInputStream().read(new byte[2]));
         }
     }
 }

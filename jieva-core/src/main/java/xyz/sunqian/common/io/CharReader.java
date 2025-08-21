@@ -499,6 +499,6 @@ public interface CharReader extends IORuntimeCloseable {
      * @return a {@link Reader} represents this reader. Its content and status are shared with this reader
      */
     default @Nonnull Reader asReader() {
-        return IOKit.newReader(this);
+        return CharReaderImpl.asReader(this);
     }
 }

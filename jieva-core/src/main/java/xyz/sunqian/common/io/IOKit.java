@@ -2088,24 +2088,6 @@ public class IOKit {
     }
 
     /**
-     * Wraps the given reader as a new {@link InputStream}. Note this method returns a new wrapper object, it is not
-     * equivalent to {@link ByteReader#asInputStream()}.
-     * <p>
-     * The result's support is as follows:
-     * <ul>
-     *     <li>mark/reset: based on the given reader;</li>
-     *     <li>close: closes the reader;</li>
-     *     <li>thread safety: no;</li>
-     * </ul>
-     *
-     * @param reader the given reader
-     * @return the given reader as a new {@link InputStream}
-     */
-    public static @Nonnull InputStream newInputStream(@Nonnull ByteReader reader) {
-        return IOImpls.inputStream(reader);
-    }
-
-    /**
      * Wraps the given stream as a new {@link InputStream} of which readable number is limited to the specified limit.
      * <p>
      * The result's support is as follows:
@@ -2265,24 +2247,6 @@ public class IOKit {
      */
     public static @Nonnull Reader newReader(@Nonnull InputStream stream, @Nonnull Charset charset) {
         return IOImpls.reader(stream, charset);
-    }
-
-    /**
-     * Wraps the given reader as a new {@link Reader}. Note this method returns a new wrapper object, it is not
-     * equivalent to {@link CharReader#asReader()}.
-     * <p>
-     * The result's support is as follows:
-     * <ul>
-     *     <li>mark/reset: based on the given reader;</li>
-     *     <li>close: closes the reader;</li>
-     *     <li>thread safety: no;</li>
-     * </ul>
-     *
-     * @param reader the given reader
-     * @return the given reader as a new {@link Reader}
-     */
-    public static @Nonnull Reader newReader(@Nonnull CharReader reader) {
-        return IOImpls.reader(reader);
     }
 
     /**

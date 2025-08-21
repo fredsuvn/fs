@@ -3,6 +3,7 @@ package test.io;
 import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.chars.CharsBuilder;
+import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.string.StringKit;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.CharReader;
@@ -16,6 +17,7 @@ import xyz.sunqian.test.TestReader;
 
 import java.io.CharArrayReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.nio.CharBuffer;
 import java.util.Arrays;
@@ -67,11 +69,6 @@ public class CharReaderTest implements DataTest {
             TestReader tr = new TestReader(new CharArrayReader(data));
             tr.setNextOperation(ReadOps.READ_ZERO);
             testSkipChars(CharReader.from(tr), data, readSize);
-            if (dataSize >= 128) {
-                IOImplsTest.testReader(CharReader.from(IOKit.newReader(data)).asReader(),
-                    data, false, false, false
-                );
-            }
         }
         {
             // char array
@@ -86,15 +83,6 @@ public class CharReaderTest implements DataTest {
                 readSize, true
             );
             testSkipChars(CharReader.from(dataPadding, 33, data.length), data, readSize);
-            if (dataSize >= 128) {
-                IOImplsTest.testReader(CharReader.from(data).asReader(),
-                    data, false, false, true
-                );
-                IOImplsTest.testReader(CharReader.from(dataPadding, 33, data.length).asReader(),
-                    Arrays.copyOfRange(dataPadding, 33, 33 + data.length),
-                    false, false, true
-                );
-            }
         }
         {
             // char sequence
@@ -111,26 +99,12 @@ public class CharReaderTest implements DataTest {
                 readSize, true
             );
             testSkipChars(CharReader.from(dataStrPadding, 33, 33 + data.length), data, readSize);
-            if (dataSize >= 128) {
-                IOImplsTest.testReader(CharReader.from(dataStr).asReader(),
-                    data, false, false, true
-                );
-                IOImplsTest.testReader(CharReader.from(dataStrPadding, 33, 33 + data.length).asReader(),
-                    Arrays.copyOfRange(dataPadding, 33, 33 + data.length),
-                    false, false, true
-                );
-            }
         }
         {
             // buffer
             char[] data = randomChars(dataSize);
             testReadChars(CharReader.from(CharBuffer.wrap(data)), data, readSize, true);
             testSkipChars(CharReader.from(CharBuffer.wrap(data)), data, readSize);
-            if (dataSize >= 128) {
-                IOImplsTest.testReader(CharReader.from(CharBuffer.wrap(data)).asReader(),
-                    data, false, false, false
-                );
-            }
         }
         {
             // limited
@@ -175,20 +149,6 @@ public class CharReaderTest implements DataTest {
                     CharReader.from(data).limit(data.length - 5),
                     Arrays.copyOf(data, data.length - 5),
                     readSize
-                );
-            }
-            if (dataSize >= 128) {
-                IOImplsTest.testReader(
-                    CharReader.from(data).limit(data.length).asReader(),
-                    data, false, false, true
-                );
-                IOImplsTest.testReader(
-                    CharReader.from(data).limit(data.length + 5).asReader(),
-                    data, false, false, true
-                );
-                IOImplsTest.testReader(
-                    CharReader.from(data).limit(data.length - 5).asReader(),
-                    Arrays.copyOf(data, data.length - 5), false, false, true
                 );
             }
         }
@@ -953,6 +913,100 @@ public class CharReaderTest implements DataTest {
     }
 
     @Test
+    public void testAsReader() throws Exception {
+        testAsReader(128);
+        testAsReader(IOKit.bufferSize());
+        testAsReader(IOKit.bufferSize() + 1);
+    }
+
+    private void testAsReader(int size) throws Exception {
+        char[] data = randomChars(size, 'a', 'z');
+        byte[] bytes = new String(data).getBytes(CharsKit.defaultCharset());
+        CharsBuilder builder = new CharsBuilder(size);
+        {
+            // reader
+            FakeFile file = new FakeFile(bytes);
+            InputStream in = IOKit.newInputStream(file, 0);
+            IOImplsTest.testReader(
+                CharReader.from(IOKit.newReader(in, CharsKit.defaultCharset())).asReader(),
+                data,
+                false,
+                true,
+                false
+            );
+            testReadToBuilder(CharReader.from(new CharArrayReader(data)), data, builder);
+        }
+        {
+            // array
+            IOImplsTest.testReader(
+                CharReader.from(data).asReader(),
+                data,
+                false,
+                false,
+                true
+            );
+            testReadToBuilder(CharReader.from(data), data, builder);
+        }
+        {
+            // string
+            IOImplsTest.testReader(
+                CharReader.from(new String(data)).asReader(),
+                data,
+                false,
+                false,
+                true
+            );
+            testReadToBuilder(CharReader.from(new String(data)), data, builder);
+        }
+        {
+            // buffer
+            IOImplsTest.testReader(
+                CharReader.from(CharBuffer.wrap(data)).asReader(),
+                data,
+                false,
+                false,
+                false
+            );
+            testReadToBuilder(CharReader.from(CharBuffer.wrap(data)), data, builder);
+        }
+        {
+            // limited
+            IOImplsTest.testReader(
+                CharReader.from(data).limit(size).asReader(),
+                data,
+                false,
+                false,
+                true
+            );
+            testReadToBuilder(CharReader.from(data).limit(size), data, builder);
+            IOImplsTest.testReader(
+                CharReader.from(data).limit(size - 5).asReader(),
+                Arrays.copyOf(data, size - 5),
+                false,
+                false,
+                true
+            );
+            testReadToBuilder(CharReader.from(data).limit(size - 5), Arrays.copyOf(data, size - 5), builder);
+            IOImplsTest.testReader(
+                CharReader.from(data).limit(size + 5).asReader(),
+                data,
+                false,
+                false,
+                true
+            );
+            testReadToBuilder(CharReader.from(data).limit(size + 5), data, builder);
+        }
+    }
+
+    public static void testReadToBuilder(CharReader reader, char[] data, CharsBuilder builder) {
+        builder.reset();
+        Reader asIn = reader.asReader();
+        reader.readTo(builder, 1);
+        IOKit.readTo(asIn, builder);
+        assertEquals(builder.toCharArray(), data);
+    }
+
+    @Test
     public void testCharsOthers() throws Exception {
         TestReader tin = new TestReader(new CharArrayReader(new char[0]));
         tin.setNextOperation(ReadOps.THROW, 99);
@@ -966,12 +1020,19 @@ public class CharReaderTest implements DataTest {
             expectThrows(IORuntimeException.class, reader::reset);
             Reader in1 = CharReader.from(CharBuffer.allocate(1)).limit(1).asReader();
             expectThrows(IOException.class, in1::reset);
+        }
+        {
+            // asReader
             Reader in2 = CharReader.from(tin).limit(1).asReader();
             expectThrows(IOException.class, () -> in2.skip(1));
             Reader in3 = CharReader.from(tin).limit(1).asReader();
             expectThrows(IOException.class, () -> in3.close());
             Reader in4 = CharReader.from(tin).limit(1).asReader();
             expectThrows(IOException.class, () -> in4.mark(1));
+            TestReader errIn = new TestReader(new CharArrayReader(new char[0]));
+            errIn.setNextOperation(ReadOps.THROW, 99);
+            expectThrows(IOException.class, () -> CharReader.from(errIn).limit(1).asReader().read());
+            expectThrows(IOException.class, () -> CharReader.from(errIn).limit(1).asReader().read(new char[2]));
         }
     }
 }

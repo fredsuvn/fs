@@ -7,6 +7,7 @@ import xyz.sunqian.common.base.math.MathKit;
 import xyz.sunqian.common.base.string.StringKit;
 import xyz.sunqian.common.io.IOChecker.ReadChecker;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.nio.CharBuffer;
 
@@ -42,6 +43,10 @@ final class CharReaderImpl {
 
     static @Nonnull CharSegment emptySeg(boolean end) {
         return end ? CharSegmentImpl.EMPTY_END : CharSegmentImpl.EMPTY_SEG;
+    }
+
+    static @Nonnull Reader asReader(@Nonnull CharReader reader) {
+        return new AsReader(reader);
     }
 
     private static final class CharSegmentImpl implements CharSegment {
@@ -1063,6 +1068,81 @@ final class CharReaderImpl {
         @Override
         public void close() throws IORuntimeException {
             src.close();
+        }
+    }
+
+    static final class AsReader extends DoReadReader {
+
+        private final @Nonnull CharReader in;
+        private char[] oneChar;
+
+        private AsReader(@Nonnull CharReader in) {
+            this.in = in;
+        }
+
+        @Override
+        public int read() throws IOException {
+            try {
+                if (oneChar == null) {
+                    oneChar = new char[1];
+                }
+                int ret = in.readTo(oneChar);
+                return ret < 0 ? -1 : oneChar[0] & 0xFFFF;
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        protected int doRead(char @Nonnull [] b, int off, int len) throws IOException {
+            try {
+                return in.readTo(b, off, len);
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        public long skip(long n) throws IllegalArgumentException, IOException {
+            try {
+                return in.skip(n);
+            } catch (IllegalArgumentException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        public boolean markSupported() {
+            return in.markSupported();
+        }
+
+        @Override
+        public void mark(int readAheadLimit) throws IOException {
+            try {
+                in.mark();
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        public void reset() throws IOException {
+            try {
+                in.reset();
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        public void close() throws IOException {
+            try {
+                in.close();
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
         }
     }
 }

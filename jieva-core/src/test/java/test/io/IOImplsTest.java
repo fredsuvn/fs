@@ -23,7 +23,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.CharArrayReader;
 import java.io.CharArrayWriter;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -89,7 +88,7 @@ public class IOImplsTest implements DataTest {
             TestInputStream tin = new TestInputStream(new ByteArrayInputStream(new byte[0]));
             tin.setNextOperation(ReadOps.THROW, 99);
             ByteReader reader = ByteReader.from(tin);
-            InputStream in = IOKit.newInputStream(reader);
+            InputStream in = reader.asInputStream();
             expectThrows(IOException.class, in::read);
             expectThrows(IOException.class, () -> in.read(new byte[10]));
             expectThrows(IOException.class, () -> in.skip(1));
@@ -390,7 +389,7 @@ public class IOImplsTest implements DataTest {
             TestReader tin = new TestReader(new CharArrayReader(new char[0]));
             tin.setNextOperation(ReadOps.THROW, 99);
             CharReader reader = CharReader.from(tin);
-            Reader in = IOKit.newReader(reader);
+            Reader in = reader.asReader();
             expectThrows(IOException.class, in::read);
             expectThrows(IOException.class, () -> in.read(new char[10]));
             expectThrows(IOException.class, () -> in.skip(1));
@@ -415,7 +414,6 @@ public class IOImplsTest implements DataTest {
         {
             // string
             char[] data = randomChars(dataSize);
-            ;
             testReader(IOKit.newReader(new String(data)), data, true, false, false);
             data = randomChars(dataSize + 12);
             testReader(
@@ -427,7 +425,6 @@ public class IOImplsTest implements DataTest {
         {
             // buffer
             char[] data = randomChars(dataSize);
-            ;
             CharBuffer buffer = CharBuffer.wrap(data);
             Reader bufferIn = IOKit.newReader(buffer);
             testReader(bufferIn, data, true, false, false);
@@ -1160,97 +1157,6 @@ public class IOImplsTest implements DataTest {
             expectThrows(IndexOutOfBoundsException.class, () -> new Out().write("1", 0, -1));
             expectThrows(IndexOutOfBoundsException.class, () -> new Out().write("1", -1, 1));
             expectThrows(IndexOutOfBoundsException.class, () -> new Out().write("1", 0, 2));
-        }
-    }
-
-    private static final class FakeFile extends RandomAccessFile {
-
-        private final byte[] data;
-        private final OutputStream out;
-        private boolean closed = false;
-        private ByteArrayInputStream in;
-
-        public FakeFile(byte[] data) throws FileNotFoundException {
-            super(ClassLoader.getSystemResource("io/fakeRaf.txt").getFile(), "r");
-            this.data = data;
-            in = new ByteArrayInputStream(data);
-            this.out = null;
-        }
-
-        public FakeFile(OutputStream out) throws FileNotFoundException {
-            super(ClassLoader.getSystemResource("io/fakeRaf.txt").getFile(), "r");
-            this.data = null;
-            in = null;
-            this.out = out;
-        }
-
-        @Override
-        public int read() throws IOException {
-            if (closed) {
-                throw new IOException();
-            }
-            return in.read();
-        }
-
-        @Override
-        public int read(byte[] b, int off, int len) throws IOException {
-            if (closed) {
-                throw new IOException();
-            }
-            return in.read(b, off, len);
-        }
-
-        @Override
-        public int skipBytes(int n) throws IOException {
-            if (closed) {
-                throw new IOException();
-            }
-            return (int) in.skip(n);
-        }
-
-        @Override
-        public void write(byte[] b, int off, int len) throws IOException {
-            if (closed) {
-                throw new IOException();
-            }
-            out.write(b, off, len);
-        }
-
-        @Override
-        public void write(int b) throws IOException {
-            if (closed) {
-                throw new IOException();
-            }
-            out.write(b);
-        }
-
-        @Override
-        public long getFilePointer() throws IOException {
-            if (closed) {
-                throw new IOException();
-            }
-            return data.length - in.available();
-        }
-
-        @Override
-        public void seek(long pos) throws IOException {
-            if (closed) {
-                throw new IOException();
-            }
-            if (data != null) {
-                in = new ByteArrayInputStream(data, (int) pos, data.length - (int) pos);
-            }
-        }
-
-        @Override
-        public long length() throws IOException {
-            return data.length;
-        }
-
-        @Override
-        public void close() throws IOException {
-            super.close();
-            this.closed = true;
         }
     }
 
