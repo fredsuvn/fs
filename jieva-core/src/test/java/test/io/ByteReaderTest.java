@@ -1076,7 +1076,7 @@ public class ByteReaderTest implements DataTest {
             IOImplsTest.testInputStream(
                 ByteReader.from(data).asInputStream(),
                 data,
-                false,
+                true,
                 false,
                 true
             );
@@ -1087,7 +1087,7 @@ public class ByteReaderTest implements DataTest {
             IOImplsTest.testInputStream(
                 ByteReader.from(ByteBuffer.wrap(data)).asInputStream(),
                 data,
-                false,
+                true,
                 false,
                 false
             );
@@ -1133,7 +1133,65 @@ public class ByteReaderTest implements DataTest {
     }
 
     @Test
-    public void testBytesOthers() throws Exception {
+    public void testReady() throws Exception {
+        testReady(128);
+        testReady(IOKit.bufferSize());
+        testReady(IOKit.bufferSize() + 1);
+    }
+
+    private void testReady(int size) throws Exception {
+        byte[] data = randomBytes(size);
+        {
+            // reader
+            ByteReader reader = ByteReader.from(new ByteArrayInputStream(data));
+            assertEquals(reader.ready(), size);
+            reader.read();
+            assertEquals(reader.ready(), 0);
+        }
+        {
+            // channel
+            ByteReader reader = ByteReader.from(Channels.newChannel(new ByteArrayInputStream(data)));
+            assertEquals(reader.ready(), 0);
+            reader.read();
+            assertEquals(reader.ready(), 0);
+        }
+        {
+            // array
+            ByteReader reader = ByteReader.from(data);
+            assertEquals(reader.ready(), size);
+            reader.read();
+            assertEquals(reader.ready(), 0);
+        }
+        {
+            // buffer
+            ByteReader reader = ByteReader.from(ByteBuffer.wrap(data));
+            assertEquals(reader.ready(), size);
+            reader.read();
+            assertEquals(reader.ready(), 0);
+        }
+        {
+            // limited
+            ByteReader reader1 = ByteReader.from(data).limit(size);
+            assertEquals(reader1.ready(), size);
+            reader1.read();
+            assertEquals(reader1.ready(), 0);
+            ByteReader reader2 = ByteReader.from(data).limit(size - 5);
+            assertEquals(reader2.ready(), size - 5);
+            reader2.read();
+            assertEquals(reader2.ready(), 0);
+            ByteReader reader3 = ByteReader.from(data).limit(size + 5);
+            assertEquals(reader3.ready(), size);
+            reader3.read();
+            assertEquals(reader3.ready(), 0);
+            ByteReader reader4 = ByteReader.from(Channels.newChannel(new ByteArrayInputStream(data))).limit(size);
+            assertEquals(reader4.ready(), 0);
+            reader4.read();
+            assertEquals(reader4.ready(), 0);
+        }
+    }
+
+    @Test
+    public void testOthers() throws Exception {
         TestInputStream tin = new TestInputStream(new ByteArrayInputStream(new byte[0]));
         tin.setNextOperation(ReadOps.THROW, 99);
         {
@@ -1148,6 +1206,12 @@ public class ByteReaderTest implements DataTest {
             expectThrows(IORuntimeException.class, reader::close);
             reader = ByteReader.from(ByteBuffer.allocate(1));
             expectThrows(IORuntimeException.class, reader::reset);
+        }
+        {
+            // ready
+            TestInputStream errIn = new TestInputStream(new ByteArrayInputStream(new byte[0]));
+            errIn.setNextOperation(ReadOps.THROW, 99);
+            expectThrows(IORuntimeException.class, () -> ByteReader.from(errIn).ready());
         }
         {
             // asInputStream

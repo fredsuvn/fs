@@ -100,6 +100,15 @@ final class ByteReaderImpl {
         }
 
         @Override
+        public int ready() throws IORuntimeException {
+            try {
+                return src.available();
+            } catch (IOException e) {
+                throw new IORuntimeException(e);
+            }
+        }
+
+        @Override
         public @Nonnull ByteSegment read(int len) throws IllegalArgumentException, IORuntimeException {
             IOChecker.checkLen(len);
             byte[] data = IOKit.read0(src, len, bufSize, IOChecker.endChecker());
@@ -348,6 +357,11 @@ final class ByteReaderImpl {
         private ByteChannelReader(@Nonnull ReadableByteChannel src, int bufSize) {
             this.src = src;
             this.bufSize = bufSize;
+        }
+
+        @Override
+        public int ready() {
+            return 0;
         }
 
         @Override
@@ -635,6 +649,11 @@ final class ByteReaderImpl {
         }
 
         @Override
+        public int ready() {
+            return end - pos;
+        }
+
+        @Override
         public @Nonnull ByteSegment read(int len) throws IllegalArgumentException {
             IOChecker.checkLen(len);
             if (len == 0) {
@@ -844,6 +863,11 @@ final class ByteReaderImpl {
         }
 
         @Override
+        public int ready() {
+            return src.remaining();
+        }
+
+        @Override
         public @Nonnull ByteSegment read(int len) throws IllegalArgumentException, IORuntimeException {
             IOChecker.checkLen(len);
             if (len == 0) {
@@ -977,6 +1001,11 @@ final class ByteReaderImpl {
         private LimitedReader(@Nonnull ByteReader src, long limit) {
             this.src = src;
             this.limit = limit;
+        }
+
+        @Override
+        public int ready() throws IORuntimeException {
+            return Math.min(src.ready(), MathKit.intValue(limit - pos));
         }
 
         @Override
@@ -1367,8 +1396,8 @@ final class ByteReaderImpl {
         }
 
         @Override
-        public int available() throws IOException {
-            return super.available();
+        public int available() {
+            return in.ready();
         }
     }
 }

@@ -1007,7 +1007,65 @@ public class CharReaderTest implements DataTest {
     }
 
     @Test
-    public void testCharsOthers() throws Exception {
+    public void testReady() throws Exception {
+        testReady(128);
+        testReady(IOKit.bufferSize());
+        testReady(IOKit.bufferSize() + 1);
+    }
+
+    private void testReady(int size) throws Exception {
+        char[] data = randomChars(size);
+        {
+            // reader
+            CharReader reader = CharReader.from(new CharArrayReader(data));
+            assertEquals(reader.ready(), 0);
+            reader.read();
+            assertEquals(reader.ready(), 0);
+        }
+        {
+            // array
+            CharReader reader = CharReader.from(data);
+            assertEquals(reader.ready(), size);
+            reader.read();
+            assertEquals(reader.ready(), 0);
+        }
+        {
+            // string
+            CharReader reader = CharReader.from(new String(data));
+            assertEquals(reader.ready(), size);
+            reader.read();
+            assertEquals(reader.ready(), 0);
+        }
+        {
+            // buffer
+            CharReader reader = CharReader.from(CharBuffer.wrap(data));
+            assertEquals(reader.ready(), size);
+            reader.read();
+            assertEquals(reader.ready(), 0);
+        }
+        {
+            // limited
+            CharReader reader1 = CharReader.from(data).limit(size);
+            assertEquals(reader1.ready(), size);
+            reader1.read();
+            assertEquals(reader1.ready(), 0);
+            CharReader reader2 = CharReader.from(data).limit(size - 5);
+            assertEquals(reader2.ready(), size - 5);
+            reader2.read();
+            assertEquals(reader2.ready(), 0);
+            CharReader reader3 = CharReader.from(data).limit(size + 5);
+            assertEquals(reader3.ready(), size);
+            reader3.read();
+            assertEquals(reader3.ready(), 0);
+            CharReader reader4 = CharReader.from(new CharArrayReader(data)).limit(size);
+            assertEquals(reader4.ready(), 0);
+            reader4.read();
+            assertEquals(reader4.ready(), 0);
+        }
+    }
+
+    @Test
+    public void testOthers() throws Exception {
         TestReader tin = new TestReader(new CharArrayReader(new char[0]));
         tin.setNextOperation(ReadOps.THROW, 99);
         {

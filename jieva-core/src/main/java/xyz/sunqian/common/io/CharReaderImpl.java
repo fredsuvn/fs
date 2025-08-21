@@ -97,6 +97,11 @@ final class CharReaderImpl {
         }
 
         @Override
+        public int ready() {
+            return 0;
+        }
+
+        @Override
         public @Nonnull CharSegment read(int len) throws IllegalArgumentException, IORuntimeException {
             IOChecker.checkLen(len);
             char[] data = IOKit.read0(src, len, bufSize, IOChecker.endChecker());
@@ -353,6 +358,11 @@ final class CharReaderImpl {
         }
 
         @Override
+        public int ready() {
+            return end - pos;
+        }
+
+        @Override
         public @Nonnull CharSegment read(int len) throws IllegalArgumentException {
             IOChecker.checkLen(len);
             if (len == 0) {
@@ -533,6 +543,11 @@ final class CharReaderImpl {
         }
 
         @Override
+        public int ready() {
+            return endPos - pos;
+        }
+
+        @Override
         public @Nonnull CharSegment read(int len) throws IllegalArgumentException, IORuntimeException {
             IOChecker.checkLen(len);
             if (len == 0) {
@@ -707,6 +722,11 @@ final class CharReaderImpl {
         }
 
         @Override
+        public int ready() {
+            return src.remaining();
+        }
+
+        @Override
         public @Nonnull CharSegment read(int len) throws IllegalArgumentException, IORuntimeException {
             IOChecker.checkLen(len);
             if (len == 0) {
@@ -822,6 +842,11 @@ final class CharReaderImpl {
         private LimitedReader(@Nonnull CharReader src, long limit) {
             this.src = src;
             this.limit = limit;
+        }
+
+        @Override
+        public int ready() throws IORuntimeException {
+            return Math.min(src.ready(), MathKit.intValue(limit - pos));
         }
 
         @Override

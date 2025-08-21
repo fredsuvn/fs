@@ -160,6 +160,17 @@ public interface CharReader extends IORuntimeCloseable {
     }
 
     /**
+     * Returns the chars number this reader is ready to be read, may be {@code 0}.
+     * <p>
+     * Note some data sources are unpredictable, so even if this method returns {@code 0}, it does not necessarily mean
+     * that there is no data can be read out immediately
+     *
+     * @return the chars number this reader is ready to be read, may be {@code 0}
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    int ready() throws IORuntimeException;
+
+    /**
      * Reads and returns the next specified length of data segment. This method reads continuously until the read number
      * reaches the specified length or reaches the end of this reader. It never returns {@code null}, but can return an
      * empty segment.
