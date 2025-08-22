@@ -232,21 +232,6 @@ public class IOTest implements DataTest {
     public void testString() {
         char[] chars = randomChars(16, 'a', 'z');
         byte[] data = new String(chars).getBytes(CharsKit.defaultCharset());
-        // string
-        InputStream in = new ByteArrayInputStream(data);
-        assertEquals(IOKit.string(in), new String(chars));
-        assertNull(IOKit.string(in));
-        ReadableByteChannel ch = Channels.newChannel(new ByteArrayInputStream(data));
-        assertEquals(IOKit.string(ch), new String(chars));
-        assertNull(IOKit.string(ch));
-        // available stream string
-        TestInputStream tin = new TestInputStream(new ByteArrayInputStream(data));
-        tin.setNextOperation(ReadOps.READ_ZERO, 99);
-        assertEquals(IOKit.availableString(tin), "");
-        tin.setNextOperation(ReadOps.READ_NORMAL, 99);
-        assertEquals(IOKit.availableString(tin), new String(chars));
-        assertNull(IOKit.availableString(tin));
-        // available channel string
         ReadableByteChannel tch = new ReadableByteChannel() {
             @Override
             public int read(ByteBuffer dst) {
@@ -262,10 +247,51 @@ public class IOTest implements DataTest {
             public void close() {
             }
         };
-        assertEquals(IOKit.availableString(tch), "");
-        ReadableByteChannel tch2 = Channels.newChannel(new ByteArrayInputStream(data));
-        assertEquals(IOKit.availableString(tch2), new String(chars));
-        assertNull(IOKit.availableString(tch2));
+        {
+            // no charset
+            // string
+            InputStream in = new ByteArrayInputStream(data);
+            assertEquals(IOKit.string(in), new String(chars));
+            assertNull(IOKit.string(in));
+            ReadableByteChannel ch = Channels.newChannel(new ByteArrayInputStream(data));
+            assertEquals(IOKit.string(ch), new String(chars));
+            assertNull(IOKit.string(ch));
+            // available stream string
+            TestInputStream tin = new TestInputStream(new ByteArrayInputStream(data));
+            tin.setNextOperation(ReadOps.READ_ZERO, 99);
+            assertEquals(IOKit.availableString(tin), "");
+            tin.setNextOperation(ReadOps.READ_NORMAL, 99);
+            assertEquals(IOKit.availableString(tin), new String(chars));
+            assertNull(IOKit.availableString(tin));
+            // available channel string
+            assertEquals(IOKit.availableString(tch), "");
+            ReadableByteChannel tch2 = Channels.newChannel(new ByteArrayInputStream(data));
+            assertEquals(IOKit.availableString(tch2), new String(chars));
+            assertNull(IOKit.availableString(tch2));
+        }
+        {
+            // with charset
+            // string
+            InputStream in = new ByteArrayInputStream(data);
+            assertEquals(IOKit.string(in, CharsKit.defaultCharset()), new String(chars));
+            assertNull(IOKit.string(in, CharsKit.defaultCharset()));
+            ReadableByteChannel ch = Channels.newChannel(new ByteArrayInputStream(data));
+            assertEquals(IOKit.string(ch, CharsKit.defaultCharset()), new String(chars));
+            assertNull(IOKit.string(ch, CharsKit.defaultCharset()));
+            // available stream string
+            TestInputStream tin = new TestInputStream(new ByteArrayInputStream(data));
+            tin.setNextOperation(ReadOps.READ_ZERO, 99);
+            assertEquals(IOKit.availableString(tin, CharsKit.defaultCharset()), "");
+            tin.setNextOperation(ReadOps.READ_NORMAL, 99);
+            assertEquals(IOKit.availableString(tin, CharsKit.defaultCharset()), new String(chars));
+            assertNull(IOKit.availableString(tin, CharsKit.defaultCharset()));
+            // available channel string
+            assertEquals(IOKit.availableString(tch, CharsKit.defaultCharset()), "");
+            ReadableByteChannel tch2 = Channels.newChannel(new ByteArrayInputStream(data));
+            assertEquals(IOKit.availableString(tch2, CharsKit.defaultCharset()), new String(chars));
+            assertNull(IOKit.availableString(tch2, CharsKit.defaultCharset()));
+        }
+
     }
 
     @Test

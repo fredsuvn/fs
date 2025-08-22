@@ -1,5 +1,6 @@
 package xyz.sunqian.common.net;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.io.communicate.IOChannelContext;
 
 import java.net.InetSocketAddress;
@@ -10,12 +11,35 @@ import java.net.InetSocketAddress;
  *
  * @author sunqian
  */
-public interface NetChannelContext extends IOChannelContext<InetSocketAddress> {
+public interface NetChannelContext extends IOChannelContext<InetSocketAddress, NetChannelReader, NetChannelWriter> {
 
     /**
      * Returns the type of the channel.
      *
      * @return the type of the channel
      */
+    @Nonnull
     NetChannelType channelType();
+
+    @Override
+    @Nonnull
+    InetSocketAddress remoteAddress() throws Exception;
+
+    @Override
+    @Nonnull
+    InetSocketAddress localAddress() throws Exception;
+
+    @Override
+    @Nonnull
+    NetChannelReader reader();
+
+    @Override
+    @Nonnull
+    NetChannelWriter writer();
+
+    @Override
+    void close() throws Exception;
+
+    @Override
+    boolean isOpen();
 }

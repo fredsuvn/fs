@@ -3,17 +3,21 @@ package xyz.sunqian.common.io.communicate;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 
-import java.nio.ByteBuffer;
-import java.nio.channels.ReadableByteChannel;
-
 /**
  * Handles IO events.
  *
  * @param <A> the type of the channel address
+ * @param <R> the type of the channel reader
+ * @param <W> the type of the channel writer
  * @param <C> the type of the channel context
  * @author sunqian
  */
-public interface IOChannelHandler<A, C extends IOChannelContext<A>> {
+public interface IOChannelHandler<
+    A,
+    R extends IOChannelReader,
+    W extends IOChannelWriter,
+    C extends IOChannelContext<A, R, W>
+    > {
 
     /**
      * This method is invoked after a new channel is opened, and only once for each new channel.
@@ -21,7 +25,7 @@ public interface IOChannelHandler<A, C extends IOChannelContext<A>> {
      * @param context the context of the channel
      * @throws Exception for any error
      */
-    void channelOpen(C context) throws Exception;
+    void channelOpen(@Nonnull C context) throws Exception;
 
     /**
      * This method is invoked after a channel is closed, and only once for each channel.
@@ -29,20 +33,16 @@ public interface IOChannelHandler<A, C extends IOChannelContext<A>> {
      * @param context the context of the channel
      * @throws Exception for any error
      */
-    void channelClose(C context) throws Exception;
+    void channelClose(@Nonnull C context) throws Exception;
 
     /**
-     * This method is invoked after a channel receives new data.
-     * <p>
-     * The parameter {@code reader} is a {@link ReadableByteChannel} that can be used to read the received data. And, if
-     * the {@link ReadableByteChannel#read(ByteBuffer)} returns {@code -1}, means the channel is closed; if returns
-     * {@code 0}, means the received data for the current read-event has been read completely.
+     * This method is invoked after a channel receives new data, and the context's reader from the
+     * {@link IOChannelContext#reader()} may read the data.
      *
      * @param context the context of the channel
-     * @param reader  the reader for reading received data
      * @throws Exception for any error
      */
-    void channelRead(C context, ReadableByteChannel reader) throws Exception;
+    void channelRead(@Nonnull C context) throws Exception;
 
     /**
      * This method is invoked after catching an unhandled exception thrown from the channel of this context. The

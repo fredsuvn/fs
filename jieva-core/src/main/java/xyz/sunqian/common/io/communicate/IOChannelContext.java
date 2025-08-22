@@ -1,18 +1,15 @@
 package xyz.sunqian.common.io.communicate;
 
-import xyz.sunqian.common.io.BufferKit;
-
-import java.nio.ByteBuffer;
-import java.nio.channels.WritableByteChannel;
-
 /**
  * Represents a context of an IO channel, can be used to obtain information from the remote endpoint of the channel and
  * send data to it.
  *
  * @param <A> the type of the channel address
+ * @param <R> the type of the channel reader
+ * @param <W> the type of the channel writer
  * @author sunqian
  */
-public interface IOChannelContext<A> {
+public interface IOChannelContext<A, R extends IOChannelReader, W extends IOChannelWriter> {
 
     /**
      * Returns the remote address of the channel.
@@ -31,21 +28,18 @@ public interface IOChannelContext<A> {
     A localAddress() throws Exception;
 
     /**
-     * Write the data to the remote endpoint of this channel.
+     * Returns a reader that can be used to read data from the remote endpoint of this channel.
      *
-     * @param buffer the data to be written
-     * @throws Exception for any error
+     * @return a reader that can be used to read data from the remote endpoint of this channel.
      */
-    default void write(ByteBuffer buffer) throws Exception {
-        BufferKit.readTo(buffer, writer());
-    }
+    R reader();
 
     /**
-     * Returns a {@link WritableByteChannel} that can be used to write data to the remote endpoint of this channel.
+     * Returns a writer that can be used to write data to the remote endpoint of this channel.
      *
-     * @return a {@link WritableByteChannel} that can be used to write data to the remote endpoint of this channel.
+     * @return a writer that can be used to write data to the remote endpoint of this channel.
      */
-    WritableByteChannel writer();
+    W writer();
 
     /**
      * Close this channel.

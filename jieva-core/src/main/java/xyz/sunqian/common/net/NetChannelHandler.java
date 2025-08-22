@@ -9,5 +9,6 @@ import java.net.InetSocketAddress;
  *
  * @author sunqian
  */
-public interface NetChannelHandler extends IOChannelHandler<InetSocketAddress, NetChannelContext> {
+public interface NetChannelHandler
+    extends IOChannelHandler<InetSocketAddress, NetChannelReader, NetChannelWriter, NetChannelContext> {
 }

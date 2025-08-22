@@ -7,7 +7,9 @@ import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.net.NetChannelContext;
 import xyz.sunqian.common.net.NetChannelHandler;
 import xyz.sunqian.common.net.NetChannelHandlerWrapper;
+import xyz.sunqian.common.net.NetChannelReader;
 import xyz.sunqian.common.net.NetChannelType;
+import xyz.sunqian.common.net.NetChannelWriter;
 import xyz.sunqian.common.net.NetException;
 
 import java.io.IOException;
@@ -20,7 +22,6 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.nio.channels.WritableByteChannel;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -140,6 +141,7 @@ public class SocketTcpServerBuilder {
         private final @Nonnull Selector bossSelector = Jie.uncheck(Selector::open, NetException::new);
         private final @Nonnull Worker @Nonnull [] workers;
         private final @Nonnull NetChannelHandlerWrapper handler;
+        private final int bufSize = 1024;
         private volatile boolean closed = false;
         private final @Nonnull CountDownLatch latch = new CountDownLatch(1);
 
@@ -336,7 +338,7 @@ public class SocketTcpServerBuilder {
                     SelectionKey key = keys.next();
                     keys.remove();
                     TcpContext context = (TcpContext) key.attachment();
-                    handler.channelRead(context, context);
+                    handler.channelRead(context);
                 }
             }
 
@@ -385,6 +387,8 @@ public class SocketTcpServerBuilder {
             private final @Nonnull SocketChannel client;
             private final @Nonnull InetSocketAddress remoteAddress;
             private final @Nonnull InetSocketAddress localAddress;
+            private final @Nonnull NetChannelReader reader;
+            private final @Nonnull NetChannelWriter writer;
 
             private boolean handleClose = false;
 
@@ -392,33 +396,37 @@ public class SocketTcpServerBuilder {
                 this.client = client;
                 this.remoteAddress = (InetSocketAddress) client.getRemoteAddress();
                 this.localAddress = (InetSocketAddress) server.getLocalAddress();
+                this.reader = new SocketChannelReader(client, bufSize);
+                this.writer = new SocketChannelWriter(client);
             }
 
             @Override
-            public NetChannelType channelType() {
+            public @Nonnull NetChannelType channelType() {
                 return NetChannelType.tcpIp();
             }
 
             @Override
-            public InetSocketAddress remoteAddress() {
+            public @Nonnull InetSocketAddress remoteAddress() {
                 return remoteAddress;
             }
 
             @Override
-            public InetSocketAddress localAddress() {
+            public @Nonnull InetSocketAddress localAddress() {
                 return localAddress;
             }
 
             @Override
-            public WritableByteChannel writer() {
-                return client;
+            public @Nonnull NetChannelReader reader() {
+                return reader;
+            }
+
+            @Override
+            public @Nonnull NetChannelWriter writer() {
+                return writer;
             }
 
             @Override
             public void close() throws IOException {
-                client.shutdownInput();
-                client.shutdownOutput();
-                client.finishConnect();
                 client.close();
             }
 

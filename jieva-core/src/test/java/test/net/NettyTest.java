@@ -23,19 +23,18 @@ public class NettyTest implements PrintTest {
             .workThreadNum(1)
             .handler(new NetChannelHandler() {
                 @Override
-                public void channelOpen(NetChannelContext context) throws Exception {
+                public void channelOpen(@Nonnull NetChannelContext context) throws Exception {
                     printFor("client open", context.remoteAddress());
                 }
 
                 @Override
-                public void channelClose(NetChannelContext context) throws Exception {
+                public void channelClose(@Nonnull NetChannelContext context) throws Exception {
                     printFor("client close", context.remoteAddress());
                 }
 
                 @Override
-                public void channelRead(NetChannelContext context, ReadableByteChannel reader) {
-                    ByteBuffer buf = IOKit.available(reader);
-                    printFor("client read", buf == null ? "null" : BufferKit.string(buf));
+                public void channelRead(@Nonnull NetChannelContext context) {
+                    printFor("client read", context.reader().nextString());
                 }
 
                 @Override

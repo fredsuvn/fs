@@ -3,14 +3,12 @@ package xyz.sunqian.common.net;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 
-import java.nio.channels.ReadableByteChannel;
-
 /**
  * Wraps a given {@link NetChannelHandler} to provide centralized exception handling.
  * <p>
  * This wrapper ensures that exceptions occurring during {@link #channelOpen(NetChannelContext)},
- * {@link #channelClose(NetChannelContext)}, or {@link #channelRead(NetChannelContext, ReadableByteChannel)} operations
- * are automatically routed to the {@link #exceptionCaught(NetChannelContext, Throwable)} method.
+ * {@link #channelClose(NetChannelContext)}, or {@link #channelRead(NetChannelContext)} operations are automatically
+ * routed to the {@link #exceptionCaught(NetChannelContext, Throwable)} method.
  *
  * @author sunqian
  */
@@ -23,7 +21,7 @@ public class NetChannelHandlerWrapper implements NetChannelHandler {
     }
 
     @Override
-    public void channelOpen(NetChannelContext context) {
+    public void channelOpen(@Nonnull NetChannelContext context) {
         try {
             handler.channelOpen(context);
         } catch (Exception e) {
@@ -32,7 +30,7 @@ public class NetChannelHandlerWrapper implements NetChannelHandler {
     }
 
     @Override
-    public void channelClose(NetChannelContext context) {
+    public void channelClose(@Nonnull NetChannelContext context) {
         try {
             handler.channelClose(context);
         } catch (Exception e) {
@@ -41,9 +39,9 @@ public class NetChannelHandlerWrapper implements NetChannelHandler {
     }
 
     @Override
-    public void channelRead(NetChannelContext context, ReadableByteChannel reader) {
+    public void channelRead(@Nonnull NetChannelContext context) {
         try {
-            handler.channelRead(context, reader);
+            handler.channelRead(context);
         } catch (Exception e) {
             exceptionCaught(context, e);
         }
