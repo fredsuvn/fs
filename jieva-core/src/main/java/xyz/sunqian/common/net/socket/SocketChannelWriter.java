@@ -7,6 +7,7 @@ import xyz.sunqian.common.net.NetChannelWriter;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
 
@@ -45,6 +46,9 @@ public class SocketChannelWriter implements NetChannelWriter {
 
     @Override
     public int write(ByteBuffer src) throws IOException {
+        if (!channel.isOpen()) {
+            throw new ClosedChannelException();
+        }
         return channel.write(src);
     }
 

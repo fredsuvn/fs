@@ -52,6 +52,9 @@ public class SocketChannelReader implements NetChannelReader {
 
     @Override
     public int read(ByteBuffer dst) throws IOException {
+        if (!channel.isOpen()) {
+            return -1;
+        }
         int ret = channel.read(dst);
         if (ret < 0) {
             close();
