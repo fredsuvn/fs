@@ -1,6 +1,6 @@
 package xyz.sunqian.common.net;
 
-import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.annotations.Nonnull;
 
 /**
  * This interface represents a network server.
@@ -11,8 +11,7 @@ import xyz.sunqian.annotations.Nullable;
 public interface NetServer<A> {
 
     /**
-     * Starts this server, and returns immediately after startup. This method will not block the current thread,
-     * {@link #await()} will.
+     * Starts this server.
      *
      * @throws NetException if any error occurs
      */
@@ -37,6 +36,6 @@ public interface NetServer<A> {
      *
      * @return the address this server is bound to, may be {@code null} if the server is not bound yet
      */
-    @Nullable
-    A getBoundAddress();
+    @Nonnull
+    A localAddress();
 }

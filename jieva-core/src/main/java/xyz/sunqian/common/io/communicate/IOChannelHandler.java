@@ -1,5 +1,6 @@
 package xyz.sunqian.common.io.communicate;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 
 import java.nio.ByteBuffer;
@@ -50,5 +51,5 @@ public interface IOChannelHandler<A, C extends IOChannelContext<A>> {
      * @param context the context of the channel, may be {@code null} if the exception is not thrown by a context
      * @param cause   the unhandled exception
      */
-    void exceptionCaught(@Nullable C context, Throwable cause);
+    void exceptionCaught(@Nullable C context, @Nonnull Throwable cause);
 }

@@ -53,4 +53,11 @@ public interface IOChannelContext<A> {
      * @throws Exception for any error
      */
     void close() throws Exception;
+
+    /**
+     * Returns whether this channel is open.
+     *
+     * @return whether this channel is open
+     */
+    boolean isOpen();
 }

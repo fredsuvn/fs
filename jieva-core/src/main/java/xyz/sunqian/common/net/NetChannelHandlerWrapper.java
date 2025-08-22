@@ -50,7 +50,7 @@ public class NetChannelHandlerWrapper implements NetChannelHandler {
     }
 
     @Override
-    public void exceptionCaught(@Nullable NetChannelContext context, Throwable cause) {
+    public void exceptionCaught(@Nullable NetChannelContext context, @Nonnull Throwable cause) {
         handler.exceptionCaught(context, cause);
     }
 }
