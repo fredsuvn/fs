@@ -10,6 +10,8 @@ import xyz.sunqian.common.io.IORuntimeCloseable;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.test.DataTest;
 import xyz.sunqian.test.ErrorAppender;
+import xyz.sunqian.test.ReadOps;
+import xyz.sunqian.test.TestInputStream;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -17,10 +19,12 @@ import java.io.CharArrayReader;
 import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.util.Arrays;
 
 import static org.testng.Assert.assertEquals;
@@ -225,17 +229,47 @@ public class IOTest implements DataTest {
     }
 
     @Test
+    public void testString() {
+        char[] chars = randomChars(16, 'a', 'z');
+        byte[] data = new String(chars).getBytes(CharsKit.defaultCharset());
+        // string
+        InputStream in = new ByteArrayInputStream(data);
+        assertEquals(IOKit.string(in), new String(chars));
+        assertNull(IOKit.string(in));
+        ReadableByteChannel ch = Channels.newChannel(new ByteArrayInputStream(data));
+        assertEquals(IOKit.string(ch), new String(chars));
+        assertNull(IOKit.string(ch));
+        // available stream string
+        TestInputStream tin = new TestInputStream(new ByteArrayInputStream(data));
+        tin.setNextOperation(ReadOps.READ_ZERO, 99);
+        assertEquals(IOKit.availableString(tin), "");
+        tin.setNextOperation(ReadOps.READ_NORMAL, 99);
+        assertEquals(IOKit.availableString(tin), new String(chars));
+        assertNull(IOKit.availableString(tin));
+        // available channel string
+        ReadableByteChannel tch = new ReadableByteChannel() {
+            @Override
+            public int read(ByteBuffer dst) {
+                return 0;
+            }
+
+            @Override
+            public boolean isOpen() {
+                return false;
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+        assertEquals(IOKit.availableString(tch), "");
+        ReadableByteChannel tch2 = Channels.newChannel(new ByteArrayInputStream(data));
+        assertEquals(IOKit.availableString(tch2), new String(chars));
+        assertNull(IOKit.availableString(tch2));
+    }
+
+    @Test
     public void testOthers() throws Exception {
-        {
-            // string
-            String hello = "hello";
-            assertEquals(IOKit.string(new ByteArrayInputStream(hello.getBytes(CharsKit.defaultCharset()))), hello);
-            assertEquals(
-                IOKit.string(new ByteArrayInputStream(hello.getBytes(CharsKit.defaultCharset())), CharsKit.defaultCharset()),
-                hello
-            );
-            assertNull(IOKit.string(new ByteArrayInputStream(new byte[0])));
-        }
         {
             // close
             IOKit.close((Closeable) () -> {

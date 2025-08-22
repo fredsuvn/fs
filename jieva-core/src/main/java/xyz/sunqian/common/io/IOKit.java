@@ -510,6 +510,69 @@ public class IOKit {
     }
 
     /**
+     * Reads all data from the input stream as a string with {@link CharsKit#defaultCharset()}, continuing until reaches
+     * the end of the stream, and returns the string.
+     * <p>
+     * If reaches the end of the stream and no data is read, returns {@code null}.
+     *
+     * @param src the input stream
+     * @return a string with {@link CharsKit#defaultCharset()}, or {@code null} if reaches the end of the stream and no
+     * data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static @Nullable String string(@Nonnull InputStream src) throws IORuntimeException {
+        return io.string(src);
+    }
+
+    /**
+     * Reads all data from the input stream as a string with the specified charset, continuing until reaches the end of
+     * the stream, and returns the string.
+     * <p>
+     * If reaches the end of the stream and no data is read, returns {@code null}.
+     *
+     * @param src the input stream
+     * @return a string with the specified charset, or {@code null} if reaches the end of the stream and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static @Nullable String string(
+        @Nonnull InputStream src, @Nonnull Charset charset
+    ) throws IORuntimeException {
+        return io.string(src, charset);
+    }
+
+    /**
+     * Reads all data from the channel as a string with {@link CharsKit#defaultCharset()}, continuing until reaches the
+     * end of the channel, and returns the string.
+     * <p>
+     * If reaches the end of the channel and no data is read, returns {@code null}.
+     *
+     * @param src the channel
+     * @return a string with {@link CharsKit#defaultCharset()}, or {@code null} if reaches the end of the channel and no
+     * data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static @Nullable String string(@Nonnull ReadableByteChannel src) throws IORuntimeException {
+        return io.string(src);
+    }
+
+    /**
+     * Reads all data from the channel as a string with the specified charset, continuing until reaches the end of the
+     * channel, and returns the string.
+     * <p>
+     * If reaches the end of the channel and no data is read, returns {@code null}.
+     *
+     * @param src the channel
+     * @return a string with the specified charset, or {@code null} if reaches the end of the channel and no data is
+     * read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static @Nullable String string(
+        @Nonnull ReadableByteChannel src, @Nonnull Charset charset
+    ) throws IORuntimeException {
+        return io.string(src, charset);
+    }
+
+    /**
      * Reads data from the reader into the appender, until reaches the end of the reader, and returns the actual number
      * of chars read to.
      * <p>
@@ -1088,6 +1151,69 @@ public class IOKit {
         @Nonnull Reader src, int len
     ) throws IllegalArgumentException, IORuntimeException {
         return io.availableString(src, len);
+    }
+
+    /**
+     * Reads available data from the input stream as a string with {@link CharsKit#defaultCharset()}, continuing until
+     * no data is immediately available, and returns the string.
+     * <p>
+     * If reaches the end of the stream and no data is read, returns {@code null}.
+     *
+     * @param src the input stream
+     * @return a string with {@link CharsKit#defaultCharset()}, or {@code null} if reaches the end of the stream and no
+     * data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static @Nullable String availableString(@Nonnull InputStream src) throws IORuntimeException {
+        return io.availableString(src);
+    }
+
+    /**
+     * Reads available data from the input stream as a string with the specified charset, continuing until no data is
+     * immediately available, and returns the string.
+     * <p>
+     * If reaches the end of the stream and no data is read, returns {@code null}.
+     *
+     * @param src the input stream
+     * @return a string with the specified charset, or {@code null} if reaches the end of the stream and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static @Nullable String availableString(
+        @Nonnull InputStream src, @Nonnull Charset charset
+    ) throws IORuntimeException {
+        return io.availableString(src, charset);
+    }
+
+    /**
+     * Reads available data from the channel as a string with {@link CharsKit#defaultCharset()}, continuing until no
+     * data is immediately available, and returns the string.
+     * <p>
+     * If reaches the end of the channel and no data is read, returns {@code null}.
+     *
+     * @param src the channel
+     * @return a string with {@link CharsKit#defaultCharset()}, or {@code null} if reaches the end of the channel and no
+     * data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static @Nullable String availableString(@Nonnull ReadableByteChannel src) throws IORuntimeException {
+        return io.availableString(src);
+    }
+
+    /**
+     * Reads available data from the channel as a string with the specified charset, continuing until no data is
+     * immediately available, and returns the string.
+     * <p>
+     * If reaches the end of the channel and no data is read, returns {@code null}.
+     *
+     * @param src the channel
+     * @return a string with the specified charset, or {@code null} if reaches the end of the channel and no data is
+     * read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static @Nullable String availableString(
+        @Nonnull ReadableByteChannel src, @Nonnull Charset charset
+    ) throws IORuntimeException {
+        return io.availableString(src, charset);
     }
 
     /**
@@ -1896,40 +2022,6 @@ public class IOKit {
         } catch (IOException e) {
             throw new IORuntimeException(e);
         }
-    }
-
-    /**
-     * Reads all data from the input stream as a string with {@link CharsKit#defaultCharset()}, continuing until reaches
-     * the end of the input stream, and returns the string.
-     * <p>
-     * If reaches the end of the input stream and no data is read, returns {@code null}.
-     *
-     * @param in the input stream
-     * @return a string represents the read data, or {@code null} if reaches the end of the input stream and no data is
-     * read
-     * @throws IORuntimeException if an I/O error occurs
-     */
-    public static @Nullable String string(@Nonnull InputStream in) throws IORuntimeException {
-        return string(in, CharsKit.defaultCharset());
-    }
-
-    /**
-     * Reads all data from the input stream as a string with the specified charset, continuing until reaches the end of
-     * the input stream, and returns the string.
-     * <p>
-     * If reaches the end of the input stream and no data is read, returns {@code null}.
-     *
-     * @param in      the input stream
-     * @param charset the specified charset
-     * @return a string represents the read data, or {@code null} if reaches the end of the input stream and no data is
-     * read
-     * @throws IORuntimeException if an I/O error occurs
-     */
-    public static @Nullable String string(
-        @Nonnull InputStream in, @Nonnull Charset charset
-    ) throws IORuntimeException {
-        byte[] bytes = read(in);
-        return bytes == null ? null : new String(bytes, charset);
     }
 
     /**

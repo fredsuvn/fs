@@ -3,6 +3,7 @@ package xyz.sunqian.common.io;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.ThreadSafe;
+import xyz.sunqian.common.base.chars.CharsKit;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -11,6 +12,7 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.charset.Charset;
 
 /**
  * This interface provides I/O operations, and it is thread-safe.
@@ -526,6 +528,71 @@ public interface IOOperator {
     ) throws IllegalArgumentException, IORuntimeException {
         char[] chars = read(src, len);
         return chars == null ? null : new String(chars);
+    }
+
+    /**
+     * Reads all data from the input stream as a string with {@link CharsKit#defaultCharset()}, continuing until reaches
+     * the end of the stream, and returns the string.
+     * <p>
+     * If reaches the end of the stream and no data is read, returns {@code null}.
+     *
+     * @param src the input stream
+     * @return a string with {@link CharsKit#defaultCharset()}, or {@code null} if reaches the end of the stream and no
+     * data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    default @Nullable String string(@Nonnull InputStream src) throws IORuntimeException {
+        return string(src, CharsKit.defaultCharset());
+    }
+
+    /**
+     * Reads all data from the input stream as a string with the specified charset, continuing until reaches the end of
+     * the stream, and returns the string.
+     * <p>
+     * If reaches the end of the stream and no data is read, returns {@code null}.
+     *
+     * @param src the input stream
+     * @return a string with the specified charset, or {@code null} if reaches the end of the stream and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    default @Nullable String string(
+        @Nonnull InputStream src, @Nonnull Charset charset
+    ) throws IORuntimeException {
+        byte[] bytes = read(src);
+        return bytes == null ? null : new String(bytes, charset);
+    }
+
+    /**
+     * Reads all data from the channel as a string with {@link CharsKit#defaultCharset()}, continuing until reaches the
+     * end of the channel, and returns the string.
+     * <p>
+     * If reaches the end of the channel and no data is read, returns {@code null}.
+     *
+     * @param src the channel
+     * @return a string with {@link CharsKit#defaultCharset()}, or {@code null} if reaches the end of the channel and no
+     * data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    default @Nullable String string(@Nonnull ReadableByteChannel src) throws IORuntimeException {
+        return string(src, CharsKit.defaultCharset());
+    }
+
+    /**
+     * Reads all data from the channel as a string with the specified charset, continuing until reaches the end of the
+     * channel, and returns the string.
+     * <p>
+     * If reaches the end of the channel and no data is read, returns {@code null}.
+     *
+     * @param src the channel
+     * @return a string with the specified charset, or {@code null} if reaches the end of the channel and no data is
+     * read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    default @Nullable String string(
+        @Nonnull ReadableByteChannel src, @Nonnull Charset charset
+    ) throws IORuntimeException {
+        ByteBuffer bytes = read(src);
+        return bytes == null ? null : BufferKit.string(bytes, charset);
     }
 
     /**
@@ -1118,6 +1185,78 @@ public interface IOOperator {
     ) throws IllegalArgumentException, IORuntimeException {
         char[] chars = available(src, len);
         return chars == null ? null : new String(chars);
+    }
+
+    /**
+     * Reads available data from the input stream as a string with {@link CharsKit#defaultCharset()}, continuing until
+     * no data is immediately available, and returns the string.
+     * <p>
+     * If reaches the end of the stream and no data is read, returns {@code null}.
+     *
+     * @param src the input stream
+     * @return a string with {@link CharsKit#defaultCharset()}, possibly empty, or {@code null} if reaches the end of
+     * the stream and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    default @Nullable String availableString(@Nonnull InputStream src) throws IORuntimeException {
+        return availableString(src, CharsKit.defaultCharset());
+    }
+
+    /**
+     * Reads available data from the input stream as a string with the specified charset, continuing until no data is
+     * immediately available, and returns the string.
+     * <p>
+     * If reaches the end of the stream and no data is read, returns {@code null}.
+     *
+     * @param src the input stream
+     * @return a string with the specified charset, possibly empty, or {@code null} if reaches the end of the stream and
+     * no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    default @Nullable String availableString(
+        @Nonnull InputStream src, @Nonnull Charset charset
+    ) throws IORuntimeException {
+        byte[] bytes = available(src);
+        return bytes == null ? null : new String(bytes, charset);
+    }
+
+    /**
+     * Reads available data from the channel as a string with {@link CharsKit#defaultCharset()}, continuing until no
+     * data is immediately available, and returns the string.
+     * <p>
+     * If reaches the end of the channel and no data is read, returns {@code null}.
+     *
+     * @param src the channel
+     * @return a string with {@link CharsKit#defaultCharset()}, possibly empty, or {@code null} if reaches the end of
+     * the channel and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    default @Nullable String availableString(@Nonnull ReadableByteChannel src) throws IORuntimeException {
+        return availableString(src, CharsKit.defaultCharset());
+    }
+
+    /**
+     * Reads available data from the channel as a string with the specified charset, continuing until no data is
+     * immediately available, and returns the string.
+     * <p>
+     * If reaches the end of the channel and no data is read, returns {@code null}.
+     *
+     * @param src the channel
+     * @return a string with the specified charset, possibly empty, or {@code null} if reaches the end of the channel
+     * and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    default @Nullable String availableString(
+        @Nonnull ReadableByteChannel src, @Nonnull Charset charset
+    ) throws IORuntimeException {
+        ByteBuffer bytes = available(src);
+        if (bytes == null) {
+            return null;
+        }
+        if (!bytes.hasRemaining()) {
+            return "";
+        }
+        return BufferKit.string(bytes, charset);
     }
 
     /**
