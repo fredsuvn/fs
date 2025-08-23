@@ -6,12 +6,12 @@ import xyz.sunqian.common.io.communicate.IOChannelContext;
 import java.net.InetSocketAddress;
 
 /**
- * Represents a context of a network channel including TCP and UDP, can be used to obtain information from the remote
- * endpoint of the channel and send data to it.
+ * Context of a network channel, can be used to obtain information of the channel and receive/send data between this
+ * point and the remote endpoint.
  *
  * @author sunqian
  */
-public interface NetChannelContext extends IOChannelContext<InetSocketAddress, NetChannelReader, NetChannelWriter> {
+public interface NetChannelContext extends IOChannelContext<InetSocketAddress> {
 
     /**
      * Returns the type of the channel.
@@ -23,22 +23,14 @@ public interface NetChannelContext extends IOChannelContext<InetSocketAddress, N
 
     @Override
     @Nonnull
-    InetSocketAddress remoteAddress() throws Exception;
+    InetSocketAddress remoteAddress() throws NetException;
 
     @Override
     @Nonnull
-    InetSocketAddress localAddress() throws Exception;
+    InetSocketAddress localAddress() throws NetException;
 
     @Override
-    @Nonnull
-    NetChannelReader reader();
-
-    @Override
-    @Nonnull
-    NetChannelWriter writer();
-
-    @Override
-    void close() throws Exception;
+    void close() throws NetException;
 
     @Override
     boolean isOpen();

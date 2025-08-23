@@ -1041,14 +1041,6 @@ public class IOImplsTest implements DataTest {
     }
 
     @Test
-    public void testSpecial() throws Exception {
-        assertSame(IOKit.emptyInputStream(), IOKit.emptyInputStream());
-        assertSame(IOKit.emptyReader(), IOKit.emptyReader());
-        assertSame(IOKit.nullOutputStream(), IOKit.nullOutputStream());
-        assertSame(IOKit.nullWriter(), IOKit.nullWriter());
-    }
-
-    @Test
     public void testDoImpls() throws Exception {
         {
             class In extends DoReadStream {
@@ -1158,6 +1150,14 @@ public class IOImplsTest implements DataTest {
             expectThrows(IndexOutOfBoundsException.class, () -> new Out().write("1", -1, 1));
             expectThrows(IndexOutOfBoundsException.class, () -> new Out().write("1", 0, 2));
         }
+    }
+
+    @Test
+    public void testSpecial() throws Exception {
+        assertSame(IOKit.emptyInputStream(), IOKit.emptyInputStream());
+        assertSame(IOKit.emptyReader(), IOKit.emptyReader());
+        assertSame(IOKit.nullOutputStream(), IOKit.nullOutputStream());
+        assertSame(IOKit.nullWriter(), IOKit.nullWriter());
     }
 
     private static final class ErrorCharset extends Charset {

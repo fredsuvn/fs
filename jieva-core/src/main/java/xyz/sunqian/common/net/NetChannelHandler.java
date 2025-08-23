@@ -5,10 +5,10 @@ import xyz.sunqian.common.io.communicate.IOChannelHandler;
 import java.net.InetSocketAddress;
 
 /**
- * Handles network IO events.
+ * Handler for handling network channel events.
  *
  * @author sunqian
  */
 public interface NetChannelHandler
-    extends IOChannelHandler<InetSocketAddress, NetChannelReader, NetChannelWriter, NetChannelContext> {
+    extends IOChannelHandler<InetSocketAddress, NetChannelContext> {
 }

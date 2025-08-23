@@ -2,7 +2,7 @@ package xyz.sunqian.common.net;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.exception.JieRuntimeException;
+import xyz.sunqian.common.io.IORuntimeException;
 
 import java.io.IOException;
 
@@ -11,7 +11,7 @@ import java.io.IOException;
  *
  * @author sunqian
  */
-public class NetException extends JieRuntimeException {
+public class NetException extends IORuntimeException {
 
     /**
      * Empty constructor.

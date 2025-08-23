@@ -4,20 +4,13 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 
 /**
- * Handles IO events.
+ * Handler for handling IO channel events.
  *
- * @param <A> the type of the channel address
- * @param <R> the type of the channel reader
- * @param <W> the type of the channel writer
+ * @param <A> the type of the endpoint address
  * @param <C> the type of the channel context
  * @author sunqian
  */
-public interface IOChannelHandler<
-    A,
-    R extends IOChannelReader,
-    W extends IOChannelWriter,
-    C extends IOChannelContext<A, R, W>
-    > {
+public interface IOChannelHandler<A, C extends IOChannelContext<A>> {
 
     /**
      * This method is invoked after a new channel is opened, and only once for each new channel.
@@ -36,8 +29,8 @@ public interface IOChannelHandler<
     void channelClose(@Nonnull C context) throws Exception;
 
     /**
-     * This method is invoked after a channel receives new data, and the context's reader from the
-     * {@link IOChannelContext#reader()} may read the data.
+     * This method is invoked after a channel receives new data, and the context's io channel from the
+     * {@link IOChannelContext#ioChannel()} may be used.
      *
      * @param context the context of the channel
      * @throws Exception for any error
