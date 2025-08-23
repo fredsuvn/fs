@@ -4,6 +4,7 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.CheckKit;
 import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.io.communicate.IOChannel;
 import xyz.sunqian.common.net.NetChannelContext;
@@ -11,6 +12,7 @@ import xyz.sunqian.common.net.NetChannelHandler;
 import xyz.sunqian.common.net.NetChannelHandlerWrapper;
 import xyz.sunqian.common.net.NetChannelType;
 import xyz.sunqian.common.net.NetException;
+import xyz.sunqian.common.net.NetServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -23,6 +25,7 @@ import java.nio.channels.SocketChannel;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ThreadFactory;
@@ -151,7 +154,7 @@ public class SocketTcpServerBuilder {
 
         private final @Nonnull ServerSocketChannel server = Jie.uncheck(ServerSocketChannel::open, NetException::new);
         private final @Nonnull Selector bossSelector = Jie.uncheck(Selector::open, NetException::new);
-        private final @Nonnull Worker @Nonnull [] workers;
+        private final @Nonnull TcpWorker @Nonnull [] workers;
         private final @Nonnull NetChannelHandlerWrapper handler;
         private final int bufSize;
 
@@ -168,7 +171,7 @@ public class SocketTcpServerBuilder {
             int bufSize
         ) throws NetException {
             this.handler = handler;
-            this.workers = new Worker[workThreadNum];
+            this.workers = new TcpWorker[workThreadNum];
             this.bufSize = bufSize;
             Jie.uncheck(
                 () -> init(localAddress, workThreadNum, threadFactory, socketOptions, backlog),
@@ -194,7 +197,7 @@ public class SocketTcpServerBuilder {
             });
             server.register(bossSelector, SelectionKey.OP_ACCEPT);
             for (int i = 0; i < workThreadNum; i++) {
-                Worker worker = new Worker();
+                TcpWorker worker = new TcpWorker();
                 workers[i] = worker;
                 worker.thread = threadFactory == null ? new Thread(worker) : threadFactory.newThread(worker);
             }
@@ -207,7 +210,7 @@ public class SocketTcpServerBuilder {
             }
             Thread thread = Thread.currentThread();
             this.bossThread = thread;
-            for (Worker worker : workers) {
+            for (TcpWorker worker : workers) {
                 worker.thread.start();
             }
             while (!thread.isInterrupted()) {
@@ -247,7 +250,7 @@ public class SocketTcpServerBuilder {
         }
 
         private void releaseWorkers() {
-            for (Worker worker : workers) {
+            for (TcpWorker worker : workers) {
                 worker.thread.interrupt();
                 worker.selector.wakeup();
             }
@@ -270,8 +273,13 @@ public class SocketTcpServerBuilder {
             return (InetSocketAddress) Jie.uncheck(server::getLocalAddress, NetException::new);
         }
 
+        @Override
+        public List<NetServer.Worker> workers() {
+            return ListKit.list(workers);
+        }
+
         @SuppressWarnings("resource")
-        private void handleAccept(SelectionKey key, Worker[] workers) throws Exception {
+        private void handleAccept(SelectionKey key, TcpWorker[] workers) throws Exception {
             ServerSocketChannel server = (ServerSocketChannel) key.channel();
             SocketChannel client = server.accept();
             TcpContext context = new TcpContext(client);
@@ -280,7 +288,7 @@ public class SocketTcpServerBuilder {
             workers[index].selector.wakeup();
         }
 
-        private int findWorker(Worker[] workers) {
+        private int findWorker(TcpWorker[] workers) {
             int index = 0;
             int minClientCount = Integer.MAX_VALUE;
             for (int i = 0; i < workers.length; i++) {
@@ -293,7 +301,7 @@ public class SocketTcpServerBuilder {
             return index;
         }
 
-        private final class Worker implements Runnable {
+        private final class TcpWorker implements Worker, Runnable {
 
             private final @Nonnull Selector selector;
             private final @Nonnull Set<TcpContext> clientSet = new HashSet<>();
@@ -411,6 +419,11 @@ public class SocketTcpServerBuilder {
                 for (TcpContext context : clientSet) {
                     context.close();
                 }
+            }
+
+            @Override
+            public int clientCount() {
+                return clientSet.size();
             }
         }
 

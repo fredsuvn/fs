@@ -2,6 +2,8 @@ package xyz.sunqian.common.net;
 
 import xyz.sunqian.annotations.Nonnull;
 
+import java.util.List;
+
 /**
  * This interface represents a network server.
  *
@@ -38,4 +40,27 @@ public interface NetServer<A> {
      */
     @Nonnull
     A localAddress();
+
+    /**
+     * Returns all current workers of this server.
+     *
+     * @return all current workers of this server
+     */
+    List<Worker> workers();
+
+    /**
+     * Represents the worker of the server. A worker is a processor that handles each connected client, typically
+     * contains a work thread (possibly not).
+     *
+     * @author sunqian
+     */
+    interface Worker {
+
+        /**
+         * Returns the number of currently connected clients in this worker.
+         *
+         * @return the number of currently connected clients in this worker
+         */
+        int clientCount();
+    }
 }
