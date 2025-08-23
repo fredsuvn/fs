@@ -311,6 +311,27 @@ public class IOTest implements DataTest {
         assertEquals(IOKit.availableBytes(channel, 64), Arrays.copyOf(data, 64));
         assertEquals(IOKit.availableBytes(channel, 64), Arrays.copyOfRange(data, 64, 128));
         assertNull(IOKit.availableBytes(channel, 64));
+        {
+            // empty
+            ReadableByteChannel zch = new ReadableByteChannel() {
+
+                @Override
+                public int read(ByteBuffer dst) {
+                    return 0;
+                }
+
+                @Override
+                public boolean isOpen() {
+                    return true;
+                }
+
+                @Override
+                public void close() {
+                }
+            };
+            assertEquals(IOKit.availableBytes(zch), new byte[0]);
+            assertEquals(IOKit.availableBytes(zch, 1), new byte[0]);
+        }
     }
 
     @Test

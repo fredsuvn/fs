@@ -845,8 +845,14 @@ public interface IOOperator {
      * @throws IORuntimeException if an I/O error occurs
      */
     default byte @Nullable [] availableBytes(@Nonnull ReadableByteChannel src) throws IORuntimeException {
-        ByteBuffer buf = available(src);
-        return buf == null ? null : BufferKit.read(buf);
+        ByteBuffer bytes = available(src);
+        if (bytes == null) {
+            return null;
+        }
+        if (!bytes.hasRemaining()) {
+            return new byte[0];
+        }
+        return BufferKit.read(bytes);
     }
 
     /**
@@ -869,8 +875,14 @@ public interface IOOperator {
     default byte @Nullable [] availableBytes(
         @Nonnull ReadableByteChannel src, int len
     ) throws IllegalArgumentException, IORuntimeException {
-        ByteBuffer buf = available(src, len);
-        return buf == null ? null : BufferKit.read(buf);
+        ByteBuffer bytes = available(src, len);
+        if (bytes == null) {
+            return null;
+        }
+        if (!bytes.hasRemaining()) {
+            return new byte[0];
+        }
+        return BufferKit.read(bytes);
     }
 
     /**

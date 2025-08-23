@@ -101,7 +101,7 @@ public interface IOChannel extends ByteChannel {
      * @throws IORuntimeException if an error occurs
      */
     default byte @Nullable [] nextBytes() throws IORuntimeException {
-        return operator().readBytes(this);
+        return operator().availableBytes(this);
     }
 
     /**
@@ -112,7 +112,7 @@ public interface IOChannel extends ByteChannel {
      * @throws IORuntimeException if an error occurs
      */
     default @Nullable ByteBuffer nextBuffer() throws IORuntimeException {
-        return operator().read(this);
+        return operator().available(this);
     }
 
     /**
@@ -135,7 +135,7 @@ public interface IOChannel extends ByteChannel {
      * @throws IORuntimeException if an error occurs
      */
     default @Nullable String nextString(@Nonnull Charset charset) throws IORuntimeException {
-        return operator().string(this, charset);
+        return operator().availableString(this, charset);
     }
 
     /**

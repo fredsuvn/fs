@@ -1,5 +1,6 @@
 package xyz.sunqian.common.io.communicate;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.io.IORuntimeException;
 
 /**
@@ -32,6 +33,7 @@ public interface IOChannelContext<A> {
      *
      * @return the io channel between this point and the remote endpoint
      */
+    @Nonnull
     IOChannel ioChannel();
 
     /**

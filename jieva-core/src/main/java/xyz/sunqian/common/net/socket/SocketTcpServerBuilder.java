@@ -4,6 +4,7 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.CheckKit;
 import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.io.communicate.IOChannel;
 import xyz.sunqian.common.net.NetChannelContext;
 import xyz.sunqian.common.net.NetChannelHandler;
@@ -15,8 +16,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketOption;
 import java.net.StandardSocketOptions;
-import java.nio.ByteBuffer;
-import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -26,7 +25,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadFactory;
 
 /**
@@ -41,6 +39,7 @@ public class SocketTcpServerBuilder {
     private int workThreadNum;
     private @Nullable ThreadFactory threadFactory;
     private int backlog = -1;
+    private int bufSize = IOKit.bufferSize();
     private final Map<SocketOption<?>, Object> socketOptions = new LinkedHashMap<>();
 
     /**
@@ -106,6 +105,20 @@ public class SocketTcpServerBuilder {
     }
 
     /**
+     * Sets the buffer size for advanced IO operations. Note this buffer size is not the kernel network buffer size, it
+     * is an I/O advanced operations buffer size.
+     *
+     * @param bufSize the buffer size for advanced IO operations
+     * @return this builder
+     * @throws IllegalArgumentException if the buffer size is negative or {@code 0}
+     */
+    public @Nonnull SocketTcpServerBuilder bufferSize(int bufSize) throws IllegalArgumentException {
+        CheckKit.checkArgument(bufSize > 0, "bufSize must be positive");
+        this.bufSize = bufSize;
+        return this;
+    }
+
+    /**
      * Sets a socket option. This method can be invoked multiple times to set different socket options.
      *
      * @param <T>   the type of the socket option value
@@ -131,7 +144,7 @@ public class SocketTcpServerBuilder {
         if (handler == null) {
             throw new NetException("Handle can not be null.");
         }
-        return new TcpServerImpl(localAddress, handler, workThreadNum, threadFactory, socketOptions, backlog);
+        return new TcpServerImpl(localAddress, handler, workThreadNum, threadFactory, socketOptions, backlog, bufSize);
     }
 
     private static final class TcpServerImpl implements TcpServer {
@@ -140,9 +153,10 @@ public class SocketTcpServerBuilder {
         private final @Nonnull Selector bossSelector = Jie.uncheck(Selector::open, NetException::new);
         private final @Nonnull Worker @Nonnull [] workers;
         private final @Nonnull NetChannelHandlerWrapper handler;
-        private final int bufSize = 1024;
+        private final int bufSize;
+
+        private volatile @Nullable Thread bossThread;
         private volatile boolean closed = false;
-        private final @Nonnull CountDownLatch latch = new CountDownLatch(1);
 
         private TcpServerImpl(
             @Nullable InetSocketAddress localAddress,
@@ -150,10 +164,12 @@ public class SocketTcpServerBuilder {
             int workThreadNum,
             @Nullable ThreadFactory threadFactory,
             Map<SocketOption<?>, Object> socketOptions,
-            int backlog
+            int backlog,
+            int bufSize
         ) throws NetException {
             this.handler = handler;
             this.workers = new Worker[workThreadNum];
+            this.bufSize = bufSize;
             Jie.uncheck(
                 () -> init(localAddress, workThreadNum, threadFactory, socketOptions, backlog),
                 NetException::new
@@ -185,16 +201,20 @@ public class SocketTcpServerBuilder {
         }
 
         @Override
-        public void start() throws NetException {
+        public synchronized void start() throws NetException {
+            if (closed) {
+                throw new NetException("This server has already closed.");
+            }
+            Thread thread = Thread.currentThread();
+            this.bossThread = thread;
             for (Worker worker : workers) {
                 worker.thread.start();
             }
-            Thread thread = Thread.currentThread();
             while (!thread.isInterrupted()) {
+                if (closed) {
+                    break;
+                }
                 try {
-                    if (closed) {
-                        break;
-                    }
                     bossSelector.select();
                     Set<SelectionKey> selectedKeys = bossSelector.selectedKeys();
                     Iterator<SelectionKey> keys = selectedKeys.iterator();
@@ -207,25 +227,42 @@ public class SocketTcpServerBuilder {
                     handler.exceptionCaught(null, e);
                 }
             }
+            releaseWorkers();
         }
 
         @Override
-        public void close() throws NetException {
+        public synchronized void close() throws NetException {
             if (closed) {
                 return;
             }
-            Jie.uncheck(server::close, NetException::new);
             closed = true;
-            latch.countDown();
+            Jie.uncheck(server::close, NetException::new);
+            Thread boss = bossThread;
+            if (boss != null) {
+                boss.interrupt();
+                return;
+            }
             bossSelector.wakeup();
+            releaseWorkers();
+        }
+
+        private void releaseWorkers() {
             for (Worker worker : workers) {
+                worker.thread.interrupt();
                 worker.selector.wakeup();
             }
         }
 
         @Override
         public void await() throws NetException {
-            Jie.uncheck(() -> latch.await(), NetException::new);
+            Thread boss = bossThread;
+            if (boss == null) {
+                return;
+            }
+            try {
+                boss.join();
+            } catch (InterruptedException ignored) {
+            }
         }
 
         @Override
@@ -346,7 +383,7 @@ public class SocketTcpServerBuilder {
                 for (TcpContext context : clientSet) {
                     if (!context.client.isOpen()) {
                         rm.add(context);
-                        context.handleClose();
+                        context.close();
                     }
                 }
                 clientSet.removeAll(rm);
@@ -372,23 +409,19 @@ public class SocketTcpServerBuilder {
 
             private void releaseClients() {
                 for (TcpContext context : clientSet) {
-                    try {
-                        context.close();
-                        context.handleClose();
-                    } catch (Exception ignored) {
-                    }
+                    context.close();
                 }
             }
         }
 
-        private final class TcpContext implements NetChannelContext, ReadableByteChannel {
+        private final class TcpContext implements NetChannelContext {
 
             private final @Nonnull SocketChannel client;
             private final @Nonnull InetSocketAddress remoteAddress;
             private final @Nonnull InetSocketAddress localAddress;
             private final @Nonnull IOChannel ioChannel;
 
-            private boolean handleClose = false;
+            private boolean closed = false;
 
             private TcpContext(@Nonnull SocketChannel client) throws Exception {
                 this.client = client;
@@ -413,35 +446,23 @@ public class SocketTcpServerBuilder {
             }
 
             @Override
-            public IOChannel ioChannel() {
+            public @Nonnull IOChannel ioChannel() {
                 return ioChannel;
             }
 
             @Override
             public void close() throws NetException {
-                Jie.uncheck(client::close, NetException::new);
-            }
-
-            private void handleClose() {
-                if (handleClose) {
+                if (closed) {
                     return;
                 }
+                closed = true;
+                Jie.uncheck(client::close, NetException::new);
                 handler.channelClose(this);
-                handleClose = true;
             }
 
             @Override
             public boolean isOpen() {
                 return client.isOpen();
-            }
-
-            @Override
-            public int read(ByteBuffer dst) throws IOException {
-                int ret = client.read(dst);
-                if (ret < 0) {
-                    client.close();
-                }
-                return ret;
             }
         }
 
