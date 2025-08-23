@@ -125,6 +125,44 @@ public class IOKit {
     }
 
     /**
+     * Reads all data from the source channel into a new array, continuing until reaches the end of the source channel,
+     * and returns the array.
+     * <p>
+     * If reaches the end of the source channel and no data is read, returns {@code null}.
+     *
+     * @param src the source channel
+     * @return a new array containing the read data, or {@code null} if reaches the end of the source channel and no
+     * data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static byte @Nullable [] readBytes(@Nonnull ReadableByteChannel src) throws IORuntimeException {
+        return io.readBytes(src);
+    }
+
+    /**
+     * Reads a specified length of data from the source channel into a new array, and returns the array. If the
+     * specified length is {@code 0}, returns an empty array without reading. Otherwise, this method keeps reading until
+     * the read number reaches the specified length or reaches the end of the source channel.
+     * <p>
+     * If reaches the end of the source channel and no data is read, returns {@code null}.
+     * <p>
+     * Note this method will allocate a new array with the specified length, and the excessive length may cause out of
+     * memory.
+     *
+     * @param src the source channel
+     * @param len the specified read length, must {@code >= 0}
+     * @return a new array containing the read data, or {@code null} if reaches the end of the source channel and no
+     * data is read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static byte @Nullable [] readBytes(
+        @Nonnull ReadableByteChannel src, int len
+    ) throws IllegalArgumentException, IORuntimeException {
+        return io.readBytes(src, len);
+    }
+
+    /**
      * Reads data from the input stream into the output stream, until reaches the end of the input stream, and returns
      * the actual number of bytes read to.
      * <p>
@@ -746,7 +784,7 @@ public class IOKit {
      * <p>
      * If reaches the end of the source channel and no data is read, returns {@code null}.
      * <p>
-     * Note this method will allocate a new array with the specified length, and the excessive length may cause out of
+     * Note this method will allocate a new buffer with the specified length, and the excessive length may cause out of
      * memory.
      *
      * @param src the source channel
@@ -760,6 +798,44 @@ public class IOKit {
         @Nonnull ReadableByteChannel src, int len
     ) throws IllegalArgumentException, IORuntimeException {
         return io.available(src, len);
+    }
+
+    /**
+     * Reads available data from the source channel into a new array, continuing until no data is immediately available,
+     * and returns the array.
+     * <p>
+     * If reaches the end of the source channel and no data is read, returns {@code null}.
+     *
+     * @param src the source channel
+     * @return a new array containing the read data, possibly empty, or {@code null} if reaches the end of the source
+     * channel and no data is read
+     * @throws IORuntimeException if an I/O error occurs
+     */
+    public static byte @Nullable [] availableBytes(@Nonnull ReadableByteChannel src) throws IORuntimeException {
+        return io.availableBytes(src);
+    }
+
+    /**
+     * Reads a specified length of data from the source channel into a new array, and returns the array. If the
+     * specified length is {@code 0}, returns an empty array without reading. Otherwise, this method keeps reading until
+     * the read number reaches the specified length or no data is immediately available.
+     * <p>
+     * If reaches the end of the source channel and no data is read, returns {@code null}.
+     * <p>
+     * Note this method will allocate a new array with the specified length, and the excessive length may cause out of
+     * memory.
+     *
+     * @param src the source channel
+     * @param len the specified read length, must {@code >= 0}
+     * @return a new array containing the read data, possibly empty, or {@code null} if reaches the end of the source
+     * channel and no data is read
+     * @throws IllegalArgumentException if the specified read length is illegal
+     * @throws IORuntimeException       if an I/O error occurs
+     */
+    public static byte @Nullable [] availableBytes(
+        @Nonnull ReadableByteChannel src, int len
+    ) throws IllegalArgumentException, IORuntimeException {
+        return io.availableBytes(src, len);
     }
 
     /**

@@ -291,7 +291,26 @@ public class IOTest implements DataTest {
             assertEquals(IOKit.availableString(tch2, CharsKit.defaultCharset()), new String(chars));
             assertNull(IOKit.availableString(tch2, CharsKit.defaultCharset()));
         }
+    }
 
+    @Test
+    public void testReadBytes() {
+        byte[] data = randomBytes(128);
+        ByteArrayInputStream in = new ByteArrayInputStream(data);
+        ReadableByteChannel channel = Channels.newChannel(in);
+        assertEquals(IOKit.readBytes(channel), data);
+        assertNull(IOKit.readBytes(channel));
+        in.reset();
+        assertEquals(IOKit.readBytes(channel, 64), Arrays.copyOf(data, 64));
+        assertEquals(IOKit.readBytes(channel, 64), Arrays.copyOfRange(data, 64, 128));
+        assertNull(IOKit.readBytes(channel, 64));
+        in.reset();
+        assertEquals(IOKit.availableBytes(channel), data);
+        assertNull(IOKit.availableBytes(channel));
+        in.reset();
+        assertEquals(IOKit.availableBytes(channel, 64), Arrays.copyOf(data, 64));
+        assertEquals(IOKit.availableBytes(channel, 64), Arrays.copyOfRange(data, 64, 128));
+        assertNull(IOKit.availableBytes(channel, 64));
     }
 
     @Test

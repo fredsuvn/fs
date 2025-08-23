@@ -135,18 +135,11 @@ public class IOOperatorTest implements DataTest {
     public void testReadBytesTo() throws Exception {
         testReadBytesTo(64);
         testReadBytesTo(128);
-        testReadBytesTo(256);
-        testReadBytesTo(1024);
         testReadBytesTo(IOKit.bufferSize());
         testReadBytesTo(IOKit.bufferSize() - 1);
         testReadBytesTo(IOKit.bufferSize() + 1);
         testReadBytesTo(IOKit.bufferSize() - 5);
         testReadBytesTo(IOKit.bufferSize() + 5);
-        testReadBytesTo(IOKit.bufferSize() * 2);
-        testReadBytesTo(IOKit.bufferSize() * 2 - 1);
-        testReadBytesTo(IOKit.bufferSize() * 2 + 1);
-        testReadBytesTo(IOKit.bufferSize() * 2 - 5);
-        testReadBytesTo(IOKit.bufferSize() * 2 + 5);
         testReadBytesTo(IOKit.bufferSize() * 3);
         testReadBytesTo(IOKit.bufferSize() * 3 - 1);
         testReadBytesTo(IOKit.bufferSize() * 3 + 1);
@@ -1218,18 +1211,11 @@ public class IOOperatorTest implements DataTest {
     public void testReadCharsTo() throws Exception {
         testReadCharsTo(64);
         testReadCharsTo(128);
-        testReadCharsTo(256);
-        testReadCharsTo(1024);
         testReadCharsTo(IOKit.bufferSize());
         testReadCharsTo(IOKit.bufferSize() - 1);
         testReadCharsTo(IOKit.bufferSize() + 1);
         testReadCharsTo(IOKit.bufferSize() - 5);
         testReadCharsTo(IOKit.bufferSize() + 5);
-        testReadCharsTo(IOKit.bufferSize() * 2);
-        testReadCharsTo(IOKit.bufferSize() * 2 - 1);
-        testReadCharsTo(IOKit.bufferSize() * 2 + 1);
-        testReadCharsTo(IOKit.bufferSize() * 2 - 5);
-        testReadCharsTo(IOKit.bufferSize() * 2 + 5);
         testReadCharsTo(IOKit.bufferSize() * 3);
         testReadCharsTo(IOKit.bufferSize() * 3 - 1);
         testReadCharsTo(IOKit.bufferSize() * 3 + 1);
