@@ -17,4 +17,13 @@ public class SocketKit {
     public static @Nonnull SocketTcpServerBuilder tcpServerBuilder() {
         return new SocketTcpServerBuilder();
     }
+
+    /**
+     * Returns a new builder for building {@link TcpClient}.
+     *
+     * @return a new builder for building {@link TcpClient}
+     */
+    public static @Nonnull SocketTcpClientBuilder tcpClientBuilder() {
+        return new SocketTcpClientBuilder();
+    }
 }

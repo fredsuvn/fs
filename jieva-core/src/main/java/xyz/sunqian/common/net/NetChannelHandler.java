@@ -5,7 +5,7 @@ import xyz.sunqian.common.io.communicate.IOChannelHandler;
 import java.net.InetSocketAddress;
 
 /**
- * Handler for handling network channel events.
+ * {@link IOChannelHandler} for network.
  *
  * @author sunqian
  */

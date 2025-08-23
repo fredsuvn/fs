@@ -6,8 +6,8 @@ import xyz.sunqian.common.io.communicate.IOChannelContext;
 import java.net.InetSocketAddress;
 
 /**
- * Context of a network channel, can be used to obtain information of the channel and receive/send data between this
- * point and the remote endpoint.
+ * {@link IOChannelContext} for network, can be used to obtain information of the channel and receive/send data between
+ * this point and the remote endpoint.
  *
  * @author sunqian
  */

@@ -1,57 +1,66 @@
 package xyz.sunqian.common.net;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.io.communicate.IOChannel;
 
 /**
- * This interface represents a network client, as opposed to the server.
+ * This interface represents a network client.
  *
- * @param <A> the type of the address this client connects to or is bound to
+ * @param <A> the type of the address in the network
  * @author sunqian
  */
 public interface NetClient<A> {
 
     /**
-     * Starts this client, and returns immediately after startup. This method will not block the current thread,
-     * {@link #await()} will.
+     * Connects this client.
      *
      * @throws NetException if any error occurs
      */
-    void start() throws NetException;
+    void connect() throws NetException;
 
     /**
-     * Blocks current thread until this client is closed.
-     *
-     * @throws NetException if any error occurs
-     */
-    void await() throws NetException;
-
-    /**
-     * Closes this client. The connection will be disconnected.
+     * Disconnects and closes this client.
      *
      * @throws NetException if any error occurs
      */
     void close() throws NetException;
 
     /**
-     * Returns the address this client connects to, may be {@code null} if the client does not connect yet.
+     * Returns the remote address this client connects to.
      *
-     * @return the address this client connects to, may be {@code null} if the client does not connect yet
+     * @return the remote address this client connects to
      */
-    @Nullable
-    A getRemoteAddress();
+    @Nonnull
+    A remoteAddress();
 
     /**
-     * Returns the local address this client is bound to, may be {@code null} if the client is not bound yet.
+     * Returns the address this client is bound to, may be {@code null} if the client has not connected yet.
      *
-     * @return the local address this client is bound to, may be {@code null} if the client is not bound yet
+     * @return the address this client is bound to, may be {@code null} if the client has not connected yet
      */
     @Nullable
-    A getLocalAddress();
+    A localAddress();
 
     /**
-     * Returns the current state of this client.
+     * Returns whether this client connects to the server.
      *
-     * @return the current state of this client
+     * @return whether this client connects to the server
      */
-    NetState getState();
+    boolean isConnected();
+
+    /**
+     * Returns whether this client is closed.
+     *
+     * @return whether this client is closed
+     */
+    boolean isClosed();
+
+    /**
+     * Returns an I/O channel between this client and the remote server.
+     *
+     * @return an I/O channel between this client and the remote server
+     */
+    @Nonnull
+    IOChannel ioChannel();
 }

@@ -21,7 +21,7 @@ public interface TcpNetClient extends NetClient<InetSocketAddress> {
      * @return the port number to which this client connects, may be {@code -1} if the client does not connect yet
      */
     default int getRemotePort() {
-        InetSocketAddress address = getRemoteAddress();
+        InetSocketAddress address = remoteAddress();
         return address != null ? address.getPort() : -1;
     }
 
@@ -31,7 +31,7 @@ public interface TcpNetClient extends NetClient<InetSocketAddress> {
      * @return the IP this client connects to, may be {@code null} if the client does not connect yet
      */
     default @Nullable InetAddress getRemoteIp() {
-        InetSocketAddress address = getRemoteAddress();
+        InetSocketAddress address = remoteAddress();
         return address != null ? address.getAddress() : null;
     }
 
@@ -41,7 +41,7 @@ public interface TcpNetClient extends NetClient<InetSocketAddress> {
      * @return the port number to which this server is bound, may be {@code -1} if the server is not bound yet
      */
     default int getLocalPort() {
-        InetSocketAddress address = getLocalAddress();
+        InetSocketAddress address = localAddress();
         return address != null ? address.getPort() : -1;
     }
 
@@ -51,7 +51,7 @@ public interface TcpNetClient extends NetClient<InetSocketAddress> {
      * @return the local IP this server is bound to, may be {@code null} if the server is not bound yet
      */
     default @Nullable InetAddress getLocalIp() {
-        InetSocketAddress address = getLocalAddress();
+        InetSocketAddress address = localAddress();
         return address != null ? address.getAddress() : null;
     }
 

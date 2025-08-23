@@ -14,7 +14,6 @@ import xyz.sunqian.common.net.NetChannelType;
 import xyz.sunqian.common.net.NetException;
 import xyz.sunqian.common.net.NetServer;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketOption;
 import java.net.StandardSocketOptions;
@@ -31,7 +30,7 @@ import java.util.Set;
 import java.util.concurrent.ThreadFactory;
 
 /**
- * Builder for builder a TCP/IP network server by Socket.
+ * Builder for building new instances of {@link TcpServer} by Socket.
  *
  * @author sunqian
  */
@@ -39,11 +38,12 @@ public class SocketTcpServerBuilder {
 
     private @Nullable InetSocketAddress localAddress;
     private @Nullable NetChannelHandlerWrapper handler;
-    private int workThreadNum;
-    private @Nullable ThreadFactory threadFactory;
+    private int workerThreadNum = 1;
+    private @Nullable ThreadFactory mainThreadFactory;
+    private @Nullable ThreadFactory workerThreadFactory;
     private int backlog = -1;
     private int bufSize = IOKit.bufferSize();
-    private final Map<SocketOption<?>, Object> socketOptions = new LinkedHashMap<>();
+    private final @Nonnull Map<SocketOption<?>, Object> socketOptions = new LinkedHashMap<>();
 
     /**
      * Sets the local address the server is bound to. If the local address is not configured, the server will auto bind
@@ -58,7 +58,7 @@ public class SocketTcpServerBuilder {
     }
 
     /**
-     * Sets the handler to handle server events. The main behavior of the server is handled by this handler.
+     * Sets the handler to handle server events.
      *
      * @param handler the handler to handle server events
      * @return this builder
@@ -69,27 +69,44 @@ public class SocketTcpServerBuilder {
     }
 
     /**
-     * Sets the number of work thread. The server will use the worker thread handles the data exchange with the client.
+     * Sets the main thread factory to create main thread. The main thread is responsible for accepting new client, and
+     * then the worker thread will take over the already connected clients.
+     * <p>
+     * If the factory is not configured, the server will use {@link Thread#Thread(Runnable)}.
      *
-     * @param workThreadNum the number of work thread, must {@code >= 1}
+     * @param mainThreadFactory the main thread factory
      * @return this builder
-     * @throws IllegalArgumentException if {@code < 1}
      */
-    public @Nonnull SocketTcpServerBuilder workThreadNum(int workThreadNum) throws IllegalArgumentException {
-        CheckKit.checkArgument(workThreadNum >= 1, "workThreadNum must >= 1");
-        this.workThreadNum = workThreadNum;
+    public @Nonnull SocketTcpServerBuilder mainThreadFactory(@Nonnull ThreadFactory mainThreadFactory) {
+        this.mainThreadFactory = mainThreadFactory;
         return this;
     }
 
     /**
-     * Sets the thread factory to create work thread. If the factory is not configured, the server will use
-     * {@link Thread#Thread(Runnable)} to create work thread.
+     * Sets the worker thread factory to create worker thread. The main thread is responsible for accepting new client,
+     * and then the worker thread will take over the already connected clients.
+     * <p>
+     * If the factory is not configured, the server will use {@link Thread#Thread(Runnable)}.
      *
-     * @param threadFactory the thread factory to create work thread
+     * @param workerThreadFactory the worker thread factory
      * @return this builder
      */
-    public @Nonnull SocketTcpServerBuilder threadFactory(@Nonnull ThreadFactory threadFactory) {
-        this.threadFactory = threadFactory;
+    public @Nonnull SocketTcpServerBuilder workerThreadFactory(@Nonnull ThreadFactory workerThreadFactory) {
+        this.workerThreadFactory = workerThreadFactory;
+        return this;
+    }
+
+    /**
+     * Sets the number of worker thread. The default is {@code 1}.
+     *
+     * @param workThreadNum the number of worker thread, must {@code >= 1}
+     * @return this builder
+     * @throws IllegalArgumentException if the number is negative or {@code 0}
+     * @see #workerThreadFactory(ThreadFactory)
+     */
+    public @Nonnull SocketTcpServerBuilder workerThreadNum(int workThreadNum) throws IllegalArgumentException {
+        CheckKit.checkArgument(workThreadNum >= 1, "workThreadNum must >= 1");
+        this.workerThreadNum = workThreadNum;
         return this;
     }
 
@@ -147,46 +164,50 @@ public class SocketTcpServerBuilder {
         if (handler == null) {
             throw new NetException("Handle can not be null.");
         }
-        return new TcpServerImpl(localAddress, handler, workThreadNum, threadFactory, socketOptions, backlog, bufSize);
+        return Jie.uncheck(() -> new TcpServerImpl(
+                localAddress,
+                handler,
+                mainThreadFactory,
+                workerThreadFactory,
+                workerThreadNum,
+                socketOptions,
+                backlog,
+                bufSize
+            ),
+            NetException::new
+        );
     }
 
-    private static final class TcpServerImpl implements TcpServer {
+    private static final class TcpServerImpl implements TcpServer, Runnable {
 
-        private final @Nonnull ServerSocketChannel server = Jie.uncheck(ServerSocketChannel::open, NetException::new);
-        private final @Nonnull Selector bossSelector = Jie.uncheck(Selector::open, NetException::new);
+        private final @Nonnull ServerSocketChannel server;
+        private final @Nonnull Selector mainSelector;
+        private final @Nonnull Thread mainThread;
         private final @Nonnull TcpWorker @Nonnull [] workers;
         private final @Nonnull NetChannelHandlerWrapper handler;
+        private final @Nullable InetSocketAddress localAddress;
+        private final int backlog;
         private final int bufSize;
 
-        private volatile @Nullable Thread bossThread;
-        private volatile boolean closed = false;
+        // 0: not started, 1: started, 2: closed
+        private volatile int state = 0;
 
         private TcpServerImpl(
             @Nullable InetSocketAddress localAddress,
             @Nonnull NetChannelHandlerWrapper handler,
+            @Nullable ThreadFactory mainthreadFactory,
+            @Nullable ThreadFactory workerthreadFactory,
             int workThreadNum,
-            @Nullable ThreadFactory threadFactory,
             Map<SocketOption<?>, Object> socketOptions,
             int backlog,
             int bufSize
-        ) throws NetException {
-            this.handler = handler;
-            this.workers = new TcpWorker[workThreadNum];
-            this.bufSize = bufSize;
-            Jie.uncheck(
-                () -> init(localAddress, workThreadNum, threadFactory, socketOptions, backlog),
-                NetException::new
-            );
-        }
-
-        private void init(
-            @Nullable InetSocketAddress localAddress,
-            int workThreadNum,
-            @Nullable ThreadFactory threadFactory,
-            Map<SocketOption<?>, Object> socketOptions,
-            int backlog
         ) throws Exception {
-            server.bind(localAddress, backlog);
+            this.server = ServerSocketChannel.open();
+            this.mainSelector = Selector.open();
+            this.localAddress = localAddress;
+            this.handler = handler;
+            this.mainThread = newThread(mainthreadFactory, this);
+            this.workers = new TcpWorker[workThreadNum];
             server.configureBlocking(false);
             socketOptions.forEach((name, value) -> {
                 try {
@@ -195,75 +216,58 @@ public class SocketTcpServerBuilder {
                     throw new NetException(e);
                 }
             });
-            server.register(bossSelector, SelectionKey.OP_ACCEPT);
+            this.bufSize = bufSize;
+            this.backlog = backlog;
+            server.register(mainSelector, SelectionKey.OP_ACCEPT);
             for (int i = 0; i < workThreadNum; i++) {
                 TcpWorker worker = new TcpWorker();
                 workers[i] = worker;
-                worker.thread = threadFactory == null ? new Thread(worker) : threadFactory.newThread(worker);
+                worker.thread = newThread(workerthreadFactory, worker);
             }
         }
 
+        private @Nonnull Thread newThread(@Nullable ThreadFactory factory, @Nonnull Runnable runnable) {
+            return factory == null ? new Thread(runnable) : factory.newThread(runnable);
+        }
+
+        @SuppressWarnings("resource")
         @Override
         public synchronized void start() throws NetException {
-            if (closed) {
+            if (state == 1) {
+                throw new NetException("This server has already started.");
+            }
+            if (state == 2) {
                 throw new NetException("This server has already closed.");
             }
-            Thread thread = Thread.currentThread();
-            this.bossThread = thread;
-            for (TcpWorker worker : workers) {
-                worker.thread.start();
-            }
-            while (!thread.isInterrupted()) {
-                if (closed) {
-                    break;
-                }
-                try {
-                    bossSelector.select();
-                    Set<SelectionKey> selectedKeys = bossSelector.selectedKeys();
-                    Iterator<SelectionKey> keys = selectedKeys.iterator();
-                    while (keys.hasNext()) {
-                        SelectionKey key = keys.next();
-                        keys.remove();
-                        handleAccept(key, workers);
-                    }
-                } catch (Exception e) {
-                    handler.exceptionCaught(null, e);
-                }
-            }
-            releaseWorkers();
+            state = 1;
+            Jie.uncheck(() -> server.bind(localAddress, backlog), NetException::new);
+            mainThread.start();
         }
 
         @Override
         public synchronized void close() throws NetException {
-            if (closed) {
+            if (state != 1) {
                 return;
             }
-            closed = true;
-            Jie.uncheck(server::close, NetException::new);
-            Thread boss = bossThread;
-            if (boss != null) {
-                boss.interrupt();
-                return;
-            }
-            bossSelector.wakeup();
+            Jie.uncheck(() -> {
+                    server.close();
+                    mainSelector.close();
+                    mainSelector.wakeup();
+                    mainThread.interrupt();
+                },
+                NetException::new
+            );
             releaseWorkers();
-        }
-
-        private void releaseWorkers() {
-            for (TcpWorker worker : workers) {
-                worker.thread.interrupt();
-                worker.selector.wakeup();
-            }
+            state = 2;
         }
 
         @Override
         public void await() throws NetException {
-            Thread boss = bossThread;
-            if (boss == null) {
-                return;
-            }
             try {
-                boss.join();
+                mainThread.join();
+                for (TcpWorker worker : workers) {
+                    worker.thread.join();
+                }
             } catch (InterruptedException ignored) {
             }
         }
@@ -276,6 +280,45 @@ public class SocketTcpServerBuilder {
         @Override
         public List<NetServer.Worker> workers() {
             return ListKit.list(workers);
+        }
+
+        @Override
+        public boolean isStarted() {
+            return state == 1;
+        }
+
+        @Override
+        public boolean isClosed() {
+            return state == 2;
+        }
+
+        @Override
+        public void run() {
+            for (TcpWorker worker : workers) {
+                worker.thread.start();
+            }
+            while (!mainThread.isInterrupted()) {
+                if (state == 2) {
+                    break;
+                }
+                try {
+                    mainSelector.select();
+                    Set<SelectionKey> selectedKeys = mainSelector.selectedKeys();
+                    Iterator<SelectionKey> keys = selectedKeys.iterator();
+                    while (keys.hasNext()) {
+                        SelectionKey key = keys.next();
+                        keys.remove();
+                        handleAccept(key, workers);
+                    }
+                } catch (Exception e) {
+                    handler.exceptionCaught(null, e);
+                }
+            }
+            releaseWorkers();
+            Jie.uncheck(() -> {
+                server.close();
+                mainSelector.close();
+            }, NetException::new);
         }
 
         @SuppressWarnings("resource")
@@ -301,6 +344,18 @@ public class SocketTcpServerBuilder {
             return index;
         }
 
+        private void releaseWorkers() {
+            for (TcpWorker worker : workers) {
+                worker.thread.interrupt();
+            }
+            for (TcpWorker worker : workers) {
+                try {
+                    worker.thread.join();
+                } catch (InterruptedException ignored) {
+                }
+            }
+        }
+
         private final class TcpWorker implements Worker, Runnable {
 
             private final @Nonnull Selector selector;
@@ -311,12 +366,8 @@ public class SocketTcpServerBuilder {
 
             private volatile @Nullable ClientNode clientNode;
 
-            {
-                try {
-                    selector = Selector.open();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+            private TcpWorker() {
+                this.selector = Jie.uncheck(Selector::open, NetException::new);
             }
 
             //@SuppressWarnings({"InfiniteLoopStatement"})
@@ -324,7 +375,7 @@ public class SocketTcpServerBuilder {
             public void run() {
                 Thread thread = Thread.currentThread();
                 while (!thread.isInterrupted()) {
-                    if (closed) {
+                    if (isClosed()) {
                         break;
                     }
                     try {
@@ -334,6 +385,7 @@ public class SocketTcpServerBuilder {
                     }
                 }
                 releaseClients();
+                Jie.uncheck(selector::close, NetException::new);
             }
 
             private void doWork() throws Exception {
@@ -415,15 +467,20 @@ public class SocketTcpServerBuilder {
                 }
             }
 
+            @Override
+            public int clientCount() {
+                return clientSet.size();
+            }
+
+            @Override
+            public @Nonnull Thread thread() {
+                return thread;
+            }
+
             private void releaseClients() {
                 for (TcpContext context : clientSet) {
                     context.close();
                 }
-            }
-
-            @Override
-            public int clientCount() {
-                return clientSet.size();
             }
         }
 
@@ -469,8 +526,13 @@ public class SocketTcpServerBuilder {
                     return;
                 }
                 closed = true;
-                Jie.uncheck(client::close, NetException::new);
-                handler.channelClose(this);
+                try {
+                    client.close();
+                } catch (Exception e) {
+                    handler.exceptionCaught(this, e);
+                } finally {
+                    handler.channelClose(this);
+                }
             }
 
             @Override
