@@ -1,7 +1,7 @@
 package xyz.sunqian.common.net;
 
 /**
- * Static utility class for net.
+ * Network utilities.
  *
  * @author sunqian
  */

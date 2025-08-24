@@ -1,7 +1,7 @@
 package xyz.sunqian.common.net.socket;
 
 /**
- * Utilities kit for Socket.
+ * Socket utilities.
  *
  * @author sunqian
  */
