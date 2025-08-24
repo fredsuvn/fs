@@ -1,10 +1,5 @@
 /**
- * Provides utilities and interfaces for option.
- * <p>
- * Utilities Kits:
- * <ul>
- *     <li></li>
- * </ul>
+ * Provides option interfaces.
  * <p>
  * Interfaces:
  * <ul>

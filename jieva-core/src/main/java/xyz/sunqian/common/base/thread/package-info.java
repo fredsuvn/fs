@@ -1,7 +1,7 @@
 /**
  * Provides utilities and interfaces for thread.
  * <p>
- * Utilities Kits:
+ * Utilities:
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.thread.ThreadKit}</li>
  * </ul>

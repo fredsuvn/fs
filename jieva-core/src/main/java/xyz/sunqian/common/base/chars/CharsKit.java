@@ -10,7 +10,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Utilities kit for {@code char}, {@code char array} and {@link Charset}.
+ * Utilities for {@code char}, {@code char array} and {@link Charset}.
  *
  * @author sunqian
  */

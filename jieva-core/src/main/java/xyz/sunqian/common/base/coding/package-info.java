@@ -1,14 +1,9 @@
 /**
- * Provides utilities and interfaces for coding.
+ * Provides utilities for coding.
  * <p>
- * Utilities Kits:
+ * Utilities:
  * <ul>
- *     <li>{@link xyz.sunqian.common.base.chars.CharsKit}</li>
- * </ul>
- * <p>
- * Interfaces:
- * <ul>
- *     <li></li>
+ *     <li>{@link xyz.sunqian.common.base.coding.CodingKit}</li>
  * </ul>
  */
 package xyz.sunqian.common.base.coding;

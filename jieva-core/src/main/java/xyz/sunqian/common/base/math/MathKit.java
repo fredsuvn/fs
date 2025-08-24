@@ -1,7 +1,7 @@
 package xyz.sunqian.common.base.math;
 
 /**
- * Utilities kit for math.
+ * Utilities for math.
  *
  * @author sunqian
  */

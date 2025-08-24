@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * Utilities kit for coding.
+ * Utilities for coding.
  *
  * @author sunqian
  */

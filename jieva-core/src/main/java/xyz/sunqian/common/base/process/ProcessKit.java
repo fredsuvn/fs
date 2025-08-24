@@ -5,7 +5,7 @@ import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.io.IORuntimeException;
 
 /**
- * Utilities kit for process.
+ * Utilities for process.
  *
  * @author sunqian
  */

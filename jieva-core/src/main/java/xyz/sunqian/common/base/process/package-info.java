@@ -1,12 +1,12 @@
 /**
- * Provides utilities and interfaces for process.
+ * Provides utilities and classes for process.
  * <p>
- * Utilities Kits:
+ * Utilities:
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.process.ProcessKit}</li>
  * </ul>
  * <p>
- * Interfaces and Classes:
+ * Classes:
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.process.VirtualProcess}</li>
  * </ul>

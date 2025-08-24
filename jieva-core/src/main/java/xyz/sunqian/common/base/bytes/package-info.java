@@ -1,12 +1,12 @@
 /**
- * Provides utilities and interfaces for byte.
+ * Provides utilities and classes for byte.
  * <p>
- * Utilities Kits:
+ * Utilities:
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.bytes.BytesKit}</li>
  * </ul>
  * <p>
- * Interfaces:
+ * Classes:
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.bytes.BytesBuilder}</li>
  * </ul>

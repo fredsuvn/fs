@@ -5,9 +5,10 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.Jie;
 
 /**
- * This interface represents an immutable container holding a value, similar to a {@code final} variable. There are also
- * primitive type versions: {@link BooleanVal}, {@link ByteVal}, {@link CharVal}, {@link ShortVal}, {@link IntVal},
- * {@link LongVal}, {@link DoubleVal} and {@link FloatVal}.
+ * This interface represents an immutable container holding a value, similar to a {@code final} variable.
+ * <p>
+ * There are also primitive type versions: {@link BooleanVal}, {@link ByteVal}, {@link CharVal}, {@link ShortVal},
+ * {@link IntVal}, {@link LongVal}, {@link DoubleVal} and {@link FloatVal}.
  *
  * @param <T> type of the held value
  * @author sunqian

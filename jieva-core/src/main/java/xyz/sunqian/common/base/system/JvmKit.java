@@ -18,7 +18,7 @@ import java.lang.reflect.WildcardType;
 import java.util.Objects;
 
 /**
- * Utilities kit for JVM
+ * Utilities for JVM
  *
  * @author sunqian
  */

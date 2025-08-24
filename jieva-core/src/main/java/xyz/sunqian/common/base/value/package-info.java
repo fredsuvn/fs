@@ -1,10 +1,5 @@
 /**
- * Provides utilities and interfaces for value and variable.
- * <p>
- * Utilities Kits:
- * <ul>
- *     <li></li>
- * </ul>
+ * Provides interfaces for value and variable.
  * <p>
  * Interfaces:
  * <ul>

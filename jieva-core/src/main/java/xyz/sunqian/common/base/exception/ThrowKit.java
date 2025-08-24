@@ -6,7 +6,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 /**
- * Utilities kit for {@link Throwable}.
+ * Utilities for {@link Throwable}.
  *
  * @author sunqian
  */

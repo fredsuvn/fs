@@ -12,7 +12,14 @@ import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
 /**
- * The Random Object Generator, to produce random objects.
+ * The Random Object Generator, to produce random objects. The usage is simple:
+ * <pre>{@code
+ * Rog<String> rog = Rog.newBuilder()
+ *     .weight(10, "a")
+ *     .weight(10, "b")
+ *     .build();
+ * String randomString = rog.next();
+ * }</pre>
  *
  * @author sunqian
  */

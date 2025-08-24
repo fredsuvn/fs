@@ -8,7 +8,7 @@ import xyz.sunqian.common.function.callable.BooleanCallable;
 import java.time.Duration;
 
 /**
- * Utilities kit for thread.
+ * Utilities for thread.
  *
  * @author sunqian
  */

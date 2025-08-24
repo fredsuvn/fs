@@ -3,9 +3,11 @@ package xyz.sunqian.common.base.value;
 import xyz.sunqian.annotations.Nonnull;
 
 /**
- * This interface represents a mutable container holding a value. There are also primitive type versions:
- * {@link BooleanVar}, {@link ByteVar}, {@link CharVar}, {@link ShortVar}, {@link IntVar}, {@link LongVar},
- * {@link DoubleVar} and {@link FloatVar}.
+ * This interface represents a mutable container holding a value, typically used for sharing values across scope
+ * boundaries (e.g., lambda expressions).
+ * <p>
+ * There are also primitive type versions: {@link BooleanVar}, {@link ByteVar}, {@link CharVar}, {@link ShortVar},
+ * {@link IntVar}, {@link LongVar}, {@link DoubleVar} and {@link FloatVar}.
  *
  * @param <T> type of the held value
  * @author sunqian
