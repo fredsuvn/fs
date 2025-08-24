@@ -21,7 +21,7 @@ _Gek_ includes:
 * link:../gek-annotations/[gek-annotation]: Annotations; link:../gek-annotations/docs/DOCUMENTATION_en.adoc[javadoc];
 * link:../gek-core/[gek-core]: Core lib; link:../gek-core/docs/DOCUMENTATION_en.adoc[javadoc];
 * link:../gek-kotlin/[gek-kotlin]: Kotlin support; link:../gek-kotlin/docs/DOCUMENTATION_en.adoc[javadoc];
-* link:../gek-test/[gek-test]: Testing support;
+* link:../gek-tests/[gek-tests]: Testing support;
 * link:../gek-bom/[gek-bom]: BOM;
 
 Generally just import:

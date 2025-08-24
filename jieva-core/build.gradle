@@ -148,6 +148,10 @@ tasks.register('cleanWithJavadoc') {
 
 test {
   include("**/TU.class")
+  useTestNG() {
+    //timeout = Duration.ofMillis(1000)
+    suites 'src/test/resources/testng.xml'
+  }
 //  jacoco {
 //    excludeClassLoaders = ['sun.reflect.DelegatingClassLoader']
 //  }

@@ -15,6 +15,6 @@ _gek-annotations_ 提供了一系列的注解来帮助你的代码保持整洁�
 * *Immutable*: 标注参数是不可变的;
 * *ThreadSafe*: 标注注解对象是线程安全的;
 
-link:../src/test/java/samples/[样例]
+link:../src/tests/java/samples/[样例]
 
 link:javadoc/index.html[Javadoc]

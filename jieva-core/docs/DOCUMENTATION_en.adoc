@@ -44,7 +44,7 @@ provides interfaces and utilities for Crypto/Cipher/MAC/Digest/Sign/Key;
 
 == Main utilities and interfaces and Samples
 
-link:../src/test/java/samples/[Samples].
+link:../src/tests/java/samples/[Samples].
 
 == Benchmarks
 

@@ -21,7 +21,7 @@ _Gek_ 包括:
 * link:../gek-annotations/[gek-annotation]: 注解; link:../gek-annotations/docs/DOCUMENTATION_zh.adoc[javadoc];
 * link:../gek-core/[gek-core]: 核心库; link:../gek-core/docs/DOCUMENTATION_zh.adoc[javadoc];
 * link:../gek-kotlin/[gek-kotlin]: Kotlin支持; link:../gek-kotlin/docs/DOCUMENTATION_zh.adoc[javadoc];
-* link:../gek-test/[gek-test]: 测试支持;
+* link:../gek-tests/[gek-tests]: 测试支持;
 * link:../gek-bom/[gek-bom]: BOM;
 
 通常只需要引入:

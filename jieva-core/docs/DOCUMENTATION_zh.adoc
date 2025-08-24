@@ -42,7 +42,7 @@ IO相关的包;
 
 == 主要的类和接口，以及样例
 
-link:../src/test/java/samples/[样例].
+link:../src/tests/java/samples/[样例].
 
 == 基准测试
 

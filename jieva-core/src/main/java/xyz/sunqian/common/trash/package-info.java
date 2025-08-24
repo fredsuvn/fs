@@ -1,0 +1,1 @@
+package xyz.sunqian.common.trash;
