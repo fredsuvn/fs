@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 /**
- * Utilities kit for Hex.
+ * Utilities for Hex.
  *
  * @author sunqian
  */

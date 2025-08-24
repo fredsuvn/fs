@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 
 /**
- * Utilities kit for {@link MessageDigest}.
+ * Utilities for {@link MessageDigest}.
  *
  * @author sunqian
  */

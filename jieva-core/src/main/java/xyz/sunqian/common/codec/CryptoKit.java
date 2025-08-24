@@ -9,7 +9,7 @@ import javax.crypto.Mac;
 import java.nio.ByteBuffer;
 
 /**
- * Utilities kit for crypto.
+ * Utilities for crypto.
  *
  * @author sunqian
  */

@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 /**
- * Utilities kit for Base64.
+ * Utilities for Base64.
  *
  * @author sunqian
  */
