@@ -10,4 +10,15 @@ import java.net.InetSocketAddress;
  * @author sunqian
  */
 public interface TcpClient extends NetClient<InetSocketAddress> {
+
+    /**
+     * Blocks current thread until the next read operation is available. This method can be interrupted by
+     * {@link #wakeUpRead()}.
+     */
+    void nextRead();
+
+    /**
+     * Wakes up the blocking for {@link #nextRead()}.
+     */
+    void wakeUpRead();
 }

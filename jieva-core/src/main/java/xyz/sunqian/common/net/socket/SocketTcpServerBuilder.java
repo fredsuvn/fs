@@ -5,6 +5,7 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.CheckKit;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.collect.ListKit;
+import xyz.sunqian.common.function.callable.VoidCallable;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.io.communicate.IOChannel;
 import xyz.sunqian.common.net.NetChannelContext;
@@ -209,13 +210,7 @@ public class SocketTcpServerBuilder {
             this.mainThread = newThread(mainthreadFactory, this);
             this.workers = new TcpWorker[workThreadNum];
             server.configureBlocking(false);
-            socketOptions.forEach((name, value) -> {
-                try {
-                    server.setOption(Jie.as(name), value);
-                } catch (Exception e) {
-                    throw new NetException(e);
-                }
-            });
+            SocketKit.setSocketOptions(socketOptions, server);
             this.bufSize = bufSize;
             this.backlog = backlog;
             server.register(mainSelector, SelectionKey.OP_ACCEPT);
@@ -289,6 +284,10 @@ public class SocketTcpServerBuilder {
 
         @Override
         public boolean isClosed() {
+            return isClosed(state);
+        }
+
+        private boolean isClosed(int state) {
             return state == 2;
         }
 
@@ -298,27 +297,24 @@ public class SocketTcpServerBuilder {
                 worker.thread.start();
             }
             while (!mainThread.isInterrupted()) {
-                if (state == 2) {
-                    break;
-                }
-                try {
-                    mainSelector.select();
-                    Set<SelectionKey> selectedKeys = mainSelector.selectedKeys();
-                    Iterator<SelectionKey> keys = selectedKeys.iterator();
-                    while (keys.hasNext()) {
-                        SelectionKey key = keys.next();
-                        keys.remove();
-                        handleAccept(key, workers);
-                    }
-                } catch (Exception e) {
-                    handler.exceptionCaught(null, e);
-                }
+                doWork(this::doMainWork, state);
             }
             releaseWorkers();
             Jie.uncheck(() -> {
                 server.close();
                 mainSelector.close();
             }, NetException::new);
+        }
+
+        private void doMainWork() throws Exception {
+            mainSelector.select();
+            Set<SelectionKey> selectedKeys = mainSelector.selectedKeys();
+            Iterator<SelectionKey> keys = selectedKeys.iterator();
+            while (keys.hasNext()) {
+                SelectionKey key = keys.next();
+                keys.remove();
+                handleAccept(key, workers);
+            }
         }
 
         @SuppressWarnings("resource")
@@ -356,6 +352,17 @@ public class SocketTcpServerBuilder {
             }
         }
 
+        private void doWork(VoidCallable callable, int state) {
+            if (isClosed(state)) {
+                return;
+            }
+            try {
+                callable.call();
+            } catch (Exception e) {
+                handler.exceptionCaught(null, e);
+            }
+        }
+
         private final class TcpWorker implements Worker, Runnable {
 
             private final @Nonnull Selector selector;
@@ -375,20 +382,13 @@ public class SocketTcpServerBuilder {
             public void run() {
                 Thread thread = Thread.currentThread();
                 while (!thread.isInterrupted()) {
-                    if (isClosed()) {
-                        break;
-                    }
-                    try {
-                        doWork();
-                    } catch (Exception e) {
-                        handler.exceptionCaught(null, e);
-                    }
+                    doWork(this::doWorkerWork, state);
                 }
                 releaseClients();
                 Jie.uncheck(selector::close, NetException::new);
             }
 
-            private void doWork() throws Exception {
+            private void doWorkerWork() throws Exception {
                 // register client
                 ClientNode head = this.clientNode;
                 if (head != null) {
@@ -529,7 +529,7 @@ public class SocketTcpServerBuilder {
                 try {
                     client.close();
                 } catch (Exception e) {
-                    handler.exceptionCaught(this, e);
+                    // handler.exceptionCaught(this, e);
                 } finally {
                     handler.channelClose(this);
                 }

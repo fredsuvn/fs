@@ -11,14 +11,19 @@ import xyz.sunqian.common.net.NetException;
 import java.net.InetSocketAddress;
 import java.net.SocketOption;
 import java.net.StandardSocketOptions;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Builder for building new instances of {@link TcpClient} by Socket.
  * <p>
- * Note the {@link TcpClient#ioChannel()} of the built instance is always in blocking mode.
+ * Note the {@link TcpClient#ioChannel()} of the built instance is always in non-blocking mode, using
+ * {@link TcpClient#nextRead()} can check whether there is data to read.
  *
  * @author sunqian
  */
@@ -84,7 +89,8 @@ public class SocketTcpClientBuilder {
 
     /**
      * Builds a new {@link TcpClient} with the configurations. Note the {@link TcpClient#ioChannel()} of the built
-     * instance is always in blocking mode.
+     * instance is always in non-blocking mode, using {@link TcpClient#nextRead()} can check whether there is data to
+     * read.
      *
      * @return a new {@link TcpClient} with the configurations
      * @throws NetException If an error occurs
@@ -108,6 +114,7 @@ public class SocketTcpClientBuilder {
         private final @Nonnull SocketChannel client;
         private volatile @Nullable InetSocketAddress localAddress;
         private final @Nonnull InetSocketAddress remoteAddress;
+        private final @Nonnull Selector selector;
         private final @Nonnull IOChannel ioChannel;
 
         // 0: not started, 1: started, 2: closed
@@ -122,13 +129,8 @@ public class SocketTcpClientBuilder {
             this.client = SocketChannel.open();
             this.localAddress = localAddress;
             this.remoteAddress = remoteAddress;
-            socketOptions.forEach((name, value) -> {
-                try {
-                    client.setOption(Jie.as(name), value);
-                } catch (Exception e) {
-                    throw new NetException(e);
-                }
-            });
+            SocketKit.setSocketOptions(socketOptions, client);
+            this.selector = Selector.open();
             this.ioChannel = IOChannel.newChannel(client, bufSize);
         }
 
@@ -146,6 +148,8 @@ public class SocketTcpClientBuilder {
                 client.configureBlocking(true);
                 client.connect(remoteAddress);
                 this.localAddress = (InetSocketAddress) client.getLocalAddress();
+                client.configureBlocking(false);
+                client.register(selector, SelectionKey.OP_READ);
             }, NetException::new);
         }
 
@@ -154,7 +158,10 @@ public class SocketTcpClientBuilder {
             if (state != 1) {
                 return;
             }
-            Jie.uncheck(client::close, NetException::new);
+            Jie.uncheck(() -> {
+                client.close();
+                selector.close();
+            }, NetException::new);
             state = 2;
         }
 
@@ -181,6 +188,25 @@ public class SocketTcpClientBuilder {
         @Override
         public @Nonnull IOChannel ioChannel() {
             return ioChannel;
+        }
+
+        @Override
+        public void nextRead() {
+            Jie.uncheck(() -> {
+                selector.select();
+                Set<SelectionKey> selectedKeys = selector.selectedKeys();
+                Iterator<SelectionKey> keys = selectedKeys.iterator();
+                while (keys.hasNext()) {
+                    SelectionKey key = keys.next();
+                    keys.remove();
+                    // ignored
+                }
+            }, NetException::new);
+        }
+
+        @Override
+        public void wakeUpRead() {
+            selector.wakeup();
         }
     }
 }

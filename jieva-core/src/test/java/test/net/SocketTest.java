@@ -7,6 +7,7 @@ import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.exception.ThrowKit;
 import xyz.sunqian.common.base.thread.ThreadGate;
 import xyz.sunqian.common.base.value.IntVar;
+import xyz.sunqian.common.function.callable.VoidCallable;
 import xyz.sunqian.common.net.NetChannelContext;
 import xyz.sunqian.common.net.NetChannelHandler;
 import xyz.sunqian.common.net.NetChannelType;
@@ -18,7 +19,10 @@ import xyz.sunqian.common.net.socket.TcpServer;
 import xyz.sunqian.test.DataTest;
 import xyz.sunqian.test.PrintTest;
 
+import java.lang.reflect.Method;
+import java.net.InetSocketAddress;
 import java.net.StandardSocketOptions;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadFactory;
@@ -33,7 +37,8 @@ import static org.testng.Assert.expectThrows;
 public class SocketTest implements DataTest, PrintTest {
 
     @Test
-    public void testTcpMain() throws Exception {
+    public void testTcp() throws Exception {
+        byte[] data = randomBytes(16);
         int workerNum = 5;
         AtomicInteger closeCount = new AtomicInteger();
         CountDownLatch closeLatch = new CountDownLatch(workerNum);
@@ -65,6 +70,10 @@ public class SocketTest implements DataTest, PrintTest {
         for (int i = 0; i < openLatches.length; i++) {
             openLatches[i] = new CountDownLatch(1);
         }
+        CountDownLatch[] readLatches = new CountDownLatch[workerNum];
+        for (int i = 0; i < openLatches.length; i++) {
+            readLatches[i] = new CountDownLatch(1);
+        }
 
         TcpServer server = SocketKit.tcpServerBuilder()
             .workerThreadNum(workerNum)
@@ -94,6 +103,10 @@ public class SocketTest implements DataTest, PrintTest {
                     byte[] bytes = context.ioChannel().nextBytes();
                     if (bytes != null) {
                         builders[thread.num].append(bytes);
+                        context.ioChannel().writeBytes(bytes);
+                    }
+                    if (builders[thread.num].size() == data.length) {
+                        readLatches[thread.num].countDown();
                     }
                 }
 
@@ -154,10 +167,21 @@ public class SocketTest implements DataTest, PrintTest {
             assertEquals(thread.num, i);
         }
 
-        // send data then close
-        byte[] data = randomBytes(16);
-        for (TcpClient client : clients) {
+        // send data then read
+        for (int i = 0; i < clients.length; i++) {
+            TcpClient client = clients[i];
             client.ioChannel().writeBytes(data);
+            readLatches[i].await();
+            BytesBuilder b = new BytesBuilder();
+            while (true) {
+                client.nextRead();
+                b.append(client.ioChannel().nextBytes());
+                if (b.size() == data.length) {
+                    break;
+                }
+            }
+            client.wakeUpRead();
+            assertEquals(b.toByteArray(), data);
         }
 
         // close clients
@@ -184,44 +208,104 @@ public class SocketTest implements DataTest, PrintTest {
     }
 
     @Test
-    public void testTcpOther() {
-        NetChannelHandler emptyHandler = new NetChannelHandler() {
+    public void testTcpOther() throws Exception {
+        {
+            // test one work thread and exception caught
+            int clientNum = 10;
+            ThreadGate gate = ThreadGate.newThreadGate();
+            CountDownLatch closeLatch = new CountDownLatch(1);
+            gate.close();
+            CountDownLatch openLatch = new CountDownLatch(clientNum);
+            CountDownLatch throwLatch = new CountDownLatch(clientNum * 3);
+            TcpServer server = SocketKit.tcpServerBuilder()
+                .handler(new NetChannelHandler() {
 
-            @Override
-            public void channelOpen(@Nonnull NetChannelContext context) {
+                    @Override
+                    public void channelOpen(@Nonnull NetChannelContext context) throws Exception {
+                        openLatch.countDown();
+                        throw new XException();
+                    }
+
+                    @Override
+                    public void channelClose(@Nonnull NetChannelContext context) throws Exception {
+                        throw new XException();
+                    }
+
+                    @Override
+                    public void channelRead(@Nonnull NetChannelContext context) throws Exception {
+                        throw new XException();
+                    }
+
+                    @Override
+                    public void exceptionCaught(@Nullable NetChannelContext context, @Nonnull Throwable cause) {
+                        if (cause instanceof XException) {
+                            throwLatch.countDown();
+                        }
+                    }
+                })
+                .workerThreadNum(1)
+                .workerThreadFactory(r -> new Thread(() -> {
+                    gate.await();
+                    r.run();
+                    closeLatch.countDown();
+                }))
+                .build();
+            server.start();
+            List<TcpClient> clients = new ArrayList<>();
+            for (int i = 0; i < clientNum; i++) {
+                TcpClient client = SocketKit.tcpClientBuilder()
+                    .remoteAddress(server.localAddress())
+                    .build();
+                client.connect();
+                clients.add(client);
             }
-
-            @Override
-            public void channelClose(@Nonnull NetChannelContext context) {
+            gate.open();
+            openLatch.await();
+            for (TcpClient client : clients) {
+                client.close();
             }
-
-            @Override
-            public void channelRead(@Nonnull NetChannelContext context) {
-            }
-
-            @Override
-            public void exceptionCaught(@Nullable NetChannelContext context, @Nonnull Throwable cause) {
-            }
-        };
-
-        ThreadGate gate = ThreadGate.newThreadGate();
-        CountDownLatch closeLatch = new CountDownLatch(1);
-        gate.close();
-        TcpServer server = SocketKit.tcpServerBuilder()
-            .handler(emptyHandler)
-            .workerThreadNum(1)
-            .workerThreadFactory(r-> new Thread(()->{
-                gate.await();
-                r.run();
-                closeLatch.countDown();
-            }))
-            .build();
-        server.start();
-        for (int i = 0; i < 10; i++) {
-            TcpClient client = SocketKit.tcpClientBuilder().remoteAddress(server.localAddress()).build();
-            client.connect();
+            throwLatch.await();
+            server.close();
+            closeLatch.await();
+            // exception: doWork()
+            Method doWork = server.getClass().getDeclaredMethod("doWork", VoidCallable.class, int.class);
+            doWork.setAccessible(true);
+            doWork.invoke(server, null, 2);
+            doWork.invoke(server, (VoidCallable) () -> {
+                throw new XException();
+            }, 1);
         }
-        gate.open();
-        //server.
+        {
+            // builder exceptions
+            expectThrows(IllegalArgumentException.class, () ->
+                SocketKit.tcpServerBuilder()
+                    .localAddress(new InetSocketAddress(0))
+                    .mainThreadFactory(Thread::new)
+                    .workerThreadNum(0)
+            );
+            expectThrows(NetException.class, () ->
+                SocketKit.tcpServerBuilder().build()
+            );
+            expectThrows(IllegalArgumentException.class, () ->
+                SocketKit.tcpClientBuilder()
+                    .localAddress(new InetSocketAddress(0))
+                    .bufferSize(0)
+                    .build()
+            );
+            expectThrows(NetException.class, () ->
+                SocketKit.tcpClientBuilder().build()
+            );
+            // socket option exceptions
+            expectThrows(NetException.class, () ->
+                SocketKit.tcpClientBuilder()
+                    .remoteAddress(new InetSocketAddress(0))
+                    .socketOption(StandardSocketOptions.IP_MULTICAST_IF, null)
+                    .build()
+            );
+        }
+    }
+
+    private static final class XException extends Exception {
+        private static final long serialVersionUID = 1L;
     }
 }
