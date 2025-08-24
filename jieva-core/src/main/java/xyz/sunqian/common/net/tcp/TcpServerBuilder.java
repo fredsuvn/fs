@@ -1,4 +1,4 @@
-package xyz.sunqian.common.net.socket;
+package xyz.sunqian.common.net.tcp;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
@@ -35,7 +35,7 @@ import java.util.concurrent.ThreadFactory;
  *
  * @author sunqian
  */
-public class SocketTcpServerBuilder {
+public class TcpServerBuilder {
 
     private @Nullable InetSocketAddress localAddress;
     private @Nullable NetChannelHandlerWrapper handler;
@@ -53,7 +53,7 @@ public class SocketTcpServerBuilder {
      * @param localAddress the local address the server is bound to
      * @return this builder
      */
-    public @Nonnull SocketTcpServerBuilder localAddress(@Nonnull InetSocketAddress localAddress) {
+    public @Nonnull TcpServerBuilder localAddress(@Nonnull InetSocketAddress localAddress) {
         this.localAddress = localAddress;
         return this;
     }
@@ -64,7 +64,7 @@ public class SocketTcpServerBuilder {
      * @param handler the handler to handle server events
      * @return this builder
      */
-    public @Nonnull SocketTcpServerBuilder handler(@Nonnull NetChannelHandler handler) {
+    public @Nonnull TcpServerBuilder handler(@Nonnull NetChannelHandler handler) {
         this.handler = new NetChannelHandlerWrapper(handler);
         return this;
     }
@@ -78,7 +78,7 @@ public class SocketTcpServerBuilder {
      * @param mainThreadFactory the main thread factory
      * @return this builder
      */
-    public @Nonnull SocketTcpServerBuilder mainThreadFactory(@Nonnull ThreadFactory mainThreadFactory) {
+    public @Nonnull TcpServerBuilder mainThreadFactory(@Nonnull ThreadFactory mainThreadFactory) {
         this.mainThreadFactory = mainThreadFactory;
         return this;
     }
@@ -92,7 +92,7 @@ public class SocketTcpServerBuilder {
      * @param workerThreadFactory the worker thread factory
      * @return this builder
      */
-    public @Nonnull SocketTcpServerBuilder workerThreadFactory(@Nonnull ThreadFactory workerThreadFactory) {
+    public @Nonnull TcpServerBuilder workerThreadFactory(@Nonnull ThreadFactory workerThreadFactory) {
         this.workerThreadFactory = workerThreadFactory;
         return this;
     }
@@ -105,7 +105,7 @@ public class SocketTcpServerBuilder {
      * @throws IllegalArgumentException if the number is negative or {@code 0}
      * @see #workerThreadFactory(ThreadFactory)
      */
-    public @Nonnull SocketTcpServerBuilder workerThreadNum(int workThreadNum) throws IllegalArgumentException {
+    public @Nonnull TcpServerBuilder workerThreadNum(int workThreadNum) throws IllegalArgumentException {
         CheckKit.checkArgument(workThreadNum >= 1, "workThreadNum must >= 1");
         this.workerThreadNum = workThreadNum;
         return this;
@@ -120,7 +120,7 @@ public class SocketTcpServerBuilder {
      * @param backlog the maximum number of pending connections
      * @return this builder
      */
-    public @Nonnull SocketTcpServerBuilder backlog(int backlog) {
+    public @Nonnull TcpServerBuilder backlog(int backlog) {
         this.backlog = backlog;
         return this;
     }
@@ -133,7 +133,7 @@ public class SocketTcpServerBuilder {
      * @return this builder
      * @throws IllegalArgumentException if the buffer size is negative or {@code 0}
      */
-    public @Nonnull SocketTcpServerBuilder bufferSize(int bufSize) throws IllegalArgumentException {
+    public @Nonnull TcpServerBuilder bufferSize(int bufSize) throws IllegalArgumentException {
         CheckKit.checkArgument(bufSize > 0, "bufSize must be positive");
         this.bufSize = bufSize;
         return this;
@@ -150,7 +150,7 @@ public class SocketTcpServerBuilder {
      * @throws NetException If an error occurs
      * @see StandardSocketOptions
      */
-    public <T> @Nonnull SocketTcpServerBuilder socketOption(@Nonnull SocketOption<T> name, T value) throws NetException {
+    public <T> @Nonnull TcpServerBuilder socketOption(@Nonnull SocketOption<T> name, T value) throws NetException {
         socketOptions.put(name, value);
         return this;
     }
@@ -193,6 +193,7 @@ public class SocketTcpServerBuilder {
         // 0: not started, 1: started, 2: closed
         private volatile int state = 0;
 
+        @SuppressWarnings("resource")
         private TcpServerImpl(
             @Nullable InetSocketAddress localAddress,
             @Nonnull NetChannelHandlerWrapper handler,
@@ -210,7 +211,8 @@ public class SocketTcpServerBuilder {
             this.mainThread = newThread(mainthreadFactory, this);
             this.workers = new TcpWorker[workThreadNum];
             server.configureBlocking(false);
-            SocketKit.setSocketOptions(socketOptions, server);
+            socketOptions.forEach((name, value) ->
+                Jie.uncheck(() -> server.setOption(Jie.as(name), value), NetException::new));
             this.bufSize = bufSize;
             this.backlog = backlog;
             server.register(mainSelector, SelectionKey.OP_ACCEPT);

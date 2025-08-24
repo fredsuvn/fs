@@ -1,4 +1,4 @@
-package xyz.sunqian.common.net.socket;
+package xyz.sunqian.common.net.tcp;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
@@ -27,7 +27,7 @@ import java.util.Set;
  *
  * @author sunqian
  */
-public class SocketTcpClientBuilder {
+public class TcpClientBuilder {
 
     private @Nullable InetSocketAddress localAddress;
     private InetSocketAddress remoteAddress;
@@ -41,7 +41,7 @@ public class SocketTcpClientBuilder {
      * @param localAddress the local address the client is bound to
      * @return this builder
      */
-    public @Nonnull SocketTcpClientBuilder localAddress(@Nonnull InetSocketAddress localAddress) {
+    public @Nonnull TcpClientBuilder localAddress(@Nonnull InetSocketAddress localAddress) {
         this.localAddress = localAddress;
         return this;
     }
@@ -52,7 +52,7 @@ public class SocketTcpClientBuilder {
      * @param remoteAddress the remote address the client connects to
      * @return this builder
      */
-    public @Nonnull SocketTcpClientBuilder remoteAddress(@Nonnull InetSocketAddress remoteAddress) {
+    public @Nonnull TcpClientBuilder remoteAddress(@Nonnull InetSocketAddress remoteAddress) {
         this.remoteAddress = remoteAddress;
         return this;
     }
@@ -65,7 +65,7 @@ public class SocketTcpClientBuilder {
      * @return this builder
      * @throws IllegalArgumentException if the buffer size is negative or {@code 0}
      */
-    public @Nonnull SocketTcpClientBuilder bufferSize(int bufSize) throws IllegalArgumentException {
+    public @Nonnull TcpClientBuilder bufferSize(int bufSize) throws IllegalArgumentException {
         CheckKit.checkArgument(bufSize > 0, "bufSize must be positive");
         this.bufSize = bufSize;
         return this;
@@ -82,7 +82,7 @@ public class SocketTcpClientBuilder {
      * @throws NetException If an error occurs
      * @see StandardSocketOptions
      */
-    public <T> @Nonnull SocketTcpClientBuilder socketOption(@Nonnull SocketOption<T> name, T value) throws NetException {
+    public <T> @Nonnull TcpClientBuilder socketOption(@Nonnull SocketOption<T> name, T value) throws NetException {
         socketOptions.put(name, value);
         return this;
     }
@@ -120,6 +120,7 @@ public class SocketTcpClientBuilder {
         // 0: not started, 1: started, 2: closed
         private volatile int state = 0;
 
+        @SuppressWarnings("resource")
         private TcpClientImpl(
             @Nullable InetSocketAddress localAddress,
             @Nonnull InetSocketAddress remoteAddress,
@@ -129,7 +130,8 @@ public class SocketTcpClientBuilder {
             this.client = SocketChannel.open();
             this.localAddress = localAddress;
             this.remoteAddress = remoteAddress;
-            SocketKit.setSocketOptions(socketOptions, client);
+            socketOptions.forEach((name, value) ->
+                Jie.uncheck(() -> client.setOption(Jie.as(name), value), NetException::new));
             this.selector = Selector.open();
             this.ioChannel = IOChannel.newChannel(client, bufSize);
         }

@@ -13,9 +13,8 @@ import xyz.sunqian.common.net.NetChannelHandler;
 import xyz.sunqian.common.net.NetChannelType;
 import xyz.sunqian.common.net.NetException;
 import xyz.sunqian.common.net.NetServer;
-import xyz.sunqian.common.net.socket.SocketKit;
-import xyz.sunqian.common.net.socket.TcpClient;
-import xyz.sunqian.common.net.socket.TcpServer;
+import xyz.sunqian.common.net.tcp.TcpClient;
+import xyz.sunqian.common.net.tcp.TcpServer;
 import xyz.sunqian.test.DataTest;
 import xyz.sunqian.test.PrintTest;
 
@@ -34,7 +33,7 @@ import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
-public class SocketTest implements DataTest, PrintTest {
+public class TcpTest implements DataTest, PrintTest {
 
     @Test
     public void testTcp() throws Exception {
@@ -75,7 +74,7 @@ public class SocketTest implements DataTest, PrintTest {
             readLatches[i] = new CountDownLatch(1);
         }
 
-        TcpServer server = SocketKit.tcpServerBuilder()
+        TcpServer server = TcpServer.newBuilder()
             .workerThreadNum(workerNum)
             .workerThreadFactory(workerFactory)
             .socketOption(StandardSocketOptions.SO_RCVBUF, 1024)
@@ -137,7 +136,7 @@ public class SocketTest implements DataTest, PrintTest {
         printFor("server address", server.localAddress());
 
         for (int i = 0; i < clients.length; i++) {
-            TcpClient client = SocketKit.tcpClientBuilder()
+            TcpClient client = TcpClient.newBuilder()
                 .remoteAddress(server.localAddress())
                 .socketOption(StandardSocketOptions.SO_SNDBUF, 1024)
                 .bufferSize(1024)
@@ -217,7 +216,7 @@ public class SocketTest implements DataTest, PrintTest {
             gate.close();
             CountDownLatch openLatch = new CountDownLatch(clientNum);
             CountDownLatch throwLatch = new CountDownLatch(clientNum * 3);
-            TcpServer server = SocketKit.tcpServerBuilder()
+            TcpServer server = TcpServer.newBuilder()
                 .handler(new NetChannelHandler() {
 
                     @Override
@@ -253,7 +252,7 @@ public class SocketTest implements DataTest, PrintTest {
             server.start();
             List<TcpClient> clients = new ArrayList<>();
             for (int i = 0; i < clientNum; i++) {
-                TcpClient client = SocketKit.tcpClientBuilder()
+                TcpClient client = TcpClient.newBuilder()
                     .remoteAddress(server.localAddress())
                     .build();
                 client.connect();
@@ -278,26 +277,29 @@ public class SocketTest implements DataTest, PrintTest {
         {
             // builder exceptions
             expectThrows(IllegalArgumentException.class, () ->
-                SocketKit.tcpServerBuilder()
+                TcpServer.newBuilder()
                     .localAddress(new InetSocketAddress(0))
                     .mainThreadFactory(Thread::new)
                     .workerThreadNum(0)
             );
+            expectThrows(IllegalArgumentException.class, () ->
+                TcpServer.newBuilder().bufferSize(0).build()
+            );
             expectThrows(NetException.class, () ->
-                SocketKit.tcpServerBuilder().build()
+                TcpServer.newBuilder().build()
             );
             expectThrows(IllegalArgumentException.class, () ->
-                SocketKit.tcpClientBuilder()
+                TcpClient.newBuilder()
                     .localAddress(new InetSocketAddress(0))
                     .bufferSize(0)
                     .build()
             );
             expectThrows(NetException.class, () ->
-                SocketKit.tcpClientBuilder().build()
+                TcpClient.newBuilder().build()
             );
             // socket option exceptions
             expectThrows(NetException.class, () ->
-                SocketKit.tcpClientBuilder()
+                TcpClient.newBuilder()
                     .remoteAddress(new InetSocketAddress(0))
                     .socketOption(StandardSocketOptions.IP_MULTICAST_IF, null)
                     .build()
