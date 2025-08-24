@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Utilities kit for dynamic proxy.
+ * Proxy utilities.
  *
  * @author sunqian
  */

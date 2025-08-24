@@ -7,6 +7,11 @@
  * TcpClient client = TcpClient.newBuilder()
  *     .build();
  * }</pre>
- *
+ * <p>
+ * Core interfaces:
+ * <ul>
+ *     <li>{@link xyz.sunqian.common.net.tcp.TcpServer}</li>
+ *     <li>{@link xyz.sunqian.common.net.tcp.TcpClient}</li>
+ * </ul>
  */
 package xyz.sunqian.common.net.tcp;

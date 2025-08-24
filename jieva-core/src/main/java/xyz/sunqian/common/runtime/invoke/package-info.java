@@ -1,12 +1,16 @@
 /**
- * Provides utilities and interfaces for invocation.
+ * Provides unified interfaces to handle an invocable body, for example:
+ * <pre>{@code
+ * Invocable byDefault = Invocable.of(method);
+ * Invocable byAsm = Invocable.of(constructor, InvocationMode.ASM);
+ * }</pre>
  * <p>
- * Utilities Kits:
+ * Utilities:
  * <ul>
  *     <li>{@link xyz.sunqian.common.runtime.invoke.InvokeKit}</li>
  * </ul>
  * <p>
- * Interfaces:
+ * Core interfaces:
  * <ul>
  *     <li>{@link xyz.sunqian.common.runtime.invoke.Invocable}</li>
  * </ul>

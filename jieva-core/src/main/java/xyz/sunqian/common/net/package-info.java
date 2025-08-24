@@ -1,11 +1,11 @@
 /**
  * Provides utilities and interfaces for network, and subpackages for different protocols and tools.
  * <p>
- * Utilities Kis:
+ * Utilities:
  * <ul>
  *     <li>{@link xyz.sunqian.common.net.NetKit}</li>
  * </ul>
- * Core Interfaces:
+ * Core interfaces:
  * <ul>
  *     <li>{@link xyz.sunqian.common.net.NetServer}</li>
  *     <li>{@link xyz.sunqian.common.net.NetClient}</li>

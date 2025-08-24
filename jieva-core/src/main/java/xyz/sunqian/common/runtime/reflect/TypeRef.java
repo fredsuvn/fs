@@ -8,16 +8,15 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 /**
- * This abstract class is used for obtaining runtime {@link Type} instance:
+ * This abstract class is used for obtaining runtime {@link Type} instance. The usage as following:
  * <pre>{@code
- *     // To obtain a class type: String.class
- *     Type classType = new TypeRef<String>(){}.type(); // String.class
- *
- *     // To obtain a parameterized type: List<String>
- *     ParameterizedType paramType = new TypeRef<List<String>>(){}.asParameterized();// List<String>
+ * // To obtain a class type: String.class
+ * Type classType = new TypeRef<String>(){}.type();
+ * // To obtain a parameterized type: List<String>
+ * ParameterizedType paramType = new TypeRef<List<String>>(){}.asParameterized();
  * }</pre>
  *
- * @param <T> the actual runtime type to be obtained
+ * @param <T> the runtime type to be obtained
  * @author sunqian
  */
 public abstract class TypeRef<T> {

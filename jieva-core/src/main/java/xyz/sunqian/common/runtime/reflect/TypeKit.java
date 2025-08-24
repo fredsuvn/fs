@@ -26,7 +26,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Utilities kit for {@link Type}.
+ * Utilities for {@link Type}.
  *
  * @author sunqian
  */

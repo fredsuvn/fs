@@ -6,7 +6,7 @@ import xyz.sunqian.annotations.Nullable;
 import java.lang.invoke.MethodHandle;
 
 /**
- * Utilities kit for {@link Invocable}, {@link MethodHandle} and other invocation related.
+ * Utilities for {@link Invocable}, {@link MethodHandle} and other invocation related.
  *
  * @author sunqian
  */

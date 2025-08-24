@@ -18,7 +18,7 @@ import java.lang.reflect.WildcardType;
 import java.util.Iterator;
 
 /**
- * Utilities kit for {@link Class}.
+ * Utilities for {@link Class}.
  *
  * @author sunqian
  */

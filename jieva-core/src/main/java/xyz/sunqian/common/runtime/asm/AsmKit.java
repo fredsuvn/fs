@@ -15,7 +15,7 @@ import java.lang.reflect.Parameter;
 import java.util.Objects;
 
 /**
- * Static utility class for <a href="https://asm.ow2.io/">ASM</a>. The runtime environment must have asm package
+ * <a href="https://asm.ow2.io/">ASM</a> utilities. The runtime environment must have asm package
  * {@code org.objectweb.asm}.
  *
  * @author sunqian
