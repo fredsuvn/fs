@@ -12,7 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Utilities kit for {@link Collection}.
+ * Utilities for {@link Collection}.
  *
  * @author sunqian
  */

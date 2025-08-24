@@ -8,7 +8,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Utilities kit for {@link Future}.
+ * Utilities for {@link Future}.
  *
  * @author sunqian
  */

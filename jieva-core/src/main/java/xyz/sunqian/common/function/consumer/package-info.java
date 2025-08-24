@@ -1,7 +1,7 @@
 /**
  * Provides extensions for {@link java.util.function.Consumer}.
  * <p>
- * Extension Functions:
+ * Extension functional interfaces:
  * <ul>
  *     <li>{@link xyz.sunqian.common.function.consumer.IndexedConsumer}</li>
  *     <li>{@link xyz.sunqian.common.function.consumer.IndexedIntConsumer}</li>

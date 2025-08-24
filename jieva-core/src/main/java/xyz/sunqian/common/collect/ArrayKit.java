@@ -17,7 +17,7 @@ import java.util.RandomAccess;
 import java.util.function.Function;
 
 /**
- * Utilities kit for array.
+ * Utilities for array.
  *
  * @author sunqian
  */

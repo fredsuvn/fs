@@ -12,7 +12,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
- * Utilities kit for {@link Set}.
+ * Utilities for {@link Set}.
  *
  * @author sunqian
  */

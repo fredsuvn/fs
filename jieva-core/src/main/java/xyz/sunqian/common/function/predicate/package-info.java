@@ -1,7 +1,7 @@
 /**
  * Provides extensions for {@link java.util.function.Predicate}.
  * <p>
- * Extension Functions:
+ * Extension functional interfaces:
  * <ul>
  *     <li>{@link xyz.sunqian.common.function.predicate.IndexedPredicate}</li>
  *     <li>{@link xyz.sunqian.common.function.predicate.IndexedIntPredicate}</li>

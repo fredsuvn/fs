@@ -1,7 +1,7 @@
 /**
  * Provides extensions for {@link java.util.concurrent.Callable}.
  * <p>
- * Extension Functions:
+ * Extension functional interfaces:
  * <ul>
  *     <li>{@link xyz.sunqian.common.function.callable.BooleanCallable}</li>
  *     <li>{@link xyz.sunqian.common.function.callable.VoidCallable}</li>

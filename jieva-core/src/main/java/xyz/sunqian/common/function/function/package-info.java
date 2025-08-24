@@ -1,7 +1,7 @@
 /**
  * Provides extensions for {@link java.util.function.Function}.
  * <p>
- * Extension Functions:
+ * Extension functional interfaces:
  * <ul>
  *     <li>{@link xyz.sunqian.common.function.function.IndexedFunction}</li>
  *     <li>{@link xyz.sunqian.common.function.function.IndexedIntFunction}</li>
