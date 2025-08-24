@@ -1,7 +1,7 @@
 /**
  * Provides utilities and interfaces for file and path.
  * <p>
- * Utilities Kits:
+ * Utilities:
  * <ul>
  *     <li>{@link xyz.sunqian.common.io.file.FileKit}</li>
  * </ul>

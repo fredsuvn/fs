@@ -10,7 +10,7 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.FileAttribute;
 
 /**
- * Utilities kit for file related.
+ * Utilities for file related.
  *
  * @author sunqian
  */
