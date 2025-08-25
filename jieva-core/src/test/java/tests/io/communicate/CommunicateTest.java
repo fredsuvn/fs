@@ -54,22 +54,22 @@ public class CommunicateTest implements DataTest {
             };
             IOChannel ic = IOChannel.newChannel(bc);
             assertTrue(ic.isOpen());
-            assertEquals(ic.nextString(), "hello world");
+            assertEquals(ic.availableString(), "hello world");
             assertFalse(ic.isOpen());
-            assertNull(ic.nextString());
+            assertNull(ic.availableString());
             reader.clear();
             open.set(true);
-            assertEquals(ic.nextBytes(), data);
-            assertNull(ic.nextBytes());
+            assertEquals(ic.availableBytes(), data);
+            assertNull(ic.availableBytes());
             reader.clear();
             open.set(true);
-            assertEquals(ic.nextBuffer(), ByteBuffer.wrap(data));
-            assertNull(ic.nextBytes());
+            assertEquals(ic.availableBuffer(), ByteBuffer.wrap(data));
+            assertNull(ic.availableBytes());
             open.set(true);
             ic.writeString("hello world");
             assertEquals(writer.toString(), "hello world");
             open.set(false);
-            assertNull(ic.nextString());
+            assertNull(ic.availableString());
             expectThrows(IORuntimeException.class, () -> ic.writeString("hello world"));
             open.set(true);
             assertTrue(ic.isOpen());
@@ -99,9 +99,9 @@ public class CommunicateTest implements DataTest {
                 }
             };
             IOChannel ic = IOChannel.newChannel(bc);
-            assertEquals(ic.nextString(), "");
-            assertEquals(ic.nextBytes(), new byte[0]);
-            assertEquals(ic.nextBuffer(), ByteBuffer.allocate(0));
+            assertEquals(ic.availableString(), "");
+            assertEquals(ic.availableBytes(), new byte[0]);
+            assertEquals(ic.availableBuffer(), ByteBuffer.allocate(0));
         }
     }
 }

@@ -8,13 +8,10 @@ import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.function.callable.VoidCallable;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.io.communicate.IOChannel;
-import xyz.sunqian.common.net.NetChannelContext;
-import xyz.sunqian.common.net.NetChannelHandler;
-import xyz.sunqian.common.net.NetChannelHandlerWrapper;
+import xyz.sunqian.common.io.communicate.IOChannelHandler;
 import xyz.sunqian.common.net.NetChannelType;
 import xyz.sunqian.common.net.NetException;
 import xyz.sunqian.common.net.NetServer;
-import xyz.sunqian.common.net.NullNetChannelHandler;
 
 import java.net.InetSocketAddress;
 import java.net.SocketOption;
@@ -38,7 +35,7 @@ import java.util.concurrent.ThreadFactory;
  */
 public class TcpServerBuilder {
 
-    private @Nonnull NetChannelHandler handler = NullNetChannelHandler.SINGLETON;
+    private @Nonnull IOChannelHandler.Unchecked<TcpChannel> handler = IOChannelHandler.nullHandler();
     private int workerThreadNum = 1;
     private @Nullable ThreadFactory mainThreadFactory;
     private @Nullable ThreadFactory workerThreadFactory;
@@ -46,13 +43,14 @@ public class TcpServerBuilder {
     private final @Nonnull Map<SocketOption<?>, Object> socketOptions = new LinkedHashMap<>();
 
     /**
-     * Sets the handler to handle server events. The default handler is {@link NullNetChannelHandler#SINGLETON}.
+     * Sets the handler to handle server events. The default handler's behavior is equivalent to
+     * {@link IOChannelHandler#nullHandler()}.
      *
      * @param handler the handler to handle server events
      * @return this builder
      */
-    public @Nonnull TcpServerBuilder handler(@Nonnull NetChannelHandler handler) {
-        this.handler = new NetChannelHandlerWrapper(handler);
+    public @Nonnull TcpServerBuilder handler(@Nonnull TcpChannelHandler handler) {
+        this.handler = IOChannelHandler.wrapper(handler);
         return this;
     }
 
@@ -186,7 +184,7 @@ public class TcpServerBuilder {
         private final @Nonnull Selector mainSelector;
         private final @Nonnull Thread mainThread;
         private final @Nonnull TcpWorker @Nonnull [] workers;
-        private final @Nonnull NetChannelHandlerWrapper handler;
+        private final @Nonnull IOChannelHandler.Unchecked<TcpChannel> handler;
         private final int bufSize;
 
         private volatile boolean closed = false;
@@ -194,7 +192,7 @@ public class TcpServerBuilder {
         @SuppressWarnings("resource")
         private TcpServerImpl(
             @Nullable InetSocketAddress localAddress,
-            @Nonnull NetChannelHandler handler,
+            @Nonnull IOChannelHandler.Unchecked<TcpChannel> handler,
             @Nullable ThreadFactory mainthreadFactory,
             @Nullable ThreadFactory workerthreadFactory,
             int workThreadNum,
@@ -204,7 +202,7 @@ public class TcpServerBuilder {
         ) throws Exception {
             this.server = ServerSocketChannel.open();
             this.mainSelector = Selector.open();
-            this.handler = new NetChannelHandlerWrapper(handler);
+            this.handler = handler;
             this.mainThread = newThread(mainthreadFactory, this);
             this.workers = new TcpWorker[workThreadNum];
             server.configureBlocking(false);

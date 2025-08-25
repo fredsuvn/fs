@@ -99,7 +99,7 @@ public class TcpTest implements DataTest, PrintTest {
                     printFor("client read", thread.num);
                     assertEquals(clients[thread.num].remoteAddress(), context.localAddress());
                     assertEquals(clients[thread.num].localAddress(), context.remoteAddress());
-                    byte[] bytes = context.ioChannel().nextBytes();
+                    byte[] bytes = context.ioChannel().availableBytes();
                     if (bytes != null) {
                         builders[thread.num].append(bytes);
                         context.ioChannel().writeBytes(bytes);
@@ -169,7 +169,7 @@ public class TcpTest implements DataTest, PrintTest {
             BytesBuilder b = new BytesBuilder();
             while (true) {
                 client.nextRead();
-                b.append(client.ioChannel().nextBytes());
+                b.append(client.ioChannel().availableBytes());
                 if (b.size() == data.length) {
                     break;
                 }

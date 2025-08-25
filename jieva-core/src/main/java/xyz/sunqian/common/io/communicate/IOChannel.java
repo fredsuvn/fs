@@ -3,180 +3,110 @@ package xyz.sunqian.common.io.communicate;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.chars.CharsKit;
-import xyz.sunqian.common.io.BufferKit;
-import xyz.sunqian.common.io.IOKit;
-import xyz.sunqian.common.io.IOOperator;
 import xyz.sunqian.common.io.IORuntimeException;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
-import java.nio.channels.ClosedChannelException;
 import java.nio.charset.Charset;
 
 /**
- * The channel used to read/write data between this point and the remote endpoint.
+ * Channel for IO Communication, typically used for network or IPC (Inter-Process Communication).
  * <p>
- * This interface extends the {@link ByteChannel},  if the read methods returns {@code -1}, means the channel is closed;
- * if returns {@code 0}, means the received data of the current read-event has been read completely.
+ * IOChannel extends the {@link ByteChannel} and provides more advanced methods for reading and writing. For its read
+ * methods, if the number of bytes read is {@code -1}, means the channel is closed; if is {@code 0}, means all available
+ * data has been read but the channel is still alive.
+ * <p>
+ * There is a skeletal implementation: {@link AbstractIOChannel}, which can help to implement this interface with
+ * minimal effort.
  *
  * @author sunqian
  */
 public interface IOChannel extends ByteChannel {
 
     /**
-     * Creates a new {@link IOChannel} based on the given {@link ByteChannel}.
-     * <p>
-     * Note if the read methods returns {@code -1}, the returned {@link IOChannel} will auto close the channel.
+     * Returns the available bytes in the channel, possibly empty if no data is available but the channel is still
+     * alive, or {@code null} if the channel is closed.
      *
-     * @param channel the given {@link ByteChannel}
-     * @return a new {@link IOChannel} based on the given {@link ByteChannel}
-     */
-    static @Nonnull IOChannel newChannel(@Nonnull ByteChannel channel) {
-        return newChannel(channel, IOKit.bufferSize());
-    }
-
-    /**
-     * Creates a new {@link IOChannel} based on the given {@link ByteChannel}.
-     * <p>
-     * Note if the read methods returns {@code -1}, the returned {@link IOChannel} will auto close the channel.
-     *
-     * @param channel the given {@link ByteChannel}
-     * @param bufSize the buffer size for the advanced IO operations
-     * @return a new {@link IOChannel} based on the given {@link ByteChannel}
-     */
-    static @Nonnull IOChannel newChannel(@Nonnull ByteChannel channel, int bufSize) {
-        return new IOChannel() {
-
-            private final @Nonnull IOOperator operator = IOOperator.get(bufSize);
-
-            @Override
-            public boolean isOpen() {
-                return channel.isOpen();
-            }
-
-            @Override
-            public void close() throws IOException {
-                channel.close();
-            }
-
-            @Override
-            public int write(ByteBuffer src) throws IOException {
-                if (!channel.isOpen()) {
-                    throw new ClosedChannelException();
-                }
-                return channel.write(src);
-            }
-
-            @Override
-            public int read(ByteBuffer dst) throws IOException {
-                if (!channel.isOpen()) {
-                    return -1;
-                }
-                int ret = channel.read(dst);
-                if (ret < 0) {
-                    channel.close();
-                }
-                return ret;
-            }
-
-            @Override
-            public IOOperator operator() {
-                return operator;
-            }
-        };
-    }
-
-    /**
-     * Returns the operator for the advanced IO operations.
-     *
-     * @return the operator for the advanced IO operations
-     */
-    IOOperator operator();
-
-    /**
-     * Returns the next received bytes from the remote endpoint, may be {@code null} if the channel is closed.
-     *
-     * @return the next received bytes from the remote endpoint, may be {@code null} if the channel is closed.
+     * @return the available bytes in the channel, possibly empty, or {@code null} if the channel is closed.
      * @throws IORuntimeException if an error occurs
      */
-    default byte @Nullable [] nextBytes() throws IORuntimeException {
-        return operator().availableBytes(this);
-    }
+    byte @Nullable [] availableBytes() throws IORuntimeException;
 
     /**
-     * Returns the next received bytes as buffer from the remote endpoint, may be {@code null} if the channel is closed.
-     * The buffer's position is {@code 0}.
+     * Returns the available bytes as a buffer in the channel, possibly empty if no data is available but the channel is
+     * still alive, or {@code null} if the channel is closed. The position of the buffer is {@code 0}.
      *
-     * @return the next received bytes as buffer from the remote endpoint, may be {@code null} if the channel is closed.
+     * @return the available bytes as a buffer in the channel, possibly empty, may be {@code null} if the channel is
+     * closed.
      * @throws IORuntimeException if an error occurs
      */
-    default @Nullable ByteBuffer nextBuffer() throws IORuntimeException {
-        return operator().available(this);
-    }
+    @Nullable
+    ByteBuffer availableBuffer() throws IORuntimeException;
 
     /**
-     * Returns the next received bytes as string from the remote endpoint, may be {@code null} if the channel is closed.
-     * The returned string is encoded by {@link CharsKit#defaultCharset()}.
+     * Returns the available bytes as a string in the channel, possibly empty if no data is available but the channel is
+     * still alive, or {@code null} if the channel is closed. The string is decoded by the
+     * {@link CharsKit#defaultCharset()}.
      *
-     * @return the next received bytes as string from the remote endpoint, may be {@code null} if the channel is closed.
+     * @return the available bytes as a string in the channel, possibly empty, may be {@code null} if the channel is
+     * closed.
      * @throws IORuntimeException if an error occurs
      */
-    default @Nullable String nextString() throws IORuntimeException {
-        return nextString(CharsKit.defaultCharset());
-    }
+    @Nullable
+    String availableString() throws IORuntimeException;
 
     /**
-     * Returns the next received bytes as string from the remote endpoint, may be {@code null} if the channel is closed.
-     * The returned string is encoded by the specified charset.
+     * Returns the available bytes as a string in the channel, possibly empty if no data is available but the channel is
+     * still alive, or {@code null} if the channel is closed. The string is decoded by the specified charset.
      *
      * @param charset the specified charset
-     * @return the next received bytes as string from the remote endpoint, may be {@code null} if the channel is closed.
+     * @return the available bytes as a string in the channel, possibly empty, may be {@code null} if the channel is
+     * closed.
      * @throws IORuntimeException if an error occurs
      */
-    default @Nullable String nextString(@Nonnull Charset charset) throws IORuntimeException {
-        return operator().availableString(this, charset);
-    }
+    @Nullable
+    String availableString(@Nonnull Charset charset) throws IORuntimeException;
 
     /**
-     * Writes the specified bytes to the remote endpoint.
+     * Writes the given bytes to the channel.
      *
      * @param src the given bytes
      * @throws IORuntimeException if an error occurs
      */
-    default void writeBytes(byte @Nonnull [] src) throws IORuntimeException {
-        writeBuffer(ByteBuffer.wrap(src));
-    }
+    void writeBytes(byte @Nonnull [] src) throws IORuntimeException;
 
     /**
-     * Writes the specified byte buffer to the remote endpoint. The position of the buffer will increment to its limit.
+     * Writes the given buffer to the channel. The position of the buffer will increment by the actual write number.
      *
-     * @param src the given byte buffer
+     * @param src the given buffer
      * @throws IORuntimeException if an error occurs
      */
-    default void writeBuffer(@Nonnull ByteBuffer src) throws IORuntimeException {
-        BufferKit.readTo(src, this);
-    }
+    void writeBuffer(@Nonnull ByteBuffer src) throws IORuntimeException;
 
     /**
-     * Writes the specified string to the remote endpoint. The string will be decoded using
-     * {@link CharsKit#defaultCharset()}.
+     * Writes bytes encoded from the given string to the channel, with {@link CharsKit#defaultCharset()}.
      *
      * @param src the given string
      * @throws IORuntimeException if an error occurs
      */
-    default void writeString(@Nonnull String src) throws IORuntimeException {
-        writeString(src, CharsKit.defaultCharset());
-    }
+    void writeString(@Nonnull String src) throws IORuntimeException;
 
     /**
-     * Writes the specified string to the remote endpoint. The string will be decoded using the specified charset.
+     * Writes bytes encoded from the given string to the channel, with the specified charset.
      *
      * @param src     the given string
      * @param charset the specified charset
      * @throws IORuntimeException if an error occurs
      */
-    default void writeString(@Nonnull String src, @Nonnull Charset charset) throws IORuntimeException {
-        writeBytes(src.getBytes(charset));
-    }
+    void writeString(@Nonnull String src, @Nonnull Charset charset) throws IORuntimeException;
+
+    /**
+     * Blocks current thread and waits for the channel to be readable.
+     */
+    void awaitReadable();
+
+    /**
+     * Wakes up the thread blocked in {@link #awaitReadable()}.
+     */
+    void wakeUpReadable();
 }
