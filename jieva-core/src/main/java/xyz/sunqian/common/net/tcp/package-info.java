@@ -3,7 +3,7 @@
  * <pre>{@code
  * TcpServer server = TcpServer.newBuilder()
  *     .handler(handler)
- *     .build();
+ *     .bind();
  * TcpClient client = TcpClient.newBuilder()
  *     .build();
  * }</pre>

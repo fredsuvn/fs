@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
@@ -79,7 +80,6 @@ public class TcpTest implements DataTest, PrintTest {
             .workerThreadFactory(workerFactory)
             .socketOption(StandardSocketOptions.SO_RCVBUF, 1024)
             .bufferSize(1024)
-            .backlog(50)
             .handler(new NetChannelHandler() {
 
                 @Override
@@ -125,14 +125,9 @@ public class TcpTest implements DataTest, PrintTest {
                     printFor("client exception", ThrowKit.toString(cause));
                 }
             })
-            .build();
-        assertFalse(server.isStarted());
-        server.start();
-        assertTrue(server.isStarted());
+            .bind();
         assertFalse(server.isClosed());
-        expectThrows(NetException.class, server::start);
-        assertTrue(server.isStarted());
-        assertFalse(server.isClosed());
+        assertNotNull(server.localAddress());
         printFor("server address", server.localAddress());
 
         for (int i = 0; i < clients.length; i++) {
@@ -199,8 +194,6 @@ public class TcpTest implements DataTest, PrintTest {
         assertTrue(server.isClosed());
         server.close();
         assertTrue(server.isClosed());
-        assertFalse(server.isStarted());
-        expectThrows(NetException.class, server::start);
         server.await();
         closeLatch.await();
         assertEquals(closeCount.get(), 10);
@@ -248,8 +241,7 @@ public class TcpTest implements DataTest, PrintTest {
                     r.run();
                     closeLatch.countDown();
                 }))
-                .build();
-            server.start();
+                .bind();
             List<TcpClient> clients = new ArrayList<>();
             for (int i = 0; i < clientNum; i++) {
                 TcpClient client = TcpClient.newBuilder()
@@ -267,26 +259,22 @@ public class TcpTest implements DataTest, PrintTest {
             server.close();
             closeLatch.await();
             // exception: doWork()
-            Method doWork = server.getClass().getDeclaredMethod("doWork", VoidCallable.class, int.class);
+            Method doWork = server.getClass().getDeclaredMethod("doWork", VoidCallable.class, boolean.class);
             doWork.setAccessible(true);
-            doWork.invoke(server, null, 2);
+            doWork.invoke(server, null, true);
             doWork.invoke(server, (VoidCallable) () -> {
                 throw new XException();
-            }, 1);
+            }, false);
         }
         {
             // builder exceptions
             expectThrows(IllegalArgumentException.class, () ->
                 TcpServer.newBuilder()
-                    .localAddress(new InetSocketAddress(0))
                     .mainThreadFactory(Thread::new)
                     .workerThreadNum(0)
             );
             expectThrows(IllegalArgumentException.class, () ->
-                TcpServer.newBuilder().bufferSize(0).build()
-            );
-            expectThrows(NetException.class, () ->
-                TcpServer.newBuilder().build()
+                TcpServer.newBuilder().bufferSize(0).bind()
             );
             expectThrows(IllegalArgumentException.class, () ->
                 TcpClient.newBuilder()

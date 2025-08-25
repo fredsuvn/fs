@@ -6,7 +6,7 @@ import xyz.sunqian.common.net.NetServer;
 import java.net.InetSocketAddress;
 
 /**
- * Represents a TCP server.
+ * Represents a TCP server, can be built with {@link #newBuilder()}.
  *
  * @author sunqian
  */

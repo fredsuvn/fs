@@ -14,6 +14,7 @@ import xyz.sunqian.common.net.NetChannelHandlerWrapper;
 import xyz.sunqian.common.net.NetChannelType;
 import xyz.sunqian.common.net.NetException;
 import xyz.sunqian.common.net.NetServer;
+import xyz.sunqian.common.net.NullNetChannelHandler;
 
 import java.net.InetSocketAddress;
 import java.net.SocketOption;
@@ -37,29 +38,15 @@ import java.util.concurrent.ThreadFactory;
  */
 public class TcpServerBuilder {
 
-    private @Nullable InetSocketAddress localAddress;
-    private @Nullable NetChannelHandlerWrapper handler;
+    private @Nonnull NetChannelHandler handler = NullNetChannelHandler.SINGLETON;
     private int workerThreadNum = 1;
     private @Nullable ThreadFactory mainThreadFactory;
     private @Nullable ThreadFactory workerThreadFactory;
-    private int backlog = -1;
     private int bufSize = IOKit.bufferSize();
     private final @Nonnull Map<SocketOption<?>, Object> socketOptions = new LinkedHashMap<>();
 
     /**
-     * Sets the local address the server is bound to. If the local address is not configured, the server will auto bind
-     * to an available address when it starts.
-     *
-     * @param localAddress the local address the server is bound to
-     * @return this builder
-     */
-    public @Nonnull TcpServerBuilder localAddress(@Nonnull InetSocketAddress localAddress) {
-        this.localAddress = localAddress;
-        return this;
-    }
-
-    /**
-     * Sets the handler to handle server events.
+     * Sets the handler to handle server events. The default handler is {@link NullNetChannelHandler#SINGLETON}.
      *
      * @param handler the handler to handle server events
      * @return this builder
@@ -112,20 +99,6 @@ public class TcpServerBuilder {
     }
 
     /**
-     * Sets the {@code backlog}. The {@code backlog} is the maximum number of pending connections on the socket. Its
-     * exact semantics are implementation specific. In particular, an implementation may impose a maximum length or may
-     * choose to ignore. If the {@code backlog} parameter has the value 0, or a negative value, then an implementation
-     * specific default is used.
-     *
-     * @param backlog the maximum number of pending connections
-     * @return this builder
-     */
-    public @Nonnull TcpServerBuilder backlog(int backlog) {
-        this.backlog = backlog;
-        return this;
-    }
-
-    /**
      * Sets the buffer size for advanced IO operations. Note this buffer size is not the kernel network buffer size, it
      * is an I/O advanced operations buffer size.
      *
@@ -156,15 +129,43 @@ public class TcpServerBuilder {
     }
 
     /**
-     * Builds a new {@link TcpServer} with the configurations.
+     * Binds the server's socket to the automatically assigned address and configures the socket to listen for
+     * connections. And a new {@link TcpServer} instance is returned.
      *
-     * @return a new {@link TcpServer} with the configurations
+     * @return a new {@link TcpServer} instance
      * @throws NetException If an error occurs
      */
-    public @Nonnull TcpServer build() throws NetException {
-        if (handler == null) {
-            throw new NetException("Handle can not be null.");
-        }
+    public @Nonnull TcpServer bind() throws NetException {
+        return bind(null);
+    }
+
+    /**
+     * Binds the server's socket to the specified local address and configures the socket to listen for connections. And
+     * a new {@link TcpServer} instance is returned.
+     *
+     * @param localAddress the local address the server is bound to, may be {@code null} to bind to the automatically
+     *                     assigned address
+     * @return a new {@link TcpServer} instance
+     * @throws NetException If an error occurs
+     */
+    public @Nonnull TcpServer bind(@Nullable InetSocketAddress localAddress) throws NetException {
+        return bind(localAddress, 0);
+    }
+
+    /**
+     * Binds the server's socket to the specified local address and configures the socket to listen for connections. And
+     * a new {@link TcpServer} instance is returned.
+     * <p>
+     * The {@code backlog} is the maximum number of pending connections on the socket. If the {@code backlog} parameter
+     * has the value 0, or a negative value, then a default value is used.
+     *
+     * @param localAddress the local address the server is bound to, may be {@code null} to bind to the automatically
+     *                     assigned address
+     * @param backlog      the maximum number of pending connections
+     * @return a new {@link TcpServer} instance
+     * @throws NetException If an error occurs
+     */
+    public @Nonnull TcpServer bind(@Nullable InetSocketAddress localAddress, int backlog) throws NetException {
         return Jie.uncheck(() -> new TcpServerImpl(
                 localAddress,
                 handler,
@@ -186,17 +187,14 @@ public class TcpServerBuilder {
         private final @Nonnull Thread mainThread;
         private final @Nonnull TcpWorker @Nonnull [] workers;
         private final @Nonnull NetChannelHandlerWrapper handler;
-        private final @Nullable InetSocketAddress localAddress;
-        private final int backlog;
         private final int bufSize;
 
-        // 0: not started, 1: started, 2: closed
-        private volatile int state = 0;
+        private volatile boolean closed = false;
 
         @SuppressWarnings("resource")
         private TcpServerImpl(
             @Nullable InetSocketAddress localAddress,
-            @Nonnull NetChannelHandlerWrapper handler,
+            @Nonnull NetChannelHandler handler,
             @Nullable ThreadFactory mainthreadFactory,
             @Nullable ThreadFactory workerthreadFactory,
             int workThreadNum,
@@ -206,56 +204,25 @@ public class TcpServerBuilder {
         ) throws Exception {
             this.server = ServerSocketChannel.open();
             this.mainSelector = Selector.open();
-            this.localAddress = localAddress;
-            this.handler = handler;
+            this.handler = new NetChannelHandlerWrapper(handler);
             this.mainThread = newThread(mainthreadFactory, this);
             this.workers = new TcpWorker[workThreadNum];
             server.configureBlocking(false);
             socketOptions.forEach((name, value) ->
                 Jie.uncheck(() -> server.setOption(Jie.as(name), value), NetException::new));
             this.bufSize = bufSize;
-            this.backlog = backlog;
             server.register(mainSelector, SelectionKey.OP_ACCEPT);
             for (int i = 0; i < workThreadNum; i++) {
                 TcpWorker worker = new TcpWorker();
                 workers[i] = worker;
                 worker.thread = newThread(workerthreadFactory, worker);
             }
+            server.bind(localAddress, backlog);
+            mainThread.start();
         }
 
         private @Nonnull Thread newThread(@Nullable ThreadFactory factory, @Nonnull Runnable runnable) {
             return factory == null ? new Thread(runnable) : factory.newThread(runnable);
-        }
-
-        @SuppressWarnings("resource")
-        @Override
-        public synchronized void start() throws NetException {
-            if (state == 1) {
-                throw new NetException("This server has already started.");
-            }
-            if (state == 2) {
-                throw new NetException("This server has already closed.");
-            }
-            state = 1;
-            Jie.uncheck(() -> server.bind(localAddress, backlog), NetException::new);
-            mainThread.start();
-        }
-
-        @Override
-        public synchronized void close() throws NetException {
-            if (state != 1) {
-                return;
-            }
-            Jie.uncheck(() -> {
-                    server.close();
-                    mainSelector.close();
-                    mainSelector.wakeup();
-                    mainThread.interrupt();
-                },
-                NetException::new
-            );
-            releaseWorkers();
-            state = 2;
         }
 
         @Override
@@ -270,6 +237,23 @@ public class TcpServerBuilder {
         }
 
         @Override
+        public synchronized void close() throws NetException {
+            if (closed) {
+                return;
+            }
+            Jie.uncheck(() -> {
+                    server.close();
+                    mainSelector.close();
+                    mainSelector.wakeup();
+                    mainThread.interrupt();
+                },
+                NetException::new
+            );
+            releaseWorkers();
+            closed = true;
+        }
+
+        @Override
         public @Nonnull InetSocketAddress localAddress() throws NetException {
             return (InetSocketAddress) Jie.uncheck(server::getLocalAddress, NetException::new);
         }
@@ -280,17 +264,8 @@ public class TcpServerBuilder {
         }
 
         @Override
-        public boolean isStarted() {
-            return state == 1;
-        }
-
-        @Override
         public boolean isClosed() {
-            return isClosed(state);
-        }
-
-        private boolean isClosed(int state) {
-            return state == 2;
+            return closed;
         }
 
         @Override
@@ -299,7 +274,7 @@ public class TcpServerBuilder {
                 worker.thread.start();
             }
             while (!mainThread.isInterrupted()) {
-                doWork(this::doMainWork, state);
+                doWork(this::doMainWork, closed);
             }
             releaseWorkers();
             Jie.uncheck(() -> {
@@ -354,8 +329,8 @@ public class TcpServerBuilder {
             }
         }
 
-        private void doWork(VoidCallable callable, int state) {
-            if (isClosed(state)) {
+        private void doWork(VoidCallable callable, boolean closed) {
+            if (closed) {
                 return;
             }
             try {
@@ -384,7 +359,7 @@ public class TcpServerBuilder {
             public void run() {
                 Thread thread = Thread.currentThread();
                 while (!thread.isInterrupted()) {
-                    doWork(this::doWorkerWork, state);
+                    doWork(this::doWorkerWork, closed);
                 }
                 releaseClients();
                 Jie.uncheck(selector::close, NetException::new);

@@ -17,30 +17,24 @@ import java.util.List;
 public interface NetServer<A> {
 
     /**
-     * Starts this server. This method returns immediately, using {@link #await()} to wait for the server to terminate.
-     *
-     * @throws NetException if any error occurs
-     */
-    void start() throws NetException;
-
-    /**
-     * Closes this server. This method interrupts all thread of this server, and waits for all threads to terminate.
-     *
-     * @throws NetException if any error occurs
-     */
-    void close() throws NetException;
-
-    /**
-     * Blocks current thread until all threads of this server terminates.
+     * Blocks current thread until all threads of this server terminates, or interrupted via an
+     * {@link InterruptedException}.
      *
      * @throws NetException if any error occurs
      */
     void await() throws NetException;
 
     /**
-     * Returns the address this server is bound to, may be {@code null} if the server is not started.
+     * Closes this server. This method interrupts all thread of the server, and waits for all threads to terminate.
      *
-     * @return the address this server is bound to, may be {@code null} if the server is not started
+     * @throws NetException if any error occurs
+     */
+    void close() throws NetException;
+
+    /**
+     * Returns the address this server is bound to, may be {@code null} if the server is closed.
+     *
+     * @return the address this server is bound to, may be {@code null} if the server is closed
      */
     @Nullable
     A localAddress();
@@ -53,13 +47,6 @@ public interface NetServer<A> {
     List<Worker> workers();
 
     /**
-     * Returns whether this server is started.
-     *
-     * @return whether this server is started
-     */
-    boolean isStarted();
-
-    /**
      * Returns whether this server is closed.
      *
      * @return whether this server is closed
@@ -67,8 +54,8 @@ public interface NetServer<A> {
     boolean isClosed();
 
     /**
-     * Represents the worker of the server. A worker typically is responsible for handling connected clients, and
-     * typically contains a worker thread.
+     * Represents the worker of the server. A worker typically is responsible for handling connected clients, with a
+     * delicated thread.
      *
      * @author sunqian
      */
