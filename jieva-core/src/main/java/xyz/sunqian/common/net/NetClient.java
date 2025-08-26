@@ -13,13 +13,6 @@ import xyz.sunqian.common.io.communicate.IOChannel;
 public interface NetClient<A> {
 
     /**
-     * Connects this client.
-     *
-     * @throws NetException if any error occurs
-     */
-    void connect() throws NetException;
-
-    /**
      * Disconnects and closes this client.
      *
      * @throws NetException if any error occurs
@@ -57,9 +50,9 @@ public interface NetClient<A> {
     boolean isClosed();
 
     /**
-     * Returns an I/O channel between this client and the remote server.
+     * Returns an I/O channel of this client.
      *
-     * @return an I/O channel between this client and the remote server
+     * @return an I/O channel of this client
      */
     @Nonnull
     IOChannel ioChannel();

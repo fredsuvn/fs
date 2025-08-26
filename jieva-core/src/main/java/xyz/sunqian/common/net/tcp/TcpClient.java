@@ -22,13 +22,11 @@ public interface TcpClient extends NetClient<InetSocketAddress> {
     }
 
     /**
-     * Blocks current thread until the next read operation is available. This method can be interrupted by
-     * {@link #wakeUpRead()}.
+     * Returns an I/O channel of this client.
+     *
+     * @return an I/O channel of this client
      */
-    void nextRead();
-
-    /**
-     * Wakes up the blocking for {@link #nextRead()}.
-     */
-    void wakeUpRead();
+    @Override
+    @Nonnull
+    TcpClientChannel ioChannel();
 }

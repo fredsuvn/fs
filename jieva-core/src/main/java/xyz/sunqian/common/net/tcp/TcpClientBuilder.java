@@ -5,12 +5,13 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.CheckKit;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.io.IOKit;
-import xyz.sunqian.common.io.communicate.IOChannel;
+import xyz.sunqian.common.io.communicate.AbstractIOChannel;
 import xyz.sunqian.common.net.NetException;
 
 import java.net.InetSocketAddress;
 import java.net.SocketOption;
 import java.net.StandardSocketOptions;
+import java.nio.channels.ByteChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
@@ -21,41 +22,14 @@ import java.util.Set;
 
 /**
  * Builder for building new instances of {@link TcpClient} by Socket.
- * <p>
- * Note the {@link TcpClient#ioChannel()} of the built instance is always in non-blocking mode, using
- * {@link TcpClient#nextRead()} can check whether there is data to read.
  *
  * @author sunqian
  */
 public class TcpClientBuilder {
 
     private @Nullable InetSocketAddress localAddress;
-    private InetSocketAddress remoteAddress;
     private int bufSize = IOKit.bufferSize();
     private final @Nonnull Map<SocketOption<?>, Object> socketOptions = new LinkedHashMap<>();
-
-    /**
-     * Sets the local address the client is bound to. If the local address is not configured, the client will auto bind
-     * to an available address when it starts.
-     *
-     * @param localAddress the local address the client is bound to
-     * @return this builder
-     */
-    public @Nonnull TcpClientBuilder localAddress(@Nonnull InetSocketAddress localAddress) {
-        this.localAddress = localAddress;
-        return this;
-    }
-
-    /**
-     * Sets the remote address the client connects to.
-     *
-     * @param remoteAddress the remote address the client connects to
-     * @return this builder
-     */
-    public @Nonnull TcpClientBuilder remoteAddress(@Nonnull InetSocketAddress remoteAddress) {
-        this.remoteAddress = remoteAddress;
-        return this;
-    }
 
     /**
      * Sets the buffer size for advanced IO operations. Note this buffer size is not the kernel network buffer size, it
@@ -88,17 +62,27 @@ public class TcpClientBuilder {
     }
 
     /**
-     * Builds a new {@link TcpClient} with the configurations. Note the {@link TcpClient#ioChannel()} of the built
-     * instance is always in non-blocking mode, using {@link TcpClient#nextRead()} can check whether there is data to
-     * read.
+     * Binds the client's socket to the specified local address.
      *
+     * @param localAddress the local address the client is bound to, may be {@code null} to bind to the automatically
+     *                     assigned address
+     * @return this builder
+     * @throws NetException If an error occurs
+     */
+    public @Nonnull TcpClientBuilder bind(@Nullable InetSocketAddress localAddress) {
+        this.localAddress = localAddress;
+        return this;
+    }
+
+    /**
+     * Connects this client's socket to the specified remote address and configures the socket to listen for
+     * connections. And a new {@link TcpClient} instance is returned.
+     *
+     * @param remoteAddress the remote address the client connects to
      * @return a new {@link TcpClient} with the configurations
      * @throws NetException If an error occurs
      */
-    public @Nonnull TcpClient build() throws NetException {
-        if (remoteAddress == null) {
-            throw new NetException("The remote address can not be null.");
-        }
+    public @Nonnull TcpClient connect(@Nonnull InetSocketAddress remoteAddress) throws NetException {
         return Jie.uncheck(() -> new TcpClientImpl(
                 localAddress,
                 remoteAddress,
@@ -112,13 +96,12 @@ public class TcpClientBuilder {
     private static final class TcpClientImpl implements TcpClient {
 
         private final @Nonnull SocketChannel client;
-        private volatile @Nullable InetSocketAddress localAddress;
+        private final @Nonnull InetSocketAddress localAddress;
         private final @Nonnull InetSocketAddress remoteAddress;
         private final @Nonnull Selector selector;
-        private final @Nonnull IOChannel ioChannel;
+        private final @Nonnull TcpClientChannel channel;
 
-        // 0: not started, 1: started, 2: closed
-        private volatile int state = 0;
+        private volatile boolean closed = false;
 
         @SuppressWarnings("resource")
         private TcpClientImpl(
@@ -128,43 +111,29 @@ public class TcpClientBuilder {
             int bufSize
         ) throws Exception {
             this.client = SocketChannel.open();
-            this.localAddress = localAddress;
             this.remoteAddress = remoteAddress;
             socketOptions.forEach((name, value) ->
                 Jie.uncheck(() -> client.setOption(Jie.as(name), value), NetException::new));
             this.selector = Selector.open();
-            this.ioChannel = IOChannel.newChannel(client, bufSize);
-        }
-
-        @Override
-        public synchronized void connect() throws NetException {
-            if (state == 1) {
-                throw new NetException("This client has already connected.");
-            }
-            if (state == 2) {
-                throw new NetException("This client has already closed.");
-            }
-            state = 1;
-            Jie.uncheck(() -> {
-                client.bind(localAddress);
-                client.configureBlocking(true);
-                client.connect(remoteAddress);
-                this.localAddress = (InetSocketAddress) client.getLocalAddress();
-                client.configureBlocking(false);
-                client.register(selector, SelectionKey.OP_READ);
-            }, NetException::new);
+            this.channel = new ChannelImpl(client, bufSize);
+            client.bind(localAddress);
+            this.localAddress = (InetSocketAddress) client.getLocalAddress();
+            client.configureBlocking(true);
+            client.connect(remoteAddress);
+            client.configureBlocking(false);
+            client.register(selector, SelectionKey.OP_READ);
         }
 
         @Override
         public synchronized void close() throws NetException {
-            if (state != 1) {
+            if (closed) {
                 return;
             }
             Jie.uncheck(() -> {
                 client.close();
                 selector.close();
             }, NetException::new);
-            state = 2;
+            closed = true;
         }
 
         @Override
@@ -173,7 +142,7 @@ public class TcpClientBuilder {
         }
 
         @Override
-        public @Nullable InetSocketAddress localAddress() {
+        public @Nonnull InetSocketAddress localAddress() {
             return localAddress;
         }
 
@@ -184,31 +153,48 @@ public class TcpClientBuilder {
 
         @Override
         public boolean isClosed() {
-            return state == 2;
+            return closed;
         }
 
         @Override
-        public @Nonnull IOChannel ioChannel() {
-            return ioChannel;
+        public @Nonnull TcpClientChannel ioChannel() {
+            return channel;
         }
 
-        @Override
-        public void nextRead() {
-            Jie.uncheck(() -> {
-                selector.select();
-                Set<SelectionKey> selectedKeys = selector.selectedKeys();
-                Iterator<SelectionKey> keys = selectedKeys.iterator();
-                while (keys.hasNext()) {
-                    SelectionKey key = keys.next();
-                    keys.remove();
-                    // ignored
-                }
-            }, NetException::new);
-        }
+        private final class ChannelImpl extends AbstractIOChannel implements TcpClientChannel {
 
-        @Override
-        public void wakeUpRead() {
-            selector.wakeup();
+            private ChannelImpl(@Nonnull ByteChannel channel, int bufSize) throws IllegalArgumentException {
+                super(channel, bufSize);
+            }
+
+            @Override
+            public @Nonnull InetSocketAddress remoteAddress() {
+                return remoteAddress;
+            }
+
+            @Override
+            public @Nonnull InetSocketAddress localAddress() {
+                return localAddress;
+            }
+
+            @Override
+            public void awaitReadable() {
+                Jie.uncheck(() -> {
+                    selector.select();
+                    Set<SelectionKey> selectedKeys = selector.selectedKeys();
+                    Iterator<SelectionKey> keys = selectedKeys.iterator();
+                    while (keys.hasNext()) {
+                        SelectionKey key = keys.next();
+                        keys.remove();
+                        // ignored
+                    }
+                }, NetException::new);
+            }
+
+            @Override
+            public void wakeUpReadable() {
+                selector.wakeup();
+            }
         }
     }
 }

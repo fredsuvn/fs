@@ -16,15 +16,15 @@ import java.nio.charset.Charset;
  * methods, if the number of bytes read is {@code -1}, means the channel is closed; if is {@code 0}, means all available
  * data has been read but the channel is still alive.
  * <p>
- * There is a skeletal implementation: {@link AbstractIOChannel}, which can help to implement this interface with
- * minimal effort.
+ * There is a skeletal implementation: {@link AbstractIOChannel}, which can help implement this interface with minimal
+ * effort.
  *
  * @author sunqian
  */
 public interface IOChannel extends ByteChannel {
 
     /**
-     * Returns the available bytes in the channel, possibly empty if no data is available but the channel is still
+     * Returns all available bytes in the channel, possibly empty if no data is available but the channel is still
      * alive, or {@code null} if the channel is closed.
      *
      * @return the available bytes in the channel, possibly empty, or {@code null} if the channel is closed.
@@ -33,7 +33,7 @@ public interface IOChannel extends ByteChannel {
     byte @Nullable [] availableBytes() throws IORuntimeException;
 
     /**
-     * Returns the available bytes as a buffer in the channel, possibly empty if no data is available but the channel is
+     * Returns all available bytes as a buffer in the channel, possibly empty if no data is available but the channel is
      * still alive, or {@code null} if the channel is closed. The position of the buffer is {@code 0}.
      *
      * @return the available bytes as a buffer in the channel, possibly empty, may be {@code null} if the channel is
@@ -44,7 +44,7 @@ public interface IOChannel extends ByteChannel {
     ByteBuffer availableBuffer() throws IORuntimeException;
 
     /**
-     * Returns the available bytes as a string in the channel, possibly empty if no data is available but the channel is
+     * Returns all available bytes as a string in the channel, possibly empty if no data is available but the channel is
      * still alive, or {@code null} if the channel is closed. The string is decoded by the
      * {@link CharsKit#defaultCharset()}.
      *
@@ -56,7 +56,7 @@ public interface IOChannel extends ByteChannel {
     String availableString() throws IORuntimeException;
 
     /**
-     * Returns the available bytes as a string in the channel, possibly empty if no data is available but the channel is
+     * Returns all available bytes as a string in the channel, possibly empty if no data is available but the channel is
      * still alive, or {@code null} if the channel is closed. The string is decoded by the specified charset.
      *
      * @param charset the specified charset
@@ -99,14 +99,4 @@ public interface IOChannel extends ByteChannel {
      * @throws IORuntimeException if an error occurs
      */
     void writeString(@Nonnull String src, @Nonnull Charset charset) throws IORuntimeException;
-
-    /**
-     * Blocks current thread and waits for the channel to be readable.
-     */
-    void awaitReadable();
-
-    /**
-     * Wakes up the thread blocked in {@link #awaitReadable()}.
-     */
-    void wakeUpReadable();
 }

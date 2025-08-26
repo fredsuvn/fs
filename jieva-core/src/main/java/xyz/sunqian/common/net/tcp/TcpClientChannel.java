@@ -6,11 +6,11 @@ import xyz.sunqian.common.io.communicate.IOChannel;
 import java.net.InetSocketAddress;
 
 /**
- * {@link IOChannel} for TCP network.
+ * Client {@link IOChannel} for of TCP network.
  *
  * @author sunqian
  */
-public interface TcpChannel extends IOChannel {
+public interface TcpClientChannel extends IOChannel {
 
     /**
      * Returns the remote address of this channel.
@@ -27,4 +27,14 @@ public interface TcpChannel extends IOChannel {
      */
     @Nonnull
     InetSocketAddress localAddress();
+
+    /**
+     * Blocks current thread and waits for the channel to be readable.
+     */
+    void awaitReadable();
+
+    /**
+     * Wakes up the thread blocked in {@link #awaitReadable()}.
+     */
+    void wakeUpReadable();
 }

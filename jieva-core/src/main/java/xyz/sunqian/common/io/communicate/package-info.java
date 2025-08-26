@@ -1,6 +1,10 @@
 /**
  * Provides interfaces and classes for IO communication, typically for network or IPC (Inter-Process Communication).
  * <p>
+ * Utilities:
+ * <ul>
+ *     <li>{@link xyz.sunqian.common.io.communicate.IOChannelKit}</li>
+ * </ul>
  * Interfaces:
  * <ul>
  *     <li>{@link xyz.sunqian.common.io.communicate.IOChannelHandler}</li>

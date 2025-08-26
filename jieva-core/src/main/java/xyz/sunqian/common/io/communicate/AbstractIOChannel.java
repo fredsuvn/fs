@@ -14,13 +14,11 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.charset.Charset;
 
 /**
- * An abstract class provides a skeletal implementation of the {@link IOChannel} to implement the {@link IOChannel} with
- * minimal effort.
+ * Skeletal implementation of {@link IOChannel} to help minimize effort in implementing {@link IOChannel}.
  * <p>
  * The read and write methods of this class is based on a given {@link ByteChannel}, and the advanced I/O operations are
  * based on the {@link #operator} witch is gotten by the specified buffer size. These two field is accessible for
- * subclasses: {@link #channel} and {@link #operator}. The subclass only needs to implement {@link #awaitReadable()} and
- * {@link #wakeUpReadable()}.
+ * subclasses: {@link #channel} and {@link #operator}.
  */
 public abstract class AbstractIOChannel implements IOChannel {
 
@@ -44,11 +42,10 @@ public abstract class AbstractIOChannel implements IOChannel {
         if (!channel.isOpen()) {
             return -1;
         }
-        int ret = channel.read(dst);
-        if (ret < 0) {
-            channel.close();
-        }
-        return ret;
+        // if (ret < 0) {
+        //     channel.close();
+        // }
+        return channel.read(dst);
     }
 
     @Override
