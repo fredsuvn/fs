@@ -3,6 +3,7 @@ package xyz.sunqian.common.io;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 
+import java.io.Closeable;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.nio.CharBuffer;
@@ -13,7 +14,7 @@ import java.nio.CharBuffer;
  *
  * @author sunqian
  */
-public interface CharReader extends IORuntimeCloseable {
+public interface CharReader extends Closeable {
 
     /**
      * Wraps the given reader as a new {@link CharReader}.
@@ -476,6 +477,7 @@ public interface CharReader extends IORuntimeCloseable {
      *
      * @throws IORuntimeException if an I/O error occurs
      */
+    @Override
     void close() throws IORuntimeException;
 
     /**

@@ -3,6 +3,7 @@ package xyz.sunqian.common.io;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 
+import java.io.Closeable;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
@@ -15,7 +16,7 @@ import java.nio.channels.WritableByteChannel;
  *
  * @author sunqian
  */
-public interface ByteReader extends IORuntimeCloseable {
+public interface ByteReader extends Closeable {
 
     /**
      * Wraps the given stream as a new {@link ByteReader}.
@@ -534,6 +535,7 @@ public interface ByteReader extends IORuntimeCloseable {
      *
      * @throws IORuntimeException if an I/O error occurs
      */
+    @Override
     void close() throws IORuntimeException;
 
     /**

@@ -2101,9 +2101,8 @@ public class IOKit {
     }
 
     /**
-     * Closes the given closeable object, which is an instance of {@link Closeable} or {@link AutoCloseable} or
-     * {@link IORuntimeCloseable}. If the given object is not an instance of above interfaces, then invoking this method
-     * has no effect.
+     * Closes the given closeable object, which is an instance of {@link Closeable} or {@link AutoCloseable}. If the
+     * given object is not an instance of above interfaces, then invoking this method has no effect.
      *
      * @param closeable the given closeable object
      * @throws IOException if an I/O error occurs
@@ -2116,12 +2115,6 @@ public class IOKit {
                 ((AutoCloseable) closeable).close();
             } catch (IOException e) {
                 throw e;
-            } catch (Exception e) {
-                throw new IOException(e);
-            }
-        } else if (closeable instanceof IORuntimeCloseable) {
-            try {
-                ((IORuntimeCloseable) closeable).close();
             } catch (Exception e) {
                 throw new IOException(e);
             }
