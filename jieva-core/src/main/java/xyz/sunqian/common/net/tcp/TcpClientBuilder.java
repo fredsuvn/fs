@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Builder for building new instances of {@link TcpClient} by Socket.
+ * Builder for building new instances of {@link TcpClient} by {@link SocketChannel}.
  *
  * @author sunqian
  */
@@ -185,6 +185,11 @@ public class TcpClientBuilder {
             @Override
             public void wakeUpReadable() {
                 selector.wakeup();
+            }
+
+            @Override
+            public @Nonnull SocketChannel socketChannel() {
+                return client;
             }
         }
     }

@@ -91,11 +91,12 @@ public class TcpTest implements DataTest, PrintTest {
             .handler(new TcpChannelHandler() {
 
                 @Override
-                public void channelOpen(@Nonnull TcpChannel channel) {
+                public void channelOpen(@Nonnull TcpChannel channel) throws Exception {
                     assertTrue(channel.isOpen());
                     XThread thread = (XThread) Thread.currentThread();
                     openLatches[thread.num].countDown();
-                    printFor("client open", thread.num);
+                    printFor("client open",
+                        thread.num, ", addr: ", channel.socketChannel().getRemoteAddress());
                 }
 
                 @Override
@@ -148,6 +149,8 @@ public class TcpTest implements DataTest, PrintTest {
             assertTrue(client.isConnected());
             assertFalse(client.isClosed());
             clients[i] = client;
+            printFor("client connect",
+                i, ", addr: ", client.ioChannel().socketChannel().getRemoteAddress());
         }
 
         // worker threads

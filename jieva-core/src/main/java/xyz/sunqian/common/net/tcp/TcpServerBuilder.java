@@ -28,7 +28,10 @@ import java.util.Set;
 import java.util.concurrent.ThreadFactory;
 
 /**
- * Builder for building new instances of {@link TcpServer} by Socket.
+ * Builder for building new instances of {@link TcpServer} by {@link ServerSocketChannel} and {@link SocketChannel}.
+ * <p>
+ * The server built by this builder requires a main thread and at least one worker thread, the main thread is
+ * responsible for accepting new client, and the worker threads are responsible for handling connected client.
  *
  * @author sunqian
  */
@@ -289,7 +292,7 @@ public class TcpServerBuilder {
                 SelectionKey key = keys.next();
                 keys.remove();
                 handleAccept(key, workers);
-                //key.cancel();
+                // key.cancel();
             }
         }
 
@@ -482,6 +485,11 @@ public class TcpServerBuilder {
                 @Override
                 public @Nonnull InetSocketAddress localAddress() {
                     return localAddress;
+                }
+
+                @Override
+                public @Nonnull SocketChannel socketChannel() {
+                    return client;
                 }
 
                 @Override

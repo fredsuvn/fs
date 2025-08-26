@@ -1,8 +1,10 @@
 package xyz.sunqian.common.net.tcp;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.io.communicate.IOChannel;
 
 import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 
 /**
  * Client {@link IOChannel} for of TCP network.
@@ -24,4 +26,15 @@ public interface TcpClientChannel extends IOChannel {
      * Wakes up the thread blocked in {@link #awaitReadable()}.
      */
     void wakeUpReadable();
+
+    /**
+     * Returns the internal {@link SocketChannel} that supports this channel.
+     * <p>
+     * This method is used to provide high-performance (such as direct buffer) data transmission support, and any
+     * modifications to the internal socket channel will affect the client.
+     *
+     * @return the internal {@link SocketChannel} that supports this channel
+     */
+    @Nonnull
+    SocketChannel socketChannel();
 }

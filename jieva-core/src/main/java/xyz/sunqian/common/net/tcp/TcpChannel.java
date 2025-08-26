@@ -5,6 +5,7 @@ import xyz.sunqian.common.io.communicate.IOChannel;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 
 /**
  * {@link IOChannel} for TCP network.
@@ -32,4 +33,15 @@ public interface TcpChannel extends IOChannel {
      */
     @Nonnull
     InetSocketAddress localAddress();
+
+    /**
+     * Returns the internal {@link SocketChannel} that supports this channel.
+     * <p>
+     * This method is used to provide high-performance (such as direct buffer) data transmission support, and any
+     * modifications to the internal socket channel will affect the server.
+     *
+     * @return the internal {@link SocketChannel} that supports this channel
+     */
+    @Nonnull
+    SocketChannel socketChannel();
 }
