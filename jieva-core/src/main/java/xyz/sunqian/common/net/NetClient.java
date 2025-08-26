@@ -9,7 +9,7 @@ import xyz.sunqian.common.io.communicate.IOChannel;
  * @param <A> the type of the address in the network
  * @author sunqian
  */
-public interface NetClient<A> {
+public interface NetClient<A> extends Cloneable {
 
     /**
      * Disconnects and closes this client.

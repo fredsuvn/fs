@@ -13,7 +13,7 @@ import java.util.List;
  * @param <A> the type of the address in the network
  * @author sunqian
  */
-public interface NetServer<A> {
+public interface NetServer<A> extends Cloneable {
 
     /**
      * Blocks current thread until all threads of this server terminates, or interrupted via an
@@ -45,7 +45,8 @@ public interface NetServer<A> {
      *
      * @return all current workers of this server
      */
-    @Nonnull List<@Nonnull Worker> workers();
+    @Nonnull
+    List<@Nonnull Worker> workers();
 
     /**
      * Returns whether this server is closed.

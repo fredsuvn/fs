@@ -64,6 +64,7 @@ public class UdpTest implements PrintTest {
         sender.sendString("hello", server.localAddress());
         sender.datagramChannel().send(ByteBuffer.wrap("hello".getBytes()), server.localAddress());
         readLatch.countDown();
+        sender.close();
         server.close();
         server.close();
         server.await();

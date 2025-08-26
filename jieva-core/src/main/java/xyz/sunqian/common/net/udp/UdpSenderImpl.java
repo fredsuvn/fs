@@ -29,6 +29,11 @@ final class UdpSenderImpl implements UdpSender {
     }
 
     @Override
+    public void close() throws NetException {
+        Jie.uncheck(channel::close, NetException::new);
+    }
+
+    @Override
     public @Nonnull DatagramChannel datagramChannel() {
         return channel;
     }

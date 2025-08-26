@@ -15,7 +15,6 @@
  *     <li>{@link xyz.sunqian.common.net.tcp}</li>
  *     <li>{@link xyz.sunqian.common.net.udp}</li>
  *     <li>{@link xyz.sunqian.common.net.http}</li>
- *     <li>{@link xyz.sunqian.common.net.socket}</li>
  * </ul>
  */
 package xyz.sunqian.common.net;

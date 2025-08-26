@@ -16,7 +16,7 @@ import java.util.concurrent.Callable;
  *
  * @author sunqian
  */
-public interface UdpSender {
+public interface UdpSender extends Cloneable {
 
     /**
      * Returns a new UDP sender which disables broadcast. This method is equivalent to {@code newSender(false)}.
@@ -83,6 +83,13 @@ public interface UdpSender {
     ) throws NetException {
         sendBytes(str.getBytes(charset), address);
     }
+
+    /**
+     * Closes this sender.
+     *
+     * @throws NetException if any error occurs
+     */
+    void close() throws NetException;
 
     /**
      * Returns the underlying socket channel that supports this sender.
