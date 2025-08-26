@@ -289,6 +289,7 @@ public class TcpServerBuilder {
                 SelectionKey key = keys.next();
                 keys.remove();
                 handleAccept(key, workers);
+                //key.cancel();
             }
         }
 
@@ -491,6 +492,8 @@ public class TcpServerBuilder {
                     closed = true;
                     try {
                         client.close();
+                        SelectionKey key = client.keyFor(selector);
+                        key.cancel();
                     } catch (Exception e) {
                         // handler.exceptionCaught(this, e);
                     } finally {

@@ -131,6 +131,7 @@ public class TcpClientBuilder {
             }
             Jie.uncheck(() -> {
                 client.close();
+                client.keyFor(selector).cancel();
                 selector.close();
             }, NetException::new);
             closed = true;

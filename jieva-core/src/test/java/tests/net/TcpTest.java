@@ -323,6 +323,7 @@ public class TcpTest implements DataTest, PrintTest {
                     String msg = channel.availableString();
                     if (msg == null) {
                         channel.close();
+                        return;
                     }
                     printFor("telnet read", channel.remoteAddress(), ": ", msg);
                 }

@@ -2,8 +2,14 @@ package xyz.sunqian.common.net.tcp;
 
 import xyz.sunqian.common.io.communicate.IOChannel;
 
+import java.nio.ByteBuffer;
+
 /**
  * Client {@link IOChannel} for of TCP network.
+ * <p>
+ * When the remote endpoint sends a {@code FIN} message, {@link #isOpen()} may still return {@code true} (but
+ * {@link #read(ByteBuffer)} will return {@code -1}) because in a TCP connection, the {@code FIN} message requires an
+ * {@code ACK} response. Using {@link #close()} can close this channel.
  *
  * @author sunqian
  */
