@@ -260,7 +260,7 @@ public class TcpServerBuilder {
         }
 
         @Override
-        public List<NetServer.Worker> workers() {
+        public @Nonnull List<NetServer.@Nonnull Worker> workers() {
             return ListKit.list(workers);
         }
 

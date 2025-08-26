@@ -45,7 +45,7 @@ public interface NetServer<A> {
      *
      * @return all current workers of this server
      */
-    List<Worker> workers();
+    @Nonnull List<@Nonnull Worker> workers();
 
     /**
      * Returns whether this server is closed.
