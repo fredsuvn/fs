@@ -5,7 +5,8 @@
  *     .handler(handler)
  *     .bind();
  * TcpClient client = TcpClient.newBuilder()
- *     .build();
+ *     .bind(address)
+ *     .connect();
  * }</pre>
  * <p>
  * Core interfaces:

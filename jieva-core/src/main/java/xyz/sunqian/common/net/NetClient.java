@@ -1,7 +1,6 @@
 package xyz.sunqian.common.net;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.io.communicate.IOChannel;
 
 /**
@@ -21,6 +20,8 @@ public interface NetClient<A> {
 
     /**
      * Returns the remote address this client connects to.
+     * <p>
+     * If the client is closed, it still returns the address at which the connection was alive.
      *
      * @return the remote address this client connects to
      */
@@ -28,11 +29,13 @@ public interface NetClient<A> {
     A remoteAddress();
 
     /**
-     * Returns the address this client is bound to, may be {@code null} if the client has not connected yet.
+     * Returns the address this client is bound to.
+     * <p>
+     * If the client is closed, it still returns the address at which the connection was alive.
      *
-     * @return the address this client is bound to, may be {@code null} if the client has not connected yet
+     * @return the address this client is bound to
      */
-    @Nullable
+    @Nonnull
     A localAddress();
 
     /**

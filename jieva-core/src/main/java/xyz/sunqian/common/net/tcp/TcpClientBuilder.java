@@ -168,16 +168,6 @@ public class TcpClientBuilder {
             }
 
             @Override
-            public @Nonnull InetSocketAddress remoteAddress() {
-                return remoteAddress;
-            }
-
-            @Override
-            public @Nonnull InetSocketAddress localAddress() {
-                return localAddress;
-            }
-
-            @Override
             public void awaitReadable() {
                 Jie.uncheck(() -> {
                     selector.select();

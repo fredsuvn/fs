@@ -9,12 +9,6 @@
  * <ul>
  *     <li>{@link xyz.sunqian.common.net.NetServer}</li>
  *     <li>{@link xyz.sunqian.common.net.NetClient}</li>
- *     <li>{@link xyz.sunqian.common.net.NetChannelContext}</li>
- *     <li>{@link xyz.sunqian.common.net.NetChannelHandler}</li>
- * </ul>
- * Wrappers:
- * <ul>
- *     <li>{@link xyz.sunqian.common.net.NetChannelHandlerWrapper}</li>
  * </ul>
  * Subpackages:
  * <ul>

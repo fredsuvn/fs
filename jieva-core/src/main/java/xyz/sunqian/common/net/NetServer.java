@@ -1,7 +1,6 @@
 package xyz.sunqian.common.net;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.annotations.Nullable;
 
 import java.util.List;
 
@@ -32,11 +31,13 @@ public interface NetServer<A> {
     void close() throws NetException;
 
     /**
-     * Returns the address this server is bound to, may be {@code null} if the server is closed.
+     * Returns the address this server is bound to.
+     * <p>
+     * If the server is closed, it still returns the address at which the server was alive.
      *
-     * @return the address this server is bound to, may be {@code null} if the server is closed
+     * @return the address this server is bound to
      */
-    @Nullable
+    @Nonnull
     A localAddress();
 
     /**

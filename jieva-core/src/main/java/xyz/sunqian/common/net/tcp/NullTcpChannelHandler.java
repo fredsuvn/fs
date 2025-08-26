@@ -23,6 +23,5 @@ final class NullTcpChannelHandler implements TcpChannelHandler {
 
     @Override
     public void exceptionCaught(@Nullable TcpChannel channel, @Nonnull Throwable cause) {
-
     }
 }

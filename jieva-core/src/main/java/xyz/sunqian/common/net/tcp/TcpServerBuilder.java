@@ -184,6 +184,7 @@ public class TcpServerBuilder {
         private final @Nonnull WorkerImpl @Nonnull [] workers;
         private final @Nonnull TcpChannelHandler handler;
         private final int bufSize;
+        private final @Nonnull InetSocketAddress localAddress;
 
         private volatile boolean closed = false;
 
@@ -214,6 +215,7 @@ public class TcpServerBuilder {
                 worker.thread = newThread(workerthreadFactory, worker);
             }
             server.bind(localAddress, backlog);
+            this.localAddress = (InetSocketAddress) server.getLocalAddress();
             mainThread.start();
         }
 
@@ -251,7 +253,7 @@ public class TcpServerBuilder {
 
         @Override
         public @Nonnull InetSocketAddress localAddress() throws NetException {
-            return (InetSocketAddress) Jie.uncheck(server::getLocalAddress, NetException::new);
+            return localAddress;
         }
 
         @Override

@@ -19,7 +19,7 @@ public class IOChannelKit {
     public static <C extends IOChannel> void channelOpen(@Nonnull IOChannelHandler<C> handler, @Nonnull C channel) {
         try {
             handler.channelOpen(channel);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             handler.exceptionCaught(channel, e);
         }
     }
@@ -34,7 +34,7 @@ public class IOChannelKit {
     public static <C extends IOChannel> void channelClose(@Nonnull IOChannelHandler<C> handler, @Nonnull C channel) {
         try {
             handler.channelClose(channel);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             handler.exceptionCaught(channel, e);
         }
     }
@@ -49,7 +49,7 @@ public class IOChannelKit {
     public static <C extends IOChannel> void channelRead(@Nonnull IOChannelHandler<C> handler, @Nonnull C channel) {
         try {
             handler.channelRead(channel);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             handler.exceptionCaught(channel, e);
         }
     }
