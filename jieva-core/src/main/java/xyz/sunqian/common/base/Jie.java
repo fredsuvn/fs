@@ -6,7 +6,6 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.base.exception.AwaitingException;
 import xyz.sunqian.common.base.exception.UnknownArrayTypeException;
-import xyz.sunqian.common.base.exception.WrappedException;
 import xyz.sunqian.common.base.process.ProcessKit;
 import xyz.sunqian.common.base.string.StringKit;
 import xyz.sunqian.common.base.thread.ThreadKit;
@@ -175,33 +174,21 @@ public class Jie {
         }
     }
 
-    public static void ignoreException(@Nonnull VoidCallable action) {
-        try {
-            action.call();
-        } catch (Exception ignored) {
-        }
-    }
-
     /**
-     * Runs the given action and wraps any exception into the {@link WrappedException}. The logic as follows:
+     * Runs the given action and ignores any exception thrown by the action. The logic as follows:
      * <pre>{@code
      * try {
-     *     return action.call();
-     * } catch (Exception e) {
-     *     throw new WrappedException(e);
+     *     action.call();
+     * } catch (Exception ignored) {
      * }
      * }</pre>
      *
      * @param action the given action
-     * @param <T>    the type of the result
-     * @return the result of the given action
-     * @throws WrappedException if any exception occurs
      */
-    public static <T> T call(@Nonnull Callable<T> action) throws WrappedException {
+    public static void ignoreException(@Nonnull VoidCallable action) {
         try {
-            return action.call();
-        } catch (Exception e) {
-            throw new WrappedException(e);
+            action.call();
+        } catch (Exception ignored) {
         }
     }
 

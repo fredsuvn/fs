@@ -5,7 +5,6 @@ import tests.utils.Utils;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.exception.UnknownArrayTypeException;
-import xyz.sunqian.common.base.exception.WrappedException;
 import xyz.sunqian.common.base.system.OSKit;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.test.AssertTest;
@@ -76,10 +75,6 @@ public class JieTest implements AssertTest, PrintTest {
         {
             // call
             Exception cause = new Exception();
-            WrappedException we = expectThrows(WrappedException.class, () -> Jie.call(() -> {
-                throw cause;
-            }));
-            assertSame(we.getCause(), cause);
             assertEquals(Jie.call(() -> 1, 2), 1);
             assertEquals(Jie.call(() -> throwEx(cause), 2), 2);
             assertEquals(Jie.callUncheck(() -> 1, e -> 2), 1);
@@ -87,6 +82,12 @@ public class JieTest implements AssertTest, PrintTest {
                 assertSame(e, cause);
                 return 2;
             }), 2);
+        }
+        {
+            // ignore
+            Jie.ignoreException(() -> {
+                throw new Exception();
+            });
         }
     }
 
