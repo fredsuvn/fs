@@ -347,7 +347,7 @@ public class TcpTest implements DataTest, PrintTest {
                 }
             })
             .bind();
-        printFor("Telnet address:", server.localAddress());
+        printFor("Telnet address", server.localAddress());
         server.await();
     }
 }

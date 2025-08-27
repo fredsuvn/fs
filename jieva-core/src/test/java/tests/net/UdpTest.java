@@ -5,12 +5,14 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.function.callable.VoidCallable;
+import xyz.sunqian.common.net.NetException;
 import xyz.sunqian.common.net.udp.UdpSender;
 import xyz.sunqian.common.net.udp.UdpServer;
 import xyz.sunqian.common.net.udp.UdpServerHandler;
 import xyz.sunqian.test.PrintTest;
 
 import java.lang.reflect.Method;
+import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -32,6 +34,7 @@ public class UdpTest implements PrintTest {
         InetSocketAddress address = new InetSocketAddress(InetAddress.getLocalHost(), 0);
         CountDownLatch closeLatch = new CountDownLatch(1);
         CountDownLatch readLatch = new CountDownLatch(2);
+        String sentData = "hello";
         UdpServer server = UdpServer.newBuilder()
             .maxPacketSize(1024)
             .mainThreadFactory(r -> new Thread(() -> {
@@ -46,7 +49,7 @@ public class UdpTest implements PrintTest {
                 ) throws Exception {
                     String msg = new String(data, CharsKit.defaultCharset());
                     printFor("udp read", msg);
-                    assertEquals(msg, "hello");
+                    assertEquals(msg, sentData);
                     throw new XException();
                 }
 
@@ -61,8 +64,10 @@ public class UdpTest implements PrintTest {
             .socketOption(StandardSocketOptions.SO_BROADCAST, true)
             .bind(address);
         printFor("server start", server.localAddress());
-        sender.sendString("hello", server.localAddress());
-        sender.datagramChannel().send(ByteBuffer.wrap("hello".getBytes()), server.localAddress());
+        sender.sendString(sentData, server.localAddress());
+        byte[] sentBytes = sentData.getBytes(CharsKit.defaultCharset());
+        sender.channel().send(ByteBuffer.wrap(sentBytes), server.localAddress());
+        sender.sendPacket(new DatagramPacket(sentBytes, 0, sentBytes.length, server.localAddress()));
         readLatch.countDown();
         sender.close();
         server.close();
@@ -81,6 +86,7 @@ public class UdpTest implements PrintTest {
             sender.sendString("hello world", address);
             assertFalse(server.isClosed());
             assertEquals(server.workers().size(), 0);
+            sender.close();
             server.close();
             assertTrue(server.isClosed());
             // exception: doWork()
@@ -107,5 +113,40 @@ public class UdpTest implements PrintTest {
     }
 
     private static final class XException extends Exception {
+    }
+
+    @Test
+    public void testBroadcast() throws Exception {
+        CountDownLatch readLatch = new CountDownLatch(1);
+        String sentData = "hello";
+        UdpServer server = UdpServer.newBuilder()
+            .handler(new UdpServerHandler() {
+                @Override
+                public void channelRead(
+                    @Nonnull DatagramChannel channel, byte @Nonnull [] data, @Nonnull SocketAddress address
+                ) throws Exception {
+                    String msg = new String(data, CharsKit.defaultCharset());
+                    printFor("udp read", address, ": ", msg);
+                    assertEquals(msg, sentData);
+                    readLatch.countDown();
+                }
+
+                @Override
+                public void exceptionCaught(@Nullable DatagramChannel channel, @Nonnull Throwable cause) {
+                }
+            })
+            .bind();
+        printFor("Udp address", server.localAddress());
+        UdpSender sender = UdpSender.newSender(true);
+        printFor("Broadcast address", sender.broadcastAddress());
+        printFor("Broadcast address refresh", sender.refreshBroadcastAddress());
+        sender.sendBroadcast(sentData, server.localAddress().getPort());
+        readLatch.await();
+        sender.close();
+        UdpSender nSender = UdpSender.newSender();
+        expectThrows(NetException.class, nSender::broadcastAddress);
+        expectThrows(NetException.class, () -> nSender.sendBroadcast(sentData, server.localAddress().getPort()));
+        server.close();
+        server.await();
     }
 }
