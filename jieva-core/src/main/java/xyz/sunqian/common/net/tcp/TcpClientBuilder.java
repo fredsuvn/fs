@@ -5,13 +5,14 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.CheckKit;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.io.IOKit;
-import xyz.sunqian.common.io.communicate.AbstractIOChannel;
+import xyz.sunqian.common.io.IOOperator;
+import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.net.NetException;
 
 import java.net.InetSocketAddress;
 import java.net.SocketOption;
 import java.net.StandardSocketOptions;
-import java.nio.channels.ByteChannel;
+import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
@@ -99,7 +100,7 @@ public class TcpClientBuilder {
         private final @Nonnull InetSocketAddress localAddress;
         private final @Nonnull InetSocketAddress remoteAddress;
         private final @Nonnull Selector selector;
-        private final @Nonnull TcpClientChannel channel;
+        private final @Nonnull IOOperator ioOperator;
 
         private volatile boolean closed = false;
 
@@ -115,13 +116,13 @@ public class TcpClientBuilder {
             socketOptions.forEach((name, value) ->
                 Jie.uncheck(() -> client.setOption(Jie.as(name), value), NetException::new));
             this.selector = Selector.open();
-            this.channel = new ChannelImpl(client, bufSize);
             client.bind(localAddress);
             this.localAddress = (InetSocketAddress) client.getLocalAddress();
             client.configureBlocking(true);
             client.connect(remoteAddress);
             client.configureBlocking(false);
             client.register(selector, SelectionKey.OP_READ);
+            this.ioOperator = IOOperator.get(bufSize);
         }
 
         @Override
@@ -158,39 +159,38 @@ public class TcpClientBuilder {
         }
 
         @Override
-        public @Nonnull TcpClientChannel ioChannel() {
-            return channel;
+        public @Nonnull SocketChannel channel() {
+            return client;
         }
 
-        private final class ChannelImpl extends AbstractIOChannel implements TcpClientChannel {
+        @Override
+        public byte @Nullable [] availableBytes() throws IORuntimeException {
+            return ioOperator.availableBytes(client);
+        }
 
-            private ChannelImpl(@Nonnull ByteChannel channel, int bufSize) throws IllegalArgumentException {
-                super(channel, bufSize);
-            }
+        @Override
+        public @Nullable ByteBuffer availableBuffer() throws IORuntimeException {
+            return ioOperator.available(client);
+        }
 
-            @Override
-            public void awaitReadable() {
-                Jie.uncheck(() -> {
-                    selector.select();
-                    Set<SelectionKey> selectedKeys = selector.selectedKeys();
-                    Iterator<SelectionKey> keys = selectedKeys.iterator();
-                    while (keys.hasNext()) {
-                        SelectionKey key = keys.next();
-                        keys.remove();
-                        // ignored
-                    }
-                }, NetException::new);
-            }
+        @Override
+        public void awaitReadable() {
+            Jie.uncheck(() -> {
+                selector.select();
+                Set<SelectionKey> selectedKeys = selector.selectedKeys();
+                Iterator<SelectionKey> keys = selectedKeys.iterator();
+                while (keys.hasNext()) {
+                    // SelectionKey key = keys.next();
+                    keys.next();
+                    // ignored
+                    keys.remove();
+                }
+            }, NetException::new);
+        }
 
-            @Override
-            public void wakeUpReadable() {
-                selector.wakeup();
-            }
-
-            @Override
-            public @Nonnull SocketChannel socketChannel() {
-                return client;
-            }
+        @Override
+        public void wakeUpReadable() {
+            selector.wakeup();
         }
     }
 }

@@ -1,15 +1,17 @@
 package xyz.sunqian.common.net;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.io.communicate.IOChannel;
+
+import java.nio.channels.Channel;
 
 /**
- * This interface represents a network client.
+ * This interface represents a network client, based on an underlying {@link Channel}.
  *
  * @param <A> the type of the address in the network
+ * @param <C> the type of the underlying channel
  * @author sunqian
  */
-public interface NetClient<A> extends Cloneable {
+public interface NetClient<A, C extends Channel> extends Cloneable {
 
     /**
      * Disconnects and closes this client.
@@ -53,10 +55,10 @@ public interface NetClient<A> extends Cloneable {
     boolean isClosed();
 
     /**
-     * Returns an I/O channel of this client.
+     * Returns the underlying channel of this client.
      *
-     * @return an I/O channel of this client
+     * @return the underlying channel of this client
      */
     @Nonnull
-    IOChannel ioChannel();
+    C channel();
 }

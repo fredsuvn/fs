@@ -6,11 +6,8 @@ import java.util.List;
 
 /**
  * This interface represents a network server.
- * <p>
- * A network server is typically has a main thread, which is responsible for accepting new client, and a group of worker
- * threads, which are responsible for handling connected client.
  *
- * @param <A> the type of the address in the network
+ * @param <A> the type of the address in the current network
  * @author sunqian
  */
 public interface NetServer<A> extends Cloneable {

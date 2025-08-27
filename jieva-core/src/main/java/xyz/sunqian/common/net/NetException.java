@@ -1,10 +1,7 @@
 package xyz.sunqian.common.net;
 
-import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.io.IORuntimeException;
-
-import java.io.IOException;
 
 /**
  * Exception for network.
@@ -46,14 +43,5 @@ public class NetException extends IORuntimeException {
      */
     public NetException(@Nullable Throwable cause) {
         super(cause);
-    }
-
-    /**
-     * Constructs with the {@link IOException}.
-     *
-     * @param cause the {@link IOException}
-     */
-    public NetException(@Nonnull IOException cause) {
-        this(cause.getMessage(), cause.getCause());
     }
 }

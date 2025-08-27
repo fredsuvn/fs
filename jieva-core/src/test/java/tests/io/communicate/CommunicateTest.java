@@ -1,21 +1,18 @@
 package tests.io.communicate;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.bytes.BytesBuilder;
 import xyz.sunqian.common.base.chars.CharsKit;
-import xyz.sunqian.common.base.value.IntVar;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IORuntimeException;
-import xyz.sunqian.common.io.communicate.AbstractIOChannel;
-import xyz.sunqian.common.io.communicate.IOChannel;
-import xyz.sunqian.common.io.communicate.IOChannelHandler;
-import xyz.sunqian.common.io.communicate.IOChannelKit;
+import xyz.sunqian.common.io.communicate.AbstractChannelContext;
+import xyz.sunqian.common.io.communicate.ChannelContext;
 import xyz.sunqian.test.DataTest;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
+import java.nio.channels.ClosedChannelException;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -40,7 +37,10 @@ public class CommunicateTest implements DataTest {
             }
 
             @Override
-            public int write(ByteBuffer src) {
+            public int write(ByteBuffer src) throws IOException {
+                if (closed) {
+                    throw new ClosedChannelException();
+                }
                 int remaining = src.remaining();
                 writer.append(src);
                 return remaining;
@@ -56,10 +56,10 @@ public class CommunicateTest implements DataTest {
                 closed = true;
             }
         };
-        IOChannel ic = new AbstractIOChannel(bc, 1024) {};
-        assertTrue(ic.isOpen());
+        ChannelContext<ByteChannel> ic = new AbstractChannelContext<ByteChannel>(bc, 1024) {};
+        assertTrue(ic.channel().isOpen());
         assertEquals(ic.availableString(), "hello world");
-        assertTrue(ic.isOpen());
+        assertTrue(ic.channel().isOpen());
         assertNull(ic.availableString());
         reader.clear();
         assertEquals(ic.availableBytes(), data);
@@ -70,42 +70,10 @@ public class CommunicateTest implements DataTest {
         ic.writeString("hello world");
         assertEquals(writer.toString(), "hello world");
         assertNull(ic.availableString());
-        assertTrue(ic.isOpen());
-        ic.close();
-        assertFalse(ic.isOpen());
+        assertTrue(ic.channel().isOpen());
+        ic.channel().close();
+        assertFalse(ic.channel().isOpen());
         expectThrows(IORuntimeException.class, () -> ic.writeString("hello world"));
         assertNull(ic.availableString());
-    }
-
-    @Test
-    public void testChannelKit() throws Exception {
-        IntVar count = IntVar.of(0);
-        IOChannelHandler<IOChannel> handler = new IOChannelHandler<IOChannel>() {
-
-            @Override
-            public void channelOpen(@Nonnull IOChannel channel) throws Exception {
-                throw new Exception();
-            }
-
-            @Override
-            public void channelClose(@Nonnull IOChannel channel) throws Exception {
-                throw new Exception();
-            }
-
-            @Override
-            public void channelRead(@Nonnull IOChannel channel) throws Exception {
-                throw new Exception();
-            }
-
-            @Override
-            public void exceptionCaught(@Nullable IOChannel channel, @Nonnull Throwable cause) {
-                count.getAndIncrement();
-            }
-        };
-        IOChannel channel = new AbstractIOChannel(null, 1) {};
-        IOChannelKit.channelOpen(handler, channel);
-        IOChannelKit.channelClose(handler, channel);
-        IOChannelKit.channelRead(handler, channel);
-        assertEquals(count.get(), 3);
     }
 }

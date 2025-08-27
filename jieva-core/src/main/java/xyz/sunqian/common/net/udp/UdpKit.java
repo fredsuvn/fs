@@ -12,15 +12,7 @@ import java.nio.channels.DatagramChannel;
  */
 public class UdpKit {
 
-    /**
-     * Invokes {@link UdpServerHandler#channelRead(DatagramChannel, byte[], SocketAddress)}, and all {@link Throwable}
-     * thrown by it will be caught and passed to {@link UdpServerHandler#exceptionCaught(DatagramChannel, Throwable)}.
-     *
-     * @param handler the handler of which {@link UdpServerHandler#channelRead(DatagramChannel, byte[], SocketAddress)}
-     *                is invoked
-     * @param channel the channel to be handled
-     */
-    public static void channelRead(
+    static void channelRead(
         @Nonnull UdpServerHandler handler,
         @Nonnull DatagramChannel channel,
         byte @Nonnull [] data,

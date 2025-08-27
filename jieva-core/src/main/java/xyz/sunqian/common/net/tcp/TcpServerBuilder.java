@@ -7,8 +7,7 @@ import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.function.callable.VoidCallable;
 import xyz.sunqian.common.io.IOKit;
-import xyz.sunqian.common.io.communicate.AbstractIOChannel;
-import xyz.sunqian.common.io.communicate.IOChannelKit;
+import xyz.sunqian.common.io.communicate.AbstractChannelContext;
 import xyz.sunqian.common.net.NetException;
 import xyz.sunqian.common.net.NetServer;
 
@@ -37,7 +36,7 @@ import java.util.concurrent.ThreadFactory;
  */
 public class TcpServerBuilder {
 
-    private @Nonnull TcpChannelHandler handler = TcpChannelHandler.nullHandler();
+    private @Nonnull TcpServerHandler handler = TcpServerHandler.nullHandler();
     private int workerThreadNum = 1;
     private @Nullable ThreadFactory mainThreadFactory;
     private @Nullable ThreadFactory workerThreadFactory;
@@ -45,12 +44,12 @@ public class TcpServerBuilder {
     private final @Nonnull Map<SocketOption<?>, Object> socketOptions = new LinkedHashMap<>();
 
     /**
-     * Sets the handler to handle server events. The default handler is {@link TcpChannelHandler#nullHandler()}.
+     * Sets the handler to handle server events. The default handler is {@link TcpServerHandler#nullHandler()}.
      *
      * @param handler the handler to handle server events
      * @return this builder
      */
-    public @Nonnull TcpServerBuilder handler(@Nonnull TcpChannelHandler handler) {
+    public @Nonnull TcpServerBuilder handler(@Nonnull TcpServerHandler handler) {
         this.handler = handler;
         return this;
     }
@@ -185,16 +184,16 @@ public class TcpServerBuilder {
         private final @Nonnull Selector mainSelector;
         private final @Nonnull Thread mainThread;
         private final @Nonnull WorkerImpl @Nonnull [] workers;
-        private final @Nonnull TcpChannelHandler handler;
-        private final int bufSize;
+        private final @Nonnull TcpServerHandler handler;
         private final @Nonnull InetSocketAddress localAddress;
+        private final int bufSize;
 
         private volatile boolean closed = false;
 
         @SuppressWarnings("resource")
         private TcpServerImpl(
             @Nullable InetSocketAddress localAddress,
-            @Nonnull TcpChannelHandler handler,
+            @Nonnull TcpServerHandler handler,
             @Nullable ThreadFactory mainthreadFactory,
             @Nullable ThreadFactory workerthreadFactory,
             int workThreadNum,
@@ -210,7 +209,6 @@ public class TcpServerBuilder {
             server.configureBlocking(false);
             socketOptions.forEach((name, value) ->
                 Jie.uncheck(() -> server.setOption(Jie.as(name), value), NetException::new));
-            this.bufSize = bufSize;
             server.register(mainSelector, SelectionKey.OP_ACCEPT);
             for (int i = 0; i < workThreadNum; i++) {
                 WorkerImpl worker = new WorkerImpl();
@@ -219,6 +217,7 @@ public class TcpServerBuilder {
             }
             server.bind(localAddress, backlog);
             this.localAddress = (InetSocketAddress) server.getLocalAddress();
+            this.bufSize = bufSize;
             mainThread.start();
         }
 
@@ -344,7 +343,7 @@ public class TcpServerBuilder {
         private final class WorkerImpl implements Worker, Runnable {
 
             private final @Nonnull Selector selector;
-            private final @Nonnull Set<TcpChannelImpl> clientSet = new HashSet<>();
+            private final @Nonnull Set<TcpContext> clientSet = new HashSet<>();
 
             // the thread this worker starts on
             private Thread thread;
@@ -382,11 +381,11 @@ public class TcpServerBuilder {
                 @Nonnull ClientNode node = head;
                 while (true) {
                     if (!node.done) {
-                        SocketChannel client = node.channel;
-                        TcpChannelImpl clientChannel = new TcpChannelImpl(client);
-                        clientSet.add(clientChannel);
-                        registerRead(clientChannel);
-                        IOChannelKit.channelOpen(handler, clientChannel);
+                        SocketChannel channel = node.channel;
+                        TcpContext context = new TcpContext(channel, bufSize);
+                        clientSet.add(context);
+                        registerRead(context);
+                        TcpKit.channelOpen(handler, context);
                         node.done = true;
                     }
                     ClientNode next = node.next;
@@ -399,10 +398,11 @@ public class TcpServerBuilder {
                 }
             }
 
-            private void registerRead(TcpChannelImpl context) throws Exception {
-                SocketChannel client = context.client;
-                client.configureBlocking(false);
-                client.register(selector, SelectionKey.OP_READ, context);
+            @SuppressWarnings("resource")
+            private void registerRead(TcpContext context) throws Exception {
+                SocketChannel channel = context.channel();
+                channel.configureBlocking(false);
+                channel.register(selector, SelectionKey.OP_READ, context);
             }
 
             private void handleRead() throws Exception {
@@ -412,15 +412,15 @@ public class TcpServerBuilder {
                 while (keys.hasNext()) {
                     SelectionKey key = keys.next();
                     keys.remove();
-                    TcpChannelImpl context = (TcpChannelImpl) key.attachment();
-                    IOChannelKit.channelRead(handler, context);
+                    TcpKit.channelRead(handler, (TcpContext) key.attachment());
                 }
             }
 
+            @SuppressWarnings("resource")
             private void handleClose() {
-                Set<TcpChannelImpl> rm = new HashSet<>();
-                for (TcpChannelImpl context : clientSet) {
-                    if (!context.client.isOpen()) {
+                Set<TcpContext> rm = new HashSet<>();
+                for (TcpContext context : clientSet) {
+                    if (!context.channel().isOpen()) {
                         rm.add(context);
                         context.close();
                     }
@@ -457,61 +457,46 @@ public class TcpServerBuilder {
             }
 
             private void releaseClients() {
-                for (TcpChannelImpl channel : clientSet) {
-                    channel.close();
+                for (TcpContext context : clientSet) {
+                    context.close();
                 }
             }
 
-            private final class TcpChannelImpl extends AbstractIOChannel implements TcpChannel {
+            private final class TcpContext
+                extends AbstractChannelContext<SocketChannel> implements TcpServerHandler.Context {
 
-                private final @Nonnull SocketChannel client;
-                private final @Nonnull InetSocketAddress remoteAddress;
-                private final @Nonnull InetSocketAddress localAddress;
+                private final @Nonnull InetSocketAddress clientAddress;
+                private final @Nonnull InetSocketAddress serverAddress;
 
-                private boolean closed = false;
+                private volatile boolean closed = false;
 
-                private TcpChannelImpl(@Nonnull SocketChannel client) throws Exception {
-                    super(client, bufSize);
-                    this.client = client;
-                    this.remoteAddress = (InetSocketAddress) client.getRemoteAddress();
-                    this.localAddress = (InetSocketAddress) server.getLocalAddress();
+                private TcpContext(@Nonnull SocketChannel channel, int bufSize) throws IllegalArgumentException {
+                    super(channel, bufSize);
+                    this.clientAddress = (InetSocketAddress) Jie.uncheck(channel::getLocalAddress, NetException::new);
+                    this.serverAddress = (InetSocketAddress) Jie.uncheck(channel::getRemoteAddress, NetException::new);
                 }
 
                 @Override
-                public @Nonnull InetSocketAddress remoteAddress() {
-                    return remoteAddress;
+                public @Nonnull InetSocketAddress clientAddress() {
+                    return clientAddress;
                 }
 
                 @Override
-                public @Nonnull InetSocketAddress localAddress() {
-                    return localAddress;
+                public @Nonnull InetSocketAddress serverAddress() {
+                    return serverAddress;
                 }
 
                 @Override
-                public @Nonnull SocketChannel socketChannel() {
-                    return client;
-                }
-
-                @Override
-                public void close() throws NetException {
+                public synchronized void close() throws NetException {
                     if (closed) {
                         return;
                     }
+                    Jie.uncheck(() -> {
+                        channel.close();
+                        channel.keyFor(selector).cancel();
+                        TcpKit.channelClose(handler, this);
+                    }, NetException::new);
                     closed = true;
-                    try {
-                        client.close();
-                        SelectionKey key = client.keyFor(selector);
-                        key.cancel();
-                    } catch (Exception e) {
-                        // handler.exceptionCaught(this, e);
-                    } finally {
-                        IOChannelKit.channelClose(handler, this);
-                    }
-                }
-
-                @Override
-                public boolean isOpen() {
-                    return client.isOpen();
                 }
             }
         }

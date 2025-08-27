@@ -175,6 +175,13 @@ public class Jie {
         }
     }
 
+    public static void ignoreException(@Nonnull VoidCallable action) {
+        try {
+            action.call();
+        } catch (Exception ignored) {
+        }
+    }
+
     /**
      * Runs the given action and wraps any exception into the {@link WrappedException}. The logic as follows:
      * <pre>{@code

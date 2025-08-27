@@ -10,17 +10,17 @@ import xyz.sunqian.common.base.value.IntVar;
 import xyz.sunqian.common.function.callable.VoidCallable;
 import xyz.sunqian.common.net.NetException;
 import xyz.sunqian.common.net.NetServer;
-import xyz.sunqian.common.net.tcp.TcpChannel;
-import xyz.sunqian.common.net.tcp.TcpChannelHandler;
 import xyz.sunqian.common.net.tcp.TcpClient;
-import xyz.sunqian.common.net.tcp.TcpClientChannel;
 import xyz.sunqian.common.net.tcp.TcpServer;
+import xyz.sunqian.common.net.tcp.TcpServerHandler;
 import xyz.sunqian.test.DataTest;
 import xyz.sunqian.test.PrintTest;
 
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.net.StandardSocketOptions;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -66,6 +66,7 @@ public class TcpTest implements DataTest, PrintTest {
         });
 
         TcpClient[] clients = new TcpClient[workerNum];
+        TcpServerHandler.Context[] contexts = new TcpServerHandler.Context[workerNum];
         BytesBuilder[] builders = new BytesBuilder[workerNum];
         for (int i = 0; i < builders.length; i++) {
             builders[i] = new BytesBuilder();
@@ -88,27 +89,30 @@ public class TcpTest implements DataTest, PrintTest {
             .workerThreadFactory(workerFactory)
             .socketOption(StandardSocketOptions.SO_RCVBUF, 1024)
             .bufferSize(1024)
-            .handler(new TcpChannelHandler() {
+            .handler(new TcpServerHandler() {
 
                 @Override
-                public void channelOpen(@Nonnull TcpChannel channel) throws Exception {
+                public void channelOpen(@Nonnull TcpServerHandler.Context context) throws Exception {
+                    SocketChannel channel = context.channel();
                     assertTrue(channel.isOpen());
                     XThread thread = (XThread) Thread.currentThread();
                     openLatches[thread.num].countDown();
                     printFor("client open",
-                        thread.num, ", addr: ", channel.socketChannel().getRemoteAddress());
+                        thread.num, ", addr: ", channel.getRemoteAddress());
+                    contexts[thread.num] = context;
                 }
 
                 @Override
-                public void channelRead(@Nonnull TcpChannel channel) {
+                public void channelRead(@Nonnull TcpServerHandler.Context context) throws Exception {
+                    SocketChannel channel = context.channel();
                     XThread thread = (XThread) Thread.currentThread();
                     printFor("client read", thread.num);
-                    assertEquals(clients[thread.num].remoteAddress(), channel.localAddress());
-                    assertEquals(clients[thread.num].localAddress(), channel.remoteAddress());
-                    byte[] bytes = channel.availableBytes();
+                    assertEquals(clients[thread.num].remoteAddress(), context.clientAddress());
+                    assertEquals(clients[thread.num].localAddress(), context.serverAddress());
+                    byte[] bytes = context.availableBytes();
                     if (bytes != null) {
                         builders[thread.num].append(bytes);
-                        channel.writeBytes(bytes);
+                        context.writeBytes(bytes);
                     }
                     if (builders[thread.num].size() == data.length) {
                         readLatches[thread.num].countDown();
@@ -116,18 +120,19 @@ public class TcpTest implements DataTest, PrintTest {
                 }
 
                 @Override
-                public void channelClose(@Nonnull TcpChannel channel) throws Exception {
+                public void channelClose(@Nonnull TcpServerHandler.Context context) throws Exception {
+                    SocketChannel channel = context.channel();
                     assertFalse(channel.isOpen());
                     channel.close();
                     XThread thread = (XThread) Thread.currentThread();
                     printFor("client close", thread.num);
-                    assertEquals(clients[thread.num].remoteAddress(), channel.localAddress());
-                    assertEquals(clients[thread.num].localAddress(), channel.remoteAddress());
+                    assertEquals(clients[thread.num].remoteAddress(), context.clientAddress());
+                    assertEquals(clients[thread.num].localAddress(), context.serverAddress());
                     closeCount.getAndIncrement();
                 }
 
                 @Override
-                public void exceptionCaught(@Nullable TcpChannel context, @Nonnull Throwable cause) {
+                public void exceptionCaught(@Nullable TcpServerHandler.Context context, @Nonnull Throwable cause) {
                     printFor("client exception", ThrowKit.toString(cause));
                 }
             })
@@ -150,7 +155,7 @@ public class TcpTest implements DataTest, PrintTest {
             assertFalse(client.isClosed());
             clients[i] = client;
             printFor("client connect",
-                i, ", addr: ", client.ioChannel().socketChannel().getRemoteAddress());
+                i, ", addr: ", client.channel().getRemoteAddress());
         }
 
         // worker threads
@@ -165,18 +170,17 @@ public class TcpTest implements DataTest, PrintTest {
         // send data then read
         for (int i = 0; i < clients.length; i++) {
             TcpClient client = clients[i];
-            TcpClientChannel channel = client.ioChannel();
-            channel.writeBytes(data);
+            client.writeBytes(data);
             readLatches[i].await();
             BytesBuilder b = new BytesBuilder();
             while (true) {
-                channel.awaitReadable();
-                b.append(channel.availableBytes());
+                client.awaitReadable();
+                b.append(client.availableBytes());
                 if (b.size() == data.length) {
                     break;
                 }
             }
-            channel.wakeUpReadable();
+            client.wakeUpReadable();
             assertEquals(b.toByteArray(), data);
         }
 
@@ -203,6 +207,11 @@ public class TcpTest implements DataTest, PrintTest {
         closeLatch.await();
         assertEquals(closeCount.get(), 11);
         assertSame(server.localAddress(), serverLocal);
+
+        // close contexts again
+        for (TcpServerHandler.Context context : contexts) {
+            context.close();
+        }
     }
 
     @Test
@@ -216,26 +225,26 @@ public class TcpTest implements DataTest, PrintTest {
             CountDownLatch openLatch = new CountDownLatch(clientNum);
             CountDownLatch throwLatch = new CountDownLatch(clientNum * 3);
             TcpServer server = TcpServer.newBuilder()
-                .handler(new TcpChannelHandler() {
+                .handler(new TcpServerHandler() {
 
                     @Override
-                    public void channelOpen(@Nonnull TcpChannel channel) throws Exception {
+                    public void channelOpen(@Nonnull TcpServerHandler.Context context) throws Exception {
                         openLatch.countDown();
                         throw new XException();
                     }
 
                     @Override
-                    public void channelClose(@Nonnull TcpChannel channel) throws Exception {
+                    public void channelClose(@Nonnull TcpServerHandler.Context context) throws Exception {
                         throw new XException();
                     }
 
                     @Override
-                    public void channelRead(@Nonnull TcpChannel channel) throws Exception {
+                    public void channelRead(@Nonnull TcpServerHandler.Context context) throws Exception {
                         throw new XException();
                     }
 
                     @Override
-                    public void exceptionCaught(@Nullable TcpChannel channel, @Nonnull Throwable cause) {
+                    public void exceptionCaught(@Nullable TcpServerHandler.Context context, @Nonnull Throwable cause) {
                         if (cause instanceof XException) {
                             throwLatch.countDown();
                         }
@@ -274,7 +283,8 @@ public class TcpTest implements DataTest, PrintTest {
             // null handler
             TcpServer server = TcpServer.newBuilder().bind();
             TcpClient client = TcpClient.newBuilder().connect(server.localAddress());
-            client.ioChannel().writeString("hello world");
+            client.writeString("hello world");
+            assertEquals(client.availableBuffer(), ByteBuffer.allocate(0));
             client.close();
             server.close();
         }
@@ -309,30 +319,30 @@ public class TcpTest implements DataTest, PrintTest {
     //@Test(timeOut = 100000)
     public void testTelnet() throws Exception {
         TcpServer server = TcpServer.newBuilder()
-            .handler(new TcpChannelHandler() {
+            .handler(new TcpServerHandler() {
 
                 @Override
-                public void channelOpen(@Nonnull TcpChannel channel) throws Exception {
-                    printFor("telnet open", channel.remoteAddress());
+                public void channelOpen(@Nonnull TcpServerHandler.Context context) throws Exception {
+                    printFor("telnet open", context.clientAddress());
                 }
 
                 @Override
-                public void channelClose(@Nonnull TcpChannel channel) throws Exception {
-                    printFor("telnet close", channel.remoteAddress());
+                public void channelClose(@Nonnull TcpServerHandler.Context context) throws Exception {
+                    printFor("telnet close", context.clientAddress());
                 }
 
                 @Override
-                public void channelRead(@Nonnull TcpChannel channel) throws Exception {
-                    String msg = channel.availableString();
+                public void channelRead(@Nonnull TcpServerHandler.Context context) throws Exception {
+                    String msg = context.availableString();
                     if (msg == null) {
-                        channel.close();
+                        context.close();
                         return;
                     }
-                    printFor("telnet read", channel.remoteAddress(), ": ", msg);
+                    printFor("telnet read", context.clientAddress(), ": ", msg);
                 }
 
                 @Override
-                public void exceptionCaught(@Nullable TcpChannel channel, @Nonnull Throwable cause) {
+                public void exceptionCaught(@Nullable TcpServerHandler.Context context, @Nonnull Throwable cause) {
 
                 }
             })

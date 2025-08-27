@@ -92,12 +92,12 @@ public interface UdpSender extends Cloneable {
     void close() throws NetException;
 
     /**
-     * Returns the underlying socket channel that supports this sender.
+     * Returns the underlying channel that supports this sender.
      * <p>
      * This method is used to provide high-performance (such as direct buffer) data transmission support, and any
-     * modifications to the underlying socket channel will affect the sender.
+     * modifications to the underlying channel will affect the sender.
      *
-     * @return the underlying socket channel that supports this sender
+     * @return the underlying channel that supports this sender
      */
     @Nonnull
     DatagramChannel datagramChannel();
