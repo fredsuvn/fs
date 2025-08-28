@@ -79,7 +79,7 @@ public interface HttpResp {
         if (contentType == null) {
             return null;
         }
-        return HttpKit.parseCharset(contentType);
+        return HttpKit.contentCharset(contentType);
     }
 
     /**

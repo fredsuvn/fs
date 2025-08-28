@@ -3,6 +3,7 @@ package xyz.sunqian.common.net.udp;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.net.NetException;
+import xyz.sunqian.common.net.NetKit;
 
 import java.net.InetAddress;
 import java.net.SocketAddress;
@@ -66,7 +67,7 @@ final class UdpSenderImpls {
         private BroadcastUdpSender() throws Exception {
             super();
             channel.setOption(StandardSocketOptions.SO_BROADCAST, true);
-            this.broadcastIp = UdpKit.getBroadcastAddress();
+            this.broadcastIp = NetKit.getBroadcastAddress();
         }
 
         @Override
@@ -76,7 +77,7 @@ final class UdpSenderImpls {
 
         @Override
         public @Nonnull InetAddress refreshBroadcastAddress() throws NetException {
-            broadcastIp = UdpKit.getBroadcastAddress();
+            broadcastIp = NetKit.getBroadcastAddress();
             return broadcastIp;
         }
     }

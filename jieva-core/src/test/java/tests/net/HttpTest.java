@@ -108,9 +108,9 @@ public class HttpTest implements PrintTest {
 
     @Test
     public void testContentType() throws Exception {
-        assertEquals(HttpKit.parseCharset("text/html;charset=UTF-8;some=haha"), CharsKit.UTF_8);
-        assertNull(HttpKit.parseCharset("text/html;"));
-        assertNull(HttpKit.parseCharset("text/html"));
+        assertEquals(HttpKit.contentCharset("text/html;charset=UTF-8;some=haha"), CharsKit.UTF_8);
+        assertNull(HttpKit.contentCharset("text/html;"));
+        assertNull(HttpKit.contentCharset("text/html"));
         CountDownLatch readLatch = new CountDownLatch(1);
         TcpServer httpServer = TcpServer.newBuilder()
             .handler(new TcpServerHandler() {

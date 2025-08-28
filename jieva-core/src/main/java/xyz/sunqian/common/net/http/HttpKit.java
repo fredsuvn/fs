@@ -64,7 +64,7 @@ public class HttpKit {
      * @param contentType the given http content type
      * @return the charset parsed from the given http content type, may be {@code null} if the charset is not specified
      */
-    public static @Nullable Charset parseCharset(@Nonnull String contentType) {
+    public static @Nullable Charset contentCharset(@Nonnull String contentType) {
         String[] parts = contentType.split(";");
         for (String part : parts) {
             String charsetToken = "charset=";
