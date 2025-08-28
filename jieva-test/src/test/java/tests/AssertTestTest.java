@@ -46,7 +46,7 @@ public class AssertTestTest implements AssertTest {
 
     @Test
     public void testFile() throws Exception {
-        Path path = Paths.get("src", "tests", "resources", "test.test");
+        Path path = Paths.get("src", "test", "resources", "test.test");
         path.toFile().delete();
         byte[] data = {'1', '2', '3'};
         newFile(path, data);
