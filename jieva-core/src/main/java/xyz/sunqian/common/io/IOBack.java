@@ -18,7 +18,7 @@ import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
 import java.nio.charset.CodingErrorAction;
 
-final class IOImpls {
+final class IOBack {
 
     private static final @Nonnull String MARK_NOT_SET = "Mark has not been set.";
     private static final @Nonnull String STREAM_CLOSED = "Stream closed.";

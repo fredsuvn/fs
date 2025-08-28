@@ -39,7 +39,7 @@ public interface UdpSender extends Cloneable {
      * @throws NetException if an error occurs
      */
     static @Nonnull UdpSender newSender(boolean broadcast) throws NetException {
-        return Jie.uncheck(() -> UdpSenderImpls.newSender(broadcast), NetException::new);
+        return Jie.uncheck(() -> UdpSenderBack.newSender(broadcast), NetException::new);
     }
 
     /**

@@ -17,7 +17,7 @@ public interface ByteVal extends PrimitiveToVal<Byte> {
      * @return a {@link ByteVal} holding the {@code 0}
      */
     static @Nonnull ByteVal ofZero() {
-        return ValImpls.OF_ZERO_BYTE;
+        return ValBack.OF_ZERO_BYTE;
     }
 
     /**
@@ -27,7 +27,7 @@ public interface ByteVal extends PrimitiveToVal<Byte> {
      * @return a {@link ByteVal} holding the specified value
      */
     static @Nonnull ByteVal of(byte value) {
-        return ValImpls.of(value);
+        return ValBack.of(value);
     }
 
     /**

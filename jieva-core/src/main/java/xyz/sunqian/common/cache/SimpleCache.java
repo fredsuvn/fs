@@ -37,7 +37,7 @@ public interface SimpleCache<K, V> {
      * @return a new {@link SimpleCache} based on {@link WeakReference}
      */
     static <K, V> @Nonnull SimpleCache<K, V> ofWeak() {
-        return CacheImpls.ofWeak();
+        return CacheBack.ofWeak();
     }
 
     /**
@@ -51,7 +51,7 @@ public interface SimpleCache<K, V> {
      * @return a new {@link SimpleCache} based on {@link SoftReference}
      */
     static <K, V> @Nonnull SimpleCache<K, V> ofSoft() {
-        return CacheImpls.ofSoft();
+        return CacheBack.ofSoft();
     }
 
     /**
@@ -65,7 +65,7 @@ public interface SimpleCache<K, V> {
      * @return a new {@link SimpleCache} based on {@link PhantomReference}
      */
     static <K, V> @Nonnull SimpleCache<K, V> ofPhantom() {
-        return CacheImpls.ofPhantom();
+        return CacheBack.ofPhantom();
     }
 
     /**
@@ -78,7 +78,7 @@ public interface SimpleCache<K, V> {
      * @return a new {@link SimpleCache} based on strong reference
      */
     static <K, V> @Nonnull SimpleCache<K, V> ofStrong() {
-        return CacheImpls.ofStrong();
+        return CacheBack.ofStrong();
     }
 
     /**

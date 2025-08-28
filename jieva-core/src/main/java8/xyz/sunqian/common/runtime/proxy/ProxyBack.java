@@ -11,7 +11,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
-final class Proxy8 {
+final class ProxyBack {
 
     // ========  works on JDK 8 ======== {
 
@@ -45,7 +45,7 @@ final class Proxy8 {
     }
 
     static @Nonnull Invocable getDefaultMethodInvocable(@Nonnull Method method) throws Exception {
-        Optional<MethodHandles.Lookup> lookupOpt = Proxy8.getLookUp(method);
+        Optional<MethodHandles.Lookup> lookupOpt = ProxyBack.getLookUp(method);
         return lookupOpt
             .map(lookup ->
                 Jie.call(() -> lookup.unreflectSpecial(method, method.getDeclaringClass()), null)

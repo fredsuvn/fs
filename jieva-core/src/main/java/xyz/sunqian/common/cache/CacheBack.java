@@ -11,7 +11,7 @@ import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.util.Map;
 
-final class CacheImpls {
+final class CacheBack {
 
     static <K, V> @Nonnull SimpleCache<K, V> ofWeak() {
         return new WeakCache<>();

@@ -17,7 +17,7 @@ public interface ShortVal extends PrimitiveToVal<Short> {
      * @return a {@link ShortVal} holding the {@code 0}
      */
     static @Nonnull ShortVal ofZero() {
-        return ValImpls.OF_ZERO_SHORT;
+        return ValBack.OF_ZERO_SHORT;
     }
 
     /**
@@ -27,7 +27,7 @@ public interface ShortVal extends PrimitiveToVal<Short> {
      * @return a {@link ShortVal} holding the specified value
      */
     static @Nonnull ShortVal of(short value) {
-        return ValImpls.of(value);
+        return ValBack.of(value);
     }
 
     /**

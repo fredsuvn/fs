@@ -2148,7 +2148,7 @@ public class IOKit {
      * @return the given array as a new {@link InputStream}
      */
     public static @Nonnull InputStream newInputStream(byte @Nonnull [] array) {
-        return IOImpls.inputStream(array);
+        return IOBack.inputStream(array);
     }
 
     /**
@@ -2171,7 +2171,7 @@ public class IOKit {
     public static @Nonnull InputStream newInputStream(
         byte @Nonnull [] array, int off, int len
     ) throws IndexOutOfBoundsException {
-        return IOImpls.inputStream(array, off, len);
+        return IOBack.inputStream(array, off, len);
     }
 
     /**
@@ -2188,7 +2188,7 @@ public class IOKit {
      * @return the given buffer as a new {@link InputStream}
      */
     public static @Nonnull InputStream newInputStream(@Nonnull ByteBuffer buffer) {
-        return IOImpls.inputStream(buffer);
+        return IOBack.inputStream(buffer);
     }
 
     /**
@@ -2210,7 +2210,7 @@ public class IOKit {
     public static @Nonnull InputStream newInputStream(
         @Nonnull RandomAccessFile raf, long off
     ) throws IllegalArgumentException, IORuntimeException {
-        return IOImpls.inputStream(raf, off);
+        return IOBack.inputStream(raf, off);
     }
 
     /**
@@ -2245,7 +2245,7 @@ public class IOKit {
      * @return the given reader as a new {@link InputStream}
      */
     public static @Nonnull InputStream newInputStream(@Nonnull Reader reader, @Nonnull Charset charset) {
-        return IOImpls.inputStream(reader, charset);
+        return IOBack.inputStream(reader, charset);
     }
 
     /**
@@ -2266,7 +2266,7 @@ public class IOKit {
     public static @Nonnull InputStream limitedInputStream(
         @Nonnull InputStream stream, long limit
     ) throws IllegalArgumentException {
-        return IOImpls.inputStream(stream, limit);
+        return IOBack.inputStream(stream, limit);
     }
 
     /**
@@ -2275,7 +2275,7 @@ public class IOKit {
      * @return a singleton empty {@link InputStream}
      */
     public static @Nonnull InputStream emptyInputStream() {
-        return IOImpls.emptyInputStream();
+        return IOBack.emptyInputStream();
     }
 
     /**
@@ -2292,7 +2292,7 @@ public class IOKit {
      * @return the given array as a new {@link Reader}
      */
     public static @Nonnull Reader newReader(char @Nonnull [] array) {
-        return IOImpls.reader(array);
+        return IOBack.reader(array);
     }
 
     /**
@@ -2315,7 +2315,7 @@ public class IOKit {
     public static @Nonnull Reader newReader(
         char @Nonnull [] array, int off, int len
     ) throws IndexOutOfBoundsException {
-        return IOImpls.reader(array, off, len);
+        return IOBack.reader(array, off, len);
     }
 
     /**
@@ -2332,7 +2332,7 @@ public class IOKit {
      * @return the given char sequence as a new {@link Reader}
      */
     public static @Nonnull Reader newReader(@Nonnull CharSequence chars) {
-        return IOImpls.reader(chars);
+        return IOBack.reader(chars);
     }
 
     /**
@@ -2355,7 +2355,7 @@ public class IOKit {
     public static @Nonnull Reader newReader(
         @Nonnull CharSequence chars, int start, int end
     ) throws IndexOutOfBoundsException {
-        return IOImpls.reader(chars, start, end);
+        return IOBack.reader(chars, start, end);
     }
 
     /**
@@ -2372,7 +2372,7 @@ public class IOKit {
      * @return the given buffer as a new {@link Reader}
      */
     public static @Nonnull Reader newReader(@Nonnull CharBuffer buffer) {
-        return IOImpls.reader(buffer);
+        return IOBack.reader(buffer);
     }
 
     /**
@@ -2407,7 +2407,7 @@ public class IOKit {
      * @return the given stream as a new {@link Reader}
      */
     public static @Nonnull Reader newReader(@Nonnull InputStream stream, @Nonnull Charset charset) {
-        return IOImpls.reader(stream, charset);
+        return IOBack.reader(stream, charset);
     }
 
     /**
@@ -2426,7 +2426,7 @@ public class IOKit {
      * @throws IllegalArgumentException if the limit argument is negative
      */
     public static @Nonnull Reader limitedReader(@Nonnull Reader reader, long limit) throws IllegalArgumentException {
-        return IOImpls.reader(reader, limit);
+        return IOBack.reader(reader, limit);
     }
 
     /**
@@ -2435,7 +2435,7 @@ public class IOKit {
      * @return a singleton empty {@link Reader}
      */
     public static @Nonnull Reader emptyReader() {
-        return IOImpls.emptyReader();
+        return IOBack.emptyReader();
     }
 
     /**
@@ -2453,7 +2453,7 @@ public class IOKit {
      * @return the given array as a new {@link OutputStream}
      */
     public static @Nonnull OutputStream newOutputStream(byte @Nonnull [] array) {
-        return IOImpls.outputStream(array);
+        return IOBack.outputStream(array);
     }
 
     /**
@@ -2477,7 +2477,7 @@ public class IOKit {
     public static @Nonnull OutputStream newOutputStream(
         byte @Nonnull [] array, int off, int len
     ) throws IndexOutOfBoundsException {
-        return IOImpls.outputStream(array, off, len);
+        return IOBack.outputStream(array, off, len);
     }
 
     /**
@@ -2495,7 +2495,7 @@ public class IOKit {
      * @return the given buffer as a new {@link OutputStream}
      */
     public static @Nonnull OutputStream newOutputStream(@Nonnull ByteBuffer buffer) {
-        return IOImpls.outputStream(buffer);
+        return IOBack.outputStream(buffer);
     }
 
     /**
@@ -2519,7 +2519,7 @@ public class IOKit {
     public static @Nonnull OutputStream newOutputStream(
         @Nonnull RandomAccessFile raf, long off
     ) throws IllegalArgumentException, IORuntimeException {
-        return IOImpls.outputStream(raf, off);
+        return IOBack.outputStream(raf, off);
     }
 
     /**
@@ -2556,7 +2556,7 @@ public class IOKit {
      * @return the given appender as a new {@link OutputStream}
      */
     public static @Nonnull OutputStream newOutputStream(@Nonnull Appendable appender, @Nonnull Charset charset) {
-        return IOImpls.outputStream(appender, charset);
+        return IOBack.outputStream(appender, charset);
     }
 
     /**
@@ -2580,7 +2580,7 @@ public class IOKit {
     public static @Nonnull OutputStream limitedOutputStream(
         @Nonnull OutputStream stream, long limit
     ) throws IllegalArgumentException {
-        return IOImpls.outputStream(stream, limit);
+        return IOBack.outputStream(stream, limit);
     }
 
     /**
@@ -2589,7 +2589,7 @@ public class IOKit {
      * @return a singleton {@link OutputStream} which supports writing infinitely data but immediately discards them.
      */
     public static @Nonnull OutputStream nullOutputStream() {
-        return IOImpls.nullOutputStream();
+        return IOBack.nullOutputStream();
     }
 
     /**
@@ -2607,7 +2607,7 @@ public class IOKit {
      * @return the given array as a new {@link Writer}
      */
     public static @Nonnull Writer newWriter(char @Nonnull [] array) {
-        return IOImpls.writer(array);
+        return IOBack.writer(array);
     }
 
     /**
@@ -2631,7 +2631,7 @@ public class IOKit {
     public static @Nonnull Writer newWriter(
         char @Nonnull [] array, int off, int len
     ) throws IndexOutOfBoundsException {
-        return IOImpls.writer(array, off, len);
+        return IOBack.writer(array, off, len);
     }
 
     /**
@@ -2649,7 +2649,7 @@ public class IOKit {
      * @return the given buffer as a new {@link Writer}
      */
     public static @Nonnull Writer newWriter(@Nonnull CharBuffer buffer) {
-        return IOImpls.writer(buffer);
+        return IOBack.writer(buffer);
     }
 
     /**
@@ -2686,7 +2686,7 @@ public class IOKit {
      * @return the given stream as a new {@link Writer}
      */
     public static @Nonnull Writer newWriter(@Nonnull OutputStream stream, @Nonnull Charset charset) {
-        return IOImpls.writer(stream, charset);
+        return IOBack.writer(stream, charset);
     }
 
     /**
@@ -2706,7 +2706,7 @@ public class IOKit {
      * @throws IllegalArgumentException if the limit argument is negative
      */
     public static @Nonnull Writer limitedWriter(@Nonnull Writer writer, long limit) throws IllegalArgumentException {
-        return IOImpls.writer(writer, limit);
+        return IOBack.writer(writer, limit);
     }
 
     /**
@@ -2715,6 +2715,6 @@ public class IOKit {
      * @return a singleton {@link Writer} which supports writing infinitely data but immediately discards them.
      */
     public static @Nonnull Writer nullWriter() {
-        return IOImpls.nullWriter();
+        return IOBack.nullWriter();
     }
 }

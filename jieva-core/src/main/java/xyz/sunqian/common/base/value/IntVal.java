@@ -17,7 +17,7 @@ public interface IntVal extends PrimitiveToVal<Integer> {
      * @return a {@link IntVal} holding the {@code 0}
      */
     static @Nonnull IntVal ofZero() {
-        return ValImpls.OF_ZERO_INT;
+        return ValBack.OF_ZERO_INT;
     }
 
     /**
@@ -27,7 +27,7 @@ public interface IntVal extends PrimitiveToVal<Integer> {
      * @return a {@link IntVal} holding the specified value
      */
     static @Nonnull IntVal of(int value) {
-        return ValImpls.of(value);
+        return ValBack.of(value);
     }
 
     /**

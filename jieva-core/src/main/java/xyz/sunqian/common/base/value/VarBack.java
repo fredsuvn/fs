@@ -3,7 +3,7 @@ package xyz.sunqian.common.base.value;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.Jie;
 
-final class VarImpls {
+final class VarBack {
 
     static <T> @Nonnull Var<T> of(T value) {
         return new VarImpl<>(value);

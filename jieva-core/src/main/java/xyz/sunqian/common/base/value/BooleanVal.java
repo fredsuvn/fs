@@ -17,7 +17,7 @@ public interface BooleanVal extends PrimitiveToVal<Boolean> {
      * @return a {@link BooleanVal} holding the {@code true}
      */
     static @Nonnull BooleanVal ofTrue() {
-        return ValImpls.OF_TRUE;
+        return ValBack.OF_TRUE;
     }
 
     /**
@@ -26,7 +26,7 @@ public interface BooleanVal extends PrimitiveToVal<Boolean> {
      * @return a {@link BooleanVal} holding the {@code true}
      */
     static @Nonnull BooleanVal ofFalse() {
-        return ValImpls.OF_FALSE;
+        return ValBack.OF_FALSE;
     }
 
     /**
@@ -36,7 +36,7 @@ public interface BooleanVal extends PrimitiveToVal<Boolean> {
      * @return a {@link BooleanVal} holding the specified value
      */
     static @Nonnull BooleanVal of(boolean value) {
-        return ValImpls.of(value);
+        return ValBack.of(value);
     }
 
     /**

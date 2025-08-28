@@ -185,7 +185,7 @@ public interface HttpReq {
          */
         public @Nonnull HttpReq build() throws IllegalArgumentException {
             CheckKit.checkArgument(url != null, "The url can not be null.");
-            //CheckKit.checkArgument(method != null, "The method can not be null.");
+            // CheckKit.checkArgument(method != null, "The method can not be null.");
             return new HttpReqImpl(
                 url,
                 method,

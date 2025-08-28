@@ -326,7 +326,7 @@ public class ClassKit {
      * @return the array class whose component type is the specified type, may be {@code null} if fails
      */
     public static @Nullable Class<?> arrayClass(@Nonnull Type componentType) {
-        return Reflect8.arrayClass(componentType);
+        return ReflectBack.arrayClass(componentType);
     }
 
     /**

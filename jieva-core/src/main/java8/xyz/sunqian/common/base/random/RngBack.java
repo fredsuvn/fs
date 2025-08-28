@@ -16,7 +16,7 @@ import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
-final class Rng8 {
+final class RngBack {
 
     static @Nonnull Rng random(@Nonnull Random random) {
         return new RandomRng(random);

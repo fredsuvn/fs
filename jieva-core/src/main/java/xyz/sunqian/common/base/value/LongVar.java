@@ -16,7 +16,7 @@ public interface LongVar extends LongVal, PrimitiveToVar<Long, LongVar> {
      * @return a {@link LongVar} initialized with the specified value
      */
     static @Nonnull LongVar of(long value) {
-        return VarImpls.of(value);
+        return VarBack.of(value);
     }
 
     /**

@@ -11,7 +11,7 @@ import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 
-final class UdpSenderImpls {
+final class UdpSenderBack {
 
     static @Nonnull UdpSender newSender(boolean broadcast) throws Exception {
         return broadcast ? new BroadcastUdpSender() : new CommonUdpSender();

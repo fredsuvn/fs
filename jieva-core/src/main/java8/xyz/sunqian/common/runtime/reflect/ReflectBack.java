@@ -5,7 +5,7 @@ import xyz.sunqian.annotations.Nullable;
 
 import java.lang.reflect.Type;
 
-final class Reflect8 {
+final class ReflectBack {
 
     static @Nullable Class<?> arrayClass(@Nonnull Type componentType) {
         Class<?> componentClass = TypeKit.toRuntimeClass(componentType);

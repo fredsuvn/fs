@@ -166,7 +166,7 @@ public class JdkProxyMaker implements ProxyMaker {
                 throw new AbstractMethodError(method.toString());
             };
         }
-        return Proxy8.getDefaultMethodInvocable(method);
+        return ProxyBack.getDefaultMethodInvocable(method);
     }
 
     /**
