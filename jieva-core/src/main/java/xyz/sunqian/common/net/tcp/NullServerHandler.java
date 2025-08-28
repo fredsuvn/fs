@@ -18,7 +18,7 @@ final class NullServerHandler implements TcpServerHandler {
 
     @Override
     public void channelRead(@Nonnull TcpServerHandler.Context channel) {
-        IOKit.readTo(channel.channel(), IOKit.nullOutputStream());
+        IOKit.availableTo(channel.channel(), IOKit.nullOutputStream());
     }
 
     @Override

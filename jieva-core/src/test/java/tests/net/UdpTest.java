@@ -79,13 +79,35 @@ public class UdpTest implements PrintTest {
     public void testUdpOther() throws Exception {
         {
             // null handler
-            UdpServer server = UdpServer.newBuilder().bind();
+            CountDownLatch latch = new CountDownLatch(2);
+            UdpServer server = UdpServer.newBuilder()
+                .handler(new UdpServerHandler() {
+
+                    @Override
+                    public void channelRead(
+                        @Nonnull DatagramChannel channel, byte @Nonnull [] data, @Nonnull SocketAddress address
+                    ) throws Exception {
+                        UdpServerHandler.nullHandler().channelRead(channel, data, address);
+                        latch.countDown();
+                        throw new XException();
+                    }
+
+                    @Override
+                    public void exceptionCaught(@Nullable DatagramChannel channel, @Nonnull Throwable cause) {
+                        UdpServerHandler.nullHandler().exceptionCaught(channel, cause);
+                        if (cause instanceof XException) {
+                            latch.countDown();
+                        }
+                    }
+                })
+                .bind();
             UdpSender sender = UdpSender.newSender();
             InetSocketAddress address =
                 new InetSocketAddress(InetAddress.getLocalHost(), server.localAddress().getPort());
             sender.sendString("hello world", address);
             assertFalse(server.isClosed());
             assertEquals(server.workers().size(), 0);
+            latch.await();
             sender.close();
             server.close();
             assertTrue(server.isClosed());

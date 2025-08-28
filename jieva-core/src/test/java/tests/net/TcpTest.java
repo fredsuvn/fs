@@ -281,10 +281,40 @@ public class TcpTest implements DataTest, PrintTest {
         }
         {
             // null handler
-            TcpServer server = TcpServer.newBuilder().bind();
+            CountDownLatch latch = new CountDownLatch(2);
+            TcpServer server = TcpServer.newBuilder()
+                .handler(new TcpServerHandler() {
+
+                    @Override
+                    public void channelOpen(@Nonnull Context context) throws Exception {
+                        TcpServerHandler.nullHandler().channelOpen(context);
+                    }
+
+                    @Override
+                    public void channelClose(@Nonnull Context context) throws Exception {
+                        TcpServerHandler.nullHandler().channelClose(context);
+                    }
+
+                    @Override
+                    public void channelRead(@Nonnull Context context) throws Exception {
+                        TcpServerHandler.nullHandler().channelRead(context);
+                        latch.countDown();
+                        throw new XException();
+                    }
+
+                    @Override
+                    public void exceptionCaught(@Nullable Context context, @Nonnull Throwable cause) {
+                        TcpServerHandler.nullHandler().exceptionCaught(context, cause);
+                        if (cause instanceof XException) {
+                            latch.countDown();
+                        }
+                    }
+                })
+                .bind();
             TcpClient client = TcpClient.newBuilder().connect(server.localAddress());
             client.writeString("hello world");
             assertEquals(client.availableBuffer(), ByteBuffer.allocate(0));
+            latch.await();
             client.close();
             server.close();
         }
