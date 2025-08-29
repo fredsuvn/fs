@@ -1,5 +1,6 @@
 package xyz.sunqian.common.base.string;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 
 import java.util.List;
@@ -7,11 +8,11 @@ import java.util.Objects;
 import java.util.function.Function;
 
 /**
- * This interface is a type of formatter to resolve and format naming case such as camel-case, underscore-case.
+ * Represents the specification for naming, such as camel-case, snake-case, file-naming, etc.
  *
- * @author fredsuvn
+ * @author sunqian
  */
-public interface NameFormatter {
+public interface NameSpec {
 
     /**
      * Upper Camel Case from {@link #camelCase(boolean)}. It is equivalent to ({@link #camelCase(boolean)}):
@@ -19,7 +20,7 @@ public interface NameFormatter {
      *     camelCase(true);
      * </pre>
      */
-    NameFormatter UPPER_CAMEL = camelCase(true);
+    NameSpec UPPER_CAMEL = camelCase(true);
 
     /**
      * Lower Camel Case from {@link #camelCase(boolean)}. It is equivalent to ({@link #camelCase(boolean)}):
@@ -27,7 +28,7 @@ public interface NameFormatter {
      *     camelCase(true);
      * </pre>
      */
-    NameFormatter LOWER_CAMEL = camelCase(false);
+    NameSpec LOWER_CAMEL = camelCase(false);
 
     /**
      * Underscore Delimiter Case from {@link #delimiterCase(CharSequence, Function)}. It is equivalent to
@@ -36,7 +37,7 @@ public interface NameFormatter {
      *     delimiterCase("_", null);
      * </pre>
      */
-    NameFormatter UNDERSCORE = delimiterCase("_", null);
+    NameSpec UNDERSCORE = delimiterCase("_", null);
 
     /**
      * Upper Underscore Delimiter Case from {@link #delimiterCase(CharSequence, Function)}. It is equivalent to
@@ -45,7 +46,7 @@ public interface NameFormatter {
      *     delimiterCase("_", JieString::upperCase);
      * </pre>
      */
-    NameFormatter UPPER_UNDERSCORE = delimiterCase("_", StringKit::upperCase);
+    NameSpec UPPER_UNDERSCORE = delimiterCase("_", StringKit::upperCase);
 
     /**
      * Lower Underscore Delimiter Case from {@link #delimiterCase(CharSequence, Function)}. It is equivalent to
@@ -54,7 +55,7 @@ public interface NameFormatter {
      *     delimiterCase("_", JieString::lowerCase);
      * </pre>
      */
-    NameFormatter LOWER_UNDERSCORE = delimiterCase("_", StringKit::lowerCase);
+    NameSpec LOWER_UNDERSCORE = delimiterCase("_", StringKit::lowerCase);
 
     /**
      * Hyphen Delimiter Case from {@link #delimiterCase(CharSequence, Function)}. It is equivalent to
@@ -63,7 +64,7 @@ public interface NameFormatter {
      *     delimiterCase("-", null);
      * </pre>
      */
-    NameFormatter HYPHEN = delimiterCase("-", null);
+    NameSpec HYPHEN = delimiterCase("-", null);
 
     /**
      * Upper Hyphen Delimiter Case from {@link #delimiterCase(CharSequence, Function)}. It is equivalent to
@@ -72,7 +73,7 @@ public interface NameFormatter {
      *     delimiterCase("-", JieString::upperCase);
      * </pre>
      */
-    NameFormatter UPPER_HYPHEN = delimiterCase("-", StringKit::upperCase);
+    NameSpec UPPER_HYPHEN = delimiterCase("-", StringKit::upperCase);
 
     /**
      * Lower Hyphen Delimiter Case from {@link #delimiterCase(CharSequence, Function)}. It is equivalent to
@@ -81,65 +82,67 @@ public interface NameFormatter {
      *     delimiterCase("-", JieString::lowerCase);
      * </pre>
      */
-    NameFormatter LOWER_HYPHEN = delimiterCase("-", StringKit::lowerCase);
+    NameSpec LOWER_HYPHEN = delimiterCase("-", StringKit::lowerCase);
 
     /**
-     * Returns a new {@link NameFormatter} represents {@code Camel Case}.
+     * Returns a new {@link NameSpec} represents {@code Camel Case}.
      * <p>
      * Note the continuous characters which are non-lowercase and non-uppercase (such as digits) will be separately
      * combined to a word.
      *
      * @param upperHead whether this case is upper camel case
-     * @return a new {@link NameFormatter} represents {@code Camel Case}
+     * @return a new {@link NameSpec} represents {@code Camel Case}
      */
-    static NameFormatter camelCase(boolean upperHead) {
-        return new NameFormatterBack.CamelNameFormatter(upperHead);
+    static NameSpec camelCase(boolean upperHead) {
+        return new NameSpecBack.CamelNameSpec(upperHead);
     }
 
     /**
-     * Returns a new {@link NameFormatter} represents {@code Delimiter Case}.
+     * Returns a new {@link NameSpec} represents {@code Delimiter Case}.
      *
      * @param delimiter  the delimiter
      * @param wordMapper the mapper to deal with each word before joining the words, may be {@code null} if no need
-     * @return a new {@link NameFormatter} represents {@code Delimiter Case}
+     * @return a new {@link NameSpec} represents {@code Delimiter Case}
      */
-    static NameFormatter delimiterCase(
+    static NameSpec delimiterCase(
         CharSequence delimiter, @Nullable Function<? super CharSequence, ? extends CharSequence> wordMapper) {
-        return new NameFormatterBack.DelimiterNameFormatter(delimiter, wordMapper);
+        return new NameSpecBack.DelimiterNameSpec(delimiter, wordMapper);
     }
 
     /**
-     * Resolves given name to a list of words in rules of this name case.
+     * Splits the given name to words by rules of this name spec.
      *
-     * @param name given name
-     * @return a list of words in rules of this name case
+     * @param name the given name
+     * @return a list of words in rules of this name spec
      */
-    List<CharSequence> resolve(CharSequence name);
+    @Nonnull
+    List<@Nonnull CharSequence> split(@Nonnull CharSequence name);
 
     /**
-     * Formats and returns name by this name case from given list of words.
+     * Joins the given list of words into a name by rules of this name spec.
      *
-     * @param wordList given list of words
-     * @return name by this name case from given list of words
+     * @param words the given list of words
+     * @return a name joined from the given list of words by rules of this name spec
      */
-    String format(List<? extends CharSequence> wordList);
+    @Nonnull
+    String join(@Nonnull List<? extends @Nonnull CharSequence> words);
 
     /**
-     * Formats given name from this name case to specified other name case. This method is equivalent to:
+     * Converts the given name from this name spec to the other specified name spec. This method is equivalent to:
      * <pre>
-     *     return otherCase.format(resolve(name));
+     * return otherSpec.join(split(name));
      * </pre>
      *
-     * @param otherCase specified other name case
-     * @param name      given name
-     * @return formatted name
-     * @see #resolve(CharSequence)
-     * @see #format(List)
+     * @param otherSpec the other specified name spec
+     * @param name      the given name
+     * @return the converted name
+     * @see #split(CharSequence)
+     * @see #join(List)
      */
-    default String to(NameFormatter otherCase, CharSequence name) {
-        if (Objects.equals(this, otherCase)) {
+    default @Nonnull String to(@Nonnull NameSpec otherSpec, @Nonnull CharSequence name) {
+        if (Objects.equals(this, otherSpec)) {
             return name.toString();
         }
-        return otherCase.format(resolve(name));
+        return otherSpec.join(split(name));
     }
 }

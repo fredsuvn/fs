@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-final class NameFormatterBack {
+final class NameSpecBack {
 
-    static final class CamelNameFormatter implements NameFormatter {
+    static final class CamelNameSpec implements NameSpec {
 
         private static final int LOWER = 0;
         private static final int UPPER = 1;
@@ -19,12 +19,12 @@ final class NameFormatterBack {
 
         private final boolean upperHead;
 
-        CamelNameFormatter(boolean upperHead) {
+        CamelNameSpec(boolean upperHead) {
             this.upperHead = upperHead;
         }
 
         @Override
-        public List<CharSequence> resolve(CharSequence name) {
+        public List<CharSequence> split(CharSequence name) {
             if (StringKit.isBlank(name)) {
                 return Collections.emptyList();
             }
@@ -95,17 +95,17 @@ final class NameFormatterBack {
         }
 
         @Override
-        public String format(List<? extends CharSequence> wordList) {
-            if (CollectKit.isEmpty(wordList)) {
+        public String join(List<? extends CharSequence> words) {
+            if (CollectKit.isEmpty(words)) {
                 return "";
             }
             int length = 0;
-            for (CharSequence chars : wordList) {
+            for (CharSequence chars : words) {
                 length += chars.length();
             }
             StringBuilder sb = new StringBuilder(length);
             int i = 0;
-            for (CharSequence chars : wordList) {
+            for (CharSequence chars : words) {
                 if (StringKit.isEmpty(chars)) {
                     continue;
                 }
@@ -199,31 +199,31 @@ final class NameFormatterBack {
         }
     }
 
-    static final class DelimiterNameFormatter implements NameFormatter {
+    static final class DelimiterNameSpec implements NameSpec {
 
         private final CharSequence delimiter;
         private final @Nullable Function<? super CharSequence, ? extends CharSequence> wordMapper;
 
-        DelimiterNameFormatter(
+        DelimiterNameSpec(
             CharSequence delimiter, @Nullable Function<? super CharSequence, ? extends CharSequence> wordMapper) {
             this.delimiter = delimiter;
             this.wordMapper = wordMapper;
         }
 
         @Override
-        public List<CharSequence> resolve(CharSequence name) {
+        public List<CharSequence> split(CharSequence name) {
             return StringKit.split(name, delimiter, Word::new);
         }
 
         @Override
-        public String format(List<? extends CharSequence> wordList) {
-            if (wordList.isEmpty()) {
+        public String join(List<? extends CharSequence> words) {
+            if (words.isEmpty()) {
                 return "";
             }
             if (wordMapper == null) {
-                return String.join(delimiter, wordList);
+                return String.join(delimiter, words);
             }
-            return wordList.stream().map(wordMapper).collect(Collectors.joining(delimiter));
+            return words.stream().map(wordMapper).collect(Collectors.joining(delimiter));
         }
     }
 
