@@ -18,21 +18,21 @@ import java.util.Objects;
 
 final class TimeBack {
 
-    static @Nonnull TimeSpec ofFormatter(@Nonnull DateTimeFormatter formatter) {
+    static @Nonnull TimeFormatter ofFormatter(@Nonnull DateTimeFormatter formatter) {
         return new OfFormatter(formatter);
     }
 
-    static @Nonnull TimeSpec ofPattern(@Nonnull String pattern) {
+    static @Nonnull TimeFormatter ofPattern(@Nonnull String pattern) {
         return new OfPattern(pattern);
     }
 
-    private static class AbsTimeSpec implements TimeSpec {
+    private static class AbsTimeFormatter implements TimeFormatter {
 
         private static final @Nonnull String NO_PATTERN = "No pattern in this TimeSpec.";
 
         protected final @Nonnull DateTimeFormatter formatter;
 
-        private AbsTimeSpec(@Nonnull DateTimeFormatter formatter) {
+        private AbsTimeFormatter(@Nonnull DateTimeFormatter formatter) {
             this.formatter = formatter;
         }
 
@@ -164,14 +164,14 @@ final class TimeBack {
         }
     }
 
-    private static final class OfFormatter extends AbsTimeSpec {
+    private static final class OfFormatter extends AbsTimeFormatter {
 
         private OfFormatter(@Nonnull DateTimeFormatter formatter) {
             super(formatter);
         }
     }
 
-    private static final class OfPattern extends AbsTimeSpec {
+    private static final class OfPattern extends AbsTimeFormatter {
 
         private final @Nonnull String pattern;
 

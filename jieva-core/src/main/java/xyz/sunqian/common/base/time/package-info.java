@@ -7,7 +7,7 @@
  * </ul>
  * Core interfaces
  * <ul>
- *     <li>{@link xyz.sunqian.common.base.time.TimeSpec}</li>
+ *     <li>{@link xyz.sunqian.common.base.time.TimeFormatter}</li>
  * </ul>
  */
 package xyz.sunqian.common.base.time;

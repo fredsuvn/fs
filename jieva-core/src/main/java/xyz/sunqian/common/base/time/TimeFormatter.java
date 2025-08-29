@@ -17,12 +17,12 @@ import java.time.temporal.TemporalAccessor;
 import java.util.Date;
 
 /**
- * Specification for time and date, used to format and parse time and date.
+ * Formatter for time and date.
  *
  * @author sunqian
  */
 @Immutable
-public interface TimeSpec {
+public interface TimeFormatter {
 
     /**
      * Returns a time specification based on the given formatter.
@@ -33,7 +33,7 @@ public interface TimeSpec {
      * @param formatter the given formatter
      * @return a time specification based on the given formatter
      */
-    static @Nonnull TimeSpec ofFormatter(@Nonnull DateTimeFormatter formatter) {
+    static @Nonnull TimeFormatter ofFormatter(@Nonnull DateTimeFormatter formatter) {
         return TimeBack.ofFormatter(formatter);
     }
 
@@ -47,7 +47,7 @@ public interface TimeSpec {
      * @param pattern the given pattern
      * @return a time specification based on the given pattern
      */
-    static @Nonnull TimeSpec ofPattern(@Nonnull String pattern) {
+    static @Nonnull TimeFormatter ofPattern(@Nonnull String pattern) {
         return TimeBack.ofPattern(pattern);
     }
 

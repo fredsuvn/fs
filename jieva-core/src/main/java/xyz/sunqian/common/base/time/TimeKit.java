@@ -23,9 +23,9 @@ public class TimeKit {
     public static final String DEFAULT_PATTERN = "yyyy-MM-dd HH:mm:ss.SSS";
 
     /**
-     * Default {@link TimeSpec} of {@link #DEFAULT_PATTERN}.
+     * Default {@link TimeFormatter} of {@link #DEFAULT_PATTERN}.
      */
-    static final @Nonnull TimeSpec DEFAULT_TIME_SPEC = TimeSpec.ofPattern(DEFAULT_PATTERN);
+    static final @Nonnull TimeFormatter DEFAULT_TIME_SPEC = TimeFormatter.ofPattern(DEFAULT_PATTERN);
 
     /**
      * Formats the given date by {@link #DEFAULT_TIME_SPEC}.

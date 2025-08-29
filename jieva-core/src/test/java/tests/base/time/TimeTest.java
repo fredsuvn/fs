@@ -2,8 +2,8 @@ package tests.base.time;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.time.TimeException;
+import xyz.sunqian.common.base.time.TimeFormatter;
 import xyz.sunqian.common.base.time.TimeKit;
-import xyz.sunqian.common.base.time.TimeSpec;
 import xyz.sunqian.test.PrintTest;
 
 import java.time.DateTimeException;
@@ -51,15 +51,15 @@ public class TimeTest implements PrintTest {
             assertEquals(TimeKit.formatSafe(nowInstant, zoneId), formatter.format(nowZonedDateTime));
             assertEquals(TimeKit.formatSafe(nowLocalDateTime, zoneId), formatter.format(nowZonedDateTime));
             assertEquals(TimeKit.formatSafe(nowZonedDateTime, zoneId), formatter.format(nowZonedDateTime));
-            TimeSpec instantSpec = TimeSpec.ofFormatter(DateTimeFormatter.ISO_INSTANT);
+            TimeFormatter instantSpec = TimeFormatter.ofFormatter(DateTimeFormatter.ISO_INSTANT);
             assertEquals(instantSpec.formatSafe(nowDate), DateTimeFormatter.ISO_INSTANT.format(nowInstant));
             assertEquals(instantSpec.formatSafe(nowInstant), DateTimeFormatter.ISO_INSTANT.format(nowInstant));
             assertEquals(
-                TimeSpec.ofFormatter(DateTimeFormatter.ISO_DATE).formatSafe(nowLocalDate),
+                TimeFormatter.ofFormatter(DateTimeFormatter.ISO_DATE).formatSafe(nowLocalDate),
                 DateTimeFormatter.ISO_DATE.format(nowLocalDate)
             );
             assertEquals(
-                TimeSpec.ofFormatter(DateTimeFormatter.ISO_TIME).formatSafe(nowLocalTime),
+                TimeFormatter.ofFormatter(DateTimeFormatter.ISO_TIME).formatSafe(nowLocalTime),
                 DateTimeFormatter.ISO_TIME.format(nowLocalTime)
             );
             assertNull(TimeKit.formatSafe(nowDate));
@@ -80,16 +80,16 @@ public class TimeTest implements PrintTest {
             assertEquals(TimeKit.parseSafe(dateStr, LocalDate.class), nowLocalDate);
             assertEquals(TimeKit.parseSafe(dateStr, LocalTime.class), nowLocalTime);
             String fullStr = DateTimeFormatter.ISO_ZONED_DATE_TIME.format(nowZonedDateTime);
-            TimeSpec instantSpec = TimeSpec.ofFormatter(DateTimeFormatter.ISO_ZONED_DATE_TIME);
+            TimeFormatter instantSpec = TimeFormatter.ofFormatter(DateTimeFormatter.ISO_ZONED_DATE_TIME);
             assertEquals(instantSpec.parseSafe(fullStr, ZonedDateTime.class), nowZonedDateTime);
             assertEquals(instantSpec.parseSafe(fullStr, OffsetDateTime.class), nowOffsetDateTime);
             assertEquals(
-                TimeSpec.ofFormatter(DateTimeFormatter.ISO_INSTANT)
+                TimeFormatter.ofFormatter(DateTimeFormatter.ISO_INSTANT)
                     .parseSafe(DateTimeFormatter.ISO_INSTANT.format(nowInstant), Instant.class),
                 nowInstant
             );
             assertEquals(
-                TimeSpec.ofFormatter(DateTimeFormatter.ISO_INSTANT)
+                TimeFormatter.ofFormatter(DateTimeFormatter.ISO_INSTANT)
                     .parseSafe(DateTimeFormatter.ISO_INSTANT.format(nowInstant), Date.class),
                 nowDate
             );
@@ -128,10 +128,10 @@ public class TimeTest implements PrintTest {
         }
         {
             // pattern
-            TimeSpec p = TimeSpec.ofPattern("yyyy-MM-dd HH:mm:ss");
+            TimeFormatter p = TimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             assertEquals(p.pattern(), "yyyy-MM-dd HH:mm:ss");
             assertTrue(p.hasPattern());
-            TimeSpec f = TimeSpec.ofFormatter(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            TimeFormatter f = TimeFormatter.ofFormatter(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             expectThrows(DateTimeException.class, f::pattern);
             assertFalse(f.hasPattern());
         }
