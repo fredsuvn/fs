@@ -2,7 +2,7 @@ package xyz.sunqian.common.objects.data.handlers;
 
 import lombok.Data;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.CaseFormatter;
+import xyz.sunqian.common.base.string.NameFormatter;
 import xyz.sunqian.common.base.string.StringKit;
 import xyz.sunqian.common.objects.data.DataSchemaParser;
 
@@ -23,7 +23,7 @@ import java.util.Objects;
  */
 public class JavaBeanDataSchemaHandler extends AbstractDataSchemaHandler {
 
-    private final CaseFormatter caseFormatter = CaseFormatter.LOWER_CAMEL;
+    private final NameFormatter nameFormatter = NameFormatter.LOWER_CAMEL;
 
     @Override
     protected @Nullable AccessorInfo resolveAccessor(Method method) {
@@ -57,7 +57,7 @@ public class JavaBeanDataSchemaHandler extends AbstractDataSchemaHandler {
         if (!isGetterName) {
             return null;
         }
-        List<CharSequence> getterNameWords = caseFormatter.resolve(methodName);
+        List<CharSequence> getterNameWords = nameFormatter.resolve(methodName);
         if (getterNameWords.size() <= 1) {
             return null;
         }
@@ -67,7 +67,7 @@ public class JavaBeanDataSchemaHandler extends AbstractDataSchemaHandler {
         }
         // sure it is a getter
         List<CharSequence> propertyNameWords = getterNameWords.subList(1, getterNameWords.size());
-        return new AccessorInfoImpl(caseFormatter.format(propertyNameWords), true);
+        return new AccessorInfoImpl(nameFormatter.format(propertyNameWords), true);
     }
 
     @Nullable
@@ -78,7 +78,7 @@ public class JavaBeanDataSchemaHandler extends AbstractDataSchemaHandler {
         if (!isSetterName) {
             return null;
         }
-        List<CharSequence> setterNameWords = caseFormatter.resolve(methodName);
+        List<CharSequence> setterNameWords = nameFormatter.resolve(methodName);
         if (setterNameWords.size() <= 1) {
             return null;
         }
@@ -88,7 +88,7 @@ public class JavaBeanDataSchemaHandler extends AbstractDataSchemaHandler {
         }
         // sure it is a setter
         List<CharSequence> propertyNameWords = setterNameWords.subList(1, setterNameWords.size());
-        return new AccessorInfoImpl(caseFormatter.format(propertyNameWords), false);
+        return new AccessorInfoImpl(nameFormatter.format(propertyNameWords), false);
     }
 
     @Data

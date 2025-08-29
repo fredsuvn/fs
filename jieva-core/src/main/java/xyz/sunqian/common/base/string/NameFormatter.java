@@ -1,7 +1,6 @@
-package xyz.sunqian.common.base;
+package xyz.sunqian.common.base.string;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.string.StringKit;
 
 import java.util.List;
 import java.util.Objects;
@@ -12,7 +11,7 @@ import java.util.function.Function;
  *
  * @author fredsuvn
  */
-public interface CaseFormatter {
+public interface NameFormatter {
 
     /**
      * Upper Camel Case from {@link #camelCase(boolean)}. It is equivalent to ({@link #camelCase(boolean)}):
@@ -20,7 +19,7 @@ public interface CaseFormatter {
      *     camelCase(true);
      * </pre>
      */
-    CaseFormatter UPPER_CAMEL = camelCase(true);
+    NameFormatter UPPER_CAMEL = camelCase(true);
 
     /**
      * Lower Camel Case from {@link #camelCase(boolean)}. It is equivalent to ({@link #camelCase(boolean)}):
@@ -28,7 +27,7 @@ public interface CaseFormatter {
      *     camelCase(true);
      * </pre>
      */
-    CaseFormatter LOWER_CAMEL = camelCase(false);
+    NameFormatter LOWER_CAMEL = camelCase(false);
 
     /**
      * Underscore Delimiter Case from {@link #delimiterCase(CharSequence, Function)}. It is equivalent to
@@ -37,7 +36,7 @@ public interface CaseFormatter {
      *     delimiterCase("_", null);
      * </pre>
      */
-    CaseFormatter UNDERSCORE = delimiterCase("_", null);
+    NameFormatter UNDERSCORE = delimiterCase("_", null);
 
     /**
      * Upper Underscore Delimiter Case from {@link #delimiterCase(CharSequence, Function)}. It is equivalent to
@@ -46,7 +45,7 @@ public interface CaseFormatter {
      *     delimiterCase("_", JieString::upperCase);
      * </pre>
      */
-    CaseFormatter UPPER_UNDERSCORE = delimiterCase("_", StringKit::upperCase);
+    NameFormatter UPPER_UNDERSCORE = delimiterCase("_", StringKit::upperCase);
 
     /**
      * Lower Underscore Delimiter Case from {@link #delimiterCase(CharSequence, Function)}. It is equivalent to
@@ -55,7 +54,7 @@ public interface CaseFormatter {
      *     delimiterCase("_", JieString::lowerCase);
      * </pre>
      */
-    CaseFormatter LOWER_UNDERSCORE = delimiterCase("_", StringKit::lowerCase);
+    NameFormatter LOWER_UNDERSCORE = delimiterCase("_", StringKit::lowerCase);
 
     /**
      * Hyphen Delimiter Case from {@link #delimiterCase(CharSequence, Function)}. It is equivalent to
@@ -64,7 +63,7 @@ public interface CaseFormatter {
      *     delimiterCase("-", null);
      * </pre>
      */
-    CaseFormatter HYPHEN = delimiterCase("-", null);
+    NameFormatter HYPHEN = delimiterCase("-", null);
 
     /**
      * Upper Hyphen Delimiter Case from {@link #delimiterCase(CharSequence, Function)}. It is equivalent to
@@ -73,7 +72,7 @@ public interface CaseFormatter {
      *     delimiterCase("-", JieString::upperCase);
      * </pre>
      */
-    CaseFormatter UPPER_HYPHEN = delimiterCase("-", StringKit::upperCase);
+    NameFormatter UPPER_HYPHEN = delimiterCase("-", StringKit::upperCase);
 
     /**
      * Lower Hyphen Delimiter Case from {@link #delimiterCase(CharSequence, Function)}. It is equivalent to
@@ -82,31 +81,31 @@ public interface CaseFormatter {
      *     delimiterCase("-", JieString::lowerCase);
      * </pre>
      */
-    CaseFormatter LOWER_HYPHEN = delimiterCase("-", StringKit::lowerCase);
+    NameFormatter LOWER_HYPHEN = delimiterCase("-", StringKit::lowerCase);
 
     /**
-     * Returns a new {@link CaseFormatter} represents {@code Camel Case}.
+     * Returns a new {@link NameFormatter} represents {@code Camel Case}.
      * <p>
      * Note the continuous characters which are non-lowercase and non-uppercase (such as digits) will be separately
      * combined to a word.
      *
      * @param upperHead whether this case is upper camel case
-     * @return a new {@link CaseFormatter} represents {@code Camel Case}
+     * @return a new {@link NameFormatter} represents {@code Camel Case}
      */
-    static CaseFormatter camelCase(boolean upperHead) {
-        return new CaseFormatterImpls.CamelCaseFormatter(upperHead);
+    static NameFormatter camelCase(boolean upperHead) {
+        return new NameFormatterBack.CamelNameFormatter(upperHead);
     }
 
     /**
-     * Returns a new {@link CaseFormatter} represents {@code Delimiter Case}.
+     * Returns a new {@link NameFormatter} represents {@code Delimiter Case}.
      *
      * @param delimiter  the delimiter
      * @param wordMapper the mapper to deal with each word before joining the words, may be {@code null} if no need
-     * @return a new {@link CaseFormatter} represents {@code Delimiter Case}
+     * @return a new {@link NameFormatter} represents {@code Delimiter Case}
      */
-    static CaseFormatter delimiterCase(
+    static NameFormatter delimiterCase(
         CharSequence delimiter, @Nullable Function<? super CharSequence, ? extends CharSequence> wordMapper) {
-        return new CaseFormatterImpls.DelimiterCaseFormatter(delimiter, wordMapper);
+        return new NameFormatterBack.DelimiterNameFormatter(delimiter, wordMapper);
     }
 
     /**
@@ -137,7 +136,7 @@ public interface CaseFormatter {
      * @see #resolve(CharSequence)
      * @see #format(List)
      */
-    default String to(CaseFormatter otherCase, CharSequence name) {
+    default String to(NameFormatter otherCase, CharSequence name) {
         if (Objects.equals(this, otherCase)) {
             return name.toString();
         }

@@ -1,7 +1,6 @@
-package xyz.sunqian.common.base;
+package xyz.sunqian.common.base.string;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.string.StringKit;
 import xyz.sunqian.common.collect.CollectKit;
 
 import java.util.Collections;
@@ -10,9 +9,9 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-final class CaseFormatterImpls {
+final class NameFormatterBack {
 
-    static final class CamelCaseFormatter implements CaseFormatter {
+    static final class CamelNameFormatter implements NameFormatter {
 
         private static final int LOWER = 0;
         private static final int UPPER = 1;
@@ -20,7 +19,7 @@ final class CaseFormatterImpls {
 
         private final boolean upperHead;
 
-        CamelCaseFormatter(boolean upperHead) {
+        CamelNameFormatter(boolean upperHead) {
             this.upperHead = upperHead;
         }
 
@@ -200,12 +199,12 @@ final class CaseFormatterImpls {
         }
     }
 
-    static final class DelimiterCaseFormatter implements CaseFormatter {
+    static final class DelimiterNameFormatter implements NameFormatter {
 
         private final CharSequence delimiter;
         private final @Nullable Function<? super CharSequence, ? extends CharSequence> wordMapper;
 
-        DelimiterCaseFormatter(
+        DelimiterNameFormatter(
             CharSequence delimiter, @Nullable Function<? super CharSequence, ? extends CharSequence> wordMapper) {
             this.delimiter = delimiter;
             this.wordMapper = wordMapper;
