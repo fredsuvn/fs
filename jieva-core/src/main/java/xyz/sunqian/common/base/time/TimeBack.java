@@ -18,12 +18,20 @@ import java.util.Objects;
 
 final class TimeBack {
 
-    static @Nonnull TimeFormatter ofFormatter(@Nonnull DateTimeFormatter formatter) {
-        return new OfFormatter(formatter);
+    static @Nonnull TimeFormatter ofFormatter(
+        @Nonnull DateTimeFormatter formatter, @Nonnull ZoneId zoneId
+    ) {
+        return new OfFormatter(formatter, zoneId);
     }
 
-    static @Nonnull TimeFormatter ofPattern(@Nonnull String pattern) {
-        return new OfPattern(pattern);
+    static @Nonnull TimeFormatter ofPattern(
+        @Nonnull String pattern, @Nonnull ZoneId zoneId
+    ) throws DateTimeException {
+        try {
+            return new OfPattern(pattern, zoneId);
+        } catch (Exception e) {
+            throw new TimeException(e);
+        }
     }
 
     private static class AbsTimeFormatter implements TimeFormatter {
@@ -31,9 +39,16 @@ final class TimeBack {
         private static final @Nonnull String NO_PATTERN = "No pattern in this TimeSpec.";
 
         protected final @Nonnull DateTimeFormatter formatter;
+        private final @Nonnull ZoneId zoneId;
 
-        private AbsTimeFormatter(@Nonnull DateTimeFormatter formatter) {
+        private AbsTimeFormatter(@Nonnull DateTimeFormatter formatter, @Nonnull ZoneId zoneId) {
             this.formatter = formatter;
+            this.zoneId = zoneId;
+        }
+
+        @Override
+        public @Nonnull ZoneId zoneId() {
+            return zoneId;
         }
 
         @Override
@@ -53,19 +68,13 @@ final class TimeBack {
         }
 
         @Override
-        public @Nonnull String format(@Nonnull Date date, @Nonnull ZoneId zoneId) throws DateTimeException {
-            Instant instant = date.toInstant();
-            return format(instant, zoneId);
-        }
-
-        @Override
         public @Nonnull String format(@Nonnull TemporalAccessor time) throws DateTimeException {
-            return formatter.format(time);
+            TemporalAccessor withZone = withZoneId(time, zoneId);
+            return format0(withZone);
         }
 
-        @Override
-        public @Nonnull String format(@Nonnull TemporalAccessor time, @Nonnull ZoneId zoneId) throws DateTimeException {
-            return format(withZoneId(time, zoneId));
+        private @Nonnull String format0(@Nonnull TemporalAccessor time) throws DateTimeException {
+            return formatter.format(time);
         }
 
         @Override
@@ -109,21 +118,8 @@ final class TimeBack {
         public <T> @Nonnull T convert(
             @Nonnull TemporalAccessor time, @Nonnull Class<T> timeType
         ) throws DateTimeException {
-            return Jie.as(convert0(time, timeType));
-        }
-
-        @Override
-        public <T> @Nonnull T convert(
-            @Nonnull Date date, @Nonnull Class<T> timeType, @Nonnull ZoneId zoneId
-        ) throws DateTimeException {
-            return convert(date.toInstant(), timeType, zoneId);
-        }
-
-        @Override
-        public <T> @Nonnull T convert(
-            @Nonnull TemporalAccessor time, @Nonnull Class<T> timeType, @Nonnull ZoneId zoneId
-        ) throws DateTimeException {
-            return convert(withZoneId(time, zoneId), timeType);
+            TemporalAccessor withZone = withZoneId(time, zoneId);
+            return Jie.as(convert0(withZone, timeType));
         }
 
         private @Nonnull Object convert0(
@@ -165,9 +161,8 @@ final class TimeBack {
     }
 
     private static final class OfFormatter extends AbsTimeFormatter {
-
-        private OfFormatter(@Nonnull DateTimeFormatter formatter) {
-            super(formatter);
+        private OfFormatter(@Nonnull DateTimeFormatter formatter, @Nonnull ZoneId zoneId) {
+            super(formatter, zoneId);
         }
     }
 
@@ -175,8 +170,8 @@ final class TimeBack {
 
         private final @Nonnull String pattern;
 
-        private OfPattern(@Nonnull String pattern) {
-            super(DateTimeFormatter.ofPattern(pattern));
+        private OfPattern(@Nonnull String pattern, @Nonnull ZoneId zoneId) throws DateTimeException {
+            super(DateTimeFormatter.ofPattern(pattern), zoneId);
             this.pattern = pattern;
         }
 
