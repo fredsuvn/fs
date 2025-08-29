@@ -3,22 +3,11 @@ package xyz.sunqian.common.base.time;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.Date;
-import java.util.function.Supplier;
 
 /**
  * Utilities for time and date.
@@ -33,370 +22,126 @@ public class TimeKit {
     public static final String DEFAULT_PATTERN = "yyyy-MM-dd HH:mm:ss.SSS";
 
     /**
-     * Default date time formatter of {@link #DEFAULT_PATTERN} with the zone at {@link ZoneId#systemDefault()}.
+     * Default {@link TimeSpec} of {@link #DEFAULT_PATTERN}.
      */
-    public static final DateTimeFormatter DEFAULT_FORMATTER = DateTimeFormatter
-        .ofPattern(DEFAULT_PATTERN).withZone(ZoneId.systemDefault());
+    static final @Nonnull TimeSpec DEFAULT_TIME_SPEC = TimeSpec.ofPattern(DEFAULT_PATTERN);
 
     /**
-     * Returns a {@link DateFormat} of the specified pattern.
+     * Formats the given date by {@link #DEFAULT_TIME_SPEC}.
      *
-     * @param pattern the specified pattern
-     * @return a {@link DateFormat} of the specified pattern
-     */
-    public static @Nonnull DateFormat dateFormat(@Nonnull String pattern) {
-        return new SimpleDateFormat(pattern);
-    }
-
-    /**
-     * Formats the given date with {@link #DEFAULT_PATTERN}.
-     *
-     * @param date the given date
+     * @param date the given date to format
      * @return the formatted string
+     * @throws DateTimeException if any error occurs
      */
-    public static @Nonnull String format(@Nonnull Date date) {
-        return format(date, DEFAULT_PATTERN);
+    public static @Nonnull String format(@Nonnull Date date) throws DateTimeException {
+        return DEFAULT_TIME_SPEC.format(date);
     }
 
     /**
-     * Formats the given date with the specified pattern.
+     * Formats the given date by {@link #DEFAULT_TIME_SPEC}. If the given date is {@code null}, or an exception thrown
+     * during formating, returns {@code null}.
      *
-     * @param date    the given date
-     * @param pattern the specified pattern
+     * @param date the given date to format, can be {@code null}
+     * @return the formatted string, or {@code null} if the given date is {@code null} or an exception thrown
+     * @throws DateTimeException if any error occurs
+     */
+    public static @Nullable String formatSafe(@Nullable Date date) throws DateTimeException {
+        return DEFAULT_TIME_SPEC.formatSafe(date);
+    }
+
+    /**
+     * Formats the given time object by {@link #DEFAULT_TIME_SPEC}.
+     *
+     * @param time the given time object to format
      * @return the formatted string
+     * @throws DateTimeException if any error occurs
      */
-    public static @Nonnull String format(@Nonnull Date date, @Nonnull String pattern) {
-        return dateFormat(pattern).format(date);
+    public static @Nonnull String format(@Nonnull TemporalAccessor time) throws DateTimeException {
+        return DEFAULT_TIME_SPEC.format(time);
     }
 
     /**
-     * Parses the given date string with {@link #DEFAULT_PATTERN}.
+     * Formats the given time object by {@link #DEFAULT_TIME_SPEC}. If the given time object is {@code null}, or an
+     * exception thrown during formating, returns {@code null}.
      *
-     * @param date the given date string
-     * @return the parsed date
+     * @param time the given time object to format, can be {@code null}
+     * @return the formatted string, or {@code null} if the given time object is {@code null} or an exception thrown
+     * @throws DateTimeException if any error occurs
      */
-    public static @Nonnull Date parse(@Nonnull String date) {
-        return parse(date, DEFAULT_PATTERN);
+    public static @Nullable String formatSafe(@Nullable TemporalAccessor time) throws DateTimeException {
+        return DEFAULT_TIME_SPEC.formatSafe(time);
     }
 
     /**
-     * Parses the given date string with the specified pattern.
+     * Parses the given date string to an instance of the specified time type by {@link #DEFAULT_TIME_SPEC}.
      *
-     * @param date    the given date string
-     * @param pattern the specified pattern
-     * @return the parsed date
+     * @param date     the given date string to parse
+     * @param timeType the specified time type
+     * @param <T>      the time type
+     * @return the parsed time instance
+     * @throws DateTimeException if any error occurs
      */
-    public static @Nonnull Date parse(@Nonnull String date, @Nonnull String pattern) {
-        try {
-            return dateFormat(pattern).parse(date);
-        } catch (ParseException e) {
-            throw new IllegalArgumentException(e);
-        }
+    public static <T> @Nonnull T parse(
+        @Nonnull CharSequence date, @Nonnull Class<T> timeType
+    ) throws DateTimeException {
+        return DEFAULT_TIME_SPEC.parse(date, timeType);
     }
 
     /**
-     * Formats the given date with {@link #DEFAULT_PATTERN}. If the date is {@code null}, returns {@code null}.
+     * Parses the given date string to an instance of the specified time type by {@link #DEFAULT_TIME_SPEC}. If the
+     * given date string is {@code null}, or an exception thrown during parsing, returns {@code null}.
      *
-     * @param date the given date
-     * @return the formatted string
+     * @param date     the given date string to parse, can be {@code null}
+     * @param timeType the specified time type
+     * @param <T>      the time type
+     * @return the parsed time instance, or {@code null} if the given date string is {@code null} or an exception thrown
+     * @throws DateTimeException if any error occurs
      */
-    public static @Nullable String toString(@Nullable Date date) {
-        if (date == null) {
-            return null;
-        }
-        return format(date);
+    public static <T> @Nullable T parseSafe(
+        @Nullable CharSequence date, @Nonnull Class<T> timeType
+    ) throws DateTimeException {
+        return DEFAULT_TIME_SPEC.parseSafe(date, timeType);
     }
 
     /**
-     * Formats the given date with the specified pattern. If the date or pattern is {@code null}, returns {@code null}.
+     * Converts the given time object to an instance of the specified time type by {@link #DEFAULT_TIME_SPEC}.
      *
-     * @param date    the given date
-     * @param pattern the specified pattern
-     * @return the formatted string
+     * @param time     the given time object to parse
+     * @param timeType the specified time type
+     * @param <T>      the time type
+     * @return the converted time instance
+     * @throws DateTimeException if any error occurs
      */
-    public static @Nullable String toString(@Nullable Date date, @Nullable String pattern) {
-        if (date == null || pattern == null) {
-            return null;
-        }
-        return format(date, pattern);
+    public static <T> @Nonnull T convert(
+        @Nonnull Object time, @Nonnull Class<T> timeType
+    ) throws DateTimeException {
+        return DEFAULT_TIME_SPEC.convert(time, timeType);
     }
 
     /**
-     * Parses the given date string with {@link #DEFAULT_PATTERN}. If the date string is {@code null}, returns
-     * {@code null}.
+     * Converts the given time object to an instance of the specified time type by {@link #DEFAULT_TIME_SPEC}. If the
+     * given time object is {@code null}, or an exception thrown during parsing, returns {@code null}.
      *
-     * @param date the given date string
-     * @return the parsed date
+     * @param time     the given time object to parse, can be {@code null}
+     * @param timeType the specified time type
+     * @param <T>      the time type
+     * @return the converted time instance, or {@code null} if the given time object is {@code null} or an exception
+     * thrown
+     * @throws DateTimeException if any error occurs
      */
-    public static @Nullable Date toDate(@Nullable String date) {
-        if (date == null) {
-            return null;
-        }
-        return parse(date);
+    public static <T> @Nullable T convertSafe(
+        @Nullable Object time, @Nonnull Class<T> timeType
+    ) throws DateTimeException {
+        return DEFAULT_TIME_SPEC.convertSafe(time, timeType);
     }
 
     /**
-     * Parses the given date string with the specified pattern. If the date string or pattern is {@code null}, returns
-     * {@code null}.
+     * Returns the {@link ZoneOffset} at the current time, which is equivalent to:
+     * {@code ZoneOffset.systemDefault().getRules().getOffset(Instant.now())}.
      *
-     * @param date    the given date string
-     * @param pattern the specified pattern
-     * @return the parsed date
+     * @return the {@link ZoneOffset} at the current time
      */
-    public static @Nullable Date toDate(@Nullable String date, @Nullable String pattern) {
-        if (date == null || pattern == null) {
-            return null;
-        }
-        return parse(date, pattern);
-    }
-
-    /**
-     * Returns the current zone offset.
-     *
-     * @return the current zone offset
-     */
-    public static @Nonnull ZoneOffset zoneOffset() {
-        return OffsetDateTime.now().getOffset();
-    }
-
-    /**
-     * Converts the given temporal to an {@link Instant}. If the given temporal lacks a zone offset, use
-     * {@link #zoneOffset()}.
-     *
-     * @param temporal the given temporal
-     * @return the {@link Instant} converted from the given temporal
-     * @throws DateTimeException if the conversion fails
-     */
-    public static @Nonnull Instant toInstant(@Nonnull TemporalAccessor temporal) throws DateTimeException {
-        return toInstant(temporal, TimeKit::zoneOffset);
-    }
-
-    /**
-     * Converts the given temporal to an {@link Instant} with the specified zone offset.
-     *
-     * @param temporal the given temporal
-     * @param offset   specified zone offset
-     * @return the {@link Instant} converted from the given temporal
-     * @throws DateTimeException if the conversion fails
-     */
-    public static @Nonnull Instant toInstant(@Nonnull TemporalAccessor temporal, @Nonnull ZoneOffset offset) {
-        return toInstant(temporal, () -> offset);
-    }
-
-    private static @Nonnull Instant toInstant(
-        @Nonnull TemporalAccessor temporal,
-        @Nonnull Supplier<@Nonnull ZoneOffset> offset
-    ) {
-        if (temporal instanceof Instant) {
-            return (Instant) temporal;
-        }
-        if (temporal instanceof LocalDateTime) {
-            return ((LocalDateTime) temporal).toInstant(offset.get());
-        }
-        if (temporal instanceof ZonedDateTime) {
-            return ((ZonedDateTime) temporal).toInstant();
-        }
-        if (temporal instanceof OffsetDateTime) {
-            return ((OffsetDateTime) temporal).toInstant();
-        }
-        if (temporal instanceof LocalDate) {
-            return LocalDateTime.of((LocalDate) temporal, LocalTime.MIN).toInstant(offset.get());
-        }
-        if (temporal instanceof LocalTime) {
-            return LocalDateTime.of(LocalDate.MIN, (LocalTime) temporal).toInstant(offset.get());
-        }
-        return Instant.from(temporal);
-    }
-
-    /**
-     * Returns {@link LocalDateTime} from given temporal. If the given temporal lacks a zone offset, use
-     * {@link #zoneOffset()}.
-     *
-     * @param temporal given temporal
-     * @return {@link LocalDateTime} from given temporal
-     */
-    @Nullable
-    public static LocalDateTime toLocalDateTime(TemporalAccessor temporal) {
-        if (temporal instanceof Instant) {
-            return LocalDateTime.ofInstant((Instant) temporal, zoneOffset());
-        }
-        if (temporal instanceof LocalDateTime) {
-            return (LocalDateTime) temporal;
-        }
-        if (temporal instanceof ZonedDateTime) {
-            return ((ZonedDateTime) temporal).toLocalDateTime();
-        }
-        if (temporal instanceof OffsetDateTime) {
-            return ((OffsetDateTime) temporal).toLocalDateTime();
-        }
-        if (temporal instanceof LocalDate) {
-            return LocalDateTime.of((LocalDate) temporal, LocalTime.MIN);
-        }
-        if (temporal instanceof LocalTime) {
-            return LocalDateTime.of(LocalDate.MIN, (LocalTime) temporal);
-        }
-        return LocalDateTime.from(temporal);
-    }
-
-    /**
-     * Returns {@link LocalDateTime} from given temporal. If the given temporal lacks a zone offset, use specified zone
-     * offset.
-     *
-     * @param temporal given temporal
-     * @param offset   specified zone offset
-     * @return {@link LocalDateTime} from given temporal
-     */
-    public static LocalDateTime toLocalDateTime(TemporalAccessor temporal, ZoneOffset offset) {
-        if (temporal instanceof Instant) {
-            return LocalDateTime.ofInstant((Instant) temporal, offset);
-        }
-        if (temporal instanceof LocalDateTime) {
-            return (LocalDateTime) temporal;
-        }
-        if (temporal instanceof ZonedDateTime) {
-            return ((ZonedDateTime) temporal).toLocalDateTime();
-        }
-        if (temporal instanceof OffsetDateTime) {
-            return ((OffsetDateTime) temporal).toLocalDateTime();
-        }
-        if (temporal instanceof LocalDate) {
-            return LocalDateTime.of((LocalDate) temporal, LocalTime.MIN);
-        }
-        if (temporal instanceof LocalTime) {
-            return LocalDateTime.of(LocalDate.MIN, (LocalTime) temporal);
-        }
-        return LocalDateTime.from(temporal);
-    }
-
-    /**
-     * Returns {@link ZonedDateTime} from given temporal. If the given temporal lacks a zone offset, use
-     * {@link #zoneOffset()}.
-     *
-     * @param temporal given temporal
-     * @return {@link ZonedDateTime} from given temporal
-     */
-    @Nullable
-    public static ZonedDateTime toZonedDateTime(TemporalAccessor temporal) {
-        return toZonedDateTime(temporal, zoneOffset());
-    }
-
-    /**
-     * Returns {@link ZonedDateTime} from given temporal. If the given temporal lacks a zone offset, use specified zone
-     * offset.
-     *
-     * @param temporal given temporal
-     * @param offset   specified zone offset
-     * @return {@link ZonedDateTime} from given temporal
-     */
-    public static ZonedDateTime toZonedDateTime(TemporalAccessor temporal, ZoneOffset offset) {
-        if (temporal instanceof Instant) {
-            return ZonedDateTime.ofInstant((Instant) temporal, offset);
-        }
-        if (temporal instanceof LocalDateTime) {
-            return ((LocalDateTime) temporal).atZone(offset);
-        }
-        if (temporal instanceof ZonedDateTime) {
-            return ((ZonedDateTime) temporal).withZoneSameInstant(offset);
-        }
-        if (temporal instanceof OffsetDateTime) {
-            return ((OffsetDateTime) temporal).withOffsetSameInstant(offset).toZonedDateTime();
-        }
-        if (temporal instanceof LocalDate) {
-            return LocalDateTime.of((LocalDate) temporal, LocalTime.MIN).atZone(offset);
-        }
-        if (temporal instanceof LocalTime) {
-            return LocalDateTime.of(LocalDate.MIN, (LocalTime) temporal).atZone(offset);
-        }
-        return ZonedDateTime.from(temporal).withZoneSameInstant(offset);
-    }
-
-    /**
-     * Returns {@link OffsetDateTime} from given temporal. If the given temporal lacks a zone offset, use
-     * {@link #zoneOffset()}.
-     *
-     * @param temporal given temporal
-     * @return {@link OffsetDateTime} from given temporal
-     */
-    @Nullable
-    public static OffsetDateTime toOffsetDateTime(TemporalAccessor temporal) {
-        return toOffsetDateTime(temporal, zoneOffset());
-    }
-
-    /**
-     * Returns {@link OffsetDateTime} from given temporal. If the given temporal lacks a zone offset, use specified zone
-     * offset.
-     *
-     * @param temporal given temporal
-     * @param offset   specified zone offset
-     * @return {@link OffsetDateTime} from given temporal
-     */
-    public static OffsetDateTime toOffsetDateTime(TemporalAccessor temporal, ZoneOffset offset) {
-        if (temporal instanceof Instant) {
-            return OffsetDateTime.ofInstant((Instant) temporal, offset);
-        }
-        if (temporal instanceof LocalDateTime) {
-            return ((LocalDateTime) temporal).atOffset(offset);
-        }
-        if (temporal instanceof ZonedDateTime) {
-            return ((ZonedDateTime) temporal).toOffsetDateTime().withOffsetSameInstant(offset);
-        }
-        if (temporal instanceof OffsetDateTime) {
-            return ((OffsetDateTime) temporal).withOffsetSameInstant(offset);
-        }
-        if (temporal instanceof LocalDate) {
-            return LocalDateTime.of((LocalDate) temporal, LocalTime.MIN).atOffset(offset);
-        }
-        if (temporal instanceof LocalTime) {
-            return LocalDateTime.of(LocalDate.MIN, (LocalTime) temporal).atOffset(offset);
-        }
-        return OffsetDateTime.from(temporal).withOffsetSameInstant(offset);
-    }
-
-    /**
-     * Returns {@link LocalDate} from given temporal. If the given temporal lacks a zone offset, use
-     * {@link #zoneOffset()}.
-     *
-     * @param temporal given temporal
-     * @return {@link LocalDate} from given temporal
-     */
-    @Nullable
-    public static LocalDate toLocalDate(TemporalAccessor temporal) {
-        return toLocalDateTime(temporal).toLocalDate();
-    }
-
-    /**
-     * Returns {@link LocalDate} from given temporal. If the given temporal lacks a zone offset, use specified zone
-     * offset.
-     *
-     * @param temporal given temporal
-     * @param offset   specified zone offset
-     * @return {@link LocalDate} from given temporal
-     */
-    public static LocalDate toLocalDate(TemporalAccessor temporal, ZoneOffset offset) {
-        return toLocalDateTime(temporal, offset).toLocalDate();
-    }
-
-    /**
-     * Returns {@link LocalTime} from given temporal. If the given temporal lacks a zone offset, use
-     * {@link #zoneOffset()}.
-     *
-     * @param temporal given temporal
-     * @return {@link LocalTime} from given temporal
-     */
-    @Nullable
-    public static LocalTime toLocalTime(TemporalAccessor temporal) {
-        return toLocalDateTime(temporal).toLocalTime();
-    }
-
-    /**
-     * Returns {@link LocalTime} from given temporal. If the given temporal lacks a zone offset, use specified zone
-     * offset.
-     *
-     * @param temporal given temporal
-     * @param offset   specified zone offset
-     * @return {@link LocalTime} from given temporal
-     */
-    public static LocalTime toLocalTime(TemporalAccessor temporal, ZoneOffset offset) {
-        return toLocalDateTime(temporal, offset).toLocalTime();
+    public static @Nonnull ZoneOffset nowOffset() {
+        return ZoneOffset.systemDefault().getRules().getOffset(Instant.now());
     }
 }
