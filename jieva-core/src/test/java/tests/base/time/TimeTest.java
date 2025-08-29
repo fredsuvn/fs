@@ -129,6 +129,10 @@ public class TimeTest implements PrintTest {
             // zone
             assertEquals(TimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").zoneId(), ZoneId.systemDefault());
         }
+        {
+            // default formatter
+            assertEquals(TimeKit.formatter().pattern(), TimeKit.DEFAULT_PATTERN);
+        }
     }
 
     @Test

@@ -6,6 +6,7 @@ import xyz.sunqian.common.base.chars.CharsBuilder;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.io.IOMode;
+import xyz.sunqian.common.io.IOOperator;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.test.DataTest;
 import xyz.sunqian.test.ErrorAppender;
@@ -28,6 +29,7 @@ import java.util.Arrays;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.expectThrows;
 
 public class IOTest implements DataTest {
@@ -373,6 +375,10 @@ public class IOTest implements DataTest {
             // mode
             assertEquals(IOMode.valueOf("BLOCKING"), IOMode.BLOCKING);
             assertEquals(IOMode.valueOf("NON_BLOCKING"), IOMode.NON_BLOCKING);
+        }
+        {
+            // default io operator
+            assertSame(IOKit.ioOperator(), IOOperator.get(IOKit.bufferSize()));
         }
     }
 

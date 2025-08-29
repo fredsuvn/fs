@@ -23,7 +23,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 
 /**
- * Utilities for IO related, some methods are provided by {@link IOOperator}.
+ * Utilities for IO related, some methods are provided by a default {@link IOOperator}.
  *
  * @author sunqian
  */
@@ -45,6 +45,15 @@ public class IOKit {
      */
     public static int bufferSize() {
         return BUFFER_SIZE;
+    }
+
+    /**
+     * Returns the default io operator this class uses.
+     *
+     * @return the default io operator this class uses
+     */
+    public static @Nonnull IOOperator ioOperator() {
+        return io;
     }
 
     /**
