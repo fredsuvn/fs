@@ -9,6 +9,7 @@
  * Interfaces:
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.string.StringView}</li>
+ *     <li>{@link xyz.sunqian.common.base.string.NameFormatter}</li>
  * </ul>
  */
 package xyz.sunqian.common.base.string;
