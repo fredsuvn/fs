@@ -5,9 +5,9 @@ import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.base.CheckKit;
 import xyz.sunqian.common.base.exception.UnreachablePointException;
 
-final class StringViewBack {
+final class StringBack {
 
-    static @Nonnull StringView of(@Nonnull CharSequence @Nonnull @RetainedParam ... strings) {
+    static @Nonnull StringView view(@Nonnull CharSequence @Nonnull @RetainedParam ... strings) {
         return new StringViewImpl(strings);
     }
 

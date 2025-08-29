@@ -22,7 +22,7 @@ public interface StringView extends CharSequence {
      * @return a {@code StringView} that is composed of the specified {@link CharSequence} instances
      */
     static @Nonnull StringView of(@Nonnull CharSequence @Nonnull @RetainedParam ... strings) {
-        return StringViewBack.of(strings);
+        return StringBack.view(strings);
     }
 
     /**
