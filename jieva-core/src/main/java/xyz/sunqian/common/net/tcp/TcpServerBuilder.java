@@ -30,7 +30,8 @@ import java.util.concurrent.ThreadFactory;
  * Builder for building new instances of {@link TcpServer} by {@link ServerSocketChannel} and {@link SocketChannel}.
  * <p>
  * The server built by this builder requires a main thread and at least one worker thread, the main thread is
- * responsible for accepting new client, and the worker threads are responsible for handling connected client.
+ * responsible for accepting new client, and the worker threads are responsible for handling connected client. A client
+ * is always handled by one worker thread, so there is no client thread safety issues in the {@link TcpServerHandler}.
  *
  * @author sunqian
  */

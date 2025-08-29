@@ -1,6 +1,7 @@
 package xyz.sunqian.common.net.http;
 
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.net.NetException;
 
 import java.net.Proxy;
@@ -11,6 +12,7 @@ import java.time.Duration;
  *
  * @author sunqian
  */
+@ThreadSafe
 public interface HttpClientEngine {
 
     /**
