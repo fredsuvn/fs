@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
@@ -52,8 +53,19 @@ final class TimeBack {
         }
 
         @Override
+        public @Nonnull String format(@Nonnull Date date, @Nonnull ZoneId zoneId) throws DateTimeException {
+            Instant instant = date.toInstant();
+            return format(instant, zoneId);
+        }
+
+        @Override
         public @Nonnull String format(@Nonnull TemporalAccessor time) throws DateTimeException {
             return formatter.format(time);
+        }
+
+        @Override
+        public @Nonnull String format(@Nonnull TemporalAccessor time, @Nonnull ZoneId zoneId) throws DateTimeException {
+            return format(withZoneId(time, zoneId));
         }
 
         @Override
@@ -89,19 +101,29 @@ final class TimeBack {
         }
 
         @Override
-        public <T> @Nonnull T convert(@Nonnull Object time, @Nonnull Class<T> timeType) throws DateTimeException {
-            if (time instanceof CharSequence) {
-                return parse((CharSequence) time, timeType);
-            }
-            TemporalAccessor src;
-            if (time instanceof TemporalAccessor) {
-                src = (TemporalAccessor) time;
-            } else if (time instanceof Date) {
-                src = ((Date) time).toInstant();
-            } else {
-                throw new TimeException("Unsupported time type: " + time.getClass());
-            }
-            return Jie.as(convert0(src, timeType));
+        public <T> @Nonnull T convert(@Nonnull Date date, @Nonnull Class<T> timeType) throws DateTimeException {
+            return convert(date.toInstant(), timeType);
+        }
+
+        @Override
+        public <T> @Nonnull T convert(
+            @Nonnull TemporalAccessor time, @Nonnull Class<T> timeType
+        ) throws DateTimeException {
+            return Jie.as(convert0(time, timeType));
+        }
+
+        @Override
+        public <T> @Nonnull T convert(
+            @Nonnull Date date, @Nonnull Class<T> timeType, @Nonnull ZoneId zoneId
+        ) throws DateTimeException {
+            return convert(date.toInstant(), timeType, zoneId);
+        }
+
+        @Override
+        public <T> @Nonnull T convert(
+            @Nonnull TemporalAccessor time, @Nonnull Class<T> timeType, @Nonnull ZoneId zoneId
+        ) throws DateTimeException {
+            return convert(withZoneId(time, zoneId), timeType);
         }
 
         private @Nonnull Object convert0(
@@ -129,6 +151,16 @@ final class TimeBack {
                 return LocalTime.from(time);
             }
             throw new TimeException("Unsupported conversion from " + time.getClass() + " to " + timeType + ".");
+        }
+
+        private @Nonnull TemporalAccessor withZoneId(@Nonnull TemporalAccessor time, @Nonnull ZoneId zoneId) {
+            if (time instanceof Instant) {
+                return ZonedDateTime.ofInstant((Instant) time, zoneId);
+            }
+            if (time instanceof LocalDateTime) {
+                return ZonedDateTime.of((LocalDateTime) time, zoneId);
+            }
+            return time;
         }
     }
 

@@ -45,13 +45,15 @@ public class TimeTest implements PrintTest {
             assertEquals(TimeKit.formatSafe(nowLocalDateTime), formatter.format(nowLocalDateTime));
             assertEquals(TimeKit.formatSafe(nowZonedDateTime), formatter.format(nowZonedDateTime));
             assertEquals(TimeKit.formatSafe(nowOffsetDateTime), formatter.format(nowOffsetDateTime));
+            assertEquals(TimeKit.format(nowDate, zoneId), formatter.format(nowZonedDateTime));
+            assertEquals(TimeKit.formatSafe(nowDate, zoneId), formatter.format(nowZonedDateTime));
+            assertEquals(TimeKit.format(nowInstant, zoneId), formatter.format(nowZonedDateTime));
+            assertEquals(TimeKit.formatSafe(nowInstant, zoneId), formatter.format(nowZonedDateTime));
+            assertEquals(TimeKit.formatSafe(nowLocalDateTime, zoneId), formatter.format(nowZonedDateTime));
+            assertEquals(TimeKit.formatSafe(nowZonedDateTime, zoneId), formatter.format(nowZonedDateTime));
             TimeSpec instantSpec = TimeSpec.ofFormatter(DateTimeFormatter.ISO_INSTANT);
             assertEquals(instantSpec.formatSafe(nowDate), DateTimeFormatter.ISO_INSTANT.format(nowInstant));
             assertEquals(instantSpec.formatSafe(nowInstant), DateTimeFormatter.ISO_INSTANT.format(nowInstant));
-            // assertEquals(
-            //     TimeSpec.ofFormatter(DateTimeFormatter.ISO_DATE_TIME).formatSafe(nowLocalDateTime),
-            //     DateTimeFormatter.ISO_DATE_TIME.format(nowLocalDateTime)
-            // );
             assertEquals(
                 TimeSpec.ofFormatter(DateTimeFormatter.ISO_DATE).formatSafe(nowLocalDate),
                 DateTimeFormatter.ISO_DATE.format(nowLocalDate)
@@ -66,6 +68,10 @@ public class TimeTest implements PrintTest {
             expectThrows(DateTimeException.class, () -> TimeKit.format(nowInstant));
             assertNull(TimeKit.formatSafe((Date) null));
             assertNull(TimeKit.formatSafe((Instant) null));
+            assertNull(TimeKit.formatSafe((Date) null, zoneId));
+            assertNull(TimeKit.formatSafe((Instant) null, zoneId));
+            assertNull(TimeKit.formatSafe(nowLocalDate, zoneId));
+            assertNull(TimeKit.formatSafe(new ErrDate(), zoneId));
         }
         {
             // parse
@@ -94,8 +100,6 @@ public class TimeTest implements PrintTest {
         }
         {
             // convert
-            String dateStr = TimeKit.format(nowLocalDateTime);
-            assertEquals(TimeKit.convertSafe(dateStr, LocalDateTime.class), nowLocalDateTime);
             assertEquals(TimeKit.convertSafe(nowLocalDateTime, LocalDateTime.class), nowLocalDateTime);
             assertEquals(TimeKit.convertSafe(nowLocalDateTime, LocalDate.class), nowLocalDate);
             assertEquals(TimeKit.convertSafe(nowLocalDateTime, LocalTime.class), nowLocalTime);
@@ -104,14 +108,23 @@ public class TimeTest implements PrintTest {
             assertEquals(TimeKit.convertSafe(nowZonedDateTime, LocalDateTime.class), nowLocalDateTime);
             assertEquals(TimeKit.convertSafe(nowZonedDateTime, Instant.class), nowInstant);
             assertEquals(TimeKit.convertSafe(nowZonedDateTime, Date.class), nowDate);
-            assertNull(TimeKit.convertSafe(nowLocalDateTime, ZonedDateTime.class));
-            expectThrows(DateTimeException.class, () -> TimeKit.convert(nowLocalDateTime, ZonedDateTime.class));
-            assertNull(TimeKit.convertSafe(null, ZonedDateTime.class));
-            assertNull(TimeKit.convertSafe(dateStr, String.class));
-            assertNull(TimeKit.convertSafe(new Object(), String.class));
-            assertNull(TimeKit.convertSafe(nowInstant, String.class));
             assertEquals(TimeKit.convert(nowDate, Instant.class), nowInstant);
             assertEquals(TimeKit.convert(nowInstant, Date.class), nowDate);
+            assertEquals(TimeKit.convert(nowDate, ZonedDateTime.class, zoneId), nowZonedDateTime);
+            assertEquals(TimeKit.convert(nowInstant, ZonedDateTime.class, zoneId), nowZonedDateTime);
+            assertEquals(TimeKit.convertSafe(nowDate, ZonedDateTime.class, zoneId), nowZonedDateTime);
+            assertEquals(TimeKit.convertSafe(nowInstant, ZonedDateTime.class, zoneId), nowZonedDateTime);
+            assertEquals(TimeKit.convertSafe(nowLocalDateTime, ZonedDateTime.class, zoneId), nowZonedDateTime);
+            assertNull(TimeKit.convertSafe(nowLocalDateTime, ZonedDateTime.class));
+            expectThrows(DateTimeException.class, () -> TimeKit.convert(nowLocalDateTime, ZonedDateTime.class));
+            assertNull(TimeKit.convertSafe((Date) null, ZonedDateTime.class));
+            assertNull(TimeKit.convertSafe((Instant) null, ZonedDateTime.class));
+            assertNull(TimeKit.convertSafe(nowDate, ZonedDateTime.class));
+            assertNull(TimeKit.convertSafe(nowInstant, ZonedDateTime.class));
+            assertNull(TimeKit.convertSafe((Date) null, ZonedDateTime.class, zoneId));
+            assertNull(TimeKit.convertSafe((Instant) null, ZonedDateTime.class, zoneId));
+            assertNull(TimeKit.convertSafe(nowLocalDate, ZonedDateTime.class, zoneId));
+            assertNull(TimeKit.convertSafe(nowDate, String.class, zoneId));
         }
         {
             // pattern
@@ -140,6 +153,13 @@ public class TimeTest implements PrintTest {
             expectThrows(TimeException.class, () -> {
                 throw new TimeException(new RuntimeException());
             });
+        }
+    }
+
+    private static final class ErrDate extends Date {
+        @Override
+        public Instant toInstant() {
+            throw new RuntimeException();
         }
     }
 }

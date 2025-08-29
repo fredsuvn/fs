@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
@@ -96,6 +97,37 @@ public interface TimeSpec {
     }
 
     /**
+     * Formats the given date with the specified zone.
+     *
+     * @param date   the given date to format
+     * @param zoneId the specified zone
+     * @return the formatted string
+     * @throws DateTimeException if any error occurs
+     */
+    @Nonnull
+    String format(@Nonnull Date date, @Nonnull ZoneId zoneId) throws DateTimeException;
+
+    /**
+     * Formats the given date with the specified zone. If the given date is {@code null}, or an exception thrown during
+     * formating, returns {@code null}.
+     *
+     * @param date   the given date to format, can be {@code null}
+     * @param zoneId the specified zone
+     * @return the formatted string, or {@code null} if the given date is {@code null} or an exception thrown
+     * @throws DateTimeException if any error occurs
+     */
+    default @Nullable String formatSafe(@Nullable Date date, @Nonnull ZoneId zoneId) throws DateTimeException {
+        if (date == null) {
+            return null;
+        }
+        try {
+            return format(date, zoneId);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
      * Formats the given time object.
      *
      * @param time the given time object to format
@@ -119,6 +151,39 @@ public interface TimeSpec {
         }
         try {
             return format(time);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Formats the given time object. If the given arguments cannot determine zone info, use the specified zone.
+     *
+     * @param time   the given time object to format
+     * @param zoneId the specified zone
+     * @return the formatted string
+     * @throws DateTimeException if any error occurs
+     */
+    @Nonnull
+    String format(@Nonnull TemporalAccessor time, @Nonnull ZoneId zoneId) throws DateTimeException;
+
+    /**
+     * Formats the given time object. If the given time object is {@code null}, or an exception thrown during formating,
+     * returns {@code null}. If the given arguments cannot determine zone info, use the specified zone.
+     *
+     * @param time   the given time object to format, can be {@code null}
+     * @param zoneId the specified zone
+     * @return the formatted string, or {@code null} if the given time object is {@code null} or an exception thrown
+     * @throws DateTimeException if any error occurs
+     */
+    default @Nullable String formatSafe(
+        @Nullable TemporalAccessor time, @Nonnull ZoneId zoneId
+    ) throws DateTimeException {
+        if (time == null) {
+            return null;
+        }
+        try {
+            return format(time, zoneId);
         } catch (Exception e) {
             return null;
         }
@@ -159,6 +224,38 @@ public interface TimeSpec {
     }
 
     /**
+     * Converts the given date to an instance of the specified time type.
+     *
+     * @param date     the given date to parse
+     * @param timeType the specified time type
+     * @param <T>      the time type
+     * @return the converted time instance
+     * @throws DateTimeException if any error occurs
+     */
+    <T> @Nonnull T convert(@Nonnull Date date, @Nonnull Class<T> timeType) throws DateTimeException;
+
+    /**
+     * Converts the given date to an instance of the specified time type. If the given date is {@code null}, or an
+     * exception thrown during parsing, returns {@code null}.
+     *
+     * @param date     the given date to parse, can be {@code null}
+     * @param timeType the specified time type
+     * @param <T>      the time type
+     * @return the converted time instance, or {@code null} if the given date is {@code null} or an exception thrown
+     * @throws DateTimeException if any error occurs
+     */
+    default <T> @Nullable T convertSafe(@Nullable Date date, @Nonnull Class<T> timeType) throws DateTimeException {
+        if (date == null) {
+            return null;
+        }
+        try {
+            return convert(date, timeType);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
      * Converts the given time object to an instance of the specified time type.
      *
      * @param time     the given time object to parse
@@ -167,7 +264,7 @@ public interface TimeSpec {
      * @return the converted time instance
      * @throws DateTimeException if any error occurs
      */
-    <T> @Nonnull T convert(@Nonnull Object time, @Nonnull Class<T> timeType) throws DateTimeException;
+    <T> @Nonnull T convert(@Nonnull TemporalAccessor time, @Nonnull Class<T> timeType) throws DateTimeException;
 
     /**
      * Converts the given time object to an instance of the specified time type. If the given time object is
@@ -180,12 +277,95 @@ public interface TimeSpec {
      * thrown
      * @throws DateTimeException if any error occurs
      */
-    default <T> @Nullable T convertSafe(@Nullable Object time, @Nonnull Class<T> timeType) throws DateTimeException {
+    default <T> @Nullable T convertSafe(
+        @Nullable TemporalAccessor time, @Nonnull Class<T> timeType
+    ) throws DateTimeException {
         if (time == null) {
             return null;
         }
         try {
             return convert(time, timeType);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Converts the given date to an instance of the specified time type. If the given arguments cannot determine zone
+     * info, use the specified zone.
+     *
+     * @param date     the given date to parse
+     * @param timeType the specified time type
+     * @param zoneId   the specified zone
+     * @param <T>      the time type
+     * @return the converted time instance
+     * @throws DateTimeException if any error occurs
+     */
+    <T> @Nonnull T convert(
+        @Nonnull Date date, @Nonnull Class<T> timeType, @Nonnull ZoneId zoneId
+    ) throws DateTimeException;
+
+    /**
+     * Converts the given date to an instance of the specified time type. If the given date is {@code null}, or an
+     * exception thrown during parsing, returns {@code null}. If the given arguments cannot determine zone info, use the
+     * specified zone.
+     *
+     * @param date     the given date to parse, can be {@code null}
+     * @param timeType the specified time type
+     * @param zoneId   the specified zone
+     * @param <T>      the time type
+     * @return the converted time instance, or {@code null} if the given date is {@code null} or an exception thrown
+     * @throws DateTimeException if any error occurs
+     */
+    default <T> @Nullable T convertSafe(
+        @Nullable Date date, @Nonnull Class<T> timeType, @Nonnull ZoneId zoneId
+    ) throws DateTimeException {
+        if (date == null) {
+            return null;
+        }
+        try {
+            return convert(date, timeType, zoneId);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Converts the given time object to an instance of the specified time type. If the given arguments cannot determine
+     * zone info, use the specified zone.
+     *
+     * @param time     the given time object to parse
+     * @param timeType the specified time type
+     * @param zoneId   the specified zone
+     * @param <T>      the time type
+     * @return the converted time instance
+     * @throws DateTimeException if any error occurs
+     */
+    <T> @Nonnull T convert(
+        @Nonnull TemporalAccessor time, @Nonnull Class<T> timeType, @Nonnull ZoneId zoneId
+    ) throws DateTimeException;
+
+    /**
+     * Converts the given time object to an instance of the specified time type. If the given time object is
+     * {@code null}, or an exception thrown during parsing, returns {@code null}. If the given arguments cannot
+     * determine zone info, use the specified zone.
+     *
+     * @param time     the given time object to parse, can be {@code null}
+     * @param timeType the specified time type
+     * @param zoneId   the specified zone
+     * @param <T>      the time type
+     * @return the converted time instance, or {@code null} if the given time object is {@code null} or an exception
+     * thrown
+     * @throws DateTimeException if any error occurs
+     */
+    default <T> @Nullable T convertSafe(
+        @Nullable TemporalAccessor time, @Nonnull Class<T> timeType, @Nonnull ZoneId zoneId
+    ) throws DateTimeException {
+        if (time == null) {
+            return null;
+        }
+        try {
+            return convert(time, timeType, zoneId);
         } catch (Exception e) {
             return null;
         }
