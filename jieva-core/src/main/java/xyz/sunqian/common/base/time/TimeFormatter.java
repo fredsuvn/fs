@@ -18,7 +18,8 @@ import java.util.Date;
 
 /**
  * Formatter for time and date. This formatter has a default zone information ({@link #zoneId()}), which will be used
- * when the object to be operated does not contain zone information.
+ * when the object to be operated does not contain zone information. The implementation of this interface is immutable
+ * and thread-safe.
  *
  * @author sunqian
  */
