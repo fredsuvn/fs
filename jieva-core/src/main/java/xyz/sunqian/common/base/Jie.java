@@ -41,8 +41,6 @@ import java.util.Objects;
 import java.util.RandomAccess;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -748,33 +746,6 @@ public class Jie {
      */
     public static <T> T copyProperties(Object source, T dest, MappingOptions options) {
         return BeanMapper.defaultMapper().copyProperties(source, dest, options);
-    }
-
-    /**
-     * Returns a new starter to build and start a {@link Thread}.
-     *
-     * @return a new starter to build and start a {@link Thread}
-     */
-    public static ThreadStarter threadStarter() {
-        return ThreadStarter.newInstance();
-    }
-
-    /**
-     * Returns a new builder to build a {@link ExecutorService}.
-     *
-     * @return a new builder to build a {@link ExecutorService}
-     */
-    public static ExecutorBuilder executorBuilder() {
-        return ExecutorBuilder.newInstance();
-    }
-
-    /**
-     * Returns a new builder to build a {@link ScheduledExecutorService}.
-     *
-     * @return a new builder to build a {@link ScheduledExecutorService}
-     */
-    public static ScheduledBuilder scheduledBuilder() {
-        return ScheduledBuilder.newInstance();
     }
 
     //---------------- Collection Begin ----------------//
