@@ -148,6 +148,13 @@ public interface SimpleCache<K, V> {
     void remove(@Nonnull K key);
 
     /**
+     * Returns the current size of this cache.
+     *
+     * @return the current size of this cache
+     */
+    int size();
+
+    /**
      * Removes all entries from this cache.
      */
     void clear();

@@ -46,6 +46,7 @@ public class CacheTest implements PrintTest, DataTest {
         assertNull(cache.get(1));
         assertNotNull(cache.getVal(1));
         assertNull(cache.getVal(1).get());
+        assertEquals(cache.size(), 1);
 
         // remove
         cache.remove(0);
@@ -54,6 +55,7 @@ public class CacheTest implements PrintTest, DataTest {
         cache.remove(1);
         assertNull(cache.get(1));
         assertNull(cache.getVal(1));
+        assertEquals(cache.size(), 0);
 
         // producer
         assertNull(cache.getVal(2));
@@ -66,6 +68,7 @@ public class CacheTest implements PrintTest, DataTest {
         assertEquals(cache.getVal(3, k -> Val.of(4)).get(), 3);
         assertNull(cache.getVal(4, k -> null));
         assertNull(cache.getVal(4));
+        assertEquals(cache.size(), 2);
 
         // clear
         assertNotNull(cache.getVal(2));
@@ -74,6 +77,7 @@ public class CacheTest implements PrintTest, DataTest {
         assertNull(cache.getVal(2));
         assertNull(cache.getVal(3));
         assertNull(cache.getVal(4));
+        assertEquals(cache.size(), 0);
     }
 
     @Test

@@ -149,6 +149,12 @@ public abstract class AbstractSimpleCache<K, V> implements SimpleCache<K, V> {
     }
 
     @Override
+    public int size() {
+        clean();
+        return cacheMap.size();
+    }
+
+    @Override
     public void clear() {
         cacheMap.forEach((k, v) -> {
             v.invalid();
