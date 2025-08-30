@@ -27,6 +27,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
+import static org.testng.Assert.expectThrows;
 
 public class ValueTest {
 
@@ -216,6 +217,11 @@ public class ValueTest {
             assertFalse(Span.of(start, end).equals(""));
             assertEquals(Span.of(start, end).hashCode(), Span.of(start, end).hashCode());
             assertEquals(Span.of(start, end).toString(), "[1, 10)");
+            assertEquals(Span.of(start, end).isEmpty(), false);
+            assertEquals(Span.of(start, start).isEmpty(), true);
+            assertEquals(Span.of(start, end).length(), end - start);
+            expectThrows(IllegalArgumentException.class, () -> Span.of(end, start));
+            assertSame(Span.empty(), Span.empty());
         }
         {
             // long span
@@ -228,6 +234,11 @@ public class ValueTest {
             assertFalse(LongSpan.of(start, end).equals(""));
             assertEquals(LongSpan.of(start, end).hashCode(), LongSpan.of(start, end).hashCode());
             assertEquals(LongSpan.of(start, end).toString(), "[1, 10)");
+            assertEquals(LongSpan.of(start, end).isEmpty(), false);
+            assertEquals(LongSpan.of(start, start).isEmpty(), true);
+            assertEquals(LongSpan.of(start, end).length(), end - start);
+            expectThrows(IllegalArgumentException.class, () -> LongSpan.of(end, start));
+            assertSame(LongSpan.empty(), LongSpan.empty());
         }
     }
 }

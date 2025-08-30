@@ -319,4 +319,9 @@ public class JieTest implements AssertTest, PrintTest {
         InputStream in = process.getInputStream();
         printFor(title, IOKit.string(in, CharsKit.localCharset()));
     }
+
+    //@Test
+    public void testOther() {
+        // other tests
+    }
 }

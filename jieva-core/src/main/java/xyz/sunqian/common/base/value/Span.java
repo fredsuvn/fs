@@ -17,15 +17,30 @@ import java.util.Objects;
 @Immutable
 public final class Span {
 
+    private static final @Nonnull Span EMPTY = Span.of(0, 0);
+
     /**
      * Returns an instance of {@link Span} with the given start index and end index.
      *
      * @param startIndex the given start index
      * @param endIndex   the given end index
      * @return an instance of {@link Span} with the given start index and end index
+     * @throws IllegalArgumentException if {@code startIndex > endIndex}
      */
-    public static @Nonnull Span of(int startIndex, int endIndex) {
+    public static @Nonnull Span of(int startIndex, int endIndex) throws IllegalArgumentException {
+        if (startIndex > endIndex) {
+            throw new IllegalArgumentException("startIndex must <= endIndex");
+        }
         return new Span(startIndex, endIndex);
+    }
+
+    /**
+     * Returns an instance of {@link Span} of which {@code startIndex} and {@code endIndex} are both {@code 0}.
+     *
+     * @return an instance of {@link Span} of which {@code startIndex} and {@code endIndex} are both {@code 0}
+     */
+    public static @Nonnull Span empty() {
+        return EMPTY;
     }
 
     private final int startIndex;
@@ -52,6 +67,24 @@ public final class Span {
      */
     public int endIndex() {
         return endIndex;
+    }
+
+    /**
+     * Returns {@code true} if {@code startIndex == endIndex}, otherwise {@code false}.
+     *
+     * @return {@code true} if {@code startIndex == endIndex}, otherwise {@code false}
+     */
+    public boolean isEmpty() {
+        return startIndex == endIndex;
+    }
+
+    /**
+     * Returns the result of {@code endIndex - startIndex}.
+     *
+     * @return the result of {@code endIndex - startIndex}
+     */
+    public int length() {
+        return endIndex - startIndex;
     }
 
     @Override

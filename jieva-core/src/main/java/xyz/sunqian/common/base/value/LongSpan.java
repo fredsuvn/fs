@@ -17,14 +17,20 @@ import java.util.Objects;
 @Immutable
 public final class LongSpan {
 
+    private static final @Nonnull LongSpan EMPTY = LongSpan.of(0L, 0L);
+
     /**
      * Returns an instance of {@link LongSpan} with the given start index and end index.
      *
      * @param startIndex the given start index
      * @param endIndex   the given end index
      * @return an instance of {@link LongSpan} with the given start index and end index
+     * @throws IllegalArgumentException if {@code startIndex > endIndex}
      */
-    public static @Nonnull LongSpan of(long startIndex, long endIndex) {
+    public static @Nonnull LongSpan of(long startIndex, long endIndex) throws IllegalArgumentException {
+        if (startIndex > endIndex) {
+            throw new IllegalArgumentException("startIndex must <= endIndex");
+        }
         return new LongSpan(startIndex, endIndex);
     }
 
@@ -34,6 +40,15 @@ public final class LongSpan {
     private LongSpan(long startIndex, long endIndex) {
         this.startIndex = startIndex;
         this.endIndex = endIndex;
+    }
+
+    /**
+     * Returns an instance of {@link LongSpan} of which {@code startIndex} and {@code endIndex} are both {@code 0}.
+     *
+     * @return an instance of {@link LongSpan} of which {@code startIndex} and {@code endIndex} are both {@code 0}
+     */
+    public static @Nonnull LongSpan empty() {
+        return EMPTY;
     }
 
     /**
@@ -52,6 +67,24 @@ public final class LongSpan {
      */
     public long endIndex() {
         return endIndex;
+    }
+
+    /**
+     * Returns {@code true} if {@code startIndex == endIndex}, otherwise {@code false}.
+     *
+     * @return {@code true} if {@code startIndex == endIndex}, otherwise {@code false}
+     */
+    public boolean isEmpty() {
+        return startIndex == endIndex;
+    }
+
+    /**
+     * Returns the result of {@code endIndex - startIndex}.
+     *
+     * @return the result of {@code endIndex - startIndex}
+     */
+    public long length() {
+        return endIndex - startIndex;
     }
 
     @Override
