@@ -2,6 +2,7 @@ package xyz.sunqian.common.base.string;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.RetainedParam;
+import xyz.sunqian.annotations.ValueClass;
 import xyz.sunqian.common.base.CheckKit;
 import xyz.sunqian.common.base.exception.UnreachablePointException;
 
@@ -81,6 +82,7 @@ final class StringViewBack {
             throw new UnreachablePointException("index: " + index);
         }
 
+        @ValueClass
         private static final class Node {
 
             private final int charsIndex;
