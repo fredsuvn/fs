@@ -212,7 +212,7 @@ public class CharProcessorImpl implements CharProcessor {
                     return -1;
                 }
                 if (nextSeg.data().hasRemaining()) {
-                    return nextSeg.data().get() & 0xffff;
+                    return nextSeg.data().get();
                 }
                 if (nextSeg.end()) {
                     nextSeg = CharSegment.empty(true);

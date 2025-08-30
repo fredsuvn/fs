@@ -659,7 +659,7 @@ final class IOBack {
 
         @Override
         public int read() {
-            return (pos < end) ? (buf[pos++] & 0xffff) : -1;
+            return (pos < end) ? buf[pos++] : -1;
         }
 
         @Override
@@ -745,7 +745,7 @@ final class IOBack {
             if (buffer.remaining() <= 0) {
                 return -1;
             }
-            return buffer.get() & 0xffff;
+            return buffer.get();
         }
 
         @Override
@@ -859,7 +859,7 @@ final class IOBack {
         @Override
         public int read() throws IOException {
             int readNum = read(cbuf, 0, 1);
-            return readNum < 0 ? -1 : (cbuf[0] & 0xffff);
+            return readNum < 0 ? -1 : cbuf[0];
         }
 
         @Override

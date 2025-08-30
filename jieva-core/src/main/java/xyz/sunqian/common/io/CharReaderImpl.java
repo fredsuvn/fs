@@ -1112,7 +1112,7 @@ final class CharReaderImpl {
                     oneChar = new char[1];
                 }
                 int ret = in.readTo(oneChar);
-                return ret < 0 ? -1 : oneChar[0] & 0xFFFF;
+                return ret < 0 ? -1 : oneChar[0];
             } catch (Exception e) {
                 throw new IOException(e);
             }
