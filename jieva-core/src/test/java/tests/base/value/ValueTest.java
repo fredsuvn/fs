@@ -13,15 +13,18 @@ import xyz.sunqian.common.base.value.FloatVal;
 import xyz.sunqian.common.base.value.FloatVar;
 import xyz.sunqian.common.base.value.IntVal;
 import xyz.sunqian.common.base.value.IntVar;
+import xyz.sunqian.common.base.value.LongSpan;
 import xyz.sunqian.common.base.value.LongVal;
 import xyz.sunqian.common.base.value.LongVar;
 import xyz.sunqian.common.base.value.ShortVal;
 import xyz.sunqian.common.base.value.ShortVar;
+import xyz.sunqian.common.base.value.Span;
 import xyz.sunqian.common.base.value.Val;
 import xyz.sunqian.common.base.value.Var;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
 
@@ -195,6 +198,36 @@ public class ValueTest {
             assertEquals(DoubleVar.of(1).add(1).get(), 2);
             assertEquals(DoubleVar.of(1).toVar().get(), Double.valueOf(1));
             assertEquals(DoubleVar.of(111).clear().get(), 0);
+        }
+    }
+
+    @Test
+    public void testSpan() {
+        int start = 1;
+        int end = 10;
+        {
+            // span
+            assertEquals(Span.of(start, end), Span.of(start, end));
+            assertEquals(Span.of(start, end).startIndex(), start);
+            assertEquals(Span.of(start, end).endIndex(), end);
+            assertNotEquals(Span.of(start, end), Span.of(start, end + 1));
+            assertNotEquals(Span.of(start, end), Span.of(start + 1, end));
+            assertNotEquals(Span.of(start, end), Span.of(start + 1, end + 1));
+            assertFalse(Span.of(start, end).equals(""));
+            assertEquals(Span.of(start, end).hashCode(), Span.of(start, end).hashCode());
+            assertEquals(Span.of(start, end).toString(), "[1, 10)");
+        }
+        {
+            // long span
+            assertEquals(LongSpan.of(start, end), LongSpan.of(start, end));
+            assertEquals(LongSpan.of(start, end).startIndex(), start);
+            assertEquals(LongSpan.of(start, end).endIndex(), end);
+            assertNotEquals(LongSpan.of(start, end), LongSpan.of(start, end + 1));
+            assertNotEquals(LongSpan.of(start, end), LongSpan.of(start + 1, end));
+            assertNotEquals(LongSpan.of(start, end), LongSpan.of(start + 1, end + 1));
+            assertFalse(LongSpan.of(start, end).equals(""));
+            assertEquals(LongSpan.of(start, end).hashCode(), LongSpan.of(start, end).hashCode());
+            assertEquals(LongSpan.of(start, end).toString(), "[1, 10)");
         }
     }
 }
