@@ -1,262 +1,309 @@
 package xyz.sunqian.common.base.string;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.collect.CollectKit;
+import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.value.Span;
+import xyz.sunqian.common.collect.ListKit;
 
 import java.util.Collections;
-import java.util.LinkedList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 final class NameSpecBack {
 
-    static final class CamelNameSpec implements NameSpec {
+    static @Nonnull NameSpec camelCase(boolean capitalized) {
+        return new CamelCase(capitalized);
+    }
 
-        private static final int LOWER = 0;
-        private static final int UPPER = 1;
-        private static final int OTHER = 2;
+    static @Nonnull NameSpec delimiterCase
+        (@Nonnull CharSequence delimiter, @Nullable NameSpec.WordAppender wordAppender
+        ) {
+        return new DelimiterCase(delimiter, Jie.nonnull(wordAppender, SimpleAppender.SINGLETON));
+    }
 
-        private final boolean upperHead;
+    static @Nonnull NameSpec fileNaming() {
+        return new FileNaming();
+    }
 
-        CamelNameSpec(boolean upperHead) {
-            this.upperHead = upperHead;
+    private static final class CamelCase implements NameSpec {
+
+        private static final int LOWER = 1;
+        private static final int UPPER = 2;
+        private static final int NUM = 4;
+        private static final int OTHER = 8;
+
+        private final boolean capitalized;
+
+        private CamelCase(boolean capitalized) {
+            this.capitalized = capitalized;
         }
 
         @Override
-        public List<CharSequence> split(CharSequence name) {
-            if (StringKit.isBlank(name)) {
-                return Collections.emptyList();
+        public @Nonnull List<@Nonnull Span> split(@Nonnull CharSequence name) {
+            if (name.length() == 0) {
+                return Collections.singletonList(Span.empty());
             }
-            int len = name.length();
-            if (len == 1) {
-                return Collections.singletonList(name);
-            }
-            List<CharSequence> result = new LinkedList<>();
-            int startIndex = 0;
-            int lastCharType = getCharType(name.charAt(0));
-            for (int i = 1; i < name.length(); i++) {
-                char c = name.charAt(i);
-                int currentCharType = getCharType(c);
-                // AA, aa, 00: just i++
-                if (lastCharType == currentCharType) {
+            int size = 1;
+            int start = 0;
+            int i = 1;
+            int t1 = charType(name.charAt(0));
+            while (i < name.length()) {
+                int t2 = charType(name.charAt(i));
+                if (t1 == t2) {
+                    i++;
                     continue;
                 }
-                // Aa: one token
-                if (lastCharType == UPPER && currentCharType == LOWER) {
-                    int endIndex = i - 1;
-                    if (endIndex > startIndex) {
-                        result.add(new Word(name, startIndex, endIndex));
+                // Aa: check AAa and aAa
+                if (t1 == UPPER && t2 == LOWER) {
+                    if (start == i - 1) {
+                        // Aa: one word
+                        i++;
+                        continue;
+                    } else {
+                        // AAa: split as A + Aa
+                        start = i - 1;
                     }
-                    startIndex = endIndex;
+                } else {
+                    // others start from current char
+                    start = i;
                 }
-                // aA: two tokens
-                else if (lastCharType == LOWER && currentCharType == UPPER) {
-                    if (i > startIndex) {
-                        result.add(new Word(name, startIndex, i));
-                    }
-                    startIndex = i;
-                }
-                // A0: three tokens
-                else if (lastCharType == UPPER && currentCharType == OTHER) {
-                    // first token
-                    int endIndex = i - 1;
-                    if (endIndex > startIndex) {
-                        result.add(new Word(name, startIndex, endIndex));
-                    }
-                    // second token: A
-                    result.add(new Word(name, endIndex, i));
-                    // third token
-                    startIndex = i;
-                }
-                // 0A, a0, 0a: two words
-                else {
-                    if (i > startIndex) {
-                        result.add(new Word(name, startIndex, i));
-                    }
-                    startIndex = i;
-                }
-                lastCharType = currentCharType;
+                // others add one word
+                size++;
+                i++;
             }
-            if (startIndex < len) {
-                result.add(new Word(name, startIndex, len));
+            Span[] words = new Span[size];
+            start = 0;
+            i = 1;
+            int wi = 0;
+            t1 = charType(name.charAt(0));
+            while (i < name.length()) {
+                int t2 = charType(name.charAt(i));
+                if (t1 == t2) {
+                    i++;
+                    continue;
+                }
+                // Aa: check AAa and aAa
+                if (t1 == UPPER && t2 == LOWER) {
+                    if (start == i - 1) {
+                        // Aa: one word
+                        i++;
+                        continue;
+                    } else {
+                        // AAa: split as A + Aa
+                        words[wi++] = Span.of(start, i - 1);
+                        start = i - 1;
+                    }
+                } else {
+                    // others start from current char
+                    words[wi++] = Span.of(start, i);
+                    start = i;
+                }
+                i++;
             }
-            return result;
+            words[wi] = Span.of(start, name.length());
+            return ListKit.list(words);
         }
 
-        private int getCharType(char c) {
-            if (Character.isLowerCase(c)) {
+        @Override
+        public @Nonnull String join(
+            @Nonnull CharSequence originalName, @Nonnull List<@Nonnull Span> wordSpans
+        ) throws UnsupportedOperationException {
+            if (wordSpans.isEmpty()) {
+                throw new UnsupportedOperationException("wordSpan is empty.");
+            }
+            StringBuilder builder = new StringBuilder(originalName.length());
+            Span first = wordSpans.get(0);
+            appendFirstWord(builder, originalName, first);
+            if (wordSpans.size() > 1) {
+                for (Span span : wordSpans.subList(1, wordSpans.size())) {
+                    appendWord(builder, originalName, span);
+                }
+            }
+            return builder.toString();
+        }
+
+        private void appendFirstWord(
+            @Nonnull StringBuilder builder, @Nonnull CharSequence originalName, @Nonnull Span span
+        ) throws UnsupportedOperationException {
+            if (span.isEmpty()) {
+                throw new UnsupportedOperationException("The first span is empty.");
+            }
+            if (capitalized) {
+                builder.append(Character.toUpperCase(originalName.charAt(span.startIndex())));
+                builder.append(originalName, span.startIndex() + 1, span.endIndex());
+            } else {
+                if (isAllUpper(originalName, span)) {
+                    builder.append(originalName, span.startIndex(), span.endIndex());
+                } else {
+                    builder.append(Character.toLowerCase(originalName.charAt(span.startIndex())));
+                    builder.append(originalName, span.startIndex() + 1, span.endIndex());
+                }
+            }
+        }
+
+        private void appendWord(
+            @Nonnull StringBuilder builder, @Nonnull CharSequence originalName, @Nonnull Span span
+        ) throws UnsupportedOperationException {
+            if (span.isEmpty()) {
+                throw new UnsupportedOperationException("The span is empty.");
+            }
+            if (isAllUpper(originalName, span)) {
+                builder.append(originalName, span.startIndex(), span.endIndex());
+            } else {
+                builder.append(Character.toUpperCase(originalName.charAt(span.startIndex())));
+                builder.append(originalName, span.startIndex() + 1, span.endIndex());
+            }
+        }
+
+        private boolean isAllUpper(@Nonnull CharSequence originalName, @Nonnull Span span) {
+            if (span.length() < 2) {
+                return false;
+            }
+            return charType(originalName.charAt(span.startIndex())) == UPPER
+                && charType(originalName.charAt(span.startIndex() + 1)) == UPPER;
+        }
+
+        private int charType(char c) {
+            if (c >= 'a' && c <= 'z') {
                 return LOWER;
             }
-            if (Character.isUpperCase(c)) {
+            if (c >= 'A' && c <= 'Z') {
                 return UPPER;
+            }
+            if (c >= '0' && c <= '9') {
+                return NUM;
             }
             return OTHER;
         }
-
-        @Override
-        public String join(List<? extends CharSequence> words) {
-            if (CollectKit.isEmpty(words)) {
-                return "";
-            }
-            int length = 0;
-            for (CharSequence chars : words) {
-                length += chars.length();
-            }
-            StringBuilder sb = new StringBuilder(length);
-            int i = 0;
-            for (CharSequence chars : words) {
-                if (StringKit.isEmpty(chars)) {
-                    continue;
-                }
-                buildCamel(chars, sb, i++);
-            }
-            return sb.toString();
-        }
-
-        private void buildCamel(CharSequence chars, StringBuilder builder, int i) {
-            char first = chars.charAt(0);
-            int type0 = getCharType(first);
-            if (chars.length() == 1) {
-                switch (type0) {
-                    case OTHER: {
-                        builder.append(first);
-                        return;
-                    }
-                    case UPPER:
-                    case LOWER: {
-                        builder.append(i == 0 ? Character.toLowerCase(first) : Character.toUpperCase(first));
-                        return;
-                    }
-                }
-                return;
-            }
-            boolean formatted = true;
-            boolean allUpper = true;
-            boolean allOther = true;
-            switch (type0) {
-                case UPPER: {
-                    allOther = false;
-                    if (i == 0 && !upperHead) {
-                        formatted = false;
-                    }
-                    break;
-                }
-                case LOWER: {
-                    allOther = false;
-                    allUpper = false;
-                    if (i == 0 && upperHead) {
-                        formatted = false;
-                    }
-                    break;
-                }
-                case OTHER: {
-                    formatted = false;
-                    allUpper = false;
-                    break;
-                }
-            }
-            if (!formatted && !allUpper && !allOther) {
-                buildNewWord(chars, builder, i);
-                return;
-            }
-            for (int j = 1; j < chars.length(); j++) {
-                int typeJ = getCharType(chars.charAt(j));
-                switch (typeJ) {
-                    case UPPER: {
-                        allOther = false;
-                        formatted = false;
-                        break;
-                    }
-                    case LOWER: {
-                        allOther = false;
-                        allUpper = false;
-                        break;
-                    }
-                    case OTHER: {
-                        formatted = false;
-                        allUpper = false;
-                        break;
-                    }
-                }
-                if (!formatted && !allUpper && !allOther) {
-                    break;
-                }
-            }
-            if (formatted || allUpper || allOther) {
-                builder.append(chars);
-                return;
-            }
-            buildNewWord(chars, builder, i);
-        }
-
-        private void buildNewWord(CharSequence chars, StringBuilder builder, int i) {
-            char first = chars.charAt(0);
-            builder.append(i == 0 && !upperHead ? Character.toLowerCase(first) : Character.toUpperCase(first));
-            for (int j = 1; j < chars.length(); j++) {
-                builder.append(Character.toLowerCase(chars.charAt(j)));
-            }
-        }
     }
 
-    static final class DelimiterNameSpec implements NameSpec {
+    private static final class DelimiterCase implements NameSpec {
 
-        private final CharSequence delimiter;
-        private final @Nullable Function<? super CharSequence, ? extends CharSequence> wordMapper;
+        private final @Nonnull CharSequence delimiter;
+        private final @Nonnull NameSpec.WordAppender wordAppender;
 
-        DelimiterNameSpec(
-            CharSequence delimiter, @Nullable Function<? super CharSequence, ? extends CharSequence> wordMapper) {
+        private DelimiterCase(
+            @Nonnull CharSequence delimiter, @Nonnull NameSpec.WordAppender wordAppender
+        ) {
             this.delimiter = delimiter;
-            this.wordMapper = wordMapper;
+            this.wordAppender = wordAppender;
         }
 
         @Override
-        public List<CharSequence> split(CharSequence name) {
-            return StringKit.split(name, delimiter, Word::new);
+        public @Nonnull List<@Nonnull Span> split(@Nonnull CharSequence name) {
+            int size = 1;
+            int start = 0;
+            while (start < name.length()) {
+                int index = StringKit.indexOf(name, delimiter, start);
+                if (index < 0) {
+                    break;
+                }
+                size++;
+                start += index + delimiter.length();
+            }
+            Span[] spans = new Span[size];
+            int i = 0;
+            start = 0;
+            while (start < name.length()) {
+                int index = StringKit.indexOf(name, delimiter, start);
+                if (index < 0) {
+                    break;
+                }
+                spans[i++] = Span.of(start, index);
+                start += index + delimiter.length();
+            }
+            spans[i] = start < name.length() ? Span.of(start, name.length()) : Span.empty();
+            return ListKit.list(spans);
         }
 
         @Override
-        public String join(List<? extends CharSequence> words) {
-            if (words.isEmpty()) {
-                return "";
+        public @Nonnull String join(
+            @Nonnull CharSequence originalName, @Nonnull List<@Nonnull Span> wordSpans
+        ) throws UnsupportedOperationException {
+            if (wordSpans.isEmpty()) {
+                throw new UnsupportedOperationException("wordSpan is empty.");
             }
-            if (wordMapper == null) {
-                return String.join(delimiter, words);
+            StringBuilder builder = new StringBuilder(originalName.length());
+            if (wordSpans.size() == 1) {
+                Span first = wordSpans.get(0);
+                wordAppender.append(builder, originalName, first, 0);
+                return builder.toString();
             }
-            return words.stream().map(wordMapper).collect(Collectors.joining(delimiter));
+            int i = 0;
+            Iterator<Span> iterator = wordSpans.iterator();
+            while (iterator.hasNext()) {
+                Span span = iterator.next();
+                wordAppender.append(builder, originalName, span, i++);
+                if (iterator.hasNext()) {
+                    builder.append(delimiter);
+                }
+            }
+            return builder.toString();
         }
     }
 
-    private static final class Word implements CharSequence {
+    private static final class FileNaming implements NameSpec {
 
-        private final CharSequence source;
-        private final int startIndex;
-        private final int endIndex;
-
-        private Word(CharSequence source, int startIndex, int endIndex) {
-            this.source = source;
-            this.startIndex = startIndex;
-            this.endIndex = endIndex;
+        @Override
+        public @Nonnull List<@Nonnull Span> split(@Nonnull CharSequence name) {
+            int lastDot = StringKit.lastIndexOf(name, '.');
+            if (lastDot < 0 || lastDot == name.length() - 1) {
+                return Collections.singletonList(Span.of(0, name.length()));
+            }
+            return ListKit.list(
+                Span.of(0, lastDot),
+                Span.of(lastDot + 1, name.length())
+            );
         }
 
         @Override
-        public int length() {
-            return endIndex - startIndex;
+        public @Nonnull String join(
+            @Nonnull CharSequence originalName, @Nonnull List<@Nonnull Span> wordSpans
+        ) throws UnsupportedOperationException {
+            if (wordSpans.isEmpty()) {
+                throw new UnsupportedOperationException("wordSpan is empty.");
+            }
+            StringBuilder builder = new StringBuilder(originalName.length());
+            if (wordSpans.size() == 1) {
+                Span first = wordSpans.get(0);
+                appendWord(builder, originalName, first);
+                return builder.toString();
+            }
+            if (wordSpans.size() == 2) {
+                Span prefix = wordSpans.get(0);
+                Span suffix = wordSpans.get(1);
+                appendWord(builder, originalName, prefix);
+                builder.append('.');
+                appendWord(builder, originalName, suffix);
+                return builder.toString();
+            }
+            List<@Nonnull Span> prefixList = wordSpans.subList(0, wordSpans.size() - 1);
+            for (Span prefix : prefixList) {
+                appendWord(builder, originalName, prefix);
+            }
+            builder.append('.');
+            Span suffix = wordSpans.get(wordSpans.size() - 1);
+            appendWord(builder, originalName, suffix);
+            return builder.toString();
         }
+    }
+
+    private static void appendWord(
+        @Nonnull StringBuilder builder, @Nonnull CharSequence originalName, @Nonnull Span span
+    ) {
+        SimpleAppender.SINGLETON.append(builder, originalName, span, 0);
+    }
+
+    private static final class SimpleAppender implements NameSpec.WordAppender {
+
+        private static final @Nonnull NameSpecBack.SimpleAppender SINGLETON = new SimpleAppender();
 
         @Override
-        public char charAt(int index) {
-            return source.charAt(startIndex + index);
-        }
-
-        @Override
-        public CharSequence subSequence(int start, int end) {
-            return new Word(source, startIndex + start, startIndex + end);
-        }
-
-        @Override
-        public String toString() {
-            return source.subSequence(startIndex, endIndex).toString();
+        public void append(
+            @Nonnull StringBuilder builder, @Nonnull CharSequence originalName, @Nonnull Span span, int index
+        ) {
+            builder.append(originalName, span.startIndex(), span.endIndex());
         }
     }
 }

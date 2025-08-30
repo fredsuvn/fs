@@ -555,6 +555,42 @@ public class StringKit {
         return sb.toString();
     }
 
+    public static int indexOf(CharSequence str, char c) {
+        return indexOf(str, c, 0);
+    }
+
+    public static int indexOf(CharSequence str, char c, int start) {
+        if (str instanceof String) {
+            return ((String) str).indexOf(c, start);
+        }
+        for (int i = start; i < str.length(); i++) {
+            if (str.charAt(i) == c) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public static int lastIndexOf(CharSequence str, char c) {
+        return lastIndexOf(str, c, 0);
+    }
+
+    public static int lastIndexOf(CharSequence str, char c, int start) {
+        if (str instanceof String) {
+            return ((String) str).lastIndexOf(c, start);
+        }
+        if (start < 0 || str.length() == 0) {
+            return -1;
+        }
+        int s = Math.min(str.length() - 1, start);
+        for (int i = s; i >= 0; i--) {
+            if (str.charAt(i) == c) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     /**
      * Returns first index of given search word in given chars, starts from index 0, in natural order (0,1,2,3...end).
      * Returns -1 if not found.

@@ -23,7 +23,7 @@ import java.util.Objects;
  */
 public class JavaBeanDataSchemaHandler extends AbstractDataSchemaHandler {
 
-    private final NameSpec nameSpec = NameSpec.LOWER_CAMEL;
+    private final NameSpec nameSpec = NameSpec.camelCase(false);
 
     @Override
     protected @Nullable AccessorInfo resolveAccessor(Method method) {
@@ -57,17 +57,18 @@ public class JavaBeanDataSchemaHandler extends AbstractDataSchemaHandler {
         if (!isGetterName) {
             return null;
         }
-        List<CharSequence> getterNameWords = nameSpec.split(methodName);
-        if (getterNameWords.size() <= 1) {
-            return null;
-        }
-        CharSequence firstWord = getterNameWords.get(0);
-        if (!StringKit.charEquals(firstWord, "get") && !StringKit.charEquals(firstWord, "is")) {
-            return null;
-        }
-        // sure it is a getter
-        List<CharSequence> propertyNameWords = getterNameWords.subList(1, getterNameWords.size());
-        return new AccessorInfoImpl(nameSpec.join(propertyNameWords), true);
+        // List<CharSequence> getterNameWords = nameSpec.split(methodName);
+        // if (getterNameWords.size() <= 1) {
+        //     return null;
+        // }
+        // CharSequence firstWord = getterNameWords.get(0);
+        // if (!StringKit.charEquals(firstWord, "get") && !StringKit.charEquals(firstWord, "is")) {
+        //     return null;
+        // }
+        // // sure it is a getter
+        // List<CharSequence> propertyNameWords = getterNameWords.subList(1, getterNameWords.size());
+        // return new AccessorInfoImpl(nameSpec.join(propertyNameWords), true);
+        return null;
     }
 
     @Nullable
@@ -78,17 +79,18 @@ public class JavaBeanDataSchemaHandler extends AbstractDataSchemaHandler {
         if (!isSetterName) {
             return null;
         }
-        List<CharSequence> setterNameWords = nameSpec.split(methodName);
-        if (setterNameWords.size() <= 1) {
-            return null;
-        }
-        CharSequence firstWord = setterNameWords.get(0);
-        if (!StringKit.charEquals(firstWord, "set")) {
-            return null;
-        }
-        // sure it is a setter
-        List<CharSequence> propertyNameWords = setterNameWords.subList(1, setterNameWords.size());
-        return new AccessorInfoImpl(nameSpec.join(propertyNameWords), false);
+        // List<CharSequence> setterNameWords = nameSpec.split(methodName);
+        // if (setterNameWords.size() <= 1) {
+        //     return null;
+        // }
+        // CharSequence firstWord = setterNameWords.get(0);
+        // if (!StringKit.charEquals(firstWord, "set")) {
+        //     return null;
+        // }
+        // // sure it is a setter
+        // List<CharSequence> propertyNameWords = setterNameWords.subList(1, setterNameWords.size());
+        // return new AccessorInfoImpl(nameSpec.join(propertyNameWords), false);
+        return null;
     }
 
     @Data
