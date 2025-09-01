@@ -5,7 +5,6 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.OutParam;
 import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.base.string.StringKit;
 import xyz.sunqian.common.collect.ArrayKit;
 import xyz.sunqian.common.collect.MapKit;
 
@@ -108,7 +107,7 @@ public class TypeKit {
     }
 
     private static @Nonnull String getLastName(@Nonnull String typeName) {
-        int index = StringKit.lastIndexOf(typeName, ".");
+        int index = typeName.lastIndexOf('.');
         return typeName.substring(index + 1);
     }
 
