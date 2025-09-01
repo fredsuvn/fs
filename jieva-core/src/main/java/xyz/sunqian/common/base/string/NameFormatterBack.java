@@ -10,23 +10,27 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-final class NameSpecBack {
+final class NameFormatterBack {
 
-    static @Nonnull NameSpec camelCase(boolean capitalized) {
+    static @Nonnull NameFormatter camelCase(boolean capitalized) {
         return new CamelCase(capitalized);
     }
 
-    static @Nonnull NameSpec delimiterCase
-        (@Nonnull CharSequence delimiter, @Nullable NameSpec.WordAppender wordAppender
+    static @Nonnull NameFormatter delimiterCase
+        (@Nonnull CharSequence delimiter, @Nullable NameFormatter.WordAppender wordAppender
         ) {
         return new DelimiterCase(delimiter, Jie.nonnull(wordAppender, SimpleAppender.SINGLETON));
     }
 
-    static @Nonnull NameSpec fileNaming() {
+    static @Nonnull NameFormatter fileNaming() {
         return new FileNaming();
     }
 
-    private static final class CamelCase implements NameSpec {
+    static @Nonnull NameFormatter.WordAppender simpleAppender() {
+        return SimpleAppender.SINGLETON;
+    }
+
+    private static final class CamelCase implements NameFormatter {
 
         private static final int LOWER = 1;
         private static final int UPPER = 2;
@@ -40,7 +44,7 @@ final class NameSpecBack {
         }
 
         @Override
-        public @Nonnull List<@Nonnull Span> split(@Nonnull CharSequence name) {
+        public @Nonnull List<@Nonnull Span> tokenize(@Nonnull CharSequence name) {
             if (name.length() == 0) {
                 return Collections.singletonList(Span.empty());
             }
@@ -178,20 +182,20 @@ final class NameSpecBack {
         }
     }
 
-    private static final class DelimiterCase implements NameSpec {
+    private static final class DelimiterCase implements NameFormatter {
 
         private final @Nonnull CharSequence delimiter;
-        private final @Nonnull NameSpec.WordAppender wordAppender;
+        private final @Nonnull NameFormatter.WordAppender wordAppender;
 
         private DelimiterCase(
-            @Nonnull CharSequence delimiter, @Nonnull NameSpec.WordAppender wordAppender
+            @Nonnull CharSequence delimiter, @Nonnull NameFormatter.WordAppender wordAppender
         ) {
             this.delimiter = delimiter;
             this.wordAppender = wordAppender;
         }
 
         @Override
-        public @Nonnull List<@Nonnull Span> split(@Nonnull CharSequence name) {
+        public @Nonnull List<@Nonnull Span> tokenize(@Nonnull CharSequence name) {
             int size = 1;
             int start = 0;
             while (start < name.length()) {
@@ -243,10 +247,10 @@ final class NameSpecBack {
         }
     }
 
-    private static final class FileNaming implements NameSpec {
+    private static final class FileNaming implements NameFormatter {
 
         @Override
-        public @Nonnull List<@Nonnull Span> split(@Nonnull CharSequence name) {
+        public @Nonnull List<@Nonnull Span> tokenize(@Nonnull CharSequence name) {
             int lastDot = StringKit.lastIndexOf(name, '.');
             if (lastDot < 0 || lastDot == name.length() - 1) {
                 return Collections.singletonList(Span.of(0, name.length()));
@@ -295,9 +299,9 @@ final class NameSpecBack {
         SimpleAppender.SINGLETON.append(builder, originalName, span, 0);
     }
 
-    private static final class SimpleAppender implements NameSpec.WordAppender {
+    private static final class SimpleAppender implements NameFormatter.WordAppender {
 
-        private static final @Nonnull NameSpecBack.SimpleAppender SINGLETON = new SimpleAppender();
+        private static final @Nonnull NameFormatterBack.SimpleAppender SINGLETON = new SimpleAppender();
 
         @Override
         public void append(

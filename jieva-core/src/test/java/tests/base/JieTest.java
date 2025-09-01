@@ -231,35 +231,6 @@ public class JieTest implements AssertTest, PrintTest {
     }
 
     @Test
-    public void testToString() throws Exception {
-        String str = "str";
-        assertEquals(Jie.toString(str), Objects.toString(str));
-        Object[] strs = {"str1", "str2"};
-        assertEquals(Jie.toStringAll(strs), Arrays.toString(strs));
-        Object[][] strss = {{"str1", "str2"}, {"str3", "str4"}};
-        assertEquals(Jie.toString(strss), Arrays.deepToString(strss));
-        Object[][] strss2 = {{"str1", "str2"}, {"str3", "str4"}};
-        assertEquals(Jie.toStringWith(strss2, true, false), Arrays.toString(strss2));
-        assertEquals(Jie.toStringWith(strss2, false, false), Objects.toString(strss2));
-        assertEquals(Jie.toString(new boolean[]{true, false}), Arrays.toString(new boolean[]{true, false}));
-        assertEquals(Jie.toString(new byte[]{6, 66}), Arrays.toString(new byte[]{6, 66}));
-        assertEquals(Jie.toString(new short[]{6, 66}), Arrays.toString(new short[]{6, 66}));
-        assertEquals(Jie.toString(new char[]{6, 66}), Arrays.toString(new char[]{6, 66}));
-        assertEquals(Jie.toString(new int[]{6, 66}), Arrays.toString(new int[]{6, 66}));
-        assertEquals(Jie.toString(new long[]{6, 66}), Arrays.toString(new long[]{6, 66}));
-        assertEquals(Jie.toString(new float[]{6, 66}), Arrays.toString(new float[]{6, 66}));
-        assertEquals(Jie.toString(new double[]{6, 66}), Arrays.toString(new double[]{6, 66}));
-
-        // null:
-        assertEquals(Jie.toString(null), Objects.toString(null));
-        assertEquals(Jie.toStringWith(null, false, false), Objects.toString(null));
-
-        // unknown:
-        Method toStringArray = Jie.class.getDeclaredMethod("toStringArray", Object.class, boolean.class);
-        invokeThrows(UnknownArrayTypeException.class, toStringArray, null, "str", true);
-    }
-
-    @Test
     public void testShortcut() throws Exception {
         {
             // collection

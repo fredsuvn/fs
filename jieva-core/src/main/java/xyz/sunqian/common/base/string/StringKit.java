@@ -4,15 +4,12 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.CheckKit;
 import xyz.sunqian.common.base.chars.CharsKit;
-import xyz.sunqian.common.function.function.SubFunction;
+import xyz.sunqian.common.base.exception.UnknownArrayTypeException;
 
 import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Objects;
 import java.util.StringJoiner;
-import java.util.function.Supplier;
 
 /**
  * Utilities kit for string related.
@@ -266,50 +263,6 @@ public class StringKit {
     }
 
     /**
-     * Returns whether given chars starts with given start chars.
-     *
-     * @param chars given chars
-     * @param start given start chars
-     * @return whether given chars starts with given start chars
-     */
-    public static boolean startsWith(@Nullable CharSequence chars, @Nullable CharSequence start) {
-        if (chars == null || start == null) {
-            return false;
-        }
-        if (chars.length() < start.length()) {
-            return false;
-        }
-        for (int i = 0; i < start.length(); i++) {
-            if (chars.charAt(i) != start.charAt(i)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Returns whether given chars ends with given start chars.
-     *
-     * @param chars given chars
-     * @param end   given start chars
-     * @return whether given chars ends with given start chars
-     */
-    public static boolean endsWith(@Nullable CharSequence chars, @Nullable CharSequence end) {
-        if (chars == null || end == null) {
-            return false;
-        }
-        if (chars.length() < end.length()) {
-            return false;
-        }
-        for (int i = chars.length() - 1, j = end.length() - 1; j >= 0; i--, j--) {
-            if (chars.charAt(i) != end.charAt(j)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
      * Returns whether all chars of given chars are upper case.
      *
      * @param chars given chars
@@ -423,147 +376,48 @@ public class StringKit {
     }
 
     /**
-     * Splits given chars by given separator, using {@link #subChars(CharSequence, int, int)} to generate sub
-     * CharSequence. If chars or separator is empty, or separator's length is greater than chars' length, or separator
-     * is never matched, return an empty list.
-     * <p>
-     * Note empty part will be created there is no char between separator and the next separator, position of start or
-     * end. That means, if the returned list is not empty, its length is at least 2.
+     * Returns the first index of the specified char in the specified string. The returned value is the smallest value
+     * {@code k} such that:
+     * <pre>{@code
+     * (str.charAt(k) == ch) && (k >= 0)
+     * }</pre>
+     * If no such {@code k} is found, returns {@code -1}.
      *
-     * @param chars     given chars
-     * @param separator given separator
-     * @return split list
+     * @param str the specified string
+     * @param c   the specified char
+     * @return the first index of the specified char in the specified string, or {@code -1} if not found
      */
-    public static List<CharSequence> split(CharSequence chars, CharSequence separator) {
-        return split(chars, separator, StringKit::subChars);
-    }
-
-    /**
-     * Splits given chars by given separator, using given sub-sequence function to generate sub-CharSequence. If chars
-     * or separator is empty, or separator's length is greater than chars' length, or separator is never matched, return
-     * an empty list.
-     * <p>
-     * Note empty part will be created there is no char between separator and the next separator, position of start or
-     * end. That means, if the returned list is not empty, its length is at least 2.
-     *
-     * @param chars     given chars
-     * @param separator given separator
-     * @param subFunc   given sub-sequence generator
-     * @return split list
-     */
-    public static <T> List<T> split(
-        CharSequence chars, CharSequence separator, SubFunction<CharSequence, T> subFunc) {
-        if (isEmpty(chars) || isEmpty(separator) || separator.length() > chars.length()) {
-            return Collections.emptyList();
-        }
-        List<T> result = new LinkedList<>();
-        int wordStart = 0;
-        while (true) {
-            int index = indexOf(chars, separator, wordStart);
-            if (index >= 0) {
-                result.add(subFunc.apply(chars, wordStart, index));
-                wordStart = index + separator.length();
-                if (wordStart >= chars.length()) {
-                    result.add(subFunc.apply(chars, wordStart, chars.length()));
-                    return result;
-                }
-            } else {
-                if (result.isEmpty()) {
-                    return Collections.emptyList();
-                }
-                result.add(subFunc.apply(chars, wordStart, chars.length()));
-                return result;
-            }
-        }
-    }
-
-    /**
-     * Replaces all given matcher in given chars with given replacement.
-     *
-     * @param chars       given chars
-     * @param matcher     given matcher (to replace)
-     * @param replacement given replacement
-     * @return replaced string
-     */
-    public static String replace(CharSequence chars, CharSequence matcher, CharSequence replacement) {
-        return replace(chars, matcher, replacement, -1);
-    }
-
-    /**
-     * Replaces given matcher in given chars with given replacement. If given limit &lt; 0, replace all; if given limit
-     * = 0, do nothing and return given chars to string; If given limit &gt; 0, this method will replace given limit
-     * times.
-     * <p>
-     * FOr example, replaceFirst is equivalent to:
-     * <pre>
-     *     replace(chars, matcher, replacement, 1);
-     * </pre>
-     *
-     * @param chars       given chars
-     * @param matcher     given matcher (to replace)
-     * @param replacement given replacement
-     * @param limit       given limit
-     * @return replaced string
-     */
-    public static String replace(CharSequence chars, CharSequence matcher, CharSequence replacement, int limit) {
-        if (limit == 0 || isEmpty(chars) || chars.length() < matcher.length() || isEmpty(matcher)) {
-            return chars.toString();
-        }
-        if (matcher.length() == replacement.length()) {
-            char[] result = new char[chars.length()];
-            int cs = 0;
-            int rs = 0;
-            int count = 0;
-            while (cs < chars.length()) {
-                int i = indexOf(chars, matcher, cs);
-                if (i >= 0) {
-                    getChars(chars, cs, i, result, rs);
-                    getChars(replacement, result, i);
-                    cs = i + matcher.length();
-                    rs = i + replacement.length();
-                } else {
-                    break;
-                }
-                if (limit > 0 && count++ >= limit) {
-                    break;
-                }
-            }
-            if (cs < chars.length()) {
-                getChars(chars, cs, chars.length(), result, rs);
-            }
-            return new String(result);
-        }
-        StringBuilder sb = new StringBuilder();
-        int cs = 0;
-        int count = 0;
-        while (cs < chars.length()) {
-            int i = indexOf(chars, matcher, cs);
-            if (i >= 0) {
-                sb.append(chars, cs, i);
-                sb.append(replacement);
-                cs = i + matcher.length();
-            } else {
-                break;
-            }
-            if (limit > 0 && count++ >= limit) {
-                break;
-            }
-        }
-        if (cs < chars.length()) {
-            sb.append(chars, cs, chars.length());
-        }
-        return sb.toString();
-    }
-
     public static int indexOf(CharSequence str, char c) {
         return indexOf(str, c, 0);
     }
 
-    public static int indexOf(CharSequence str, char c, int start) {
+    /**
+     * Returns the first index of the specified char in the specified string, starting at the specified index. The
+     * returned value is the smallest value {@code k} such that:
+     * <pre>{@code
+     * (str.charAt(k) == ch) && (k >= index)
+     * }</pre>
+     * If no such {@code k} is found, returns {@code -1}.
+     * <p>
+     * There is no restriction on the {@code index}. If it is negative, it has the same effect as if it were {@code 0};
+     * if it is greater than {@code str.length()}, it has the same effect as if it were {@code str.length()} ({@code -1}
+     * is returned).
+     *
+     * @param str   the specified string
+     * @param c     the specified char
+     * @param index the specified index
+     * @return the first index of the specified char in the specified string, starting at the specified index, or
+     * {@code -1} if not found
+     */
+    public static int indexOf(CharSequence str, char c, int index) {
         if (str instanceof String) {
-            return ((String) str).indexOf(c, start);
+            return ((String) str).indexOf(c, index);
         }
-        for (int i = start; i < str.length(); i++) {
+        if (index >= str.length()) {
+            return -1;
+        }
+        int s = Math.max(0, index);
+        for (int i = s; i < str.length(); i++) {
             if (str.charAt(i) == c) {
                 return i;
             }
@@ -571,18 +425,49 @@ public class StringKit {
         return -1;
     }
 
+    /**
+     * Returns the last index of the specified char in the specified string, searching backward. The returned value is
+     * the largest value {@code k} such that:
+     * <pre>{@code
+     * (str.charAt(k) == ch) && (k <= str.length() - 1)
+     * }</pre>
+     * If no such {@code k} is found, returns {@code -1}.
+     *
+     * @param str the specified string
+     * @param c   the specified char
+     * @return the last index of the specified char in the specified string, searching backward, or {@code -1} if not
+     * found
+     */
     public static int lastIndexOf(CharSequence str, char c) {
-        return lastIndexOf(str, c, 0);
+        return lastIndexOf(str, c, str.length() - 1);
     }
 
-    public static int lastIndexOf(CharSequence str, char c, int start) {
+    /**
+     * Returns the last index of the specified char in the specified string, searching backward starting at the
+     * specified index. The returned value is the largest value {@code k} such that:
+     * <pre>{@code
+     * (str.charAt(k) == ch) && (k <= index)
+     * }</pre>
+     * If no such {@code k} is found, returns {@code -1}.
+     * <p>
+     * There is no restriction on the {@code index}. If it is negative, it has the same effect as if it were {@code -1}
+     * ({@code -1} is returned); if it is greater than or equal to {@code str.length()}, it has the same effect as if it
+     * were {@code str.length() - 1}.
+     *
+     * @param str   the specified string
+     * @param c     the specified char
+     * @param index the specified index
+     * @return the last index of the specified char in the specified string, searching backward starting at the
+     * specified index, or {@code -1} if not found
+     */
+    public static int lastIndexOf(CharSequence str, char c, int index) {
         if (str instanceof String) {
-            return ((String) str).lastIndexOf(c, start);
+            return ((String) str).lastIndexOf(c, index);
         }
-        if (start < 0 || str.length() == 0) {
+        if (index < 0) {
             return -1;
         }
-        int s = Math.min(str.length() - 1, start);
+        int s = Math.min(str.length() - 1, index);
         for (int i = s; i >= 0; i--) {
             if (str.charAt(i) == c) {
                 return i;
@@ -592,47 +477,53 @@ public class StringKit {
     }
 
     /**
-     * Returns first index of given search word in given chars, starts from index 0, in natural order (0,1,2,3...end).
-     * Returns -1 if not found.
+     * Returns the first index of the specified substring in the specified string. The returned value is the smallest
+     * value {@code k} for which:
+     * <pre>{@code
+     * (k >= 0) && str.startsWith(sub, k)
+     * }</pre>
+     * If no such {@code k} is found, returns {@code -1}.
+     * <p>
+     * The behavior of this method is the same as {@link String#indexOf(String)}.
      *
-     * @param chars  given chars
-     * @param search given search word
-     * @return the index
+     * @param str the specified string
+     * @param sub the specified substring
+     * @return the first index of the specified substring in the specified string, or {@code -1} if not found
      */
-    public static int indexOf(CharSequence chars, CharSequence search) {
-        return indexOf(chars, search, 0);
+    public static int indexOf(CharSequence str, CharSequence sub) {
+        return indexOf(str, sub, 0);
     }
 
     /**
-     * Returns first index of given search word in given chars, starts from given index, in natural order
-     * (0,1,2,3...end). Returns -1 if not found.
+     * Returns the first index of the specified substring in the specified string, starting at the specified index. The
+     * returned value is the smallest value {@code k} for which:
+     * <pre>{@code
+     * (k >= index) && str.startsWith(sub, k)
+     * }</pre>
+     * If no such {@code k} is found, returns {@code -1}.
+     * <p>
+     * The behavior of this method is the same as {@link String#indexOf(String, int)}.
      *
-     * @param chars  given chars
-     * @param search given search word
-     * @param from   given index
-     * @return the index
+     * @param str   the specified string
+     * @param sub   the specified substring
+     * @param index the specified index
+     * @return the first index of the specified substring in the specified string, starting at the specified index, or
+     * {@code -1} if not found
      */
-    public static int indexOf(CharSequence chars, CharSequence search, int from) {
-        if (isEmpty(chars) || chars.length() < search.length()) {
-            return -1;
+    public static int indexOf(CharSequence str, CharSequence sub, int index) {
+        if ((str instanceof String) && (sub instanceof String)) {
+            return ((String) str).indexOf((String) sub, index);
         }
-        CheckKit.checkArgument(!isEmpty(search), "search string is empty.");
-        CheckKit.checkInBounds(from, 0, chars.length());
-        if (chars.length() - from < search.length()) {
-            return -1;
+        int maxIndex = str.length() - sub.length();
+        if (index > maxIndex) {
+            return (sub.length() == 0 ? str.length() : -1);
         }
-        for (int i = from; i < chars.length(); i++) {
-            if (chars.length() - i < search.length()) {
-                return -1;
-            }
-            boolean match = true;
-            for (int j = 0; j < search.length(); j++) {
-                if (chars.charAt(i + j) != search.charAt(j)) {
-                    match = false;
-                    break;
-                }
-            }
-            if (match) {
+        int s = Math.max(index, 0);
+        if (sub.length() == 0) {
+            return s;
+        }
+        for (int i = s; i <= maxIndex; i++) {
+            if (startsWith(str, sub, i)) {
                 return i;
             }
         }
@@ -640,69 +531,93 @@ public class StringKit {
     }
 
     /**
-     * Returns last index of given search word in given chars, starts from last index, in reversed natural order
-     * (end...3,2,1,0). Returns -1 if not found.
+     * Returns the last index of the specified substring in the specified string, searching backward. The returned value
+     * is the smallest value {@code k} for which:
+     * <pre>{@code
+     * (k <= str.length() - 1) && str.startsWith(sub, k)
+     * }</pre>
+     * If no such {@code k} is found, returns {@code -1}.
+     * <p>
+     * The behavior of this method is the same as {@link String#lastIndexOf(String)}.
      *
-     * @param chars  given chars
-     * @param search given search word
-     * @return the index
+     * @param str the specified string
+     * @param sub the specified substring
+     * @return the last index of the specified substring in the specified string, searching backward, or {@code -1} if
+     * not found
      */
-    public static int lastIndexOf(CharSequence chars, CharSequence search) {
-        if (isEmpty(chars)) {
-            return -1;
-        }
-        return lastIndexOf(chars, search, chars.length() - 1);
+    public static int lastIndexOf(CharSequence str, CharSequence sub) {
+        return lastIndexOf(str, sub, str.length());
     }
 
     /**
-     * Returns last index of given search word in given chars, starts given index, in reversed natural order
-     * (end...3,2,1,0). Returns -1 if not found.
+     * Returns the last index of the specified substring in the specified string, searching backward starting at the
+     * specified index. The returned value is the largest value {@code k} for which:
+     * <pre>{@code
+     * (k <= index) && str.startsWith(sub, k)
+     * }</pre>
+     * If no such {@code k} is found, returns {@code -1}.
+     * <p>
+     * The behavior of this method is the same as {@link String#lastIndexOf(String, int)}.
      *
-     * @param chars  given chars
-     * @param search given search word
-     * @param from   given index
-     * @return the index
+     * @param str   the specified string
+     * @param sub   the specified substring
+     * @param index the specified index
+     * @return the last index of the specified substring in the specified string, searching backward starting at the
+     * specified index, or {@code -1} if not found
      */
-    public static int lastIndexOf(CharSequence chars, CharSequence search, int from) {
-        if (isEmpty(chars) || chars.length() < search.length()) {
+    public static int lastIndexOf(CharSequence str, CharSequence sub, int index) {
+        if ((str instanceof String) && (sub instanceof String)) {
+            return ((String) str).lastIndexOf((String) sub, index);
+        }
+        if (index < 0) {
             return -1;
         }
-        CheckKit.checkArgument(!isEmpty(search), "search string is empty.");
-        CheckKit.checkInBounds(from, 0, chars.length());
-        if (from + 1 < search.length()) {
-            return -1;
+        int maxIndex = str.length() - sub.length();
+        int s = Math.min(index, maxIndex);
+        if (sub.length() == 0) {
+            return s;
         }
-        for (int i = from; i >= 0; i--) {
-            if (i + 1 < search.length()) {
-                return -1;
-            }
-            boolean match = true;
-            for (int j = 0; j < search.length(); j++) {
-                if (chars.charAt(i - j) != search.charAt(search.length() - 1 - j)) {
-                    match = false;
-                    break;
-                }
-            }
-            if (match) {
-                return i - search.length() + 1;
+        for (int i = s; i >= 0; i--) {
+            if (startsWith(str, sub, i)) {
+                return i;
             }
         }
         return -1;
     }
 
     /**
-     * Returns whether each char of two char sequence at same index are equal.
+     * Returns whether the specified string is starts with the specified substring.
+     * <p>
+     * The behavior of this method is the same as {@link String#startsWith(String)}.
      *
-     * @param cs1 char sequence 1
-     * @param cs2 char sequence 2
-     * @return whether each char of two char sequence at same index are equal
+     * @param str the specified string
+     * @param sub the specified substring
+     * @return whether the specified string is starts with the specified substring
      */
-    public static boolean charEquals(CharSequence cs1, CharSequence cs2) {
-        if (cs1.length() != cs2.length()) {
+    public static boolean startsWith(@Nonnull CharSequence str, @Nonnull CharSequence sub) {
+        return startsWith(str, sub, 0);
+    }
+
+    /**
+     * Returns whether the specified string is starts with the specified substring, the comparing starting at the
+     * specified index.
+     * <p>
+     * The behavior of this method is the same as {@link String#startsWith(String, int)}.
+     *
+     * @param str   the specified string
+     * @param sub   the specified substring
+     * @param index the specified index
+     * @return whether the specified string is starts with the specified substring
+     */
+    public static boolean startsWith(@Nonnull CharSequence str, @Nonnull CharSequence sub, int index) {
+        int strLen = str.length();
+        int subLen = sub.length();
+        if (index < 0 || index > strLen - subLen) {
             return false;
         }
-        for (int i = 0; i < cs1.length(); i++) {
-            if (cs1.charAt(i) != cs2.charAt(i)) {
+        int l = subLen + index;
+        for (int i = index, j = 0; i < l; i++, j++) {
+            if (str.charAt(i) != sub.charAt(j)) {
                 return false;
             }
         }
@@ -710,62 +625,81 @@ public class StringKit {
     }
 
     /**
-     * Returns a string follows:
-     * <ul>
-     *     <li>returns String.valueOf for given object if it is not an array;</li>
-     *     <li>if given object is primitive array, returns Arrays.toString for it;</li>
-     *     <li>if given object is Object[], returns Arrays.deepToString for it;</li>
-     *     <li>else returns String.valueOf for given object</li>
-     * </ul>
-     * This method is same as: toString(obj, true, true)
+     * Returns whether the specified string is ends with the specified substring.
+     * <p>
+     * The behavior of this method is the same as {@link String#endsWith(String)}.
      *
-     * @param obj given object
-     * @return computed string
+     * @param str the specified string
+     * @param sub the specified substring
+     * @return whether the specified string is ends with the specified substring
      */
-    public static String toString(@Nullable Object obj) {
+    public static boolean endsWith(@Nonnull CharSequence str, @Nonnull CharSequence sub) {
+        return startsWith(str, sub, str.length() - sub.length());
+    }
+
+    /**
+     * Returns the {@code toString} of the given object. If the given object is array, uses {@code Arrays.toString} or
+     * {@link Arrays#deepToString(Object[])} if necessary.
+     * <p>
+     * This method is equivalent to ({@link #toStringWith(Object, boolean, boolean)}):
+     * {@code toStringWith(obj, true, true)}.
+     *
+     * @param obj the given object
+     * @return the {@code toString} of the given object
+     */
+    public static @Nonnull String toString(@Nullable Object obj) {
         return toStringWith(obj, true, true);
     }
 
     /**
-     * Returns deep-array-to-string for given objects.
+     * Returns the {@code toString} of the given objects via {@link Arrays#deepToString(Object[])}.
      *
-     * @param objs given objects
-     * @return computed string
+     * @param objs the given objects
+     * @return the {@code toString} of the given objects via {@link Arrays#deepToString(Object[])}
      */
-    public static String toString(Object... objs) {
+    public static @Nonnull String toStringAll(@Nullable Object @Nonnull ... objs) {
         return Arrays.deepToString(objs);
     }
 
     /**
-     * Returns a string follows:
+     * Returns the {@code toString} of the given object. This method follows the following logic:
      * <ul>
-     *     <li>if given object is primitive array and array-check is true, returns Arrays.toString for it;</li>
      *     <li>
-     *         if given object is Object[] and both array-check and deep-to-string are true,
-     *         returns Arrays.deepToString for it;
+     *         If the given object is not an array, returns {@link Objects#toString(Object)}.
      *     </li>
      *     <li>
-     *         if given object is Object[] and array-check is true and deep-to-string is false,
-     *         returns Arrays.toString for it;
+     *         If the {@code arrayToString} is {@code true}:
+     *         <ul>
+     *             <li>
+     *                 If the {@code deep} is {@code true}, uses {@link Arrays#deepToString(Object[])} for them.
+     *                 Otherwise, uses {@code Arrays.toString}.
+     *             </li>
+     *         </ul>
      *     </li>
-     *     <li>else returns String.valueOf for given object</li>
+     *     <li>
+     *         Returns {@link Objects#toString(Object)} otherwise.
+     *     </li>
      * </ul>
      *
-     * @param obj          given object
-     * @param arrayCheck   the array-check
-     * @param deepToString whether deep-to-string
-     * @return computed string
+     * @param obj           the given object
+     * @param arrayToString the arrayToString option
+     * @param deep          the deep option
+     * @return the {@code toString} of the given object
      */
-    public static String toStringWith(@Nullable Object obj, boolean arrayCheck, boolean deepToString) {
-        if (obj == null || !arrayCheck) {
-            return String.valueOf(obj);
+    public static @Nonnull String toStringWith(@Nullable Object obj, boolean arrayToString, boolean deep) {
+        if (obj == null || !arrayToString) {
+            return Objects.toString(obj);
         }
-        Class<?> type = obj.getClass();
-        if (!type.isArray()) {
-            return obj.toString();
+        Class<?> cls = obj.getClass();
+        if (cls.isArray()) {
+            return toStringArray(obj, deep);
         }
+        return obj.toString();
+    }
+
+    private static @Nonnull String toStringArray(@Nonnull Object obj, boolean deep) {
         if (obj instanceof Object[]) {
-            return deepToString ? Arrays.deepToString((Object[]) obj) : Arrays.toString((Object[]) obj);
+            return deep ? Arrays.deepToString((Object[]) obj) : Arrays.toString((Object[]) obj);
         }
         if (obj instanceof boolean[]) {
             return Arrays.toString((boolean[]) obj);
@@ -791,54 +725,73 @@ public class StringKit {
         if (obj instanceof double[]) {
             return Arrays.toString((double[]) obj);
         }
-        return obj.toString();
+        throw new UnknownArrayTypeException(obj.getClass());
     }
 
     /**
-     * Puts chars in specified length from given chars into given dest starts at given offset.
+     * Compares the given two {@link CharSequence} instances, returns {@code true} if they have same length and two
+     * chars at the same index in two sequences are equal, otherwise {@code false}.
      *
-     * @param chars  given chars
-     * @param dest   given dest
-     * @param offset given offset
+     * @param cs1 the first {@link CharSequence} to compare
+     * @param cs2 the second {@link CharSequence} to compare
+     * @return {@code true} if they have same length and two chars at the same index in two sequences are equal,
+     * otherwise {@code false}
      */
-    public static void getChars(CharSequence chars, char[] dest, int offset) {
-        getChars(chars, 0, chars.length(), dest, offset);
+    public static boolean charEquals(CharSequence cs1, CharSequence cs2) {
+        if (cs1.length() != cs2.length()) {
+            return false;
+        }
+        for (int i = 0; i < cs1.length(); i++) {
+            if (cs1.charAt(i) != cs2.charAt(i)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
-     * Puts chars in specified length from given chars into given dest starts at given offset.
+     * Copies chars from the given string into the specified destination char array. The chars copied starting at the
+     * specified start index inclusive, and ending at the specified end index exclusive. The destination array receives
+     * starting at the specified offset.
+     * <p>
+     * The behavior of this method is the same as {@link String#getChars(int, int, char[], int)}.
      *
-     * @param chars  given chars
-     * @param start  start index of given chars inclusive
-     * @param end    end index of given chars exclusive
-     * @param dest   given dest
-     * @param offset given offset
+     * @param str   the given string of which chars will be copied
+     * @param start the specified start index, inclusive
+     * @param end   the specified end index, exclusive
+     * @param dst   the specified destination char array
+     * @param off   the specified offset
+     * @throws IndexOutOfBoundsException if there exists an arguments is out of bounds
      */
-    public static void getChars(CharSequence chars, int start, int end, char[] dest, int offset) {
-        if (chars instanceof String) {
-            ((String) chars).getChars(start, end, dest, offset);
+    public static void charsCopy(
+        @Nonnull CharSequence str, int start, int end, char @Nonnull [] dst, int off
+    ) throws IndexOutOfBoundsException {
+        if (str instanceof String) {
+            ((String) str).getChars(start, end, dst, off);
         } else {
-            CheckKit.checkRangeInBounds(start, end, 0, chars.length());
-            CheckKit.checkRangeInBounds(offset, end - start, 0, dest.length);
+            CheckKit.checkRangeInBounds(start, end, 0, str.length());
+            CheckKit.checkRangeInBounds(off, end - start, 0, dst.length);
             if (start == end) {
                 return;
             }
             for (int i = 0; i < end - start; i++) {
-                dest[offset + i] = chars.charAt(start + i);
+                dst[off + i] = str.charAt(start + i);
             }
         }
     }
 
     /**
-     * Copies chars of the specified length from the given source (starting at the specified source offset) to the given
-     * destination array (starting at the specified destination offset).
+     * Copies the specified length of chars from the given source, starting at the specified source offset, to the given
+     * destination array, starting at the specified destination offset.
+     * <p>
+     * The behavior of this method is the same as {@link System#arraycopy(Object, int, Object, int, int)}.
      *
      * @param src    the given source
      * @param srcOff the specified source offset
-     * @param dst    the given destination
+     * @param dst    the given destination array
      * @param dstOff the specified destination offset
      * @param len    the specified copy length
-     * @throws IndexOutOfBoundsException if the bounds arguments are out of bounds
+     * @throws IndexOutOfBoundsException if there exists an arguments is out of bounds
      */
     public static void charsCopy(
         @Nonnull CharSequence src,
@@ -859,21 +812,6 @@ public class StringKit {
     }
 
     /**
-     * Returns a string starts with given start string. If given source string starts with given start string, return
-     * itself; if not, return start + src.
-     *
-     * @param src   given source string
-     * @param start given start string
-     * @return a string starts with given start string
-     */
-    public static String startWith(CharSequence src, CharSequence start) {
-        if (startsWith(src, start)) {
-            return src.toString();
-        }
-        return start.toString() + src;
-    }
-
-    /**
      * Returns a string doesn't start with given start string. If given source string starts with given start string,
      * remove the start chars and return; else return source string.
      *
@@ -891,21 +829,6 @@ public class StringKit {
             }
         }
         return src.subSequence(start.length(), src.length()).toString();
-    }
-
-    /**
-     * Returns a string ends with given end string. If given source string ends with given end string, return itself; if
-     * not, return src + end.
-     *
-     * @param src given source string
-     * @param end given end string
-     * @return a string ends with given end string
-     */
-    public static String endWith(CharSequence src, CharSequence end) {
-        if (endsWith(src, end)) {
-            return src.toString();
-        }
-        return src.toString() + end;
     }
 
     /**
@@ -1095,186 +1018,6 @@ public class StringKit {
             return Double.parseDouble(chars.toString());
         } catch (Exception e) {
             return defaultValue;
-        }
-    }
-
-    /**
-     * Wraps given char array as an instance of {@link CharSequence}. Any change for content of wrapped array will
-     * reflect to the returned instance.
-     *
-     * @param array given char array
-     * @return an instance of {@link CharSequence} wraps given char array
-     */
-    public static CharSequence asChars(char[] array) {
-        return asChars(array, 0, array.length);
-    }
-
-    /**
-     * Wraps given char array as an instance of {@link CharSequence}, starting from specified start index inclusive and
-     * ending at specified end index exclusive. Any change for content of wrapped array will reflect to the returned
-     * instance.
-     *
-     * @param array given char array
-     * @param start start index inclusive
-     * @param end   end index exclusive
-     * @return an instance of {@link CharSequence} wraps given char array
-     */
-    public static CharSequence asChars(char[] array, int start, int end) {
-        CheckKit.checkRangeInBounds(start, end, 0, array.length);
-        return new CharsWrapper(array, start, end);
-    }
-
-    /**
-     * Returns a {@link CharSequence} which is lazy for executing method {@link Object#toString()}, the executing was
-     * provided by given supplier.
-     * <p>
-     * Note returned {@link CharSequence}'s other methods (such as {@link CharSequence#length()}) were based on its lazy
-     * toString().
-     *
-     * @param supplier given supplier
-     * @return lazy char sequence
-     */
-    public static CharSequence lazyChars(Supplier<String> supplier) {
-        return new LazyChars(supplier);
-    }
-
-    /**
-     * Returns a sub-range view of given chars from given start index inclusive to end. The two chars will share the
-     * same data so any operation will reflect each other.
-     * <p>
-     * Note the method {@link CharSequence#subSequence(int, int)} of returned CharSequence will still use
-     * {@link #subChars(CharSequence, int, int)}.
-     *
-     * @param chars given chars
-     * @param start given start index inclusive
-     * @return sub-range view of given chars
-     */
-    public static CharSequence subChars(CharSequence chars, int start) {
-        return subChars(chars, start, chars.length());
-    }
-
-    /**
-     * Returns a sub-range view of given chars from given start index inclusive to given end index exclusive. The two
-     * chars will share the same data so any operation will reflect each other.
-     * <p>
-     * Note the method {@link CharSequence#subSequence(int, int)} of returned CharSequence will still use this method.
-     *
-     * @param chars given chars
-     * @param start given start index inclusive
-     * @param end   given end index exclusive
-     * @return sub-range view of given chars
-     */
-    public static CharSequence subChars(CharSequence chars, int start, int end) {
-        CheckKit.checkRangeInBounds(start, end, 0, chars.length());
-        return new SubChars(chars, start, end);
-    }
-
-    private static final class CharsWrapper implements CharSequence {
-
-        private final char[] source;
-        private final int start;
-        private final int end;
-
-        private CharsWrapper(char[] source, int start, int end) {
-            this.source = source;
-            this.start = start;
-            this.end = end;
-        }
-
-        @Override
-        public int length() {
-            return end - start;
-        }
-
-        @Override
-        public char charAt(int index) {
-            return source[start + index];
-        }
-
-        @Override
-        public CharSequence subSequence(int start, int end) {
-            return StringKit.asChars(source, this.start + start, this.start + end);
-        }
-
-        @Override
-        public String toString() {
-            return new String(source, start, end - start);
-        }
-    }
-
-    private static final class LazyChars implements CharSequence {
-
-        private final Supplier<String> supplier;
-        private volatile String chars = null;
-
-        private LazyChars(Supplier<String> supplier) {
-            this.supplier = supplier;
-        }
-
-        @Override
-        public int length() {
-            return get().length();
-        }
-
-        @Override
-        public char charAt(int index) {
-            return get().charAt(index);
-        }
-
-        @Override
-        public CharSequence subSequence(int start, int end) {
-            return get().subSequence(start, end);
-        }
-
-        @Override
-        public String toString() {
-            return get();
-        }
-
-        private String get() {
-            if (chars != null) {
-                return chars;
-            }
-            synchronized (this) {
-                if (chars != null) {
-                    return chars;
-                }
-                chars = supplier.get();
-                return chars;
-            }
-        }
-    }
-
-    private static final class SubChars implements CharSequence {
-
-        private final CharSequence source;
-        private final int start;
-        private final int end;
-
-        private SubChars(CharSequence source, int start, int end) {
-            this.source = source;
-            this.start = start;
-            this.end = end;
-        }
-
-        @Override
-        public int length() {
-            return end - start;
-        }
-
-        @Override
-        public char charAt(int index) {
-            return source.charAt(start + index);
-        }
-
-        @Override
-        public CharSequence subSequence(int start, int end) {
-            return subChars(source, this.start + start, this.start + end);
-        }
-
-        @Override
-        public String toString() {
-            return source.subSequence(start, end).toString();
         }
     }
 }

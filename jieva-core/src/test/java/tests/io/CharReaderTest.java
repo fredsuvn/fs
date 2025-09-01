@@ -4,7 +4,6 @@ import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.chars.CharsBuilder;
 import xyz.sunqian.common.base.chars.CharsKit;
-import xyz.sunqian.common.base.string.StringKit;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.CharReader;
 import xyz.sunqian.common.io.CharSegment;
@@ -829,7 +828,7 @@ public class CharReaderTest implements DataTest {
         {
             // char sequence
             char[] data = randomChars(dataSize);
-            CharSequence dataStr = StringKit.asChars(data);
+            CharSequence dataStr = CharBuffer.wrap(data);
             testShareChars(CharReader.from(dataStr), CharBuffer.wrap(data), false, true);
             testShareChars(
                 CharReader.from(dataStr).limit(limitSize),
@@ -838,7 +837,7 @@ public class CharReaderTest implements DataTest {
             );
             char[] dataPadding = new char[data.length + 66];
             System.arraycopy(data, 0, dataPadding, 33, data.length);
-            CharSequence dataStrPadding = StringKit.asChars(dataPadding);
+            CharSequence dataStrPadding = CharBuffer.wrap(dataPadding);
             testShareChars(
                 CharReader.from(dataStrPadding, 33, 33 + data.length),
                 CharBuffer.wrap(dataPadding, 33, data.length),

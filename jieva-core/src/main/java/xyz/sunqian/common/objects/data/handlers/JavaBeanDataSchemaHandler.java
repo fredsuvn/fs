@@ -2,12 +2,10 @@ package xyz.sunqian.common.objects.data.handlers;
 
 import lombok.Data;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.string.NameSpec;
-import xyz.sunqian.common.base.string.StringKit;
+import xyz.sunqian.common.base.string.NameFormatter;
 import xyz.sunqian.common.objects.data.DataSchemaParser;
 
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -23,7 +21,7 @@ import java.util.Objects;
  */
 public class JavaBeanDataSchemaHandler extends AbstractDataSchemaHandler {
 
-    private final NameSpec nameSpec = NameSpec.camelCase(false);
+    private final NameFormatter nameFormatter = NameFormatter.camelCase(false);
 
     @Override
     protected @Nullable AccessorInfo resolveAccessor(Method method) {

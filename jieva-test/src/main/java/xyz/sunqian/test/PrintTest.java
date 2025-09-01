@@ -39,6 +39,7 @@ public interface PrintTest {
         PrintStream printer = ThreadLocals.get(ThreadLocals.Key.PRINTER);
         printer = printer == null ? System.out : printer;
         printer.print(sb);
+        printer.flush();
     }
 
     /**
@@ -55,6 +56,7 @@ public interface PrintTest {
         PrintStream printer = ThreadLocals.get(ThreadLocals.Key.PRINTER);
         printer = printer == null ? System.out : printer;
         printer.println(sb);
+        printer.flush();
     }
 
     /**
