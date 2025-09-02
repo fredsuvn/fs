@@ -11,6 +11,7 @@ import xyz.sunqian.common.function.callable.VoidCallable;
 import xyz.sunqian.common.net.NetException;
 import xyz.sunqian.common.net.NetServer;
 import xyz.sunqian.common.net.tcp.TcpClient;
+import xyz.sunqian.common.net.tcp.TcpContext;
 import xyz.sunqian.common.net.tcp.TcpServer;
 import xyz.sunqian.common.net.tcp.TcpServerHandler;
 import xyz.sunqian.test.DataTest;
@@ -66,7 +67,7 @@ public class TcpTest implements DataTest, PrintTest {
         });
 
         TcpClient[] clients = new TcpClient[workerNum];
-        TcpServerHandler.Context[] contexts = new TcpServerHandler.Context[workerNum];
+        TcpContext[] contexts = new TcpContext[workerNum];
         BytesBuilder[] builders = new BytesBuilder[workerNum];
         for (int i = 0; i < builders.length; i++) {
             builders[i] = new BytesBuilder();
@@ -83,6 +84,8 @@ public class TcpTest implements DataTest, PrintTest {
 
         InetSocketAddress localhost = new InetSocketAddress("127.0.0.1", 0);
 
+        Object attachment = new Object();
+
         TcpServer server = TcpServer.newBuilder()
             .mainThreadFactory(mainFactory)
             .workerThreadNum(workerNum)
@@ -92,7 +95,7 @@ public class TcpTest implements DataTest, PrintTest {
             .handler(new TcpServerHandler() {
 
                 @Override
-                public void channelOpen(@Nonnull TcpServerHandler.Context context) throws Exception {
+                public void channelOpen(@Nonnull TcpContext context) throws Exception {
                     SocketChannel channel = context.channel();
                     assertTrue(channel.isOpen());
                     XThread thread = (XThread) Thread.currentThread();
@@ -100,10 +103,11 @@ public class TcpTest implements DataTest, PrintTest {
                     printFor("client open",
                         thread.num, ", addr: ", channel.getRemoteAddress());
                     contexts[thread.num] = context;
+                    context.attach(attachment);
                 }
 
                 @Override
-                public void channelRead(@Nonnull TcpServerHandler.Context context) throws Exception {
+                public void channelRead(@Nonnull TcpContext context) throws Exception {
                     SocketChannel channel = context.channel();
                     XThread thread = (XThread) Thread.currentThread();
                     printFor("client read", thread.num);
@@ -117,10 +121,11 @@ public class TcpTest implements DataTest, PrintTest {
                     if (builders[thread.num].size() == data.length) {
                         readLatches[thread.num].countDown();
                     }
+                    assertSame(context.attachment(), attachment);
                 }
 
                 @Override
-                public void channelClose(@Nonnull TcpServerHandler.Context context) throws Exception {
+                public void channelClose(@Nonnull TcpContext context) throws Exception {
                     SocketChannel channel = context.channel();
                     assertFalse(channel.isOpen());
                     channel.close();
@@ -132,7 +137,7 @@ public class TcpTest implements DataTest, PrintTest {
                 }
 
                 @Override
-                public void exceptionCaught(@Nullable TcpServerHandler.Context context, @Nonnull Throwable cause) {
+                public void exceptionCaught(@Nullable TcpContext context, @Nonnull Throwable cause) {
                     printFor("client exception", ThrowKit.toString(cause));
                 }
             })
@@ -209,7 +214,7 @@ public class TcpTest implements DataTest, PrintTest {
         assertSame(server.localAddress(), serverLocal);
 
         // close contexts again
-        for (TcpServerHandler.Context context : contexts) {
+        for (TcpContext context : contexts) {
             context.close();
         }
     }
@@ -228,23 +233,23 @@ public class TcpTest implements DataTest, PrintTest {
                 .handler(new TcpServerHandler() {
 
                     @Override
-                    public void channelOpen(@Nonnull TcpServerHandler.Context context) throws Exception {
+                    public void channelOpen(@Nonnull TcpContext context) throws Exception {
                         openLatch.countDown();
                         throw new XException();
                     }
 
                     @Override
-                    public void channelClose(@Nonnull TcpServerHandler.Context context) throws Exception {
+                    public void channelClose(@Nonnull TcpContext context) throws Exception {
                         throw new XException();
                     }
 
                     @Override
-                    public void channelRead(@Nonnull TcpServerHandler.Context context) throws Exception {
+                    public void channelRead(@Nonnull TcpContext context) throws Exception {
                         throw new XException();
                     }
 
                     @Override
-                    public void exceptionCaught(@Nullable TcpServerHandler.Context context, @Nonnull Throwable cause) {
+                    public void exceptionCaught(@Nullable TcpContext context, @Nonnull Throwable cause) {
                         if (cause instanceof XException) {
                             throwLatch.countDown();
                         }
@@ -286,24 +291,24 @@ public class TcpTest implements DataTest, PrintTest {
                 .handler(new TcpServerHandler() {
 
                     @Override
-                    public void channelOpen(@Nonnull Context context) throws Exception {
+                    public void channelOpen(@Nonnull TcpContext context) throws Exception {
                         TcpServerHandler.nullHandler().channelOpen(context);
                     }
 
                     @Override
-                    public void channelClose(@Nonnull Context context) throws Exception {
+                    public void channelClose(@Nonnull TcpContext context) throws Exception {
                         TcpServerHandler.nullHandler().channelClose(context);
                     }
 
                     @Override
-                    public void channelRead(@Nonnull Context context) throws Exception {
+                    public void channelRead(@Nonnull TcpContext context) throws Exception {
                         TcpServerHandler.nullHandler().channelRead(context);
                         latch.countDown();
                         throw new XException();
                     }
 
                     @Override
-                    public void exceptionCaught(@Nullable Context context, @Nonnull Throwable cause) {
+                    public void exceptionCaught(@Nullable TcpContext context, @Nonnull Throwable cause) {
                         TcpServerHandler.nullHandler().exceptionCaught(context, cause);
                         if (cause instanceof XException) {
                             latch.countDown();
@@ -352,17 +357,17 @@ public class TcpTest implements DataTest, PrintTest {
             .handler(new TcpServerHandler() {
 
                 @Override
-                public void channelOpen(@Nonnull TcpServerHandler.Context context) throws Exception {
+                public void channelOpen(@Nonnull TcpContext context) throws Exception {
                     printFor("telnet open", context.clientAddress());
                 }
 
                 @Override
-                public void channelClose(@Nonnull TcpServerHandler.Context context) throws Exception {
+                public void channelClose(@Nonnull TcpContext context) throws Exception {
                     printFor("telnet close", context.clientAddress());
                 }
 
                 @Override
-                public void channelRead(@Nonnull TcpServerHandler.Context context) throws Exception {
+                public void channelRead(@Nonnull TcpContext context) throws Exception {
                     String msg = context.availableString();
                     if (msg == null) {
                         context.close();
@@ -372,7 +377,7 @@ public class TcpTest implements DataTest, PrintTest {
                 }
 
                 @Override
-                public void exceptionCaught(@Nullable TcpServerHandler.Context context, @Nonnull Throwable cause) {
+                public void exceptionCaught(@Nullable TcpContext context, @Nonnull Throwable cause) {
 
                 }
             })

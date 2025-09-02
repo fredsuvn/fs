@@ -17,6 +17,7 @@ import java.nio.channels.ClosedChannelException;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
@@ -56,7 +57,22 @@ public class CommunicateTest implements DataTest {
                 closed = true;
             }
         };
-        ChannelContext<ByteChannel> ic = new AbstractChannelContext<ByteChannel>(bc, 1024) {};
+        ChannelContext<ByteChannel> ic = new AbstractChannelContext<ByteChannel>(bc, 1024) {
+
+            private Object attachment;
+
+            @Override
+            public void attach(Object attachment) {
+                this.attachment = attachment;
+            }
+
+            @Override
+            public Object attachment() {
+                return attachment;
+            }
+        };
+        Object attachment = new Object();
+        ic.attach(attachment);
         assertTrue(ic.channel().isOpen());
         assertEquals(ic.availableString(), "hello world");
         assertTrue(ic.channel().isOpen());
@@ -75,5 +91,6 @@ public class CommunicateTest implements DataTest {
         assertFalse(ic.channel().isOpen());
         expectThrows(IORuntimeException.class, () -> ic.writeString("hello world"));
         assertNull(ic.availableString());
+        assertSame(ic.attachment(), attachment);
     }
 }

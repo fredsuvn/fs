@@ -9,7 +9,7 @@ import xyz.sunqian.annotations.Nonnull;
  */
 public class TcpKit {
 
-    static void channelOpen(@Nonnull TcpServerHandler handler, @Nonnull TcpServerHandler.Context context) {
+    static void channelOpen(@Nonnull TcpServerHandler handler, @Nonnull TcpContext context) {
         try {
             handler.channelOpen(context);
         } catch (Throwable e) {
@@ -17,7 +17,7 @@ public class TcpKit {
         }
     }
 
-    static void channelClose(@Nonnull TcpServerHandler handler, @Nonnull TcpServerHandler.Context context) {
+    static void channelClose(@Nonnull TcpServerHandler handler, @Nonnull TcpContext context) {
         try {
             handler.channelClose(context);
         } catch (Throwable e) {
@@ -25,7 +25,7 @@ public class TcpKit {
         }
     }
 
-    static void channelRead(@Nonnull TcpServerHandler handler, @Nonnull TcpServerHandler.Context context) {
+    static void channelRead(@Nonnull TcpServerHandler handler, @Nonnull TcpContext context) {
         try {
             handler.channelRead(context);
         } catch (Throwable e) {

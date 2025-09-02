@@ -10,6 +10,7 @@ import xyz.sunqian.common.net.NetException;
 import xyz.sunqian.common.net.http.HttpKit;
 import xyz.sunqian.common.net.http.HttpReq;
 import xyz.sunqian.common.net.http.HttpResp;
+import xyz.sunqian.common.net.tcp.TcpContext;
 import xyz.sunqian.common.net.tcp.TcpServer;
 import xyz.sunqian.common.net.tcp.TcpServerHandler;
 import xyz.sunqian.test.ErrorCharset;
@@ -116,15 +117,15 @@ public class HttpTest implements PrintTest {
             .handler(new TcpServerHandler() {
 
                 @Override
-                public void channelOpen(@Nonnull Context context) throws Exception {
+                public void channelOpen(@Nonnull TcpContext context) throws Exception {
                 }
 
                 @Override
-                public void channelClose(@Nonnull Context context) throws Exception {
+                public void channelClose(@Nonnull TcpContext context) throws Exception {
                 }
 
                 @Override
-                public void channelRead(@Nonnull Context context) throws Exception {
+                public void channelRead(@Nonnull TcpContext context) throws Exception {
                     context.writeString("HTTP/1.1 200 OK\r\n" +
                         // "Content-Type: text/html;charset=UTF-8\r\n" +
                         //"Content-Length: " + respBody.length() + "\r\n" +
@@ -135,7 +136,7 @@ public class HttpTest implements PrintTest {
                 }
 
                 @Override
-                public void exceptionCaught(@Nullable Context context, @Nonnull Throwable cause) {
+                public void exceptionCaught(@Nullable TcpContext context, @Nonnull Throwable cause) {
                 }
             })
             .bind();
@@ -190,17 +191,17 @@ public class HttpTest implements PrintTest {
         }
 
         @Override
-        public void channelOpen(@Nonnull Context context) throws Exception {
+        public void channelOpen(@Nonnull TcpContext context) throws Exception {
             printFor("http open", context.clientAddress());
         }
 
         @Override
-        public void channelClose(@Nonnull Context context) throws Exception {
+        public void channelClose(@Nonnull TcpContext context) throws Exception {
             printFor("http close", context.clientAddress());
         }
 
         @Override
-        public void channelRead(@Nonnull Context context) throws Exception {
+        public void channelRead(@Nonnull TcpContext context) throws Exception {
             printFor("http read", context.clientAddress());
             String msg = context.availableString();
             printFor("http read msg", msg);
@@ -237,7 +238,7 @@ public class HttpTest implements PrintTest {
         }
 
         @Override
-        public void exceptionCaught(@Nullable Context context, @Nonnull Throwable cause) {
+        public void exceptionCaught(@Nullable TcpContext context, @Nonnull Throwable cause) {
             System.out.println(cause);
         }
     }

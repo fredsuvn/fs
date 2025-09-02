@@ -9,19 +9,19 @@ final class NullServerHandler implements TcpServerHandler {
     static final @Nonnull NullServerHandler SINGLETON = new NullServerHandler();
 
     @Override
-    public void channelOpen(@Nonnull TcpServerHandler.Context context) {
+    public void channelOpen(@Nonnull TcpContext context) {
     }
 
     @Override
-    public void channelClose(@Nonnull TcpServerHandler.Context context) {
+    public void channelClose(@Nonnull TcpContext context) {
     }
 
     @Override
-    public void channelRead(@Nonnull TcpServerHandler.Context channel) {
+    public void channelRead(@Nonnull TcpContext channel) {
         IOKit.availableTo(channel.channel(), IOKit.nullOutputStream());
     }
 
     @Override
-    public void exceptionCaught(@Nullable TcpServerHandler.Context context, @Nonnull Throwable cause) {
+    public void exceptionCaught(@Nullable TcpContext context, @Nonnull Throwable cause) {
     }
 }

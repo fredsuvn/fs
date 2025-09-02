@@ -3,13 +3,19 @@ package xyz.sunqian.common.io.communicate;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 
+import java.nio.channels.ByteChannel;
+
 /**
- * Handler for handling events of IO Communication.
+ * Handler for handling underlying channel events of IO Communication.
+ * <p>
+ * All callbacks triggered by events from the same underlying channel will use the same {@link ChannelContext} instance,
+ * ensuring consistent access to channel-specific state and attachments throughout the channel's lifecycle.
  *
- * @param <C> the type of the {@link ChannelContext}
+ * @param <C>  the type of the {@link ChannelContext}
+ * @param <CH> the type of the underlying channel
  * @author sunqian
  */
-public interface ChannelHandler<C extends ChannelContext> {
+public interface ChannelHandler<C extends ChannelContext<CH>, CH extends ByteChannel> {
 
     /**
      * This method is invoked after a new channel is opened, and only once for each new channel.

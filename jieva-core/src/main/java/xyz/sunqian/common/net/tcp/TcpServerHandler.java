@@ -2,19 +2,21 @@ package xyz.sunqian.common.net.tcp;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.io.communicate.ChannelContext;
 import xyz.sunqian.common.io.communicate.ChannelHandler;
-import xyz.sunqian.common.net.NetException;
 
-import java.net.InetSocketAddress;
+import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
 /**
- * Handler for tcp server events.
+ * Handler for handling tcp server events for TCP network server, based on {@link ServerSocketChannel} and
+ * {@link SocketChannel}.
+ * <p>
+ * All callbacks triggered by events from the same underlying channel will use the same {@link TcpContext} instance,
+ * ensuring consistent access to channel-specific state and attachments throughout the channel's lifecycle.
  *
  * @author sunqian
  */
-public interface TcpServerHandler extends ChannelHandler<TcpServerHandler.Context> {
+public interface TcpServerHandler extends ChannelHandler<TcpContext, SocketChannel> {
 
     /**
      * Returns an instance of {@link TcpServerHandler} that does nothing but discards received data.
@@ -32,7 +34,7 @@ public interface TcpServerHandler extends ChannelHandler<TcpServerHandler.Contex
      * @throws Exception for any error
      */
     @Override
-    void channelOpen(@Nonnull TcpServerHandler.Context context) throws Exception;
+    void channelOpen(@Nonnull TcpContext context) throws Exception;
 
     /**
      * This method is invoked after a channel is closed, and only once for each channel.
@@ -41,7 +43,7 @@ public interface TcpServerHandler extends ChannelHandler<TcpServerHandler.Contex
      * @throws Exception for any error
      */
     @Override
-    void channelClose(@Nonnull TcpServerHandler.Context context) throws Exception;
+    void channelClose(@Nonnull TcpContext context) throws Exception;
 
     /**
      * This method is invoked after the server receives data.
@@ -55,7 +57,7 @@ public interface TcpServerHandler extends ChannelHandler<TcpServerHandler.Contex
      * @throws Exception for any error
      */
     @Override
-    void channelRead(@Nonnull TcpServerHandler.Context context) throws Exception;
+    void channelRead(@Nonnull TcpContext context) throws Exception;
 
     /**
      * This method is invoked after catching an unhandled exception, the exception may come from this handler or from
@@ -68,40 +70,6 @@ public interface TcpServerHandler extends ChannelHandler<TcpServerHandler.Contex
      * @param cause   the unhandled exception
      */
     @Override
-    void exceptionCaught(@Nullable TcpServerHandler.Context context, @Nonnull Throwable cause);
+    void exceptionCaught(@Nullable TcpContext context, @Nonnull Throwable cause);
 
-    /**
-     * Context for {@link TcpServerHandler}, based on {@link SocketChannel}.
-     */
-    interface Context extends ChannelContext<SocketChannel> {
-
-        /**
-         * Returns the address of the client.
-         * <p>
-         * Note even if the underlying channel is closed, it still returns the address at which the connection was
-         * alive.
-         *
-         * @return the address of the client
-         */
-        @Nonnull
-        InetSocketAddress clientAddress();
-
-        /**
-         * Returns the address of the server.
-         * <p>
-         * Note even if the underlying channel is closed, it still returns the address at which the connection was
-         * alive.
-         *
-         * @return the address of the server
-         */
-        @Nonnull
-        InetSocketAddress serverAddress();
-
-        /**
-         * Disconnects and closes the client.
-         *
-         * @throws NetException if any error occurs
-         */
-        void close() throws NetException;
-    }
 }

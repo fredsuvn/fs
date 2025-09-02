@@ -1,7 +1,8 @@
 package xyz.sunqian.common.net.tcp;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.io.communicate.ChannelContext;
+import xyz.sunqian.common.io.communicate.ChannelReader;
+import xyz.sunqian.common.io.communicate.ChannelWriter;
 import xyz.sunqian.common.net.NetClient;
 
 import java.net.InetSocketAddress;
@@ -12,7 +13,10 @@ import java.nio.channels.SocketChannel;
  *
  * @author sunqian
  */
-public interface TcpClient extends NetClient<InetSocketAddress, SocketChannel>, ChannelContext<SocketChannel> {
+public interface TcpClient extends
+    NetClient<InetSocketAddress, SocketChannel>,
+    ChannelReader<SocketChannel>,
+    ChannelWriter<SocketChannel> {
 
     /**
      * Returns a new builder for building {@link TcpClient}.

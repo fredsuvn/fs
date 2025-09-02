@@ -7,7 +7,7 @@ import java.net.SocketAddress;
 import java.nio.channels.DatagramChannel;
 
 /**
- * Handler for udp server events.
+ * Handler for handling udp server events for UDP network server, based on {@link DatagramChannel}.
  *
  * @author sunqian
  */

@@ -344,7 +344,7 @@ public class TcpServerBuilder {
         private final class WorkerImpl implements Worker, Runnable {
 
             private final @Nonnull Selector selector;
-            private final @Nonnull Set<TcpContext> clientSet = new HashSet<>();
+            private final @Nonnull Set<ContextImpl> clientSet = new HashSet<>();
 
             // the thread this worker starts on
             private Thread thread;
@@ -383,7 +383,7 @@ public class TcpServerBuilder {
                 while (true) {
                     if (!node.done) {
                         SocketChannel channel = node.channel;
-                        TcpContext context = new TcpContext(channel, bufSize);
+                        ContextImpl context = new ContextImpl(channel, bufSize);
                         clientSet.add(context);
                         registerRead(context);
                         TcpKit.channelOpen(handler, context);
@@ -400,7 +400,7 @@ public class TcpServerBuilder {
             }
 
             @SuppressWarnings("resource")
-            private void registerRead(TcpContext context) throws Exception {
+            private void registerRead(ContextImpl context) throws Exception {
                 SocketChannel channel = context.channel();
                 channel.configureBlocking(false);
                 channel.register(selector, SelectionKey.OP_READ, context);
@@ -413,14 +413,14 @@ public class TcpServerBuilder {
                 while (keys.hasNext()) {
                     SelectionKey key = keys.next();
                     keys.remove();
-                    TcpKit.channelRead(handler, (TcpContext) key.attachment());
+                    TcpKit.channelRead(handler, (ContextImpl) key.attachment());
                 }
             }
 
             @SuppressWarnings("resource")
             private void handleClose() {
-                Set<TcpContext> rm = new HashSet<>();
-                for (TcpContext context : clientSet) {
+                Set<ContextImpl> rm = new HashSet<>();
+                for (ContextImpl context : clientSet) {
                     if (!context.channel().isOpen()) {
                         rm.add(context);
                         context.close();
@@ -458,20 +458,22 @@ public class TcpServerBuilder {
             }
 
             private void releaseClients() {
-                for (TcpContext context : clientSet) {
+                for (ContextImpl context : clientSet) {
                     context.close();
                 }
             }
 
-            private final class TcpContext
-                extends AbstractChannelContext<SocketChannel> implements TcpServerHandler.Context {
+            private final class ContextImpl
+                extends AbstractChannelContext<SocketChannel> implements TcpContext {
 
                 private final @Nonnull InetSocketAddress clientAddress;
                 private final @Nonnull InetSocketAddress serverAddress;
 
+                private Object attachment;
+
                 private volatile boolean closed = false;
 
-                private TcpContext(@Nonnull SocketChannel channel, int bufSize) throws IllegalArgumentException {
+                private ContextImpl(@Nonnull SocketChannel channel, int bufSize) throws IllegalArgumentException {
                     super(channel, bufSize);
                     this.clientAddress = (InetSocketAddress) Jie.uncheck(channel::getRemoteAddress, NetException::new);
                     this.serverAddress = (InetSocketAddress) Jie.uncheck(channel::getLocalAddress, NetException::new);
@@ -498,6 +500,16 @@ public class TcpServerBuilder {
                         TcpKit.channelClose(handler, this);
                     }, NetException::new);
                     closed = true;
+                }
+
+                @Override
+                public void attach(Object attachment) {
+                    this.attachment = attachment;
+                }
+
+                @Override
+                public Object attachment() {
+                    return this.attachment;
                 }
             }
         }
