@@ -43,6 +43,7 @@ public class TcpServerBuilder {
     private @Nullable ThreadFactory workerThreadFactory;
     private int bufSize = IOKit.bufferSize();
     private final @Nonnull Map<SocketOption<?>, Object> socketOptions = new LinkedHashMap<>();
+    private long selectTimeout = 0;
 
     /**
      * Sets the handler to handle server events. The default handler is {@link TcpServerHandler#nullHandler()}.
@@ -128,6 +129,22 @@ public class TcpServerBuilder {
     }
 
     /**
+     * Sets the timeout for underlying {@link Selector#select(long)}, in milliseconds. This timeout must {@code >= 0},
+     * and will affect the triggering interval of {@link TcpServerHandler#channelLoop(TcpContext)}. If it is {@code 0},
+     * there may be a large interval or even never triggering.
+     *
+     * @param selectTimeout the timeout for underlying {@link Selector#select(long)}, in milliseconds, must
+     *                      {@code >= 0}
+     * @return this builder
+     * @throws IllegalArgumentException if the timeout is negative
+     */
+    public @Nonnull TcpServerBuilder selectTimeout(long selectTimeout) throws IllegalArgumentException {
+        CheckKit.checkArgument(selectTimeout >= 0, "selectTimeout must >= 0");
+        this.selectTimeout = selectTimeout;
+        return this;
+    }
+
+    /**
      * Binds the server's socket to the automatically assigned address and configures the socket to listen for
      * connections. And a new {@link TcpServer} instance is returned.
      *
@@ -172,6 +189,7 @@ public class TcpServerBuilder {
                 workerThreadFactory,
                 workerThreadNum,
                 socketOptions,
+                selectTimeout,
                 backlog,
                 bufSize
             ),
@@ -183,6 +201,7 @@ public class TcpServerBuilder {
 
         private final @Nonnull ServerSocketChannel server;
         private final @Nonnull Selector mainSelector;
+        private final long selectTimeout;
         private final @Nonnull Thread mainThread;
         private final @Nonnull WorkerImpl @Nonnull [] workers;
         private final @Nonnull TcpServerHandler handler;
@@ -199,6 +218,7 @@ public class TcpServerBuilder {
             @Nullable ThreadFactory workerthreadFactory,
             int workThreadNum,
             Map<SocketOption<?>, Object> socketOptions,
+            long selectTimeout,
             int backlog,
             int bufSize
         ) throws Exception {
@@ -207,6 +227,7 @@ public class TcpServerBuilder {
             this.handler = handler;
             this.mainThread = newThread(mainthreadFactory, this);
             this.workers = new WorkerImpl[workThreadNum];
+            this.selectTimeout = selectTimeout;
             server.configureBlocking(false);
             socketOptions.forEach((name, value) ->
                 Jie.uncheck(() -> server.setOption(Jie.as(name), value), NetException::new));
@@ -372,8 +393,10 @@ public class TcpServerBuilder {
                 if (head != null) {
                     handleOpen(head);
                 }
-                // handle
+                // read event
                 handleRead();
+                // loop event
+                handleLoop();
                 // remove closed client
                 handleClose();
             }
@@ -407,13 +430,19 @@ public class TcpServerBuilder {
             }
 
             private void handleRead() throws Exception {
-                selector.select();
+                selector.select(selectTimeout);
                 Set<SelectionKey> selectedKeys = selector.selectedKeys();
                 Iterator<SelectionKey> keys = selectedKeys.iterator();
                 while (keys.hasNext()) {
                     SelectionKey key = keys.next();
                     keys.remove();
                     TcpKit.channelRead(handler, (ContextImpl) key.attachment());
+                }
+            }
+
+            private void handleLoop() throws Exception {
+                for (ContextImpl context : clientSet) {
+                    handler.channelLoop(context);
                 }
             }
 

@@ -4,6 +4,7 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.io.communicate.ChannelHandler;
 
+import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
@@ -60,6 +61,18 @@ public interface TcpServerHandler extends ChannelHandler<TcpContext, SocketChann
     void channelRead(@Nonnull TcpContext context) throws Exception;
 
     /**
+     * This method is invoked for all active clients in the event loop after each selector wake-up
+     * ({@link Selector#select(long)}). It can be used to uniformly handle some issues, such as connection heartbeats.
+     * <p>
+     * Note the default implementation does nothing.
+     *
+     * @param context the context for the active channel
+     * @throws Exception for any error
+     */
+    default void channelLoop(@Nonnull TcpContext context) throws Exception {
+    }
+
+    /**
      * This method is invoked after catching an unhandled exception, the exception may come from this handler or from
      * the container running this handler.
      * <p>
@@ -71,5 +84,4 @@ public interface TcpServerHandler extends ChannelHandler<TcpContext, SocketChann
      */
     @Override
     void exceptionCaught(@Nullable TcpContext context, @Nonnull Throwable cause);
-
 }

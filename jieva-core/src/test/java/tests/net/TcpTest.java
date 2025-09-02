@@ -81,6 +81,10 @@ public class TcpTest implements DataTest, PrintTest {
         for (int i = 0; i < openLatches.length; i++) {
             readLatches[i] = new CountDownLatch(1);
         }
+        CountDownLatch[] loopLatches = new CountDownLatch[workerNum];
+        for (int i = 0; i < openLatches.length; i++) {
+            loopLatches[i] = new CountDownLatch(1);
+        }
 
         InetSocketAddress localhost = new InetSocketAddress("127.0.0.1", 0);
 
@@ -91,6 +95,7 @@ public class TcpTest implements DataTest, PrintTest {
             .workerThreadNum(workerNum)
             .workerThreadFactory(workerFactory)
             .socketOption(StandardSocketOptions.SO_RCVBUF, 1024)
+            .selectTimeout(5000)
             .bufferSize(1024)
             .handler(new TcpServerHandler() {
 
@@ -122,6 +127,12 @@ public class TcpTest implements DataTest, PrintTest {
                         readLatches[thread.num].countDown();
                     }
                     assertSame(context.attachment(), attachment);
+                }
+
+                @Override
+                public void channelLoop(@Nonnull TcpContext context) throws Exception {
+                    XThread thread = (XThread) Thread.currentThread();
+                    loopLatches[thread.num].countDown();
                 }
 
                 @Override
@@ -200,6 +211,11 @@ public class TcpTest implements DataTest, PrintTest {
             assertTrue(client.isClosed());
             assertSame(client.localAddress(), clientLocal);
             assertSame(client.remoteAddress(), clientRemote);
+        }
+
+        // loop latch
+        for (CountDownLatch loopLatch : loopLatches) {
+            loopLatch.await();
         }
 
         // server close
@@ -332,6 +348,9 @@ public class TcpTest implements DataTest, PrintTest {
             );
             expectThrows(IllegalArgumentException.class, () ->
                 TcpServer.newBuilder().bufferSize(0).bind()
+            );
+            expectThrows(IllegalArgumentException.class, () ->
+                TcpServer.newBuilder().selectTimeout(-1).bind()
             );
             // socket option exceptions
             expectThrows(IllegalArgumentException.class, () ->
