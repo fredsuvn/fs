@@ -473,8 +473,8 @@ public class TcpServerBuilder {
 
                 private TcpContext(@Nonnull SocketChannel channel, int bufSize) throws IllegalArgumentException {
                     super(channel, bufSize);
-                    this.clientAddress = (InetSocketAddress) Jie.uncheck(channel::getLocalAddress, NetException::new);
-                    this.serverAddress = (InetSocketAddress) Jie.uncheck(channel::getRemoteAddress, NetException::new);
+                    this.clientAddress = (InetSocketAddress) Jie.uncheck(channel::getRemoteAddress, NetException::new);
+                    this.serverAddress = (InetSocketAddress) Jie.uncheck(channel::getLocalAddress, NetException::new);
                 }
 
                 @Override

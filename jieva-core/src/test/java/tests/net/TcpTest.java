@@ -107,8 +107,8 @@ public class TcpTest implements DataTest, PrintTest {
                     SocketChannel channel = context.channel();
                     XThread thread = (XThread) Thread.currentThread();
                     printFor("client read", thread.num);
-                    assertEquals(clients[thread.num].remoteAddress(), context.clientAddress());
-                    assertEquals(clients[thread.num].localAddress(), context.serverAddress());
+                    assertEquals(clients[thread.num].remoteAddress(), context.serverAddress());
+                    assertEquals(clients[thread.num].localAddress(), context.clientAddress());
                     byte[] bytes = context.availableBytes();
                     if (bytes != null) {
                         builders[thread.num].append(bytes);
@@ -126,8 +126,8 @@ public class TcpTest implements DataTest, PrintTest {
                     channel.close();
                     XThread thread = (XThread) Thread.currentThread();
                     printFor("client close", thread.num);
-                    assertEquals(clients[thread.num].remoteAddress(), context.clientAddress());
-                    assertEquals(clients[thread.num].localAddress(), context.serverAddress());
+                    assertEquals(clients[thread.num].remoteAddress(), context.serverAddress());
+                    assertEquals(clients[thread.num].localAddress(), context.clientAddress());
                     closeCount.getAndIncrement();
                 }
 
