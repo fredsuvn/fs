@@ -448,14 +448,14 @@ public class TcpServerBuilder {
 
             @SuppressWarnings("resource")
             private void handleClose() {
-                Set<ContextImpl> rm = new HashSet<>();
-                for (ContextImpl context : clientSet) {
+                Iterator<ContextImpl> iterator = clientSet.iterator();
+                while (iterator.hasNext()) {
+                    ContextImpl context = iterator.next();
                     if (!context.channel().isOpen()) {
-                        rm.add(context);
                         context.close();
+                        iterator.remove();
                     }
                 }
-                clientSet.removeAll(rm);
             }
 
             public void registerClient(SocketChannel client) {
