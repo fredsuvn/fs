@@ -32,4 +32,12 @@ public class TcpKit {
             handler.exceptionCaught(context, e);
         }
     }
+
+    static void channelLoop(@Nonnull TcpServerHandler handler, @Nonnull TcpContext context) {
+        try {
+            handler.channelLoop(context);
+        } catch (Throwable e) {
+            handler.exceptionCaught(context, e);
+        }
+    }
 }

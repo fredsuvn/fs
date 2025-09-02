@@ -132,7 +132,11 @@ public class TcpTest implements DataTest, PrintTest {
                 @Override
                 public void channelLoop(@Nonnull TcpContext context) throws Exception {
                     XThread thread = (XThread) Thread.currentThread();
-                    loopLatches[thread.num].countDown();
+                    CountDownLatch latch = loopLatches[thread.num];
+                    if (latch.getCount() > 0) {
+                        latch.countDown();
+                        throw new Exception("loop");
+                    }
                 }
 
                 @Override

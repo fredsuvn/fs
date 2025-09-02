@@ -440,9 +440,9 @@ public class TcpServerBuilder {
                 }
             }
 
-            private void handleLoop() throws Exception {
+            private void handleLoop() {
                 for (ContextImpl context : clientSet) {
-                    handler.channelLoop(context);
+                    TcpKit.channelLoop(handler, context);
                 }
             }
 
