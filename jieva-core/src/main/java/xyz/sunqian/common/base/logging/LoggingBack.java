@@ -1,4 +1,4 @@
-package xyz.sunqian.common.base;
+package xyz.sunqian.common.base.logging;
 
 import xyz.sunqian.common.base.lang.TraceKit;
 import xyz.sunqian.common.base.time.TimeKit;
@@ -6,16 +6,16 @@ import xyz.sunqian.common.base.time.TimeKit;
 import java.util.Date;
 import java.util.Objects;
 
-final class JieLogImpls {
+final class LoggingBack {
 
-    static final JieLog DEFAULT = new JieLogImpl(JieLog.LEVEL_INFO, System.out);
+    static final SimpleLog DEFAULT = new SimpleLogImpl(SimpleLog.LEVEL_INFO, System.out);
 
-    static final class JieLogImpl implements JieLog {
+    static final class SimpleLogImpl implements SimpleLog {
 
         private final int level;
         private final Appendable appendable;
 
-        JieLogImpl(int level, Appendable appendable) {
+        SimpleLogImpl(int level, Appendable appendable) {
             this.level = level;
             this.appendable = appendable;
         }
@@ -55,7 +55,7 @@ final class JieLogImpls {
                 return;
             }
             StackTraceElement trace = TraceKit.findCallerTrace(0, t -> {
-                if (!Objects.equals(t.getClassName(), JieLogImpl.class.getName())) {
+                if (!Objects.equals(t.getClassName(), SimpleLogImpl.class.getName())) {
                     return false;
                 }
                 return Objects.equals(t.getMethodName(), "log")

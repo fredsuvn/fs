@@ -1,11 +1,11 @@
-package xyz.sunqian.common.base;
+package xyz.sunqian.common.base.logging;
 
 /**
  * Simple logging interface for Jie.
  *
  * @author fredsuvn
  */
-public interface JieLog {
+public interface SimpleLog {
 
     /**
      * Log level: TRACE = 1000.
@@ -37,19 +37,19 @@ public interface JieLog {
      *
      * @return system default log with {@link #LEVEL_INFO} and {@link System#out}
      */
-    static JieLog system() {
-        return JieLogImpls.DEFAULT;
+    static SimpleLog system() {
+        return LoggingBack.DEFAULT;
     }
 
     /**
-     * Returns a new {@link JieLog} with specified level and appendable object to be written.
+     * Returns a new {@link SimpleLog} with specified level and appendable object to be written.
      *
      * @param level      specified level
      * @param appendable appendable object to be written
-     * @return a new {@link JieLog} with specified level and appendable object to be written
+     * @return a new {@link SimpleLog} with specified level and appendable object to be written
      */
-    static JieLog of(int level, Appendable appendable) {
-        return new JieLogImpls.JieLogImpl(level, appendable);
+    static SimpleLog of(int level, Appendable appendable) {
+        return new LoggingBack.SimpleLogImpl(level, appendable);
     }
 
     /**
