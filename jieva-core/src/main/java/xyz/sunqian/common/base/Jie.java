@@ -7,7 +7,6 @@ import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.base.exception.AwaitingException;
 import xyz.sunqian.common.base.exception.UnknownArrayTypeException;
 import xyz.sunqian.common.base.process.ProcessKit;
-import xyz.sunqian.common.base.string.StringKit;
 import xyz.sunqian.common.base.thread.ThreadKit;
 import xyz.sunqian.common.collect.ArrayKit;
 import xyz.sunqian.common.collect.ListKit;
@@ -22,14 +21,10 @@ import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingOptions;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
-import java.net.URL;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -438,40 +433,6 @@ public class Jie {
     public static int hashId(@Nullable Object obj) {
         return System.identityHashCode(obj);
     }
-
-    // /**
-    //  * Finds resource of given resource path (starts with "/").
-    //  *
-    //  * @param resPath given resource
-    //  * @return url of resource of given resource path
-    //  */
-    // public static URL findRes(String resPath) {
-    //     ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-    //     return classLoader.getResource(StringKit.removeStart(resPath, "/"));
-    // }
-
-    // /**
-    //  * Finds all resources of given resource path (starts with "/").
-    //  *
-    //  * @param resPath given resource
-    //  * @return url set of resource of given resource path
-    //  */
-    // public static Set<URL> findAllRes(String resPath) {
-    //     ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-    //     try {
-    //         Enumeration<URL> urls = classLoader.getResources(StringKit.removeStart(resPath, "/"));
-    //         if (!urls.hasMoreElements()) {
-    //             return Collections.emptySet();
-    //         }
-    //         Set<URL> result = new LinkedHashSet<>();
-    //         while (urls.hasMoreElements()) {
-    //             result.add(urls.nextElement());
-    //         }
-    //         return result;
-    //     } catch (IOException e) {
-    //         throw new IllegalStateException(e);
-    //     }
-    // }
 
     /**
      * Maps source object from source type to target type, return null if mapping is unsupported or the result itself is
