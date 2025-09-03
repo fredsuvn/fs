@@ -48,7 +48,7 @@ final class IOBack {
     static @Nonnull InputStream inputStream(
         byte @Nonnull [] array, int off, int len
     ) throws IndexOutOfBoundsException {
-        IOChecker.checkOffLen(array.length, off, len);
+        IOChecker.checkOffLen(off, len, array.length);
         return new BytesInputStream(array, off, len);
     }
 
@@ -85,7 +85,7 @@ final class IOBack {
     }
 
     static @Nonnull Reader reader(char @Nonnull [] array, int off, int len) throws IndexOutOfBoundsException {
-        IOChecker.checkOffLen(array.length, off, len);
+        IOChecker.checkOffLen(off, len, array.length);
         return new CharsReader(array, off, len);
     }
 
@@ -94,7 +94,7 @@ final class IOBack {
     }
 
     static @Nonnull Reader reader(@Nonnull CharSequence chars, int start, int end) throws IndexOutOfBoundsException {
-        IOChecker.checkStartEnd(chars.length(), start, end);
+        IOChecker.checkStartEnd(start, end, chars.length());
         return new BufferReader(CharBuffer.wrap(chars, start, end));
     }
 
@@ -122,7 +122,7 @@ final class IOBack {
     static @Nonnull OutputStream outputStream(
         byte @Nonnull [] array, int off, int len
     ) throws IndexOutOfBoundsException {
-        IOChecker.checkOffLen(array.length, off, len);
+        IOChecker.checkOffLen(off, len, array.length);
         return new BytesOutputStream(array, off, len);
     }
 
@@ -159,7 +159,7 @@ final class IOBack {
     }
 
     static @Nonnull Writer writer(char @Nonnull [] array, int off, int len) throws IndexOutOfBoundsException {
-        IOChecker.checkOffLen(array.length, off, len);
+        IOChecker.checkOffLen(off, len, array.length);
         return new CharsWriter(array, off, len);
     }
 
@@ -1634,7 +1634,7 @@ final class IOBack {
 
         @Override
         public Writer append(CharSequence csq, int start, int end) {
-            IOChecker.checkOffLen(csq.length(), start, end - start);
+            IOChecker.checkOffLen(start, end - start, csq.length());
             return this;
         }
 

@@ -141,7 +141,7 @@ public class BufferKit {
     public static int readTo(
         @Nonnull ByteBuffer src, byte @Nonnull [] dst, int off, int len
     ) throws IndexOutOfBoundsException {
-        IOChecker.checkOffLen(dst.length, off, len);
+        IOChecker.checkOffLen(off, len, dst.length);
         return readTo0(src, dst, off, len);
     }
 
@@ -485,7 +485,7 @@ public class BufferKit {
     public static int readTo(
         @Nonnull CharBuffer src, char @Nonnull [] dst, int off, int len
     ) throws IndexOutOfBoundsException {
-        IOChecker.checkOffLen(dst.length, off, len);
+        IOChecker.checkOffLen(off, len, dst.length);
         return readTo0(src, dst, off, len);
     }
 
@@ -800,7 +800,7 @@ public class BufferKit {
     public static @Nonnull ByteBuffer slice(
         @Nonnull ByteBuffer src, int off, int len
     ) throws IndexOutOfBoundsException {
-        IOChecker.checkOffLen(src.remaining(), off, len);
+        IOChecker.checkOffLen(off, len, src.remaining());
         return slice0(src, off, len);
     }
 
@@ -854,7 +854,7 @@ public class BufferKit {
     public static @Nonnull CharBuffer slice(
         @Nonnull CharBuffer src, int off, int len
     ) throws IndexOutOfBoundsException {
-        IOChecker.checkOffLen(src.remaining(), off, len);
+        IOChecker.checkOffLen(off, len, src.remaining());
         return slice0(src, off, len);
     }
 
@@ -982,7 +982,7 @@ public class BufferKit {
     public static @Nonnull ByteBuffer copyDirect(
         byte @Nonnull [] src, int off, int len
     ) throws IndexOutOfBoundsException {
-        IOChecker.checkOffLen(src.length, off, len);
+        IOChecker.checkOffLen(off, len, src.length);
         ByteBuffer buf = ByteBuffer.allocateDirect(len);
         buf.put(src, off, len);
         buf.flip();
@@ -1018,7 +1018,7 @@ public class BufferKit {
     public static @Nonnull CharBuffer copyDirect(
         char @Nonnull [] src, int off, int len
     ) throws IndexOutOfBoundsException {
-        IOChecker.checkOffLen(src.length, off, len);
+        IOChecker.checkOffLen(off, len, src.length);
         CharBuffer buf = directCharBuffer(len);
         buf.put(src, off, len);
         buf.flip();

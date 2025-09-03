@@ -230,7 +230,7 @@ public class CharProcessorImpl implements CharProcessor {
         @Override
         public int read(char @Nonnull [] dst, int off, int len) throws IOException {
             checkClosed();
-            IOChecker.checkOffLen(dst.length, off, len);
+            IOChecker.checkOffLen(off, len, dst.length);
             if (len == 0) {
                 return 0;
             }

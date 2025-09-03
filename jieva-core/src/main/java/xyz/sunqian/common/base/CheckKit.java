@@ -1,6 +1,5 @@
 package xyz.sunqian.common.base;
 
-import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.exception.UnreachablePointException;
 
 import java.util.NoSuchElementException;
@@ -13,128 +12,84 @@ import java.util.NoSuchElementException;
 public class CheckKit {
 
     /**
-     * Checks whether the sub-range defined by the given offset and length is within the specified range. Its logic is
-     * the same as the following code:
+     * Checks whether the given {@code off} and {@code len} are out of the given {@code capacity}. Its logic is the same
+     * as the following code:
      * <pre>{@code
-     *     if (offset < 0 || length < 0 || length > range - offset) {
-     *         throw new IndexOutOfBoundsException();
-     *     }
+     * if (off < 0 || len < 0 || off + len > capacity) {
+     *     throw new IndexOutOfBoundsException("off=" + off + ", len=" + len + ", capacity=" + capacity);
+     * }
      * }</pre>
      *
-     * @param range  the specified range
-     * @param offset the given offset
-     * @param length the given length
-     * @throws IndexOutOfBoundsException if the sub-range is out of the specified range
+     * @param off      the given offset
+     * @param len      the given length
+     * @param capacity the given capacity
+     * @throws IndexOutOfBoundsException if the given {@code off} and {@code len} are out of the given {@code capacity}
      */
-    public static void checkOffsetLength(int range, int offset, int length) throws IndexOutOfBoundsException {
-        if (offset < 0 || length < 0 || length > range - offset) {
-            throw new IndexOutOfBoundsException();
+    public static void checkOffLen(int off, int len, int capacity) throws IndexOutOfBoundsException {
+        if (off < 0 || len < 0 || off + len > capacity) {
+            throw new IndexOutOfBoundsException("off=" + off + ", len=" + len + ", capacity=" + capacity);
         }
     }
 
     /**
-     * Checks whether the sub-range defined by the given offset and length is within the specified range. Its logic is
-     * the same as the following code:
+     * Checks whether the given {@code off} and {@code len} are out of the given {@code capacity}. Its logic is the same
+     * as the following code:
      * <pre>{@code
-     *     if (offset < 0 || length < 0 || length > range - offset) {
-     *         throw new IndexOutOfBoundsException();
-     *     }
+     * if (off < 0 || len < 0 || off + len > capacity) {
+     *     throw new IndexOutOfBoundsException("off=" + off + ", len=" + len + ", capacity=" + capacity);
+     * }
      * }</pre>
      *
-     * @param range  the specified range
-     * @param offset the given offset
-     * @param length the given length
-     * @throws IndexOutOfBoundsException if the sub-range is out of the specified range
+     * @param off      the given offset
+     * @param len      the given length
+     * @param capacity the given capacity
+     * @throws IndexOutOfBoundsException if the given {@code off} and {@code len} are out of the given {@code capacity}
      */
-    public static void checkOffsetLength(long range, long offset, long length) throws IndexOutOfBoundsException {
-        if (offset < 0 || length < 0 || length > range - offset) {
-            throw new IndexOutOfBoundsException();
+    public static void checkOffLen(long off, long len, long capacity) throws IndexOutOfBoundsException {
+        if (off < 0 || len < 0 || len > capacity - off) {
+            throw new IndexOutOfBoundsException("off=" + off + ", len=" + len + ", capacity=" + capacity);
         }
     }
 
     /**
-     * Checks whether the sub-range defined by the given start position and end position is within the specified range.
-     * Its logic is the same as the following code:
+     * Checks whether the given {@code start} and {@code end} are out of the given {@code capacity}. Its logic is the
+     * same as the following code:
      * <pre>{@code
-     *     if (start < 0 || end < start || end > range) {
-     *         throw new IndexOutOfBoundsException();
-     *     }
+     * if (start < 0 || end < start || end > capacity) {
+     *     throw new IndexOutOfBoundsException("start=" + start + ", end=" + end + ", capacity=" + capacity);
+     * }
      * }</pre>
      *
-     * @param range the specified range
-     * @param start the given start position
-     * @param end   the given end position
-     * @throws IndexOutOfBoundsException if the sub-range is out of the specified range
+     * @param start    the given start, typically inclusive
+     * @param end      the given end, typically exclusive
+     * @param capacity the given capacity
+     * @throws IndexOutOfBoundsException if the given {@code start} and {@code end} are out of the given
+     *                                   {@code capacity}
      */
-    public static void checkStartEnd(int range, int start, int end) throws IndexOutOfBoundsException {
-        if (start < 0 || end < start || end > range) {
-            throw new IndexOutOfBoundsException();
+    public static void checkStartEnd(int start, int end, int capacity) throws IndexOutOfBoundsException {
+        if (start < 0 || end < start || end > capacity) {
+            throw new IndexOutOfBoundsException("start=" + start + ", end=" + end + ", capacity=" + capacity);
         }
     }
 
     /**
-     * Checks whether the sub-range defined by the given start position and end position is within the specified range.
-     * Its logic is the same as the following code:
+     * Checks whether the given {@code start} and {@code end} are out of the given {@code capacity}. Its logic is the
+     * same as the following code:
      * <pre>{@code
-     *     if (start < 0 || end < start || end > range) {
-     *         throw new IndexOutOfBoundsException();
-     *     }
+     * if (start < 0 || end < start || end > capacity) {
+     *     throw new IndexOutOfBoundsException("start=" + start + ", end=" + end + ", capacity=" + capacity);
+     * }
      * }</pre>
      *
-     * @param range the specified range
-     * @param start the given start position
-     * @param end   the given end position
-     * @throws IndexOutOfBoundsException if the sub-range is out of the specified range
+     * @param start    the given start, typically inclusive
+     * @param end      the given end, typically exclusive
+     * @param capacity the given capacity
+     * @throws IndexOutOfBoundsException if the given {@code start} and {@code end} are out of the given
+     *                                   {@code capacity}
      */
-    public static void checkStartEnd(long range, long start, long end) throws IndexOutOfBoundsException {
-        if (start < 0 || end < start || end > range) {
-            throw new IndexOutOfBoundsException();
-        }
-    }
-
-    /**
-     * Checks whether given object is null, if it is, throw a {@link NullPointerException}.
-     *
-     * @param obj given object
-     */
-    public static void checkNull(@Nullable Object obj) throws NullPointerException {
-        if (obj == null) {
-            throw new NullPointerException();
-        }
-    }
-
-    /**
-     * Checks whether given obj is null, if it is, throw a {@link NullPointerException} with given message.
-     *
-     * @param obj     given object
-     * @param message given message
-     */
-    public static void checkNull(@Nullable Object obj, CharSequence message) throws NullPointerException {
-        if (obj == null) {
-            throw new NullPointerException(message.toString());
-        }
-    }
-
-    /**
-     * Checks whether given expression is true, if it is not, throw a {@link NullPointerException}.
-     *
-     * @param expr given expression
-     */
-    public static void checkNull(boolean expr) throws NullPointerException {
-        if (!expr) {
-            throw new NullPointerException();
-        }
-    }
-
-    /**
-     * Checks whether given expression is true, if it is not, throw a {@link NullPointerException} with given message.
-     *
-     * @param expr    given expression
-     * @param message given message
-     */
-    public static void checkNull(boolean expr, CharSequence message) throws NullPointerException {
-        if (!expr) {
-            throw new NullPointerException(message.toString());
+    public static void checkStartEnd(long start, long end, long capacity) throws IndexOutOfBoundsException {
+        if (start < 0 || end < start || end > capacity) {
+            throw new IndexOutOfBoundsException("start=" + start + ", end=" + end + ", capacity=" + capacity);
         }
     }
 

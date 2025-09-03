@@ -5,12 +5,12 @@ import xyz.sunqian.common.base.CheckKit;
 
 final class IOChecker {
 
-    static void checkOffLen(int range, int off, int len) throws IndexOutOfBoundsException {
-        CheckKit.checkOffsetLength(range, off, len);
+    static void checkOffLen(int off, int len, int capacity) throws IndexOutOfBoundsException {
+        CheckKit.checkOffLen(off, len, capacity);
     }
 
-    static void checkStartEnd(int range, int start, int end) throws IndexOutOfBoundsException {
-        CheckKit.checkStartEnd(range, start, end);
+    static void checkStartEnd(int start, int end, int capacity) throws IndexOutOfBoundsException {
+        CheckKit.checkStartEnd(start, end, capacity);
     }
 
     static void checkBufSize(int bufSize) throws IllegalArgumentException {

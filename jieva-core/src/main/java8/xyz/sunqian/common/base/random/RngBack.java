@@ -180,7 +180,7 @@ final class RngBack {
                 random().nextBytes(bytes);
                 return;
             }
-            CheckKit.checkOffsetLength(bytes.length, off, len);
+            CheckKit.checkOffLen(off, len, bytes.length);
             int i = off;
             int end = off + len;
             for (int words = len >> 3; words-- > 0; ) {

@@ -1,6 +1,7 @@
 package xyz.sunqian.common.base.bytes;
 
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.common.base.CheckKit;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.io.IORuntimeException;
@@ -12,8 +13,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
-
-import static xyz.sunqian.common.base.CheckKit.checkOffsetLength;
 
 /**
  * {@code BytesBuilder} is used to build byte arrays and their derived objects by appending byte data. It is similar to
@@ -105,7 +104,7 @@ public class BytesBuilder extends OutputStream {
      */
     @Override
     public void write(byte @Nonnull [] b, int off, int len) throws IndexOutOfBoundsException {
-        checkOffsetLength(b.length, off, len);
+        CheckKit.checkOffLen(off, len, b.length);
         ensureCapacity(count + len);
         System.arraycopy(b, off, buf, count, len);
         count += len;

@@ -35,7 +35,7 @@ public abstract class DoReadReader extends Reader {
 
     @Override
     public int read(char @Nonnull [] cbuf, int off, int len) throws IOException {
-        IOChecker.checkOffLen(cbuf.length, off, len);
+        IOChecker.checkOffLen(off, len, cbuf.length);
         return doRead(cbuf, off, len);
     }
 }

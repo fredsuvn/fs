@@ -19,12 +19,12 @@ final class CharReaderImpl {
     }
 
     static @Nonnull CharReader of(char @Nonnull [] src, int off, int len) throws IndexOutOfBoundsException {
-        IOChecker.checkOffLen(src.length, off, len);
+        IOChecker.checkOffLen(off, len, src.length);
         return new CharArrayReader(src, off, len);
     }
 
     static @Nonnull CharReader of(@Nonnull CharSequence src, int start, int end) throws IndexOutOfBoundsException {
-        IOChecker.checkStartEnd(src.length(), start, end);
+        IOChecker.checkStartEnd(start, end, src.length());
         return new CharSequenceReader(src, start, end);
     }
 
@@ -248,7 +248,7 @@ final class CharReaderImpl {
         private int readTo(
             char @Nonnull [] dst, int off, int len, ReadChecker readChecker
         ) throws IndexOutOfBoundsException, IORuntimeException {
-            IOChecker.checkOffLen(dst.length, off, len);
+            IOChecker.checkOffLen(off, len, dst.length);
             return IOKit.readTo0(src, dst, off, len, readChecker);
         }
 
@@ -445,7 +445,7 @@ final class CharReaderImpl {
 
         @Override
         public int readTo(char @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException {
-            IOChecker.checkOffLen(dst.length, off, len);
+            IOChecker.checkOffLen(off, len, dst.length);
             return readTo0(dst, off, len);
         }
 
@@ -630,7 +630,7 @@ final class CharReaderImpl {
 
         @Override
         public int readTo(char @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException {
-            IOChecker.checkOffLen(dst.length, off, len);
+            IOChecker.checkOffLen(off, len, dst.length);
             return readTo0(dst, off, len);
         }
 
@@ -918,7 +918,7 @@ final class CharReaderImpl {
         public int readTo(
             char @Nonnull [] dst, int off, int len
         ) throws IndexOutOfBoundsException, IORuntimeException {
-            IOChecker.checkOffLen(dst.length, off, len);
+            IOChecker.checkOffLen(off, len, dst.length);
             if (len == 0) {
                 return 0;
             }
@@ -1011,7 +1011,7 @@ final class CharReaderImpl {
         public int availableTo(
             char @Nonnull [] dst, int off, int len
         ) throws IndexOutOfBoundsException, IORuntimeException {
-            IOChecker.checkOffLen(dst.length, off, len);
+            IOChecker.checkOffLen(off, len, dst.length);
             if (len == 0) {
                 return 0;
             }

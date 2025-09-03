@@ -1,6 +1,7 @@
 package xyz.sunqian.common.base.chars;
 
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.common.base.CheckKit;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.io.IORuntimeException;
@@ -10,8 +11,6 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.CharBuffer;
 import java.util.Arrays;
-
-import static xyz.sunqian.common.base.CheckKit.checkOffsetLength;
 
 /**
  * {@code CharsBuilder} is used to build char arrays and their derived objects by appending char data. It is similar to
@@ -100,7 +99,7 @@ public class CharsBuilder extends Writer implements CharSequence {
      * @throws IndexOutOfBoundsException if the offset or number is out of bounds
      */
     public void write(char @Nonnull [] cbuf, int off, int len) throws IndexOutOfBoundsException {
-        checkOffsetLength(cbuf.length, off, len);
+        CheckKit.checkOffLen(off, len, cbuf.length);
         ensureCapacity(count + len);
         System.arraycopy(cbuf, off, buf, count, len);
         count += len;

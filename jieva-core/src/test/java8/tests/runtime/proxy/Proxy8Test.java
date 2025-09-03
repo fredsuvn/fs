@@ -10,7 +10,7 @@ import static org.testng.Assert.expectThrows;
 final class Proxy8Test {
 
     static void testUnsupportedDefaultMethod() throws Exception {
-        Class<?> cls = Class.forName("xyz.sunqian.common.runtime.proxy.Proxy8");
+        Class<?> cls = Class.forName("xyz.sunqian.common.runtime.proxy.ProxyBack");
         Field field = cls.getDeclaredField("UNSUPPORTED_DEFAULT_METHOD_INVOCABLE");
         field.setAccessible(true);
         Invocable invocable = (Invocable) field.get(null);

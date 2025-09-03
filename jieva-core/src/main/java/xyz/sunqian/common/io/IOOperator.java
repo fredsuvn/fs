@@ -287,7 +287,7 @@ public interface IOOperator {
     default int readTo(
         @Nonnull InputStream src, byte @Nonnull [] dst, int off, int len
     ) throws IndexOutOfBoundsException, IORuntimeException {
-        IOChecker.checkOffLen(dst.length, off, len);
+        IOChecker.checkOffLen(off, len, dst.length);
         return IOKit.readTo0(src, dst, off, len, IOChecker.endChecker());
     }
 
@@ -706,7 +706,7 @@ public interface IOOperator {
     default int readTo(
         @Nonnull Reader src, char @Nonnull [] dst, int off, int len
     ) throws IndexOutOfBoundsException, IORuntimeException {
-        IOChecker.checkOffLen(dst.length, off, len);
+        IOChecker.checkOffLen(off, len, dst.length);
         return IOKit.readTo0(src, dst, off, len, IOChecker.endChecker());
     }
 
@@ -998,7 +998,7 @@ public interface IOOperator {
     default int availableTo(
         @Nonnull InputStream src, byte @Nonnull [] dst, int off, int len
     ) throws IndexOutOfBoundsException, IORuntimeException {
-        IOChecker.checkOffLen(dst.length, off, len);
+        IOChecker.checkOffLen(off, len, dst.length);
         return IOKit.readTo0(src, dst, off, len, IOChecker.availableChecker());
     }
 
@@ -1426,7 +1426,7 @@ public interface IOOperator {
     default int availableTo(
         @Nonnull Reader src, char @Nonnull [] dst, int off, int len
     ) throws IndexOutOfBoundsException, IORuntimeException {
-        IOChecker.checkOffLen(dst.length, off, len);
+        IOChecker.checkOffLen(off, len, dst.length);
         return IOKit.readTo0(src, dst, off, len, IOChecker.availableChecker());
     }
 

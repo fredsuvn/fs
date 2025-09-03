@@ -720,8 +720,8 @@ public class StringKit {
         if (src instanceof String) {
             ((String) src).getChars(srcOff, srcOff + len, dst, dstOff);
         } else {
-            CheckKit.checkOffsetLength(src.length(), srcOff, len);
-            CheckKit.checkOffsetLength(dst.length, dstOff, len);
+            CheckKit.checkOffLen(srcOff, len, src.length());
+            CheckKit.checkOffLen(dstOff, len, dst.length);
             if (len == 0) {
                 return;
             }

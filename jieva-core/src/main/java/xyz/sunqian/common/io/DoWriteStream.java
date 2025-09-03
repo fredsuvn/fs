@@ -34,7 +34,7 @@ public abstract class DoWriteStream extends OutputStream {
 
     @Override
     public void write(byte @Nonnull [] b, int off, int len) throws IOException {
-        IOChecker.checkOffLen(b.length, off, len);
+        IOChecker.checkOffLen(off, len, b.length);
         doWrite(b, off, len);
     }
 }

@@ -247,7 +247,7 @@ final class ByteProcessorImpl implements ByteProcessor {
         @Override
         public int read(byte @Nonnull [] dst, int off, int len) throws IOException {
             checkClosed();
-            IOChecker.checkOffLen(dst.length, off, len);
+            IOChecker.checkOffLen(off, len, dst.length);
             if (len == 0) {
                 return 0;
             }

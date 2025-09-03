@@ -238,7 +238,7 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
      * @throws IndexOutOfBoundsException if {@code off < 0} or {@code len < 0} or {@code off + len > bytes.length}
      */
     default void nextBytes(byte @Nonnull [] bytes, int off, int len) throws IndexOutOfBoundsException {
-        CheckKit.checkOffsetLength(bytes.length, off, len);
+        CheckKit.checkOffLen(off, len, bytes.length);
         int i = off;
         int end = off + len;
         for (int words = len >> 3; words-- > 0; ) {

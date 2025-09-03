@@ -27,7 +27,7 @@ final class ByteReaderImpl {
     }
 
     static @Nonnull ByteReader of(byte @Nonnull [] src, int off, int len) throws IndexOutOfBoundsException {
-        IOChecker.checkOffLen(src.length, off, len);
+        IOChecker.checkOffLen(off, len, src.length);
         return new ByteArrayReader(src, off, len);
     }
 
@@ -294,7 +294,7 @@ final class ByteReaderImpl {
         private int readTo(
             byte @Nonnull [] dst, int off, int len, ReadChecker readChecker
         ) throws IndexOutOfBoundsException, IORuntimeException {
-            IOChecker.checkOffLen(dst.length, off, len);
+            IOChecker.checkOffLen(off, len, dst.length);
             return IOKit.readTo0(src, dst, off, len, readChecker);
         }
 
@@ -771,7 +771,7 @@ final class ByteReaderImpl {
 
         @Override
         public int readTo(byte @Nonnull [] dst, int off, int len) throws IndexOutOfBoundsException {
-            IOChecker.checkOffLen(dst.length, off, len);
+            IOChecker.checkOffLen(off, len, dst.length);
             return readTo0(dst, off, len);
         }
 
@@ -1110,7 +1110,7 @@ final class ByteReaderImpl {
         public int readTo(
             byte @Nonnull [] dst, int off, int len
         ) throws IndexOutOfBoundsException, IORuntimeException {
-            IOChecker.checkOffLen(dst.length, off, len);
+            IOChecker.checkOffLen(off, len, dst.length);
             if (len == 0) {
                 return 0;
             }
@@ -1237,7 +1237,7 @@ final class ByteReaderImpl {
         public int availableTo(
             byte @Nonnull [] dst, int off, int len
         ) throws IndexOutOfBoundsException, IORuntimeException {
-            IOChecker.checkOffLen(dst.length, off, len);
+            IOChecker.checkOffLen(off, len, dst.length);
             if (len == 0) {
                 return 0;
             }
