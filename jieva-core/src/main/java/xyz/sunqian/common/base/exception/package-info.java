@@ -5,13 +5,11 @@
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.exception.ThrowKit}</li>
  * </ul>
- * <p>
  * Root exceptions:
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.exception.JieException}</li>
  *     <li>{@link xyz.sunqian.common.base.exception.JieRuntimeException}</li>
  * </ul>
- * <p>
  * Other exceptions:
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.exception.AwaitingException}</li>

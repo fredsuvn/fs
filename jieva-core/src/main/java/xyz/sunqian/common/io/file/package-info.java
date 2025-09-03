@@ -5,7 +5,6 @@
  * <ul>
  *     <li>{@link xyz.sunqian.common.io.file.FileKit}</li>
  * </ul>
- * <p>
  * Interfaces:
  * <ul>
  *     <li>{@link xyz.sunqian.common.io.file.FileRef}</li>

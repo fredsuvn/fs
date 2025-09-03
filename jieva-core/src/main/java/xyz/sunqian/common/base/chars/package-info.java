@@ -5,7 +5,6 @@
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.chars.CharsKit}</li>
  * </ul>
- * <p>
  * Classes:
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.chars.CharsBuilder}</li>

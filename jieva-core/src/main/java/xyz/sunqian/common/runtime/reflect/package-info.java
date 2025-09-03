@@ -6,7 +6,6 @@
  *     <li>{@link xyz.sunqian.common.runtime.reflect.TypeKit}</li>
  *     <li>{@link xyz.sunqian.common.runtime.reflect.ClassKit}</li>
  * </ul>
- * <p>
  * Classes:
  * <ul>
  *     <li>{@link xyz.sunqian.common.runtime.reflect.TypeRef}</li>

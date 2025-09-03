@@ -5,7 +5,6 @@
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.thread.ThreadKit}</li>
  * </ul>
- * <p>
  * Interfaces:
  * <ul>
  *     <li>{@link xyz.sunqian.common.base.thread.ThreadGate}</li>

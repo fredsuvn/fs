@@ -9,7 +9,6 @@
  * <ul>
  *     <li>{@link xyz.sunqian.common.runtime.invoke.InvokeKit}</li>
  * </ul>
- * <p>
  * Core interfaces:
  * <ul>
  *     <li>{@link xyz.sunqian.common.runtime.invoke.Invocable}</li>
