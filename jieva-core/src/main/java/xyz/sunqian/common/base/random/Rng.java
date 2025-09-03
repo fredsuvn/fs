@@ -73,7 +73,7 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
      * <pre>{@code
      * try {
      *     SecureRandom secureRandom = SecureRandom.getInstance(algorithm);
-     *     return RngImpl.random(secureRandom);
+     *     return Rng.newRng(secureRandom);
      * } catch (NoSuchAlgorithmException e) {
      *     throw new UnsupportedOperationException(e);
      * }
@@ -87,7 +87,7 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
     static @Nonnull Rng secure(@Nonnull String algorithm) throws UnsupportedOperationException {
         try {
             SecureRandom secureRandom = SecureRandom.getInstance(algorithm);
-            return RngBack.random(secureRandom);
+            return newRng(secureRandom);
         } catch (NoSuchAlgorithmException e) {
             throw new UnsupportedOperationException(e);
         }

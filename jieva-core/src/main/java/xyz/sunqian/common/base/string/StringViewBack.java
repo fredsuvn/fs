@@ -40,7 +40,7 @@ final class StringViewBack {
 
         @Override
         public @Nonnull CharSequence subSequence(int start, int end) {
-            CheckKit.checkRangeInBounds(start, end, 0, length);
+            CheckKit.checkInBounds(start, end, 0, length);
             if (start == end) {
                 Node node = findNode(start);
                 return chars[node.charsIndex].subSequence(node.charIndex, node.charIndex);

@@ -686,8 +686,8 @@ public class StringKit {
         if (str instanceof String) {
             ((String) str).getChars(start, end, dst, off);
         } else {
-            CheckKit.checkRangeInBounds(start, end, 0, str.length());
-            CheckKit.checkRangeInBounds(off, off + end - start, 0, dst.length);
+            CheckKit.checkInBounds(start, end, 0, str.length());
+            CheckKit.checkInBounds(off, off + end - start, 0, dst.length);
             if (start == end) {
                 return;
             }

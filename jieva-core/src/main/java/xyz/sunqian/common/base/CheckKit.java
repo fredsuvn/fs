@@ -1,5 +1,6 @@
 package xyz.sunqian.common.base;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.exception.UnreachablePointException;
 
 import java.util.NoSuchElementException;
@@ -12,8 +13,8 @@ import java.util.NoSuchElementException;
 public class CheckKit {
 
     /**
-     * Checks whether the given {@code off} and {@code len} are out of the given {@code capacity}. Its logic is the same
-     * as the following code:
+     * Checks whether the given {@code off} and {@code len} are out of the range: {@code [0, capacity)}. Its logic is
+     * the same as the following code:
      * <pre>{@code
      * if (off < 0 || len < 0 || off + len > capacity) {
      *     throw new IndexOutOfBoundsException("off=" + off + ", len=" + len + ", capacity=" + capacity);
@@ -22,8 +23,9 @@ public class CheckKit {
      *
      * @param off      the given offset
      * @param len      the given length
-     * @param capacity the given capacity
-     * @throws IndexOutOfBoundsException if the given {@code off} and {@code len} are out of the given {@code capacity}
+     * @param capacity the given capacity which is typically represents the length of the range
+     * @throws IndexOutOfBoundsException if the given {@code off} and {@code len} are out of the range:
+     *                                   {@code [0, capacity)}
      */
     public static void checkOffLen(int off, int len, int capacity) throws IndexOutOfBoundsException {
         if (off < 0 || len < 0 || off + len > capacity) {
@@ -32,8 +34,8 @@ public class CheckKit {
     }
 
     /**
-     * Checks whether the given {@code off} and {@code len} are out of the given {@code capacity}. Its logic is the same
-     * as the following code:
+     * Checks whether the given {@code off} and {@code len} are out of the range: {@code [0, capacity)}. Its logic is
+     * the same as the following code:
      * <pre>{@code
      * if (off < 0 || len < 0 || off + len > capacity) {
      *     throw new IndexOutOfBoundsException("off=" + off + ", len=" + len + ", capacity=" + capacity);
@@ -42,8 +44,9 @@ public class CheckKit {
      *
      * @param off      the given offset
      * @param len      the given length
-     * @param capacity the given capacity
-     * @throws IndexOutOfBoundsException if the given {@code off} and {@code len} are out of the given {@code capacity}
+     * @param capacity the given capacity which is typically represents the length of the range
+     * @throws IndexOutOfBoundsException if the given {@code off} and {@code len} are out of the range:
+     *                                   {@code [0, capacity)}
      */
     public static void checkOffLen(long off, long len, long capacity) throws IndexOutOfBoundsException {
         if (off < 0 || len < 0 || len > capacity - off) {
@@ -52,8 +55,8 @@ public class CheckKit {
     }
 
     /**
-     * Checks whether the given {@code start} and {@code end} are out of the given {@code capacity}. Its logic is the
-     * same as the following code:
+     * Checks whether the given {@code start} and {@code end} are out of the range: {@code [0, capacity)}. Its logic is
+     * the same as the following code:
      * <pre>{@code
      * if (start < 0 || end < start || end > capacity) {
      *     throw new IndexOutOfBoundsException("start=" + start + ", end=" + end + ", capacity=" + capacity);
@@ -62,9 +65,9 @@ public class CheckKit {
      *
      * @param start    the given start, typically inclusive
      * @param end      the given end, typically exclusive
-     * @param capacity the given capacity
-     * @throws IndexOutOfBoundsException if the given {@code start} and {@code end} are out of the given
-     *                                   {@code capacity}
+     * @param capacity the given capacity which is typically represents the length of the range
+     * @throws IndexOutOfBoundsException if the given {@code start} and {@code end} are out of the range:
+     *                                   {@code [0, capacity)}
      */
     public static void checkStartEnd(int start, int end, int capacity) throws IndexOutOfBoundsException {
         if (start < 0 || end < start || end > capacity) {
@@ -73,8 +76,8 @@ public class CheckKit {
     }
 
     /**
-     * Checks whether the given {@code start} and {@code end} are out of the given {@code capacity}. Its logic is the
-     * same as the following code:
+     * Checks whether the given {@code start} and {@code end} are out of the range: {@code [0, capacity)}. Its logic is
+     * the same as the following code:
      * <pre>{@code
      * if (start < 0 || end < start || end > capacity) {
      *     throw new IndexOutOfBoundsException("start=" + start + ", end=" + end + ", capacity=" + capacity);
@@ -83,9 +86,9 @@ public class CheckKit {
      *
      * @param start    the given start, typically inclusive
      * @param end      the given end, typically exclusive
-     * @param capacity the given capacity
-     * @throws IndexOutOfBoundsException if the given {@code start} and {@code end} are out of the given
-     *                                   {@code capacity}
+     * @param capacity the given capacity which is typically represents the length of the range
+     * @throws IndexOutOfBoundsException if the given {@code start} and {@code end} are out of the range:
+     *                                   {@code [0, capacity)}
      */
     public static void checkStartEnd(long start, long end, long capacity) throws IndexOutOfBoundsException {
         if (start < 0 || end < start || end > capacity) {
@@ -94,320 +97,256 @@ public class CheckKit {
     }
 
     /**
-     * Checks whether given expression is true, if it is not, throw an {@link IllegalArgumentException}.
+     * Checks whether the given expression is {@code true}, if it is not, throws a new {@link IllegalArgumentException}
+     * with the given message.
      *
-     * @param expr given expression
+     * @param expr    the given expression
+     * @param message the given message
+     * @throws IllegalArgumentException if the given expression is {@code false}
      */
-    public static void checkArgument(boolean expr) throws IllegalArgumentException {
-        if (!expr) {
-            throw new IllegalArgumentException();
-        }
-    }
-
-    /**
-     * Checks whether given expression is true, if it is not, throw an {@link IllegalArgumentException} with given
-     * message.
-     *
-     * @param expr    given expression
-     * @param message given message
-     */
-    public static void checkArgument(boolean expr, CharSequence message) throws IllegalArgumentException {
+    public static void checkArgument(
+        boolean expr, @Nonnull CharSequence message
+    ) throws IllegalArgumentException {
         if (!expr) {
             throw new IllegalArgumentException(message.toString());
         }
     }
 
     /**
-     * Checks whether given expression is true, if it is not, throw an {@link IllegalStateException}.
+     * Checks whether the given expression is {@code true}, if it is not, throws a new {@link IllegalStateException}
+     * with the given message.
      *
-     * @param expr given expression
+     * @param expr    the given expression
+     * @param message the given message
+     * @throws IllegalStateException if the given expression is {@code false}
      */
-    public static void checkState(boolean expr) throws IllegalStateException {
-        if (!expr) {
-            throw new IllegalStateException();
-        }
-    }
-
-    /**
-     * Checks whether given expression is true, if it is not, throw an {@link IllegalStateException} with given
-     * message.
-     *
-     * @param expr    given expression
-     * @param message given message
-     */
-    public static void checkState(boolean expr, CharSequence message) throws IllegalStateException {
+    public static void checkState(
+        boolean expr, @Nonnull CharSequence message
+    ) throws IllegalStateException {
         if (!expr) {
             throw new IllegalStateException(message.toString());
         }
     }
 
     /**
-     * Checks whether given expression is true, if it is not, throw an {@link UnsupportedOperationException}.
+     * Checks whether the given expression is {@code true}, if it is not, throws a new
+     * {@link UnsupportedOperationException} with the given message.
      *
-     * @param expr given expression
+     * @param expr    the given expression
+     * @param message the given message
+     * @throws UnsupportedOperationException if the given expression is {@code false}
      */
-    public static void checkSupported(boolean expr) throws UnsupportedOperationException {
-        if (!expr) {
-            throw new UnsupportedOperationException();
-        }
-    }
-
-    /**
-     * Checks whether given expression is true, if it is not, throw an {@link UnsupportedOperationException} with given
-     * message.
-     *
-     * @param expr    given expression
-     * @param message given message
-     */
-    public static void checkSupported(boolean expr, CharSequence message) throws UnsupportedOperationException {
+    public static void checkSupported(
+        boolean expr, @Nonnull CharSequence message
+    ) throws UnsupportedOperationException {
         if (!expr) {
             throw new UnsupportedOperationException(message.toString());
         }
     }
 
-
     /**
-     * Checks whether given expression is true, if it is not, throw a {@link NoSuchElementException}.
+     * Checks whether the given expression is {@code true}, if it is not, throws a new {@link NoSuchElementException}
+     * with the given message.
      *
-     * @param expr given expression
+     * @param expr    the given expression
+     * @param message the given message
+     * @throws NoSuchElementException if the given expression is {@code false}
      */
-    public static void checkElement(boolean expr) throws NoSuchElementException {
-        if (!expr) {
-            throw new NoSuchElementException();
-        }
-    }
-
-    /**
-     * Checks whether given expression is true, if it is not, throw a {@link NoSuchElementException} with given
-     * message.
-     *
-     * @param expr    given expression
-     * @param message given message
-     */
-    public static void checkElement(boolean expr, CharSequence message) throws NoSuchElementException {
+    public static void checkElement(
+        boolean expr, @Nonnull CharSequence message
+    ) throws NoSuchElementException {
         if (!expr) {
             throw new NoSuchElementException(message.toString());
         }
     }
 
     /**
-     * Returns whether given index is in bounds from start index (inclusive) to end index (exclusive).
-     * <p>
-     * Note all indexed must &gt;= 0;
+     * Checks whether the given expression is {@code true}, if it is not, throws a new {@link UnreachablePointException}
+     * with the given message.
      *
-     * @param index      given index
-     * @param startIndex start index (inclusive)
-     * @param endIndex   end index (exclusive)
-     * @return whether given index is in bounds from start index (inclusive) to end index (exclusive)
+     * @param expr    the given expression
+     * @param message the given message
+     * @throws UnreachablePointException if the given expression is {@code false}
      */
-    public static boolean isInBounds(int index, int startIndex, int endIndex) {
-        return index >= startIndex && index < endIndex && index >= 0 && startIndex >= 0;
-    }
-
-    /**
-     * Returns whether given index is in bounds from start index (inclusive) to end index (exclusive).
-     * <p>
-     * Note all indexed must &gt;= 0;
-     *
-     * @param index      given index
-     * @param startIndex start index (inclusive)
-     * @param endIndex   end index (exclusive)
-     * @return whether given index is in bounds from start index (inclusive) to end index (exclusive)
-     */
-    public static boolean isInBounds(long index, long startIndex, long endIndex) {
-        return index >= startIndex && index < endIndex && index >= 0 && startIndex >= 0;
-    }
-
-    /**
-     * Checks whether given index is in bounds from start index (inclusive) to end index (exclusive), if it is not,
-     * throw an {@link IndexOutOfBoundsException} with message pattern: [startIndex, endIndex): index.
-     * <p>
-     * Note all indexed must &gt;= 0;
-     *
-     * @param index      given index
-     * @param startIndex start index (inclusive)
-     * @param endIndex   end index (exclusive)
-     */
-    public static void checkInBounds(int index, int startIndex, int endIndex) throws IndexOutOfBoundsException {
-        if (!isInBounds(index, startIndex, endIndex)) {
-            throw new IndexOutOfBoundsException("[" + startIndex + ", " + endIndex + "): " + index);
+    public static void checkReachable(
+        boolean expr, @Nonnull CharSequence message
+    ) throws UnreachablePointException {
+        if (!expr) {
+            throw new UnreachablePointException(message.toString());
         }
     }
 
     /**
-     * Checks whether given index is in bounds from start index (inclusive) to end index (exclusive), if it is not,
-     * throw an {@link IndexOutOfBoundsException} with given message.
-     * <p>
-     * Note all indexed must &gt;= 0;
+     * Returns whether the given position is between the start boundary (inclusive) and the end boundary (exclusive).
+     * Its logic is the same as the following code:
+     * <pre>{@code
+     * return pos >= startBound && pos < endBound;
+     * }</pre>
      *
-     * @param index      given index
-     * @param startIndex start index (inclusive)
-     * @param endIndex   end index (exclusive)
-     * @param message    given message
+     * @param pos        the given position to be compared
+     * @param startBound the start boundary, inclusive
+     * @param endBound   the end boundary, exclusive
+     * @return whether the given position is between the start boundary (inclusive) and the end boundary (exclusive)
+     */
+    public static boolean isInBounds(int pos, int startBound, int endBound) {
+        return pos >= startBound && pos < endBound;
+    }
+
+    /**
+     * Returns whether the given position is between the start boundary (inclusive) and the end boundary (exclusive).
+     * Its logic is the same as the following code:
+     * <pre>{@code
+     * return pos >= startBound && pos < endBound;
+     * }</pre>
+     *
+     * @param pos        the given position to be compared
+     * @param startBound the start boundary, inclusive
+     * @param endBound   the end boundary, exclusive
+     * @return whether the given position is between the start boundary (inclusive) and the end boundary (exclusive)
+     */
+    public static boolean isInBounds(long pos, long startBound, long endBound) {
+        return pos >= startBound && pos < endBound;
+    }
+
+    /**
+     * Checks whether the given position is between the start boundary (inclusive) and the end boundary (exclusive). Its
+     * logic is the same as the following code:
+     * <pre>{@code
+     * if (!(pos >= startBound && pos < endBound)) {
+     *     throw new IndexOutOfBoundsException(
+     *         "Out of bounds for " + pos + " in [" + startPos + ", " + endPos + ")."
+     *     );
+     * }
+     * }</pre>
+     *
+     * @param pos        the given position to be compared
+     * @param startBound the start boundary, inclusive
+     * @param endBound   the end boundary, exclusive
+     * @throws IndexOutOfBoundsException if the given position is out of the specified bounds
      */
     public static void checkInBounds(
-        int index, int startIndex, int endIndex, CharSequence message) throws IndexOutOfBoundsException {
-        if (!isInBounds(index, startIndex, endIndex)) {
-            throw new IndexOutOfBoundsException(message.toString());
+        int pos, int startBound, int endBound
+    ) throws IndexOutOfBoundsException {
+        if (!isInBounds(pos, startBound, endBound)) {
+            throw new IndexOutOfBoundsException(
+                "Out of bounds for " + pos + " in [" + startBound + ", " + endBound + ")."
+            );
         }
     }
 
     /**
-     * Checks whether given index is in bounds from start index (inclusive) to end index (exclusive), if it is not,
-     * throw an {@link IndexOutOfBoundsException} with message pattern: [startIndex, endIndex): index.
-     * <p>
-     * Note all indexed must &gt;= 0;
+     * Checks whether the given position is between the start boundary (inclusive) and the end boundary (exclusive). Its
+     * logic is the same as the following code:
+     * <pre>{@code
+     * if (!(pos >= startBound && pos < endBound)) {
+     *     throw new IndexOutOfBoundsException(
+     *         "Out of bounds for " + pos + " in [" + startPos + ", " + endPos + ")."
+     *     );
+     * }
+     * }</pre>
      *
-     * @param index      given index
-     * @param startIndex start index (inclusive)
-     * @param endIndex   end index (exclusive)
-     */
-    public static void checkInBounds(long index, long startIndex, long endIndex) throws IndexOutOfBoundsException {
-        if (!isInBounds(index, startIndex, endIndex)) {
-            throw new IndexOutOfBoundsException("[" + startIndex + ", " + endIndex + "): " + index);
-        }
-    }
-
-    /**
-     * Checks whether given index is in bounds from start index (inclusive) to end index (exclusive), if it is not,
-     * throw an {@link IndexOutOfBoundsException} with given message.
-     * <p>
-     * Note all indexed must &gt;= 0;
-     *
-     * @param index      given index
-     * @param startIndex start index (inclusive)
-     * @param endIndex   end index (exclusive)
-     * @param message    given message
+     * @param pos        the given position to be compared
+     * @param startBound the start boundary, inclusive
+     * @param endBound   the end boundary, exclusive
+     * @throws IndexOutOfBoundsException if the given position is out of the specified bounds
      */
     public static void checkInBounds(
-        long index, long startIndex, long endIndex, CharSequence message) throws IndexOutOfBoundsException {
-        if (!isInBounds(index, startIndex, endIndex)) {
-            throw new IndexOutOfBoundsException(message.toString());
+        long pos, long startBound, long endBound
+    ) throws IndexOutOfBoundsException {
+        if (!isInBounds(pos, startBound, endBound)) {
+            throw new IndexOutOfBoundsException(
+                "Out of bounds for " + pos + " in [" + startBound + ", " + endBound + ")."
+            );
         }
     }
 
     /**
-     * Returns whether given range (from start range index inclusive to end range index exclusive) is in bounds from
-     * start index (inclusive) to end index (exclusive).
-     * <p>
-     * Note all ranges and indexed must &gt;= 0;
+     * Returns whether the given range, starting at the given start position (inclusive) and ending at the given end
+     * position (exclusive), is between the start boundary (inclusive) and the end boundary (exclusive). Its logic is
+     * the same as the following code:
+     * <pre>{@code
+     * return start >= startBound && end <= endBound && start <= end;
+     * }</pre>
      *
-     * @param startRange start range index inclusive
-     * @param endRange   end range index exclusive
-     * @param startIndex start index (inclusive)
-     * @param endIndex   end index (exclusive)
-     * @return whether given range (from start range index inclusive to end range index exclusive) is in bounds from *
-     * start index (inclusive) to end index (exclusive)
+     * @param start      the given start position of the range, inclusive
+     * @param end        the given end position of the range, exclusive
+     * @param startBound the start boundary, inclusive
+     * @param endBound   the end boundary, exclusive
+     * @return whether the given range is between the start boundary (inclusive) and the end boundary (exclusive)
      */
-    public static boolean isRangeInBounds(int startRange, int endRange, int startIndex, int endIndex) {
-        return startRange >= startIndex && endRange <= endIndex && startRange <= endRange && startRange >= 0 && startIndex >= 0;
+    public static boolean isInBounds(int start, int end, int startBound, int endBound) {
+        return start >= startBound && end <= endBound && start <= end;
     }
 
     /**
-     * Returns whether given range (from start range index inclusive to end range index exclusive) is in bounds from
-     * start index (inclusive) to end index (exclusive).
-     * <p>
-     * Note all ranges and indexed must &gt;= 0;
+     * Returns whether the given range, starting at the given start position (inclusive) and ending at the given end
+     * position (exclusive), is between the start boundary (inclusive) and the end boundary (exclusive). Its logic is
+     * the same as the following code:
+     * <pre>{@code
+     * return start >= startBound && end <= endBound && start <= end;
+     * }</pre>
      *
-     * @param startRange start range index inclusive
-     * @param endRange   end range index exclusive
-     * @param startIndex start index (inclusive)
-     * @param endIndex   end index (exclusive)
-     * @return whether given range (from start range index inclusive to end range index exclusive) is in bounds from *
-     * start index (inclusive) to end index (exclusive)
+     * @param start      the given start position of the range, inclusive
+     * @param end        the given end position of the range, exclusive
+     * @param startBound the start boundary, inclusive
+     * @param endBound   the end boundary, exclusive
+     * @return whether the given range is between the start boundary (inclusive) and the end boundary (exclusive)
      */
-    public static boolean isRangeInBounds(long startRange, long endRange, long startIndex, long endIndex) {
-        return startRange >= startIndex && endRange <= endIndex && startRange <= endRange && startRange >= 0 && startIndex >= 0;
+    public static boolean isInBounds(long start, long end, long startBound, long endBound) {
+        return start >= startBound && end <= endBound && start <= end;
     }
 
     /**
-     * Checks whether given range (from start range index inclusive to end range index exclusive) is in bounds from
-     * start index (inclusive) to end index (exclusive), if it is not, throw an {@link IndexOutOfBoundsException} with
-     * message pattern: [startIndex, endIndex): [startRange, endRange).
-     * <p>
-     * Note all ranges and indexed must &gt;= 0;
+     * Checks whether the given range, starting at the given start position (inclusive) and ending at the given end
+     * position (exclusive), is between the start boundary (inclusive) and the end boundary (exclusive). Its logic is
+     * the same as the following code:
+     * <pre>{@code
+     * if (!(start >= startBound && end <= endBound && start <= end)) {
+     *     throw new IndexOutOfBoundsException(
+     *         "Out of bounds for [" + start + ", " + end + ") in [" + startBound + ", " + endBound + ")."
+     *     );
+     * }
+     * }</pre>
      *
-     * @param startRange start range index inclusive
-     * @param endRange   end range index exclusive
-     * @param startIndex start index (inclusive)
-     * @param endIndex   end index (exclusive)
+     * @param start      the given start position of the range, inclusive
+     * @param end        the given end position of the range, exclusive
+     * @param startBound the start boundary, inclusive
+     * @param endBound   the end boundary, exclusive
+     * @throws IndexOutOfBoundsException if the given range is out of the specified bounds
      */
-    public static void checkRangeInBounds(
-        int startRange, int endRange, int startIndex, int endIndex) throws IndexOutOfBoundsException {
-        if (!isRangeInBounds(startRange, endRange, startIndex, endIndex)) {
-            throw new IndexOutOfBoundsException("[" + startIndex + ", " + endIndex + "): [" + startRange + ", " + endRange + ")");
+    public static void checkInBounds(
+        int start, int end, int startBound, int endBound) throws IndexOutOfBoundsException {
+        if (!isInBounds(start, end, startBound, endBound)) {
+            throw new IndexOutOfBoundsException(
+                "Out of bounds for [" + start + ", " + end + ") in [" + startBound + ", " + endBound + ")."
+            );
         }
     }
 
     /**
-     * Checks whether given range (from start range index inclusive to end range index exclusive) is in bounds from
-     * start index (inclusive) to end index (exclusive), if it is not, throw an {@link IndexOutOfBoundsException} with
-     * given message.
-     * <p>
-     * Note all ranges and indexed must &gt;= 0;
+     * Checks whether the given range, starting at the given start position (inclusive) and ending at the given end
+     * position (exclusive), is between the start boundary (inclusive) and the end boundary (exclusive). Its logic is
+     * the same as the following code:
+     * <pre>{@code
+     * if (!(start >= startBound && end <= endBound && start <= end)) {
+     *     throw new IndexOutOfBoundsException(
+     *         "Out of bounds for [" + start + ", " + end + ") in [" + startBound + ", " + endBound + ")."
+     *     );
+     * }
+     * }</pre>
      *
-     * @param startRange start range index inclusive
-     * @param endRange   end range index exclusive
-     * @param startIndex start index (inclusive)
-     * @param endIndex   end index (exclusive)
-     * @param message    given message
+     * @param start      the given start position of the range, inclusive
+     * @param end        the given end position of the range, exclusive
+     * @param startBound the start boundary, inclusive
+     * @param endBound   the end boundary, exclusive
+     * @throws IndexOutOfBoundsException if the given range is out of the specified bounds
      */
-    public static void checkRangeInBounds(
-        int startRange, int endRange, int startIndex, int endIndex, CharSequence message) throws IndexOutOfBoundsException {
-        if (!isRangeInBounds(startRange, endRange, startIndex, endIndex)) {
-            throw new IndexOutOfBoundsException(message.toString());
-        }
-    }
-
-    /**
-     * Checks whether given range (from start range index inclusive to end range index exclusive) is in bounds from
-     * start index (inclusive) to end index (exclusive), if it is not, throw an {@link IndexOutOfBoundsException} with
-     * message pattern: [startIndex, endIndex): [startRange, endRange).
-     * <p>
-     * Note all ranges and indexed must &gt;= 0;
-     *
-     * @param startRange start range index inclusive
-     * @param endRange   end range index exclusive
-     * @param startIndex start index (inclusive)
-     * @param endIndex   end index (exclusive)
-     */
-    public static void checkRangeInBounds(
-        long startRange, long endRange, long startIndex, long endIndex) throws IndexOutOfBoundsException {
-        if (!isRangeInBounds(startRange, endRange, startIndex, endIndex)) {
-            throw new IndexOutOfBoundsException("[" + startIndex + ", " + endIndex + "): [" + startRange + ", " + endRange + ")");
-        }
-    }
-
-    /**
-     * Checks whether given range (from start range index inclusive to end range index exclusive) is in bounds from
-     * start index (inclusive) to end index (exclusive), if it is not, throw an {@link IndexOutOfBoundsException} with
-     * given message.
-     * <p>
-     * Note all ranges and indexed must &gt;= 0;
-     *
-     * @param startRange start range index inclusive
-     * @param endRange   end range index exclusive
-     * @param startIndex start index (inclusive)
-     * @param endIndex   end index (exclusive)
-     * @param message    given message
-     */
-    public static void checkRangeInBounds(
-        long startRange, long endRange, long startIndex, long endIndex, CharSequence message) throws IndexOutOfBoundsException {
-        if (!isRangeInBounds(startRange, endRange, startIndex, endIndex)) {
-            throw new IndexOutOfBoundsException(message.toString());
-        }
-    }
-
-    /**
-     * Checks whether the given expression is {@code true}. If it is, an {@link UnreachablePointException} will be
-     * thrown.
-     *
-     * @param expr the given expression
-     * @throws UnreachablePointException if the given expression is {@code true}
-     */
-    public static void unreachable(boolean expr) throws UnreachablePointException {
-        if (expr) {
-            throw new UnreachablePointException();
+    public static void checkInBounds(
+        long start, long end, long startBound, long endBound) throws IndexOutOfBoundsException {
+        if (!isInBounds(start, end, startBound, endBound)) {
+            throw new IndexOutOfBoundsException(
+                "Out of bounds for [" + start + ", " + end + ") in [" + startBound + ", " + endBound + ")."
+            );
         }
     }
 }
