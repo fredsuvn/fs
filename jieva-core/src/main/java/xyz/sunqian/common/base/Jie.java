@@ -439,69 +439,6 @@ public class Jie {
         return System.identityHashCode(obj);
     }
 
-    /**
-     * Returns enum object of specified name from given enum class, may be null if not found.
-     *
-     * @param enumClass given enum class
-     * @param name      specified name
-     * @param <T>       type of enum
-     * @return the enum object or null
-     */
-    @Nullable
-    public static <T extends Enum<T>> T findEnum(Class<?> enumClass, String name) {
-        return findEnum(enumClass, name, false);
-    }
-
-    /**
-     * Returns enum object of specified name from given enum class, may be null if not found.
-     *
-     * @param enumClass  given enum class
-     * @param name       specified name
-     * @param ignoreCase whether ignore case for specified name
-     * @param <T>        type of enum
-     * @return the enum object or null
-     */
-    @Nullable
-    public static <T extends Enum<T>> T findEnum(Class<?> enumClass, String name, boolean ignoreCase) {
-        CheckKit.checkArgument(enumClass.isEnum(), "Not an enum class.");
-        if (!ignoreCase) {
-            try {
-                return Enum.valueOf(as(enumClass), name);
-            } catch (IllegalArgumentException e) {
-                return null;
-            }
-        }
-        Object[] enums = enumClass.getEnumConstants();
-        if (ArrayKit.isEmpty(enums)) {
-            return null;
-        }
-        for (Object anEnum : enums) {
-            if (name.equalsIgnoreCase(anEnum.toString())) {
-                return as(anEnum);
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Returns enum object at specified index from given enum class, may be null if not found.
-     *
-     * @param enumClass given enum class
-     * @param index     specified index
-     * @param <T>       type of enum
-     * @return the enum object or null
-     */
-    @Nullable
-    public static <T extends Enum<T>> T findEnum(Class<?> enumClass, int index) {
-        CheckKit.checkArgument(enumClass.isEnum(), enumClass + " is not an enum.");
-        CheckKit.checkArgument(index >= 0, "index must >= 0.");
-        Object[] enums = enumClass.getEnumConstants();
-        if (ArrayKit.isEmpty(enums) || index >= enums.length) {
-            return null;
-        }
-        return as(enums[index]);
-    }
-
     // /**
     //  * Finds resource of given resource path (starts with "/").
     //  *
