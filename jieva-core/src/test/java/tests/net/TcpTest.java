@@ -95,7 +95,7 @@ public class TcpTest implements DataTest, PrintTest {
             .workerThreadNum(workerNum)
             .workerThreadFactory(workerFactory)
             .socketOption(StandardSocketOptions.SO_RCVBUF, 1024)
-            .selectTimeout(5000)
+            .selectTimeout(100)
             .bufferSize(1024)
             .handler(new TcpServerHandler() {
 
@@ -228,6 +228,8 @@ public class TcpTest implements DataTest, PrintTest {
         assertTrue(server.isClosed());
         server.close();
         assertTrue(server.isClosed());
+        // select timeout
+        Thread.sleep(100 * 3);
         server.await();
         closeLatch.await();
         assertEquals(closeCount.get(), 11);

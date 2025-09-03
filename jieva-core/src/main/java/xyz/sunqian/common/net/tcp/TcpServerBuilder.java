@@ -430,7 +430,10 @@ public class TcpServerBuilder {
             }
 
             private void handleRead() throws Exception {
-                selector.select(selectTimeout);
+                int keysNum = selector.select(selectTimeout);
+                if (keysNum == 0) {
+                    return;
+                }
                 Set<SelectionKey> selectedKeys = selector.selectedKeys();
                 Iterator<SelectionKey> keys = selectedKeys.iterator();
                 while (keys.hasNext()) {
