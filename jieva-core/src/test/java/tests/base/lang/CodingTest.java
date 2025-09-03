@@ -1,7 +1,7 @@
-package tests.base.coding;
+package tests.base.lang;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.coding.CodingKit;
+import xyz.sunqian.common.base.lang.CodingKit;
 
 import java.util.Arrays;
 import java.util.Collections;

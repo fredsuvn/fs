@@ -1,4 +1,4 @@
-package xyz.sunqian.common.base.coding;
+package xyz.sunqian.common.base.lang;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;

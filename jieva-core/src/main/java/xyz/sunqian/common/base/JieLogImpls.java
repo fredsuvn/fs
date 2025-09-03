@@ -1,5 +1,6 @@
 package xyz.sunqian.common.base;
 
+import xyz.sunqian.common.base.lang.TraceKit;
 import xyz.sunqian.common.base.time.TimeKit;
 
 import java.util.Date;
@@ -53,7 +54,7 @@ final class JieLogImpls {
             if (level < this.level) {
                 return;
             }
-            StackTraceElement trace = JieTrace.findCallerTrace(0, t -> {
+            StackTraceElement trace = TraceKit.findCallerTrace(0, t -> {
                 if (!Objects.equals(t.getClassName(), JieLogImpl.class.getName())) {
                     return false;
                 }
