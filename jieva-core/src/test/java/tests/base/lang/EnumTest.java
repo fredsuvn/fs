@@ -10,7 +10,7 @@ import static org.testng.Assert.assertNull;
 public class EnumTest {
 
     @Test
-    public void testCheckOffLen() {
+    public void testFindEnum() {
         assertEquals(EnumKit.findEnum(X.class, "A"), X.A);
         assertEquals(EnumKit.findEnum(X.class, "B"), X.B);
         assertEquals(EnumKit.findEnum(X.class, "C"), X.C);
