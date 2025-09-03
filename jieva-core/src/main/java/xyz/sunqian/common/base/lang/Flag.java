@@ -1,9 +1,9 @@
-package xyz.sunqian.common.base;
+package xyz.sunqian.common.base.lang;
 
 /**
  * Flag enum, indicating a state, result, instruction, special value, etc.
  *
- * @author fredsuvn
+ * @author sunqian
  */
 public enum Flag {
 

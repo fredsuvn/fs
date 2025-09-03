@@ -7,7 +7,7 @@
 // import org.testng.Assert;
 // import org.testng.annotations.Test;
 // import xyz.fslabo.annotations.Nullable;
-// import xyz.sunqian.common.base.Flag;
+// import xyz.sunqian.common.base.lang.Flag;
 // import xyz.sunqian.common.base.Jie;
 // import xyz.sunqian.common.base.time.JieDate;
 // import xyz.sunqian.common.bean.PropertyInfo;

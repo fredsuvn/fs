@@ -1,7 +1,7 @@
 package xyz.sunqian.common.mapping.handlers;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Flag;
+import xyz.sunqian.common.base.lang.Flag;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingOptions;
 import xyz.sunqian.common.objects.data.DataProperty;

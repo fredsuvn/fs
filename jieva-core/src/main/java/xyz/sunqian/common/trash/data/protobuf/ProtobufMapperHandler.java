@@ -2,7 +2,7 @@ package xyz.sunqian.common.trash.data.protobuf;
 
 import com.google.protobuf.ByteString;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Flag;
+import xyz.sunqian.common.base.lang.Flag;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.mapping.Mapper;
