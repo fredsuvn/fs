@@ -3,13 +3,15 @@ package xyz.sunqian.common.base.string;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.CheckKit;
+import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.exception.UnknownArrayTypeException;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.StringJoiner;
 
 /**
  * Utilities kit for string related.
@@ -19,126 +21,37 @@ import java.util.StringJoiner;
 public class StringKit {
 
     /**
-     * Returns string decoding from given bytes with {@link CharsKit#defaultCharset()}.
+     * Returns whether the given string is {@code null} or empty.
      *
-     * @param bytes given bytes
-     * @return string decoding from given bytes and charset
+     * @param str the given string
+     * @return whether the given string is {@code null} or empty
      */
-    public static String of(byte[] bytes) {
-        return of(bytes, CharsKit.defaultCharset());
+    public static boolean isEmpty(@Nullable CharSequence str) {
+        return str == null || str.length() == 0;
     }
 
     /**
-     * Returns string decoding from given bytes (from given offset to specified length) with
-     * {@link CharsKit#defaultCharset()}.
+     * Returns whether the given string is not {@code null} nor empty.
      *
-     * @param bytes  given bytes
-     * @param offset given offset
-     * @param length specified length
-     * @return string decoding from given bytes and charset
+     * @param str the given string
+     * @return whether the given string is not {@code null} nor empty
      */
-    public static String of(byte[] bytes, int offset, int length) {
-        return of(bytes, offset, length, CharsKit.defaultCharset());
+    public static boolean isNonEmpty(@Nullable CharSequence str) {
+        return !isEmpty(str);
     }
 
     /**
-     * Returns string decoding from given bytes and charset.
+     * Returns whether the given string is blank ({@code null}, empty or whitespace).
      *
-     * @param bytes   given bytes
-     * @param charset given charset
-     * @return string decoding from given bytes and charset
+     * @param str the given string
+     * @return whether the given string is blank
      */
-    public static String of(byte[] bytes, Charset charset) {
-        return new String(bytes, charset);
-    }
-
-    /**
-     * Returns string decoding from given bytes (from given offset to specified length) and charset.
-     *
-     * @param bytes   given bytes
-     * @param offset  given offset
-     * @param length  specified length
-     * @param charset given charset
-     * @return string decoding from given bytes and charset
-     */
-    public static String of(byte[] bytes, int offset, int length, Charset charset) {
-        return new String(bytes, offset, length, charset);
-    }
-
-    /**
-     * Encodes given chars into a new byte array using {@link CharsKit#defaultCharset()}.
-     *
-     * @param chars given chars
-     * @return a new byte array encoded given chars
-     */
-    public static byte[] getBytes(char[] chars) {
-        return getBytes(chars, CharsKit.defaultCharset());
-    }
-
-    /**
-     * Encodes given chars into a new byte array using the given charset.
-     *
-     * @param chars   given chars
-     * @param charset given charset
-     * @return a new byte array encoded given chars
-     */
-    public static byte[] getBytes(char[] chars, Charset charset) {
-        return new String(chars).getBytes(charset);
-    }
-
-    /**
-     * Encodes given chars into a new byte array using {@link CharsKit#defaultCharset()}.
-     *
-     * @param chars given chars
-     * @return a new byte array encoded given chars
-     */
-    public static byte[] getBytes(CharSequence chars) {
-        return getBytes(chars, CharsKit.defaultCharset());
-    }
-
-    /**
-     * Encodes given chars into a new byte array using the given charset.
-     *
-     * @param chars   given chars
-     * @param charset given charset
-     * @return a new byte array encoded given chars
-     */
-    public static byte[] getBytes(CharSequence chars, Charset charset) {
-        return chars.toString().getBytes(charset);
-    }
-
-    /**
-     * Returns whether given chars is null or empty.
-     *
-     * @param chars given chars
-     * @return whether given chars is null or empty
-     */
-    public static boolean isEmpty(@Nullable CharSequence chars) {
-        return chars == null || chars.length() == 0;
-    }
-
-    /**
-     * Returns whether given chars is not null and empty.
-     *
-     * @param chars given chars
-     * @return whether given chars is not null and empty
-     */
-    public static boolean isNotEmpty(@Nullable CharSequence chars) {
-        return !isEmpty(chars);
-    }
-
-    /**
-     * Returns whether given chars is blank (null, empty or whitespace).
-     *
-     * @param chars given chars
-     * @return whether given chars is blank
-     */
-    public static boolean isBlank(@Nullable CharSequence chars) {
-        if (chars == null || chars.length() == 0) {
+    public static boolean isBlank(@Nullable CharSequence str) {
+        if (isEmpty(str)) {
             return true;
         }
-        for (int i = 0; i < chars.length(); i++) {
-            char c = chars.charAt(i);
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
             if (!Character.isWhitespace(c)) {
                 return false;
             }
@@ -147,38 +60,24 @@ public class StringKit {
     }
 
     /**
-     * Returns whether given chars is not blank (null, empty or whitespace).
+     * Returns whether the given string is not blank ({@code null} nor empty nor whitespace).
      *
-     * @param chars given chars
-     * @return whether given chars is not blank
+     * @param str the given string
+     * @return whether the given string is not blank
      */
-    public static boolean isNotBlank(@Nullable CharSequence chars) {
-        return !isBlank(chars);
+    public static boolean isNonBlank(@Nullable CharSequence str) {
+        return !isBlank(str);
     }
 
     /**
-     * Returns whether given chars can match given regex.
+     * Returns {@code true} if any of the given strings is {@code null} or empty, otherwise {@code false}.
      *
-     * @param regex given regex
-     * @param chars given chars
-     * @return whether given chars can match given regex
+     * @param strings the given strings
+     * @return {@code true} if any of the given strings is {@code null} or empty, otherwise {@code false}
      */
-    public static boolean matches(CharSequence regex, @Nullable CharSequence chars) {
-        if (chars == null) {
-            return false;
-        }
-        return chars.toString().matches(regex.toString());
-    }
-
-    /**
-     * Returns ture if any given chars is empty, otherwise false.
-     *
-     * @param chars given chars
-     * @return ture if any given chars is empty, otherwise false
-     */
-    public static boolean anyEmpty(CharSequence... chars) {
-        for (CharSequence c : chars) {
-            if (isEmpty(c)) {
+    public static boolean anyEmpty(@Nullable CharSequence @Nonnull ... strings) {
+        for (CharSequence str : strings) {
+            if (isEmpty(str)) {
                 return true;
             }
         }
@@ -186,14 +85,30 @@ public class StringKit {
     }
 
     /**
-     * Returns ture if any given chars is blank (null, empty or whitespace), otherwise false.
+     * Returns {@code true} if all the given strings are {@code null} or empty, otherwise {@code false}.
      *
-     * @param chars given chars
-     * @return ture if any given chars is blank, otherwise false
+     * @param strings the given strings
+     * @return {@code true} if all the given strings are {@code null} or empty, otherwise {@code false}
      */
-    public static boolean anyBlank(CharSequence... chars) {
-        for (CharSequence c : chars) {
-            if (isBlank(c)) {
+    public static boolean allEmpty(@Nullable CharSequence @Nonnull ... strings) {
+        for (CharSequence str : strings) {
+            if (!isEmpty(str)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Returns {@code true} if any of the given strings is blank, otherwise {@code false}. This method uses
+     * {@link #isBlank(CharSequence)} to check whether a string is blank.
+     *
+     * @param strings the given strings
+     * @return {@code true} if any of the given strings is blank, otherwise {@code false}
+     */
+    public static boolean anyBlank(@Nullable CharSequence @Nonnull ... strings) {
+        for (CharSequence str : strings) {
+            if (isBlank(str)) {
                 return true;
             }
         }
@@ -201,30 +116,15 @@ public class StringKit {
     }
 
     /**
-     * Returns ture if any given chars can match given regex, otherwise false.
+     * Returns {@code true} if all the given strings are blank, otherwise {@code false}. This method uses
+     * {@link #isBlank(CharSequence)} to check whether a string is blank.
      *
-     * @param chars given chars
-     * @param regex given regex
-     * @return ture if any given chars can match given regex, otherwise false
+     * @param strings the given strings
+     * @return {@code true} if all the given strings are blank, otherwise {@code false}
      */
-    public static boolean anyMatches(CharSequence regex, CharSequence... chars) {
-        for (CharSequence c : chars) {
-            if (matches(regex, c)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Returns ture if all given chars is empty, otherwise false.
-     *
-     * @param chars given chars
-     * @return ture if all given chars is empty, otherwise false
-     */
-    public static boolean allEmpty(CharSequence... chars) {
-        for (CharSequence c : chars) {
-            if (isNotEmpty(c)) {
+    public static boolean allBlank(@Nullable CharSequence @Nonnull ... strings) {
+        for (CharSequence str : strings) {
+            if (!isBlank(str)) {
                 return false;
             }
         }
@@ -232,14 +132,57 @@ public class StringKit {
     }
 
     /**
-     * Returns ture if all given chars is blank (null, empty or whitespace), otherwise false.
+     * Encodes the given char array into a new byte array using {@link CharsKit#defaultCharset()}.
      *
-     * @param chars given chars
-     * @return ture if all given chars is blank, otherwise false
+     * @param chars the given char array
+     * @return a new byte array contains the encoded bytes
      */
-    public static boolean allBlank(CharSequence... chars) {
-        for (CharSequence c : chars) {
-            if (isNotBlank(c)) {
+    public static byte @Nonnull [] getBytes(char @Nonnull [] chars) {
+        return getBytes(chars, CharsKit.defaultCharset());
+    }
+
+    /**
+     * Encodes the given char array into a new byte array using the specified charset.
+     *
+     * @param chars   the given char array
+     * @param charset the specified charset
+     * @return a new byte array contains the encoded bytes
+     */
+    public static byte @Nonnull [] getBytes(char @Nonnull [] chars, Charset charset) {
+        return new String(chars).getBytes(charset);
+    }
+
+    /**
+     * Encodes the given char sequence into a new byte array using {@link CharsKit#defaultCharset()}.
+     *
+     * @param chars the given char sequence
+     * @return a new byte array contains the encoded bytes
+     */
+    public static byte @Nonnull [] getBytes(@Nonnull CharSequence chars) {
+        return getBytes(chars, CharsKit.defaultCharset());
+    }
+
+    /**
+     * Encodes the given char sequence into a new byte array using the specified charset.
+     *
+     * @param chars   the given char sequence
+     * @param charset the specified charset
+     * @return a new byte array contains the encoded bytes
+     */
+    public static byte @Nonnull [] getBytes(@Nonnull CharSequence chars, Charset charset) {
+        return chars.toString().getBytes(charset);
+    }
+
+    /**
+     * Returns whether all chars of the given string are upper case. Note if the string is empty, returns {@code true}.
+     *
+     * @param str the given string
+     * @return whether all chars of the given string are upper case
+     */
+    public static boolean allUpperCase(@Nonnull CharSequence str) {
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+            if (!Character.isUpperCase(c)) {
                 return false;
             }
         }
@@ -247,15 +190,15 @@ public class StringKit {
     }
 
     /**
-     * Returns ture if all given chars can match given regex, otherwise false.
+     * Returns whether all chars of the given string are lower case. Note if the string is empty, returns {@code true}.
      *
-     * @param chars given chars
-     * @param regex given regex
-     * @return ture if all given chars can match given regex, otherwise false
+     * @param str the given string
+     * @return whether all chars of the given string are lower case
      */
-    public static boolean allMatches(CharSequence regex, CharSequence... chars) {
-        for (CharSequence c : chars) {
-            if (!matches(regex, c)) {
+    public static boolean allLowerCase(@Nonnull CharSequence str) {
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+            if (!Character.isLowerCase(c)) {
                 return false;
             }
         }
@@ -263,114 +206,88 @@ public class StringKit {
     }
 
     /**
-     * Returns whether all chars of given chars are upper case.
+     * Capitalizes the given string.
      *
-     * @param chars given chars
-     * @return whether all chars of given chars are upper case
+     * @param str the given string
+     * @return the capitalized string
      */
-    public static boolean allUpperCase(CharSequence chars) {
-        if (isEmpty(chars)) {
-            return false;
+    public static @Nonnull String capitalize(@Nonnull CharSequence str) {
+        if (str.length() == 0) {
+            return str.toString();
         }
-        for (int i = 0; i < chars.length(); i++) {
-            if (!Character.isUpperCase(chars.charAt(i))) {
-                return false;
+        if (str.length() == 1) {
+            char c = str.charAt(0);
+            if (Character.isLowerCase(c)) {
+                return String.valueOf(Character.toUpperCase(c));
             }
         }
-        return true;
+        char c = str.charAt(0);
+        if (Character.isLowerCase(c)) {
+            StringBuilder sb = new StringBuilder(str.length());
+            sb.append(Character.toUpperCase(c));
+            sb.append(str, 1, str.length());
+            return sb.toString();
+        }
+        return str.toString();
     }
 
     /**
-     * Returns whether all chars of given chars are lower case.
+     * Uncapitalizes the given string. Specifically, if the given string's length {@code >= 2} and its chars are all
+     * upper case, the original string is also returned.
      *
-     * @param chars given chars
-     * @return whether all chars of given chars are lower case
+     * @param str the given string
+     * @return the uncapitalized string
      */
-    public static boolean allLowerCase(CharSequence chars) {
-        if (isEmpty(chars)) {
-            return false;
-        }
-        for (int i = 0; i < chars.length(); i++) {
-            if (!Character.isLowerCase(chars.charAt(i))) {
-                return false;
+    public static @Nonnull String uncapitalize(@Nonnull CharSequence str) {
+        if (str.length() == 1) {
+            char c = str.charAt(0);
+            if (Character.isUpperCase(c)) {
+                return String.valueOf(Character.toLowerCase(c));
             }
         }
-        return true;
-    }
-
-    /**
-     * Capitalizes given chars, equivalent to {@code firstCase(chars, true)}.
-     *
-     * @param chars given chars
-     * @return capitalized string
-     */
-    public static String capitalize(CharSequence chars) {
-        return firstCase(chars, true);
-    }
-
-    /**
-     * Uncapitalizes given chars, equivalent to {@code firstCase(chars, false)}.
-     *
-     * @param chars given chars
-     * @return uncapitalized string
-     */
-    public static String uncapitalize(CharSequence chars) {
-        return firstCase(chars, false);
-    }
-
-    /**
-     * Returns a String of which first char is upper or lower (according to given upper) of first char of given chars,
-     * and the rest chars are unchanged.
-     *
-     * @param chars given chars
-     * @param upper given upper
-     * @return converted string
-     */
-    public static String firstCase(CharSequence chars, boolean upper) {
-        if (isEmpty(chars)) {
-            return chars.toString();
+        if (allUpperCase(str)) {
+            return str.toString();
         }
-        if (Character.isUpperCase(chars.charAt(0)) == upper) {
-            return chars.toString();
+        char c = str.charAt(0);
+        if (Character.isUpperCase(c)) {
+            StringBuilder sb = new StringBuilder(str.length());
+            sb.append(Character.toLowerCase(c));
+            sb.append(str, 1, str.length());
+            return sb.toString();
         }
-        char[] cs = new char[chars.length()];
-        cs[0] = upper ? Character.toUpperCase(chars.charAt(0)) : Character.toLowerCase(chars.charAt(0));
-        for (int i = 1; i < chars.length(); i++) {
-            cs[i] = chars.charAt(i);
+        return str.toString();
+    }
+
+    /**
+     * Returns a String of which content is upper case of the given string.
+     *
+     * @param str the given string
+     * @return the converted string
+     */
+    public static @Nonnull String upperCase(@Nonnull CharSequence str) {
+        if (str.length() == 0) {
+            return str.toString();
+        }
+        char[] cs = new char[str.length()];
+        for (int i = 0; i < str.length(); i++) {
+            cs[i] = Character.toUpperCase(str.charAt(i));
         }
         return new String(cs);
     }
 
     /**
-     * Returns a String of which content is upper case of given chars.
+     * Returns a String of which content is lower case of the given string.
      *
-     * @param chars given chars
-     * @return converted string
+     * @param str the given string
+     * @return the converted string
      */
-    public static String upperCase(CharSequence chars) {
-        if (isEmpty(chars)) {
-            return chars.toString();
+    public static @Nonnull String lowerCase(@Nonnull CharSequence str) {
+        if (str.length() == 0) {
+            return str.toString();
         }
-        char[] cs = new char[chars.length()];
-        for (int i = 0; i < chars.length(); i++) {
-            cs[i] = Character.toUpperCase(chars.charAt(i));
-        }
-        return new String(cs);
-    }
-
-    /**
-     * Returns a String of which content is lower case of given chars.
-     *
-     * @param chars given chars
-     * @return converted string
-     */
-    public static String lowerCase(CharSequence chars) {
-        if (isEmpty(chars)) {
-            return chars.toString();
-        }
-        char[] cs = new char[chars.length()];
-        for (int i = 0; i < chars.length(); i++) {
-            cs[i] = Character.toLowerCase(chars.charAt(i));
+        char[] cs = new char[str.length()];
+        for (int i = 0; i < str.length(); i++) {
+            cs[i] = Character.toLowerCase(str.charAt(i));
         }
         return new String(cs);
     }
@@ -770,7 +687,7 @@ public class StringKit {
             ((String) str).getChars(start, end, dst, off);
         } else {
             CheckKit.checkRangeInBounds(start, end, 0, str.length());
-            CheckKit.checkRangeInBounds(off, end - start, 0, dst.length);
+            CheckKit.checkRangeInBounds(off, off + end - start, 0, dst.length);
             if (start == end) {
                 return;
             }
@@ -805,6 +722,9 @@ public class StringKit {
         } else {
             CheckKit.checkOffsetLength(src.length(), srcOff, len);
             CheckKit.checkOffsetLength(dst.length, dstOff, len);
+            if (len == 0) {
+                return;
+            }
             for (int i = 0; i < len; i++) {
                 dst[dstOff + i] = src.charAt(srcOff + i);
             }
@@ -812,212 +732,58 @@ public class StringKit {
     }
 
     /**
-     * Returns a string doesn't start with given start string. If given source string starts with given start string,
-     * remove the start chars and return; else return source string.
+     * Converts the given string to the specified number type. Supported number types are:
+     * <ul>
+     *     <li>{@link Byte}</li>
+     *     <li>{@link Short}</li>
+     *     <li>{@link Character} (Converts to {@link Integer} first, then to {@link Character})</li>
+     *     <li>{@link Integer}</li>
+     *     <li>{@link Long}</li>
+     *     <li>{@link Float}</li>
+     *     <li>{@link Double}</li>
+     *     <li>{@link BigInteger}</li>
+     *     <li>{@link BigDecimal}</li>
+     * </ul>
      *
-     * @param src   given source string
-     * @param start given start string
-     * @return removed string
+     * @param str     the given string
+     * @param numType the specified number type
+     * @param <T>     the number type
+     * @return the converted number object
+     * @throws NumberFormatException         if the given string can't be converted to the specified number type
+     * @throws UnsupportedOperationException if the given number type is not supported
      */
-    public static String removeStart(CharSequence src, CharSequence start) {
-        if (src.length() < start.length()) {
-            return src.toString();
+    public static <T> @Nonnull T toNumber(
+        @Nonnull CharSequence str, Class<T> numType
+    ) throws NumberFormatException, UnsupportedOperationException {
+        if (Byte.class.equals(numType)) {
+            return Jie.as(Byte.parseByte(str.toString()));
         }
-        for (int i = 0; i < start.length(); i++) {
-            if (src.charAt(i) != start.charAt(i)) {
-                return src.toString();
-            }
+        if (Short.class.equals(numType)) {
+            return Jie.as(Short.parseShort(str.toString()));
         }
-        return src.subSequence(start.length(), src.length()).toString();
-    }
-
-    /**
-     * Returns a string doesn't end with given end string. If given source string ends with given end string, remove the
-     * end chars and return; else return source string.
-     *
-     * @param src given source string
-     * @param end given end string
-     * @return removed string
-     */
-    public static String removeEnd(CharSequence src, CharSequence end) {
-        if (src.length() < end.length()) {
-            return src.toString();
+        if (Character.class.equals(numType)) {
+            int i = Integer.parseInt(str.toString());
+            char c = (char) i;
+            return Jie.as(c);
         }
-        for (int i = src.length() - 1, j = end.length() - 1; j >= 0; i--, j--) {
-            if (src.charAt(i) != end.charAt(j)) {
-                return src.toString();
-            }
+        if (Integer.class.equals(numType)) {
+            return Jie.as(Integer.parseInt(str.toString()));
         }
-        return src.subSequence(0, src.length() - end.length()).toString();
-    }
-
-    /**
-     * Concatenates toString of given arguments.
-     *
-     * @param args given arguments
-     * @return concatenated string
-     */
-    public static String concat(Object... args) {
-        StringBuilder builder = new StringBuilder();
-        for (Object arg : args) {
-            builder.append(arg);
+        if (Long.class.equals(numType)) {
+            return Jie.as(Long.parseLong(str.toString()));
         }
-        return builder.toString();
-    }
-
-    /**
-     * Concatenates toString of given arguments.
-     *
-     * @param args given arguments
-     * @return concatenated string
-     */
-    public static String concat(Iterable<?> args) {
-        StringBuilder builder = new StringBuilder();
-        for (Object arg : args) {
-            builder.append(arg);
+        if (Float.class.equals(numType)) {
+            return Jie.as(Float.parseFloat(str.toString()));
         }
-        return builder.toString();
-    }
-
-    /**
-     * Joins toString of given arguments with given separator.
-     *
-     * @param separator given separator
-     * @param args      given arguments
-     * @return joined string
-     */
-    public static String join(CharSequence separator, Object... args) {
-        StringJoiner joiner = new StringJoiner(separator);
-        for (Object arg : args) {
-            joiner.add(String.valueOf(arg));
+        if (Double.class.equals(numType)) {
+            return Jie.as(Double.parseDouble(str.toString()));
         }
-        return joiner.toString();
-    }
-
-    /**
-     * Joins toString of given arguments with given separator.
-     *
-     * @param separator given separator
-     * @param args      given arguments
-     * @return joined string
-     */
-    public static String join(CharSequence separator, Iterable<?> args) {
-        StringJoiner joiner = new StringJoiner(separator);
-        for (Object arg : args) {
-            joiner.add(String.valueOf(arg));
+        if (BigInteger.class.equals(numType)) {
+            return Jie.as(new BigInteger(str.toString()));
         }
-        return joiner.toString();
-    }
-
-    /**
-     * Converts given chars to int, if given chars is blank or failed to convert, return 0.
-     *
-     * @param chars given chars
-     * @return int from chars
-     */
-    public static int toInt(@Nullable CharSequence chars) {
-        return toInt(chars, 0);
-    }
-
-    /**
-     * Converts given chars to int, if given chars is blank or failed to convert, return default value.
-     *
-     * @param chars        given chars
-     * @param defaultValue default value
-     * @return int from chars
-     */
-    public static int toInt(@Nullable CharSequence chars, int defaultValue) {
-        if (isBlank(chars)) {
-            return defaultValue;
+        if (BigDecimal.class.equals(numType)) {
+            return Jie.as(new BigDecimal(str.toString()));
         }
-        try {
-            return Integer.parseInt(chars.toString());
-        } catch (Exception e) {
-            return defaultValue;
-        }
-    }
-
-    /**
-     * Converts given chars to long, if given chars is blank or failed to convert, return 0.
-     *
-     * @param chars given chars
-     * @return long from chars
-     */
-    public static long toLong(@Nullable CharSequence chars) {
-        return toLong(chars, 0);
-    }
-
-    /**
-     * Converts given chars to long, if given chars is blank or failed to convert, return default value.
-     *
-     * @param chars        given chars
-     * @param defaultValue default value
-     * @return long from chars
-     */
-    public static long toLong(@Nullable CharSequence chars, long defaultValue) {
-        if (isBlank(chars)) {
-            return defaultValue;
-        }
-        try {
-            return Integer.parseInt(chars.toString());
-        } catch (Exception e) {
-            return defaultValue;
-        }
-    }
-
-    /**
-     * Converts given chars to float, if given chars is blank or failed to convert, return 0.
-     *
-     * @param chars given chars
-     * @return float from chars
-     */
-    public static float toFloat(@Nullable CharSequence chars) {
-        return toFloat(chars, 0);
-    }
-
-    /**
-     * Converts given chars to float, if given chars is blank or failed to convert, return default value.
-     *
-     * @param chars        given chars
-     * @param defaultValue default value
-     * @return float from chars
-     */
-    public static float toFloat(@Nullable CharSequence chars, float defaultValue) {
-        if (isBlank(chars)) {
-            return defaultValue;
-        }
-        try {
-            return Float.parseFloat(chars.toString());
-        } catch (Exception e) {
-            return defaultValue;
-        }
-    }
-
-    /**
-     * Converts given chars to double, if given chars is blank or failed to convert, return 0.
-     *
-     * @param chars given chars
-     * @return double from chars
-     */
-    public static double toDouble(@Nullable CharSequence chars) {
-        return toDouble(chars, 0);
-    }
-
-    /**
-     * Converts given chars to double, if given chars is blank or failed to convert, return default value.
-     *
-     * @param chars        given chars
-     * @param defaultValue default value
-     * @return double from chars
-     */
-    public static double toDouble(@Nullable CharSequence chars, double defaultValue) {
-        if (isBlank(chars)) {
-            return defaultValue;
-        }
-        try {
-            return Double.parseDouble(chars.toString());
-        } catch (Exception e) {
-            return defaultValue;
-        }
+        throw new UnsupportedOperationException("Unsupported number type: " + numType);
     }
 }

@@ -502,39 +502,39 @@ public class Jie {
         return as(enums[index]);
     }
 
-    /**
-     * Finds resource of given resource path (starts with "/").
-     *
-     * @param resPath given resource
-     * @return url of resource of given resource path
-     */
-    public static URL findRes(String resPath) {
-        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-        return classLoader.getResource(StringKit.removeStart(resPath, "/"));
-    }
+    // /**
+    //  * Finds resource of given resource path (starts with "/").
+    //  *
+    //  * @param resPath given resource
+    //  * @return url of resource of given resource path
+    //  */
+    // public static URL findRes(String resPath) {
+    //     ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+    //     return classLoader.getResource(StringKit.removeStart(resPath, "/"));
+    // }
 
-    /**
-     * Finds all resources of given resource path (starts with "/").
-     *
-     * @param resPath given resource
-     * @return url set of resource of given resource path
-     */
-    public static Set<URL> findAllRes(String resPath) {
-        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-        try {
-            Enumeration<URL> urls = classLoader.getResources(StringKit.removeStart(resPath, "/"));
-            if (!urls.hasMoreElements()) {
-                return Collections.emptySet();
-            }
-            Set<URL> result = new LinkedHashSet<>();
-            while (urls.hasMoreElements()) {
-                result.add(urls.nextElement());
-            }
-            return result;
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-    }
+    // /**
+    //  * Finds all resources of given resource path (starts with "/").
+    //  *
+    //  * @param resPath given resource
+    //  * @return url set of resource of given resource path
+    //  */
+    // public static Set<URL> findAllRes(String resPath) {
+    //     ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+    //     try {
+    //         Enumeration<URL> urls = classLoader.getResources(StringKit.removeStart(resPath, "/"));
+    //         if (!urls.hasMoreElements()) {
+    //             return Collections.emptySet();
+    //         }
+    //         Set<URL> result = new LinkedHashSet<>();
+    //         while (urls.hasMoreElements()) {
+    //             result.add(urls.nextElement());
+    //         }
+    //         return result;
+    //     } catch (IOException e) {
+    //         throw new IllegalStateException(e);
+    //     }
+    // }
 
     /**
      * Maps source object from source type to target type, return null if mapping is unsupported or the result itself is

@@ -1,13 +1,18 @@
 package tests.base.string;
 
 import org.testng.annotations.Test;
+import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.exception.UnknownArrayTypeException;
 import xyz.sunqian.common.base.string.StringKit;
 import xyz.sunqian.common.base.string.StringView;
+import xyz.sunqian.test.DataTest;
 import xyz.sunqian.test.PrintTest;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.nio.CharBuffer;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -16,18 +21,19 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
-public class StringTest implements PrintTest {
+public class StringTest implements DataTest, PrintTest {
 
     @Test
     public void testIndexOf() {
         testIndexOf("123", "123");
         testIndexOf(StringView.of("123"), "123");
         testIndexOf(StringView.of("123"), "1234");
+        assertEquals(StringKit.indexOf(StringView.of("123"), "", 100), 3);
         assertEquals(StringKit.indexOf("123", StringView.of("2")), "123".indexOf("2"));
         assertEquals(StringKit.lastIndexOf("123", StringView.of("2")), "123".lastIndexOf("2"));
     }
 
-    public void testIndexOf(CharSequence chars, CharSequence subChars) {
+    private void testIndexOf(CharSequence chars, CharSequence subChars) {
         for (int i = 0; i < subChars.length(); i++) {
             for (int j = i; j < subChars.length() + 1; j++) {
                 CharSequence sub = subChars.subSequence(i, j);
@@ -87,7 +93,7 @@ public class StringTest implements PrintTest {
         testStartsEndsWith("123", "123");
     }
 
-    public void testStartsEndsWith(CharSequence chars, CharSequence subChars) {
+    private void testStartsEndsWith(CharSequence chars, CharSequence subChars) {
         for (int i = 0; i < subChars.length(); i++) {
             for (int j = i; j < subChars.length() + 1; j++) {
                 CharSequence sub = subChars.subSequence(i, j);
@@ -159,6 +165,8 @@ public class StringTest implements PrintTest {
     @Test
     public void testCharsCopy() {
         testCharsCopy("12345");
+        testCharsCopy(StringView.of("12345"));
+        // error
         expectThrows(IndexOutOfBoundsException.class, () ->
             StringKit.charsCopy("12345", 0, 6, new char[5], 0));
         expectThrows(IndexOutOfBoundsException.class, () ->
@@ -171,14 +179,42 @@ public class StringTest implements PrintTest {
             StringKit.charsCopy("12345", 8, new char[5], 0, 5));
         expectThrows(IndexOutOfBoundsException.class, () ->
             StringKit.charsCopy("12345", 0, new char[5], 0, 6));
+        expectThrows(IndexOutOfBoundsException.class, () ->
+            StringKit.charsCopy("12345", 0, new char[5], 6, 0));
+        expectThrows(IndexOutOfBoundsException.class, () ->
+            StringKit.charsCopy("12345", 6, new char[5], 0, 0));
+        expectThrows(IndexOutOfBoundsException.class, () ->
+            StringKit.charsCopy("12345", 0, new char[5], 0, 6));
+
+        expectThrows(IndexOutOfBoundsException.class, () ->
+            StringKit.charsCopy(StringView.of("12345"), 0, 6, new char[5], 0));
+        expectThrows(IndexOutOfBoundsException.class, () ->
+            StringKit.charsCopy(StringView.of("12345"), 0, 5, new char[5], 1));
+        expectThrows(IndexOutOfBoundsException.class, () ->
+            StringKit.charsCopy(StringView.of("12345"), 5, 0, new char[5], 0));
+        expectThrows(IndexOutOfBoundsException.class, () ->
+            StringKit.charsCopy(StringView.of("12345"), 0, new char[1], 0, 5));
+        expectThrows(IndexOutOfBoundsException.class, () ->
+            StringKit.charsCopy(StringView.of("12345"), 8, new char[5], 0, 5));
+        expectThrows(IndexOutOfBoundsException.class, () ->
+            StringKit.charsCopy(StringView.of("12345"), 0, new char[5], 0, 6));
+        expectThrows(IndexOutOfBoundsException.class, () ->
+            StringKit.charsCopy(StringView.of("12345"), 0, new char[5], 6, 0));
+        expectThrows(IndexOutOfBoundsException.class, () ->
+            StringKit.charsCopy(StringView.of("12345"), 6, new char[5], 0, 0));
+        expectThrows(IndexOutOfBoundsException.class, () ->
+            StringKit.charsCopy(StringView.of("12345"), 0, new char[5], 0, 6));
     }
 
-    public void testCharsCopy(CharSequence chars) {
+    private void testCharsCopy(CharSequence chars) {
         for (int i = 0; i < chars.length(); i++) {
             for (int j = i; j <= chars.length(); j++) {
                 for (int k = 0; k < 3; k++) {
                     char[] dst = new char[j - i + k];
                     StringKit.charsCopy(chars, i, j, dst, k);
+                    char[] dstCopy = new char[j - i + k];
+                    StringKit.charsCopy(chars, i, dstCopy, k, j - i);
+                    assertEquals(dst, dstCopy);
                     char[] dst1 = new char[j - i + k];
                     chars.toString().getChars(i, j, dst1, k);
                     assertEquals(dst, dst1);
@@ -188,5 +224,82 @@ public class StringTest implements PrintTest {
                 }
             }
         }
+    }
+
+    @Test
+    public void testToNumber() {
+        assertEquals(StringKit.toNumber("-123", Byte.class), (byte) -123);
+        assertEquals(StringKit.toNumber("-123", Short.class), (short) -123L);
+        assertEquals(StringKit.toNumber("123", Character.class), (char) 123);
+        assertEquals(StringKit.toNumber("123", Integer.class), 123);
+        assertEquals(StringKit.toNumber("123", Long.class), 123L);
+        assertEquals(StringKit.toNumber("123", Float.class), 123f);
+        assertEquals(StringKit.toNumber("123", Double.class), 123.0);
+        assertEquals(StringKit.toNumber("123", BigInteger.class), new BigInteger("123"));
+        assertEquals(StringKit.toNumber("123", BigDecimal.class), new BigDecimal("123"));
+        expectThrows(NumberFormatException.class, () -> StringKit.toNumber("kkk", Integer.class));
+        expectThrows(UnsupportedOperationException.class, () -> StringKit.toNumber("kkk", String.class));
+    }
+
+    @Test
+    public void testEmptyAndBlank() {
+        assertTrue(StringKit.isBlank(""));
+        assertTrue(StringKit.isBlank(" "));
+        assertTrue(StringKit.isBlank(null));
+        assertFalse(StringKit.isBlank(" a "));
+        assertFalse(StringKit.isNonBlank(""));
+        assertFalse(StringKit.isNonBlank(" "));
+        assertFalse(StringKit.isNonBlank(null));
+        assertTrue(StringKit.isNonBlank(" a "));
+        assertTrue(StringKit.isNonEmpty(" a "));
+        assertTrue(StringKit.anyEmpty(" ", ""));
+        assertFalse(StringKit.anyEmpty(" ", " "));
+        assertTrue(StringKit.allEmpty("", ""));
+        assertFalse(StringKit.allEmpty("", " "));
+        assertTrue(StringKit.anyBlank("a", ""));
+        assertFalse(StringKit.anyBlank("a", "a"));
+        assertTrue(StringKit.allBlank(" ", ""));
+        assertFalse(StringKit.allBlank("", "a"));
+    }
+
+    @Test
+    public void testEncode() {
+        char[] chars = randomChars(20, 'a', 'z');
+        byte[] en = new String(chars).getBytes(CharsKit.defaultCharset());
+        assertEquals(StringKit.getBytes(chars), en);
+        assertEquals(StringKit.getBytes(CharBuffer.wrap(chars)), en);
+    }
+
+    @Test
+    public void testCase() {
+        // case
+        assertTrue(StringKit.allUpperCase("ABC"));
+        assertFalse(StringKit.allUpperCase("ABc"));
+        assertFalse(StringKit.allUpperCase("AB中"));
+        assertTrue(StringKit.allUpperCase(""));
+        assertTrue(StringKit.allLowerCase("abc"));
+        assertFalse(StringKit.allLowerCase("ABc"));
+        assertFalse(StringKit.allLowerCase("ab中"));
+        assertTrue(StringKit.allLowerCase(""));
+        assertEquals(StringKit.upperCase("abc"), "ABC");
+        assertEquals(StringKit.upperCase("aBc"), "ABC");
+        assertEquals(StringKit.upperCase("abc中"), "ABC中");
+        assertEquals(StringKit.upperCase(""), "");
+        assertEquals(StringKit.lowerCase("ABC"), "abc");
+        assertEquals(StringKit.lowerCase("aBc"), "abc");
+        assertEquals(StringKit.lowerCase("aBc中"), "abc中");
+        assertEquals(StringKit.lowerCase(""), "");
+        // capitalize
+        assertEquals(StringKit.capitalize("abc"), "Abc");
+        assertEquals(StringKit.capitalize("a"), "A");
+        assertEquals(StringKit.capitalize("A"), "A");
+        assertEquals(StringKit.capitalize(""), "");
+        assertEquals(StringKit.capitalize("ABc"), "ABc");
+        assertEquals(StringKit.uncapitalize("Abc"), "abc");
+        assertEquals(StringKit.uncapitalize("A"), "a");
+        assertEquals(StringKit.uncapitalize("a"), "a");
+        assertEquals(StringKit.uncapitalize(""), "");
+        assertEquals(StringKit.uncapitalize("ABc"), "aBc");
+        assertEquals(StringKit.uncapitalize("ABC"), "ABC");
     }
 }

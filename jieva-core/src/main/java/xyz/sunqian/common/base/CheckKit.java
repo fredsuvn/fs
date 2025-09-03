@@ -2,7 +2,6 @@ package xyz.sunqian.common.base;
 
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.exception.UnreachablePointException;
-import xyz.sunqian.common.base.string.StringKit;
 
 import java.util.NoSuchElementException;
 
@@ -117,19 +116,6 @@ public class CheckKit {
     }
 
     /**
-     * Checks whether given obj is null, if it is, throw a {@link NullPointerException} with message concatenated from
-     * given message arguments.
-     *
-     * @param obj         given object
-     * @param messageArgs given message arguments
-     */
-    public static void checkNull(@Nullable Object obj, Object... messageArgs) throws NullPointerException {
-        if (obj == null) {
-            throw new NullPointerException(StringKit.concat(messageArgs));
-        }
-    }
-
-    /**
      * Checks whether given expression is true, if it is not, throw a {@link NullPointerException}.
      *
      * @param expr given expression
@@ -149,19 +135,6 @@ public class CheckKit {
     public static void checkNull(boolean expr, CharSequence message) throws NullPointerException {
         if (!expr) {
             throw new NullPointerException(message.toString());
-        }
-    }
-
-    /**
-     * Checks whether given expression is true, if it is not, throw a {@link NullPointerException} with message
-     * concatenated from given message arguments.
-     *
-     * @param expr        given expression
-     * @param messageArgs given message arguments
-     */
-    public static void checkNull(boolean expr, Object... messageArgs) throws NullPointerException {
-        if (!expr) {
-            throw new NullPointerException(StringKit.concat(messageArgs));
         }
     }
 
@@ -190,19 +163,6 @@ public class CheckKit {
     }
 
     /**
-     * Checks whether given expression is true, if it is not, throw an {@link IllegalArgumentException} with given
-     * message concatenated from given message arguments.
-     *
-     * @param expr        given expression
-     * @param messageArgs given message arguments
-     */
-    public static void checkArgument(boolean expr, Object... messageArgs) throws IllegalArgumentException {
-        if (!expr) {
-            throw new IllegalArgumentException(StringKit.concat(messageArgs));
-        }
-    }
-
-    /**
      * Checks whether given expression is true, if it is not, throw an {@link IllegalStateException}.
      *
      * @param expr given expression
@@ -223,19 +183,6 @@ public class CheckKit {
     public static void checkState(boolean expr, CharSequence message) throws IllegalStateException {
         if (!expr) {
             throw new IllegalStateException(message.toString());
-        }
-    }
-
-    /**
-     * Checks whether given expression is true, if it is not, throw an {@link IllegalStateException} with given message
-     * concatenated from given message arguments.
-     *
-     * @param expr        given expression
-     * @param messageArgs given message arguments
-     */
-    public static void checkState(boolean expr, Object... messageArgs) throws IllegalArgumentException {
-        if (!expr) {
-            throw new IllegalStateException(StringKit.concat(messageArgs));
         }
     }
 
@@ -263,18 +210,6 @@ public class CheckKit {
         }
     }
 
-    /**
-     * Checks whether given expression is true, if it is not, throw an {@link UnsupportedOperationException} with given
-     * message concatenated from given message arguments.
-     *
-     * @param expr        given expression
-     * @param messageArgs given message arguments
-     */
-    public static void checkSupported(boolean expr, Object... messageArgs) throws IllegalArgumentException {
-        if (!expr) {
-            throw new UnsupportedOperationException(StringKit.concat(messageArgs));
-        }
-    }
 
     /**
      * Checks whether given expression is true, if it is not, throw a {@link NoSuchElementException}.
@@ -297,19 +232,6 @@ public class CheckKit {
     public static void checkElement(boolean expr, CharSequence message) throws NoSuchElementException {
         if (!expr) {
             throw new NoSuchElementException(message.toString());
-        }
-    }
-
-    /**
-     * Checks whether given expression is true, if it is not, throw a {@link IllegalArgumentException} with given
-     * message concatenated from given message arguments.
-     *
-     * @param expr        given expression
-     * @param messageArgs given message arguments
-     */
-    public static void checkElement(boolean expr, Object... messageArgs) throws IllegalArgumentException {
-        if (!expr) {
-            throw new NoSuchElementException(StringKit.concat(messageArgs));
         }
     }
 
