@@ -5,6 +5,7 @@ import xyz.sunqian.common.base.Jie;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * Represents the context of the current thread, based on {@link ThreadLocal}.
@@ -25,8 +26,27 @@ public class ThreadContext {
      * @return the value to which the specified key is mapped in the context of the current thread, or {@code null} if
      * the context contains no mapping for the key
      */
-    public static <K, V> V get(K key) {
+    public static <K, V> V get(@Nonnull K key) {
         return Jie.as(asMap().get(key));
+    }
+
+    /**
+     * Returns the value to which the specified key is mapped in the context of the current thread. If the specified key
+     * is not already associated with a value (or is mapped to {@code null}), attempts to compute its value using the
+     * given mapping function and enters it into this map unless {@code null}. If the function returns {@code null} no
+     * mapping is recorded. The behavior of this method is equivalent to: {@code asMap().computeIfAbsent(key, func)}.
+     *
+     * @param key  the specified key
+     * @param func the given mapping function
+     * @param <K>  the key type
+     * @param <V>  the value type
+     * @return the value to which the specified key is mapped in the context of the current thread, or a new value
+     * computed by the given mapping function if the context contains no mapping for the key
+     * @see Map#computeIfAbsent(Object, Function)
+     */
+    public static <K, V> V get(@Nonnull K key, @Nonnull Function<? super @Nonnull K, ? extends V> func) {
+        Map<K, V> map = Jie.as(asMap());
+        return map.computeIfAbsent(key, func);
     }
 
     /**
@@ -39,7 +59,7 @@ public class ThreadContext {
      * @param <V>   the value type
      * @return the old value or {@code null} if no old mapping
      */
-    public static <K, V> V set(K key, V value) {
+    public static <K, V> V set(@Nonnull K key, V value) {
         return Jie.as(asMap().put(key, value));
     }
 

@@ -3,11 +3,9 @@ package xyz.sunqian.common.base.logging;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.base.lang.TraceKit;
 import xyz.sunqian.common.base.time.TimeKit;
 
 import java.util.Date;
-import java.util.List;
 
 final class LoggingBack {
 
@@ -70,8 +68,8 @@ final class LoggingBack {
                 return;
             }
             try {
-                List<StackTraceElement> traceList = TraceKit.stackTrace();
-                StackTraceElement caller = Jie.nonnull(getCallerTrace(methodName, traceList), NULL_TRACE);
+                StackTraceElement[] stackElements = Thread.currentThread().getStackTrace();
+                StackTraceElement caller = Jie.nonnull(getCallerTrace(methodName, stackElements), NULL_TRACE);
                 appendable.append(TimeKit.format(new Date()))
                     .append("[")
                     .append(level.levelName())
@@ -99,20 +97,20 @@ final class LoggingBack {
 
         private @Nullable StackTraceElement getCallerTrace(
             @Nonnull String methodName,
-            @Nonnull List<@Nonnull StackTraceElement> traceList
+            @Nonnull StackTraceElement[] stackElements
         ) {
             int i = -1;
-            for (StackTraceElement element : traceList) {
+            for (StackTraceElement element : stackElements) {
                 i++;
                 if (getClass().getName().equals(element.getClassName())
                     && methodName.equals(element.getMethodName())) {
                     break;
                 }
             }
-            if (i < 0 || i + 1 >= traceList.size()) {
+            if (i < 0 || i + 1 >= stackElements.length) {
                 return null;
             }
-            return traceList.get(i + 1);
+            return stackElements[i + 1];
         }
     }
 }

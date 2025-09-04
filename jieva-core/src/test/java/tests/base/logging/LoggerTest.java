@@ -5,8 +5,6 @@ import xyz.sunqian.common.base.logging.SimpleLogger;
 import xyz.sunqian.test.ErrorAppender;
 
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.List;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
@@ -33,13 +31,14 @@ public class LoggerTest {
         cusLogger.trace("This", " is ", "a trace message!");
         SimpleLogger errLogger = SimpleLogger.newLogger(SimpleLogger.Level.TRACE, new ErrorAppender());
         expectThrows(IllegalStateException.class, () -> errLogger.info("This", " is ", "a fatal message!"));
-        Method getCallerTrace = sysLogger.getClass().getDeclaredMethod("getCallerTrace", String.class, List.class);
+        Method getCallerTrace = sysLogger.getClass()
+            .getDeclaredMethod("getCallerTrace", String.class, StackTraceElement[].class);
         getCallerTrace.setAccessible(true);
-        assertNull(getCallerTrace.invoke(sysLogger, "info", Collections.emptyList()));
-        assertNull(getCallerTrace.invoke(sysLogger, "info", Collections.singletonList(
+        assertNull(getCallerTrace.invoke(sysLogger, "info", new StackTraceElement[0]));
+        assertNull(getCallerTrace.invoke(sysLogger, "info", new StackTraceElement[]{
             new StackTraceElement("xyz.sunqian.common.base.logging.SimpleLoggerImpl",
                 "info",
-                "ErrorAppender.java", 1)))
-        );
+                "ErrorAppender.java", 1)}
+        ));
     }
 }
