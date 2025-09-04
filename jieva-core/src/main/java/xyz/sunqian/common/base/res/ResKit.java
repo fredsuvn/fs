@@ -1,5 +1,7 @@
 package xyz.sunqian.common.base.res;
 
+import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.collect.CollectKit;
 import xyz.sunqian.common.collect.SetKit;
@@ -21,9 +23,9 @@ public class ResKit {
      * doesn't expect the given path to start with "/".
      *
      * @param path the given resource path
-     * @return the resource url of the given resource path
+     * @return the resource url of the given resource path, or {@code null} if not found
      */
-    public static URL findResource(String path) {
+    public static @Nullable URL findResource(@Nonnull String path) {
         ClassLoader classLoader = ClassLoader.getSystemClassLoader();
         return classLoader.getResource(path);
     }
@@ -33,9 +35,9 @@ public class ResKit {
      * libs, and doesn't expect the given path to start with "/".
      *
      * @param path the given resource path
-     * @return all resource urls of the given resource path
+     * @return all resource urls of the given resource path, may be empty if not found
      */
-    public static Set<URL> findAllRes(String path) throws IORuntimeException {
+    public static @Nonnull Set<@Nonnull URL> findResources(@Nonnull String path) throws IORuntimeException {
         ClassLoader classLoader = ClassLoader.getSystemClassLoader();
         Enumeration<URL> urls = Jie.uncheck(() -> classLoader.getResources(path), IORuntimeException::new);
         return SetKit.toSet(() -> CollectKit.asIterator(urls));
