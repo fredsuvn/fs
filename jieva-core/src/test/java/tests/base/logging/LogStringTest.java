@@ -5,7 +5,7 @@ import xyz.sunqian.common.base.logging.LogString;
 
 import static org.testng.Assert.assertEquals;
 
-public class LoggingTest {
+public class LogStringTest {
 
     @Test
     public void testLogString() {

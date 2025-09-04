@@ -1,85 +1,88 @@
 package xyz.sunqian.common.base.logging;
 
+import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.lang.TraceKit;
 import xyz.sunqian.common.base.time.TimeKit;
 
 import java.util.Date;
-import java.util.Objects;
+import java.util.List;
 
 final class LoggingBack {
 
-    static final SimpleLog DEFAULT = new SimpleLogImpl(SimpleLog.LEVEL_INFO, System.out);
+    static @Nonnull SimpleLogger SYSTEM = newLogger(SimpleLogger.Level.INFO, System.out);
 
-    static final class SimpleLogImpl implements SimpleLog {
+    static @Nonnull SimpleLogger newLogger(@Nonnull SimpleLogger.Level level, @Nonnull Appendable appendable) {
+        return new SimpleLoggerImpl(level, appendable);
+    }
 
-        private final int level;
-        private final Appendable appendable;
+    private static final class SimpleLoggerImpl implements SimpleLogger {
 
-        SimpleLogImpl(int level, Appendable appendable) {
+        private static final @Nonnull StackTraceElement NULL_TRACE = new StackTraceElement(
+            "null", "null", "null", -1);
+
+        private final @Nonnull Level level;
+        private final @Nonnull Appendable appendable;
+
+        private SimpleLoggerImpl(@Nonnull Level level, @Nonnull Appendable appendable) {
             this.level = level;
             this.appendable = appendable;
         }
 
         @Override
-        public void trace(Object... message) {
-            log0(LEVEL_TRACE, message);
-        }
-
-        @Override
-        public void debug(Object... message) {
-            log0(LEVEL_DEBUG, message);
-        }
-
-        @Override
-        public void info(Object... message) {
-            log0(LEVEL_INFO, message);
-        }
-
-        @Override
-        public void warn(Object... message) {
-            log0(LEVEL_WARN, message);
+        public void fatal(Object... message) {
+            log(Level.FATAL, "fatal", message);
         }
 
         @Override
         public void error(Object... message) {
-            log0(LEVEL_ERROR, message);
+            log(Level.ERROR, "error", message);
         }
 
         @Override
-        public void log(int level, Object... message) {
-            log0(level, message);
+        public void warn(Object... message) {
+            log(Level.WARN, "warn", message);
         }
 
-        private void log0(int level, Object... message) {
-            if (level < this.level) {
+        @Override
+        public void info(Object... message) {
+            log(Level.INFO, "info", message);
+        }
+
+        @Override
+        public void debug(Object... message) {
+            log(Level.DEBUG, "debug", message);
+        }
+
+        @Override
+        public void trace(Object... message) {
+            log(Level.TRACE, "trace", message);
+        }
+
+        @Override
+        public @Nonnull Level level() {
+            return level;
+        }
+
+        private void log(Level level, @Nonnull String methodName, Object... message) {
+            if (level.levelValue() < this.level.levelValue()) {
                 return;
             }
-            StackTraceElement trace = null;
-            // TraceKit.findCallerTrace(0, t -> {
-            //     if (!Objects.equals(t.getClassName(), SimpleLogImpl.class.getName())) {
-            //         return false;
-            //     }
-            //     return Objects.equals(t.getMethodName(), "log")
-            //         || Objects.equals(t.getMethodName(), "trace")
-            //         || Objects.equals(t.getMethodName(), "debug")
-            //         || Objects.equals(t.getMethodName(), "info")
-            //         || Objects.equals(t.getMethodName(), "warn")
-            //         || Objects.equals(t.getMethodName(), "error");
-            // });
             try {
+                List<StackTraceElement> traceList = TraceKit.stackTrace();
+                StackTraceElement caller = Jie.nonnull(getCallerTrace(methodName, traceList), NULL_TRACE);
                 appendable.append(TimeKit.format(new Date()))
                     .append("[")
-                    .append(levelToString(level))
+                    .append(level.levelName())
                     .append("]");
-                if (trace != null) {
-                    appendable.append("@")
-                        .append(trace.getClassName())
-                        .append(".")
-                        .append(trace.getMethodName())
-                        .append("(")
-                        .append(String.valueOf(trace.getLineNumber()))
-                        .append(")");
-                }
+                appendable.append("@")
+                    .append(caller.getClassName())
+                    .append(".")
+                    .append(caller.getMethodName())
+                    .append("(")
+                    .append(String.valueOf(caller.getLineNumber()))
+                    .append(")");
                 Thread thread = Thread.currentThread();
                 appendable.append("-")
                     .append("[")
@@ -94,25 +97,22 @@ final class LoggingBack {
             }
         }
 
-        @Override
-        public int getLevel() {
-            return this.level;
-        }
-
-        private String levelToString(int level) {
-            switch (level) {
-                case LEVEL_TRACE:
-                    return "TRACE";
-                case LEVEL_DEBUG:
-                    return "DEBUG";
-                case LEVEL_INFO:
-                    return "INFO";
-                case LEVEL_WARN:
-                    return "WARN";
-                case LEVEL_ERROR:
-                    return "ERROR";
+        private @Nullable StackTraceElement getCallerTrace(
+            @Nonnull String methodName,
+            @Nonnull List<@Nonnull StackTraceElement> traceList
+        ) {
+            int i = -1;
+            for (StackTraceElement element : traceList) {
+                i++;
+                if (getClass().getName().equals(element.getClassName())
+                    && methodName.equals(element.getMethodName())) {
+                    break;
+                }
             }
-            return String.valueOf(level);
+            if (i < 0 || i + 1 >= traceList.size()) {
+                return null;
+            }
+            return traceList.get(i + 1);
         }
     }
 }
