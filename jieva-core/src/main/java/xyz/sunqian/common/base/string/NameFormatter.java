@@ -1,12 +1,9 @@
 package xyz.sunqian.common.base.string;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.value.Span;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * Name formatter, used to parse or format a given name. A name formatter represents a formatting scheme, such as
@@ -17,40 +14,52 @@ import java.util.stream.Collectors;
 public interface NameFormatter {
 
     /**
-     * Returns a new {@link NameFormatter} for {@code Camel Case} (e.g. someName, SomeName). The returned instance
-     * applies {@code Camel Case} parsing to sequences of letters ({@code a-z} and {@code A-Z}), but treats digits
+     * Returns a new {@link NameFormatter} for lower camel case (e.g. {@code someName}). The returned instance applies
+     * the lower camel case to parse letters in {@code a-z} and {@code A-Z}, but treats digits ({@code 0-9}) and other
+     * characters as separate words.
+     *
+     * @return a new {@link NameFormatter} for lower camel case (e.g. {@code someName})
+     */
+    static @Nonnull NameFormatter lowerCamel() {
+        return NameFormatterBack.camelCase(false);
+    }
+
+    /**
+     * Returns a new {@link NameFormatter} for upper camel case (e.g. {@code SomeName}), also called pascal case. The
+     * returned instance applies the upper camel case to parse letters in {@code a-z} and {@code A-Z}, but treats digits
      * ({@code 0-9}) and other characters as separate words.
      *
-     * @param capitalized specifies whether the first letter is capitalized (e.g. SomeName), and this is also called
-     *                    {@code Pascal Case}
-     * @return a new {@link NameFormatter} for {@code Camel Case} (e.g. someName, SomeName)
+     * @return a new {@link NameFormatter} for upper camel case (e.g. {@code SomeName})
      */
-    static @Nonnull NameFormatter camelCase(boolean capitalized) {
-        return NameFormatterBack.camelCase(capitalized);
+    static @Nonnull NameFormatter upperCamel() {
+        return NameFormatterBack.camelCase(true);
     }
 
     /**
-     * Returns a new {@link NameFormatter} base on the specified delimiter (e.g. some-name, some_name).
+     * Returns a new {@link NameFormatter} base on the specified delimiter (e.g. {@code some-name}, {@code some_name}).
      *
      * @param delimiter the specified delimiter
-     * @return a new {@link NameFormatter} base on the specified delimiter (e.g. some-name, some_name)
+     * @return a new {@link NameFormatter} base on the specified delimiter (e.g. {@code some-name}, {@code some_name})
+     * @throws IllegalArgumentException if the delimiter is empty
      */
-    static @Nonnull NameFormatter delimiterCase(@Nonnull CharSequence delimiter) {
-        return delimiterCase(delimiter, null);
+    static @Nonnull NameFormatter delimiterCase(
+        @Nonnull CharSequence delimiter
+    ) throws IllegalArgumentException {
+        return delimiterCase(delimiter, simpleAppender());
     }
 
     /**
-     * Returns a new {@link NameFormatter} base on the specified delimiter (e.g. some-name, some_name).
+     * Returns a new {@link NameFormatter} base on the specified delimiter (e.g. {@code some-name}, {@code some_name}).
      *
-     * @param delimiter    the specified delimiter
-     * @param wordAppender the word appender used in {@link #join(CharSequence, List)} method, for appending each word
-     *                     into the specified string builder
-     * @return a new {@link NameFormatter} base on the specified delimiter (e.g. some-name, some_name)
+     * @param delimiter the specified delimiter, can not be empty
+     * @param appender  the appender used to append each word into the destination appendable object
+     * @return a new {@link NameFormatter} base on the specified delimiter (e.g. {@code some-name}, {@code some_name})
+     * @throws IllegalArgumentException if the delimiter is empty
      */
     static @Nonnull NameFormatter delimiterCase(
-        @Nonnull CharSequence delimiter, @Nullable NameFormatter.WordAppender wordAppender
-    ) {
-        return NameFormatterBack.delimiterCase(delimiter, wordAppender);
+        @Nonnull CharSequence delimiter, @Nonnull NameFormatter.Appender appender
+    ) throws IllegalArgumentException {
+        return NameFormatterBack.delimiterCase(delimiter, appender);
     }
 
     /**
@@ -65,89 +74,140 @@ public interface NameFormatter {
     }
 
     /**
-     * Parses the given name, splits it into a list of words by scheme of this formatter.
+     * Returns an instance of {@link NameFormatter.Appender} which simply adds the word without any modifications.
      *
-     * @param name the given name
-     * @return a list of words split from the given name
-     * @throws NameFormatException if failed to parse the given name
+     * @return an instance of {@link NameFormatter.Appender} which simply adds the word without any modifications
      */
-    default @Nonnull List<@Nonnull String> parse(@Nonnull CharSequence name) throws NameFormatException {
-        List<Span> spans = tokenize(name);
-        return spans.stream()
-            .map(span -> name.subSequence(span.startIndex(), span.endIndex()).toString())
-            .collect(Collectors.toList());
+    static @Nonnull NameFormatter.Appender simpleAppender() {
+        return NameFormatterBack.simpleAppender();
     }
 
     /**
-     * Parses the given name, splits it into a list of words by scheme of this formatter. Returns a list of
+     * Parses the given name, splits it into an array of words by scheme of this formatter.
+     *
+     * @param name the given name
+     * @return an array of words split from the given name
+     * @throws NameFormatException if failed to parse the given name
+     */
+    default @Nonnull String @Nonnull [] parse(@Nonnull CharSequence name) throws NameFormatException {
+        Span[] spans = tokenize(name);
+        if (spans.length <= 1) {
+            return new String[]{name.toString()};
+        }
+        String[] ret = new String[spans.length];
+        for (int i = 0; i < spans.length; i++) {
+            ret[i] = name.subSequence(spans[i].startIndex(), spans[i].endIndex()).toString();
+        }
+        return ret;
+    }
+
+    /**
+     * Parses the given name, splits it into an array of words by scheme of this formatter. Returns an array of
      * {@link Span}s define the range of each word within the given name.
      *
      * @param name the given name
-     * @return a list of {@link Span}s define the range of each word within the given name
+     * @return an array of {@link Span}s define the range of each word within the given name
      * @throws NameFormatException if failed to parse the given name
      */
     @Nonnull
-    List<@Nonnull Span> tokenize(@Nonnull CharSequence name) throws NameFormatException;
+    Span @Nonnull [] tokenize(@Nonnull CharSequence name) throws NameFormatException;
 
     /**
-     * Joins the words into a name by rules of this name spec. The words are specified by the list of {@link Span} that
-     * define the range of each word within the given original name.
+     * Joins the given words into a name by rules of this name formatter.
      *
-     * @param originalName the given original name where the word spans are derived
-     * @param wordSpans    the list of {@link Span} that define the range of each word within the given original name
-     * @return a name joined from the words by rules of this name spec
-     * @throws UnsupportedOperationException if this name spec does not support the join operation for the given words
+     * @param words the given words
+     * @return a name joined by the given words by rules of this name formatter
+     * @throws NameFormatException if failed to join the words
      */
-    @Nonnull
-    String join(
-        @Nonnull CharSequence originalName, @Nonnull List<@Nonnull Span> wordSpans
-    ) throws UnsupportedOperationException;
-
-    /**
-     * Converts the given name from this name spec to the other specified name spec. This method is equivalent to:
-     * <pre>
-     * return otherSpec.join(name, split(name));
-     * </pre>
-     *
-     * @param otherSpec the other specified name spec
-     * @param name      the given name
-     * @return the converted name
-     * @throws UnsupportedOperationException if the conversion is not supported for the given name
-     * @see #tokenize(CharSequence)
-     * @see #join(CharSequence, List)
-     */
-    default @Nonnull String to(
-        @Nonnull NameFormatter otherSpec, @Nonnull CharSequence name
-    ) throws UnsupportedOperationException {
-        if (Objects.equals(this, otherSpec)) {
-            return name.toString();
-        }
-        return otherSpec.join(name, tokenize(name));
+    default @Nonnull String format(@Nonnull CharSequence @Nonnull ... words) throws NameFormatException {
+        StringBuilder sb = new StringBuilder();
+        format(words, sb);
+        return sb.toString();
     }
 
     /**
-     * Appender for appending each word split by {@link #tokenize(CharSequence)} into a specified {@link Appendable}.
-     * This interface is typically used in {@link #join(CharSequence, List)}.
+     * Joins the given words into a name by rules of this name formatter. The joined name will be appended to the
+     * specified destination appendable.
+     *
+     * @param words the given words
+     * @param dst   the specified destination appendable
+     * @throws NameFormatException if failed to join the words
      */
-    interface WordAppender {
+    void format(
+        @Nonnull CharSequence @Nonnull [] words,
+        @Nonnull Appendable dst
+    ) throws NameFormatException;
 
-        static @Nonnull WordAppender simpleAppender() {
-            return NameFormatterBack.simpleAppender();
+    /**
+     * Joins the words into a name by rules of this name formatter. The words are specified by the array of {@link Span}
+     * that define the range of each word within the given original name.
+     *
+     * @param originalName the given original name where the word spans are derived
+     * @param wordSpans    the array of {@link Span} that define the range of each word within the given original name
+     * @return a name joined from the words by rules of this name formatter
+     * @throws NameFormatException if failed to join the words
+     */
+    default @Nonnull String format(
+        @Nonnull CharSequence originalName, @Nonnull Span @Nonnull [] wordSpans
+    ) throws NameFormatException {
+        StringBuilder sb = new StringBuilder(originalName.length());
+        format(originalName, wordSpans, sb);
+        return sb.toString();
+    }
+
+    /**
+     * Joins the words into a name by rules of this name formatter. The words are specified by the array of {@link Span}
+     * that define the range of each word within the given original name. The joined name will be appended to the
+     * specified destination appendable.
+     *
+     * @param originalName the given original name where the word spans are derived
+     * @param wordSpans    the array of {@link Span} that define the range of each word within the given original name
+     * @param dst          the specified destination appendable
+     * @throws NameFormatException if failed to join the words
+     */
+    void format(
+        @Nonnull CharSequence originalName,
+        @Nonnull Span @Nonnull [] wordSpans,
+        @Nonnull Appendable dst
+    ) throws NameFormatException;
+
+    /**
+     * Converts the given name from this name formatter to the other specified name formatter. This method is equivalent
+     * to: {@code otherFormatter.format(name, tokenize(name))}.
+     *
+     * @param name           the given name
+     * @param otherFormatter the other specified name formatter
+     * @return the converted name
+     * @throws NameFormatException if the conversion is not supported for the given name
+     */
+    default @Nonnull String format(
+        @Nonnull CharSequence name, @Nonnull NameFormatter otherFormatter
+    ) throws NameFormatException {
+        if (Objects.equals(this, otherFormatter)) {
+            return name.toString();
         }
+        return otherFormatter.format(name, tokenize(name));
+    }
+
+    /**
+     * Appender for appending each word split by {@link #tokenize(CharSequence)} into the specified {@link Appendable}.
+     */
+    interface Appender {
 
         /**
-         * Appends the word into the specified {@link StringBuilder}, the word is specified by the given span that
-         * define the range of the word within the given original name.
+         * Appends the word into the specified {@link Appendable}, the word is specified by the given span that define
+         * the range of the word within the given original name.
          *
-         * @param builder      the specified {@link StringBuilder}
+         * @param dst          the specified {@link Appendable}
          * @param originalName the given original name where the word span is derived
          * @param index        the index of the word in the returned list of {@link #tokenize(CharSequence)}
+         * @throws Exception if failed to append
          */
         void append(
-            @Nonnull StringBuilder builder,
+            @Nonnull Appendable dst,
             @Nonnull CharSequence originalName,
             @Nonnull Span span,
             int index
-        );
+        ) throws Exception;
     }
 }

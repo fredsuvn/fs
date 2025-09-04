@@ -21,7 +21,7 @@ import java.util.Objects;
  */
 public class JavaBeanDataSchemaHandler extends AbstractDataSchemaHandler {
 
-    private final NameFormatter nameFormatter = NameFormatter.camelCase(false);
+    private final NameFormatter nameFormatter = NameFormatter.lowerCamel();
 
     @Override
     protected @Nullable AccessorInfo resolveAccessor(Method method) {

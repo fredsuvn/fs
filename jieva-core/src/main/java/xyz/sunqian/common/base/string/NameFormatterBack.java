@@ -1,32 +1,27 @@
 package xyz.sunqian.common.base.string;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.CheckKit;
 import xyz.sunqian.common.base.value.Span;
-import xyz.sunqian.common.collect.ListKit;
-
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import xyz.sunqian.common.collect.ArrayKit;
 
 final class NameFormatterBack {
 
-    static @Nonnull NameFormatter camelCase(boolean capitalized) {
-        return new CamelCase(capitalized);
+    static @Nonnull NameFormatter camelCase(boolean upperFirst) {
+        return new CamelCase(upperFirst);
     }
 
-    static @Nonnull NameFormatter delimiterCase
-        (@Nonnull CharSequence delimiter, @Nullable NameFormatter.WordAppender wordAppender
-        ) {
-        return new DelimiterCase(delimiter, Jie.nonnull(wordAppender, SimpleAppender.SINGLETON));
+    static @Nonnull NameFormatter delimiterCase(
+        @Nonnull CharSequence delimiter, @Nonnull NameFormatter.Appender appender
+    ) throws IllegalArgumentException {
+        return new DelimiterCase(delimiter, appender);
     }
 
     static @Nonnull NameFormatter fileNaming() {
         return new FileNaming();
     }
 
-    static @Nonnull NameFormatter.WordAppender simpleAppender() {
+    static @Nonnull NameFormatter.Appender simpleAppender() {
         return SimpleAppender.SINGLETON;
     }
 
@@ -37,16 +32,20 @@ final class NameFormatterBack {
         private static final int NUM = 4;
         private static final int OTHER = 8;
 
-        private final boolean capitalized;
+        private final boolean upperFirst;
 
-        private CamelCase(boolean capitalized) {
-            this.capitalized = capitalized;
+        private CamelCase(boolean upperFirst) {
+            this.upperFirst = upperFirst;
         }
 
         @Override
-        public @Nonnull List<@Nonnull Span> tokenize(@Nonnull CharSequence name) {
-            if (name.length() == 0) {
-                return Collections.singletonList(Span.empty());
+        public @Nonnull Span @Nonnull [] tokenize(@Nonnull CharSequence name) {
+            int len = name.length();
+            if (len == 0) {
+                return new Span[]{Span.empty()};
+            }
+            if (len == 1) {
+                return new Span[]{Span.of(0, 1)};
             }
             int size = 1;
             int start = 0;
@@ -63,6 +62,7 @@ final class NameFormatterBack {
                     if (start == i - 1) {
                         // Aa: one word
                         i++;
+                        t1 = t2;
                         continue;
                     } else {
                         // AAa: split as A + Aa
@@ -75,8 +75,9 @@ final class NameFormatterBack {
                 // others add one word
                 size++;
                 i++;
+                t1 = t2;
             }
-            Span[] words = new Span[size];
+            Span[] spans = new Span[size];
             start = 0;
             i = 1;
             int wi = 0;
@@ -92,80 +93,125 @@ final class NameFormatterBack {
                     if (start == i - 1) {
                         // Aa: one word
                         i++;
+                        t1 = t2;
                         continue;
                     } else {
                         // AAa: split as A + Aa
-                        words[wi++] = Span.of(start, i - 1);
+                        spans[wi++] = Span.of(start, i - 1);
                         start = i - 1;
                     }
                 } else {
                     // others start from current char
-                    words[wi++] = Span.of(start, i);
+                    spans[wi++] = Span.of(start, i);
                     start = i;
                 }
                 i++;
+                t1 = t2;
             }
-            words[wi] = Span.of(start, name.length());
-            return ListKit.list(words);
+            spans[wi] = Span.of(start, name.length());
+            return spans;
         }
 
         @Override
-        public @Nonnull String join(
-            @Nonnull CharSequence originalName, @Nonnull List<@Nonnull Span> wordSpans
-        ) throws UnsupportedOperationException {
-            if (wordSpans.isEmpty()) {
-                throw new UnsupportedOperationException("wordSpan is empty.");
+        public void format(
+            @Nonnull CharSequence @Nonnull [] words, @Nonnull Appendable dst
+        ) throws NameFormatException {
+            if (words.length == 0) {
+                return;
             }
-            StringBuilder builder = new StringBuilder(originalName.length());
-            Span first = wordSpans.get(0);
-            appendFirstWord(builder, originalName, first);
-            if (wordSpans.size() > 1) {
-                for (Span span : wordSpans.subList(1, wordSpans.size())) {
-                    appendWord(builder, originalName, span);
+            try {
+                format0(words, dst);
+            } catch (Exception e) {
+                throw new NameFormatException(e);
+            }
+        }
+
+        private void format0(
+            @Nonnull CharSequence @Nonnull [] words, @Nonnull Appendable dst
+        ) throws Exception {
+            CharSequence first = words[0];
+            appendFirstWord(dst, first, Span.of(0, first.length()));
+            if (words.length > 1) {
+                for (int i = 1; i < words.length; i++) {
+                    appendWord(dst, words[i], Span.of(0, words[i].length()));
                 }
             }
-            return builder.toString();
+        }
+
+        @Override
+        public void format(
+            @Nonnull CharSequence originalName,
+            @Nonnull Span @Nonnull [] wordSpans,
+            @Nonnull Appendable dst
+        ) throws NameFormatException {
+            if (wordSpans.length == 0) {
+                return;
+            }
+            try {
+                format0(originalName, wordSpans, dst);
+            } catch (Exception e) {
+                throw new NameFormatException(e);
+            }
+        }
+
+        private void format0(
+            @Nonnull CharSequence originalName,
+            @Nonnull Span @Nonnull [] wordSpans,
+            @Nonnull Appendable dst
+        ) throws Exception {
+            Span first = wordSpans[0];
+            appendFirstWord(dst, originalName, first);
+            if (wordSpans.length > 1) {
+                for (int i = 1; i < wordSpans.length; i++) {
+                    appendWord(dst, originalName, wordSpans[i]);
+                }
+            }
         }
 
         private void appendFirstWord(
-            @Nonnull StringBuilder builder, @Nonnull CharSequence originalName, @Nonnull Span span
-        ) throws UnsupportedOperationException {
+            @Nonnull Appendable dst, @Nonnull CharSequence str, @Nonnull Span span
+        ) throws Exception {
             if (span.isEmpty()) {
-                throw new UnsupportedOperationException("The first span is empty.");
+                return;
             }
-            if (capitalized) {
-                builder.append(Character.toUpperCase(originalName.charAt(span.startIndex())));
-                builder.append(originalName, span.startIndex() + 1, span.endIndex());
-            } else {
-                if (isAllUpper(originalName, span)) {
-                    builder.append(originalName, span.startIndex(), span.endIndex());
-                } else {
-                    builder.append(Character.toLowerCase(originalName.charAt(span.startIndex())));
-                    builder.append(originalName, span.startIndex() + 1, span.endIndex());
-                }
+            if (isAllUpper(str, span)) {
+                dst.append(str, span.startIndex(), span.endIndex());
+                return;
             }
+            dst.append(upperFirst ?
+                Character.toUpperCase(str.charAt(span.startIndex()))
+                :
+                Character.toLowerCase(str.charAt(span.startIndex()))
+            );
+            if (span.endIndex() - span.startIndex() == 1) {
+                return;
+            }
+            dst.append(str, span.startIndex() + 1, span.endIndex());
         }
 
         private void appendWord(
-            @Nonnull StringBuilder builder, @Nonnull CharSequence originalName, @Nonnull Span span
-        ) throws UnsupportedOperationException {
+            @Nonnull Appendable dst, @Nonnull CharSequence str, @Nonnull Span span
+        ) throws Exception {
             if (span.isEmpty()) {
-                throw new UnsupportedOperationException("The span is empty.");
+                return;
             }
-            if (isAllUpper(originalName, span)) {
-                builder.append(originalName, span.startIndex(), span.endIndex());
-            } else {
-                builder.append(Character.toUpperCase(originalName.charAt(span.startIndex())));
-                builder.append(originalName, span.startIndex() + 1, span.endIndex());
+            if (isAllUpper(str, span)) {
+                dst.append(str, span.startIndex(), span.endIndex());
+                return;
             }
+            dst.append(Character.toUpperCase(str.charAt(span.startIndex())));
+            if (span.endIndex() - span.startIndex() == 1) {
+                return;
+            }
+            dst.append(str, span.startIndex() + 1, span.endIndex());
         }
 
-        private boolean isAllUpper(@Nonnull CharSequence originalName, @Nonnull Span span) {
+        private boolean isAllUpper(@Nonnull CharSequence str, @Nonnull Span span) {
             if (span.length() < 2) {
                 return false;
             }
-            return charType(originalName.charAt(span.startIndex())) == UPPER
-                && charType(originalName.charAt(span.startIndex() + 1)) == UPPER;
+            return charType(str.charAt(span.startIndex())) == UPPER
+                && charType(str.charAt(span.startIndex() + 1)) == UPPER;
         }
 
         private int charType(char c) {
@@ -185,17 +231,21 @@ final class NameFormatterBack {
     private static final class DelimiterCase implements NameFormatter {
 
         private final @Nonnull CharSequence delimiter;
-        private final @Nonnull NameFormatter.WordAppender wordAppender;
+        private final @Nonnull NameFormatter.Appender appender;
 
         private DelimiterCase(
-            @Nonnull CharSequence delimiter, @Nonnull NameFormatter.WordAppender wordAppender
-        ) {
+            @Nonnull CharSequence delimiter, @Nonnull NameFormatter.Appender appender
+        ) throws IllegalArgumentException {
+            CheckKit.checkArgument(delimiter.length() > 0, "The delimiter must not be empty.");
             this.delimiter = delimiter;
-            this.wordAppender = wordAppender;
+            this.appender = appender;
         }
 
         @Override
-        public @Nonnull List<@Nonnull Span> tokenize(@Nonnull CharSequence name) {
+        public @Nonnull Span @Nonnull [] tokenize(@Nonnull CharSequence name) {
+            if (name.length() < delimiter.length()) {
+                return new Span[]{Span.of(0, name.length())};
+            }
             int size = 1;
             int start = 0;
             while (start < name.length()) {
@@ -204,7 +254,7 @@ final class NameFormatterBack {
                     break;
                 }
                 size++;
-                start += index + delimiter.length();
+                start = index + delimiter.length();
             }
             Span[] spans = new Span[size];
             int i = 0;
@@ -215,99 +265,181 @@ final class NameFormatterBack {
                     break;
                 }
                 spans[i++] = Span.of(start, index);
-                start += index + delimiter.length();
+                start = index + delimiter.length();
             }
             spans[i] = start < name.length() ? Span.of(start, name.length()) : Span.empty();
-            return ListKit.list(spans);
+            return spans;
         }
 
         @Override
-        public @Nonnull String join(
-            @Nonnull CharSequence originalName, @Nonnull List<@Nonnull Span> wordSpans
-        ) throws UnsupportedOperationException {
-            if (wordSpans.isEmpty()) {
-                throw new UnsupportedOperationException("wordSpan is empty.");
+        public void format(
+            @Nonnull CharSequence @Nonnull [] words, @Nonnull Appendable dst
+        ) throws NameFormatException {
+            if (words.length == 0) {
+                return;
             }
-            StringBuilder builder = new StringBuilder(originalName.length());
-            if (wordSpans.size() == 1) {
-                Span first = wordSpans.get(0);
-                wordAppender.append(builder, originalName, first, 0);
-                return builder.toString();
+            try {
+                format0(words, dst);
+            } catch (Exception e) {
+                throw new NameFormatException(e);
             }
-            int i = 0;
-            Iterator<Span> iterator = wordSpans.iterator();
-            while (iterator.hasNext()) {
-                Span span = iterator.next();
-                wordAppender.append(builder, originalName, span, i++);
-                if (iterator.hasNext()) {
-                    builder.append(delimiter);
-                }
+        }
+
+        private void format0(
+            @Nonnull CharSequence @Nonnull [] words, @Nonnull Appendable dst
+        ) throws Exception {
+            if (words.length == 1) {
+                CharSequence first = words[0];
+                dst.append(first);
+                return;
             }
-            return builder.toString();
+            dst.append(words[0]);
+            for (int i = 1; i < words.length; i++) {
+                dst.append(delimiter);
+                dst.append(words[i]);
+            }
+        }
+
+        @Override
+        public void format(
+            @Nonnull CharSequence originalName,
+            @Nonnull Span @Nonnull [] wordSpans,
+            @Nonnull Appendable dst
+        ) throws NameFormatException {
+            if (wordSpans.length == 0) {
+                return;
+            }
+            try {
+                format0(originalName, wordSpans, dst);
+            } catch (Exception e) {
+                throw new NameFormatException(e);
+            }
+        }
+
+        private void format0(
+            @Nonnull CharSequence originalName,
+            @Nonnull Span @Nonnull [] wordSpans,
+            @Nonnull Appendable dst
+        ) throws Exception {
+            if (wordSpans.length == 1) {
+                Span first = wordSpans[0];
+                appender.append(dst, originalName, first, 0);
+                return;
+            }
+            appender.append(dst, originalName, wordSpans[0], 0);
+            for (int i = 1; i < wordSpans.length; i++) {
+                dst.append(delimiter);
+                appender.append(dst, originalName, wordSpans[i], i);
+            }
         }
     }
 
     private static final class FileNaming implements NameFormatter {
 
+        private static final SimpleAppender appender = (SimpleAppender) simpleAppender();
+
         @Override
-        public @Nonnull List<@Nonnull Span> tokenize(@Nonnull CharSequence name) {
+        public @Nonnull Span @Nonnull [] tokenize(@Nonnull CharSequence name) {
             int lastDot = StringKit.lastIndexOf(name, '.');
             if (lastDot < 0 || lastDot == name.length() - 1) {
-                return Collections.singletonList(Span.of(0, name.length()));
+                return new Span[]{Span.of(0, name.length())};
             }
-            return ListKit.list(
+            return ArrayKit.array(
                 Span.of(0, lastDot),
                 Span.of(lastDot + 1, name.length())
             );
         }
 
         @Override
-        public @Nonnull String join(
-            @Nonnull CharSequence originalName, @Nonnull List<@Nonnull Span> wordSpans
-        ) throws UnsupportedOperationException {
-            if (wordSpans.isEmpty()) {
-                throw new UnsupportedOperationException("wordSpan is empty.");
+        public void format(
+            @Nonnull CharSequence @Nonnull [] words, @Nonnull Appendable dst
+        ) throws NameFormatException {
+            if (words.length == 0) {
+                return;
             }
-            StringBuilder builder = new StringBuilder(originalName.length());
-            if (wordSpans.size() == 1) {
-                Span first = wordSpans.get(0);
-                appendWord(builder, originalName, first);
-                return builder.toString();
+            try {
+                format0(words, dst);
+            } catch (Exception e) {
+                throw new NameFormatException(e);
             }
-            if (wordSpans.size() == 2) {
-                Span prefix = wordSpans.get(0);
-                Span suffix = wordSpans.get(1);
-                appendWord(builder, originalName, prefix);
-                builder.append('.');
-                appendWord(builder, originalName, suffix);
-                return builder.toString();
+        }
+
+        private void format0(
+            @Nonnull CharSequence @Nonnull [] words, @Nonnull Appendable dst
+        ) throws Exception {
+            if (words.length == 1) {
+                CharSequence first = words[0];
+                dst.append(first);
+                return;
             }
-            List<@Nonnull Span> prefixList = wordSpans.subList(0, wordSpans.size() - 1);
-            for (Span prefix : prefixList) {
-                appendWord(builder, originalName, prefix);
+            if (words.length == 2) {
+                CharSequence prefix = words[0];
+                CharSequence suffix = words[1];
+                dst.append(prefix);
+                dst.append('.');
+                dst.append(suffix);
+                return;
             }
-            builder.append('.');
-            Span suffix = wordSpans.get(wordSpans.size() - 1);
-            appendWord(builder, originalName, suffix);
-            return builder.toString();
+            for (int i = 0; i < words.length - 1; i++) {
+                dst.append(words[i]);
+            }
+            dst.append('.');
+            CharSequence suffix = words[words.length - 1];
+            dst.append(suffix);
+        }
+
+        @Override
+        public void format(
+            @Nonnull CharSequence originalName,
+            @Nonnull Span @Nonnull [] wordSpans,
+            @Nonnull Appendable dst
+        ) throws NameFormatException {
+            if (wordSpans.length == 0) {
+                return;
+            }
+            try {
+                format0(originalName, wordSpans, dst);
+            } catch (Exception e) {
+                throw new NameFormatException(e);
+            }
+        }
+
+        private void format0(
+            @Nonnull CharSequence originalName,
+            @Nonnull Span @Nonnull [] wordSpans,
+            @Nonnull Appendable dst
+        ) throws Exception {
+            if (wordSpans.length == 1) {
+                Span first = wordSpans[0];
+                appender.append(dst, originalName, first, 0);
+                return;
+            }
+            if (wordSpans.length == 2) {
+                Span prefix = wordSpans[0];
+                Span suffix = wordSpans[1];
+                appender.append(dst, originalName, prefix, 0);
+                dst.append('.');
+                appender.append(dst, originalName, suffix, 1);
+                return;
+            }
+            for (int i = 0; i < wordSpans.length - 1; i++) {
+                appender.append(dst, originalName, wordSpans[i], i);
+            }
+            dst.append('.');
+            Span suffix = wordSpans[wordSpans.length - 1];
+            appender.append(dst, originalName, suffix, wordSpans.length - 1);
         }
     }
 
-    private static void appendWord(
-        @Nonnull StringBuilder builder, @Nonnull CharSequence originalName, @Nonnull Span span
-    ) {
-        SimpleAppender.SINGLETON.append(builder, originalName, span, 0);
-    }
-
-    private static final class SimpleAppender implements NameFormatter.WordAppender {
+    private static final class SimpleAppender implements NameFormatter.Appender {
 
         private static final @Nonnull NameFormatterBack.SimpleAppender SINGLETON = new SimpleAppender();
 
         @Override
         public void append(
-            @Nonnull StringBuilder builder, @Nonnull CharSequence originalName, @Nonnull Span span, int index
-        ) {
-            builder.append(originalName, span.startIndex(), span.endIndex());
+            @Nonnull Appendable dst, @Nonnull CharSequence originalName, @Nonnull Span span, int index
+        ) throws Exception {
+            dst.append(originalName, span.startIndex(), span.endIndex());
         }
     }
 }
