@@ -1,7 +1,6 @@
 package xyz.sunqian.common.base.thread;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 
 import java.util.LinkedHashMap;
@@ -26,7 +25,6 @@ public class ThreadContext {
      * @return the value to which the specified key is mapped in the context of the current thread, or {@code null} if
      * the context contains no mapping for the key
      */
-    @Nullable
     public static <K, V> V get(K key) {
         return Jie.as(asMap().get(key));
     }
@@ -41,7 +39,7 @@ public class ThreadContext {
      * @param <V>   the value type
      * @return the old value or {@code null} if no old mapping
      */
-    public static <K, V> V set(K key, @Nullable V value) {
+    public static <K, V> V set(K key, V value) {
         return Jie.as(asMap().put(key, value));
     }
 

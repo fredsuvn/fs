@@ -54,17 +54,18 @@ final class LoggingBack {
             if (level < this.level) {
                 return;
             }
-            StackTraceElement trace = TraceKit.findCallerTrace(0, t -> {
-                if (!Objects.equals(t.getClassName(), SimpleLogImpl.class.getName())) {
-                    return false;
-                }
-                return Objects.equals(t.getMethodName(), "log")
-                    || Objects.equals(t.getMethodName(), "trace")
-                    || Objects.equals(t.getMethodName(), "debug")
-                    || Objects.equals(t.getMethodName(), "info")
-                    || Objects.equals(t.getMethodName(), "warn")
-                    || Objects.equals(t.getMethodName(), "error");
-            });
+            StackTraceElement trace = null;
+            // TraceKit.findCallerTrace(0, t -> {
+            //     if (!Objects.equals(t.getClassName(), SimpleLogImpl.class.getName())) {
+            //         return false;
+            //     }
+            //     return Objects.equals(t.getMethodName(), "log")
+            //         || Objects.equals(t.getMethodName(), "trace")
+            //         || Objects.equals(t.getMethodName(), "debug")
+            //         || Objects.equals(t.getMethodName(), "info")
+            //         || Objects.equals(t.getMethodName(), "warn")
+            //         || Objects.equals(t.getMethodName(), "error");
+            // });
             try {
                 appendable.append(TimeKit.format(new Date()))
                     .append("[")
