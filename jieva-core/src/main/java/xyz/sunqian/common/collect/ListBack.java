@@ -79,6 +79,11 @@ final class ListBack {
         return ArrayKit.isEmpty(array) ? Collections.emptyList() : new DoubleImmutableList(array);
     }
 
+    @SafeVarargs
+    static <T> @Nonnull List<T> compositeList(@Nonnull List<T> @Nonnull ... lists) {
+        return new CompositeList<>(lists);
+    }
+
     private static final class BooleanArrayList
         extends AbstractList<Boolean> implements RandomAccess, Serializable {
 
@@ -499,6 +504,54 @@ final class ListBack {
         @Override
         public int size() {
             return array.length;
+        }
+    }
+
+    private static final class CompositeList<T>
+        extends AbstractList<T> implements RandomAccess, Serializable {
+
+        private final @Nonnull List<T> @Nonnull [] lists;
+
+        private CompositeList(@Nonnull List<T> @Nonnull [] lists) {
+            this.lists = lists;
+        }
+
+        @Override
+        public T get(int index) {
+            long pos = getElementPos(index);
+            int listIndex = (int) (pos >>> 32);
+            int elementIndex = (int) (pos & 0x00000000ffffffffL);
+            return lists[listIndex].get(elementIndex);
+        }
+
+        @Override
+        public T set(int index, T element) {
+            long pos = getElementPos(index);
+            int listIndex = (int) (pos >>> 32);
+            int elementIndex = (int) (pos & 0x00000000ffffffffL);
+            return lists[listIndex].set(elementIndex, element);
+        }
+
+        private long getElementPos(final int index) {
+            int x = index;
+            for (int i = 0; i < lists.length; i++) {
+                List<T> list = lists[i];
+                if (x < list.size()) {
+                    return ((long) i << 32) | (x & 0x00000000ffffffffL);
+                } else {
+                    x -= list.size();
+                }
+            }
+            throw new IndexOutOfBoundsException("index: " + index + ".");
+        }
+
+        @Override
+        public int size() {
+            int size = 0;
+            for (List<T> list : lists) {
+                size += list.size();
+            }
+            return size;
         }
     }
 }

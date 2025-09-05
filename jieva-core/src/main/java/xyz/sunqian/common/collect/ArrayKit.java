@@ -1238,8 +1238,7 @@ public class ArrayKit {
      * @param <T>   the component type
      * @return a fixed-size list backed by the given array
      */
-    @SafeVarargs
-    public static <T> @Nonnull List<T> asList(T @Nonnull @RetainedParam ... array) {
+    public static <T> @Nonnull List<T> asList(T @Nonnull @RetainedParam [] array) {
         return Arrays.asList(array);
     }
 
@@ -1250,7 +1249,7 @@ public class ArrayKit {
      * @param array the given array
      * @return a fixed-size list backed by the given array
      */
-    public static @Nonnull List<@Nonnull Boolean> asList(boolean @Nonnull @RetainedParam ... array) {
+    public static @Nonnull List<@Nonnull Boolean> asList(boolean @Nonnull @RetainedParam [] array) {
         return ListBack.asList(array);
     }
 
@@ -1261,7 +1260,7 @@ public class ArrayKit {
      * @param array the given array
      * @return a fixed-size list backed by the given array
      */
-    public static @Nonnull List<@Nonnull Byte> asList(byte @Nonnull @RetainedParam ... array) {
+    public static @Nonnull List<@Nonnull Byte> asList(byte @Nonnull @RetainedParam [] array) {
         return ListBack.asList(array);
     }
 
@@ -1272,7 +1271,7 @@ public class ArrayKit {
      * @param array the given array
      * @return a fixed-size list backed by the given array
      */
-    public static @Nonnull List<@Nonnull Short> asList(short @Nonnull @RetainedParam ... array) {
+    public static @Nonnull List<@Nonnull Short> asList(short @Nonnull @RetainedParam [] array) {
         return ListBack.asList(array);
     }
 
@@ -1283,7 +1282,7 @@ public class ArrayKit {
      * @param array the given array
      * @return a fixed-size list backed by the given array
      */
-    public static @Nonnull List<@Nonnull Character> asList(char @Nonnull @RetainedParam ... array) {
+    public static @Nonnull List<@Nonnull Character> asList(char @Nonnull @RetainedParam [] array) {
         return ListBack.asList(array);
     }
 
@@ -1294,7 +1293,7 @@ public class ArrayKit {
      * @param array the given array
      * @return a fixed-size list backed by the given array
      */
-    public static @Nonnull List<@Nonnull Integer> asList(int @Nonnull @RetainedParam ... array) {
+    public static @Nonnull List<@Nonnull Integer> asList(int @Nonnull @RetainedParam [] array) {
         return ListBack.asList(array);
     }
 
@@ -1305,7 +1304,7 @@ public class ArrayKit {
      * @param array the given array
      * @return a fixed-size list backed by the given array
      */
-    public static @Nonnull List<@Nonnull Long> asList(long @Nonnull @RetainedParam ... array) {
+    public static @Nonnull List<@Nonnull Long> asList(long @Nonnull @RetainedParam [] array) {
         return ListBack.asList(array);
     }
 
@@ -1316,7 +1315,7 @@ public class ArrayKit {
      * @param array the given array
      * @return a fixed-size list backed by the given array
      */
-    public static @Nonnull List<@Nonnull Float> asList(float @Nonnull @RetainedParam ... array) {
+    public static @Nonnull List<@Nonnull Float> asList(float @Nonnull @RetainedParam [] array) {
         return ListBack.asList(array);
     }
 
@@ -1327,7 +1326,7 @@ public class ArrayKit {
      * @param array the given array
      * @return a fixed-size list backed by the given array
      */
-    public static @Nonnull List<@Nonnull Double> asList(double @Nonnull @RetainedParam ... array) {
+    public static @Nonnull List<@Nonnull Double> asList(double @Nonnull @RetainedParam [] array) {
         return ListBack.asList(array);
     }
 }

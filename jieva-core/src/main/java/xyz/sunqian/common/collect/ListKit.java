@@ -41,7 +41,7 @@ public class ListKit {
      * @param array the given array
      * @return an immutable list backed by the given array
      */
-    public static @Nonnull @Immutable List<@Nonnull Boolean> list(boolean @Nonnull @RetainedParam ... array) {
+    public static @Nonnull @Immutable List<@Nonnull Boolean> booleanList(boolean @Nonnull @RetainedParam ... array) {
         return ListBack.immutableList(array);
     }
 
@@ -53,7 +53,7 @@ public class ListKit {
      * @param array the given array
      * @return an immutable list backed by the given array
      */
-    public static @Nonnull @Immutable List<@Nonnull Byte> list(byte @Nonnull @RetainedParam ... array) {
+    public static @Nonnull @Immutable List<@Nonnull Byte> byteList(byte @Nonnull @RetainedParam ... array) {
         return ListBack.immutableList(array);
     }
 
@@ -65,7 +65,7 @@ public class ListKit {
      * @param array the given array
      * @return an immutable list backed by the given array
      */
-    public static @Nonnull @Immutable List<@Nonnull Short> list(short @Nonnull @RetainedParam ... array) {
+    public static @Nonnull @Immutable List<@Nonnull Short> shortList(short @Nonnull @RetainedParam ... array) {
         return ListBack.immutableList(array);
     }
 
@@ -77,7 +77,7 @@ public class ListKit {
      * @param array the given array
      * @return an immutable list backed by the given array
      */
-    public static @Nonnull @Immutable List<@Nonnull Character> list(char @Nonnull @RetainedParam ... array) {
+    public static @Nonnull @Immutable List<@Nonnull Character> charList(char @Nonnull @RetainedParam ... array) {
         return ListBack.immutableList(array);
     }
 
@@ -89,7 +89,7 @@ public class ListKit {
      * @param array the given array
      * @return an immutable list backed by the given array
      */
-    public static @Nonnull @Immutable List<@Nonnull Integer> list(int @Nonnull @RetainedParam ... array) {
+    public static @Nonnull @Immutable List<@Nonnull Integer> intList(int @Nonnull @RetainedParam ... array) {
         return ListBack.immutableList(array);
     }
 
@@ -101,7 +101,7 @@ public class ListKit {
      * @param array the given array
      * @return an immutable list backed by the given array
      */
-    public static @Nonnull @Immutable List<@Nonnull Long> list(long @Nonnull @RetainedParam ... array) {
+    public static @Nonnull @Immutable List<@Nonnull Long> longList(long @Nonnull @RetainedParam ... array) {
         return ListBack.immutableList(array);
     }
 
@@ -113,7 +113,7 @@ public class ListKit {
      * @param array the given array
      * @return an immutable list backed by the given array
      */
-    public static @Nonnull @Immutable List<@Nonnull Float> list(float @Nonnull @RetainedParam ... array) {
+    public static @Nonnull @Immutable List<@Nonnull Float> floatList(float @Nonnull @RetainedParam ... array) {
         return ListBack.immutableList(array);
     }
 
@@ -125,7 +125,7 @@ public class ListKit {
      * @param array the given array
      * @return an immutable list backed by the given array
      */
-    public static @Nonnull @Immutable List<@Nonnull Double> list(double @Nonnull @RetainedParam ... array) {
+    public static @Nonnull @Immutable List<@Nonnull Double> doubleList(double @Nonnull @RetainedParam ... array) {
         return ListBack.immutableList(array);
     }
 
@@ -193,5 +193,19 @@ public class ListKit {
             return new LinkedList<>((Collection<T>) it);
         }
         return CollectKit.addAll(new LinkedList<>(), it);
+    }
+
+    /**
+     * Returns a composite view of multiple lists as a single list. The returned list provides a unified view of all
+     * elements from the provided lists, in the order they are specified. Changes to the underlying lists will be
+     * reflected in the composite view.
+     *
+     * @param lists the lists to be composited as a view
+     * @param <T>   the component type
+     * @return a composite view of multiple lists
+     */
+    @SafeVarargs
+    public static <T> @Nonnull List<T> compositeView(@Nonnull List<T> @Nonnull ... lists) {
+        return ListBack.compositeList(lists);
     }
 }
