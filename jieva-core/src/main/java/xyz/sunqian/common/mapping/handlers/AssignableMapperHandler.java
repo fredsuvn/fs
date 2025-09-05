@@ -5,7 +5,7 @@ import xyz.sunqian.common.base.lang.Flag;
 import xyz.sunqian.common.base.value.Val;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingOptions;
-import xyz.sunqian.common.objects.data.DataProperty;
+import xyz.sunqian.common.object.data.DataProperty;
 import xyz.sunqian.common.runtime.reflect.TypeKit;
 
 import java.lang.reflect.Type;

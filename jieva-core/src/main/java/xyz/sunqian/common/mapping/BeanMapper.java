@@ -1,7 +1,7 @@
 package xyz.sunqian.common.mapping;
 
-import xyz.sunqian.common.objects.data.DataProperty;
-import xyz.sunqian.common.objects.data.DataSchema;
+import xyz.sunqian.common.object.data.DataProperty;
+import xyz.sunqian.common.object.data.DataSchema;
 
 import java.lang.reflect.Type;
 import java.util.Map;
@@ -85,7 +85,7 @@ public interface BeanMapper {
      *     </li>
      *     <li>
      *         For bean object, bean info will be provided by {@link BeanProvider} first, type of properties' names
-     *         is always {@link String} and types of properties' values are come from {@link DataProperty#getType()};
+     *         is always {@link String} and types of properties' values are come from {@link DataProperty#type()};
      *     </li>
      *     <li>
      *         For {@link Map} object, types of keys and values are come from {@code sourceType} or {@code destType};

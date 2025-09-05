@@ -7,7 +7,7 @@ import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingOptions;
-import xyz.sunqian.common.objects.data.DataProperty;
+import xyz.sunqian.common.object.data.DataProperty;
 
 import java.lang.reflect.Type;
 import java.nio.ByteBuffer;

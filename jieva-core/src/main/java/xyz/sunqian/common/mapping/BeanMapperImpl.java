@@ -3,9 +3,9 @@ package xyz.sunqian.common.mapping;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.value.Val;
-import xyz.sunqian.common.objects.data.DataProperty;
-import xyz.sunqian.common.objects.data.DataSchema;
-import xyz.sunqian.common.objects.data.DataSchemaParser;
+import xyz.sunqian.common.object.data.DataProperty;
+import xyz.sunqian.common.object.data.DataSchema;
+import xyz.sunqian.common.object.data.DataSchemaParser;
 import xyz.sunqian.common.runtime.reflect.TypeKit;
 
 import java.lang.reflect.Type;
@@ -83,8 +83,8 @@ final class BeanMapperImpl implements BeanMapper {
         Type sourceValueType = sourceTypeArgs.get(1);
         Map<Object, Object> sourceMap = Jie.as(source);
         DataSchemaParser beanProvider = Jie.nonnull(options.getDataSchemaParser(), DataSchemaParser.defaultParser());
-        DataSchema destInfo = DataSchema.get(destType, beanProvider);
-        Map<String, DataProperty> destProperties = destInfo.getProperties();
+        DataSchema destInfo = DataSchema.parse(destType);
+        Map<String, DataProperty> destProperties = destInfo.properties();
         Collection<?> ignored = Jie.nonnull(options.getIgnored(), Collections.emptyList());
         boolean ignoreNull = options.isIgnoreNull();
         BiFunction<Object, Type, @Nullable Object> nameMapper = Jie.nonnull(options.getNameMapper(), (o1, o2) -> o1);
@@ -110,8 +110,8 @@ final class BeanMapperImpl implements BeanMapper {
 
     private void beanToMap(Object source, Type sourceType, Object dest, Type destType, MappingOptions options) {
         DataSchemaParser beanProvider = Jie.nonnull(options.getDataSchemaParser(), DataSchemaParser.defaultParser());
-        DataSchema sourceInfo = DataSchema.get(sourceType, beanProvider);
-        Map<String, DataProperty> sourceProperties = sourceInfo.getProperties();
+        DataSchema sourceInfo = DataSchema.parse(sourceType);
+        Map<String, DataProperty> sourceProperties = sourceInfo.properties();
         List<Type> destTypeArgs = getMapTypeArgs(destType);
         Type destKeyType = destTypeArgs.get(0);
         Type destValueType = destTypeArgs.get(1);
@@ -139,7 +139,7 @@ final class BeanMapperImpl implements BeanMapper {
             }
             putToMap(
                 mappedKey, String.class, destKeyType,
-                sourceValue, property.getType(), destValueType,
+                sourceValue, property.type(), destValueType,
                 destMap, mapper, options
             );
         });
@@ -147,10 +147,10 @@ final class BeanMapperImpl implements BeanMapper {
 
     private void beanToBean(Object source, Type sourceType, Object dest, Type destType, MappingOptions options) {
         DataSchemaParser beanProvider = Jie.nonnull(options.getDataSchemaParser(), DataSchemaParser.defaultParser());
-        DataSchema sourceInfo = DataSchema.get(sourceType, beanProvider);
-        Map<String, DataProperty> sourceProperties = sourceInfo.getProperties();
-        DataSchema destInfo = DataSchema.get(destType, beanProvider);
-        Map<String, DataProperty> destProperties = destInfo.getProperties();
+        DataSchema sourceInfo = DataSchema.parse(sourceType);
+        Map<String, DataProperty> sourceProperties = sourceInfo.properties();
+        DataSchema destInfo = DataSchema.parse(destType);
+        Map<String, DataProperty> destProperties = destInfo.properties();
         Collection<?> ignored = Jie.nonnull(options.getIgnored(), Collections.emptyList());
         boolean ignoreNull = options.isIgnoreNull();
         BiFunction<Object, Type, @Nullable Object> nameMapper = Jie.nonnull(options.getNameMapper(), (o1, o2) -> o1);
@@ -173,7 +173,7 @@ final class BeanMapperImpl implements BeanMapper {
                 return;
             }
             putToBean(
-                mappedKey, String.class, sourceValue, property.getType(),
+                mappedKey, String.class, sourceValue, property.type(),
                 dest, destProperties, mapper, options
             );
         });
@@ -266,7 +266,7 @@ final class BeanMapperImpl implements BeanMapper {
     @Nullable
     private Object mapProperty(
         Mapper mapper, @Nullable Object sourceValue, Type sourceType, DataProperty destProperty, MappingOptions options) {
-        return map0(mapper, sourceValue, sourceType, destProperty.getType(), destProperty, options);
+        return map0(mapper, sourceValue, sourceType, destProperty.type(), destProperty, options);
     }
 
     @Nullable

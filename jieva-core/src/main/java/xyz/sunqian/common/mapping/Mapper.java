@@ -11,7 +11,7 @@ import xyz.sunqian.common.mapping.handlers.BeanMapperHandler;
 import xyz.sunqian.common.mapping.handlers.CollectionMappingHandler;
 import xyz.sunqian.common.mapping.handlers.EnumMapperHandler;
 import xyz.sunqian.common.mapping.handlers.TypedMapperHandler;
-import xyz.sunqian.common.objects.data.DataProperty;
+import xyz.sunqian.common.object.data.DataProperty;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
 
 import java.lang.reflect.Type;
@@ -188,7 +188,7 @@ public interface Mapper {
 
     /**
      * Maps source object from source type to target property with {@link #getOptions()}. The target type is specified
-     * in current context, may not equal to {@link DataProperty#getType()} of target property. The result of this method
+     * in current context, may not equal to {@link DataProperty#type()} of target property. The result of this method
      * in 3 types:
      * <ul>
      *     <li>
@@ -333,7 +333,7 @@ public interface Mapper {
 
     /**
      * Maps source object from source type to target property. The target type is specified in current context, may not
-     * equal to {@link DataProperty#getType()} of target property. The result of this method in 3 types:
+     * equal to {@link DataProperty#type()} of target property. The result of this method in 3 types:
      * <ul>
      *     <li>
      *         {@code null}: mapping failed;
@@ -511,7 +511,7 @@ public interface Mapper {
 
         /**
          * Maps object from source type to the target type of target property. The target type is specified in current
-         * context, may not equal to {@link DataProperty#getType()} of target property. The result of this method in 4
+         * context, may not equal to {@link DataProperty#type()} of target property. The result of this method in 4
          * types:
          * <ul>
          *     <li>

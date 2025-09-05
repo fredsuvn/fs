@@ -7,7 +7,7 @@ import xyz.sunqian.common.collect.CollectKit;
 import xyz.sunqian.common.mapping.Mapper;
 import xyz.sunqian.common.mapping.MappingException;
 import xyz.sunqian.common.mapping.MappingOptions;
-import xyz.sunqian.common.objects.data.DataProperty;
+import xyz.sunqian.common.object.data.DataProperty;
 import xyz.sunqian.common.runtime.reflect.TypeKit;
 
 import java.lang.reflect.Array;

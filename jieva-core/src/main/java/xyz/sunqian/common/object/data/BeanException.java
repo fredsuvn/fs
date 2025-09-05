@@ -1,4 +1,4 @@
-package xyz.sunqian.common.objects.data;
+package xyz.sunqian.common.object.data;
 
 import xyz.sunqian.common.base.exception.JieRuntimeException;
 

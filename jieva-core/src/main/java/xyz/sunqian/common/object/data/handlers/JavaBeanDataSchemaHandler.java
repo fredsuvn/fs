@@ -1,9 +1,11 @@
-package xyz.sunqian.common.objects.data.handlers;
+package xyz.sunqian.common.object.data.handlers;
 
 import lombok.Data;
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.string.NameFormatter;
-import xyz.sunqian.common.objects.data.DataSchemaParser;
+import xyz.sunqian.common.object.data.DataSchemaParser;
+import xyz.sunqian.common.runtime.invoke.Invocable;
 
 import java.lang.reflect.Method;
 import java.util.Objects;
@@ -24,7 +26,7 @@ public class JavaBeanDataSchemaHandler extends AbstractDataSchemaHandler {
     private final NameFormatter nameFormatter = NameFormatter.lowerCamel();
 
     @Override
-    protected @Nullable AccessorInfo resolveAccessor(Method method) {
+    protected @Nullable AccessorInfo resolveAccessor(@Nonnull Method method) {
         int parameterCount = method.getParameterCount();
         switch (parameterCount) {
             case 0:// maybe getter
@@ -35,8 +37,7 @@ public class JavaBeanDataSchemaHandler extends AbstractDataSchemaHandler {
         return null;
     }
 
-    @Nullable
-    private AccessorInfo tryGetter(Method method) {
+    private @Nullable  AccessorInfo tryGetter(@Nonnull Method method) {
         Class<?> returnType = method.getReturnType();
         if (Objects.equals(returnType, void.class)) {
             return null;
@@ -69,8 +70,7 @@ public class JavaBeanDataSchemaHandler extends AbstractDataSchemaHandler {
         return null;
     }
 
-    @Nullable
-    private AccessorInfo trySetter(Method method) {
+    private @Nullable AccessorInfo trySetter(@Nonnull Method method) {
         String methodName = method.getName();
         // setter's name should be setXxx
         boolean isSetterName = methodName.length() > 3 && methodName.startsWith("set");
@@ -91,9 +91,31 @@ public class JavaBeanDataSchemaHandler extends AbstractDataSchemaHandler {
         return null;
     }
 
-    @Data
     private static final class AccessorInfoImpl implements AccessorInfo {
-        private final String propertyName;
+
+        private final @Nonnull String name;
+        private final @Nonnull Invocable accessor;
         private final boolean isGetter;
+
+        private AccessorInfoImpl(@Nonnull String name, @Nonnull Invocable accessor, boolean isGetter) {
+            this.name = name;
+            this.accessor = accessor;
+            this.isGetter = isGetter;
+        }
+
+        @Override
+        public @Nonnull String propertyName() {
+            return name;
+        }
+
+        @Override
+        public @Nonnull Invocable accessor() {
+            return accessor;
+        }
+
+        @Override
+        public boolean isGetter() {
+            return isGetter;
+        }
     }
 }

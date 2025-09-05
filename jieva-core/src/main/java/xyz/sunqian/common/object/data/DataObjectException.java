@@ -1,4 +1,4 @@
-package xyz.sunqian.common.objects.data;
+package xyz.sunqian.common.object.data;
 
 import java.lang.reflect.Type;
 
