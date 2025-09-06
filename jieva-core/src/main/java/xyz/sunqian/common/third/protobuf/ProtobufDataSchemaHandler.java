@@ -1,0 +1,215 @@
+package xyz.sunqian.common.third.protobuf;
+
+import com.google.protobuf.Descriptors;
+import com.google.protobuf.Message;
+import com.google.protobuf.ProtocolStringList;
+import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.string.StringKit;
+import xyz.sunqian.common.object.data.DataProperty;
+import xyz.sunqian.common.object.data.DataPropertyBase;
+import xyz.sunqian.common.object.data.DataSchemaParser;
+import xyz.sunqian.common.runtime.invoke.Invocable;
+import xyz.sunqian.common.runtime.reflect.TypeKit;
+import xyz.sunqian.common.runtime.reflect.TypeRef;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+/**
+ * {@link DataSchemaParser.Handler} implementation for
+ * <a href="https://github.com/protocolbuffers/protobuf">Protocol Buffers</a>.
+ * To use this class, the protobuf package {@code com.google.protobuf} must in the runtime environment.
+ * <p>
+ * Note:
+ * <ul>
+ *     <li>
+ *         When {@link ProtocolStringList} is used as a property type, it will be mapped to {@code List<String>}, but
+ *         the type of the instance returned by {@link DataProperty#getValue(Object)} is still
+ *         {@link ProtocolStringList};
+ *     </li>
+ *     <li>
+ *         For a Builder, the properties of {@code repeated} and {@code map} types do not have setter methods, but the
+ *         setter (which is am {@link Invocable}) is not null.
+ *     </li>
+ * </ul>
+ *
+ * @author sunqian
+ */
+public class ProtobufDataSchemaHandler implements DataSchemaParser.Handler {
+
+    private static final @Nonnull Type STRING_LIST_TYPE = new TypeRef<List<String>>() {}.type();
+
+    @Override
+    public boolean parse(@Nonnull DataSchemaParser.Context context) throws Exception {
+        Class<?> rawType = TypeKit.getRawClass(context.dataType());
+        if (rawType == null) {
+            return true;
+        }
+        // Check whether it is a protobuf object
+        boolean isProtobuf = false;
+        boolean isBuilder = false;
+        if (Message.class.isAssignableFrom(rawType)) {
+            isProtobuf = true;
+        }
+        if (Message.Builder.class.isAssignableFrom(rawType)) {
+            isProtobuf = true;
+            isBuilder = true;
+        }
+        if (!isProtobuf) {
+            return true;
+        }
+        Method getDescriptorMethod = rawType.getMethod("getDescriptor");
+        Descriptors.Descriptor descriptor = (Descriptors.Descriptor) getDescriptorMethod.invoke(null);
+        for (Descriptors.FieldDescriptor field : descriptor.getFields()) {
+            DataPropertyBase dataPropertyBase = buildProperty(field, rawType, isBuilder);
+            context.propertyBaseMap().put(dataPropertyBase.name(), dataPropertyBase);
+        }
+        return false;
+    }
+
+    private @Nonnull DataPropertyBase buildProperty(
+        @Nonnull Descriptors.FieldDescriptor field,
+        @Nonnull Class<?> rawClass,
+        boolean isBuilder
+    ) throws Exception {
+
+        String rawName = field.getName();
+
+        // map
+        if (field.isMapField()) {
+            String name = rawName + "Map";
+            Method getterMethod = rawClass.getMethod("get" + StringKit.capitalize(name));
+            Invocable getter = Invocable.of(getterMethod);
+            Invocable setter = null;
+            if (isBuilder) {
+                Method clearMethod = rawClass.getMethod("clear" + StringKit.capitalize(rawName));
+                Method putAllMethod = rawClass.getMethod("putAll" + StringKit.capitalize(rawName), Map.class);
+                setter = (inst, args) -> {
+                    clearMethod.invoke(inst);
+                    return putAllMethod.invoke(inst, args);
+                };
+            }
+            return new PropertyBaseImpl(
+                rawName,
+                getterMethod.getGenericReturnType(),
+                getterMethod,
+                null,
+                getter,
+                setter
+            );
+        }
+
+        // repeated
+        if (field.isRepeated()) {
+            String name = rawName + "List";
+            Method getterMethod = rawClass.getMethod("get" + StringKit.capitalize(name));
+            Type type = getterMethod.getGenericReturnType();
+            if (Objects.equals(type, ProtocolStringList.class)) {
+                type = STRING_LIST_TYPE;
+            }
+            Invocable getter = Invocable.of(getterMethod);
+            Invocable setter = null;
+            if (isBuilder) {
+                Method clearMethod = rawClass.getMethod("clear" + StringKit.capitalize(rawName));
+                Method addAllMethod = rawClass.getMethod("addAll" + StringKit.capitalize(rawName), Iterable.class);
+                setter = (inst, args) -> {
+                    clearMethod.invoke(inst);
+                    return addAllMethod.invoke(inst, args);
+                };
+            }
+            return new PropertyBaseImpl(
+                rawName,
+                type,
+                getterMethod,
+                null,
+                getter,
+                setter
+            );
+        }
+
+        // Simple object
+        Method getterMethod = rawClass.getMethod("get" + StringKit.capitalize(rawName));
+        Type type = getterMethod.getGenericReturnType();
+        Invocable getter = Invocable.of(getterMethod);
+        Method setterMethod = null;
+        Invocable setter = null;
+        if (isBuilder) {
+            setterMethod = rawClass.getMethod("set" + StringKit.capitalize(rawName), TypeKit.getRawClass(type));
+            setter = Invocable.of(setterMethod);
+        }
+        return new PropertyBaseImpl(
+            rawName,
+            type,
+            getterMethod,
+            setterMethod,
+            getter,
+            setter
+        );
+    }
+
+    private static final class PropertyBaseImpl implements DataPropertyBase {
+
+        private final @Nonnull String name;
+        private final @Nonnull Type type;
+        private final @Nullable Method getterMethod;
+        private final @Nullable Method setterMethod;
+        private final @Nonnull Invocable getter;
+        private final @Nullable Invocable setter;
+
+        private PropertyBaseImpl(
+            @Nonnull String name,
+            @Nonnull Type type,
+            @Nullable Method getterMethod,
+            @Nullable Method setterMethod,
+            @Nonnull Invocable getter,
+            @Nullable Invocable setter
+        ) {
+            this.name = name;
+            this.type = type;
+            this.getterMethod = getterMethod;
+            this.setterMethod = setterMethod;
+            this.getter = getter;
+            this.setter = setter;
+        }
+
+        @Override
+        public @Nonnull String name() {
+            return name;
+        }
+
+        @Override
+        public @Nonnull Type type() {
+            return type;
+        }
+
+        @Override
+        public @Nullable Method getterMethod() {
+            return getterMethod;
+        }
+
+        @Override
+        public @Nullable Method setterMethod() {
+            return setterMethod;
+        }
+
+        @Override
+        public @Nullable Field field() {
+            return null;
+        }
+
+        @Override
+        public @Nonnull Invocable getter() {
+            return getter;
+        }
+
+        @Override
+        public @Nullable Invocable setter() {
+            return setter;
+        }
+    }
+}
