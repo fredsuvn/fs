@@ -78,6 +78,18 @@ public class Jie {
     }
 
     /**
+     * Directly returns the given object itself. The given object is annotated by {@link Nullable}, but the return value
+     * is annotated by {@link Nonnull}. This method is used to suppress some IDE or compilation warnings.
+     *
+     * @param obj the given object
+     * @param <T> the type of the given object
+     * @return the given object itself
+     */
+    public static <T> @Nonnull T asNonnull(@Nullable T obj) {
+        return as(obj);
+    }
+
+    /**
      * Returns the default value if the given object is {@code null}, or the given object itself if it is not
      * {@code null}. This method is equivalent to:
      * <pre>{@code

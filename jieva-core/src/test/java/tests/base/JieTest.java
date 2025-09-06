@@ -38,6 +38,7 @@ public class JieTest implements AssertTest, PrintTest {
         assertEquals(Jie.NULL_STRING, Objects.toString(null));
         String hello = "hello";
         assertSame(Jie.as(hello), hello);
+        assertSame(Jie.asNonnull(hello), hello);
         assertEquals(Jie.nonnull("123", "456"), "123");
         assertEquals(Jie.nonnull(null, "456"), "456");
         assertEquals(Jie.nonnull("123", () -> "456"), "123");
