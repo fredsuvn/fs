@@ -114,13 +114,11 @@ public interface DataSchema {
     /**
      * Returns a string representation of this {@link DataSchema}. The string is generated like following codes:
      * <pre>{@code
-     * return "data[" +
-     *     "type=" + type().typeName() + ", " +
-     *     "properties=[" +
-     *     properties().values().stream().map(it ->
-     *         it.name() + ": " + it.type().typeName()
-     *     ).collect(Collectors.joining("; ")) +
-     *     "]]";
+     * return "data: " + type().getTypeName() + "[" +
+     *     properties().values().stream()
+     *         .map(DataProperty::toString)
+     *         .collect(Collectors.joining(", "))
+     *     + "]";
      * }</pre>
      *
      * @return a string representation of this {@link DataSchema}

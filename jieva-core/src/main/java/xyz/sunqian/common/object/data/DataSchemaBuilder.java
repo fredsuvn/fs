@@ -2,17 +2,13 @@ package xyz.sunqian.common.object.data;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.runtime.invoke.Invocable;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 final class DataSchemaBuilder implements DataSchemaParser.Context {
@@ -98,12 +94,6 @@ final class DataSchemaBuilder implements DataSchemaParser.Context {
             private final @Nullable Invocable getter;
             private final @Nullable Invocable setter;
 
-            // annotations
-            private final @Nonnull List<@Nonnull Annotation> fieldAnnotations;
-            private final @Nonnull List<@Nonnull Annotation> getterAnnotations;
-            private final @Nonnull List<@Nonnull Annotation> setterAnnotations;
-            private final @Nonnull List<@Nonnull Annotation> annotations;
-
             private PropertyImpl(@Nonnull DataPropertyBase propertyBase) {
                 this.name = propertyBase.name();
                 this.type = propertyBase.type();
@@ -112,20 +102,6 @@ final class DataSchemaBuilder implements DataSchemaParser.Context {
                 this.field = propertyBase.field();
                 this.getter = propertyBase.getter();
                 this.setter = propertyBase.setter();
-
-                // annotations
-                this.fieldAnnotations = getAnnotations(field);
-                this.getterAnnotations = getAnnotations(getterMethod);
-                this.setterAnnotations = getAnnotations(setterMethod);
-                this.annotations = ListKit.compositeView(fieldAnnotations, getterAnnotations, setterAnnotations);
-            }
-
-            private @Nonnull List<@Nonnull Annotation> getAnnotations(@Nullable AnnotatedElement element) {
-                if (element == null) {
-                    return Collections.emptyList();
-                }
-                Annotation[] as = element.getAnnotations();
-                return as.length == 0 ? Collections.emptyList() : ListKit.list(as);
             }
 
             @Override
@@ -156,26 +132,6 @@ final class DataSchemaBuilder implements DataSchemaParser.Context {
             @Override
             public @Nullable Field field() {
                 return field;
-            }
-
-            @Override
-            public @Nonnull List<@Nonnull Annotation> fieldAnnotations() {
-                return fieldAnnotations;
-            }
-
-            @Override
-            public @Nonnull List<@Nonnull Annotation> getterAnnotations() {
-                return getterAnnotations;
-            }
-
-            @Override
-            public @Nonnull List<@Nonnull Annotation> setterAnnotations() {
-                return setterAnnotations;
-            }
-
-            @Override
-            public @Nonnull List<@Nonnull Annotation> annotations() {
-                return annotations;
             }
 
             @Override

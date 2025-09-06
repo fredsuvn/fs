@@ -1,5 +1,9 @@
 package xyz.sunqian.common.object.data;
 
+import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.exception.JieRuntimeException;
+
 import java.lang.reflect.Type;
 
 /**
@@ -7,9 +11,9 @@ import java.lang.reflect.Type;
  *
  * @author sunqian
  */
-public class DataObjectException extends BeanException {
+public class DataObjectException extends JieRuntimeException {
 
-    private static String parsingSchemaMessage(Type type) {
+    private static String parsingSchemaMessage(@Nonnull Type type) {
         return "Parsing data schema failed: " + type.getTypeName() + "[" + type.getClass().getName() + "].";
     }
 
@@ -24,7 +28,7 @@ public class DataObjectException extends BeanException {
      *
      * @param message exception message
      */
-    public DataObjectException(String message) {
+    public DataObjectException(@Nullable String message) {
         super(message);
     }
 
@@ -34,7 +38,7 @@ public class DataObjectException extends BeanException {
      * @param message exception message
      * @param cause   exception cause
      */
-    public DataObjectException(String message, Throwable cause) {
+    public DataObjectException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
@@ -43,7 +47,7 @@ public class DataObjectException extends BeanException {
      *
      * @param cause exception cause
      */
-    public DataObjectException(Throwable cause) {
+    public DataObjectException(@Nullable Throwable cause) {
         super(cause);
     }
 
@@ -53,7 +57,7 @@ public class DataObjectException extends BeanException {
      *
      * @param type specified data object type
      */
-    public DataObjectException(Type type) {
+    public DataObjectException(@Nonnull Type type) {
         this(parsingSchemaMessage(type));
     }
 
@@ -64,7 +68,7 @@ public class DataObjectException extends BeanException {
      * @param type  specified data object type
      * @param cause exception cause
      */
-    public DataObjectException(Type type, Throwable cause) {
+    public DataObjectException(@Nonnull Type type, @Nullable Throwable cause) {
         this(parsingSchemaMessage(type), cause);
     }
 }

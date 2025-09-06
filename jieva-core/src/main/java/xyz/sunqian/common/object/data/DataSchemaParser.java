@@ -49,7 +49,7 @@ public interface DataSchemaParser {
      * @param handlers given handlers
      * @return a new {@link DataSchemaParser} with given handlers
      */
-    static @Nonnull DataSchemaParser withHandlers(@Nonnull @RetainedParam List<? extends @Nonnull Handler> handlers) {
+    static @Nonnull DataSchemaParser withHandlers(@Nonnull @RetainedParam List<@Nonnull Handler> handlers) {
         return new DataSchemaParserImpl(handlers);
     }
 
@@ -82,7 +82,7 @@ public interface DataSchemaParser {
             }
             return builder.build(this);
         } catch (Exception e) {
-            throw new DataObjectException(e);
+            throw new DataObjectException(type, e);
         }
     }
 
@@ -103,7 +103,7 @@ public interface DataSchemaParser {
      * @return a new {@link DataSchemaParser} of which handler list consists of the given handler as the first element,
      * followed by {@link #handlers()} of the current parser
      */
-    default DataSchemaParser withFirstHandler(Handler handler) {
+    default @Nonnull DataSchemaParser withFirstHandler(Handler handler) {
         Handler[] newHandlers = new Handler[handlers().size() + 1];
         int i = 0;
         newHandlers[i++] = handler;
@@ -121,7 +121,7 @@ public interface DataSchemaParser {
      * @return a {@link DataSchemaParser} of which handler list consists of {@link #handlers()} of the current parser,
      * followed by the given handler as the last element
      */
-    default DataSchemaParser withLastHandler(Handler handler) {
+    default @Nonnull DataSchemaParser withLastHandler(Handler handler) {
         Handler[] newHandlers = new Handler[handlers().size() + 1];
         int i = 0;
         for (Handler h : handlers()) {
@@ -136,6 +136,7 @@ public interface DataSchemaParser {
      *
      * @return this parser as a {@link Handler}
      */
+    @Nonnull
     Handler asHandler();
 
     /**

@@ -88,27 +88,21 @@ public class DataObjectKit {
      * @return a string representation of given {@link DataSchema}
      */
     public static @Nonnull String toString(@Nonnull DataSchema dataSchema) {
-        return "data[" +
-            "type=" + dataSchema.type().getTypeName() + ", " +
-            "properties=[" +
-            dataSchema.properties().values().stream().map(it ->
-                it.name() + ": " + it.type().getTypeName()
-            ).collect(Collectors.joining("; ")) +
-            "]]";
+        return "data: " + dataSchema.type().getTypeName() + "[" +
+            dataSchema.properties().values().stream()
+                .map(DataProperty::toString)
+                .collect(Collectors.joining(", "))
+            + "]";
     }
 
     /**
      * The implementation of {@link DataProperty#toString()}.
      *
-     * @param dataProperty the {@link DataProperty} to be string
+     * @param property the {@link DataProperty} to be string
      * @return a string representation of given {@link DataProperty}
      */
-    public static @Nonnull String toString(@Nonnull DataProperty dataProperty) {
-        return "property[" +
-            "name=" + dataProperty.name() + ", " +
-            "type=" + dataProperty.type().getTypeName() + ", " +
-            "ownerType=" + dataProperty.owner().type().getTypeName() +
-            "]";
+    public static @Nonnull String toString(@Nonnull DataProperty property) {
+        return property.name() + ": " + property.type().getTypeName();
     }
 
     // /**

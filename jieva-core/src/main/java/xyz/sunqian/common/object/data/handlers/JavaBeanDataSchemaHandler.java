@@ -1,9 +1,7 @@
 package xyz.sunqian.common.object.data.handlers;
 
-import lombok.Data;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.string.NameFormatter;
 import xyz.sunqian.common.object.data.DataSchemaParser;
 import xyz.sunqian.common.runtime.invoke.Invocable;
 
@@ -23,8 +21,6 @@ import java.util.Objects;
  */
 public class JavaBeanDataSchemaHandler extends AbstractDataSchemaHandler {
 
-    private final NameFormatter nameFormatter = NameFormatter.lowerCamel();
-
     @Override
     protected @Nullable AccessorInfo resolveAccessor(@Nonnull Method method) {
         int parameterCount = method.getParameterCount();
@@ -37,57 +33,74 @@ public class JavaBeanDataSchemaHandler extends AbstractDataSchemaHandler {
         return null;
     }
 
-    private @Nullable  AccessorInfo tryGetter(@Nonnull Method method) {
+    private @Nullable AccessorInfo tryGetter(@Nonnull Method method) {
         Class<?> returnType = method.getReturnType();
         if (Objects.equals(returnType, void.class)) {
             return null;
         }
-        String methodName = method.getName();
-        // getter's name should be getXxx or isXxx
-        boolean isGetterName = false;
-        if (methodName.length() > 3 && methodName.startsWith("get")) {
-            isGetterName = true;
-        } else if (
-            (methodName.length() > 2 && methodName.startsWith("is"))
-                && (Objects.equals(returnType, boolean.class) || Objects.equals(returnType, Boolean.class))
-        ) {
-            isGetterName = true;
-        }
-        if (!isGetterName) {
+        String propertyName = propertyNameFromGetter(method);
+        if (propertyName == null) {
             return null;
         }
-        // List<CharSequence> getterNameWords = nameSpec.split(methodName);
-        // if (getterNameWords.size() <= 1) {
-        //     return null;
-        // }
-        // CharSequence firstWord = getterNameWords.get(0);
-        // if (!StringKit.charEquals(firstWord, "get") && !StringKit.charEquals(firstWord, "is")) {
-        //     return null;
-        // }
-        // // sure it is a getter
-        // List<CharSequence> propertyNameWords = getterNameWords.subList(1, getterNameWords.size());
-        // return new AccessorInfoImpl(nameSpec.join(propertyNameWords), true);
+        return new AccessorInfoImpl(propertyName, Invocable.of(method), true);
+    }
+
+    private @Nullable String propertyNameFromGetter(@Nonnull Method method) {
+        // getter's name should be getXxx or isXxx
+        String methodName = method.getName();
+        if (methodName.length() > 3 && methodName.startsWith("get")) {
+            if (!Character.isUpperCase(methodName.charAt(3))) {
+                return null;
+            }
+            if (methodName.length() == 4) {
+                return String.valueOf(Character.toLowerCase(methodName.charAt(3)));
+            }
+            if (Character.isUpperCase(methodName.charAt(4))) {
+                return methodName.substring(3);
+            } else {
+                return Character.toLowerCase(methodName.charAt(3)) + methodName.substring(4);
+            }
+        }
+        if (methodName.length() > 2 && methodName.startsWith("is")) {
+            if (!Character.isUpperCase(methodName.charAt(2))) {
+                return null;
+            }
+            if (methodName.length() == 3) {
+                return String.valueOf(Character.toLowerCase(methodName.charAt(2)));
+            }
+            if (Character.isUpperCase(methodName.charAt(3))) {
+                return methodName.substring(2);
+            } else {
+                return Character.toLowerCase(methodName.charAt(2)) + methodName.substring(3);
+            }
+        }
         return null;
     }
 
     private @Nullable AccessorInfo trySetter(@Nonnull Method method) {
-        String methodName = method.getName();
-        // setter's name should be setXxx
-        boolean isSetterName = methodName.length() > 3 && methodName.startsWith("set");
-        if (!isSetterName) {
+        String propertyName = propertyNameFromSetter(method);
+        if (propertyName == null) {
             return null;
         }
-        // List<CharSequence> setterNameWords = nameSpec.split(methodName);
-        // if (setterNameWords.size() <= 1) {
-        //     return null;
-        // }
-        // CharSequence firstWord = setterNameWords.get(0);
-        // if (!StringKit.charEquals(firstWord, "set")) {
-        //     return null;
-        // }
-        // // sure it is a setter
-        // List<CharSequence> propertyNameWords = setterNameWords.subList(1, setterNameWords.size());
-        // return new AccessorInfoImpl(nameSpec.join(propertyNameWords), false);
+        return new AccessorInfoImpl(propertyName, Invocable.of(method), false);
+    }
+
+    private @Nullable String propertyNameFromSetter(@Nonnull Method method) {
+        // setter's name should be setXxx
+        String methodName = method.getName();
+        if (methodName.length() > 3 && methodName.startsWith("set")) {
+            if (!Character.isUpperCase(methodName.charAt(3))) {
+                return null;
+            }
+            if (methodName.length() == 4) {
+                return String.valueOf(Character.toLowerCase(methodName.charAt(3)));
+            }
+            if (Character.isUpperCase(methodName.charAt(4))) {
+                return methodName.substring(3);
+            } else {
+                return Character.toLowerCase(methodName.charAt(3)) + methodName.substring(4);
+            }
+        }
         return null;
     }
 

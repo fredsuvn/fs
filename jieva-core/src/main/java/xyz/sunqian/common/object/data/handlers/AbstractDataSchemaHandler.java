@@ -31,10 +31,10 @@ import java.util.Set;
  */
 public abstract class AbstractDataSchemaHandler implements DataSchemaParser.Handler {
 
-    private static Type findActualType(
-        Type type,
-        Map<TypeVariable<?>, Type> typeParameterMapping,
-        Set<Type> stack
+    private static @Nonnull Type findActualType(
+        @Nonnull Type type,
+        @Nonnull Map<@Nonnull TypeVariable<?>, @Nonnull Type> typeParameterMapping,
+        @Nonnull Set<@Nonnull Type> stack
     ) {
         if (type instanceof Class) {
             return type;
@@ -47,8 +47,7 @@ public abstract class AbstractDataSchemaHandler implements DataSchemaParser.Hand
         return type;
     }
 
-    @Nullable
-    private static Field findField(String name, Class<?> type) {
+    private static @Nullable Field findField(@Nonnull String name, @Nonnull Class<?> type) {
         try {
             return type.getField(name);
         } catch (NoSuchFieldException e) {
@@ -99,19 +98,20 @@ public abstract class AbstractDataSchemaHandler implements DataSchemaParser.Hand
         Set<Type> stack = new HashSet<>();
         propertyInfoMap.forEach((propertyName, propertyInfo) -> {
             Method getterMethod = propertyInfo.getterMethod;
-            Type getterType = getterMethod == null ? null :
+            Type propertyType = getterMethod == null ? null :
                 findActualType(getterMethod.getGenericReturnType(), typeParameterMapping, stack);
             Method setterMethod = propertyInfo.setterMethod;
-            Type setterType = setterMethod == null ? null :
-                findActualType(setterMethod.getGenericParameterTypes()[0], typeParameterMapping, stack);
+            if (propertyType == null) {
+                propertyType = findActualType(
+                    Jie.asNonnull(setterMethod).getGenericParameterTypes()[0], typeParameterMapping, stack);
+            }
             /*
             The property's type is the return type of getter or the parameter type of setter.
             If the getter's return type and the setter's parameter type are not equal, the getter's return type is used,
             and the setter method will no longer be considered as the setter for this property.
              */
-            Type propertyType = getterType != null ? getterType : setterType;
             Field field = findField(propertyName, rawType);
-            propertyInfo.type = Jie.nonnull(propertyType, Object.class);
+            propertyInfo.type = propertyType;
             propertyInfo.field = field;
             context.propertyBaseMap().put(propertyName, propertyInfo);
         });

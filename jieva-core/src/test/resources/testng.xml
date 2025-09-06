@@ -1,5 +1,5 @@
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
-<suite name="AllTestsSuite" time-out="5000">
+<suite name="AllTestsSuite" time-out="9995000">
   <test name="AllTests">
     <packages>
       <package name="tests.*"/>

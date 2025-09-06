@@ -1,4 +1,4 @@
-// package test.objects;
+// package tests.object;
 //
 // import lombok.Data;
 // import lombok.Getter;
@@ -7,15 +7,13 @@
 // import xyz.sunqian.annotations.Nonnull;
 // import xyz.sunqian.annotations.Nullable;
 // import xyz.sunqian.common.base.Jie;
-// import xyz.sunqian.common.objects.data.BeanException;
-// import xyz.sunqian.common.objects.data.DataObjectException;
-// import xyz.sunqian.common.objects.data.DataProperty;
-// import xyz.sunqian.common.objects.data.DataPropertyBase;
-// import xyz.sunqian.common.objects.data.DataSchema;
-// import xyz.sunqian.common.objects.data.DataSchemaParser;
-// import xyz.sunqian.common.objects.data.JieDataObject;
-// import xyz.sunqian.common.reflect.TypeKit;
-// import xyz.sunqian.common.reflect.TypeRef;
+// import xyz.sunqian.common.object.data.DataObjectException;
+// import xyz.sunqian.common.object.data.DataProperty;
+// import xyz.sunqian.common.object.data.DataPropertyBase;
+// import xyz.sunqian.common.object.data.DataSchema;
+// import xyz.sunqian.common.object.data.DataSchemaParser;
+// import xyz.sunqian.common.runtime.reflect.TypeKit;
+// import xyz.sunqian.common.runtime.reflect.TypeRef;
 //
 // import java.lang.reflect.Method;
 // import java.lang.reflect.Type;

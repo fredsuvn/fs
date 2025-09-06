@@ -12,29 +12,29 @@ final class DataSchemaParserImpl implements DataSchemaParser, DataSchemaParser.H
     static DataSchemaParserImpl SINGLETON =
         new DataSchemaParserImpl(Collections.singletonList(new JavaBeanDataSchemaHandler()));
 
-    private final List<? extends DataSchemaParser.Handler> handlers;
+    private final List<DataSchemaParser.Handler> handlers;
 
-    DataSchemaParserImpl(@Immutable List<? extends DataSchemaParser.Handler> handlers) {
+    DataSchemaParserImpl(@Immutable List<DataSchemaParser.Handler> handlers) {
         this.handlers = handlers;
     }
 
     @Override
     public @Nonnull List<Handler> handlers() {
-        return Collections.emptyList();
+        return handlers;
     }
 
     @Override
-    public Handler asHandler() {
+    public @Nonnull Handler asHandler() {
         return this;
     }
 
     @Override
     public boolean parse(@Nonnull Context context) throws Exception {
         for (Handler handler : handlers) {
-            if (handler.parse(context)) {
-                return true;
+            if (!handler.parse(context)) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 }
