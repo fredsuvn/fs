@@ -25,7 +25,7 @@ import java.util.Map;
 public interface DataSchemaParser {
 
     /**
-     * Returns the default {@link DataSchemaParser}, of which handler is {@link JavaBeanDataSchemaHandler}.
+     * Returns the default {@link DataSchemaParser} with {@link JavaBeanDataSchemaHandler} as the only handler.
      *
      * @return the default {@link DataSchemaParser}
      */

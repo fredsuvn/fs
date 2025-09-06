@@ -12,6 +12,7 @@ import xyz.sunqian.common.object.data.DataProperty;
 import xyz.sunqian.common.object.data.DataPropertyBase;
 import xyz.sunqian.common.object.data.DataSchema;
 import xyz.sunqian.common.object.data.DataSchemaParser;
+import xyz.sunqian.common.object.data.handlers.JavaBeanDataSchemaHandler;
 import xyz.sunqian.common.runtime.invoke.Invocable;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
 import xyz.sunqian.test.PrintTest;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotSame;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
@@ -44,11 +46,11 @@ public class DataSchemaTest implements PrintTest {
         printFor("DataSchema toString", schema);
         assertEquals(
             schema.toString(),
-            "data: " + schema.type().getTypeName() + "[" +
+            schema.type().getTypeName() + "{" +
                 schema.properties().values().stream()
                     .map(DataProperty::toString)
                     .collect(Collectors.joining(", "))
-                + "]"
+                + "}"
         );
         // instance
         TestData<CharSequence, String> instance = new TestData<>();
@@ -105,6 +107,7 @@ public class DataSchemaTest implements PrintTest {
         assertTrue(i.isReadable());
         assertEquals(i.getValue(instance), 0);
         assertFalse(i.isWriteable());
+        expectThrows(DataObjectException.class, () -> i.setValue(instance, 1));
         // property strArray
         DataProperty strArray = schema.getProperty("strArray");
         assertSame(strArray.owner(), schema);
@@ -115,6 +118,7 @@ public class DataSchemaTest implements PrintTest {
         assertNull(strArray.getterMethod());
         assertEquals(strArray.setterMethod(), strArraySetter);
         assertFalse(strArray.isReadable());
+        expectThrows(DataObjectException.class, () -> strArray.getValue(instance));
         assertTrue(strArray.isWriteable());
         strArray.setValue(instance, new String[]{"hello"});
         assertEquals(instance.strArray, new String[]{"hello"});
@@ -194,6 +198,10 @@ public class DataSchemaTest implements PrintTest {
         assertFalse(BB.isWriteable());
         // error type
         expectThrows(DataObjectException.class, () -> DataSchema.parse(TestData.class.getTypeParameters()[0]));
+        // raw type
+        DataSchema raw = DataSchema.parse(TestData.class);
+        assertEquals(raw.getProperty("t").type(), TestData.class.getTypeParameters()[0]);
+        assertEquals(raw.getProperty("UU").type(), TestData.class.getTypeParameters()[1]);
     }
 
     @Test
@@ -271,26 +279,42 @@ public class DataSchemaTest implements PrintTest {
 
     @Test
     public void testEqualHashCode() throws Exception {
+        // schema equal
+        DataSchema a1 = DataSchema.parse(A.class);
+        DataSchema a2 = DataSchema.parse(A.class);
+        DataSchema b1 = DataSchema.parse(B.class);
+        DataSchemaParser parser2 = DataSchemaParser.withHandlers(new JavaBeanDataSchemaHandler());
+        DataSchema a3 = parser2.parse(A.class);
+        assertEquals(a1, a1);
+        assertFalse(a1.equals(""));
+        assertNotSame(a1, a2);
+        assertEquals(a1, a2);
+        assertFalse(a1.equals(b1));
+        assertFalse(a1.equals(a3));
+        // properties equal
+        DataProperty ap1 = a1.getProperty("class");
+        DataProperty appp = a1.getProperty("pp");
+        DataProperty ap2 = a2.getProperty("class");
+        DataProperty bp1 = b1.getProperty("class");
+        DataProperty ap3 = a3.getProperty("class");
+        assertTrue(ap1.equals(ap1));
+        assertEquals(ap1, ap2);
+        assertFalse(ap1.equals(appp));
+        assertFalse(ap1.equals(""));
+        assertFalse(ap1.equals(bp1));
+        assertFalse(ap1.equals(ap3));
+        // hash code
         {
-            // DataObjectException
-            expectThrows(DataObjectException.class, () -> {
-                throw new DataObjectException();
-            });
-            expectThrows(DataObjectException.class, () -> {
-                throw new DataObjectException("");
-            });
-            expectThrows(DataObjectException.class, () -> {
-                throw new DataObjectException("", new RuntimeException());
-            });
-            expectThrows(DataObjectException.class, () -> {
-                throw new DataObjectException(new RuntimeException());
-            });
-            expectThrows(DataObjectException.class, () -> {
-                throw new DataObjectException(Object.class);
-            });
-            expectThrows(DataObjectException.class, () -> {
-                throw new DataObjectException(Object.class, new RuntimeException());
-            });
+            int result = 1;
+            result = 31 * result + a1.type().hashCode();
+            result = 31 * result + a1.parser().hashCode();
+            assertEquals(a1.hashCode(), result);
+        }
+        {
+            int result = 1;
+            result = 31 * result + ap1.name().hashCode();
+            result = 31 * result + ap1.owner().hashCode();
+            assertEquals(ap1.hashCode(), result);
         }
     }
 
@@ -403,5 +427,14 @@ public class DataSchemaTest implements PrintTest {
         default boolean b(boolean b) {
             return b;
         }
+    }
+
+    public static class A {
+        public String getPp() {
+            return "pp";
+        }
+    }
+
+    public static class B {
     }
 }

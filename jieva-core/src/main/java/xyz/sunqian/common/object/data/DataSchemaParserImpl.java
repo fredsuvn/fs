@@ -3,14 +3,16 @@ package xyz.sunqian.common.object.data;
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.object.data.handlers.JavaBeanDataSchemaHandler;
+import xyz.sunqian.common.runtime.reflect.ClassKit;
 
-import java.util.Collections;
 import java.util.List;
 
 final class DataSchemaParserImpl implements DataSchemaParser, DataSchemaParser.Handler {
 
-    static DataSchemaParserImpl SINGLETON =
-        new DataSchemaParserImpl(Collections.singletonList(new JavaBeanDataSchemaHandler()));
+    static DataSchemaParserImpl SINGLETON = new DataSchemaParserImpl(ClassKit.runtimeInstances(
+        "xyz.sunqian.common.third.protobuf.ProtobufDataSchemaHandler",
+        JavaBeanDataSchemaHandler.class.getName()
+    ));
 
     private final List<DataSchemaParser.Handler> handlers;
 
