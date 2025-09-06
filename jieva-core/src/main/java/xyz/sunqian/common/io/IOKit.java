@@ -2569,8 +2569,7 @@ public class IOKit {
     }
 
     /**
-     * Wraps the given stream as a new {@link OutputStream} of which writeable number is limited to the specified
-     * limit.
+     * Wraps the given stream as a new {@link OutputStream} of which writable number is limited to the specified limit.
      * <p>
      * The result's support is as follows:
      * <ul>
@@ -2582,8 +2581,7 @@ public class IOKit {
      *
      * @param stream the given stream
      * @param limit  the specified limit, must {@code >= 0}
-     * @return the given stream as a new {@link OutputStream} of which writeable number is limited to the specified
-     * limit
+     * @return the given stream as a new {@link OutputStream} of which writable number is limited to the specified limit
      * @throws IllegalArgumentException if the limit argument is negative
      */
     public static @Nonnull OutputStream limitedOutputStream(
@@ -2699,7 +2697,7 @@ public class IOKit {
     }
 
     /**
-     * Wraps the given writer as a new {@link Writer} of which writeable number is limited to the specified limit.
+     * Wraps the given writer as a new {@link Writer} of which writable number is limited to the specified limit.
      * <p>
      * The result's support is as follows:
      * <ul>
@@ -2711,7 +2709,7 @@ public class IOKit {
      *
      * @param writer the given writer
      * @param limit  the specified limit, must {@code >= 0}
-     * @return the given writer as a new {@link Writer} of which writeable number is limited to the specified limit
+     * @return the given writer as a new {@link Writer} of which writable number is limited to the specified limit
      * @throws IllegalArgumentException if the limit argument is negative
      */
     public static @Nonnull Writer limitedWriter(@Nonnull Writer writer, long limit) throws IllegalArgumentException {

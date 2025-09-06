@@ -519,7 +519,7 @@ public class IOOperatorTest implements DataTest {
                 (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
             );
             // write one byte channel
-            channel = new OneByteWriteableChannel(builder);
+            channel = new OneByteWritableChannel(builder);
             builder.reset();
             assertEquals(
                 reader.readTo(new ByteArrayInputStream(data), channel),
@@ -663,7 +663,7 @@ public class IOOperatorTest implements DataTest {
             );
             builder.reset();
             // write one byte channel
-            WritableByteChannel wch = new OneByteWriteableChannel(builder);
+            WritableByteChannel wch = new OneByteWritableChannel(builder);
             builder.reset();
             assertEquals(
                 reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), wch),

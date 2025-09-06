@@ -92,7 +92,7 @@ public class DataSchemaTest implements PrintTest {
         assertEquals(str.setterMethod(), strSetter);
         assertTrue(str.isReadable());
         assertNull(str.getValue(instance));
-        assertTrue(str.isWriteable());
+        assertTrue(str.isWritable());
         str.setValue(instance, "hello");
         assertEquals(instance.str, "hello");
         // property i
@@ -106,7 +106,7 @@ public class DataSchemaTest implements PrintTest {
         assertNull(i.setterMethod());
         assertTrue(i.isReadable());
         assertEquals(i.getValue(instance), 0);
-        assertFalse(i.isWriteable());
+        assertFalse(i.isWritable());
         expectThrows(DataObjectException.class, () -> i.setValue(instance, 1));
         // property strArray
         DataProperty strArray = schema.getProperty("strArray");
@@ -119,7 +119,7 @@ public class DataSchemaTest implements PrintTest {
         assertEquals(strArray.setterMethod(), strArraySetter);
         assertFalse(strArray.isReadable());
         expectThrows(DataObjectException.class, () -> strArray.getValue(instance));
-        assertTrue(strArray.isWriteable());
+        assertTrue(strArray.isWritable());
         strArray.setValue(instance, new String[]{"hello"});
         assertEquals(instance.strArray, new String[]{"hello"});
         // property t
@@ -133,7 +133,7 @@ public class DataSchemaTest implements PrintTest {
         assertEquals(t.setterMethod(), tSetter);
         assertTrue(t.isReadable());
         assertNull(t.getValue(instance));
-        assertTrue(t.isWriteable());
+        assertTrue(t.isWritable());
         t.setValue(instance, "hello");
         assertEquals(instance.t, "hello");
         // property UU
@@ -147,7 +147,7 @@ public class DataSchemaTest implements PrintTest {
         assertEquals(UU.setterMethod(), uSetter);
         assertTrue(UU.isReadable());
         assertNull(UU.getValue(instance));
-        assertTrue(UU.isWriteable());
+        assertTrue(UU.isWritable());
         UU.setValue(instance, "hello");
         assertEquals(instance.u, "hello");
         // property class
@@ -161,7 +161,7 @@ public class DataSchemaTest implements PrintTest {
         assertNull(classProp.setterMethod());
         assertTrue(classProp.isReadable());
         assertEquals(classProp.getValue(instance), TestData.class);
-        assertFalse(classProp.isWriteable());
+        assertFalse(classProp.isWritable());
         // properties b, bb, BB
         DataProperty b = schema.getProperty("b");
         assertSame(b.owner(), schema);
@@ -173,7 +173,7 @@ public class DataSchemaTest implements PrintTest {
         assertNull(b.setterMethod());
         assertTrue(b.isReadable());
         assertEquals(b.getValue(instance), instance.isB());
-        assertFalse(b.isWriteable());
+        assertFalse(b.isWritable());
         DataProperty bb = schema.getProperty("bb");
         assertSame(bb.owner(), schema);
         assertEquals(bb.name(), "bb");
@@ -184,7 +184,7 @@ public class DataSchemaTest implements PrintTest {
         assertNull(bb.setterMethod());
         assertTrue(bb.isReadable());
         assertEquals(bb.getValue(instance), instance.isBb());
-        assertFalse(bb.isWriteable());
+        assertFalse(bb.isWritable());
         DataProperty BB = schema.getProperty("BB");
         assertSame(BB.owner(), schema);
         assertEquals(BB.name(), "BB");
@@ -195,7 +195,7 @@ public class DataSchemaTest implements PrintTest {
         assertNull(BB.setterMethod());
         assertTrue(BB.isReadable());
         assertEquals(BB.getValue(instance), instance.isBB());
-        assertFalse(BB.isWriteable());
+        assertFalse(BB.isWritable());
         // error type
         expectThrows(DataObjectException.class, () -> DataSchema.parse(TestData.class.getTypeParameters()[0]));
         // raw type

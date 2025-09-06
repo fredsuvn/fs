@@ -5,11 +5,11 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 
-public class OneByteWriteableChannel implements WritableByteChannel {
+public class OneByteWritableChannel implements WritableByteChannel {
 
     private final OutputStream out;
 
-    public OneByteWriteableChannel(OutputStream out) {
+    public OneByteWritableChannel(OutputStream out) {
         this.out = out;
     }
 

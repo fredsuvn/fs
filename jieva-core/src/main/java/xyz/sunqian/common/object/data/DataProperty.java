@@ -34,11 +34,11 @@ public interface DataProperty extends DataPropertyBase {
     }
 
     /**
-     * Returns whether this property is writeable.
+     * Returns whether this property is writable.
      *
-     * @return whether this property is writeable
+     * @return whether this property is writable
      */
-    default boolean isWriteable() {
+    default boolean isWritable() {
         return setter() != null;
     }
 
@@ -62,12 +62,12 @@ public interface DataProperty extends DataPropertyBase {
      *
      * @param inst  the specified instance
      * @param value the property value
-     * @throws DataObjectException if this property is not writeable
+     * @throws DataObjectException if this property is not writable
      */
     default void setValue(@Nonnull Object inst, @Nullable Object value) throws DataObjectException {
         Invocable setter = setter();
         if (setter == null) {
-            throw new DataObjectException("The property is not writeable: " + name() + ".");
+            throw new DataObjectException("The property is not writable: " + name() + ".");
         }
         setter.invoke(inst, value);
     }

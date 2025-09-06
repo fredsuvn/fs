@@ -346,7 +346,7 @@ public class ByteReaderTest implements DataTest {
         {
             // to one byte channel
             BytesBuilder builder = new BytesBuilder();
-            WritableByteChannel channel = new OneByteWriteableChannel(builder);
+            WritableByteChannel channel = new OneByteWritableChannel(builder);
             if (data.length == 0) {
                 ByteReader reader = supplier.get();
                 assertEquals(reader.readTo(channel), -1);

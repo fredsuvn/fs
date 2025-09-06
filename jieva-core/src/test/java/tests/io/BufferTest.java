@@ -371,7 +371,7 @@ public class BufferTest implements DataTest {
             assertEquals(builder.toByteArray(), Arrays.copyOf(data, actualLen));
             assertEquals(src.position(), actualLen);
             // write one byte channel
-            dst = new OneByteWriteableChannel(builder);
+            dst = new OneByteWritableChannel(builder);
             src.clear();
             builder.reset();
             assertEquals(BufferKit.readTo(src, dst), totalSize == 0 ? -1 : totalSize);

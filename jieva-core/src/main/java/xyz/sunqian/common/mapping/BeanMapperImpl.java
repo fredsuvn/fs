@@ -244,7 +244,7 @@ final class BeanMapperImpl implements BeanMapper {
         }
         String destName = String.valueOf(destKey);
         DataProperty destProperty = destProperties.get(destName);
-        if (destProperty == null || !destProperty.isWriteable()) {
+        if (destProperty == null || !destProperty.isWritable()) {
             return;
         }
         Object destValue = mapProperty(mapper, sourceValue, sourceValueType, destProperty, options);
