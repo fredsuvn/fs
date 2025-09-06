@@ -199,6 +199,9 @@ public class ListKit {
      * Returns a composite view of multiple lists as a single list. The returned list provides a unified view of all
      * elements from the provided lists, in the order they are specified. Changes to the underlying lists will be
      * reflected in the composite view.
+     * <p>
+     * The returned list is un-variable-size, serializable and implements {@link RandomAccess}, and is mutable if the
+     * corresponding underlying list is mutable.
      *
      * @param lists the lists to be composited as a view
      * @param <T>   the component type
