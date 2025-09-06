@@ -4,6 +4,7 @@ import org.testng.annotations.Test;
 import tests.utils.ErrorConstructor;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
+import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.runtime.reflect.ClassKit;
 import xyz.sunqian.test.AssertTest;
 
@@ -95,6 +96,14 @@ public class ClassTest implements AssertTest {
         Constructor<?> constructor = String.class.getConstructor();
         assertEquals(ClassKit.newInstance(constructor), "");
         assertNull(ClassKit.newInstance(ErrorConstructor.class.getConstructor()));
+        assertEquals(
+            ClassKit.runtimeInstances(String.class.getName(), String.class.getName()),
+            ListKit.list("", "")
+        );
+        assertEquals(
+            ClassKit.runtimeInstances(String.class.getName(), "123"),
+            ListKit.list("")
+        );
     }
 
     @Test

@@ -1,11 +1,13 @@
 package xyz.sunqian.common.runtime.reflect;
 
+import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 import xyz.sunqian.common.base.system.JvmKit;
+import xyz.sunqian.common.collect.ListKit;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -15,7 +17,9 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Utilities for {@link Class}.
@@ -285,6 +289,30 @@ public class ClassKit {
             return null;
         }
         return newInstance(cls);
+    }
+
+    /**
+     * Creates and returns a list of instances for the given class names, in the order of the given names. The class
+     * specified by the class name must have an empty constructor for instantiation. If a class instantiation fails, the
+     * instance will be skipped and the returned list will be reduced by one accordingly.
+     *
+     * @param classNames the given class names to be instantiated
+     * @param <T>        the instance's type
+     * @return a list of instances for the given class names, in the order of the given names
+     */
+    public static <T> @Nonnull @Immutable List<@Nonnull T> runtimeInstances(
+        @Nonnull String @Nonnull ... classNames
+    ) {
+        Object[] instances = new Object[classNames.length];
+        int i = 0;
+        for (String className : classNames) {
+            T instance = newInstance(className);
+            if (instance != null) {
+                instances[i++] = instance;
+            }
+        }
+        instances = i == classNames.length ? instances : Arrays.copyOf(instances, i);
+        return Jie.as(ListKit.list(instances));
     }
 
     /**

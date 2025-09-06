@@ -41,9 +41,10 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
- * Utilities for object and common/base operations.
+ * The core utility class of this library, provides support methods for {@link Object}, such as {@code equals} and
+ * {@code hashCode}, and many methods to improve language convenience, such as {@code nonnull}, {@code uncheck}, etc.
  *
- * @author fredsuvn
+ * @author sunqian
  */
 public class Jie {
 
