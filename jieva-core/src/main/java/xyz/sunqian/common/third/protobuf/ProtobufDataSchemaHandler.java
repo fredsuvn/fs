@@ -13,6 +13,8 @@ import xyz.sunqian.common.runtime.invoke.Invocable;
 import xyz.sunqian.common.runtime.reflect.TypeKit;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -42,7 +44,9 @@ import java.util.Objects;
  */
 public class ProtobufDataSchemaHandler implements DataSchemaParser.Handler {
 
-    private static final @Nonnull Type STRING_LIST_TYPE = new TypeRef<List<String>>() {}.type();
+    private static final class StringListTypeRef extends TypeRef<List<String>> {
+        private static final @Nonnull StringListTypeRef SINGLETON = new StringListTypeRef();
+    }
 
     @Override
     public boolean parse(@Nonnull DataSchemaParser.Context context) throws Exception {
@@ -89,10 +93,7 @@ public class ProtobufDataSchemaHandler implements DataSchemaParser.Handler {
             if (isBuilder) {
                 Method clearMethod = rawClass.getMethod("clear" + StringKit.capitalize(rawName));
                 Method putAllMethod = rawClass.getMethod("putAll" + StringKit.capitalize(rawName), Map.class);
-                setter = (inst, args) -> {
-                    clearMethod.invoke(inst);
-                    return putAllMethod.invoke(inst, args);
-                };
+                setter = new MapSetter(clearMethod, putAllMethod);
             }
             return new PropertyBaseImpl(
                 rawName,
@@ -110,17 +111,14 @@ public class ProtobufDataSchemaHandler implements DataSchemaParser.Handler {
             Method getterMethod = rawClass.getMethod("get" + StringKit.capitalize(name));
             Type type = getterMethod.getGenericReturnType();
             if (Objects.equals(type, ProtocolStringList.class)) {
-                type = STRING_LIST_TYPE;
+                type = StringListTypeRef.SINGLETON.type();
             }
             Invocable getter = Invocable.of(getterMethod);
             Invocable setter = null;
             if (isBuilder) {
                 Method clearMethod = rawClass.getMethod("clear" + StringKit.capitalize(rawName));
                 Method addAllMethod = rawClass.getMethod("addAll" + StringKit.capitalize(rawName), Iterable.class);
-                setter = (inst, args) -> {
-                    clearMethod.invoke(inst);
-                    return addAllMethod.invoke(inst, args);
-                };
+                setter = new ListSetter(clearMethod, addAllMethod);
             }
             return new PropertyBaseImpl(
                 rawName,
@@ -150,6 +148,54 @@ public class ProtobufDataSchemaHandler implements DataSchemaParser.Handler {
             getter,
             setter
         );
+    }
+
+    private static final class MapSetter implements Invocable {
+
+        private final @Nonnull MethodHandle clearHandle;
+        private final @Nonnull MethodHandle putAllHandle;
+
+        private MapSetter(@Nonnull Method clearMethod, @Nonnull Method putAllMethod) throws Exception {
+            // setter = (inst, args) -> {
+            //     clearMethod.invoke(inst);
+            //     return putAllMethod.invoke(inst, args);
+            // };
+            this.clearHandle = MethodHandles.lookup().unreflect(clearMethod);
+            this.putAllHandle = MethodHandles.lookup().unreflect(putAllMethod);
+        }
+
+        @Override
+        public @Nullable Object invokeChecked(
+            @Nullable Object inst, @Nullable Object @Nonnull ... args
+        ) throws Throwable {
+            clearHandle.invoke(inst);
+            putAllHandle.invoke(inst, args[0]);
+            return null;
+        }
+    }
+
+    private static final class ListSetter implements Invocable {
+
+        private final @Nonnull MethodHandle clearHandle;
+        private final @Nonnull MethodHandle addAllMethod;
+
+        private ListSetter(@Nonnull Method clearMethod, @Nonnull Method addAllMethod) throws Exception {
+            // setter = (inst, args) -> {
+            //     clearMethod.invoke(inst);
+            //     return addAllMethod.invoke(inst, args);
+            // };
+            this.clearHandle = MethodHandles.lookup().unreflect(clearMethod);
+            this.addAllMethod = MethodHandles.lookup().unreflect(addAllMethod);
+        }
+
+        @Override
+        public @Nullable Object invokeChecked(
+            @Nullable Object inst, @Nullable Object @Nonnull ... args
+        ) throws Throwable {
+            clearHandle.invoke(inst);
+            addAllMethod.invoke(inst, args[0]);
+            return null;
+        }
     }
 
     private static final class PropertyBaseImpl implements DataPropertyBase {

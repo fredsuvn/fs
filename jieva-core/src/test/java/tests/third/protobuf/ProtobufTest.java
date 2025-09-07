@@ -15,8 +15,6 @@ import xyz.sunqian.common.third.protobuf.ProtobufDataSchemaHandler;
 import xyz.sunqian.common.third.protobuf.ProtobufKit;
 import xyz.sunqian.test.PrintTest;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 
@@ -116,10 +114,6 @@ public class ProtobufTest implements PrintTest {
             SetKit.set("str", "i32", "u64", "f32", "f64", "sf32", "sf64", "sint32", "sint64", "bytes", "bool",
                 "float", "double", "siMap", "iList", "strList", "xEnum")
         );
-        // List<String>
-        Field field = ProtobufDataSchemaHandler.class.getDeclaredField("STRING_LIST_TYPE");
-        field.setAccessible(true);
-        Type listStringType = (Type) field.get(null);
         {
             // str
             DataProperty str = schema.getProperty("str");
@@ -394,7 +388,7 @@ public class ProtobufTest implements PrintTest {
             // strList
             DataProperty strList = schema.getProperty("strList");
             assertNotNull(strList);
-            assertEquals(strList.type(), listStringType);
+            assertEquals(strList.type(), new TypeRef<List<String>>() {}.type());
             assertEquals(strList.getValue(inst), ListKit.list("strList"));
             assertTrue(strList.isReadable());
             assertEquals(strList.isWritable(), writable);

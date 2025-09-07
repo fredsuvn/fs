@@ -10,6 +10,8 @@
  *     <li>{@link xyz.sunqian.common.object.data.DataSchema}</li>
  *     <li>{@link xyz.sunqian.common.object.data.DataProperty}</li>
  *     <li>{@link xyz.sunqian.common.object.data.DataSchemaParser}</li>
+ *     <li>{@link xyz.sunqian.common.object.data.handlers.AbstractDataSchemaHandler}</li>
+ *     <li>{@link xyz.sunqian.common.object.data.handlers.JavaBeanDataSchemaHandler}</li>
  * </ul>
  * Utilities:
  * <ul>
