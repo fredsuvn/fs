@@ -2,8 +2,8 @@ package xyz.sunqian.common.trash.data.protobuf;
 
 import com.google.protobuf.Message;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.object.mapping.MappingException;
-import xyz.sunqian.common.object.mapping.handlers.BeanMapperHandler;
+import xyz.sunqian.common.object.convert.ObjectConversionException;
+import xyz.sunqian.common.object.convert.handlers.BeanMapperHandler;
 import xyz.sunqian.common.runtime.reflect.TypeKit;
 
 import java.lang.reflect.Method;
@@ -40,10 +40,10 @@ public class ProtobufBeanGenerator implements BeanMapperHandler.BeanGenerator {
         }
         try {
             return getProtobufBuilder(rawType, isBuilder);
-        } catch (MappingException e) {
+        } catch (ObjectConversionException e) {
             throw e;
         } catch (Exception e) {
-            throw new MappingException(e);
+            throw new ObjectConversionException(e);
         }
     }
 
@@ -53,7 +53,7 @@ public class ProtobufBeanGenerator implements BeanMapperHandler.BeanGenerator {
         try {
             return build(builder, isBuilder);
         } catch (Exception e) {
-            throw new MappingException(e);
+            throw new ObjectConversionException(e);
         }
     }
 

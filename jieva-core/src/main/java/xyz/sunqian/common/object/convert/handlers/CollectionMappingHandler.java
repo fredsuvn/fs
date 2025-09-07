@@ -1,12 +1,12 @@
-package xyz.sunqian.common.object.mapping.handlers;
+package xyz.sunqian.common.object.convert.handlers;
 
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.lang.Flag;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.collect.CollectKit;
-import xyz.sunqian.common.object.mapping.Mapper;
-import xyz.sunqian.common.object.mapping.MappingException;
-import xyz.sunqian.common.object.mapping.MappingOptions;
+import xyz.sunqian.common.object.convert.Mapper;
+import xyz.sunqian.common.object.convert.ObjectConversionException;
+import xyz.sunqian.common.object.convert.MappingOptions;
 import xyz.sunqian.common.object.data.DataProperty;
 import xyz.sunqian.common.runtime.reflect.TypeKit;
 
@@ -271,7 +271,7 @@ public class CollectionMappingHandler implements Mapper.Handler {
             if (options.isIgnoreError()) {
                 targetComponent = null;
             } else {
-                throw new MappingException(sourceComponent, sourceComponentType, targetComponentType);
+                throw new ObjectConversionException(sourceComponentType, targetComponentType);
             }
         } else {
             targetComponent = Mapper.resolveResult(targetResult);

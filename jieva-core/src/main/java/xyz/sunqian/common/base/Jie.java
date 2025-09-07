@@ -16,9 +16,9 @@ import xyz.sunqian.common.collect.StreamKit;
 import xyz.sunqian.common.function.callable.BooleanCallable;
 import xyz.sunqian.common.function.callable.VoidCallable;
 import xyz.sunqian.common.io.IORuntimeException;
-import xyz.sunqian.common.object.mapping.BeanMapper;
-import xyz.sunqian.common.object.mapping.Mapper;
-import xyz.sunqian.common.object.mapping.MappingOptions;
+import xyz.sunqian.common.object.convert.BeanMapper;
+import xyz.sunqian.common.object.convert.Mapper;
+import xyz.sunqian.common.object.convert.MappingOptions;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
 
 import java.lang.reflect.Type;

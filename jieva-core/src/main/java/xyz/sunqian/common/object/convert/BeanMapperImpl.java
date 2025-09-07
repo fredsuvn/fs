@@ -1,4 +1,4 @@
-package xyz.sunqian.common.object.mapping;
+package xyz.sunqian.common.object.convert;
 
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
@@ -23,7 +23,7 @@ final class BeanMapperImpl implements BeanMapper {
     @Override
     public <T> T copyProperties(
         Object source, Type sourceType, T dest, Type destType, MappingOptions options
-    ) throws MappingException {
+    ) throws ObjectConversionException {
         try {
             if (source instanceof Map) {
                 if (dest instanceof Map) {
@@ -39,7 +39,7 @@ final class BeanMapperImpl implements BeanMapper {
                 }
             }
         } catch (Exception e) {
-            throw new MappingException(e);
+            throw new ObjectConversionException(e);
         }
         return dest;
     }
@@ -288,13 +288,13 @@ final class BeanMapperImpl implements BeanMapper {
             if (options.isIgnoreError()) {
                 return F.RETURN;
             }
-            throw new MappingException(sourceType, destType, e);
+            throw new ObjectConversionException(sourceType, destType, e);
         }
         if (destValue == null) {
             if (options.isIgnoreError()) {
                 return F.RETURN;
             }
-            throw new MappingException(sourceValue, sourceType, destType);
+            throw new ObjectConversionException(sourceType, destType);
         }
         if (destValue instanceof Val) {
             destValue = ((Val<?>) destValue).get();

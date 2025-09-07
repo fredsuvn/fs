@@ -1,4 +1,4 @@
-package xyz.sunqian.common.object.mapping;
+package xyz.sunqian.common.object.convert;
 
 import lombok.Builder;
 import lombok.EqualsAndHashCode;

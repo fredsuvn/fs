@@ -13,7 +13,7 @@ import java.lang.reflect.Type;
  */
 public class DataObjectException extends JieRuntimeException {
 
-    private static String parsingSchemaMessage(@Nonnull Type type) {
+    private static String buildTypeMessage(@Nonnull Type type) {
         return "Parsing data schema failed: " + type.getTypeName() + "[" + type.getClass().getName() + "].";
     }
 
@@ -58,7 +58,7 @@ public class DataObjectException extends JieRuntimeException {
      * @param type specified data object type
      */
     public DataObjectException(@Nonnull Type type) {
-        this(parsingSchemaMessage(type));
+        this(buildTypeMessage(type));
     }
 
     /**
@@ -69,6 +69,6 @@ public class DataObjectException extends JieRuntimeException {
      * @param cause exception cause
      */
     public DataObjectException(@Nonnull Type type, @Nullable Throwable cause) {
-        this(parsingSchemaMessage(type), cause);
+        this(buildTypeMessage(type), cause);
     }
 }

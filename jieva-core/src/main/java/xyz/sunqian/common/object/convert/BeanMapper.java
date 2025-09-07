@@ -1,4 +1,4 @@
-package xyz.sunqian.common.object.mapping;
+package xyz.sunqian.common.object.convert;
 
 import xyz.sunqian.common.object.data.DataProperty;
 import xyz.sunqian.common.object.data.DataSchema;
@@ -32,9 +32,9 @@ public interface BeanMapper {
      * @param source source object
      * @param dest   dest object
      * @param <T>    type of dest object
-     * @throws MappingException exception when copying
+     * @throws ObjectConversionException exception when copying
      */
-    default <T> T copyProperties(Object source, T dest) throws MappingException {
+    default <T> T copyProperties(Object source, T dest) throws ObjectConversionException {
         return copyProperties(source, dest, MappingOptions.defaultOptions());
     }
 
@@ -50,9 +50,9 @@ public interface BeanMapper {
      * @param dest    dest object
      * @param options mapper options
      * @param <T>     type of dest object
-     * @throws MappingException exception when copying
+     * @throws ObjectConversionException exception when copying
      */
-    default <T> T copyProperties(Object source, T dest, MappingOptions options) throws MappingException {
+    default <T> T copyProperties(Object source, T dest, MappingOptions options) throws ObjectConversionException {
         return copyProperties(source, source.getClass(), dest, dest.getClass(), options);
     }
 
@@ -69,9 +69,9 @@ public interface BeanMapper {
      * @param dest       dest object
      * @param destType   type of dest object
      * @param <T>        type of dest object
-     * @throws MappingException exception when copying
+     * @throws ObjectConversionException exception when copying
      */
-    default <T> T copyProperties(Object source, Type sourceType, T dest, Type destType) throws MappingException {
+    default <T> T copyProperties(Object source, Type sourceType, T dest, Type destType) throws ObjectConversionException {
         return copyProperties(source, sourceType, dest, destType, MappingOptions.defaultOptions());
     }
 
@@ -98,11 +98,11 @@ public interface BeanMapper {
      * @param destType   type of dest object
      * @param options    mapper options
      * @param <T>        type of dest object
-     * @throws MappingException exception when copying
+     * @throws ObjectConversionException exception when copying
      */
     <T> T copyProperties(
         Object source, Type sourceType,
         T dest, Type destType,
         MappingOptions options
-    ) throws MappingException;
+    ) throws ObjectConversionException;
 }
