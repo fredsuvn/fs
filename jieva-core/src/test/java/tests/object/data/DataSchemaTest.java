@@ -1,4 +1,4 @@
-package tests.object;
+package tests.object.data;
 
 import lombok.Getter;
 import lombok.Setter;
