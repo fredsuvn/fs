@@ -2,8 +2,8 @@ package xyz.sunqian.common.trash.data.protobuf;
 
 import com.google.protobuf.Message;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.mapping.MappingException;
-import xyz.sunqian.common.mapping.handlers.BeanMapperHandler;
+import xyz.sunqian.common.object.mapping.MappingException;
+import xyz.sunqian.common.object.mapping.handlers.BeanMapperHandler;
 import xyz.sunqian.common.runtime.reflect.TypeKit;
 
 import java.lang.reflect.Method;

@@ -1,4 +1,4 @@
-package xyz.sunqian.common.mapping.handlers;
+package xyz.sunqian.common.object.mapping.handlers;
 
 import lombok.EqualsAndHashCode;
 import xyz.sunqian.annotations.Immutable;
@@ -7,8 +7,8 @@ import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.string.StringKit;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IOKit;
-import xyz.sunqian.common.mapping.MappingException;
-import xyz.sunqian.common.mapping.MappingOptions;
+import xyz.sunqian.common.object.mapping.MappingException;
+import xyz.sunqian.common.object.mapping.MappingOptions;
 import xyz.sunqian.common.object.data.DataProperty;
 
 import java.io.ByteArrayInputStream;

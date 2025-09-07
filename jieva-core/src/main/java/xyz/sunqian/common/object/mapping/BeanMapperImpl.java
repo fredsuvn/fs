@@ -1,4 +1,4 @@
-package xyz.sunqian.common.mapping;
+package xyz.sunqian.common.object.mapping;
 
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;

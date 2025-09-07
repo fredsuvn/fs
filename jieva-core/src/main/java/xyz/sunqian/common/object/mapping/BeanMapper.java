@@ -1,4 +1,4 @@
-package xyz.sunqian.common.mapping;
+package xyz.sunqian.common.object.mapping;
 
 import xyz.sunqian.common.object.data.DataProperty;
 import xyz.sunqian.common.object.data.DataSchema;

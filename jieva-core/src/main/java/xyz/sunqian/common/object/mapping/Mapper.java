@@ -1,4 +1,4 @@
-package xyz.sunqian.common.mapping;
+package xyz.sunqian.common.object.mapping;
 
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nullable;
@@ -6,11 +6,11 @@ import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.lang.Flag;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.value.Val;
-import xyz.sunqian.common.mapping.handlers.AssignableMapperHandler;
-import xyz.sunqian.common.mapping.handlers.BeanMapperHandler;
-import xyz.sunqian.common.mapping.handlers.CollectionMappingHandler;
-import xyz.sunqian.common.mapping.handlers.EnumMapperHandler;
-import xyz.sunqian.common.mapping.handlers.TypedMapperHandler;
+import xyz.sunqian.common.object.mapping.handlers.AssignableMapperHandler;
+import xyz.sunqian.common.object.mapping.handlers.BeanMapperHandler;
+import xyz.sunqian.common.object.mapping.handlers.CollectionMappingHandler;
+import xyz.sunqian.common.object.mapping.handlers.EnumMapperHandler;
+import xyz.sunqian.common.object.mapping.handlers.TypedMapperHandler;
 import xyz.sunqian.common.object.data.DataProperty;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
 
