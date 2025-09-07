@@ -21,52 +21,53 @@ public class ObjectConversionException extends JieRuntimeException {
      * Empty constructor.
      */
     public ObjectConversionException() {
+        super();
     }
 
     /**
-     * Constructs with exception message.
+     * Constructs with the message.
      *
-     * @param message exception message
+     * @param message the message
      */
     public ObjectConversionException(@Nullable String message) {
         super(message);
     }
 
     /**
-     * Constructs with exception message and exception cause.
+     * Constructs with the message and cause.
      *
-     * @param message exception message
-     * @param cause   exception cause
+     * @param message the message
+     * @param cause   the cause
      */
     public ObjectConversionException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
     /**
-     * Constructs with exception cause.
+     * Constructs with the cause.
      *
-     * @param cause exception cause
+     * @param cause the cause
      */
     public ObjectConversionException(@Nullable Throwable cause) {
         super(cause);
     }
 
     /**
-     * Constructs with source type and target type.
+     * Constructs with the source type and target type.
      *
-     * @param sourceType source type
-     * @param targetType target type
+     * @param sourceType the source type
+     * @param targetType the target type
      */
     public ObjectConversionException(@Nonnull Type sourceType, @Nonnull Type targetType) {
         this(buildTypeMessage(sourceType, targetType));
     }
 
     /**
-     * Constructs with source type, target type and exception cause.
+     * Constructs with the source type, target type and cause.
      *
-     * @param sourceType source type
-     * @param targetType target type
-     * @param cause      exception cause
+     * @param sourceType the source type
+     * @param targetType the target type
+     * @param cause      the cause
      */
     public ObjectConversionException(@Nonnull Type sourceType, @Nonnull Type targetType, @Nullable Throwable cause) {
         this(buildTypeMessage(sourceType, targetType), cause);

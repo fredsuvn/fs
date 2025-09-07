@@ -21,52 +21,51 @@ public class DataObjectException extends JieRuntimeException {
      * Empty constructor.
      */
     public DataObjectException() {
+        super();
     }
 
     /**
-     * Constructs with exception message.
+     * Constructs with the message.
      *
-     * @param message exception message
+     * @param message the message
      */
     public DataObjectException(@Nullable String message) {
         super(message);
     }
 
     /**
-     * Constructs with exception message and exception cause.
+     * Constructs with the message and cause.
      *
-     * @param message exception message
-     * @param cause   exception cause
+     * @param message the message
+     * @param cause   the cause
      */
     public DataObjectException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
     /**
-     * Constructs with exception cause.
+     * Constructs with the cause.
      *
-     * @param cause exception cause
+     * @param cause the cause
      */
     public DataObjectException(@Nullable Throwable cause) {
         super(cause);
     }
 
     /**
-     * Constructs with specified data object type. This exception constructor is typically used when parsing data schema
-     * fails.
+     * Constructs with the type of specified data object.
      *
-     * @param type specified data object type
+     * @param type the type of specified data object
      */
     public DataObjectException(@Nonnull Type type) {
         this(buildTypeMessage(type));
     }
 
     /**
-     * Constructs with specified data object type and exception cause. This exception constructor is typically used when
-     * parsing data schema fails.
+     * Constructs with the type of specified data object and cause.
      *
-     * @param type  specified data object type
-     * @param cause exception cause
+     * @param type  the type of specified data object
+     * @param cause the cause
      */
     public DataObjectException(@Nonnull Type type, @Nullable Throwable cause) {
         this(buildTypeMessage(type), cause);
