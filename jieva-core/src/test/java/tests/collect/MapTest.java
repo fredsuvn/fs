@@ -150,4 +150,12 @@ public class MapTest {
         assertNull(MapKit.resolveChain(map, 20, new HashSet<>()), null);
         assertNull(MapKit.resolveChain(map, 6, new HashSet<>()), null);
     }
+
+    @Test
+    public void testEntry() {
+        Map.Entry<String, String> entry = MapKit.entry("1", "2");
+        assertEquals(entry.getKey(), "1");
+        assertEquals(entry.getValue(), "2");
+        expectThrows(UnsupportedOperationException.class, () -> entry.setValue("3"));
+    }
 }

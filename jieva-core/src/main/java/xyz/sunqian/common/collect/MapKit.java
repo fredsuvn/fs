@@ -283,4 +283,32 @@ public class MapKit {
             nextKey = map.get(nextKey);
         }
     }
+
+    /**
+     * Returns a new immutable {@link Map.Entry} with the given key and value.
+     *
+     * @param key   the given key
+     * @param value the given value
+     * @param <K>   the key type
+     * @param <V>   the value type
+     * @return a new immutable {@link Map.Entry} with the given key and value
+     */
+    public static <K, V> Map.@Nonnull Entry<K, V> entry(K key, V value) {
+        return new Map.Entry<K, V>() {
+            @Override
+            public K getKey() {
+                return key;
+            }
+
+            @Override
+            public V getValue() {
+                return value;
+            }
+
+            @Override
+            public V setValue(V value) {
+                throw new UnsupportedOperationException();
+            }
+        };
+    }
 }
