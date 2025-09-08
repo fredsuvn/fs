@@ -3,8 +3,8 @@ package xyz.sunqian.common.object.convert.handlers;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.lang.Flag;
 import xyz.sunqian.common.base.value.Val;
-import xyz.sunqian.common.object.convert.Mapper;
-import xyz.sunqian.common.object.convert.MappingOptions;
+import xyz.sunqian.common.object.convert.ObjectConverter;
+import xyz.sunqian.common.object.convert.ConversionOptions;
 import xyz.sunqian.common.object.data.DataProperty;
 import xyz.sunqian.common.runtime.reflect.TypeKit;
 
@@ -14,15 +14,15 @@ import java.lang.reflect.WildcardType;
 import java.util.Objects;
 
 /**
- * Default first {@link Mapper.Handler} of {@link Mapper#getHandlers()}, to check assignable relationship between source
+ * Default first {@link ObjectConverter.Handler} of {@link ObjectConverter#getHandlers()}, to check assignable relationship between source
  * and target types.
  * <p>
  * In this handler, if {@code source} is {@code null}, return {@link Val#ofNull()}.
  * <p>
- * Else if value of {@link MappingOptions#getCopyLevel()} equals to {@link MappingOptions#COPY_LEVEL_EQUAL} and
+ * Else if value of {@link ConversionOptions#getCopyLevel()} equals to {@link ConversionOptions#COPY_LEVEL_EQUAL} and
  * {@code targetType} equals to {@code targetType}, return {@code wrapResult(source)}.
  * <p>
- * Else if value of {@link MappingOptions#getCopyLevel()} equals to {@link MappingOptions#COPY_LEVEL_ASSIGNABLE}, and (
+ * Else if value of {@link ConversionOptions#getCopyLevel()} equals to {@link ConversionOptions#COPY_LEVEL_ASSIGNABLE}, and (
  * {@code targetType} equals to {@code Object.class} or {@code targetType} is assignable from {@code sourceType}),
  * return {@code wrapResult(source)}.
  * <p>
@@ -43,21 +43,21 @@ import java.util.Objects;
  *
  * @author fredsuvn
  */
-public class AssignableMapperHandler implements Mapper.Handler {
+public class AssignableMapperHandler implements ObjectConverter.Handler {
 
     public AssignableMapperHandler() {
     }
 
     @Override
     public Object map(
-        @Nullable Object source, Type sourceType, Type targetType, Mapper mapper, MappingOptions options) {
+        @Nullable Object source, Type sourceType, Type targetType, ObjectConverter objectConverter, ConversionOptions options) {
         if (source == null) {
             return Val.ofNull();
         }
-        if (options.getCopyLevel() == MappingOptions.COPY_LEVEL_EQUAL && Objects.equals(source, targetType)) {
+        if (options.getCopyLevel() == ConversionOptions.COPY_LEVEL_EQUAL && Objects.equals(source, targetType)) {
             return wrapResult(source);
         }
-        if (options.getCopyLevel() == MappingOptions.COPY_LEVEL_ASSIGNABLE) {
+        if (options.getCopyLevel() == ConversionOptions.COPY_LEVEL_ASSIGNABLE) {
             if (Objects.equals(targetType, Object.class) || TypeKit.isAssignable(targetType, sourceType)) {
                 return wrapResult(source);
             }
@@ -71,14 +71,14 @@ public class AssignableMapperHandler implements Mapper.Handler {
             }
             // ? extends T
             Type upper = TypeKit.getUpperBound(targetWildcard);
-            return mapper.asHandler().map(source, sourceType, upper, mapper, options);
+            return objectConverter.asHandler().map(source, sourceType, upper, objectConverter, options);
         }
         if (targetType instanceof TypeVariable<?>) {
             TypeVariable<?> targetTypeVariable = (TypeVariable<?>) targetType;
             // T extends
             Type[] uppers = targetTypeVariable.getBounds();
             if (uppers.length == 1) {
-                return mapper.asHandler().map(source, sourceType, uppers[0], mapper, options);
+                return objectConverter.asHandler().map(source, sourceType, uppers[0], objectConverter, options);
             }
         }
         return Flag.CONTINUE;
@@ -86,14 +86,14 @@ public class AssignableMapperHandler implements Mapper.Handler {
 
     @Override
     public Object mapProperty(
-        @Nullable Object source, Type sourceType, Type targetType, DataProperty targetProperty, Mapper mapper, MappingOptions options) {
+        @Nullable Object source, Type sourceType, Type targetType, DataProperty targetProperty, ObjectConverter objectConverter, ConversionOptions options) {
         if (source == null) {
             return Val.ofNull();
         }
-        if (options.getCopyLevel() == MappingOptions.COPY_LEVEL_EQUAL && Objects.equals(source, targetType)) {
+        if (options.getCopyLevel() == ConversionOptions.COPY_LEVEL_EQUAL && Objects.equals(source, targetType)) {
             return wrapResult(source);
         }
-        if (options.getCopyLevel() == MappingOptions.COPY_LEVEL_ASSIGNABLE) {
+        if (options.getCopyLevel() == ConversionOptions.COPY_LEVEL_ASSIGNABLE) {
             if (Objects.equals(targetType, Object.class) || TypeKit.isAssignable(targetType, sourceType)) {
                 return wrapResult(source);
             }
@@ -107,14 +107,14 @@ public class AssignableMapperHandler implements Mapper.Handler {
             }
             // ? extends T
             Type upper = TypeKit.getUpperBound(targetWildcard);
-            return mapper.asHandler().mapProperty(source, sourceType, upper, targetProperty, mapper, options);
+            return objectConverter.asHandler().mapProperty(source, sourceType, upper, targetProperty, objectConverter, options);
         }
         if (targetType instanceof TypeVariable<?>) {
             TypeVariable<?> targetTypeVariable = (TypeVariable<?>) targetType;
             // T extends
             Type[] uppers = targetTypeVariable.getBounds();
             if (uppers.length == 1) {
-                return mapper.asHandler().mapProperty(source, sourceType, uppers[0], targetProperty, mapper, options);
+                return objectConverter.asHandler().mapProperty(source, sourceType, uppers[0], targetProperty, objectConverter, options);
             }
         }
         return Flag.CONTINUE;

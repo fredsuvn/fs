@@ -217,7 +217,7 @@
 //
 //        Mapper kConverter = Mapper.defaultMapper().addFirstHandler(new Mapper.Handler() {
 //            @Override
-//            public Object map(@Nullable Object source, Type sourceType, Type targetType, Mapper mapper, MappingOptions options) {
+//            public Object map(@Nullable Object source, Type sourceType, Type targetType, Mapper objectConverter, MappingOptions options) {
 //                if (Objects.equals(targetType, Kk.class)) {
 //                    return new Kk(String.valueOf(source));
 //                }
@@ -225,7 +225,7 @@
 //            }
 //
 //            @Override
-//            public Object mapProperty(@Nullable Object source, Type sourceType, Type targetType, PropertyInfo targetProperty, Mapper mapper, MappingOptions options) {
+//            public Object mapProperty(@Nullable Object source, Type sourceType, Type targetType, PropertyInfo targetProperty, Mapper objectConverter, MappingOptions options) {
 //                if (Objects.equals(targetType, Kk.class)) {
 //                    return new Kk(source + "Property");
 //                }
@@ -251,7 +251,7 @@
 //            new HashMap<>(),
 //            new TypeRef<Map<Kk, String>>() {
 //            }.getType(),
-//            MappingOptions.builder().ignoreNull(true).mapper(kConverter).build()
+//            MappingOptions.builder().ignoreNull(true).objectConverter(kConverter).build()
 //        );
 //        Assert.assertEquals(map1.get(new Kk("i1")), Jie.orNull(cc1.getI1(), String::valueOf));
 //        Assert.assertEquals(map1.get(new Kk("i2")), Jie.orNull(cc1.getI2(), String::valueOf));
@@ -267,7 +267,7 @@
 //            new Cc<>(),
 //            new TypeRef<Cc<String>>() {
 //            }.getType(),
-//            MappingOptions.builder().mapper(kConverter).build()
+//            MappingOptions.builder().objectConverter(kConverter).build()
 //        );
 //        Assert.assertEquals(map1.get(new Kk("i1")), Jie.orNull(cs2.getI1(), String::valueOf));
 //        Assert.assertEquals(map1.get(new Kk("i2")), Jie.orNull(cs2.getI2(), String::valueOf));
@@ -282,7 +282,7 @@
 //            new HashMap<>(),
 //            new TypeRef<Map<String, Kk>>() {
 //            }.getType(),
-//            MappingOptions.builder().mapper(kConverter).build()
+//            MappingOptions.builder().objectConverter(kConverter).build()
 //        );
 //        Assert.assertEquals(map1.get(new Kk("i1")), Jie.orNull(map2.get("i1"), String::valueOf));
 //        Assert.assertEquals(map1.get(new Kk("i2")), Jie.orNull(map2.get("i2"), String::valueOf));
@@ -298,7 +298,7 @@
 //            }.getType(),
 //            new Dd(),
 //            Dd.class,
-//            MappingOptions.builder().mapper(kConverter).build()
+//            MappingOptions.builder().objectConverter(kConverter).build()
 //        );
 //        Assert.assertEquals(dd.getD(), JieDate.format(now, "yyyy-MM-dd"));
 //    }

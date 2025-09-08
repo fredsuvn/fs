@@ -4,8 +4,8 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.lang.Flag;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.object.convert.BeanMapper;
-import xyz.sunqian.common.object.convert.Mapper;
-import xyz.sunqian.common.object.convert.MappingOptions;
+import xyz.sunqian.common.object.convert.ObjectConverter;
+import xyz.sunqian.common.object.convert.ConversionOptions;
 import xyz.sunqian.common.object.data.DataProperty;
 import xyz.sunqian.common.runtime.reflect.ClassKit;
 import xyz.sunqian.common.runtime.reflect.TypeKit;
@@ -25,13 +25,13 @@ import java.util.function.Supplier;
 
 /**
  * Bean mapper handler implementation, to create and map properties for target type from source object. By default, this
- * handler is last handler in {@link Mapper#getHandlers()}.
+ * handler is last handler in {@link ObjectConverter#getHandlers()}.
  * <p>
  * This handler has a bean generator ({@link BeanGenerator}). If source object is {@code null}, return
  * {@link Flag#CONTINUE}. Else the generator tries to create a new object of target type as target bean object, if the
  * generator return {@code null}, this handler return {@link Flag#CONTINUE}, else this handler will get the bean mapper
- * by {@link MappingOptions#getBeanMapper()} and call
- * {@link BeanMapper#copyProperties(Object, Type, Object, Type, MappingOptions)} to map the properties, then return
+ * by {@link ConversionOptions#getBeanMapper()} and call
+ * {@link BeanMapper#copyProperties(Object, Type, Object, Type, ConversionOptions)} to map the properties, then return
  * target object wrapped by {@link #wrapResult(Object)} ({@code wrapResult(targetBean)}).
  * <p>
  * The generator should be specified in {@link #BeanMapperHandler(BeanGenerator)}, or use default generator
@@ -62,7 +62,7 @@ import java.util.function.Supplier;
  * @author fredsuvn
  * @see BeanGenerator
  */
-public class BeanMapperHandler implements Mapper.Handler {
+public class BeanMapperHandler implements ObjectConverter.Handler {
 
     private static final Map<Type, Supplier<Object>> NEW_INSTANCE_MAP = new HashMap<>();
 
@@ -124,7 +124,7 @@ public class BeanMapperHandler implements Mapper.Handler {
     }
 
     @Override
-    public Object map(@Nullable Object source, Type sourceType, Type targetType, Mapper mapper, MappingOptions options) {
+    public Object map(@Nullable Object source, Type sourceType, Type targetType, ObjectConverter objectConverter, ConversionOptions options) {
         if (source == null) {
             return Flag.CONTINUE;
         }
@@ -141,8 +141,8 @@ public class BeanMapperHandler implements Mapper.Handler {
     }
 
     @Override
-    public Object mapProperty(@Nullable Object source, Type sourceType, Type targetType, DataProperty targetProperty, Mapper mapper, MappingOptions options) {
-        return map(source, sourceType, targetType, mapper, options);
+    public Object mapProperty(@Nullable Object source, Type sourceType, Type targetType, DataProperty targetProperty, ObjectConverter objectConverter, ConversionOptions options) {
+        return map(source, sourceType, targetType, objectConverter, options);
     }
 
     /**

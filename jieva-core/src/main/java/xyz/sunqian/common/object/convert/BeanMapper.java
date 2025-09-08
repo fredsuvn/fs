@@ -24,7 +24,7 @@ public interface BeanMapper {
 
     /**
      * Copies properties from source object to dest object, then returns dest object. Supports both bean object and
-     * {@link Map} object. This method is equivalent to ({@link #copyProperties(Object, Object, MappingOptions)}):
+     * {@link Map} object. This method is equivalent to ({@link #copyProperties(Object, Object, ConversionOptions)}):
      * <pre>
      *     copyProperties(source, dest, MappingOptions.defaultOptions());
      * </pre>
@@ -35,13 +35,13 @@ public interface BeanMapper {
      * @throws ObjectConversionException exception when copying
      */
     default <T> T copyProperties(Object source, T dest) throws ObjectConversionException {
-        return copyProperties(source, dest, MappingOptions.defaultOptions());
+        return copyProperties(source, dest, ConversionOptions.defaultOptions2());
     }
 
     /**
      * Copies properties from source object to dest object, then returns dest object. Supports both bean object and
      * {@link Map} object. This method is equivalent to
-     * ({@link #copyProperties(Object, Type, Object, Type, MappingOptions)}):
+     * ({@link #copyProperties(Object, Type, Object, Type, ConversionOptions)}):
      * <pre>
      *     copyProperties(source, source.getClass(), dest, dest.getClass(), options);
      * </pre>
@@ -52,14 +52,14 @@ public interface BeanMapper {
      * @param <T>     type of dest object
      * @throws ObjectConversionException exception when copying
      */
-    default <T> T copyProperties(Object source, T dest, MappingOptions options) throws ObjectConversionException {
+    default <T> T copyProperties(Object source, T dest, ConversionOptions options) throws ObjectConversionException {
         return copyProperties(source, source.getClass(), dest, dest.getClass(), options);
     }
 
 
     /**
      * Copies properties from source object to dest object, then returns dest object. Thie method is equivalent to
-     * ({@link #copyProperties(Object, Type, Object, Type, MappingOptions)}):
+     * ({@link #copyProperties(Object, Type, Object, Type, ConversionOptions)}):
      * <pre>
      *     return copyProperties(source, sourceType, dest, destType, MappingOptions.defaultOptions());
      * </pre>
@@ -72,7 +72,7 @@ public interface BeanMapper {
      * @throws ObjectConversionException exception when copying
      */
     default <T> T copyProperties(Object source, Type sourceType, T dest, Type destType) throws ObjectConversionException {
-        return copyProperties(source, sourceType, dest, destType, MappingOptions.defaultOptions());
+        return copyProperties(source, sourceType, dest, destType, ConversionOptions.defaultOptions2());
     }
 
     /**
@@ -103,6 +103,6 @@ public interface BeanMapper {
     <T> T copyProperties(
         Object source, Type sourceType,
         T dest, Type destType,
-        MappingOptions options
+        ConversionOptions options
     ) throws ObjectConversionException;
 }

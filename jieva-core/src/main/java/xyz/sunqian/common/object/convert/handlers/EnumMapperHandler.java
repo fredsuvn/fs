@@ -4,8 +4,8 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.lang.Flag;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.lang.EnumKit;
-import xyz.sunqian.common.object.convert.Mapper;
-import xyz.sunqian.common.object.convert.MappingOptions;
+import xyz.sunqian.common.object.convert.ObjectConverter;
+import xyz.sunqian.common.object.convert.ConversionOptions;
 import xyz.sunqian.common.object.data.DataProperty;
 
 import java.lang.reflect.Type;
@@ -17,10 +17,10 @@ import java.lang.reflect.Type;
  *
  * @author fredsuvn
  */
-public class EnumMapperHandler implements Mapper.Handler {
+public class EnumMapperHandler implements ObjectConverter.Handler {
 
     @Override
-    public Object map(@Nullable Object source, Type sourceType, Type targetType, Mapper mapper, MappingOptions options) {
+    public Object map(@Nullable Object source, Type sourceType, Type targetType, ObjectConverter objectConverter, ConversionOptions options) {
         if (source == null) {
             return Flag.CONTINUE;
         }
@@ -36,7 +36,7 @@ public class EnumMapperHandler implements Mapper.Handler {
     }
 
     @Override
-    public Object mapProperty(@Nullable Object source, Type sourceType, Type targetType, DataProperty targetProperty, Mapper mapper, MappingOptions options) {
-        return map(source, sourceType, targetType, mapper, options);
+    public Object mapProperty(@Nullable Object source, Type sourceType, Type targetType, DataProperty targetProperty, ObjectConverter objectConverter, ConversionOptions options) {
+        return map(source, sourceType, targetType, objectConverter, options);
     }
 }

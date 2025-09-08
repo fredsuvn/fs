@@ -22,7 +22,7 @@ final class BeanMapperImpl implements BeanMapper {
 
     @Override
     public <T> T copyProperties(
-        Object source, Type sourceType, T dest, Type destType, MappingOptions options
+        Object source, Type sourceType, T dest, Type destType, ConversionOptions options
     ) throws ObjectConversionException {
         try {
             if (source instanceof Map) {
@@ -44,7 +44,7 @@ final class BeanMapperImpl implements BeanMapper {
         return dest;
     }
 
-    private void mapToMap(Object source, Type sourceType, Object dest, Type destType, MappingOptions options) {
+    private void mapToMap(Object source, Type sourceType, Object dest, Type destType, ConversionOptions options) {
         List<Type> sourceTypeArgs = getMapTypeArgs(sourceType);
         Type sourceKeyType = sourceTypeArgs.get(0);
         Type sourceValueType = sourceTypeArgs.get(1);
@@ -56,7 +56,7 @@ final class BeanMapperImpl implements BeanMapper {
         Collection<?> ignored = Jie.nonnull(options.getIgnored(), Collections.emptyList());
         boolean ignoreNull = options.isIgnoreNull();
         BiFunction<Object, Type, @Nullable Object> nameMapper = Jie.nonnull(options.getNameMapper(), (o1, o2) -> o1);
-        Mapper mapper = Jie.nonnull(options.getMapper(), Mapper.defaultMapper());
+        ObjectConverter objectConverter = Jie.nonnull(options.getObjectConverter(), ObjectConverter.defaultConverter());
         boolean ignoreError = options.isIgnoreError();
         sourceMap.forEach((key, value) -> {
             if (ignored.contains(key)) {
@@ -72,12 +72,12 @@ final class BeanMapperImpl implements BeanMapper {
             putToMap(
                 mappedKey, sourceKeyType, destKeyType,
                 value, sourceValueType, destValueType,
-                destMap, mapper, options
+                destMap, objectConverter, options
             );
         });
     }
 
-    private void mapToBean(Object source, Type sourceType, Object dest, Type destType, MappingOptions options) {
+    private void mapToBean(Object source, Type sourceType, Object dest, Type destType, ConversionOptions options) {
         List<Type> sourceTypeArgs = getMapTypeArgs(sourceType);
         Type sourceKeyType = sourceTypeArgs.get(0);
         Type sourceValueType = sourceTypeArgs.get(1);
@@ -88,7 +88,7 @@ final class BeanMapperImpl implements BeanMapper {
         Collection<?> ignored = Jie.nonnull(options.getIgnored(), Collections.emptyList());
         boolean ignoreNull = options.isIgnoreNull();
         BiFunction<Object, Type, @Nullable Object> nameMapper = Jie.nonnull(options.getNameMapper(), (o1, o2) -> o1);
-        Mapper mapper = Jie.nonnull(options.getMapper(), Mapper.defaultMapper());
+        ObjectConverter objectConverter = Jie.nonnull(options.getObjectConverter(), ObjectConverter.defaultConverter());
         boolean ignoreError = options.isIgnoreError();
         sourceMap.forEach((key, value) -> {
             if (ignored.contains(key)) {
@@ -103,12 +103,12 @@ final class BeanMapperImpl implements BeanMapper {
             }
             putToBean(
                 mappedKey, sourceKeyType, value, sourceValueType,
-                dest, destProperties, mapper, options
+                dest, destProperties, objectConverter, options
             );
         });
     }
 
-    private void beanToMap(Object source, Type sourceType, Object dest, Type destType, MappingOptions options) {
+    private void beanToMap(Object source, Type sourceType, Object dest, Type destType, ConversionOptions options) {
         DataSchemaParser beanProvider = Jie.nonnull(options.getDataSchemaParser(), DataSchemaParser.defaultParser());
         DataSchema sourceInfo = DataSchema.parse(sourceType);
         Map<String, DataProperty> sourceProperties = sourceInfo.properties();
@@ -119,7 +119,7 @@ final class BeanMapperImpl implements BeanMapper {
         Collection<?> ignored = Jie.nonnull(options.getIgnored(), Collections.emptyList());
         boolean ignoreNull = options.isIgnoreNull();
         BiFunction<Object, Type, @Nullable Object> nameMapper = Jie.nonnull(options.getNameMapper(), (o1, o2) -> o1);
-        Mapper mapper = Jie.nonnull(options.getMapper(), Mapper.defaultMapper());
+        ObjectConverter objectConverter = Jie.nonnull(options.getObjectConverter(), ObjectConverter.defaultConverter());
         boolean ignoreError = options.isIgnoreError();
         boolean ignoreClass = options.isIgnoreClass();
         sourceProperties.forEach((name, property) -> {
@@ -140,12 +140,12 @@ final class BeanMapperImpl implements BeanMapper {
             putToMap(
                 mappedKey, String.class, destKeyType,
                 sourceValue, property.type(), destValueType,
-                destMap, mapper, options
+                destMap, objectConverter, options
             );
         });
     }
 
-    private void beanToBean(Object source, Type sourceType, Object dest, Type destType, MappingOptions options) {
+    private void beanToBean(Object source, Type sourceType, Object dest, Type destType, ConversionOptions options) {
         DataSchemaParser beanProvider = Jie.nonnull(options.getDataSchemaParser(), DataSchemaParser.defaultParser());
         DataSchema sourceInfo = DataSchema.parse(sourceType);
         Map<String, DataProperty> sourceProperties = sourceInfo.properties();
@@ -154,7 +154,7 @@ final class BeanMapperImpl implements BeanMapper {
         Collection<?> ignored = Jie.nonnull(options.getIgnored(), Collections.emptyList());
         boolean ignoreNull = options.isIgnoreNull();
         BiFunction<Object, Type, @Nullable Object> nameMapper = Jie.nonnull(options.getNameMapper(), (o1, o2) -> o1);
-        Mapper mapper = Jie.nonnull(options.getMapper(), Mapper.defaultMapper());
+        ObjectConverter objectConverter = Jie.nonnull(options.getObjectConverter(), ObjectConverter.defaultConverter());
         boolean ignoreError = options.isIgnoreError();
         boolean ignoreClass = options.isIgnoreClass();
         sourceProperties.forEach((name, property) -> {
@@ -174,7 +174,7 @@ final class BeanMapperImpl implements BeanMapper {
             }
             putToBean(
                 mappedKey, String.class, sourceValue, property.type(),
-                dest, destProperties, mapper, options
+                dest, destProperties, objectConverter, options
             );
         });
     }
@@ -186,31 +186,31 @@ final class BeanMapperImpl implements BeanMapper {
     private void putToMap(
         Object mappedKey, Type sourceKeyType, Type destKeyType,
         Object sourceValue, Type sourceValueType, Type destValueType,
-        Map<Object, Object> destMap, Mapper mapper, MappingOptions options
+        Map<Object, Object> destMap, ObjectConverter objectConverter, ConversionOptions options
     ) {
         if (mappedKey instanceof Collection) {
             for (Object mk : ((Collection<?>) mappedKey)) {
-                putToMap0(mk, sourceKeyType, destKeyType, sourceValue, sourceValueType, destValueType, destMap, mapper, options);
+                putToMap0(mk, sourceKeyType, destKeyType, sourceValue, sourceValueType, destValueType, destMap, objectConverter, options);
             }
         } else {
-            putToMap0(mappedKey, sourceKeyType, destKeyType, sourceValue, sourceValueType, destValueType, destMap, mapper, options);
+            putToMap0(mappedKey, sourceKeyType, destKeyType, sourceValue, sourceValueType, destValueType, destMap, objectConverter, options);
         }
     }
 
     private void putToMap0(
         Object mappedKey, Type sourceKeyType, Type destKeyType,
         Object sourceValue, Type sourceValueType, Type destValueType,
-        Map<Object, Object> destMap, Mapper mapper, MappingOptions options
+        Map<Object, Object> destMap, ObjectConverter objectConverter, ConversionOptions options
     ) {
         boolean ignoreError = options.isIgnoreError();
-        Object destKey = map(mapper, mappedKey, sourceKeyType, destKeyType, options);
+        Object destKey = map(objectConverter, mappedKey, sourceKeyType, destKeyType, options);
         if (destKey == F.RETURN || destKey == null) {
             return;
         }
         if (!destMap.containsKey(destKey) && !options.isPutNew()) {
             return;
         }
-        Object destValue = map(mapper, sourceValue, sourceValueType, destValueType, options);
+        Object destValue = map(objectConverter, sourceValue, sourceValueType, destValueType, options);
         if (destValue == F.RETURN) {
             return;
         }
@@ -222,23 +222,23 @@ final class BeanMapperImpl implements BeanMapper {
 
     private void putToBean(
         Object mappedKey, Type sourceKeyType, Object sourceValue, Type sourceValueType,
-        Object dest, Map<String, DataProperty> destProperties, Mapper mapper, MappingOptions options
+        Object dest, Map<String, DataProperty> destProperties, ObjectConverter objectConverter, ConversionOptions options
     ) {
         if (mappedKey instanceof Collection) {
             for (Object mk : ((Collection<?>) mappedKey)) {
-                putToBean0(mk, sourceKeyType, sourceValue, sourceValueType, dest, destProperties, mapper, options);
+                putToBean0(mk, sourceKeyType, sourceValue, sourceValueType, dest, destProperties, objectConverter, options);
             }
         } else {
-            putToBean0(mappedKey, sourceKeyType, sourceValue, sourceValueType, dest, destProperties, mapper, options);
+            putToBean0(mappedKey, sourceKeyType, sourceValue, sourceValueType, dest, destProperties, objectConverter, options);
         }
     }
 
     private void putToBean0(
         Object mappedKey, Type sourceKeyType, Object sourceValue, Type sourceValueType,
-        Object dest, Map<String, DataProperty> destProperties, Mapper mapper, MappingOptions options
+        Object dest, Map<String, DataProperty> destProperties, ObjectConverter objectConverter, ConversionOptions options
     ) {
         boolean ignoreError = options.isIgnoreError();
-        Object destKey = map(mapper, mappedKey, sourceKeyType, String.class, options);
+        Object destKey = map(objectConverter, mappedKey, sourceKeyType, String.class, options);
         if (destKey == F.RETURN || destKey == null) {
             return;
         }
@@ -247,7 +247,7 @@ final class BeanMapperImpl implements BeanMapper {
         if (destProperty == null || !destProperty.isWritable()) {
             return;
         }
-        Object destValue = mapProperty(mapper, sourceValue, sourceValueType, destProperty, options);
+        Object destValue = mapProperty(objectConverter, sourceValue, sourceValueType, destProperty, options);
         if (destValue == F.RETURN) {
             return;
         }
@@ -259,31 +259,31 @@ final class BeanMapperImpl implements BeanMapper {
 
     @Nullable
     private Object map(
-        Mapper mapper, @Nullable Object sourceValue, Type sourceType, Type destType, MappingOptions options) {
-        return map0(mapper, sourceValue, sourceType, destType, null, options);
+        ObjectConverter objectConverter, @Nullable Object sourceValue, Type sourceType, Type destType, ConversionOptions options) {
+        return map0(objectConverter, sourceValue, sourceType, destType, null, options);
     }
 
     @Nullable
     private Object mapProperty(
-        Mapper mapper, @Nullable Object sourceValue, Type sourceType, DataProperty destProperty, MappingOptions options) {
-        return map0(mapper, sourceValue, sourceType, destProperty.type(), destProperty, options);
+        ObjectConverter objectConverter, @Nullable Object sourceValue, Type sourceType, DataProperty destProperty, ConversionOptions options) {
+        return map0(objectConverter, sourceValue, sourceType, destProperty.type(), destProperty, options);
     }
 
     @Nullable
     private Object map0(
-        Mapper mapper,
+        ObjectConverter objectConverter,
         @Nullable Object sourceValue,
         Type sourceType,
         Type destType,
         @Nullable DataProperty destProperty,
-        MappingOptions options
+        ConversionOptions options
     ) {
         Object destValue;
         try {
             destValue = destProperty == null ?
-                mapper.map(sourceValue, sourceType, destType, options)
+                objectConverter.map(sourceValue, sourceType, destType, options)
                 :
-                mapper.mapProperty(sourceValue, sourceType, destType, destProperty, options);
+                objectConverter.mapProperty(sourceValue, sourceType, destType, destProperty, options);
         } catch (Exception e) {
             if (options.isIgnoreError()) {
                 return F.RETURN;

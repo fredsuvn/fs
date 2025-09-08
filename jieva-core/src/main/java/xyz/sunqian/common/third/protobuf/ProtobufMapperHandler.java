@@ -5,8 +5,8 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.lang.Flag;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.chars.CharsKit;
-import xyz.sunqian.common.object.convert.Mapper;
-import xyz.sunqian.common.object.convert.MappingOptions;
+import xyz.sunqian.common.object.convert.ObjectConverter;
+import xyz.sunqian.common.object.convert.ConversionOptions;
 import xyz.sunqian.common.object.data.DataProperty;
 
 import java.lang.reflect.Type;
@@ -29,15 +29,15 @@ import java.util.Objects;
  *
  * @author fredsuvn
  */
-public class ProtobufMapperHandler implements Mapper.Handler {
+public class ProtobufMapperHandler implements ObjectConverter.Handler {
 
     @Override
-    public @Nullable Object map(@Nullable Object source, Type sourceType, Type targetType, Mapper mapper, MappingOptions options) {
-        return mapProperty(source, sourceType, targetType, null, mapper, options);
+    public @Nullable Object map(@Nullable Object source, Type sourceType, Type targetType, ObjectConverter objectConverter, ConversionOptions options) {
+        return mapProperty(source, sourceType, targetType, null, objectConverter, options);
     }
 
     @Override
-    public Object mapProperty(@Nullable Object source, Type sourceType, Type targetType, @Nullable DataProperty targetProperty, Mapper mapper, MappingOptions options) {
+    public Object mapProperty(@Nullable Object source, Type sourceType, Type targetType, @Nullable DataProperty targetProperty, ObjectConverter objectConverter, ConversionOptions options) {
         if (source == null) {
             return Flag.CONTINUE;
         }
@@ -73,7 +73,7 @@ public class ProtobufMapperHandler implements Mapper.Handler {
         return Flag.CONTINUE;
     }
 
-    private Charset getCharset(@Nullable DataProperty targetProperty, MappingOptions options) {
+    private Charset getCharset(@Nullable DataProperty targetProperty, ConversionOptions options) {
         Charset charset = options.getCharset(targetProperty);
         return Jie.nonnull(charset, CharsKit.defaultCharset());
     }

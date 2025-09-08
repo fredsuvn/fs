@@ -16,20 +16,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-final class MapperImpl implements Mapper, Mapper.Handler {
+final class ObjectConverterImpl implements ObjectConverter, ObjectConverter.Handler {
 
-    static final MapperImpl DEFAULT_MAPPER = new MapperImpl(Jie.list(
+    static final ObjectConverterImpl DEFAULT_MAPPER = new ObjectConverterImpl(Jie.list(
         new AssignableMapperHandler(),
         new EnumMapperHandler(),
         new TypedMapperHandler(),
         new CollectionMappingHandler(),
         new BeanMapperHandler()
-    ), MappingOptions.defaultOptions());
+    ), ConversionOptions.defaultOptions2());
 
-    private final List<Mapper.Handler> handlers;
-    private final MappingOptions defaultOptions;
+    private final List<ObjectConverter.Handler> handlers;
+    private final ConversionOptions defaultOptions;
 
-    MapperImpl(Iterable<Mapper.Handler> handlers, MappingOptions defaultOptions) {
+    ObjectConverterImpl(Iterable<ObjectConverter.Handler> handlers, ConversionOptions defaultOptions) {
         this.handlers = ListKit.toList(handlers);
         this.defaultOptions = defaultOptions;
     }
@@ -40,54 +40,54 @@ final class MapperImpl implements Mapper, Mapper.Handler {
     }
 
     @Override
-    public Mapper addFirstHandler(Handler handler) {
+    public ObjectConverter addFirstHandler(Handler handler) {
         List<Handler> newHandlers = new ArrayList<>(handlers.size() + 1);
         newHandlers.add(handler);
         newHandlers.addAll(handlers);
-        return new MapperImpl(newHandlers, getOptions());
+        return new ObjectConverterImpl(newHandlers, getOptions());
     }
 
     @Override
-    public Mapper addLastHandler(Handler handler) {
+    public ObjectConverter addLastHandler(Handler handler) {
         List<Handler> newHandlers = new ArrayList<>(handlers.size() + 1);
         newHandlers.addAll(handlers);
         newHandlers.add(handler);
-        return new MapperImpl(newHandlers, getOptions());
+        return new ObjectConverterImpl(newHandlers, getOptions());
     }
 
     @Override
-    public Mapper replaceFirstHandler(Handler handler) {
+    public ObjectConverter replaceFirstHandler(Handler handler) {
         if (Objects.equals(handlers.get(0), handler)) {
             return this;
         }
         List<Handler> newHandlers = new ArrayList<>(handlers.size());
         newHandlers.addAll(handlers);
         newHandlers.set(0, handler);
-        return new MapperImpl(newHandlers, getOptions());
+        return new ObjectConverterImpl(newHandlers, getOptions());
     }
 
     @Override
-    public Mapper replaceLastHandler(Handler handler) {
+    public ObjectConverter replaceLastHandler(Handler handler) {
         if (Objects.equals(handlers.get(handlers.size() - 1), handler)) {
             return this;
         }
         List<Handler> newHandlers = new ArrayList<>(handlers.size());
         newHandlers.addAll(handlers);
         newHandlers.set(newHandlers.size() - 1, handler);
-        return new MapperImpl(newHandlers, getOptions());
+        return new ObjectConverterImpl(newHandlers, getOptions());
     }
 
     @Override
-    public MappingOptions getOptions() {
+    public ConversionOptions getOptions() {
         return defaultOptions;
     }
 
     @Override
-    public Mapper replaceOptions(MappingOptions options) {
+    public ObjectConverter replaceOptions(ConversionOptions options) {
         if (Objects.equals(defaultOptions, options)) {
             return this;
         }
-        return new MapperImpl(handlers, options);
+        return new ObjectConverterImpl(handlers, options);
     }
 
     @Override
@@ -97,7 +97,7 @@ final class MapperImpl implements Mapper, Mapper.Handler {
 
     @Override
     public @Nullable Object map(
-        @Nullable Object source, Type sourceType, Type targetType, Mapper mapper, MappingOptions options) {
+        @Nullable Object source, Type sourceType, Type targetType, ObjectConverter objectConverter, ConversionOptions options) {
         Object result = map(source, sourceType, targetType, options);
         if (result == null) {
             return Flag.CONTINUE;
@@ -107,7 +107,7 @@ final class MapperImpl implements Mapper, Mapper.Handler {
 
     @Override
     public Object mapProperty(
-        @Nullable Object source, Type sourceType, Type targetType, DataProperty targetProperty, Mapper mapper, MappingOptions options) {
+        @Nullable Object source, Type sourceType, Type targetType, DataProperty targetProperty, ObjectConverter objectConverter, ConversionOptions options) {
         Object result = mapProperty(source, sourceType, targetType, targetProperty, options);
         if (result == null) {
             return Flag.CONTINUE;

@@ -8,7 +8,7 @@ import xyz.sunqian.common.base.string.StringKit;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.object.convert.ObjectConversionException;
-import xyz.sunqian.common.object.convert.MappingOptions;
+import xyz.sunqian.common.object.convert.ConversionOptions;
 import xyz.sunqian.common.object.data.DataProperty;
 
 import java.io.ByteArrayInputStream;
@@ -241,7 +241,7 @@ public class TypedConverters {
 
         @Override
         public @Nullable String convert(
-            Object source, Type sourceType, @Nullable DataProperty targetProperty, MappingOptions options) {
+            Object source, Type sourceType, @Nullable DataProperty targetProperty, ConversionOptions options) {
             if (source instanceof Date) {
                 DateTimeFormatter dateTimeFormatter = options.getDateTimeFormatterWithZone(targetProperty);
                 if (dateTimeFormatter != null) {
@@ -306,7 +306,7 @@ public class TypedConverters {
 
         @Override
         public @Nullable byte[] convert(
-            Object source, Type sourceType, @Nullable DataProperty targetProperty, MappingOptions options) {
+            Object source, Type sourceType, @Nullable DataProperty targetProperty, ConversionOptions options) {
             if (source instanceof CharSequence) {
                 Charset charset = options.getCharset(targetProperty);
                 if (charset != null) {
@@ -348,7 +348,7 @@ public class TypedConverters {
 
         @Override
         public @Nullable Number convert(
-            Object source, Type sourceType, @Nullable DataProperty targetProperty, MappingOptions options) {
+            Object source, Type sourceType, @Nullable DataProperty targetProperty, ConversionOptions options) {
             if (source instanceof Number) {
                 return (Number) source;
             }
@@ -431,7 +431,7 @@ public class TypedConverters {
 
         @Override
         public @Nullable Character convert(
-            Object source, Type sourceType, @Nullable DataProperty targetProperty, MappingOptions options) {
+            Object source, Type sourceType, @Nullable DataProperty targetProperty, ConversionOptions options) {
             if (source instanceof Character) {
                 return (Character) source;
             }
@@ -460,7 +460,7 @@ public class TypedConverters {
 
         @Override
         public @Nullable Date convert(
-            Object source, Type sourceType, @Nullable DataProperty targetProperty, MappingOptions options) {
+            Object source, Type sourceType, @Nullable DataProperty targetProperty, ConversionOptions options) {
             if (source instanceof Date) {
                 return new Date(((Date) source).getTime());
             }
@@ -503,7 +503,7 @@ public class TypedConverters {
 
         @Override
         public @Nullable TemporalAccessor convert(
-            Object source, Type sourceType, @Nullable DataProperty targetProperty, MappingOptions options) {
+            Object source, Type sourceType, @Nullable DataProperty targetProperty, ConversionOptions options) {
             if (source instanceof Date) {
                 return ((Date) source).toInstant();
             }
@@ -524,9 +524,9 @@ public class TypedConverters {
 
             private final CharSequence string;
             private final @Nullable DataProperty targetProperty;
-            private final MappingOptions options;
+            private final ConversionOptions options;
 
-            private StringTemporal(CharSequence string, @Nullable DataProperty targetProperty, MappingOptions options) {
+            private StringTemporal(CharSequence string, @Nullable DataProperty targetProperty, ConversionOptions options) {
                 this.string = string;
                 this.targetProperty = targetProperty;
                 this.options = options;
@@ -607,7 +607,7 @@ public class TypedConverters {
 
         @Override
         public @Nullable Duration convert(
-            Object source, Type sourceType, @Nullable DataProperty targetProperty, MappingOptions options) {
+            Object source, Type sourceType, @Nullable DataProperty targetProperty, ConversionOptions options) {
             if (source instanceof Duration) {
                 return (Duration) source;
             }
@@ -638,7 +638,7 @@ public class TypedConverters {
 
         @Override
         public @Nullable Boolean convert(
-            Object source, Type sourceType, @Nullable DataProperty targetProperty, MappingOptions options) {
+            Object source, Type sourceType, @Nullable DataProperty targetProperty, ConversionOptions options) {
             if (source instanceof Boolean) {
                 return (Boolean) source;
             }

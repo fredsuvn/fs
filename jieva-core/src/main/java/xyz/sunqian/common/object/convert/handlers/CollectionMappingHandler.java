@@ -4,9 +4,9 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.lang.Flag;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.collect.CollectKit;
-import xyz.sunqian.common.object.convert.Mapper;
+import xyz.sunqian.common.object.convert.ObjectConverter;
 import xyz.sunqian.common.object.convert.ObjectConversionException;
-import xyz.sunqian.common.object.convert.MappingOptions;
+import xyz.sunqian.common.object.convert.ConversionOptions;
 import xyz.sunqian.common.object.data.DataProperty;
 import xyz.sunqian.common.runtime.reflect.TypeKit;
 
@@ -38,8 +38,8 @@ import java.util.function.IntFunction;
  * type or target type is not subtype of {@link Iterable}, array, {@link GenericArrayType}, return
  * {@link Flag#CONTINUE}. Else the generator tries to create a new collection of target type as target collection, if
  * the generator return {@code null}, this handler return {@link Flag#CONTINUE}, else this handler will map all
- * component of source object by {@link Mapper#map(Object, Type, Type, MappingOptions)} or
- * {@link Mapper#mapProperty(Object, Type, Type, DataProperty, MappingOptions)}, then return target collection wrapped
+ * component of source object by {@link ObjectConverter#map(Object, Type, Type, ConversionOptions)} or
+ * {@link ObjectConverter#mapProperty(Object, Type, Type, DataProperty, ConversionOptions)}, then return target collection wrapped
  * by {@link #wrapResult(Object)} ({@code wrapResult(targetCollection)}).
  * <p>
  * The generator should be specified in {@link #CollectionMappingHandler(CollectionGenerator)}, or use default generator
@@ -63,7 +63,7 @@ import java.util.function.IntFunction;
  *
  * @author fredsuvn
  */
-public class CollectionMappingHandler implements Mapper.Handler {
+public class CollectionMappingHandler implements ObjectConverter.Handler {
 
     private static final Map<Type, IntFunction<Object>> NEW_INSTANCE_MAP = new HashMap<>();
 
@@ -133,12 +133,12 @@ public class CollectionMappingHandler implements Mapper.Handler {
     }
 
     @Override
-    public Object map(@Nullable Object source, Type sourceType, Type targetType, Mapper mapper, MappingOptions options) {
-        return mapProperty(source, sourceType, targetType, null, mapper, options);
+    public Object map(@Nullable Object source, Type sourceType, Type targetType, ObjectConverter objectConverter, ConversionOptions options) {
+        return mapProperty(source, sourceType, targetType, null, objectConverter, options);
     }
 
     @Override
-    public Object mapProperty(@Nullable Object source, Type sourceType, Type targetType, @Nullable DataProperty targetProperty, Mapper mapper, MappingOptions options) {
+    public Object mapProperty(@Nullable Object source, Type sourceType, Type targetType, @Nullable DataProperty targetProperty, ObjectConverter objectConverter, ConversionOptions options) {
         if (source == null) {
             return Flag.CONTINUE;
         }
@@ -157,61 +157,61 @@ public class CollectionMappingHandler implements Mapper.Handler {
         int i = 0;
         if (source instanceof Iterable<?>) {
             for (Object sourceComponent : (Iterable<?>) source) {
-                addComponent(targetCollection, i++, sourceComponent, sourceComponentType, targetComponentType, targetProperty, mapper, options);
+                addComponent(targetCollection, i++, sourceComponent, sourceComponentType, targetComponentType, targetProperty, objectConverter, options);
             }
             return wrapResult(targetCollection);
         }
         if (source instanceof Object[]) {
             for (Object sourceComponent : (Object[]) source) {
-                addComponent(targetCollection, i++, sourceComponent, sourceComponentType, targetComponentType, targetProperty, mapper, options);
+                addComponent(targetCollection, i++, sourceComponent, sourceComponentType, targetComponentType, targetProperty, objectConverter, options);
             }
             return wrapResult(targetCollection);
         }
         if (source instanceof boolean[]) {
             for (Object sourceComponent : (boolean[]) source) {
-                addComponent(targetCollection, i++, sourceComponent, sourceComponentType, targetComponentType, targetProperty, mapper, options);
+                addComponent(targetCollection, i++, sourceComponent, sourceComponentType, targetComponentType, targetProperty, objectConverter, options);
             }
             return wrapResult(targetCollection);
         }
         if (source instanceof byte[]) {
             for (Object sourceComponent : (byte[]) source) {
-                addComponent(targetCollection, i++, sourceComponent, sourceComponentType, targetComponentType, targetProperty, mapper, options);
+                addComponent(targetCollection, i++, sourceComponent, sourceComponentType, targetComponentType, targetProperty, objectConverter, options);
             }
             return wrapResult(targetCollection);
         }
         if (source instanceof short[]) {
             for (Object sourceComponent : (short[]) source) {
-                addComponent(targetCollection, i++, sourceComponent, sourceComponentType, targetComponentType, targetProperty, mapper, options);
+                addComponent(targetCollection, i++, sourceComponent, sourceComponentType, targetComponentType, targetProperty, objectConverter, options);
             }
             return wrapResult(targetCollection);
         }
         if (source instanceof char[]) {
             for (Object sourceComponent : (char[]) source) {
-                addComponent(targetCollection, i++, sourceComponent, sourceComponentType, targetComponentType, targetProperty, mapper, options);
+                addComponent(targetCollection, i++, sourceComponent, sourceComponentType, targetComponentType, targetProperty, objectConverter, options);
             }
             return wrapResult(targetCollection);
         }
         if (source instanceof int[]) {
             for (Object sourceComponent : (int[]) source) {
-                addComponent(targetCollection, i++, sourceComponent, sourceComponentType, targetComponentType, targetProperty, mapper, options);
+                addComponent(targetCollection, i++, sourceComponent, sourceComponentType, targetComponentType, targetProperty, objectConverter, options);
             }
             return wrapResult(targetCollection);
         }
         if (source instanceof long[]) {
             for (Object sourceComponent : (long[]) source) {
-                addComponent(targetCollection, i++, sourceComponent, sourceComponentType, targetComponentType, targetProperty, mapper, options);
+                addComponent(targetCollection, i++, sourceComponent, sourceComponentType, targetComponentType, targetProperty, objectConverter, options);
             }
             return wrapResult(targetCollection);
         }
         if (source instanceof float[]) {
             for (Object sourceComponent : (float[]) source) {
-                addComponent(targetCollection, i++, sourceComponent, sourceComponentType, targetComponentType, targetProperty, mapper, options);
+                addComponent(targetCollection, i++, sourceComponent, sourceComponentType, targetComponentType, targetProperty, objectConverter, options);
             }
             return wrapResult(targetCollection);
         }
         if (source instanceof double[]) {
             for (Object sourceComponent : (double[]) source) {
-                addComponent(targetCollection, i++, sourceComponent, sourceComponentType, targetComponentType, targetProperty, mapper, options);
+                addComponent(targetCollection, i++, sourceComponent, sourceComponentType, targetComponentType, targetProperty, objectConverter, options);
             }
             return wrapResult(targetCollection);
         }
@@ -259,14 +259,14 @@ public class CollectionMappingHandler implements Mapper.Handler {
         Type sourceComponentType,
         Type targetComponentType,
         @Nullable DataProperty targetProperty,
-        Mapper mapper,
-        MappingOptions options
+        ObjectConverter objectConverter,
+        ConversionOptions options
     ) {
         Object targetComponent;
         Object targetResult = targetProperty == null ?
-            mapper.map(sourceComponent, sourceComponentType, targetComponentType, options)
+            objectConverter.map(sourceComponent, sourceComponentType, targetComponentType, options)
             :
-            mapper.mapProperty(sourceComponent, sourceComponentType, targetComponentType, targetProperty, options);
+            objectConverter.mapProperty(sourceComponent, sourceComponentType, targetComponentType, targetProperty, options);
         if (targetResult == null) {
             if (options.isIgnoreError()) {
                 targetComponent = null;
@@ -274,7 +274,7 @@ public class CollectionMappingHandler implements Mapper.Handler {
                 throw new ObjectConversionException(sourceComponentType, targetComponentType);
             }
         } else {
-            targetComponent = Mapper.resolveResult(targetResult);
+            targetComponent = ObjectConverter.resolveResult(targetResult);
         }
         if (targetCollection instanceof Collection<?>) {
             Collection<Object> target = Jie.as(targetCollection);

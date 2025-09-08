@@ -319,7 +319,7 @@ public class DataSchemaTest implements PrintTest {
     }
 
     @Test
-    public void testException() throws Exception {
+    public void testException() {
         {
             // DataObjectException
             expectThrows(DataObjectException.class, () -> {

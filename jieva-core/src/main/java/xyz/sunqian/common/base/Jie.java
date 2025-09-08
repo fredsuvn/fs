@@ -17,8 +17,8 @@ import xyz.sunqian.common.function.callable.BooleanCallable;
 import xyz.sunqian.common.function.callable.VoidCallable;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.object.convert.BeanMapper;
-import xyz.sunqian.common.object.convert.Mapper;
-import xyz.sunqian.common.object.convert.MappingOptions;
+import xyz.sunqian.common.object.convert.ObjectConverter;
+import xyz.sunqian.common.object.convert.ConversionOptions;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
 
 import java.lang.reflect.Type;
@@ -449,62 +449,62 @@ public class Jie {
 
     /**
      * Maps source object from source type to target type, return null if mapping is unsupported or the result itself is
-     * null. This method is equivalent to ({@link Mapper#map(Object, Class, MappingOptions)}):
+     * null. This method is equivalent to ({@link ObjectConverter#map(Object, Class, ConversionOptions)}):
      * <pre>
      *     return Mapper.defaultMapper().map(source, targetType, MappingOptions.defaultOptions());
      * </pre>
-     * Using {@link Mapper} for more mapping operations.
+     * Using {@link ObjectConverter} for more mapping operations.
      *
      * @param source     source object
      * @param targetType target type
      * @param <T>        target type
      * @return converted object or null
-     * @see Mapper#defaultMapper()
-     * @see Mapper#map(Object, Class, MappingOptions)
+     * @see ObjectConverter#defaultConverter()
+     * @see ObjectConverter#map(Object, Class, ConversionOptions)
      */
     @Nullable
     public static <T> T map(@Nullable Object source, Class<T> targetType) {
-        return Mapper.defaultMapper().map(source, targetType, MappingOptions.defaultOptions());
+        return ObjectConverter.defaultConverter().map(source, targetType, ConversionOptions.defaultOptions2());
     }
 
     /**
      * Maps source object from source type to target type, return null if mapping is unsupported or the result itself is
-     * null. This method is equivalent to ({@link Mapper#map(Object, Type, MappingOptions)}):
+     * null. This method is equivalent to ({@link ObjectConverter#map(Object, Type, ConversionOptions)}):
      * <pre>
      *     return Mapper.defaultMapper().map(source, targetType, MappingOptions.defaultOptions());
      * </pre>
-     * Using {@link Mapper} for more mapping operations.
+     * Using {@link ObjectConverter} for more mapping operations.
      *
      * @param source     source object
      * @param targetType target type
      * @param <T>        target type
      * @return converted object or null
-     * @see Mapper#defaultMapper()
-     * @see Mapper#map(Object, Type, MappingOptions)
+     * @see ObjectConverter#defaultConverter()
+     * @see ObjectConverter#map(Object, Type, ConversionOptions)
      */
     @Nullable
     public static <T> T map(@Nullable Object source, Type targetType) {
-        return Mapper.defaultMapper().map(source, targetType, MappingOptions.defaultOptions());
+        return ObjectConverter.defaultConverter().map(source, targetType, ConversionOptions.defaultOptions2());
     }
 
     /**
      * Maps source object from source type to target type, return null if mapping is unsupported or the result itself is
-     * null. This method is equivalent to ({@link Mapper#map(Object, TypeRef, MappingOptions)}):
+     * null. This method is equivalent to ({@link ObjectConverter#map(Object, TypeRef, ConversionOptions)}):
      * <pre>
      *     return Mapper.defaultMapper().map(source, targetType, MappingOptions.defaultOptions());
      * </pre>
-     * Using {@link Mapper} for more mapping operations.
+     * Using {@link ObjectConverter} for more mapping operations.
      *
      * @param source     source object
      * @param targetType target type
      * @param <T>        target type
      * @return converted object or null
-     * @see Mapper#defaultMapper()
-     * @see Mapper#map(Object, TypeRef, MappingOptions)
+     * @see ObjectConverter#defaultConverter()
+     * @see ObjectConverter#map(Object, TypeRef, ConversionOptions)
      */
     @Nullable
     public static <T> T map(@Nullable Object source, TypeRef<T> targetType) {
-        return Mapper.defaultMapper().map(source, targetType, MappingOptions.defaultOptions());
+        return ObjectConverter.defaultConverter().map(source, targetType, ConversionOptions.defaultOptions2());
     }
 
     /**
@@ -528,7 +528,7 @@ public class Jie {
 
     /**
      * Copies properties from source object to dest object (specified ignored properties will be excluded), return the
-     * dest object. This method is equivalent to ({@link BeanMapper#copyProperties(Object, Object, MappingOptions)}):
+     * dest object. This method is equivalent to ({@link BeanMapper#copyProperties(Object, Object, ConversionOptions)}):
      * <pre>
      *     return BeanMapper.defaultMapper().copyProperties(source, dest,
      *         MappingOptions.builder().ignored(JieArray.asList(ignoredProperties)).build());
@@ -541,16 +541,16 @@ public class Jie {
      * @param <T>               dest type
      * @return dest object
      * @see BeanMapper#defaultMapper()
-     * @see BeanMapper#copyProperties(Object, Object, MappingOptions)
+     * @see BeanMapper#copyProperties(Object, Object, ConversionOptions)
      */
     public static <T> T copyProperties(Object source, T dest, Object... ignoredProperties) {
         return BeanMapper.defaultMapper().copyProperties(source, dest,
-            MappingOptions.builder().ignored(ArrayKit.asList(ignoredProperties)).build());
+            ConversionOptions.builder().ignored(ArrayKit.asList(ignoredProperties)).build());
     }
 
     /**
      * Copies properties from source object to dest object, return the dest object. This method is equivalent to
-     * ({@link BeanMapper#copyProperties(Object, Object, MappingOptions)}):
+     * ({@link BeanMapper#copyProperties(Object, Object, ConversionOptions)}):
      * <pre>
      *     return BeanMapper.defaultMapper().copyProperties(source, dest, options);
      * </pre>
@@ -562,9 +562,9 @@ public class Jie {
      * @param <T>     dest type
      * @return dest object
      * @see BeanMapper#defaultMapper()
-     * @see BeanMapper#copyProperties(Object, Object, MappingOptions)
+     * @see BeanMapper#copyProperties(Object, Object, ConversionOptions)
      */
-    public static <T> T copyProperties(Object source, T dest, MappingOptions options) {
+    public static <T> T copyProperties(Object source, T dest, ConversionOptions options) {
         return BeanMapper.defaultMapper().copyProperties(source, dest, options);
     }
 
