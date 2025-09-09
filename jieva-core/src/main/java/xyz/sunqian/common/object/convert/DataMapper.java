@@ -3,6 +3,7 @@ package xyz.sunqian.common.object.convert;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.option.Option;
+import xyz.sunqian.common.object.data.DataSchema;
 import xyz.sunqian.common.object.data.ObjectSchema;
 
 import java.lang.reflect.Type;
@@ -15,6 +16,27 @@ import java.util.Map;
  * @author sunqian
  */
 public interface DataMapper {
+
+    /**
+     * Returns the default data mapper.
+     * <p>
+     * The default data mapper will cache the {@link DataSchema}s parsed if needed.
+     *
+     * @return the default data mapper
+     */
+    static @Nonnull DataMapper defaultMapper() {
+        return DataMapperImpl.SINGLETON;
+    }
+
+    /**
+     * Returns a new data mapper with the given schema cache.
+     *
+     * @param schemaCache the map tp cache the {@link DataSchema}s parsed if needed
+     * @return a new data mapper with the given schema cache
+     */
+    static @Nonnull DataMapper newMapper(@Nonnull Map<@Nonnull Type, @Nonnull DataSchema> schemaCache) {
+        return new DataMapperImpl(schemaCache);
+    }
 
     /**
      * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
@@ -66,16 +88,14 @@ public interface DataMapper {
      * @param options   the options for copying properties
      * @throws ObjectConversionException if an error occurs during copying properties
      */
-    default void copyProperties(
+    void copyProperties(
         @Nonnull Object src,
         @Nonnull Type srcType,
         @Nonnull Object dst,
         @Nonnull Type dstType,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws ObjectConversionException {
-
-    }
+    ) throws ObjectConversionException;
 
     /**
      * Returns an option to specify the {@link PropertyMapper}.
@@ -85,10 +105,10 @@ public interface DataMapper {
      * @param propertyMapper the {@link PropertyMapper} to be specified
      * @return an option to specify the {@link PropertyMapper}
      */
-    static @Nonnull Option<Key, @Nonnull PropertyMapper> propertyMapper(
+    static @Nonnull Option<OptionKey, @Nonnull PropertyMapper> propertyMapper(
         @Nonnull PropertyMapper propertyMapper
     ) {
-        return Option.of(Key.PROPERTY_MAPPER, propertyMapper);
+        return Option.of(OptionKey.PROPERTY_MAPPER, propertyMapper);
     }
 
     /**
@@ -99,16 +119,16 @@ public interface DataMapper {
      * @param exceptionHandler the {@link ExceptionHandler} to be specified
      * @return an option to specify the {@link ExceptionHandler}
      */
-    static @Nonnull Option<Key, @Nonnull ExceptionHandler> exceptionHandler(
+    static @Nonnull Option<OptionKey, @Nonnull ExceptionHandler> exceptionHandler(
         @Nonnull ExceptionHandler exceptionHandler
     ) {
-        return Option.of(Key.EXCEPTION_HANDLER, exceptionHandler);
+        return Option.of(OptionKey.EXCEPTION_HANDLER, exceptionHandler);
     }
 
     /**
-     * Option key for copying properties.
+     * Option key for data mapping.
      */
-    enum Key {
+    enum OptionKey {
 
         /**
          * Key of {@link #propertyMapper(PropertyMapper)}.
@@ -138,11 +158,9 @@ public interface DataMapper {
          *
          * @param propertyName the name of the specified property to be copied
          * @param src          the source object
-         * @param srcSchema    the schema of the source object, may be {@code null} if the source object is a
-         *                     {@link Map}
+         * @param srcSchema    the schema of the source object
          * @param dst          the destination object
-         * @param dstSchema    the schema of the destination object, may be {@code null} if the destination object is a
-         *                     {@link Map}
+         * @param dstSchema    the schema of the destination object
          * @param converter    the converter used in the mapping process
          * @param options      the options used in the mapping process
          * @return the mapped name and value, may be {@code null} to ignore copy of this property
@@ -150,9 +168,9 @@ public interface DataMapper {
         Map.@Nullable Entry<@Nonnull Object, Object> map(
             @Nonnull Object propertyName,
             @Nonnull Object src,
-            @Nullable ObjectSchema srcSchema,
+            @Nonnull DataSchema srcSchema,
             @Nonnull Object dst,
-            @Nullable ObjectSchema dstSchema,
+            @Nonnull DataSchema dstSchema,
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
         );
@@ -173,11 +191,9 @@ public interface DataMapper {
          * @param e            the exception thrown when copying a source property to a destination property
          * @param propertyName the name of the specified property to be copied
          * @param src          the source object
-         * @param srcSchema    the schema of the source object, may be {@code null} if the source object is a
-         *                     {@link Map}
+         * @param srcSchema    the schema of the source object
          * @param dst          the destination object
-         * @param dstSchema    the schema of the destination object, may be {@code null} if the destination object is a
-         *                     {@link Map}
+         * @param dstSchema    the schema of the destination object
          * @param converter    the converter used in the mapping process
          * @param options      the options used in the mapping process
          * @throws Exception any exception can be thrown here
@@ -186,9 +202,9 @@ public interface DataMapper {
             @Nonnull Throwable e,
             @Nonnull Object propertyName,
             @Nonnull Object src,
-            @Nullable ObjectSchema srcSchema,
+            @Nonnull DataSchema srcSchema,
             @Nonnull Object dst,
-            @Nullable ObjectSchema dstSchema,
+            @Nonnull DataSchema dstSchema,
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
         ) throws Exception;

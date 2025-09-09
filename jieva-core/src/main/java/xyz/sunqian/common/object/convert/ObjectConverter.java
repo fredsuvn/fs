@@ -393,7 +393,7 @@ public interface ObjectConverter {
     }
 
     default Object convert(
-        @Nonnull Object src,
+        @Nullable Object src,
         @Nonnull Type srcType,
         @Nonnull Type dstType,
         @Nonnull Option<?, ?> @Nonnull ... options
