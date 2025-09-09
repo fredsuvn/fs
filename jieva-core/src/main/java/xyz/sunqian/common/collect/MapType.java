@@ -2,6 +2,7 @@ package xyz.sunqian.common.collect;
 
 import xyz.sunqian.annotations.Nonnull;
 
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Map;
 
@@ -21,6 +22,17 @@ public final class MapType {
      */
     public static @Nonnull MapType of(@Nonnull Type keyType, @Nonnull Type valueType) {
         return new MapType(keyType, valueType);
+    }
+
+    /**
+     * Returns a new {@link MapType} instance with the specified parameterized map type.
+     *
+     * @param mapType the specified parameterized map type
+     * @return a new {@link MapType} instance with the specified parameterized map type
+     */
+    public static @Nonnull MapType of(@Nonnull ParameterizedType mapType) {
+        Type[] actualTypeArguments = mapType.getActualTypeArguments();
+        return new MapType(actualTypeArguments[0], actualTypeArguments[1]);
     }
 
     private final @Nonnull Type keyType;

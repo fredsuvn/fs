@@ -5,13 +5,17 @@ import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.collect.CollectKit;
 import xyz.sunqian.common.collect.ListType;
 import xyz.sunqian.common.collect.MapType;
+import xyz.sunqian.common.runtime.reflect.TypeRef;
 
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Vector;
 
@@ -126,6 +130,10 @@ public class CollectTest {
         Type valueType = Integer.class;
         assertSame(MapType.of(keyType, valueType).keyType(), keyType);
         assertSame(MapType.of(keyType, valueType).valueType(), valueType);
-        assertSame(ListType.of(keyType).keyType(), keyType);
+        ParameterizedType mapType = new TypeRef<Map<Integer, String>>(){}.asParameterized();
+        assertSame(MapType.of(mapType).keyType(), Integer.class);
+        assertSame(MapType.of(mapType).valueType(), String.class);
+        assertSame(ListType.of(keyType).componentType(), keyType);
+        assertSame(ListType.of(new TypeRef<List<Long>>(){}.asParameterized()).componentType(), Long.class);
     }
 }
