@@ -3,7 +3,10 @@ package tests.collect;
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.collect.CollectKit;
+import xyz.sunqian.common.collect.ListType;
+import xyz.sunqian.common.collect.MapType;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,6 +17,7 @@ import java.util.Vector;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
@@ -114,5 +118,14 @@ public class CollectTest {
             CollectKit.addAll(new ArrayList<>(), () -> Arrays.asList(1, 2, 3).iterator()),
             Arrays.asList(1, 2, 3)
         );
+    }
+
+    @Test
+    public void testTypes() {
+        Type keyType = String.class;
+        Type valueType = Integer.class;
+        assertSame(MapType.of(keyType, valueType).keyType(), keyType);
+        assertSame(MapType.of(keyType, valueType).valueType(), valueType);
+        assertSame(ListType.of(keyType).keyType(), keyType);
     }
 }

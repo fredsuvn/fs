@@ -238,7 +238,7 @@ public class TypeTest {
             MappingCls2<Void> cls2 = null;
         }
         Type cls3 = X.class.getDeclaredField("cls3").getGenericType();
-        Map<TypeVariable<?>, Type> map = TypeKit.mapTypeParameters(cls3);
+        Map<TypeVariable<?>, Type> map = TypeKit.typeParametersMapping(cls3);
         assertEquals(getTypeParameter(map, MappingCls2.class, 0), CharSequence.class);
         assertEquals(getTypeParameter(map, MappingCls1.class, 0), String.class);
         assertEquals(getTypeParameter(map, MappingCls1.class, 1), MappingCls2.class.getTypeParameters()[0]);
@@ -260,7 +260,7 @@ public class TypeTest {
         assertEquals(getTypeParameter(map, MappingInterB2.class, 1), MappingInterB.class.getTypeParameters()[3]);
         assertEquals(map.size(), 19);
         Type cls2 = X.class.getDeclaredField("cls2").getGenericType();
-        Map<TypeVariable<?>, Type> map2 = TypeKit.mapTypeParameters(cls2);
+        Map<TypeVariable<?>, Type> map2 = TypeKit.typeParametersMapping(cls2);
         assertEquals(getTypeParameter(map2, MappingCls2.class, 0), Void.class);
         assertEquals(map2.size(), 19);
 

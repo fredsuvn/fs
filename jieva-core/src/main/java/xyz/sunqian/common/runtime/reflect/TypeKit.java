@@ -282,7 +282,7 @@ public class TypeKit {
         if (ArrayKit.isEmpty(typeParameters)) {
             return Collections.emptyList();
         }
-        Map<TypeVariable<?>, Type> typeArguments = mapTypeParameters(type);
+        Map<TypeVariable<?>, Type> typeArguments = typeParametersMapping(type);
         Set<Type> stack = new HashSet<>();
         return Jie.stream(typeParameters)
             .map(typeVariable -> {
@@ -314,15 +314,15 @@ public class TypeKit {
      * @param type the given type
      * @return a map contains the mapping of type parameters for the given type
      */
-    public static @Nonnull Map<@Nonnull TypeVariable<?>, @Nullable Type> mapTypeParameters(
+    public static @Nonnull Map<@Nonnull TypeVariable<?>, @Nullable Type> typeParametersMapping(
         @Nonnull Type type
     ) {
         Map<TypeVariable<?>, Type> result = new HashMap<>();
-        mapTypeParameters(type, result);
+        typeParametersMapping(type, result);
         return result;
     }
 
-    private static void mapTypeParameters(
+    private static void typeParametersMapping(
         @Nonnull Type type,
         @Nonnull @OutParam Map<@Nonnull TypeVariable<?>, @Nullable Type> mapping
     ) {
@@ -340,7 +340,7 @@ public class TypeKit {
         }
         if (TypeKit.isParameterized(type)) {
             mapTypeVariables(type, mapping);
-            mapTypeParameters(((ParameterizedType) type).getRawType(), mapping);
+            typeParametersMapping(((ParameterizedType) type).getRawType(), mapping);
         }
     }
 

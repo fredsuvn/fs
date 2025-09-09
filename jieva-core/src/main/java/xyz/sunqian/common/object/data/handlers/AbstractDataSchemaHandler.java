@@ -94,7 +94,7 @@ public abstract class AbstractDataSchemaHandler implements DataSchemaParser.Hand
         }
 
         // Builds property base for each property info.
-        Map<TypeVariable<?>, Type> typeParameterMapping = TypeKit.mapTypeParameters(context.dataType());
+        Map<TypeVariable<?>, Type> typeParameterMapping = TypeKit.typeParametersMapping(context.dataType());
         Set<Type> stack = new HashSet<>();
         propertyInfoMap.forEach((propertyName, propertyInfo) -> {
             Method getterMethod = propertyInfo.getterMethod;
