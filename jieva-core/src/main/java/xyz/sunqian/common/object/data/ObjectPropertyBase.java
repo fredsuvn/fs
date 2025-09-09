@@ -7,20 +7,18 @@ import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.runtime.invoke.Invocable;
 import xyz.sunqian.common.runtime.reflect.TypeKit;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.List;
 
 /**
- * This interface provides the base info for {@link DataProperty}, typically used in the parsing process of
- * {@link DataSchema}.
+ * This interface provides the base info for {@link ObjectProperty}, typically used in the parsing process of
+ * {@link ObjectSchema}.
  *
  * @author sunqian
  */
 @Immutable
-public interface DataPropertyBase {
+public interface ObjectPropertyBase {
 
     /**
      * Returns the name of this property.

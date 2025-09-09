@@ -8,8 +8,8 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.option.Option;
-import xyz.sunqian.common.object.data.DataProperty;
-import xyz.sunqian.common.object.data.DataSchemaParser;
+import xyz.sunqian.common.object.data.ObjectProperty;
+import xyz.sunqian.common.object.data.ObjectSchemaParser;
 
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
@@ -54,14 +54,14 @@ public class ConversionOptions {
     }
 
     /**
-     * Returns an option to specify the {@link DataSchemaParser}.
+     * Returns an option to specify the {@link ObjectSchemaParser}.
      * <p>
-     * By default, using {@link DataSchemaParser#defaultParser()}.
+     * By default, using {@link ObjectSchemaParser#defaultParser()}.
      *
-     * @param parser the {@link DataSchemaParser} to be specified
-     * @return an option to specify the {@link DataSchemaParser}
+     * @param parser the {@link ObjectSchemaParser} to be specified
+     * @return an option to specify the {@link ObjectSchemaParser}
      */
-    public static @Nonnull Option<Key, DataSchemaParser> schemaParser(@Nonnull DataSchemaParser parser) {
+    public static @Nonnull Option<Key, ObjectSchemaParser> schemaParser(@Nonnull ObjectSchemaParser parser) {
         return Option.of(Key.CONVERTER, parser);
     }
 
@@ -76,7 +76,7 @@ public class ConversionOptions {
         CONVERTER,
 
         /**
-         * Key of {@link #schemaParser(DataSchemaParser)}.
+         * Key of {@link #schemaParser(ObjectSchemaParser)}.
          */
         SCHEMA_PARSER,
         ;
@@ -128,7 +128,7 @@ public class ConversionOptions {
      * Option for {@link BeanProvider}, to resolve bean infos if needed. If this option is null, the mapper will use
      * {@link BeanProvider#defaultProvider()}.
      */
-    private @Nullable DataSchemaParser dataSchemaParser;
+    private @Nullable ObjectSchemaParser objectSchemaParser;
 
     /**
      * Option for {@link BeanMapper}, to map bean infos if needed. If this option is null, the mapper will use
@@ -237,7 +237,7 @@ public class ConversionOptions {
      * <p>
      * Default is {@code null}.
      */
-    private @Nullable Function<DataProperty, Charset> propertyCharset;
+    private @Nullable Function<ObjectProperty, Charset> propertyCharset;
 
     /**
      * Function to determine which format to use for number conversion. This option is typically used in
@@ -245,7 +245,7 @@ public class ConversionOptions {
      * <p>
      * Default is {@code null}.
      */
-    private @Nullable Function<DataProperty, NumberFormat> propertyNumberFormat;
+    private @Nullable Function<ObjectProperty, NumberFormat> propertyNumberFormat;
 
     /**
      * Function to determine which format to use for date conversion. This option is typically used in
@@ -253,7 +253,7 @@ public class ConversionOptions {
      * <p>
      * Default is {@code null}.
      */
-    private @Nullable Function<DataProperty, DateTimeFormatter> propertyDateFormat;
+    private @Nullable Function<ObjectProperty, DateTimeFormatter> propertyDateFormat;
 
     /**
      * Function to determine which zone offset to use for date conversion. This option is typically used in
@@ -261,7 +261,7 @@ public class ConversionOptions {
      * <p>
      * Default is {@code null}.
      */
-    private @Nullable Function<DataProperty, ZoneOffset> propertyZoneOffset;
+    private @Nullable Function<ObjectProperty, ZoneOffset> propertyZoneOffset;
 
     /**
      * Returns {@link Charset} option from given property info and this options. If property info is not null and
@@ -272,9 +272,9 @@ public class ConversionOptions {
      * @param targetProperty given property info
      * @return {@link Charset} option
      */
-    public Charset getCharset(@Nullable DataProperty targetProperty) {
+    public Charset getCharset(@Nullable ObjectProperty targetProperty) {
         if (targetProperty != null) {
-            Function<DataProperty, Charset> func = getPropertyCharset();
+            Function<ObjectProperty, Charset> func = getPropertyCharset();
             if (func != null) {
                 return Jie.nonnull(func.apply(targetProperty), CharsKit.defaultCharset());
             }
@@ -287,17 +287,17 @@ public class ConversionOptions {
      * property info is not null and {@link #getPropertyDateFormat()} is not null, returns result of
      * {@link #getPropertyDateFormat()}. Otherwise, it returns {@link #getDateFormat()}.
      * <p>
-     * Note the returned formatter does not include zone offset from {@link #getZoneOffset(DataProperty)} or
-     * {@link #getZoneOffset()}. Using {@link #getDateTimeFormatterWithZone(DataProperty)} to get that.
+     * Note the returned formatter does not include zone offset from {@link #getZoneOffset(ObjectProperty)} or
+     * {@link #getZoneOffset()}. Using {@link #getDateTimeFormatterWithZone(ObjectProperty)} to get that.
      *
      * @param targetProperty given property info
      * @return {@link DateTimeFormatter} option, may be {@code null}
-     * @see #getDateTimeFormatterWithZone(DataProperty)
+     * @see #getDateTimeFormatterWithZone(ObjectProperty)
      */
     @Nullable
-    public DateTimeFormatter getDateTimeFormatter(@Nullable DataProperty targetProperty) {
+    public DateTimeFormatter getDateTimeFormatter(@Nullable ObjectProperty targetProperty) {
         if (targetProperty != null) {
-            Function<DataProperty, DateTimeFormatter> func = getPropertyDateFormat();
+            Function<ObjectProperty, DateTimeFormatter> func = getPropertyDateFormat();
             if (func != null) {
                 return func.apply(targetProperty);
             }
@@ -314,9 +314,9 @@ public class ConversionOptions {
      * @return {@link NumberFormat} option, may be {@code null}
      */
     @Nullable
-    public NumberFormat getNumberFormatter(@Nullable DataProperty targetProperty) {
+    public NumberFormat getNumberFormatter(@Nullable ObjectProperty targetProperty) {
         if (targetProperty != null) {
-            Function<DataProperty, NumberFormat> func = getPropertyNumberFormat();
+            Function<ObjectProperty, NumberFormat> func = getPropertyNumberFormat();
             if (func != null) {
                 return func.apply(targetProperty);
             }
@@ -333,9 +333,9 @@ public class ConversionOptions {
      * @return {@link ZoneOffset} option
      */
     @Nullable
-    public ZoneOffset getZoneOffset(@Nullable DataProperty targetProperty) {
+    public ZoneOffset getZoneOffset(@Nullable ObjectProperty targetProperty) {
         if (targetProperty != null) {
-            Function<DataProperty, ZoneOffset> func = getPropertyZoneOffset();
+            Function<ObjectProperty, ZoneOffset> func = getPropertyZoneOffset();
             if (func != null) {
                 return func.apply(targetProperty);
             }
@@ -344,8 +344,8 @@ public class ConversionOptions {
     }
 
     /**
-     * Returns a combined {@link DateTimeFormatter} with {@link #getDateTimeFormatter(DataProperty)} and
-     * {@link #getZoneOffset()}, may be {@code null} if result of {@link #getDateTimeFormatter(DataProperty)} is
+     * Returns a combined {@link DateTimeFormatter} with {@link #getDateTimeFormatter(ObjectProperty)} and
+     * {@link #getZoneOffset()}, may be {@code null} if result of {@link #getDateTimeFormatter(ObjectProperty)} is
      * {@code null}. It is equivalent to:
      * <pre>
      *     DateTimeFormatter formatter = getDateTimeFormatter(targetProperty);
@@ -363,7 +363,7 @@ public class ConversionOptions {
      * @return {@link DateTimeFormatter} option, may be {@code null}
      */
     @Nullable
-    public DateTimeFormatter getDateTimeFormatterWithZone(@Nullable DataProperty targetProperty) {
+    public DateTimeFormatter getDateTimeFormatterWithZone(@Nullable ObjectProperty targetProperty) {
         DateTimeFormatter formatter = getDateTimeFormatter(targetProperty);
         if (formatter == null) {
             return null;

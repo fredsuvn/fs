@@ -9,7 +9,7 @@
 //import xyz.sunqian.annotations.Nullable;
 //import xyz.sunqian.common.base.*;
 //import xyz.sunqian.common.object.*;
-//import xyz.sunqian.common.object.data.handlers.JavaBeanDataSchemaHandler;
+//import xyz.sunqian.common.object.data.handlers.SimpleBeanSchemaHandler;
 //import xyz.sunqian.common.object.data.handlers.NonGetterPrefixSchemaHandler;
 //import xyz.sunqian.common.mapping.BeanMapper;
 //import xyz.sunqian.common.mapping.Mapper;

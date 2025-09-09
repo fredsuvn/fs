@@ -2,16 +2,16 @@ package xyz.sunqian.common.object.data.handlers;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.object.data.DataSchemaParser;
+import xyz.sunqian.common.object.data.ObjectSchemaParser;
 import xyz.sunqian.common.runtime.invoke.Invocable;
 
 import java.lang.reflect.Method;
 import java.util.Objects;
 
 /**
- * This is an implementation of {@link DataSchemaParser.Handler} which basically follows the <a
+ * This is an implementation of {@link ObjectSchemaParser.Handler} which basically follows the <a
  * href="https://www.oracle.com/java/technologies/javase/javabeans-spec.html">JavaBeans</a> style, inheriting from
- * {@link AbstractDataSchemaHandler} and overriding the {@link AbstractDataSchemaHandler#resolveAccessor(Method)}
+ * {@link AbstractObjectSchemaHandler} and overriding the {@link AbstractObjectSchemaHandler#resolveAccessor(Method)}
  * method.
  * <p>
  * This implementation resolves {@code getXxx} or {@code isXxx} methods as getters and {@code setXxx} methods as setters
@@ -19,7 +19,7 @@ import java.util.Objects;
  *
  * @author sunqian
  */
-public class JavaBeanDataSchemaHandler extends AbstractDataSchemaHandler {
+public class SimpleBeanSchemaHandler extends AbstractObjectSchemaHandler {
 
     @Override
     protected @Nullable AccessorInfo resolveAccessor(@Nonnull Method method) {

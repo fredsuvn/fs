@@ -13,7 +13,7 @@ import xyz.sunqian.common.object.convert.handlers.BeanMapperHandler;
 import xyz.sunqian.common.object.convert.handlers.CollectionMappingHandler;
 import xyz.sunqian.common.object.convert.handlers.EnumMapperHandler;
 import xyz.sunqian.common.object.convert.handlers.TypedMapperHandler;
-import xyz.sunqian.common.object.data.DataProperty;
+import xyz.sunqian.common.object.data.ObjectProperty;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
 
 import java.lang.reflect.Type;
@@ -23,11 +23,11 @@ import java.util.List;
  * Mapper interface to map object from source type to target type. A {@link ObjectConverter} typically has a list of
  * {@link Handler}s, and in default implementation, the {@link Handler}s provide actual map operation for core methods
  * {@link #map(Object, Type, Type, ConversionOptions)} and
- * {@link #mapProperty(Object, Type, Type, DataProperty, ConversionOptions)}.
+ * {@link #mapProperty(Object, Type, Type, ObjectProperty, ConversionOptions)}.
  *
  * @author fredsuvn
  * @see Handler#map(Object, Type, Type, ObjectConverter, ConversionOptions)
- * @see Handler#mapProperty(Object, Type, Type, DataProperty, ObjectConverter, ConversionOptions)
+ * @see Handler#mapProperty(Object, Type, Type, ObjectProperty, ObjectConverter, ConversionOptions)
  */
 @ThreadSafe
 public interface ObjectConverter {
@@ -190,7 +190,7 @@ public interface ObjectConverter {
 
     /**
      * Maps source object from source type to target property with {@link #getOptions()}. The target type is specified
-     * in current context, may not equal to {@link DataProperty#type()} of target property. The result of this method in
+     * in current context, may not equal to {@link ObjectProperty#type()} of target property. The result of this method in
      * 3 types:
      * <ul>
      *     <li>
@@ -203,7 +203,7 @@ public interface ObjectConverter {
      *         {@code others}: mapping successful, the result is returned object;
      *     </li>
      * </ul>
-     * This method is equivalent to ({@link #mapProperty(Object, Type, Type, DataProperty, ConversionOptions)}):
+     * This method is equivalent to ({@link #mapProperty(Object, Type, Type, ObjectProperty, ConversionOptions)}):
      * <pre>
      *     return mapProperty(source, sourceType, targetType, targetProperty, defaultOptions());
      * </pre>
@@ -219,7 +219,7 @@ public interface ObjectConverter {
         @Nullable Object source,
         Type sourceType,
         Type targetType,
-        DataProperty targetProperty
+        ObjectProperty targetProperty
     ) {
         return mapProperty(source, sourceType, targetType, targetProperty, getOptions());
     }
@@ -335,7 +335,7 @@ public interface ObjectConverter {
 
     /**
      * Maps source object from source type to target property. The target type is specified in current context, may not
-     * equal to {@link DataProperty#type()} of target property. The result of this method in 3 types:
+     * equal to {@link ObjectProperty#type()} of target property. The result of this method in 3 types:
      * <ul>
      *     <li>
      *         {@code null}: mapping failed;
@@ -348,7 +348,7 @@ public interface ObjectConverter {
      *     </li>
      * </ul>
      * In the default implementation, this method will invoke
-     * {@link Handler#mapProperty(Object, Type, Type, DataProperty, ObjectConverter, ConversionOptions)} for each handler in
+     * {@link Handler#mapProperty(Object, Type, Type, ObjectProperty, ObjectConverter, ConversionOptions)} for each handler in
      * {@link ObjectConverter#getHandlers()} sequentially. It is equivalent to:
      * <pre>
      *     for (Handler handler : getHandlers()) {
@@ -376,7 +376,7 @@ public interface ObjectConverter {
         @Nullable Object source,
         Type sourceType,
         Type targetType,
-        DataProperty targetProperty,
+        ObjectProperty targetProperty,
         ConversionOptions options
     ) {
         for (Handler handler : getHandlers()) {
@@ -522,7 +522,7 @@ public interface ObjectConverter {
 
         /**
          * Maps object from source type to the target type of target property. The target type is specified in current
-         * context, may not equal to {@link DataProperty#type()} of target property. The result of this method in 4
+         * context, may not equal to {@link ObjectProperty#type()} of target property. The result of this method in 4
          * types:
          * <ul>
          *     <li>
@@ -551,7 +551,7 @@ public interface ObjectConverter {
             @Nullable Object source,
             Type sourceType,
             Type targetType,
-            DataProperty targetProperty,
+            ObjectProperty targetProperty,
             ObjectConverter objectConverter,
             ConversionOptions options
         );

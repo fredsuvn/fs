@@ -7,7 +7,7 @@ import xyz.sunqian.common.collect.CollectKit;
 import xyz.sunqian.common.object.convert.ObjectConverter;
 import xyz.sunqian.common.object.convert.ObjectConversionException;
 import xyz.sunqian.common.object.convert.ConversionOptions;
-import xyz.sunqian.common.object.data.DataProperty;
+import xyz.sunqian.common.object.data.ObjectProperty;
 import xyz.sunqian.common.runtime.reflect.TypeKit;
 
 import java.lang.reflect.Array;
@@ -39,7 +39,7 @@ import java.util.function.IntFunction;
  * {@link Flag#CONTINUE}. Else the generator tries to create a new collection of target type as target collection, if
  * the generator return {@code null}, this handler return {@link Flag#CONTINUE}, else this handler will map all
  * component of source object by {@link ObjectConverter#map(Object, Type, Type, ConversionOptions)} or
- * {@link ObjectConverter#mapProperty(Object, Type, Type, DataProperty, ConversionOptions)}, then return target collection wrapped
+ * {@link ObjectConverter#mapProperty(Object, Type, Type, ObjectProperty, ConversionOptions)}, then return target collection wrapped
  * by {@link #wrapResult(Object)} ({@code wrapResult(targetCollection)}).
  * <p>
  * The generator should be specified in {@link #CollectionMappingHandler(CollectionGenerator)}, or use default generator
@@ -138,7 +138,7 @@ public class CollectionMappingHandler implements ObjectConverter.Handler {
     }
 
     @Override
-    public Object mapProperty(@Nullable Object source, Type sourceType, Type targetType, @Nullable DataProperty targetProperty, ObjectConverter objectConverter, ConversionOptions options) {
+    public Object mapProperty(@Nullable Object source, Type sourceType, Type targetType, @Nullable ObjectProperty targetProperty, ObjectConverter objectConverter, ConversionOptions options) {
         if (source == null) {
             return Flag.CONTINUE;
         }
@@ -258,7 +258,7 @@ public class CollectionMappingHandler implements ObjectConverter.Handler {
         @Nullable Object sourceComponent,
         Type sourceComponentType,
         Type targetComponentType,
-        @Nullable DataProperty targetProperty,
+        @Nullable ObjectProperty targetProperty,
         ObjectConverter objectConverter,
         ConversionOptions options
     ) {

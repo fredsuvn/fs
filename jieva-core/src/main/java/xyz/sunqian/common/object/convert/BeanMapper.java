@@ -1,13 +1,13 @@
 package xyz.sunqian.common.object.convert;
 
-import xyz.sunqian.common.object.data.DataProperty;
-import xyz.sunqian.common.object.data.DataSchema;
+import xyz.sunqian.common.object.data.ObjectProperty;
+import xyz.sunqian.common.object.data.ObjectSchema;
 
 import java.lang.reflect.Type;
 import java.util.Map;
 
 /**
- * Mapper for {@link DataSchema}, to copy properties from source object to dest object.
+ * Mapper for {@link ObjectSchema}, to copy properties from source object to dest object.
  *
  * @author fredsuvn
  */
@@ -85,7 +85,7 @@ public interface BeanMapper {
      *     </li>
      *     <li>
      *         For bean object, bean info will be provided by {@link BeanProvider} first, type of properties' names
-     *         is always {@link String} and types of properties' values are come from {@link DataProperty#type()};
+     *         is always {@link String} and types of properties' values are come from {@link ObjectProperty#type()};
      *     </li>
      *     <li>
      *         For {@link Map} object, types of keys and values are come from {@code sourceType} or {@code destType};

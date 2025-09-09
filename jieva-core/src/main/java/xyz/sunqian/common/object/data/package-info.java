@@ -7,11 +7,11 @@
  * <p>
  * Core interfaces:
  * <ul>
- *     <li>{@link xyz.sunqian.common.object.data.DataSchema}</li>
- *     <li>{@link xyz.sunqian.common.object.data.DataProperty}</li>
- *     <li>{@link xyz.sunqian.common.object.data.DataSchemaParser}</li>
- *     <li>{@link xyz.sunqian.common.object.data.handlers.AbstractDataSchemaHandler}</li>
- *     <li>{@link xyz.sunqian.common.object.data.handlers.JavaBeanDataSchemaHandler}</li>
+ *     <li>{@link xyz.sunqian.common.object.data.ObjectSchema}</li>
+ *     <li>{@link xyz.sunqian.common.object.data.ObjectProperty}</li>
+ *     <li>{@link xyz.sunqian.common.object.data.ObjectSchemaParser}</li>
+ *     <li>{@link xyz.sunqian.common.object.data.handlers.AbstractObjectSchemaHandler}</li>
+ *     <li>{@link xyz.sunqian.common.object.data.handlers.SimpleBeanSchemaHandler}</li>
  * </ul>
  * Utilities:
  * <ul>

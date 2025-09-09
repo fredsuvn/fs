@@ -5,7 +5,7 @@ import xyz.sunqian.common.base.lang.Flag;
 import xyz.sunqian.common.base.value.Val;
 import xyz.sunqian.common.object.convert.ObjectConverter;
 import xyz.sunqian.common.object.convert.ConversionOptions;
-import xyz.sunqian.common.object.data.DataProperty;
+import xyz.sunqian.common.object.data.ObjectProperty;
 import xyz.sunqian.common.runtime.reflect.TypeKit;
 
 import java.lang.reflect.Type;
@@ -86,7 +86,7 @@ public class AssignableMapperHandler implements ObjectConverter.Handler {
 
     @Override
     public Object mapProperty(
-        @Nullable Object source, Type sourceType, Type targetType, DataProperty targetProperty, ObjectConverter objectConverter, ConversionOptions options) {
+        @Nullable Object source, Type sourceType, Type targetType, ObjectProperty targetProperty, ObjectConverter objectConverter, ConversionOptions options) {
         if (source == null) {
             return Val.ofNull();
         }

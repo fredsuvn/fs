@@ -7,11 +7,11 @@ import tests.protobuf.xEnum;
 import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.collect.MapKit;
 import xyz.sunqian.common.collect.SetKit;
-import xyz.sunqian.common.object.data.DataProperty;
-import xyz.sunqian.common.object.data.DataSchema;
-import xyz.sunqian.common.object.data.DataSchemaParser;
+import xyz.sunqian.common.object.data.ObjectProperty;
+import xyz.sunqian.common.object.data.ObjectSchema;
+import xyz.sunqian.common.object.data.ObjectSchemaParser;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
-import xyz.sunqian.common.third.protobuf.ProtobufDataSchemaHandler;
+import xyz.sunqian.common.third.protobuf.ProtobufSchemaHandler;
 import xyz.sunqian.common.third.protobuf.ProtobufKit;
 import xyz.sunqian.test.PrintTest;
 
@@ -32,7 +32,7 @@ public class ProtobufTest implements PrintTest {
 
     @Test
     public void testDataSchema() throws Exception {
-        DataSchemaParser protoParser = DataSchemaParser.withHandlers(new ProtobufDataSchemaHandler());
+        ObjectSchemaParser protoParser = ObjectSchemaParser.withHandlers(new ProtobufSchemaHandler());
         Data.Builder builder = Data.newBuilder()
             .setStr("str")
             .setI32(1)
@@ -51,13 +51,13 @@ public class ProtobufTest implements PrintTest {
             .addIList(1)
             .addStrList("strList")
             .setXEnum(xEnum.E1);
-        DataSchema builderSchema = protoParser.parse(Data.Builder.class);
+        ObjectSchema builderSchema = protoParser.parse(Data.Builder.class);
         printFor("Builder", builderSchema);
         assertEquals(builderSchema.type(), Data.Builder.class);
         assertEquals(builderSchema.rawType(), Data.Builder.class);
         testSchema(builderSchema, builder, true);
         Data message = builder.build();
-        DataSchema messageSchema = protoParser.parse(Data.class);
+        ObjectSchema messageSchema = protoParser.parse(Data.class);
         printFor("Message", messageSchema);
         assertEquals(messageSchema.type(), Data.class);
         assertEquals(messageSchema.rawType(), Data.class);
@@ -102,13 +102,13 @@ public class ProtobufTest implements PrintTest {
 
         // error
         class T<T> {}
-        DataSchema NonClassSchema = protoParser.parse(T.class.getTypeParameters()[0]);
+        ObjectSchema NonClassSchema = protoParser.parse(T.class.getTypeParameters()[0]);
         assertEquals(NonClassSchema.properties().size(), 0);
-        DataSchema NonProtoSchema = protoParser.parse(String.class);
+        ObjectSchema NonProtoSchema = protoParser.parse(String.class);
         assertEquals(NonProtoSchema.properties().size(), 0);
     }
 
-    private void testSchema(DataSchema schema, Object inst, boolean writable) throws Exception {
+    private void testSchema(ObjectSchema schema, Object inst, boolean writable) throws Exception {
         assertEquals(
             schema.properties().keySet(),
             SetKit.set("str", "i32", "u64", "f32", "f64", "sf32", "sf64", "sint32", "sint64", "bytes", "bool",
@@ -116,7 +116,7 @@ public class ProtobufTest implements PrintTest {
         );
         {
             // str
-            DataProperty str = schema.getProperty("str");
+            ObjectProperty str = schema.getProperty("str");
             assertNotNull(str);
             assertEquals(str.type(), String.class);
             assertEquals(str.getValue(inst), "str");
@@ -134,7 +134,7 @@ public class ProtobufTest implements PrintTest {
         }
         {
             // i32
-            DataProperty i32 = schema.getProperty("i32");
+            ObjectProperty i32 = schema.getProperty("i32");
             assertNotNull(i32);
             assertEquals(i32.type(), int.class);
             assertEquals(i32.getValue(inst), 1);
@@ -152,7 +152,7 @@ public class ProtobufTest implements PrintTest {
         }
         {
             // u64
-            DataProperty u64 = schema.getProperty("u64");
+            ObjectProperty u64 = schema.getProperty("u64");
             assertNotNull(u64);
             assertEquals(u64.type(), long.class);
             assertEquals(u64.getValue(inst), 2L);
@@ -170,7 +170,7 @@ public class ProtobufTest implements PrintTest {
         }
         {
             // f32
-            DataProperty f32 = schema.getProperty("f32");
+            ObjectProperty f32 = schema.getProperty("f32");
             assertNotNull(f32);
             assertEquals(f32.type(), int.class);
             assertEquals(f32.getValue(inst), 3);
@@ -188,7 +188,7 @@ public class ProtobufTest implements PrintTest {
         }
         {
             // f64
-            DataProperty f64 = schema.getProperty("f64");
+            ObjectProperty f64 = schema.getProperty("f64");
             assertNotNull(f64);
             assertEquals(f64.type(), long.class);
             assertEquals(f64.getValue(inst), 4L);
@@ -206,7 +206,7 @@ public class ProtobufTest implements PrintTest {
         }
         {
             // sf32
-            DataProperty sf32 = schema.getProperty("sf32");
+            ObjectProperty sf32 = schema.getProperty("sf32");
             assertNotNull(sf32);
             assertEquals(sf32.type(), int.class);
             assertEquals(sf32.getValue(inst), 5);
@@ -224,7 +224,7 @@ public class ProtobufTest implements PrintTest {
         }
         {
             // sf64
-            DataProperty sf64 = schema.getProperty("sf64");
+            ObjectProperty sf64 = schema.getProperty("sf64");
             assertNotNull(sf64);
             assertEquals(sf64.type(), long.class);
             assertEquals(sf64.getValue(inst), 6L);
@@ -242,7 +242,7 @@ public class ProtobufTest implements PrintTest {
         }
         {
             // sint32
-            DataProperty sint32 = schema.getProperty("sint32");
+            ObjectProperty sint32 = schema.getProperty("sint32");
             assertNotNull(sint32);
             assertEquals(sint32.type(), int.class);
             assertEquals(sint32.getValue(inst), 7);
@@ -260,7 +260,7 @@ public class ProtobufTest implements PrintTest {
         }
         {
             // sint64
-            DataProperty sint64 = schema.getProperty("sint64");
+            ObjectProperty sint64 = schema.getProperty("sint64");
             assertNotNull(sint64);
             assertEquals(sint64.type(), long.class);
             assertEquals(sint64.getValue(inst), 8L);
@@ -278,7 +278,7 @@ public class ProtobufTest implements PrintTest {
         }
         {
             // bytes
-            DataProperty bytes = schema.getProperty("bytes");
+            ObjectProperty bytes = schema.getProperty("bytes");
             assertNotNull(bytes);
             assertEquals(bytes.type(), ByteString.class);
             assertEquals(bytes.getValue(inst), ByteString.copyFromUtf8("bytes"));
@@ -296,7 +296,7 @@ public class ProtobufTest implements PrintTest {
         }
         {
             // bool
-            DataProperty bool = schema.getProperty("bool");
+            ObjectProperty bool = schema.getProperty("bool");
             assertNotNull(bool);
             assertEquals(bool.type(), boolean.class);
             assertEquals(bool.getValue(inst), true);
@@ -314,7 +314,7 @@ public class ProtobufTest implements PrintTest {
         }
         {
             // float
-            DataProperty floatProp = schema.getProperty("float");
+            ObjectProperty floatProp = schema.getProperty("float");
             assertNotNull(floatProp);
             assertEquals(floatProp.type(), float.class);
             assertEquals(floatProp.getValue(inst), 1.1f);
@@ -332,7 +332,7 @@ public class ProtobufTest implements PrintTest {
         }
         {
             // double
-            DataProperty doubleProp = schema.getProperty("double");
+            ObjectProperty doubleProp = schema.getProperty("double");
             assertNotNull(doubleProp);
             assertEquals(doubleProp.type(), double.class);
             assertEquals(doubleProp.getValue(inst), 1.2);
@@ -350,7 +350,7 @@ public class ProtobufTest implements PrintTest {
         }
         {
             // siMap
-            DataProperty siMap = schema.getProperty("siMap");
+            ObjectProperty siMap = schema.getProperty("siMap");
             assertNotNull(siMap);
             assertEquals(siMap.type(), new TypeRef<Map<String, Integer>>() {}.type());
             assertEquals(siMap.getValue(inst), MapKit.map("siMap", 1));
@@ -368,7 +368,7 @@ public class ProtobufTest implements PrintTest {
         }
         {
             // iList
-            DataProperty iList = schema.getProperty("iList");
+            ObjectProperty iList = schema.getProperty("iList");
             assertNotNull(iList);
             assertEquals(iList.type(), new TypeRef<List<Integer>>() {}.type());
             assertEquals(iList.getValue(inst), ListKit.list(1));
@@ -386,7 +386,7 @@ public class ProtobufTest implements PrintTest {
         }
         {
             // strList
-            DataProperty strList = schema.getProperty("strList");
+            ObjectProperty strList = schema.getProperty("strList");
             assertNotNull(strList);
             assertEquals(strList.type(), new TypeRef<List<String>>() {}.type());
             assertEquals(strList.getValue(inst), ListKit.list("strList"));
@@ -404,7 +404,7 @@ public class ProtobufTest implements PrintTest {
         }
         {
             // xEnum
-            DataProperty xEnum = schema.getProperty("xEnum");
+            ObjectProperty xEnum = schema.getProperty("xEnum");
             assertNotNull(xEnum);
             assertEquals(xEnum.type(), xEnum.class);
             assertEquals(xEnum.getValue(inst), tests.protobuf.xEnum.E1);

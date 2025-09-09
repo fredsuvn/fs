@@ -6,23 +6,23 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.runtime.invoke.Invocable;
 
 /**
- * This interface represents the property info of {@link DataSchema}. It is very similar to the simple property of
+ * This interface represents the property info of {@link ObjectSchema}. It is very similar to the simple property of
  * <a href="https://www.oracle.com/java/technologies/javase/javabeans-spec.html">JavaBeans</a>.
  * <p>
- * Two {@link DataProperty}s are considered equal if, and only if both the property's name and owner are equal.
+ * Two {@link ObjectProperty}s are considered equal if, and only if both their names and both their owners are equal.
  *
  * @author sunqian
  */
 @Immutable
-public interface DataProperty extends DataPropertyBase {
+public interface ObjectProperty extends ObjectPropertyBase {
 
     /**
-     * Returns the owner {@link DataSchema} of this property.
+     * Returns the owner {@link ObjectSchema} of this property.
      *
-     * @return the owner {@link DataSchema} of this property
+     * @return the owner {@link ObjectSchema} of this property
      */
     @Nonnull
-    DataSchema owner();
+    ObjectSchema owner();
 
     /**
      * Returns whether this property is readable.
@@ -73,16 +73,16 @@ public interface DataProperty extends DataPropertyBase {
     }
 
     /**
-     * Returns whether this {@link DataProperty} is equal to the other {@link DataProperty}. They are considered equal
-     * if, and only if both the data object's name and owner are equal.
+     * Returns whether this {@link ObjectProperty} is equal to the other {@link ObjectProperty}. They are considered
+     * equal if, and only if both their names and both their owners are equal.
      *
-     * @param other the other {@link DataProperty}
-     * @return whether this {@link DataProperty} is equal to the other {@link DataProperty}
+     * @param other the other {@link ObjectProperty}
+     * @return whether this {@link ObjectProperty} is equal to the other {@link ObjectProperty}
      */
     boolean equals(@Nullable Object other);
 
     /**
-     * Returns the hash code of this {@link DataProperty}. The hash code is generated via {@link #name()} and
+     * Returns the hash code of this {@link ObjectProperty}. The hash code is generated via {@link #name()} and
      * {@link #owner()} like following codes:
      * <pre>{@code
      * int result = 1;
@@ -91,17 +91,17 @@ public interface DataProperty extends DataPropertyBase {
      * return result;
      * }</pre>
      *
-     * @return the hash code of this {@link DataProperty}
+     * @return the hash code of this {@link ObjectProperty}
      */
     int hashCode();
 
     /**
-     * Returns a string representation of this {@link DataProperty}. The string is generated like following codes:
+     * Returns a string representation of this {@link ObjectProperty}. The string is generated like following codes:
      * <pre>{@code
      * return name() + ": " + type().getTypeName();
      * }</pre>
      *
-     * @return a string representation of this {@link DataProperty}
+     * @return a string representation of this {@link ObjectProperty}
      */
     @Nonnull
     String toString();

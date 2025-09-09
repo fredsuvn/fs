@@ -7,7 +7,7 @@ import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.object.convert.ObjectConverter;
 import xyz.sunqian.common.object.convert.ConversionOptions;
-import xyz.sunqian.common.object.data.DataProperty;
+import xyz.sunqian.common.object.data.ObjectProperty;
 
 import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
@@ -37,7 +37,7 @@ public class ProtobufMapperHandler implements ObjectConverter.Handler {
     }
 
     @Override
-    public Object mapProperty(@Nullable Object source, Type sourceType, Type targetType, @Nullable DataProperty targetProperty, ObjectConverter objectConverter, ConversionOptions options) {
+    public Object mapProperty(@Nullable Object source, Type sourceType, Type targetType, @Nullable ObjectProperty targetProperty, ObjectConverter objectConverter, ConversionOptions options) {
         if (source == null) {
             return Flag.CONTINUE;
         }
@@ -73,7 +73,7 @@ public class ProtobufMapperHandler implements ObjectConverter.Handler {
         return Flag.CONTINUE;
     }
 
-    private Charset getCharset(@Nullable DataProperty targetProperty, ConversionOptions options) {
+    private Charset getCharset(@Nullable ObjectProperty targetProperty, ConversionOptions options) {
         Charset charset = options.getCharset(targetProperty);
         return Jie.nonnull(charset, CharsKit.defaultCharset());
     }

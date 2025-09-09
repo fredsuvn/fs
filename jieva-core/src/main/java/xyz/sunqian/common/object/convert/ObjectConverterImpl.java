@@ -9,7 +9,7 @@ import xyz.sunqian.common.object.convert.handlers.BeanMapperHandler;
 import xyz.sunqian.common.object.convert.handlers.CollectionMappingHandler;
 import xyz.sunqian.common.object.convert.handlers.EnumMapperHandler;
 import xyz.sunqian.common.object.convert.handlers.TypedMapperHandler;
-import xyz.sunqian.common.object.data.DataProperty;
+import xyz.sunqian.common.object.data.ObjectProperty;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -107,7 +107,7 @@ final class ObjectConverterImpl implements ObjectConverter, ObjectConverter.Hand
 
     @Override
     public Object mapProperty(
-        @Nullable Object source, Type sourceType, Type targetType, DataProperty targetProperty, ObjectConverter objectConverter, ConversionOptions options) {
+        @Nullable Object source, Type sourceType, Type targetType, ObjectProperty targetProperty, ObjectConverter objectConverter, ConversionOptions options) {
         Object result = mapProperty(source, sourceType, targetType, targetProperty, options);
         if (result == null) {
             return Flag.CONTINUE;

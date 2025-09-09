@@ -3,9 +3,9 @@ package xyz.sunqian.common.object.convert;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.value.Val;
-import xyz.sunqian.common.object.data.DataProperty;
-import xyz.sunqian.common.object.data.DataSchema;
-import xyz.sunqian.common.object.data.DataSchemaParser;
+import xyz.sunqian.common.object.data.ObjectProperty;
+import xyz.sunqian.common.object.data.ObjectSchema;
+import xyz.sunqian.common.object.data.ObjectSchemaParser;
 import xyz.sunqian.common.runtime.reflect.TypeKit;
 
 import java.lang.reflect.Type;
@@ -82,9 +82,9 @@ final class BeanMapperImpl implements BeanMapper {
         Type sourceKeyType = sourceTypeArgs.get(0);
         Type sourceValueType = sourceTypeArgs.get(1);
         Map<Object, Object> sourceMap = Jie.as(source);
-        DataSchemaParser beanProvider = Jie.nonnull(options.getDataSchemaParser(), DataSchemaParser.defaultParser());
-        DataSchema destInfo = DataSchema.parse(destType);
-        Map<String, DataProperty> destProperties = destInfo.properties();
+        ObjectSchemaParser beanProvider = Jie.nonnull(options.getObjectSchemaParser(), ObjectSchemaParser.defaultParser());
+        ObjectSchema destInfo = ObjectSchema.parse(destType);
+        Map<String, ObjectProperty> destProperties = destInfo.properties();
         Collection<?> ignored = Jie.nonnull(options.getIgnored(), Collections.emptyList());
         boolean ignoreNull = options.isIgnoreNull();
         BiFunction<Object, Type, @Nullable Object> nameMapper = Jie.nonnull(options.getNameMapper(), (o1, o2) -> o1);
@@ -109,9 +109,9 @@ final class BeanMapperImpl implements BeanMapper {
     }
 
     private void beanToMap(Object source, Type sourceType, Object dest, Type destType, ConversionOptions options) {
-        DataSchemaParser beanProvider = Jie.nonnull(options.getDataSchemaParser(), DataSchemaParser.defaultParser());
-        DataSchema sourceInfo = DataSchema.parse(sourceType);
-        Map<String, DataProperty> sourceProperties = sourceInfo.properties();
+        ObjectSchemaParser beanProvider = Jie.nonnull(options.getObjectSchemaParser(), ObjectSchemaParser.defaultParser());
+        ObjectSchema sourceInfo = ObjectSchema.parse(sourceType);
+        Map<String, ObjectProperty> sourceProperties = sourceInfo.properties();
         List<Type> destTypeArgs = getMapTypeArgs(destType);
         Type destKeyType = destTypeArgs.get(0);
         Type destValueType = destTypeArgs.get(1);
@@ -146,11 +146,11 @@ final class BeanMapperImpl implements BeanMapper {
     }
 
     private void beanToBean(Object source, Type sourceType, Object dest, Type destType, ConversionOptions options) {
-        DataSchemaParser beanProvider = Jie.nonnull(options.getDataSchemaParser(), DataSchemaParser.defaultParser());
-        DataSchema sourceInfo = DataSchema.parse(sourceType);
-        Map<String, DataProperty> sourceProperties = sourceInfo.properties();
-        DataSchema destInfo = DataSchema.parse(destType);
-        Map<String, DataProperty> destProperties = destInfo.properties();
+        ObjectSchemaParser beanProvider = Jie.nonnull(options.getObjectSchemaParser(), ObjectSchemaParser.defaultParser());
+        ObjectSchema sourceInfo = ObjectSchema.parse(sourceType);
+        Map<String, ObjectProperty> sourceProperties = sourceInfo.properties();
+        ObjectSchema destInfo = ObjectSchema.parse(destType);
+        Map<String, ObjectProperty> destProperties = destInfo.properties();
         Collection<?> ignored = Jie.nonnull(options.getIgnored(), Collections.emptyList());
         boolean ignoreNull = options.isIgnoreNull();
         BiFunction<Object, Type, @Nullable Object> nameMapper = Jie.nonnull(options.getNameMapper(), (o1, o2) -> o1);
@@ -222,7 +222,7 @@ final class BeanMapperImpl implements BeanMapper {
 
     private void putToBean(
         Object mappedKey, Type sourceKeyType, Object sourceValue, Type sourceValueType,
-        Object dest, Map<String, DataProperty> destProperties, ObjectConverter objectConverter, ConversionOptions options
+        Object dest, Map<String, ObjectProperty> destProperties, ObjectConverter objectConverter, ConversionOptions options
     ) {
         if (mappedKey instanceof Collection) {
             for (Object mk : ((Collection<?>) mappedKey)) {
@@ -235,7 +235,7 @@ final class BeanMapperImpl implements BeanMapper {
 
     private void putToBean0(
         Object mappedKey, Type sourceKeyType, Object sourceValue, Type sourceValueType,
-        Object dest, Map<String, DataProperty> destProperties, ObjectConverter objectConverter, ConversionOptions options
+        Object dest, Map<String, ObjectProperty> destProperties, ObjectConverter objectConverter, ConversionOptions options
     ) {
         boolean ignoreError = options.isIgnoreError();
         Object destKey = map(objectConverter, mappedKey, sourceKeyType, String.class, options);
@@ -243,7 +243,7 @@ final class BeanMapperImpl implements BeanMapper {
             return;
         }
         String destName = String.valueOf(destKey);
-        DataProperty destProperty = destProperties.get(destName);
+        ObjectProperty destProperty = destProperties.get(destName);
         if (destProperty == null || !destProperty.isWritable()) {
             return;
         }
@@ -265,7 +265,7 @@ final class BeanMapperImpl implements BeanMapper {
 
     @Nullable
     private Object mapProperty(
-        ObjectConverter objectConverter, @Nullable Object sourceValue, Type sourceType, DataProperty destProperty, ConversionOptions options) {
+        ObjectConverter objectConverter, @Nullable Object sourceValue, Type sourceType, ObjectProperty destProperty, ConversionOptions options) {
         return map0(objectConverter, sourceValue, sourceType, destProperty.type(), destProperty, options);
     }
 
@@ -275,7 +275,7 @@ final class BeanMapperImpl implements BeanMapper {
         @Nullable Object sourceValue,
         Type sourceType,
         Type destType,
-        @Nullable DataProperty destProperty,
+        @Nullable ObjectProperty destProperty,
         ConversionOptions options
     ) {
         Object destValue;

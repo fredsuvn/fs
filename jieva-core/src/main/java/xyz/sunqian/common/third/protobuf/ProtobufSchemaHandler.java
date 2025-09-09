@@ -6,9 +6,9 @@ import com.google.protobuf.ProtocolStringList;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.string.StringKit;
-import xyz.sunqian.common.object.data.DataProperty;
-import xyz.sunqian.common.object.data.DataPropertyBase;
-import xyz.sunqian.common.object.data.DataSchemaParser;
+import xyz.sunqian.common.object.data.ObjectProperty;
+import xyz.sunqian.common.object.data.ObjectPropertyBase;
+import xyz.sunqian.common.object.data.ObjectSchemaParser;
 import xyz.sunqian.common.runtime.invoke.Invocable;
 import xyz.sunqian.common.runtime.reflect.TypeKit;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * {@link DataSchemaParser.Handler} implementation for
+ * {@link ObjectSchemaParser.Handler} implementation for
  * <a href="https://github.com/protocolbuffers/protobuf">Protocol Buffers</a>.
  * To use this class, the protobuf package {@code com.google.protobuf} must in the runtime environment.
  * <p>
@@ -31,7 +31,7 @@ import java.util.Objects;
  * <ul>
  *     <li>
  *         When {@link ProtocolStringList} is used as a property type, it will be mapped to {@code List<String>}, but
- *         the type of the instance returned by {@link DataProperty#getValue(Object)} is still
+ *         the type of the instance returned by {@link ObjectProperty#getValue(Object)} is still
  *         {@link ProtocolStringList};
  *     </li>
  *     <li>
@@ -42,14 +42,14 @@ import java.util.Objects;
  *
  * @author sunqian
  */
-public class ProtobufDataSchemaHandler implements DataSchemaParser.Handler {
+public class ProtobufSchemaHandler implements ObjectSchemaParser.Handler {
 
     private static final class StringListTypeRef extends TypeRef<List<String>> {
         private static final @Nonnull StringListTypeRef SINGLETON = new StringListTypeRef();
     }
 
     @Override
-    public boolean parse(@Nonnull DataSchemaParser.Context context) throws Exception {
+    public boolean parse(@Nonnull ObjectSchemaParser.Context context) throws Exception {
         Class<?> rawType = TypeKit.getRawClass(context.dataType());
         if (rawType == null) {
             return true;
@@ -70,13 +70,13 @@ public class ProtobufDataSchemaHandler implements DataSchemaParser.Handler {
         Method getDescriptorMethod = rawType.getMethod("getDescriptor");
         Descriptors.Descriptor descriptor = (Descriptors.Descriptor) getDescriptorMethod.invoke(null);
         for (Descriptors.FieldDescriptor field : descriptor.getFields()) {
-            DataPropertyBase dataPropertyBase = buildProperty(field, rawType, isBuilder);
-            context.propertyBaseMap().put(dataPropertyBase.name(), dataPropertyBase);
+            ObjectPropertyBase objectPropertyBase = buildProperty(field, rawType, isBuilder);
+            context.propertyBaseMap().put(objectPropertyBase.name(), objectPropertyBase);
         }
         return false;
     }
 
-    private @Nonnull DataPropertyBase buildProperty(
+    private @Nonnull ObjectPropertyBase buildProperty(
         @Nonnull Descriptors.FieldDescriptor field,
         @Nonnull Class<?> rawClass,
         boolean isBuilder
@@ -198,7 +198,7 @@ public class ProtobufDataSchemaHandler implements DataSchemaParser.Handler {
         }
     }
 
-    private static final class PropertyBaseImpl implements DataPropertyBase {
+    private static final class PropertyBaseImpl implements ObjectPropertyBase {
 
         private final @Nonnull String name;
         private final @Nonnull Type type;

@@ -4,8 +4,8 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.collect.MapKit;
-import xyz.sunqian.common.object.data.DataPropertyBase;
-import xyz.sunqian.common.object.data.DataSchemaParser;
+import xyz.sunqian.common.object.data.ObjectPropertyBase;
+import xyz.sunqian.common.object.data.ObjectSchemaParser;
 import xyz.sunqian.common.runtime.invoke.Invocable;
 import xyz.sunqian.common.runtime.reflect.TypeKit;
 
@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * This is a skeletal implementation of the {@link DataSchemaParser.Handler} to minimize the effort required to
+ * This is a skeletal implementation of the {@link ObjectSchemaParser.Handler} to minimize the effort required to
  * implement the interface.
  * <p>
  * This class uses {@link Class#getMethods()} to find out all methods (the synthetic method will be filtered out), then
@@ -29,7 +29,7 @@ import java.util.Set;
  *
  * @author sunqian
  */
-public abstract class AbstractDataSchemaHandler implements DataSchemaParser.Handler {
+public abstract class AbstractObjectSchemaHandler implements ObjectSchemaParser.Handler {
 
     private static @Nonnull Type findActualType(
         @Nonnull Type type,
@@ -64,7 +64,7 @@ public abstract class AbstractDataSchemaHandler implements DataSchemaParser.Hand
     }
 
     @Override
-    public boolean parse(@Nonnull DataSchemaParser.Context context) throws Exception {
+    public boolean parse(@Nonnull ObjectSchemaParser.Context context) throws Exception {
         Type type = context.dataType();
         Class<?> rawType = TypeKit.getRawClass(type);
         if (rawType == null) {
@@ -159,7 +159,7 @@ public abstract class AbstractDataSchemaHandler implements DataSchemaParser.Hand
         boolean isGetter();
     }
 
-    private static final class PropertyInfo implements DataPropertyBase {
+    private static final class PropertyInfo implements ObjectPropertyBase {
 
         private final @Nonnull String name;
         private @Nonnull Type type = Object.class;

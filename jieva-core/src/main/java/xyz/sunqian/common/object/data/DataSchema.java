@@ -1,52 +1,22 @@
 package xyz.sunqian.common.object.data;
 
-import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.runtime.reflect.TypeKit;
 
-import java.beans.BeanInfo;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Map;
 
 /**
- * This interface represents the structure of data object, parsed by a {@link DataSchemaParser}, and provides
- * information about data's properties.
+ * Top interface of {@link MapSchema} and {@link ObjectSchema}, presents the schema of a data object.
  * <p>
- * It is very similar to the {@link BeanInfo} used to describe
- * <a href="https://www.oracle.com/java/technologies/javase/javabeans-spec.html">JavaBeans</a>, but it only includes
- * simple properties, without indexed properties, events, methods, or other more complex components. And the rules for
- * parsing properties are defined by the implementation of {@link DataSchemaParser}, rather than the public rules.
- * <p>
- * Two {@link DataSchema}s are considered equal if, and only if both the data object's type and {@link DataSchemaParser}
- * are equal.
+ * A data object, which may be an instance of {@link Map}, or a non-map object. The type of {@link Map} can be parsed to
+ * {@link MapSchema}, and a non-map object can be parsed to {@link ObjectSchema}.
  *
  * @author sunqian
  */
-@Immutable
 public interface DataSchema {
-
-    /**
-     * Parse the given type to {@link DataSchema} using {@link DataSchemaParser#defaultParser()}.
-     * <p>
-     * Note that this method does not cache the results and will generate new instances every invocation.
-     *
-     * @param type the given type
-     * @return the {@link DataSchema} parsed from the given type using {@link DataSchemaParser#defaultParser()}
-     */
-    static DataSchema parse(Type type) {
-        return DataSchemaParser.defaultParser().parse(type);
-    }
-
-    /**
-     * Returns the {@link DataSchemaParser} of this {@link DataSchema}.
-     *
-     * @return the {@link DataSchemaParser} of this {@link DataSchema}
-     */
-    @Nonnull
-    DataSchemaParser parser();
 
     /**
      * Returns the type of the data object described by this {@link DataSchema}, typically is an instance of
@@ -70,59 +40,36 @@ public interface DataSchema {
     }
 
     /**
-     * Returns a map contains all properties of this {@link DataSchema}.
+     * Returns whether this schema is an instance of {@link MapSchema}.
      *
-     * @return a map contains all properties of this {@link DataSchema}
+     * @return whether this schema is an instance of {@link MapSchema}.
      */
-    @Immutable
-    @Nonnull
-    Map<@Nonnull String, @Nonnull DataProperty> properties();
+    boolean isMapSchema();
 
     /**
-     * Returns the specified property with the specified name in this {@link DataSchema}.
+     * Returns this instance as an instance of {@link MapSchema}.
      *
-     * @param name the specified name
-     * @return the specified property with the specified name in this {@link DataSchema}
+     * @return this instance as an instance of {@link MapSchema}
+     * @throws ClassCastException if this schema is not an instance of {@link MapSchema}
      */
-    default @Nullable DataProperty getProperty(String name) {
-        return properties().get(name);
+    default @Nonnull MapSchema asMapSchema() throws ClassCastException {
+        return (MapSchema) this;
     }
 
     /**
-     * Returns whether this {@link DataSchema} is equal to the other {@link DataSchema}. They are considered equal if,
-     * and only if both the data object's type and {@link DataSchemaParser} are equal.
+     * Returns whether this schema is an instance of {@link ObjectSchema}.
      *
-     * @param other the other {@link DataSchema}
-     * @return whether this {@link DataSchema} is equal to the other {@link DataSchema}
+     * @return whether this schema is an instance of {@link ObjectSchema}.
      */
-    boolean equals(@Nullable Object other);
+    boolean isObjectSchema();
 
     /**
-     * Returns the hash code of this {@link DataSchema}. The hash code is generated via {@link #type()} and
-     * {@link #parser()} like following codes:
-     * <pre>{@code
-     * int result = 1;
-     * result = 31 * result + type().hashCode();
-     * result = 31 * result + parser().hashCode();
-     * return result;
-     * }</pre>
+     * Returns this instance as an instance of {@link ObjectSchema}.
      *
-     * @return the hash code of this {@link DataSchema}
+     * @return this instance as an instance of{@link ObjectSchema}
+     * @throws ClassCastException if this schema is not an instance of {@link ObjectSchema}
      */
-    int hashCode();
-
-    /**
-     * Returns a string representation of this {@link DataSchema}. The string is generated like following codes:
-     * <pre>{@code
-     * return type().getTypeName() + "[" +
-     *     properties().values().stream()
-     *         .map(DataProperty::toString)
-     *         .collect(Collectors.joining(", "))
-     *     + "]";
-     * }</pre>
-     *
-     * @return a string representation of this {@link DataSchema}
-     */
-    @Nonnull
-    String toString();
+    default @Nonnull ObjectSchema asObjectSchema() throws ClassCastException {
+        return (ObjectSchema) this;
+    }
 }

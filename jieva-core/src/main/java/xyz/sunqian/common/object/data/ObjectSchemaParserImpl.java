@@ -2,21 +2,21 @@ package xyz.sunqian.common.object.data;
 
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.object.data.handlers.JavaBeanDataSchemaHandler;
+import xyz.sunqian.common.object.data.handlers.SimpleBeanSchemaHandler;
 import xyz.sunqian.common.runtime.reflect.ClassKit;
 
 import java.util.List;
 
-final class DataSchemaParserImpl implements DataSchemaParser, DataSchemaParser.Handler {
+final class ObjectSchemaParserImpl implements ObjectSchemaParser, ObjectSchemaParser.Handler {
 
-    static DataSchemaParserImpl SINGLETON = new DataSchemaParserImpl(ClassKit.runtimeInstances(
-        "xyz.sunqian.common.third.protobuf.ProtobufDataSchemaHandler",
-        JavaBeanDataSchemaHandler.class.getName()
+    static ObjectSchemaParserImpl SINGLETON = new ObjectSchemaParserImpl(ClassKit.runtimeInstances(
+        "xyz.sunqian.common.third.protobuf.ProtobufSchemaHandler",
+        SimpleBeanSchemaHandler.class.getName()
     ));
 
-    private final List<DataSchemaParser.Handler> handlers;
+    private final List<ObjectSchemaParser.Handler> handlers;
 
-    DataSchemaParserImpl(@Immutable List<DataSchemaParser.Handler> handlers) {
+    ObjectSchemaParserImpl(@Immutable List<ObjectSchemaParser.Handler> handlers) {
         this.handlers = handlers;
     }
 

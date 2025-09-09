@@ -6,7 +6,7 @@ import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.object.convert.BeanMapper;
 import xyz.sunqian.common.object.convert.ObjectConverter;
 import xyz.sunqian.common.object.convert.ConversionOptions;
-import xyz.sunqian.common.object.data.DataProperty;
+import xyz.sunqian.common.object.data.ObjectProperty;
 import xyz.sunqian.common.runtime.reflect.ClassKit;
 import xyz.sunqian.common.runtime.reflect.TypeKit;
 
@@ -141,7 +141,7 @@ public class BeanMapperHandler implements ObjectConverter.Handler {
     }
 
     @Override
-    public Object mapProperty(@Nullable Object source, Type sourceType, Type targetType, DataProperty targetProperty, ObjectConverter objectConverter, ConversionOptions options) {
+    public Object mapProperty(@Nullable Object source, Type sourceType, Type targetType, ObjectProperty targetProperty, ObjectConverter objectConverter, ConversionOptions options) {
         return map(source, sourceType, targetType, objectConverter, options);
     }
 

@@ -5,59 +5,59 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.collect.ListKit;
-import xyz.sunqian.common.object.data.handlers.AbstractDataSchemaHandler;
-import xyz.sunqian.common.object.data.handlers.JavaBeanDataSchemaHandler;
+import xyz.sunqian.common.object.data.handlers.AbstractObjectSchemaHandler;
+import xyz.sunqian.common.object.data.handlers.SimpleBeanSchemaHandler;
 
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 
 /**
- * This interface is used to parse {@link Type} to {@link DataSchema}. It uses a list of {@link Handler}s to execute the
- * specific parsing operations, where each {@link Handler} possesses its own specific parsing logic.
+ * This interface is used to parse {@link Type} to {@link ObjectSchema}. It uses a list of {@link Handler}s to execute
+ * the specific parsing operations, where each {@link Handler} possesses its own specific parsing logic.
  * <p>
- * There is a skeletal handler implementation: {@link AbstractDataSchemaHandler}. And the default parser is based on
- * {@link JavaBeanDataSchemaHandler}.
+ * There is a skeletal handler implementation: {@link AbstractObjectSchemaHandler}. And the default parser is based on
+ * {@link SimpleBeanSchemaHandler}.
  *
  * @author sunqian
  */
 @ThreadSafe
-public interface DataSchemaParser {
+public interface ObjectSchemaParser {
 
     /**
-     * Returns the default {@link DataSchemaParser} with {@link JavaBeanDataSchemaHandler} as the only handler.
+     * Returns the default {@link ObjectSchemaParser} with {@link SimpleBeanSchemaHandler} as the only handler.
      *
-     * @return the default {@link DataSchemaParser}
+     * @return the default {@link ObjectSchemaParser}
      */
-    static @Nonnull DataSchemaParser defaultParser() {
-        return DataSchemaParserImpl.SINGLETON;
+    static @Nonnull ObjectSchemaParser defaultParser() {
+        return ObjectSchemaParserImpl.SINGLETON;
     }
 
     /**
-     * Creates and returns a new {@link DataSchemaParser} with the given handlers.
+     * Creates and returns a new {@link ObjectSchemaParser} with the given handlers.
      *
      * @param handlers the given handlers
-     * @return a new {@link DataSchemaParser} with the given handlers
+     * @return a new {@link ObjectSchemaParser} with the given handlers
      */
-    static @Nonnull DataSchemaParser withHandlers(@Nonnull @RetainedParam Handler @Nonnull ... handlers) {
+    static @Nonnull ObjectSchemaParser withHandlers(@Nonnull @RetainedParam Handler @Nonnull ... handlers) {
         return withHandlers(ListKit.list(handlers));
     }
 
     /**
-     * Creates and returns a new {@link DataSchemaParser} with given handlers.
+     * Creates and returns a new {@link ObjectSchemaParser} with given handlers.
      *
      * @param handlers given handlers
-     * @return a new {@link DataSchemaParser} with given handlers
+     * @return a new {@link ObjectSchemaParser} with given handlers
      */
-    static @Nonnull DataSchemaParser withHandlers(@Nonnull @RetainedParam List<@Nonnull Handler> handlers) {
-        return new DataSchemaParserImpl(handlers);
+    static @Nonnull ObjectSchemaParser withHandlers(@Nonnull @RetainedParam List<@Nonnull Handler> handlers) {
+        return new ObjectSchemaParserImpl(handlers);
     }
 
     /**
-     * Parses the given type to a {@link DataSchema}, and returns the parsed {@link DataSchema}.
+     * Parses the given type to an instance of {@link ObjectSchema}, and returns the parsed {@link ObjectSchema}.
      * <p>
-     * The parsing logic of the implementations must be: invokes the {@link Handler#parse(DataSchemaParser.Context)} in
-     * the order of {@link #handlers()} until one of the handlers returns {@code false}. The code is similar to:
+     * The parsing logic of the implementations must be: invokes the {@link Handler#parse(ObjectSchemaParser.Context)}
+     * in the order of {@link #handlers()} until one of the handlers returns {@code false}. The code is similar to:
      * <pre>{@code
      * for (Handler handler : handlers()) {
      *     if (!handler.parse(context)) {
@@ -69,12 +69,12 @@ public interface DataSchemaParser {
      * Note that this method does not cache the results and will generate new instances every invocation.
      *
      * @param type the given type
-     * @return the parsed {@link DataSchema}
+     * @return the parsed {@link ObjectSchema}
      * @throws DataObjectException if any problem occurs
      */
-    default @Nonnull DataSchema parse(Type type) throws DataObjectException {
+    default @Nonnull ObjectSchema parse(@Nonnull Type type) throws DataObjectException {
         try {
-            DataSchemaBuilder builder = new DataSchemaBuilder(type);
+            ObjectSchemaBuilder builder = new ObjectSchemaBuilder(type);
             for (Handler handler : handlers()) {
                 if (!handler.parse(builder)) {
                     break;
@@ -96,14 +96,14 @@ public interface DataSchemaParser {
     List<Handler> handlers();
 
     /**
-     * Returns a new {@link DataSchemaParser} of which handler list consists of the given handler as the first element,
-     * followed by {@link #handlers()} of the current parser.
+     * Returns a new {@link ObjectSchemaParser} of which handler list consists of the given handler as the first
+     * element, followed by {@link #handlers()} of the current parser.
      *
      * @param handler the given handler
-     * @return a new {@link DataSchemaParser} of which handler list consists of the given handler as the first element,
-     * followed by {@link #handlers()} of the current parser
+     * @return a new {@link ObjectSchemaParser} of which handler list consists of the given handler as the first
+     * element, followed by {@link #handlers()} of the current parser
      */
-    default @Nonnull DataSchemaParser withFirstHandler(Handler handler) {
+    default @Nonnull ObjectSchemaParser withFirstHandler(Handler handler) {
         Handler[] newHandlers = new Handler[handlers().size() + 1];
         int i = 0;
         newHandlers[i++] = handler;
@@ -114,14 +114,14 @@ public interface DataSchemaParser {
     }
 
     /**
-     * Returns a new {@link DataSchemaParser} of which handler list consists of {@link #handlers()} of the current
+     * Returns a new {@link ObjectSchemaParser} of which handler list consists of {@link #handlers()} of the current
      * parser, followed by the given handler as the last element.
      *
      * @param handler the given handler
-     * @return a {@link DataSchemaParser} of which handler list consists of {@link #handlers()} of the current parser,
+     * @return a {@link ObjectSchemaParser} of which handler list consists of {@link #handlers()} of the current parser,
      * followed by the given handler as the last element
      */
-    default @Nonnull DataSchemaParser withLastHandler(Handler handler) {
+    default @Nonnull ObjectSchemaParser withLastHandler(Handler handler) {
         Handler[] newHandlers = new Handler[handlers().size() + 1];
         int i = 0;
         for (Handler h : handlers()) {
@@ -140,7 +140,7 @@ public interface DataSchemaParser {
     Handler asHandler();
 
     /**
-     * Handler for {@link DataSchemaParser}, provides the specific parsing logic.
+     * Handler for {@link ObjectSchemaParser}, provides the specific parsing logic.
      *
      * @author sunqian
      */
@@ -148,7 +148,7 @@ public interface DataSchemaParser {
     interface Handler {
 
         /**
-         * Parses {@link Type} to {@link DataSchema} with its owner parsing logic. The {@link Type} is specified by
+         * Parses {@link Type} to {@link ObjectSchema} with its owner parsing logic. The {@link Type} is specified by
          * {@link Context#dataType()} of the given context, and the parsed properties should be stored in
          * {@link Context#propertyBaseMap()}. Returns {@code false} to prevent subsequent handlers to continue to parse,
          * otherwise returns {@code true}.
@@ -161,7 +161,7 @@ public interface DataSchemaParser {
     }
 
     /**
-     * Context for parsing the specified {@link Type} to {@link DataSchema}.
+     * Context for parsing the specified {@link Type} to {@link ObjectSchema}.
      *
      * @author sunqian
      */
@@ -184,6 +184,6 @@ public interface DataSchemaParser {
          * @return a mutable map for storing property base infos
          */
         @Nonnull
-        Map<@Nonnull String, @Nonnull DataPropertyBase> propertyBaseMap();
+        Map<@Nonnull String, @Nonnull ObjectPropertyBase> propertyBaseMap();
     }
 }

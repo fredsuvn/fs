@@ -11,12 +11,12 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-final class DataSchemaBuilder implements DataSchemaParser.Context {
+final class ObjectSchemaBuilder implements ObjectSchemaParser.Context {
 
     private final @Nonnull Type type;
-    private final @Nonnull Map<@Nonnull String, @Nonnull DataPropertyBase> properties = new LinkedHashMap<>();
+    private final @Nonnull Map<@Nonnull String, @Nonnull ObjectPropertyBase> properties = new LinkedHashMap<>();
 
-    DataSchemaBuilder(Type type) {
+    ObjectSchemaBuilder(Type type) {
         this.type = type;
     }
 
@@ -26,35 +26,35 @@ final class DataSchemaBuilder implements DataSchemaParser.Context {
     }
 
     @Override
-    public @Nonnull Map<@Nonnull String, @Nonnull DataPropertyBase> propertyBaseMap() {
+    public @Nonnull Map<@Nonnull String, @Nonnull ObjectPropertyBase> propertyBaseMap() {
         return properties;
     }
 
     @Nonnull
-    DataSchema build(@Nonnull DataSchemaParser parser) {
-        return new DataSchemaImpl(parser, type, properties);
+    ObjectSchema build(@Nonnull ObjectSchemaParser parser) {
+        return new ObjectSchemaImpl(parser, type, properties);
     }
 
-    private static final class DataSchemaImpl implements DataSchema {
+    private static final class ObjectSchemaImpl implements ObjectSchema {
 
-        private final @Nonnull DataSchemaParser parser;
+        private final @Nonnull ObjectSchemaParser parser;
         private final @Nonnull Type type;
-        private final @Nonnull Map<@Nonnull String, @Nonnull DataProperty> properties;
+        private final @Nonnull Map<@Nonnull String, @Nonnull ObjectProperty> properties;
 
-        private DataSchemaImpl(
-            @Nonnull DataSchemaParser parser,
+        private ObjectSchemaImpl(
+            @Nonnull ObjectSchemaParser parser,
             @Nonnull Type type,
-            @Nonnull Map<@Nonnull String, @Nonnull DataPropertyBase> propBases
+            @Nonnull Map<@Nonnull String, @Nonnull ObjectPropertyBase> propBases
         ) {
             this.parser = parser;
             this.type = type;
-            Map<@Nonnull String, @Nonnull DataProperty> props = new LinkedHashMap<>();
+            Map<@Nonnull String, @Nonnull ObjectProperty> props = new LinkedHashMap<>();
             propBases.forEach((name, propBase) -> props.put(name, new PropertyImpl(propBase)));
             this.properties = Collections.unmodifiableMap(props);
         }
 
         @Override
-        public @Nonnull DataSchemaParser parser() {
+        public @Nonnull ObjectSchemaParser parser() {
             return parser;
         }
 
@@ -64,7 +64,7 @@ final class DataSchemaBuilder implements DataSchemaParser.Context {
         }
 
         @Override
-        public @Nonnull Map<@Nonnull String, @Nonnull DataProperty> properties() {
+        public @Nonnull Map<@Nonnull String, @Nonnull ObjectProperty> properties() {
             return properties;
         }
 
@@ -84,7 +84,7 @@ final class DataSchemaBuilder implements DataSchemaParser.Context {
             return DataObjectKit.toString(this);
         }
 
-        private final class PropertyImpl implements DataProperty {
+        private final class PropertyImpl implements ObjectProperty {
 
             private final @Nonnull String name;
             private final @Nonnull Type type;
@@ -94,7 +94,7 @@ final class DataSchemaBuilder implements DataSchemaParser.Context {
             private final @Nullable Invocable getter;
             private final @Nullable Invocable setter;
 
-            private PropertyImpl(@Nonnull DataPropertyBase propertyBase) {
+            private PropertyImpl(@Nonnull ObjectPropertyBase propertyBase) {
                 this.name = propertyBase.name();
                 this.type = propertyBase.type();
                 this.getterMethod = propertyBase.getterMethod();
@@ -105,8 +105,8 @@ final class DataSchemaBuilder implements DataSchemaParser.Context {
             }
 
             @Override
-            public @Nonnull DataSchema owner() {
-                return DataSchemaImpl.this;
+            public @Nonnull ObjectSchema owner() {
+                return ObjectSchemaImpl.this;
             }
 
             @Override

@@ -14,94 +14,138 @@ import java.util.stream.Collectors;
 public class DataObjectKit {
 
     /**
-     * The implementation of {@link DataSchema#equals(Object)}, and it works in conjunction with
-     * {@link #hashCode(DataSchema)}.
+     * The implementation of {@link ObjectSchema#equals(Object)}, and it works in conjunction with
+     * {@link #hashCode(ObjectSchema)}.
      *
-     * @param dataSchema the compared {@link DataSchema}
-     * @param other      the other {@link DataSchema}
-     * @return whether the compared {@link DataSchema} is equal to other {@link DataSchema}
+     * @param objectSchema the compared {@link ObjectSchema}
+     * @param other        the other {@link ObjectSchema}
+     * @return whether the compared {@link ObjectSchema} is equal to other {@link ObjectSchema}
      */
-    public static boolean equals(@Nonnull DataSchema dataSchema, @Nullable Object other) {
-        if (dataSchema == other) {
+    public static boolean equals(@Nonnull ObjectSchema objectSchema, @Nullable Object other) {
+        if (objectSchema == other) {
             return true;
         }
-        if (!(other instanceof DataSchema)) {
+        if (!(other instanceof ObjectSchema)) {
             return false;
         }
-        DataSchema otherSchema = (DataSchema) other;
-        return Objects.equals(dataSchema.type(), otherSchema.type())
-            && Objects.equals(dataSchema.parser(), otherSchema.parser());
+        ObjectSchema otherSchema = (ObjectSchema) other;
+        return Objects.equals(objectSchema.type(), otherSchema.type())
+            && Objects.equals(objectSchema.parser(), otherSchema.parser());
     }
 
     /**
-     * The implementation of {@link DataProperty#equals(Object)}, and it works in conjunction with
-     * {@link #hashCode(DataProperty)}.
+     * The implementation of {@link ObjectProperty#equals(Object)}, and it works in conjunction with
+     * {@link #hashCode(ObjectProperty)}.
      *
-     * @param dataProperty the compared {@link DataProperty}
-     * @param other        the other {@link DataProperty}
-     * @return whether the compared {@link DataProperty} is equal to other {@link DataProperty}
+     * @param objectProperty the compared {@link ObjectProperty}
+     * @param other          the other {@link ObjectProperty}
+     * @return whether the compared {@link ObjectProperty} is equal to other {@link ObjectProperty}
      */
-    public static boolean equals(@Nonnull DataProperty dataProperty, @Nullable Object other) {
-        if (dataProperty == other) {
+    public static boolean equals(@Nonnull ObjectProperty objectProperty, @Nullable Object other) {
+        if (objectProperty == other) {
             return true;
         }
-        if (!(other instanceof DataProperty)) {
+        if (!(other instanceof ObjectProperty)) {
             return false;
         }
-        DataProperty otherProperty = (DataProperty) other;
-        return Objects.equals(dataProperty.name(), otherProperty.name())
-            && Objects.equals(dataProperty.owner(), otherProperty.owner());
+        ObjectProperty otherProperty = (ObjectProperty) other;
+        return Objects.equals(objectProperty.name(), otherProperty.name())
+            && Objects.equals(objectProperty.owner(), otherProperty.owner());
     }
 
     /**
-     * The implementation of {@link DataSchema#hashCode()}, and it works in conjunction with
-     * {@link #equals(DataSchema, Object)}.
+     * The implementation of {@link MapSchema#equals(Object)}, and it works in conjunction with
+     * {@link #hashCode(MapSchema)}.
      *
-     * @param dataSchema the {@link DataSchema} to be hashed
-     * @return the hash code of the {@link DataSchema}
+     * @param mapSchema the compared {@link MapSchema}
+     * @param other     the other {@link MapSchema}
+     * @return whether the compared {@link MapSchema} is equal to other {@link MapSchema}
      */
-    public static int hashCode(@Nonnull DataSchema dataSchema) {
+    public static boolean equals(@Nonnull MapSchema mapSchema, @Nullable Object other) {
+        if (mapSchema == other) {
+            return true;
+        }
+        if (!(other instanceof MapSchema)) {
+            return false;
+        }
+        MapSchema otherSchema = (MapSchema) other;
+        return Objects.equals(mapSchema.type(), otherSchema.type())
+            && Objects.equals(mapSchema.parser(), otherSchema.parser());
+    }
+
+    /**
+     * The implementation of {@link ObjectSchema#hashCode()}, and it works in conjunction with
+     * {@link #equals(ObjectSchema, Object)}.
+     *
+     * @param objectSchema the {@link ObjectSchema} to be hashed
+     * @return the hash code of the {@link ObjectSchema}
+     */
+    public static int hashCode(@Nonnull ObjectSchema objectSchema) {
         int result = 1;
-        result = 31 * result + dataSchema.type().hashCode();
-        result = 31 * result + dataSchema.parser().hashCode();
+        result = 31 * result + objectSchema.type().hashCode();
+        result = 31 * result + objectSchema.parser().hashCode();
         return result;
     }
 
     /**
-     * The implementation of {@link DataProperty#hashCode()}, and it works in conjunction with
-     * {@link #equals(DataProperty, Object)}.
+     * The implementation of {@link ObjectProperty#hashCode()}, and it works in conjunction with
+     * {@link #equals(ObjectProperty, Object)}.
      *
-     * @param dataProperty the {@link DataProperty} to be hashed
-     * @return the hash code of the {@link DataProperty}
+     * @param objectProperty the {@link ObjectProperty} to be hashed
+     * @return the hash code of the {@link ObjectProperty}
      */
-    public static int hashCode(@Nonnull DataProperty dataProperty) {
+    public static int hashCode(@Nonnull ObjectProperty objectProperty) {
         int result = 1;
-        result = 31 * result + dataProperty.name().hashCode();
-        result = 31 * result + dataProperty.owner().hashCode();
+        result = 31 * result + objectProperty.name().hashCode();
+        result = 31 * result + objectProperty.owner().hashCode();
         return result;
     }
 
     /**
-     * The implementation of {@link DataSchema#toString()}.
+     * The implementation of {@link MapSchema#hashCode()}, and it works in conjunction with
+     * {@link #equals(MapSchema, Object)}.
      *
-     * @param dataSchema the {@link DataSchema} to be string
-     * @return a string representation of given {@link DataSchema}
+     * @param mapSchema the {@link MapSchema} to be hashed
+     * @return the hash code of the {@link MapSchema}
      */
-    public static @Nonnull String toString(@Nonnull DataSchema dataSchema) {
-        return dataSchema.type().getTypeName() + "{" +
-            dataSchema.properties().values().stream()
-                .map(DataProperty::toString)
+    public static int hashCode(@Nonnull MapSchema mapSchema) {
+        int result = 1;
+        result = 31 * result + mapSchema.type().hashCode();
+        result = 31 * result + mapSchema.parser().hashCode();
+        return result;
+    }
+
+    /**
+     * The implementation of {@link ObjectSchema#toString()}.
+     *
+     * @param objectSchema the {@link ObjectSchema} to be string
+     * @return a string representation of given {@link ObjectSchema}
+     */
+    public static @Nonnull String toString(@Nonnull ObjectSchema objectSchema) {
+        return objectSchema.type().getTypeName() + "{" +
+            objectSchema.properties().values().stream()
+                .map(ObjectProperty::toString)
                 .collect(Collectors.joining(", "))
             + "}";
     }
 
     /**
-     * The implementation of {@link DataProperty#toString()}.
+     * The implementation of {@link ObjectProperty#toString()}.
      *
-     * @param property the {@link DataProperty} to be string
-     * @return a string representation of given {@link DataProperty}
+     * @param property the {@link ObjectProperty} to be string
+     * @return a string representation of given {@link ObjectProperty}
      */
-    public static @Nonnull String toString(@Nonnull DataProperty property) {
+    public static @Nonnull String toString(@Nonnull ObjectProperty property) {
         return property.name() + ": " + property.type().getTypeName();
+    }
+
+    /**
+     * The implementation of {@link MapSchema#toString()}.
+     *
+     * @param mapSchema the {@link MapSchema} to be string
+     * @return a string representation of given {@link MapSchema}
+     */
+    public static @Nonnull String toString(@Nonnull MapSchema mapSchema) {
+        return mapSchema.type().getTypeName();
     }
 }

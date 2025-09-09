@@ -4,7 +4,7 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.lang.Flag;
 import xyz.sunqian.common.object.convert.ObjectConverter;
 import xyz.sunqian.common.object.convert.ConversionOptions;
-import xyz.sunqian.common.object.data.DataProperty;
+import xyz.sunqian.common.object.data.ObjectProperty;
 
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -17,7 +17,7 @@ import java.util.Map;
  * <p>
  * This handler has a {@link Converter} map ({@code Map<Type, Converter<?>>}). If source object is {@code null}, return
  * {@link Flag#CONTINUE}. Else the map tries to find the converter for target type, if the converter is not found, or
- * result of {@link Converter#convert(Object, Type, DataProperty, ConversionOptions)} is {@code null}, return
+ * result of {@link Converter#convert(Object, Type, ObjectProperty, ConversionOptions)} is {@code null}, return
  * {@link Flag#CONTINUE}.
  * <p>
  * The converter map should be specified in {@link #TypedMapperHandler(Map)}, or use default map
@@ -55,7 +55,7 @@ public class TypedMapperHandler implements ObjectConverter.Handler {
     }
 
     @Override
-    public Object mapProperty(@Nullable Object source, Type sourceType, Type targetType, @Nullable DataProperty targetProperty, ObjectConverter objectConverter, ConversionOptions options) {
+    public Object mapProperty(@Nullable Object source, Type sourceType, Type targetType, @Nullable ObjectProperty targetProperty, ObjectConverter objectConverter, ConversionOptions options) {
         if (source == null) {
             return Flag.CONTINUE;
         }
@@ -108,6 +108,6 @@ public class TypedMapperHandler implements ObjectConverter.Handler {
          * @return a new object from source type to target type or null if unsupported
          */
         @Nullable
-        T convert(Object source, Type sourceType, @Nullable DataProperty targetProperty, ConversionOptions options);
+        T convert(Object source, Type sourceType, @Nullable ObjectProperty targetProperty, ConversionOptions options);
     }
 }
