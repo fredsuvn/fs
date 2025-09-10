@@ -6,6 +6,7 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.base.exception.AwaitingException;
 import xyz.sunqian.common.base.exception.UnknownArrayTypeException;
+import xyz.sunqian.common.base.option.Option;
 import xyz.sunqian.common.base.process.ProcessKit;
 import xyz.sunqian.common.base.thread.ThreadKit;
 import xyz.sunqian.common.collect.ArrayKit;
@@ -16,9 +17,12 @@ import xyz.sunqian.common.collect.StreamKit;
 import xyz.sunqian.common.function.callable.BooleanCallable;
 import xyz.sunqian.common.function.callable.VoidCallable;
 import xyz.sunqian.common.io.IORuntimeException;
-import xyz.sunqian.common.object.convert.BeanMapper;
-import xyz.sunqian.common.object.convert.ObjectConverter;
 import xyz.sunqian.common.object.convert.ConversionOptions;
+import xyz.sunqian.common.object.convert.DataMapper;
+import xyz.sunqian.common.object.convert.MappingOptions;
+import xyz.sunqian.common.object.convert.ObjectConversionException;
+import xyz.sunqian.common.object.convert.ObjectConverter;
+import xyz.sunqian.common.object.data.ObjectSchema;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
 
 import java.lang.reflect.Type;
@@ -42,7 +46,9 @@ import java.util.stream.Stream;
 
 /**
  * The core utility class of this library, provides support methods for {@link Object}, such as {@code equals} and
- * {@code hashCode}, and many methods to improve language convenience, such as {@code nonnull}, {@code uncheck}, etc.
+ * {@code hashCode}. And many methods to improve language convenience, such as {@code nonnull}, {@code uncheck}. And
+ * shortcuts to other commonly used methods in this lib, such as {@link #list(Object[])},
+ * {@link #copyProperties(Object, Object)}.
  *
  * @author sunqian
  */
@@ -507,66 +513,106 @@ public class Jie {
         return ObjectConverter.defaultConverter().map(source, targetType, ConversionOptions.defaultOptions2());
     }
 
+    //---------------- Copy Properties Begin ----------------//
+
     /**
-     * Copies properties from source object to dest object, return the dest object. This method is equivalent to
-     * ({@link BeanMapper#copyProperties(Object, Object)}):
-     * <pre>
-     *     return BeanMapper.defaultMapper().copyProperties(source, dest);
-     * </pre>
-     * Using {@link BeanMapper} for more mapping operations.
+     * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
+     * a non-map object which can be parsed to {@link ObjectSchema}.
+     * <p>
+     * This method is a shortcut to the {@link DataMapper#copyProperties(Object, Object)}.
      *
-     * @param source source object
-     * @param dest   dest object
-     * @param <T>    dest type
-     * @return dest object
-     * @see BeanMapper#defaultMapper()
-     * @see BeanMapper#copyProperties(Object, Object)
+     * @param src the given source object
+     * @param dst the given destination object
+     * @throws ObjectConversionException if an error occurs during copying properties
+     * @see DataMapper
      */
-    public static <T> T copyProperties(Object source, T dest) {
-        return BeanMapper.defaultMapper().copyProperties(source, dest);
+    public static void copyProperties(@Nonnull Object src, @Nonnull Object dst) throws ObjectConversionException {
+        DataMapper.defaultMapper().copyProperties(src, dst);
     }
 
     /**
-     * Copies properties from source object to dest object (specified ignored properties will be excluded), return the
-     * dest object. This method is equivalent to ({@link BeanMapper#copyProperties(Object, Object, ConversionOptions)}):
-     * <pre>
-     *     return BeanMapper.defaultMapper().copyProperties(source, dest,
-     *         MappingOptions.builder().ignored(JieArray.asList(ignoredProperties)).build());
-     * </pre>
-     * Using {@link BeanMapper} for more mapping operations.
+     * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
+     * a non-map object which can be parsed to {@link ObjectSchema}.
+     * <p>
+     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
+     * {@link MappingOptions} or other custom options for custom implementations.
+     * <p>
+     * This method is a shortcut to the {@link DataMapper#copyProperties(Object, Object, Option[])}.
      *
-     * @param source            source object
-     * @param dest              dest object
-     * @param ignoredProperties ignored properties
-     * @param <T>               dest type
-     * @return dest object
-     * @see BeanMapper#defaultMapper()
-     * @see BeanMapper#copyProperties(Object, Object, ConversionOptions)
+     * @param src     the given source object
+     * @param dst     the given destination object
+     * @param options the options for copying properties
+     * @throws ObjectConversionException if an error occurs during copying properties
+     * @see DataMapper
      */
-    public static <T> T copyProperties(Object source, T dest, Object... ignoredProperties) {
-        return BeanMapper.defaultMapper().copyProperties(source, dest,
-            ConversionOptions.builder().ignored(ArrayKit.asList(ignoredProperties)).build());
+    public static void copyProperties(
+        @Nonnull Object src, @Nonnull Object dst, @Nonnull Option<?, ?> @Nonnull ... options
+    ) throws ObjectConversionException {
+        DataMapper.defaultMapper().copyProperties(src, dst, options);
     }
 
     /**
-     * Copies properties from source object to dest object, return the dest object. This method is equivalent to
-     * ({@link BeanMapper#copyProperties(Object, Object, ConversionOptions)}):
-     * <pre>
-     *     return BeanMapper.defaultMapper().copyProperties(source, dest, options);
-     * </pre>
-     * Using {@link BeanMapper} for more mapping operations.
+     * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
+     * a non-map object which can be parsed to {@link ObjectSchema}.
+     * <p>
+     * This method is a shortcut to the {@link DataMapper#copyProperties(Object, Type, Object, Type)}.
      *
-     * @param source  source object
-     * @param dest    dest object
-     * @param options mapping options
-     * @param <T>     dest type
-     * @return dest object
-     * @see BeanMapper#defaultMapper()
-     * @see BeanMapper#copyProperties(Object, Object, ConversionOptions)
+     * @param src     the given source object
+     * @param srcType specifies the type of the given source object
+     * @param dst     the given destination object
+     * @param dstType specifies the type of the given destination object
+     * @throws ObjectConversionException if an error occurs during copying properties
+     * @see DataMapper
      */
-    public static <T> T copyProperties(Object source, T dest, ConversionOptions options) {
-        return BeanMapper.defaultMapper().copyProperties(source, dest, options);
+    public static void copyProperties(
+        @Nonnull Object src,
+        @Nonnull Type srcType,
+        @Nonnull Object dst,
+        @Nonnull Type dstType
+    ) throws ObjectConversionException {
+        DataMapper.defaultMapper().copyProperties(
+            src,
+            srcType,
+            dst,
+            dstType
+        );
     }
+
+    /**
+     * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
+     * a non-map object which can be parsed to {@link ObjectSchema}.
+     * <p>
+     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
+     * {@link MappingOptions} or other custom options for custom implementations.
+     * <p>
+     * This method is a shortcut to the {@link DataMapper#copyProperties(Object, Type, Object, Type, Option[])}.
+     *
+     * @param src     the given source object
+     * @param srcType specifies the type of the given source object
+     * @param dst     the given destination object
+     * @param dstType specifies the type of the given destination object
+     * @param options the options for copying properties
+     * @throws ObjectConversionException if an error occurs during copying properties
+     * @see DataMapper
+     */
+    public static void copyProperties(
+        @Nonnull Object src,
+        @Nonnull Type srcType,
+        @Nonnull Object dst,
+        @Nonnull Type dstType,
+        @Nonnull Option<?, ?> @Nonnull ... options
+    ) throws ObjectConversionException {
+        DataMapper.defaultMapper().copyProperties(
+            src,
+            srcType,
+            dst,
+            dstType,
+            ObjectConverter.defaultConverter(),
+            options
+        );
+    }
+
+    //---------------- Copy Properties End ----------------//
 
     //---------------- Collection Begin ----------------//
 

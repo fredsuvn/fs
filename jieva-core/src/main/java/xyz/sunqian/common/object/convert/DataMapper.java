@@ -4,14 +4,15 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.option.Option;
 import xyz.sunqian.common.object.data.DataSchema;
+import xyz.sunqian.common.object.data.MapSchema;
 import xyz.sunqian.common.object.data.ObjectSchema;
 
 import java.lang.reflect.Type;
 import java.util.Map;
 
 /**
- * This interface is used to copy properties from an object to another object, The object can be a {@link Map} or a
- * non-map object which can be parsed to {@link ObjectSchema}.
+ * This interface is used to map data properties from an object to another object. The object should be a {@link Map} or
+ * a non-map object which can be parsed to {@link MapSchema} and {@link ObjectSchema}.
  *
  * @author sunqian
  */
@@ -53,6 +54,24 @@ public interface DataMapper {
     /**
      * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
      * a non-map object which can be parsed to {@link ObjectSchema}.
+     * <p>
+     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
+     * {@link MappingOptions} or other custom options for custom implementations.
+     *
+     * @param src     the given source object
+     * @param dst     the given destination object
+     * @param options the options for copying properties
+     * @throws ObjectConversionException if an error occurs during copying properties
+     */
+    default void copyProperties(
+        @Nonnull Object src, @Nonnull Object dst, @Nonnull Option<?, ?> @Nonnull ... options
+    ) throws ObjectConversionException {
+        copyProperties(src, src.getClass(), dst, dst.getClass(), options);
+    }
+
+    /**
+     * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
+     * a non-map object which can be parsed to {@link ObjectSchema}.
      *
      * @param src     the given source object
      * @param srcType specifies the type of the given source object
@@ -71,14 +90,47 @@ public interface DataMapper {
             srcType,
             dst,
             dstType,
-            ObjectConverter.defaultConverter(),
-            ConversionOptions.defaultOptions()
+            Option.empty()
         );
     }
 
     /**
      * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
      * a non-map object which can be parsed to {@link ObjectSchema}.
+     * <p>
+     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
+     * {@link MappingOptions} or other custom options for custom implementations.
+     *
+     * @param src     the given source object
+     * @param srcType specifies the type of the given source object
+     * @param dst     the given destination object
+     * @param dstType specifies the type of the given destination object
+     * @param options the options for copying properties
+     * @throws ObjectConversionException if an error occurs during copying properties
+     */
+    default void copyProperties(
+        @Nonnull Object src,
+        @Nonnull Type srcType,
+        @Nonnull Object dst,
+        @Nonnull Type dstType,
+        @Nonnull Option<?, ?> @Nonnull ... options
+    ) throws ObjectConversionException {
+        copyProperties(
+            src,
+            srcType,
+            dst,
+            dstType,
+            ObjectConverter.defaultConverter(),
+            options
+        );
+    }
+
+    /**
+     * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
+     * a non-map object which can be parsed to {@link ObjectSchema}.
+     * <p>
+     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
+     * {@link MappingOptions} or other custom options for custom implementations.
      *
      * @param src       the given source object
      * @param srcType   specifies the type of the given source object
@@ -96,51 +148,6 @@ public interface DataMapper {
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws ObjectConversionException;
-
-    /**
-     * Returns an option to specify the {@link PropertyMapper}.
-     * <p>
-     * By default, all properties which is both readable and writable will be copied with their original names.
-     *
-     * @param propertyMapper the {@link PropertyMapper} to be specified
-     * @return an option to specify the {@link PropertyMapper}
-     */
-    static @Nonnull Option<OptionKey, @Nonnull PropertyMapper> propertyMapper(
-        @Nonnull PropertyMapper propertyMapper
-    ) {
-        return Option.of(OptionKey.PROPERTY_MAPPER, propertyMapper);
-    }
-
-    /**
-     * Returns an option to specify the {@link ExceptionHandler}.
-     * <p>
-     * By default, the exception will be thrown directly.
-     *
-     * @param exceptionHandler the {@link ExceptionHandler} to be specified
-     * @return an option to specify the {@link ExceptionHandler}
-     */
-    static @Nonnull Option<OptionKey, @Nonnull ExceptionHandler> exceptionHandler(
-        @Nonnull ExceptionHandler exceptionHandler
-    ) {
-        return Option.of(OptionKey.EXCEPTION_HANDLER, exceptionHandler);
-    }
-
-    /**
-     * Option key for data mapping.
-     */
-    enum OptionKey {
-
-        /**
-         * Key of {@link #propertyMapper(PropertyMapper)}.
-         */
-        PROPERTY_MAPPER,
-
-        /**
-         * Key of {@link #exceptionHandler(ExceptionHandler)}.
-         */
-        EXCEPTION_HANDLER,
-        ;
-    }
 
     /**
      * Property mapper for copying object property, this interface is called when copying each property.

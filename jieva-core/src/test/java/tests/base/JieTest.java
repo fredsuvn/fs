@@ -1,10 +1,15 @@
 package tests.base;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.testng.annotations.Test;
 import tests.utils.Utils;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.exception.UnknownArrayTypeException;
+import xyz.sunqian.common.base.option.Option;
 import xyz.sunqian.common.base.system.OSKit;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.test.AssertTest;
@@ -292,8 +297,40 @@ public class JieTest implements AssertTest, PrintTest {
         printFor(title, IOKit.string(in, CharsKit.localCharset()));
     }
 
-    //@Test
-    public void testOther() {
-        // other tests
+    @Test
+    public void testCopyProperties() {
+        StringProps sp = new StringProps("1", "2", "3");
+        IntProps ip1 = new IntProps();
+        Jie.copyProperties(sp, ip1);
+        assertEquals(ip1, new IntProps(1, 2, 3));
+        IntProps ip2 = new IntProps();
+        Jie.copyProperties(sp, ip2, Option.empty());
+        assertEquals(ip2, new IntProps(1, 2, 3));
+        IntProps ip3 = new IntProps();
+        Jie.copyProperties(sp, sp.getClass(), ip3, ip3.getClass());
+        assertEquals(ip3, new IntProps(1, 2, 3));
+        IntProps ip4 = new IntProps();
+        Jie.copyProperties(sp, sp.getClass(), ip4, ip4.getClass(), Option.empty());
+        assertEquals(ip4, new IntProps(1, 2, 3));
+    }
+
+    @Data
+    @EqualsAndHashCode
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class StringProps {
+        private String first;
+        private String second;
+        private String third;
+    }
+
+    @Data
+    @EqualsAndHashCode
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class IntProps {
+        private Integer first;
+        private Integer second;
+        private Integer third;
     }
 }

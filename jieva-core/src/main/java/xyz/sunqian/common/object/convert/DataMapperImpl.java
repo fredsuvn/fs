@@ -13,6 +13,9 @@ import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static xyz.sunqian.common.object.convert.MappingOptions.Key.EXCEPTION_HANDLER;
+import static xyz.sunqian.common.object.convert.MappingOptions.Key.PROPERTY_MAPPER;
+
 final class DataMapperImpl implements DataMapper {
 
     static final @Nonnull DataMapper SINGLETON = new DataMapperImpl(new ConcurrentHashMap<>());
@@ -33,8 +36,8 @@ final class DataMapperImpl implements DataMapper {
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws ObjectConversionException {
         try {
-            DataMapper.PropertyMapper propertyMapper = Option.findValue(OptionKey.PROPERTY_MAPPER, options);
-            DataMapper.ExceptionHandler exceptionHandler = Option.findValue(OptionKey.EXCEPTION_HANDLER, options);
+            DataMapper.PropertyMapper propertyMapper = Option.findValue(PROPERTY_MAPPER, options);
+            DataMapper.ExceptionHandler exceptionHandler = Option.findValue(EXCEPTION_HANDLER, options);
             if (src instanceof Map) {
                 MapSchema srcSchema = schemaCache.computeIfAbsent(srcType, MapSchema::parse).asMapSchema();
                 if (dst instanceof Map) {
@@ -104,6 +107,8 @@ final class DataMapperImpl implements DataMapper {
                     } catch (Exception ex) {
                         throw new ObjectConversionException(ex);
                     }
+                } else {
+                    throw e;
                 }
             }
         });
@@ -153,6 +158,8 @@ final class DataMapperImpl implements DataMapper {
                     } catch (Exception ex) {
                         throw new ObjectConversionException(ex);
                     }
+                } else {
+                    throw e;
                 }
             }
         });
@@ -171,6 +178,10 @@ final class DataMapperImpl implements DataMapper {
         srcSchema.properties().forEach((srcPropertyName, srcProperty) -> {
             try {
                 if (!srcProperty.isReadable()) {
+                    return;
+                }
+                // do not map "class"
+                if ("class".equals(srcPropertyName)) {
                     return;
                 }
                 Object dstPropertyName;
@@ -198,6 +209,8 @@ final class DataMapperImpl implements DataMapper {
                     } catch (Exception ex) {
                         throw new ObjectConversionException(ex);
                     }
+                } else {
+                    throw e;
                 }
             }
         });
@@ -252,6 +265,8 @@ final class DataMapperImpl implements DataMapper {
                     } catch (Exception ex) {
                         throw new ObjectConversionException(ex);
                     }
+                } else {
+                    throw e;
                 }
             }
         });
