@@ -3,31 +3,45 @@ package xyz.sunqian.common.object.convert;
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.annotations.ThreadSafe;
-import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.base.lang.Flag;
 import xyz.sunqian.common.base.option.Option;
-import xyz.sunqian.common.base.value.Val;
-import xyz.sunqian.common.object.convert.handlers.AssignableMapperHandler;
-import xyz.sunqian.common.object.convert.handlers.BeanMapperHandler;
-import xyz.sunqian.common.object.convert.handlers.CollectionMappingHandler;
+import xyz.sunqian.common.collect.ListKit;
+import xyz.sunqian.common.object.convert.handlers.AssignableConversionHandler;
+import xyz.sunqian.common.object.convert.handlers.DataConversionHandler;
+import xyz.sunqian.common.object.convert.handlers.CollectionConversionHandler;
 import xyz.sunqian.common.object.convert.handlers.EnumMapperHandler;
 import xyz.sunqian.common.object.convert.handlers.TypedMapperHandler;
-import xyz.sunqian.common.object.data.ObjectProperty;
-import xyz.sunqian.common.runtime.reflect.TypeRef;
 
 import java.lang.reflect.Type;
 import java.util.List;
 
 /**
- * Mapper interface to map object from source type to target type. A {@link ObjectConverter} typically has a list of
- * {@link Handler}s, and in default implementation, the {@link Handler}s provide actual map operation for core methods
- * {@link #map(Object, Type, Type, ConversionOptions)} and
- * {@link #mapProperty(Object, Type, Type, ObjectProperty, ConversionOptions)}.
+ * This interface is used to convert an object from the specified type to the target type.
+ * <p>
+ * It uses a list of {@link ObjectConverter.Handler}s to sequentially attempt conversion. A handler can return
+ * {@link Status#HANDLER_CONTINUE}, {@link Status#HANDLER_BREAK} or a normal value as the final result. The conversion
+ * logic is as follows:
+ * <pre>{@code
+ * for (Handler handler : handlers()) {
+ *     Object ret;
+ *     try {
+ *         ret = handler.convert(src, srcType, target, this, options);
+ *     } catch (Exception e) {
+ *         throw new ObjectConversionException(e);
+ *     }
+ *     if (ret == Status.HANDLER_CONTINUE) {
+ *         continue;
+ *     }
+ *     if (ret == Status.HANDLER_BREAK) {
+ *         throw new ObjectConversionFailedException(src, srcType, target, this, options);
+ *     }
+ *     return ret;
+ * }
+ * throw new ObjectConversionFailedException(src, srcType, target, this, options);
+ * }</pre>
  *
- * @author fredsuvn
- * @see Handler#map(Object, Type, Type, ObjectConverter, ConversionOptions)
- * @see Handler#mapProperty(Object, Type, Type, ObjectProperty, ObjectConverter, ConversionOptions)
+ * @author sunqian
  */
 @ThreadSafe
 public interface ObjectConverter {
@@ -35,11 +49,11 @@ public interface ObjectConverter {
     /**
      * Returns default mapper with {@link ConversionOptions#defaultOptions2()}, and of which handlers are:
      * <ul>
-     *     <li>{@link AssignableMapperHandler};</li>
+     *     <li>{@link AssignableConversionHandler};</li>
      *     <li>{@link EnumMapperHandler};</li>
      *     <li>{@link TypedMapperHandler};</li>
-     *     <li>{@link CollectionMappingHandler};</li>
-     *     <li>{@link BeanMapperHandler};</li>
+     *     <li>{@link CollectionConversionHandler};</li>
+     *     <li>{@link DataConversionHandler};</li>
      * </ul>
      *
      * @return default converter
@@ -49,537 +63,196 @@ public interface ObjectConverter {
     }
 
     /**
-     * Returns new {@link ObjectConverter} with given handlers.
+     * Creates and returns a new {@link ObjectConverter} with the given handlers.
+     *
+     * @param handlers the given handlers
+     * @return a new {@link ObjectConverter} with the given handlers
+     */
+    static @Nonnull ObjectConverter withHandlers(@Nonnull @RetainedParam Handler @Nonnull ... handlers) {
+        return withHandlers(ListKit.list(handlers));
+    }
+
+    /**
+     * Creates and returns a new {@link ObjectConverter} with given handlers.
      *
      * @param handlers given handlers
-     * @return new {@link ObjectConverter}
+     * @return a new {@link ObjectConverter} with given handlers
      */
-    static ObjectConverter newMapper(Handler... handlers) {
-        return newMapper(Jie.list(handlers));
+    static @Nonnull ObjectConverter withHandlers(@Nonnull @RetainedParam List<@Nonnull Handler> handlers) {
+        return new ObjectConverterImpl(handlers);
     }
 
     /**
-     * Returns new {@link ObjectConverter} with given handlers.
+     * Converts the given source object from the specified type to the target type.
      *
-     * @param handlers given handlers
-     * @return new {@link ObjectConverter}
+     * @param src    the given source object
+     * @param target the specified type of the target object
+     * @return the converted object, {@code null} is permitted
+     * @throws UnsupportedObjectConversionException if the conversion from the specified type to the target type is not
+     *                                              supported
+     * @throws ObjectConversionException            if the conversion failed
      */
-    static ObjectConverter newMapper(Iterable<Handler> handlers) {
-        return newMapper(handlers, ConversionOptions.defaultOptions2());
+    default Object convert(
+        @Nullable Object src,
+        @Nonnull Type target
+    ) throws UnsupportedObjectConversionException, ObjectConversionException {
+        return convert(src, target, Option.empty());
     }
 
     /**
-     * Returns new {@link ObjectConverter} with given handlers and default options.
+     * Converts the given source object from the specified type to the target type.
      *
-     * @param handlers given handlers
-     * @param options  default options
-     * @return new {@link ObjectConverter}
+     * @param src     the given source object
+     * @param target  the specified type of the target object
+     * @param options the other conversion options
+     * @return the converted object, {@code null} is permitted
+     * @throws UnsupportedObjectConversionException if the conversion from the specified type to the target type is not
+     *                                              supported
+     * @throws ObjectConversionException            if the conversion failed
      */
-    static ObjectConverter newMapper(Iterable<Handler> handlers, ConversionOptions options) {
-        return new ObjectConverterImpl(handlers, options);
+    default Object convert(
+        @Nullable Object src,
+        @Nonnull Type target,
+        @Nonnull Option<?, ?> @Nonnull ... options
+    ) throws UnsupportedObjectConversionException, ObjectConversionException {
+        return convert(src, src == null ? Object.class : src.getClass(), target, options);
     }
 
     /**
-     * Returns actual result from {@link #map(Object, Type, Type, ConversionOptions)}. The code is similar to the
-     * following:
-     * <pre>
-     *     if (result == null) {
-     *         return null;
-     *     }
-     *     if (result instanceof Val) {
-     *         return Jie.as(((Val&lt;?&gt;) result).get());
-     *     }
-     *     return Jie.as(result);
-     * </pre>
+     * Converts the given source object from the specified type to the target type.
      *
-     * @param result result from {@link #map(Object, Type, Type, ConversionOptions)}
-     * @param <T>    target type
-     * @return the actual result
+     * @param src     the given source object
+     * @param srcType the specified type of the given source object
+     * @param target  the specified type of the target object
+     * @param options the other conversion options
+     * @return the converted object, {@code null} is permitted
+     * @throws UnsupportedObjectConversionException if the conversion from the specified type to the target type is not
+     *                                              supported
+     * @throws ObjectConversionException            if the conversion failed
      */
-    @Nullable
-    static <T> T resolveResult(Object result) {
-        if (result == null) {
-            return null;
-        }
-        if (result instanceof Val) {
-            return Jie.as(((Val<?>) result).get());
-        }
-        return Jie.as(result);
-    }
-
-    /**
-     * Maps source object from source type to target with {@link #getOptions()}, returns null if mapping failed or the
-     * result itself is null. This method is equivalent to ({@link #map(Object, Class, ConversionOptions)}):
-     * <pre>
-     *     return map(source, (Type) targetType, defaultOptions());
-     * </pre>
-     *
-     * @param source     source object
-     * @param targetType target type
-     * @param <T>        target type
-     * @return mapped object or null
-     */
-    @Nullable
-    default <T> T map(@Nullable Object source, Class<T> targetType) {
-        return map(source, (Type) targetType, getOptions());
-    }
-
-    /**
-     * Maps source object from source type to target type ref with {@link #getOptions()}, returns null if mapping failed
-     * or the result itself is null. This method is equivalent to ({@link #map(Object, TypeRef, ConversionOptions)}):
-     * <pre>
-     *     return map(source, targetTypeRef, defaultOptions());
-     * </pre>
-     *
-     * @param source        source object
-     * @param targetTypeRef type reference target type
-     * @param <T>           target type
-     * @return mapped object or null
-     */
-    @Nullable
-    default <T> T map(@Nullable Object source, TypeRef<T> targetTypeRef) {
-        return map(source, targetTypeRef, getOptions());
-    }
-
-    /**
-     * Maps source object from source type to target type with {@link #getOptions()}, returns null if mapping failed or
-     * the result itself is null. This method is equivalent to ({@link #map(Object, Type, ConversionOptions)}):
-     * <pre>
-     *     return map(source, targetType, defaultOptions());
-     * </pre>
-     *
-     * @param source     source object
-     * @param targetType target type
-     * @param <T>        target type
-     * @return mapped object or null
-     */
-    @Nullable
-    default <T> T map(@Nullable Object source, Type targetType) {
-        return map(source, targetType, getOptions());
-    }
-
-    /**
-     * Maps source object from source type to target type with {@link #getOptions()}. The result of this method in 3
-     * types:
-     * <ul>
-     *     <li>
-     *         {@code null}: mapping failed;
-     *     </li>
-     *     <li>
-     *         {@link Val}: mapping successful, the result is {@link Val#get()};
-     *     </li>
-     *     <li>
-     *         {@code others}: mapping successful, the result is returned object;
-     *     </li>
-     * </ul>
-     * This method is equivalent to ({@link #map(Object, Type, Type, ConversionOptions)}):
-     * <pre>
-     *     return map(source, sourceType, targetType, defaultOptions());
-     * </pre>
-     *
-     * @param source     source object
-     * @param sourceType source type
-     * @param targetType target type
-     * @return mapped object or null
-     */
-    @Nullable
-    default Object map(@Nullable Object source, Type sourceType, Type targetType) {
-        return map(source, sourceType, targetType, getOptions());
-    }
-
-
-    /**
-     * Maps source object from source type to target property with {@link #getOptions()}. The target type is specified
-     * in current context, may not equal to {@link ObjectProperty#type()} of target property. The result of this method in
-     * 3 types:
-     * <ul>
-     *     <li>
-     *         {@code null}: mapping failed;
-     *     </li>
-     *     <li>
-     *         {@link Val}: mapping successful, the result is {@link Val#get()};
-     *     </li>
-     *     <li>
-     *         {@code others}: mapping successful, the result is returned object;
-     *     </li>
-     * </ul>
-     * This method is equivalent to ({@link #mapProperty(Object, Type, Type, ObjectProperty, ConversionOptions)}):
-     * <pre>
-     *     return mapProperty(source, sourceType, targetType, targetProperty, defaultOptions());
-     * </pre>
-     *
-     * @param source         source object
-     * @param sourceType     source type
-     * @param targetProperty target property
-     * @param targetType     target type
-     * @return mapped object or null
-     */
-    @Nullable
-    default Object mapProperty(
-        @Nullable Object source,
-        Type sourceType,
-        Type targetType,
-        ObjectProperty targetProperty
-    ) {
-        return mapProperty(source, sourceType, targetType, targetProperty, getOptions());
-    }
-
-    /**
-     * Maps source object from source type to target, returns null if mapping failed or the result itself is null. This
-     * method is equivalent to ({@link #map(Object, Type, ConversionOptions)}):
-     * <pre>
-     *     return map(source, (Type) targetType, options);
-     * </pre>
-     *
-     * @param source     source object
-     * @param targetType target type
-     * @param options    mapping options
-     * @param <T>        target type
-     * @return mapped object or null
-     */
-    @Nullable
-    default <T> T map(@Nullable Object source, Class<T> targetType, ConversionOptions options) {
-        return map(source, (Type) targetType, options);
-    }
-
-    /**
-     * Maps source object from source type to target type ref, returns null if mapping failed or the result itself is
-     * null. This method is equivalent to:
-     * <pre>
-     *     Object result = map(source, source == null ? Object.class : source.getClass(), targetTypeRef.getType(), options);
-     *     return resolveResult(result);
-     * </pre>
-     *
-     * @param source        source object
-     * @param targetTypeRef type reference target type
-     * @param options       mapping options
-     * @param <T>           target type
-     * @return mapped object or null
-     */
-    @Nullable
-    default <T> T map(@Nullable Object source, TypeRef<T> targetTypeRef, ConversionOptions options) {
-        Object result = map(source, source == null ? Object.class : source.getClass(), targetTypeRef.type(), options);
-        return resolveResult(result);
-    }
-
-    /**
-     * Maps source object from source type to target type, returns null if mapping failed or the result itself is null.
-     * This method is equivalent to:
-     * <pre>
-     *     Object result = map(source, source == null ? Object.class : source.getClass(), targetType, options);
-     *     return resolveResult(result);
-     * </pre>
-     *
-     * @param source     source object
-     * @param targetType target type
-     * @param options    mapping options
-     * @param <T>        target type
-     * @return mapped object or null
-     */
-    @Nullable
-    default <T> T map(@Nullable Object source, Type targetType, ConversionOptions options) {
-        Object result = map(source, source == null ? Object.class : source.getClass(), targetType, options);
-        return resolveResult(result);
-    }
-
-    /**
-     * Maps source object from source type to target type. The result of this method in 3 types:
-     * <ul>
-     *     <li>
-     *         {@code null}: mapping failed;
-     *     </li>
-     *     <li>
-     *         {@link Val}: mapping successful, the result is {@link Val#get()};
-     *     </li>
-     *     <li>
-     *         {@code others}: mapping successful, the result is returned object;
-     *     </li>
-     * </ul>
-     * In the default implementation, this method will invoke
-     * {@link Handler#map(Object, Type, Type, ObjectConverter, ConversionOptions)} for each handler in {@link ObjectConverter#getHandlers()}
-     * sequentially. It is equivalent to:
-     * <pre>
-     *     for (Handler handler : getHandlers()) {
-     *         Object value = handler.map(source, sourceType, targetType, this, options);
-     *         if (value == Flag.CONTINUE) {
-     *             continue;
-     *         }
-     *         if (value == Flag.BREAK) {
-     *             return null;
-     *         }
-     *         return value;
-     *     }
-     *     return null;
-     * </pre>
-     *
-     * @param source     source object
-     * @param sourceType source type
-     * @param targetType target type
-     * @param options    mapping options
-     * @return mapped object or null
-     */
-    @Nullable
-    default Object map(@Nullable Object source, Type sourceType, Type targetType, ConversionOptions options) {
-        for (Handler handler : getHandlers()) {
-            Object value = handler.map(source, sourceType, targetType, this, options);
-            if (value == Flag.CONTINUE) {
-                continue;
-            }
-            if (value == Flag.BREAK) {
-                return null;
-            }
-            return value;
-        }
-        return null;
-    }
-
-    /**
-     * Maps source object from source type to target property. The target type is specified in current context, may not
-     * equal to {@link ObjectProperty#type()} of target property. The result of this method in 3 types:
-     * <ul>
-     *     <li>
-     *         {@code null}: mapping failed;
-     *     </li>
-     *     <li>
-     *         {@link Val}: mapping successful, the result is {@link Val#get()};
-     *     </li>
-     *     <li>
-     *         {@code others}: mapping successful, the result is returned object;
-     *     </li>
-     * </ul>
-     * In the default implementation, this method will invoke
-     * {@link Handler#mapProperty(Object, Type, Type, ObjectProperty, ObjectConverter, ConversionOptions)} for each handler in
-     * {@link ObjectConverter#getHandlers()} sequentially. It is equivalent to:
-     * <pre>
-     *     for (Handler handler : getHandlers()) {
-     *         Object value = handler.mapProperty(source, sourceType, targetType, this, options);
-     *         if (value == Flag.CONTINUE) {
-     *             continue;
-     *         }
-     *         if (value == Flag.BREAK) {
-     *             return null;
-     *         }
-     *         return value;
-     *     }
-     *     return null;
-     * </pre>
-     *
-     * @param source         source object
-     * @param sourceType     source type
-     * @param targetProperty target property
-     * @param targetType     target type
-     * @param options        mapping options
-     * @return mapped object or null
-     */
-    @Nullable
-    default Object mapProperty(
-        @Nullable Object source,
-        Type sourceType,
-        Type targetType,
-        ObjectProperty targetProperty,
-        ConversionOptions options
-    ) {
-        for (Handler handler : getHandlers()) {
-            Object value = handler.mapProperty(source, sourceType, targetType, targetProperty, this, options);
-            if (value == Flag.CONTINUE) {
-                continue;
-            }
-            if (value == Flag.BREAK) {
-                return null;
-            }
-            return value;
-        }
-        return null;
-    }
-
     default Object convert(
         @Nullable Object src,
         @Nonnull Type srcType,
-        @Nonnull Type dstType,
+        @Nonnull Type target,
         @Nonnull Option<?, ?> @Nonnull ... options
-    ) {
-        return map(src, srcType, dstType);
+    ) throws UnsupportedObjectConversionException, ObjectConversionException {
+        for (Handler handler : handlers()) {
+            Object ret;
+            try {
+                ret = handler.convert(src, srcType, target, this, options);
+            } catch (Exception e) {
+                throw new ObjectConversionException(e);
+            }
+            if (ret == Status.HANDLER_CONTINUE) {
+                continue;
+            }
+            if (ret == Status.HANDLER_BREAK) {
+                throw new UnsupportedObjectConversionException(src, srcType, target, this, options);
+            }
+            return ret;
+        }
+        throw new UnsupportedObjectConversionException(src, srcType, target, this, options);
     }
 
     /**
-     * Returns all handlers.
+     * Returns all handlers of this converter.
      *
-     * @return all handlers
+     * @return all handlers of this converter
      */
+    @Nonnull
     @Immutable
-    List<Handler> getHandlers();
+    List<Handler> handlers();
 
     /**
-     * Returns a new {@link ObjectConverter} of which handler list consists of given handler as first element, followed
-     * by {@link #getHandlers()} of current mapper.
+     * Returns a new {@link ObjectConverter} of which handler list consists of the given handler as the first element,
+     * followed by {@link #handlers()} of the current converter.
      *
-     * @param handler given handler
-     * @return a new {@link ObjectConverter} of which handler list consists of given handler as first element, followed
-     * by {@link #getHandlers()} of current mapper
+     * @param handler the given handler
+     * @return a new {@link ObjectConverter} of which handler list consists of the given handler as the first element,
+     * followed by {@link #handlers()} of the current converter
      */
-    ObjectConverter addFirstHandler(Handler handler);
+    default @Nonnull ObjectConverter withFirstHandler(Handler handler) {
+        Handler[] newHandlers = new Handler[handlers().size() + 1];
+        int i = 0;
+        newHandlers[i++] = handler;
+        for (Handler h : handlers()) {
+            newHandlers[i++] = h;
+        }
+        return withHandlers(newHandlers);
+    }
 
     /**
-     * Returns a new {@link ObjectConverter} of which handler list consists of {@link #getHandlers()} of current mapper,
-     * followed by given handler as last element.
+     * Returns a new {@link ObjectConverter} of which handler list consists of {@link #handlers()} of the current
+     * converter, followed by the given handler as the last element.
      *
-     * @param handler given handler
-     * @return a {@link ObjectConverter} of which handler list consists of {@link #getHandlers()} of current mapper,
-     * followed by given handler as last element
+     * @param handler the given handler
+     * @return a {@link ObjectConverter} of which handler list consists of {@link #handlers()} of the current converter,
+     * followed by the given handler as the last element
      */
-    ObjectConverter addLastHandler(Handler handler);
+    default @Nonnull ObjectConverter withLastHandler(Handler handler) {
+        Handler[] newHandlers = new Handler[handlers().size() + 1];
+        int i = 0;
+        for (Handler h : handlers()) {
+            newHandlers[i++] = h;
+        }
+        newHandlers[i] = handler;
+        return withHandlers(newHandlers);
+    }
 
     /**
-     * Returns a new {@link ObjectConverter} of which handler list comes from a copy of {@link #getHandlers()} of
-     * current mapper but the first element is replaced by given handler.
-     * <p>
-     * Note if replaced handler equals given handler, return this-self.
+     * Returns this converter as a {@link Handler}.
      *
-     * @param handler given handler
-     * @return a new {@link ObjectConverter} of which handler list comes from a copy of {@link #getHandlers()} of
-     * current mapper but the first element is replaced by given handler
+     * @return this converter as a {@link Handler}
      */
-    ObjectConverter replaceFirstHandler(Handler handler);
-
-    /**
-     * Returns a new {@link ObjectConverter} of which handler list comes from a copy of {@link #getHandlers()} of
-     * current mapper but the last element is replaced by given handler.
-     * <p>
-     * Note if replaced handler equals given handler, return this-self.
-     *
-     * @param handler given handler
-     * @return a new {@link ObjectConverter} of which handler list comes from a copy of {@link #getHandlers()} of
-     * current mapper but the last element is replaced by given handler
-     */
-    ObjectConverter replaceLastHandler(Handler handler);
-
-    /**
-     * Returns default options of this {@link ObjectConverter}.
-     *
-     * @return default options of this {@link ObjectConverter}
-     */
-    ConversionOptions getOptions();
-
-    /**
-     * Returns a new {@link ObjectConverter} of which default options is replaced by given options.
-     * <p>
-     * Note if replaced options equals given options, return this-self.
-     *
-     * @param options given options
-     * @return a new {@link ObjectConverter} of which default options is replaced by given options
-     */
-    ObjectConverter replaceOptions(ConversionOptions options);
-
-    /**
-     * Returns this mapper as {@link Handler}.
-     *
-     * @return this mapper as {@link Handler}
-     */
+    @Nonnull
     Handler asHandler();
 
     /**
-     * Handler of {@link ObjectConverter} to provide map operation.
-     * <p>
-     * This interface also provides a default util method {@link #wrapResult(Object)}.
+     * Handler for {@link ObjectConverter}, provides the specific conversion logic.
      *
-     * @author fredsuvn
-     * @see ObjectConverter
+     * @author sunqian
      */
     @ThreadSafe
     interface Handler {
 
         /**
-         * Maps object from source type to target type. The result of this method in 4 types:
-         * <ul>
-         *     <li>
-         *         {@link Flag#CONTINUE}: mapping failed, hands off to next handler;
-         *     </li>
-         *     <li>
-         *         {@link Flag#BREAK}: mapping failed, breaks the handler chain;
-         *     </li>
-         *     <li>
-         *         {@link Val}: mapping successful, the result is {@link Val#get()};
-         *     </li>
-         *     <li>
-         *         {@code others}: mapping successful, the result is returned object;
-         *     </li>
-         * </ul>
+         * Converts the given source object to the given target type.
          *
-         * @param source          source object
-         * @param sourceType      source type
-         * @param targetType      target type
-         * @param objectConverter mapper of current context.
-         * @param options         mapping options
-         * @return converted object
+         * @param src       the given source object
+         * @param srcType   the specified type of the given source object
+         * @param target    the specified type of the target object
+         * @param converter the converter where this handler in
+         * @param options   the other conversion options
+         * @return the converted object, {@code null} is permitted, or {@link Status#HANDLER_CONTINUE} /
+         * {@link Status#HANDLER_BREAK} if conversion failed
+         * @throws Exception any exception can be thrown here
          */
-        Object map(
-            @Nullable Object source,
-            Type sourceType,
-            Type targetType,
-            ObjectConverter objectConverter,
-            ConversionOptions options
-        );
+        Object convert(
+            @Nullable Object src,
+            @Nonnull Type srcType,
+            @Nonnull Type target,
+            @Nonnull ObjectConverter converter,
+            @Nonnull Option<?, ?> @Nonnull ... options
+        ) throws Exception;
+    }
+
+    /**
+     * Represents the status of conversion.
+     *
+     * @author sunqian
+     */
+    enum Status {
 
         /**
-         * Maps object from source type to the target type of target property. The target type is specified in current
-         * context, may not equal to {@link ObjectProperty#type()} of target property. The result of this method in 4
-         * types:
-         * <ul>
-         *     <li>
-         *         {@link Flag#CONTINUE}: mapping failed, hands off to next handler;
-         *     </li>
-         *     <li>
-         *         {@link Flag#BREAK}: mapping failed, breaks the handler chain;
-         *     </li>
-         *     <li>
-         *         {@link Val}: mapping successful, the result is {@link Val#get()};
-         *     </li>
-         *     <li>
-         *         {@code others}: mapping successful, the result is returned object;
-         *     </li>
-         * </ul>
-         *
-         * @param source          source object
-         * @param sourceType      source type
-         * @param targetType      target type
-         * @param targetProperty  target property
-         * @param objectConverter mapper of current context.
-         * @param options         mapping options
-         * @return converted object
+         * This status is returned by a {@link Handler} in a conversion process, to indicate that the current handler
+         * cannot convert but can continue to convert by the next handler.
          */
-        Object mapProperty(
-            @Nullable Object source,
-            Type sourceType,
-            Type targetType,
-            ObjectProperty targetProperty,
-            ObjectConverter objectConverter,
-            ConversionOptions options
-        );
-
+        HANDLER_CONTINUE,
 
         /**
-         * This method is used to help wrap the actual result of this handler. The code is similar to the following:
-         * <pre>
-         *     if (result == null) {
-         *         return Val.ofNull();
-         *     }
-         *     if ((result instanceof Flag) || (result instanceof Val)) {
-         *         return Val.of(result);
-         *     }
-         *     return result;
-         * </pre>
-         *
-         * @param result actual result of this handler
-         * @return wrapped result
+         * This status is returned by a {@link Handler} in a conversion process, to indicate that the current handler
+         * cannot convert and the conversion process needs to end in failure.
          */
-        default Object wrapResult(@Nullable Object result) {
-            if (result == null) {
-                return Val.ofNull();
-            }
-            if ((result instanceof Flag) || (result instanceof Val)) {
-                return Val.of(result);
-            }
-            return result;
-        }
+        HANDLER_BREAK
     }
 }

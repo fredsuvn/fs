@@ -1,5 +1,6 @@
 package xyz.sunqian.common.object.data;
 
+import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.runtime.reflect.TypeKit;
@@ -16,6 +17,7 @@ import java.util.Map;
  *
  * @author sunqian
  */
+@Immutable
 public interface DataSchema {
 
     /**

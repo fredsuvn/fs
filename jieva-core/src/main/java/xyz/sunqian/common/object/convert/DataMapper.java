@@ -2,6 +2,7 @@ package xyz.sunqian.common.object.convert;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.option.Option;
 import xyz.sunqian.common.object.data.DataObjectException;
 import xyz.sunqian.common.object.data.DataSchema;
@@ -19,6 +20,7 @@ import java.util.function.Function;
  *
  * @author sunqian
  */
+@ThreadSafe
 public interface DataMapper {
 
     /**

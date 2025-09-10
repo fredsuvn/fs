@@ -1,7 +1,7 @@
 package xyz.sunqian.common.object.data;
 
-import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.object.data.handlers.SimpleBeanSchemaHandler;
 import xyz.sunqian.common.runtime.reflect.ClassKit;
 
@@ -16,7 +16,7 @@ final class ObjectSchemaParserImpl implements ObjectSchemaParser, ObjectSchemaPa
 
     private final List<ObjectSchemaParser.Handler> handlers;
 
-    ObjectSchemaParserImpl(@Immutable List<ObjectSchemaParser.Handler> handlers) {
+    ObjectSchemaParserImpl(@RetainedParam List<ObjectSchemaParser.Handler> handlers) {
         this.handlers = handlers;
     }
 

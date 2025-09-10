@@ -17,13 +17,12 @@ import xyz.sunqian.common.collect.StreamKit;
 import xyz.sunqian.common.function.callable.BooleanCallable;
 import xyz.sunqian.common.function.callable.VoidCallable;
 import xyz.sunqian.common.io.IORuntimeException;
-import xyz.sunqian.common.object.convert.ConversionOptions;
 import xyz.sunqian.common.object.convert.DataMapper;
 import xyz.sunqian.common.object.convert.MappingOptions;
 import xyz.sunqian.common.object.convert.ObjectConversionException;
 import xyz.sunqian.common.object.convert.ObjectConverter;
+import xyz.sunqian.common.object.convert.UnsupportedObjectConversionException;
 import xyz.sunqian.common.object.data.ObjectSchema;
-import xyz.sunqian.common.runtime.reflect.TypeRef;
 
 import java.lang.reflect.Type;
 import java.time.Duration;
@@ -453,65 +452,75 @@ public class Jie {
         return System.identityHashCode(obj);
     }
 
+    //---------------- Object Conversion Begin ----------------//
+
     /**
-     * Maps source object from source type to target type, return null if mapping is unsupported or the result itself is
-     * null. This method is equivalent to ({@link ObjectConverter#map(Object, Class, ConversionOptions)}):
-     * <pre>
-     *     return Mapper.defaultMapper().map(source, targetType, MappingOptions.defaultOptions());
-     * </pre>
-     * Using {@link ObjectConverter} for more mapping operations.
+     * Converts the given source object from the specified type to the target type.
+     * <p>
+     * This method is a shortcut to the {@link ObjectConverter#convert(Object, Type)}.
      *
-     * @param source     source object
-     * @param targetType target type
-     * @param <T>        target type
-     * @return converted object or null
-     * @see ObjectConverter#defaultConverter()
-     * @see ObjectConverter#map(Object, Class, ConversionOptions)
+     * @param src    the given source object
+     * @param target the specified type of the target object
+     * @return the converted object
+     * @throws UnsupportedObjectConversionException if the conversion from the specified type to the target type is not
+     *                                              supported
+     * @throws ObjectConversionException            if the conversion failed
+     * @see ObjectConverter
      */
-    @Nullable
-    public static <T> T map(@Nullable Object source, Class<T> targetType) {
-        return ObjectConverter.defaultConverter().map(source, targetType, ConversionOptions.defaultOptions2());
+    public static Object convert(
+        @Nullable Object src,
+        @Nonnull Type target
+    ) throws UnsupportedObjectConversionException, ObjectConversionException {
+        return ObjectConverter.defaultConverter().convert(src, target);
     }
 
     /**
-     * Maps source object from source type to target type, return null if mapping is unsupported or the result itself is
-     * null. This method is equivalent to ({@link ObjectConverter#map(Object, Type, ConversionOptions)}):
-     * <pre>
-     *     return Mapper.defaultMapper().map(source, targetType, MappingOptions.defaultOptions());
-     * </pre>
-     * Using {@link ObjectConverter} for more mapping operations.
+     * Converts the given source object from the specified type to the target type.
+     * <p>
+     * This method is a shortcut to the {@link ObjectConverter#convert(Object, Type, Option[])}.
      *
-     * @param source     source object
-     * @param targetType target type
-     * @param <T>        target type
-     * @return converted object or null
-     * @see ObjectConverter#defaultConverter()
-     * @see ObjectConverter#map(Object, Type, ConversionOptions)
+     * @param src     the given source object
+     * @param target  the specified type of the target object
+     * @param options the other conversion options
+     * @return the converted object
+     * @throws UnsupportedObjectConversionException if the conversion from the specified type to the target type is not
+     *                                              supported
+     * @throws ObjectConversionException            if the conversion failed
+     * @see ObjectConverter
      */
-    @Nullable
-    public static <T> T map(@Nullable Object source, Type targetType) {
-        return ObjectConverter.defaultConverter().map(source, targetType, ConversionOptions.defaultOptions2());
+    public static Object convert(
+        @Nullable Object src,
+        @Nonnull Type target,
+        @Nonnull Option<?, ?> @Nonnull ... options
+    ) throws UnsupportedObjectConversionException, ObjectConversionException {
+        return ObjectConverter.defaultConverter().convert(src, target, options);
     }
 
     /**
-     * Maps source object from source type to target type, return null if mapping is unsupported or the result itself is
-     * null. This method is equivalent to ({@link ObjectConverter#map(Object, TypeRef, ConversionOptions)}):
-     * <pre>
-     *     return Mapper.defaultMapper().map(source, targetType, MappingOptions.defaultOptions());
-     * </pre>
-     * Using {@link ObjectConverter} for more mapping operations.
+     * Converts the given source object from the specified type to the target type.
+     * <p>
+     * This method is a shortcut to the {@link ObjectConverter#convert(Object, Type, Type, Option[])}.
      *
-     * @param source     source object
-     * @param targetType target type
-     * @param <T>        target type
-     * @return converted object or null
-     * @see ObjectConverter#defaultConverter()
-     * @see ObjectConverter#map(Object, TypeRef, ConversionOptions)
+     * @param src     the given source object
+     * @param srcType the specified type of the given source object
+     * @param target  the specified type of the target object
+     * @param options the other conversion options
+     * @return the converted object
+     * @throws UnsupportedObjectConversionException if the conversion from the specified type to the target type is not
+     *                                              supported
+     * @throws ObjectConversionException            if the conversion failed
+     * @see ObjectConverter
      */
-    @Nullable
-    public static <T> T map(@Nullable Object source, TypeRef<T> targetType) {
-        return ObjectConverter.defaultConverter().map(source, targetType, ConversionOptions.defaultOptions2());
+    public static Object convert(
+        @Nullable Object src,
+        @Nonnull Type srcType,
+        @Nonnull Type target,
+        @Nonnull Option<?, ?> @Nonnull ... options
+    ) throws UnsupportedObjectConversionException, ObjectConversionException {
+        return ObjectConverter.defaultConverter().convert(src, srcType, target, options);
     }
+
+    //---------------- Object Conversion End ----------------//
 
     //---------------- Copy Properties Begin ----------------//
 
@@ -624,6 +633,7 @@ public class Jie {
      * @param elements the given variable arguments
      * @param <T>      the component type
      * @return the given variable arguments as an array
+     * @see ArrayKit
      */
     @SafeVarargs
     public static <T> T @Nonnull [] array(T @Nonnull @RetainedParam ... elements) {
@@ -640,6 +650,7 @@ public class Jie {
      * @param array the given array
      * @param <T>   the component type
      * @return an immutable list backed by the given array
+     * @see ListKit
      */
     @SafeVarargs
     public static <T> @Nonnull @Immutable List<T> list(T @Nonnull @RetainedParam ... array) {
@@ -654,6 +665,7 @@ public class Jie {
      * @param array the given array
      * @param <T>   the component type
      * @return a new {@link ArrayList} initialing with the given array
+     * @see ListKit
      */
     @SafeVarargs
     public static <T> @Nonnull ArrayList<T> arrayList(T @Nonnull ... array) {
@@ -668,6 +680,7 @@ public class Jie {
      * @param array the given array
      * @param <T>   the component type
      * @return a new {@link LinkedList} initialing with the given array
+     * @see ListKit
      */
     @SafeVarargs
     public static <T> @Nonnull LinkedList<T> linkedList(T @Nonnull ... array) {
@@ -686,6 +699,7 @@ public class Jie {
      * @param array the given array
      * @param <T>   the component type
      * @return a new immutable set of which content is added from the given array
+     * @see SetKit
      */
     @SafeVarargs
     public static <T> @Nonnull @Immutable Set<T> set(T @Nonnull ... array) {
@@ -700,6 +714,7 @@ public class Jie {
      * @param array the given array
      * @param <T>   the component type
      * @return a new {@link HashSet} initialing with the given array
+     * @see SetKit
      */
     @SafeVarargs
     public static <T> @Nonnull HashSet<T> hashSet(T @Nonnull ... array) {
@@ -714,6 +729,7 @@ public class Jie {
      * @param array the given array
      * @param <T>   the component type
      * @return a new {@link LinkedHashSet} initialing with the given array
+     * @see SetKit
      */
     @SafeVarargs
     public static <T> @Nonnull LinkedHashSet<T> linkedHashSet(T @Nonnull ... array) {
@@ -739,6 +755,7 @@ public class Jie {
      * @param <K>>  the key type
      * @param <V>>  the value type
      * @return a new {@link HashMap} initialing with the given array
+     * @see MapKit
      */
     public static <K, V> @Nonnull @Immutable Map<K, V> map(Object @Nonnull ... array) {
         return MapKit.map(array);
@@ -758,6 +775,7 @@ public class Jie {
      * @param <K>>  the key type
      * @param <V>>  the value type
      * @return a new {@link HashMap} initialing with the given array
+     * @see MapKit
      */
     public static <K, V> @Nonnull HashMap<K, V> hashMap(Object @Nonnull ... array) {
         return MapKit.hashMap(array);
@@ -777,6 +795,7 @@ public class Jie {
      * @param <K>>  the key type
      * @param <V>>  the value type
      * @return a new {@link HashMap} initialing with the given array
+     * @see MapKit
      */
     public static <K, V> @Nonnull LinkedHashMap<K, V> linkedHashMap(Object @Nonnull ... array) {
         return MapKit.linkedHashMap(array);
@@ -790,6 +809,7 @@ public class Jie {
      * @param elements the given elements
      * @param <T>      the component type
      * @return a {@link Stream} from the given elements
+     * @see StreamKit
      */
     @SafeVarargs
     public static <T> @Nonnull Stream<T> stream(T @Nonnull ... elements) {
@@ -804,6 +824,7 @@ public class Jie {
      * @param elements the given elements
      * @param <T>      the component type
      * @return a {@link Stream} from the given elements
+     * @see StreamKit
      */
     public static <T> @Nonnull Stream<T> stream(@Nonnull Iterable<T> elements) {
         return StreamKit.stream(elements);
@@ -819,6 +840,7 @@ public class Jie {
      * This method is a shortcut to the {@link ThreadKit#sleep()}.
      *
      * @throws AwaitingException if the current thread is interrupted or an error occurs while sleeping
+     * @see ThreadKit
      */
     public static void sleep() throws AwaitingException {
         ThreadKit.sleep();
@@ -831,6 +853,7 @@ public class Jie {
      *
      * @param millis the specified milliseconds
      * @throws AwaitingException if the current thread is interrupted or an error occurs while sleeping
+     * @see ThreadKit
      */
     public static void sleep(long millis) throws AwaitingException {
         ThreadKit.sleep(millis);
@@ -843,6 +866,7 @@ public class Jie {
      *
      * @param duration the specified duration
      * @throws AwaitingException if the current thread is interrupted or an error occurs while sleeping
+     * @see ThreadKit
      */
     public static void sleep(@Nonnull Duration duration) throws AwaitingException {
         ThreadKit.sleep(duration);
@@ -871,6 +895,7 @@ public class Jie {
      *
      * @param task the given task to be executed
      * @throws AwaitingException if an error occurs while awaiting
+     * @see ThreadKit
      */
     public static void until(@Nonnull BooleanCallable task) throws AwaitingException {
         ThreadKit.until(task);
@@ -888,6 +913,7 @@ public class Jie {
      * @param command the specified command
      * @return the process
      * @throws IORuntimeException if any error occurs
+     * @see ProcessKit
      */
     public static @Nonnull Process process(@Nonnull String command) throws IORuntimeException {
         return ProcessKit.start(command);
@@ -901,6 +927,7 @@ public class Jie {
      * @param command the specified command and arguments
      * @return the process
      * @throws IORuntimeException if any error occurs
+     * @see ProcessKit
      */
     public static @Nonnull Process process(@Nonnull String @Nonnull ... command) throws IORuntimeException {
         return ProcessKit.start(command);

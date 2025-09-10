@@ -33,52 +33,26 @@ public class ConversionOptions {
     private static final @Nonnull Option<Object, Object> @Nonnull [] EMPTY_OPTIONS = new Option[0];
 
     /**
-     * Returns an empty options array.
-     *
-     * @return an empty options array
-     */
-    public static @Nonnull Option<?, ?> @Nonnull [] defaultOptions() {
-        return Jie.as(EMPTY_OPTIONS);
-    }
-
-    /**
-     * Returns an option to specify the {@link ObjectConverter}.
+     * Returns an option to specify the {@link DataMapper}.
      * <p>
-     * By default, using {@link ObjectConverter#defaultConverter()}.
+     * By default, the {@link DataMapper#defaultMapper()} is used if needed.
      *
-     * @param converter the {@link ObjectConverter} to be specified
-     * @return an option to specify the {@link ObjectConverter}
+     * @param dataMapper the {@link DataMapper} to be specified
+     * @return an option to specify the {@link DataMapper}
      */
-    public static @Nonnull Option<Key, ObjectConverter> converter(@Nonnull ObjectConverter converter) {
-        return Option.of(Key.CONVERTER, converter);
+    public static @Nonnull Option<Key, DataMapper> dataMapper(@Nonnull DataMapper dataMapper) {
+        return Option.of(Key.DATA_MAPPER, dataMapper);
     }
 
     /**
-     * Returns an option to specify the {@link ObjectSchemaParser}.
-     * <p>
-     * By default, using {@link ObjectSchemaParser#defaultParser()}.
-     *
-     * @param parser the {@link ObjectSchemaParser} to be specified
-     * @return an option to specify the {@link ObjectSchemaParser}
-     */
-    public static @Nonnull Option<Key, ObjectSchemaParser> schemaParser(@Nonnull ObjectSchemaParser parser) {
-        return Option.of(Key.CONVERTER, parser);
-    }
-
-    /**
-     * Option key for converting and mapping data objects.
+     * Option key for object conversion.
      */
     public enum Key {
 
         /**
-         * Key of {@link #converter(ObjectConverter)}.
+         * Key of {@link #dataMapper(DataMapper)}.
          */
-        CONVERTER,
-
-        /**
-         * Key of {@link #schemaParser(ObjectSchemaParser)}.
-         */
-        SCHEMA_PARSER,
+        DATA_MAPPER,
         ;
     }
 
