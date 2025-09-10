@@ -11,8 +11,8 @@ import java.util.Map;
 /**
  * Top interface of {@link MapSchema} and {@link ObjectSchema}, presents the schema of a data object.
  * <p>
- * A data object, which may be an instance of {@link Map}, or a non-map object. The type of {@link Map} can be parsed to
- * {@link MapSchema}, and a non-map object can be parsed to {@link ObjectSchema}.
+ * A data object may be an instance of {@link Map} parsed by {@link MapSchemaParser}, or a non-map object parsed by
+ * {@link ObjectSchemaParser}.
  *
  * @author sunqian
  */
