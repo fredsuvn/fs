@@ -3,12 +3,15 @@ package xyz.sunqian.common.object.convert;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.option.Option;
+import xyz.sunqian.common.object.data.DataObjectException;
 import xyz.sunqian.common.object.data.DataSchema;
 import xyz.sunqian.common.object.data.MapSchema;
 import xyz.sunqian.common.object.data.ObjectSchema;
 
 import java.lang.reflect.Type;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 /**
  * This interface is used to map data properties from an object to another object. The object should be a {@link Map} or
@@ -21,7 +24,7 @@ public interface DataMapper {
     /**
      * Returns the default data mapper.
      * <p>
-     * The default data mapper will cache the {@link DataSchema}s parsed if needed.
+     * The default data mapper will cache the {@link DataSchema}s parsed into a {@link ConcurrentHashMap} if needed.
      *
      * @return the default data mapper
      */
@@ -32,11 +35,21 @@ public interface DataMapper {
     /**
      * Returns a new data mapper with the given schema cache.
      *
-     * @param schemaCache the map tp cache the {@link DataSchema}s parsed if needed
+     * @param schemaCache the given schema cache
      * @return a new data mapper with the given schema cache
      */
-    static @Nonnull DataMapper newMapper(@Nonnull Map<@Nonnull Type, @Nonnull DataSchema> schemaCache) {
+    static @Nonnull DataMapper newMapper(@Nonnull SchemaCache schemaCache) {
         return new DataMapperImpl(schemaCache);
+    }
+
+    /**
+     * Returns a new data mapper with the given map as schema cache.
+     *
+     * @param map the given map as schema cache
+     * @return a new data mapper with the given schema cache
+     */
+    static @Nonnull DataMapper newMapper(@Nonnull Map<@Nonnull Type, @Nonnull DataSchema> map) {
+        return newMapper(new DataMapperImpl.SchemaCacheImpl(map));
     }
 
     /**
@@ -148,6 +161,27 @@ public interface DataMapper {
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws ObjectConversionException;
+
+    /**
+     * Cache for {@link DataSchema}s parsed during the mapping process.
+     */
+    interface SchemaCache {
+
+        /**
+         * Returns the {@link DataSchema} for the given type. If the schema is not cached, it will be loaded by the
+         * given loader. The semantics of this method are the same as {@link Map#computeIfAbsent(Object, Function)}.
+         *
+         * @param type   the given type to be parsed to {@link DataSchema}
+         * @param loader the loader for loading new {@link DataSchema}
+         * @return the {@link DataSchema} for the given type
+         * @throws DataObjectException if an error occurs during parsing
+         */
+        @Nonnull
+        DataSchema get(
+            @Nonnull Type type,
+            @Nonnull Function<@Nonnull Type, @Nonnull DataSchema> loader
+        ) throws DataObjectException;
+    }
 
     /**
      * Property mapper for copying object property, this interface is called when copying each property.

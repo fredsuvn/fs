@@ -4,6 +4,7 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.option.Option;
+import xyz.sunqian.common.object.data.DataObjectException;
 import xyz.sunqian.common.object.data.DataSchema;
 import xyz.sunqian.common.object.data.MapSchema;
 import xyz.sunqian.common.object.data.ObjectProperty;
@@ -12,17 +13,18 @@ import xyz.sunqian.common.object.data.ObjectSchema;
 import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 import static xyz.sunqian.common.object.convert.MappingOptions.Key.EXCEPTION_HANDLER;
 import static xyz.sunqian.common.object.convert.MappingOptions.Key.PROPERTY_MAPPER;
 
 final class DataMapperImpl implements DataMapper {
 
-    static final @Nonnull DataMapper SINGLETON = new DataMapperImpl(new ConcurrentHashMap<>());
+    static final @Nonnull DataMapper SINGLETON = new DataMapperImpl(new SchemaCacheImpl(new ConcurrentHashMap<>()));
 
-    private final @Nonnull Map<Type, DataSchema> schemaCache;
+    private final @Nonnull SchemaCache schemaCache;
 
-    DataMapperImpl(@Nonnull Map<@Nonnull Type, @Nonnull DataSchema> schemaCache) {
+    DataMapperImpl(@Nonnull SchemaCache schemaCache) {
         this.schemaCache = schemaCache;
     }
 
@@ -39,27 +41,27 @@ final class DataMapperImpl implements DataMapper {
             DataMapper.PropertyMapper propertyMapper = Option.findValue(PROPERTY_MAPPER, options);
             DataMapper.ExceptionHandler exceptionHandler = Option.findValue(EXCEPTION_HANDLER, options);
             if (src instanceof Map) {
-                MapSchema srcSchema = schemaCache.computeIfAbsent(srcType, MapSchema::parse).asMapSchema();
+                MapSchema srcSchema = schemaCache.get(srcType, MapSchema::parse).asMapSchema();
                 if (dst instanceof Map) {
-                    MapSchema dstSchema = schemaCache.computeIfAbsent(dstType, MapSchema::parse).asMapSchema();
+                    MapSchema dstSchema = schemaCache.get(dstType, MapSchema::parse).asMapSchema();
                     mapToMap(
                         Jie.as(src), srcSchema, Jie.as(dst), dstSchema, converter, propertyMapper, exceptionHandler, options
                     );
                 } else {
-                    ObjectSchema dstSchema = schemaCache.computeIfAbsent(dstType, ObjectSchema::parse).asObjectSchema();
+                    ObjectSchema dstSchema = schemaCache.get(dstType, ObjectSchema::parse).asObjectSchema();
                     mapToObject(
                         Jie.as(src), srcSchema, dst, dstSchema, converter, propertyMapper, exceptionHandler, options
                     );
                 }
             } else {
-                ObjectSchema srcSchema = schemaCache.computeIfAbsent(srcType, ObjectSchema::parse).asObjectSchema();
+                ObjectSchema srcSchema = schemaCache.get(srcType, ObjectSchema::parse).asObjectSchema();
                 if (dst instanceof Map) {
-                    MapSchema dstSchema = schemaCache.computeIfAbsent(dstType, MapSchema::parse).asMapSchema();
+                    MapSchema dstSchema = schemaCache.get(dstType, MapSchema::parse).asMapSchema();
                     objectToMap(
                         src, srcSchema, Jie.as(dst), dstSchema, converter, propertyMapper, exceptionHandler, options
                     );
                 } else {
-                    ObjectSchema dstSchema = schemaCache.computeIfAbsent(dstType, ObjectSchema::parse).asObjectSchema();
+                    ObjectSchema dstSchema = schemaCache.get(dstType, ObjectSchema::parse).asObjectSchema();
                     objectToObject(
                         src, srcSchema, dst, dstSchema, converter, propertyMapper, exceptionHandler, options
                     );
@@ -270,5 +272,22 @@ final class DataMapperImpl implements DataMapper {
                 }
             }
         });
+    }
+
+    static final class SchemaCacheImpl implements SchemaCache {
+
+        private final @Nonnull Map<@Nonnull Type, @Nonnull DataSchema> map;
+
+        SchemaCacheImpl(@Nonnull Map<@Nonnull Type, @Nonnull DataSchema> map) {
+            this.map = map;
+        }
+
+        @Override
+        public @Nonnull DataSchema get(
+            @Nonnull Type type, @Nonnull
+            Function<@Nonnull Type, @Nonnull DataSchema> loader
+        ) throws DataObjectException {
+            return map.computeIfAbsent(type, loader);
+        }
     }
 }
