@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
@@ -66,6 +67,24 @@ public class DataMapperTest implements PrintTest {
                     return MapKit.entry(key + "2", ma.get(key));
                 }));
             assertEquals(mapA2, MapKit.map("first2", "1", "second2", "2", "third2", "3"));
+            // ignore
+            Map<String, String> nullFrom = MapKit.map("first", "1", "second", null, "third", "3");
+            Map<String, String> nullTo = new HashMap<>();
+            dataMapper.copyProperties(nullFrom, typeA, nullTo, typeA, MappingOptions.ignoreNull());
+            assertEquals(nullTo, MapKit.map("first", "1", "third", "3"));
+            nullTo.clear();
+            dataMapper.copyProperties(nullFrom, typeA, nullTo, typeA, MappingOptions.ignoreProperties("first"));
+            assertEquals(nullTo, MapKit.map("second", null, "third", "3"));
+            nullTo.clear();
+            dataMapper.copyProperties(nullFrom, typeA, nullTo, typeA, MappingOptions.ignoreNull(),
+                MappingOptions.propertyMapper((propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
+                    if ("second".equals(propertyName)) {
+                        return MapKit.entry(propertyName, "2");
+                    } else {
+                        return MapKit.entry(propertyName, "1");
+                    }
+                }));
+            assertEquals(nullTo, MapKit.map("first", "1", "second", "2", "third", "1"));
             // errors
             ObjectConversionException oce1 = expectThrows(ObjectConversionException.class, () ->
                 dataMapper.copyProperties(new ErrorMap<>(), typeA, mapA2, typeA)
@@ -110,6 +129,24 @@ public class DataMapperTest implements PrintTest {
             ClsA1 clsA12 = new ClsA1();
             dataMapper.copyProperties(mapA, typeA, clsA12, ClsA1.class);
             assertEquals(clsA12, new ClsA1("1", null));
+            // ignore
+            Map<String, String> nullFrom = MapKit.map("first", "1", "second", null, "third", "3");
+            ClsA nullTo = new ClsA();
+            dataMapper.copyProperties(nullFrom, typeA, nullTo, ClsA.class, MappingOptions.ignoreNull());
+            assertEquals(nullTo, new ClsA("1", null, "3"));
+            nullTo.clear();
+            dataMapper.copyProperties(nullFrom, typeA, nullTo, ClsA.class, MappingOptions.ignoreProperties("first"));
+            assertEquals(nullTo, new ClsA(null, null, "3"));
+            nullTo.clear();
+            dataMapper.copyProperties(nullFrom, typeA, nullTo, ClsA.class, MappingOptions.ignoreNull(),
+                MappingOptions.propertyMapper((propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
+                    if ("second".equals(propertyName)) {
+                        return MapKit.entry(propertyName, "2");
+                    } else {
+                        return MapKit.entry(propertyName, "1");
+                    }
+                }));
+            assertEquals(nullTo, new ClsA("1", "2", "1"));
             // errors
             ObjectConversionException oce1 = expectThrows(ObjectConversionException.class, () ->
                 dataMapper.copyProperties(new ErrorMap<>(), typeA, clsA2, ClsA2.class)
@@ -155,6 +192,24 @@ public class DataMapperTest implements PrintTest {
                     return MapKit.entry(key + "2", op.getValue(src));
                 }));
             assertEquals(mapA2, MapKit.map("first2", "1", "second2", "2", "third2", "3"));
+            // ignore
+            ClsA nullFrom = new ClsA("1", null, "3");
+            Map<String, String> nullTo = new HashMap<>();
+            dataMapper.copyProperties(nullFrom, ClsA.class, nullTo, typeA, MappingOptions.ignoreNull());
+            assertEquals(nullTo, MapKit.map("first", "1", "third", "3"));
+            nullTo.clear();
+            dataMapper.copyProperties(nullFrom, ClsA.class, nullTo, typeA, MappingOptions.ignoreProperties("first"));
+            assertEquals(nullTo, MapKit.map("second", null, "third", "3"));
+            nullTo.clear();
+            dataMapper.copyProperties(nullFrom, ClsA.class, nullTo, typeA, MappingOptions.ignoreNull(),
+                MappingOptions.propertyMapper((propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
+                    if ("second".equals(propertyName)) {
+                        return MapKit.entry(propertyName, "2");
+                    } else {
+                        return MapKit.entry(propertyName, "1");
+                    }
+                }));
+            assertEquals(nullTo, MapKit.map("first", "1", "second", "2", "third", "1"));
             // errors
             // ObjectConversionException oce1 = expectThrows(ObjectConversionException.class, () ->
             //     dataMapper.copyProperties(new ErrorMap<>(), typeA, mapA2, typeA)
@@ -203,6 +258,24 @@ public class DataMapperTest implements PrintTest {
             ClsA1 clsA12 = new ClsA1();
             dataMapper.copyProperties(clsA, ClsA.class, clsA12, ClsA1.class);
             assertEquals(clsA12, new ClsA1("1", null));
+            // ignore
+            ClsA nullFrom = new ClsA("1", null, "3");
+            ClsA nullTo = new ClsA();
+            dataMapper.copyProperties(nullFrom, ClsA.class, nullTo, ClsA.class, MappingOptions.ignoreNull());
+            assertEquals(nullTo, new ClsA("1", null, "3"));
+            nullTo.clear();
+            dataMapper.copyProperties(nullFrom, ClsA.class, nullTo, ClsA.class, MappingOptions.ignoreProperties("first"));
+            assertEquals(nullTo, new ClsA(null, null, "3"));
+            nullTo.clear();
+            dataMapper.copyProperties(nullFrom, ClsA.class, nullTo, ClsA.class, MappingOptions.ignoreNull(),
+                MappingOptions.propertyMapper((propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
+                    if ("second".equals(propertyName)) {
+                        return MapKit.entry(propertyName, "2");
+                    } else {
+                        return MapKit.entry(propertyName, "1");
+                    }
+                }));
+            assertEquals(nullTo, new ClsA("1", "2", "1"));
             // errors
             // ObjectConversionException oce1 = expectThrows(ObjectConversionException.class, () ->
             //     dataMapper.copyProperties(new ErrorMap<>(), typeA, clsA2, ClsA2.class)
@@ -229,6 +302,11 @@ public class DataMapperTest implements PrintTest {
         }
     }
 
+    @Test
+    public void testOptions() {
+        assertNull(MappingOptions.ignoreNull().value());
+    }
+
     @Data
     @EqualsAndHashCode
     @AllArgsConstructor
@@ -240,6 +318,12 @@ public class DataMapperTest implements PrintTest {
 
         public void setForth(String forth) {
             // this.third = forth;
+        }
+
+        public void clear() {
+            first = null;
+            second = null;
+            third = null;
         }
     }
 

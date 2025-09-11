@@ -86,6 +86,9 @@ public interface ObjectConverter {
 
     /**
      * Converts the given source object from the specified type to the target type.
+     * <p>
+     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
+     * {@link ConversionOptions} or {@link MappingOptions} or other custom options for custom implementations.
      *
      * @param src     the given source object
      * @param target  the specified type of the target object
@@ -106,6 +109,9 @@ public interface ObjectConverter {
 
     /**
      * Converts the given source object from the specified type to the target type.
+     * <p>
+     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
+     * {@link ConversionOptions} or {@link MappingOptions} or other custom options for custom implementations.
      *
      * @param src     the given source object
      * @param target  the specified type ref of the target object
@@ -126,6 +132,9 @@ public interface ObjectConverter {
 
     /**
      * Converts the given source object from the specified type to the target type.
+     * <p>
+     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
+     * {@link ConversionOptions} or {@link MappingOptions} or other custom options for custom implementations.
      *
      * @param src     the given source object
      * @param target  the specified type of the target object
@@ -145,6 +154,9 @@ public interface ObjectConverter {
 
     /**
      * Converts the given source object from the specified type to the target type.
+     * <p>
+     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
+     * {@link ConversionOptions} or {@link MappingOptions} or other custom options for custom implementations.
      *
      * @param src     the given source object
      * @param srcType the specified type of the given source object
@@ -167,6 +179,9 @@ public interface ObjectConverter {
 
     /**
      * Converts the given source object from the specified type to the target type.
+     * <p>
+     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
+     * {@link ConversionOptions} or {@link MappingOptions} or other custom options for custom implementations.
      *
      * @param src     the given source object
      * @param srcType the specified type of the given source object
@@ -189,6 +204,9 @@ public interface ObjectConverter {
 
     /**
      * Converts the given source object from the specified type to the target type.
+     * <p>
+     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
+     * {@link ConversionOptions} or {@link MappingOptions} or other custom options for custom implementations.
      *
      * @param src     the given source object
      * @param srcType the specified type of the given source object

@@ -1,6 +1,7 @@
 package xyz.sunqian.common.object.convert;
 
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.option.Option;
 
 /**
@@ -39,6 +40,32 @@ public class MappingOptions {
     }
 
     /**
+     * Returns an option to ignore copy properties with {@code null} values. If a {@link DataMapper.PropertyMapper} is
+     * set, this option becomes invalid.
+     * <p>
+     * This option is not available by default.
+     *
+     * @return an option to ignore copy properties with {@code null} values
+     */
+    public static @Nonnull MappingOptions.IgnoreNull ignoreNull() {
+        return IgnoreNull.SINGLETON;
+    }
+
+    /**
+     * Returns an option to ignore copy properties with the specified property names (or key for map).
+     * <p>
+     * By default, all readable properties will be attempted to be copied.
+     *
+     * @param ignoredProperties the names (or key) of ignored properties
+     * @return an option to ignore copy properties with the specified property names (or key for map)
+     */
+    public static @Nonnull Option<@Nonnull Key, @Nonnull Object @Nonnull []> ignoreProperties(
+        @Nonnull Object @Nonnull ... ignoredProperties
+    ) {
+        return Option.of(Key.IGNORE_PROPERTIES, ignoredProperties);
+    }
+
+    /**
      * Option key for data mapping.
      */
     public enum Key {
@@ -52,6 +79,34 @@ public class MappingOptions {
          * Key of {@link #exceptionHandler(DataMapper.ExceptionHandler)}.
          */
         EXCEPTION_HANDLER,
+
+        /**
+         * Key of {@link #ignoreNull()}.
+         */
+        IGNORE_NULL_PROPERTIES,
+
+        /**
+         * Key of {@link #ignoreProperties(Object...)}.
+         */
+        IGNORE_PROPERTIES,
         ;
+    }
+
+    /**
+     * Mapping option to ignore copy properties with {@code null} values.
+     */
+    public static final class IgnoreNull implements Option<Key, Object> {
+
+        private static final @Nonnull MappingOptions.IgnoreNull SINGLETON = new IgnoreNull();
+
+        @Override
+        public @Nonnull Key key() {
+            return Key.IGNORE_NULL_PROPERTIES;
+        }
+
+        @Override
+        public @Nullable Object value() {
+            return null;
+        }
     }
 }

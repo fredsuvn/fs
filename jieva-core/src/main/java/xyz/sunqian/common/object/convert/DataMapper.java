@@ -59,7 +59,7 @@ public interface DataMapper {
      * a non-map object which can be parsed to {@link ObjectSchema}.
      * <p>
      * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
-     * {@link MappingOptions} or other custom options for custom implementations.
+     * {@link MappingOptions} or {@link ConversionOptions} or other custom options for custom implementations.
      *
      * @param src     the given source object
      * @param dst     the given destination object
@@ -77,7 +77,7 @@ public interface DataMapper {
      * a non-map object which can be parsed to {@link ObjectSchema}.
      * <p>
      * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
-     * {@link MappingOptions} or other custom options for custom implementations.
+     * {@link MappingOptions} or {@link ConversionOptions} or other custom options for custom implementations.
      *
      * @param src     the given source object
      * @param srcType specifies the type of the given source object
@@ -108,7 +108,7 @@ public interface DataMapper {
      * a non-map object which can be parsed to {@link ObjectSchema}.
      * <p>
      * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
-     * {@link MappingOptions} or other custom options for custom implementations.
+     * {@link MappingOptions} or {@link ConversionOptions} or other custom options for custom implementations.
      *
      * @param src       the given source object
      * @param srcType   specifies the type of the given source object

@@ -4,6 +4,7 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.option.Option;
+import xyz.sunqian.common.collect.ArrayKit;
 import xyz.sunqian.common.object.data.DataObjectException;
 import xyz.sunqian.common.object.data.DataSchema;
 import xyz.sunqian.common.object.data.MapSchema;
@@ -84,6 +85,9 @@ final class DataMapperImpl implements DataMapper {
     ) {
         src.forEach((srcKey, srcValue) -> {
             try {
+                if (ignored(srcKey, options)) {
+                    return;
+                }
                 Object dstPropertyName;
                 Object dstPropertyValue;
                 if (propertyMapper != null) {
@@ -96,6 +100,9 @@ final class DataMapperImpl implements DataMapper {
                     dstPropertyName = entry.getKey();
                     dstPropertyValue = entry.getValue();
                 } else {
+                    if (srcValue == null && ignoredNull(options)) {
+                        return;
+                    }
                     dstPropertyName = converter.convert(
                         srcKey, srcSchema.keyType(), dstSchema.keyType(), options);
                     dstPropertyValue = converter.convert(
@@ -128,6 +135,9 @@ final class DataMapperImpl implements DataMapper {
     ) {
         src.forEach((srcKey, srcValue) -> {
             try {
+                if (ignored(srcKey, options)) {
+                    return;
+                }
                 Object dstPropertyName;
                 Object dstPropertyValue;
                 ObjectProperty dstProperty;
@@ -145,6 +155,9 @@ final class DataMapperImpl implements DataMapper {
                         return;
                     }
                 } else {
+                    if (srcValue == null && ignoredNull(options)) {
+                        return;
+                    }
                     dstPropertyName = converter.convert(srcKey, srcSchema.keyType(), String.class, options);
                     dstProperty = dstSchema.getProperty((String) dstPropertyName);
                     if (dstProperty == null || !dstProperty.isWritable()) {
@@ -179,6 +192,9 @@ final class DataMapperImpl implements DataMapper {
     ) {
         srcSchema.properties().forEach((srcPropertyName, srcProperty) -> {
             try {
+                if (ignored(srcPropertyName, options)) {
+                    return;
+                }
                 if (!srcProperty.isReadable()) {
                     return;
                 }
@@ -198,8 +214,11 @@ final class DataMapperImpl implements DataMapper {
                     dstPropertyName = entry.getKey();
                     dstPropertyValue = entry.getValue();
                 } else {
-                    dstPropertyName = converter.convert(srcPropertyName, String.class, dstSchema.keyType(), options);
                     Object srcPropertyValue = srcProperty.getValue(src);
+                    if (srcPropertyValue == null && ignoredNull(options)) {
+                        return;
+                    }
+                    dstPropertyName = converter.convert(srcPropertyName, String.class, dstSchema.keyType(), options);
                     dstPropertyValue = converter.convert(
                         srcPropertyValue, srcProperty.type(), dstSchema.valueType(), options);
                 }
@@ -230,6 +249,9 @@ final class DataMapperImpl implements DataMapper {
     ) {
         srcSchema.properties().forEach((srcPropertyName, srcProperty) -> {
             try {
+                if (ignored(srcPropertyName, options)) {
+                    return;
+                }
                 if (!srcProperty.isReadable()) {
                     return;
                 }
@@ -250,12 +272,15 @@ final class DataMapperImpl implements DataMapper {
                         return;
                     }
                 } else {
+                    Object srcPropertyValue = srcProperty.getValue(src);
+                    if (srcPropertyValue == null && ignoredNull(options)) {
+                        return;
+                    }
                     dstPropertyName = srcPropertyName;
                     dstProperty = dstSchema.getProperty((String) dstPropertyName);
                     if (dstProperty == null || !dstProperty.isWritable()) {
                         return;
                     }
-                    Object srcPropertyValue = srcProperty.getValue(src);
                     dstPropertyValue = converter.convert(
                         srcPropertyValue, srcProperty.type(), dstProperty.type(), options);
                 }
@@ -272,6 +297,19 @@ final class DataMapperImpl implements DataMapper {
                 }
             }
         });
+    }
+
+    private boolean ignored(@Nonnull Object propertyName, @Nonnull Option<?, ?> @Nonnull ... options) {
+        Object[] ignoredProperties = Option.findValue(MappingOptions.Key.IGNORE_PROPERTIES, options);
+        if (ignoredProperties == null) {
+            return false;
+        }
+        return ArrayKit.indexOf(ignoredProperties, propertyName) >= 0;
+    }
+
+    private boolean ignoredNull(@Nonnull Option<?, ?> @Nonnull ... options) {
+        Object op = Option.findOption(MappingOptions.Key.IGNORE_NULL_PROPERTIES, options);
+        return op != null;
     }
 
     static final class SchemaCacheImpl implements SchemaCache {
