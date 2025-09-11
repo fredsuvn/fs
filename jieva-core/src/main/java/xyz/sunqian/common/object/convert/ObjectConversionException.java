@@ -13,7 +13,7 @@ import java.lang.reflect.Type;
  */
 public class ObjectConversionException extends JieRuntimeException {
 
-    private static String buildTypeMessage(@Nonnull Type sourceType, @Nonnull Type targetType) {
+    private static String toMessage(@Nonnull Type sourceType, @Nonnull Type targetType) {
         return "Conversion failed: " + sourceType.getTypeName() + " to " + targetType.getTypeName() + ".";
     }
 
@@ -59,7 +59,7 @@ public class ObjectConversionException extends JieRuntimeException {
      * @param targetType the target type
      */
     public ObjectConversionException(@Nonnull Type sourceType, @Nonnull Type targetType) {
-        this(buildTypeMessage(sourceType, targetType));
+        this(toMessage(sourceType, targetType));
     }
 
     /**
@@ -70,6 +70,6 @@ public class ObjectConversionException extends JieRuntimeException {
      * @param cause      the cause
      */
     public ObjectConversionException(@Nonnull Type sourceType, @Nonnull Type targetType, @Nullable Throwable cause) {
-        this(buildTypeMessage(sourceType, targetType), cause);
+        this(toMessage(sourceType, targetType), cause);
     }
 }

@@ -1,5 +1,7 @@
 package xyz.sunqian.common.base.exception;
 
+import xyz.sunqian.annotations.Nonnull;
+
 import java.lang.reflect.Type;
 
 /**
@@ -9,13 +11,21 @@ import java.lang.reflect.Type;
  */
 public class UnknownTypeException extends JieRuntimeException {
 
+    private static @Nonnull String toMessage(@Nonnull Type type) {
+        return "Unknown type: " + type + ".";
+    }
+
+    private static @Nonnull String toMessage(@Nonnull Type type, @Nonnull String keyword) {
+        return "Unknown " + keyword + " type: " + type + ".";
+    }
+
     /**
      * Constructs with the unknown type.
      *
      * @param type the unknown type
      */
-    public UnknownTypeException(Type type) {
-        super("Unknown type: " + type + ".");
+    public UnknownTypeException(@Nonnull Type type) {
+        super(toMessage(type));
     }
 
     /**
@@ -25,7 +35,7 @@ public class UnknownTypeException extends JieRuntimeException {
      * @param type    the unknown type
      * @param keyword the keyword for the type
      */
-    public UnknownTypeException(Type type, String keyword) {
-        super("Unknown " + keyword + " type: " + type + ".");
+    public UnknownTypeException(@Nonnull Type type, @Nonnull String keyword) {
+        super(toMessage(type, keyword));
     }
 }
