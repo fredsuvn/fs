@@ -528,21 +528,6 @@ public class Jie {
      * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
      * a non-map object which can be parsed to {@link ObjectSchema}.
      * <p>
-     * This method is a shortcut to the {@link DataMapper#copyProperties(Object, Object)}.
-     *
-     * @param src the given source object
-     * @param dst the given destination object
-     * @throws ObjectConversionException if an error occurs during copying properties
-     * @see DataMapper
-     */
-    public static void copyProperties(@Nonnull Object src, @Nonnull Object dst) throws ObjectConversionException {
-        DataMapper.defaultMapper().copyProperties(src, dst);
-    }
-
-    /**
-     * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
-     * a non-map object which can be parsed to {@link ObjectSchema}.
-     * <p>
      * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
      * {@link MappingOptions} or other custom options for custom implementations.
      * <p>
@@ -558,33 +543,6 @@ public class Jie {
         @Nonnull Object src, @Nonnull Object dst, @Nonnull Option<?, ?> @Nonnull ... options
     ) throws ObjectConversionException {
         DataMapper.defaultMapper().copyProperties(src, dst, options);
-    }
-
-    /**
-     * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
-     * a non-map object which can be parsed to {@link ObjectSchema}.
-     * <p>
-     * This method is a shortcut to the {@link DataMapper#copyProperties(Object, Type, Object, Type)}.
-     *
-     * @param src     the given source object
-     * @param srcType specifies the type of the given source object
-     * @param dst     the given destination object
-     * @param dstType specifies the type of the given destination object
-     * @throws ObjectConversionException if an error occurs during copying properties
-     * @see DataMapper
-     */
-    public static void copyProperties(
-        @Nonnull Object src,
-        @Nonnull Type srcType,
-        @Nonnull Object dst,
-        @Nonnull Type dstType
-    ) throws ObjectConversionException {
-        DataMapper.defaultMapper().copyProperties(
-            src,
-            srcType,
-            dst,
-            dstType
-        );
     }
 
     /**
@@ -616,7 +574,43 @@ public class Jie {
             srcType,
             dst,
             dstType,
-            ObjectConverter.defaultConverter(),
+            options
+        );
+    }
+
+    /**
+     * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
+     * a non-map object which can be parsed to {@link ObjectSchema}.
+     * <p>
+     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
+     * {@link MappingOptions} or other custom options for custom implementations.
+     * <p>
+     * This method is a shortcut to the
+     * {@link DataMapper#copyProperties(Object, Type, Object, Type, ObjectConverter, Option[])}.
+     *
+     * @param src       the given source object
+     * @param srcType   specifies the type of the given source object
+     * @param dst       the given destination object
+     * @param dstType   specifies the type of the given destination object
+     * @param converter the converter for converting values of the properties if needed
+     * @param options   the options for copying properties
+     * @throws ObjectConversionException if an error occurs during copying properties
+     * @see DataMapper
+     */
+    public static void copyProperties(
+        @Nonnull Object src,
+        @Nonnull Type srcType,
+        @Nonnull Object dst,
+        @Nonnull Type dstType,
+        @Nonnull ObjectConverter converter,
+        @Nonnull Option<?, ?> @Nonnull ... options
+    ) throws ObjectConversionException {
+        DataMapper.defaultMapper().copyProperties(
+            src,
+            srcType,
+            dst,
+            dstType,
+            converter,
             options
         );
     }

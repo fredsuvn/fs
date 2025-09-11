@@ -57,18 +57,6 @@ public interface DataMapper {
     /**
      * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
      * a non-map object which can be parsed to {@link ObjectSchema}.
-     *
-     * @param src the given source object
-     * @param dst the given destination object
-     * @throws ObjectConversionException if an error occurs during copying properties
-     */
-    default void copyProperties(@Nonnull Object src, @Nonnull Object dst) throws ObjectConversionException {
-        copyProperties(src, src.getClass(), dst, dst.getClass());
-    }
-
-    /**
-     * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
-     * a non-map object which can be parsed to {@link ObjectSchema}.
      * <p>
      * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
      * {@link MappingOptions} or other custom options for custom implementations.
@@ -82,31 +70,6 @@ public interface DataMapper {
         @Nonnull Object src, @Nonnull Object dst, @Nonnull Option<?, ?> @Nonnull ... options
     ) throws ObjectConversionException {
         copyProperties(src, src.getClass(), dst, dst.getClass(), options);
-    }
-
-    /**
-     * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
-     * a non-map object which can be parsed to {@link ObjectSchema}.
-     *
-     * @param src     the given source object
-     * @param srcType specifies the type of the given source object
-     * @param dst     the given destination object
-     * @param dstType specifies the type of the given destination object
-     * @throws ObjectConversionException if an error occurs during copying properties
-     */
-    default void copyProperties(
-        @Nonnull Object src,
-        @Nonnull Type srcType,
-        @Nonnull Object dst,
-        @Nonnull Type dstType
-    ) throws ObjectConversionException {
-        copyProperties(
-            src,
-            srcType,
-            dst,
-            dstType,
-            Option.empty()
-        );
     }
 
     /**

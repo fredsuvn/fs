@@ -9,9 +9,9 @@ import tests.utils.Utils;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.exception.UnknownArrayTypeException;
-import xyz.sunqian.common.base.option.Option;
 import xyz.sunqian.common.base.system.OSKit;
 import xyz.sunqian.common.io.IOKit;
+import xyz.sunqian.common.object.convert.ObjectConverter;
 import xyz.sunqian.test.AssertTest;
 import xyz.sunqian.test.PrintTest;
 
@@ -304,14 +304,11 @@ public class JieTest implements AssertTest, PrintTest {
         Jie.copyProperties(sp, ip1);
         assertEquals(ip1, new IntProps(1, 2, 3));
         IntProps ip2 = new IntProps();
-        Jie.copyProperties(sp, ip2, Option.empty());
+        Jie.copyProperties(sp, sp.getClass(), ip2, ip2.getClass());
         assertEquals(ip2, new IntProps(1, 2, 3));
         IntProps ip3 = new IntProps();
-        Jie.copyProperties(sp, sp.getClass(), ip3, ip3.getClass());
+        Jie.copyProperties(sp, sp.getClass(), ip3, ip3.getClass(), ObjectConverter.defaultConverter());
         assertEquals(ip3, new IntProps(1, 2, 3));
-        IntProps ip4 = new IntProps();
-        Jie.copyProperties(sp, sp.getClass(), ip4, ip4.getClass(), Option.empty());
-        assertEquals(ip4, new IntProps(1, 2, 3));
     }
 
     @Data
