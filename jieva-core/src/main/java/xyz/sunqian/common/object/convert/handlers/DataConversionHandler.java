@@ -126,8 +126,8 @@ public class DataConversionHandler implements ObjectConverter.Handler {
 
         static {
             NEW_INSTANCE_MAP = new HashMap<>();
-            NEW_INSTANCE_MAP.put(Map.class, LinkedHashMap::new);
-            NEW_INSTANCE_MAP.put(AbstractMap.class, LinkedHashMap::new);
+            NEW_INSTANCE_MAP.put(Map.class, HashMap::new);
+            NEW_INSTANCE_MAP.put(AbstractMap.class, HashMap::new);
             NEW_INSTANCE_MAP.put(LinkedHashMap.class, LinkedHashMap::new);
             NEW_INSTANCE_MAP.put(HashMap.class, HashMap::new);
             NEW_INSTANCE_MAP.put(TreeMap.class, TreeMap::new);
@@ -139,13 +139,13 @@ public class DataConversionHandler implements ObjectConverter.Handler {
 
         @Override
         public @Nullable Object newBuilder(@Nonnull Type target) {
-            Supplier<Object> supplier = NEW_INSTANCE_MAP.get(target);
-            if (supplier != null) {
-                return supplier.get();
-            }
             Class<?> rawType = TypeKit.getRawClass(target);
             if (rawType == null) {
                 return null;
+            }
+            Supplier<Object> rawSupplier = NEW_INSTANCE_MAP.get(rawType);
+            if (rawSupplier != null) {
+                return rawSupplier.get();
             }
             return ClassKit.newInstance(rawType);
         }

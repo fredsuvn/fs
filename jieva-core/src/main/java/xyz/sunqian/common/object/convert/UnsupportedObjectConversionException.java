@@ -14,6 +14,13 @@ import java.lang.reflect.Type;
  */
 public class UnsupportedObjectConversionException extends JieRuntimeException {
 
+    private static @Nonnull String toMessage(
+        @Nonnull Type srcType,
+        @Nonnull Type target
+    ) {
+        return "Unsupported object conversion from " + srcType + " to " + target + ".";
+    }
+
     private final @Nullable Object src;
     private final @Nonnull Type srcType;
     private final @Nonnull Type target;
@@ -36,6 +43,7 @@ public class UnsupportedObjectConversionException extends JieRuntimeException {
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull [] options
     ) {
+        super(toMessage(srcType, target));
         this.src = src;
         this.srcType = srcType;
         this.target = target;

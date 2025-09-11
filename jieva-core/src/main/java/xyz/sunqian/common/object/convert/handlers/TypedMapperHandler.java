@@ -1,9 +1,11 @@
 package xyz.sunqian.common.object.convert.handlers;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.lang.Flag;
-import xyz.sunqian.common.object.convert.ObjectConverter;
+import xyz.sunqian.common.base.option.Option;
 import xyz.sunqian.common.object.convert.ConversionOptions;
+import xyz.sunqian.common.object.convert.ObjectConverter;
 import xyz.sunqian.common.object.data.ObjectProperty;
 
 import java.lang.reflect.Type;
@@ -49,26 +51,26 @@ public class TypedMapperHandler implements ObjectConverter.Handler {
         this.converters = directly ? converters : Collections.unmodifiableMap(new HashMap<>(converters));
     }
 
-    @Override
-    public Object map(@Nullable Object source, Type sourceType, Type targetType, ObjectConverter objectConverter, ConversionOptions options) {
-        return mapProperty(source, sourceType, targetType, null, objectConverter, options);
-    }
-
-    @Override
-    public Object mapProperty(@Nullable Object source, Type sourceType, Type targetType, @Nullable ObjectProperty targetProperty, ObjectConverter objectConverter, ConversionOptions options) {
-        if (source == null) {
-            return Flag.CONTINUE;
-        }
-        Converter<?> converter = converters.get(targetType);
-        if (converter == null) {
-            return Flag.CONTINUE;
-        }
-        Object targetObject = converter.convert(source, sourceType, targetProperty, options);
-        if (targetObject == null) {
-            return Flag.CONTINUE;
-        }
-        return wrapResult(targetObject);
-    }
+    // @Override
+    // public Object map(@Nullable Object source, Type sourceType, Type targetType, ObjectConverter objectConverter, ConversionOptions options) {
+    //     return mapProperty(source, sourceType, targetType, null, objectConverter, options);
+    // }
+    //
+    // @Override
+    // public Object mapProperty(@Nullable Object source, Type sourceType, Type targetType, @Nullable ObjectProperty targetProperty, ObjectConverter objectConverter, ConversionOptions options) {
+    //     if (source == null) {
+    //         return Flag.CONTINUE;
+    //     }
+    //     Converter<?> converter = converters.get(targetType);
+    //     if (converter == null) {
+    //         return Flag.CONTINUE;
+    //     }
+    //     Object targetObject = converter.convert(source, sourceType, targetProperty, options);
+    //     if (targetObject == null) {
+    //         return Flag.CONTINUE;
+    //     }
+    //     return wrapResult(targetObject);
+    // }
 
     /**
      * Returns {@link Converter} map of this handler.
@@ -91,6 +93,28 @@ public class TypedMapperHandler implements ObjectConverter.Handler {
         Map<Type, Converter<?>> newConverters = new HashMap<>(this.converters);
         newConverters.putAll(moreConverters);
         return new TypedMapperHandler(Collections.unmodifiableMap(newConverters), true);
+    }
+
+    @Override
+    public Object convert(
+        @Nullable Object src,
+        @Nonnull Type srcType,
+        @Nonnull Type target,
+        @Nonnull ObjectConverter converter,
+        @Nonnull Option<?, ?> @Nonnull ... options
+    ) throws Exception {
+        if (src == null) {
+            return ObjectConverter.Status.HANDLER_CONTINUE;
+        }
+        Converter<?> typeConverter = converters.get(target);
+        if (typeConverter == null) {
+            return ObjectConverter.Status.HANDLER_CONTINUE;
+        }
+        Object targetObject = typeConverter.convert(src, srcType, null, ConversionOptions.defaultOptions2());
+        if (targetObject == null) {
+            return ObjectConverter.Status.HANDLER_CONTINUE;
+        }
+        return targetObject;
     }
 
     /**

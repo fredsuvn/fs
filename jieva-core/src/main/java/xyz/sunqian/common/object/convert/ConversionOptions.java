@@ -105,12 +105,6 @@ public class ConversionOptions {
     private @Nullable ObjectSchemaParser objectSchemaParser;
 
     /**
-     * Option for {@link BeanMapper}, to map bean infos if needed. If this option is null, the mapper will use
-     * {@link BeanMapper#defaultMapper()}.
-     */
-    private @Nullable BeanMapper beanMapper;
-
-    /**
      * Ignored names or keys when mapping properties.
      */
     private @Nullable Collection<?> ignored;
