@@ -12,6 +12,7 @@ import xyz.sunqian.common.base.exception.UnknownArrayTypeException;
 import xyz.sunqian.common.base.system.OSKit;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.object.convert.ObjectConverter;
+import xyz.sunqian.common.runtime.reflect.TypeRef;
 import xyz.sunqian.test.AssertTest;
 import xyz.sunqian.test.PrintTest;
 
@@ -309,6 +310,15 @@ public class JieTest implements AssertTest, PrintTest {
         IntProps ip3 = new IntProps();
         Jie.copyProperties(sp, sp.getClass(), ip3, ip3.getClass(), ObjectConverter.defaultConverter());
         assertEquals(ip3, new IntProps(1, 2, 3));
+    }
+
+    @Test
+    public void testObjectConversion() {
+        StringProps sp = new StringProps("1", "2", "3");
+        assertEquals(Jie.convert(sp, IntProps.class), new IntProps(1, 2, 3));
+        assertEquals(Jie.convert(sp, sp.getClass(), IntProps.class), new IntProps(1, 2, 3));
+        assertEquals(Jie.convert(sp, new TypeRef<IntProps>() {}), new IntProps(1, 2, 3));
+        assertEquals(Jie.convert(sp, sp.getClass(), new TypeRef<IntProps>() {}), new IntProps(1, 2, 3));
     }
 
     @Data

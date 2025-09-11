@@ -23,6 +23,7 @@ import xyz.sunqian.common.object.convert.ObjectConversionException;
 import xyz.sunqian.common.object.convert.ObjectConverter;
 import xyz.sunqian.common.object.convert.UnsupportedObjectConversionException;
 import xyz.sunqian.common.object.data.ObjectSchema;
+import xyz.sunqian.common.runtime.reflect.TypeRef;
 
 import java.lang.reflect.Type;
 import java.time.Duration;
@@ -47,7 +48,7 @@ import java.util.stream.Stream;
  * The core utility class of this library, provides support methods for {@link Object}, such as {@code equals} and
  * {@code hashCode}. And many methods to improve language convenience, such as {@code nonnull}, {@code uncheck}. And
  * shortcuts to other commonly used methods in this lib, such as {@link #list(Object[])},
- * {@link #copyProperties(Object, Object)}.
+ * {@link #copyProperties(Object, Object, Option[])}, {@link #convert(Object, Class, Option[])}, etc.
  *
  * @author sunqian
  */
@@ -91,8 +92,9 @@ public class Jie {
      * @param <T> the type of the given object
      * @return the given object itself
      */
+    @SuppressWarnings("ConstantConditions")
     public static <T> @Nonnull T asNonnull(@Nullable T obj) {
-        return as(obj);
+        return obj;
     }
 
     /**
@@ -452,76 +454,6 @@ public class Jie {
         return System.identityHashCode(obj);
     }
 
-    //---------------- Object Conversion Begin ----------------//
-
-    /**
-     * Converts the given source object from the specified type to the target type.
-     * <p>
-     * This method is a shortcut to the {@link ObjectConverter#convert(Object, Type)}.
-     *
-     * @param src    the given source object
-     * @param target the specified type of the target object
-     * @return the converted object
-     * @throws UnsupportedObjectConversionException if the conversion from the specified type to the target type is not
-     *                                              supported
-     * @throws ObjectConversionException            if the conversion failed
-     * @see ObjectConverter
-     */
-    public static Object convert(
-        @Nullable Object src,
-        @Nonnull Type target
-    ) throws UnsupportedObjectConversionException, ObjectConversionException {
-        return ObjectConverter.defaultConverter().convert(src, target);
-    }
-
-    /**
-     * Converts the given source object from the specified type to the target type.
-     * <p>
-     * This method is a shortcut to the {@link ObjectConverter#convert(Object, Type, Option[])}.
-     *
-     * @param src     the given source object
-     * @param target  the specified type of the target object
-     * @param options the other conversion options
-     * @return the converted object
-     * @throws UnsupportedObjectConversionException if the conversion from the specified type to the target type is not
-     *                                              supported
-     * @throws ObjectConversionException            if the conversion failed
-     * @see ObjectConverter
-     */
-    public static Object convert(
-        @Nullable Object src,
-        @Nonnull Type target,
-        @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws UnsupportedObjectConversionException, ObjectConversionException {
-        return ObjectConverter.defaultConverter().convert(src, target, options);
-    }
-
-    /**
-     * Converts the given source object from the specified type to the target type.
-     * <p>
-     * This method is a shortcut to the {@link ObjectConverter#convert(Object, Type, Type, Option[])}.
-     *
-     * @param src     the given source object
-     * @param srcType the specified type of the given source object
-     * @param target  the specified type of the target object
-     * @param options the other conversion options
-     * @return the converted object
-     * @throws UnsupportedObjectConversionException if the conversion from the specified type to the target type is not
-     *                                              supported
-     * @throws ObjectConversionException            if the conversion failed
-     * @see ObjectConverter
-     */
-    public static Object convert(
-        @Nullable Object src,
-        @Nonnull Type srcType,
-        @Nonnull Type target,
-        @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws UnsupportedObjectConversionException, ObjectConversionException {
-        return ObjectConverter.defaultConverter().convert(src, srcType, target, options);
-    }
-
-    //---------------- Object Conversion End ----------------//
-
     //---------------- Copy Properties Begin ----------------//
 
     /**
@@ -616,6 +548,106 @@ public class Jie {
     }
 
     //---------------- Copy Properties End ----------------//
+
+    //---------------- Object Conversion Begin ----------------//
+
+    /**
+     * Converts the given source object from the specified type to the target type.
+     * <p>
+     * This method is a shortcut to the {@link ObjectConverter#convert(Object, Class, Option[])}.
+     *
+     * @param src     the given source object
+     * @param target  the specified type of the target object
+     * @param options the other conversion options
+     * @param <T>     the target type
+     * @return the converted object, {@code null} is permitted
+     * @throws UnsupportedObjectConversionException if the conversion from the specified type to the target type is not
+     *                                              supported
+     * @throws ObjectConversionException            if the conversion failed
+     * @see ObjectConverter
+     */
+    public static <T> T convert(
+        @Nullable Object src,
+        @Nonnull Class<? extends T> target,
+        @Nonnull Option<?, ?> @Nonnull ... options
+    ) throws UnsupportedObjectConversionException, ObjectConversionException {
+        return ObjectConverter.defaultConverter().convert(src, target, options);
+    }
+
+    /**
+     * Converts the given source object from the specified type to the target type.
+     * <p>
+     * This method is a shortcut to the {@link ObjectConverter#convert(Object, TypeRef, Option[])}.
+     *
+     * @param src     the given source object
+     * @param target  the specified type ref of the target object
+     * @param options the other conversion options
+     * @param <T>     the target type
+     * @return the converted object, {@code null} is permitted
+     * @throws UnsupportedObjectConversionException if the conversion from the specified type to the target type is not
+     *                                              supported
+     * @throws ObjectConversionException            if the conversion failed
+     * @see ObjectConverter
+     */
+    public static <T> T convert(
+        @Nullable Object src,
+        @Nonnull TypeRef<? extends T> target,
+        @Nonnull Option<?, ?> @Nonnull ... options
+    ) throws UnsupportedObjectConversionException, ObjectConversionException {
+        return ObjectConverter.defaultConverter().convert(src, target, options);
+    }
+
+    /**
+     * Converts the given source object from the specified type to the target type.
+     * <p>
+     * This method is a shortcut to the {@link ObjectConverter#convert(Object, Type, Class, Option[])}.
+     *
+     * @param src     the given source object
+     * @param srcType the specified type of the given source object
+     * @param target  the specified type of the target object
+     * @param options the other conversion options
+     * @param <T>     the target type
+     * @return the converted object, {@code null} is permitted
+     * @throws UnsupportedObjectConversionException if the conversion from the specified type to the target type is not
+     *                                              supported
+     * @throws ObjectConversionException            if the conversion failed
+     * @see ObjectConverter
+     */
+    public static <T> T convert(
+        @Nullable Object src,
+        @Nonnull Type srcType,
+        @Nonnull Class<? extends T> target,
+        @Nonnull Option<?, ?> @Nonnull ... options
+    ) throws UnsupportedObjectConversionException, ObjectConversionException {
+        return ObjectConverter.defaultConverter().convert(src, srcType, target, options);
+    }
+
+    /**
+     * Converts the given source object from the specified type to the target type.
+     * <p>
+     * This method is a shortcut to the {@link ObjectConverter#convert(Object, Type, TypeRef, Option[])}.
+     *
+     * @param src     the given source object
+     * @param srcType the specified type of the given source object
+     * @param target  the specified type ref of the target object
+     * @param options the other conversion options
+     * @param <T>     the target type
+     * @return the converted object, {@code null} is permitted
+     * @throws UnsupportedObjectConversionException if the conversion from the specified type to the target type is not
+     *                                              supported
+     * @throws ObjectConversionException            if the conversion failed
+     * @see ObjectConverter
+     */
+    public static <T> T convert(
+        @Nullable Object src,
+        @Nonnull Type srcType,
+        @Nonnull TypeRef<? extends T> target,
+        @Nonnull Option<?, ?> @Nonnull ... options
+    ) throws UnsupportedObjectConversionException, ObjectConversionException {
+        return ObjectConverter.defaultConverter().convert(src, srcType, target, options);
+    }
+
+    //---------------- Object Conversion End ----------------//
 
     //---------------- Collection Begin ----------------//
 
