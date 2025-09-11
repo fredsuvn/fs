@@ -2,21 +2,12 @@ package xyz.sunqian.common.object.convert.handlers;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
-import xyz.sunqian.common.base.lang.Flag;
 import xyz.sunqian.common.base.option.Option;
-import xyz.sunqian.common.collect.CollectKit;
-import xyz.sunqian.common.object.convert.ConversionOptions;
-import xyz.sunqian.common.object.convert.ObjectConversionException;
 import xyz.sunqian.common.object.convert.ObjectConverter;
-import xyz.sunqian.common.object.data.ObjectProperty;
 import xyz.sunqian.common.runtime.reflect.TypeKit;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,42 +24,108 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.IntFunction;
 
 /**
- * Collection mapper handler implementation, to create and map elements for target collection type from source
- * collection type.
+ * The implementation of {@link ObjectConverter.Handler} used to generate collection and array for target types.
  * <p>
- * This handler has a collection generator ({@link CollectionFactory}). If source object is {@code null}, or source type
- * or target type is not subtype of {@link Iterable}, array, {@link GenericArrayType}, return {@link Flag#CONTINUE}.
- * Else the generator tries to create a new collection of target type as target collection, if the generator return
- * {@code null}, this handler return {@link Flag#CONTINUE}, else this handler will map all component of source object by
- * {@link ObjectConverter#map(Object, Type, Type, ConversionOptions)} or
- * {@link ObjectConverter#mapProperty(Object, Type, Type, ObjectProperty, ConversionOptions)}, then return target
- * collection wrapped by {@link #wrapResult(Object)} ({@code wrapResult(targetCollection)}).
+ * If the target type is an array type, this handler will create a new array with the component type parsed from the
+ * target array type. If the target type is a collection type, this handler will attempt to generate the target
+ * collection. If the target type is unsupported, this handler return {@link ObjectConverter.Status#HANDLER_CONTINUE}.
  * <p>
- * The generator should be specified in {@link #CollectionConversionHandler(CollectionFactory)}, or use default
- * generator ({@link #DEFAULT_GENERATOR}) in {@link #CollectionConversionHandler()}. Default generator supports these
- * target collection types:
- * <ul>
- *     <li>any array;</li>
- *     <li>{@link Iterable};</li>
- *     <li>{@link Collection};</li>
- *     <li>{@link List};</li>
- *     <li>{@link AbstractList};</li>
- *     <li>{@link ArrayList};</li>
- *     <li>{@link LinkedList};</li>
- *     <li>{@link CopyOnWriteArrayList};</li>
- *     <li>{@link Set};</li>
- *     <li>{@link LinkedHashSet};</li>
- *     <li>{@link HashSet};</li>
- *     <li>{@link TreeSet};</li>
- *     <li>{@link ConcurrentSkipListSet};</li>
- * </ul>
+ * This handler uses a {@link BuilderFactory} to retrieve a builder for creating new collection instance, using
+ * {@link #defaultBuilderFactory()} can get the default builder factory.
  *
- * @author fredsuvn
+ * @author sunqian
+ * @see BuilderFactory
  */
 public class CollectionConversionHandler implements ObjectConverter.Handler {
+
+    private static final BuilderFactory DEFAULT_BUILDER_FACTORY = new DefaultBuilderFactory();
+
+    /**
+     * Returns the default builder factory.
+     * <p>
+     * The supported collection types are:
+     * <ul>
+     *     <li>{@link Iterable}</li>
+     *     <li>{@link Collection}</li>
+     *     <li>{@link List}</li>
+     *     <li>{@link AbstractList}</li>
+     *     <li>{@link ArrayList}</li>
+     *     <li>{@link LinkedList}</li>
+     *     <li>{@link CopyOnWriteArrayList}</li>
+     *     <li>{@link Set}</li>
+     *     <li>{@link LinkedHashSet}</li>
+     *     <li>{@link HashSet}</li>
+     *     <li>{@link TreeSet}</li>
+     *     <li>{@link ConcurrentSkipListSet}</li>
+     * </ul>
+     *
+     * @return the default builder factory
+     */
+    public static @Nonnull BuilderFactory defaultBuilderFactory() {
+        return DEFAULT_BUILDER_FACTORY;
+    }
+
+    private final @Nonnull BuilderFactory builderFactory;
+
+    /**
+     * Constructs with the specified builder factory.
+     *
+     * @param builderFactory the specified builder factory
+     */
+    public CollectionConversionHandler(@Nonnull BuilderFactory builderFactory) {
+        this.builderFactory = builderFactory;
+    }
+
     @Override
-    public Object convert(@Nullable Object src, @Nonnull Type srcType, @Nonnull Type target, @Nonnull ObjectConverter converter, @Nonnull Option<?, ?> @Nonnull ... options) throws Exception {
+    public Object convert(
+        @Nullable Object src,
+        @Nonnull Type srcType,
+        @Nonnull Type target,
+        @Nonnull ObjectConverter converter,
+        @Nonnull Option<?, ?> @Nonnull ... options
+    ) throws Exception {
+        Type targetComponentType;
+        IntFunction<Object> targetBuilder;
+        if (target instanceof Class<?>) {
+            if (!((Class<?>) target).isArray()) {
+                return ObjectConverter.Status.HANDLER_CONTINUE;
+            }
+            Class<?> arrType = (Class<?>) target;
+            targetComponentType = arrType.getComponentType();
+        } else if (target instanceof GenericArrayType) {
+            GenericArrayType arrType = (GenericArrayType) target;
+            targetComponentType = arrType.getGenericComponentType();
+        } else {
+            targetBuilder = builderFactory.newBuilder(target);
+            if (targetBuilder == null) {
+                return ObjectConverter.Status.HANDLER_CONTINUE;
+            }
+        }
         return ObjectConverter.Status.HANDLER_CONTINUE;
+    }
+
+    private static final class TargetCollectionInfo {
+
+        private final @Nonnull Type collectionType;
+        private final @Nonnull Type componentType;
+
+        private TargetCollectionInfo(@Nonnull Type collectionType, @Nonnull Type componentType) {
+            this.collectionType = collectionType;
+            this.componentType = componentType;
+        }
+    }
+
+    private static final class SourceCollectionInfo {
+
+        private final @Nonnull Type componentType;
+        private final int size;
+        private final @Nonnull Iterable<?> iterable;
+
+        private SourceCollectionInfo(@Nonnull Type componentType, int size, @Nonnull Iterable<?> iterable) {
+            this.componentType = componentType;
+            this.size = size;
+            this.iterable = iterable;
+        }
     }
 
 
@@ -276,79 +333,53 @@ public class CollectionConversionHandler implements ObjectConverter.Handler {
     //         return;
     //     }
     // }
-    //
-    // /**
-    //  * This interface is used to create collection object with the target type.
-    //  */
-    // public interface CollectionFactory {
-    //
-    //     /**
-    //      * Creates and returns a new collection or array with the target type and initial size, or returns {@code null}
-    //      * if the target type is unsupported.
-    //      *
-    //      * @param target      the target type
-    //      * @param initialSize the initial size
-    //      * @return a new collection or array object
-    //      */
-    //     @Nullable
-    //     Object create(@Nonnull Type target, int initialSize);
-    // }
-    //
-    // /**
-    //  * Default collection generator.
-    //  */
-    // public static final CollectionFactory DEFAULT_GENERATOR = new DefaultCollectionFactory();
-    //
-    // private static final class DefaultCollectionFactory implements CollectionFactory {
-    //
-    //     private static final @Nonnull Map<@Nonnull Type, @Nonnull IntFunction<@Nonnull Object>> NEW_INSTANCE_MAP;
-    //
-    //     static {
-    //         NEW_INSTANCE_MAP = new HashMap<>();
-    //         NEW_INSTANCE_MAP.put(Iterable.class, (s) -> s > 0 ? new ArrayList<>(s) : new ArrayList<>());
-    //         NEW_INSTANCE_MAP.put(Collection.class, (s) -> s > 0 ? new ArrayList<>(s) : new ArrayList<>());
-    //         NEW_INSTANCE_MAP.put(List.class, (s) -> s > 0 ? new ArrayList<>(s) : new ArrayList<>());
-    //         NEW_INSTANCE_MAP.put(AbstractList.class, (s) -> s > 0 ? new ArrayList<>(s) : new ArrayList<>());
-    //         NEW_INSTANCE_MAP.put(ArrayList.class, (s) -> s > 0 ? new ArrayList<>(s) : new ArrayList<>());
-    //         NEW_INSTANCE_MAP.put(LinkedList.class, (s) -> new LinkedList<>());
-    //         NEW_INSTANCE_MAP.put(CopyOnWriteArrayList.class, (s) -> new CopyOnWriteArrayList<>());
-    //         NEW_INSTANCE_MAP.put(Set.class, (s) -> s > 0 ? new LinkedHashSet<>(s) : new LinkedHashSet<>());
-    //         NEW_INSTANCE_MAP.put(LinkedHashSet.class, (s) -> s > 0 ? new LinkedHashSet<>(s) : new LinkedHashSet<>());
-    //         NEW_INSTANCE_MAP.put(HashSet.class, (s) -> s > 0 ? new HashSet<>(s) : new HashSet<>());
-    //         NEW_INSTANCE_MAP.put(TreeSet.class, (s) -> new TreeSet<>());
-    //         NEW_INSTANCE_MAP.put(ConcurrentSkipListSet.class, (s) -> new ConcurrentSkipListSet<>());
-    //     }
-    //
-    //     @Nullable
-    //     public Object create(@Nonnull Type target, int initialSize) {
-    //         IntFunction<Object> func = NEW_INSTANCE_MAP.get(target);
-    //         if (func != null) {
-    //             return func.apply(initialSize);
-    //         }
-    //         if (target instanceof Class<?>) {
-    //             if (((Class<?>) target).isArray()) {
-    //                 return Array.newInstance(((Class<?>) type).getComponentType(), size);
-    //             }
-    //         }
-    //         if (type instanceof GenericArrayType) {
-    //             Type componentType = ((GenericArrayType) type).getGenericComponentType();
-    //             Class<?> componentClass = TypeKit.getRawClass(componentType);
-    //             if (componentClass == null && componentType instanceof TypeVariable<?>) {
-    //                 componentClass = Object.class;
-    //             }
-    //             return Array.newInstance(componentClass, size);
-    //         }
-    //         Class<?> rawType = TypeKit.getRawClass(type);
-    //         if (rawType == null) {
-    //             return null;
-    //         }
-    //         IntFunction<Object> rawFunc = NEW_INSTANCE_MAP.get(rawType);
-    //         if (rawFunc != null) {
-    //             return rawFunc.apply(size);
-    //         }
-    //         return null;
-    //     }
-    // }
 
-    //private static final class
+    /**
+     * This interface is used to get collection builder with the target type.
+     */
+    public interface BuilderFactory {
+
+        /**
+         * Creates and returns a function to generate target collection object, or {@code null} if the target type is
+         * unsupported.
+         * <p>
+         * The {@code int} parameter of the returned function is the expected size of the collection, if the size is
+         * unknown, sets it to {@code -1}.
+         *
+         * @param target the target type
+         * @return a function to generate target collection object, or {@code null} if the target type is unsupported
+         */
+        @Nullable
+        IntFunction<Object> newBuilder(@Nonnull Type target);
+    }
+
+    private static final class DefaultBuilderFactory implements BuilderFactory {
+
+        private static final @Nonnull Map<@Nonnull Type, @Nonnull IntFunction<@Nonnull Object>> NEW_INSTANCE_MAP;
+
+        static {
+            NEW_INSTANCE_MAP = new HashMap<>();
+            NEW_INSTANCE_MAP.put(Iterable.class, (s) -> s >= 0 ? new ArrayList<>(s) : new ArrayList<>());
+            NEW_INSTANCE_MAP.put(Collection.class, (s) -> s >= 0 ? new ArrayList<>(s) : new ArrayList<>());
+            NEW_INSTANCE_MAP.put(List.class, (s) -> s >= 0 ? new ArrayList<>(s) : new ArrayList<>());
+            NEW_INSTANCE_MAP.put(AbstractList.class, (s) -> s >= 0 ? new ArrayList<>(s) : new ArrayList<>());
+            NEW_INSTANCE_MAP.put(ArrayList.class, (s) -> s >= 0 ? new ArrayList<>(s) : new ArrayList<>());
+            NEW_INSTANCE_MAP.put(LinkedList.class, (s) -> new LinkedList<>());
+            NEW_INSTANCE_MAP.put(CopyOnWriteArrayList.class, (s) -> new CopyOnWriteArrayList<>());
+            NEW_INSTANCE_MAP.put(Set.class, (s) -> s >= 0 ? new LinkedHashSet<>(s) : new LinkedHashSet<>());
+            NEW_INSTANCE_MAP.put(LinkedHashSet.class, (s) -> s >= 0 ? new LinkedHashSet<>(s) : new LinkedHashSet<>());
+            NEW_INSTANCE_MAP.put(HashSet.class, (s) -> s >= 0 ? new HashSet<>(s) : new HashSet<>());
+            NEW_INSTANCE_MAP.put(TreeSet.class, (s) -> new TreeSet<>());
+            NEW_INSTANCE_MAP.put(ConcurrentSkipListSet.class, (s) -> new ConcurrentSkipListSet<>());
+        }
+
+        @Override
+        public @Nullable IntFunction<Object> newBuilder(@Nonnull Type target) {
+            Class<?> rawType = TypeKit.getRawClass(target);
+            if (rawType == null) {
+                return null;
+            }
+            return NEW_INSTANCE_MAP.get(rawType);
+        }
+    }
 }

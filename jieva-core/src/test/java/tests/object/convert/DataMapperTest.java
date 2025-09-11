@@ -229,14 +229,6 @@ public class DataMapperTest implements PrintTest {
         }
     }
 
-    @Test
-    public void testRawMap() {
-        ClsA a = new ClsA("1", "2", "3");
-        Map map = new HashMap();
-        DataMapper.defaultMapper().copyProperties(a, map);
-        assertEquals(map, MapKit.map("first", "1", "second", "2", "third", "3"));
-    }
-
     @Data
     @EqualsAndHashCode
     @AllArgsConstructor

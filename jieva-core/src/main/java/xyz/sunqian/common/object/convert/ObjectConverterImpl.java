@@ -20,7 +20,7 @@ final class ObjectConverterImpl implements ObjectConverter, ObjectConverter.Hand
         new AssignableConversionHandler(),
         new EnumConversionHandler(),
         new TypedMapperHandler(),
-        new CollectionConversionHandler(),
+        new CollectionConversionHandler(CollectionConversionHandler.defaultBuilderFactory()),
         new DataConversionHandler(DataConversionHandler.defaultBuilderFactory())
     ));
 

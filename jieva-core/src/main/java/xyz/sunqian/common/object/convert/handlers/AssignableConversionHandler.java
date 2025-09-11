@@ -19,25 +19,19 @@ import java.util.Objects;
  *         if the specified source type equals to the target type, returns the source object itself;
  *     </li>
  *     <li>
- *         if the target type is assignable from the specified source type, returns the source object itself;
+ *         if the target type is a wildcard type, returns {@link ObjectConverter.Status#HANDLER_CONTINUE};
  *     </li>
  *     <li>
- *         if the target type is a wildcard type with a lower bound ({@code ? super}), returns
- *         {@link AssignableConversionHandler#SUPER};
+ *         if the target type is assignable from the specified source type, returns the source object itself;
  *     </li>
  *     <li>
  *         otherwise, returns {@link ObjectConverter.Status#HANDLER_CONTINUE}.
  *     </li>
  * </ol>
  *
- * @author fredsuvn
+ * @author sunqian
  */
 public class AssignableConversionHandler implements ObjectConverter.Handler {
-
-    /**
-     * An instance of {@link Object}.
-     */
-    public static final @Nonnull Object SUPER = new Object();
 
     @Override
     public Object convert(
@@ -50,16 +44,11 @@ public class AssignableConversionHandler implements ObjectConverter.Handler {
         if (Objects.equals(target, srcType)) {
             return src;
         }
+        if (target instanceof WildcardType) {
+            return ObjectConverter.Status.HANDLER_CONTINUE;
+        }
         if (TypeKit.isAssignable(target, srcType)) {
             return src;
-        }
-        if (target instanceof WildcardType) {
-            WildcardType targetWildcard = (WildcardType) target;
-            Type lower = TypeKit.getLowerBound(targetWildcard);
-            // ? super T
-            if (lower != null) {
-                return SUPER;
-            }
         }
         return ObjectConverter.Status.HANDLER_CONTINUE;
     }

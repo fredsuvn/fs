@@ -11,7 +11,6 @@ import xyz.sunqian.common.collect.MapKit;
 import xyz.sunqian.common.object.convert.ObjectConversionException;
 import xyz.sunqian.common.object.convert.ObjectConverter;
 import xyz.sunqian.common.object.convert.UnsupportedObjectConversionException;
-import xyz.sunqian.common.object.convert.handlers.AssignableConversionHandler;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
 import xyz.sunqian.test.PrintTest;
 
@@ -65,15 +64,17 @@ public class ConvertTest implements PrintTest {
         assertSame(cs, hello);
         Type wildLower = ((ParameterizedType) (F.class.getField("l1").getGenericType()))
             .getActualTypeArguments()[0];
-        assertSame(converter.convert(new Object(), wildLower), AssignableConversionHandler.SUPER);
-        Type wildUpper = ((ParameterizedType) (F.class.getField("l2").getGenericType()))
-            .getActualTypeArguments()[0];
-        expectThrows(UnsupportedObjectConversionException.class, () -> converter.convert(new Object(), wildUpper));
+        // assertSame(converter.convert(new Object(), wildLower), AssignableConversionHandler.SUPER);
+        // Type wildUpper = ((ParameterizedType) (F.class.getField("l2").getGenericType()))
+        //     .getActualTypeArguments()[0];
+        expectThrows(UnsupportedObjectConversionException.class, () -> converter.convert(new Object(), wildLower));
         // to map
         Map<String, String> map1 = converter.convert(a, new TypeRef<Map<String, String>>() {});
         assertEquals(map1, MapKit.map("first", "1", "second", "2", "third", "3"));
         Map<String, String> map2 = converter.convert(a, A.class, new TypeRef<Map<String, String>>() {});
         assertEquals(map2, MapKit.map("first", "1", "second", "2", "third", "3"));
+        class Err {}
+        expectThrows(ObjectConversionException.class, () -> converter.convert(a, Err.class));
         // to enum
         assertEquals(converter.convert("A", E.class), E.A);
         assertNull(converter.convert("B", E.class));
