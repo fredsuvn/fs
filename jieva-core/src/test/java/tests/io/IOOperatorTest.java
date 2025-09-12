@@ -78,7 +78,8 @@ public class IOOperatorTest implements DataTest {
     }
 
     private void testReadBytes(int totalSize) throws Exception {
-        testReadBytes(IOOperator.get(IOKit.bufferSize()), totalSize);
+        testReadBytes(IOOperator.defaultOperator(), totalSize);
+        // testReadBytes(IOOperator.get(IOKit.bufferSize()), totalSize);
         testReadBytes(IOOperator.get(1), totalSize);
         testReadBytes(IOOperator.get(2), totalSize);
         testReadBytes(IOOperator.get(IOKit.bufferSize() - 1), totalSize);
@@ -1162,7 +1163,8 @@ public class IOOperatorTest implements DataTest {
     }
 
     private void testReadChars(int totalSize) throws Exception {
-        testReadChars(IOOperator.get(IOKit.bufferSize()), totalSize);
+        testReadChars(IOOperator.defaultOperator(), totalSize);
+        // testReadChars(IOOperator.get(IOKit.bufferSize()), totalSize);
         testReadChars(IOOperator.get(1), totalSize);
         testReadChars(IOOperator.get(2), totalSize);
         testReadChars(IOOperator.get(IOKit.bufferSize() - 1), totalSize);

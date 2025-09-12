@@ -23,6 +23,15 @@ import java.nio.charset.Charset;
 public interface IOOperator {
 
     /**
+     * Returns the default {@link IOOperator} instance of which buffer size of {@link IOKit#bufferSize()}.
+     *
+     * @return the default {@link IOOperator} instance of which buffer size of {@link IOKit#bufferSize()}
+     */
+    static IOOperator defaultOperator() {
+        return IOKit.io;
+    }
+
+    /**
      * Returns a {@link IOOperator} instance with the given buffer size. If the buffer size equals to the
      * {@link IOKit#bufferSize()}, returns the default {@link IOOperator} instance, otherwise returns a new one by
      * {@link #newOperator(int)}.
