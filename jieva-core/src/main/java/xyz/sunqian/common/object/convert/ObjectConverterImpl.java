@@ -6,7 +6,6 @@ import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.option.Option;
 import xyz.sunqian.common.object.convert.handlers.AssignableConversionHandler;
-import xyz.sunqian.common.object.convert.handlers.CollectionConversionHandler;
 import xyz.sunqian.common.object.convert.handlers.CommonConversionHandler;
 import xyz.sunqian.common.object.convert.handlers.TypedMapperHandler;
 
@@ -19,7 +18,7 @@ final class ObjectConverterImpl implements ObjectConverter, ObjectConverter.Hand
         new AssignableConversionHandler(),
         // new EnumConversionHandler(),
         new TypedMapperHandler(),
-        new CollectionConversionHandler(CollectionConversionHandler.defaultBuilderFactory()),
+        // new CollectionConversionHandler(CollectionConversionHandler.defaultBuilderFactory()),
         // new DataConversionHandler(DataConversionHandler.defaultBuilderFactory()),
         new CommonConversionHandler()
     ));

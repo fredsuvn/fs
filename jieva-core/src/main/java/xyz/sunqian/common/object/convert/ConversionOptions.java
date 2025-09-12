@@ -8,6 +8,7 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.option.Option;
+import xyz.sunqian.common.base.time.TimeFormatter;
 import xyz.sunqian.common.io.IOOperator;
 import xyz.sunqian.common.object.data.ObjectProperty;
 import xyz.sunqian.common.object.data.ObjectSchemaParser;
@@ -88,6 +89,20 @@ public class ConversionOptions {
     }
 
     /**
+     * Returns an option to specify the {@link TimeFormatter} if needed.
+     * <p>
+     * By default, the {@link TimeFormatter#defaultFormatter()} is used.
+     *
+     * @param timeFormatter the {@link TimeFormatter} to be specified
+     * @return an option to specify the {@link TimeFormatter} if needed
+     */
+    public static @Nonnull Option<@Nonnull Key, @Nonnull TimeFormatter> timeFormatter(
+        @Nonnull TimeFormatter timeFormatter
+    ) {
+        return Option.of(Key.TIME_FORMATTER, timeFormatter);
+    }
+
+    /**
      * Option key for object conversion.
      */
     public enum Key {
@@ -111,6 +126,11 @@ public class ConversionOptions {
          * Key of {@link #charset(Charset)}.
          */
         CHARSET,
+
+        /**
+         * Key of {@link #timeFormatter(TimeFormatter)}.
+         */
+        TIME_FORMATTER,
         ;
     }
 

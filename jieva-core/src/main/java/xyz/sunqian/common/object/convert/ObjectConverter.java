@@ -9,7 +9,6 @@ import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.option.Option;
 import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.object.convert.handlers.AssignableConversionHandler;
-import xyz.sunqian.common.object.convert.handlers.CollectionConversionHandler;
 import xyz.sunqian.common.object.convert.handlers.CommonConversionHandler;
 import xyz.sunqian.common.object.convert.handlers.TypedMapperHandler;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
@@ -35,11 +34,11 @@ import java.util.List;
  *         continue;
  *     }
  *     if (ret == Status.HANDLER_BREAK) {
- *         throw new ObjectConversionFailedException(src, srcType, target, this, options);
+ *         throw new UnsupportedObjectConversionException(src, srcType, target, this, options);
  *     }
  *     return ret;
  * }
- * throw new ObjectConversionFailedException(src, srcType, target, this, options);
+ * throw new UnsupportedObjectConversionException(src, srcType, target, this, options);
  * }</pre>
  *
  * @author sunqian
@@ -48,15 +47,14 @@ import java.util.List;
 public interface ObjectConverter {
 
     /**
-     * Returns default mapper with {@link ConversionOptions#defaultOptions2()}, and of which handlers are:
+     * Returns the default {@link ObjectConverter}, of which handlers are:
      * <ul>
      *     <li>{@link AssignableConversionHandler};</li>
      *     <li>{@link TypedMapperHandler};</li>
-     *     <li>{@link CollectionConversionHandler};</li>
      *     <li>{@link CommonConversionHandler};</li>
      * </ul>
      *
-     * @return default converter
+     * @return the default converter
      */
     static ObjectConverter defaultConverter() {
         return ObjectConverterImpl.DEFAULT_MAPPER;

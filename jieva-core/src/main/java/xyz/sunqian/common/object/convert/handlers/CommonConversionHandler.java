@@ -5,6 +5,8 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.lang.EnumKit;
 import xyz.sunqian.common.base.option.Option;
+import xyz.sunqian.common.base.string.StringKit;
+import xyz.sunqian.common.base.time.TimeFormatter;
 import xyz.sunqian.common.io.IOOperator;
 import xyz.sunqian.common.object.convert.ConversionOptions;
 import xyz.sunqian.common.object.convert.DataBuilderFactory;
@@ -16,20 +18,29 @@ import java.io.Reader;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
+import java.util.AbstractList;
 import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.IntFunction;
 
 /**
@@ -40,9 +51,9 @@ import java.util.function.IntFunction;
  * this handler for different target types:
  * <table border="1px solid">
  * <tr>
- *     <th>Target Type</th>
- *     <th>Source Type</th>
- *     <th>Conversion Logic</th>
+ *     <th width="20%">Target Type</th>
+ *     <th width="20%">Source</th>
+ *     <th width="60%">Conversion Logic</th>
  * </tr>
  * <tr>
  *     <td rowspan="3">{@link String}, {@link CharSequence}</td>
@@ -59,15 +70,44 @@ import java.util.function.IntFunction;
  *     <td>Using {@link Object#toString()}.</td>
  * </tr>
  * <tr>
- *     <td>Number types: {@link Number}, {@link Byte}, {@link Short}, {@link Character}, {@link Integer}, {@link Long},
- *     {@link Float}, {@link Double}, {@link BigInteger}, {@link BigDecimal}</td>
- *     <td>Others</td>
- *     <td>Using {@link Object#toString()}.</td>
+ *     <td>Number Types</td>
+ *     <td>Any Objects</td>
+ *     <td>Using {@link StringKit#toNumber(CharSequence, Class)} with the string from {@link Object#toString()}.</td>
  * </tr>
  * <tr>
- *     <td>Enum types</td>
- *     <td>Any objects</td>
+ *     <td rowspan="2">Date and Time Types</td>
+ *     <td>String Types and Other Date Time Types</td>
+ *     <td>Using {@link ConversionOptions#timeFormatter(TimeFormatter)} to handle.</td>
+ * </tr>
+ * <tr>
+ *     <td>{@code long} and {@link Long}</td>
+ *     <td>Treated as an epoch milliseconds, then using {@link ConversionOptions#timeFormatter(TimeFormatter)} to
+ *     handle.</td>
+ * </tr>
+ * <tr>
+ *     <td>Enum Types</td>
+ *     <td>Any Objects</td>
  *     <td>Using {@link EnumKit#findEnum(Class, String)} with the name from {@link Object#toString()}.</td>
+ * </tr>
+ * <tr>
+ *     <td>Arrays and Collections</td>
+ *     <td>Array or Iterable Objects</td>
+ *     <td>Array created using reflection. Collection created using its constructor, the supported collection types:
+ *     {@link Iterable}, {@link Collection}, {@link List}, {@link AbstractList}, {@link ArrayList}, {@link LinkedList},
+ *     {@link CopyOnWriteArrayList}, {@link Set}, {@link LinkedHashSet}, {@link HashSet}, {@link TreeSet},
+ *     {@link ConcurrentSkipListSet}. After creating the container, uses the {@code converter} parameter to handle
+ *     component types.
+ *     </td>
+ * </tr>
+ * <tr>
+ *     <td>Maps and Data Objects</td>
+ *     <td>Classes or Parameterized Types</td>
+ *     <td>Generating data object is based on {@link ConversionOptions#builderFactory(DataBuilderFactory)} and
+ *     {@link ConversionOptions#dataMapper(DataMapper)}. Generating map using its constructor, and copying properties
+ *     also using {@link ConversionOptions#dataMapper(DataMapper)}. The supported map types:
+ *     {@link Map}, {@link AbstractMap}, {@link LinkedHashMap}, {@link HashMap}, {@link TreeMap}, {@link ConcurrentMap},
+ *     {@link ConcurrentHashMap}, {@link Hashtable}, {@link ConcurrentSkipListMap}.
+ *     </td>
  * </tr>
  * </table>
  */
@@ -87,22 +127,37 @@ public class CommonConversionHandler implements ObjectConverter.Handler {
         if (target instanceof Class<?>) {
             Class<?> classType = (Class<?>) target;
             if (classType.isEnum()) {
-                // enum:
+                // to enum:
                 String name = src.toString();
                 return EnumKit.findEnum(Jie.as(classType), name);
             }
             if (classType.isArray()) {
-                // for array
+                // to array
                 return convertToArray(src, srcType, classType, converter, options);
             }
-            // map or data object
+            IntFunction<Object> collectionFunc = CollectionGenerator.get(classType);
+            if (collectionFunc != null) {
+                // to collection
+                return convertToCollection(
+                    src, srcType, collectionFunc, classType.getTypeParameters()[0], converter, options
+                );
+            }
+            // to map or data object
             return convertToDataObject(src, srcType, classType, target, converter, options);
         } else if (target instanceof GenericArrayType) {
-            // for generic array
+            // to generic array
             return convertToArray(src, srcType, (GenericArrayType) target, converter, options);
         } else if (target instanceof ParameterizedType) {
             ParameterizedType paramType = (ParameterizedType) target;
             Class<?> rawTarget = (Class<?>) paramType.getRawType();
+            IntFunction<Object> collectionFunc = CollectionGenerator.get(rawTarget);
+            if (collectionFunc != null) {
+                // to collection
+                return convertToCollection(
+                    src, srcType, collectionFunc, paramType.getActualTypeArguments()[0], converter, options
+                );
+            }
+            // to map or data object
             return convertToDataObject(src, srcType, rawTarget, target, converter, options);
         }
         return ObjectConverter.Status.HANDLER_CONTINUE;
@@ -128,6 +183,17 @@ public class CommonConversionHandler implements ObjectConverter.Handler {
         return null;
     }
 
+    private Object convertToCollection(
+        @Nonnull Object src,
+        @Nonnull Type srcType,
+        @Nonnull IntFunction<Object> collectionFunc,
+        @Nonnull Type targetComponentType,
+        @Nonnull ObjectConverter converter,
+        @Nonnull Option<?, ?> @Nonnull ... options
+    ) throws Exception {
+        return null;
+    }
+
     private Object convertToDataObject(
         @Nonnull Object src,
         @Nonnull Type srcType,
@@ -136,13 +202,13 @@ public class CommonConversionHandler implements ObjectConverter.Handler {
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws Exception {
-        IntFunction<Object> instantiator = Instantiator.get(rawTarget);
+        IntFunction<Object> mapFunc = MapGenerator.get(rawTarget);
         DataMapper dataMapper = Jie.nonnull(
             Option.findValue(ConversionOptions.Key.DATA_MAPPER, options),
             DataMapper.defaultMapper()
         );
-        if (instantiator != null) {
-            Object targetObject = instantiator.apply(0);
+        if (mapFunc != null) {
+            Object targetObject = mapFunc.apply(0);
             dataMapper.copyProperties(src, srcType, targetObject, target, converter, options);
             return targetObject;
         } else {
@@ -159,7 +225,33 @@ public class CommonConversionHandler implements ObjectConverter.Handler {
         }
     }
 
-    private static final class Instantiator {
+
+    private static final class CollectionGenerator {
+
+        private static final @Nonnull Map<@Nonnull Type, @Nonnull IntFunction<@Nonnull Object>> CLASS_MAP;
+
+        static {
+            CLASS_MAP = new HashMap<>();
+            CLASS_MAP.put(Iterable.class, ArrayList::new);
+            CLASS_MAP.put(Collection.class, HashSet::new);
+            CLASS_MAP.put(List.class, ArrayList::new);
+            CLASS_MAP.put(AbstractList.class, ArrayList::new);
+            CLASS_MAP.put(ArrayList.class, ArrayList::new);
+            CLASS_MAP.put(LinkedList.class, size -> new LinkedList<>());
+            CLASS_MAP.put(CopyOnWriteArrayList.class, size -> new CopyOnWriteArrayList<>());
+            CLASS_MAP.put(Set.class, HashSet::new);
+            CLASS_MAP.put(LinkedHashSet.class, LinkedHashSet::new);
+            CLASS_MAP.put(HashSet.class, HashSet::new);
+            CLASS_MAP.put(TreeSet.class, size -> new TreeSet<>());
+            CLASS_MAP.put(ConcurrentSkipListSet.class, size -> new ConcurrentSkipListSet<>());
+        }
+
+        public static @Nullable IntFunction<@Nonnull Object> get(@Nonnull Class<?> target) {
+            return CLASS_MAP.get(target);
+        }
+    }
+
+    private static final class MapGenerator {
 
         private static final @Nonnull Map<@Nonnull Type, @Nonnull IntFunction<@Nonnull Object>> CLASS_MAP;
 
