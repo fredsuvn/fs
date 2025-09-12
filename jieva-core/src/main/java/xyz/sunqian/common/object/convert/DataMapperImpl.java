@@ -8,8 +8,10 @@ import xyz.sunqian.common.collect.ArrayKit;
 import xyz.sunqian.common.object.data.DataObjectException;
 import xyz.sunqian.common.object.data.DataSchema;
 import xyz.sunqian.common.object.data.MapSchema;
+import xyz.sunqian.common.object.data.MapSchemaParser;
 import xyz.sunqian.common.object.data.ObjectProperty;
 import xyz.sunqian.common.object.data.ObjectSchema;
+import xyz.sunqian.common.object.data.ObjectSchemaParser;
 
 import java.lang.reflect.Type;
 import java.util.Map;
@@ -42,27 +44,43 @@ final class DataMapperImpl implements DataMapper {
             DataMapper.PropertyMapper propertyMapper = Option.findValue(PROPERTY_MAPPER, options);
             DataMapper.ExceptionHandler exceptionHandler = Option.findValue(EXCEPTION_HANDLER, options);
             if (src instanceof Map) {
-                MapSchema srcSchema = schemaCache.get(srcType, MapSchema::parse).asMapSchema();
+                MapSchemaParser mapSchemaParser = Jie.nonnull(
+                    Option.findValue(MappingOptions.Key.MAP_SCHEMA_PARSER),
+                    MapSchemaParser.defaultParser()
+                );
+                MapSchema srcSchema = schemaCache.get(srcType, mapSchemaParser::parse).asMapSchema();
                 if (dst instanceof Map) {
-                    MapSchema dstSchema = schemaCache.get(dstType, MapSchema::parse).asMapSchema();
+                    MapSchema dstSchema = schemaCache.get(dstType, mapSchemaParser::parse).asMapSchema();
                     mapToMap(
                         Jie.as(src), srcSchema, Jie.as(dst), dstSchema, converter, propertyMapper, exceptionHandler, options
                     );
                 } else {
-                    ObjectSchema dstSchema = schemaCache.get(dstType, ObjectSchema::parse).asObjectSchema();
+                    ObjectSchemaParser objectSchemaParser = Jie.nonnull(
+                        Option.findValue(MappingOptions.Key.OBJECT_SCHEMA_PARSER),
+                        ObjectSchemaParser.defaultParser()
+                    );
+                    ObjectSchema dstSchema = schemaCache.get(dstType, objectSchemaParser::parse).asObjectSchema();
                     mapToObject(
                         Jie.as(src), srcSchema, dst, dstSchema, converter, propertyMapper, exceptionHandler, options
                     );
                 }
             } else {
-                ObjectSchema srcSchema = schemaCache.get(srcType, ObjectSchema::parse).asObjectSchema();
+                ObjectSchemaParser objectSchemaParser = Jie.nonnull(
+                    Option.findValue(MappingOptions.Key.OBJECT_SCHEMA_PARSER),
+                    ObjectSchemaParser.defaultParser()
+                );
+                ObjectSchema srcSchema = schemaCache.get(srcType, objectSchemaParser::parse).asObjectSchema();
                 if (dst instanceof Map) {
-                    MapSchema dstSchema = schemaCache.get(dstType, MapSchema::parse).asMapSchema();
+                    MapSchemaParser mapSchemaParser = Jie.nonnull(
+                        Option.findValue(MappingOptions.Key.MAP_SCHEMA_PARSER),
+                        MapSchemaParser.defaultParser()
+                    );
+                    MapSchema dstSchema = schemaCache.get(dstType, mapSchemaParser::parse).asMapSchema();
                     objectToMap(
                         src, srcSchema, Jie.as(dst), dstSchema, converter, propertyMapper, exceptionHandler, options
                     );
                 } else {
-                    ObjectSchema dstSchema = schemaCache.get(dstType, ObjectSchema::parse).asObjectSchema();
+                    ObjectSchema dstSchema = schemaCache.get(dstType, objectSchemaParser::parse).asObjectSchema();
                     objectToObject(
                         src, srcSchema, dst, dstSchema, converter, propertyMapper, exceptionHandler, options
                     );

@@ -3,6 +3,8 @@ package xyz.sunqian.common.object.convert;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.option.Option;
+import xyz.sunqian.common.object.data.MapSchemaParser;
+import xyz.sunqian.common.object.data.ObjectSchemaParser;
 
 /**
  * Provides options for data mapping.
@@ -10,6 +12,34 @@ import xyz.sunqian.common.base.option.Option;
  * @author sunqian
  */
 public class MappingOptions {
+
+    /**
+     * Returns an option to specify the object schema parser.
+     * <p>
+     * Using {@link ObjectSchemaParser#defaultParser()} by default.
+     *
+     * @param schemaParser the specified object schema parser
+     * @return an option to specify the object schema parser
+     */
+    public static @Nonnull Option<@Nonnull Key, @Nonnull ObjectSchemaParser> schemaParser(
+        @Nonnull ObjectSchemaParser schemaParser
+    ) {
+        return Option.of(Key.OBJECT_SCHEMA_PARSER, schemaParser);
+    }
+
+    /**
+     * Returns an option to specify the map schema parser.
+     * <p>
+     * Using {@link MapSchemaParser#defaultParser()} by default.
+     *
+     * @param schemaParser the specified map schema parser
+     * @return an option to specify the map schema parser
+     */
+    public static @Nonnull Option<@Nonnull Key, @Nonnull MapSchemaParser> schemaParser(
+        @Nonnull MapSchemaParser schemaParser
+    ) {
+        return Option.of(Key.MAP_SCHEMA_PARSER, schemaParser);
+    }
 
     /**
      * Returns an option to specify the {@link DataMapper.PropertyMapper}.
@@ -69,6 +99,16 @@ public class MappingOptions {
      * Option key for data mapping.
      */
     public enum Key {
+
+        /**
+         * Key of {@link #schemaParser(ObjectSchemaParser)}.
+         */
+        OBJECT_SCHEMA_PARSER,
+
+        /**
+         * Key of {@link #schemaParser(MapSchemaParser)}.
+         */
+        MAP_SCHEMA_PARSER,
 
         /**
          * Key of {@link #propertyMapper(DataMapper.PropertyMapper)}.

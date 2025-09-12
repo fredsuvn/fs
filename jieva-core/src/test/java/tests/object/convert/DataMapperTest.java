@@ -15,8 +15,10 @@ import xyz.sunqian.common.object.convert.DataMapper;
 import xyz.sunqian.common.object.convert.MappingOptions;
 import xyz.sunqian.common.object.convert.ObjectConversionException;
 import xyz.sunqian.common.object.convert.ObjectConverter;
+import xyz.sunqian.common.object.data.MapSchemaParser;
 import xyz.sunqian.common.object.data.ObjectProperty;
 import xyz.sunqian.common.object.data.ObjectSchema;
+import xyz.sunqian.common.object.data.ObjectSchemaParser;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
 import xyz.sunqian.test.PrintTest;
 
@@ -54,7 +56,8 @@ public class DataMapperTest implements PrintTest {
             // map to map
             Map<String, String> mapA = MapKit.map("first", "1", "second", "2", "third", "3");
             Map<String, Integer> mapB = new HashMap<>();
-            dataMapper.copyProperties(mapA, typeA, mapB, typeB);
+            dataMapper.copyProperties(
+                mapA, typeA, mapB, typeB, MappingOptions.schemaParser(MapSchemaParser.defaultParser()));
             assertEquals(mapB, MapKit.map("first", 1, "second", 2, "third", 3));
             Map<String, String> mapA2 = new HashMap<>();
             dataMapper.copyProperties(mapA, typeA, mapA2, typeA, MappingOptions.propertyMapper(
@@ -113,7 +116,8 @@ public class DataMapperTest implements PrintTest {
             // map to object
             Map<String, String> mapA = MapKit.map("first", "1", "second", "2", "third", "3");
             ClsB clsB = new ClsB();
-            dataMapper.copyProperties(mapA, typeA, clsB, ClsB.class);
+            dataMapper.copyProperties(
+                mapA, typeA, clsB, ClsB.class, MappingOptions.schemaParser(ObjectSchemaParser.defaultParser()));
             assertEquals(clsB, new ClsB(1, 2, 3));
             ClsA2 clsA2 = new ClsA2();
             dataMapper.copyProperties(mapA, typeA, clsA2, ClsA2.class, MappingOptions.propertyMapper(
