@@ -79,6 +79,28 @@ public interface DataMapper {
      * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
      * {@link MappingOptions} or {@link ConversionOptions} or other custom options for custom implementations.
      *
+     * @param src       the given source object
+     * @param dst       the given destination object
+     * @param converter the converter for converting values of the properties if needed
+     * @param options   the options for copying properties
+     * @throws ObjectConversionException if an error occurs during copying properties
+     */
+    default void copyProperties(
+        @Nonnull Object src,
+        @Nonnull Object dst,
+        @Nonnull ObjectConverter converter,
+        @Nonnull Option<?, ?> @Nonnull ... options
+    ) throws ObjectConversionException {
+        copyProperties(src, src.getClass(), dst, dst.getClass(), converter, options);
+    }
+
+    /**
+     * Copy properties from the given source object to the given destination object. The object can be a {@link Map} or
+     * a non-map object which can be parsed to {@link ObjectSchema}.
+     * <p>
+     * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
+     * {@link MappingOptions} or {@link ConversionOptions} or other custom options for custom implementations.
+     *
      * @param src     the given source object
      * @param srcType specifies the type of the given source object
      * @param dst     the given destination object

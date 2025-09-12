@@ -310,6 +310,9 @@ public class JieTest implements AssertTest, PrintTest {
         IntProps ip3 = new IntProps();
         Jie.copyProperties(sp, sp.getClass(), ip3, ip3.getClass(), ObjectConverter.defaultConverter());
         assertEquals(ip3, new IntProps(1, 2, 3));
+        IntProps ip4 = new IntProps();
+        Jie.copyProperties(sp, ip4, ObjectConverter.defaultConverter());
+        assertEquals(ip4, new IntProps(1, 2, 3));
     }
 
     @Test

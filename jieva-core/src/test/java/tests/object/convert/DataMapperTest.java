@@ -10,11 +10,11 @@ import org.testng.annotations.Test;
 import tests.utils.ErrorMap;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.exception.UnreachablePointException;
-import xyz.sunqian.common.base.option.Option;
 import xyz.sunqian.common.collect.MapKit;
 import xyz.sunqian.common.object.convert.DataMapper;
 import xyz.sunqian.common.object.convert.MappingOptions;
 import xyz.sunqian.common.object.convert.ObjectConversionException;
+import xyz.sunqian.common.object.convert.ObjectConverter;
 import xyz.sunqian.common.object.data.ObjectProperty;
 import xyz.sunqian.common.object.data.ObjectSchema;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
@@ -42,7 +42,7 @@ public class DataMapperTest implements PrintTest {
             DataMapper.defaultMapper().copyProperties(a, b1);
             assertEquals(b1, new ClsB(1, 2, 3));
             ClsB b2 = new ClsB();
-            DataMapper.defaultMapper().copyProperties(a, b2, Option.empty());
+            DataMapper.defaultMapper().copyProperties(a, b2, ObjectConverter.defaultConverter());
             assertEquals(b2, new ClsB(1, 2, 3));
         }
     }
