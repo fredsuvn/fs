@@ -73,15 +73,15 @@ public class ConvertTest implements PrintTest {
         // Type wildUpper = ((ParameterizedType) (F.class.getField("l2").getGenericType()))
         //     .getActualTypeArguments()[0];
         expectThrows(UnsupportedObjectConversionException.class, () -> converter.convert(new Object(), wildLower));
-        // to enum
-        assertEquals(converter.convert("A", E.class), E.A);
-        assertNull(converter.convert("B", E.class));
     }
 
     @Test
     public void testCommonHandler() {
         A a = new A("1", "2", "3");
         ObjectConverter converter = ObjectConverter.defaultConverter();
+        // to enum
+        assertEquals(converter.convert("A", E.class), E.A);
+        assertNull(converter.convert("B", E.class));
         // to map
         Map<String, String> map1 = converter.convert(a, new TypeRef<Map<String, String>>() {});
         assertEquals(map1, MapKit.map("first", "1", "second", "2", "third", "3"));

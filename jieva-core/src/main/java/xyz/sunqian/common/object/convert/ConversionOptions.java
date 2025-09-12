@@ -8,6 +8,7 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.option.Option;
+import xyz.sunqian.common.io.IOOperator;
 import xyz.sunqian.common.object.data.ObjectProperty;
 import xyz.sunqian.common.object.data.ObjectSchemaParser;
 
@@ -35,7 +36,7 @@ public class ConversionOptions {
     /**
      * Returns an option to specify the {@link DataMapper}.
      * <p>
-     * By default, the {@link DataMapper#defaultMapper()} is used if needed.
+     * By default, the {@link DataMapper#defaultMapper()} is used.
      *
      * @param dataMapper the {@link DataMapper} to be specified
      * @return an option to specify the {@link DataMapper}
@@ -47,7 +48,7 @@ public class ConversionOptions {
     /**
      * Returns an option to specify the {@link DataBuilderFactory} to generate data object during the conversion.
      * <p>
-     * By default, the {@link DataBuilderFactory#defaultFactory()} is used if needed.
+     * By default, the {@link DataBuilderFactory#defaultFactory()} is used.
      *
      * @param builderFactory the {@link DataBuilderFactory} to be specified
      * @return an option to specify the {@link DataBuilderFactory} to generate data object during the conversion
@@ -56,6 +57,34 @@ public class ConversionOptions {
         @Nonnull DataBuilderFactory builderFactory
     ) {
         return Option.of(Key.BUILDER_FACTORY, builderFactory);
+    }
+
+    /**
+     * Returns an option to specify the {@link IOOperator} if needed.
+     * <p>
+     * By default, the {@link IOOperator#defaultOperator()} is used.
+     *
+     * @param ioOperator the {@link IOOperator} to be specified
+     * @return an option to specify the {@link IOOperator} if needed
+     */
+    public static @Nonnull Option<@Nonnull Key, @Nonnull IOOperator> ioOperator(
+        @Nonnull IOOperator ioOperator
+    ) {
+        return Option.of(Key.IO_OPERATOR, ioOperator);
+    }
+
+    /**
+     * Returns an option to specify the {@link Charset} if needed.
+     * <p>
+     * By default, the {@link CharsKit#defaultCharset()} is used.
+     *
+     * @param charset the {@link Charset} to be specified
+     * @return an option to specify the {@link Charset} if needed
+     */
+    public static @Nonnull Option<@Nonnull Key, @Nonnull Charset> charset(
+        @Nonnull Charset charset
+    ) {
+        return Option.of(Key.CHARSET, charset);
     }
 
     /**
@@ -72,6 +101,16 @@ public class ConversionOptions {
          * Key of {@link #builderFactory(DataBuilderFactory)}.
          */
         BUILDER_FACTORY,
+
+        /**
+         * Key of {@link #ioOperator(IOOperator)}.
+         */
+        IO_OPERATOR,
+
+        /**
+         * Key of {@link #charset(Charset)}.
+         */
+        CHARSET,
         ;
     }
 

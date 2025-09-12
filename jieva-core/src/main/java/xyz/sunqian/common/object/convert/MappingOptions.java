@@ -16,7 +16,7 @@ public class MappingOptions {
     /**
      * Returns an option to specify the object schema parser.
      * <p>
-     * Using {@link ObjectSchemaParser#defaultParser()} by default.
+     * By default, {@link ObjectSchemaParser#defaultParser()} is used.
      *
      * @param schemaParser the specified object schema parser
      * @return an option to specify the object schema parser
@@ -30,7 +30,7 @@ public class MappingOptions {
     /**
      * Returns an option to specify the map schema parser.
      * <p>
-     * Using {@link MapSchemaParser#defaultParser()} by default.
+     * By default, {@link MapSchemaParser#defaultParser()} is used.
      *
      * @param schemaParser the specified map schema parser
      * @return an option to specify the map schema parser
