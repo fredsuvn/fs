@@ -40,8 +40,22 @@ public class ConversionOptions {
      * @param dataMapper the {@link DataMapper} to be specified
      * @return an option to specify the {@link DataMapper}
      */
-    public static @Nonnull Option<Key, DataMapper> dataMapper(@Nonnull DataMapper dataMapper) {
+    public static @Nonnull Option<@Nonnull Key, @Nonnull DataMapper> dataMapper(@Nonnull DataMapper dataMapper) {
         return Option.of(Key.DATA_MAPPER, dataMapper);
+    }
+
+    /**
+     * Returns an option to specify the {@link DataBuilderFactory} to generate data object during the conversion.
+     * <p>
+     * By default, the {@link DataBuilderFactory#defaultFactory()} is used if needed.
+     *
+     * @param builderFactory the {@link DataBuilderFactory} to be specified
+     * @return an option to specify the {@link DataBuilderFactory} to generate data object during the conversion
+     */
+    public static @Nonnull Option<@Nonnull Key, @Nonnull DataBuilderFactory> builderFactory(
+        @Nonnull DataBuilderFactory builderFactory
+    ) {
+        return Option.of(Key.BUILDER_FACTORY, builderFactory);
     }
 
     /**
@@ -53,6 +67,11 @@ public class ConversionOptions {
          * Key of {@link #dataMapper(DataMapper)}.
          */
         DATA_MAPPER,
+
+        /**
+         * Key of {@link #builderFactory(DataBuilderFactory)}.
+         */
+        BUILDER_FACTORY,
         ;
     }
 

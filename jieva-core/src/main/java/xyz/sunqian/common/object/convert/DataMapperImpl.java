@@ -5,7 +5,6 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.option.Option;
 import xyz.sunqian.common.collect.ArrayKit;
-import xyz.sunqian.common.object.data.DataObjectException;
 import xyz.sunqian.common.object.data.DataSchema;
 import xyz.sunqian.common.object.data.MapSchema;
 import xyz.sunqian.common.object.data.MapSchemaParser;
@@ -340,9 +339,9 @@ final class DataMapperImpl implements DataMapper {
 
         @Override
         public @Nonnull DataSchema get(
-            @Nonnull Type type, @Nonnull
-            Function<@Nonnull Type, @Nonnull DataSchema> loader
-        ) throws DataObjectException {
+            @Nonnull Type type,
+            @Nonnull Function<? super @Nonnull Type, ? extends @Nonnull DataSchema> loader
+        ) throws ObjectConversionException {
             return map.computeIfAbsent(type, loader);
         }
     }

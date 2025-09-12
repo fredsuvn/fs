@@ -5,9 +5,13 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.testng.annotations.Test;
+import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.exception.UnreachablePointException;
 import xyz.sunqian.common.base.option.Option;
 import xyz.sunqian.common.collect.MapKit;
+import xyz.sunqian.common.object.convert.ConversionOptions;
+import xyz.sunqian.common.object.convert.DataBuilderFactory;
 import xyz.sunqian.common.object.convert.ObjectConversionException;
 import xyz.sunqian.common.object.convert.ObjectConverter;
 import xyz.sunqian.common.object.convert.UnsupportedObjectConversionException;
@@ -16,6 +20,7 @@ import xyz.sunqian.test.PrintTest;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,7 +37,7 @@ public class ConvertTest implements PrintTest {
         testObjectConverter(ObjectConverter.defaultConverter());
     }
 
-    public void testObjectConverter(ObjectConverter converter) throws Exception {
+    private void testObjectConverter(ObjectConverter converter) throws Exception {
         A a = new A("1", "2", "3");
         assertEquals(converter.convert(a, B.class), new B(1L, 2L, 3L));
         assertEquals(converter.convert(a, A.class, B.class), new B(1L, 2L, 3L));
@@ -68,16 +73,39 @@ public class ConvertTest implements PrintTest {
         // Type wildUpper = ((ParameterizedType) (F.class.getField("l2").getGenericType()))
         //     .getActualTypeArguments()[0];
         expectThrows(UnsupportedObjectConversionException.class, () -> converter.convert(new Object(), wildLower));
+        // to enum
+        assertEquals(converter.convert("A", E.class), E.A);
+        assertNull(converter.convert("B", E.class));
+    }
+
+    @Test
+    public void testCommonHandler() {
+        A a = new A("1", "2", "3");
+        ObjectConverter converter = ObjectConverter.defaultConverter();
         // to map
         Map<String, String> map1 = converter.convert(a, new TypeRef<Map<String, String>>() {});
         assertEquals(map1, MapKit.map("first", "1", "second", "2", "third", "3"));
         Map<String, String> map2 = converter.convert(a, A.class, new TypeRef<Map<String, String>>() {});
         assertEquals(map2, MapKit.map("first", "1", "second", "2", "third", "3"));
+        Map<String, String> map3 = converter.convert(a, new TypeRef<Map<String, String>>() {},
+            ConversionOptions.builderFactory(DataBuilderFactory.newFactory(new HashMap<>())));
+        assertEquals(map3, MapKit.map("first", "1", "second", "2", "third", "3"));
         class Err {}
         expectThrows(ObjectConversionException.class, () -> converter.convert(a, Err.class));
-        // to enum
-        assertEquals(converter.convert("A", E.class), E.A);
-        assertNull(converter.convert("B", E.class));
+        // builder factory
+        expectThrows(UnsupportedObjectConversionException.class, () -> converter.convert(a, B.class,
+            ConversionOptions.builderFactory(new DataBuilderFactory() {
+
+                @Override
+                public @Nullable Object newBuilder(@Nonnull Class<?> target) throws Exception {
+                    return null;
+                }
+
+                @Override
+                public @Nonnull Object build(@Nonnull Object builder) throws Exception {
+                    return null;
+                }
+            })));
     }
 
     @Test

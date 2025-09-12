@@ -4,7 +4,6 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.option.Option;
-import xyz.sunqian.common.object.data.DataObjectException;
 import xyz.sunqian.common.object.data.DataSchema;
 import xyz.sunqian.common.object.data.MapSchema;
 import xyz.sunqian.common.object.data.ObjectSchema;
@@ -48,10 +47,20 @@ public interface DataMapper {
      * Returns a new data mapper with the given map as schema cache.
      *
      * @param map the given map as schema cache
-     * @return a new data mapper with the given schema cache
+     * @return a new data mapper with the given map as schema cache
      */
     static @Nonnull DataMapper newMapper(@Nonnull Map<@Nonnull Type, @Nonnull DataSchema> map) {
-        return newMapper(new DataMapperImpl.SchemaCacheImpl(map));
+        return newMapper(newSchemaCache(map));
+    }
+
+    /**
+     * Returns a new data schema cache with the given map.
+     *
+     * @param map the given map
+     * @return a new data schema cache with the given map
+     */
+    static @Nonnull SchemaCache newSchemaCache(@Nonnull Map<@Nonnull Type, @Nonnull DataSchema> map) {
+        return new DataMapperImpl.SchemaCacheImpl(map);
     }
 
     /**
@@ -161,13 +170,13 @@ public interface DataMapper {
          * @param type   the given type to be parsed to {@link DataSchema}
          * @param loader the loader for loading new {@link DataSchema}
          * @return the {@link DataSchema} for the given type
-         * @throws DataObjectException if an error occurs during parsing
+         * @throws ObjectConversionException if an error occurs during parsing
          */
         @Nonnull
         DataSchema get(
             @Nonnull Type type,
-            @Nonnull Function<@Nonnull Type, @Nonnull DataSchema> loader
-        ) throws DataObjectException;
+            @Nonnull Function<? super @Nonnull Type, ? extends @Nonnull DataSchema> loader
+        ) throws ObjectConversionException;
     }
 
     /**
