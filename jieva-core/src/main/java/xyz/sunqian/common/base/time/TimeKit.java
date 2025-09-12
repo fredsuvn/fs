@@ -10,8 +10,7 @@ import java.time.temporal.TemporalAccessor;
 import java.util.Date;
 
 /**
- * Utilities for time and date, some methods are provided by a default {@link TimeFormatter} with
- * {@link #DEFAULT_PATTERN}.
+ * Utilities for time and date. This class is backed by {@link TimeFormatter#defaultFormatter()}.
  *
  * @author sunqian
  */
@@ -22,16 +21,7 @@ public class TimeKit {
      */
     public static final @Nonnull String DEFAULT_PATTERN = "yyyy-MM-dd HH:mm:ss.SSS";
 
-    private static final @Nonnull TimeFormatter formatter = TimeFormatter.ofPattern(DEFAULT_PATTERN);
-
-    /**
-     * Returns the default formatter this class uses.
-     *
-     * @return the default formatter this class uses
-     */
-    public static @Nonnull TimeFormatter formatter() {
-        return formatter;
-    }
+    static final @Nonnull TimeFormatter formatter = TimeFormatter.ofPattern(DEFAULT_PATTERN);
 
     /**
      * Formats the given date by {@link #formatter}.

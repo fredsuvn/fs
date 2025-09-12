@@ -131,7 +131,8 @@ public class TimeTest implements PrintTest {
         }
         {
             // default formatter
-            assertEquals(TimeKit.formatter().pattern(), TimeKit.DEFAULT_PATTERN);
+            // assertEquals(TimeKit.formatter().pattern(), TimeKit.DEFAULT_PATTERN);
+            assertEquals(TimeFormatter.defaultFormatter().pattern(), TimeKit.DEFAULT_PATTERN);
         }
     }
 

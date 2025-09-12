@@ -27,6 +27,16 @@ import java.util.Date;
 public interface TimeFormatter {
 
     /**
+     * Returns the default {@link TimeFormatter} of which pattern is {@link TimeKit#DEFAULT_PATTERN}, and zone is
+     * {@link ZoneId#systemDefault()}.
+     *
+     * @return the default {@link TimeFormatter} of which pattern is {@link TimeKit#DEFAULT_PATTERN}
+     */
+    static @Nonnull TimeFormatter defaultFormatter() {
+        return TimeKit.formatter;
+    }
+
+    /**
      * Returns a new instance of {@link TimeFormatter} based on the given {@link DateTimeFormatter}. The default zone
      * info of the returned instance is {@link ZoneId#systemDefault()}.
      * <p>
