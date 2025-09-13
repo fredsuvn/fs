@@ -3,10 +3,12 @@ package xyz.sunqian.common.object.convert.handlers;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.lang.EnumKit;
+import xyz.sunqian.common.base.number.NumberKit;
 import xyz.sunqian.common.base.option.Option;
-import xyz.sunqian.common.base.string.StringKit;
 import xyz.sunqian.common.base.time.TimeFormatter;
+import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IOOperator;
 import xyz.sunqian.common.object.convert.ConvertOption;
 import xyz.sunqian.common.object.convert.DataBuilderFactory;
@@ -32,6 +34,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
+import java.time.temporal.TemporalAccessor;
 import java.util.AbstractList;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -90,9 +93,27 @@ import java.util.function.IntFunction;
  *     <td>Using {@link Object#toString()}.</td>
  * </tr>
  * <tr>
+ *     <td rowspan="2">Numbers</td>
+ *     <td>{@link String}</td>
+ *     <td>Using {@link NumberKit#toNumber(CharSequence, Class)}.</td>
+ * </tr>
+ * <tr>
+ *     <td>Other Numbers</td>
+ *     <td>Using {@link NumberKit#toNumber(Number, Class)}.</td>
+ * </tr>
+ * <tr>
+ *     <td>{@code long} and {@link Long}</td>
+ *     <td>Date and Time</td>
+ *     <td>Returns epoch milliseconds of the date or time object.</td>
+ * </tr>
+ * <tr>
+ *     <td rowspan="2">{@code boolean} and {@link Boolean}</td>
  *     <td>Numbers</td>
- *     <td>Any Objects</td>
- *     <td>Using {@link StringKit#toNumber(CharSequence, Class)} with the string from {@link Object#toString()}.</td>
+ *     <td>{@code false} for {@code 0}, otherwise {@code true}.</td>
+ * </tr>
+ * <tr>
+ *     <td>{@link String}</td>
+ *     <td>{@code true} for {@code equalsIgnoreCase("true")}, otherwise {@code false}.</td>
  * </tr>
  * <tr>
  *     <td rowspan="2">Date and Time</td>
@@ -130,6 +151,9 @@ import java.util.function.IntFunction;
  *     </td>
  * </tr>
  * </table>
+ * <p>
+ * Note that this handler typically creates new objects and does not perform the same handing as
+ * {@link AssignableConvertHandler}.
  */
 public class CommonConvertHandler implements ObjectConverter.Handler {
 
@@ -155,10 +179,10 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
                 // to array
                 return convertToArray(src, srcType, targetClass, converter, options);
             }
-            // Handler handler = TargetClasses.get(targetClass);
-            // if (handler != null) {
-            //     return handler.convert(src, srcType, targetClass, converter, options);
-            // }
+            Handler handler = TargetClasses.get(targetClass);
+            if (handler != null) {
+                return handler.convert(src, srcType, targetClass, converter, options);
+            }
             IntFunction<Collection<Object>> collectionFunc = CollectionGenerator.get(targetClass);
             if (collectionFunc != null) {
                 // to collection
@@ -492,7 +516,50 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
         ) throws Exception {
-            return null;
+            if (src instanceof char[]) {
+                return new String((char[]) src);
+            }
+            if (src instanceof BigDecimal) {
+                return ((BigDecimal) src).toPlainString();
+            }
+            if (src instanceof Date) {
+                TimeFormatter timeFormatter = Jie.nonnull(
+                    Option.findValue(ConvertOption.TIME_FORMATTER, options),
+                    TimeFormatter.defaultFormatter()
+                );
+                return timeFormatter.format((Date) src);
+            }
+            if (src instanceof TemporalAccessor) {
+                TimeFormatter timeFormatter = Jie.nonnull(
+                    Option.findValue(ConvertOption.TIME_FORMATTER, options),
+                    TimeFormatter.defaultFormatter()
+                );
+                return timeFormatter.format((TemporalAccessor) src);
+            }
+            Charset charset = Jie.nonnull(
+                Option.findValue(ConvertOption.CHARSET, options),
+                CharsKit.defaultCharset()
+            );
+            if (src instanceof byte[]) {
+                return new String((byte[]) src, charset);
+            }
+            if (src instanceof ByteBuffer) {
+                return BufferKit.string((ByteBuffer) src, charset);
+            }
+            IOOperator ioOperator = Jie.nonnull(
+                Option.findValue(ConvertOption.IO_OPERATOR, options),
+                IOOperator.defaultOperator()
+            );
+            if (src instanceof Reader) {
+                return ioOperator.string((Reader) src);
+            }
+            if (src instanceof InputStream) {
+                return ioOperator.string((InputStream) src, charset);
+            }
+            if (src instanceof ReadableByteChannel) {
+                return ioOperator.string((ReadableByteChannel) src, charset);
+            }
+            return src.toString();
         }
     }
 
@@ -504,8 +571,32 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             @Nonnull Class<?> target,
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
-        ) throws Exception {
-            return null;
+        ) {
+            if (src instanceof String) {
+                return NumberKit.toNumber((String) src, target);
+            }
+            if (!(srcType instanceof Class<?>)) {
+                return ObjectConverter.Status.HANDLER_CONTINUE;
+            }
+            if (target.equals(Long.class) || target.equals(long.class)) {
+                if (srcType.equals(Date.class)) {
+                    return ((Date) src).getTime();
+                }
+                if (TemporalAccessor.class.isAssignableFrom((Class<?>) srcType)) {
+                    TemporalAccessor ta = (TemporalAccessor) src;
+                    TimeFormatter timeFormatter = Jie.nonnull(
+                        Option.findValue(ConvertOption.TIME_FORMATTER, options),
+                        TimeFormatter.defaultFormatter()
+                    );
+                    Date date = timeFormatter.convert(ta, Date.class);
+                    return date.getTime();
+                }
+            }
+            if (Number.class.isAssignableFrom((Class<?>) srcType)) {
+                Number srcNum = (Number) src;
+                return NumberKit.toNumber(srcNum, target);
+            }
+            return ObjectConverter.Status.HANDLER_CONTINUE;
         }
     }
 
@@ -517,15 +608,15 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             @Nonnull Class<?> target,
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
-        ) throws Exception {
+        ) {
             if (src instanceof Boolean) {
                 return src;
             }
             if (src instanceof Number) {
                 return ((Number) src).intValue() != 0;
             }
-            if (src instanceof CharSequence) {
-                return src.toString().equalsIgnoreCase("true");
+            if (src instanceof String) {
+                return ((String) src).equalsIgnoreCase("true");
             }
             return ObjectConverter.Status.HANDLER_CONTINUE;
         }
@@ -539,13 +630,27 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             @Nonnull Class<?> target,
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
-        ) throws Exception {
+        ) {
             TimeFormatter timeFormatter = Jie.nonnull(
-                Option.findValue(ConvertOption.TIME_FORMATTER,  options),
+                Option.findValue(ConvertOption.TIME_FORMATTER, options),
                 TimeFormatter.defaultFormatter()
             );
-            //if (src)
-            return null;
+            if (srcType.equals(String.class)) {
+                return timeFormatter.parse((String) src, target);
+            }
+            if (srcType.equals(Date.class)) {
+                return timeFormatter.convert((Date) src, target);
+            }
+            if (srcType.equals(long.class) || srcType.equals(Long.class)) {
+                Date date = new Date((Long) src);
+                return timeFormatter.convert(date, target);
+            }
+            if (srcType instanceof Class<?>) {
+                if (TemporalAccessor.class.isAssignableFrom((Class<?>) srcType)) {
+                    return timeFormatter.convert((TemporalAccessor) src, target);
+                }
+            }
+            return ObjectConverter.Status.HANDLER_CONTINUE;
         }
     }
 }

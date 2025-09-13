@@ -163,7 +163,9 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
      * @param dataMapper the {@link DataMapper} to be specified
      * @return an option to specify the {@link DataMapper}
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull DataMapper> dataMapper(@Nonnull DataMapper dataMapper) {
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull DataMapper> dataMapper(
+        @Nonnull DataMapper dataMapper
+    ) {
         return Option.of(DATA_MAPPER, dataMapper);
     }
 

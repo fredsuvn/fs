@@ -7,7 +7,6 @@ import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.option.Option;
 import xyz.sunqian.common.object.convert.handlers.AssignableConvertHandler;
 import xyz.sunqian.common.object.convert.handlers.CommonConvertHandler;
-import xyz.sunqian.common.object.convert.handlers.TypedMapperHandler;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -17,7 +16,7 @@ final class ObjectConverterImpl implements ObjectConverter, ObjectConverter.Hand
     static final ObjectConverterImpl DEFAULT_MAPPER = new ObjectConverterImpl(Jie.list(
         new AssignableConvertHandler(),
         // new EnumConversionHandler(),
-        new TypedMapperHandler(),
+        // new TypedMapperHandler(),
         // new CollectionConversionHandler(CollectionConversionHandler.defaultBuilderFactory()),
         // new DataConversionHandler(DataConversionHandler.defaultBuilderFactory()),
         new CommonConvertHandler()

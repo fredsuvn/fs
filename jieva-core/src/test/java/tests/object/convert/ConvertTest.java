@@ -9,11 +9,15 @@ import org.testng.annotations.Test;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.exception.UnreachablePointException;
+import xyz.sunqian.common.base.time.TimeFormatter;
+import xyz.sunqian.common.base.time.TimeKit;
 import xyz.sunqian.common.collect.ArrayKit;
 import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.collect.MapKit;
+import xyz.sunqian.common.io.IOOperator;
 import xyz.sunqian.common.object.convert.ConvertOption;
 import xyz.sunqian.common.object.convert.DataBuilderFactory;
+import xyz.sunqian.common.object.convert.DataMapper;
 import xyz.sunqian.common.object.convert.ObjectConvertException;
 import xyz.sunqian.common.object.convert.ObjectConverter;
 import xyz.sunqian.common.object.convert.UnsupportedObjectConvertException;
@@ -21,9 +25,19 @@ import xyz.sunqian.common.runtime.reflect.TypeKit;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
 import xyz.sunqian.test.PrintTest;
 
+import java.io.ByteArrayInputStream;
+import java.io.CharArrayReader;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -213,14 +227,90 @@ public class ConvertTest implements PrintTest {
             expectThrows(UnsupportedObjectConvertException.class, () ->
                 converter.convert("", new TypeRef<List<String>>() {}.type(), collectionType));
         }
+        {
+            // to String
+            Date now = new Date();
+            String nowDate = TimeKit.format(now);
+            Charset c8859 = StandardCharsets.ISO_8859_1;
+            assertEquals(converter.convert("123".toCharArray(), String.class), "123");
+            assertEquals(converter.convert(new BigDecimal("123.456"), String.class), "123.456");
+            assertEquals(converter.convert(now, String.class), nowDate);
+            assertEquals(converter.convert(now.toInstant(), String.class), nowDate);
+            assertEquals(converter.convert("123".getBytes(c8859), String.class, ConvertOption.charset(c8859)), "123");
+            assertEquals(converter.convert(ByteBuffer.wrap("123".getBytes(c8859)), String.class), "123");
+            ByteArrayInputStream in = new ByteArrayInputStream("123".getBytes(c8859));
+            assertEquals(converter.convert(in, String.class), "123");
+            in.reset();
+            assertEquals(converter.convert(in, String.class), "123");
+            in.reset();
+            assertEquals(
+                converter.convert(Channels.newChannel(in), String.class),
+                "123"
+            );
+            CharArrayReader reader = new CharArrayReader("123".toCharArray());
+            assertEquals(converter.convert(reader, String.class), "123");
+            Object x = new Object();
+            assertEquals(converter.convert(x, String.class), x.toString());
+        }
+        class X<T> {}
+        Type nonClass = X.class.getTypeParameters()[0];
+        {
+            // to Number
+            Date now = new Date();
+            assertEquals(converter.convert("123", int.class), 123);
+            assertEquals(converter.convert("123", long.class), 123L);
+            assertEquals(converter.convert("123", Long.class), 123L);
+            assertEquals(converter.convert(now, long.class), now.getTime());
+            assertEquals(converter.convert(now.toInstant(), Long.class), now.getTime());
+            assertEquals(converter.convert(123, long.class), 123L);
+            assertEquals(converter.convert(123, Long.class), 123L);
+            assertEquals(converter.convert(123, BigDecimal.class), new BigDecimal("123"));
+            expectThrows(UnsupportedObjectConvertException.class, () ->
+                converter.convert(new X<String>(), nonClass, long.class));
+            expectThrows(UnsupportedObjectConvertException.class, () ->
+                converter.convert(a, long.class));
+        }
+        {
+            // to boolean
+            assertEquals(converter.convert(true, boolean.class), true);
+            assertEquals(converter.convert(false, boolean.class), false);
+            assertEquals(converter.convert("true", Boolean.class), true);
+            assertEquals(converter.convert("true0", Boolean.class), false);
+            assertEquals(converter.convert(0, boolean.class), false);
+            assertEquals(converter.convert(1, boolean.class), true);
+            assertEquals(converter.convert(-1, boolean.class), true);
+            expectThrows(UnsupportedObjectConvertException.class, () ->
+                converter.convert(a, boolean.class));
+        }
+        {
+            // to time
+            Date now = new Date();
+            String nowDate = TimeKit.format(now);
+            assertEquals(converter.convert(nowDate, Date.class), now);
+            assertEquals(converter.convert(now, Date.class), now);
+            assertEquals(converter.convert(now.toInstant(), Date.class), now);
+            assertEquals(converter.convert(now, Instant.class), now.toInstant());
+            assertEquals(converter.convert(now.toInstant(), Instant.class), now.toInstant());
+            assertEquals(converter.convert(now.getTime(), Date.class), now);
+            assertEquals(converter.convert(now.getTime(), long.class, Date.class), now);
+            expectThrows(UnsupportedObjectConvertException.class, () ->
+                converter.convert(new X<String>(), nonClass, Date.class));
+            expectThrows(UnsupportedObjectConvertException.class, () ->
+                converter.convert(a, Date.class));
+        }
     }
 
     @Test
     public void testComplexConvert() {
-        CA ca = new CA("1", ListKit.list("1", "2", "3"), new A("1", "2", "3"));
+        Date now = new Date();
+        CA ca = new CA("1", ListKit.list("1", "2", "3"), new A("1", "2", "3"), TimeKit.format(now));
         assertEquals(
-            ObjectConverter.defaultConverter().convert(ca, CB.class),
-            new CB(1, ListKit.list(1, 2, 3), new B(1L, 2L, 3L))
+            ObjectConverter.defaultConverter().convert(ca, CB.class,
+                ConvertOption.dataMapper(DataMapper.defaultMapper()),
+                ConvertOption.timeFormatter(TimeFormatter.defaultFormatter()),
+                ConvertOption.ioOperator(IOOperator.defaultOperator())
+            ),
+            new CB(1, ListKit.list(1, 2, 3), new B(1L, 2L, 3L), TimeKit.parse(ca.date, LocalDateTime.class))
         );
     }
 
@@ -286,6 +376,7 @@ public class ConvertTest implements PrintTest {
         private String p1;
         private List<String> p2;
         private A p3;
+        private String date;
     }
 
     @Data
@@ -296,5 +387,6 @@ public class ConvertTest implements PrintTest {
         private Integer p1;
         private List<Integer> p2;
         private B p3;
+        private LocalDateTime date;
     }
 }
