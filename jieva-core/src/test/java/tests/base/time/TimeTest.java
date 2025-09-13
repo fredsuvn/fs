@@ -23,6 +23,7 @@ import java.util.Date;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
@@ -108,6 +109,7 @@ public class TimeTest implements PrintTest {
             assertEquals(TimeKit.convertSafe(nowZonedDateTime, LocalDateTime.class), nowLocalDateTime);
             assertEquals(TimeKit.convertSafe(nowZonedDateTime, Instant.class), nowInstant);
             assertEquals(TimeKit.convertSafe(nowZonedDateTime, Date.class), nowDate);
+            assertSame(TimeKit.convert(nowDate, Date.class), nowDate);
             assertEquals(TimeKit.convert(nowDate, Instant.class), nowInstant);
             assertEquals(TimeKit.convert(nowInstant, Date.class), nowDate);
             assertNull(TimeKit.convertSafe((Date) null, ZonedDateTime.class));

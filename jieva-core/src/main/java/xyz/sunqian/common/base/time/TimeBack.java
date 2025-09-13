@@ -111,6 +111,9 @@ final class TimeBack {
 
         @Override
         public <T> @Nonnull T convert(@Nonnull Date date, @Nonnull Class<T> timeType) throws DateTimeException {
+            if (timeType.equals(Date.class)) {
+                return Jie.as(date);
+            }
             return convert(date.toInstant(), timeType);
         }
 
@@ -118,6 +121,9 @@ final class TimeBack {
         public <T> @Nonnull T convert(
             @Nonnull TemporalAccessor time, @Nonnull Class<T> timeType
         ) throws DateTimeException {
+            if (timeType.equals(time.getClass())) {
+                return Jie.as(time);
+            }
             TemporalAccessor withZone = withZoneId(time, zoneId);
             return Jie.as(convert0(withZone, timeType));
         }
