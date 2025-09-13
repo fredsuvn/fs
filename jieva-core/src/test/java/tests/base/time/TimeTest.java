@@ -71,6 +71,10 @@ public class TimeTest implements PrintTest {
         {
             // parse
             String dateStr = TimeKit.format(nowLocalDateTime);
+            assertEquals(TimeKit.parseSafe(dateStr, Date.class), nowDate);
+            assertEquals(TimeKit.parseSafe(dateStr, Instant.class), nowInstant);
+            assertEquals(TimeKit.parseSafe(dateStr, ZonedDateTime.class), nowZonedDateTime);
+            assertEquals(TimeKit.parseSafe(dateStr, OffsetDateTime.class), nowOffsetDateTime);
             assertEquals(TimeKit.parseSafe(dateStr, LocalDateTime.class), nowLocalDateTime);
             assertEquals(TimeKit.parseSafe(dateStr, LocalDate.class), nowLocalDate);
             assertEquals(TimeKit.parseSafe(dateStr, LocalTime.class), nowLocalTime);

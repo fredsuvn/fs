@@ -12,6 +12,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAccessor;
 import java.util.Date;
 import java.util.Objects;
@@ -86,19 +87,34 @@ final class TimeBack {
             @Nonnull CharSequence date, @Nonnull Class<?> timeType
         ) throws DateTimeException {
             if (Objects.equals(timeType, Instant.class)) {
-                return Instant.parse(date);
+                try {
+                    return Instant.parse(date);
+                } catch (DateTimeParseException e) {
+                    LocalDateTime localDateTime = LocalDateTime.parse(date, formatter);
+                    return ZonedDateTime.of(localDateTime, zoneId).toInstant();
+                }
             }
             if (Objects.equals(timeType, Date.class)) {
-                return Date.from(Instant.parse(date));
+                return Date.from(parse(date, Instant.class));
             }
             if (Objects.equals(timeType, LocalDateTime.class)) {
                 return LocalDateTime.parse(date, formatter);
             }
             if (Objects.equals(timeType, ZonedDateTime.class)) {
-                return ZonedDateTime.parse(date, formatter);
+                try {
+                    return ZonedDateTime.parse(date, formatter);
+                } catch (DateTimeParseException e) {
+                    LocalDateTime localDateTime = LocalDateTime.parse(date, formatter);
+                    return ZonedDateTime.of(localDateTime, zoneId);
+                }
             }
             if (Objects.equals(timeType, OffsetDateTime.class)) {
-                return OffsetDateTime.parse(date, formatter);
+                try {
+                    return OffsetDateTime.parse(date, formatter);
+                } catch (DateTimeParseException e) {
+                    LocalDateTime localDateTime = LocalDateTime.parse(date, formatter);
+                    return OffsetDateTime.of(localDateTime, TimeKit.nowOffset());
+                }
             }
             if (Objects.equals(timeType, LocalDate.class)) {
                 return LocalDate.parse(date, formatter);
