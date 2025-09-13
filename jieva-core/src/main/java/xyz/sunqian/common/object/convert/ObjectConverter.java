@@ -10,7 +10,6 @@ import xyz.sunqian.common.base.option.Option;
 import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.object.convert.handlers.AssignableConversionHandler;
 import xyz.sunqian.common.object.convert.handlers.CommonConversionHandler;
-import xyz.sunqian.common.object.convert.handlers.TypedMapperHandler;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
 
 import java.lang.reflect.Type;
@@ -28,17 +27,17 @@ import java.util.List;
  *     try {
  *         ret = handler.convert(src, srcType, target, this, options);
  *     } catch (Exception e) {
- *         throw new ObjectConversionException(e);
+ *         throw new ObjectConvertException(e);
  *     }
  *     if (ret == Status.HANDLER_CONTINUE) {
  *         continue;
  *     }
  *     if (ret == Status.HANDLER_BREAK) {
- *         throw new UnsupportedObjectConversionException(src, srcType, target, this, options);
+ *         throw new UnsupportedObjectConvertException(src, srcType, target, this, options);
  *     }
  *     return ret;
  * }
- * throw new UnsupportedObjectConversionException(src, srcType, target, this, options);
+ * throw new UnsupportedObjectConvertException(src, srcType, target, this, options);
  * }</pre>
  *
  * @author sunqian
@@ -50,7 +49,6 @@ public interface ObjectConverter {
      * Returns the default {@link ObjectConverter}, of which handlers are:
      * <ul>
      *     <li>{@link AssignableConversionHandler};</li>
-     *     <li>{@link TypedMapperHandler};</li>
      *     <li>{@link CommonConversionHandler};</li>
      * </ul>
      *
@@ -91,15 +89,15 @@ public interface ObjectConverter {
      * @param options the other conversion options
      * @param <T>     the target type
      * @return the converted object, {@code null} is permitted
-     * @throws UnsupportedObjectConversionException if the conversion from the specified type to the target type is not
-     *                                              supported
-     * @throws ObjectConversionException            if the conversion failed
+     * @throws UnsupportedObjectConvertException if the conversion from the specified type to the target type is not
+     *                                           supported
+     * @throws ObjectConvertException            if the conversion failed
      */
     default <T> T convert(
         @Nullable Object src,
         @Nonnull Class<? extends T> target,
         @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws UnsupportedObjectConversionException, ObjectConversionException {
+    ) throws UnsupportedObjectConvertException, ObjectConvertException {
         return Jie.as(convert(src, (Type) target, options));
     }
 
@@ -114,15 +112,15 @@ public interface ObjectConverter {
      * @param options the other conversion options
      * @param <T>     the target type
      * @return the converted object, {@code null} is permitted
-     * @throws UnsupportedObjectConversionException if the conversion from the specified type to the target type is not
-     *                                              supported
-     * @throws ObjectConversionException            if the conversion failed
+     * @throws UnsupportedObjectConvertException if the conversion from the specified type to the target type is not
+     *                                           supported
+     * @throws ObjectConvertException            if the conversion failed
      */
     default <T> T convert(
         @Nullable Object src,
         @Nonnull TypeRef<? extends T> target,
         @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws UnsupportedObjectConversionException, ObjectConversionException {
+    ) throws UnsupportedObjectConvertException, ObjectConvertException {
         return Jie.as(convert(src, target.type(), options));
     }
 
@@ -136,15 +134,15 @@ public interface ObjectConverter {
      * @param target  the specified type of the target object
      * @param options the other conversion options
      * @return the converted object, {@code null} is permitted
-     * @throws UnsupportedObjectConversionException if the conversion from the specified type to the target type is not
-     *                                              supported
-     * @throws ObjectConversionException            if the conversion failed
+     * @throws UnsupportedObjectConvertException if the conversion from the specified type to the target type is not
+     *                                           supported
+     * @throws ObjectConvertException            if the conversion failed
      */
     default Object convert(
         @Nullable Object src,
         @Nonnull Type target,
         @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws UnsupportedObjectConversionException, ObjectConversionException {
+    ) throws UnsupportedObjectConvertException, ObjectConvertException {
         return convert(src, src == null ? Object.class : src.getClass(), target, options);
     }
 
@@ -160,16 +158,16 @@ public interface ObjectConverter {
      * @param options the other conversion options
      * @param <T>     the target type
      * @return the converted object, {@code null} is permitted
-     * @throws UnsupportedObjectConversionException if the conversion from the specified type to the target type is not
-     *                                              supported
-     * @throws ObjectConversionException            if the conversion failed
+     * @throws UnsupportedObjectConvertException if the conversion from the specified type to the target type is not
+     *                                           supported
+     * @throws ObjectConvertException            if the conversion failed
      */
     default <T> T convert(
         @Nullable Object src,
         @Nonnull Type srcType,
         @Nonnull Class<? extends T> target,
         @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws UnsupportedObjectConversionException, ObjectConversionException {
+    ) throws UnsupportedObjectConvertException, ObjectConvertException {
         return Jie.as(convert(src, srcType, (Type) target, options));
     }
 
@@ -185,16 +183,16 @@ public interface ObjectConverter {
      * @param options the other conversion options
      * @param <T>     the target type
      * @return the converted object, {@code null} is permitted
-     * @throws UnsupportedObjectConversionException if the conversion from the specified type to the target type is not
-     *                                              supported
-     * @throws ObjectConversionException            if the conversion failed
+     * @throws UnsupportedObjectConvertException if the conversion from the specified type to the target type is not
+     *                                           supported
+     * @throws ObjectConvertException            if the conversion failed
      */
     default <T> T convert(
         @Nullable Object src,
         @Nonnull Type srcType,
         @Nonnull TypeRef<? extends T> target,
         @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws UnsupportedObjectConversionException, ObjectConversionException {
+    ) throws UnsupportedObjectConvertException, ObjectConvertException {
         return Jie.as(convert(src, srcType, target.type(), options));
     }
 
@@ -209,32 +207,32 @@ public interface ObjectConverter {
      * @param target  the specified type of the target object
      * @param options the other conversion options
      * @return the converted object, {@code null} is permitted
-     * @throws UnsupportedObjectConversionException if the conversion from the specified type to the target type is not
-     *                                              supported
-     * @throws ObjectConversionException            if the conversion failed
+     * @throws UnsupportedObjectConvertException if the conversion from the specified type to the target type is not
+     *                                           supported
+     * @throws ObjectConvertException            if the conversion failed
      */
     default Object convert(
         @Nullable Object src,
         @Nonnull Type srcType,
         @Nonnull Type target,
         @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws UnsupportedObjectConversionException, ObjectConversionException {
+    ) throws UnsupportedObjectConvertException, ObjectConvertException {
         for (Handler handler : handlers()) {
             Object ret;
             try {
                 ret = handler.convert(src, srcType, target, this, options);
             } catch (Exception e) {
-                throw new ObjectConversionException(e);
+                throw new ObjectConvertException(e);
             }
             if (ret == Status.HANDLER_CONTINUE) {
                 continue;
             }
             if (ret == Status.HANDLER_BREAK) {
-                throw new UnsupportedObjectConversionException(src, srcType, target, this, options);
+                throw new UnsupportedObjectConvertException(src, srcType, target, this, options);
             }
             return ret;
         }
-        throw new UnsupportedObjectConversionException(src, srcType, target, this, options);
+        throw new UnsupportedObjectConvertException(src, srcType, target, this, options);
     }
 
     /**

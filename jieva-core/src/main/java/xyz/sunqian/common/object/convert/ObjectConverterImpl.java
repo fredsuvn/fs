@@ -49,7 +49,7 @@ final class ObjectConverterImpl implements ObjectConverter, ObjectConverter.Hand
     ) throws Exception {
         try {
             return convert(src, srcType, target, options);
-        } catch (UnsupportedObjectConversionException e) {
+        } catch (UnsupportedObjectConvertException e) {
             return Status.HANDLER_CONTINUE;
         }
     }

@@ -19,9 +19,9 @@ import xyz.sunqian.common.function.callable.VoidCallable;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.object.convert.ConvertOption;
 import xyz.sunqian.common.object.convert.DataMapper;
-import xyz.sunqian.common.object.convert.ObjectConversionException;
+import xyz.sunqian.common.object.convert.ObjectConvertException;
 import xyz.sunqian.common.object.convert.ObjectConverter;
-import xyz.sunqian.common.object.convert.UnsupportedObjectConversionException;
+import xyz.sunqian.common.object.convert.UnsupportedObjectConvertException;
 import xyz.sunqian.common.object.data.ObjectSchema;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
 
@@ -468,12 +468,12 @@ public class Jie {
      * @param src     the given source object
      * @param dst     the given destination object
      * @param options the options for copying properties
-     * @throws ObjectConversionException if an error occurs during copying properties
+     * @throws ObjectConvertException if an error occurs during copying properties
      * @see DataMapper
      */
     public static void copyProperties(
         @Nonnull Object src, @Nonnull Object dst, @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws ObjectConversionException {
+    ) throws ObjectConvertException {
         DataMapper.defaultMapper().copyProperties(src, dst, options);
     }
 
@@ -490,7 +490,7 @@ public class Jie {
      * @param dst       the given destination object
      * @param converter the converter for converting values of the properties if needed
      * @param options   the options for copying properties
-     * @throws ObjectConversionException if an error occurs during copying properties
+     * @throws ObjectConvertException if an error occurs during copying properties
      * @see DataMapper
      */
     public static void copyProperties(
@@ -498,7 +498,7 @@ public class Jie {
         @Nonnull Object dst,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws ObjectConversionException {
+    ) throws ObjectConvertException {
         DataMapper.defaultMapper().copyProperties(src, dst, converter, options);
     }
 
@@ -516,7 +516,7 @@ public class Jie {
      * @param dst     the given destination object
      * @param dstType specifies the type of the given destination object
      * @param options the options for copying properties
-     * @throws ObjectConversionException if an error occurs during copying properties
+     * @throws ObjectConvertException if an error occurs during copying properties
      * @see DataMapper
      */
     public static void copyProperties(
@@ -525,7 +525,7 @@ public class Jie {
         @Nonnull Object dst,
         @Nonnull Type dstType,
         @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws ObjectConversionException {
+    ) throws ObjectConvertException {
         DataMapper.defaultMapper().copyProperties(
             src,
             srcType,
@@ -551,7 +551,7 @@ public class Jie {
      * @param dstType   specifies the type of the given destination object
      * @param converter the converter for converting values of the properties if needed
      * @param options   the options for copying properties
-     * @throws ObjectConversionException if an error occurs during copying properties
+     * @throws ObjectConvertException if an error occurs during copying properties
      * @see DataMapper
      */
     public static void copyProperties(
@@ -561,7 +561,7 @@ public class Jie {
         @Nonnull Type dstType,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws ObjectConversionException {
+    ) throws ObjectConvertException {
         DataMapper.defaultMapper().copyProperties(
             src,
             srcType,
@@ -589,16 +589,16 @@ public class Jie {
      * @param options the other conversion options
      * @param <T>     the target type
      * @return the converted object, {@code null} is permitted
-     * @throws UnsupportedObjectConversionException if the conversion from the specified type to the target type is not
-     *                                              supported
-     * @throws ObjectConversionException            if the conversion failed
+     * @throws UnsupportedObjectConvertException if the conversion from the specified type to the target type is not
+     *                                           supported
+     * @throws ObjectConvertException            if the conversion failed
      * @see ObjectConverter
      */
     public static <T> T convert(
         @Nullable Object src,
         @Nonnull Class<? extends T> target,
         @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws UnsupportedObjectConversionException, ObjectConversionException {
+    ) throws UnsupportedObjectConvertException, ObjectConvertException {
         return ObjectConverter.defaultConverter().convert(src, target, options);
     }
 
@@ -615,16 +615,16 @@ public class Jie {
      * @param options the other conversion options
      * @param <T>     the target type
      * @return the converted object, {@code null} is permitted
-     * @throws UnsupportedObjectConversionException if the conversion from the specified type to the target type is not
-     *                                              supported
-     * @throws ObjectConversionException            if the conversion failed
+     * @throws UnsupportedObjectConvertException if the conversion from the specified type to the target type is not
+     *                                           supported
+     * @throws ObjectConvertException            if the conversion failed
      * @see ObjectConverter
      */
     public static <T> T convert(
         @Nullable Object src,
         @Nonnull TypeRef<? extends T> target,
         @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws UnsupportedObjectConversionException, ObjectConversionException {
+    ) throws UnsupportedObjectConvertException, ObjectConvertException {
         return ObjectConverter.defaultConverter().convert(src, target, options);
     }
 
@@ -642,9 +642,9 @@ public class Jie {
      * @param options the other conversion options
      * @param <T>     the target type
      * @return the converted object, {@code null} is permitted
-     * @throws UnsupportedObjectConversionException if the conversion from the specified type to the target type is not
-     *                                              supported
-     * @throws ObjectConversionException            if the conversion failed
+     * @throws UnsupportedObjectConvertException if the conversion from the specified type to the target type is not
+     *                                           supported
+     * @throws ObjectConvertException            if the conversion failed
      * @see ObjectConverter
      */
     public static <T> T convert(
@@ -652,7 +652,7 @@ public class Jie {
         @Nonnull Type srcType,
         @Nonnull Class<? extends T> target,
         @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws UnsupportedObjectConversionException, ObjectConversionException {
+    ) throws UnsupportedObjectConvertException, ObjectConvertException {
         return ObjectConverter.defaultConverter().convert(src, srcType, target, options);
     }
 
@@ -670,9 +670,9 @@ public class Jie {
      * @param options the other conversion options
      * @param <T>     the target type
      * @return the converted object, {@code null} is permitted
-     * @throws UnsupportedObjectConversionException if the conversion from the specified type to the target type is not
-     *                                              supported
-     * @throws ObjectConversionException            if the conversion failed
+     * @throws UnsupportedObjectConvertException if the conversion from the specified type to the target type is not
+     *                                           supported
+     * @throws ObjectConvertException            if the conversion failed
      * @see ObjectConverter
      */
     public static <T> T convert(
@@ -680,7 +680,7 @@ public class Jie {
         @Nonnull Type srcType,
         @Nonnull TypeRef<? extends T> target,
         @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws UnsupportedObjectConversionException, ObjectConversionException {
+    ) throws UnsupportedObjectConvertException, ObjectConvertException {
         return ObjectConverter.defaultConverter().convert(src, srcType, target, options);
     }
 

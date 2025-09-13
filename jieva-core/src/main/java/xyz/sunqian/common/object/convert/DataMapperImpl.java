@@ -35,7 +35,7 @@ final class DataMapperImpl implements DataMapper {
         @Nonnull Type dstType,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws ObjectConversionException {
+    ) throws ObjectConvertException {
         try {
             DataMapper.PropertyMapper propertyMapper = Option.findValue(ConvertOption.PROPERTY_MAPPER, options);
             DataMapper.ExceptionHandler exceptionHandler = Option.findValue(ConvertOption.EXCEPTION_HANDLER, options);
@@ -83,7 +83,7 @@ final class DataMapperImpl implements DataMapper {
                 }
             }
         } catch (Exception e) {
-            throw new ObjectConversionException(e);
+            throw new ObjectConvertException(e);
         }
     }
 
@@ -128,7 +128,7 @@ final class DataMapperImpl implements DataMapper {
                     try {
                         exceptionHandler.handle(e, srcKey, src, srcSchema, dst, dstSchema, converter, options);
                     } catch (Exception ex) {
-                        throw new ObjectConversionException(ex);
+                        throw new ObjectConvertException(ex);
                     }
                 } else {
                     throw e;
@@ -185,7 +185,7 @@ final class DataMapperImpl implements DataMapper {
                     try {
                         exceptionHandler.handle(e, srcKey, src, srcSchema, dst, dstSchema, converter, options);
                     } catch (Exception ex) {
-                        throw new ObjectConversionException(ex);
+                        throw new ObjectConvertException(ex);
                     }
                 } else {
                     throw e;
@@ -242,7 +242,7 @@ final class DataMapperImpl implements DataMapper {
                     try {
                         exceptionHandler.handle(e, srcPropertyName, src, srcSchema, dst, dstSchema, converter, options);
                     } catch (Exception ex) {
-                        throw new ObjectConversionException(ex);
+                        throw new ObjectConvertException(ex);
                     }
                 } else {
                     throw e;
@@ -304,7 +304,7 @@ final class DataMapperImpl implements DataMapper {
                     try {
                         exceptionHandler.handle(e, srcPropertyName, src, srcSchema, dst, dstSchema, converter, options);
                     } catch (Exception ex) {
-                        throw new ObjectConversionException(ex);
+                        throw new ObjectConvertException(ex);
                     }
                 } else {
                     throw e;
@@ -337,7 +337,7 @@ final class DataMapperImpl implements DataMapper {
         public @Nonnull DataSchema get(
             @Nonnull Type type,
             @Nonnull Function<? super @Nonnull Type, ? extends @Nonnull DataSchema> loader
-        ) throws ObjectConversionException {
+        ) throws ObjectConvertException {
             return map.computeIfAbsent(type, loader);
         }
     }

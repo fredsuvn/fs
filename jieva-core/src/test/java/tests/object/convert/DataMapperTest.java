@@ -13,7 +13,7 @@ import xyz.sunqian.common.base.exception.UnreachablePointException;
 import xyz.sunqian.common.collect.MapKit;
 import xyz.sunqian.common.object.convert.ConvertOption;
 import xyz.sunqian.common.object.convert.DataMapper;
-import xyz.sunqian.common.object.convert.ObjectConversionException;
+import xyz.sunqian.common.object.convert.ObjectConvertException;
 import xyz.sunqian.common.object.convert.ObjectConverter;
 import xyz.sunqian.common.object.data.MapSchemaParser;
 import xyz.sunqian.common.object.data.ObjectProperty;
@@ -90,18 +90,18 @@ public class DataMapperTest implements PrintTest {
                 }));
             assertEquals(nullTo, MapKit.map("first", "1", "second", "2", "third", "1"));
             // errors
-            ObjectConversionException oce1 = expectThrows(ObjectConversionException.class, () ->
+            ObjectConvertException oce1 = expectThrows(ObjectConvertException.class, () ->
                 dataMapper.copyProperties(new ErrorMap<>(), typeA, mapA2, typeA)
             );
             assertTrue(oce1.getCause() instanceof UnsupportedOperationException);
-            ObjectConversionException oce2 = expectThrows(ObjectConversionException.class, () ->
+            ObjectConvertException oce2 = expectThrows(ObjectConvertException.class, () ->
                 dataMapper.copyProperties(mapA, typeA, mapA2, typeA,
                     ConvertOption.propertyMapper(
                         (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
                             throw new UnreachablePointException();
                         })));
             assertTrue(oce2.getCause() instanceof UnreachablePointException);
-            ObjectConversionException oce3 = expectThrows(ObjectConversionException.class, () ->
+            ObjectConvertException oce3 = expectThrows(ObjectConvertException.class, () ->
                 dataMapper.copyProperties(mapA, typeA, mapA2, typeA,
                     ConvertOption.propertyMapper(
                         (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
@@ -153,18 +153,18 @@ public class DataMapperTest implements PrintTest {
                 }));
             assertEquals(nullTo, new ClsA("1", "2", "1"));
             // errors
-            ObjectConversionException oce1 = expectThrows(ObjectConversionException.class, () ->
+            ObjectConvertException oce1 = expectThrows(ObjectConvertException.class, () ->
                 dataMapper.copyProperties(new ErrorMap<>(), typeA, clsA2, ClsA2.class)
             );
             assertTrue(oce1.getCause() instanceof UnsupportedOperationException);
-            ObjectConversionException oce2 = expectThrows(ObjectConversionException.class, () ->
+            ObjectConvertException oce2 = expectThrows(ObjectConvertException.class, () ->
                 dataMapper.copyProperties(mapA, typeA, clsA2, ClsA2.class,
                     ConvertOption.propertyMapper(
                         (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
                             throw new UnreachablePointException();
                         })));
             assertTrue(oce2.getCause() instanceof UnreachablePointException);
-            ObjectConversionException oce3 = expectThrows(ObjectConversionException.class, () ->
+            ObjectConvertException oce3 = expectThrows(ObjectConvertException.class, () ->
                 dataMapper.copyProperties(mapA, typeA, clsA2, ClsA2.class,
                     ConvertOption.propertyMapper(
                         (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
@@ -220,14 +220,14 @@ public class DataMapperTest implements PrintTest {
             //     dataMapper.copyProperties(new ErrorMap<>(), typeA, mapA2, typeA)
             // );
             // assertTrue(oce1.getCause() instanceof UnsupportedOperationException);
-            ObjectConversionException oce2 = expectThrows(ObjectConversionException.class, () ->
+            ObjectConvertException oce2 = expectThrows(ObjectConvertException.class, () ->
                 dataMapper.copyProperties(clsA, ClsA.class, mapA2, typeA,
                     ConvertOption.propertyMapper(
                         (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
                             throw new UnreachablePointException();
                         })));
             assertTrue(oce2.getCause() instanceof UnreachablePointException);
-            ObjectConversionException oce3 = expectThrows(ObjectConversionException.class, () ->
+            ObjectConvertException oce3 = expectThrows(ObjectConvertException.class, () ->
                 dataMapper.copyProperties(clsA, ClsA.class, mapA2, typeA,
                     ConvertOption.propertyMapper(
                         (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
@@ -286,14 +286,14 @@ public class DataMapperTest implements PrintTest {
             //     dataMapper.copyProperties(new ErrorMap<>(), typeA, clsA2, ClsA2.class)
             // );
             // assertTrue(oce1.getCause() instanceof UnsupportedOperationException);
-            ObjectConversionException oce2 = expectThrows(ObjectConversionException.class, () ->
+            ObjectConvertException oce2 = expectThrows(ObjectConvertException.class, () ->
                 dataMapper.copyProperties(clsA, ClsA.class, clsA2, ClsA2.class,
                     ConvertOption.propertyMapper(
                         (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
                             throw new UnreachablePointException();
                         })));
             assertTrue(oce2.getCause() instanceof UnreachablePointException);
-            ObjectConversionException oce3 = expectThrows(ObjectConversionException.class, () ->
+            ObjectConvertException oce3 = expectThrows(ObjectConvertException.class, () ->
                 dataMapper.copyProperties(clsA, ClsA.class, clsA2, ClsA2.class,
                     ConvertOption.propertyMapper(
                         (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {

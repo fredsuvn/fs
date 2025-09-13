@@ -12,7 +12,7 @@ import java.lang.reflect.Type;
  *
  * @author sunqian
  */
-public class UnsupportedObjectConversionException extends JieRuntimeException {
+public class UnsupportedObjectConvertException extends JieRuntimeException {
 
     private static @Nonnull String toMessage(
         @Nonnull Type srcType,
@@ -36,7 +36,7 @@ public class UnsupportedObjectConversionException extends JieRuntimeException {
      * @param converter the converter object where this exception throws from
      * @param options   the options used in the conversion
      */
-    public UnsupportedObjectConversionException(
+    public UnsupportedObjectConvertException(
         @Nullable Object src,
         @Nonnull Type srcType,
         @Nonnull Type target,

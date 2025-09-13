@@ -98,12 +98,12 @@ public interface DataBuilderFactory {
          * @param type   the given type to be parsed to {@link Invocable} as constructor
          * @param loader the loader for loading new {@link Invocable}
          * @return the {@link Invocable} as constructor for the given type
-         * @throws ObjectConversionException if an error occurs during parsing
+         * @throws ObjectConvertException if an error occurs during parsing
          */
         @Nonnull
         Invocable get(
             @Nonnull Class<?> type,
             @Nonnull Function<? super @Nonnull Class<?>, ? extends @Nonnull Invocable> loader
-        ) throws ObjectConversionException;
+        ) throws ObjectConvertException;
     }
 }

@@ -12,9 +12,9 @@ import xyz.sunqian.common.collect.ArrayKit;
 import xyz.sunqian.common.collect.MapKit;
 import xyz.sunqian.common.object.convert.ConvertOption;
 import xyz.sunqian.common.object.convert.DataBuilderFactory;
-import xyz.sunqian.common.object.convert.ObjectConversionException;
+import xyz.sunqian.common.object.convert.ObjectConvertException;
 import xyz.sunqian.common.object.convert.ObjectConverter;
-import xyz.sunqian.common.object.convert.UnsupportedObjectConversionException;
+import xyz.sunqian.common.object.convert.UnsupportedObjectConvertException;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
 import xyz.sunqian.test.PrintTest;
 
@@ -41,18 +41,18 @@ public class ConvertTest implements PrintTest {
         A a = new A("1", "2", "3");
         assertEquals(converter.convert(a, B.class), new B(1L, 2L, 3L));
         assertEquals(converter.convert(a, A.class, B.class), new B(1L, 2L, 3L));
-        expectThrows(UnsupportedObjectConversionException.class, () -> converter.convert(null, B.class));
+        expectThrows(UnsupportedObjectConvertException.class, () -> converter.convert(null, B.class));
         ObjectConverter converter2 = ObjectConverter.withHandlers(converter.asHandler());
         assertEquals(converter2.convert(a, B.class), new B(1L, 2L, 3L));
         assertEquals(converter2.convert(a, A.class, B.class), new B(1L, 2L, 3L));
-        expectThrows(UnsupportedObjectConversionException.class, () -> converter2.convert(null, B.class));
+        expectThrows(UnsupportedObjectConvertException.class, () -> converter2.convert(null, B.class));
         {
             // error during handler
             ObjectConverter cvt = converter.withFirstHandler(
                 (src, srcType, target, converter1, options) -> {
                     throw new UnreachablePointException();
                 });
-            ObjectConversionException e = expectThrows(ObjectConversionException.class, () ->
+            ObjectConvertException e = expectThrows(ObjectConvertException.class, () ->
                 cvt.convert(a, B.class));
             assertTrue(e.getCause() instanceof UnreachablePointException);
         }
@@ -62,7 +62,7 @@ public class ConvertTest implements PrintTest {
                 (src, srcType, target, converter1, options) ->
                     ObjectConverter.Status.HANDLER_BREAK
             );
-            UnsupportedObjectConversionException e = expectThrows(UnsupportedObjectConversionException.class, () ->
+            UnsupportedObjectConvertException e = expectThrows(UnsupportedObjectConvertException.class, () ->
                 cvt.convert(a, B.class, ConvertOption.IGNORE_NULL));
             assertEquals(e.sourceObject(), a);
             assertEquals(e.sourceObjectType(), A.class);
@@ -77,7 +77,7 @@ public class ConvertTest implements PrintTest {
                 (src, srcType, target, converter1, options) -> {
                     throw new UnreachablePointException();
                 });
-            ObjectConversionException e = expectThrows(ObjectConversionException.class, () ->
+            ObjectConvertException e = expectThrows(ObjectConvertException.class, () ->
                 cvt.convert(a, X.class.getTypeParameters()[0], ConvertOption.STRICT_TYPE_MODE));
             assertTrue(e.getCause() instanceof UnreachablePointException);
         }
@@ -92,16 +92,16 @@ public class ConvertTest implements PrintTest {
             Type wildLower = ((ParameterizedType) (F.class.getField("l1").getGenericType()))
                 .getActualTypeArguments()[0];
             Object obj = new Object();
-            expectThrows(UnsupportedObjectConversionException.class, () ->
+            expectThrows(UnsupportedObjectConvertException.class, () ->
                 converter.convert(obj, wildLower, ConvertOption.STRICT_TYPE_MODE));
             assertEquals(converter.convert(obj, wildLower), obj.toString());
             Type upperLower = ((ParameterizedType) (F.class.getField("l2").getGenericType()))
                 .getActualTypeArguments()[0];
-            expectThrows(UnsupportedObjectConversionException.class, () ->
+            expectThrows(UnsupportedObjectConvertException.class, () ->
                 converter.convert(obj, upperLower, ConvertOption.STRICT_TYPE_MODE));
             assertEquals(converter.convert(obj, upperLower), obj.toString());
             class X<T> {}
-            expectThrows(UnsupportedObjectConversionException.class, () ->
+            expectThrows(UnsupportedObjectConvertException.class, () ->
                 converter.convert(obj, X.class.getTypeParameters()[0], ConvertOption.STRICT_TYPE_MODE));
             assertSame(converter.convert(obj, X.class.getTypeParameters()[0]), obj);
         }
@@ -124,9 +124,9 @@ public class ConvertTest implements PrintTest {
             ConvertOption.builderFactory(DataBuilderFactory.newFactory(new HashMap<>())));
         assertEquals(map3, MapKit.map("first", "1", "second", "2", "third", "3"));
         class Err {}
-        expectThrows(ObjectConversionException.class, () -> converter.convert(a, Err.class));
+        expectThrows(ObjectConvertException.class, () -> converter.convert(a, Err.class));
         // builder factory
-        expectThrows(UnsupportedObjectConversionException.class, () -> converter.convert(a, B.class,
+        expectThrows(UnsupportedObjectConvertException.class, () -> converter.convert(a, B.class,
             ConvertOption.builderFactory(new DataBuilderFactory() {
 
                 @Override
@@ -145,23 +145,23 @@ public class ConvertTest implements PrintTest {
     public void testException() {
         {
             // ObjectConversionException
-            expectThrows(ObjectConversionException.class, () -> {
-                throw new ObjectConversionException();
+            expectThrows(ObjectConvertException.class, () -> {
+                throw new ObjectConvertException();
             });
-            expectThrows(ObjectConversionException.class, () -> {
-                throw new ObjectConversionException("");
+            expectThrows(ObjectConvertException.class, () -> {
+                throw new ObjectConvertException("");
             });
-            expectThrows(ObjectConversionException.class, () -> {
-                throw new ObjectConversionException("", new RuntimeException());
+            expectThrows(ObjectConvertException.class, () -> {
+                throw new ObjectConvertException("", new RuntimeException());
             });
-            expectThrows(ObjectConversionException.class, () -> {
-                throw new ObjectConversionException(new RuntimeException());
+            expectThrows(ObjectConvertException.class, () -> {
+                throw new ObjectConvertException(new RuntimeException());
             });
-            expectThrows(ObjectConversionException.class, () -> {
-                throw new ObjectConversionException(Object.class, String.class);
+            expectThrows(ObjectConvertException.class, () -> {
+                throw new ObjectConvertException(Object.class, String.class);
             });
-            expectThrows(ObjectConversionException.class, () -> {
-                throw new ObjectConversionException(Object.class, String.class, new RuntimeException());
+            expectThrows(ObjectConvertException.class, () -> {
+                throw new ObjectConvertException(Object.class, String.class, new RuntimeException());
             });
         }
     }

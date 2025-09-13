@@ -11,7 +11,7 @@ import java.lang.reflect.Type;
  *
  * @author sunqian
  */
-public class ObjectConversionException extends JieRuntimeException {
+public class ObjectConvertException extends JieRuntimeException {
 
     private static String toMessage(@Nonnull Type sourceType, @Nonnull Type targetType) {
         return "Conversion failed: " + sourceType.getTypeName() + " to " + targetType.getTypeName() + ".";
@@ -20,7 +20,7 @@ public class ObjectConversionException extends JieRuntimeException {
     /**
      * Empty constructor.
      */
-    public ObjectConversionException() {
+    public ObjectConvertException() {
         super();
     }
 
@@ -29,7 +29,7 @@ public class ObjectConversionException extends JieRuntimeException {
      *
      * @param message the message
      */
-    public ObjectConversionException(@Nullable String message) {
+    public ObjectConvertException(@Nullable String message) {
         super(message);
     }
 
@@ -39,7 +39,7 @@ public class ObjectConversionException extends JieRuntimeException {
      * @param message the message
      * @param cause   the cause
      */
-    public ObjectConversionException(@Nullable String message, @Nullable Throwable cause) {
+    public ObjectConvertException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
@@ -48,7 +48,7 @@ public class ObjectConversionException extends JieRuntimeException {
      *
      * @param cause the cause
      */
-    public ObjectConversionException(@Nullable Throwable cause) {
+    public ObjectConvertException(@Nullable Throwable cause) {
         super(cause);
     }
 
@@ -58,7 +58,7 @@ public class ObjectConversionException extends JieRuntimeException {
      * @param sourceType the source type
      * @param targetType the target type
      */
-    public ObjectConversionException(@Nonnull Type sourceType, @Nonnull Type targetType) {
+    public ObjectConvertException(@Nonnull Type sourceType, @Nonnull Type targetType) {
         this(toMessage(sourceType, targetType));
     }
 
@@ -69,7 +69,7 @@ public class ObjectConversionException extends JieRuntimeException {
      * @param targetType the target type
      * @param cause      the cause
      */
-    public ObjectConversionException(@Nonnull Type sourceType, @Nonnull Type targetType, @Nullable Throwable cause) {
+    public ObjectConvertException(@Nonnull Type sourceType, @Nonnull Type targetType, @Nullable Throwable cause) {
         this(toMessage(sourceType, targetType), cause);
     }
 }

@@ -73,11 +73,11 @@ public interface DataMapper {
      * @param src     the given source object
      * @param dst     the given destination object
      * @param options the options for copying properties
-     * @throws ObjectConversionException if an error occurs during copying properties
+     * @throws ObjectConvertException if an error occurs during copying properties
      */
     default void copyProperties(
         @Nonnull Object src, @Nonnull Object dst, @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws ObjectConversionException {
+    ) throws ObjectConvertException {
         copyProperties(src, src.getClass(), dst, dst.getClass(), options);
     }
 
@@ -92,14 +92,14 @@ public interface DataMapper {
      * @param dst       the given destination object
      * @param converter the converter for converting values of the properties if needed
      * @param options   the options for copying properties
-     * @throws ObjectConversionException if an error occurs during copying properties
+     * @throws ObjectConvertException if an error occurs during copying properties
      */
     default void copyProperties(
         @Nonnull Object src,
         @Nonnull Object dst,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws ObjectConversionException {
+    ) throws ObjectConvertException {
         copyProperties(src, src.getClass(), dst, dst.getClass(), converter, options);
     }
 
@@ -115,7 +115,7 @@ public interface DataMapper {
      * @param dst     the given destination object
      * @param dstType specifies the type of the given destination object
      * @param options the options for copying properties
-     * @throws ObjectConversionException if an error occurs during copying properties
+     * @throws ObjectConvertException if an error occurs during copying properties
      */
     default void copyProperties(
         @Nonnull Object src,
@@ -123,7 +123,7 @@ public interface DataMapper {
         @Nonnull Object dst,
         @Nonnull Type dstType,
         @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws ObjectConversionException {
+    ) throws ObjectConvertException {
         copyProperties(
             src,
             srcType,
@@ -147,7 +147,7 @@ public interface DataMapper {
      * @param dstType   specifies the type of the given destination object
      * @param converter the converter for converting values of the properties if needed
      * @param options   the options for copying properties
-     * @throws ObjectConversionException if an error occurs during copying properties
+     * @throws ObjectConvertException if an error occurs during copying properties
      */
     void copyProperties(
         @Nonnull Object src,
@@ -156,7 +156,7 @@ public interface DataMapper {
         @Nonnull Type dstType,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws ObjectConversionException;
+    ) throws ObjectConvertException;
 
     /**
      * Cache for {@link DataSchema}s parsed during the mapping process.
@@ -170,13 +170,13 @@ public interface DataMapper {
          * @param type   the given type to be parsed to {@link DataSchema}
          * @param loader the loader for loading new {@link DataSchema}
          * @return the {@link DataSchema} for the given type
-         * @throws ObjectConversionException if an error occurs during parsing
+         * @throws ObjectConvertException if an error occurs during parsing
          */
         @Nonnull
         DataSchema get(
             @Nonnull Type type,
             @Nonnull Function<? super @Nonnull Type, ? extends @Nonnull DataSchema> loader
-        ) throws ObjectConversionException;
+        ) throws ObjectConvertException;
     }
 
     /**

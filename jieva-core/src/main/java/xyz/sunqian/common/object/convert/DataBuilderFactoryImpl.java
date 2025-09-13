@@ -25,7 +25,7 @@ final class DataBuilderFactoryImpl implements DataBuilderFactory {
             try {
                 return Invocable.of(t.getConstructor());
             } catch (NoSuchMethodException e) {
-                throw new ObjectConversionException(e);
+                throw new ObjectConvertException(e);
             }
         });
         return instantiator.invoke(null);
@@ -48,7 +48,7 @@ final class DataBuilderFactoryImpl implements DataBuilderFactory {
         public @Nonnull Invocable get(
             @Nonnull Class<?> type,
             @Nonnull Function<? super @Nonnull Class<?>, ? extends @Nonnull Invocable> loader
-        ) throws ObjectConversionException {
+        ) throws ObjectConvertException {
             return map.computeIfAbsent(type, loader);
         }
     }

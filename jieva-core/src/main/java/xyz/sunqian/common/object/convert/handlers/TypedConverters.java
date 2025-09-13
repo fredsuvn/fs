@@ -7,8 +7,8 @@ import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.string.StringKit;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IOKit;
-import xyz.sunqian.common.object.convert.ObjectConversionException;
 import xyz.sunqian.common.object.convert.ConversionOptions;
+import xyz.sunqian.common.object.convert.ObjectConvertException;
 import xyz.sunqian.common.object.data.ObjectProperty;
 
 import java.io.ByteArrayInputStream;
@@ -476,7 +476,7 @@ public class TypedConverters {
                     try {
                         return DateFormat.getInstance().parse(source.toString());
                     } catch (ParseException e) {
-                        throw new ObjectConversionException(e);
+                        throw new ObjectConvertException(e);
                     }
                 }
                 return Date.from(Instant.from(formatter.parse(source.toString())));
