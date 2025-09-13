@@ -1,6 +1,7 @@
 package xyz.sunqian.common.object.data;
 
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.common.runtime.reflect.ReflectionException;
 import xyz.sunqian.common.runtime.reflect.TypeKit;
 
 import java.lang.reflect.Type;
@@ -20,17 +21,28 @@ class MapSchemaParserImpl implements MapSchemaParser {
         }
     }
 
+    @Override
+    public @Nonnull MapSchema parse(@Nonnull Type type, @Nonnull Type keyType, @Nonnull Type valueType) {
+        return new MapSchemaImpl(type, keyType, valueType);
+    }
+
     private final class MapSchemaImpl implements MapSchema {
 
         private final @Nonnull Type type;
         private final @Nonnull Type keyType;
         private final @Nonnull Type valueType;
 
-        MapSchemaImpl(@Nonnull Type type) {
+        private MapSchemaImpl(@Nonnull Type type) throws ReflectionException {
             this.type = type;
             List<Type> actualTypes = TypeKit.resolveActualTypeArguments(type, Map.class);
             this.keyType = actualTypes.get(0);
             this.valueType = actualTypes.get(1);
+        }
+
+        private MapSchemaImpl(@Nonnull Type type, @Nonnull Type keyType, @Nonnull Type valueType) {
+            this.type = type;
+            this.keyType = keyType;
+            this.valueType = valueType;
         }
 
         @Override

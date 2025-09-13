@@ -33,4 +33,19 @@ public interface MapSchemaParser {
      */
     @Nonnull
     MapSchema parse(@Nonnull Type type) throws DataObjectException;
+
+    /**
+     * Parses the given type to an instance of {@link MapSchemaParser} with the specified key type and value type, and
+     * returns the parsed {@link MapSchemaParser}.
+     * <p>
+     * Note that this method does not cache the results and will generate new instances every invocation.
+     *
+     * @param type      the given type
+     * @param keyType   the specified key type
+     * @param valueType the specified value type
+     * @return the parsed {@link MapSchemaParser}
+     * @throws DataObjectException if any problem occurs
+     */
+    @Nonnull
+    MapSchema parse(@Nonnull Type type, @Nonnull Type keyType, @Nonnull Type valueType) throws DataObjectException;
 }

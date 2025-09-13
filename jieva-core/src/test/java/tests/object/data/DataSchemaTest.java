@@ -346,6 +346,12 @@ public class DataSchemaTest implements PrintTest {
             schema.type().getTypeName()
         );
         expectThrows(DataObjectException.class, () -> MapSchema.parse(String.class));
+        MapSchema schemaWithTypes = MapSchema.parse(Map.class, Object.class, Long.class);
+        assertEquals(schemaWithTypes.type(), Map.class);
+        assertEquals(schemaWithTypes.rawType(), Map.class);
+        assertSame(schemaWithTypes.parser(), MapSchemaParser.defaultParser());
+        assertEquals(schemaWithTypes.keyType(), Object.class);
+        assertEquals(schemaWithTypes.valueType(), Long.class);
         // schema equal
         MapSchema m1 = MapSchema.parse(Map.class);
         MapSchema m2 = MapSchema.parse(Map.class);
@@ -379,6 +385,13 @@ public class DataSchemaTest implements PrintTest {
                         return type;
                     }
                 };
+            }
+
+            @Override
+            public @Nonnull MapSchema parse(
+                @Nonnull Type type, @Nonnull Type keyType, @Nonnull Type valueType
+            ) throws DataObjectException {
+                return null;
             }
         }
         MapSchemaParser parser2 = new Parser2();
