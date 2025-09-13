@@ -3,12 +3,9 @@ package xyz.sunqian.common.base.string;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.CheckKit;
-import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.exception.UnknownArrayTypeException;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Objects;
@@ -16,7 +13,7 @@ import java.util.Objects;
 /**
  * Utilities kit for string related.
  *
- * @author fredsuvn
+ * @author sunqian
  */
 public class StringKit {
 
@@ -729,61 +726,5 @@ public class StringKit {
                 dst[dstOff + i] = src.charAt(srcOff + i);
             }
         }
-    }
-
-    /**
-     * Converts the given string to the specified number type. Supported number types are:
-     * <ul>
-     *     <li>{@link Byte}</li>
-     *     <li>{@link Short}</li>
-     *     <li>{@link Character} (Converts to {@link Integer} first, then to {@link Character})</li>
-     *     <li>{@link Integer}</li>
-     *     <li>{@link Long}</li>
-     *     <li>{@link Float}</li>
-     *     <li>{@link Double}</li>
-     *     <li>{@link BigInteger}</li>
-     *     <li>{@link BigDecimal}</li>
-     * </ul>
-     *
-     * @param str     the given string
-     * @param numType the specified number type
-     * @param <T>     the number type
-     * @return the converted number object
-     * @throws NumberFormatException         if the given string can't be converted to the specified number type
-     * @throws UnsupportedOperationException if the given number type is not supported
-     */
-    public static <T> @Nonnull T toNumber(
-        @Nonnull CharSequence str, Class<T> numType
-    ) throws NumberFormatException, UnsupportedOperationException {
-        if (Byte.class.equals(numType)) {
-            return Jie.as(Byte.parseByte(str.toString()));
-        }
-        if (Short.class.equals(numType)) {
-            return Jie.as(Short.parseShort(str.toString()));
-        }
-        if (Character.class.equals(numType)) {
-            int i = Integer.parseInt(str.toString());
-            char c = (char) i;
-            return Jie.as(c);
-        }
-        if (Integer.class.equals(numType)) {
-            return Jie.as(Integer.parseInt(str.toString()));
-        }
-        if (Long.class.equals(numType)) {
-            return Jie.as(Long.parseLong(str.toString()));
-        }
-        if (Float.class.equals(numType)) {
-            return Jie.as(Float.parseFloat(str.toString()));
-        }
-        if (Double.class.equals(numType)) {
-            return Jie.as(Double.parseDouble(str.toString()));
-        }
-        if (BigInteger.class.equals(numType)) {
-            return Jie.as(new BigInteger(str.toString()));
-        }
-        if (BigDecimal.class.equals(numType)) {
-            return Jie.as(new BigDecimal(str.toString()));
-        }
-        throw new UnsupportedOperationException("Unsupported number type: " + numType);
     }
 }

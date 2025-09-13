@@ -10,8 +10,6 @@ import xyz.sunqian.test.PrintTest;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.nio.CharBuffer;
 import java.util.Arrays;
 import java.util.Objects;
@@ -224,21 +222,6 @@ public class StringTest implements DataTest, PrintTest {
                 }
             }
         }
-    }
-
-    @Test
-    public void testToNumber() {
-        assertEquals(StringKit.toNumber("-123", Byte.class), (byte) -123);
-        assertEquals(StringKit.toNumber("-123", Short.class), (short) -123L);
-        assertEquals(StringKit.toNumber("123", Character.class), (char) 123);
-        assertEquals(StringKit.toNumber("123", Integer.class), 123);
-        assertEquals(StringKit.toNumber("123", Long.class), 123L);
-        assertEquals(StringKit.toNumber("123", Float.class), 123f);
-        assertEquals(StringKit.toNumber("123", Double.class), 123.0);
-        assertEquals(StringKit.toNumber("123", BigInteger.class), new BigInteger("123"));
-        assertEquals(StringKit.toNumber("123", BigDecimal.class), new BigDecimal("123"));
-        expectThrows(NumberFormatException.class, () -> StringKit.toNumber("kkk", Integer.class));
-        expectThrows(UnsupportedOperationException.class, () -> StringKit.toNumber("kkk", String.class));
     }
 
     @Test
