@@ -12,9 +12,12 @@ import xyz.sunqian.common.object.convert.ConvertOption;
 import xyz.sunqian.common.object.convert.DataBuilderFactory;
 import xyz.sunqian.common.object.convert.DataMapper;
 import xyz.sunqian.common.object.convert.ObjectConverter;
+import xyz.sunqian.common.runtime.reflect.ReflectionException;
+import xyz.sunqian.common.runtime.reflect.TypeKit;
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -144,7 +147,7 @@ public class CommonConversionHandler implements ObjectConverter.Handler {
                 // to array
                 return convertToArray(src, srcType, classType, converter, options);
             }
-            IntFunction<Object> collectionFunc = CollectionGenerator.get(classType);
+            IntFunction<Collection<Object>> collectionFunc = CollectionGenerator.get(classType);
             if (collectionFunc != null) {
                 // to collection
                 return convertToCollection(
@@ -159,7 +162,7 @@ public class CommonConversionHandler implements ObjectConverter.Handler {
         } else if (target instanceof ParameterizedType) {
             ParameterizedType paramType = (ParameterizedType) target;
             Class<?> rawTarget = (Class<?>) paramType.getRawType();
-            IntFunction<Object> collectionFunc = CollectionGenerator.get(rawTarget);
+            IntFunction<Collection<Object>> collectionFunc = CollectionGenerator.get(rawTarget);
             if (collectionFunc != null) {
                 // to collection
                 return convertToCollection(
@@ -178,8 +181,53 @@ public class CommonConversionHandler implements ObjectConverter.Handler {
         @Nonnull Class<?> target,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws Exception {
-        return null;
+    ) {
+        if (srcType instanceof Class<?>) {
+            Class<?> srcClass = (Class<?>) srcType;
+            if (srcClass.isArray()) {
+                int size = Array.getLength(src);
+                Class<?> targetComponentType = target.getComponentType();
+                Object newArray = Array.newInstance(targetComponentType, size);
+                Class<?> srcComponentType = srcClass.getComponentType();
+                for (int i = 0; i < size; i++) {
+                    Object srcElement = Array.get(src, i);
+                    Array.set(
+                        newArray, i, converter.convert(srcElement, srcComponentType, targetComponentType, options)
+                    );
+                }
+                return newArray;
+            }
+        }
+        Type srcComponentType = resolveComponentType(srcType);
+        if (srcComponentType == null) {
+            return ObjectConverter.Status.HANDLER_CONTINUE;
+        }
+        if (src instanceof Collection<?>) {
+            Collection<?> coll = (Collection<?>) src;
+            int size = coll.size();
+            Class<?> targetComponentType = target.getComponentType();
+            Object newArray = Array.newInstance(targetComponentType, size);
+            int i = 0;
+            for (Object s : coll) {
+                Array.set(newArray, i++, converter.convert(s, srcComponentType, targetComponentType, options));
+            }
+            return newArray;
+        }
+        if (src instanceof Iterable<?>) {
+            Iterable<?> iter = (Iterable<?>) src;
+            List<Object> dst = new ArrayList<>();
+            Class<?> targetComponentType = target.getComponentType();
+            for (Object s : iter) {
+                dst.add(converter.convert(s, srcComponentType, targetComponentType, options));
+            }
+            Object newArray = Array.newInstance(targetComponentType, dst.size());
+            int i = 0;
+            for (Object s : dst) {
+                Array.set(newArray, i++, s);
+            }
+            return newArray;
+        }
+        return ObjectConverter.Status.HANDLER_CONTINUE;
     }
 
     private Object convertToArray(
@@ -188,19 +236,110 @@ public class CommonConversionHandler implements ObjectConverter.Handler {
         @Nonnull GenericArrayType target,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws Exception {
-        return null;
+    ) {
+        if (srcType instanceof Class<?>) {
+            Class<?> srcClass = (Class<?>) srcType;
+            if (srcClass.isArray()) {
+                int size = Array.getLength(src);
+                Type targetComponentType = target.getGenericComponentType();
+                Object newArray = Array.newInstance(TypeKit.toRuntimeClass(targetComponentType), size);
+                Class<?> srcComponentType = srcClass.getComponentType();
+                for (int i = 0; i < size; i++) {
+                    Object srcElement = Array.get(src, i);
+                    Array.set(
+                        newArray, i, converter.convert(srcElement, srcComponentType, targetComponentType, options)
+                    );
+                }
+                return newArray;
+            }
+        }
+        Type srcComponentType = resolveComponentType(srcType);
+        if (srcComponentType == null) {
+            return ObjectConverter.Status.HANDLER_CONTINUE;
+        }
+        if (src instanceof Collection<?>) {
+            Collection<?> coll = (Collection<?>) src;
+            int size = coll.size();
+            Type targetComponentType = target.getGenericComponentType();
+            Object newArray = Array.newInstance(TypeKit.toRuntimeClass(targetComponentType), size);
+            int i = 0;
+            for (Object s : coll) {
+                Array.set(newArray, i++, converter.convert(s, srcComponentType, targetComponentType, options));
+            }
+            return newArray;
+        }
+        if (src instanceof Iterable<?>) {
+            Iterable<?> iter = (Iterable<?>) src;
+            List<Object> dst = new ArrayList<>();
+            Type targetComponentType = target.getGenericComponentType();
+            for (Object s : iter) {
+                dst.add(converter.convert(s, srcComponentType, targetComponentType, options));
+            }
+            Object newArray = Array.newInstance(TypeKit.toRuntimeClass(targetComponentType), dst.size());
+            int i = 0;
+            for (Object s : dst) {
+                Array.set(newArray, i++, s);
+            }
+            return newArray;
+        }
+        return ObjectConverter.Status.HANDLER_CONTINUE;
     }
 
     private Object convertToCollection(
         @Nonnull Object src,
         @Nonnull Type srcType,
-        @Nonnull IntFunction<Object> collectionFunc,
+        @Nonnull IntFunction<Collection<Object>> collectionFunc,
         @Nonnull Type targetComponentType,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
-    ) throws Exception {
-        return null;
+    ) {
+        if (srcType instanceof Class<?>) {
+            Class<?> srcClass = (Class<?>) srcType;
+            if (srcClass.isArray()) {
+                int size = Array.getLength(src);
+                Collection<Object> newCollection = collectionFunc.apply(size);
+                Class<?> srcComponentType = srcClass.getComponentType();
+                for (int i = 0; i < size; i++) {
+                    Object srcElement = Array.get(src, i);
+                    newCollection.add(
+                        converter.convert(srcElement, srcComponentType, targetComponentType, options)
+                    );
+                }
+                return newCollection;
+            }
+        }
+        Type srcComponentType = resolveComponentType(srcType);
+        if (srcComponentType == null) {
+            return ObjectConverter.Status.HANDLER_CONTINUE;
+        }
+        if (src instanceof Collection<?>) {
+            Collection<?> coll = (Collection<?>) src;
+            int size = coll.size();
+            Collection<Object> newCollection = collectionFunc.apply(size);
+            for (Object s : coll) {
+                newCollection.add(converter.convert(s, srcComponentType, targetComponentType, options));
+            }
+            return newCollection;
+        }
+        if (src instanceof Iterable<?>) {
+            Iterable<?> iter = (Iterable<?>) src;
+            List<Object> dst = new ArrayList<>();
+            for (Object s : iter) {
+                dst.add(converter.convert(s, srcComponentType, targetComponentType, options));
+            }
+            Collection<Object> newCollection = collectionFunc.apply(dst.size());
+            newCollection.addAll(dst);
+            return newCollection;
+        }
+        return ObjectConverter.Status.HANDLER_CONTINUE;
+    }
+
+    private @Nullable Type resolveComponentType(@Nonnull Type type) {
+        try {
+            return TypeKit.resolveActualTypeArguments(type, Iterable.class).get(0);
+        } catch (ReflectionException e) {
+            return null;
+        }
     }
 
     private Object convertToDataObject(
@@ -234,10 +373,9 @@ public class CommonConversionHandler implements ObjectConverter.Handler {
         }
     }
 
-
     private static final class CollectionGenerator {
 
-        private static final @Nonnull Map<@Nonnull Type, @Nonnull IntFunction<@Nonnull Object>> CLASS_MAP;
+        private static final @Nonnull Map<@Nonnull Type, @Nonnull IntFunction<@Nonnull Collection<Object>>> CLASS_MAP;
 
         static {
             CLASS_MAP = new HashMap<>();
@@ -255,7 +393,7 @@ public class CommonConversionHandler implements ObjectConverter.Handler {
             CLASS_MAP.put(ConcurrentSkipListSet.class, size -> new ConcurrentSkipListSet<>());
         }
 
-        public static @Nullable IntFunction<@Nonnull Object> get(@Nonnull Class<?> target) {
+        public static @Nullable IntFunction<@Nonnull Collection<Object>> get(@Nonnull Class<?> target) {
             return CLASS_MAP.get(target);
         }
     }

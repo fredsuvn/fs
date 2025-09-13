@@ -260,7 +260,7 @@ public class TypeKit {
      * order of those type parameters
      * @throws ReflectionException if the given type cannot be resolved
      */
-    public static @Nonnull List<Type> resolveActualTypeArguments(
+    public static @Nonnull List<@Nonnull Type> resolveActualTypeArguments(
         @Nonnull Type type, @Nonnull Class<?> baseType
     ) throws ReflectionException {
         if (baseType.isArray()) {

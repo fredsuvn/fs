@@ -4,25 +4,31 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.exception.UnreachablePointException;
 import xyz.sunqian.common.collect.ArrayKit;
+import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.collect.MapKit;
 import xyz.sunqian.common.object.convert.ConvertOption;
 import xyz.sunqian.common.object.convert.DataBuilderFactory;
 import xyz.sunqian.common.object.convert.ObjectConvertException;
 import xyz.sunqian.common.object.convert.ObjectConverter;
 import xyz.sunqian.common.object.convert.UnsupportedObjectConvertException;
+import xyz.sunqian.common.runtime.reflect.TypeKit;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
 import xyz.sunqian.test.PrintTest;
 
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
@@ -139,6 +145,83 @@ public class ConvertTest implements PrintTest {
                     return null;
                 }
             })));
+        {
+            // to array
+            String[] strArray = new String[]{"1", "2", "3"};
+            assertEquals(converter.convert(strArray, int[].class), new int[]{1, 2, 3});
+            List<String> strList = ListKit.list("1", "2", "3");
+            assertEquals(converter.convert(strList, int[].class), new int[]{1, 2, 3});
+            assertEquals(
+                converter.convert(strList, new TypeRef<List<String>>() {}.type(), int[].class),
+                new int[]{1, 2, 3}
+            );
+            assertEquals(converter.convert(new Iterable<String>() {
+                @NotNull
+                @Override
+                public Iterator<String> iterator() {
+                    return strList.iterator();
+                }
+            }, int[].class), new int[]{1, 2, 3});
+            expectThrows(UnsupportedObjectConvertException.class, () ->
+                converter.convert("", int[].class));
+            expectThrows(UnsupportedObjectConvertException.class, () ->
+                converter.convert("", new TypeRef<List<String>>() {}.type(), int[].class));
+        }
+        {
+            // to generic array
+            String[] strArray = new String[]{"1", "2", "3"};
+            GenericArrayType genericArrayType = TypeKit.arrayType(Integer.class);
+            assertEquals(converter.convert(strArray, genericArrayType), new Integer[]{1, 2, 3});
+            List<String> strList = ListKit.list("1", "2", "3");
+            assertEquals(converter.convert(strList, genericArrayType), new Integer[]{1, 2, 3});
+            assertEquals(
+                converter.convert(strList, new TypeRef<List<String>>() {}.type(), genericArrayType),
+                new Integer[]{1, 2, 3}
+            );
+            assertEquals(converter.convert(new Iterable<String>() {
+                @NotNull
+                @Override
+                public Iterator<String> iterator() {
+                    return strList.iterator();
+                }
+            }, genericArrayType), new Integer[]{1, 2, 3});
+            expectThrows(UnsupportedObjectConvertException.class, () ->
+                converter.convert("", genericArrayType));
+            expectThrows(UnsupportedObjectConvertException.class, () ->
+                converter.convert("", new TypeRef<List<String>>() {}.type(), genericArrayType));
+        }
+        {
+            // to collection
+            String[] strArray = new String[]{"1", "2", "3"};
+            Type collectionType = new TypeRef<List<Integer>>() {}.type();
+            assertEquals(converter.convert(strArray, collectionType), ListKit.list(1, 2, 3));
+            List<String> strList = ListKit.list("1", "2", "3");
+            assertEquals(converter.convert(strList, Set.class, List.class), ListKit.list("1", "2", "3"));
+            assertEquals(
+                converter.convert(strList, new TypeRef<List<String>>() {}.type(), collectionType),
+                ListKit.list(1, 2, 3)
+            );
+            assertEquals(converter.convert(new Iterable<String>() {
+                @NotNull
+                @Override
+                public Iterator<String> iterator() {
+                    return strList.iterator();
+                }
+            }, collectionType), ListKit.list(1, 2, 3));
+            expectThrows(UnsupportedObjectConvertException.class, () ->
+                converter.convert("", collectionType));
+            expectThrows(UnsupportedObjectConvertException.class, () ->
+                converter.convert("", new TypeRef<List<String>>() {}.type(), collectionType));
+        }
+    }
+
+    @Test
+    public void testComplexConvert() {
+        CA ca = new CA("1", ListKit.list("1", "2", "3"), new A("1", "2", "3"));
+        assertEquals(
+            ObjectConverter.defaultConverter().convert(ca, CB.class),
+            new CB(1, ListKit.list(1, 2, 3), new B(1L, 2L, 3L))
+        );
     }
 
     @Test
@@ -193,5 +276,25 @@ public class ConvertTest implements PrintTest {
 
     public enum E {
         A,
+    }
+
+    @Data
+    @EqualsAndHashCode
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CA {
+        private String p1;
+        private List<String> p2;
+        private A p3;
+    }
+
+    @Data
+    @EqualsAndHashCode
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CB {
+        private Integer p1;
+        private List<Integer> p2;
+        private B p3;
     }
 }
