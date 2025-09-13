@@ -35,7 +35,7 @@ import java.util.Objects;
  *
  * @author sunqian
  */
-public class AssignableConversionHandler implements ObjectConverter.Handler {
+public class AssignableConvertHandler implements ObjectConverter.Handler {
 
     @Override
     public Object convert(

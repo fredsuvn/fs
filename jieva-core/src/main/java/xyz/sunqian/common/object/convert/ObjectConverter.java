@@ -8,8 +8,8 @@ import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.option.Option;
 import xyz.sunqian.common.collect.ListKit;
-import xyz.sunqian.common.object.convert.handlers.AssignableConversionHandler;
-import xyz.sunqian.common.object.convert.handlers.CommonConversionHandler;
+import xyz.sunqian.common.object.convert.handlers.AssignableConvertHandler;
+import xyz.sunqian.common.object.convert.handlers.CommonConvertHandler;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
 
 import java.lang.reflect.Type;
@@ -48,8 +48,8 @@ public interface ObjectConverter {
     /**
      * Returns the default {@link ObjectConverter}, of which handlers are:
      * <ul>
-     *     <li>{@link AssignableConversionHandler};</li>
-     *     <li>{@link CommonConversionHandler};</li>
+     *     <li>{@link AssignableConvertHandler};</li>
+     *     <li>{@link CommonConvertHandler};</li>
      * </ul>
      *
      * @return the default converter

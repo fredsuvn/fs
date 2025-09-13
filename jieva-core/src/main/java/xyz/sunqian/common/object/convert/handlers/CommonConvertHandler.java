@@ -123,7 +123,7 @@ import java.util.function.IntFunction;
  * </tr>
  * </table>
  */
-public class CommonConversionHandler implements ObjectConverter.Handler {
+public class CommonConvertHandler implements ObjectConverter.Handler {
 
     @Override
     public Object convert(
