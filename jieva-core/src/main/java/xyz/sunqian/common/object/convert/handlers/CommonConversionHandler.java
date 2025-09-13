@@ -18,6 +18,7 @@ import java.io.Reader;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
@@ -51,12 +52,12 @@ import java.util.function.IntFunction;
  * this handler for different target types:
  * <table border="1px solid">
  * <tr>
- *     <th width="20%">Target Type</th>
+ *     <th width="20%">Target</th>
  *     <th width="20%">Source</th>
  *     <th width="60%">Conversion Logic</th>
  * </tr>
  * <tr>
- *     <td rowspan="3">{@link String}, {@link CharSequence}</td>
+ *     <td rowspan="5">{@link String}, {@link CharSequence}</td>
  *     <td>{@link InputStream}, {@link ReadableByteChannel}, {@link Reader}, {@link ByteBuffer}, {@code byte[]}</td>
  *     <td>Using {@link ConversionOptions#ioOperator(IOOperator)} and {@link ConversionOptions#charset(Charset)}
  *     to decode to string.</td>
@@ -66,17 +67,25 @@ import java.util.function.IntFunction;
  *     <td>Using {@link String#String(char[])} to construct to string.</td>
  * </tr>
  * <tr>
+ *     <td>{@link BigDecimal}</td>
+ *     <td>Using {@link BigDecimal#toPlainString()}.</td>
+ * </tr>
+ * <tr>
+ *     <td>Date and Time Objects</td>
+ *     <td>Using {@link ConversionOptions#timeFormatter(TimeFormatter)} to handle.</td>
+ * </tr>
+ * <tr>
  *     <td>Others</td>
  *     <td>Using {@link Object#toString()}.</td>
  * </tr>
  * <tr>
- *     <td>Number Types</td>
+ *     <td>Numbers</td>
  *     <td>Any Objects</td>
  *     <td>Using {@link StringKit#toNumber(CharSequence, Class)} with the string from {@link Object#toString()}.</td>
  * </tr>
  * <tr>
- *     <td rowspan="2">Date and Time Types</td>
- *     <td>String Types and Other Date Time Types</td>
+ *     <td rowspan="2">Date and Time</td>
+ *     <td>{@link String} and Other Date Time Objects</td>
  *     <td>Using {@link ConversionOptions#timeFormatter(TimeFormatter)} to handle.</td>
  * </tr>
  * <tr>
@@ -85,12 +94,12 @@ import java.util.function.IntFunction;
  *     handle.</td>
  * </tr>
  * <tr>
- *     <td>Enum Types</td>
+ *     <td>Enums</td>
  *     <td>Any Objects</td>
  *     <td>Using {@link EnumKit#findEnum(Class, String)} with the name from {@link Object#toString()}.</td>
  * </tr>
  * <tr>
- *     <td>Arrays and Collections</td>
+ *     <td>Array and Collection Objects</td>
  *     <td>Array or Iterable Objects</td>
  *     <td>Array created using reflection. Collection created using its constructor, the supported collection types:
  *     {@link Iterable}, {@link Collection}, {@link List}, {@link AbstractList}, {@link ArrayList}, {@link LinkedList},
@@ -100,8 +109,8 @@ import java.util.function.IntFunction;
  *     </td>
  * </tr>
  * <tr>
- *     <td>Maps and Data Objects</td>
- *     <td>Classes or Parameterized Types</td>
+ *     <td>Map and Data Objects</td>
+ *     <td>Any Objects</td>
  *     <td>Generating data object is based on {@link ConversionOptions#builderFactory(DataBuilderFactory)} and
  *     {@link ConversionOptions#dataMapper(DataMapper)}. Generating map using its constructor, and copying properties
  *     also using {@link ConversionOptions#dataMapper(DataMapper)}. The supported map types:
