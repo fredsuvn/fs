@@ -22,13 +22,21 @@ import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.AbstractList;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -137,25 +145,29 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             return ObjectConverter.Status.HANDLER_CONTINUE;
         }
         if (target instanceof Class<?>) {
-            Class<?> classType = (Class<?>) target;
-            if (classType.isEnum()) {
+            Class<?> targetClass = (Class<?>) target;
+            if (targetClass.isEnum()) {
                 // to enum:
                 String name = src.toString();
-                return EnumKit.findEnum(Jie.as(classType), name);
+                return EnumKit.findEnum(Jie.as(targetClass), name);
             }
-            if (classType.isArray()) {
+            if (targetClass.isArray()) {
                 // to array
-                return convertToArray(src, srcType, classType, converter, options);
+                return convertToArray(src, srcType, targetClass, converter, options);
             }
-            IntFunction<Collection<Object>> collectionFunc = CollectionGenerator.get(classType);
+            // Handler handler = TargetClasses.get(targetClass);
+            // if (handler != null) {
+            //     return handler.convert(src, srcType, targetClass, converter, options);
+            // }
+            IntFunction<Collection<Object>> collectionFunc = CollectionGenerator.get(targetClass);
             if (collectionFunc != null) {
                 // to collection
                 return convertToCollection(
-                    src, srcType, collectionFunc, classType.getTypeParameters()[0], converter, options
+                    src, srcType, collectionFunc, targetClass.getTypeParameters()[0], converter, options
                 );
             }
             // to map or data object
-            return convertToDataObject(src, srcType, classType, target, converter, options);
+            return convertToDataObject(src, srcType, targetClass, target, converter, options);
         } else if (target instanceof GenericArrayType) {
             // to generic array
             return convertToArray(src, srcType, (GenericArrayType) target, converter, options);
@@ -417,6 +429,123 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
 
         public static @Nullable IntFunction<@Nonnull Object> get(@Nonnull Class<?> target) {
             return CLASS_MAP.get(target);
+        }
+    }
+
+    private interface Handler {
+        Object convert(
+            @Nonnull Object src,
+            @Nonnull Type srcType,
+            @Nonnull Class<?> target,
+            @Nonnull ObjectConverter converter,
+            @Nonnull Option<?, ?> @Nonnull ... options
+        ) throws Exception;
+    }
+
+    private static final class TargetClasses {
+
+        private static final @Nonnull Map<@Nonnull Type, @Nonnull Handler> HANDLER_MAP;
+
+        static {
+            HANDLER_MAP = new HashMap<>();
+            HANDLER_MAP.put(String.class, new StringHandler());
+            HANDLER_MAP.put(CharSequence.class, new StringHandler());
+            HANDLER_MAP.put(boolean.class, new BooleanHandler());
+            HANDLER_MAP.put(Boolean.class, new BooleanHandler());
+            HANDLER_MAP.put(byte.class, new NumberHandler());
+            HANDLER_MAP.put(short.class, new NumberHandler());
+            HANDLER_MAP.put(char.class, new NumberHandler());
+            HANDLER_MAP.put(int.class, new NumberHandler());
+            HANDLER_MAP.put(long.class, new NumberHandler());
+            HANDLER_MAP.put(float.class, new NumberHandler());
+            HANDLER_MAP.put(double.class, new NumberHandler());
+            HANDLER_MAP.put(Byte.class, new NumberHandler());
+            HANDLER_MAP.put(Short.class, new NumberHandler());
+            HANDLER_MAP.put(Character.class, new NumberHandler());
+            HANDLER_MAP.put(Integer.class, new NumberHandler());
+            HANDLER_MAP.put(Long.class, new NumberHandler());
+            HANDLER_MAP.put(Float.class, new NumberHandler());
+            HANDLER_MAP.put(Double.class, new NumberHandler());
+            HANDLER_MAP.put(BigInteger.class, new NumberHandler());
+            HANDLER_MAP.put(BigDecimal.class, new NumberHandler());
+            HANDLER_MAP.put(Number.class, new NumberHandler());
+            HANDLER_MAP.put(Date.class, new TimeHandler());
+            HANDLER_MAP.put(Instant.class, new TimeHandler());
+            HANDLER_MAP.put(LocalDateTime.class, new TimeHandler());
+            HANDLER_MAP.put(ZonedDateTime.class, new TimeHandler());
+            HANDLER_MAP.put(OffsetDateTime.class, new TimeHandler());
+            HANDLER_MAP.put(LocalDate.class, new TimeHandler());
+            HANDLER_MAP.put(LocalTime.class, new TimeHandler());
+        }
+
+        public static @Nullable Handler get(@Nonnull Class<?> target) {
+            return HANDLER_MAP.get(target);
+        }
+    }
+
+    private static final class StringHandler implements Handler {
+        @Override
+        public Object convert(
+            @Nonnull Object src,
+            @Nonnull Type srcType,
+            @Nonnull Class<?> target,
+            @Nonnull ObjectConverter converter,
+            @Nonnull Option<?, ?> @Nonnull ... options
+        ) throws Exception {
+            return null;
+        }
+    }
+
+    private static final class NumberHandler implements Handler {
+        @Override
+        public Object convert(
+            @Nonnull Object src,
+            @Nonnull Type srcType,
+            @Nonnull Class<?> target,
+            @Nonnull ObjectConverter converter,
+            @Nonnull Option<?, ?> @Nonnull ... options
+        ) throws Exception {
+            return null;
+        }
+    }
+
+    private static final class BooleanHandler implements Handler {
+        @Override
+        public Object convert(
+            @Nonnull Object src,
+            @Nonnull Type srcType,
+            @Nonnull Class<?> target,
+            @Nonnull ObjectConverter converter,
+            @Nonnull Option<?, ?> @Nonnull ... options
+        ) throws Exception {
+            if (src instanceof Boolean) {
+                return src;
+            }
+            if (src instanceof Number) {
+                return ((Number) src).intValue() != 0;
+            }
+            if (src instanceof CharSequence) {
+                return src.toString().equalsIgnoreCase("true");
+            }
+            return ObjectConverter.Status.HANDLER_CONTINUE;
+        }
+    }
+
+    private static final class TimeHandler implements Handler {
+        @Override
+        public Object convert(
+            @Nonnull Object src,
+            @Nonnull Type srcType,
+            @Nonnull Class<?> target,
+            @Nonnull ObjectConverter converter,
+            @Nonnull Option<?, ?> @Nonnull ... options
+        ) throws Exception {
+            TimeFormatter timeFormatter = Jie.nonnull(
+                Option.findValue(ConvertOption.TIME_FORMATTER,  options),
+                TimeFormatter.defaultFormatter()
+            );
+            //if (src)
+            return null;
         }
     }
 }
