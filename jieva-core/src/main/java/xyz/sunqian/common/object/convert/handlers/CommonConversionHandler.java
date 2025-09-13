@@ -8,7 +8,7 @@ import xyz.sunqian.common.base.option.Option;
 import xyz.sunqian.common.base.string.StringKit;
 import xyz.sunqian.common.base.time.TimeFormatter;
 import xyz.sunqian.common.io.IOOperator;
-import xyz.sunqian.common.object.convert.ConversionOptions;
+import xyz.sunqian.common.object.convert.ConvertOption;
 import xyz.sunqian.common.object.convert.DataBuilderFactory;
 import xyz.sunqian.common.object.convert.DataMapper;
 import xyz.sunqian.common.object.convert.ObjectConverter;
@@ -59,7 +59,7 @@ import java.util.function.IntFunction;
  * <tr>
  *     <td rowspan="5">{@link String}, {@link CharSequence}</td>
  *     <td>{@link InputStream}, {@link ReadableByteChannel}, {@link Reader}, {@link ByteBuffer}, {@code byte[]}</td>
- *     <td>Using {@link ConversionOptions#ioOperator(IOOperator)} and {@link ConversionOptions#charset(Charset)}
+ *     <td>Using {@link ConvertOption#ioOperator(IOOperator)} and {@link ConvertOption#charset(Charset)}
  *     to decode to string.</td>
  * </tr>
  * <tr>
@@ -72,7 +72,7 @@ import java.util.function.IntFunction;
  * </tr>
  * <tr>
  *     <td>Date and Time Objects</td>
- *     <td>Using {@link ConversionOptions#timeFormatter(TimeFormatter)} to handle.</td>
+ *     <td>Using {@link ConvertOption#timeFormatter(TimeFormatter)} to handle.</td>
  * </tr>
  * <tr>
  *     <td>Others</td>
@@ -86,11 +86,11 @@ import java.util.function.IntFunction;
  * <tr>
  *     <td rowspan="2">Date and Time</td>
  *     <td>{@link String} and Other Date Time Objects</td>
- *     <td>Using {@link ConversionOptions#timeFormatter(TimeFormatter)} to handle.</td>
+ *     <td>Using {@link ConvertOption#timeFormatter(TimeFormatter)} to handle.</td>
  * </tr>
  * <tr>
  *     <td>{@code long} and {@link Long}</td>
- *     <td>Treated as an epoch milliseconds, then using {@link ConversionOptions#timeFormatter(TimeFormatter)} to
+ *     <td>Treated as an epoch milliseconds, then using {@link ConvertOption#timeFormatter(TimeFormatter)} to
  *     handle.</td>
  * </tr>
  * <tr>
@@ -111,9 +111,9 @@ import java.util.function.IntFunction;
  * <tr>
  *     <td>Map and Data Objects</td>
  *     <td>Any Objects</td>
- *     <td>Generating data object is based on {@link ConversionOptions#builderFactory(DataBuilderFactory)} and
- *     {@link ConversionOptions#dataMapper(DataMapper)}. Generating map using its constructor, and copying properties
- *     also using {@link ConversionOptions#dataMapper(DataMapper)}. The supported map types:
+ *     <td>Generating data object is based on {@link ConvertOption#builderFactory(DataBuilderFactory)} and
+ *     {@link ConvertOption#dataMapper(DataMapper)}. Generating map using its constructor, and copying properties
+ *     also using {@link ConvertOption#dataMapper(DataMapper)}. The supported map types:
  *     {@link Map}, {@link AbstractMap}, {@link LinkedHashMap}, {@link HashMap}, {@link TreeMap}, {@link ConcurrentMap},
  *     {@link ConcurrentHashMap}, {@link Hashtable}, {@link ConcurrentSkipListMap}.
  *     </td>
@@ -213,7 +213,7 @@ public class CommonConversionHandler implements ObjectConverter.Handler {
     ) throws Exception {
         IntFunction<Object> mapFunc = MapGenerator.get(rawTarget);
         DataMapper dataMapper = Jie.nonnull(
-            Option.findValue(ConversionOptions.Key.DATA_MAPPER, options),
+            Option.findValue(ConvertOption.DATA_MAPPER, options),
             DataMapper.defaultMapper()
         );
         if (mapFunc != null) {
@@ -222,7 +222,7 @@ public class CommonConversionHandler implements ObjectConverter.Handler {
             return targetObject;
         } else {
             DataBuilderFactory builderFactory = Jie.nonnull(
-                Option.findValue(ConversionOptions.Key.BUILDER_FACTORY, options),
+                Option.findValue(ConvertOption.BUILDER_FACTORY, options),
                 DataBuilderFactory.defaultFactory()
             );
             Object targetBuilder = builderFactory.newBuilder(rawTarget);

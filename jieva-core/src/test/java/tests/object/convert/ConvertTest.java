@@ -10,9 +10,8 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.exception.UnreachablePointException;
 import xyz.sunqian.common.collect.ArrayKit;
 import xyz.sunqian.common.collect.MapKit;
-import xyz.sunqian.common.object.convert.ConversionOptions;
+import xyz.sunqian.common.object.convert.ConvertOption;
 import xyz.sunqian.common.object.convert.DataBuilderFactory;
-import xyz.sunqian.common.object.convert.MappingOption;
 import xyz.sunqian.common.object.convert.ObjectConversionException;
 import xyz.sunqian.common.object.convert.ObjectConverter;
 import xyz.sunqian.common.object.convert.UnsupportedObjectConversionException;
@@ -64,12 +63,12 @@ public class ConvertTest implements PrintTest {
                     ObjectConverter.Status.HANDLER_BREAK
             );
             UnsupportedObjectConversionException e = expectThrows(UnsupportedObjectConversionException.class, () ->
-                cvt.convert(a, B.class, MappingOption.IGNORE_NULL));
+                cvt.convert(a, B.class, ConvertOption.IGNORE_NULL));
             assertEquals(e.sourceObject(), a);
             assertEquals(e.sourceObjectType(), A.class);
             assertEquals(e.targetType(), B.class);
             assertSame(e.converter(), cvt);
-            assertEquals(e.options(), ArrayKit.array(MappingOption.IGNORE_NULL));
+            assertEquals(e.options(), ArrayKit.array(ConvertOption.IGNORE_NULL));
         }
         {
             // withLastHandler
@@ -79,7 +78,7 @@ public class ConvertTest implements PrintTest {
                     throw new UnreachablePointException();
                 });
             ObjectConversionException e = expectThrows(ObjectConversionException.class, () ->
-                cvt.convert(a, X.class.getTypeParameters()[0], MappingOption.STRICT_TYPE));
+                cvt.convert(a, X.class.getTypeParameters()[0], ConvertOption.STRICT_TYPE_MODE));
             assertTrue(e.getCause() instanceof UnreachablePointException);
         }
         {
@@ -94,28 +93,18 @@ public class ConvertTest implements PrintTest {
                 .getActualTypeArguments()[0];
             Object obj = new Object();
             expectThrows(UnsupportedObjectConversionException.class, () ->
-                converter.convert(obj, wildLower, MappingOption.STRICT_TYPE));
-            assertSame(converter.convert(obj, wildLower), obj);
+                converter.convert(obj, wildLower, ConvertOption.STRICT_TYPE_MODE));
+            assertEquals(converter.convert(obj, wildLower), obj.toString());
+            Type upperLower = ((ParameterizedType) (F.class.getField("l2").getGenericType()))
+                .getActualTypeArguments()[0];
+            expectThrows(UnsupportedObjectConversionException.class, () ->
+                converter.convert(obj, upperLower, ConvertOption.STRICT_TYPE_MODE));
+            assertEquals(converter.convert(obj, upperLower), obj.toString());
             class X<T> {}
             expectThrows(UnsupportedObjectConversionException.class, () ->
-                converter.convert(obj, X.class.getTypeParameters()[0], MappingOption.STRICT_TYPE));
+                converter.convert(obj, X.class.getTypeParameters()[0], ConvertOption.STRICT_TYPE_MODE));
             assertSame(converter.convert(obj, X.class.getTypeParameters()[0]), obj);
         }
-        // class X<T> {}
-        // ObjectConverter converter4 = converter.withLastHandler(
-        //     (src, srcType, target, converter1, options) ->
-        //         ObjectConverter.Status.HANDLER_BREAK);
-        // UnsupportedObjectConversionException e2 = expectThrows(UnsupportedObjectConversionException.class, () ->
-        //     converter4.convert(a, X.class.getTypeParameters()[0], MappingOption.STRICT_TYPE));
-        // assertEquals(e2.sourceObject(), a);
-        // assertEquals(e2.sourceObjectType(), A.class);
-        // assertEquals(e2.targetType(), X.class.getTypeParameters()[0]);
-        // assertSame(e2.converter(), converter4);
-        // assertEquals(e2.options(), ArrayKit.array(MappingOption.STRICT_TYPE));
-        // // assignable
-        // String hello = "hello";
-        // CharSequence cs = converter.convert(hello, CharSequence.class);
-        // assertSame(cs, hello);
 
     }
 
@@ -132,13 +121,13 @@ public class ConvertTest implements PrintTest {
         Map<String, String> map2 = converter.convert(a, A.class, new TypeRef<Map<String, String>>() {});
         assertEquals(map2, MapKit.map("first", "1", "second", "2", "third", "3"));
         Map<String, String> map3 = converter.convert(a, new TypeRef<Map<String, String>>() {},
-            ConversionOptions.builderFactory(DataBuilderFactory.newFactory(new HashMap<>())));
+            ConvertOption.builderFactory(DataBuilderFactory.newFactory(new HashMap<>())));
         assertEquals(map3, MapKit.map("first", "1", "second", "2", "third", "3"));
         class Err {}
         expectThrows(ObjectConversionException.class, () -> converter.convert(a, Err.class));
         // builder factory
         expectThrows(UnsupportedObjectConversionException.class, () -> converter.convert(a, B.class,
-            ConversionOptions.builderFactory(new DataBuilderFactory() {
+            ConvertOption.builderFactory(new DataBuilderFactory() {
 
                 @Override
                 public @Nullable Object newBuilder(@Nonnull Class<?> target) throws Exception {

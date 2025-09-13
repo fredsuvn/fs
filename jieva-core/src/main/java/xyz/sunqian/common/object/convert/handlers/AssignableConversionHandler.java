@@ -3,7 +3,7 @@ package xyz.sunqian.common.object.convert.handlers;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.option.Option;
-import xyz.sunqian.common.object.convert.MappingOption;
+import xyz.sunqian.common.object.convert.ConvertOption;
 import xyz.sunqian.common.object.convert.ObjectConverter;
 import xyz.sunqian.common.runtime.reflect.TypeKit;
 
@@ -21,10 +21,9 @@ import java.util.Objects;
  *         If the specified source type equals to the target type, returns the source object itself;
  *     </li>
  *     <li>
- *         If the {@link MappingOption#STRICT_TYPE} option is enabled, returns
+ *         If the {@link ConvertOption#STRICT_TYPE_MODE} option is enabled, returns
  *         {@link ObjectConverter.Status#HANDLER_CONTINUE} for target type of {@link WildcardType};
- *         Otherwise, the source will be returned directly for target type of {@link WildcardType} and
- *         {@link TypeVariable};
+ *         Otherwise, recursively convert their bounds type using the {@code converter} parameter;
  *     </li>
  *     <li>
  *         If the target type is assignable from the specified source type, returns the source object itself;
@@ -49,19 +48,23 @@ public class AssignableConversionHandler implements ObjectConverter.Handler {
         if (Objects.equals(target, srcType)) {
             return src;
         }
-        if (Option.hasKey(MappingOption.STRICT_TYPE, options)) {
+        if (Option.hasKey(ConvertOption.STRICT_TYPE_MODE, options)) {
             // strict mode, wildcard is unsupported
             if (target instanceof WildcardType) {
                 return ObjectConverter.Status.HANDLER_CONTINUE;
             }
         } else {
-            // non-strict mode, wildcard and type variable will be considered as Object.class
-            // and the src will be returned directly
+            // non-strict mode, wildcard and type variable will be considered as their bounds type
             if (target instanceof WildcardType) {
-                return src;
+                WildcardType wildcard = (WildcardType) target;
+                Type superType = TypeKit.getLowerBound(wildcard);
+                if (superType != null) {
+                    return converter.convert(src, srcType, superType, options);
+                }
+                return converter.convert(src, srcType, TypeKit.getUpperBound(wildcard), options);
             }
             if (target instanceof TypeVariable<?>) {
-                return src;
+                return converter.convert(src, srcType, ((TypeVariable<?>) target).getBounds()[0], options);
             }
         }
         if (TypeKit.isAssignable(target, srcType)) {

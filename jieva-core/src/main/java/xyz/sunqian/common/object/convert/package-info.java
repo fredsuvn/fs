@@ -11,7 +11,7 @@
  * The core interfaces and classes for data mapping:
  * <ul>
  *     <li>{@link xyz.sunqian.common.object.convert.DataMapper}</li>
- *     <li>{@link xyz.sunqian.common.object.convert.MappingOption}</li>
+ *     <li>{@link xyz.sunqian.common.object.convert.ConvertOption}</li>
  * </ul>
  * Supports object type conversion, using code similar to the following:
  * <pre>{@code
