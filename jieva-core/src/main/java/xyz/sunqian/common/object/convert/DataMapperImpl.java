@@ -17,9 +17,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-import static xyz.sunqian.common.object.convert.MappingOptions.Key.EXCEPTION_HANDLER;
-import static xyz.sunqian.common.object.convert.MappingOptions.Key.PROPERTY_MAPPER;
-
 final class DataMapperImpl implements DataMapper {
 
     static final @Nonnull DataMapper SINGLETON = new DataMapperImpl(new SchemaCacheImpl(new ConcurrentHashMap<>()));
@@ -40,11 +37,11 @@ final class DataMapperImpl implements DataMapper {
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws ObjectConversionException {
         try {
-            DataMapper.PropertyMapper propertyMapper = Option.findValue(PROPERTY_MAPPER, options);
-            DataMapper.ExceptionHandler exceptionHandler = Option.findValue(EXCEPTION_HANDLER, options);
+            DataMapper.PropertyMapper propertyMapper = Option.findValue(MappingOption.PROPERTY_MAPPER, options);
+            DataMapper.ExceptionHandler exceptionHandler = Option.findValue(MappingOption.EXCEPTION_HANDLER, options);
             if (src instanceof Map) {
                 MapSchemaParser mapSchemaParser = Jie.nonnull(
-                    Option.findValue(MappingOptions.Key.MAP_SCHEMA_PARSER),
+                    Option.findValue(MappingOption.MAP_SCHEMA_PARSER),
                     MapSchemaParser.defaultParser()
                 );
                 MapSchema srcSchema = schemaCache.get(srcType, mapSchemaParser::parse).asMapSchema();
@@ -55,7 +52,7 @@ final class DataMapperImpl implements DataMapper {
                     );
                 } else {
                     ObjectSchemaParser objectSchemaParser = Jie.nonnull(
-                        Option.findValue(MappingOptions.Key.OBJECT_SCHEMA_PARSER),
+                        Option.findValue(MappingOption.OBJECT_SCHEMA_PARSER),
                         ObjectSchemaParser.defaultParser()
                     );
                     ObjectSchema dstSchema = schemaCache.get(dstType, objectSchemaParser::parse).asObjectSchema();
@@ -65,13 +62,13 @@ final class DataMapperImpl implements DataMapper {
                 }
             } else {
                 ObjectSchemaParser objectSchemaParser = Jie.nonnull(
-                    Option.findValue(MappingOptions.Key.OBJECT_SCHEMA_PARSER),
+                    Option.findValue(MappingOption.OBJECT_SCHEMA_PARSER),
                     ObjectSchemaParser.defaultParser()
                 );
                 ObjectSchema srcSchema = schemaCache.get(srcType, objectSchemaParser::parse).asObjectSchema();
                 if (dst instanceof Map) {
                     MapSchemaParser mapSchemaParser = Jie.nonnull(
-                        Option.findValue(MappingOptions.Key.MAP_SCHEMA_PARSER),
+                        Option.findValue(MappingOption.MAP_SCHEMA_PARSER),
                         MapSchemaParser.defaultParser()
                     );
                     MapSchema dstSchema = schemaCache.get(dstType, mapSchemaParser::parse).asMapSchema();
@@ -317,7 +314,7 @@ final class DataMapperImpl implements DataMapper {
     }
 
     private boolean ignored(@Nonnull Object propertyName, @Nonnull Option<?, ?> @Nonnull ... options) {
-        Object[] ignoredProperties = Option.findValue(MappingOptions.Key.IGNORE_PROPERTIES, options);
+        Object[] ignoredProperties = Option.findValue(MappingOption.IGNORE_PROPERTIES, options);
         if (ignoredProperties == null) {
             return false;
         }
@@ -325,8 +322,7 @@ final class DataMapperImpl implements DataMapper {
     }
 
     private boolean ignoredNull(@Nonnull Option<?, ?> @Nonnull ... options) {
-        Object op = Option.findOption(MappingOptions.Key.IGNORE_NULL_PROPERTIES, options);
-        return op != null;
+        return Option.hasKey(MappingOption.IGNORE_NULL, options);
     }
 
     static final class SchemaCacheImpl implements SchemaCache {

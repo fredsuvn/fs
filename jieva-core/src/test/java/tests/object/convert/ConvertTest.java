@@ -8,10 +8,11 @@ import org.testng.annotations.Test;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.exception.UnreachablePointException;
-import xyz.sunqian.common.base.option.Option;
+import xyz.sunqian.common.collect.ArrayKit;
 import xyz.sunqian.common.collect.MapKit;
 import xyz.sunqian.common.object.convert.ConversionOptions;
 import xyz.sunqian.common.object.convert.DataBuilderFactory;
+import xyz.sunqian.common.object.convert.MappingOption;
 import xyz.sunqian.common.object.convert.ObjectConversionException;
 import xyz.sunqian.common.object.convert.ObjectConverter;
 import xyz.sunqian.common.object.convert.UnsupportedObjectConversionException;
@@ -46,33 +47,76 @@ public class ConvertTest implements PrintTest {
         assertEquals(converter2.convert(a, B.class), new B(1L, 2L, 3L));
         assertEquals(converter2.convert(a, A.class, B.class), new B(1L, 2L, 3L));
         expectThrows(UnsupportedObjectConversionException.class, () -> converter2.convert(null, B.class));
-        ObjectConverter converter3 = converter.withFirstHandler(
-            (src, srcType, target, converter1, options) -> {
-                throw new UnreachablePointException();
-            });
-        ObjectConversionException e1 = expectThrows(ObjectConversionException.class, () -> converter3.convert(a, B.class));
-        assertTrue(e1.getCause() instanceof UnreachablePointException);
-        class X<T> {}
-        ObjectConverter converter4 = converter.withLastHandler(
-            (src, srcType, target, converter1, options) ->
-                ObjectConverter.Status.HANDLER_BREAK);
-        UnsupportedObjectConversionException e2 = expectThrows(UnsupportedObjectConversionException.class, () ->
-            converter4.convert(a, X.class.getTypeParameters()[0]));
-        assertEquals(e2.sourceObject(), a);
-        assertEquals(e2.sourceObjectType(), A.class);
-        assertEquals(e2.targetType(), X.class.getTypeParameters()[0]);
-        assertSame(e2.converter(), converter4);
-        assertEquals(e2.options(), Option.empty());
-        // assignable
-        String hello = "hello";
-        CharSequence cs = converter.convert(hello, CharSequence.class);
-        assertSame(cs, hello);
-        Type wildLower = ((ParameterizedType) (F.class.getField("l1").getGenericType()))
-            .getActualTypeArguments()[0];
-        // assertSame(converter.convert(new Object(), wildLower), AssignableConversionHandler.SUPER);
-        // Type wildUpper = ((ParameterizedType) (F.class.getField("l2").getGenericType()))
-        //     .getActualTypeArguments()[0];
-        expectThrows(UnsupportedObjectConversionException.class, () -> converter.convert(new Object(), wildLower));
+        {
+            // error during handler
+            ObjectConverter cvt = converter.withFirstHandler(
+                (src, srcType, target, converter1, options) -> {
+                    throw new UnreachablePointException();
+                });
+            ObjectConversionException e = expectThrows(ObjectConversionException.class, () ->
+                cvt.convert(a, B.class));
+            assertTrue(e.getCause() instanceof UnreachablePointException);
+        }
+        {
+            // break during handler
+            ObjectConverter cvt = converter.withFirstHandler(
+                (src, srcType, target, converter1, options) ->
+                    ObjectConverter.Status.HANDLER_BREAK
+            );
+            UnsupportedObjectConversionException e = expectThrows(UnsupportedObjectConversionException.class, () ->
+                cvt.convert(a, B.class, MappingOption.IGNORE_NULL));
+            assertEquals(e.sourceObject(), a);
+            assertEquals(e.sourceObjectType(), A.class);
+            assertEquals(e.targetType(), B.class);
+            assertSame(e.converter(), cvt);
+            assertEquals(e.options(), ArrayKit.array(MappingOption.IGNORE_NULL));
+        }
+        {
+            // withLastHandler
+            class X<T> {}
+            ObjectConverter cvt = converter.withLastHandler(
+                (src, srcType, target, converter1, options) -> {
+                    throw new UnreachablePointException();
+                });
+            ObjectConversionException e = expectThrows(ObjectConversionException.class, () ->
+                cvt.convert(a, X.class.getTypeParameters()[0], MappingOption.STRICT_TYPE));
+            assertTrue(e.getCause() instanceof UnreachablePointException);
+        }
+        {
+            // assignable
+            String hello = "hello";
+            CharSequence cs = converter.convert(hello, CharSequence.class);
+            assertSame(cs, hello);
+        }
+        {
+            // strict type
+            Type wildLower = ((ParameterizedType) (F.class.getField("l1").getGenericType()))
+                .getActualTypeArguments()[0];
+            Object obj = new Object();
+            expectThrows(UnsupportedObjectConversionException.class, () ->
+                converter.convert(obj, wildLower, MappingOption.STRICT_TYPE));
+            assertSame(converter.convert(obj, wildLower), obj);
+            class X<T> {}
+            expectThrows(UnsupportedObjectConversionException.class, () ->
+                converter.convert(obj, X.class.getTypeParameters()[0], MappingOption.STRICT_TYPE));
+            assertSame(converter.convert(obj, X.class.getTypeParameters()[0]), obj);
+        }
+        // class X<T> {}
+        // ObjectConverter converter4 = converter.withLastHandler(
+        //     (src, srcType, target, converter1, options) ->
+        //         ObjectConverter.Status.HANDLER_BREAK);
+        // UnsupportedObjectConversionException e2 = expectThrows(UnsupportedObjectConversionException.class, () ->
+        //     converter4.convert(a, X.class.getTypeParameters()[0], MappingOption.STRICT_TYPE));
+        // assertEquals(e2.sourceObject(), a);
+        // assertEquals(e2.sourceObjectType(), A.class);
+        // assertEquals(e2.targetType(), X.class.getTypeParameters()[0]);
+        // assertSame(e2.converter(), converter4);
+        // assertEquals(e2.options(), ArrayKit.array(MappingOption.STRICT_TYPE));
+        // // assignable
+        // String hello = "hello";
+        // CharSequence cs = converter.convert(hello, CharSequence.class);
+        // assertSame(cs, hello);
+
     }
 
     @Test

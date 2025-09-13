@@ -110,6 +110,11 @@ public class ConversionOptions {
         /**
          * Key of {@link #dataMapper(DataMapper)}.
          */
+        STRICT_TYPE,
+
+        /**
+         * Key of {@link #dataMapper(DataMapper)}.
+         */
         DATA_MAPPER,
 
         /**
@@ -132,6 +137,24 @@ public class ConversionOptions {
          */
         TIME_FORMATTER,
         ;
+    }
+
+    /**
+     * Mapping option to ignore copy properties with {@code null} values.
+     */
+    public static final class StrictType implements Option<ConversionOptions.Key, Object> {
+
+        private static final @Nonnull StrictType SINGLETON = new StrictType();
+
+        @Override
+        public @Nonnull ConversionOptions.Key key() {
+            return Key.STRICT_TYPE;
+        }
+
+        @Override
+        public @Nullable Object value() {
+            return null;
+        }
     }
 
     private static final ConversionOptions DEFAULT_OPTIONS = ConversionOptions.builder().build();

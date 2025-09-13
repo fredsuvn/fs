@@ -19,7 +19,7 @@ import xyz.sunqian.common.function.callable.VoidCallable;
 import xyz.sunqian.common.io.IORuntimeException;
 import xyz.sunqian.common.object.convert.ConversionOptions;
 import xyz.sunqian.common.object.convert.DataMapper;
-import xyz.sunqian.common.object.convert.MappingOptions;
+import xyz.sunqian.common.object.convert.MappingOption;
 import xyz.sunqian.common.object.convert.ObjectConversionException;
 import xyz.sunqian.common.object.convert.ObjectConverter;
 import xyz.sunqian.common.object.convert.UnsupportedObjectConversionException;
@@ -462,7 +462,7 @@ public class Jie {
      * a non-map object which can be parsed to {@link ObjectSchema}.
      * <p>
      * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
-     * {@link MappingOptions} or {@link ConversionOptions} or other custom options for custom implementations.
+     * {@link MappingOption} or {@link ConversionOptions} or other custom options for custom implementations.
      * <p>
      * This method is a shortcut to the {@link DataMapper#copyProperties(Object, Object, Option[])}.
      *
@@ -483,7 +483,7 @@ public class Jie {
      * a non-map object which can be parsed to {@link ObjectSchema}.
      * <p>
      * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
-     * {@link MappingOptions} or {@link ConversionOptions} or other custom options for custom implementations.
+     * {@link MappingOption} or {@link ConversionOptions} or other custom options for custom implementations.
      * <p>
      * This method is a shortcut to the {@link DataMapper#copyProperties(Object, Object, ObjectConverter, Option[])}.
      *
@@ -508,7 +508,7 @@ public class Jie {
      * a non-map object which can be parsed to {@link ObjectSchema}.
      * <p>
      * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
-     * {@link MappingOptions} or {@link ConversionOptions} or other custom options for custom implementations.
+     * {@link MappingOption} or {@link ConversionOptions} or other custom options for custom implementations.
      * <p>
      * This method is a shortcut to the {@link DataMapper#copyProperties(Object, Type, Object, Type, Option[])}.
      *
@@ -541,7 +541,7 @@ public class Jie {
      * a non-map object which can be parsed to {@link ObjectSchema}.
      * <p>
      * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
-     * {@link MappingOptions} or {@link ConversionOptions} or other custom options for custom implementations.
+     * {@link MappingOption} or {@link ConversionOptions} or other custom options for custom implementations.
      * <p>
      * This method is a shortcut to the
      * {@link DataMapper#copyProperties(Object, Type, Object, Type, ObjectConverter, Option[])}.
@@ -581,7 +581,7 @@ public class Jie {
      * Converts the given source object from the specified type to the target type.
      * <p>
      * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
-     * {@link ConversionOptions} or {@link MappingOptions} or other custom options for custom implementations.
+     * {@link ConversionOptions} or {@link MappingOption} or other custom options for custom implementations.
      * <p>
      * This method is a shortcut to the {@link ObjectConverter#convert(Object, Class, Option[])}.
      *
@@ -607,7 +607,7 @@ public class Jie {
      * Converts the given source object from the specified type to the target type.
      * <p>
      * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
-     * {@link ConversionOptions} or {@link MappingOptions} or other custom options for custom implementations.
+     * {@link ConversionOptions} or {@link MappingOption} or other custom options for custom implementations.
      * <p>
      * This method is a shortcut to the {@link ObjectConverter#convert(Object, TypeRef, Option[])}.
      *
@@ -633,7 +633,7 @@ public class Jie {
      * Converts the given source object from the specified type to the target type.
      * <p>
      * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
-     * {@link ConversionOptions} or {@link MappingOptions} or other custom options for custom implementations.
+     * {@link ConversionOptions} or {@link MappingOption} or other custom options for custom implementations.
      * <p>
      * This method is a shortcut to the {@link ObjectConverter#convert(Object, Type, Class, Option[])}.
      *
@@ -661,7 +661,7 @@ public class Jie {
      * Converts the given source object from the specified type to the target type.
      * <p>
      * The options parameter can be empty, in which case the default behavior will be used, or built-in options in
-     * {@link ConversionOptions} or {@link MappingOptions} or other custom options for custom implementations.
+     * {@link ConversionOptions} or {@link MappingOption} or other custom options for custom implementations.
      * <p>
      * This method is a shortcut to the {@link ObjectConverter#convert(Object, Type, TypeRef, Option[])}.
      *
