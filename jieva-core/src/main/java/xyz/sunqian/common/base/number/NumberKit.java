@@ -16,13 +16,13 @@ public class NumberKit {
     /**
      * Converts the given string to the specified number type. Supported number types are:
      * <ul>
-     *     <li>{@link Byte}</li>
-     *     <li>{@link Short}</li>
-     *     <li>{@link Character} (Converts to {@link Integer} first, then to {@link Character})</li>
-     *     <li>{@link Integer}</li>
-     *     <li>{@link Long}</li>
-     *     <li>{@link Float}</li>
-     *     <li>{@link Double}</li>
+     *     <li>{@code byte}, {@link Byte}</li>
+     *     <li>{@code short}, {@link Short}</li>
+     *     <li>{@code char}, {@link Character} (Converts to {@link Integer} first, then to {@link Character})</li>
+     *     <li>{@code int}, {@link Integer}</li>
+     *     <li>{@code long}, {@link Long}</li>
+     *     <li>{@code float}, {@link Float}</li>
+     *     <li>{@code double}, {@link Double}</li>
      *     <li>{@link BigInteger}</li>
      *     <li>{@link BigDecimal}</li>
      * </ul>
@@ -37,27 +37,27 @@ public class NumberKit {
     public static <T> @Nonnull T toNumber(
         @Nonnull CharSequence str, Class<T> numType
     ) throws NumberFormatException, UnsupportedOperationException {
-        if (Byte.class.equals(numType)) {
+        if (byte.class.equals(numType) || Byte.class.equals(numType)) {
             return Jie.as(Byte.parseByte(str.toString()));
         }
-        if (Short.class.equals(numType)) {
+        if (short.class.equals(numType) || Short.class.equals(numType)) {
             return Jie.as(Short.parseShort(str.toString()));
         }
-        if (Character.class.equals(numType)) {
+        if (char.class.equals(numType) || Character.class.equals(numType)) {
             int i = Integer.parseInt(str.toString());
             char c = (char) i;
             return Jie.as(c);
         }
-        if (Integer.class.equals(numType)) {
+        if (int.class.equals(numType) || Integer.class.equals(numType)) {
             return Jie.as(Integer.parseInt(str.toString()));
         }
-        if (Long.class.equals(numType)) {
+        if (long.class.equals(numType) || Long.class.equals(numType)) {
             return Jie.as(Long.parseLong(str.toString()));
         }
-        if (Float.class.equals(numType)) {
+        if (float.class.equals(numType) || Float.class.equals(numType)) {
             return Jie.as(Float.parseFloat(str.toString()));
         }
-        if (Double.class.equals(numType)) {
+        if (double.class.equals(numType) || Double.class.equals(numType)) {
             return Jie.as(Double.parseDouble(str.toString()));
         }
         if (BigInteger.class.equals(numType)) {
@@ -72,13 +72,13 @@ public class NumberKit {
     /**
      * Converts the given number to the specified other number type. Supported other number types are:
      * <ul>
-     *     <li>{@link Byte}</li>
-     *     <li>{@link Short}</li>
-     *     <li>{@link Character} (Converts to {@link Integer} first, then to {@link Character})</li>
-     *     <li>{@link Integer}</li>
-     *     <li>{@link Long}</li>
-     *     <li>{@link Float}</li>
-     *     <li>{@link Double}</li>
+     *     <li>{@code byte}, {@link Byte}</li>
+     *     <li>{@code short}, {@link Short}</li>
+     *     <li>{@code char}, {@link Character} (Converts to {@link Integer} first, then to {@link Character})</li>
+     *     <li>{@code int}, {@link Integer}</li>
+     *     <li>{@code long}, {@link Long}</li>
+     *     <li>{@code float}, {@link Float}</li>
+     *     <li>{@code double}, {@link Double}</li>
      *     <li>{@link BigInteger}</li>
      *     <li>{@link BigDecimal}</li>
      * </ul>
@@ -93,27 +93,27 @@ public class NumberKit {
     public static <T> @Nonnull T toNumber(
         @Nonnull Number num, Class<T> numType
     ) throws NumberFormatException, UnsupportedOperationException {
-        if (Byte.class.equals(numType)) {
+        if (byte.class.equals(numType) || Byte.class.equals(numType)) {
             return Jie.as(num.byteValue());
         }
-        if (Short.class.equals(numType)) {
+        if (short.class.equals(numType) || Short.class.equals(numType)) {
             return Jie.as(num.shortValue());
         }
-        if (Character.class.equals(numType)) {
+        if (char.class.equals(numType) || Character.class.equals(numType)) {
             int i = num.intValue();
             char c = (char) i;
             return Jie.as(c);
         }
-        if (Integer.class.equals(numType)) {
+        if (int.class.equals(numType) || Integer.class.equals(numType)) {
             return Jie.as(num.intValue());
         }
-        if (Long.class.equals(numType)) {
+        if (long.class.equals(numType) || Long.class.equals(numType)) {
             return Jie.as(num.longValue());
         }
-        if (Float.class.equals(numType)) {
+        if (float.class.equals(numType) || Float.class.equals(numType)) {
             return Jie.as(num.floatValue());
         }
-        if (Double.class.equals(numType)) {
+        if (double.class.equals(numType) || Double.class.equals(numType)) {
             return Jie.as(num.doubleValue());
         }
         if (BigInteger.class.equals(numType)) {
