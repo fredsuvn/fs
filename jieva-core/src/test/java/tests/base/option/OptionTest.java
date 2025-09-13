@@ -4,6 +4,8 @@ import org.testng.annotations.Test;
 import xyz.sunqian.common.base.option.Option;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 import static xyz.sunqian.common.collect.ArrayKit.array;
 
 public class OptionTest {
@@ -14,7 +16,8 @@ public class OptionTest {
         assertEquals(Option.findValue("b", opts), "2");
         assertEquals(Option.findValue("d", opts), (String) null);
         assertEquals(Option.findValue("d", Option.empty()), (String) null);
-        opts[0] = null;
         assertEquals(Option.findValue("b", opts), "2");
+        assertTrue(Option.hasKey("a", opts));
+        assertFalse(Option.hasKey("d", opts));
     }
 }

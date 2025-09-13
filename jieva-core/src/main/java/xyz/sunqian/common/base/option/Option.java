@@ -70,7 +70,7 @@ public interface Option<K, V> {
             return null;
         }
         for (Option<?, ?> option : options) {
-            if (option != null && Jie.equals(option.key(), key)) {
+            if (Jie.equals(option.key(), key)) {
                 return Jie.as(option);
             }
         }
@@ -89,6 +89,18 @@ public interface Option<K, V> {
     static <V> V findValue(@Nonnull Object key, @Nonnull Option<?, ?> @Nonnull ... options) {
         @Nullable Option<?, V> option = findOption(key, options);
         return option == null ? null : option.value();
+    }
+
+    /**
+     * Returns whether the given options contain an option whose key equals the specified key.
+     *
+     * @param key     the specified key
+     * @param options the given options
+     * @return {@code true} if given options contain an option whose key equals the specified key, otherwise
+     * {@code false}
+     */
+    static boolean hasKey(@Nonnull Object key, @Nonnull Option<?, ?> @Nonnull ... options) {
+        return findOption(key, options) != null;
     }
 
     /**
