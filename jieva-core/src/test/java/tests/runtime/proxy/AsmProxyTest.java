@@ -170,6 +170,7 @@ public class AsmProxyTest implements PrintTest {
             // test class
             ProxySpec pc = generateProxy(ClsC.class, Jie.list(), counter);
             Class<?> c = pc.proxyClass();
+            printFor("ASM proxy class: ", c);
             Constructor<?>[] constructors = c.getConstructors();
             assertEquals(constructors.length, 1);
             assertEquals(

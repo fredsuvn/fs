@@ -26,8 +26,14 @@ public class TraceKit {
      *
      * @return the stack trace list of the current thread
      */
-    public static @Nonnull List<StackTraceElement> stackTrace() {
+    public static @Nonnull List<@Nonnull StackTraceElement> stackTrace() {
         StackTraceElement[] elements = Thread.currentThread().getStackTrace();
+        return parseStackTrace(elements);
+    }
+
+    private static @Nonnull List<@Nonnull StackTraceElement> parseStackTrace(
+        @Nonnull StackTraceElement @Nonnull [] elements
+    ) {
         int preIndex = -1;
         for (int i = 0; i < elements.length; i++) {
             StackTraceElement element = elements[i];
