@@ -8,6 +8,9 @@ import xyz.sunqian.common.base.lang.EnumKit;
 import xyz.sunqian.common.base.number.NumberKit;
 import xyz.sunqian.common.base.option.Option;
 import xyz.sunqian.common.base.time.TimeFormatter;
+import xyz.sunqian.common.collect.ArrayKit;
+import xyz.sunqian.common.collect.ArrayOperator;
+import xyz.sunqian.common.collect.CollectKit;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IOOperator;
 import xyz.sunqian.common.object.convert.ConvertOption;
@@ -19,7 +22,6 @@ import xyz.sunqian.common.runtime.reflect.TypeKit;
 
 import java.io.InputStream;
 import java.io.Reader;
-import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -179,11 +181,11 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
                 // to array
                 return convertToArray(src, srcType, targetClass, converter, options);
             }
-            Handler handler = TargetClasses.get(targetClass);
-            if (handler != null) {
-                return handler.convert(src, srcType, targetClass, converter, options);
+            ClassHandler classHandler = TargetClasses.get(targetClass);
+            if (classHandler != null) {
+                return classHandler.convert(src, srcType, targetClass, converter, options);
             }
-            IntFunction<Collection<Object>> collectionFunc = CollectionGenerator.get(targetClass);
+            IntFunction<Collection<Object>> collectionFunc = CollectionClasses.get(targetClass);
             if (collectionFunc != null) {
                 // to collection
                 return convertToCollection(
@@ -198,7 +200,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         } else if (target instanceof ParameterizedType) {
             ParameterizedType paramType = (ParameterizedType) target;
             Class<?> rawTarget = (Class<?>) paramType.getRawType();
-            IntFunction<Collection<Object>> collectionFunc = CollectionGenerator.get(rawTarget);
+            IntFunction<Collection<Object>> collectionFunc = CollectionClasses.get(rawTarget);
             if (collectionFunc != null) {
                 // to collection
                 return convertToCollection(
@@ -218,52 +220,15 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
-        if (srcType instanceof Class<?>) {
-            Class<?> srcClass = (Class<?>) srcType;
-            if (srcClass.isArray()) {
-                int size = Array.getLength(src);
-                Class<?> targetComponentType = target.getComponentType();
-                Object newArray = Array.newInstance(targetComponentType, size);
-                Class<?> srcComponentType = srcClass.getComponentType();
-                for (int i = 0; i < size; i++) {
-                    Object srcElement = Array.get(src, i);
-                    Array.set(
-                        newArray, i, converter.convert(srcElement, srcComponentType, targetComponentType, options)
-                    );
-                }
-                return newArray;
-            }
-        }
-        Type srcComponentType = resolveComponentType(srcType);
-        if (srcComponentType == null) {
-            return ObjectConverter.Status.HANDLER_CONTINUE;
-        }
-        if (src instanceof Collection<?>) {
-            Collection<?> coll = (Collection<?>) src;
-            int size = coll.size();
-            Class<?> targetComponentType = target.getComponentType();
-            Object newArray = Array.newInstance(targetComponentType, size);
-            int i = 0;
-            for (Object s : coll) {
-                Array.set(newArray, i++, converter.convert(s, srcComponentType, targetComponentType, options));
-            }
-            return newArray;
-        }
-        if (src instanceof Iterable<?>) {
-            Iterable<?> iter = (Iterable<?>) src;
-            List<Object> dst = new ArrayList<>();
-            Class<?> targetComponentType = target.getComponentType();
-            for (Object s : iter) {
-                dst.add(converter.convert(s, srcComponentType, targetComponentType, options));
-            }
-            Object newArray = Array.newInstance(targetComponentType, dst.size());
-            int i = 0;
-            for (Object s : dst) {
-                Array.set(newArray, i++, s);
-            }
-            return newArray;
-        }
-        return ObjectConverter.Status.HANDLER_CONTINUE;
+        return convertToArray(
+            src,
+            srcType,
+            target,
+            target.getComponentType(),
+            target.getComponentType(),
+            converter,
+            options
+        );
     }
 
     private Object convertToArray(
@@ -273,18 +238,39 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
+        Class<?> targetClass = Jie.asNonnull(TypeKit.toRuntimeClass(target));
+        return convertToArray(
+            src,
+            srcType,
+            targetClass,
+            target.getGenericComponentType(),
+            Jie.asNonnull(TypeKit.toRuntimeClass(target.getGenericComponentType())),
+            converter,
+            options
+        );
+    }
+
+    private Object convertToArray(
+        @Nonnull Object src,
+        @Nonnull Type srcType,
+        @Nonnull Class<?> target,
+        @Nonnull Type targetComponentType,
+        @Nonnull Class<?> targetComponentClass,
+        @Nonnull ObjectConverter converter,
+        @Nonnull Option<?, ?> @Nonnull ... options
+    ) {
         if (srcType instanceof Class<?>) {
             Class<?> srcClass = (Class<?>) srcType;
             if (srcClass.isArray()) {
-                int size = Array.getLength(src);
-                Type targetComponentType = target.getGenericComponentType();
-                Object newArray = Array.newInstance(TypeKit.toRuntimeClass(targetComponentType), size);
+                ArrayOperator srcOperator = ArrayOperator.of(srcClass);
+                int size = srcOperator.size(src);
+                Object newArray = ArrayKit.newArray(targetComponentClass, size);
                 Class<?> srcComponentType = srcClass.getComponentType();
+                ArrayOperator targetOperator = ArrayOperator.of(target);
                 for (int i = 0; i < size; i++) {
-                    Object srcElement = Array.get(src, i);
-                    Array.set(
-                        newArray, i, converter.convert(srcElement, srcComponentType, targetComponentType, options)
-                    );
+                    Object srcElement = srcOperator.get(src, i);
+                    Object targetElement = converter.convert(srcElement, srcComponentType, targetComponentType, options);
+                    targetOperator.set(newArray, i, targetElement);
                 }
                 return newArray;
             }
@@ -293,32 +279,24 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         if (srcComponentType == null) {
             return ObjectConverter.Status.HANDLER_CONTINUE;
         }
+        Collection<?> srcCollection;
         if (src instanceof Collection<?>) {
-            Collection<?> coll = (Collection<?>) src;
-            int size = coll.size();
-            Type targetComponentType = target.getGenericComponentType();
-            Object newArray = Array.newInstance(TypeKit.toRuntimeClass(targetComponentType), size);
-            int i = 0;
-            for (Object s : coll) {
-                Array.set(newArray, i++, converter.convert(s, srcComponentType, targetComponentType, options));
-            }
-            return newArray;
-        }
-        if (src instanceof Iterable<?>) {
+            srcCollection = (Collection<?>) src;
+        } else if (src instanceof Iterable<?>) {
             Iterable<?> iter = (Iterable<?>) src;
-            List<Object> dst = new ArrayList<>();
-            Type targetComponentType = target.getGenericComponentType();
-            for (Object s : iter) {
-                dst.add(converter.convert(s, srcComponentType, targetComponentType, options));
-            }
-            Object newArray = Array.newInstance(TypeKit.toRuntimeClass(targetComponentType), dst.size());
-            int i = 0;
-            for (Object s : dst) {
-                Array.set(newArray, i++, s);
-            }
-            return newArray;
+            srcCollection = CollectKit.addAll(new ArrayList<>(), iter);
+        } else {
+            return ObjectConverter.Status.HANDLER_CONTINUE;
         }
-        return ObjectConverter.Status.HANDLER_CONTINUE;
+        int size = srcCollection.size();
+        Object newArray = ArrayKit.newArray(targetComponentClass, size);
+        ArrayOperator targetOperator = ArrayOperator.of(target);
+        int i = 0;
+        for (Object srcElement : srcCollection) {
+            Object targetElement = converter.convert(srcElement, srcComponentType, targetComponentType, options);
+            targetOperator.set(newArray, i++, targetElement);
+        }
+        return newArray;
     }
 
     private Object convertToCollection(
@@ -332,14 +310,14 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         if (srcType instanceof Class<?>) {
             Class<?> srcClass = (Class<?>) srcType;
             if (srcClass.isArray()) {
-                int size = Array.getLength(src);
+                ArrayOperator srcOperator = ArrayOperator.of(srcClass);
+                int size = srcOperator.size(src);
                 Collection<Object> newCollection = collectionFunc.apply(size);
                 Class<?> srcComponentType = srcClass.getComponentType();
                 for (int i = 0; i < size; i++) {
-                    Object srcElement = Array.get(src, i);
-                    newCollection.add(
-                        converter.convert(srcElement, srcComponentType, targetComponentType, options)
-                    );
+                    Object srcElement = srcOperator.get(src, i);
+                    Object targetElement = converter.convert(srcElement, srcComponentType, targetComponentType, options);
+                    newCollection.add(targetElement);
                 }
                 return newCollection;
             }
@@ -348,26 +326,23 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         if (srcComponentType == null) {
             return ObjectConverter.Status.HANDLER_CONTINUE;
         }
+        Collection<?> srcCollection;
         if (src instanceof Collection<?>) {
-            Collection<?> coll = (Collection<?>) src;
-            int size = coll.size();
-            Collection<Object> newCollection = collectionFunc.apply(size);
-            for (Object s : coll) {
-                newCollection.add(converter.convert(s, srcComponentType, targetComponentType, options));
-            }
-            return newCollection;
-        }
-        if (src instanceof Iterable<?>) {
+            srcCollection = (Collection<?>) src;
+        } else if (src instanceof Iterable<?>) {
             Iterable<?> iter = (Iterable<?>) src;
-            List<Object> dst = new ArrayList<>();
-            for (Object s : iter) {
-                dst.add(converter.convert(s, srcComponentType, targetComponentType, options));
-            }
-            Collection<Object> newCollection = collectionFunc.apply(dst.size());
-            newCollection.addAll(dst);
-            return newCollection;
+            srcCollection = CollectKit.addAll(new ArrayList<>(), iter);
+        } else {
+            return ObjectConverter.Status.HANDLER_CONTINUE;
         }
-        return ObjectConverter.Status.HANDLER_CONTINUE;
+        int size = srcCollection.size();
+        Collection<Object> newCollection = collectionFunc.apply(size);
+        int i = 0;
+        for (Object srcElement : srcCollection) {
+            Object targetElement = converter.convert(srcElement, srcComponentType, targetComponentType, options);
+            newCollection.add(targetElement);
+        }
+        return newCollection;
     }
 
     private @Nullable Type resolveComponentType(@Nonnull Type type) {
@@ -386,7 +361,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws Exception {
-        IntFunction<Object> mapFunc = MapGenerator.get(rawTarget);
+        IntFunction<Object> mapFunc = MapClasses.get(rawTarget);
         DataMapper dataMapper = Jie.nonnull(
             Option.findValue(ConvertOption.DATA_MAPPER, options),
             DataMapper.defaultMapper()
@@ -409,7 +384,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         }
     }
 
-    private static final class CollectionGenerator {
+    private static final class CollectionClasses {
 
         private static final @Nonnull Map<@Nonnull Type, @Nonnull IntFunction<@Nonnull Collection<Object>>> CLASS_MAP;
 
@@ -434,7 +409,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         }
     }
 
-    private static final class MapGenerator {
+    private static final class MapClasses {
 
         private static final @Nonnull Map<@Nonnull Type, @Nonnull IntFunction<@Nonnull Object>> CLASS_MAP;
 
@@ -456,7 +431,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         }
     }
 
-    private interface Handler {
+    private interface ClassHandler {
         Object convert(
             @Nonnull Object src,
             @Nonnull Type srcType,
@@ -468,46 +443,49 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
 
     private static final class TargetClasses {
 
-        private static final @Nonnull Map<@Nonnull Type, @Nonnull Handler> HANDLER_MAP;
+        private static final @Nonnull Map<@Nonnull Type, @Nonnull ClassHandler> HANDLER_MAP;
 
         static {
             HANDLER_MAP = new HashMap<>();
-            HANDLER_MAP.put(String.class, new StringHandler());
-            HANDLER_MAP.put(CharSequence.class, new StringHandler());
-            HANDLER_MAP.put(boolean.class, new BooleanHandler());
-            HANDLER_MAP.put(Boolean.class, new BooleanHandler());
-            HANDLER_MAP.put(byte.class, new NumberHandler());
-            HANDLER_MAP.put(short.class, new NumberHandler());
-            HANDLER_MAP.put(char.class, new NumberHandler());
-            HANDLER_MAP.put(int.class, new NumberHandler());
-            HANDLER_MAP.put(long.class, new NumberHandler());
-            HANDLER_MAP.put(float.class, new NumberHandler());
-            HANDLER_MAP.put(double.class, new NumberHandler());
-            HANDLER_MAP.put(Byte.class, new NumberHandler());
-            HANDLER_MAP.put(Short.class, new NumberHandler());
-            HANDLER_MAP.put(Character.class, new NumberHandler());
-            HANDLER_MAP.put(Integer.class, new NumberHandler());
-            HANDLER_MAP.put(Long.class, new NumberHandler());
-            HANDLER_MAP.put(Float.class, new NumberHandler());
-            HANDLER_MAP.put(Double.class, new NumberHandler());
-            HANDLER_MAP.put(BigInteger.class, new NumberHandler());
-            HANDLER_MAP.put(BigDecimal.class, new NumberHandler());
-            HANDLER_MAP.put(Number.class, new NumberHandler());
-            HANDLER_MAP.put(Date.class, new TimeHandler());
-            HANDLER_MAP.put(Instant.class, new TimeHandler());
-            HANDLER_MAP.put(LocalDateTime.class, new TimeHandler());
-            HANDLER_MAP.put(ZonedDateTime.class, new TimeHandler());
-            HANDLER_MAP.put(OffsetDateTime.class, new TimeHandler());
-            HANDLER_MAP.put(LocalDate.class, new TimeHandler());
-            HANDLER_MAP.put(LocalTime.class, new TimeHandler());
+            HANDLER_MAP.put(String.class, StringClassHandler.INST);
+            HANDLER_MAP.put(CharSequence.class, StringClassHandler.INST);
+            HANDLER_MAP.put(boolean.class, BooleanClassHandler.INST);
+            HANDLER_MAP.put(Boolean.class, BooleanClassHandler.INST);
+            HANDLER_MAP.put(byte.class, NumberClassHandler.INST);
+            HANDLER_MAP.put(short.class, NumberClassHandler.INST);
+            HANDLER_MAP.put(char.class, NumberClassHandler.INST);
+            HANDLER_MAP.put(int.class, NumberClassHandler.INST);
+            HANDLER_MAP.put(long.class, NumberClassHandler.INST);
+            HANDLER_MAP.put(float.class, NumberClassHandler.INST);
+            HANDLER_MAP.put(double.class, NumberClassHandler.INST);
+            HANDLER_MAP.put(Byte.class, NumberClassHandler.INST);
+            HANDLER_MAP.put(Short.class, NumberClassHandler.INST);
+            HANDLER_MAP.put(Character.class, NumberClassHandler.INST);
+            HANDLER_MAP.put(Integer.class, NumberClassHandler.INST);
+            HANDLER_MAP.put(Long.class, NumberClassHandler.INST);
+            HANDLER_MAP.put(Float.class, NumberClassHandler.INST);
+            HANDLER_MAP.put(Double.class, NumberClassHandler.INST);
+            HANDLER_MAP.put(BigInteger.class, NumberClassHandler.INST);
+            HANDLER_MAP.put(BigDecimal.class, NumberClassHandler.INST);
+            HANDLER_MAP.put(Number.class, NumberClassHandler.INST);
+            HANDLER_MAP.put(Date.class, TimeClassHandler.INST);
+            HANDLER_MAP.put(Instant.class, TimeClassHandler.INST);
+            HANDLER_MAP.put(LocalDateTime.class, TimeClassHandler.INST);
+            HANDLER_MAP.put(ZonedDateTime.class, TimeClassHandler.INST);
+            HANDLER_MAP.put(OffsetDateTime.class, TimeClassHandler.INST);
+            HANDLER_MAP.put(LocalDate.class, TimeClassHandler.INST);
+            HANDLER_MAP.put(LocalTime.class, TimeClassHandler.INST);
         }
 
-        public static @Nullable Handler get(@Nonnull Class<?> target) {
+        public static @Nullable CommonConvertHandler.ClassHandler get(@Nonnull Class<?> target) {
             return HANDLER_MAP.get(target);
         }
     }
 
-    private static final class StringHandler implements Handler {
+    private enum StringClassHandler implements ClassHandler {
+
+        INST;
+
         @Override
         public Object convert(
             @Nonnull Object src,
@@ -563,7 +541,10 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         }
     }
 
-    private static final class NumberHandler implements Handler {
+    private enum NumberClassHandler implements ClassHandler {
+
+        INST;
+
         @Override
         public Object convert(
             @Nonnull Object src,
@@ -600,7 +581,10 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         }
     }
 
-    private static final class BooleanHandler implements Handler {
+    private enum BooleanClassHandler implements ClassHandler {
+
+        INST;
+
         @Override
         public Object convert(
             @Nonnull Object src,
@@ -622,7 +606,10 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         }
     }
 
-    private static final class TimeHandler implements Handler {
+    private enum TimeClassHandler implements ClassHandler {
+
+        INST;
+
         @Override
         public Object convert(
             @Nonnull Object src,
