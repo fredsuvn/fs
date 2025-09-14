@@ -9,7 +9,7 @@ import java.util.List;
 
 final class ObjectSchemaParserImpl implements ObjectSchemaParser, ObjectSchemaParser.Handler {
 
-    static ObjectSchemaParserImpl SINGLETON = new ObjectSchemaParserImpl(ClassKit.runtimeInstances(
+    static ObjectSchemaParserImpl DEFAULT = new ObjectSchemaParserImpl(ClassKit.runtimeInstances(
         "xyz.sunqian.common.third.protobuf.ProtobufSchemaHandler",
         SimpleBeanSchemaHandler.class.getName()
     ));

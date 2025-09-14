@@ -30,7 +30,7 @@ public interface DataMapper {
      * @return the default data mapper
      */
     static @Nonnull DataMapper defaultMapper() {
-        return DataMapperImpl.SINGLETON;
+        return DataMapperImpl.DEFAULT;
     }
 
     /**

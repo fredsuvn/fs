@@ -19,7 +19,7 @@ public interface MapSchemaParser {
      * @return the default {@link MapSchemaParser}
      */
     static @Nonnull MapSchemaParser defaultParser() {
-        return MapSchemaParserImpl.SINGLETON;
+        return MapSchemaParserImpl.INST;
     }
 
     /**

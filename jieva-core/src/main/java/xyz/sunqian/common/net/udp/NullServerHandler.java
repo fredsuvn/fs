@@ -6,9 +6,9 @@ import xyz.sunqian.annotations.Nullable;
 import java.net.SocketAddress;
 import java.nio.channels.DatagramChannel;
 
-final class NullServerHandler implements UdpServerHandler {
+enum NullServerHandler implements UdpServerHandler {
 
-    static final @Nonnull NullServerHandler SINGLETON = new NullServerHandler();
+    INST;
 
     @Override
     public void channelRead(

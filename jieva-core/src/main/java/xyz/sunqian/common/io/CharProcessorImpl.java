@@ -496,9 +496,9 @@ public class CharProcessorImpl implements CharProcessor {
         }
     }
 
-    static final class EmptyHandler implements CharTransformer {
+    enum EmptyHandler implements CharTransformer {
 
-        static final EmptyHandler SINGLETON = new EmptyHandler();
+        INST;
 
         @Override
         public CharBuffer transform(@Nonnull CharBuffer data, boolean end) {

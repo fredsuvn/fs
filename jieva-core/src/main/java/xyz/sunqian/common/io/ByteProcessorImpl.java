@@ -515,9 +515,9 @@ final class ByteProcessorImpl implements ByteProcessor {
         }
     }
 
-    static final class EmptyHandler implements ByteTransformer {
+    enum EmptyHandler implements ByteTransformer {
 
-        static final EmptyHandler SINGLETON = new EmptyHandler();
+        INST;
 
         @Override
         public ByteBuffer transform(@Nonnull ByteBuffer data, boolean end) {

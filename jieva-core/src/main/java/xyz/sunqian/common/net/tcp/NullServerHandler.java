@@ -4,9 +4,9 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.io.IOKit;
 
-final class NullServerHandler implements TcpServerHandler {
+enum NullServerHandler implements TcpServerHandler {
 
-    static final @Nonnull NullServerHandler SINGLETON = new NullServerHandler();
+    INST;
 
     @Override
     public void channelOpen(@Nonnull TcpContext context) {

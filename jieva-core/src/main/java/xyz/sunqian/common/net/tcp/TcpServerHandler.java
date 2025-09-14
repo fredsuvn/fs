@@ -25,7 +25,7 @@ public interface TcpServerHandler extends ChannelHandler<TcpContext, SocketChann
      * @return an instance of {@link TcpServerHandler} that does nothing but discards received data
      */
     static @Nonnull TcpServerHandler nullHandler() {
-        return NullServerHandler.SINGLETON;
+        return NullServerHandler.INST;
     }
 
     /**

@@ -86,7 +86,7 @@ public interface ByteTransformer {
      * @return an empty {@link ByteTransformer} which does nothing but only returns the input data directly
      */
     static @Nonnull ByteTransformer empty() {
-        return ByteProcessorImpl.EmptyHandler.SINGLETON;
+        return ByteProcessorImpl.EmptyHandler.INST;
     }
 
     /**

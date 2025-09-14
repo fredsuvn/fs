@@ -33,7 +33,7 @@ public interface DataBuilderFactory {
      * @return the default data builder factory
      */
     static @Nonnull DataBuilderFactory defaultFactory() {
-        return DataBuilderFactoryImpl.SINGLETON;
+        return DataBuilderFactoryImpl.DEFAULT;
     }
 
     /**

@@ -8,9 +8,9 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 
-class MapSchemaParserImpl implements MapSchemaParser {
+enum MapSchemaParserImpl implements MapSchemaParser {
 
-    static final @Nonnull MapSchemaParser SINGLETON = new MapSchemaParserImpl();
+    INST;
 
     @Override
     public @Nonnull MapSchema parse(@Nonnull Type type) throws DataObjectException {

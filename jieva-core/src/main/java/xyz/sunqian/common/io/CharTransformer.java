@@ -86,7 +86,7 @@ public interface CharTransformer {
      * @return an empty {@link CharTransformer} which does nothing but only returns the input data directly
      */
     static @Nonnull CharTransformer empty() {
-        return CharProcessorImpl.EmptyHandler.SINGLETON;
+        return CharProcessorImpl.EmptyHandler.INST;
     }
 
     /**

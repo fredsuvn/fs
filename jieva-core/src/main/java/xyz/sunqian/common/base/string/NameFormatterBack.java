@@ -22,7 +22,7 @@ final class NameFormatterBack {
     }
 
     static @Nonnull NameFormatter.Appender simpleAppender() {
-        return SimpleAppender.SINGLETON;
+        return SimpleAppender.INST;
     }
 
     private static final class CamelCase implements NameFormatter {
@@ -431,9 +431,9 @@ final class NameFormatterBack {
         }
     }
 
-    private static final class SimpleAppender implements NameFormatter.Appender {
+    private enum SimpleAppender implements NameFormatter.Appender {
 
-        private static final @Nonnull NameFormatterBack.SimpleAppender SINGLETON = new SimpleAppender();
+        INST;
 
         @Override
         public void append(

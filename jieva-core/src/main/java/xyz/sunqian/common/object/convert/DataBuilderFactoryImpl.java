@@ -10,7 +10,7 @@ import java.util.function.Function;
 
 final class DataBuilderFactoryImpl implements DataBuilderFactory {
 
-    static final @Nonnull DataBuilderFactory SINGLETON =
+    static final @Nonnull DataBuilderFactory DEFAULT =
         new DataBuilderFactoryImpl(new ConstructorCacheImpl(new ConcurrentHashMap<>()));
 
     private final @Nonnull ConstructorCache constructorCache;

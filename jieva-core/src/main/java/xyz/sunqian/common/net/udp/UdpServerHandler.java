@@ -19,7 +19,7 @@ public interface UdpServerHandler {
      * @return an instance of {@link UdpServerHandler} that does nothing but discards received data
      */
     static @Nonnull UdpServerHandler nullHandler() {
-        return NullServerHandler.SINGLETON;
+        return NullServerHandler.INST;
     }
 
     /**

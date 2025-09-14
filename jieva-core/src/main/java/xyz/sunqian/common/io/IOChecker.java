@@ -1,6 +1,5 @@
 package xyz.sunqian.common.io;
 
-import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.CheckKit;
 
 final class IOChecker {
@@ -54,11 +53,11 @@ final class IOChecker {
     }
 
     static EndChecker endChecker() {
-        return EndChecker.SINGLETON;
+        return EndChecker.INST;
     }
 
     static AvailableChecker availableChecker() {
-        return AvailableChecker.SINGLETON;
+        return AvailableChecker.INST;
     }
 
     interface ReadChecker {
@@ -70,9 +69,9 @@ final class IOChecker {
         long actualCount(int lastReadSize, long count);
     }
 
-    static final class EndChecker implements ReadChecker {
+    enum EndChecker implements ReadChecker {
 
-        private static final @Nonnull EndChecker SINGLETON = new EndChecker();
+        INST;
 
         @Override
         public boolean readEnd(int readSize) {
@@ -90,9 +89,9 @@ final class IOChecker {
         }
     }
 
-    static final class AvailableChecker implements ReadChecker {
+    enum AvailableChecker implements ReadChecker {
 
-        private static final @Nonnull AvailableChecker SINGLETON = new AvailableChecker();
+        INST;
 
         @Override
         public boolean readEnd(int readSize) {

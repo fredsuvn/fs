@@ -19,7 +19,7 @@ import java.util.function.Function;
 
 final class DataMapperImpl implements DataMapper {
 
-    static final @Nonnull DataMapper SINGLETON = new DataMapperImpl(new SchemaCacheImpl(new ConcurrentHashMap<>()));
+    static final @Nonnull DataMapper DEFAULT = new DataMapperImpl(new SchemaCacheImpl(new ConcurrentHashMap<>()));
 
     private final @Nonnull SchemaCache schemaCache;
 

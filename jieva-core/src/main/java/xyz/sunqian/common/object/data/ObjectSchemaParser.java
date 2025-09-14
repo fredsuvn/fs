@@ -30,7 +30,7 @@ public interface ObjectSchemaParser {
      * @return the default {@link ObjectSchemaParser}
      */
     static @Nonnull ObjectSchemaParser defaultParser() {
-        return ObjectSchemaParserImpl.SINGLETON;
+        return ObjectSchemaParserImpl.DEFAULT;
     }
 
     /**
