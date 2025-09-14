@@ -6,6 +6,7 @@ import xyz.sunqian.common.base.time.TimeFormatter;
 import xyz.sunqian.common.base.time.TimeKit;
 import xyz.sunqian.test.PrintTest;
 
+import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -44,8 +45,13 @@ public class TimeTest implements PrintTest {
         LocalTime nowLocalTime = nowLocalDateTime.toLocalTime();
         {
             // format
+            String nowFormatStr = new SimpleDateFormat(TimeKit.DEFAULT_PATTERN).format(nowDate);
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(TimeKit.DEFAULT_PATTERN);
-            assertEquals(TimeKit.format(nowDate), formatter.format(nowZonedDateTime));
+            assertEquals(TimeKit.format(nowDate), nowFormatStr);
+            assertEquals(TimeKit.format(nowDate.toInstant()), nowFormatStr);
+            assertEquals(TimeKit.format(nowLocalDateTime), nowFormatStr);
+            assertEquals(TimeKit.format(nowZonedDateTime), nowFormatStr);
+            assertEquals(TimeKit.format(nowOffsetDateTime), nowFormatStr);
             assertEquals(TimeKit.formatSafe(nowDate), formatter.format(nowZonedDateTime));
             assertEquals(TimeKit.format(nowInstant), formatter.format(nowZonedDateTime));
             assertEquals(TimeKit.formatSafe(nowInstant), formatter.format(nowZonedDateTime));

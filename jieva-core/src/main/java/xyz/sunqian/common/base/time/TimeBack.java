@@ -178,6 +178,12 @@ final class TimeBack {
             if (time instanceof LocalDateTime) {
                 return ZonedDateTime.of((LocalDateTime) time, zoneId);
             }
+            // if (time instanceof LocalDate) {
+            //     return ZonedDateTime.of((LocalDate) time, LocalTime.MIN, zoneId);
+            // }
+            // if (time instanceof LocalTime) {
+            //     return ZonedDateTime.of(LocalDate.MIN, (LocalTime) time, zoneId);
+            // }
             return time;
         }
     }
