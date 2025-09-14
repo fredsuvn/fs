@@ -225,7 +225,6 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             srcType,
             target,
             target.getComponentType(),
-            target.getComponentType(),
             converter,
             options
         );
@@ -244,7 +243,6 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             srcType,
             targetClass,
             target.getGenericComponentType(),
-            Jie.asNonnull(TypeKit.toRuntimeClass(target.getGenericComponentType())),
             converter,
             options
         );
@@ -255,7 +253,6 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         @Nonnull Type srcType,
         @Nonnull Class<?> target,
         @Nonnull Type targetComponentType,
-        @Nonnull Class<?> targetComponentClass,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
@@ -264,7 +261,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             if (srcClass.isArray()) {
                 ArrayOperator srcOperator = ArrayOperator.of(srcClass);
                 int size = srcOperator.size(src);
-                Object newArray = ArrayKit.newArray(targetComponentClass, size);
+                Object newArray = ArrayKit.newArray(target.getComponentType(), size);
                 Class<?> srcComponentType = srcClass.getComponentType();
                 ArrayOperator targetOperator = ArrayOperator.of(target);
                 for (int i = 0; i < size; i++) {
@@ -289,7 +286,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             return ObjectConverter.Status.HANDLER_CONTINUE;
         }
         int size = srcCollection.size();
-        Object newArray = ArrayKit.newArray(targetComponentClass, size);
+        Object newArray = ArrayKit.newArray(target.getComponentType(), size);
         ArrayOperator targetOperator = ArrayOperator.of(target);
         int i = 0;
         for (Object srcElement : srcCollection) {
