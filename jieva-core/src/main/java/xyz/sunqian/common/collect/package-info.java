@@ -10,5 +10,9 @@
  *     <li>{@link xyz.sunqian.common.collect.ArrayKit}</li>
  *     <li>{@link xyz.sunqian.common.collect.StreamKit}</li>
  * </ul>
+ * Interfaces:
+ * <ul>
+ *     <li>{@link xyz.sunqian.common.collect.ArrayOperator}</li>
+ * </ul>
  */
 package xyz.sunqian.common.collect;
