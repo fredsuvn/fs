@@ -160,74 +160,6 @@ public class ConvertTest implements PrintTest {
                 }
             })));
         {
-            // to array
-            String[] strArray = new String[]{"1", "2", "3"};
-            assertEquals(converter.convert(strArray, int[].class), new int[]{1, 2, 3});
-            List<String> strList = ListKit.list("1", "2", "3");
-            assertEquals(converter.convert(strList, int[].class), new int[]{1, 2, 3});
-            assertEquals(
-                converter.convert(strList, new TypeRef<List<String>>() {}.type(), int[].class),
-                new int[]{1, 2, 3}
-            );
-            assertEquals(converter.convert(new Iterable<String>() {
-                @NotNull
-                @Override
-                public Iterator<String> iterator() {
-                    return strList.iterator();
-                }
-            }, int[].class), new int[]{1, 2, 3});
-            expectThrows(UnsupportedObjectConvertException.class, () ->
-                converter.convert("", int[].class));
-            expectThrows(UnsupportedObjectConvertException.class, () ->
-                converter.convert("", new TypeRef<List<String>>() {}.type(), int[].class));
-        }
-        {
-            // to generic array
-            String[] strArray = new String[]{"1", "2", "3"};
-            GenericArrayType genericArrayType = TypeKit.arrayType(Integer.class);
-            assertEquals(converter.convert(strArray, genericArrayType), new Integer[]{1, 2, 3});
-            List<String> strList = ListKit.list("1", "2", "3");
-            assertEquals(converter.convert(strList, genericArrayType), new Integer[]{1, 2, 3});
-            assertEquals(
-                converter.convert(strList, new TypeRef<List<String>>() {}.type(), genericArrayType),
-                new Integer[]{1, 2, 3}
-            );
-            assertEquals(converter.convert(new Iterable<String>() {
-                @NotNull
-                @Override
-                public Iterator<String> iterator() {
-                    return strList.iterator();
-                }
-            }, genericArrayType), new Integer[]{1, 2, 3});
-            expectThrows(UnsupportedObjectConvertException.class, () ->
-                converter.convert("", genericArrayType));
-            expectThrows(UnsupportedObjectConvertException.class, () ->
-                converter.convert("", new TypeRef<List<String>>() {}.type(), genericArrayType));
-        }
-        {
-            // to collection
-            String[] strArray = new String[]{"1", "2", "3"};
-            Type collectionType = new TypeRef<List<Integer>>() {}.type();
-            assertEquals(converter.convert(strArray, collectionType), ListKit.list(1, 2, 3));
-            List<String> strList = ListKit.list("1", "2", "3");
-            assertEquals(converter.convert(strList, Set.class, List.class), ListKit.list("1", "2", "3"));
-            assertEquals(
-                converter.convert(strList, new TypeRef<List<String>>() {}.type(), collectionType),
-                ListKit.list(1, 2, 3)
-            );
-            assertEquals(converter.convert(new Iterable<String>() {
-                @NotNull
-                @Override
-                public Iterator<String> iterator() {
-                    return strList.iterator();
-                }
-            }, collectionType), ListKit.list(1, 2, 3));
-            expectThrows(UnsupportedObjectConvertException.class, () ->
-                converter.convert("", collectionType));
-            expectThrows(UnsupportedObjectConvertException.class, () ->
-                converter.convert("", new TypeRef<List<String>>() {}.type(), collectionType));
-        }
-        {
             // to String
             Date now = new Date();
             String nowDate = TimeKit.format(now);
@@ -297,6 +229,142 @@ public class ConvertTest implements PrintTest {
                 converter.convert(new X<String>(), nonClass, Date.class));
             expectThrows(UnsupportedObjectConvertException.class, () ->
                 converter.convert(a, Date.class));
+        }
+        Date now = new Date();
+        TimeFormatter nowFormat = TimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String nowStr = nowFormat.format(now);
+        {
+            // to array
+            String[] strArray = new String[]{"1", "2", "3"};
+            assertEquals(converter.convert(strArray, int[].class), new int[]{1, 2, 3});
+            List<String> strList = ListKit.list("1", "2", "3");
+            assertEquals(converter.convert(strList, int[].class), new int[]{1, 2, 3});
+            assertEquals(
+                converter.convert(strList, new TypeRef<List<String>>() {}.type(), int[].class),
+                new int[]{1, 2, 3}
+            );
+            assertEquals(converter.convert(new Iterable<String>() {
+                @NotNull
+                @Override
+                public Iterator<String> iterator() {
+                    return strList.iterator();
+                }
+            }, int[].class), new int[]{1, 2, 3});
+            // with options
+            Date[] dateArray = new Date[]{now, now, now};
+            assertEquals(
+                converter.convert(dateArray, String[].class, ConvertOption.timeFormatter(nowFormat)),
+                new String[]{nowStr, nowStr, nowStr}
+            );
+            List<Date> dateList = ListKit.list(now, now, now);
+            assertEquals(converter.convert(
+                    dateList, new TypeRef<List<Date>>() {}.type(), String[].class, ConvertOption.timeFormatter(nowFormat)),
+                new String[]{nowStr, nowStr, nowStr}
+            );
+            assertEquals(converter.convert(new Iterable<Date>() {
+                    @NotNull
+                    @Override
+                    public Iterator<Date> iterator() {
+                        return dateList.iterator();
+                    }
+                }, new TypeRef<Iterable<Date>>() {}.type(), String[].class, ConvertOption.timeFormatter(nowFormat)),
+                new String[]{nowStr, nowStr, nowStr}
+            );
+            // errors
+            expectThrows(UnsupportedObjectConvertException.class, () ->
+                converter.convert("", int[].class));
+            expectThrows(UnsupportedObjectConvertException.class, () ->
+                converter.convert("", new TypeRef<List<String>>() {}.type(), int[].class));
+        }
+        {
+            // to generic array
+            String[] strArray = new String[]{"1", "2", "3"};
+            GenericArrayType intsType = TypeKit.arrayType(Integer.class);
+            assertEquals(converter.convert(strArray, intsType), new Integer[]{1, 2, 3});
+            List<String> strList = ListKit.list("1", "2", "3");
+            assertEquals(converter.convert(strList, intsType), new Integer[]{1, 2, 3});
+            assertEquals(
+                converter.convert(strList, new TypeRef<List<String>>() {}.type(), intsType),
+                new Integer[]{1, 2, 3}
+            );
+            assertEquals(converter.convert(new Iterable<String>() {
+                @NotNull
+                @Override
+                public Iterator<String> iterator() {
+                    return strList.iterator();
+                }
+            }, intsType), new Integer[]{1, 2, 3});
+            // with options
+            GenericArrayType stringsType = TypeKit.arrayType(String.class);
+            Date[] dateArray = new Date[]{now, now, now};
+            assertEquals(
+                converter.convert(dateArray, stringsType, ConvertOption.timeFormatter(nowFormat)),
+                new String[]{nowStr, nowStr, nowStr}
+            );
+            List<Date> dateList = ListKit.list(now, now, now);
+            assertEquals(converter.convert(
+                    dateList, new TypeRef<List<Date>>() {}.type(), stringsType, ConvertOption.timeFormatter(nowFormat)),
+                new String[]{nowStr, nowStr, nowStr}
+            );
+            assertEquals(converter.convert(new Iterable<Date>() {
+                    @NotNull
+                    @Override
+                    public Iterator<Date> iterator() {
+                        return dateList.iterator();
+                    }
+                }, new TypeRef<Iterable<Date>>() {}.type(), stringsType, ConvertOption.timeFormatter(nowFormat)),
+                new String[]{nowStr, nowStr, nowStr}
+            );
+            // errors
+            expectThrows(UnsupportedObjectConvertException.class, () ->
+                converter.convert("", intsType));
+            expectThrows(UnsupportedObjectConvertException.class, () ->
+                converter.convert("", new TypeRef<List<String>>() {}.type(), intsType));
+        }
+        {
+            // to collection
+            String[] strArray = new String[]{"1", "2", "3"};
+            Type intsType = new TypeRef<List<Integer>>() {}.type();
+            assertEquals(converter.convert(strArray, intsType), ListKit.list(1, 2, 3));
+            List<String> strList = ListKit.list("1", "2", "3");
+            assertEquals(converter.convert(strList, Set.class, List.class), ListKit.list("1", "2", "3"));
+            assertEquals(
+                converter.convert(strList, new TypeRef<List<String>>() {}.type(), intsType),
+                ListKit.list(1, 2, 3)
+            );
+            assertEquals(converter.convert(new Iterable<String>() {
+                @NotNull
+                @Override
+                public Iterator<String> iterator() {
+                    return strList.iterator();
+                }
+            }, intsType), ListKit.list(1, 2, 3));
+            // with options
+            Type stringsType = new TypeRef<List<String>>() {}.type();
+            Date[] dateArray = new Date[]{now, now, now};
+            assertEquals(
+                converter.convert(dateArray, stringsType, ConvertOption.timeFormatter(nowFormat)),
+                ListKit.list(nowStr, nowStr, nowStr)
+            );
+            List<Date> dateList = ListKit.list(now, now, now);
+            assertEquals(converter.convert(
+                    dateList, new TypeRef<List<Date>>() {}.type(), stringsType, ConvertOption.timeFormatter(nowFormat)),
+                ListKit.list(nowStr, nowStr, nowStr)
+            );
+            assertEquals(converter.convert(new Iterable<Date>() {
+                    @NotNull
+                    @Override
+                    public Iterator<Date> iterator() {
+                        return dateList.iterator();
+                    }
+                }, new TypeRef<Iterable<Date>>() {}.type(), stringsType, ConvertOption.timeFormatter(nowFormat)),
+                ListKit.list(nowStr, nowStr, nowStr)
+            );
+            // errors
+            expectThrows(UnsupportedObjectConvertException.class, () ->
+                converter.convert("", intsType));
+            expectThrows(UnsupportedObjectConvertException.class, () ->
+                converter.convert("", new TypeRef<List<String>>() {}.type(), intsType));
         }
     }
 
