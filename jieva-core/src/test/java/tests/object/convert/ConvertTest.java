@@ -6,8 +6,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
-import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.exception.UnreachablePointException;
 import xyz.sunqian.common.base.time.TimeFormatter;
 import xyz.sunqian.common.base.time.TimeKit;
@@ -141,24 +139,14 @@ public class ConvertTest implements PrintTest {
         Map<String, String> map2 = converter.convert(a, A.class, new TypeRef<Map<String, String>>() {});
         assertEquals(map2, MapKit.map("first", "1", "second", "2", "third", "3"));
         Map<String, String> map3 = converter.convert(a, new TypeRef<Map<String, String>>() {},
-            ConvertOption.builderFactory(DataBuilderFactory.newFactory(new HashMap<>())));
+            ConvertOption.builderFactory(DataBuilderFactory.newFactory(
+                DataBuilderFactory.newConstructorCache(new HashMap<>()),
+                DataBuilderFactory.defaultFactory().asHandler())
+            )
+        );
         assertEquals(map3, MapKit.map("first", "1", "second", "2", "third", "3"));
         class Err {}
         expectThrows(ObjectConvertException.class, () -> converter.convert(a, Err.class));
-        // builder factory
-        expectThrows(UnsupportedObjectConvertException.class, () -> converter.convert(a, B.class,
-            ConvertOption.builderFactory(new DataBuilderFactory() {
-
-                @Override
-                public @Nullable Object newBuilder(@Nonnull Class<?> target) throws Exception {
-                    return null;
-                }
-
-                @Override
-                public @Nonnull Object build(@Nonnull Object builder) throws Exception {
-                    return null;
-                }
-            })));
         {
             // to String
             Date now = new Date();

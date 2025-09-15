@@ -2,7 +2,6 @@ package xyz.sunqian.common.object.convert;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.exception.JieRuntimeException;
 import xyz.sunqian.common.base.option.Option;
 
 import java.lang.reflect.Type;
@@ -12,7 +11,7 @@ import java.lang.reflect.Type;
  *
  * @author sunqian
  */
-public class UnsupportedObjectConvertException extends JieRuntimeException {
+public class UnsupportedObjectConvertException extends ObjectConvertException {
 
     private static @Nonnull String toMessage(
         @Nonnull Type srcType,

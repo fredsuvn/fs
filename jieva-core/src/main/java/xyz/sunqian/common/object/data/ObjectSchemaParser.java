@@ -101,7 +101,7 @@ public interface ObjectSchemaParser {
      * @return a new {@link ObjectSchemaParser} of which handler list consists of the given handler as the first
      * element, followed by {@link #handlers()} of the current parser
      */
-    default @Nonnull ObjectSchemaParser withFirstHandler(Handler handler) {
+    default @Nonnull ObjectSchemaParser withFirstHandler(@Nonnull Handler handler) {
         Handler[] newHandlers = new Handler[handlers().size() + 1];
         int i = 0;
         newHandlers[i++] = handler;
@@ -119,7 +119,7 @@ public interface ObjectSchemaParser {
      * @return a {@link ObjectSchemaParser} of which handler list consists of {@link #handlers()} of the current parser,
      * followed by the given handler as the last element
      */
-    default @Nonnull ObjectSchemaParser withLastHandler(Handler handler) {
+    default @Nonnull ObjectSchemaParser withLastHandler(@Nonnull Handler handler) {
         Handler[] newHandlers = new Handler[handlers().size() + 1];
         int i = 0;
         for (Handler h : handlers()) {

@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * This interface is used to convert an object from the specified type to the target type.
  * <p>
- * It uses a list of {@link ObjectConverter.Handler}s to sequentially attempt conversion. A handler can return
+ * It contains and uses a list of {@link Handler}s to sequentially attempt conversion. A handler can return
  * {@link Status#HANDLER_CONTINUE}, {@link Status#HANDLER_BREAK} or a normal value as the final result. The conversion
  * logic is as follows:
  * <pre>{@code
@@ -251,7 +251,7 @@ public interface ObjectConverter {
      * @return a new {@link ObjectConverter} of which handler list consists of the given handler as the first element,
      * followed by {@link #handlers()} of the current converter
      */
-    default @Nonnull ObjectConverter withFirstHandler(Handler handler) {
+    default @Nonnull ObjectConverter withFirstHandler(@Nonnull Handler handler) {
         Handler[] newHandlers = new Handler[handlers().size() + 1];
         int i = 0;
         newHandlers[i++] = handler;
@@ -269,7 +269,7 @@ public interface ObjectConverter {
      * @return a {@link ObjectConverter} of which handler list consists of {@link #handlers()} of the current converter,
      * followed by the given handler as the last element
      */
-    default @Nonnull ObjectConverter withLastHandler(Handler handler) {
+    default @Nonnull ObjectConverter withLastHandler(@Nonnull Handler handler) {
         Handler[] newHandlers = new Handler[handlers().size() + 1];
         int i = 0;
         for (Handler h : handlers()) {
