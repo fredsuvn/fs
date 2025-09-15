@@ -7,7 +7,7 @@ import java.lang.reflect.Field;
 
 import static org.testng.Assert.expectThrows;
 
-final class Proxy8Test {
+final class ProxyBackTest {
 
     static void testUnsupportedDefaultMethod() throws Exception {
         Class<?> cls = Class.forName("xyz.sunqian.common.runtime.proxy.ProxyBack");

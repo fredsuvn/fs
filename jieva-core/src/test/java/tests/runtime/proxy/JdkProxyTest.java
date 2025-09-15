@@ -210,7 +210,7 @@ public class JdkProxyTest {
 
         {
             // unsupported default method invocable
-            Proxy8Test.testUnsupportedDefaultMethod();
+            ProxyBackTest.testUnsupportedDefaultMethod();
         }
     }
 
