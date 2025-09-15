@@ -378,7 +378,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
                 return ObjectConverter.Status.HANDLER_CONTINUE;
             }
             Object targetBuilder = builder.newBuilder();
-            dataMapper.copyProperties(src, srcType, targetBuilder, target, converter, options);
+            dataMapper.copyProperties(src, srcType, targetBuilder, builder.builderType(), converter, options);
             return builder.build(targetBuilder);
         }
     }

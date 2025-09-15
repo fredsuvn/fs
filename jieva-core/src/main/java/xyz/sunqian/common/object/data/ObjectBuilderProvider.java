@@ -8,6 +8,7 @@ import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.runtime.invoke.Invocable;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -86,7 +87,7 @@ public interface ObjectBuilderProvider {
      * @return a new builder cache with the given map
      */
     static @Nonnull BuilderCache newBuilderCache(
-        @Nonnull Map<@Nonnull Class<?>, @Nonnull ObjectBuilder> map
+        @Nonnull Map<@Nonnull Type, @Nonnull ObjectBuilder> map
     ) {
         return new ObjectBuilderProviderImpl.BuilderCacheImpl(map);
     }
@@ -99,7 +100,7 @@ public interface ObjectBuilderProvider {
      * @throws DataObjectException if an error occurs
      */
     @Nullable
-    ObjectBuilder builder(@Nonnull Class<?> target) throws DataObjectException;
+    ObjectBuilder builder(@Nonnull Type target) throws DataObjectException;
 
     /**
      * Returns all handlers of this builder provider.
@@ -162,8 +163,8 @@ public interface ObjectBuilderProvider {
          */
         @Nullable
         ObjectBuilder get(
-            @Nonnull Class<?> target,
-            @Nonnull Function<? super @Nonnull Class<?>, ? extends @Nullable ObjectBuilder> loader
+            @Nonnull Type target,
+            @Nonnull Function<? super @Nonnull Type, ? extends @Nullable ObjectBuilder> loader
         ) throws DataObjectException;
     }
 
@@ -183,6 +184,6 @@ public interface ObjectBuilderProvider {
          * @throws Exception if an error occurs
          */
         @Nullable
-        ObjectBuilder newBuilder(@Nonnull Class<?> target) throws Exception;
+        ObjectBuilder newBuilder(@Nonnull Type target) throws Exception;
     }
 }

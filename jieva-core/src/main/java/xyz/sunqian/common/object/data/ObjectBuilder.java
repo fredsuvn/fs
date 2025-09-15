@@ -3,6 +3,8 @@ package xyz.sunqian.common.object.data;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 
+import java.lang.reflect.Type;
+
 /**
  * This interface is used to build an object for the target type through the following methods:
  * <ol>
@@ -31,7 +33,7 @@ public interface ObjectBuilder {
      * @return an instance of {@link ObjectBuilder}, or {@code null} if the target type is unsupported
      * @throws DataObjectException if an error occurs
      */
-    static @Nullable ObjectBuilder get(@Nonnull Class<?> target) throws DataObjectException {
+    static @Nullable ObjectBuilder get(@Nonnull Type target) throws DataObjectException {
         return ObjectBuilderProvider.defaultProvider().builder(target);
     }
 
@@ -43,6 +45,14 @@ public interface ObjectBuilder {
      */
     @Nonnull
     Object newBuilder() throws DataObjectException;
+
+    /**
+     * Returns the type of the builder which is returned from {@link #newBuilder()}.
+     *
+     * @return the type of the builder which is returned from {@link #newBuilder()}
+     */
+    @Nonnull
+    Type builderType();
 
     /**
      * Makes the given builder, which is returned by {@link #newBuilder()} of the same instance of

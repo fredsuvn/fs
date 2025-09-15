@@ -5,9 +5,10 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.runtime.invoke.Invocable;
 import xyz.sunqian.common.runtime.invoke.InvocationException;
-import xyz.sunqian.common.runtime.reflect.ClassKit;
+import xyz.sunqian.common.runtime.reflect.TypeKit;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,7 @@ final class ObjectBuilderProviderImpl implements ObjectBuilderProvider, ObjectBu
     }
 
     @Override
-    public @Nullable ObjectBuilder builder(@Nonnull Class<?> target) throws DataObjectException {
+    public @Nullable ObjectBuilder builder(@Nonnull Type target) throws DataObjectException {
         return builderCache.get(target, t -> {
             try {
                 for (Handler handler : handlers) {
@@ -50,7 +51,7 @@ final class ObjectBuilderProviderImpl implements ObjectBuilderProvider, ObjectBu
     }
 
     @Override
-    public @Nullable ObjectBuilder newBuilder(@Nonnull Class<?> target) {
+    public @Nullable ObjectBuilder newBuilder(@Nonnull Type target) {
         return builder(target);
     }
 
@@ -86,16 +87,16 @@ final class ObjectBuilderProviderImpl implements ObjectBuilderProvider, ObjectBu
 
     static final class BuilderCacheImpl implements BuilderCache {
 
-        private final @Nonnull Map<@Nonnull Class<?>, @Nonnull ObjectBuilder> map;
+        private final @Nonnull Map<@Nonnull Type, @Nonnull ObjectBuilder> map;
 
-        BuilderCacheImpl(@Nonnull Map<@Nonnull Class<?>, @Nonnull ObjectBuilder> map) {
+        BuilderCacheImpl(@Nonnull Map<@Nonnull Type, @Nonnull ObjectBuilder> map) {
             this.map = map;
         }
 
         @Override
         public @Nullable ObjectBuilder get(
-            @Nonnull Class<?> target,
-            @Nonnull Function<? super @Nonnull Class<?>, ? extends @Nullable ObjectBuilder> loader
+            @Nonnull Type target,
+            @Nonnull Function<? super @Nonnull Type, ? extends @Nullable ObjectBuilder> loader
         ) throws DataObjectException {
             return map.computeIfAbsent(target, loader);
         }
@@ -106,10 +107,14 @@ final class ObjectBuilderProviderImpl implements ObjectBuilderProvider, ObjectBu
         INST;
 
         @Override
-        public @Nullable ObjectBuilder newBuilder(@Nonnull Class<?> target) throws Exception {
+        public @Nullable ObjectBuilder newBuilder(@Nonnull Type target) throws Exception {
+            Class<?> rawTarget = TypeKit.getRawClass(target);
+            if (rawTarget == null) {
+                return null;
+            }
             try {
-                Constructor<?> cst = target.getConstructor();
-                return new SimpleBuilder(cst);
+                Constructor<?> cst = rawTarget.getConstructor();
+                return new SimpleBuilder(cst, target);
             } catch (NoSuchMethodException e) {
                 return null;
             }
@@ -119,9 +124,11 @@ final class ObjectBuilderProviderImpl implements ObjectBuilderProvider, ObjectBu
     private static final class SimpleBuilder implements ObjectBuilder {
 
         private final @Nonnull Invocable constructor;
+        private final @Nonnull Type target;
 
-        private SimpleBuilder(@Nonnull Constructor<?> constructor) {
+        private SimpleBuilder(@Nonnull Constructor<?> constructor, @Nonnull Type target) {
             this.constructor = Invocable.of(constructor);
+            this.target = target;
         }
 
         @Override
@@ -131,6 +138,11 @@ final class ObjectBuilderProviderImpl implements ObjectBuilderProvider, ObjectBu
             } catch (InvocationException e) {
                 throw new DataObjectException(e.getCause());
             }
+        }
+
+        @Override
+        public @Nonnull Type builderType() {
+            return target;
         }
 
         @Override
