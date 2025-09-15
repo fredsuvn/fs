@@ -99,7 +99,7 @@ public interface Option<K, V> {
      * @return {@code true} if given options contain an option whose key equals the specified key, otherwise
      * {@code false}
      */
-    static boolean hasKey(@Nonnull Object key, @Nonnull Option<?, ?> @Nonnull ... options) {
+    static boolean containsKey(@Nonnull Object key, @Nonnull Option<?, ?> @Nonnull ... options) {
         return findOption(key, options) != null;
     }
 

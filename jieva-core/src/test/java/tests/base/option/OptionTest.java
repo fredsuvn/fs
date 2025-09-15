@@ -17,7 +17,7 @@ public class OptionTest {
         assertEquals(Option.findValue("d", opts), (String) null);
         assertEquals(Option.findValue("d", Option.empty()), (String) null);
         assertEquals(Option.findValue("b", opts), "2");
-        assertTrue(Option.hasKey("a", opts));
-        assertFalse(Option.hasKey("d", opts));
+        assertTrue(Option.containsKey("a", opts));
+        assertFalse(Option.containsKey("d", opts));
     }
 }
