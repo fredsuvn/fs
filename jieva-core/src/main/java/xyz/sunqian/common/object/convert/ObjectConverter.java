@@ -1,10 +1,8 @@
 package xyz.sunqian.common.object.convert;
 
-import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.RetainedParam;
-import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.option.Option;
 import xyz.sunqian.common.collect.ListKit;
@@ -39,10 +37,12 @@ import java.util.List;
  * }
  * throw new UnsupportedObjectConvertException(src, srcType, target, this, options);
  * }</pre>
+ * <p>
+ * The thread safety of the methods in this interface is determined by its dependent {@link DataMapper},
+ * {@link DataBuilderFactory}, and other objects. By default, they are all thread-safe.
  *
  * @author sunqian
  */
-@ThreadSafe
 public interface ObjectConverter {
 
     /**
@@ -54,7 +54,7 @@ public interface ObjectConverter {
      *
      * @return the default converter
      */
-    static ObjectConverter defaultConverter() {
+    static @Nonnull ObjectConverter defaultConverter() {
         return ObjectConverterImpl.DEFAULT_MAPPER;
     }
 
@@ -241,8 +241,7 @@ public interface ObjectConverter {
      * @return all handlers of this converter
      */
     @Nonnull
-    @Immutable
-    List<Handler> handlers();
+    List<@Nonnull Handler> handlers();
 
     /**
      * Returns a new {@link ObjectConverter} of which handler list consists of the given handler as the first element,
@@ -290,10 +289,12 @@ public interface ObjectConverter {
 
     /**
      * Handler for {@link ObjectConverter}, provides the specific conversion logic.
+     * <p>
+     * The thread safety of the methods in this interface is determined by its dependent {@link DataMapper},
+     * {@link DataBuilderFactory}, and other objects. By default, they are all thread-safe.
      *
      * @author sunqian
      */
-    @ThreadSafe
     interface Handler {
 
         /**

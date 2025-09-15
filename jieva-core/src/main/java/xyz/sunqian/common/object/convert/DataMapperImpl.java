@@ -322,7 +322,7 @@ final class DataMapperImpl implements DataMapper {
     }
 
     private boolean ignoredNull(@Nonnull Option<?, ?> @Nonnull ... options) {
-        return Option.hasKey(ConvertOption.IGNORE_NULL, options);
+        return Option.containsKey(ConvertOption.IGNORE_NULL, options);
     }
 
     static final class SchemaCacheImpl implements SchemaCache {

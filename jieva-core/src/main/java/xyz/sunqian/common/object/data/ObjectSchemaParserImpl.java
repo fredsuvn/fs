@@ -9,19 +9,19 @@ import java.util.List;
 
 final class ObjectSchemaParserImpl implements ObjectSchemaParser, ObjectSchemaParser.Handler {
 
-    static ObjectSchemaParserImpl DEFAULT = new ObjectSchemaParserImpl(ClassKit.runtimeInstances(
+    static @Nonnull ObjectSchemaParserImpl DEFAULT = new ObjectSchemaParserImpl(ClassKit.runtimeInstances(
         "xyz.sunqian.common.third.protobuf.ProtobufSchemaHandler",
         SimpleBeanSchemaHandler.class.getName()
     ));
 
-    private final List<ObjectSchemaParser.Handler> handlers;
+    private final @Nonnull List<ObjectSchemaParser.@Nonnull Handler> handlers;
 
-    ObjectSchemaParserImpl(@RetainedParam List<ObjectSchemaParser.Handler> handlers) {
+    ObjectSchemaParserImpl(@RetainedParam List<ObjectSchemaParser.@Nonnull Handler> handlers) {
         this.handlers = handlers;
     }
 
     @Override
-    public @Nonnull List<Handler> handlers() {
+    public @Nonnull List<@Nonnull Handler> handlers() {
         return handlers;
     }
 

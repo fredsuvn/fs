@@ -13,23 +13,19 @@ import java.util.List;
 
 final class ObjectConverterImpl implements ObjectConverter, ObjectConverter.Handler {
 
-    static final ObjectConverterImpl DEFAULT_MAPPER = new ObjectConverterImpl(Jie.list(
+    static final @Nonnull ObjectConverterImpl DEFAULT_MAPPER = new ObjectConverterImpl(Jie.list(
         new AssignableConvertHandler(),
-        // new EnumConversionHandler(),
-        // new TypedMapperHandler(),
-        // new CollectionConversionHandler(CollectionConversionHandler.defaultBuilderFactory()),
-        // new DataConversionHandler(DataConversionHandler.defaultBuilderFactory()),
         new CommonConvertHandler()
     ));
 
-    private final List<ObjectConverter.Handler> handlers;
+    private final @Nonnull List<ObjectConverter.@Nonnull Handler> handlers;
 
-    ObjectConverterImpl(@RetainedParam List<ObjectConverter.Handler> handlers) {
+    ObjectConverterImpl(@RetainedParam List<ObjectConverter.@Nonnull Handler> handlers) {
         this.handlers = handlers;
     }
 
     @Override
-    public @Nonnull List<Handler> handlers() {
+    public @Nonnull List<@Nonnull Handler> handlers() {
         return handlers;
     }
 

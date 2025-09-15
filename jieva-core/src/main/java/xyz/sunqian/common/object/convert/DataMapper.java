@@ -2,7 +2,6 @@ package xyz.sunqian.common.object.convert;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.option.Option;
 import xyz.sunqian.common.object.data.DataSchema;
 import xyz.sunqian.common.object.data.MapSchema;
@@ -16,16 +15,19 @@ import java.util.function.Function;
 /**
  * This interface is used to map data properties from an object to another object. The object should be a {@link Map} or
  * a non-map object which can be parsed to {@link MapSchema} and {@link ObjectSchema}.
+ * <p>
+ * A {@link DataMapper} typically uses a {@link SchemaCache} to cache the parsed {@link DataSchema}s, and the thread
+ * safety is determined by the {@link SchemaCache}. By default, they are thread-safe.
  *
  * @author sunqian
  */
-@ThreadSafe
 public interface DataMapper {
 
     /**
      * Returns the default data mapper.
      * <p>
-     * The default data mapper will cache the {@link DataSchema}s parsed into a {@link ConcurrentHashMap} if needed.
+     * The default data mapper will cache the {@link DataSchema}s parsed into a {@link ConcurrentHashMap} if needed, so
+     * it is thread-safe.
      *
      * @return the default data mapper
      */
@@ -34,7 +36,7 @@ public interface DataMapper {
     }
 
     /**
-     * Returns a new data mapper with the given schema cache.
+     * Returns a new data mapper with the given schema cache. The thread safety is determined by the given cache.
      *
      * @param schemaCache the given schema cache
      * @return a new data mapper with the given schema cache
@@ -44,7 +46,7 @@ public interface DataMapper {
     }
 
     /**
-     * Returns a new data mapper with the given map as schema cache.
+     * Returns a new data mapper with the given map as schema cache. The thread safety is determined by the given map.
      *
      * @param map the given map as schema cache
      * @return a new data mapper with the given map as schema cache
@@ -54,7 +56,7 @@ public interface DataMapper {
     }
 
     /**
-     * Returns a new data schema cache with the given map.
+     * Returns a new data schema cache with the given map. The thread safety is determined by the given map.
      *
      * @param map the given map
      * @return a new data schema cache with the given map

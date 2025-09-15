@@ -1,6 +1,5 @@
 package xyz.sunqian.common.object.data;
 
-import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.annotations.ThreadSafe;
@@ -92,8 +91,7 @@ public interface ObjectSchemaParser {
      * @return all handlers of this parser
      */
     @Nonnull
-    @Immutable
-    List<Handler> handlers();
+    List<@Nonnull Handler> handlers();
 
     /**
      * Returns a new {@link ObjectSchemaParser} of which handler list consists of the given handler as the first
