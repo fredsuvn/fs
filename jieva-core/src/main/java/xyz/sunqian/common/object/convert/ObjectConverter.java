@@ -8,6 +8,7 @@ import xyz.sunqian.common.base.option.Option;
 import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.object.convert.handlers.AssignableConvertHandler;
 import xyz.sunqian.common.object.convert.handlers.CommonConvertHandler;
+import xyz.sunqian.common.object.data.ObjectBuilderProvider;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
 
 import java.lang.reflect.Type;
@@ -39,7 +40,7 @@ import java.util.List;
  * }</pre>
  * <p>
  * The thread safety of the methods in this interface is determined by its dependent {@link DataMapper},
- * {@link DataBuilderFactory}, and other objects. By default, they are all thread-safe.
+ * {@link ObjectBuilderProvider}, and other objects. By default, they are all thread-safe.
  *
  * @author sunqian
  */
@@ -291,7 +292,7 @@ public interface ObjectConverter {
      * Handler for {@link ObjectConverter}, provides the specific conversion logic.
      * <p>
      * The thread safety of the methods in this interface is determined by its dependent {@link DataMapper},
-     * {@link DataBuilderFactory}, and other objects. By default, they are all thread-safe.
+     * {@link ObjectBuilderProvider}, and other objects. By default, they are all thread-safe.
      *
      * @author sunqian
      */

@@ -41,3 +41,8 @@ enum xEnum {
     E1 = 0;
     E2 = 1;
 }
+
+message PbSimple{
+    string p1 = 1;
+    int32 p2 = 2;
+}

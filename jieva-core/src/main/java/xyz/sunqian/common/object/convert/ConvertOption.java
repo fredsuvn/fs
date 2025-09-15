@@ -7,6 +7,7 @@ import xyz.sunqian.common.base.option.Option;
 import xyz.sunqian.common.base.time.TimeFormatter;
 import xyz.sunqian.common.io.IOOperator;
 import xyz.sunqian.common.object.data.MapSchemaParser;
+import xyz.sunqian.common.object.data.ObjectBuilderProvider;
 import xyz.sunqian.common.object.data.ObjectSchemaParser;
 
 import java.nio.charset.Charset;
@@ -65,9 +66,9 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
     DATA_MAPPER,
 
     /**
-     * Key of {@link #builderFactory(DataBuilderFactory)}.
+     * Key of {@link #builderProvider(ObjectBuilderProvider)}.
      */
-    BUILDER_FACTORY,
+    BUILDER_PROVIDER,
 
     /**
      * Key of {@link #ioOperator(IOOperator)}.
@@ -170,17 +171,17 @@ public enum ConvertOption implements Option<ConvertOption, Object> {
     }
 
     /**
-     * Returns an option to specify the {@link DataBuilderFactory} to generate data object during the conversion.
+     * Returns an option to specify the {@link ObjectBuilderProvider} to generate data object during the conversion.
      * <p>
-     * By default, the {@link DataBuilderFactory#defaultFactory()} is used.
+     * By default, the {@link ObjectBuilderProvider#defaultProvider()} is used.
      *
-     * @param builderFactory the {@link DataBuilderFactory} to be specified
-     * @return an option to specify the {@link DataBuilderFactory} to generate data object during the conversion
+     * @param builderFactory the {@link ObjectBuilderProvider} to be specified
+     * @return an option to specify the {@link ObjectBuilderProvider} to generate data object during the conversion
      */
-    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull DataBuilderFactory> builderFactory(
-        @Nonnull DataBuilderFactory builderFactory
+    public static @Nonnull Option<@Nonnull ConvertOption, @Nonnull ObjectBuilderProvider> builderProvider(
+        @Nonnull ObjectBuilderProvider builderFactory
     ) {
-        return Option.of(BUILDER_FACTORY, builderFactory);
+        return Option.of(BUILDER_PROVIDER, builderFactory);
     }
 
     /**

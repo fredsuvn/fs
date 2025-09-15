@@ -14,11 +14,11 @@ import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.collect.MapKit;
 import xyz.sunqian.common.io.IOOperator;
 import xyz.sunqian.common.object.convert.ConvertOption;
-import xyz.sunqian.common.object.convert.DataBuilderFactory;
 import xyz.sunqian.common.object.convert.DataMapper;
 import xyz.sunqian.common.object.convert.ObjectConvertException;
 import xyz.sunqian.common.object.convert.ObjectConverter;
 import xyz.sunqian.common.object.convert.UnsupportedObjectConvertException;
+import xyz.sunqian.common.object.data.ObjectBuilderProvider;
 import xyz.sunqian.common.runtime.reflect.TypeKit;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
 import xyz.sunqian.test.PrintTest;
@@ -139,14 +139,16 @@ public class ConvertTest implements PrintTest {
         Map<String, String> map2 = converter.convert(a, A.class, new TypeRef<Map<String, String>>() {});
         assertEquals(map2, MapKit.map("first", "1", "second", "2", "third", "3"));
         Map<String, String> map3 = converter.convert(a, new TypeRef<Map<String, String>>() {},
-            ConvertOption.builderFactory(DataBuilderFactory.newFactory(
-                DataBuilderFactory.newConstructorCache(new HashMap<>()),
-                DataBuilderFactory.defaultFactory().asHandler())
+            ConvertOption.builderProvider(ObjectBuilderProvider.newProvider(
+                ObjectBuilderProvider.newBuilderCache(new HashMap<>()),
+                ObjectBuilderProvider.defaultProvider().asHandler())
             )
         );
         assertEquals(map3, MapKit.map("first", "1", "second", "2", "third", "3"));
         class Err {}
         expectThrows(ObjectConvertException.class, () -> converter.convert(a, Err.class));
+        class N {}
+        expectThrows(UnsupportedObjectConvertException.class, () -> converter.convert(a, N.class));
         {
             // to String
             Date now = new Date();

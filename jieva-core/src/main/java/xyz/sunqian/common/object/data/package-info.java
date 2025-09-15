@@ -6,9 +6,16 @@
  * // Parse a non-map object:
  * ObjectSchema objectSchema = ObjectSchema.parse(type);
  * String str = objectSchema.getProperty("someString").getValue(instant);
+ *
  * // Parse a map:
  * MapSchema mapSchema = MapSchema.parse(type);
  * Type keyType = mapSchema.keyType();
+ *
+ * // Object builder
+ * ObjectBuilder objectBuilder = ObjectBuilder.get(type);
+ * Object builder = objectBuilder.newBuilder();
+ * // copy properties for builder ...
+ * Object result = objectBuilder.build(builder);
  * }</pre>
  * <p>
  * The core interfaces of this package:
@@ -21,6 +28,8 @@
  *     <li>{@link xyz.sunqian.common.object.data.handlers.SimpleBeanSchemaHandler}</li>
  *     <li>{@link xyz.sunqian.common.object.data.MapSchema}</li>
  *     <li>{@link xyz.sunqian.common.object.data.MapSchemaParser}</li>
+ *     <li>{@link xyz.sunqian.common.object.data.ObjectBuilder}</li>
+ *     <li>{@link xyz.sunqian.common.object.data.ObjectBuilderProvider}</li>
  * </ul>
  * And utilities:
  * <ul>

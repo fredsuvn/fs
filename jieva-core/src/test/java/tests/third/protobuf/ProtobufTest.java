@@ -1,18 +1,24 @@
 package tests.third.protobuf;
 
 import com.google.protobuf.ByteString;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.testng.annotations.Test;
 import tests.protobuf.Data;
+import tests.protobuf.PbSimple;
 import tests.protobuf.xEnum;
 import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.collect.MapKit;
 import xyz.sunqian.common.collect.SetKit;
+import xyz.sunqian.common.object.convert.ConvertOption;
+import xyz.sunqian.common.object.data.ObjectBuilderProvider;
+import xyz.sunqian.common.object.convert.ObjectConverter;
 import xyz.sunqian.common.object.data.ObjectProperty;
 import xyz.sunqian.common.object.data.ObjectSchema;
 import xyz.sunqian.common.object.data.ObjectSchemaParser;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
-import xyz.sunqian.common.third.protobuf.ProtobufSchemaHandler;
 import xyz.sunqian.common.third.protobuf.ProtobufKit;
+import xyz.sunqian.common.third.protobuf.ProtobufSchemaHandler;
 import xyz.sunqian.test.PrintTest;
 
 import java.util.List;
@@ -420,5 +426,25 @@ public class ProtobufTest implements PrintTest {
                 assertNull(xEnum.setter());
             }
         }
+    }
+
+    // @Test
+    // public void testBuilderFactory() {
+    //     ObjectBuilderProvider factory = ObjectBuilderProvider.defaultFactory()
+    //         .withFirstHandler(new ProtobufBuilderFactoryHandler());
+    //     JvSimple jvSimple = new JvSimple("123", 456);
+    //     PbSimple pbSimple = ObjectConverter.defaultConverter().convert(jvSimple, PbSimple.class,
+    //         ConvertOption.builderProvider(factory)
+    //     );
+    //     assertEquals(pbSimple.getP1(), jvSimple.getP1());
+    //     assertEquals(pbSimple.getP2(), jvSimple.getP2());
+    // }
+
+    @lombok.Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class JvSimple {
+        private String p1;
+        private int p2;
     }
 }

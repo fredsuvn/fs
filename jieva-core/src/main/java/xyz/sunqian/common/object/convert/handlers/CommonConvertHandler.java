@@ -14,9 +14,10 @@ import xyz.sunqian.common.collect.CollectKit;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IOOperator;
 import xyz.sunqian.common.object.convert.ConvertOption;
-import xyz.sunqian.common.object.convert.DataBuilderFactory;
 import xyz.sunqian.common.object.convert.DataMapper;
 import xyz.sunqian.common.object.convert.ObjectConverter;
+import xyz.sunqian.common.object.data.ObjectBuilder;
+import xyz.sunqian.common.object.data.ObjectBuilderProvider;
 import xyz.sunqian.common.runtime.reflect.ReflectionException;
 import xyz.sunqian.common.runtime.reflect.TypeKit;
 
@@ -145,7 +146,7 @@ import java.util.function.IntFunction;
  * <tr>
  *     <td>Map and Data Objects</td>
  *     <td>Any Objects</td>
- *     <td>Generating data object is based on {@link ConvertOption#builderFactory(DataBuilderFactory)} and
+ *     <td>Generating data object is based on {@link ConvertOption#builderProvider(ObjectBuilderProvider)} and
  *     {@link ConvertOption#dataMapper(DataMapper)}. Generating map using its constructor, and copying properties
  *     also using {@link ConvertOption#dataMapper(DataMapper)}. The supported map types:
  *     {@link Map}, {@link AbstractMap}, {@link LinkedHashMap}, {@link HashMap}, {@link TreeMap}, {@link ConcurrentMap},
@@ -368,16 +369,17 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             dataMapper.copyProperties(src, srcType, targetObject, target, converter, options);
             return targetObject;
         } else {
-            DataBuilderFactory builderFactory = Jie.nonnull(
-                Option.findValue(ConvertOption.BUILDER_FACTORY, options),
-                DataBuilderFactory.defaultFactory()
+            ObjectBuilderProvider builderProvider = Jie.nonnull(
+                Option.findValue(ConvertOption.BUILDER_PROVIDER, options),
+                ObjectBuilderProvider.defaultProvider()
             );
-            Object targetBuilder = builderFactory.newBuilder(rawTarget);
-            if (targetBuilder == null) {
+            ObjectBuilder builder = builderProvider.builder(rawTarget);
+            if (builder == null) {
                 return ObjectConverter.Status.HANDLER_CONTINUE;
             }
+            Object targetBuilder = builder.newBuilder();
             dataMapper.copyProperties(src, srcType, targetBuilder, target, converter, options);
-            return builderFactory.build(targetBuilder);
+            return builder.build(targetBuilder);
         }
     }
 
