@@ -179,7 +179,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             }
             if (targetClass.isArray()) {
                 // to array
-                return convertToArray(src, srcType, targetClass, converter, options);
+                return toArray(src, srcType, targetClass, converter, options);
             }
             ClassHandler classHandler = TargetClasses.get(targetClass);
             if (classHandler != null) {
@@ -188,39 +188,39 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             IntFunction<Collection<Object>> collectionFunc = CollectionClasses.get(targetClass);
             if (collectionFunc != null) {
                 // to collection
-                return convertToCollection(
+                return toCollection(
                     src, srcType, collectionFunc, targetClass.getTypeParameters()[0], converter, options
                 );
             }
             // to map or data object
-            return convertToDataObject(src, srcType, targetClass, target, converter, options);
+            return toDataObject(src, srcType, targetClass, target, converter, options);
         } else if (target instanceof GenericArrayType) {
             // to generic array
-            return convertToArray(src, srcType, (GenericArrayType) target, converter, options);
+            return toArray(src, srcType, (GenericArrayType) target, converter, options);
         } else if (target instanceof ParameterizedType) {
             ParameterizedType paramType = (ParameterizedType) target;
             Class<?> rawTarget = (Class<?>) paramType.getRawType();
             IntFunction<Collection<Object>> collectionFunc = CollectionClasses.get(rawTarget);
             if (collectionFunc != null) {
                 // to collection
-                return convertToCollection(
+                return toCollection(
                     src, srcType, collectionFunc, paramType.getActualTypeArguments()[0], converter, options
                 );
             }
             // to map or data object
-            return convertToDataObject(src, srcType, rawTarget, target, converter, options);
+            return toDataObject(src, srcType, rawTarget, target, converter, options);
         }
         return ObjectConverter.Status.HANDLER_CONTINUE;
     }
 
-    private Object convertToArray(
+    private Object toArray(
         @Nonnull Object src,
         @Nonnull Type srcType,
         @Nonnull Class<?> target,
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
-        return convertToArray(
+        return toArray(
             src,
             srcType,
             target,
@@ -230,7 +230,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         );
     }
 
-    private Object convertToArray(
+    private Object toArray(
         @Nonnull Object src,
         @Nonnull Type srcType,
         @Nonnull GenericArrayType target,
@@ -238,7 +238,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
         Class<?> targetClass = Jie.asNonnull(TypeKit.toRuntimeClass(target));
-        return convertToArray(
+        return toArray(
             src,
             srcType,
             targetClass,
@@ -248,7 +248,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         );
     }
 
-    private Object convertToArray(
+    private Object toArray(
         @Nonnull Object src,
         @Nonnull Type srcType,
         @Nonnull Class<?> target,
@@ -296,7 +296,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         return newArray;
     }
 
-    private Object convertToCollection(
+    private Object toCollection(
         @Nonnull Object src,
         @Nonnull Type srcType,
         @Nonnull IntFunction<Collection<Object>> collectionFunc,
@@ -350,7 +350,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         }
     }
 
-    private Object convertToDataObject(
+    private Object toDataObject(
         @Nonnull Object src,
         @Nonnull Type srcType,
         @Nonnull Class<?> rawTarget,

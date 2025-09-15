@@ -48,7 +48,7 @@ public class AssignableConvertHandler implements ObjectConverter.Handler {
         if (Objects.equals(target, srcType)) {
             return src;
         }
-        if (Option.hasKey(ConvertOption.STRICT_TYPE_MODE, options)) {
+        if (Option.containsKey(ConvertOption.STRICT_TYPE_MODE, options)) {
             // strict mode, wildcard is unsupported
             if (target instanceof WildcardType) {
                 return ObjectConverter.Status.HANDLER_CONTINUE;
