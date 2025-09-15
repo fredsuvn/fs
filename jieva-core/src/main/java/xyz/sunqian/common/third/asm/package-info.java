@@ -4,10 +4,10 @@
  * <p>
  * Utilities:
  * <ul>
- *     <li>{@link xyz.sunqian.common.runtime.asm.AsmKit}</li>
+ *     <li>{@link xyz.sunqian.common.third.asm.AsmKit}</li>
  * </ul>
  */
 @NonExported
-package xyz.sunqian.common.runtime.asm;
+package xyz.sunqian.common.third.asm;
 
 import xyz.sunqian.annotations.NonExported;

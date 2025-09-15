@@ -10,9 +10,9 @@ import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.ThreadSafe;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.system.JvmKit;
-import xyz.sunqian.common.runtime.asm.AsmKit;
 import xyz.sunqian.common.runtime.proxy.ProxyKit;
 import xyz.sunqian.common.runtime.reflect.BytesClassLoader;
+import xyz.sunqian.common.third.asm.AsmKit;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;

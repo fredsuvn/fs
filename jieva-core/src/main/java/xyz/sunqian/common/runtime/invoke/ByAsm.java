@@ -6,9 +6,9 @@ import org.objectweb.asm.Opcodes;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.base.system.JvmKit;
-import xyz.sunqian.common.runtime.asm.AsmKit;
 import xyz.sunqian.common.runtime.reflect.BytesClassLoader;
 import xyz.sunqian.common.runtime.reflect.ClassKit;
+import xyz.sunqian.common.third.asm.AsmKit;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;

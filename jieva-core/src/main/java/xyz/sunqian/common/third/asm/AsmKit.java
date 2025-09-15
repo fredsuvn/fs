@@ -1,4 +1,4 @@
-package xyz.sunqian.common.runtime.asm;
+package xyz.sunqian.common.third.asm;
 
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -39,11 +39,11 @@ public class AsmKit {
     public static final @Nonnull String EMPTY_CONSTRUCTOR_DESCRIPTOR = "()V";
 
     /**
-     * Returns whether the current runtime environment has asm package.
+     * Returns whether the {@code ASM} is available on the current runtime environment.
      *
-     * @return whether the current runtime environment has asm package
+     * @return whether the {@code ASM} is available on the current runtime environment
      */
-    public static boolean supportsAsm() {
+    public static boolean isAvailable() {
         return ClassKit.classExists("org.objectweb.asm.ClassWriter");
     }
 

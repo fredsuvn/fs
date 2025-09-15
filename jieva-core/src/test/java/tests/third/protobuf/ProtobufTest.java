@@ -39,7 +39,7 @@ public class ProtobufTest implements PrintTest {
 
     @Test
     public void testProtobuf() {
-        printFor("Protobuf Support", ProtobufKit.supportsProtobuf());
+        printFor("Protobuf Support", ProtobufKit.isAvailable());
     }
 
     @Test

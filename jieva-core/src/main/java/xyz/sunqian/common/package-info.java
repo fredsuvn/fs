@@ -1,4 +1,4 @@
-@DefaultNonNull
+/**
+ * Common package, provides common and base support.
+ */
 package xyz.sunqian.common;
-
-import xyz.sunqian.annotations.DefaultNonNull;

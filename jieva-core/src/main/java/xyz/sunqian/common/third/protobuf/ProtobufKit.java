@@ -11,11 +11,11 @@ import xyz.sunqian.common.runtime.reflect.ClassKit;
 public class ProtobufKit {
 
     /**
-     * Returns whether the current runtime environment has protobuf package.
+     * Returns whether the {@code Protocol Buffers} is available on the current runtime environment.
      *
-     * @return whether the current runtime environment has protobuf package
+     * @return whether the {@code Protocol Buffers} is available on the current runtime environment
      */
-    public static boolean supportsProtobuf() {
+    public static boolean isAvailable() {
         return ClassKit.classExists("com.google.protobuf.Message");
     }
 }
