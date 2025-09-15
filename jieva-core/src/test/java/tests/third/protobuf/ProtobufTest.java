@@ -5,14 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.testng.annotations.Test;
 import tests.protobuf.Data;
-import tests.protobuf.PbSimple;
 import tests.protobuf.xEnum;
 import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.collect.MapKit;
 import xyz.sunqian.common.collect.SetKit;
-import xyz.sunqian.common.object.convert.ConvertOption;
-import xyz.sunqian.common.object.data.ObjectBuilderProvider;
-import xyz.sunqian.common.object.convert.ObjectConverter;
 import xyz.sunqian.common.object.data.ObjectProperty;
 import xyz.sunqian.common.object.data.ObjectSchema;
 import xyz.sunqian.common.object.data.ObjectSchemaParser;
@@ -38,7 +34,7 @@ public class ProtobufTest implements PrintTest {
 
     @Test
     public void testDataSchema() throws Exception {
-        ObjectSchemaParser protoParser = ObjectSchemaParser.withHandlers(new ProtobufSchemaHandler());
+        ObjectSchemaParser protoParser = ObjectSchemaParser.newParser(new ProtobufSchemaHandler());
         Data.Builder builder = Data.newBuilder()
             .setStr("str")
             .setI32(1)

@@ -38,8 +38,8 @@ public interface ObjectSchemaParser {
      * @param handlers the given handlers
      * @return a new {@link ObjectSchemaParser} with the given handlers
      */
-    static @Nonnull ObjectSchemaParser withHandlers(@Nonnull @RetainedParam Handler @Nonnull ... handlers) {
-        return withHandlers(ListKit.list(handlers));
+    static @Nonnull ObjectSchemaParser newParser(@Nonnull @RetainedParam Handler @Nonnull ... handlers) {
+        return newParser(ListKit.list(handlers));
     }
 
     /**
@@ -48,7 +48,7 @@ public interface ObjectSchemaParser {
      * @param handlers given handlers
      * @return a new {@link ObjectSchemaParser} with given handlers
      */
-    static @Nonnull ObjectSchemaParser withHandlers(@Nonnull @RetainedParam List<@Nonnull Handler> handlers) {
+    static @Nonnull ObjectSchemaParser newParser(@Nonnull @RetainedParam List<@Nonnull Handler> handlers) {
         return new ObjectSchemaParserImpl(handlers);
     }
 
@@ -108,7 +108,7 @@ public interface ObjectSchemaParser {
         for (Handler h : handlers()) {
             newHandlers[i++] = h;
         }
-        return withHandlers(newHandlers);
+        return newParser(newHandlers);
     }
 
     /**
@@ -126,7 +126,7 @@ public interface ObjectSchemaParser {
             newHandlers[i++] = h;
         }
         newHandlers[i] = handler;
-        return withHandlers(newHandlers);
+        return newParser(newHandlers);
     }
 
     /**

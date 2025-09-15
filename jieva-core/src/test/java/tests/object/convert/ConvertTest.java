@@ -60,7 +60,7 @@ public class ConvertTest implements PrintTest {
         assertEquals(converter.convert(a, B.class), new B(1L, 2L, 3L));
         assertEquals(converter.convert(a, A.class, B.class), new B(1L, 2L, 3L));
         expectThrows(UnsupportedObjectConvertException.class, () -> converter.convert(null, B.class));
-        ObjectConverter converter2 = ObjectConverter.withHandlers(converter.asHandler());
+        ObjectConverter converter2 = ObjectConverter.newConverter(converter.asHandler());
         assertEquals(converter2.convert(a, B.class), new B(1L, 2L, 3L));
         assertEquals(converter2.convert(a, A.class, B.class), new B(1L, 2L, 3L));
         expectThrows(UnsupportedObjectConvertException.class, () -> converter2.convert(null, B.class));

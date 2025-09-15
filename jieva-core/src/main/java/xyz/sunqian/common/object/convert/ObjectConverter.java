@@ -65,8 +65,8 @@ public interface ObjectConverter {
      * @param handlers the given handlers
      * @return a new {@link ObjectConverter} with the given handlers
      */
-    static @Nonnull ObjectConverter withHandlers(@Nonnull @RetainedParam Handler @Nonnull ... handlers) {
-        return withHandlers(ListKit.list(handlers));
+    static @Nonnull ObjectConverter newConverter(@Nonnull @RetainedParam Handler @Nonnull ... handlers) {
+        return newConverter(ListKit.list(handlers));
     }
 
     /**
@@ -75,7 +75,7 @@ public interface ObjectConverter {
      * @param handlers given handlers
      * @return a new {@link ObjectConverter} with given handlers
      */
-    static @Nonnull ObjectConverter withHandlers(@Nonnull @RetainedParam List<@Nonnull Handler> handlers) {
+    static @Nonnull ObjectConverter newConverter(@Nonnull @RetainedParam List<@Nonnull Handler> handlers) {
         return new ObjectConverterImpl(handlers);
     }
 
@@ -259,7 +259,7 @@ public interface ObjectConverter {
         for (Handler h : handlers()) {
             newHandlers[i++] = h;
         }
-        return withHandlers(newHandlers);
+        return newConverter(newHandlers);
     }
 
     /**
@@ -277,7 +277,7 @@ public interface ObjectConverter {
             newHandlers[i++] = h;
         }
         newHandlers[i] = handler;
-        return withHandlers(newHandlers);
+        return newConverter(newHandlers);
     }
 
     /**

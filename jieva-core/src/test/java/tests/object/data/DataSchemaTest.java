@@ -277,11 +277,11 @@ public class DataSchemaTest implements PrintTest {
         ObjectSchema lastSchema = lastParser.parse(Object.class);
         assertEquals(lastSchema.type(), Object.class);
         assertEquals(lastSchema.properties().keySet(), SetKit.set("class", "test"));
-        ObjectSchemaParser asPreParser = ObjectSchemaParser.withHandlers(preParser.asHandler());
+        ObjectSchemaParser asPreParser = ObjectSchemaParser.newParser(preParser.asHandler());
         ObjectSchema asPreSchema = asPreParser.parse(Object.class);
         assertEquals(asPreSchema.type(), Object.class);
         assertEquals(asPreSchema.properties().size(), 0);
-        ObjectSchemaParser asLastParser = ObjectSchemaParser.withHandlers(lastParser.asHandler());
+        ObjectSchemaParser asLastParser = ObjectSchemaParser.newParser(lastParser.asHandler());
         ObjectSchema asLastSchema = asLastParser.parse(Object.class);
         assertEquals(asLastSchema.type(), Object.class);
         assertEquals(asLastSchema.properties().keySet(), SetKit.set("class", "test"));
@@ -293,7 +293,7 @@ public class DataSchemaTest implements PrintTest {
         ObjectSchema a1 = ObjectSchema.parse(A.class);
         ObjectSchema a2 = ObjectSchema.parse(A.class);
         ObjectSchema b1 = ObjectSchema.parse(B.class);
-        ObjectSchemaParser parser2 = ObjectSchemaParser.withHandlers(new SimpleBeanSchemaHandler());
+        ObjectSchemaParser parser2 = ObjectSchemaParser.newParser(new SimpleBeanSchemaHandler());
         ObjectSchema a3 = parser2.parse(A.class);
         assertEquals(a1, a1);
         assertFalse(a1.equals(""));
