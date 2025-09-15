@@ -29,6 +29,7 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
 import java.time.Instant;
@@ -94,6 +95,11 @@ import java.util.function.IntFunction;
  * <tr>
  *     <td>Others</td>
  *     <td>Using {@link Object#toString()}.</td>
+ * </tr>
+ * <tr>
+ *     <td>{@code byte[]}, {@code char[]}, {@link ByteBuffer}, {@link CharBuffer}</td>
+ *     <td>{@link String}</td>
+ *     <td>Using {@link String#getBytes(Charset)} or {@link String#toCharArray()}.</td>
  * </tr>
  * <tr>
  *     <td rowspan="2">Numbers</td>
@@ -177,6 +183,22 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
                 // to enum:
                 String name = src.toString();
                 return EnumKit.findEnum(Jie.as(targetClass), name);
+            }
+            if (srcType.equals(String.class)) {
+                if (target.equals(byte[].class) || target.equals(ByteBuffer.class)) {
+                    Charset charset = Jie.nonnull(
+                        Option.findValue(ConvertOption.CHARSET, options),
+                        CharsKit.defaultCharset()
+                    );
+                    byte[] bytes = ((String) src).getBytes(charset);
+                    return target.equals(ByteBuffer.class) ? ByteBuffer.wrap(bytes) : bytes;
+                }
+                if (target.equals(char[].class)) {
+                    return ((String) src).toCharArray();
+                }
+                if (target.equals(CharBuffer.class)) {
+                    return CharBuffer.wrap((String) src);
+                }
             }
             if (targetClass.isArray()) {
                 // to array
@@ -373,7 +395,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
                 Option.findValue(ConvertOption.BUILDER_PROVIDER, options),
                 ObjectBuilderProvider.defaultProvider()
             );
-            ObjectBuilder builder = builderProvider.builder(rawTarget);
+            ObjectBuilder builder = builderProvider.builder(target);
             if (builder == null) {
                 return ObjectConverter.Status.HANDLER_CONTINUE;
             }

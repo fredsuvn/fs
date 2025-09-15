@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
+import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.exception.UnreachablePointException;
 import xyz.sunqian.common.base.time.TimeFormatter;
 import xyz.sunqian.common.base.time.TimeKit;
@@ -30,6 +31,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.channels.Channels;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -173,6 +175,25 @@ public class ConvertTest implements PrintTest {
             assertEquals(converter.convert(reader, String.class), "123");
             Object x = new Object();
             assertEquals(converter.convert(x, String.class), x.toString());
+        }
+        {
+            // String to
+            assertEquals(
+                converter.convert("123", byte[].class),
+                "123".getBytes(CharsKit.defaultCharset())
+            );
+            assertEquals(
+                converter.convert("123", ByteBuffer.class),
+                ByteBuffer.wrap("123".getBytes(CharsKit.defaultCharset()))
+            );
+            assertEquals(
+                converter.convert("123", char[].class),
+                "123".toCharArray()
+            );
+            assertEquals(
+                converter.convert("123", CharBuffer.class),
+                CharBuffer.wrap("123")
+            );
         }
         class X<T> {}
         Type nonClass = X.class.getTypeParameters()[0];
