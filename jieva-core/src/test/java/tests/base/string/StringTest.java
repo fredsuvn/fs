@@ -249,8 +249,8 @@ public class StringTest implements DataTest, PrintTest {
     public void testEncode() {
         char[] chars = randomChars(20, 'a', 'z');
         byte[] en = new String(chars).getBytes(CharsKit.defaultCharset());
-        assertEquals(StringKit.getBytes(chars), en);
-        assertEquals(StringKit.getBytes(CharBuffer.wrap(chars)), en);
+        assertEquals(StringKit.toBytes(chars), en);
+        assertEquals(StringKit.toBytes(CharBuffer.wrap(chars)), en);
     }
 
     @Test

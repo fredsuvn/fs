@@ -24,7 +24,7 @@ public class CharsTest implements AssertTest {
         assertTrue(CharsKit.isEmpty(CharBuffer.allocate(0)));
         assertTrue(CharsKit.isEmpty(CharBuffer.wrap(new char[10], 5, 0)));
         assertTrue(CharsKit.isEmpty(CharsKit.emptyBuffer()));
-        assertTrue(CharsKit.isEmpty(CharBuffer.wrap(CharsKit.emptyChars())));
+        assertTrue(CharsKit.isEmpty(CharBuffer.wrap(CharsKit.empty())));
     }
 
     @Test

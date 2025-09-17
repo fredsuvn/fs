@@ -134,8 +134,8 @@ public class StringKit {
      * @param chars the given char array
      * @return a new byte array contains the encoded bytes
      */
-    public static byte @Nonnull [] getBytes(char @Nonnull [] chars) {
-        return getBytes(chars, CharsKit.defaultCharset());
+    public static byte @Nonnull [] toBytes(char @Nonnull [] chars) {
+        return toBytes(chars, CharsKit.defaultCharset());
     }
 
     /**
@@ -145,7 +145,7 @@ public class StringKit {
      * @param charset the specified charset
      * @return a new byte array contains the encoded bytes
      */
-    public static byte @Nonnull [] getBytes(char @Nonnull [] chars, Charset charset) {
+    public static byte @Nonnull [] toBytes(char @Nonnull [] chars, Charset charset) {
         return new String(chars).getBytes(charset);
     }
 
@@ -155,8 +155,8 @@ public class StringKit {
      * @param chars the given char sequence
      * @return a new byte array contains the encoded bytes
      */
-    public static byte @Nonnull [] getBytes(@Nonnull CharSequence chars) {
-        return getBytes(chars, CharsKit.defaultCharset());
+    public static byte @Nonnull [] toBytes(@Nonnull CharSequence chars) {
+        return toBytes(chars, CharsKit.defaultCharset());
     }
 
     /**
@@ -166,7 +166,7 @@ public class StringKit {
      * @param charset the specified charset
      * @return a new byte array contains the encoded bytes
      */
-    public static byte @Nonnull [] getBytes(@Nonnull CharSequence chars, Charset charset) {
+    public static byte @Nonnull [] toBytes(@Nonnull CharSequence chars, Charset charset) {
         return chars.toString().getBytes(charset);
     }
 

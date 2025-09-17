@@ -372,7 +372,7 @@ public class ClassKit {
             if (Jie.equals(componentType, void.class)) {
                 return null;
             }
-            return "[" + JvmKit.getDescriptor(componentType);
+            return "[" + JvmKit.toDescriptor(componentType);
         }
         return "[L" + componentType.getName() + ";";
     }

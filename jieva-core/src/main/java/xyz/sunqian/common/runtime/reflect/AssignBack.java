@@ -10,7 +10,7 @@ import java.lang.reflect.WildcardType;
 import java.util.List;
 import java.util.Objects;
 
-final class Assign {
+final class AssignBack {
 
     public static boolean isAssignable(@Nonnull Type assigned, @Nonnull Type assignee) {
         if (assigned instanceof Class<?>) {

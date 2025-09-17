@@ -234,7 +234,7 @@ public class TypeKit {
      * @return whether a type can be assigned by another type
      */
     public static boolean isAssignable(@Nonnull Type assigned, @Nonnull Type assignee) {
-        return Assign.isAssignable(assigned, assignee);
+        return AssignBack.isAssignable(assigned, assignee);
     }
 
     /**

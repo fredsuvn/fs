@@ -17,7 +17,7 @@ public class BytesTest {
         assertTrue(BytesKit.isEmpty(ByteBuffer.allocateDirect(0)));
         assertTrue(BytesKit.isEmpty(ByteBuffer.wrap(new byte[10], 5, 0)));
         assertTrue(BytesKit.isEmpty(BytesKit.emptyBuffer()));
-        assertTrue(BytesKit.isEmpty(ByteBuffer.wrap(BytesKit.emptyBytes())));
+        assertTrue(BytesKit.isEmpty(ByteBuffer.wrap(BytesKit.empty())));
     }
 
     @Test

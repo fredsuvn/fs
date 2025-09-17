@@ -12,8 +12,8 @@ import java.nio.ByteBuffer;
  */
 public class BytesKit {
 
-    private static final byte @Nonnull [] EMPTY_BYTES = new byte[0];
-    private static final @Nonnull ByteBuffer EMPTY_BUFFER = ByteBuffer.wrap(EMPTY_BYTES);
+    private static final byte @Nonnull [] EMPTY = new byte[0];
+    private static final @Nonnull ByteBuffer EMPTY_BUFFER = ByteBuffer.wrap(EMPTY);
 
     /**
      * Returns whether the given buffer is null or empty.
@@ -30,8 +30,8 @@ public class BytesKit {
      *
      * @return an empty byte array
      */
-    public static byte @Nonnull [] emptyBytes() {
-        return EMPTY_BYTES;
+    public static byte @Nonnull [] empty() {
+        return EMPTY;
     }
 
     /**

@@ -222,7 +222,7 @@ public class AsmKit {
             }
         }
         if (requiresCast) {
-            visitor.visitTypeInsn(Opcodes.CHECKCAST, JvmKit.getInternalName(type));
+            visitor.visitTypeInsn(Opcodes.CHECKCAST, JvmKit.toInternalName(type));
         }
         visitor.visitInsn(Opcodes.ARETURN);
     }
@@ -282,7 +282,7 @@ public class AsmKit {
                 Opcodes.INVOKEVIRTUAL, "java/lang/Double", "doubleValue", "()D", false);
             return;
         }
-        visitor.visitTypeInsn(Opcodes.CHECKCAST, JvmKit.getInternalName(type));
+        visitor.visitTypeInsn(Opcodes.CHECKCAST, JvmKit.toInternalName(type));
     }
 
     /**
@@ -424,7 +424,7 @@ public class AsmKit {
         if (ArrayKit.isEmpty(exceptionTypes)) {
             return null;
         }
-        return Jie.stream(exceptionTypes).map(JvmKit::getInternalName).toArray(String[]::new);
+        return Jie.stream(exceptionTypes).map(JvmKit::toInternalName).toArray(String[]::new);
     }
 
     /**

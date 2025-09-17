@@ -104,6 +104,6 @@ public class ProxyKit {
     }
 
     private static @Nonnull String buildMethodId(@Nonnull Method method) {
-        return method.getName() + ":" + JvmKit.getDescriptor(method);
+        return method.getName() + ":" + JvmKit.toDescriptor(method);
     }
 }

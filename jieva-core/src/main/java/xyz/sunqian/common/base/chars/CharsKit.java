@@ -26,8 +26,8 @@ public class CharsKit {
      */
     public static final @Nonnull Charset ISO_8859_1 = StandardCharsets.ISO_8859_1;
 
-    private static final char @Nonnull [] EMPTY_CHARS = {};
-    private static final @Nonnull CharBuffer EMPTY_BUFFER = CharBuffer.wrap(EMPTY_CHARS);
+    private static final char @Nonnull [] EMPTY = {};
+    private static final @Nonnull CharBuffer EMPTY_BUFFER = CharBuffer.wrap(EMPTY);
 
     /**
      * Returns whether the given buffer is null or empty.
@@ -44,8 +44,8 @@ public class CharsKit {
      *
      * @return an empty char array
      */
-    public static char @Nonnull [] emptyChars() {
-        return EMPTY_CHARS;
+    public static char @Nonnull [] empty() {
+        return EMPTY;
     }
 
     /**
@@ -87,10 +87,9 @@ public class CharsKit {
     }
 
     /**
-     * Returns the default charset of this Java virtual machine. It is equivalent to the
-     * {@link Charset#defaultCharset()}.
+     * Returns the default charset of the JVM. It is equivalent to the {@link Charset#defaultCharset()}.
      *
-     * @return the default charset of this Java virtual machine
+     * @return the default charset of the JVM
      * @see Charset#defaultCharset()
      */
     public static @Nonnull Charset jvmCharset() {
@@ -98,7 +97,7 @@ public class CharsKit {
     }
 
     /**
-     * Returns the default charset of current native environment, which is typically the charset of current OS.
+     * Returns the charset from the host environment, which is typically the charset of current OS.
      * <p>
      * This method is <b>not</b> equivalent to the {@link #jvmCharset()}, it will search the system properties in the
      * following order:
@@ -109,14 +108,14 @@ public class CharsKit {
      * </ul>
      * It may return {@code null} if not found.
      *
-     * @return the default charset of current native environment
+     * @return the charset from the host environment, which is typically the charset of current OS
      */
     public static @Nullable Charset nativeCharset() {
         return Natives.NATIVE_CHARSET;
     }
 
     /**
-     * Returns the charset with the specified name, may be {@code null} if the search fails.
+     * Returns the charset with the specified name, may be {@code null} if searching fails.
      *
      * @param name the specified name
      * @return the charset with the specified name

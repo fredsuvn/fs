@@ -18,14 +18,14 @@ import java.util.concurrent.atomic.AtomicLong;
 
 final class ByAsm {
 
-    private static final @Nonnull String INVOCABLE_NAME = JvmKit.getInternalName(Invocable.class);
+    private static final @Nonnull String INVOCABLE_NAME = JvmKit.toInternalName(Invocable.class);
     private static final @Nonnull String @Nonnull [] INTERFACES = new String[]{INVOCABLE_NAME};
     private static final @Nonnull Method INVOKE_CHECKED = Jie.uncheck(
         () -> Invocable.class.getMethod("invokeChecked", Object.class, Object[].class),
         InvocationException::new
     );
-    private static final @Nonnull String @Nonnull [] INVOKE_CHECKED_EXCEPTIONS = {JvmKit.getInternalName(Throwable.class)};
-    private static final @Nonnull String INVOKE_CHECKED_DESC = JvmKit.getDescriptor(INVOKE_CHECKED);
+    private static final @Nonnull String @Nonnull [] INVOKE_CHECKED_EXCEPTIONS = {JvmKit.toInternalName(Throwable.class)};
+    private static final @Nonnull String INVOKE_CHECKED_DESC = JvmKit.toDescriptor(INVOKE_CHECKED);
     // private static final @Nonnull String THROWABLE_NAME = JieJvm.getInternalName(Throwable.class);
     // private static final @Nonnull String EXCEPTION_NAME = JieJvm.getInternalName(InvocationException.class);
     // private static final @Nonnull String EXCEPTION_CONSTRUCTOR_DESCRIPTOR = Jie.uncheck(
@@ -110,7 +110,7 @@ final class ByAsm {
         // Label handler = new Label();
         // visitor.visitTryCatchBlock(start, end, handler, THROWABLE_NAME);
         // visitor.visitLabel(start);
-        String methodOwnerName = JvmKit.getInternalName(method.getDeclaringClass());
+        String methodOwnerName = JvmKit.toInternalName(method.getDeclaringClass());
         boolean isStatic = ClassKit.isStatic(method);
         if (!isStatic) {
             // get object
@@ -125,7 +125,7 @@ final class ByAsm {
                 Opcodes.INVOKESTATIC,
                 methodOwnerName,
                 method.getName(),
-                JvmKit.getDescriptor(method),
+                JvmKit.toDescriptor(method),
                 method.getDeclaringClass().isInterface()
             );
         } else {
@@ -133,7 +133,7 @@ final class ByAsm {
                 visitor,
                 methodOwnerName,
                 method.getName(),
-                JvmKit.getDescriptor(method),
+                JvmKit.toDescriptor(method),
                 method.getDeclaringClass().isInterface()
             );
         }
@@ -171,7 +171,7 @@ final class ByAsm {
         // Label handler = new Label();
         // visitor.visitTryCatchBlock(start, end, handler, THROWABLE_NAME);
         // visitor.visitLabel(start);
-        String methodOwnerName = JvmKit.getInternalName(constructor.getDeclaringClass());
+        String methodOwnerName = JvmKit.toInternalName(constructor.getDeclaringClass());
         // new Object();
         visitor.visitTypeInsn(Opcodes.NEW, methodOwnerName);
         visitor.visitInsn(Opcodes.DUP);
@@ -182,7 +182,7 @@ final class ByAsm {
             Opcodes.INVOKESPECIAL,
             methodOwnerName,
             AsmKit.CONSTRUCTOR_NAME,
-            JvmKit.getDescriptor(constructor),
+            JvmKit.toDescriptor(constructor),
             false
         );
         // visitor.visitLabel(end);

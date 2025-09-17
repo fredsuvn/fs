@@ -1087,7 +1087,7 @@ public class BufferKit {
                     dst.put(dstArr, 0, ret);
                 }
             } else {
-                byte[] srcArr = Jie.nonnull(read(src), BytesKit.emptyBytes());
+                byte[] srcArr = Jie.nonnull(read(src), BytesKit.empty());
                 if (dst.hasArray()) {
                     ret = operator.process(
                         srcArr,
@@ -1162,7 +1162,7 @@ public class BufferKit {
                     dst.put(dstArr, 0, ret);
                 }
             } else {
-                char[] srcArr = Jie.nonnull(read(src), CharsKit.emptyChars());
+                char[] srcArr = Jie.nonnull(read(src), CharsKit.empty());
                 if (dst.hasArray()) {
                     ret = operator.process(
                         srcArr,

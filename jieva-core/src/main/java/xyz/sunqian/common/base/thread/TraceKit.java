@@ -3,18 +3,59 @@ package xyz.sunqian.common.base.thread;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.Jie;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
 /**
- * Represents the context of the current thread, based on {@link ThreadLocal}.
+ * Utilities for tracing in thread. This class supports get and/or set values in the context of the current thread by
+ * {@link #get(Object)}, {@link #get(Object, Function)} and {@link #set(Object, Object)}.
  *
  * @author sunqian
  */
-public class ThreadContext {
+public class TraceKit {
 
     private static final ThreadLocal<Map<Object, Object>> CONTEXT = ThreadLocal.withInitial(LinkedHashMap::new);
+
+    /**
+     * Returns the stack trace list of the current thread, starting at the method that invokes this method
+     * ({@code TraceKit.stackTrace()}).
+     * <p>
+     * The list is a snapshot of the stack trace at the time of invocation. The first element at index {@code 0}
+     * represents the <i>caller</i> of this method (the most recent method invocation). The last element of the list
+     * represents the bottom of the stack, which is the least recent method invocation, typically is the {@code main()}
+     * or {@link Thread#run()}.
+     * <p>
+     * The original stack trace info is come from {@link Thread#getStackTrace()}.
+     *
+     * @return the stack trace list of the current thread
+     */
+    public static @Nonnull List<@Nonnull StackTraceElement> stackTrace() {
+        StackTraceElement[] elements = Thread.currentThread().getStackTrace();
+        return parseStackTrace(elements);
+    }
+
+    private static @Nonnull List<@Nonnull StackTraceElement> parseStackTrace(
+        @Nonnull StackTraceElement @Nonnull [] elements
+    ) {
+        int preIndex = -1;
+        for (int i = 0; i < elements.length; i++) {
+            StackTraceElement element = elements[i];
+            if (TraceKit.class.getName().equals(element.getClassName())
+                && "stackTrace".equals(element.getMethodName())) {
+                preIndex = i;
+            }
+        }
+        if (preIndex < 0) {
+            return Collections.emptyList();
+        }
+        StackTraceElement[] actualElements = new StackTraceElement[elements.length - preIndex - 1];
+        System.arraycopy(elements, preIndex + 1, actualElements, 0, actualElements.length);
+        return Arrays.asList(actualElements);
+    }
 
     /**
      * Returns the value to which the specified key is mapped in the context of the current thread. or {@code null} if
@@ -27,7 +68,7 @@ public class ThreadContext {
      * the context contains no mapping for the key
      */
     public static <K, V> V get(@Nonnull K key) {
-        return Jie.as(asMap().get(key));
+        return Jie.as(contextMap().get(key));
     }
 
     /**
@@ -45,7 +86,7 @@ public class ThreadContext {
      * @see Map#computeIfAbsent(Object, Function)
      */
     public static <K, V> V get(@Nonnull K key, @Nonnull Function<? super @Nonnull K, ? extends V> func) {
-        Map<K, V> map = Jie.as(asMap());
+        Map<K, V> map = Jie.as(contextMap());
         return map.computeIfAbsent(key, func);
     }
 
@@ -60,16 +101,16 @@ public class ThreadContext {
      * @return the old value or {@code null} if no old mapping
      */
     public static <K, V> V set(@Nonnull K key, V value) {
-        return Jie.as(asMap().put(key, value));
+        return Jie.as(contextMap().put(key, value));
     }
 
     /**
-     * Returns the content of the current thread as a {@link Map}. The returned {@link Map} is mutable, any changes to
-     * the {@link Map} will reflect to the context of the current thread.
+     * Returns content of the context in the current thread as a {@link Map}. The returned {@link Map} is mutable, any
+     * changes to the {@link Map} will reflect to the context of the current thread.
      *
-     * @return the content of the current thread as a {@link Map}
+     * @return content of the context in the current thread as a {@link Map}
      */
-    public static @Nonnull Map<Object, Object> asMap() {
+    public static @Nonnull Map<Object, Object> contextMap() {
         return CONTEXT.get();
     }
 }

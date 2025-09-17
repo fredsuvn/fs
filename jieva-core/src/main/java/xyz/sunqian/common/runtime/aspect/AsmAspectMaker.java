@@ -41,26 +41,26 @@ import java.util.concurrent.atomic.AtomicLong;
 @ThreadSafe
 public class AsmAspectMaker implements AspectMaker {
 
-    private static final @Nonnull String HANDLER_NAME = JvmKit.getInternalName(AspectHandler.class);
-    private static final @Nonnull String HANDLER_DESCRIPTOR = JvmKit.getDescriptor(AspectHandler.class);
-    private static final @Nonnull String METHODS_DESCRIPTOR = JvmKit.getDescriptor(Method[].class);
+    private static final @Nonnull String HANDLER_NAME = JvmKit.toInternalName(AspectHandler.class);
+    private static final @Nonnull String HANDLER_DESCRIPTOR = JvmKit.toDescriptor(AspectHandler.class);
+    private static final @Nonnull String METHODS_DESCRIPTOR = JvmKit.toDescriptor(Method[].class);
     private static final @Nonnull Method BEFORE_METHOD = Jie.uncheck(
         () -> AspectHandler.class.getMethod("beforeInvoking", Method.class, Object[].class, Object.class),
         AsmAspectException::new
     );
-    private static final @Nonnull String BEFORE_DESCRIPTOR = JvmKit.getDescriptor(BEFORE_METHOD);
+    private static final @Nonnull String BEFORE_DESCRIPTOR = JvmKit.toDescriptor(BEFORE_METHOD);
     private static final @Nonnull Method AFTER_METHOD = Jie.uncheck(
         () -> AspectHandler.class.getMethod("afterReturning", Object.class, Method.class, Object[].class, Object.class),
         AsmAspectException::new
     );
-    private static final @Nonnull String AFTER_DESCRIPTOR = JvmKit.getDescriptor(AFTER_METHOD);
+    private static final @Nonnull String AFTER_DESCRIPTOR = JvmKit.toDescriptor(AFTER_METHOD);
     private static final @Nonnull Method THROW_METHOD = Jie.uncheck(
         () -> AspectHandler.class.getMethod("afterThrowing", Throwable.class, Method.class, Object[].class, Object.class),
         AsmAspectException::new
     );
-    private static final @Nonnull String THROW_DESCRIPTOR = JvmKit.getDescriptor(THROW_METHOD);
-    private static final @Nonnull String METHOD_NAME = JvmKit.getInternalName(Method.class);
-    private static final @Nonnull String ARGS_NAME = JvmKit.getInternalName(Object[].class);
+    private static final @Nonnull String THROW_DESCRIPTOR = JvmKit.toDescriptor(THROW_METHOD);
+    private static final @Nonnull String METHOD_NAME = JvmKit.toInternalName(Method.class);
+    private static final @Nonnull String ARGS_NAME = JvmKit.toInternalName(Object[].class);
 
     private static final @Nonnull AtomicLong classCounter = new AtomicLong();
 
@@ -76,7 +76,7 @@ public class AsmAspectMaker implements AspectMaker {
                 + "/" + AsmKit.generateClassSimpleName(classCounter.incrementAndGet());
             // aspect class descriptor
             // String aspectDescriptor = "L" + aspectName + ";";
-            String advisedName = JvmKit.getInternalName(advisedClass);
+            String advisedName = JvmKit.toInternalName(advisedClass);
             // advised methods
             Map<Method, AspectMethodInfo> advisedMethodMap = new LinkedHashMap<>();
             // IntVar methodCount = IntVar.of(0);
@@ -124,8 +124,8 @@ public class AsmAspectMaker implements AspectMaker {
         //@Nonnull String aspectDescriptor,
         // int methodIndex
     ) {
-        String descriptor = JvmKit.getDescriptor(method);
-        String signature = JvmKit.getSignature(method);
+        String descriptor = JvmKit.toDescriptor(method);
+        String signature = JvmKit.toSignature(method);
         String[] exceptions = AsmKit.getExceptions(method);
         return new AspectMethodInfo(
             method,
@@ -385,7 +385,7 @@ public class AsmAspectMaker implements AspectMaker {
         if (Objects.equals(type, double.class)) {
             return Opcodes.DOUBLE;
         }
-        return JvmKit.getInternalName(type);
+        return JvmKit.toInternalName(type);
     }
 
     private static final class AspectClassInfo {

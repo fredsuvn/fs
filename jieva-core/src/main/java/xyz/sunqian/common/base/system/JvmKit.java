@@ -95,7 +95,7 @@ public class JvmKit {
      * @param cls the given class
      * @return the internal name of the given class.
      */
-    public static @Nonnull String getInternalName(@Nonnull Class<?> cls) {
+    public static @Nonnull String toInternalName(@Nonnull Class<?> cls) {
         return cls.getName().replace('.', '/');
     }
 
@@ -107,20 +107,20 @@ public class JvmKit {
      * @return the descriptor of the given type
      * @throws JvmException if any problem occurs
      */
-    public static @Nonnull String getDescriptor(@Nonnull Type type) throws JvmException {
+    public static @Nonnull String toDescriptor(@Nonnull Type type) throws JvmException {
         if (TypeKit.isTypeVariable(type)) {
             TypeVariable<?> tv = (TypeVariable<?>) type;
             Type bound = TypeKit.getFirstBound(tv);
-            return getDescriptor(bound);
+            return toDescriptor(bound);
         }
         StringBuilder appender = new StringBuilder();
         if (TypeKit.isClass(type)) {
             appendDescriptor((Class<?>) type, appender);
         } else if (TypeKit.isParameterized(type)) {
-            Class<?> rawClass = getRawClass((ParameterizedType) type);
+            Class<?> rawClass = toRawClass((ParameterizedType) type);
             appendDescriptor(rawClass, appender);
         } else if (TypeKit.isGenericArray(type)) {
-            appendDescriptor(getRawClass((GenericArrayType) type), appender);
+            appendDescriptor(toRawClass((GenericArrayType) type), appender);
         } else {
             throw new JvmException("Unknown type: " + type + ".");
         }
@@ -133,7 +133,7 @@ public class JvmKit {
      * @param method the given method
      * @return the descriptor of the given method
      */
-    public static @Nonnull String getDescriptor(@Nonnull Method method) {
+    public static @Nonnull String toDescriptor(@Nonnull Method method) {
         Class<?> returnType = method.getReturnType();
         Class<?>[] parameters = method.getParameterTypes();
         if (Objects.equals(returnType, void.class) && parameters.length == 0) {
@@ -155,7 +155,7 @@ public class JvmKit {
      * @param constructor the given constructor
      * @return the descriptor of the given constructor
      */
-    public static @Nonnull String getDescriptor(@Nonnull Constructor<?> constructor) {
+    public static @Nonnull String toDescriptor(@Nonnull Constructor<?> constructor) {
         Class<?>[] parameters = constructor.getParameterTypes();
         if (parameters.length == 0) {
             return "()V";
@@ -176,13 +176,13 @@ public class JvmKit {
             curCls = curCls.getComponentType();
         }
         if (curCls.isPrimitive()) {
-            appender.append(getPrimitiveDescriptor(curCls));
+            appender.append(toPrimitiveDescriptor(curCls));
         } else {
-            appender.append('L').append(getInternalName(curCls)).append(';');
+            appender.append('L').append(toInternalName(curCls)).append(';');
         }
     }
 
-    private static char getPrimitiveDescriptor(@Nonnull Class<?> cls) {
+    private static char toPrimitiveDescriptor(@Nonnull Class<?> cls) {
         if (Objects.equals(cls, boolean.class)) {
             return 'Z';
         }
@@ -291,7 +291,7 @@ public class JvmKit {
      * @param type the given type
      * @return the signature of the given type
      */
-    public static @Nullable String getSignature(@Nonnull Type type, boolean declaration) {
+    public static @Nullable String toSignature(@Nonnull Type type, boolean declaration) {
         if (!needSignature(type, declaration)) {
             return null;
         }
@@ -317,13 +317,13 @@ public class JvmKit {
 
     /**
      * Returns the given type's signature used for the declaration. This method is equivalent to
-     * ({@link #getSignature(Type, boolean)}): {@code getSignature(type, true)}.
+     * ({@link #toSignature(Type, boolean)}): {@code getSignature(type, true)}.
      *
      * @param type the given type
      * @return the given type's signature used for the declaration
      */
-    public static @Nullable String getSignature(@Nonnull Type type) {
-        return getSignature(type, true);
+    public static @Nullable String toSignature(@Nonnull Type type) {
+        return toSignature(type, true);
     }
 
     /**
@@ -332,8 +332,8 @@ public class JvmKit {
      * @param field the given field
      * @return the signature of the given field
      */
-    public static @Nullable String getSignature(@Nonnull Field field) {
-        return getSignature(field.getGenericType(), false);
+    public static @Nullable String toSignature(@Nonnull Field field) {
+        return toSignature(field.getGenericType(), false);
     }
 
     /**
@@ -342,7 +342,7 @@ public class JvmKit {
      * @param method the given method
      * @return the signature of the given method
      */
-    public static @Nullable String getSignature(@Nonnull Method method) {
+    public static @Nullable String toSignature(@Nonnull Method method) {
         if (!needSignature(method)) {
             return null;
         }
@@ -359,7 +359,7 @@ public class JvmKit {
      * @param constructor the given constructor
      * @return the signature of the given constructor
      */
-    public static @Nullable String getSignature(@Nonnull Constructor<?> constructor) {
+    public static @Nullable String toSignature(@Nonnull Constructor<?> constructor) {
         if (!needSignature(constructor)) {
             return null;
         }
@@ -411,7 +411,7 @@ public class JvmKit {
             }
             if (i == 0) {
                 if (TypeKit.isParameterized(bound)) {
-                    Class<?> rawClass = getRawClass((ParameterizedType) bound);
+                    Class<?> rawClass = toRawClass((ParameterizedType) bound);
                     if (rawClass.isInterface()) {
                         appender.append(':');
                     }
@@ -452,12 +452,12 @@ public class JvmKit {
     }
 
     private static void appendSignature(@Nonnull Class<?> type, @Nonnull StringBuilder appender) {
-        appender.append(getDescriptor(type));
+        appender.append(toDescriptor(type));
     }
 
     private static void appendSignature(@Nonnull ParameterizedType type, @Nonnull StringBuilder appender) {
         Type owner = type.getOwnerType();
-        Class<?> rawClass = getRawClass(type);
+        Class<?> rawClass = toRawClass(type);
         if (owner != null) {
             appendSignature(owner, appender);
             // it must end with a ';'
@@ -471,7 +471,7 @@ public class JvmKit {
         } else {
             // no primitive
             appender.append('L');
-            appender.append(getInternalName(rawClass));
+            appender.append(toInternalName(rawClass));
         }
         appender.append('<');
         for (Type actualTypeArgument : type.getActualTypeArguments()) {
@@ -511,7 +511,7 @@ public class JvmKit {
         appendSignature(curType, appender);
     }
 
-    private static @Nonnull Class<?> getRawClass(@Nonnull ParameterizedType type) throws JvmException {
+    private static @Nonnull Class<?> toRawClass(@Nonnull ParameterizedType type) throws JvmException {
         Type rawType = type.getRawType();
         if (TypeKit.isClass(rawType)) {
             return (Class<?>) rawType;
@@ -519,7 +519,7 @@ public class JvmKit {
         throw new JvmException("Unknown raw type: " + rawType + ".");
     }
 
-    private static @Nonnull Class<?> getRawClass(@Nonnull GenericArrayType type) throws JvmException {
+    private static @Nonnull Class<?> toRawClass(@Nonnull GenericArrayType type) throws JvmException {
         @Nullable Class<?> arrayClass = TypeKit.toRuntimeClass(type);
         if (arrayClass != null) {
             return arrayClass;

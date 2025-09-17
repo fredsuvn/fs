@@ -47,7 +47,7 @@ public interface Option<K, V> {
      * @param <V> the value type
      * @return an empty {@link Option} array
      */
-    static <K, V> @Nonnull Option<K, V>[] empty() {
+    static <K, V> @Nonnull Option<K, V>[] emptyOptions() {
         return Jie.as(OptionImpl.EMPTY_OPTIONS);
     }
 

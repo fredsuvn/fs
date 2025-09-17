@@ -6,7 +6,8 @@ import xyz.sunqian.common.collect.SetKit;
 import java.util.Set;
 
 /**
- * Provides keys of system properties. Most of them are standard keys which always have values, but some are not.
+ * Provides keys of system properties in {@link SystemKit#getProperties()}. Most of them are standard keys which always
+ * have values, but some are not.
  *
  * @author sunqian
  * @see System#getProperties()

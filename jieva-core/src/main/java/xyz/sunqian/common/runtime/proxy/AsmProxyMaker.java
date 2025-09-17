@@ -46,29 +46,29 @@ import java.util.concurrent.atomic.AtomicLong;
 @ThreadSafe
 public class AsmProxyMaker implements ProxyMaker {
 
-    private static final @Nonnull String INVOKER_NAME = JvmKit.getInternalName(ProxyInvoker.class);
-    private static final @Nonnull String INVOKERS_DESCRIPTOR = JvmKit.getDescriptor(ProxyInvoker[].class);
-    private static final @Nonnull String HANDLER_NAME = JvmKit.getInternalName(ProxyHandler.class);
-    private static final @Nonnull String HANDLER_DESCRIPTOR = JvmKit.getDescriptor(ProxyHandler.class);
-    private static final @Nonnull String METHODS_DESCRIPTOR = JvmKit.getDescriptor(Method[].class);
+    private static final @Nonnull String INVOKER_NAME = JvmKit.toInternalName(ProxyInvoker.class);
+    private static final @Nonnull String INVOKERS_DESCRIPTOR = JvmKit.toDescriptor(ProxyInvoker[].class);
+    private static final @Nonnull String HANDLER_NAME = JvmKit.toInternalName(ProxyHandler.class);
+    private static final @Nonnull String HANDLER_DESCRIPTOR = JvmKit.toDescriptor(ProxyHandler.class);
+    private static final @Nonnull String METHODS_DESCRIPTOR = JvmKit.toDescriptor(Method[].class);
     private static final @Nonnull String INVOKER_SIMPLE_NAME = "AsmInvoker";
     private static final @Nonnull String SUPER_INVOKER_NAME_PREFIX = "access$super$";
     private static final @Nonnull Method HANDLER_INVOKE = Jie.uncheck(
         () -> ProxyHandler.class.getMethod("invoke", Object.class, Method.class, ProxyInvoker.class, Object[].class),
         AsmProxyException::new
     );
-    private static final @Nonnull String HANDLER_INVOKE_DESCRIPTOR = JvmKit.getDescriptor(HANDLER_INVOKE);
+    private static final @Nonnull String HANDLER_INVOKE_DESCRIPTOR = JvmKit.toDescriptor(HANDLER_INVOKE);
     private static final @Nonnull Method INVOKER_INVOKE = Jie.uncheck(
         () -> ProxyInvoker.class.getMethod("invoke", Object.class, Object[].class),
         AsmProxyException::new
     );
-    private static final @Nonnull String INVOKER_INVOKE_DESCRIPTOR = JvmKit.getDescriptor(INVOKER_INVOKE);
+    private static final @Nonnull String INVOKER_INVOKE_DESCRIPTOR = JvmKit.toDescriptor(INVOKER_INVOKE);
     private static final @Nonnull String @Nullable [] INVOKER_INVOKE_EXCEPTIONS = AsmKit.getExceptions(INVOKER_INVOKE);
     private static final @Nonnull Method INVOKER_INVOKE_SUPER = Jie.uncheck(
         () -> ProxyInvoker.class.getMethod("invokeSuper", Object.class, Object[].class),
         AsmProxyException::new
     );
-    private static final @Nonnull String INVOKER_INVOKE_SUPER_DESCRIPTOR = JvmKit.getDescriptor(INVOKER_INVOKE_SUPER);
+    private static final @Nonnull String INVOKER_INVOKE_SUPER_DESCRIPTOR = JvmKit.toDescriptor(INVOKER_INVOKE_SUPER);
     private static final @Nonnull String @Nullable [] INVOKER_INVOKE_SUPER_EXCEPTIONS = AsmKit.getExceptions(INVOKER_INVOKE_SUPER);
 
     private static final @Nonnull AtomicLong classCounter = new AtomicLong();
@@ -88,11 +88,11 @@ public class AsmProxyMaker implements ProxyMaker {
             String proxyDescriptor = "L" + proxyName + ";";
             // proxy class's superclass, which is the proxied class
             Class<?> proxySuperClass = proxiedClass == null ? Object.class : proxiedClass;
-            String proxySuperName = JvmKit.getInternalName(proxySuperClass);
+            String proxySuperName = JvmKit.toInternalName(proxySuperClass);
             // proxy class's interfaces, which is the proxied interfaces
             String[] proxyInterfaces = {};
             if (!interfaces.isEmpty()) {
-                proxyInterfaces = interfaces.stream().map(JvmKit::getInternalName).toArray(String[]::new);
+                proxyInterfaces = interfaces.stream().map(JvmKit::toInternalName).toArray(String[]::new);
             }
             // ProxyInvoker's class internal name (inner class's simple name)
             String invokerSimpleName = INVOKER_SIMPLE_NAME;
@@ -106,7 +106,7 @@ public class AsmProxyMaker implements ProxyMaker {
             );
             IntVar methodCount = IntVar.of(0);
             proxiableMethods.forEach((type, methods) -> {
-                String ownerName = JvmKit.getInternalName(type);
+                String ownerName = JvmKit.toInternalName(type);
                 for (Method method : methods) {
                     proxiedMethodMap.put(
                         method,
@@ -154,8 +154,8 @@ public class AsmProxyMaker implements ProxyMaker {
         boolean isInterface,
         int methodIndex
     ) {
-        String descriptor = JvmKit.getDescriptor(method);
-        String signature = JvmKit.getSignature(method);
+        String descriptor = JvmKit.toDescriptor(method);
+        String signature = JvmKit.toSignature(method);
         String[] exceptions = AsmKit.getExceptions(method);
         String superInvokerName = SUPER_INVOKER_NAME_PREFIX + methodIndex;// access$001
         String superInvokerDescriptor = descriptor.replace("(", "(" + proxyDescriptor);
