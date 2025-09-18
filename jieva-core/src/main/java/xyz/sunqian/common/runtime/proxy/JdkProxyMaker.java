@@ -49,7 +49,7 @@ public class JdkProxyMaker implements ProxyMaker {
                 if (ClassKit.isStatic(method)) {
                     continue;
                 }
-                if (!proxiedMethods.containsKey(method) && proxyHandler.shouldProxyMethod(method)) {
+                if (!proxiedMethods.containsKey(method) && proxyHandler.needsProxy(method)) {
                     proxiedMethods.put(method, Var.of(null));
                 } else {
                     unproxiedMethods.put(method, Var.of(null));

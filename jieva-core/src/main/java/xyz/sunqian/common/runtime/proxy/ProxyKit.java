@@ -60,7 +60,7 @@ public class ProxyKit {
         if (!isProxiable(method)) {
             return false;
         }
-        return handler.shouldProxyMethod(method);
+        return handler.needsProxy(method);
     }
 
     /**

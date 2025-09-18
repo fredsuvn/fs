@@ -7,7 +7,7 @@ import java.lang.reflect.Method;
 
 /**
  * The AspectHandler is an interface used to handle aspect-oriented programming, including determining whether a method
- * needs to apply aspect ({@link #shouldApplyAspect(Method)}) and the specific behavior of the target advised method
+ * needs to apply aspect ({@link #needsAspect(Method)}) and the specific behavior of the target advised method
  * ({@link #beforeInvoking(Method, Object[], Object)}, {@link #afterReturning(Object, Method, Object[], Object)} and
  * {@link #afterThrowing(Throwable, Method, Object[], Object)}).
  * <p>
@@ -26,7 +26,7 @@ public interface AspectHandler {
      * @param method the given method
      * @return whether the aspect-oriented programming should be applied to the given method
      */
-    boolean shouldApplyAspect(@Nonnull Method method);
+    boolean needsAspect(@Nonnull Method method);
 
     /**
      * This method will be invoked before the invocation of the target method.

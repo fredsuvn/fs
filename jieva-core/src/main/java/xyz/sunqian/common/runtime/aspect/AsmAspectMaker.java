@@ -31,8 +31,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * This implementation uses inheritance to implement proxy, just like the keywords: {@code extends}. That means the
  * superclass, which is the advised class, cannot be {@code final} and must be inheritable, and must have an empty
  * constructor to ensure that the {@link AspectSpec#newInstance()} can execute correctly. And only the methods, which
- * can pass the {@link ProxyKit#isProxiable(Method)} and {@link AspectHandler#shouldApplyAspect(Method)}, can be
- * advised.
+ * can pass the {@link ProxyKit#isProxiable(Method)} and {@link AspectHandler#needsAspect(Method)}, can be advised.
  * <p>
  * Note the generated aspect class is {@code final}.
  *
@@ -84,7 +83,7 @@ public class AsmAspectMaker implements AspectMaker {
                 if (!ProxyKit.isProxiable(method)) {
                     continue;
                 }
-                if (!aspectHandler.shouldApplyAspect(method)) {
+                if (!aspectHandler.needsAspect(method)) {
                     continue;
                 }
                 advisedMethodMap.put(

@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * The ProxyHandler is an interface used to handle proxy behavior, including determining whether a method needs to be
- * proxied ({@link #shouldProxyMethod(Method)}) and the specific behavior of the proxy method
+ * proxied ({@link #needsProxy(Method)}) and the specific behavior of the proxy method
  * ({@link #invoke(Object, Method, ProxyInvoker, Object...)}).
  * <p>
  * This interface is typically used for {@link ProxyMaker#make(Class, List, ProxyHandler)}.
@@ -27,7 +27,7 @@ public interface ProxyHandler {
      * @param method the given method
      * @return whether the given method should be proxied
      */
-    boolean shouldProxyMethod(@Nonnull Method method);
+    boolean needsProxy(@Nonnull Method method);
 
     /**
      * Defines the proxy behavior for the proxied method. When a proxied method is invoked on a proxy instance, this

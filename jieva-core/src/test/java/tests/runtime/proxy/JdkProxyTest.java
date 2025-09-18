@@ -30,7 +30,7 @@ public class JdkProxyTest {
             ProxyHandler proxyHandler = new ProxyHandler() {
 
                 @Override
-                public boolean shouldProxyMethod(@Nonnull Method method) {
+                public boolean needsProxy(@Nonnull Method method) {
                     return true;
                 }
 
@@ -76,7 +76,7 @@ public class JdkProxyTest {
                 new ProxyHandler() {
 
                     @Override
-                    public boolean shouldProxyMethod(@Nonnull Method method) {
+                    public boolean needsProxy(@Nonnull Method method) {
                         return true;
                     }
 
@@ -109,7 +109,7 @@ public class JdkProxyTest {
                 new ProxyHandler() {
 
                     @Override
-                    public boolean shouldProxyMethod(@Nonnull Method method) {
+                    public boolean needsProxy(@Nonnull Method method) {
                         return !method.getName().startsWith("filtered");
                     }
 
@@ -147,7 +147,7 @@ public class JdkProxyTest {
                 new ProxyHandler() {
 
                     @Override
-                    public boolean shouldProxyMethod(@Nonnull Method method) {
+                    public boolean needsProxy(@Nonnull Method method) {
                         return true;
                     }
 
@@ -185,7 +185,7 @@ public class JdkProxyTest {
             new ProxyHandler() {
 
                 @Override
-                public boolean shouldProxyMethod(@Nonnull Method method) {
+                public boolean needsProxy(@Nonnull Method method) {
                     return true;
                 }
 
@@ -226,7 +226,7 @@ public class JdkProxyTest {
                 private boolean encounter = false;
 
                 @Override
-                public boolean shouldProxyMethod(@Nonnull Method method) {
+                public boolean needsProxy(@Nonnull Method method) {
                     if (method.getDeclaringClass().equals(SameMethodA.class)) {
                         if (encounter) {
                             return true;

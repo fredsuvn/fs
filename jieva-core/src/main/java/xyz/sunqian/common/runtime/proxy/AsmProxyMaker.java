@@ -37,7 +37,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * <p>
  * When the {@link #make(Class, List, ProxyHandler)} is called, and if there are methods with the same name and JVM
  * descriptor, this implementation only passes the first one encountered to the
- * {@link ProxyHandler#shouldProxyMethod(Method)}.
+ * {@link ProxyHandler#needsProxy(Method)}.
  * <p>
  * Note the generated proxy class is {@code final}.
  *

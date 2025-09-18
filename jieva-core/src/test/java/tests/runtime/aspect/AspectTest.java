@@ -26,7 +26,7 @@ public class AspectTest {
         AspectHandler handler = new AspectHandler() {
 
             @Override
-            public boolean shouldApplyAspect(@Nonnull Method method) {
+            public boolean needsAspect(@Nonnull Method method) {
                 return true;
             }
 
@@ -278,7 +278,7 @@ public class AspectTest {
             // direct throw
             AspectSpec spec2 = AspectMaker.byAsm().make(cls, new AspectHandler() {
                 @Override
-                public boolean shouldApplyAspect(@Nonnull Method method) {
+                public boolean needsAspect(@Nonnull Method method) {
                     return true;
                 }
 
@@ -318,7 +318,7 @@ public class AspectTest {
         AspectHandler handler = new AspectHandler() {
 
             @Override
-            public boolean shouldApplyAspect(@Nonnull Method method) {
+            public boolean needsAspect(@Nonnull Method method) {
                 return !method.getDeclaringClass().equals(Object.class);
             }
 
@@ -364,7 +364,7 @@ public class AspectTest {
         AspectHandler handler = new AspectHandler() {
 
             @Override
-            public boolean shouldApplyAspect(@Nonnull Method method) {
+            public boolean needsAspect(@Nonnull Method method) {
                 return !method.getDeclaringClass().equals(Object.class);
             }
 

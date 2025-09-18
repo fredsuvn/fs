@@ -110,7 +110,7 @@ public class AsmProxyTest implements PrintTest {
                     private boolean encounter = false;
 
                     @Override
-                    public boolean shouldProxyMethod(@Nonnull Method method) {
+                    public boolean needsProxy(@Nonnull Method method) {
                         if (method.getDeclaringClass().equals(SameMethodA.class)) {
                             if (encounter) {
                                 return true;
@@ -193,7 +193,7 @@ public class AsmProxyTest implements PrintTest {
                 new ProxyHandler() {
 
                     @Override
-                    public boolean shouldProxyMethod(@Nonnull Method method) {
+                    public boolean needsProxy(@Nonnull Method method) {
                         return method.getDeclaringClass().equals(ClsA.class)
                             || method.getDeclaringClass().equals(DefaultInter.class);
                     }
@@ -240,7 +240,7 @@ public class AsmProxyTest implements PrintTest {
                 new ProxyHandler() {
 
                     @Override
-                    public boolean shouldProxyMethod(@Nonnull Method method) {
+                    public boolean needsProxy(@Nonnull Method method) {
                         return method.getDeclaringClass().equals(ClsA.class)
                             || method.getDeclaringClass().equals(DefaultInter.class);
                     }
@@ -275,7 +275,7 @@ public class AsmProxyTest implements PrintTest {
                 new ProxyHandler() {
 
                     @Override
-                    public boolean shouldProxyMethod(@Nonnull Method method) {
+                    public boolean needsProxy(@Nonnull Method method) {
                         return method.getDeclaringClass().equals(ClsA.class)
                             || method.getDeclaringClass().equals(DefaultInter.class);
                     }
@@ -304,7 +304,7 @@ public class AsmProxyTest implements PrintTest {
                 new ProxyHandler() {
 
                     @Override
-                    public boolean shouldProxyMethod(@Nonnull Method method) {
+                    public boolean needsProxy(@Nonnull Method method) {
                         return method.getDeclaringClass().equals(ClsA.class)
                             || method.getDeclaringClass().equals(DefaultInter.class);
                     }
@@ -329,7 +329,7 @@ public class AsmProxyTest implements PrintTest {
                 new ProxyHandler() {
 
                     @Override
-                    public boolean shouldProxyMethod(@Nonnull Method method) {
+                    public boolean needsProxy(@Nonnull Method method) {
                         return method.getDeclaringClass().equals(ClsA.class)
                             || method.getDeclaringClass().equals(DefaultInter.class);
                     }
@@ -359,7 +359,7 @@ public class AsmProxyTest implements PrintTest {
                 new ProxyHandler() {
 
                     @Override
-                    public boolean shouldProxyMethod(@Nonnull Method method) {
+                    public boolean needsProxy(@Nonnull Method method) {
                         return true;
                     }
 
@@ -385,7 +385,7 @@ public class AsmProxyTest implements PrintTest {
                 new ProxyHandler() {
 
                     @Override
-                    public boolean shouldProxyMethod(@Nonnull Method method) {
+                    public boolean needsProxy(@Nonnull Method method) {
                         return true;
                     }
 
@@ -411,7 +411,7 @@ public class AsmProxyTest implements PrintTest {
                 new ProxyHandler() {
 
                     @Override
-                    public boolean shouldProxyMethod(@Nonnull Method method) {
+                    public boolean needsProxy(@Nonnull Method method) {
                         return true;
                     }
 
@@ -442,7 +442,7 @@ public class AsmProxyTest implements PrintTest {
                 new ProxyHandler() {
 
                     @Override
-                    public boolean shouldProxyMethod(@Nonnull Method method) {
+                    public boolean needsProxy(@Nonnull Method method) {
                         return !method.getName().startsWith("filtered");
                     }
 
@@ -493,7 +493,7 @@ public class AsmProxyTest implements PrintTest {
             new ProxyHandler() {
 
                 @Override
-                public boolean shouldProxyMethod(@Nonnull Method method) {
+                public boolean needsProxy(@Nonnull Method method) {
                     return true;
                 }
 
@@ -721,7 +721,7 @@ public class AsmProxyTest implements PrintTest {
         ProxyHandler proxyHandler = new ProxyHandler() {
 
             @Override
-            public boolean shouldProxyMethod(@Nonnull Method method) {
+            public boolean needsProxy(@Nonnull Method method) {
                 return true;
             }
 
@@ -948,7 +948,7 @@ public class AsmProxyTest implements PrintTest {
         ProxyHandler handler = new ProxyHandler() {
 
             @Override
-            public boolean shouldProxyMethod(@Nonnull Method method) {
+            public boolean needsProxy(@Nonnull Method method) {
                 return true;
             }
 
@@ -1206,7 +1206,7 @@ public class AsmProxyTest implements PrintTest {
             ProxySpec spec2 = ProxyMaker.byAsm().make(SimpleCls.class, Collections.emptyList(), new ProxyHandler() {
 
                 @Override
-                public boolean shouldProxyMethod(@Nonnull Method method) {
+                public boolean needsProxy(@Nonnull Method method) {
                     return true;
                 }
 
