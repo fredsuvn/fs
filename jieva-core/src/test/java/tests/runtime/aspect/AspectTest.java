@@ -5,6 +5,7 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.value.BooleanVar;
 import xyz.sunqian.common.base.value.IntVar;
+import xyz.sunqian.common.base.value.Var;
 import xyz.sunqian.common.runtime.aspect.AspectException;
 import xyz.sunqian.common.runtime.aspect.AspectHandler;
 import xyz.sunqian.common.runtime.aspect.AspectMaker;
@@ -357,6 +358,40 @@ public class AspectTest {
         }
     }
 
+    @Test
+    public void testGeneric() {
+        Var<Object> arg = Var.of(null);
+        AspectHandler handler = new AspectHandler() {
+
+            @Override
+            public boolean shouldApplyAspect(@Nonnull Method method) {
+                return !method.getDeclaringClass().equals(Object.class);
+            }
+
+            @Override
+            public void beforeInvoking(@Nonnull Method method, @Nullable Object @Nonnull [] args, @Nonnull Object target) throws Throwable {
+                arg.set(args[0]);
+            }
+
+            @Override
+            public @Nullable Object afterReturning(@Nullable Object result, @Nonnull Method method, @Nullable Object @Nonnull [] args, @Nonnull Object target) throws Throwable {
+                return result;
+            }
+
+            @Override
+            public @Nullable Object afterThrowing(@Nonnull Throwable ex, @Nonnull Method method, @Nullable Object @Nonnull [] args, @Nonnull Object target) {
+                return null;
+            }
+        };
+        AspectSpec spec = AspectMaker.byAsm().make(SimpleGeneric.class, handler);
+        SimpleGeneric<String> strSg = spec.newInstance();
+        assertEquals(strSg.generic("sss"), "sss");
+        assertEquals(arg.get(), "sss");
+        SimpleGeneric<Integer> intSg = spec.newInstance();
+        assertEquals(intSg.generic(888), 888);
+        assertEquals(arg.get(), 888);
+    }
+
     public static class SimpleCls {
 
         public String getString(String a, boolean p1, byte p2, char p3, short p4, int p5, long p6, float p7, double p8) {
@@ -439,6 +474,13 @@ public class AspectTest {
 
         @Override
         public <T> T inter3(T t) {
+            return t;
+        }
+    }
+
+    public static class SimpleGeneric<T> {
+
+        public T generic(T t) {
             return t;
         }
     }
