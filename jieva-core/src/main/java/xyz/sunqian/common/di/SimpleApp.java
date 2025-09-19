@@ -3,7 +3,6 @@ package xyz.sunqian.common.di;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.collect.CollectKit;
-import xyz.sunqian.common.runtime.aspect.AspectHandler;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
 
 import javax.annotation.PostConstruct;
@@ -199,17 +198,16 @@ public interface SimpleApp {
         /**
          * Enables or disables the aspect-oriented programming (AOP) functionality.
          * <p>
-         * When enabled, resource classes implementing the {@link AspectHandler} interface will be treated as aspect
+         * When enabled, resource classes implementing the {@link SimpleAppAspect} interface will be treated as aspect
          * handlers. These handlers are themselves managed by the dependency injection container and can have their own
          * dependencies injected.
          * <p>
-         * Methods in other resource classes will be evaluated by the {@link AspectHandler#needsAspect(Method)} of each
-         * aspect handler in an unspecified order. The evaluation stops at the first handler where the
-         * {@code needsAspect} returns {@code true} for any method in the target class. When a match is found, the
-         * entire class (not just the matching method) will be advised by that handler, and no further aspect handlers
-         * will be evaluated for that class.
+         * The other resource classes will be evaluated by the {@link SimpleAppAspect#needsAspect(Type)} of each aspect
+         * handler in an unspecified order. The evaluation stops at the first handler where the {@code needsAspect}
+         * returns {@code true} for the resource class. When a match is found, the resource class will be advised by
+         * that handler, and no further aspect handlers will be evaluated for that class.
          * <p>
-         * If no aspect handler matches any method in a class, the class will not be advised.
+         * If no aspect handler matches a resource class, the resource class will not be advised.
          *
          * @param enableAspect {@code true} to enable AOP functionality, {@code false} to disable it
          * @return this builder

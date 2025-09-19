@@ -10,6 +10,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -27,11 +28,10 @@ final class SimpleAppImpl implements SimpleApp {
         @Nonnull Class<? extends @Nonnull Annotation> preDestroyAnnotation
     ) throws SimpleAppException {
         try {
-            Map<@Nonnull Type, @Nonnull ResourceObject> resourceMap = new HashMap<>();
+            Map<@Nonnull Type, @Nonnull ResourceBuilder> resourceMap = new HashMap<>();
             for (Type resourceClass : resourceClasses) {
                 scanResourceTypes(
                     resourceClass,
-                    null,
                     resourceAnnotation,
                     postConstructAnnotation,
                     preDestroyAnnotation,
@@ -45,11 +45,10 @@ final class SimpleAppImpl implements SimpleApp {
 
     private void scanResourceTypes(
         @Nonnull Type type,
-        @Nullable Field field,
         @Nonnull Class<? extends @Nonnull Annotation> resourceAnnotation,
         @Nonnull Class<? extends @Nonnull Annotation> postConstructAnnotation,
         @Nonnull Class<? extends @Nonnull Annotation> preDestroyAnnotation,
-        @Nonnull @OutParam Map<@Nonnull Type, @Nonnull ResourceObject> resourceMap
+        @Nonnull @OutParam Map<@Nonnull Type, @Nonnull ResourceBuilder> resourceMap
     ) throws Exception {
         if (resourceMap.containsKey(type)) {
             return;
@@ -58,41 +57,57 @@ final class SimpleAppImpl implements SimpleApp {
         if (rawClass == null) {
             throw new UnsupportedOperationException("Unsupported DI type: " + type.getTypeName() + ".");
         }
-        ResourceObject ro = new ResourceObject(type, rawClass);
-        if (field != null) {
-            ro.field = field;
-        }
+        Method postConstruct = null;
+        Method preDestroy = null;
         for (Method method : rawClass.getMethods()) {
             if (method.isAnnotationPresent(postConstructAnnotation)) {
-                ro.postConstruct = method;
+                postConstruct = method;
             }
             if (method.isAnnotationPresent(preDestroyAnnotation)) {
-                ro.preDestroy = method;
+                preDestroy = method;
             }
         }
+        List<Field> fields = new ArrayList<>();
         Class<?> cur = rawClass;
         while (cur != null) {
             for (Field declaredField : cur.getDeclaredFields()) {
                 if (declaredField.isAnnotationPresent(resourceAnnotation)) {
-                    Type fieldType = declaredField.getGenericType();
-                    scanResourceTypes(
-                        fieldType,
-                        declaredField,
-                        resourceAnnotation,
-                        postConstructAnnotation,
-                        preDestroyAnnotation,
-                        resourceMap
-                    );
+                    fields.add(declaredField);
                 }
             }
             cur = cur.getSuperclass();
         }
+        ResourceBuilder rb = new ResourceBuilder(type, rawClass, fields, postConstruct, preDestroy);
+        resourceMap.put(type, rb);
+        for (Field field : fields) {
+            scanResourceTypes(
+                field.getGenericType(),
+                resourceAnnotation,
+                postConstructAnnotation,
+                preDestroyAnnotation,
+                resourceMap
+            );
+        }
     }
 
     private void scanResourceAspects(
-        @Nonnull @OutParam Map<@Nonnull Type, @Nonnull ResourceObject> resourceMap
+        @Nonnull @OutParam Map<@Nonnull Type, @Nonnull ResourceBuilder> resourceMap
     ) throws Exception {
-
+        List<ResourceBuilder> aspects = new ArrayList<>();
+        for (ResourceBuilder rb : resourceMap.values()) {
+            Class<?> rawType = rb.rawType;
+            if (SimpleAppAspect.class.isAssignableFrom(rawType)) {
+                aspects.add(rb);
+            }
+        }
+        if (aspects.isEmpty()) {
+            return;
+        }
+        for (ResourceBuilder rb : aspects) {
+            for (ResourceBuilder aspect : aspects) {
+                //if (aspect.)
+            }
+        }
     }
 
     @Override
@@ -115,19 +130,27 @@ final class SimpleAppImpl implements SimpleApp {
         return null;
     }
 
-    private static final class ResourceObject {
+    private static final class ResourceBuilder {
 
         private final @Nonnull Type type;
         private final @Nonnull Class<?> rawType;
-        private Field field;
-        private Object object;
-        private Method postConstruct;
-        private Method preDestroy;
-        private AspectHandler aspectHandler;
+        private final @Nonnull List<@Nonnull Field> fields;
+        private final @Nullable Method postConstruct;
+        private final @Nullable Method preDestroy;
+        private @Nullable SimpleAppAspect aspect;
 
-        private ResourceObject(@Nonnull Type type, @Nonnull Class<?> rawType) {
+        private ResourceBuilder(
+            @Nonnull Type type,
+            @Nonnull Class<?> rawType,
+            @Nonnull List<@Nonnull Field> fields,
+            @Nullable Method postConstruct,
+            @Nullable Method preDestroy
+        ) {
             this.type = type;
             this.rawType = rawType;
+            this.fields = fields;
+            this.postConstruct = postConstruct;
+            this.preDestroy = preDestroy;
         }
     }
 }
