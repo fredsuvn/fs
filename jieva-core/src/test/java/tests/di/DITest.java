@@ -12,8 +12,8 @@ public class DITest {
     @Test
     public void testDI() {
         SimpleApp app = SimpleApp.newBuilder()
-            .resources(Starter.class, ServiceAaa.class, ServiceBbb.class)
-            .enableAspect(true)
+            .resourceTypes(Starter.class, ServiceAaa.class, ServiceBbb.class)
+            .aspect(true)
             .build();
         ServiceAaa serviceAaa = app.getResource(ServiceAaa.class);
         assertEquals(serviceAaa.getLocalName(), "A");

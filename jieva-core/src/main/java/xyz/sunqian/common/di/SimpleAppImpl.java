@@ -31,9 +31,9 @@ final class SimpleAppImpl implements SimpleApp {
         @Nonnull List<@Nonnull Type> resourceTypes,
         @Nonnull List<@Nonnull SimpleApp> parents,
         boolean enableAspect,
-        @Nonnull Class<? extends @Nonnull Annotation> resourceAnnotation,
-        @Nonnull Class<? extends @Nonnull Annotation> postConstructAnnotation,
-        @Nonnull Class<? extends @Nonnull Annotation> preDestroyAnnotation
+        @Nullable String resourceAnnotation,
+        @Nullable String postConstructAnnotation,
+        @Nullable String preDestroyAnnotation
     ) throws SimpleAppException {
         Map<Type, Res> resourceMap = new HashMap<>();
         Set<FieldRes> fieldSet = new HashSet<>();
@@ -46,7 +46,8 @@ final class SimpleAppImpl implements SimpleApp {
                 preDestroyAnnotation,
                 parents,
                 resourceMap,
-                fieldSet
+                fieldSet,
+                new HashSet<>()
             );
         }
         // base injects:
@@ -87,28 +88,38 @@ final class SimpleAppImpl implements SimpleApp {
         this.parents = Collections.unmodifiableList(new ArrayList<>(parents));
     }
 
-    private @Nonnull Res dependencyInjection(
+    private void dependencyInjection(
         @Nonnull Type type,
-        @Nonnull Class<? extends @Nonnull Annotation> resourceAnnotation,
-        @Nonnull Class<? extends @Nonnull Annotation> postConstructAnnotation,
-        @Nonnull Class<? extends @Nonnull Annotation> preDestroyAnnotation,
+        @Nullable String resourceAnnotation,
+        @Nullable String postConstructAnnotation,
+        @Nullable String preDestroyAnnotation,
         @Nonnull List<@Nonnull SimpleApp> parents,
         @Nonnull @OutParam Map<@Nonnull Type, @Nonnull Res> resourceMap,
-        @Nonnull @OutParam Set<@Nonnull FieldRes> fieldSet
+        @Nonnull @OutParam Set<@Nonnull FieldRes> fieldSet,
+        @Nonnull @OutParam Set<@Nonnull Type> interfaceTypes
     ) throws SimpleAppException {
-        Res res = resourceMap.get(type);
-        if (res != null) {
-            return res;
+        if (resourceMap.containsKey(type)) {
+            return;
         }
         for (SimpleApp parent : parents) {
             Object instance = parent.getResource(type);
             if (instance != null) {
-                res = new Res(type, instance);
+               Res res = new Res(type, instance);
                 resourceMap.put(type, res);
-                return res;
+                return;
             }
         }
-        res = new Res(type, postConstructAnnotation, preDestroyAnnotation);
+        Class<?> rawClass = rawClass(type);
+        if (rawClass.isInterface()) {
+            interfaceTypes.add(type);
+            return;
+        }
+        int rawClassMod = rawClass.getModifiers();
+        if (Modifier.isAbstract(rawClassMod)) {
+            interfaceTypes.add(type);
+            return;
+        }
+        Res res = new Res(type, rawClass, postConstructAnnotation, preDestroyAnnotation);
         resourceMap.put(type, res);
         Class<?> cur = res.rawClass;
         while (cur != null) {
@@ -118,21 +129,21 @@ final class SimpleAppImpl implements SimpleApp {
                     continue;
                 }
                 if (declaredField.isAnnotationPresent(resourceAnnotation)) {
-                    Res reference = dependencyInjection(
+                    dependencyInjection(
                         declaredField.getGenericType(),
                         resourceAnnotation,
                         postConstructAnnotation,
                         preDestroyAnnotation,
                         parents,
                         resourceMap,
-                        fieldSet
+                        fieldSet,
+                        interfaceTypes
                     );
-                    fieldSet.add(new FieldRes(declaredField, res, reference));
+                    fieldSet.add(new FieldRes(declaredField, res));
                 }
             }
             cur = cur.getSuperclass();
         }
-        return res;
     }
 
     private void aop(
@@ -222,6 +233,14 @@ final class SimpleAppImpl implements SimpleApp {
         return allResources;
     }
 
+    private static @Nonnull Class<?> rawClass(@Nonnull Type type) {
+        Class<?> raw = TypeKit.getRawClass(type);
+        if (raw == null) {
+            throw new UnsupportedOperationException("Unsupported DI type: " + type.getTypeName() + ".");
+        }
+        return raw;
+    }
+
     private static final class Res {
 
         private final @Nonnull Type type;
@@ -236,20 +255,26 @@ final class SimpleAppImpl implements SimpleApp {
 
         private Res(
             @Nonnull Type type,
-            @Nonnull Class<? extends @Nonnull Annotation> postConstructAnnotation,
-            @Nonnull Class<? extends @Nonnull Annotation> preDestroyAnnotation
+            @Nonnull Class<?> rawClass,
+            @Nullable String postConstructAnnotation,
+            @Nullable String preDestroyAnnotation
         ) throws SimpleAppException {
             this.type = type;
-            this.rawClass = rawClass(type);
+            this.rawClass = rawClass;
             this.local = true;
             Method postConstruct = null;
             Method preDestroy = null;
             for (Method method : rawClass.getMethods()) {
-                if (method.isAnnotationPresent(postConstructAnnotation)) {
-                    postConstruct = method;
+                for (Annotation annotation : method.getAnnotations()) {
+                    if (annotation.annotationType().getName().equals(postConstructAnnotation)) {
+                        postConstruct = method;
+                    }
+                    if (annotation.annotationType().getName().equals(preDestroyAnnotation)) {
+                        preDestroy = method;
+                    }
                 }
-                if (method.isAnnotationPresent(preDestroyAnnotation)) {
-                    preDestroy = method;
+                if (postConstruct != null && preDestroy != null) {
+                    break;
                 }
             }
             this.postConstruct = postConstruct;
@@ -269,26 +294,16 @@ final class SimpleAppImpl implements SimpleApp {
             this.preDestroy = null;
             this.instance = instance;
         }
-
-        private @Nonnull Class<?> rawClass(@Nonnull Type type) {
-            Class<?> raw = TypeKit.getRawClass(type);
-            if (raw == null) {
-                throw new UnsupportedOperationException("Unsupported DI type: " + type.getTypeName() + ".");
-            }
-            return raw;
-        }
     }
 
     private static final class FieldRes {
 
         private final @Nonnull Field field;
         private final @Nonnull Res owner;
-        private final @Nonnull Res reference;
 
-        private FieldRes(@Nonnull Field field, @Nonnull Res owner, @Nonnull Res reference) {
+        private FieldRes(@Nonnull Field field, @Nonnull Res owner) {
             this.field = field;
             this.owner = owner;
-            this.reference = reference;
         }
     }
 

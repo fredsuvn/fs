@@ -6,12 +6,10 @@ import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.collect.CollectKit;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +36,7 @@ public interface SimpleApp {
      * Shuts down this app by performing the following cleanup operations in order:
      * <ol>
      *     <li><b>Pre-Destroy Method Execution</b>:
-     *     Invokes pre-destroy methods, which are typically annotated with {@link PreDestroy}
+     *     Invokes pre-destroy methods, which are typically annotated with {@code PreDestroy}
      *     on managed objects, allowing for custom cleanup logic before object destruction.
      *     And the order is unspecified.</li>
      *     <li><b>Resource Release</b>:
@@ -134,77 +132,100 @@ public interface SimpleApp {
         private final @Nonnull List<Type> resourceTypes = new ArrayList<>();
         private final @Nonnull List<@Nonnull SimpleApp> parentApps = new ArrayList<>();
         private boolean enableAspect = false;
-        private @Nonnull Class<? extends @Nonnull Annotation> resourceAnnotation = Resource.class;
-        private @Nonnull Class<? extends @Nonnull Annotation> postConstructAnnotation = PostConstruct.class;
-        private @Nonnull Class<? extends @Nonnull Annotation> preDestroyAnnotation = PreDestroy.class;
+        private @Nonnull String @Nonnull [] resourceAnnotations = {"javax.annotation.Resource", "jakarta.annotation.Resource"};
+        private @Nonnull String @Nonnull [] postConstructAnnotations = {"javax.annotation.PostConstruct", "jakarta.annotation.PostConstruct"};
+        private @Nonnull String @Nonnull [] preDestroyAnnotations = {"javax.annotation.PreDestroy", "jakarta.annotation.PreDestroy"};
 
         /**
-         * Sets the annotation on a {@link Field} to specify this field is a resource needs to be managed by the
-         * dependency injection container.
+         * Sets the annotations applied to a {@link Field} indicate that it references a resource instance. The
+         * {@link Field} is considered annotated if it has any one of those annotations.
          * <p>
-         * The default annotation is: {@link Resource}.
+         * The default annotations are: {@code javax.annotation.Resource} and {@code jakarta.annotation.Resource}.
          *
-         * @param resourceAnnotation the annotation on a {@link Field} to specify this field is a resource needs to be
-         *                           managed by the dependency injection container
+         * @param resourceAnnotations the annotations applied to a {@link Field} indicate that it references a resource
+         *                            instance
          * @return this builder
          */
-        public @Nonnull Builder resourceAnnotation(
-            @Nonnull Class<? extends @Nonnull Annotation> resourceAnnotation
+        public @Nonnull Builder resourceAnnotations(
+            @Nonnull Class<? extends @Nonnull Annotation> @Nonnull ... resourceAnnotations
         ) {
-            this.resourceAnnotation = resourceAnnotation;
+            this.resourceAnnotations = toStringArray(resourceAnnotations);
             return this;
         }
 
         /**
-         * Sets the annotation on a {@link Method} to specify this method is a post-construct method.
+         * Sets the annotations applied to a {@link Method} indicate that it is a post-construct method. The
+         * {@link Method} is considered annotated if it has any one of those annotations.
          * <p>
-         * The default annotation is: {@link PostConstruct}.
+         * The default annotations are: {@code javax.annotation.PostConstruct} and
+         * {@code jakarta.annotation.PostConstruct}.
          *
-         * @param postConstructAnnotation the annotation on a {@link Method} to specify this method is a post-construct
-         *                                method
+         * @param postConstructAnnotations the annotations applied to a {@link Method} indicate that it is a
+         *                                 post-construct method
          * @return this builder
          */
-        public @Nonnull Builder postConstructAnnotation(
-            @Nonnull Class<? extends @Nonnull Annotation> postConstructAnnotation
+        public @Nonnull Builder postConstructAnnotations(
+            @Nonnull Class<? extends @Nonnull Annotation> @Nonnull ... postConstructAnnotations
         ) {
-            this.postConstructAnnotation = postConstructAnnotation;
+            this.postConstructAnnotations = toStringArray(postConstructAnnotations);
             return this;
         }
 
         /**
-         * Sets the annotation on a {@link Method} to specify this method is a pre-destroy method.
+         * Sets the annotations applied to a {@link Method} indicate that it is a pre-destroy method. The {@link Method}
+         * is considered annotated if it has any one of those annotations.
          * <p>
-         * The default annotation is: {@link PreDestroy}.
+         * The default annotations are: {@code javax.annotation.PreDestroy} and {@code jakarta.annotation.PreDestroy}.
          *
-         * @param preDestroyAnnotation the annotation on a {@link Method} to specify this method is a pre-destroy
-         *                             method
+         * @param preDestroyAnnotations the annotations applied to a {@link Method} indicate that it is a pre-destroy
+         *                              method
          * @return this builder
          */
-        public @Nonnull Builder preDestroyAnnotation(
-            @Nonnull Class<? extends @Nonnull Annotation> preDestroyAnnotation
+        public @Nonnull Builder preDestroyAnnotations(
+            @Nonnull Class<? extends @Nonnull Annotation> @Nonnull ... preDestroyAnnotations
         ) {
-            this.preDestroyAnnotation = preDestroyAnnotation;
+            this.preDestroyAnnotations = toStringArray(preDestroyAnnotations);
             return this;
         }
 
+        private @Nonnull String @Nonnull [] toStringArray(
+            @Nonnull Class<? extends @Nonnull Annotation> @Nonnull [] annotations
+        ) {
+            String[] annotationNames = new String[annotations.length];
+            for (int i = 0; i < annotations.length; i++) {
+                annotationNames[i] = annotations[i].getName();
+            }
+            return annotationNames;
+        }
+
         /**
-         * Adds resource types, which will be managed by the dependency injection container, to this builder.
+         * Adds types of the resources to this builder, each type must be a {@link Class} or {@link ParameterizedType}.
+         * <p>
+         * These types will serve as the root types from which dependency injection instances are generated, based on
+         * both the types themselves and the fields declared within them.
+         * <p>
+         * Note if there are identical types, only one will be retained, and each type will only generate one instance.
          *
-         * @param resourceTypes the resource types to be added
+         * @param resourceTypes the types of the resources to be added
          * @return this builder
          */
-        public @Nonnull Builder resources(@Nonnull Type @Nonnull ... resourceTypes) {
+        public @Nonnull Builder resourceTypes(@Nonnull Type @Nonnull ... resourceTypes) {
             CollectKit.addAll(this.resourceTypes, resourceTypes);
             return this;
         }
 
         /**
-         * Adds resource types, which will be managed by the dependency injection container, to this builder.
+         * Adds types of the resources to this builder, each type must be a {@link Class} or {@link ParameterizedType}.
+         * <p>
+         * These types will serve as the root types from which dependency injection instances are generated, based on
+         * both the types themselves and the fields declared within them.
+         * <p>
+         * Note if there are identical types, only one will be retained, and each type will only generate one instance.
          *
-         * @param resourceTypes the resource types to be added
+         * @param resourceTypes the types of the resources to be added
          * @return this builder
          */
-        public @Nonnull Builder resources(@Nonnull Iterable<@Nonnull Type> resourceTypes) {
+        public @Nonnull Builder resourceTypes(@Nonnull Iterable<@Nonnull Type> resourceTypes) {
             CollectKit.addAll(this.resourceTypes, resourceTypes);
             return this;
         }
@@ -256,11 +277,11 @@ public interface SimpleApp {
          * instance is advised and replaced by the advised instance, the Post-Construct and Pre-Destroy methods (if any)
          * will execute on the advised instance rather than the original instance.
          *
-         * @param enableAspect {@code true} to enable AOP functionality, {@code false} to disable it
+         * @param aspect {@code true} to enable AOP functionality, {@code false} to disable it
          * @return this builder
          */
-        public @Nonnull Builder enableAspect(boolean enableAspect) {
-            this.enableAspect = enableAspect;
+        public @Nonnull Builder aspect(boolean aspect) {
+            this.enableAspect = aspect;
             return this;
         }
 
@@ -274,7 +295,7 @@ public interface SimpleApp {
          *     <li><b>Aspect-Oriented Programming (AOP) Processing</b>:
          *     Applies aspect handlers to relevant classes if AOP is enabled.</li>
          *     <li><b>Initialization Method Execution</b>:
-         *     Invokes initialization methods which are typically annotated with {@link PostConstruct},
+         *     Invokes initialization methods which are typically annotated with {@code PostConstruct},
          *     excluding resources shared from the parent apps. And the order is unspecified.</li>
          * </ol>
          * <p>
