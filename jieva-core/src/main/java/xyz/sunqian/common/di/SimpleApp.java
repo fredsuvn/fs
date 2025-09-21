@@ -2,6 +2,7 @@ package xyz.sunqian.common.di;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
+import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.collect.CollectKit;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
 
@@ -56,7 +57,7 @@ public interface SimpleApp {
      *         resume functionality.
      *     </li>
      *     <li>
-     *         Stopping this app will not result in stopping sub apps, but shared resources of this app may be removed.
+     *         Stopping this app will not result in stopping sub apps, but shared resources of this app may be invalid.
      *     </li>
      * </ul>
      *
@@ -74,15 +75,24 @@ public interface SimpleApp {
     List<@Nonnull SimpleApp> parents();
 
     /**
-     * Returns the resources managed by this app (excluding resources shared from the parent apps).
+     * Returns the resources managed by this app (excluding the instance shared from the parent apps).
      *
-     * @return the resources managed by this app (excluding resources shared from the parent apps)
+     * @return the resources managed by this app (excluding the instance shared from the parent apps)
      */
     @Nonnull
     Map<@Nonnull Type, @Nonnull Object> resources();
 
     /**
-     * Returns the resource of the specified type, or {@code null} if no such resource exists.
+     * Returns all resources this app depends (including the instance shared from parents).
+     *
+     * @return all resources this app depends (including the instance shared from parents)
+     */
+    @Nonnull
+    Map<@Nonnull Type, @Nonnull Object> allResources();
+
+    /**
+     * Returns the resource instance of the specified type (including the instance shared from parents), or {@code null}
+     * if no such resource exists.
      *
      * @param type the specified type of the resource
      * @param <T>  the type of the resource
@@ -93,7 +103,8 @@ public interface SimpleApp {
     }
 
     /**
-     * Returns the resource of the specified type, or {@code null} if no such resource exists.
+     * Returns the resource instance of the specified type (including the instance shared from parents), or {@code null}
+     * if no such resource exists.
      *
      * @param type the {@link TypeRef} of the specified type of the resource
      * @param <T>  the type of the resource
@@ -104,20 +115,23 @@ public interface SimpleApp {
     }
 
     /**
-     * Returns the resource of the specified type, or {@code null} if no such resource exists.
+     * Returns the resource instance of the specified type (including the instance shared from parents), or {@code null}
+     * if no such resource exists.
      *
      * @param type the specified type of the resource
      * @param <T>  the type of the resource
      * @return the resource of the specified type, or {@code null} if no such resource exists
      */
-    <T> @Nullable T getResource(@Nonnull Type type);
+    default <T> @Nullable T getResource(@Nonnull Type type) {
+        return Jie.as(allResources().get(type));
+    }
 
     /**
      * Builder for {@link SimpleApp}.
      */
     class Builder {
 
-        private final @Nonnull List<Type> resourceClasses = new ArrayList<>();
+        private final @Nonnull List<Type> resourceTypes = new ArrayList<>();
         private final @Nonnull List<@Nonnull SimpleApp> parentApps = new ArrayList<>();
         private boolean enableAspect = false;
         private @Nonnull Class<? extends @Nonnull Annotation> resourceAnnotation = Resource.class;
@@ -176,44 +190,22 @@ public interface SimpleApp {
         /**
          * Adds resource types, which will be managed by the dependency injection container, to this builder.
          *
-         * @param resourceClasses the resource types to be added
+         * @param resourceTypes the resource types to be added
          * @return this builder
          */
-        public @Nonnull Builder resources(@Nonnull Type @Nonnull ... resourceClasses) {
-            CollectKit.addAll(this.resourceClasses, resourceClasses);
+        public @Nonnull Builder resources(@Nonnull Type @Nonnull ... resourceTypes) {
+            CollectKit.addAll(this.resourceTypes, resourceTypes);
             return this;
         }
 
         /**
          * Adds resource types, which will be managed by the dependency injection container, to this builder.
          *
-         * @param resourceClasses the resource types to be added
+         * @param resourceTypes the resource types to be added
          * @return this builder
          */
-        public @Nonnull Builder resources(@Nonnull Iterable<@Nonnull Type> resourceClasses) {
-            CollectKit.addAll(this.resourceClasses, resourceClasses);
-            return this;
-        }
-
-        /**
-         * Enables or disables the aspect-oriented programming (AOP) functionality.
-         * <p>
-         * When enabled, resource classes implementing the {@link SimpleAppAspect} interface will be treated as aspect
-         * handlers. These handlers are themselves managed by the dependency injection container and can have their own
-         * dependencies injected.
-         * <p>
-         * The other resource classes will be evaluated by the {@link SimpleAppAspect#needsAspect(Type)} of each aspect
-         * handler in an unspecified order. The evaluation stops at the first handler where the {@code needsAspect}
-         * returns {@code true} for the resource class. When a match is found, the resource class will be advised by
-         * that handler, and no further aspect handlers will be evaluated for that class.
-         * <p>
-         * If no aspect handler matches a resource class, the resource class will not be advised.
-         *
-         * @param enableAspect {@code true} to enable AOP functionality, {@code false} to disable it
-         * @return this builder
-         */
-        public @Nonnull Builder enableAspect(boolean enableAspect) {
-            this.enableAspect = enableAspect;
+        public @Nonnull Builder resources(@Nonnull Iterable<@Nonnull Type> resourceTypes) {
+            CollectKit.addAll(this.resourceTypes, resourceTypes);
             return this;
         }
 
@@ -221,7 +213,7 @@ public interface SimpleApp {
          * Adds the parent {@link SimpleApp}s for resource sharing.
          * <p>
          * When a parent {@link SimpleApp} is provided, the current {@link SimpleApp} will attempt to reuse resource
-         * instances from the parent {@link SimpleApp} instead of creating new ones. Specifically, if a resource class
+         * instances from the parent {@link SimpleApp} instead of creating new ones. Specifically, if a resource type
          * required by the current {@link SimpleApp} already exists in the parent {@link SimpleApp}, the instance from
          * the parent {@link SimpleApp} will be shared and used directly.
          *
@@ -237,7 +229,7 @@ public interface SimpleApp {
          * Adds the parent {@link SimpleApp}s for resource sharing.
          * <p>
          * When a parent {@link SimpleApp} is provided, the current {@link SimpleApp} will attempt to reuse resource
-         * instances from the parent {@link SimpleApp} instead of creating new ones. Specifically, if a resource class
+         * instances from the parent {@link SimpleApp} instead of creating new ones. Specifically, if a resource type
          * required by the current {@link SimpleApp} already exists in the parent {@link SimpleApp}, the instance from
          * the parent {@link SimpleApp} will be shared and used directly.
          *
@@ -250,7 +242,30 @@ public interface SimpleApp {
         }
 
         /**
-         * Builds and starts this app with the settings, following steps in order:
+         * Enables or disables the aspect-oriented programming (AOP) functionality.
+         * <p>
+         * When enabled, this builder will first start standard dependency injection, creating one instance for each
+         * resource type. Resource objects which are instances of the {@link SimpleAppAspect} will be treated as aspect
+         * handlers, and the other resource instances (excluding resources shared from the parent apps) will be
+         * evaluated by {@link SimpleAppAspect#needsAspect(Type)} of each aspect handler in an unspecified order. The
+         * evaluation stops at the first handler where the {@code needsAspect} returns {@code true} for the resource
+         * type. When a match is found, the resource instance will be advised by that handler, and no further aspect
+         * handlers will be evaluated for that type.
+         * <p>
+         * If no aspect handler matches a resource type, the resource type will not be advised. And if a resource
+         * instance is advised and replaced by the advised instance, the Post-Construct and Pre-Destroy methods (if any)
+         * will execute on the advised instance rather than the original instance.
+         *
+         * @param enableAspect {@code true} to enable AOP functionality, {@code false} to disable it
+         * @return this builder
+         */
+        public @Nonnull Builder enableAspect(boolean enableAspect) {
+            this.enableAspect = enableAspect;
+            return this;
+        }
+
+        /**
+         * Builds and starts this app, following steps in order:
          * <ol>
          *     <li><b>Dependency Injection (DI) Processing</b>:
          *     Creates and manages object instances, excluding resources shared from the parent apps,
@@ -259,8 +274,8 @@ public interface SimpleApp {
          *     <li><b>Aspect-Oriented Programming (AOP) Processing</b>:
          *     Applies aspect handlers to relevant classes if AOP is enabled.</li>
          *     <li><b>Initialization Method Execution</b>:
-         *     Invokes initialization methods, which are typically annotated with {@link PostConstruct},
-         *     following the dependency injection completion. And the order is unspecified.</li>
+         *     Invokes initialization methods which are typically annotated with {@link PostConstruct},
+         *     excluding resources shared from the parent apps. And the order is unspecified.</li>
          * </ol>
          * <p>
          * Note:
@@ -269,12 +284,12 @@ public interface SimpleApp {
          *         This method will block the current thread until all steps have completed.
          *     </li>
          *     <li>
-         *         A {@link SimpleApp} can only start or shutdown once, A new {@link SimpleApp} instance must be created to
-         *         resume functionality.
+         *         A {@link SimpleApp} can only start or shutdown once, A new {@link SimpleApp} instance must be created
+         *         to resume functionality.
          *     </li>
          *     <li>
-         *         A {@link SimpleApp} can only be started after all parent {@link SimpleApp} have been started.
-         *         The behavior is undefined if
+         *         A {@link SimpleApp} can only be started if all parent {@link SimpleApp} are valid.
+         *         The behavior is undefined if a parent {@link SimpleApp} is invalid for this app.
          *     </li>
          * </ul>
          *
@@ -283,7 +298,7 @@ public interface SimpleApp {
          */
         public @Nonnull SimpleApp build() throws SimpleAppException {
             return new SimpleAppImpl(
-                resourceClasses,
+                resourceTypes,
                 parentApps,
                 enableAspect,
                 resourceAnnotation,

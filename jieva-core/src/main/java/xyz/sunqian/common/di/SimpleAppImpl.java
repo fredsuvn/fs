@@ -3,153 +3,302 @@ package xyz.sunqian.common.di;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.OutParam;
-import xyz.sunqian.common.runtime.aspect.AspectHandler;
+import xyz.sunqian.common.runtime.aspect.AspectMaker;
+import xyz.sunqian.common.runtime.aspect.AspectSpec;
 import xyz.sunqian.common.runtime.reflect.TypeKit;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-
+import java.util.Set;
 
 final class SimpleAppImpl implements SimpleApp {
 
+    private final @Nonnull Map<@Nonnull Type, @Nonnull Object> resources;
+    private final @Nonnull Map<@Nonnull Type, @Nonnull Object> allResources;
+    private final @Nonnull List<@Nonnull ForPreDestroy> destroyList;
+    private final @Nonnull List<@Nonnull SimpleApp> parents;
+
     public SimpleAppImpl(
-        @Nonnull List<@Nonnull Type> resourceClasses,
+        @Nonnull List<@Nonnull Type> resourceTypes,
         @Nonnull List<@Nonnull SimpleApp> parents,
         boolean enableAspect,
         @Nonnull Class<? extends @Nonnull Annotation> resourceAnnotation,
         @Nonnull Class<? extends @Nonnull Annotation> postConstructAnnotation,
         @Nonnull Class<? extends @Nonnull Annotation> preDestroyAnnotation
     ) throws SimpleAppException {
-        try {
-            Map<@Nonnull Type, @Nonnull ResourceBuilder> resourceMap = new HashMap<>();
-            for (Type resourceClass : resourceClasses) {
-                scanResourceTypes(
-                    resourceClass,
-                    resourceAnnotation,
-                    postConstructAnnotation,
-                    preDestroyAnnotation,
-                    resourceMap
-                );
-            }
-        } catch (Exception e) {
-            throw new SimpleAppException(e);
+        Map<Type, Res> resourceMap = new HashMap<>();
+        Set<FieldRes> fieldSet = new HashSet<>();
+        // generate instances
+        for (Type resourceType : resourceTypes) {
+            dependencyInjection(
+                resourceType,
+                resourceAnnotation,
+                postConstructAnnotation,
+                preDestroyAnnotation,
+                parents,
+                resourceMap,
+                fieldSet
+            );
         }
+        // base injects:
+        for (FieldRes fieldRes : fieldSet) {
+            setField(fieldRes.field, fieldRes.owner.instance, fieldRes.reference.instance);
+        }
+        // aop
+        if (enableAspect) {
+            aop(resourceMap, fieldSet);
+        }
+        // execute post construct
+        Map<Type, Object> resources = new HashMap<>();
+        Map<Type, Object> allResources = new HashMap<>();
+        ArrayList<ForPreDestroy> destroyList = new ArrayList<>();
+        for (Res res : resourceMap.values()) {
+            Object instance = res.advisedInstance != null ? res.advisedInstance : res.instance;
+            Method postConstruct = res.postConstruct;
+            if (postConstruct != null) {
+                try {
+                    postConstruct.invoke(instance);
+                } catch (Exception e) {
+                    throw new SimpleAppException("Executes Post-Construct failed on :" + postConstruct + ".", e);
+                }
+            }
+            allResources.put(res.type, instance);
+            if (res.local) {
+                resources.put(res.type, instance);
+            }
+            Method preDestroy = res.preDestroy;
+            if (preDestroy != null) {
+                destroyList.add(new ForPreDestroy(instance, preDestroy));
+            }
+        }
+        this.resources = Collections.unmodifiableMap(resources);
+        this.allResources = Collections.unmodifiableMap(allResources);
+        destroyList.trimToSize();
+        this.destroyList = destroyList;
+        this.parents = Collections.unmodifiableList(new ArrayList<>(parents));
     }
 
-    private void scanResourceTypes(
+    private @Nonnull Res dependencyInjection(
         @Nonnull Type type,
         @Nonnull Class<? extends @Nonnull Annotation> resourceAnnotation,
         @Nonnull Class<? extends @Nonnull Annotation> postConstructAnnotation,
         @Nonnull Class<? extends @Nonnull Annotation> preDestroyAnnotation,
-        @Nonnull @OutParam Map<@Nonnull Type, @Nonnull ResourceBuilder> resourceMap
-    ) throws Exception {
-        if (resourceMap.containsKey(type)) {
-            return;
+        @Nonnull List<@Nonnull SimpleApp> parents,
+        @Nonnull @OutParam Map<@Nonnull Type, @Nonnull Res> resourceMap,
+        @Nonnull @OutParam Set<@Nonnull FieldRes> fieldSet
+    ) throws SimpleAppException {
+        Res res = resourceMap.get(type);
+        if (res != null) {
+            return res;
         }
-        Class<?> rawClass = TypeKit.getRawClass(type);
-        if (rawClass == null) {
-            throw new UnsupportedOperationException("Unsupported DI type: " + type.getTypeName() + ".");
-        }
-        Method postConstruct = null;
-        Method preDestroy = null;
-        for (Method method : rawClass.getMethods()) {
-            if (method.isAnnotationPresent(postConstructAnnotation)) {
-                postConstruct = method;
-            }
-            if (method.isAnnotationPresent(preDestroyAnnotation)) {
-                preDestroy = method;
+        for (SimpleApp parent : parents) {
+            Object instance = parent.getResource(type);
+            if (instance != null) {
+                res = new Res(type, instance);
+                resourceMap.put(type, res);
+                return res;
             }
         }
-        List<Field> fields = new ArrayList<>();
-        Class<?> cur = rawClass;
+        res = new Res(type, postConstructAnnotation, preDestroyAnnotation);
+        resourceMap.put(type, res);
+        Class<?> cur = res.rawClass;
         while (cur != null) {
             for (Field declaredField : cur.getDeclaredFields()) {
+                int mod = declaredField.getModifiers();
+                if (Modifier.isFinal(mod)) {
+                    continue;
+                }
                 if (declaredField.isAnnotationPresent(resourceAnnotation)) {
-                    fields.add(declaredField);
+                    Res reference = dependencyInjection(
+                        declaredField.getGenericType(),
+                        resourceAnnotation,
+                        postConstructAnnotation,
+                        preDestroyAnnotation,
+                        parents,
+                        resourceMap,
+                        fieldSet
+                    );
+                    fieldSet.add(new FieldRes(declaredField, res, reference));
                 }
             }
             cur = cur.getSuperclass();
         }
-        ResourceBuilder rb = new ResourceBuilder(type, rawClass, fields, postConstruct, preDestroy);
-        resourceMap.put(type, rb);
-        for (Field field : fields) {
-            scanResourceTypes(
-                field.getGenericType(),
-                resourceAnnotation,
-                postConstructAnnotation,
-                preDestroyAnnotation,
-                resourceMap
-            );
+        return res;
+    }
+
+    private void aop(
+        @Nonnull @OutParam Map<@Nonnull Type, @Nonnull Res> resourceMap,
+        @Nonnull @OutParam Set<@Nonnull FieldRes> fieldSet
+    ) throws SimpleAppException {
+        List<SimpleAppAspect> aspects = new ArrayList<>();
+        for (Res res : resourceMap.values()) {
+            Object instance = res.instance;
+            if (instance instanceof SimpleAppAspect) {
+                aspects.add((SimpleAppAspect) instance);
+                res.isAspectHandler = true;
+            }
+        }
+        AspectMaker aspectMaker = AspectMaker.byAsm();
+        for (Res res : resourceMap.values()) {
+            if (res.isAspectHandler || !res.local) {
+                continue;
+            }
+            for (SimpleAppAspect aspect : aspects) {
+                if (aspect.needsAspect(res.type)) {
+                    AspectSpec spec = aspectMaker.make(res.rawClass, aspect);
+                    res.advisedInstance = spec.newInstance();
+                    break;
+                }
+            }
+        }
+        // rewrite fields
+        for (FieldRes fieldRes : fieldSet) {
+            boolean needsRewrite = false;
+            Object owner;
+            if (fieldRes.owner.advisedInstance != null) {
+                needsRewrite = true;
+                owner = fieldRes.owner.advisedInstance;
+            } else {
+                owner = fieldRes.owner.instance;
+            }
+            Object reference;
+            if (fieldRes.reference.advisedInstance != null) {
+                needsRewrite = true;
+                reference = fieldRes.reference.advisedInstance;
+            } else {
+                reference = fieldRes.reference.instance;
+            }
+            if (needsRewrite) {
+                setField(fieldRes.field, owner, reference);
+            }
         }
     }
 
-    private void scanResourceAspects(
-        @Nonnull @OutParam Map<@Nonnull Type, @Nonnull ResourceBuilder> resourceMap
-    ) throws Exception {
-        List<ResourceBuilder> aspects = new ArrayList<>();
-        for (ResourceBuilder rb : resourceMap.values()) {
-            Class<?> rawType = rb.rawType;
-            if (SimpleAppAspect.class.isAssignableFrom(rawType)) {
-                aspects.add(rb);
-            }
-        }
-        if (aspects.isEmpty()) {
-            return;
-        }
-        for (ResourceBuilder rb : aspects) {
-            for (ResourceBuilder aspect : aspects) {
-                //if (aspect.)
-            }
+    private void setField(
+        @Nonnull Field field, @Nonnull Object owner, @Nonnull Object value
+    ) throws SimpleAppException {
+        try {
+            boolean accessible = field.isAccessible();
+            field.setAccessible(true);
+            field.set(owner, value);
+            field.setAccessible(accessible);
+        } catch (Exception e) {
+            throw new SimpleAppException("Set field failed on :" + field + ".", e);
         }
     }
 
     @Override
-    public void shutdown() {
-
+    public void shutdown() throws SimpleAppException {
+        for (ForPreDestroy destroy : destroyList) {
+            try {
+                destroy.preDestroy.invoke(destroy.instance);
+            } catch (Exception e) {
+                throw new SimpleAppException("Executes Pre-Destroy failed on :" + destroy.preDestroy + ".", e);
+            }
+        }
     }
 
     @Override
     public @Nonnull List<@Nonnull SimpleApp> parents() {
-        return Collections.emptyList();
+        return parents;
     }
 
     @Override
     public @Nonnull Map<@Nonnull Type, @Nonnull Object> resources() {
-        return Collections.emptyMap();
+        return resources;
     }
 
     @Override
-    public <T> @Nullable T getResource(@Nonnull Type type) {
-        return null;
+    public @Nonnull Map<@Nonnull Type, @Nonnull Object> allResources() {
+        return allResources;
     }
 
-    private static final class ResourceBuilder {
+    private static final class Res {
 
         private final @Nonnull Type type;
-        private final @Nonnull Class<?> rawType;
-        private final @Nonnull List<@Nonnull Field> fields;
+        private final @Nonnull Class<?> rawClass;
         private final @Nullable Method postConstruct;
         private final @Nullable Method preDestroy;
-        private @Nullable SimpleAppAspect aspect;
+        private final boolean local;
+        private final @Nonnull Object instance;
 
-        private ResourceBuilder(
+        private Object advisedInstance;
+        private boolean isAspectHandler = false;
+
+        private Res(
             @Nonnull Type type,
-            @Nonnull Class<?> rawType,
-            @Nonnull List<@Nonnull Field> fields,
-            @Nullable Method postConstruct,
-            @Nullable Method preDestroy
-        ) {
+            @Nonnull Class<? extends @Nonnull Annotation> postConstructAnnotation,
+            @Nonnull Class<? extends @Nonnull Annotation> preDestroyAnnotation
+        ) throws SimpleAppException {
             this.type = type;
-            this.rawType = rawType;
-            this.fields = fields;
+            this.rawClass = rawClass(type);
+            this.local = true;
+            Method postConstruct = null;
+            Method preDestroy = null;
+            for (Method method : rawClass.getMethods()) {
+                if (method.isAnnotationPresent(postConstructAnnotation)) {
+                    postConstruct = method;
+                }
+                if (method.isAnnotationPresent(preDestroyAnnotation)) {
+                    preDestroy = method;
+                }
+            }
             this.postConstruct = postConstruct;
+            this.preDestroy = preDestroy;
+            try {
+                this.instance = rawClass.getConstructor().newInstance();
+            } catch (Exception e) {
+                throw new SimpleAppException("Creates instance for " + type.getTypeName() + " failed.", e);
+            }
+        }
+
+        private Res(@Nonnull Type type, @Nonnull Object instance) {
+            this.type = type;
+            this.rawClass = rawClass(type);
+            this.local = false;
+            this.postConstruct = null;
+            this.preDestroy = null;
+            this.instance = instance;
+        }
+
+        private @Nonnull Class<?> rawClass(@Nonnull Type type) {
+            Class<?> raw = TypeKit.getRawClass(type);
+            if (raw == null) {
+                throw new UnsupportedOperationException("Unsupported DI type: " + type.getTypeName() + ".");
+            }
+            return raw;
+        }
+    }
+
+    private static final class FieldRes {
+
+        private final @Nonnull Field field;
+        private final @Nonnull Res owner;
+        private final @Nonnull Res reference;
+
+        private FieldRes(@Nonnull Field field, @Nonnull Res owner, @Nonnull Res reference) {
+            this.field = field;
+            this.owner = owner;
+            this.reference = reference;
+        }
+    }
+
+    private static final class ForPreDestroy {
+
+        private final @Nonnull Object instance;
+        private final @Nonnull Method preDestroy;
+
+        private ForPreDestroy(@Nonnull Object instance, @Nonnull Method preDestroy) {
+            this.instance = instance;
             this.preDestroy = preDestroy;
         }
     }
