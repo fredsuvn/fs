@@ -13,7 +13,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * A simple application interface that managed by dependency injection and aspect-oriented programming (AOP) support.
@@ -73,12 +72,12 @@ public interface SimpleApp {
     List<@Nonnull SimpleApp> parents();
 
     /**
-     * Returns the resources managed by this app (excluding the instance shared from the parent apps).
+     * Returns the resources generated and managed by this app (excluding the instance shared from the parent apps).
      *
-     * @return the resources managed by this app (excluding the instance shared from the parent apps)
+     * @return the resources generated and managed by this app (excluding the instance shared from the parent apps)
      */
     @Nonnull
-    Map<@Nonnull Type, @Nonnull Object> resources();
+    List<@Nonnull SimpleResource> localResources();
 
     /**
      * Returns all resources this app depends (including the instance shared from parents).
@@ -86,159 +85,161 @@ public interface SimpleApp {
      * @return all resources this app depends (including the instance shared from parents)
      */
     @Nonnull
-    Map<@Nonnull Type, @Nonnull Object> allResources();
+    List<@Nonnull SimpleResource> allResources();
 
     /**
-     * Returns the resource instance of the specified type (including the instance shared from parents), or {@code null}
-     * if no such resource exists.
+     * Returns a resource instance that can be assigned to the specified type from {@link #allResources()}, or
+     * {@code null} if no such resource exists.
+     * <p>
+     * This method will first attempt to precisely match the type using {@link Object#equals(Object)}. If there is no
+     * exact matching resource type, it will return the first instance that can be assigned to the specified type.
      *
-     * @param type the specified type of the resource
-     * @param <T>  the type of the resource
-     * @return the resource of the specified type, or {@code null} if no such resource exists
+     * @param type the specified type that can be assigned from the returned instance
+     * @return a resource instance that can be assigned to the specified type
      */
     default <T> @Nullable T getResource(@Nonnull Class<T> type) {
-        return getResource((Type) type);
+        return Jie.as(getResource((Type) type));
     }
 
     /**
-     * Returns the resource instance of the specified type (including the instance shared from parents), or {@code null}
-     * if no such resource exists.
+     * Returns a resource instance that can be assigned to the specified type from {@link #allResources()}, or
+     * {@code null} if no such resource exists.
+     * <p>
+     * This method will first attempt to precisely match the type using {@link Object#equals(Object)}. If there is no
+     * exact matching resource type, it will return the first instance that can be assigned to the specified type.
      *
-     * @param type the {@link TypeRef} of the specified type of the resource
-     * @param <T>  the type of the resource
-     * @return the resource of the specified type, or {@code null} if no such resource exists
+     * @param type the {@link TypeRef} of the specified type that can be assigned from the returned instance
+     * @return a resource instance that can be assigned to the specified type
      */
     default <T> @Nullable T getResource(@Nonnull TypeRef<T> type) {
-        return getResource(type.type());
+        return Jie.as(getResource(type.type()));
     }
 
     /**
-     * Returns the resource instance of the specified type (including the instance shared from parents), or {@code null}
-     * if no such resource exists.
+     * Returns a resource instance that can be assigned to the specified type from {@link #allResources()}, or
+     * {@code null} if no such resource exists.
+     * <p>
+     * This method will first attempt to precisely match the type using {@link Object#equals(Object)}. If there is no
+     * exact matching resource type, it will return the first instance that can be assigned to the specified type.
      *
-     * @param type the specified type of the resource
-     * @param <T>  the type of the resource
-     * @return the resource of the specified type, or {@code null} if no such resource exists
+     * @param type the specified type that can be assigned from the returned instance
+     * @return a resource instance that can be assigned to the specified type
      */
-    default <T> @Nullable T getResource(@Nonnull Type type) {
-        return Jie.as(allResources().get(type));
-    }
+    @Nullable
+    Object getResource(@Nonnull Type type);
 
     /**
      * Builder for {@link SimpleApp}.
      */
     class Builder {
 
+        private static final @Nonnull String @Nonnull [] RESOURCE_ANNOTATIONS =
+            {"javax.annotation.Resource", "jakarta.annotation.Resource"};
+        private static final @Nonnull String @Nonnull [] POST_CONSTRUCT_ANNOTATIONS =
+            {"javax.annotation.Resource", "jakarta.annotation.Resource"};
+        private static final @Nonnull String @Nonnull [] PRE_DESTROY_ANNOTATIONS =
+            {"javax.annotation.Resource", "jakarta.annotation.Resource"};
+
         private final @Nonnull List<Type> resourceTypes = new ArrayList<>();
         private final @Nonnull List<@Nonnull SimpleApp> parentApps = new ArrayList<>();
+        private final @Nonnull List<@Nonnull String> resourceAnnotations = new ArrayList<>();
+        private final @Nonnull List<@Nonnull String> postConstructAnnotations = new ArrayList<>();
+        private final @Nonnull List<@Nonnull String> preDestroyAnnotations = new ArrayList<>();
         private boolean enableAspect = false;
-        private @Nonnull String @Nonnull [] resourceAnnotations = {"javax.annotation.Resource", "jakarta.annotation.Resource"};
-        private @Nonnull String @Nonnull [] postConstructAnnotations = {"javax.annotation.PostConstruct", "jakarta.annotation.PostConstruct"};
-        private @Nonnull String @Nonnull [] preDestroyAnnotations = {"javax.annotation.PreDestroy", "jakarta.annotation.PreDestroy"};
 
         /**
-         * Sets the annotations applied to a {@link Field} indicate that it references a resource instance. The
-         * {@link Field} is considered annotated if it has any one of those annotations.
+         * Adds an annotation applied to a {@link Field} indicate that it references a resource instance. There can be
+         * multiple annotations serve as resource annotation, and a {@link Field} is considered annotated if it has any
+         * one of those annotations.
          * <p>
-         * The default annotations are: {@code javax.annotation.Resource} and {@code jakarta.annotation.Resource}.
+         * If no annotation is specified, the default annotations will be used: {@code javax.annotation.Resource} and
+         * {@code jakarta.annotation.Resource}.
          *
-         * @param resourceAnnotations the annotations applied to a {@link Field} indicate that it references a resource
-         *                            instance
+         * @param resourceAnnotation the annotation applied to a {@link Field} indicate that it references a resource
+         *                           instance
          * @return this builder
          */
-        public @Nonnull Builder resourceAnnotations(
-            @Nonnull Class<? extends @Nonnull Annotation> @Nonnull ... resourceAnnotations
-        ) {
-            this.resourceAnnotations = toStringArray(resourceAnnotations);
+        public @Nonnull Builder resourceAnnotation(@Nonnull Class<? extends Annotation> resourceAnnotation) {
+            this.resourceAnnotations.add(resourceAnnotation.getName());
             return this;
         }
 
         /**
-         * Sets the annotations applied to a {@link Method} indicate that it is a post-construct method. The
-         * {@link Method} is considered annotated if it has any one of those annotations.
+         * Adds an annotation applied to a {@link Method} indicate that it is a post-construct method. There can be
+         * multiple annotations serve as post-construct annotation, and a {@link Method} is considered annotated if it
+         * has any one of those annotations.
          * <p>
-         * The default annotations are: {@code javax.annotation.PostConstruct} and
-         * {@code jakarta.annotation.PostConstruct}.
+         * If no annotation is specified, the default annotations will be used: {@code javax.annotation.PostConstruct}
+         * and {@code jakarta.annotation.PostConstruct}.
          *
-         * @param postConstructAnnotations the annotations applied to a {@link Method} indicate that it is a
-         *                                 post-construct method
+         * @param postConstructAnnotation the annotation applied to a {@link Method} indicate that it is a
+         *                                post-construct method
          * @return this builder
          */
-        public @Nonnull Builder postConstructAnnotations(
-            @Nonnull Class<? extends @Nonnull Annotation> @Nonnull ... postConstructAnnotations
-        ) {
-            this.postConstructAnnotations = toStringArray(postConstructAnnotations);
+        public @Nonnull Builder postConstructAnnotation(@Nonnull Class<? extends Annotation> postConstructAnnotation) {
+            this.postConstructAnnotations.add(postConstructAnnotation.getName());
             return this;
         }
 
         /**
-         * Sets the annotations applied to a {@link Method} indicate that it is a pre-destroy method. The {@link Method}
-         * is considered annotated if it has any one of those annotations.
+         * Adds an annotation applied to a {@link Method} indicate that it is a pre-destroy method. There can be
+         * multiple annotations serve as pre-destroy annotation, and a {@link Method} is considered annotated if it has
+         * any one of those annotations.
          * <p>
-         * The default annotations are: {@code javax.annotation.PreDestroy} and {@code jakarta.annotation.PreDestroy}.
+         * If no annotation is specified, the default annotations will be used: {@code javax.annotation.PostConstruct}
+         * and {@code jakarta.annotation.PostConstruct}.
          *
-         * @param preDestroyAnnotations the annotations applied to a {@link Method} indicate that it is a pre-destroy
-         *                              method
+         * @param preDestroyAnnotation the annotation applied to a {@link Method} indicate that it is a pre-destroy
+         *                             method
          * @return this builder
          */
-        public @Nonnull Builder preDestroyAnnotations(
-            @Nonnull Class<? extends @Nonnull Annotation> @Nonnull ... preDestroyAnnotations
-        ) {
-            this.preDestroyAnnotations = toStringArray(preDestroyAnnotations);
+        public @Nonnull Builder preDestroyAnnotation(@Nonnull Class<? extends Annotation> preDestroyAnnotation) {
+            this.preDestroyAnnotations.add(preDestroyAnnotation.getName());
             return this;
         }
 
-        private @Nonnull String @Nonnull [] toStringArray(
-            @Nonnull Class<? extends @Nonnull Annotation> @Nonnull [] annotations
-        ) {
-            String[] annotationNames = new String[annotations.length];
-            for (int i = 0; i < annotations.length; i++) {
-                annotationNames[i] = annotations[i].getName();
-            }
-            return annotationNames;
-        }
-
         /**
-         * Adds types of the resources to this builder, each type must be a {@link Class} or {@link ParameterizedType}.
+         * Adds types of the resources to this builder, each type should be a {@link Class} or
+         * {@link ParameterizedType}.
          * <p>
-         * These types will serve as the root types from which dependency injection instances are generated, based on
-         * both the types themselves and the fields declared within them.
+         * These types serve as root types for dependency injection. The dependency resolver will recursively analyze
+         * fields of these types to build the complete dependency graph.
          * <p>
-         * Note if there are identical types, only one will be retained, and each type will only generate one instance.
+         * Note if there are equal types, only one will be retained, and each type will only generate one instance.
          *
          * @param resourceTypes the types of the resources to be added
          * @return this builder
          */
-        public @Nonnull Builder resourceTypes(@Nonnull Type @Nonnull ... resourceTypes) {
+        public @Nonnull Builder resources(@Nonnull Type @Nonnull ... resourceTypes) {
             CollectKit.addAll(this.resourceTypes, resourceTypes);
             return this;
         }
 
         /**
-         * Adds types of the resources to this builder, each type must be a {@link Class} or {@link ParameterizedType}.
+         * Adds types of the resources to this builder, each type should be a {@link Class} or
+         * {@link ParameterizedType}.
          * <p>
-         * These types will serve as the root types from which dependency injection instances are generated, based on
-         * both the types themselves and the fields declared within them.
+         * These types serve as root types for dependency injection. The dependency resolver will recursively analyze
+         * fields of these types to build the complete dependency graph.
          * <p>
-         * Note if there are identical types, only one will be retained, and each type will only generate one instance.
+         * Note if there are equal types, only one will be retained, and each type will only generate one instance.
          *
          * @param resourceTypes the types of the resources to be added
          * @return this builder
          */
-        public @Nonnull Builder resourceTypes(@Nonnull Iterable<@Nonnull Type> resourceTypes) {
+        public @Nonnull Builder resources(@Nonnull Iterable<@Nonnull Type> resourceTypes) {
             CollectKit.addAll(this.resourceTypes, resourceTypes);
             return this;
         }
 
         /**
-         * Adds the parent {@link SimpleApp}s for resource sharing.
+         * Adds parent apps for resource sharing.
          * <p>
-         * When a parent {@link SimpleApp} is provided, the current {@link SimpleApp} will attempt to reuse resource
-         * instances from the parent {@link SimpleApp} instead of creating new ones. Specifically, if a resource type
-         * required by the current {@link SimpleApp} already exists in the parent {@link SimpleApp}, the instance from
-         * the parent {@link SimpleApp} will be shared and used directly.
+         * When a parent app is provided, the current app will attempt to reuse resource instances from the parent app
+         * instead of creating new ones. Specifically, if a resource type required by the current app already exists in
+         * the parent app, the instance from the parent app will be shared and used directly.
          *
-         * @param parents the parent {@link SimpleApp}s
+         * @param parents the parent apps
          * @return this builder
          */
         public @Nonnull Builder parent(@Nullable SimpleApp @Nonnull ... parents) {
@@ -247,14 +248,13 @@ public interface SimpleApp {
         }
 
         /**
-         * Adds the parent {@link SimpleApp}s for resource sharing.
+         * Adds parent apps for resource sharing.
          * <p>
-         * When a parent {@link SimpleApp} is provided, the current {@link SimpleApp} will attempt to reuse resource
-         * instances from the parent {@link SimpleApp} instead of creating new ones. Specifically, if a resource type
-         * required by the current {@link SimpleApp} already exists in the parent {@link SimpleApp}, the instance from
-         * the parent {@link SimpleApp} will be shared and used directly.
+         * When a parent app is provided, the current app will attempt to reuse resource instances from the parent app
+         * instead of creating new ones. Specifically, if a resource type required by the current app already exists in
+         * the parent app, the instance from the parent app will be shared and used directly.
          *
-         * @param parents the parent {@link SimpleApp}s
+         * @param parents the parent apps
          * @return this builder
          */
         public @Nonnull Builder parent(@Nonnull Iterable<@Nonnull SimpleApp> parents) {
@@ -267,11 +267,11 @@ public interface SimpleApp {
          * <p>
          * When enabled, this builder will first start standard dependency injection, creating one instance for each
          * resource type. Resource objects which are instances of the {@link SimpleAppAspect} will be treated as aspect
-         * handlers, and the other resource instances (excluding resources shared from the parent apps) will be
-         * evaluated by {@link SimpleAppAspect#needsAspect(Type)} of each aspect handler in an unspecified order. The
-         * evaluation stops at the first handler where the {@code needsAspect} returns {@code true} for the resource
-         * type. When a match is found, the resource instance will be advised by that handler, and no further aspect
-         * handlers will be evaluated for that type.
+         * handlers (excluding instances from parent apps), and the other resource instances (also excluding instances
+         * from parent apps) will be evaluated by {@link SimpleAppAspect#needsAspect(Type)} of each aspect handler in an
+         * unspecified order. The evaluation stops at the first handler where the {@code needsAspect} returns
+         * {@code true} for the resource type. When a match is found, the resource instance will be advised by that
+         * handler, and no further aspect handlers will be evaluated for that type.
          * <p>
          * If no aspect handler matches a resource type, the resource type will not be advised. And if a resource
          * instance is advised and replaced by the advised instance, the Post-Construct and Pre-Destroy methods (if any)
@@ -320,11 +320,11 @@ public interface SimpleApp {
         public @Nonnull SimpleApp build() throws SimpleAppException {
             return new SimpleAppImpl(
                 resourceTypes,
-                parentApps,
+                parentApps.isEmpty() ? new SimpleApp[0] : parentApps.toArray(new SimpleApp[0]),
                 enableAspect,
-                resourceAnnotation,
-                postConstructAnnotation,
-                preDestroyAnnotation
+                resourceAnnotations.isEmpty() ? RESOURCE_ANNOTATIONS : resourceAnnotations.toArray(new String[0]),
+                postConstructAnnotations.isEmpty() ? POST_CONSTRUCT_ANNOTATIONS : postConstructAnnotations.toArray(new String[0]),
+                preDestroyAnnotations.isEmpty() ? PRE_DESTROY_ANNOTATIONS : preDestroyAnnotations.toArray(new String[0])
             );
         }
     }

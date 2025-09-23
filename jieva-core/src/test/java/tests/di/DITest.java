@@ -12,7 +12,7 @@ public class DITest {
     @Test
     public void testDI() {
         SimpleApp app = SimpleApp.newBuilder()
-            .resourceTypes(Starter.class, ServiceAaa.class, ServiceBbb.class)
+            .resources(Starter.class, ServiceAaa.class, ServiceBbb.class)
             .aspect(true)
             .build();
         ServiceAaa serviceAaa = app.getResource(ServiceAaa.class);
