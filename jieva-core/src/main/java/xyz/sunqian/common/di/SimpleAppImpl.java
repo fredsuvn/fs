@@ -3,6 +3,7 @@ package xyz.sunqian.common.di;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.OutParam;
+import xyz.sunqian.common.base.Jie;
 import xyz.sunqian.common.collect.ArrayKit;
 import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.runtime.aspect.AspectMaker;
@@ -16,18 +17,21 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 final class SimpleAppImpl implements SimpleApp {
 
     private final @Nonnull List<@Nonnull SimpleResource> localResources;
     private final @Nonnull List<@Nonnull SimpleResource> allResources;
     private final @Nonnull Map<@Nonnull Type, @Nonnull SimpleResource> resources;
-    private final @Nonnull List<@Nonnull ForPreDestroy> destroyList;
+    private final @Nonnull List<@Nonnull SimpleResource> preDestroyList;
     private final @Nonnull List<@Nonnull SimpleApp> parents;
 
     public SimpleAppImpl(
@@ -89,29 +93,29 @@ final class SimpleAppImpl implements SimpleApp {
         this.resources = Collections.unmodifiableMap(resources);
         this.localResources = ListKit.list(localResources);
         this.allResources = ListKit.list(allResources);
-        // destroy list
-        ArrayList<ForPreDestroy> destroyList = new ArrayList<>();
-        // for (Res res : resourceMap.values()) {
-        //     Object instance = res.advisedInstance != null ? res.advisedInstance : res.instance;
-        //     Method postConstruct = res.postConstruct;
-        //     if (postConstruct != null) {
-        //         try {
-        //             postConstruct.invoke(instance);
-        //         } catch (Exception e) {
-        //             throw new SimpleAppException("Executes Post-Construct failed on :" + postConstruct + ".", e);
-        //         }
-        //     }
-        //     allResources.put(res.type, instance);
-        //     if (res.local) {
-        //         resources.put(res.type, instance);
-        //     }
-        //     Method preDestroy = res.preDestroy;
-        //     if (preDestroy != null) {
-        //         destroyList.add(new ForPreDestroy(instance, preDestroy));
-        //     }
-        // }
-        destroyList.trimToSize();
-        this.destroyList = destroyList;
+        // post-construct and pre-destroy
+        Set<SimpleResource> postConstructSet = new LinkedHashSet<>();
+        Set<SimpleResource> preDestroySet = new LinkedHashSet<>();
+        Set<Type> stack = new HashSet<>();
+        for (SimpleResource resource : localResources) {
+            postConstruct(resource, resource, stack, postConstructSet);
+            stack.clear();
+            checkPreDestroy(resource, resource, stack, preDestroySet);
+            stack.clear();
+        }
+        List<SimpleResource> postConstructList = new ArrayList<>(postConstructSet);
+        postConstructList.sort(PostConstructComparator.INST);
+        List<SimpleResource> preDestroyList = new ArrayList<>(postConstructSet);
+        preDestroyList.sort(PreDestroyComparator.INST);
+        this.preDestroyList = preDestroyList;
+        for (SimpleResource resource : postConstructList) {
+            Method postConstruct = Jie.asNonnull(resource.postConstructMethod());
+            try {
+                postConstruct.invoke(resource.instance());
+            } catch (Exception e) {
+                throw new SimpleAppException("Execute post-construct failed on :" + postConstruct + ".", e);
+            }
+        }
     }
 
     private void dependencyInjection(
@@ -259,27 +263,68 @@ final class SimpleAppImpl implements SimpleApp {
         throw new SimpleAppException("Can not find resource instance for type :" + type.getTypeName() + ".");
     }
 
-    private void checkDependency(
-        @Nonnull List<@Nonnull SimpleResource> resources
+    private void postConstruct(
+        @Nonnull SimpleResource firstRes,
+        @Nonnull SimpleResource curRes,
+        @Nonnull Set<@Nonnull Type> stack,
+        @Nonnull @OutParam Set<@Nonnull SimpleResource> postConstructSet
     ) throws SimpleAppException {
-        Set<Type> stack = new HashSet<>();
-        for (SimpleResource resource : resources) {
-            Method postConstruct = resource.postConstructMethod();
-            // while (postConstruct != null) {
-            //     SimpleDependency sd = postConstruct.getAnnotation(SimpleDependency.class);
-            //     if (sd != null) {
-            //         if (!stack.add(resource.type())){
-            //             throw new SimpleAppException("Circular dependency detected on :" + resource.type() + ".");
-            //         }
-            //         //Class<?>
-            //     } else {
-            //         break;
-            //     }
-            // }
+        Type curType = curRes.type();
+        Method postConstruct = curRes.postConstructMethod();
+        if (postConstruct == null) {
+            return;
+        }
+        postConstructSet.add(curRes);
+        SimpleDependsOn sdo = postConstruct.getAnnotation(SimpleDependsOn.class);
+        if (sdo == null) {
+            return;
+        }
+        if (!stack.add(curType)) {
+            throw new SimpleAppException(
+                "Circular post-construct dependency detected: " +
+                    stack.stream().map(Type::getTypeName).collect(Collectors.joining(" -> ")) + "."
+            );
+        }
+        for (Class<?> depType : sdo.value()) {
+            SimpleResource depRes = resources.get(depType);
+            if (depRes == null) {
+                throw new SimpleAppException("Unknown post-construct dependency type: " + depType.getTypeName() + ".");
+            }
+            postConstruct(firstRes, depRes, stack, postConstructSet);
+            stack.remove(depType);
         }
     }
 
-    private void checkPostConstruct(@Nonnull Class<?> type) throws SimpleAppException {
+    private void checkPreDestroy(
+        @Nonnull SimpleResource firstRes,
+        @Nonnull SimpleResource curRes,
+        @Nonnull Set<@Nonnull Type> stack,
+        @Nonnull @OutParam Set<@Nonnull SimpleResource> preDestroySet
+    ) throws SimpleAppException {
+        Type curType = curRes.type();
+        Method preDestroy = curRes.preDestroyMethod();
+        if (preDestroy == null) {
+            return;
+        }
+        preDestroySet.add(curRes);
+        SimpleDependsOn sdo = preDestroy.getAnnotation(SimpleDependsOn.class);
+        if (sdo == null) {
+            return;
+        }
+        if (!stack.add(curType)) {
+            throw new SimpleAppException(
+                "Circular pre-destroy dependency: " +
+                    stack.stream().map(Type::getTypeName).collect(Collectors.joining(" -> ")) + "."
+            );
+        }
+        for (Class<?> depType : sdo.value()) {
+            SimpleResource depRes = resources.get(depType);
+            if (depRes == null) {
+                throw new SimpleAppException("Unknown pre-destroy dependency type: " + depType.getTypeName() + ".");
+            }
+            postConstruct(firstRes, depRes, stack, preDestroySet);
+            stack.remove(depType);
+        }
     }
 
     private @Nonnull Object getResInstance(
@@ -290,11 +335,12 @@ final class SimpleAppImpl implements SimpleApp {
 
     @Override
     public void shutdown() throws SimpleAppException {
-        for (ForPreDestroy destroy : destroyList) {
+        for (SimpleResource resource : preDestroyList) {
+            Method preDestroy = Jie.asNonnull(resource.preDestroyMethod());
             try {
-                destroy.preDestroy.invoke(destroy.instance);
+                preDestroy.invoke(resource.instance());
             } catch (Exception e) {
-                throw new SimpleAppException("Executes Pre-Destroy failed on :" + destroy.preDestroy + ".", e);
+                throw new SimpleAppException("Execute pre-destroy failed on :" + preDestroy + ".", e);
             }
         }
     }
@@ -402,17 +448,6 @@ final class SimpleAppImpl implements SimpleApp {
         }
     }
 
-    private static final class ForPreDestroy {
-
-        private final @Nonnull Object instance;
-        private final @Nonnull Method preDestroy;
-
-        private ForPreDestroy(@Nonnull Object instance, @Nonnull Method preDestroy) {
-            this.instance = instance;
-            this.preDestroy = preDestroy;
-        }
-    }
-
     private static final class SimpleRes implements SimpleResource {
 
         private final @Nonnull Type type;
@@ -459,5 +494,54 @@ final class SimpleAppImpl implements SimpleApp {
         public @Nullable Method preDestroyMethod() {
             return preDestroy;
         }
+    }
+
+    enum PostConstructComparator implements Comparator<SimpleResource> {
+
+        INST;
+
+        @Override
+        public int compare(@Nonnull SimpleResource sr1, @Nonnull SimpleResource sr2) {
+            Method pc1 = Jie.asNonnull(sr1.postConstructMethod());
+            Method pc2 = Jie.asNonnull(sr2.postConstructMethod());
+            SimpleDependsOn sd1 = pc1.getAnnotation(SimpleDependsOn.class);
+            SimpleDependsOn sd2 = pc2.getAnnotation(SimpleDependsOn.class);
+            return compareDependsOn(sr1, sd1, sr2, sd2);
+        }
+    }
+
+    enum PreDestroyComparator implements Comparator<SimpleResource> {
+
+        INST;
+
+        @Override
+        public int compare(@Nonnull SimpleResource sr1, @Nonnull SimpleResource sr2) {
+            Method pd1 = Jie.asNonnull(sr1.preDestroyMethod());
+            Method pd2 = Jie.asNonnull(sr2.preDestroyMethod());
+            SimpleDependsOn sd1 = pd1.getAnnotation(SimpleDependsOn.class);
+            SimpleDependsOn sd2 = pd2.getAnnotation(SimpleDependsOn.class);
+            return compareDependsOn(sr1, sd1, sr2, sd2);
+        }
+    }
+
+    private static int compareDependsOn(
+        @Nonnull SimpleResource sr1, @Nullable SimpleDependsOn sd1,
+        @Nonnull SimpleResource sr2, @Nullable SimpleDependsOn sd2
+    ) {
+        if (sd1 != null) {
+            for (Class<?> c1 : sd1.value()) {
+                if (c1.equals(sr2.type())) {
+                    return 1;
+                }
+            }
+        }
+        if (sd2 != null) {
+            for (Class<?> c2 : sd2.value()) {
+                if (c2.equals(sr1.type())) {
+                    return -1;
+                }
+            }
+        }
+        return 0;
     }
 }

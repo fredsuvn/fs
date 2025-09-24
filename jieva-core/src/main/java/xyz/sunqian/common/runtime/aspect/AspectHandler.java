@@ -38,7 +38,7 @@ public interface AspectHandler {
      * @throws Throwable any exception thrown by the invocation
      */
     void beforeInvoking(
-        @Nonnull Method method, @Nullable Object @Nonnull [] args, @Nonnull Object target
+        @Nonnull Method method, Object @Nonnull [] args, @Nonnull Object target
     ) throws Throwable;
 
     /**
@@ -55,7 +55,7 @@ public interface AspectHandler {
      */
     @Nullable
     Object afterReturning(
-        @Nullable Object result, @Nonnull Method method, @Nullable Object @Nonnull [] args, @Nonnull Object target
+        @Nullable Object result, @Nonnull Method method, Object @Nonnull [] args, @Nonnull Object target
     ) throws Throwable;
 
     /**
@@ -72,6 +72,6 @@ public interface AspectHandler {
      */
     @Nullable
     Object afterThrowing(
-        @Nonnull Throwable ex, @Nonnull Method method, @Nullable Object @Nonnull [] args, @Nonnull Object target
+        @Nonnull Throwable ex, @Nonnull Method method, Object @Nonnull [] args, @Nonnull Object target
     );
 }

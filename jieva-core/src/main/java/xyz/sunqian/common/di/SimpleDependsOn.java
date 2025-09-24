@@ -1,5 +1,7 @@
 package xyz.sunqian.common.di;
 
+import xyz.sunqian.annotations.Nonnull;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -18,12 +20,12 @@ import java.lang.annotation.Target;
 @Target({
     ElementType.METHOD,
 })
-public @interface SimpleDependency {
+public @interface SimpleDependsOn {
 
     /**
      * The classes of the dependency.
      *
      * @return the classes of the dependency.
      */
-    Class<?>[] value();
+    @Nonnull Class<?> @Nonnull [] value();
 }

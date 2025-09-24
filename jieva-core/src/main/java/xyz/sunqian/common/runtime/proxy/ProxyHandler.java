@@ -45,6 +45,6 @@ public interface ProxyHandler {
         @Nonnull Object proxy,
         @Nonnull Method method,
         @Nonnull ProxyInvoker invoker,
-        @Nullable Object @Nonnull ... args
+        Object @Nonnull ... args
     ) throws Throwable;
 }
