@@ -56,6 +56,9 @@ dependencies {
 
   //testCompileOnly 'cglib:cglib'
   testImplementation 'org.mockito:mockito-core:5.5.0'
+
+  // jakarta
+  testImplementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 }
 
 java {

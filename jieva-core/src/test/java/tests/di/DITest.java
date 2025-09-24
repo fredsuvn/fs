@@ -1,5 +1,8 @@
 package tests.di;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.annotation.Resource;
 import org.jetbrains.annotations.Nullable;
 import org.testng.annotations.Test;
 import xyz.sunqian.annotations.Nonnull;
@@ -8,17 +11,22 @@ import xyz.sunqian.common.di.SimpleApp;
 import xyz.sunqian.common.di.SimpleAppAspect;
 import xyz.sunqian.common.di.SimpleAppException;
 import xyz.sunqian.common.di.SimpleDependsOn;
+import xyz.sunqian.common.di.SimpleResource;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
 import xyz.sunqian.test.PrintTest;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotSame;
 import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
 public class DITest implements PrintTest {
@@ -27,25 +35,83 @@ public class DITest implements PrintTest {
     private static final List<String> preList = new ArrayList<>();
 
     @Test
-    public void testDI() {
+    public void testDIResources() {
+        // app
         postList.clear();
         SimpleApp app = SimpleApp.newBuilder()
             .resources(
                 Starter.class, ServiceAaa.class, ServiceBbb.class, InterServiceImpl.class,
                 AspectServiceImpl.class, AspectHandler.class,
-                Generic.class, new TypeRef<Generic<String>>() {}.type(), new TypeRef<Generic<Integer>>() {}.type(),
+                new TypeRef<Generic<String>>() {}.type(), new TypeRef<Generic<Integer>>() {}.type(),
                 NeedExecution.class, NeedExecution2.class, NeedExecution3.class
             )
+            .resources(ListKit.list(NeedExecution.class, NeedExecution2.class, NeedExecution3.class))
             .resourceAnnotation(TestRes.class)
             .postConstructAnnotation(TestPost.class)
             .preDestroyAnnotation(TestPre.class)
             .aspect(true)
             .build();
-        // post-construct
         assertEquals(
             postList,
             ListKit.list(NeedExecution.class.getName(), NeedExecution2.class.getName(), NeedExecution3.class.getName())
         );
+        List<SimpleResource> appResources = app.allResources();
+        for (SimpleResource appResource : appResources) {
+            assertTrue(appResource.isLocal());
+        }
+        assertEquals(appResources, app.localResources());
+        assertEquals(app.dependencyApps(), Collections.emptyList());
+        testDIResources(app);
+        preList.clear();
+        app.shutdown();
+        assertEquals(
+            preList,
+            ListKit.list(NeedExecution.class.getName(), NeedExecution2.class.getName(), NeedExecution3.class.getName())
+        );
+
+        // app2
+        postList.clear();
+        SimpleApp app2 = SimpleApp.newBuilder()
+            .resources(SubService2.class)
+            .dependencyApps(app)
+            .dependencyApps(ListKit.list(app))
+            .build();
+        assertEquals(
+            postList,
+            ListKit.list(SubService2.class.getName())
+        );
+        List<SimpleResource> app2Resources = app2.allResources();
+        assertEquals(app2Resources.size(), 3);
+        List<SimpleResource> app2LocalResources = app2.localResources();
+        assertEquals(app2LocalResources.size(), 2);
+        for (SimpleResource app2Resource : app2Resources) {
+            if (app2Resource.type().equals(SubService.class)) {
+                assertTrue(app2Resource.isLocal());
+            } else if (app2Resource.type().equals(SubService2.class)) {
+                assertTrue(app2Resource.isLocal());
+            } else {
+                assertFalse(app2Resource.isLocal());
+            }
+        }
+        SubService subService = app2.getResource(SubService.class);
+        assertEquals(subService.subService(), SubService.class.getName());
+        SubService2 subService2 = app2.getResource(SubService2.class);
+        assertEquals(subService2.subService2(), subService.subService());
+        ServiceAaa serviceAaa = app2.getResource(ServiceAaa.class);
+        assertEquals(serviceAaa.getLocalName(), "A");
+        assertEquals(app2.dependencyApps(), ListKit.list(app));
+        preList.clear();
+        app2.shutdown();
+        assertEquals(
+            preList,
+            ListKit.list(SubService2.class.getName())
+        );
+    }
+
+    private void testDIResources(SimpleApp app) {
+        printFor("Resources", app.allResources().stream()
+            .map(r -> r.type().getTypeName() + ": " + r.instance())
+            .collect(Collectors.joining(System.lineSeparator() + "    ")));
         // starter
         Starter starter = app.getResource(Starter.class);
         // common resource
@@ -77,13 +143,6 @@ public class DITest implements PrintTest {
         assertSame(integerGenericInter, integerGeneric);
         assertEquals(starter.genericInter("X"), "X");
         assertEquals(starter.genericInter(100), 100);
-        // pre-destroy
-        preList.clear();
-        app.shutdown();
-        assertEquals(
-            preList,
-            ListKit.list(NeedExecution.class.getName(), NeedExecution2.class.getName(), NeedExecution3.class.getName())
-        );
     }
 
     @Test
@@ -215,7 +274,7 @@ public class DITest implements PrintTest {
 
         @Override
         public boolean needsAspect(@Nonnull Method method) {
-            return true;
+            return !method.getDeclaringClass().equals(Object.class);
         }
 
         @Override
@@ -285,6 +344,34 @@ public class DITest implements PrintTest {
 
         @TestPre
         @SimpleDependsOn({NeedExecution.class, NeedExecution2.class})
+        public void preDestroy() {
+            preList.add(getClass().getName());
+        }
+    }
+
+    public static class SubService {
+        public String subService() {
+            return SubService.class.getName();
+        }
+    }
+
+    public static class SubService2 {
+
+        @Resource
+        private SubService subService;
+        @Resource
+        private ServiceAaa serviceAaa;
+
+        public String subService2() {
+            return subService.subService();
+        }
+
+        @PostConstruct
+        public void postConstruct() {
+            postList.add(getClass().getName());
+        }
+
+        @PreDestroy
         public void preDestroy() {
             preList.add(getClass().getName());
         }

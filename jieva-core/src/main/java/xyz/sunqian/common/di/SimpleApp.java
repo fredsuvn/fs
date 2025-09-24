@@ -11,8 +11,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A simple application interface that managed by dependency injection and aspect-oriented programming (AOP) support.
@@ -39,7 +40,7 @@ public interface SimpleApp {
      *     on managed objects, allowing for custom cleanup logic before object destruction.
      *     And the order is unspecified.</li>
      *     <li><b>Resource Release</b>:
-     *     Removes all resources from the dependency injection container (excluding resources shared from the parent
+     *     Removes all resources from the dependency injection container (excluding resources shared from the dependency
      *     apps).
      *     </li>
      * </ol>
@@ -64,25 +65,26 @@ public interface SimpleApp {
     void shutdown() throws SimpleAppException;
 
     /**
-     * Returns the parent {@link SimpleApp} instances.
+     * Returns dependency apps of this app.
      *
-     * @return the parent {@link SimpleApp} instances
+     * @return dependency apps of this app
      */
     @Nonnull
-    List<@Nonnull SimpleApp> parents();
+    List<@Nonnull SimpleApp> dependencyApps();
 
     /**
-     * Returns the resources generated and managed by this app (excluding the instance shared from the parent apps).
+     * Returns the resources generated and managed by this app (excluding the instance shared from the dependency
+     * apps).
      *
-     * @return the resources generated and managed by this app (excluding the instance shared from the parent apps)
+     * @return the resources generated and managed by this app (excluding the instance shared from the dependency apps)
      */
     @Nonnull
     List<@Nonnull SimpleResource> localResources();
 
     /**
-     * Returns all resources this app depends (including the instance shared from parents).
+     * Returns all resources this app depends (including the instance shared from dependency apps).
      *
-     * @return all resources this app depends (including the instance shared from parents)
+     * @return all resources this app depends (including the instance shared from dependency apps)
      */
     @Nonnull
     List<@Nonnull SimpleResource> allResources();
@@ -136,15 +138,15 @@ public interface SimpleApp {
         private static final @Nonnull String @Nonnull [] RESOURCE_ANNOTATIONS =
             {"javax.annotation.Resource", "jakarta.annotation.Resource"};
         private static final @Nonnull String @Nonnull [] POST_CONSTRUCT_ANNOTATIONS =
-            {"javax.annotation.Resource", "jakarta.annotation.Resource"};
+            {"javax.annotation.PostConstruct", "jakarta.annotation.PostConstruct"};
         private static final @Nonnull String @Nonnull [] PRE_DESTROY_ANNOTATIONS =
-            {"javax.annotation.Resource", "jakarta.annotation.Resource"};
+            {"javax.annotation.PreDestroy", "jakarta.annotation.PreDestroy"};
 
-        private final @Nonnull List<Type> resourceTypes = new ArrayList<>();
-        private final @Nonnull List<@Nonnull SimpleApp> parentApps = new ArrayList<>();
-        private final @Nonnull List<@Nonnull String> resourceAnnotations = new ArrayList<>();
-        private final @Nonnull List<@Nonnull String> postConstructAnnotations = new ArrayList<>();
-        private final @Nonnull List<@Nonnull String> preDestroyAnnotations = new ArrayList<>();
+        private final @Nonnull Set<Type> resourceTypes = new LinkedHashSet<>();
+        private final @Nonnull Set<@Nonnull SimpleApp> dependencyApps = new LinkedHashSet<>();
+        private final @Nonnull Set<@Nonnull String> resourceAnnotations = new LinkedHashSet<>();
+        private final @Nonnull Set<@Nonnull String> postConstructAnnotations = new LinkedHashSet<>();
+        private final @Nonnull Set<@Nonnull String> preDestroyAnnotations = new LinkedHashSet<>();
         private boolean enableAspect = false;
 
         /**
@@ -186,8 +188,8 @@ public interface SimpleApp {
          * multiple annotations serve as pre-destroy annotation, and a {@link Method} is considered annotated if it has
          * any one of those annotations.
          * <p>
-         * If no annotation is specified, the default annotations will be used: {@code javax.annotation.PostConstruct}
-         * and {@code jakarta.annotation.PostConstruct}.
+         * If no annotation is specified, the default annotations will be used: {@code javax.annotation.PreDestroy} and
+         * {@code jakarta.annotation.PreDestroy}.
          *
          * @param preDestroyAnnotation the annotation applied to a {@link Method} indicate that it is a pre-destroy
          *                             method
@@ -233,32 +235,32 @@ public interface SimpleApp {
         }
 
         /**
-         * Adds parent apps for resource sharing.
+         * Adds dependency apps for resource sharing.
          * <p>
-         * When a parent app is provided, the current app will attempt to reuse resource instances from the parent app
-         * instead of creating new ones. Specifically, if a resource type required by the current app already exists in
-         * the parent app, the instance from the parent app will be shared and used directly.
+         * When a dependency app is provided, the current app will attempt to reuse resource instances from the
+         * dependency app instead of creating new ones. Specifically, if a resource type required by the current app
+         * already exists in the dependency app, the instance from the dependency app will be shared and used directly.
          *
-         * @param parents the parent apps
+         * @param dependencyApps the dependency apps
          * @return this builder
          */
-        public @Nonnull Builder parent(@Nullable SimpleApp @Nonnull ... parents) {
-            CollectKit.addAll(this.parentApps, parents);
+        public @Nonnull Builder dependencyApps(@Nullable SimpleApp @Nonnull ... dependencyApps) {
+            CollectKit.addAll(this.dependencyApps, dependencyApps);
             return this;
         }
 
         /**
-         * Adds parent apps for resource sharing.
+         * Adds dependency apps for resource sharing.
          * <p>
-         * When a parent app is provided, the current app will attempt to reuse resource instances from the parent app
-         * instead of creating new ones. Specifically, if a resource type required by the current app already exists in
-         * the parent app, the instance from the parent app will be shared and used directly.
+         * When a dependency app is provided, the current app will attempt to reuse resource instances from the
+         * dependency app instead of creating new ones. Specifically, if a resource type required by the current app
+         * already exists in the dependency app, the instance from the dependency app will be shared and used directly.
          *
-         * @param parents the parent apps
+         * @param dependencyApps the dependency apps
          * @return this builder
          */
-        public @Nonnull Builder parent(@Nonnull Iterable<@Nonnull SimpleApp> parents) {
-            CollectKit.addAll(this.parentApps, parents);
+        public @Nonnull Builder dependencyApps(@Nonnull Iterable<@Nonnull SimpleApp> dependencyApps) {
+            CollectKit.addAll(this.dependencyApps, dependencyApps);
             return this;
         }
 
@@ -267,11 +269,11 @@ public interface SimpleApp {
          * <p>
          * When enabled, this builder will first start standard dependency injection, creating one instance for each
          * resource type. Resource objects which are instances of the {@link SimpleAppAspect} will be treated as aspect
-         * handlers (excluding instances from parent apps), and the other resource instances (also excluding instances
-         * from parent apps) will be evaluated by {@link SimpleAppAspect#needsAspect(Type)} of each aspect handler in an
-         * unspecified order. The evaluation stops at the first handler where the {@code needsAspect} returns
-         * {@code true} for the resource type. When a match is found, the resource instance will be advised by that
-         * handler, and no further aspect handlers will be evaluated for that type.
+         * handlers (excluding instances from dependency apps), and the other resource instances (also excluding
+         * instances from dependency apps) will be evaluated by {@link SimpleAppAspect#needsAspect(Type)} of each aspect
+         * handler in an unspecified order. The evaluation stops at the first handler where the {@code needsAspect}
+         * returns {@code true} for the resource type. When a match is found, the resource instance will be advised by
+         * that handler, and no further aspect handlers will be evaluated for that type.
          * <p>
          * If no aspect handler matches a resource type, the resource type will not be advised. And if a resource
          * instance is advised and replaced by the advised instance, the Post-Construct and Pre-Destroy methods (if any)
@@ -289,14 +291,14 @@ public interface SimpleApp {
          * Builds and starts this app, following steps in order:
          * <ol>
          *     <li><b>Dependency Injection (DI) Processing</b>:
-         *     Creates and manages object instances, excluding resources shared from the parent apps,
+         *     Creates and manages object instances, excluding resources shared from the dependency apps,
          *     and only one instance per {@link Type} (singleton scope).
          *     </li>
          *     <li><b>Aspect-Oriented Programming (AOP) Processing</b>:
          *     Applies aspect handlers to relevant classes if AOP is enabled.</li>
          *     <li><b>Initialization Method Execution</b>:
          *     Invokes initialization methods which are typically annotated with {@code PostConstruct},
-         *     excluding resources shared from the parent apps. And the order is unspecified.</li>
+         *     excluding resources shared from the dependency apps. And the order is unspecified.</li>
          * </ol>
          * <p>
          * Note:
@@ -309,8 +311,8 @@ public interface SimpleApp {
          *         to resume functionality.
          *     </li>
          *     <li>
-         *         A {@link SimpleApp} can only be started if all parent {@link SimpleApp} are valid.
-         *         The behavior is undefined if a parent {@link SimpleApp} is invalid for this app.
+         *         A {@link SimpleApp} can only be started if all dependency {@link SimpleApp} are valid.
+         *         The behavior is undefined if a dependency {@link SimpleApp} is invalid for this app.
          *     </li>
          * </ul>
          *
@@ -320,7 +322,7 @@ public interface SimpleApp {
         public @Nonnull SimpleApp build() throws SimpleAppException {
             return new SimpleAppImpl(
                 resourceTypes,
-                parentApps.isEmpty() ? new SimpleApp[0] : parentApps.toArray(new SimpleApp[0]),
+                dependencyApps.isEmpty() ? new SimpleApp[0] : dependencyApps.toArray(new SimpleApp[0]),
                 enableAspect,
                 resourceAnnotations.isEmpty() ? RESOURCE_ANNOTATIONS : resourceAnnotations.toArray(new String[0]),
                 postConstructAnnotations.isEmpty() ? POST_CONSTRUCT_ANNOTATIONS : postConstructAnnotations.toArray(new String[0]),

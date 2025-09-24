@@ -32,11 +32,11 @@ final class SimpleAppImpl implements SimpleApp {
     private final @Nonnull List<@Nonnull SimpleResource> allResources;
     private final @Nonnull Map<@Nonnull Type, @Nonnull SimpleResource> resources;
     private final @Nonnull List<@Nonnull SimpleResource> preDestroyList;
-    private final @Nonnull List<@Nonnull SimpleApp> parents;
+    private final @Nonnull List<@Nonnull SimpleApp> dependencyApps;
 
     public SimpleAppImpl(
-        @Nonnull List<@Nonnull Type> resourceTypes,
-        @Nonnull SimpleApp @Nonnull [] parents,
+        @Nonnull Set<@Nonnull Type> resourceTypes,
+        @Nonnull SimpleApp @Nonnull [] dependencyApps,
         boolean enableAspect,
         @Nonnull String @Nonnull [] resourceAnnotations,
         @Nonnull String @Nonnull [] postConstructAnnotations,
@@ -51,7 +51,7 @@ final class SimpleAppImpl implements SimpleApp {
                 resourceAnnotations,
                 postConstructAnnotations,
                 preDestroyAnnotations,
-                parents,
+                dependencyApps,
                 resourceMap,
                 fieldSet
             );
@@ -89,7 +89,7 @@ final class SimpleAppImpl implements SimpleApp {
                 localResources[i++] = res;
             }
         }
-        this.parents = ListKit.list(parents);
+        this.dependencyApps = ListKit.list(dependencyApps);
         this.resources = Collections.unmodifiableMap(resources);
         this.localResources = ListKit.list(localResources);
         this.allResources = ListKit.list(allResources);
@@ -123,15 +123,15 @@ final class SimpleAppImpl implements SimpleApp {
         @Nonnull String @Nonnull [] resourceAnnotations,
         @Nonnull String @Nonnull [] postConstructAnnotations,
         @Nonnull String @Nonnull [] preDestroyAnnotations,
-        @Nonnull SimpleApp @Nonnull [] parents,
+        @Nonnull SimpleApp @Nonnull [] dependencyApps,
         @Nonnull @OutParam Map<@Nonnull Type, @Nonnull Res> resourceMap,
         @Nonnull @OutParam Set<@Nonnull FieldRes> fieldSet
     ) throws SimpleAppException {
         if (resourceMap.containsKey(type)) {
             return;
         }
-        for (SimpleApp parent : parents) {
-            Object instance = parent.getResource(type);
+        for (SimpleApp dependency : dependencyApps) {
+            Object instance = dependency.getResource(type);
             if (instance != null) {
                 Res res = new Res(type, instance);
                 resourceMap.put(type, res);
@@ -159,7 +159,7 @@ final class SimpleAppImpl implements SimpleApp {
                             resourceAnnotations,
                             postConstructAnnotations,
                             preDestroyAnnotations,
-                            parents,
+                            dependencyApps,
                             resourceMap,
                             fieldSet
                         );
@@ -346,8 +346,8 @@ final class SimpleAppImpl implements SimpleApp {
     }
 
     @Override
-    public @Nonnull List<@Nonnull SimpleApp> parents() {
-        return parents;
+    public @Nonnull List<@Nonnull SimpleApp> dependencyApps() {
+        return dependencyApps;
     }
 
     @Override
