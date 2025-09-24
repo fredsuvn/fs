@@ -1,14 +1,14 @@
 package xyz.sunqian.common.di;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.io.IORuntimeException;
+import xyz.sunqian.common.base.exception.JieRuntimeException;
 
 /**
  * Exception for {@link SimpleApp}.
  *
  * @author sunqian
  */
-public class SimpleAppException extends IORuntimeException {
+public class SimpleAppException extends JieRuntimeException {
 
     /**
      * Empty constructor.
