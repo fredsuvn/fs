@@ -8,18 +8,18 @@ import xyz.sunqian.common.base.exception.JieRuntimeException;
 import java.util.List;
 
 /**
- * Exception for shutdown failure of a {@link SimpleApp}.
+ * Exception for failing to destroy resources during shutdown of a {@link SimpleApp}.
  *
  * @author sunqian
  */
-public class SimpleAppShutdownException extends JieRuntimeException {
+public class SimpleResourceDestroyException extends JieRuntimeException {
 
     private final @Nonnull SimpleResource failedResource;
     private final @Nonnull List<@Nonnull SimpleResource> destroyedResources;
     private final @Nonnull List<@Nonnull SimpleResource> undestroyedResources;
 
     /**
-     * Constructs a shutdown exception with detailed context about the resource cleanup failure. This exception provides
+     * Constructs an exception with detailed context about the resource destroy failure. This exception provides
      * complete information about the resource that caused the failure, resources that were successfully destroyed
      * before the failure, and resources that remained undestroyed due to the abortive termination of the shutdown
      * process.
@@ -31,7 +31,7 @@ public class SimpleAppShutdownException extends JieRuntimeException {
      * @param destroyedResources   the resources that were successfully destroyed before the failure occurred
      * @param undestroyedResources the resources that were not destroyed due to the abortive termination
      */
-    public SimpleAppShutdownException(
+    public SimpleResourceDestroyException(
         @Nonnull SimpleResource failedResource,
         @Nullable Throwable cause,
         @Nonnull @RetainedParam List<@Nonnull SimpleResource> destroyedResources,

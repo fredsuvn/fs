@@ -59,9 +59,10 @@ public interface SimpleApp {
      *     </li>
      * </ul>
      *
-     * @throws SimpleAppShutdownException if an error occurs during shutdown
+     * @throws SimpleResourceInitialException if failed to destroy resources
+     * @throws SimpleAppException             if the other error occurs during shutdown
      */
-    void shutdown() throws SimpleAppShutdownException;
+    void shutdown() throws SimpleResourceDestroyException, SimpleAppException;
 
     /**
      * Returns dependency apps of this app.
@@ -315,9 +316,10 @@ public interface SimpleApp {
          *     </li>
          * </ul>
          *
-         * @throws SimpleAppException if an error occurs during startup
+         * @throws SimpleResourceInitialException if failed to post-construct resources
+         * @throws SimpleAppException             if the other error occurs during startup
          */
-        public @Nonnull SimpleApp build() throws SimpleAppStartupException {
+        public @Nonnull SimpleApp build() throws SimpleResourceInitialException, SimpleAppException {
             return new SimpleAppImpl(
                 resourceTypes,
                 dependencyApps.isEmpty() ? new SimpleApp[0] : dependencyApps.toArray(new SimpleApp[0]),

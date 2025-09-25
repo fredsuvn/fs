@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +42,7 @@ final class SimpleAppImpl implements SimpleApp {
         @Nonnull String @Nonnull [] resourceAnnotations,
         @Nonnull String @Nonnull [] postConstructAnnotations,
         @Nonnull String @Nonnull [] preDestroyAnnotations
-    ) throws SimpleAppStartupException {
+    ) throws SimpleResourceInitialException, SimpleAppException {
         Map<Type, Res> resourceMap = new HashMap<>();
         Set<FieldRes> fieldSet = new HashSet<>();
         // generate instances
@@ -98,9 +99,9 @@ final class SimpleAppImpl implements SimpleApp {
         Set<SimpleResource> preDestroySet = new LinkedHashSet<>();
         Set<Type> stack = new HashSet<>();
         for (SimpleResource resource : localResources) {
-            postConstruct(resource, resource, stack, postConstructSet);
+            checkDependencyForPostConstruct(resource, resource, stack, postConstructSet);
             stack.clear();
-            checkPreDestroy(resource, resource, stack, preDestroySet);
+            checkDependencyForPreDestroy(resource, resource, stack, preDestroySet);
             stack.clear();
         }
         List<SimpleResource> postConstructList = new ArrayList<>(postConstructSet);
@@ -108,12 +109,19 @@ final class SimpleAppImpl implements SimpleApp {
         List<SimpleResource> preDestroyList = new ArrayList<>(postConstructSet);
         preDestroyList.sort(PreDestroyComparator.INST);
         this.preDestroyList = preDestroyList;
-        for (SimpleResource resource : postConstructList) {
+        // execute post-construct
+        List<SimpleResource> uninitializedResources = new ArrayList<>(postConstructList);
+        List<SimpleResource> initializedResources = new ArrayList<>(postConstructList);
+        Iterator<SimpleResource> uninitializedIt = uninitializedResources.iterator();
+        while (uninitializedIt.hasNext()) {
+            SimpleResource resource = uninitializedIt.next();
             Method postConstruct = Jie.asNonnull(resource.postConstructMethod());
             try {
                 postConstruct.invoke(resource.instance());
+                initializedResources.add(resource);
+                uninitializedIt.remove();
             } catch (Exception e) {
-                throw new SimpleAppException("Execute post-construct failed on :" + postConstruct + ".", e);
+                throw new SimpleResourceInitialException(resource, e, initializedResources, uninitializedResources);
             }
         }
     }
@@ -126,7 +134,7 @@ final class SimpleAppImpl implements SimpleApp {
         @Nonnull SimpleApp @Nonnull [] dependencyApps,
         @Nonnull @OutParam Map<@Nonnull Type, @Nonnull Res> resourceMap,
         @Nonnull @OutParam Set<@Nonnull FieldRes> fieldSet
-    )  {
+    ) throws SimpleAppException {
         if (resourceMap.containsKey(type)) {
             return;
         }
@@ -250,7 +258,7 @@ final class SimpleAppImpl implements SimpleApp {
     private @Nonnull Res getRes(
         @Nonnull Type type,
         @Nonnull Map<@Nonnull Type, @Nonnull Res> resourceMap
-    ) {
+    ) throws SimpleAppException {
         Res res = resourceMap.get(type);
         if (res != null) {
             return res;
@@ -263,7 +271,7 @@ final class SimpleAppImpl implements SimpleApp {
         throw new SimpleAppException("Can not find resource instance for type :" + type.getTypeName() + ".");
     }
 
-    private void postConstruct(
+    private void checkDependencyForPostConstruct(
         @Nonnull SimpleResource firstRes,
         @Nonnull SimpleResource curRes,
         @Nonnull Set<@Nonnull Type> stack,
@@ -290,12 +298,12 @@ final class SimpleAppImpl implements SimpleApp {
             if (depRes == null) {
                 throw new SimpleAppException("Unknown post-construct dependency type: " + depType.getTypeName() + ".");
             }
-            postConstruct(firstRes, depRes, stack, postConstructSet);
+            checkDependencyForPostConstruct(firstRes, depRes, stack, postConstructSet);
             stack.remove(depType);
         }
     }
 
-    private void checkPreDestroy(
+    private void checkDependencyForPreDestroy(
         @Nonnull SimpleResource firstRes,
         @Nonnull SimpleResource curRes,
         @Nonnull Set<@Nonnull Type> stack,
@@ -322,7 +330,7 @@ final class SimpleAppImpl implements SimpleApp {
             if (depRes == null) {
                 throw new SimpleAppException("Unknown pre-destroy dependency type: " + depType.getTypeName() + ".");
             }
-            postConstruct(firstRes, depRes, stack, preDestroySet);
+            checkDependencyForPreDestroy(firstRes, depRes, stack, preDestroySet);
             stack.remove(depType);
         }
     }
@@ -334,13 +342,19 @@ final class SimpleAppImpl implements SimpleApp {
     }
 
     @Override
-    public void shutdown() throws SimpleAppException {
-        for (SimpleResource resource : preDestroyList) {
+    public void shutdown() throws SimpleResourceDestroyException, SimpleAppException {
+        List<SimpleResource> undestroyedResources = new ArrayList<>(preDestroyList);
+        List<SimpleResource> destroyedResources = new ArrayList<>(preDestroyList);
+        Iterator<SimpleResource> undestroyedIt = undestroyedResources.iterator();
+        while (undestroyedIt.hasNext()) {
+            SimpleResource resource = undestroyedIt.next();
             Method preDestroy = Jie.asNonnull(resource.preDestroyMethod());
             try {
                 preDestroy.invoke(resource.instance());
+                destroyedResources.add(resource);
+                undestroyedIt.remove();
             } catch (Exception e) {
-                throw new SimpleAppException("Execute pre-destroy failed on :" + preDestroy + ".", e);
+                throw new SimpleResourceDestroyException(resource, e, destroyedResources, undestroyedResources);
             }
         }
     }
@@ -399,7 +413,7 @@ final class SimpleAppImpl implements SimpleApp {
             @Nonnull Class<?> rawClass,
             @Nonnull String @Nonnull [] postConstructAnnotations,
             @Nonnull String @Nonnull [] preDestroyAnnotations
-        ) {
+        ) throws SimpleAppException {
             this.type = type;
             this.local = true;
             this.rawClass = rawClass;

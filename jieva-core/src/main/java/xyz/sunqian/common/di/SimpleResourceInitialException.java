@@ -3,22 +3,23 @@ package xyz.sunqian.common.di;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.RetainedParam;
+import xyz.sunqian.common.base.exception.JieRuntimeException;
 
 import java.util.List;
 
 /**
- * Exception for startup failure of a {@link SimpleApp}.
+ * Exception for failing to initialize (post-construct) resources during startup of a {@link SimpleApp}.
  *
  * @author sunqian
  */
-public class SimpleAppStartupException extends SimpleAppException {
+public class SimpleResourceInitialException extends JieRuntimeException {
 
     private final @Nonnull SimpleResource failedResource;
     private final @Nonnull List<@Nonnull SimpleResource> initializedResources;
     private final @Nonnull List<@Nonnull SimpleResource> uninitializedResources;
 
     /**
-     * Constructs a startup exception with detailed context about the initialization failure. This exception provides
+     * Constructs an exception with detailed context about the resource initialize failure. This exception provides
      * complete information about the resource that caused the failure, resources that were successfully initialized
      * before the failure, and resources that remained uninitialized due to the abortive termination of the startup
      * process.
@@ -30,7 +31,7 @@ public class SimpleAppStartupException extends SimpleAppException {
      * @param initializedResources   the resources that were successfully initialized before the failure occurred
      * @param uninitializedResources the resources that were not initialized due to the abortive termination
      */
-    public SimpleAppStartupException(
+    public SimpleResourceInitialException(
         @Nonnull SimpleResource failedResource,
         @Nullable Throwable cause,
         @Nonnull @RetainedParam List<@Nonnull SimpleResource> initializedResources,

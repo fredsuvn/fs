@@ -145,25 +145,6 @@ public class DITest implements PrintTest {
         assertEquals(starter.genericInter(100), 100);
     }
 
-    @Test
-    public void testException() throws Exception {
-        {
-            // SimpleAppException
-            expectThrows(SimpleAppException.class, () -> {
-                throw new SimpleAppException();
-            });
-            expectThrows(SimpleAppException.class, () -> {
-                throw new SimpleAppException("");
-            });
-            expectThrows(SimpleAppException.class, () -> {
-                throw new SimpleAppException("", new RuntimeException());
-            });
-            expectThrows(SimpleAppException.class, () -> {
-                throw new SimpleAppException(new RuntimeException());
-            });
-        }
-    }
-
     public static class Starter {
 
         @TestRes
@@ -374,6 +355,158 @@ public class DITest implements PrintTest {
         @PreDestroy
         public void preDestroy() {
             preList.add(getClass().getName());
+        }
+    }
+
+    @Test
+    public void testDependency() throws Exception {
+        {
+            SimpleApp app = SimpleApp.newBuilder()
+                .resources(Dep1.class, Dep2.class, Dep3.class)
+                .build();
+            app.shutdown();
+        }
+        {
+            SimpleApp app = SimpleApp.newBuilder()
+                .resources(Dep1.class, Dep3.class, Dep2.class)
+                .build();
+            app.shutdown();
+        }
+        {
+            SimpleApp app = SimpleApp.newBuilder()
+                .resources(Dep2.class, Dep1.class, Dep3.class)
+                .build();
+            app.shutdown();
+        }
+        {
+            SimpleApp app = SimpleApp.newBuilder()
+                .resources(Dep2.class, Dep3.class, Dep1.class)
+                .build();
+            app.shutdown();
+        }
+        {
+            SimpleApp app = SimpleApp.newBuilder()
+                .resources(Dep3.class, Dep1.class, Dep2.class)
+                .build();
+            app.shutdown();
+        }
+        {
+            SimpleApp app = SimpleApp.newBuilder()
+                .resources(Dep3.class, Dep2.class, Dep1.class)
+                .build();
+            app.shutdown();
+        }
+        {
+            expectThrows(SimpleAppException.class, () ->
+                SimpleApp.newBuilder().resources(Dep4.class, Dep5.class).build());
+            expectThrows(SimpleAppException.class, () ->
+                SimpleApp.newBuilder().resources(Dep6.class, Dep7.class).build());
+            expectThrows(SimpleAppException.class, () ->
+                SimpleApp.newBuilder().resources(Dep8.class).build());
+        }
+    }
+
+    public static class Dep1 {
+
+        @PostConstruct
+        public void postConstruct() {
+        }
+
+        @PreDestroy
+        public void preDestroy() {
+        }
+    }
+
+    public static class Dep2 {
+
+        @PostConstruct
+        @SimpleDependsOn(Dep1.class)
+        public void postConstruct() {
+        }
+
+        @PreDestroy
+        @SimpleDependsOn(Dep1.class)
+        public void preDestroy() {
+        }
+    }
+
+    public static class Dep3 {
+
+        @PostConstruct
+        @SimpleDependsOn({Dep1.class, Dep2.class})
+        public void postConstruct() {
+        }
+
+        @PreDestroy
+        @SimpleDependsOn({Dep2.class, Dep1.class})
+        public void preDestroy() {
+        }
+    }
+
+    public static class Dep4 {
+
+        @PostConstruct
+        @SimpleDependsOn(Dep5.class)
+        public void postConstruct() {
+        }
+    }
+
+    public static class Dep5 {
+
+        @PostConstruct
+        @SimpleDependsOn(Dep4.class)
+        public void postConstruct() {
+        }
+    }
+
+    public static class Dep6 {
+
+        @PreDestroy
+        @SimpleDependsOn(Dep7.class)
+        public void preDestroy() {
+        }
+    }
+
+    public static class Dep7 {
+
+        @PreDestroy
+        @SimpleDependsOn(Dep6.class)
+        public void preDestroy() {
+        }
+    }
+
+    public static class Dep8 {
+
+        @PostConstruct
+        @SimpleDependsOn(String.class)
+        public void postConstruct() {
+        }
+    }
+
+    public static class Dep9 {
+
+        @PostConstruct
+        @SimpleDependsOn(String.class)
+        public void postConstruct() {
+        }
+    }
+
+    @Test
+    public void testException() throws Exception {
+        {
+            // SimpleAppException
+            expectThrows(SimpleAppException.class, () -> {
+                throw new SimpleAppException();
+            });
+            expectThrows(SimpleAppException.class, () -> {
+                throw new SimpleAppException("");
+            });
+            expectThrows(SimpleAppException.class, () -> {
+                throw new SimpleAppException("", new RuntimeException());
+            });
+            expectThrows(SimpleAppException.class, () -> {
+                throw new SimpleAppException(new RuntimeException());
+            });
         }
     }
 }
