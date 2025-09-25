@@ -41,7 +41,7 @@ final class SimpleAppImpl implements SimpleApp {
         @Nonnull String @Nonnull [] resourceAnnotations,
         @Nonnull String @Nonnull [] postConstructAnnotations,
         @Nonnull String @Nonnull [] preDestroyAnnotations
-    ) throws SimpleAppException {
+    ) throws SimpleAppStartupException {
         Map<Type, Res> resourceMap = new HashMap<>();
         Set<FieldRes> fieldSet = new HashSet<>();
         // generate instances
@@ -126,7 +126,7 @@ final class SimpleAppImpl implements SimpleApp {
         @Nonnull SimpleApp @Nonnull [] dependencyApps,
         @Nonnull @OutParam Map<@Nonnull Type, @Nonnull Res> resourceMap,
         @Nonnull @OutParam Set<@Nonnull FieldRes> fieldSet
-    ) throws SimpleAppException {
+    )  {
         if (resourceMap.containsKey(type)) {
             return;
         }
@@ -399,7 +399,7 @@ final class SimpleAppImpl implements SimpleApp {
             @Nonnull Class<?> rawClass,
             @Nonnull String @Nonnull [] postConstructAnnotations,
             @Nonnull String @Nonnull [] preDestroyAnnotations
-        ) throws SimpleAppException {
+        ) {
             this.type = type;
             this.local = true;
             this.rawClass = rawClass;

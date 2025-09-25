@@ -59,10 +59,9 @@ public interface SimpleApp {
      *     </li>
      * </ul>
      *
-     * @throws SimpleAppException if an error occurs during shutdown, or if the caller does not have permission to shut
-     *                            down the application
+     * @throws SimpleAppShutdownException if an error occurs during shutdown
      */
-    void shutdown() throws SimpleAppException;
+    void shutdown() throws SimpleAppShutdownException;
 
     /**
      * Returns dependency apps of this app.
@@ -316,10 +315,9 @@ public interface SimpleApp {
          *     </li>
          * </ul>
          *
-         * @throws SimpleAppException if an error occurs during startup, or if the app is already running or has been
-         *                            stopped
+         * @throws SimpleAppException if an error occurs during startup
          */
-        public @Nonnull SimpleApp build() throws SimpleAppException {
+        public @Nonnull SimpleApp build() throws SimpleAppStartupException {
             return new SimpleAppImpl(
                 resourceTypes,
                 dependencyApps.isEmpty() ? new SimpleApp[0] : dependencyApps.toArray(new SimpleApp[0]),

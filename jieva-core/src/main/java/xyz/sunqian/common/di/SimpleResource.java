@@ -8,6 +8,9 @@ import java.lang.reflect.Type;
 
 /**
  * Represents resource of a {@link SimpleApp}.
+ * <p>
+ * A resource is a singleton instance of a specified type, and different generics defined under the same type are
+ * considered as different types.
  *
  * @author sunqian
  */
