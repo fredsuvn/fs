@@ -3,16 +3,19 @@ package tests.di;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.annotation.Resource;
-import org.jetbrains.annotations.Nullable;
 import org.testng.annotations.Test;
 import xyz.sunqian.annotations.Nonnull;
+import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.di.SimpleApp;
 import xyz.sunqian.common.di.SimpleAppAspect;
 import xyz.sunqian.common.di.SimpleAppException;
 import xyz.sunqian.common.di.SimpleDependsOn;
 import xyz.sunqian.common.di.SimpleResource;
+import xyz.sunqian.common.di.SimpleResourceDestroyException;
+import xyz.sunqian.common.di.SimpleResourceInitialException;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
+import xyz.sunqian.test.JieTestException;
 import xyz.sunqian.test.PrintTest;
 
 import java.lang.reflect.Method;
@@ -41,7 +44,7 @@ public class DITest implements PrintTest {
         SimpleApp app = SimpleApp.newBuilder()
             .resources(
                 Starter.class, ServiceAaa.class, ServiceBbb.class, InterServiceImpl.class,
-                AspectServiceImpl.class, AspectHandler.class,
+                AspectService1Impl.class, AspectHandler.class,
                 new TypeRef<Generic<String>>() {}.type(), new TypeRef<Generic<Integer>>() {}.type(),
                 NeedExecution.class, NeedExecution2.class, NeedExecution3.class
             )
@@ -128,7 +131,14 @@ public class DITest implements PrintTest {
         assertEquals(starter.getNames(), "AB");
         assertEquals(starter.interService(), interService.interService());
         // aspect
-        assertEquals(starter.aspectService(), AspectServiceImpl.class.getName() + ";" + interService.interService());
+        assertEquals(
+            starter.aspectService1(),
+            AspectService1Impl.class.getName() + ";" + interService.interService()
+        );
+        assertEquals(
+            starter.aspectService2(),
+            "call: " + starter.aspectService1() + ";" + interService.interService()
+        );
         // generic resource
         Generic<String> stringGeneric = app.getResource(new TypeRef<Generic<String>>() {});
         Generic<Integer> integerGeneric = app.getResource(new TypeRef<Generic<Integer>>() {});
@@ -154,7 +164,9 @@ public class DITest implements PrintTest {
         @TestRes
         private InterService interService;
         @TestRes
-        private AspectService aspectService;
+        private AspectService1 aspectService1;
+        @TestRes
+        private AspectService2 aspectService2;
         @TestRes
         private Generic<String> stringGeneric;
         @TestRes
@@ -172,8 +184,12 @@ public class DITest implements PrintTest {
             return interService.interService();
         }
 
-        public String aspectService() {
-            return aspectService.aspectService();
+        public String aspectService1() {
+            return aspectService1.aspectService1();
+        }
+
+        public String aspectService2() {
+            return aspectService2.aspectService2();
         }
 
         public String generic(String s) {
@@ -198,8 +214,15 @@ public class DITest implements PrintTest {
         @TestRes
         private ServiceBbb serviceBbb;
 
+        private final String name = "A";
+
+        private String withoutAnnotation;
+
+        @Nullable
+        private String otherAnnotation;
+
         public String getLocalName() {
-            return "A";
+            return name;
         }
 
         public String getRemoteName() {
@@ -212,8 +235,15 @@ public class DITest implements PrintTest {
         @TestRes
         private ServiceAaa serviceAaa;
 
+        private final String name = "B";
+
+        private String withoutAnnotation;
+
+        @Nullable
+        private String otherAnnotation;
+
         public String getLocalName() {
-            return "B";
+            return name;
         }
 
         public String getRemoteName() {
@@ -232,14 +262,24 @@ public class DITest implements PrintTest {
         }
     }
 
-    public interface AspectService {
-        String aspectService();
+    public interface AspectService1 {
+        String aspectService1();
     }
 
-    public static class AspectServiceImpl implements AspectService {
+    public static class AspectService1Impl implements AspectService1 {
         @Override
-        public String aspectService() {
-            return AspectServiceImpl.class.getName();
+        public String aspectService1() {
+            return AspectService1Impl.class.getName();
+        }
+    }
+
+    public static class AspectService2 {
+
+        @TestRes
+        private AspectService1 aspectService1;
+
+        public String aspectService2() {
+            return "call: " + aspectService1.aspectService1();
         }
     }
 
@@ -250,7 +290,7 @@ public class DITest implements PrintTest {
 
         @Override
         public boolean needsAspect(@Nonnull Type type) {
-            return type.equals(AspectServiceImpl.class);
+            return type.equals(AspectService1Impl.class) || type.equals(AspectService2.class);
         }
 
         @Override
@@ -361,40 +401,64 @@ public class DITest implements PrintTest {
     @Test
     public void testDependency() throws Exception {
         {
+            Dep.postList.clear();
+            Dep.destroyList.clear();
             SimpleApp app = SimpleApp.newBuilder()
                 .resources(Dep1.class, Dep2.class, Dep3.class)
                 .build();
             app.shutdown();
+            assertEquals(Dep.postList, ListKit.list(1, 2, 3));
+            assertEquals(Dep.destroyList, ListKit.list(1, 2, 3));
         }
         {
+            Dep.postList.clear();
+            Dep.destroyList.clear();
             SimpleApp app = SimpleApp.newBuilder()
                 .resources(Dep1.class, Dep3.class, Dep2.class)
                 .build();
             app.shutdown();
+            assertEquals(Dep.postList, ListKit.list(1, 2, 3));
+            assertEquals(Dep.destroyList, ListKit.list(1, 2, 3));
         }
         {
+            Dep.postList.clear();
+            Dep.destroyList.clear();
             SimpleApp app = SimpleApp.newBuilder()
                 .resources(Dep2.class, Dep1.class, Dep3.class)
                 .build();
             app.shutdown();
+            assertEquals(Dep.postList, ListKit.list(1, 2, 3));
+            assertEquals(Dep.destroyList, ListKit.list(1, 2, 3));
         }
         {
+            Dep.postList.clear();
+            Dep.destroyList.clear();
             SimpleApp app = SimpleApp.newBuilder()
                 .resources(Dep2.class, Dep3.class, Dep1.class)
                 .build();
             app.shutdown();
+            assertEquals(Dep.postList, ListKit.list(1, 2, 3));
+            assertEquals(Dep.destroyList, ListKit.list(1, 2, 3));
         }
         {
+            Dep.postList.clear();
+            Dep.destroyList.clear();
             SimpleApp app = SimpleApp.newBuilder()
                 .resources(Dep3.class, Dep1.class, Dep2.class)
                 .build();
             app.shutdown();
+            assertEquals(Dep.postList, ListKit.list(1, 2, 3));
+            assertEquals(Dep.destroyList, ListKit.list(1, 2, 3));
         }
         {
+            Dep.postList.clear();
+            Dep.destroyList.clear();
             SimpleApp app = SimpleApp.newBuilder()
                 .resources(Dep3.class, Dep2.class, Dep1.class)
                 .build();
             app.shutdown();
+            assertEquals(Dep.postList, ListKit.list(1, 2, 3));
+            assertEquals(Dep.destroyList, ListKit.list(1, 2, 3));
         }
         {
             expectThrows(SimpleAppException.class, () ->
@@ -402,18 +466,39 @@ public class DITest implements PrintTest {
             expectThrows(SimpleAppException.class, () ->
                 SimpleApp.newBuilder().resources(Dep6.class, Dep7.class).build());
             expectThrows(SimpleAppException.class, () ->
-                SimpleApp.newBuilder().resources(Dep8.class).build());
+                SimpleApp.newBuilder().resources(DepErr1.class).build());
+            expectThrows(SimpleAppException.class, () ->
+                SimpleApp.newBuilder().resources(DepErr2.class).build());
         }
+        {
+            SimpleApp app = SimpleApp.newBuilder()
+                .resources(Dep8.class, Dep10.class, Dep9.class)
+                .build();
+            app.shutdown();
+        }
+        {
+            SimpleApp app = SimpleApp.newBuilder()
+                .resources(Dep9.class, Dep10.class, Dep8.class)
+                .build();
+            app.shutdown();
+        }
+    }
+
+    public static class Dep {
+        static final List<Integer> postList = new ArrayList<>();
+        static final List<Integer> destroyList = new ArrayList<>();
     }
 
     public static class Dep1 {
 
         @PostConstruct
         public void postConstruct() {
+            Dep.postList.add(1);
         }
 
         @PreDestroy
         public void preDestroy() {
+            Dep.destroyList.add(1);
         }
     }
 
@@ -422,11 +507,13 @@ public class DITest implements PrintTest {
         @PostConstruct
         @SimpleDependsOn(Dep1.class)
         public void postConstruct() {
+            Dep.postList.add(2);
         }
 
         @PreDestroy
         @SimpleDependsOn(Dep1.class)
         public void preDestroy() {
+            Dep.destroyList.add(2);
         }
     }
 
@@ -435,11 +522,13 @@ public class DITest implements PrintTest {
         @PostConstruct
         @SimpleDependsOn({Dep1.class, Dep2.class})
         public void postConstruct() {
+            Dep.postList.add(3);
         }
 
         @PreDestroy
         @SimpleDependsOn({Dep2.class, Dep1.class})
         public void preDestroy() {
+            Dep.destroyList.add(3);
         }
     }
 
@@ -478,16 +567,106 @@ public class DITest implements PrintTest {
     public static class Dep8 {
 
         @PostConstruct
-        @SimpleDependsOn(String.class)
+        @SimpleDependsOn({})
         public void postConstruct() {
+        }
+
+        @PreDestroy
+        @SimpleDependsOn({})
+        public void preDestroy() {
         }
     }
 
     public static class Dep9 {
 
         @PostConstruct
+        public void postConstruct() {
+        }
+
+        @PreDestroy
+        public void preDestroy() {
+        }
+    }
+
+    public static class Dep10 {
+
+        @PostConstruct
+        public void postConstruct() {
+        }
+
+        @PreDestroy
+        public void preDestroy() {
+        }
+    }
+
+    public static class DepErr1 {
+
+        @PostConstruct
         @SimpleDependsOn(String.class)
         public void postConstruct() {
+        }
+    }
+
+    public static class DepErr2 {
+
+        @PreDestroy
+        @SimpleDependsOn(String.class)
+        public void preDestroy() {
+        }
+    }
+
+    @Test
+    public void testStartAndShutdown() {
+        {
+            // startup
+            SimpleResourceInitialException startErr = expectThrows(SimpleResourceInitialException.class, () -> {
+                SimpleApp.newBuilder()
+                    .resources(Dep8.class, Dep9.class, DepErr3.class, Dep10.class)
+                    .build();
+            });
+            assertEquals(startErr.failedResource().type(), DepErr3.class);
+            assertEquals(
+                startErr.initializedResources().stream().map(SimpleResource::type).collect(Collectors.toList()),
+                ListKit.list(Dep8.class, Dep9.class)
+            );
+            assertEquals(
+                startErr.uninitializedResources().stream().map(SimpleResource::type).collect(Collectors.toList()),
+                ListKit.list(Dep10.class)
+            );
+        }
+        {
+            // shutdown
+            SimpleResourceDestroyException shutErr = expectThrows(SimpleResourceDestroyException.class, () -> {
+                SimpleApp.newBuilder()
+                    .resources(Dep8.class, Dep9.class, DepErr4.class, Dep10.class)
+                    .build()
+                    .shutdown();
+            });
+            assertEquals(shutErr.failedResource().type(), DepErr4.class);
+            assertEquals(
+                shutErr.destroyedResources().stream().map(SimpleResource::type).collect(Collectors.toList()),
+                ListKit.list(Dep8.class, Dep9.class)
+            );
+            assertEquals(
+                shutErr.undestroyedResources().stream().map(SimpleResource::type).collect(Collectors.toList()),
+                ListKit.list(Dep10.class)
+            );
+        }
+    }
+
+    public static class DepErr3 {
+
+        @PostConstruct
+        public void postConstruct() {
+            throw new JieTestException();
+        }
+    }
+
+    public static class DepErr4 {
+
+        @PreDestroy
+        public void preDestroy() {
+            throw new JieTestException();
         }
     }
 
@@ -508,5 +687,34 @@ public class DITest implements PrintTest {
                 throw new SimpleAppException(new RuntimeException());
             });
         }
+        {
+            expectThrows(SimpleAppException.class, () -> {
+                SimpleApp.newBuilder()
+                    .resources(DepErr5.class)
+                    .build();
+            });
+            expectThrows(SimpleAppException.class, () -> {
+                SimpleApp.newBuilder()
+                    .resources(DepErr5.class.getTypeParameters()[0])
+                    .build();
+            });
+            expectThrows(SimpleAppException.class, () -> {
+                SimpleApp.newBuilder()
+                    .resources(DepErr6.class)
+                    .build();
+            });
+        }
+    }
+
+    public static class DepErr5<T> {
+
+        public DepErr5(int i) {
+        }
+    }
+
+    public static class DepErr6 {
+
+        @Resource
+        private DepErr5 dep;
     }
 }

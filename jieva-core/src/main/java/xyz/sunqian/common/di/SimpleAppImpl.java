@@ -18,9 +18,9 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -43,8 +43,8 @@ final class SimpleAppImpl implements SimpleApp {
         @Nonnull String @Nonnull [] postConstructAnnotations,
         @Nonnull String @Nonnull [] preDestroyAnnotations
     ) throws SimpleResourceInitialException, SimpleAppException {
-        Map<Type, Res> resourceMap = new HashMap<>();
-        Set<FieldRes> fieldSet = new HashSet<>();
+        Map<Type, Res> resourceMap = new LinkedHashMap<>();
+        Set<FieldRes> fieldSet = new LinkedHashSet<>();
         // generate instances
         for (Type resourceType : resourceTypes) {
             dependencyInjection(
@@ -70,7 +70,7 @@ final class SimpleAppImpl implements SimpleApp {
             aop(resourceMap, fieldSet);
         }
         // resources
-        Map<Type, SimpleResource> resources = new HashMap<>();
+        Map<Type, SimpleResource> resources = new LinkedHashMap<>();
         SimpleResource[] allResources = new SimpleResource[resourceMap.size()];
         int localCount = 0;
         int i = 0;
@@ -99,19 +99,19 @@ final class SimpleAppImpl implements SimpleApp {
         Set<SimpleResource> preDestroySet = new LinkedHashSet<>();
         Set<Type> stack = new HashSet<>();
         for (SimpleResource resource : localResources) {
-            checkDependencyForPostConstruct(resource, resource, stack, postConstructSet);
+            checkDependencyForPostConstruct(resource, stack, postConstructSet);
             stack.clear();
-            checkDependencyForPreDestroy(resource, resource, stack, preDestroySet);
+            checkDependencyForPreDestroy(resource, stack, preDestroySet);
             stack.clear();
         }
         List<SimpleResource> postConstructList = new ArrayList<>(postConstructSet);
         postConstructList.sort(PostConstructComparator.INST);
-        List<SimpleResource> preDestroyList = new ArrayList<>(postConstructSet);
+        List<SimpleResource> preDestroyList = new ArrayList<>(preDestroySet);
         preDestroyList.sort(PreDestroyComparator.INST);
         this.preDestroyList = preDestroyList;
         // execute post-construct
         List<SimpleResource> uninitializedResources = new ArrayList<>(postConstructList);
-        List<SimpleResource> initializedResources = new ArrayList<>(postConstructList);
+        List<SimpleResource> initializedResources = new ArrayList<>(postConstructList.size());
         Iterator<SimpleResource> uninitializedIt = uninitializedResources.iterator();
         while (uninitializedIt.hasNext()) {
             SimpleResource resource = uninitializedIt.next();
@@ -121,6 +121,7 @@ final class SimpleAppImpl implements SimpleApp {
                 initializedResources.add(resource);
                 uninitializedIt.remove();
             } catch (Exception e) {
+                uninitializedIt.remove();
                 throw new SimpleResourceInitialException(resource, e, initializedResources, uninitializedResources);
             }
         }
@@ -272,7 +273,6 @@ final class SimpleAppImpl implements SimpleApp {
     }
 
     private void checkDependencyForPostConstruct(
-        @Nonnull SimpleResource firstRes,
         @Nonnull SimpleResource curRes,
         @Nonnull Set<@Nonnull Type> stack,
         @Nonnull @OutParam Set<@Nonnull SimpleResource> postConstructSet
@@ -298,13 +298,12 @@ final class SimpleAppImpl implements SimpleApp {
             if (depRes == null) {
                 throw new SimpleAppException("Unknown post-construct dependency type: " + depType.getTypeName() + ".");
             }
-            checkDependencyForPostConstruct(firstRes, depRes, stack, postConstructSet);
+            checkDependencyForPostConstruct(depRes, stack, postConstructSet);
             stack.remove(depType);
         }
     }
 
     private void checkDependencyForPreDestroy(
-        @Nonnull SimpleResource firstRes,
         @Nonnull SimpleResource curRes,
         @Nonnull Set<@Nonnull Type> stack,
         @Nonnull @OutParam Set<@Nonnull SimpleResource> preDestroySet
@@ -330,7 +329,7 @@ final class SimpleAppImpl implements SimpleApp {
             if (depRes == null) {
                 throw new SimpleAppException("Unknown pre-destroy dependency type: " + depType.getTypeName() + ".");
             }
-            checkDependencyForPreDestroy(firstRes, depRes, stack, preDestroySet);
+            checkDependencyForPreDestroy(depRes, stack, preDestroySet);
             stack.remove(depType);
         }
     }
@@ -344,7 +343,7 @@ final class SimpleAppImpl implements SimpleApp {
     @Override
     public void shutdown() throws SimpleResourceDestroyException, SimpleAppException {
         List<SimpleResource> undestroyedResources = new ArrayList<>(preDestroyList);
-        List<SimpleResource> destroyedResources = new ArrayList<>(preDestroyList);
+        List<SimpleResource> destroyedResources = new ArrayList<>(preDestroyList.size());
         Iterator<SimpleResource> undestroyedIt = undestroyedResources.iterator();
         while (undestroyedIt.hasNext()) {
             SimpleResource resource = undestroyedIt.next();
@@ -354,6 +353,7 @@ final class SimpleAppImpl implements SimpleApp {
                 destroyedResources.add(resource);
                 undestroyedIt.remove();
             } catch (Exception e) {
+                undestroyedIt.remove();
                 throw new SimpleResourceDestroyException(resource, e, destroyedResources, undestroyedResources);
             }
         }
@@ -391,7 +391,7 @@ final class SimpleAppImpl implements SimpleApp {
     private static @Nonnull Class<?> rawClass(@Nonnull Type type) {
         Class<?> raw = TypeKit.getRawClass(type);
         if (raw == null) {
-            throw new UnsupportedOperationException("Unsupported DI type: " + type.getTypeName() + ".");
+            throw new SimpleAppException("Unsupported DI type: " + type.getTypeName() + ".");
         }
         return raw;
     }
