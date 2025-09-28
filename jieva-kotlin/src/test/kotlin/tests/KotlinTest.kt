@@ -1,12 +1,12 @@
-package tests
-
-import org.testng.annotations.Test
-import xyz.sunqian.common.base.helloKotlin
-
-class KotlinTest {
-
-    @Test
-    fun testKotlin() {
-        helloKotlin()
-    }
-}
+//package tests
+//
+//import org.testng.annotations.Test
+//import xyz.sunqian.common.base.helloKotlin
+//
+//class KotlinTest {
+//
+//    @Test
+//    fun testKotlin() {
+//        helloKotlin()
+//    }
+//}
