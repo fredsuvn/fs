@@ -13,6 +13,7 @@ import xyz.sunqian.common.di.SimpleAppException;
 import xyz.sunqian.common.di.SimpleDependsOn;
 import xyz.sunqian.common.di.SimpleResource;
 import xyz.sunqian.common.di.SimpleResourceDestroyException;
+import xyz.sunqian.common.di.SimpleResourceException;
 import xyz.sunqian.common.di.SimpleResourceInitialException;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
 import xyz.sunqian.test.JieTestException;
@@ -78,6 +79,7 @@ public class DITest implements PrintTest {
             .resources(SubService2.class)
             .dependencyApps(app)
             .dependencyApps(ListKit.list(app))
+            .aspect(true)
             .build();
         assertEquals(
             postList,
@@ -469,6 +471,8 @@ public class DITest implements PrintTest {
                 SimpleApp.newBuilder().resources(DepErr1.class).build());
             expectThrows(SimpleAppException.class, () ->
                 SimpleApp.newBuilder().resources(DepErr2.class).build());
+            expectThrows(SimpleAppException.class, () ->
+                SimpleApp.newBuilder().resources(DepErr3.class).build());
         }
         {
             SimpleApp app = SimpleApp.newBuilder()
@@ -615,16 +619,22 @@ public class DITest implements PrintTest {
         }
     }
 
+    public static class DepErr3 {
+
+        @Resource
+        private Number field;
+    }
+
     @Test
     public void testStartAndShutdown() {
         {
             // startup
             SimpleResourceInitialException startErr = expectThrows(SimpleResourceInitialException.class, () -> {
                 SimpleApp.newBuilder()
-                    .resources(Dep8.class, Dep9.class, DepErr3.class, Dep10.class)
+                    .resources(Dep8.class, Dep9.class, ConstructErr.class, Dep10.class)
                     .build();
             });
-            assertEquals(startErr.failedResource().type(), DepErr3.class);
+            assertEquals(startErr.failedResource().type(), ConstructErr.class);
             assertEquals(
                 startErr.initializedResources().stream().map(SimpleResource::type).collect(Collectors.toList()),
                 ListKit.list(Dep8.class, Dep9.class)
@@ -638,11 +648,11 @@ public class DITest implements PrintTest {
             // shutdown
             SimpleResourceDestroyException shutErr = expectThrows(SimpleResourceDestroyException.class, () -> {
                 SimpleApp.newBuilder()
-                    .resources(Dep8.class, Dep9.class, DepErr4.class, Dep10.class)
+                    .resources(Dep8.class, Dep9.class, DestroyErr.class, Dep10.class)
                     .build()
                     .shutdown();
             });
-            assertEquals(shutErr.failedResource().type(), DepErr4.class);
+            assertEquals(shutErr.failedResource().type(), DestroyErr.class);
             assertEquals(
                 shutErr.destroyedResources().stream().map(SimpleResource::type).collect(Collectors.toList()),
                 ListKit.list(Dep8.class, Dep9.class)
@@ -654,7 +664,7 @@ public class DITest implements PrintTest {
         }
     }
 
-    public static class DepErr3 {
+    public static class ConstructErr {
 
         @PostConstruct
         public void postConstruct() {
@@ -662,7 +672,7 @@ public class DITest implements PrintTest {
         }
     }
 
-    public static class DepErr4 {
+    public static class DestroyErr {
 
         @PreDestroy
         public void preDestroy() {
@@ -685,6 +695,21 @@ public class DITest implements PrintTest {
             });
             expectThrows(SimpleAppException.class, () -> {
                 throw new SimpleAppException(new RuntimeException());
+            });
+        }
+        {
+            // SimpleResourceException
+            expectThrows(SimpleResourceException.class, () -> {
+                throw new SimpleResourceException();
+            });
+            expectThrows(SimpleResourceException.class, () -> {
+                throw new SimpleResourceException("");
+            });
+            expectThrows(SimpleResourceException.class, () -> {
+                throw new SimpleResourceException("", new RuntimeException());
+            });
+            expectThrows(SimpleResourceException.class, () -> {
+                throw new SimpleResourceException(new RuntimeException());
             });
         }
         {

@@ -6,8 +6,9 @@ import xyz.sunqian.common.base.exception.JieRuntimeException;
 import java.lang.reflect.InvocationTargetException;
 
 /**
- * This runtime exception is used for wrapping exceptions thrown during the invocation of {@link Invocable}. The
- * {@link #getCause()} method returns the wrapped original cause (if any).
+ * This runtime exception is used for wrapping exceptions thrown during an invocation, such as an exception during the
+ * execution of {@link Invocable#invoke(Object, Object...)}. The {@link #getCause()} method returns the wrapped original
+ * cause (if any).
  *
  * @author sunqian
  */

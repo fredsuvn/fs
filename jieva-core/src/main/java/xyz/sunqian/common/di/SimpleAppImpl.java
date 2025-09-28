@@ -8,6 +8,8 @@ import xyz.sunqian.common.collect.ArrayKit;
 import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.runtime.aspect.AspectMaker;
 import xyz.sunqian.common.runtime.aspect.AspectSpec;
+import xyz.sunqian.common.runtime.invoke.Invocable;
+import xyz.sunqian.common.runtime.invoke.InvocationException;
 import xyz.sunqian.common.runtime.reflect.TypeKit;
 
 import java.lang.annotation.Annotation;
@@ -115,15 +117,14 @@ final class SimpleAppImpl implements SimpleApp {
         Iterator<SimpleResource> uninitializedIt = uninitializedResources.iterator();
         while (uninitializedIt.hasNext()) {
             SimpleResource resource = uninitializedIt.next();
-            Method postConstruct = Jie.asNonnull(resource.postConstructMethod());
             try {
-                postConstruct.invoke(resource.instance());
-                initializedResources.add(resource);
-                uninitializedIt.remove();
+                resource.postConstruct();
             } catch (Exception e) {
-                uninitializedIt.remove();
                 throw new SimpleResourceInitialException(resource, e, initializedResources, uninitializedResources);
+            } finally {
+                uninitializedIt.remove();
             }
+            initializedResources.add(resource);
         }
     }
 
@@ -246,14 +247,15 @@ final class SimpleAppImpl implements SimpleApp {
     private void setField(
         @Nonnull Field field, @Nonnull Object owner, @Nonnull Object value
     ) throws SimpleAppException {
-        try {
-            boolean accessible = field.isAccessible();
-            field.setAccessible(true);
-            field.set(owner, value);
-            field.setAccessible(accessible);
-        } catch (Exception e) {
-            throw new SimpleAppException("Set field failed on :" + field + ".", e);
-        }
+        Jie.uncheck(
+            () -> {
+                boolean accessible = field.isAccessible();
+                field.setAccessible(true);
+                field.set(owner, value);
+                field.setAccessible(accessible);
+            },
+            SimpleAppException::new
+        );
     }
 
     private @Nonnull Res getRes(
@@ -347,14 +349,13 @@ final class SimpleAppImpl implements SimpleApp {
         Iterator<SimpleResource> undestroyedIt = undestroyedResources.iterator();
         while (undestroyedIt.hasNext()) {
             SimpleResource resource = undestroyedIt.next();
-            Method preDestroy = Jie.asNonnull(resource.preDestroyMethod());
             try {
-                preDestroy.invoke(resource.instance());
+                resource.preDestroy();
                 destroyedResources.add(resource);
-                undestroyedIt.remove();
             } catch (Exception e) {
-                undestroyedIt.remove();
                 throw new SimpleResourceDestroyException(resource, e, destroyedResources, undestroyedResources);
+            } finally {
+                undestroyedIt.remove();
             }
         }
     }
@@ -435,7 +436,7 @@ final class SimpleAppImpl implements SimpleApp {
             this.postConstruct = postConstruct;
             this.preDestroy = preDestroy;
             try {
-                this.instance = rawClass.getConstructor().newInstance();
+                this.instance = Invocable.of(rawClass.getConstructor()).invoke(null);
             } catch (Exception e) {
                 throw new SimpleAppException("Creates instance for " + type.getTypeName() + " failed.", e);
             }
@@ -467,21 +468,25 @@ final class SimpleAppImpl implements SimpleApp {
         private final @Nonnull Type type;
         private final @Nonnull Object instance;
         private final boolean local;
-        private final @Nullable Method postConstruct;
-        private final @Nullable Method preDestroy;
+        private final @Nullable Method postConstructMethod;
+        private final @Nonnull Invocable postConstruct;
+        private final @Nullable Method preDestroyMethod;
+        private final @Nonnull Invocable preDestroy;
 
         private SimpleRes(
             @Nonnull Type type,
             @Nonnull Object instance,
             boolean local,
-            @Nullable Method postConstruct,
-            @Nullable Method preDestroy
+            @Nullable Method postConstructMethod,
+            @Nullable Method preDestroyMethod
         ) {
             this.type = type;
             this.instance = instance;
             this.local = local;
-            this.postConstruct = postConstruct;
-            this.preDestroy = preDestroy;
+            this.postConstructMethod = postConstructMethod;
+            this.postConstruct = postConstructMethod == null ? Invocable.empty() : Invocable.of(postConstructMethod);
+            this.preDestroyMethod = preDestroyMethod;
+            this.preDestroy = preDestroyMethod == null ? Invocable.empty() : Invocable.of(preDestroyMethod);
         }
 
         @Override
@@ -501,12 +506,22 @@ final class SimpleAppImpl implements SimpleApp {
 
         @Override
         public @Nullable Method postConstructMethod() {
-            return postConstruct;
+            return postConstructMethod;
+        }
+
+        @Override
+        public void postConstruct() throws InvocationException {
+            postConstruct.invoke(instance);
         }
 
         @Override
         public @Nullable Method preDestroyMethod() {
-            return preDestroy;
+            return preDestroyMethod;
+        }
+
+        @Override
+        public void preDestroy() throws InvocationException {
+            preDestroy.invoke(instance);
         }
     }
 

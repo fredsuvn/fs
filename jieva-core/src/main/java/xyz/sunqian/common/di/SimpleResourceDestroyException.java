@@ -3,7 +3,6 @@ package xyz.sunqian.common.di;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.RetainedParam;
-import xyz.sunqian.common.base.exception.JieRuntimeException;
 
 import java.util.List;
 
@@ -12,7 +11,7 @@ import java.util.List;
  *
  * @author sunqian
  */
-public class SimpleResourceDestroyException extends JieRuntimeException {
+public class SimpleResourceDestroyException extends SimpleResourceException {
 
     private final @Nonnull SimpleResource failedResource;
     private final @Nonnull List<@Nonnull SimpleResource> destroyedResources;
