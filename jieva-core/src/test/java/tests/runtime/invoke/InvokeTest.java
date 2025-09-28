@@ -17,6 +17,8 @@ import java.util.stream.Collectors;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
@@ -217,6 +219,12 @@ public class InvokeTest {
             7.0,
             "8"
         };
+    }
+
+    @Test
+    public void testEmpty() {
+        assertNull(Invocable.empty().invoke(null));
+        assertSame(Invocable.empty(), Invocable.empty());
     }
 
     public static class Cls {

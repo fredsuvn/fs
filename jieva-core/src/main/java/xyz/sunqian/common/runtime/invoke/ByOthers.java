@@ -1,10 +1,11 @@
 package xyz.sunqian.common.runtime.invoke;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 
 import java.lang.invoke.MethodHandle;
 
-final class HandleInvoker {
+final class ByOthers {
 
     // public static void main(String[] args) {
     //     int max = 128;
@@ -561,6 +562,16 @@ final class HandleInvoker {
             */
             default:
                 return handle.invokeWithArguments(args);
+        }
+    }
+
+    enum EmptyInvoker implements Invocable {
+
+        INST;
+
+        @Override
+        public Object invokeChecked(@Nullable Object inst, Object @Nonnull ... args) {
+            return null;
         }
     }
 }

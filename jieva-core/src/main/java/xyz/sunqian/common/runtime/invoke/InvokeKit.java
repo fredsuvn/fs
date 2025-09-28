@@ -24,7 +24,7 @@ public class InvokeKit {
     public static @Nullable Object invokeInstance(
         @Nonnull MethodHandle handle, Object inst, @Nullable Object... args
     ) throws Throwable {
-        return HandleInvoker.invokeInstance(handle, inst, args);
+        return ByOthers.invokeInstance(handle, inst, args);
     }
 
     /**
@@ -38,7 +38,7 @@ public class InvokeKit {
     public static @Nullable Object invokeStatic(
         @Nonnull MethodHandle handle, @Nullable Object... args
     ) throws Throwable {
-        return HandleInvoker.invokeStatic(handle, args);
+        return ByOthers.invokeStatic(handle, args);
     }
 
     static @Nullable Object @Nonnull [] toInstanceArgs(

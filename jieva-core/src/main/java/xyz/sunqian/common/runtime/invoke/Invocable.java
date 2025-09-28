@@ -21,6 +21,15 @@ import java.lang.reflect.Method;
 public interface Invocable {
 
     /**
+     * Returns an empty {@link Invocable} which has no effect and always returns {@code null}.
+     *
+     * @return an empty {@link Invocable} which has no effect and always returns {@code null}
+     */
+    static @Nonnull Invocable empty() {
+        return ByOthers.EmptyInvoker.INST;
+    }
+
+    /**
      * Returns a new {@link Invocable} represents the specified method, using recommended implementation in current
      * environment.
      *
