@@ -525,7 +525,7 @@ final class SimpleAppImpl implements SimpleApp {
         }
     }
 
-    enum PostConstructComparator implements Comparator<SimpleResource> {
+    private enum PostConstructComparator implements Comparator<SimpleResource> {
 
         INST;
 
@@ -539,7 +539,7 @@ final class SimpleAppImpl implements SimpleApp {
         }
     }
 
-    enum PreDestroyComparator implements Comparator<SimpleResource> {
+    private enum PreDestroyComparator implements Comparator<SimpleResource> {
 
         INST;
 
