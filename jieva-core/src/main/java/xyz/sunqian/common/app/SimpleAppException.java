@@ -1,7 +1,8 @@
-package xyz.sunqian.common.di;
+package xyz.sunqian.common.app;
 
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.exception.JieRuntimeException;
+import xyz.sunqian.common.di.SimpleApp;
 
 /**
  * Exception for {@link SimpleApp}.
