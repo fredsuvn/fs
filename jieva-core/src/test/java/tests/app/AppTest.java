@@ -1,18 +1,35 @@
 package tests.app;
 
 import org.testng.annotations.Test;
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.app.SimpleApp;
 import xyz.sunqian.common.app.SimpleAppException;
+import xyz.sunqian.common.app.SimpleResource;
 import xyz.sunqian.test.PrintTest;
 
+import java.util.Collections;
+import java.util.List;
+
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.expectThrows;
 
 public class AppTest implements PrintTest {
 
     @Test
     public void testSimpleApp() throws Exception {
-        SimpleApp app = () -> {
+        SimpleResource res = () -> SimpleResource.class;
+        SimpleApp app = new SimpleApp() {
+            @Override
+            public void shutdown() throws SimpleAppException {
+
+            }
+
+            @Override
+            public @Nonnull List<@Nonnull SimpleResource> resources() {
+                return Collections.singletonList(res);
+            }
         };
+        assertEquals(app.resources(), Collections.singletonList(res));
         app.shutdown();
     }
 

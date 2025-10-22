@@ -1,6 +1,9 @@
 package xyz.sunqian.common.app;
 
+import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.di.SimpleInjector;
+
+import java.util.List;
 
 /**
  * This interface represents a simple application.
@@ -20,4 +23,12 @@ public interface SimpleApp {
      * @throws SimpleAppException if any error occurs during shutdown
      */
     void shutdown() throws SimpleAppException;
+
+    /**
+     * Returns all resources this app depends on.
+     *
+     * @return all resources this app depends on
+     */
+    @Nonnull
+    List<@Nonnull SimpleResource> resources();
 }
