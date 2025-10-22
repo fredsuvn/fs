@@ -11,10 +11,10 @@ repositories {
   gradlePluginPortal()
 }
 
-dependencies {
-  implementation "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-  implementation "org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion"
-}
+//dependencies {
+//  implementation "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+//  implementation "org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion"
+//}
 
 gradlePlugin {
   plugins {

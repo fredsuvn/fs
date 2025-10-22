@@ -62,6 +62,9 @@ dependencies {
 }
 
 java {
+  toolchain {
+    languageVersion = toJavaVersion
+  }
   withJavadocJar()
   withSourcesJar()
 }
@@ -74,39 +77,39 @@ javadoc {
 }
 
 def generatedPath = "$project.projectDir/generated"
-def protoPath = "$generatedPath/proto"
+//def protoPath = "$generatedPath/proto"
 
 sourceSets {
   main {
     java {
-      if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_17)) {
+      if (toJavaVersion.canCompileOrRun(JavaLanguageVersion.of(17))) {
         srcDirs += "src/main/java17"
-      } else if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_1_8)) {
+      } else if (toJavaVersion.canCompileOrRun(JavaLanguageVersion.of(8))) {
         srcDirs += "src/main/java8"
       }
     }
   }
   test {
     proto {
-      srcDirs = ["src/test/proto"]
+      //srcDirs += "src/test/proto"
     }
     java {
-      srcDirs += "$protoPath/test/java"
-      if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_17)) {
+      if (toJavaVersion.canCompileOrRun(JavaLanguageVersion.of(17))) {
         srcDirs += "src/test/java17"
-      } else if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_1_8)) {
+      } else if (toJavaVersion.canCompileOrRun(JavaLanguageVersion.of(8))) {
         srcDirs += "src/test/java8"
       }
+      //srcDirs += "src/test/proto"
     }
   }
 }
 
 protobuf {
-  generatedFilesBaseDir = "$protoPath"
+  //generatedFilesBaseDir = "$protoPath"
   protoc {
     // Download from repositories
     artifact = "com.google.protobuf:protoc:$protocVersion"
-    generatedFilesBaseDir = "$protoPath"
+    // generatedFilesBaseDir = "$protoPath"
   }
 
   plugins {
@@ -119,22 +122,42 @@ protobuf {
   }
 
   generateProtoTasks {
-    all()*.each { task ->
-      task.plugins {
-        // Generate Java gRPC classes
+    //all().each { task ->
+      //task.plugins {
+      // Generate Java gRPC classes
+      //grpc {
+      //  setOutputSubDir "$protoGenDir"
+      //}
+      // Generate Kotlin gRPC using the custom plugin from library
+      //grpckt {}
+      //}
+    //}
+    //ofSourceSet('test').each { task ->
+    //  task.plugins {
+    //    java {
+    //      outputSubDir = "proto222"
+    //    }
         //grpc {
-        //  setOutputSubDir "$protoGenDir"
+        //  outputDir = file("$buildDir/proto22/test/java")
         //}
-        // Generate Kotlin gRPC using the custom plugin from library
-        //grpckt {}
-      }
-    }
+    //  }
+    //}
+  }
+}
+
+compileTestJava.dependsOn generateTestProto
+
+tasks.register('cleanProto') {
+  doLast {
+    delete("${protobuf.generatedFilesBaseDir}")
   }
 }
 
 clean {
-  delete("${protobuf.generatedFilesBaseDir}")
-  delete("$generatedPath/temp")
+  doLast {
+    delete("${protobuf.generatedFilesBaseDir}")
+    //delete("$generatedPath/temp")
+  }
 }
 
 tasks.register('cleanWithJavadoc') {

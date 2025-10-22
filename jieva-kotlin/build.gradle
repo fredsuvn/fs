@@ -4,8 +4,9 @@ plugins {
   id 'gek'
   id 'gek-config'
   id 'gek-repo'
-  id 'org.jetbrains.kotlin.jvm'
-  id 'org.jetbrains.dokka'
+  //id 'org.jetbrains.kotlin.jvm'
+  id 'org.jetbrains.kotlin.jvm' version '1.9.23'
+  id 'org.jetbrains.dokka' version '1.9.0'
   id 'gek-test'
   id 'gek-publish'
 }

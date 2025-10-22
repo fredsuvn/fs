@@ -1,8 +1,14 @@
+import org.gradle.jvm.toolchain.internal.DefaultJavaLanguageVersion
+
 plugins {
   id 'gek'
   id 'gek-config'
   id 'gek-doc'
 }
 
-description = "Root Project of Gek"
+description = "Root Project of Kitva"
 
+// add global properties:
+ext {
+  toJavaVersion = JavaLanguageVersion.of(kitvaJavaVersion) as DefaultJavaLanguageVersion
+}

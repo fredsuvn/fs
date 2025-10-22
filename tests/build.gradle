@@ -45,3 +45,9 @@ dependencies {
 //    }
 //  }
 //}
+
+java {
+  toolchain {
+    languageVersion = toJavaVersion
+  }
+}

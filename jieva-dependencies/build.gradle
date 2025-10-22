@@ -6,7 +6,7 @@ plugins {
   id 'gek-publish'
 }
 
-description = "Dependencies Management of Gek."
+description = "Dependencies Management of Kitva."
 
 javaPlatform {
   allowDependencies()

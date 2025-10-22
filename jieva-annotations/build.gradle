@@ -7,7 +7,7 @@ plugins {
   id 'gek-publish'
 }
 
-description = "Annotations of Gek."
+description = "Annotations of Kitva."
 
 dependencies {
 
@@ -22,6 +22,9 @@ dependencies {
 }
 
 java {
+  toolchain {
+    languageVersion = toJavaVersion
+  }
   withJavadocJar()
   withSourcesJar()
 }

@@ -13,7 +13,10 @@ dependencies {
   implementation platform(project(':jieva-dependencies'))
   implementation project(':jieva-annotations')
   api 'org.testng:testng:7.5.1'
-  api("org.jetbrains.kotlin:kotlin-test-testng:$kotlinVersion") {
+//  api("org.jetbrains.kotlin:kotlin-test-testng:$kotlinVersion") {
+//    exclude(group: "org.testng", module: "testng")
+//  }
+  api("org.jetbrains.kotlin:kotlin-test-testng") {
     exclude(group: "org.testng", module: "testng")
   }
   api 'org.openjdk.jmh:jmh-core'
@@ -39,6 +42,9 @@ dependencies {
 }
 
 java {
+  toolchain {
+    languageVersion = toJavaVersion
+  }
   withJavadocJar()
   withSourcesJar()
 }
