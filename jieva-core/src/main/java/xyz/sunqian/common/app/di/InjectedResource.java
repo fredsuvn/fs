@@ -1,4 +1,4 @@
-package xyz.sunqian.common.di;
+package xyz.sunqian.common.app.di;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
@@ -8,14 +8,14 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 /**
- * Represents resource of a {@link SimpleApp}.
+ * Represents resource of a {@link InjectedApp}.
  * <p>
- * A resource is a singleton instance of a specified type, and different generics defined under the same type are
- * considered as different types.
+ * A resource contains a specified type and a singleton instance of the type. The different generics defined under the
+ * same type are considered as different types.
  *
  * @author sunqian
  */
-public interface SimpleResource {
+public interface InjectedResource {
 
     /**
      * Returns the type of this resource.

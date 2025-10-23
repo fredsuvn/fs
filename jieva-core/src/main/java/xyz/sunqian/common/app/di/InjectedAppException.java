@@ -1,19 +1,19 @@
-package xyz.sunqian.common.app;
+package xyz.sunqian.common.app.di;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.exception.JieRuntimeException;
+import xyz.sunqian.common.app.SimpleAppException;
 
 /**
- * Exception for {@link SimpleResource}.
+ * Exception for {@link InjectedApp}.
  *
  * @author sunqian
  */
-public class SimpleResourceException extends JieRuntimeException {
+public class InjectedAppException extends SimpleAppException {
 
     /**
      * Empty constructor.
      */
-    public SimpleResourceException() {
+    public InjectedAppException() {
         super();
     }
 
@@ -22,7 +22,7 @@ public class SimpleResourceException extends JieRuntimeException {
      *
      * @param message the message
      */
-    public SimpleResourceException(@Nullable String message) {
+    public InjectedAppException(@Nullable String message) {
         super(message);
     }
 
@@ -32,7 +32,7 @@ public class SimpleResourceException extends JieRuntimeException {
      * @param message the message
      * @param cause   the cause
      */
-    public SimpleResourceException(@Nullable String message, @Nullable Throwable cause) {
+    public InjectedAppException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
@@ -41,7 +41,7 @@ public class SimpleResourceException extends JieRuntimeException {
      *
      * @param cause the cause
      */
-    public SimpleResourceException(@Nullable Throwable cause) {
+    public InjectedAppException(@Nullable Throwable cause) {
         super(cause);
     }
 }

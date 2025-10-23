@@ -4,7 +4,10 @@
  * Core interfaces:
  * <ul>
  *     <li>{@link xyz.sunqian.common.app.SimpleApp}</li>
- *     <li>{@link xyz.sunqian.common.app.SimpleResource}</li>
+ * </ul>
+ * And it has a dependency injection-based implementation package:
+ * <ul>
+ *     <li>{@link xyz.sunqian.common.app.di}</li>
  * </ul>
  */
 package xyz.sunqian.common.app;

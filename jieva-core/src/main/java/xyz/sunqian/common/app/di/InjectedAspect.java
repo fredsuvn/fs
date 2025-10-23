@@ -1,4 +1,4 @@
-package xyz.sunqian.common.di;
+package xyz.sunqian.common.app.di;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.runtime.aspect.AspectHandler;
@@ -6,11 +6,11 @@ import xyz.sunqian.common.runtime.aspect.AspectHandler;
 import java.lang.reflect.Type;
 
 /**
- * Aspect interface for {@link SimpleApp}, extends {@link AspectHandler}.
+ * Aspect interface for {@link InjectedApp}, extends {@link AspectHandler}.
  *
  * @author sunqian
  */
-public interface SimpleAppAspect extends AspectHandler {
+public interface InjectedAspect extends AspectHandler {
 
     /**
      * Returns whether the aspect-oriented programming should be applied to the given type.

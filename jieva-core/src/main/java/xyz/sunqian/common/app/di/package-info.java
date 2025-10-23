@@ -1,4 +1,4 @@
 /**
  * A simple dependency injection framework.
  */
-package xyz.sunqian.common.di;
+package xyz.sunqian.common.app.di;

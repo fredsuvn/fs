@@ -1,4 +1,4 @@
-package tests.di;
+package tests.app.di;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

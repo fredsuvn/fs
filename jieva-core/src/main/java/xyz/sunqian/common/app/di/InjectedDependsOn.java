@@ -1,4 +1,4 @@
-package xyz.sunqian.common.di;
+package xyz.sunqian.common.app.di;
 
 import xyz.sunqian.annotations.Nonnull;
 
@@ -20,7 +20,7 @@ import java.lang.annotation.Target;
 @Target({
     ElementType.METHOD,
 })
-public @interface SimpleDependsOn {
+public @interface InjectedDependsOn {
 
     /**
      * The classes of the dependency.

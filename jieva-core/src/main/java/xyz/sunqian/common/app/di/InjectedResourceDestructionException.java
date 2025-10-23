@@ -1,21 +1,22 @@
-package xyz.sunqian.common.di;
+package xyz.sunqian.common.app.di;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.RetainedParam;
+import xyz.sunqian.common.base.exception.JieRuntimeException;
 
 import java.util.List;
 
 /**
- * Exception for failing to destroy resources during shutdown of a {@link SimpleApp}.
+ * Exception for failing to destroy resources during shutdown of a {@link InjectedApp}.
  *
  * @author sunqian
  */
-public class SimpleResourceDestroyException extends SimpleResourceException {
+public class InjectedResourceDestructionException extends JieRuntimeException {
 
-    private final @Nonnull SimpleResource failedResource;
-    private final @Nonnull List<@Nonnull SimpleResource> destroyedResources;
-    private final @Nonnull List<@Nonnull SimpleResource> undestroyedResources;
+    private final @Nonnull InjectedResource failedResource;
+    private final @Nonnull List<@Nonnull InjectedResource> destroyedResources;
+    private final @Nonnull List<@Nonnull InjectedResource> undestroyedResources;
 
     /**
      * Constructs an exception with detailed context about the resource destroy failure. This exception provides
@@ -30,11 +31,11 @@ public class SimpleResourceDestroyException extends SimpleResourceException {
      * @param destroyedResources   the resources that were successfully destroyed before the failure occurred
      * @param undestroyedResources the resources that were not destroyed due to the abortive termination
      */
-    public SimpleResourceDestroyException(
-        @Nonnull SimpleResource failedResource,
+    public InjectedResourceDestructionException(
+        @Nonnull InjectedResource failedResource,
         @Nullable Throwable cause,
-        @Nonnull @RetainedParam List<@Nonnull SimpleResource> destroyedResources,
-        @Nonnull @RetainedParam List<@Nonnull SimpleResource> undestroyedResources
+        @Nonnull @RetainedParam List<@Nonnull InjectedResource> destroyedResources,
+        @Nonnull @RetainedParam List<@Nonnull InjectedResource> undestroyedResources
     ) {
         super(cause);
         this.failedResource = failedResource;
@@ -47,7 +48,7 @@ public class SimpleResourceDestroyException extends SimpleResourceException {
      *
      * @return the resource that failed during destruction, causing the shutdown to abort
      */
-    public @Nonnull SimpleResource failedResource() {
+    public @Nonnull InjectedResource failedResource() {
         return failedResource;
     }
 
@@ -56,7 +57,7 @@ public class SimpleResourceDestroyException extends SimpleResourceException {
      *
      * @return the resources that were successfully destroyed before the failure occurred
      */
-    public @Nonnull List<@Nonnull SimpleResource> destroyedResources() {
+    public @Nonnull List<@Nonnull InjectedResource> destroyedResources() {
         return destroyedResources;
     }
 
@@ -65,7 +66,7 @@ public class SimpleResourceDestroyException extends SimpleResourceException {
      *
      * @return the resources that were not destroyed due to the abortive termination
      */
-    public @Nonnull List<@Nonnull SimpleResource> undestroyedResources() {
+    public @Nonnull List<@Nonnull InjectedResource> undestroyedResources() {
         return undestroyedResources;
     }
 }

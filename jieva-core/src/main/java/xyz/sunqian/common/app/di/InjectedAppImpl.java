@@ -1,4 +1,4 @@
-package xyz.sunqian.common.di;
+package xyz.sunqian.common.app.di;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
@@ -29,22 +29,21 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-final class SimpleAppImpl implements SimpleApp {
+final class InjectedAppImpl implements InjectedApp {
 
-    private final @Nonnull List<@Nonnull SimpleResource> localResources;
-    private final @Nonnull List<@Nonnull SimpleResource> allResources;
-    private final @Nonnull Map<@Nonnull Type, @Nonnull SimpleResource> resources;
-    private final @Nonnull List<@Nonnull SimpleResource> preDestroyList;
-    private final @Nonnull List<@Nonnull SimpleApp> dependencyApps;
+    private final @Nonnull List<@Nonnull InjectedResource> localResources;
+    private final @Nonnull List<@Nonnull InjectedResource> allResources;
+    private final @Nonnull Map<@Nonnull Type, @Nonnull InjectedResource> resources;
+    private final @Nonnull List<@Nonnull InjectedResource> preDestroyList;
+    private final @Nonnull List<@Nonnull InjectedApp> dependencyApps;
 
-    public SimpleAppImpl(
+    public InjectedAppImpl(
         @Nonnull Set<@Nonnull Type> resourceTypes,
-        @Nonnull SimpleApp @Nonnull [] dependencyApps,
-        boolean enableAspect,
+        @Nonnull InjectedApp @Nonnull [] dependencyApps,
         @Nonnull String @Nonnull [] resourceAnnotations,
         @Nonnull String @Nonnull [] postConstructAnnotations,
         @Nonnull String @Nonnull [] preDestroyAnnotations
-    ) throws SimpleResourceInitialException, SimpleAppException {
+    ) throws InjectedResourceInitializationException, InjectedAppException {
         Map<Type, Res> resourceMap = new LinkedHashMap<>();
         Set<FieldRes> fieldSet = new LinkedHashSet<>();
         // generate instances
@@ -68,26 +67,24 @@ final class SimpleAppImpl implements SimpleApp {
             );
         }
         // aop
-        if (enableAspect) {
-            aop(resourceMap, fieldSet);
-        }
+        aop(resourceMap, fieldSet);
         // resources
-        Map<Type, SimpleResource> resources = new LinkedHashMap<>();
-        SimpleResource[] allResources = new SimpleResource[resourceMap.size()];
+        Map<Type, InjectedResource> resources = new LinkedHashMap<>();
+        InjectedResource[] allResources = new InjectedResource[resourceMap.size()];
         int localCount = 0;
         int i = 0;
         for (Res res : resourceMap.values()) {
             Object inst = getResInstance(res);
-            SimpleResource simpleResource = new SimpleRes(res.type, inst, res.local, res.postConstruct, res.preDestroy);
+            InjectedResource simpleResource = new SimpleRes(res.type, inst, res.local, res.postConstruct, res.preDestroy);
             resources.put(res.type, simpleResource);
             allResources[i++] = simpleResource;
             if (res.local) {
                 localCount++;
             }
         }
-        SimpleResource[] localResources = new SimpleResource[localCount];
+        InjectedResource[] localResources = new InjectedResource[localCount];
         i = 0;
-        for (SimpleResource res : allResources) {
+        for (InjectedResource res : allResources) {
             if (res.isLocal()) {
                 localResources[i++] = res;
             }
@@ -97,30 +94,30 @@ final class SimpleAppImpl implements SimpleApp {
         this.localResources = ListKit.list(localResources);
         this.allResources = ListKit.list(allResources);
         // post-construct and pre-destroy
-        Set<SimpleResource> postConstructSet = new LinkedHashSet<>();
-        Set<SimpleResource> preDestroySet = new LinkedHashSet<>();
+        Set<InjectedResource> postConstructSet = new LinkedHashSet<>();
+        Set<InjectedResource> preDestroySet = new LinkedHashSet<>();
         Set<Type> stack = new HashSet<>();
-        for (SimpleResource resource : localResources) {
+        for (InjectedResource resource : localResources) {
             checkDependencyForPostConstruct(resource, stack, postConstructSet);
             stack.clear();
             checkDependencyForPreDestroy(resource, stack, preDestroySet);
             stack.clear();
         }
-        List<SimpleResource> postConstructList = new ArrayList<>(postConstructSet);
+        List<InjectedResource> postConstructList = new ArrayList<>(postConstructSet);
         postConstructList.sort(PostConstructComparator.INST);
-        List<SimpleResource> preDestroyList = new ArrayList<>(preDestroySet);
+        List<InjectedResource> preDestroyList = new ArrayList<>(preDestroySet);
         preDestroyList.sort(PreDestroyComparator.INST);
         this.preDestroyList = preDestroyList;
         // execute post-construct
-        List<SimpleResource> uninitializedResources = new ArrayList<>(postConstructList);
-        List<SimpleResource> initializedResources = new ArrayList<>(postConstructList.size());
-        Iterator<SimpleResource> uninitializedIt = uninitializedResources.iterator();
+        List<InjectedResource> uninitializedResources = new ArrayList<>(postConstructList);
+        List<InjectedResource> initializedResources = new ArrayList<>(postConstructList.size());
+        Iterator<InjectedResource> uninitializedIt = uninitializedResources.iterator();
         while (uninitializedIt.hasNext()) {
-            SimpleResource resource = uninitializedIt.next();
+            InjectedResource resource = uninitializedIt.next();
             try {
                 resource.postConstruct();
             } catch (Exception e) {
-                throw new SimpleResourceInitialException(resource, e, initializedResources, uninitializedResources);
+                throw new InjectedResourceInitializationException(resource, e, initializedResources, uninitializedResources);
             } finally {
                 uninitializedIt.remove();
             }
@@ -133,14 +130,14 @@ final class SimpleAppImpl implements SimpleApp {
         @Nonnull String @Nonnull [] resourceAnnotations,
         @Nonnull String @Nonnull [] postConstructAnnotations,
         @Nonnull String @Nonnull [] preDestroyAnnotations,
-        @Nonnull SimpleApp @Nonnull [] dependencyApps,
+        @Nonnull InjectedApp @Nonnull [] dependencyApps,
         @Nonnull @OutParam Map<@Nonnull Type, @Nonnull Res> resourceMap,
         @Nonnull @OutParam Set<@Nonnull FieldRes> fieldSet
-    ) throws SimpleAppException {
+    ) throws InjectedAppException {
         if (resourceMap.containsKey(type)) {
             return;
         }
-        for (SimpleApp dependency : dependencyApps) {
+        for (InjectedApp dependency : dependencyApps) {
             Object instance = dependency.getResource(type);
             if (instance != null) {
                 Res res = new Res(type, instance);
@@ -192,15 +189,15 @@ final class SimpleAppImpl implements SimpleApp {
     private void aop(
         @Nonnull @OutParam Map<@Nonnull Type, @Nonnull Res> resourceMap,
         @Nonnull @OutParam Set<@Nonnull FieldRes> fieldSet
-    ) throws SimpleAppException {
-        List<SimpleAppAspect> aspects = new ArrayList<>();
+    ) throws InjectedAppException {
+        List<InjectedAspect> aspects = new ArrayList<>();
         for (Res res : resourceMap.values()) {
             if (!res.local) {
                 continue;
             }
             Object instance = res.instance;
-            if (instance instanceof SimpleAppAspect) {
-                aspects.add((SimpleAppAspect) instance);
+            if (instance instanceof InjectedAspect) {
+                aspects.add((InjectedAspect) instance);
                 res.isAspectHandler = true;
             }
         }
@@ -212,7 +209,7 @@ final class SimpleAppImpl implements SimpleApp {
             if (res.isAspectHandler) {
                 continue;
             }
-            for (SimpleAppAspect aspect : aspects) {
+            for (InjectedAspect aspect : aspects) {
                 if (aspect.needsAspect(res.type)) {
                     AspectSpec spec = aspectMaker.make(res.rawClass, aspect);
                     res.advisedInstance = spec.newInstance();
@@ -246,7 +243,7 @@ final class SimpleAppImpl implements SimpleApp {
 
     private void setField(
         @Nonnull Field field, @Nonnull Object owner, @Nonnull Object value
-    ) throws SimpleAppException {
+    ) throws InjectedAppException {
         Jie.uncheck(
             () -> {
                 boolean accessible = field.isAccessible();
@@ -254,14 +251,14 @@ final class SimpleAppImpl implements SimpleApp {
                 field.set(owner, value);
                 field.setAccessible(accessible);
             },
-            SimpleAppException::new
+            InjectedAppException::new
         );
     }
 
     private @Nonnull Res getRes(
         @Nonnull Type type,
         @Nonnull Map<@Nonnull Type, @Nonnull Res> resourceMap
-    ) throws SimpleAppException {
+    ) throws InjectedAppException {
         Res res = resourceMap.get(type);
         if (res != null) {
             return res;
@@ -271,34 +268,34 @@ final class SimpleAppImpl implements SimpleApp {
                 return resource;
             }
         }
-        throw new SimpleAppException("Can not find resource instance for type :" + type.getTypeName() + ".");
+        throw new InjectedAppException("Can not find resource instance for type :" + type.getTypeName() + ".");
     }
 
     private void checkDependencyForPostConstruct(
-        @Nonnull SimpleResource curRes,
+        @Nonnull InjectedResource curRes,
         @Nonnull Set<@Nonnull Type> stack,
-        @Nonnull @OutParam Set<@Nonnull SimpleResource> postConstructSet
-    ) throws SimpleAppException {
+        @Nonnull @OutParam Set<@Nonnull InjectedResource> postConstructSet
+    ) throws InjectedAppException {
         Type curType = curRes.type();
         Method postConstruct = curRes.postConstructMethod();
         if (postConstruct == null) {
             return;
         }
         postConstructSet.add(curRes);
-        SimpleDependsOn sdo = postConstruct.getAnnotation(SimpleDependsOn.class);
+        InjectedDependsOn sdo = postConstruct.getAnnotation(InjectedDependsOn.class);
         if (sdo == null) {
             return;
         }
         if (!stack.add(curType)) {
-            throw new SimpleAppException(
+            throw new InjectedAppException(
                 "Circular post-construct dependency detected: " +
                     stack.stream().map(Type::getTypeName).collect(Collectors.joining(" -> ")) + "."
             );
         }
         for (Class<?> depType : sdo.value()) {
-            SimpleResource depRes = resources.get(depType);
+            InjectedResource depRes = resources.get(depType);
             if (depRes == null) {
-                throw new SimpleAppException("Unknown post-construct dependency type: " + depType.getTypeName() + ".");
+                throw new InjectedAppException("Unknown post-construct dependency type: " + depType.getTypeName() + ".");
             }
             checkDependencyForPostConstruct(depRes, stack, postConstructSet);
             stack.remove(depType);
@@ -306,30 +303,30 @@ final class SimpleAppImpl implements SimpleApp {
     }
 
     private void checkDependencyForPreDestroy(
-        @Nonnull SimpleResource curRes,
+        @Nonnull InjectedResource curRes,
         @Nonnull Set<@Nonnull Type> stack,
-        @Nonnull @OutParam Set<@Nonnull SimpleResource> preDestroySet
-    ) throws SimpleAppException {
+        @Nonnull @OutParam Set<@Nonnull InjectedResource> preDestroySet
+    ) throws InjectedAppException {
         Type curType = curRes.type();
         Method preDestroy = curRes.preDestroyMethod();
         if (preDestroy == null) {
             return;
         }
         preDestroySet.add(curRes);
-        SimpleDependsOn sdo = preDestroy.getAnnotation(SimpleDependsOn.class);
+        InjectedDependsOn sdo = preDestroy.getAnnotation(InjectedDependsOn.class);
         if (sdo == null) {
             return;
         }
         if (!stack.add(curType)) {
-            throw new SimpleAppException(
+            throw new InjectedAppException(
                 "Circular pre-destroy dependency: " +
                     stack.stream().map(Type::getTypeName).collect(Collectors.joining(" -> ")) + "."
             );
         }
         for (Class<?> depType : sdo.value()) {
-            SimpleResource depRes = resources.get(depType);
+            InjectedResource depRes = resources.get(depType);
             if (depRes == null) {
-                throw new SimpleAppException("Unknown pre-destroy dependency type: " + depType.getTypeName() + ".");
+                throw new InjectedAppException("Unknown pre-destroy dependency type: " + depType.getTypeName() + ".");
             }
             checkDependencyForPreDestroy(depRes, stack, preDestroySet);
             stack.remove(depType);
@@ -343,17 +340,17 @@ final class SimpleAppImpl implements SimpleApp {
     }
 
     @Override
-    public void shutdown() throws SimpleResourceDestroyException, SimpleAppException {
-        List<SimpleResource> undestroyedResources = new ArrayList<>(preDestroyList);
-        List<SimpleResource> destroyedResources = new ArrayList<>(preDestroyList.size());
-        Iterator<SimpleResource> undestroyedIt = undestroyedResources.iterator();
+    public void shutdown() throws InjectedResourceDestructionException, InjectedAppException {
+        List<InjectedResource> undestroyedResources = new ArrayList<>(preDestroyList);
+        List<InjectedResource> destroyedResources = new ArrayList<>(preDestroyList.size());
+        Iterator<InjectedResource> undestroyedIt = undestroyedResources.iterator();
         while (undestroyedIt.hasNext()) {
-            SimpleResource resource = undestroyedIt.next();
+            InjectedResource resource = undestroyedIt.next();
             try {
                 resource.preDestroy();
                 destroyedResources.add(resource);
             } catch (Exception e) {
-                throw new SimpleResourceDestroyException(resource, e, destroyedResources, undestroyedResources);
+                throw new InjectedResourceDestructionException(resource, e, destroyedResources, undestroyedResources);
             } finally {
                 undestroyedIt.remove();
             }
@@ -361,27 +358,27 @@ final class SimpleAppImpl implements SimpleApp {
     }
 
     @Override
-    public @Nonnull List<@Nonnull SimpleApp> dependencyApps() {
+    public @Nonnull List<@Nonnull InjectedApp> parentApps() {
         return dependencyApps;
     }
 
     @Override
-    public @Nonnull List<@Nonnull SimpleResource> localResources() {
+    public @Nonnull List<@Nonnull InjectedResource> localResources() {
         return localResources;
     }
 
     @Override
-    public @Nonnull List<@Nonnull SimpleResource> allResources() {
+    public @Nonnull List<@Nonnull InjectedResource> resources() {
         return allResources;
     }
 
     @Override
     public @Nullable Object getResource(@Nonnull Type type) {
-        SimpleResource resource = resources.get(type);
+        InjectedResource resource = resources.get(type);
         if (resource != null) {
             return resource.instance();
         }
-        for (SimpleResource sr : allResources) {
+        for (InjectedResource sr : allResources) {
             if (TypeKit.isAssignable(type, sr.type())) {
                 return sr.instance();
             }
@@ -392,7 +389,7 @@ final class SimpleAppImpl implements SimpleApp {
     private static @Nonnull Class<?> rawClass(@Nonnull Type type) {
         Class<?> raw = TypeKit.getRawClass(type);
         if (raw == null) {
-            throw new SimpleAppException("Unsupported DI type: " + type.getTypeName() + ".");
+            throw new InjectedAppException("Unsupported DI type: " + type.getTypeName() + ".");
         }
         return raw;
     }
@@ -414,7 +411,7 @@ final class SimpleAppImpl implements SimpleApp {
             @Nonnull Class<?> rawClass,
             @Nonnull String @Nonnull [] postConstructAnnotations,
             @Nonnull String @Nonnull [] preDestroyAnnotations
-        ) throws SimpleAppException {
+        ) throws InjectedAppException {
             this.type = type;
             this.local = true;
             this.rawClass = rawClass;
@@ -438,7 +435,7 @@ final class SimpleAppImpl implements SimpleApp {
             try {
                 this.instance = Invocable.of(rawClass.getConstructor()).invoke(null);
             } catch (Exception e) {
-                throw new SimpleAppException("Creates instance for " + type.getTypeName() + " failed.", e);
+                throw new InjectedAppException("Creates instance for " + type.getTypeName() + " failed.", e);
             }
         }
 
@@ -463,7 +460,7 @@ final class SimpleAppImpl implements SimpleApp {
         }
     }
 
-    private static final class SimpleRes implements SimpleResource {
+    private static final class SimpleRes implements InjectedResource {
 
         private final @Nonnull Type type;
         private final @Nonnull Object instance;
@@ -486,7 +483,9 @@ final class SimpleAppImpl implements SimpleApp {
             this.postConstructMethod = postConstructMethod;
             this.postConstruct = postConstructMethod == null ? Invocable.empty() : Invocable.of(postConstructMethod);
             this.preDestroyMethod = preDestroyMethod;
-            this.preDestroy = preDestroyMethod == null ? Invocable.empty() : Invocable.of(preDestroyMethod);
+            this.preDestroy = preDestroyMethod == null ? Invocable.empty() : (
+                postConstructMethod == preDestroyMethod ? postConstruct : Invocable.of(preDestroyMethod)
+            );
         }
 
         @Override
@@ -525,37 +524,37 @@ final class SimpleAppImpl implements SimpleApp {
         }
     }
 
-    private enum PostConstructComparator implements Comparator<SimpleResource> {
+    private enum PostConstructComparator implements Comparator<InjectedResource> {
 
         INST;
 
         @Override
-        public int compare(@Nonnull SimpleResource sr1, @Nonnull SimpleResource sr2) {
+        public int compare(@Nonnull InjectedResource sr1, @Nonnull InjectedResource sr2) {
             Method pc1 = Jie.asNonnull(sr1.postConstructMethod());
             Method pc2 = Jie.asNonnull(sr2.postConstructMethod());
-            SimpleDependsOn sd1 = pc1.getAnnotation(SimpleDependsOn.class);
-            SimpleDependsOn sd2 = pc2.getAnnotation(SimpleDependsOn.class);
+            InjectedDependsOn sd1 = pc1.getAnnotation(InjectedDependsOn.class);
+            InjectedDependsOn sd2 = pc2.getAnnotation(InjectedDependsOn.class);
             return compareDependsOn(sr1, sd1, sr2, sd2);
         }
     }
 
-    private enum PreDestroyComparator implements Comparator<SimpleResource> {
+    private enum PreDestroyComparator implements Comparator<InjectedResource> {
 
         INST;
 
         @Override
-        public int compare(@Nonnull SimpleResource sr1, @Nonnull SimpleResource sr2) {
+        public int compare(@Nonnull InjectedResource sr1, @Nonnull InjectedResource sr2) {
             Method pd1 = Jie.asNonnull(sr1.preDestroyMethod());
             Method pd2 = Jie.asNonnull(sr2.preDestroyMethod());
-            SimpleDependsOn sd1 = pd1.getAnnotation(SimpleDependsOn.class);
-            SimpleDependsOn sd2 = pd2.getAnnotation(SimpleDependsOn.class);
+            InjectedDependsOn sd1 = pd1.getAnnotation(InjectedDependsOn.class);
+            InjectedDependsOn sd2 = pd2.getAnnotation(InjectedDependsOn.class);
             return compareDependsOn(sr1, sd1, sr2, sd2);
         }
     }
 
     private static int compareDependsOn(
-        @Nonnull SimpleResource sr1, @Nullable SimpleDependsOn sd1,
-        @Nonnull SimpleResource sr2, @Nullable SimpleDependsOn sd2
+        @Nonnull InjectedResource sr1, @Nullable InjectedDependsOn sd1,
+        @Nonnull InjectedResource sr2, @Nullable InjectedDependsOn sd2
     ) {
         if (sd1 != null) {
             for (Class<?> c1 : sd1.value()) {

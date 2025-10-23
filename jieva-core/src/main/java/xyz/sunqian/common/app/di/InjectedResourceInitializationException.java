@@ -1,21 +1,22 @@
-package xyz.sunqian.common.di;
+package xyz.sunqian.common.app.di;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.RetainedParam;
+import xyz.sunqian.common.base.exception.JieRuntimeException;
 
 import java.util.List;
 
 /**
- * Exception for failing to initialize (post-construct) resources during startup of a {@link SimpleApp}.
+ * Exception for failing to initialize (post-construct) resources during startup of a {@link InjectedApp}.
  *
  * @author sunqian
  */
-public class SimpleResourceInitialException extends SimpleResourceException {
+public class InjectedResourceInitializationException extends JieRuntimeException {
 
-    private final @Nonnull SimpleResource failedResource;
-    private final @Nonnull List<@Nonnull SimpleResource> initializedResources;
-    private final @Nonnull List<@Nonnull SimpleResource> uninitializedResources;
+    private final @Nonnull InjectedResource failedResource;
+    private final @Nonnull List<@Nonnull InjectedResource> initializedResources;
+    private final @Nonnull List<@Nonnull InjectedResource> uninitializedResources;
 
     /**
      * Constructs an exception with detailed context about the resource initialize failure. This exception provides
@@ -30,11 +31,11 @@ public class SimpleResourceInitialException extends SimpleResourceException {
      * @param initializedResources   the resources that were successfully initialized before the failure occurred
      * @param uninitializedResources the resources that were not initialized due to the abortive termination
      */
-    public SimpleResourceInitialException(
-        @Nonnull SimpleResource failedResource,
+    public InjectedResourceInitializationException(
+        @Nonnull InjectedResource failedResource,
         @Nullable Throwable cause,
-        @Nonnull @RetainedParam List<@Nonnull SimpleResource> initializedResources,
-        @Nonnull @RetainedParam List<@Nonnull SimpleResource> uninitializedResources
+        @Nonnull @RetainedParam List<@Nonnull InjectedResource> initializedResources,
+        @Nonnull @RetainedParam List<@Nonnull InjectedResource> uninitializedResources
     ) {
         super(cause);
         this.failedResource = failedResource;
@@ -47,7 +48,7 @@ public class SimpleResourceInitialException extends SimpleResourceException {
      *
      * @return the resource that failed during initialization, causing the startup to abort
      */
-    public @Nonnull SimpleResource failedResource() {
+    public @Nonnull InjectedResource failedResource() {
         return failedResource;
     }
 
@@ -56,7 +57,7 @@ public class SimpleResourceInitialException extends SimpleResourceException {
      *
      * @return the resources that were successfully initialized before the failure occurred
      */
-    public @Nonnull List<@Nonnull SimpleResource> initializedResources() {
+    public @Nonnull List<@Nonnull InjectedResource> initializedResources() {
         return initializedResources;
     }
 
@@ -65,7 +66,7 @@ public class SimpleResourceInitialException extends SimpleResourceException {
      *
      * @return the resources that were not initialized due to the abortive termination
      */
-    public @Nonnull List<@Nonnull SimpleResource> uninitializedResources() {
+    public @Nonnull List<@Nonnull InjectedResource> uninitializedResources() {
         return uninitializedResources;
     }
 }

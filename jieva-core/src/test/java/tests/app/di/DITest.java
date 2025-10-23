@@ -1,4 +1,4 @@
-package tests.di;
+package tests.app.di;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -7,14 +7,13 @@ import org.testng.annotations.Test;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.collect.ListKit;
-import xyz.sunqian.common.di.SimpleApp;
-import xyz.sunqian.common.di.SimpleAppAspect;
-import xyz.sunqian.common.di.SimpleAppException;
-import xyz.sunqian.common.di.SimpleDependsOn;
-import xyz.sunqian.common.di.SimpleResource;
-import xyz.sunqian.common.di.SimpleResourceDestroyException;
-import xyz.sunqian.common.di.SimpleResourceException;
-import xyz.sunqian.common.di.SimpleResourceInitialException;
+import xyz.sunqian.common.app.di.InjectedApp;
+import xyz.sunqian.common.app.di.InjectedAppException;
+import xyz.sunqian.common.app.di.InjectedAspect;
+import xyz.sunqian.common.app.di.InjectedResource;
+import xyz.sunqian.common.app.di.InjectedResourceDestructionException;
+import xyz.sunqian.common.app.di.InjectedResourceInitializationException;
+import xyz.sunqian.common.app.di.InjectedDependsOn;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
 import xyz.sunqian.test.JieTestException;
 import xyz.sunqian.test.PrintTest;
@@ -42,29 +41,28 @@ public class DITest implements PrintTest {
     public void testDIResources() {
         // app
         postList.clear();
-        SimpleApp app = SimpleApp.newBuilder()
-            .resources(
+        InjectedApp app = InjectedApp.newBuilder()
+            .resourceTypes(
                 Starter.class, ServiceAaa.class, ServiceBbb.class, InterServiceImpl.class,
                 AspectService1Impl.class, AspectHandler.class,
                 new TypeRef<Generic<String>>() {}.type(), new TypeRef<Generic<Integer>>() {}.type(),
                 NeedExecution.class, NeedExecution2.class, NeedExecution3.class
             )
-            .resources(ListKit.list(NeedExecution.class, NeedExecution2.class, NeedExecution3.class))
+            .resourceTypes(ListKit.list(NeedExecution.class, NeedExecution2.class, NeedExecution3.class))
             .resourceAnnotation(TestRes.class)
             .postConstructAnnotation(TestPost.class)
             .preDestroyAnnotation(TestPre.class)
-            .aspect(true)
             .build();
         assertEquals(
             postList,
             ListKit.list(NeedExecution.class.getName(), NeedExecution2.class.getName(), NeedExecution3.class.getName())
         );
-        List<SimpleResource> appResources = app.allResources();
-        for (SimpleResource appResource : appResources) {
+        List<InjectedResource> appResources = app.resources();
+        for (InjectedResource appResource : appResources) {
             assertTrue(appResource.isLocal());
         }
         assertEquals(appResources, app.localResources());
-        assertEquals(app.dependencyApps(), Collections.emptyList());
+        assertEquals(app.parentApps(), Collections.emptyList());
         testDIResources(app);
         preList.clear();
         app.shutdown();
@@ -75,21 +73,20 @@ public class DITest implements PrintTest {
 
         // app2
         postList.clear();
-        SimpleApp app2 = SimpleApp.newBuilder()
-            .resources(SubService2.class)
-            .dependencyApps(app)
-            .dependencyApps(ListKit.list(app))
-            .aspect(true)
+        InjectedApp app2 = InjectedApp.newBuilder()
+            .resourceTypes(SubService2.class)
+            .parentApps(app)
+            .parentApps(ListKit.list(app))
             .build();
         assertEquals(
             postList,
             ListKit.list(SubService2.class.getName())
         );
-        List<SimpleResource> app2Resources = app2.allResources();
+        List<InjectedResource> app2Resources = app2.resources();
         assertEquals(app2Resources.size(), 3);
-        List<SimpleResource> app2LocalResources = app2.localResources();
+        List<InjectedResource> app2LocalResources = app2.localResources();
         assertEquals(app2LocalResources.size(), 2);
-        for (SimpleResource app2Resource : app2Resources) {
+        for (InjectedResource app2Resource : app2Resources) {
             if (app2Resource.type().equals(SubService.class)) {
                 assertTrue(app2Resource.isLocal());
             } else if (app2Resource.type().equals(SubService2.class)) {
@@ -104,7 +101,7 @@ public class DITest implements PrintTest {
         assertEquals(subService2.subService2(), subService.subService());
         ServiceAaa serviceAaa = app2.getResource(ServiceAaa.class);
         assertEquals(serviceAaa.getLocalName(), "A");
-        assertEquals(app2.dependencyApps(), ListKit.list(app));
+        assertEquals(app2.parentApps(), ListKit.list(app));
         preList.clear();
         app2.shutdown();
         assertEquals(
@@ -113,8 +110,8 @@ public class DITest implements PrintTest {
         );
     }
 
-    private void testDIResources(SimpleApp app) {
-        printFor("Resources", app.allResources().stream()
+    private void testDIResources(InjectedApp app) {
+        printFor("Resources", app.resources().stream()
             .map(r -> r.type().getTypeName() + ": " + r.instance())
             .collect(Collectors.joining(System.lineSeparator() + "    ")));
         // starter
@@ -285,7 +282,7 @@ public class DITest implements PrintTest {
         }
     }
 
-    public static class AspectHandler implements SimpleAppAspect {
+    public static class AspectHandler implements InjectedAspect {
 
         @TestRes
         private InterService interService;
@@ -345,13 +342,13 @@ public class DITest implements PrintTest {
     public static class NeedExecution2 {
 
         @TestPost
-        @SimpleDependsOn(NeedExecution.class)
+        @InjectedDependsOn(NeedExecution.class)
         public void postConstruct() {
             postList.add(getClass().getName());
         }
 
         @TestPre
-        @SimpleDependsOn(NeedExecution.class)
+        @InjectedDependsOn(NeedExecution.class)
         public void preDestroy() {
             preList.add(getClass().getName());
         }
@@ -360,13 +357,13 @@ public class DITest implements PrintTest {
     public static class NeedExecution3 {
 
         @TestPost
-        @SimpleDependsOn({NeedExecution.class, NeedExecution2.class})
+        @InjectedDependsOn({NeedExecution.class, NeedExecution2.class})
         public void postConstruct() {
             postList.add(getClass().getName());
         }
 
         @TestPre
-        @SimpleDependsOn({NeedExecution.class, NeedExecution2.class})
+        @InjectedDependsOn({NeedExecution.class, NeedExecution2.class})
         public void preDestroy() {
             preList.add(getClass().getName());
         }
@@ -405,8 +402,8 @@ public class DITest implements PrintTest {
         {
             Dep.postList.clear();
             Dep.destroyList.clear();
-            SimpleApp app = SimpleApp.newBuilder()
-                .resources(Dep1.class, Dep2.class, Dep3.class)
+            InjectedApp app = InjectedApp.newBuilder()
+                .resourceTypes(Dep1.class, Dep2.class, Dep3.class)
                 .build();
             app.shutdown();
             assertEquals(Dep.postList, ListKit.list(1, 2, 3));
@@ -415,8 +412,8 @@ public class DITest implements PrintTest {
         {
             Dep.postList.clear();
             Dep.destroyList.clear();
-            SimpleApp app = SimpleApp.newBuilder()
-                .resources(Dep1.class, Dep3.class, Dep2.class)
+            InjectedApp app = InjectedApp.newBuilder()
+                .resourceTypes(Dep1.class, Dep3.class, Dep2.class)
                 .build();
             app.shutdown();
             assertEquals(Dep.postList, ListKit.list(1, 2, 3));
@@ -425,8 +422,8 @@ public class DITest implements PrintTest {
         {
             Dep.postList.clear();
             Dep.destroyList.clear();
-            SimpleApp app = SimpleApp.newBuilder()
-                .resources(Dep2.class, Dep1.class, Dep3.class)
+            InjectedApp app = InjectedApp.newBuilder()
+                .resourceTypes(Dep2.class, Dep1.class, Dep3.class)
                 .build();
             app.shutdown();
             assertEquals(Dep.postList, ListKit.list(1, 2, 3));
@@ -435,8 +432,8 @@ public class DITest implements PrintTest {
         {
             Dep.postList.clear();
             Dep.destroyList.clear();
-            SimpleApp app = SimpleApp.newBuilder()
-                .resources(Dep2.class, Dep3.class, Dep1.class)
+            InjectedApp app = InjectedApp.newBuilder()
+                .resourceTypes(Dep2.class, Dep3.class, Dep1.class)
                 .build();
             app.shutdown();
             assertEquals(Dep.postList, ListKit.list(1, 2, 3));
@@ -445,8 +442,8 @@ public class DITest implements PrintTest {
         {
             Dep.postList.clear();
             Dep.destroyList.clear();
-            SimpleApp app = SimpleApp.newBuilder()
-                .resources(Dep3.class, Dep1.class, Dep2.class)
+            InjectedApp app = InjectedApp.newBuilder()
+                .resourceTypes(Dep3.class, Dep1.class, Dep2.class)
                 .build();
             app.shutdown();
             assertEquals(Dep.postList, ListKit.list(1, 2, 3));
@@ -455,34 +452,34 @@ public class DITest implements PrintTest {
         {
             Dep.postList.clear();
             Dep.destroyList.clear();
-            SimpleApp app = SimpleApp.newBuilder()
-                .resources(Dep3.class, Dep2.class, Dep1.class)
+            InjectedApp app = InjectedApp.newBuilder()
+                .resourceTypes(Dep3.class, Dep2.class, Dep1.class)
                 .build();
             app.shutdown();
             assertEquals(Dep.postList, ListKit.list(1, 2, 3));
             assertEquals(Dep.destroyList, ListKit.list(1, 2, 3));
         }
         {
-            expectThrows(SimpleAppException.class, () ->
-                SimpleApp.newBuilder().resources(Dep4.class, Dep5.class).build());
-            expectThrows(SimpleAppException.class, () ->
-                SimpleApp.newBuilder().resources(Dep6.class, Dep7.class).build());
-            expectThrows(SimpleAppException.class, () ->
-                SimpleApp.newBuilder().resources(DepErr1.class).build());
-            expectThrows(SimpleAppException.class, () ->
-                SimpleApp.newBuilder().resources(DepErr2.class).build());
-            expectThrows(SimpleAppException.class, () ->
-                SimpleApp.newBuilder().resources(DepErr3.class).build());
+            expectThrows(InjectedAppException.class, () ->
+                InjectedApp.newBuilder().resourceTypes(Dep4.class, Dep5.class).build());
+            expectThrows(InjectedAppException.class, () ->
+                InjectedApp.newBuilder().resourceTypes(Dep6.class, Dep7.class).build());
+            expectThrows(InjectedAppException.class, () ->
+                InjectedApp.newBuilder().resourceTypes(DepErr1.class).build());
+            expectThrows(InjectedAppException.class, () ->
+                InjectedApp.newBuilder().resourceTypes(DepErr2.class).build());
+            expectThrows(InjectedAppException.class, () ->
+                InjectedApp.newBuilder().resourceTypes(DepErr3.class).build());
         }
         {
-            SimpleApp app = SimpleApp.newBuilder()
-                .resources(Dep8.class, Dep10.class, Dep9.class)
+            InjectedApp app = InjectedApp.newBuilder()
+                .resourceTypes(Dep8.class, Dep10.class, Dep9.class)
                 .build();
             app.shutdown();
         }
         {
-            SimpleApp app = SimpleApp.newBuilder()
-                .resources(Dep9.class, Dep10.class, Dep8.class)
+            InjectedApp app = InjectedApp.newBuilder()
+                .resourceTypes(Dep9.class, Dep10.class, Dep8.class)
                 .build();
             app.shutdown();
         }
@@ -509,13 +506,13 @@ public class DITest implements PrintTest {
     public static class Dep2 {
 
         @PostConstruct
-        @SimpleDependsOn(Dep1.class)
+        @InjectedDependsOn(Dep1.class)
         public void postConstruct() {
             Dep.postList.add(2);
         }
 
         @PreDestroy
-        @SimpleDependsOn(Dep1.class)
+        @InjectedDependsOn(Dep1.class)
         public void preDestroy() {
             Dep.destroyList.add(2);
         }
@@ -524,13 +521,13 @@ public class DITest implements PrintTest {
     public static class Dep3 {
 
         @PostConstruct
-        @SimpleDependsOn({Dep1.class, Dep2.class})
+        @InjectedDependsOn({Dep1.class, Dep2.class})
         public void postConstruct() {
             Dep.postList.add(3);
         }
 
         @PreDestroy
-        @SimpleDependsOn({Dep2.class, Dep1.class})
+        @InjectedDependsOn({Dep2.class, Dep1.class})
         public void preDestroy() {
             Dep.destroyList.add(3);
         }
@@ -539,7 +536,7 @@ public class DITest implements PrintTest {
     public static class Dep4 {
 
         @PostConstruct
-        @SimpleDependsOn(Dep5.class)
+        @InjectedDependsOn(Dep5.class)
         public void postConstruct() {
         }
     }
@@ -547,7 +544,7 @@ public class DITest implements PrintTest {
     public static class Dep5 {
 
         @PostConstruct
-        @SimpleDependsOn(Dep4.class)
+        @InjectedDependsOn(Dep4.class)
         public void postConstruct() {
         }
     }
@@ -555,7 +552,7 @@ public class DITest implements PrintTest {
     public static class Dep6 {
 
         @PreDestroy
-        @SimpleDependsOn(Dep7.class)
+        @InjectedDependsOn(Dep7.class)
         public void preDestroy() {
         }
     }
@@ -563,7 +560,7 @@ public class DITest implements PrintTest {
     public static class Dep7 {
 
         @PreDestroy
-        @SimpleDependsOn(Dep6.class)
+        @InjectedDependsOn(Dep6.class)
         public void preDestroy() {
         }
     }
@@ -571,12 +568,12 @@ public class DITest implements PrintTest {
     public static class Dep8 {
 
         @PostConstruct
-        @SimpleDependsOn({})
+        @InjectedDependsOn({})
         public void postConstruct() {
         }
 
         @PreDestroy
-        @SimpleDependsOn({})
+        @InjectedDependsOn({})
         public void preDestroy() {
         }
     }
@@ -603,10 +600,18 @@ public class DITest implements PrintTest {
         }
     }
 
+    public static class Dep11 {
+
+        @PostConstruct
+        @PreDestroy
+        public void postConstructDestroy() {
+        }
+    }
+
     public static class DepErr1 {
 
         @PostConstruct
-        @SimpleDependsOn(String.class)
+        @InjectedDependsOn(String.class)
         public void postConstruct() {
         }
     }
@@ -614,7 +619,7 @@ public class DITest implements PrintTest {
     public static class DepErr2 {
 
         @PreDestroy
-        @SimpleDependsOn(String.class)
+        @InjectedDependsOn(String.class)
         public void preDestroy() {
         }
     }
@@ -629,38 +634,48 @@ public class DITest implements PrintTest {
     public void testStartAndShutdown() {
         {
             // startup
-            SimpleResourceInitialException startErr = expectThrows(SimpleResourceInitialException.class, () -> {
-                SimpleApp.newBuilder()
-                    .resources(Dep8.class, Dep9.class, ConstructErr.class, Dep10.class)
+            InjectedResourceInitializationException startErr = expectThrows(InjectedResourceInitializationException.class, () -> {
+                InjectedApp.newBuilder()
+                    .resourceTypes(Dep8.class, Dep9.class, ConstructErr.class, Dep10.class)
                     .build();
             });
             assertEquals(startErr.failedResource().type(), ConstructErr.class);
             assertEquals(
-                startErr.initializedResources().stream().map(SimpleResource::type).collect(Collectors.toList()),
+                startErr.initializedResources().stream().map(InjectedResource::type).collect(Collectors.toList()),
                 ListKit.list(Dep8.class, Dep9.class)
             );
             assertEquals(
-                startErr.uninitializedResources().stream().map(SimpleResource::type).collect(Collectors.toList()),
+                startErr.uninitializedResources().stream().map(InjectedResource::type).collect(Collectors.toList()),
                 ListKit.list(Dep10.class)
             );
         }
         {
             // shutdown
-            SimpleResourceDestroyException shutErr = expectThrows(SimpleResourceDestroyException.class, () -> {
-                SimpleApp.newBuilder()
-                    .resources(Dep8.class, Dep9.class, DestroyErr.class, Dep10.class)
+            InjectedResourceDestructionException shutErr = expectThrows(InjectedResourceDestructionException.class, () -> {
+                InjectedApp.newBuilder()
+                    .resourceTypes(Dep8.class, Dep9.class, DestroyErr.class, Dep10.class)
                     .build()
                     .shutdown();
             });
             assertEquals(shutErr.failedResource().type(), DestroyErr.class);
             assertEquals(
-                shutErr.destroyedResources().stream().map(SimpleResource::type).collect(Collectors.toList()),
+                shutErr.destroyedResources().stream().map(InjectedResource::type).collect(Collectors.toList()),
                 ListKit.list(Dep8.class, Dep9.class)
             );
             assertEquals(
-                shutErr.undestroyedResources().stream().map(SimpleResource::type).collect(Collectors.toList()),
+                shutErr.undestroyedResources().stream().map(InjectedResource::type).collect(Collectors.toList()),
                 ListKit.list(Dep10.class)
             );
+        }
+        {
+            // PostConstruct and PreDestroy at same method
+            InjectedApp app = InjectedApp.newBuilder()
+                .resourceTypes(Dep11.class)
+                .build();
+            for (InjectedResource resource : app.resources()) {
+                assertSame(resource.postConstructMethod(), resource.preDestroyMethod());
+            }
+            app.shutdown();
         }
     }
 
@@ -683,52 +698,35 @@ public class DITest implements PrintTest {
     @Test
     public void testException() throws Exception {
         {
-            // SimpleAppException
-            expectThrows(SimpleAppException.class, () -> {
-                throw new SimpleAppException();
+            // InjectedSimpleAppException
+            expectThrows(InjectedAppException.class, () -> {
+                throw new InjectedAppException();
             });
-            expectThrows(SimpleAppException.class, () -> {
-                throw new SimpleAppException("");
+            expectThrows(InjectedAppException.class, () -> {
+                throw new InjectedAppException("");
             });
-            expectThrows(SimpleAppException.class, () -> {
-                throw new SimpleAppException("", new RuntimeException());
+            expectThrows(InjectedAppException.class, () -> {
+                throw new InjectedAppException("", new RuntimeException());
             });
-            expectThrows(SimpleAppException.class, () -> {
-                throw new SimpleAppException(new RuntimeException());
-            });
-        }
-        {
-            // SimpleResourceException
-            expectThrows(SimpleResourceException.class, () -> {
-                throw new SimpleResourceException();
-            });
-            expectThrows(SimpleResourceException.class, () -> {
-                throw new SimpleResourceException("");
-            });
-            expectThrows(SimpleResourceException.class, () -> {
-                throw new SimpleResourceException("", new RuntimeException());
-            });
-            expectThrows(SimpleResourceException.class, () -> {
-                throw new SimpleResourceException(new RuntimeException());
+            expectThrows(InjectedAppException.class, () -> {
+                throw new InjectedAppException(new RuntimeException());
             });
         }
-        {
-            expectThrows(SimpleAppException.class, () -> {
-                SimpleApp.newBuilder()
-                    .resources(DepErr5.class)
-                    .build();
-            });
-            expectThrows(SimpleAppException.class, () -> {
-                SimpleApp.newBuilder()
-                    .resources(DepErr5.class.getTypeParameters()[0])
-                    .build();
-            });
-            expectThrows(SimpleAppException.class, () -> {
-                SimpleApp.newBuilder()
-                    .resources(DepErr6.class)
-                    .build();
-            });
-        }
+        expectThrows(InjectedAppException.class, () -> {
+            InjectedApp.newBuilder()
+                .resourceTypes(DepErr5.class)
+                .build();
+        });
+        expectThrows(InjectedAppException.class, () -> {
+            InjectedApp.newBuilder()
+                .resourceTypes(DepErr5.class.getTypeParameters()[0])
+                .build();
+        });
+        expectThrows(InjectedAppException.class, () -> {
+            InjectedApp.newBuilder()
+                .resourceTypes(DepErr6.class)
+                .build();
+        });
     }
 
     public static class DepErr5<T> {

@@ -1,15 +1,10 @@
 package xyz.sunqian.common.app;
 
-import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.di.InjectedSimpleApp;
-
-import java.util.List;
+import xyz.sunqian.common.app.di.InjectedApp;
 
 /**
- * This interface represents a simple application.
- * <p>
- * A SimpleApp is typically launched by its creator, such as {@link InjectedSimpleApp#newBuilder()}, and can be shutdown
- * by {@link #shutdown()}.
+ * This interface represents a simple application. It is typically started by its creator and terminated by itself or
+ * {@link #shutdown()}. The default implementation is {@link InjectedApp}.
  *
  * @author sunqian
  */
@@ -18,17 +13,9 @@ public interface SimpleApp {
     /**
      * Shuts down this app.
      * <p>
-     * This method blocks current thread until this app is closed.
+     * This method blocks current thread until the shutdown operation is completed.
      *
-     * @throws SimpleAppException if any error occurs during shutdown
+     * @throws SimpleAppException if any error occurs during shutdown operation
      */
     void shutdown() throws SimpleAppException;
-
-    /**
-     * Returns all resources this app depends on.
-     *
-     * @return all resources this app depends on
-     */
-    @Nonnull
-    List<@Nonnull SimpleResource> resources();
 }
