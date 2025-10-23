@@ -1,5 +1,5 @@
 /**
- * This package provides core application interfaces, which are used to abstract application behaviors.
+ * This package provides core application and resource interfaces, which are used to abstract application behaviors.
  * <p>
  * Core interfaces:
  * <ul>

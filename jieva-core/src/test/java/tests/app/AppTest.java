@@ -5,6 +5,7 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.app.SimpleApp;
 import xyz.sunqian.common.app.SimpleAppException;
 import xyz.sunqian.common.app.SimpleResource;
+import xyz.sunqian.common.app.SimpleResourceException;
 import xyz.sunqian.test.PrintTest;
 
 import java.util.Collections;
@@ -48,6 +49,21 @@ public class AppTest implements PrintTest {
             });
             expectThrows(SimpleAppException.class, () -> {
                 throw new SimpleAppException(new RuntimeException());
+            });
+        }
+        {
+            // SimpleResourceException
+            expectThrows(SimpleResourceException.class, () -> {
+                throw new SimpleResourceException();
+            });
+            expectThrows(SimpleResourceException.class, () -> {
+                throw new SimpleResourceException("");
+            });
+            expectThrows(SimpleResourceException.class, () -> {
+                throw new SimpleResourceException("", new RuntimeException());
+            });
+            expectThrows(SimpleResourceException.class, () -> {
+                throw new SimpleResourceException(new RuntimeException());
             });
         }
     }

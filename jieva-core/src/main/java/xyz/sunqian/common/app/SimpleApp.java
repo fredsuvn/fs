@@ -1,15 +1,15 @@
 package xyz.sunqian.common.app;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.di.SimpleInjector;
+import xyz.sunqian.common.di.InjectedSimpleApp;
 
 import java.util.List;
 
 /**
  * This interface represents a simple application.
  * <p>
- * A SimpleApp is typically launched by its creator, such as {@link SimpleInjector}, and can be shutdown by
- * {@link #shutdown()}.
+ * A SimpleApp is typically launched by its creator, such as {@link InjectedSimpleApp#newBuilder()}, and can be shutdown
+ * by {@link #shutdown()}.
  *
  * @author sunqian
  */

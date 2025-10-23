@@ -1,4 +1,4 @@
-package xyz.sunqian.common.di;
+package xyz.sunqian.common.app;
 
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.exception.JieRuntimeException;
