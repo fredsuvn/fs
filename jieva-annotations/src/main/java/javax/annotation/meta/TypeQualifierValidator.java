@@ -1,0 +1,17 @@
+package javax.annotation.meta;
+
+import javax.annotation.Nonnull;
+import java.lang.annotation.Annotation;
+
+public interface TypeQualifierValidator<A extends Annotation> {
+    /**
+     * Given a type qualifier, check to see if a known specific constant value is an instance of the set of values
+     * denoted by the qualifier.
+     *
+     * @param annotation the type qualifier
+     * @param value      the value to check
+     * @return a value indicating whether the value is a member of the values denoted by the type qualifier
+     */
+    @Nonnull
+    When forConstantValue(@Nonnull A annotation, Object value);
+}
