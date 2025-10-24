@@ -2,7 +2,7 @@ package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.bytes.BytesKit;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.math.MathKit;
@@ -1087,7 +1087,7 @@ public class BufferKit {
                     dst.put(dstArr, 0, ret);
                 }
             } else {
-                byte[] srcArr = Jie.nonnull(read(src), BytesKit.empty());
+                byte[] srcArr = Kit.nonnull(read(src), BytesKit.empty());
                 if (dst.hasArray()) {
                     ret = operator.process(
                         srcArr,
@@ -1162,7 +1162,7 @@ public class BufferKit {
                     dst.put(dstArr, 0, ret);
                 }
             } else {
-                char[] srcArr = Jie.nonnull(read(src), CharsKit.empty());
+                char[] srcArr = Kit.nonnull(read(src), CharsKit.empty());
                 if (dst.hasArray()) {
                     ret = operator.process(
                         srcArr,

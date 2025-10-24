@@ -3,7 +3,7 @@ package xyz.sunqian.common.collect;
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.RetainedParam;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -164,7 +164,7 @@ public class ListKit {
     public static <T> @Nonnull @Immutable List<T> toList(@Nonnull Iterable<? extends T> it) {
         Object[] array = CollectKit.toArray(it);
         List<Object> list = list(array);
-        return Jie.as(list);
+        return Kit.as(list);
     }
 
     /**

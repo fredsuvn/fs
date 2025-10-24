@@ -1,14 +1,14 @@
 package xyz.sunqian.common.app;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.exception.JieRuntimeException;
+import xyz.sunqian.common.base.exception.KitvaRuntimeException;
 
 /**
  * Exception for {@link SimpleApp}.
  *
  * @author sunqian
  */
-public class SimpleAppException extends JieRuntimeException {
+public class SimpleAppException extends KitvaRuntimeException {
 
     /**
      * Empty constructor.

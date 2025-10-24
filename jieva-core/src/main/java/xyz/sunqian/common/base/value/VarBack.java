@@ -1,7 +1,7 @@
 package xyz.sunqian.common.base.value;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 
 final class VarBack {
 
@@ -51,7 +51,7 @@ final class VarBack {
 
         @Override
         public T get() {
-            return Jie.as(value);
+            return Kit.as(value);
         }
 
         @Override

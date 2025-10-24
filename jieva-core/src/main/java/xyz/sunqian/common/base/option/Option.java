@@ -3,7 +3,7 @@ package xyz.sunqian.common.base.option;
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.collect.ArrayKit;
 
 /**
@@ -48,7 +48,7 @@ public interface Option<K, V> {
      * @return an empty {@link Option} array
      */
     static <K, V> @Nonnull Option<K, V>[] emptyOptions() {
-        return Jie.as(OptionImpl.EMPTY_OPTIONS);
+        return Kit.as(OptionImpl.EMPTY_OPTIONS);
     }
 
     /**
@@ -70,8 +70,8 @@ public interface Option<K, V> {
             return null;
         }
         for (Option<?, ?> option : options) {
-            if (Jie.equals(option.key(), key)) {
-                return Jie.as(option);
+            if (Kit.equals(option.key(), key)) {
+                return Kit.as(option);
             }
         }
         return null;

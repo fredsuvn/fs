@@ -2,7 +2,7 @@ package tests.runtime.invoke;
 
 import org.testng.annotations.Test;
 import tests.utils.LotsOfMethods;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.runtime.invoke.Invocable;
 import xyz.sunqian.common.runtime.invoke.InvocationException;
 import xyz.sunqian.common.runtime.invoke.InvocationMode;
@@ -106,7 +106,7 @@ public class InvokeTest {
     @Test
     public void testLotsOfMethods() throws Throwable {
         // static
-        List<Method> staticMethods = Jie.stream(LotsOfMethods.class.getMethods())
+        List<Method> staticMethods = Kit.stream(LotsOfMethods.class.getMethods())
             .filter(method -> method.getName().startsWith("staticMethod"))
             .collect(Collectors.toList());
         for (Method method : staticMethods) {
@@ -128,7 +128,7 @@ public class InvokeTest {
             );
         }
         // instance
-        List<Method> instanceMethods = Jie.stream(LotsOfMethods.class.getMethods())
+        List<Method> instanceMethods = Kit.stream(LotsOfMethods.class.getMethods())
             .filter(method -> method.getName().startsWith("instanceMethod"))
             .collect(Collectors.toList());
         LotsOfMethods inst = new LotsOfMethods();
@@ -156,7 +156,7 @@ public class InvokeTest {
     public void testAsm() throws Exception {
         {
             // Cls
-            List<Method> methods = Jie.stream(Cls.class.getMethods())
+            List<Method> methods = Kit.stream(Cls.class.getMethods())
                 .filter(method -> method.getDeclaringClass().equals(Cls.class))
                 .collect(Collectors.toList());
             Cls inst = new Cls();
@@ -170,7 +170,7 @@ public class InvokeTest {
         }
         {
             // Inter
-            List<Method> methods = Jie.stream(Inter.class.getMethods())
+            List<Method> methods = Kit.stream(Inter.class.getMethods())
                 .filter(method -> method.getDeclaringClass().equals(Inter.class))
                 .collect(Collectors.toList());
             Inter inst = new Inter() {};
@@ -196,7 +196,7 @@ public class InvokeTest {
         }
         {
             // big parameter count
-            Method instanceMethod129 = Jie.stream(LotsOfMethods.class.getMethods())
+            Method instanceMethod129 = Kit.stream(LotsOfMethods.class.getMethods())
                 .filter(method -> "instanceMethod129".equals(method.getName()))
                 .findFirst().get();
             Invocable invocable = Invocable.of(instanceMethod129, InvocationMode.ASM);

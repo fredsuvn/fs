@@ -3,7 +3,7 @@ package xyz.sunqian.common.app.di;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.RetainedParam;
-import xyz.sunqian.common.base.exception.JieRuntimeException;
+import xyz.sunqian.common.base.exception.KitvaRuntimeException;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ import java.util.List;
  *
  * @author sunqian
  */
-public class InjectedResourceInitializationException extends JieRuntimeException {
+public class InjectedResourceInitializationException extends KitvaRuntimeException {
 
     private final @Nonnull InjectedResource failedResource;
     private final @Nonnull List<@Nonnull InjectedResource> initializedResources;

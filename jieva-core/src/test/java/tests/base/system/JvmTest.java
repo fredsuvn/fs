@@ -7,7 +7,7 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.testng.annotations.Test;
 import tests.runtime.reflect.TypeTest;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 import xyz.sunqian.common.base.system.JvmException;
 import xyz.sunqian.common.base.system.JvmKit;
@@ -103,7 +103,7 @@ public class JvmTest implements AssertTest, PrintTest {
                 assertEquals(testDesc, asmDesc);
             }
             // method:
-            List<Method> methods = Jie.list(DS.class.getDeclaredMethods());
+            List<Method> methods = Kit.list(DS.class.getDeclaredMethods());
             for (int i = 1; i <= DS.methodNum; i++) {
                 String methodName = "m" + i;
                 Method method = methods.stream().filter(m -> m.getName().equals(methodName)).findFirst().get();
@@ -143,7 +143,7 @@ public class JvmTest implements AssertTest, PrintTest {
                 assertEquals(testDesc, asmDesc);
             }
             // method:
-            List<Method> methods = Jie.list(ODS.class.getDeclaredMethods());
+            List<Method> methods = Kit.list(ODS.class.getDeclaredMethods());
             for (int i = 1; i <= ODS.methodNum; i++) {
                 String methodName = "m" + i;
                 Method method = methods.stream().filter(m -> m.getName().equals(methodName)).findFirst().get();
@@ -246,7 +246,7 @@ public class JvmTest implements AssertTest, PrintTest {
                 assertEquals(testSig, asmSig);
             }
             // method:
-            List<Method> methods = Jie.list(DS.class.getDeclaredMethods());
+            List<Method> methods = Kit.list(DS.class.getDeclaredMethods());
             for (int i = 1; i <= DS.methodNum; i++) {
                 String methodName = "m" + i;
                 Method method = methods.stream().filter(m -> m.getName().equals(methodName)).findFirst().get();
@@ -296,7 +296,7 @@ public class JvmTest implements AssertTest, PrintTest {
                 assertEquals(testSig, asmSig);
             }
             // method:
-            List<Method> methods = Jie.list(ODS.class.getDeclaredMethods());
+            List<Method> methods = Kit.list(ODS.class.getDeclaredMethods());
             for (int i = 1; i <= ODS.methodNum; i++) {
                 String methodName = "m" + i;
                 Method method = methods.stream().filter(m -> m.getName().equals(methodName)).findFirst().get();

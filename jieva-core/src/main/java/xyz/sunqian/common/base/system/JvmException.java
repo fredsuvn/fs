@@ -1,7 +1,7 @@
 package xyz.sunqian.common.base.system;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.exception.JieRuntimeException;
+import xyz.sunqian.common.base.exception.KitvaRuntimeException;
 
 /**
  * This runtime exception is typically used for wrapping exceptions thrown during the JVM operation. The
@@ -9,7 +9,7 @@ import xyz.sunqian.common.base.exception.JieRuntimeException;
  *
  * @author sunqian
  */
-public class JvmException extends JieRuntimeException {
+public class JvmException extends KitvaRuntimeException {
 
     /**
      * Empty constructor.

@@ -3,7 +3,7 @@ package xyz.sunqian.common.net.tcp;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.CheckKit;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.function.callable.VoidCallable;
 import xyz.sunqian.common.io.IOKit;
@@ -182,7 +182,7 @@ public class TcpServerBuilder {
      * @throws NetException If an error occurs
      */
     public @Nonnull TcpServer bind(@Nullable InetSocketAddress localAddress, int backlog) throws NetException {
-        return Jie.uncheck(() -> new TcpServerImpl(
+        return Kit.uncheck(() -> new TcpServerImpl(
                 localAddress,
                 handler,
                 mainThreadFactory,
@@ -230,7 +230,7 @@ public class TcpServerBuilder {
             this.selectTimeout = selectTimeout;
             server.configureBlocking(false);
             socketOptions.forEach((name, value) ->
-                Jie.uncheck(() -> server.setOption(Jie.as(name), value), NetException::new));
+                Kit.uncheck(() -> server.setOption(Kit.as(name), value), NetException::new));
             server.register(mainSelector, SelectionKey.OP_ACCEPT);
             for (int i = 0; i < workThreadNum; i++) {
                 WorkerImpl worker = new WorkerImpl();
@@ -263,7 +263,7 @@ public class TcpServerBuilder {
             if (closed) {
                 return;
             }
-            Jie.uncheck(() -> {
+            Kit.uncheck(() -> {
                     server.close();
                     mainSelector.close();
                     mainSelector.wakeup();
@@ -299,7 +299,7 @@ public class TcpServerBuilder {
                 doWork(this::doMainWork, closed);
             }
             releaseWorkers();
-            Jie.uncheck(() -> {
+            Kit.uncheck(() -> {
                 server.close();
                 mainSelector.close();
             }, NetException::new);
@@ -373,7 +373,7 @@ public class TcpServerBuilder {
             private volatile @Nullable ClientNode clientNode;
 
             private WorkerImpl() {
-                this.selector = Jie.uncheck(Selector::open, NetException::new);
+                this.selector = Kit.uncheck(Selector::open, NetException::new);
             }
 
             //@SuppressWarnings({"InfiniteLoopStatement"})
@@ -384,7 +384,7 @@ public class TcpServerBuilder {
                     doWork(this::doWorkerWork, closed);
                 }
                 releaseClients();
-                Jie.uncheck(selector::close, NetException::new);
+                Kit.uncheck(selector::close, NetException::new);
             }
 
             private void doWorkerWork() throws Exception {
@@ -507,8 +507,8 @@ public class TcpServerBuilder {
 
                 private ContextImpl(@Nonnull SocketChannel channel, int bufSize) throws IllegalArgumentException {
                     super(channel, bufSize);
-                    this.clientAddress = (InetSocketAddress) Jie.uncheck(channel::getRemoteAddress, NetException::new);
-                    this.serverAddress = (InetSocketAddress) Jie.uncheck(channel::getLocalAddress, NetException::new);
+                    this.clientAddress = (InetSocketAddress) Kit.uncheck(channel::getRemoteAddress, NetException::new);
+                    this.serverAddress = (InetSocketAddress) Kit.uncheck(channel::getLocalAddress, NetException::new);
                 }
 
                 @Override
@@ -526,7 +526,7 @@ public class TcpServerBuilder {
                     if (closed) {
                         return;
                     }
-                    Jie.uncheck(() -> {
+                    Kit.uncheck(() -> {
                         channel.close();
                         channel.keyFor(selector).cancel();
                         TcpKit.channelClose(handler, this);

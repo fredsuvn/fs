@@ -52,12 +52,12 @@ import java.util.stream.Stream;
  *
  * @author sunqian
  */
-public class Jie {
+public class Kit {
 
     /**
      * Name of this lib.
      */
-    public static final @Nonnull String LIB_NAME = "Jieva";
+    public static final @Nonnull String LIB_NAME = "KitVa";
 
     /**
      * Version of this lib.

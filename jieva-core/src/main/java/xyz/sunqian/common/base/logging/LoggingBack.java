@@ -2,7 +2,7 @@ package xyz.sunqian.common.base.logging;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.time.TimeKit;
 
 import java.util.Date;
@@ -69,7 +69,7 @@ final class LoggingBack {
             }
             try {
                 StackTraceElement[] stackElements = Thread.currentThread().getStackTrace();
-                StackTraceElement caller = Jie.nonnull(getCallerTrace(methodName, stackElements), NULL_TRACE);
+                StackTraceElement caller = Kit.nonnull(getCallerTrace(methodName, stackElements), NULL_TRACE);
                 appendable.append(TimeKit.format(new Date()))
                     .append("[")
                     .append(level.levelName())

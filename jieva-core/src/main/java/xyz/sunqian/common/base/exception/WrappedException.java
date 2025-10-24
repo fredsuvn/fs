@@ -8,7 +8,7 @@ import xyz.sunqian.annotations.Nonnull;
  *
  * @author sunqian
  */
-public class WrappedException extends JieRuntimeException {
+public class WrappedException extends KitvaRuntimeException {
 
     /**
      * Constructs with the original cause.

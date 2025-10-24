@@ -2,7 +2,7 @@ package xyz.sunqian.common.runtime.proxy;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.system.JvmKit;
 import xyz.sunqian.common.runtime.invoke.Invocable;
 
@@ -30,7 +30,7 @@ final class ProxyBack {
         Optional.ofNullable(getLookUpConstructor());
 
     private static @Nullable Constructor<MethodHandles.Lookup> getLookUpConstructor() {
-        return Jie.call(() -> {
+        return Kit.call(() -> {
             Constructor<MethodHandles.Lookup> c = MethodHandles.Lookup.class
                 .getDeclaredConstructor(Class.class);
             c.setAccessible(true);
@@ -40,7 +40,7 @@ final class ProxyBack {
 
     private static @Nonnull Optional<MethodHandles.Lookup> getLookUp(@Nonnull Method method) {
         return csOpt.map(c ->
-            Jie.call(() -> c.newInstance(method.getDeclaringClass()), null)
+            Kit.call(() -> c.newInstance(method.getDeclaringClass()), null)
         );
     }
 
@@ -48,7 +48,7 @@ final class ProxyBack {
         Optional<MethodHandles.Lookup> lookupOpt = ProxyBack.getLookUp(method);
         return lookupOpt
             .map(lookup ->
-                Jie.call(() -> lookup.unreflectSpecial(method, method.getDeclaringClass()), null)
+                Kit.call(() -> lookup.unreflectSpecial(method, method.getDeclaringClass()), null)
             )
             .map(methodHandle -> Invocable.of(methodHandle, false))
             .orElse(UNSUPPORTED_DEFAULT_METHOD_INVOCABLE);

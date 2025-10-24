@@ -1,14 +1,14 @@
 package xyz.sunqian.common.runtime.proxy;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.exception.JieRuntimeException;
+import xyz.sunqian.common.base.exception.KitvaRuntimeException;
 
 /**
  * This runtime exception is typically used for proxy.
  *
  * @author sunqian
  */
-public class ProxyException extends JieRuntimeException {
+public class ProxyException extends KitvaRuntimeException {
 
     /**
      * Empty constructor.

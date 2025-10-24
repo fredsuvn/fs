@@ -2,7 +2,7 @@ package xyz.sunqian.common.object.convert.handlers;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.base.lang.EnumKit;
 import xyz.sunqian.common.base.number.NumberKit;
@@ -182,11 +182,11 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             if (targetClass.isEnum()) {
                 // to enum:
                 String name = src.toString();
-                return EnumKit.findEnum(Jie.as(targetClass), name);
+                return EnumKit.findEnum(Kit.as(targetClass), name);
             }
             if (srcType.equals(String.class)) {
                 if (target.equals(byte[].class) || target.equals(ByteBuffer.class)) {
-                    Charset charset = Jie.nonnull(
+                    Charset charset = Kit.nonnull(
                         Option.findValue(ConvertOption.CHARSET, options),
                         CharsKit.defaultCharset()
                     );
@@ -260,7 +260,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         @Nonnull ObjectConverter converter,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) {
-        Class<?> targetClass = Jie.asNonnull(TypeKit.toRuntimeClass(target));
+        Class<?> targetClass = Kit.asNonnull(TypeKit.toRuntimeClass(target));
         return toArray(
             src,
             srcType,
@@ -382,7 +382,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws Exception {
         IntFunction<Object> mapFunc = MapClasses.get(rawTarget);
-        DataMapper dataMapper = Jie.nonnull(
+        DataMapper dataMapper = Kit.nonnull(
             Option.findValue(ConvertOption.DATA_MAPPER, options),
             DataMapper.defaultMapper()
         );
@@ -391,7 +391,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             dataMapper.copyProperties(src, srcType, targetObject, target, converter, options);
             return targetObject;
         } else {
-            ObjectBuilderProvider builderProvider = Jie.nonnull(
+            ObjectBuilderProvider builderProvider = Kit.nonnull(
                 Option.findValue(ConvertOption.BUILDER_PROVIDER, options),
                 ObjectBuilderProvider.defaultProvider()
             );
@@ -522,20 +522,20 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
                 return ((BigDecimal) src).toPlainString();
             }
             if (src instanceof Date) {
-                TimeFormatter timeFormatter = Jie.nonnull(
+                TimeFormatter timeFormatter = Kit.nonnull(
                     Option.findValue(ConvertOption.TIME_FORMATTER, options),
                     TimeFormatter.defaultFormatter()
                 );
                 return timeFormatter.format((Date) src);
             }
             if (src instanceof TemporalAccessor) {
-                TimeFormatter timeFormatter = Jie.nonnull(
+                TimeFormatter timeFormatter = Kit.nonnull(
                     Option.findValue(ConvertOption.TIME_FORMATTER, options),
                     TimeFormatter.defaultFormatter()
                 );
                 return timeFormatter.format((TemporalAccessor) src);
             }
-            Charset charset = Jie.nonnull(
+            Charset charset = Kit.nonnull(
                 Option.findValue(ConvertOption.CHARSET, options),
                 CharsKit.defaultCharset()
             );
@@ -545,7 +545,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             if (src instanceof ByteBuffer) {
                 return BufferKit.string((ByteBuffer) src, charset);
             }
-            IOOperator ioOperator = Jie.nonnull(
+            IOOperator ioOperator = Kit.nonnull(
                 Option.findValue(ConvertOption.IO_OPERATOR, options),
                 IOOperator.defaultOperator()
             );
@@ -586,7 +586,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
                 }
                 if (TemporalAccessor.class.isAssignableFrom((Class<?>) srcType)) {
                     TemporalAccessor ta = (TemporalAccessor) src;
-                    TimeFormatter timeFormatter = Jie.nonnull(
+                    TimeFormatter timeFormatter = Kit.nonnull(
                         Option.findValue(ConvertOption.TIME_FORMATTER, options),
                         TimeFormatter.defaultFormatter()
                     );
@@ -639,7 +639,7 @@ public class CommonConvertHandler implements ObjectConverter.Handler {
             @Nonnull ObjectConverter converter,
             @Nonnull Option<?, ?> @Nonnull ... options
         ) {
-            TimeFormatter timeFormatter = Jie.nonnull(
+            TimeFormatter timeFormatter = Kit.nonnull(
                 Option.findValue(ConvertOption.TIME_FORMATTER, options),
                 TimeFormatter.defaultFormatter()
             );

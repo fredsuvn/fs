@@ -15,7 +15,7 @@ import xyz.sunqian.common.app.di.InjectedResourceDestructionException;
 import xyz.sunqian.common.app.di.InjectedResourceInitializationException;
 import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
-import xyz.sunqian.test.JieTestException;
+import xyz.sunqian.test.KitvaTestException;
 import xyz.sunqian.test.PrintTest;
 
 import java.lang.reflect.Method;
@@ -730,7 +730,7 @@ public class DITest implements PrintTest {
 
         @PostConstruct
         public void postConstruct() {
-            throw new JieTestException();
+            throw new KitvaTestException();
         }
     }
 
@@ -738,7 +738,7 @@ public class DITest implements PrintTest {
 
         @PreDestroy
         public void preDestroy() {
-            throw new JieTestException();
+            throw new KitvaTestException();
         }
     }
 

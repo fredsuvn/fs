@@ -1,7 +1,7 @@
 package xyz.sunqian.common.net.udp;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.net.NetException;
 
@@ -39,7 +39,7 @@ public interface UdpSender extends Cloneable {
      * @throws NetException if an error occurs
      */
     static @Nonnull UdpSender newSender(boolean broadcast) throws NetException {
-        return Jie.uncheck(() -> UdpSenderBack.newSender(broadcast), NetException::new);
+        return Kit.uncheck(() -> UdpSenderBack.newSender(broadcast), NetException::new);
     }
 
     /**

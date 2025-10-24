@@ -1,7 +1,7 @@
 package tests.base.lang;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.lang.EnumKit;
 
 import static org.testng.Assert.assertEquals;
@@ -18,10 +18,10 @@ public class EnumTest {
         assertEquals(EnumKit.findEnum(X.class, 1), X.B);
         assertEquals(EnumKit.findEnum(X.class, 2), X.C);
         assertNull(EnumKit.findEnum(X.class, "D"));
-        assertNull(EnumKit.findEnum(Jie.as(String.class), "D"));
+        assertNull(EnumKit.findEnum(Kit.as(String.class), "D"));
         assertNull(EnumKit.findEnum(X.class, 3));
         assertNull(EnumKit.findEnum(X.class, -1));
-        assertNull(EnumKit.findEnum(Jie.as(String.class), 3));
+        assertNull(EnumKit.findEnum(Kit.as(String.class), 3));
     }
 
     enum X {

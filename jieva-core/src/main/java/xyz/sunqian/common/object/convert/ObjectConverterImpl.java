@@ -3,7 +3,7 @@ package xyz.sunqian.common.object.convert;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.RetainedParam;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.option.Option;
 import xyz.sunqian.common.object.convert.handlers.AssignableConvertHandler;
 import xyz.sunqian.common.object.convert.handlers.CommonConvertHandler;
@@ -13,7 +13,7 @@ import java.util.List;
 
 final class ObjectConverterImpl implements ObjectConverter, ObjectConverter.Handler {
 
-    static final @Nonnull ObjectConverterImpl DEFAULT_MAPPER = new ObjectConverterImpl(Jie.list(
+    static final @Nonnull ObjectConverterImpl DEFAULT_MAPPER = new ObjectConverterImpl(Kit.list(
         new AssignableConvertHandler(),
         new CommonConvertHandler()
     ));

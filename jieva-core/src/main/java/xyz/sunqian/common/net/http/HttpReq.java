@@ -2,7 +2,7 @@ package xyz.sunqian.common.net.http;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.common.base.CheckKit;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.net.NetException;
@@ -94,7 +94,7 @@ public interface HttpReq {
          * @throws NetException if the url is invalid
          */
         public @Nonnull Builder url(@Nonnull String url) throws NetException {
-            return url(Jie.uncheck(() -> new URL(url), NetException::new));
+            return url(Kit.uncheck(() -> new URL(url), NetException::new));
         }
 
         /**
@@ -189,8 +189,8 @@ public interface HttpReq {
             return new HttpReqImpl(
                 url,
                 method,
-                Jie.nonnull(headers, Collections.emptyMap()),
-                Jie.nonnull(body, IOKit.emptyInputStream())
+                Kit.nonnull(headers, Collections.emptyMap()),
+                Kit.nonnull(body, IOKit.emptyInputStream())
             );
         }
 

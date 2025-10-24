@@ -1,14 +1,14 @@
 package xyz.sunqian.common.base.string;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.exception.JieRuntimeException;
+import xyz.sunqian.common.base.exception.KitvaRuntimeException;
 
 /**
  * Extension for naming format, typically used for {@link NameFormatter}.
  *
  * @author sunqian
  */
-public class NameFormatException extends JieRuntimeException {
+public class NameFormatException extends KitvaRuntimeException {
 
     /**
      * Empty constructor.

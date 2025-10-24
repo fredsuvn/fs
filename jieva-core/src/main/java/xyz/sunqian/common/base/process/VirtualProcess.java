@@ -1,7 +1,7 @@
 package xyz.sunqian.common.base.process;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.io.IOKit;
 
 import java.io.InputStream;
@@ -114,7 +114,7 @@ public class VirtualProcess extends Process {
 
     @Override
     public int waitFor() {
-        Jie.until(() -> !alive);
+        Kit.until(() -> !alive);
         return exitValue();
     }
 

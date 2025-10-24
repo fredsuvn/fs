@@ -4,7 +4,7 @@ import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.OutParam;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -213,12 +213,12 @@ public class MapKit {
         int end = array.length / 2 * 2;
         int i = 0;
         while (i < end) {
-            K key = Jie.as(array[i++]);
-            V value = Jie.as(array[i++]);
+            K key = Kit.as(array[i++]);
+            V value = Kit.as(array[i++]);
             map.put(key, value);
         }
         if (end < array.length) {
-            map.put(Jie.as(array[end]), null);
+            map.put(Kit.as(array[end]), null);
         }
         return map;
     }
@@ -244,8 +244,8 @@ public class MapKit {
     ) {
         Iterator<?> iterator = it.iterator();
         while (iterator.hasNext()) {
-            K key = Jie.as(iterator.next());
-            V value = iterator.hasNext() ? Jie.as(iterator.next()) : null;
+            K key = Kit.as(iterator.next());
+            V value = iterator.hasNext() ? Kit.as(iterator.next()) : null;
             map.put(key, value);
         }
         return map;

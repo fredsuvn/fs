@@ -1,7 +1,7 @@
 package xyz.sunqian.common.base.thread;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.exception.AwaitingException;
 import xyz.sunqian.common.function.callable.BooleanCallable;
 
@@ -21,7 +21,7 @@ public class ThreadKit {
      */
     @SuppressWarnings({"InfiniteLoopStatement", "BusyWait"})
     public static void sleep() throws AwaitingException {
-        Jie.uncheck(
+        Kit.uncheck(
             () -> {
                 while (true) {
                     Thread.sleep(Integer.MAX_VALUE);
@@ -38,7 +38,7 @@ public class ThreadKit {
      * @throws AwaitingException if the current thread is interrupted or an error occurs while sleeping
      */
     public static void sleep(long millis) throws AwaitingException {
-        Jie.uncheck(
+        Kit.uncheck(
             () -> {
                 Thread.sleep(millis);
                 return null;
@@ -54,7 +54,7 @@ public class ThreadKit {
      * @throws AwaitingException if the current thread is interrupted or an error occurs while sleeping
      */
     public static void sleep(@Nonnull Duration duration) throws AwaitingException {
-        Jie.uncheck(
+        Kit.uncheck(
             () -> {
                 Thread.sleep(duration.toMillis(), duration.getNano() / 1000);
                 return null;

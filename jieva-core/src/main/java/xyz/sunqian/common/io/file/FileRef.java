@@ -2,7 +2,7 @@ package xyz.sunqian.common.io.file;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.io.IORuntimeException;
 
@@ -170,7 +170,7 @@ public interface FileRef {
      * @throws IORuntimeException if any error occurs
      */
     default @Nullable String getContentType() throws IORuntimeException {
-        return Jie.uncheck(
+        return Kit.uncheck(
             () -> Files.probeContentType(getPath()),
             IORuntimeException::new
         );

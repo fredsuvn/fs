@@ -4,7 +4,7 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.annotations.ThreadSafe;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.value.Var;
 import xyz.sunqian.common.runtime.invoke.Invocable;
 import xyz.sunqian.common.runtime.reflect.BytesClassLoader;
@@ -70,7 +70,7 @@ public class JdkProxyMaker implements ProxyMaker {
         @Nonnull Map<@Nonnull Method, @Nonnull Var<Invocable>> unproxiedMap
     ) {
         return (proxy, method, args) -> {
-            Object[] nonnullArgs = Jie.nonnull(args, EMPTY_ARGS);
+            Object[] nonnullArgs = Kit.nonnull(args, EMPTY_ARGS);
             Var<ProxyInvoker> invokerVar = proxiedMap.get(method);
             if (invokerVar == null) {
                 @Nonnull Var<Invocable> invocableVar = unproxiedMap.get(method);
@@ -133,9 +133,9 @@ public class JdkProxyMaker implements ProxyMaker {
 
         @Override
         public <T> @Nonnull T newInstance() throws JdkProxyException {
-            return Jie.uncheck(() -> {
+            return Kit.uncheck(() -> {
                 Constructor<?> constructor = proxyClass.getConstructor(InvocationHandler.class);
-                return Jie.as(constructor.newInstance(invocationHandler));
+                return Kit.as(constructor.newInstance(invocationHandler));
             }, JdkProxyException::new);
         }
 

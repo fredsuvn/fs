@@ -2,7 +2,7 @@ package tests.runtime.reflect;
 
 import org.testng.annotations.Test;
 import tests.utils.ErrorConstructor;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.runtime.reflect.ClassKit;
@@ -83,9 +83,9 @@ public class ClassTest implements AssertTest {
         Constructor<?> cl3 = Cls3.class.getConstructor();
         Constructor<?> pcl3 = Cls3.class.getDeclaredConstructor(int.class);
         assertEquals(ClassKit.getConstructor(Cls3.class, params), cl3);
-        assertEquals(ClassKit.getConstructor(Cls3.class, Jie.array(int.class)), pcl3);
-        assertNull(ClassKit.getConstructor(Cls3.class, Jie.array(int.class), false));
-        assertNull(ClassKit.getConstructor(Cls3.class, Jie.array(long.class)));
+        assertEquals(ClassKit.getConstructor(Cls3.class, Kit.array(int.class)), pcl3);
+        assertNull(ClassKit.getConstructor(Cls3.class, Kit.array(int.class), false));
+        assertNull(ClassKit.getConstructor(Cls3.class, Kit.array(long.class)));
     }
 
     @Test

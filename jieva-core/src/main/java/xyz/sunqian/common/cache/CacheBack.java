@@ -2,7 +2,7 @@ package xyz.sunqian.common.cache;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 
 import java.lang.ref.PhantomReference;
 import java.lang.ref.Reference;
@@ -54,7 +54,7 @@ final class CacheBack {
                 if (reference == null) {
                     return;
                 }
-                Value<K> rv = Jie.as(reference);
+                Value<K> rv = Kit.as(reference);
                 compareAndRemove(cacheMap, rv.key(), rv);
             }
         }

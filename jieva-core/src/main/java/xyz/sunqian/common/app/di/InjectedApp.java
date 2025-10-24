@@ -3,7 +3,7 @@ package xyz.sunqian.common.app.di;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.app.SimpleApp;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.collect.CollectKit;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
 
@@ -90,7 +90,7 @@ public interface InjectedApp extends SimpleApp {
      * exists
      */
     default <T> @Nullable T getResource(@Nonnull Class<T> type) {
-        return Jie.as(getResource((Type) type));
+        return Kit.as(getResource((Type) type));
     }
 
     /**
@@ -106,7 +106,7 @@ public interface InjectedApp extends SimpleApp {
      * exists
      */
     default <T> @Nullable T getResource(@Nonnull TypeRef<T> type) {
-        return Jie.as(getResource(type.type()));
+        return Kit.as(getResource(type.type()));
     }
 
     /**

@@ -1,7 +1,7 @@
 package xyz.sunqian.common.runtime.reflect;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -31,7 +31,7 @@ public abstract class TypeRef<T> {
         Type genericSuper = getClass().getGenericSuperclass();
         if (TypeKit.isParameterized(genericSuper)) {
             ParameterizedType parameterizedSuper = (ParameterizedType) genericSuper;
-            if (Jie.equals(parameterizedSuper.getRawType(), TypeRef.class)) {
+            if (Kit.equals(parameterizedSuper.getRawType(), TypeRef.class)) {
                 return parameterizedSuper.getActualTypeArguments()[0];
             }
         }

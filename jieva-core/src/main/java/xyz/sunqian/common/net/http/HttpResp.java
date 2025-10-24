@@ -2,7 +2,7 @@ package xyz.sunqian.common.net.http;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.io.IOKit;
 
@@ -90,7 +90,7 @@ public interface HttpResp {
      * @return the body of the response as a string, may be {@code null} if the response body is empty
      */
     default @Nullable String bodyString() {
-        Charset charset = Jie.nonnull(bodyCharset(), CharsKit.defaultCharset());
+        Charset charset = Kit.nonnull(bodyCharset(), CharsKit.defaultCharset());
         return IOKit.string(body(), charset);
     }
 }

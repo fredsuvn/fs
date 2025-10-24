@@ -5,7 +5,7 @@ import org.objectweb.asm.Opcodes;
 import xyz.sunqian.annotations.NonExported;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.system.JvmKit;
 import xyz.sunqian.common.collect.ArrayKit;
 import xyz.sunqian.common.runtime.reflect.ClassKit;
@@ -424,7 +424,7 @@ public class AsmKit {
         if (ArrayKit.isEmpty(exceptionTypes)) {
             return null;
         }
-        return Jie.stream(exceptionTypes).map(JvmKit::toInternalName).toArray(String[]::new);
+        return Kit.stream(exceptionTypes).map(JvmKit::toInternalName).toArray(String[]::new);
     }
 
     /**
@@ -433,8 +433,8 @@ public class AsmKit {
      * @param count the given count
      */
     public static String generateClassSimpleName(long count) {
-        return "ClassGeneratedBy" + Jie.LIB_NAME
-            + "$V" + Jie.LIB_VERSION.replace('.', '_')
+        return "ClassGeneratedBy" + Kit.LIB_NAME
+            + "$V" + Kit.LIB_VERSION.replace('.', '_')
             + "$C" + count;
     }
 }

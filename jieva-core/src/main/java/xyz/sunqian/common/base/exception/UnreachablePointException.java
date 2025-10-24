@@ -7,7 +7,7 @@ import xyz.sunqian.annotations.Nullable;
  *
  * @author sunqian
  */
-public class UnreachablePointException extends JieRuntimeException {
+public class UnreachablePointException extends KitvaRuntimeException {
 
     /**
      * Empty constructor.

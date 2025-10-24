@@ -2,7 +2,7 @@ package xyz.sunqian.common.net.http;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.chars.CharsKit;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.net.NetException;
@@ -55,7 +55,7 @@ public class HttpKit {
         @Nonnull Duration readTimeout,
         @Nullable Proxy proxy
     ) throws NetException {
-        return HTTP_CLIENT_ENGINE.request(req, connectTimeout, readTimeout, Jie.nonnull(proxy, Proxy.NO_PROXY));
+        return HTTP_CLIENT_ENGINE.request(req, connectTimeout, readTimeout, Kit.nonnull(proxy, Proxy.NO_PROXY));
     }
 
     /**
@@ -114,7 +114,7 @@ public class HttpKit {
                 encodeUrl(value, charset)
             ).append("&"));
         }
-        return Jie.uncheck(() -> new URL(url.toString()), NetException::new);
+        return Kit.uncheck(() -> new URL(url.toString()), NetException::new);
     }
 
     /**

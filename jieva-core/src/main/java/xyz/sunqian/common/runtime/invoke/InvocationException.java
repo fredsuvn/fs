@@ -1,7 +1,7 @@
 package xyz.sunqian.common.runtime.invoke;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.exception.JieRuntimeException;
+import xyz.sunqian.common.base.exception.KitvaRuntimeException;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -12,7 +12,7 @@ import java.lang.reflect.InvocationTargetException;
  *
  * @author sunqian
  */
-public class InvocationException extends JieRuntimeException {
+public class InvocationException extends KitvaRuntimeException {
 
     /**
      * Constructs with the message.

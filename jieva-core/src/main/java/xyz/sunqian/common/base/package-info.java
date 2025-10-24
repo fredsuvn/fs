@@ -1,7 +1,7 @@
 /**
  * This package is the base package for this lib, provides the most basic utilities:
  * <ul>
- *     <li>{@link xyz.sunqian.common.base.Jie}</li>
+ *     <li>{@link xyz.sunqian.common.base.Kit}</li>
  *     <li>{@link xyz.sunqian.common.base.CheckKit}</li>
  * </ul>
  * And, it also has many subpackages provide very basic utilities, interfaces and classes:

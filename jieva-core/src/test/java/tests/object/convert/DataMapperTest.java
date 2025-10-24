@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.testng.annotations.Test;
 import tests.utils.ErrorMap;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.exception.UnreachablePointException;
 import xyz.sunqian.common.collect.MapKit;
 import xyz.sunqian.common.object.convert.ConvertOption;
@@ -66,7 +66,7 @@ public class DataMapperTest implements PrintTest {
             assertTrue(mapA2.isEmpty());
             dataMapper.copyProperties(mapA, typeA, mapA2, typeA, ConvertOption.propertyMapper(
                 (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
-                    Map<String, String> ma = Jie.as(src);
+                    Map<String, String> ma = Kit.as(src);
                     String key = (String) propertyName;
                     return MapKit.entry(key + "2", ma.get(key));
                 }));
@@ -126,7 +126,7 @@ public class DataMapperTest implements PrintTest {
             assertTrue(clsA2.getFirst2() == null && clsA2.getSecond2() == null);
             dataMapper.copyProperties(mapA, typeA, clsA2, ClsA2.class, ConvertOption.propertyMapper(
                 (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
-                    Map<String, String> ma = Jie.as(src);
+                    Map<String, String> ma = Kit.as(src);
                     String key = (String) propertyName;
                     return MapKit.entry(key + "2", ma.get(key));
                 }));
@@ -188,7 +188,7 @@ public class DataMapperTest implements PrintTest {
             assertTrue(mapA2.isEmpty());
             dataMapper.copyProperties(clsA, ClsA.class, mapA2, typeA, ConvertOption.propertyMapper(
                 (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
-                    ObjectSchema os = Jie.as(srcSchema);
+                    ObjectSchema os = Kit.as(srcSchema);
                     String key = (String) propertyName;
                     ObjectProperty op = os.getProperty(key);
                     if (op == null) {
@@ -251,7 +251,7 @@ public class DataMapperTest implements PrintTest {
             assertTrue(clsA2.getFirst2() == null && clsA2.getSecond2() == null);
             dataMapper.copyProperties(clsA, ClsA.class, clsA2, ClsA2.class, ConvertOption.propertyMapper(
                 (propertyName, src, srcSchema, dst, dstSchema, converter, options) -> {
-                    ObjectSchema os = Jie.as(srcSchema);
+                    ObjectSchema os = Kit.as(srcSchema);
                     String key = (String) propertyName;
                     ObjectProperty op = os.getProperty(key);
                     if (op == null) {

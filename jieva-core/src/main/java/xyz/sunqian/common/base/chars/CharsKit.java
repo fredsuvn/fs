@@ -2,7 +2,7 @@ package xyz.sunqian.common.base.chars;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.system.SystemKeys;
 
 import java.nio.CharBuffer;
@@ -83,7 +83,7 @@ public class CharsKit {
      * {@link #jvmCharset()}.
      */
     public static @Nonnull Charset localCharset() {
-        return Jie.nonnull(nativeCharset(), jvmCharset());
+        return Kit.nonnull(nativeCharset(), jvmCharset());
     }
 
     /**

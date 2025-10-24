@@ -2,7 +2,7 @@ package xyz.sunqian.common.base.value;
 
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 
 /**
  * This interface represents an immutable container holding a value, similar to a {@code final} variable.
@@ -23,7 +23,7 @@ public interface Val<T> {
      * @return a {@link Val} holding the {@code null}
      */
     static <T> @Nonnull Val<T> ofNull() {
-        return Jie.as(ValBack.OF_NULL);
+        return Kit.as(ValBack.OF_NULL);
     }
 
     /**

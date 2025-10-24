@@ -2,7 +2,7 @@ package xyz.sunqian.common.cache;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.value.Val;
 import xyz.sunqian.common.base.value.Var;
 
@@ -88,7 +88,7 @@ public abstract class AbstractSimpleCache<K, V> implements SimpleCache<K, V> {
             value.set(newV);
             return generate(key, maskValue(newV));
         });
-        return Jie.as(value.get());
+        return Kit.as(value.get());
     }
 
     @Override
@@ -126,7 +126,7 @@ public abstract class AbstractSimpleCache<K, V> implements SimpleCache<K, V> {
         if (v == NULL_VAL) {
             return null;
         }
-        return Val.of(Jie.as(v));
+        return Val.of(Kit.as(v));
     }
 
     @Override
@@ -170,7 +170,7 @@ public abstract class AbstractSimpleCache<K, V> implements SimpleCache<K, V> {
         if (raw instanceof Null) {
             return null;
         }
-        return Jie.as(raw);
+        return Kit.as(raw);
     }
 
     private static final class Null {

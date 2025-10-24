@@ -1,7 +1,7 @@
 package xyz.sunqian.common.net;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.collect.CollectKit;
 import xyz.sunqian.common.collect.StreamKit;
 
@@ -25,18 +25,18 @@ public class NetKit {
      * @throws NetException if an error occurs
      */
     public static @Nonnull InetAddress getBroadcastAddress() throws NetException {
-        return Jie.uncheck(NetKit::getBroadcastAddress0, NetException::new);
+        return Kit.uncheck(NetKit::getBroadcastAddress0, NetException::new);
     }
 
     private static @Nonnull InetAddress getBroadcastAddress0() throws Exception {
         Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
         return StreamKit.stream(() -> CollectKit.asIterator(interfaces))
             .filter(networkInterface ->
-                Jie.uncheck(networkInterface::isUp, NetException::new))
+                Kit.uncheck(networkInterface::isUp, NetException::new))
             .filter(networkInterface ->
-                Jie.uncheck(() -> !networkInterface.isLoopback(), NetException::new))
+                Kit.uncheck(() -> !networkInterface.isLoopback(), NetException::new))
             .filter(networkInterface ->
-                Jie.uncheck(() -> !networkInterface.isPointToPoint(), NetException::new))
+                Kit.uncheck(() -> !networkInterface.isPointToPoint(), NetException::new))
             .flatMap(networkInterface -> networkInterface.getInterfaceAddresses().stream())
             .map(InterfaceAddress::getBroadcast)
             .filter(Objects::nonNull)

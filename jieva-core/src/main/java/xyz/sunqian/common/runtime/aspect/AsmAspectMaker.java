@@ -8,7 +8,7 @@ import org.objectweb.asm.Opcodes;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.ThreadSafe;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.system.JvmKit;
 import xyz.sunqian.common.runtime.proxy.ProxyKit;
 import xyz.sunqian.common.runtime.reflect.BytesClassLoader;
@@ -43,17 +43,17 @@ public class AsmAspectMaker implements AspectMaker {
     private static final @Nonnull String HANDLER_NAME = JvmKit.toInternalName(AspectHandler.class);
     private static final @Nonnull String HANDLER_DESCRIPTOR = JvmKit.toDescriptor(AspectHandler.class);
     private static final @Nonnull String METHODS_DESCRIPTOR = JvmKit.toDescriptor(Method[].class);
-    private static final @Nonnull Method BEFORE_METHOD = Jie.uncheck(
+    private static final @Nonnull Method BEFORE_METHOD = Kit.uncheck(
         () -> AspectHandler.class.getMethod("beforeInvoking", Method.class, Object[].class, Object.class),
         AsmAspectException::new
     );
     private static final @Nonnull String BEFORE_DESCRIPTOR = JvmKit.toDescriptor(BEFORE_METHOD);
-    private static final @Nonnull Method AFTER_METHOD = Jie.uncheck(
+    private static final @Nonnull Method AFTER_METHOD = Kit.uncheck(
         () -> AspectHandler.class.getMethod("afterReturning", Object.class, Method.class, Object[].class, Object.class),
         AsmAspectException::new
     );
     private static final @Nonnull String AFTER_DESCRIPTOR = JvmKit.toDescriptor(AFTER_METHOD);
-    private static final @Nonnull Method THROW_METHOD = Jie.uncheck(
+    private static final @Nonnull Method THROW_METHOD = Kit.uncheck(
         () -> AspectHandler.class.getMethod("afterThrowing", Throwable.class, Method.class, Object[].class, Object.class),
         AsmAspectException::new
     );
@@ -451,9 +451,9 @@ public class AsmAspectMaker implements AspectMaker {
 
         @Override
         public <T> @Nonnull T newInstance() throws AsmAspectException {
-            return Jie.uncheck(() -> {
+            return Kit.uncheck(() -> {
                 Constructor<?> constructor = aspectClass.getConstructor(AspectHandler.class, Method[].class);
-                return Jie.as(constructor.newInstance(aspectHandler, methods));
+                return Kit.as(constructor.newInstance(aspectHandler, methods));
             }, AsmAspectException::new);
         }
 

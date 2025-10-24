@@ -1,18 +1,18 @@
-package xyz.sunqian.common.base.exception;
+package xyz.sunqian.test;
 
 import xyz.sunqian.annotations.Nullable;
 
 /**
- * This is the root exception for this lib.
+ * Exception for tests.
  *
  * @author sunqian
  */
-public class JieException extends Exception {
+public class KitvaTestException extends RuntimeException {
 
     /**
      * Empty constructor.
      */
-    public JieException() {
+    public KitvaTestException() {
         super();
     }
 
@@ -21,7 +21,7 @@ public class JieException extends Exception {
      *
      * @param message the message
      */
-    public JieException(@Nullable String message) {
+    public KitvaTestException(@Nullable String message) {
         super(message);
     }
 
@@ -31,7 +31,7 @@ public class JieException extends Exception {
      * @param message the message
      * @param cause   the cause
      */
-    public JieException(@Nullable String message, @Nullable Throwable cause) {
+    public KitvaTestException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
@@ -40,7 +40,7 @@ public class JieException extends Exception {
      *
      * @param cause the cause
      */
-    public JieException(@Nullable Throwable cause) {
+    public KitvaTestException(@Nullable Throwable cause) {
         super(cause);
     }
 }

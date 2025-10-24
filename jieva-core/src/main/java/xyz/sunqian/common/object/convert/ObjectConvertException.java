@@ -2,7 +2,7 @@ package xyz.sunqian.common.object.convert;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.exception.JieRuntimeException;
+import xyz.sunqian.common.base.exception.KitvaRuntimeException;
 
 import java.lang.reflect.Type;
 
@@ -11,7 +11,7 @@ import java.lang.reflect.Type;
  *
  * @author sunqian
  */
-public class ObjectConvertException extends JieRuntimeException {
+public class ObjectConvertException extends KitvaRuntimeException {
 
     private static String toMessage(@Nonnull Type sourceType, @Nonnull Type targetType) {
         return "Conversion failed: " + sourceType.getTypeName() + " to " + targetType.getTypeName() + ".";

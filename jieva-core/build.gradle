@@ -9,7 +9,7 @@ plugins {
   //id 'jacoco'
 }
 
-description = 'Core of Jieva.'
+description = 'Core of KitVa.'
 
 java {
   registerFeature('proxySpringSupport') {

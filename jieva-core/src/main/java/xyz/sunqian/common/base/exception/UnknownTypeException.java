@@ -9,7 +9,7 @@ import java.lang.reflect.Type;
  *
  * @author sunqian
  */
-public class UnknownTypeException extends JieRuntimeException {
+public class UnknownTypeException extends KitvaRuntimeException {
 
     private static @Nonnull String toMessage(@Nonnull Type type) {
         return "Unknown type: " + type + ".";

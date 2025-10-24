@@ -2,7 +2,7 @@ package tests;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.test.AssertTest;
-import xyz.sunqian.test.JieTestException;
+import xyz.sunqian.test.KitvaTestException;
 import xyz.sunqian.test.MaterialBox;
 import xyz.sunqian.test.TestIOException;
 
@@ -30,7 +30,7 @@ public class AssertTestTest implements AssertTest {
     @Test
     public void testThrows() throws Exception {
         Method throwError = Tt.class.getDeclaredMethod("throwError");
-        assertEquals(invokeThrows(JieTestException.class, throwError, null).getClass(), JieTestException.class);
+        assertEquals(invokeThrows(KitvaTestException.class, throwError, null).getClass(), KitvaTestException.class);
         Method string = Tt.class.getDeclaredMethod("string");
         assertEquals(invokeThrows(AssertTest.NoThrows.class, string, null).getClass(), AssertTest.NoThrows.class);
     }
@@ -163,17 +163,17 @@ public class AssertTestTest implements AssertTest {
 
     @Test
     public void testException() {
-        expectThrows(JieTestException.class, () -> {
-            throw new JieTestException();
+        expectThrows(KitvaTestException.class, () -> {
+            throw new KitvaTestException();
         });
-        expectThrows(JieTestException.class, () -> {
-            throw new JieTestException("");
+        expectThrows(KitvaTestException.class, () -> {
+            throw new KitvaTestException("");
         });
-        expectThrows(JieTestException.class, () -> {
-            throw new JieTestException("", new RuntimeException());
+        expectThrows(KitvaTestException.class, () -> {
+            throw new KitvaTestException("", new RuntimeException());
         });
-        expectThrows(JieTestException.class, () -> {
-            throw new JieTestException(new RuntimeException());
+        expectThrows(KitvaTestException.class, () -> {
+            throw new KitvaTestException(new RuntimeException());
         });
         expectThrows(TestIOException.class, () -> {
             throw new TestIOException();
@@ -192,7 +192,7 @@ public class AssertTestTest implements AssertTest {
     private static final class Tt {
 
         private static void throwError() {
-            throw new JieTestException();
+            throw new KitvaTestException();
         }
 
         private static String string() {

@@ -4,7 +4,7 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.OutParam;
 import xyz.sunqian.annotations.RetainedParam;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.collect.ArrayKit;
 import xyz.sunqian.common.collect.MapKit;
 
@@ -284,11 +284,11 @@ public class TypeKit {
         }
         Map<TypeVariable<?>, Type> typeArguments = typeParametersMapping(type);
         Set<Type> stack = new HashSet<>();
-        return Jie.stream(typeParameters)
+        return Kit.stream(typeParameters)
             .map(typeVariable -> {
                 Type actualType = MapKit.resolveChain(typeArguments, typeVariable, stack);
                 stack.clear();
-                return Jie.nonnull(actualType, typeVariable);
+                return Kit.nonnull(actualType, typeVariable);
             })
             .collect(Collectors.toList());
     }
@@ -409,7 +409,7 @@ public class TypeKit {
         @Nonnull Class<?> matching,
         @Nonnull Type replacement
     ) throws ReflectionException {
-        return replaceType(type, t -> Jie.equals(t, matching) ? replacement : t);
+        return replaceType(type, t -> Kit.equals(t, matching) ? replacement : t);
     }
 
     /**
@@ -437,7 +437,7 @@ public class TypeKit {
     ) throws ReflectionException {
         if (TypeKit.isClass(type)) {
             Type newType = mapper.apply((Class<?>) type);
-            if (!Jie.equals(type, newType)) {
+            if (!Kit.equals(type, newType)) {
                 return newType;
             }
         }
@@ -463,14 +463,14 @@ public class TypeKit {
         if (!TypeKit.isClass(newRawType)) {
             throw new ReflectionException("Unsupported raw type: " + newRawType + ".");
         }
-        if (!Jie.equals(rawType, newRawType)) {
+        if (!Kit.equals(rawType, newRawType)) {
             matched = true;
         }
         @Nullable Type ownerType = type.getOwnerType();
         Type newOwnerType = null;
         if (ownerType != null) {
             newOwnerType = replaceType(ownerType, mapper);
-            if (!Jie.equals(ownerType, newOwnerType)) {
+            if (!Kit.equals(ownerType, newOwnerType)) {
                 matched = true;
             }
         }
@@ -478,7 +478,7 @@ public class TypeKit {
         for (int i = 0; i < actualTypeArguments.length; i++) {
             Type actualTypeArgument = actualTypeArguments[i];
             Type newActualTypeArgument = replaceType(actualTypeArgument, mapper);
-            if (!Jie.equals(actualTypeArgument, newActualTypeArgument)) {
+            if (!Kit.equals(actualTypeArgument, newActualTypeArgument)) {
                 matched = true;
                 actualTypeArguments[i] = newActualTypeArgument;
             }
@@ -499,7 +499,7 @@ public class TypeKit {
         for (int i = 0; i < upperBounds.length; i++) {
             Type upperBound = upperBounds[i];
             Type newUpperBound = replaceType(upperBound, mapper);
-            if (!Jie.equals(upperBound, newUpperBound)) {
+            if (!Kit.equals(upperBound, newUpperBound)) {
                 matched = true;
                 upperBounds[i] = newUpperBound;
             }
@@ -508,7 +508,7 @@ public class TypeKit {
         for (int i = 0; i < lowerBounds.length; i++) {
             Type lowerBound = lowerBounds[i];
             Type newLowerBound = replaceType(lowerBound, mapper);
-            if (!Jie.equals(lowerBound, newLowerBound)) {
+            if (!Kit.equals(lowerBound, newLowerBound)) {
                 matched = true;
                 lowerBounds[i] = newLowerBound;
             }
@@ -527,7 +527,7 @@ public class TypeKit {
         boolean matched = false;
         Type componentType = type.getGenericComponentType();
         Type newComponentType = replaceType(componentType, mapper);
-        if (!Jie.equals(componentType, newComponentType)) {
+        if (!Kit.equals(componentType, newComponentType)) {
             matched = true;
         }
         if (matched) {
@@ -576,7 +576,7 @@ public class TypeKit {
      * @return a new {@link WildcardType} with the specified upper bound ({@code ? extends})
      */
     public static @Nonnull WildcardType upperWildcard(@Nonnull Type upperBound) {
-        return new WildcardTypeImpl(Jie.array(upperBound), WildcardTypeImpl.EMPTY_BOUNDS);
+        return new WildcardTypeImpl(Kit.array(upperBound), WildcardTypeImpl.EMPTY_BOUNDS);
     }
 
     /**
@@ -586,7 +586,7 @@ public class TypeKit {
      * @return a new {@link WildcardType} with the specified lower bound ({@code ? super})
      */
     public static @Nonnull WildcardType lowerWildcard(@Nonnull Type lowerBounds) {
-        return new WildcardTypeImpl(WildcardTypeImpl.OBJECT_BOUND, Jie.array(lowerBounds));
+        return new WildcardTypeImpl(WildcardTypeImpl.OBJECT_BOUND, Kit.array(lowerBounds));
     }
 
     /**
@@ -673,14 +673,14 @@ public class TypeKit {
             }
             if (o instanceof ParameterizedTypeImpl) {
                 ParameterizedTypeImpl that = (ParameterizedTypeImpl) o;
-                return Jie.equals(ownerType, that.ownerType) &&
-                    Jie.equals(rawType, that.rawType) &&
+                return Kit.equals(ownerType, that.ownerType) &&
+                    Kit.equals(rawType, that.rawType) &&
                     Arrays.equals(actualTypeArguments, that.actualTypeArguments);
             }
             if (o instanceof ParameterizedType) {
                 ParameterizedType that = (ParameterizedType) o;
-                return Jie.equals(ownerType, that.getOwnerType()) &&
-                    Jie.equals(rawType, that.getRawType()) &&
+                return Kit.equals(ownerType, that.getOwnerType()) &&
+                    Kit.equals(rawType, that.getRawType()) &&
                     Arrays.equals(actualTypeArguments, that.getActualTypeArguments());
             }
             return false;
@@ -709,7 +709,7 @@ public class TypeKit {
             }
             // <...>
             sb.append("<");
-            sb.append(Jie.stream(actualTypeArguments)
+            sb.append(Kit.stream(actualTypeArguments)
                 .map(Type::getTypeName)
                 .collect(Collectors.joining(", ")));
             sb.append(">");
@@ -722,7 +722,7 @@ public class TypeKit {
         private static final @Nonnull Type @Nonnull [] EMPTY_BOUNDS = {};
         private static final @Nonnull Type @Nonnull [] OBJECT_BOUND = {Object.class};
         private static final WildcardType QUESTION_MARK = new WildcardTypeImpl(
-            Jie.array(Object.class), EMPTY_BOUNDS
+            Kit.array(Object.class), EMPTY_BOUNDS
         );
 
         private final @Nonnull Type @Nonnull [] upperBounds;
@@ -779,7 +779,7 @@ public class TypeKit {
                 return "? super " + lowerBounds[0].getTypeName();
             }
             if (upperBounds.length > 0) {
-                if (Jie.equals(upperBounds[0], Object.class)) {
+                if (Kit.equals(upperBounds[0], Object.class)) {
                     return "?";
                 }
                 // ? extends

@@ -4,7 +4,7 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.system.JvmKit;
 import xyz.sunqian.common.runtime.reflect.BytesClassLoader;
 import xyz.sunqian.common.runtime.reflect.ClassKit;
@@ -20,18 +20,12 @@ final class ByAsm {
 
     private static final @Nonnull String INVOCABLE_NAME = JvmKit.toInternalName(Invocable.class);
     private static final @Nonnull String @Nonnull [] INTERFACES = new String[]{INVOCABLE_NAME};
-    private static final @Nonnull Method INVOKE_CHECKED = Jie.uncheck(
+    private static final @Nonnull Method INVOKE_CHECKED = Kit.uncheck(
         () -> Invocable.class.getMethod("invokeChecked", Object.class, Object[].class),
         InvocationException::new
     );
     private static final @Nonnull String @Nonnull [] INVOKE_CHECKED_EXCEPTIONS = {JvmKit.toInternalName(Throwable.class)};
     private static final @Nonnull String INVOKE_CHECKED_DESC = JvmKit.toDescriptor(INVOKE_CHECKED);
-    // private static final @Nonnull String THROWABLE_NAME = JieJvm.getInternalName(Throwable.class);
-    // private static final @Nonnull String EXCEPTION_NAME = JieJvm.getInternalName(InvocationException.class);
-    // private static final @Nonnull String EXCEPTION_CONSTRUCTOR_DESCRIPTOR = Jie.uncheck(
-    //     () -> JieJvm.getDescriptor(InvocationException.class.getConstructor(Throwable.class)),
-    //     InvocationException::new
-    // );
 
     private static final @Nonnull AtomicLong classCounter = new AtomicLong();
 
@@ -61,7 +55,7 @@ final class ByAsm {
     private static Invocable generate(byte[] bytecode) {
         BytesClassLoader classLoader = new BytesClassLoader();
         Class<?> cls = classLoader.loadClass(null, bytecode);
-        return Jie.uncheck(() -> Jie.as(cls.getDeclaredConstructor().newInstance()), InvocationException::new);
+        return Kit.uncheck(() -> Kit.as(cls.getDeclaredConstructor().newInstance()), InvocationException::new);
     }
 
     private static ClassWriter generateClassBody(String className) {
@@ -105,11 +99,6 @@ final class ByAsm {
             null,
             INVOKE_CHECKED_EXCEPTIONS
         );
-        // Label start = new Label();
-        // Label end = new Label();
-        // Label handler = new Label();
-        // visitor.visitTryCatchBlock(start, end, handler, THROWABLE_NAME);
-        // visitor.visitLabel(start);
         String methodOwnerName = JvmKit.toInternalName(method.getDeclaringClass());
         boolean isStatic = ClassKit.isStatic(method);
         if (!isStatic) {
@@ -137,23 +126,8 @@ final class ByAsm {
                 method.getDeclaringClass().isInterface()
             );
         }
-        // visitor.visitLabel(end);
         Class<?> returnType = AsmKit.wrapToObject(visitor, method.getReturnType());
         AsmKit.visitReturn(visitor, returnType, false, true);
-        // visitor.visitLabel(handler);
-        // visitor.visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[]{THROWABLE_NAME});
-        // visitor.visitVarInsn(Opcodes.ASTORE, 3);
-        // visitor.visitTypeInsn(Opcodes.NEW, EXCEPTION_NAME);
-        // visitor.visitInsn(Opcodes.DUP);
-        // visitor.visitVarInsn(Opcodes.ALOAD, 3);
-        // visitor.visitMethodInsn(
-        //     Opcodes.INVOKESPECIAL,
-        //     EXCEPTION_NAME,
-        //     JieAsm.CONSTRUCTOR_NAME,
-        //     EXCEPTION_CONSTRUCTOR_DESCRIPTOR,
-        //     false
-        // );
-        // visitor.visitInsn(Opcodes.ATHROW);
         visitor.visitMaxs(0, 0);
         visitor.visitEnd();
     }
@@ -166,11 +140,6 @@ final class ByAsm {
             null,
             INVOKE_CHECKED_EXCEPTIONS
         );
-        // Label start = new Label();
-        // Label end = new Label();
-        // Label handler = new Label();
-        // visitor.visitTryCatchBlock(start, end, handler, THROWABLE_NAME);
-        // visitor.visitLabel(start);
         String methodOwnerName = JvmKit.toInternalName(constructor.getDeclaringClass());
         // new Object();
         visitor.visitTypeInsn(Opcodes.NEW, methodOwnerName);
@@ -185,22 +154,7 @@ final class ByAsm {
             JvmKit.toDescriptor(constructor),
             false
         );
-        // visitor.visitLabel(end);
         visitor.visitInsn(Opcodes.ARETURN);
-        // visitor.visitLabel(handler);
-        // visitor.visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[]{THROWABLE_NAME});
-        // visitor.visitVarInsn(Opcodes.ASTORE, 3);
-        // visitor.visitTypeInsn(Opcodes.NEW, EXCEPTION_NAME);
-        // visitor.visitInsn(Opcodes.DUP);
-        // visitor.visitVarInsn(Opcodes.ALOAD, 3);
-        // visitor.visitMethodInsn(
-        //     Opcodes.INVOKESPECIAL,
-        //     EXCEPTION_NAME,
-        //     JieAsm.CONSTRUCTOR_NAME,
-        //     EXCEPTION_CONSTRUCTOR_DESCRIPTOR,
-        //     false
-        // );
-        // visitor.visitInsn(Opcodes.ATHROW);
         visitor.visitMaxs(0, 0);
         visitor.visitEnd();
     }

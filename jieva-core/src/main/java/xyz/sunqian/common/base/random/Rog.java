@@ -3,7 +3,7 @@ package xyz.sunqian.common.base.random;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.CheckKit;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.exception.UnreachablePointException;
 
 import java.util.ArrayList;
@@ -93,7 +93,7 @@ public interface Rog<T> {
         ) throws IllegalArgumentException {
             CheckKit.checkArgument(weight >= 0, "weight must be non-negative");
             weights.add(new Weight<>(weight, supplier));
-            return Jie.as(this);
+            return Kit.as(this);
         }
 
         /**
@@ -105,7 +105,7 @@ public interface Rog<T> {
          */
         public <T1> @Nonnull Builder<T1> rng(@Nonnull LongSupplier rng) {
             this.rng = rng;
-            return Jie.as(this);
+            return Kit.as(this);
         }
 
         /**
@@ -115,7 +115,7 @@ public interface Rog<T> {
          * @return a new {@link Rog} instance with the added weights, objects and suppliers
          */
         public <T1> @Nonnull Rog<T1> build() {
-            return Jie.as(
+            return Kit.as(
                 new RogImpl<>(rng == null ? Rng.newRng() : rng, weights)
             );
         }

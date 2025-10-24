@@ -4,7 +4,7 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.OutParam;
 import xyz.sunqian.annotations.RetainedParam;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.function.predicate.IndexedDoublePredicate;
 import xyz.sunqian.common.function.predicate.IndexedIntPredicate;
 import xyz.sunqian.common.function.predicate.IndexedLongPredicate;
@@ -397,7 +397,7 @@ public class ArrayKit {
      * @return the created array
      */
     public static <A> @Nonnull A newArray(@Nonnull Class<?> componentType, int length) {
-        return Jie.as(Array.newInstance(componentType, length));
+        return Kit.as(Array.newInstance(componentType, length));
     }
 
     /**
@@ -547,18 +547,18 @@ public class ArrayKit {
     }
 
     /**
-     * Returns the first index of the element which equals the specified value via {@link Jie#equals(Object, Object)} at
+     * Returns the first index of the element which equals the specified value via {@link Kit#equals(Object, Object)} at
      * the given array. If none of the elements found, returns -1.
      *
      * @param array the given array
      * @param value the specified value
      * @param <T>   the component type
-     * @return the first index of the element which equals the specified value via {@link Jie#equals(Object, Object)} at
+     * @return the first index of the element which equals the specified value via {@link Kit#equals(Object, Object)} at
      * the given array
      */
     public static <T> int indexOf(T @Nonnull [] array, T value) {
         for (int i = 0; i < array.length; i++) {
-            if (Jie.equals(array[i], value)) {
+            if (Kit.equals(array[i], value)) {
                 return i;
             }
         }
@@ -575,7 +575,7 @@ public class ArrayKit {
      */
     public static int indexOf(boolean @Nonnull [] array, boolean value) {
         for (int i = 0; i < array.length; i++) {
-            if (Jie.equals(array[i], value)) {
+            if (Kit.equals(array[i], value)) {
                 return i;
             }
         }
@@ -592,7 +592,7 @@ public class ArrayKit {
      */
     public static int indexOf(byte @Nonnull [] array, byte value) {
         for (int i = 0; i < array.length; i++) {
-            if (Jie.equals(array[i], value)) {
+            if (Kit.equals(array[i], value)) {
                 return i;
             }
         }
@@ -609,7 +609,7 @@ public class ArrayKit {
      */
     public static int indexOf(short @Nonnull [] array, short value) {
         for (int i = 0; i < array.length; i++) {
-            if (Jie.equals(array[i], value)) {
+            if (Kit.equals(array[i], value)) {
                 return i;
             }
         }
@@ -626,7 +626,7 @@ public class ArrayKit {
      */
     public static int indexOf(char @Nonnull [] array, char value) {
         for (int i = 0; i < array.length; i++) {
-            if (Jie.equals(array[i], value)) {
+            if (Kit.equals(array[i], value)) {
                 return i;
             }
         }
@@ -643,7 +643,7 @@ public class ArrayKit {
      */
     public static int indexOf(int @Nonnull [] array, int value) {
         for (int i = 0; i < array.length; i++) {
-            if (Jie.equals(array[i], value)) {
+            if (Kit.equals(array[i], value)) {
                 return i;
             }
         }
@@ -660,7 +660,7 @@ public class ArrayKit {
      */
     public static int indexOf(long @Nonnull [] array, long value) {
         for (int i = 0; i < array.length; i++) {
-            if (Jie.equals(array[i], value)) {
+            if (Kit.equals(array[i], value)) {
                 return i;
             }
         }
@@ -677,7 +677,7 @@ public class ArrayKit {
      */
     public static int indexOf(float @Nonnull [] array, float value) {
         for (int i = 0; i < array.length; i++) {
-            if (Jie.equals(array[i], value)) {
+            if (Kit.equals(array[i], value)) {
                 return i;
             }
         }
@@ -694,7 +694,7 @@ public class ArrayKit {
      */
     public static int indexOf(double @Nonnull [] array, double value) {
         for (int i = 0; i < array.length; i++) {
-            if (Jie.equals(array[i], value)) {
+            if (Kit.equals(array[i], value)) {
                 return i;
             }
         }
@@ -865,7 +865,7 @@ public class ArrayKit {
     }
 
     /**
-     * Returns the last index of the element which equals the specified value via {@link Jie#equals(Object, Object)} at
+     * Returns the last index of the element which equals the specified value via {@link Kit#equals(Object, Object)} at
      * the given array. If none of the elements found, returns -1.
      * <p>
      * It is the reverse order method of the {@link #indexOf(Object[], Object)}.
@@ -873,12 +873,12 @@ public class ArrayKit {
      * @param array the given array
      * @param value the specified value
      * @param <T>   the component type
-     * @return the last index of the element which equals the specified value via {@link Jie#equals(Object, Object)} at
+     * @return the last index of the element which equals the specified value via {@link Kit#equals(Object, Object)} at
      * the given array
      */
     public static <T> int lastIndexOf(T @Nonnull [] array, T value) {
         for (int i = array.length - 1; i >= 0; i--) {
-            if (Jie.equals(array[i], value)) {
+            if (Kit.equals(array[i], value)) {
                 return i;
             }
         }

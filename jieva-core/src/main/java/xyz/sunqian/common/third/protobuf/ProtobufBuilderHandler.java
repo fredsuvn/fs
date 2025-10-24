@@ -3,7 +3,7 @@ package xyz.sunqian.common.third.protobuf;
 import com.google.protobuf.Message;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.object.data.DataObjectException;
 import xyz.sunqian.common.object.data.ObjectBuilder;
 import xyz.sunqian.common.object.data.ObjectBuilderProvider;
@@ -71,7 +71,7 @@ public class ProtobufBuilderHandler implements ObjectBuilderProvider.Handler {
 
         @Override
         public @Nonnull Object newBuilder() throws DataObjectException {
-            return Jie.uncheck(() -> builder.invoke(null), DataObjectException::new);
+            return Kit.uncheck(() -> builder.invoke(null), DataObjectException::new);
         }
 
         @Override
@@ -101,7 +101,7 @@ public class ProtobufBuilderHandler implements ObjectBuilderProvider.Handler {
 
         @Override
         public @Nonnull Object newBuilder() throws DataObjectException {
-            return Jie.uncheck(() -> builder.invoke(null), DataObjectException::new);
+            return Kit.uncheck(() -> builder.invoke(null), DataObjectException::new);
         }
 
         @Override
@@ -111,7 +111,7 @@ public class ProtobufBuilderHandler implements ObjectBuilderProvider.Handler {
 
         @Override
         public @Nonnull Object build(@Nonnull Object builder) throws DataObjectException {
-            return Jie.uncheck(() -> build.invoke(builder), DataObjectException::new);
+            return Kit.uncheck(() -> build.invoke(builder), DataObjectException::new);
         }
     }
 }

@@ -3,16 +3,16 @@ package xyz.sunqian.common.base.exception;
 import xyz.sunqian.annotations.Nullable;
 
 /**
- * This is the root runtime exception for this lib.
+ * This is the root exception for this lib.
  *
  * @author sunqian
  */
-public class JieRuntimeException extends RuntimeException {
+public class KitvaException extends Exception {
 
     /**
      * Empty constructor.
      */
-    public JieRuntimeException() {
+    public KitvaException() {
         super();
     }
 
@@ -21,7 +21,7 @@ public class JieRuntimeException extends RuntimeException {
      *
      * @param message the message
      */
-    public JieRuntimeException(@Nullable String message) {
+    public KitvaException(@Nullable String message) {
         super(message);
     }
 
@@ -31,7 +31,7 @@ public class JieRuntimeException extends RuntimeException {
      * @param message the message
      * @param cause   the cause
      */
-    public JieRuntimeException(@Nullable String message, @Nullable Throwable cause) {
+    public KitvaException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
@@ -40,7 +40,7 @@ public class JieRuntimeException extends RuntimeException {
      *
      * @param cause the cause
      */
-    public JieRuntimeException(@Nullable Throwable cause) {
+    public KitvaException(@Nullable Throwable cause) {
         super(cause);
     }
 }

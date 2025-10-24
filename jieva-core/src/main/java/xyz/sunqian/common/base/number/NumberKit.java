@@ -1,7 +1,7 @@
 package xyz.sunqian.common.base.number;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -38,33 +38,33 @@ public class NumberKit {
         @Nonnull CharSequence str, Class<T> numType
     ) throws NumberFormatException, UnsupportedOperationException {
         if (byte.class.equals(numType) || Byte.class.equals(numType)) {
-            return Jie.as(Byte.parseByte(str.toString()));
+            return Kit.as(Byte.parseByte(str.toString()));
         }
         if (short.class.equals(numType) || Short.class.equals(numType)) {
-            return Jie.as(Short.parseShort(str.toString()));
+            return Kit.as(Short.parseShort(str.toString()));
         }
         if (char.class.equals(numType) || Character.class.equals(numType)) {
             int i = Integer.parseInt(str.toString());
             char c = (char) i;
-            return Jie.as(c);
+            return Kit.as(c);
         }
         if (int.class.equals(numType) || Integer.class.equals(numType)) {
-            return Jie.as(Integer.parseInt(str.toString()));
+            return Kit.as(Integer.parseInt(str.toString()));
         }
         if (long.class.equals(numType) || Long.class.equals(numType)) {
-            return Jie.as(Long.parseLong(str.toString()));
+            return Kit.as(Long.parseLong(str.toString()));
         }
         if (float.class.equals(numType) || Float.class.equals(numType)) {
-            return Jie.as(Float.parseFloat(str.toString()));
+            return Kit.as(Float.parseFloat(str.toString()));
         }
         if (double.class.equals(numType) || Double.class.equals(numType)) {
-            return Jie.as(Double.parseDouble(str.toString()));
+            return Kit.as(Double.parseDouble(str.toString()));
         }
         if (BigInteger.class.equals(numType)) {
-            return Jie.as(new BigInteger(str.toString()));
+            return Kit.as(new BigInteger(str.toString()));
         }
         if (BigDecimal.class.equals(numType)) {
-            return Jie.as(new BigDecimal(str.toString()));
+            return Kit.as(new BigDecimal(str.toString()));
         }
         throw new UnsupportedOperationException("Unsupported number type: " + numType);
     }
@@ -94,47 +94,47 @@ public class NumberKit {
         @Nonnull Number num, Class<T> numType
     ) throws NumberFormatException, UnsupportedOperationException {
         if (byte.class.equals(numType) || Byte.class.equals(numType)) {
-            return Jie.as(num.byteValue());
+            return Kit.as(num.byteValue());
         }
         if (short.class.equals(numType) || Short.class.equals(numType)) {
-            return Jie.as(num.shortValue());
+            return Kit.as(num.shortValue());
         }
         if (char.class.equals(numType) || Character.class.equals(numType)) {
             int i = num.intValue();
             char c = (char) i;
-            return Jie.as(c);
+            return Kit.as(c);
         }
         if (int.class.equals(numType) || Integer.class.equals(numType)) {
-            return Jie.as(num.intValue());
+            return Kit.as(num.intValue());
         }
         if (long.class.equals(numType) || Long.class.equals(numType)) {
-            return Jie.as(num.longValue());
+            return Kit.as(num.longValue());
         }
         if (float.class.equals(numType) || Float.class.equals(numType)) {
-            return Jie.as(num.floatValue());
+            return Kit.as(num.floatValue());
         }
         if (double.class.equals(numType) || Double.class.equals(numType)) {
-            return Jie.as(num.doubleValue());
+            return Kit.as(num.doubleValue());
         }
         if (BigInteger.class.equals(numType)) {
             if (num instanceof BigInteger) {
-                return Jie.as(num);
+                return Kit.as(num);
             }
             if (num instanceof BigDecimal) {
                 BigDecimal decimal = (BigDecimal) num;
-                return Jie.as(decimal.toBigInteger());
+                return Kit.as(decimal.toBigInteger());
             }
-            return Jie.as(new BigInteger(num.toString()));
+            return Kit.as(new BigInteger(num.toString()));
         }
         if (BigDecimal.class.equals(numType)) {
             if (num instanceof BigDecimal) {
-                return Jie.as(num);
+                return Kit.as(num);
             }
             if (num instanceof BigInteger) {
                 BigInteger integer = (BigInteger) num;
-                return Jie.as(new BigDecimal(integer));
+                return Kit.as(new BigDecimal(integer));
             }
-            return Jie.as(new BigDecimal(num.toString()));
+            return Kit.as(new BigDecimal(num.toString()));
         }
         throw new UnsupportedOperationException("Unsupported number type: " + numType);
     }

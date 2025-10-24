@@ -4,7 +4,7 @@ import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.RetainedParam;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 import xyz.sunqian.common.base.system.JvmKit;
 import xyz.sunqian.common.collect.ListKit;
@@ -312,7 +312,7 @@ public class ClassKit {
             }
         }
         instances = i == classNames.length ? instances : Arrays.copyOf(instances, i);
-        return Jie.as(ListKit.list(instances));
+        return Kit.as(ListKit.list(instances));
     }
 
     /**
@@ -340,7 +340,7 @@ public class ClassKit {
      */
     public static <T> @Nullable T newInstance(@Nonnull Constructor<?> constructor, Object @Nonnull ... args) {
         try {
-            return Jie.as(constructor.newInstance(args));
+            return Kit.as(constructor.newInstance(args));
         } catch (Exception e) {
             return null;
         }
@@ -369,7 +369,7 @@ public class ClassKit {
         }
         if (componentType.isPrimitive()) {
             // No void[]
-            if (Jie.equals(componentType, void.class)) {
+            if (Kit.equals(componentType, void.class)) {
                 return null;
             }
             return "[" + JvmKit.toDescriptor(componentType);
@@ -391,31 +391,31 @@ public class ClassKit {
     }
 
     private static Class<?> wrapperPrimitive(Class<?> cls) {
-        if (Jie.equals(cls, boolean.class)) {
+        if (Kit.equals(cls, boolean.class)) {
             return Boolean.class;
         }
-        if (Jie.equals(cls, byte.class)) {
+        if (Kit.equals(cls, byte.class)) {
             return Byte.class;
         }
-        if (Jie.equals(cls, short.class)) {
+        if (Kit.equals(cls, short.class)) {
             return Short.class;
         }
-        if (Jie.equals(cls, char.class)) {
+        if (Kit.equals(cls, char.class)) {
             return Character.class;
         }
-        if (Jie.equals(cls, int.class)) {
+        if (Kit.equals(cls, int.class)) {
             return Integer.class;
         }
-        if (Jie.equals(cls, long.class)) {
+        if (Kit.equals(cls, long.class)) {
             return Long.class;
         }
-        if (Jie.equals(cls, float.class)) {
+        if (Kit.equals(cls, float.class)) {
             return Float.class;
         }
-        if (Jie.equals(cls, double.class)) {
+        if (Kit.equals(cls, double.class)) {
             return Double.class;
         }
-        if (Jie.equals(cls, void.class)) {
+        if (Kit.equals(cls, void.class)) {
             return Void.class;
         }
         throw new UnknownPrimitiveTypeException(cls);

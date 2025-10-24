@@ -12,7 +12,7 @@ import java.util.concurrent.TimeoutException;
  *
  * @author sunqian
  */
-public class AwaitingException extends JieRuntimeException {
+public class AwaitingException extends KitvaRuntimeException {
 
     /**
      * Empty constructor.

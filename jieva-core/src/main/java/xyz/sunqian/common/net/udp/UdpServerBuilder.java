@@ -3,7 +3,7 @@ package xyz.sunqian.common.net.udp;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.CheckKit;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.function.callable.VoidCallable;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.IOKit;
@@ -114,7 +114,7 @@ public class UdpServerBuilder {
      * @throws NetException If an error occurs
      */
     public @Nonnull UdpServer bind(@Nullable InetSocketAddress localAddress) throws NetException {
-        return Jie.uncheck(() -> new UdpServerImpl(
+        return Kit.uncheck(() -> new UdpServerImpl(
                 localAddress,
                 handler,
                 mainThreadFactory,
@@ -149,7 +149,7 @@ public class UdpServerBuilder {
             this.handler = handler;
             this.mainThread = newThread(mainthreadFactory, this);
             socketOptions.forEach((name, value) ->
-                Jie.uncheck(() -> server.setOption(Jie.as(name), value), NetException::new));
+                Kit.uncheck(() -> server.setOption(Kit.as(name), value), NetException::new));
             server.configureBlocking(false);
             server.register(mainSelector, SelectionKey.OP_READ);
             this.buffer = ByteBuffer.allocate(maxPacketSize);
@@ -175,7 +175,7 @@ public class UdpServerBuilder {
             if (closed) {
                 return;
             }
-            Jie.uncheck(() -> {
+            Kit.uncheck(() -> {
                     server.close();
                     mainSelector.close();
                     mainSelector.wakeup();
@@ -206,7 +206,7 @@ public class UdpServerBuilder {
             while (!mainThread.isInterrupted()) {
                 doWork(this::doMainWork, closed);
             }
-            Jie.uncheck(() -> {
+            Kit.uncheck(() -> {
                 server.close();
                 mainSelector.close();
             }, NetException::new);

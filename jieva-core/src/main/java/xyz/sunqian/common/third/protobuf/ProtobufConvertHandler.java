@@ -5,7 +5,7 @@ import com.google.protobuf.LazyStringArrayList;
 import com.google.protobuf.ProtocolStringList;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.option.Option;
 import xyz.sunqian.common.object.convert.ObjectConverter;
 import xyz.sunqian.common.object.data.ObjectBuilderProvider;
@@ -55,7 +55,7 @@ public class ProtobufConvertHandler implements ObjectConverter.Handler {
                 src, srcType, ProtobufSchemaHandler.StringListTypeRef.SINGLETON.type(), converter, options
             );
             if (ret instanceof List) {
-                List<String> list = Jie.as(ret);
+                List<String> list = Kit.as(ret);
                 return new LazyStringArrayList(list);
             }
         }

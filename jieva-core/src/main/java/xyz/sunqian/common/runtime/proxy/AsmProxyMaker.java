@@ -9,7 +9,7 @@ import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.RetainedParam;
 import xyz.sunqian.annotations.ThreadSafe;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.system.JvmKit;
 import xyz.sunqian.common.base.value.IntVar;
 import xyz.sunqian.common.runtime.reflect.BytesClassLoader;
@@ -53,18 +53,18 @@ public class AsmProxyMaker implements ProxyMaker {
     private static final @Nonnull String METHODS_DESCRIPTOR = JvmKit.toDescriptor(Method[].class);
     private static final @Nonnull String INVOKER_SIMPLE_NAME = "AsmInvoker";
     private static final @Nonnull String SUPER_INVOKER_NAME_PREFIX = "access$super$";
-    private static final @Nonnull Method HANDLER_INVOKE = Jie.uncheck(
+    private static final @Nonnull Method HANDLER_INVOKE = Kit.uncheck(
         () -> ProxyHandler.class.getMethod("invoke", Object.class, Method.class, ProxyInvoker.class, Object[].class),
         AsmProxyException::new
     );
     private static final @Nonnull String HANDLER_INVOKE_DESCRIPTOR = JvmKit.toDescriptor(HANDLER_INVOKE);
-    private static final @Nonnull Method INVOKER_INVOKE = Jie.uncheck(
+    private static final @Nonnull Method INVOKER_INVOKE = Kit.uncheck(
         () -> ProxyInvoker.class.getMethod("invoke", Object.class, Object[].class),
         AsmProxyException::new
     );
     private static final @Nonnull String INVOKER_INVOKE_DESCRIPTOR = JvmKit.toDescriptor(INVOKER_INVOKE);
     private static final @Nonnull String @Nullable [] INVOKER_INVOKE_EXCEPTIONS = AsmKit.getExceptions(INVOKER_INVOKE);
-    private static final @Nonnull Method INVOKER_INVOKE_SUPER = Jie.uncheck(
+    private static final @Nonnull Method INVOKER_INVOKE_SUPER = Kit.uncheck(
         () -> ProxyInvoker.class.getMethod("invokeSuper", Object.class, Object[].class),
         AsmProxyException::new
     );
@@ -641,9 +641,9 @@ public class AsmProxyMaker implements ProxyMaker {
 
         @Override
         public <T> @Nonnull T newInstance() throws AsmProxyException {
-            return Jie.uncheck(() -> {
+            return Kit.uncheck(() -> {
                 Constructor<?> constructor = proxyClass.getConstructor(ProxyHandler.class, Method[].class);
-                return Jie.as(constructor.newInstance(proxyHandler, methods));
+                return Kit.as(constructor.newInstance(proxyHandler, methods));
             }, AsmProxyException::new);
         }
 

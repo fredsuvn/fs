@@ -1,7 +1,7 @@
 package tests.collect;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.collect.ArrayKit;
 import xyz.sunqian.common.collect.ArrayOperator;
 
@@ -152,12 +152,12 @@ public class ArrayTest {
         assertEquals(ArrayKit.lastIndexOf(objArray, 3), 5);
         assertEquals(ArrayKit.lastIndexOf(objArray, 6), -1);
         assertEquals(ArrayKit.lastIndexOf(objArray, 1), 7);
-        assertEquals(ArrayKit.indexOf(objArray, (i, t) -> Jie.equals(t, 3)), 2);
-        assertEquals(ArrayKit.indexOf(objArray, (i, t) -> Jie.equals(t, 6)), -1);
-        assertEquals(ArrayKit.indexOf(objArray, (i, t) -> Jie.equals(t, 1)), 0);
-        assertEquals(ArrayKit.lastIndexOf(objArray, (i, t) -> Jie.equals(t, 3)), 5);
-        assertEquals(ArrayKit.lastIndexOf(objArray, (i, t) -> Jie.equals(t, 6)), -1);
-        assertEquals(ArrayKit.lastIndexOf(objArray, (i, t) -> Jie.equals(t, 1)), 7);
+        assertEquals(ArrayKit.indexOf(objArray, (i, t) -> Kit.equals(t, 3)), 2);
+        assertEquals(ArrayKit.indexOf(objArray, (i, t) -> Kit.equals(t, 6)), -1);
+        assertEquals(ArrayKit.indexOf(objArray, (i, t) -> Kit.equals(t, 1)), 0);
+        assertEquals(ArrayKit.lastIndexOf(objArray, (i, t) -> Kit.equals(t, 3)), 5);
+        assertEquals(ArrayKit.lastIndexOf(objArray, (i, t) -> Kit.equals(t, 6)), -1);
+        assertEquals(ArrayKit.lastIndexOf(objArray, (i, t) -> Kit.equals(t, 1)), 7);
 
         // Test int array
         int[] intArray = {1, 2, 3, 4, 5, 3, 2, 1};

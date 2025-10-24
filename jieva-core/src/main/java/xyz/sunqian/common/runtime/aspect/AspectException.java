@@ -1,14 +1,14 @@
 package xyz.sunqian.common.runtime.aspect;
 
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.exception.JieRuntimeException;
+import xyz.sunqian.common.base.exception.KitvaRuntimeException;
 
 /**
  * This runtime exception is typically used for aspect-oriented programming.
  *
  * @author sunqian
  */
-public class AspectException extends JieRuntimeException {
+public class AspectException extends KitvaRuntimeException {
 
     /**
      * Empty constructor.

@@ -3,7 +3,7 @@ package tests.runtime.proxy;
 import org.testng.annotations.Test;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.value.BooleanVar;
 import xyz.sunqian.common.base.value.IntVar;
 import xyz.sunqian.common.runtime.proxy.ProxyHandler;
@@ -46,10 +46,10 @@ public class JdkProxyTest {
                 }
             };
             ProxySpec spec = proxyMaker.make(
-                null, Jie.list(InterA.class, InterB.class, InterC.class), proxyHandler
+                null, Kit.list(InterA.class, InterB.class, InterC.class), proxyHandler
             );
             assertEquals(spec.proxiedClass(), Object.class);
-            assertEquals(spec.proxiedInterfaces(), Jie.list(InterA.class, InterB.class, InterC.class));
+            assertEquals(spec.proxiedInterfaces(), Kit.list(InterA.class, InterB.class, InterC.class));
             assertEquals(spec.proxyHandler(), proxyHandler);
             assertNotNull(spec.proxyClass());
             InterA a = spec.newInstance();
@@ -72,7 +72,7 @@ public class JdkProxyTest {
             }
             Cls cls = new Cls();
             ProxySpec spec = proxyMaker.make(
-                null, Jie.list(InterA.class, InterB.class, InterC.class),
+                null, Kit.list(InterA.class, InterB.class, InterC.class),
                 new ProxyHandler() {
 
                     @Override
@@ -105,7 +105,7 @@ public class JdkProxyTest {
             }
             Cls cls = new Cls();
             ProxySpec spec = proxyMaker.make(
-                null, Jie.list(InterA.class, InterB.class, InterC.class),
+                null, Kit.list(InterA.class, InterB.class, InterC.class),
                 new ProxyHandler() {
 
                     @Override
@@ -143,7 +143,7 @@ public class JdkProxyTest {
         }
         {
             ProxySpec spec = proxyMaker.make(
-                null, Jie.list(InterOverpass1.class, InterOverpass2.class, InterOverpass3.class),
+                null, Kit.list(InterOverpass1.class, InterOverpass2.class, InterOverpass3.class),
                 new ProxyHandler() {
 
                     @Override
@@ -181,7 +181,7 @@ public class JdkProxyTest {
             }
         };
         ProxySpec pc = proxyMaker.make(
-            null, Jie.list(SuperInter.class),
+            null, Kit.list(SuperInter.class),
             new ProxyHandler() {
 
                 @Override
@@ -220,7 +220,7 @@ public class JdkProxyTest {
         IntVar counter = IntVar.of(0);
         BooleanVar isA = BooleanVar.of(false);
         ProxySpec pc = proxyMaker.make(
-            null, Jie.list(SameMethodA.class, SameMethodB.class),
+            null, Kit.list(SameMethodA.class, SameMethodB.class),
             new ProxyHandler() {
 
                 private boolean encounter = false;

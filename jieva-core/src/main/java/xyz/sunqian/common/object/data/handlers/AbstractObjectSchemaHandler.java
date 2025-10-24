@@ -2,7 +2,7 @@ package xyz.sunqian.common.object.data.handlers;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.collect.MapKit;
 import xyz.sunqian.common.object.data.ObjectPropertyBase;
 import xyz.sunqian.common.object.data.ObjectSchemaParser;
@@ -103,7 +103,7 @@ public abstract class AbstractObjectSchemaHandler implements ObjectSchemaParser.
             Method setterMethod = propertyInfo.setterMethod;
             if (propertyType == null) {
                 propertyType = findActualType(
-                    Jie.asNonnull(setterMethod).getGenericParameterTypes()[0], typeParameterMapping, stack);
+                    Kit.asNonnull(setterMethod).getGenericParameterTypes()[0], typeParameterMapping, stack);
             }
             /*
             The property's type is the return type of getter or the parameter type of setter.

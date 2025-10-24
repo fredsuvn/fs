@@ -2,8 +2,8 @@ package tests.base.exception;
 
 import org.testng.annotations.Test;
 import xyz.sunqian.common.base.exception.AwaitingException;
-import xyz.sunqian.common.base.exception.JieException;
-import xyz.sunqian.common.base.exception.JieRuntimeException;
+import xyz.sunqian.common.base.exception.KitvaException;
+import xyz.sunqian.common.base.exception.KitvaRuntimeException;
 import xyz.sunqian.common.base.exception.ThrowKit;
 import xyz.sunqian.common.base.exception.UnknownArrayTypeException;
 import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
@@ -44,33 +44,33 @@ public class ExceptionTest {
         String message = "hello";
         Throwable cause = new RuntimeException(message);
         {
-            // JieException
-            expectThrows(JieException.class, () -> {
-                throw new JieException();
+            // KitvaException
+            expectThrows(KitvaException.class, () -> {
+                throw new KitvaException();
             });
-            expectThrows(JieException.class, () -> {
-                throw new JieException("");
+            expectThrows(KitvaException.class, () -> {
+                throw new KitvaException("");
             });
-            expectThrows(JieException.class, () -> {
-                throw new JieException("", new RuntimeException());
+            expectThrows(KitvaException.class, () -> {
+                throw new KitvaException("", new RuntimeException());
             });
-            expectThrows(JieException.class, () -> {
-                throw new JieException(new RuntimeException());
+            expectThrows(KitvaException.class, () -> {
+                throw new KitvaException(new RuntimeException());
             });
         }
         {
-            // JieRuntimeException
-            expectThrows(JieRuntimeException.class, () -> {
-                throw new JieRuntimeException();
+            // KitvaRuntimeException
+            expectThrows(KitvaRuntimeException.class, () -> {
+                throw new KitvaRuntimeException();
             });
-            expectThrows(JieRuntimeException.class, () -> {
-                throw new JieRuntimeException("");
+            expectThrows(KitvaRuntimeException.class, () -> {
+                throw new KitvaRuntimeException("");
             });
-            expectThrows(JieRuntimeException.class, () -> {
-                throw new JieRuntimeException("", new RuntimeException());
+            expectThrows(KitvaRuntimeException.class, () -> {
+                throw new KitvaRuntimeException("", new RuntimeException());
             });
-            expectThrows(JieRuntimeException.class, () -> {
-                throw new JieRuntimeException(new RuntimeException());
+            expectThrows(KitvaRuntimeException.class, () -> {
+                throw new KitvaRuntimeException(new RuntimeException());
             });
         }
         {

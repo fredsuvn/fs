@@ -1,7 +1,7 @@
 package tests.collect;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.collect.MapKit;
 
 import java.util.ArrayList;
@@ -94,7 +94,7 @@ public class MapTest {
         assertEquals(strMap1, MapKit.toMap(Arrays.asList("1", "2", "3", "4", "5", "6")));
         Map<String, String> strMap2 = MapKit.toMap(
             intMap,
-            k -> Jie.equals(k, 5) ? "3" : k.toString(),
+            k -> Kit.equals(k, 5) ? "3" : k.toString(),
             Object::toString
         );
         assertEquals(strMap2, MapKit.toMap(Arrays.asList("1", "2", "3", "6")));

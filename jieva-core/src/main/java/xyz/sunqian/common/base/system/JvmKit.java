@@ -2,7 +2,7 @@ package xyz.sunqian.common.base.system;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 import xyz.sunqian.common.runtime.reflect.TypeKit;
 
@@ -417,7 +417,7 @@ public class JvmKit {
                     }
                 }
                 if (TypeKit.isClass(bound)) {
-                    Class<?> boundClass = Jie.as(bound);
+                    Class<?> boundClass = Kit.as(bound);
                     if (boundClass.isInterface()) {
                         appender.append(':');
                     }

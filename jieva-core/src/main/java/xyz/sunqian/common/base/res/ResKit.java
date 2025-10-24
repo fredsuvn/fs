@@ -2,7 +2,7 @@ package xyz.sunqian.common.base.res;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.collect.CollectKit;
 import xyz.sunqian.common.collect.SetKit;
 import xyz.sunqian.common.io.IORuntimeException;
@@ -39,7 +39,7 @@ public class ResKit {
      */
     public static @Nonnull Set<@Nonnull URL> findResources(@Nonnull String path) throws IORuntimeException {
         ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-        Enumeration<URL> urls = Jie.uncheck(() -> classLoader.getResources(path), IORuntimeException::new);
+        Enumeration<URL> urls = Kit.uncheck(() -> classLoader.getResources(path), IORuntimeException::new);
         return SetKit.toSet(() -> CollectKit.asIterator(urls));
     }
 }

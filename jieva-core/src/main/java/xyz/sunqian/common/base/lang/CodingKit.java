@@ -2,7 +2,7 @@ package xyz.sunqian.common.base.lang;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,7 +34,7 @@ public class CodingKit {
             return old;
         }
         if (old instanceof Collection) {
-            Collection<Object> oldList = Jie.as(old);
+            Collection<Object> oldList = Kit.as(old);
             oldList.add(added);
             return old;
         }
@@ -60,9 +60,9 @@ public class CodingKit {
             return merger.apply(Collections.emptyList());
         }
         if (objOrColl instanceof Collection<?>) {
-            Collection<T> collection = Jie.as(objOrColl);
+            Collection<T> collection = Kit.as(objOrColl);
             return merger.apply(collection);
         }
-        return merger.apply(Collections.singletonList(Jie.as(objOrColl)));
+        return merger.apply(Collections.singletonList(Kit.as(objOrColl)));
     }
 }

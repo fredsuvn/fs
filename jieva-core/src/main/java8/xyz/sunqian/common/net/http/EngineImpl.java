@@ -2,7 +2,7 @@ package xyz.sunqian.common.net.http;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.math.MathKit;
 import xyz.sunqian.common.io.IOOperator;
 import xyz.sunqian.common.net.NetException;
@@ -30,7 +30,7 @@ final class EngineImpl implements HttpClientEngine {
         @Nonnull Duration readTimeout,
         @Nonnull Proxy proxy
     ) throws NetException {
-        return Jie.uncheck(() -> request0(req, connectTimeout, readTimeout, proxy), NetException::new);
+        return Kit.uncheck(() -> request0(req, connectTimeout, readTimeout, proxy), NetException::new);
     }
 
     private @Nonnull HttpResp request0(
@@ -59,7 +59,7 @@ final class EngineImpl implements HttpClientEngine {
         }
         int respCode = connection.getResponseCode();
         String respMsg = connection.getResponseMessage();
-        String firstLine = Jie.nonnull(connection.getHeaderField(null), "");
+        String firstLine = Kit.nonnull(connection.getHeaderField(null), "");
         String protocol = firstLine.substring(0, Math.max(firstLine.indexOf(' '), 0));
         Map<String, List<String>> respHeaders = connection.getHeaderFields();
         String respContentType = connection.getContentType();

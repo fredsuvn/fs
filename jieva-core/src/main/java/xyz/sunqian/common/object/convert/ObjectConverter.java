@@ -3,7 +3,7 @@ package xyz.sunqian.common.object.convert;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.RetainedParam;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.option.Option;
 import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.object.convert.handlers.AssignableConvertHandler;
@@ -99,7 +99,7 @@ public interface ObjectConverter {
         @Nonnull Class<? extends T> target,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws UnsupportedObjectConvertException, ObjectConvertException {
-        return Jie.as(convert(src, (Type) target, options));
+        return Kit.as(convert(src, (Type) target, options));
     }
 
     /**
@@ -122,7 +122,7 @@ public interface ObjectConverter {
         @Nonnull TypeRef<? extends T> target,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws UnsupportedObjectConvertException, ObjectConvertException {
-        return Jie.as(convert(src, target.type(), options));
+        return Kit.as(convert(src, target.type(), options));
     }
 
     /**
@@ -169,7 +169,7 @@ public interface ObjectConverter {
         @Nonnull Class<? extends T> target,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws UnsupportedObjectConvertException, ObjectConvertException {
-        return Jie.as(convert(src, srcType, (Type) target, options));
+        return Kit.as(convert(src, srcType, (Type) target, options));
     }
 
     /**
@@ -194,7 +194,7 @@ public interface ObjectConverter {
         @Nonnull TypeRef<? extends T> target,
         @Nonnull Option<?, ?> @Nonnull ... options
     ) throws UnsupportedObjectConvertException, ObjectConvertException {
-        return Jie.as(convert(src, srcType, target.type(), options));
+        return Kit.as(convert(src, srcType, target.type(), options));
     }
 
     /**

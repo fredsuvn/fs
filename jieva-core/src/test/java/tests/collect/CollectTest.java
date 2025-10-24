@@ -1,7 +1,7 @@
 package tests.collect;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.collect.CollectKit;
 
 import java.util.ArrayList;
@@ -63,11 +63,11 @@ public class CollectTest {
         assertEquals(CollectKit.toArray(Arrays.asList(1, 2, 3)), Arrays.asList(1, 2, 3).toArray());
         assertEquals(CollectKit.toArray(Arrays.asList(1, 2, 3), Integer.class), Arrays.asList(1, 2, 3).toArray(new Integer[3]));
         assertEquals(
-            CollectKit.toArray(() -> Jie.as(Arrays.asList(1, 2, 3).iterator())),
+            CollectKit.toArray(() -> Kit.as(Arrays.asList(1, 2, 3).iterator())),
             Arrays.asList(1, 2, 3).toArray()
         );
         assertEquals(
-            CollectKit.toArray(() -> Jie.as(Arrays.asList(1, 2, 3).iterator()), Integer.class),
+            CollectKit.toArray(() -> Kit.as(Arrays.asList(1, 2, 3).iterator()), Integer.class),
             Arrays.asList(1, 2, 3).toArray(new Integer[3])
         );
     }

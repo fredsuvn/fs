@@ -1,7 +1,7 @@
 package xyz.sunqian.common.base.thread;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.exception.AwaitingException;
 
 import java.time.Duration;
@@ -40,7 +40,7 @@ final class ThreadGateImpl implements ThreadGate {
 
     @Override
     public void await() throws AwaitingException {
-        Jie.uncheck(
+        Kit.uncheck(
             () -> sync.acquireSharedInterruptibly(1),
             AwaitingException::new
         );
@@ -48,7 +48,7 @@ final class ThreadGateImpl implements ThreadGate {
 
     @Override
     public boolean await(long millis) throws AwaitingException {
-        return Jie.uncheck(
+        return Kit.uncheck(
             () -> sync.tryAcquireSharedNanos(1, millis * 1000000L),
             AwaitingException::new
         );
@@ -56,7 +56,7 @@ final class ThreadGateImpl implements ThreadGate {
 
     @Override
     public boolean await(@Nonnull Duration duration) throws AwaitingException {
-        return Jie.uncheck(
+        return Kit.uncheck(
             () -> sync.tryAcquireSharedNanos(1, duration.toNanos()),
             AwaitingException::new
         );

@@ -2,7 +2,7 @@ package xyz.sunqian.common.runtime.reflect;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.system.JvmException;
 
 import java.nio.ByteBuffer;
@@ -30,7 +30,7 @@ public class BytesClassLoader extends ClassLoader {
      * @throws JvmException if an exception occurs
      */
     public @Nonnull Class<?> loadClass(@Nullable String name, @Nonnull byte @Nonnull [] bytes) throws JvmException {
-        return Jie.uncheck(() -> {
+        return Kit.uncheck(() -> {
             if (name != null) {
                 Class<?> loaded = findLoadedClass(name);
                 if (loaded != null) {
@@ -53,7 +53,7 @@ public class BytesClassLoader extends ClassLoader {
      * @throws JvmException if an exception occurs
      */
     public @Nonnull Class<?> loadClass(@Nullable String name, @Nonnull ByteBuffer bytes) throws JvmException {
-        return Jie.uncheck(() -> {
+        return Kit.uncheck(() -> {
             if (name != null) {
                 Class<?> loaded = findLoadedClass(name);
                 if (loaded != null) {

@@ -7,8 +7,8 @@
  * </ul>
  * Root exceptions:
  * <ul>
- *     <li>{@link xyz.sunqian.common.base.exception.JieException}</li>
- *     <li>{@link xyz.sunqian.common.base.exception.JieRuntimeException}</li>
+ *     <li>{@link xyz.sunqian.common.base.exception.KitvaException}</li>
+ *     <li>{@link xyz.sunqian.common.base.exception.KitvaRuntimeException}</li>
  * </ul>
  * Other exceptions:
  * <ul>

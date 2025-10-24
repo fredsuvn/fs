@@ -2,7 +2,7 @@ package xyz.sunqian.common.io;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.exception.JieRuntimeException;
+import xyz.sunqian.common.base.exception.KitvaRuntimeException;
 
 import java.io.IOException;
 
@@ -12,7 +12,7 @@ import java.io.IOException;
  *
  * @author sunqian
  */
-public class IORuntimeException extends JieRuntimeException {
+public class IORuntimeException extends KitvaRuntimeException {
 
     /**
      * Empty constructor.

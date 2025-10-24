@@ -3,7 +3,7 @@ package xyz.sunqian.common.object.data;
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.runtime.invoke.Invocable;
 import xyz.sunqian.common.runtime.reflect.TypeKit;
 
@@ -39,13 +39,13 @@ public interface ObjectPropertyBase {
     /**
      * Returns the raw type of this property. The default implementation is:
      * <pre>{@code
-     * return Jie.nonnull(TypeKit.getRawClass(type()), Object.class);
+     * return Kit.nonnull(TypeKit.getRawClass(type()), Object.class);
      * }</pre>
      *
      * @return the raw type of this property
      */
     default @Nonnull Class<?> rawType() {
-        return Jie.nonnull(TypeKit.getRawClass(type()), Object.class);
+        return Kit.nonnull(TypeKit.getRawClass(type()), Object.class);
     }
 
     /**

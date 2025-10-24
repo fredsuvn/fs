@@ -2,7 +2,7 @@ package xyz.sunqian.common.codec;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.exception.JieRuntimeException;
+import xyz.sunqian.common.base.exception.KitvaRuntimeException;
 import xyz.sunqian.common.io.BufferKit;
 import xyz.sunqian.common.io.ByteArrayOperator;
 import xyz.sunqian.common.io.IORuntimeException;
@@ -308,7 +308,7 @@ public class HexKit {
      *
      * @author sunqian
      */
-    public static class HexException extends JieRuntimeException {
+    public static class HexException extends KitvaRuntimeException {
 
         private final long position;
 

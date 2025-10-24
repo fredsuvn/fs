@@ -3,7 +3,7 @@ package xyz.sunqian.common.base.system;
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -313,7 +313,7 @@ public class SystemKit {
      * @return an immutable copy of {@link System#getProperties()}
      */
     public static @Nonnull @Immutable Map<String, String> getProperties() {
-        return Jie.as(
+        return Kit.as(
             new LinkedHashMap<>(System.getProperties())
         );
     }

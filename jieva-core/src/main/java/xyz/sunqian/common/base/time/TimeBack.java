@@ -1,7 +1,7 @@
 package xyz.sunqian.common.base.time;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 
 import java.time.DateTimeException;
 import java.time.Instant;
@@ -80,7 +80,7 @@ final class TimeBack {
 
         @Override
         public <T> @Nonnull T parse(@Nonnull CharSequence date, @Nonnull Class<T> timeType) throws DateTimeException {
-            return Jie.as(parse0(date, timeType));
+            return Kit.as(parse0(date, timeType));
         }
 
         private @Nonnull Object parse0(
@@ -128,7 +128,7 @@ final class TimeBack {
         @Override
         public <T> @Nonnull T convert(@Nonnull Date date, @Nonnull Class<T> timeType) throws DateTimeException {
             if (timeType.equals(Date.class)) {
-                return Jie.as(date);
+                return Kit.as(date);
             }
             return convert(date.toInstant(), timeType);
         }
@@ -138,10 +138,10 @@ final class TimeBack {
             @Nonnull TemporalAccessor time, @Nonnull Class<T> timeType
         ) throws DateTimeException {
             if (timeType.equals(time.getClass())) {
-                return Jie.as(time);
+                return Kit.as(time);
             }
             TemporalAccessor withZone = withZoneId(time, zoneId);
-            return Jie.as(convert0(withZone, timeType));
+            return Kit.as(convert0(withZone, timeType));
         }
 
         private @Nonnull Object convert0(

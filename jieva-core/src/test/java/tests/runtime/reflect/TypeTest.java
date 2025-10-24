@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.runtime.reflect.ReflectionException;
 import xyz.sunqian.common.runtime.reflect.TypeKit;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
@@ -278,7 +278,7 @@ public class TypeTest {
             mapTypeVariables.setAccessible(true);
             Map<@Nonnull TypeVariable<?>, @Nullable Type> mapping = new HashMap<>();
             Type errorParam = TypeTest.errorParameterizedType();
-            mapTypeVariables.invoke(null, Jie.array(errorParam), mapping);
+            mapTypeVariables.invoke(null, Kit.array(errorParam), mapping);
             assertTrue(mapping.isEmpty());
         }
     }
@@ -354,8 +354,8 @@ public class TypeTest {
         // special:
         expectThrows(ReflectionException.class, () ->
             TypeKit.replaceType(TypeTest.errorParameterizedType(), String.class, Integer.class));
-        Type p1 = TypeKit.parameterizedType(List.class, Jie.array(), Integer.class);
-        Type p2 = TypeKit.parameterizedType(List.class, Jie.array(), Long.class);
+        Type p1 = TypeKit.parameterizedType(List.class, Kit.array(), Integer.class);
+        Type p2 = TypeKit.parameterizedType(List.class, Kit.array(), Long.class);
         assertEquals(TypeKit.replaceType(p1, Integer.class, Long.class), p2);
         assertSame(TypeKit.replaceType(p1, Integer.class, Integer.class), p1);
     }
@@ -372,22 +372,22 @@ public class TypeTest {
         }
         // no owner
         Type x = new TypeRef<X<String>>() {}.type();
-        Type xx = TypeKit.parameterizedType(X.class, Jie.array(String.class));
+        Type xx = TypeKit.parameterizedType(X.class, Kit.array(String.class));
         assertEquals(x, xx);
         assertEquals(x.toString(), xx.toString());
         assertEquals(x.hashCode(), xx.hashCode());
         assertTrue(xx.equals(xx));
         assertFalse(xx.equals(null));
-        Type xf1 = TypeKit.parameterizedType(String.class, Jie.array(String.class));
+        Type xf1 = TypeKit.parameterizedType(String.class, Kit.array(String.class));
         assertFalse(xx.equals(xf1));
-        Type xf2 = TypeKit.parameterizedType(X.class, Jie.array(Integer.class));
+        Type xf2 = TypeKit.parameterizedType(X.class, Kit.array(Integer.class));
         assertFalse(xx.equals(xf2));
         // has owner
         Type y = new TypeRef<X<String>.Y<Integer>>() {}.type();
         Type yy = TypeKit.parameterizedType(
             X.Y.class,
-            Jie.array(Integer.class),
-            TypeKit.parameterizedType(X.class, Jie.array(String.class))
+            Kit.array(Integer.class),
+            TypeKit.parameterizedType(X.class, Kit.array(String.class))
         );
         assertEquals(y, yy);
         assertEquals(y.toString(), yy.toString());
@@ -396,20 +396,20 @@ public class TypeTest {
         assertFalse(yy.equals(null));
         Type yf1 = TypeKit.parameterizedType(
             X.class,
-            Jie.array(Integer.class),
-            TypeKit.parameterizedType(X.class, Jie.array(String.class))
+            Kit.array(Integer.class),
+            TypeKit.parameterizedType(X.class, Kit.array(String.class))
         );
         assertFalse(yy.equals(yf1));
         Type yf2 = TypeKit.parameterizedType(
             X.Y.class,
-            Jie.array(String.class),
-            TypeKit.parameterizedType(X.class, Jie.array(String.class))
+            Kit.array(String.class),
+            TypeKit.parameterizedType(X.class, Kit.array(String.class))
         );
         assertFalse(yy.equals(yf2));
         Type yf3 = TypeKit.parameterizedType(
             X.Y.class,
-            Jie.array(Integer.class),
-            TypeKit.parameterizedType(X.class, Jie.array(Integer.class))
+            Kit.array(Integer.class),
+            TypeKit.parameterizedType(X.class, Kit.array(Integer.class))
         );
         assertFalse(yy.equals(yf3));
         Type yf4 = new TypeRef<X<String>.Z<Integer>>() {}.type();
@@ -457,7 +457,7 @@ public class TypeTest {
         assertFalse(l1.equals(list2));
         assertFalse(l1.equals(list3));
         assertFalse(l1.equals(String.class));
-        assertEquals(TypeKit.wildcardType(Jie.array(), Jie.array()).toString(), "??");
+        assertEquals(TypeKit.wildcardType(Kit.array(), Kit.array()).toString(), "??");
     }
 
     @Test

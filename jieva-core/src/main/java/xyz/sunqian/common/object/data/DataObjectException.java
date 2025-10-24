@@ -2,7 +2,7 @@ package xyz.sunqian.common.object.data;
 
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.exception.JieRuntimeException;
+import xyz.sunqian.common.base.exception.KitvaRuntimeException;
 
 import java.lang.reflect.Type;
 
@@ -11,7 +11,7 @@ import java.lang.reflect.Type;
  *
  * @author sunqian
  */
-public class DataObjectException extends JieRuntimeException {
+public class DataObjectException extends KitvaRuntimeException {
 
     private static String toMessage(@Nonnull Type type) {
         return "Parsing data schema failed: " + type.getTypeName() + "[" + type.getClass().getName() + "].";

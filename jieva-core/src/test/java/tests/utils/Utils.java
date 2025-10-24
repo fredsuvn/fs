@@ -1,15 +1,15 @@
 package tests.utils;
 
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 
 public class Utils {
 
     public static void awaitUntilExecuteTo(Thread thread, String className, String methodName) {
-        Jie.until(() -> {
+        Kit.until(() -> {
             StackTraceElement[] traceElements = thread.getStackTrace();
             for (StackTraceElement traceElement : traceElements) {
-                if (Jie.equals(className, traceElement.getClassName())
-                    && Jie.equals(methodName, traceElement.getMethodName())) {
+                if (Kit.equals(className, traceElement.getClassName())
+                    && Kit.equals(methodName, traceElement.getMethodName())) {
                     return true;
                 }
             }

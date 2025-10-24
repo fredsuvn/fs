@@ -4,7 +4,7 @@ import org.testng.annotations.Test;
 import tests.utils.LotsOfMethods;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.base.value.BooleanVar;
 import xyz.sunqian.common.base.value.IntVar;
 import xyz.sunqian.common.runtime.proxy.AsmProxyMaker;
@@ -33,21 +33,21 @@ public class AsmProxyTest implements PrintTest {
         IntVar counter = IntVar.of(0);
         {
             // InterA
-            ProxySpec pc = generateProxy(null, Jie.list(InterA.class), counter);
+            ProxySpec pc = generateProxy(null, Kit.list(InterA.class), counter);
             InterA a = pc.newInstance();
             testInterA(a, counter);
             counter.clear();
         }
         {
             // InterB
-            ProxySpec pc = generateProxy(null, Jie.list(InterB.class), counter);
+            ProxySpec pc = generateProxy(null, Kit.list(InterB.class), counter);
             InterB b = pc.newInstance();
             testInterB(b, counter);
             counter.clear();
         }
         {
             // InterC
-            ProxySpec pc = generateProxy(null, Jie.list(InterC.class), counter);
+            ProxySpec pc = generateProxy(null, Kit.list(InterC.class), counter);
             InterC c1 = pc.newInstance();
             InterC<String> c2 = pc.newInstance();
             testInterC(c1, c2, counter);
@@ -55,25 +55,25 @@ public class AsmProxyTest implements PrintTest {
         }
         {
             // InterD
-            ProxySpec pc1 = generateProxy(null, Jie.list(InterD.class), counter);
+            ProxySpec pc1 = generateProxy(null, Kit.list(InterD.class), counter);
             InterD d1 = pc1.newInstance();
             testInterD(d1, new ClsD(), counter);
             counter.clear();
-            ProxySpec pc2 = generateProxy(ClsD.class, Jie.list(), counter);
+            ProxySpec pc2 = generateProxy(ClsD.class, Kit.list(), counter);
             InterD d2 = pc2.newInstance();
             testInterD(d2, new ClsD(), counter);
             counter.clear();
         }
         {
             // ClsA
-            ProxySpec pc = generateProxy(ClsA.class, Jie.list(), counter);
+            ProxySpec pc = generateProxy(ClsA.class, Kit.list(), counter);
             ClsA a = pc.newInstance();
             testClsA(a, counter);
             counter.clear();
         }
         {
             // ClsB
-            ProxySpec pc = generateProxy(ClsB.class, Jie.list(), counter);
+            ProxySpec pc = generateProxy(ClsB.class, Kit.list(), counter);
             ClsB b1 = pc.newInstance();
             ClsB<String> b2 = pc.newInstance();
             testClsB(b1, b2, counter);
@@ -81,14 +81,14 @@ public class AsmProxyTest implements PrintTest {
         }
         {
             // ClsC
-            ProxySpec pc = generateProxy(ClsC.class, Jie.list(), counter);
+            ProxySpec pc = generateProxy(ClsC.class, Kit.list(), counter);
             ClsC c = pc.newInstance();
             testClsC(c, counter);
             counter.clear();
         }
         {
             // ClsA, InterA, InterB, InterC
-            ProxySpec pc = generateProxy(ClsA.class, Jie.list(InterA.class, InterB.class, InterC.class), counter);
+            ProxySpec pc = generateProxy(ClsA.class, Kit.list(InterA.class, InterB.class, InterC.class), counter);
             Object obj = pc.newInstance();
             testClsA((ClsA) obj, counter);
             counter.clear();
@@ -104,7 +104,7 @@ public class AsmProxyTest implements PrintTest {
             ProxyMaker proxyMaker = ProxyMaker.byAsm();
             BooleanVar isA = BooleanVar.of(false);
             ProxySpec pc = proxyMaker.make(
-                null, Jie.list(SameMethodA.class, SameMethodB.class),
+                null, Kit.list(SameMethodA.class, SameMethodB.class),
                 new ProxyHandler() {
 
                     private boolean encounter = false;
@@ -147,7 +147,7 @@ public class AsmProxyTest implements PrintTest {
             SameMethodA sa = pc.newInstance();
             assertFalse(sa.equals(""));
             assertEquals(counter.get(), 0);
-            assertEquals(sa.hashCode(), Jie.hashId(sa));
+            assertEquals(sa.hashCode(), Kit.hashId(sa));
             assertEquals(counter.get(), 0);
             assertEquals(sa.toString(), sa.getClass().getName() + '@' + Integer.toHexString(sa.hashCode()));
             assertEquals(counter.get(), 0);
@@ -168,14 +168,14 @@ public class AsmProxyTest implements PrintTest {
         }
         {
             // test class
-            ProxySpec pc = generateProxy(ClsC.class, Jie.list(), counter);
+            ProxySpec pc = generateProxy(ClsC.class, Kit.list(), counter);
             Class<?> c = pc.proxyClass();
             printFor("ASM proxy class: ", c);
             Constructor<?>[] constructors = c.getConstructors();
             assertEquals(constructors.length, 1);
             assertEquals(
-                Jie.list(constructors[0].getParameterTypes()),
-                Jie.list(ProxyHandler.class, Method[].class)
+                Kit.list(constructors[0].getParameterTypes()),
+                Kit.list(ProxyHandler.class, Method[].class)
             );
             assertTrue(Modifier.isPublic(constructors[0].getModifiers()));
             counter.clear();
@@ -189,7 +189,7 @@ public class AsmProxyTest implements PrintTest {
             ProxyMaker proxyMaker = ProxyMaker.byAsm();
             IntVar counter = IntVar.of(0);
             ProxySpec pc = proxyMaker.make(
-                ClsA.class, Jie.list(DefaultInter.class),
+                ClsA.class, Kit.list(DefaultInter.class),
                 new ProxyHandler() {
 
                     @Override
@@ -236,7 +236,7 @@ public class AsmProxyTest implements PrintTest {
             }
             ClaAProxy manProxy = new ClaAProxy();
             ProxySpec pc = proxyMaker.make(
-                ClsA.class, Jie.list(DefaultInter.class),
+                ClsA.class, Kit.list(DefaultInter.class),
                 new ProxyHandler() {
 
                     @Override
@@ -271,7 +271,7 @@ public class AsmProxyTest implements PrintTest {
             // stack overflow
             ProxyMaker proxyMaker = ProxyMaker.byAsm();
             ProxySpec pc = proxyMaker.make(
-                ClsA.class, Jie.list(DefaultInter.class),
+                ClsA.class, Kit.list(DefaultInter.class),
                 new ProxyHandler() {
 
                     @Override
@@ -300,7 +300,7 @@ public class AsmProxyTest implements PrintTest {
             // throws directly
             ProxyMaker proxyMaker = ProxyMaker.byAsm();
             ProxySpec pc1 = proxyMaker.make(
-                ClsA.class, Jie.list(DefaultInter.class),
+                ClsA.class, Kit.list(DefaultInter.class),
                 new ProxyHandler() {
 
                     @Override
@@ -325,7 +325,7 @@ public class AsmProxyTest implements PrintTest {
             DefaultInter s1 = pc1.newInstance();
             expectThrows(ProxyTestException.class, () -> s1.defaultInt(1));
             ProxySpec pc2 = proxyMaker.make(
-                ClsA.class, Jie.list(DefaultInter.class),
+                ClsA.class, Kit.list(DefaultInter.class),
                 new ProxyHandler() {
 
                     @Override
@@ -355,7 +355,7 @@ public class AsmProxyTest implements PrintTest {
             ProxyMaker proxyMaker = ProxyMaker.byAsm();
             ClsD cd = new ClsD();
             ProxySpec pc1 = proxyMaker.make(
-                ClsD.class, Jie.list(),
+                ClsD.class, Kit.list(),
                 new ProxyHandler() {
 
                     @Override
@@ -381,7 +381,7 @@ public class AsmProxyTest implements PrintTest {
             );
             ClsE ce = new ClsE();
             ProxySpec pc2 = proxyMaker.make(
-                ClsE.class, Jie.list(),
+                ClsE.class, Kit.list(),
                 new ProxyHandler() {
 
                     @Override
@@ -407,7 +407,7 @@ public class AsmProxyTest implements PrintTest {
             );
             InterE ie = new ClsE();
             ProxySpec pc3 = proxyMaker.make(
-                null, Jie.list(InterE.class),
+                null, Kit.list(InterE.class),
                 new ProxyHandler() {
 
                     @Override
@@ -438,7 +438,7 @@ public class AsmProxyTest implements PrintTest {
             }
             ProxyMaker proxyMaker = ProxyMaker.byAsm();
             ProxySpec pc = proxyMaker.make(
-                ClsA.class, Jie.list(InterC.class),
+                ClsA.class, Kit.list(InterC.class),
                 new ProxyHandler() {
 
                     @Override
@@ -470,10 +470,10 @@ public class AsmProxyTest implements PrintTest {
     @Test
     public void testBigParameters() throws Exception {
         IntVar counter = IntVar.of(0);
-        ProxySpec pc = generateProxy(LotsOfMethods.class, Jie.list(), counter);
+        ProxySpec pc = generateProxy(LotsOfMethods.class, Kit.list(), counter);
         LotsOfMethods proxy = pc.newInstance();
         LotsOfMethods inst = new LotsOfMethods();
-        List<Method> methods = Jie.stream(inst.getClass().getMethods())
+        List<Method> methods = Kit.stream(inst.getClass().getMethods())
             .filter(m -> m.getName().startsWith("instanceMethod") && m.getParameterCount() > 0)
             .collect(Collectors.toList());
         for (Method method : methods) {
@@ -489,7 +489,7 @@ public class AsmProxyTest implements PrintTest {
     public void testOverpass() {
         ProxyMaker proxyMaker = ProxyMaker.byAsm();
         ProxySpec pc = proxyMaker.make(
-            ClsOverpass3.class, Jie.list(InterOverpass3.class),
+            ClsOverpass3.class, Kit.list(InterOverpass3.class),
             new ProxyHandler() {
 
                 @Override
@@ -519,13 +519,13 @@ public class AsmProxyTest implements PrintTest {
     @Test
     public void testException() {
         expectThrows(AsmProxyMaker.AsmProxyException.class, () ->
-            ProxyMaker.byAsm().make(null, Jie.list(), null));
+            ProxyMaker.byAsm().make(null, Kit.list(), null));
     }
 
     private void testInterA(InterA obj, IntVar counter) {
         assertFalse(obj.equals(""));
         assertEquals(counter.get(), 1);
-        assertEquals(obj.hashCode(), Jie.hashId(obj));
+        assertEquals(obj.hashCode(), Kit.hashId(obj));
         assertEquals(counter.get(), 2);
         assertEquals(obj.toString(), obj.getClass().getName() + '@' + Integer.toHexString(obj.hashCode()));
         assertEquals(counter.get(), 5);
@@ -556,7 +556,7 @@ public class AsmProxyTest implements PrintTest {
     private void testInterB(InterB obj, IntVar counter) {
         assertFalse(obj.equals(""));
         assertEquals(counter.get(), 1);
-        assertEquals(obj.hashCode(), Jie.hashId(obj));
+        assertEquals(obj.hashCode(), Kit.hashId(obj));
         assertEquals(counter.get(), 2);
         assertEquals(obj.toString(), obj.getClass().getName() + '@' + Integer.toHexString(obj.hashCode()));
         assertEquals(counter.get(), 5);
@@ -587,7 +587,7 @@ public class AsmProxyTest implements PrintTest {
     private void testInterD(InterD obj, ClsD cd, IntVar counter) {
         assertFalse(obj.equals(""));
         assertEquals(counter.get(), 1);
-        assertEquals(obj.hashCode(), Jie.hashId(obj));
+        assertEquals(obj.hashCode(), Kit.hashId(obj));
         assertEquals(counter.get(), 2);
         assertEquals(obj.toString(), obj.getClass().getName() + '@' + Integer.toHexString(obj.hashCode()));
         assertEquals(counter.get(), 5);
@@ -648,7 +648,7 @@ public class AsmProxyTest implements PrintTest {
     private void testInterC(InterC obj1, InterC<String> obj2, IntVar counter) {
         assertFalse(obj1.equals(""));
         assertEquals(counter.get(), 1);
-        assertEquals(obj1.hashCode(), Jie.hashId(obj1));
+        assertEquals(obj1.hashCode(), Kit.hashId(obj1));
         assertEquals(counter.get(), 2);
         assertEquals(obj1.toString(), obj1.getClass().getName() + '@' + Integer.toHexString(obj1.hashCode()));
         assertEquals(counter.get(), 5);
@@ -657,7 +657,7 @@ public class AsmProxyTest implements PrintTest {
         counter.clear();
         assertFalse(obj2.equals(""));
         assertEquals(counter.get(), 1);
-        assertEquals(obj2.hashCode(), Jie.hashId(obj2));
+        assertEquals(obj2.hashCode(), Kit.hashId(obj2));
         assertEquals(counter.get(), 2);
         assertEquals(obj2.toString(), obj2.getClass().getName() + '@' + Integer.toHexString(obj2.hashCode()));
         assertEquals(counter.get(), 5);
@@ -669,7 +669,7 @@ public class AsmProxyTest implements PrintTest {
     private void testClsA(ClsA obj, IntVar counter) {
         assertFalse(obj.equals(""));
         assertEquals(counter.get(), 1);
-        assertEquals(obj.hashCode(), Jie.hashId(obj));
+        assertEquals(obj.hashCode(), Kit.hashId(obj));
         assertEquals(counter.get(), 2);
         assertEquals(obj.toString(), obj.getClass().getName() + '@' + Integer.toHexString(obj.hashCode()));
         assertEquals(counter.get(), 5);
@@ -680,7 +680,7 @@ public class AsmProxyTest implements PrintTest {
     private void testClsB(ClsB obj1, ClsB<String> obj2, IntVar counter) {
         assertFalse(obj1.equals(""));
         assertEquals(counter.get(), 1);
-        assertEquals(obj1.hashCode(), Jie.hashId(obj1));
+        assertEquals(obj1.hashCode(), Kit.hashId(obj1));
         assertEquals(counter.get(), 2);
         assertEquals(obj1.toString(), obj1.getClass().getName() + '@' + Integer.toHexString(obj1.hashCode()));
         assertEquals(counter.get(), 5);
@@ -689,7 +689,7 @@ public class AsmProxyTest implements PrintTest {
         counter.clear();
         assertFalse(obj2.equals(""));
         assertEquals(counter.get(), 1);
-        assertEquals(obj2.hashCode(), Jie.hashId(obj2));
+        assertEquals(obj2.hashCode(), Kit.hashId(obj2));
         assertEquals(counter.get(), 2);
         assertEquals(obj2.toString(), obj2.getClass().getName() + '@' + Integer.toHexString(obj2.hashCode()));
         assertEquals(counter.get(), 5);
@@ -701,16 +701,16 @@ public class AsmProxyTest implements PrintTest {
     private void testClsC(ClsC obj, IntVar counter) {
         assertFalse(obj.equals(""));
         assertEquals(counter.get(), 1);
-        assertEquals(obj.hashCode(), Jie.hashId(obj));
+        assertEquals(obj.hashCode(), Kit.hashId(obj));
         assertEquals(counter.get(), 2);
         assertEquals(obj.toString(), obj.getClass().getName() + '@' + Integer.toHexString(obj.hashCode()));
         assertEquals(counter.get(), 5);
         assertEquals(obj.b1("aaa"), "aaa");
         assertEquals(counter.get(), 6);
-        ClsB<String> b1 = Jie.as(obj);
+        ClsB<String> b1 = Kit.as(obj);
         assertEquals(b1.b1("bbb"), "bbb");
         assertEquals(counter.get(), 7);
-        ClsB<Object> b2 = Jie.as(obj);
+        ClsB<Object> b2 = Kit.as(obj);
         Object b2Result = b2.b1("bbb");
         assertEquals(b2Result, "bbb");
         assertEquals(counter.get(), 8);

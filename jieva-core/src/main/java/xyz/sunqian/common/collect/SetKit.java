@@ -2,7 +2,7 @@ package xyz.sunqian.common.collect;
 
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -70,7 +70,7 @@ public class SetKit {
     public static <T> @Nonnull @Immutable Set<T> toSet(@Nonnull Iterable<? extends T> it) {
         Object[] array = CollectKit.toArray(it);
         Set<Object> set = set(array);
-        return Jie.as(set);
+        return Kit.as(set);
     }
 
     /**

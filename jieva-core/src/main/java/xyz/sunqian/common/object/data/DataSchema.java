@@ -2,7 +2,7 @@ package xyz.sunqian.common.object.data;
 
 import xyz.sunqian.annotations.Immutable;
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.runtime.reflect.TypeKit;
 
 import java.lang.reflect.ParameterizedType;
@@ -32,13 +32,13 @@ public interface DataSchema {
     /**
      * Returns the raw type of the {@link #type()}. The default implementation is:
      * <pre>{@code
-     * return Jie.nonnull(TypeKit.getRawClass(type()), Object.class);
+     * return Kit.nonnull(TypeKit.getRawClass(type()), Object.class);
      * }</pre>
      *
      * @return the raw type of the {@link #type()}
      */
     default @Nonnull Class<?> rawType() {
-        return Jie.nonnull(TypeKit.getRawClass(type()), Object.class);
+        return Kit.nonnull(TypeKit.getRawClass(type()), Object.class);
     }
 
     /**

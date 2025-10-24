@@ -3,7 +3,7 @@ package xyz.sunqian.common.app.di;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.annotations.OutParam;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.collect.ArrayKit;
 import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.runtime.aspect.AspectMaker;
@@ -253,7 +253,7 @@ final class InjectedAppImpl implements InjectedApp {
     private void setField(
         @Nonnull Field field, @Nonnull Object owner, @Nonnull Object value
     ) throws InjectedAppException {
-        Jie.uncheck(
+        Kit.uncheck(
             () -> {
                 boolean accessible = field.isAccessible();
                 field.setAccessible(true);
@@ -552,8 +552,8 @@ final class InjectedAppImpl implements InjectedApp {
 
         @Override
         public int compare(@Nonnull InjectedResource sr1, @Nonnull InjectedResource sr2) {
-            Method pc1 = Jie.asNonnull(sr1.postConstructMethod());
-            Method pc2 = Jie.asNonnull(sr2.postConstructMethod());
+            Method pc1 = Kit.asNonnull(sr1.postConstructMethod());
+            Method pc2 = Kit.asNonnull(sr2.postConstructMethod());
             InjectedDependsOn sd1 = pc1.getAnnotation(InjectedDependsOn.class);
             InjectedDependsOn sd2 = pc2.getAnnotation(InjectedDependsOn.class);
             return compareDependsOn(sr1, sd1, sr2, sd2);
@@ -566,8 +566,8 @@ final class InjectedAppImpl implements InjectedApp {
 
         @Override
         public int compare(@Nonnull InjectedResource sr1, @Nonnull InjectedResource sr2) {
-            Method pd1 = Jie.asNonnull(sr1.preDestroyMethod());
-            Method pd2 = Jie.asNonnull(sr2.preDestroyMethod());
+            Method pd1 = Kit.asNonnull(sr1.preDestroyMethod());
+            Method pd2 = Kit.asNonnull(sr2.preDestroyMethod());
             InjectedDependsOn sd1 = pd1.getAnnotation(InjectedDependsOn.class);
             InjectedDependsOn sd2 = pd2.getAnnotation(InjectedDependsOn.class);
             return compareDependsOn(sr1, sd1, sr2, sd2);

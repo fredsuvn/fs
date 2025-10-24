@@ -1,7 +1,7 @@
 package xyz.sunqian.common.base.thread;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -68,7 +68,7 @@ public class TraceKit {
      * the context contains no mapping for the key
      */
     public static <K, V> V get(@Nonnull K key) {
-        return Jie.as(contextMap().get(key));
+        return Kit.as(contextMap().get(key));
     }
 
     /**
@@ -86,7 +86,7 @@ public class TraceKit {
      * @see Map#computeIfAbsent(Object, Function)
      */
     public static <K, V> V get(@Nonnull K key, @Nonnull Function<? super @Nonnull K, ? extends V> func) {
-        Map<K, V> map = Jie.as(contextMap());
+        Map<K, V> map = Kit.as(contextMap());
         return map.computeIfAbsent(key, func);
     }
 
@@ -101,7 +101,7 @@ public class TraceKit {
      * @return the old value or {@code null} if no old mapping
      */
     public static <K, V> V set(@Nonnull K key, V value) {
-        return Jie.as(contextMap().put(key, value));
+        return Kit.as(contextMap().put(key, value));
     }
 
     /**

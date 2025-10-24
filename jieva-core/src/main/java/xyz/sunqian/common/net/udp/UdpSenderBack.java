@@ -1,7 +1,7 @@
 package xyz.sunqian.common.net.udp;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.net.NetException;
 import xyz.sunqian.common.net.NetKit;
 
@@ -28,7 +28,7 @@ final class UdpSenderBack {
 
         @Override
         public void sendData(@Nonnull ByteBuffer data, @Nonnull SocketAddress address) throws NetException {
-            Jie.uncheck(() -> {
+            Kit.uncheck(() -> {
                 channel.send(data, address);
             }, NetException::new);
         }
@@ -45,7 +45,7 @@ final class UdpSenderBack {
 
         @Override
         public void close() throws NetException {
-            Jie.uncheck(channel::close, NetException::new);
+            Kit.uncheck(channel::close, NetException::new);
         }
 
         @Override

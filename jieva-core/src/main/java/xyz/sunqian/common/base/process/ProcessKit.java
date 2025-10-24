@@ -1,7 +1,7 @@
 package xyz.sunqian.common.base.process;
 
 import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.io.IORuntimeException;
 
 /**
@@ -19,7 +19,7 @@ public class ProcessKit {
      * @throws IORuntimeException if any error occurs
      */
     public static @Nonnull Process start(@Nonnull String command) throws IORuntimeException {
-        return Jie.uncheck(() -> Runtime.getRuntime().exec(command), IORuntimeException::new);
+        return Kit.uncheck(() -> Runtime.getRuntime().exec(command), IORuntimeException::new);
     }
 
     /**
@@ -30,6 +30,6 @@ public class ProcessKit {
      * @throws IORuntimeException if any error occurs
      */
     public static @Nonnull Process start(@Nonnull String @Nonnull ... command) throws IORuntimeException {
-        return Jie.uncheck(() -> Runtime.getRuntime().exec(command), IORuntimeException::new);
+        return Kit.uncheck(() -> Runtime.getRuntime().exec(command), IORuntimeException::new);
     }
 }

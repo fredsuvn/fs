@@ -3,7 +3,7 @@ package xyz.sunqian.common.net.tcp;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
 import xyz.sunqian.common.base.CheckKit;
-import xyz.sunqian.common.base.Jie;
+import xyz.sunqian.common.base.Kit;
 import xyz.sunqian.common.io.IOKit;
 import xyz.sunqian.common.io.IOOperator;
 import xyz.sunqian.common.io.IORuntimeException;
@@ -84,7 +84,7 @@ public class TcpClientBuilder {
      * @throws NetException If an error occurs
      */
     public @Nonnull TcpClient connect(@Nonnull InetSocketAddress remoteAddress) throws NetException {
-        return Jie.uncheck(() -> new TcpClientImpl(
+        return Kit.uncheck(() -> new TcpClientImpl(
                 localAddress,
                 remoteAddress,
                 socketOptions,
@@ -114,7 +114,7 @@ public class TcpClientBuilder {
             this.client = SocketChannel.open();
             this.remoteAddress = remoteAddress;
             socketOptions.forEach((name, value) ->
-                Jie.uncheck(() -> client.setOption(Jie.as(name), value), NetException::new));
+                Kit.uncheck(() -> client.setOption(Kit.as(name), value), NetException::new));
             this.selector = Selector.open();
             client.bind(localAddress);
             this.localAddress = (InetSocketAddress) client.getLocalAddress();
@@ -130,7 +130,7 @@ public class TcpClientBuilder {
             if (closed) {
                 return;
             }
-            Jie.uncheck(() -> {
+            Kit.uncheck(() -> {
                 client.close();
                 client.keyFor(selector).cancel();
                 selector.close();
@@ -175,7 +175,7 @@ public class TcpClientBuilder {
 
         @Override
         public void awaitReadable() {
-            Jie.uncheck(() -> {
+            Kit.uncheck(() -> {
                 selector.select();
                 Set<SelectionKey> selectedKeys = selector.selectedKeys();
                 Iterator<SelectionKey> keys = selectedKeys.iterator();
