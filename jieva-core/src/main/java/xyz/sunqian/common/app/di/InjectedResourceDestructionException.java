@@ -8,7 +8,7 @@ import xyz.sunqian.common.base.exception.JieRuntimeException;
 import java.util.List;
 
 /**
- * Exception for failing to destroy resources during shutdown of a {@link InjectedApp}.
+ * Exception for failing to destroy resources during {@link InjectedApp} shutdown.
  *
  * @author sunqian
  */
@@ -21,10 +21,9 @@ public class InjectedResourceDestructionException extends JieRuntimeException {
     /**
      * Constructs an exception with detailed context about the resource destroy failure. This exception provides
      * complete information about the resource that caused the failure, resources that were successfully destroyed
-     * before the failure, and resources that remained undestroyed due to the abortive termination of the shutdown
-     * process.
+     * before the failure, and resources that remained undestroyed due to the failure.
      * <p>
-     * Note the resources have been sorted according to their dependency relationships.
+     * Note the resources have already been sorted according to their dependency relationships.
      *
      * @param failedResource       the resource that failed during destruction, causing the shutdown to abort
      * @param cause                the exception that occurred during the failed resource's destruction
@@ -62,9 +61,9 @@ public class InjectedResourceDestructionException extends JieRuntimeException {
     }
 
     /**
-     * Returns the resources that were not destroyed due to the abortive termination.
+     * Returns the resources that were not destroyed due to the failure.
      *
-     * @return the resources that were not destroyed due to the abortive termination
+     * @return the resources that were not destroyed due to the failure
      */
     public @Nonnull List<@Nonnull InjectedResource> undestroyedResources() {
         return undestroyedResources;

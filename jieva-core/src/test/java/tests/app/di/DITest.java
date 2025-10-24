@@ -6,14 +6,14 @@ import jakarta.annotation.Resource;
 import org.testng.annotations.Test;
 import xyz.sunqian.annotations.Nonnull;
 import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.app.di.InjectedApp;
 import xyz.sunqian.common.app.di.InjectedAppException;
 import xyz.sunqian.common.app.di.InjectedAspect;
+import xyz.sunqian.common.app.di.InjectedDependsOn;
 import xyz.sunqian.common.app.di.InjectedResource;
 import xyz.sunqian.common.app.di.InjectedResourceDestructionException;
 import xyz.sunqian.common.app.di.InjectedResourceInitializationException;
-import xyz.sunqian.common.app.di.InjectedDependsOn;
+import xyz.sunqian.common.collect.ListKit;
 import xyz.sunqian.common.runtime.reflect.TypeRef;
 import xyz.sunqian.test.JieTestException;
 import xyz.sunqian.test.PrintTest;
@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotSame;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
@@ -74,7 +75,7 @@ public class DITest implements PrintTest {
         // app2
         postList.clear();
         InjectedApp app2 = InjectedApp.newBuilder()
-            .resourceTypes(SubService2.class)
+            .resourceTypes(SubService2.class, AspectHandler2.class)
             .parentApps(app)
             .parentApps(ListKit.list(app))
             .build();
@@ -83,13 +84,15 @@ public class DITest implements PrintTest {
             ListKit.list(SubService2.class.getName())
         );
         List<InjectedResource> app2Resources = app2.resources();
-        assertEquals(app2Resources.size(), 3);
+        assertEquals(app2Resources.size(), appResources.size() + 3);
         List<InjectedResource> app2LocalResources = app2.localResources();
-        assertEquals(app2LocalResources.size(), 2);
+        assertEquals(app2LocalResources.size(), 3);
         for (InjectedResource app2Resource : app2Resources) {
             if (app2Resource.type().equals(SubService.class)) {
                 assertTrue(app2Resource.isLocal());
-            } else if (app2Resource.type().equals(SubService2.class)) {
+            } else if (app2Resource.instance() instanceof SubService2) {
+                assertTrue(app2Resource.isLocal());
+            } else if (app2Resource.instance() instanceof AspectHandler2) {
                 assertTrue(app2Resource.isLocal());
             } else {
                 assertFalse(app2Resource.isLocal());
@@ -98,7 +101,7 @@ public class DITest implements PrintTest {
         SubService subService = app2.getResource(SubService.class);
         assertEquals(subService.subService(), SubService.class.getName());
         SubService2 subService2 = app2.getResource(SubService2.class);
-        assertEquals(subService2.subService2(), subService.subService());
+        assertEquals(subService2.subService2(), subService.subService() + "[" + AspectHandler2.class.getName() + "]");
         ServiceAaa serviceAaa = app2.getResource(ServiceAaa.class);
         assertEquals(serviceAaa.getLocalName(), "A");
         assertEquals(app2.parentApps(), ListKit.list(app));
@@ -108,6 +111,11 @@ public class DITest implements PrintTest {
             preList,
             ListKit.list(SubService2.class.getName())
         );
+
+        {
+            // error
+            assertNull(app2.getResource(String.class));
+        }
     }
 
     private void testDIResources(InjectedApp app) {
@@ -388,12 +396,39 @@ public class DITest implements PrintTest {
 
         @PostConstruct
         public void postConstruct() {
-            postList.add(getClass().getName());
+            postList.add(SubService2.class.getName());
         }
 
         @PreDestroy
         public void preDestroy() {
-            preList.add(getClass().getName());
+            preList.add(SubService2.class.getName());
+        }
+    }
+
+    public static class AspectHandler2 implements InjectedAspect {
+
+        @Override
+        public boolean needsAspect(@Nonnull Type type) {
+            return type.equals(SubService2.class);
+        }
+
+        @Override
+        public boolean needsAspect(@Nonnull Method method) {
+            return method.getName().equals("subService2");
+        }
+
+        @Override
+        public void beforeInvoking(@Nonnull Method method, Object @Nonnull [] args, @Nonnull Object target) throws Throwable {
+        }
+
+        @Override
+        public @Nullable Object afterReturning(@Nullable Object result, @Nonnull Method method, Object @Nonnull [] args, @Nonnull Object target) throws Throwable {
+            return result + "[" + AspectHandler2.class.getName() + "]";
+        }
+
+        @Override
+        public @Nullable Object afterThrowing(@Nonnull Throwable ex, @Nonnull Method method, Object @Nonnull [] args, @Nonnull Object target) {
+            return null;
         }
     }
 
@@ -640,10 +675,16 @@ public class DITest implements PrintTest {
                     .build();
             });
             assertEquals(startErr.failedResource().type(), ConstructErr.class);
+            for (InjectedResource initializedResource : startErr.initializedResources()) {
+                assertTrue(initializedResource.isInitialized());
+            }
             assertEquals(
                 startErr.initializedResources().stream().map(InjectedResource::type).collect(Collectors.toList()),
                 ListKit.list(Dep8.class, Dep9.class)
             );
+            for (InjectedResource uninitializedResource : startErr.uninitializedResources()) {
+                assertFalse(uninitializedResource.isInitialized());
+            }
             assertEquals(
                 startErr.uninitializedResources().stream().map(InjectedResource::type).collect(Collectors.toList()),
                 ListKit.list(Dep10.class)
@@ -658,10 +699,16 @@ public class DITest implements PrintTest {
                     .shutdown();
             });
             assertEquals(shutErr.failedResource().type(), DestroyErr.class);
+            for (InjectedResource destroyedResource : shutErr.destroyedResources()) {
+                assertTrue(destroyedResource.isDestroyed());
+            }
             assertEquals(
                 shutErr.destroyedResources().stream().map(InjectedResource::type).collect(Collectors.toList()),
                 ListKit.list(Dep8.class, Dep9.class)
             );
+            for (InjectedResource undestroyedResource : shutErr.undestroyedResources()) {
+                assertFalse(undestroyedResource.isDestroyed());
+            }
             assertEquals(
                 shutErr.undestroyedResources().stream().map(InjectedResource::type).collect(Collectors.toList()),
                 ListKit.list(Dep10.class)

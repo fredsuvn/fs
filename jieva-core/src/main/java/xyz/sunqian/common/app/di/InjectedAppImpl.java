@@ -35,16 +35,22 @@ final class InjectedAppImpl implements InjectedApp {
     private final @Nonnull List<@Nonnull InjectedResource> allResources;
     private final @Nonnull Map<@Nonnull Type, @Nonnull InjectedResource> resources;
     private final @Nonnull List<@Nonnull InjectedResource> preDestroyList;
-    private final @Nonnull List<@Nonnull InjectedApp> dependencyApps;
+    private final @Nonnull List<@Nonnull InjectedApp> parentApps;
 
     public InjectedAppImpl(
         @Nonnull Set<@Nonnull Type> resourceTypes,
-        @Nonnull InjectedApp @Nonnull [] dependencyApps,
+        @Nonnull InjectedApp @Nonnull [] parentApps,
         @Nonnull String @Nonnull [] resourceAnnotations,
         @Nonnull String @Nonnull [] postConstructAnnotations,
         @Nonnull String @Nonnull [] preDestroyAnnotations
     ) throws InjectedResourceInitializationException, InjectedAppException {
         Map<Type, Res> resourceMap = new LinkedHashMap<>();
+        // add parent resource into this app
+        for (InjectedApp parentApp : parentApps) {
+            for (InjectedResource resource : parentApp.resources()) {
+                resourceMap.put(resource.type(), new Res(resource.type(), resource.instance()));
+            }
+        }
         Set<FieldRes> fieldSet = new LinkedHashSet<>();
         // generate instances
         for (Type resourceType : resourceTypes) {
@@ -53,7 +59,7 @@ final class InjectedAppImpl implements InjectedApp {
                 resourceAnnotations,
                 postConstructAnnotations,
                 preDestroyAnnotations,
-                dependencyApps,
+                //parentApps,
                 resourceMap,
                 fieldSet
             );
@@ -75,7 +81,7 @@ final class InjectedAppImpl implements InjectedApp {
         int i = 0;
         for (Res res : resourceMap.values()) {
             Object inst = getResInstance(res);
-            InjectedResource simpleResource = new SimpleRes(res.type, inst, res.local, res.postConstruct, res.preDestroy);
+            InjectedResource simpleResource = new InjectedRes(res.type, inst, res.local, res.postConstruct, res.preDestroy);
             resources.put(res.type, simpleResource);
             allResources[i++] = simpleResource;
             if (res.local) {
@@ -89,7 +95,7 @@ final class InjectedAppImpl implements InjectedApp {
                 localResources[i++] = res;
             }
         }
-        this.dependencyApps = ListKit.list(dependencyApps);
+        this.parentApps = ListKit.list(parentApps);
         this.resources = Collections.unmodifiableMap(resources);
         this.localResources = ListKit.list(localResources);
         this.allResources = ListKit.list(allResources);
@@ -130,21 +136,21 @@ final class InjectedAppImpl implements InjectedApp {
         @Nonnull String @Nonnull [] resourceAnnotations,
         @Nonnull String @Nonnull [] postConstructAnnotations,
         @Nonnull String @Nonnull [] preDestroyAnnotations,
-        @Nonnull InjectedApp @Nonnull [] dependencyApps,
+        //@Nonnull InjectedApp @Nonnull [] dependencyApps,
         @Nonnull @OutParam Map<@Nonnull Type, @Nonnull Res> resourceMap,
         @Nonnull @OutParam Set<@Nonnull FieldRes> fieldSet
     ) throws InjectedAppException {
         if (resourceMap.containsKey(type)) {
             return;
         }
-        for (InjectedApp dependency : dependencyApps) {
-            Object instance = dependency.getResource(type);
-            if (instance != null) {
-                Res res = new Res(type, instance);
-                resourceMap.put(type, res);
-                return;
-            }
-        }
+        // for (InjectedApp dependency : dependencyApps) {
+        //     Object instance = dependency.getResource(type);
+        //     if (instance != null) {
+        //         Res res = new Res(type, instance);
+        //         resourceMap.put(type, res);
+        //         return;
+        //     }
+        // }
         Class<?> rawClass = rawClass(type);
         if (!canInstantiate(rawClass)) {
             return;
@@ -166,7 +172,7 @@ final class InjectedAppImpl implements InjectedApp {
                             resourceAnnotations,
                             postConstructAnnotations,
                             preDestroyAnnotations,
-                            dependencyApps,
+                            //dependencyApps,
                             resourceMap,
                             fieldSet
                         );
@@ -200,6 +206,9 @@ final class InjectedAppImpl implements InjectedApp {
                 aspects.add((InjectedAspect) instance);
                 res.isAspectHandler = true;
             }
+        }
+        if (aspects.isEmpty()) {
+            return;
         }
         AspectMaker aspectMaker = AspectMaker.byAsm();
         for (Res res : resourceMap.values()) {
@@ -359,7 +368,7 @@ final class InjectedAppImpl implements InjectedApp {
 
     @Override
     public @Nonnull List<@Nonnull InjectedApp> parentApps() {
-        return dependencyApps;
+        return parentApps;
     }
 
     @Override
@@ -460,7 +469,7 @@ final class InjectedAppImpl implements InjectedApp {
         }
     }
 
-    private static final class SimpleRes implements InjectedResource {
+    private static final class InjectedRes implements InjectedResource {
 
         private final @Nonnull Type type;
         private final @Nonnull Object instance;
@@ -469,8 +478,9 @@ final class InjectedAppImpl implements InjectedApp {
         private final @Nonnull Invocable postConstruct;
         private final @Nullable Method preDestroyMethod;
         private final @Nonnull Invocable preDestroy;
+        private volatile int state = 0;
 
-        private SimpleRes(
+        private InjectedRes(
             @Nonnull Type type,
             @Nonnull Object instance,
             boolean local,
@@ -511,6 +521,12 @@ final class InjectedAppImpl implements InjectedApp {
         @Override
         public void postConstruct() throws InvocationException {
             postConstruct.invoke(instance);
+            state = 1;
+        }
+
+        @Override
+        public boolean isInitialized() {
+            return state == 1;
         }
 
         @Override
@@ -521,6 +537,12 @@ final class InjectedAppImpl implements InjectedApp {
         @Override
         public void preDestroy() throws InvocationException {
             preDestroy.invoke(instance);
+            state = 2;
+        }
+
+        @Override
+        public boolean isDestroyed() {
+            return state == 2;
         }
     }
 

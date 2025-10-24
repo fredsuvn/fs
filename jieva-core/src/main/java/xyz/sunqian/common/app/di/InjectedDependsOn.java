@@ -9,9 +9,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Declares that the annotated post-construct or pre-destroy methods depends on the resources specified by
- * {@link #value()}, and the DI system ensures that the post-construct or pre-destroy methods of the dependent resource
- * is executed before they are executed.
+ * This annotation is used for post-construct or pre-destroy methods, to declare dependent resources specified by
+ * {@link #value()}. The current DI system ensures that post-construct methods will be executed after their dependent
+ * resources have been initialized, and pre-destroy methods will be executed before their dependent resources have been
+ * destroyed.
  *
  * @author sunqian
  */
@@ -23,9 +24,9 @@ import java.lang.annotation.Target;
 public @interface InjectedDependsOn {
 
     /**
-     * The classes of the dependency.
+     * The classes of the dependent resources.
      *
-     * @return the classes of the dependency.
+     * @return classes of the dependent resources
      */
     @Nonnull Class<?> @Nonnull [] value();
 }

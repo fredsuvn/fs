@@ -82,8 +82,8 @@ public interface InjectedApp extends SimpleApp {
      * exists.
      * <p>
      * This method first attempts to find a resource whose type exactly matches the specified type using
-     * {@link Object#equals(Object)}. If no exact match is found, it will randomly select one instance that can be
-     * assigned to the specified type from all resources that constitute this app.
+     * {@link Object#equals(Object)}. If no exact match is found, it will randomly select one resource instance that can
+     * be assigned to the specified type from all resources that constitute this app.
      *
      * @param type the specified type
      * @return a resource instance whose type is assignable to the specified type, or {@code null} if no such resource
@@ -98,8 +98,8 @@ public interface InjectedApp extends SimpleApp {
      * exists.
      * <p>
      * This method first attempts to find a resource whose type exactly matches the specified type using
-     * {@link Object#equals(Object)}. If no exact match is found, it will randomly select one instance that can be
-     * assigned to the specified type from all resources that constitute this app.
+     * {@link Object#equals(Object)}. If no exact match is found, it will randomly select one resource instance that can
+     * be assigned to the specified type from all resources that constitute this app.
      *
      * @param type the {@link TypeRef} for the specified type
      * @return a resource instance whose type is assignable to the specified type, or {@code null} if no such resource
@@ -114,8 +114,8 @@ public interface InjectedApp extends SimpleApp {
      * exists.
      * <p>
      * This method first attempts to find a resource whose type exactly matches the specified type using
-     * {@link Object#equals(Object)}. If no exact match is found, it will randomly select one instance that can be
-     * assigned to the specified type from all resources that constitute this app.
+     * {@link Object#equals(Object)}. If no exact match is found, it will randomly select one resource instance that can
+     * be assigned to the specified type from all resources that constitute this app.
      *
      * @param type the specified type
      * @return a resource instance whose type is assignable to the specified type, or {@code null} if no such resource
@@ -192,8 +192,8 @@ public interface InjectedApp extends SimpleApp {
         }
 
         /**
-         * Adds resource types to this builder, each type should be a {@link Class} or {@link ParameterizedType}. And
-         * previously added types will be ignored.
+         * Adds root resource types to this builder, each type should be a {@link Class} or {@link ParameterizedType}.
+         * And previously added types will be ignored.
          * <p>
          * These types serve as root types for dependency injection. The dependency resolver will recursively analyze
          * {@link Field}s of these types to build the complete dependency graph. Note each type only generates singleton
@@ -208,8 +208,8 @@ public interface InjectedApp extends SimpleApp {
         }
 
         /**
-         * Adds resource types to this builder, each type should be a {@link Class} or {@link ParameterizedType}. And
-         * previously added types will be ignored.
+         * Adds root resource types to this builder, each type should be a {@link Class} or {@link ParameterizedType}.
+         * And previously added types will be ignored.
          * <p>
          * These types serve as root types for dependency injection. The dependency resolver will recursively analyze
          * {@link Field}s of these types to build the complete dependency graph. Note each type only generates singleton
@@ -224,7 +224,8 @@ public interface InjectedApp extends SimpleApp {
         }
 
         /**
-         * Adds parent apps to inherit and share its resources.
+         * Adds parent apps to inherit and share its resources. If a resource type already exists in the parent app, the
+         * sub-app will not generate another instance of that type.
          * <p>
          * Once a parent app is shut down, its sub-apps are not automatically shut down along with it. The inherited
          * resources will still be held by the sub-apps, but theirs pre-destroy methods will be executed.
@@ -238,7 +239,8 @@ public interface InjectedApp extends SimpleApp {
         }
 
         /**
-         * Adds parent apps to inherit and share its resources.
+         * Adds parent apps to inherit and share its resources. If a resource type already exists in the parent app, the
+         * sub-app will not generate another instance of that type.
          * <p>
          * Once a parent app is shut down, its sub-apps are not automatically shut down along with it. The inherited
          * resources will still be held by the sub-apps, but theirs pre-destroy methods will be executed.
@@ -251,36 +253,14 @@ public interface InjectedApp extends SimpleApp {
             return this;
         }
 
-        // /**
-        //  * Enables or disables the aspect-oriented programming (AOP) functionality.
-        //  * <p>
-        //  * When enabled, this builder will first start standard dependency injection, creating one instance for each
-        //  * resource type. Resource objects which are instances of the {@link InjectedAspect} will be treated as aspect
-        //  * handlers (excluding instances from dependency apps), and the other resource instances (also excluding
-        //  * instances from dependency apps) will be evaluated by {@link InjectedAspect#needsAspect(Type)} of each aspect
-        //  * handler in an unspecified order. The evaluation stops at the first handler where the {@code needsAspect}
-        //  * returns {@code true} for the resource type. When a match is found, the resource instance will be advised by
-        //  * that handler, and no further aspect handlers will be evaluated for that type.
-        //  * <p>
-        //  * If no aspect handler matches a resource type, the resource type will not be advised. And if a resource
-        //  * instance is advised and replaced by the advised instance, the Post-Construct and Pre-Destroy methods (if any)
-        //  * will execute on the advised instance rather than the original instance.
-        //  *
-        //  * @param aspect {@code true} to enable AOP functionality, {@code false} to disable it
-        //  * @return this builder
-        //  */
-        // public @Nonnull Builder aspect(boolean aspect) {
-        //     this.enableAspect = aspect;
-        //     return this;
-        // }
-
         /**
          * Builds and starts a new app instance. The startup process performs the following operations in sequence:
          * <ol>
-         *   <li>Dependency injection for all resources;</li>
-         *   <li>AOP processing if {@link InjectedAspect} instances exist in resources;</li>
-         *   <li>Re-injection of dependencies for instances affected by AOP;</li>
-         *   <li>Execution of {@code post-construct} methods in dependency order</li>
+         *   <li>Generating instances for all resource types with singleton mode;</li>
+         *   <li>Dependency injection for all resource instances;</li>
+         *   <li>AOP processing if {@link InjectedAspect} instances exist in resource instances;</li>
+         *   <li>Re-injection of dependencies for resource instances affected by AOP processing;</li>
+         *   <li>Executing all {@code post-construct} methods of resource instances in dependency order</li>
          * </ol>
          * If any {@code post-construct} method fails, an {@link InjectedResourceInitializationException} is thrown
          * immediately. Resources that have already successfully executed {@code post-construct} methods will not be
