@@ -1,4 +1,4 @@
 @DefaultNonNull
 package tests.nonnullpkg;
 
-import xyz.sunqian.annotations.DefaultNonNull;
+import space.sunqian.annotations.DefaultNonNull;

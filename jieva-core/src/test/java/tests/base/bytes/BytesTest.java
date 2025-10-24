@@ -1,7 +1,7 @@
 package tests.base.bytes;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.bytes.BytesKit;
+import space.sunqian.common.base.bytes.BytesKit;
 
 import java.nio.ByteBuffer;
 

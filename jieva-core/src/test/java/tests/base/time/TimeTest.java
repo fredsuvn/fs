@@ -1,10 +1,10 @@
 package tests.base.time;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.time.TimeException;
-import xyz.sunqian.common.base.time.TimeFormatter;
-import xyz.sunqian.common.base.time.TimeKit;
-import xyz.sunqian.test.PrintTest;
+import space.sunqian.common.base.time.TimeException;
+import space.sunqian.common.base.time.TimeFormatter;
+import space.sunqian.common.base.time.TimeKit;
+import space.sunqian.test.PrintTest;
 
 import java.text.SimpleDateFormat;
 import java.time.DateTimeException;

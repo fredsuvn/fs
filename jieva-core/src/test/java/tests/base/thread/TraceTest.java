@@ -1,9 +1,9 @@
 package tests.base.thread;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.thread.TraceKit;
-import xyz.sunqian.common.collect.MapKit;
-import xyz.sunqian.test.PrintTest;
+import space.sunqian.common.base.thread.TraceKit;
+import space.sunqian.common.collect.MapKit;
+import space.sunqian.test.PrintTest;
 
 import java.lang.reflect.Method;
 import java.util.Collections;

@@ -1,7 +1,7 @@
 package tests;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.test.PrintTest;
+import space.sunqian.test.PrintTest;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;

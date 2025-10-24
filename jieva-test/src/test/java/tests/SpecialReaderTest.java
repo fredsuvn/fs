@@ -1,10 +1,10 @@
 package tests;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.test.ReadOps;
-import xyz.sunqian.test.TestIOException;
-import xyz.sunqian.test.TestInputStream;
-import xyz.sunqian.test.TestReader;
+import space.sunqian.test.ReadOps;
+import space.sunqian.test.TestIOException;
+import space.sunqian.test.TestInputStream;
+import space.sunqian.test.TestReader;
 
 import java.io.ByteArrayInputStream;
 import java.io.CharArrayReader;

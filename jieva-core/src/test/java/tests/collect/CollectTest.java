@@ -1,8 +1,8 @@
 package tests.collect;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.Kit;
-import xyz.sunqian.common.collect.CollectKit;
+import space.sunqian.common.base.Kit;
+import space.sunqian.common.collect.CollectKit;
 
 import java.util.ArrayList;
 import java.util.Arrays;

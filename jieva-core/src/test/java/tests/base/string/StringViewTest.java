@@ -1,10 +1,10 @@
 package tests.base.string;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.exception.UnreachablePointException;
-import xyz.sunqian.common.base.string.StringView;
-import xyz.sunqian.common.collect.ListKit;
-import xyz.sunqian.test.PrintTest;
+import space.sunqian.common.base.exception.UnreachablePointException;
+import space.sunqian.common.base.string.StringView;
+import space.sunqian.common.collect.ListKit;
+import space.sunqian.test.PrintTest;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

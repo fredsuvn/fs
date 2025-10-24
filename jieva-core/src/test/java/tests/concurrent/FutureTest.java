@@ -1,8 +1,8 @@
 package tests.concurrent;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.exception.AwaitingException;
-import xyz.sunqian.common.concurrent.FutureKit;
+import space.sunqian.common.base.exception.AwaitingException;
+import space.sunqian.common.concurrent.FutureKit;
 
 import java.time.Duration;
 import java.util.concurrent.ExecutorService;

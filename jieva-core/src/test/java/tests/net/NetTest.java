@@ -1,8 +1,8 @@
 package tests.net;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.net.NetException;
-import xyz.sunqian.test.PrintTest;
+import space.sunqian.common.net.NetException;
+import space.sunqian.test.PrintTest;
 
 import static org.testng.Assert.expectThrows;
 

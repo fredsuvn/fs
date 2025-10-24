@@ -1,13 +1,13 @@
 package tests.runtime.proxy;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Kit;
-import xyz.sunqian.common.runtime.proxy.ProxyHandler;
-import xyz.sunqian.common.runtime.proxy.ProxyInvoker;
-import xyz.sunqian.common.runtime.proxy.ProxyMaker;
-import xyz.sunqian.common.runtime.proxy.ProxySpec;
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.base.Kit;
+import space.sunqian.common.runtime.proxy.ProxyHandler;
+import space.sunqian.common.runtime.proxy.ProxyInvoker;
+import space.sunqian.common.runtime.proxy.ProxyMaker;
+import space.sunqian.common.runtime.proxy.ProxySpec;
 
 import java.lang.reflect.Method;
 

@@ -1,18 +1,18 @@
 package tests.io;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.bytes.BytesBuilder;
-import xyz.sunqian.common.base.chars.CharsBuilder;
-import xyz.sunqian.common.base.chars.CharsKit;
-import xyz.sunqian.common.collect.ArrayKit;
-import xyz.sunqian.common.io.BufferKit;
-import xyz.sunqian.common.io.ByteArrayOperator;
-import xyz.sunqian.common.io.CharArrayOperator;
-import xyz.sunqian.common.io.IORuntimeException;
-import xyz.sunqian.test.DataTest;
-import xyz.sunqian.test.ErrorAppender;
-import xyz.sunqian.test.ErrorOutputStream;
-import xyz.sunqian.test.MaterialBox;
+import space.sunqian.common.base.bytes.BytesBuilder;
+import space.sunqian.common.base.chars.CharsBuilder;
+import space.sunqian.common.base.chars.CharsKit;
+import space.sunqian.common.collect.ArrayKit;
+import space.sunqian.common.io.BufferKit;
+import space.sunqian.common.io.ByteArrayOperator;
+import space.sunqian.common.io.CharArrayOperator;
+import space.sunqian.common.io.IORuntimeException;
+import space.sunqian.test.DataTest;
+import space.sunqian.test.ErrorAppender;
+import space.sunqian.test.ErrorOutputStream;
+import space.sunqian.test.MaterialBox;
 
 import java.io.ByteArrayOutputStream;
 import java.io.CharArrayWriter;

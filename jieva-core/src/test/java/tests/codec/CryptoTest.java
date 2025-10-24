@@ -1,9 +1,9 @@
 package tests.codec;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.codec.CryptoKit;
-import xyz.sunqian.common.io.ByteProcessor;
-import xyz.sunqian.test.DataTest;
+import space.sunqian.common.codec.CryptoKit;
+import space.sunqian.common.io.ByteProcessor;
+import space.sunqian.test.DataTest;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;

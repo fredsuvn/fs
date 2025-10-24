@@ -1,8 +1,8 @@
 package tests.base.system;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.system.OSKit;
-import xyz.sunqian.test.PrintTest;
+import space.sunqian.common.base.system.OSKit;
+import space.sunqian.test.PrintTest;
 
 public class OSTest implements PrintTest {
 

@@ -1,7 +1,7 @@
 package tests.collect;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.collect.StreamKit;
+import space.sunqian.common.collect.StreamKit;
 
 import java.util.Arrays;
 import java.util.Collections;

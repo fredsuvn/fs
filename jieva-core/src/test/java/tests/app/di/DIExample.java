@@ -1,11 +1,11 @@
 package tests.app.di;
 
-import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.app.di.InjectedApp;
-import xyz.sunqian.common.app.di.InjectedAspect;
-import xyz.sunqian.common.app.di.InjectedDependsOn;
-import xyz.sunqian.test.PrintTest;
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.app.di.InjectedApp;
+import space.sunqian.common.app.di.InjectedAspect;
+import space.sunqian.common.app.di.InjectedDependsOn;
+import space.sunqian.test.PrintTest;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

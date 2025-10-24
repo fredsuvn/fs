@@ -1,7 +1,7 @@
 package tests.runtime.reflect;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.runtime.reflect.TypeKit;
+import space.sunqian.common.runtime.reflect.TypeKit;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;

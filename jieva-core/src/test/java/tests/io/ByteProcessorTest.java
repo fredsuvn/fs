@@ -1,21 +1,21 @@
 package tests.io;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.bytes.BytesBuilder;
-import xyz.sunqian.common.base.chars.CharsKit;
-import xyz.sunqian.common.base.value.IntVar;
-import xyz.sunqian.common.io.BufferKit;
-import xyz.sunqian.common.io.ByteProcessor;
-import xyz.sunqian.common.io.ByteReader;
-import xyz.sunqian.common.io.ByteSegment;
-import xyz.sunqian.common.io.ByteTransformer;
-import xyz.sunqian.common.io.IOKit;
-import xyz.sunqian.common.io.IORuntimeException;
-import xyz.sunqian.test.AssertTest;
-import xyz.sunqian.test.DataTest;
-import xyz.sunqian.test.ErrorOutputStream;
-import xyz.sunqian.test.ReadOps;
-import xyz.sunqian.test.TestInputStream;
+import space.sunqian.common.base.bytes.BytesBuilder;
+import space.sunqian.common.base.chars.CharsKit;
+import space.sunqian.common.base.value.IntVar;
+import space.sunqian.common.io.BufferKit;
+import space.sunqian.common.io.ByteProcessor;
+import space.sunqian.common.io.ByteReader;
+import space.sunqian.common.io.ByteSegment;
+import space.sunqian.common.io.ByteTransformer;
+import space.sunqian.common.io.IOKit;
+import space.sunqian.common.io.IORuntimeException;
+import space.sunqian.test.AssertTest;
+import space.sunqian.test.DataTest;
+import space.sunqian.test.ErrorOutputStream;
+import space.sunqian.test.ReadOps;
+import space.sunqian.test.TestInputStream;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

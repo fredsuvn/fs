@@ -1,7 +1,7 @@
 package tests.collect;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.collect.ListKit;
+import space.sunqian.common.collect.ListKit;
 
 import java.util.ArrayList;
 import java.util.Arrays;

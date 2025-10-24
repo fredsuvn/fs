@@ -1,7 +1,7 @@
 package tests.runtime.proxy;
 
-import xyz.sunqian.common.runtime.invoke.Invocable;
-import xyz.sunqian.common.runtime.proxy.JdkProxyMaker;
+import space.sunqian.common.runtime.invoke.Invocable;
+import space.sunqian.common.runtime.proxy.JdkProxyMaker;
 
 import java.lang.reflect.Field;
 
@@ -10,7 +10,7 @@ import static org.testng.Assert.expectThrows;
 final class ProxyBackTest {
 
     static void testUnsupportedDefaultMethod() throws Exception {
-        Class<?> cls = Class.forName("xyz.sunqian.common.runtime.proxy.ProxyBack");
+        Class<?> cls = Class.forName("space.sunqian.common.runtime.proxy.ProxyBack");
         Field field = cls.getDeclaredField("UNSUPPORTED_DEFAULT_METHOD_INVOCABLE");
         field.setAccessible(true);
         Invocable invocable = (Invocable) field.get(null);

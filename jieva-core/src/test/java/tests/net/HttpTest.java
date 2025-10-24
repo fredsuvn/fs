@@ -1,20 +1,20 @@
 package tests.net;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.chars.CharsKit;
-import xyz.sunqian.common.collect.ListKit;
-import xyz.sunqian.common.collect.MapKit;
-import xyz.sunqian.common.net.NetException;
-import xyz.sunqian.common.net.http.HttpKit;
-import xyz.sunqian.common.net.http.HttpReq;
-import xyz.sunqian.common.net.http.HttpResp;
-import xyz.sunqian.common.net.tcp.TcpContext;
-import xyz.sunqian.common.net.tcp.TcpServer;
-import xyz.sunqian.common.net.tcp.TcpServerHandler;
-import xyz.sunqian.test.ErrorCharset;
-import xyz.sunqian.test.PrintTest;
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.base.chars.CharsKit;
+import space.sunqian.common.collect.ListKit;
+import space.sunqian.common.collect.MapKit;
+import space.sunqian.common.net.NetException;
+import space.sunqian.common.net.http.HttpKit;
+import space.sunqian.common.net.http.HttpReq;
+import space.sunqian.common.net.http.HttpResp;
+import space.sunqian.common.net.tcp.TcpContext;
+import space.sunqian.common.net.tcp.TcpServer;
+import space.sunqian.common.net.tcp.TcpServerHandler;
+import space.sunqian.test.ErrorCharset;
+import space.sunqian.test.PrintTest;
 
 import java.net.URLEncoder;
 import java.util.ArrayList;

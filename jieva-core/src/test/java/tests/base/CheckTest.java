@@ -1,8 +1,8 @@
 package tests.base;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.CheckKit;
-import xyz.sunqian.common.base.exception.UnreachablePointException;
+import space.sunqian.common.base.CheckKit;
+import space.sunqian.common.base.exception.UnreachablePointException;
 
 import java.util.NoSuchElementException;
 

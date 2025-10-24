@@ -2,8 +2,8 @@ package tests.base.thread;
 
 import org.testng.annotations.Test;
 import tests.utils.Utils;
-import xyz.sunqian.common.base.exception.AwaitingException;
-import xyz.sunqian.common.base.thread.ThreadKit;
+import space.sunqian.common.base.exception.AwaitingException;
+import space.sunqian.common.base.thread.ThreadKit;
 
 import java.time.Duration;
 

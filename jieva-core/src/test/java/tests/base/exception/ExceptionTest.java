@@ -1,15 +1,15 @@
 package tests.base.exception;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.exception.AwaitingException;
-import xyz.sunqian.common.base.exception.KitvaException;
-import xyz.sunqian.common.base.exception.KitvaRuntimeException;
-import xyz.sunqian.common.base.exception.ThrowKit;
-import xyz.sunqian.common.base.exception.UnknownArrayTypeException;
-import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
-import xyz.sunqian.common.base.exception.UnknownTypeException;
-import xyz.sunqian.common.base.exception.UnreachablePointException;
-import xyz.sunqian.common.base.exception.WrappedException;
+import space.sunqian.common.base.exception.AwaitingException;
+import space.sunqian.common.base.exception.KitvaException;
+import space.sunqian.common.base.exception.KitvaRuntimeException;
+import space.sunqian.common.base.exception.ThrowKit;
+import space.sunqian.common.base.exception.UnknownArrayTypeException;
+import space.sunqian.common.base.exception.UnknownPrimitiveTypeException;
+import space.sunqian.common.base.exception.UnknownTypeException;
+import space.sunqian.common.base.exception.UnreachablePointException;
+import space.sunqian.common.base.exception.WrappedException;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

@@ -1,12 +1,12 @@
 package tests.base.string;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.chars.CharsKit;
-import xyz.sunqian.common.base.exception.UnknownArrayTypeException;
-import xyz.sunqian.common.base.string.StringKit;
-import xyz.sunqian.common.base.string.StringView;
-import xyz.sunqian.test.DataTest;
-import xyz.sunqian.test.PrintTest;
+import space.sunqian.common.base.chars.CharsKit;
+import space.sunqian.common.base.exception.UnknownArrayTypeException;
+import space.sunqian.common.base.string.StringKit;
+import space.sunqian.common.base.string.StringView;
+import space.sunqian.test.DataTest;
+import space.sunqian.test.PrintTest;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

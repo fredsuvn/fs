@@ -1,10 +1,10 @@
 package tests.function;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.function.callable.BooleanCallable;
-import xyz.sunqian.common.function.callable.DoubleCallable;
-import xyz.sunqian.common.function.callable.IntCallable;
-import xyz.sunqian.common.function.callable.LongCallable;
+import space.sunqian.common.function.callable.BooleanCallable;
+import space.sunqian.common.function.callable.DoubleCallable;
+import space.sunqian.common.function.callable.IntCallable;
+import space.sunqian.common.function.callable.LongCallable;
 
 import static org.testng.Assert.assertEquals;
 

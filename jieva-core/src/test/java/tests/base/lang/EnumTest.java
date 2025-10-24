@@ -1,8 +1,8 @@
 package tests.base.lang;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.Kit;
-import xyz.sunqian.common.base.lang.EnumKit;
+import space.sunqian.common.base.Kit;
+import space.sunqian.common.base.lang.EnumKit;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;

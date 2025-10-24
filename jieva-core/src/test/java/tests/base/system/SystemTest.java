@@ -1,9 +1,9 @@
 package tests.base.system;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.system.SystemKeys;
-import xyz.sunqian.common.base.system.SystemKit;
-import xyz.sunqian.test.PrintTest;
+import space.sunqian.common.base.system.SystemKeys;
+import space.sunqian.common.base.system.SystemKit;
+import space.sunqian.test.PrintTest;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

@@ -2,11 +2,11 @@ package tests.runtime.reflect;
 
 import org.testng.annotations.Test;
 import tests.utils.ErrorConstructor;
-import xyz.sunqian.common.base.Kit;
-import xyz.sunqian.common.base.exception.UnknownPrimitiveTypeException;
-import xyz.sunqian.common.collect.ListKit;
-import xyz.sunqian.common.runtime.reflect.ClassKit;
-import xyz.sunqian.test.AssertTest;
+import space.sunqian.common.base.Kit;
+import space.sunqian.common.base.exception.UnknownPrimitiveTypeException;
+import space.sunqian.common.collect.ListKit;
+import space.sunqian.common.runtime.reflect.ClassKit;
+import space.sunqian.test.AssertTest;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;

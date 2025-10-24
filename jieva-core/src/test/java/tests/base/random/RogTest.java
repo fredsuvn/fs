@@ -1,10 +1,10 @@
 package tests.base.random;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.exception.UnreachablePointException;
-import xyz.sunqian.common.base.random.Rog;
-import xyz.sunqian.test.AssertTest;
-import xyz.sunqian.test.PrintTest;
+import space.sunqian.common.base.exception.UnreachablePointException;
+import space.sunqian.common.base.random.Rog;
+import space.sunqian.test.AssertTest;
+import space.sunqian.test.PrintTest;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;

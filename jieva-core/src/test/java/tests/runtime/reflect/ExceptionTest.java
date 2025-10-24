@@ -1,7 +1,7 @@
 package tests.runtime.reflect;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.runtime.reflect.ReflectionException;
+import space.sunqian.common.runtime.reflect.ReflectionException;
 
 import static org.testng.Assert.expectThrows;
 

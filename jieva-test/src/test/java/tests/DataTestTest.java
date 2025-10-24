@@ -1,8 +1,8 @@
 package tests;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.test.DataTest;
-import xyz.sunqian.test.PrintTest;
+import space.sunqian.test.DataTest;
+import space.sunqian.test.PrintTest;
 
 import java.util.Arrays;
 

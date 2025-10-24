@@ -1,9 +1,9 @@
 package tests.app;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.app.SimpleApp;
-import xyz.sunqian.common.app.SimpleAppException;
-import xyz.sunqian.test.PrintTest;
+import space.sunqian.common.app.SimpleApp;
+import space.sunqian.common.app.SimpleAppException;
+import space.sunqian.test.PrintTest;
 
 import static org.testng.Assert.expectThrows;
 

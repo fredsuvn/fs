@@ -1,8 +1,8 @@
 package tests.runtime.reflect;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.runtime.reflect.TypeKit;
-import xyz.sunqian.common.runtime.reflect.TypeRef;
+import space.sunqian.common.runtime.reflect.TypeKit;
+import space.sunqian.common.runtime.reflect.TypeRef;
 
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;

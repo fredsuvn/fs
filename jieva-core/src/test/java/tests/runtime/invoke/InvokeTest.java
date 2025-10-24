@@ -2,11 +2,11 @@ package tests.runtime.invoke;
 
 import org.testng.annotations.Test;
 import tests.utils.LotsOfMethods;
-import xyz.sunqian.common.base.Kit;
-import xyz.sunqian.common.runtime.invoke.Invocable;
-import xyz.sunqian.common.runtime.invoke.InvocationException;
-import xyz.sunqian.common.runtime.invoke.InvocationMode;
-import xyz.sunqian.common.runtime.invoke.InvokeKit;
+import space.sunqian.common.base.Kit;
+import space.sunqian.common.runtime.invoke.Invocable;
+import space.sunqian.common.runtime.invoke.InvocationException;
+import space.sunqian.common.runtime.invoke.InvocationMode;
+import space.sunqian.common.runtime.invoke.InvokeKit;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;

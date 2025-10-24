@@ -1,9 +1,9 @@
 package tests.base.chars;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.chars.CharsKit;
-import xyz.sunqian.common.base.system.SystemKeys;
-import xyz.sunqian.test.AssertTest;
+import space.sunqian.common.base.chars.CharsKit;
+import space.sunqian.common.base.system.SystemKeys;
+import space.sunqian.test.AssertTest;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

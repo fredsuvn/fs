@@ -1,7 +1,7 @@
 package tests.runtime.asm;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.third.asm.AsmKit;
+import space.sunqian.common.third.asm.AsmKit;
 
 import static org.testng.Assert.assertTrue;
 

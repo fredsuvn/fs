@@ -1,8 +1,8 @@
 package tests.base.res;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.res.ResKit;
-import xyz.sunqian.common.io.IOKit;
+import space.sunqian.common.base.res.ResKit;
+import space.sunqian.common.io.IOKit;
 
 import java.net.URL;
 import java.util.Set;

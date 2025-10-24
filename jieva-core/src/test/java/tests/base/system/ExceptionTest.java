@@ -1,7 +1,7 @@
 package tests.base.system;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.system.JvmException;
+import space.sunqian.common.base.system.JvmException;
 
 import static org.testng.Assert.expectThrows;
 

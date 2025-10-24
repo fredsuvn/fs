@@ -1,12 +1,12 @@
 package tests.base.process;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.chars.CharsKit;
-import xyz.sunqian.common.base.process.ProcessKit;
-import xyz.sunqian.common.base.process.VirtualProcess;
-import xyz.sunqian.common.base.system.OSKit;
-import xyz.sunqian.common.io.IOKit;
-import xyz.sunqian.test.PrintTest;
+import space.sunqian.common.base.chars.CharsKit;
+import space.sunqian.common.base.process.ProcessKit;
+import space.sunqian.common.base.process.VirtualProcess;
+import space.sunqian.common.base.system.OSKit;
+import space.sunqian.common.io.IOKit;
+import space.sunqian.test.PrintTest;
 
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;

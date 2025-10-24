@@ -1,7 +1,7 @@
 package tests.runtime.reflect;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.runtime.reflect.TypeRef;
+import space.sunqian.common.runtime.reflect.TypeRef;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;

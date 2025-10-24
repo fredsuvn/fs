@@ -1,14 +1,14 @@
 package tests.cache;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.value.BooleanVar;
-import xyz.sunqian.common.base.value.Val;
-import xyz.sunqian.common.cache.AbstractSimpleCache;
-import xyz.sunqian.common.cache.SimpleCache;
-import xyz.sunqian.test.DataTest;
-import xyz.sunqian.test.PrintTest;
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.base.value.BooleanVar;
+import space.sunqian.common.base.value.Val;
+import space.sunqian.common.cache.AbstractSimpleCache;
+import space.sunqian.common.cache.SimpleCache;
+import space.sunqian.test.DataTest;
+import space.sunqian.test.PrintTest;
 
 import java.util.ArrayList;
 import java.util.Arrays;

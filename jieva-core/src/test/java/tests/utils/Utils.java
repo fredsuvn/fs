@@ -1,6 +1,6 @@
 package tests.utils;
 
-import xyz.sunqian.common.base.Kit;
+import space.sunqian.common.base.Kit;
 
 public class Utils {
 

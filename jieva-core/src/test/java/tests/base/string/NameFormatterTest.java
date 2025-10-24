@@ -1,11 +1,11 @@
 package tests.base.string;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.string.NameFormatException;
-import xyz.sunqian.common.base.string.NameFormatter;
-import xyz.sunqian.common.base.value.Span;
-import xyz.sunqian.common.collect.ArrayKit;
-import xyz.sunqian.test.ErrorAppender;
+import space.sunqian.common.base.string.NameFormatException;
+import space.sunqian.common.base.string.NameFormatter;
+import space.sunqian.common.base.value.Span;
+import space.sunqian.common.collect.ArrayKit;
+import space.sunqian.test.ErrorAppender;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.expectThrows;

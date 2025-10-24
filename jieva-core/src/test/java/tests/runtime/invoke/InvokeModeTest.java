@@ -1,7 +1,7 @@
 package tests.runtime.invoke;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.runtime.invoke.InvocationMode;
+import space.sunqian.common.runtime.invoke.InvocationMode;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;

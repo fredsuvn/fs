@@ -1,8 +1,8 @@
 package tests.runtime.reflect;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.io.IOKit;
-import xyz.sunqian.common.runtime.reflect.BytesClassLoader;
+import space.sunqian.common.io.IOKit;
+import space.sunqian.common.runtime.reflect.BytesClassLoader;
 
 import java.io.InputStream;
 import java.nio.ByteBuffer;

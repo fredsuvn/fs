@@ -1,9 +1,9 @@
 package tests.base.number;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.number.NumberKit;
-import xyz.sunqian.test.DataTest;
-import xyz.sunqian.test.PrintTest;
+import space.sunqian.common.base.number.NumberKit;
+import space.sunqian.test.DataTest;
+import space.sunqian.test.PrintTest;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

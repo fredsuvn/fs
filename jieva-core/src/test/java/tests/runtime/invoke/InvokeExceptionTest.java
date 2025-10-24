@@ -1,7 +1,7 @@
 package tests.runtime.invoke;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.runtime.invoke.InvocationException;
+import space.sunqian.common.runtime.invoke.InvocationException;
 
 import java.lang.reflect.InvocationTargetException;
 

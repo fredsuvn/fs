@@ -1,0 +1,47 @@
+package space.sunqian.common.runtime.aspect;
+
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.base.exception.KitvaRuntimeException;
+
+/**
+ * This runtime exception is typically used for aspect-oriented programming.
+ *
+ * @author sunqian
+ */
+public class AspectException extends KitvaRuntimeException {
+
+    /**
+     * Empty constructor.
+     */
+    public AspectException() {
+        super();
+    }
+
+    /**
+     * Constructs with the message.
+     *
+     * @param message the message
+     */
+    public AspectException(@Nullable String message) {
+        super(message);
+    }
+
+    /**
+     * Constructs with the message and cause.
+     *
+     * @param message the message
+     * @param cause   the cause
+     */
+    public AspectException(@Nullable String message, @Nullable Throwable cause) {
+        super(message, cause);
+    }
+
+    /**
+     * Constructs with the cause.
+     *
+     * @param cause the cause
+     */
+    public AspectException(@Nullable Throwable cause) {
+        super(cause);
+    }
+}

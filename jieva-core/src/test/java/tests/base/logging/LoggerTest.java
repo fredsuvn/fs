@@ -1,8 +1,8 @@
 package tests.base.logging;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.logging.SimpleLogger;
-import xyz.sunqian.test.ErrorAppender;
+import space.sunqian.common.base.logging.SimpleLogger;
+import space.sunqian.test.ErrorAppender;
 
 import java.lang.reflect.Method;
 
@@ -36,7 +36,7 @@ public class LoggerTest {
         getCallerTrace.setAccessible(true);
         assertNull(getCallerTrace.invoke(sysLogger, "info", new StackTraceElement[0]));
         assertNull(getCallerTrace.invoke(sysLogger, "info", new StackTraceElement[]{
-            new StackTraceElement("xyz.sunqian.common.base.logging.SimpleLoggerImpl",
+            new StackTraceElement("space.sunqian.common.base.logging.SimpleLoggerImpl",
                 "info",
                 "ErrorAppender.java", 1)}
         ));

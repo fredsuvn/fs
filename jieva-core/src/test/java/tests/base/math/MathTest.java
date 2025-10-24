@@ -1,7 +1,7 @@
 package tests.base.math;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.math.MathKit;
+import space.sunqian.common.base.math.MathKit;
 
 import static org.testng.Assert.assertEquals;
 

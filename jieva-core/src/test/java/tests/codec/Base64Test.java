@@ -1,8 +1,8 @@
 package tests.codec;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.codec.Base64Kit;
-import xyz.sunqian.test.DataTest;
+import space.sunqian.common.codec.Base64Kit;
+import space.sunqian.test.DataTest;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;

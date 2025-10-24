@@ -2,12 +2,12 @@ package tests.runtime.reflect;
 
 import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
-import xyz.sunqian.annotations.Nonnull;
-import xyz.sunqian.annotations.Nullable;
-import xyz.sunqian.common.base.Kit;
-import xyz.sunqian.common.runtime.reflect.ReflectionException;
-import xyz.sunqian.common.runtime.reflect.TypeKit;
-import xyz.sunqian.common.runtime.reflect.TypeRef;
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
+import space.sunqian.common.base.Kit;
+import space.sunqian.common.runtime.reflect.ReflectionException;
+import space.sunqian.common.runtime.reflect.TypeKit;
+import space.sunqian.common.runtime.reflect.TypeRef;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedType;

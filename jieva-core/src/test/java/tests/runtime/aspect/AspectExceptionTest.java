@@ -1,7 +1,7 @@
 package tests.runtime.aspect;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.runtime.aspect.AspectException;
+import space.sunqian.common.runtime.aspect.AspectException;
 
 import static org.testng.Assert.expectThrows;
 

@@ -1,7 +1,7 @@
 package tests.base.thread;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.thread.ThreadGate;
+import space.sunqian.common.base.thread.ThreadGate;
 
 import java.time.Duration;
 import java.util.concurrent.CountDownLatch;

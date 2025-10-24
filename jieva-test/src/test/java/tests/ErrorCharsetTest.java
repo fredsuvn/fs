@@ -1,7 +1,7 @@
 package tests;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.test.ErrorCharset;
+import space.sunqian.test.ErrorCharset;
 
 import java.nio.charset.Charset;
 

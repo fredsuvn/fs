@@ -2,13 +2,13 @@ package tests.base.chars;
 
 import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.chars.CharsBuilder;
-import xyz.sunqian.common.base.chars.CharsKit;
-import xyz.sunqian.common.io.BufferKit;
-import xyz.sunqian.common.io.IOKit;
-import xyz.sunqian.common.io.IORuntimeException;
-import xyz.sunqian.test.AssertTest;
-import xyz.sunqian.test.DataTest;
+import space.sunqian.common.base.chars.CharsBuilder;
+import space.sunqian.common.base.chars.CharsKit;
+import space.sunqian.common.io.BufferKit;
+import space.sunqian.common.io.IOKit;
+import space.sunqian.common.io.IORuntimeException;
+import space.sunqian.test.AssertTest;
+import space.sunqian.test.DataTest;
 
 import java.io.CharArrayReader;
 import java.io.CharArrayWriter;

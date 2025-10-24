@@ -1,7 +1,7 @@
 package tests.runtime.proxy;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.runtime.proxy.ProxyException;
+import space.sunqian.common.runtime.proxy.ProxyException;
 
 import static org.testng.Assert.expectThrows;
 

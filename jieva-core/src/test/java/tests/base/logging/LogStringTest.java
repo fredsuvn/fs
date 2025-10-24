@@ -1,7 +1,7 @@
 package tests.base.logging;
 
 import org.testng.annotations.Test;
-import xyz.sunqian.common.base.logging.LogString;
+import space.sunqian.common.base.logging.LogString;
 
 import static org.testng.Assert.assertEquals;
 
