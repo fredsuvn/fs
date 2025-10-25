@@ -1,4 +1,4 @@
 @DefaultNullable
-package tests.nullablepkg;
+package tests.annotations.nullablepkg;
 
 import space.sunqian.annotations.DefaultNullable;

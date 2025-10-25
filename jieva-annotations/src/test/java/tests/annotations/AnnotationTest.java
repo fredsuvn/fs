@@ -1,7 +1,6 @@
-package tests;
+package tests.annotations;
 
 import org.testng.annotations.Test;
-import samples.Samples;
 
 /**
  * @author fredsuvn

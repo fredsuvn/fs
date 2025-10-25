@@ -1,4 +1,4 @@
-package tests.nullablepkg;
+package tests.annotations.nullablepkg;
 
 public class NullableTest {
 

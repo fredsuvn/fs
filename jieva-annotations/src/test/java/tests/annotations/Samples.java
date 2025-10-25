@@ -1,4 +1,4 @@
-package samples;
+package tests.annotations;
 
 import space.sunqian.annotations.CachedResult;
 import space.sunqian.annotations.DefaultNonNull;

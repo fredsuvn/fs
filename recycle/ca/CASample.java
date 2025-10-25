@@ -1,4 +1,4 @@
-//package samples;
+//package tests.annotations.samples;
 //
 //import xyz.srclab.common.security.FsKeyTool;
 //

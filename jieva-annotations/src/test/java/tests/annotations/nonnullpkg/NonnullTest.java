@@ -1,4 +1,4 @@
-package tests.nonnullpkg;
+package tests.annotations.nonnullpkg;
 
 public class NonnullTest {
 
