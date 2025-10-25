@@ -10,8 +10,8 @@ plugins {
 description = 'Testing support of Gek.'
 
 dependencies {
-  implementation platform(project(':jieva-dependencies'))
-  implementation project(':jieva-annotations')
+  implementation platform(project(':kitva-dependencies'))
+  implementation project(':kitva-annotations')
   api 'org.testng:testng:7.5.1'
 //  api("org.jetbrains.kotlin:kotlin-test-testng:$kotlinVersion") {
 //    exclude(group: "org.testng", module: "testng")

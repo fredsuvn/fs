@@ -11,15 +11,15 @@ description = "Annotations of Kitva."
 
 dependencies {
 
-  //implementation platform(project(":jieva-dependencies"))
+  //implementation platform(project(":kitva-dependencies"))
   //implementation "com.google.code.findbugs:jsr305"
   //compileOnly 'org.projectlombok:lombok'
 
-  //testAnnotationProcessor platform(project(":jieva-dependencies"))
+  //testAnnotationProcessor platform(project(":kitva-dependencies"))
   //testAnnotationProcessor 'org.projectlombok:lombok'
-  //testImplementation project(":jieva-test")
+  //testImplementation project(":kitva-test")
 
-  testImplementation platform(project(":jieva-dependencies"))
+  testImplementation platform(project(":kitva-dependencies"))
   testImplementation 'org.testng:testng:7.5.1'
 }
 

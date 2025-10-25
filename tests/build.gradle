@@ -9,16 +9,16 @@ plugins {
 description = 'Jieva tests.'
 
 dependencies {
-  implementation platform(project(':jieva-dependencies'))
+  implementation platform(project(':kitva-dependencies'))
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
   implementation("org.openjdk.jmh:jmh-core")
-  annotationProcessor platform(project(":jieva-dependencies"))
+  annotationProcessor platform(project(":kitva-dependencies"))
   annotationProcessor("org.openjdk.jmh:jmh-generator-annprocess")
-  implementation project(':jieva-annotations')
-  implementation project(':jieva-core')
+  implementation project(':kitva-annotations')
+  implementation project(':kitva-core')
   implementation 'cglib:cglib'
 //  implementation project(':gek-kotlin')
-  implementation project(":jieva-test")
+  implementation project(":kitva-test")
 }
 
 //tasks.register('benchmark') {

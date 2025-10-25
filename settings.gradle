@@ -1,6 +1,7 @@
 pluginManagement {
   repositories {
     maven {
+      // custom repo:
       url "https://maven.aliyun.com/repository/gradle-plugin"
     }
     mavenCentral()
@@ -8,9 +9,9 @@ pluginManagement {
   }
 }
 
-rootProject.name = 'jieva'
-file("${rootDir}/").eachDirMatch(~/jieva-(?!(plugins|draft)).*/) { dir ->
+rootProject.name = 'KitVa'
+file("${rootDir}/").eachDirMatch(~/kitva-(?!(recycle|draft)).*/) { dir ->
   include ":${dir.name}"
 }
 // include ":docs"
-include ":tests"
+// include ":tests"

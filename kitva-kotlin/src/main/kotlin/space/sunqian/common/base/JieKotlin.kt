@@ -1,7 +1,7 @@
 //package xyz.sunqian.common.base
 //
 ///**
-// * A hello function for jieva-kotlin.
+// * A hello function for kitva-kotlin.
 // */
 //fun helloKotlin() {
 //    println("Hello, Jie Kotlin!")

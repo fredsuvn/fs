@@ -28,10 +28,10 @@ java {
 
 dependencies {
 
-  implementation platform(project(':jieva-dependencies'))
-  annotationProcessor platform(project(':jieva-dependencies'))
+  implementation platform(project(':kitva-dependencies'))
+  annotationProcessor platform(project(':kitva-dependencies'))
 
-  api project(':jieva-annotations')
+  api project(':kitva-annotations')
 
   compileOnly 'org.projectlombok:lombok'
   annotationProcessor 'org.projectlombok:lombok'
@@ -44,13 +44,13 @@ dependencies {
   compileOnly 'cglib:cglib'
   compileOnly 'com.google.protobuf:protobuf-java'
 
-  testImplementation platform(project(':jieva-dependencies'))
-  testAnnotationProcessor platform(project(":jieva-dependencies"))
+  testImplementation platform(project(':kitva-dependencies'))
+  testAnnotationProcessor platform(project(":kitva-dependencies"))
 
   testAnnotationProcessor 'org.projectlombok:lombok'
   //testAnnotationProcessor "org.openjdk.jmh:jmh-generator-annprocess"
 
-  testImplementation project(":jieva-test")
+  testImplementation project(":kitva-test")
   testImplementation "com.google.protobuf:protobuf-java"
   testImplementation 'org.bouncycastle:bcpkix-jdk18on:1.79'
 
