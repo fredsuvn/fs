@@ -5,8 +5,8 @@ import space.sunqian.annotations.Nonnull;
 import space.sunqian.common.base.math.MathKit;
 import space.sunqian.common.base.random.Rng;
 import space.sunqian.common.collect.StreamKit;
-import space.sunqian.test.AssertTest;
-import space.sunqian.test.PrintTest;
+import internal.test.AssertTest;
+import internal.test.PrintTest;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;

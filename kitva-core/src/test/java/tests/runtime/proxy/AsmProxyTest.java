@@ -12,7 +12,7 @@ import space.sunqian.common.runtime.proxy.ProxyHandler;
 import space.sunqian.common.runtime.proxy.ProxyInvoker;
 import space.sunqian.common.runtime.proxy.ProxyMaker;
 import space.sunqian.common.runtime.proxy.ProxySpec;
-import space.sunqian.test.PrintTest;
+import internal.test.PrintTest;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;

@@ -4,7 +4,7 @@ import org.testng.annotations.Test;
 import space.sunqian.common.base.time.TimeException;
 import space.sunqian.common.base.time.TimeFormatter;
 import space.sunqian.common.base.time.TimeKit;
-import space.sunqian.test.PrintTest;
+import internal.test.PrintTest;
 
 import java.text.SimpleDateFormat;
 import java.time.DateTimeException;

@@ -1,10 +1,10 @@
 package tests;
 
 import org.testng.annotations.Test;
-import space.sunqian.test.AssertTest;
-import space.sunqian.test.KitvaTestException;
-import space.sunqian.test.MaterialBox;
-import space.sunqian.test.TestIOException;
+import internal.test.AssertTest;
+import internal.test.KitvaTestException;
+import internal.test.MaterialBox;
+import internal.test.TestIOException;
 
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
@@ -19,11 +19,11 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
-import static space.sunqian.test.MaterialBox.copyBuffer;
-import static space.sunqian.test.MaterialBox.copyBytes;
-import static space.sunqian.test.MaterialBox.copyChars;
-import static space.sunqian.test.MaterialBox.copyDirect;
-import static space.sunqian.test.MaterialBox.newFile;
+import static internal.test.MaterialBox.copyBuffer;
+import static internal.test.MaterialBox.copyBytes;
+import static internal.test.MaterialBox.copyChars;
+import static internal.test.MaterialBox.copyDirect;
+import static internal.test.MaterialBox.newFile;
 
 public class AssertTestTest implements AssertTest {
 

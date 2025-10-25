@@ -3,7 +3,7 @@ package tests.base.system;
 import org.testng.annotations.Test;
 import space.sunqian.common.base.system.SystemKeys;
 import space.sunqian.common.base.system.SystemKit;
-import space.sunqian.test.PrintTest;
+import internal.test.PrintTest;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

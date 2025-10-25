@@ -7,9 +7,9 @@ import space.sunqian.common.io.IOKit;
 import space.sunqian.common.io.IORuntimeException;
 import space.sunqian.common.io.file.FileKit;
 import space.sunqian.common.io.file.FileRef;
-import space.sunqian.test.AssertTest;
-import space.sunqian.test.DataTest;
-import space.sunqian.test.PrintTest;
+import internal.test.AssertTest;
+import internal.test.DataTest;
+import internal.test.PrintTest;
 
 import java.io.File;
 import java.io.FileInputStream;

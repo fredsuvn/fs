@@ -5,8 +5,8 @@ import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.base.exception.UnknownArrayTypeException;
 import space.sunqian.common.base.string.StringKit;
 import space.sunqian.common.base.string.StringView;
-import space.sunqian.test.DataTest;
-import space.sunqian.test.PrintTest;
+import internal.test.DataTest;
+import internal.test.PrintTest;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

@@ -6,8 +6,8 @@ import space.sunqian.common.base.bytes.BytesKit;
 import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.io.IOKit;
 import space.sunqian.common.io.IORuntimeException;
-import space.sunqian.test.AssertTest;
-import space.sunqian.test.DataTest;
+import internal.test.AssertTest;
+import internal.test.DataTest;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

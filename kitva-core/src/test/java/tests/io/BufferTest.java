@@ -9,10 +9,10 @@ import space.sunqian.common.io.BufferKit;
 import space.sunqian.common.io.ByteArrayOperator;
 import space.sunqian.common.io.CharArrayOperator;
 import space.sunqian.common.io.IORuntimeException;
-import space.sunqian.test.DataTest;
-import space.sunqian.test.ErrorAppender;
-import space.sunqian.test.ErrorOutputStream;
-import space.sunqian.test.MaterialBox;
+import internal.test.DataTest;
+import internal.test.ErrorAppender;
+import internal.test.ErrorOutputStream;
+import internal.test.MaterialBox;
 
 import java.io.ByteArrayOutputStream;
 import java.io.CharArrayWriter;

@@ -20,7 +20,7 @@ import space.sunqian.common.object.data.ObjectProperty;
 import space.sunqian.common.object.data.ObjectSchema;
 import space.sunqian.common.object.data.ObjectSchemaParser;
 import space.sunqian.common.runtime.reflect.TypeRef;
-import space.sunqian.test.PrintTest;
+import internal.test.PrintTest;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;

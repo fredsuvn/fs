@@ -13,8 +13,8 @@ import space.sunqian.common.net.http.HttpResp;
 import space.sunqian.common.net.tcp.TcpContext;
 import space.sunqian.common.net.tcp.TcpServer;
 import space.sunqian.common.net.tcp.TcpServerHandler;
-import space.sunqian.test.ErrorCharset;
-import space.sunqian.test.PrintTest;
+import internal.test.ErrorCharset;
+import internal.test.PrintTest;
 
 import java.net.URLEncoder;
 import java.util.ArrayList;

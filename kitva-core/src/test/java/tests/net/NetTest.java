@@ -2,7 +2,7 @@ package tests.net;
 
 import org.testng.annotations.Test;
 import space.sunqian.common.net.NetException;
-import space.sunqian.test.PrintTest;
+import internal.test.PrintTest;
 
 import static org.testng.Assert.expectThrows;
 

@@ -17,7 +17,7 @@ import space.sunqian.common.object.data.ObjectSchemaParser;
 import space.sunqian.common.object.data.handlers.SimpleBeanSchemaHandler;
 import space.sunqian.common.runtime.invoke.Invocable;
 import space.sunqian.common.runtime.reflect.TypeRef;
-import space.sunqian.test.PrintTest;
+import internal.test.PrintTest;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

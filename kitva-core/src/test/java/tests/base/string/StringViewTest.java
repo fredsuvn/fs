@@ -4,7 +4,7 @@ import org.testng.annotations.Test;
 import space.sunqian.common.base.exception.UnreachablePointException;
 import space.sunqian.common.base.string.StringView;
 import space.sunqian.common.collect.ListKit;
-import space.sunqian.test.PrintTest;
+import internal.test.PrintTest;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

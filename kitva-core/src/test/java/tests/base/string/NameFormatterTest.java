@@ -5,7 +5,7 @@ import space.sunqian.common.base.string.NameFormatException;
 import space.sunqian.common.base.string.NameFormatter;
 import space.sunqian.common.base.value.Span;
 import space.sunqian.common.collect.ArrayKit;
-import space.sunqian.test.ErrorAppender;
+import internal.test.ErrorAppender;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.expectThrows;

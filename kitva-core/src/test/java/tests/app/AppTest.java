@@ -3,7 +3,7 @@ package tests.app;
 import org.testng.annotations.Test;
 import space.sunqian.common.app.SimpleApp;
 import space.sunqian.common.app.SimpleAppException;
-import space.sunqian.test.PrintTest;
+import internal.test.PrintTest;
 
 import static org.testng.Assert.expectThrows;
 

@@ -3,7 +3,7 @@ package tests.codec;
 import org.apache.commons.codec.binary.Hex;
 import org.testng.annotations.Test;
 import space.sunqian.common.codec.HexKit;
-import space.sunqian.test.DataTest;
+import internal.test.DataTest;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;

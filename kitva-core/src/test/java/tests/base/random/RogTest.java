@@ -3,8 +3,8 @@ package tests.base.random;
 import org.testng.annotations.Test;
 import space.sunqian.common.base.exception.UnreachablePointException;
 import space.sunqian.common.base.random.Rog;
-import space.sunqian.test.AssertTest;
-import space.sunqian.test.PrintTest;
+import internal.test.AssertTest;
+import internal.test.PrintTest;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;

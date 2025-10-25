@@ -22,7 +22,7 @@ import space.sunqian.common.object.convert.UnsupportedObjectConvertException;
 import space.sunqian.common.object.data.ObjectBuilderProvider;
 import space.sunqian.common.runtime.reflect.TypeKit;
 import space.sunqian.common.runtime.reflect.TypeRef;
-import space.sunqian.test.PrintTest;
+import internal.test.PrintTest;
 
 import java.io.ByteArrayInputStream;
 import java.io.CharArrayReader;

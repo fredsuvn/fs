@@ -1,8 +1,8 @@
 package tests;
 
 import org.testng.annotations.Test;
-import space.sunqian.test.ErrorAppender;
-import space.sunqian.test.ErrorOutputStream;
+import internal.test.ErrorAppender;
+import internal.test.ErrorOutputStream;
 
 import java.io.IOException;
 import java.io.OutputStream;

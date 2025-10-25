@@ -12,8 +12,8 @@ import space.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 import space.sunqian.common.base.system.JvmException;
 import space.sunqian.common.base.system.JvmKit;
 import space.sunqian.common.runtime.reflect.TypeKit;
-import space.sunqian.test.AssertTest;
-import space.sunqian.test.PrintTest;
+import internal.test.AssertTest;
+import internal.test.PrintTest;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;

@@ -14,8 +14,8 @@ import space.sunqian.common.net.tcp.TcpClient;
 import space.sunqian.common.net.tcp.TcpContext;
 import space.sunqian.common.net.tcp.TcpServer;
 import space.sunqian.common.net.tcp.TcpServerHandler;
-import space.sunqian.test.DataTest;
-import space.sunqian.test.PrintTest;
+import internal.test.DataTest;
+import internal.test.PrintTest;
 
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;

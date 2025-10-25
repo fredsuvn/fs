@@ -1,18 +1,18 @@
-package space.sunqian.test;
+package internal.test;
 
 import space.sunqian.annotations.Nullable;
 
 /**
- * Exception for tests.
+ * Exception for I/O tests.
  *
  * @author sunqian
  */
-public class KitvaTestException extends RuntimeException {
+public class TestIOException extends RuntimeException {
 
     /**
      * Empty constructor.
      */
-    public KitvaTestException() {
+    public TestIOException() {
         super();
     }
 
@@ -21,7 +21,7 @@ public class KitvaTestException extends RuntimeException {
      *
      * @param message the message
      */
-    public KitvaTestException(@Nullable String message) {
+    public TestIOException(@Nullable String message) {
         super(message);
     }
 
@@ -31,7 +31,7 @@ public class KitvaTestException extends RuntimeException {
      * @param message the message
      * @param cause   the cause
      */
-    public KitvaTestException(@Nullable String message, @Nullable Throwable cause) {
+    public TestIOException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
@@ -40,7 +40,7 @@ public class KitvaTestException extends RuntimeException {
      *
      * @param cause the cause
      */
-    public KitvaTestException(@Nullable Throwable cause) {
+    public TestIOException(@Nullable Throwable cause) {
         super(cause);
     }
 }

@@ -8,12 +8,12 @@ import space.sunqian.common.io.BufferKit;
 import space.sunqian.common.io.IOKit;
 import space.sunqian.common.io.IOOperator;
 import space.sunqian.common.io.IORuntimeException;
-import space.sunqian.test.DataTest;
-import space.sunqian.test.ErrorAppender;
-import space.sunqian.test.ErrorOutputStream;
-import space.sunqian.test.ReadOps;
-import space.sunqian.test.TestInputStream;
-import space.sunqian.test.TestReader;
+import internal.test.DataTest;
+import internal.test.ErrorAppender;
+import internal.test.ErrorOutputStream;
+import internal.test.ReadOps;
+import internal.test.TestInputStream;
+import internal.test.TestReader;
 
 import java.io.ByteArrayInputStream;
 import java.io.CharArrayReader;

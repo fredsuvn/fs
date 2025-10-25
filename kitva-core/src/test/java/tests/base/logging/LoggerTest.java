@@ -2,7 +2,7 @@ package tests.base.logging;
 
 import org.testng.annotations.Test;
 import space.sunqian.common.base.logging.SimpleLogger;
-import space.sunqian.test.ErrorAppender;
+import internal.test.ErrorAppender;
 
 import java.lang.reflect.Method;
 

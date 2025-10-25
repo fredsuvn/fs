@@ -20,7 +20,7 @@ dependencies {
   api project(':kitva-annotations')
   api project(':kitva-core')
 
-  testImplementation project(":kitva-test")
+  testImplementation project(":kitva-foundation")
   testAnnotationProcessor platform(project(":kitva-dependencies"))
   testAnnotationProcessor "org.openjdk.jmh:jmh-generator-annprocess"
 }

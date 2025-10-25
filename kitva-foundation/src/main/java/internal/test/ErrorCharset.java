@@ -1,4 +1,4 @@
-package space.sunqian.test;
+package internal.test;
 
 import org.jetbrains.annotations.NotNull;
 import space.sunqian.annotations.Nonnull;

@@ -11,11 +11,11 @@ import space.sunqian.common.io.CharSegment;
 import space.sunqian.common.io.CharTransformer;
 import space.sunqian.common.io.IOKit;
 import space.sunqian.common.io.IORuntimeException;
-import space.sunqian.test.AssertTest;
-import space.sunqian.test.DataTest;
-import space.sunqian.test.ErrorOutputStream;
-import space.sunqian.test.ReadOps;
-import space.sunqian.test.TestReader;
+import internal.test.AssertTest;
+import internal.test.DataTest;
+import internal.test.ErrorOutputStream;
+import internal.test.ReadOps;
+import internal.test.TestReader;
 
 import java.io.CharArrayReader;
 import java.io.IOException;

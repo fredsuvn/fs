@@ -7,8 +7,8 @@ import space.sunqian.common.base.value.BooleanVar;
 import space.sunqian.common.base.value.Val;
 import space.sunqian.common.cache.AbstractSimpleCache;
 import space.sunqian.common.cache.SimpleCache;
-import space.sunqian.test.DataTest;
-import space.sunqian.test.PrintTest;
+import internal.test.DataTest;
+import internal.test.PrintTest;
 
 import java.util.ArrayList;
 import java.util.Arrays;

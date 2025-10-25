@@ -23,7 +23,7 @@ import space.sunqian.common.third.protobuf.ProtobufBuilderHandler;
 import space.sunqian.common.third.protobuf.ProtobufConvertHandler;
 import space.sunqian.common.third.protobuf.ProtobufKit;
 import space.sunqian.common.third.protobuf.ProtobufSchemaHandler;
-import space.sunqian.test.PrintTest;
+import internal.test.PrintTest;
 
 import java.util.List;
 import java.util.Map;

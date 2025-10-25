@@ -3,7 +3,7 @@ package tests.codec;
 import org.testng.annotations.Test;
 import space.sunqian.common.codec.CryptoKit;
 import space.sunqian.common.io.ByteProcessor;
-import space.sunqian.test.DataTest;
+import internal.test.DataTest;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;

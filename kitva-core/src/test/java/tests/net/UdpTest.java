@@ -9,7 +9,7 @@ import space.sunqian.common.net.NetException;
 import space.sunqian.common.net.udp.UdpSender;
 import space.sunqian.common.net.udp.UdpServer;
 import space.sunqian.common.net.udp.UdpServerHandler;
-import space.sunqian.test.PrintTest;
+import internal.test.PrintTest;
 
 import java.lang.reflect.Method;
 import java.net.DatagramPacket;

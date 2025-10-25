@@ -6,7 +6,7 @@ import space.sunqian.common.base.Kit;
 import space.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 import space.sunqian.common.collect.ListKit;
 import space.sunqian.common.runtime.reflect.ClassKit;
-import space.sunqian.test.AssertTest;
+import internal.test.AssertTest;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;

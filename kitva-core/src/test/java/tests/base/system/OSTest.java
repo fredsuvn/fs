@@ -2,7 +2,7 @@ package tests.base.system;
 
 import org.testng.annotations.Test;
 import space.sunqian.common.base.system.OSKit;
-import space.sunqian.test.PrintTest;
+import internal.test.PrintTest;
 
 public class OSTest implements PrintTest {
 

@@ -3,7 +3,7 @@ package tests.base.thread;
 import org.testng.annotations.Test;
 import space.sunqian.common.base.thread.TraceKit;
 import space.sunqian.common.collect.MapKit;
-import space.sunqian.test.PrintTest;
+import internal.test.PrintTest;
 
 import java.lang.reflect.Method;
 import java.util.Collections;

@@ -13,8 +13,8 @@ import space.sunqian.common.base.system.OSKit;
 import space.sunqian.common.io.IOKit;
 import space.sunqian.common.object.convert.ObjectConverter;
 import space.sunqian.common.runtime.reflect.TypeRef;
-import space.sunqian.test.AssertTest;
-import space.sunqian.test.PrintTest;
+import internal.test.AssertTest;
+import internal.test.PrintTest;
 
 import java.io.InputStream;
 import java.lang.reflect.Method;

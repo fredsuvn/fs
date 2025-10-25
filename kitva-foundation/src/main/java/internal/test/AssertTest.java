@@ -1,4 +1,4 @@
-package space.sunqian.test;
+package internal.test;
 
 import org.testng.Assert;
 import space.sunqian.annotations.Nonnull;

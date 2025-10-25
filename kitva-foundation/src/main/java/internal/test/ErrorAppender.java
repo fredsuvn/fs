@@ -1,4 +1,4 @@
-package space.sunqian.test;
+package internal.test;
 
 import java.io.IOException;
 

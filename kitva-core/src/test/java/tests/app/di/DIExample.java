@@ -5,7 +5,7 @@ import space.sunqian.annotations.Nullable;
 import space.sunqian.common.app.di.InjectedApp;
 import space.sunqian.common.app.di.InjectedAspect;
 import space.sunqian.common.app.di.InjectedDependsOn;
-import space.sunqian.test.PrintTest;
+import internal.test.PrintTest;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

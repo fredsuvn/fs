@@ -6,7 +6,7 @@ import space.sunqian.common.base.process.ProcessKit;
 import space.sunqian.common.base.process.VirtualProcess;
 import space.sunqian.common.base.system.OSKit;
 import space.sunqian.common.io.IOKit;
-import space.sunqian.test.PrintTest;
+import internal.test.PrintTest;
 
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;

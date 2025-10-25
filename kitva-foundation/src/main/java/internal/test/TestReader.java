@@ -1,31 +1,31 @@
-package space.sunqian.test;
+package internal.test;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.Reader;
 import java.util.Objects;
 
 /**
- * This is a testing input stream. It wraps a normal stream, then provides the {@link #setNextOperation(ReadOps)} to set
+ * This is a testing reader. It wraps a normal reader, then provides the {@link #setNextOperation(ReadOps)} to set
  * behavior for next read operation.
  *
  * @author sunqian
  */
-public class TestInputStream extends InputStream {
+public class TestReader extends Reader {
 
-    private final @Nonnull InputStream in;
+    private final @Nonnull Reader in;
     private @Nonnull ReadOps readOps = ReadOps.READ_NORMAL;
     private int times = 0;
     private @Nullable Boolean markSupported = null;
 
     /**
-     * Constructs with the specified wrapped input stream.
+     * Constructs with the specified wrapped reader.
      *
-     * @param in the specified wrapped input stream
+     * @param in the specified wrapped reader
      */
-    public TestInputStream(@Nonnull InputStream in) {
+    public TestReader(@Nonnull Reader in) {
         this.in = in;
     }
 
@@ -72,12 +72,12 @@ public class TestInputStream extends InputStream {
     }
 
     @Override
-    public int read(byte @Nonnull [] b) throws IOException {
+    public int read(char @Nonnull [] b) throws IOException {
         return read(b, 0, b.length);
     }
 
     @Override
-    public int read(byte @Nonnull [] b, int off, int len) throws IOException {
+    public int read(char @Nonnull [] b, int off, int len) throws IOException {
         switch (readOps) {
             case READ_NORMAL:
                 return in.read(b, off, len);
@@ -113,26 +113,9 @@ public class TestInputStream extends InputStream {
         }
     }
 
-    @Override
-    public int available() throws IOException {
-        switch (readOps) {
-            case READ_NORMAL:
-                return in.available();
-            case READ_ZERO:
-            case REACH_END: {
-                reduceTimes();
-                return 0;
-            }
-            default: {
-                reduceTimes();
-                throw new IOException();
-            }
-        }
-    }
-
     /**
-     * Sets the mark-supported for this {@link InputStream}. If the {@code markSupported} is null, this
-     * {@link InputStream} will directly use the mark-supported flag of wrapped source.
+     * Sets the mark-supported for this {@link Reader}. If the {@code markSupported} is null, this {@link Reader} will
+     * directly use the mark-supported flag of wrapped source.
      *
      * @param markSupported the mark-supported flag, can be null
      */
@@ -149,10 +132,10 @@ public class TestInputStream extends InputStream {
     }
 
     @Override
-    public synchronized void mark(int readlimit) {
+    public synchronized void mark(int readlimit) throws IOException {
         if (Objects.equals(readOps, ReadOps.THROW)) {
             reduceTimes();
-            throw new TestIOException();
+            throw new IOException();
         } else {
             in.mark(readlimit);
         }
