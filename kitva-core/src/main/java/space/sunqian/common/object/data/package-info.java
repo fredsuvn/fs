@@ -1,7 +1,7 @@
 /**
  * Package for data object. A data object may be an instance of {@link java.util.Map} parsed by
- * {@link space.sunqian.common.object.data.MapSchemaParser}, or be a non-map object, such as a simple java bean, parsed by
- * {@link space.sunqian.common.object.data.ObjectSchemaParser}, using code similar to the following:
+ * {@link space.sunqian.common.object.data.MapSchemaParser}, or be a non-map object, such as a simple java bean, parsed
+ * by {@link space.sunqian.common.object.data.ObjectSchemaParser}, using code similar to the following:
  * <pre>{@code
  * // Parse a non-map object:
  * ObjectSchema objectSchema = ObjectSchema.parse(type);

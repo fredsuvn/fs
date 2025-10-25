@@ -59,7 +59,7 @@ final class InjectedAppImpl implements InjectedApp {
                 resourceAnnotations,
                 postConstructAnnotations,
                 preDestroyAnnotations,
-                //parentApps,
+                // parentApps,
                 resourceMap,
                 fieldSet
             );
@@ -172,7 +172,7 @@ final class InjectedAppImpl implements InjectedApp {
                             resourceAnnotations,
                             postConstructAnnotations,
                             preDestroyAnnotations,
-                            //dependencyApps,
+                            // dependencyApps,
                             resourceMap,
                             fieldSet
                         );
