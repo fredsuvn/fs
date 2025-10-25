@@ -9,7 +9,7 @@ plugins {
   //id 'jacoco'
 }
 
-description = 'Core of KitVa.'
+description = "Core kits and interfaces of kitva including default implementations."
 
 java {
   registerFeature('proxySpringSupport') {
