@@ -18,7 +18,7 @@ dependencies {
   implementation project(':kitva-core')
   implementation 'cglib:cglib'
 //  implementation project(':gek-kotlin')
-  implementation project(":kitva-foundation")
+  implementation project(":kitva-internal")
 }
 
 //tasks.register('benchmark') {

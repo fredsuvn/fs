@@ -50,7 +50,7 @@ dependencies {
   testAnnotationProcessor 'org.projectlombok:lombok'
   //testAnnotationProcessor "org.openjdk.jmh:jmh-generator-annprocess"
 
-  testImplementation project(":kitva-foundation")
+  testImplementation project(":kitva-internal")
   testImplementation "com.google.protobuf:protobuf-java"
   testImplementation 'org.bouncycastle:bcpkix-jdk18on:1.79'
 
