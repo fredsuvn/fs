@@ -6,7 +6,7 @@ plugins {
 }
 
 project.afterEvaluate {
-  gek.info "Configure gek-publish"
+  //gek.info "Configure gek-publish"
   configurePublishing()
 }
 

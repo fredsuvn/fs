@@ -14,15 +14,15 @@ description = "Core kits and interfaces of kitva including default implementatio
 java {
   registerFeature('proxySpringSupport') {
     usingSourceSet(sourceSets.main)
-    capability('xyz.fsgek.build', 'proxy-spring-support', projectVersion)
+    capability('kitva.build', 'proxy-spring-support', projectVersion)
   }
   registerFeature('proxyCglibSupport') {
     usingSourceSet(sourceSets.main)
-    capability('xyz.fsgek.build', 'proxy-cglib-support', projectVersion)
+    capability('kitva.build', 'proxy-cglib-support', projectVersion)
   }
   registerFeature('dataProtobufSupport') {
     usingSourceSet(sourceSets.main)
-    capability('xyz.fsgek.build', 'data-protobuf-support', projectVersion)
+    capability('kitva.build', 'data-protobuf-support', projectVersion)
   }
 }
 

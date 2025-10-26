@@ -1,4 +1,4 @@
-package xyz.fsgek.build
+package kitva.build
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project

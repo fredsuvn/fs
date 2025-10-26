@@ -11,16 +11,21 @@ repositories {
   gradlePluginPortal()
 }
 
-//dependencies {
-//  implementation "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-//  implementation "org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion"
-//}
+dependencies {
+  //implementation "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+  //implementation "org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion"
+  testImplementation 'org.testng:testng:7.5.1'
+}
 
 gradlePlugin {
   plugins {
-    gekPlugin {
-      id = 'xyz.fsgek.build.gek'
-      implementationClass = 'xyz.fsgek.build.GekPlugin'
+    kitvaPlugin {
+      id = 'kitva.build.gek'
+      implementationClass = 'kitva.build.GekPlugin'
+    }
+    loggerPlugin {
+      id = 'kitva.build.logger'
+      implementationClass = 'kitva.build.BuildLogger'
     }
   }
 }
