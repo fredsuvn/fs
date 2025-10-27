@@ -1,7 +1,7 @@
 import java.util.function.BiFunction
 
 plugins {
-  id 'gek'
+  id 'kitva'
 }
 
 //asciidoc -> html

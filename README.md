@@ -19,7 +19,7 @@ cd boat && gradle clean build
 **Note:**
 
 * Some properties should be configured if you want to enable publish to remote, see publish info part
-  of [build.gradle](build.gradle)
+  of [build.gradle](build.gradle.kts)
 * `gek-core` need `protoc` to compile protobuf files, some architectures don't support it (such as `ARM`);
 
 ## Join

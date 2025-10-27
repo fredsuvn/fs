@@ -1,7 +1,8 @@
 pluginManagement {
   repositories {
     maven {
-      url "https://maven.aliyun.com/repository/gradle-plugin"
+      val myGradlePluginRepo: String by settings
+      url = uri(myGradlePluginRepo)
     }
     mavenCentral()
     gradlePluginPortal()

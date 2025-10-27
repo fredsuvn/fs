@@ -1,4 +1,0 @@
-test {
-  useTestNG()
-  include("**/*Test.class", "**/*TestKt.class")
-}

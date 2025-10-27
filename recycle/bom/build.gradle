@@ -1,9 +1,7 @@
 plugins {
-  id 'gek'
-  id 'gek-config'
-  id 'gek-repo'
+  id 'kitva'
   id 'java-platform'
-  id 'gek-publish'
+  id 'kitva-publish'
 }
 
 description = "BOM of Gek."
