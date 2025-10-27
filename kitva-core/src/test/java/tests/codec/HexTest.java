@@ -1,16 +1,17 @@
 package tests.codec;
 
 import org.apache.commons.codec.binary.Hex;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.codec.HexKit;
 import internal.test.DataTest;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class HexTest implements DataTest {
 
@@ -34,45 +35,45 @@ public class HexTest implements DataTest {
             // exception
             HexKit.HexException e;
             byte[] errorLen = new byte[3];
-            e = expectThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorLen));
+            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorLen));
             assertEquals(e.position(), -1);
             byte[] errorChar = new byte[2];
             errorChar[0] = '0' - 1;
-            e = expectThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
+            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
             assertEquals(e.position(), 0);
             errorChar[0] = '9' + 1;
-            e = expectThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
+            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
             assertEquals(e.position(), 0);
             errorChar[0] = 'A' - 1;
-            e = expectThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
+            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
             assertEquals(e.position(), 0);
             errorChar[0] = 'F' + 1;
-            e = expectThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
+            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
             assertEquals(e.position(), 0);
             errorChar[0] = 'a' - 1;
-            e = expectThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
+            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
             assertEquals(e.position(), 0);
             errorChar[0] = 'f' + 1;
-            e = expectThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
+            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
             assertEquals(e.position(), 0);
             errorChar[0] = '0';
             errorChar[1] = '0' - 1;
-            e = expectThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
+            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
             assertEquals(e.position(), 1);
             errorChar[1] = '9' + 1;
-            e = expectThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
+            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
             assertEquals(e.position(), 1);
             errorChar[1] = 'A' - 1;
-            e = expectThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
+            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
             assertEquals(e.position(), 1);
             errorChar[1] = 'F' + 1;
-            e = expectThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
+            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
             assertEquals(e.position(), 1);
             errorChar[1] = 'a' - 1;
-            e = expectThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
+            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
             assertEquals(e.position(), 1);
             errorChar[1] = 'f' + 1;
-            e = expectThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
+            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(errorChar));
             assertEquals(e.position(), 1);
         }
     }
@@ -93,15 +94,15 @@ public class HexTest implements DataTest {
             byte[] deUpperLoose = HexKit.decoder(false).decode(hexUpper);
             byte[] deLowerStrict = HexKit.decoder().decode(hexLower);
             byte[] deLowerLoose = HexKit.decoder(false).decode(hexLower);
-            assertEquals(deUpperStrict, src);
-            assertEquals(deUpperLoose, src);
-            assertEquals(deLowerStrict, src);
-            assertEquals(deLowerLoose, src);
+            assertArrayEquals(deUpperStrict, src);
+            assertArrayEquals(deUpperLoose, src);
+            assertArrayEquals(deLowerStrict, src);
+            assertArrayEquals(deLowerLoose, src);
             // decode by buffer
             ByteBuffer upperBuf = ByteBuffer.wrap(hexUpper.getBytes(StandardCharsets.ISO_8859_1));
             ByteBuffer lowerBuf = ByteBuffer.wrap(hexLower.getBytes(StandardCharsets.ISO_8859_1));
-            assertEquals(HexKit.decoder().decode(upperBuf), src);
-            assertEquals(HexKit.decoder().decode(lowerBuf), src);
+            assertArrayEquals(HexKit.decoder().decode(upperBuf), src);
+            assertArrayEquals(HexKit.decoder().decode(lowerBuf), src);
         }
         {
             // add bad char
@@ -123,9 +124,9 @@ public class HexTest implements DataTest {
             assertEquals(HexKit.decoder(false).decode(upperBuf2), src);
             assertEquals(HexKit.decoder(false).decode(lowerBuf2), src);
             HexKit.HexException e;
-            e = expectThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(defectiveUpper));
+            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(defectiveUpper));
             assertEquals(e.position(), -1);
-            e = expectThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(defectiveLower));
+            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(defectiveLower));
             assertEquals(e.position(), -1);
             String defectiveUpper2 =
                 hexUpper.substring(0, midIndex) +
@@ -139,12 +140,12 @@ public class HexTest implements DataTest {
                     '%';
             ByteBuffer upperBuf3 = ByteBuffer.wrap(defectiveUpper2.getBytes(StandardCharsets.ISO_8859_1));
             ByteBuffer lowerBuf3 = ByteBuffer.wrap(defectiveLower2.getBytes(StandardCharsets.ISO_8859_1));
-            e = expectThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(upperBuf3));
+            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(upperBuf3));
             assertEquals(e.position(), midIndex);
-            e = expectThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(lowerBuf3));
+            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(lowerBuf3));
             assertEquals(e.position(), midIndex);
             String upperTail = hexUpper + "A";
-            e = expectThrows(HexKit.HexException.class, () -> HexKit.decoder(false).decode(upperTail));
+            e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder(false).decode(upperTail));
             assertEquals(e.position(), -1);
         }
     }
@@ -152,35 +153,35 @@ public class HexTest implements DataTest {
     @Test
     public void testHexException() {
         HexKit.HexException e;
-        e = expectThrows(HexKit.HexException.class, () -> {
+        e = assertThrows(HexKit.HexException.class, () -> {
             throw new HexKit.HexException();
         });
         assertEquals(e.position(), -1);
-        e = expectThrows(HexKit.HexException.class, () -> {
+        e = assertThrows(HexKit.HexException.class, () -> {
             throw new HexKit.HexException("");
         });
         assertEquals(e.position(), -1);
-        e = expectThrows(HexKit.HexException.class, () -> {
+        e = assertThrows(HexKit.HexException.class, () -> {
             throw new HexKit.HexException("", new RuntimeException());
         });
         assertEquals(e.position(), -1);
-        e = expectThrows(HexKit.HexException.class, () -> {
+        e = assertThrows(HexKit.HexException.class, () -> {
             throw new HexKit.HexException(new RuntimeException());
         });
         assertEquals(e.position(), -1);
-        e = expectThrows(HexKit.HexException.class, () -> {
+        e = assertThrows(HexKit.HexException.class, () -> {
             throw new HexKit.HexException(66);
         });
         assertEquals(e.position(), 66);
-        e = expectThrows(HexKit.HexException.class, () -> {
+        e = assertThrows(HexKit.HexException.class, () -> {
             throw new HexKit.HexException(66, "");
         });
         assertEquals(e.position(), 66);
-        e = expectThrows(HexKit.HexException.class, () -> {
+        e = assertThrows(HexKit.HexException.class, () -> {
             throw new HexKit.HexException(66, "", new RuntimeException());
         });
         assertEquals(e.position(), 66);
-        e = expectThrows(HexKit.HexException.class, () -> {
+        e = assertThrows(HexKit.HexException.class, () -> {
             throw new HexKit.HexException(66, new RuntimeException());
         });
         assertEquals(e.position(), 66);

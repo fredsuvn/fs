@@ -1,6 +1,6 @@
 package tests.codec;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.codec.Base64Kit;
 import internal.test.DataTest;
 
@@ -8,9 +8,10 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class Base64Test implements DataTest {
 
@@ -45,22 +46,22 @@ public class Base64Test implements DataTest {
             // exception
             Base64Kit.Base64Exception e;
             String err1 = "+/%==";
-            e = expectThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(err1));
+            e = assertThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(err1));
             assertEquals(e.position(), 2);
             String err2 = "+/+/=";
-            e = expectThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(err2));
+            e = assertThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(err2));
             assertEquals(e.position(), 4);
             String err3 = "+/==0";
-            e = expectThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(err3));
+            e = assertThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(err3));
             assertEquals(e.position(), 4);
             String err4 = "+/=0=";
-            e = expectThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(err4));
+            e = assertThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(err4));
             assertEquals(e.position(), 3);
             String err5 = "+/=";
-            e = expectThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(err5));
+            e = assertThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(err5));
             assertEquals(e.position(), 2);
             String err6 = "+/h==";
-            e = expectThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(err6));
+            e = assertThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(err6));
             assertEquals(e.position(), 4);
         }
     }
@@ -90,19 +91,19 @@ public class Base64Test implements DataTest {
             byte[] baseNoPaddingDe = Base64Kit.decoder().decode(baseNoPadding);
             byte[] urlPaddingDe = Base64Kit.decoder().decode(urlPadding);
             byte[] urlNoPaddingDe = Base64Kit.decoder().decode(urlNoPadding);
-            assertEquals(basePaddingDe, src);
-            assertEquals(baseNoPaddingDe, src);
-            assertEquals(urlPaddingDe, src);
-            assertEquals(urlNoPaddingDe, src);
+            assertArrayEquals(basePaddingDe, src);
+            assertArrayEquals(baseNoPaddingDe, src);
+            assertArrayEquals(urlPaddingDe, src);
+            assertArrayEquals(urlNoPaddingDe, src);
             // decode by buffer
             ByteBuffer basePaddingBuffer = ByteBuffer.wrap(basePadding.getBytes(StandardCharsets.ISO_8859_1));
             ByteBuffer baseNoPaddingBuffer = ByteBuffer.wrap(baseNoPadding.getBytes(StandardCharsets.ISO_8859_1));
             ByteBuffer urlPaddingBuffer = ByteBuffer.wrap(urlPadding.getBytes(StandardCharsets.ISO_8859_1));
             ByteBuffer urlNoPaddingBuffer = ByteBuffer.wrap(urlNoPadding.getBytes(StandardCharsets.ISO_8859_1));
-            assertEquals(Base64Kit.decoder().decode(basePaddingBuffer), src);
-            assertEquals(Base64Kit.decoder().decode(baseNoPaddingBuffer), src);
-            assertEquals(Base64Kit.decoder().decode(urlPaddingBuffer), src);
-            assertEquals(Base64Kit.decoder().decode(urlNoPaddingBuffer), src);
+            assertArrayEquals(Base64Kit.decoder().decode(basePaddingBuffer), src);
+            assertArrayEquals(Base64Kit.decoder().decode(baseNoPaddingBuffer), src);
+            assertArrayEquals(Base64Kit.decoder().decode(urlPaddingBuffer), src);
+            assertArrayEquals(Base64Kit.decoder().decode(urlNoPaddingBuffer), src);
         }
         {
             // add bad char
@@ -116,10 +117,10 @@ public class Base64Test implements DataTest {
             ByteBuffer defectiveBuf = ByteBuffer.wrap(defective.getBytes(StandardCharsets.ISO_8859_1));
             assertEquals(Base64Kit.decoder(false).decode(defectiveBuf), src);
             Base64Kit.Base64Exception e;
-            e = expectThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(defective));
+            e = assertThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(defective));
             assertEquals(e.position(), midIndex);
             defectiveBuf.clear();
-            e = expectThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(defectiveBuf));
+            e = assertThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(defectiveBuf));
             assertEquals(e.position(), midIndex);
         }
     }
@@ -127,35 +128,35 @@ public class Base64Test implements DataTest {
     @Test
     public void testBase64Exception() {
         Base64Kit.Base64Exception e;
-        e = expectThrows(Base64Kit.Base64Exception.class, () -> {
+        e = assertThrows(Base64Kit.Base64Exception.class, () -> {
             throw new Base64Kit.Base64Exception();
         });
         assertEquals(e.position(), -1);
-        e = expectThrows(Base64Kit.Base64Exception.class, () -> {
+        e = assertThrows(Base64Kit.Base64Exception.class, () -> {
             throw new Base64Kit.Base64Exception("");
         });
         assertEquals(e.position(), -1);
-        e = expectThrows(Base64Kit.Base64Exception.class, () -> {
+        e = assertThrows(Base64Kit.Base64Exception.class, () -> {
             throw new Base64Kit.Base64Exception("", new RuntimeException());
         });
         assertEquals(e.position(), -1);
-        e = expectThrows(Base64Kit.Base64Exception.class, () -> {
+        e = assertThrows(Base64Kit.Base64Exception.class, () -> {
             throw new Base64Kit.Base64Exception(new RuntimeException());
         });
         assertEquals(e.position(), -1);
-        e = expectThrows(Base64Kit.Base64Exception.class, () -> {
+        e = assertThrows(Base64Kit.Base64Exception.class, () -> {
             throw new Base64Kit.Base64Exception(66);
         });
         assertEquals(e.position(), 66);
-        e = expectThrows(Base64Kit.Base64Exception.class, () -> {
+        e = assertThrows(Base64Kit.Base64Exception.class, () -> {
             throw new Base64Kit.Base64Exception(66, "");
         });
         assertEquals(e.position(), 66);
-        e = expectThrows(Base64Kit.Base64Exception.class, () -> {
+        e = assertThrows(Base64Kit.Base64Exception.class, () -> {
             throw new Base64Kit.Base64Exception(66, "", new RuntimeException());
         });
         assertEquals(e.position(), 66);
-        e = expectThrows(Base64Kit.Base64Exception.class, () -> {
+        e = assertThrows(Base64Kit.Base64Exception.class, () -> {
             throw new Base64Kit.Base64Exception(66, new RuntimeException());
         });
         assertEquals(e.position(), 66);

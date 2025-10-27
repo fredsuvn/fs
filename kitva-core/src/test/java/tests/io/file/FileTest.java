@@ -1,6 +1,6 @@
 package tests.io.file;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.io.BufferKit;
 import space.sunqian.common.io.IOKit;
@@ -28,10 +28,11 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
 import java.util.Collections;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class FileTest implements DataTest, PrintTest, AssertTest {
 
@@ -72,7 +73,7 @@ public class FileTest implements DataTest, PrintTest, AssertTest {
         Path sub = path.resolve("sub");
         assertEquals(FileRef.of(path.toString(), "sub").getPath(), sub);
         URL errUrl = new URL("http://www.123.456");
-        expectThrows(IORuntimeException.class, () -> FileRef.of(errUrl));
+        assertThrows(IORuntimeException.class, () -> FileRef.of(errUrl));
 
         // FileRef
         File file = path.toFile();
@@ -90,7 +91,7 @@ public class FileTest implements DataTest, PrintTest, AssertTest {
         BasicFileAttributes attributes2 = Files.readAttributes(path, BasicFileAttributes.class);
         assertEquals(attributes.creationTime(), attributes2.creationTime());
         assertEquals(attributes.size(), attributes2.size());
-        expectThrows(IORuntimeException.class, errRef::getBasicFileAttributes);
+        assertThrows(IORuntimeException.class, errRef::getBasicFileAttributes);
         assertEquals(fileRef.getContentType(), Files.probeContentType(path));
 
         String hello = "hello";
@@ -99,20 +100,20 @@ public class FileTest implements DataTest, PrintTest, AssertTest {
         try (FileOutputStream out = fileRef.fileOutputStream()) {
             out.write(helloBytes);
         }
-        expectThrows(IORuntimeException.class, errRef::fileOutputStream);
+        assertThrows(IORuntimeException.class, errRef::fileOutputStream);
         try (FileInputStream in = fileRef.fileInputStream()) {
             assertEquals(IOKit.string(in), hello);
         }
-        expectThrows(IORuntimeException.class, errRef::fileInputStream);
+        assertThrows(IORuntimeException.class, errRef::fileInputStream);
         // new Stream
         try (OutputStream out = fileRef.newOutputStream()) {
             out.write(helloBytes);
         }
-        expectThrows(IORuntimeException.class, errRef::newOutputStream);
+        assertThrows(IORuntimeException.class, errRef::newOutputStream);
         try (InputStream in = fileRef.newInputStream()) {
             assertEquals(IOKit.string(in), hello);
         }
-        expectThrows(IORuntimeException.class, errRef::newInputStream);
+        assertThrows(IORuntimeException.class, errRef::newInputStream);
         // File Channel
         try (FileChannel channel = fileRef.newFileChannel(StandardOpenOption.READ, StandardOpenOption.WRITE)) {
             BufferKit.readTo(ByteBuffer.wrap(helloBytes), channel);
@@ -120,18 +121,18 @@ public class FileTest implements DataTest, PrintTest, AssertTest {
             ByteBuffer ret = ByteBuffer.allocate(helloBytes.length);
             assertEquals(IOKit.readTo(channel, ret), helloBytes.length);
             ret.flip();
-            assertEquals(BufferKit.copyContent(ret), helloBytes);
+            assertArrayEquals(BufferKit.copyContent(ret), helloBytes);
         }
-        expectThrows(IORuntimeException.class, errRef::newFileChannel);
+        assertThrows(IORuntimeException.class, errRef::newFileChannel);
         // read
         assertEquals(fileRef.readString(), hello);
         assertEquals(fileRef.readLines(), Collections.singleton(hello));
-        expectThrows(IORuntimeException.class, errRef::readString);
-        expectThrows(IORuntimeException.class, errRef::readLines);
+        assertThrows(IORuntimeException.class, errRef::readString);
+        assertThrows(IORuntimeException.class, errRef::readLines);
         // write
         String world = "world";
         fileRef.writeString(world);
         assertEquals(fileRef.readString(), world);
-        expectThrows(IORuntimeException.class, () -> errRef.writeString(world));
+        assertThrows(IORuntimeException.class, () -> errRef.writeString(world));
     }
 }

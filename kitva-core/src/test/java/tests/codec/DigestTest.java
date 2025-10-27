@@ -1,13 +1,14 @@
 package tests.codec;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.codec.DigestKit;
 import space.sunqian.common.io.ByteProcessor;
 import internal.test.DataTest;
 
 import java.security.MessageDigest;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DigestTest implements DataTest {
 
@@ -23,6 +24,6 @@ public class DigestTest implements DataTest {
             .readBlockSize(blockSize)
             .transformer(DigestKit.digestTransformer(digest))
             .toByteArray();
-        assertEquals(enBytes, digest.digest(data));
+        assertArrayEquals(enBytes, digest.digest(data));
     }
 }

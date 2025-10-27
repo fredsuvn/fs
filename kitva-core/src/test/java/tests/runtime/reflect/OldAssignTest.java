@@ -1,6 +1,6 @@
 package tests.runtime.reflect;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.runtime.reflect.TypeKit;
 
 import java.lang.reflect.Field;
@@ -12,9 +12,9 @@ import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OldAssignTest {
     @Test

@@ -1,12 +1,12 @@
 package tests.function;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.function.callable.BooleanCallable;
 import space.sunqian.common.function.callable.DoubleCallable;
 import space.sunqian.common.function.callable.IntCallable;
 import space.sunqian.common.function.callable.LongCallable;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FunctionTest {
 

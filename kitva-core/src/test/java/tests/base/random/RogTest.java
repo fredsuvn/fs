@@ -1,6 +1,6 @@
 package tests.base.random;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.exception.UnreachablePointException;
 import space.sunqian.common.base.random.Rog;
 import internal.test.AssertTest;
@@ -10,8 +10,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class RogTest implements AssertTest, PrintTest {
 

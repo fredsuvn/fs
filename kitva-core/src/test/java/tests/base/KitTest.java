@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import tests.utils.Utils;
 import space.sunqian.common.base.Kit;
 import space.sunqian.common.base.chars.CharsKit;
@@ -28,12 +28,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class KitTest implements AssertTest, PrintTest {
 
@@ -61,7 +61,7 @@ public class KitTest implements AssertTest, PrintTest {
                 i[0]++;
             }, RuntimeException::new);
             assertEquals(i[0], 1);
-            expectThrows(RuntimeException.class, () -> Kit.uncheck(() -> {
+            assertThrows(RuntimeException.class, () -> Kit.uncheck(() -> {
                 i[1]++;
             }, e -> {
                 assertTrue(e instanceof ArrayIndexOutOfBoundsException);
@@ -72,7 +72,7 @@ public class KitTest implements AssertTest, PrintTest {
             // uncheck return
             assertEquals(Kit.uncheck(() -> 1, RuntimeException::new), 1);
             Exception cause = new Exception();
-            expectThrows(RuntimeException.class, () -> Kit.uncheck(() -> {
+            assertThrows(RuntimeException.class, () -> Kit.uncheck(() -> {
                 throw cause;
             }, e -> {
                 assertSame(e, cause);

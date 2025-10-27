@@ -1,6 +1,6 @@
 package tests.runtime.proxy;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import tests.utils.LotsOfMethods;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
@@ -21,10 +21,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class AsmProxyTest implements PrintTest {
 
@@ -292,9 +292,9 @@ public class AsmProxyTest implements PrintTest {
                 }
             );
             ClsA asmProxy1 = pc.newInstance();
-            expectThrows(StackOverflowError.class, () -> asmProxy1.a1(""));
+            assertThrows(StackOverflowError.class, () -> asmProxy1.a1(""));
             DefaultInter asmProxy2 = pc.newInstance();
-            expectThrows(StackOverflowError.class, () -> asmProxy2.defaultInt(1));
+            assertThrows(StackOverflowError.class, () -> asmProxy2.defaultInt(1));
         }
         {
             // throws directly
@@ -321,9 +321,9 @@ public class AsmProxyTest implements PrintTest {
                 }
             );
             ClsA a1 = pc1.newInstance();
-            expectThrows(ProxyTestException.class, () -> a1.a1(""));
+            assertThrows(ProxyTestException.class, () -> a1.a1(""));
             DefaultInter s1 = pc1.newInstance();
-            expectThrows(ProxyTestException.class, () -> s1.defaultInt(1));
+            assertThrows(ProxyTestException.class, () -> s1.defaultInt(1));
             ProxySpec pc2 = proxyMaker.make(
                 ClsA.class, Kit.list(DefaultInter.class),
                 new ProxyHandler() {
@@ -346,9 +346,9 @@ public class AsmProxyTest implements PrintTest {
                 }
             );
             ClsA a2 = pc2.newInstance();
-            expectThrows(ProxyTestException.class, a2::throwClsEx);
+            assertThrows(ProxyTestException.class, a2::throwClsEx);
             DefaultInter s2 = pc1.newInstance();
-            expectThrows(ProxyTestException.class, () -> s2.defaultInt(1));
+            assertThrows(ProxyTestException.class, () -> s2.defaultInt(1));
         }
         {
             // indirect super: A extends B extends C: A super-> C
@@ -459,10 +459,10 @@ public class AsmProxyTest implements PrintTest {
             );
             F f = new F();
             ClsA ca = pc.newInstance();
-            expectThrows(StackOverflowError.class, () -> ca.a1(""));
+            assertThrows(StackOverflowError.class, () -> ca.a1(""));
             assertEquals(ca.filteredA(), f.filteredA());
             InterC ic = pc.newInstance();
-            expectThrows(StackOverflowError.class, () -> ic.c1(""));
+            assertThrows(StackOverflowError.class, () -> ic.c1(""));
             assertEquals(ic.filteredC(), f.filteredC());
         }
     }
@@ -518,7 +518,7 @@ public class AsmProxyTest implements PrintTest {
 
     @Test
     public void testException() {
-        expectThrows(AsmProxyMaker.AsmProxyException.class, () ->
+        assertThrows(AsmProxyMaker.AsmProxyException.class, () ->
             ProxyMaker.byAsm().make(null, Kit.list(), null));
     }
 
@@ -529,27 +529,27 @@ public class AsmProxyTest implements PrintTest {
         assertEquals(counter.get(), 2);
         assertEquals(obj.toString(), obj.getClass().getName() + '@' + Integer.toHexString(obj.hashCode()));
         assertEquals(counter.get(), 5);
-        expectThrows(AbstractMethodError.class, obj::a1);
+        assertThrows(AbstractMethodError.class, obj::a1);
         assertEquals(counter.get(), 6);
-        expectThrows(AbstractMethodError.class, obj::a2);
+        assertThrows(AbstractMethodError.class, obj::a2);
         assertEquals(counter.get(), 7);
-        expectThrows(AbstractMethodError.class, obj::a3);
+        assertThrows(AbstractMethodError.class, obj::a3);
         assertEquals(counter.get(), 8);
-        expectThrows(AbstractMethodError.class, obj::a4);
+        assertThrows(AbstractMethodError.class, obj::a4);
         assertEquals(counter.get(), 9);
-        expectThrows(AbstractMethodError.class, obj::a5);
+        assertThrows(AbstractMethodError.class, obj::a5);
         assertEquals(counter.get(), 10);
-        expectThrows(AbstractMethodError.class, obj::a6);
+        assertThrows(AbstractMethodError.class, obj::a6);
         assertEquals(counter.get(), 11);
-        expectThrows(AbstractMethodError.class, obj::a7);
+        assertThrows(AbstractMethodError.class, obj::a7);
         assertEquals(counter.get(), 12);
-        expectThrows(AbstractMethodError.class, obj::a8);
+        assertThrows(AbstractMethodError.class, obj::a8);
         assertEquals(counter.get(), 13);
-        expectThrows(AbstractMethodError.class, obj::a9);
+        assertThrows(AbstractMethodError.class, obj::a9);
         assertEquals(counter.get(), 14);
-        expectThrows(AbstractMethodError.class, obj::a10);
+        assertThrows(AbstractMethodError.class, obj::a10);
         assertEquals(counter.get(), 15);
-        expectThrows(AbstractMethodError.class, obj::a11);
+        assertThrows(AbstractMethodError.class, obj::a11);
         assertEquals(counter.get(), 16);
     }
 
@@ -560,27 +560,27 @@ public class AsmProxyTest implements PrintTest {
         assertEquals(counter.get(), 2);
         assertEquals(obj.toString(), obj.getClass().getName() + '@' + Integer.toHexString(obj.hashCode()));
         assertEquals(counter.get(), 5);
-        expectThrows(AbstractMethodError.class, () -> obj.b1(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
+        assertThrows(AbstractMethodError.class, () -> obj.b1(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
         assertEquals(counter.get(), 6);
-        expectThrows(AbstractMethodError.class, () -> obj.b2(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
+        assertThrows(AbstractMethodError.class, () -> obj.b2(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
         assertEquals(counter.get(), 7);
-        expectThrows(AbstractMethodError.class, () -> obj.b3(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
+        assertThrows(AbstractMethodError.class, () -> obj.b3(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
         assertEquals(counter.get(), 8);
-        expectThrows(AbstractMethodError.class, () -> obj.b4(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
+        assertThrows(AbstractMethodError.class, () -> obj.b4(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
         assertEquals(counter.get(), 9);
-        expectThrows(AbstractMethodError.class, () -> obj.b5(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
+        assertThrows(AbstractMethodError.class, () -> obj.b5(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
         assertEquals(counter.get(), 10);
-        expectThrows(AbstractMethodError.class, () -> obj.b6(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
+        assertThrows(AbstractMethodError.class, () -> obj.b6(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
         assertEquals(counter.get(), 11);
-        expectThrows(AbstractMethodError.class, () -> obj.b7(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
+        assertThrows(AbstractMethodError.class, () -> obj.b7(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
         assertEquals(counter.get(), 12);
-        expectThrows(AbstractMethodError.class, () -> obj.b8(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
+        assertThrows(AbstractMethodError.class, () -> obj.b8(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
         assertEquals(counter.get(), 13);
-        expectThrows(AbstractMethodError.class, () -> obj.b9(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
+        assertThrows(AbstractMethodError.class, () -> obj.b9(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
         assertEquals(counter.get(), 14);
-        expectThrows(AbstractMethodError.class, () -> obj.b10(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
+        assertThrows(AbstractMethodError.class, () -> obj.b10(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
         assertEquals(counter.get(), 15);
-        expectThrows(AbstractMethodError.class, () -> obj.b11(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
+        assertThrows(AbstractMethodError.class, () -> obj.b11(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0, "8"));
         assertEquals(counter.get(), 16);
     }
 
@@ -1217,7 +1217,7 @@ public class AsmProxyTest implements PrintTest {
                 }
             });
             SimpleCls sc2 = spec2.newInstance();
-            ProxyTestException ex = expectThrows(ProxyTestException.class, () ->
+            ProxyTestException ex = assertThrows(ProxyTestException.class, () ->
                 sc2.throwDouble("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d, null)
             );
             assertEquals(ex.getMessage(), "hello!");

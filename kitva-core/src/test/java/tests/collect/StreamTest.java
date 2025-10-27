@@ -1,6 +1,6 @@
 package tests.collect;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.collect.StreamKit;
 
 import java.util.Arrays;
@@ -15,8 +15,8 @@ import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class StreamTest {
 
@@ -46,7 +46,7 @@ public class StreamTest {
             assertEquals(supplier.get(), "1");
             assertEquals(supplier.get(), "2");
             assertEquals(supplier.get(), "3");
-            expectThrows(NoSuchElementException.class, supplier::get);
+            assertThrows(NoSuchElementException.class, supplier::get);
         }
         {
             // int
@@ -54,7 +54,7 @@ public class StreamTest {
             assertEquals(supplier.getAsInt(), 1);
             assertEquals(supplier.getAsInt(), 2);
             assertEquals(supplier.getAsInt(), 3);
-            expectThrows(NoSuchElementException.class, supplier::getAsInt);
+            assertThrows(NoSuchElementException.class, supplier::getAsInt);
         }
         {
             // long
@@ -62,7 +62,7 @@ public class StreamTest {
             assertEquals(supplier.getAsLong(), 1);
             assertEquals(supplier.getAsLong(), 2);
             assertEquals(supplier.getAsLong(), 3);
-            expectThrows(NoSuchElementException.class, supplier::getAsLong);
+            assertThrows(NoSuchElementException.class, supplier::getAsLong);
         }
         {
             // double
@@ -70,7 +70,7 @@ public class StreamTest {
             assertEquals(supplier.getAsDouble(), 1.0);
             assertEquals(supplier.getAsDouble(), 2.0);
             assertEquals(supplier.getAsDouble(), 3.0);
-            expectThrows(NoSuchElementException.class, supplier::getAsDouble);
+            assertThrows(NoSuchElementException.class, supplier::getAsDouble);
         }
     }
 }

@@ -1,14 +1,15 @@
 package tests.base.string;
 
-import org.testng.annotations.Test;
+import internal.test.ErrorAppender;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.string.NameFormatException;
 import space.sunqian.common.base.string.NameFormatter;
 import space.sunqian.common.base.value.Span;
 import space.sunqian.common.collect.ArrayKit;
-import internal.test.ErrorAppender;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class NameFormatterTest {
 
@@ -17,60 +18,60 @@ public class NameFormatterTest {
         {
             // file
             NameFormatter format = NameFormatter.fileNaming();
-            assertEquals(format.parse("a.b.c"), ArrayKit.array("a.b", "c"));
-            assertEquals(format.parse(""), ArrayKit.array(""));
-            assertEquals(format.parse("."), ArrayKit.array("."));
-            assertEquals(format.parse("a."), ArrayKit.array("a."));
-            assertEquals(format.parse("a.b"), ArrayKit.array("a", "b"));
+            assertArrayEquals(format.parse("a.b.c"), ArrayKit.array("a.b", "c"));
+            assertArrayEquals(format.parse(""), ArrayKit.array(""));
+            assertArrayEquals(format.parse("."), ArrayKit.array("."));
+            assertArrayEquals(format.parse("a."), ArrayKit.array("a."));
+            assertArrayEquals(format.parse("a.b"), ArrayKit.array("a", "b"));
         }
         {
             // delimiter "-"
             NameFormatter format = NameFormatter.delimiterCase("-");
-            assertEquals(format.parse("a-b-c"), ArrayKit.array("a", "b", "c"));
-            assertEquals(format.parse("a-b"), ArrayKit.array("a", "b"));
-            assertEquals(format.parse("a-b-"), ArrayKit.array("a", "b", ""));
-            assertEquals(format.parse("-a-b-"), ArrayKit.array("", "a", "b", ""));
-            assertEquals(format.parse("-"), ArrayKit.array("", ""));
-            assertEquals(format.parse("a"), ArrayKit.array("a"));
-            assertEquals(format.parse(""), ArrayKit.array(""));
+            assertArrayEquals(format.parse("a-b-c"), ArrayKit.array("a", "b", "c"));
+            assertArrayEquals(format.parse("a-b"), ArrayKit.array("a", "b"));
+            assertArrayEquals(format.parse("a-b-"), ArrayKit.array("a", "b", ""));
+            assertArrayEquals(format.parse("-a-b-"), ArrayKit.array("", "a", "b", ""));
+            assertArrayEquals(format.parse("-"), ArrayKit.array("", ""));
+            assertArrayEquals(format.parse("a"), ArrayKit.array("a"));
+            assertArrayEquals(format.parse(""), ArrayKit.array(""));
         }
         {
             // delimiter "--"
             NameFormatter format = NameFormatter.delimiterCase("--");
-            assertEquals(format.parse("a--b--c"), ArrayKit.array("a", "b", "c"));
-            assertEquals(format.parse("a--b"), ArrayKit.array("a", "b"));
-            assertEquals(format.parse("a--b--"), ArrayKit.array("a", "b", ""));
-            assertEquals(format.parse("--a--b--"), ArrayKit.array("", "a", "b", ""));
-            assertEquals(format.parse("--"), ArrayKit.array("", ""));
-            assertEquals(format.parse("a"), ArrayKit.array("a"));
-            assertEquals(format.parse(""), ArrayKit.array(""));
-            assertEquals(format.parse("-"), ArrayKit.array("-"));
-            assertEquals(format.parse("a--b-c"), ArrayKit.array("a", "b-c"));
+            assertArrayEquals(format.parse("a--b--c"), ArrayKit.array("a", "b", "c"));
+            assertArrayEquals(format.parse("a--b"), ArrayKit.array("a", "b"));
+            assertArrayEquals(format.parse("a--b--"), ArrayKit.array("a", "b", ""));
+            assertArrayEquals(format.parse("--a--b--"), ArrayKit.array("", "a", "b", ""));
+            assertArrayEquals(format.parse("--"), ArrayKit.array("", ""));
+            assertArrayEquals(format.parse("a"), ArrayKit.array("a"));
+            assertArrayEquals(format.parse(""), ArrayKit.array(""));
+            assertArrayEquals(format.parse("-"), ArrayKit.array("-"));
+            assertArrayEquals(format.parse("a--b-c"), ArrayKit.array("a", "b-c"));
         }
         {
             // delimiter error
-            expectThrows(IllegalArgumentException.class, () -> NameFormatter.delimiterCase(""));
+            assertThrows(IllegalArgumentException.class, () -> NameFormatter.delimiterCase(""));
         }
         {
             // lower camel
             NameFormatter format = NameFormatter.lowerCamel();
-            assertEquals(format.parse("aBc"), ArrayKit.array("a", "Bc"));
-            assertEquals(format.parse("aBcD"), ArrayKit.array("a", "Bc", "D"));
-            assertEquals(format.parse("aBcDe"), ArrayKit.array("a", "Bc", "De"));
-            assertEquals(format.parse("aBcD0"), ArrayKit.array("a", "Bc", "D", "0"));
-            assertEquals(format.parse("aBcDe0"), ArrayKit.array("a", "Bc", "De", "0"));
-            assertEquals(format.parse("0aBcDe0"), ArrayKit.array("0", "a", "Bc", "De", "0"));
-            assertEquals(format.parse("01aaBcDe0"), ArrayKit.array("01", "aa", "Bc", "De", "0"));
-            assertEquals(format.parse("01AABcDe0"), ArrayKit.array("01", "AA", "Bc", "De", "0"));
-            assertEquals(format.parse("01AaBcDe0"), ArrayKit.array("01", "Aa", "Bc", "De", "0"));
-            assertEquals(format.parse("AaBcDe0"), ArrayKit.array("Aa", "Bc", "De", "0"));
-            assertEquals(format.parse("AABcDe0"), ArrayKit.array("AA", "Bc", "De", "0"));
-            assertEquals(format.parse("AA0BcDe0"), ArrayKit.array("AA", "0", "Bc", "De", "0"));
-            assertEquals(format.parse("AA00BcDe0"), ArrayKit.array("AA", "00", "Bc", "De", "0"));
-            assertEquals(format.parse("AA中BcDe0"), ArrayKit.array("AA", "中", "Bc", "De", "0"));
-            assertEquals(format.parse("AA0中BcDe0"), ArrayKit.array("AA", "0", "中", "Bc", "De", "0"));
-            assertEquals(format.parse("AA0中BcDe中"), ArrayKit.array("AA", "0", "中", "Bc", "De", "中"));
-            assertEquals(
+            assertArrayEquals(format.parse("aBc"), ArrayKit.array("a", "Bc"));
+            assertArrayEquals(format.parse("aBcD"), ArrayKit.array("a", "Bc", "D"));
+            assertArrayEquals(format.parse("aBcDe"), ArrayKit.array("a", "Bc", "De"));
+            assertArrayEquals(format.parse("aBcD0"), ArrayKit.array("a", "Bc", "D", "0"));
+            assertArrayEquals(format.parse("aBcDe0"), ArrayKit.array("a", "Bc", "De", "0"));
+            assertArrayEquals(format.parse("0aBcDe0"), ArrayKit.array("0", "a", "Bc", "De", "0"));
+            assertArrayEquals(format.parse("01aaBcDe0"), ArrayKit.array("01", "aa", "Bc", "De", "0"));
+            assertArrayEquals(format.parse("01AABcDe0"), ArrayKit.array("01", "AA", "Bc", "De", "0"));
+            assertArrayEquals(format.parse("01AaBcDe0"), ArrayKit.array("01", "Aa", "Bc", "De", "0"));
+            assertArrayEquals(format.parse("AaBcDe0"), ArrayKit.array("Aa", "Bc", "De", "0"));
+            assertArrayEquals(format.parse("AABcDe0"), ArrayKit.array("AA", "Bc", "De", "0"));
+            assertArrayEquals(format.parse("AA0BcDe0"), ArrayKit.array("AA", "0", "Bc", "De", "0"));
+            assertArrayEquals(format.parse("AA00BcDe0"), ArrayKit.array("AA", "00", "Bc", "De", "0"));
+            assertArrayEquals(format.parse("AA中BcDe0"), ArrayKit.array("AA", "中", "Bc", "De", "0"));
+            assertArrayEquals(format.parse("AA0中BcDe0"), ArrayKit.array("AA", "0", "中", "Bc", "De", "0"));
+            assertArrayEquals(format.parse("AA0中BcDe中"), ArrayKit.array("AA", "0", "中", "Bc", "De", "中"));
+            assertArrayEquals(
                 format.parse("AaBcDe/中01AabBb"),
                 ArrayKit.array("Aa", "Bc", "De", "/中", "01", "Aab", "Bb")
             );
@@ -78,28 +79,28 @@ public class NameFormatterTest {
         {
             // upper camel
             NameFormatter format = NameFormatter.upperCamel();
-            assertEquals(format.parse("ABc"), ArrayKit.array("A", "Bc"));
-            assertEquals(format.parse("ABcD"), ArrayKit.array("A", "Bc", "D"));
-            assertEquals(format.parse("AaBcDe"), ArrayKit.array("Aa", "Bc", "De"));
-            assertEquals(format.parse("AaBcD0"), ArrayKit.array("Aa", "Bc", "D", "0"));
-            assertEquals(format.parse("AaBcDe0"), ArrayKit.array("Aa", "Bc", "De", "0"));
-            assertEquals(format.parse("aBc"), ArrayKit.array("a", "Bc"));
-            assertEquals(format.parse("aBcD"), ArrayKit.array("a", "Bc", "D"));
-            assertEquals(format.parse("aBcDe"), ArrayKit.array("a", "Bc", "De"));
-            assertEquals(format.parse("aBcD0"), ArrayKit.array("a", "Bc", "D", "0"));
-            assertEquals(format.parse("aBcDe0"), ArrayKit.array("a", "Bc", "De", "0"));
-            assertEquals(format.parse("0aBcDe0"), ArrayKit.array("0", "a", "Bc", "De", "0"));
-            assertEquals(format.parse("01aaBcDe0"), ArrayKit.array("01", "aa", "Bc", "De", "0"));
-            assertEquals(format.parse("01AABcDe0"), ArrayKit.array("01", "AA", "Bc", "De", "0"));
-            assertEquals(format.parse("01AaBcDe0"), ArrayKit.array("01", "Aa", "Bc", "De", "0"));
-            assertEquals(format.parse("AaBcDe0"), ArrayKit.array("Aa", "Bc", "De", "0"));
-            assertEquals(format.parse("AABcDe0"), ArrayKit.array("AA", "Bc", "De", "0"));
-            assertEquals(format.parse("AA0BcDe0"), ArrayKit.array("AA", "0", "Bc", "De", "0"));
-            assertEquals(format.parse("AA00BcDe0"), ArrayKit.array("AA", "00", "Bc", "De", "0"));
-            assertEquals(format.parse("AA中BcDe0"), ArrayKit.array("AA", "中", "Bc", "De", "0"));
-            assertEquals(format.parse("AA0中BcDe0"), ArrayKit.array("AA", "0", "中", "Bc", "De", "0"));
-            assertEquals(format.parse("AA0中BcDe中"), ArrayKit.array("AA", "0", "中", "Bc", "De", "中"));
-            assertEquals(
+            assertArrayEquals(format.parse("ABc"), ArrayKit.array("A", "Bc"));
+            assertArrayEquals(format.parse("ABcD"), ArrayKit.array("A", "Bc", "D"));
+            assertArrayEquals(format.parse("AaBcDe"), ArrayKit.array("Aa", "Bc", "De"));
+            assertArrayEquals(format.parse("AaBcD0"), ArrayKit.array("Aa", "Bc", "D", "0"));
+            assertArrayEquals(format.parse("AaBcDe0"), ArrayKit.array("Aa", "Bc", "De", "0"));
+            assertArrayEquals(format.parse("aBc"), ArrayKit.array("a", "Bc"));
+            assertArrayEquals(format.parse("aBcD"), ArrayKit.array("a", "Bc", "D"));
+            assertArrayEquals(format.parse("aBcDe"), ArrayKit.array("a", "Bc", "De"));
+            assertArrayEquals(format.parse("aBcD0"), ArrayKit.array("a", "Bc", "D", "0"));
+            assertArrayEquals(format.parse("aBcDe0"), ArrayKit.array("a", "Bc", "De", "0"));
+            assertArrayEquals(format.parse("0aBcDe0"), ArrayKit.array("0", "a", "Bc", "De", "0"));
+            assertArrayEquals(format.parse("01aaBcDe0"), ArrayKit.array("01", "aa", "Bc", "De", "0"));
+            assertArrayEquals(format.parse("01AABcDe0"), ArrayKit.array("01", "AA", "Bc", "De", "0"));
+            assertArrayEquals(format.parse("01AaBcDe0"), ArrayKit.array("01", "Aa", "Bc", "De", "0"));
+            assertArrayEquals(format.parse("AaBcDe0"), ArrayKit.array("Aa", "Bc", "De", "0"));
+            assertArrayEquals(format.parse("AABcDe0"), ArrayKit.array("AA", "Bc", "De", "0"));
+            assertArrayEquals(format.parse("AA0BcDe0"), ArrayKit.array("AA", "0", "Bc", "De", "0"));
+            assertArrayEquals(format.parse("AA00BcDe0"), ArrayKit.array("AA", "00", "Bc", "De", "0"));
+            assertArrayEquals(format.parse("AA中BcDe0"), ArrayKit.array("AA", "中", "Bc", "De", "0"));
+            assertArrayEquals(format.parse("AA0中BcDe0"), ArrayKit.array("AA", "0", "中", "Bc", "De", "0"));
+            assertArrayEquals(format.parse("AA0中BcDe中"), ArrayKit.array("AA", "0", "中", "Bc", "De", "中"));
+            assertArrayEquals(
                 format.parse("AaBcDe/中01AabBb"),
                 ArrayKit.array("Aa", "Bc", "De", "/中", "01", "Aab", "Bb")
             );
@@ -107,12 +108,12 @@ public class NameFormatterTest {
         {
             // camel empty
             NameFormatter format = NameFormatter.lowerCamel();
-            assertEquals(format.parse(""), ArrayKit.array(""));
-            assertEquals(format.parse("a"), ArrayKit.array("a"));
-            assertEquals(format.parse("A"), ArrayKit.array("A"));
-            assertEquals(format.parse("0"), ArrayKit.array("0"));
-            assertEquals(format.parse("中"), ArrayKit.array("中"));
-            assertEquals(format.parse("0中a"), ArrayKit.array("0", "中", "a"));
+            assertArrayEquals(format.parse(""), ArrayKit.array(""));
+            assertArrayEquals(format.parse("a"), ArrayKit.array("a"));
+            assertArrayEquals(format.parse("A"), ArrayKit.array("A"));
+            assertArrayEquals(format.parse("0"), ArrayKit.array("0"));
+            assertArrayEquals(format.parse("中"), ArrayKit.array("中"));
+            assertArrayEquals(format.parse("0中a"), ArrayKit.array("0", "中", "a"));
         }
     }
 
@@ -165,9 +166,9 @@ public class NameFormatterTest {
                 format.format("abc", new Span[0]),
                 ""
             );
-            expectThrows(NameFormatException.class, () ->
+            assertThrows(NameFormatException.class, () ->
                 format.format(ArrayKit.array("a"), new ErrorAppender()));
-            expectThrows(NameFormatException.class, () ->
+            assertThrows(NameFormatException.class, () ->
                 format.format("a", new Span[]{Span.of(0, 1)}, new ErrorAppender()));
         }
         {
@@ -221,9 +222,9 @@ public class NameFormatterTest {
                 format.format("abc", new Span[0]),
                 ""
             );
-            expectThrows(NameFormatException.class, () ->
+            assertThrows(NameFormatException.class, () ->
                 format.format(ArrayKit.array("a"), new ErrorAppender()));
-            expectThrows(NameFormatException.class, () ->
+            assertThrows(NameFormatException.class, () ->
                 format.format("a", new Span[]{Span.of(0, 1)}, new ErrorAppender()));
         }
         {
@@ -293,9 +294,9 @@ public class NameFormatterTest {
                 format.format("someName", new Span[0]),
                 ""
             );
-            expectThrows(NameFormatException.class, () ->
+            assertThrows(NameFormatException.class, () ->
                 format.format(ArrayKit.array("a"), new ErrorAppender()));
-            expectThrows(NameFormatException.class, () ->
+            assertThrows(NameFormatException.class, () ->
                 format.format("a", new Span[]{Span.of(0, 1)}, new ErrorAppender()));
         }
         {
@@ -365,9 +366,9 @@ public class NameFormatterTest {
                 format.format("someName", new Span[0]),
                 ""
             );
-            expectThrows(NameFormatException.class, () ->
+            assertThrows(NameFormatException.class, () ->
                 format.format(ArrayKit.array("a"), new ErrorAppender()));
-            expectThrows(NameFormatException.class, () ->
+            assertThrows(NameFormatException.class, () ->
                 format.format("a", new Span[]{Span.of(0, 1)}, new ErrorAppender()));
         }
     }
@@ -389,16 +390,16 @@ public class NameFormatterTest {
     public void testException() {
         {
             // NameFormatException
-            expectThrows(NameFormatException.class, () -> {
+            assertThrows(NameFormatException.class, () -> {
                 throw new NameFormatException();
             });
-            expectThrows(NameFormatException.class, () -> {
+            assertThrows(NameFormatException.class, () -> {
                 throw new NameFormatException("");
             });
-            expectThrows(NameFormatException.class, () -> {
+            assertThrows(NameFormatException.class, () -> {
                 throw new NameFormatException("", new RuntimeException());
             });
-            expectThrows(NameFormatException.class, () -> {
+            assertThrows(NameFormatException.class, () -> {
                 throw new NameFormatException(new RuntimeException());
             });
         }

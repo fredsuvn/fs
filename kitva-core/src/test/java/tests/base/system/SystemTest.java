@@ -1,6 +1,6 @@
 package tests.base.system;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.system.SystemKeys;
 import space.sunqian.common.base.system.SystemKit;
 import internal.test.PrintTest;
@@ -12,7 +12,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SystemTest implements PrintTest {
 

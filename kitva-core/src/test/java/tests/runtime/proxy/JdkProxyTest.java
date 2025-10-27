@@ -1,6 +1,6 @@
 package tests.runtime.proxy;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.common.base.Kit;
@@ -13,11 +13,11 @@ import space.sunqian.common.runtime.proxy.ProxySpec;
 
 import java.lang.reflect.Method;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class JdkProxyTest {
 
@@ -128,9 +128,9 @@ public class JdkProxyTest {
             InterA paA = spec.newInstance();
             InterB paB = spec.newInstance();
             InterC paC = spec.newInstance();
-            expectThrows(StackOverflowError.class, () -> paA.aa("11", 11));
-            expectThrows(StackOverflowError.class, () -> paB.bb("11", 11));
-            expectThrows(StackOverflowError.class, () -> paC.cc("11", 11));
+            assertThrows(StackOverflowError.class, () -> paA.aa("11", 11));
+            assertThrows(StackOverflowError.class, () -> paB.bb("11", 11));
+            assertThrows(StackOverflowError.class, () -> paC.cc("11", 11));
             counter.clear();
             assertEquals(paA.filteredA(), cls.filteredA());
             assertEquals(paB.filteredB(), cls.filteredB());
@@ -204,7 +204,7 @@ public class JdkProxyTest {
         SuperInter psi = pc.newInstance();
         assertEquals(psi.si1(), si.si1());
         assertEquals(counter.get(), 1);
-        expectThrows(AbstractMethodError.class, psi::si2);
+        assertThrows(AbstractMethodError.class, psi::si2);
         assertEquals(counter.get(), 2);
         counter.clear();
 

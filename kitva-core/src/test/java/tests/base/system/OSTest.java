@@ -1,6 +1,6 @@
 package tests.base.system;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.system.OSKit;
 import internal.test.PrintTest;
 

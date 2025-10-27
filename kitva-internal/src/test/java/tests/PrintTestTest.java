@@ -1,12 +1,12 @@
 package tests;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import internal.test.PrintTest;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PrintTestTest implements PrintTest {
 

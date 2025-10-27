@@ -1,6 +1,6 @@
 package tests.object.convert;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.common.base.exception.UnreachablePointException;
 import space.sunqian.common.object.data.DataObjectException;
@@ -13,12 +13,12 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ObjectBuilderTest {
 
@@ -102,10 +102,10 @@ public class ObjectBuilderTest {
             ObjectBuilderProvider err = provider.withFirstHandler(target -> {
                 throw new UnreachablePointException();
             });
-            expectThrows(DataObjectException.class, () -> err.builder(X.class));
+            assertThrows(DataObjectException.class, () -> err.builder(X.class));
             ObjectBuilderProvider err2 = ObjectBuilderProvider.newProvider(
                 ObjectBuilderProvider.defaultProvider().asHandler());
-            expectThrows(DataObjectException.class, () -> err2.builder(E.class).newBuilder());
+            assertThrows(DataObjectException.class, () -> err2.builder(E.class).newBuilder());
         }
         {
             // generic

@@ -1,11 +1,12 @@
 package tests.object.convert;
 
+import internal.test.PrintTest;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.jetbrains.annotations.NotNull;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
+import space.sunqian.annotations.Nonnull;
 import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.base.exception.UnreachablePointException;
 import space.sunqian.common.base.time.TimeFormatter;
@@ -22,7 +23,6 @@ import space.sunqian.common.object.convert.UnsupportedObjectConvertException;
 import space.sunqian.common.object.data.ObjectBuilderProvider;
 import space.sunqian.common.runtime.reflect.TypeKit;
 import space.sunqian.common.runtime.reflect.TypeRef;
-import internal.test.PrintTest;
 
 import java.io.ByteArrayInputStream;
 import java.io.CharArrayReader;
@@ -44,11 +44,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ConvertTest implements PrintTest {
 
@@ -61,18 +62,18 @@ public class ConvertTest implements PrintTest {
         A a = new A("1", "2", "3");
         assertEquals(converter.convert(a, B.class), new B(1L, 2L, 3L));
         assertEquals(converter.convert(a, A.class, B.class), new B(1L, 2L, 3L));
-        expectThrows(UnsupportedObjectConvertException.class, () -> converter.convert(null, B.class));
+        assertThrows(UnsupportedObjectConvertException.class, () -> converter.convert(null, B.class));
         ObjectConverter converter2 = ObjectConverter.newConverter(converter.asHandler());
         assertEquals(converter2.convert(a, B.class), new B(1L, 2L, 3L));
         assertEquals(converter2.convert(a, A.class, B.class), new B(1L, 2L, 3L));
-        expectThrows(UnsupportedObjectConvertException.class, () -> converter2.convert(null, B.class));
+        assertThrows(UnsupportedObjectConvertException.class, () -> converter2.convert(null, B.class));
         {
             // error during handler
             ObjectConverter cvt = converter.withFirstHandler(
                 (src, srcType, target, converter1, options) -> {
                     throw new UnreachablePointException();
                 });
-            ObjectConvertException e = expectThrows(ObjectConvertException.class, () ->
+            ObjectConvertException e = assertThrows(ObjectConvertException.class, () ->
                 cvt.convert(a, B.class));
             assertTrue(e.getCause() instanceof UnreachablePointException);
         }
@@ -82,13 +83,13 @@ public class ConvertTest implements PrintTest {
                 (src, srcType, target, converter1, options) ->
                     ObjectConverter.Status.HANDLER_BREAK
             );
-            UnsupportedObjectConvertException e = expectThrows(UnsupportedObjectConvertException.class, () ->
+            UnsupportedObjectConvertException e = assertThrows(UnsupportedObjectConvertException.class, () ->
                 cvt.convert(a, B.class, ConvertOption.IGNORE_NULL));
             assertEquals(e.sourceObject(), a);
             assertEquals(e.sourceObjectType(), A.class);
             assertEquals(e.targetType(), B.class);
             assertSame(e.converter(), cvt);
-            assertEquals(e.options(), ArrayKit.array(ConvertOption.IGNORE_NULL));
+            assertArrayEquals(e.options(), ArrayKit.array(ConvertOption.IGNORE_NULL));
         }
         {
             // withLastHandler
@@ -97,7 +98,7 @@ public class ConvertTest implements PrintTest {
                 (src, srcType, target, converter1, options) -> {
                     throw new UnreachablePointException();
                 });
-            ObjectConvertException e = expectThrows(ObjectConvertException.class, () ->
+            ObjectConvertException e = assertThrows(ObjectConvertException.class, () ->
                 cvt.convert(a, X.class.getTypeParameters()[0], ConvertOption.STRICT_TYPE_MODE));
             assertTrue(e.getCause() instanceof UnreachablePointException);
         }
@@ -112,16 +113,16 @@ public class ConvertTest implements PrintTest {
             Type wildLower = ((ParameterizedType) (F.class.getField("l1").getGenericType()))
                 .getActualTypeArguments()[0];
             Object obj = new Object();
-            expectThrows(UnsupportedObjectConvertException.class, () ->
+            assertThrows(UnsupportedObjectConvertException.class, () ->
                 converter.convert(obj, wildLower, ConvertOption.STRICT_TYPE_MODE));
             assertEquals(converter.convert(obj, wildLower), obj.toString());
             Type upperLower = ((ParameterizedType) (F.class.getField("l2").getGenericType()))
                 .getActualTypeArguments()[0];
-            expectThrows(UnsupportedObjectConvertException.class, () ->
+            assertThrows(UnsupportedObjectConvertException.class, () ->
                 converter.convert(obj, upperLower, ConvertOption.STRICT_TYPE_MODE));
             assertEquals(converter.convert(obj, upperLower), obj.toString());
             class X<T> {}
-            expectThrows(UnsupportedObjectConvertException.class, () ->
+            assertThrows(UnsupportedObjectConvertException.class, () ->
                 converter.convert(obj, X.class.getTypeParameters()[0], ConvertOption.STRICT_TYPE_MODE));
             assertSame(converter.convert(obj, X.class.getTypeParameters()[0]), obj);
         }
@@ -148,9 +149,9 @@ public class ConvertTest implements PrintTest {
         );
         assertEquals(map3, MapKit.map("first", "1", "second", "2", "third", "3"));
         class Err {}
-        expectThrows(ObjectConvertException.class, () -> converter.convert(a, Err.class));
+        assertThrows(ObjectConvertException.class, () -> converter.convert(a, Err.class));
         class N {}
-        expectThrows(UnsupportedObjectConvertException.class, () -> converter.convert(a, N.class));
+        assertThrows(UnsupportedObjectConvertException.class, () -> converter.convert(a, N.class));
         {
             // to String
             Date now = new Date();
@@ -178,7 +179,7 @@ public class ConvertTest implements PrintTest {
         }
         {
             // String to
-            assertEquals(
+            assertArrayEquals(
                 converter.convert("123", byte[].class),
                 "123".getBytes(CharsKit.defaultCharset())
             );
@@ -186,7 +187,7 @@ public class ConvertTest implements PrintTest {
                 converter.convert("123", ByteBuffer.class),
                 ByteBuffer.wrap("123".getBytes(CharsKit.defaultCharset()))
             );
-            assertEquals(
+            assertArrayEquals(
                 converter.convert("123", char[].class),
                 "123".toCharArray()
             );
@@ -208,9 +209,9 @@ public class ConvertTest implements PrintTest {
             assertEquals(converter.convert(123, long.class), 123L);
             assertEquals(converter.convert(123, Long.class), 123L);
             assertEquals(converter.convert(123, BigDecimal.class), new BigDecimal("123"));
-            expectThrows(UnsupportedObjectConvertException.class, () ->
+            assertThrows(UnsupportedObjectConvertException.class, () ->
                 converter.convert(new X<String>(), nonClass, long.class));
-            expectThrows(UnsupportedObjectConvertException.class, () ->
+            assertThrows(UnsupportedObjectConvertException.class, () ->
                 converter.convert(a, long.class));
         }
         {
@@ -222,7 +223,7 @@ public class ConvertTest implements PrintTest {
             assertEquals(converter.convert(0, boolean.class), false);
             assertEquals(converter.convert(1, boolean.class), true);
             assertEquals(converter.convert(-1, boolean.class), true);
-            expectThrows(UnsupportedObjectConvertException.class, () ->
+            assertThrows(UnsupportedObjectConvertException.class, () ->
                 converter.convert(a, boolean.class));
         }
         {
@@ -236,9 +237,9 @@ public class ConvertTest implements PrintTest {
             assertEquals(converter.convert(now.toInstant(), Instant.class), now.toInstant());
             assertEquals(converter.convert(now.getTime(), Date.class), now);
             assertEquals(converter.convert(now.getTime(), long.class, Date.class), now);
-            expectThrows(UnsupportedObjectConvertException.class, () ->
+            assertThrows(UnsupportedObjectConvertException.class, () ->
                 converter.convert(new X<String>(), nonClass, Date.class));
-            expectThrows(UnsupportedObjectConvertException.class, () ->
+            assertThrows(UnsupportedObjectConvertException.class, () ->
                 converter.convert(a, Date.class));
         }
         Date now = new Date();
@@ -255,9 +256,8 @@ public class ConvertTest implements PrintTest {
                 new int[]{1, 2, 3}
             );
             assertEquals(converter.convert(new Iterable<String>() {
-                @NotNull
                 @Override
-                public Iterator<String> iterator() {
+                public @Nonnull Iterator<String> iterator() {
                     return strList.iterator();
                 }
             }, int[].class), new int[]{1, 2, 3});
@@ -273,18 +273,18 @@ public class ConvertTest implements PrintTest {
                 new String[]{nowStr, nowStr, nowStr}
             );
             assertEquals(converter.convert(new Iterable<Date>() {
-                    @NotNull
+
                     @Override
-                    public Iterator<Date> iterator() {
+                    public @Nonnull Iterator<Date> iterator() {
                         return dateList.iterator();
                     }
                 }, new TypeRef<Iterable<Date>>() {}.type(), String[].class, ConvertOption.timeFormatter(nowFormat)),
                 new String[]{nowStr, nowStr, nowStr}
             );
             // errors
-            expectThrows(UnsupportedObjectConvertException.class, () ->
+            assertThrows(UnsupportedObjectConvertException.class, () ->
                 converter.convert("", int[].class));
-            expectThrows(UnsupportedObjectConvertException.class, () ->
+            assertThrows(UnsupportedObjectConvertException.class, () ->
                 converter.convert("", new TypeRef<List<String>>() {}.type(), int[].class));
         }
         {
@@ -299,9 +299,9 @@ public class ConvertTest implements PrintTest {
                 new Integer[]{1, 2, 3}
             );
             assertEquals(converter.convert(new Iterable<String>() {
-                @NotNull
+
                 @Override
-                public Iterator<String> iterator() {
+                public @Nonnull Iterator<String> iterator() {
                     return strList.iterator();
                 }
             }, intsType), new Integer[]{1, 2, 3});
@@ -318,18 +318,18 @@ public class ConvertTest implements PrintTest {
                 new String[]{nowStr, nowStr, nowStr}
             );
             assertEquals(converter.convert(new Iterable<Date>() {
-                    @NotNull
+
                     @Override
-                    public Iterator<Date> iterator() {
+                    public @Nonnull Iterator<Date> iterator() {
                         return dateList.iterator();
                     }
                 }, new TypeRef<Iterable<Date>>() {}.type(), stringsType, ConvertOption.timeFormatter(nowFormat)),
                 new String[]{nowStr, nowStr, nowStr}
             );
             // errors
-            expectThrows(UnsupportedObjectConvertException.class, () ->
+            assertThrows(UnsupportedObjectConvertException.class, () ->
                 converter.convert("", intsType));
-            expectThrows(UnsupportedObjectConvertException.class, () ->
+            assertThrows(UnsupportedObjectConvertException.class, () ->
                 converter.convert("", new TypeRef<List<String>>() {}.type(), intsType));
         }
         {
@@ -344,9 +344,9 @@ public class ConvertTest implements PrintTest {
                 ListKit.list(1, 2, 3)
             );
             assertEquals(converter.convert(new Iterable<String>() {
-                @NotNull
+
                 @Override
-                public Iterator<String> iterator() {
+                public @Nonnull Iterator<String> iterator() {
                     return strList.iterator();
                 }
             }, intsType), ListKit.list(1, 2, 3));
@@ -363,18 +363,18 @@ public class ConvertTest implements PrintTest {
                 ListKit.list(nowStr, nowStr, nowStr)
             );
             assertEquals(converter.convert(new Iterable<Date>() {
-                    @NotNull
+
                     @Override
-                    public Iterator<Date> iterator() {
+                    public @Nonnull Iterator<Date> iterator() {
                         return dateList.iterator();
                     }
                 }, new TypeRef<Iterable<Date>>() {}.type(), stringsType, ConvertOption.timeFormatter(nowFormat)),
                 ListKit.list(nowStr, nowStr, nowStr)
             );
             // errors
-            expectThrows(UnsupportedObjectConvertException.class, () ->
+            assertThrows(UnsupportedObjectConvertException.class, () ->
                 converter.convert("", intsType));
-            expectThrows(UnsupportedObjectConvertException.class, () ->
+            assertThrows(UnsupportedObjectConvertException.class, () ->
                 converter.convert("", new TypeRef<List<String>>() {}.type(), intsType));
         }
     }
@@ -397,22 +397,22 @@ public class ConvertTest implements PrintTest {
     public void testException() {
         {
             // ObjectConversionException
-            expectThrows(ObjectConvertException.class, () -> {
+            assertThrows(ObjectConvertException.class, () -> {
                 throw new ObjectConvertException();
             });
-            expectThrows(ObjectConvertException.class, () -> {
+            assertThrows(ObjectConvertException.class, () -> {
                 throw new ObjectConvertException("");
             });
-            expectThrows(ObjectConvertException.class, () -> {
+            assertThrows(ObjectConvertException.class, () -> {
                 throw new ObjectConvertException("", new RuntimeException());
             });
-            expectThrows(ObjectConvertException.class, () -> {
+            assertThrows(ObjectConvertException.class, () -> {
                 throw new ObjectConvertException(new RuntimeException());
             });
-            expectThrows(ObjectConvertException.class, () -> {
+            assertThrows(ObjectConvertException.class, () -> {
                 throw new ObjectConvertException(Object.class, String.class);
             });
-            expectThrows(ObjectConvertException.class, () -> {
+            assertThrows(ObjectConvertException.class, () -> {
                 throw new ObjectConvertException(Object.class, String.class, new RuntimeException());
             });
         }

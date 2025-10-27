@@ -1,6 +1,6 @@
 package tests.collect;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.collect.SetKit;
 
 import java.util.Arrays;
@@ -9,9 +9,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotSame;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SetTest {
 
@@ -22,7 +22,7 @@ public class SetTest {
         Set<String> stringSet = SetKit.set(stringArray);
         assertEquals(stringSet.size(), 5);
         assertEquals(stringSet, new LinkedHashSet<>(Arrays.asList(stringArray)));
-        expectThrows(UnsupportedOperationException.class, () -> stringSet.add("modified"));
+        assertThrows(UnsupportedOperationException.class, () -> stringSet.add("modified"));
     }
 
     @Test
@@ -39,7 +39,7 @@ public class SetTest {
         List<Integer> list = Arrays.asList(1, 2, 3);
         assertEquals(SetKit.toSet(list), new LinkedHashSet<>(list));
         assertNotSame(SetKit.toSet(list), new LinkedHashSet<>(list));
-        expectThrows(UnsupportedOperationException.class, () -> SetKit.toSet(list).add(10));
+        assertThrows(UnsupportedOperationException.class, () -> SetKit.toSet(list).add(10));
 
         assertEquals(SetKit.toHashSet(list), new HashSet<>(list));
         assertNotSame(SetKit.toHashSet(list), new HashSet<>(list));

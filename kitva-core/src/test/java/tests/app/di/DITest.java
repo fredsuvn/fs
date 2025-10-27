@@ -3,7 +3,7 @@ package tests.app.di;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.annotation.Resource;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.common.app.di.InjectedApp;
@@ -25,13 +25,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotSame;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class DITest implements PrintTest {
 
@@ -495,15 +495,15 @@ public class DITest implements PrintTest {
             assertEquals(Dep.destroyList, ListKit.list(1, 2, 3));
         }
         {
-            expectThrows(InjectedAppException.class, () ->
+            assertThrows(InjectedAppException.class, () ->
                 InjectedApp.newBuilder().resourceTypes(Dep4.class, Dep5.class).build());
-            expectThrows(InjectedAppException.class, () ->
+            assertThrows(InjectedAppException.class, () ->
                 InjectedApp.newBuilder().resourceTypes(Dep6.class, Dep7.class).build());
-            expectThrows(InjectedAppException.class, () ->
+            assertThrows(InjectedAppException.class, () ->
                 InjectedApp.newBuilder().resourceTypes(DepErr1.class).build());
-            expectThrows(InjectedAppException.class, () ->
+            assertThrows(InjectedAppException.class, () ->
                 InjectedApp.newBuilder().resourceTypes(DepErr2.class).build());
-            expectThrows(InjectedAppException.class, () ->
+            assertThrows(InjectedAppException.class, () ->
                 InjectedApp.newBuilder().resourceTypes(DepErr3.class).build());
         }
         {
@@ -669,7 +669,7 @@ public class DITest implements PrintTest {
     public void testStartAndShutdown() {
         {
             // startup
-            InjectedResourceInitializationException startErr = expectThrows(InjectedResourceInitializationException.class, () -> {
+            InjectedResourceInitializationException startErr = assertThrows(InjectedResourceInitializationException.class, () -> {
                 InjectedApp.newBuilder()
                     .resourceTypes(Dep8.class, Dep9.class, ConstructErr.class, Dep10.class)
                     .build();
@@ -692,7 +692,7 @@ public class DITest implements PrintTest {
         }
         {
             // shutdown
-            InjectedResourceDestructionException shutErr = expectThrows(InjectedResourceDestructionException.class, () -> {
+            InjectedResourceDestructionException shutErr = assertThrows(InjectedResourceDestructionException.class, () -> {
                 InjectedApp.newBuilder()
                     .resourceTypes(Dep8.class, Dep9.class, DestroyErr.class, Dep10.class)
                     .build()
@@ -746,30 +746,30 @@ public class DITest implements PrintTest {
     public void testException() throws Exception {
         {
             // InjectedSimpleAppException
-            expectThrows(InjectedAppException.class, () -> {
+            assertThrows(InjectedAppException.class, () -> {
                 throw new InjectedAppException();
             });
-            expectThrows(InjectedAppException.class, () -> {
+            assertThrows(InjectedAppException.class, () -> {
                 throw new InjectedAppException("");
             });
-            expectThrows(InjectedAppException.class, () -> {
+            assertThrows(InjectedAppException.class, () -> {
                 throw new InjectedAppException("", new RuntimeException());
             });
-            expectThrows(InjectedAppException.class, () -> {
+            assertThrows(InjectedAppException.class, () -> {
                 throw new InjectedAppException(new RuntimeException());
             });
         }
-        expectThrows(InjectedAppException.class, () -> {
+        assertThrows(InjectedAppException.class, () -> {
             InjectedApp.newBuilder()
                 .resourceTypes(DepErr5.class)
                 .build();
         });
-        expectThrows(InjectedAppException.class, () -> {
+        assertThrows(InjectedAppException.class, () -> {
             InjectedApp.newBuilder()
                 .resourceTypes(DepErr5.class.getTypeParameters()[0])
                 .build();
         });
-        expectThrows(InjectedAppException.class, () -> {
+        assertThrows(InjectedAppException.class, () -> {
             InjectedApp.newBuilder()
                 .resourceTypes(DepErr6.class)
                 .build();

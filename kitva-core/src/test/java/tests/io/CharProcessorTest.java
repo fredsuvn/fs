@@ -1,6 +1,6 @@
 package tests.io;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.chars.CharsBuilder;
 import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.base.value.IntVar;
@@ -25,9 +25,9 @@ import java.lang.reflect.Method;
 import java.nio.CharBuffer;
 import java.util.Arrays;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class CharProcessorTest implements DataTest, AssertTest {
 
@@ -50,23 +50,23 @@ public class CharProcessorTest implements DataTest, AssertTest {
         testProcess(77, 123, 1333);
         {
             // exceptions
-            expectThrows(IllegalArgumentException.class, () -> CharProcessor.from(new char[0]).readBlockSize(0));
-            expectThrows(IllegalArgumentException.class, () -> CharProcessor.from(new char[0]).readBlockSize(-1));
-            expectThrows(IllegalArgumentException.class, () -> CharProcessor.from(new char[0]).readLimit(-1));
-            expectThrows(IndexOutOfBoundsException.class, () -> CharProcessor.from(new char[0], 0, 1));
-            expectThrows(IndexOutOfBoundsException.class, () -> CharProcessor.from(new char[0]).processTo(new char[0], 1));
+            assertThrows(IllegalArgumentException.class, () -> CharProcessor.from(new char[0]).readBlockSize(0));
+            assertThrows(IllegalArgumentException.class, () -> CharProcessor.from(new char[0]).readBlockSize(-1));
+            assertThrows(IllegalArgumentException.class, () -> CharProcessor.from(new char[0]).readLimit(-1));
+            assertThrows(IndexOutOfBoundsException.class, () -> CharProcessor.from(new char[0], 0, 1));
+            assertThrows(IndexOutOfBoundsException.class, () -> CharProcessor.from(new char[0]).processTo(new char[0], 1));
             TestReader err = new TestReader(new CharArrayReader(new char[0]));
             Writer errWriter = IOKit.newWriter(new ErrorOutputStream());
             err.setNextOperation(ReadOps.THROW, 99);
-            expectThrows(IORuntimeException.class, () ->
+            assertThrows(IORuntimeException.class, () ->
                 CharProcessor.from(err).process());
-            expectThrows(IORuntimeException.class, () ->
+            assertThrows(IORuntimeException.class, () ->
                 CharProcessor.from(new char[10]).processTo(errWriter));
-            expectThrows(IORuntimeException.class, () ->
+            assertThrows(IORuntimeException.class, () ->
                 CharProcessor.from(new char[10]).processTo(new char[1]));
-            expectThrows(IORuntimeException.class, () ->
+            assertThrows(IORuntimeException.class, () ->
                 CharProcessor.from(new char[10], 0, 5).processTo(new char[1], 0));
-            expectThrows(IORuntimeException.class, () ->
+            assertThrows(IORuntimeException.class, () ->
                 CharProcessor.from(new char[10]).processTo(CharBuffer.allocate(0)));
             Method writeTo = CharProcessor.from(new char[0]).getClass()
                 .getDeclaredMethod("writeTo", CharBuffer.class, Object.class);
@@ -300,9 +300,9 @@ public class CharProcessorTest implements DataTest, AssertTest {
             TestReader err = new TestReader(new CharArrayReader(new char[0]));
             err.setNextOperation(ReadOps.THROW, 99);
             CharReader reader = CharReader.from(err);
-            expectThrows(IOException.class, () ->
+            assertThrows(IOException.class, () ->
                 CharProcessor.from(reader).transformer(CharTransformer.empty()).asReader().read());
-            expectThrows(IOException.class, () ->
+            assertThrows(IOException.class, () ->
                 CharProcessor.from(reader).transformer(CharTransformer.empty()).asReader().close());
         }
     }
@@ -498,16 +498,16 @@ public class CharProcessorTest implements DataTest, AssertTest {
         testResidualSizeTransformer(256, 32, 64);
         {
             // exception
-            expectThrows(IllegalArgumentException.class, () ->
+            assertThrows(IllegalArgumentException.class, () ->
                 CharProcessor.from(new char[0])
                     .transformer(CharTransformer.withFixedSize(CharTransformer.empty(), -1)));
-            expectThrows(IllegalArgumentException.class, () ->
+            assertThrows(IllegalArgumentException.class, () ->
                 CharProcessor.from(new char[0])
                     .transformer(CharTransformer.withFixedSize(CharTransformer.empty(), 0)));
-            expectThrows(IllegalArgumentException.class, () ->
+            assertThrows(IllegalArgumentException.class, () ->
                 CharProcessor.from(new char[0])
                     .transformer(CharTransformer.withMultipleSize(CharTransformer.empty(), -1)));
-            expectThrows(IllegalArgumentException.class, () ->
+            assertThrows(IllegalArgumentException.class, () ->
                 CharProcessor.from(new char[0])
                     .transformer(CharTransformer.withMultipleSize(CharTransformer.empty(), 0)));
         }

@@ -1,6 +1,6 @@
 package tests.io;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.bytes.BytesBuilder;
 import space.sunqian.common.base.chars.CharsBuilder;
 import space.sunqian.common.base.chars.CharsKit;
@@ -22,11 +22,12 @@ import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 import java.util.Arrays;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class BufferTest implements DataTest {
 
@@ -53,7 +54,7 @@ public class BufferTest implements DataTest {
             directBuffer.flip();
             assertEquals(directBuffer, heapBuffer);
             assertTrue(directBuffer.isDirect());
-            expectThrows(IllegalArgumentException.class, () -> BufferKit.directCharBuffer(-1));
+            assertThrows(IllegalArgumentException.class, () -> BufferKit.directCharBuffer(-1));
         }
         {
             // byte
@@ -143,22 +144,22 @@ public class BufferTest implements DataTest {
         {
             // exceptions
             // byte
-            expectThrows(IllegalArgumentException.class, () ->
+            assertThrows(IllegalArgumentException.class, () ->
                 BufferKit.slice(ByteBuffer.allocate(100), -1));
-            expectThrows(IndexOutOfBoundsException.class, () ->
+            assertThrows(IndexOutOfBoundsException.class, () ->
                 BufferKit.slice(ByteBuffer.allocate(100), 0, -1));
-            expectThrows(IndexOutOfBoundsException.class, () ->
+            assertThrows(IndexOutOfBoundsException.class, () ->
                 BufferKit.slice(ByteBuffer.allocate(100), -1, 0));
-            expectThrows(IndexOutOfBoundsException.class, () ->
+            assertThrows(IndexOutOfBoundsException.class, () ->
                 BufferKit.slice(ByteBuffer.allocate(100), 50, 51));
             // char
-            expectThrows(IllegalArgumentException.class, () ->
+            assertThrows(IllegalArgumentException.class, () ->
                 BufferKit.slice(CharBuffer.allocate(100), -1));
-            expectThrows(IndexOutOfBoundsException.class, () ->
+            assertThrows(IndexOutOfBoundsException.class, () ->
                 BufferKit.slice(CharBuffer.allocate(100), 0, -1));
-            expectThrows(IndexOutOfBoundsException.class, () ->
+            assertThrows(IndexOutOfBoundsException.class, () ->
                 BufferKit.slice(CharBuffer.allocate(100), -1, 0));
-            expectThrows(IndexOutOfBoundsException.class, () ->
+            assertThrows(IndexOutOfBoundsException.class, () ->
                 BufferKit.slice(CharBuffer.allocate(100), 50, 51));
         }
     }
@@ -176,11 +177,11 @@ public class BufferTest implements DataTest {
             assertEquals(slice.limit(), length);
             assertEquals(slice.capacity(), length);
             slice.put(ArrayKit.fill(new byte[length], (byte) 8));
-            assertEquals(
+            assertArrayEquals(
                 Arrays.copyOf(data, length),
                 ArrayKit.fill(new byte[length], (byte) 8)
             );
-            assertEquals(
+            assertArrayEquals(
                 Arrays.copyOfRange(data, length, data.length),
                 ArrayKit.fill(new byte[size - length], (byte) 6)
             );
@@ -197,15 +198,15 @@ public class BufferTest implements DataTest {
             assertEquals(slice.limit(), length);
             assertEquals(slice.capacity(), length);
             slice.put(ArrayKit.fill(new byte[length], (byte) 8));
-            assertEquals(
+            assertArrayEquals(
                 Arrays.copyOfRange(data, offset, offset + length),
                 ArrayKit.fill(new byte[length], (byte) 8)
             );
-            assertEquals(
+            assertArrayEquals(
                 Arrays.copyOfRange(data, 0, offset),
                 ArrayKit.fill(new byte[offset], (byte) 6)
             );
-            assertEquals(
+            assertArrayEquals(
                 Arrays.copyOfRange(data, offset + length, data.length),
                 ArrayKit.fill(new byte[data.length - offset - length], (byte) 6)
             );
@@ -222,11 +223,11 @@ public class BufferTest implements DataTest {
             assertEquals(slice.limit(), length);
             assertEquals(slice.capacity(), length);
             slice.put(ArrayKit.fill(new char[length], (char) 8));
-            assertEquals(
+            assertArrayEquals(
                 Arrays.copyOf(data, length),
                 ArrayKit.fill(new char[length], (char) 8)
             );
-            assertEquals(
+            assertArrayEquals(
                 Arrays.copyOfRange(data, length, data.length),
                 ArrayKit.fill(new char[size - length], (char) 6)
             );
@@ -243,15 +244,15 @@ public class BufferTest implements DataTest {
             assertEquals(slice.limit(), length);
             assertEquals(slice.capacity(), length);
             slice.put(ArrayKit.fill(new char[length], (char) 8));
-            assertEquals(
+            assertArrayEquals(
                 Arrays.copyOfRange(data, offset, offset + length),
                 ArrayKit.fill(new char[length], (char) 8)
             );
-            assertEquals(
+            assertArrayEquals(
                 Arrays.copyOfRange(data, 0, offset),
                 ArrayKit.fill(new char[offset], (char) 6)
             );
-            assertEquals(
+            assertArrayEquals(
                 Arrays.copyOfRange(data, offset + length, data.length),
                 ArrayKit.fill(new char[data.length - offset - length], (char) 6)
             );
@@ -277,23 +278,23 @@ public class BufferTest implements DataTest {
 
         {
             // error
-            expectThrows(IllegalArgumentException.class, () ->
+            assertThrows(IllegalArgumentException.class, () ->
                 BufferKit.read(ByteBuffer.allocate(1), -1));
-            expectThrows(IllegalArgumentException.class, () ->
+            assertThrows(IllegalArgumentException.class, () ->
                 BufferKit.readTo(ByteBuffer.allocate(1), ByteBuffer.allocate(1), -1));
-            expectThrows(IORuntimeException.class, () ->
+            assertThrows(IORuntimeException.class, () ->
                 BufferKit.readTo(ByteBuffer.allocate(1), Channels.newChannel(new ErrorOutputStream())));
-            expectThrows(IllegalArgumentException.class, () ->
+            assertThrows(IllegalArgumentException.class, () ->
                 BufferKit.readTo(ByteBuffer.allocate(1), Channels.newChannel(new ByteArrayOutputStream()), -1));
-            expectThrows(IORuntimeException.class, () ->
+            assertThrows(IORuntimeException.class, () ->
                 BufferKit.readTo(ByteBuffer.allocate(1), Channels.newChannel(new ErrorOutputStream()), 1));
-            expectThrows(IORuntimeException.class, () ->
+            assertThrows(IORuntimeException.class, () ->
                 BufferKit.readTo(ByteBuffer.allocate(1), new ErrorOutputStream()));
-            expectThrows(IllegalArgumentException.class, () ->
+            assertThrows(IllegalArgumentException.class, () ->
                 BufferKit.readTo(ByteBuffer.allocate(1), new ByteArrayOutputStream(), -1));
-            expectThrows(IORuntimeException.class, () ->
+            assertThrows(IORuntimeException.class, () ->
                 BufferKit.readTo(ByteBuffer.allocate(1), ByteBuffer.allocate(1).asReadOnlyBuffer()));
-            expectThrows(IORuntimeException.class, () ->
+            assertThrows(IORuntimeException.class, () ->
                 BufferKit.readTo(ByteBuffer.allocate(1), ByteBuffer.allocate(1).asReadOnlyBuffer(), 1));
         }
     }
@@ -326,12 +327,12 @@ public class BufferTest implements DataTest {
             ByteBuffer src = ByteBuffer.wrap(data);
             byte[] dst = new byte[readSize];
             assertEquals(BufferKit.readTo(src, dst), actualReadSize(totalSize, readSize));
-            assertEquals(Arrays.copyOf(dst, actualLen), Arrays.copyOf(data, actualLen));
+            assertArrayEquals(Arrays.copyOf(dst, actualLen), Arrays.copyOf(data, actualLen));
             assertEquals(src.position(), actualLen);
             src.clear();
             dst = new byte[readSize];
             assertEquals(BufferKit.readTo(src, dst, 0, readSize), actualReadSize(totalSize, readSize));
-            assertEquals(Arrays.copyOf(dst, actualLen), Arrays.copyOf(data, actualLen));
+            assertArrayEquals(Arrays.copyOf(dst, actualLen), Arrays.copyOf(data, actualLen));
             assertEquals(src.position(), actualLen);
         }
         {
@@ -341,14 +342,14 @@ public class BufferTest implements DataTest {
             byte[] dstData = new byte[readSize];
             ByteBuffer dst = ByteBuffer.wrap(dstData);
             assertEquals(BufferKit.readTo(src, dst), actualReadSize(totalSize, readSize));
-            assertEquals(Arrays.copyOf(dstData, actualLen), Arrays.copyOf(data, actualLen));
+            assertArrayEquals(Arrays.copyOf(dstData, actualLen), Arrays.copyOf(data, actualLen));
             assertEquals(src.position(), actualLen);
             assertEquals(dst.position(), actualLen);
             src.clear();
             dstData = new byte[readSize];
             dst = ByteBuffer.wrap(dstData);
             assertEquals(BufferKit.readTo(src, dst, readSize), actualReadSize(totalSize, readSize));
-            assertEquals(Arrays.copyOf(dstData, actualLen), Arrays.copyOf(data, actualLen));
+            assertArrayEquals(Arrays.copyOf(dstData, actualLen), Arrays.copyOf(data, actualLen));
             assertEquals(src.position(), actualLen);
             assertEquals(dst.position(), actualLen);
             src.clear();
@@ -363,24 +364,24 @@ public class BufferTest implements DataTest {
             ByteBuffer src = ByteBuffer.wrap(data);
             WritableByteChannel dst = Channels.newChannel(builder);
             assertEquals(BufferKit.readTo(src, dst), totalSize == 0 ? -1 : totalSize);
-            assertEquals(builder.toByteArray(), data);
+            assertArrayEquals(builder.toByteArray(), data);
             assertEquals(src.position(), src.limit());
             src.clear();
             builder.reset();
             assertEquals(BufferKit.readTo(src, dst, readSize), actualReadSize(totalSize, readSize));
-            assertEquals(builder.toByteArray(), Arrays.copyOf(data, actualLen));
+            assertArrayEquals(builder.toByteArray(), Arrays.copyOf(data, actualLen));
             assertEquals(src.position(), actualLen);
             // write one byte channel
             dst = new OneByteWritableChannel(builder);
             src.clear();
             builder.reset();
             assertEquals(BufferKit.readTo(src, dst), totalSize == 0 ? -1 : totalSize);
-            assertEquals(builder.toByteArray(), data);
+            assertArrayEquals(builder.toByteArray(), data);
             assertEquals(src.position(), src.limit());
             src.clear();
             builder.reset();
             assertEquals(BufferKit.readTo(src, dst, readSize), actualReadSize(totalSize, readSize));
-            assertEquals(builder.toByteArray(), Arrays.copyOf(data, actualLen));
+            assertArrayEquals(builder.toByteArray(), Arrays.copyOf(data, actualLen));
             assertEquals(src.position(), actualLen);
         }
         {
@@ -389,12 +390,12 @@ public class BufferTest implements DataTest {
             BytesBuilder builder = new BytesBuilder();
             ByteBuffer src = ByteBuffer.wrap(data);
             assertEquals(BufferKit.readTo(src, builder), totalSize == 0 ? -1 : totalSize);
-            assertEquals(builder.toByteArray(), data);
+            assertArrayEquals(builder.toByteArray(), data);
             assertEquals(src.position(), src.limit());
             src.clear();
             builder.reset();
             assertEquals(BufferKit.readTo(src, builder, readSize), actualReadSize(totalSize, readSize));
-            assertEquals(builder.toByteArray(), Arrays.copyOf(data, actualLen));
+            assertArrayEquals(builder.toByteArray(), Arrays.copyOf(data, actualLen));
             assertEquals(src.position(), actualLen);
         }
         {
@@ -403,12 +404,12 @@ public class BufferTest implements DataTest {
             BytesBuilder builder = new BytesBuilder();
             ByteBuffer src = BufferKit.copyDirect(data);
             assertEquals(BufferKit.readTo(src, builder), totalSize == 0 ? -1 : totalSize);
-            assertEquals(builder.toByteArray(), data);
+            assertArrayEquals(builder.toByteArray(), data);
             assertEquals(src.position(), src.limit());
             src.clear();
             builder.reset();
             assertEquals(BufferKit.readTo(src, builder, readSize), actualReadSize(totalSize, readSize));
-            assertEquals(builder.toByteArray(), Arrays.copyOf(data, actualLen));
+            assertArrayEquals(builder.toByteArray(), Arrays.copyOf(data, actualLen));
             assertEquals(src.position(), actualLen);
         }
     }
@@ -424,17 +425,17 @@ public class BufferTest implements DataTest {
 
         {
             // error
-            expectThrows(IllegalArgumentException.class, () ->
+            assertThrows(IllegalArgumentException.class, () ->
                 BufferKit.read(CharBuffer.allocate(1), -1));
-            expectThrows(IllegalArgumentException.class, () ->
+            assertThrows(IllegalArgumentException.class, () ->
                 BufferKit.readTo(CharBuffer.allocate(1), CharBuffer.allocate(1), -1));
-            expectThrows(IORuntimeException.class, () ->
+            assertThrows(IORuntimeException.class, () ->
                 BufferKit.readTo(CharBuffer.allocate(1), new ErrorAppender()));
-            expectThrows(IllegalArgumentException.class, () ->
+            assertThrows(IllegalArgumentException.class, () ->
                 BufferKit.readTo(CharBuffer.allocate(1), new CharArrayWriter(), -1));
-            expectThrows(IORuntimeException.class, () ->
+            assertThrows(IORuntimeException.class, () ->
                 BufferKit.readTo(CharBuffer.allocate(1), CharBuffer.allocate(1).asReadOnlyBuffer()));
-            expectThrows(IORuntimeException.class, () ->
+            assertThrows(IORuntimeException.class, () ->
                 BufferKit.readTo(CharBuffer.allocate(1), CharBuffer.allocate(1).asReadOnlyBuffer(), 1));
         }
     }
@@ -449,7 +450,7 @@ public class BufferTest implements DataTest {
             if (totalSize == 0) {
                 assertNull(ret);
             } else {
-                assertEquals(ret, data);
+                assertArrayEquals(ret, data);
             }
             assertEquals(src.position(), src.limit());
             src.clear();
@@ -457,7 +458,7 @@ public class BufferTest implements DataTest {
             if (totalSize == 0 && readSize != 0) {
                 assertNull(ret);
             } else {
-                assertEquals(ret, Arrays.copyOf(data, actualLen));
+                assertArrayEquals(ret, Arrays.copyOf(data, actualLen));
             }
             assertEquals(src.position(), actualLen);
             // string
@@ -484,12 +485,12 @@ public class BufferTest implements DataTest {
             CharBuffer src = CharBuffer.wrap(data);
             char[] dst = new char[readSize];
             assertEquals(BufferKit.readTo(src, dst), actualReadSize(totalSize, readSize));
-            assertEquals(Arrays.copyOf(dst, actualLen), Arrays.copyOf(data, actualLen));
+            assertArrayEquals(Arrays.copyOf(dst, actualLen), Arrays.copyOf(data, actualLen));
             assertEquals(src.position(), actualLen);
             src.clear();
             dst = new char[readSize];
             assertEquals(BufferKit.readTo(src, dst, 0, readSize), actualReadSize(totalSize, readSize));
-            assertEquals(Arrays.copyOf(dst, actualLen), Arrays.copyOf(data, actualLen));
+            assertArrayEquals(Arrays.copyOf(dst, actualLen), Arrays.copyOf(data, actualLen));
             assertEquals(src.position(), actualLen);
         }
         {
@@ -499,14 +500,14 @@ public class BufferTest implements DataTest {
             char[] dstData = new char[readSize];
             CharBuffer dst = CharBuffer.wrap(dstData);
             assertEquals(BufferKit.readTo(src, dst), actualReadSize(totalSize, readSize));
-            assertEquals(Arrays.copyOf(dstData, actualLen), Arrays.copyOf(data, actualLen));
+            assertArrayEquals(Arrays.copyOf(dstData, actualLen), Arrays.copyOf(data, actualLen));
             assertEquals(src.position(), actualLen);
             assertEquals(dst.position(), actualLen);
             src.clear();
             dstData = new char[readSize];
             dst = CharBuffer.wrap(dstData);
             assertEquals(BufferKit.readTo(src, dst, readSize), actualReadSize(totalSize, readSize));
-            assertEquals(Arrays.copyOf(dstData, actualLen), Arrays.copyOf(data, actualLen));
+            assertArrayEquals(Arrays.copyOf(dstData, actualLen), Arrays.copyOf(data, actualLen));
             assertEquals(src.position(), actualLen);
             assertEquals(dst.position(), actualLen);
             src.clear();
@@ -560,7 +561,7 @@ public class BufferTest implements DataTest {
         dst.flip();
         assertEquals(BufferKit.string(dst), str);
         ByteBuffer dst2 = ByteBuffer.allocate(strBytes.length - 1);
-        expectThrows(IORuntimeException.class, () -> BufferKit.write(dst2, str));
+        assertThrows(IORuntimeException.class, () -> BufferKit.write(dst2, str));
     }
 
     @Test
@@ -615,7 +616,7 @@ public class BufferTest implements DataTest {
             dst4.flip();
             assertEquals(BufferKit.read(dst4), size == 0 ? null : expected);
             // exception
-            expectThrows(IORuntimeException.class, () ->
+            assertThrows(IORuntimeException.class, () ->
                 BufferKit.process(src4, dst4, (src, srcOff, dst, dstOff, len) -> {
                     throw new Exception();
                 })
@@ -665,7 +666,7 @@ public class BufferTest implements DataTest {
             dst4.flip();
             assertEquals(BufferKit.read(dst4), size == 0 ? null : expected);
             // exception
-            expectThrows(IORuntimeException.class, () ->
+            assertThrows(IORuntimeException.class, () ->
                 BufferKit.process(src4, dst4, (src, srcOff, dst, dstOff, len) -> {
                     throw new Exception();
                 })

@@ -1,12 +1,12 @@
 package tests.runtime.invoke;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.runtime.invoke.InvocationMode;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class InvokeModeTest {
 

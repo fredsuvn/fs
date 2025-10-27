@@ -1,6 +1,6 @@
 package tests.net;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.common.base.bytes.BytesBuilder;
@@ -28,12 +28,13 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TcpTest implements DataTest, PrintTest {
 
@@ -201,7 +202,7 @@ public class TcpTest implements DataTest, PrintTest {
                 }
             }
             client.wakeUpReadable();
-            assertEquals(b.toByteArray(), data);
+            assertArrayEquals(b.toByteArray(), data);
         }
 
         // close clients
@@ -347,24 +348,24 @@ public class TcpTest implements DataTest, PrintTest {
         }
         {
             // builder exceptions
-            expectThrows(IllegalArgumentException.class, () ->
+            assertThrows(IllegalArgumentException.class, () ->
                 TcpServer.newBuilder()
                     .mainThreadFactory(Thread::new)
                     .workerThreadNum(0)
             );
-            expectThrows(IllegalArgumentException.class, () ->
+            assertThrows(IllegalArgumentException.class, () ->
                 TcpServer.newBuilder().bufferSize(0).bind()
             );
-            expectThrows(IllegalArgumentException.class, () ->
+            assertThrows(IllegalArgumentException.class, () ->
                 TcpServer.newBuilder().selectTimeout(-1).bind()
             );
             // socket option exceptions
-            expectThrows(IllegalArgumentException.class, () ->
+            assertThrows(IllegalArgumentException.class, () ->
                 TcpClient.newBuilder()
                     .bufferSize(0)
                     .connect(null)
             );
-            expectThrows(NetException.class, () ->
+            assertThrows(NetException.class, () ->
                 TcpClient.newBuilder()
                     .socketOption(StandardSocketOptions.IP_MULTICAST_IF, null)
                     .connect(null)

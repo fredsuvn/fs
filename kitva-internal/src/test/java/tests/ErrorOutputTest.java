@@ -1,31 +1,31 @@
 package tests;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import internal.test.ErrorAppender;
 import internal.test.ErrorOutputStream;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ErrorOutputTest {
 
     @Test
     public void testErrorOutputStream() throws Exception {
         OutputStream out = new ErrorOutputStream();
-        expectThrows(IOException.class, () -> out.write(new byte[1]));
-        expectThrows(IOException.class, () -> out.write(new byte[1], 0, 1));
-        expectThrows(IOException.class, () -> out.write(1));
-        expectThrows(IOException.class, out::flush);
-        expectThrows(IOException.class, out::close);
+        assertThrows(IOException.class, () -> out.write(new byte[1]));
+        assertThrows(IOException.class, () -> out.write(new byte[1], 0, 1));
+        assertThrows(IOException.class, () -> out.write(1));
+        assertThrows(IOException.class, out::flush);
+        assertThrows(IOException.class, out::close);
     }
 
     @Test
     public void testErrorAppender() throws Exception {
         Appendable out = new ErrorAppender();
-        expectThrows(IOException.class, () -> out.append(""));
-        expectThrows(IOException.class, () -> out.append("1", 0, 1));
-        expectThrows(IOException.class, () -> out.append('c'));
+        assertThrows(IOException.class, () -> out.append(""));
+        assertThrows(IOException.class, () -> out.append("1", 0, 1));
+        assertThrows(IOException.class, () -> out.append('c'));
     }
 }

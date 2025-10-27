@@ -1,6 +1,6 @@
 package tests.concurrent;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.exception.AwaitingException;
 import space.sunqian.common.concurrent.FutureKit;
 
@@ -9,8 +9,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class FutureTest {
 
@@ -27,9 +27,9 @@ public class FutureTest {
             Future<String> future = service.submit(() -> {
                 throw new Exception("hello");
             });
-            expectThrows(AwaitingException.class, () -> FutureKit.get(future));
-            expectThrows(AwaitingException.class, () -> FutureKit.get(future, 100));
-            expectThrows(AwaitingException.class, () -> FutureKit.get(future, Duration.ofMillis(100)));
+            assertThrows(AwaitingException.class, () -> FutureKit.get(future));
+            assertThrows(AwaitingException.class, () -> FutureKit.get(future, 100));
+            assertThrows(AwaitingException.class, () -> FutureKit.get(future, Duration.ofMillis(100)));
         }
         {
             Future<String> future = service.submit(() -> {

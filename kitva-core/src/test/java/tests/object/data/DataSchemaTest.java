@@ -2,7 +2,7 @@ package tests.object.data;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.annotations.Immutable;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
@@ -27,14 +27,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotEquals;
-import static org.testng.Assert.assertNotSame;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class DataSchemaTest implements PrintTest {
 
@@ -48,7 +49,7 @@ public class DataSchemaTest implements PrintTest {
         assertTrue(schema.isObjectSchema());
         assertFalse(schema.isMapSchema());
         assertSame(schema.asObjectSchema(), schema);
-        expectThrows(ClassCastException.class, schema::asMapSchema);
+        assertThrows(ClassCastException.class, schema::asMapSchema);
         assertEquals(
             schema.properties().keySet(),
             SetKit.set("str", "i", "strArray", "t", "UU", "class", "b", "bb", "BB")
@@ -117,7 +118,7 @@ public class DataSchemaTest implements PrintTest {
         assertTrue(i.isReadable());
         assertEquals(i.getValue(instance), 0);
         assertFalse(i.isWritable());
-        expectThrows(DataObjectException.class, () -> i.setValue(instance, 1));
+        assertThrows(DataObjectException.class, () -> i.setValue(instance, 1));
         // property strArray
         ObjectProperty strArray = schema.getProperty("strArray");
         assertSame(strArray.owner(), schema);
@@ -128,10 +129,10 @@ public class DataSchemaTest implements PrintTest {
         assertNull(strArray.getterMethod());
         assertEquals(strArray.setterMethod(), strArraySetter);
         assertFalse(strArray.isReadable());
-        expectThrows(DataObjectException.class, () -> strArray.getValue(instance));
+        assertThrows(DataObjectException.class, () -> strArray.getValue(instance));
         assertTrue(strArray.isWritable());
         strArray.setValue(instance, new String[]{"hello"});
-        assertEquals(instance.strArray, new String[]{"hello"});
+        assertArrayEquals(instance.strArray, new String[]{"hello"});
         // property t
         ObjectProperty t = schema.getProperty("t");
         assertSame(t.owner(), schema);
@@ -207,7 +208,7 @@ public class DataSchemaTest implements PrintTest {
         assertEquals(BB.getValue(instance), instance.isBB());
         assertFalse(BB.isWritable());
         // error type
-        expectThrows(DataObjectException.class, () -> ObjectSchema.parse(TestData.class.getTypeParameters()[0]));
+        assertThrows(DataObjectException.class, () -> ObjectSchema.parse(TestData.class.getTypeParameters()[0]));
         // raw type
         ObjectSchema raw = ObjectSchema.parse(TestData.class);
         assertEquals(raw.getProperty("t").type(), TestData.class.getTypeParameters()[0]);
@@ -337,7 +338,7 @@ public class DataSchemaTest implements PrintTest {
         assertTrue(schema.isMapSchema());
         assertFalse(schema.isObjectSchema());
         assertSame(schema.asMapSchema(), schema);
-        expectThrows(ClassCastException.class, schema::asObjectSchema);
+        assertThrows(ClassCastException.class, schema::asObjectSchema);
         assertEquals(schema.keyType(), String.class);
         assertEquals(schema.valueType(), Long.class);
         printFor("MapSchema toString", schema);
@@ -345,7 +346,7 @@ public class DataSchemaTest implements PrintTest {
             schema.toString(),
             schema.type().getTypeName()
         );
-        expectThrows(DataObjectException.class, () -> MapSchema.parse(String.class));
+        assertThrows(DataObjectException.class, () -> MapSchema.parse(String.class));
         MapSchema schemaWithTypes = MapSchema.parse(Map.class, Object.class, Long.class);
         assertEquals(schemaWithTypes.type(), Map.class);
         assertEquals(schemaWithTypes.rawType(), Map.class);
@@ -411,22 +412,22 @@ public class DataSchemaTest implements PrintTest {
     public void testException() {
         {
             // DataObjectException
-            expectThrows(DataObjectException.class, () -> {
+            assertThrows(DataObjectException.class, () -> {
                 throw new DataObjectException();
             });
-            expectThrows(DataObjectException.class, () -> {
+            assertThrows(DataObjectException.class, () -> {
                 throw new DataObjectException("");
             });
-            expectThrows(DataObjectException.class, () -> {
+            assertThrows(DataObjectException.class, () -> {
                 throw new DataObjectException("", new RuntimeException());
             });
-            expectThrows(DataObjectException.class, () -> {
+            assertThrows(DataObjectException.class, () -> {
                 throw new DataObjectException(new RuntimeException());
             });
-            expectThrows(DataObjectException.class, () -> {
+            assertThrows(DataObjectException.class, () -> {
                 throw new DataObjectException(Object.class);
             });
-            expectThrows(DataObjectException.class, () -> {
+            assertThrows(DataObjectException.class, () -> {
                 throw new DataObjectException(Object.class, new RuntimeException());
             });
         }

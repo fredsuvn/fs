@@ -1,6 +1,6 @@
 package tests.base.process;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.base.process.ProcessKit;
 import space.sunqian.common.base.process.VirtualProcess;
@@ -11,11 +11,11 @@ import internal.test.PrintTest;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ProcessTest implements PrintTest {
 
@@ -59,7 +59,7 @@ public class ProcessTest implements PrintTest {
         {
             VirtualProcess process = new VirtualProcess();
             assertFalse(process.waitFor(1, TimeUnit.MILLISECONDS));
-            expectThrows(IllegalThreadStateException.class, process::exitValue);
+            assertThrows(IllegalThreadStateException.class, process::exitValue);
             process.destroy();
             assertEquals(process.waitFor(), 0);
             assertEquals(process.getInputStream(), IOKit.emptyInputStream());
@@ -69,7 +69,7 @@ public class ProcessTest implements PrintTest {
         {
             VirtualProcess process = new VirtualProcess();
             assertFalse(process.waitFor(1, TimeUnit.MILLISECONDS));
-            expectThrows(IllegalThreadStateException.class, process::exitValue);
+            assertThrows(IllegalThreadStateException.class, process::exitValue);
             process.normal(false);
             assertSame(process.destroyForcibly(), process);
             assertEquals(process.waitFor(), 1);

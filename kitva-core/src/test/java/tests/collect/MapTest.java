@@ -1,6 +1,6 @@
 package tests.collect;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.Kit;
 import space.sunqian.common.collect.MapKit;
 
@@ -13,12 +13,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotSame;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MapTest {
 
@@ -42,7 +42,7 @@ public class MapTest {
         map.put(3, 4);
         map.put(5, 6);
         assertEquals(MapKit.map(1, 2, 3, 4, 5, 6), map);
-        expectThrows(UnsupportedOperationException.class, () -> MapKit.map(1, 2, 3, 4, 5, 6).put(7, 8));
+        assertThrows(UnsupportedOperationException.class, () -> MapKit.map(1, 2, 3, 4, 5, 6).put(7, 8));
     }
 
     @Test
@@ -65,7 +65,7 @@ public class MapTest {
         map.put(5, 6);
         List<Object> list = Arrays.asList(1, 2, 3, 4, 5, 6);
         assertEquals(MapKit.toMap(list), new LinkedHashMap<>(map));
-        expectThrows(UnsupportedOperationException.class, () -> MapKit.toMap(list).put(7, 8));
+        assertThrows(UnsupportedOperationException.class, () -> MapKit.toMap(list).put(7, 8));
 
         assertEquals(MapKit.toHashMap(list), new HashMap<>(map));
         assertNotSame(MapKit.toHashMap(list), new HashMap<>(map));
@@ -98,7 +98,7 @@ public class MapTest {
             Object::toString
         );
         assertEquals(strMap2, MapKit.toMap(Arrays.asList("1", "2", "3", "6")));
-        expectThrows(UnsupportedOperationException.class, () -> strMap2.put("", ""));
+        assertThrows(UnsupportedOperationException.class, () -> strMap2.put("", ""));
     }
 
     @Test
@@ -147,8 +147,8 @@ public class MapTest {
         assertNull(MapKit.resolveChain(map, 3, new HashSet<>()));
         assertNull(MapKit.resolveChain(map, 10, new HashSet<>()));
         assertNull(MapKit.resolveChain(map, 11, new HashSet<>()));
-        assertNull(MapKit.resolveChain(map, 20, new HashSet<>()), null);
-        assertNull(MapKit.resolveChain(map, 6, new HashSet<>()), null);
+        assertEquals(null, MapKit.resolveChain(map, 20, new HashSet<>()));
+        assertEquals(null, MapKit.resolveChain(map, 6, new HashSet<>()));
     }
 
     @Test
@@ -156,6 +156,6 @@ public class MapTest {
         Map.Entry<String, String> entry = MapKit.entry("1", "2");
         assertEquals(entry.getKey(), "1");
         assertEquals(entry.getValue(), "2");
-        expectThrows(UnsupportedOperationException.class, () -> entry.setValue("3"));
+        assertThrows(UnsupportedOperationException.class, () -> entry.setValue("3"));
     }
 }

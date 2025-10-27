@@ -1,6 +1,6 @@
 package tests.base.random;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.common.base.math.MathKit;
 import space.sunqian.common.base.random.Rng;
@@ -19,9 +19,10 @@ import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class RngTest implements AssertTest, PrintTest {
 
@@ -38,7 +39,7 @@ public class RngTest implements AssertTest, PrintTest {
         // testRng(Rng.newRng(random), 100000, Integer.MIN_VALUE, Integer.MIN_VALUE);
 
         // exceptions
-        expectThrows(UnsupportedOperationException.class, () -> Rng.secure(""));
+        assertThrows(UnsupportedOperationException.class, () -> Rng.secure(""));
     }
 
     public void testRng(Rng rng) {
@@ -64,7 +65,7 @@ public class RngTest implements AssertTest, PrintTest {
             float end = to;
             printFor("nextFloat", rng.nextFloat());
             if (end > start) {
-                expectThrows(IllegalArgumentException.class, () -> rng.nextFloat(end, start));
+                assertThrows(IllegalArgumentException.class, () -> rng.nextFloat(end, start));
             }
             float[] array = new float[size];
             for (int i = 0; i < size; i++) {
@@ -80,7 +81,7 @@ public class RngTest implements AssertTest, PrintTest {
             printFor("nextInt", rng.nextInt());
             printFor("getAsInt", rng.getAsInt());
             if (end > start) {
-                expectThrows(IllegalArgumentException.class, () -> rng.nextInt(end, start));
+                assertThrows(IllegalArgumentException.class, () -> rng.nextInt(end, start));
             }
             int[] array = new int[size];
             for (int i = 0; i < size; i++) {
@@ -135,7 +136,7 @@ public class RngTest implements AssertTest, PrintTest {
             printFor("nextLong", rng.nextLong());
             printFor("getAsLong", rng.getAsLong());
             if (end > start) {
-                expectThrows(IllegalArgumentException.class, () -> rng.nextLong(end, start));
+                assertThrows(IllegalArgumentException.class, () -> rng.nextLong(end, start));
             }
             long[] array = new long[size];
             for (int i = 0; i < size; i++) {
@@ -190,7 +191,7 @@ public class RngTest implements AssertTest, PrintTest {
             printFor("nextDouble", rng.nextDouble());
             printFor("getAsDouble", rng.getAsDouble());
             if (end > start) {
-                expectThrows(IllegalArgumentException.class, () -> rng.nextDouble(end, start));
+                assertThrows(IllegalArgumentException.class, () -> rng.nextDouble(end, start));
             }
             double[] array = new double[size];
             for (int i = 0; i < size; i++) {
@@ -248,11 +249,11 @@ public class RngTest implements AssertTest, PrintTest {
             byte[] array2 = new byte[size + 10];
             rng.nextBytes(array2, 5, size);
             printFor("nextBytes", Arrays.toString(array2));
-            assertEquals(Arrays.copyOfRange(array2, 0, 5), new byte[]{0, 0, 0, 0, 0,});
-            assertEquals(Arrays.copyOfRange(array2, array2.length - 5, array2.length), new byte[]{0, 0, 0, 0, 0,});
-            expectThrows(IndexOutOfBoundsException.class, () -> rng.nextBytes(array, -1, size));
-            expectThrows(IndexOutOfBoundsException.class, () -> rng.nextBytes(array, 0, size + 1));
-            expectThrows(IndexOutOfBoundsException.class, () -> rng.nextBytes(array, 0, -1));
+            assertArrayEquals(Arrays.copyOfRange(array2, 0, 5), new byte[]{0, 0, 0, 0, 0,});
+            assertArrayEquals(Arrays.copyOfRange(array2, array2.length - 5, array2.length), new byte[]{0, 0, 0, 0, 0,});
+            assertThrows(IndexOutOfBoundsException.class, () -> rng.nextBytes(array, -1, size));
+            assertThrows(IndexOutOfBoundsException.class, () -> rng.nextBytes(array, 0, size + 1));
+            assertThrows(IndexOutOfBoundsException.class, () -> rng.nextBytes(array, 0, -1));
             ByteBuffer buffer = ByteBuffer.allocate(0);
             rng.nextBytes(buffer);
             buffer = ByteBuffer.allocateDirect(0);

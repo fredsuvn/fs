@@ -1,6 +1,6 @@
 package tests.base.value;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.value.BooleanVal;
 import space.sunqian.common.base.value.BooleanVar;
 import space.sunqian.common.base.value.ByteVal;
@@ -22,12 +22,12 @@ import space.sunqian.common.base.value.Span;
 import space.sunqian.common.base.value.Val;
 import space.sunqian.common.base.value.Var;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotEquals;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ValueTest {
 
@@ -220,7 +220,7 @@ public class ValueTest {
             assertEquals(Span.of(start, end).isEmpty(), false);
             assertEquals(Span.of(start, start).isEmpty(), true);
             assertEquals(Span.of(start, end).length(), end - start);
-            expectThrows(IllegalArgumentException.class, () -> Span.of(end, start));
+            assertThrows(IllegalArgumentException.class, () -> Span.of(end, start));
             assertSame(Span.empty(), Span.empty());
         }
         {
@@ -237,7 +237,7 @@ public class ValueTest {
             assertEquals(LongSpan.of(start, end).isEmpty(), false);
             assertEquals(LongSpan.of(start, start).isEmpty(), true);
             assertEquals(LongSpan.of(start, end).length(), end - start);
-            expectThrows(IllegalArgumentException.class, () -> LongSpan.of(end, start));
+            assertThrows(IllegalArgumentException.class, () -> LongSpan.of(end, start));
             assertSame(LongSpan.empty(), LongSpan.empty());
         }
     }

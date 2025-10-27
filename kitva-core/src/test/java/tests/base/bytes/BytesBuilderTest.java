@@ -1,6 +1,6 @@
 package tests.base.bytes;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.bytes.BytesBuilder;
 import space.sunqian.common.base.bytes.BytesKit;
 import space.sunqian.common.base.chars.CharsKit;
@@ -18,9 +18,10 @@ import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class BytesBuilderTest implements DataTest, AssertTest {
 
@@ -30,30 +31,30 @@ public class BytesBuilderTest implements DataTest, AssertTest {
     public void testBytesBuilder() throws Exception {
         testBytesBuilder(512);
         testBytesBuilder(1024);
-        expectThrows(IllegalArgumentException.class, () -> new BytesBuilder(-1));
-        expectThrows(IllegalArgumentException.class, () -> new BytesBuilder(10, -2));
-        expectThrows(IllegalArgumentException.class, () -> new BytesBuilder(10, 2));
+        assertThrows(IllegalArgumentException.class, () -> new BytesBuilder(-1));
+        assertThrows(IllegalArgumentException.class, () -> new BytesBuilder(10, -2));
+        assertThrows(IllegalArgumentException.class, () -> new BytesBuilder(10, 2));
         BytesBuilder bb = new BytesBuilder();
         bb.append(1);
-        expectThrows(IORuntimeException.class, () -> bb.writeTo(new OutputStream() {
+        assertThrows(IORuntimeException.class, () -> bb.writeTo(new OutputStream() {
             @Override
             public void write(int b) throws IOException {
                 throw new IOException();
             }
         }));
         ByteBuffer bufEmpty = ByteBuffer.allocate(0);
-        expectThrows(IORuntimeException.class, () -> bb.writeTo(bufEmpty));
+        assertThrows(IORuntimeException.class, () -> bb.writeTo(bufEmpty));
 
         // test big memory!
         Method grow = BytesBuilder.class.getDeclaredMethod("grow", int.class);
         BytesBuilder bbs = new BytesBuilder(1, 1);
         bbs.write(1);
-        expectThrows(IllegalStateException.class, () -> bbs.write(1));
+        assertThrows(IllegalStateException.class, () -> bbs.write(1));
         BytesBuilder bbs2 = new BytesBuilder(2, 3);
         bbs2.write(1);
         bbs2.write(1);
         bbs2.write(1);
-        expectThrows(IllegalStateException.class, () -> bbs2.write(1));
+        assertThrows(IllegalStateException.class, () -> bbs2.write(1));
         invokeThrows(IllegalStateException.class, grow, new BytesBuilder(), MAX_ARRAY_SIZE + 10);
         Method newCapacity = BytesBuilder.class.getDeclaredMethod("newCapacity", int.class, int.class);
         newCapacity.setAccessible(true);
@@ -67,73 +68,73 @@ public class BytesBuilderTest implements DataTest, AssertTest {
         bb.close();
         bb.trim();
         bb.append(bs[0]);
-        assertEquals(bb.toByteArray(), Arrays.copyOf(bs, 1));
+        assertArrayEquals(bb.toByteArray(), Arrays.copyOf(bs, 1));
         bb.append(Arrays.copyOfRange(bs, 1, 10));
-        assertEquals(bb.toByteArray(), Arrays.copyOf(bs, 10));
+        assertArrayEquals(bb.toByteArray(), Arrays.copyOf(bs, 10));
         bb.append(bs, 10, 10);
-        assertEquals(bb.toByteArray(), Arrays.copyOf(bs, 20));
+        assertArrayEquals(bb.toByteArray(), Arrays.copyOf(bs, 20));
         ByteBuffer buffer = ByteBuffer.wrap(Arrays.copyOfRange(bs, 20, 25));
         bb.append(buffer);
         ByteBuffer arrayBuf = ByteBuffer.wrap(bs, 20, 10);
         arrayBuf.get(new byte[5]);
         bb.append(arrayBuf);
-        assertEquals(bb.toByteArray(), Arrays.copyOf(bs, 30));
+        assertArrayEquals(bb.toByteArray(), Arrays.copyOf(bs, 30));
         assertEquals(buffer.position(), 5);
         assertFalse(buffer.hasRemaining());
         bb.append(IOKit.newInputStream(Arrays.copyOfRange(bs, 30, 40)));
-        assertEquals(bb.toByteArray(), Arrays.copyOf(bs, 40));
+        assertArrayEquals(bb.toByteArray(), Arrays.copyOf(bs, 40));
         BytesBuilder bb2 = new BytesBuilder();
         bb2.append(Arrays.copyOfRange(bs, 40, 50));
         bb.append(bb2);
-        assertEquals(bb.toByteArray(), Arrays.copyOf(bs, 50));
+        assertArrayEquals(bb.toByteArray(), Arrays.copyOf(bs, 50));
         bb.append(IOKit.newInputStream(Arrays.copyOfRange(bs, 50, 60)), 1);
-        assertEquals(bb.toByteArray(), Arrays.copyOf(bs, 60));
+        assertArrayEquals(bb.toByteArray(), Arrays.copyOf(bs, 60));
         ByteBuffer buffer2 = ByteBuffer.allocateDirect(10);
         buffer2.put(ByteBuffer.wrap(Arrays.copyOfRange(bs, 60, 70)));
         buffer2.flip();
         bb.append(buffer2);
-        assertEquals(bb.toByteArray(), Arrays.copyOf(bs, 70));
+        assertArrayEquals(bb.toByteArray(), Arrays.copyOf(bs, 70));
         bb.append(ByteBuffer.allocateDirect(0));
-        assertEquals(bb.toByteArray(), Arrays.copyOf(bs, 70));
+        assertArrayEquals(bb.toByteArray(), Arrays.copyOf(bs, 70));
         assertEquals(buffer2.position(), 10);
         assertFalse(buffer2.hasRemaining());
         bb.append(BytesKit.emptyBuffer());
-        expectThrows(IORuntimeException.class, () -> bb.append(new InputStream() {
+        assertThrows(IORuntimeException.class, () -> bb.append(new InputStream() {
             @Override
             public int read() throws IOException {
                 throw new IOException();
             }
         }));
-        expectThrows(IllegalArgumentException.class, () ->
+        assertThrows(IllegalArgumentException.class, () ->
             bb.append(new ByteArrayInputStream(new byte[0]), -1)
         );
         assertEquals(bb.size(), 70);
         assertEquals(bb.toByteBuffer(), ByteBuffer.wrap(bs, 0, 70));
-        assertEquals(Arrays.copyOf(cs, 70), bb.toString().toCharArray());
-        assertEquals(Arrays.copyOf(cs, 70), bb.toString("utf-8").toCharArray());
-        assertEquals(Arrays.copyOf(cs, 70), bb.toString(CharsKit.UTF_8).toCharArray());
+        assertArrayEquals(Arrays.copyOf(cs, 70), bb.toString().toCharArray());
+        assertArrayEquals(Arrays.copyOf(cs, 70), bb.toString("utf-8").toCharArray());
+        assertArrayEquals(Arrays.copyOf(cs, 70), bb.toString(CharsKit.UTF_8).toCharArray());
         bb.reset();
         bb.append(bs[0]);
         bb.append(bs[1]);
-        assertEquals(bb.toByteArray(), Arrays.copyOf(bs, 2));
+        assertArrayEquals(bb.toByteArray(), Arrays.copyOf(bs, 2));
         bb.reset();
         bb.append(bs[0]);
-        assertEquals(bb.toByteArray(), Arrays.copyOf(bs, 1));
+        assertArrayEquals(bb.toByteArray(), Arrays.copyOf(bs, 1));
         bb.reset();
         bb.trim();
         bb.append(bs[0]);
         bb.append(bs[1]);
-        assertEquals(bb.toByteArray(), Arrays.copyOf(bs, 2));
+        assertArrayEquals(bb.toByteArray(), Arrays.copyOf(bs, 2));
         bb.trim();
         bb.reset();
         bb.trim();
         bb.append(bs[0]);
-        assertEquals(bb.toByteArray(), Arrays.copyOf(bs, 1));
+        assertArrayEquals(bb.toByteArray(), Arrays.copyOf(bs, 1));
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         bb.writeTo(out);
-        assertEquals(bb.toByteArray(), out.toByteArray());
+        assertArrayEquals(bb.toByteArray(), out.toByteArray());
         ByteBuffer bufOut = ByteBuffer.allocate(1);
         bb.writeTo(bufOut);
-        assertEquals(bb.toByteArray(), bufOut.array());
+        assertArrayEquals(bb.toByteArray(), bufOut.array());
     }
 }

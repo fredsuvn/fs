@@ -1,9 +1,9 @@
 package tests.runtime.reflect;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.runtime.reflect.ReflectionException;
 
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ExceptionTest {
 
@@ -11,16 +11,16 @@ public class ExceptionTest {
     public void testExceptions() {
         {
             // ReflectionException
-            expectThrows(ReflectionException.class, () -> {
+            assertThrows(ReflectionException.class, () -> {
                 throw new ReflectionException();
             });
-            expectThrows(ReflectionException.class, () -> {
+            assertThrows(ReflectionException.class, () -> {
                 throw new ReflectionException("");
             });
-            expectThrows(ReflectionException.class, () -> {
+            assertThrows(ReflectionException.class, () -> {
                 throw new ReflectionException("", new RuntimeException());
             });
-            expectThrows(ReflectionException.class, () -> {
+            assertThrows(ReflectionException.class, () -> {
                 throw new ReflectionException(new RuntimeException());
             });
         }

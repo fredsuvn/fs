@@ -1,6 +1,6 @@
 package tests.base.time;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.time.TimeException;
 import space.sunqian.common.base.time.TimeFormatter;
 import space.sunqian.common.base.time.TimeKit;
@@ -21,12 +21,12 @@ import java.time.temporal.TemporalAccessor;
 import java.time.temporal.TemporalField;
 import java.util.Date;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TimeTest implements PrintTest {
 
@@ -99,7 +99,7 @@ public class TimeTest implements PrintTest {
                 nowDate
             );
             assertNull(TimeKit.parseSafe("hahaha", Date.class));
-            expectThrows(DateTimeException.class, () -> TimeKit.parse("hahaha", Date.class));
+            assertThrows(DateTimeException.class, () -> TimeKit.parse("hahaha", Date.class));
             assertNull(TimeKit.parseSafe(null, Date.class));
             assertNull(TimeKit.parseSafe(dateStr, String.class));
         }
@@ -133,9 +133,9 @@ public class TimeTest implements PrintTest {
             assertEquals(p.pattern(), "yyyy-MM-dd HH:mm:ss");
             assertTrue(p.hasPattern());
             TimeFormatter f = TimeFormatter.ofFormatter(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            expectThrows(DateTimeException.class, f::pattern);
+            assertThrows(DateTimeException.class, f::pattern);
             assertFalse(f.hasPattern());
-            expectThrows(DateTimeException.class, () -> TimeFormatter.ofPattern(null));
+            assertThrows(DateTimeException.class, () -> TimeFormatter.ofPattern(null));
         }
         {
             // zone
@@ -152,16 +152,16 @@ public class TimeTest implements PrintTest {
     public void testException() throws Exception {
         {
             // TimeException
-            expectThrows(TimeException.class, () -> {
+            assertThrows(TimeException.class, () -> {
                 throw new TimeException();
             });
-            expectThrows(TimeException.class, () -> {
+            assertThrows(TimeException.class, () -> {
                 throw new TimeException("");
             });
-            expectThrows(TimeException.class, () -> {
+            assertThrows(TimeException.class, () -> {
                 throw new TimeException("", new RuntimeException());
             });
-            expectThrows(TimeException.class, () -> {
+            assertThrows(TimeException.class, () -> {
                 throw new TimeException(new RuntimeException());
             });
         }

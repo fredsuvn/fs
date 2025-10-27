@@ -1,6 +1,6 @@
 package tests.base.number;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.number.NumberKit;
 import internal.test.DataTest;
 import internal.test.PrintTest;
@@ -8,8 +8,8 @@ import internal.test.PrintTest;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class NumberTest implements DataTest, PrintTest {
 
@@ -31,8 +31,8 @@ public class NumberTest implements DataTest, PrintTest {
         assertEquals(NumberKit.toNumber("123", Double.class), 123.0);
         assertEquals(NumberKit.toNumber("123", BigInteger.class), new BigInteger("123"));
         assertEquals(NumberKit.toNumber("123", BigDecimal.class), new BigDecimal("123"));
-        expectThrows(NumberFormatException.class, () -> NumberKit.toNumber("kkk", Integer.class));
-        expectThrows(UnsupportedOperationException.class, () -> NumberKit.toNumber("kkk", String.class));
+        assertThrows(NumberFormatException.class, () -> NumberKit.toNumber("kkk", Integer.class));
+        assertThrows(UnsupportedOperationException.class, () -> NumberKit.toNumber("kkk", String.class));
     }
 
     @Test
@@ -45,7 +45,7 @@ public class NumberTest implements DataTest, PrintTest {
         testNumberToNumber(123d);
         testNumberToNumber(new BigInteger("123"));
         testNumberToNumber(new BigDecimal("123"));
-        expectThrows(NumberFormatException.class, () -> NumberKit.toNumber(new Number() {
+        assertThrows(NumberFormatException.class, () -> NumberKit.toNumber(new Number() {
             @Override
             public int intValue() {
                 return 0;
@@ -71,7 +71,7 @@ public class NumberTest implements DataTest, PrintTest {
                 return "anonymous Number{}";
             }
         }, BigInteger.class));
-        expectThrows(UnsupportedOperationException.class, () -> NumberKit.toNumber(123, Number.class));
+        assertThrows(UnsupportedOperationException.class, () -> NumberKit.toNumber(123, Number.class));
     }
 
     public void testNumberToNumber(Number number) {

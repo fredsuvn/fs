@@ -1,6 +1,10 @@
 package tests.io;
 
-import org.testng.annotations.Test;
+import internal.test.DataTest;
+import internal.test.ErrorAppender;
+import internal.test.ReadOps;
+import internal.test.TestInputStream;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.bytes.BytesBuilder;
 import space.sunqian.common.base.chars.CharsBuilder;
 import space.sunqian.common.base.chars.CharsKit;
@@ -8,10 +12,6 @@ import space.sunqian.common.io.IOKit;
 import space.sunqian.common.io.IOMode;
 import space.sunqian.common.io.IOOperator;
 import space.sunqian.common.io.IORuntimeException;
-import internal.test.DataTest;
-import internal.test.ErrorAppender;
-import internal.test.ReadOps;
-import internal.test.TestInputStream;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -27,10 +27,11 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.Arrays;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class IOTest implements DataTest {
 
@@ -40,8 +41,8 @@ public class IOTest implements DataTest {
             // byte
             // read all
             byte[] data = randomBytes(1024);
-            assertEquals(IOKit.read(new ByteArrayInputStream(data)), data);
-            assertEquals(IOKit.read(new ByteArrayInputStream(data), 5), Arrays.copyOf(data, 5));
+            assertArrayEquals(IOKit.read(new ByteArrayInputStream(data)), data);
+            assertArrayEquals(IOKit.read(new ByteArrayInputStream(data), 5), Arrays.copyOf(data, 5));
             assertEquals(
                 IOKit.read(Channels.newChannel(new ByteArrayInputStream(data))),
                 ByteBuffer.wrap(data)
@@ -55,120 +56,121 @@ public class IOTest implements DataTest {
             assertEquals(
                 IOKit.readTo(new ByteArrayInputStream(data), builder),
                 data.length
+
             );
-            assertEquals(data, builder.toByteArray());
+            assertArrayEquals(data, builder.toByteArray());
             builder.reset();
             assertEquals(
                 IOKit.readTo(new ByteArrayInputStream(data), Channels.newChannel(builder)),
                 data.length
             );
-            assertEquals(data, builder.toByteArray());
+            assertArrayEquals(data, builder.toByteArray());
             builder.reset();
             assertEquals(
                 IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), builder),
                 data.length
             );
-            assertEquals(data, builder.toByteArray());
+            assertArrayEquals(data, builder.toByteArray());
             builder.reset();
             assertEquals(
                 IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(builder)),
                 data.length
             );
-            assertEquals(data, builder.toByteArray());
+            assertArrayEquals(data, builder.toByteArray());
             builder.reset();
             assertEquals(
                 IOKit.readTo(new ByteArrayInputStream(data), builder, data.length),
                 data.length
             );
-            assertEquals(data, builder.toByteArray());
+            assertArrayEquals(data, builder.toByteArray());
             builder.reset();
             assertEquals(
                 IOKit.readTo(new ByteArrayInputStream(data), Channels.newChannel(builder), data.length),
                 data.length
             );
-            assertEquals(data, builder.toByteArray());
+            assertArrayEquals(data, builder.toByteArray());
             builder.reset();
             assertEquals(
                 IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), builder, data.length),
                 data.length
             );
-            assertEquals(data, builder.toByteArray());
+            assertArrayEquals(data, builder.toByteArray());
             builder.reset();
             assertEquals(
                 IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(builder), data.length),
                 data.length
             );
-            assertEquals(data, builder.toByteArray());
+            assertArrayEquals(data, builder.toByteArray());
             builder.reset();
             // to array
             byte[] dst = new byte[data.length];
             assertEquals(IOKit.readTo(new ByteArrayInputStream(data), dst), data.length);
-            assertEquals(data, dst);
+            assertArrayEquals(data, dst);
             dst = new byte[data.length];
             assertEquals(IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst), data.length);
-            assertEquals(data, dst);
+            assertArrayEquals(data, dst);
             dst = new byte[data.length];
             assertEquals(
                 IOKit.readTo(new ByteArrayInputStream(data), dst, 0, dst.length),
                 data.length
             );
-            assertEquals(data, dst);
+            assertArrayEquals(data, dst);
             dst = new byte[data.length];
             assertEquals(
                 IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst, 0, dst.length),
                 data.length
             );
-            assertEquals(data, dst);
+            assertArrayEquals(data, dst);
             // to buffer
             ByteBuffer dstBuf = ByteBuffer.allocate(data.length);
             assertEquals(IOKit.readTo(new ByteArrayInputStream(data), dstBuf), data.length);
-            assertEquals(data, dstBuf.array());
+            assertArrayEquals(data, dstBuf.array());
             dstBuf = ByteBuffer.allocate(data.length);
             assertEquals(IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dstBuf), data.length);
-            assertEquals(data, dstBuf.array());
+            assertArrayEquals(data, dstBuf.array());
             dstBuf = ByteBuffer.allocate(data.length);
             assertEquals(IOKit.readTo(new ByteArrayInputStream(data), dstBuf, data.length), data.length);
-            assertEquals(data, dstBuf.array());
+            assertArrayEquals(data, dstBuf.array());
             dstBuf = ByteBuffer.allocate(data.length);
             assertEquals(
                 IOKit.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dstBuf, data.length),
                 data.length
             );
-            assertEquals(data, dstBuf.array());
+            assertArrayEquals(data, dstBuf.array());
         }
         {
             // char
             // read all
             char[] data = randomChars(1024);
-            assertEquals(IOKit.read(new CharArrayReader(data)), data);
-            assertEquals(IOKit.read(new CharArrayReader(data), 5), Arrays.copyOf(data, 5));
+            assertArrayEquals(IOKit.read(new CharArrayReader(data)), data);
+            assertArrayEquals(IOKit.read(new CharArrayReader(data), 5), Arrays.copyOf(data, 5));
             assertEquals(IOKit.string(new CharArrayReader(data)), new String(data));
             assertEquals(IOKit.string(new CharArrayReader(data), 5), new String(Arrays.copyOf(data, 5)));
             // to appender
             CharsBuilder builder = new CharsBuilder();
             assertEquals(IOKit.readTo(new CharArrayReader(data), builder), data.length);
-            assertEquals(data, builder.toCharArray());
+            assertArrayEquals(data, builder.toCharArray());
             builder.reset();
             assertEquals(IOKit.readTo(new CharArrayReader(data), builder, data.length), data.length);
-            assertEquals(data, builder.toCharArray());
+            assertArrayEquals(data, builder.toCharArray());
             builder.reset();
             // to array
             char[] dst = new char[data.length];
             assertEquals(IOKit.readTo(new CharArrayReader(data), dst), data.length);
-            assertEquals(data, dst);
+            assertArrayEquals(data, dst);
             dst = new char[data.length];
             assertEquals(
                 IOKit.readTo(new CharArrayReader(data), dst, 0, dst.length),
                 data.length
             );
-            assertEquals(data, dst);
+            assertArrayEquals(data, dst);
             // to buffer
             CharBuffer dstBuf = CharBuffer.allocate(data.length);
             assertEquals(IOKit.readTo(new CharArrayReader(data), dstBuf), data.length);
-            assertEquals(data, dstBuf.array());
+            assertArrayEquals(data, dstBuf.array());
             dstBuf = CharBuffer.allocate(data.length);
             assertEquals(IOKit.readTo(new CharArrayReader(data), dstBuf, data.length), data.length);
-            assertEquals(data, dstBuf.array());
+            assertArrayEquals(data, dstBuf.array());
         }
     }
 
@@ -179,10 +181,10 @@ public class IOTest implements DataTest {
             char[] data = randomChars(1024);
             CharsBuilder appender1 = new CharsBuilder();
             IOKit.write(appender1, data);
-            assertEquals(appender1.toCharArray(), data);
+            assertArrayEquals(appender1.toCharArray(), data);
             appender1.reset();
             IOKit.write(appender1, data, 33, 99);
-            assertEquals(appender1.toCharArray(), Arrays.copyOfRange(data, 33, 33 + 99));
+            assertArrayEquals(appender1.toCharArray(), Arrays.copyOfRange(data, 33, 33 + 99));
             class Appender implements Appendable {
 
                 private final CharsBuilder appender = new CharsBuilder();
@@ -212,11 +214,11 @@ public class IOTest implements DataTest {
             }
             Appender appender2 = new Appender();
             IOKit.write(appender2, data);
-            assertEquals(appender2.toCharArray(), data);
+            assertArrayEquals(appender2.toCharArray(), data);
             appender2.reset();
             IOKit.write(appender2, data, 33, 99);
-            assertEquals(appender2.toCharArray(), Arrays.copyOfRange(data, 33, 33 + 99));
-            expectThrows(IORuntimeException.class, () -> IOKit.write(new ErrorAppender(), data));
+            assertArrayEquals(appender2.toCharArray(), Arrays.copyOfRange(data, 33, 33 + 99));
+            assertThrows(IORuntimeException.class, () -> IOKit.write(new ErrorAppender(), data));
         }
         {
             // write to output stream
@@ -225,7 +227,7 @@ public class IOTest implements DataTest {
             IOKit.write(dst, str);
             assertEquals(dst.toString("UTF-8"), str);
             OutputStream dst2 = IOKit.newOutputStream(new byte[1]);
-            expectThrows(IORuntimeException.class, () -> IOKit.write(dst2, str));
+            assertThrows(IORuntimeException.class, () -> IOKit.write(dst2, str));
         }
     }
 
@@ -299,18 +301,18 @@ public class IOTest implements DataTest {
         byte[] data = randomBytes(128);
         ByteArrayInputStream in = new ByteArrayInputStream(data);
         ReadableByteChannel channel = Channels.newChannel(in);
-        assertEquals(IOKit.readBytes(channel), data);
+        assertArrayEquals(IOKit.readBytes(channel), data);
         assertNull(IOKit.readBytes(channel));
         in.reset();
-        assertEquals(IOKit.readBytes(channel, 64), Arrays.copyOf(data, 64));
-        assertEquals(IOKit.readBytes(channel, 64), Arrays.copyOfRange(data, 64, 128));
+        assertArrayEquals(IOKit.readBytes(channel, 64), Arrays.copyOf(data, 64));
+        assertArrayEquals(IOKit.readBytes(channel, 64), Arrays.copyOfRange(data, 64, 128));
         assertNull(IOKit.readBytes(channel, 64));
         in.reset();
-        assertEquals(IOKit.availableBytes(channel), data);
+        assertArrayEquals(IOKit.availableBytes(channel), data);
         assertNull(IOKit.availableBytes(channel));
         in.reset();
-        assertEquals(IOKit.availableBytes(channel, 64), Arrays.copyOf(data, 64));
-        assertEquals(IOKit.availableBytes(channel, 64), Arrays.copyOfRange(data, 64, 128));
+        assertArrayEquals(IOKit.availableBytes(channel, 64), Arrays.copyOf(data, 64));
+        assertArrayEquals(IOKit.availableBytes(channel, 64), Arrays.copyOfRange(data, 64, 128));
         assertNull(IOKit.availableBytes(channel, 64));
         {
             // empty
@@ -330,8 +332,8 @@ public class IOTest implements DataTest {
                 public void close() {
                 }
             };
-            assertEquals(IOKit.availableBytes(zch), new byte[0]);
-            assertEquals(IOKit.availableBytes(zch, 1), new byte[0]);
+            assertArrayEquals(IOKit.availableBytes(zch), new byte[0]);
+            assertArrayEquals(IOKit.availableBytes(zch, 1), new byte[0]);
         }
     }
 
@@ -341,19 +343,19 @@ public class IOTest implements DataTest {
             // close
             IOKit.close((Closeable) () -> {
             });
-            expectThrows(IOException.class, () -> {
+            assertThrows(IOException.class, () -> {
                 IOKit.close((Closeable) () -> {
                     throw new IOException();
                 });
             });
             IOKit.close((AutoCloseable) () -> {
             });
-            expectThrows(IOException.class, () -> {
+            assertThrows(IOException.class, () -> {
                 IOKit.close((AutoCloseable) () -> {
                     throw new IOException();
                 });
             });
-            expectThrows(IOException.class, () -> {
+            assertThrows(IOException.class, () -> {
                 IOKit.close((AutoCloseable) () -> {
                     throw new Exception();
                 });
@@ -364,7 +366,7 @@ public class IOTest implements DataTest {
             // flush
             IOKit.flush((Flushable) () -> {
             });
-            expectThrows(IOException.class, () -> {
+            assertThrows(IOException.class, () -> {
                 IOKit.flush((Flushable) () -> {
                     throw new IOException();
                 });
@@ -384,19 +386,19 @@ public class IOTest implements DataTest {
 
     @Test
     public void testIORuntimeException() throws Exception {
-        expectThrows(IORuntimeException.class, () -> {
+        assertThrows(IORuntimeException.class, () -> {
             throw new IORuntimeException();
         });
-        expectThrows(IORuntimeException.class, () -> {
+        assertThrows(IORuntimeException.class, () -> {
             throw new IORuntimeException("");
         });
-        expectThrows(IORuntimeException.class, () -> {
+        assertThrows(IORuntimeException.class, () -> {
             throw new IORuntimeException("", new RuntimeException());
         });
-        expectThrows(IORuntimeException.class, () -> {
+        assertThrows(IORuntimeException.class, () -> {
             throw new IORuntimeException(new RuntimeException());
         });
-        expectThrows(IORuntimeException.class, () -> {
+        assertThrows(IORuntimeException.class, () -> {
             throw new IORuntimeException(new IOException());
         });
     }

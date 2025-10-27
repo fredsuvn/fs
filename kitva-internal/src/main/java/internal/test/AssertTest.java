@@ -1,14 +1,15 @@
 package internal.test;
 
-import org.testng.Assert;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.function.Executable;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * This interface provides methods for asserting.
@@ -18,11 +19,11 @@ import static org.testng.Assert.expectThrows;
 public interface AssertTest {
 
     /**
-     * Tests the specified method via reflection and {@link Assert#expectThrows(Class, Assert.ThrowingRunnable)}. This
-     * method is equivalent to:
+     * Tests the specified method via reflection and {@link Assertions#assertThrows(Class, Executable)}. This method is
+     * equivalent to:
      * <pre>{@code
      * method.setAccessible(true);
-     * return expectThrows(exception, () -> {
+     * return assertThrows(exception, () -> {
      *     try {
      *         method.invoke(inst, args);
      *          throw new NoThrows("No throws for: " + method + ".");
@@ -45,7 +46,7 @@ public interface AssertTest {
         @Nullable Object @Nonnull ... args
     ) {
         method.setAccessible(true);
-        return expectThrows(exception, () -> {
+        return assertThrows(exception, () -> {
             try {
                 method.invoke(inst, args);
                 throw new NoThrows("No throws for: " + method + ".");
@@ -56,7 +57,7 @@ public interface AssertTest {
     }
 
     /**
-     * Tests the specified method via reflection and {@link Assert#assertEquals(Object, Object)}. This method is
+     * Tests the specified method via reflection and {@link Assertions#assertEquals(Object, Object)}. This method is
      * equivalent to:
      * <pre>{@code
      * method.setAccessible(true);

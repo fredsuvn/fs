@@ -5,7 +5,7 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import tests.runtime.reflect.TypeTest;
 import space.sunqian.common.base.Kit;
 import space.sunqian.common.base.exception.UnknownPrimitiveTypeException;
@@ -25,9 +25,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.RandomAccess;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class JvmTest implements AssertTest, PrintTest {
 
@@ -153,7 +153,7 @@ public class JvmTest implements AssertTest, PrintTest {
             }
         }
         // exception
-        expectThrows(JvmException.class, () -> JvmKit.toDescriptor(TypeKit.upperWildcard(String.class)));
+        assertThrows(JvmException.class, () -> JvmKit.toDescriptor(TypeKit.upperWildcard(String.class)));
         Method toPrimitiveDescriptor = JvmKit.class.getDeclaredMethod("toPrimitiveDescriptor", Class.class);
         invokeThrows(UnknownPrimitiveTypeException.class, toPrimitiveDescriptor, null, Object.class);
     }
@@ -306,7 +306,7 @@ public class JvmTest implements AssertTest, PrintTest {
             }
         }
         // exception
-        expectThrows(JvmException.class, () -> JvmKit.toSignature(TypeKit.otherType()));
+        assertThrows(JvmException.class, () -> JvmKit.toSignature(TypeKit.otherType()));
     }
 
     private SignatureParser signatureParser(Class<?> cls) throws Exception {

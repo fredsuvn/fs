@@ -1,6 +1,6 @@
 package tests.collect;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.Kit;
 import space.sunqian.common.collect.CollectKit;
 
@@ -12,10 +12,11 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Vector;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class CollectTest {
 
@@ -60,13 +61,13 @@ public class CollectTest {
 
     @Test
     public void testToArray() {
-        assertEquals(CollectKit.toArray(Arrays.asList(1, 2, 3)), Arrays.asList(1, 2, 3).toArray());
-        assertEquals(CollectKit.toArray(Arrays.asList(1, 2, 3), Integer.class), Arrays.asList(1, 2, 3).toArray(new Integer[3]));
-        assertEquals(
+        assertArrayEquals(CollectKit.toArray(Arrays.asList(1, 2, 3)), Arrays.asList(1, 2, 3).toArray());
+        assertArrayEquals(CollectKit.toArray(Arrays.asList(1, 2, 3), Integer.class), Arrays.asList(1, 2, 3).toArray(new Integer[3]));
+        assertArrayEquals(
             CollectKit.toArray(() -> Kit.as(Arrays.asList(1, 2, 3).iterator())),
             Arrays.asList(1, 2, 3).toArray()
         );
-        assertEquals(
+        assertArrayEquals(
             CollectKit.toArray(() -> Kit.as(Arrays.asList(1, 2, 3).iterator()), Integer.class),
             Arrays.asList(1, 2, 3).toArray(new Integer[3])
         );
@@ -85,7 +86,7 @@ public class CollectTest {
             assertTrue(intEnum.hasMoreElements());
             assertEquals(intEnum.nextElement(), 3);
             assertFalse(intEnum.hasMoreElements());
-            expectThrows(NoSuchElementException.class, intEnum::nextElement);
+            assertThrows(NoSuchElementException.class, intEnum::nextElement);
         }
         {
             // en -> it
@@ -102,7 +103,7 @@ public class CollectTest {
             assertTrue(intIt.hasNext());
             assertEquals(intIt.next(), 3);
             assertFalse(intIt.hasNext());
-            expectThrows(NoSuchElementException.class, intIt::next);
+            assertThrows(NoSuchElementException.class, intIt::next);
         }
     }
 

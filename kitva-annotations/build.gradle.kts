@@ -11,7 +11,10 @@ dependencies {
   //implementation("com.google.code.findbugs:jsr305")
 
   testImplementation(platform(project(":kitva-dependencies")))
-  testImplementation("org.testng:testng:7.5.1")
+  //testImplementation("org.testng:testng:7.5.1")
+  testImplementation("org.junit.jupiter:junit-jupiter-api")
+  testRuntimeOnly ("org.junit.jupiter:junit-jupiter-engine")
+  testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 java {
@@ -45,7 +48,8 @@ tasks.register("cleanWithJavadoc") {
 
 tasks.test {
   include("**/*Test.class", "**/*TestKt.class")
-  useTestNG {
-    suites("src/test/resources/testng.xml")
-  }
+  useJUnitPlatform()
+//  useTestNG {
+//    suites("src/test/resources/testng.xml")
+//  }
 }

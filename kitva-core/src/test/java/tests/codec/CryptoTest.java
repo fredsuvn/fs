@@ -1,6 +1,6 @@
 package tests.codec;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.codec.CryptoKit;
 import space.sunqian.common.io.ByteProcessor;
 import internal.test.DataTest;
@@ -13,7 +13,8 @@ import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CryptoTest implements DataTest {
 
@@ -62,7 +63,7 @@ public class CryptoTest implements DataTest {
             .readBlockSize(deBlock)
             .transformer(CryptoKit.cipherTransformer(cipher))
             .toByteArray();
-        assertEquals(ret, data);
+        assertArrayEquals(ret, data);
     }
 
     @Test
@@ -79,6 +80,6 @@ public class CryptoTest implements DataTest {
             .readBlockSize(blockSize)
             .transformer(CryptoKit.macTransformer(mac))
             .toByteArray();
-        assertEquals(enBytes, mac.doFinal(data));
+        assertArrayEquals(enBytes, mac.doFinal(data));
     }
 }

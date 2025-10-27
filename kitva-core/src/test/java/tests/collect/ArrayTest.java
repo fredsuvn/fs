@@ -1,17 +1,18 @@
 package tests.collect;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.Kit;
 import space.sunqian.common.collect.ArrayKit;
 import space.sunqian.common.collect.ArrayOperator;
 
 import java.util.List;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ArrayTest {
 
@@ -368,12 +369,12 @@ public class ArrayTest {
     public void testMap() {
         Character[] chars = {'a', 'b', null, 'c'};
         Integer[] asciiValues = {97, 98, null, 99};
-        assertEquals(ArrayKit.map(chars, new Integer[0], c -> c == null ? null : (int) c), asciiValues);
-        assertEquals(ArrayKit.map(chars, new Integer[4], c -> c == null ? null : (int) c), asciiValues);
-        assertEquals(ArrayKit.map(chars, c -> c == null ? null : (int) c), asciiValues);
+        assertArrayEquals(ArrayKit.map(chars, new Integer[0], c -> c == null ? null : (int) c), asciiValues);
+        assertArrayEquals(ArrayKit.map(chars, new Integer[4], c -> c == null ? null : (int) c), asciiValues);
+        assertArrayEquals(ArrayKit.map(chars, c -> c == null ? null : (int) c), asciiValues);
         Integer[] asciiValues2 = {null, 98, null, 99};
-        assertEquals(ArrayKit.map(chars, c -> c == null ? null : (c == 'a' ? null : (int) c)), asciiValues2);
-        expectThrows(UnsupportedOperationException.class, () -> ArrayKit.map(chars, c -> null));
+        assertArrayEquals(ArrayKit.map(chars, c -> c == null ? null : (c == 'a' ? null : (int) c)), asciiValues2);
+        assertThrows(UnsupportedOperationException.class, () -> ArrayKit.map(chars, c -> null));
     }
 
     @Test
@@ -384,15 +385,15 @@ public class ArrayTest {
 
     @Test
     public void testFill() {
-        assertEquals(ArrayKit.fill(new Integer[3], 6), new Integer[]{6, 6, 6});
-        assertEquals(ArrayKit.fill(new int[3], 6), new int[]{6, 6, 6});
-        assertEquals(ArrayKit.fill(new long[3], 6), new long[]{6, 6, 6});
-        assertEquals(ArrayKit.fill(new float[3], 6), new float[]{6, 6, 6});
-        assertEquals(ArrayKit.fill(new double[3], 6), new double[]{6, 6, 6});
-        assertEquals(ArrayKit.fill(new boolean[3], true), new boolean[]{true, true, true});
-        assertEquals(ArrayKit.fill(new byte[3], (byte) 6), new byte[]{6, 6, 6});
-        assertEquals(ArrayKit.fill(new short[3], (short) 6), new short[]{6, 6, 6});
-        assertEquals(ArrayKit.fill(new char[3], (char) 6), new char[]{6, 6, 6});
+        assertArrayEquals(ArrayKit.fill(new Integer[3], 6), new Integer[]{6, 6, 6});
+        assertArrayEquals(ArrayKit.fill(new int[3], 6), new int[]{6, 6, 6});
+        assertArrayEquals(ArrayKit.fill(new long[3], 6), new long[]{6, 6, 6});
+        assertArrayEquals(ArrayKit.fill(new float[3], 6), new float[]{6, 6, 6});
+        assertArrayEquals(ArrayKit.fill(new double[3], 6), new double[]{6, 6, 6});
+        assertArrayEquals(ArrayKit.fill(new boolean[3], true), new boolean[]{true, true, true});
+        assertArrayEquals(ArrayKit.fill(new byte[3], (byte) 6), new byte[]{6, 6, 6});
+        assertArrayEquals(ArrayKit.fill(new short[3], (short) 6), new short[]{6, 6, 6});
+        assertArrayEquals(ArrayKit.fill(new char[3], (char) 6), new char[]{6, 6, 6});
     }
 
     @Test
@@ -479,6 +480,6 @@ public class ArrayTest {
             assertEquals(operator.size(array), 1);
         }
         // error
-        expectThrows(IllegalArgumentException.class, () -> ArrayOperator.of(String.class));
+        assertThrows(IllegalArgumentException.class, () -> ArrayOperator.of(String.class));
     }
 }

@@ -1,9 +1,9 @@
 package tests.runtime.proxy;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.runtime.proxy.ProxyException;
 
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ProxyExceptionTest {
 
@@ -11,16 +11,16 @@ public class ProxyExceptionTest {
     public void testProxyException() {
         {
             // ProxyException
-            expectThrows(ProxyException.class, () -> {
+            assertThrows(ProxyException.class, () -> {
                 throw new ProxyException();
             });
-            expectThrows(ProxyException.class, () -> {
+            assertThrows(ProxyException.class, () -> {
                 throw new ProxyException("");
             });
-            expectThrows(ProxyException.class, () -> {
+            assertThrows(ProxyException.class, () -> {
                 throw new ProxyException("", new RuntimeException());
             });
-            expectThrows(ProxyException.class, () -> {
+            assertThrows(ProxyException.class, () -> {
                 throw new ProxyException(new RuntimeException());
             });
         }

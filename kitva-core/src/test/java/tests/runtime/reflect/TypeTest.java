@@ -1,7 +1,6 @@
 package tests.runtime.reflect;
 
-import org.jetbrains.annotations.NotNull;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.common.base.Kit;
@@ -25,13 +24,13 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotEquals;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TypeTest {
 
@@ -222,10 +221,10 @@ public class TypeTest {
             Collections.singletonList(Y.class.getTypeParameters()[0])
         );
         // exception:
-        expectThrows(ReflectionException.class, () -> TypeKit.resolveActualTypeArguments(TypeKit.otherType(), Object.class));
-        expectThrows(ReflectionException.class, () -> TypeKit.resolveActualTypeArguments(X[].class, Map.class));
-        expectThrows(ReflectionException.class, () -> TypeKit.resolveActualTypeArguments(X.class, Map[].class));
-        expectThrows(
+        assertThrows(ReflectionException.class, () -> TypeKit.resolveActualTypeArguments(TypeKit.otherType(), Object.class));
+        assertThrows(ReflectionException.class, () -> TypeKit.resolveActualTypeArguments(X[].class, Map.class));
+        assertThrows(ReflectionException.class, () -> TypeKit.resolveActualTypeArguments(X.class, Map[].class));
+        assertThrows(
             ReflectionException.class,
             () -> TypeKit.resolveActualTypeArguments(X.class.getTypeParameters()[0], Map.class)
         );
@@ -352,7 +351,7 @@ public class TypeTest {
         assertSame(TypeKit.replaceType(t5, Integer.class, String.class), t5);
 
         // special:
-        expectThrows(ReflectionException.class, () ->
+        assertThrows(ReflectionException.class, () ->
             TypeKit.replaceType(TypeTest.errorParameterizedType(), String.class, Integer.class));
         Type p1 = TypeKit.parameterizedType(List.class, Kit.array(), Integer.class);
         Type p2 = TypeKit.parameterizedType(List.class, Kit.array(), Long.class);
@@ -493,14 +492,12 @@ public class TypeTest {
     public static ParameterizedType errorParameterizedType() {
         return new ParameterizedType() {
             @Override
-            @NotNull
-            public Type[] getActualTypeArguments() {
+            public Type @Nonnull [] getActualTypeArguments() {
                 return new Type[0];
             }
 
-            @NotNull
             @Override
-            public Type getRawType() {
+            public @Nonnull Type getRawType() {
                 return null;
             }
 

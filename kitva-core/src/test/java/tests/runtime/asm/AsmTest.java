@@ -1,9 +1,9 @@
 package tests.runtime.asm;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.third.asm.AsmKit;
 
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AsmTest {
 

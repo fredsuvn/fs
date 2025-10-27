@@ -1,12 +1,12 @@
 package tests.runtime.invoke;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.runtime.invoke.InvocationException;
 
 import java.lang.reflect.InvocationTargetException;
 
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class InvokeExceptionTest {
 
@@ -18,13 +18,13 @@ public class InvokeExceptionTest {
         InvocationTargetException targetException = new InvocationTargetException(cause);
         {
             // InvocationException
-            expectThrows(InvocationException.class, () -> {
+            assertThrows(InvocationException.class, () -> {
                 throw new InvocationException("");
             });
-            expectThrows(InvocationException.class, () -> {
+            assertThrows(InvocationException.class, () -> {
                 throw new InvocationException(cause);
             });
-            expectThrows(InvocationException.class, () -> {
+            assertThrows(InvocationException.class, () -> {
                 throw new InvocationException(targetException);
             });
             InvocationException e = new InvocationException(targetException);

@@ -1,6 +1,6 @@
 package tests.base.string;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.base.exception.UnknownArrayTypeException;
 import space.sunqian.common.base.string.StringKit;
@@ -14,10 +14,11 @@ import java.nio.CharBuffer;
 import java.util.Arrays;
 import java.util.Objects;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class StringTest implements DataTest, PrintTest {
 
@@ -144,7 +145,7 @@ public class StringTest implements DataTest, PrintTest {
         // unknown:
         Method toStringArray = StringKit.class.getDeclaredMethod("toStringArray", Object.class, boolean.class);
         toStringArray.setAccessible(true);
-        InvocationTargetException e = expectThrows(InvocationTargetException.class, () ->
+        InvocationTargetException e = assertThrows(InvocationTargetException.class, () ->
             toStringArray.invoke(null, "str", true));
         assertTrue(e.getCause() instanceof UnknownArrayTypeException);
         // invokeThrows(UnknownArrayTypeException.class, toStringArray, null, "str", true);
@@ -165,42 +166,42 @@ public class StringTest implements DataTest, PrintTest {
         testCharsCopy("12345");
         testCharsCopy(StringView.of("12345"));
         // error
-        expectThrows(IndexOutOfBoundsException.class, () ->
+        assertThrows(IndexOutOfBoundsException.class, () ->
             StringKit.charsCopy("12345", 0, 6, new char[5], 0));
-        expectThrows(IndexOutOfBoundsException.class, () ->
+        assertThrows(IndexOutOfBoundsException.class, () ->
             StringKit.charsCopy("12345", 0, 5, new char[5], 1));
-        expectThrows(IndexOutOfBoundsException.class, () ->
+        assertThrows(IndexOutOfBoundsException.class, () ->
             StringKit.charsCopy("12345", 5, 0, new char[5], 0));
-        expectThrows(IndexOutOfBoundsException.class, () ->
+        assertThrows(IndexOutOfBoundsException.class, () ->
             StringKit.charsCopy("12345", 0, new char[1], 0, 5));
-        expectThrows(IndexOutOfBoundsException.class, () ->
+        assertThrows(IndexOutOfBoundsException.class, () ->
             StringKit.charsCopy("12345", 8, new char[5], 0, 5));
-        expectThrows(IndexOutOfBoundsException.class, () ->
+        assertThrows(IndexOutOfBoundsException.class, () ->
             StringKit.charsCopy("12345", 0, new char[5], 0, 6));
-        expectThrows(IndexOutOfBoundsException.class, () ->
+        assertThrows(IndexOutOfBoundsException.class, () ->
             StringKit.charsCopy("12345", 0, new char[5], 6, 0));
-        expectThrows(IndexOutOfBoundsException.class, () ->
+        assertThrows(IndexOutOfBoundsException.class, () ->
             StringKit.charsCopy("12345", 6, new char[5], 0, 0));
-        expectThrows(IndexOutOfBoundsException.class, () ->
+        assertThrows(IndexOutOfBoundsException.class, () ->
             StringKit.charsCopy("12345", 0, new char[5], 0, 6));
 
-        expectThrows(IndexOutOfBoundsException.class, () ->
+        assertThrows(IndexOutOfBoundsException.class, () ->
             StringKit.charsCopy(StringView.of("12345"), 0, 6, new char[5], 0));
-        expectThrows(IndexOutOfBoundsException.class, () ->
+        assertThrows(IndexOutOfBoundsException.class, () ->
             StringKit.charsCopy(StringView.of("12345"), 0, 5, new char[5], 1));
-        expectThrows(IndexOutOfBoundsException.class, () ->
+        assertThrows(IndexOutOfBoundsException.class, () ->
             StringKit.charsCopy(StringView.of("12345"), 5, 0, new char[5], 0));
-        expectThrows(IndexOutOfBoundsException.class, () ->
+        assertThrows(IndexOutOfBoundsException.class, () ->
             StringKit.charsCopy(StringView.of("12345"), 0, new char[1], 0, 5));
-        expectThrows(IndexOutOfBoundsException.class, () ->
+        assertThrows(IndexOutOfBoundsException.class, () ->
             StringKit.charsCopy(StringView.of("12345"), 8, new char[5], 0, 5));
-        expectThrows(IndexOutOfBoundsException.class, () ->
+        assertThrows(IndexOutOfBoundsException.class, () ->
             StringKit.charsCopy(StringView.of("12345"), 0, new char[5], 0, 6));
-        expectThrows(IndexOutOfBoundsException.class, () ->
+        assertThrows(IndexOutOfBoundsException.class, () ->
             StringKit.charsCopy(StringView.of("12345"), 0, new char[5], 6, 0));
-        expectThrows(IndexOutOfBoundsException.class, () ->
+        assertThrows(IndexOutOfBoundsException.class, () ->
             StringKit.charsCopy(StringView.of("12345"), 6, new char[5], 0, 0));
-        expectThrows(IndexOutOfBoundsException.class, () ->
+        assertThrows(IndexOutOfBoundsException.class, () ->
             StringKit.charsCopy(StringView.of("12345"), 0, new char[5], 0, 6));
     }
 
@@ -212,13 +213,13 @@ public class StringTest implements DataTest, PrintTest {
                     StringKit.charsCopy(chars, i, j, dst, k);
                     char[] dstCopy = new char[j - i + k];
                     StringKit.charsCopy(chars, i, dstCopy, k, j - i);
-                    assertEquals(dst, dstCopy);
+                    assertArrayEquals(dst, dstCopy);
                     char[] dst1 = new char[j - i + k];
                     chars.toString().getChars(i, j, dst1, k);
-                    assertEquals(dst, dst1);
+                    assertArrayEquals(dst, dst1);
                     char[] dst2 = new char[j - i + k];
                     System.arraycopy(chars.toString().toCharArray(), i, dst2, k, j - i);
-                    assertEquals(dst, dst2);
+                    assertArrayEquals(dst, dst2);
                 }
             }
         }
@@ -249,8 +250,8 @@ public class StringTest implements DataTest, PrintTest {
     public void testEncode() {
         char[] chars = randomChars(20, 'a', 'z');
         byte[] en = new String(chars).getBytes(CharsKit.defaultCharset());
-        assertEquals(StringKit.toBytes(chars), en);
-        assertEquals(StringKit.toBytes(CharBuffer.wrap(chars)), en);
+        assertArrayEquals(StringKit.toBytes(chars), en);
+        assertArrayEquals(StringKit.toBytes(CharBuffer.wrap(chars)), en);
     }
 
     @Test

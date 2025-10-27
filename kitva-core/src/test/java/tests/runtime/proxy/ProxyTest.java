@@ -1,6 +1,6 @@
 package tests.runtime.proxy;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.common.base.Kit;
@@ -11,8 +11,8 @@ import space.sunqian.common.runtime.proxy.ProxySpec;
 
 import java.lang.reflect.Method;
 
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ProxyTest {
 
@@ -42,7 +42,7 @@ public class ProxyTest {
             }
         });
         InterA pa = pc.newInstance();
-        expectThrows(AbstractMethodError.class, pa::a1);
+        assertThrows(AbstractMethodError.class, pa::a1);
         assertSame(pa.a2(), result);
     }
 

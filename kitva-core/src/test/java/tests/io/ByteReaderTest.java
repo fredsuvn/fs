@@ -1,17 +1,17 @@
 package tests.io;
 
-import org.jetbrains.annotations.NotNull;
-import org.testng.annotations.Test;
+import internal.test.DataTest;
+import internal.test.ErrorOutputStream;
+import internal.test.ReadOps;
+import internal.test.TestInputStream;
+import org.junit.jupiter.api.Test;
+import space.sunqian.annotations.Nonnull;
 import space.sunqian.common.base.bytes.BytesBuilder;
 import space.sunqian.common.io.BufferKit;
 import space.sunqian.common.io.ByteReader;
 import space.sunqian.common.io.ByteSegment;
 import space.sunqian.common.io.IOKit;
 import space.sunqian.common.io.IORuntimeException;
-import internal.test.DataTest;
-import internal.test.ErrorOutputStream;
-import internal.test.ReadOps;
-import internal.test.TestInputStream;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -23,13 +23,13 @@ import java.nio.channels.WritableByteChannel;
 import java.util.Arrays;
 import java.util.function.Supplier;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotSame;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ByteReaderTest implements DataTest {
 
@@ -54,8 +54,8 @@ public class ByteReaderTest implements DataTest {
         {
             TestInputStream tr = new TestInputStream(new ByteArrayInputStream(new byte[10]));
             tr.setNextOperation(ReadOps.THROW, 99);
-            expectThrows(IORuntimeException.class, () -> ByteReader.from(tr).skip(100));
-            expectThrows(IORuntimeException.class, () -> ByteReader.from(Channels.newChannel(tr)).skip(100));
+            assertThrows(IORuntimeException.class, () -> ByteReader.from(tr).skip(100));
+            assertThrows(IORuntimeException.class, () -> ByteReader.from(Channels.newChannel(tr)).skip(100));
         }
     }
 
@@ -213,8 +213,8 @@ public class ByteReaderTest implements DataTest {
             // read to channel error
             ByteReader reader = ByteReader.from(new byte[128]);
             WritableByteChannel errCh = Channels.newChannel(new ErrorOutputStream());
-            expectThrows(IORuntimeException.class, () -> reader.readTo(errCh));
-            expectThrows(IORuntimeException.class, () -> reader.readTo(errCh, 1));
+            assertThrows(IORuntimeException.class, () -> reader.readTo(errCh));
+            assertThrows(IORuntimeException.class, () -> reader.readTo(errCh, 1));
         }
     }
 
@@ -294,10 +294,10 @@ public class ByteReaderTest implements DataTest {
                 assertEquals(reader.readTo(builder, 0), 0);
             }
             // error
-            expectThrows(IllegalArgumentException.class, () -> supplier.get().readTo(builder, -1));
+            assertThrows(IllegalArgumentException.class, () -> supplier.get().readTo(builder, -1));
             if (data.length > 0) {
-                expectThrows(IORuntimeException.class, () -> supplier.get().readTo(new ErrorOutputStream()));
-                expectThrows(IORuntimeException.class, () -> supplier.get().readTo(new ErrorOutputStream(), 1));
+                assertThrows(IORuntimeException.class, () -> supplier.get().readTo(new ErrorOutputStream()));
+                assertThrows(IORuntimeException.class, () -> supplier.get().readTo(new ErrorOutputStream(), 1));
             }
         }
         {
@@ -336,10 +336,10 @@ public class ByteReaderTest implements DataTest {
                 assertEquals(reader.readTo(channel, 0), 0);
             }
             // error
-            expectThrows(IllegalArgumentException.class, () -> supplier.get().readTo(builder, -1));
+            assertThrows(IllegalArgumentException.class, () -> supplier.get().readTo(builder, -1));
             if (data.length > 0) {
-                expectThrows(IORuntimeException.class, () -> supplier.get().readTo(new ErrorOutputStream()));
-                expectThrows(IORuntimeException.class, () -> supplier.get().readTo(new ErrorOutputStream(), 1));
+                assertThrows(IORuntimeException.class, () -> supplier.get().readTo(new ErrorOutputStream()));
+                assertThrows(IORuntimeException.class, () -> supplier.get().readTo(new ErrorOutputStream(), 1));
             }
         }
 
@@ -379,10 +379,10 @@ public class ByteReaderTest implements DataTest {
                 assertEquals(reader.readTo(channel, 0), 0);
             }
             // error
-            expectThrows(IllegalArgumentException.class, () -> supplier.get().readTo(builder, -1));
+            assertThrows(IllegalArgumentException.class, () -> supplier.get().readTo(builder, -1));
             if (data.length > 0) {
-                expectThrows(IORuntimeException.class, () -> supplier.get().readTo(new ErrorOutputStream()));
-                expectThrows(IORuntimeException.class, () -> supplier.get().readTo(new ErrorOutputStream(), 1));
+                assertThrows(IORuntimeException.class, () -> supplier.get().readTo(new ErrorOutputStream()));
+                assertThrows(IORuntimeException.class, () -> supplier.get().readTo(new ErrorOutputStream(), 1));
             }
         }
         {
@@ -455,8 +455,8 @@ public class ByteReaderTest implements DataTest {
                 assertEquals(reader.readTo(new byte[0], 0, 0), 0);
             }
             // error
-            expectThrows(IndexOutOfBoundsException.class, () -> supplier.get().readTo(new byte[0], 0, -1));
-            expectThrows(IndexOutOfBoundsException.class, () -> supplier.get().readTo(new byte[0], 0, 1));
+            assertThrows(IndexOutOfBoundsException.class, () -> supplier.get().readTo(new byte[0], 0, -1));
+            assertThrows(IndexOutOfBoundsException.class, () -> supplier.get().readTo(new byte[0], 0, 1));
         }
         {
             // to buffer full
@@ -503,9 +503,9 @@ public class ByteReaderTest implements DataTest {
             }
             // error
             if (data.length > 0) {
-                expectThrows(IORuntimeException.class, () ->
+                assertThrows(IORuntimeException.class, () ->
                     supplier.get().readTo(ByteBuffer.allocate(1).asReadOnlyBuffer()));
-                expectThrows(IORuntimeException.class, () ->
+                assertThrows(IORuntimeException.class, () ->
                     supplier.get().readTo(ByteBuffer.allocateDirect(1).asReadOnlyBuffer()));
             }
         }
@@ -561,12 +561,12 @@ public class ByteReaderTest implements DataTest {
                 assertEquals(reader.readTo(ByteBuffer.allocateDirect(0), 1), 0);
             }
             // error
-            expectThrows(IllegalArgumentException.class, () ->
+            assertThrows(IllegalArgumentException.class, () ->
                 supplier.get().readTo(ByteBuffer.allocate(1), -1));
             if (data.length > 0) {
-                expectThrows(IORuntimeException.class, () ->
+                assertThrows(IORuntimeException.class, () ->
                     supplier.get().readTo(ByteBuffer.allocate(1).asReadOnlyBuffer(), 1));
-                expectThrows(IORuntimeException.class, () ->
+                assertThrows(IORuntimeException.class, () ->
                     supplier.get().readTo(ByteBuffer.allocateDirect(1).asReadOnlyBuffer(), 1));
             }
         }
@@ -596,7 +596,7 @@ public class ByteReaderTest implements DataTest {
             }
 
             @Override
-            public int read(@NotNull byte[] b, int off, int len) {
+            public int read(byte @Nonnull [] b, int off, int len) {
                 return 0;
             }
         }
@@ -660,7 +660,7 @@ public class ByteReaderTest implements DataTest {
             }
 
             @Override
-            public int read(@NotNull byte[] b, int off, int len) {
+            public int read(byte @Nonnull [] b, int off, int len) {
                 if (pos >= data.length) {
                     return -1;
                 }
@@ -1197,34 +1197,34 @@ public class ByteReaderTest implements DataTest {
         {
             // mark/reset error
             ByteReader reader = ByteReader.from(tin);
-            expectThrows(IORuntimeException.class, reader::mark);
-            expectThrows(IORuntimeException.class, reader::reset);
-            expectThrows(IORuntimeException.class, reader::close);
+            assertThrows(IORuntimeException.class, reader::mark);
+            assertThrows(IORuntimeException.class, reader::reset);
+            assertThrows(IORuntimeException.class, reader::close);
             reader = ByteReader.from(Channels.newChannel(tin));
-            expectThrows(IORuntimeException.class, reader::mark);
-            expectThrows(IORuntimeException.class, reader::reset);
-            expectThrows(IORuntimeException.class, reader::close);
+            assertThrows(IORuntimeException.class, reader::mark);
+            assertThrows(IORuntimeException.class, reader::reset);
+            assertThrows(IORuntimeException.class, reader::close);
             reader = ByteReader.from(ByteBuffer.allocate(1));
-            expectThrows(IORuntimeException.class, reader::reset);
+            assertThrows(IORuntimeException.class, reader::reset);
         }
         {
             // ready
             TestInputStream errIn = new TestInputStream(new ByteArrayInputStream(new byte[0]));
             errIn.setNextOperation(ReadOps.THROW, 99);
-            expectThrows(IORuntimeException.class, () -> ByteReader.from(errIn).ready());
+            assertThrows(IORuntimeException.class, () -> ByteReader.from(errIn).ready());
         }
         {
             // asInputStream
             InputStream in1 = ByteReader.from(ByteBuffer.allocate(1)).limit(1).asInputStream();
-            expectThrows(IOException.class, in1::reset);
+            assertThrows(IOException.class, in1::reset);
             InputStream in2 = ByteReader.from(tin).limit(1).asInputStream();
-            expectThrows(IOException.class, () -> in2.skip(1));
+            assertThrows(IOException.class, () -> in2.skip(1));
             InputStream in3 = ByteReader.from(tin).limit(1).asInputStream();
-            expectThrows(IOException.class, () -> in3.close());
+            assertThrows(IOException.class, () -> in3.close());
             TestInputStream errIn = new TestInputStream(new ByteArrayInputStream(new byte[0]));
             errIn.setNextOperation(ReadOps.THROW, 99);
-            expectThrows(IOException.class, () -> ByteReader.from(errIn).limit(1).asInputStream().read());
-            expectThrows(IOException.class, () -> ByteReader.from(errIn).limit(1).asInputStream().read(new byte[2]));
+            assertThrows(IOException.class, () -> ByteReader.from(errIn).limit(1).asInputStream().read());
+            assertThrows(IOException.class, () -> ByteReader.from(errIn).limit(1).asInputStream().read(new byte[2]));
         }
     }
 }

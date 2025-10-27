@@ -4,7 +4,7 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.ProtocolStringList;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import tests.protobuf.Data;
 import tests.protobuf.PbSimple;
 import tests.protobuf.xEnum;
@@ -28,12 +28,12 @@ import internal.test.PrintTest;
 import java.util.List;
 import java.util.Map;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ProtobufTest implements PrintTest {
 
@@ -511,12 +511,12 @@ public class ProtobufTest implements PrintTest {
         ProtocolStringList psList = converter.convert(ListKit.list("1", "2", "3"), ProtocolStringList.class);
         assertEquals(psList, ListKit.list("1", "2", "3"));
         assertSame(converter.convert(str, String.class), str);
-        expectThrows(UnsupportedObjectConvertException.class, () -> converter.convert(null, List.class));
+        assertThrows(UnsupportedObjectConvertException.class, () -> converter.convert(null, List.class));
         ObjectConverter cvt2 = ObjectConverter
             .newConverter(new ProtobufConvertHandler());
-        expectThrows(UnsupportedObjectConvertException.class, () ->
+        assertThrows(UnsupportedObjectConvertException.class, () ->
             cvt2.convert(str, ByteString.class));
-        expectThrows(UnsupportedObjectConvertException.class, () ->
+        assertThrows(UnsupportedObjectConvertException.class, () ->
             cvt2.convert(ListKit.list("1", "2", "3"), ProtocolStringList.class));
     }
 

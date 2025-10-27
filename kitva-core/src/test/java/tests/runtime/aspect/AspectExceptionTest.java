@@ -1,9 +1,9 @@
 package tests.runtime.aspect;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.runtime.aspect.AspectException;
 
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class AspectExceptionTest {
 
@@ -11,16 +11,16 @@ public class AspectExceptionTest {
     public void testProxyException() {
         {
             // AspectException
-            expectThrows(AspectException.class, () -> {
+            assertThrows(AspectException.class, () -> {
                 throw new AspectException();
             });
-            expectThrows(AspectException.class, () -> {
+            assertThrows(AspectException.class, () -> {
                 throw new AspectException("");
             });
-            expectThrows(AspectException.class, () -> {
+            assertThrows(AspectException.class, () -> {
                 throw new AspectException("", new RuntimeException());
             });
-            expectThrows(AspectException.class, () -> {
+            assertThrows(AspectException.class, () -> {
                 throw new AspectException(new RuntimeException());
             });
         }

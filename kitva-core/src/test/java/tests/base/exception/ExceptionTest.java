@@ -1,6 +1,6 @@
 package tests.base.exception;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.exception.AwaitingException;
 import space.sunqian.common.base.exception.KitvaException;
 import space.sunqian.common.base.exception.KitvaRuntimeException;
@@ -17,11 +17,11 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ExceptionTest {
 
@@ -45,72 +45,72 @@ public class ExceptionTest {
         Throwable cause = new RuntimeException(message);
         {
             // KitvaException
-            expectThrows(KitvaException.class, () -> {
+            assertThrows(KitvaException.class, () -> {
                 throw new KitvaException();
             });
-            expectThrows(KitvaException.class, () -> {
+            assertThrows(KitvaException.class, () -> {
                 throw new KitvaException("");
             });
-            expectThrows(KitvaException.class, () -> {
+            assertThrows(KitvaException.class, () -> {
                 throw new KitvaException("", new RuntimeException());
             });
-            expectThrows(KitvaException.class, () -> {
+            assertThrows(KitvaException.class, () -> {
                 throw new KitvaException(new RuntimeException());
             });
         }
         {
             // KitvaRuntimeException
-            expectThrows(KitvaRuntimeException.class, () -> {
+            assertThrows(KitvaRuntimeException.class, () -> {
                 throw new KitvaRuntimeException();
             });
-            expectThrows(KitvaRuntimeException.class, () -> {
+            assertThrows(KitvaRuntimeException.class, () -> {
                 throw new KitvaRuntimeException("");
             });
-            expectThrows(KitvaRuntimeException.class, () -> {
+            assertThrows(KitvaRuntimeException.class, () -> {
                 throw new KitvaRuntimeException("", new RuntimeException());
             });
-            expectThrows(KitvaRuntimeException.class, () -> {
+            assertThrows(KitvaRuntimeException.class, () -> {
                 throw new KitvaRuntimeException(new RuntimeException());
             });
         }
         {
             // UnreachablePointException
-            expectThrows(UnreachablePointException.class, () -> {
+            assertThrows(UnreachablePointException.class, () -> {
                 throw new UnreachablePointException();
             });
-            expectThrows(UnreachablePointException.class, () -> {
+            assertThrows(UnreachablePointException.class, () -> {
                 throw new UnreachablePointException("");
             });
-            expectThrows(UnreachablePointException.class, () -> {
+            assertThrows(UnreachablePointException.class, () -> {
                 throw new UnreachablePointException("", new RuntimeException());
             });
-            expectThrows(UnreachablePointException.class, () -> {
+            assertThrows(UnreachablePointException.class, () -> {
                 throw new UnreachablePointException(new RuntimeException());
             });
         }
         {
             // UnknownTypeException
-            expectThrows(UnknownTypeException.class, () -> {
+            assertThrows(UnknownTypeException.class, () -> {
                 throw new UnknownTypeException(Object.class);
             });
             // UnknownArrayTypeException
-            expectThrows(UnknownArrayTypeException.class, () -> {
+            assertThrows(UnknownArrayTypeException.class, () -> {
                 throw new UnknownArrayTypeException(Object.class);
             });
             // UnknownPrimitiveTypeException
-            expectThrows(UnknownPrimitiveTypeException.class, () -> {
+            assertThrows(UnknownPrimitiveTypeException.class, () -> {
                 throw new UnknownPrimitiveTypeException(Object.class);
             });
         }
         {
             // AwaitingException
-            expectThrows(AwaitingException.class, () -> {
+            assertThrows(AwaitingException.class, () -> {
                 throw new AwaitingException();
             });
-            expectThrows(AwaitingException.class, () -> {
+            assertThrows(AwaitingException.class, () -> {
                 throw new AwaitingException("");
             });
-            expectThrows(AwaitingException.class, () -> {
+            assertThrows(AwaitingException.class, () -> {
                 throw new AwaitingException("", new RuntimeException());
             });
             assertTrue(new AwaitingException(new InterruptedException()).isCausedByInterruption());

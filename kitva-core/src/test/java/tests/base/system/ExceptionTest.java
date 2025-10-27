@@ -1,9 +1,9 @@
 package tests.base.system;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.system.JvmException;
 
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ExceptionTest {
 
@@ -11,16 +11,16 @@ public class ExceptionTest {
     public void testExceptions() {
         {
             // JvmException
-            expectThrows(JvmException.class, () -> {
+            assertThrows(JvmException.class, () -> {
                 throw new JvmException();
             });
-            expectThrows(JvmException.class, () -> {
+            assertThrows(JvmException.class, () -> {
                 throw new JvmException("");
             });
-            expectThrows(JvmException.class, () -> {
+            assertThrows(JvmException.class, () -> {
                 throw new JvmException("", new RuntimeException());
             });
-            expectThrows(JvmException.class, () -> {
+            assertThrows(JvmException.class, () -> {
                 throw new JvmException(new RuntimeException());
             });
         }

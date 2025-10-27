@@ -1,7 +1,11 @@
 package tests.io;
 
-import org.jetbrains.annotations.NotNull;
-import org.testng.annotations.Test;
+import internal.test.DataTest;
+import internal.test.ErrorAppender;
+import internal.test.ReadOps;
+import internal.test.TestReader;
+import org.junit.jupiter.api.Test;
+import space.sunqian.annotations.Nonnull;
 import space.sunqian.common.base.chars.CharsBuilder;
 import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.io.BufferKit;
@@ -9,10 +13,6 @@ import space.sunqian.common.io.CharReader;
 import space.sunqian.common.io.CharSegment;
 import space.sunqian.common.io.IOKit;
 import space.sunqian.common.io.IORuntimeException;
-import internal.test.DataTest;
-import internal.test.ErrorAppender;
-import internal.test.ReadOps;
-import internal.test.TestReader;
 
 import java.io.CharArrayReader;
 import java.io.IOException;
@@ -22,13 +22,13 @@ import java.nio.CharBuffer;
 import java.util.Arrays;
 import java.util.function.Supplier;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotSame;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CharReaderTest implements DataTest {
 
@@ -53,7 +53,7 @@ public class CharReaderTest implements DataTest {
         {
             TestReader tr = new TestReader(new CharArrayReader(new char[10]));
             tr.setNextOperation(ReadOps.THROW, 99);
-            expectThrows(IORuntimeException.class, () -> CharReader.from(tr).skip(100));
+            assertThrows(IORuntimeException.class, () -> CharReader.from(tr).skip(100));
         }
     }
 
@@ -286,10 +286,10 @@ public class CharReaderTest implements DataTest {
                 assertEquals(reader.readTo(builder, 0), 0);
             }
             // error
-            expectThrows(IllegalArgumentException.class, () -> supplier.get().readTo(builder, -1));
+            assertThrows(IllegalArgumentException.class, () -> supplier.get().readTo(builder, -1));
             if (data.length > 0) {
-                expectThrows(IORuntimeException.class, () -> supplier.get().readTo(new ErrorAppender()));
-                expectThrows(IORuntimeException.class, () -> supplier.get().readTo(new ErrorAppender(), 1));
+                assertThrows(IORuntimeException.class, () -> supplier.get().readTo(new ErrorAppender()));
+                assertThrows(IORuntimeException.class, () -> supplier.get().readTo(new ErrorAppender(), 1));
             }
         }
         {
@@ -362,8 +362,8 @@ public class CharReaderTest implements DataTest {
                 assertEquals(reader.readTo(new char[0], 0, 0), 0);
             }
             // error
-            expectThrows(IndexOutOfBoundsException.class, () -> supplier.get().readTo(new char[0], 0, -1));
-            expectThrows(IndexOutOfBoundsException.class, () -> supplier.get().readTo(new char[0], 0, 1));
+            assertThrows(IndexOutOfBoundsException.class, () -> supplier.get().readTo(new char[0], 0, -1));
+            assertThrows(IndexOutOfBoundsException.class, () -> supplier.get().readTo(new char[0], 0, 1));
         }
         {
             // to buffer full
@@ -410,9 +410,9 @@ public class CharReaderTest implements DataTest {
             }
             // error
             if (data.length > 0) {
-                expectThrows(IORuntimeException.class, () ->
+                assertThrows(IORuntimeException.class, () ->
                     supplier.get().readTo(CharBuffer.allocate(1).asReadOnlyBuffer()));
-                expectThrows(IORuntimeException.class, () ->
+                assertThrows(IORuntimeException.class, () ->
                     supplier.get().readTo(BufferKit.directCharBuffer(1).asReadOnlyBuffer()));
             }
         }
@@ -468,12 +468,12 @@ public class CharReaderTest implements DataTest {
                 assertEquals(reader.readTo(BufferKit.directCharBuffer(0), 1), 0);
             }
             // error
-            expectThrows(IllegalArgumentException.class, () ->
+            assertThrows(IllegalArgumentException.class, () ->
                 supplier.get().readTo(CharBuffer.allocate(1), -1));
             if (data.length > 0) {
-                expectThrows(IORuntimeException.class, () ->
+                assertThrows(IORuntimeException.class, () ->
                     supplier.get().readTo(CharBuffer.allocate(1).asReadOnlyBuffer(), 1));
-                expectThrows(IORuntimeException.class, () ->
+                assertThrows(IORuntimeException.class, () ->
                     supplier.get().readTo(BufferKit.directCharBuffer(1).asReadOnlyBuffer(), 1));
             }
         }
@@ -498,7 +498,7 @@ public class CharReaderTest implements DataTest {
             }
 
             @Override
-            public int read(@NotNull char[] b, int off, int len) {
+            public int read(char @Nonnull [] b, int off, int len) {
                 return 0;
             }
 
@@ -560,7 +560,7 @@ public class CharReaderTest implements DataTest {
             }
 
             @Override
-            public int read(@NotNull char[] b, int off, int len) {
+            public int read(char @Nonnull [] b, int off, int len) {
                 if (pos >= data.length) {
                     return -1;
                 }
@@ -1070,26 +1070,26 @@ public class CharReaderTest implements DataTest {
         {
             // mark/reset error
             CharReader reader = CharReader.from(tin);
-            expectThrows(IORuntimeException.class, reader::mark);
-            expectThrows(IORuntimeException.class, reader::reset);
-            expectThrows(IORuntimeException.class, reader::close);
+            assertThrows(IORuntimeException.class, reader::mark);
+            assertThrows(IORuntimeException.class, reader::reset);
+            assertThrows(IORuntimeException.class, reader::close);
             reader = CharReader.from(CharBuffer.allocate(1));
-            expectThrows(IORuntimeException.class, reader::reset);
+            assertThrows(IORuntimeException.class, reader::reset);
             Reader in1 = CharReader.from(CharBuffer.allocate(1)).limit(1).asReader();
-            expectThrows(IOException.class, in1::reset);
+            assertThrows(IOException.class, in1::reset);
         }
         {
             // asReader
             Reader in2 = CharReader.from(tin).limit(1).asReader();
-            expectThrows(IOException.class, () -> in2.skip(1));
+            assertThrows(IOException.class, () -> in2.skip(1));
             Reader in3 = CharReader.from(tin).limit(1).asReader();
-            expectThrows(IOException.class, () -> in3.close());
+            assertThrows(IOException.class, () -> in3.close());
             Reader in4 = CharReader.from(tin).limit(1).asReader();
-            expectThrows(IOException.class, () -> in4.mark(1));
+            assertThrows(IOException.class, () -> in4.mark(1));
             TestReader errIn = new TestReader(new CharArrayReader(new char[0]));
             errIn.setNextOperation(ReadOps.THROW, 99);
-            expectThrows(IOException.class, () -> CharReader.from(errIn).limit(1).asReader().read());
-            expectThrows(IOException.class, () -> CharReader.from(errIn).limit(1).asReader().read(new char[2]));
+            assertThrows(IOException.class, () -> CharReader.from(errIn).limit(1).asReader().read());
+            assertThrows(IOException.class, () -> CharReader.from(errIn).limit(1).asReader().read(new char[2]));
         }
     }
 }

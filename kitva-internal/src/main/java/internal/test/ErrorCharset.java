@@ -1,6 +1,5 @@
 package internal.test;
 
-import org.jetbrains.annotations.NotNull;
 import space.sunqian.annotations.Nonnull;
 
 import java.nio.charset.Charset;
@@ -19,7 +18,7 @@ public class ErrorCharset extends Charset {
      */
     public static final @Nonnull Charset SINGLETON = new ErrorCharset("TEST-ERROR", new String[]{});
 
-    private ErrorCharset(@NotNull String canonicalName, String[] aliases) {
+    private ErrorCharset(@Nonnull String canonicalName, String[] aliases) {
         super(canonicalName, aliases);
     }
 

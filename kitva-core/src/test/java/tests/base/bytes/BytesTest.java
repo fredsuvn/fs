@@ -1,12 +1,13 @@
 package tests.base.bytes;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.bytes.BytesKit;
 
 import java.nio.ByteBuffer;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BytesTest {
 
@@ -28,7 +29,7 @@ public class BytesTest {
             assertEquals(BytesKit.bytesToInt(new byte[]{0x01, 0x02, 0x03}), 0x010203);
             assertEquals(BytesKit.bytesToInt(new byte[]{0x01, 0x02, 0x03, 0x04, 0x05}), 0x02030405);
             assertEquals(BytesKit.bytesToInt(new byte[]{0x01}), 0x01);
-            assertEquals(
+            assertArrayEquals(
                 BytesKit.intToBytes(0x01020304),
                 new byte[]{0x01, 0x02, 0x03, 0x04}
             );
@@ -39,7 +40,7 @@ public class BytesTest {
             assertEquals(BytesKit.bytesToLong(new byte[]{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07}), 0x01020304050607L);
             assertEquals(BytesKit.bytesToLong(new byte[]{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09}), 0x0203040506070809L);
             assertEquals(BytesKit.bytesToLong(new byte[]{0x01}), 0x01L);
-            assertEquals(
+            assertArrayEquals(
                 BytesKit.longToBytes(0x0102030405060708L),
                 new byte[]{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08}
             );

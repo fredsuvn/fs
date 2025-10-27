@@ -1,19 +1,19 @@
 package tests.io;
 
-import org.jetbrains.annotations.NotNull;
-import org.testng.annotations.Test;
-import space.sunqian.common.base.bytes.BytesBuilder;
-import space.sunqian.common.base.chars.CharsBuilder;
-import space.sunqian.common.io.BufferKit;
-import space.sunqian.common.io.IOKit;
-import space.sunqian.common.io.IOOperator;
-import space.sunqian.common.io.IORuntimeException;
 import internal.test.DataTest;
 import internal.test.ErrorAppender;
 import internal.test.ErrorOutputStream;
 import internal.test.ReadOps;
 import internal.test.TestInputStream;
 import internal.test.TestReader;
+import org.junit.jupiter.api.Test;
+import space.sunqian.annotations.Nonnull;
+import space.sunqian.common.base.bytes.BytesBuilder;
+import space.sunqian.common.base.chars.CharsBuilder;
+import space.sunqian.common.io.BufferKit;
+import space.sunqian.common.io.IOKit;
+import space.sunqian.common.io.IOOperator;
+import space.sunqian.common.io.IORuntimeException;
 
 import java.io.ByteArrayInputStream;
 import java.io.CharArrayReader;
@@ -27,10 +27,10 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.Arrays;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class IOOperatorTest implements DataTest {
 
@@ -68,12 +68,12 @@ public class IOOperatorTest implements DataTest {
             // error
             TestInputStream tin = new TestInputStream(new ByteArrayInputStream(new byte[0]));
             tin.setNextOperation(ReadOps.THROW, 99);
-            expectThrows(IORuntimeException.class, () -> IOKit.read(tin));
-            expectThrows(IORuntimeException.class, () -> IOKit.read(tin, 1));
-            expectThrows(IllegalArgumentException.class, () -> IOKit.read(tin, -1));
-            expectThrows(IORuntimeException.class, () -> IOKit.read(Channels.newChannel(tin)));
-            expectThrows(IORuntimeException.class, () -> IOKit.read(Channels.newChannel(tin), 1));
-            expectThrows(IllegalArgumentException.class, () -> IOKit.read(Channels.newChannel(tin), -1));
+            assertThrows(IORuntimeException.class, () -> IOKit.read(tin));
+            assertThrows(IORuntimeException.class, () -> IOKit.read(tin, 1));
+            assertThrows(IllegalArgumentException.class, () -> IOKit.read(tin, -1));
+            assertThrows(IORuntimeException.class, () -> IOKit.read(Channels.newChannel(tin)));
+            assertThrows(IORuntimeException.class, () -> IOKit.read(Channels.newChannel(tin), 1));
+            assertThrows(IllegalArgumentException.class, () -> IOKit.read(Channels.newChannel(tin), -1));
         }
     }
 
@@ -393,40 +393,40 @@ public class IOOperatorTest implements DataTest {
             TestInputStream tin = new TestInputStream(new ByteArrayInputStream(new byte[0]));
             tin.setNextOperation(ReadOps.THROW, 99);
             // read stream
-            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tin, errOut));
-            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tin, errOut, 1));
-            expectThrows(IllegalArgumentException.class, () -> IOKit.readTo(tin, errOut, -1));
-            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tin, new byte[1], 0, 1));
-            expectThrows(IndexOutOfBoundsException.class, () -> IOKit.readTo(tin, new byte[0], 1, 0));
-            expectThrows(IndexOutOfBoundsException.class, () -> IOKit.readTo(tin, new byte[0], 0, 1));
-            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tin, ByteBuffer.allocate(1)));
-            expectThrows(IllegalArgumentException.class, () ->
+            assertThrows(IORuntimeException.class, () -> IOKit.readTo(tin, errOut));
+            assertThrows(IORuntimeException.class, () -> IOKit.readTo(tin, errOut, 1));
+            assertThrows(IllegalArgumentException.class, () -> IOKit.readTo(tin, errOut, -1));
+            assertThrows(IORuntimeException.class, () -> IOKit.readTo(tin, new byte[1], 0, 1));
+            assertThrows(IndexOutOfBoundsException.class, () -> IOKit.readTo(tin, new byte[0], 1, 0));
+            assertThrows(IndexOutOfBoundsException.class, () -> IOKit.readTo(tin, new byte[0], 0, 1));
+            assertThrows(IORuntimeException.class, () -> IOKit.readTo(tin, ByteBuffer.allocate(1)));
+            assertThrows(IllegalArgumentException.class, () ->
                 IOKit.readTo(tin, ByteBuffer.allocate(1), -1));
-            expectThrows(IORuntimeException.class, () ->
+            assertThrows(IORuntimeException.class, () ->
                 IOKit.readTo(new ByteArrayInputStream(new byte[1]), ByteBuffer.allocate(1).asReadOnlyBuffer())
             );
-            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tin, errCh));
-            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tin, errCh, 1));
-            expectThrows(IllegalArgumentException.class, () -> IOKit.readTo(tin, errCh, -1));
+            assertThrows(IORuntimeException.class, () -> IOKit.readTo(tin, errCh));
+            assertThrows(IORuntimeException.class, () -> IOKit.readTo(tin, errCh, 1));
+            assertThrows(IllegalArgumentException.class, () -> IOKit.readTo(tin, errCh, -1));
             // read channel
             ReadableByteChannel tch = Channels.newChannel(tin);
-            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tch, errCh));
-            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tch, errCh, 1));
-            expectThrows(IllegalArgumentException.class, () -> IOKit.readTo(tch, errCh, -1));
-            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tch, new byte[1], 0, 1));
-            expectThrows(IndexOutOfBoundsException.class, () -> IOKit.readTo(tch, new byte[0], 1, 0));
-            expectThrows(IndexOutOfBoundsException.class, () -> IOKit.readTo(tch, new byte[0], 0, 1));
-            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tch, ByteBuffer.allocate(1)));
-            expectThrows(IllegalArgumentException.class, () -> IOKit.readTo(tch, ByteBuffer.allocate(1), -1));
-            expectThrows(IORuntimeException.class, () ->
+            assertThrows(IORuntimeException.class, () -> IOKit.readTo(tch, errCh));
+            assertThrows(IORuntimeException.class, () -> IOKit.readTo(tch, errCh, 1));
+            assertThrows(IllegalArgumentException.class, () -> IOKit.readTo(tch, errCh, -1));
+            assertThrows(IORuntimeException.class, () -> IOKit.readTo(tch, new byte[1], 0, 1));
+            assertThrows(IndexOutOfBoundsException.class, () -> IOKit.readTo(tch, new byte[0], 1, 0));
+            assertThrows(IndexOutOfBoundsException.class, () -> IOKit.readTo(tch, new byte[0], 0, 1));
+            assertThrows(IORuntimeException.class, () -> IOKit.readTo(tch, ByteBuffer.allocate(1)));
+            assertThrows(IllegalArgumentException.class, () -> IOKit.readTo(tch, ByteBuffer.allocate(1), -1));
+            assertThrows(IORuntimeException.class, () ->
                 IOKit.readTo(
                     Channels.newChannel(new ByteArrayInputStream(new byte[1])),
                     ByteBuffer.allocate(1).asReadOnlyBuffer()
                 )
             );
-            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tch, errOut));
-            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tch, errOut, 1));
-            expectThrows(IllegalArgumentException.class, () -> IOKit.readTo(tch, errOut, -1));
+            assertThrows(IORuntimeException.class, () -> IOKit.readTo(tch, errOut));
+            assertThrows(IORuntimeException.class, () -> IOKit.readTo(tch, errOut, 1));
+            assertThrows(IllegalArgumentException.class, () -> IOKit.readTo(tch, errOut, -1));
         }
     }
 
@@ -876,7 +876,7 @@ public class IOOperatorTest implements DataTest {
             }
 
             @Override
-            public int read(@NotNull byte[] b, int off, int len) {
+            public int read(byte @Nonnull [] b, int off, int len) {
                 if (pos >= data.length) {
                     return -1;
                 }
@@ -1156,9 +1156,9 @@ public class IOOperatorTest implements DataTest {
             // error
             TestReader tin = new TestReader(new CharArrayReader(new char[0]));
             tin.setNextOperation(ReadOps.THROW, 99);
-            expectThrows(IORuntimeException.class, () -> IOKit.read(tin));
-            expectThrows(IORuntimeException.class, () -> IOKit.read(tin, 1));
-            expectThrows(IllegalArgumentException.class, () -> IOKit.read(tin, -1));
+            assertThrows(IORuntimeException.class, () -> IOKit.read(tin));
+            assertThrows(IORuntimeException.class, () -> IOKit.read(tin, 1));
+            assertThrows(IllegalArgumentException.class, () -> IOKit.read(tin, -1));
         }
     }
 
@@ -1334,15 +1334,15 @@ public class IOOperatorTest implements DataTest {
             tin.setNextOperation(ReadOps.THROW, 99);
             ErrorAppender errOut = new ErrorAppender();
             // read stream
-            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tin, errOut));
-            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tin, errOut, 1));
-            expectThrows(IllegalArgumentException.class, () -> IOKit.readTo(tin, errOut, -1));
-            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tin, new char[1], 0, 1));
-            expectThrows(IndexOutOfBoundsException.class, () -> IOKit.readTo(tin, new char[0], 1, 0));
-            expectThrows(IndexOutOfBoundsException.class, () -> IOKit.readTo(tin, new char[0], 0, 1));
-            expectThrows(IORuntimeException.class, () -> IOKit.readTo(tin, CharBuffer.allocate(1)));
-            expectThrows(IllegalArgumentException.class, () -> IOKit.readTo(tin, CharBuffer.allocate(1), -1));
-            expectThrows(IORuntimeException.class, () ->
+            assertThrows(IORuntimeException.class, () -> IOKit.readTo(tin, errOut));
+            assertThrows(IORuntimeException.class, () -> IOKit.readTo(tin, errOut, 1));
+            assertThrows(IllegalArgumentException.class, () -> IOKit.readTo(tin, errOut, -1));
+            assertThrows(IORuntimeException.class, () -> IOKit.readTo(tin, new char[1], 0, 1));
+            assertThrows(IndexOutOfBoundsException.class, () -> IOKit.readTo(tin, new char[0], 1, 0));
+            assertThrows(IndexOutOfBoundsException.class, () -> IOKit.readTo(tin, new char[0], 0, 1));
+            assertThrows(IORuntimeException.class, () -> IOKit.readTo(tin, CharBuffer.allocate(1)));
+            assertThrows(IllegalArgumentException.class, () -> IOKit.readTo(tin, CharBuffer.allocate(1), -1));
+            assertThrows(IORuntimeException.class, () ->
                 IOKit.readTo(new CharArrayReader(new char[1]), CharBuffer.allocate(1).asReadOnlyBuffer())
             );
         }
@@ -1545,7 +1545,7 @@ public class IOOperatorTest implements DataTest {
             }
 
             @Override
-            public int read(@NotNull char[] b, int off, int len) {
+            public int read(char @Nonnull [] b, int off, int len) {
                 if (pos >= data.length) {
                     return -1;
                 }
@@ -1693,8 +1693,8 @@ public class IOOperatorTest implements DataTest {
         }
         {
             // error
-            expectThrows(IllegalArgumentException.class, () -> IOOperator.newOperator(0));
-            expectThrows(IllegalArgumentException.class, () -> IOOperator.newOperator(-1));
+            assertThrows(IllegalArgumentException.class, () -> IOOperator.newOperator(0));
+            assertThrows(IllegalArgumentException.class, () -> IOOperator.newOperator(-1));
         }
     }
 }

@@ -1,13 +1,13 @@
 package tests;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import internal.test.DataTest;
 import internal.test.PrintTest;
 
 import java.util.Arrays;
 
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class DataTestTest implements DataTest, PrintTest {
 
@@ -17,10 +17,10 @@ public class DataTestTest implements DataTest, PrintTest {
         testRandom(100, -64, 22);
         testRandom(100, -33, 44);
 
-        expectThrows(NegativeArraySizeException.class, () -> randomBytes(-1));
-        expectThrows(IllegalArgumentException.class, () -> randomBytes(10, (byte) 3, (byte) 2));
-        expectThrows(NegativeArraySizeException.class, () -> randomChars(-1));
-        expectThrows(IllegalArgumentException.class, () -> randomChars(10, '3', '2'));
+        assertThrows(NegativeArraySizeException.class, () -> randomBytes(-1));
+        assertThrows(IllegalArgumentException.class, () -> randomBytes(10, (byte) 3, (byte) 2));
+        assertThrows(NegativeArraySizeException.class, () -> randomChars(-1));
+        assertThrows(IllegalArgumentException.class, () -> randomChars(10, '3', '2'));
     }
 
     private void testRandom(int size, int from, int to) throws Exception {

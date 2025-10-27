@@ -1,6 +1,6 @@
 package tests.runtime.reflect;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.runtime.reflect.TypeKit;
 import space.sunqian.common.runtime.reflect.TypeRef;
 
@@ -12,8 +12,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class AssignTest {
 

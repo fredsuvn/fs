@@ -5,7 +5,7 @@ import space.sunqian.common.runtime.proxy.JdkProxyMaker;
 
 import java.lang.reflect.Field;
 
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 final class ProxyBackTest {
 
@@ -14,6 +14,6 @@ final class ProxyBackTest {
         Field field = cls.getDeclaredField("UNSUPPORTED_DEFAULT_METHOD_INVOCABLE");
         field.setAccessible(true);
         Invocable invocable = (Invocable) field.get(null);
-        expectThrows(JdkProxyMaker.JdkProxyException.class, () -> invocable.invokeChecked(null));
+        assertThrows(JdkProxyMaker.JdkProxyException.class, () -> invocable.invokeChecked(null));
     }
 }

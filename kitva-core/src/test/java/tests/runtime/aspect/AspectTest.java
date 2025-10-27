@@ -1,6 +1,6 @@
 package tests.runtime.aspect;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.common.base.value.BooleanVar;
@@ -13,9 +13,9 @@ import space.sunqian.common.runtime.aspect.AspectSpec;
 
 import java.lang.reflect.Method;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class AspectTest {
 
@@ -64,7 +64,7 @@ public class AspectTest {
         testSimple(count, replace, handler, SimpleCls.class);
         testSimple(count, replace, handler, ComplexCls.class);
         // exception
-        expectThrows(AspectException.class, () -> AspectMaker.byAsm().make(SimpleCls.class, null));
+        assertThrows(AspectException.class, () -> AspectMaker.byAsm().make(SimpleCls.class, null));
     }
 
     private <T extends SimpleCls> void testSimple(IntVar count, BooleanVar replace, AspectHandler handler, Class<T> cls) {
@@ -303,7 +303,7 @@ public class AspectTest {
                 }
             });
             SimpleCls sc2 = spec2.newInstance();
-            AspectTestException ex = expectThrows(AspectTestException.class, () ->
+            AspectTestException ex = assertThrows(AspectTestException.class, () ->
                 sc2.throwDouble("a", true, (byte) 2, '3', (short) 4, 5, 6L, 7.0f, 8.0d, null)
             );
             assertTrue(ex.getCause() instanceof NullPointerException);

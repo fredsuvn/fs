@@ -1,11 +1,11 @@
 package tests.app;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.app.SimpleApp;
 import space.sunqian.common.app.SimpleAppException;
 import internal.test.PrintTest;
 
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class AppTest implements PrintTest {
 
@@ -20,16 +20,16 @@ public class AppTest implements PrintTest {
     public void testException() throws Exception {
         {
             // SimpleAppException
-            expectThrows(SimpleAppException.class, () -> {
+            assertThrows(SimpleAppException.class, () -> {
                 throw new SimpleAppException();
             });
-            expectThrows(SimpleAppException.class, () -> {
+            assertThrows(SimpleAppException.class, () -> {
                 throw new SimpleAppException("");
             });
-            expectThrows(SimpleAppException.class, () -> {
+            assertThrows(SimpleAppException.class, () -> {
                 throw new SimpleAppException("", new RuntimeException());
             });
-            expectThrows(SimpleAppException.class, () -> {
+            assertThrows(SimpleAppException.class, () -> {
                 throw new SimpleAppException(new RuntimeException());
             });
         }

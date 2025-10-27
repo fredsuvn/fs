@@ -1,15 +1,15 @@
 package tests.base.thread;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import tests.utils.Utils;
 import space.sunqian.common.base.exception.AwaitingException;
 import space.sunqian.common.base.thread.ThreadKit;
 
 import java.time.Duration;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ThreadTest {
 

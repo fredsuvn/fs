@@ -1,6 +1,6 @@
 package tests.io.communicate;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.bytes.BytesBuilder;
 import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.io.BufferKit;
@@ -14,12 +14,13 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 import java.nio.channels.ClosedChannelException;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class CommunicateTest implements DataTest {
 
@@ -78,7 +79,7 @@ public class CommunicateTest implements DataTest {
         assertTrue(ic.channel().isOpen());
         assertNull(ic.availableString());
         reader.clear();
-        assertEquals(ic.availableBytes(), data);
+        assertArrayEquals(ic.availableBytes(), data);
         assertNull(ic.availableBytes());
         reader.clear();
         assertEquals(ic.availableBuffer(), ByteBuffer.wrap(data));
@@ -89,7 +90,7 @@ public class CommunicateTest implements DataTest {
         assertTrue(ic.channel().isOpen());
         ic.channel().close();
         assertFalse(ic.channel().isOpen());
-        expectThrows(IORuntimeException.class, () -> ic.writeString("hello world"));
+        assertThrows(IORuntimeException.class, () -> ic.writeString("hello world"));
         assertNull(ic.availableString());
         assertSame(ic.attachment(), attachment);
     }

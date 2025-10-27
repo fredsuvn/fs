@@ -1,6 +1,8 @@
 package tests.net;
 
-import org.testng.annotations.Test;
+import internal.test.ErrorCharset;
+import internal.test.PrintTest;
+import org.junit.jupiter.api.Test;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.common.base.chars.CharsKit;
@@ -13,8 +15,6 @@ import space.sunqian.common.net.http.HttpResp;
 import space.sunqian.common.net.tcp.TcpContext;
 import space.sunqian.common.net.tcp.TcpServer;
 import space.sunqian.common.net.tcp.TcpServerHandler;
-import internal.test.ErrorCharset;
-import internal.test.PrintTest;
 
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -25,16 +25,16 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.CountDownLatch;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class HttpTest implements PrintTest {
 
     private static final String TEST_URL = "https://www.baidu.com/s";
 
-    @Test(timeOut = 100000)
+    @Test
     public void testRequest() throws Exception {
         CountDownLatch readLatch = new CountDownLatch(1);
         TcpServer httpServer = TcpServer.newBuilder()
@@ -104,7 +104,7 @@ public class HttpTest implements PrintTest {
             assertEquals(bodyString, "hello, world2!");
         }
         httpServer.close();
-        expectThrows(IllegalArgumentException.class, () -> HttpReq.newBuilder().build());
+        assertThrows(IllegalArgumentException.class, () -> HttpReq.newBuilder().build());
     }
 
     @Test
@@ -179,7 +179,7 @@ public class HttpTest implements PrintTest {
             HttpKit.buildUrl(TEST_URL, MapKit.map()).toString(),
             TEST_URL
         );
-        expectThrows(NetException.class, () -> HttpKit.encodeUrl("abc", ErrorCharset.SINGLETON));
+        assertThrows(NetException.class, () -> HttpKit.encodeUrl("abc", ErrorCharset.SINGLETON));
     }
 
     private static final class HttpHandler implements TcpServerHandler, PrintTest {

@@ -1,6 +1,6 @@
 package tests;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import internal.test.AssertTest;
 import internal.test.KitvaTestException;
 import internal.test.MaterialBox;
@@ -15,10 +15,11 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static internal.test.MaterialBox.copyBuffer;
 import static internal.test.MaterialBox.copyBytes;
 import static internal.test.MaterialBox.copyChars;
@@ -39,7 +40,7 @@ public class AssertTestTest implements AssertTest {
     public void testEquals() throws Exception {
         Method string = Tt.class.getDeclaredMethod("string");
         invokeEquals("123", string, null);
-        expectThrows(AssertionError.class, () ->
+        assertThrows(AssertionError.class, () ->
             invokeEquals("123", string, null, "123")
         );
     }
@@ -50,14 +51,14 @@ public class AssertTestTest implements AssertTest {
         path.toFile().delete();
         byte[] data = {'1', '2', '3'};
         newFile(path, data);
-        expectThrows(IllegalStateException.class, () -> newFile(path, data));
+        assertThrows(IllegalStateException.class, () -> newFile(path, data));
         FileChannel fc = FileChannel.open(path, StandardOpenOption.READ);
         ByteBuffer buffer = ByteBuffer.allocate(data.length + 1);
         for (int i = 0; i >= 0; ) {
             i = fc.read(buffer);
         }
         buffer.flip();
-        assertEquals(Arrays.copyOf(buffer.array(), data.length), data);
+        assertArrayEquals(Arrays.copyOf(buffer.array(), data.length), data);
         path.toFile().delete();
     }
 
@@ -83,7 +84,7 @@ public class AssertTestTest implements AssertTest {
             ByteBuffer heapBuffer = MaterialBox.copyHeap(bytes);
             assertEquals(heapBuffer, ByteBuffer.wrap(bytes));
             assertFalse(heapBuffer.isDirect());
-            assertEquals(bytes, copyBytes(ByteBuffer.wrap(bytes)));
+            assertArrayEquals(bytes, copyBytes(ByteBuffer.wrap(bytes)));
         }
         {
             // buffer copy
@@ -96,7 +97,7 @@ public class AssertTestTest implements AssertTest {
             ByteBuffer heapBuffer = MaterialBox.copyHeap(buffer);
             assertEquals(heapBuffer, ByteBuffer.wrap(bytes));
             assertFalse(heapBuffer.isDirect());
-            assertEquals(bytes, copyBytes(ByteBuffer.wrap(bytes)));
+            assertArrayEquals(bytes, copyBytes(ByteBuffer.wrap(bytes)));
         }
         {
             // copy buffer
@@ -133,7 +134,7 @@ public class AssertTestTest implements AssertTest {
             CharBuffer heapBuffer = MaterialBox.copyHeap(chars);
             assertEquals(heapBuffer, CharBuffer.wrap(chars));
             assertFalse(heapBuffer.isDirect());
-            assertEquals(chars, copyChars(CharBuffer.wrap(chars)));
+            assertArrayEquals(chars, copyChars(CharBuffer.wrap(chars)));
         }
         {
             // buffer copy
@@ -146,7 +147,7 @@ public class AssertTestTest implements AssertTest {
             CharBuffer heapBuffer = MaterialBox.copyHeap(buffer);
             assertEquals(heapBuffer, CharBuffer.wrap(chars));
             assertFalse(heapBuffer.isDirect());
-            assertEquals(chars, copyChars(CharBuffer.wrap(chars)));
+            assertArrayEquals(chars, copyChars(CharBuffer.wrap(chars)));
         }
         {
             // copy buffer
@@ -163,28 +164,28 @@ public class AssertTestTest implements AssertTest {
 
     @Test
     public void testException() {
-        expectThrows(KitvaTestException.class, () -> {
+        assertThrows(KitvaTestException.class, () -> {
             throw new KitvaTestException();
         });
-        expectThrows(KitvaTestException.class, () -> {
+        assertThrows(KitvaTestException.class, () -> {
             throw new KitvaTestException("");
         });
-        expectThrows(KitvaTestException.class, () -> {
+        assertThrows(KitvaTestException.class, () -> {
             throw new KitvaTestException("", new RuntimeException());
         });
-        expectThrows(KitvaTestException.class, () -> {
+        assertThrows(KitvaTestException.class, () -> {
             throw new KitvaTestException(new RuntimeException());
         });
-        expectThrows(TestIOException.class, () -> {
+        assertThrows(TestIOException.class, () -> {
             throw new TestIOException();
         });
-        expectThrows(TestIOException.class, () -> {
+        assertThrows(TestIOException.class, () -> {
             throw new TestIOException("");
         });
-        expectThrows(TestIOException.class, () -> {
+        assertThrows(TestIOException.class, () -> {
             throw new TestIOException("", new RuntimeException());
         });
-        expectThrows(TestIOException.class, () -> {
+        assertThrows(TestIOException.class, () -> {
             throw new TestIOException(new RuntimeException());
         });
     }

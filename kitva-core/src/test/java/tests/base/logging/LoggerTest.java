@@ -1,14 +1,14 @@
 package tests.base.logging;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.logging.SimpleLogger;
 import internal.test.ErrorAppender;
 
 import java.lang.reflect.Method;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class LoggerTest {
 
@@ -30,7 +30,7 @@ public class LoggerTest {
         cusLogger.debug("This", " is ", "a debug message!");
         cusLogger.trace("This", " is ", "a trace message!");
         SimpleLogger errLogger = SimpleLogger.newLogger(SimpleLogger.Level.TRACE, new ErrorAppender());
-        expectThrows(IllegalStateException.class, () -> errLogger.info("This", " is ", "a fatal message!"));
+        assertThrows(IllegalStateException.class, () -> errLogger.info("This", " is ", "a fatal message!"));
         Method getCallerTrace = sysLogger.getClass()
             .getDeclaredMethod("getCallerTrace", String.class, StackTraceElement[].class);
         getCallerTrace.setAccessible(true);

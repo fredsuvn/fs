@@ -1,6 +1,6 @@
 package tests.net;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.common.base.chars.CharsKit;
@@ -21,10 +21,10 @@ import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.concurrent.CountDownLatch;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class UdpTest implements PrintTest {
 
@@ -121,13 +121,13 @@ public class UdpTest implements PrintTest {
         }
         {
             // builder exceptions
-            expectThrows(IllegalArgumentException.class, () ->
+            assertThrows(IllegalArgumentException.class, () ->
                 UdpServer.newBuilder()
                     .maxPacketSize(0)
                     .bind()
                     .close()
             );
-            // expectThrows(NetException.class, () ->
+            // assertThrows(NetException.class, () ->
             //     UdpServer.newBuilder()
             //         .socketOption(StandardSocketOptions.SO_LINGER, 111)
             // );
@@ -166,8 +166,8 @@ public class UdpTest implements PrintTest {
         readLatch.await();
         sender.close();
         UdpSender nSender = UdpSender.newSender();
-        expectThrows(NetException.class, nSender::broadcastAddress);
-        expectThrows(NetException.class, () -> nSender.sendBroadcast(sentData, server.localAddress().getPort()));
+        assertThrows(NetException.class, nSender::broadcastAddress);
+        assertThrows(NetException.class, () -> nSender.sendBroadcast(sentData, server.localAddress().getPort()));
         server.close();
         server.await();
     }

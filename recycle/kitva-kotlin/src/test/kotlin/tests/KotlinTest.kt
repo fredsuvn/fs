@@ -1,6 +1,6 @@
 //package tests
 //
-//import org.testng.annotations.Test
+//import org.junit.jupiter.api.Test
 //import xyz.sunqian.common.base.helloKotlin
 //
 //class KotlinTest {

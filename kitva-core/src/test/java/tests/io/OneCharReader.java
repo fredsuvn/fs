@@ -1,6 +1,6 @@
 package tests.io;
 
-import org.jetbrains.annotations.NotNull;
+import space.sunqian.annotations.Nonnull;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -23,7 +23,7 @@ public class OneCharReader extends Reader {
     }
 
     @Override
-    public int read(@NotNull char[] b, int off, int len) throws IOException {
+    public int read(char @Nonnull [] b, int off, int len) throws IOException {
         if (pos >= data.length) {
             return -1;
         }

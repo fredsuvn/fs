@@ -1,6 +1,6 @@
 package tests.base.string;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.exception.UnreachablePointException;
 import space.sunqian.common.base.string.StringView;
 import space.sunqian.common.collect.ListKit;
@@ -10,9 +10,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class StringViewTest implements PrintTest {
 
@@ -26,13 +26,13 @@ public class StringViewTest implements PrintTest {
         testStringView(fullString, ListKit.list("0", "1", "2", "3", "", "4", "", "5", "", "6", "7", "8", "9"));
         testStringView(fullString, ListKit.list("0", "1", "2", "3", "", "4", "", "5678", "", "", "9", "", ""));
         StringView sv = StringView.of(strings);
-        expectThrows(IndexOutOfBoundsException.class, () -> sv.charAt(-1));
-        expectThrows(IndexOutOfBoundsException.class, () -> sv.subSequence(-1, 5));
-        expectThrows(IndexOutOfBoundsException.class, () -> sv.subSequence(0, 11));
-        expectThrows(IndexOutOfBoundsException.class, () -> sv.subSequence(6, 5));
+        assertThrows(IndexOutOfBoundsException.class, () -> sv.charAt(-1));
+        assertThrows(IndexOutOfBoundsException.class, () -> sv.subSequence(-1, 5));
+        assertThrows(IndexOutOfBoundsException.class, () -> sv.subSequence(0, 11));
+        assertThrows(IndexOutOfBoundsException.class, () -> sv.subSequence(6, 5));
         Method findNode = sv.getClass().getDeclaredMethod("findNode", int.class);
         findNode.setAccessible(true);
-        Throwable invokeEx = expectThrows(InvocationTargetException.class, () -> findNode.invoke(sv, 100));
+        Throwable invokeEx = assertThrows(InvocationTargetException.class, () -> findNode.invoke(sv, 100));
         assertTrue(invokeEx.getCause() instanceof UnreachablePointException);
     }
 

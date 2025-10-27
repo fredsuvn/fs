@@ -26,6 +26,9 @@ dependencies {
     api("org.springframework:spring-beans:5.3.30")
 
     //test
+    api("org.junit.jupiter:junit-jupiter-api:5.14.0")
+    api("org.junit.jupiter:junit-jupiter-engine:5.14.0")
+    api("org.junit.platform:junit-platform-launcher:1.14.0")
     api("org.testng:testng:7.5.1")
     api("org.openjdk.jmh:jmh-core:1.37")
     api("org.openjdk.jmh:jmh-generator-annprocess:1.37")

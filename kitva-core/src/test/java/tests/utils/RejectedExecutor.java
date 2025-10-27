@@ -1,6 +1,6 @@
 package tests.utils;
 
-import org.jetbrains.annotations.NotNull;
+import space.sunqian.annotations.Nonnull;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -16,27 +16,27 @@ import java.util.concurrent.TimeoutException;
 
 public class RejectedExecutor implements ScheduledExecutorService {
 
-    @NotNull
+    @Nonnull
     @Override
-    public ScheduledFuture<?> schedule(@NotNull Runnable command, long delay, @NotNull TimeUnit unit) {
+    public ScheduledFuture<?> schedule(@Nonnull Runnable command, long delay, @Nonnull TimeUnit unit) {
         throw new RejectedExecutionException();
     }
 
-    @NotNull
+    @Nonnull
     @Override
-    public <V> ScheduledFuture<V> schedule(@NotNull Callable<V> callable, long delay, @NotNull TimeUnit unit) {
+    public <V> ScheduledFuture<V> schedule(@Nonnull Callable<V> callable, long delay, @Nonnull TimeUnit unit) {
         throw new RejectedExecutionException();
     }
 
-    @NotNull
+    @Nonnull
     @Override
-    public ScheduledFuture<?> scheduleAtFixedRate(@NotNull Runnable command, long initialDelay, long period, @NotNull TimeUnit unit) {
+    public ScheduledFuture<?> scheduleAtFixedRate(@Nonnull Runnable command, long initialDelay, long period, @Nonnull TimeUnit unit) {
         throw new RejectedExecutionException();
     }
 
-    @NotNull
+    @Nonnull
     @Override
-    public ScheduledFuture<?> scheduleWithFixedDelay(@NotNull Runnable command, long initialDelay, long delay, @NotNull TimeUnit unit) {
+    public ScheduledFuture<?> scheduleWithFixedDelay(@Nonnull Runnable command, long initialDelay, long delay, @Nonnull TimeUnit unit) {
         throw new RejectedExecutionException();
     }
 
@@ -44,7 +44,7 @@ public class RejectedExecutor implements ScheduledExecutorService {
     public void shutdown() {
     }
 
-    @NotNull
+    @Nonnull
     @Override
     public List<Runnable> shutdownNow() {
         return Collections.emptyList();
@@ -61,53 +61,53 @@ public class RejectedExecutor implements ScheduledExecutorService {
     }
 
     @Override
-    public boolean awaitTermination(long timeout, @NotNull TimeUnit unit) throws InterruptedException {
+    public boolean awaitTermination(long timeout, @Nonnull TimeUnit unit) throws InterruptedException {
         return false;
     }
 
-    @NotNull
+    @Nonnull
     @Override
-    public <T> Future<T> submit(@NotNull Callable<T> task) {
+    public <T> Future<T> submit(@Nonnull Callable<T> task) {
         throw new RejectedExecutionException();
     }
 
-    @NotNull
+    @Nonnull
     @Override
-    public <T> Future<T> submit(@NotNull Runnable task, T result) {
+    public <T> Future<T> submit(@Nonnull Runnable task, T result) {
         throw new RejectedExecutionException();
     }
 
-    @NotNull
+    @Nonnull
     @Override
-    public Future<?> submit(@NotNull Runnable task) {
+    public Future<?> submit(@Nonnull Runnable task) {
         throw new RejectedExecutionException();
     }
 
-    @NotNull
+    @Nonnull
     @Override
-    public <T> List<Future<T>> invokeAll(@NotNull Collection<? extends Callable<T>> tasks) throws InterruptedException {
+    public <T> List<Future<T>> invokeAll(@Nonnull Collection<? extends Callable<T>> tasks) throws InterruptedException {
         throw new RejectedExecutionException();
     }
 
-    @NotNull
+    @Nonnull
     @Override
-    public <T> List<Future<T>> invokeAll(@NotNull Collection<? extends Callable<T>> tasks, long timeout, @NotNull TimeUnit unit) throws InterruptedException {
+    public <T> List<Future<T>> invokeAll(@Nonnull Collection<? extends Callable<T>> tasks, long timeout, @Nonnull TimeUnit unit) throws InterruptedException {
         throw new RejectedExecutionException();
     }
 
-    @NotNull
+    @Nonnull
     @Override
-    public <T> T invokeAny(@NotNull Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
-        throw new RejectedExecutionException();
-    }
-
-    @Override
-    public <T> T invokeAny(@NotNull Collection<? extends Callable<T>> tasks, long timeout, @NotNull TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+    public <T> T invokeAny(@Nonnull Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
         throw new RejectedExecutionException();
     }
 
     @Override
-    public void execute(@NotNull Runnable command) {
+    public <T> T invokeAny(@Nonnull Collection<? extends Callable<T>> tasks, long timeout, @Nonnull TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+        throw new RejectedExecutionException();
+    }
+
+    @Override
+    public void execute(@Nonnull Runnable command) {
         throw new RejectedExecutionException();
     }
 }
