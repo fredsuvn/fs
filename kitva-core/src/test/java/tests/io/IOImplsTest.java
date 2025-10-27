@@ -37,6 +37,7 @@ import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
 import java.util.Arrays;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -251,12 +252,12 @@ public class IOImplsTest implements DataTest {
             byte[] dst = new byte[13];
             in.mark(dst.length);
             assertEquals(in.read(dst), dst.length);
-            assertEquals(dst, Arrays.copyOfRange(data, hasRead, hasRead + dst.length));
+            assertArrayEquals(dst, Arrays.copyOfRange(data, hasRead, hasRead + dst.length));
             if (in.markSupported()) {
                 in.reset();
                 dst = new byte[13];
                 assertEquals(in.read(dst), dst.length);
-                assertEquals(dst, Arrays.copyOfRange(data, hasRead, hasRead + dst.length));
+                assertArrayEquals(dst, Arrays.copyOfRange(data, hasRead, hasRead + dst.length));
             }
             hasRead += dst.length;
         }
@@ -271,7 +272,7 @@ public class IOImplsTest implements DataTest {
             byte[] dst = new byte[readSize + 4];
             in.mark(readSize);
             assertEquals(in.read(dst, 2, readSize), readSize);
-            assertEquals(
+            assertArrayEquals(
                 Arrays.copyOfRange(dst, 2, 2 + readSize),
                 Arrays.copyOfRange(data, hasRead, hasRead + readSize)
             );
@@ -279,7 +280,7 @@ public class IOImplsTest implements DataTest {
                 in.reset();
                 dst = new byte[readSize + 4];
                 assertEquals(in.read(dst, 2, readSize), readSize);
-                assertEquals(
+                assertArrayEquals(
                     Arrays.copyOfRange(dst, 2, 2 + readSize),
                     Arrays.copyOfRange(data, hasRead, hasRead + readSize)
                 );
@@ -318,7 +319,7 @@ public class IOImplsTest implements DataTest {
             byte[] remaining = new byte[remainingSize * 2];
             assertEquals(in.read(remaining), remainingSize);
             assertEquals(in.read(), -1);
-            assertEquals(
+            assertArrayEquals(
                 Arrays.copyOf(remaining, remainingSize),
                 Arrays.copyOfRange(data, hasRead, data.length)
             );
@@ -327,11 +328,11 @@ public class IOImplsTest implements DataTest {
                 byte[] remaining2 = new byte[remainingSize * 2];
                 assertEquals(in.read(remaining2), remainingSize);
                 assertEquals(in.read(), -1);
-                assertEquals(
+                assertArrayEquals(
                     Arrays.copyOf(remaining2, remainingSize),
                     Arrays.copyOfRange(data, hasRead, data.length)
                 );
-                assertEquals(
+                assertArrayEquals(
                     remaining,
                     remaining2
                 );
@@ -573,12 +574,12 @@ public class IOImplsTest implements DataTest {
                 in.mark(dst.length);
             }
             assertEquals(in.read(dst), dst.length);
-            assertEquals(dst, Arrays.copyOfRange(data, hasRead, hasRead + dst.length));
+            assertArrayEquals(dst, Arrays.copyOfRange(data, hasRead, hasRead + dst.length));
             if (in.markSupported()) {
                 in.reset();
                 dst = new char[13];
                 assertEquals(in.read(dst), dst.length);
-                assertEquals(dst, Arrays.copyOfRange(data, hasRead, hasRead + dst.length));
+                assertArrayEquals(dst, Arrays.copyOfRange(data, hasRead, hasRead + dst.length));
             }
             hasRead += dst.length;
         }
@@ -590,7 +591,7 @@ public class IOImplsTest implements DataTest {
                 in.mark(readSize);
             }
             assertEquals(in.read(dst, 2, readSize), readSize);
-            assertEquals(
+            assertArrayEquals(
                 Arrays.copyOfRange(dst, 2, 2 + readSize),
                 Arrays.copyOfRange(data, hasRead, hasRead + readSize)
             );
@@ -598,7 +599,7 @@ public class IOImplsTest implements DataTest {
                 in.reset();
                 dst = new char[readSize + 4];
                 assertEquals(in.read(dst, 2, readSize), readSize);
-                assertEquals(
+                assertArrayEquals(
                     Arrays.copyOfRange(dst, 2, 2 + readSize),
                     Arrays.copyOfRange(data, hasRead, hasRead + readSize)
                 );
@@ -613,13 +614,13 @@ public class IOImplsTest implements DataTest {
             }
             assertEquals(in.read(dst), dst.capacity());
             assertEquals(dst.position(), dst.capacity());
-            assertEquals(dst.array(), Arrays.copyOfRange(data, hasRead, hasRead + dst.capacity()));
+            assertArrayEquals(dst.array(), Arrays.copyOfRange(data, hasRead, hasRead + dst.capacity()));
             if (in.markSupported()) {
                 in.reset();
                 dst = CharBuffer.allocate(6);
                 assertEquals(in.read(dst), dst.capacity());
                 assertEquals(dst.position(), dst.capacity());
-                assertEquals(dst.array(), Arrays.copyOfRange(data, hasRead, hasRead + dst.capacity()));
+                assertArrayEquals(dst.array(), Arrays.copyOfRange(data, hasRead, hasRead + dst.capacity()));
             }
             hasRead += dst.capacity();
         }
@@ -651,7 +652,7 @@ public class IOImplsTest implements DataTest {
             char[] remaining = new char[remainingSize * 2];
             assertEquals(in.read(remaining), remainingSize);
             assertEquals(in.read(), -1);
-            assertEquals(
+            assertArrayEquals(
                 Arrays.copyOf(remaining, remainingSize),
                 Arrays.copyOfRange(data, hasRead, data.length)
             );
@@ -660,11 +661,11 @@ public class IOImplsTest implements DataTest {
                 char[] remaining2 = new char[remainingSize * 2];
                 assertEquals(in.read(remaining2), remainingSize);
                 assertEquals(in.read(), -1);
-                assertEquals(
+                assertArrayEquals(
                     Arrays.copyOf(remaining2, remainingSize),
                     Arrays.copyOfRange(data, hasRead, data.length)
                 );
-                assertEquals(
+                assertArrayEquals(
                     remaining,
                     remaining2
                 );
@@ -730,11 +731,11 @@ public class IOImplsTest implements DataTest {
             byte[] dst = new byte[data.length];
             OutputStream out = IOKit.newOutputStream(dst);
             testOutputStream(out, data, true, false);
-            assertEquals(dst, data);
+            assertArrayEquals(dst, data);
             dst = new byte[data.length + 10];
             out = IOKit.newOutputStream(dst, 5, data.length);
             testOutputStream(out, data, true, false);
-            assertEquals(Arrays.copyOfRange(dst, 5, dst.length - 5), data);
+            assertArrayEquals(Arrays.copyOfRange(dst, 5, dst.length - 5), data);
         }
         {
             // buffer
@@ -751,7 +752,7 @@ public class IOImplsTest implements DataTest {
             RandomAccessFile raf = new FakeFile(builder);
             OutputStream out = IOKit.newOutputStream(raf, 6);
             testOutputStream(out, data, false, true);
-            assertEquals(builder.toByteArray(), data);
+            assertArrayEquals(builder.toByteArray(), data);
         }
         {
             // chars
@@ -760,14 +761,14 @@ public class IOImplsTest implements DataTest {
             byte[] charBytes = new String(chars).getBytes(CharsKit.UTF_8);
             OutputStream out = IOKit.newOutputStream(builder);
             testOutputStream(out, charBytes, false, true);
-            assertEquals(builder.toCharArray(), chars);
+            assertArrayEquals(builder.toCharArray(), chars);
             // chinese: '\u4e00' - '\u9fff'
             builder.reset();
             chars = randomChars(dataSize, '\u4e00', '\u4e01');
             charBytes = new String(chars).getBytes(CharsKit.UTF_8);
             out = IOKit.newOutputStream(builder);
             testOutputStream(out, charBytes, false, true);
-            assertEquals(builder.toCharArray(), chars);
+            assertArrayEquals(builder.toCharArray(), chars);
             // emoji: "\uD83D\uDD1E"
             builder.reset();
             for (int i = 0; i < chars.length; i += 2) {
@@ -777,7 +778,7 @@ public class IOImplsTest implements DataTest {
             charBytes = new String(chars).getBytes(CharsKit.UTF_8);
             out = IOKit.newOutputStream(builder);
             testOutputStream(out, charBytes, false, true);
-            assertEquals(builder.toCharArray(), chars);
+            assertArrayEquals(builder.toCharArray(), chars);
             // fake charset
             builder.reset();
             byte[] fakeBytes = randomBytes(dataSize);
@@ -788,7 +789,7 @@ public class IOImplsTest implements DataTest {
             }
             out = IOKit.newOutputStream(builder, new ByteToNCharCharset(2));
             testOutputStream(out, fakeBytes, false, true);
-            assertEquals(builder.toCharArray(), fakeChars);
+            assertArrayEquals(builder.toCharArray(), fakeChars);
             // error: 0xC1
             builder.reset();
             OutputStream errOut = IOKit.newOutputStream(builder, new ErrorCharset());
@@ -803,14 +804,14 @@ public class IOImplsTest implements DataTest {
                 data,
                 true, false
             );
-            assertEquals(builder.toByteArray(), data);
+            assertArrayEquals(builder.toByteArray(), data);
             builder.reset();
             testOutputStream(
                 IOKit.limitedOutputStream(builder, data.length - 5),
                 Arrays.copyOf(data, data.length - 5),
                 true, false
             );
-            assertEquals(builder.toByteArray(), Arrays.copyOf(data, data.length - 5));
+            assertArrayEquals(builder.toByteArray(), Arrays.copyOf(data, data.length - 5));
         }
     }
 
@@ -888,11 +889,11 @@ public class IOImplsTest implements DataTest {
             char[] dst = new char[data.length];
             Writer out = IOKit.newWriter(dst);
             testWriter(out, data, true, false);
-            assertEquals(dst, data);
+            assertArrayEquals(dst, data);
             dst = new char[data.length + 10];
             out = IOKit.newWriter(dst, 5, data.length);
             testWriter(out, data, true, false);
-            assertEquals(Arrays.copyOfRange(dst, 5, dst.length - 5), data);
+            assertArrayEquals(Arrays.copyOfRange(dst, 5, dst.length - 5), data);
         }
         {
             // buffer
@@ -910,14 +911,14 @@ public class IOImplsTest implements DataTest {
             byte[] charBytes = new String(chars).getBytes(CharsKit.UTF_8);
             Writer out = IOKit.newWriter(builder);
             testWriter(out, chars, false, true);
-            assertEquals(builder.toByteArray(), charBytes);
+            assertArrayEquals(builder.toByteArray(), charBytes);
             // chinese: '\u4e00' - '\u9fff'
             builder.reset();
             chars = randomChars(dataSize, '\u4e00', '\u4e01');
             charBytes = new String(chars).getBytes(CharsKit.UTF_8);
             out = IOKit.newWriter(builder);
             testWriter(out, chars, false, true);
-            assertEquals(builder.toByteArray(), charBytes);
+            assertArrayEquals(builder.toByteArray(), charBytes);
             // emoji: "\uD83D\uDD1E"
             builder.reset();
             for (int i = 0; i < chars.length; i += 2) {
@@ -927,7 +928,7 @@ public class IOImplsTest implements DataTest {
             charBytes = new String(chars).getBytes(CharsKit.UTF_8);
             out = IOKit.newWriter(builder);
             testWriter(out, chars, false, true);
-            assertEquals(builder.toByteArray(), charBytes);
+            assertArrayEquals(builder.toByteArray(), charBytes);
             // error: U+DD88
             builder.reset();
             Writer errOut = IOKit.newWriter(builder, new ErrorCharset());
@@ -943,14 +944,14 @@ public class IOImplsTest implements DataTest {
                 data,
                 true, false
             );
-            assertEquals(builder.toCharArray(), data);
+            assertArrayEquals(builder.toCharArray(), data);
             builder.reset();
             testWriter(
                 IOKit.limitedWriter(builder, data.length - 5),
                 Arrays.copyOf(data, data.length - 5),
                 true, false
             );
-            assertEquals(builder.toCharArray(), Arrays.copyOf(data, data.length - 5));
+            assertArrayEquals(builder.toCharArray(), Arrays.copyOf(data, data.length - 5));
         }
     }
 

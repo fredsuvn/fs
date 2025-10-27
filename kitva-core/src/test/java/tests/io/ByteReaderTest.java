@@ -23,6 +23,7 @@ import java.nio.channels.WritableByteChannel;
 import java.util.Arrays;
 import java.util.function.Supplier;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
@@ -160,7 +161,7 @@ public class ByteReaderTest implements DataTest {
         while (hasRead < data.length) {
             ByteSegment segment = reader.read(readSize);
             int actualLen = Math.min(readSize, data.length - hasRead);
-            assertEquals(
+            assertArrayEquals(
                 BufferKit.copyContent(segment.data()),
                 Arrays.copyOfRange(data, hasRead, hasRead + actualLen)
             );
@@ -278,7 +279,7 @@ public class ByteReaderTest implements DataTest {
                 assertEquals(hasRead, Math.min(readSize, data.length));
                 long restLen = data.length - hasRead;
                 assertEquals(reader.readTo(builder), restLen == 0 ? -1 : restLen);
-                assertEquals(builder.toByteArray(), data);
+                assertArrayEquals(builder.toByteArray(), data);
                 if (reader.markSupported()) {
                     reader.reset();
                     builder.reset();
@@ -286,7 +287,7 @@ public class ByteReaderTest implements DataTest {
                     assertEquals(hasRead, Math.min(readSize, data.length));
                     restLen = data.length - hasRead;
                     assertEquals(reader.readTo(builder), restLen == 0 ? -1 : restLen);
-                    assertEquals(builder.toByteArray(), data);
+                    assertArrayEquals(builder.toByteArray(), data);
                 }
                 assertEquals(reader.readTo(builder), -1);
                 assertEquals(reader.readTo(builder, 66), -1);
@@ -320,7 +321,7 @@ public class ByteReaderTest implements DataTest {
                 assertEquals(hasRead, Math.min(readSize, data.length));
                 long restLen = data.length - hasRead;
                 assertEquals(reader.readTo(channel), restLen == 0 ? -1 : restLen);
-                assertEquals(builder.toByteArray(), data);
+                assertArrayEquals(builder.toByteArray(), data);
                 if (reader.markSupported()) {
                     reader.reset();
                     builder.reset();
@@ -328,7 +329,7 @@ public class ByteReaderTest implements DataTest {
                     assertEquals(hasRead, Math.min(readSize, data.length));
                     restLen = data.length - hasRead;
                     assertEquals(reader.readTo(channel), restLen == 0 ? -1 : restLen);
-                    assertEquals(builder.toByteArray(), data);
+                    assertArrayEquals(builder.toByteArray(), data);
                 }
                 assertEquals(reader.readTo(channel), -1);
                 assertEquals(reader.readTo(channel, 66), -1);
@@ -363,7 +364,7 @@ public class ByteReaderTest implements DataTest {
                 assertEquals(hasRead, Math.min(readSize, data.length));
                 long restLen = data.length - hasRead;
                 assertEquals(reader.readTo(channel), restLen == 0 ? -1 : restLen);
-                assertEquals(builder.toByteArray(), data);
+                assertArrayEquals(builder.toByteArray(), data);
                 if (reader.markSupported()) {
                     reader.reset();
                     builder.reset();
@@ -371,7 +372,7 @@ public class ByteReaderTest implements DataTest {
                     assertEquals(hasRead, Math.min(readSize, data.length));
                     restLen = data.length - hasRead;
                     assertEquals(reader.readTo(channel), restLen == 0 ? -1 : restLen);
-                    assertEquals(builder.toByteArray(), data);
+                    assertArrayEquals(builder.toByteArray(), data);
                 }
                 assertEquals(reader.readTo(channel), -1);
                 assertEquals(reader.readTo(channel, 66), -1);
@@ -402,19 +403,19 @@ public class ByteReaderTest implements DataTest {
                 }
                 int actualLen = reader.readTo(dst);
                 assertEquals(actualLen, Math.min(data.length, DST_SIZE));
-                assertEquals(Arrays.copyOf(dst, actualLen), Arrays.copyOf(data, actualLen));
+                assertArrayEquals(Arrays.copyOf(dst, actualLen), Arrays.copyOf(data, actualLen));
                 if (reader.markSupported()) {
                     reader.reset();
                     dst = new byte[DST_SIZE];
                     actualLen = reader.readTo(dst);
                     assertEquals(actualLen, Math.min(data.length, DST_SIZE));
-                    assertEquals(Arrays.copyOf(dst, actualLen), Arrays.copyOf(data, actualLen));
+                    assertArrayEquals(Arrays.copyOf(dst, actualLen), Arrays.copyOf(data, actualLen));
                 }
                 // read all
                 reader = supplier.get();
                 dst = new byte[data.length];
                 assertEquals(reader.readTo(dst), data.length);
-                assertEquals(dst, data);
+                assertArrayEquals(dst, data);
                 assertEquals(reader.readTo(new byte[1]), -1);
                 reader.close();
                 assertEquals(reader.readTo(new byte[0]), 0);
@@ -437,19 +438,19 @@ public class ByteReaderTest implements DataTest {
                 }
                 int actualLen = reader.readTo(dst, 3, Math.min(readSize, DST_SIZE));
                 assertEquals(actualLen, minSize(data.length, readSize, DST_SIZE));
-                assertEquals(Arrays.copyOfRange(dst, 3, 3 + actualLen), Arrays.copyOf(data, actualLen));
+                assertArrayEquals(Arrays.copyOfRange(dst, 3, 3 + actualLen), Arrays.copyOf(data, actualLen));
                 if (reader.markSupported()) {
                     reader.reset();
                     dst = new byte[DST_SIZE + 6];
                     actualLen = reader.readTo(dst, 3, Math.min(readSize, DST_SIZE));
                     assertEquals(actualLen, minSize(data.length, readSize, DST_SIZE));
-                    assertEquals(Arrays.copyOfRange(dst, 3, 3 + actualLen), Arrays.copyOf(data, actualLen));
+                    assertArrayEquals(Arrays.copyOfRange(dst, 3, 3 + actualLen), Arrays.copyOf(data, actualLen));
                 }
                 // read all
                 reader = supplier.get();
                 dst = new byte[data.length + 2];
                 assertEquals(reader.readTo(dst, 1, data.length), data.length);
-                assertEquals(Arrays.copyOfRange(dst, 1, 1 + data.length), data);
+                assertArrayEquals(Arrays.copyOfRange(dst, 1, 1 + data.length), data);
                 assertEquals(reader.readTo(new byte[1], 0, 1), -1);
                 reader.close();
                 assertEquals(reader.readTo(new byte[0], 0, 0), 0);
@@ -480,21 +481,21 @@ public class ByteReaderTest implements DataTest {
                 int actualLen = reader.readTo(dst);
                 assertEquals(actualLen, Math.min(data.length, DST_SIZE));
                 dst.flip();
-                assertEquals(BufferKit.copyContent(dst), Arrays.copyOf(data, actualLen));
+                assertArrayEquals(BufferKit.copyContent(dst), Arrays.copyOf(data, actualLen));
                 if (reader.markSupported()) {
                     reader.reset();
                     dst = ByteBuffer.allocateDirect(DST_SIZE);
                     actualLen = reader.readTo(dst);
                     assertEquals(actualLen, Math.min(data.length, DST_SIZE));
                     dst.flip();
-                    assertEquals(BufferKit.copyContent(dst), Arrays.copyOf(data, actualLen));
+                    assertArrayEquals(BufferKit.copyContent(dst), Arrays.copyOf(data, actualLen));
                 }
                 // read all
                 reader = supplier.get();
                 dst = ByteBuffer.allocate(data.length);
                 assertEquals(reader.readTo(dst), data.length);
                 dst.flip();
-                assertEquals(BufferKit.copyContent(dst), data);
+                assertArrayEquals(BufferKit.copyContent(dst), data);
                 assertEquals(reader.readTo(ByteBuffer.allocate(1)), -1);
                 assertEquals(reader.readTo(ByteBuffer.allocateDirect(1)), -1);
                 reader.close();
@@ -537,21 +538,21 @@ public class ByteReaderTest implements DataTest {
                 int actualLen = reader.readTo(dst, readSize);
                 assertEquals(actualLen, minSize(data.length, readSize, DST_SIZE));
                 dst.flip();
-                assertEquals(BufferKit.copyContent(dst), Arrays.copyOf(data, actualLen));
+                assertArrayEquals(BufferKit.copyContent(dst), Arrays.copyOf(data, actualLen));
                 if (reader.markSupported()) {
                     reader.reset();
                     dst = ByteBuffer.allocateDirect(DST_SIZE);
                     actualLen = reader.readTo(dst, readSize);
                     assertEquals(actualLen, minSize(data.length, readSize, DST_SIZE));
                     dst.flip();
-                    assertEquals(BufferKit.copyContent(dst), Arrays.copyOf(data, actualLen));
+                    assertArrayEquals(BufferKit.copyContent(dst), Arrays.copyOf(data, actualLen));
                 }
                 // read all
                 reader = supplier.get();
                 dst = ByteBuffer.allocate(data.length);
                 assertEquals(reader.readTo(dst, data.length), data.length);
                 dst.flip();
-                assertEquals(BufferKit.copyContent(dst), data);
+                assertArrayEquals(BufferKit.copyContent(dst), data);
                 assertEquals(reader.readTo(ByteBuffer.allocate(1), 1), -1);
                 assertEquals(reader.readTo(ByteBuffer.allocateDirect(1), 1), -1);
                 reader.close();
@@ -745,7 +746,7 @@ public class ByteReaderTest implements DataTest {
             if (preKnown) {
                 ByteSegment s = reader.available();
                 assertTrue(s.end());
-                assertEquals(BufferKit.copyContent(s.data()), src);
+                assertArrayEquals(BufferKit.copyContent(s.data()), src);
                 assertTrue(reader.available(1).end());
             } else {
                 ByteSegment s0 = reader.available();
@@ -761,7 +762,7 @@ public class ByteReaderTest implements DataTest {
                         break;
                     }
                 }
-                assertEquals(builder.toByteArray(), src);
+                assertArrayEquals(builder.toByteArray(), src);
                 ByteSegment se = reader.available(size);
                 assertTrue(se.end());
                 assertFalse(se.data().hasRemaining());
@@ -778,7 +779,7 @@ public class ByteReaderTest implements DataTest {
                     break;
                 }
             }
-            assertEquals(builder.toByteArray(), src);
+            assertArrayEquals(builder.toByteArray(), src);
             builder.reset();
             ByteReader reader2 = supplier.get();
             assertEquals(reader2.availableTo(builder, size * 2L), preKnown ? size : 0);
@@ -788,7 +789,7 @@ public class ByteReaderTest implements DataTest {
                     break;
                 }
             }
-            assertEquals(builder.toByteArray(), src);
+            assertArrayEquals(builder.toByteArray(), src);
             builder.reset();
         }
         {
@@ -803,7 +804,7 @@ public class ByteReaderTest implements DataTest {
                     break;
                 }
             }
-            assertEquals(builder.toByteArray(), src);
+            assertArrayEquals(builder.toByteArray(), src);
             builder.reset();
             ByteReader reader2 = supplier.get();
             assertEquals(reader2.availableTo(builder, size * 2L), preKnown ? size : 0);
@@ -813,7 +814,7 @@ public class ByteReaderTest implements DataTest {
                     break;
                 }
             }
-            assertEquals(builder.toByteArray(), src);
+            assertArrayEquals(builder.toByteArray(), src);
             builder.reset();
         }
         {
@@ -829,7 +830,7 @@ public class ByteReaderTest implements DataTest {
                 }
                 c += (int) readSize;
             }
-            assertEquals(Arrays.copyOf(dst, size), src);
+            assertArrayEquals(Arrays.copyOf(dst, size), src);
             dst = new byte[size * 2];
             c = 0;
             ByteReader reader2 = supplier.get();
@@ -841,7 +842,7 @@ public class ByteReaderTest implements DataTest {
                 }
                 c += (int) readSize;
             }
-            assertEquals(Arrays.copyOf(dst, size), src);
+            assertArrayEquals(Arrays.copyOf(dst, size), src);
         }
         {
             // to buffer
@@ -857,7 +858,7 @@ public class ByteReaderTest implements DataTest {
                 c += (int) readSize;
             }
             dst.flip();
-            assertEquals(BufferKit.read(dst), src);
+            assertArrayEquals(BufferKit.read(dst), src);
             dst = ByteBuffer.allocate(size * 2);
             c = 0;
             ByteReader reader2 = supplier.get();
@@ -870,7 +871,7 @@ public class ByteReaderTest implements DataTest {
                 c += (int) readSize;
             }
             dst.flip();
-            assertEquals(BufferKit.read(dst), src);
+            assertArrayEquals(BufferKit.read(dst), src);
         }
     }
 
@@ -891,7 +892,7 @@ public class ByteReaderTest implements DataTest {
             ByteBuffer buffer = reader.read();
             assertEquals(buffer == null, size == 0);
             if (buffer != null) {
-                assertEquals(buffer.array(), data);
+                assertArrayEquals(buffer.array(), data);
             }
             assertNull(reader.read());
         }
@@ -901,7 +902,7 @@ public class ByteReaderTest implements DataTest {
             ByteBuffer buffer = reader.read();
             assertEquals(buffer == null, size == 0);
             if (buffer != null) {
-                assertEquals(buffer.array(), data);
+                assertArrayEquals(buffer.array(), data);
             }
             assertNull(reader.read());
         }
@@ -911,7 +912,7 @@ public class ByteReaderTest implements DataTest {
             ByteBuffer buffer = reader.read();
             assertEquals(buffer == null, size == 0);
             if (buffer != null) {
-                assertEquals(buffer.array(), data);
+                assertArrayEquals(buffer.array(), data);
             }
             assertNull(reader.read());
         }
@@ -921,7 +922,7 @@ public class ByteReaderTest implements DataTest {
             ByteBuffer buffer = reader.read();
             assertEquals(buffer == null, size == 0);
             if (buffer != null) {
-                assertEquals(buffer.array(), data);
+                assertArrayEquals(buffer.array(), data);
             }
             assertNull(reader.read());
         }
@@ -931,7 +932,7 @@ public class ByteReaderTest implements DataTest {
             ByteBuffer buffer = reader.read();
             assertEquals(buffer == null, size == 0);
             if (buffer != null) {
-                assertEquals(buffer.array(), data);
+                assertArrayEquals(buffer.array(), data);
             }
             assertNull(reader.read());
         }
@@ -1031,10 +1032,10 @@ public class ByteReaderTest implements DataTest {
         assertEquals(segmentCopy.data(), ByteBuffer.wrap(bytes));
         assertTrue(segmentCopy.end());
         assertNotSame(segmentCopy.data().array(), bytes);
-        assertEquals(segment.copyArray(), bytes);
+        assertArrayEquals(segment.copyArray(), bytes);
         assertNotSame(segment.copyArray(), bytes);
-        assertEquals(segment.array(), bytes);
-        assertEquals(segment.array(), new byte[0]);
+        assertArrayEquals(segment.array(), bytes);
+        assertArrayEquals(segment.array(), new byte[0]);
     }
 
     @Test
@@ -1129,7 +1130,7 @@ public class ByteReaderTest implements DataTest {
         InputStream asIn = reader.asInputStream();
         reader.readTo(builder, 1);
         IOKit.readTo(asIn, builder);
-        assertEquals(builder.toByteArray(), data);
+        assertArrayEquals(builder.toByteArray(), data);
     }
 
     @Test

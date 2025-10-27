@@ -1,5 +1,10 @@
 package tests.io;
 
+import internal.test.AssertTest;
+import internal.test.DataTest;
+import internal.test.ErrorOutputStream;
+import internal.test.ReadOps;
+import internal.test.TestInputStream;
 import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.bytes.BytesBuilder;
 import space.sunqian.common.base.chars.CharsKit;
@@ -11,11 +16,6 @@ import space.sunqian.common.io.ByteSegment;
 import space.sunqian.common.io.ByteTransformer;
 import space.sunqian.common.io.IOKit;
 import space.sunqian.common.io.IORuntimeException;
-import internal.test.AssertTest;
-import internal.test.DataTest;
-import internal.test.ErrorOutputStream;
-import internal.test.ReadOps;
-import internal.test.TestInputStream;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -28,8 +28,8 @@ import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ByteProcessorTest implements DataTest, AssertTest {
 
@@ -121,13 +121,13 @@ public class ByteProcessorTest implements DataTest, AssertTest {
                 ByteProcessor.from(data).readBlockSize(readBlockSize).processTo(builder),
                 totalSize == 0 ? -1 : totalSize
             );
-            assertEquals(builder.toByteArray(), data);
+            assertArrayEquals(builder.toByteArray(), data);
             builder.reset();
             assertEquals(
                 ByteProcessor.from(data).readBlockSize(readBlockSize).readLimit(limit).processTo(builder),
                 actualSize(totalSize, limit)
             );
-            assertEquals(builder.toByteArray(), limitedData);
+            assertArrayEquals(builder.toByteArray(), limitedData);
             builder.reset();
             // with transformers
             assertEquals(
@@ -200,13 +200,13 @@ public class ByteProcessorTest implements DataTest, AssertTest {
                 ByteProcessor.from(ByteBuffer.wrap(data)).readBlockSize(readBlockSize).processTo(dst),
                 totalSize == 0 ? -1 : totalSize
             );
-            assertEquals(dst, data);
+            assertArrayEquals(dst, data);
             dst = new byte[limitedData.length];
             assertEquals(
                 ByteProcessor.from(ByteBuffer.wrap(data)).readBlockSize(readBlockSize).readLimit(limit).processTo(dst),
                 actualSize(totalSize, limit)
             );
-            assertEquals(dst, limitedData);
+            assertArrayEquals(dst, limitedData);
             // with transformers
             dst = new byte[timesData.length];
             assertEquals(
@@ -217,7 +217,7 @@ public class ByteProcessorTest implements DataTest, AssertTest {
                 totalSize == 0 ? -1 : totalSize
             );
             assertEquals(endCount.get(), 2);
-            assertEquals(dst, timesData);
+            assertArrayEquals(dst, timesData);
             endCount.clear();
             dst = new byte[dstSize(totalSize, limit) * 4];
             assertEquals(
@@ -228,7 +228,7 @@ public class ByteProcessorTest implements DataTest, AssertTest {
                 actualSize(totalSize, limit)
             );
             assertEquals(endCount.get(), 2);
-            assertEquals(dst, limitedTimesData);
+            assertArrayEquals(dst, limitedTimesData);
             endCount.clear();
         }
         {
@@ -238,13 +238,13 @@ public class ByteProcessorTest implements DataTest, AssertTest {
                 ByteProcessor.from(data).readBlockSize(readBlockSize).processTo(dst, 5),
                 totalSize == 0 ? -1 : totalSize
             );
-            assertEquals(Arrays.copyOfRange(dst, 5, dst.length), data);
+            assertArrayEquals(Arrays.copyOfRange(dst, 5, dst.length), data);
             dst = new byte[limitedData.length + 5];
             assertEquals(
                 ByteProcessor.from(data).readBlockSize(readBlockSize).readLimit(limit).processTo(dst, 5),
                 actualSize(totalSize, limit)
             );
-            assertEquals(
+            assertArrayEquals(
                 Arrays.copyOfRange(dst, 5, dst.length),
                 limitedData
             );
@@ -258,7 +258,7 @@ public class ByteProcessorTest implements DataTest, AssertTest {
                 totalSize == 0 ? -1 : totalSize
             );
             assertEquals(endCount.get(), 2);
-            assertEquals(Arrays.copyOfRange(dst, 5, dst.length), timesData);
+            assertArrayEquals(Arrays.copyOfRange(dst, 5, dst.length), timesData);
             endCount.clear();
             dst = new byte[limitedTimesData.length + 5];
             assertEquals(
@@ -269,7 +269,7 @@ public class ByteProcessorTest implements DataTest, AssertTest {
                 actualSize(totalSize, limit)
             );
             assertEquals(endCount.get(), 2);
-            assertEquals(
+            assertArrayEquals(
                 Arrays.copyOfRange(dst, 5, dst.length),
                 limitedTimesData
             );
@@ -282,13 +282,13 @@ public class ByteProcessorTest implements DataTest, AssertTest {
                 ByteProcessor.from(data).readBlockSize(readBlockSize).processTo(dst),
                 totalSize == 0 ? -1 : totalSize
             );
-            assertEquals(BufferKit.copyContent((ByteBuffer) dst.flip()), data);
+            assertArrayEquals(BufferKit.copyContent((ByteBuffer) dst.flip()), data);
             dst = ByteBuffer.allocate(limitedData.length);
             assertEquals(
                 ByteProcessor.from(data).readBlockSize(readBlockSize).readLimit(limit).processTo(dst),
                 actualSize(totalSize, limit)
             );
-            assertEquals(
+            assertArrayEquals(
                 BufferKit.copyContent((ByteBuffer) dst.flip()),
                 limitedData
             );
@@ -302,7 +302,7 @@ public class ByteProcessorTest implements DataTest, AssertTest {
                 totalSize == 0 ? -1 : totalSize
             );
             assertEquals(endCount.get(), 2);
-            assertEquals(BufferKit.copyContent((ByteBuffer) dst.flip()), timesData);
+            assertArrayEquals(BufferKit.copyContent((ByteBuffer) dst.flip()), timesData);
             endCount.clear();
             dst = ByteBuffer.allocate(limitedTimesData.length);
             assertEquals(
@@ -313,7 +313,7 @@ public class ByteProcessorTest implements DataTest, AssertTest {
                 actualSize(totalSize, limit)
             );
             assertEquals(endCount.get(), 2);
-            assertEquals(
+            assertArrayEquals(
                 BufferKit.copyContent((ByteBuffer) dst.flip()),
                 limitedTimesData
             );
@@ -357,15 +357,15 @@ public class ByteProcessorTest implements DataTest, AssertTest {
         byte[] timesData = timesData(data);
         byte[] limitedTimesData = timesData(limitedData);
         {
-            assertEquals(
+            assertArrayEquals(
                 IOKit.read(ByteProcessor.from(data).readBlockSize(readBlockSize).asInputStream()),
                 data.length == 0 ? null : data
             );
-            assertEquals(
+            assertArrayEquals(
                 IOKit.read(ByteProcessor.from(data).readBlockSize(readBlockSize).readLimit(limit).asInputStream()),
                 limitedData.length == 0 ? null : limitedData
             );
-            assertEquals(
+            assertArrayEquals(
                 IOKit.read(ByteProcessor.from(data).readBlockSize(readBlockSize)
                     .transformer(timesTransformer(readBlockSize, endCount))
                     .transformer(timesTransformer(readBlockSize, endCount))
@@ -374,7 +374,7 @@ public class ByteProcessorTest implements DataTest, AssertTest {
             );
             assertEquals(endCount.get(), 2);
             endCount.clear();
-            assertEquals(
+            assertArrayEquals(
                 IOKit.read(ByteProcessor.from(data).readBlockSize(readBlockSize).readLimit(limit)
                     .transformer(timesTransformer(readBlockSize, endCount))
                     .transformer(timesTransformer(readBlockSize, endCount))
@@ -416,7 +416,7 @@ public class ByteProcessorTest implements DataTest, AssertTest {
         }
         {
             // for empty
-            assertEquals(
+            assertArrayEquals(
                 IOKit.read(ByteProcessor.from(data).readBlockSize(readBlockSize)
                     .transformer(ByteTransformer.empty())
                     .asInputStream()),
@@ -575,7 +575,7 @@ public class ByteProcessorTest implements DataTest, AssertTest {
                     .processTo(builder),
                 totalSize == 0 ? -1 : totalSize
             );
-            assertEquals(builder.toByteArray(), data);
+            assertArrayEquals(builder.toByteArray(), data);
             assertEquals(endCount.get(), 1);
             builder.reset();
             endCount.clear();
@@ -595,7 +595,7 @@ public class ByteProcessorTest implements DataTest, AssertTest {
                     .processTo(builder),
                 totalSize == 0 ? -1 : totalSize
             );
-            assertEquals(builder.toByteArray(), data);
+            assertArrayEquals(builder.toByteArray(), data);
             assertEquals(endCount.get(), 1);
             builder.reset();
             endCount.clear();
@@ -631,7 +631,7 @@ public class ByteProcessorTest implements DataTest, AssertTest {
                     .processTo(builder),
                 totalSize == 0 ? -1 : totalSize
             );
-            assertEquals(builder.toByteArray(), data);
+            assertArrayEquals(builder.toByteArray(), data);
             assertEquals(endCount.get(), 1);
             builder.reset();
             endCount.clear();

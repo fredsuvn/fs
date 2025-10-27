@@ -1,8 +1,8 @@
 package tests.codec;
 
+import internal.test.DataTest;
 import org.junit.jupiter.api.Test;
 import space.sunqian.common.codec.Base64Kit;
-import internal.test.DataTest;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -37,7 +37,7 @@ public class Base64Test implements DataTest {
         {
             // url safe
             String urlSafe = "+/==";
-            assertEquals(
+            assertArrayEquals(
                 Base64Kit.decoder().decode(urlSafe),
                 Base64.getDecoder().decode(urlSafe)
             );
@@ -113,9 +113,9 @@ public class Base64Test implements DataTest {
                     '%' +
                     baseNoPadding.substring(midIndex) +
                     '%';
-            assertEquals(Base64Kit.decoder(false).decode(defective), src);
+            assertArrayEquals(Base64Kit.decoder(false).decode(defective), src);
             ByteBuffer defectiveBuf = ByteBuffer.wrap(defective.getBytes(StandardCharsets.ISO_8859_1));
-            assertEquals(Base64Kit.decoder(false).decode(defectiveBuf), src);
+            assertArrayEquals(Base64Kit.decoder(false).decode(defectiveBuf), src);
             Base64Kit.Base64Exception e;
             e = assertThrows(Base64Kit.Base64Exception.class, () -> Base64Kit.decoder().decode(defective));
             assertEquals(e.position(), midIndex);

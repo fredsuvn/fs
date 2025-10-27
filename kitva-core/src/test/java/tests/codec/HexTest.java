@@ -117,12 +117,12 @@ public class HexTest implements DataTest {
                 '%' +
                 hexLower.substring(midIndex) +
                 '%';
-            assertEquals(HexKit.decoder(false).decode(defectiveUpper), src);
-            assertEquals(HexKit.decoder(false).decode(defectiveLower), src);
+            assertArrayEquals(HexKit.decoder(false).decode(defectiveUpper), src);
+            assertArrayEquals(HexKit.decoder(false).decode(defectiveLower), src);
             ByteBuffer upperBuf2 = ByteBuffer.wrap(defectiveUpper.getBytes(StandardCharsets.ISO_8859_1));
             ByteBuffer lowerBuf2 = ByteBuffer.wrap(defectiveLower.getBytes(StandardCharsets.ISO_8859_1));
-            assertEquals(HexKit.decoder(false).decode(upperBuf2), src);
-            assertEquals(HexKit.decoder(false).decode(lowerBuf2), src);
+            assertArrayEquals(HexKit.decoder(false).decode(upperBuf2), src);
+            assertArrayEquals(HexKit.decoder(false).decode(lowerBuf2), src);
             HexKit.HexException e;
             e = assertThrows(HexKit.HexException.class, () -> HexKit.decoder().decode(defectiveUpper));
             assertEquals(e.position(), -1);

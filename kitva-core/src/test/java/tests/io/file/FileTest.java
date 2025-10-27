@@ -1,5 +1,8 @@
 package tests.io.file;
 
+import internal.test.AssertTest;
+import internal.test.DataTest;
+import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.io.BufferKit;
@@ -7,9 +10,6 @@ import space.sunqian.common.io.IOKit;
 import space.sunqian.common.io.IORuntimeException;
 import space.sunqian.common.io.file.FileKit;
 import space.sunqian.common.io.file.FileRef;
-import internal.test.AssertTest;
-import internal.test.DataTest;
-import internal.test.PrintTest;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,8 +31,8 @@ import java.util.Collections;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FileTest implements DataTest, PrintTest, AssertTest {
 
@@ -126,7 +126,7 @@ public class FileTest implements DataTest, PrintTest, AssertTest {
         assertThrows(IORuntimeException.class, errRef::newFileChannel);
         // read
         assertEquals(fileRef.readString(), hello);
-        assertEquals(fileRef.readLines(), Collections.singleton(hello));
+        assertEquals(fileRef.readLines(), Collections.singletonList(hello));
         assertThrows(IORuntimeException.class, errRef::readString);
         assertThrows(IORuntimeException.class, errRef::readLines);
         // write

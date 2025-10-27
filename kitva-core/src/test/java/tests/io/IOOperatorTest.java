@@ -27,6 +27,7 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.Arrays;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -101,13 +102,13 @@ public class IOOperatorTest implements DataTest {
         {
             // stream
             byte[] data = randomBytes(totalSize);
-            assertEquals(reader.read(new ByteArrayInputStream(data)), data);
-            assertEquals(
+            assertArrayEquals(reader.read(new ByteArrayInputStream(data)), data);
+            assertArrayEquals(
                 reader.read(new ByteArrayInputStream(data), readSize < 0 ? totalSize : readSize),
                 (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
             );
-            assertEquals(reader.read(new OneByteInputStream(data)), data);
-            assertEquals(
+            assertArrayEquals(reader.read(new OneByteInputStream(data)), data);
+            assertArrayEquals(
                 reader.read(new OneByteInputStream(data), readSize < 0 ? totalSize : readSize),
                 (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
             );
@@ -458,13 +459,13 @@ public class IOOperatorTest implements DataTest {
                 reader.readTo(new ByteArrayInputStream(data), builder),
                 totalSize
             );
-            assertEquals(builder.toByteArray(), data);
+            assertArrayEquals(builder.toByteArray(), data);
             builder.reset();
             assertEquals(
                 reader.readTo(new ByteArrayInputStream(data), builder, readSize < 0 ? totalSize : readSize),
                 actualReadSize(totalSize, readSize)
             );
-            assertEquals(
+            assertArrayEquals(
                 builder.toByteArray(),
                 (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
             );
@@ -473,13 +474,13 @@ public class IOOperatorTest implements DataTest {
                 reader.readTo(new OneByteInputStream(data), builder),
                 totalSize
             );
-            assertEquals(builder.toByteArray(), data);
+            assertArrayEquals(builder.toByteArray(), data);
             builder.reset();
             assertEquals(
                 reader.readTo(new OneByteInputStream(data), builder, readSize < 0 ? totalSize : readSize),
                 actualReadSize(totalSize, readSize)
             );
-            assertEquals(
+            assertArrayEquals(
                 builder.toByteArray(),
                 (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
             );
@@ -494,13 +495,13 @@ public class IOOperatorTest implements DataTest {
                 reader.readTo(new ByteArrayInputStream(data), channel),
                 totalSize
             );
-            assertEquals(builder.toByteArray(), data);
+            assertArrayEquals(builder.toByteArray(), data);
             builder.reset();
             assertEquals(
                 reader.readTo(new ByteArrayInputStream(data), channel, readSize < 0 ? totalSize : readSize),
                 actualReadSize(totalSize, readSize)
             );
-            assertEquals(
+            assertArrayEquals(
                 builder.toByteArray(),
                 (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
             );
@@ -509,13 +510,13 @@ public class IOOperatorTest implements DataTest {
                 reader.readTo(new OneByteInputStream(data), channel),
                 totalSize
             );
-            assertEquals(builder.toByteArray(), data);
+            assertArrayEquals(builder.toByteArray(), data);
             builder.reset();
             assertEquals(
                 reader.readTo(new OneByteInputStream(data), channel, readSize < 0 ? totalSize : readSize),
                 actualReadSize(totalSize, readSize)
             );
-            assertEquals(
+            assertArrayEquals(
                 builder.toByteArray(),
                 (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
             );
@@ -526,13 +527,13 @@ public class IOOperatorTest implements DataTest {
                 reader.readTo(new ByteArrayInputStream(data), channel),
                 totalSize
             );
-            assertEquals(builder.toByteArray(), data);
+            assertArrayEquals(builder.toByteArray(), data);
             builder.reset();
             assertEquals(
                 reader.readTo(new ByteArrayInputStream(data), channel, readSize < 0 ? totalSize : readSize),
                 actualReadSize(totalSize, readSize)
             );
-            assertEquals(
+            assertArrayEquals(
                 builder.toByteArray(),
                 (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
             );
@@ -541,13 +542,13 @@ public class IOOperatorTest implements DataTest {
                 reader.readTo(new OneByteInputStream(data), channel),
                 totalSize
             );
-            assertEquals(builder.toByteArray(), data);
+            assertArrayEquals(builder.toByteArray(), data);
             builder.reset();
             assertEquals(
                 reader.readTo(new OneByteInputStream(data), channel, readSize < 0 ? totalSize : readSize),
                 actualReadSize(totalSize, readSize)
             );
-            assertEquals(
+            assertArrayEquals(
                 builder.toByteArray(),
                 (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
             );
@@ -560,14 +561,14 @@ public class IOOperatorTest implements DataTest {
                 reader.readTo(new ByteArrayInputStream(data), dst),
                 totalSize
             );
-            assertEquals(dst, data);
+            assertArrayEquals(dst, data);
             if (readSize >= 0 && readSize <= totalSize) {
                 dst = new byte[data.length];
                 assertEquals(
                     reader.readTo(new ByteArrayInputStream(data), dst, 0, readSize),
                     readSize
                 );
-                assertEquals(
+                assertArrayEquals(
                     Arrays.copyOf(dst, readSize),
                     Arrays.copyOf(data, readSize)
                 );
@@ -577,7 +578,7 @@ public class IOOperatorTest implements DataTest {
                         reader.readTo(new ByteArrayInputStream(data), dst, 1, readSize),
                         readSize
                     );
-                    assertEquals(
+                    assertArrayEquals(
                         Arrays.copyOfRange(dst, 1, 1 + readSize),
                         Arrays.copyOf(data, readSize)
                     );
@@ -589,7 +590,7 @@ public class IOOperatorTest implements DataTest {
                     reader.readTo(new ByteArrayInputStream(data), dst, 0, readSize),
                     totalSize
                 );
-                assertEquals(
+                assertArrayEquals(
                     Arrays.copyOf(dst, totalSize),
                     data
                 );
@@ -598,7 +599,7 @@ public class IOOperatorTest implements DataTest {
                     reader.readTo(new ByteArrayInputStream(data), dst, 1, readSize),
                     totalSize
                 );
-                assertEquals(
+                assertArrayEquals(
                     Arrays.copyOfRange(dst, 1, 1 + totalSize),
                     data
                 );
@@ -648,7 +649,7 @@ public class IOOperatorTest implements DataTest {
                 reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), Channels.newChannel(builder)),
                 totalSize
             );
-            assertEquals(builder.toByteArray(), data);
+            assertArrayEquals(builder.toByteArray(), data);
             builder.reset();
             assertEquals(
                 reader.readTo(
@@ -658,7 +659,7 @@ public class IOOperatorTest implements DataTest {
                 ),
                 actualReadSize(totalSize, readSize)
             );
-            assertEquals(
+            assertArrayEquals(
                 builder.toByteArray(),
                 (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
             );
@@ -670,13 +671,13 @@ public class IOOperatorTest implements DataTest {
                 reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), wch),
                 totalSize
             );
-            assertEquals(builder.toByteArray(), data);
+            assertArrayEquals(builder.toByteArray(), data);
             builder.reset();
             assertEquals(
                 reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), wch, readSize < 0 ? totalSize : readSize),
                 actualReadSize(totalSize, readSize)
             );
-            assertEquals(
+            assertArrayEquals(
                 builder.toByteArray(),
                 (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
             );
@@ -685,13 +686,13 @@ public class IOOperatorTest implements DataTest {
                 reader.readTo(Channels.newChannel(new OneByteInputStream(data)), wch),
                 totalSize
             );
-            assertEquals(builder.toByteArray(), data);
+            assertArrayEquals(builder.toByteArray(), data);
             builder.reset();
             assertEquals(
                 reader.readTo(Channels.newChannel(new OneByteInputStream(data)), wch, readSize < 0 ? totalSize : readSize),
                 actualReadSize(totalSize, readSize)
             );
-            assertEquals(
+            assertArrayEquals(
                 builder.toByteArray(),
                 (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
             );
@@ -704,7 +705,7 @@ public class IOOperatorTest implements DataTest {
                 reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), builder),
                 totalSize
             );
-            assertEquals(builder.toByteArray(), data);
+            assertArrayEquals(builder.toByteArray(), data);
             builder.reset();
             assertEquals(
                 reader.readTo(
@@ -714,7 +715,7 @@ public class IOOperatorTest implements DataTest {
                 ),
                 actualReadSize(totalSize, readSize)
             );
-            assertEquals(
+            assertArrayEquals(
                 builder.toByteArray(),
                 (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
             );
@@ -728,14 +729,14 @@ public class IOOperatorTest implements DataTest {
                 reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst),
                 totalSize
             );
-            assertEquals(dst, data);
+            assertArrayEquals(dst, data);
             if (readSize >= 0 && readSize <= totalSize) {
                 dst = new byte[data.length];
                 assertEquals(
                     reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst, 0, readSize),
                     readSize
                 );
-                assertEquals(
+                assertArrayEquals(
                     Arrays.copyOf(dst, readSize),
                     Arrays.copyOf(data, readSize)
                 );
@@ -745,7 +746,7 @@ public class IOOperatorTest implements DataTest {
                         reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst, 1, readSize),
                         readSize
                     );
-                    assertEquals(
+                    assertArrayEquals(
                         Arrays.copyOfRange(dst, 1, 1 + readSize),
                         Arrays.copyOf(data, readSize)
                     );
@@ -757,7 +758,7 @@ public class IOOperatorTest implements DataTest {
                     reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst, 0, readSize),
                     totalSize
                 );
-                assertEquals(
+                assertArrayEquals(
                     Arrays.copyOf(dst, totalSize),
                     data
                 );
@@ -766,7 +767,7 @@ public class IOOperatorTest implements DataTest {
                     reader.readTo(Channels.newChannel(new ByteArrayInputStream(data)), dst, 1, readSize),
                     totalSize
                 );
-                assertEquals(
+                assertArrayEquals(
                     Arrays.copyOfRange(dst, 1, 1 + totalSize),
                     data
                 );
@@ -928,7 +929,7 @@ public class IOOperatorTest implements DataTest {
             In in1 = new In();
             BytesBuilder builder = new BytesBuilder();
             byte[] b1 = IOKit.available(in1);
-            assertEquals(b1, empty);
+            assertArrayEquals(b1, empty);
             while (true) {
                 byte[] b = IOKit.available(in1);
                 if (b == null) {
@@ -936,11 +937,11 @@ public class IOOperatorTest implements DataTest {
                 }
                 builder.append(b);
             }
-            assertEquals(builder.toByteArray(), src);
+            assertArrayEquals(builder.toByteArray(), src);
             builder.reset();
             In in2 = new In();
             byte[] b2 = IOKit.available(in2, size * 2);
-            assertEquals(b2, empty);
+            assertArrayEquals(b2, empty);
             while (true) {
                 byte[] b = IOKit.available(in2);
                 if (b == null) {
@@ -948,7 +949,7 @@ public class IOOperatorTest implements DataTest {
                 }
                 builder.append(b);
             }
-            assertEquals(builder.toByteArray(), src);
+            assertArrayEquals(builder.toByteArray(), src);
             builder.reset();
             ReadableByteChannel c3 = new Cin();
             ByteBuffer b3 = IOKit.available(c3);
@@ -960,7 +961,7 @@ public class IOOperatorTest implements DataTest {
                 }
                 builder.append(b);
             }
-            assertEquals(builder.toByteArray(), src);
+            assertArrayEquals(builder.toByteArray(), src);
             builder.reset();
             ReadableByteChannel c4 = new Cin();
             ByteBuffer b4 = IOKit.available(c4, size * 2);
@@ -972,7 +973,7 @@ public class IOOperatorTest implements DataTest {
                 }
                 builder.append(b);
             }
-            assertEquals(builder.toByteArray(), src);
+            assertArrayEquals(builder.toByteArray(), src);
             builder.reset();
         }
         {
@@ -986,7 +987,7 @@ public class IOOperatorTest implements DataTest {
                     break;
                 }
             }
-            assertEquals(builder.toByteArray(), src);
+            assertArrayEquals(builder.toByteArray(), src);
             builder.reset();
             In in2 = new In();
             assertEquals(IOKit.availableTo(in2, builder, size * 2L), 0);
@@ -996,7 +997,7 @@ public class IOOperatorTest implements DataTest {
                     break;
                 }
             }
-            assertEquals(builder.toByteArray(), src);
+            assertArrayEquals(builder.toByteArray(), src);
             builder.reset();
             ReadableByteChannel c3 = new Cin();
             assertEquals(IOKit.availableTo(c3, builder), 0);
@@ -1006,7 +1007,7 @@ public class IOOperatorTest implements DataTest {
                     break;
                 }
             }
-            assertEquals(builder.toByteArray(), src);
+            assertArrayEquals(builder.toByteArray(), src);
             builder.reset();
             ReadableByteChannel c4 = new Cin();
             assertEquals(IOKit.availableTo(c4, builder, size * 2L), 0);
@@ -1016,7 +1017,7 @@ public class IOOperatorTest implements DataTest {
                     break;
                 }
             }
-            assertEquals(builder.toByteArray(), src);
+            assertArrayEquals(builder.toByteArray(), src);
             builder.reset();
         }
         {
@@ -1031,7 +1032,7 @@ public class IOOperatorTest implements DataTest {
                     break;
                 }
             }
-            assertEquals(builder.toByteArray(), src);
+            assertArrayEquals(builder.toByteArray(), src);
             builder.reset();
             In in2 = new In();
             assertEquals(IOKit.availableTo(in2, builder, size * 2L), 0);
@@ -1041,7 +1042,7 @@ public class IOOperatorTest implements DataTest {
                     break;
                 }
             }
-            assertEquals(builder.toByteArray(), src);
+            assertArrayEquals(builder.toByteArray(), src);
             builder.reset();
             ReadableByteChannel c3 = new Cin();
             assertEquals(IOKit.availableTo(c3, builder), 0);
@@ -1051,7 +1052,7 @@ public class IOOperatorTest implements DataTest {
                     break;
                 }
             }
-            assertEquals(builder.toByteArray(), src);
+            assertArrayEquals(builder.toByteArray(), src);
             builder.reset();
             ReadableByteChannel c4 = new Cin();
             assertEquals(IOKit.availableTo(c4, builder, size * 2L), 0);
@@ -1061,7 +1062,7 @@ public class IOOperatorTest implements DataTest {
                     break;
                 }
             }
-            assertEquals(builder.toByteArray(), src);
+            assertArrayEquals(builder.toByteArray(), src);
             builder.reset();
         }
         {
@@ -1077,7 +1078,7 @@ public class IOOperatorTest implements DataTest {
                 }
                 c += (int) readSize;
             }
-            assertEquals(Arrays.copyOf(dst, size), src);
+            assertArrayEquals(Arrays.copyOf(dst, size), src);
             dst = new byte[size * 2];
             c = 0;
             Cin c1 = new Cin();
@@ -1089,7 +1090,7 @@ public class IOOperatorTest implements DataTest {
                 }
                 c += (int) readSize;
             }
-            assertEquals(Arrays.copyOf(dst, size), src);
+            assertArrayEquals(Arrays.copyOf(dst, size), src);
         }
         {
             // available to buffer
@@ -1105,7 +1106,7 @@ public class IOOperatorTest implements DataTest {
                 c += (int) readSize;
             }
             dst.flip();
-            assertEquals(BufferKit.read(dst), src);
+            assertArrayEquals(BufferKit.read(dst), src);
             dst = ByteBuffer.allocate(size * 2);
             c = 0;
             Cin c1 = new Cin();
@@ -1118,7 +1119,7 @@ public class IOOperatorTest implements DataTest {
                 c += (int) readSize;
             }
             dst.flip();
-            assertEquals(BufferKit.read(dst), src);
+            assertArrayEquals(BufferKit.read(dst), src);
         }
     }
 
@@ -1186,9 +1187,9 @@ public class IOOperatorTest implements DataTest {
         {
             // reader
             char[] data = randomChars(totalSize);
-            assertEquals(reader.read(new CharArrayReader(data)), data);
+            assertArrayEquals(reader.read(new CharArrayReader(data)), data);
             assertEquals(reader.string(new CharArrayReader(data)), new String(data));
-            assertEquals(
+            assertArrayEquals(
                 reader.read(new CharArrayReader(data), readSize < 0 ? totalSize : readSize),
                 (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
             );
@@ -1196,9 +1197,9 @@ public class IOOperatorTest implements DataTest {
                 reader.string(new CharArrayReader(data), readSize < 0 ? totalSize : readSize),
                 new String((readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize))
             );
-            assertEquals(reader.read(new OneCharReader(data)), data);
+            assertArrayEquals(reader.read(new OneCharReader(data)), data);
             assertEquals(reader.string(new OneCharReader(data)), new String(data));
-            assertEquals(
+            assertArrayEquals(
                 reader.read(new OneCharReader(data), readSize < 0 ? totalSize : readSize),
                 (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
             );
@@ -1376,13 +1377,13 @@ public class IOOperatorTest implements DataTest {
                 reader.readTo(new CharArrayReader(data), builder),
                 totalSize
             );
-            assertEquals(builder.toCharArray(), data);
+            assertArrayEquals(builder.toCharArray(), data);
             builder.reset();
             assertEquals(
                 reader.readTo(new CharArrayReader(data), builder, readSize < 0 ? totalSize : readSize),
                 actualReadSize(totalSize, readSize)
             );
-            assertEquals(
+            assertArrayEquals(
                 builder.toCharArray(),
                 (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
             );
@@ -1391,13 +1392,13 @@ public class IOOperatorTest implements DataTest {
                 reader.readTo(new OneCharReader(data), builder),
                 totalSize
             );
-            assertEquals(builder.toCharArray(), data);
+            assertArrayEquals(builder.toCharArray(), data);
             builder.reset();
             assertEquals(
                 reader.readTo(new OneCharReader(data), builder, readSize < 0 ? totalSize : readSize),
                 actualReadSize(totalSize, readSize)
             );
-            assertEquals(
+            assertArrayEquals(
                 builder.toCharArray(),
                 (readSize < 0 || readSize > totalSize) ? data : Arrays.copyOf(data, readSize)
             );
@@ -1411,14 +1412,14 @@ public class IOOperatorTest implements DataTest {
                 reader.readTo(new CharArrayReader(data), dst),
                 totalSize
             );
-            assertEquals(dst, data);
+            assertArrayEquals(dst, data);
             if (readSize >= 0 && readSize <= totalSize) {
                 dst = new char[data.length];
                 assertEquals(
                     reader.readTo(new CharArrayReader(data), dst, 0, readSize),
                     readSize
                 );
-                assertEquals(
+                assertArrayEquals(
                     Arrays.copyOf(dst, readSize),
                     Arrays.copyOf(data, readSize)
                 );
@@ -1428,7 +1429,7 @@ public class IOOperatorTest implements DataTest {
                         reader.readTo(new CharArrayReader(data), dst, 1, readSize),
                         readSize
                     );
-                    assertEquals(
+                    assertArrayEquals(
                         Arrays.copyOfRange(dst, 1, 1 + readSize),
                         Arrays.copyOf(data, readSize)
                     );
@@ -1440,7 +1441,7 @@ public class IOOperatorTest implements DataTest {
                     reader.readTo(new CharArrayReader(data), dst, 0, readSize),
                     totalSize
                 );
-                assertEquals(
+                assertArrayEquals(
                     Arrays.copyOf(dst, totalSize),
                     data
                 );
@@ -1449,7 +1450,7 @@ public class IOOperatorTest implements DataTest {
                     reader.readTo(new CharArrayReader(data), dst, 1, readSize),
                     totalSize
                 );
-                assertEquals(
+                assertArrayEquals(
                     Arrays.copyOfRange(dst, 1, 1 + totalSize),
                     data
                 );
@@ -1570,7 +1571,7 @@ public class IOOperatorTest implements DataTest {
             In in1 = new In();
             CharsBuilder builder = new CharsBuilder();
             char[] s1 = IOKit.available(in1);
-            assertEquals(s1, empty);
+            assertArrayEquals(s1, empty);
             while (true) {
                 char[] b = IOKit.available(in1);
                 if (b == null) {
@@ -1578,7 +1579,7 @@ public class IOOperatorTest implements DataTest {
                 }
                 builder.append(b);
             }
-            assertEquals(builder.toCharArray(), src);
+            assertArrayEquals(builder.toCharArray(), src);
             builder.reset();
             In in2 = new In();
             String s2 = IOKit.availableString(in2);
@@ -1590,11 +1591,11 @@ public class IOOperatorTest implements DataTest {
                 }
                 builder.append(b);
             }
-            assertEquals(builder.toCharArray(), src);
+            assertArrayEquals(builder.toCharArray(), src);
             builder.reset();
             In in3 = new In();
             char[] s3 = IOKit.available(in3, size * 2);
-            assertEquals(s3, empty);
+            assertArrayEquals(s3, empty);
             while (true) {
                 char[] b = IOKit.available(in3);
                 if (b == null) {
@@ -1602,7 +1603,7 @@ public class IOOperatorTest implements DataTest {
                 }
                 builder.append(b);
             }
-            assertEquals(builder.toCharArray(), src);
+            assertArrayEquals(builder.toCharArray(), src);
             builder.reset();
             In in4 = new In();
             String s4 = IOKit.availableString(in4, size * 2);
@@ -1614,7 +1615,7 @@ public class IOOperatorTest implements DataTest {
                 }
                 builder.append(b);
             }
-            assertEquals(builder.toCharArray(), src);
+            assertArrayEquals(builder.toCharArray(), src);
             builder.reset();
         }
         {
@@ -1628,7 +1629,7 @@ public class IOOperatorTest implements DataTest {
                     break;
                 }
             }
-            assertEquals(builder.toCharArray(), src);
+            assertArrayEquals(builder.toCharArray(), src);
             builder.reset();
             In in2 = new In();
             assertEquals(IOKit.availableTo(in2, builder, size * 2L), 0);
@@ -1638,7 +1639,7 @@ public class IOOperatorTest implements DataTest {
                     break;
                 }
             }
-            assertEquals(builder.toCharArray(), src);
+            assertArrayEquals(builder.toCharArray(), src);
             builder.reset();
         }
         {
@@ -1654,7 +1655,7 @@ public class IOOperatorTest implements DataTest {
                 }
                 c += (int) readSize;
             }
-            assertEquals(Arrays.copyOf(dst, size), src);
+            assertArrayEquals(Arrays.copyOf(dst, size), src);
         }
         {
             // available to buffer
@@ -1670,7 +1671,7 @@ public class IOOperatorTest implements DataTest {
                 c += (int) readSize;
             }
             dst.flip();
-            assertEquals(BufferKit.read(dst), src);
+            assertArrayEquals(BufferKit.read(dst), src);
         }
     }
 

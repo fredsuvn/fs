@@ -248,14 +248,14 @@ public class ConvertTest implements PrintTest {
         {
             // to array
             String[] strArray = new String[]{"1", "2", "3"};
-            assertEquals(converter.convert(strArray, int[].class), new int[]{1, 2, 3});
+            assertArrayEquals(converter.convert(strArray, int[].class), new int[]{1, 2, 3});
             List<String> strList = ListKit.list("1", "2", "3");
-            assertEquals(converter.convert(strList, int[].class), new int[]{1, 2, 3});
-            assertEquals(
+            assertArrayEquals(converter.convert(strList, int[].class), new int[]{1, 2, 3});
+            assertArrayEquals(
                 converter.convert(strList, new TypeRef<List<String>>() {}.type(), int[].class),
                 new int[]{1, 2, 3}
             );
-            assertEquals(converter.convert(new Iterable<String>() {
+            assertArrayEquals(converter.convert(new Iterable<String>() {
                 @Override
                 public @Nonnull Iterator<String> iterator() {
                     return strList.iterator();
@@ -263,16 +263,16 @@ public class ConvertTest implements PrintTest {
             }, int[].class), new int[]{1, 2, 3});
             // with options
             Date[] dateArray = new Date[]{now, now, now};
-            assertEquals(
+            assertArrayEquals(
                 converter.convert(dateArray, String[].class, ConvertOption.timeFormatter(nowFormat)),
                 new String[]{nowStr, nowStr, nowStr}
             );
             List<Date> dateList = ListKit.list(now, now, now);
-            assertEquals(converter.convert(
+            assertArrayEquals(converter.convert(
                     dateList, new TypeRef<List<Date>>() {}.type(), String[].class, ConvertOption.timeFormatter(nowFormat)),
                 new String[]{nowStr, nowStr, nowStr}
             );
-            assertEquals(converter.convert(new Iterable<Date>() {
+            assertArrayEquals(converter.convert(new Iterable<Date>() {
 
                     @Override
                     public @Nonnull Iterator<Date> iterator() {
@@ -291,14 +291,14 @@ public class ConvertTest implements PrintTest {
             // to generic array
             String[] strArray = new String[]{"1", "2", "3"};
             GenericArrayType intsType = TypeKit.arrayType(Integer.class);
-            assertEquals(converter.convert(strArray, intsType), new Integer[]{1, 2, 3});
+            assertArrayEquals((Integer[]) converter.convert(strArray, intsType), new Integer[]{1, 2, 3});
             List<String> strList = ListKit.list("1", "2", "3");
-            assertEquals(converter.convert(strList, intsType), new Integer[]{1, 2, 3});
-            assertEquals(
-                converter.convert(strList, new TypeRef<List<String>>() {}.type(), intsType),
+            assertArrayEquals((Integer[]) converter.convert(strList, intsType), new Integer[]{1, 2, 3});
+            assertArrayEquals(
+                (Integer[]) converter.convert(strList, new TypeRef<List<String>>() {}.type(), intsType),
                 new Integer[]{1, 2, 3}
             );
-            assertEquals(converter.convert(new Iterable<String>() {
+            assertArrayEquals((Integer[]) converter.convert(new Iterable<String>() {
 
                 @Override
                 public @Nonnull Iterator<String> iterator() {
@@ -308,16 +308,16 @@ public class ConvertTest implements PrintTest {
             // with options
             GenericArrayType stringsType = TypeKit.arrayType(String.class);
             Date[] dateArray = new Date[]{now, now, now};
-            assertEquals(
-                converter.convert(dateArray, stringsType, ConvertOption.timeFormatter(nowFormat)),
+            assertArrayEquals(
+                (String[]) converter.convert(dateArray, stringsType, ConvertOption.timeFormatter(nowFormat)),
                 new String[]{nowStr, nowStr, nowStr}
             );
             List<Date> dateList = ListKit.list(now, now, now);
-            assertEquals(converter.convert(
+            assertArrayEquals((String[]) converter.convert(
                     dateList, new TypeRef<List<Date>>() {}.type(), stringsType, ConvertOption.timeFormatter(nowFormat)),
                 new String[]{nowStr, nowStr, nowStr}
             );
-            assertEquals(converter.convert(new Iterable<Date>() {
+            assertArrayEquals((String[]) converter.convert(new Iterable<Date>() {
 
                     @Override
                     public @Nonnull Iterator<Date> iterator() {

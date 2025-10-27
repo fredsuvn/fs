@@ -1,5 +1,10 @@
 package tests.io;
 
+import internal.test.AssertTest;
+import internal.test.DataTest;
+import internal.test.ErrorOutputStream;
+import internal.test.ReadOps;
+import internal.test.TestReader;
 import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.chars.CharsBuilder;
 import space.sunqian.common.base.chars.CharsKit;
@@ -11,11 +16,6 @@ import space.sunqian.common.io.CharSegment;
 import space.sunqian.common.io.CharTransformer;
 import space.sunqian.common.io.IOKit;
 import space.sunqian.common.io.IORuntimeException;
-import internal.test.AssertTest;
-import internal.test.DataTest;
-import internal.test.ErrorOutputStream;
-import internal.test.ReadOps;
-import internal.test.TestReader;
 
 import java.io.CharArrayReader;
 import java.io.IOException;
@@ -25,9 +25,10 @@ import java.lang.reflect.Method;
 import java.nio.CharBuffer;
 import java.util.Arrays;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CharProcessorTest implements DataTest, AssertTest {
 
@@ -118,13 +119,13 @@ public class CharProcessorTest implements DataTest, AssertTest {
                 CharProcessor.from(data).readBlockSize(readBlockSize).processTo(builder),
                 totalSize == 0 ? -1 : totalSize
             );
-            assertEquals(builder.toCharArray(), data);
+            assertArrayEquals(builder.toCharArray(), data);
             builder.reset();
             assertEquals(
                 CharProcessor.from(data).readBlockSize(readBlockSize).readLimit(limit).processTo(builder),
                 actualSize(totalSize, limit)
             );
-            assertEquals(builder.toCharArray(), limitedData);
+            assertArrayEquals(builder.toCharArray(), limitedData);
             builder.reset();
             // with transformers
             assertEquals(
@@ -135,7 +136,7 @@ public class CharProcessorTest implements DataTest, AssertTest {
                 totalSize == 0 ? -1 : totalSize
             );
             assertEquals(endCount.get(), 2);
-            assertEquals(builder.toCharArray(), timesData);
+            assertArrayEquals(builder.toCharArray(), timesData);
             builder.reset();
             endCount.clear();
             assertEquals(
@@ -146,7 +147,7 @@ public class CharProcessorTest implements DataTest, AssertTest {
                 actualSize(totalSize, limit)
             );
             assertEquals(endCount.get(), 2);
-            assertEquals(builder.toCharArray(), limitedTimesData);
+            assertArrayEquals(builder.toCharArray(), limitedTimesData);
             builder.reset();
             endCount.clear();
         }
@@ -157,13 +158,13 @@ public class CharProcessorTest implements DataTest, AssertTest {
                 CharProcessor.from(CharBuffer.wrap(data)).readBlockSize(readBlockSize).processTo(dst),
                 totalSize == 0 ? -1 : totalSize
             );
-            assertEquals(dst, data);
+            assertArrayEquals(dst, data);
             dst = new char[limitedData.length];
             assertEquals(
                 CharProcessor.from(CharBuffer.wrap(data)).readBlockSize(readBlockSize).readLimit(limit).processTo(dst),
                 actualSize(totalSize, limit)
             );
-            assertEquals(dst, limitedData);
+            assertArrayEquals(dst, limitedData);
             // with transformers
             dst = new char[timesData.length];
             assertEquals(
@@ -174,7 +175,7 @@ public class CharProcessorTest implements DataTest, AssertTest {
                 totalSize == 0 ? -1 : totalSize
             );
             assertEquals(endCount.get(), 2);
-            assertEquals(dst, timesData);
+            assertArrayEquals(dst, timesData);
             endCount.clear();
             dst = new char[dstSize(totalSize, limit) * 4];
             assertEquals(
@@ -185,7 +186,7 @@ public class CharProcessorTest implements DataTest, AssertTest {
                 actualSize(totalSize, limit)
             );
             assertEquals(endCount.get(), 2);
-            assertEquals(dst, limitedTimesData);
+            assertArrayEquals(dst, limitedTimesData);
             endCount.clear();
         }
         {
@@ -195,13 +196,13 @@ public class CharProcessorTest implements DataTest, AssertTest {
                 CharProcessor.from(data).readBlockSize(readBlockSize).processTo(dst, 5),
                 totalSize == 0 ? -1 : totalSize
             );
-            assertEquals(Arrays.copyOfRange(dst, 5, dst.length), data);
+            assertArrayEquals(Arrays.copyOfRange(dst, 5, dst.length), data);
             dst = new char[limitedData.length + 5];
             assertEquals(
                 CharProcessor.from(data).readBlockSize(readBlockSize).readLimit(limit).processTo(dst, 5),
                 actualSize(totalSize, limit)
             );
-            assertEquals(
+            assertArrayEquals(
                 Arrays.copyOfRange(dst, 5, dst.length),
                 limitedData
             );
@@ -215,7 +216,7 @@ public class CharProcessorTest implements DataTest, AssertTest {
                 totalSize == 0 ? -1 : totalSize
             );
             assertEquals(endCount.get(), 2);
-            assertEquals(Arrays.copyOfRange(dst, 5, dst.length), timesData);
+            assertArrayEquals(Arrays.copyOfRange(dst, 5, dst.length), timesData);
             endCount.clear();
             dst = new char[limitedTimesData.length + 5];
             assertEquals(
@@ -226,7 +227,7 @@ public class CharProcessorTest implements DataTest, AssertTest {
                 actualSize(totalSize, limit)
             );
             assertEquals(endCount.get(), 2);
-            assertEquals(
+            assertArrayEquals(
                 Arrays.copyOfRange(dst, 5, dst.length),
                 limitedTimesData
             );
@@ -239,13 +240,13 @@ public class CharProcessorTest implements DataTest, AssertTest {
                 CharProcessor.from(new String(data)).readBlockSize(readBlockSize).processTo(dst),
                 totalSize == 0 ? -1 : totalSize
             );
-            assertEquals(BufferKit.copyContent((CharBuffer) dst.flip()), data);
+            assertArrayEquals(BufferKit.copyContent((CharBuffer) dst.flip()), data);
             dst = CharBuffer.allocate(limitedData.length);
             assertEquals(
                 CharProcessor.from(new String(data)).readBlockSize(readBlockSize).readLimit(limit).processTo(dst),
                 actualSize(totalSize, limit)
             );
-            assertEquals(
+            assertArrayEquals(
                 BufferKit.copyContent((CharBuffer) dst.flip()),
                 limitedData
             );
@@ -259,7 +260,7 @@ public class CharProcessorTest implements DataTest, AssertTest {
                 totalSize == 0 ? -1 : totalSize
             );
             assertEquals(endCount.get(), 2);
-            assertEquals(BufferKit.copyContent((CharBuffer) dst.flip()), timesData);
+            assertArrayEquals(BufferKit.copyContent((CharBuffer) dst.flip()), timesData);
             endCount.clear();
             dst = CharBuffer.allocate(limitedTimesData.length);
             assertEquals(
@@ -270,7 +271,7 @@ public class CharProcessorTest implements DataTest, AssertTest {
                 actualSize(totalSize, limit)
             );
             assertEquals(endCount.get(), 2);
-            assertEquals(
+            assertArrayEquals(
                 BufferKit.copyContent((CharBuffer) dst.flip()),
                 limitedTimesData
             );
@@ -314,15 +315,15 @@ public class CharProcessorTest implements DataTest, AssertTest {
         char[] timesData = timesData(data);
         char[] limitedTimesData = timesData(limitedData);
         {
-            assertEquals(
+            assertArrayEquals(
                 IOKit.read(CharProcessor.from(data).readBlockSize(readBlockSize).asReader()),
                 data.length == 0 ? null : data
             );
-            assertEquals(
+            assertArrayEquals(
                 IOKit.read(CharProcessor.from(data).readBlockSize(readBlockSize).readLimit(limit).asReader()),
                 limitedData.length == 0 ? null : limitedData
             );
-            assertEquals(
+            assertArrayEquals(
                 IOKit.read(CharProcessor.from(data).readBlockSize(readBlockSize)
                     .transformer(timesTransformer(readBlockSize, endCount))
                     .transformer(timesTransformer(readBlockSize, endCount))
@@ -331,7 +332,7 @@ public class CharProcessorTest implements DataTest, AssertTest {
             );
             assertEquals(endCount.get(), 2);
             endCount.clear();
-            assertEquals(
+            assertArrayEquals(
                 IOKit.read(CharProcessor.from(data).readBlockSize(readBlockSize).readLimit(limit)
                     .transformer(timesTransformer(readBlockSize, endCount))
                     .transformer(timesTransformer(readBlockSize, endCount))
@@ -373,7 +374,7 @@ public class CharProcessorTest implements DataTest, AssertTest {
         }
         {
             // for empty
-            assertEquals(
+            assertArrayEquals(
                 IOKit.read(CharProcessor.from(data).readBlockSize(readBlockSize)
                     .transformer(CharTransformer.empty())
                     .asReader()),
@@ -407,24 +408,24 @@ public class CharProcessorTest implements DataTest, AssertTest {
                 }
                 builder.append(next);
             }
-            assertEquals(builder.toCharArray(), data);
+            assertArrayEquals(builder.toCharArray(), data);
             assertEquals(in.read(), -1);
         }
         {
             // reader
             CharSegment readData = CharProcessor.from(data).readBlockSize(readBlockSize)
                 .asCharReader().read(data.length + 1);
-            assertEquals(readData.array(), data);
+            assertArrayEquals(readData.array(), data);
             assertTrue(readData.end());
             readData = CharProcessor.from(data).readBlockSize(readBlockSize).readLimit(limit)
                 .asCharReader().read(limitedData.length + 1);
-            assertEquals(readData.array(), limitedData);
+            assertArrayEquals(readData.array(), limitedData);
             assertTrue(readData.end());
             readData = CharProcessor.from(data).readBlockSize(readBlockSize)
                 .transformer(timesTransformer(readBlockSize, endCount))
                 .transformer(timesTransformer(readBlockSize, endCount))
                 .asCharReader().read(timesData.length + 1);
-            assertEquals(readData.array(), timesData);
+            assertArrayEquals(readData.array(), timesData);
             assertTrue(readData.end());
             assertEquals(endCount.get(), 2);
             endCount.clear();
@@ -432,7 +433,7 @@ public class CharProcessorTest implements DataTest, AssertTest {
                 .transformer(timesTransformer(readBlockSize, endCount))
                 .transformer(timesTransformer(readBlockSize, endCount))
                 .asCharReader().read(limitedTimesData.length + 1);
-            assertEquals(readData.array(), limitedTimesData);
+            assertArrayEquals(readData.array(), limitedTimesData);
             assertTrue(readData.end());
             assertEquals(endCount.get(), 2);
             endCount.clear();
@@ -532,7 +533,7 @@ public class CharProcessorTest implements DataTest, AssertTest {
                     .processTo(builder),
                 totalSize == 0 ? -1 : totalSize
             );
-            assertEquals(builder.toCharArray(), data);
+            assertArrayEquals(builder.toCharArray(), data);
             assertEquals(endCount.get(), 1);
             builder.reset();
             endCount.clear();
@@ -552,7 +553,7 @@ public class CharProcessorTest implements DataTest, AssertTest {
                     .processTo(builder),
                 totalSize == 0 ? -1 : totalSize
             );
-            assertEquals(builder.toCharArray(), data);
+            assertArrayEquals(builder.toCharArray(), data);
             assertEquals(endCount.get(), 1);
             builder.reset();
             endCount.clear();
@@ -588,7 +589,7 @@ public class CharProcessorTest implements DataTest, AssertTest {
                     .processTo(builder),
                 totalSize == 0 ? -1 : totalSize
             );
-            assertEquals(builder.toCharArray(), data);
+            assertArrayEquals(builder.toCharArray(), data);
             assertEquals(endCount.get(), 1);
             builder.reset();
             endCount.clear();
@@ -612,7 +613,7 @@ public class CharProcessorTest implements DataTest, AssertTest {
         String str = new String(data);
         {
             // toArray
-            assertEquals(
+            assertArrayEquals(
                 CharProcessor.from(data).readBlockSize(readBlockSize)
                     .transformer(CharTransformer.withBuffered((d, e) -> {
                         if (e) {
@@ -628,7 +629,7 @@ public class CharProcessorTest implements DataTest, AssertTest {
             endCount.clear();
         }
         {
-            // toArray
+            // to buffer
             assertEquals(
                 CharProcessor.from(data).readBlockSize(readBlockSize)
                     .transformer(CharTransformer.withBuffered((d, e) -> {
@@ -645,7 +646,7 @@ public class CharProcessorTest implements DataTest, AssertTest {
             endCount.clear();
         }
         {
-            // toArray
+            // to string
             assertEquals(
                 CharProcessor.from(data).readBlockSize(readBlockSize)
                     .transformer(CharTransformer.withBuffered((d, e) -> {
