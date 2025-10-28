@@ -2,6 +2,7 @@ plugins {
   id("kitva")
   id("kitva-publish")
   `java-library`
+  jacoco
 }
 
 description = "Collection of annotations supporting static analyses and partial jsr305."
@@ -47,4 +48,25 @@ tasks.register("cleanWithJavadoc") {
 tasks.test {
   include("**/*Test.class", "**/*TestKt.class")
   useJUnitPlatform()
+  outputs.cacheIf { false }
+  outputs.upToDateWhen { false }
+  finalizedBy(tasks.jacocoTestReport)
+
+  reports {
+    html.outputLocation.set(layout.buildDirectory.dir("reports2/custom-test-html"))
+    //junitXml.outputLocation.set(layout.buildDirectory.dir("reports2/custom-test-xml"))
+  }
+}
+tasks.jacocoTestReport {
+  dependsOn(tasks.test)
+  reports {
+    xml.required = false
+    csv.required = false
+    html.outputLocation = layout.buildDirectory.dir("reports3/html")
+  }
+}
+jacoco {
+  val jacocoToolVersion: String by project
+  toolVersion = jacocoToolVersion
+  //reportsDirectory = layout.buildDirectory.dir("customJacocoReportDir")
 }
