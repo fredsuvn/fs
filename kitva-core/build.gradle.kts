@@ -128,7 +128,7 @@ protobuf {
     }
     ofSourceSet("test").forEach { task ->
       task.plugins {
-        //java { outputSubDir = "proto222" }
+        //create("java") { outputSubDir = "proto222" }
         //grpc { outputDir = file("$buildDir/proto22/test/java") }
       }
     }
