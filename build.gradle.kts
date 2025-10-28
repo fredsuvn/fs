@@ -4,9 +4,9 @@ plugins {
 
 description = "Root project of KitVa."
 
-val kitvaJavaVersion: String by project
+val javaVersion: String by project
 val projectVersion: String by project
-val toJavaVersion: JavaLanguageVersion by extra(JavaLanguageVersion.of(kitvaJavaVersion))
+val toJavaVersion: JavaLanguageVersion by extra(JavaLanguageVersion.of(javaVersion))
 
 val projectInfo by extra(
   ProjectInfo(

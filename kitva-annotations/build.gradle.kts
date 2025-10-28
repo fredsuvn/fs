@@ -1,7 +1,7 @@
 plugins {
   id("kitva")
-  id("java-library")
   id("kitva-publish")
+  `java-library`
 }
 
 description = "Collection of annotations supporting static analyses and partial jsr305."
@@ -9,7 +9,6 @@ description = "Collection of annotations supporting static analyses and partial 
 dependencies {
   //implementation platform(project(":kitva-dependencies"))
   //implementation("com.google.code.findbugs:jsr305")
-
   testImplementation(platform(project(":kitva-dependencies")))
   testImplementation("org.junit.jupiter:junit-jupiter-api")
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
