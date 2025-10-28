@@ -1,8 +1,8 @@
 pluginManagement {
   repositories {
     maven {
-      val myGradlePluginRepo: String by settings
-      url = uri(myGradlePluginRepo)
+      val xGradlePluginRepo: String by settings
+      url = uri(xGradlePluginRepo)
     }
     mavenCentral()
     gradlePluginPortal()

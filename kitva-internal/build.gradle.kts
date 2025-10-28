@@ -9,13 +9,6 @@ description = "Internal support of KitVa."
 dependencies {
   implementation(platform(project(":kitva-dependencies")))
   implementation(project(":kitva-annotations"))
-  //api("org.testng:testng:7.5.1")
-  //  api("org.jetbrains.kotlin:kotlin-test-testng:$kotlinVersion") {
-  //    exclude(group = "org.testng", module = "testng")
-  //  }
-  //  api("org.jetbrains.kotlin:kotlin-test-testng") {
-  //    exclude(group = "org.testng", module = "testng")
-  //  }
   api("org.junit.jupiter:junit-jupiter-api")
   runtimeOnly("org.junit.jupiter:junit-jupiter-engine")
   runtimeOnly("org.junit.platform:junit-platform-launcher")
@@ -73,7 +66,4 @@ tasks.register("cleanWithJavadoc") {
 tasks.test {
   include("**/*Test.class", "**/*TestKt.class")
   useJUnitPlatform()
-  //  useTestNG {
-  //    suites("src/test/resources/testng.xml")
-  //  }
 }

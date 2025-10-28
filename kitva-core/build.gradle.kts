@@ -43,12 +43,10 @@ dependencies {
 
   api(project(":kitva-annotations"))
 
-  testImplementation(platform(project(":kitva-dependencies")))
   testAnnotationProcessor(platform(project(":kitva-dependencies")))
-
   testAnnotationProcessor("org.projectlombok:lombok")
-  //testAnnotationProcessor("org.openjdk.jmh:jmh-generator-annprocess")
 
+  testImplementation(platform(project(":kitva-dependencies")))
   testImplementation(project(":kitva-internal"))
   testImplementation("com.google.protobuf:protobuf-java")
   testImplementation("org.bouncycastle:bcpkix-jdk18on")
@@ -117,35 +115,23 @@ protobuf {
   }
 
   plugins {
-    //grpc {
-    //  artifact = "io.grpc:protoc-gen-grpc-java:$grpcVersion"
-    //}
-    //grpckt {
-    //  artifact = "io.grpc:protoc-gen-grpc-kotlin:$grpcKotlinVersion"
-    //}
+    //grpc { artifact = "io.grpc:protoc-gen-grpc-java:$grpcVersion" }
+    //grpckt { artifact = "io.grpc:protoc-gen-grpc-kotlin:$grpcKotlinVersion" }
   }
 
   generateProtoTasks {
-    //all().forEach { task ->
-    //  task.plugins {
-    // Generate Java gRPC classes
-    //grpc {
-    //  setOutputSubDir("$protoGenDir")
-    //}
-    // Generate Kotlin gRPC using the custom plugin from library
-    //grpckt {}
-    //}
-    //}
-    //ofSourceSet("test").forEach { task ->
-    //  task.plugins {
-    //    java {
-    //      outputSubDir = "proto222"
-    //    }
-    //grpc {
-    //  outputDir = file("$buildDir/proto22/test/java")
-    //}
-    //  }
-    //}
+    all().forEach { task ->
+      task.plugins {
+        //grpc { setOutputSubDir("$protoGenDir") }
+        //grpckt {}
+      }
+    }
+    ofSourceSet("test").forEach { task ->
+      task.plugins {
+        //java { outputSubDir = "proto222" }
+        //grpc { outputDir = file("$buildDir/proto22/test/java") }
+      }
+    }
   }
 }
 
@@ -155,14 +141,13 @@ tasks.named("compileTestJava") {
 
 tasks.register("cleanProto") {
   doLast {
-    delete(protobuf.generatedFilesBaseDir)
+    deleteProtoGeneratedFiles()
   }
 }
 
 tasks.clean {
   doLast {
-    delete(protobuf.generatedFilesBaseDir)
-    //delete("$generatedPath/temp")
+    deleteProtoGeneratedFiles()
   }
 }
 
@@ -173,7 +158,9 @@ tasks.clean {
 tasks.test {
   include("**/*Test.class", "**/*TestKt.class")
   useJUnitPlatform()
-  //  useTestNG {
-  //    suites("src/test/resources/testng.xml")
-  //  }
+}
+
+fun deleteProtoGeneratedFiles() {
+  delete(protobuf.generatedFilesBaseDir)
+  //delete("$generatedPath/temp")
 }

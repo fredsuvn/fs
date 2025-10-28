@@ -3,8 +3,8 @@ apply(plugin = "kitva.build.pLogger")
 project.repositories {
   mavenLocal()
   maven {
-    val myMavenRepo: String by project
-    url = uri(myMavenRepo)
+    val xMavenRepo: String by project
+    url = uri(xMavenRepo)
   }
   mavenCentral()
   //jcenter()

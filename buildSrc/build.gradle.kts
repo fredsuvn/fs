@@ -6,8 +6,8 @@ plugins {
 
 repositories {
   maven {
-    val myGradlePluginRepo: String by project
-    url = uri(myGradlePluginRepo)
+    val xGradlePluginRepo: String by project
+    url = uri(xGradlePluginRepo)
   }
   mavenCentral()
   gradlePluginPortal()
@@ -16,7 +16,9 @@ repositories {
 dependencies {
   //implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
   //implementation("org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion")
-  testImplementation("org.testng:testng:7.5.1")
+  //testImplementation("org.testng:testng:7.5.1")
+  implementation(kotlin("stdlib"))
+  testImplementation(kotlin("test"))
 }
 
 gradlePlugin {
@@ -26,4 +28,8 @@ gradlePlugin {
       implementationClass = "PluginLogger"
     }
   }
+}
+
+tasks.test {
+  useJUnitPlatform()
 }
