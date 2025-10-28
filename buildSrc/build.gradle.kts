@@ -13,12 +13,14 @@ repositories {
   gradlePluginPortal()
 }
 
+val kotlinVersion: String by project
+
 dependencies {
-  //implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
   //implementation("org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion")
-  //testImplementation("org.testng:testng:7.5.1")
-  implementation(kotlin("stdlib"))
-  testImplementation(kotlin("test"))
+  implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
+  testImplementation("org.jetbrains.kotlin:kotlin-test:${kotlinVersion}")
+  testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:${kotlinVersion}")
+  testImplementation(gradleTestKit())
 }
 
 gradlePlugin {

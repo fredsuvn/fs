@@ -1,4 +1,4 @@
-object PluginVersions {
+object ProtobufVersions {
     //protobuf:
     //protobufPluginVersion=0.8.15
     //protobufPluginVersion=0.9.5

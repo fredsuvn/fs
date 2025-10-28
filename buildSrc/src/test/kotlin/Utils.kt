@@ -1,10 +1,11 @@
-import org.gradle.api.Project
-import org.gradle.testfixtures.ProjectBuilder
+import java.io.File
 
-fun newProject(): Project {
-    val project = ProjectBuilder.builder().build()
-    project.extensions.add("pluginLogLevel", "INFO")
-    project.extensions.add("xGradlePluginRepo", "https://maven.aliyun.com/repository/gradle-plugin")
-    project.extensions.add("xMavenRepo", "https://maven.aliyun.com/repository/public")
-    return project;
+fun newPropertiesFile(testProjectDir: File) {
+    File(testProjectDir, "gradle.properties").writeText(
+        """
+        pluginLogLevel=INFO
+        xGradlePluginRepo="https://maven.aliyun.com/repository/gradle-plugin"
+        xMavenRepo="https://maven.aliyun.com/repository/public"
+    """.trimIndent()
+    )
 }
