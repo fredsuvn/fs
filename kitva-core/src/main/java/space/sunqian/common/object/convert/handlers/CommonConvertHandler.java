@@ -68,11 +68,11 @@ import java.util.function.IntFunction;
  * <p>
  * This handler providers the common conversion logic for all types. This is a table showing the conversion logic of
  * this handler for different target types:
- * <table border="1px solid">
+ * <table summary="Conversion Logic">
  * <tr>
- *     <th width="20%">Target</th>
- *     <th width="20%">Source</th>
- *     <th width="60%">Conversion Logic</th>
+ *     <th>Target</th>
+ *     <th>Source</th>
+ *     <th>Conversion Logic</th>
  * </tr>
  * <tr>
  *     <td rowspan="5">{@link String}, {@link CharSequence}</td>

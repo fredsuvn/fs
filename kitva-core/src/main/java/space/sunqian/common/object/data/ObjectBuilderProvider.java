@@ -155,10 +155,9 @@ public interface ObjectBuilderProvider {
          * {@link Map#computeIfAbsent(Object, Function)}.
          *
          * @param target the target type
-         * @param loader the loader for loading new {@link {@link ObjectBuilder}}
-         * @return the
-         * {@link {@link ObjectBuilder} for the target type, or {@code null} if no mapping and no loading for the target
-         * type
+         * @param loader the loader for loading new {@link ObjectBuilder}
+         * @return the {@link ObjectBuilder} for the target type, or {@code null} if no mapping and no loading for the
+         * target type
          * @throws DataObjectException if an error occurs during loading
          */
         @Nullable

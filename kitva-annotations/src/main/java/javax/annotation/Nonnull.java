@@ -18,10 +18,26 @@ import java.lang.annotation.RetentionPolicy;
 @TypeQualifier
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Nonnull {
+
+    /**
+     * The contexts that this annotation is applicable to.
+     *
+     * @return the contexts that this annotation is applicable to
+     */
     When when() default When.ALWAYS;
 
+    /**
+     * A validator for {@link Nonnull} annotations.
+     */
     class Checker implements TypeQualifierValidator<Nonnull> {
 
+        /**
+         * Checks whether the given value is valid for the given qualifier.
+         *
+         * @param qualifierArgument the qualifier to check
+         * @param value             the value to check
+         * @return the validity of the value
+         */
         public @Nonnull When forConstantValue(@Nonnull Nonnull qualifierArgument, Object value) {
             if (value == null)
                 return When.NEVER;

@@ -151,8 +151,9 @@ public class ClassKit {
      * this method will traverse the hierarchy of superclasses and interfaces of the given class to search via
      * {@link Class#getDeclaredMethod(String, Class[])}.
      *
-     * @param cls  the given class
-     * @param name the specified method name
+     * @param cls            the given class
+     * @param name           the specified method name
+     * @param parameterTypes the specified parameter types
      * @return the method of the specified name and parameter types from the given class, or {@code null} if not found
      */
     public static @Nullable Method searchMethod(
@@ -318,7 +319,8 @@ public class ClassKit {
     /**
      * Returns a new instance for the given class with the empty constructor, may be {@code null} if fails.
      *
-     * @param <T> the instance's type
+     * @param <T>  the instance's type
+     * @param type the given class
      * @return a new instance for the given class with the empty constructor, may be {@code null} if fails
      */
     public static <T> @Nullable T newInstance(@Nonnull Class<?> type) {

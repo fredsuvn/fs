@@ -577,7 +577,8 @@ public class IOKit {
      * <p>
      * If reaches the end of the stream and no data is read, returns {@code null}.
      *
-     * @param src the input stream
+     * @param src     the input stream
+     * @param charset the specified charset
      * @return a string with the specified charset, or {@code null} if reaches the end of the stream and no data is read
      * @throws IORuntimeException if an I/O error occurs
      */
@@ -608,7 +609,8 @@ public class IOKit {
      * <p>
      * If reaches the end of the channel and no data is read, returns {@code null}.
      *
-     * @param src the channel
+     * @param src     the channel
+     * @param charset the specified charset
      * @return a string with the specified charset, or {@code null} if reaches the end of the channel and no data is
      * read
      * @throws IORuntimeException if an I/O error occurs
@@ -1259,7 +1261,8 @@ public class IOKit {
      * <p>
      * If reaches the end of the stream and no data is read, returns {@code null}.
      *
-     * @param src the input stream
+     * @param src     the input stream
+     * @param charset the specified charset
      * @return a string with the specified charset, or {@code null} if reaches the end of the stream and no data is read
      * @throws IORuntimeException if an I/O error occurs
      */
@@ -1290,7 +1293,8 @@ public class IOKit {
      * <p>
      * If reaches the end of the channel and no data is read, returns {@code null}.
      *
-     * @param src the channel
+     * @param src     the channel
+     * @param charset the specified charset
      * @return a string with the specified charset, or {@code null} if reaches the end of the channel and no data is
      * read
      * @throws IORuntimeException if an I/O error occurs

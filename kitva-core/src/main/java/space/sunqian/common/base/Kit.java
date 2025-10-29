@@ -815,8 +815,8 @@ public class Kit {
      * This method is a shortcut to the {@link MapKit#map(Object[])}.
      *
      * @param array the given array
-     * @param <K>>  the key type
-     * @param <V>>  the value type
+     * @param <K>   the key type
+     * @param <V>   the value type
      * @return a new {@link HashMap} initialing with the given array
      * @see MapKit
      */
@@ -835,8 +835,8 @@ public class Kit {
      * This method is a shortcut to the {@link MapKit#hashMap(Object[])}.
      *
      * @param array the given array
-     * @param <K>>  the key type
-     * @param <V>>  the value type
+     * @param <K>   the key type
+     * @param <V>   the value type
      * @return a new {@link HashMap} initialing with the given array
      * @see MapKit
      */
@@ -855,8 +855,8 @@ public class Kit {
      * This method is a shortcut to the {@link MapKit#linkedHashMap(Object[])}.
      *
      * @param array the given array
-     * @param <K>>  the key type
-     * @param <V>>  the value type
+     * @param <K>   the key type
+     * @param <V>   the value type
      * @return a new {@link HashMap} initialing with the given array
      * @see MapKit
      */

@@ -21,7 +21,13 @@ import java.io.OutputStream;
  */
 public class VirtualProcess extends Process {
 
+    /**
+     * The flag to specify whether this process is alive.
+     */
     protected volatile boolean alive = true;
+    /**
+     * The flag to specify whether this process ends normally.
+     */
     protected volatile boolean normal = true;
 
     private final @Nonnull InputStream input;

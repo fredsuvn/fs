@@ -200,6 +200,7 @@ public interface NameFormatter {
          *
          * @param dst          the specified {@link Appendable}
          * @param originalName the given original name where the word span is derived
+         * @param span         the span that define the range of the word within the given original name
          * @param index        the index of the word in the returned list of {@link #tokenize(CharSequence)}
          * @throws Exception if failed to append
          */

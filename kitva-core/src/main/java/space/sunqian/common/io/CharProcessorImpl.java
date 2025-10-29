@@ -10,7 +10,7 @@ import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CharProcessorImpl implements CharProcessor {
+final class CharProcessorImpl implements CharProcessor {
 
     private final @Nonnull CharReader src;
     private long readLimit = -1;

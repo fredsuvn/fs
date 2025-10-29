@@ -21,7 +21,7 @@ public class FileKit {
      * <p>
      * The directory is determined by the {@code java.io.tmpdir} system property, which is platform-dependent but always
      * represents a valid temporary directory. Different OS may have different temporary directory, for examples:
-     * <table>
+     * <table summary="System's Temporary Directory">
      *   <tr>
      *     <th>OS</th>
      *     <th>Typical Path</th>

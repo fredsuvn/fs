@@ -59,8 +59,8 @@ public class MapKit {
      *  }</pre>
      *
      * @param array the given array
-     * @param <K>>  the key type
-     * @param <V>>  the value type
+     * @param <K>   the key type
+     * @param <V>   the value type
      * @return a new {@link HashMap} initialing with the given array
      */
     public static <K, V> @Nonnull @Immutable Map<K, V> map(Object @Nonnull ... array) {
@@ -76,8 +76,8 @@ public class MapKit {
      * key-{@code null} pair to put.
      *
      * @param array the given array
-     * @param <K>>  the key type
-     * @param <V>>  the value type
+     * @param <K>   the key type
+     * @param <V>   the value type
      * @return a new {@link HashMap} initialing with the given array
      */
     public static <K, V> @Nonnull HashMap<K, V> hashMap(Object @Nonnull ... array) {
@@ -93,8 +93,8 @@ public class MapKit {
      * key-{@code null} pair to put.
      *
      * @param array the given array
-     * @param <K>>  the key type
-     * @param <V>>  the value type
+     * @param <K>   the key type
+     * @param <V>   the value type
      * @return a new {@link HashMap} initialing with the given array
      */
     public static <K, V> @Nonnull LinkedHashMap<K, V> linkedHashMap(Object @Nonnull ... array) {
@@ -109,9 +109,9 @@ public class MapKit {
      * the length of the iterable is odd and the last key cannot match the value, then the last pair will be the
      * key-{@code null} pair to put. This is the iterable version of {@link #map(Object...)}.
      *
-     * @param it   the given iterable
-     * @param <K>> the key type
-     * @param <V>> the value type
+     * @param it  the given iterable
+     * @param <K> the key type
+     * @param <V> the value type
      * @return a new {@link HashMap} initialing with the given iterable
      */
     public static <K, V> @Nonnull @Immutable Map<K, V> toMap(@Nonnull Iterable<?> it) {
@@ -133,11 +133,13 @@ public class MapKit {
      * );
      * }</pre>
      *
-     * @param map   the given map
-     * @param <KO>> the old key type
-     * @param <VO>> the old value type
-     * @param <KN>  the new key type
-     * @param <VN>  the new value type
+     * @param map         the given map
+     * @param keyMapper   the key mapper
+     * @param valueMapper the value mapper
+     * @param <KO>        the old key type
+     * @param <VO>        the old value type
+     * @param <KN>        the new key type
+     * @param <VN>        the new value type
      * @return a new immutable map of which entries are put from the given map
      */
     public static <KO, VO, KN, VN> @Nonnull @Immutable Map<KN, VN> toMap(
@@ -163,9 +165,9 @@ public class MapKit {
      * the length of the iterable is odd and the last key cannot match the value, then the last pair will be the
      * key-{@code null} pair to put.
      *
-     * @param it   the given iterable
-     * @param <K>> the key type
-     * @param <V>> the value type
+     * @param it  the given iterable
+     * @param <K> the key type
+     * @param <V> the value type
      * @return a new {@link HashMap} initialing with the given iterable
      */
     public static <K, V> @Nonnull HashMap<K, V> toHashMap(@Nonnull Iterable<?> it) {
@@ -181,9 +183,9 @@ public class MapKit {
      * the length of the iterable is odd and the last key cannot match the value, then the last pair will be the
      * key-{@code null} pair to put.
      *
-     * @param it   the given iterable
-     * @param <K>> the key type
-     * @param <V>> the value type
+     * @param it  the given iterable
+     * @param <K> the key type
+     * @param <V> the value type
      * @return a new {@link HashMap} initialing with the given iterable
      */
     public static <K, V> @Nonnull LinkedHashMap<K, V> toLinkedHashMap(@Nonnull Iterable<?> it) {

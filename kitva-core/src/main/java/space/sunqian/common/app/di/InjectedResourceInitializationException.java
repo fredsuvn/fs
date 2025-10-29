@@ -43,7 +43,7 @@ public class InjectedResourceInitializationException extends KitvaRuntimeExcepti
     }
 
     /**
-     * Returns the resource that failed during initialization, causing the startup to abort。
+     * Returns the resource that failed during initialization, causing the startup to abort.
      *
      * @return the resource that failed during initialization, causing the startup to abort
      */

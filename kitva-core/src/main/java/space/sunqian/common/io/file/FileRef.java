@@ -381,6 +381,7 @@ public interface FileRef {
      * <p>
      * This method is equivalent to {@link FileChannel#open(Path, OpenOption...)}.
      *
+     * @param options options specifying how the file is opened
      * @return a new {@link FileChannel} for operating the referenced file
      * @throws IORuntimeException if any error occurs
      */

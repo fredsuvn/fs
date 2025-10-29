@@ -14,5 +14,11 @@ import java.lang.annotation.Target;
 @Target(ElementType.ANNOTATION_TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface TypeQualifierDefault {
+
+    /**
+     * The element types to which the type qualifier is applied.
+     *
+     * @return The element types to which the type qualifier is applied
+     */
     ElementType[] value() default {};
 }

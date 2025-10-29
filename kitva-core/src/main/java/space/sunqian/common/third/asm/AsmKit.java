@@ -291,6 +291,7 @@ public class AsmKit {
      *
      * @param visitor the {@link MethodVisitor} to be invoked
      * @param type    the type of the var
+     * @return the wrapper type
      */
     public static Class<?> wrapToObject(@Nonnull MethodVisitor visitor, @Nonnull Class<?> type) {
         if (Objects.equals(type, boolean.class)) {
@@ -375,6 +376,7 @@ public class AsmKit {
      * Returns the slots count for the given method's parameters.
      *
      * @param method the given method
+     * @return the slots count for the given method's parameters
      */
     public static int countParamSlots(@Nonnull Method method) {
         int count = 0;
@@ -389,6 +391,7 @@ public class AsmKit {
      * Returns the slot count of the specified type.
      *
      * @param type the specified type
+     * @return the slot count of the specified type
      */
     public static int varSize(@Nonnull Class<?> type) {
         if (Objects.equals(type, long.class) || Objects.equals(type, double.class)) {
@@ -404,6 +407,7 @@ public class AsmKit {
      * Returns the all slot count of the specified parameters.
      *
      * @param parameters the specified parameters
+     * @return the all slot count of the specified parameters
      */
     public static int paramSize(@Nonnull Parameter @Nonnull [] parameters) {
         int size = 0;
@@ -431,6 +435,7 @@ public class AsmKit {
      * Generates and returns a class simple name with the given count.
      *
      * @param count the given count
+     * @return a class simple name
      */
     public static String generateClassSimpleName(long count) {
         return "ClassGeneratedBy" + Kit.LIB_NAME

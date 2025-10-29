@@ -20,7 +20,14 @@ import java.nio.channels.ByteChannel;
  */
 public abstract class AbstractChannelContext<C extends ByteChannel> implements ChannelContext<C> {
 
+    /**
+     * The given underlying channel.
+     */
     protected final @Nonnull C channel;
+
+    /**
+     * The {@link IOOperator} for advanced I/O operations.
+     */
     protected final @Nonnull IOOperator operator;
 
     /**

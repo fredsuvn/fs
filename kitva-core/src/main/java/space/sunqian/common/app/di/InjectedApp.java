@@ -85,6 +85,7 @@ public interface InjectedApp extends SimpleApp {
      * {@link Object#equals(Object)}. If no exact match is found, it will randomly select one resource instance that can
      * be assigned to the specified type from all resources that constitute this app.
      *
+     * @param <T>  the specified type
      * @param type the specified type
      * @return a resource instance whose type is assignable to the specified type, or {@code null} if no such resource
      * exists
@@ -101,6 +102,7 @@ public interface InjectedApp extends SimpleApp {
      * {@link Object#equals(Object)}. If no exact match is found, it will randomly select one resource instance that can
      * be assigned to the specified type from all resources that constitute this app.
      *
+     * @param <T>  the specified type
      * @param type the {@link TypeRef} for the specified type
      * @return a resource instance whose type is assignable to the specified type, or {@code null} if no such resource
      * exists

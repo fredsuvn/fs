@@ -61,8 +61,9 @@ public class CollectKit {
     /**
      * Collects the given iterable to an array of the component type.
      *
-     * @param it  the given iterable
-     * @param <T> the component type
+     * @param it            the given iterable
+     * @param componentType the component type
+     * @param <T>           the component type
      * @return the array
      */
     public static <T> T @Nonnull [] toArray(@Nonnull Iterable<?> it, @Nonnull Class<?> componentType) {

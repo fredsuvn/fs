@@ -288,7 +288,8 @@ public class JvmKit {
      * The {@code declaration} specifies where the signature is used for. When for the declaration, {@code true} should
      * be passed here. Otherwise, such as signature of a {@link Field}'s type, {@code false}.
      *
-     * @param type the given type
+     * @param type        the given type
+     * @param declaration whether the type is declaring
      * @return the signature of the given type
      */
     public static @Nullable String toSignature(@Nonnull Type type, boolean declaration) {

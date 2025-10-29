@@ -34,6 +34,5 @@
  *     <li>{@link space.sunqian.common.io.file}</li>
  *     <li>{@link space.sunqian.common.io.communicate}</li>
  * </ul>
- * <p>
  */
 package space.sunqian.common.io;

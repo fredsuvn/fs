@@ -3,7 +3,13 @@ package javax.annotation.meta;
 import javax.annotation.Nonnull;
 import java.lang.annotation.Annotation;
 
+/**
+ * This interface defines a validator for type qualifiers.
+ *
+ * @param <A> the type of annotation being validated
+ */
 public interface TypeQualifierValidator<A extends Annotation> {
+
     /**
      * Given a type qualifier, check to see if a known specific constant value is an instance of the set of values
      * denoted by the qualifier.

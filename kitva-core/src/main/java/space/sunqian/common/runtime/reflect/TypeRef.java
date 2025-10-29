@@ -23,6 +23,9 @@ public abstract class TypeRef<T> {
 
     private final @Nonnull Type type;
 
+    /**
+     * Constructs a new instance of {@link TypeRef}.
+     */
     protected TypeRef() {
         this.type = resolveActualTypeArgument();
     }

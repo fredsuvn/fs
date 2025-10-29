@@ -38,6 +38,7 @@ public interface AssertTest {
      * @param inst      the instance for the method
      * @param args      the arguments for the method
      * @param <T>       the type of the expected exception
+     * @return the exception thrown by the method
      */
     default <T extends Throwable> @Nonnull T invokeThrows(
         @Nonnull Class<T> exception,

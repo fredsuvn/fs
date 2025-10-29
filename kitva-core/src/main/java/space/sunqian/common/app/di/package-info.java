@@ -24,20 +24,20 @@
  *
  *     public static class XController {
  *
- *         @XResource
+ *         &#064;XResource
  *         private XService xService;
- *         @XResource
+ *         &#064;XResource
  *         private ConstructService constructService;
- *         @XResource
+ *         &#064;XResource
  *         private DestroyService destroyService;
  *
- *         @XPostConstruct
+ *         &#064;XPostConstruct
  *         public void init() {
  *             constructService.doConstruct();
  *         }
  *
- *         @XPreDestroy
- *         @InjectedDependsOn(BeforeDestroyService.class)
+ *         &#064;XPreDestroy
+ *         &#064;InjectedDependsOn(BeforeDestroyService.class)
  *         public void destroy() {
  *             destroyService.doDestroy();
  *         }
@@ -45,7 +45,7 @@
  *
  *     public static class BeforeDestroyService {
  *
- *         @XPreDestroy
+ *         &#064;XPreDestroy
  *         public void destroy() {
  *             System.out.println("before destroy");
  *         }
@@ -58,7 +58,7 @@
  *
  *     public static class XServiceImpl implements XService {
  *
- *         @Override
+ *         &#064;Override
  *         public String doService() {
  *             return "do service...";
  *         }
@@ -66,27 +66,27 @@
  *
  *     public static class XServiceProxy implements InjectedAspect {
  *
- *         @Override
- *         public boolean needsAspect(@Nonnull Type type) {
+ *         &#064;Override
+ *         public boolean needsAspect(&#064;Nonnull Type type) {
  *             return type.equals(XServiceImpl.class);
  *         }
  *
- *         @Override
- *         public boolean needsAspect(@Nonnull Method method) {
+ *         &#064;Override
+ *         public boolean needsAspect(&#064;Nonnull Method method) {
  *             return method.getName().equals("doService");
  *         }
  *
- *         @Override
- *         public void beforeInvoking(@Nonnull Method method, Object @Nonnull [] args, @Nonnull Object target) throws Throwable {
+ *         &#064;Override
+ *         public void beforeInvoking(&#064;Nonnull Method method, Object &#064;Nonnull [] args, &#064;Nonnull Object target) throws Throwable {
  *         }
  *
- *         @Override
- *         public @Nullable Object afterReturning(@Nullable Object result, @Nonnull Method method, Object @Nonnull [] args, @Nonnull Object target) throws Throwable {
+ *         &#064;Override
+ *         public &#064;Nullable Object afterReturning(&#064;Nullable Object result, &#064;Nonnull Method method, Object &#064;Nonnull [] args, &#064;Nonnull Object target) throws Throwable {
  *             return result + "[proxied]";
  *         }
  *
- *         @Override
- *         public @Nullable Object afterThrowing(@Nonnull Throwable ex, @Nonnull Method method, Object @Nonnull [] args, @Nonnull Object target) {
+ *         &#064;Override
+ *         public &#064;Nullable Object afterThrowing(&#064;Nonnull Throwable ex, &#064;Nonnull Method method, Object &#064;Nonnull [] args, &#064;Nonnull Object target) {
  *             return null;
  *         }
  *     }
@@ -105,19 +105,19 @@
  *         }
  *     }
  *
- *     @Target(FIELD)
- *     @Retention(RUNTIME)
- *     public @interface XResource {
+ *     &#064;Target(FIELD)
+ *     &#064;Retention(RUNTIME)
+ *     public &#064;interface XResource {
  *     }
  *
- *     @Target(METHOD)
- *     @Retention(RUNTIME)
- *     public @interface XPostConstruct {
+ *     &#064;Target(METHOD)
+ *     &#064;Retention(RUNTIME)
+ *     public &#064;interface XPostConstruct {
  *     }
  *
- *     @Target(METHOD)
- *     @Retention(RUNTIME)
- *     public @interface XPreDestroy {
+ *     &#064;Target(METHOD)
+ *     &#064;Retention(RUNTIME)
+ *     public &#064;interface XPreDestroy {
  *     }
  * }
  * }</pre>

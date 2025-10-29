@@ -63,12 +63,22 @@ java {
   withSourcesJar()
 }
 
-tasks.withType<Javadoc>().configureEach {
-  destinationDir = file("$projectDir/docs/javadoc")
-  (options as StandardJavadocDocletOptions).apply {
-    encoding = "UTF-8"
-    locale = "en_US"
-  }
+//tasks.withType<Javadoc>().configureEach {
+//  //destinationDir = file("$projectDir/docs/javadoc")
+////  (options as StandardJavadocDocletOptions).apply {
+////    encoding = "UTF-8"
+////    locale = "en_US"
+////  }
+//
+//  options.encoding = "UTF-8"
+//}
+
+tasks.javadoc {
+  options.encoding = "UTF-8"
+}
+
+tasks.compileJava {
+  options.encoding = "UTF-8"
 }
 
 tasks.register("cleanWithJavadoc") {
