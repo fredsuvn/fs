@@ -1,6 +1,6 @@
 plugins {
+  `java-platform`
   id("kitva")
-  id("java-platform")
   id("kitva-publish")
 }
 

@@ -1,6 +1,7 @@
 plugins {
+  `java-library`
+  jacoco
   id("kitva")
-  id("java-library")
   id("kitva-publish")
 }
 
@@ -43,27 +44,25 @@ java {
   withSourcesJar()
 }
 
-tasks.withType<Javadoc>().configureEach {
-  destinationDir = file("$projectDir/docs/javadoc")
-  (options as StandardJavadocDocletOptions).apply {
-    encoding = "UTF-8"
-    locale = "en_US"
-  }
-}
-
-tasks.clean {
-  //delete(tasks.javadoc.get().destinationDir)
-}
-
-tasks.register("cleanWithJavadoc") {
-  dependsOn(tasks.clean)
-  group = "build"
-  doLast {
-    delete(tasks.javadoc.get().destinationDir)
-  }
-}
-
 tasks.test {
   include("**/*Test.class", "**/*TestKt.class")
   useJUnitPlatform()
+  outputs.cacheIf { false }
+  outputs.upToDateWhen { false }
+  finalizedBy(tasks.jacocoTestReport)
+  reports {
+    html.required = false
+  }
+}
+tasks.jacocoTestReport {
+  dependsOn(tasks.test)
+  reports {
+    html.required = false
+    xml.required = false
+    csv.required = false
+  }
+}
+jacoco {
+  val jacocoToolVersion: String by project
+  toolVersion = jacocoToolVersion
 }

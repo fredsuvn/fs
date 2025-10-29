@@ -1,9 +1,10 @@
 plugins {
+  `java-library`
+  jacoco
   id("kitva")
   id("java-library")
   id("kitva-publish")
   id("com.google.protobuf") version (Versions.protobuf)
-  //jacoco
 }
 
 description = "Core kits and interfaces of KitVa including default implementations."
@@ -151,29 +152,30 @@ tasks.clean {
   }
 }
 
-tasks.test {
-  include("**/*Test.class", "**/*TestKt.class")
-  useJUnitPlatform()
-  //finalizedBy(tasks.jacocoTestReport)
-}
-
-//jacoco {
-//  toolVersion = "0.8.14"
-//}
-
-//tasks.jacocoTestReport {
-//  reports {
-//    html.required.set(true) // 生成HTML报告便于查看[citation:6]
-//    //xml.required.set(true)
-//  }
-//  // 确保报告包含了所有源码，包括 .kts 文件
-//  classDirectories.setFrom(sourceSets.main.get().output.asFileTree.matching {
-//    // 根据需要调整包含模式
-//    include("**/*.class")
-//  })
-//}
-
 fun deleteProtoGeneratedFiles() {
   delete(protobuf.generatedFilesBaseDir)
   //delete("$generatedPath/temp")
+}
+
+tasks.test {
+  include("**/*Test.class", "**/*TestKt.class")
+  useJUnitPlatform()
+  outputs.cacheIf { false }
+  outputs.upToDateWhen { false }
+  finalizedBy(tasks.jacocoTestReport)
+  reports {
+    html.required = false
+  }
+}
+tasks.jacocoTestReport {
+  dependsOn(tasks.test)
+  reports {
+    html.required = false
+    xml.required = false
+    csv.required = false
+  }
+}
+jacoco {
+  val jacocoToolVersion: String by project
+  toolVersion = jacocoToolVersion
 }

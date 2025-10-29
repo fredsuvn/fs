@@ -1,4 +1,4 @@
-package tests;
+package tests.internal;
 
 import org.junit.jupiter.api.Test;
 import internal.test.DataTest;
