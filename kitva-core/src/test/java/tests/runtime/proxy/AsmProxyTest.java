@@ -586,9 +586,9 @@ public class AsmProxyTest implements PrintTest {
 
     private void testInterD(InterD obj, ClsD cd, IntVar counter) {
         assertFalse(obj.equals(""));
-        assertEquals(counter.get(), 1);
+        assertEquals(1, counter.get());
         assertEquals(obj.hashCode(), Kit.hashId(obj));
-        assertEquals(counter.get(), 2);
+        assertEquals(2, counter.get());
         assertEquals(obj.toString(), obj.getClass().getName() + '@' + Integer.toHexString(obj.hashCode()));
         assertEquals(counter.get(), 5);
         assertEquals(

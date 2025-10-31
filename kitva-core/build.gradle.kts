@@ -56,29 +56,85 @@ dependencies {
 }
 
 java {
-  toolchain {
-    languageVersion.set(toJavaVersion)
-  }
-  withJavadocJar()
-  withSourcesJar()
+  //toolchain {
+  //  languageVersion.set(JavaLanguageVersion.of(8))
+  //}
+  //withJavadocJar()
+  //withSourcesJar()
 }
 
-//tasks.withType<Javadoc>().configureEach {
-//  //destinationDir = file("$projectDir/docs/javadoc")
-////  (options as StandardJavadocDocletOptions).apply {
-////    encoding = "UTF-8"
-////    locale = "en_US"
-////  }
-//
-//  options.encoding = "UTF-8"
-//}
-
-tasks.javadoc {
-  options.encoding = "UTF-8"
+sourceSets {
+  main {
+    java {
+      srcDirs("src/main/java")
+      srcDirs("src/main/java8")
+    }
+  }
+  test {
+    proto {
+      //srcDirs("src/test/proto")
+    }
+    java {
+      srcDirs("src/test/java")
+      srcDirs("src/test/java8")
+    }
+  }
 }
 
 tasks.compileJava {
-  options.encoding = "UTF-8"
+  source = sourceSets.main.get().allJava
+  exclude("**/*ImplByJdk17.java")
+  options.release.set(8)
+}
+
+val compileJava17 by tasks.registering(JavaCompile::class) {
+  source = sourceSets.main.get().allJava
+  include("**/*ImplByJdk17.java")
+  options.release.set(17)
+  destinationDirectory.set(file(layout.buildDirectory.dir("/classes/java/main17")))
+  classpath = tasks.compileJava.get().classpath + files(tasks.compileJava.get().destinationDirectory)
+}
+
+tasks.named("classes") {
+  dependsOn(compileJava17)
+}
+
+tasks.compileTestJava {
+  source = sourceSets.main.get().allJava
+  exclude("**/*ImplByJdk17.java")
+  options.release.set(8)
+}
+
+val compileTestJava17 by tasks.registering(JavaCompile::class) {
+  source = sourceSets.main.get().allJava
+  include("**/*ImplByJdk17.java")
+  options.release.set(17)
+  destinationDirectory.set(file(layout.buildDirectory.dir("/classes/java/main17")))
+  classpath = tasks.compileJava.get().classpath + files(tasks.compileJava.get().destinationDirectory)
+}
+
+tasks.named("compileTestJava") {
+  dependsOn(tasks.named("generateTestProto"))
+}
+
+tasks.jar {
+  from(sourceSets.main.get().output)
+  from(fileTree(layout.buildDirectory.dir("/classes/java/main17")))
+  manifest.attributes["Multi-Release"] = "true"
+}
+
+tasks.javadoc {
+  val ops = options as StandardJavadocDocletOptions
+  ops.encoding = "UTF-8"
+  ops.locale = "en_US"
+  ops.charSet = "UTF-8"
+  ops.docEncoding = "UTF-8"
+  ops.addStringOption("Xdoclint:none", "-quiet")
+
+  doFirst {
+    val ops = options as StandardJavadocDocletOptions
+    println("Javadoc locale: ${ops.locale}") // 应输出 en_US
+  }
 }
 
 tasks.register("cleanWithJavadoc") {
@@ -91,31 +147,6 @@ tasks.register("cleanWithJavadoc") {
 
 val generatedPath = "$projectDir/generated"
 //val protoPath = "$generatedPath/proto"
-
-sourceSets {
-  main {
-    java {
-      if (toJavaVersion.canCompileOrRun(JavaLanguageVersion.of(17))) {
-        srcDirs("src/main/java17")
-      } else if (toJavaVersion.canCompileOrRun(JavaLanguageVersion.of(8))) {
-        srcDirs("src/main/java8")
-      }
-    }
-  }
-  test {
-    proto {
-      //srcDirs("src/test/proto")
-    }
-    java {
-      if (toJavaVersion.canCompileOrRun(JavaLanguageVersion.of(17))) {
-        srcDirs("src/test/java17")
-      } else if (toJavaVersion.canCompileOrRun(JavaLanguageVersion.of(8))) {
-        srcDirs("src/test/java8")
-      }
-      //srcDirs("src/test/proto")
-    }
-  }
-}
 
 protobuf {
   //generatedFilesBaseDir = protoPath
@@ -146,10 +177,6 @@ protobuf {
   }
 }
 
-tasks.named("compileTestJava") {
-  dependsOn(tasks.named("generateTestProto"))
-}
-
 tasks.register("cleanProto") {
   doLast {
     deleteProtoGeneratedFiles()
@@ -168,19 +195,40 @@ fun deleteProtoGeneratedFiles() {
 }
 
 tasks.test {
-  include("**/*Test.class", "**/*TestKt.class")
-  useJUnitPlatform()
+  dependsOn(tasks.named("testJava8"), tasks.named("testJava17"))
+  //  include("**/*Test.class", "**/*TestKt.class")
+  //  exclude("**/java17/*Test.class")
+  //  useJUnitPlatform()
   outputs.cacheIf { false }
   outputs.upToDateWhen { false }
   finalizedBy(tasks.jacocoTestReport)
   reports {
     html.required = false
   }
+  failOnNoDiscoveredTests = false
 }
 tasks.jacocoTestReport {
-  dependsOn(tasks.test)
+  //dependsOn(tasks.test)
+  dependsOn(tasks.named("testJava8"), tasks.named("testJava17"))
+  outputs.cacheIf { false }
+  outputs.upToDateWhen { false }
+  executionData.from(
+    fileTree(layout.buildDirectory.dir("jacoco")) {
+      include("*.exec")
+    }
+  )
+  // 设置源代码和类文件目录
+  sourceDirectories.from(
+    sourceSets.main.get().allJava.srcDirs,
+    sourceSets.test.get().allJava.srcDirs
+  )
+
+  classDirectories.from(
+    sourceSets.main.get().output,
+    sourceSets.test.get().output
+  )
   reports {
-    html.required = false
+    html.required = true
     xml.required = false
     csv.required = false
   }
@@ -188,4 +236,45 @@ tasks.jacocoTestReport {
 jacoco {
   val jacocoToolVersion: String by project
   toolVersion = jacocoToolVersion
+}
+
+tasks.register<Test>("testJava8") {
+  group = "Verification"
+  description = "Runs Java 8 specific tests"
+
+  testClassesDirs = sourceSets["test"].output.classesDirs
+  classpath = sourceSets["test"].runtimeClasspath
+
+  // 只包含Java 8测试
+  include("**/*Test.class", "**/*TestKt.class")
+  exclude("**/java17/*Test.class")
+
+  outputs.cacheIf { false }
+  outputs.upToDateWhen { false }
+  // 使用Java 8
+  javaLauncher.set(javaToolchains.launcherFor {
+    languageVersion.set(JavaLanguageVersion.of(8))
+  })
+  useJUnitPlatform()
+  finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.register<Test>("testJava17") {
+  group = "Verification"
+  description = "Runs Java 17 specific tests"
+
+  testClassesDirs = sourceSets["test"].output.classesDirs
+  classpath = sourceSets["test"].runtimeClasspath
+
+  // 只包含Java 17测试
+  include("**/java17/*Test.class")
+
+  outputs.cacheIf { false }
+  outputs.upToDateWhen { false }
+  // 使用Java 17
+  javaLauncher.set(javaToolchains.launcherFor {
+    languageVersion.set(JavaLanguageVersion.of(17))
+  })
+  useJUnitPlatform()
+  finalizedBy(tasks.jacocoTestReport)
 }

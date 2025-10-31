@@ -20,7 +20,6 @@ tasks.jar {
     project(":kitva-core").sourceSets.main.get().output,
   )
 }
-
 tasks.javadoc {
 
   val projectsToDocument = listOf(
@@ -30,7 +29,7 @@ tasks.javadoc {
   )
   // 收集源文件
   source = files(projectsToDocument.flatMap { project ->
-    project.sourceSets.main.get().allJava.srcDirs
+    project.the<JavaPluginExtension>().sourceSets.main.get().allJava.srcDirs
   }).asFileTree
 
   // 设置类路径
@@ -40,12 +39,20 @@ tasks.javadoc {
       project.sourceSets.main.get().output
     )
   })
-  options.encoding = "UTF-8"
-  options.locale = "en_US"
-  val opt = options as StandardJavadocDocletOptions
-  opt.charSet = "UTF-8"
-  opt.memberLevel = JavadocMemberLevel.PUBLIC
-  //opt.
+
+  val ops = options as StandardJavadocDocletOptions
+  ops.encoding = "UTF-8"
+  ops.locale = "en-us"
+  ops.charSet = "UTF-8"
+  ops.docEncoding = "UTF-8"
+  ops.jFlags("-Duser.language=en", "-Duser.country=US")
+  ops.addStringOption("Xdoclint:none", "-quiet")
+  //opt.memberLevel = JavadocMemberLevel.PUBLIC
+
+  doFirst {
+    val ops = options as StandardJavadocDocletOptions
+    println("Javadoc locale: ${ops.locale}") // 应输出 en_US
+  }
 
   // 输出目录
   //setDestinationDir(file("${buildDir}/docs/javadoc"))
@@ -91,7 +98,7 @@ tasks.javadoc {
 //  }
 
   // 任务依赖
-  dependsOn(projectsToDocument.map { it.tasks.named("classes") })
+  //dependsOn(projectsToDocument.map { it.tasks.named("classes") })
 }
 
 jacoco {
