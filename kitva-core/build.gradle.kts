@@ -120,22 +120,20 @@ tasks.compileTestJava {
 }
 
 val compileTestJava17 by tasks.registering(JavaCompile::class) {
+  dependsOn(compileJava17)
   source = sourceSets.test.get().allJava
   include("**/*J17Test.java")
   destinationDirectory.set(file(layout.buildDirectory.dir("/classes/java/test")))
-  classpath = tasks.compileJava.get().classpath + files(tasks.compileJava.get().destinationDirectory)
-    tasks.compileTestJava.get().classpath + files(tasks.compileTestJava.get().destinationDirectory)
+  classpath = sourceSets.test.get().compileClasspath + files(compileJava17.get().destinationDirectory)
+  javaCompiler.set(javaToolchains.compilerFor {
+    languageVersion.set(JavaLanguageVersion.of(17))
+  })
 }
 
 tasks.named("compileTestJava") {
-  dependsOn(tasks.named("generateTestProto"))
+  dependsOn(tasks.named("generateTestProto"), compileTestJava17)
 }
 
-//tasks.jar {
-//  from(sourceSets.main.get().output)
-//  from(fileTree(layout.buildDirectory.dir("/classes/java/main17")))
-//  manifest.attributes["Multi-Release"] = "true"
-//}
 tasks.named<Jar>("sourcesJar") {
   // 明确指定源码来源（仅main sourceSet的源码，避免重复添加）
   from(sourceSets.main.get().allJava)
