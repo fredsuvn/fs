@@ -59,8 +59,8 @@ java {
   //toolchain {
   //  languageVersion.set(JavaLanguageVersion.of(8))
   //}
-  //withJavadocJar()
-  //withSourcesJar()
+  withJavadocJar()
+  withSourcesJar()
 }
 
 sourceSets {
@@ -84,15 +84,27 @@ sourceSets {
 tasks.compileJava {
   source = sourceSets.main.get().allJava
   exclude("**/*ImplByJdk17.java")
-  options.release.set(8)
+  javaCompiler.set(javaToolchains.compilerFor {
+    languageVersion.set(JavaLanguageVersion.of(8))
+  })
 }
 
 val compileJava17 by tasks.registering(JavaCompile::class) {
+  // 复用main sourceSet的源码（同一个源码目录）
   source = sourceSets.main.get().allJava
-  include("**/*ImplByJdk17.java")
-  options.release.set(17)
-  destinationDirectory.set(file(layout.buildDirectory.dir("/classes/java/main17")))
+  // 输出目录单独设置，避免与Java 8的class文件冲突
+  destinationDirectory.set(file(layout.buildDirectory.dir("/classes/java/main")))
   classpath = tasks.compileJava.get().classpath + files(tasks.compileJava.get().destinationDirectory)
+
+  // 仅包含ImplByJ17后缀的Java文件
+  include("**/*ImplByJdk17.java")
+
+  // 指定使用Java 17工具链
+  javaCompiler.set(javaToolchains.compilerFor {
+    languageVersion.set(JavaLanguageVersion.of(17))
+  })
+  // 编译选项（可选，根据需要添加）
+  //options.compilerArgs.add("-Xlint:all")
 }
 
 tasks.named("classes") {
@@ -100,27 +112,36 @@ tasks.named("classes") {
 }
 
 tasks.compileTestJava {
-  source = sourceSets.main.get().allJava
-  exclude("**/*ImplByJdk17.java")
-  options.release.set(8)
+  source = sourceSets.test.get().allJava
+  exclude("**/*J17Test.java")
+  javaCompiler.set(javaToolchains.compilerFor {
+    languageVersion.set(JavaLanguageVersion.of(8))
+  })
 }
 
 val compileTestJava17 by tasks.registering(JavaCompile::class) {
-  source = sourceSets.main.get().allJava
-  include("**/*ImplByJdk17.java")
-  options.release.set(17)
-  destinationDirectory.set(file(layout.buildDirectory.dir("/classes/java/main17")))
+  source = sourceSets.test.get().allJava
+  include("**/*J17Test.java")
+  destinationDirectory.set(file(layout.buildDirectory.dir("/classes/java/test")))
   classpath = tasks.compileJava.get().classpath + files(tasks.compileJava.get().destinationDirectory)
+    tasks.compileTestJava.get().classpath + files(tasks.compileTestJava.get().destinationDirectory)
 }
 
 tasks.named("compileTestJava") {
   dependsOn(tasks.named("generateTestProto"))
 }
 
-tasks.jar {
-  from(sourceSets.main.get().output)
-  from(fileTree(layout.buildDirectory.dir("/classes/java/main17")))
-  manifest.attributes["Multi-Release"] = "true"
+//tasks.jar {
+//  from(sourceSets.main.get().output)
+//  from(fileTree(layout.buildDirectory.dir("/classes/java/main17")))
+//  manifest.attributes["Multi-Release"] = "true"
+//}
+tasks.named<Jar>("sourcesJar") {
+  // 明确指定源码来源（仅main sourceSet的源码，避免重复添加）
+  from(sourceSets.main.get().allJava)
+
+  // 设置重复文件处理策略：保留第一个，忽略后续重复
+  duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
 tasks.javadoc {
