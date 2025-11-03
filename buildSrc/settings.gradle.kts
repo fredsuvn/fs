@@ -13,6 +13,7 @@ pluginManagement {
       }
     }
   repositories {
+    mavenLocal()
     maven {
       val xGradlePluginRepo: String by settings
       url = uri(xGradlePluginRepo)

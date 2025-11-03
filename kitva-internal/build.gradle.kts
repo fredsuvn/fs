@@ -2,7 +2,6 @@ plugins {
   `java-library`
   jacoco
   id("kitva")
-  id("kitva-publish")
 }
 
 description = "Internal support of KitVa."
@@ -37,23 +36,30 @@ dependencies {
 
 java {
   toolchain {
-    val toJavaVersion: JavaLanguageVersion by project
-    languageVersion.set(toJavaVersion)
+    languageVersion = project.property("javaCompatibleLang") as JavaLanguageVersion
   }
-  withJavadocJar()
-  withSourcesJar()
+}
+
+tasks.javadoc {
+  enabled = false
 }
 
 tasks.test {
   include("**/*Test.class", "**/*TestKt.class")
   useJUnitPlatform()
-  outputs.cacheIf { false }
-  outputs.upToDateWhen { false }
-  finalizedBy(tasks.jacocoTestReport)
   reports {
     html.required = false
   }
+  javaLauncher = javaToolchains.launcherFor {
+    languageVersion = project.property("javaCompatibleLang") as JavaLanguageVersion
+  }
 }
+
+jacoco {
+  val jacocoToolVersion: String by project
+  toolVersion = jacocoToolVersion
+}
+
 tasks.jacocoTestReport {
   dependsOn(tasks.test)
   reports {
@@ -61,8 +67,4 @@ tasks.jacocoTestReport {
     xml.required = false
     csv.required = false
   }
-}
-jacoco {
-  val jacocoToolVersion: String by project
-  toolVersion = jacocoToolVersion
 }

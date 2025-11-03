@@ -5,6 +5,7 @@ plugins {
 }
 
 repositories {
+  mavenLocal()
   maven {
     val xGradlePluginRepo: String by project
     url = uri(xGradlePluginRepo)

@@ -10,5 +10,11 @@ project.repositories {
   //jcenter()
 }
 
-
-
+val javaCompatibleVersion: String by project
+val javaCurrentVersion: String by project
+val javaCompatibleLang by extra {
+  JavaLanguageVersion.of(javaCompatibleVersion)
+}
+val javaCurrentLang by extra {
+  JavaLanguageVersion.of(javaCurrentVersion)
+}

@@ -9,18 +9,62 @@ plugins {
 description = "Aggregation of KitVa modules including annotations, core, and etc."
 
 dependencies {
-  //testReportAggregation(project(":kitva-annotations"))
+  implementation(platform(project(":kitva-dependencies")))
+  implementation(project(":kitva-annotations"))
+  implementation(project(":kitva-core"))
+  implementation(project(":kitva-internal"))
+  testReportAggregation(project(":kitva-annotations"))
   testReportAggregation(project(":kitva-core"))
-  //testReportAggregation(project(":kitva-internal"))
+  testReportAggregation(project(":kitva-internal"))
+}
+
+java {
+  withJavadocJar()
+  withSourcesJar()
+  toolchain {
+    languageVersion = project.property("javaCompatibleLang") as JavaLanguageVersion
+  }
+}
+
+sourceSets {
+  evaluationDependsOn(":kitva-annotations")
+  evaluationDependsOn(":kitva-core")
+  evaluationDependsOn(":kitva-internal")
+  main {
+    java {
+      srcDirs(
+        project(":kitva-annotations").sourceSets.main.get().allJava,
+        project(":kitva-core").sourceSets.main.get().allJava
+      )
+    }
+//    add(project(":kitva-annotations").sourceSets.main.get())
+//    add(project(":kitva-core").sourceSets.main.get())
+    //add(project(":kitva-annotations").sourceSets.main.get())
+  }
 }
 
 tasks.jar {
+  evaluationDependsOn(":kitva-annotations")
+  //dependsOn(configurations.runtimeClasspath)
   from(
     project(":kitva-annotations").sourceSets.main.get().output,
     project(":kitva-core").sourceSets.main.get().output,
   )
+  duplicatesStrategy = DuplicatesStrategy.INCLUDE
+  //archiveFileName.set("kitva.jar")
 }
-tasks.javadoc {
+
+tasks.named<Jar>("sourcesJar") {
+  //evaluationDependsOn(":kitva-annotations")
+//  archiveClassifier.set("sources")
+//  from(
+//    project(":kitva-annotations").sourceSets.main.get().allSource,
+//    //project(":kitva-core").layout.projectDirectory.dir("src/main/java"),
+//  )
+  duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+tasks.named<Javadoc>("javadoc") {
 
   val projectsToDocument = listOf(
     project(":kitva-annotations"),
@@ -58,44 +102,44 @@ tasks.javadoc {
   //setDestinationDir(file("${buildDir}/docs/javadoc"))
 
   // 配置选项
-//  (options as StandardJavadocDocletOptions).apply {
-//    encoding = "UTF-8"
-//    charSet = "UTF-8"
-//    memberLevel = JavadocMemberLevel.PUBLIC
+  //  (options as StandardJavadocDocletOptions).apply {
+  //    encoding = "UTF-8"
+  //    charSet = "UTF-8"
+  //    memberLevel = JavadocMemberLevel.PUBLIC
 
-    // 外部 API 文档链接
-    //links("https://docs.oracle.com/javase/8/docs/api/")
-    //links("https://javadoc.io/doc/org.springframework/spring-core/5.3.0/")
+  // 外部 API 文档链接
+  //links("https://docs.oracle.com/javase/8/docs/api/")
+  //links("https://javadoc.io/doc/org.springframework/spring-core/5.3.0/")
 
-    // 控制台输出更安静
-    //addBooleanOption("quiet", true)
+  // 控制台输出更安静
+  //addBooleanOption("quiet", true)
 
-    // 忽略缺少的注释
-    //addBooleanOption("Xdoclint:none", true)
+  // 忽略缺少的注释
+  //addBooleanOption("Xdoclint:none", true)
 
-    // 启用 HTML5 输出
-    // addBooleanOption("html5", true)
+  // 启用 HTML5 输出
+  // addBooleanOption("html5", true)
 
-    // 设置窗口标题
-    //docTitle = "${project.name} API Documentation"
-    //windowTitle = "${project.name} API"
+  // 设置窗口标题
+  //docTitle = "${project.name} API Documentation"
+  //windowTitle = "${project.name} API"
 
-    // 底部版权信息
-    //bottom = "Copyright © 2024 ${project.name}. All rights reserved."
+  // 底部版权信息
+  //bottom = "Copyright © 2024 ${project.name}. All rights reserved."
   //}
 
   // 源文件编码
   //encoding = "UTF-8"
 
-//  options {
-//    // 强制转换为StandardJavadocDocletOptions以设置更多参数
-//    this as StandardJavadocDocletOptions
-//    //charset = "UTF-8"
-//    docEncoding = "UTF-8"
-//    encoding = "UTF-8"
-//    charSet = "UTF-8"
-//    //addStringOption("Xdoclint", "all,-private")
-//  }
+  //  options {
+  //    // 强制转换为StandardJavadocDocletOptions以设置更多参数
+  //    this as StandardJavadocDocletOptions
+  //    //charset = "UTF-8"
+  //    docEncoding = "UTF-8"
+  //    encoding = "UTF-8"
+  //    charSet = "UTF-8"
+  //    //addStringOption("Xdoclint", "all,-private")
+  //  }
 
   // 任务依赖
   //dependsOn(projectsToDocument.map { it.tasks.named("classes") })
@@ -104,7 +148,7 @@ tasks.javadoc {
 jacoco {
   val jacocoToolVersion: String by project
   toolVersion = jacocoToolVersion
-  reportsDirectory = layout.buildDirectory.dir("reports/coverage")
+  //reportsDirectory = layout.buildDirectory.dir("reports/coverage")
 }
 
 tasks.test {
@@ -122,16 +166,16 @@ tasks.test {
 }
 
 tasks.jacocoTestReport {
-  dependsOn(tasks.test)
+  //dependsOn(tasks.test)
   executionData(
     project(":kitva-annotations").file("build/jacoco/test.exec"),
-    project(":kitva-core").file("build/jacoco/test.exec"),
-    project(":kitva-internal").file("build/jacoco/test.exec"),
+    //project(":kitva-core").file("build/jacoco/test.exec"),
+    //project(":kitva-internal").file("build/jacoco/test.exec"),
   )
   sourceSets(
     project(":kitva-annotations").sourceSets.main.get(),
-    project(":kitva-core").sourceSets.main.get(),
-    project(":kitva-internal").sourceSets.main.get(),
+    //project(":kitva-core").sourceSets.main.get(),
+    //project(":kitva-internal").sourceSets.main.get(),
   )
   reports {
     xml.required = false

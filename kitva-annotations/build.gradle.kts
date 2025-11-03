@@ -5,7 +5,7 @@ plugins {
   id("kitva-publish")
 }
 
-description = "Collection of annotations supporting static analyses and partial jsr305."
+description = "Collection of annotations supporting static analyses and providing partial of jsr305."
 
 dependencies {
   //implementation platform(project(":kitva-dependencies"))
@@ -17,44 +17,42 @@ dependencies {
 }
 
 java {
-  toolchain {
-    val toJavaVersion: JavaLanguageVersion by project
-    languageVersion.set(toJavaVersion)
-  }
   withJavadocJar()
   withSourcesJar()
-}
-
-tasks.withType<Javadoc>().configureEach {
-  destinationDir = file("$projectDir/docs/javadoc")
-  (options as StandardJavadocDocletOptions).apply {
-    encoding = "UTF-8"
-    locale = "en_US"
-  }
-}
-
-tasks.clean {
-  //delete(tasks.javadoc.get().destinationDir)
-}
-
-tasks.register("cleanWithJavadoc") {
-  dependsOn(tasks.clean)
-  group = "build"
-  doLast {
-    delete(tasks.javadoc.get().destinationDir)
+  toolchain {
+    languageVersion = project.property("javaCompatibleLang") as JavaLanguageVersion
   }
 }
 
 tasks.test {
   include("**/*Test.class", "**/*TestKt.class")
   useJUnitPlatform()
-  outputs.cacheIf { false }
-  outputs.upToDateWhen { false }
-  finalizedBy(tasks.jacocoTestReport)
   reports {
     html.required = false
   }
+  javaLauncher = javaToolchains.launcherFor {
+    languageVersion = project.property("javaCompatibleLang") as JavaLanguageVersion
+  }
 }
+
+tasks.named<Javadoc>("javadoc") {
+  val ops = options as StandardJavadocDocletOptions
+  ops.encoding = "UTF-8"
+  ops.locale = "en-us"
+  ops.charSet = "UTF-8"
+  ops.docEncoding = "UTF-8"
+  ops.jFlags("-Duser.language=en", "-Duser.country=US")
+  ops.addStringOption("Xdoclint:none", "-quiet")
+  javadocTool = javaToolchains.javadocToolFor {
+    languageVersion = project.property("javaCurrentLang") as JavaLanguageVersion
+  }
+}
+
+jacoco {
+  val jacocoToolVersion: String by project
+  toolVersion = jacocoToolVersion
+}
+
 tasks.jacocoTestReport {
   dependsOn(tasks.test)
   reports {
@@ -62,8 +60,4 @@ tasks.jacocoTestReport {
     xml.required = false
     csv.required = false
   }
-}
-jacoco {
-  val jacocoToolVersion: String by project
-  toolVersion = jacocoToolVersion
 }
