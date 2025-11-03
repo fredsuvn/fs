@@ -8,11 +8,11 @@ plugins {
 
 val pLogger: PluginLogger by project
 
-project.afterEvaluate {
-  val projectInfo: ProjectInfo by project
-  val publishInfo: PublishInfo by project
-  configurePublishing(projectInfo, publishInfo)
-}
+//project.afterEvaluate {
+//  val projectInfo: ProjectInfo by project
+//  val publishInfo: PublishInfo by project
+//  configurePublishing(projectInfo, publishInfo)
+//}
 
 fun configurePublishing(projectInfo: ProjectInfo, publishInfo: PublishInfo) {
   configure<PublishingExtension> {

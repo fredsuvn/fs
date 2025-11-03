@@ -12,21 +12,6 @@ description = "Core kits and interfaces of KitVa including default implementatio
 val projectVersion: String by project
 val toJavaVersion: JavaLanguageVersion by project
 
-//java {
-//  registerFeature("proxySpringSupport") {
-//    usingSourceSet(sourceSets.main.get())
-//    capability("kitva.build", "proxy-spring-support", projectVersion)
-//  }
-//  registerFeature("proxyCglibSupport") {
-//    usingSourceSet(sourceSets.main.get())
-//    capability("kitva.build", "proxy-cglib-support", projectVersion)
-//  }
-//  registerFeature("dataProtobufSupport") {
-//    usingSourceSet(sourceSets.main.get())
-//    capability("kitva.build", "data-protobuf-support", projectVersion)
-//  }
-//}
-
 dependencies {
 
   annotationProcessor(platform(project(":kitva-dependencies")))
@@ -131,19 +116,14 @@ tasks.named<Jar>("sourcesJar") {
   duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
-fun deleteProtoGeneratedFiles() {
-  delete(protobuf.generatedFilesBaseDir)
-  //delete("$generatedPath/temp")
-}
-
 tasks.test {
   include("**/*Test.class", "**/*TestKt.class")
   exclude("**/*${j17Suffix}Test.class")
   useJUnitPlatform()
   failOnNoDiscoveredTests = false
-  reports {
-    html.required = false
-  }
+//  reports {
+//    html.required = false
+//  }
   //outputs.cacheIf { false }
   //outputs.upToDateWhen { false }
   //finalizedBy(testJava17)
@@ -160,6 +140,10 @@ val testJava17 by tasks.registering(Test::class) {
   include("**/*${j17Suffix}Test.class")
   include("**/*MultiJvmTest.class")
   useJUnitPlatform()
+  failOnNoDiscoveredTests = false
+//  reports {
+//    html.required = false
+//  }
   javaLauncher = javaToolchains.launcherFor {
     languageVersion = project.property("javaCurrentLang") as JavaLanguageVersion
   }
@@ -170,28 +154,6 @@ jacoco {
   val jacocoToolVersion: String by project
   toolVersion = jacocoToolVersion
 }
-
-//tasks.jacocoTestReport {
-//  dependsOn(tasks.test, testJava17)
-//  outputs.cacheIf { false }
-//  outputs.upToDateWhen { false }
-//  executionData.from(
-//    fileTree(layout.buildDirectory.dir("jacoco")) {
-//      include("*.exec")
-//    }
-//  )
-//  sourceDirectories.from(
-//    sourceSets.main.get().allJava.srcDirs,
-//  )
-//  classDirectories.from(
-//    sourceSets.main.get().output,
-//  )
-//  reports {
-//    html.required = true
-//    xml.required = false
-//    csv.required = false
-//  }
-//}
 
 tasks.named<Javadoc>("javadoc") {
   val ops = options as StandardJavadocDocletOptions
@@ -248,4 +210,9 @@ tasks.clean {
   doLast {
     deleteProtoGeneratedFiles()
   }
+}
+
+fun deleteProtoGeneratedFiles() {
+  delete(protobuf.generatedFilesBaseDir)
+  //delete("$generatedPath/temp")
 }

@@ -40,6 +40,22 @@ java {
   }
 }
 
+//tasks.jar {
+//  enabled = false
+//}
+
+//tasks.named<Jar>("sourcesJar") {
+//  enabled = false
+//}
+
+//tasks.named<Jar>("javadocJar") {
+//  enabled = false
+//}
+
+tasks.named<Javadoc>("javadoc"){
+  enabled  = false
+}
+
 tasks.javadoc {
   enabled = false
 }
