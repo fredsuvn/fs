@@ -8,19 +8,23 @@ plugins {
 
 description = "Aggregation of KitVa modules including annotations, core, and etc."
 
+val annotationProject = project(":kitva-annotations")
+val coreProject = project(":kitva-core")
+val internalProject = project(":kitva-internal")
+
 dependencies {
   implementation(platform(project(":kitva-dependencies")))
-  implementation(project(":kitva-annotations"))
-  implementation(project(":kitva-core"))
-  implementation(project(":kitva-internal"))
-  testReportAggregation(project(":kitva-annotations"))
-  testReportAggregation(project(":kitva-core"))
-  testReportAggregation(project(":kitva-internal"))
+  implementation(annotationProject)
+  implementation(coreProject)
+  implementation(internalProject)
+  testReportAggregation(annotationProject)
+  testReportAggregation(coreProject)
+  testReportAggregation(internalProject)
 }
 
-evaluationDependsOn(":kitva-annotations")
-evaluationDependsOn(":kitva-core")
-evaluationDependsOn(":kitva-internal")
+evaluationDependsOn(annotationProject.path)
+evaluationDependsOn(coreProject.path)
+evaluationDependsOn(internalProject.path)
 
 java {
   withJavadocJar()
@@ -32,8 +36,8 @@ java {
 
 tasks.named<Jar>("jar") {
   from(
-    project(":kitva-annotations").sourceSets.main.get().output,
-    project(":kitva-core").sourceSets.main.get().output,
+    annotationProject.sourceSets.main.get().output,
+    coreProject.sourceSets.main.get().output,
   )
   duplicatesStrategy = DuplicatesStrategy.INCLUDE
   //archiveFileName.set("kitva.jar")
@@ -41,8 +45,8 @@ tasks.named<Jar>("jar") {
 
 tasks.named<Jar>("sourcesJar") {
   from(
-    project(":kitva-annotations").sourceSets.main.get().allSource,
-    project(":kitva-core").sourceSets.main.get().allSource,
+    annotationProject.sourceSets.main.get().allSource,
+    coreProject.sourceSets.main.get().allSource,
   )
   duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
@@ -50,8 +54,8 @@ tasks.named<Jar>("sourcesJar") {
 tasks.named<Javadoc>("javadoc") {
 
   val projectsToDocument = listOf(
-    project(":kitva-annotations"),
-    project(":kitva-core"),
+    annotationProject,
+    coreProject,
   )
   source = files(projectsToDocument.flatMap { project ->
     project.the<JavaPluginExtension>().sourceSets.main.get().allJava.srcDirs
@@ -75,12 +79,14 @@ tasks.named<Javadoc>("javadoc") {
   }
 }
 
+val testByJ17 = coreProject.tasks.named("testByJ17")
+
 tasks.test {
   dependsOn(
-    project(":kitva-annotations").tasks.test,
-    project(":kitva-core").tasks.test,
-    project(":kitva-core").tasks.named("testJava17"),
-    project(":kitva-internal").tasks.test,
+    annotationProject.tasks.test,
+    coreProject.tasks.test,
+    testByJ17,
+    internalProject.tasks.test,
   )
   reports {
     html.required = false
@@ -95,15 +101,15 @@ jacoco {
 tasks.jacocoTestReport {
   dependsOn(tasks.test)
   executionData(
-    project(":kitva-annotations").file("build/jacoco/test.exec"),
-    project(":kitva-core").file("build/jacoco/test.exec"),
-    project(":kitva-core").file("build/jacoco/testJava17.exec"),
-    project(":kitva-internal").file("build/jacoco/test.exec"),
+    annotationProject.file("build/jacoco/test.exec"),
+    coreProject.file("build/jacoco/test.exec"),
+    coreProject.file("build/jacoco/${testByJ17.name}.exec"),
+    internalProject.file("build/jacoco/test.exec"),
   )
   sourceSets(
-    project(":kitva-annotations").sourceSets.main.get(),
-    project(":kitva-core").sourceSets.main.get(),
-    project(":kitva-internal").sourceSets.main.get(),
+    annotationProject.sourceSets.main.get(),
+    coreProject.sourceSets.main.get(),
+    internalProject.sourceSets.main.get(),
   )
   reports {
     xml.required = false
@@ -114,21 +120,8 @@ tasks.jacocoTestReport {
 
 tasks.testAggregateTestReport {
   dependsOn(tasks.test)
-  //testResults.
   testResults.from(
-    // kitva-annotations的默认test任务结果
-    project(":kitva-annotations").layout.buildDirectory.dir("test-results/test"),
-    // kitva-core的默认test任务结果
-    project(":kitva-core").layout.buildDirectory.dir("test-results/test"),
-    // kitva-core的testJava17任务结果（精确到子目录）
-    project(":kitva-core").layout.buildDirectory.dir("test-results/testJava17"),
-    // kitva-internal的默认test任务结果
-    project(":kitva-internal").layout.buildDirectory.dir("test-results/test")
+    coreProject.layout.buildDirectory.dir("test-results/${testByJ17.name}"),
+    coreProject.layout.buildDirectory.dir("test-results/${testByJ17.name}/binary"),
   )
-  doFirst {
-    println("聚合的测试结果目录：")
-    testResults.files.forEach { file ->
-      println("- ${file.absolutePath}")
-    }
-  }
 }

@@ -121,18 +121,15 @@ tasks.test {
   exclude("**/*${j17Suffix}Test.class")
   useJUnitPlatform()
   failOnNoDiscoveredTests = false
-//  reports {
-//    html.required = false
-//  }
-  //outputs.cacheIf { false }
-  //outputs.upToDateWhen { false }
-  //finalizedBy(testJava17)
+  reports {
+    html.required = false
+  }
   javaLauncher = javaToolchains.launcherFor {
     languageVersion = project.property("javaCompatibleLang") as JavaLanguageVersion
   }
 }
 
-val testJava17 by tasks.registering(Test::class) {
+val testByJ17 by tasks.registering(Test::class) {
   dependsOn(compileTestJava17)
   group = "verification"
   testClassesDirs = fileTree(layout.buildDirectory.dir("/classes/java/test"))
@@ -141,14 +138,14 @@ val testJava17 by tasks.registering(Test::class) {
   include("**/*MultiJvmTest.class")
   useJUnitPlatform()
   failOnNoDiscoveredTests = false
-//  reports {
-//    html.required = false
-//  }
+  reports {
+    html.required = false
+  }
   javaLauncher = javaToolchains.launcherFor {
     languageVersion = project.property("javaCurrentLang") as JavaLanguageVersion
   }
 }
-tasks.check.get().dependsOn(testJava17)
+tasks.check.get().dependsOn(testByJ17)
 
 jacoco {
   val jacocoToolVersion: String by project
@@ -168,29 +165,17 @@ tasks.named<Javadoc>("javadoc") {
   }
 }
 
-val generatedPath = "$projectDir/generated"
-//val protoPath = "$generatedPath/proto"
-
 protobuf {
   //generatedFilesBaseDir = protoPath
   protoc {
-    // Download from repositories
     artifact = "com.google.protobuf:protoc:${Versions.protoc}"
     // generatedFilesBaseDir = protoPath
   }
-
   plugins {
     //grpc { artifact = "io.grpc:protoc-gen-grpc-java:$grpcVersion" }
     //grpckt { artifact = "io.grpc:protoc-gen-grpc-kotlin:$grpcKotlinVersion" }
   }
-
   generateProtoTasks {
-    all().forEach { task ->
-      task.plugins {
-        //grpc { setOutputSubDir("$protoGenDir") }
-        //grpckt {}
-      }
-    }
     ofSourceSet("test").forEach { task ->
       task.plugins {
         //create("java") { outputSubDir = "proto222" }
@@ -214,5 +199,4 @@ tasks.clean {
 
 fun deleteProtoGeneratedFiles() {
   delete(protobuf.generatedFilesBaseDir)
-  //delete("$generatedPath/temp")
 }
