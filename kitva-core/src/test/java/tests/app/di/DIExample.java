@@ -1,11 +1,11 @@
 package tests.app.di;
 
+import internal.test.PrintTest;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.common.app.di.InjectedApp;
 import space.sunqian.common.app.di.InjectedAspect;
 import space.sunqian.common.app.di.InjectedDependsOn;
-import internal.test.PrintTest;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -32,7 +32,20 @@ public class DIExample implements PrintTest {
             .build();
         XService xService = app.getResource(XService.class);
         System.out.println(xService.doService());
+        InjectedApp child = InjectedApp.newBuilder()
+            .parentApps(app)
+            .resourceTypes(
+                XController.class,
+                XServiceImpl.class,
+                XServiceProxy.class,
+                BeforeDestroyService.class
+            )
+            .resourceAnnotation(XResource.class)
+            .postConstructAnnotation(XPostConstruct.class)
+            .preDestroyAnnotation(XPreDestroy.class)
+            .build();
         app.shutdown();
+        child.shutdown();
     }
 
     public static class XController {

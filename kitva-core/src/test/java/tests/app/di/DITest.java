@@ -1,5 +1,7 @@
 package tests.app.di;
 
+import internal.test.KitvaTestException;
+import internal.test.PrintTest;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.annotation.Resource;
@@ -15,8 +17,6 @@ import space.sunqian.common.app.di.InjectedResourceDestructionException;
 import space.sunqian.common.app.di.InjectedResourceInitializationException;
 import space.sunqian.common.collect.ListKit;
 import space.sunqian.common.runtime.reflect.TypeRef;
-import internal.test.KitvaTestException;
-import internal.test.PrintTest;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -30,8 +30,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DITest implements PrintTest {
 
@@ -111,6 +111,13 @@ public class DITest implements PrintTest {
             preList,
             ListKit.list(SubService2.class.getName())
         );
+
+        // app3
+        InjectedApp app3 = InjectedApp.newBuilder()
+            .parentApps(app)
+            .resourceTypes(Starter.class)
+            .build();
+        assertSame(app.getResource(Starter.class), app3.getResource(Starter.class));
 
         {
             // error

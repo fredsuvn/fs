@@ -24,20 +24,20 @@
  *
  *     public static class XController {
  *
- *         &#064;XResource
+ *         @XResource
  *         private XService xService;
- *         &#064;XResource
+ *         @XResource
  *         private ConstructService constructService;
- *         &#064;XResource
+ *         @XResource
  *         private DestroyService destroyService;
  *
- *         &#064;XPostConstruct
+ *         @XPostConstruct
  *         public void init() {
  *             constructService.doConstruct();
  *         }
  *
- *         &#064;XPreDestroy
- *         &#064;InjectedDependsOn(BeforeDestroyService.class)
+ *         @XPreDestroy
+ *         @InjectedDependsOn(BeforeDestroyService.class)
  *         public void destroy() {
  *             destroyService.doDestroy();
  *         }
@@ -45,7 +45,7 @@
  *
  *     public static class BeforeDestroyService {
  *
- *         &#064;XPreDestroy
+ *         @XPreDestroy
  *         public void destroy() {
  *             System.out.println("before destroy");
  *         }
@@ -58,7 +58,7 @@
  *
  *     public static class XServiceImpl implements XService {
  *
- *         &#064;Override
+ *         @Override
  *         public String doService() {
  *             return "do service...";
  *         }
@@ -66,27 +66,27 @@
  *
  *     public static class XServiceProxy implements InjectedAspect {
  *
- *         &#064;Override
- *         public boolean needsAspect(&#064;Nonnull Type type) {
+ *         @Override
+ *         public boolean needsAspect(@Nonnull Type type) {
  *             return type.equals(XServiceImpl.class);
  *         }
  *
- *         &#064;Override
- *         public boolean needsAspect(&#064;Nonnull Method method) {
+ *         @Override
+ *         public boolean needsAspect(@Nonnull Method method) {
  *             return method.getName().equals("doService");
  *         }
  *
- *         &#064;Override
- *         public void beforeInvoking(&#064;Nonnull Method method, Object &#064;Nonnull [] args, &#064;Nonnull Object target) throws Throwable {
+ *         @Override
+ *         public void beforeInvoking(@Nonnull Method method, Object @Nonnull [] args, @Nonnull Object target) throws Throwable {
  *         }
  *
- *         &#064;Override
- *         public &#064;Nullable Object afterReturning(&#064;Nullable Object result, &#064;Nonnull Method method, Object &#064;Nonnull [] args, &#064;Nonnull Object target) throws Throwable {
+ *         @Override
+ *         public @Nullable Object afterReturning(@Nullable Object result, @Nonnull Method method, Object @Nonnull [] args, @Nonnull Object target) throws Throwable {
  *             return result + "[proxied]";
  *         }
  *
- *         &#064;Override
- *         public &#064;Nullable Object afterThrowing(&#064;Nonnull Throwable ex, &#064;Nonnull Method method, Object &#064;Nonnull [] args, &#064;Nonnull Object target) {
+ *         @Override
+ *         public @Nullable Object afterThrowing(@Nonnull Throwable ex, @Nonnull Method method, Object @Nonnull [] args, @Nonnull Object target) {
  *             return null;
  *         }
  *     }
@@ -105,19 +105,19 @@
  *         }
  *     }
  *
- *     &#064;Target(FIELD)
- *     &#064;Retention(RUNTIME)
- *     public &#064;interface XResource {
+ *     @Target(FIELD)
+ *     @Retention(RUNTIME)
+ *     public @interface XResource {
  *     }
  *
- *     &#064;Target(METHOD)
- *     &#064;Retention(RUNTIME)
- *     public &#064;interface XPostConstruct {
+ *     @Target(METHOD)
+ *     @Retention(RUNTIME)
+ *     public @interface XPostConstruct {
  *     }
  *
- *     &#064;Target(METHOD)
- *     &#064;Retention(RUNTIME)
- *     public &#064;interface XPreDestroy {
+ *     @Target(METHOD)
+ *     @Retention(RUNTIME)
+ *     public @interface XPreDestroy {
  *     }
  * }
  * }</pre>
@@ -155,13 +155,28 @@
  *   thrown and already executed methods are not rolled back.</li>
  * </ol>
  * <p>
+ * An app can be inherited from a parent app:
+ * <pre>{@code
+ * InjectedApp child = InjectedApp.newBuilder()
+ *     .parentApps(app)
+ *     .resourceTypes(
+ *         SomeObject.class,
+ *         XServiceImpl.class
+ *     )
+ *     .build();
+ * }</pre>
+ * The {@code child} inherits all resources from its parent {@code app}. This simple DI framework supports singleton
+ * mode for resources, so resources of the same types will be reused from the parent {@code app}, that is to say,
+ * the resource of {@code XServiceImpl.class} in {@code child} will directly use its parent's instead of creating a new
+ * one.
+ * <p>
  * When {@code shutdown} method is executed, all {@code pre-destroy} methods in its app's resources are executed
  * sequentially according to their dependency relationships. If an exception occurs during the execution, an exception
  * will be thrown and the shutdown process will terminate immediately, and the remaining {@code pre-destroy} methods
  * will not be executed.
  * <p>
- * Once an app is shut down, it becomes invalid and cannot be restarted. However, its sub-apps are not
- * automatically shut down along with it. Sub-apps that depend on resources from this app will generally continue to
+ * Once an app is shut down, it becomes invalid and cannot be restarted. However, its child-apps are not
+ * automatically shut down along with it. Child-apps that depend on resources from this app will generally continue to
  * function normally, as long as those resources haven't been destroyed (by {@code pre-destroy} methods) during this
  * shutdown process.
  */
