@@ -4,7 +4,7 @@ plugins {
   id("kitva")
 }
 
-description = "Internal support of KitVa."
+description = "Internal supporting for KitVa."
 
 dependencies {
   implementation(platform(project(":kitva-dependencies")))

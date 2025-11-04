@@ -1,13 +1,13 @@
 plugins {
   `java-library`
   jacoco
-  id("kitva")
-  id("java-library")
-  id("kitva-publish")
+  `maven-publish`
+  signing
   id("com.google.protobuf")
+  id("kitva")
 }
 
-description = "Core kits and interfaces of KitVa including default implementations."
+description = "Core of KitVa, including core kits and interfaces with their default implementations."
 
 val projectVersion: String by project
 val toJavaVersion: JavaLanguageVersion by project
@@ -200,4 +200,49 @@ tasks.clean {
 
 fun deleteProtoGeneratedFiles() {
   delete(protobuf.generatedFilesBaseDir)
+}
+
+publishing {
+  publications {
+    create<MavenPublication>("main") {
+      from(components["java"])
+      val projectInfo: ProjectInfo by rootProject.extra
+      pom {
+        version = projectInfo.version
+        group = rootProject.group
+        name = project.name
+        description = project.description
+        url = projectInfo.url
+        licenses {
+          projectInfo.licenses.forEach {
+            license {
+              name.set(it.name)
+              url.set(it.url)
+            }
+          }
+        }
+        developers {
+          projectInfo.developers.forEach {
+            developer {
+              id.set(it.id)
+              name.set(it.name)
+              email.set(it.email)
+              url.set(it.url)
+            }
+          }
+        }
+        scm {
+          connection = projectInfo.scm.connection
+          developerConnection = projectInfo.scm.developerConnection
+          url = projectInfo.scm.url
+        }
+      }
+    }
+  }
+  repositories {
+    mavenLocal()
+  }
+}
+
+signing {
 }

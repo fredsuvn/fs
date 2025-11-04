@@ -2,25 +2,16 @@ plugins {
   `java-library`
   jacoco
   `test-report-aggregation`
+  `maven-publish`
+  signing
   id("kitva")
-  id("kitva-publish")
 }
 
-description = "Aggregation of KitVa modules including annotations, core, and etc."
+description = "Aggregation of KitVa, including kitva-annotations and kitva-core, without dependencies."
 
 val annotationProject = project(":kitva-annotations")
 val coreProject = project(":kitva-core")
 val internalProject = project(":kitva-internal")
-
-dependencies {
-  implementation(platform(project(":kitva-dependencies")))
-  implementation(annotationProject)
-  implementation(coreProject)
-  implementation(internalProject)
-  testReportAggregation(annotationProject)
-  testReportAggregation(coreProject)
-  testReportAggregation(internalProject)
-}
 
 evaluationDependsOn(annotationProject.path)
 evaluationDependsOn(coreProject.path)
@@ -121,7 +112,58 @@ tasks.jacocoTestReport {
 tasks.testAggregateTestReport {
   dependsOn(tasks.test)
   testResults.from(
+    annotationProject.layout.buildDirectory.dir("test-results/test"),
+    annotationProject.layout.buildDirectory.dir("test-results/test/binary"),
+    coreProject.layout.buildDirectory.dir("test-results/test"),
+    coreProject.layout.buildDirectory.dir("test-results/test/binary"),
     coreProject.layout.buildDirectory.dir("test-results/${testByJ17.name}"),
     coreProject.layout.buildDirectory.dir("test-results/${testByJ17.name}/binary"),
+    internalProject.layout.buildDirectory.dir("test-results/test"),
+    internalProject.layout.buildDirectory.dir("test-results/test/binary"),
   )
+}
+
+publishing {
+  publications {
+    create<MavenPublication>("main") {
+      from(components["java"])
+      val projectInfo: ProjectInfo by rootProject.extra
+      pom {
+        version = projectInfo.version
+        group = rootProject.group
+        name = project.name
+        description = project.description
+        url = projectInfo.url
+        licenses {
+          projectInfo.licenses.forEach {
+            license {
+              name.set(it.name)
+              url.set(it.url)
+            }
+          }
+        }
+        developers {
+          projectInfo.developers.forEach {
+            developer {
+              id.set(it.id)
+              name.set(it.name)
+              email.set(it.email)
+              url.set(it.url)
+            }
+          }
+        }
+        scm {
+          connection = projectInfo.scm.connection
+          developerConnection = projectInfo.scm.developerConnection
+          url = projectInfo.scm.url
+        }
+      }
+    }
+  }
+  repositories {
+    mavenLocal()
+  }
+}
+
+signing {
 }
