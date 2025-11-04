@@ -4,14 +4,13 @@ plugins {
 
 description = "Root project of KitVa."
 
-val javaVersion: String by project
+rootProject.group = "space.sunqian.common"
+
 val projectVersion: String by project
-val toJavaVersion: JavaLanguageVersion by extra(JavaLanguageVersion.of(javaVersion))
 
 val projectInfo by extra(
   ProjectInfo(
     version = projectVersion,
-    group = "space.sunqian.common",
     url = "https://github.com/fredsuvn/kitva",
     inceptionYear = "2020",
     licenses = listOf(
@@ -28,6 +27,11 @@ val projectInfo by extra(
         url = "https://github.com/fredsuvn"
       )
     ),
+    scm = Scm(
+      connection = "scm:git:https://github.com/fredsuvn/kitva.git",
+      developerConnection = "scm:git:https://github.com/fredsuvn/kitva.git",
+      url = "https://github.com/fredsuvn/kitva"
+    )
   )
 )
 

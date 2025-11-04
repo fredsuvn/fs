@@ -1,5 +1,6 @@
 pluginManagement {
-  File(rootDir.parentFile, "gradle.properties")
+
+  file("${rootDir.parentFile}/gradle.properties")
     .inputStream().use { input ->
       val properties = java.util.Properties()
       properties.load(input)
@@ -12,6 +13,7 @@ pluginManagement {
         }
       }
     }
+
   repositories {
     mavenLocal()
     maven {

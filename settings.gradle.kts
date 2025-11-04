@@ -1,4 +1,5 @@
 pluginManagement {
+
   repositories {
     mavenLocal()
     maven {
@@ -7,6 +8,11 @@ pluginManagement {
     }
     mavenCentral()
     gradlePluginPortal()
+  }
+
+  plugins {
+    val protobufPluginVersion: String by settings
+    id("com.google.protobuf") version protobufPluginVersion
   }
 }
 

@@ -4,7 +4,7 @@ plugins {
   id("kitva")
   id("java-library")
   id("kitva-publish")
-  id("com.google.protobuf") version (Versions.protobuf)
+  id("com.google.protobuf")
 }
 
 description = "Core kits and interfaces of KitVa including default implementations."
@@ -168,7 +168,8 @@ tasks.named<Javadoc>("javadoc") {
 protobuf {
   //generatedFilesBaseDir = protoPath
   protoc {
-    artifact = "com.google.protobuf:protoc:${Versions.protoc}"
+    val protocToolVersion: String by project
+    artifact = "com.google.protobuf:protoc:${protocToolVersion}"
     // generatedFilesBaseDir = protoPath
   }
   plugins {
