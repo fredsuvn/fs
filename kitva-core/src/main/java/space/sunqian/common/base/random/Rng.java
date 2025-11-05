@@ -54,7 +54,7 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
      * @return a {@link Rng} instance based on the specified {@link Random}
      */
     static @Nonnull Rng newRng(@Nonnull Random random) {
-        return RngBack.random(random);
+        return RngService.INST.random(random);
     }
 
     /**
@@ -64,7 +64,7 @@ public interface Rng extends IntSupplier, LongSupplier, DoubleSupplier {
      * @return a {@link Rng} instance based on the {@link ThreadLocalRandom}
      */
     static @Nonnull Rng threadLocal() {
-        return RngBack.threadLocalRandom();
+        return RngService.INST.threadLocalRandom();
     }
 
     /**

@@ -1,12 +1,13 @@
 package tests.base.random;
 
+import internal.test.AssertTest;
+import internal.test.J17Also;
+import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.common.base.math.MathKit;
 import space.sunqian.common.base.random.Rng;
 import space.sunqian.common.collect.StreamKit;
-import internal.test.AssertTest;
-import internal.test.PrintTest;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -21,9 +22,10 @@ import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@J17Also
 public class RngTest implements AssertTest, PrintTest {
 
     @Test

@@ -3,7 +3,6 @@ package space.sunqian.common.base.random;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.common.base.CheckKit;
 import space.sunqian.common.base.bytes.BytesKit;
-import space.sunqian.common.base.math.MathKit;
 import space.sunqian.common.collect.StreamKit;
 
 import java.security.SecureRandom;
@@ -16,13 +15,16 @@ import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
-final class RngBack {
+enum RngServiceImplByJ17 implements RngService {
+    INST;
 
-    static @Nonnull Rng random(@Nonnull Random random) {
+    @Override
+    public @Nonnull Rng random(@Nonnull Random random) {
         return new RandomRng(random);
     }
 
-    static @Nonnull Rng threadLocalRandom() {
+    @Override
+    public @Nonnull Rng threadLocalRandom() {
         return ThreadLocalRandomRng.INST;
     }
 
@@ -60,7 +62,10 @@ final class RngBack {
 
         @Override
         public int nextInt(int startInclusive, int endExclusive) throws IllegalArgumentException {
-            return ints(startInclusive, endExclusive).iterator().nextInt();
+            if (startInclusive == endExclusive) {
+                return startInclusive;
+            }
+            return random.nextInt(startInclusive, endExclusive);
         }
 
         @Override
@@ -70,19 +75,23 @@ final class RngBack {
 
         @Override
         public long nextLong(long startInclusive, long endExclusive) throws IllegalArgumentException {
-            return longs(startInclusive, endExclusive).iterator().nextLong();
+            if (startInclusive == endExclusive) {
+                return startInclusive;
+            }
+            return random.nextLong(startInclusive, endExclusive);
         }
 
         @Override
         public float nextFloat() {
-            double value = nextDouble();
-            return MathKit.makeIn((float) value, 0.0f, 1.0f);
+            return random.nextFloat();
         }
 
         @Override
         public float nextFloat(float startInclusive, float endExclusive) throws IllegalArgumentException {
-            double value = nextDouble(startInclusive, endExclusive);
-            return MathKit.makeIn((float) value, startInclusive, endExclusive);
+            if (startInclusive == endExclusive) {
+                return startInclusive;
+            }
+            return random.nextFloat(startInclusive, endExclusive);
         }
 
         @Override
@@ -92,7 +101,10 @@ final class RngBack {
 
         @Override
         public double nextDouble(double startInclusive, double endExclusive) throws IllegalArgumentException {
-            return doubles(startInclusive, endExclusive).iterator().nextDouble();
+            if (startInclusive == endExclusive) {
+                return startInclusive;
+            }
+            return random.nextDouble(startInclusive, endExclusive);
         }
     }
 
@@ -141,14 +153,15 @@ final class RngBack {
 
         @Override
         public float nextFloat() {
-            double value = nextDouble();
-            return MathKit.makeIn((float) value, 0.0f, 1.0f);
+            return random().nextFloat();
         }
 
         @Override
         public float nextFloat(float startInclusive, float endExclusive) throws IllegalArgumentException {
-            double value = nextDouble(startInclusive, endExclusive);
-            return MathKit.makeIn((float) value, startInclusive, endExclusive);
+            if (startInclusive == endExclusive) {
+                return startInclusive;
+            }
+            return random().nextFloat(startInclusive, endExclusive);
         }
 
         @Override
