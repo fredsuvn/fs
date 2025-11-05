@@ -23,7 +23,7 @@ public interface HttpClientEngine {
      * @throws IllegalArgumentException if the buffer size {@code <= 0}
      */
     static @Nonnull HttpClientEngine newEngine(int bufSize) throws IllegalArgumentException {
-        return new EngineImpl(bufSize);
+        return HttpClientEngineService.INST.newEngine(bufSize);
     }
 
     /**

@@ -1,6 +1,7 @@
 package tests.net;
 
 import internal.test.ErrorCharset;
+import internal.test.J17Also;
 import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
 import space.sunqian.annotations.Nonnull;
@@ -30,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@J17Also
 public class HttpTest implements PrintTest {
 
     private static final String TEST_URL = "https://www.baidu.com/s";
