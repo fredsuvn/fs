@@ -4,6 +4,8 @@ import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.annotations.RetainedParam;
 import space.sunqian.annotations.ThreadSafe;
+import space.sunqian.common.runtime.proxy.asm.AsmProxyMaker;
+import space.sunqian.common.runtime.proxy.jdk.JdkProxyMaker;
 
 import java.util.List;
 

@@ -2,6 +2,7 @@ package space.sunqian.common.runtime.aspect;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.ThreadSafe;
+import space.sunqian.common.runtime.aspect.asm.AsmAspectMaker;
 
 /**
  * This interface is used to create aspect class to implement aspect-oriented programming. The implementations should be

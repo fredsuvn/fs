@@ -1,18 +1,18 @@
 package tests.runtime.proxy;
 
+import internal.test.PrintTest;
 import org.junit.jupiter.api.Test;
-import tests.utils.LotsOfMethods;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.common.base.Kit;
 import space.sunqian.common.base.value.BooleanVar;
 import space.sunqian.common.base.value.IntVar;
-import space.sunqian.common.runtime.proxy.AsmProxyMaker;
 import space.sunqian.common.runtime.proxy.ProxyHandler;
 import space.sunqian.common.runtime.proxy.ProxyInvoker;
 import space.sunqian.common.runtime.proxy.ProxyMaker;
 import space.sunqian.common.runtime.proxy.ProxySpec;
-import internal.test.PrintTest;
+import space.sunqian.common.runtime.proxy.asm.AsmProxyMaker;
+import tests.utils.LotsOfMethods;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -23,8 +23,8 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AsmProxyTest implements PrintTest {
 

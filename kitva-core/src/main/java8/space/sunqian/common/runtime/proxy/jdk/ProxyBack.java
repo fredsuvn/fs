@@ -1,4 +1,4 @@
-package space.sunqian.common.runtime.proxy;
+package space.sunqian.common.runtime.proxy.jdk;
 
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;

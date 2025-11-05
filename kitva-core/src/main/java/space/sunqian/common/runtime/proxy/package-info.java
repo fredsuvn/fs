@@ -15,8 +15,6 @@
  *     <li>{@link space.sunqian.common.runtime.proxy.ProxySpec}</li>
  *     <li>{@link space.sunqian.common.runtime.proxy.ProxyHandler}</li>
  *     <li>{@link space.sunqian.common.runtime.proxy.ProxyInvoker}</li>
- *     <li>{@link space.sunqian.common.runtime.proxy.AsmProxyMaker}</li>
- *     <li>{@link space.sunqian.common.runtime.proxy.JdkProxyMaker}</li>
  * </ul>
  */
 package space.sunqian.common.runtime.proxy;
