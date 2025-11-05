@@ -25,7 +25,7 @@ public class KitVa {
      * @param <T>          the service type
      * @return the corresponding version of service implementation
      */
-    public static <T> @Nonnull T loadServiceByJvm(
+    public static <T> @Nonnull T loadImplByJvm(
         @Nonnull Class<T> serviceClass, int highVersion
     ) throws UnknownTypeException {
         int majorVersion = JvmKit.javaMajorVersion();

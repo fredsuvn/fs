@@ -1,6 +1,6 @@
 package tests;
 
-import org.junit.jupiter.api.Tag;
+import internal.test.J17Also;
 import org.junit.jupiter.api.Test;
 import space.sunqian.common.KitVa;
 import space.sunqian.common.base.exception.UnknownTypeException;
@@ -11,25 +11,25 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class KitVaTest {
 
-    @Tag("J17Test")
+    @J17Also
     @Test
-    public void testLoadServiceByJvm() {
+    public void testLoadImplByJvm() {
         int jvmVersion = JvmKit.javaMajorVersion();
         if (jvmVersion <= 8) {
-            XService service8 = KitVa.loadServiceByJvm(XService.class, 8);
+            XService service8 = KitVa.loadImplByJvm(XService.class, 8);
             assertEquals("XService.J8", service8.doSomething());
-            XService service9 = KitVa.loadServiceByJvm(XService.class, 9);
+            XService service9 = KitVa.loadImplByJvm(XService.class, 9);
             assertEquals("XService.J8", service9.doSomething());
-            XService service17 = KitVa.loadServiceByJvm(XService.class, 17);
+            XService service17 = KitVa.loadImplByJvm(XService.class, 17);
             assertEquals("XService.J8", service17.doSomething());
         } else {
-            XService service8 = KitVa.loadServiceByJvm(XService.class, 8);
+            XService service8 = KitVa.loadImplByJvm(XService.class, 8);
             assertEquals("XService.J8", service8.doSomething());
-            assertThrows(UnknownTypeException.class, () -> KitVa.loadServiceByJvm(XService2.class, 9));
-            XService service17 = KitVa.loadServiceByJvm(XService.class, 17);
+            assertThrows(UnknownTypeException.class, () -> KitVa.loadImplByJvm(XService2.class, 9));
+            XService service17 = KitVa.loadImplByJvm(XService.class, 17);
             assertEquals("XService.J17", service17.doSomething());
         }
-        assertThrows(UnknownTypeException.class, () -> KitVa.loadServiceByJvm(XService2.class, 8));
+        assertThrows(UnknownTypeException.class, () -> KitVa.loadImplByJvm(XService2.class, 8));
     }
 
     private interface XService {

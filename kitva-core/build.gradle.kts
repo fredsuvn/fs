@@ -151,7 +151,9 @@ tasks.named<Jar>("sourcesJar") {
 tasks.test {
   include("**/*Test.class", "**/*TestKt.class")
   exclude("**/*${implByJvm}*Test.class")
-  useJUnitPlatform()
+  useJUnitPlatform() {
+    excludeTags("J17Only")
+  }
   failOnNoDiscoveredTests = false
   reports {
     html.required = false
@@ -174,7 +176,7 @@ tasks.register(testByJMaxName, Test::class) {
   //include("**/*${j17Suffix}Test.class")
   //include("**/*MultiJvmTest.class")
   useJUnitPlatform() {
-    includeTags("J17Test")
+    includeTags("J17Also", "J17Only")
   }
   failOnNoDiscoveredTests = false
   reports {

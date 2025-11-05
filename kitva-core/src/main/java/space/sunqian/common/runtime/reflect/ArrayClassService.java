@@ -8,7 +8,8 @@ import java.lang.reflect.Type;
 
 interface ArrayClassService {
 
-    @Nonnull ArrayClassService INST = KitVa.loadServiceByJvm(ArrayClassService.class, 12);
+    @Nonnull
+    ArrayClassService INST = KitVa.loadImplByJvm(ArrayClassService.class, 12);
 
     @Nullable
     Class<?> arrayClass(@Nonnull Type componentType);

@@ -1,13 +1,13 @@
 package tests.runtime.reflect;
 
-import org.junit.jupiter.api.Tag;
+import internal.test.AssertTest;
+import internal.test.J17Also;
 import org.junit.jupiter.api.Test;
-import tests.utils.ErrorConstructor;
 import space.sunqian.common.base.Kit;
 import space.sunqian.common.base.exception.UnknownPrimitiveTypeException;
 import space.sunqian.common.collect.ListKit;
 import space.sunqian.common.runtime.reflect.ClassKit;
-import internal.test.AssertTest;
+import tests.utils.ErrorConstructor;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -107,7 +107,7 @@ public class ClassTest implements AssertTest {
         );
     }
 
-    @Tag("J17Test")
+    @J17Also
     @Test
     public void testArrayClass() throws Exception {
         // class:
