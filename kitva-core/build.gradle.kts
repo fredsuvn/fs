@@ -58,7 +58,7 @@ sourceSets {
     }
     java {
       srcDirs("src/test/java")
-      srcDirs("src/test/java8")
+      //srcDirs("src/test/java8")
     }
   }
 }

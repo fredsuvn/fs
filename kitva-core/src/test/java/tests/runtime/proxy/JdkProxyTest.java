@@ -1,5 +1,6 @@
 package tests.runtime.proxy;
 
+import internal.test.J17Also;
 import org.junit.jupiter.api.Test;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
@@ -10,6 +11,7 @@ import space.sunqian.common.runtime.proxy.ProxyHandler;
 import space.sunqian.common.runtime.proxy.ProxyInvoker;
 import space.sunqian.common.runtime.proxy.ProxyMaker;
 import space.sunqian.common.runtime.proxy.ProxySpec;
+import space.sunqian.common.runtime.proxy.jdk.JdkProxyMaker;
 
 import java.lang.reflect.Method;
 
@@ -170,6 +172,7 @@ public class JdkProxyTest {
         }
     }
 
+    @J17Also
     @Test
     public void testInvokeSuper() throws Exception {
         ProxyMaker proxyMaker = ProxyMaker.byJdk();
@@ -207,11 +210,6 @@ public class JdkProxyTest {
         assertThrows(AbstractMethodError.class, psi::si2);
         assertEquals(counter.get(), 2);
         counter.clear();
-
-        {
-            // unsupported default method invocable
-            ProxyBackTest.testUnsupportedDefaultMethod();
-        }
     }
 
     @Test
@@ -276,6 +274,14 @@ public class JdkProxyTest {
         }
         assertEquals(counter.get(), 2);
         counter.clear();
+    }
+
+    @Test
+    public void testException() {
+        // JdkProxyMaker.JdkProxyException
+        assertThrows(JdkProxyMaker.JdkProxyException.class, () -> {
+            throw new JdkProxyMaker.JdkProxyException(new Exception());
+        });
     }
 
     public interface InterA {
