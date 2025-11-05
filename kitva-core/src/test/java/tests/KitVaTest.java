@@ -16,20 +16,41 @@ public class KitVaTest {
     public void testLoadImplByJvm() {
         int jvmVersion = JvmKit.javaMajorVersion();
         if (jvmVersion <= 8) {
-            XService service8 = KitVa.loadImplByJvm(XService.class, 8);
-            assertEquals("XService.J8", service8.doSomething());
-            XService service9 = KitVa.loadImplByJvm(XService.class, 9);
-            assertEquals("XService.J8", service9.doSomething());
-            XService service17 = KitVa.loadImplByJvm(XService.class, 17);
-            assertEquals("XService.J8", service17.doSomething());
+            {
+                XService service8 = KitVa.loadImplByJvm(XService.class, 8);
+                assertEquals("XService.J8", service8.doSomething());
+                XService service9 = KitVa.loadImplByJvm(XService.class, 9);
+                assertEquals("XService.J8", service9.doSomething());
+                XService service17 = KitVa.loadImplByJvm(XService.class, 17);
+                assertEquals("XService.J8", service17.doSomething());
+            }
+            {
+                YService service8 = KitVa.loadImplByJvm(YService.class, 8);
+                assertEquals("YService.J8", service8.doSomething());
+                YService service9 = KitVa.loadImplByJvm(YService.class, 9);
+                assertEquals("YService.J8", service9.doSomething());
+                YService service17 = KitVa.loadImplByJvm(YService.class, 17);
+                assertEquals("YService.J8", service17.doSomething());
+            }
         } else {
-            XService service8 = KitVa.loadImplByJvm(XService.class, 8);
-            assertEquals("XService.J8", service8.doSomething());
-            assertThrows(UnknownTypeException.class, () -> KitVa.loadImplByJvm(XService2.class, 9));
-            XService service17 = KitVa.loadImplByJvm(XService.class, 17);
-            assertEquals("XService.J17", service17.doSomething());
+            {
+                XService service8 = KitVa.loadImplByJvm(XService.class, 8);
+                assertEquals("XService.J8", service8.doSomething());
+                YService service9 = KitVa.loadImplByJvm(YService.class, 9);
+                assertEquals("YService.J8", service9.doSomething());
+                XService service17 = KitVa.loadImplByJvm(XService.class, 17);
+                assertEquals("XService.J17", service17.doSomething());
+            }
+            {
+                YService service8 = KitVa.loadImplByJvm(YService.class, 8);
+                assertEquals("YService.J8", service8.doSomething());
+                YService service9 = KitVa.loadImplByJvm(YService.class, 9);
+                assertEquals("YService.J8", service9.doSomething());
+                YService service17 = KitVa.loadImplByJvm(YService.class, 17);
+                assertEquals("YService.J8", service17.doSomething());
+            }
         }
-        assertThrows(UnknownTypeException.class, () -> KitVa.loadImplByJvm(XService2.class, 8));
+        assertThrows(UnknownTypeException.class, () -> KitVa.loadImplByJvm(XXService.class, 8));
     }
 
     private interface XService {
@@ -56,7 +77,21 @@ public class KitVaTest {
         }
     }
 
-    private interface XService2 {
+    private interface YService {
+        String doSomething();
+    }
+
+    private enum YServiceImpl implements YService {
+        INST;
+
+        @Override
+        public String doSomething() {
+            System.out.println("current jvm: " + JvmKit.javaMajorVersion());
+            return "YService.J8";
+        }
+    }
+
+    private interface XXService {
         String doSomething();
     }
 }

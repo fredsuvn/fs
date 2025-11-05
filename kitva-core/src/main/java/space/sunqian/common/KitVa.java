@@ -1,6 +1,7 @@
 package space.sunqian.common;
 
 import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
 import space.sunqian.common.base.Kit;
 import space.sunqian.common.base.exception.UnknownTypeException;
 import space.sunqian.common.base.lang.EnumKit;
@@ -29,17 +30,26 @@ public class KitVa {
         @Nonnull Class<T> serviceClass, int highVersion
     ) throws UnknownTypeException {
         int majorVersion = JvmKit.javaMajorVersion();
+        System.out.println(majorVersion);
         String className;
-        if (highVersion > 8 && majorVersion >= highVersion) {
+        if (majorVersion > 8) {
             className = serviceClass.getName() + "ImplByJ" + highVersion;
-        } else {
-            className = serviceClass.getName() + "Impl";
+            T ret = loadImplByJvm(className);
+            if (ret != null) {
+                return ret;
+            }
         }
-        Class<?> cls = ClassKit.classForName(className, null);
+        className = serviceClass.getName() + "Impl";
+        T ret = loadImplByJvm(className);
+        if (ret != null) {
+            return ret;
+        }
+        throw new UnknownTypeException(className);
+    }
+
+    private static <T> @Nullable T loadImplByJvm(String classImplName) throws UnknownTypeException {
+        Class<?> cls = ClassKit.classForName(classImplName, null);
         Enum<?> enumObj = EnumKit.findEnum(Kit.as(cls), "INST");
-        if (enumObj == null) {
-            throw new UnknownTypeException(className);
-        }
         return Kit.as(enumObj);
     }
 }
