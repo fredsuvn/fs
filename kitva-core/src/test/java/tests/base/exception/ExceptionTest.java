@@ -20,8 +20,8 @@ import java.util.concurrent.TimeoutException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ExceptionTest {
 
@@ -92,6 +92,12 @@ public class ExceptionTest {
             // UnknownTypeException
             assertThrows(UnknownTypeException.class, () -> {
                 throw new UnknownTypeException(Object.class);
+            });
+            assertThrows(UnknownTypeException.class, () -> {
+                throw new UnknownTypeException(Object.class, "keyword");
+            });
+            assertThrows(UnknownTypeException.class, () -> {
+                throw new UnknownTypeException("unknow.type");
             });
             // UnknownArrayTypeException
             assertThrows(UnknownArrayTypeException.class, () -> {

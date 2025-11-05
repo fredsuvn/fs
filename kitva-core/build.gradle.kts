@@ -37,8 +37,6 @@ dependencies {
   testImplementation("jakarta.annotation:jakarta.annotation-api")
 }
 
-val j17Suffix = "ImplByJ17"
-
 java {
   withJavadocJar()
   withSourcesJar()
@@ -65,50 +63,84 @@ sourceSets {
   }
 }
 
+val implByJvm = "ImplByJ"
+val maxJvmVersion = 17
+
 tasks.compileJava {
+  group = "compile"
   source = sourceSets.main.get().allJava
-  exclude("**/*$j17Suffix.java")
+  classpath = sourceSets.main.get().compileClasspath
+  exclude("**/*${implByJvm}*.java")
   javaCompiler = javaToolchains.compilerFor {
     languageVersion = project.property("javaCompatibleLang") as JavaLanguageVersion
   }
 }
 
-val compileJava17 by tasks.registering(JavaCompile::class) {
-  dependsOn(tasks.compileJava)
-  source = sourceSets.main.get().allJava
-  destinationDirectory = file(layout.buildDirectory.dir("/classes/java/main"))
-  classpath = tasks.compileJava.get().classpath + files(tasks.compileJava.get().destinationDirectory)
-  include("**/*$j17Suffix.java")
-  javaCompiler = javaToolchains.compilerFor {
-    languageVersion = project.property("javaCurrentLang") as JavaLanguageVersion
+(9..maxJvmVersion).forEach { jvmVersion ->
+  val taskName = "compileJava$jvmVersion"
+  tasks.register(taskName, JavaCompile::class) {
+    group = "compile"
+    //dependsOn(tasks.compileJava)
+    source = sourceSets.main.get().allJava
+    classpath = sourceSets.main.get().compileClasspath + files(tasks.compileJava.get().destinationDirectory)
+    (9..<jvmVersion).forEach { jv ->
+      //dependsOn += tasks.named("compileJava$jv")
+      classpath += files(tasks.named<JavaCompile>("compileJava$jv").get().destinationDirectory)
+    }
+    include("**/*${implByJvm + jvmVersion}.java")
+    destinationDirectory = file(layout.buildDirectory.dir("/classes/java/main"))
+    javaCompiler = javaToolchains.compilerFor {
+      languageVersion = project.property("javaCurrentLang") as JavaLanguageVersion
+    }
+    options.compilerArgs.add("--release")
+    options.compilerArgs.add(jvmVersion.toString())
   }
 }
+
+val compileJavaMax = tasks.named<JavaCompile>("compileJava$maxJvmVersion")
 
 tasks.named("classes") {
-  dependsOn(compileJava17)
+  dependsOn(compileJavaMax)
 }
 
+val j17TestTag = "J17Test"
+
 tasks.compileTestJava {
+  group = "compile"
+  //dependsOn(compileJavaMax)
   source = sourceSets.test.get().allJava
-  exclude("**/*${j17Suffix}Test.java")
+  classpath = sourceSets.test.get().compileClasspath
+  exclude("**/*${implByJvm}*Test.java")
   javaCompiler = javaToolchains.compilerFor {
     languageVersion = project.property("javaCompatibleLang") as JavaLanguageVersion
   }
 }
 
-val compileTestJava17 by tasks.registering(JavaCompile::class) {
-  dependsOn(compileJava17)
-  source = sourceSets.test.get().allJava
-  include("**/*${j17Suffix}Test.java")
-  destinationDirectory = file(layout.buildDirectory.dir("/classes/java/test"))
-  classpath = sourceSets.test.get().compileClasspath + files(compileJava17.get().destinationDirectory)
-  javaCompiler = javaToolchains.compilerFor {
-    languageVersion = project.property("javaCurrentLang") as JavaLanguageVersion
+(9..maxJvmVersion).forEach { jvmVersion ->
+  val taskName = "compileTestJava$jvmVersion"
+  tasks.register(taskName, JavaCompile::class) {
+    group = "compile"
+    //dependsOn(compileJavaMax)
+    source = sourceSets.test.get().allJava
+    classpath = sourceSets.test.get().compileClasspath
+    (9..<jvmVersion).forEach { jv ->
+      //dependsOn += tasks.named("compileTestJava$jv")
+      classpath += files(tasks.named<JavaCompile>("compileTestJava$jv").get().destinationDirectory)
+    }
+    include("**/*${implByJvm + jvmVersion}Test.java")
+    destinationDirectory = file(layout.buildDirectory.dir("/classes/java/test"))
+    javaCompiler = javaToolchains.compilerFor {
+      languageVersion = project.property("javaCurrentLang") as JavaLanguageVersion
+    }
+    options.compilerArgs.add("--release")
+    options.compilerArgs.add(jvmVersion.toString())
   }
 }
 
+val compileTestJavaMax = tasks.named<JavaCompile>("compileTestJava$maxJvmVersion")
+
 tasks.named("compileTestJava") {
-  dependsOn(tasks.named("generateTestProto"), compileTestJava17)
+  dependsOn(tasks.named("generateTestProto"), compileTestJavaMax)
 }
 
 tasks.named<Jar>("sourcesJar") {
@@ -118,7 +150,7 @@ tasks.named<Jar>("sourcesJar") {
 
 tasks.test {
   include("**/*Test.class", "**/*TestKt.class")
-  exclude("**/*${j17Suffix}Test.class")
+  exclude("**/*${implByJvm}*Test.class")
   useJUnitPlatform()
   failOnNoDiscoveredTests = false
   reports {
@@ -129,14 +161,21 @@ tasks.test {
   }
 }
 
-val testByJ17 by tasks.registering(Test::class) {
-  dependsOn(compileTestJava17)
+val testByJMaxName = "testByJ$maxJvmVersion"
+tasks.register(testByJMaxName, Test::class) {
+  dependsOn(compileTestJavaMax)
   group = "verification"
   testClassesDirs = fileTree(layout.buildDirectory.dir("/classes/java/test"))
   classpath = sourceSets.test.get().runtimeClasspath
-  include("**/*${j17Suffix}Test.class")
-  include("**/*MultiJvmTest.class")
-  useJUnitPlatform()
+  (9..maxJvmVersion).forEach { jv ->
+    classpath += files(tasks.named<JavaCompile>("compileJava$jv").get().destinationDirectory)
+    classpath += files(tasks.named<JavaCompile>("compileTestJava$jv").get().destinationDirectory)
+  }
+  //include("**/*${j17Suffix}Test.class")
+  //include("**/*MultiJvmTest.class")
+  useJUnitPlatform() {
+    includeTags("J17Test")
+  }
   failOnNoDiscoveredTests = false
   reports {
     html.required = false
@@ -145,7 +184,7 @@ val testByJ17 by tasks.registering(Test::class) {
     languageVersion = project.property("javaCurrentLang") as JavaLanguageVersion
   }
 }
-tasks.check.get().dependsOn(testByJ17)
+tasks.check.get().dependsOn(tasks.named(testByJMaxName))
 
 jacoco {
   val jacocoToolVersion: String by project

@@ -1,11 +1,12 @@
 package tests.base;
 
+import internal.test.AssertTest;
+import internal.test.PrintTest;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
-import tests.utils.Utils;
 import space.sunqian.common.base.Kit;
 import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.base.exception.UnknownArrayTypeException;
@@ -13,8 +14,7 @@ import space.sunqian.common.base.system.OSKit;
 import space.sunqian.common.io.IOKit;
 import space.sunqian.common.object.convert.ObjectConverter;
 import space.sunqian.common.runtime.reflect.TypeRef;
-import internal.test.AssertTest;
-import internal.test.PrintTest;
+import tests.utils.Utils;
 
 import java.io.InputStream;
 import java.lang.reflect.Method;
@@ -32,8 +32,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class KitTest implements AssertTest, PrintTest {
 
@@ -43,12 +43,12 @@ public class KitTest implements AssertTest, PrintTest {
         assertNotNull(Kit.LIB_VERSION);
         assertEquals(Kit.NULL_STRING, Objects.toString(null));
         String hello = "hello";
-        assertSame(Kit.as(hello), hello);
-        assertSame(Kit.asNonnull(hello), hello);
-        assertEquals(Kit.nonnull("123", "456"), "123");
-        assertEquals(Kit.nonnull(null, "456"), "456");
-        assertEquals(Kit.nonnull("123", () -> "456"), "123");
-        assertEquals(Kit.nonnull(null, () -> "456"), "456");
+        assertSame(hello, Kit.as(hello));
+        assertSame(hello, Kit.asNonnull(hello));
+        assertEquals("123", Kit.nonnull("123", "456"));
+        assertEquals("456", Kit.nonnull(null, "456"));
+        assertEquals("123", Kit.nonnull("123", () -> "456"));
+        assertEquals("456", Kit.nonnull(null, () -> "456"));
     }
 
     @Test

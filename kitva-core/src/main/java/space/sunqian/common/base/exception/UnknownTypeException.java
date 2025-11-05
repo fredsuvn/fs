@@ -19,6 +19,10 @@ public class UnknownTypeException extends KitvaRuntimeException {
         return "Unknown " + keyword + " type: " + type + ".";
     }
 
+    private static @Nonnull String toMessage(@Nonnull String typeName) {
+        return "Unknown type: " + typeName + ".";
+    }
+
     /**
      * Constructs with the unknown type.
      *
@@ -37,5 +41,14 @@ public class UnknownTypeException extends KitvaRuntimeException {
      */
     public UnknownTypeException(@Nonnull Type type, @Nonnull String keyword) {
         super(toMessage(type, keyword));
+    }
+
+    /**
+     * Constructs with the name of unknown type.
+     *
+     * @param typeName the name of unknown type
+     */
+    public UnknownTypeException(@Nonnull String typeName) {
+        super(toMessage(typeName));
     }
 }

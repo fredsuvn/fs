@@ -1,5 +1,6 @@
 package tests.runtime.reflect;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import tests.utils.ErrorConstructor;
 import space.sunqian.common.base.Kit;
@@ -106,20 +107,21 @@ public class ClassTest implements AssertTest {
         );
     }
 
+    @Tag("J17Test")
     @Test
     public void testArrayClass() throws Exception {
         // class:
-        assertEquals(ClassKit.arrayClass(Object.class), Object[].class);
-        assertEquals(ClassKit.arrayClass(Object[].class), Object[][].class);
-        assertEquals(ClassKit.arrayClass(boolean.class), boolean[].class);
-        assertEquals(ClassKit.arrayClass(boolean[].class), boolean[][].class);
-        assertEquals(ClassKit.arrayClass(byte.class), byte[].class);
-        assertEquals(ClassKit.arrayClass(short.class), short[].class);
-        assertEquals(ClassKit.arrayClass(char.class), char[].class);
-        assertEquals(ClassKit.arrayClass(int.class), int[].class);
-        assertEquals(ClassKit.arrayClass(long.class), long[].class);
-        assertEquals(ClassKit.arrayClass(float.class), float[].class);
-        assertEquals(ClassKit.arrayClass(double.class), double[].class);
+        assertEquals(Object[].class, ClassKit.arrayClass(Object.class));
+        assertEquals(Object[][].class, ClassKit.arrayClass(Object[].class));
+        assertEquals(boolean[].class, ClassKit.arrayClass(boolean.class));
+        assertEquals(boolean[][].class, ClassKit.arrayClass(boolean[].class));
+        assertEquals(byte[].class, ClassKit.arrayClass(byte.class));
+        assertEquals(short[].class, ClassKit.arrayClass(short.class));
+        assertEquals(char[].class, ClassKit.arrayClass(char.class));
+        assertEquals(int[].class, ClassKit.arrayClass(int.class));
+        assertEquals(long[].class, ClassKit.arrayClass(long.class));
+        assertEquals(float[].class, ClassKit.arrayClass(float.class));
+        assertEquals(double[].class, ClassKit.arrayClass(double.class));
         assertNull(ClassKit.arrayClass(void.class));
 
         // parameterized types:
@@ -129,11 +131,11 @@ public class ClassTest implements AssertTest {
             List<? extends String>[][] l3 = null;
         }
         Type l1Type = X.class.getDeclaredField("l1").getGenericType();
-        assertEquals(ClassKit.arrayClass(l1Type), List[].class);
+        assertEquals(List[].class, ClassKit.arrayClass(l1Type));
         Type l2Type = X.class.getDeclaredField("l2").getGenericType();
-        assertEquals(ClassKit.arrayClass(l2Type), List[][].class);
+        assertEquals(List[][].class, ClassKit.arrayClass(l2Type));
         Type l3Type = X.class.getDeclaredField("l3").getGenericType();
-        assertEquals(ClassKit.arrayClass(l3Type), List[][][].class);
+        assertEquals(List[][][].class, ClassKit.arrayClass(l3Type));
 
         // component type:
         assertNull(ClassKit.arrayClass(((ParameterizedType) l1Type).getActualTypeArguments()[0]));
