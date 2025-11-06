@@ -6,17 +6,14 @@ import space.sunqian.common.base.Kit;
 import space.sunqian.common.io.IOKit;
 import space.sunqian.common.net.NetException;
 
-import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.ProxySelector;
-import java.net.SocketAddress;
-import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -31,12 +28,6 @@ enum HttpClientEngineServiceImplByJ11 implements HttpClientEngineService {
 
     private static final class EngineImpl implements HttpClientEngine {
 
-        private final @Nonnull HttpClient client;
-
-        EngineImpl() throws IllegalArgumentException {
-            this.client = HttpClient.newHttpClient();
-        }
-
         @Override
         public @Nonnull HttpResp request(@Nonnull HttpReq req, @Nullable Proxy proxy) throws NetException {
             return Kit.uncheck(() -> request0(req, proxy), NetException::new);
@@ -44,20 +35,10 @@ enum HttpClientEngineServiceImplByJ11 implements HttpClientEngineService {
 
         private @Nonnull HttpClient getClient(@Nullable Proxy proxy) {
             if (proxy == null || Objects.equals(proxy, Proxy.NO_PROXY)) {
-                return HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build();
+                return HttpClient.newHttpClient();
             }
             return HttpClient.newBuilder()
-                .proxy(new ProxySelector() {
-                    @Override
-                    public List<Proxy> select(URI uri) {
-                        return Collections.singletonList(proxy);
-                    }
-
-                    @Override
-                    public void connectFailed(URI uri, SocketAddress sa, IOException ioe) {
-                        throw new NetException("Failed to proxy: " + uri + "[proxied by " + sa + "]", ioe);
-                    }
-                })
+                .proxy(ProxySelector.of((InetSocketAddress) proxy.address()))
                 .build();
         }
 

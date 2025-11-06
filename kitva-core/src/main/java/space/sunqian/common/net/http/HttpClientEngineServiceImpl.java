@@ -37,7 +37,6 @@ enum HttpClientEngineServiceImpl implements HttpClientEngineService {
 
         private @Nonnull HttpResp request0(@Nonnull HttpReq req, @Nonnull Proxy proxy) throws Exception {
             HttpURLConnection connection = (HttpURLConnection) req.url().openConnection(proxy);
-            connection.setRequestMethod(req.method());
             connection.setConnectTimeout(MathKit.intValue(req.timeout().toMillis()));
             connection.setReadTimeout(MathKit.intValue(req.timeout().toMillis()));
             req.headers().forEach((k, list) -> {
@@ -45,7 +44,8 @@ enum HttpClientEngineServiceImpl implements HttpClientEngineService {
                     connection.addRequestProperty(k, s);
                 }
             });
-            connection.setDoInput(true);
+            //connection.setDoInput(true);
+            connection.setRequestMethod(req.method());
             InputStream in = req.body();
             if (in != null) {
                 int firstByte = in.read();
