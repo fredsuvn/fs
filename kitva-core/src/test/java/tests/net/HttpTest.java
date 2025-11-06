@@ -3,10 +3,16 @@ package tests.net;
 import internal.test.ErrorCharset;
 import internal.test.J17Also;
 import internal.test.PrintTest;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.common.base.chars.CharsKit;
+import space.sunqian.common.collect.CollectKit;
 import space.sunqian.common.collect.ListKit;
 import space.sunqian.common.collect.MapKit;
 import space.sunqian.common.io.IOKit;
@@ -18,11 +24,17 @@ import space.sunqian.common.net.tcp.TcpContext;
 import space.sunqian.common.net.tcp.TcpServer;
 import space.sunqian.common.net.tcp.TcpServerHandler;
 
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -40,14 +52,14 @@ public class HttpTest implements PrintTest {
 
     @Test
     public void testRequest() throws Exception {
-        CountDownLatch readLatch = new CountDownLatch(1);
-        TcpServer httpServer = TcpServer.newBuilder()
-            .handler(new HttpHandler(readLatch))
-            .bind();
+        //CountDownLatch readLatch = new CountDownLatch(1);
+        // TcpServer httpServer = TcpServer.newBuilder()
+        //     .handler(new HttpHandler(readLatch))
+        //     .bind();
         {
             // post
             HttpReq req = HttpReq.newBuilder()
-                .url("http://localhost:" + httpServer.localAddress().getPort())
+                .url("http://localhost:" + httpServer.getURI().getPort())
                 .method("GET")
                 //.headers(MapKit.map("Accept", "text/html"))
                 .header("X-HEADER", "hello!")
@@ -57,7 +69,7 @@ public class HttpTest implements PrintTest {
                 .timeout(Duration.ofSeconds(5))
                 .build();
             HttpResp resp = HttpKit.request(req);
-            readLatch.await();
+            //readLatch.await();
             assertEquals("200", resp.statusCode());
             assertEquals("OK", resp.statusText());
             assertEquals("HTTP/1.1", resp.protocolVersion());
@@ -70,7 +82,7 @@ public class HttpTest implements PrintTest {
         {
             // post no-body
             HttpReq req = HttpReq.newBuilder()
-                .url("http://localhost:" + httpServer.localAddress().getPort())
+                .url("http://localhost:" + httpServer.getURI().getPort())
                 .method("GET")
                 //.headers(MapKit.map("Accept", "text/html"))
                 .header("X-HEADER", "hello!")
@@ -79,7 +91,7 @@ public class HttpTest implements PrintTest {
                 .body("no-body")
                 .build();
             HttpResp resp = HttpKit.request(req);
-            readLatch.await();
+            //readLatch.await();
             assertEquals("200", resp.statusCode());
             assertEquals("OK", resp.statusText());
             assertEquals("HTTP/1.1", resp.protocolVersion());
@@ -91,7 +103,7 @@ public class HttpTest implements PrintTest {
         {
             // post no-code
             HttpReq req = HttpReq.newBuilder()
-                .url("http://localhost:" + httpServer.localAddress().getPort())
+                .url("http://localhost:" + httpServer.getURI().getPort())
                 .method("GET")
                 //.headers(MapKit.map("Accept", "text/html"))
                 .header("X-HEADER", "hello!")
@@ -100,7 +112,7 @@ public class HttpTest implements PrintTest {
                 .body("no-code")
                 .build();
             HttpResp resp = HttpKit.request(req);
-            readLatch.await();
+            //readLatch.await();
             assertEquals("999", resp.statusCode());
             assertEquals("Unknown", resp.statusText());
             assertEquals("HTTP/1.1", resp.protocolVersion());
@@ -113,14 +125,14 @@ public class HttpTest implements PrintTest {
         {
             // get
             HttpReq req = HttpReq.newBuilder()
-                .url("http://localhost:" + httpServer.localAddress().getPort())
+                .url("http://localhost:" + httpServer.getURI().getPort())
                 .method("GET")
                 .header("X-HEADER", "hello!")
                 .header("X-HEADER2", "hello2-1!")
                 .header("X-HEADER2", "hello2-2!")
                 .build();
             HttpResp resp = HttpKit.request(req);
-            readLatch.await();
+            //readLatch.await();
             assertEquals("200", resp.statusCode());
             assertEquals("OK", resp.statusText());
             assertEquals("HTTP/1.1", resp.protocolVersion());
@@ -133,7 +145,7 @@ public class HttpTest implements PrintTest {
         {
             // get
             HttpReq req = HttpReq.newBuilder()
-                .url("http://localhost:" + httpServer.localAddress().getPort())
+                .url("http://localhost:" + httpServer.getURI().getPort())
                 .method("GET")
                 .headers(MapKit.map(
                     "X-HEADER", Collections.singletonList("hello!"),
@@ -142,7 +154,7 @@ public class HttpTest implements PrintTest {
                 .body(IOKit.emptyInputStream())
                 .build();
             HttpResp resp = HttpKit.request(req);
-            readLatch.await();
+            //readLatch.await();
             assertEquals("200", resp.statusCode());
             assertEquals("OK", resp.statusText());
             assertEquals("HTTP/1.1", resp.protocolVersion());
@@ -152,7 +164,7 @@ public class HttpTest implements PrintTest {
             String bodyString = resp.bodyString();
             assertEquals("hello, world2!", bodyString);
         }
-        httpServer.close();
+        //httpServer.close();
         assertThrows(IllegalArgumentException.class, () -> HttpReq.newBuilder().build());
     }
 
@@ -292,4 +304,50 @@ public class HttpTest implements PrintTest {
             printFor("exceptionCaught", cause);
         }
     }
+
+    @BeforeAll
+    public static void startHttpServer() throws Exception {
+        httpServer = new Server(0);
+        ServletContextHandler context = new ServletContextHandler();
+        context.setContextPath("/");
+        httpServer.setHandler(context);
+        context.addServlet(new ServletHolder(new HttpServlet() {
+            @Override
+            protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+                String msg = IOKit.availableString(req.getInputStream());
+                Map<String, List<String>> headers = new HashMap<>();
+                Enumeration<String> namesIt = req.getHeaderNames();
+                while (namesIt.hasMoreElements()) {
+                    Enumeration<String> values = req.getHeaders(namesIt.nextElement());
+                    List<String> list = new ArrayList<>();
+                    while (values.hasMoreElements()) {
+                        list.add(values.nextElement());
+                    }
+                    headers.put(namesIt.nextElement(), list);
+                }
+                assertTrue(headers.containsKey("X-HEADER"));
+                assertEquals(headers.get("X-HEADER"), ListKit.list("hello!"));
+                assertTrue(headers.containsKey("X-HEADER2"));
+                assertEquals(headers.get("X-HEADER2"), ListKit.list("hello2-1!", "hello2-2!"));
+                String respBody = "no-body".equals( msg) ? null : "hello, world2!";
+                if ("no-code".equals(msg)) {
+                    resp.setStatus(999, "Unknown");
+                    ///resp.setStatus(999);
+                }
+                resp.setContentType("text/html;charset=UTF-8");
+                resp.setHeader("X-HEADER", "hello2!");
+                if (respBody != null) {
+                    resp.getWriter().write(respBody);
+                }
+            }
+        }), "/*");
+        httpServer.start();
+    }
+
+    @AfterAll
+    public static void stopServer() throws Exception {
+        httpServer.stop();
+    }
+
+    private static Server httpServer;
 }

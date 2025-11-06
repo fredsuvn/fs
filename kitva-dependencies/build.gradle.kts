@@ -62,6 +62,7 @@ dependencies {
     //network
     api("io.netty:netty-all:4.1.100.Final")
     api("jakarta.annotation:jakarta.annotation-api:2.1.1")
+    api("org.eclipse.jetty:jetty-bom:9.4.58.v20250814")
 
     //template
     api("org.apache.velocity:velocity-engine-core:2.3")

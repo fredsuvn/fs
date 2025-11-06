@@ -35,6 +35,10 @@ dependencies {
   testImplementation("org.bouncycastle:bcpkix-jdk18on")
   testImplementation("org.mockito:mockito-core")
   testImplementation("jakarta.annotation:jakarta.annotation-api")
+  testImplementation(platform("org.eclipse.jetty:jetty-bom"))
+  testImplementation("org.eclipse.jetty:jetty-server")
+  testImplementation("org.eclipse.jetty:jetty-servlet")
+  testImplementation("javax.servlet:javax.servlet-api")
 }
 
 java {
