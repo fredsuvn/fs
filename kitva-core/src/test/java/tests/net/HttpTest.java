@@ -9,6 +9,7 @@ import space.sunqian.annotations.Nullable;
 import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.collect.ListKit;
 import space.sunqian.common.collect.MapKit;
+import space.sunqian.common.io.IOKit;
 import space.sunqian.common.net.NetException;
 import space.sunqian.common.net.http.HttpKit;
 import space.sunqian.common.net.http.HttpReq;
@@ -18,6 +19,7 @@ import space.sunqian.common.net.tcp.TcpServer;
 import space.sunqian.common.net.tcp.TcpServerHandler;
 
 import java.net.URLEncoder;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -52,17 +54,61 @@ public class HttpTest implements PrintTest {
                 .header("X-HEADER2", "hello2-1!")
                 .header("X-HEADER2", "hello2-2!")
                 .body("hello, world!")
+                .timeout(Duration.ofSeconds(5))
                 .build();
             HttpResp resp = HttpKit.request(req);
             readLatch.await();
-            assertEquals(resp.statusCode(), "200");
-            assertEquals(resp.statusText(), "OK");
-            assertEquals(resp.protocolVersion(), "HTTP/1.1");
-            assertEquals(resp.contentType(), "text/html;charset=UTF-8");
-            assertEquals(resp.bodyCharset(), CharsKit.UTF_8);
+            assertEquals("200", resp.statusCode());
+            assertEquals("OK", resp.statusText());
+            assertEquals("HTTP/1.1", resp.protocolVersion());
+            assertEquals("text/html;charset=UTF-8", resp.contentType());
+            assertEquals(CharsKit.UTF_8, resp.bodyCharset());
             assertEquals(resp.headers().get("X-HEADER"), Collections.singletonList("hello2!"));
             String bodyString = resp.bodyString();
-            assertEquals(bodyString, "hello, world2!");
+            assertEquals("hello, world2!", bodyString);
+        }
+        {
+            // post no-body
+            HttpReq req = HttpReq.newBuilder()
+                .url("http://localhost:" + httpServer.localAddress().getPort())
+                .method("GET")
+                //.headers(MapKit.map("Accept", "text/html"))
+                .header("X-HEADER", "hello!")
+                .header("X-HEADER2", "hello2-1!")
+                .header("X-HEADER2", "hello2-2!")
+                .body("no-body")
+                .build();
+            HttpResp resp = HttpKit.request(req);
+            readLatch.await();
+            assertEquals("200", resp.statusCode());
+            assertEquals("OK", resp.statusText());
+            assertEquals("HTTP/1.1", resp.protocolVersion());
+            assertEquals("text/html;charset=UTF-8", resp.contentType());
+            assertEquals(CharsKit.UTF_8, resp.bodyCharset());
+            assertEquals(resp.headers().get("X-HEADER"), Collections.singletonList("hello2!"));
+            assertNull(resp.bodyString());
+        }
+        {
+            // post no-code
+            HttpReq req = HttpReq.newBuilder()
+                .url("http://localhost:" + httpServer.localAddress().getPort())
+                .method("GET")
+                //.headers(MapKit.map("Accept", "text/html"))
+                .header("X-HEADER", "hello!")
+                .header("X-HEADER2", "hello2-1!")
+                .header("X-HEADER2", "hello2-2!")
+                .body("no-code")
+                .build();
+            HttpResp resp = HttpKit.request(req);
+            readLatch.await();
+            assertEquals("999", resp.statusCode());
+            assertEquals("Unknown", resp.statusText());
+            assertEquals("HTTP/1.1", resp.protocolVersion());
+            assertEquals("text/html;charset=UTF-8", resp.contentType());
+            assertEquals(CharsKit.UTF_8, resp.bodyCharset());
+            assertEquals(resp.headers().get("X-HEADER"), Collections.singletonList("hello2!"));
+            String bodyString = resp.bodyString();
+            assertEquals("hello, world2!", bodyString);
         }
         {
             // get
@@ -75,14 +121,14 @@ public class HttpTest implements PrintTest {
                 .build();
             HttpResp resp = HttpKit.request(req);
             readLatch.await();
-            assertEquals(resp.statusCode(), "200");
-            assertEquals(resp.statusText(), "OK");
-            assertEquals(resp.protocolVersion(), "HTTP/1.1");
-            assertEquals(resp.contentType(), "text/html;charset=UTF-8");
-            assertEquals(resp.bodyCharset(), CharsKit.UTF_8);
+            assertEquals("200", resp.statusCode());
+            assertEquals("OK", resp.statusText());
+            assertEquals("HTTP/1.1", resp.protocolVersion());
+            assertEquals("text/html;charset=UTF-8", resp.contentType());
+            assertEquals(CharsKit.UTF_8, resp.bodyCharset());
             assertEquals(resp.headers().get("X-HEADER"), Collections.singletonList("hello2!"));
             String bodyString = resp.bodyString();
-            assertEquals(bodyString, "hello, world2!");
+            assertEquals("hello, world2!", bodyString);
         }
         {
             // get
@@ -93,17 +139,18 @@ public class HttpTest implements PrintTest {
                     "X-HEADER", Collections.singletonList("hello!"),
                     "X-HEADER2", ListKit.list("hello2-1!", "hello2-2!")
                 ))
+                .body(IOKit.emptyInputStream())
                 .build();
             HttpResp resp = HttpKit.request(req);
             readLatch.await();
-            assertEquals(resp.statusCode(), "200");
-            assertEquals(resp.statusText(), "OK");
-            assertEquals(resp.protocolVersion(), "HTTP/1.1");
-            assertEquals(resp.contentType(), "text/html;charset=UTF-8");
-            assertEquals(resp.bodyCharset(), CharsKit.UTF_8);
+            assertEquals("200", resp.statusCode());
+            assertEquals("OK", resp.statusText());
+            assertEquals("HTTP/1.1", resp.protocolVersion());
+            assertEquals("text/html;charset=UTF-8", resp.contentType());
+            assertEquals(CharsKit.UTF_8, resp.bodyCharset());
             assertEquals(resp.headers().get("X-HEADER"), Collections.singletonList("hello2!"));
             String bodyString = resp.bodyString();
-            assertEquals(bodyString, "hello, world2!");
+            assertEquals("hello, world2!", bodyString);
         }
         httpServer.close();
         assertThrows(IllegalArgumentException.class, () -> HttpReq.newBuilder().build());
@@ -111,7 +158,7 @@ public class HttpTest implements PrintTest {
 
     @Test
     public void testContentType() throws Exception {
-        assertEquals(HttpKit.contentCharset("text/html;charset=UTF-8;some=haha"), CharsKit.UTF_8);
+        assertEquals(CharsKit.UTF_8, HttpKit.contentCharset("text/html;charset=UTF-8;some=haha"));
         assertNull(HttpKit.contentCharset("text/html;"));
         assertNull(HttpKit.contentCharset("text/html"));
         CountDownLatch readLatch = new CountDownLatch(1);
@@ -174,12 +221,12 @@ public class HttpTest implements PrintTest {
         );
         printFor("url", url);
         assertEquals(
-            HttpKit.encodeUrl("   "),
-            "%20%20%20"
+            "%20%20%20",
+            HttpKit.encodeUrl("   ")
         );
         assertEquals(
-            HttpKit.buildUrl(TEST_URL, MapKit.map()).toString(),
-            TEST_URL
+            TEST_URL,
+            HttpKit.buildUrl(TEST_URL, MapKit.map()).toString()
         );
         assertThrows(NetException.class, () -> HttpKit.encodeUrl("abc", ErrorCharset.SINGLETON));
     }
@@ -228,8 +275,9 @@ public class HttpTest implements PrintTest {
             assertEquals(headers.get("X-HEADER"), ListKit.list("hello!"));
             assertTrue(headers.containsKey("X-HEADER2"));
             assertEquals(headers.get("X-HEADER2"), ListKit.list("hello2-1!", "hello2-2!"));
-            String respBody = "hello, world2!";
-            context.writeString("HTTP/1.1 200 OK\r\n" +
+            String respBody = msg.endsWith("no-body") ? "" : "hello, world2!";
+            String status = msg.endsWith("no-code") ? "999 Unknown" : "200 OK";
+            context.writeString("HTTP/1.1 " + status + "\r\n" +
                 "Content-Type: text/html;charset=UTF-8\r\n" +
                 //"Content-Length: " + respBody.length() + "\r\n" +
                 "X-HEADER: hello2!\r\n" +
@@ -241,7 +289,7 @@ public class HttpTest implements PrintTest {
 
         @Override
         public void exceptionCaught(@Nullable TcpContext context, @Nonnull Throwable cause) {
-            System.out.println(cause);
+            printFor("exceptionCaught", cause);
         }
     }
 }

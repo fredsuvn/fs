@@ -1,11 +1,11 @@
 package space.sunqian.common.net.http;
 
 import space.sunqian.annotations.Nonnull;
+import space.sunqian.annotations.Nullable;
 import space.sunqian.annotations.ThreadSafe;
 import space.sunqian.common.net.NetException;
 
 import java.net.Proxy;
-import java.time.Duration;
 
 /**
  * Engine for http client.
@@ -29,18 +29,11 @@ public interface HttpClientEngine {
     /**
      * Requests the given http request, returns the response.
      *
-     * @param req            the given http request
-     * @param connectTimeout the connect timeout
-     * @param readTimeout    the read timeout
-     * @param proxy          the proxy
+     * @param req   the given http request
+     * @param proxy the proxy, may be {@code null} if no proxy is needed
      * @return the response
      * @throws NetException if an error occurs
      */
     @Nonnull
-    HttpResp request(
-        @Nonnull HttpReq req,
-        @Nonnull Duration connectTimeout,
-        @Nonnull Duration readTimeout,
-        @Nonnull Proxy proxy
-    ) throws NetException;
+    HttpResp request(@Nonnull HttpReq req, @Nullable Proxy proxy) throws NetException;
 }

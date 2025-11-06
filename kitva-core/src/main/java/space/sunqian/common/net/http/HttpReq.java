@@ -1,5 +1,6 @@
 package space.sunqian.common.net.http;
 
+import org.springframework.lang.Nullable;
 import space.sunqian.annotations.Nonnull;
 import space.sunqian.common.base.CheckKit;
 import space.sunqian.common.base.Kit;
@@ -11,6 +12,7 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -23,6 +25,12 @@ import java.util.Map;
  * @author sunqian
  */
 public interface HttpReq {
+
+    /**
+     * The default request timeout: 30 seconds.
+     */
+    @Nonnull
+    Duration DEFAULT_REQUEST_TIMEOUT = Duration.ofSeconds(30);
 
     /**
      * Creates a new builder.
@@ -58,12 +66,20 @@ public interface HttpReq {
     Map<String, List<String>> headers();
 
     /**
-     * Returns the body of the request.
+     * Returns the body of the request, or {@code null} if no body data.
      *
-     * @return the body of the request
+     * @return the body of the request, or {@code null} if no body data
+     */
+    @Nullable
+    InputStream body();
+
+    /**
+     * Returns the timeout of the request. The default is {@link #DEFAULT_REQUEST_TIMEOUT}.
+     *
+     * @return the timeout of the request
      */
     @Nonnull
-    InputStream body();
+    Duration timeout();
 
     /**
      * Builder for {@link HttpReq}.
@@ -74,6 +90,7 @@ public interface HttpReq {
         private String method = "GET";
         private Map<String, List<String>> headers;
         private InputStream body;
+        private @Nonnull Duration timeout = DEFAULT_REQUEST_TIMEOUT;
 
         /**
          * Sets the url of the request.
@@ -178,6 +195,17 @@ public interface HttpReq {
         }
 
         /**
+         * Sets the timeout of the request.
+         *
+         * @param timeout the timeout of the request
+         * @return this builder
+         */
+        public @Nonnull Builder timeout(@Nonnull Duration timeout) {
+            this.timeout = timeout;
+            return this;
+        }
+
+        /**
          * Builds and returns a {@link HttpReq} with the configurations.
          *
          * @return a {@link HttpReq} with the configurations
@@ -190,7 +218,8 @@ public interface HttpReq {
                 url,
                 method,
                 Kit.nonnull(headers, Collections.emptyMap()),
-                Kit.nonnull(body, IOKit.emptyInputStream())
+                body,
+                timeout
             );
         }
 
@@ -200,17 +229,20 @@ public interface HttpReq {
             private final @Nonnull String method;
             private final @Nonnull Map<String, List<String>> headers;
             private final @Nonnull InputStream body;
+            private final @Nonnull Duration timeout;
 
             private HttpReqImpl(
                 @Nonnull URL url,
                 @Nonnull String method,
                 @Nonnull Map<String, List<String>> headers,
-                @Nonnull InputStream body
+                @Nonnull InputStream body,
+                @Nonnull Duration timeout
             ) {
                 this.url = url;
                 this.method = method;
                 this.headers = headers;
                 this.body = body;
+                this.timeout = timeout;
             }
 
 
@@ -232,6 +264,11 @@ public interface HttpReq {
             @Override
             public @Nonnull InputStream body() {
                 return body;
+            }
+
+            @Override
+            public @Nonnull Duration timeout() {
+                return timeout;
             }
         }
     }

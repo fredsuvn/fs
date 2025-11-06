@@ -40,16 +40,12 @@ dependencies {
 java {
   withJavadocJar()
   withSourcesJar()
-  toolchain {
-    languageVersion = project.property("javaCompatibleLang") as JavaLanguageVersion
-  }
 }
 
 sourceSets {
   main {
     java {
       srcDirs("src/main/java")
-      srcDirs("src/main/java8")
     }
   }
   test {
@@ -58,7 +54,6 @@ sourceSets {
     }
     java {
       srcDirs("src/test/java")
-      //srcDirs("src/test/java8")
     }
   }
 }
@@ -68,23 +63,30 @@ val maxJvmVersion = 17
 
 tasks.compileJava {
   group = "compile"
+  enabled = false
+}
+
+val compileJava8 by tasks.registering(JavaCompile::class) {
+  group = "compile"
   source = sourceSets.main.get().allJava
   classpath = sourceSets.main.get().compileClasspath
   exclude("**/*${implByJvm}*.java")
+  destinationDirectory = file(layout.buildDirectory.dir("/classes/java/main"))
   javaCompiler = javaToolchains.compilerFor {
     languageVersion = project.property("javaCompatibleLang") as JavaLanguageVersion
   }
+  options.annotationProcessorPath = configurations.getByName("annotationProcessor")
 }
 
 (9..maxJvmVersion).forEach { jvmVersion ->
   val taskName = "compileJava$jvmVersion"
   tasks.register(taskName, JavaCompile::class) {
     group = "compile"
-    //dependsOn(tasks.compileJava)
+    dependsOn(tasks.compileJava)
     source = sourceSets.main.get().allJava
     classpath = sourceSets.main.get().compileClasspath + files(tasks.compileJava.get().destinationDirectory)
-    (9..<jvmVersion).forEach { jv ->
-      //dependsOn += tasks.named("compileJava$jv")
+    (8..<jvmVersion).forEach { jv ->
+      dependsOn += tasks.named("compileJava$jv")
       classpath += files(tasks.named<JavaCompile>("compileJava$jv").get().destinationDirectory)
     }
     include("**/*${implByJvm + jvmVersion}.java")
@@ -103,28 +105,33 @@ tasks.named("classes") {
   dependsOn(compileJavaMax)
 }
 
-val j17TestTag = "J17Test"
-
 tasks.compileTestJava {
   group = "compile"
-  //dependsOn(compileJavaMax)
+  enabled = false
+}
+
+val compileTestJava8 by tasks.registering(JavaCompile::class) {
+  group = "compile"
+  dependsOn(compileJavaMax)
   source = sourceSets.test.get().allJava
   classpath = sourceSets.test.get().compileClasspath
   exclude("**/*${implByJvm}*Test.java")
+  destinationDirectory = file(layout.buildDirectory.dir("/classes/java/test"))
   javaCompiler = javaToolchains.compilerFor {
     languageVersion = project.property("javaCompatibleLang") as JavaLanguageVersion
   }
+  options.annotationProcessorPath = configurations.getByName("testAnnotationProcessor")
 }
 
 (9..maxJvmVersion).forEach { jvmVersion ->
   val taskName = "compileTestJava$jvmVersion"
   tasks.register(taskName, JavaCompile::class) {
     group = "compile"
-    //dependsOn(compileJavaMax)
+    //dependsOn(compileTestJava8)
     source = sourceSets.test.get().allJava
     classpath = sourceSets.test.get().compileClasspath
-    (9..<jvmVersion).forEach { jv ->
-      //dependsOn += tasks.named("compileTestJava$jv")
+    (8..<jvmVersion).forEach { jv ->
+      dependsOn += tasks.named("compileTestJava$jv")
       classpath += files(tasks.named<JavaCompile>("compileTestJava$jv").get().destinationDirectory)
     }
     include("**/*${implByJvm + jvmVersion}Test.java")
@@ -134,6 +141,7 @@ tasks.compileTestJava {
     }
     options.compilerArgs.add("--release")
     options.compilerArgs.add(jvmVersion.toString())
+    options.annotationProcessorPath = configurations.getByName("testAnnotationProcessor")
   }
 }
 
@@ -163,8 +171,7 @@ tasks.test {
   }
 }
 
-val testByJMaxName = "testByJ$maxJvmVersion"
-tasks.register(testByJMaxName, Test::class) {
+val testJava17 by tasks.registering(Test::class) {
   dependsOn(compileTestJavaMax)
   group = "verification"
   testClassesDirs = fileTree(layout.buildDirectory.dir("/classes/java/test"))
@@ -186,7 +193,7 @@ tasks.register(testByJMaxName, Test::class) {
     languageVersion = project.property("javaCurrentLang") as JavaLanguageVersion
   }
 }
-tasks.check.get().dependsOn(tasks.named(testByJMaxName))
+tasks.check.get().dependsOn(tasks.test, testJava17)
 
 jacoco {
   val jacocoToolVersion: String by project

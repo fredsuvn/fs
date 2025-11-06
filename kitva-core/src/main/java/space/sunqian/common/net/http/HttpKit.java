@@ -11,11 +11,10 @@ import java.net.Proxy;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
-import java.time.Duration;
 import java.util.Map;
 
 /**
- * Http utilities.
+ * Http utilities, based on a default implementation of {@link HttpClientEngine}.
  *
  * @author sunqian
  */
@@ -31,31 +30,19 @@ public class HttpKit {
      * @throws NetException if an error occurs
      */
     public static @Nonnull HttpResp request(@Nonnull HttpReq req) throws NetException {
-        return request(
-            req,
-            Duration.ofSeconds(30),
-            Duration.ofSeconds(30),
-            Proxy.NO_PROXY
-        );
+        return request(req, null);
     }
 
     /**
      * Requests the given http request, returns the response.
      *
-     * @param req            the given http request
-     * @param connectTimeout the connect timeout
-     * @param readTimeout    the read timeout
-     * @param proxy          the proxy, may be {@code null} if no proxy is needed
+     * @param req   the given http request
+     * @param proxy the proxy, may be {@code null} if no proxy is needed
      * @return the response
      * @throws NetException if an error occurs
      */
-    public static @Nonnull HttpResp request(
-        @Nonnull HttpReq req,
-        @Nonnull Duration connectTimeout,
-        @Nonnull Duration readTimeout,
-        @Nullable Proxy proxy
-    ) throws NetException {
-        return HTTP_CLIENT_ENGINE.request(req, connectTimeout, readTimeout, Kit.nonnull(proxy, Proxy.NO_PROXY));
+    public static @Nonnull HttpResp request(@Nonnull HttpReq req, @Nullable Proxy proxy) throws NetException {
+        return HTTP_CLIENT_ENGINE.request(req, proxy);
     }
 
     /**

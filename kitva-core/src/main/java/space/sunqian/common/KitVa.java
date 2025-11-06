@@ -30,7 +30,6 @@ public class KitVa {
         @Nonnull Class<T> serviceClass, int highVersion
     ) throws UnknownTypeException {
         int majorVersion = JvmKit.javaMajorVersion();
-        System.out.println(majorVersion);
         String className;
         if (majorVersion > 8) {
             className = serviceClass.getName() + "ImplByJ" + highVersion;

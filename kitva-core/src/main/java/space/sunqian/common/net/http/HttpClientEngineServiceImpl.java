@@ -11,7 +11,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.Proxy;
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -32,25 +31,15 @@ enum HttpClientEngineServiceImpl implements HttpClientEngineService {
         }
 
         @Override
-        public @Nonnull HttpResp request(
-            @Nonnull HttpReq req,
-            @Nonnull Duration connectTimeout,
-            @Nonnull Duration readTimeout,
-            @Nonnull Proxy proxy
-        ) throws NetException {
-            return Kit.uncheck(() -> request0(req, connectTimeout, readTimeout, proxy), NetException::new);
+        public @Nonnull HttpResp request(@Nonnull HttpReq req, @Nullable Proxy proxy) throws NetException {
+            return Kit.uncheck(() -> request0(req, Kit.nonnull(proxy, Proxy.NO_PROXY)), NetException::new);
         }
 
-        private @Nonnull HttpResp request0(
-            @Nonnull HttpReq req,
-            @Nonnull Duration connectTimeout,
-            @Nonnull Duration readTimeout,
-            @Nonnull Proxy proxy
-        ) throws Exception {
+        private @Nonnull HttpResp request0(@Nonnull HttpReq req, @Nonnull Proxy proxy) throws Exception {
             HttpURLConnection connection = (HttpURLConnection) req.url().openConnection(proxy);
             connection.setRequestMethod(req.method());
-            connection.setConnectTimeout(MathKit.intValue(connectTimeout.toMillis()));
-            connection.setReadTimeout(MathKit.intValue(readTimeout.toMillis()));
+            connection.setConnectTimeout(MathKit.intValue(req.timeout().toMillis()));
+            connection.setReadTimeout(MathKit.intValue(req.timeout().toMillis()));
             req.headers().forEach((k, list) -> {
                 for (String s : list) {
                     connection.addRequestProperty(k, s);
@@ -58,12 +47,14 @@ enum HttpClientEngineServiceImpl implements HttpClientEngineService {
             });
             connection.setDoInput(true);
             InputStream in = req.body();
-            int firstByte = in.read();
-            if (firstByte != -1) {
-                connection.setDoOutput(true);
-                OutputStream out = connection.getOutputStream();
-                out.write(firstByte);
-                io.readTo(in, out);
+            if (in != null) {
+                int firstByte = in.read();
+                if (firstByte != -1) {
+                    connection.setDoOutput(true);
+                    OutputStream out = connection.getOutputStream();
+                    out.write(firstByte);
+                    io.readTo(in, out);
+                }
             }
             int respCode = connection.getResponseCode();
             String respMsg = connection.getResponseMessage();
@@ -71,7 +62,8 @@ enum HttpClientEngineServiceImpl implements HttpClientEngineService {
             String protocol = firstLine.substring(0, Math.max(firstLine.indexOf(' '), 0));
             Map<String, List<String>> respHeaders = connection.getHeaderFields();
             String respContentType = connection.getContentType();
-            InputStream respBody = connection.getInputStream();
+            InputStream errBody = connection.getErrorStream();
+            InputStream respBody = errBody != null ? errBody : connection.getInputStream();
             return new HttpResp() {
 
                 @Override

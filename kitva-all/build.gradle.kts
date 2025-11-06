@@ -20,9 +20,9 @@ evaluationDependsOn(internalProject.path)
 java {
   withJavadocJar()
   withSourcesJar()
-  toolchain {
-    languageVersion = project.property("javaCompatibleLang") as JavaLanguageVersion
-  }
+  //  toolchain {
+  //    languageVersion = project.property("javaCompatibleLang") as JavaLanguageVersion
+  //  }
 }
 
 tasks.named<Jar>("jar") {
@@ -70,13 +70,13 @@ tasks.named<Javadoc>("javadoc") {
   }
 }
 
-val testByJ17 = coreProject.tasks.named("testByJ17")
+val testJava17 = coreProject.tasks.named("testJava17")
 
 tasks.test {
   dependsOn(
     annotationProject.tasks.test,
     coreProject.tasks.test,
-    testByJ17,
+    testJava17,
     internalProject.tasks.test,
   )
   reports {
@@ -94,7 +94,7 @@ tasks.jacocoTestReport {
   executionData(
     annotationProject.file("build/jacoco/test.exec"),
     coreProject.file("build/jacoco/test.exec"),
-    coreProject.file("build/jacoco/${testByJ17.name}.exec"),
+    coreProject.file("build/jacoco/${testJava17.name}.exec"),
     internalProject.file("build/jacoco/test.exec"),
   )
   sourceSets(
@@ -116,8 +116,8 @@ tasks.testAggregateTestReport {
     annotationProject.layout.buildDirectory.dir("test-results/test/binary"),
     coreProject.layout.buildDirectory.dir("test-results/test"),
     coreProject.layout.buildDirectory.dir("test-results/test/binary"),
-    coreProject.layout.buildDirectory.dir("test-results/${testByJ17.name}"),
-    coreProject.layout.buildDirectory.dir("test-results/${testByJ17.name}/binary"),
+    coreProject.layout.buildDirectory.dir("test-results/${testJava17.name}"),
+    coreProject.layout.buildDirectory.dir("test-results/${testJava17.name}/binary"),
     internalProject.layout.buildDirectory.dir("test-results/test"),
     internalProject.layout.buildDirectory.dir("test-results/test/binary"),
   )
