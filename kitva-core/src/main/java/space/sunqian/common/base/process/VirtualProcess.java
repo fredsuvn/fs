@@ -120,7 +120,7 @@ public class VirtualProcess extends Process {
 
     @Override
     public int waitFor() {
-        Kit.until(() -> !alive);
+        Kit.until(() -> !isAlive());
         return exitValue();
     }
 

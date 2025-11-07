@@ -74,5 +74,15 @@ public class ProcessTest implements PrintTest {
             assertSame(process.destroyForcibly(), process);
             assertEquals(1, process.waitFor());
         }
+        // {
+        //     VirtualProcess process = new VirtualProcess();
+        //     Thread _this = Thread.currentThread();
+        //     Thread thread = new Thread(() -> {
+        //         Utils.awaitUntilExecuteTo(_this, VirtualProcess.class.getName(), "isAlive");
+        //         process.alive(false);
+        //     });
+        //     thread.start();
+        //     assertEquals(0, process.waitFor());
+        // }
     }
 }

@@ -1,9 +1,9 @@
 package tests.base.thread;
 
 import org.junit.jupiter.api.Test;
-import tests.utils.Utils;
 import space.sunqian.common.base.exception.AwaitingException;
 import space.sunqian.common.base.thread.ThreadKit;
+import tests.utils.Utils;
 
 import java.time.Duration;
 
@@ -28,10 +28,17 @@ public class ThreadTest {
             assertTrue(t2 - t1 >= 10);
         }
         {
-            Thread thread = new Thread(ThreadKit::sleep);
+            Thread _this = Thread.currentThread();
+            Thread thread = new Thread(() -> {
+                Utils.awaitUntilExecuteTo(_this, Thread.class.getName(), "sleep");
+                _this.interrupt();
+            });
             thread.start();
-            Utils.awaitUntilExecuteTo(thread, Thread.class.getName(), "sleep");
-            thread.interrupt();
+            try {
+                ThreadKit.sleep();
+            } catch (AwaitingException e) {
+                assertTrue(e.isCausedByInterruption());
+            }
         }
     }
 

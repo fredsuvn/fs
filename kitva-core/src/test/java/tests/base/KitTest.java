@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import space.sunqian.common.base.Kit;
 import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.base.exception.UnknownArrayTypeException;
+import space.sunqian.common.base.exception.UnreachablePointException;
 import space.sunqian.common.base.system.OSKit;
 import space.sunqian.common.io.IOKit;
 import space.sunqian.common.object.convert.ObjectConverter;
@@ -72,11 +73,11 @@ public class KitTest implements AssertTest, PrintTest {
             // uncheck return
             assertEquals(1, Kit.uncheck(() -> 1, RuntimeException::new));
             Exception cause = new Exception();
-            assertThrows(RuntimeException.class, () -> Kit.uncheck(() -> {
+            assertThrows(UnreachablePointException.class, () -> Kit.uncheck(() -> {
                 throw cause;
             }, e -> {
                 assertSame(e, cause);
-                throw new RuntimeException(e);
+                return new UnreachablePointException(e);
             }));
         }
         {

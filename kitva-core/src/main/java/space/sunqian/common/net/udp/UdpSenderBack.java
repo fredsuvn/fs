@@ -35,7 +35,7 @@ final class UdpSenderBack {
 
         @Override
         public @Nonnull InetAddress broadcastAddress() throws NetException {
-            return refreshBroadcastAddress();
+            throw new NetException("This sender does not support broadcast.");
         }
 
         @Override
@@ -80,5 +80,8 @@ final class UdpSenderBack {
             broadcastIp = NetKit.getBroadcastAddress();
             return broadcastIp;
         }
+    }
+
+    private UdpSenderBack() {
     }
 }

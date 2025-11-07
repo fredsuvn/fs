@@ -14,6 +14,7 @@ import space.sunqian.common.base.time.TimeKit;
 import space.sunqian.common.collect.ArrayKit;
 import space.sunqian.common.collect.ListKit;
 import space.sunqian.common.collect.MapKit;
+import space.sunqian.common.collect.SetKit;
 import space.sunqian.common.io.IOOperator;
 import space.sunqian.common.object.convert.ConvertOption;
 import space.sunqian.common.object.convert.DataMapper;
@@ -40,9 +41,15 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -394,6 +401,53 @@ public class ConvertTest implements PrintTest {
     }
 
     @Test
+    public void testConvertToSpecific() throws Exception {
+        DataObject dataObject = new DataObject("code", "name");
+        Map<String, String> dataMap = MapKit.map("code", "code", "name", "name");
+        {
+            // to TreeMap
+            Map<String, String> map = ObjectConverter.defaultConverter()
+                .convert(dataObject, new TypeRef<TreeMap<String, String>>() {}
+                );
+            assertEquals(dataMap, map);
+        }
+        {
+            // to ConcurrentSkipListMap
+            Map<String, String> map = ObjectConverter.defaultConverter()
+                .convert(dataObject, new TypeRef<ConcurrentSkipListMap<String, String>>() {}
+                );
+            assertEquals(dataMap, map);
+        }
+        {
+            // to List
+            assertEquals(
+                ListKit.list("code", "name"),
+                ObjectConverter.defaultConverter()
+                    .convert(new String[]{"code", "name"}, new TypeRef<LinkedList<String>>() {}
+                    )
+            );
+            assertEquals(
+                ListKit.list("code", "name"),
+                ObjectConverter.defaultConverter()
+                    .convert(new String[]{"code", "name"}, new TypeRef<CopyOnWriteArrayList<String>>() {}
+                    )
+            );
+            assertEquals(
+                SetKit.set("code", "name"),
+                ObjectConverter.defaultConverter()
+                    .convert(new String[]{"code", "name"}, new TypeRef<TreeSet<String>>() {}
+                    )
+            );
+            assertEquals(
+                SetKit.set("code", "name"),
+                ObjectConverter.defaultConverter()
+                    .convert(new String[]{"code", "name"}, new TypeRef<ConcurrentSkipListSet<String>>() {}
+                    )
+            );
+        }
+    }
+
+    @Test
     public void testException() {
         {
             // ObjectConversionException
@@ -467,5 +521,14 @@ public class ConvertTest implements PrintTest {
         private List<Integer> p2;
         private B p3;
         private LocalDateTime date;
+    }
+
+    @Data
+    @EqualsAndHashCode
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class DataObject {
+        private String code;
+        private String name;
     }
 }

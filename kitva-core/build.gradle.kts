@@ -72,6 +72,7 @@ tasks.compileJava {
 
 val compileJava8 by tasks.registering(JavaCompile::class) {
   group = "compile"
+  dependsOn(tasks.compileJava)
   source = sourceSets.main.get().allJava
   classpath = sourceSets.main.get().compileClasspath
   exclude("**/*${implByJvm}*.java")
@@ -86,13 +87,13 @@ val compileJava8 by tasks.registering(JavaCompile::class) {
   val taskName = "compileJava$jvmVersion"
   tasks.register(taskName, JavaCompile::class) {
     group = "compile"
-    dependsOn(tasks.compileJava)
+    dependsOn(tasks.named("compileJava${jvmVersion - 1}"))
     source = sourceSets.main.get().allJava
     classpath = sourceSets.main.get().compileClasspath + files(tasks.compileJava.get().destinationDirectory)
-    (8..<jvmVersion).forEach { jv ->
-      dependsOn += tasks.named("compileJava$jv")
-      classpath += files(tasks.named<JavaCompile>("compileJava$jv").get().destinationDirectory)
-    }
+//    (8..<jvmVersion).forEach { jv ->
+//      dependsOn += tasks.named("compileJava$jv")
+//      classpath += files(tasks.named<JavaCompile>("compileJava$jv").get().destinationDirectory)
+//    }
     include("**/*${implByJvm + jvmVersion}.java")
     destinationDirectory = file(layout.buildDirectory.dir("/classes/java/main"))
     javaCompiler = javaToolchains.compilerFor {
@@ -131,13 +132,13 @@ val compileTestJava8 by tasks.registering(JavaCompile::class) {
   val taskName = "compileTestJava$jvmVersion"
   tasks.register(taskName, JavaCompile::class) {
     group = "compile"
-    //dependsOn(compileTestJava8)
+    dependsOn(tasks.named("compileTestJava${jvmVersion - 1}"))
     source = sourceSets.test.get().allJava
     classpath = sourceSets.test.get().compileClasspath
-    (8..<jvmVersion).forEach { jv ->
-      dependsOn += tasks.named("compileTestJava$jv")
-      classpath += files(tasks.named<JavaCompile>("compileTestJava$jv").get().destinationDirectory)
-    }
+//    (8..<jvmVersion).forEach { jv ->
+//      dependsOn += tasks.named("compileTestJava$jv")
+//      classpath += files(tasks.named<JavaCompile>("compileTestJava$jv").get().destinationDirectory)
+//    }
     include("**/*${implByJvm + jvmVersion}Test.java")
     destinationDirectory = file(layout.buildDirectory.dir("/classes/java/test"))
     javaCompiler = javaToolchains.compilerFor {
