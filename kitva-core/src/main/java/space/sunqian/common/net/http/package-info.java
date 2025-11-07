@@ -12,6 +12,18 @@
  *     )
  * );
  * }</pre>
+ * or
+ * <pre>{@code
+ * HttpResp resp = HttpCaller.newHttpCaller().request(
+ *     HttpReq.newBuilder()
+ *         .url("http://localhost:" + httpServer.localAddress().getPort())
+ *         .method("GET")
+ *         .header(key, value)
+ *         .header(key, value)
+ *         .build()
+ *     )
+ * );
+ * }</pre>
  * <p>
  * Utilities:
  * <ul>
@@ -19,9 +31,9 @@
  * </ul>
  * Core interfaces:
  * <ul>
+ *     <li>{@link space.sunqian.common.net.http.HttpCaller}</li>
  *     <li>{@link space.sunqian.common.net.http.HttpReq}</li>
  *     <li>{@link space.sunqian.common.net.http.HttpResp}</li>
- *     <li>{@link space.sunqian.common.net.http.HttpClientEngine}</li>
  * </ul>
  */
 package space.sunqian.common.net.http;

@@ -4,7 +4,6 @@ import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.common.base.Kit;
 import space.sunqian.common.io.IOKit;
-import space.sunqian.common.net.NetException;
 
 import java.io.InputStream;
 import java.net.InetSocketAddress;
@@ -18,33 +17,31 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-enum HttpClientEngineServiceImplByJ11 implements HttpClientEngineService {
+enum HttpCallerServiceImplByJ11 implements HttpCallerService {
     INST;
 
     @Override
-    public @Nonnull HttpClientEngine newEngine(int bufSize) throws IllegalArgumentException {
-        return new EngineImpl();
+    public @Nonnull HttpCaller newCaller(int bufSize, @Nonnull Proxy proxy) throws HttpNetException {
+        return new CallerImpl(proxy);
     }
 
-    private static final class EngineImpl implements HttpClientEngine {
+    private static final class CallerImpl implements HttpCaller {
 
-        @Override
-        public @Nonnull HttpResp request(@Nonnull HttpReq req, @Nullable Proxy proxy) throws NetException {
-            return Kit.uncheck(() -> request0(req, proxy), NetException::new);
+        private final @Nonnull HttpClient httpClient;
+
+        CallerImpl(@Nonnull Proxy proxy) throws HttpNetException {
+            this.httpClient = Kit.uncheck(() ->
+                    HttpClient.newBuilder().proxy(ProxySelector.of((InetSocketAddress) proxy.address())).build(),
+                HttpNetException::new);
         }
 
-        private @Nonnull HttpClient getClient(@Nullable Proxy proxy) {
-            if (proxy == null || Objects.equals(proxy, Proxy.NO_PROXY)) {
-                return HttpClient.newHttpClient();
-            }
-            return HttpClient.newBuilder()
-                .proxy(ProxySelector.of((InetSocketAddress) proxy.address()))
-                .build();
+        @Override
+        public @Nonnull HttpResp request(@Nonnull HttpReq req) throws HttpNetException {
+            return Kit.uncheck(() -> request0(req), HttpNetException::new);
         }
 
         @SuppressWarnings("resource")
-        private @Nonnull HttpResp request0(@Nonnull HttpReq req, @Nullable Proxy proxy) throws Exception {
-            HttpClient httpClient = getClient(proxy);
+        private @Nonnull HttpResp request0(@Nonnull HttpReq req) throws Exception {
             HttpRequest request = HttpRequest.newBuilder()
                 .uri(req.url().toURI())
                 .headers(

@@ -5,7 +5,6 @@ import space.sunqian.annotations.Nullable;
 import space.sunqian.common.base.Kit;
 import space.sunqian.common.base.math.MathKit;
 import space.sunqian.common.io.IOOperator;
-import space.sunqian.common.net.NetException;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -14,28 +13,30 @@ import java.net.Proxy;
 import java.util.List;
 import java.util.Map;
 
-enum HttpClientEngineServiceImpl implements HttpClientEngineService {
+enum HttpCallerServiceImpl implements HttpCallerService {
     INST;
 
     @Override
-    public @Nonnull HttpClientEngine newEngine(int bufSize) throws IllegalArgumentException {
-        return new EngineImpl(bufSize);
+    public @Nonnull HttpCaller newCaller(int bufSize, @Nonnull Proxy proxy) throws HttpNetException {
+        return new CallerImpl(bufSize, proxy);
     }
 
-    private static final class EngineImpl implements HttpClientEngine {
+    private static final class CallerImpl implements HttpCaller {
 
         private final @Nonnull IOOperator io;
+        private final @Nonnull Proxy proxy;
 
-        EngineImpl(int bufSize) throws IllegalArgumentException {
-            this.io = IOOperator.get(bufSize);
+        CallerImpl(int bufSize, @Nonnull Proxy proxy) throws HttpNetException {
+            this.io = Kit.uncheck(() -> IOOperator.get(bufSize), HttpNetException::new);
+            this.proxy = proxy;
         }
 
         @Override
-        public @Nonnull HttpResp request(@Nonnull HttpReq req, @Nullable Proxy proxy) throws NetException {
-            return Kit.uncheck(() -> request0(req, Kit.nonnull(proxy, Proxy.NO_PROXY)), NetException::new);
+        public @Nonnull HttpResp request(@Nonnull HttpReq req) throws HttpNetException {
+            return Kit.uncheck(() -> request0(req), HttpNetException::new);
         }
 
-        private @Nonnull HttpResp request0(@Nonnull HttpReq req, @Nonnull Proxy proxy) throws Exception {
+        private @Nonnull HttpResp request0(@Nonnull HttpReq req) throws Exception {
             HttpURLConnection connection = (HttpURLConnection) req.url().openConnection(proxy);
             connection.setConnectTimeout(MathKit.intValue(req.timeout().toMillis()));
             connection.setReadTimeout(MathKit.intValue(req.timeout().toMillis()));
@@ -44,7 +45,7 @@ enum HttpClientEngineServiceImpl implements HttpClientEngineService {
                     connection.addRequestProperty(k, s);
                 }
             });
-            //connection.setDoInput(true);
+            // connection.setDoInput(true);
             connection.setRequestMethod(req.method());
             InputStream in = req.body();
             if (in != null) {

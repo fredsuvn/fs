@@ -6,7 +6,6 @@ import space.sunqian.common.base.CheckKit;
 import space.sunqian.common.base.Kit;
 import space.sunqian.common.base.chars.CharsKit;
 import space.sunqian.common.io.IOKit;
-import space.sunqian.common.net.NetException;
 
 import java.io.InputStream;
 import java.io.StringReader;
@@ -33,7 +32,7 @@ public interface HttpReq {
     Duration DEFAULT_REQUEST_TIMEOUT = Duration.ofSeconds(30);
 
     /**
-     * Creates a new builder.
+     * Returns a new builder for {@link HttpReq}.
      *
      * @return a new builder
      */
@@ -108,10 +107,10 @@ public interface HttpReq {
          *
          * @param url the url of the request
          * @return this builder
-         * @throws NetException if the url is invalid
+         * @throws HttpNetException if the url is invalid
          */
-        public @Nonnull Builder url(@Nonnull String url) throws NetException {
-            return url(Kit.uncheck(() -> new URL(url), NetException::new));
+        public @Nonnull Builder url(@Nonnull String url) throws HttpNetException {
+            return url(Kit.uncheck(() -> new URL(url), HttpNetException::new));
         }
 
         /**

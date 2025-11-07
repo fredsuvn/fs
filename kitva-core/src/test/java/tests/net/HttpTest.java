@@ -14,7 +14,9 @@ import space.sunqian.common.collect.ListKit;
 import space.sunqian.common.collect.MapKit;
 import space.sunqian.common.io.IOKit;
 import space.sunqian.common.net.NetException;
+import space.sunqian.common.net.http.HttpCaller;
 import space.sunqian.common.net.http.HttpKit;
+import space.sunqian.common.net.http.HttpNetException;
 import space.sunqian.common.net.http.HttpReq;
 import space.sunqian.common.net.http.HttpResp;
 
@@ -187,7 +189,24 @@ public class HttpTest implements PrintTest {
             assertEquals("hello, world2!", bodyString);
         }
         {
-            // error proxy
+            // with io buffer size
+            HttpReq req = HttpReq.newBuilder()
+                .url("http://localhost:" + httpServer.getURI().getPort())
+                .method("GET")
+                .header("X-HEADER", "hello!")
+                .header("X-HEADER2", "hello2-1!")
+                .header("X-HEADER2", "hello2-2!")
+                .timeout(Duration.ofSeconds(5))
+                .build();
+            HttpResp resp = HttpCaller.newBuilder().bufSize(1024).build().request(req);
+            assertEquals("200", resp.statusCode());
+            assertEquals("OK", resp.statusText());
+            checkRespHeaders(resp);
+            String bodyString = resp.bodyString();
+            assertEquals("hello, world2!", bodyString);
+        }
+        {
+            // with proxy
             Proxy proxy = new Proxy(
                 Proxy.Type.HTTP,
                 new InetSocketAddress(httpServer.getURI().getHost(), httpServer.getURI().getPort())
@@ -207,7 +226,10 @@ public class HttpTest implements PrintTest {
             String bodyString = resp.bodyString();
             assertEquals("hello, world2!", bodyString);
         }
-        assertThrows(IllegalArgumentException.class, () -> HttpReq.newBuilder().build());
+        {
+            // error
+            assertThrows(IllegalArgumentException.class, () -> HttpReq.newBuilder().build());
+        }
     }
 
     private void checkRespHeaders(HttpResp resp) {
@@ -264,5 +286,24 @@ public class HttpTest implements PrintTest {
         HttpResp resp = HttpKit.request(req);
         assertNull(resp.contentType());
         assertNull(resp.bodyCharset());
+    }
+
+    @Test
+    public void testException() throws Exception {
+        {
+            // HttpNetException
+            assertThrows(HttpNetException.class, () -> {
+                throw new HttpNetException();
+            });
+            assertThrows(HttpNetException.class, () -> {
+                throw new HttpNetException("");
+            });
+            assertThrows(HttpNetException.class, () -> {
+                throw new HttpNetException("", new RuntimeException());
+            });
+            assertThrows(HttpNetException.class, () -> {
+                throw new HttpNetException(new RuntimeException());
+            });
+        }
     }
 }

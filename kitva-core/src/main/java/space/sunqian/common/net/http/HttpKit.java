@@ -4,8 +4,6 @@ import space.sunqian.annotations.Nonnull;
 import space.sunqian.annotations.Nullable;
 import space.sunqian.common.base.Kit;
 import space.sunqian.common.base.chars.CharsKit;
-import space.sunqian.common.io.IOKit;
-import space.sunqian.common.net.NetException;
 
 import java.net.Proxy;
 import java.net.URL;
@@ -14,23 +12,23 @@ import java.nio.charset.Charset;
 import java.util.Map;
 
 /**
- * Http utilities, based on a default implementation of {@link HttpClientEngine}.
+ * Http utilities. The part of the HTTP request is based on {@link HttpCaller}.
  *
  * @author sunqian
  */
 public class HttpKit {
 
-    private static final @Nonnull HttpClientEngine HTTP_CLIENT_ENGINE = HttpClientEngine.newEngine(IOKit.bufferSize());
+    private static final @Nonnull HttpCaller DEFAULT_CALLER = HttpCaller.newHttpCaller();
 
     /**
-     * Requests the given http request, returns the response. The timeout for connection and read are both 30 seconds.
+     * Requests the given http request, returns the response.
      *
      * @param req the given http request
      * @return the response
-     * @throws NetException if an error occurs
+     * @throws HttpNetException if an error occurs
      */
-    public static @Nonnull HttpResp request(@Nonnull HttpReq req) throws NetException {
-        return request(req, null);
+    public static @Nonnull HttpResp request(@Nonnull HttpReq req) throws HttpNetException {
+        return DEFAULT_CALLER.request(req);
     }
 
     /**
@@ -39,10 +37,10 @@ public class HttpKit {
      * @param req   the given http request
      * @param proxy the proxy, may be {@code null} if no proxy is needed
      * @return the response
-     * @throws NetException if an error occurs
+     * @throws HttpNetException if an error occurs
      */
-    public static @Nonnull HttpResp request(@Nonnull HttpReq req, @Nullable Proxy proxy) throws NetException {
-        return HTTP_CLIENT_ENGINE.request(req, proxy);
+    public static @Nonnull HttpResp request(@Nonnull HttpReq req, @Nullable Proxy proxy) throws HttpNetException {
+        return HttpCaller.newBuilder().proxy(Kit.nonnull(proxy, Proxy.NO_PROXY)).build().request(req);
     }
 
     /**
@@ -72,11 +70,11 @@ public class HttpKit {
      * @param baseUrl     the base url
      * @param queryString the map represents the query string
      * @return a url with the query string
-     * @throws NetException if an error occurs
+     * @throws HttpNetException if an error occurs
      */
     public static @Nonnull URL buildUrl(
         @Nonnull String baseUrl, @Nonnull Map<String, String> queryString
-    ) throws NetException {
+    ) throws HttpNetException {
         return buildUrl(baseUrl, queryString, CharsKit.defaultCharset());
     }
 
@@ -87,11 +85,11 @@ public class HttpKit {
      * @param queryString the map represents the query string
      * @param charset     the specified charset for encoding the query string
      * @return a url with the query string
-     * @throws NetException if an error occurs
+     * @throws HttpNetException if an error occurs
      */
     public static @Nonnull URL buildUrl(
         @Nonnull String baseUrl, @Nonnull Map<String, String> queryString, @Nonnull Charset charset
-    ) throws NetException {
+    ) throws HttpNetException {
         StringBuilder url = new StringBuilder(baseUrl);
         if (!queryString.isEmpty()) {
             url.append("?");
@@ -101,7 +99,7 @@ public class HttpKit {
                 encodeUrl(value, charset)
             ).append("&"));
         }
-        return Kit.uncheck(() -> new URL(url.toString()), NetException::new);
+        return Kit.uncheck(() -> new URL(url.toString()), HttpNetException::new);
     }
 
     /**
@@ -110,9 +108,9 @@ public class HttpKit {
      *
      * @param str the {@code String} to be translated
      * @return the translated {@code String}
-     * @throws NetException if an error occurs
+     * @throws HttpNetException if an error occurs
      */
-    public static @Nonnull String encodeUrl(@Nonnull String str) throws NetException {
+    public static @Nonnull String encodeUrl(@Nonnull String str) throws HttpNetException {
         return encodeUrl(str, CharsKit.defaultCharset());
     }
 
@@ -122,13 +120,13 @@ public class HttpKit {
      * @param str     the {@code String} to be translated
      * @param charset the specified charset
      * @return the translated {@code String}
-     * @throws NetException if an error occurs
+     * @throws HttpNetException if an error occurs
      */
-    public static @Nonnull String encodeUrl(@Nonnull String str, @Nonnull Charset charset) throws NetException {
+    public static @Nonnull String encodeUrl(@Nonnull String str, @Nonnull Charset charset) throws HttpNetException {
         try {
             return URLEncoder.encode(str, charset.name()).replace("+", "%20");
         } catch (Exception e) {
-            throw new NetException(e);
+            throw new HttpNetException(e);
         }
     }
 }
